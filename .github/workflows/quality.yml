@@ -50,3 +50,7 @@ jobs:
       - name: Check no private assets
         run: node scripts/check-no-private-assets.mjs
         working-directory: transparencia-app
+
+      - name: Check safe links and no HTML injection
+        run: node scripts/check-safe-links.mjs && node scripts/check-no-innerhtml.mjs
+        working-directory: transparencia-app

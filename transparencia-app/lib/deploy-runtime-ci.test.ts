@@ -26,7 +26,10 @@ describe("validación runtime de despliegue", () => {
     expect(staging.r2_buckets).toEqual(config.r2_buckets);
   });
 
-  it("no incluye escrituras D1 en las rutas del Worker web", () => {
+  it("no incluye escrituras D1 fuera del canal Ley 21.715 en el Worker web", () => {
+    // ADR-0013: única excepción de escritura en el bundle web = canal de
+    // solicitudes Ley 21.715 y eventos de seguridad. El resto sigue siendo
+    // solo lectura conforme a ADR-0011.
     const runtimeFiles: string[] = [];
     const visit = (directory: string) => {
       for (const entry of fs.readdirSync(directory, { withFileTypes: true })) {
@@ -38,8 +41,16 @@ describe("validación runtime de despliegue", () => {
     visit(path.resolve(process.cwd(), "app"));
     visit(path.resolve(process.cwd(), "lib"));
 
-    const dml = /\b(?:insert\s+(?:or\s+replace\s+)?into|replace\s+into|update\s+[a-z_][a-z0-9_]*\s+set|delete\s+from)\b/i;
-    const writable = runtimeFiles.filter((file) => dml.test(fs.readFileSync(file, "utf8")));
+    const allowedWriteTables = new Set(["data_requests", "security_events", "request_rate_events"]);
+    const dml = /\b(?:insert\s+(?:or\s+replace\s+)?into|replace\s+into|update\s+[a-z_][a-z0-9_]*\s+set|delete\s+from)\s+([a-z_][a-z0-9_]*)/gi;
+    const writable = runtimeFiles.filter((file) => {
+      const content = fs.readFileSync(file, "utf8");
+      let match;
+      while ((match = dml.exec(content)) !== null) {
+        if (!allowedWriteTables.has(match[1].toLowerCase())) return true;
+      }
+      return false;
+    });
     expect(writable).toEqual([]);
   });
 });

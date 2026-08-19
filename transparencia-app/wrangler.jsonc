@@ -28,7 +28,7 @@
     {
       "name": "EXPENSIVE_API_RATE_LIMITER",
       "namespace_id": "47011",
-      "simple": { "limit": 60, "period": 60 }
+      "simple": { "limit": 30, "period": 60 }
     }
   ],
   "d1_databases": [
@@ -50,7 +50,7 @@
         {
           "name": "EXPENSIVE_API_RATE_LIMITER",
           "namespace_id": "47012",
-          "simple": { "limit": 60, "period": 60 }
+          "simple": { "limit": 30, "period": 60 }
         }
       ],
       "r2_buckets": [

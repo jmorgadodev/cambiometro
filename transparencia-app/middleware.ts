@@ -18,6 +18,7 @@ function contentSecurityPolicy(nonce: string) {
     "form-action 'self'",
     "frame-ancestors 'none'",
     "upgrade-insecure-requests",
+    "report-uri /api/csp-report",
   ].join("; ");
 }
 
@@ -30,6 +31,11 @@ export function middleware(request: NextRequest) {
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", csp);
+  // El CSP real ya está endurecido en producción; el modo Report-Only se usa
+  // solo para validar directivas nuevas sin riesgo (staging, CSP_REPORT_ONLY=true).
+  if (process.env.CSP_REPORT_ONLY === "true") {
+    response.headers.set("Content-Security-Policy-Report-Only", csp);
+  }
   return response;
 }
 
