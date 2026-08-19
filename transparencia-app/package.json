@@ -80,7 +80,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.0",
+    "eslint-config-next": "16.3.1",
     "playwright": "^1.62.1",
     "puppeteer-core": "^25.7.0",
     "puppeteer-extra": "^3.3.6",
