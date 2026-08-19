@@ -1,0 +1,77 @@
+name: ETL Bajo Demanda - SERVEL Resultados Electorales
+
+on:
+  workflow_dispatch:
+    inputs:
+      reason:
+        description: Motivo de la actualización electoral
+        required: false
+        default: Elección o recalificación de candidaturas
+
+concurrency:
+  group: etl-servel
+  cancel-in-progress: true
+
+jobs:
+  ingest-publish-materialize:
+    name: Resultados Electorales y Candidaturas SERVEL
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: transparencia-app
+
+      - name: Exigir credenciales y recuperar catálogo vigente
+        shell: bash
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          mkdir -p data/lake/catalog/v1
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+
+      - name: Preparar workspace ETL sin datasets versionados
+        working-directory: transparencia-app
+        run: npm run etl:prepare
+
+      - name: Ingerir y proyectar SERVEL
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          npm run ingest:servel
+          npm run data:publish
+
+      - name: Refrescar catálogo maestro antes de materializar
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+
+      - name: Materializar D1 y registrar ejecución
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          ETL_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+        run: npm run data:materialize -- --database transparencia-db --remote --sources servel

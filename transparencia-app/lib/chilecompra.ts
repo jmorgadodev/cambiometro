@@ -1,0 +1,113 @@
+import fs from "fs";
+import path from "path";
+
+export interface ChileCompraAdjudicacion {
+  title: string;
+  proveedor: string | null;
+  proveedor_id: string | null;
+  monto_clp: number;
+  fecha: string | null;
+  url: string | null;
+  ocid: string;
+  status_detail: string | null;
+}
+
+export interface ChileCompraMes {
+  period: string;
+  monto_total_clp: number;
+  procesos: number;
+}
+
+export interface ChileCompraComprador {
+  id: string;
+  name: string;
+  rut_juridico: string | null;
+  monto_total_clp: number;
+  procesos: number;
+  months: ChileCompraMes[];
+  top: ChileCompraAdjudicacion[];
+}
+
+export interface ChileCompraProveedor {
+  id: string;
+  name: string;
+  monto_total_clp: number;
+  procesos: number;
+  buyers: number;
+}
+
+export interface ChileCompraPar {
+  buyerId: string;
+  provId: string;
+  monto_total_clp: number;
+  procesos: number;
+}
+
+export interface ChileCompraProyeccion {
+  generatedAt: string;
+  source: string;
+  buyers: ChileCompraComprador[];
+  suppliers: ChileCompraProveedor[];
+  topPairs: ChileCompraPar[];
+  total_adjudicado_clp: number;
+}
+
+let cached: ChileCompraProyeccion | null = null;
+
+/**
+ * Proyección v1 de adjudicaciones ChileCompra OCDS (generada por
+ * scripts/build-chilecompra-v1.mjs desde las particiones del lake: awards con
+ * monto, unidos a su licitación/tender por ocid para recuperar el comprador).
+ * Aprovisiona la ficha del comprador, el grafo de adjudicaciones y los rankings
+ * de /cruces. Carga con fs + cache.
+ */
+export function leerChileCompraV1(): ChileCompraProyeccion | null {
+  if (cached) return cached;
+  try {
+    const file = path.join(process.cwd(), "data", "lake", "projections", "v1", "chilecompra.json");
+    cached = JSON.parse(fs.readFileSync(file, "utf8")) as ChileCompraProyeccion;
+    return cached;
+  } catch {
+    cached = null;
+    return null;
+  }
+}
+
+export function chilecompraParaComprador(compradorId: string): ChileCompraComprador | null {
+  return leerChileCompraV1()?.buyers.find((buyer) => buyer.id === compradorId) ?? null;
+}
+
+export function chilecompraParaMunicipalidad(nombreComuna: string, muniId?: string): ChileCompraComprador | null {
+  const buyers = leerChileCompraV1()?.buyers;
+  if (!buyers || buyers.length === 0) return null;
+
+  if (muniId) {
+    const direct = buyers.find((b) => b.id === muniId || b.rut_juridico?.includes(muniId));
+    if (direct) return direct;
+  }
+
+  const norm = nombreComuna
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .trim();
+
+  return (
+    buyers.find((b) => {
+      const normB = b.name
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .toLowerCase();
+      return (
+        normB.includes(`municipalidad de ${norm}`) ||
+        normB.includes(`municipalidad ${norm}`) ||
+        normB.includes(`i. municipalidad de ${norm}`) ||
+        normB.includes(`ilustre municipalidad de ${norm}`)
+      );
+    }) ?? null
+  );
+}
+
+export function chilecompraParaProveedor(proveedorId: string): ChileCompraProveedor | null {
+  return leerChileCompraV1()?.suppliers.find((supplier) => supplier.id === proveedorId) ?? null;
+}

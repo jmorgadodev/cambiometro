@@ -1,0 +1,15 @@
+INSERT OR IGNORE INTO partidos (id, nombre, sigla, color_hex) VALUES
+('udi', 'Union Democrata Independiente', 'UDI', '#1E40AF'),
+('rn', 'Renovacion Nacional', 'RN', '#2563EB'),
+('evopoli', 'Evolucion Politica', 'EvoPoli', '#4F46E5'),
+('ps', 'Partido Socialista', 'PS', '#EF4444'),
+('ppd', 'Partido por la Democracia', 'PPD', '#F97316'),
+('pdc', 'Partido Democrata Cristiano', 'PDC', '#F59E0B'),
+('fa', 'Frente Amplio', 'FA', '#8B5CF6'),
+('pc', 'Partido Comunista de Chile', 'PC', '#DC2626'),
+('rep', 'Partido Republicano', 'REP', '#0F172A'),
+('dem', 'Democratas', 'DEM', '#0284C7'),
+('ama', 'Amarillos por Chile', 'AMA', '#EAB308'),
+('pl', 'Partido Liberal', 'PL', '#06B6D4'),
+('pnl', 'Partido Nacional Libertario', 'PNL', '#334155'),
+('ind', 'Independientes', 'IND', '#64748B');

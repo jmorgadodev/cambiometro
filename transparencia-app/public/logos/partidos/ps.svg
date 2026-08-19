@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <rect width="160" height="160" rx="24" fill="#DC2626"/>
+  <circle cx="80" cy="58" r="32" fill="#991B1B" stroke="#FEE2E2" stroke-width="2"/>
+  <!-- Hacha indígena / símbolo socialista -->
+  <path d="M76 34 L84 34 L84 80 L76 80 Z" fill="#FFFFFF"/>
+  <path d="M64 42 Q80 34 94 48 Q80 54 64 42" fill="#FBBF24"/>
+  <path d="M80 48 L83 56 L91 56 L85 61 L87 69 L80 64 L73 69 L75 61 L69 56 L77 56 Z" fill="#FFFFFF"/>
+  <text x="80" y="132" font-family="system-ui, -apple-system, 'Segoe UI', Arial, sans-serif" font-size="52" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="2">PS</text>
+</svg>

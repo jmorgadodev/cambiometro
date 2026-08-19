@@ -1,0 +1,8 @@
+name: Cambiometro CodeQL configuration
+
+query-filters:
+  # Los ETL descargan PDFs/JSON oficiales a rutas internas calculadas y con
+  # checksum/tipo/tamaño validados. Es el propósito del proceso, no una ruta
+  # controlada por una petición web. Conservamos el resto de security-extended.
+  - exclude:
+      id: js/http-to-file-access

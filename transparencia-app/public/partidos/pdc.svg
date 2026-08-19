@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <rect width="160" height="160" rx="24" fill="#003399"/>
+  <!-- Flecha de la Democracia Cristiana -->
+  <g transform="translate(80, 50)">
+    <path d="M-5 -26 L5 -26 L5 28 L-5 28 Z" fill="#E11D48"/>
+    <!-- Brazo transversal superior -->
+    <path d="M-22 -14 L22 -14 L22 -6 L-22 -6 Z" fill="#E11D48"/>
+    <!-- Brazo transversal inferior -->
+    <path d="M-16 2 L16 2 L16 10 L-16 10 Z" fill="#E11D48"/>
+    <!-- Punta de flecha superior -->
+    <path d="M0 -34 L12 -22 L-12 -22 Z" fill="#E11D48"/>
+  </g>
+  <text x="80" y="128" font-family="system-ui, -apple-system, 'Segoe UI', Arial, sans-serif" font-size="44" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">PDC</text>
+</svg>

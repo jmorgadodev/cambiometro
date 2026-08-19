@@ -1,0 +1,125 @@
+name: ETL Diario - Parlamento, Movimientos y Diario Oficial
+
+on:
+  schedule:
+    - cron: "0 7 * * *" # 03:00 CLT diario
+  workflow_dispatch:
+    inputs:
+      from:
+        description: Fecha inicial YYYY-MM-DD (por defecto 3 días atrás)
+        required: false
+      to:
+        description: Fecha final YYYY-MM-DD
+        required: false
+
+concurrency:
+  group: etl-daily
+  cancel-in-progress: true
+
+jobs:
+  ingest-publish-materialize:
+    name: Actividad Parlamentaria y Decretos
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: transparencia-app
+
+      - name: Exigir credenciales de datos
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_DATA_API_TOKEN"
+
+      - name: Recuperar catalogo vigente
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          mkdir -p data/lake/catalog/v1
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+
+      - name: Resolver rango con solapamiento
+        id: range
+        shell: bash
+        env:
+          INPUT_FROM: ${{ inputs.from }}
+          INPUT_TO: ${{ inputs.to }}
+        run: |
+          echo "from=${INPUT_FROM:-$(date -u -d '3 days ago' +%F)}" >> "$GITHUB_OUTPUT"
+          echo "to=${INPUT_TO:-$(date -u +%F)}" >> "$GITHUB_OUTPUT"
+
+      - name: Preparar workspace ETL sin datasets versionados
+        working-directory: transparencia-app
+        run: npm run etl:prepare
+
+      - name: Ingerir nómina y votaciones de ambas cámaras
+        working-directory: transparencia-app
+        run: npm run etl -- --from "${{ steps.range.outputs.from }}" --to "${{ steps.range.outputs.to }}" --source camara,votaciones_camara,votaciones_senado
+
+      - name: Construir y publicar lote parlamentario
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          npm run data:lake -- --exclude-source infolobby,infoprobidad
+          npm run data:publish
+
+      - name: Ingerir asistencia oficial de Cámara
+        working-directory: transparencia-app
+        run: npm run ingest:camara-attendance -- --year "$(date -u +%Y)" --concurrency 8
+
+      - name: Publicar asistencia
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:publish
+
+      - name: Actualizar personal de apoyo sin guardar datasets en Git
+        working-directory: transparencia-app
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          if ! npx wrangler r2 object get transparencia-public-data/projections/personal-apoyo-v1/personal-apoyo.json --file /tmp/personal-apoyo-current.json --remote; then
+            cp data/personal-apoyo.json /tmp/personal-apoyo-current.json
+          fi
+          npm run etl:personal-apoyo -- --input /tmp/personal-apoyo-current.json --output /tmp/personal-apoyo-next.json
+
+      - name: Publicar personal de apoyo en R2 y D1
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          ETL_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-personal-apoyo
+        run: npm run data:publish:personal-apoyo -- --input /tmp/personal-apoyo-next.json --database transparencia-db --bucket transparencia-public-data --remote
+
+      - name: Materializar D1 y registrar ejecución
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          ETL_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+        run: npm run data:materialize -- --database transparencia-db --remote --sources camara,votaciones_senado

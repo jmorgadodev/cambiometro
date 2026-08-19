@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <rect width="160" height="160" rx="24" fill="#059669"/>
+  <g transform="translate(80, 50)">
+    <!-- Hoja / Árbol -->
+    <path d="M0 -28 C22 -10 24 16 0 28 C-24 16 -22 -10 0 -28 Z" fill="#A7F3D0"/>
+    <path d="M0 -22 L0 26" stroke="#047857" stroke-width="3"/>
+    <path d="M0 -8 Q10 -16 16 -12" stroke="#047857" stroke-width="2" fill="none"/>
+    <path d="M0 4 Q12 -4 18 0" stroke="#047857" stroke-width="2" fill="none"/>
+    <path d="M0 -8 Q-10 -16 -16 -12" stroke="#047857" stroke-width="2" fill="none"/>
+    <path d="M0 4 Q-12 -4 -18 0" stroke="#047857" stroke-width="2" fill="none"/>
+  </g>
+  <text x="80" y="128" font-family="system-ui, -apple-system, 'Segoe UI', Arial, sans-serif" font-size="38" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="0">FRVS</text>
+</svg>

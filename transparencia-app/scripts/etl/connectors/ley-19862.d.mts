@@ -1,0 +1,3 @@
+export function buildTransferReportUrl(year: number, month: number): string;
+export function normalizeTransferCsv(csv: string, context: { sourceUrl: string }): Array<Record<string, unknown> & { id: string; kind: "transfer"; fecha: string; monto_clp: number; objective: string; subject_entity_ids: string[]; object_entity_ids: string[]; emitter: { rut_juridico: string; entity_id: string }; receiver: { rut_juridico: string; entity_id: string } }>;
+export function fetchTransferMonth(options: { year: number; month: number; fetchImpl?: typeof fetch; timeoutMs?: number }): Promise<Record<string, unknown>>;

@@ -1,0 +1,2052 @@
+{
+  "dip-001": {
+    "politico_id": "dip-001",
+    "nombre_completo": "Jorge Díaz Ibarra",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_f9f63c4d9797290eebe9632e4f1a22b3"
+  },
+  "dip-002": {
+    "politico_id": "dip-002",
+    "nombre_completo": "Luis Malla Valenzuela",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO DE EJECUCION EN ADMINISTRACION DE EMPRESAS",
+    "profesion_oficio_display": "Ingeniero de Ejecucion en Administracion de Empresas",
+    "formacion_titulos_display": "Ingeniero de Ejecucion en Administracion de Empresas",
+    "declaracion_fecha": "2026-05-06",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_5b78acfb40d4c75f7188a4c789e7d66e"
+  },
+  "dip-003": {
+    "politico_id": "dip-003",
+    "nombre_completo": "Stephanie Jéldrez Ortiz",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PEDAGOGIA EN HISTORIA Y GEOGRAFIA",
+    "profesion_oficio_display": "Pedagogia en Historia y Geografia",
+    "formacion_titulos_display": "Pedagogia en Historia y Geografia",
+    "declaracion_fecha": "2026-05-04",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_c392b72fdcaefa09c4a555c9ea08f750"
+  },
+  "dip-004": {
+    "politico_id": "dip-004",
+    "nombre_completo": "Álvaro Jofré Cáceres",
+    "tiene_declaracion": false,
+    "profesion_oficio_raw": null,
+    "profesion_oficio_display": "No declarado en DIP",
+    "formacion_titulos_display": "No declarado en DIP",
+    "declaracion_fecha": null,
+    "declaracion_url": "https://www.infoprobidad.cl/Resultados?busqueda=%C3%81lvaro%20Jofr%C3%A9%20C%C3%A1ceres"
+  },
+  "dip-005": {
+    "politico_id": "dip-005",
+    "nombre_completo": "Carlos Carvajal Gallardo",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PEDAGOGIA EN EDUCACION FISICA",
+    "profesion_oficio_display": "Pedagogia en Educacion Fisica",
+    "formacion_titulos_display": "Pedagogia en Educacion Fisica",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_4bf727adc78d029f564d7e537e69c85e"
+  },
+  "dip-006": {
+    "politico_id": "dip-006",
+    "nombre_completo": "Ximena Naranjo Pinto",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-24",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_b37bdc329ac612f7be99976756a59070"
+  },
+  "dip-007": {
+    "politico_id": "dip-007",
+    "nombre_completo": "Carlo Arqueros Pizarro",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO COMERCIAL",
+    "profesion_oficio_display": "Ingeniero Comercial",
+    "formacion_titulos_display": "Ingeniero Comercial",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_95cbe7322a193fe4867eb5c6348f4a19"
+  },
+  "dip-008": {
+    "politico_id": "dip-008",
+    "nombre_completo": "Fabián Ossandón Briceño",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO CIVIL",
+    "profesion_oficio_display": "Ingeniero Civil",
+    "formacion_titulos_display": "Ingeniero Civil",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_2fd121f756bd83d754c65e5bbf0ddc8a"
+  },
+  "dip-009": {
+    "politico_id": "dip-009",
+    "nombre_completo": "Jaime Araya Guerrero",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_0348f0215291022b60aa29ec1528fccc"
+  },
+  "dip-010": {
+    "politico_id": "dip-010",
+    "nombre_completo": "Marcela Hernando Pérez",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "MEDICO",
+    "profesion_oficio_display": "Medico",
+    "formacion_titulos_display": "Medico",
+    "declaracion_fecha": "2026-04-08",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_d5f10f73a5354c802b559074dc664e7c"
+  },
+  "dip-011": {
+    "politico_id": "dip-011",
+    "nombre_completo": "Sebastián Videla Castillo",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-23",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_f40e7d1fedcdc45d6e841ecd4b496bd0"
+  },
+  "dip-012": {
+    "politico_id": "dip-012",
+    "nombre_completo": "Cristián Tapia Ramos",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "TECNICO UNIVERSITARIO EN ADMINISTRACION DE EMPRESAS",
+    "profesion_oficio_display": "Tecnico Universitario en Administracion de Empresas",
+    "formacion_titulos_display": "Tecnico Universitario en Administracion de Empresas",
+    "declaracion_fecha": "2026-04-23",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_760593017e56885b48295a95bced6cbb"
+  },
+  "dip-013": {
+    "politico_id": "dip-013",
+    "nombre_completo": "Ignacio Urcullú Clèment-Lund",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO AMBIENTAL",
+    "profesion_oficio_display": "Ingeniero Ambiental",
+    "formacion_titulos_display": "Ingeniero Ambiental",
+    "declaracion_fecha": "2026-04-07",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_b8a59782752f0e63a2c3b9570593b2ba"
+  },
+  "dip-014": {
+    "politico_id": "dip-014",
+    "nombre_completo": "Jaime Mulet Martínez",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-04-10",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_df09f8575670a340fcd8f4cdabaff556"
+  },
+  "dip-015": {
+    "politico_id": "dip-015",
+    "nombre_completo": "Juan Santana Castillo",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PERIODISTA",
+    "profesion_oficio_display": "Periodista",
+    "formacion_titulos_display": "Periodista",
+    "declaracion_fecha": "2026-04-13",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_e6fa2e27c4c10ad14e0c9285d0e6eede"
+  },
+  "dip-016": {
+    "politico_id": "dip-016",
+    "nombre_completo": "Paula Olmos Contreras",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_31a18d4b011e253566b13f9ebd2f8ac8"
+  },
+  "dip-017": {
+    "politico_id": "dip-017",
+    "nombre_completo": "Bernardo Salinas Maya",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "AGRONOMO",
+    "profesion_oficio_display": "Agronomo",
+    "formacion_titulos_display": "Agronomo",
+    "declaracion_fecha": "2026-04-09",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_5bcda6ccfd6b6bf3584397f23dee664d"
+  },
+  "dip-018": {
+    "politico_id": "dip-018",
+    "nombre_completo": "Carolina Tello Rojas",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-04-27",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_ac6a8ae832ef628f94ff4cc367921ea2"
+  },
+  "dip-019": {
+    "politico_id": "dip-019",
+    "nombre_completo": "Daniel Manouchehri Lobos",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_7d5d74aca2caa74ae5d51412de9337f3"
+  },
+  "dip-020": {
+    "politico_id": "dip-020",
+    "nombre_completo": "Eileen Urqueta Rojas",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PERIODISTA",
+    "profesion_oficio_display": "Periodista",
+    "formacion_titulos_display": "Periodista",
+    "declaracion_fecha": "2026-04-24",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_01cda22925d3975cd0202a796fba9e5c"
+  },
+  "dip-021": {
+    "politico_id": "dip-021",
+    "nombre_completo": "Erich Grohs Marín",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-12",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_16000f2cafd19a46f07b81f511a88290"
+  },
+  "dip-022": {
+    "politico_id": "dip-022",
+    "nombre_completo": "Marco Antonio Sulantay Olivares",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PERIODISTA",
+    "profesion_oficio_display": "Periodista",
+    "formacion_titulos_display": "Periodista",
+    "declaracion_fecha": "2026-03-26",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_4338d041ab6d15545af9cb82c8f2d544"
+  },
+  "dip-023": {
+    "politico_id": "dip-023",
+    "nombre_completo": "Nathalie Castillo Rojas",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PERIODISTA",
+    "profesion_oficio_display": "Periodista",
+    "formacion_titulos_display": "Periodista",
+    "declaracion_fecha": "2026-04-11",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_8c64a942bfe8bd12868a78c3e25dc881"
+  },
+  "dip-024": {
+    "politico_id": "dip-024",
+    "nombre_completo": "Benjamín Lorca Inzunza",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ADMINISTRADOR PUBLICO",
+    "profesion_oficio_display": "Administrador Publico",
+    "formacion_titulos_display": "Administrador Publico",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_54b6dadffe48c5aca5d39fb0e017b18a"
+  },
+  "dip-025": {
+    "politico_id": "dip-025",
+    "nombre_completo": "Chiara Barchiesi Chávez",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO AGRICOLA",
+    "profesion_oficio_display": "Ingeniero Agricola",
+    "formacion_titulos_display": "Ingeniero Agricola",
+    "declaracion_fecha": "2026-03-24",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_c8bdb3c113e545105846884be7aede1d"
+  },
+  "dip-026": {
+    "politico_id": "dip-026",
+    "nombre_completo": "Cristian Mella Andaur",
+    "tiene_declaracion": false,
+    "profesion_oficio_raw": null,
+    "profesion_oficio_display": "No declarado en DIP",
+    "formacion_titulos_display": "No declarado en DIP",
+    "declaracion_fecha": null,
+    "declaracion_url": "https://www.infoprobidad.cl/Resultados?busqueda=Cristian%20Mella%20Andaur"
+  },
+  "dip-027": {
+    "politico_id": "dip-027",
+    "nombre_completo": "Javier Olivares Avendaño",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PERIODISTA",
+    "profesion_oficio_display": "Periodista",
+    "formacion_titulos_display": "Periodista",
+    "declaracion_fecha": "2026-04-10",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_2d3c5dee930d0b083e1685f1b3b0c6cc"
+  },
+  "dip-028": {
+    "politico_id": "dip-028",
+    "nombre_completo": "Luis Pardo Sáinz",
+    "tiene_declaracion": false,
+    "profesion_oficio_raw": null,
+    "profesion_oficio_display": "No declarado en DIP",
+    "formacion_titulos_display": "No declarado en DIP",
+    "declaracion_fecha": null,
+    "declaracion_url": "https://www.infoprobidad.cl/Resultados?busqueda=Luis%20Pardo%20S%C3%A1inz"
+  },
+  "dip-029": {
+    "politico_id": "dip-029",
+    "nombre_completo": "María Francisca Bello Campos",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_956a8aaf6347ed45c4067475af343f38"
+  },
+  "dip-030": {
+    "politico_id": "dip-030",
+    "nombre_completo": "Nelson Venegas Salazar",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-24",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_5bda23948bcbc34516b4c360eb625d1f"
+  },
+  "dip-031": {
+    "politico_id": "dip-031",
+    "nombre_completo": "Sofía González Cortés",
+    "tiene_declaracion": false,
+    "profesion_oficio_raw": null,
+    "profesion_oficio_display": "No declarado en DIP",
+    "formacion_titulos_display": "No declarado en DIP",
+    "declaracion_fecha": null,
+    "declaracion_url": "https://www.infoprobidad.cl/Resultados?busqueda=Sof%C3%ADa%20Gonz%C3%A1lez%20Cort%C3%A9s"
+  },
+  "dip-032": {
+    "politico_id": "dip-032",
+    "nombre_completo": "Andrés Celis Montt",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_7e7c78061a774d01e972ee00d0bff891"
+  },
+  "dip-033": {
+    "politico_id": "dip-033",
+    "nombre_completo": "Hotuiti Teao Drago",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO COMERCIAL",
+    "profesion_oficio_display": "Ingeniero Comercial",
+    "formacion_titulos_display": "Ingeniero Comercial",
+    "declaracion_fecha": "2026-05-05",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_cd0ea41f915ab4158c35fe22f82800c2"
+  },
+  "dip-034": {
+    "politico_id": "dip-034",
+    "nombre_completo": "Jaime Bassa Mercado",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-04-03",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_75c86b6f573f548156472f54c2bdc294"
+  },
+  "dip-035": {
+    "politico_id": "dip-035",
+    "nombre_completo": "Jorge Brito Hasbún",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO CIVIL INDUSTRIAL",
+    "profesion_oficio_display": "Ingeniero Civil Industrial",
+    "formacion_titulos_display": "Ingeniero Civil Industrial",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_09a35465dfab6c4df698a3121503a9ea"
+  },
+  "dip-036": {
+    "politico_id": "dip-036",
+    "nombre_completo": "Juan Marcelo Valenzuela Henríquez",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO COMERCIAL",
+    "profesion_oficio_display": "Ingeniero Comercial",
+    "formacion_titulos_display": "Ingeniero Comercial",
+    "declaracion_fecha": "2026-04-01",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_7740754cc2410ad16805e95e6ee1b253"
+  },
+  "dip-037": {
+    "politico_id": "dip-037",
+    "nombre_completo": "Luis Alberto Cuello Peña y Lillo",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-04-02",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_2d414560be1580b708de7e823864d275"
+  },
+  "dip-038": {
+    "politico_id": "dip-038",
+    "nombre_completo": "Luis Sánchez Ossa",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_ca574b6e8160b89f80f99c52f2f8d113"
+  },
+  "dip-039": {
+    "politico_id": "dip-039",
+    "nombre_completo": "Sebastián Zamora Soto",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ADMINISTRADOR PUBLICO",
+    "profesion_oficio_display": "Administrador Publico",
+    "formacion_titulos_display": "Administrador Publico",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_6f69d98b5c1afc9034fa26d7d853c68c"
+  },
+  "dip-040": {
+    "politico_id": "dip-040",
+    "nombre_completo": "Agustín Romero Leiva",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_070d5d8f0457f34f5fbca5d419feedef"
+  },
+  "dip-041": {
+    "politico_id": "dip-041",
+    "nombre_completo": "Cristian Contreras Radovic",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PERIODISTA",
+    "profesion_oficio_display": "Periodista",
+    "formacion_titulos_display": "Periodista",
+    "declaracion_fecha": "2026-03-28",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_6ba5d4ca3b0f817420c5bd05a6671be9"
+  },
+  "dip-042": {
+    "politico_id": "dip-042",
+    "nombre_completo": "Enrique Bassaletti Riess",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-19",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_9411cc3b451712c1e5bf7e2e3262bfcc"
+  },
+  "dip-043": {
+    "politico_id": "dip-043",
+    "nombre_completo": "Gustavo Gatica Villarroel",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PSICOLOGO",
+    "profesion_oficio_display": "Psicologo",
+    "formacion_titulos_display": "Psicologo",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_4c553d01d4490fcdc48de25d79309599"
+  },
+  "dip-044": {
+    "politico_id": "dip-044",
+    "nombre_completo": "Marcos Barraza Gómez",
+    "tiene_declaracion": false,
+    "profesion_oficio_raw": null,
+    "profesion_oficio_display": "No declarado en DIP",
+    "formacion_titulos_display": "No declarado en DIP",
+    "declaracion_fecha": null,
+    "declaracion_url": "https://www.infoprobidad.cl/Resultados?busqueda=Marcos%20Barraza%20G%C3%B3mez"
+  },
+  "dip-045": {
+    "politico_id": "dip-045",
+    "nombre_completo": "Mario Olavarría Rodríguez",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-05-04",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_cd1b2b2de7115bc07b46b400a2a12fc3"
+  },
+  "dip-046": {
+    "politico_id": "dip-046",
+    "nombre_completo": "Pier Karlezi Hazleby",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ADMINISTRADOR PUBLICO",
+    "profesion_oficio_display": "Administrador Publico",
+    "formacion_titulos_display": "Administrador Publico",
+    "declaracion_fecha": "2026-04-14",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_0ab89f6eb7db21f9edc33f2e6e2ef414"
+  },
+  "dip-047": {
+    "politico_id": "dip-047",
+    "nombre_completo": "Tatiana Urrutia Herrera",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_0a84ee0953b62452bcb90119bca34c94"
+  },
+  "dip-048": {
+    "politico_id": "dip-048",
+    "nombre_completo": "Boris Barrera Moreno",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO DE EJECUCION INDUSTRIAL",
+    "profesion_oficio_display": "Ingeniero de Ejecucion Industrial",
+    "formacion_titulos_display": "Ingeniero de Ejecucion Industrial",
+    "declaracion_fecha": "2026-04-03",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_8ed50d9d0af31dadfeba70b3fa3f4c0b"
+  },
+  "dip-049": {
+    "politico_id": "dip-049",
+    "nombre_completo": "Carlos Cuadrado Prats",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PERIODISTA",
+    "profesion_oficio_display": "Periodista",
+    "formacion_titulos_display": "Periodista",
+    "declaracion_fecha": "2026-03-28",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_733e503c574a1c5f8ff1771a1a84d2ca"
+  },
+  "dip-050": {
+    "politico_id": "dip-050",
+    "nombre_completo": "César Valenzuela Maass",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-04-10",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_73cb2e0d1e2b4105cfdaea1b43e19499"
+  },
+  "dip-051": {
+    "politico_id": "dip-051",
+    "nombre_completo": "Guillermo Ramírez Diez",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_3056779da9af970648fb04a36cef8f51"
+  },
+  "dip-052": {
+    "politico_id": "dip-052",
+    "nombre_completo": "Javiera Rodríguez Pascual",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PERIODISTA",
+    "profesion_oficio_display": "Periodista",
+    "formacion_titulos_display": "Periodista",
+    "declaracion_fecha": "2026-04-14",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_421f20c2db197d8eb492ac3c9d8a738c"
+  },
+  "dip-053": {
+    "politico_id": "dip-053",
+    "nombre_completo": "José Carlos Meza Pereira",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-04-09",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_c73238c03f12ee4502baff3d1a519f9e"
+  },
+  "dip-054": {
+    "politico_id": "dip-054",
+    "nombre_completo": "Tamara Ramírez Ramírez",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ADMINISTRADOR DE EMPRESAS",
+    "profesion_oficio_display": "Administrador de Empresas",
+    "formacion_titulos_display": "Administrador de Empresas",
+    "declaracion_fecha": "2026-03-28",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_0b732362b8b8d3745bb4f0be58b41a72"
+  },
+  "dip-055": {
+    "politico_id": "dip-055",
+    "nombre_completo": "Emilia Schneider Videla",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-08",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_85b294f9ee62cdc77ec01c1ca5468ca4"
+  },
+  "dip-056": {
+    "politico_id": "dip-056",
+    "nombre_completo": "Francisco Orrego Gutiérrez",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-05-06",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_35a87857d97683941fe75e063c2ac6be"
+  },
+  "dip-057": {
+    "politico_id": "dip-057",
+    "nombre_completo": "Gonzalo Winter Etcheberry",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-24",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_4ab3e77f5ec2475a324ea888b8726549"
+  },
+  "dip-058": {
+    "politico_id": "dip-058",
+    "nombre_completo": "Hans Marowski Cuevas",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-26",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_e274ca3d4da8fd83b01cc3952fa94ae0"
+  },
+  "dip-059": {
+    "politico_id": "dip-059",
+    "nombre_completo": "Irací Hassler Jacob",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO COMERCIAL",
+    "profesion_oficio_display": "Ingeniero Comercial",
+    "formacion_titulos_display": "Ingeniero Comercial",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_2371c615dbb26ed1feed78df488223f5"
+  },
+  "dip-060": {
+    "politico_id": "dip-060",
+    "nombre_completo": "Jorge Alessandri Vergara",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-25",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_eb0b7d0b06ae4c329382245273ffa7a9"
+  },
+  "dip-061": {
+    "politico_id": "dip-061",
+    "nombre_completo": "José Antonio Kast Adriasola",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-04-11",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_c7af79d548def362db15c94e87ff375d"
+  },
+  "dip-062": {
+    "politico_id": "dip-062",
+    "nombre_completo": "Lorena Fries Monleón",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-12",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_21fe16736ed1d9c1eb6e5ce1e83eeab5"
+  },
+  "dip-063": {
+    "politico_id": "dip-063",
+    "nombre_completo": "Catalina Del Real Mihovilovic",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO COMERCIAL",
+    "profesion_oficio_display": "Ingeniero Comercial",
+    "formacion_titulos_display": "Ingeniero Comercial",
+    "declaracion_fecha": "2026-04-01",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_86952829e648417b03a18bcc68f783f2"
+  },
+  "dip-064": {
+    "politico_id": "dip-064",
+    "nombre_completo": "Claudia Mora Vega",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PERIODISTA",
+    "profesion_oficio_display": "Periodista",
+    "formacion_titulos_display": "Periodista",
+    "declaracion_fecha": "2026-03-26",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_4c042c5b6ecaca549eeb4f1c189ea88c"
+  },
+  "dip-065": {
+    "politico_id": "dip-065",
+    "nombre_completo": "Constanza Hube Portus",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_e78b735d304681cfe676b065f0c52415"
+  },
+  "dip-066": {
+    "politico_id": "dip-066",
+    "nombre_completo": "Constanza Schonhaut Soto",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_413a2ed710a8e67c32f37c98e341507e"
+  },
+  "dip-067": {
+    "politico_id": "dip-067",
+    "nombre_completo": "Cristián Araya Lerdo de Tejada",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-04-02",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_f51e0d9c5791140199d1f18f09d88531"
+  },
+  "dip-068": {
+    "politico_id": "dip-068",
+    "nombre_completo": "Diego Schalper Sepúlveda",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-15",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_2ade7daec53cfb5edaf5a4df92f242a4"
+  },
+  "dip-069": {
+    "politico_id": "dip-069",
+    "nombre_completo": "Álvaro Carter Fernández",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "DISEÑADOR GRAFICO Y PUBLICIDAD",
+    "profesion_oficio_display": "Diseñador Grafico y Publicidad",
+    "formacion_titulos_display": "Diseñador Grafico y Publicidad",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_390e3f62cfcad807e551210379711ac6"
+  },
+  "dip-070": {
+    "politico_id": "dip-070",
+    "nombre_completo": "Ana María Gazmuri Vieira",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-29",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_abf7370334884a891d7f13ec1ec2e709"
+  },
+  "dip-071": {
+    "politico_id": "dip-071",
+    "nombre_completo": "Daniela Serrano Salazar",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_09bfc26a9b150b655d4318dadc8a27b7"
+  },
+  "dip-072": {
+    "politico_id": "dip-072",
+    "nombre_completo": "Macarena Santelices Cañas",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PERIODISTA",
+    "profesion_oficio_display": "Periodista",
+    "formacion_titulos_display": "Periodista",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_b485a6d4e7d3efc32a5d037e960358e5"
+  },
+  "dip-073": {
+    "politico_id": "dip-073",
+    "nombre_completo": "Pamela Jiles Moreno",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PERIODISTA",
+    "profesion_oficio_display": "Periodista",
+    "formacion_titulos_display": "Periodista",
+    "declaracion_fecha": "2026-04-24",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_78c507749a499ab04e823fefb368adda"
+  },
+  "dip-074": {
+    "politico_id": "dip-074",
+    "nombre_completo": "Ximena Ossandón Irarrázabal",
+    "tiene_declaracion": false,
+    "profesion_oficio_raw": null,
+    "profesion_oficio_display": "No declarado en DIP",
+    "formacion_titulos_display": "No declarado en DIP",
+    "declaracion_fecha": null,
+    "declaracion_url": "https://www.infoprobidad.cl/Resultados?busqueda=Ximena%20Ossand%C3%B3n%20Irarr%C3%A1zabal"
+  },
+  "dip-075": {
+    "politico_id": "dip-075",
+    "nombre_completo": "Zandra Parisi Fernández",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "EDUCADOR DE PARVULOS",
+    "profesion_oficio_display": "Educador de Parvulos",
+    "formacion_titulos_display": "Educador de Parvulos",
+    "declaracion_fecha": "2026-04-01",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_0366817415627473415b9339323589b8"
+  },
+  "dip-076": {
+    "politico_id": "dip-076",
+    "nombre_completo": "Eduardo Durán Salinas",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO CIVIL OBRAS CIVILES",
+    "profesion_oficio_display": "Ingeniero Civil Obras Civiles",
+    "formacion_titulos_display": "Ingeniero Civil Obras Civiles",
+    "declaracion_fecha": "2026-04-08",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_6b85a7ec1c1abf01312b315211ad828f"
+  },
+  "dip-077": {
+    "politico_id": "dip-077",
+    "nombre_completo": "Felipe Ross Correa",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_371afbfa699ed5cc19e9a239b7c0fe77"
+  },
+  "dip-078": {
+    "politico_id": "dip-078",
+    "nombre_completo": "Gael Yeomans Araya",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_ace11ca3a021dea61753c714c974cf8c"
+  },
+  "dip-079": {
+    "politico_id": "dip-079",
+    "nombre_completo": "Lorena Pizarro Sierra",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "EDUCADOR DE PARVULOS",
+    "profesion_oficio_display": "Educador de Parvulos",
+    "formacion_titulos_display": "Educador de Parvulos",
+    "declaracion_fecha": "2026-04-07",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_71690ee945a79dbd4886ce72eb9bb546"
+  },
+  "dip-080": {
+    "politico_id": "dip-080",
+    "nombre_completo": "Valentina Becerra Peña",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-10",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_a1798d5d8d122cbdc8d889ce612b6842"
+  },
+  "dip-081": {
+    "politico_id": "dip-081",
+    "nombre_completo": "Diego Vergara Rodríguez",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERIO EN ACUICULTURA",
+    "profesion_oficio_display": "Ingenierio en Acuicultura",
+    "formacion_titulos_display": "Ingenierio en Acuicultura",
+    "declaracion_fecha": "2026-04-06",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_81fb984232f18617854ef399312fcc46"
+  },
+  "dip-082": {
+    "politico_id": "dip-082",
+    "nombre_completo": "Ignacio Achurra Díaz",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_5dea4457f7fe9ab16f4a0de899091eae"
+  },
+  "dip-083": {
+    "politico_id": "dip-083",
+    "nombre_completo": "Jaime Coloma Álamos",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "CIENTISTA POLITICO",
+    "profesion_oficio_display": "Cientista Politico",
+    "formacion_titulos_display": "Cientista Politico",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_402f302829762ee2245674bf03c6cd08"
+  },
+  "dip-084": {
+    "politico_id": "dip-084",
+    "nombre_completo": "Juan Irarrázaval Rossel",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-05-06",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_cc4f1122d8ff3a16212a0302d78bc59f"
+  },
+  "dip-085": {
+    "politico_id": "dip-085",
+    "nombre_completo": "Marisela Santibáñez Novoa",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-23",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_f340e9e49c17707221b8bf0eeac05882"
+  },
+  "dip-086": {
+    "politico_id": "dip-086",
+    "nombre_completo": "Raúl Leiva Carvajal",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-04-01",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_72f25e1153996bec45fbbe31ad5c099b"
+  },
+  "dip-087": {
+    "politico_id": "dip-087",
+    "nombre_completo": "Fernando Ugarte Tejeda",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PERIODISTA",
+    "profesion_oficio_display": "Periodista",
+    "formacion_titulos_display": "Periodista",
+    "declaracion_fecha": "2026-04-11",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_afdacfae1f48822d32e19c5d12aeaef0"
+  },
+  "dip-088": {
+    "politico_id": "dip-088",
+    "nombre_completo": "Fernando Zamorano Peralta",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "MEDICO",
+    "profesion_oficio_display": "Medico",
+    "formacion_titulos_display": "Medico",
+    "declaracion_fecha": "2026-04-01",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_3772bbf591b28d9163426df4e6483860"
+  },
+  "dip-089": {
+    "politico_id": "dip-089",
+    "nombre_completo": "Natalia Romero Talguia",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PERIODISTA",
+    "profesion_oficio_display": "Periodista",
+    "formacion_titulos_display": "Periodista",
+    "declaracion_fecha": "2026-03-25",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_54171be1785d22bc4a4875d47f12d0ea"
+  },
+  "dip-090": {
+    "politico_id": "dip-090",
+    "nombre_completo": "Raúl Soto Mardones",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-25",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_44997d6a90d9ccbb7f57d3789d6d9a33"
+  },
+  "dip-091": {
+    "politico_id": "dip-091",
+    "nombre_completo": "Valentina Cáceres Monsálvez",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-14",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_b0916e0bb2e03036d6ff111ed94a2862"
+  },
+  "dip-092": {
+    "politico_id": "dip-092",
+    "nombre_completo": "Carolina Cucumides Calderón",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO COMERCIAL",
+    "profesion_oficio_display": "Ingeniero Comercial",
+    "formacion_titulos_display": "Ingeniero Comercial",
+    "declaracion_fecha": "2026-03-27",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_10872522a0612bf4165ca687caaa7e4c"
+  },
+  "dip-093": {
+    "politico_id": "dip-093",
+    "nombre_completo": "Félix Bugueño Sotelo",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-23",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_313f1099a83215e9081ffbc9a7a21986"
+  },
+  "dip-094": {
+    "politico_id": "dip-094",
+    "nombre_completo": "Ricardo Neumann Bertín",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-04-27",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_0374d155eed4855ae8aa50e9bba8b98b"
+  },
+  "dip-095": {
+    "politico_id": "dip-095",
+    "nombre_completo": "Sebastián Cristoffanini Jaraquemada",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO COMERCIAL",
+    "profesion_oficio_display": "Ingeniero Comercial",
+    "formacion_titulos_display": "Ingeniero Comercial",
+    "declaracion_fecha": "2026-04-10",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_442d33bf2bad37bdded4b9f19e4ce8e4"
+  },
+  "dip-096": {
+    "politico_id": "dip-096",
+    "nombre_completo": "Benjamín Moreno Bascur",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "AGRONOMO",
+    "profesion_oficio_display": "Agronomo",
+    "formacion_titulos_display": "Agronomo",
+    "declaracion_fecha": "2026-04-10",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_d01e0f1e45e81a0bfd909f7e18d49814"
+  },
+  "dip-097": {
+    "politico_id": "dip-097",
+    "nombre_completo": "Germán Verdugo Soto",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_04eb88fecf06f41a139f8dd870f9d166"
+  },
+  "dip-098": {
+    "politico_id": "dip-098",
+    "nombre_completo": "Guillermo Valdés Carmona",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_3d86ac146fbc7ccdfde7dcbafbbf43a3"
+  },
+  "dip-099": {
+    "politico_id": "dip-099",
+    "nombre_completo": "Javier Muñoz Riquelme",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "CONTADOR AUDITOR",
+    "profesion_oficio_display": "Contador Auditor",
+    "formacion_titulos_display": "Contador Auditor",
+    "declaracion_fecha": "2026-06-26",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_7c29adaa8422961a4bedbc3741242b0c"
+  },
+  "dip-100": {
+    "politico_id": "dip-100",
+    "nombre_completo": "Jorge Guzmán Zepeda",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-24",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_59c58f42af70a72324f318800cde791f"
+  },
+  "dip-101": {
+    "politico_id": "dip-101",
+    "nombre_completo": "Priscilla Castillo Gerli",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "CONTADOR AUDITOR",
+    "profesion_oficio_display": "Contador Auditor",
+    "formacion_titulos_display": "Contador Auditor",
+    "declaracion_fecha": "2026-04-05",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_2e3e47d03a6688b1377cce9874898f2d"
+  },
+  "dip-102": {
+    "politico_id": "dip-102",
+    "nombre_completo": "Roberto Celedón Fernández",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_ba1f04408839d5e86b4839e071a5d897"
+  },
+  "dip-103": {
+    "politico_id": "dip-103",
+    "nombre_completo": "Consuelo Veloso Ávila",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-07",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_8c2b1676cb2ab2419ff76c07b13430fc"
+  },
+  "dip-104": {
+    "politico_id": "dip-104",
+    "nombre_completo": "Cristian Menchaca Pinochet",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-11",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_a3bc16dd0562a99b6cbf434ee4134a38"
+  },
+  "dip-105": {
+    "politico_id": "dip-105",
+    "nombre_completo": "Daniel Bustos Leal",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-08",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_5f60b3b4384d81942841cbdb1c9eb514"
+  },
+  "dip-106": {
+    "politico_id": "dip-106",
+    "nombre_completo": "Rodrigo Ramírez Parra",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "TECNICO DIBUJO TECNICO",
+    "profesion_oficio_display": "Tecnico Dibujo Tecnico",
+    "formacion_titulos_display": "Tecnico Dibujo Tecnico",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_a791e7947a3b43bd5ff2d3750cd7e7b9"
+  },
+  "dip-107": {
+    "politico_id": "dip-107",
+    "nombre_completo": "Carlos Chandía Alarcón",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "MECANICO INDUSTRIAL",
+    "profesion_oficio_display": "Mecanico Industrial",
+    "formacion_titulos_display": "Mecanico Industrial",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_8223335794f53c35c9a22c2f75b60981"
+  },
+  "dip-108": {
+    "politico_id": "dip-108",
+    "nombre_completo": "Cristóbal Martínez Ramírez",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO COMERCIAL",
+    "profesion_oficio_display": "Ingeniero Comercial",
+    "formacion_titulos_display": "Ingeniero Comercial",
+    "declaracion_fecha": "2026-03-25",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_370a842d483e5dd4c1cbbcb83eb65bcd"
+  },
+  "dip-109": {
+    "politico_id": "dip-109",
+    "nombre_completo": "Felipe Camaño Cárdenas",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ARQUITECTO",
+    "profesion_oficio_display": "Arquitecto",
+    "formacion_titulos_display": "Arquitecto",
+    "declaracion_fecha": "2026-03-12",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_451fe235abd3567019c376a2608f8a42"
+  },
+  "dip-110": {
+    "politico_id": "dip-110",
+    "nombre_completo": "Francisco Crisóstomo Llanos",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "TRABAJO Y SERVICIO SOCIAL",
+    "profesion_oficio_display": "Trabajo y Servicio Social",
+    "formacion_titulos_display": "Trabajo y Servicio Social",
+    "declaracion_fecha": "2026-04-10",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_08041638db619a14de9d43529c0c9359"
+  },
+  "dip-111": {
+    "politico_id": "dip-111",
+    "nombre_completo": "Sara Concha Smith",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-09",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_6563c7d1328fb1607998e18569cd39d4"
+  },
+  "dip-112": {
+    "politico_id": "dip-112",
+    "nombre_completo": "Álvaro Ortiz Vera",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PERIODISTA",
+    "profesion_oficio_display": "Periodista",
+    "formacion_titulos_display": "Periodista",
+    "declaracion_fecha": "2026-06-22",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_28fc5426ded24ab65e86db9ffc2096f3"
+  },
+  "dip-113": {
+    "politico_id": "dip-113",
+    "nombre_completo": "Francesca Muñoz González",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PEDAGOGIA IDIOMAS",
+    "profesion_oficio_display": "Pedagogia Idiomas",
+    "formacion_titulos_display": "Pedagogia Idiomas",
+    "declaracion_fecha": "2026-03-29",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_0c395d0e526c1e8617763b33022a335c"
+  },
+  "dip-114": {
+    "politico_id": "dip-114",
+    "nombre_completo": "José Antonio Rivas Villalobos",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PEDAGOGIA ARTES, MUSICA Y DANZA",
+    "profesion_oficio_display": "Pedagogia Artes, Musica y Danza",
+    "formacion_titulos_display": "Pedagogia Artes, Musica y Danza",
+    "declaracion_fecha": "2026-03-24",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_32829874c225e1513d8921598b18cfaa"
+  },
+  "dip-115": {
+    "politico_id": "dip-115",
+    "nombre_completo": "Marlene Pérez Cartes",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_d7812e439fe7278e095d86804572c21d"
+  },
+  "dip-116": {
+    "politico_id": "dip-116",
+    "nombre_completo": "Patricio Briones Moller",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_63d62831707f0425cbc2b13ca83127b5"
+  },
+  "dip-117": {
+    "politico_id": "dip-117",
+    "nombre_completo": "Paz Charpentier Rajcevich",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-04-10",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_b4288490f54e06e153a0fb46093a8225"
+  },
+  "dip-118": {
+    "politico_id": "dip-118",
+    "nombre_completo": "Roberto Arroyo Muñoz",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ODONTOLOGO",
+    "profesion_oficio_display": "Odontologo",
+    "formacion_titulos_display": "Odontologo",
+    "declaracion_fecha": "2026-04-29",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_ab8a1d64f520cf33ab3ac418e965e706"
+  },
+  "dip-119": {
+    "politico_id": "dip-119",
+    "nombre_completo": "Sergio Bobadilla Muñoz",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO DE EJECUCION INDUSTRIAL",
+    "profesion_oficio_display": "Ingeniero de Ejecucion Industrial",
+    "formacion_titulos_display": "Ingeniero de Ejecucion Industrial",
+    "declaracion_fecha": "2026-03-25",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_6a7f5c9790d51588d704a09dbb206a93"
+  },
+  "dip-120": {
+    "politico_id": "dip-120",
+    "nombre_completo": "Cristóbal Urruticoechea Ríos",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "DISEÑADOR GRAFICO Y PUBLICIDAD",
+    "profesion_oficio_display": "Diseñador Grafico y Publicidad",
+    "formacion_titulos_display": "Diseñador Grafico y Publicidad",
+    "declaracion_fecha": "2026-04-10",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_2be3f68b2c0f42a8a01f8ada3063e42f"
+  },
+  "dip-121": {
+    "politico_id": "dip-121",
+    "nombre_completo": "Flor Weisse Novoa",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO COMERCIAL",
+    "profesion_oficio_display": "Ingeniero Comercial",
+    "formacion_titulos_display": "Ingeniero Comercial",
+    "declaracion_fecha": "2026-04-09",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_e389e914bd61bc341fe9c6f5fd311c01"
+  },
+  "dip-122": {
+    "politico_id": "dip-122",
+    "nombre_completo": "Joanna Pérez Olea",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ADMINISTRADOR PUBLICO",
+    "profesion_oficio_display": "Administrador Publico",
+    "formacion_titulos_display": "Administrador Publico",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_98f8612955a182381bdd0639f46137e5"
+  },
+  "dip-123": {
+    "politico_id": "dip-123",
+    "nombre_completo": "Lilian Betancurt Delgado",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "EDUCADOR DE PARVULOS",
+    "profesion_oficio_display": "Educador de Parvulos",
+    "formacion_titulos_display": "Educador de Parvulos",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_a3b392b7d1d3054c4d5aa38cf93b5397"
+  },
+  "dip-124": {
+    "politico_id": "dip-124",
+    "nombre_completo": "Patricio Pinilla Valencia",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-04-05",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_b5cff3d4314f9249bff9211d7b345a02"
+  },
+  "dip-125": {
+    "politico_id": "dip-125",
+    "nombre_completo": "Andrea Parra Sauterel",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-02",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_38543853c44c612772975d27cec4f8bc"
+  },
+  "dip-126": {
+    "politico_id": "dip-126",
+    "nombre_completo": "Eduardo Cretton Rebolledo",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_2e2e0115903bbc167833c27176328de6"
+  },
+  "dip-127": {
+    "politico_id": "dip-127",
+    "nombre_completo": "Gloria Naveillan Arriagada",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "TECNICO EN PUBLICIDAD",
+    "profesion_oficio_display": "Tecnico en Publicidad",
+    "formacion_titulos_display": "Tecnico en Publicidad",
+    "declaracion_fecha": "2026-04-13",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_30a89804ab8c481e5697b06b9dce9ac0"
+  },
+  "dip-128": {
+    "politico_id": "dip-128",
+    "nombre_completo": "Juan Carlos Beltrán Silva",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO DE EJECUCION EN ADMINISTRACION DE EMPRESAS",
+    "profesion_oficio_display": "Ingeniero de Ejecucion en Administracion de Empresas",
+    "formacion_titulos_display": "Ingeniero de Ejecucion en Administracion de Empresas",
+    "declaracion_fecha": "2026-03-27",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_6a92d0df3a3f201d9f5eaf1c937e8b6f"
+  },
+  "dip-129": {
+    "politico_id": "dip-129",
+    "nombre_completo": "Coca Ericka Ñanco Vásquez",
+    "tiene_declaracion": false,
+    "profesion_oficio_raw": null,
+    "profesion_oficio_display": "No declarado en DIP",
+    "formacion_titulos_display": "No declarado en DIP",
+    "declaracion_fecha": null,
+    "declaracion_url": "https://www.infoprobidad.cl/Resultados?busqueda=Coca%20Ericka%20%C3%91anco%20V%C3%A1squez"
+  },
+  "dip-130": {
+    "politico_id": "dip-130",
+    "nombre_completo": "Cristian Neira Martínez",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PERIODISTA",
+    "profesion_oficio_display": "Periodista",
+    "formacion_titulos_display": "Periodista",
+    "declaracion_fecha": "2026-04-24",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_9e138a36895f51e8b924da89c26bbe08"
+  },
+  "dip-131": {
+    "politico_id": "dip-131",
+    "nombre_completo": "Flor Contreras Vivallo",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO DE EJECUCION EN ADMINISTRACION DE EMPRESAS",
+    "profesion_oficio_display": "Ingeniero de Ejecucion en Administracion de Empresas",
+    "formacion_titulos_display": "Ingeniero de Ejecucion en Administracion de Empresas",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_a9f24e906d63df274eb9a212067adf75"
+  },
+  "dip-132": {
+    "politico_id": "dip-132",
+    "nombre_completo": "José Montalva Feuerhake",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-04-09",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_b3e29052081768dd9c614fb40fa9b0b7"
+  },
+  "dip-133": {
+    "politico_id": "dip-133",
+    "nombre_completo": "René Manuel García García",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-23",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_7f6936214184b2d00c70eac687b4f29c"
+  },
+  "dip-134": {
+    "politico_id": "dip-134",
+    "nombre_completo": "Stephan Schubert Rubio",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-06-03",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_92b4dc4ddd31779d14cbf6a5cf80f08c"
+  },
+  "dip-135": {
+    "politico_id": "dip-135",
+    "nombre_completo": "Tomás Kast Sommerhoff",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO COMERCIAL",
+    "profesion_oficio_display": "Ingeniero Comercial",
+    "formacion_titulos_display": "Ingeniero Comercial",
+    "declaracion_fecha": "2026-03-17",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_2a1855ab4e1b26f4e1a1e44713e41162"
+  },
+  "dip-136": {
+    "politico_id": "dip-136",
+    "nombre_completo": "Daniel Valenzuela Salazar",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-09",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_0fc565dcc066f56e717cd4769ceddd59"
+  },
+  "dip-137": {
+    "politico_id": "dip-137",
+    "nombre_completo": "Leandro Kunstmann Collado",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "VETERINARIO",
+    "profesion_oficio_display": "Veterinario",
+    "formacion_titulos_display": "Veterinario",
+    "declaracion_fecha": "2026-05-06",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_072ad97262eec61f41a058be6d22564c"
+  },
+  "dip-138": {
+    "politico_id": "dip-138",
+    "nombre_completo": "Marcos Ilabaca Cerda",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-04-10",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_d354802156b96be5b62ad51cae8c3c45"
+  },
+  "dip-139": {
+    "politico_id": "dip-139",
+    "nombre_completo": "Matías Fernández Hartwig",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ODONTOLOGO",
+    "profesion_oficio_display": "Odontologo",
+    "formacion_titulos_display": "Odontologo",
+    "declaracion_fecha": "2026-04-01",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_c92b612c51a0eb55026e4137573486c6"
+  },
+  "dip-140": {
+    "politico_id": "dip-140",
+    "nombre_completo": "Omar Sabat Guzmán",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERIO FORESTAL",
+    "profesion_oficio_display": "Ingenierio Forestal",
+    "formacion_titulos_display": "Ingenierio Forestal",
+    "declaracion_fecha": "2026-05-05",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_07a2d6c2fb35c96a39c0122f97710e98"
+  },
+  "dip-141": {
+    "politico_id": "dip-141",
+    "nombre_completo": "Daniel Lilayu Vivanco",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "MEDICO",
+    "profesion_oficio_display": "Medico",
+    "formacion_titulos_display": "Medico",
+    "declaracion_fecha": "2026-03-24",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_37f37e73a5e9b4eab95435ec5d91cdf1"
+  },
+  "dip-142": {
+    "politico_id": "dip-142",
+    "nombre_completo": "Emilia Nuyado Ancapichun",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_01852bf4d7b60b7c945f4fa51f12abba"
+  },
+  "dip-143": {
+    "politico_id": "dip-143",
+    "nombre_completo": "Héctor Barría Angulo",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ADMINISTRADOR PUBLICO",
+    "profesion_oficio_display": "Administrador Publico",
+    "formacion_titulos_display": "Administrador Publico",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_3faacdb5786dcdfebfb9ab7780bf2bc8"
+  },
+  "dip-144": {
+    "politico_id": "dip-144",
+    "nombre_completo": "Paulina Muñoz Minte",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO CIVIL INDUSTRIAL",
+    "profesion_oficio_display": "Ingeniero Civil Industrial",
+    "formacion_titulos_display": "Ingeniero Civil Industrial",
+    "declaracion_fecha": "2026-04-12",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_ead1c6cfae2284e60cad7d1e06fc3c4e"
+  },
+  "dip-145": {
+    "politico_id": "dip-145",
+    "nombre_completo": "Alejandro Bernales Maldonado",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "DISEÑADOR GRAFICO Y PUBLICIDAD",
+    "profesion_oficio_display": "Diseñador Grafico y Publicidad",
+    "formacion_titulos_display": "Diseñador Grafico y Publicidad",
+    "declaracion_fecha": "2026-04-07",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_b402ef87fe3ddac3180a9d508df11724"
+  },
+  "dip-146": {
+    "politico_id": "dip-146",
+    "nombre_completo": "Alex Nahuelquin Nahuelquin",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-06",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_a905241ed8cdf690bcb2a0991ae26537"
+  },
+  "dip-147": {
+    "politico_id": "dip-147",
+    "nombre_completo": "Claudia Reyes Larenas",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "AGRONOMO",
+    "profesion_oficio_display": "Agronomo",
+    "formacion_titulos_display": "Agronomo",
+    "declaracion_fecha": "2026-04-09",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_9d993c4663a2f53cc9a8fdee546308c7"
+  },
+  "dip-148": {
+    "politico_id": "dip-148",
+    "nombre_completo": "Héctor Ulloa Aguilera",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-25",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_92b2d24b516b549af33ee7a544068b12"
+  },
+  "dip-149": {
+    "politico_id": "dip-149",
+    "nombre_completo": "Mauro González Villarroel",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_c4162808d83a4380169fc0a74fddd289"
+  },
+  "dip-150": {
+    "politico_id": "dip-150",
+    "nombre_completo": "Alejandra Valdebenito Torres",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-24",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_021627f30de09454ac43b5a8185b6f67"
+  },
+  "dip-151": {
+    "politico_id": "dip-151",
+    "nombre_completo": "Andrea Macías Palma",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "SOCIOLOGO",
+    "profesion_oficio_display": "Sociologo",
+    "formacion_titulos_display": "Sociologo",
+    "declaracion_fecha": "2026-05-06",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_30fd8f71a811ccf351ad1dd80fb3d523"
+  },
+  "dip-152": {
+    "politico_id": "dip-152",
+    "nombre_completo": "René Alinco Bustos",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_2c618c9f9c09dfc1d92d63ab0e2ee845"
+  },
+  "dip-153": {
+    "politico_id": "dip-153",
+    "nombre_completo": "Alejandro Riquelme Ducci",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO COMERCIAL",
+    "profesion_oficio_display": "Ingeniero Comercial",
+    "formacion_titulos_display": "Ingeniero Comercial",
+    "declaracion_fecha": "2026-04-24",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_4f96b645fc802b85cea18e8559e57e6e"
+  },
+  "dip-154": {
+    "politico_id": "dip-154",
+    "nombre_completo": "Carlos Bianchi Chelech",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ADMINISTRADOR PUBLICO",
+    "profesion_oficio_display": "Administrador Publico",
+    "formacion_titulos_display": "Administrador Publico",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_fbd9525e0674eff06df5fccf7598d445"
+  },
+  "dip-155": {
+    "politico_id": "dip-155",
+    "nombre_completo": "Javiera Morales Alvarado",
+    "tiene_declaracion": false,
+    "profesion_oficio_raw": null,
+    "profesion_oficio_display": "No declarado en DIP",
+    "formacion_titulos_display": "No declarado en DIP",
+    "declaracion_fecha": null,
+    "declaracion_url": "https://www.infoprobidad.cl/Resultados?busqueda=Javiera%20Morales%20Alvarado"
+  },
+  "sen-001": {
+    "politico_id": "sen-001",
+    "nombre_completo": "Enrique Lee Flores",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "MEDICO",
+    "profesion_oficio_display": "Medico",
+    "formacion_titulos_display": "Medico",
+    "declaracion_fecha": "2026-06-08",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_9147bea427e893fed1b1d8fab58d8627"
+  },
+  "sen-002": {
+    "politico_id": "sen-002",
+    "nombre_completo": "Vlado Mirosevic Verdugo",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-13",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_1ab0f177d17558e5d95e4a63dcd389c4"
+  },
+  "sen-003": {
+    "politico_id": "sen-003",
+    "nombre_completo": "Danisa Astudillo Peiretti",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO COMERCIAL",
+    "profesion_oficio_display": "Ingeniero Comercial",
+    "formacion_titulos_display": "Ingeniero Comercial",
+    "declaracion_fecha": "2026-04-01",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_7ee3ca22497b496d833603eae0691321"
+  },
+  "sen-004": {
+    "politico_id": "sen-004",
+    "nombre_completo": "Renzo Trisotti Martínez",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-29",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_27f42310af33264406a1e2631580aa61"
+  },
+  "sen-005": {
+    "politico_id": "sen-005",
+    "nombre_completo": "Esteban Velásquez Núñez",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PEDAGOGIA EN EDUCACION BASICA",
+    "profesion_oficio_display": "Pedagogia en Educacion Basica",
+    "formacion_titulos_display": "Pedagogia en Educacion Basica",
+    "declaracion_fecha": "2026-04-20",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_3d8459606effc806cc1546d212129083"
+  },
+  "sen-006": {
+    "politico_id": "sen-006",
+    "nombre_completo": "Paulina Núñez Urrutia",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_6973d9f3ac617f661a6ae53e2d3df4cf"
+  },
+  "sen-007": {
+    "politico_id": "sen-007",
+    "nombre_completo": "Pedro Araya Guerrero",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-19",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_13e760924d65bba3dce3393d3185abd3"
+  },
+  "sen-008": {
+    "politico_id": "sen-008",
+    "nombre_completo": "Daniella Cicardini Milla",
+    "tiene_declaracion": false,
+    "profesion_oficio_raw": null,
+    "profesion_oficio_display": "No declarado en DIP",
+    "formacion_titulos_display": "No declarado en DIP",
+    "declaracion_fecha": null,
+    "declaracion_url": "https://www.infoprobidad.cl/Resultados?busqueda=Daniella%20Cicardini%20Milla"
+  },
+  "sen-009": {
+    "politico_id": "sen-009",
+    "nombre_completo": "Yasna Provoste Campillay",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PEDAGOGIA EN EDUCACION FISICA",
+    "profesion_oficio_display": "Pedagogia en Educacion Fisica",
+    "formacion_titulos_display": "Pedagogia en Educacion Fisica",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_0d708f4e25f90f796a75dfd8dfcd7276"
+  },
+  "sen-010": {
+    "politico_id": "sen-010",
+    "nombre_completo": "Daniel Núñez Arancibia",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "SOCIOLOGO",
+    "profesion_oficio_display": "Sociologo",
+    "formacion_titulos_display": "Sociologo",
+    "declaracion_fecha": "2026-03-25",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_cf9dc8bc54c5e2d53cc7a13d0ffabc30"
+  },
+  "sen-011": {
+    "politico_id": "sen-011",
+    "nombre_completo": "Matías Walker Prieto",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-17",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_56fcc6836046246720358fda69ce3be2"
+  },
+  "sen-012": {
+    "politico_id": "sen-012",
+    "nombre_completo": "Sergio Gahona Salazar",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_53fc08a6421fcd803b6f7c6798241bf5"
+  },
+  "sen-013": {
+    "politico_id": "sen-013",
+    "nombre_completo": "Andrés Longton Herrera",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-26",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_10b84dffcdaccdf9364495f81242ac81"
+  },
+  "sen-014": {
+    "politico_id": "sen-014",
+    "nombre_completo": "Arturo Squella Ovalle",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-04-08",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_3f71ccfc983aa613bb53681a1972bfd6"
+  },
+  "sen-015": {
+    "politico_id": "sen-015",
+    "nombre_completo": "Camila Flores Oporto",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-04-09",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_7d5feb24f2ed6401e571a14d7d278f4f"
+  },
+  "sen-016": {
+    "politico_id": "sen-016",
+    "nombre_completo": "Diego Ibáñez Cotroneo",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-08",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_04e970379e4199c50fdeeff792ca7d98"
+  },
+  "sen-017": {
+    "politico_id": "sen-017",
+    "nombre_completo": "Karol Cariola Oliva",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_1fa39d0ff0ce62672f1f8b90f7899f07"
+  },
+  "sen-018": {
+    "politico_id": "sen-018",
+    "nombre_completo": "Claudia Pascual Grau",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-05-12",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_2c130d406e86791bb04cebc937ddfeac"
+  },
+  "sen-019": {
+    "politico_id": "sen-019",
+    "nombre_completo": "Fabiola Campillai Rojas",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_eb7dc0f20eb9cc3d52c4871786a802b8"
+  },
+  "sen-020": {
+    "politico_id": "sen-020",
+    "nombre_completo": "Luciano Cruz-Coke Carvallo",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-05-28",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_5c703808e72b71c6983e093697812ed7"
+  },
+  "sen-021": {
+    "politico_id": "sen-021",
+    "nombre_completo": "Manuel José Ossandón Irarrázabal",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "TECNICO AGRICOLA",
+    "profesion_oficio_display": "Tecnico Agricola",
+    "formacion_titulos_display": "Tecnico Agricola",
+    "declaracion_fecha": "2026-03-27",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_3b0d6db706137e6d897a21546dbcb344"
+  },
+  "sen-022": {
+    "politico_id": "sen-022",
+    "nombre_completo": "Rojo Edwards Silva",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO CIVIL INDUSTRIAL",
+    "profesion_oficio_display": "Ingeniero Civil Industrial",
+    "formacion_titulos_display": "Ingeniero Civil Industrial",
+    "declaracion_fecha": "2026-04-01",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_d770e0d2a9e6e9b2fcae8c54ef3c747e"
+  },
+  "sen-023": {
+    "politico_id": "sen-023",
+    "nombre_completo": "Alejandra Sepúlveda Orbenes",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "VETERINARIO",
+    "profesion_oficio_display": "Veterinario",
+    "formacion_titulos_display": "Veterinario",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_9e64871adbb77c35c22c4c11666b1321"
+  },
+  "sen-024": {
+    "politico_id": "sen-024",
+    "nombre_completo": "Javier Macaya Danús",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_8c2362cb4a90309f2dfacba9a4e06b2e"
+  },
+  "sen-025": {
+    "politico_id": "sen-025",
+    "nombre_completo": "Juan Luis Castro González",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "MEDICO",
+    "profesion_oficio_display": "Medico",
+    "formacion_titulos_display": "Medico",
+    "declaracion_fecha": "2026-03-27",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_e248df6719786fc1454db0fa8451176e"
+  },
+  "sen-026": {
+    "politico_id": "sen-026",
+    "nombre_completo": "Andrea Balladares Letelier",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-06-17",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_23a44db9827f52a064678c563f8b0f5a"
+  },
+  "sen-027": {
+    "politico_id": "sen-027",
+    "nombre_completo": "Beatriz Sánchez Muñoz",
+    "tiene_declaracion": false,
+    "profesion_oficio_raw": null,
+    "profesion_oficio_display": "No declarado en DIP",
+    "formacion_titulos_display": "No declarado en DIP",
+    "declaracion_fecha": null,
+    "declaracion_url": "https://www.infoprobidad.cl/Resultados?busqueda=Beatriz%20S%C3%A1nchez%20Mu%C3%B1oz"
+  },
+  "sen-028": {
+    "politico_id": "sen-028",
+    "nombre_completo": "Cristián Vial Maceratta",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-04-26",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_4b1dfca202c3a4b1d869e56e5f7b4fac"
+  },
+  "sen-029": {
+    "politico_id": "sen-029",
+    "nombre_completo": "Ignacio Urrutia Bonilla",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-17",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_af0f1b8b1a067bf927befbeaa596e0a5"
+  },
+  "sen-030": {
+    "politico_id": "sen-030",
+    "nombre_completo": "Paulina Vodanovic Rojas",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-23",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_90272a01e4dcf7093de03a123c94f228"
+  },
+  "sen-031": {
+    "politico_id": "sen-031",
+    "nombre_completo": "Enrique van Rysselberghe Herrera",
+    "tiene_declaracion": false,
+    "profesion_oficio_raw": null,
+    "profesion_oficio_display": "No declarado en DIP",
+    "formacion_titulos_display": "No declarado en DIP",
+    "declaracion_fecha": null,
+    "declaracion_url": "https://www.infoprobidad.cl/Resultados?busqueda=Enrique%20van%20Rysselberghe%20Herrera"
+  },
+  "sen-032": {
+    "politico_id": "sen-032",
+    "nombre_completo": "Gastón Saavedra Chandía",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_0cb5b038fe3b423c537c660a5401e117"
+  },
+  "sen-033": {
+    "politico_id": "sen-033",
+    "nombre_completo": "Sebastián Keitel Bianchi",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "COMUNICADOR AUDIOVISUAL",
+    "profesion_oficio_display": "Comunicador Audiovisual",
+    "formacion_titulos_display": "Comunicador Audiovisual",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_163b6f05cad2d4d1dbb718c668f78c13"
+  },
+  "sen-034": {
+    "politico_id": "sen-034",
+    "nombre_completo": "Francisco Huenchumilla Jaramillo",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-05-13",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_5e01e06ffe8c0b36a771eea13af9e1b2"
+  },
+  "sen-035": {
+    "politico_id": "sen-035",
+    "nombre_completo": "Miguel Becker Alvear",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-06-11",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_e515e8e70c8265b4d88cff498d26bb9a"
+  },
+  "sen-036": {
+    "politico_id": "sen-036",
+    "nombre_completo": "Ricardo Célis Araya",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "MEDICO",
+    "profesion_oficio_display": "Medico",
+    "formacion_titulos_display": "Medico",
+    "declaracion_fecha": "2026-06-10",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_db48d1c9cad2e7444d83265ffffe7195"
+  },
+  "sen-037": {
+    "politico_id": "sen-037",
+    "nombre_completo": "Rodolfo Carter Fernández",
+    "tiene_declaracion": false,
+    "profesion_oficio_raw": null,
+    "profesion_oficio_display": "No declarado en DIP",
+    "formacion_titulos_display": "No declarado en DIP",
+    "declaracion_fecha": null,
+    "declaracion_url": "https://www.infoprobidad.cl/Resultados?busqueda=Rodolfo%20Carter%20Fern%C3%A1ndez"
+  },
+  "sen-038": {
+    "politico_id": "sen-038",
+    "nombre_completo": "Vanessa Kaiser Barents-Von Hohenhagen",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PERIODISTA",
+    "profesion_oficio_display": "Periodista",
+    "formacion_titulos_display": "Periodista",
+    "declaracion_fecha": "2026-04-22",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_9e278f5bbf01364212da3bb8c4f80438"
+  },
+  "sen-039": {
+    "politico_id": "sen-039",
+    "nombre_completo": "Alfonso de Urresti Longton",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "ABOGADO",
+    "profesion_oficio_display": "Abogado",
+    "formacion_titulos_display": "Abogado",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_87fd00313e536937ccc3d3bd6e999fff"
+  },
+  "sen-040": {
+    "politico_id": "sen-040",
+    "nombre_completo": "Iván Flores García",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "VETERINARIO",
+    "profesion_oficio_display": "Veterinario",
+    "formacion_titulos_display": "Veterinario",
+    "declaracion_fecha": "2026-03-31",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_9e8946e70ed268f80528da10540d6fcb"
+  },
+  "sen-041": {
+    "politico_id": "sen-041",
+    "nombre_completo": "María José Gatica Bertin",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERIO EN CONSTRUCCION",
+    "profesion_oficio_display": "Ingenierio en Construccion",
+    "formacion_titulos_display": "Ingenierio en Construccion",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_f85aee07b9d2661f7dadf7454b016c56"
+  },
+  "sen-042": {
+    "politico_id": "sen-042",
+    "nombre_completo": "Carlos Kuschel Silva",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO COMERCIAL",
+    "profesion_oficio_display": "Ingeniero Comercial",
+    "formacion_titulos_display": "Ingeniero Comercial",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_024a3f9de949d5ae1a71fc43664bc2d5"
+  },
+  "sen-043": {
+    "politico_id": "sen-043",
+    "nombre_completo": "Fidel Espinoza Sandoval",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "PEDAGOGIA EN HISTORIA Y GEOGRAFIA",
+    "profesion_oficio_display": "Pedagogia en Historia y Geografia",
+    "formacion_titulos_display": "Pedagogia en Historia y Geografia",
+    "declaracion_fecha": "2026-04-02",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_30b5ddc3665b2cc428a134931083af0d"
+  },
+  "sen-044": {
+    "politico_id": "sen-044",
+    "nombre_completo": "Iván Moreira Barros",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "RELACIONADOR PUBLICO",
+    "profesion_oficio_display": "Relacionador Publico",
+    "formacion_titulos_display": "Relacionador Publico",
+    "declaracion_fecha": "2026-03-28",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_e3b0edfe13b49c03b8e625550c17d791"
+  },
+  "sen-045": {
+    "politico_id": "sen-045",
+    "nombre_completo": "Miguel Ángel Calisto Águila",
+    "tiene_declaracion": false,
+    "profesion_oficio_raw": null,
+    "profesion_oficio_display": "No declarado en DIP",
+    "formacion_titulos_display": "No declarado en DIP",
+    "declaracion_fecha": null,
+    "declaracion_url": "https://www.infoprobidad.cl/Resultados?busqueda=Miguel%20%C3%81ngel%20Calisto%20%C3%81guila"
+  },
+  "sen-046": {
+    "politico_id": "sen-046",
+    "nombre_completo": "Ximena Órdenes Neira",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "SOCIOLOGO",
+    "profesion_oficio_display": "Sociologo",
+    "formacion_titulos_display": "Sociologo",
+    "declaracion_fecha": "2026-03-29",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_7eb7a4b3a6930e9558e4f521bb165b7a"
+  },
+  "sen-047": {
+    "politico_id": "sen-047",
+    "nombre_completo": "Alejandro Kusanovic Glusevic",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO CIVIL MECANICO",
+    "profesion_oficio_display": "Ingeniero Civil Mecanico",
+    "formacion_titulos_display": "Ingeniero Civil Mecanico",
+    "declaracion_fecha": "2026-04-01",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_ab99b846143b248578d7fcb66ca472dd"
+  },
+  "sen-048": {
+    "politico_id": "sen-048",
+    "nombre_completo": "Karim Bianchi Retamales",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO COMERCIAL",
+    "profesion_oficio_display": "Ingeniero Comercial",
+    "formacion_titulos_display": "Ingeniero Comercial",
+    "declaracion_fecha": "2026-04-01",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_a15f8d21d55a9e54843619517c65a6b9"
+  },
+  "sen-049": {
+    "politico_id": "sen-049",
+    "nombre_completo": "Gustavo Sanhueza Dueñas",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "INGENIERO COMERCIAL",
+    "profesion_oficio_display": "Ingeniero Comercial",
+    "formacion_titulos_display": "Ingeniero Comercial",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_5f58f10d345863ce1f95f7cbbeabf39f"
+  },
+  "sen-050": {
+    "politico_id": "sen-050",
+    "nombre_completo": "Loreto Carvajal Ambiado",
+    "tiene_declaracion": true,
+    "profesion_oficio_raw": "OTRA",
+    "profesion_oficio_display": "Otra",
+    "formacion_titulos_display": "No registra títulos de educación superior",
+    "declaracion_fecha": "2026-03-30",
+    "declaracion_url": "http://datos.cplt.cl/datos/infoprobidad/declaracion_88146ecc06413bcaf58f9a02fa8df4e3"
+  }
+}

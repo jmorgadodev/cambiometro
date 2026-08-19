@@ -1,0 +1,51 @@
+name: Security - CodeQL
+
+on:
+  push:
+    branches: [master, "codex/**"]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'auditoria_integridad_datos/**'
+  pull_request:
+    branches: [master]
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'auditoria_integridad_datos/**'
+  schedule:
+    - cron: "23 6 * * 1"
+  workflow_dispatch:
+
+concurrency:
+  group: codeql-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  actions: read
+  contents: read
+  security-events: write
+
+jobs:
+  analyze:
+    name: Analyze JavaScript and TypeScript
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v4
+        with:
+          languages: javascript-typescript
+          queries: security-extended
+          config-file: ./.github/codeql-config.yml
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v4
+        with:
+          category: /language:javascript-typescript
+          # El repositorio es privado y Code Scanning puede no estar habilitado
+          # en el plan de GitHub. El analisis se ejecuta, pero no intenta subir SARIF.
+          upload: never

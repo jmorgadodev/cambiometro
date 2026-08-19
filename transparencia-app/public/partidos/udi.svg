@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <rect width="160" height="160" rx="24" fill="#003D7A"/>
+  <rect x="0" y="128" width="160" height="16" rx="0" fill="#E20613"/>
+  <rect x="0" y="144" width="160" height="16" rx="0" fill="#FFFFFF"/>
+  <path d="M80 20 L86 38 L105 38 L90 49 L96 67 L80 56 L64 67 L70 49 L55 38 L74 38 Z" fill="#FFFFFF"/>
+  <text x="80" y="112" font-family="system-ui, -apple-system, 'Segoe UI', Arial, sans-serif" font-size="44" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="-1">UDI</text>
+</svg>

@@ -1,0 +1,76 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# testing
+/coverage
+
+# next.js
+/.next/
+/out/
+/.open-next/
+/.wrangler/
+
+# production
+/build
+/data/lake/*
+/data/lake-cplt/
+/data/cplt-category/
+/data/cplt-artifacts/
+!/data/lake/projections/
+!/data/lake/projections/v1/
+!/data/lake/projections/v1/*.json
+/tmp/
+/backups/
+__pycache__/
+*.py[cod]
+
+# misc
+.DS_Store
+*.pem
+*.key
+*.p12
+*.pfx
+.dev.vars
+
+# debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# env files (can opt-in for committing if needed)
+.env*
+
+# vercel
+.vercel
+
+# typescript
+*.tsbuildinfo
+next-env.d.ts
+
+data/raw/*
+!/data/raw/transparencia_activa/
+/data/raw/transparencia_activa/*
+!/data/raw/transparencia_activa/organismos_adicionales.json
+data/lake/projections/v1/*.json
+!data/lake/projections/v1/organismos.json
+!data/lake/projections/v1/ley19862-summary.json
+!data/lake/projections/v1/contraloria.json
+/data/etl/latest.json
+/data/etl/status.json
+/data/entidades-canonica*.json
+!/data/partidos-stats.json
+/data/politicos-evidences*.json
+!/data/politicos-evidences-stats.json
+/scripts/db/seed-*.sql
+/scratch/
+/scratch_fix_await.mjs

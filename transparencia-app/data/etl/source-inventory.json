@@ -1,0 +1,768 @@
+{
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-08-08T19:50:25.432Z",
+  "sources": [
+    {
+      "id": "camara",
+      "label": "Cámara",
+      "status": "partial",
+      "indexUrl": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
+      "indexChecksumSha256": "209ce6912849cfdc0699f916bba5f7d7cd462d0387de74d318503437b53ec3b5",
+      "periods": [],
+      "assetCount": 0,
+      "assets": []
+    },
+    {
+      "id": "senado",
+      "label": "Senado",
+      "status": "partial",
+      "indexUrl": "https://www.senado.cl/transparencia/transparencia-activa",
+      "indexChecksumSha256": "95fd6a78a5d33385a46fcc3fde4769313208e6bdb9a14d4602727a6f1c321bb6",
+      "periods": [
+        "2015",
+        "2018",
+        "2024",
+        "2025",
+        "2026"
+      ],
+      "assetCount": 28,
+      "assets": [
+        {
+          "url": "https://cdn.senado.cl/portal-senado-produccion/s3fs-public/2024-01/bases_tecnicas_generales_para_obras_y_servicios.pdf",
+          "label": "Bases técnicas generales para obras y servicios"
+        },
+        {
+          "url": "https://cdn.senado.cl/portal-senado-produccion/s3fs-public/2024-01/disposiciones_para_la_proteccion_y_cuidado_de_obras_de_arte.pdf",
+          "label": "Disposiciones para la protección y cuidado de las Obras de Artes"
+        },
+        {
+          "url": "https://cdn.senado.cl/portal-senado-produccion/s3fs-public/2024-01/reglamento_3_a_1.pdf",
+          "label": "Reglamento del 3°A de la LOC del Congreso Nacional"
+        },
+        {
+          "url": "https://cdn.senado.cl/portal-senado-produccion/s3fs-public/2024-01/reglamento_de_practicas_y_pasantias_en_el_senado.pdf",
+          "label": "Reglamento de prácticas y pasantías en el Senado"
+        },
+        {
+          "url": "https://cdn.senado.cl/portal-senado-produccion/s3fs-public/2024-01/reglamento_especial_para_contratista_y_subcontratistas_del_senado.pdf",
+          "label": "Reglamento especial para contratistas y subcontratistas del Senado"
+        },
+        {
+          "url": "https://cdn.senado.cl/portal-senado-produccion/s3fs-public/2024-01/reglamento_para_la_inclusi_n_de_personas_con_discapacidad_en_el_senado_0.pdf",
+          "label": "Para la inclusión de personas con discapacidad en el Senado"
+        },
+        {
+          "url": "https://cdn.senado.cl/portal-senado-produccion/s3fs-public/2024-01/reglamento_registro_especial_de_asesores_externos.pdf",
+          "label": "Reglamento del Registro de Asesores Externos"
+        },
+        {
+          "url": "https://cdn.senado.cl/portal-senado-produccion/s3fs-public/2024-06/reglamento-interno-de-orden-higiene-y-seguridad-2018.pdf",
+          "label": "Interno de orden, higiene y seguridad ocupacional del Senado"
+        },
+        {
+          "url": "https://cdn.senado.cl/portal-senado-produccion/s3fs-public/2025-01/res-92-2024-do.pdf",
+          "label": "Resolución SG N°92/2024 que Delega facultades administrativas, financieras y presupuestarias en las autoridades del Senado que indica"
+        },
+        {
+          "url": "https://cdn.senado.cl/portal-senado-produccion/s3fs-public/2025-01/resolucion-sg-ndeg089-reglamento-interno-de-transparencia-de-la-funcion-publica-y-acceso-a-la-informacion-publica.pdf",
+          "label": "Reglamento de transparencia y de acceso a la información pública"
+        },
+        {
+          "url": "https://cdn.senado.cl/portal-senado-produccion/s3fs-public/2025-04/resolucion-sg-ndeg20-aprueba-reglamento-de-compras-publicas-del-senado.pdf",
+          "label": "Reglamento de Compras Públicas del Senado"
+        },
+        {
+          "url": "https://cdn.senado.cl/portal-senado-produccion/s3fs-public/2025-08/pago-a-organismos-internacionales-2025_0.pdf",
+          "label": "Aportes organismos internacionales"
+        },
+        {
+          "url": "https://cdn.senado.cl/portal-senado-produccion/s3fs-public/2025-09/politica-de-calidad-2025_16.pdf",
+          "label": "Política de la calidad"
+        },
+        {
+          "url": "https://cdn.senado.cl/portal-senado-produccion/s3fs-public/2025-11/senado-republica-de-chile-certificado-9001.pdf",
+          "label": "Certificado ISO 9001:2015"
+        },
+        {
+          "url": "https://cdn.senado.cl/portal-senado-produccion/s3fs-public/2026-07/resolucion-sg-ndeg38-b-2026-aprueba-politica-de-proteccion-de-datos-en-el-senado1.pdf",
+          "label": "Política de Protección y Tratamiento de Datos en el Senado"
+        },
+        {
+          "url": "https://www.senado.cl/actividad-legislativa/sala/votaciones",
+          "label": "En sala de sesiones"
+        },
+        {
+          "url": "https://www.senado.cl/transparencia/datos-abiertos-legislativos",
+          "label": "Datos abiertos legislativos"
+        },
+        {
+          "url": "https://www.senado.cl/transparencia/gastos-de-presidencia-y-vicepresidencia",
+          "label": "Gastos de presidencia y vicepresidencia"
+        },
+        {
+          "url": "https://www.senado.cl/transparencia/gastos-ex-presidentes-de-la-republica",
+          "label": "Gastos ex Presidentes de la República"
+        },
+        {
+          "url": "https://www.senado.cl/transparencia/gastos-operacionales-comite",
+          "label": "Gastos operacionales"
+        },
+        {
+          "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
+          "label": "Gastos operacionales"
+        },
+        {
+          "url": "https://www.senado.cl/transparencia/transparencia-activa/ejecucion-presupuestaria-historica",
+          "label": "Ejecución presupuestaria (histórica)"
+        },
+        {
+          "url": "https://www.senado.cl/transparencia/transparencia-activa/informes-anuales",
+          "label": "Informes Anuales del Comité de Auditoría Parlamentaria"
+        },
+        {
+          "url": "https://www.senado.cl/transparencia/transparencia-activa/ley-de-presupuestos-historico",
+          "label": "Ley de presupuestos (histórico)"
+        },
+        {
+          "url": "https://www.senado.cl/transparencia/transparencia-activa/remuneraciones-honorarios",
+          "label": "Remuneraciones honorarios"
+        },
+        {
+          "url": "https://www.senado.cl/transparencia/transparencia-activa/remuneraciones-personal-tv-senado",
+          "label": "Remuneración personal TV Senado"
+        },
+        {
+          "url": "https://www.senado.cl/transparencia/transparencia-activa/remuneraciones-planta-y-contrata",
+          "label": "Remuneraciones planta y contrata"
+        },
+        {
+          "url": "https://www.senado.cl/transparencia/transparencia-activa/resultados-de-las-auditorias-al-ejercicio-presupuestario",
+          "label": "Auditorías externas"
+        }
+      ]
+    },
+    {
+      "id": "chilecompra",
+      "label": "ChileCompra OCDS",
+      "status": "partial",
+      "indexUrl": "https://datos-abiertos.chilecompra.cl/descargas/procesos-ocds",
+      "indexChecksumSha256": "87fa1f7fa0aef4213c20d0df9b74ea9336d2108ea9631d8064448e77c1e36ce9",
+      "periods": [],
+      "assetCount": 0,
+      "assets": []
+    },
+    {
+      "id": "dipres",
+      "label": "DIPRES",
+      "status": "partial",
+      "indexUrl": "https://www.dipres.gob.cl/597/w3-multipropertyvalues-25910-37782.html",
+      "indexChecksumSha256": "278287bce57ebbe4cc1759a016a04ff375df7035eb209ef40a716e45d00cfe1d",
+      "periods": [],
+      "assetCount": 34,
+      "assets": [
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-404499_doc_csv.csv?ts=1772463823",
+          "label": "Documento CSV : Resumen Presupuesto de Partida [Pesos]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-404499_doc_xml.xml?ts=1772463839",
+          "label": "Documento XML : Resumen Presupuesto de Partida [Pesos]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-404500_doc_csv.csv?ts=1772463922",
+          "label": "Documento CSV : Resumen Presupuesto de Partida [Dólares]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-404500_doc_xml.xml?ts=1772463933",
+          "label": "Documento XML : Resumen Presupuesto de Partida [Dólares]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-406838_doc_csv.csv?ts=1783111931",
+          "label": "Documento CSV : Resumen Presupuesto de Partida [Pesos]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-406838_doc_xml.xml?ts=1783111945",
+          "label": "Documento XML : Resumen Presupuesto de Partida [Pesos]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-406839_doc_csv.csv?ts=1774965787",
+          "label": "Documento CSV : Resumen Presupuesto de Partida [Dólares]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-406839_doc_xml.xml?ts=1774965800",
+          "label": "Documento XML : Resumen Presupuesto de Partida [Dólares]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-413064_doc_csv.csv?ts=1783112137",
+          "label": "Documento CSV : Resumen Presupuesto de Partida [Pesos]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-413064_doc_xml.xml?ts=1783112158",
+          "label": "Documento XML : Resumen Presupuesto de Partida [Pesos]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-413065_doc_csv.csv?ts=1777585014",
+          "label": "Documento CSV : Resumen Presupuesto de Partida [Dólares]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-413065_doc_xml.xml?ts=1777585035",
+          "label": "Documento XML : Resumen Presupuesto de Partida [Dólares]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-414051_doc_csv.csv?ts=1783112498",
+          "label": "Documento CSV : Resumen Presupuesto de Partida [Pesos]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-414051_doc_xml.xml?ts=1783112508",
+          "label": "Documento XML : Resumen Presupuesto de Partida [Pesos]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-414052_doc_csv.csv?ts=1779918721",
+          "label": "Documento CSV : Resumen Presupuesto de Partida [Dólares]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-414052_doc_xml.xml?ts=1779918748",
+          "label": "Documento XML : Resumen Presupuesto de Partida [Dólares]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-416592_doc_csv.csv?ts=1782849054",
+          "label": "Documento CSV : Resumen Presupuesto de Partida [Pesos]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-416592_doc_xml.xml?ts=1782849067",
+          "label": "Documento XML : Resumen Presupuesto de Partida [Pesos]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-416593_doc_csv.csv?ts=1782849147",
+          "label": "Documento CSV : Resumen Presupuesto de Partida [Dólares]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-416593_doc_xml.xml?ts=1782849158",
+          "label": "Documento XML : Resumen Presupuesto de Partida [Dólares]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-422424_doc_csv.csv?ts=1785536682",
+          "label": "Documento CSV : Resumen Presupuesto de Partida [Pesos]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-422424_doc_xml.xml?ts=1785536692",
+          "label": "Documento XML : Resumen Presupuesto de Partida [Pesos]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-422425_doc_csv.csv?ts=1785536800",
+          "label": "Documento CSV : Resumen Presupuesto de Partida [Dólares]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/articles-422425_doc_xml.xml?ts=1785536813",
+          "label": "Documento XML : Resumen Presupuesto de Partida [Dólares]"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/w3-multipropertyvalues-15145-37782.html",
+          "label": "Ley de Presupuestos"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/w3-multipropertyvalues-15168-37782.html",
+          "label": "Proyecto Ley de Presupuestos"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/w3-multipropertyvalues-20816-37782.html",
+          "label": "Decretos de Modificación Presupuestaria"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/w3-multipropertyvalues-24076-37782.html",
+          "label": "Informes complementarios"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/w3-multipropertyvalues-25910-37782.html",
+          "label": "Ejecución Total"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/w3-multipropertyvalues-25916-37782.html",
+          "label": "Ejecución Ley Regular"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/w3-multipropertyvalues-35610-37782.html",
+          "label": "Ejecución Gores"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/597/w3-multipropertyvalues-36912-37782.html",
+          "label": "Ejecución FET-Incendios"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/598/w3-channel.html",
+          "label": "DIPRES - Dirección de Presupuestos"
+        },
+        {
+          "url": "https://www.dipres.gob.cl/598/w3-propertyvalue-2129.html",
+          "label": "Presupuestos"
+        }
+      ]
+    },
+    {
+      "id": "sinim",
+      "label": "SINIM",
+      "status": "partial",
+      "indexUrl": "https://datos.sinim.gov.cl/datos_municipales.php",
+      "indexChecksumSha256": "d376a215093471057ba584e4c981a2062888c8290c035ae6545c7bed4a7677ed",
+      "periods": [
+        "2001",
+        "2002",
+        "2003",
+        "2004",
+        "2005",
+        "2006",
+        "2007",
+        "2008",
+        "2009",
+        "2010",
+        "2011",
+        "2012",
+        "2013",
+        "2014",
+        "2015",
+        "2016",
+        "2017",
+        "2018",
+        "2019",
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025"
+      ],
+      "assetCount": 3,
+      "assets": [
+        {
+          "url": "https://datos.sinim.gov.cl/clasificador_presupuestario.php",
+          "label": "Clasificador presupuestario"
+        },
+        {
+          "url": "https://datos.sinim.gov.cl/datos_municipales.php",
+          "label": "Datos Municipales"
+        },
+        {
+          "url": "https://datos.sinim.gov.cl/evolucion_presupuestaria.php",
+          "label": "Evolución presupuestaria"
+        }
+      ]
+    },
+    {
+      "id": "contraloria",
+      "label": "Contraloría",
+      "status": "partial",
+      "indexUrl": "https://www.contraloria.cl/web/cgr/informes-de-auditoria",
+      "indexChecksumSha256": "5c5afea417119b628299494f6a509734fb30cc3a4a06919b188b037a59b0e4dc",
+      "periods": [],
+      "assetCount": 2,
+      "assets": [
+        {
+          "url": "https://www.contraloria.cl/es/web/cgr/informes-de-auditoria",
+          "label": "Español"
+        },
+        {
+          "url": "https://www.contraloria.cl/web/cgr/informes-de-auditoria",
+          "label": "Saltar al contenido"
+        }
+      ]
+    },
+    {
+      "id": "ley-19862",
+      "label": "Registro Ley 19.862",
+      "status": "partial",
+      "indexUrl": "https://www.registros19862.cl/",
+      "indexChecksumSha256": "3158af54a517d2b479af181186ab6492c5a0b76abf0b657c121642838e9d68ed",
+      "periods": [],
+      "assetCount": 0,
+      "assets": []
+    },
+    {
+      "id": "transparencia-activa",
+      "label": "Portal de Transparencia",
+      "status": "partial",
+      "indexUrl": "https://www.consejotransparencia.cl/datosabiertos-respaldo/",
+      "indexChecksumSha256": "f21a861af3a3425ba92080e7ad9a23e04b912b37f18b5da11b738135b9c3bcc8",
+      "periods": [],
+      "assetCount": 80,
+      "assets": [
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/casos.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/casos.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/estadosPorCaso.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/estadosPorCaso.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/motivosPorCaso.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/motivosPorCaso.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/reclamados.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/reclamados.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/reclamantes.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/reclamantes.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/BaseFinal_Funcionarios_Publicos_Final_v4.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/BBDD_ENF_2017.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/BBDD_ENF_2018.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/BBDD_ENF_2019.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/BBDD_ENT_2014.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/BBDD_ENT_2015.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/BBDD_ENT_2016.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/BBDD_ENT_2017.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/BBDD_ENT_2018.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/BBDD_ENT_2019.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/BBDD_Funcionarios_Publicos_2020.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/DetalleResultadosFiscalizaciones2014.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/diccionario_de_variables_enf2018.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/diccionario_de%20_variables%20_ent2018.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/Diccionario_variable_ENT_2014.xlsx",
+          "label": "[XLS]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/Diccionario_variable_ENT_2015.xlsx",
+          "label": "[XLS]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/Diccionario_variable_ENT_2016.xlsx",
+          "label": "[XLS]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/Diccionario_variable_ENT_2019.xlsx",
+          "label": "[XLS]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/Diccionario_Variables_ENF2019.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/Diccionario_Variables_ENF2020.xlsx",
+          "label": "[XLS]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/DiccionarioDeVariablesENF2017.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/DiccionarioDeVariablesENT2017.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/Diccionarios_de_Variables_Funcionarios_Publicos_2016.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/DiccionarioVariablesEF.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/PuntajeDAI2014.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivosFiscalizacion/PuntajeTA2014.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/EstudioFuncionarios2015_Datos.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/estudios/BBDD_ENT_2020.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/estudios/BBDDEncuestaNacional2009.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/estudios/BBDDEncuestaNacional2011.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/estudios/BBDDEncuestaNacional2012.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/estudios/BBDDEncuestaNacional2013.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/estudios/BBDDFuncionarios2012_1.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/estudios/BBDDFuncionarios2013_2.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/estudios/Diccionario_variable_ENT_2020.xlsx",
+          "label": "[XLS]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/estudios/DiccionariodeVariablesBBDDEncuestaNacional2009.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/estudios/DiccionariodeVariablesBBDDEncuestaNacional2012.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/estudios/DiccionariodevariablesBBDDEncuestaNacional2013.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/estudios/DiccionariodeVariablesBBDDFuncionarios2012_1.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/estudios/DiccionariodeVariablesBBDDFuncionarios2013_2.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_admcentral_online_2014.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_admcentral_online_2014.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_admcentral_online_2015.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_admcentral_online_2015.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_admcentral_online_2016.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_admcentral_online_2016.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_admcentral_online_2017.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_admcentral_online_2017.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_corpmuni_online_2016.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_corpmuni_online_2016.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_corpmuni_online_2017.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_corpmuni_online_2017.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_municipios_online_2014.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_municipios_online_2014.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_municipios_online_2015.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_municipios_online_2015.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_municipios_online_2016.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_municipios_online_2016.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_municipios_online_2017.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_municipios_online_2017.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_municipios_online_2018.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_municipios_online_2018.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_presencial_2014.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_presencial_2014.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_presencial_2015.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_presencial_2015.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_presencial_2016.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_presencial_2016.xml",
+          "label": "[XML]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_presencial_2017.csv",
+          "label": "[CSV]"
+        },
+        {
+          "url": "https://consejotransparencia.cl/transparencia_activa/datoabierto/od_dai/dai_presencial_2017.xml",
+          "label": "[XML]"
+        }
+      ]
+    },
+    {
+      "id": "servel",
+      "label": "SERVEL",
+      "status": "partial",
+      "indexUrl": "https://www.servel.cl/biblioteca-de-documentos/resultados-electorales-historicos/",
+      "indexChecksumSha256": "d11885a735c7383f93162cd5fe23383504ec83747094c2d77286d77620a70633",
+      "periods": [
+        "2025"
+      ],
+      "assetCount": 11,
+      "assets": [
+        {
+          "url": "https://historial.servel.cl/SitioHistorico/index1999_p2v.htm",
+          "label": "Presidenciales segunda votación"
+        },
+        {
+          "url": "https://historial.servel.cl/SitioHistorico/index1999_pres.htm",
+          "label": "Presidenciales primera votación"
+        },
+        {
+          "url": "https://historial.servel.cl/SitioHistorico/index2005_p2v.htm",
+          "label": "Presidenciales segunda votación"
+        },
+        {
+          "url": "https://historial.servel.cl/SitioHistorico/index2005_pres.htm",
+          "label": "Presidenciales primera votación"
+        },
+        {
+          "url": "https://historial.servel.cl/SitioHistorico/index2009_p2v.htm",
+          "label": "Presidenciales segunda votación"
+        },
+        {
+          "url": "https://historial.servel.cl/SitioHistorico/index2009_pres.htm",
+          "label": "Presidenciales primera votación"
+        },
+        {
+          "url": "https://www-doc.servel.cl/?tipo=presupuesto",
+          "label": "Recurso oficial"
+        },
+        {
+          "url": "https://www.servel.cl/biblioteca-de-documentos/resultados-electorales-historicos/",
+          "label": "Saltar al contenido"
+        },
+        {
+          "url": "https://www.servel.cl/campanas-electorales-introduccion/documentos/",
+          "label": "Ingresos y gastos electorales"
+        },
+        {
+          "url": "https://www.servel.cl/campanas-electorales-introduccion/gasto-electoral/",
+          "label": "Recurso oficial"
+        },
+        {
+          "url": "https://www.servel.cl/padrones-electorales-definitivos-y-nominas-de-inhabilitados-elecciones-2025/",
+          "label": "Recurso oficial"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,86 @@
+name: ETL Semanal - InfoLobby
+
+on:
+  schedule:
+    - cron: "30 8 * * 1" # Lunes 04:30 CLT
+  workflow_dispatch:
+    inputs:
+      from:
+        description: Fecha inicio YYYY-MM-DD (por defecto 8 días atrás)
+        required: false
+      to:
+        description: Fecha fin YYYY-MM-DD
+        required: false
+
+concurrency:
+  group: etl-infolobby
+  cancel-in-progress: true
+
+jobs:
+  ingest-publish-materialize:
+    name: Audiencias y Gestiones de Lobby (Ley 20.730)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    permissions:
+      contents: write
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: transparencia-app
+
+      - name: Exigir credenciales y recuperar catálogo vigente
+        shell: bash
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          mkdir -p data/lake/catalog/v1
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+
+      - name: Preparar workspace ETL sin datasets versionados
+        working-directory: transparencia-app
+        run: npm run etl:prepare
+
+      - name: Ingerir y proyectar InfoLobby
+        working-directory: transparencia-app
+        env:
+          INPUT_FROM: ${{ inputs.from }}
+          INPUT_TO: ${{ inputs.to }}
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          from_date="${INPUT_FROM:-$(date -u -d '8 days ago' +%F)}"
+          to_date="${INPUT_TO:-$(date -u +%F)}"
+          npm run ingest:infolobby -- --from "$from_date" --to "$to_date"
+          npm run data:lake:projection:infolobby
+          npm run data:publish
+
+      - name: Refrescar catálogo maestro antes de materializar
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+
+      - name: Materializar D1 y registrar ejecución
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          ETL_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
+        run: npm run data:materialize -- --database transparencia-db --remote --sources infolobby

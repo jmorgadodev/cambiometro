@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <rect width="160" height="160" rx="24" fill="#0284C7"/>
+  <g transform="translate(80, 52)">
+    <path d="M-28 -20 Q10 -30 28 -5 Q35 15 15 25 Q-10 30 -28 10 Z" fill="#E0F2FE"/>
+    <path d="M-18 -10 Q5 -18 18 0 Q22 15 8 18 Q-5 20 -18 5 Z" fill="#0369A1"/>
+  </g>
+  <text x="80" y="126" font-family="system-ui, -apple-system, 'Segoe UI', Arial, sans-serif" font-size="42" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">DEM</text>
+</svg>

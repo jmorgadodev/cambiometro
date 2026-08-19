@@ -1,0 +1,49 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1500" height="500" viewBox="0 0 1500 500" role="img" aria-label="El Cambiómetro — banner">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#0B0F17"/>
+      <stop offset="0.55" stop-color="#0e1420"/>
+      <stop offset="1" stop-color="#101a2e"/>
+    </linearGradient>
+    <pattern id="dots" width="40" height="40" patternUnits="userSpaceOnUse">
+      <circle cx="4" cy="4" r="1.4" fill="#1E293B"/>
+    </pattern>
+  </defs>
+
+  <rect width="1500" height="500" fill="url(#bg)"/>
+  <rect width="1500" height="500" fill="url(#dots)"/>
+
+  <line x1="0" y1="498" x2="1500" y2="498" stroke="#334155" stroke-width="2" opacity="0.6"/>
+
+  <g opacity="0.85">
+    <path d="M 980 320 A 200 200 0 1 1 1380 320" fill="none" stroke="#c9d4e3" stroke-width="16" opacity="0.18" stroke-linecap="round"/>
+    <path d="M 1180 120 L 1180 104" stroke="#c9d4e3" stroke-width="6" opacity="0.18" stroke-linecap="round"/>
+    <path d="M 1078 146 L 1068 131" stroke="#c9d4e3" stroke-width="6" opacity="0.18" stroke-linecap="round"/>
+    <path d="M 1282 146 L 1292 131" stroke="#c9d4e3" stroke-width="6" opacity="0.18" stroke-linecap="round"/>
+    <path d="M 1006 240 L 994 231" stroke="#c9d4e3" stroke-width="6" opacity="0.18" stroke-linecap="round"/>
+    <path d="M 1354 240 L 1366 231" stroke="#c9d4e3" stroke-width="6" opacity="0.18" stroke-linecap="round"/>
+    <path d="M 1180 320 L 1344 200" stroke="#0ea5e9" stroke-width="10" opacity="0.55" stroke-linecap="round"/>
+    <circle cx="1344" cy="200" r="7" fill="#0ea5e9" opacity="0.55"/>
+    <circle cx="1180" cy="320" r="11" fill="#c9d4e3" opacity="0.35"/>
+  </g>
+
+  <g fill="#334155" opacity="0.75">
+    <rect x="760" y="448" width="10" height="40"/>
+    <rect x="778" y="460" width="10" height="28"/>
+    <rect x="796" y="440" width="10" height="48"/>
+    <rect x="814" y="452" width="10" height="36"/>
+    <rect x="832" y="468" width="10" height="20"/>
+    <rect x="850" y="442" width="10" height="46"/>
+    <rect x="868" y="456" width="10" height="32"/>
+  </g>
+  <g fill="#0ea5e9" opacity="0.7">
+    <rect x="886" y="430" width="10" height="58"/>
+    <rect x="904" y="452" width="10" height="36"/>
+  </g>
+
+  <text x="84" y="188" font-family="'Inter','Segoe UI',Arial,sans-serif" font-size="72" font-weight="700" fill="#F8FAFC" letter-spacing="-1">El Cambiómetro</text>
+  <rect x="86" y="212" width="64" height="4" fill="#0ea5e9"/>
+  <text x="86" y="258" font-family="'Inter','Segoe UI',Arial,sans-serif" font-size="27" fill="#94A3B8">Votaciones, gastos y vínculos públicos de Chile</text>
+  <text x="86" y="302" font-family="'JetBrains Mono',Consolas,monospace" font-size="22" fill="#0ea5e9">cambiometro.impulsacv.cl</text>
+  <text x="86" y="334" font-family="'Inter','Segoe UI',Arial,sans-serif" font-size="17" fill="#64748B">evidencia trazable · fuentes oficiales · sin opinión</text>
+</svg>

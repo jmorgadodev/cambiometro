@@ -1,0 +1,20 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /transparencia-app
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+      timezone: America/Santiago
+    open-pull-requests-limit: 5
+    groups:
+      production-security:
+        dependency-type: production
+        update-types: [patch, minor]
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 3

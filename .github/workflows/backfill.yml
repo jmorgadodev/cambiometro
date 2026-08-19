@@ -1,0 +1,68 @@
+name: Backfill histórico de datos públicos
+
+on:
+  workflow_dispatch:
+    inputs:
+      source:
+        description: infoprobidad, infolobby, camara, votaciones_camara o asistencia_camara
+        required: true
+      year:
+        description: Año YYYY
+        required: true
+      month:
+        description: Mes 01-12
+        required: true
+
+concurrency:
+  group: backfill-${{ inputs.source }}-${{ inputs.year }}-${{ inputs.month }}
+  cancel-in-progress: true
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+      - run: npm ci
+        working-directory: transparencia-app
+      - name: Validar y calcular último día del mes
+        id: period
+        shell: bash
+        run: |
+          from="${{ inputs.year }}-${{ inputs.month }}-01"
+          to=$(date -u -d "$from +1 month -1 day" +%F)
+          test "$(date -u -d "$from" +%F)" = "$from"
+          echo "from=$from" >> "$GITHUB_OUTPUT"
+          echo "to=$to" >> "$GITHUB_OUTPUT"
+      - name: Ingerir período completo
+        if: inputs.source != 'asistencia_camara' && inputs.source != 'infolobby' && inputs.source != 'infoprobidad'
+        run: npm run etl -- --from "${{ steps.period.outputs.from }}" --to "${{ steps.period.outputs.to }}" --source "${{ inputs.source }}"
+        working-directory: transparencia-app
+      - name: Construir período ETL genérico
+        if: inputs.source != 'asistencia_camara' && inputs.source != 'infolobby' && inputs.source != 'infoprobidad'
+        run: npm run data:lake
+        working-directory: transparencia-app
+      - name: Ingerir período completo de InfoLobby
+        if: inputs.source == 'infolobby'
+        run: npm run ingest:infolobby -- --from "${{ steps.period.outputs.from }}" --to "${{ steps.period.outputs.to }}"
+        working-directory: transparencia-app
+      - name: Ingerir período completo de InfoProbidad
+        if: inputs.source == 'infoprobidad'
+        run: npm run ingest:infoprobidad -- --from "${{ steps.period.outputs.from }}" --to "${{ steps.period.outputs.to }}" --concurrency 2
+        working-directory: transparencia-app
+      - name: Ingerir año de asistencia oficial de Cámara
+        if: inputs.source == 'asistencia_camara'
+        run: npm run ingest:camara-attendance -- --year "${{ inputs.year }}" --concurrency 8
+        working-directory: transparencia-app
+      - name: Publicar sólo en Releases; R2 conserva períodos calientes
+        run: node scripts/publish-data-lake.mjs --releases
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}

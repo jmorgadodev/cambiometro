@@ -1,0 +1,52 @@
+name: Quality (Lint, Types & Unit Tests)
+
+on:
+  push:
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'auditoria_integridad_datos/**'
+  pull_request:
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'auditoria_integridad_datos/**'
+  workflow_dispatch:
+
+concurrency:
+  group: quality-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  quality:
+    name: Lint, Types and Unit Tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: transparencia-app
+
+      - name: Lint
+        run: npm run lint
+        working-directory: transparencia-app
+
+      - name: Types, Color Tokens and Unit Tests
+        run: npm test
+        working-directory: transparencia-app
+
+      - name: Check no AI traces
+        run: node scripts/check-no-ai-traces.mjs
+        working-directory: transparencia-app
+
+      - name: Check no private assets
+        run: node scripts/check-no-private-assets.mjs
+        working-directory: transparencia-app

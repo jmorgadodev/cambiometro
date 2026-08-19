@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <rect width="160" height="160" rx="24" fill="#0A2558"/>
+  <path d="M40 28 Q80 18 120 40 Q80 75 40 28" fill="#E11D48"/>
+  <path d="M30 45 Q80 32 130 65 Q75 100 30 45" fill="#2563EB"/>
+  <path d="M80 32 L85 45 L98 45 L87 53 L91 66 L80 58 L69 66 L73 53 L62 45 L75 45 Z" fill="#FFFFFF"/>
+  <text x="80" y="124" font-family="system-ui, -apple-system, 'Segoe UI', Arial, sans-serif" font-size="52" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="1">RN</text>
+</svg>

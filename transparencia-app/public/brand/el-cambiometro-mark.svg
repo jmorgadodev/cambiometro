@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512" role="img" aria-label="El Cambiómetro — medidor de cambio en alza (dial, modo oscuro)">
+  <g fill="none" stroke-linecap="round">
+    <path d="M78 330 L56 330" stroke="#c9d4e3" stroke-width="8"/>
+    <path d="M130 204 L115 189" stroke="#c9d4e3" stroke-width="8"/>
+    <path d="M256 152 L256 130" stroke="#c9d4e3" stroke-width="8"/>
+    <path d="M382 204 L397 189" stroke="#c9d4e3" stroke-width="8"/>
+    <path d="M434 330 L456 330" stroke="#c9d4e3" stroke-width="8"/>
+    <path d="M86 330 A170 170 0 1 1 426 330" stroke="#c9d4e3" stroke-width="16"/>
+    <path d="M256 330 L382 204" stroke="#0ea5e9" stroke-width="12"/>
+  </g>
+  <circle cx="382" cy="204" r="9" fill="#0ea5e9"/>
+  <circle cx="256" cy="330" r="11" fill="#c9d4e3"/>
+</svg>

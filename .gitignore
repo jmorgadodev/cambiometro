@@ -1,0 +1,38 @@
+# Secrets and local credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.p12
+*.pfx
+
+# Local tooling and operating-system files
+.wrangler/
+.dev.vars
+*.log
+.DS_Store
+Thumbs.db
+
+# Agent note files: never tracked (canonical copy lives in the private repo)
+AGENTS.md
+CLAUDE.md
+
+# Scratch scripts and local raw downloads
+scratch/
+data/raw/servel/
+
+# Assets moved to the private repo (cambiometro-editorial) and local artifacts
+social/
+backups/
+tmp/
+.open-next/
+.next/
+node_modules/
+.env*
+*.sqlite*
+__pycache__/
+out.json
+data/lake/.work/
+data/lake/originals/
+data/lake/partitions/

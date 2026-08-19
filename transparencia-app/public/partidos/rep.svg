@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 160" width="160" height="160">
+  <rect width="160" height="160" rx="24" fill="#0F172A"/>
+  <path d="M30 20 L130 20 L130 110 C130 135 80 150 80 150 C80 150 30 135 30 110 Z" fill="#1E3A8A" stroke="#3B82F6" stroke-width="2"/>
+  <path d="M80 34 L84 46 L96 46 L86 53 L90 65 L80 57 L70 65 L74 53 L64 46 L76 46 Z" fill="#E11D48"/>
+  <text x="80" y="116" font-family="system-ui, -apple-system, 'Segoe UI', Arial, sans-serif" font-size="44" font-weight="900" fill="#FFFFFF" text-anchor="middle" letter-spacing="-1">REP</text>
+</svg>

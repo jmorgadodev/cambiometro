@@ -1,0 +1,3278 @@
+[
+  {
+    "id": "org-presidencia-de-la-republica",
+    "nombre": "Presidencia De La República",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-del-interior",
+    "nombre": "Subsecretaría Del Interior",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-desarrollo-regional-y-administrativo-subdere",
+    "nombre": "Subsecretaría De Desarrollo Regional Y Administrativo (subdere)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-nacional-de-prevencion-y-respuesta-ante-desastres-senapred",
+    "nombre": "Servicio Nacional De Prevención Y Respuesta Ante Desastres (senapred)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-electoral-servel",
+    "nombre": "Servicio Electoral (servel)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-regional-de-arica-y-parinacota",
+    "nombre": "Delegación Presidencial Regional De Arica Y Parinacota",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-regional-de-antofagasta",
+    "nombre": "Delegación Presidencial Regional De Antofagasta",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-regional-de-atacama",
+    "nombre": "Delegación Presidencial Regional De Atacama",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-regional-de-aysen-del-general-carlos-ibanez-del-campo",
+    "nombre": "Delegación Presidencial Regional De Aysén Del General Carlos Ibáñez Del Campo",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-regional-de-coquimbo",
+    "nombre": "Delegación Presidencial Regional De Coquimbo",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-regional-de-la-araucania",
+    "nombre": "Delegación Presidencial Regional De La Araucanía",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-regional-de-los-lagos",
+    "nombre": "Delegación Presidencial Regional De Los Lagos",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-regional-de-los-rios",
+    "nombre": "Delegación Presidencial Regional De Los Ríos",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-regional-de-magallanes-y-la-antartica-chilena",
+    "nombre": "Delegación Presidencial Regional De Magallanes Y La Antártica Chilena",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-regional-del-libertador-general-bernardo-ohiggins",
+    "nombre": "Delegación Presidencial Regional Del Libertador General Bernardo Ohiggins",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-regional-de-tarapaca",
+    "nombre": "Delegación Presidencial Regional De Tarapacá",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-regional-de-valparaiso",
+    "nombre": "Delegación Presidencial Regional De Valparaíso",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-regional-del-biobio",
+    "nombre": "Delegación Presidencial Regional Del Biobío",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-regional-del-maule",
+    "nombre": "Delegación Presidencial Regional Del Maule",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-regional-metropolitana",
+    "nombre": "Delegación Presidencial Regional Metropolitana",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-parinacota",
+    "nombre": "Delegación Presidencial Provincial De Parinacota",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-tamarugal",
+    "nombre": "Delegación Presidencial Provincial De Tamarugal",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-el-loa",
+    "nombre": "Delegación Presidencial Provincial De El Loa",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-tocopilla",
+    "nombre": "Delegación Presidencial Provincial De Tocopilla",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-chanaral",
+    "nombre": "Delegación Presidencial Provincial De Chañaral",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-huasco",
+    "nombre": "Delegación Presidencial Provincial De Huasco",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-limari",
+    "nombre": "Delegación Presidencial Provincial De Limarí",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-choapa",
+    "nombre": "Delegación Presidencial Provincial De Choapa",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-petorca",
+    "nombre": "Delegación Presidencial Provincial De Petorca",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-san-felipe",
+    "nombre": "Delegación Presidencial Provincial De San Felipe",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-los-andes",
+    "nombre": "Delegación Presidencial Provincial De Los Andes",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-quillota",
+    "nombre": "Delegación Presidencial Provincial De Quillota",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-san-antonio",
+    "nombre": "Delegación Presidencial Provincial De San Antonio",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-isla-de-pascua",
+    "nombre": "Delegación Presidencial Provincial De Isla De Pascua",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-colchagua",
+    "nombre": "Delegación Presidencial Provincial De Colchagua",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-cardenal-caro",
+    "nombre": "Delegación Presidencial Provincial De Cardenal Caro",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-curico",
+    "nombre": "Delegación Presidencial Provincial De Curicó",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-linares",
+    "nombre": "Delegación Presidencial Provincial De Linares",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-cauquenes",
+    "nombre": "Delegación Presidencial Provincial De Cauquenes",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-del-biobio",
+    "nombre": "Delegación Presidencial Provincial Del Bíobío",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-arauco",
+    "nombre": "Delegación Presidencial Provincial De Arauco",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-malleco",
+    "nombre": "Delegación Presidencial Provincial De Malleco",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-del-ranco",
+    "nombre": "Delegación Presidencial Provincial Del Ranco",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-osorno",
+    "nombre": "Delegación Presidencial Provincial De Osorno",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-chiloe",
+    "nombre": "Delegación Presidencial Provincial De Chiloé",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-palena",
+    "nombre": "Delegación Presidencial Provincial De Palena",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-aysen",
+    "nombre": "Delegación Presidencial Provincial De Aysén",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-general-carrera",
+    "nombre": "Delegación Presidencial Provincial De General Carrera",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-capitan-prat",
+    "nombre": "Delegación Presidencial Provincial De Capitán Prat",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-ultima-esperanza",
+    "nombre": "Delegación Presidencial Provincial De Última Esperanza",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-tierra-del-fuego",
+    "nombre": "Delegación Presidencial Provincial De Tierra Del Fuego",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-la-antartica-chilena",
+    "nombre": "Delegación Presidencial Provincial De La Antártica Chilena",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-chacabuco",
+    "nombre": "Delegación Presidencial Provincial De Chacabuco",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-cordillera",
+    "nombre": "Delegación Presidencial Provincial De Cordillera",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-maipo",
+    "nombre": "Delegación Presidencial Provincial De Maipo",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-talagante",
+    "nombre": "Delegación Presidencial Provincial De Talagante",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-melipilla",
+    "nombre": "Delegación Presidencial Provincial De Melipilla",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-gobierno-regional-de-arica-y-parinacota-gore",
+    "nombre": "Gobierno Regional De Arica Y Parinacota (gore)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-gobierno-regional-de-tarapaca-gore",
+    "nombre": "Gobierno Regional De Tarapacá (gore)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-gobierno-regional-de-antofagasta-gore",
+    "nombre": "Gobierno Regional De Antofagasta (gore)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-gobierno-regional-de-atacama-gore",
+    "nombre": "Gobierno Regional De Atacama (gore)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-gobierno-regional-de-coquimbo-gorecoquimbo",
+    "nombre": "Gobierno Regional De Coquimbo  Gorecoquimbo",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-gobierno-regional-de-valparaiso-gore",
+    "nombre": "Gobierno Regional De Valparaíso  (gore)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-gobierno-regional-metropolitano-de-santiago-gore-metropolitano",
+    "nombre": "Gobierno Regional Metropolitano De Santiago  (gore Metropolitano)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-gobierno-regional-de-ohiggins-gore-ohiggins",
+    "nombre": "Gobierno Regional De Ohiggins (gore Ohiggins)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-gobierno-regional-del-maule-gore-maule",
+    "nombre": "Gobierno Regional Del Maule (gore Maule)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-gobierno-regional-del-bio-bio-gore-bio-bio",
+    "nombre": "Gobierno Regional Del Bío Bío (gore Bío Bío)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-gobierno-regional-de-la-araucania-gore-araucania",
+    "nombre": "Gobierno Regional De La Araucanía (gore Araucanía)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-gobierno-regional-de-los-rios-gore-de-los-rios",
+    "nombre": "Gobierno Regional De Los Ríos (gore De Los Ríos)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-gobierno-regional-de-los-lagos-gore-los-lagos",
+    "nombre": "Gobierno Regional De Los Lagos (gore Los Lagos)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-gobierno-regional-de-aysen-gore-aysen",
+    "nombre": "Gobierno Regional De Aysén (gore Aysén)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-gobierno-regional-de-magallanes-y-de-la-antartica-chilena-gore-magallanes",
+    "nombre": "Gobierno Regional De Magallanes Y De La Antártica Chilena (gore Magallanes)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-marga-marga",
+    "nombre": "Delegación Presidencial Provincial De Marga Marga",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-prevencion-del-delito",
+    "nombre": "Subsecretaría De Prevención Del Delito",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-nacional-para-la-prevencion-y-rehabilitacion-del-consumo-de-drogas-y-alcohol-senda",
+    "nombre": "Servicio Nacional Para La Prevención Y Rehabilitación Del Consumo De Drogas Y Alcohol (senda)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-regional-de-nuble",
+    "nombre": "Delegación Presidencial Regional De Ñuble",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-punilla",
+    "nombre": "Delegación Presidencial Provincial De Punilla",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-delegacion-presidencial-provincial-de-itata",
+    "nombre": "Delegación Presidencial Provincial De Itata",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-gobierno-regional-de-nuble-gore",
+    "nombre": "Gobierno Regional De Ñuble (gore)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-nacional-de-migraciones",
+    "nombre": "Servicio Nacional De Migraciones",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-relaciones-exteriores",
+    "nombre": "Subsecretaría De Relaciones Exteriores",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-general-de-relaciones-economicas-internacionales-direcon",
+    "nombre": "Dirección General De Relaciones Económicas Internacionales (direcon)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-nacional-de-fronteras-y-limites-del-estado-difrol",
+    "nombre": "Dirección Nacional De Fronteras Y Límites Del Estado (difrol)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-agencia-chilena-de-cooperacion-internacional-para-el-desarrollo-agcid",
+    "nombre": "Agencia Chilena De Cooperación Internacional Para El Desarrollo (agcid)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-antartico-chileno-inach",
+    "nombre": "Instituto Antártico Chileno (inach)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-general-de-movilizacion-nacional-dgmn",
+    "nombre": "Dirección General De Movilización Nacional (dgmn)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-caja-de-prevision-de-la-defensa-nacional-capredena",
+    "nombre": "Caja De Previsión De La Defensa Nacional (capredena)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-de-prevision-de-carabineros-de-chile-dipreca",
+    "nombre": "Dirección De Previsión De Carabineros De Chile (dipreca)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-general-de-aeronautica-civil-dgac",
+    "nombre": "Dirección General De Aeronáutica Civil (dgac)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-defensa",
+    "nombre": "Subsecretaría De Defensa",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-para-las-fuerzas-armadas-ssffaa",
+    "nombre": "Subsecretaría Para Las Fuerzas Armadas (ssffaa)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-hacienda",
+    "nombre": "Subsecretaría De Hacienda",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-de-presupuestos-dipres",
+    "nombre": "Dirección De Presupuestos (dipres)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-tesoreria-general-de-la-republica-tgr",
+    "nombre": "Tesorería General De La República (tgr)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-nacional-del-servicio-civil",
+    "nombre": "Dirección Nacional Del Servicio Civil",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-unidad-de-analisis-financiero",
+    "nombre": "Unidad De Análisis Financiero",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-superintendencia-de-bancos-e-instituciones-financieras-sbif-derogada-por-la-cmf",
+    "nombre": "Superintendencia De Bancos E Instituciones Financieras (sbif) Derogada Por La Cmf",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-comision-para-el-mercado-financiero-cmf-ex-svs",
+    "nombre": "Comisión Para El Mercado Financiero  Cmf Ex Svs",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-de-compras-y-contratacion-publica-chilecompra",
+    "nombre": "Dirección De Compras Y Contratación Pública (chilecompra)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-superintendencia-de-casinos-de-juego-scj",
+    "nombre": "Superintendencia De Casinos De Juego (scj)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-administradora-de-los-tribunales-tributarios-y-aduaneros-y-del-tribunal-de-contratacion-publica",
+    "nombre": "Administradora De Los Tribunales Tributarios Y Aduaneros Y Del Tribunal De Contratación Pública",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-defensoria-del-contribuyente",
+    "nombre": "Defensoría Del Contribuyente",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-general-de-la-presidencia-segpres",
+    "nombre": "Subsecretaría General De La Presidencia (segpres)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-general-de-gobierno-segegob",
+    "nombre": "Subsecretaría General De Gobierno (segegob)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-consejo-nacional-de-television-cntv",
+    "nombre": "Consejo Nacional De Televisión (cntv)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-economia-minecon",
+    "nombre": "Subsecretaría De Economía (minecon)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-pesca-y-acuicultura",
+    "nombre": "Subsecretaría De Pesca Y Acuicultura",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-agencia-de-promocion-de-la-inversion-extranjera",
+    "nombre": "Agencia De Promoción De La Inversión Extranjera",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-de-fomento-de-la-produccion-corfo",
+    "nombre": "Corporación De Fomento De La Producción (corfo)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-fiscalia-nacional-economica-fne",
+    "nombre": "Fiscalía Nacional Económica (fne)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-nacional-de-estadisticas-ine",
+    "nombre": "Instituto Nacional De Estadisticas (ine)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-nacional-de-turismo-sernatur",
+    "nombre": "Servicio Nacional De Turismo (sernatur)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-nacional-del-consumidor-sernac",
+    "nombre": "Servicio Nacional Del Consumidor (sernac)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-nacional-de-pesca-y-acuicultura-sernapesca",
+    "nombre": "Servicio Nacional De Pesca Y Acuicultura (sernapesca)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-turismo",
+    "nombre": "Subsecretaría De Turismo",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-superintendencia-de-insolvencia-y-reemprendimiento-superir",
+    "nombre": "Superintendencia De Insolvencia Y Reemprendimiento (superir)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-nacional-de-desarrollo-sustentable-de-la-pesca-artesanal-y-de-la-acuicultura-de-pequena-escala-indespa",
+    "nombre": "Instituto Nacional De Desarrollo Sustentable De La Pesca Artesanal Y De La Acuicultura De Pequeña Escala (indespa)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-evaluacion-social",
+    "nombre": "Subsecretaría De Evaluación Social",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-nacional-de-desarrollo-indigena-conadi",
+    "nombre": "Corporación Nacional De Desarrollo Indígena (conadi)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-nacional-de-la-discapacidad-senadis",
+    "nombre": "Servicio Nacional De La Discapacidad (senadis)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-fondo-de-solidaridad-e-inversion-social-fosis",
+    "nombre": "Fondo De Solidaridad E Inversión Social (fosis)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-nacional-de-la-juventud-injuv",
+    "nombre": "Instituto Nacional De La Juventud (injuv)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-nacional-del-adulto-mayor-senama",
+    "nombre": "Servicio Nacional Del Adulto Mayor (senama)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-servicios-sociales",
+    "nombre": "Subsecretaría De Servicios Sociales",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-la-ninez",
+    "nombre": "Subsecretaría De La Niñez",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-nacional-de-proteccion-especializada-a-la-ninez-y-adolescencia",
+    "nombre": "Servicio Nacional De Protección Especializada A La Niñez Y Adolescencia",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-educacion-mineduc",
+    "nombre": "Subsecretaría De Educación (mineduc)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-consejo-de-rectores-de-las-universidades-chilenas-cruch",
+    "nombre": "Consejo De Rectores De Las Universidades Chilenas (cruch)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-agencia-nacional-de-investigacion-y-desarrollo-anid",
+    "nombre": "Agencia Nacional De Investigación Y Desarrollo (anid)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-junta-nacional-de-auxilio-escolar-y-becas-junaeb",
+    "nombre": "Junta Nacional De Auxilio Escolar Y Becas (junaeb)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-junta-nacional-de-jardines-infantiles-junji",
+    "nombre": "Junta Nacional De Jardines Infantiles (junji)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-superintendencia-de-educacion-direccion-nacional",
+    "nombre": "Superintendencia De Educación Dirección Nacional",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-agencia-de-calidad-de-la-educacion",
+    "nombre": "Agencia De Calidad De La Educación",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-educacion-parvularia",
+    "nombre": "Subsecretaría De Educación Parvularia",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-de-barrancas-slep-barrancas",
+    "nombre": "Servicio Local De Educación Pública De Barrancas (slep Barrancas)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-puerto-cordillera",
+    "nombre": "Servicio Local De Educación Pública Puerto Cordillera",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-de-educacion-publica",
+    "nombre": "Dirección De Educación Pública",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-huasco-slep-huasco",
+    "nombre": "Servicio Local De Educación Pública Huasco (slep Huasco)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-costa-araucania-slep-costa-araucania",
+    "nombre": "Servicio Local De Educación Pública Costa Araucanía (slep Costa Araucanía)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-superintendencia-de-educacion-superior",
+    "nombre": "Superintendencia De Educación Superior",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-gabriela-mistral-slep-gabriela-mistral",
+    "nombre": "Servicio Local De Educación Pública Gabriela Mistral (slep Gabriela Mistral)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-chinchorro-slep-chinchorro",
+    "nombre": "Servicio Local De Educación Pública Chinchorro (slep Chinchorro)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-andalien-sur-slep-andalien-sur",
+    "nombre": "Servicio Local De Educación Pública Andalién Sur (slep Andalién Sur)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-educacion-superior",
+    "nombre": "Subsecretaría De Educación Superior",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-colchagua-slep-colchagua",
+    "nombre": "Servicio Local De Educación Pública Colchagua (slep Colchagua)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-atacama-slep-atacama",
+    "nombre": "Servicio Local De Educación Pública Atacama (slep Atacama)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-llanquihue-slep-llanquihue",
+    "nombre": "Servicio Local De Educación Pública Llanquihue (slep Llanquihue)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-valparaiso-slep-valparaiso",
+    "nombre": "Servicio Local De Educación Pública Valparaíso (slep Valparaíso)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-de-magallanes-slep-magallanes",
+    "nombre": "Servicio Local De Educación Pública De Magallanes (slep Magallanes)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-de-aysen-slep-aysen",
+    "nombre": "Servicio Local De Educación Pública De Aysén (slep Aysén)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-de-iquique-slep-iquique",
+    "nombre": "Servicio Local De Educación Pública De Iquique (slep Iquique)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-punilla-cordillera",
+    "nombre": "Servicio Local De Educación Pública Punilla Cordillera",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-maule-costa",
+    "nombre": "Servicio Local De Educación Pública  Maule Costa",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-licancabur",
+    "nombre": "Servicio Local De Educación Pública Licancabur",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-localde-educacion-publica-santa-corina",
+    "nombre": "Servicio Localde Educación Pública Santa Corina",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-santa-rosa",
+    "nombre": "Servicio Local De Educación Pública Santa Rosa",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-de-andalien-costa-slep-andalien-costa",
+    "nombre": "Servicio Local De Educación Pública De Andalién Costa (slep Andalién Costa)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-costa-central-slep-costa-central",
+    "nombre": "Servicio Local De Educación Pública Costa Central (slep Costa Central)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-de-los-parques",
+    "nombre": "Servicio Local De Educación Pública De Los Parques",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-del-pino",
+    "nombre": "Servicio Local De Educación Pública Del Pino",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-elqui-slep-elqui",
+    "nombre": "Servicio Local De Educación Pública Elqui (slep Elqui)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-los-libertadores",
+    "nombre": "Servicio Local De Educación Pública Los Libertadores",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-marga-marga-slep-marga-marga",
+    "nombre": "Servicio Local De Educación Pública Marga Marga (slep Marga Marga)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-del-tamarugal",
+    "nombre": "Servicio Local De Educación Pública Del Tamarugal",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-valdivia-slep-valdivia",
+    "nombre": "Servicio Local De Educación Pública Valdivia (slep Valdivia)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-de-antofagasta-slep-antofagasta",
+    "nombre": "Servicio Local De Educación Pública De Antofagasta (slep Antofagasta)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-del-aconcagua",
+    "nombre": "Servicio Local De Educación Pública Del Aconcagua",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-chiloe-slep-chiloe",
+    "nombre": "Servicio Local De Educación Pública Chiloé (slep Chiloé)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-los-alamos-slep-los-alamos",
+    "nombre": "Servicio Local De Educación Pública Los Álamos (slep Los Álamos)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-los-andes-slep-los-andes",
+    "nombre": "Servicio Local De Educación Pública Los Andes (slep Los Andes)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-petorca-slep-petorca",
+    "nombre": "Servicio Local De Educación Pública Petorca (slep Petorca)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-puelche-slep-puelche",
+    "nombre": "Servicio Local De Educación Pública Puelche (slep Puelche)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-santiago-centro-slep-santiago-centro",
+    "nombre": "Servicio Local De Educación Pública Santiago Centro (slep Santiago Centro)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-valle-cachapoal",
+    "nombre": "Servicio Local De Educación Pública Valle Cachapoal",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-valle-diguillin-slep-valle-diguillin",
+    "nombre": "Servicio Local De Educación Pública Valle Diguillín (slep Valle Diguillín)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-la-quebrada",
+    "nombre": "Servicio Local De Educación Pública La Quebrada",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-los-cerezos",
+    "nombre": "Servicio Local De Educación Pública Los Cerezos",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-reloncavi-slep-reloncavi",
+    "nombre": "Servicio Local De Educación Pública Reloncaví (slep Reloncaví)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-local-de-educacion-publica-talagante-slep-talagante",
+    "nombre": "Servicio Local De Educación Pública Talagante (slep Talagante)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-justicia",
+    "nombre": "Subsecretaría De Justicia",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-medico-legal-sml",
+    "nombre": "Servicio Médico Legal (sml)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-nacional-de-menores-sename",
+    "nombre": "Servicio Nacional De Menores (sename)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-defensoria-penal-publica-dpp",
+    "nombre": "Defensoría Penal Pública (dpp)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-derechos-humanos",
+    "nombre": "Subsecretaría De Derechos Humanos",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-del-trabajo-mintrab",
+    "nombre": "Subsecretaría Del Trabajo (mintrab)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-prevision-social-sps",
+    "nombre": "Subsecretaría De Previsión Social (sps)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-del-trabajo-dt",
+    "nombre": "Dirección Del Trabajo (dt)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-general-de-credito-prendario-dicrep",
+    "nombre": "Dirección General De Crédito Prendario (dicrep)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-de-prevision-social-ips",
+    "nombre": "Instituto De Previsión Social (ips)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-de-seguridad-laboral-isl",
+    "nombre": "Instituto De Seguridad Laboral (isl)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-nacional-de-capacitacion-y-empleo-sence",
+    "nombre": "Servicio Nacional De Capacitación Y Empleo (sence)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-superintendencia-de-pensiones-sp",
+    "nombre": "Superintendencia De Pensiones (sp)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-superintendencia-de-seguridad-social-suseso",
+    "nombre": "Superintendencia De Seguridad Social (suseso)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-obras-publicas-mop",
+    "nombre": "Subsecretaría De Obras Públicas (mop)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-general-de-obras-publicas-dgop",
+    "nombre": "Dirección General De Obras Públicas (dgop)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-de-contabilidad-y-finanzas-dcyf",
+    "nombre": "Dirección De Contabilidad Y Finanzas (dcyf)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-de-aeropuertos-dap",
+    "nombre": "Dirección De Aeropuertos (dap)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-de-arquitectura-darq",
+    "nombre": "Dirección De Arquitectura (darq)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-general-de-aguas-dga",
+    "nombre": "Dirección General De Aguas (dga)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-de-obras-hidraulicas-doh",
+    "nombre": "Dirección De Obras Hidráulicas (doh)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-de-obras-portuarias-dop",
+    "nombre": "Dirección De Obras Portuarias (dop)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-de-planeamiento-dirplan",
+    "nombre": "Dirección De Planeamiento (dirplan)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-de-vialidad-vialidad",
+    "nombre": "Dirección De Vialidad (vialidad)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-superintendencia-de-servicios-sanitarios-siss",
+    "nombre": "Superintendencia De Servicios Sanitarios (siss)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-nacional-de-hidraulica-inh",
+    "nombre": "Instituto Nacional De Hidráulica (inh)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-fiscalia-de-obras-publicas",
+    "nombre": "Fiscalía De Obras Públicas",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-direccion-general-de-concesiones-dgc",
+    "nombre": "Dirección General De Concesiones (dgc)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-transportes-mtt",
+    "nombre": "Subsecretaría De Transportes (mtt)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-telecomunicaciones-subtel",
+    "nombre": "Subsecretaría De Telecomunicaciones (subtel)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-junta-de-aeronautica-civil-jac",
+    "nombre": "Junta De Aeronáutica Civil (jac)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-salud-publica-minsal",
+    "nombre": "Subsecretaría De Salud Pública (minsal)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-redes-asistenciales",
+    "nombre": "Subsecretaría De Redes Asistenciales",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-central-de-abastecimiento-del-sistema-nacional-de-servicios-de-salud-cenabast",
+    "nombre": "Central De Abastecimiento Del Sistema Nacional De Servicios De Salud (cenabast)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-fondo-nacional-de-salud-fonasa",
+    "nombre": "Fondo Nacional De Salud (fonasa)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-de-salud-publica-isp",
+    "nombre": "Instituto De Salud Pública (isp)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-superintendencia-de-salud-sds",
+    "nombre": "Superintendencia De Salud (sds)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-metropolitano-central",
+    "nombre": "Servicio De Salud Metropolitano Central",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-metropolitano-norte",
+    "nombre": "Servicio De Salud Metropolitano Norte",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-metropolitano-occidente",
+    "nombre": "Servicio De Salud Metropolitano Occidente",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-metropolitano-oriente",
+    "nombre": "Servicio De Salud Metropolitano Oriente",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-metropolitano-sur",
+    "nombre": "Servicio De Salud Metropolitano Sur",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-metropolitano-sur-oriente",
+    "nombre": "Servicio De Salud Metropolitano Sur Oriente",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-padre-hurtado",
+    "nombre": "Hospital Padre Hurtado",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-centro-de-referencia-de-salud-de-penalolen-cordillera-oriente-crsoriente",
+    "nombre": "Centro De Referencia De Salud De Peñalolén Cordillera Oriente (crsoriente)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-centro-de-referencia-de-salud-de-maipu-crsm",
+    "nombre": "Centro De Referencia De Salud De Maipú (crsm)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-arica-y-parinacota",
+    "nombre": "Servicio De Salud Arica Y Parinacota",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-tarapaca",
+    "nombre": "Servicio De Salud Tarapacá",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-antofagasta",
+    "nombre": "Servicio De Salud Antofagasta",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-atacama",
+    "nombre": "Servicio De Salud Atacama",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-coquimbo",
+    "nombre": "Servicio De Salud Coquimbo",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-aconcagua",
+    "nombre": "Servicio De Salud Aconcagua",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-valparaiso-san-antonio",
+    "nombre": "Servicio De Salud Valparaíso  San Antonio",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-vina-del-mar-quillota",
+    "nombre": "Servicio De Salud Viña Del Mar  Quillota",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-ohiggins",
+    "nombre": "Servicio De Salud Ohiggins",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-maule",
+    "nombre": "Servicio De Salud Maule",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-nuble",
+    "nombre": "Servicio De Salud Ñuble",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-concepcion",
+    "nombre": "Servicio De Salud Concepción",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-talcahuano",
+    "nombre": "Servicio De Salud Talcahuano",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-biobio",
+    "nombre": "Servicio De Salud Bíobío",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-arauco",
+    "nombre": "Servicio De Salud Arauco",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-araucania-norte",
+    "nombre": "Servicio De Salud Araucania Norte",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-araucania-sur",
+    "nombre": "Servicio De Salud Araucanía Sur",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-valdivia",
+    "nombre": "Servicio De Salud Valdivia",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-osorno",
+    "nombre": "Servicio De Salud Osorno",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-de-chiloe",
+    "nombre": "Servicio De Salud De Chiloé",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-aysen",
+    "nombre": "Servicio De Salud Aysén",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-del-reloncavi",
+    "nombre": "Servicio De Salud Del Reloncaví",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-salud-magallanes",
+    "nombre": "Servicio De Salud Magallanes",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-salud-de-arica-y-parinacota",
+    "nombre": "Seremi De Salud  De Arica Y Parinacota",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-salud-de-tarapaca",
+    "nombre": "Seremi De Salud  De Tarapacá",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-salud-de-antofagasta",
+    "nombre": "Seremi De Salud  De Antofagasta",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-salud-de-atacama",
+    "nombre": "Seremi De Salud  De Atacama",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-salud-de-coquimbo",
+    "nombre": "Seremi De Salud  De Coquimbo",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-salud-de-valparaiso",
+    "nombre": "Seremi De Salud  De Valparaíso",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-salud-metropolitano-de-santiago",
+    "nombre": "Seremi De Salud  Metropolitano De Santiago",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-salud-de-ohiggins",
+    "nombre": "Seremi De Salud De Ohiggins",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-salud-del-maule",
+    "nombre": "Seremi De Salud Del Maule",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-salud-del-bio-bio",
+    "nombre": "Seremi De Salud Del Bío Bío",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-salud-de-la-araucania",
+    "nombre": "Seremi De Salud De La Araucanía",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-salud-de-los-rios",
+    "nombre": "Seremi De Salud De Los Ríos",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-salud-region-de-los-lagos",
+    "nombre": "Seremi De Salud Región De Los Lagos",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-salud-de-aysen",
+    "nombre": "Seremi De Salud De Aysén",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-salud-de-magallanes-y-antartica-chilena",
+    "nombre": "Seremi De Salud De Magallanes Y Antártica Chilena",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-de-san-camilo",
+    "nombre": "Hospital De San Camilo",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-leonardo-guzman-de-antofagasta",
+    "nombre": "Hospital Leonardo Guzmán De Antofagasta",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-de-victoria",
+    "nombre": "Hospital De Victoria",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-dr-mauricio-heyermann-torres-de-angol",
+    "nombre": "Hospital Dr. Mauricio Heyermann Torres De Angol",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-juan-noe-de-arica",
+    "nombre": "Hospital Juan Noé De Arica",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-regional-coyhaique",
+    "nombre": "Hospital Regional Coyhaique",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-victor-rios-ruiz-de-los-angeles",
+    "nombre": "Hospital Víctor Ríos Ruiz De Los Angeles",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-dr-augusto-riffart-de-castro",
+    "nombre": "Hospital Dr. Augusto Riffart De Castro",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-san-jose-de-coronel",
+    "nombre": "Hospital San José De Coronel",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-de-lota",
+    "nombre": "Hospital De Lota",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-guillermo-grant-benavente-de-concepcion",
+    "nombre": "Hospital Guillermo Grant Benavente De Concepción",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-de-ovalle",
+    "nombre": "Hospital De Ovalle",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-la-serena",
+    "nombre": "Hospital La Serena",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-san-pablo-de-coquimbo",
+    "nombre": "Hospital San Pablo De Coquimbo",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-ernesto-torres-de-iquique",
+    "nombre": "Hospital Ernesto Torres De Iquique",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-de-urgencia-asistencia-publica-huap",
+    "nombre": "Hospital De Urgencia Asistencia Pública (huap)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-san-borja-arriaran",
+    "nombre": "Hospital San Borja Arriarán",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-san-jose",
+    "nombre": "Hospital San José",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-roberto-del-rio",
+    "nombre": "Hospital Roberto Del Río",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-felix-bulnes",
+    "nombre": "Hospital Félix Bulnes",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-de-melipilla",
+    "nombre": "Hospital De Melipilla",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-san-juan-de-dios",
+    "nombre": "Hospital San Juan De Dios",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-nacional-de-rehabilitacion-pedro-aguirre-cerda",
+    "nombre": "Instituto Nacional De Rehabilitación Pedro Aguirre Cerda",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-de-neurocirugia",
+    "nombre": "Instituto De Neurocirugía",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-nacional-de-geriatria-inger",
+    "nombre": "Instituto Nacional De Geriatría (inger)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-del-salvador",
+    "nombre": "Hospital Del Salvador",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-barros-luco",
+    "nombre": "Hospital Barros Luco",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-sotero-del-rio",
+    "nombre": "Hospital Sótero Del Río",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-clinico-magallanes-dr-lautaro-navarro-aravia",
+    "nombre": "Hospital Clínico Magallanes Dr Lautaro Navarro Aravia",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-de-curico",
+    "nombre": "Hospital De Curicó",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-de-linares",
+    "nombre": "Hospital De Linares",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-regional-de-talca",
+    "nombre": "Hospital Regional De Talca",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-de-san-carlos",
+    "nombre": "Hospital De San Carlos",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-san-juan-de-dios-de-san-fernando",
+    "nombre": "Hospital San Juan De Dios De San Fernando",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-franco-ravera-zunino",
+    "nombre": "Hospital Franco Ravera Zunino",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-de-osorno",
+    "nombre": "Hospital De Osorno",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-de-puerto-montt",
+    "nombre": "Hospital De Puerto Montt",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-de-tome",
+    "nombre": "Hospital De Tomé",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-de-las-higueras",
+    "nombre": "Hospital De Las Higueras",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-base-de-valdivia",
+    "nombre": "Hospital Base De Valdivia",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-claudio-vicuna-de-san-antonio",
+    "nombre": "Hospital Claudio Vicuña De San Antonio",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-carlos-van-buren",
+    "nombre": "Hospital Carlos Van Buren",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-eduardo-pereira-de-valparaiso",
+    "nombre": "Hospital Eduardo Pereira De Valparaíso",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-de-quilpue",
+    "nombre": "Hospital De Quilpué",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-gustavo-fricke",
+    "nombre": "Hospital Gustavo Fricke",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-san-martin-de-quillota",
+    "nombre": "Hospital San Martín De Quillota",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-psiquiatrico",
+    "nombre": "Instituto Psiquiátrico",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-san-juan-de-dios-de-los-andes",
+    "nombre": "Hospital San Juan De Dios De Los Andes",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-dr-exequiel-gonzalez-cortes",
+    "nombre": "Hospital Dr. Exequiel González Cortes",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-el-pino",
+    "nombre": "Hospital El Pino",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-herminda-martin",
+    "nombre": "Hospital Herminda Martin",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-nacional-del-torax",
+    "nombre": "Instituto Nacional Del Tórax",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-luis-tisne",
+    "nombre": "Hospital Luis Tisné",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-traumatologico",
+    "nombre": "Instituto Traumatológico",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-nacional-del-cancer",
+    "nombre": "Instituto Nacional Del Cáncer",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-luis-calvo-mackenna",
+    "nombre": "Hospital Luis Calvo Mackenna",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-dr-hernan-henriquez-aravena-de-temuco",
+    "nombre": "Hospital Dr. Hernán Henríquez Aravena De Temuco",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-el-carmen-dr-luis-valentin-ferrada",
+    "nombre": "Hospital El Carmen Dr. Luis Valentín Ferrada",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-clinico-dra-eloisa-diaz-i-la-florida",
+    "nombre": "Hospital Clínico Dra. Eloísa Díaz I. La Florida",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-regional-copiapo-san-jose-del-carmen",
+    "nombre": "Hospital Regional Copiapó San José Del Carmen",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-hospital-dr-carlos-cisternas-de-calama",
+    "nombre": "Hospital Dr. Carlos Cisternas De Calama",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-salud-del-nuble",
+    "nombre": "Seremi De Salud Del Ñuble",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-centro-de-referencia-de-salud-hospital-provincia-cordillera-hpcordillera",
+    "nombre": "Centro De Referencia De Salud Hospital Provincia Cordillera (hpcordillera)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-vivienda-y-urbanismo-minvu",
+    "nombre": "Subsecretaría De Vivienda Y Urbanismo (minvu)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-serviu-region-de-tarapaca",
+    "nombre": "Serviu Región De Tarapacá",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-serviu-region-de-antofagasta",
+    "nombre": "Serviu Región De Antofagasta",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-serviu-region-de-atacama",
+    "nombre": "Serviu Región De Atacama",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-serviu-region-de-coquimbo",
+    "nombre": "Serviu Región De Coquimbo",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-serviu-region-de-valparaiso",
+    "nombre": "Serviu Región De Valparaíso",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-serviu-metropolitano",
+    "nombre": "Serviu Metropolitano",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-serviu-region-del-libertador-bernardo-ohiggins",
+    "nombre": "Serviu Región Del Libertador Bernardo Ohiggins",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-serviu-region-del-maule",
+    "nombre": "Serviu Región Del Maule",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-serviu-region-del-bio-bio",
+    "nombre": "Serviu Región Del Bío Bío",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-serviu-region-de-la-araucania",
+    "nombre": "Serviu Región De La Araucanía",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-serviu-region-de-los-lagos",
+    "nombre": "Serviu Región De Los Lagos",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-serviu-region-de-aysen-del-general-carlos-ibanez-del-campo",
+    "nombre": "Serviu Región De Aysén Del General Carlos Ibáñez Del Campo",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-serviu-region-de-magallanes-y-la-antartica-chilena",
+    "nombre": "Serviu Región De Magallanes Y La Antártica Chilena",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-serviu-region-de-los-rios",
+    "nombre": "Serviu Región De Los Ríos",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-serviu-region-de-arica-y-parinacota",
+    "nombre": "Serviu Región De Arica Y Parinacota",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-parque-metropolitano-de-santiago",
+    "nombre": "Parque Metropolitano De Santiago",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-serviu-region-del-nuble",
+    "nombre": "Serviu Región Del Ñuble",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-vivienda-y-urbanismo-region-de-arica-y-parinacota",
+    "nombre": "Seremi De Vivienda Y Urbanismo Región De Arica Y Parinacota",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-vivienda-y-urbanismo-region-de-tarapaca",
+    "nombre": "Seremi De Vivienda Y Urbanismo Región De Tarapacá",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-vivienda-y-urbanismo-region-de-antofagasta",
+    "nombre": "Seremi De Vivienda Y Urbanismo Región De Antofagasta",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-vivienda-y-urbanismo-region-de-atacama",
+    "nombre": "Seremi De Vivienda Y Urbanismo Región De Atacama",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-vivienda-y-urbanismo-region-de-coquimbo",
+    "nombre": "Seremi De Vivienda Y Urbanismo Región De Coquimbo",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-vivienda-y-urbanismo-region-de-valparaiso",
+    "nombre": "Seremi De Vivienda Y Urbanismo Región De Valparaíso",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-vivienda-y-urbanismo-region-metropolitana",
+    "nombre": "Seremi De Vivienda Y Urbanismo Región Metropolitana",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-vivienda-y-urbanismo-region-del-libertador-bernardo-ohiggins",
+    "nombre": "Seremi De Vivienda Y Urbanismo Región Del Libertador Bernardo Ohiggins",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-vivienda-y-urbanismo-region-de-maule",
+    "nombre": "Seremi De Vivienda Y Urbanismo Región De Maule",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-vivienda-y-urbanismo-region-de-nuble",
+    "nombre": "Seremi De Vivienda Y Urbanismo Región De Ñuble",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-vivienda-y-urbanismo-region-de-biobio",
+    "nombre": "Seremi De Vivienda Y Urbanismo Región De Bíobio",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-vivienda-y-urbanismo-region-de-la-araucania",
+    "nombre": "Seremi De Vivienda Y Urbanismo Región De La Araucanía",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-vivienda-y-urbanismo-region-de-los-rios",
+    "nombre": "Seremi De Vivienda Y Urbanismo Región De Los Ríos",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-vivienda-y-urbanismo-region-de-los-lagos",
+    "nombre": "Seremi De Vivienda Y Urbanismo Región De Los Lagos",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-vivienda-y-urbanismo-region-de-aysen",
+    "nombre": "Seremi De Vivienda Y Urbanismo Región De Aysén",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-seremi-de-vivienda-y-urbanismo-region-de-magallanes-y-antartica-chilena",
+    "nombre": "Seremi De Vivienda Y Urbanismo Región De Magallanes Y Antártica Chilena",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-bienes-nacionales",
+    "nombre": "Subsecretaría De Bienes Nacionales",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-agricultura",
+    "nombre": "Subsecretaría De Agricultura",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-comision-nacional-de-riego-cnr",
+    "nombre": "Comisión Nacional De Riego (cnr)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-de-desarrollo-agropecuario-indap",
+    "nombre": "Instituto De Desarrollo Agropecuario (indap)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-oficinas-de-estudios-y-politicas-agrarias-odepa",
+    "nombre": "Oficinas De Estudios Y Políticas Agrarias (odepa)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-agricola-y-ganadero-sag",
+    "nombre": "Servicio Agrícola Y Ganadero (sag)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-mineria",
+    "nombre": "Subsecretaría De Minería",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-comision-chilena-del-cobre-cochilco",
+    "nombre": "Comisión Chilena Del Cobre (cochilco)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-nacional-de-geologia-y-mineria-sernageomin",
+    "nombre": "Servicio Nacional De Geología Y Minería (sernageomin)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-nacional-de-la-mujer-y-la-equidad-de-genero-sernameg",
+    "nombre": "Servicio Nacional De La Mujer Y La Equidad De Género (sernameg)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-comision-nacional-de-energia-cne",
+    "nombre": "Comisión Nacional De Energía (cne)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-energia",
+    "nombre": "Subsecretaría De Energía",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-comision-chilena-de-energia-nuclear-cchen",
+    "nombre": "Comisión Chilena De Energía Nuclear (cchen)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-superintendencia-de-electricidad-y-combustibles-sec",
+    "nombre": "Superintendencia De Electricidad Y Combustibles (sec)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-ex-consejo-nacional-de-la-cultura-y-las-artes-cnca",
+    "nombre": "Ex Consejo Nacional De La Cultura Y Las Artes (cnca)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-del-medio-ambiente-mma",
+    "nombre": "Subsecretaría Del Medio Ambiente (mma)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-superintendencia-del-medio-ambiente-sma",
+    "nombre": "Superintendencia Del Medio Ambiente (sma)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-evaluacion-ambiental-sea",
+    "nombre": "Servicio De Evaluación Ambiental (sea)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-biodiversidad-y-areas-protegidas",
+    "nombre": "Servicio De Biodiversidad Y Áreas Protegidas",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-consejo-de-defensa-del-estado-cde",
+    "nombre": "Consejo De Defensa Del Estado (cde)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-nacional-de-propiedad-industrial-inapi",
+    "nombre": "Instituto Nacional De Propiedad Industrial (inapi)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-del-deporte",
+    "nombre": "Subsecretaría Del Deporte",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-instituto-nacional-del-deporte-ind",
+    "nombre": "Instituto Nacional Del Deporte (ind)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-la-mujer-y-la-equidad-de-genero",
+    "nombre": "Subsecretaría De La Mujer Y La Equidad De Género",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-las-culturas-y-las-artes",
+    "nombre": "Subsecretaría De Las Culturas Y Las Artes",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-del-patrimonio-cultural",
+    "nombre": "Subsecretaría Del Patrimonio Cultural",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-nacional-del-patrimonio-cultural",
+    "nombre": "Servicio Nacional Del Patrimonio Cultural",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-ciencia-tecnologia-conocimiento-e-innovacion",
+    "nombre": "Subsecretaría De Ciencia Tecnología Conocimiento E Innovación",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-seguridad-publica",
+    "nombre": "Subsecretaría De Seguridad Pública",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-cft-de-la-region-del-tarapaca",
+    "nombre": "Cft De La Región Del Tarapacá",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-cft-estatal-de-la-region-del-biobio",
+    "nombre": "Cft Estatal De La Región Del Biobío",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-desarrollo-social-de-nunoa",
+    "nombre": "Corporación Municipal De Desarrollo Social De Ñuñoa",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-desarrollo-social-de-antofagasta-cmds",
+    "nombre": "Corporación Municipal De Desarrollo Social De Antofagasta (cmds)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-isla-de-maipo",
+    "nombre": "Corporación Municipal Isla De Maipo",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-queilen",
+    "nombre": "Corporación Municipal De Queilen",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-penalolen-cormup",
+    "nombre": "Corporación Municipal De Peñalolén (cormup)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-puqueldon",
+    "nombre": "Corporación Municipal De Puqueldón",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-servicios-y-desarrollo-de-maipu-codeduc",
+    "nombre": "Corporación Municipal De Servicios Y Desarrollo De Maipú (codeduc)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-rancagua-cormun",
+    "nombre": "Corporación Municipal De Rancagua (cormun)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-para-el-desarrollo-social-de-villa-alemana",
+    "nombre": "Corporación Municipal Para El Desarrollo Social De Villa Alemana",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-san-fernando-cormusaf",
+    "nombre": "Corporación Municipal De San Fernando (cormusaf)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-castro",
+    "nombre": "Corporación Municipal De Castro",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-educacion-y-servicios-ramon-freire-dalcahue",
+    "nombre": "Corporación Municipal De Educación Y Servicios Ramón Freire Dalcahue",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-quellon",
+    "nombre": "Corporación Municipal De Quellón",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-pirque",
+    "nombre": "Corporación Municipal De Pirque",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-valparaiso",
+    "nombre": "Corporación Municipal De Valparaíso",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-desarrollo-social-de-tiltil",
+    "nombre": "Corporación Municipal De Desarrollo Social De Tiltil",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-la-reina",
+    "nombre": "Corporación Municipal De La Reina",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-desarrollo-social-de-calama-comdes",
+    "nombre": "Corporación Municipal De Desarrollo Social De Calama (comdes)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-quilpue",
+    "nombre": "Corporación Municipal De Quilpué",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-de-educacion-salud-y-atencion-de-menores-chonchi-chiloe",
+    "nombre": "Corporación De Educación Salud Y Atención De Menores Chonchi Chiloé",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-de-educacion-y-salud-de-las-condes",
+    "nombre": "Corporación De Educación Y Salud De Las Condes",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-de-desarrollo-social-de-cerro-navia-cormucena",
+    "nombre": "Corporación De Desarrollo Social De Cerro Navia (cormucena)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-ancud",
+    "nombre": "Corporación Municipal De Ancud",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-de-desarrollo-social-de-buin",
+    "nombre": "Corporación De Desarrollo Social De Buin",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-colina",
+    "nombre": "Corporación Municipal De Colina",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-maria-pinto",
+    "nombre": "Corporación Municipal De Maria Pinto",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-quinta-normal",
+    "nombre": "Corporación Municipal De Quinta Normal",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-desarrollo-social-de-san-joaquin",
+    "nombre": "Corporación Municipal De Desarrollo Social De San Joaquín",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-providencia",
+    "nombre": "Corporación Municipal De Providencia",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-pudahuel",
+    "nombre": "Corporación Municipal De Pudahuel",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-salud-de-san-bernardo",
+    "nombre": "Corporación Municipal De Salud De San Bernardo",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-pozo-almonte",
+    "nombre": "Corporación Municipal De Pozo Almonte",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-calera-de-tango",
+    "nombre": "Corporación Municipal De Calera De Tango",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-curaco-de-velez",
+    "nombre": "Corporación Municipal De Curaco De Velez",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-lo-prado",
+    "nombre": "Corporación Municipal De Lo Prado",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-macul",
+    "nombre": "Corporación Municipal De Macul",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-melipilla",
+    "nombre": "Corporación Municipal De Melipilla",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-salud-de-panguipulli",
+    "nombre": "Corporación Municipal De Salud De Panguipulli",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-puente-alto",
+    "nombre": "Corporación Municipal De Puente Alto",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-de-educacion-salud-y-menores-de-puerto-natales",
+    "nombre": "Corporación De Educación Salud Y Menores De Puerto Natales",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-punta-arenas-para-la-educacion-salud-y-atencion-al-menor-cormupa",
+    "nombre": "Corporación Municipal De Punta Arenas Para La Educación Salud Y Atención Al Menor (cormupa)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-quinchao",
+    "nombre": "Corporación Municipal De Quinchao",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-renca",
+    "nombre": "Corporación Municipal De Renca",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-san-vicente",
+    "nombre": "Corporación Municipal De San Vicente",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-de-talagante",
+    "nombre": "Corporación Municipal De Talagante",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-municipal-vina-del-mar-para-el-desarrollo-social",
+    "nombre": "Corporación Municipal Viña Del Mar Para El Desarrollo Social",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-nacional-de-reinsercion-social-juvenil",
+    "nombre": "Servicio Nacional De Reinserción Social Juvenil",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-corporacion-de-investigacion-y-avance-de-la-paleontologia-e-historia-natural-de-atacama",
+    "nombre": "Corporación De Investigación Y Avance De La Paleontología E Historia Natural De Atacama",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-asociacion-de-municipalidades-rurales-del-norte-chico",
+    "nombre": "Asociación De Municipalidades Rurales Del Norte Chico",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-municipalidad-de-cabo-de-hornos-y-antartica",
+    "nombre": "Municipalidad De Cabo De Hornos Y Antártica",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-ilustre-municipalidad-de-constitucion",
+    "nombre": "Ilustre Municipalidad De Constitución",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-municipalidad-de-isla-de-pascua-rapa-nui",
+    "nombre": "Municipalidad De Isla De Pascua (rapa Nui)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-municipalidad-de-llay-llay",
+    "nombre": "Municipalidad De Llay Llay",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-i-municipalidad-de-macul",
+    "nombre": "I. Municipalidad De Macul",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-municipalidad-de-marchige",
+    "nombre": "Municipalidad De Marchige",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-i-municipalidad-de-negrete",
+    "nombre": "I. Municipalidad De Negrete",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-municipalidad-de-ohiggins",
+    "nombre": "Municipalidad De Ohiggins",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-ilustre-municipalidad-de-olivar",
+    "nombre": "Ilustre Municipalidad De Olivar",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-i-municipalidad-de-penco",
+    "nombre": "I. Municipalidad De Penco",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-municipalidad-de-puerto-natales",
+    "nombre": "Municipalidad De Puerto Natales",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-municipalidad-de-san-vicente-de-tagua-tagua",
+    "nombre": "Municipalidad De San Vicente De Tagua Tagua",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-municipalidad-de-tiltil",
+    "nombre": "Municipalidad De Tiltil",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-municipalidad-de-trehuaco",
+    "nombre": "Municipalidad De Trehuaco",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-universidad-de-atacama",
+    "nombre": "Universidad De Atacama",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-universidad-de-santiago-de-chile-usach",
+    "nombre": "Universidad De Santiago De Chile (usach)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-universidad-de-los-lagos",
+    "nombre": "Universidad De Los Lagos",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-universidad-de-magallanes",
+    "nombre": "Universidad De Magallanes",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-universidad-de-aysen",
+    "nombre": "Universidad De Aysén",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-universidad-de-ohiggins-uoh",
+    "nombre": "Universidad De Ohiggins (uoh)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-servicio-de-gobierno-interior",
+    "nombre": "Servicio De Gobierno Interior",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-subsecretaria-de-relaciones-economicas-internacionales",
+    "nombre": "Subsecretaría De Relaciones Económicas Internacionales",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-defensa-civil-de-chile",
+    "nombre": "Defensa Civil De Chile",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-estado-mayor-conjunto-emco",
+    "nombre": "Estado Mayor Conjunto (emco)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-gendarmeria-de-chile",
+    "nombre": "Gendarmería De Chile",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-organismo-de-capacitacion-prueba",
+    "nombre": "Organismo De Capacitación (prueba)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-asociacion-chilena-de-municipalidades-con-farmacias-populares-achifarp",
+    "nombre": "Asociación Chilena De Municipalidades Con Farmacias Populares (achifarp)",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  },
+  {
+    "id": "org-partido-ciudadanos",
+    "nombre": "Partido Ciudadanos",
+    "tipo_organo": "Servicio Público",
+    "ministerio_dependiente": "Descubierto Automáticamente",
+    "sitio_web_oficial": ""
+  }
+]
