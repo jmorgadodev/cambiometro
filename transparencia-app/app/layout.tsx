@@ -6,6 +6,7 @@ import { Suspense } from "react";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
 import SiteHeader from "@/components/SiteHeader";
 import PageEntrance from "@/components/PageEntrance";
+import CookieConsent, { CookiePreferencesButton } from "@/components/CookieConsent";
 import { getDataPlatformSummary } from "@/lib/data-platform-d1";
 import "./globals.css";
 
@@ -90,6 +91,8 @@ const FOOTER_GROUPS = [
     links: [
       ["Fuentes oficiales", "/datos"],
       ["Cómo usamos los datos", "/como-funciona"],
+      ["Fuentes y versiones", "/fuentes"],
+      ["Política de Privacidad", "/privacidad"],
       ["Donar y apoyar", "/donar"],
       ["Instagram @cambiometro", "https://www.instagram.com/cambiometro/"],
       ["𝕏 Twitter / X @cambiometro", "https://x.com/cambiometro"],
@@ -118,6 +121,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           <main id="contenido-principal">{children}</main>
         </PageEntrance>
         <Footer updatedAt={updatedAt} totalRecords={totalRecords} />
+        <CookieConsent />
       </body>
     </html>
   );
@@ -205,6 +209,10 @@ function Footer({ updatedAt, totalRecords }: { updatedAt: string | null; totalRe
             <a href="https://x.com/cambiometro" target="_blank" rel="noopener noreferrer">
               𝕏 @cambiometro
             </a>
+            <span className="site-footer__dot" aria-hidden="true">
+              ·
+            </span>
+            <CookiePreferencesButton className="site-footer__link" />
           </span>
         </div>
       </div>

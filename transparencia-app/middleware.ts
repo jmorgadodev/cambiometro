@@ -3,16 +3,19 @@ import type { NextRequest } from "next/server";
 
 function contentSecurityPolicy(nonce: string) {
   const developmentEval = process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : "";
+  const ga4 = process.env.NEXT_PUBLIC_GA4_ID?.trim();
+  const analyticsScriptSrc = ga4 ? " https://www.googletagmanager.com" : "";
+  const analyticsConnectSrc = ga4 ? " https://www.google-analytics.com https://www.googletagmanager.com" : "";
   return [
     "default-src 'self'",
-    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${developmentEval}`,
+    `script-src 'self' 'nonce-${nonce}' 'strict-dynamic'${developmentEval} https://challenges.cloudflare.com${analyticsScriptSrc}`,
     "style-src 'self' 'unsafe-inline'",
     "img-src 'self' data: blob: https://upload.wikimedia.org",
     "font-src 'self' data:",
-    "connect-src 'self'",
+    `connect-src 'self' https://challenges.cloudflare.com${analyticsConnectSrc}`,
     "media-src 'self'",
     "worker-src 'self' blob:",
-    "frame-src 'none'",
+    "frame-src https://challenges.cloudflare.com",
     "object-src 'none'",
     "base-uri 'self'",
     "form-action 'self'",

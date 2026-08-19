@@ -3241,3 +3241,99 @@ html.dark .page-masthead {
   border: 1px solid rgba(56, 189, 248, 0.3);
 }
 
+/* ═══════════════════════════════════════════════════════════
+   COOKIE CONSENT BANNER
+═══════════════════════════════════════════════════════════ */
+.cookie-consent {
+  position: fixed;
+  inset-inline: 0;
+  bottom: 0;
+  z-index: 10000;
+  background: var(--bg-surface, #ffffff);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -8px 32px rgba(3, 7, 18, 0.18);
+  padding: 1rem 1.5rem;
+}
+
+.cookie-consent__content {
+  max-width: 1320px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 1rem;
+}
+
+.cookie-consent__title {
+  font-weight: 800;
+  font-size: 0.9rem;
+  margin: 0 0 0.15rem 0;
+  color: var(--text-primary);
+}
+
+.cookie-consent__text {
+  flex: 1 1 420px;
+  font-size: 0.8rem;
+  line-height: 1.55;
+  color: var(--text-muted);
+  margin: 0;
+}
+
+.cookie-consent__text a {
+  color: var(--accent);
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.cookie-consent__actions {
+  display: flex;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   FORM FIELDS (canal Ley 21.715)
+═══════════════════════════════════════════════════════════ */
+.form-field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.form-field__label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.form-field select,
+.form-field input,
+.form-field textarea {
+  width: 100%;
+  padding: 0.75rem 0.9rem;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  color: var(--text-primary);
+  font-family: inherit;
+  font-size: 0.9rem;
+  outline: none;
+  transition: all 0.2s;
+}
+
+.form-field select:focus,
+.form-field input:focus,
+.form-field textarea:focus {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+}
+
+.form-field select option {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.cf-turnstile-placeholder iframe {
+  border-radius: 8px;
+}
+

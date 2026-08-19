@@ -5,10 +5,10 @@ import { chromium } from "playwright";
 
 const routes = [
   "/", "/autoridades", "/calculadora", "/cambios", "/como-funciona", "/comparar", "/cruces",
-  "/datos", "/donar", "/entidades/person-infoprobidad-9204ac804e1f43cc8c3e62f712a15764", "/funcionarios", "/movimientos", "/municipalidades",
-  "/municipalidades/muni-maipu", "/partidos", "/partidos/rep", "/politico/dip-061", "/rankings", "/servicios-publicos",
+  "/datos", "/donar", "/entidades/person-infoprobidad-9204ac804e1f43cc8c3e62f712a15764", "/fuentes", "/funcionarios", "/movimientos", "/municipalidades",
+  "/municipalidades/muni-maipu", "/partidos", "/partidos/rep", "/politico/dip-061", "/privacidad", "/rankings", "/servicios-publicos",
 ];
-const responsiveRoutes = ["/", "/cruces", "/politico/dip-061"];
+const responsiveRoutes = ["/", "/cruces", "/politico/dip-061", "/privacidad", "/fuentes"];
 const baseUrl = process.env.VERIFY_BASE_URL ?? "http://127.0.0.1:3000";
 const verifyingLocal = /^http:\/\/(?:127\.0\.0\.1|localhost)/.test(baseUrl);
 const browser = await chromium.launch({ headless: true });
@@ -236,6 +236,40 @@ try {
   const health = await page.request.get(`${baseUrl}/api/v1/health/data`);
   const healthText = await health.text();
   assert(!healthText.includes("publishedVersion") && !healthText.includes('"id":"run-'), "health no debe filtrar ids o versiones internas");
+
+  // M2: /privacidad y /fuentes con fecha de versión visible
+  await gotoWithNetworkRetry(`${baseUrl}/privacidad`);
+  assert.equal(await page.getByRole("heading", { name: "Política de Privacidad" }).count(), 1);
+  assert.equal(await page.getByRole("heading", { name: /Tus derechos: acceso, rectificaci.n, cancelaci.n y oposici.n/ }).count(), 1);
+  assert.equal(await page.getByRole("heading", { name: "Envíanos tu solicitud" }).count(), 1);
+  assert((await page.getByText(/Versión 19 de agosto de 2026/, { exact: false }).count()) === 1, "/privacidad debe mostrar su fecha de versión");
+  assert((await page.getByText("datos@cambiometro.impulsacv.cl", { exact: false }).count()) > 0, "/privacidad debe exponer el canal del responsable");
+
+  await gotoWithNetworkRetry(`${baseUrl}/fuentes`);
+  assert.equal(await page.getByRole("heading", { name: "Fuentes y versiones" }).count(), 1);
+  assert.equal(await page.getByRole("heading", { name: "Catálogo de fuentes integradas" }).count(), 1);
+  assert((await page.getByText(/Versión 19 de agosto de 2026/, { exact: false }).count()) === 1, "/fuentes debe mostrar su fecha de versión");
+
+  // M2: sin GA4_ID el HTML servido no debe contener ningún script de gtag
+  const servedHtml = await (await page.request.get(baseUrl)).text();
+  assert(!servedHtml.includes("googletagmanager.com"), "el HTML servido no debe cargar googletagmanager sin GA4_ID");
+  assert(!servedHtml.includes("gtag("), "el HTML servido no debe contener llamadas gtag sin GA4_ID");
+
+  // M2: capturas 320/390px de /privacidad y del banner de cookies (R9)
+  const screenshotDir = process.env.SCREENSHOT_DIR ?? tmpdir();
+  for (const width of [320, 390]) {
+    await page.setViewportSize({ width, height: 800 });
+    await gotoWithNetworkRetry(`${baseUrl}/privacidad`, { waitUntil: "domcontentloaded" });
+    await page.locator("#form-solicitud").waitFor({ state: "visible", timeout: 10000 });
+    await page.waitForTimeout(1500);
+    await page.screenshot({ path: join(screenshotDir, `privacidad-${width}.png`), fullPage: true });
+
+    await gotoWithNetworkRetry(baseUrl, { waitUntil: "networkidle" });
+    const banner = page.locator(".cookie-consent");
+    await banner.waitFor({ state: "visible", timeout: 5000 });
+    await page.screenshot({ path: join(screenshotDir, `cookie-banner-${width}.png`), fullPage: false });
+  }
+  await page.setViewportSize({ width: 1440, height: 1000 });
 
   const homeResponse = await page.request.get(baseUrl);
   assert.equal(homeResponse.headers()["x-powered-by"], undefined);
