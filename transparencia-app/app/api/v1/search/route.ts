@@ -90,9 +90,10 @@ export async function GET(request: Request) {
 
   const total = authorityMatches.length + municipalityMatches.length + officialMatches.length + entidades.length;
   const returned = authorities.length + municipalidades.length + funcionarios.length + entidades.length;
+  const echoedQuery = rawQuery.replace(/</g, "\\u003c").replace(/>/g, "\\u003e");
   return apiSuccess(
     { autoridades: authorities, municipalidades, funcionarios, entidades },
-    { query: rawQuery, engine: "Indice textual sobre fuentes verificadas", total, returned, truncated: returned < total },
+    { query: echoedQuery, engine: "Indice textual sobre fuentes verificadas", total, returned, truncated: returned < total },
     { self: request.url },
     3600,
   );
