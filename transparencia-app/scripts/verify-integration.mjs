@@ -11,6 +11,27 @@ const routes = [
 const responsiveRoutes = ["/", "/cruces", "/politico/dip-061", "/privacidad", "/fuentes"];
 const baseUrl = process.env.VERIFY_BASE_URL ?? "http://127.0.0.1:3000";
 const verifyingLocal = /^http:\/\/(?:127\.0\.0\.1|localhost)/.test(baseUrl);
+const verifyingProd = !verifyingLocal && !/\.workers\.dev$/.test(new URL(baseUrl).hostname);
+// El rate limiter edge de producción (30 req/60s por IP) exige espaciar cada
+// request en la verificación completa: <=25 req/min + backoff exponencial ante
+// 429/503 (rate limiting). En local/staging no hay límite que respetar.
+const rateLimitBackoffBaseMs = 5_000;
+const prodThrottleMs = 2_500;
+
+async function waitForRateLimit(response, attempt) {
+  const retryAfter = Number(response?.headers()?.["retry-after"]);
+  const base = Number.isFinite(retryAfter) && retryAfter > 0 ? retryAfter * 1000 : rateLimitBackoffBaseMs;
+  // Backoff exponencial: 5s, 10s, 20s, 40s…
+  const delay = Math.min(base * 2 ** Math.max(attempt - 1, 0), 60_000);
+  await new Promise((resolve) => setTimeout(resolve, delay));
+}
+
+async function throttleProd() {
+  if (verifyingProd) await new Promise((resolve) => setTimeout(resolve, prodThrottleMs));
+}
+
+const isRateLimited = (response) => [429, 503].includes(response?.status());
+
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
 page.setDefaultTimeout(15_000);
@@ -35,11 +56,19 @@ function representativeInternalLinks(hrefs) {
   return [...representatives.values()];
 }
 
-async function getWithNetworkRetry(url, attempts = 3) {
+async function getWithNetworkRetry(url, attempts = 6) {
+  await throttleProd();
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
-      return await page.request.get(url, { timeout: 30_000 });
+      const response = await page.request.get(url, { timeout: 30_000 });
+      if (isRateLimited(response)) {
+        if (attempt < attempts) {
+          await waitForRateLimit(response, attempt);
+          continue;
+        }
+      }
+      return response;
     } catch (error) {
       lastError = error;
       if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, 500 * attempt));
@@ -48,11 +77,19 @@ async function getWithNetworkRetry(url, attempts = 3) {
   throw lastError;
 }
 
-async function gotoWithNetworkRetry(url, options = { waitUntil: "domcontentloaded" }, attempts = 3) {
+async function gotoWithNetworkRetry(url, options = { waitUntil: "domcontentloaded" }, attempts = 6) {
+  await throttleProd();
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
-      return await page.goto(url, options);
+      const response = await page.goto(url, options);
+      if (isRateLimited(response)) {
+        if (attempt < attempts) {
+          await waitForRateLimit(response, attempt);
+          continue;
+        }
+      }
+      return response;
     } catch (error) {
       lastError = error;
       if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, 750 * attempt));
@@ -61,7 +98,7 @@ async function gotoWithNetworkRetry(url, options = { waitUntil: "domcontentloade
   throw lastError;
 }
 
-async function checkInternalLinks(hrefs, batchSize = 4) {
+async function checkInternalLinks(hrefs, batchSize = 1) {
   const links = representativeInternalLinks(hrefs);
   for (let index = 0; index < links.length; index += batchSize) {
     const batch = links.slice(index, index + batchSize);
