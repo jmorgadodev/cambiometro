@@ -111,6 +111,8 @@ Cuando un agente termina o se queda sin tokens:
 | 19-ago-2026 | AGPL-3.0 como licencia | Obliga a forks a publicar cambios (protege método) |
 | 19-ago-2026 | Archivar repo viejo aunque ETL camara.cl falle | WAF es problema externo, no bloquea launch |
 | 19-ago-2026 | Opción A (prioridad técnica) | Sitio impecable antes del launch 1-sep |
+| 20-ago-2026 | Verificación prod reducida en M2 (solo gate) | El rate limiter edge bloqueó la verificación completa contra prod = evidencia de que S2 funciona como diseño; script completo se valida en CI/staging |
+| 20-ago-2026 | NO subir el rate limiter edge de prod (ns 47011, 30 req/60s) | Feature de seguridad de M1; debilitarlo abre ventana de abuso |
 
 ## NOTAS TÉCNICAS
 
