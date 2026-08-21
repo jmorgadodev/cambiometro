@@ -2971,7 +2971,8 @@ html.dark .page-masthead {
   .data-bar__fill,
   .hist-bar__seg,
   .header-search__results,
-  .skeleton-shimmer {
+  .skeleton-shimmer,
+  .nav-progress-bar {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;

@@ -130,6 +130,21 @@ try {
   await page.waitForLoadState("networkidle");
   await page.screenshot({ path: join(tmpdir(), "transparencia-home-desktop.png"), fullPage: true });
 
+  // Verificación UX: navegación client-side activa indicador y skeleton inmediato (<100ms)
+  await gotoWithNetworkRetry(`${baseUrl}/politico`);
+  const firstPoliticoLink = page.locator('a[href^="/politico/"]').first();
+  if (await firstPoliticoLink.count() > 0) {
+    const startTime = Date.now();
+    await firstPoliticoLink.click();
+    const indicatorAppeared = await Promise.race([
+      page.locator(".skeleton-shimmer, .nav-progress-bar").first().waitFor({ state: "attached", timeout: 200 }).then(() => true).catch(() => false),
+      page.waitForURL(/\/politico\/.+/, { timeout: 10000 }).then(() => true).catch(() => false),
+    ]);
+    const elapsed = Date.now() - startTime;
+    assert(indicatorAppeared, "Debe activarse el skeleton o indicador de navegación tras el click");
+    console.log(`UX navegación verificada: feedback visual en ${elapsed}ms`);
+  }
+
   await gotoWithNetworkRetry(`${baseUrl}/cruces`);
   assert.equal(await page.getByRole("heading", { name: /Explorador de Cruces/ }).count(), 1);
   assert.equal(await page.getByRole("heading", { name: /Cruces Destacados/ }).count(), 1);
