@@ -137,10 +137,11 @@ export default function DisciplinaBancadaCard({ disciplina, sigla }: Props) {
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "0.5rem" }}>
                   <div style={{ flex: 1, minWidth: 200 }}>
                     <div style={{ fontSize: "0.8rem", fontWeight: 700, color: "var(--text-1)" }}>
-                      {ses.descripcion}
+                      {ses.descripcion || "Descripción oficial no publicada"}
                     </div>
                     <div style={{ fontSize: "0.7rem", color: "var(--text-3)", marginTop: "0.15rem" }}>
-                      📅 {formatFechaCorta(ses.fecha)} · {ses.tramite}
+                      📅 {ses.fecha ? formatFechaCorta(ses.fecha) : "Fecha oficial no publicada"}
+                      {ses.tramite ? ` · ${ses.tramite}` : ""}
                     </div>
                   </div>
 

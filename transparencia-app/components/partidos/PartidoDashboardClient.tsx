@@ -161,7 +161,7 @@ export default function PartidoDashboardClient({
     // Selección con representatividad temporal (múltiples sesiones/fechas)
     const porFecha = new Map<string, FilaVotosChart[]>();
     for (const v of list) {
-      const d = v.fecha?.slice(0, 10) || "2026-08-01";
+      const d = v.fecha?.slice(0, 10) || "sin-fecha-oficial";
       if (!porFecha.has(d)) porFecha.set(d, []);
       porFecha.get(d)!.push(v);
     }
@@ -715,10 +715,10 @@ export default function PartidoDashboardClient({
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem" }}>
               <div>
                 <span className="badge" style={{ fontSize: "0.72rem", marginBottom: "0.5rem" }}>
-                  Sesión de Sala · {formatFechaCorta(selectedVotacion.fecha)}
+                  Sesión de Sala · {selectedVotacion.fecha ? formatFechaCorta(selectedVotacion.fecha) : "Fecha oficial no publicada"}
                 </span>
                 <h3 id="modal-vote-title" style={{ fontSize: "1.1rem", margin: "0.25rem 0 0.5rem", lineHeight: 1.4 }}>
-                  {selectedVotacion.descripcion || "Votación en Sala de la Cámara"}
+                  {selectedVotacion.descripcion || "Descripción oficial no publicada"}
                 </h3>
               </div>
               <button

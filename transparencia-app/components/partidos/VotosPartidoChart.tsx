@@ -29,8 +29,8 @@ const EChartContainer = dynamic(() => import("@/components/charts/EChartContaine
 
 export interface FilaVotosChart {
   id: string;
-  fecha: string;
-  descripcion: string;
+  fecha: string | null;
+  descripcion: string | null;
   nombre?: string;
   si: number;
   no: number;
@@ -72,8 +72,8 @@ export default function VotosPartidoChart({
     const conteoFechas = new Map<string, number>();
 
     return list.map((item) => {
-      const fechaCorta = formatFechaCorta(item.fecha);
-      const diaMes = item.fecha ? `${item.fecha.slice(8, 10)}/${item.fecha.slice(5, 7)}` : fechaCorta;
+      const fechaCorta = item.fecha ? formatFechaCorta(item.fecha) : "Fecha oficial no publicada";
+      const diaMes = item.fecha ? `${item.fecha.slice(8, 10)}/${item.fecha.slice(5, 7)}` : "Sin fecha";
       const count = (conteoFechas.get(diaMes) || 0) + 1;
       conteoFechas.set(diaMes, count);
       const etiquetaFinal = count === 1 ? diaMes : `${diaMes} · ${count}ª sesión`;
@@ -109,7 +109,7 @@ export default function VotosPartidoChart({
           const item = datosOrdenados[list[0].dataIndex];
           if (!item) return "";
 
-          let html = `<div style="font-weight:700;margin-bottom:4px;font-size:12.5px;max-width:320px;line-height:1.35;color:${tokens.text1};">${item.descripcion || "Votación de Sala"}</div>`;
+          let html = `<div style="font-weight:700;margin-bottom:4px;font-size:12.5px;max-width:320px;line-height:1.35;color:${tokens.text1};">${item.descripcion || "Descripción oficial no publicada"}</div>`;
           html += `<div style="font-size:11px;color:${tokens.text3};margin-bottom:8px;border-bottom:1px solid ${tokens.border};padding-bottom:4px;">Fecha: ${item.fechaCorta} · Haz clic para ver detalle nominal ↗</div>`;
 
           list.forEach((entry) => {

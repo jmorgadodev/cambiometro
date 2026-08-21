@@ -15,9 +15,9 @@ export interface DetalleRebelde {
 
 export interface SesionRebelde {
   id: string;
-  fecha: string;
-  descripcion: string;
-  tramite: string;
+  fecha: string | null;
+  descripcion: string | null;
+  tramite: string | null;
   url_tramitacion: string | null;
   votosRebeldesCount: number;
   votosMayoriaCount: number;
@@ -90,8 +90,8 @@ export interface ConteoOpciones {
 
 export interface FilaVotacionPartido {
   id: string;
-  fecha: string;
-  descripcion: string;
+  fecha: string | null;
+  descripcion: string | null;
   tramite: string | null;
   resultado: string | null;
   si: number;

@@ -3,16 +3,17 @@ import path from "path";
 import { PARTIDOS_SEED, POLITICOS_SEED } from "../../lib/seed-politicos";
 import { normalizePartidoId } from "../../lib/partido-estadisticas";
 import { resumirGastosAgregables } from "../../lib/gastos-operacionales";
+import { officialSessionMetadata } from "../../lib/session-integrity";
 import type { EtlRecord } from "../../lib/data-source";
 
 console.log("Generando estadísticas avanzadas y completas de partidos...");
 
 interface SessionData {
   id: string;
-  nombre: string;
-  fecha: string;
+  nombre?: string;
+  fecha?: string;
   periodo: string;
-  descripcion: string;
+  descripcion?: string;
   resultado?: string;
   quorum?: string;
   tipo?: string;
@@ -52,9 +53,9 @@ interface EvidenceSource {
 
 interface SesionRebelde {
   id: string;
-  fecha: string;
-  descripcion: string;
-  tramite?: string;
+  fecha: string | null;
+  descripcion: string | null;
+  tramite: string | null;
   url_tramitacion?: string | null;
   votosRebeldesCount: number;
   votosMayoriaCount?: number;
@@ -148,6 +149,14 @@ for (const partido of PARTIDOS_SEED) {
     }
 
     if (countInParty > 0) {
+      const metadata = officialSessionMetadata({
+        fecha: ses.fecha,
+        descripcion: ses.descripcion,
+        nombre: ses.nombre,
+        tramite: ses.tramite,
+        resultado: ses.resultado,
+        url_tramitacion: ses.url_tramitacion || ses.url,
+      });
       const emitidosSes = si + no + abst;
       const aparicionesSes = countInParty;
       const pctSi = emitidosSes > 0 ? Math.round((si / emitidosSes) * 100) : 0;
@@ -175,10 +184,10 @@ for (const partido of PARTIDOS_SEED) {
 
           sesionesRebeldes.push({
             id: ses.id,
-            fecha: ses.fecha ? ses.fecha.slice(0, 10) : "2026-08-01",
-            descripcion: ses.descripcion || ses.nombre || "Votación de Sala",
-            tramite: ses.tramite || "Tramitación en Sala",
-            url_tramitacion: ses.url_tramitacion || ses.url || null,
+            fecha: metadata.fecha,
+            descripcion: metadata.descripcion,
+            tramite: metadata.tramite,
+            url_tramitacion: metadata.url_tramitacion,
             votosRebeldesCount: rebeldesEnSesion,
             votosMayoriaCount: maxOpcion,
             opcionMayoria,
@@ -187,33 +196,31 @@ for (const partido of PARTIDOS_SEED) {
         }
       }
 
-      // Limpiar descripción de sesión
-      let descLimpia = ses.descripcion || ses.nombre || "Votación de Sala";
-      if (descLimpia === "1-Otros") descLimpia = "Votación de procedimiento de Sala";
-
       votacionesPartido.push({
         id: ses.id,
-        fecha: ses.fecha ? ses.fecha.slice(0, 10) : "2026-08-01",
-        descripcion: descLimpia,
-        tramite: ses.tramite || "Tramitación en Sala",
-        resultado: ses.resultado || (si > no ? "Aprobado" : "Rechazado"),
+        fecha: metadata.fecha,
+        descripcion: metadata.descripcion,
+        tramite: metadata.tramite,
+        resultado: metadata.resultado,
         si,
         no,
         abst,
         noVota: noVota + disp,
         apariciones: aparicionesSes,
         pctSi,
-        url_tramitacion: ses.url_tramitacion || ses.url || null,
+        url_tramitacion: metadata.url_tramitacion,
         votosNominales: nominales,
       });
 
       // Registrar asistencia por fecha/sesión para todo el período disponible (Cámara y Senado)
-      const fechaKey = ses.fecha ? ses.fecha.slice(0, 10) : "2026-08-01";
-      if (!asistenciaMap[fechaKey]) {
+      const fechaKey = metadata.fecha;
+      if (fechaKey && !asistenciaMap[fechaKey]) {
         asistenciaMap[fechaKey] = { presentes: 0, total: 0, fecha: fechaKey };
       }
-      asistenciaMap[fechaKey].presentes += emitidosSes;
-      asistenciaMap[fechaKey].total += aparicionesSes;
+      if (fechaKey) {
+        asistenciaMap[fechaKey].presentes += emitidosSes;
+        asistenciaMap[fechaKey].total += aparicionesSes;
+      }
     }
   }
 
