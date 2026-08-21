@@ -26,6 +26,9 @@ export async function generateMetadata({
   return {
     title: `Municipalidad de ${muni.nombre_comuna} — Alcalde ${alcalde}, Sueldos, Censo & Presupuesto | El Cambiómetro`,
     description: `Ficha municipal oficial de ${muni.nombre_comuna}: población Censo 2024, presupuesto per cápita, dependencia FCM, nóminas CPLT, concejo municipal SERVEL 2024 y compras públicas ChileCompra OCDS.`,
+    alternates: {
+      canonical: `/municipalidades/${id}`,
+    },
     openGraph: {
       title: `Municipalidad de ${muni.nombre_comuna} — El Cambiómetro`,
       description: `Sueldos, demografía Censo 2024, presupuesto SINIM y dotación municipal de ${muni.nombre_comuna}.`,
@@ -73,8 +76,21 @@ export default async function MunicipalidadDetailPage({
     )}`;
   const sinimUrl = `https://datos.sinim.gov.cl/datos_municipales/`;
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "GovernmentOrganization",
+    name: `Municipalidad de ${muni.nombre_comuna}`,
+    url: `https://cambiometro.impulsacv.cl/municipalidades/${id}`,
+    address: {
+      "@type": "PostalAddress",
+      addressRegion: muni.region,
+      addressCountry: "CL",
+    },
+  };
+
   return (
     <div style={{ minHeight: "100vh", paddingBottom: "6rem" }}>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
       {/* ═══ 1. HERO HEADER ════════════════════════════════════════════════════ */}
       <section className="page-masthead">
         <div className="container-main" id="muni-capture-zone">

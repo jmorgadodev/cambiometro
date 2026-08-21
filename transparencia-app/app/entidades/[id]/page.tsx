@@ -15,8 +15,18 @@ import Breadcrumbs from "@/components/Breadcrumbs";
 import EntityEvidenceAccordionExplorer from "@/components/records/EntityEvidenceAccordionExplorer";
 import { traducirPredicado, traducirTipoEntidad, formatNombreInstitucional } from "@/lib/diccionario-cruces";
 import { evaluateBudgetSourceAnomaly } from "@/lib/budget-integrity";
+import type { Metadata } from "next";
 
 export const dynamic = "force-dynamic";
+
+export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
+  const { id } = await params;
+  return {
+    alternates: {
+      canonical: `/entidades/${id}`,
+    },
+  };
+}
 
 const TABS: Array<{ id: string; label: string; kinds?: EvidenceKind[] }> = [
   { id: "resumen", label: "Resumen" },
