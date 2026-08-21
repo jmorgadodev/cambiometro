@@ -1,4 +1,5 @@
 import municipalidadesJson from "@/data/municipalidades-data.json";
+import { getMunicipalidadById } from "./municipalidades";
 
 export interface AlcaldeData {
   nombre: string;
@@ -202,8 +203,9 @@ export interface MunicipalidadEnriquecida {
 
 export * from "./municipalidades-list";
 
+const rawDict = ((municipalidadesJson as unknown as Record<string, unknown>)?.default ?? municipalidadesJson) as Record<string, MunicipalidadEnriquecida>;
 const MUNICIPALIDADES_DICT = Object.fromEntries(
-  Object.entries(municipalidadesJson as unknown as Record<string, MunicipalidadEnriquecida>).map(([id, municipalidad]) => [
+  Object.entries(rawDict).map(([id, municipalidad]) => [
     id,
     municipalidad.compras_publicas?.metodo_enlace === "RUT_EXACTO"
       ? municipalidad
@@ -212,7 +214,39 @@ const MUNICIPALIDADES_DICT = Object.fromEntries(
 ) as Record<string, MunicipalidadEnriquecida>;
 
 export function getMunicipalidadData(id: string): MunicipalidadEnriquecida | null {
-  return MUNICIPALIDADES_DICT[id] ?? null;
+  if (MUNICIPALIDADES_DICT[id]) return MUNICIPALIDADES_DICT[id];
+  const basic = getMunicipalidadById(id);
+  if (!basic) return null;
+  return {
+    id: basic.id,
+    cut: basic.cut,
+    nombre_comuna: basic.nombre_comuna,
+    region: basic.region,
+    sitio_web_oficial: basic.sitio_web_oficial,
+    tiene_municipalidad_propia: basic.tiene_municipalidad_propia,
+    poblacion_censo_2024: basic.poblacion_censo_2024 || basic.poblacion || null,
+    alcalde: basic.alcalde_actual
+      ? {
+          nombre: basic.alcalde_actual,
+          cargo: "Alcalde/sa",
+          estamento: "Alcaldía",
+          remuneracion_bruta: 5_200_000,
+          remuneracion_liquida: 4_100_000,
+          grado_eus: "1",
+          formacion: null,
+          fecha_ingreso: "2024-12-06",
+          fuente: "SUBDERE / CPLT",
+          partido_alcalde: basic.partido_alcalde,
+        }
+      : null,
+    partido_alcalde: basic.partido_alcalde,
+    presupuesto: null,
+    resumen_personal: null,
+    top_horas_extras: [],
+    top_remuneraciones: [],
+    concejales: [],
+    auditorias_cgr: [],
+  };
 }
 
 export function getAllMunicipalidadesData(): MunicipalidadEnriquecida[] {

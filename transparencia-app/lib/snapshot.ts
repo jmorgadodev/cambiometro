@@ -15,14 +15,18 @@ let cached: Snapshot | null = null;
  */
 export function leerSnapshot(): Snapshot {
   if (!cached) {
+    // En Cloudflare Workers (donde existe WebSocketPair o caches globales),
+    // el snapshot masivo no forma parte del bundle local y D1 es la fuente canónica.
+    if (typeof (globalThis as any).WebSocketPair !== "undefined" || typeof (globalThis as any).caches !== "undefined") {
+      cached = { fuentes: {} };
+      return cached;
+    }
     const file = path.join(process.cwd(), "data", "etl", "latest.json");
     try {
       cached = fs.existsSync(file)
         ? JSON.parse(fs.readFileSync(file, "utf8")) as Snapshot
         : { fuentes: {} };
     } catch {
-      // En Workers el snapshot masivo no forma parte del bundle: D1 es la fuente
-      // canónica y este fallback queda vacío para las rutas legacy.
       cached = { fuentes: {} };
     }
   }

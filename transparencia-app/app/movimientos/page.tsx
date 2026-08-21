@@ -11,6 +11,7 @@ import {
 } from "@/lib/movimientos";
 import Link from "next/link";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
+import { ListadoSkeleton } from "@/components/ui/Skeleton";
 
 const MESES = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -33,7 +34,7 @@ function formatFechaCorta(fechaStr: string): string {
 
 export default function MovimientosPage() {
   return (
-    <Suspense fallback={<div style={{ minHeight: "100vh", padding: "4rem 2rem", textAlign: "center", color: "var(--text-2)" }}>Cargando catálogo de movimientos...</div>}>
+    <Suspense fallback={<ListadoSkeleton title="Cargando catálogo de movimientos..." cardsCount={6} />}>
       <MovimientosContent />
     </Suspense>
   );

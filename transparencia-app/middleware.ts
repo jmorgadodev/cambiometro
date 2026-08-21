@@ -39,6 +39,14 @@ export function middleware(request: NextRequest) {
   if (process.env.CSP_REPORT_ONLY === "true") {
     response.headers.set("Content-Security-Policy-Report-Only", csp);
   }
+
+  const pathname = request.nextUrl.pathname;
+  if (!pathname.startsWith("/api/")) {
+    response.headers.set("Cache-Control", "public, max-age=0, s-maxage=300, stale-while-revalidate=600");
+    response.headers.set("CDN-Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
+    response.headers.set("Cloudflare-CDN-Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
+  }
+
   return response;
 }
 

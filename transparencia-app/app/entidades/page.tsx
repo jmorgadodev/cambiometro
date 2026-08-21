@@ -40,8 +40,6 @@ export default async function EntidadesPage({
       )
     : result.data;
 
-  const allKindCounts = await listEntities({ limit: 1 });
-
   return (
     <main>
       <section className="page-masthead">
@@ -55,7 +53,7 @@ export default async function EntidadesPage({
             </p>
           </div>
           <dl className="page-fact-sheet">
-            <div><dt>Total entidades</dt><dd>{allKindCounts.total.toLocaleString("es-CL")}</dd></div>
+            <div><dt>Total entidades</dt><dd>{result.total.toLocaleString("es-CL")}</dd></div>
             <div><dt>Fuentes</dt><dd>10</dd></div>
           </dl>
         </div>

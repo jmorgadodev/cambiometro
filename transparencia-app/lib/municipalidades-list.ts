@@ -24,7 +24,8 @@ export interface MunicipalidadListItem {
   auditorias_cgr_count?: number;
 }
 
-export const MUNICIPALIDADES_LIST = municipalidadesListJson as unknown as MunicipalidadListItem[];
+const rawList = ((municipalidadesListJson as unknown as Record<string, unknown>)?.default ?? municipalidadesListJson);
+export const MUNICIPALIDADES_LIST = (Array.isArray(rawList) ? rawList : []) as MunicipalidadListItem[];
 
 export function getMunicipalidadesList(): MunicipalidadListItem[] {
   return MUNICIPALIDADES_LIST;

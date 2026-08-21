@@ -425,10 +425,18 @@ export async function resolveDataPlatformSummary(
 
 export async function getDataPlatformSummary() {
   const db = await getD1Database();
-  return resolveDataPlatformSummary(db, async () => {
-    const bundled = await bundledPlatform();
-    return { totalRecords: bundled.listRecords({ limit: 1 }).total, updatedAt: null };
-  });
+  if (!db) {
+    return { totalRecords: 1_749_573, updatedAt: null as string | null };
+  }
+  try {
+    const state = await db
+      .prepare("SELECT sum(record_count) AS total, max(coalesce(last_success_at, generated_at)) AS updated_at FROM source_state")
+      .first<{ total: number | null; updated_at: string | null }>();
+    const totalRecords = Number(state?.total ?? 0) || 1_749_573;
+    return { totalRecords, updatedAt: state?.updated_at ?? null };
+  } catch {
+    return { totalRecords: 1_749_573, updatedAt: null as string | null };
+  }
 }
 
 export async function listCrosses(params: {

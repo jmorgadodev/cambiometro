@@ -40,8 +40,9 @@ function jsonObject(value: string | null): Record<string, unknown> {
   }
 }
 
-import { POLITICOS_SEED } from "@/lib/seed-politicos";
+import { POLITICOS_SEED } from "@/lib/politicos";
 import { diputadoIdParaPolitico, normalizeSearchText } from "@/lib/data-source";
+import { getPoliticoSlug } from "@/lib/politico-slugs";
 import diputadosIds from "@/data/diputados-ids.json";
 
 export function politicoIdFromEntityId(entityId: string, entityName?: string): string | null {
@@ -51,23 +52,26 @@ export function politicoIdFromEntityId(entityId: string, entityName?: string): s
   // Si ya es un ID de político
   if (cleanId.startsWith("dip-") || cleanId.startsWith("sen-")) {
     const exists = POLITICOS_SEED.find((p) => p.id === cleanId);
-    if (exists) return exists.id;
+    if (exists) return getPoliticoSlug(exists);
   }
 
   // person-camara-XXXX (ej. person-camara-1009)
   if (cleanId.startsWith("person-camara-")) {
     const camaraId = cleanId.replace("person-camara-", "");
-    for (const pol of POLITICOS_SEED) {
-      if (pol.cargo === "Diputado" && diputadoIdParaPolitico(pol) === camaraId) {
-        return pol.id;
-      }
-    }
-    const nombreEnMap = (diputadosIds as Record<string, string>)[camaraId];
+    const dict = (diputadosIds as Record<string, unknown>)?.default as Record<string, string> | undefined ?? (diputadosIds as Record<string, string>);
+    const nombreEnMap = dict?.[camaraId];
     if (nombreEnMap) {
       const match = POLITICOS_SEED.find(
-        (p) => normalizeSearchText(p.nombre_completo) === normalizeSearchText(nombreEnMap)
+        (p) =>
+          normalizeSearchText(p.nombre_completo) === normalizeSearchText(nombreEnMap) ||
+          nameSequenceMatches(p.nombre_completo, nombreEnMap)
       );
-      if (match) return match.id;
+      if (match) return getPoliticoSlug(match);
+    }
+    for (const pol of POLITICOS_SEED) {
+      if (pol.cargo === "Diputado" && diputadoIdParaPolitico(pol) === camaraId) {
+        return getPoliticoSlug(pol);
+      }
     }
   }
 
@@ -80,7 +84,7 @@ export function politicoIdFromEntityId(entityId: string, entityName?: string): s
         (normalizeSearchText(p.nombre_completo).includes(normalizeSearchText(raw)) ||
           nameSequenceMatches(p.nombre_completo, raw))
     );
-    if (matchSen) return matchSen.id;
+    if (matchSen) return getPoliticoSlug(matchSen);
   }
 
   // Por nombre de entidad si se provee
@@ -92,7 +96,7 @@ export function politicoIdFromEntityId(entityId: string, entityName?: string): s
           normalizeSearchText(p.nombre_completo) === normalized ||
           nameSequenceMatches(p.nombre_completo, entityName)
       );
-      if (match) return match.id;
+      if (match) return getPoliticoSlug(match);
     }
   }
 
