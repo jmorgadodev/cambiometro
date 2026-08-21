@@ -1,6 +1,13 @@
 import type { Metadata } from "next";
+export const revalidate = 300;
 import { notFound } from "next/navigation";
 import { PARTIDOS_SEED, SCORES_SEED } from "@/lib/seed-politicos";
+
+export function generateStaticParams() {
+  return PARTIDOS_SEED.map((p) => ({
+    sigla: p.sigla.toLowerCase(),
+  }));
+}
 import {
   escañosDelPartido,
   gastosDelPartido,

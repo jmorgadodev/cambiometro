@@ -1,6 +1,6 @@
 
 import type { Metadata } from "next";
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import {
@@ -43,6 +43,12 @@ import PersonalApoyoMensual from "@/components/PersonalApoyoMensual";
 
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+export function generateStaticParams() {
+  return POLITICOS_SEED.map((p) => ({
+    id: getPoliticoSlug(p),
+  }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {

@@ -17,7 +17,7 @@ import { traducirPredicado, traducirTipoEntidad, formatNombreInstitucional } fro
 import { evaluateBudgetSourceAnomaly } from "@/lib/budget-integrity";
 import type { Metadata } from "next";
 
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;

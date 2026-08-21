@@ -93,4 +93,14 @@ describe("endurecimiento del runtime publico", () => {
     expect(response?.headers.get("Retry-After")).toBe("60");
     expect(response?.headers.get("Cache-Control")).toBe("no-store");
   });
+
+  it("configura cabeceras de edge cache (300s) para fichas y listados publicos y las excluye de API", () => {
+    const pageResp = middleware(new NextRequest("https://cambiometro.impulsacv.cl/politico/dip-061"));
+    expect(pageResp.headers.get("Cache-Control")).toContain("s-maxage=300");
+    expect(pageResp.headers.get("CDN-Cache-Control")).toContain("s-maxage=300");
+    expect(pageResp.headers.get("Cloudflare-CDN-Cache-Control")).toContain("s-maxage=300");
+
+    const apiResp = middleware(new NextRequest("https://cambiometro.impulsacv.cl/api/v1/search"));
+    expect(apiResp.headers.get("CDN-Cache-Control")).toBeNull();
+  });
 });

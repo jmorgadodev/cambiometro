@@ -427,8 +427,23 @@ export async function getDataPlatformSummary() {
   const db = await getD1Database();
   return resolveDataPlatformSummary(db, async () => {
     const bundled = await bundledPlatform();
+<<<<<<< HEAD
     return { totalRecords: bundled.listRecords({ limit: 1 }).total, updatedAt: null };
   });
+=======
+    return { totalRecords: bundled.listRecords({ limit: 1 }).total, updatedAt: null as string | null };
+  }
+  try {
+    const [records, state] = await Promise.all([
+      db.prepare("SELECT count(*) AS total FROM records").first<{ total: number }>(),
+      db.prepare("SELECT max(coalesce(last_success_at, generated_at)) AS updated_at FROM source_state").first<{ updated_at: string | null }>(),
+    ]);
+    return { totalRecords: Number(records?.total ?? 0), updatedAt: state?.updated_at ?? null };
+  } catch {
+    const bundled = await bundledPlatform();
+    return { totalRecords: bundled.listRecords({ limit: 1 }).total, updatedAt: null as string | null };
+  }
+>>>>>>> f0f1d12 (perf: ISR/edge cache en fichas compatible con nonce CSP)
 }
 
 export async function listCrosses(params: {
