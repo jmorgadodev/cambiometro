@@ -79,6 +79,8 @@ describe("R10 — ninguna compra inventada entra a proyecciones", () => {
       "components/VotacionesHistorial.tsx",
       "scripts/etl/generate-partidos-stats.ts",
       "lib/partido-estadisticas.ts",
+      "lib/scores.ts",
+      "scripts/rebuild-authoritative-attendance.mjs",
     ].map((file) => readFileSync(resolve(file), "utf8")).join("\n");
 
     expect(sources).not.toMatch(/presVigente\s*\*\s*0\.34/);
@@ -102,6 +104,11 @@ describe("R10 — ninguna compra inventada entra a proyecciones", () => {
     expect(sources).not.toMatch(/presentes[^\n]+:\s*100/);
     expect(sources).not.toMatch(/ultimoPeriodo\s*\|\|\s*"2026-06"/);
     expect(sources).not.toMatch(/pctDisciplina:\s*100/);
+    expect(sources).not.toContain("charCodeSum");
+    expect(sources).not.toContain("sesionesTotales = isDip ? 177 : 180");
+    expect(sources).not.toContain("score_gastos: 80");
+    expect(sources).not.toContain("score_patrimonio: 85");
+    expect(sources).toContain("SCORES_SEED: ScoreProbidad[] = []");
     expect(sources).not.toMatch(/planta_pct:\s*28\.5/);
     expect(sources).not.toMatch(/recordCount\)\s*\|\|\s*\(muni\.poblacion/);
     expect(sources).not.toContain("Entel Chile S.A.");

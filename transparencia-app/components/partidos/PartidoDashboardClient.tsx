@@ -627,7 +627,7 @@ export default function PartidoDashboardClient({
                     flexWrap: "wrap",
                   }}
                 >
-                  {score && (
+                  {score?.porcentaje_asistencia !== null && score?.porcentaje_asistencia !== undefined && (
                     <span>
                       Asistencia:{" "}
                       <strong style={{ color: "var(--text-primary)" }}>
@@ -643,7 +643,7 @@ export default function PartidoDashboardClient({
                       </strong>
                     </span>
                   )}
-                  {score && (
+                  {score && typeof score.total_alertas_criticas === "number" && typeof score.total_alertas_altas === "number" && (
                     <span>
                       Alertas:{" "}
                       <strong
