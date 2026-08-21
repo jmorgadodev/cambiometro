@@ -3,6 +3,8 @@ import { POLITICOS_SEED } from "@/lib/seed-politicos";
 import { PARTIDOS_SEED } from "@/lib/partidos";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import { getSnapshotSummary } from "@/lib/data-source";
+import { MUNICIPALIDADES_SEED } from "@/lib/municipalidades";
+import { getAllServiciosPublicos } from "@/lib/servicios-publicos";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://cambiometro.impulsacv.cl";
@@ -50,5 +52,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  return [...routes, ...politicos, ...partidos];
+  // 346 municipalidades — fichas dinámicas
+  const municipalidades = MUNICIPALIDADES_SEED.map((m) => ({
+    url: `${baseUrl}/municipalidades/${m.id}`,
+    lastModified,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  // 538 servicios públicos — fichas dinámicas
+  const servicios = getAllServiciosPublicos().map((s) => ({
+    url: `${baseUrl}/servicios-publicos/${s.id}`,
+    lastModified,
+    changeFrequency: "monthly" as const,
+    priority: 0.7,
+  }));
+
+  return [...routes, ...politicos, ...partidos, ...municipalidades, ...servicios];
 }
