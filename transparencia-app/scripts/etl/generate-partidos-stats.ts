@@ -2,6 +2,8 @@ import fs from "fs";
 import path from "path";
 import { PARTIDOS_SEED, POLITICOS_SEED } from "../../lib/seed-politicos";
 import { normalizePartidoId } from "../../lib/partido-estadisticas";
+import { resumirGastosAgregables } from "../../lib/gastos-operacionales";
+import type { EtlRecord } from "../../lib/data-source";
 
 console.log("Generando estadísticas avanzadas y completas de partidos...");
 
@@ -62,6 +64,9 @@ interface SesionRebelde {
 
 // 2. Cargar evidencias de políticos (gastos de Cámara y Senado reales)
 const polEvPath = path.join(process.cwd(), "data", "politicos-evidences.json");
+if (!fs.existsSync(polEvPath)) {
+  throw new Error(`PARTIDOS_EVIDENCE_REQUIRED: falta ${polEvPath}; no se sobrescribirá la proyección con ceros.`);
+}
 const polEvData: Record<string, EvidenceSource[]> = fs.existsSync(polEvPath)
   ? JSON.parse(fs.readFileSync(polEvPath, "utf8"))
   : {};
@@ -257,17 +262,20 @@ for (const partido of PARTIDOS_SEED) {
     const sources = polEvData[pol.id] || [];
     for (const s of sources) {
       if (s.source?.key === "gastos_camara" || s.source?.key === "gastos_senado") {
-        for (const g of (s.records || [])) {
-          const monto = Number(g.monto_clp || g.monto_total || g.monto || 0);
-          if (monto <= 0) continue;
-          const periodo = g.periodo || g.fecha?.slice(0, 7) || "2026-05";
-          const item = g.item || g.concepto || "Gastos operacionales";
-
-          gastosPorMesMap[periodo] = (gastosPorMesMap[periodo] || 0) + monto;
-          gastosPorItemMap[item] = (gastosPorItemMap[item] || 0) + monto;
-          if (gastosPorPolMap[pol.id]) {
-            gastosPorPolMap[pol.id].total += monto;
-          }
+        const records = (s.records || []).map((record, index) => ({
+          ...record,
+          id: `${pol.id}-${s.source?.key}-${index}`,
+          monto_clp: Number(record.monto_clp ?? record.monto_total ?? record.monto ?? 0),
+        })) as EtlRecord[];
+        const resumen = resumirGastosAgregables(records);
+        for (const mes of resumen.porMes) {
+          gastosPorMesMap[mes.periodo] = (gastosPorMesMap[mes.periodo] || 0) + mes.total;
+        }
+        for (const item of resumen.porItem) {
+          gastosPorItemMap[item.item] = (gastosPorItemMap[item.item] || 0) + item.total;
+        }
+        if (gastosPorPolMap[pol.id]) {
+          gastosPorPolMap[pol.id].total += resumen.total;
         }
       }
     }

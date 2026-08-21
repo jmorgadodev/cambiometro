@@ -28,6 +28,12 @@ export interface GastosPoliticoProcesados {
   ultimoPeriodo: string;
 }
 
+export interface GastosAgregables {
+  total: number;
+  porMes: Array<{ periodo: string; total: number }>;
+  porItem: Array<{ item: string; total: number }>;
+}
+
 /**
  * Identifica si una fila corresponde a un agregado o fila de resumen total
  * (e.g. "VALOR TOTAL", "TOTAL", "TOTAL GASTOS OPERACIONALES", etc.)
@@ -160,6 +166,28 @@ export function procesarGastosPolitico(records: EtlRecord[]): GastosPoliticoProc
     totalAcumulado,
     periodos: periodosOrdenados,
     ultimoPeriodo,
+  };
+}
+
+/**
+ * Entrega la única forma admitida de incorporar gastos a agregados superiores
+ * (partido, cámara o nivel nacional). Reutiliza el cálculo de ficha para que
+ * una fila resumen nunca vuelva a sumarse junto con sus componentes.
+ */
+export function resumirGastosAgregables(records: EtlRecord[]): GastosAgregables {
+  const procesado = procesarGastosPolitico(records);
+  const items = new Map<string, number>();
+  for (const mes of procesado.meses) {
+    for (const item of mes.items) {
+      items.set(item.item, (items.get(item.item) ?? 0) + item.monto);
+    }
+  }
+  return {
+    total: procesado.totalAcumulado,
+    porMes: procesado.meses.map((mes) => ({ periodo: mes.periodo, total: mes.total })),
+    porItem: [...items.entries()]
+      .map(([item, total]) => ({ item, total }))
+      .sort((left, right) => right.total - left.total || left.item.localeCompare(right.item)),
   };
 }
 
