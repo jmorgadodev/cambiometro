@@ -193,7 +193,7 @@ export async function leerPersonalApoyo(): Promise<PersonalApoyoDataset | null> 
       const fromD1 = await getKvCache<PersonalApoyoDataset>("personal-apoyo.json");
       if (fromD1) return fromD1;
       // Cloudflare Workers no soporta fs — solo intentar en Node.js
-      if (typeof WebSocketPair !== "undefined") return null;
+      if (typeof (globalThis as Record<string, unknown>).WebSocketPair !== "undefined") return null;
       try {
         return JSON.parse(fs.readFileSync(path.join(process.cwd(), "data", "personal-apoyo.json"), "utf8")) as PersonalApoyoDataset;
       } catch {

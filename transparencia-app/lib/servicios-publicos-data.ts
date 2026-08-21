@@ -107,6 +107,18 @@ export interface ServicioPublicoEnriquecido extends ServicioPublico {
 }
 
 // Carga en memoria cacheada de las proyecciones del Lake
+let cachedChileCompra: {
+  records?: Array<{
+    id?: string;
+    fecha_publicacion?: string;
+    organismo?: string;
+    nombre?: string;
+    monto_pesos?: number;
+    tipo?: string;
+    proveedor?: string;
+    url?: string;
+  }>;
+} | null = null;
 let cachedInfoLobby: {
   records?: Array<{
     id?: string;
@@ -429,6 +441,7 @@ export function getAllServiciosPublicosEnriquecidos(): ServicioPublicoEnriquecid
         top_proveedores: [],
         ordenes_recientes: [],
         serie_mensual_2026: [],
+        anomalias_integridad: [],
       },
       audiencias_lobby: [],
       resumen_lobby: {
@@ -469,5 +482,5 @@ export function getAllServiciosPublicosEnriquecidos(): ServicioPublicoEnriquecid
       },
     };
   });
-  return cachedAllEnriquecidos;
+  return cachedAllEnriquecidos!;
 }
