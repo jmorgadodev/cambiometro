@@ -2,24 +2,24 @@ import municipalidadesJson from "@/data/municipalidades-data.json";
 
 export interface AlcaldeData {
   nombre: string;
-  cargo: string;
+  cargo: string | null;
   estamento: string;
-  remuneracion_bruta: number;
-  remuneracion_liquida: number;
-  grado_eus: string;
+  remuneracion_bruta: number | null;
+  remuneracion_liquida: number | null;
+  grado_eus: string | null;
   formacion: string | null;
-  fecha_ingreso: string;
-  fuente: string;
-  periodo?: string;
+  fecha_ingreso: string | null;
+  fuente: string | null;
+  periodo?: string | null;
   partido_alcalde?: string | null;
 }
 
 export interface PresupuestoSinim {
   cut: string;
-  inicial_clp: number;
-  vigente_clp: number;
-  gasto_personal_clp: number;
-  ingresos_propios_clp: number;
+  inicial_clp: number | null;
+  vigente_clp: number | null;
+  gasto_personal_clp: number | null;
+  ingresos_propios_clp: number | null;
   ano: number;
 }
 
@@ -53,15 +53,15 @@ export interface TopFuncionarioHorasExtras {
 export interface TopFuncionarioRemuneracion {
   id: string;
   nombre: string;
-  cargo: string;
+  cargo: string | null;
   sueldo_base?: number;
   horas_extras_monto?: number;
   horas_extras_hrs?: number;
   remuneracion_bruta: number;
-  remuneracion_liquida: number;
-  grado_eus?: string;
-  tipo_contrato?: string;
-  periodo?: string;
+  remuneracion_liquida: number | null;
+  grado_eus?: string | null;
+  tipo_contrato?: string | null;
+  periodo?: string | null;
   total_contratos_count?: number;
   cargos_consolidados?: string[];
 }
@@ -141,14 +141,14 @@ export interface ComprasPublicasMuni {
 }
 
 export interface RadiografiaComunal {
-  padron_electoral_servel: number;
-  participacion_electoral_pct: number;
-  votos_alcalde_pct: number;
-  votos_alcalde_total: number;
-  viviendas_censo_2024: number;
-  hogares_censo_2024: number;
-  fuente_electoral: string;
-  fuente_demografica: string;
+  padron_electoral_servel: number | null;
+  participacion_electoral_pct: number | null;
+  votos_alcalde_pct: number | null;
+  votos_alcalde_total: number | null;
+  viviendas_censo_2024: number | null;
+  hogares_censo_2024: number | null;
+  fuente_electoral: string | null;
+  fuente_demografica: string | null;
 }
 
 export interface AuditoriaCgrData {

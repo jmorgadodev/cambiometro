@@ -438,14 +438,16 @@ for (const muni of MUNICIPALIDADES_SEED) {
   const cut = String(muni.cut).padStart(5, "0");
   const rawStaff = cpltStaffMap.get(muni.id) ?? [];
   const sinim = sinimByCut.get(cut) ?? null;
-  const censo = CENSO_2024_OFICIAL[cut] ?? { pop: 25000, area: 500.0, dwellings: 9500 };
+  const censo = CENSO_2024_OFICIAL[cut] ?? null;
   const audits = cgrByCommune.get(muni.id) ?? [];
-  const poblacion_censo_2024 = censo.pop;
-  const superficie_km2 = censo.area;
-  const densidad_hab_km2 = Number((poblacion_censo_2024 / superficie_km2).toFixed(1));
+  const poblacion_censo_2024 = censo?.pop ?? null;
+  const superficie_km2 = censo?.area ?? null;
+  const densidad_hab_km2 = poblacion_censo_2024 !== null && superficie_km2
+    ? Number((poblacion_censo_2024 / superficie_km2).toFixed(1))
+    : null;
 
   // --- A. ALCALDE ---
-  let alcalde = ALCALDES_CORREGIDOS[muni.id] ?? null;
+  let alcalde = null;
 
   if (!alcalde && rawStaff.length > 0) {
     const alcaldeRecord = rawStaff.find(f => {
@@ -461,34 +463,18 @@ for (const muni of MUNICIPALIDADES_SEED) {
     if (alcaldeRecord) {
       alcalde = {
         nombre: alcaldeRecord.nombre_completo,
-        cargo: alcaldeRecord.cargo ?? "Alcalde",
+        cargo: alcaldeRecord.cargo ?? null,
         estamento: "Alcalde",
-        remuneracion_bruta: alcaldeRecord.remuneracion_bruta_mensual ?? 7850000,
-        remuneracion_liquida: alcaldeRecord.remuneracion_liquida_mensual ?? 6050000,
-        grado_eus: String(alcaldeRecord.grado_eus ?? "2"),
+        remuneracion_bruta: alcaldeRecord.remuneracion_bruta_mensual ?? null,
+        remuneracion_liquida: alcaldeRecord.remuneracion_liquida_mensual ?? null,
+        grado_eus: alcaldeRecord.grado_eus ? String(alcaldeRecord.grado_eus) : null,
         formacion: alcaldeRecord.formacion ?? null,
-        fecha_ingreso: alcaldeRecord.fecha_ingreso ?? "2024-12-06",
-        fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-        periodo: "2026-06",
-        partido_alcalde: muni.partido_alcalde ?? "Independiente",
+        fecha_ingreso: alcaldeRecord.fecha_ingreso ?? null,
+        fuente: alcaldeRecord.url ?? alcaldeRecord.fuente ?? null,
+        periodo: alcaldeRecord.periodo ?? alcaldeRecord.fuente_periodo ?? null,
+        partido_alcalde: muni.partido_alcalde ?? null,
       };
     }
-  }
-
-  if (!alcalde) {
-    alcalde = {
-      nombre: muni.alcalde_actual || `Alcalde/sa Titular de ${muni.nombre_comuna}`,
-      cargo: "Alcalde",
-      estamento: "Alcalde",
-      remuneracion_bruta: 7850000,
-      remuneracion_liquida: 6050000,
-      grado_eus: "3",
-      formacion: "Administración / Profesional",
-      fecha_ingreso: "2024-12-06",
-      fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-      periodo: "2026-06",
-      partido_alcalde: muni.partido_alcalde ?? "Independiente",
-    };
   }
 
   // --- B. PRESUPUESTO SINIM ---
@@ -496,26 +482,18 @@ for (const muni of MUNICIPALIDADES_SEED) {
   if (sinim && (sinim.vigente_clp > 0 || sinim.inicial_clp > 0)) {
     presupuesto = {
       cut,
-      inicial_clp: sinim.inicial_clp || sinim.vigente_clp,
-      vigente_clp: sinim.vigente_clp || sinim.inicial_clp,
-      gasto_personal_clp: sinim.gasto_personal_clp || Math.round((sinim.vigente_clp || sinim.inicial_clp) * 0.28),
-      ingresos_propios_clp: sinim.ingresos_totales_clp,
-      ano: 2025,
-    };
-  } else {
-    const estimado = Math.max(3500000000, Math.round(poblacion_censo_2024 * 580000));
-    presupuesto = {
-      cut,
-      inicial_clp: Math.round(estimado * 0.85),
-      vigente_clp: estimado,
-      gasto_personal_clp: Math.round(estimado * 0.28),
-      ingresos_propios_clp: Math.round(estimado * 0.65),
+      inicial_clp: sinim.inicial_clp || null,
+      vigente_clp: sinim.vigente_clp || null,
+      gasto_personal_clp: sinim.gasto_personal_clp || null,
+      ingresos_propios_clp: sinim.ingresos_totales_clp || null,
       ano: 2025,
     };
   }
 
-  const presVigente = presupuesto.vigente_clp || presupuesto.inicial_clp;
-  const presupuesto_per_capita_clp = Math.round(presVigente / poblacion_censo_2024);
+  const presVigente = presupuesto?.vigente_clp ?? presupuesto?.inicial_clp ?? null;
+  const presupuesto_per_capita_clp = presVigente !== null && poblacion_censo_2024
+    ? Math.round(presVigente / poblacion_censo_2024)
+    : null;
 
   // --- C. RESUMEN PERSONAL CON INTEGRIDAD Y DEDUPLICACIÓN (M4 y M1) ---
   let resumen_personal = null;
@@ -563,32 +541,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
     let masaHorasExtras = periodStaff.reduce((sum, f) => sum + Number(f.monto_horas_extras_clp ?? 0), 0);
     let totalHorasExtrasHrs = periodStaff.reduce((sum, f) => sum + Number(f.horas_extras_mes_anterior ?? 0), 0);
 
-    // Regla de consistencia presupuestaria (Talca / Comunas con absorción masiva DAEM/Salud)
-    let masaAnual = masaMensual * 12;
-    let notaMetodologica = null;
-
-    if (masaAnual > presVigente && (muni.id === "muni-talca" || masaAnual > presVigente * 1.2)) {
-      const pureMuni = periodStaff.filter(f => {
-        const est = String(f.estamento || "").toLowerCase();
-        const cargo = String(f.cargo || "").toLowerCase();
-        const isEdu = est.includes("docente") || cargo.includes("escuela") || cargo.includes("profesor");
-        const isSalud = est.includes("salud") || cargo.includes("cesfam") || cargo.includes("medico");
-        return !isEdu && !isSalud;
-      });
-
-      const masaMuniCentral = pureMuni.reduce((acc, f) => acc + Number(f.remuneracion_bruta_mensual || 0), 0);
-      if (masaMuniCentral > 0 && masaMuniCentral * 12 < presVigente) {
-        masaMensual = masaMuniCentral;
-        masaAnual = masaMensual * 12;
-      } else if (sinim && sinim.gasto_personal_clp > 0) {
-        masaMensual = Math.round(sinim.gasto_personal_clp / 12);
-        masaAnual = sinim.gasto_personal_clp;
-      } else {
-        masaMensual = Math.round(presVigente * 0.28 / 12);
-        masaAnual = Math.round(presVigente * 0.28);
-      }
-      notaMetodologica = "La masa anual de gestión municipal ($" + (masaAnual / 1e9).toFixed(1) + "B) corresponde al personal de administración central. El total de dotación comunal incluye Salud (CESFAMs) y Educación (DAEM) financiados por transferencias sectoriales del Estado.";
-    }
+    const masaAnual = masaMensual * 12;
 
     // Métricas de calidad D1, D2, D3
     const sinPagoCount = regularStaff.filter(f => Number(f.remuneracion_bruta_mensual ?? 0) <= 0).length;
@@ -611,7 +564,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
       registros_micro_monto_count: microMontoCount,
       registros_cuarentena_v7_count: anomalias_integridad.length,
       registros_validos_count: validosCount,
-      nota_metodologica: notaMetodologica,
+      nota_metodologica: null,
     };
 
     // 2. Top Horas Extras
@@ -645,64 +598,28 @@ for (const muni of MUNICIPALIDADES_SEED) {
       const heMonto = Number(f.monto_horas_extras_clp || 0);
       const heHrs = Number(f.horas_extras_mes_anterior || 0);
       const base = Math.max(0, bruto - heMonto);
-      const liquida = Number(f.remuneracion_liquida_mensual || Math.round(bruto * 0.78));
+      const liquida = f.remuneracion_liquida_mensual === null || f.remuneracion_liquida_mensual === undefined
+        ? null
+        : Number(f.remuneracion_liquida_mensual);
 
       topList.push({
         id: f.id,
         nombre: name,
-        cargo: f.cargo || "Funcionario",
+        cargo: f.cargo || null,
         sueldo_base: base,
         horas_extras_monto: heMonto,
         horas_extras_hrs: heHrs,
         remuneracion_bruta: bruto,
         remuneracion_liquida: liquida,
-        estamento: f.estamento || "Profesional",
-        tipo_contrato: f.tipo_contrato || "Planta",
-        grado_eus: f.grado_eus || "10",
-        periodo: f.periodo || "2026-06",
+        estamento: f.estamento || null,
+        tipo_contrato: f.tipo_contrato || null,
+        grado_eus: f.grado_eus || null,
+        periodo: f.periodo || f.fuente_periodo || null,
       });
 
       if (topList.length >= 5) break;
     }
     top_remuneraciones = topList;
-  } else if (sinim && (sinim.total_funcionarios_sinim > 0 || sinim.gasto_personal_clp > 0)) {
-    const totalFunc = sinim.total_funcionarios_sinim || Math.max(80, Math.round(poblacion_censo_2024 / 220));
-    const masaMensual = sinim.gasto_personal_clp > 0 ? Math.round(sinim.gasto_personal_clp / 12) : totalFunc * 1650000;
-    const planta = Math.round(totalFunc * 0.35);
-    const contrata = Math.round(totalFunc * 0.45);
-    const honorarios = Math.round(totalFunc * 0.12);
-    const codigoTrabajo = totalFunc - (planta + contrata + honorarios);
-
-    resumen_personal = {
-      total_funcionarios: totalFunc,
-      planta,
-      contrata,
-      honorarios,
-      codigo_trabajo_salud_educacion: codigoTrabajo,
-      masa_mensual_clp: masaMensual,
-      masa_anual_estimada_clp: masaMensual * 12,
-      masa_horas_extras_clp: Math.round(masaMensual * 0.04),
-      total_horas_extras_hrs: Math.round(totalFunc * 4.5),
-    };
-  } else {
-    const totalFunc = Math.max(60, Math.round(poblacion_censo_2024 / 250));
-    const masaMensual = totalFunc * 1650000;
-    const planta = Math.round(totalFunc * 0.35);
-    const contrata = Math.round(totalFunc * 0.45);
-    const honorarios = Math.round(totalFunc * 0.12);
-    const codigoTrabajo = totalFunc - (planta + contrata + honorarios);
-
-    resumen_personal = {
-      total_funcionarios: totalFunc,
-      planta,
-      contrata,
-      honorarios,
-      codigo_trabajo_salud_educacion: codigoTrabajo,
-      masa_mensual_clp: masaMensual,
-      masa_anual_estimada_clp: masaMensual * 12,
-      masa_horas_extras_clp: Math.round(masaMensual * 0.03),
-      total_horas_extras_hrs: Math.round(totalFunc * 4),
-    };
   }
 
   // --- D. CHILECOMPRA OCDS (M2) ---
@@ -710,21 +627,15 @@ for (const muni of MUNICIPALIDADES_SEED) {
 
 
   // --- E. RADIOGRAFÍA COMUNAL (SERVEL + CENSO 2024) ---
-  const padron_electoral = Math.round(poblacion_censo_2024 * 0.815);
-  const participacion_pct = 84.8;
-  const votos_alcalde_pct = Number((46.5 + (muni.nombre_comuna.length % 15) * 1.1).toFixed(1));
-  const viviendas_censo_2024 = censo.dwellings || Math.round(poblacion_censo_2024 / 2.7);
-  const hogares_censo_2024 = Math.round(viviendas_censo_2024 * 0.94);
-
   const radiografia_comunal = {
-    padron_electoral_servel: padron_electoral,
-    participacion_electoral_pct: participacion_pct,
-    votos_alcalde_pct: votos_alcalde_pct,
-    votos_alcalde_total: Math.round(padron_electoral * (participacion_pct / 100) * (votos_alcalde_pct / 100)),
-    viviendas_censo_2024,
-    hogares_censo_2024,
-    fuente_electoral: "SERVEL Elecciones Municipales 2024",
-    fuente_demografica: "INE Censo de Población y Vivienda 2024",
+    padron_electoral_servel: null,
+    participacion_electoral_pct: null,
+    votos_alcalde_pct: null,
+    votos_alcalde_total: null,
+    viviendas_censo_2024: censo?.dwellings ?? null,
+    hogares_censo_2024: null,
+    fuente_electoral: null,
+    fuente_demografica: censo ? "INE Censo de Población y Vivienda 2024" : null,
   };
 
   // --- F. CONCEJO MUNICIPAL SERVEL 2024 ---
@@ -736,7 +647,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
     cut,
     nombre_comuna: muni.nombre_comuna,
     region: muni.region,
-    sitio_web_oficial: muni.sitio_web_oficial || `https://www.municipalidadde${muni.nombre_comuna.toLowerCase().replace(/\s+/g, "")}.cl`,
+    sitio_web_oficial: muni.sitio_web_oficial ?? null,
     tiene_municipalidad_propia: muni.tiene_municipalidad_propia,
     poblacion_censo_2024,
     superficie_km2,
@@ -753,13 +664,10 @@ for (const muni of MUNICIPALIDADES_SEED) {
     compras_publicas,
     radiografia_comunal,
     sitio_transparencia_activa: `https://www.portaltransparencia.cl/PortalPdT/directorio-de-organismos-regulados/?org=${encodeURIComponent(muni.nombre_comuna)}`,
-    redes_sociales: {
-      instagram: `https://www.instagram.com/muni_${muni.nombre_comuna.toLowerCase().replace(/[^a-z0-9]/g, "")}`,
-      twitter: `https://twitter.com/search?q=Municipalidad%20${encodeURIComponent(muni.nombre_comuna)}`,
-    },
-    fcm_dependencia_pct: sinim?.fcm_dependencia_pct ?? 45.0,
-    fcm_ingresos_clp: sinim?.fcm_ingresos_clp ?? 0,
-    ingresos_totales_clp: sinim?.ingresos_totales_clp ?? 0,
+    redes_sociales: null,
+    fcm_dependencia_pct: sinim?.fcm_dependencia_pct ?? null,
+    fcm_ingresos_clp: sinim?.fcm_ingresos_clp || null,
+    ingresos_totales_clp: sinim?.ingresos_totales_clp || null,
     auditorias_cgr: audits,
   };
 }
@@ -807,11 +715,12 @@ console.log(`[ÉXITO] Generado dataset liviano (${listData.length} comunas) en d
 // Validaciones Automáticas
 const talca = output["muni-talca"];
 console.log("\n=== VALIDACIONES POST-GENERACIÓN ===");
-console.log(`1. Talca Presupuesto Vigente SINIM: $${(talca.presupuesto.vigente_clp / 1e9).toFixed(2)}B CLP`);
-console.log(`2. Talca Masa Salarial Anual Estimada: $${(talca.resumen_personal.masa_anual_estimada_clp / 1e9).toFixed(2)}B CLP`);
-console.log(`   ¿Masa Anual < Presupuesto?: ${talca.resumen_personal.masa_anual_estimada_clp < talca.presupuesto.vigente_clp ? 'SÍ (VÁLIDO)' : 'NO (ERROR)'}`);
-console.log(`3. Suma de Cards Personal Talca: ${talca.resumen_personal.planta} (Planta) + ${talca.resumen_personal.contrata} (Contrata) + ${talca.resumen_personal.honorarios} (Honorarios) + ${talca.resumen_personal.codigo_trabajo_salud_educacion} (Código Trab/Salud/Educ) = ${talca.resumen_personal.planta + talca.resumen_personal.contrata + talca.resumen_personal.honorarios + talca.resumen_personal.codigo_trabajo_salud_educacion} (Total: ${talca.resumen_personal.total_funcionarios})`);
-console.log(`4. Top Remuneraciones Talca (Deduplicadas):`, talca.top_remuneraciones.map(r => `${r.nombre}: $${r.remuneracion_bruta.toLocaleString("es-CL")}`));
-console.log(`5. Presupuesto Per Cápita Talca: $${talca.presupuesto_per_capita_clp.toLocaleString("es-CL")} CLP`);
-console.log(`6. Concejales Talca: ${talca.concejales.length} concejales con partido y dieta.`);
-console.log(`7. Compras Públicas Talca: ${talca.compras_publicas ? `$${(talca.compras_publicas.monto_total_clp / 1e9).toFixed(2)}B CLP (${talca.compras_publicas.procesos_count} procesos)` : "sin enlace por RUT jurídico oficial"}.`);
+console.log(JSON.stringify({
+  presupuesto_vigente_sinim: talca.presupuesto?.vigente_clp ?? null,
+  masa_salarial_anual_cplt: talca.resumen_personal?.masa_anual_estimada_clp ?? null,
+  funcionarios_cplt: talca.resumen_personal?.total_funcionarios ?? null,
+  top_remuneraciones: talca.top_remuneraciones.length,
+  presupuesto_per_capita: talca.presupuesto_per_capita_clp,
+  concejales_servel: talca.concejales.length,
+  compras_chilecompra: talca.compras_publicas?.monto_total_clp ?? null,
+}, null, 2));

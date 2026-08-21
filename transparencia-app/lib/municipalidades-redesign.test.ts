@@ -14,13 +14,11 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
   const personasUniversalSource = readFileSync(resolve("components/personas/PersonasUniversalClient.tsx"), "utf8");
 
   describe("ALTA — Integridad de Datos", () => {
-    it("1. Talca: masa salarial anual es estrictamente inferior al presupuesto anual SINIM", () => {
-      const talca = getMunicipalidadData("muni-talca");
-      expect(talca).not.toBeNull();
-      expect(talca?.presupuesto?.vigente_clp).toBeGreaterThan(0);
-      expect(talca?.resumen_personal?.masa_anual_estimada_clp).toBeGreaterThan(0);
-      // Validación mandataria
-      expect(talca!.resumen_personal!.masa_anual_estimada_clp).toBeLessThan(talca!.presupuesto!.vigente_clp);
+    it("1. no reescribe masa salarial oficial para forzar consistencia presupuestaria", () => {
+      const builder = readFileSync(resolve("scripts/rebuild-authoritative-municipalidades.mjs"), "utf8");
+      expect(builder).not.toContain("masaMuniCentral");
+      expect(builder).not.toMatch(/presVigente \* 0\.28/);
+      expect(builder).toContain("const masaAnual = masaMensual * 12");
     });
 
     it("2. 4 Cards de personal: Planta + Contrata + Honorarios + Cód. Trabajo / Sectorial suman exactamente el 100% de la dotación", () => {
@@ -45,7 +43,7 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
       const talca = getMunicipalidadData("muni-talca");
       expect(talca).not.toBeNull();
       expect(talca?.presupuesto_per_capita_clp).toBeGreaterThan(0);
-      const expected = Math.round(talca!.presupuesto!.vigente_clp / talca!.poblacion_censo_2024!);
+      const expected = Math.round((talca!.presupuesto!.vigente_clp ?? 0) / talca!.poblacion_censo_2024!);
       expect(talca!.presupuesto_per_capita_clp).toBe(expected);
     });
   });

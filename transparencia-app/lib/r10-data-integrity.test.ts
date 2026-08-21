@@ -79,4 +79,17 @@ describe("R10 — ninguna compra inventada entra a proyecciones", () => {
     expect(sources).not.toContain("1440000000");
     expect(sources).not.toContain("-OC${c + 1}");
   });
+
+  it("representa como null cualquier dimensión municipal sin fuente oficial", () => {
+    const source = readFileSync(resolve("scripts/rebuild-authoritative-municipalidades.mjs"), "utf8");
+    expect(source).toContain("let alcalde = null");
+    expect(source).not.toContain("ALCALDES_CORREGIDOS[muni.id]");
+    expect(source).not.toMatch(/const estimado =/);
+    expect(source).not.toMatch(/poblacion_censo_2024 \* 580000/);
+    expect(source).not.toMatch(/totalFunc \* 1650000/);
+    expect(source).not.toMatch(/poblacion_censo_2024 \* 0\.815/);
+    expect(source).not.toMatch(/Math\.round\(bruto \* 0\.78\)/);
+    expect(source).toContain("redes_sociales: null");
+    expect(source).toContain("padron_electoral_servel: null");
+  });
 });
