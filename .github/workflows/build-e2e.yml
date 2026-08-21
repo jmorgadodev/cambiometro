@@ -7,6 +7,11 @@ on:
       - '**/*.md'
       - 'docs/**'
       - 'auditoria_integridad_datos/**'
+  pull_request:
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+      - 'auditoria_integridad_datos/**'
   workflow_dispatch:
 
 concurrency:
