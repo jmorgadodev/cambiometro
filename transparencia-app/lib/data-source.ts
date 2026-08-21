@@ -96,7 +96,8 @@ const SOURCE_LABELS: Record<string, { label: string; url: string }> = {
 const normCache = new Map<string, string>();
 
 /** Normaliza acentos y espacios para comparar nombres de fuentes heterogéneas. */
-export function normalizeSearchText(value: string): string {
+export function normalizeSearchText(value: unknown): string {
+  if (typeof value !== "string") return "";
   const hit = normCache.get(value);
   if (hit !== undefined) return hit;
   const result = value
@@ -165,7 +166,7 @@ export function getSnapshotSummary(): SnapshotSummary {
 function recordContainsPolitico(record: EtlRecord, normalizedName: string): boolean {
   if (record.nombre && nameSequenceMatches(normalizedName, record.nombre)) return true;
   return [record.sujetos_activos, record.asistentes]
-    .filter((field): field is string => Boolean(field))
+    .filter((field): field is string => typeof field === "string" && field.length > 0)
     .some((field) => normalizeSearchText(field).includes(normalizedName));
 }
 
