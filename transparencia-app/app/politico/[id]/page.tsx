@@ -442,8 +442,15 @@ export default async function PoliticoPage({ params }: Props) {
                 mesesDisponibles={mesesDisponiblesPersonal}
                 ultimoPeriodo={ultimoPeriodoPersonal}
                 diputadoPersonal={apoyoDiputado?.diputado ?? null}
-                senadorPersonal={apoyoSenador ? { registros: apoyoSenador.registros, ultimo_mes: apoyoSenador.ultimo_mes } : null}
-                fuenteUrl={pol.cargo === "Diputado" ? `https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=${diputadoIdParaPolitico(pol) ?? ""}` : "https://www.senado.cl/transparencia"}
+                senadorPersonal={apoyoSenador ? {
+                  registros: apoyoSenador.registros,
+                  ultimo_mes: apoyoSenador.ultimo_mes,
+                  asignacion: apoyoSenador.asignacion,
+                  evaluaciones: apoyoSenador.evaluaciones,
+                } : null}
+                fuenteUrl={pol.cargo === "Diputado"
+                  ? `https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=${diputadoIdParaPolitico(pol) ?? ""}`
+                  : apoyoSenador?.asignacion?.source_url ?? "https://www.senado.cl/transparencia/personal-de-apoyo-senadores"}
               />
             </div>
           </div>

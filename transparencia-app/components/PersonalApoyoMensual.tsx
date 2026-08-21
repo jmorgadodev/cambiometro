@@ -2,6 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { formatCLP } from "@/lib/format";
+import type { AsignacionSenado } from "@/lib/personal-apoyo";
+import type { SenateSupportEvaluation } from "@/scripts/etl/senado-assignment.mjs";
 
 export interface FilaPersonalDiputado {
   tipo: string;
@@ -33,6 +35,8 @@ export interface PersonalApoyoProps {
   senadorPersonal?: {
     registros: FilaPersonalSenador[];
     ultimo_mes: string;
+    asignacion: AsignacionSenado | null;
+    evaluaciones: Record<string, SenateSupportEvaluation>;
   } | null;
   fuenteUrl?: string;
 }
@@ -134,6 +138,7 @@ export default function PersonalApoyoMensual({
 
   const mesActivoEtiqueta =
     mesesDisponibles.find((m) => m.periodo === periodoSeleccionado)?.etiqueta ?? periodoSeleccionado;
+  const evaluacionActiva = senadorPersonal?.evaluaciones[periodoSeleccionado];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
@@ -219,6 +224,35 @@ export default function PersonalApoyoMensual({
           </div>
         </div>
       </div>
+
+      {esSenador && senadorPersonal?.asignacion && (
+        <div
+          role={evaluacionActiva && evaluacionActiva.status !== "OK" ? "alert" : undefined}
+          style={{
+            padding: "0.9rem",
+            borderRadius: 8,
+            border: `1px solid ${evaluacionActiva && evaluacionActiva.status !== "OK" ? "var(--bad)" : "var(--border)"}`,
+            background: "var(--surface)",
+          }}
+        >
+          <strong style={{ fontSize: "0.82rem", color: evaluacionActiva && evaluacionActiva.status !== "OK" ? "var(--bad)" : "var(--text-1)" }}>
+            {evaluacionActiva && evaluacionActiva.status !== "OK"
+              ? `Hallazgo de integridad ${evaluacionActiva.status}`
+              : "Asignación mensual conciliada"}
+          </strong>
+          <p style={{ margin: "0.35rem 0 0", fontSize: "0.76rem", color: "var(--text-2)" }}>
+            Base mensual oficial: {formatCLP(senadorPersonal.asignacion.base_mensual_clp)}.
+            {evaluacionActiva
+              ? ` Total publicado: ${formatCLP(evaluacionActiva.total_clp)}; traspaso individual acreditado: ${formatCLP(evaluacionActiva.verified_transfer_clp)}; diferencia sin respaldo: ${formatCLP(evaluacionActiva.unexplained_clp)}.`
+              : " No hay una evaluación comparable para este período."}
+          </p>
+          {evaluacionActiva && evaluacionActiva.status !== "OK" && (
+            <p style={{ margin: "0.35rem 0 0", fontSize: "0.72rem", color: "var(--text-2)" }}>
+              La regla general de traspaso no acredita este caso individual; la diferencia se muestra como hallazgo y no como dato conciliado.
+            </p>
+          )}
+        </div>
+      )}
 
       {/* (d) Listado Nominal del Mes o Estado Sin Contrataciones */}
       {personasContratadas > 0 ? (

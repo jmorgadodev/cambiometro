@@ -1,6 +1,11 @@
 import fs from "fs";
 import path from "path";
 import type { CanonicalEntity, EvidenceRecord } from "@/lib/data-contracts";
+import {
+  evaluateSenateSupport,
+  type SenateSupportEvaluation,
+  type VerifiedSenateTransfer,
+} from "@/scripts/etl/senado-assignment.mjs";
 
 export interface FilaPersonalApoyo {
   tipo: string;
@@ -45,8 +50,26 @@ export interface PersonalApoyoDataset {
   generado_en: string;
   fuentes: Record<string, { url: string; nota: string }>;
   meses_senado_disponibles: string[];
+  asignacion_senado_2026?: AsignacionSenado;
   diputados: Record<string, DiputadoPersonalApoyo>;
   senadores: Record<string, RegistroSenadorPersonalApoyo[]>;
+}
+
+export interface TransferenciaSenadoAcreditada extends VerifiedSenateTransfer {
+  senador: string;
+}
+
+export interface AsignacionSenado {
+  year: number;
+  base_mensual_clp: number;
+  acumulable: boolean;
+  max_transfer_gastos_operacionales_pct: number;
+  max_transfer_asesoria_externa_clp: number;
+  transfer_asesoria_desde: string;
+  source_url: string;
+  retrieved_at: string;
+  checksum_sha256: string;
+  transferencias_acreditadas: TransferenciaSenadoAcreditada[];
 }
 
 const MONTHS: Record<string, string> = {
@@ -218,6 +241,8 @@ export interface PersonalApoyoSenador {
   registros: RegistroSenadorPersonalApoyo[];
   total_2026: number;
   ultimo_mes: string;
+  asignacion: AsignacionSenado | null;
+  evaluaciones: Record<string, SenateSupportEvaluation>;
 }
 
 /** Registros de personal de apoyo de un senador (match por nombre de oficina oficial). */
@@ -247,13 +272,30 @@ export async function personalApoyoParaSenador(nombreCompleto: string): Promise<
   }
 
   if (!matched) {
-    return { registros: [], total_2026: 0, ultimo_mes: "" };
+    return { registros: [], total_2026: 0, ultimo_mes: "", asignacion: null, evaluaciones: {} };
   }
 
-  const filas = matched[1];
-  const registros = filas.sort((a, b) => (b.periodo ?? "").localeCompare(a.periodo ?? ""));
+  const registros = [...matched[1]].sort((a, b) => (b.periodo ?? "").localeCompare(a.periodo ?? ""));
   const total_2026 = registros.reduce((total, r) => total + (r.monto ?? 0), 0);
   const ultimo_mes = registros[0]?.periodo ?? "";
-  return { registros, total_2026, ultimo_mes };
+  const asignacion = dataset?.asignacion_senado_2026 ?? null;
+  const transferencias = (asignacion?.transferencias_acreditadas ?? [])
+    .filter((transferencia) => sameNameTokens(transferencia.senador, matched[0]));
+  const totalesPorPeriodo = registros.reduce<Record<string, number>>((totales, registro) => {
+    totales[registro.periodo] = (totales[registro.periodo] ?? 0) + (registro.monto ?? 0);
+    return totales;
+  }, {});
+  const evaluaciones = asignacion
+    ? Object.fromEntries(Object.entries(totalesPorPeriodo).map(([periodo, total]) => [
+        periodo,
+        evaluateSenateSupport({
+          total_clp: total,
+          period: periodo,
+          base_mensual_clp: asignacion.base_mensual_clp,
+          verified_transfers: transferencias,
+        }),
+      ]))
+    : {};
+  return { registros, total_2026, ultimo_mes, asignacion, evaluaciones };
 }
 
