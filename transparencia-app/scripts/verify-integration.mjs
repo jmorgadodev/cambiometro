@@ -170,6 +170,7 @@ try {
   assert.equal(await page.getByRole("button", { name: /Nómina & Remuneraciones/ }).count(), 1, "Debe tener tab Nómina");
 
   await gotoWithNetworkRetry(`${baseUrl}/entidades/person-camara-1009`);
+  await page.waitForURL("**/politico/**", { timeout: 5000 }).catch(() => {});
   assert(page.url().includes("/politico/"), "la entidad parlamentaria debe redirigir a /politico");
 
   await gotoWithNetworkRetry(`${baseUrl}/entidades/person-infoprobidad-9204ac804e1f43cc8c3e62f712a15764`);
