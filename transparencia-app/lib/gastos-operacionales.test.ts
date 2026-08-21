@@ -100,6 +100,21 @@ describe("M7 - Gastos Operacionales: prevención de doble conteo y consistencia 
     });
   });
 
+  it("R10 no convierte montos o conceptos ausentes en ceros ni categorías inventadas", () => {
+    const records = [
+      { id: "sin-monto", periodo: "2026-05", item: "TRASLACIÓN", monto_clp: null },
+      { id: "sin-item", periodo: "2026-05", monto_clp: 500_000 },
+      { id: "completo", periodo: "2026-05", item: "TELEFONÍA", monto_clp: 120_000 },
+      { id: "mes-sin-evidencia", periodo: "2026-06", item: "TRASLACIÓN", monto_clp: null },
+    ] as unknown as EtlRecord[];
+
+    expect(resumirGastosAgregables(records)).toEqual({
+      total: 120_000,
+      porMes: [{ periodo: "2026-05", total: 120_000 }],
+      porItem: [{ item: "TELEFONÍA", total: 120_000 }],
+    });
+  });
+
   it("calcula variación % vs mes anterior sobre totales corregidos", () => {
     const rawRecords = [
       {

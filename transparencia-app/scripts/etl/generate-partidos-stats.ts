@@ -272,7 +272,8 @@ for (const partido of PARTIDOS_SEED) {
         const records = (s.records || []).map((record, index) => ({
           ...record,
           id: `${pol.id}-${s.source?.key}-${index}`,
-          monto_clp: Number(record.monto_clp ?? record.monto_total ?? record.monto ?? 0),
+          monto_clp: [record.monto_clp, record.monto_total, record.monto]
+            .find((value): value is number => typeof value === "number" && Number.isFinite(value)) ?? null,
         })) as EtlRecord[];
         const resumen = resumirGastosAgregables(records);
         for (const mes of resumen.porMes) {
