@@ -46,3 +46,13 @@ Este documento consolida las fuentes oficiales, criterios metodológicos, reglas
   1. **Preservación:** El registro original se mantiene intacto en el data lake como evidencia histórica inalterada.
   2. **Rotulación:** La ficha correspondiente exhibe un aviso de **"Hallazgo de Integridad ALTA (V7)"** documentando la orden o registro observado y enlazando a la fuente pública.
   3. **Exclusión de Agregados:** Dichos montos quedan excluidos del cálculo de totales transados, promedios y rankings comunales o institucionales para evitar distorsiones estadísticas.
+
+---
+
+## 6. Coaliciones de Gobierno y Oposición (desde 11-03-2026)
+
+- **Criterio:** Clasificación editorial de oficialismo/oposición según gobierno en ejercicio desde el 11-03-2026; revisada manualmente el 22-08-2026 tras feedback externo.
+- **Oficialismo (gobierno Kast):** UDI, RN, Evópoli, DEM, AMA, REP, PNL, PSC, PDG — *DEM/AMA/Evópoli confirmados en gabinete 02-02-2026 (Emol: Ximena Rincón ministra Energía por Demócratas, Francisco Undurraga ministro Cultura por Evópoli, Andrés Jouannet subsecretario Seguridad por Amarillos).*
+- **Oposición:** FA, PS, PC, PPD, PDC, PL, PR, FRVS — *PDC confirmada como oposición: ADN Radio 10-07-2026, Álvaro Ortiz “Somos oposición, pero no de trinchera”.*
+- **Independientes:** IND inalterado.
+- **Dudosos sin fuente dura:** PDG clasificado como oficialismo por inversión editorial; fuentes reales lo describen como bisagra no oficialista (“no somos oficialismo” Infobae 20-07-2026; BioBio 18-02-2026 “será oposición si Kast impulsa agenda valórica”). Se aplica swap igual y se declara clasificación editorial sin fuente dura.
