@@ -55,6 +55,10 @@ jobs:
         run: node scripts/check-no-private-assets.mjs
         working-directory: transparencia-app
 
+      - name: Check staging D1 isolated (C1)
+        run: node scripts/check-staging-isolated.mjs
+        working-directory: transparencia-app
+
       - name: Check safe links and no HTML injection
         run: node scripts/check-safe-links.mjs && node scripts/check-no-innerhtml.mjs
         working-directory: transparencia-app

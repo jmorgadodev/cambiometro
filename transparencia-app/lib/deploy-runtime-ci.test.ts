@@ -22,7 +22,10 @@ describe("validación runtime de despliegue", () => {
     expect(staging.name).toBe("cambiometro-staging");
     expect(staging.workers_dev).toBe(true);
     expect(staging.routes).toEqual([]);
-    expect(staging.d1_databases).toEqual(config.d1_databases);
+    // C1: staging aislado local-only con ID cero, no debe igualar prod
+    expect(staging.d1_databases[0].database_id).toBe("00000000-0000-0000-0000-000000000000");
+    expect(staging.d1_databases[0].database_name).toBe("transparencia-db-staging-LOCAL");
+    expect(staging.d1_databases[0].database_id).not.toBe(config.d1_databases[0].database_id);
     expect(staging.r2_buckets).toEqual(config.r2_buckets);
   });
 

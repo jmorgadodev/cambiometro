@@ -61,9 +61,10 @@
       ],
       "d1_databases": [
         {
+          "_comment": "staging solo-local; remoto bloqueado con ID cero (C1). No crear DB remota sin decisión expresa.",
           "binding": "DB",
-          "database_name": "transparencia-db",
-          "database_id": "3731487c-ed6b-401e-a33d-7ecf15bfd229"
+          "database_name": "transparencia-db-staging-LOCAL",
+          "database_id": "00000000-0000-0000-0000-000000000000"
         }
       ]
     }
