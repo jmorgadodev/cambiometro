@@ -402,17 +402,33 @@ export async function listSourceManifests(): Promise<SourceManifest[]> {
   });
 }
 
+type DataPlatformSummary = { totalRecords: number; updatedAt: string | null };
+
+/** @internal Mantiene operativa la lectura local cuando Wrangler expone un D1 sin materializar. */
+export async function resolveDataPlatformSummary(
+  db: Pick<D1Database, "prepare"> | null,
+  fallback: () => Promise<DataPlatformSummary>,
+): Promise<DataPlatformSummary> {
+  if (!db) return fallback();
+  try {
+    const [records, state] = await Promise.all([
+      db.prepare("SELECT count(*) AS total FROM records").first<{ total: number }>(),
+      db.prepare("SELECT max(coalesce(last_success_at, generated_at)) AS updated_at FROM source_state").first<{ updated_at: string | null }>(),
+    ]);
+    return { totalRecords: Number(records?.total ?? 0), updatedAt: state?.updated_at ?? null };
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (/no such table:\s*(records|source_state)\b/i.test(message)) return fallback();
+    throw error;
+  }
+}
+
 export async function getDataPlatformSummary() {
   const db = await getD1Database();
-  if (!db) {
+  return resolveDataPlatformSummary(db, async () => {
     const bundled = await bundledPlatform();
-    return { totalRecords: bundled.listRecords({ limit: 1 }).total, updatedAt: null as string | null };
-  }
-  const [records, state] = await Promise.all([
-    db.prepare("SELECT count(*) AS total FROM records").first<{ total: number }>(),
-    db.prepare("SELECT max(coalesce(last_success_at, generated_at)) AS updated_at FROM source_state").first<{ updated_at: string | null }>(),
-  ]);
-  return { totalRecords: Number(records?.total ?? 0), updatedAt: state?.updated_at ?? null };
+    return { totalRecords: bundled.listRecords({ limit: 1 }).total, updatedAt: null };
+  });
 }
 
 export async function listCrosses(params: {

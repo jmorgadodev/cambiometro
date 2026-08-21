@@ -2,7 +2,7 @@ import type { D1Database } from "@cloudflare/workers-types";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { resolveEntityScope, selectRowsByIds } from "./data-platform-d1";
+import { resolveDataPlatformSummary, resolveEntityScope, selectRowsByIds } from "./data-platform-d1";
 
 describe("consultas D1 de cruces", () => {
   it("agrupa IDs y usa un solo batch en vez de una consulta por relación", async () => {
@@ -35,6 +35,42 @@ describe("consultas D1 de cruces", () => {
     expect(prepared).toHaveLength(2);
     expect(rows).toHaveLength(81);
     expect(prepared.every((statement) => statement.sql.startsWith("SELECT * FROM entities WHERE id IN"))).toBe(true);
+  });
+});
+
+describe("resumen de plataforma con D1 local incompleto", () => {
+  it("usa la proyeccion trackeada si el binding existe pero carece de esquema", async () => {
+    const db = {
+      prepare() {
+        return {
+          async first() {
+            throw new Error("D1_ERROR: no such table: records");
+          },
+        };
+      },
+    } as unknown as Pick<D1Database, "prepare">;
+
+    await expect(resolveDataPlatformSummary(db, async () => ({
+      totalRecords: 97_815,
+      updatedAt: null,
+    }))).resolves.toEqual({ totalRecords: 97_815, updatedAt: null });
+  });
+
+  it("no oculta errores operacionales de un D1 materializado", async () => {
+    const db = {
+      prepare() {
+        return {
+          async first() {
+            throw new Error("D1_ERROR: request timed out");
+          },
+        };
+      },
+    } as unknown as Pick<D1Database, "prepare">;
+
+    await expect(resolveDataPlatformSummary(db, async () => ({
+      totalRecords: 97_815,
+      updatedAt: null,
+    }))).rejects.toThrow("request timed out");
   });
 });
 
