@@ -16,7 +16,7 @@ test("Fase A conserva 70/70 campos y referencias exactas de FIX-1 a FIX-5", asyn
     ["transparencia-app/scripts/etl/senado-assignment.mjs", 16, "parseSenadoAssignmentPolicy"],
     ["transparencia-app/scripts/etl/r10-chilecompra.mjs", 17, "findBuyerByVerifiedRut"],
     ["transparencia-app/scripts/build-presupuesto-v1.mjs", 101, "latestBudgetSnapshot"],
-    ["transparencia-app/scripts/rebuild-authoritative-municipalidades.mjs", 505, "partitionV7Records"],
+    ["transparencia-app/scripts/rebuild-authoritative-municipalidades.mjs", 190, "partitionV7Records"],
   ];
   for (const [relative, lineNumber, needle] of references) {
     const lines = (await readFile(resolve(AUDIT_ROOT, relative), "utf8")).split(/\r?\n/);

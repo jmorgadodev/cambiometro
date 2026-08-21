@@ -41,8 +41,8 @@ una divergencia o un dato sintético vuelva a entrar al flujo:
   `lib/budget-integrity.ts:5` y se rotulan en
   `ServicioPublicoDashboardClient.tsx:344-356` y
   `app/entidades/[id]/page.tsx:308-314`.
-- FIX-5/V7: `scripts/rebuild-authoritative-municipalidades.mjs:505-507`
-  separa la cuarentena y la publica en `anomalias_integridad` en la línea 662;
+- FIX-5/V7: `scripts/rebuild-authoritative-municipalidades.mjs:190-192`
+  separa la cuarentena y la publica en `anomalias_integridad` en la línea 347;
   las filas aisladas no alimentan totales ni rankings regulares.
 
 El guard de CI consume los resultados A–E y exige presencia de V1–V7; R10 se

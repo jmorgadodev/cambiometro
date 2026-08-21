@@ -132,7 +132,7 @@ describe("R10 — ninguna compra inventada entra a proyecciones", () => {
   it("representa como null cualquier dimensión municipal sin fuente oficial", () => {
     const source = readFileSync(resolve("scripts/rebuild-authoritative-municipalidades.mjs"), "utf8");
     expect(source).toContain("let alcalde = null");
-    expect(source).not.toContain("ALCALDES_CORREGIDOS[muni.id]");
+    expect(source).not.toContain("ALCALDES_CORREGIDOS");
     expect(source).not.toMatch(/const estimado =/);
     expect(source).not.toMatch(/poblacion_censo_2024 \* 580000/);
     expect(source).not.toMatch(/totalFunc \* 1650000/);
