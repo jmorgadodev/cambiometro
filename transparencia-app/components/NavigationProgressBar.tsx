@@ -45,7 +45,7 @@ export default function NavigationProgressBar() {
         left: 0,
         height: "2.5px",
         width: `${progress}%`,
-        background: "var(--accent, #0ea5e9)",
+        background: "var(--accent)",
         zIndex: 9999,
         transition: progress === 100 ? "width 180ms ease-out, opacity 180ms ease" : "width 320ms ease-out",
         opacity: active || progress < 100 ? 1 : 0,
