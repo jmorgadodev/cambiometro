@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { getLey19862Summary } from "./transferencias-data";
 import { infoprobidadParaPolitico } from "./infoprobidad";
-import { chilecompraParaMunicipalidad } from "./chilecompra";
+import { chilecompraParaCompradorPorRut } from "./chilecompra";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 
@@ -21,8 +21,8 @@ describe("Auditoría e Integración Global de Datos Conectados", () => {
     expect(typeof probidad.tiene_declaracion).toBe("boolean");
   });
 
-  it("verifica que chilecompraParaMunicipalidad asocie compras públicas a comunas", () => {
-    const santiago = chilecompraParaMunicipalidad("Santiago", "muni-santiago");
+  it("verifica que ChileCompra asocie compradores sólo por RUT jurídico exacto", () => {
+    const santiago = chilecompraParaCompradorPorRut("69.070.100-6");
     expect(santiago).not.toBeNull();
     if (santiago) {
       expect(santiago.monto_total_clp).toBeGreaterThan(0);
@@ -30,8 +30,8 @@ describe("Auditoría e Integración Global de Datos Conectados", () => {
       expect(santiago.name.toLowerCase()).toContain("santiago");
     }
 
-    const maipu = chilecompraParaMunicipalidad("Maipú");
-    expect(maipu).not.toBeNull();
+    expect(chilecompraParaCompradorPorRut("69.070.100-5")).toBeNull();
+    expect(chilecompraParaCompradorPorRut("Municipalidad de Santiago")).toBeNull();
   });
 
   it("verifica que las fichas parlamentarias incluyan InfoProbidad y no tengan bloques vacíos", () => {

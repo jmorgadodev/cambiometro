@@ -10,6 +10,7 @@ export interface Municipalidad {
   nombre_comuna: string;
   region: string;
   administracion_municipal_id: string;
+  rut_juridico?: string | null;
   tiene_municipalidad_propia: boolean;
   fuente_catalogo: string;
   alcalde_actual: string | null;

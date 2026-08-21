@@ -9,6 +9,7 @@ import fs from 'fs';
 import path from 'path';
 import { MUNICIPALIDADES_SEED } from '../lib/municipalidades.ts';
 import { CENSO_2024_OFICIAL } from './census-data.mjs';
+import { findBuyerByVerifiedRut, projectOfficialBuyer } from './etl/r10-chilecompra.mjs';
 
 const root = process.cwd();
 
@@ -89,90 +90,17 @@ const ccPath = path.join(root, "data", "lake", "projections", "v1", "chilecompra
 const ccRaw = fs.existsSync(ccPath) ? JSON.parse(fs.readFileSync(ccPath, "utf8")) : { buyers: [] };
 const ccBuyers = ccRaw.buyers || [];
 
-function findChileCompraForMuni(muniName, cut, muniId) {
-  const normMuni = muniName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-  const match = ccBuyers.find(b => {
-    const normB = b.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    return normB.includes(normMuni) && (normB.includes("muni") || normB.includes("ilustre"));
-  });
-
-  if (match) {
-    const rawTop = (match.top || []).slice(0, 8);
-    const totalOrdenes = Math.min(26, Math.max(match.procesos || 0, rawTop.length, 1));
-    const procesosList = [];
-
-    let remainingOrders = totalOrdenes;
-    for (let i = 0; i < rawTop.length; i++) {
-      const t = rawTop[i];
-      const cleanTitle = (t.title || t.titulo || "").trim();
-      const ocidPadre = t.ocid || `ocds-70d2nz-${cut}-proc-${i + 1}`;
-      const modality = cleanTitle.toLowerCase().includes("trato directo") || ocidPadre.includes("TD")
-        ? "Trato Directo"
-        : cleanTitle.toLowerCase().includes("convenio marco") || ocidPadre.includes("CM")
-        ? "Convenio Marco"
-        : "Licitación Pública";
-
-      const isLast = i === rawTop.length - 1;
-      const childCount = isLast
-        ? Math.max(1, remainingOrders)
-        : Math.max(1, Math.min(3, Math.round(remainingOrders / (rawTop.length - i))));
-      remainingOrders -= childCount;
-
-      const rawProv = (t.proveedor || "").split("|")[0].trim();
-      const cleanProv = rawProv && !rawProv.toLowerCase().includes("mercadop") && !rawProv.toLowerCase().includes("adjudicado")
-        ? rawProv
-        : "Proveedor no informado en OCDS";
-
-      const baseMonto = t.monto_clp || 0;
-      const childOrders = [];
-      for (let c = 0; c < childCount; c++) {
-        const orderMonto = childCount === 1 ? baseMonto : Math.round(baseMonto / childCount * (c === 0 ? 1.2 : 0.8 / (childCount - 1 || 1)));
-        childOrders.push({
-          ocid: `${ocidPadre}-OC${c + 1}`,
-          titulo: `Orden #${c + 1}: ${cleanTitle}`,
-          proveedor: cleanProv,
-          monto_clp: orderMonto,
-          fecha: t.fecha || "2026-07-01T00:00:00Z",
-        });
-      }
-
-      procesosList.push({
-        id: `proc-${muniId}-${i + 1}`,
-        ocid_padre: ocidPadre,
-        titulo_proceso: cleanTitle || "Proceso de Adquisición OCDS",
-        modalidad: modality,
-        monto_adjudicado_clp: baseMonto,
-        proveedor_adjudicado: cleanProv,
-        fecha_proceso: t.fecha || "2026-07-01T00:00:00Z",
-        ordenes_count: childOrders.length,
-        ordenes_compra: childOrders,
-      });
-    }
-
-    const allChildOrders = procesosList.flatMap(p => p.ordenes_compra);
-
-    return {
-      rut_comprador: match.rut_juridico,
-      nombre_comprador: match.name,
-      monto_total_clp: match.monto_total_clp,
-      procesos_count: procesosList.length,
-      ordenes_count: allChildOrders.length,
-      top_compras: allChildOrders.slice(0, 3),
-      procesos: procesosList,
-      distribucion_modalidades: {
-        licitacion_publica_pct: 68.5,
-        trato_directo_pct: 17.5,
-        convenio_marco_pct: 14.0,
-      },
-    };
-  }
-
-  return null;
+function findChileCompraForMuni(rutJuridico) {
+  return projectOfficialBuyer(findBuyerByVerifiedRut(ccBuyers, rutJuridico));
 }
 
 
 // 4. Cargar CPLT Staff Files
-const cpltDir = path.join(root, "data", "lake-cplt", "projections", "funcionarios-v1", "versions", "2026-08-13T23-55-44-412Z");
+const cpltDirCandidates = [
+  path.join(root, "data", "lake", "projections", "funcionarios-v1"),
+  path.join(root, "data", "lake-cplt", "projections", "funcionarios-v1", "current"),
+];
+const cpltDir = cpltDirCandidates.find((candidate) => fs.existsSync(candidate)) ?? cpltDirCandidates[0];
 const cpltFiles = fs.existsSync(cpltDir) ? fs.readdirSync(cpltDir).filter(f => f.startsWith("muni-") && f.endsWith(".json")) : [];
 
 const cpltStaffMap = new Map();
@@ -772,63 +700,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
   }
 
   // --- D. CHILECOMPRA OCDS (M2) ---
-  const fallbackProcesosCount = Math.max(8, Math.round(poblacion_censo_2024 / 1800));
-  const fallbackOrdenesCount = Math.max(16, fallbackProcesosCount * 2);
-  const fallbackProcesosList = [
-    {
-      id: `proc-${muni.id}-1`,
-      ocid_padre: `ocds-70d2nz-${cut}-01`,
-      titulo_proceso: `Suministro de combustible y mantención flota comunal de ${muni.nombre_comuna}`,
-      modalidad: "Licitación Pública",
-      monto_adjudicado_clp: Math.round(presVigente * 0.042),
-      proveedor_adjudicado: "Copec S.A.",
-      fecha_proceso: "2026-07-15T14:30:00Z",
-      ordenes_count: 1,
-      ordenes_compra: [
-        {
-          ocid: `ocds-70d2nz-${cut}-01-OC1`,
-          titulo: `Orden #1: Combustible Diésel Flota`,
-          proveedor: "Copec S.A.",
-          monto_clp: Math.round(presVigente * 0.042),
-          fecha: "2026-07-15T14:30:00Z",
-        },
-      ],
-    },
-    {
-      id: `proc-${muni.id}-2`,
-      ocid_padre: `ocds-70d2nz-${cut}-02`,
-      titulo_proceso: `Servicio de recolección de residuos domiciliarios y aseo urbano`,
-      modalidad: "Licitación Pública",
-      monto_adjudicado_clp: Math.round(presVigente * 0.085),
-      proveedor_adjudicado: "Consorcio Ambiental de Chile SpA",
-      fecha_proceso: "2026-06-20T10:15:00Z",
-      ordenes_count: 1,
-      ordenes_compra: [
-        {
-          ocid: `ocds-70d2nz-${cut}-02-OC1`,
-          titulo: `Orden #1: Operación Mensual Aseo`,
-          proveedor: "Consorcio Ambiental de Chile SpA",
-          monto_clp: Math.round(presVigente * 0.085),
-          fecha: "2026-06-20T10:15:00Z",
-        },
-      ],
-    },
-  ];
-
-  const compras_publicas = findChileCompraForMuni(muni.nombre_comuna, cut, muni.id) || {
-    rut_comprador: `69.${cut.slice(0, 3)}.${cut.slice(3)}-k`,
-    nombre_comprador: `Municipalidad de ${muni.nombre_comuna}`,
-    monto_total_clp: Math.round(presVigente * 0.34),
-    procesos_count: fallbackProcesosCount,
-    ordenes_count: fallbackOrdenesCount,
-    top_compras: fallbackProcesosList.flatMap(p => p.ordenes_compra).slice(0, 5),
-    procesos: fallbackProcesosList,
-    distribucion_modalidades: {
-      licitacion_publica_pct: 71.0,
-      trato_directo_pct: 16.5,
-      convenio_marco_pct: 12.5,
-    },
-  };
+  const compras_publicas = findChileCompraForMuni(muni.rut_juridico ?? null);
 
 
   // --- E. RADIOGRAFÍA COMUNAL (SERVEL + CENSO 2024) ---
@@ -935,4 +807,4 @@ console.log(`3. Suma de Cards Personal Talca: ${talca.resumen_personal.planta} (
 console.log(`4. Top Remuneraciones Talca (Deduplicadas):`, talca.top_remuneraciones.map(r => `${r.nombre}: $${r.remuneracion_bruta.toLocaleString("es-CL")}`));
 console.log(`5. Presupuesto Per Cápita Talca: $${talca.presupuesto_per_capita_clp.toLocaleString("es-CL")} CLP`);
 console.log(`6. Concejales Talca: ${talca.concejales.length} concejales con partido y dieta.`);
-console.log(`7. Compras Públicas Talca: $${(talca.compras_publicas.monto_total_clp / 1e9).toFixed(2)}B CLP (${talca.compras_publicas.procesos_count} procesos).`);
+console.log(`7. Compras Públicas Talca: ${talca.compras_publicas ? `$${(talca.compras_publicas.monto_total_clp / 1e9).toFixed(2)}B CLP (${talca.compras_publicas.procesos_count} procesos)` : "sin enlace por RUT jurídico oficial"}.`);

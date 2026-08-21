@@ -156,20 +156,11 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
       expect(detailPageSource).toContain("Total");
     });
 
-    it("M2. OCDS: Reconciliar 8 procesos vs 26 órdenes de compra para Santiago", () => {
+    it("M2. R10: Santiago no publica compras sin RUT jurídico oficial en el catálogo", () => {
       const santiago = getMunicipalidadData("muni-santiago");
-      expect(santiago?.compras_publicas).toBeDefined();
-      const cp = santiago!.compras_publicas!;
-      expect(cp.procesos_count).toBe(8);
-      expect(cp.ordenes_count).toBe(26);
-      expect(cp.procesos).toBeDefined();
-      expect(cp.procesos!.length).toBe(8);
-      const sumOrders = cp.procesos!.reduce((acc, p) => acc + p.ordenes_count, 0);
-      expect(sumOrders).toBe(26);
-      // Jerarquía y tooltip visible
-      expect(detailPageSource).toContain("Jerarquía de Contrataciones");
-      expect(detailPageSource).toContain("órdenes de compra agrupadas en");
-      expect(detailPageSource).toContain("procesos OCDS");
+      expect(santiago?.compras_publicas).toBeNull();
+      expect(detailPageSource).toContain("no publica un conteo verificable de órdenes");
+      expect(detailPageSource).toContain("No se registran contrataciones públicas para esta municipalidad");
     });
 
     it("M3. CGR: ≥ 1 comuna con informes CGR renderizados y estado vacío enriquecido", () => {

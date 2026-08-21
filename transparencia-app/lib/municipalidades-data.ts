@@ -86,12 +86,12 @@ export interface ConcejalData {
 }
 
 export interface CompraItemChileCompra {
-  titulo: string;
-  proveedor: string;
-  monto_clp: number;
-  fecha: string;
-  url: string;
-  ocid: string;
+  titulo: string | null;
+  proveedor: string | null;
+  monto_clp: number | null;
+  fecha: string | null;
+  url: string | null;
+  ocid: string | null;
 }
 
 export interface ProcesoCompraChileCompra {
@@ -109,17 +109,19 @@ export interface ProcesoCompraChileCompra {
 
 export interface ComprasPublicasMuni {
   rut_comprador: string;
-  nombre_comprador: string;
-  monto_total_clp: number;
-  procesos_count: number;
-  ordenes_count?: number;
+  nombre_comprador: string | null;
+  monto_total_clp: number | null;
+  procesos_count: number | null;
+  ordenes_count?: number | null;
   top_compras: CompraItemChileCompra[];
   procesos?: ProcesoCompraChileCompra[];
   distribucion_modalidades?: {
     licitacion_publica_pct: number;
     trato_directo_pct: number;
     convenio_marco_pct: number;
-  };
+  } | null;
+  metodo_enlace: "RUT_EXACTO";
+  fuente: "ChileCompra · Estándar OCDS";
 }
 
 export interface RadiografiaComunal {
@@ -172,7 +174,14 @@ export interface MunicipalidadEnriquecida {
 
 export * from "./municipalidades-list";
 
-const MUNICIPALIDADES_DICT = municipalidadesJson as unknown as Record<string, MunicipalidadEnriquecida>;
+const MUNICIPALIDADES_DICT = Object.fromEntries(
+  Object.entries(municipalidadesJson as unknown as Record<string, MunicipalidadEnriquecida>).map(([id, municipalidad]) => [
+    id,
+    municipalidad.compras_publicas?.metodo_enlace === "RUT_EXACTO"
+      ? municipalidad
+      : { ...municipalidad, compras_publicas: null },
+  ]),
+) as Record<string, MunicipalidadEnriquecida>;
 
 export function getMunicipalidadData(id: string): MunicipalidadEnriquecida | null {
   return MUNICIPALIDADES_DICT[id] ?? null;

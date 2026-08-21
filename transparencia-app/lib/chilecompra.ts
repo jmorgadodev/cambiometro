@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import { legalEntityIdFromRut } from "./legal-rut";
 
 export interface ChileCompraAdjudicacion {
   title: string;
@@ -77,35 +78,13 @@ export function chilecompraParaComprador(compradorId: string): ChileCompraCompra
   return leerChileCompraV1()?.buyers.find((buyer) => buyer.id === compradorId) ?? null;
 }
 
-export function chilecompraParaMunicipalidad(nombreComuna: string, muniId?: string): ChileCompraComprador | null {
+export function chilecompraParaCompradorPorRut(rutJuridico: string): ChileCompraComprador | null {
   const buyers = leerChileCompraV1()?.buyers;
   if (!buyers || buyers.length === 0) return null;
-
-  if (muniId) {
-    const direct = buyers.find((b) => b.id === muniId || b.rut_juridico?.includes(muniId));
-    if (direct) return direct;
-  }
-
-  const norm = nombreComuna
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-
-  return (
-    buyers.find((b) => {
-      const normB = b.name
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase();
-      return (
-        normB.includes(`municipalidad de ${norm}`) ||
-        normB.includes(`municipalidad ${norm}`) ||
-        normB.includes(`i. municipalidad de ${norm}`) ||
-        normB.includes(`ilustre municipalidad de ${norm}`)
-      );
-    }) ?? null
-  );
+  const entityId = legalEntityIdFromRut(rutJuridico);
+  if (!entityId) return null;
+  const compact = entityId.replace("legal-cl-", "").toUpperCase();
+  return buyers.find((buyer) => String(buyer.rut_juridico ?? "").replace(/[^0-9kK]/g, "").toUpperCase() === compact) ?? null;
 }
 
 export function chilecompraParaProveedor(proveedorId: string): ChileCompraProveedor | null {

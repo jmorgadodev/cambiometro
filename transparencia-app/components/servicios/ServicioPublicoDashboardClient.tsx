@@ -129,7 +129,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
               {compras ? formatCompactCLP(compras.monto_total_clp) : "—"}
             </div>
             <div style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
-              {compras ? `${compras.procesos_count} órdenes de compra` : "ChileCompra OCDS"}
+              {compras ? `${compras.procesos_count} procesos` : "ChileCompra OCDS"}
             </div>
           </div>
 
@@ -567,7 +567,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                     Contrataciones y Compras Públicas
                   </h2>
                   <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: 0 }}>
-                    Registro de órdenes de compra, licitaciones públicas y tratos directos del organismo.
+                    Adjudicaciones y procesos publicados por ChileCompra para el RUT jurídico del organismo.
                   </p>
                 </div>
 
@@ -584,7 +584,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                 <div style={{ padding: "1rem", background: "var(--surface-2)", borderRadius: 8, border: "1px solid var(--border)" }}>
                   <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block" }}>Licitación Pública</span>
                   <strong style={{ fontSize: "1.3rem", color: "var(--ok)", fontFamily: "monospace" }}>
-                    {compras.pct_licitacion_publica}%
+                    {compras.pct_licitacion_publica === null ? "—" : `${compras.pct_licitacion_publica}%`}
                   </strong>
                   <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", display: "block", marginTop: "0.2rem" }}>
                     Mecanismo concursal
@@ -594,7 +594,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                 <div style={{ padding: "1rem", background: "var(--surface-2)", borderRadius: 8, border: "1px solid var(--border)" }}>
                   <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block" }}>Trato Directo</span>
                   <strong style={{ fontSize: "1.3rem", color: "var(--bad)", fontFamily: "monospace" }}>
-                    {compras.pct_trato_directo}%
+                    {compras.pct_trato_directo === null ? "—" : `${compras.pct_trato_directo}%`}
                   </strong>
                   <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", display: "block", marginTop: "0.2rem" }}>
                     Contratación excepcional
@@ -604,7 +604,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                 <div style={{ padding: "1rem", background: "var(--surface-2)", borderRadius: 8, border: "1px solid var(--border)" }}>
                   <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block" }}>Convenio Marco</span>
                   <strong style={{ fontSize: "1.3rem", color: "var(--accent)", fontFamily: "monospace" }}>
-                    {compras.pct_convenio_marco}%
+                    {compras.pct_convenio_marco === null ? "—" : `${compras.pct_convenio_marco}%`}
                   </strong>
                   <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", display: "block", marginTop: "0.2rem" }}>
                     Catálogo estandarizado
@@ -612,12 +612,12 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                 </div>
 
                 <div style={{ padding: "1rem", background: "var(--surface-2)", borderRadius: 8, border: "1px solid var(--border)" }}>
-                  <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block" }}>Órdenes de Compra</span>
+                  <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block" }}>Procesos</span>
                   <strong style={{ fontSize: "1.3rem", color: "var(--text-primary)", fontFamily: "monospace" }}>
                     {compras.procesos_count.toLocaleString("es-CL")}
                   </strong>
                   <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", display: "block", marginTop: "0.2rem" }}>
-                    Transacciones emitidas
+                    Procesos OCDS publicados
                   </span>
                 </div>
               </div>
@@ -711,12 +711,12 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                 </div>
               )}
 
-              {/* Tabla Paginada de Órdenes de Compra (Trazabilidad por Fila) */}
+                  {/* Tabla paginada de adjudicaciones OCDS (trazabilidad por fila) */}
               {ordenes.length > 0 && (
                 <div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem", flexWrap: "wrap", gap: "0.5rem" }}>
                     <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>
-                      📋 Registro Detallado de Órdenes de Compra ({ordenes.length} órdenes)
+                      📋 Registro Detallado de Adjudicaciones ({ordenes.length})
                     </h3>
                     <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
                       Página {currentComprasPage} de {totalComprasPages}
@@ -822,7 +822,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
           ) : (
             <div className="card" style={{ padding: "1.75rem" }}>
               <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: 0 }}>
-                Sin órdenes de compra registradas en el período evaluado.
+                Sin enlace verificable por RUT jurídico entre este organismo y ChileCompra; los montos, órdenes y proveedores se mantienen ausentes.
               </p>
             </div>
           )}

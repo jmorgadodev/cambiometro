@@ -3,6 +3,7 @@ import path from "node:path";
 import { getServicioPublicoById, getAllServiciosPublicos, type ServicioPublico } from "./servicios-publicos";
 import { presupuestoParaServicio, type ResumenPresupuesto } from "./presupuesto";
 import { getOrganismoById } from "./organismos";
+import { leerChileCompraV1 } from "./chilecompra";
 
 export interface ProveedorChileCompra {
   id: string;
@@ -15,11 +16,11 @@ export interface ProveedorChileCompra {
 
 export interface OrdenCompraChileCompra {
   ocid: string;
-  fecha: string;
-  proveedor: string;
+  fecha: string | null;
+  proveedor: string | null;
   proveedor_rut?: string;
   monto_total_clp: number;
-  modalidad: "Licitación Pública" | "Trato Directo" | "Convenio Marco" | "Compra Ágil";
+  modalidad: "Licitación Pública" | "Trato Directo" | "Convenio Marco" | "Compra Ágil" | null;
   descripcion: string;
   url_mercadopublico: string;
 }
@@ -33,9 +34,9 @@ export interface ComprasMesChileCompra {
 export interface ComprasPublicasServicio {
   monto_total_clp: number;
   procesos_count: number;
-  pct_licitacion_publica: number;
-  pct_trato_directo: number;
-  pct_convenio_marco: number;
+  pct_licitacion_publica: number | null;
+  pct_trato_directo: number | null;
+  pct_convenio_marco: number | null;
   top_proveedores: ProveedorChileCompra[];
   ordenes_recientes: OrdenCompraChileCompra[];
   serie_mensual_2026: ComprasMesChileCompra[];
@@ -97,7 +98,6 @@ export interface ServicioPublicoEnriquecido extends ServicioPublico {
 }
 
 // Carga en memoria cacheada de las proyecciones del Lake
-let cachedChileCompra: { records?: Array<Record<string, unknown>> } | null = null;
 let cachedInfoLobby: {
   records?: Array<{
     id?: string;
@@ -133,15 +133,6 @@ let cachedContraloria: {
 function loadProjections() {
   const lakeDir = path.join(process.cwd(), "data", "lake", "projections", "v1");
   try {
-    if (!cachedChileCompra) {
-      const p = path.join(lakeDir, "chilecompra.json");
-      if (fs.existsSync(p) && fs.statSync(p).size < 20 * 1024 * 1024) {
-        cachedChileCompra = JSON.parse(fs.readFileSync(p, "utf8"));
-      }
-    }
-  } catch {}
-
-  try {
     if (!cachedInfoLobby) {
       const p = path.join(lakeDir, "infolobby.json");
       if (fs.existsSync(p) && fs.statSync(p).size < 20 * 1024 * 1024) {
@@ -158,89 +149,6 @@ function loadProjections() {
       }
     }
   } catch {}
-}
-
-const MODALIDADES_SAMPLE: Array<"Licitación Pública" | "Trato Directo" | "Convenio Marco" | "Compra Ágil"> = [
-  "Licitación Pública",
-  "Licitación Pública",
-  "Convenio Marco",
-  "Convenio Marco",
-  "Trato Directo",
-  "Compra Ágil",
-  "Licitación Pública",
-  "Convenio Marco",
-];
-
-const ITEMS_COMPRA_SAMPLE = [
-  "Servicio de soporte y mantenimiento de infraestructura de telecomunicaciones y enlaces de datos",
-  "Licenciamiento corporativo de software, ciberseguridad y almacenamiento en nube híbrida",
-  "Servicio integral de aseo, sanitización y mantención de dependencias institucionales",
-  "Adquisición de equipamiento computacional, estaciones de trabajo y periféricos de alta gama",
-  "Servicio de vigilancia, seguridad privada y control de accesos para edificios corporativos",
-  "Contratación de asesoría técnica especializada en modernización y gestión de procesos",
-  "Suministro de insumos de oficina, papelería y artículos de escritorio para oficinas regionales",
-  "Servicio de arriendo de flota vehicular y transporte de personal para fiscalizaciones en terreno",
-  "Desarrollo e implementación de módulos de interoperabilidad para plataforma de datos abiertos",
-  "Servicio de producción y difusión de campañas de información y comunicación ciudadana",
-  "Mantenimiento preventivo y correctivo de sistemas de climatización y generadores de respaldo",
-  "Adquisición de licencias de firma electrónica avanzada y custodia de documentos digitales",
-];
-
-function buildOrdenesChileCompra(servicioId: string, baseMonto: number, totalProcesos: number): OrdenCompraChileCompra[] {
-  const ordenes: OrdenCompraChileCompra[] = [];
-  const count = Math.min(24, Math.max(12, totalProcesos));
-  const baseDate = new Date("2026-07-28T12:00:00Z");
-
-  const proveedoresList = [
-    { nombre: "Entel Chile S.A.", rut: "96.806.000-4" },
-    { nombre: "Sonda S.A.", rut: "96.539.290-7" },
-    { nombre: "Sodexo Chile S.A.", rut: "96.591.680-9" },
-    { nombre: "Dimerc S.A.", rut: "96.670.320-5" },
-    { nombre: "Claro Chile SpA", rut: "96.799.250-K" },
-    { nombre: "Telefónica Empresas Chile S.A.", rut: "96.824.800-3" },
-    { nombre: "Adexus S.A.", rut: "96.554.490-1" },
-    { nombre: "Prisa S.A.", rut: "96.650.110-6" },
-  ];
-
-  for (let i = 0; i < count; i++) {
-    const prov = proveedoresList[i % proveedoresList.length];
-    const mod = MODALIDADES_SAMPLE[i % MODALIDADES_SAMPLE.length];
-    const desc = ITEMS_COMPRA_SAMPLE[i % ITEMS_COMPRA_SAMPLE.length];
-    const daysAgo = i * 7 + 2;
-    const dateObj = new Date(baseDate.getTime() - daysAgo * 24 * 3600 * 1000);
-    const dateStr = dateObj.toISOString().slice(0, 10);
-    const fraction = (count - i) / (count * 4);
-    const monto = Math.round(Math.max(1_200_000, (baseMonto / count) * (0.5 + ((i * 17) % 10) / 10)));
-    const ocNum = 1200 + i * 37 + (servicioId.length * 11);
-    const ocid = `ocds-70d3h3-${servicioId}-${dateStr.slice(0, 7)}-${ocNum}`;
-
-    ordenes.push({
-      ocid,
-      fecha: dateStr,
-      proveedor: prov.nombre,
-      proveedor_rut: prov.rut,
-      monto_total_clp: monto,
-      modalidad: mod,
-      descripcion: desc,
-      url_mercadopublico: `https://www.mercadopublico.cl/fichaLicitacion.html?code=${ocid}`,
-    });
-  }
-
-  return ordenes.sort((a, b) => b.fecha.localeCompare(a.fecha));
-}
-
-function buildSerieMensual2026(totalMonto: number, totalProcesos: number): ComprasMesChileCompra[] {
-  const meses = ["2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07"];
-  const weights = [0.11, 0.12, 0.15, 0.14, 0.16, 0.17, 0.15];
-
-  return meses.map((mes, idx) => {
-    const w = weights[idx];
-    return {
-      period: mes,
-      monto_clp: Math.round(totalMonto * w),
-      procesos_count: Math.max(1, Math.round(totalProcesos * w)),
-    };
-  });
 }
 
 export function getServicioPublicoEnriquecido(id: string): ServicioPublicoEnriquecido | null {
@@ -302,57 +210,49 @@ export function getServicioPublicoEnriquecido(id: string): ServicioPublicoEnriqu
     con_horas_extras: Math.round(dotacionReal * 0.18),
   };
 
-  // 2. Compras públicas (ChileCompra con 24 órdenes trazables + serie mensual)
-  const totalMonto = orgCanonico?.compras_ocds_monto_clp || Math.round(dotacionReal * 32_000_000);
-  const procesos = orgCanonico?.compras_ocds_procesos || 24;
-  const ordenes_recientes = buildOrdenesChileCompra(servicio.id, totalMonto, procesos);
-  const serie_mensual_2026 = buildSerieMensual2026(totalMonto, procesos);
-
-  const top_proveedores: ProveedorChileCompra[] = [
-    {
-      id: "prov-1",
-      nombre: "Entel Chile S.A.",
-      rut: "96.806.000-4",
-      monto_total_clp: Math.round(totalMonto * 0.28),
-      procesos: 8,
-      url_mercadopublico: "https://www.mercadopublico.cl/Portal/Modules/Site/BusquedaAvanzada.aspx?r=96806000-4",
-    },
-    {
-      id: "prov-2",
-      nombre: "Sonda S.A.",
-      rut: "96.539.290-7",
-      monto_total_clp: Math.round(totalMonto * 0.22),
-      procesos: 6,
-      url_mercadopublico: "https://www.mercadopublico.cl/Portal/Modules/Site/BusquedaAvanzada.aspx?r=96539290-7",
-    },
-    {
-      id: "prov-3",
-      nombre: "Sodexo Chile S.A.",
-      rut: "96.591.680-9",
-      monto_total_clp: Math.round(totalMonto * 0.15),
-      procesos: 14,
-      url_mercadopublico: "https://www.mercadopublico.cl/Portal/Modules/Site/BusquedaAvanzada.aspx?r=96591680-9",
-    },
-    {
-      id: "prov-4",
-      nombre: "Dimerc S.A.",
-      rut: "96.670.320-5",
-      monto_total_clp: Math.round(totalMonto * 0.09),
-      procesos: 22,
-      url_mercadopublico: "https://www.mercadopublico.cl/Portal/Modules/Site/BusquedaAvanzada.aspx?r=96670320-5",
-    },
-  ];
-
-  const compras: ComprasPublicasServicio = {
-    monto_total_clp: totalMonto,
-    procesos_count: procesos,
-    pct_licitacion_publica: 76.5,
-    pct_trato_directo: 14.8,
-    pct_convenio_marco: 8.7,
-    top_proveedores,
-    ordenes_recientes,
-    serie_mensual_2026,
-  };
+  // 2. Compras públicas: R10 exige enlace jurídico exacto y evidencia OCDS.
+  const officialBuyer = orgCanonico?.compras_ocds_metodo_enlace === "RUT_EXACTO"
+    ? leerChileCompraV1()?.buyers.find((buyer) => buyer.rut_juridico === orgCanonico.compras_ocds_rut_comprador) ?? null
+    : null;
+  const supplierAggregates = new Map<string, ProveedorChileCompra>();
+  for (const award of officialBuyer?.top ?? []) {
+    if (!award.proveedor_id || !award.proveedor || award.monto_clp <= 0) continue;
+    const current = supplierAggregates.get(award.proveedor_id) ?? {
+      id: award.proveedor_id,
+      nombre: award.proveedor,
+      monto_total_clp: 0,
+      procesos: 0,
+    };
+    current.monto_total_clp += award.monto_clp;
+    current.procesos += 1;
+    supplierAggregates.set(award.proveedor_id, current);
+  }
+  const compras: ComprasPublicasServicio | null = officialBuyer
+    ? {
+        monto_total_clp: officialBuyer.monto_total_clp,
+        procesos_count: officialBuyer.procesos,
+        pct_licitacion_publica: null,
+        pct_trato_directo: null,
+        pct_convenio_marco: null,
+        top_proveedores: [...supplierAggregates.values()].sort((a, b) => b.monto_total_clp - a.monto_total_clp),
+        ordenes_recientes: officialBuyer.top
+          .filter((award) => Boolean(award.ocid && award.url))
+          .map((award) => ({
+            ocid: award.ocid,
+            fecha: award.fecha,
+            proveedor: award.proveedor,
+            monto_total_clp: award.monto_clp,
+            modalidad: null,
+            descripcion: award.title,
+            url_mercadopublico: award.url!,
+          })),
+        serie_mensual_2026: officialBuyer.months.map((month) => ({
+          period: month.period,
+          monto_clp: month.monto_total_clp,
+          procesos_count: month.procesos,
+        })),
+      }
+    : null;
 
   // 3. Audiencias de Lobby (InfoLobby con agregados, ministerio tutelar y menciones sectoriales)
   const audiencias_directas: AudienciaLobbyServicio[] = [];

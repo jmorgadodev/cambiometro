@@ -74,21 +74,10 @@ describe("Dashboard Integral de Servicios Públicos y Eliminación de Bloques Ci
     expect(Math.ceil(queryResult.total / 20)).toBe(31);
   });
 
-  it("S6. ChileCompra con 24 órdenes trazables, serie mensual 2026 y top proveedores con enlace", () => {
+  it("S6. R10 omite compras si el catálogo no aporta RUT jurídico verificable", () => {
     const minagri = getServicioPublicoEnriquecido("min-agricultura");
-    expect(minagri?.compras).not.toBeNull();
-    expect(minagri?.compras?.ordenes_recientes.length).toBe(24);
-    expect(minagri?.compras?.serie_mensual_2026.length).toBe(7);
-    expect(minagri?.compras?.top_proveedores.length).toBeGreaterThan(0);
-
-    const firstOrder = minagri?.compras?.ordenes_recientes[0];
-    expect(firstOrder?.ocid).toMatch(/^ocds-70d3h3-/);
-    expect(firstOrder?.url_mercadopublico).toContain("mercadopublico.cl");
-    expect(firstOrder?.modalidad).toBeDefined();
-
-    expect(dashboardClientSource).toContain("Serie Mensual de Compras 2026");
-    expect(dashboardClientSource).toContain("Registro Detallado de Órdenes de Compra");
-    expect(dashboardClientSource).toContain("Ver en MercadoPúblico ↗");
+    expect(minagri?.compras).toBeNull();
+    expect(dashboardClientSource).toContain("Sin enlace verificable por RUT jurídico");
   });
 
   it("S7. InfoLobby con agregados anuales, top gestores, top materias y timeline detallado", () => {

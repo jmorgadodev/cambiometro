@@ -508,102 +508,7 @@ if (chilecompra) {
     }
   }
 
-  // 2. Arista explícita "LOBBY + VENTAS" con doble evidencia verificada
-  // 2. Entidad Madre MOP, Unidad MOP DCYF, Proveedor Carlos González y Arista "LOBBY + VENTAS"
-  const mopParent: CanonicalEntity = {
-    id: "public-body-mop",
-    kind: "public_body",
-    name: "Ministerio de Obras Públicas (MOP)",
-    identifiers: [{ scheme: "RUT", value: "61.202.000-0", isPublic: true, sourceUrl: "https://www.mop.gob.cl" }],
-    attributes: { ministry: "Ministerio de Obras Públicas", has_subunits: true },
-    sourceIds: ["chilecompra", "infolobby", "dipres"],
-    updatedAt: chilecompra.generatedAt,
-  };
-  entities.set(mopParent.id, mopParent);
-
-  const sampleBuyer: CanonicalEntity = {
-    id: "public-body-mop-dcyf",
-    kind: "public_body",
-    name: "Dirección de Contabilidad y Finanzas (DCYF) · MOP",
-    identifiers: [
-      { scheme: "CHILECOMPRA-RUT", value: "61.202.000-0", isPublic: true, sourceUrl: SOURCE_URL_OCDS },
-      { scheme: "ORGANISMO-ID", value: "org-direccion-de-contabilidad-y-finanzas-dcyf", isPublic: true, sourceUrl: "https://www.mop.gob.cl" },
-    ],
-    attributes: {
-      rut_juridico: "61.202.000-0",
-      parentEntityId: mopParent.id,
-      parentName: mopParent.name,
-      procesos: 12,
-      total_adjudicado_clp: 1440000000,
-    },
-    sourceIds: ["chilecompra", "infolobby"],
-    updatedAt: chilecompra.generatedAt,
-  };
-  entities.set(sampleBuyer.id, sampleBuyer);
-
-  const topSupplier: CanonicalEntity = {
-    id: "supplier-chilecompra-carlos-gonzalez",
-    kind: "supplier",
-    name: "Carlos González Asesorías e Insumos E.I.R.L.",
-    identifiers: [
-      { scheme: "CL-MP", value: "carlos-gonzalez", isPublic: true, sourceUrl: SOURCE_URL_OCDS },
-      { scheme: "RUT", value: "15.489.231-4", isPublic: true, sourceUrl: SOURCE_URL_OCDS },
-    ],
-    attributes: {
-      monto_total_clp: 1440000000,
-      procesos: 3,
-    },
-    sourceIds: ["chilecompra", "infolobby"],
-    updatedAt: chilecompra.generatedAt,
-  };
-  entities.set(topSupplier.id, topSupplier);
-
-  const doubleEdgeId = `relation-lobby-ventas-${compactId(sampleBuyer.id)}-${compactId(topSupplier.id)}`;
-  const recCompraId = `cc-award-${compactId(sampleBuyer.id)}-${compactId(topSupplier.id)}`;
-  const recLobbyId = `infolobby-${compactId(sampleBuyer.id)}-${compactId(topSupplier.id)}`;
-
-  records.push({
-    id: recCompraId,
-    kind: "contract",
-    sourceId: "chilecompra",
-    title: `${sampleBuyer.name} · Suministro y Consultoría Técnica adjudicado a ${topSupplier.name}`,
-    description: `Orden de compra N° 2405-112-LP26 registrada en MercadoPúblico por $1.440.000.000 CLP`,
-    occurredAt: "2026-07-20",
-    period: { from: "2026-07-01", to: "2026-07-31", label: "2026-07" },
-    subjectEntityIds: [sampleBuyer.id, mopParent.id],
-    objectEntityIds: [topSupplier.id],
-    amount: { amountClp: 1440000000, currency: "CLP", originalAmount: "1440000000", originalUnit: "CLP" },
-    evidence: { sourceUrl: SOURCE_URL_OCDS, checksumSha256: null, retrievedAt: chilecompra.generatedAt, documentPage: null },
-    data: publicData({ buyer: sampleBuyer.name, supplier: topSupplier.name, ocid: "ocds-2405-112-LP26", monto_clp: 1440000000 }),
-  });
-
-  records.push({
-    id: recLobbyId,
-    kind: "lobby",
-    sourceId: "infolobby",
-    title: `Audiencia InfoLobby: Presentación técnica de ${topSupplier.name}`,
-    description: `Audiencia sostenida ante directivos de la Dirección de Contabilidad y Finanzas (DCYF) del MOP sobre contratos y compras públicas`,
-    occurredAt: "2026-06-18",
-    period: { from: "2026-06-01", to: "2026-06-30", label: "2026-06" },
-    subjectEntityIds: [topSupplier.id],
-    objectEntityIds: [sampleBuyer.id, mopParent.id],
-    amount: null,
-    evidence: { sourceUrl: "https://www.infolobby.cl", checksumSha256: null, retrievedAt: chilecompra.generatedAt, documentPage: null },
-    data: publicData({ gestor: topSupplier.name, organismo: sampleBuyer.name, materia: "Presentación técnica de contratos y servicios" }),
-  });
-
-  relations.push({
-    id: doubleEdgeId,
-    fromId: sampleBuyer.id,
-    predicate: "awarded_contract",
-    toId: topSupplier.id,
-    evidenceRecordIds: [recCompraId, recLobbyId],
-    period: { from: "2026-06-01", to: "2026-07-31" },
-    reconciliation: { method: "official_id", confidence: 1 },
-    disclaimer: DISCLAIMER,
-  });
-
-  // 3. Registrar compradores y compras individuales
+  // 2. Registrar compradores y adjudicaciones individuales oficiales.
   for (const buyer of chilecompra.buyers.slice(0, 150)) {
     if (!entities.has(buyer.id)) {
       entities.set(buyer.id, {
@@ -618,10 +523,10 @@ if (chilecompra) {
     }
 
     for (const award of (buyer.top ?? []).slice(0, 3)) {
-      const provName = award.proveedor && award.proveedor !== "Proveedor MercadoPúblico" ? award.proveedor : "Proveedor Adjudicado";
-      const provId = award.proveedor_id || `provider-chilecompra-${compactId(provName)}`;
+      const provName = award.proveedor && award.proveedor !== "Proveedor MercadoPúblico" ? award.proveedor : null;
+      const provId = award.proveedor_id || null;
 
-      if (!entities.has(provId)) {
+      if (provId && provName && !entities.has(provId)) {
         entities.set(provId, {
           id: provId,
           kind: "supplier",
@@ -638,31 +543,33 @@ if (chilecompra) {
         id: recordId,
         kind: "contract",
         sourceId: "chilecompra",
-        title: award.title || `${buyer.name} · Contrato con ${provName}`,
+        title: award.title || "Adjudicación OCDS sin título publicado",
         description: `Adjudicación OCDS por ${award.monto_clp.toLocaleString("es-CL")} CLP en MercadoPúblico (OCID: ${award.ocid})`,
-        occurredAt: award.fecha?.slice(0, 10) || "2026-07-15",
-        period: periodFromDate(award.fecha || "2026-07-15"),
+        occurredAt: award.fecha?.slice(0, 10) ?? null,
+        period: periodFromDate(award.fecha ?? undefined),
         subjectEntityIds: [buyer.id],
-        objectEntityIds: [provId],
+        objectEntityIds: provId ? [provId] : [],
         amount: award.monto_clp > 0 ? { amountClp: award.monto_clp, currency: "CLP", originalAmount: String(award.monto_clp), originalUnit: "CLP" } : null,
         evidence: { sourceUrl: award.url || `https://api.mercadopublico.cl/APISOCDS/OCDS/award/${award.ocid.replace("ocds-70d2nz-", "")}`, checksumSha256: null, retrievedAt: chilecompra.generatedAt, documentPage: null },
         data: publicData({ ...award, ocid: award.ocid, buyer_name: buyer.name }),
       });
 
-      relations.push({
-        id: `relation-cc-${compactId(buyer.id)}-${compactId(provId)}-${compactId(award.ocid || String(award.monto_clp))}`,
-        fromId: buyer.id,
-        predicate: "awarded_contract_from",
-        toId: provId,
-        evidenceRecordIds: [recordId],
-        period: periodFromDate(award.fecha || "2026-07-15"),
-        reconciliation: { method: "official_id", confidence: 1 },
-        disclaimer: DISCLAIMER,
-      });
+      if (provId && provName) {
+        relations.push({
+          id: `relation-cc-${compactId(buyer.id)}-${compactId(provId)}-${compactId(award.ocid || String(award.monto_clp))}`,
+          fromId: buyer.id,
+          predicate: "awarded_contract_from",
+          toId: provId,
+          evidenceRecordIds: [recordId],
+          period: periodFromDate(award.fecha ?? undefined),
+          reconciliation: { method: "official_id", confidence: 1 },
+          disclaimer: DISCLAIMER,
+        });
+      }
     }
   }
 
-  // 4. Registrar top pares compradores ↔ proveedores con evidencia
+  // 3. Registrar top pares compradores ↔ proveedores con evidencia
   for (const pair of (chilecompra.topPairs ?? []).slice(0, 200)) {
     const buyer = chilecompra.buyers.find((b) => b.id === pair.buyerId);
     const supplier = chilecompra.suppliers.find((s) => s.id === pair.provId);
@@ -687,8 +594,8 @@ if (chilecompra) {
       sourceId: "chilecompra",
       title: `${buyer.name} · Contratos adjudicados a ${supplier.name}`,
       description: `${pair.procesos} procesos adjudicados por ${pair.monto_total_clp.toLocaleString("es-CL")} CLP en MercadoPúblico`,
-      occurredAt: "2026-07-20",
-      period: { from: "2026-07-01", to: "2026-07-31", label: "2026-07" },
+      occurredAt: null,
+      period: { from: null, to: null, label: null },
       subjectEntityIds: [buyer.id],
       objectEntityIds: [supplier.id],
       amount: { amountClp: pair.monto_total_clp, currency: "CLP", originalAmount: String(pair.monto_total_clp), originalUnit: "CLP" },
@@ -702,7 +609,7 @@ if (chilecompra) {
       predicate: "awarded_contract_from",
       toId: supplier.id,
       evidenceRecordIds: [pairRecId],
-      period: { from: "2026-07-01", to: "2026-07-31" },
+      period: { from: null, to: null },
       reconciliation: { method: "official_id", confidence: 1 },
       disclaimer: DISCLAIMER,
     });

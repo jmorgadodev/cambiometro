@@ -34,7 +34,7 @@ function formatCLP(n?: number | null) {
   }).format(n);
 }
 
-function formatCompactCLP(n: number) {
+function formatCompactCLP(n?: number | null) {
   if (!n || n <= 0) return "—";
   if (n >= 1_000_000_000_000) {
     return `$${(n / 1_000_000_000_000).toLocaleString("es-CL", {
@@ -1121,10 +1121,8 @@ export default function MunicipalidadDetailDashboardClient({
       {/* ═══ PESTAÑA 3: COMPRAS PÚBLICAS (OCDS) (M2) ═════════════════════════ */}
       {activeTab === "compras" && (() => {
         const procesos = compras?.procesos || [];
-        const fallbackOrders = compras?.top_compras || [];
-
-        const totalProcesosCount = compras?.procesos_count || procesos.length || 1;
-        const totalOrdenesCount = compras?.ordenes_count || fallbackOrders.length || totalProcesosCount;
+        const totalProcesosCount = compras?.procesos_count ?? procesos.length;
+        const totalOrdenesCount = compras?.ordenes_count ?? null;
 
         // Filtro por modalidad
         let filteredProcesos = [...procesos];
@@ -1143,7 +1141,7 @@ export default function MunicipalidadDetailDashboardClient({
             p.titulo_proceso.toLowerCase().includes(q) ||
             p.proveedor_adjudicado.toLowerCase().includes(q) ||
             p.ocid_padre.toLowerCase().includes(q) ||
-            p.ordenes_compra.some(o => o.titulo.toLowerCase().includes(q) || o.ocid.toLowerCase().includes(q))
+            p.ordenes_compra.some(o => (o.titulo ?? "").toLowerCase().includes(q) || (o.ocid ?? "").toLowerCase().includes(q))
           );
         }
 
@@ -1203,10 +1201,12 @@ export default function MunicipalidadDetailDashboardClient({
                       </span>
                     </div>
                     <div style={{ fontFamily: "monospace", fontSize: "1.25rem", fontWeight: 900, color: "var(--text-primary)", marginTop: "0.2rem" }}>
-                      {totalProcesosCount} procesos · {totalOrdenesCount} órdenes de compra
+                      {totalProcesosCount} procesos · {totalOrdenesCount ?? "—"} órdenes de compra
                     </div>
                     <div style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: "0.2rem" }}>
-                      {totalOrdenesCount} órdenes de compra agrupadas en {totalProcesosCount} procesos OCDS
+                      {totalOrdenesCount === null
+                        ? "La fuente consultada no entrega un conteo verificable de órdenes"
+                        : `${totalOrdenesCount} órdenes de compra agrupadas en ${totalProcesosCount} procesos OCDS`}
                     </div>
                   </div>
                 </div>
@@ -1466,7 +1466,7 @@ export default function MunicipalidadDetailDashboardClient({
                                           {formatCLP(co.monto_clp)}
                                         </strong>
                                         <a
-                                          href={co.url || `https://api.mercadopublico.cl/APISOCDS/OCDS/award/${encodeURIComponent(co.ocid)}`}
+                                          href={co.url || `https://api.mercadopublico.cl/APISOCDS/OCDS/award/${encodeURIComponent(co.ocid ?? "")}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           style={{ color: "var(--accent)", textDecoration: "none", fontSize: "0.7rem", fontWeight: 700 }}
@@ -1507,7 +1507,9 @@ export default function MunicipalidadDetailDashboardClient({
                     }}
                   >
                     <span>
-                      📌 <strong>Nota OCDS:</strong> {totalOrdenesCount} órdenes de compra agrupadas en {totalProcesosCount} procesos.
+                      📌 <strong>Nota OCDS:</strong> {totalOrdenesCount === null
+                        ? `la fuente acredita ${totalProcesosCount} procesos; no publica un conteo verificable de órdenes.`
+                        : `${totalOrdenesCount} órdenes de compra agrupadas en ${totalProcesosCount} procesos.`}
                     </span>
                     <span style={{ color: "var(--text-subtle)" }}>
                       Fuente: MercadoPúblico / Estándar OCDS ChileCompra
