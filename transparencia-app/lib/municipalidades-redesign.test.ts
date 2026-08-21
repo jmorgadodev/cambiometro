@@ -39,12 +39,11 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
       }
     });
 
-    it("4. Presupuesto per cápita unificado con fórmula estándar", () => {
+    it("4. Presupuesto per cápita queda ausente sin población INE materializada", () => {
       const talca = getMunicipalidadData("muni-talca");
       expect(talca).not.toBeNull();
-      expect(talca?.presupuesto_per_capita_clp).toBeGreaterThan(0);
-      const expected = Math.round((talca!.presupuesto!.vigente_clp ?? 0) / talca!.poblacion_censo_2024!);
-      expect(talca!.presupuesto_per_capita_clp).toBe(expected);
+      expect(talca?.poblacion_censo_2024).toBeNull();
+      expect(talca?.presupuesto_per_capita_clp).toBeNull();
     });
   });
 
@@ -173,16 +172,12 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
       expect(listPageSource).toContain("⚖️ CGR:");
     });
 
-    it("M4. Composición de dotación de Santiago suma exactamente 20.805 funcionarios", () => {
+    it("M4. Composición de dotación de Santiago cuadra con la nómina CPLT actual", () => {
       const santiago = getMunicipalidadData("muni-santiago");
       expect(santiago?.resumen_personal).toBeDefined();
       const { planta, contrata, honorarios, codigo_trabajo_salud_educacion, total_funcionarios } = santiago!.resumen_personal!;
-      expect(total_funcionarios).toBe(20805);
-      expect(planta + contrata + honorarios + codigo_trabajo_salud_educacion).toBe(20805);
-      expect(planta).toBe(7211);
-      expect(contrata).toBe(5914);
-      expect(honorarios).toBe(4433);
-      expect(codigo_trabajo_salud_educacion).toBe(3247);
+      expect(total_funcionarios).toBeGreaterThan(0);
+      expect(planta + contrata + honorarios + codigo_trabajo_salud_educacion).toBe(total_funcionarios);
       expect(detailPageSource).toContain("Ámbito de dotación");
     });
   });
@@ -245,7 +240,7 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
     it("A7. Composición: suma cards === contador buscador", () => {
       const santiago = getMunicipalidadData("muni-santiago");
       const sRes = santiago!.resumen_personal!;
-      expect(sRes.planta + sRes.contrata + sRes.honorarios + sRes.codigo_trabajo_salud_educacion).toBe(20805);
+      expect(sRes.planta + sRes.contrata + sRes.honorarios + sRes.codigo_trabajo_salud_educacion).toBe(sRes.total_funcionarios);
     });
 
     it("A8. OCDS: cero 'Proveedor MercadoPublico'; procesos×órdenes reconciliados", () => {

@@ -131,7 +131,11 @@ describe("R10 — ninguna compra inventada entra a proyecciones", () => {
 
   it("representa como null cualquier dimensión municipal sin fuente oficial", () => {
     const source = readFileSync(resolve("scripts/rebuild-authoritative-municipalidades.mjs"), "utf8");
+    const censusSource = readFileSync(resolve("scripts/census-data.mjs"), "utf8");
+    expect(censusSource).not.toContain("municipalidades-data.json");
+    expect(censusSource).toContain("CENSO_2024_OFICIAL = {}");
     expect(source).toContain("let alcalde = null");
+    expect(source).toContain("partido_alcalde: alcalde?.partido_alcalde ?? null");
     expect(source).not.toContain("ALCALDES_CORREGIDOS");
     expect(source).not.toMatch(/const estimado =/);
     expect(source).not.toMatch(/poblacion_censo_2024 \* 580000/);

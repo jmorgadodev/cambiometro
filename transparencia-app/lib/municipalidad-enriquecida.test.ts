@@ -40,9 +40,9 @@ describe("Ficha Comunal Enriquecida (/municipalidades/[id]) y Consolidado (/func
   it("verifica datos enriquecidos de comunas representativas (ej. Maipú, Las Condes, Santiago, Talca)", () => {
     const maipu = getMunicipalidadData("muni-maipu");
     expect(maipu).not.toBeNull();
-    expect(maipu?.poblacion_censo_2024).toBeGreaterThan(500000);
-    expect(maipu?.superficie_km2).toBeGreaterThan(100);
-    expect(maipu?.presupuesto_per_capita_clp).toBeGreaterThan(0);
+    expect(maipu?.poblacion_censo_2024).toBeNull();
+    expect(maipu?.superficie_km2).toBeNull();
+    expect(maipu?.presupuesto_per_capita_clp).toBeNull();
 
     const all = getAllMunicipalidadesData();
     expect(all.length).toBe(MUNICIPALIDADES_SEED.length);

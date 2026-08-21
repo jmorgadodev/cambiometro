@@ -339,7 +339,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
     densidad_hab_km2,
     presupuesto_per_capita_clp,
     alcalde,
-    partido_alcalde: alcalde.partido_alcalde ?? muni.partido_alcalde ?? null,
+    partido_alcalde: alcalde?.partido_alcalde ?? null,
     presupuesto,
     resumen_personal,
     top_horas_extras: (top_horas_extras || []).slice(0, 3),
