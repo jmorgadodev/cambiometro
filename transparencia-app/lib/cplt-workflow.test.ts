@@ -46,6 +46,13 @@ describe("automatizacion CPLT nacional", () => {
     expect(lakePublisher).toContain("R2_OBJECT_EXCEEDS_WRANGLER_LIMIT");
   });
 
+  it("permite materializar el lake CPLT local sin publicar", () => {
+    const packageJson = readFileSync(resolve(process.cwd(), "package.json"), "utf8");
+    const publisher = readFileSync(resolve(process.cwd(), "scripts/publish-cplt-projections.mjs"), "utf8");
+    expect(packageJson).toContain('"data:local:cplt": "node scripts/publish-cplt-projections.mjs --local-only"');
+    expect(publisher).toContain('process.argv.includes("--local-only")');
+  });
+
   it("solo permite registrar el estado CPLT en la D1 autorizada", () => {
     const recorder = readFileSync(resolve(process.cwd(), "scripts/record-cplt-source-state.mjs"), "utf8");
     expect(recorder).toContain('database !== "transparencia-db"');

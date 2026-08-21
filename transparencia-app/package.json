@@ -35,6 +35,7 @@
     "data:materialize:dry": "node scripts/materialize-d1.mjs --dry-run",
     "data:catalog:reconcile": "node scripts/reconcile-release-catalog.mjs",
     "data:publish:cplt": "node scripts/publish-cplt-projections.mjs --releases --r2",
+    "data:local:cplt": "node scripts/publish-cplt-projections.mjs --local-only",
     "data:publish:cplt-category": "node scripts/stage-cplt-category.mjs",
     "data:finalize:cplt": "node scripts/merge-cplt-category-artifacts.mjs && node scripts/publish-cplt-projections.mjs --releases --r2 && node scripts/record-cplt-source-state.mjs --remote",
     "data:record:cplt": "node scripts/record-cplt-source-state.mjs",
