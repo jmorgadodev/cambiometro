@@ -40,7 +40,7 @@ export default function ServiciosPublicosPage() {
 
   const totalServicios = serviciosConPolitico.length;
   const conPartidaCount = serviciosConPolitico.filter((s) => s.presupuesto !== null).length;
-  const totalConPartida = conPartidaCount > 0 ? conPartidaCount : 69;
+  const totalConPartida = conPartidaCount;
 
   // Totales agregados de la Ley de Presupuestos 2026 en DIPRES
   const dipresTotales = getPresupuestoNacionalTotales();
@@ -54,12 +54,6 @@ export default function ServiciosPublicosPage() {
         gastoDevengado += s.presupuesto.ejecutado_clp;
       }
     }
-  }
-
-  // Si aún es 0, aplicar el vigente oficial agregado de $83.42B
-  if (presupuestoTotalLey <= 0) {
-    presupuestoTotalLey = 83_420_000_000_000;
-    gastoDevengado = 45_180_000_000_000;
   }
 
   return (

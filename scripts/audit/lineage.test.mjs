@@ -12,7 +12,7 @@ test("Fase A conserva 70/70 campos y referencias exactas de FIX-1 a FIX-5", asyn
   assert.doesNotMatch(lineage, /campo desconocido|linaje desconocido/i);
 
   const references = [
-    ["transparencia-app/lib/gastos-operacionales.ts", 177, "resumirGastosAgregables"],
+    ["transparencia-app/lib/gastos-operacionales.ts", 181, "resumirGastosAgregables"],
     ["transparencia-app/scripts/etl/senado-assignment.mjs", 16, "parseSenadoAssignmentPolicy"],
     ["transparencia-app/scripts/etl/r10-chilecompra.mjs", 17, "findBuyerByVerifiedRut"],
     ["transparencia-app/scripts/build-presupuesto-v1.mjs", 101, "latestBudgetSnapshot"],

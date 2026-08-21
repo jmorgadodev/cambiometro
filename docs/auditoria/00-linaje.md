@@ -26,7 +26,7 @@ La matriz original conserva el linaje completo de los 70 campos. La revisión
 posterior a FIX-1–FIX-5 verificó además los puntos exactos donde se impide que
 una divergencia o un dato sintético vuelva a entrar al flujo:
 
-- FIX-1/V1: `lib/gastos-operacionales.ts:177` expone el agregador común que
+- FIX-1/V1: `lib/gastos-operacionales.ts:181` expone el agregador común que
   excluye filas resumen; `scripts/etl/generate-partidos-stats.ts:68` bloquea
   una regeneración sin evidencias oficiales.
 - FIX-2/V2: `scripts/etl/senado-assignment.mjs:16` parsea la política oficial

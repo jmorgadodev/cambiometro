@@ -52,7 +52,7 @@ export interface AutoridadItem {
   director_jefe_actual?: string;
   fuente_director?: string;
   ministerio_dependiente?: string;
-  dotacion_total: number;
+  dotacion_total: number | null;
   partida_capitulo_dipres: string | null;
   sitio_web_oficial?: string;
 }
@@ -62,7 +62,7 @@ export interface OrganismoOption {
   nombre_canonico: string;
   sigla?: string;
   tipo: string;
-  region: string;
+  region: string | null;
 }
 
 interface PersonasUniversalClientProps {
@@ -1254,7 +1254,7 @@ export default function PersonasUniversalClient({
                       <div style={{ marginTop: "0.75rem", paddingTop: "0.65rem", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "0.3rem", fontSize: "0.72rem" }}>
                         <div style={{ display: "flex", justifyContent: "space-between" }}>
                           <span style={{ color: "var(--text-3)" }}>Dotación Personal:</span>
-                          <span style={{ color: "var(--text-1)", fontWeight: 700 }}>{aut.dotacion_total.toLocaleString("es-CL")} funcionarios</span>
+                          <span style={{ color: "var(--text-1)", fontWeight: 700 }}>{aut.dotacion_total === null ? "Dotación no publicada" : `${aut.dotacion_total.toLocaleString("es-CL")} funcionarios`}</span>
                         </div>
                         {aut.ministerio_dependiente && (
                           <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -1313,7 +1313,7 @@ export default function PersonasUniversalClient({
                           {aut.partida_capitulo_dipres ? `Partida ${aut.partida_capitulo_dipres}` : "—"}
                         </td>
                         <td style={{ padding: "0.75rem 1rem", textAlign: "right", fontWeight: 700, color: "var(--text-1)" }}>
-                          {aut.dotacion_total.toLocaleString("es-CL")}
+                          {aut.dotacion_total === null ? "—" : aut.dotacion_total.toLocaleString("es-CL")}
                         </td>
                         <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
                           <Link

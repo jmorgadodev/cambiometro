@@ -64,18 +64,47 @@ describe("R10 — ninguna compra inventada entra a proyecciones", () => {
   it("elimina generadores sintéticos de montos, órdenes y proveedores", () => {
     const sources = [
       "scripts/etl/generate-organismos-projection.ts",
+      "scripts/build-chilecompra-v1.mjs",
       "scripts/rebuild-authoritative-municipalidades.mjs",
       "lib/servicios-publicos-data.ts",
       "lib/data-platform-v1.ts",
+      "lib/funcionarios-fallback.ts",
+      "scripts/census-data.mjs",
+      "app/cruces/page.tsx",
+      "app/servicios-publicos/page.tsx",
+      "app/servicios-publicos/servicios-publicos-client.tsx",
     ].map((file) => readFileSync(resolve(file), "utf8")).join("\n");
 
     expect(sources).not.toMatch(/presVigente\s*\*\s*0\.34/);
     expect(sources).not.toMatch(/dotacion(?:Real)?\s*\*\s*32_000_000/);
+    expect(sources).not.toMatch(/dotacion(?:Real)?\s*\*\s*(?:1_750_000|2_150_000|2_450_000)/);
+    expect(sources).not.toMatch(/dotacionReal\s*=\s*\d+/);
+    expect(sources).not.toContain("buildCentralGovernmentFuncionarios");
+    expect(sources).not.toContain("NOMBRES_MASC");
+    expect(sources).not.toContain("directivosBase");
+    expect(sources).not.toContain("68_450_000_000");
+    expect(sources).not.toContain("36_813");
+    expect(sources).not.toContain("83_420_000_000_000");
+    expect(sources).not.toContain("45_180_000_000_000");
+    expect(sources).not.toMatch(/totalConPresupuesto\s*\?\?\s*69/);
+    expect(sources).not.toMatch(/poblacion_censo_2024\s*\|\|\s*25000/);
+    expect(sources).not.toMatch(/superficie_km2\s*\|\|\s*350/);
+    expect(sources).not.toMatch(/planta_pct:\s*28\.5/);
+    expect(sources).not.toMatch(/recordCount\)\s*\|\|\s*\(muni\.poblacion/);
     expect(sources).not.toContain("Entel Chile S.A.");
     expect(sources).not.toContain("Sonda S.A.");
     expect(sources).not.toContain("Consorcio Ambiental de Chile SpA");
     expect(sources).not.toContain("Carlos González Asesorías e Insumos E.I.R.L.");
     expect(sources).not.toContain("Proveedor Adjudicado");
+    expect(sources).not.toContain("Proveedor Registrado");
+    expect(sources).not.toContain("Proveedor no informado en OCDS");
+    expect(sources).not.toContain("Contratación Pública");
+    expect(sources).not.toContain("Autoridad sin nombre publicado");
+    expect(sources).not.toContain("Declarante Oficial");
+    expect(sources).not.toContain("Entidad Receptora Privada");
+    expect(sources).not.toContain("2026-05-15");
+    expect(sources).not.toContain("2026-06-15");
+    expect(sources).not.toContain("2026-07-15");
     expect(sources).not.toContain("1440000000");
     expect(sources).not.toContain("-OC${c + 1}");
   });

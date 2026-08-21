@@ -3,10 +3,10 @@ import path from "path";
 import { legalEntityIdFromRut } from "./legal-rut";
 
 export interface ChileCompraAdjudicacion {
-  title: string;
+  title: string | null;
   proveedor: string | null;
   proveedor_id: string | null;
-  monto_clp: number;
+  monto_clp: number | null;
   fecha: string | null;
   url: string | null;
   ocid: string;
@@ -15,15 +15,15 @@ export interface ChileCompraAdjudicacion {
 
 export interface ChileCompraMes {
   period: string;
-  monto_total_clp: number;
+  monto_total_clp: number | null;
   procesos: number;
 }
 
 export interface ChileCompraComprador {
   id: string;
-  name: string;
+  name: string | null;
   rut_juridico: string | null;
-  monto_total_clp: number;
+  monto_total_clp: number | null;
   procesos: number;
   months: ChileCompraMes[];
   top: ChileCompraAdjudicacion[];
@@ -50,7 +50,7 @@ export interface ChileCompraProyeccion {
   buyers: ChileCompraComprador[];
   suppliers: ChileCompraProveedor[];
   topPairs: ChileCompraPar[];
-  total_adjudicado_clp: number;
+  total_adjudicado_clp: number | null;
 }
 
 let cached: ChileCompraProyeccion | null = null;

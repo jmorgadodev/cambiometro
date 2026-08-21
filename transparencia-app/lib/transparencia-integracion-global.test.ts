@@ -27,7 +27,7 @@ describe("Auditoría e Integración Global de Datos Conectados", () => {
     if (santiago) {
       expect(santiago.monto_total_clp).toBeGreaterThan(0);
       expect(santiago.procesos).toBeGreaterThan(0);
-      expect(santiago.name.toLowerCase()).toContain("santiago");
+      expect(santiago.name?.toLowerCase()).toContain("santiago");
     }
 
     expect(chilecompraParaCompradorPorRut("69.070.100-5")).toBeNull();

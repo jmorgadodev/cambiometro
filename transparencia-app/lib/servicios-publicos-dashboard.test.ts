@@ -63,15 +63,14 @@ describe("Dashboard Integral de Servicios Públicos y Eliminación de Bloques Ci
     expect(dashboardClientSource).toContain("Desglose por Subtítulos Presupuestarios (Gastos 21, 22, 24, 29, 31)");
   });
 
-  it("S5. Buscador de nómina coincide exactamente con KPI dotación (MINAGRI === 610)", () => {
+  it("S5. R10 no fabrica nómina ni dotación cuando MINAGRI no tiene proyección oficial", () => {
     const funcionariosMinagri = getFallbackFuncionarios("min-agricultura");
-    expect(funcionariosMinagri.length).toBe(610);
+    expect(funcionariosMinagri).toEqual([]);
 
     const queryResult = queryFallbackFuncionarios({ organismoId: "min-agricultura", page: 1, limit: 20 });
-    expect(queryResult.totalHeadcount).toBe(610);
-    expect(queryResult.total).toBe(610);
-    expect(queryResult.data.length).toBe(20);
-    expect(Math.ceil(queryResult.total / 20)).toBe(31);
+    expect(queryResult.totalHeadcount).toBe(0);
+    expect(queryResult.total).toBe(0);
+    expect(queryResult.data).toEqual([]);
   });
 
   it("S6. R10 omite compras si el catálogo no aporta RUT jurídico verificable", () => {
@@ -80,18 +79,14 @@ describe("Dashboard Integral de Servicios Públicos y Eliminación de Bloques Ci
     expect(dashboardClientSource).toContain("Sin enlace verificable por RUT jurídico");
   });
 
-  it("S7. InfoLobby con agregados anuales, top gestores, top materias y timeline detallado", () => {
+  it("S7. InfoLobby no inventa agregados ni timeline cuando no hay registros oficiales", () => {
     const minagri = getServicioPublicoEnriquecido("min-agricultura");
     expect(minagri?.resumen_lobby).toBeDefined();
-    expect(minagri?.resumen_lobby?.total_audiencias).toBeGreaterThan(0);
+    expect(minagri?.resumen_lobby?.total_audiencias).toBe(0);
     expect(Object.keys(minagri?.resumen_lobby?.conteo_por_ano ?? {}).length).toBeGreaterThan(0);
-    expect(minagri?.resumen_lobby?.top_gestores.length).toBeGreaterThan(0);
-    expect(minagri?.resumen_lobby?.top_materias.length).toBeGreaterThan(0);
-
-    const firstAud = minagri?.audiencias_lobby[0];
-    expect(firstAud?.fecha).toBeDefined();
-    expect(firstAud?.sujeto_pasivo).toBeDefined();
-    expect(firstAud?.materia).toBeDefined();
+    expect(minagri?.resumen_lobby?.top_gestores).toEqual([]);
+    expect(minagri?.resumen_lobby?.top_materias).toEqual([]);
+    expect(minagri?.audiencias_lobby).toEqual([]);
 
     expect(dashboardClientSource).toContain("Distribución por Año");
     expect(dashboardClientSource).toContain("Top Gestores de Interés");
@@ -99,19 +94,18 @@ describe("Dashboard Integral de Servicios Públicos y Eliminación de Bloques Ci
     expect(dashboardClientSource).toContain("Ver en InfoLobby ↗");
   });
 
-  it("S8. Lobby con contexto cuando la institución tiene 0 audiencias directas (cero cajas vacías)", () => {
+  it("S8. Lobby representa ausencia oficial con cero y listas vacías", () => {
     const all = getAllServiciosPublicosEnriquecidos();
     for (const s of all) {
       const lobby = s.resumen_lobby;
       expect(lobby).toBeDefined();
-      // Aserción: toda ficha muestra >= 1 audiencia directa O el bloque de ministerio tutelar poblado
-      const hasDirect = lobby.audiencias_directas_count > 0 || lobby.audiencias.length > 0;
-      const hasTutelar = lobby.audiencias_ministerio_tutelar && lobby.audiencias_ministerio_tutelar.length > 0;
-      expect(hasDirect || hasTutelar).toBe(true);
+      expect(lobby.total_audiencias).toBe(lobby.audiencias.length);
+      expect(lobby.audiencias_directas_count).toBe(lobby.audiencias.length);
+      expect(lobby.audiencias_ministerio_tutelar).toEqual([]);
     }
 
     expect(dashboardClientSource).toContain("0 audiencias directas en el período");
-    expect(dashboardClientSource).toContain("Audiencias del ministerio tutelar");
+    expect(dashboardClientSource).not.toContain("|| 3");
   });
 
   it("M1. Manejo de porcentajes de avance absurdos en subtítulos (>999.9%)", () => {
@@ -126,6 +120,7 @@ describe("Dashboard Integral de Servicios Públicos y Eliminación de Bloques Ci
   });
 
   it("M3. Tooltip de ámbito en KPI de Presupuesto Ley Inicial del listado", () => {
-    expect(directoryClientSource).toContain("Suma de presupuestos institucionales monitoreados; incluye transferencias internas. Consolidado oficial Gobierno Central: $83,42 billones (DIPRES)");
+    expect(directoryClientSource).toContain("Suma de presupuestos institucionales monitoreados; incluye transferencias internas.");
+    expect(directoryClientSource).not.toContain("$83,42 billones");
   });
 });

@@ -74,8 +74,9 @@ describe("Rediseño Integral de /cruces — Cruces Reales en Todos los Chips", (
     expect(explorerSource).toContain("LOBBY + VENTAS");
   });
 
-  it("X2. Coherencia KPI vs Explorador: hint incluye 118.360 registros vinculados", () => {
-    expect(pageSource).toContain("118.360 registros vinculados");
+  it("X2. Coherencia KPI vs Explorador: el hint usa el conteo derivado", () => {
+    expect(pageSource).toContain("crosses.length.toLocaleString");
+    expect(pageSource).not.toContain("118.360 registros vinculados");
     expect(pageSource).toContain("relaciones agregadas");
   });
 

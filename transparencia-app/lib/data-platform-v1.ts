@@ -117,7 +117,8 @@ function ensureDeputy(id: string, name: string): CanonicalEntity {
 }
 
 for (const raw of snapshot.fuentes.congreso_opendata ?? []) {
-  const deputy = ensureDeputy(raw.id, raw.nombre ?? "Autoridad sin nombre publicado");
+  if (!raw.id || !raw.nombre) continue;
+  const deputy = ensureDeputy(raw.id, raw.nombre);
   const recordId = `camara-authority-${compactId(raw.id)}`;
   records.push({
     id: recordId,
@@ -146,13 +147,15 @@ for (const raw of snapshot.fuentes.congreso_opendata ?? []) {
 }
 
 for (const voteEvent of snapshot.fuentes.votaciones_camara ?? []) {
-  const rawVotId = String(voteEvent.votacion_id ?? voteEvent.id ?? "sala");
+  const officialVoteId = voteEvent.votacion_id ?? voteEvent.id;
+  if (!officialVoteId) continue;
+  const rawVotId = String(officialVoteId);
   const billId = `bill-camara-${compactId(rawVotId)}`;
   if (!entities.has(billId)) {
     entities.set(billId, {
       id: billId,
       kind: "public_body",
-      name: `Boletín Legislativo N° ${rawVotId} · ${voteEvent.tipo || "Proyecto de Ley"}`,
+      name: `Votación Cámara N° ${rawVotId}${voteEvent.tipo ? ` · ${voteEvent.tipo}` : ""}`,
       identifiers: [
         {
           scheme: "CAMARA-VOTACION",
@@ -162,7 +165,7 @@ for (const voteEvent of snapshot.fuentes.votaciones_camara ?? []) {
         },
       ],
       attributes: {
-        tipo: voteEvent.tipo || "Proyecto de Ley",
+        tipo: voteEvent.tipo ?? null,
         resultado: voteEvent.resultado ?? null,
         quorum: voteEvent.quorum ?? null,
       },
@@ -172,6 +175,7 @@ for (const voteEvent of snapshot.fuentes.votaciones_camara ?? []) {
   }
 
   for (const rawVote of voteEvent.votos ?? []) {
+    if (!rawVote.id || !rawVote.nombre || !rawVote.opcion) continue;
     const deputy = ensureDeputy(rawVote.id, rawVote.nombre);
     const voteId = `camara-vote-${compactId(String(voteEvent.votacion_id ?? voteEvent.id))}-${compactId(rawVote.id)}`;
     records.push({
@@ -227,45 +231,48 @@ try {
         organismo?: string;
         diputado?: string;
         monto_clp?: number;
+        periodo?: string;
         url?: string;
       }>;
     };
     for (const p of (personalRaw.personal || []).slice(0, 80)) {
-      const personName = p.nombre || "Personal de Apoyo";
+      if (!p.id || !p.nombre || !p.cargo || !p.periodo || !p.url) continue;
+      const personName = p.nombre;
       const personId = `person-apoyo-${compactId(personName)}`;
       if (!entities.has(personId)) {
         entities.set(personId, {
           id: personId,
           kind: "person",
           name: personName,
-          identifiers: [{ scheme: "CONGRESO-PERSONAL", value: personName, isPublic: true, sourceUrl: p.url || "https://www.camara.cl/" }],
-          attributes: { cargo: p.cargo, organismo: p.organismo || "Cámara de Diputadas y Diputados" },
+          identifiers: [{ scheme: "CONGRESO-PERSONAL", value: personName, isPublic: true, sourceUrl: p.url }],
+          attributes: { cargo: p.cargo, organismo: p.organismo ?? null },
           sourceIds: ["camara"],
           updatedAt,
         });
       }
-      const recordId = `camara-apoyo-${compactId(p.id || personName)}`;
+      const recordId = `camara-apoyo-${compactId(p.id)}`;
+      const occurredAt = `${p.periodo}-01`;
       records.push({
         id: recordId,
         kind: "authority",
         sourceId: "camara",
         title: `Asesoría: ${personName} · ${p.cargo}`,
-        description: `Personal de apoyo contratado en Congreso Nacional ante ${p.diputado || "Cámara de Diputados"}`,
-        occurredAt: "2026-06-01",
-        period: { from: "2026-06-01", to: "2026-06-30", label: "2026-06" },
+        description: p.diputado ? `Personal de apoyo publicado para ${p.diputado}` : null,
+        occurredAt,
+        period: { from: occurredAt, to: null, label: p.periodo },
         subjectEntityIds: [personId],
         objectEntityIds: [CAMARA_ID],
-        amount: p.monto_clp ? { amountClp: p.monto_clp, currency: "CLP", originalAmount: String(p.monto_clp), originalUnit: "CLP" } : null,
-        evidence: { sourceUrl: p.url || "https://www.camara.cl/", checksumSha256: null, retrievedAt: updatedAt, documentPage: null },
+        amount: typeof p.monto_clp === "number" ? { amountClp: p.monto_clp, currency: "CLP", originalAmount: String(p.monto_clp), originalUnit: "CLP" } : null,
+        evidence: { sourceUrl: p.url, checksumSha256: null, retrievedAt: updatedAt, documentPage: null },
         data: publicData(p),
       });
       relations.push({
-        id: `relation-apoyo-${compactId(p.id || personName)}`,
+        id: `relation-apoyo-${compactId(p.id)}`,
         fromId: personId,
         predicate: "employed_by",
         toId: CAMARA_ID,
         evidenceRecordIds: [recordId],
-        period: { from: "2026-06-01", to: "2026-06-30" },
+        period: { from: occurredAt, to: null },
         reconciliation: { method: "official_id", confidence: 1 },
         disclaimer: DISCLAIMER,
       });
@@ -277,11 +284,13 @@ try {
 
 function addUnreconciledRecords(sourceId: string, kind: EvidenceKind, sourceRecords: RawRecord[]) {
   for (const raw of sourceRecords) {
+    const title = raw.nombre ?? raw.organismo;
+    if (!raw.id || !title) continue;
     records.push({
       id: `${sourceId}-${compactId(raw.id)}`,
       kind,
       sourceId,
-      title: raw.nombre ?? raw.organismo ?? `${kind} sin título`,
+      title,
       description: raw.descripcion ?? raw.materia ?? null,
       occurredAt: raw.fecha ?? null,
       period: periodFromDate(raw.fecha),
@@ -302,28 +311,29 @@ try {
   if (fs.existsSync(infoprobidadFile)) {
     const infoprobidadRaw = JSON.parse(fs.readFileSync(infoprobidadFile, "utf8")) as { records: RawRecord[] };
     for (const raw of (infoprobidadRaw.records ?? []).slice(0, 250)) {
-      const personName = raw.nombre || "Declarante Oficial";
+      if (!raw.id || !raw.nombre || !raw.fecha || !raw.url) continue;
+      const personName = raw.nombre;
       const personId = `person-infoprobidad-${compactId(personName)}`;
       if (!entities.has(personId)) {
         entities.set(personId, {
           id: personId,
           kind: "person",
           name: personName,
-          identifiers: [{ scheme: "CPLT-DECLARANTE", value: personName, isPublic: true, sourceUrl: raw.url || "https://datos.cplt.cl/" }],
+          identifiers: [{ scheme: "CPLT-DECLARANTE", value: personName, isPublic: true, sourceUrl: raw.url }],
           attributes: { office: "Funcionario/a Declarante" },
           sourceIds: ["infoprobidad"],
           updatedAt,
         });
       }
       const org = (raw.organizations as Array<{ entity_id: string; name: string }>)?.[0];
-      const orgId = org?.entity_id || "public-body-cgr";
-      const orgName = org?.name || "Contraloría General de la República";
-      if (!entities.has(orgId)) {
+      const orgId = org?.entity_id || null;
+      const orgName = org?.name || null;
+      if (orgId && orgName && !entities.has(orgId)) {
         entities.set(orgId, {
           id: orgId,
           kind: "public_body",
           name: orgName,
-          identifiers: [{ scheme: "CPLT-ORG", value: orgId, isPublic: true, sourceUrl: raw.url || "https://datos.cplt.cl/" }],
+          identifiers: [{ scheme: "CPLT-ORG", value: orgId, isPublic: true, sourceUrl: raw.url }],
           attributes: { tipo: "Organismo" },
           sourceIds: ["infoprobidad"],
           updatedAt,
@@ -335,25 +345,27 @@ try {
         kind: "declaration",
         sourceId: "infoprobidad",
         title: raw.title || `Declaración patrimonial de ${personName}`,
-        description: `Declaración de intereses y patrimonio registrada en InfoProbidad ante ${orgName}`,
-        occurredAt: raw.fecha || "2026-04-01",
-        period: periodFromDate(raw.fecha || "2026-04-01"),
+        description: orgName ? `Declaración de intereses y patrimonio registrada en InfoProbidad ante ${orgName}` : "Declaración de intereses y patrimonio registrada en InfoProbidad",
+        occurredAt: raw.fecha,
+        period: periodFromDate(raw.fecha),
         subjectEntityIds: [personId],
-        objectEntityIds: [orgId],
+        objectEntityIds: orgId ? [orgId] : [],
         amount: null,
-        evidence: { sourceUrl: raw.url || "https://datos.cplt.cl/", checksumSha256: null, retrievedAt: updatedAt, documentPage: null },
+        evidence: { sourceUrl: raw.url, checksumSha256: null, retrievedAt: updatedAt, documentPage: null },
         data: publicData(raw),
       });
-      relations.push({
-        id: `relation-infoprobidad-${compactId(raw.id)}`,
-        fromId: personId,
-        predicate: "filed_declaration_with",
-        toId: orgId,
-        evidenceRecordIds: [recordId],
-        period: periodFromDate(raw.fecha || "2026-04-01"),
-        reconciliation: { method: "official_infoprobidad_id", confidence: 1 },
-        disclaimer: DISCLAIMER,
-      });
+      if (orgId) {
+        relations.push({
+          id: `relation-infoprobidad-${compactId(raw.id)}`,
+          fromId: personId,
+          predicate: "filed_declaration_with",
+          toId: orgId,
+          evidenceRecordIds: [recordId],
+          period: periodFromDate(raw.fecha),
+          reconciliation: { method: "official_infoprobidad_id", confidence: 1 },
+          disclaimer: DISCLAIMER,
+        });
+      }
     }
   }
 } catch (e) {
@@ -366,10 +378,14 @@ try {
   if (infolobby && Array.isArray(infolobby.records)) {
     for (const raw of infolobby.records.slice(0, 250)) {
       const rawAny = raw as Record<string, unknown>;
-      const gestorName = String(rawAny.gestor_interes || rawAny.solicitante || rawAny.representante || rawAny.sujetos_activos || "Gestor de Interés");
-      const sujetoName = String(rawAny.sujeto_pasivo || rawAny.autoridad || rawAny.nombre || "Autoridad Institucional");
-      const orgName = String(rawAny.organismo || "Organismo del Estado");
-      const cargoSujeto = String(rawAny.cargo_sujeto || rawAny.cargo || "Sujeto Pasivo de Lobby");
+      const gestorName = rawAny.gestor_interes || rawAny.solicitante || rawAny.representante || rawAny.sujetos_activos;
+      const sujetoName = rawAny.sujeto_pasivo || rawAny.autoridad || rawAny.nombre;
+      const orgName = rawAny.organismo;
+      const materia = raw.materia || rawAny.objeto;
+      if (!raw.id || !raw.fecha || !raw.url || typeof gestorName !== "string" || typeof sujetoName !== "string" || typeof orgName !== "string" || typeof materia !== "string") continue;
+      const cargoSujeto = typeof rawAny.cargo_sujeto === "string"
+        ? rawAny.cargo_sujeto
+        : typeof rawAny.cargo === "string" ? rawAny.cargo : null;
 
     const gestorId = `company-infolobby-${compactId(gestorName)}`;
     const sujetoId = `person-infolobby-${compactId(sujetoName)}`;
@@ -379,7 +395,7 @@ try {
         id: gestorId,
         kind: "legal_entity",
         name: gestorName,
-        identifiers: [{ scheme: "INFOLOBBY-GESTOR", value: gestorName, isPublic: true, sourceUrl: raw.url || "https://www.infolobby.cl" }],
+        identifiers: [{ scheme: "INFOLOBBY-GESTOR", value: gestorName, isPublic: true, sourceUrl: raw.url }],
         attributes: { tipo: "Gestor de Interés" },
         sourceIds: ["infolobby"],
         updatedAt,
@@ -390,7 +406,7 @@ try {
         id: sujetoId,
         kind: "person",
         name: `${sujetoName} (${orgName})`,
-        identifiers: [{ scheme: "INFOLOBBY-SUJETO", value: sujetoName, isPublic: true, sourceUrl: raw.url || "https://www.infolobby.cl" }],
+        identifiers: [{ scheme: "INFOLOBBY-SUJETO", value: sujetoName, isPublic: true, sourceUrl: raw.url }],
         attributes: { cargo: cargoSujeto, organismo: orgName },
         sourceIds: ["infolobby"],
         updatedAt,
@@ -402,14 +418,14 @@ try {
       id: recordId,
       kind: "lobby",
       sourceId: "infolobby",
-      title: `Audiencia: ${raw.materia || rawAny.objeto || "Gestión de intereses particulares"}`,
+      title: `Audiencia: ${materia}`,
       description: `Audiencia sostenida por ${gestorName} ante ${sujetoName} (${orgName})`,
-      occurredAt: raw.fecha || "2026-06-15",
-      period: periodFromDate(raw.fecha || "2026-06-15"),
+      occurredAt: raw.fecha,
+      period: periodFromDate(raw.fecha),
       subjectEntityIds: [gestorId],
       objectEntityIds: [sujetoId],
       amount: null,
-      evidence: { sourceUrl: raw.url || "https://www.infolobby.cl", checksumSha256: null, retrievedAt: updatedAt, documentPage: null },
+      evidence: { sourceUrl: raw.url, checksumSha256: null, retrievedAt: updatedAt, documentPage: null },
       data: publicData(raw),
     });
 
@@ -419,7 +435,7 @@ try {
         predicate: "participated_in_lobby_meeting",
         toId: sujetoId,
         evidenceRecordIds: [recordId],
-        period: periodFromDate(raw.fecha || "2026-06-15"),
+        period: periodFromDate(raw.fecha),
         reconciliation: { method: "official_id", confidence: 1 },
         disclaimer: DISCLAIMER,
       });
@@ -510,6 +526,7 @@ if (chilecompra) {
 
   // 2. Registrar compradores y adjudicaciones individuales oficiales.
   for (const buyer of chilecompra.buyers.slice(0, 150)) {
+    if (!buyer.name) continue;
     if (!entities.has(buyer.id)) {
       entities.set(buyer.id, {
         id: buyer.id,
@@ -523,6 +540,7 @@ if (chilecompra) {
     }
 
     for (const award of (buyer.top ?? []).slice(0, 3)) {
+      if (!award.title) continue;
       const provName = award.proveedor && award.proveedor !== "Proveedor MercadoPúblico" ? award.proveedor : null;
       const provId = award.proveedor_id || null;
 
@@ -538,18 +556,20 @@ if (chilecompra) {
         });
       }
 
-      const recordId = `cc-award-${compactId(buyer.id)}-${compactId(award.ocid || award.title || String(award.monto_clp))}`;
+      const recordId = `cc-award-${compactId(buyer.id)}-${compactId(award.ocid || award.title)}`;
       records.push({
         id: recordId,
         kind: "contract",
         sourceId: "chilecompra",
-        title: award.title || "Adjudicación OCDS sin título publicado",
-        description: `Adjudicación OCDS por ${award.monto_clp.toLocaleString("es-CL")} CLP en MercadoPúblico (OCID: ${award.ocid})`,
+        title: award.title,
+        description: award.monto_clp === null
+          ? `Adjudicación OCDS sin monto publicado en MercadoPúblico (OCID: ${award.ocid})`
+          : `Adjudicación OCDS por ${award.monto_clp.toLocaleString("es-CL")} CLP en MercadoPúblico (OCID: ${award.ocid})`,
         occurredAt: award.fecha?.slice(0, 10) ?? null,
         period: periodFromDate(award.fecha ?? undefined),
         subjectEntityIds: [buyer.id],
         objectEntityIds: provId ? [provId] : [],
-        amount: award.monto_clp > 0 ? { amountClp: award.monto_clp, currency: "CLP", originalAmount: String(award.monto_clp), originalUnit: "CLP" } : null,
+        amount: award.monto_clp !== null ? { amountClp: award.monto_clp, currency: "CLP", originalAmount: String(award.monto_clp), originalUnit: "CLP" } : null,
         evidence: { sourceUrl: award.url || `https://api.mercadopublico.cl/APISOCDS/OCDS/award/${award.ocid.replace("ocds-70d2nz-", "")}`, checksumSha256: null, retrievedAt: chilecompra.generatedAt, documentPage: null },
         data: publicData({ ...award, ocid: award.ocid, buyer_name: buyer.name }),
       });
@@ -573,7 +593,7 @@ if (chilecompra) {
   for (const pair of (chilecompra.topPairs ?? []).slice(0, 200)) {
     const buyer = chilecompra.buyers.find((b) => b.id === pair.buyerId);
     const supplier = chilecompra.suppliers.find((s) => s.id === pair.provId);
-    if (!buyer || !supplier) continue;
+    if (!buyer || !buyer.name || !supplier) continue;
 
     if (!entities.has(buyer.id)) {
       entities.set(buyer.id, {
@@ -633,8 +653,9 @@ try {
     };
 
     for (const t of (leySummary.transfers_sample ?? []).slice(0, 350)) {
-      const emisorName = t.emitter_name || "Ministerio del Interior y Seguridad Pública";
-      const receptorName = t.receiver_name || "Entidad Receptora Privada";
+      if (!t.id || !t.emitter_name || !t.receiver_name || !t.title || !t.fecha || !t.url || !Number.isFinite(t.monto_clp)) continue;
+      const emisorName = t.emitter_name;
+      const receptorName = t.receiver_name;
 
       const emisorId = `public-body-ley19862-${compactId(emisorName)}`;
       const receptorId = `legal-ley19862-${compactId(receptorName)}`;
@@ -644,7 +665,7 @@ try {
           id: emisorId,
           kind: "public_body",
           name: emisorName,
-          identifiers: [{ scheme: "LEY19862-EMISOR", value: emisorName, isPublic: true, sourceUrl: t.url || "https://www.registros19862.cl/" }],
+          identifiers: [{ scheme: "LEY19862-EMISOR", value: emisorName, isPublic: true, sourceUrl: t.url }],
           attributes: { tipo: "Organismo Pagador" },
           sourceIds: ["ley-19862"],
           updatedAt,
@@ -655,7 +676,7 @@ try {
           id: receptorId,
           kind: "legal_entity",
           name: receptorName,
-          identifiers: [{ scheme: "LEY19862-RECEPTOR", value: receptorName, isPublic: true, sourceUrl: t.url || "https://www.registros19862.cl/" }],
+          identifiers: [{ scheme: "LEY19862-RECEPTOR", value: receptorName, isPublic: true, sourceUrl: t.url }],
           attributes: { tipo: "Entidad Receptora" },
           sourceIds: ["ley-19862"],
           updatedAt,
@@ -667,14 +688,14 @@ try {
         id: recordId,
         kind: "transfer",
         sourceId: "ley-19862",
-        title: t.title || `Transferencia a ${receptorName}`,
+        title: t.title,
         description: `Transferencia fiscal registrada en Ley 19.862 por ${t.monto_clp.toLocaleString("es-CL")} CLP`,
-        occurredAt: t.fecha?.slice(0, 10) || "2026-05-15",
-        period: periodFromDate(t.fecha || "2026-05-15"),
+        occurredAt: t.fecha.slice(0, 10),
+        period: periodFromDate(t.fecha),
         subjectEntityIds: [emisorId],
         objectEntityIds: [receptorId],
         amount: t.monto_clp > 0 ? { amountClp: t.monto_clp, currency: "CLP", originalAmount: String(t.monto_clp), originalUnit: "CLP" } : null,
-        evidence: { sourceUrl: t.url || "https://www.registros19862.cl/", checksumSha256: null, retrievedAt: updatedAt, documentPage: null },
+        evidence: { sourceUrl: t.url, checksumSha256: null, retrievedAt: updatedAt, documentPage: null },
         data: publicData(t),
       });
 
@@ -684,7 +705,7 @@ try {
         predicate: "received_transfer_from",
         toId: receptorId,
         evidenceRecordIds: [recordId],
-        period: periodFromDate(t.fecha || "2026-05-15"),
+        period: periodFromDate(t.fecha),
         reconciliation: { method: "official_id", confidence: 1 },
         disclaimer: DISCLAIMER,
       });

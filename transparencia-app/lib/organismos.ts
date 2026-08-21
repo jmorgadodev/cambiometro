@@ -19,9 +19,9 @@ export interface OrganismoCanonico {
   tipo: TipoOrganismo;
   partida_capitulo_dipres: string | null;
   cut_si_municipio: string | null;
-  region: string;
-  dotacion_total: number;
-  gasto_mensual_estimado_clp: number;
+  region: string | null;
+  dotacion_total: number | null;
+  gasto_mensual_estimado_clp: number | null;
   compras_ocds_monto_clp: number | null;
   compras_ocds_procesos: number | null;
   compras_ocds_rut_comprador?: string | null;
