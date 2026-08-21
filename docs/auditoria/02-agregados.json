@@ -1,8 +1,8 @@
 {
   "meta": {
-    "generated_at": "2026-08-21T00:49:43.494Z",
+    "generated_at": "2026-08-21T10:26:23.135Z",
     "cutoff": "2026-08-20",
-    "elapsed_seconds": 8,
+    "elapsed_seconds": 3,
     "site_extraction": "RSC"
   },
   "summary": {
@@ -45,7 +45,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "6ff42e0fe9112f3513f5f6f95f8264f5d25fb671ab772d73df96df7c953301ee",
       "site_extraction_method": "RSC"
     },
@@ -69,7 +69,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "60df0dfffac25e1d4aa4ac919ea8e47ac642e43a9c18c7346e2857d575c86c65",
       "site_extraction_method": "RSC"
     },
@@ -93,7 +93,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "ca08f126cbda19f97c75d7757be51510d7846f8aae6d83e1a3e5af4c3b6595b9",
       "site_extraction_method": "RSC"
     },
@@ -117,7 +117,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "fae1d85de2090db91b43ad23d0e821a0d4c85a3a58633cac8c80caaa5cdf022d",
       "site_extraction_method": "RSC"
     },
@@ -141,7 +141,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "2626b55b16fdc02bb7de57cc3b4fadfba3d01dcd82ba0a47f3725300261a795b",
       "site_extraction_method": "RSC"
     },
@@ -165,7 +165,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "b132157ecb343df4225257142329ecda7b90da6251adcfef512907b919a5e75e",
       "site_extraction_method": "RSC"
     },
@@ -189,7 +189,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "5f2b0554f9d6cce870cd7a9ef9bb6e598052454ec559b71e0470e6b8482bf363",
       "site_extraction_method": "RSC"
     },
@@ -213,7 +213,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "ab3d3ecc6c263dddaa0c7c9bc89429cc23554e2de463f006aa741737fa7f9cdb",
       "site_extraction_method": "RSC"
     },
@@ -237,7 +237,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "aafb20b8647b662e67e803d18ab0ccd271b506a5e7708206b2302cf301f0d5bd",
       "site_extraction_method": "RSC"
     },
@@ -261,7 +261,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "138c8fc9f14fcc3880b877a40979ef0149fa7d534da8bb67a469f7d9f68e7d4d",
       "site_extraction_method": "RSC"
     },
@@ -285,7 +285,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "dd86a9441b6c19a61d1a62268810f7a1fc95380089b59bc29ce432a6ef9eec20",
       "site_extraction_method": "RSC"
     },
@@ -309,7 +309,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "8fa4bf1bac6a22a65d088c2fad6bce21e3b6f09d2b21d01a69fdd95c081dd0c7",
       "site_extraction_method": "RSC"
     },
@@ -333,7 +333,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "09489a44afc000afc6fd3829fec759969209c0d120a4d7ad06950df4242fd308",
       "site_extraction_method": "RSC"
     },
@@ -357,7 +357,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "1a1c86a32ecbb7a99e9d27239e52de81f1080cf181bf1280c453a2a6d6a1d337",
       "site_extraction_method": "RSC"
     },
@@ -375,13 +375,13 @@
         "oficial": 154,
         "proyeccion": 154,
         "lake": 154,
-        "sitio": 154
+        "sitio": null
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "db5266b88a6eacd7d24415b44f8aadec06b46ce9b27d2de40697353a8ec529f3",
       "site_extraction_method": "RSC"
     },
@@ -405,7 +405,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "bfc66532d5419d20220e832dca427a9c544022f9ee6f8e8bd900ffb4aacb6936",
       "site_extraction_method": "RSC"
     },
@@ -429,7 +429,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "0a32d859ece8982f61b294b6dcf8c720f3f036fe531c7b58494a89f6d76233bf",
       "site_extraction_method": "RSC"
     },
@@ -453,7 +453,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "a3e11f6efa33a36fb8b0e9182079cb8399397f6e2ff68ed4c591e9101d7d34de",
       "site_extraction_method": "RSC"
     },
@@ -477,7 +477,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "5505c44aae236b18f1ccb71ea9e88c95ca210087c7f28da52629811be2ff21fd",
       "site_extraction_method": "RSC"
     },
@@ -495,13 +495,13 @@
         "oficial": 1411,
         "proyeccion": 1411,
         "lake": 1411,
-        "sitio": null
+        "sitio": 1411
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "8d23b0738f041274b2ab21abaee4dccce683efd4c0c0c3d67e460f8a08a475ad",
       "site_extraction_method": "RSC"
     },
@@ -525,7 +525,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "f94cd3ea91d5cb52f9309d83111ec575126cb50c885a3a6bc55f6f299702effd",
       "site_extraction_method": "RSC"
     },
@@ -543,13 +543,13 @@
         "oficial": 265,
         "proyeccion": 265,
         "lake": 265,
-        "sitio": null
+        "sitio": 265
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "a38e15f083df4ddda39c91ca23f30d95ae20e4f6c95c701e9acaa2762dc7c762",
       "site_extraction_method": "RSC"
     },
@@ -573,7 +573,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "649d1b49a791532ac2746dfca52331ea19f89bb90eec35d01b40e2f3301212c8",
       "site_extraction_method": "RSC"
     },
@@ -597,7 +597,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "1e2f6df08265d955e1b51ebaa22da2e17ed9be7c8f2e0dcc6c79aacb245f5f3d",
       "site_extraction_method": "RSC"
     },
@@ -621,7 +621,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "9eb0e2b0bb2a1e067e6acaa886dd78d0eae0f572f8adc6f75c7042c423622631",
       "site_extraction_method": "RSC"
     },
@@ -645,7 +645,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "48c55e5394fc68c3e776cce9b59588cb588ccf898cc9653ab6dda3d46bbad45d",
       "site_extraction_method": "RSC"
     },
@@ -669,7 +669,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "0ab4fc52c39442d582b7107258122694cfb09baf8e0a9181673d830bbe14d0c6",
       "site_extraction_method": "RSC"
     },
@@ -693,7 +693,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "666f949a565c4cbfbe7d04b46e6e5da269e9944737106881bcb9117a1229d963",
       "site_extraction_method": "RSC"
     },
@@ -717,7 +717,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "2c21bf60293c46d53f23cbf61e95768976e6bdab7d20a84e153f100c5be1c837",
       "site_extraction_method": "RSC"
     },
@@ -741,7 +741,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "97156343b5ed06aabd030b1939fb43b6d0a32c161229319f89b3ac6cd1188f77",
       "site_extraction_method": "RSC"
     },
@@ -765,7 +765,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "d7c5173e200113dc9699a6ed962da4ca456900c5df20fc9c8bf8aa1bee6c64bb",
       "site_extraction_method": "RSC"
     },
@@ -783,13 +783,13 @@
         "oficial": 135,
         "proyeccion": 135,
         "lake": 135,
-        "sitio": null
+        "sitio": 135
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "2508cc6d7a1acfc8c2407ab6607d203594a9c34829e0a6f34b976dc76da82538",
       "site_extraction_method": "RSC"
     },
@@ -813,7 +813,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "a6a93fd2bc8bcb513486302d91030ff209484fdc349bee2c4e1199dc95e9fcaf",
       "site_extraction_method": "RSC"
     },
@@ -837,7 +837,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "c5a35a09734232a41eb4158f52ef6ce63f7e8d6ab40f3483463f43171cd35743",
       "site_extraction_method": "RSC"
     },
@@ -861,7 +861,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "5aad50e0e656ea08b46ac0acc58797321f35f81e2bc82ae7ccd259375034bff3",
       "site_extraction_method": "RSC"
     },
@@ -885,7 +885,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "55a184eea08881f3c05ac5ce835281775f41c37cc3509467938a1d1a0ad4d949",
       "site_extraction_method": "RSC"
     },
@@ -909,7 +909,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "4fefef19322f5b0d2161a911ea9f0a7834221b0768486b9e461a26596cd2f1c7",
       "site_extraction_method": "RSC"
     },
@@ -933,7 +933,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "444b1e8472b80ee2d462e1bf8c2add11ea53a4129b4024eadc8612382cae4e7e",
       "site_extraction_method": "RSC"
     },
@@ -957,7 +957,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "3426430e2e27d7436446f3d03f19844346b4cf31447ebe34638cc1615f8cf83a",
       "site_extraction_method": "RSC"
     },
@@ -981,7 +981,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "d6c0f27b03ea873fe50ea3ba472b431c50985dfd7ccd6d684f0ccd03b3fa122f",
       "site_extraction_method": "RSC"
     },
@@ -1005,7 +1005,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "d5dcb9b0d8664895e41cfcc590696c01b09bbd2df85fac185138431d00749f83",
       "site_extraction_method": "RSC"
     },
@@ -1023,13 +1023,13 @@
         "oficial": 6520,
         "proyeccion": 6520,
         "lake": 6520,
-        "sitio": null
+        "sitio": 6520
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "cb28625068b46c1257bbd1ac89688e584baecef6a3919d0c12dc1e17e53c41d2",
       "site_extraction_method": "RSC"
     },
@@ -1053,7 +1053,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "b845edc31e037f8f0dbd4f25025c946fe0d04f8db4bfc363316aecacd8d2e173",
       "site_extraction_method": "RSC"
     },
@@ -1077,7 +1077,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "e0d0b4a0eeca23aaa5fa9f3e13f903eb8b8f18816e04f39df467ae4075a3935e",
       "site_extraction_method": "RSC"
     },
@@ -1101,7 +1101,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "b4f4b3655fdb9f3cf80ce40008d1a3fed95b0de276523fd6f8864f15610b97e8",
       "site_extraction_method": "RSC"
     },
@@ -1125,7 +1125,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "6c39d748bdeb656f4ad4141410cf6745641431318dfe14598e0987fdf95746d5",
       "site_extraction_method": "RSC"
     },
@@ -1149,7 +1149,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "4de0e00e9946ce9f92c3cc78efee0684b1b7e5931d822aa8e9d1bfc0e87be75e",
       "site_extraction_method": "RSC"
     },
@@ -1173,7 +1173,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "f684475086cb12235988e093ddd2d5af24014eb0defb30b84f326ba37f7d0084",
       "site_extraction_method": "RSC"
     },
@@ -1188,17 +1188,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 68646138,
-        "proyeccion": 68646138,
-        "lake": 68646138,
-        "sitio": 68646138
+        "oficial": 58165674,
+        "proyeccion": 58165674,
+        "lake": 58165674,
+        "sitio": 58165674
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/dem",
-      "checksum": "2ce6dc0e3681b1b8ceb861d4dc733585bd2bd593548adc43deaea2307dfd8117",
+      "url": "http://127.0.0.1:3010/partidos/dem",
+      "checksum": "0cfbb03f0b80a135f302a02e4bdefe89384bfb80025bfc27b9eec53a04a7fd26",
       "site_extraction_method": "RSC"
     },
     {
@@ -1221,7 +1221,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "d7ff4ae6a36fbed85fa556c2cbde1692e26ea080a69020bf9bd187e8e8e10e2c",
       "site_extraction_method": "RSC"
     },
@@ -1245,7 +1245,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "a6a569de25e40460e4947d2d4d07ae3cebc88f9b015264747dc4f11520f61f6e",
       "site_extraction_method": "RSC"
     },
@@ -1269,7 +1269,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "c3f19a8d5736d32388a49463a7c02d6328a35b74493bafae8abfbdc87d0b4f21",
       "site_extraction_method": "RSC"
     },
@@ -1293,7 +1293,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "f37c6fe3ab5349b25aed82b36e864ee86d507b7fa94d7d68211caae264959d09",
       "site_extraction_method": "RSC"
     },
@@ -1317,7 +1317,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "db51e4f34f0c9bdddd2e623e3fe5ecde670fba6347d854066e78a83c29e4b21a",
       "site_extraction_method": "RSC"
     },
@@ -1341,7 +1341,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "e4d2ca58ffd5154cb3b15fb0554a2dfc3ffb1f7d0e552a5f37bb5401ea9a400b",
       "site_extraction_method": "RSC"
     },
@@ -1365,7 +1365,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "07d06aab18bd69e4daab606e92c85feaf203fabb09629ec0a26eeaeea7612772",
       "site_extraction_method": "RSC"
     },
@@ -1380,17 +1380,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 38150473,
-        "proyeccion": 38150473,
-        "lake": 38150473,
-        "sitio": 38150473
+        "oficial": 49516929,
+        "proyeccion": 49516929,
+        "lake": 49516929,
+        "sitio": 49516929
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/evopoli",
-      "checksum": "93b381b99173b22fcda91be215d85fbcad55c4da3edc2f2936453c912061d520",
+      "url": "http://127.0.0.1:3010/partidos/evopoli",
+      "checksum": "bb243ffde2aa17a501d04136241c6134870da0fefb159f6c0fd7593ae051273f",
       "site_extraction_method": "RSC"
     },
     {
@@ -1413,7 +1413,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "9a712d9b3f165ab92ebf1d493080fb7f9d587427ed711a6cb4c1af25a93e5215",
       "site_extraction_method": "RSC"
     },
@@ -1437,7 +1437,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "724b3450d705e6a2e687b35bfea258d6b611738a5523937afc1a97fba7f44f46",
       "site_extraction_method": "RSC"
     },
@@ -1461,7 +1461,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "268497321eb2dddfbf684291b1d16b38015e406de73ad30e061f9e8a1ddadd13",
       "site_extraction_method": "RSC"
     },
@@ -1485,7 +1485,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "d0efa8f549decdd764f6af473e0ddcef557069d28999390da293afcffc4e8fe1",
       "site_extraction_method": "RSC"
     },
@@ -1509,7 +1509,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "33444bd16cc849d7f279f7ff6236bd809a5b7a8092a0e14496be989b69611fb4",
       "site_extraction_method": "RSC"
     },
@@ -1533,7 +1533,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "9dab09051898743ea47f31f93a6b5c9b06e312261abbdc521d965f4217d07e86",
       "site_extraction_method": "RSC"
     },
@@ -1557,7 +1557,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "b4916ff3137884598202b05f68d01357cc36f7d027d95a84caf5b8ec7e13aca0",
       "site_extraction_method": "RSC"
     },
@@ -1572,17 +1572,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 182746240,
-        "proyeccion": 182746240,
-        "lake": 182746240,
-        "sitio": 182746240
+        "oficial": 265506543,
+        "proyeccion": 265506543,
+        "lake": 265506543,
+        "sitio": 265506543
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/fa",
-      "checksum": "4b90cfe340a6dd7a4ea7a32a86066d99562de1c4e11b3cbe3519889079cd4b15",
+      "url": "http://127.0.0.1:3010/partidos/fa",
+      "checksum": "7b4e827c521d4b8528d61ee79645103399247edbfee053aa9e4bd8f7b46219f7",
       "site_extraction_method": "RSC"
     },
     {
@@ -1605,7 +1605,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "b95d89b0c93cf2a5d16ba034958aac1875936e995c44c923d638c2882c20b39f",
       "site_extraction_method": "RSC"
     },
@@ -1629,7 +1629,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "3f82122fb9f899c00bb3bbb1621072ec4c8027989a995ec4d8e61214d11bd826",
       "site_extraction_method": "RSC"
     },
@@ -1653,7 +1653,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "86a1968197b9a7be9c05075d19aca7b16c6e0c94cc785a02ab477f728b16c5d0",
       "site_extraction_method": "RSC"
     },
@@ -1677,7 +1677,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "136ed92eefa4e958bdb8a2564a484614f07ed36077602f17722ed413f65d5873",
       "site_extraction_method": "RSC"
     },
@@ -1701,7 +1701,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "7484858fe393351a5deda09286a0f17fb7d0b5a6a49b91d18850c9d957777ae0",
       "site_extraction_method": "RSC"
     },
@@ -1725,7 +1725,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "d0155a53708098baa401f7cfdde423cd2384f616c8a945b30ea5332f2b74c931",
       "site_extraction_method": "RSC"
     },
@@ -1749,7 +1749,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "61990b9febf123a83d1bf3b76046a33105e7a5395b1712ffe009426cd37c654b",
       "site_extraction_method": "RSC"
     },
@@ -1764,17 +1764,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 60741909,
-        "proyeccion": 60741909,
-        "lake": 60741909,
-        "sitio": 60741909
+        "oficial": 55126448,
+        "proyeccion": 55126448,
+        "lake": 55126448,
+        "sitio": 55126448
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/frvs",
-      "checksum": "d86fecac5eb197534d9e9e272fc739cff05d166f734ad673cb6fc9921e3e3c6a",
+      "url": "http://127.0.0.1:3010/partidos/frvs",
+      "checksum": "61ccce856909ccf4902ff3d10335a49976929dd35bbee3ce603996f7a03ec6a5",
       "site_extraction_method": "RSC"
     },
     {
@@ -1797,7 +1797,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "a9b2981ff594715786678cf6639fa222380e4d9833ce3577bfc3ea39585f94ef",
       "site_extraction_method": "RSC"
     },
@@ -1821,7 +1821,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "8767319669c34d127dcd68cc49c7a4fe281386426ad8124c58abcf7e71d46721",
       "site_extraction_method": "RSC"
     },
@@ -1839,13 +1839,13 @@
         "oficial": 3835,
         "proyeccion": 3835,
         "lake": 3835,
-        "sitio": null
+        "sitio": 3835
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "6ce8d24353377c5dd229da2148ffbaa10bab6afdf4534cdc2fd35cfd0e97ed53",
       "site_extraction_method": "RSC"
     },
@@ -1869,7 +1869,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "8dd3aeec77e425f3f1ca1a1608b9373aa8b345e60d91bde989f9612d95e2c221",
       "site_extraction_method": "RSC"
     },
@@ -1893,7 +1893,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "7f07b96c78111164a992ecccb39d9e28c41cba25e9e82326c12e40bf2cf03e8b",
       "site_extraction_method": "RSC"
     },
@@ -1911,13 +1911,13 @@
         "oficial": 5361,
         "proyeccion": 5361,
         "lake": 5361,
-        "sitio": 5361
+        "sitio": null
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "af6211fa851d98857566dd43fd8db102ec6ea9d7d85862dde772d634df5677c9",
       "site_extraction_method": "RSC"
     },
@@ -1941,7 +1941,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "95c2c794e70d6b13af7bedb18e4270f068af7f0e9939531f2379778068046565",
       "site_extraction_method": "RSC"
     },
@@ -1956,17 +1956,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 869552716,
-        "proyeccion": 869552716,
-        "lake": 869552716,
-        "sitio": 869552716
+        "oficial": 874609282,
+        "proyeccion": 874609282,
+        "lake": 874609282,
+        "sitio": 874609282
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/ind",
-      "checksum": "770a576eb742b561c9738db6aa7a604aac651d75fcf416125fa695231524ed85",
+      "url": "http://127.0.0.1:3010/partidos/ind",
+      "checksum": "34341dbcc44b1f17814b6aaba3662b4d16dee8f6fdcf6b62e02ec750f034c5fe",
       "site_extraction_method": "RSC"
     },
     {
@@ -1989,7 +1989,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "b7f4e65cc557d863abd9c608248684a462e742dbf8e5d95381c4ede84a3c2b05",
       "site_extraction_method": "RSC"
     },
@@ -2013,7 +2013,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "9a8ed90b8bf77f15a8cd0af5c6096f619d0a7cfb97ac4413ec9b77bb01e992a8",
       "site_extraction_method": "RSC"
     },
@@ -2037,7 +2037,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "c1cf79d80e65542b6d789e4f3c01d9f17c7403d0f04c69ce7ee338b2c0d52b9a",
       "site_extraction_method": "RSC"
     },
@@ -2061,7 +2061,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "c3d31118d137a98c379c55a69b5e94ee6fb3269096214ef1eb0067ca09eb468a",
       "site_extraction_method": "RSC"
     },
@@ -2085,7 +2085,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "45f4c5b345c5f69e57a0de3a8c864142c1a905305200798be94475f754abb9b4",
       "site_extraction_method": "RSC"
     },
@@ -2109,7 +2109,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "7d1a81894d249fd67f8ef56f9b084a973f6d97f27694da96485dd8bfc7f21277",
       "site_extraction_method": "RSC"
     },
@@ -2133,7 +2133,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "b5fac72c45d9a635447719c9c1a8fd7a1b572eee19017c7ea987fd1fee040275",
       "site_extraction_method": "RSC"
     },
@@ -2148,17 +2148,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 189065424,
-        "proyeccion": 189065424,
-        "lake": 189065424,
-        "sitio": 189065424
+        "oficial": 198613785,
+        "proyeccion": 198613785,
+        "lake": 198613785,
+        "sitio": 198613785
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/pc",
-      "checksum": "90406e5cbde8f9dc737534284db91cfb67c0b4fac2995e2404687093413ebbf6",
+      "url": "http://127.0.0.1:3010/partidos/pc",
+      "checksum": "b777b843dc448bb8f7a719c85ecc3c57c732814c970076197b53ebf07b896b53",
       "site_extraction_method": "RSC"
     },
     {
@@ -2181,7 +2181,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "9e1ca3a5e22dfd62b340ff8e7f9945deac912c57eccbb94e1e3e8bc05ca65572",
       "site_extraction_method": "RSC"
     },
@@ -2205,7 +2205,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "fdcfa6605145178a01848cd35f228fdcd9b70eb5bfc36cfaf5b7c5e750c56b50",
       "site_extraction_method": "RSC"
     },
@@ -2229,7 +2229,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "9c40473ac00c906c03752a097e23116dc6d88f8a29076f832f3e0e1fe045ba79",
       "site_extraction_method": "RSC"
     },
@@ -2247,13 +2247,13 @@
         "oficial": 1779,
         "proyeccion": 1779,
         "lake": 1779,
-        "sitio": 1779
+        "sitio": null
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "6edc89a099cd4d132fd05231dd74978ba571e1e7d0dfad01586b608a2f18fb5b",
       "site_extraction_method": "RSC"
     },
@@ -2277,7 +2277,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "77963821e0c48ccb4d90c858e36f5dadd5d2ef00e5c1340709e20bc10460c980",
       "site_extraction_method": "RSC"
     },
@@ -2301,7 +2301,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "afbf363e9acb3a28821c3f86c6052c05664249c74df00456299d0aceb16f9116",
       "site_extraction_method": "RSC"
     },
@@ -2325,7 +2325,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "98974e4dcfb50a2bbe31110b4ccf9807e41c573e419939c1484735aaa192be85",
       "site_extraction_method": "RSC"
     },
@@ -2340,17 +2340,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 181616979,
-        "proyeccion": 181616979,
-        "lake": 181616979,
-        "sitio": 181616979
+        "oficial": 204329421,
+        "proyeccion": 204329421,
+        "lake": 204329421,
+        "sitio": 204329421
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/pdc",
-      "checksum": "8054aa8820878acd3586c2849470634a58e3da05711a6468288c1668644af1a6",
+      "url": "http://127.0.0.1:3010/partidos/pdc",
+      "checksum": "4bc35304c159a18fcf999e01f9278239efeb738cf8092e57a5b3013e3aa7d0b2",
       "site_extraction_method": "RSC"
     },
     {
@@ -2373,7 +2373,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "25c32da41c6911bb229cfbc08fce479862fa564c80914bf26dae0e21819a4be6",
       "site_extraction_method": "RSC"
     },
@@ -2397,7 +2397,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "176c48f2e8ea0e3e1c0a85d1d57e9c964839c6d524cd8e395bb17d754be2950a",
       "site_extraction_method": "RSC"
     },
@@ -2421,7 +2421,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "3b883cfaa5284e2890c1aa766647db1c9b75ee55eec925e856158355d7a0bd8e",
       "site_extraction_method": "RSC"
     },
@@ -2445,7 +2445,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "1f1ffb76deb3b019fcca879b8fa4496f7f8452b087f6ba3dea5ae2985f24f424",
       "site_extraction_method": "RSC"
     },
@@ -2469,7 +2469,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "e7039dd0b3f009cfef89d6b0b0be4fd5f6c4db7427771460a58fb7aff3ab4051",
       "site_extraction_method": "RSC"
     },
@@ -2493,7 +2493,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "10f8496e775cf89c0c7a20e5ba591154f5a2b3fb5139724ab39df92bd9c066e1",
       "site_extraction_method": "RSC"
     },
@@ -2517,7 +2517,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "670af439361574d4a4182452e4c67febe65a15ef0e2790bbd4dcae41cdc0f58d",
       "site_extraction_method": "RSC"
     },
@@ -2532,17 +2532,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 114491930,
-        "proyeccion": 114491930,
-        "lake": 114491930,
-        "sitio": 114491930
+        "oficial": 216611295,
+        "proyeccion": 216611295,
+        "lake": 216611295,
+        "sitio": 216611295
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/pdg",
-      "checksum": "a45a63b5c9994c0756c716ee20a25351600853a143d2c1cc9cf8bc6b9adb5476",
+      "url": "http://127.0.0.1:3010/partidos/pdg",
+      "checksum": "1419e494f648272b454256e8a945e131eef8be5fd0aed0e55ddbee915307518c",
       "site_extraction_method": "RSC"
     },
     {
@@ -2565,7 +2565,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "07a60931af8a5341dd3617121a5db605160a7ded085cf6b9f9fa614a67354c5d",
       "site_extraction_method": "RSC"
     },
@@ -2589,7 +2589,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "305e4b1ae1dce20d72c18b595512ed423df1a5a0c24fd197541a4023da7836bf",
       "site_extraction_method": "RSC"
     },
@@ -2613,7 +2613,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "3d97a0e899a5123505ff12e2ebd34b332511e148bc5b003d85f61bbd97dd9840",
       "site_extraction_method": "RSC"
     },
@@ -2637,7 +2637,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "daff574590d0330ff6862ba0277de9dba923dd23b67837745c2df5ea21c2aa0d",
       "site_extraction_method": "RSC"
     },
@@ -2661,7 +2661,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "de1381446a7e6f0d713aceeadb642c99ff166077d6cdcfa603388c121625ff4f",
       "site_extraction_method": "RSC"
     },
@@ -2685,7 +2685,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "eb344a52d0af6e7cc6416cdda3f9ccfefef7f7fb8753b814dc4539cb5c30e00c",
       "site_extraction_method": "RSC"
     },
@@ -2709,7 +2709,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "6da3011368b51d57c453a7e2f7b423bb24c03673e268f6382288cb36e0e10b4a",
       "site_extraction_method": "RSC"
     },
@@ -2724,17 +2724,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 9413477,
-        "proyeccion": 9413477,
-        "lake": 9413477,
-        "sitio": 9413477
+        "oficial": 16712507,
+        "proyeccion": 16712507,
+        "lake": 16712507,
+        "sitio": 16712507
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/ph",
-      "checksum": "a82e8dea64c663d527ad8b0ac71fca768463799261e80fbc320f362c4d4e9739",
+      "url": "http://127.0.0.1:3010/partidos/ph",
+      "checksum": "9efa4581f188c967d5d511fd4e69416f30e7ba81fe6973e5ced674f3af97b53b",
       "site_extraction_method": "RSC"
     },
     {
@@ -2757,7 +2757,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "9e54a22cb728a9d9fb3f52928cc2baa8181487beb9ab87be04d512bf12238249",
       "site_extraction_method": "RSC"
     },
@@ -2781,7 +2781,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "6ed3cb1f72e6e81e685914cd16bbc788c80bcce6b95d942db104943ea334c98d",
       "site_extraction_method": "RSC"
     },
@@ -2805,7 +2805,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "0793696e711b3b8706dae0a3a9b0e159ff2020f943e17c5b3330d459503534f4",
       "site_extraction_method": "RSC"
     },
@@ -2829,7 +2829,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "572dc04f4fab90fcd5befae36e2018eba6809b8a8b0bd275d36485a6d0d1feba",
       "site_extraction_method": "RSC"
     },
@@ -2853,7 +2853,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "b2f7614ac00922f0dd884b286d7b3153520cf92ec89da9acced8553f65c34318",
       "site_extraction_method": "RSC"
     },
@@ -2877,7 +2877,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "b6a188d6d706acc2fe93a1ef6f16f74114d1e0bb044a3ae4ebd7d9e8d8905730",
       "site_extraction_method": "RSC"
     },
@@ -2901,7 +2901,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "d5dc46285a05de8c93999eba4f16bd91f6151513ce6c99d05de7c28407a3e699",
       "site_extraction_method": "RSC"
     },
@@ -2916,17 +2916,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 45714996,
-        "proyeccion": 45714996,
-        "lake": 45714996,
-        "sitio": 45714996
+        "oficial": 51940482,
+        "proyeccion": 51940482,
+        "lake": 51940482,
+        "sitio": 51940482
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/pl",
-      "checksum": "83e3d8a718d85c233d74e4a698497ef3565c9df3d26b73cc7153f0c1f786d0f0",
+      "url": "http://127.0.0.1:3010/partidos/pl",
+      "checksum": "ebc081e5288485287a97fc203124aa61619c71f99b29736d38802369aec9e06c",
       "site_extraction_method": "RSC"
     },
     {
@@ -2949,7 +2949,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "5826256bd373512e32923be6a1c4037fe9327d0bfe7f4fbae5161df51a3abced",
       "site_extraction_method": "RSC"
     },
@@ -2973,7 +2973,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "8008a5aac04a08487dda6c8dac1884334c4e11da0aa98902ada011e647fcb995",
       "site_extraction_method": "RSC"
     },
@@ -2997,7 +2997,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "6921e3c173b6eda6411cdc87418cfee1f6ee561d4fd16a2d637e6fca50f19e37",
       "site_extraction_method": "RSC"
     },
@@ -3021,7 +3021,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "373cffa45acf4e5b8a01fc9460ce4da7a15c3749ff8f6f569f49bd22022345e4",
       "site_extraction_method": "RSC"
     },
@@ -3045,7 +3045,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "08d26e48f1cb6994fc08b927a473731291d38ef807e55f5f5598ff8e02ad28b8",
       "site_extraction_method": "RSC"
     },
@@ -3069,7 +3069,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "6466f2b1fa18716b7b3a07a980ebd878111d0604f5d8a4b3700574c8ad3ad3c9",
       "site_extraction_method": "RSC"
     },
@@ -3093,7 +3093,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "86b844c1b99fdb24910a6fc55fe6a5155d98b801d967d9d3a0726dbcb4865652",
       "site_extraction_method": "RSC"
     },
@@ -3108,17 +3108,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 84515960,
-        "proyeccion": 84515960,
-        "lake": 84515960,
-        "sitio": 84515960
+        "oficial": 130177373,
+        "proyeccion": 130177373,
+        "lake": 130177373,
+        "sitio": 130177373
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/pnl",
-      "checksum": "317c170ac2cb621c6757ab11e7e19bd7f9ad1bb26ac1d48aeecae96603420786",
+      "url": "http://127.0.0.1:3010/partidos/pnl",
+      "checksum": "19bf03114bb258a6c2c56c778763a8c114becba0f9b51ecf523d152aa28a1f24",
       "site_extraction_method": "RSC"
     },
     {
@@ -3141,7 +3141,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "bb0231a24010494086ba6e77b1aba3827487f47702b507f53e0eb622faa6a116",
       "site_extraction_method": "RSC"
     },
@@ -3165,7 +3165,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "6abeeaccdabe046fc8f61d098ae127639690d0af28b5e420dfce5af47bac7636",
       "site_extraction_method": "RSC"
     },
@@ -3189,7 +3189,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "f792b7c40a1bbc7548362bcf5b7893a0fd903948aa081b7dd7661cc4b6cefa82",
       "site_extraction_method": "RSC"
     },
@@ -3213,7 +3213,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "69eec0a43c1121ac6dff4839c129ffbaa70492ffab50a78964a8f921633ceacd",
       "site_extraction_method": "RSC"
     },
@@ -3237,7 +3237,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "c3523b60dd05be60ec50c563f4f66557da94479cc79a9fd488b4a04cbd199790",
       "site_extraction_method": "RSC"
     },
@@ -3261,7 +3261,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "bc6e8373498a981471b6ac9860a463796ea9a1be70ab1a3ba2e247558e71e6a5",
       "site_extraction_method": "RSC"
     },
@@ -3285,7 +3285,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "328dd3053d347655a0408393496bee1e50fdbf3f2fac9bf720be03dc97e130ec",
       "site_extraction_method": "RSC"
     },
@@ -3300,17 +3300,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 277942157,
-        "proyeccion": 277942157,
-        "lake": 277942157,
-        "sitio": 277942157
+        "oficial": 222635801,
+        "proyeccion": 222635801,
+        "lake": 222635801,
+        "sitio": 222635801
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/ppd",
-      "checksum": "271948dd2feba59747fef96957296415947c955f7eb7df582a745f0b4a30ffd1",
+      "url": "http://127.0.0.1:3010/partidos/ppd",
+      "checksum": "07828c95bf1050527299d3d532b203809f54abdbee1dd3f37f10a5205bc0ee35",
       "site_extraction_method": "RSC"
     },
     {
@@ -3333,7 +3333,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "a5376c4cd7765d2604769110a79a0daab162e0be976c27339e340dc2562acb1d",
       "site_extraction_method": "RSC"
     },
@@ -3357,7 +3357,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "d71c947394d33112ee7eec7fbc8f31d28328f27bdf725a4c49a1093634d3e2c6",
       "site_extraction_method": "RSC"
     },
@@ -3381,7 +3381,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "60628b9460f8f36fc34c7b8c253b5b5ba3db530ef2412cc7920544d72e3e5cbc",
       "site_extraction_method": "RSC"
     },
@@ -3405,7 +3405,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "a0004d6fa37590b9ef5e1aff95cf10cee78d1b83be1d3acd3a6c25a25992fdff",
       "site_extraction_method": "RSC"
     },
@@ -3429,7 +3429,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "0cab9b78ee33c3faff60a4092f365859c7b2611c3c6c6772f1cebb9b7aa63733",
       "site_extraction_method": "RSC"
     },
@@ -3453,7 +3453,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "3f0bfa8cd20a6162911fd77f8fea69d516f9e4b84d0071d68a719d1a9436f0fe",
       "site_extraction_method": "RSC"
     },
@@ -3477,7 +3477,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "b07ffe4797f835b9ad7086155c98c7737ed627c0f846b2f10eebc2208a2c6dbe",
       "site_extraction_method": "RSC"
     },
@@ -3492,17 +3492,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 8577294,
-        "proyeccion": 8577294,
-        "lake": 8577294,
-        "sitio": 8577294
+        "oficial": 18800335,
+        "proyeccion": 18800335,
+        "lake": 18800335,
+        "sitio": 18800335
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/pr",
-      "checksum": "31a5d9e8fe9f381ce697af9a9333c08a56e0eb49255384b889c313bc1dd7160b",
+      "url": "http://127.0.0.1:3010/partidos/pr",
+      "checksum": "d3612c685dd10348de3324de621c78ed148c70297493384aab2368acf745f65e",
       "site_extraction_method": "RSC"
     },
     {
@@ -3525,7 +3525,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "c002317f620203733b17966f54b16c2ef1515742ccb1f73f4b7636a0180a1de6",
       "site_extraction_method": "RSC"
     },
@@ -3549,7 +3549,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "f354c52f971dfab920de102edcfeddd589e6e5de4739e28704cf6c9135027c60",
       "site_extraction_method": "RSC"
     },
@@ -3573,7 +3573,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "fdcaf615236df43fd474b4758003feb50257bfa5fad7c2ed2b0d8f758f2ca11a",
       "site_extraction_method": "RSC"
     },
@@ -3591,13 +3591,13 @@
         "oficial": 3030,
         "proyeccion": 3030,
         "lake": 3030,
-        "sitio": 3030
+        "sitio": null
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "18ed58c061fddb6172bb560afea15c99d3a4b6003b79695a5f6353bfa859c30e",
       "site_extraction_method": "RSC"
     },
@@ -3621,7 +3621,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "01eb0f205c1d0a70c76bd8206f773f29b7a95df60a3b85434a64883a026eeee9",
       "site_extraction_method": "RSC"
     },
@@ -3645,7 +3645,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "aba0f2fa7b2fe964a5cbf26a37dfacf1fa1ceb5fc3ecf9d5597af98329e1c72d",
       "site_extraction_method": "RSC"
     },
@@ -3669,7 +3669,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "89c050c20612c2d902f9068667696d730b6af3f2f4e98a1acaca40f7ff14186c",
       "site_extraction_method": "RSC"
     },
@@ -3684,17 +3684,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 410360288,
-        "proyeccion": 410360288,
-        "lake": 410360288,
-        "sitio": 410360288
+        "oficial": 374205696,
+        "proyeccion": 374205696,
+        "lake": 374205696,
+        "sitio": 374205696
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/ps",
-      "checksum": "af5aae3a4cb4eb061d728128ef93ca63b5f36efb01776c33b83aeccd37595f07",
+      "url": "http://127.0.0.1:3010/partidos/ps",
+      "checksum": "2db3e1b7c608f4e81cd8568ebfb046b77abe451732e14cfaafaf50e9189d5de3",
       "site_extraction_method": "RSC"
     },
     {
@@ -3717,7 +3717,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "3ad6af4ea6dd3bba0c1f14bf187b343b688276b8b1426a4e895cb19ea40c6d95",
       "site_extraction_method": "RSC"
     },
@@ -3741,7 +3741,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "246f0aff23ecb0d428d9687478c829928eb59c998c8cf957400b33668a86abd0",
       "site_extraction_method": "RSC"
     },
@@ -3765,7 +3765,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "a85c59b7aa2ec7cd27fe130bfff16800bb845f41c4ba27f241ab0fc95bd24c19",
       "site_extraction_method": "RSC"
     },
@@ -3789,7 +3789,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "0a1f1cf63efd91f8af5781eaab4d236d02ace31a7d5683a3091d5dd35de5cf99",
       "site_extraction_method": "RSC"
     },
@@ -3813,7 +3813,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "6ae0309561d5e4c1342a0a0fd9adab2886227b80e6c176be53f97bbab8476c2b",
       "site_extraction_method": "RSC"
     },
@@ -3837,7 +3837,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "24c9f311d96d736131fb57c915aa0763dc1367cc5dc64404421767feb23d0510",
       "site_extraction_method": "RSC"
     },
@@ -3861,7 +3861,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "12150053ee3cbf6633cd63cce8eea17b0ebc7780dc9785341daca9514ba08d8e",
       "site_extraction_method": "RSC"
     },
@@ -3876,17 +3876,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 26355590,
-        "proyeccion": 26355590,
-        "lake": 26355590,
-        "sitio": 26355590
+        "oficial": 46563370,
+        "proyeccion": 46563370,
+        "lake": 46563370,
+        "sitio": 46563370
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/psc",
-      "checksum": "1a6d923f68e688bd8e87097aadf205423f3c266566f91f20ce4f96f6ced85a68",
+      "url": "http://127.0.0.1:3010/partidos/psc",
+      "checksum": "e0768e2a817173ecd7221ad5c23715aa321cf0a7504cd6b658345793f53d4744",
       "site_extraction_method": "RSC"
     },
     {
@@ -3909,7 +3909,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "2ec099fdf538993507935e990f7877d074187564b6d456f5e31388ee047f39c1",
       "site_extraction_method": "RSC"
     },
@@ -3933,7 +3933,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "c1c63fabb7bb95865a21f76100d612554a40e2f90d77243aea0d5c6c9b2d6f85",
       "site_extraction_method": "RSC"
     },
@@ -3957,7 +3957,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "31496ec20430a189775b0193d76b7d30eb3ead262246f20c7e7209980fecef84",
       "site_extraction_method": "RSC"
     },
@@ -3975,13 +3975,13 @@
         "oficial": 5856,
         "proyeccion": 5856,
         "lake": 5856,
-        "sitio": 5856
+        "sitio": null
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "c632ac13aab81fdd6e0bc85cfd30c64f1ff014d89ca2ecb4565e555df58036cf",
       "site_extraction_method": "RSC"
     },
@@ -4005,7 +4005,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "216ff8629d27976e34ada5b1dc6f51ba8bf4ab67d054189206f85acb8c3b4b07",
       "site_extraction_method": "RSC"
     },
@@ -4029,7 +4029,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "15f30530fd22cadaa28525a7b2c4f696b6dd274779d0f2c21f3fbcf0afce4b4c",
       "site_extraction_method": "RSC"
     },
@@ -4047,13 +4047,13 @@
         "oficial": 1246,
         "proyeccion": 1246,
         "lake": 1246,
-        "sitio": null
+        "sitio": 1246
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "6dce6de4900068926ab8139a7dc58e3a81436fb200d599b45ab37f8593fe6c2b",
       "site_extraction_method": "RSC"
     },
@@ -4068,17 +4068,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 386202039,
-        "proyeccion": 386202039,
-        "lake": 386202039,
-        "sitio": 386202039
+        "oficial": 506081481,
+        "proyeccion": 506081481,
+        "lake": 506081481,
+        "sitio": 506081481
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/rep",
-      "checksum": "d40c84d81f5f0968cebf11101a44601bb4d5f0a9c725d883fe0ddcbe65546495",
+      "url": "http://127.0.0.1:3010/partidos/rep",
+      "checksum": "edb1fac062f790575bc0c4fd07a9e066c36c9072bf4029a3cf13ed918f444d00",
       "site_extraction_method": "RSC"
     },
     {
@@ -4101,7 +4101,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "6b9ee12d3ddc10784583d2825d2490d3f5239b4c00bd3e147b40c5dab3213948",
       "site_extraction_method": "RSC"
     },
@@ -4125,7 +4125,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "cfef109a7a68a033e491959e87d8981141d12aa0d44faeac4fd2e30c48066bd6",
       "site_extraction_method": "RSC"
     },
@@ -4149,7 +4149,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "e0c531648c9baf565a3bf1ea585dcf9cfe75c1cdfc1cffdaf55ff4eb11c994d9",
       "site_extraction_method": "RSC"
     },
@@ -4173,7 +4173,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "880eda0eb6ad95ebcfa2869fa284fd71da6d0df2d8c9c3cbf1e5172d902e498b",
       "site_extraction_method": "RSC"
     },
@@ -4197,7 +4197,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "79a690ec8a8ec8da60a4c5ef2b7654ffc22d84ac28d32c713230ee7ed8140d9f",
       "site_extraction_method": "RSC"
     },
@@ -4215,13 +4215,13 @@
         "oficial": 3092,
         "proyeccion": 3092,
         "lake": 3092,
-        "sitio": 3092
+        "sitio": null
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "c2fc0e5d3e2e40d5071a9b808e4e8dc9b8314a76b78730db48090af903d9849b",
       "site_extraction_method": "RSC"
     },
@@ -4245,7 +4245,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "df2fcf8d160f9a6ad9f1550dfeee3f97eedb3f356028b6709124d9bd103e808e",
       "site_extraction_method": "RSC"
     },
@@ -4260,17 +4260,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 437825602,
-        "proyeccion": 437825602,
-        "lake": 437825602,
-        "sitio": 437825602
+        "oficial": 413274499,
+        "proyeccion": 413274499,
+        "lake": 413274499,
+        "sitio": 413274499
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/rn",
-      "checksum": "5d6bdfc77bf2aa6ae7268a5978d0530a2afd28ef30bb916caeae5cc8860eced0",
+      "url": "http://127.0.0.1:3010/partidos/rn",
+      "checksum": "eda82facee96d223be810cc44e53f24869b96ce3c7d8bc02ce71ce0d691fdb05",
       "site_extraction_method": "RSC"
     },
     {
@@ -4293,7 +4293,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "9787ab78940729bf286aced3d3be1d87fb3f336bfba99eeda11c7a7995d7e9b5",
       "site_extraction_method": "RSC"
     },
@@ -4317,7 +4317,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "8ed90112e214fe85e693f6c801f9a2020029416c6e21258e8fccbf3637971f75",
       "site_extraction_method": "RSC"
     },
@@ -4341,7 +4341,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "d6e6ccb9d1e8a891e189041971bf8037142617622b63971d3d171a6acefa38f5",
       "site_extraction_method": "RSC"
     },
@@ -4365,7 +4365,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "40e59205ecde28171836b1753f67021fe2fc5cb45a9f8c49bb9dd1499d94b54a",
       "site_extraction_method": "RSC"
     },
@@ -4389,7 +4389,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "354cb04716c892383e4a044859c6efe0bcad187c19acfb85207cab8e4899ebad",
       "site_extraction_method": "RSC"
     },
@@ -4413,7 +4413,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "409a69040a2cf4a822e2f549b8daa1408599ebd73363e319d0cc3c470ad61ed6",
       "site_extraction_method": "RSC"
     },
@@ -4437,7 +4437,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "e2ec8e7579758c8392c59e5ec7190f2b17ead8f9981d0ce3dfa53adbb50f547a",
       "site_extraction_method": "RSC"
     },
@@ -4452,17 +4452,17 @@
       "layer_from": "fuente_oficial",
       "layer_to": "sitio_RSC",
       "values": {
-        "oficial": 116943820,
-        "proyeccion": 116943820,
-        "lake": 116943820,
-        "sitio": 116943820
+        "oficial": 201316194,
+        "proyeccion": 201316194,
+        "lake": 201316194,
+        "sitio": 201316194
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos/udi",
-      "checksum": "16962aeb5302f7d75420db5fad29a8bd524fb3552a4b361609a688301d0b1792",
+      "url": "http://127.0.0.1:3010/partidos/udi",
+      "checksum": "2f244d912ed403bc9737269754451b0fdbc80c1b349b30ce518a0d080382de1d",
       "site_extraction_method": "RSC"
     },
     {
@@ -4485,7 +4485,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/partidos",
+      "url": "http://127.0.0.1:3010/partidos",
       "checksum": "6c7dc3a91318824f7c278d6089e9b69a61c900f6e40c213bfeb74bc7e4698181",
       "site_extraction_method": "RSC"
     },
@@ -4509,7 +4509,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "63f2ed2b770f307cb82d737339b11a56426cb5839a5a7b36656255105f54a632",
       "site_extraction_method": "RSC"
     },
@@ -4533,7 +4533,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "e9cf5209c6046d0572414ca6516fa7225fd97e6591a86c7904ab3f4ac51f0107",
       "site_extraction_method": "RSC"
     },
@@ -4557,7 +4557,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "af8a0f74c7d00ba5164eb56e01535c62c1b4341ee070be4bbc233599ad75248e",
       "site_extraction_method": "RSC"
     },
@@ -4581,7 +4581,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "c43b0ea173fa18e7ab0870be772ba8a86196ab98c35d214a7eeb39ca0df07b13",
       "site_extraction_method": "RSC"
     },
@@ -4605,7 +4605,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "4438db4ba23a8d2d771e40ba77aa4d8781afa93cf194da1b9300a3392bf6d350",
       "site_extraction_method": "RSC"
     },
@@ -4623,13 +4623,13 @@
         "oficial": 275,
         "proyeccion": 275,
         "lake": 275,
-        "sitio": null
+        "sitio": 275
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "8b46e03c1a19a24d7a48c30c127d818acaa19cd309f8367c05775e76d113dc82",
       "site_extraction_method": "RSC"
     },
@@ -4647,13 +4647,13 @@
         "oficial": 293,
         "proyeccion": 293,
         "lake": 293,
-        "sitio": null
+        "sitio": 293
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "d87ce63bf71dcf71decf5b372131f3c3f102680b11657af6ea1bda6a747ed8da",
       "site_extraction_method": "RSC"
     },
@@ -4677,7 +4677,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "86a480a218a6c9701dbdbccea0ace76384f533d8cf28569a9a71d301d8b2a34f",
       "site_extraction_method": "RSC"
     },
@@ -4701,7 +4701,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "1bea0b51050c9e69bf9caf515dd2192091f5e5489f79858c73e95e1f2e21d6ea",
       "site_extraction_method": "RSC"
     },
@@ -4725,7 +4725,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "eb524dcc4d14e2ab17d16a433e8392619d85a00a59a4d4e83da42e9cafd9eeea",
       "site_extraction_method": "RSC"
     },
@@ -4749,7 +4749,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "5a2b668c7b34a883d61ddfc9aa98af7ca998b1a50937b479128bd79e825ffa66",
       "site_extraction_method": "RSC"
     },
@@ -4773,7 +4773,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "47539989a433e60f1289fc2d0cc42d87773711df6c34fa6a808cfb8c12fa5e94",
       "site_extraction_method": "RSC"
     },
@@ -4797,7 +4797,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "40b69ecde6d3075dc8af5df6a2de097cb1922aea3893ed98d723ef168285118f",
       "site_extraction_method": "RSC"
     },
@@ -4821,7 +4821,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "c6a0187ea205399e4e291568c66acc3e98cf648233b99d8be8f11dabd1d82c41",
       "site_extraction_method": "RSC"
     },
@@ -4845,7 +4845,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "ec344495eeb25aaf01a1d30899c4fbb8a21eaca4d1d5fac84ea7379530192625",
       "site_extraction_method": "RSC"
     },
@@ -4869,7 +4869,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "fdc74857a25301ea28d6308020c02693f4898a695f9d182fe754ee47a5ef83b1",
       "site_extraction_method": "RSC"
     },
@@ -4893,7 +4893,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "995c632d6cf2d11aa9bc066cd9cd85d3d3d605d86766d6afed537be60bb0472f",
       "site_extraction_method": "RSC"
     },
@@ -4917,7 +4917,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "95cfda6444b1a9c66eb9ea6f214add870b3f091bd38f55e0a62dc1a995020b2b",
       "site_extraction_method": "RSC"
     },
@@ -4941,7 +4941,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "1ce731db97f3e0af32084663bc9605f9a978b476ed5a244efa6c02729e910060",
       "site_extraction_method": "RSC"
     },
@@ -4965,7 +4965,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "7a0ef35b458dfac68daa328d1afe7496799d6b7ec6b8075897434fed0815a7a9",
       "site_extraction_method": "RSC"
     },
@@ -4989,7 +4989,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "fd9172b928418c1f8ab8c66cc626699320165e92ed9dca490bbbf1bbf5a852ca",
       "site_extraction_method": "RSC"
     },
@@ -5013,7 +5013,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "f4fe22c6812e7b6264e18a424ad4327b4e421b6015a54c7e052eb54f453f0401",
       "site_extraction_method": "RSC"
     },
@@ -5037,7 +5037,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "9925bae3dc912bb4a654fbec25172385b99811ceff1f3f3b20d9a58a21992ea9",
       "site_extraction_method": "RSC"
     },
@@ -5061,7 +5061,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "c84f69b745373f7ade9e77eb7eab210bd20163cbc7bcf9181a733722f13e15a7",
       "site_extraction_method": "RSC"
     },
@@ -5085,7 +5085,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "c50dc1218bdd23a5653bbf312673afbbc931ef7bbee945ddb42413b560cd59f9",
       "site_extraction_method": "RSC"
     },
@@ -5109,7 +5109,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "d9328e0ca705820c0122f7fbaa28be473110f3e9704cc2b05632d0aecb25d412",
       "site_extraction_method": "RSC"
     },
@@ -5133,7 +5133,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "e7d46d537c3f800a086f556036e18bdf4239172c5e11c8374d0e390154a2e6e4",
       "site_extraction_method": "RSC"
     },
@@ -5157,7 +5157,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "153850ad16bd0532332c0da6fd96e6f3f277a69d3e37ef2a46ad8e26b39c206a",
       "site_extraction_method": "RSC"
     },
@@ -5181,7 +5181,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "13f38ace90ef723d6bf4e24a0fce527dda44269eb3fac37df0596b0fedbf8b3f",
       "site_extraction_method": "RSC"
     },
@@ -5205,7 +5205,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "f315d2b37cd68062f88f2ec0f56c7c98cd009c0570480132b9066e7c1aa7d290",
       "site_extraction_method": "RSC"
     },
@@ -5229,7 +5229,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "c2005143106fb1e7c486934e2c76a3a138ed90709d427c75364dc7131d2eadd5",
       "site_extraction_method": "RSC"
     },
@@ -5253,7 +5253,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "54cecbd8d2bb42578237df432539fac9232212aac45ad8cc4cfc58bb68ca6d89",
       "site_extraction_method": "RSC"
     },
@@ -5277,7 +5277,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "6fc6c72420f5e394806ae67b758bbb105eb09ca1ac016456d37a485e42dfa7a8",
       "site_extraction_method": "RSC"
     },
@@ -5295,13 +5295,13 @@
         "oficial": 392,
         "proyeccion": 392,
         "lake": 392,
-        "sitio": null
+        "sitio": 392
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "364503b6de9d08a0fcefb8315b1e3672c0542b6202befb68326f9c931be553e6",
       "site_extraction_method": "RSC"
     },
@@ -5319,13 +5319,13 @@
         "oficial": 389,
         "proyeccion": 389,
         "lake": 389,
-        "sitio": null
+        "sitio": 389
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "2fc328c1dd02280e2c39f1cd8ad6c3a4b0eae1695c75834b267b42afa39a81a8",
       "site_extraction_method": "RSC"
     },
@@ -5343,13 +5343,13 @@
         "oficial": 44,
         "proyeccion": 44,
         "lake": 44,
-        "sitio": null
+        "sitio": 44
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "1825c35c425cf762c257e33444120c6b5a8b65ba58ffa721132e6d7bff50d887",
       "site_extraction_method": "RSC"
     },
@@ -5373,7 +5373,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "a06cf1973764cb5bc81dbc68ac2911947705501e45995785213ac7f82ec19b02",
       "site_extraction_method": "RSC"
     },
@@ -5397,7 +5397,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "c4631405623063afb451c2272dc38b42e8c113e8b5153885d64ad94340861f93",
       "site_extraction_method": "RSC"
     },
@@ -5421,7 +5421,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "ff8d6d35f21f231c6e8e40357d911ba12ee56efaedf38ea6f78f31b494c2cd28",
       "site_extraction_method": "RSC"
     },
@@ -5439,13 +5439,13 @@
         "oficial": 2252,
         "proyeccion": 2252,
         "lake": 2252,
-        "sitio": null
+        "sitio": 2252
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "c6cec90b359f34b0f0a599cdf4735f9b118da519609d5037ca28284384d270fb",
       "site_extraction_method": "RSC"
     },
@@ -5469,7 +5469,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "4531a5a60a12674c9b763a32d2fc9d6bf6ae4776873a02df9b3992531dac2ef6",
       "site_extraction_method": "RSC"
     },
@@ -5493,7 +5493,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "7fcf84df23954a2b744f95cb1c283cfbc6347a19ae4a682237a804c2303cef14",
       "site_extraction_method": "RSC"
     },
@@ -5511,13 +5511,13 @@
         "oficial": 47,
         "proyeccion": 47,
         "lake": 47,
-        "sitio": null
+        "sitio": 47
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "51370ad986a02b1c7bc93ef0b40659939ee4f3811f217b32e3d712a393f80b1d",
       "site_extraction_method": "RSC"
     },
@@ -5541,7 +5541,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "6a4429ea19b55ad7cbbfc564adaba4a5cdbc17e6849b8d5aa97ae1f07f6b52a7",
       "site_extraction_method": "RSC"
     },
@@ -5565,7 +5565,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "06ce5bddbd6527439e35f00dedab779a1c5a7138dd0bfa112d533f49c5d95f7a",
       "site_extraction_method": "RSC"
     },
@@ -5589,7 +5589,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "a5dd67302f6a8b8c1333b78bedbd1981e00b2277dbcaba39eeefeb32c66330cb",
       "site_extraction_method": "RSC"
     },
@@ -5613,7 +5613,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "bf574171c888a0ecc49f8675e69ad2bb48a40ac31306027ee29c45fa0eb83ae4",
       "site_extraction_method": "RSC"
     },
@@ -5637,7 +5637,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "36d4d43a222c7213b45aa444dc2ec2ff860ba9cc1ca2a3e923a6c57d4d0453e8",
       "site_extraction_method": "RSC"
     },
@@ -5661,7 +5661,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "bf3729f5d9bb24a4880067f325677c69a4c9a002618a246f879dce9fc2150d8e",
       "site_extraction_method": "RSC"
     },
@@ -5685,7 +5685,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "564870d3a73e4ff913a151e442daaa170f53912e8600ec47c4245792e3948168",
       "site_extraction_method": "RSC"
     },
@@ -5703,13 +5703,13 @@
         "oficial": 872,
         "proyeccion": 872,
         "lake": 872,
-        "sitio": null
+        "sitio": 872
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "1bbfdb980d9251688469482d09bc6bb44ebb825ac6cb6ff954efb219c5f3509a",
       "site_extraction_method": "RSC"
     },
@@ -5733,7 +5733,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "abba84cd273e3dcba5ad15dc53f261ae68e7ae9b35d3359376143cbf2a713085",
       "site_extraction_method": "RSC"
     },
@@ -5757,7 +5757,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "e9c2aacc0d1b3c7b10c626208239347e26998bd10366e12fbbd880587582d74d",
       "site_extraction_method": "RSC"
     },
@@ -5781,7 +5781,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "8d04326bc612e089a37bba63696f2373031b0dfd7ab8ad0e8085aca00265d940",
       "site_extraction_method": "RSC"
     },
@@ -5805,7 +5805,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "9907297da592a9e12f0ffb12ee6bbe98390ecf176f602fefcbbb4a7e246c6914",
       "site_extraction_method": "RSC"
     },
@@ -5823,13 +5823,13 @@
         "oficial": 173,
         "proyeccion": 173,
         "lake": 173,
-        "sitio": null
+        "sitio": 173
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "20d3e0942b1f1f6e4acc06a675cd2a4d5540493efc7e3f9bd2d3351240a05a5e",
       "site_extraction_method": "RSC"
     },
@@ -5853,7 +5853,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "6b0b6f460e739e68b39f0d05a996b7554a09e4f258783b905e580a615498d0b1",
       "site_extraction_method": "RSC"
     },
@@ -5877,7 +5877,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "ee6783e334ea478a0bb5e9ee85fb6a2eb5bb6dbdd580fc6561bb1af531642559",
       "site_extraction_method": "RSC"
     },
@@ -5901,7 +5901,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "f58cb0b84e338bf018b29ae8eae6c86824e0045fa29b870e35bfce9b93cd3b42",
       "site_extraction_method": "RSC"
     },
@@ -5925,7 +5925,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "e1813bb18c97be29a2e9be577e1ff111ae334348cbad2214d7cab225bc2a431e",
       "site_extraction_method": "RSC"
     },
@@ -5949,7 +5949,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "a3238bab1caa8103e62e9f2edb7cb9339c6b4804c32c1e749ecadd77b86fa595",
       "site_extraction_method": "RSC"
     },
@@ -5967,13 +5967,13 @@
         "oficial": 126,
         "proyeccion": 126,
         "lake": 126,
-        "sitio": null
+        "sitio": 126
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "22f1eda3a59c55fa75d674ce1d2c3e11d40883ac233b9202bae3527c63b563c2",
       "site_extraction_method": "RSC"
     },
@@ -5997,7 +5997,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "f909df4779a1cdb5878256760813a3ec8cc592c824950bb9e1a1d51fcfbb9fb6",
       "site_extraction_method": "RSC"
     },
@@ -6021,7 +6021,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "b6e9a96e6fd3e0a2e83bf89c30df40ba03988be687407e24128d26bb557e105c",
       "site_extraction_method": "RSC"
     },
@@ -6045,7 +6045,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "fb8136f52a51750855c14cf23c1884f48a124dd87c28a9e1c2c5912a1c8ce021",
       "site_extraction_method": "RSC"
     },
@@ -6069,7 +6069,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "7f148156b98420f230eb9ad8b1b43f634fcad704338ddbbec4a6d39abcb3142b",
       "site_extraction_method": "RSC"
     },
@@ -6093,7 +6093,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "f0270ebd0015fed1a662fcb6de990d3099020597a9a52505ae9ea5241dc488e8",
       "site_extraction_method": "RSC"
     },
@@ -6117,7 +6117,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "229b24bea814f1a1d722ee4f89b16f07d1b5c81343d105dbe1f70e55f156af0c",
       "site_extraction_method": "RSC"
     },
@@ -6141,7 +6141,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "c6f0a701d39f107d69a37b16f7341e8619149123a70515628e9334dc157da682",
       "site_extraction_method": "RSC"
     },
@@ -6159,13 +6159,13 @@
         "oficial": 179,
         "proyeccion": 179,
         "lake": 179,
-        "sitio": null
+        "sitio": 179
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "b7b5730528453a42ce59622b17e3f031effdbb048aee20ba06b18a3482fb479f",
       "site_extraction_method": "RSC"
     },
@@ -6189,7 +6189,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "0f8fee7a29df834afa1f70c12a4ec9b731d05ae7a7114646c3df80be7dbb40c9",
       "site_extraction_method": "RSC"
     },
@@ -6213,7 +6213,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "6ee2ff8e41ec8b360f9b48e103b69bc0a4cea5c0bf909893dec7807d445b3907",
       "site_extraction_method": "RSC"
     },
@@ -6237,7 +6237,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "d6f6d5274585f89536b14af65873a89340dd1ad1d20f1bd2b9287d872ac33163",
       "site_extraction_method": "RSC"
     },
@@ -6261,7 +6261,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "ec44e28b81ead70eb43b38f59944abbe046b2723f3383325fd27b10f6b62fd52",
       "site_extraction_method": "RSC"
     },
@@ -6285,7 +6285,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "3a8b4ef481bca1007337197b690ca1d2b0a8cc39f67d8755b40352166e42eee5",
       "site_extraction_method": "RSC"
     },
@@ -6303,13 +6303,13 @@
         "oficial": 179,
         "proyeccion": 179,
         "lake": 179,
-        "sitio": null
+        "sitio": 179
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "f65b8b1696df50650b47e054d6390ecfc0f0d9bf1d861c04a5a47ae59af699de",
       "site_extraction_method": "RSC"
     },
@@ -6333,7 +6333,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "4812d914d27730be948dd0450c8fe9c1f29743fc486ffbf9199336b6924fc45b",
       "site_extraction_method": "RSC"
     },
@@ -6351,13 +6351,13 @@
         "oficial": 83,
         "proyeccion": 83,
         "lake": 83,
-        "sitio": null
+        "sitio": 83
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "6580047fc26b2d70459c83e78e90ddc200eb4ff3fe1bc73251211686b556b4eb",
       "site_extraction_method": "RSC"
     },
@@ -6381,7 +6381,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "8211203b1314a481d5082fe7b92d11b2d633782929b725c608d868719817c677",
       "site_extraction_method": "RSC"
     },
@@ -6405,7 +6405,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "4ca1129deb8b8b8c48f2c2c1467f24fe0b553318e7c6c74d4760bd84abf74dd8",
       "site_extraction_method": "RSC"
     },
@@ -6429,7 +6429,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "91cafc12606c8a7283fc5645e1c89f887e30abdf00ed56195c96bc3488617738",
       "site_extraction_method": "RSC"
     },
@@ -6453,7 +6453,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "a27749286e84fa888007c9f67a295b8640817853ccb7c91909a46142170a23d4",
       "site_extraction_method": "RSC"
     },
@@ -6477,7 +6477,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "96d81262f59ba680e8ee44c7abb5122ba3b4420f47e8df7109aca0df22bee267",
       "site_extraction_method": "RSC"
     },
@@ -6501,7 +6501,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "6d50399c4ed95fc9f3086c26fc0fc6162feec952d0c1956fcd958ff956699628",
       "site_extraction_method": "RSC"
     },
@@ -6525,7 +6525,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "1e1bda67ac2533837248be9b9c4dae7a787586806fbee8cc59696284919ccb18",
       "site_extraction_method": "RSC"
     },
@@ -6543,13 +6543,13 @@
         "oficial": 1592,
         "proyeccion": 1592,
         "lake": 1592,
-        "sitio": null
+        "sitio": 1592
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "bc28ae64977f60c07d83a8d9ac22fe61d60d7788d3f1fff68b479d1fd579c91d",
       "site_extraction_method": "RSC"
     },
@@ -6573,7 +6573,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "c30721b87731362345b40a1aa1cef0aeec949a4dbadce7ad280477ad16f3cd68",
       "site_extraction_method": "RSC"
     },
@@ -6591,13 +6591,13 @@
         "oficial": 44,
         "proyeccion": 44,
         "lake": 44,
-        "sitio": null
+        "sitio": 44
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "7923205e39d9a5cdbe26da5c1f1702ca23bdb890c0256056e062276d6dfd5d27",
       "site_extraction_method": "RSC"
     },
@@ -6621,7 +6621,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "e98fcb67dd00d722194db2f85406c436ef0a328b055be65c56e2d4f646284a59",
       "site_extraction_method": "RSC"
     },
@@ -6645,7 +6645,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "9d36efd5179db8eee2ac57db48647e5cc5e3b1e8de3f98217b797f995b43c57a",
       "site_extraction_method": "RSC"
     },
@@ -6669,7 +6669,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "3db6b40e499feedda7375fa976c5babb796ae8cf6b9ab23eebdd27081f5f26c1",
       "site_extraction_method": "RSC"
     },
@@ -6687,13 +6687,13 @@
         "oficial": 49,
         "proyeccion": 49,
         "lake": 49,
-        "sitio": null
+        "sitio": 49
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "20f38785b0f0d468a9cf2322ce946e7b450463408179a97639e59ca662e67c66",
       "site_extraction_method": "RSC"
     },
@@ -6717,7 +6717,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "6e4bff0d005e6ff152d7262fb1700ca3cb3e78ab2a4db3f853e70ddd85a45d2a",
       "site_extraction_method": "RSC"
     },
@@ -6741,7 +6741,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "c492338adeb4120859ec73516094149d114970a0ec89c92b7a710a6675aebda2",
       "site_extraction_method": "RSC"
     },
@@ -6759,13 +6759,13 @@
         "oficial": 38,
         "proyeccion": 38,
         "lake": 38,
-        "sitio": null
+        "sitio": 38
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "8949c17bdb108e09d5d782efbf0b8cbe2b62cb884e6ef7968fb2cd214ae7b795",
       "site_extraction_method": "RSC"
     },
@@ -6789,7 +6789,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "a6956c59419a826e357c03755c7a31d98a434c4ee8c9913f36bac69de2ebdb39",
       "site_extraction_method": "RSC"
     },
@@ -6813,7 +6813,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "10c64efa116ae823c7d6dd56fc62911e95e2c9eb546882a18c4345d1a3871095",
       "site_extraction_method": "RSC"
     },
@@ -6831,13 +6831,13 @@
         "oficial": 372,
         "proyeccion": 372,
         "lake": 372,
-        "sitio": null
+        "sitio": 372
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "eb29d330d6468c54bebf15729795b5111d4ea62149c57fe8a4ca117b8192aaa2",
       "site_extraction_method": "RSC"
     },
@@ -6855,13 +6855,13 @@
         "oficial": 58,
         "proyeccion": 58,
         "lake": 58,
-        "sitio": null
+        "sitio": 58
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "05a9b2daf6f2b13412d0e49daafb1860bb72761026ee5ab7a5dc93d8ea278aae",
       "site_extraction_method": "RSC"
     },
@@ -6885,7 +6885,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "d8f37e832259b28bdaf3414f5759266890715036940f15d4d83e1128409f2b87",
       "site_extraction_method": "RSC"
     },
@@ -6909,7 +6909,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "40e8b66ac08443691c730a28164eb39e81b88436746dba59a67ac6d9616d4684",
       "site_extraction_method": "RSC"
     },
@@ -6933,7 +6933,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "501effded466b54c8b0fb40207e03f9758028fd79fbb3541d7360e1d435df8e3",
       "site_extraction_method": "RSC"
     },
@@ -6957,7 +6957,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "badb6f656f5ed522d75fe0ccddaf766ea89da4abdafb4deb65e3ae02726ab7ff",
       "site_extraction_method": "RSC"
     },
@@ -6981,7 +6981,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "7ef30d7d69dbd109d8c53b85ce304722cf7a69019e7c01a6b80992ee9ec2fada",
       "site_extraction_method": "RSC"
     },
@@ -7005,7 +7005,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "a9c7e512f28581821dcc4047fb98ee7fed3e763468c7c4eff4fd026b6ccd0449",
       "site_extraction_method": "RSC"
     },
@@ -7029,7 +7029,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "fa6d05a8b0356cf102724f69b64e99a284012d8edbb7ad32499ca856e79bf8d0",
       "site_extraction_method": "RSC"
     },
@@ -7053,7 +7053,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "a39c748430fbf870188976c2ef2b5799a986dd7af2ed1d20d903050b90a2187e",
       "site_extraction_method": "RSC"
     },
@@ -7077,7 +7077,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "749f2c711744aa9dfc1ff2f3345efc64d79831be3bb59aa2d35db6956cd11cd1",
       "site_extraction_method": "RSC"
     },
@@ -7101,7 +7101,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "ce5f38279333fa8b25fd503aeeecedbfb3acf29add211ef57d3e4362b37db324",
       "site_extraction_method": "RSC"
     },
@@ -7119,13 +7119,13 @@
         "oficial": 7701,
         "proyeccion": 7701,
         "lake": 7701,
-        "sitio": null
+        "sitio": 7701
       },
       "difference": 0,
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "0b8e34283793a51dbb0aa2fc1249ebb265b140a29bebfdfcfdfde402e5a9b589",
       "site_extraction_method": "RSC"
     },
@@ -7149,7 +7149,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "5d598e7da65a5dec397b607023c5f06aed8c128dd97ea573b4accb368e51038c",
       "site_extraction_method": "RSC"
     },
@@ -7173,7 +7173,7 @@
       "validation": "V5",
       "severity": "OK",
       "status": "OK",
-      "url": "https://cambiometro.impulsacv.cl/rankings",
+      "url": "http://127.0.0.1:3010/rankings",
       "checksum": "3fe968dd1ba16136f4705ca496739e21e11878e863ccd3692657a30ba1bb615c",
       "site_extraction_method": "RSC"
     }

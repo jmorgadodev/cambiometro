@@ -27,21 +27,21 @@ posterior a FIX-1–FIX-5 verificó además los puntos exactos donde se impide q
 una divergencia o un dato sintético vuelva a entrar al flujo:
 
 - FIX-1/V1: `lib/gastos-operacionales.ts:181` expone el agregador común que
-  excluye filas resumen; `scripts/etl/generate-partidos-stats.ts:68` bloquea
-  una regeneración sin evidencias oficiales.
+  excluye filas resumen; `scripts/etl/generate-partidos-stats.ts:278` aplica
+  el mismo agregador exclusivamente a evidencias oficiales.
 - FIX-2/V2: `scripts/etl/senado-assignment.mjs:16` parsea la política oficial
   de asignación y `components/PersonalApoyoMensual.tsx:240` publica el estado
   del hallazgo sin presentar el exceso como normal.
 - FIX-3/R10: `scripts/etl/r10-chilecompra.mjs:17-48` exige RUT jurídico exacto
   y devuelve `null` cuando no existe evidencia; los consumidores están en
-  `scripts/etl/generate-organismos-projection.ts:77` y
-  `scripts/rebuild-authoritative-municipalidades.mjs:95`.
+  `scripts/etl/generate-organismos-projection.ts:76` y
+  `scripts/rebuild-authoritative-municipalidades.mjs:94`.
 - FIX-4/V7: `scripts/build-presupuesto-v1.mjs:101` selecciona el último
   snapshot DIPRES. Las anomalías oficiales se evalúan en
   `lib/budget-integrity.ts:5` y se rotulan en
   `ServicioPublicoDashboardClient.tsx:344-356` y
   `app/entidades/[id]/page.tsx:308-314`.
-- FIX-5/V7: `scripts/rebuild-authoritative-municipalidades.mjs:190-192`
+- FIX-5/V7: `scripts/rebuild-authoritative-municipalidades.mjs:187-191`
   separa la cuarentena y la publica en `anomalias_integridad` en la línea 347;
   las filas aisladas no alimentan totales ni rankings regulares.
 
