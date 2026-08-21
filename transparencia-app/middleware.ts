@@ -34,13 +34,11 @@ export function middleware(request: NextRequest) {
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", csp);
-<<<<<<< HEAD
   // El CSP real ya está endurecido en producción; el modo Report-Only se usa
   // solo para validar directivas nuevas sin riesgo (staging, CSP_REPORT_ONLY=true).
   if (process.env.CSP_REPORT_ONLY === "true") {
     response.headers.set("Content-Security-Policy-Report-Only", csp);
   }
-=======
 
   const pathname = request.nextUrl.pathname;
   if (!pathname.startsWith("/api/")) {
@@ -49,7 +47,6 @@ export function middleware(request: NextRequest) {
     response.headers.set("Cloudflare-CDN-Cache-Control", "public, s-maxage=300, stale-while-revalidate=600");
   }
 
->>>>>>> f0f1d12 (perf: ISR/edge cache en fichas compatible con nonce CSP)
   return response;
 }
 
