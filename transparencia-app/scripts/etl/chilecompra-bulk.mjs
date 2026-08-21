@@ -11,6 +11,9 @@ export function buildBulkLicitacionUrl(year, month) {
 }
 
 export function recordPackageFromBulk(document) {
+  if (document && Number.isInteger(document.status) && typeof document.detail === "string" && !("records" in document)) {
+    return null;
+  }
   if (!document || !Array.isArray(document.records)) {
     throw new Error("CHILECOMPRA_BULK_INVALID_SCHEMA");
   }
