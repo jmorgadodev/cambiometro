@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
 import { createHash } from "node:crypto";
-import { normalizeProjectionContract, sumKnownAmounts } from "./etl/chilecompra-projection.mjs";
+import { evaluateProjectionAmount, normalizeProjectionContract, sumKnownAmounts } from "./etl/chilecompra-projection.mjs";
 
 const OUT = "data/lake/projections/v1/chilecompra.json";
 const ROOT = "data/lake/partitions/chilecompra";
@@ -30,6 +30,8 @@ const suppliers = new Map();
 const pairs = new Map();
 const seenContractIds = new Set();
 const seenBuyerContracts = new Map(); // buyerId -> Set of ocids
+const anomalies = [];
+const anomaliesByBuyer = new Map();
 
 // 1. Index Buyers
 for (const mPath of findManifests(ROOT)) {
@@ -68,12 +70,37 @@ for (const mPath of findManifests(ROOT)) {
     seenContractIds.add(recId);
 
     const normalized = normalizeProjectionContract(d);
-    const monto = normalized.monto_clp;
+    const amountEvaluation = evaluateProjectionAmount(normalized.monto_clp);
+    const monto = amountEvaluation.monto_clp;
     const ocid = d.ocid || d.process_id || "";
     const buyerId = buyerByOcid.get(ocid) || null;
     const period = d.period;
     const provId = normalized.proveedor_id;
     const provName = normalized.proveedor;
+
+    if (amountEvaluation.anomaly) {
+      const anomaly = {
+        id: `chilecompra-v7-${recId}`,
+        ...amountEvaluation.anomaly,
+        buyer_id: buyerId,
+        buyer_name: buyerId ? buyerById.get(buyerId)?.name ?? null : null,
+        ocid,
+        title: normalized.title,
+        proveedor: provName,
+        monto_oficial_clp: normalized.monto_clp,
+        fecha: d.fecha || null,
+        source_url: d.url || r.evidence?.sourceUrl || null,
+        source_anomaly: true,
+        site_disclosure: true,
+        excluded_from_totals_and_rankings: true,
+      };
+      anomalies.push(anomaly);
+      if (buyerId) {
+        const buyerAnomalies = anomaliesByBuyer.get(buyerId) ?? [];
+        buyerAnomalies.push(anomaly);
+        anomaliesByBuyer.set(buyerId, buyerAnomalies);
+      }
+    }
 
     if (provId && provName && monto !== null) {
       if (!suppliers.has(provId)) {
@@ -103,15 +130,17 @@ for (const mPath of findManifests(ROOT)) {
       mo.procesos++;
     }
 
-    b.top.push({
-      title: normalized.title?.slice(0, 180) ?? null,
-      proveedor: provName,
-      proveedor_id: provId,
-      monto_clp: monto,
-      fecha: d.fecha || null,
-      url: d.url || (ocid ? `https://api.mercadopublico.cl/APISOCDS/OCDS/award/${ocid.replace(/^ocds-70d2nz-/, "")}` : null),
-      ocid,
-    });
+    if (!amountEvaluation.anomaly) {
+      b.top.push({
+        title: normalized.title?.slice(0, 180) ?? null,
+        proveedor: provName,
+        proveedor_id: provId,
+        monto_clp: monto,
+        fecha: d.fecha || null,
+        url: d.url || (ocid ? `https://api.mercadopublico.cl/APISOCDS/OCDS/award/${ocid.replace(/^ocds-70d2nz-/, "")}` : null),
+        ocid,
+      });
+    }
 
     if (provId && provName && monto !== null) {
       const pairKey = `${buyerId}|${provId}`;
@@ -145,6 +174,7 @@ const buyers = [...buyerById.values()]
       procesos: Math.max(b.procesos, sortedTop.length),
       months: [...b.months.values()].sort((a, c) => (a.period < c.period ? 1 : -1)).slice(0, 12),
       top: sortedTop.slice(0, 8), // Top 8 compras deduplicadas por comprador
+      anomalies: (anomaliesByBuyer.get(b.id) ?? []).sort((left, right) => left.id.localeCompare(right.id)),
     };
   })
 
@@ -166,6 +196,7 @@ const out = {
   buyers,
   suppliers: suppliersTop,
   topPairs,
+  anomalies: anomalies.sort((left, right) => left.id.localeCompare(right.id)),
   total_adjudicado_clp: sumKnownAmounts(buyers.map((buyer) => buyer.monto_total_clp)),
 };
 
@@ -174,6 +205,7 @@ console.log(`✓ Generado ${OUT}`);
 console.log(`  Compradores: ${buyers.length}`);
 console.log(`  Proveedores: ${suppliersTop.length}`);
 console.log(`  Monto Total: ${out.total_adjudicado_clp === null ? "no disponible" : `$${(out.total_adjudicado_clp / 1e12).toFixed(2)}T CLP`}`);
+console.log(`  Anomalías V7 en cuarentena: ${out.anomalies.length}`);
 
 // Verificar comprador Las Condes
 const lc = buyers.find((b) => b.name?.toLowerCase().includes("condes"));

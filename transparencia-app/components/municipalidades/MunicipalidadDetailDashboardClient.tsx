@@ -1186,6 +1186,23 @@ export default function MunicipalidadDetailDashboardClient({
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             {compras ? (
               <>
+                {compras.anomalias_integridad.length > 0 && (
+                  <div className="card" style={{ padding: "1.25rem", border: "1px solid var(--warn)" }}>
+                    <strong style={{ color: "var(--warn)", display: "block", marginBottom: "0.35rem" }}>
+                      Hallazgo de integridad ALTA (V7) · valor oficial preservado
+                    </strong>
+                    <p style={{ margin: 0, fontSize: "0.78rem", color: "var(--text-muted)" }}>
+                      {compras.anomalias_integridad.length} orden(es) oficial(es) fuera del límite de sanidad fueron excluidas de totales y rankings, sin alterar su evidencia de origen.
+                    </p>
+                    <ul style={{ margin: "0.65rem 0 0", paddingLeft: "1.2rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                      {compras.anomalias_integridad.map((anomaly) => (
+                        <li key={anomaly.id ?? `${anomaly.titulo}-${anomaly.monto_oficial_clp}`}>
+                          {anomaly.titulo ?? "Orden oficial sin título"} · {formatCLP(anomaly.monto_oficial_clp)}{anomaly.source_url ? <> · <a href={anomaly.source_url} target="_blank" rel="noopener noreferrer">fuente ↗</a></> : null}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 {/* Métricas Generales M2 */}
                 <div
                   style={{

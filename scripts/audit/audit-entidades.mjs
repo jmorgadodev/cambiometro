@@ -32,7 +32,7 @@ async function main() {
   const args = parseArgs();
   const projectionRoot = resolve(APP_ROOT, "data/lake/projections/v1");
   const archiveRoot = resolve(args.lake, "projections/v1");
-  const [organizations, archivedOrganizations, budget, sinim, archivedSinim, municipalityList, municipalityData] = await Promise.all([
+  const [organizations, archivedOrganizations, budget, sinim, archivedSinim, municipalityList, municipalityData, chileCompra] = await Promise.all([
     readFile(resolve(projectionRoot, "organismos.json"), "utf8").then(JSON.parse),
     readFile(resolve(archiveRoot, "organismos.json"), "utf8").then(JSON.parse),
     readFile(resolve(projectionRoot, "presupuesto.json"), "utf8").then(JSON.parse),
@@ -40,6 +40,7 @@ async function main() {
     readFile(resolve(archiveRoot, "sinim.json"), "utf8").then(JSON.parse),
     readFile(resolve(APP_ROOT, "data/municipalidades-list.json"), "utf8").then(JSON.parse),
     readFile(resolve(APP_ROOT, "data/municipalidades-data.json"), "utf8").then(JSON.parse),
+    readFile(resolve(projectionRoot, "chilecompra.json"), "utf8").then(JSON.parse),
   ]);
   const budgetDisclosureSources = await Promise.all([
     readFile(resolve(APP_ROOT, "components/servicios/ServicioPublicoDashboardClient.tsx"), "utf8"),
@@ -47,6 +48,12 @@ async function main() {
   ]);
   const budgetDisclosure = budgetDisclosureSources.every((source) => source.includes("Hallazgo de integridad ALTA (V7) · valor oficial preservado"));
   if (!budgetDisclosure) throw new Error("AUDIT_BUDGET_ANOMALY_NOT_DISCLOSED");
+  const purchaseDisclosureSources = await Promise.all([
+    readFile(resolve(APP_ROOT, "components/servicios/ServicioPublicoDashboardClient.tsx"), "utf8"),
+    readFile(resolve(APP_ROOT, "components/municipalidades/MunicipalidadDetailDashboardClient.tsx"), "utf8"),
+  ]);
+  const purchaseDisclosure = purchaseDisclosureSources.every((source) => source.includes("Hallazgo de integridad ALTA (V7) · valor oficial preservado"));
+  if (!purchaseDisclosure) throw new Error("AUDIT_PURCHASE_ANOMALY_NOT_DISCLOSED");
   requireFields(organizations, ["id", "nombre_canonico", "tipo", ...NUMERIC_FIELDS], "organismos");
   if (organizations.length !== 884) throw new Error(`AUDIT_ORGANIZATION_COUNT:${organizations.length}`);
   const publicBodies = organizations.filter((row) => row.tipo !== "Municipalidad");
@@ -171,6 +178,30 @@ async function main() {
         detail: { r10: true, join_method: purchase?.metodo_enlace ?? null, missing_evidence_is_null: true },
       }));
     }
+  }
+
+  for (const anomaly of chileCompra.anomalies ?? []) {
+    findings.push(finding({
+      entity: { type: "organismo", id: anomaly.buyer_id ?? "sin-comprador", name: anomaly.buyer_name ?? "Comprador no reconciliado" },
+      period: anomaly.fecha?.slice(0, 7) ?? "2026",
+      category: "compras",
+      field: `cuarentena_v7:${anomaly.ocid}`,
+      official: anomaly.monto_oficial_clp,
+      projection: null,
+      lake: anomaly.monto_oficial_clp,
+      site: { visible_como_hallazgo: purchaseDisclosure, excluded_from_totals_and_rankings: anomaly.excluded_from_totals_and_rankings === true },
+      validation: "V7",
+      status: "ALTA",
+      difference: anomaly.monto_oficial_clp,
+      url: anomaly.source_url,
+      detail: {
+        violations: anomaly.violations,
+        source_anomaly: true,
+        site_disclosure: purchaseDisclosure,
+        quarantined: true,
+        excluded_from_totals_and_rankings: anomaly.excluded_from_totals_and_rankings === true,
+      },
+    }));
   }
 
   const ordered = stableSortFindings(findings);

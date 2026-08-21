@@ -24,6 +24,16 @@ const buyer = {
       ocid: "ocds-70d2nz-1",
     },
   ],
+  anomalies: [{
+    id: "chilecompra-v7-official",
+    severity: "ALTA",
+    validation: "V7",
+    violations: ["monto_relacion"],
+    monto_oficial_clp: 100_000_000_001,
+    title: "Orden oficial fuera de rango",
+    source_url: "https://official.example/order",
+    excluded_from_totals_and_rankings: true,
+  }],
 };
 
 describe("R10 — ninguna compra inventada entra a proyecciones", () => {
@@ -54,6 +64,15 @@ describe("R10 — ninguna compra inventada entra a proyecciones", () => {
       }),
     ]);
     expect(projection.procesos).toEqual([]);
+    expect(projection.anomalias_integridad).toEqual([
+      expect.objectContaining({
+        id: "chilecompra-v7-official",
+        severity: "ALTA",
+        validation: "V7",
+        monto_oficial_clp: 100_000_000_001,
+        excluded_from_totals_and_rankings: true,
+      }),
+    ]);
   });
 
   it("la ausencia de RUT o comprador oficial se representa como null", () => {

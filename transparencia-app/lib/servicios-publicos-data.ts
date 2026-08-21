@@ -40,6 +40,15 @@ export interface ComprasPublicasServicio {
   top_proveedores: ProveedorChileCompra[];
   ordenes_recientes: OrdenCompraChileCompra[];
   serie_mensual_2026: ComprasMesChileCompra[];
+  anomalias_integridad: Array<{
+    id: string;
+    severity: "ALTA";
+    validation: "V7";
+    titulo: string | null;
+    monto_oficial_clp: number;
+    source_url: string | null;
+    excluded_from_totals_and_rankings: true;
+  }>;
 }
 
 export interface AudienciaLobbyServicio {
@@ -212,6 +221,15 @@ export function getServicioPublicoEnriquecido(id: string): ServicioPublicoEnriqu
           period: month.period,
           monto_clp: month.monto_total_clp,
           procesos_count: month.procesos,
+        })),
+        anomalias_integridad: (officialBuyer.anomalies ?? []).map((anomaly) => ({
+          id: anomaly.id,
+          severity: anomaly.severity,
+          validation: anomaly.validation,
+          titulo: anomaly.title,
+          monto_oficial_clp: anomaly.monto_oficial_clp,
+          source_url: anomaly.source_url,
+          excluded_from_totals_and_rankings: anomaly.excluded_from_totals_and_rankings,
         })),
       }
     : null;

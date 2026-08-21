@@ -19,6 +19,24 @@ export interface ChileCompraMes {
   procesos: number;
 }
 
+export interface ChileCompraAnomalia {
+  id: string;
+  severity: "ALTA";
+  validation: "V7";
+  violations: string[];
+  buyer_id: string | null;
+  buyer_name: string | null;
+  ocid: string;
+  title: string | null;
+  proveedor: string | null;
+  monto_oficial_clp: number;
+  fecha: string | null;
+  source_url: string | null;
+  source_anomaly: true;
+  site_disclosure: true;
+  excluded_from_totals_and_rankings: true;
+}
+
 export interface ChileCompraComprador {
   id: string;
   name: string | null;
@@ -27,6 +45,7 @@ export interface ChileCompraComprador {
   procesos: number;
   months: ChileCompraMes[];
   top: ChileCompraAdjudicacion[];
+  anomalies: ChileCompraAnomalia[];
 }
 
 export interface ChileCompraProveedor {
@@ -50,6 +69,7 @@ export interface ChileCompraProyeccion {
   buyers: ChileCompraComprador[];
   suppliers: ChileCompraProveedor[];
   topPairs: ChileCompraPar[];
+  anomalies: ChileCompraAnomalia[];
   total_adjudicado_clp: number | null;
 }
 

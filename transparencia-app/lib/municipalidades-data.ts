@@ -138,6 +138,17 @@ export interface ComprasPublicasMuni {
   } | null;
   metodo_enlace: "RUT_EXACTO";
   fuente: "ChileCompra · Estándar OCDS";
+  anomalias_integridad: Array<{
+    id: string | null;
+    severity: "ALTA" | null;
+    validation: "V7" | null;
+    violations: string[];
+    titulo: string | null;
+    monto_oficial_clp: number | null;
+    fecha: string | null;
+    source_url: string | null;
+    excluded_from_totals_and_rankings: boolean;
+  }>;
 }
 
 export interface RadiografiaComunal {

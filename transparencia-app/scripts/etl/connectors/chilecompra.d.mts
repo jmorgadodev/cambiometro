@@ -16,6 +16,7 @@ export interface ChileCompraRawRecord extends Record<string, unknown> {
 export function buildChileCompraListUrl(type: ChileCompraType, year: number, month: number, offset: number, limit: number): string;
 export function normalizeOcdsPackage(packageData: Record<string, unknown>, context: { procurementType: ChileCompraType; sourceUrl: string }): ChileCompraRawRecord[];
 export function reconcileChileCompraRecords(records: ChileCompraRawRecord[]): ChileCompraRawRecord[];
+export function filterChileCompraRecordsByCutoff<T extends { data?: { fecha?: unknown } }>(records: T[], cutoff: string): T[];
 export function fetchChileCompraMonth(options: {
   year: number;
   month: number;
