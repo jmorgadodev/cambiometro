@@ -113,6 +113,16 @@ function publicDocuments(documents) {
   })).filter((document) => document.url);
 }
 
+export function filterChileCompraRecordsByCutoff(records, cutoff) {
+  if (!/^\d{4}-\d{2}-\d{2}$/u.test(String(cutoff ?? "")) || Number.isNaN(Date.parse(`${cutoff}T00:00:00Z`))) {
+    throw new Error("CHILECOMPRA_INVALID_CUTOFF");
+  }
+  return records.filter((record) => {
+    const date = typeof record?.data?.fecha === "string" ? record.data.fecha.slice(0, 10) : null;
+    return date !== null && /^\d{4}-\d{2}-\d{2}$/u.test(date) && date <= cutoff;
+  });
+}
+
 function dateRank(record) {
   const timestamp = Date.parse(record.fecha ?? "");
   return Number.isFinite(timestamp) ? timestamp : 0;

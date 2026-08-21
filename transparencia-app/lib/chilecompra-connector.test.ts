@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   buildChileCompraListUrl,
+  filterChileCompraRecordsByCutoff,
   fetchChileCompraMonth,
   normalizeOcdsPackage,
   reconcileChileCompraRecords,
@@ -251,5 +252,15 @@ describe("conector ChileCompra OCDS", () => {
     const result = await fetchChileCompraMonth({ year: 2026, month: 6, types: ["trato_directo"], fetchImpl, requestsPerSecond: 1 });
     expect(result.documents).toHaveLength(1);
     expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("excluye de la proyección registros posteriores al corte sin reemplazarlos", () => {
+    expect(filterChileCompraRecordsByCutoff([
+      { id: "before", data: { fecha: "2026-08-20T23:59:59Z" } },
+      { id: "after", data: { fecha: "2026-08-21T00:00:00Z" } },
+      { id: "unknown", data: { fecha: null } },
+    ], "2026-08-20")).toEqual([
+      { id: "before", data: { fecha: "2026-08-20T23:59:59Z" } },
+    ]);
   });
 });
