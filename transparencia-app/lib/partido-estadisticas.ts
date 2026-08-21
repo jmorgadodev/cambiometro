@@ -3,9 +3,10 @@ import type { Politico } from "@/lib/politicos";
 import { COLOR_ABST, COLOR_NO, COLOR_NO_VOTA, COLOR_SI } from "@/lib/colores-votacion";
 import { getKvCache } from "@/lib/db";
 import { diputadoIdParaPolitico } from "@/lib/data-source";
-import { personalApoyoParaDiputado, personalApoyoParaSenador } from "@/lib/personal-apoyo";
+import { personalApoyoParaDiputado, personalApoyoParaSenador, leerPersonalApoyo } from "@/lib/personal-apoyo";
 import { COALICION_POR_PARTIDO } from "@/lib/partido-electoral-data";
-import PARTIDOS_STATS_FALLBACK from "@/data/partidos-stats.json";
+import _PARTIDOS_STATS_FALLBACK_RAW from "@/data/partidos-stats.json";
+const PARTIDOS_STATS_FALLBACK: Record<string, unknown> = ((_PARTIDOS_STATS_FALLBACK_RAW as unknown as Record<string, unknown>)?.default ?? _PARTIDOS_STATS_FALLBACK_RAW) as Record<string, unknown>;
 
 export interface DetalleRebelde {
   politico_id: string;
@@ -51,7 +52,7 @@ export async function getPartidoEstadisticas(partidoId: string): Promise<Partido
   if (!cached) {
     cachedPromise ??= getKvCache<Record<string, PartidoEstadistica>>("partidos-stats.json");
     const kvData = await cachedPromise;
-    cached = kvData || (PARTIDOS_STATS_FALLBACK as unknown as Record<string, PartidoEstadistica>);
+    cached = kvData || (PARTIDOS_STATS_FALLBACK as Record<string, PartidoEstadistica>);
   }
   return cached?.[normId] ?? (PARTIDOS_STATS_FALLBACK as Record<string, unknown>)[normId] as PartidoEstadistica ?? null;
 }
@@ -218,6 +219,18 @@ export async function gastosDelPartido(partidoId: string): Promise<GastoPartido>
 /** Agregación de personal de apoyo para todos los miembros de un partido. */
 export async function personalApoyoDelPartido(partidoId: string): Promise<PersonalApoyoPartido> {
   const pols = politicosDelPartido(partidoId);
+  const dataset = await leerPersonalApoyo();
+  if (!dataset) {
+    return {
+      totalMensual: 0,
+      totalPersonas: 0,
+      promedioPorParlamentario: 0,
+      parlamentariosConPersonal: 0,
+      totalParlamentarios: pols.length,
+      cobertura: `0/${pols.length}`,
+    };
+  }
+
   let totalMensual = 0;
   let totalPersonas = 0;
   let conPersonal = 0;
@@ -225,18 +238,29 @@ export async function personalApoyoDelPartido(partidoId: string): Promise<Person
   for (const pol of pols) {
     if (pol.cargo === "Diputado") {
       const idDip = diputadoIdParaPolitico(pol);
-      const apoyo = await personalApoyoParaDiputado(idDip);
-      if (apoyo.total_mensual > 0) {
-        totalMensual += apoyo.total_mensual;
-        totalPersonas += apoyo.n_personas;
+      const diputado = idDip ? dataset.diputados[String(idDip)] : null;
+      if (diputado && diputado.personal_apoyo && diputado.personal_apoyo.length > 0) {
+        const sum = diputado.personal_apoyo.reduce((total, fila) => total + (fila.sueldo ?? 0), 0);
+        totalMensual += sum;
+        totalPersonas += diputado.personal_apoyo.length;
         conPersonal += 1;
       }
     } else {
-      const apoyoSen = await personalApoyoParaSenador(pol.nombre_completo);
-      if (apoyoSen.total_2026 > 0) {
-        totalMensual += apoyoSen.total_2026;
-        totalPersonas += apoyoSen.registros.length;
-        conPersonal += 1;
+      const normalize = (s: string) => s.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase().trim();
+      const targetName = normalize(pol.nombre_completo);
+      const targetTokens = targetName.split(/\s+/).filter((t) => t.length >= 3);
+      for (const [oficina, regs] of Object.entries(dataset.senadores ?? {})) {
+        const normOficina = normalize(oficina);
+        const match = normOficina.includes(targetName) || targetTokens.filter((t) => normOficina.includes(t)).length >= 2;
+        if (match) {
+          const sum = regs.reduce((total, r) => total + (r.monto ?? 0), 0);
+          if (sum > 0) {
+            totalMensual += sum;
+            totalPersonas += regs.length;
+            conPersonal += 1;
+          }
+          break;
+        }
       }
     }
   }

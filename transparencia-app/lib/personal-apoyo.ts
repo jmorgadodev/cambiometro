@@ -192,6 +192,8 @@ export async function leerPersonalApoyo(): Promise<PersonalApoyoDataset | null> 
     cachedPromise ??= (async () => {
       const fromD1 = await getKvCache<PersonalApoyoDataset>("personal-apoyo.json");
       if (fromD1) return fromD1;
+      // Cloudflare Workers no soporta fs — solo intentar en Node.js
+      if (typeof WebSocketPair !== "undefined") return null;
       try {
         return JSON.parse(fs.readFileSync(path.join(process.cwd(), "data", "personal-apoyo.json"), "utf8")) as PersonalApoyoDataset;
       } catch {
@@ -204,6 +206,10 @@ export async function leerPersonalApoyo(): Promise<PersonalApoyoDataset | null> 
 }
 
 export async function personalApoyoEvidenceParaEntidad(entity: CanonicalEntity) {
+  const sources = Array.isArray(entity.sourceIds) ? entity.sourceIds : [];
+  if (!sources.includes("personal-apoyo") && !sources.includes("camara") && !sources.includes("senado")) {
+    return [];
+  }
   return personalApoyoEvidenceRecords(entity, await leerPersonalApoyo());
 }
 
