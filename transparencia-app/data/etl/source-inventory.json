@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "generatedAt": "2026-08-08T19:50:25.432Z",
+  "generatedAt": "2026-08-21T10:12:13.111Z",
   "sources": [
     {
       "id": "camara",
@@ -146,7 +146,7 @@
       "label": "ChileCompra OCDS",
       "status": "partial",
       "indexUrl": "https://datos-abiertos.chilecompra.cl/descargas/procesos-ocds",
-      "indexChecksumSha256": "87fa1f7fa0aef4213c20d0df9b74ea9336d2108ea9631d8064448e77c1e36ce9",
+      "indexChecksumSha256": "1bce7de1ed00f321363f1a5e0e7a920d679f2e767264b2b327db6acb565f1bd8",
       "periods": [],
       "assetCount": 0,
       "assets": []
@@ -352,17 +352,81 @@
       "label": "Contraloría",
       "status": "partial",
       "indexUrl": "https://www.contraloria.cl/web/cgr/informes-de-auditoria",
-      "indexChecksumSha256": "5c5afea417119b628299494f6a509734fb30cc3a4a06919b188b037a59b0e4dc",
+      "indexChecksumSha256": "2ce90c4c1f74d21aa7936aded57289a1c545a9679fd0fe253b1f66a60d828386",
       "periods": [],
-      "assetCount": 2,
+      "assetCount": 18,
       "assets": [
         {
           "url": "https://www.contraloria.cl/es/web/cgr/informes-de-auditoria",
           "label": "Español"
         },
         {
+          "url": "https://www.contraloria.cl/multisite/datos-abiertos/",
+          "label": "Datos abiertos"
+        },
+        {
+          "url": "https://www.contraloria.cl/web/cgr/ambito-de-la-funcion-auditora",
+          "label": "Ámbito de la Función"
+        },
+        {
+          "url": "https://www.contraloria.cl/web/cgr/auditorias-a-las-transferencias-relacionadas-con-fundaciones",
+          "label": "Auditorías a las transferencias relacionadas con Fundaciones"
+        },
+        {
+          "url": "https://www.contraloria.cl/web/cgr/certificado-de-disponibilidad-presupuestaria",
+          "label": "Certificado de Disponibilidad Presupuestaria"
+        },
+        {
+          "url": "https://www.contraloria.cl/web/cgr/contribuir-a-una-auditoria-en-curso",
+          "label": "Contribuir a una Auditoría en Curso"
+        },
+        {
+          "url": "https://www.contraloria.cl/web/cgr/igfe3",
+          "label": "Informe de la Gestión Financiera del Estado"
+        },
+        {
+          "url": "https://www.contraloria.cl/web/cgr/informacion-presupuestaria",
+          "label": "Información Presupuestaria"
+        },
+        {
           "url": "https://www.contraloria.cl/web/cgr/informes-de-auditoria",
           "label": "Saltar al contenido"
+        },
+        {
+          "url": "https://www.contraloria.cl/web/cgr/informes-de-auditorias",
+          "label": "Informes de Auditorías"
+        },
+        {
+          "url": "https://www.contraloria.cl/web/cgr/informes-de-auditorias2",
+          "label": "Informes de Auditorías"
+        },
+        {
+          "url": "https://www.contraloria.cl/web/cgr/junta-de-auditores-onu",
+          "label": "Junta de auditores ONU"
+        },
+        {
+          "url": "https://www.contraloria.cl/web/cgr/nomina-de-sujetos-pasivos",
+          "label": "Nómina de sujetos pasivos"
+        },
+        {
+          "url": "https://www.contraloria.cl/web/cgr/presupuesto-actualizado-de-iniciativas-de-inversion",
+          "label": "Presupuesto Actualizado de Iniciativas de Inversion"
+        },
+        {
+          "url": "https://www.contraloria.cl/web/cgr/presupuesto-actualizado-de-la-nacion",
+          "label": "Presupuesto Actualizado de la Nación"
+        },
+        {
+          "url": "https://www.contraloria.cl/web/cgr/toma-de-razon",
+          "label": "Modificaciones Presupuestarias Tramitadas"
+        },
+        {
+          "url": "https://www.contraloria.cl/web/cgr/ultimas-auditorias-por-sector-y-region",
+          "label": "Últimas auditorías por sector y región"
+        },
+        {
+          "url": "https://www.contraloria.cl/web/cgr/unidades-de-control-interno",
+          "label": "Unidades de Auditoría o Control Interno"
         }
       ]
     },
@@ -371,7 +435,7 @@
       "label": "Registro Ley 19.862",
       "status": "partial",
       "indexUrl": "https://www.registros19862.cl/",
-      "indexChecksumSha256": "3158af54a517d2b479af181186ab6492c5a0b76abf0b657c121642838e9d68ed",
+      "indexChecksumSha256": "68ab01b0404f0d7e264575f6d724d0448a53d35910451f25b7bcb48fac703789",
       "periods": [],
       "assetCount": 0,
       "assets": []
@@ -381,7 +445,7 @@
       "label": "Portal de Transparencia",
       "status": "partial",
       "indexUrl": "https://www.consejotransparencia.cl/datosabiertos-respaldo/",
-      "indexChecksumSha256": "f21a861af3a3425ba92080e7ad9a23e04b912b37f18b5da11b738135b9c3bcc8",
+      "indexChecksumSha256": "c743477cffa7f6957dc7d89dc52cc77b1878b022707bea113ca20091c0be66bb",
       "periods": [],
       "assetCount": 80,
       "assets": [
@@ -712,7 +776,7 @@
       "label": "SERVEL",
       "status": "partial",
       "indexUrl": "https://www.servel.cl/biblioteca-de-documentos/resultados-electorales-historicos/",
-      "indexChecksumSha256": "d11885a735c7383f93162cd5fe23383504ec83747094c2d77286d77620a70633",
+      "indexChecksumSha256": "64911ca0e9efd36ccc715efde4c9d23b236dfbc4d39083284087478bbddf6db6",
       "periods": [
         "2025"
       ],

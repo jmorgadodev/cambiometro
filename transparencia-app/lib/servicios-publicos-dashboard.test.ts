@@ -29,21 +29,16 @@ describe("Dashboard Integral de Servicios Públicos y Eliminación de Bloques Ci
     expect(directoryClientSource).toContain("pendiente de publicación");
   });
 
-  it("S3. Dotaciones reales y diferenciadas por institución (no placeholders idénticos)", () => {
+  it("S3. Servicios sin cobertura CPLT conservan dotación y gasto como null", () => {
     const minagri = getServicioPublicoEnriquecido("min-agricultura");
     const bbnn = getServicioPublicoEnriquecido("min-bienesnacionales");
     const ciencia = getServicioPublicoEnriquecido("min-ciencia");
     const interior = getServicioPublicoEnriquecido("min-interior");
 
-    expect(minagri?.personal?.dotacion_total).toBe(610);
-    expect(bbnn?.personal?.dotacion_total).toBe(460);
-    expect(ciencia?.personal?.dotacion_total).toBe(210);
-    expect(interior?.personal?.dotacion_total).toBe(1150);
-
-    // Aserción estricta: dotación(MINAGRI) !== dotación(BBNN) !== dotación(Ciencia)
-    expect(minagri?.personal?.dotacion_total).not.toBe(bbnn?.personal?.dotacion_total);
-    expect(minagri?.personal?.dotacion_total).not.toBe(ciencia?.personal?.dotacion_total);
-    expect(bbnn?.personal?.dotacion_total).not.toBe(ciencia?.personal?.dotacion_total);
+    expect(minagri?.personal).toBeNull();
+    expect(bbnn?.personal).toBeNull();
+    expect(ciencia?.personal).toBeNull();
+    expect(interior?.personal).toBeNull();
   });
 
   it("S4. Ministerios no son 'subordinados' y cuentan con desglose de subtítulos 21/22/29", () => {
