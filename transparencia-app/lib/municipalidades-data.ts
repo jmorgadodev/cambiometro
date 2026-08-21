@@ -36,6 +36,7 @@ export interface ResumenPersonal {
   registros_observados_count?: number;
   registros_sin_pago_count?: number;
   registros_micro_monto_count?: number;
+  registros_cuarentena_v7_count?: number;
   registros_validos_count?: number;
   nota_metodologica?: string | null;
 }
@@ -63,6 +64,21 @@ export interface TopFuncionarioRemuneracion {
   periodo?: string;
   total_contratos_count?: number;
   cargos_consolidados?: string[];
+}
+
+export interface AnomaliaIntegridadMunicipal {
+  id: string;
+  severity: "ALTA";
+  validation: "V7";
+  violations: Array<"sueldo_mensual" | "horas_extras">;
+  source_url: string | null;
+  record: {
+    nombre_completo?: string;
+    remuneracion_bruta_mensual?: number | null;
+    horas_extras_mes_anterior?: number | null;
+    periodo?: string;
+    fuente_periodo?: string;
+  };
 }
 
 export interface RedesSocialesComunales {
@@ -170,6 +186,7 @@ export interface MunicipalidadEnriquecida {
   resumen_personal: ResumenPersonal | null;
   top_horas_extras: TopFuncionarioHorasExtras[];
   top_remuneraciones: TopFuncionarioRemuneracion[];
+  anomalias_integridad?: AnomaliaIntegridadMunicipal[];
 }
 
 export * from "./municipalidades-list";

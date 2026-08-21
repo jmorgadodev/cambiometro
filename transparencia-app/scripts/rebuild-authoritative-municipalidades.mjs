@@ -10,6 +10,7 @@ import path from 'path';
 import { MUNICIPALIDADES_SEED } from '../lib/municipalidades.ts';
 import { CENSO_2024_OFICIAL } from './census-data.mjs';
 import { findBuyerByVerifiedRut, projectOfficialBuyer } from './etl/r10-chilecompra.mjs';
+import { partitionV7Records } from './etl/v7-quarantine.mjs';
 
 const root = process.cwd();
 
@@ -520,11 +521,15 @@ for (const muni of MUNICIPALIDADES_SEED) {
   let resumen_personal = null;
   let top_horas_extras = [];
   let top_remuneraciones = [];
+  let anomalias_integridad = [];
 
   if (rawStaff.length > 0) {
+    const v7 = partitionV7Records(rawStaff);
+    const regularStaff = v7.regular;
+    anomalias_integridad = v7.anomalies;
     // 1. Identificar periodo activo mensual representativo para masa salarial mensual
     const periodCounts = new Map();
-    for (const f of rawStaff) {
+    for (const f of regularStaff) {
       const p = f.fuente_periodo || "unknown";
       periodCounts.set(p, (periodCounts.get(p) || 0) + 1);
     }
@@ -537,7 +542,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
         return b[1] - a[1];
       });
     const bestPeriod = sortedPeriods.length > 0 ? sortedPeriods[0][0] : null;
-    const periodStaff = bestPeriod ? rawStaff.filter(f => f.fuente_periodo === bestPeriod) : rawStaff;
+    const periodStaff = bestPeriod ? regularStaff.filter(f => f.fuente_periodo === bestPeriod) : regularStaff;
 
     // Dotación completa (M4): 100% de la nómina (20.805 para Santiago)
     let totalPlanta = 0;
@@ -545,7 +550,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
     let totalHonorarios = 0;
     let totalCodigoTrabajo = 0;
 
-    for (const f of rawStaff) {
+    for (const f of regularStaff) {
       const tipo = String(f.tipo_contrato ?? "");
       if (tipo === "Planta") totalPlanta++;
       else if (tipo === "Contrata") totalContrata++;
@@ -586,13 +591,13 @@ for (const muni of MUNICIPALIDADES_SEED) {
     }
 
     // Métricas de calidad D1, D2, D3
-    const sinPagoCount = rawStaff.filter(f => Number(f.remuneracion_bruta_mensual ?? 0) <= 0).length;
-    const microMontoCount = rawStaff.filter(f => Number(f.remuneracion_bruta_mensual ?? 0) > 0 && Number(f.remuneracion_bruta_mensual ?? 0) < 50000).length;
-    const observadosCount = sinPagoCount + microMontoCount;
-    const validosCount = rawStaff.length - sinPagoCount;
+    const sinPagoCount = regularStaff.filter(f => Number(f.remuneracion_bruta_mensual ?? 0) <= 0).length;
+    const microMontoCount = regularStaff.filter(f => Number(f.remuneracion_bruta_mensual ?? 0) > 0 && Number(f.remuneracion_bruta_mensual ?? 0) < 50000).length;
+    const observadosCount = sinPagoCount + microMontoCount + anomalias_integridad.length;
+    const validosCount = regularStaff.length - sinPagoCount;
 
     resumen_personal = {
-      total_funcionarios: rawStaff.length,
+      total_funcionarios: regularStaff.length,
       planta: totalPlanta,
       contrata: totalContrata,
       honorarios: totalHonorarios,
@@ -604,12 +609,13 @@ for (const muni of MUNICIPALIDADES_SEED) {
       registros_observados_count: observadosCount,
       registros_sin_pago_count: sinPagoCount,
       registros_micro_monto_count: microMontoCount,
+      registros_cuarentena_v7_count: anomalias_integridad.length,
       registros_validos_count: validosCount,
       nota_metodologica: notaMetodologica,
     };
 
     // 2. Top Horas Extras
-    top_horas_extras = rawStaff
+    top_horas_extras = regularStaff
       .filter(f => Number(f.horas_extras_mes_anterior ?? 0) > 0)
       .sort((a, b) => Number(b.horas_extras_mes_anterior ?? 0) - Number(a.horas_extras_mes_anterior ?? 0))
       .slice(0, 5)
@@ -623,7 +629,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
       }));
 
     // 3. Top Remuneraciones M1: ORDENADO POR SUELDO BRUTO TOTAL (Base + HH.EE.), idéntico criterio al buscador, sobre registros válidos
-    const sortedByBruto = rawStaff
+    const sortedByBruto = regularStaff
       .filter(f => Number(f.remuneracion_bruta_mensual || 0) >= 50000)
       .sort((a, b) => Number(b.remuneracion_bruta_mensual || 0) - Number(a.remuneracion_bruta_mensual || 0));
 
@@ -742,6 +748,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
     resumen_personal,
     top_horas_extras: (top_horas_extras || []).slice(0, 3),
     top_remuneraciones,
+    anomalias_integridad,
     concejales,
     compras_publicas,
     radiografia_comunal,

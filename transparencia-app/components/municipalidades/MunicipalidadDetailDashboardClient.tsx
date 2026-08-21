@@ -120,6 +120,7 @@ export default function MunicipalidadDetailDashboardClient({
   const auditorias = muniData.auditorias_cgr ?? [];
   const topRemuneraciones = muniData.top_remuneraciones ?? [];
   const topHorasExtras = muniData.top_horas_extras ?? [];
+  const integrityAnomalies = muniData.anomalias_integridad ?? [];
 
   const partidoAlcalde =
     alcalde?.partido_alcalde ||
@@ -1009,6 +1010,28 @@ export default function MunicipalidadDetailDashboardClient({
               </div>
             )}
           </div>
+
+          {integrityAnomalies.length > 0 && (
+            <div className="card" role="alert" style={{ padding: "1.25rem", borderColor: "var(--bad)" }}>
+              <div className="section-title" style={{ marginBottom: "0.4rem", color: "var(--bad)" }}>
+                Hallazgos de integridad ALTA (V7)
+              </div>
+              <p style={{ margin: "0 0 0.75rem", fontSize: "0.75rem", color: "var(--text-subtle)" }}>
+                Estas filas provienen de la fuente oficial, exceden los límites de plausibilidad y fueron excluidas de totales y rankings normales sin alterar su evidencia.
+              </p>
+              {integrityAnomalies.map((anomaly) => (
+                <div key={anomaly.id} style={{ padding: "0.6rem 0", borderTop: "1px solid var(--border-subtle)", fontSize: "0.76rem" }}>
+                  <strong>{anomaly.record.nombre_completo || anomaly.id}</strong>{" · "}
+                  {anomaly.violations.includes("sueldo_mensual") && `remuneración ${formatCLP(anomaly.record.remuneracion_bruta_mensual)}`}
+                  {anomaly.violations.length > 1 && " · "}
+                  {anomaly.violations.includes("horas_extras") && `${anomaly.record.horas_extras_mes_anterior ?? 0} horas extra`}
+                  {anomaly.source_url && (
+                    <> · <a href={anomaly.source_url} target="_blank" rel="noopener noreferrer">ver fuente oficial ↗</a></>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
 
           {/* Top Remuneraciones M1 */}
           {topRemuneraciones.length > 0 && (
