@@ -27,12 +27,14 @@ export function fetchChileCompraMonth(options: {
   onProgress?: (progress: { phase: string; type?: string; completed: number; total: number }) => void;
   requestsPerSecond?: number;
   retryBaseMs?: number;
+  bulkLicitacionDocuments?: Map<string, { url: string; payload: Record<string, unknown> }> | null;
 }): Promise<{
   sourceId: "chilecompra";
   year: number;
   month: number;
   period: string;
   listingCounts: Record<string, number>;
+  bulkCoverage: { used: number; missing: number };
   records: ChileCompraRawRecord[];
   documents: Array<{ url: string; stage: string; procurementType: ChileCompraType; ocid: string; payload: Record<string, unknown> }>;
   rejectedDocuments: Array<{

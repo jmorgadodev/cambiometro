@@ -5,6 +5,7 @@ import { fetchChileCompraMonth } from "./etl/connectors/chilecompra.mjs";
 import { gzipDeterministicJsonl, stableStringify } from "./etl/core.mjs";
 import { buildLakePlan } from "./etl/lake.mjs";
 import { createCheckpointFetch } from "./etl/checkpoint-cache.mjs";
+import { loadOfficialBulkLicitaciones } from "./etl/chilecompra-bulk.mjs";
 
 function argument(name) {
   const index = process.argv.indexOf(name);
@@ -24,6 +25,16 @@ if (outputRoot === root || dirname(outputRoot) === outputRoot) throw new Error("
 
 const cacheRoot = join(outputRoot, ".work", `chilecompra-${year}-${String(month).padStart(2, "0")}`);
 const cachedFetch = createCheckpointFetch({ cacheRoot });
+let bulkLicitacionDocuments = null;
+if (!selectedTypes || selectedTypes.includes("licitacion")) {
+  try {
+    const bulk = await loadOfficialBulkLicitaciones({ year, month, workRoot: join(outputRoot, ".work") });
+    bulkLicitacionDocuments = bulk.documents;
+    process.stderr.write(`${JSON.stringify({ phase: "bulk_licitacion", completed: bulk.documents.size, url: bulk.url })}\n`);
+  } catch (error) {
+    process.stderr.write(`${JSON.stringify({ phase: "bulk_licitacion_fallback", error: error instanceof Error ? error.message : String(error) })}\n`);
+  }
+}
 
 const result = await fetchChileCompraMonth({
   year,
@@ -31,6 +42,7 @@ const result = await fetchChileCompraMonth({
   concurrency,
   requestsPerSecond,
   fetchImpl: cachedFetch,
+  ...(bulkLicitacionDocuments ? { bulkLicitacionDocuments } : {}),
   ...(selectedTypes ? { types: selectedTypes } : {}),
   onProgress(progress) {
     process.stderr.write(`${JSON.stringify(progress)}\n`);
@@ -98,4 +110,4 @@ const publishPlan = {
   })),
 };
 writeFileSync(join(outputRoot, "publish-plan.json"), `${JSON.stringify(publishPlan, null, 2)}\n`, "utf8");
-console.log(JSON.stringify({ source: "chilecompra", period: result.period, listingCounts: result.listingCounts, documents: result.documents.length, rejectedDocuments: result.rejectedDocuments.length, records: result.records.length, originalChecksumSha256, originalSize, originalArchived: false, assets: plan.assets.length, output: outputRoot }, null, 2));
+console.log(JSON.stringify({ source: "chilecompra", period: result.period, listingCounts: result.listingCounts, bulkCoverage: result.bulkCoverage, documents: result.documents.length, rejectedDocuments: result.rejectedDocuments.length, records: result.records.length, originalChecksumSha256, originalSize, originalArchived: false, assets: plan.assets.length, output: outputRoot }, null, 2));

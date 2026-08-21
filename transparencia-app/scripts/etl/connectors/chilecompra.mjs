@@ -408,6 +408,7 @@ export async function fetchChileCompraMonth({
   onProgress,
   requestsPerSecond = 20,
   retryBaseMs = 1000,
+  bulkLicitacionDocuments = null,
 }) {
   assertPeriod(year, month);
   if (!Array.isArray(types) || types.length === 0 || types.some((type) => !LIST_ENDPOINTS[type])) throw new Error("CHILECOMPRA_INVALID_TYPES");
@@ -417,7 +418,22 @@ export async function fetchChileCompraMonth({
   const listings = (await Promise.all(types.map((type) => fetchListing({ type, year, month, pageSize, fetchImpl, timeoutMs, onProgress, retryBaseMs, coordinator })))).flat();
   const requests = [];
   const seen = new Set();
+  const bulkCoverage = { used: 0, missing: 0 };
   for (const item of listings) {
+    if (item.procurementType === "licitacion" && bulkLicitacionDocuments) {
+      const source = httpsUrl(item.urlTender ?? item.urlAward);
+      const processId = source ? decodeURIComponent(new URL(source).pathname.split("/").filter(Boolean).at(-1) ?? "") : "";
+      const bulk = bulkLicitacionDocuments.get(processId);
+      if (bulk?.url && bulk?.payload) {
+        bulkCoverage.used += 1;
+        if (!seen.has(bulk.url)) {
+          seen.add(bulk.url);
+          requests.push({ url: bulk.url, stage: "record", procurementType: item.procurementType, ocid: item.ocid, payload: bulk.payload });
+        }
+        continue;
+      }
+      bulkCoverage.missing += 1;
+    }
     for (const [stage, rawUrl] of [["tender", item.urlTender], ["award", item.urlAward]]) {
       const url = httpsUrl(rawUrl);
       if (!url || seen.has(url)) continue;
@@ -427,7 +443,9 @@ export async function fetchChileCompraMonth({
   }
   let completedDocuments = 0;
   const documents = await mapConcurrent(requests, concurrency, async (request) => {
-    const document = { ...request, payload: await requestJson(request.url, { fetchImpl, timeoutMs, retryBaseMs, coordinator }) };
+    const document = request.payload
+      ? request
+      : { ...request, payload: await requestJson(request.url, { fetchImpl, timeoutMs, retryBaseMs, coordinator }) };
     completedDocuments += 1;
     if (completedDocuments === requests.length || completedDocuments % 500 === 0) {
       onProgress?.({ phase: "documents", completed: completedDocuments, total: requests.length });
@@ -462,6 +480,7 @@ export async function fetchChileCompraMonth({
     records: reconcileChileCompraRecords(records),
     documents,
     rejectedDocuments,
+    bulkCoverage,
     license: "CC0-1.0",
   };
 }
