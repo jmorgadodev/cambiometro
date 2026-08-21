@@ -140,6 +140,7 @@ try {
 
   // Verificación de /funcionarios (valor por defecto Todos y consolidado nacional)
   await gotoWithNetworkRetry(`${baseUrl}/funcionarios`);
+  await page.waitForSelector("#select-muni", { timeout: 8000 }).catch(() => {});
   const selectMuni = page.locator("#select-muni");
   assert.equal(await selectMuni.count(), 1, "Debe existir selector de municipalidad");
   assert.equal(await selectMuni.inputValue(), "Todos", "Valor por defecto debe ser Todos");
