@@ -2,7 +2,7 @@ name: Build and E2E Verification
 
 on:
   push:
-    branches: [master]
+    branches: [main]
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
