@@ -1,0 +1,36 @@
+name: Backup Semanal (D1 + Data Lake)
+
+on:
+  schedule:
+    - cron: "0 5 * * 0" # 01:00 CLT, domingo
+  workflow_dispatch:
+
+concurrency:
+  group: backup-weekly
+  cancel-in-progress: true
+
+jobs:
+  backup:
+    name: Exportar D1 y copiar lake a R2 backups
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: transparencia-app
+
+      - name: Ejecutar backup semanal
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: node scripts/backup-weekly.mjs
