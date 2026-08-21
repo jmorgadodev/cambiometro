@@ -1,4 +1,4 @@
-# Fase A — Linaje de campos numéricos publicados
+# Fase A — Re-auditoría de linaje de campos numéricos publicados
 
 **Corte:** 2026-08-20  
 **Inventario:** 70 campos numéricos canónicos  
@@ -8,7 +8,7 @@
 
 La fuente oficial actual es la autoridad. Las proyecciones trackeadas y el
 lake archivado son capas diagnósticas; el sitio es la última capa publicada.
-En producción, las fichas dinámicas se leen desde el payload Flight/RSC
+Para la re-auditoría, las fichas corregidas se leen desde el payload Flight/RSC
 `text/x-component`. El identificador de despliegue M2
 `22ce1ca3-d8eb-4b61-a811-9f22e2b86f74` no es un Next build-id consumible:
 `/_next/data/<id>/...` y `/_next/static/<id>/_buildManifest.js` responden 404.
@@ -19,6 +19,35 @@ normalizados en `records.data_json`; la pertenencia se resuelve mediante
 `record_subjects`. La definición está en
 `migrations/0010_canonical_data_platform.sql:24-56` y la conversión en
 `scripts/etl/materialize.mjs:20-62`.
+
+## Overlay de corrección y guards permanentes
+
+La matriz original conserva el linaje completo de los 70 campos. La revisión
+posterior a FIX-1–FIX-5 verificó además los puntos exactos donde se impide que
+una divergencia o un dato sintético vuelva a entrar al flujo:
+
+- FIX-1/V1: `lib/gastos-operacionales.ts:177` expone el agregador común que
+  excluye filas resumen; `scripts/etl/generate-partidos-stats.ts:68` bloquea
+  una regeneración sin evidencias oficiales.
+- FIX-2/V2: `scripts/etl/senado-assignment.mjs:16` parsea la política oficial
+  de asignación y `components/PersonalApoyoMensual.tsx:240` publica el estado
+  del hallazgo sin presentar el exceso como normal.
+- FIX-3/R10: `scripts/etl/r10-chilecompra.mjs:17-48` exige RUT jurídico exacto
+  y devuelve `null` cuando no existe evidencia; los consumidores están en
+  `scripts/etl/generate-organismos-projection.ts:77` y
+  `scripts/rebuild-authoritative-municipalidades.mjs:95`.
+- FIX-4/V7: `scripts/build-presupuesto-v1.mjs:101` selecciona el último
+  snapshot DIPRES. Las anomalías oficiales se evalúan en
+  `lib/budget-integrity.ts:5` y se rotulan en
+  `ServicioPublicoDashboardClient.tsx:344-356` y
+  `app/entidades/[id]/page.tsx:308-314`.
+- FIX-5/V7: `scripts/rebuild-authoritative-municipalidades.mjs:505-507`
+  separa la cuarentena y la publica en `anomalias_integridad` en la línea 662;
+  las filas aisladas no alimentan totales ni rankings regulares.
+
+El guard de CI consume los resultados A–E y exige presencia de V1–V7; R10 se
+verifica por regresión y por estados `null/FUENTE_NO_DISPONIBLE`. Una CRITICA
+o un validador ausente produce código de salida distinto de cero.
 
 ## Inventario de campos
 
@@ -87,16 +116,13 @@ normalizados en `records.data_json`; la pertenencia se resuelve mediante
 | Agregados de partido (7) | Componentes parlamentarios oficiales anteriores | `lib/partido-estadisticas.ts:88-108` y agregadores del ETL | `data/partidos-stats.json` / KV | Derivados de `records` agrupados por identidad/partido | `lib/partido-estadisticas.ts` | `app/partidos/[sigla]/page.tsx:81-108,178-229` |
 | Rankings electorales (2) | SERVEL 2025 | ingesta y proyección SERVEL | `projections/v1/servel.json` | `records.data_json`; `source_id=servel` | `lib/servel.ts` | `app/rankings/page.tsx:20-81` |
 
-## Riesgos de linaje que pasan a las fases B–D
+## Riesgos residuales que pasan a las fases B–D
 
-1. Personal de apoyo se publica desde JSON/KV y no atraviesa las tablas
-   canónicas de D1; una divergencia puede nacer antes de D1 y permanecer
-   invisible para los controles de materialización.
-2. `procesarGastosPolitico` usa la suma de ítems como total visible cuando hay
-   desglose (`lib/gastos-operacionales.ts:114-128`), aunque conserva el total
-   oficial en `totalPublicadoFuente`. Esto explica cómo una inconsistencia V1
-   puede publicarse como cifra recalculada.
-3. Los agregados de partido combinan KV con `partidos-stats.json`; la auditoría
-   debe recalcularlos desde las 205 fichas, no confiar en el agregado cacheado.
-4. La proyección SINIM declara 345 municipios mientras la interfaz publica un
-   catálogo de 346; la ausencia se tratará como cobertura, nunca como cero.
+1. Personal de apoyo sigue usando JSON/KV fuera de las tablas canónicas D1;
+   por eso V2 compara explícitamente fuente, proyección y aviso de sitio.
+2. Los agregados de partido combinan KV con `partidos-stats.json`; V5 los
+   recalcula desde las 205 fichas y no confía en el agregado cacheado.
+3. SINIM declara 345 municipios frente a un catálogo de 346; la ausencia se
+   conserva como cobertura incompleta, nunca como cero.
+4. Valores oficiales DIPRES o CPLT fuera de V7 se preservan solo en una capa
+   de hallazgos visible y quedan fuera de rankings o totales normales.
