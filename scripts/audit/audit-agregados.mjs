@@ -5,8 +5,8 @@ import { resolve } from "node:path";
 import { APP_ROOT, DOCS_ROOT, fetchWithPolicy, findingId, normalizeText, parseArgs, sha256, stableSortFindings, validateV5, writeJson, writeMarkdown } from "./audit-core.mjs";
 
 const COALITION = {
-  udi: "Oposición", rn: "Oposición", evopoli: "Oposición", dem: "Oposición", ama: "Oposición", rep: "Oposición", pnl: "Oposición", psc: "Oposición", pdg: "Oposición",
-  fa: "Oficialismo", ps: "Oficialismo", pc: "Oficialismo", ppd: "Oficialismo", pdc: "Oficialismo", pl: "Oficialismo", pr: "Oficialismo", frvs: "Oficialismo",
+  udi: "Oficialismo", rn: "Oficialismo", evopoli: "Oficialismo", dem: "Oficialismo", ama: "Oficialismo", rep: "Oficialismo", pnl: "Oficialismo", psc: "Oficialismo", pdg: "Oficialismo",
+  fa: "Oposición", ps: "Oposición", pc: "Oposición", ppd: "Oposición", pdc: "Oposición", pl: "Oposición", pr: "Oposición", frvs: "Oposición",
   ind: "Independientes",
 };
 const OPTIONS = { afirmativo: "Afirmativo", enContra: "En Contra", abstencion: "Abstención", noVota: "No Vota", dispensado: "Dispensado" };
