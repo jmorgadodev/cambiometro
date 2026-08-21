@@ -417,7 +417,7 @@ export default function PersonasUniversalClient({
                   Directorio de Personas del Estado
                 </h1>
                 <p style={{ fontSize: "0.9rem", color: "var(--text-2)", margin: 0, lineHeight: 1.6 }}>
-                  Consolidación universal de parlamentarios, alcaldes, ministros, directores de servicio y más de 1.2M de funcionarios públicos clasificados por organismo del Estado.
+                  Consolidación de parlamentarios, alcaldes, ministros, directores de servicio y nóminas oficiales de personal según la cobertura publicada por cada organismo.
                 </p>
               </div>
 
@@ -447,8 +447,8 @@ export default function PersonasUniversalClient({
                   <div style={{ fontSize: "0.68rem", color: "var(--text-3)", fontWeight: 600 }}>Altas Autoridades</div>
                 </div>
                 <div style={{ textAlign: "center", padding: "0 0.5rem", borderLeft: "1px solid var(--border)" }}>
-                  <div style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--money)" }}>1.2M+</div>
-                  <div style={{ fontSize: "0.68rem", color: "var(--text-3)", fontWeight: 600 }}>Funcionarios CPLT</div>
+                  <div style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--money)" }}>CPLT</div>
+                  <div style={{ fontSize: "0.68rem", color: "var(--text-3)", fontWeight: 600 }}>Cobertura por organismo</div>
                 </div>
               </div>
             </div>
@@ -459,7 +459,7 @@ export default function PersonasUniversalClient({
                 { id: "parlamentarios" as PersonaTab, label: "🏛️ Parlamentarios", count: String(parlamentarios.length) },
                 { id: "alcaldes" as PersonaTab, label: "🏙️ Alcaldes", count: String(alcaldes.length) },
                 { id: "autoridades" as PersonaTab, label: "⚖️ Altas autoridades DIP", count: String(autoridades.length) },
-                { id: "funcionarios" as PersonaTab, label: "📋 Funcionarios", count: "1.2M+ CPLT" },
+                { id: "funcionarios" as PersonaTab, label: "📋 Funcionarios", count: "CPLT" },
               ].map((t) => {
                 const activo = activeTab === t.id;
                 return (

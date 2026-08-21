@@ -53,7 +53,7 @@ for (const m of sinimRaw.municipios || []) {
 console.log(`Cargados ${sinimByCut.size} registros presupuestarios y FCM desde SINIM.`);
 
 
-// 2. Cargar Auditorías CGR (275 informes SIAPER)
+// 2. Cargar auditorías CGR disponibles en la proyección oficial local.
 const cgrPath = path.join(root, "data", "lake", "projections", "v1", "contraloria.json");
 const cgrRaw = fs.existsSync(cgrPath) ? JSON.parse(fs.readFileSync(cgrPath, "utf8")) : { records: [] };
 const cgrRecords = cgrRaw.records || [];
@@ -207,7 +207,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
     const bestPeriod = sortedPeriods.length > 0 ? sortedPeriods[0][0] : null;
     const periodStaff = bestPeriod ? regularStaff.filter(f => f.fuente_periodo === bestPeriod) : regularStaff;
 
-    // Dotación completa (M4): 100% de la nómina (20.805 para Santiago)
+    // Dotación completa (M4): 100% de la nómina disponible en la fuente oficial.
     let totalPlanta = 0;
     let totalContrata = 0;
     let totalHonorarios = 0;

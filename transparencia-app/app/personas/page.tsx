@@ -15,7 +15,7 @@ import path from "node:path";
 export const metadata: Metadata = {
   title: "Directorio Universal de Personas y Autoridades del Estado — El Cambiómetro",
   description:
-    "Directorio oficial consolidado de personas del Estado de Chile: 205 parlamentarios, 345 alcaldes, ministros, directores de servicio y más de 1.2M de funcionarios públicos clasificados por organismo.",
+    "Directorio consolidado de parlamentarios, autoridades y nóminas oficiales de personal, con cobertura declarada por organismo.",
   openGraph: {
     title: "Directorio de Personas del Estado de Chile — El Cambiómetro",
     description:

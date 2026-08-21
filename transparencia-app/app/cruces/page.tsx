@@ -5,6 +5,7 @@ import { leerContraloriaV1 } from "@/lib/contraloria-lake";
 import { leerChileCompraV1 } from "@/lib/chilecompra";
 import { leerInfoLobbyV1 } from "@/lib/infolobby";
 import CrucesExplorerClient from "@/components/cruces/CrucesExplorerClient";
+import { getLey19862Summary } from "@/lib/transferencias-data";
 
 export const metadata: Metadata = {
   title: "Explorador de Cruces de Datos Públicos — El Cambiómetro",
@@ -25,6 +26,7 @@ export default async function CrossesPage({
   const contraloria = leerContraloriaV1();
   const chilecompra = leerChileCompraV1();
   const infolobby = leerInfoLobbyV1();
+  const ley19862 = getLey19862Summary();
 
   const clp = (amount: number | null) => {
     if (amount === null || amount <= 0) return "—";
@@ -198,7 +200,7 @@ export default async function CrossesPage({
             <div className="card" style={{ padding: "1.25rem", background: "var(--surface)", borderColor: "var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>📑</span>
-                <span className="badge badge-info">361.101 registros</span>
+                <span className="badge badge-info">{ley19862.kpis.total_transfers.toLocaleString("es-CL")} registros</span>
               </div>
               <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>
                 Transferencias Ley 19.862

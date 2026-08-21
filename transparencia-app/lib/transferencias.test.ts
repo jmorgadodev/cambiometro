@@ -6,10 +6,16 @@ describe("Módulo /transferencias — Validación y aserciones", () => {
     const summary = getLey19862Summary();
     expect(summary).toBeDefined();
     expect(summary.kpis).toBeDefined();
-    expect(summary.kpis.total_monto_clp).toBeGreaterThan(1_000_000_000_000);
-    expect(summary.kpis.total_transfers).toBe(361101);
-    expect(summary.kpis.total_receptores).toBe(61336);
-    expect(summary.kpis.total_emisores).toBe(419);
+    expect(summary.kpis.total_monto_clp).toBeGreaterThan(0);
+    expect(summary.kpis.total_transfers).toBeGreaterThan(0);
+    expect(summary.kpis.total_receptores).toBeGreaterThan(0);
+    expect(summary.kpis.total_emisores).toBeGreaterThan(0);
+    expect(Object.values(summary.by_year).reduce((sum, year) => sum + year.count, 0)).toBe(
+      summary.kpis.total_transfers,
+    );
+    expect(Object.values(summary.by_year).reduce((sum, year) => sum + year.total, 0)).toBe(
+      summary.kpis.total_monto_clp,
+    );
   });
 
   it("1. Top 10 Receptoras y Top 10 Emisores presentes con montos válidos", () => {
@@ -40,11 +46,12 @@ describe("Módulo /transferencias — Validación y aserciones", () => {
 
     for (const t of summary.transfers_sample) {
       expect(t.id).toBeDefined();
-      expect(t.monto_clp).toBeGreaterThan(0);
-      expect(t.url).toBeDefined();
+      expect(t.monto_clp).toBeGreaterThanOrEqual(0);
+      expect(t.url).not.toBeNull();
+      if (!t.url) throw new Error("URL oficial ausente");
       expect(t.url).toMatch(/^https:\/\/registros19862\.gob\.cl\/transferencia\/\d+$/);
-      expect(t.emitter_name).toBeDefined();
-      expect(t.receiver_name).toBeDefined();
+      expect(t.emitter_name).not.toBeNull();
+      expect(t.receiver_name).not.toBeNull();
     }
   });
 });

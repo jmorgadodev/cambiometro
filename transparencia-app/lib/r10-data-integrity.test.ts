@@ -81,6 +81,13 @@ describe("R10 — ninguna compra inventada entra a proyecciones", () => {
       "lib/partido-estadisticas.ts",
       "lib/scores.ts",
       "scripts/rebuild-authoritative-attendance.mjs",
+      "scripts/etl/ley19862-projection.mjs",
+      "app/transferencias/page.tsx",
+      "components/transferencias/TransferenciasExplorerClient.tsx",
+      "app/cruces/page.tsx",
+      "app/personas/page.tsx",
+      "components/personas/PersonasUniversalClient.tsx",
+      "components/municipalidades/MunicipalidadDetailDashboardClient.tsx",
     ].map((file) => readFileSync(resolve(file), "utf8")).join("\n");
 
     expect(sources).not.toMatch(/presVigente\s*\*\s*0\.34/);
@@ -127,6 +134,12 @@ describe("R10 — ninguna compra inventada entra a proyecciones", () => {
     expect(sources).not.toContain("2026-07-15");
     expect(sources).not.toContain("1440000000");
     expect(sources).not.toContain("-OC${c + 1}");
+    expect(sources).not.toContain("361.101");
+    expect(sources).not.toContain("1.2M+");
+    expect(sources).not.toContain("20.805");
+    expect(sources).not.toContain("11.483");
+    expect(sources).not.toContain("275 informes SIAPER");
+    expect(sources).not.toContain('classification: t.classification || "Transferencia Corriente"');
   });
 
   it("representa como null cualquier dimensión municipal sin fuente oficial", () => {

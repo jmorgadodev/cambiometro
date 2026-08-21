@@ -167,8 +167,8 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
       expect(lasCondes!.auditorias_cgr![0].titulo).toContain("INFORME FINAL");
 
       // Estado vacío con prueba SIAPER y cobertura
-      expect(detailPageSource).toContain("Se consultaron los 275 informes SIAPER 2024-2026 por CUT");
-      expect(detailPageSource).toContain("Cobertura nacional: 275 informes en 53 de 346 comunas");
+      expect(detailPageSource).toContain("La proyección CGR local no contiene coincidencias verificables para el CUT");
+      expect(detailPageSource).toContain("Cobertura de esta ficha: sin coincidencias verificables");
       expect(listPageSource).toContain("⚖️ CGR:");
     });
 

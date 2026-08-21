@@ -14,7 +14,7 @@ interface KPIs {
 interface TopEntry {
   name: string;
   rut: string;
-  class: string;
+  class: string | null;
   total_clp: number;
   count: number;
   top_emisores?: string[];
@@ -22,18 +22,18 @@ interface TopEntry {
 
 interface Transfer {
   id: string;
-  fecha: string;
-  period: string;
-  title: string;
-  description: string;
-  classification: string;
-  emitter_name: string;
-  emitter_rut: string;
-  receiver_name: string;
-  receiver_rut: string;
+  fecha: string | null;
+  period: string | null;
+  title: string | null;
+  description: string | null;
+  classification: string | null;
+  emitter_name: string | null;
+  emitter_rut: string | null;
+  receiver_name: string | null;
+  receiver_rut: string | null;
   monto_clp: number;
-  url: string;
-  municipality?: string;
+  url: string | null;
+  municipality: string | null;
 }
 
 interface Props {
@@ -69,7 +69,7 @@ function fmtNum(n: number): string {
   return (n || 0).toLocaleString("es-CL");
 }
 
-function fmtDate(fecha: string): string {
+function fmtDate(fecha: string | null): string {
   if (!fecha) return "—";
   const parts = fecha.slice(0, 10).split("-");
   if (parts.length === 3) {
@@ -79,8 +79,6 @@ function fmtDate(fecha: string): string {
 }
 
 const ITEMS_PER_PAGE = 20;
-const YEARS_OPTIONS = ["Todos", "2023", "2024", "2025", "2026"];
-
 export default function TransferenciasExplorerClient({
   kpis,
   topReceptores,
@@ -149,9 +147,7 @@ export default function TransferenciasExplorerClient({
 
   // ── Serie anual (4 barras 2023-2026) ─────────────────────────────────────────
   const yearChartData = useMemo(() => {
-    const defaultYears = ["2023", "2024", "2025", "2026"];
-    return defaultYears.map((yr) => {
-      const info = byYear[yr] || { total: 0, count: 0 };
+    return Object.entries(byYear).map(([yr, info]) => {
       return {
         label: yr,
         value: info.total,
@@ -160,6 +156,8 @@ export default function TransferenciasExplorerClient({
       };
     });
   }, [byYear]);
+
+  const yearsOptions = useMemo(() => ["Todos", ...Object.keys(byYear).sort()], [byYear]);
 
   const maxYearVal = Math.max(1, ...yearChartData.map((d) => d.value));
 
@@ -591,7 +589,7 @@ export default function TransferenciasExplorerClient({
                 cursor: "pointer",
               }}
             >
-              {YEARS_OPTIONS.map((yr) => (
+              {yearsOptions.map((yr) => (
                 <option key={yr} value={yr}>
                   {yr === "Todos" ? "Año: Todos" : `Año ${yr}`}
                 </option>
@@ -717,7 +715,7 @@ export default function TransferenciasExplorerClient({
                       {/* Organismo Emisor */}
                       <td style={{ padding: "0.6rem 0.75rem", maxWidth: 220 }}>
                         <div style={{ fontWeight: 600, color: "var(--text-1)", lineHeight: 1.3 }}>
-                          {t.emitter_name || "Organismo Público"}
+                          {t.emitter_name ?? "No informado en la fuente oficial"}
                         </div>
                         {t.emitter_rut && (
                           <div style={{ fontSize: "0.7rem", color: "var(--text-3)" }}>
@@ -729,7 +727,7 @@ export default function TransferenciasExplorerClient({
                       {/* Entidad Receptora */}
                       <td style={{ padding: "0.6rem 0.75rem", maxWidth: 240 }}>
                         <div style={{ fontWeight: 600, color: "var(--text-1)", lineHeight: 1.3 }}>
-                          {t.receiver_name || "Entidad Receptora"}
+                          {t.receiver_name ?? "No informado en la fuente oficial"}
                         </div>
                         {t.receiver_rut && (
                           <div style={{ fontSize: "0.7rem", color: "var(--text-3)" }}>
@@ -740,7 +738,7 @@ export default function TransferenciasExplorerClient({
 
                       {/* Materia / Programa */}
                       <td style={{ padding: "0.6rem 0.75rem", maxWidth: 280, color: "var(--text-2)", lineHeight: 1.3 }}>
-                        <div>{t.title || t.description || "Transferencia Corriente"}</div>
+                        <div>{t.title ?? t.description ?? "No informado en la fuente oficial"}</div>
                         {t.classification && (
                           <div style={{ fontSize: "0.7rem", color: "var(--text-3)" }}>
                             {t.classification}

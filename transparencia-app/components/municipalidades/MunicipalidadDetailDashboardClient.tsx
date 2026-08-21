@@ -1794,7 +1794,7 @@ export default function MunicipalidadDetailDashboardClient({
                 </div>
 
                 <div style={{ marginTop: "0.5rem", fontSize: "0.72rem", color: "var(--text-subtle)" }}>
-                  Cobertura nacional: 275 informes SIAPER cruzados en 53 de 346 comunas.
+                  {auditorias.length} informe(s) oficial(es) vinculados a esta comuna en la proyección local.
                 </div>
               </div>
             ) : (
@@ -1808,7 +1808,7 @@ export default function MunicipalidadDetailDashboardClient({
                   }}
                 >
                   <p style={{ color: "var(--text-primary)", fontSize: "0.85rem", margin: "0 0 0.75rem", lineHeight: 1.5 }}>
-                    Se consultaron los 275 informes SIAPER 2024-2026 por CUT <strong>{cut}</strong> y razón social oficial; <strong>0 coincidencias en el período</strong>.
+                    La proyección CGR local no contiene coincidencias verificables para el CUT <strong>{cut}</strong> y la razón social oficial de esta comuna.
                   </p>
                   <div>
                     <a
@@ -1835,7 +1835,7 @@ export default function MunicipalidadDetailDashboardClient({
                   }}
                 >
                   <div style={{ fontWeight: 700, color: "var(--text-primary)", marginBottom: "0.3rem" }}>
-                    📊 Cobertura nacional: 275 informes en 53 de 346 comunas
+                    📊 Cobertura de esta ficha: sin coincidencias verificables
                   </div>
                   <div>
                     Puedes comprobar el funcionamiento del cruce de auditorías en comunas con informes publicados:{" "}

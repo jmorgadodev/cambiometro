@@ -1,0 +1,63 @@
+{
+  "generatedAt": "2026-08-21T04:05:29.577Z",
+  "sources": {
+    "cplt": {
+      "recordCount": 1218136,
+      "status": "partial",
+      "generatedAt": "2026-08-21T03:35:33.587Z"
+    },
+    "dipres": {
+      "recordCount": 476,
+      "financialAmountClp": null,
+      "status": "partial",
+      "generatedAt": "2026-08-21T02:44:54.415Z"
+    },
+    "ley19862": {
+      "recordCount": 59361,
+      "financialAmountClp": 5011094170302,
+      "status": "partial",
+      "generatedAt": "2026-08-21T02:44:54.415Z"
+    },
+    "chilecompra": {
+      "recordCount": 35979,
+      "financialAmountClp": 62482389175904,
+      "status": "partial",
+      "generatedAt": "2026-08-16T10:21:02.755Z"
+    },
+    "infolobby": {
+      "recordCount": 60523,
+      "status": "partial",
+      "generatedAt": "2026-08-21T04:05:29.577Z"
+    },
+    "infoprobidad": {
+      "recordCount": 15331,
+      "status": "partial",
+      "generatedAt": "2026-08-21T04:05:29.577Z"
+    },
+    "sinim": {
+      "recordCount": 3105,
+      "status": "partial",
+      "generatedAt": "2026-08-21T04:05:29.577Z"
+    },
+    "contraloria": {
+      "recordCount": 291,
+      "status": "partial",
+      "generatedAt": "2026-08-21T04:05:29.577Z"
+    },
+    "camara": {
+      "recordCount": 19025,
+      "status": "partial",
+      "generatedAt": "2026-08-21T04:05:29.577Z"
+    },
+    "senado": {
+      "recordCount": 8138,
+      "status": "partial",
+      "generatedAt": "2026-08-21T04:05:29.577Z"
+    },
+    "servel": {
+      "recordCount": 23894,
+      "status": "partial",
+      "generatedAt": "2026-08-21T04:05:29.577Z"
+    }
+  }
+}
