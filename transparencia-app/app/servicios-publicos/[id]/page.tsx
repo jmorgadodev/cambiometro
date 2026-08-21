@@ -26,6 +26,9 @@ export async function generateMetadata({
   return {
     title: `${servicio.nombre} (${servicio.sigla || servicio.tipo_organo}) — Presupuesto DIPRES, Personal & Compras | El Cambiómetro`,
     description: `Dashboard institucional de ${servicio.nombre}: presupuesto DIPRES 2026, dotación de personal CPLT, compras públicas en MercadoPúblico, audiencias de lobby y auditorías CGR.`,
+    alternates: {
+      canonical: `/servicios-publicos/${id}`,
+    },
     openGraph: {
       title: `${servicio.nombre} — El Cambiómetro`,
       description: `Presupuesto Ley DIPRES, compras públicas, lobby y dotación oficial de ${servicio.nombre}.`,

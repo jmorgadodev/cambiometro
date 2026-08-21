@@ -7,6 +7,7 @@ export default function robots(): MetadataRoute.Robots {
     rules: [
       { userAgent: "*", allow: ["/", "/api/og/"], disallow: ["/api/", "/_next/"] },
       { userAgent: ["GPTBot", "ClaudeBot", "CCBot", "Google-Extended"], disallow: "/" },
+      { userAgent: "PerplexityBot", allow: "/" },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
     host: baseUrl,
