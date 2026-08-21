@@ -14,6 +14,7 @@ import PersonEntityProfile from "@/components/PersonEntityProfile";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import EntityEvidenceAccordionExplorer from "@/components/records/EntityEvidenceAccordionExplorer";
 import { traducirPredicado, traducirTipoEntidad, formatNombreInstitucional } from "@/lib/diccionario-cruces";
+import { evaluateBudgetSourceAnomaly } from "@/lib/budget-integrity";
 
 export const dynamic = "force-dynamic";
 
@@ -303,15 +304,21 @@ export default async function EntityPage({
                   <div style={{ overflowX: "auto" }}>
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.75rem" }}>
                       <thead><tr style={{ color: "var(--text-subtle)", textAlign: "left" }}><th style={{ padding: "0.35rem 0.5rem", borderBottom: "1px solid var(--border-subtle)" }}>Cód.</th><th style={{ padding: "0.35rem 0.5rem", borderBottom: "1px solid var(--border-subtle)" }}>Denominación</th><th style={{ padding: "0.35rem 0.5rem", borderBottom: "1px solid var(--border-subtle)", textAlign: "right" }}>Vigente</th><th style={{ padding: "0.35rem 0.5rem", borderBottom: "1px solid var(--border-subtle)", textAlign: "right" }}>Ejecutado</th><th style={{ padding: "0.35rem 0.5rem", borderBottom: "1px solid var(--border-subtle)", textAlign: "right" }}>% ejec.</th></tr></thead>
-                      <tbody>{presupuesto.subtitulos.map((sub) => (
-                        <tr key={sub.subtitulo} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-                          <td style={{ padding: "0.35rem 0.5rem", color: "var(--text-muted)", fontFamily: "monospace" }}>{sub.subtitulo}</td>
-                          <td style={{ padding: "0.35rem 0.5rem" }}>{sub.denominacion}</td>
-                          <td style={{ padding: "0.35rem 0.5rem", textAlign: "right", fontFamily: "monospace" }}>{clp(sub.vigente)}</td>
-                          <td style={{ padding: "0.35rem 0.5rem", textAlign: "right", fontFamily: "monospace" }}>{clp(sub.ejecutado)}</td>
-                          <td style={{ padding: "0.35rem 0.5rem", textAlign: "right", fontFamily: "monospace" }}>{pct(sub.ejecutado, sub.vigente)}</td>
-                        </tr>
-                      ))}</tbody>
+                      <tbody>{presupuesto.subtitulos.map((sub) => {
+                        const integrity = evaluateBudgetSourceAnomaly({ ejecutado: sub.ejecutado, vigente: sub.vigente });
+                        return (
+                          <tr key={sub.subtitulo} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+                            <td style={{ padding: "0.35rem 0.5rem", color: "var(--text-muted)", fontFamily: "monospace" }}>{sub.subtitulo}</td>
+                            <td style={{ padding: "0.35rem 0.5rem" }}>
+                              {sub.denominacion}
+                              {integrity.status === "ALTA" && <span style={{ display: "block", color: "var(--warn)", fontWeight: 800 }}>Hallazgo de integridad ALTA (V7) · valor oficial preservado</span>}
+                            </td>
+                            <td style={{ padding: "0.35rem 0.5rem", textAlign: "right", fontFamily: "monospace" }}>{clp(sub.vigente)}</td>
+                            <td style={{ padding: "0.35rem 0.5rem", textAlign: "right", fontFamily: "monospace" }}>{clp(sub.ejecutado)}</td>
+                            <td style={{ padding: "0.35rem 0.5rem", textAlign: "right", fontFamily: "monospace" }}>{pct(sub.ejecutado, sub.vigente)}</td>
+                          </tr>
+                        );
+                      })}</tbody>
                     </table>
                   </div>
                 </>

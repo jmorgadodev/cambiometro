@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import type { ServicioPublicoEnriquecido, OrdenCompraChileCompra } from "@/lib/servicios-publicos-data";
 import OrganismoFuncionariosList from "@/components/OrganismoFuncionariosList";
+import { evaluateBudgetSourceAnomaly } from "@/lib/budget-integrity";
 
 interface Props {
   servicio: ServicioPublicoEnriquecido;
@@ -340,6 +341,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                         {pres.subtitulos.map((sub, i) => {
                           const rawPct = sub.vigente > 0 ? (sub.ejecutado / sub.vigente) * 100 : sub.ejecutado > 0 ? 9999 : 0;
                           const isOverflow = rawPct > 999.9 || !isFinite(rawPct);
+                          const integrity = evaluateBudgetSourceAnomaly({ ejecutado: sub.ejecutado, vigente: sub.vigente });
                           const pctDisplay = isOverflow ? "⚠ >999%" : `${rawPct.toFixed(1)}%`;
 
                           return (
@@ -349,6 +351,11 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                               </td>
                               <td style={{ padding: "0.65rem 0.8rem", fontWeight: 600, color: "var(--text-primary)" }}>
                                 {sub.denominacion}
+                                {integrity.status === "ALTA" && (
+                                  <span style={{ display: "block", marginTop: "0.2rem", color: "var(--warn)", fontSize: "0.68rem", fontWeight: 800 }}>
+                                    Hallazgo de integridad ALTA (V7) · valor oficial preservado
+                                  </span>
+                                )}
                               </td>
                               <td style={{ padding: "0.65rem 0.8rem", textAlign: "right", fontFamily: "var(--font-mono, monospace)" }}>
                                 {formatCLP(sub.inicial)}
