@@ -6,6 +6,7 @@ import {
   hasExactOfficialOrderSchema,
   mergeOfficialOrderRow,
   officialOrderFromRow,
+  shouldPublishOfficialMonth,
 } from "./chilecompra-orders-bulk.mjs";
 
 const BASE = {
@@ -107,4 +108,9 @@ test("filas con columnas desplazadas se ponen en cuarentena", () => {
   const missing = { ...BASE };
   delete missing.ProveedorRUT;
   assert.equal(hasExactOfficialOrderSchema(missing, headers), false);
+});
+
+test("un mes sin órdenes oficiales no se publica como cero", () => {
+  assert.equal(shouldPublishOfficialMonth(1), true);
+  assert.equal(shouldPublishOfficialMonth(0), false);
 });

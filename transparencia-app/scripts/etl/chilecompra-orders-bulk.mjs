@@ -12,6 +12,10 @@ export function hasExactOfficialOrderSchema(row, headers) {
   return keys.length === headers.length && headers.every((header) => Object.hasOwn(row, header));
 }
 
+export function shouldPublishOfficialMonth(orderCount) {
+  return Number.isSafeInteger(orderCount) && orderCount > 0;
+}
+
 function cleanText(value) {
   if (typeof value !== "string") return null;
   const text = value.replace(/\0/g, "").replace(/\s+/g, " ").trim();

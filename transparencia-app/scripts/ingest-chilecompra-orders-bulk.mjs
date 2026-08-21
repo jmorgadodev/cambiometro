@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 import { createHash } from "node:crypto";
-import { createReadStream, createWriteStream, existsSync, mkdirSync, readFileSync, statSync, writeFileSync } from "node:fs";
+import { createReadStream, createWriteStream, existsSync, mkdirSync, readFileSync, rmSync, statSync, writeFileSync } from "node:fs";
 import { basename, dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { pipeline } from "node:stream/promises";
@@ -15,6 +15,7 @@ import {
   canonicalRecordsForOfficialOrder,
   hasExactOfficialOrderSchema,
   mergeOfficialOrderRow,
+  shouldPublishOfficialMonth,
 } from "./etl/chilecompra-orders-bulk.mjs";
 
 const SECTORS = [
@@ -131,7 +132,7 @@ async function writePartition(root, year, month, orders, originals, generatedAt)
   return manifest;
 }
 
-function updateCatalog(root, manifests, generatedAt) {
+function updateCatalog(root, manifests, generatedAt, unavailableIds = []) {
   const path = join(root, "catalog", "v1", "manifest.json");
   if (!existsSync(path)) return;
   const catalog = JSON.parse(readFileSync(path, "utf8"));
@@ -146,7 +147,10 @@ function updateCatalog(root, manifests, generatedAt) {
     sourcePeriod: manifest.sourcePeriod,
     status: manifest.status,
   }]));
-  catalog.partitions = catalog.partitions.map((partition) => replacements.get(partition.id) ?? partition);
+  const unavailable = new Set(unavailableIds);
+  catalog.partitions = catalog.partitions
+    .filter((partition) => !unavailable.has(partition.id))
+    .map((partition) => replacements.get(partition.id) ?? partition);
   for (const replacement of replacements.values()) {
     if (!catalog.partitions.some((partition) => partition.id === replacement.id)) catalog.partitions.push(replacement);
   }
@@ -192,10 +196,20 @@ for (const sector of SECTORS) {
 
 const generatedAt = new Date().toISOString();
 const manifests = [];
+const unavailableIds = [];
 for (const month of [...months].sort((left, right) => left - right)) {
   const monthOrders = [...orders.values()].filter((order) => Number(order.period.slice(5, 7)) === month).sort((left, right) => left.code.localeCompare(right.code));
+  if (!shouldPublishOfficialMonth(monthOrders.length)) {
+    const period = `${year}-${String(month).padStart(2, "0")}`;
+    const staleDirectory = resolve(outputRoot, "partitions", "chilecompra", String(year), String(month).padStart(2, "0"));
+    if (!staleDirectory.startsWith(`${outputRoot}${sep}`)) throw new Error("CHILECOMPRA_BULK_INVALID_UNAVAILABLE_PATH");
+    rmSync(staleDirectory, { recursive: true, force: true });
+    unavailableIds.push(`chilecompra/${period}`);
+    process.stderr.write(`${JSON.stringify({ phase: "partition", period, status: "FUENTE_NO_DISPONIBLE", orders: 0, records: null })}\n`);
+    continue;
+  }
   manifests.push(await writePartition(outputRoot, year, month, monthOrders, originals, generatedAt));
   process.stderr.write(`${JSON.stringify({ phase: "partition", period: `${year}-${String(month).padStart(2, "0")}`, orders: monthOrders.length, records: monthOrders.length * 2 })}\n`);
 }
-updateCatalog(outputRoot, manifests, generatedAt);
-console.log(JSON.stringify({ source: "chilecompra-orders-bulk", year, semester, cutoff, months: [...months].sort(), orders: orders.size, partitions: manifests.map((manifest) => ({ period: manifest.sourcePeriod, records: manifest.recordCount })) }, null, 2));
+updateCatalog(outputRoot, manifests, generatedAt, unavailableIds);
+console.log(JSON.stringify({ source: "chilecompra-orders-bulk", year, semester, cutoff, months: [...months].sort(), orders: orders.size, unavailable: unavailableIds.map((id) => id.split("/").at(-1)), partitions: manifests.map((manifest) => ({ period: manifest.sourcePeriod, records: manifest.recordCount })) }, null, 2));
