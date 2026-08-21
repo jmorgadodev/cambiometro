@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import {
+  assertAllowedAuditUrl,
   deterministicSample,
   extractRscPrimitives,
   normalizeRut,
@@ -15,6 +16,13 @@ import {
   validateV6,
   validateV7,
 } from "./audit-core.mjs";
+
+test("política HTTP solo permite loopback para auditar el build local", () => {
+  assert.doesNotThrow(() => assertAllowedAuditUrl("http://127.0.0.1:3010/politico/ana"));
+  assert.doesNotThrow(() => assertAllowedAuditUrl("http://localhost:3010/api/v1/export"));
+  assert.throws(() => assertAllowedAuditUrl("http://cambiometro.impulsacv.cl"), /AUDIT_URL_NOT_ALLOWED/);
+  assert.throws(() => assertAllowedAuditUrl("http://example.test"), /AUDIT_URL_NOT_ALLOWED/);
+});
 
 test("parseClp normaliza moneda chilena sin perder el signo", () => {
   assert.equal(parseClp("$ 4.582.550"), 4_582_550);

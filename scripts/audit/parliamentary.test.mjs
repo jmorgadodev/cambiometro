@@ -5,20 +5,32 @@ import {
   analyzeOperationalExpenseGroup,
   analyzeSupportAssignment,
   compareRscWithHtml,
+  isCorrectedKaiserCalibration,
   reconcileRoster,
   selectRscValidationSample,
 } from "./parliamentary.mjs";
 
-test("V1 separa VALOR TOTAL de los conceptos y detecta la suma visible duplicada", () => {
-  const result = analyzeOperationalExpenseGroup([
+test("V1 separa VALOR TOTAL y valida la proyección corregida sin duplicarlo", () => {
+  const records = [
     { title: "CORRESPONDENCIA", monto_clp: 1_000_000 },
     { title: "TRASLACION VEHICULO", monto_clp: 3_582_550 },
     { title: "VALOR TOTAL", monto_clp: 4_582_550 },
-  ]);
+  ];
+  const result = analyzeOperationalExpenseGroup(records, { projectedTotal: 4_582_550 });
   assert.equal(result.officialTotal, 4_582_550);
   assert.equal(result.itemSum, 4_582_550);
-  assert.equal(result.projectedVisibleTotal, 9_165_100);
+  assert.equal(result.projectedVisibleTotal, 4_582_550);
+  assert.equal(result.naiveSumIncludingSummary, 9_165_100);
   assert.equal(result.sourceIntegrity.status, "OK");
+  assert.equal(result.publicationIntegrity.status, "OK");
+});
+
+test("V1 conserva una regresión que rechaza volver a sumar la fila resumen", () => {
+  const records = [
+    { title: "CONCEPTO", monto_clp: 4_582_550 },
+    { title: "VALOR TOTAL", monto_clp: 4_582_550 },
+  ];
+  const result = analyzeOperationalExpenseGroup(records, { projectedTotal: 9_165_100 });
   assert.equal(result.publicationIntegrity.status, "CRITICA");
 });
 
@@ -27,6 +39,18 @@ test("control V2 Kaiser conserva los valores y severidad aprobados", () => {
   assert.equal(result.salarySum, 15_250_000);
   assert.equal(result.validation.status, "ALTA");
   assert.equal(result.validation.difference, 3_843_851);
+});
+
+test("calibración Kaiser posterior a FIX-1 exige total V1 corregido", () => {
+  const calibration = {
+    expenses_may: { official: 4_582_550, items: 4_582_550, status: "OK" },
+    support_july: { assignment: 11_406_149, salaries: 15_250_000, status: "ALTA" },
+  };
+  assert.equal(isCorrectedKaiserCalibration(calibration), true);
+  assert.equal(isCorrectedKaiserCalibration({
+    ...calibration,
+    expenses_may: { official: 4_582_550, items: 9_165_100, status: "CRITICA" },
+  }), false);
 });
 
 test("reconciliación de roster es independiente de tildes y orden de entrada", () => {

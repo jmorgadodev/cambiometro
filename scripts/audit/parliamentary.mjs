@@ -8,19 +8,23 @@ function isTotalRow(row) {
   return TOTAL_LABELS.has(normalizeText(row?.title ?? row?.category ?? row?.item));
 }
 
-export function analyzeOperationalExpenseGroup(records) {
+export function analyzeOperationalExpenseGroup(records, { projectedTotal = null } = {}) {
   const totals = records.filter(isTotalRow);
   const items = records.filter((row) => !isTotalRow(row));
   const officialTotal = totals.length ? parseClp(totals.at(-1)?.monto_clp) ?? 0 : 0;
   const itemValues = items.map((row) => parseClp(row?.monto_clp) ?? 0);
   const itemSum = itemValues.reduce((sum, value) => sum + value, 0);
-  const projectedVisibleTotal = records.reduce((sum, row) => sum + (parseClp(row?.monto_clp) ?? 0), 0);
+  const naiveSumIncludingSummary = records.reduce((sum, row) => sum + (parseClp(row?.monto_clp) ?? 0), 0);
+  const projectedVisibleTotal = parseClp(projectedTotal);
   return {
     officialTotal,
     itemSum,
     projectedVisibleTotal,
+    naiveSumIncludingSummary,
     sourceIntegrity: validateV1({ officialTotal, items: itemValues }),
-    publicationIntegrity: validateV1({ officialTotal, items: [projectedVisibleTotal] }),
+    publicationIntegrity: projectedVisibleTotal === null
+      ? { status: "CAPA_NO_DISPONIBLE", difference: null }
+      : validateV1({ officialTotal, items: [projectedVisibleTotal] }),
     hasOfficialTotal: totals.length > 0,
     itemCount: items.length,
   };
@@ -29,6 +33,15 @@ export function analyzeOperationalExpenseGroup(records) {
 export function analyzeSupportAssignment({ assignment, salaries }) {
   const validation = validateV2({ assignment, salaries });
   return { assignment: parseClp(assignment), salarySum: validation.salarySum, validation };
+}
+
+export function isCorrectedKaiserCalibration(calibration) {
+  return calibration.expenses_may?.official === 4_582_550
+    && calibration.expenses_may?.items === 4_582_550
+    && calibration.expenses_may?.status === "OK"
+    && calibration.support_july?.assignment === 11_406_149
+    && calibration.support_july?.salaries === 15_250_000
+    && calibration.support_july?.status === "ALTA";
 }
 
 function hash(value) {

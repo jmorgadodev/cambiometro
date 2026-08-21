@@ -1,4 +1,35 @@
-import { deterministicSample } from "./audit-core.mjs";
+import { deterministicSample, validateV7 } from "./audit-core.mjs";
+
+export function auditQuarantinedV7(anomalies, regularIds = new Set()) {
+  return (anomalies ?? []).map((anomaly) => {
+    const record = anomaly?.record ?? {};
+    const id = String(anomaly?.id ?? record.id ?? "");
+    if (regularIds.has(id)) throw new Error(`AUDIT_V7_QUARANTINE_LEAK:${id}`);
+    const check = validateV7({
+      monthlySalary: record.remuneracion_bruta_mensual,
+      overtimeHours: record.horas_extras_mes_anterior,
+    });
+    if (anomaly?.validation !== "V7" || anomaly?.severity !== "ALTA" || check.status !== "ALTA") {
+      throw new Error(`AUDIT_V7_QUARANTINE_INVALID:${id}`);
+    }
+    return {
+      id,
+      status: "ALTA",
+      violations: check.violations,
+      sourceUrl: anomaly.source_url ?? record.url ?? record.fuente ?? null,
+      record,
+      excludedFromRegular: true,
+    };
+  });
+}
+
+export function classifyR10PurchaseLayer({ projection, site }) {
+  if (projection === null || projection === undefined || site === null || site === undefined) {
+    return { status: "FUENTE_NO_DISPONIBLE", difference: null };
+  }
+  const difference = Number(projection) - Number(site);
+  return { status: difference === 0 ? "OK" : "CRITICA", difference };
+}
 
 export function requireFields(rows, fields, label) {
   if (!Array.isArray(rows)) throw new Error(`AUDIT_INVALID_SCHEMA:${label}:array`);

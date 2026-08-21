@@ -23,6 +23,7 @@ const ALLOWED_HOSTS = new Set([
   "api.mercadopublico.cl",
   "api.mercadopublico.cl",
 ]);
+const LOOPBACK_HOSTS = new Set(["127.0.0.1", "localhost", "::1"]);
 
 const SOURCE_INTERVAL_MS = new Map([
   ["cambiometro.impulsacv.cl", 2_100],
@@ -199,9 +200,8 @@ function sleep(ms) {
 }
 
 export async function fetchWithPolicy(rawUrl, options = {}) {
-  const url = new URL(rawUrl);
-  if (url.protocol !== "https:" || !ALLOWED_HOSTS.has(url.hostname)) throw new Error(`AUDIT_URL_NOT_ALLOWED:${url.hostname}`);
-  const interval = SOURCE_INTERVAL_MS.get(url.hostname) ?? 1_000;
+  const url = assertAllowedAuditUrl(rawUrl);
+  const interval = LOOPBACK_HOSTS.has(url.hostname) ? 0 : SOURCE_INTERVAL_MS.get(url.hostname) ?? 1_000;
   const previous = lastRequestAt.get(url.hostname) ?? 0;
   const remaining = interval - (Date.now() - previous);
   if (remaining > 0) await sleep(remaining);
@@ -238,6 +238,14 @@ export async function fetchWithPolicy(rawUrl, options = {}) {
   const unavailable = new Error(`FUENTE_NO_DISPONIBLE:${url.hostname}:${lastError?.message ?? "unknown"}`);
   unavailable.cause = lastError;
   throw unavailable;
+}
+
+export function assertAllowedAuditUrl(rawUrl) {
+  const url = new URL(rawUrl);
+  const officialHttps = url.protocol === "https:" && ALLOWED_HOSTS.has(url.hostname);
+  const localHttp = url.protocol === "http:" && LOOPBACK_HOSTS.has(url.hostname);
+  if (!officialHttps && !localHttp) throw new Error(`AUDIT_URL_NOT_ALLOWED:${url.hostname}`);
+  return url;
 }
 
 export function findingId(parts) {

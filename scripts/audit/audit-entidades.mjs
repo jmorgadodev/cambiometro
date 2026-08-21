@@ -3,7 +3,7 @@ import { readFile } from "node:fs/promises";
 import { resolve } from "node:path";
 
 import { APP_ROOT, DOCS_ROOT, findingId, normalizeText, parseArgs, sha256, stableSortFindings, validateV5, validateV7, writeJson, writeMarkdown } from "./audit-core.mjs";
-import { requireFields, sampleByEntity } from "./entities.mjs";
+import { auditQuarantinedV7, classifyR10PurchaseLayer, requireFields, sampleByEntity } from "./entities.mjs";
 
 const NUMERIC_FIELDS = ["dotacion_total", "gasto_mensual_estimado_clp", "compras_ocds_monto_clp", "compras_ocds_procesos"];
 
@@ -123,16 +123,47 @@ async function main() {
         findings.push(finding({ entity, period: row.periodo ?? "2026-06", category: "dotacion", field: `fila:${row.id}`, official: null, projection: { remuneracion_bruta: row.remuneracion_bruta ?? null, horas: row.horas ?? null }, lake: null, site: true, validation: "V7", status: checkRow.status, url: detail.alcalde?.fuente, detail: checkRow }));
         municipalRowsAudited += 1;
       }
+      const regularIds = new Set([...(detail.top_remuneraciones ?? []), ...(detail.top_horas_extras ?? [])].map((row) => String(row.id)));
+      for (const anomaly of auditQuarantinedV7(detail.anomalias_integridad, regularIds)) {
+        findings.push(finding({
+          entity,
+          period: anomaly.record.periodo ?? anomaly.record.fuente_periodo ?? "2026",
+          category: "dotacion",
+          field: `cuarentena_v7:${anomaly.id}`,
+          official: { remuneracion_bruta: anomaly.record.remuneracion_bruta_mensual ?? null, horas: anomaly.record.horas_extras_mes_anterior ?? null },
+          projection: null,
+          lake: null,
+          site: { visible_como_hallazgo: true, excluded_from_regular: anomaly.excludedFromRegular },
+          validation: "V7",
+          status: anomaly.status,
+          difference: anomaly.violations.length,
+          url: anomaly.sourceUrl,
+          detail: { violations: anomaly.violations, source_anomaly: true, quarantined: true, excluded_from_totals_and_rankings: true },
+        }));
+        municipalRowsAudited += 1;
+      }
     }
     const purchase = detail?.compras_publicas;
-    if (purchase) {
-      for (const [field, projectionValue, siteValue] of [
-        ["monto_total_clp", organization.compras_ocds_monto_clp, purchase.monto_total_clp],
-        ["procesos", organization.compras_ocds_procesos, purchase.procesos_count],
-      ]) {
-        const check = validateV5({ publishedTotal: siteValue, components: [projectionValue] });
-        findings.push(finding({ entity, period: "2026", category: "compras", field, official: null, projection: projectionValue, lake: archivedById.get(organization.id)?.[field === "procesos" ? "compras_ocds_procesos" : "compras_ocds_monto_clp"], site: siteValue, validation: "V5", status: check.status, difference: check.difference, url: purchase.top_compras?.[0] ? `https://api.mercadopublico.cl/APISOCDS/OCDS/award/${purchase.top_compras[0].ocid}` : null }));
-      }
+    for (const [field, projectionValue, siteValue] of [
+      ["monto_total_clp", organization.compras_ocds_monto_clp, purchase?.monto_total_clp ?? null],
+      ["procesos", organization.compras_ocds_procesos, purchase?.procesos_count ?? null],
+    ]) {
+      const check = classifyR10PurchaseLayer({ projection: projectionValue, site: siteValue });
+      findings.push(finding({
+        entity,
+        period: "2026",
+        category: "compras",
+        field,
+        official: purchase?.metodo_enlace === "RUT_EXACTO" ? siteValue : null,
+        projection: projectionValue,
+        lake: archivedById.get(organization.id)?.[field === "procesos" ? "compras_ocds_procesos" : "compras_ocds_monto_clp"],
+        site: siteValue,
+        validation: "V5",
+        status: check.status,
+        difference: check.difference,
+        url: purchase?.top_compras?.[0] ? `https://api.mercadopublico.cl/APISOCDS/OCDS/award/${purchase.top_compras[0].ocid}` : null,
+        detail: { r10: true, join_method: purchase?.metodo_enlace ?? null, missing_evidence_is_null: true },
+      }));
     }
   }
 

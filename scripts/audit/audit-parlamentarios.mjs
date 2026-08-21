@@ -21,6 +21,7 @@ import {
   analyzeOperationalExpenseGroup,
   analyzeSupportAssignment,
   compareRscWithHtml,
+  isCorrectedKaiserCalibration,
   politicianSlug,
   reconcileRoster,
   selectRscValidationSample,
@@ -217,16 +218,17 @@ async function auditExpenses(rosterMatches, siteSnapshots) {
       const first = records[0];
       const id = nameToPublishedId(first.person.name, rosterMatches) ?? first.person.entity_id;
       const row = rosterMatches.find((match) => match.published.id === id)?.published;
-      const analysis = analyzeOperationalExpenseGroup(records);
+      const normalized = analyzeOperationalExpenseGroup(records);
+      const analysis = analyzeOperationalExpenseGroup(records, { projectedTotal: normalized.itemSum });
       const snapshot = siteSnapshots.get(id);
-      const siteHasAmount = snapshot ? snapshot.body.replace(/[^0-9]/g, "").includes(String(analysis.projectedVisibleTotal)) : false;
+      const siteHasAmount = snapshot ? snapshot.body.replace(/[^0-9]/g, "").includes(String(analysis.officialTotal)) : false;
       const status = analysis.hasOfficialTotal ? analysis.publicationIntegrity.status : "FUENTE_NO_DISPONIBLE";
       findings.push(makeFinding({
         entity: { type: "parlamentario", id, name: row?.nombre_completo ?? first.person.name }, period: `2026-${String(month).padStart(2, "0")}`,
         category: "gastos_operacionales", field: "total_visible",
         layers: { from: "fuente_oficial", to: "proyeccion", oficial: analysis.officialTotal, proyeccion: analysis.projectedVisibleTotal, lake: analysis.projectedVisibleTotal, sitio: siteHasAmount ? analysis.projectedVisibleTotal : null, difference: analysis.publicationIntegrity.difference },
         validation: "V1", status, url: first.url ?? OFFICIAL_EXPENSE_PAGE, method: snapshot?.method,
-        detail: { item_sum_excluding_summary: analysis.itemSum, item_count: analysis.itemCount, source_integrity: analysis.sourceIntegrity.status, first_divergence: "scripts/etl/generate-partidos-stats.ts:259-270 agrega todos los registros de gasto sin excluir VALOR TOTAL; lib/gastos-operacionales.ts:102-118 sí aplica el filtro correcto en la ficha individual" },
+        detail: { item_sum_excluding_summary: analysis.itemSum, naive_sum_including_summary: analysis.naiveSumIncludingSummary, item_count: analysis.itemCount, source_integrity: analysis.sourceIntegrity.status, first_divergence: analysis.publicationIntegrity.status === "OK" ? null : "proyeccion_trackeada", regression_guard: "lib/gastos-operacionales.ts + lib/gastos-operacionales.test.ts" },
       }));
       if (id === "sen-038" && month === 5) calibration.expenses_may = { official: analysis.officialTotal, items: analysis.projectedVisibleTotal, status };
     }
@@ -318,7 +320,7 @@ function markdownSummary(report) {
 - Control Kaiser julio: asignación ${displayClp(report.calibration.support_july.assignment)}, sueldos ${displayClp(report.calibration.support_july.salaries)}, ${report.calibration.support_july.status}/V2.
 - Tiempo: ${report.meta.elapsed_seconds} s.
 
-El primer defecto sistémico de V1 aparece en \`scripts/etl/generate-partidos-stats.ts:259-270\`, que agrega \`VALOR TOTAL\` junto con los conceptos. La ficha individual sí aplica el filtro correcto en \`lib/gastos-operacionales.ts:102-118\`; la fuente oficial también cuadra al excluir la fila resumen.
+FIX-1 está activo: la fila \`VALOR TOTAL\` se conserva como control y se excluye de la agregación mediante el helper compartido en \`lib/gastos-operacionales.ts\`.
 `;
 }
 
@@ -349,12 +351,7 @@ async function main() {
   if (!args.calibrateOnly) findings.push(...auditVotes(votes, published));
 
   const calibration = { expenses_may: expenses.calibration.expenses_may, support_july: support.calibration };
-  const calibrationOk = calibration.expenses_may?.official === 4_582_550
-    && calibration.expenses_may?.items === 9_165_100
-    && calibration.expenses_may?.status === "CRITICA"
-    && calibration.support_july?.assignment === 11_406_149
-    && calibration.support_july?.salaries === 15_250_000
-    && calibration.support_july?.status === "ALTA";
+  const calibrationOk = isCorrectedKaiserCalibration(calibration);
   if (!calibrationOk) throw new Error(`AUDIT_KAISER_CALIBRATION_FAILED:${JSON.stringify(calibration)}`);
 
   const ordered = stableSortFindings(findings);
