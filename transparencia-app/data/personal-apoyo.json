@@ -1,5 +1,5 @@
 {
- "generado_en": "2026-08-21T03:40:17.673Z",
+ "generado_en": "2026-08-21T16:51:03.038Z",
  "fuentes": {
   "camara": {
    "url": "https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId={id}",
@@ -27,8 +27,8 @@
   "max_transfer_asesoria_externa_clp": 1230467,
   "transfer_asesoria_desde": "2026-03-11",
   "source_url": "https://www.senado.cl/transparencia/personal-de-apoyo-senadores",
-  "retrieved_at": "2026-08-21T03:36:07.686Z",
-  "checksum_sha256": "e1c65ad4d953cf3a4b93533a8e8d0638f4bf20172327b8d4d375183faa401ccf",
+  "retrieved_at": "2026-08-21T16:46:56.516Z",
+  "checksum_sha256": "37c4f4b578e0de29887411232a902e9d52021d198c852d68d9d3ee247a1c24e0",
   "transferencias_acreditadas": []
  },
  "diputados": {

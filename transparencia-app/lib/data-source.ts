@@ -125,10 +125,26 @@ export function nameSequenceMatches(seedName: string, recordName: string): boole
   const seedTokens = normalizeTokens(seedName);
   const recordTokens = normalizeTokens(recordName);
   if (seedTokens.length < 2 || recordTokens.length < seedTokens.length) return false;
-  if (seedTokens[seedTokens.length - 1] !== recordTokens[recordTokens.length - 1]) return false;
+  const lastSeed = seedTokens[seedTokens.length - 1];
+  const lastRec = recordTokens[recordTokens.length - 1];
+  const lastMatches =
+    lastSeed === lastRec ||
+    (lastSeed.length >= 5 &&
+      lastRec.length >= 5 &&
+      (lastSeed.startsWith(lastRec) || lastRec.startsWith(lastSeed)));
+  if (!lastMatches) return false;
+
   let cursor = 0;
   for (const recordToken of recordTokens) {
-    if (recordToken === seedTokens[cursor]) cursor += 1;
+    const target = seedTokens[cursor];
+    if (
+      recordToken === target ||
+      (target &&
+        target.length >= 5 &&
+        (recordToken.startsWith(target) || target.startsWith(recordToken)))
+    ) {
+      cursor += 1;
+    }
   }
   return cursor === seedTokens.length;
 }

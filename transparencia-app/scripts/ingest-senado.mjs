@@ -17,17 +17,25 @@ const outputRoot = resolve(argument("--output") ?? join(root, "data", "lake"));
 if (outputRoot === root || dirname(outputRoot) === outputRoot) throw new Error("INVALID_OUTPUT_PATH");
 
 const datasets = [
-  { id: "operational_expenses", fetcher: fetchSenateOperationalExpenses },
-  { id: "diet", fetcher: fetchSenateDiet },
+  { id: "operational_expenses", fetcher: fetchSenateOperationalExpenses, allMonths2026: [1, 2, 3, 4, 5] },
+  { id: "diet", fetcher: fetchSenateDiet, allMonths2026: [1, 2, 3, 4, 5, 6, 7] },
   { id: "domestic_tickets", fetcher: fetchSenateDomesticTickets },
   { id: "foreign_missions", fetcher: fetchSenateForeignMissions },
 ];
 const results = [];
+const ingestAll = process.argv.includes("--all-2026") || (requestedYear === null && requestedMonth === null);
+
 for (const dataset of datasets) {
-  const period = requestedYear === null || requestedMonth === null
-    ? await discoverLatestSenatePeriod({ dataset: dataset.id })
-    : { year: requestedYear, month: requestedMonth };
-  results.push(await dataset.fetcher(period));
+  if (ingestAll && dataset.allMonths2026) {
+    for (const m of dataset.allMonths2026) {
+      results.push(await dataset.fetcher({ year: 2026, month: m }));
+    }
+  } else {
+    const period = requestedYear === null || requestedMonth === null
+      ? await discoverLatestSenatePeriod({ dataset: dataset.id })
+      : { year: requestedYear, month: requestedMonth };
+    results.push(await dataset.fetcher(period));
+  }
 }
 const snapshot = JSON.parse(readFileSync(join(root, "data", "etl", "latest.json"), "utf8"));
 snapshot.actualizado_en = new Date().toISOString();
