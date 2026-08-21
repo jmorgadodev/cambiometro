@@ -113,6 +113,7 @@ try {
   for (const route of routes) {
     const response = await gotoWithNetworkRetry(`${baseUrl}${route}`);
     assert(response?.ok(), `${route} HTTP ${response?.status() ?? "sin respuesta"}`);
+    await page.waitForSelector("h1", { state: "attached", timeout: 5000 }).catch(() => {});
     assert.equal(await page.locator("h1").count(), 1, `${route} debe tener exactamente un h1`);
     const hrefs = await page.locator("a[href]").evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute("href")).filter(Boolean));
     for (const href of hrefs) {
@@ -139,6 +140,7 @@ try {
 
   // Verificación de /funcionarios (valor por defecto Todos y consolidado nacional)
   await gotoWithNetworkRetry(`${baseUrl}/funcionarios`);
+  await page.waitForSelector("#select-muni", { timeout: 8000 }).catch(() => {});
   const selectMuni = page.locator("#select-muni");
   assert.equal(await selectMuni.count(), 1, "Debe existir selector de municipalidad");
   assert.equal(await selectMuni.inputValue(), "Todos", "Valor por defecto debe ser Todos");
@@ -168,6 +170,7 @@ try {
   assert.equal(await page.getByRole("button", { name: /Nómina & Remuneraciones/ }).count(), 1, "Debe tener tab Nómina");
 
   await gotoWithNetworkRetry(`${baseUrl}/entidades/person-camara-1009`);
+  await page.waitForURL("**/politico/**", { timeout: 5000 }).catch(() => {});
   assert(page.url().includes("/politico/"), "la entidad parlamentaria debe redirigir a /politico");
 
   await gotoWithNetworkRetry(`${baseUrl}/entidades/person-infoprobidad-9204ac804e1f43cc8c3e62f712a15764`);

@@ -7,6 +7,7 @@ import { Inter, IBM_Plex_Mono } from "next/font/google";
 import SiteHeader from "@/components/SiteHeader";
 import PageEntrance from "@/components/PageEntrance";
 import CookieConsent, { CookiePreferencesButton } from "@/components/CookieConsent";
+import NavigationProgressBar from "@/components/NavigationProgressBar";
 import { getDataPlatformSummary } from "@/lib/data-platform-d1";
 import "./globals.css";
 
@@ -114,6 +115,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     <html lang="es" className={`${inter.variable} ${ibmPlexMono.variable}`}>
       <body className="font-sans">
         <a className="skip-link" href="#contenido-principal">Saltar al contenido</a>
+        <Suspense fallback={null}>
+          <NavigationProgressBar />
+        </Suspense>
         <Suspense fallback={<div className="site-header site-header--fallback" aria-hidden="true" />}>
           <SiteHeader updatedAt={updatedAt} totalRecords={totalRecords} />
         </Suspense>
