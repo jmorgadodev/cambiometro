@@ -36,8 +36,10 @@
     },
     "sinim": {
       "recordCount": 3105,
+      "coverageCount": 345,
+      "coverageUniverse": 346,
       "status": "partial",
-      "generatedAt": "2026-08-21T04:05:29.577Z"
+      "generatedAt": "2026-08-21T03:50:05.194Z"
     },
     "contraloria": {
       "recordCount": 291,

@@ -49,3 +49,8 @@ export const ETL_SOURCES_DATA: EtlSourceInfo[] = descriptors.map(({ health, ...d
     statusText: state.status === "complete" ? "Cobertura completa" : "Cobertura parcial declarada",
   };
 });
+
+export const ETL_MUNICIPAL_COVERAGE = {
+  covered: healthRaw.sources.sinim.coverageCount,
+  total: healthRaw.sources.sinim.coverageUniverse,
+};

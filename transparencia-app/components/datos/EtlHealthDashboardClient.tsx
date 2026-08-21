@@ -3,7 +3,7 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import Icono, { type IconoNombre } from "@/components/ui/Icono";
-import { ETL_SOURCES_DATA, type EtlSourceInfo } from "@/lib/etl-sources-data";
+import { ETL_MUNICIPAL_COVERAGE, ETL_SOURCES_DATA, type EtlSourceInfo } from "@/lib/etl-sources-data";
 
 export type { EtlSourceInfo };
 
@@ -69,7 +69,7 @@ export default function EtlHealthDashboardClient() {
           <div className="stat-tile__hint">Indexados y auditados en el Lake</div>
         </div>
         <div className="stat-tile stat-tile--info">
-          <div className="stat-tile__value">345 / 346</div>
+          <div className="stat-tile__value">{ETL_MUNICIPAL_COVERAGE.covered} / {ETL_MUNICIPAL_COVERAGE.total}</div>
           <div className="stat-tile__label">Cobertura Comunal</div>
           <div className="stat-tile__hint">Cobertura oficial SINIM disponible</div>
         </div>
