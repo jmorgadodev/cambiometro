@@ -73,6 +73,12 @@ describe("R10 — ninguna compra inventada entra a proyecciones", () => {
       "app/cruces/page.tsx",
       "app/servicios-publicos/page.tsx",
       "app/servicios-publicos/servicios-publicos-client.tsx",
+      "app/politico/[id]/page.tsx",
+      "components/PoliticoScoreHeader.tsx",
+      "components/PersonalApoyoMensual.tsx",
+      "components/VotacionesHistorial.tsx",
+      "scripts/etl/generate-partidos-stats.ts",
+      "lib/partido-estadisticas.ts",
     ].map((file) => readFileSync(resolve(file), "utf8")).join("\n");
 
     expect(sources).not.toMatch(/presVigente\s*\*\s*0\.34/);
@@ -89,6 +95,13 @@ describe("R10 — ninguna compra inventada entra a proyecciones", () => {
     expect(sources).not.toMatch(/totalConPresupuesto\s*\?\?\s*69/);
     expect(sources).not.toMatch(/poblacion_censo_2024\s*\|\|\s*25000/);
     expect(sources).not.toMatch(/superficie_km2\s*\|\|\s*350/);
+    expect(sources).not.toContain("Sin coincidencias en 1.2M nóminas");
+    expect(sources).not.toContain("0 informes SIAPER");
+    expect(sources).not.toContain("Máx. horas extras del personal: 0 h");
+    expect(sources).not.toMatch(/totalSesiones[^\n]+:\s*100/);
+    expect(sources).not.toMatch(/presentes[^\n]+:\s*100/);
+    expect(sources).not.toMatch(/ultimoPeriodo\s*\|\|\s*"2026-06"/);
+    expect(sources).not.toMatch(/pctDisciplina:\s*100/);
     expect(sources).not.toMatch(/planta_pct:\s*28\.5/);
     expect(sources).not.toMatch(/recordCount\)\s*\|\|\s*\(muni\.poblacion/);
     expect(sources).not.toContain("Entel Chile S.A.");

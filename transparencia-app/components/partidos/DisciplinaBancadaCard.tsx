@@ -58,8 +58,8 @@ export default function DisciplinaBancadaCard({ disciplina, sigla }: Props) {
           <div
             style={{
               padding: "0.4rem 0.75rem",
-              background: disciplina.pctRebelion > 5 ? "var(--warn-bg)" : "var(--surface-2)",
-              color: disciplina.pctRebelion > 5 ? "var(--warn)" : "var(--text-2)",
+              background: disciplina.pctRebelion !== null && disciplina.pctRebelion > 5 ? "var(--warn-bg)" : "var(--surface-2)",
+              color: disciplina.pctRebelion !== null && disciplina.pctRebelion > 5 ? "var(--warn)" : "var(--text-2)",
               borderRadius: "8px",
               border: "1px solid var(--border)",
               fontWeight: 800,
@@ -88,19 +88,19 @@ export default function DisciplinaBancadaCard({ disciplina, sigla }: Props) {
         >
           <div
             style={{
-              width: `${disciplina.pctDisciplina}%`,
+              width: `${disciplina.pctDisciplina ?? 0}%`,
               background: "var(--ok)",
               transition: "width 0.3s ease",
             }}
-            title={`Votos en bloque mayoritario: ${disciplina.pctDisciplina}%`}
+            title={disciplina.pctDisciplina === null ? "Sin votos comparables" : `Votos en bloque mayoritario: ${disciplina.pctDisciplina}%`}
           />
           <div
             style={{
-              width: `${disciplina.pctRebelion}%`,
+              width: `${disciplina.pctRebelion ?? 0}%`,
               background: "var(--warn)",
               transition: "width 0.3s ease",
             }}
-            title={`Votos rebeldes / disidentes: ${disciplina.pctRebelion}%`}
+            title={disciplina.pctRebelion === null ? "Sin votos comparables" : `Votos rebeldes / disidentes: ${disciplina.pctRebelion}%`}
           />
         </div>
         <div style={{ display: "flex", justifyContent: "space-between", marginTop: "0.35rem", fontSize: "0.72rem", color: "var(--text-3)" }}>
@@ -115,7 +115,11 @@ export default function DisciplinaBancadaCard({ disciplina, sigla }: Props) {
           Top 3 Votaciones con Mayor Quiebre de Bancada
         </div>
 
-        {!tieneRebeldes ? (
+        {disciplina.totalVotosConscientes === 0 ? (
+          <div style={{ fontSize: "0.78rem", color: "var(--text-3)", padding: "0.75rem", background: "var(--surface-2)", borderRadius: "8px" }}>
+            Sin votaciones comparables publicadas para calcular disciplina en el período.
+          </div>
+        ) : !tieneRebeldes ? (
           <div style={{ fontSize: "0.78rem", color: "var(--text-3)", padding: "0.75rem", background: "var(--surface-2)", borderRadius: "8px" }}>
             No se registran votaciones con quiebre o votos disidentes significativos en el período.
           </div>

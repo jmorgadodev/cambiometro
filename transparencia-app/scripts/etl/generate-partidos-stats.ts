@@ -241,10 +241,10 @@ for (const partido of PARTIDOS_SEED) {
   // Disciplina general
   const pctDisciplina = totalVotosConscientes > 0
     ? Math.round((totalVotosCoincidentes / totalVotosConscientes) * 1000) / 10
-    : 100;
+    : null;
   const pctRebelion = totalVotosConscientes > 0
     ? Math.round((totalVotosRebeldes / totalVotosConscientes) * 1000) / 10
-    : 0;
+    : null;
 
   const topVotosRebeldes = sesionesRebeldes
     .sort((a, b) => b.votosRebeldesCount - a.votosRebeldesCount)

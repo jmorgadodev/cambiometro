@@ -120,7 +120,7 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
     const total = votaciones.length;
     const emitidos = afirmativo + enContra + abstencion;
     const presentes = emitidos + noVota;
-    const asistencia = total > 0 ? Math.round((presentes / total) * 100) : 100;
+    const asistencia = total > 0 ? Math.round((presentes / total) * 100) : null;
 
     return {
       total,
@@ -256,10 +256,10 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
             {/* Presencia en votaciones */}
             <div className="stat-tile" style={{ textAlign: "left", justifyContent: "flex-start", background: "var(--bg-surface-2)", border: "1px solid var(--border-subtle)" }}>
               <div className="stat-tile__label" style={{ textTransform: "none", letterSpacing: "normal", fontSize: "0.74rem", fontWeight: 700, color: "var(--text-primary)" }}>
-                Presencia efectiva en votaciones de Sala: {stats.asistencia}% ({stats.presentes}/{stats.total})
+                Presencia efectiva en votaciones de Sala: {stats.asistencia === null ? "—" : `${stats.asistencia}%`} ({stats.presentes}/{stats.total})
               </div>
-              <div className="stat-tile__value" style={{ fontSize: "1.8rem", color: stats.asistencia >= 90 ? "var(--ok)" : stats.asistencia >= 75 ? "var(--warn)" : "var(--danger)" }}>
-                {stats.asistencia}%
+              <div className="stat-tile__value" style={{ fontSize: "1.8rem", color: stats.asistencia !== null && stats.asistencia >= 90 ? "var(--ok)" : stats.asistencia !== null && stats.asistencia >= 75 ? "var(--warn)" : "var(--danger)" }}>
+                {stats.asistencia === null ? "—" : `${stats.asistencia}%`}
               </div>
               <div style={{ fontSize: "0.72rem", color: "var(--text-subtle)", lineHeight: 1.5, marginTop: "0.2rem" }}>
                 Calculado sobre las <strong>{stats.total} votaciones de sala</strong> registradas ({stats.sustantivos} proyectos sustantivos y {stats.procedimentales} de procedimiento).

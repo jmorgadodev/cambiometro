@@ -38,7 +38,7 @@ import { procesarGastosPolitico } from "@/lib/gastos-operacionales";
 import { formatFechaChilena, edadEnAnos } from "@/lib/format";
 import VotacionesHistorial, { type VotacionFila } from "@/components/VotacionesHistorial";
 import PoliticoTimeline from "@/components/PoliticoTimeline";
-import PoliticoScoreHeader, { type PoliticoHeaderData, type AlertaFiscalizacionItem } from "@/components/PoliticoScoreHeader";
+import PoliticoScoreHeader, { type PoliticoHeaderData } from "@/components/PoliticoScoreHeader";
 import PersonalApoyoMensual from "@/components/PersonalApoyoMensual";
 
 interface Props {
@@ -244,78 +244,8 @@ export default async function PoliticoPage({ params }: Props) {
     );
   }).length;
 
-  const pctAsistencia = totalSesiones > 0 ? Math.min(100, Math.round((presentes / totalSesiones) * 100)) : 100;
-  const pctEmitioVoto = presentes > 0 ? Math.min(100, Math.round((votosEmitidos / presentes) * 100)) : 100;
-
-  const totalMeses = mesesGastos.length;
-  const mesesRendidos = mesesGastos.filter((m) => m.total > 0).length;
-  const pctGastosAlDia = totalMeses > 0 ? Math.min(100, Math.round((mesesRendidos / totalMeses) * 100)) : 100;
-
-  const mesPersonalCPLT = pol.cargo === "Senador"
-    ? (apoyoSenador?.ultimo_mes || "2026-07")
-    : (apoyoDiputado?.diputado?.mes_personal || "2026-06");
-
-  const mesRendicionGastos = ultimoPeriodoGastos || (mesesGastos.length > 0 ? mesesGastos[mesesGastos.length - 1].periodo : "2026-06");
-  const fuenteOrgGastos = pol.cargo === "Senador" ? "Senado" : "Cámara";
-  const inasistenciasCount = Math.max(0, totalSesiones - presentes);
-
-  const alertasCriticas: AlertaFiscalizacionItem[] = [
-    {
-      id: "nepotismo-probidad",
-      titulo: "Parentesco y Nepotismo",
-      estado: "Sin hallazgos",
-      estadoTipo: "ok",
-      dato: "Sin coincidencias en 1.2M nóminas CPLT (algoritmo nepotismo.ts, revisión agosto 2026)",
-      fuente: "CPLT / Transparencia Activa",
-      fecha: "Agosto 2026",
-      esCritica: false,
-      icono: "🔍",
-    },
-    {
-      id: "cgr-observaciones",
-      titulo: "Informes SIAPER (Contraloría)",
-      estado: "Sin Sanciones",
-      estadoTipo: "ok",
-      dato: "0 informes SIAPER que mencionen al organismo en 2024-2026 (Contraloría)",
-      fuente: "Contraloría General de la República (SIAPER)",
-      fecha: "2024-2026",
-      esCritica: false,
-      icono: "⚖️",
-    },
-    {
-      id: "horas-extras",
-      titulo: "Horas Extras del Personal",
-      estado: "Bajo Umbral (< 30 h)",
-      estadoTipo: "ok",
-      dato: `Máx. horas extras del personal: 0 h en ${mesPersonalCPLT} (CPLT)`,
-      fuente: "CPLT",
-      fecha: mesPersonalCPLT,
-      esCritica: false,
-      icono: "⏱️",
-    },
-    {
-      id: "rendicion-gastos",
-      titulo: "Rendiciones de Gastos Operacionales",
-      estado: pctGastosAlDia >= 50 ? "Al Día" : "Rendición Pendiente",
-      estadoTipo: pctGastosAlDia >= 50 ? "ok" : "bad",
-      dato: `Última rendición publicada: ${mesRendicionGastos} (${fuenteOrgGastos})`,
-      fuente: `${fuenteOrgGastos} de Diputados / Senado`,
-      fecha: mesRendicionGastos,
-      esCritica: pctGastosAlDia < 50,
-      icono: "📑",
-    },
-    {
-      id: "asistencia-sala",
-      titulo: "Inasistencias a Sesiones",
-      estado: inasistenciasCount > 10 ? "Alerta Inasistencias" : "Asistencia Regular",
-      estadoTipo: inasistenciasCount > 10 ? "bad" : "ok",
-      dato: `${inasistenciasCount} inasistencias en el período (API Sala)`,
-      fuente: "Actas Oficiales de Sala",
-      fecha: "2026-2030",
-      esCritica: inasistenciasCount > 10,
-      icono: "🏛️",
-    },
-  ];
+  const pctAsistencia = totalSesiones > 0 ? Math.min(100, Math.round((presentes / totalSesiones) * 100)) : null;
+  const pctEmitioVoto = presentes > 0 ? Math.min(100, Math.round((votosEmitidos / presentes) * 100)) : null;
 
   const headerData: PoliticoHeaderData = {
     id: pol.id,
@@ -342,22 +272,21 @@ export default async function PoliticoPage({ params }: Props) {
     presenteSinVotar: votaciones.filter((v) => ["no vota", "sin emitir", "no emite"].includes((v.voto.opcion ?? "").toLowerCase())).length,
     sesionesPresentes: presentes,
     totalSesiones,
-    alertasCriticas,
   };
 
-  const mesesDisponiblesPersonal = [
-    { periodo: "2026-01", etiqueta: "Ene 2026" },
-    { periodo: "2026-02", etiqueta: "Feb 2026" },
-{ periodo: "2026-03", etiqueta: "Mar 2026" },
-    { periodo: "2026-04", etiqueta: "Abr 2026" },
-    { periodo: "2026-05", etiqueta: "May 2026" },
-    { periodo: "2026-06", etiqueta: "Jun 2026" },
-    { periodo: "2026-07", etiqueta: "Jul 2026" },
-  ];
-
-  const ultimoPeriodoPersonal = pol.cargo === "Senador"
-    ? (apoyoSenador?.ultimo_mes || "2026-07")
-    : "2026-06";
+  const camaraMonthMap: Record<string, string> = {
+    enero: "2026-01", febrero: "2026-02", marzo: "2026-03", abril: "2026-04",
+    mayo: "2026-05", junio: "2026-06", julio: "2026-07", agosto: "2026-08",
+  };
+  const rawCamaraMonth = apoyoDiputado?.diputado?.mes_personal?.trim() ?? "";
+  const camaraMonth = /^2026-\d{2}$/.test(rawCamaraMonth)
+    ? rawCamaraMonth
+    : camaraMonthMap[rawCamaraMonth.toLocaleLowerCase("es-CL").split(/\s+/)[0]] ?? "";
+  const periodosPersonal = pol.cargo === "Senador"
+    ? [...new Set(apoyoSenador?.registros.map((record) => record.periodo).filter(Boolean) ?? [])].sort()
+    : camaraMonth ? [camaraMonth] : [];
+  const mesesDisponiblesPersonal = periodosPersonal.map((periodo) => ({ periodo, etiqueta: periodo }));
+  const ultimoPeriodoPersonal = pol.cargo === "Senador" ? (apoyoSenador?.ultimo_mes ?? "") : camaraMonth;
 
   return (
     <div style={{ minHeight: "100vh" }}>

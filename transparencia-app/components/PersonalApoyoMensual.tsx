@@ -73,7 +73,9 @@ export default function PersonalApoyoMensual({
   senadorPersonal,
   fuenteUrl,
 }: PersonalApoyoProps) {
-  const [periodoSeleccionado, setPeriodoSeleccionado] = useState(ultimoPeriodo || "2026-06");
+  const [periodoSeleccionado, setPeriodoSeleccionado] = useState(
+    ultimoPeriodo || mesesDisponibles[mesesDisponibles.length - 1]?.periodo || ""
+  );
 
   const esSenador = cargo === "Senador";
   const mesDiputadoOficial = normalizeCamaraMonth(diputadoPersonal?.mes_personal);
