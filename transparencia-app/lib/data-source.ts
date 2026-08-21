@@ -383,7 +383,8 @@ import diputadosIds from "../data/diputados-ids.json";
 export function diputadoIdParaPolitico(politico: Pick<Politico, "nombre_completo">): string | null {
   const normalizedName = normalizeSearchText(politico.nombre_completo);
   if (normalizedName.length < 8) return null;
-  const entries = Object.entries(diputadosIds);
+  const dict = (diputadosIds as Record<string, unknown>)?.default as Record<string, string> | undefined ?? (diputadosIds as Record<string, string>);
+  const entries = Object.entries(dict);
   const match = entries.find(([id, nombre]) => normalizeSearchText(nombre as string) === normalizedName);
   return match ? match[0] : null;
 }

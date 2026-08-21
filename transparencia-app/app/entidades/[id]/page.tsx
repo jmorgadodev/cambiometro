@@ -43,7 +43,7 @@ const TABS: Array<{ id: string; label: string; kinds?: EvidenceKind[] }> = [
 async function loadAllRecords(id: string) {
   const all: EvidenceRecord[] = [];
   let cursor: string | undefined;
-  for (let page = 0; page < 20; page += 1) {
+  for (let page = 0; page < 3; page += 1) {
     const res = await listRecords({ entityId: id, limit: 100, cursor });
     all.push(...res.data);
     if (!res.nextCursor || res.data.length === 0) break;
@@ -61,7 +61,7 @@ async function runtimeEntity(id: string) {
     const sourceIds = index?.sourceIds ?? (index ? [index.sourceId] : entity.sourceIds);
     const all: EvidenceRecord[] = [];
     let cursor: string | undefined;
-    for (let page = 0; page < 20; page += 1) {
+    for (let page = 0; page < 3; page += 1) {
       try {
         const res: CursorPage<EvidenceRecord> | null = await readR2EvidenceRecords(env.PUBLIC_DATA, { source: sourceIds, entityId: id, limit: 100, cursor });
         if (!res) break;
@@ -126,16 +126,9 @@ export default async function EntityPage({
 
   if (allRecords.length === 0) {
     const platform = await import("@/lib/data-platform-v1");
-    const allKnown = platform.listRecords({ limit: 1000 }).data;
-    const directMatches = allKnown.filter(
-      (r) =>
-        r.subjectEntityIds.includes(id) ||
-        r.objectEntityIds.includes(id) ||
-        (r.title && r.title.toLowerCase().includes(entity.name.toLowerCase())) ||
-        (entity.name && JSON.stringify(r.data || {}).toLowerCase().includes(entity.name.toLowerCase()))
-    );
-    if (directMatches.length > 0) {
-      allRecords = directMatches;
+    const res = platform.listRecords({ entityId: id, limit: 100 });
+    if (res.data && res.data.length > 0) {
+      allRecords = res.data;
     }
   }
   console.log(`[EntityPage DEBUG] id=${id}, d1Entity=${Boolean(d1Entity)}, platformRecords=${platformRecords.length}, extraRecords=${extraRecords.length}, allRecords=${allRecords.length}`);

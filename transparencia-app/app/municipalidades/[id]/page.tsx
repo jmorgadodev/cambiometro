@@ -1,11 +1,13 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { MUNICIPALIDADES_SEED } from "@/lib/seed-politicos";
+import { MUNICIPALIDADES_SEED } from "@/lib/municipalidades";
 import { getMunicipalidadData } from "@/lib/municipalidades-data";
 import { getPartidoConfig } from "@/lib/partidos.config";
 import ShareButton from "@/components/ShareButton";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import MunicipalidadDetailDashboardClient from "@/components/municipalidades/MunicipalidadDetailDashboardClient";
+
+export const revalidate = 300;
 
 export function generateStaticParams() {
   return MUNICIPALIDADES_SEED.map((muni) => ({ id: muni.id }));

@@ -3,10 +3,8 @@ import type { Metadata } from "next";
 export const revalidate = 300;
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
-import {
-  POLITICOS_SEED,
-  PARTIDOS_SEED,
-} from "@/lib/seed-politicos";
+import { POLITICOS_SEED } from "@/lib/politicos";
+import { PARTIDOS_SEED } from "@/lib/partidos";
 import {
   getPoliticoByIdOrSlug,
   getPoliticoSlug,
@@ -146,20 +144,18 @@ export default async function PoliticoPage({ params }: Props) {
   const apoyoDiputado = pol.cargo === "Diputado" ? await personalApoyoParaDiputado(diputadoIdParaPolitico(pol)) : null;
   const apoyoSenador = pol.cargo === "Senador" ? await personalApoyoParaSenador(pol.nombre_completo) : null;
   const companerosPartido = POLITICOS_SEED.filter((p) => p.partido_id === pol.partido_id && p.id !== pol.id);
+  const bancadaTokens = companerosPartido.map((cp) => (cp.nombre_completo || "").toLowerCase());
   
   const votacionesFila: VotacionFila[] = votaciones.map(({ votacion, voto }) => {
     // Calcular consenso del partido
     let consensoPartido: string | null = null;
     let esRebelde = false;
     
-    if (companerosPartido.length > 0 && votacion.votos && Array.isArray(votacion.votos)) {
-      const votosPartido = (votacion.votos as { nombre: string, opcion: string }[]).filter(v => 
-        companerosPartido.some(cp => {
-           const normVoto = (v.nombre || "").toLowerCase();
-           const normBancada = (cp.nombre_completo || "").toLowerCase();
-           return normVoto.includes(normBancada) || normBancada.includes(normVoto);
-        })
-      );
+    if (bancadaTokens.length > 0 && votacion.votos && Array.isArray(votacion.votos)) {
+      const votosPartido = (votacion.votos as { nombre: string, opcion: string }[]).filter((v) => {
+        const normVoto = (v.nombre || "").toLowerCase();
+        return bancadaTokens.some((bt) => normVoto.includes(bt) || bt.includes(normVoto));
+      });
       
       if (votosPartido.length > 0) {
         const conteo: Record<string, number> = {};

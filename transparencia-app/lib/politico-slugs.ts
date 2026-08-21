@@ -1,4 +1,4 @@
-import { POLITICOS_SEED, type Politico } from "@/lib/seed-politicos";
+import { POLITICOS_SEED, type Politico } from "@/lib/politicos";
 
 /**
  * Convierte un nombre en un slug URL limpio y legible.

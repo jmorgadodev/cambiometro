@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
+export const revalidate = 300;
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { SERVICIOS_PUBLICOS_SEED } from "@/lib/servicios-publicos";
 import { getServicioPublicoEnriquecido } from "@/lib/servicios-publicos-data";
-import { POLITICOS_SEED } from "@/lib/seed-politicos";
+import { POLITICOS_SEED } from "@/lib/politicos";
 import ShareButton from "@/components/ShareButton";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import ServicioPublicoDashboardClient from "@/components/servicios/ServicioPublicoDashboardClient";
