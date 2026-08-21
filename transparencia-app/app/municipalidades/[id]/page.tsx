@@ -90,7 +90,7 @@ export default async function MunicipalidadDetailPage({
 
   return (
     <div style={{ minHeight: "100vh", paddingBottom: "6rem" }}>
-      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }} />
       {/* ═══ 1. HERO HEADER ════════════════════════════════════════════════════ */}
       <section className="page-masthead">
         <div className="container-main" id="muni-capture-zone">
