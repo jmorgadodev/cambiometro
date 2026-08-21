@@ -29,6 +29,8 @@ const PATTERNS = [
 
 const ALLOWLIST = {
   ".github/workflows/usage-watch.yml": ["bearer"], // Authorization: Bearer $GH_TOKEN
+  "scripts/backup-weekly.mjs": ["bearer"], // Authorization: Bearer $CLOUDFLARE_API_TOKEN (R2 API)
+  "scripts/verify-lake-manifests.mjs": ["bearer"], // allow if uses Bearer for R2
 };
 
 const SELF = new Set(["check-no-ai-traces.mjs", "check-no-private-assets.mjs"]);
