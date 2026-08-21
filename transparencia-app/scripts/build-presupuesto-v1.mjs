@@ -13,6 +13,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { gunzipSync } from "node:zlib";
 import { basename, dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { latestBudgetSnapshot } from "./etl/presupuesto-snapshots.mjs";
 
 function argument(name) {
   const index = process.argv.indexOf(name);
@@ -35,7 +36,7 @@ const programs = new Map();
 function ensureProgram(programId) {
   let entry = programs.get(programId);
   if (!entry) {
-    entry = { programId, partida: "", capitulo: "", programa: "", budgetSide: "", meses: [], subtitulos: new Map() };
+    entry = { programId, partida: "", capitulo: "", programa: "", budgetSide: "", meses: [], subtitleSnapshots: [] };
     programs.set(programId, entry);
   }
   return entry;
@@ -92,23 +93,23 @@ for (const partition of partitions) {
     }
     const subtitulo = String(d.subtitulo ?? "");
     const denominacion = String(d.denominacion ?? "");
-    const sub = entry.subtitulos.get(subtitulo) ?? { subtitulo, denominacion, inicial: 0, vigente: 0, ejecutado: 0 };
-    sub.inicial += inicial;
-    sub.vigente += vigente;
-    sub.ejecutado += ejecutado;
-    entry.subtitulos.set(subtitulo, sub);
+    entry.subtitleSnapshots.push({ period, subtitulo, denominacion, inicial, vigente, ejecutado });
   }
 }
 
-const programsOut = [...programs.values()].map((entry) => ({
-  programId: entry.programId,
-  partida: entry.partida,
-  capitulo: entry.capitulo,
-  programa: entry.programa,
-  budgetSide: entry.budgetSide,
-  meses: entry.meses.sort((a, b) => a.period.localeCompare(b.period)),
-  subtitulos: [...entry.subtitulos.values()].sort((a, b) => Number(a.subtitulo) - Number(b.subtitulo)),
-}));
+const programsOut = [...programs.values()].map((entry) => {
+  const latest = latestBudgetSnapshot(entry.subtitleSnapshots);
+  return {
+    programId: entry.programId,
+    partida: entry.partida,
+    capitulo: entry.capitulo,
+    programa: entry.programa,
+    budgetSide: entry.budgetSide,
+    meses: entry.meses.sort((a, b) => a.period.localeCompare(b.period)),
+    subtitulos_periodo: latest.period,
+    subtitulos: latest.subtitulos,
+  };
+});
 
 mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, JSON.stringify({ generatedAt, period: "2026", count: programsOut.length, programs: programsOut }));

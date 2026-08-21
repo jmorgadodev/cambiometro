@@ -102,8 +102,11 @@ assets.push({
 mkdirSync(outputRoot, { recursive: true });
 writeFileSync(join(outputRoot, "publish-plan.json"), `${JSON.stringify({ schemaVersion: "1.0.0", generatedAt: latest, assets }, null, 2)}\n`);
 const modes = ["--releases", "--r2"].filter((mode) => process.argv.includes(mode));
-if (modes.length === 0) throw new Error("CPLT_PUBLICATION_MODE_REQUIRED");
-const localAuth = process.argv.includes("--local-auth") ? ["--local-auth"] : [];
-const result = spawnSync(process.execPath, [resolve("scripts/publish-data-lake.mjs"), "--output", outputRoot, ...modes, ...localAuth], { stdio: "inherit" });
-if (result.status !== 0) throw new Error(`CPLT_PUBLICATION_FAILED: ${result.status}`);
-console.log(JSON.stringify({ version, records: manifest.recordCount, assets: manifestAssets.length, manifest: manifestKey }, null, 2));
+const localOnly = process.argv.includes("--local-only");
+if (modes.length === 0 && !localOnly) throw new Error("CPLT_PUBLICATION_MODE_REQUIRED");
+if (!localOnly) {
+  const localAuth = process.argv.includes("--local-auth") ? ["--local-auth"] : [];
+  const result = spawnSync(process.execPath, [resolve("scripts/publish-data-lake.mjs"), "--output", outputRoot, ...modes, ...localAuth], { stdio: "inherit" });
+  if (result.status !== 0) throw new Error(`CPLT_PUBLICATION_FAILED: ${result.status}`);
+}
+console.log(JSON.stringify({ version, records: manifest.recordCount, assets: manifestAssets.length, manifest: manifestKey, published: !localOnly }, null, 2));

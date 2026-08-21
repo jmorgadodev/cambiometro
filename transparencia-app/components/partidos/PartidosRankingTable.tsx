@@ -117,7 +117,7 @@ export default function PartidosRankingTable({ partidos }: Props) {
           diff = a.asistencia - b.asistencia;
           break;
         case "rebelion":
-          diff = a.pctRebelion - b.pctRebelion;
+          diff = (a.pctRebelion ?? Number.NEGATIVE_INFINITY) - (b.pctRebelion ?? Number.NEGATIVE_INFINITY);
           break;
         case "gastos":
           diff = getGastoParaPartido(a) - getGastoParaPartido(b);
@@ -441,7 +441,7 @@ export default function PartidosRankingTable({ partidos }: Props) {
 
                   {/* % Rebelión */}
                   <td style={{ padding: "0.75rem 0.5rem", textAlign: "right", fontFamily: "monospace", fontWeight: 700 }}>
-                    <span style={{ color: p.pctRebelion > 5 ? "var(--warn)" : "var(--text-2)" }}>
+                    <span style={{ color: p.pctRebelion !== null && p.pctRebelion > 5 ? "var(--warn)" : "var(--text-2)" }}>
                       {formatPct(p.pctRebelion, 1)}
                     </span>
                   </td>

@@ -28,6 +28,12 @@ export interface GastosPoliticoProcesados {
   ultimoPeriodo: string;
 }
 
+export interface GastosAgregables {
+  total: number;
+  porMes: Array<{ periodo: string; total: number }>;
+  porItem: Array<{ item: string; total: number }>;
+}
+
 /**
  * Identifica si una fila corresponde a un agregado o fila de resumen total
  * (e.g. "VALOR TOTAL", "TOTAL", "TOTAL GASTOS OPERACIONALES", etc.)
@@ -96,16 +102,20 @@ export function procesarGastosPolitico(records: EtlRecord[]): GastosPoliticoProc
     const itemsMap = new Map<string, number>();
 
     for (const r of recs) {
-      const itemNombre = (r.item || r.categoria || r.concepto || (r as Record<string, unknown>).title || "Otros gastos") as string;
-      const monto = typeof r.monto_clp === "number" && Number.isFinite(r.monto_clp) ? r.monto_clp : 0;
+      const rawItem = r.item || r.categoria || r.concepto || (r as Record<string, unknown>).title;
+      if (typeof rawItem !== "string" || !rawItem.trim()) continue;
+      if (typeof r.monto_clp !== "number" || !Number.isFinite(r.monto_clp)) continue;
+      const itemNombre = rawItem.trim();
+      const monto = r.monto_clp;
 
       if (esFilaResumenTotal(itemNombre)) {
         totalPublicadoFuente = monto;
       } else {
-        const cleanNombre = itemNombre.trim();
-        itemsMap.set(cleanNombre, (itemsMap.get(cleanNombre) || 0) + monto);
+        itemsMap.set(itemNombre, (itemsMap.get(itemNombre) || 0) + monto);
       }
     }
+
+    if (totalPublicadoFuente === null && itemsMap.size === 0) continue;
 
     const items: ItemGasto[] = Array.from(itemsMap.entries())
       .map(([item, monto]) => ({ item, monto }))
@@ -131,8 +141,8 @@ export function procesarGastosPolitico(records: EtlRecord[]): GastosPoliticoProc
 
     // Variación % vs mes anterior
     let variacion: number | null = null;
-    if (i > 0) {
-      const mesAnterior = meses[i - 1];
+    if (meses.length > 0) {
+      const mesAnterior = meses.at(-1);
       if (mesAnterior && mesAnterior.total > 0) {
         variacion = ((total - mesAnterior.total) / mesAnterior.total) * 100;
       }
@@ -160,6 +170,28 @@ export function procesarGastosPolitico(records: EtlRecord[]): GastosPoliticoProc
     totalAcumulado,
     periodos: periodosOrdenados,
     ultimoPeriodo,
+  };
+}
+
+/**
+ * Entrega la única forma admitida de incorporar gastos a agregados superiores
+ * (partido, cámara o nivel nacional). Reutiliza el cálculo de ficha para que
+ * una fila resumen nunca vuelva a sumarse junto con sus componentes.
+ */
+export function resumirGastosAgregables(records: EtlRecord[]): GastosAgregables {
+  const procesado = procesarGastosPolitico(records);
+  const items = new Map<string, number>();
+  for (const mes of procesado.meses) {
+    for (const item of mes.items) {
+      items.set(item.item, (items.get(item.item) ?? 0) + item.monto);
+    }
+  }
+  return {
+    total: procesado.totalAcumulado,
+    porMes: procesado.meses.map((mes) => ({ periodo: mes.periodo, total: mes.total })),
+    porItem: [...items.entries()]
+      .map(([item, total]) => ({ item, total }))
+      .sort((left, right) => right.total - left.total || left.item.localeCompare(right.item)),
   };
 }
 

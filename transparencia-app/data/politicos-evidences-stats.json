@@ -1,2624 +1,3730 @@
 {
   "dip-001": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-002": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-003": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-004": [
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-005": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-006": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-007": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-008": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-009": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-010": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-011": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-012": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-013": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-014": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-015": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-016": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-017": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-018": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-019": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-020": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-021": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-022": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-023": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-024": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-025": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-026": [
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-027": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-028": [
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-029": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-030": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-031": [
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-032": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-033": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-034": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-035": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-036": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-037": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-038": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-039": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-040": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-041": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-042": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-043": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-044": [
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-045": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-046": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-047": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-048": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-049": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-050": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-051": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-052": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-053": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 4
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-054": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-055": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-056": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-057": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-058": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-059": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-060": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-061": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-062": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-063": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-064": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-065": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-066": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-067": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-068": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-069": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-070": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
-      "count": 2
+      "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-071": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-072": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-073": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-074": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-075": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-076": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-077": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-078": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-079": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-080": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-081": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-082": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-083": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-084": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-085": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-086": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-087": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-088": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-089": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-090": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-091": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-092": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-093": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-094": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-095": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-096": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-097": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-098": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-099": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 3
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-100": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-101": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-102": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-103": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-104": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-105": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-106": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-107": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-108": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-109": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-110": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-111": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
-      "count": 5
+      "count": 4
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-112": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-113": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-114": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-115": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-116": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-117": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-118": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 3
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-119": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-120": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-121": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-122": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-123": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-124": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-125": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-126": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-127": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-128": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-129": [
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-130": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-131": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-132": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-133": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-134": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-135": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-136": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-137": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-138": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-139": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-140": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-141": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-142": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-143": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-144": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-145": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-146": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-147": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-148": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-149": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-150": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-151": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-152": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-153": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-154": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "dip-155": [
     {
+      "key": "congreso_opendata",
+      "label": "Congreso Nacional · OpenData",
       "url": "https://opendata.congreso.cl/wscamaradiputados.asmx/getDiputados_Vigentes",
       "count": 1
     },
     {
+      "key": "gastos_camara",
+      "label": "Cámara de Diputados · Gastos operacionales (rendiciones por diputado)",
       "url": "https://www.camara.cl/diputados/detalle/gastosoperacionales.aspx",
       "count": 105
     }
   ],
   "sen-001": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
-      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 74
-    }
-  ],
-  "sen-002": [
-    {
-      "url": "https://datos.cplt.cl/",
-      "count": 2
-    },
-    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 73
     }
   ],
-  "sen-003": [
+  "sen-002": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 75
+      "count": 74
+    }
+  ],
+  "sen-003": [
+    {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
+      "url": "https://datos.cplt.cl/",
+      "count": 2
+    },
+    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
+      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
+      "count": 74
     }
   ],
   "sen-004": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 76
+      "count": 74
     }
   ],
   "sen-005": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 122
+      "count": 120
     }
   ],
   "sen-006": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 122
     }
   ],
   "sen-007": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 123
+      "count": 122
     }
   ],
   "sen-008": [
     {
-      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 76
-    }
-  ],
-  "sen-009": [
-    {
-      "url": "https://datos.cplt.cl/",
-      "count": 1
-    },
-    {
-      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 123
-    }
-  ],
-  "sen-010": [
-    {
-      "url": "https://datos.cplt.cl/",
-      "count": 2
-    },
-    {
-      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 124
-    }
-  ],
-  "sen-011": [
-    {
-      "url": "https://datos.cplt.cl/",
-      "count": 1
-    },
-    {
-      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 120
-    }
-  ],
-  "sen-012": [
-    {
-      "url": "https://datos.cplt.cl/",
-      "count": 2
-    },
-    {
-      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 124
-    }
-  ],
-  "sen-013": [
-    {
-      "url": "https://datos.cplt.cl/",
-      "count": 3
-    },
-    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 73
     }
   ],
-  "sen-014": [
+  "sen-009": [
     {
-      "url": "https://datos.cplt.cl/",
-      "count": 3
-    },
-    {
-      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 75
-    }
-  ],
-  "sen-015": [
-    {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 75
+      "count": 122
     }
   ],
-  "sen-016": [
+  "sen-010": [
     {
-      "url": "https://datos.cplt.cl/",
-      "count": 1
-    },
-    {
-      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 75
-    }
-  ],
-  "sen-017": [
-    {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
+      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
+      "count": 122
+    }
+  ],
+  "sen-011": [
+    {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
+      "url": "https://datos.cplt.cl/",
+      "count": 1
+    },
+    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
+      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
+      "count": 122
+    }
+  ],
+  "sen-012": [
+    {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
+      "url": "https://datos.cplt.cl/",
+      "count": 2
+    },
+    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
+      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
+      "count": 122
+    }
+  ],
+  "sen-013": [
+    {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
+      "url": "https://datos.cplt.cl/",
+      "count": 3
+    },
+    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
+      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
+      "count": 74
+    }
+  ],
+  "sen-014": [
+    {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
+      "url": "https://datos.cplt.cl/",
+      "count": 3
+    },
+    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
+      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
+      "count": 74
+    }
+  ],
+  "sen-015": [
+    {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
+      "url": "https://datos.cplt.cl/",
+      "count": 2
+    },
+    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
+      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
+      "count": 74
+    }
+  ],
+  "sen-016": [
+    {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
+      "url": "https://datos.cplt.cl/",
+      "count": 1
+    },
+    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
+      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
+      "count": 73
+    }
+  ],
+  "sen-017": [
+    {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
+      "url": "https://datos.cplt.cl/",
+      "count": 2
+    },
+    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 74
     }
   ],
   "sen-018": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
-      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 123
-    }
-  ],
-  "sen-019": [
-    {
-      "url": "https://datos.cplt.cl/",
-      "count": 1
-    },
-    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 122
     }
   ],
+  "sen-019": [
+    {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
+      "url": "https://datos.cplt.cl/",
+      "count": 1
+    },
+    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
+      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
+      "count": 121
+    }
+  ],
   "sen-020": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 122
     }
   ],
   "sen-021": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 123
+      "count": 122
     }
   ],
   "sen-022": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 122
     }
   ],
   "sen-023": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 120
+      "count": 122
     }
   ],
   "sen-024": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 124
+      "count": 121
     }
   ],
   "sen-025": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 124
+      "count": 121
     }
   ],
   "sen-026": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 4
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 73
     }
   ],
   "sen-027": [
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 73
     }
   ],
   "sen-028": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 73
+      "count": 72
     }
   ],
   "sen-029": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 74
     }
   ],
   "sen-030": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 120
     }
   ],
   "sen-031": [
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 122
+      "count": 121
     }
   ],
   "sen-032": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 121
     }
   ],
   "sen-033": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
-      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 120
-    }
-  ],
-  "sen-034": [
-    {
-      "url": "https://datos.cplt.cl/",
-      "count": 2
-    },
-    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 122
     }
   ],
-  "sen-035": [
+  "sen-034": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 73
+      "count": 120
+    }
+  ],
+  "sen-035": [
+    {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
+      "url": "https://datos.cplt.cl/",
+      "count": 2
+    },
+    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
+      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
+      "count": 72
     }
   ],
   "sen-036": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 2
     },
     {
-      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 75
-    }
-  ],
-  "sen-037": [
-    {
-      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 76
-    }
-  ],
-  "sen-038": [
-    {
-      "url": "https://datos.cplt.cl/",
-      "count": 2
-    },
-    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 73
     }
   ],
+  "sen-037": [
+    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
+      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
+      "count": 74
+    }
+  ],
+  "sen-038": [
+    {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
+      "url": "https://datos.cplt.cl/",
+      "count": 2
+    },
+    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
+      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
+      "count": 74
+    }
+  ],
   "sen-039": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 122
     }
   ],
   "sen-040": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 122
     }
   ],
   "sen-041": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
-      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 120
-    }
-  ],
-  "sen-042": [
-    {
-      "url": "https://datos.cplt.cl/",
-      "count": 1
-    },
-    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 121
     }
   ],
-  "sen-043": [
+  "sen-042": [
     {
-      "url": "https://datos.cplt.cl/",
-      "count": 2
-    },
-    {
-      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 123
-    }
-  ],
-  "sen-044": [
-    {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
+      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
+      "count": 122
+    }
+  ],
+  "sen-043": [
+    {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
+      "url": "https://datos.cplt.cl/",
+      "count": 2
+    },
+    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
+      "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
+      "count": 122
+    }
+  ],
+  "sen-044": [
+    {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
+      "url": "https://datos.cplt.cl/",
+      "count": 1
+    },
+    {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 122
     }
   ],
   "sen-045": [
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 73
     }
   ],
   "sen-046": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 122
     }
   ],
   "sen-047": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
       "count": 122
     }
   ],
   "sen-048": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 121
+      "count": 120
     }
   ],
   "sen-049": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 1
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 119
+      "count": 122
     }
   ],
   "sen-050": [
     {
+      "key": "infoprobidad",
+      "label": "InfoProbidad · Consejo para la Transparencia",
       "url": "https://datos.cplt.cl/",
       "count": 3
     },
     {
+      "key": "gastos_senado",
+      "label": "Senado · Gastos operacionales (Transparencia activa)",
       "url": "https://www.senado.cl/transparencia/gastos-operacionales-senadores",
-      "count": 122
+      "count": 121
     }
   ]
 }

@@ -45,7 +45,7 @@ export default function TransferenciasDashboardClient({ summary }: Props) {
       (r) =>
         r.name.toLowerCase().includes(q) ||
         r.rut.toLowerCase().includes(q) ||
-        r.class.toLowerCase().includes(q)
+        (r.class ?? "").toLowerCase().includes(q)
     );
   }, [summary.top_receptores, searchReceptor]);
 
@@ -57,7 +57,7 @@ export default function TransferenciasDashboardClient({ summary }: Props) {
       (e) =>
         e.name.toLowerCase().includes(q) ||
         e.rut.toLowerCase().includes(q) ||
-        e.class.toLowerCase().includes(q)
+        (e.class ?? "").toLowerCase().includes(q)
     );
   }, [summary.top_emisores, searchEmisor]);
 

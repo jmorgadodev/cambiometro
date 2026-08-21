@@ -14,6 +14,7 @@ import PersonEntityProfile from "@/components/PersonEntityProfile";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import EntityEvidenceAccordionExplorer from "@/components/records/EntityEvidenceAccordionExplorer";
 import { traducirPredicado, traducirTipoEntidad, formatNombreInstitucional } from "@/lib/diccionario-cruces";
+import { evaluateBudgetSourceAnomaly } from "@/lib/budget-integrity";
 
 export const dynamic = "force-dynamic";
 
@@ -303,15 +304,21 @@ export default async function EntityPage({
                   <div style={{ overflowX: "auto" }}>
                     <table style={{ width: "100%", borderCollapse: "collapse", fontSize: "0.75rem" }}>
                       <thead><tr style={{ color: "var(--text-subtle)", textAlign: "left" }}><th style={{ padding: "0.35rem 0.5rem", borderBottom: "1px solid var(--border-subtle)" }}>Cód.</th><th style={{ padding: "0.35rem 0.5rem", borderBottom: "1px solid var(--border-subtle)" }}>Denominación</th><th style={{ padding: "0.35rem 0.5rem", borderBottom: "1px solid var(--border-subtle)", textAlign: "right" }}>Vigente</th><th style={{ padding: "0.35rem 0.5rem", borderBottom: "1px solid var(--border-subtle)", textAlign: "right" }}>Ejecutado</th><th style={{ padding: "0.35rem 0.5rem", borderBottom: "1px solid var(--border-subtle)", textAlign: "right" }}>% ejec.</th></tr></thead>
-                      <tbody>{presupuesto.subtitulos.map((sub) => (
-                        <tr key={sub.subtitulo} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
-                          <td style={{ padding: "0.35rem 0.5rem", color: "var(--text-muted)", fontFamily: "monospace" }}>{sub.subtitulo}</td>
-                          <td style={{ padding: "0.35rem 0.5rem" }}>{sub.denominacion}</td>
-                          <td style={{ padding: "0.35rem 0.5rem", textAlign: "right", fontFamily: "monospace" }}>{clp(sub.vigente)}</td>
-                          <td style={{ padding: "0.35rem 0.5rem", textAlign: "right", fontFamily: "monospace" }}>{clp(sub.ejecutado)}</td>
-                          <td style={{ padding: "0.35rem 0.5rem", textAlign: "right", fontFamily: "monospace" }}>{pct(sub.ejecutado, sub.vigente)}</td>
-                        </tr>
-                      ))}</tbody>
+                      <tbody>{presupuesto.subtitulos.map((sub) => {
+                        const integrity = evaluateBudgetSourceAnomaly({ ejecutado: sub.ejecutado, vigente: sub.vigente });
+                        return (
+                          <tr key={sub.subtitulo} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
+                            <td style={{ padding: "0.35rem 0.5rem", color: "var(--text-muted)", fontFamily: "monospace" }}>{sub.subtitulo}</td>
+                            <td style={{ padding: "0.35rem 0.5rem" }}>
+                              {sub.denominacion}
+                              {integrity.status === "ALTA" && <span style={{ display: "block", color: "var(--warn)", fontWeight: 800 }}>Hallazgo de integridad ALTA (V7) · valor oficial preservado</span>}
+                            </td>
+                            <td style={{ padding: "0.35rem 0.5rem", textAlign: "right", fontFamily: "monospace" }}>{clp(sub.vigente)}</td>
+                            <td style={{ padding: "0.35rem 0.5rem", textAlign: "right", fontFamily: "monospace" }}>{clp(sub.ejecutado)}</td>
+                            <td style={{ padding: "0.35rem 0.5rem", textAlign: "right", fontFamily: "monospace" }}>{pct(sub.ejecutado, sub.vigente)}</td>
+                          </tr>
+                        );
+                      })}</tbody>
                     </table>
                   </div>
                 </>
@@ -323,7 +330,7 @@ export default async function EntityPage({
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
                 <div>
                   <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--text-muted)" }}>Licitaciones y adjudicaciones · ChileCompra OCDS</div>
-                  <div style={{ fontSize: "0.68rem", color: "var(--text-subtle)", marginTop: "0.15rem" }}>{chilecompra.procesos} procesos adjudicados por {clp(chilecompra.monto_total_clp)} CLP · período {chilecompra.months[chilecompra.months.length - 1]?.period} al {chilecompra.months[0]?.period}</div>
+                  <div style={{ fontSize: "0.68rem", color: "var(--text-subtle)", marginTop: "0.15rem" }}>{chilecompra.procesos} procesos · {chilecompra.monto_total_clp === null ? "monto oficial no publicado" : `${clp(chilecompra.monto_total_clp)} CLP adjudicados`} · período {chilecompra.months[chilecompra.months.length - 1]?.period} al {chilecompra.months[0]?.period}</div>
                 </div>
                 <a href="https://datos-abiertos.chilecompra.cl/descargas/procesos-ocds" target="_blank" rel="noreferrer" style={{ fontSize: "0.72rem", color: "var(--accent)", textDecoration: "none" }}>Fuente oficial ↗</a>
               </div>
@@ -334,7 +341,7 @@ export default async function EntityPage({
                     <tr key={mes.period} style={{ borderBottom: "1px solid var(--border-subtle)" }}>
                       <td style={{ padding: "0.35rem 0.5rem", color: "var(--text-muted)" }}>{new Date(`${mes.period}-01T00:00:00`).toLocaleDateString("es-CL", { month: "short", year: "numeric" }).replace(".", "")}</td>
                       <td style={{ padding: "0.35rem 0.5rem", textAlign: "right", fontFamily: "monospace" }}>{mes.procesos}</td>
-                      <td style={{ padding: "0.35rem 0.5rem", textAlign: "right", fontFamily: "monospace" }}>{clp(mes.monto_total_clp)}</td>
+                      <td style={{ padding: "0.35rem 0.5rem", textAlign: "right", fontFamily: "monospace" }}>{mes.monto_total_clp === null ? "—" : clp(mes.monto_total_clp)}</td>
                     </tr>
                   ))}</tbody>
                 </table>
@@ -343,10 +350,10 @@ export default async function EntityPage({
               <div style={{ display: "flex", flexDirection: "column", gap: "0.45rem" }}>{chilecompra.top.map((adj, index) => (
                 <div key={`${adj.ocid}-${index}`} style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "baseline", fontSize: "0.72rem" }}>
                   <div style={{ minWidth: 0 }}>
-                    <a href={adj.url ?? `https://www.mercadopublico.cl/Procesos/VerProceso?Id=${adj.ocid.split("-").at(-1)}`} target="_blank" rel="noreferrer" style={{ color: "var(--accent)", textDecoration: "none" }}>{adj.title}</a>
+                    <a href={adj.url ?? `https://www.mercadopublico.cl/Procesos/VerProceso?Id=${adj.ocid.split("-").at(-1)}`} target="_blank" rel="noreferrer" style={{ color: "var(--accent)", textDecoration: "none" }}>{adj.title ?? "Título oficial no publicado"}</a>
                     <div style={{ color: "var(--text-subtle)", fontSize: "0.66rem" }}>{adj.proveedor ?? "Proveedor no publicado"} · {(adj.fecha ?? "").slice(0, 10)}</div>
                   </div>
-                  <div style={{ fontFamily: "monospace", whiteSpace: "nowrap" }}>{clp(adj.monto_clp)}</div>
+                  <div style={{ fontFamily: "monospace", whiteSpace: "nowrap" }}>{adj.monto_clp === null ? "—" : clp(adj.monto_clp)}</div>
                 </div>
               ))}</div>
             </div>

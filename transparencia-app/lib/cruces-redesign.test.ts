@@ -67,20 +67,16 @@ describe("Rediseño Integral de /cruces — Cruces Reales en Todos los Chips", (
     expect(votaciones.length).toBeGreaterThan(0);
   });
 
-  it("X1 & X2. Existe al menos una arista 'LOBBY + VENTAS' con doble evidencia", () => {
+  it("X1 & X2. R10 no fabrica una arista 'LOBBY + VENTAS' para completar cobertura", () => {
     const page = listCrosses({ limit: 500 });
-    const doubleEvidence = page.data.find((r) =>
-      (r.evidence.some((e) => e.sourceId === "chilecompra" || e.kind === "contract") &&
-       r.evidence.some((e) => e.sourceId === "infolobby" || e.kind === "lobby")) ||
-      r.relation.id.includes("lobby-ventas")
-    );
-    expect(doubleEvidence).toBeDefined();
-    expect(doubleEvidence?.evidence.length).toBeGreaterThanOrEqual(2);
+    expect(page.data.some((record) => record.relation.id.includes("public-body-mop-dcyf"))).toBe(false);
+    expect(page.data.some((record) => record.toEntity?.name.includes("Carlos González Asesorías"))).toBe(false);
     expect(explorerSource).toContain("LOBBY + VENTAS");
   });
 
-  it("X2. Coherencia KPI vs Explorador: hint incluye 118.360 registros vinculados", () => {
-    expect(pageSource).toContain("118.360 registros vinculados");
+  it("X2. Coherencia KPI vs Explorador: el hint usa el conteo derivado", () => {
+    expect(pageSource).toContain("crosses.length.toLocaleString");
+    expect(pageSource).not.toContain("118.360 registros vinculados");
     expect(pageSource).toContain("relaciones agregadas");
   });
 
@@ -151,14 +147,7 @@ describe("Rediseño Integral de /cruces — Cruces Reales en Todos los Chips", (
     const tiposPage1 = new Set(page1.map((r) => getTipoCruceBadge(r).tipo));
     expect(tiposPage1.size).toBeGreaterThanOrEqual(3);
 
-    // Badge LOBBY + VENTAS presente en fila visible de página 1
-    const hasLobbyVentasInPage1 = page1.some(
-      (r) =>
-        (r.evidence.some((e: { sourceId: string; kind?: string }) => e.sourceId === "chilecompra" || e.kind === "contract") &&
-          r.evidence.some((e: { sourceId: string; kind?: string }) => e.sourceId === "infolobby" || e.kind === "lobby")) ||
-        r.relation.id.includes("lobby-ventas")
-    );
-    expect(hasLobbyVentasInPage1).toBe(true);
+    expect(page1.every((record) => record.evidence.length > 0)).toBe(true);
   });
 
   it("X5. Cada uno de los 6 chips tiene conteo > 0 y visible en su etiqueta", () => {

@@ -52,7 +52,7 @@ export interface AutoridadItem {
   director_jefe_actual?: string;
   fuente_director?: string;
   ministerio_dependiente?: string;
-  dotacion_total: number;
+  dotacion_total: number | null;
   partida_capitulo_dipres: string | null;
   sitio_web_oficial?: string;
 }
@@ -62,7 +62,7 @@ export interface OrganismoOption {
   nombre_canonico: string;
   sigla?: string;
   tipo: string;
-  region: string;
+  region: string | null;
 }
 
 interface PersonasUniversalClientProps {
@@ -417,7 +417,7 @@ export default function PersonasUniversalClient({
                   Directorio de Personas del Estado
                 </h1>
                 <p style={{ fontSize: "0.9rem", color: "var(--text-2)", margin: 0, lineHeight: 1.6 }}>
-                  Consolidación universal de parlamentarios, alcaldes, ministros, directores de servicio y más de 1.2M de funcionarios públicos clasificados por organismo del Estado.
+                  Consolidación de parlamentarios, alcaldes, ministros, directores de servicio y nóminas oficiales de personal según la cobertura publicada por cada organismo.
                 </p>
               </div>
 
@@ -447,8 +447,8 @@ export default function PersonasUniversalClient({
                   <div style={{ fontSize: "0.68rem", color: "var(--text-3)", fontWeight: 600 }}>Altas Autoridades</div>
                 </div>
                 <div style={{ textAlign: "center", padding: "0 0.5rem", borderLeft: "1px solid var(--border)" }}>
-                  <div style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--money)" }}>1.2M+</div>
-                  <div style={{ fontSize: "0.68rem", color: "var(--text-3)", fontWeight: 600 }}>Funcionarios CPLT</div>
+                  <div style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--money)" }}>CPLT</div>
+                  <div style={{ fontSize: "0.68rem", color: "var(--text-3)", fontWeight: 600 }}>Cobertura por organismo</div>
                 </div>
               </div>
             </div>
@@ -459,7 +459,7 @@ export default function PersonasUniversalClient({
                 { id: "parlamentarios" as PersonaTab, label: "🏛️ Parlamentarios", count: String(parlamentarios.length) },
                 { id: "alcaldes" as PersonaTab, label: "🏙️ Alcaldes", count: String(alcaldes.length) },
                 { id: "autoridades" as PersonaTab, label: "⚖️ Altas autoridades DIP", count: String(autoridades.length) },
-                { id: "funcionarios" as PersonaTab, label: "📋 Funcionarios", count: "1.2M+ CPLT" },
+                { id: "funcionarios" as PersonaTab, label: "📋 Funcionarios", count: "CPLT" },
               ].map((t) => {
                 const activo = activeTab === t.id;
                 return (
@@ -1254,7 +1254,7 @@ export default function PersonasUniversalClient({
                       <div style={{ marginTop: "0.75rem", paddingTop: "0.65rem", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "0.3rem", fontSize: "0.72rem" }}>
                         <div style={{ display: "flex", justifyContent: "space-between" }}>
                           <span style={{ color: "var(--text-3)" }}>Dotación Personal:</span>
-                          <span style={{ color: "var(--text-1)", fontWeight: 700 }}>{aut.dotacion_total.toLocaleString("es-CL")} funcionarios</span>
+                          <span style={{ color: "var(--text-1)", fontWeight: 700 }}>{aut.dotacion_total === null ? "Dotación no publicada" : `${aut.dotacion_total.toLocaleString("es-CL")} funcionarios`}</span>
                         </div>
                         {aut.ministerio_dependiente && (
                           <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -1313,7 +1313,7 @@ export default function PersonasUniversalClient({
                           {aut.partida_capitulo_dipres ? `Partida ${aut.partida_capitulo_dipres}` : "—"}
                         </td>
                         <td style={{ padding: "0.75rem 1rem", textAlign: "right", fontWeight: 700, color: "var(--text-1)" }}>
-                          {aut.dotacion_total.toLocaleString("es-CL")}
+                          {aut.dotacion_total === null ? "—" : aut.dotacion_total.toLocaleString("es-CL")}
                         </td>
                         <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
                           <Link

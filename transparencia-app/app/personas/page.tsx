@@ -15,7 +15,7 @@ import path from "node:path";
 export const metadata: Metadata = {
   title: "Directorio Universal de Personas y Autoridades del Estado — El Cambiómetro",
   description:
-    "Directorio oficial consolidado de personas del Estado de Chile: 205 parlamentarios, 345 alcaldes, ministros, directores de servicio y más de 1.2M de funcionarios públicos clasificados por organismo.",
+    "Directorio consolidado de parlamentarios, autoridades y nóminas oficiales de personal, con cobertura declarada por organismo.",
   openGraph: {
     title: "Directorio de Personas del Estado de Chile — El Cambiómetro",
     description:
@@ -47,9 +47,6 @@ export default function PersonasPage() {
       distrito_o_circunscripcion: territory || "Nacional",
       region: p.distrito_region || "Nacional",
       foto_url: p.foto_url,
-      asistencia_sala_pct: 96.4,
-      proyectos_presentados_count: 14,
-      gastos_operacionales_promedio_mensual_clp: 4850000,
     };
   });
 
@@ -75,24 +72,25 @@ export default function PersonasPage() {
     }
   } catch {}
 
-  const alcaldes: AlcaldeItem[] = MUNICIPALIDADES_SEED.map((muni) => {
+  const alcaldes: AlcaldeItem[] = MUNICIPALIDADES_SEED.flatMap((muni) => {
     const data = munisData[muni.id] || {};
     const alcaldeData = data.alcalde || {};
-    const nombreAlcalde = alcaldeData.nombre || muni.alcalde_actual || `Alcalde/sa de ${muni.nombre_comuna}`;
-    return {
+    const nombreAlcalde = alcaldeData.nombre || muni.alcalde_actual;
+    if (!nombreAlcalde) return [];
+    return [{
       muni_id: muni.id,
       cut: muni.cut,
       nombre_comuna: muni.nombre_comuna,
       region: muni.region,
       alcalde_nombre: nombreAlcalde,
       cargo: "Alcalde",
-      remuneracion_bruta: alcaldeData.remuneracion_bruta || 6500000,
-      remuneracion_liquida: alcaldeData.remuneracion_liquida || 4900000,
-      grado_eus: alcaldeData.grado_eus || "2",
+      remuneracion_bruta: alcaldeData.remuneracion_bruta ?? undefined,
+      remuneracion_liquida: alcaldeData.remuneracion_liquida ?? undefined,
+      grado_eus: alcaldeData.grado_eus,
       formacion: alcaldeData.formacion,
       partido_alcalde: alcaldeData.partido_alcalde || muni.partido_alcalde,
-      poblacion_censo_2024: data.poblacion_censo_2024 || muni.poblacion_censo_2024 || undefined,
-    };
+      poblacion_censo_2024: data.poblacion_censo_2024 ?? muni.poblacion_censo_2024 ?? undefined,
+    }];
   });
 
   // 3. Altas Autoridades DIP
@@ -109,7 +107,7 @@ export default function PersonasPage() {
       director_jefe_actual: serv.director_jefe_actual,
       fuente_director: serv.fuente_director,
       ministerio_dependiente: serv.ministerio_dependiente,
-      dotacion_total: org?.dotacion_total || 340,
+      dotacion_total: org?.dotacion_total ?? null,
       partida_capitulo_dipres: org?.partida_capitulo_dipres || null,
       sitio_web_oficial: serv.sitio_web_oficial,
     };

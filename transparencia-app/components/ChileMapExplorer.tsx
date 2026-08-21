@@ -29,10 +29,9 @@ export default function ChileMapExplorer() {
       const region = pol.distrito_region;
       const score = SCORES_SEED.find((s) => s.politico_id === pol.id);
       const gasto = score?.gasto_bruto_mensual ?? null;
-      const alertas =
-        score && (score.total_alertas_criticas || score.total_alertas_altas)
-          ? score.total_alertas_criticas + score.total_alertas_altas
-          : null;
+      const alertas = typeof score?.total_alertas_criticas === "number" && typeof score.total_alertas_altas === "number"
+        ? score.total_alertas_criticas + score.total_alertas_altas
+        : null;
 
       if (!map.has(region)) {
         map.set(region, {
@@ -191,7 +190,7 @@ export default function ChileMapExplorer() {
                       {partido?.sigla} · {pol.cargo}
                     </div>
                   </div>
-                  {score && hayScores && (
+                  {score && hayScores && score.gasto_bruto_mensual !== null && (
                     <div style={{ textAlign: "right" }}>
                       <div style={{ fontFamily: "monospace", fontWeight: 800, fontSize: "0.9rem", color: "var(--accent)" }}>
                         {formatCLP(score.gasto_bruto_mensual)}

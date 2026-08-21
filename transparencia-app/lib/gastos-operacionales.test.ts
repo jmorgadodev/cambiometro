@@ -3,6 +3,7 @@ import {
   esFilaResumenTotal,
   formatPeriodoMes,
   procesarGastosPolitico,
+  resumirGastosAgregables,
   assertGastosConsistency,
 } from "./gastos-operacionales";
 import { POLITICOS_SEED } from "./seed-politicos";
@@ -78,6 +79,40 @@ describe("M7 - Gastos Operacionales: prevención de doble conteo y consistencia 
 
     // Acumulado coincide con total del mes
     expect(result.totalAcumulado).toBe(18330206);
+  });
+
+  it("FIX-1 aplica la misma exclusión a agregados de partido", () => {
+    const records = [
+      { id: "total", periodo: "2026-05", item: "VALOR TOTAL", monto_clp: 18_330_206 },
+      { id: "a", periodo: "2026-05", item: "TRASLACION VEHICULO", monto_clp: 7_847_170 },
+      { id: "b", periodo: "2026-05", item: "TELEFONIA CELULAR", monto_clp: 2_845_068 },
+      { id: "c", periodo: "2026-05", item: "ARRIENDO OFICINAS", monto_clp: 7_637_968 },
+    ] as unknown as EtlRecord[];
+
+    expect(resumirGastosAgregables(records)).toEqual({
+      total: 18_330_206,
+      porMes: [{ periodo: "2026-05", total: 18_330_206 }],
+      porItem: [
+        { item: "TRASLACION VEHICULO", total: 7_847_170 },
+        { item: "ARRIENDO OFICINAS", total: 7_637_968 },
+        { item: "TELEFONIA CELULAR", total: 2_845_068 },
+      ],
+    });
+  });
+
+  it("R10 no convierte montos o conceptos ausentes en ceros ni categorías inventadas", () => {
+    const records = [
+      { id: "sin-monto", periodo: "2026-05", item: "TRASLACIÓN", monto_clp: null },
+      { id: "sin-item", periodo: "2026-05", monto_clp: 500_000 },
+      { id: "completo", periodo: "2026-05", item: "TELEFONÍA", monto_clp: 120_000 },
+      { id: "mes-sin-evidencia", periodo: "2026-06", item: "TRASLACIÓN", monto_clp: null },
+    ] as unknown as EtlRecord[];
+
+    expect(resumirGastosAgregables(records)).toEqual({
+      total: 120_000,
+      porMes: [{ periodo: "2026-05", total: 120_000 }],
+      porItem: [{ item: "TELEFONÍA", total: 120_000 }],
+    });
   });
 
   it("calcula variación % vs mes anterior sobre totales corregidos", () => {

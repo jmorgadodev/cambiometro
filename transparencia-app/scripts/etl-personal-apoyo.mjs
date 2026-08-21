@@ -1,7 +1,9 @@
 import { execFileSync } from "node:child_process";
+import { createHash } from "node:crypto";
 import fs from "node:fs";
 import { externalText } from "./etl/safe-text.mjs";
 import { mergePersonalApoyoDeputies } from "./etl/personal-apoyo-publication.mjs";
+import { parseSenadoAssignmentPolicy } from "./etl/senado-assignment.mjs";
 
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
@@ -128,6 +130,19 @@ function mejorMesConDatos(htmlGet, meses, st, url, jar) {
 }
 
 async function main() {
+  const senatePolicyUrl = "https://www.senado.cl/transparencia/personal-de-apoyo-senadores";
+  const senatePolicyHtml = curlHtml(senatePolicyUrl);
+  const senatePolicy = parseSenadoAssignmentPolicy(senatePolicyHtml);
+  const senateAssignment = {
+    ...senatePolicy,
+    source_url: senatePolicyUrl,
+    retrieved_at: new Date().toISOString(),
+    checksum_sha256: createHash("sha256").update(senatePolicyHtml).digest("hex"),
+    // La regla general no prueba un traspaso individual. Este arreglo sólo puede
+    // poblarse desde un documento oficial individualizado incorporado por ETL.
+    transferencias_acreditadas: [],
+  };
+
   const jar = `cookies-${Date.now()}.txt`;
   const primera = curlHtml("https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=1009", { jar });
   const ids = [...primera.matchAll(/<option value="(\d+)">([^<]+)<\/option>/g)].map((m) => ({ id: m[1], apellido: html(m[2]) }));
@@ -272,6 +287,7 @@ async function main() {
       },
     },
     meses_senado_disponibles: [...mesesSenado].sort(),
+    asignacion_senado_2026: senateAssignment,
     diputados,
     senadores,
   };

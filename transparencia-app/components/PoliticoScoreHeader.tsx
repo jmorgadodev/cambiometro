@@ -38,20 +38,19 @@ export interface PoliticoHeaderData {
   edad?: number | null;
   dipInfo?: PoliticoDipInfo;
   // Métricas reales
-  pctAsistencia: number;
-  pctEmitioVoto: number;
+  pctAsistencia: number | null;
+  pctEmitioVoto: number | null;
   presenteSinVotar: number;
   sesionesPresentes: number;
   totalSesiones: number;
-  // Alertas
-  alertasCriticas: AlertaFiscalizacionItem[];
 }
 
 export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData }) {
   const partidoTxt = data.partido?.sigla ? ` (${data.partido.sigla})` : "";
   const regionTxt = data.distrito_region ? ` por ${data.distrito_region}` : "";
   const shareTitle = `${data.nombre_completo}${partidoTxt}`;
-  const shareText = `${data.nombre_completo}${partidoTxt} · ${data.cargo}${regionTxt} — asistencia ${data.pctAsistencia}%, votaciones y rendiciones en El Cambiómetro`;
+  const asistenciaTxt = data.pctAsistencia === null ? "asistencia sin cobertura" : `asistencia ${data.pctAsistencia}%`;
+  const shareText = `${data.nombre_completo}${partidoTxt} · ${data.cargo}${regionTxt} — ${asistenciaTxt}, votaciones y rendiciones en El Cambiómetro`;
 
   const dip = data.dipInfo;
   const dipProfesion = dip?.profesion_oficio_display || "No declarado en DIP";
@@ -329,9 +328,9 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                 >
                   <div
                     className="stat-tile__value"
-                    style={{ fontSize: "clamp(14px, 4vw, 1.25rem)", fontWeight: 800, color: data.pctAsistencia >= 90 ? "var(--ok)" : "var(--warn)" }}
+                    style={{ fontSize: "clamp(14px, 4vw, 1.25rem)", fontWeight: 800, color: data.pctAsistencia !== null && data.pctAsistencia >= 90 ? "var(--ok)" : "var(--warn)" }}
                   >
-                    {data.pctAsistencia}%
+                    {data.pctAsistencia === null ? "—" : `${data.pctAsistencia}%`}
                   </div>
                   <div className="stat-tile__label" style={{ color: "var(--text-2)", fontSize: "0.68rem" }}>
                     Asistió a sesiones ({data.sesionesPresentes}/{data.totalSesiones})
@@ -351,7 +350,7 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                   title="Porcentaje de votaciones en las que emitió opción sustantiva (A favor, En contra, Abstención) estando presente."
                 >
                   <div className="stat-tile__value" style={{ fontSize: "clamp(14px, 4vw, 1.25rem)", fontWeight: 800, color: "var(--accent)" }}>
-                    {data.pctEmitioVoto}%
+                    {data.pctEmitioVoto === null ? "—" : `${data.pctEmitioVoto}%`}
                   </div>
                   <div className="stat-tile__label" style={{ color: "var(--text-2)", fontSize: "0.68rem" }}>
                     Emitió voto efectivo

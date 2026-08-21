@@ -16,6 +16,7 @@ export interface ChileCompraRawRecord extends Record<string, unknown> {
 export function buildChileCompraListUrl(type: ChileCompraType, year: number, month: number, offset: number, limit: number): string;
 export function normalizeOcdsPackage(packageData: Record<string, unknown>, context: { procurementType: ChileCompraType; sourceUrl: string }): ChileCompraRawRecord[];
 export function reconcileChileCompraRecords(records: ChileCompraRawRecord[]): ChileCompraRawRecord[];
+export function filterChileCompraRecordsByCutoff<T extends { data?: { fecha?: unknown } }>(records: T[], cutoff: string): T[];
 export function fetchChileCompraMonth(options: {
   year: number;
   month: number;
@@ -27,12 +28,14 @@ export function fetchChileCompraMonth(options: {
   onProgress?: (progress: { phase: string; type?: string; completed: number; total: number }) => void;
   requestsPerSecond?: number;
   retryBaseMs?: number;
+  bulkLicitacionDocuments?: Map<string, { url: string; payload: Record<string, unknown> }> | null;
 }): Promise<{
   sourceId: "chilecompra";
   year: number;
   month: number;
   period: string;
   listingCounts: Record<string, number>;
+  bulkCoverage: { used: number; missing: number };
   records: ChileCompraRawRecord[];
   documents: Array<{ url: string; stage: string; procurementType: ChileCompraType; ocid: string; payload: Record<string, unknown> }>;
   rejectedDocuments: Array<{

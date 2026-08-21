@@ -55,7 +55,8 @@ export function formatMontoConsolidado(amount?: number | null): string {
   return formatCLP(amount);
 }
 
-export function formatPct(value: number, digits = 1): string {
+export function formatPct(value: number | null | undefined, digits = 1): string {
+  if (value === null || value === undefined) return "—";
   return `${value.toLocaleString("es-CL", { maximumFractionDigits: digits })}%`;
 }
 

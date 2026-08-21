@@ -1,11 +1,12 @@
 import fs from "fs";
 import path from "path";
+import { legalEntityIdFromRut } from "./legal-rut";
 
 export interface ChileCompraAdjudicacion {
-  title: string;
+  title: string | null;
   proveedor: string | null;
   proveedor_id: string | null;
-  monto_clp: number;
+  monto_clp: number | null;
   fecha: string | null;
   url: string | null;
   ocid: string;
@@ -14,18 +15,37 @@ export interface ChileCompraAdjudicacion {
 
 export interface ChileCompraMes {
   period: string;
-  monto_total_clp: number;
+  monto_total_clp: number | null;
   procesos: number;
+}
+
+export interface ChileCompraAnomalia {
+  id: string;
+  severity: "ALTA";
+  validation: "V7";
+  violations: string[];
+  buyer_id: string | null;
+  buyer_name: string | null;
+  ocid: string;
+  title: string | null;
+  proveedor: string | null;
+  monto_oficial_clp: number;
+  fecha: string | null;
+  source_url: string | null;
+  source_anomaly: true;
+  site_disclosure: true;
+  excluded_from_totals_and_rankings: true;
 }
 
 export interface ChileCompraComprador {
   id: string;
-  name: string;
+  name: string | null;
   rut_juridico: string | null;
-  monto_total_clp: number;
+  monto_total_clp: number | null;
   procesos: number;
   months: ChileCompraMes[];
   top: ChileCompraAdjudicacion[];
+  anomalies: ChileCompraAnomalia[];
 }
 
 export interface ChileCompraProveedor {
@@ -49,7 +69,8 @@ export interface ChileCompraProyeccion {
   buyers: ChileCompraComprador[];
   suppliers: ChileCompraProveedor[];
   topPairs: ChileCompraPar[];
-  total_adjudicado_clp: number;
+  anomalies: ChileCompraAnomalia[];
+  total_adjudicado_clp: number | null;
 }
 
 let cached: ChileCompraProyeccion | null = null;
@@ -77,35 +98,13 @@ export function chilecompraParaComprador(compradorId: string): ChileCompraCompra
   return leerChileCompraV1()?.buyers.find((buyer) => buyer.id === compradorId) ?? null;
 }
 
-export function chilecompraParaMunicipalidad(nombreComuna: string, muniId?: string): ChileCompraComprador | null {
+export function chilecompraParaCompradorPorRut(rutJuridico: string): ChileCompraComprador | null {
   const buyers = leerChileCompraV1()?.buyers;
   if (!buyers || buyers.length === 0) return null;
-
-  if (muniId) {
-    const direct = buyers.find((b) => b.id === muniId || b.rut_juridico?.includes(muniId));
-    if (direct) return direct;
-  }
-
-  const norm = nombreComuna
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase()
-    .trim();
-
-  return (
-    buyers.find((b) => {
-      const normB = b.name
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .toLowerCase();
-      return (
-        normB.includes(`municipalidad de ${norm}`) ||
-        normB.includes(`municipalidad ${norm}`) ||
-        normB.includes(`i. municipalidad de ${norm}`) ||
-        normB.includes(`ilustre municipalidad de ${norm}`)
-      );
-    }) ?? null
-  );
+  const entityId = legalEntityIdFromRut(rutJuridico);
+  if (!entityId) return null;
+  const compact = entityId.replace("legal-cl-", "").toUpperCase();
+  return buyers.find((buyer) => String(buyer.rut_juridico ?? "").replace(/[^0-9kK]/g, "").toUpperCase() === compact) ?? null;
 }
 
 export function chilecompraParaProveedor(proveedorId: string): ChileCompraProveedor | null {

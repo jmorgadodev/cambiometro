@@ -9,6 +9,8 @@ import fs from 'fs';
 import path from 'path';
 import { MUNICIPALIDADES_SEED } from '../lib/municipalidades.ts';
 import { CENSO_2024_OFICIAL } from './census-data.mjs';
+import { findBuyerByVerifiedRut, projectOfficialBuyer } from './etl/r10-chilecompra.mjs';
+import { partitionV7Records } from './etl/v7-quarantine.mjs';
 
 const root = process.cwd();
 
@@ -51,7 +53,7 @@ for (const m of sinimRaw.municipios || []) {
 console.log(`Cargados ${sinimByCut.size} registros presupuestarios y FCM desde SINIM.`);
 
 
-// 2. Cargar Auditorías CGR (275 informes SIAPER)
+// 2. Cargar auditorías CGR disponibles en la proyección oficial local.
 const cgrPath = path.join(root, "data", "lake", "projections", "v1", "contraloria.json");
 const cgrRaw = fs.existsSync(cgrPath) ? JSON.parse(fs.readFileSync(cgrPath, "utf8")) : { records: [] };
 const cgrRecords = cgrRaw.records || [];
@@ -89,90 +91,17 @@ const ccPath = path.join(root, "data", "lake", "projections", "v1", "chilecompra
 const ccRaw = fs.existsSync(ccPath) ? JSON.parse(fs.readFileSync(ccPath, "utf8")) : { buyers: [] };
 const ccBuyers = ccRaw.buyers || [];
 
-function findChileCompraForMuni(muniName, cut, muniId) {
-  const normMuni = muniName.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim();
-  const match = ccBuyers.find(b => {
-    const normB = b.name.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    return normB.includes(normMuni) && (normB.includes("muni") || normB.includes("ilustre"));
-  });
-
-  if (match) {
-    const rawTop = (match.top || []).slice(0, 8);
-    const totalOrdenes = Math.min(26, Math.max(match.procesos || 0, rawTop.length, 1));
-    const procesosList = [];
-
-    let remainingOrders = totalOrdenes;
-    for (let i = 0; i < rawTop.length; i++) {
-      const t = rawTop[i];
-      const cleanTitle = (t.title || t.titulo || "").trim();
-      const ocidPadre = t.ocid || `ocds-70d2nz-${cut}-proc-${i + 1}`;
-      const modality = cleanTitle.toLowerCase().includes("trato directo") || ocidPadre.includes("TD")
-        ? "Trato Directo"
-        : cleanTitle.toLowerCase().includes("convenio marco") || ocidPadre.includes("CM")
-        ? "Convenio Marco"
-        : "Licitación Pública";
-
-      const isLast = i === rawTop.length - 1;
-      const childCount = isLast
-        ? Math.max(1, remainingOrders)
-        : Math.max(1, Math.min(3, Math.round(remainingOrders / (rawTop.length - i))));
-      remainingOrders -= childCount;
-
-      const rawProv = (t.proveedor || "").split("|")[0].trim();
-      const cleanProv = rawProv && !rawProv.toLowerCase().includes("mercadop") && !rawProv.toLowerCase().includes("adjudicado")
-        ? rawProv
-        : "Proveedor no informado en OCDS";
-
-      const baseMonto = t.monto_clp || 0;
-      const childOrders = [];
-      for (let c = 0; c < childCount; c++) {
-        const orderMonto = childCount === 1 ? baseMonto : Math.round(baseMonto / childCount * (c === 0 ? 1.2 : 0.8 / (childCount - 1 || 1)));
-        childOrders.push({
-          ocid: `${ocidPadre}-OC${c + 1}`,
-          titulo: `Orden #${c + 1}: ${cleanTitle}`,
-          proveedor: cleanProv,
-          monto_clp: orderMonto,
-          fecha: t.fecha || "2026-07-01T00:00:00Z",
-        });
-      }
-
-      procesosList.push({
-        id: `proc-${muniId}-${i + 1}`,
-        ocid_padre: ocidPadre,
-        titulo_proceso: cleanTitle || "Proceso de Adquisición OCDS",
-        modalidad: modality,
-        monto_adjudicado_clp: baseMonto,
-        proveedor_adjudicado: cleanProv,
-        fecha_proceso: t.fecha || "2026-07-01T00:00:00Z",
-        ordenes_count: childOrders.length,
-        ordenes_compra: childOrders,
-      });
-    }
-
-    const allChildOrders = procesosList.flatMap(p => p.ordenes_compra);
-
-    return {
-      rut_comprador: match.rut_juridico,
-      nombre_comprador: match.name,
-      monto_total_clp: match.monto_total_clp,
-      procesos_count: procesosList.length,
-      ordenes_count: allChildOrders.length,
-      top_compras: allChildOrders.slice(0, 3),
-      procesos: procesosList,
-      distribucion_modalidades: {
-        licitacion_publica_pct: 68.5,
-        trato_directo_pct: 17.5,
-        convenio_marco_pct: 14.0,
-      },
-    };
-  }
-
-  return null;
+function findChileCompraForMuni(rutJuridico) {
+  return projectOfficialBuyer(findBuyerByVerifiedRut(ccBuyers, rutJuridico));
 }
 
 
 // 4. Cargar CPLT Staff Files
-const cpltDir = path.join(root, "data", "lake-cplt", "projections", "funcionarios-v1", "versions", "2026-08-13T23-55-44-412Z");
+const cpltDirCandidates = [
+  path.join(root, "data", "lake", "projections", "funcionarios-v1"),
+  path.join(root, "data", "lake-cplt", "projections", "funcionarios-v1", "current"),
+];
+const cpltDir = cpltDirCandidates.find((candidate) => fs.existsSync(candidate)) ?? cpltDirCandidates[0];
 const cpltFiles = fs.existsSync(cpltDir) ? fs.readdirSync(cpltDir).filter(f => f.startsWith("muni-") && f.endsWith(".json")) : [];
 
 const cpltStaffMap = new Map();
@@ -186,322 +115,7 @@ for (const file of cpltFiles) {
 
 console.log(`Cargados ${cpltStaffMap.size} archivos de personal municipal CPLT.`);
 
-// 5. Alcaldes corregidos de base
-const ALCALDES_CORREGIDOS = {
-  "muni-santiago": {
-    nombre: "Mario Desbordes Jiménez",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9850200,
-    remuneracion_liquida: 7420100,
-    grado_eus: "1",
-    formacion: "Abogado / Administrador Público",
-    fecha_ingreso: "2024-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Renovación Nacional"
-  },
-  "muni-las-condes": {
-    nombre: "Catalina San Martín Cavada",
-    cargo: "Alcaldesa",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9980500,
-    remuneracion_liquida: 7560300,
-    grado_eus: "1",
-    formacion: "Abogada",
-    fecha_ingreso: "2024-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Independiente"
-  },
-  "muni-providencia": {
-    nombre: "Jaime Bellolio Avaria",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9750400,
-    remuneracion_liquida: 7350200,
-    grado_eus: "1",
-    formacion: "Ingeniero Comercial",
-    fecha_ingreso: "2024-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Unión Demócrata Independiente"
-  },
-  "muni-nunoa": {
-    nombre: "Sebastián Sichel Ramírez",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9640300,
-    remuneracion_liquida: 7280100,
-    grado_eus: "1",
-    formacion: "Abogado",
-    fecha_ingreso: "2024-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Independiente - Chile Vamos"
-  },
-  "muni-vina-del-mar": {
-    nombre: "Macarena Ripamonti Serrano",
-    cargo: "Alcaldesa",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9890200,
-    remuneracion_liquida: 7480100,
-    grado_eus: "1",
-    formacion: "Licenciada en Ciencias Jurídicas",
-    fecha_ingreso: "2021-06-28",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Frente Amplio"
-  },
-  "muni-valparaiso": {
-    nombre: "Camila Nieto Hernández",
-    cargo: "Alcaldesa",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9780500,
-    remuneracion_liquida: 7390200,
-    grado_eus: "1",
-    formacion: "Abogada",
-    fecha_ingreso: "2024-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Frente Amplio"
-  },
-  "muni-concepcion": {
-    nombre: "Héctor Muñoz Uribe",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9680300,
-    remuneracion_liquida: 7310400,
-    grado_eus: "1",
-    formacion: "Químico Farmacéutico",
-    fecha_ingreso: "2024-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Partido Social Cristiano"
-  },
-  "muni-maipu": {
-    nombre: "Tomás Vodanovic Escudero",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9950400,
-    remuneracion_liquida: 7520300,
-    grado_eus: "1",
-    formacion: "Sociólogo",
-    fecha_ingreso: "2021-06-28",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Frente Amplio"
-  },
-  "muni-puente-alto": {
-    nombre: "Matías Toledo Herrera",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9920100,
-    remuneracion_liquida: 7490200,
-    grado_eus: "1",
-    formacion: "Administrador Público",
-    fecha_ingreso: "2024-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Independiente"
-  },
-  "muni-la-florida": {
-    nombre: "Daniel Reyes Morales",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9810300,
-    remuneracion_liquida: 7410200,
-    grado_eus: "1",
-    formacion: "Abogado",
-    fecha_ingreso: "2024-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Independiente - Chile Vamos"
-  },
-  "muni-talca": {
-    nombre: "Juan Carlos Díaz Avendaño",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 8798186,
-    remuneracion_liquida: 6729432,
-    grado_eus: "2",
-    formacion: "Ingeniero Comercial",
-    fecha_ingreso: "2016-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Renovación Nacional"
-  },
-  "muni-talcahuano": {
-    nombre: "Eduardo Saavedra Bustos",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9150200,
-    remuneracion_liquida: 6920100,
-    grado_eus: "1",
-    formacion: "Administrador Público",
-    fecha_ingreso: "2024-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Partido Socialista de Chile"
-  },
-  "muni-antofagasta": {
-    nombre: "Sacha Razmilic Burgos",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9890400,
-    remuneracion_liquida: 7480200,
-    grado_eus: "1",
-    formacion: "Ingeniero Comercial",
-    fecha_ingreso: "2024-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Evolución Política"
-  },
-  "muni-temuco": {
-    nombre: "Roberto Neira Aburto",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9680300,
-    remuneracion_liquida: 7310400,
-    grado_eus: "1",
-    formacion: "Abogado / Trabajador Social",
-    fecha_ingreso: "2021-06-28",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Partido por la Democracia"
-  },
-  "muni-puerto-montt": {
-    nombre: "Rodrigo Wainraihgt Galilea",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9650200,
-    remuneracion_liquida: 7290100,
-    grado_eus: "1",
-    formacion: "Abogado",
-    fecha_ingreso: "2024-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Renovación Nacional"
-  },
-  "muni-arica": {
-    nombre: "Orlando Vargas Pizarro",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9480300,
-    remuneracion_liquida: 7150200,
-    grado_eus: "1",
-    formacion: "Comunicador Social",
-    fecha_ingreso: "2024-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Independiente"
-  },
-  "muni-iquique": {
-    nombre: "Mauricio Soria Macchiavello",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9620400,
-    remuneracion_liquida: 7260100,
-    grado_eus: "1",
-    formacion: "Administrador de Empresas",
-    fecha_ingreso: "2016-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Partido por la Democracia"
-  },
-  "muni-copiapo": {
-    nombre: "Maglio Cicardini Neyra",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9420300,
-    remuneracion_liquida: 7110200,
-    grado_eus: "2",
-    formacion: "Técnico en Administración",
-    fecha_ingreso: "2024-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Independiente"
-  },
-  "muni-la-serena": {
-    nombre: "Daniela Norambuena Borgheresi",
-    cargo: "Alcaldesa",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9690400,
-    remuneracion_liquida: 7320100,
-    grado_eus: "1",
-    formacion: "Ingeniera Agrónoma",
-    fecha_ingreso: "2024-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Renovación Nacional"
-  },
-  "muni-rancagua": {
-    nombre: "Raimundo Agliati Marchant",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9680300,
-    remuneracion_liquida: 7310400,
-    grado_eus: "1",
-    formacion: "Arquitecto",
-    fecha_ingreso: "2024-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Independiente - Chile Vamos"
-  },
-  "muni-chillan": {
-    nombre: "Camilo Benavente Jiménez",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9550300,
-    remuneracion_liquida: 7210200,
-    grado_eus: "1",
-    formacion: "Abogado",
-    fecha_ingreso: "2021-06-28",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Partido por la Democracia"
-  },
-  "muni-valdivia": {
-    nombre: "Carla Amtmann Fecci",
-    cargo: "Alcaldesa",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9580400,
-    remuneracion_liquida: 7240300,
-    grado_eus: "1",
-    formacion: "Profesora de Historia / Economista",
-    fecha_ingreso: "2021-06-28",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Frente Amplio"
-  },
-  "muni-coyhaique": {
-    nombre: "Carlos Gatica Villegas",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9280300,
-    remuneracion_liquida: 7010200,
-    grado_eus: "2",
-    formacion: "Ingeniero Ambiental",
-    fecha_ingreso: "2021-06-28",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Partido Demócrata Cristiano"
-  },
-  "muni-punta-arenas": {
-    nombre: "Claudio Radonich Jiménez",
-    cargo: "Alcalde",
-    estamento: "Alcalde",
-    remuneracion_bruta: 9520400,
-    remuneracion_liquida: 7190300,
-    grado_eus: "1",
-    formacion: "Abogado",
-    fecha_ingreso: "2016-12-06",
-    fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-    periodo: "2026-06",
-    partido_alcalde: "Renovación Nacional"
-  },
-};
-
+// 5. Las autoridades sólo se incorporan desde filas oficiales CPLT verificables.
 // 6. Ensamblaje Principal de las 346 Municipalidades
 const output = {};
 
@@ -509,14 +123,16 @@ for (const muni of MUNICIPALIDADES_SEED) {
   const cut = String(muni.cut).padStart(5, "0");
   const rawStaff = cpltStaffMap.get(muni.id) ?? [];
   const sinim = sinimByCut.get(cut) ?? null;
-  const censo = CENSO_2024_OFICIAL[cut] ?? { pop: 25000, area: 500.0, dwellings: 9500 };
+  const censo = CENSO_2024_OFICIAL[cut] ?? null;
   const audits = cgrByCommune.get(muni.id) ?? [];
-  const poblacion_censo_2024 = censo.pop;
-  const superficie_km2 = censo.area;
-  const densidad_hab_km2 = Number((poblacion_censo_2024 / superficie_km2).toFixed(1));
+  const poblacion_censo_2024 = censo?.pop ?? null;
+  const superficie_km2 = censo?.area ?? null;
+  const densidad_hab_km2 = poblacion_censo_2024 !== null && superficie_km2
+    ? Number((poblacion_censo_2024 / superficie_km2).toFixed(1))
+    : null;
 
   // --- A. ALCALDE ---
-  let alcalde = ALCALDES_CORREGIDOS[muni.id] ?? null;
+  let alcalde = null;
 
   if (!alcalde && rawStaff.length > 0) {
     const alcaldeRecord = rawStaff.find(f => {
@@ -532,34 +148,18 @@ for (const muni of MUNICIPALIDADES_SEED) {
     if (alcaldeRecord) {
       alcalde = {
         nombre: alcaldeRecord.nombre_completo,
-        cargo: alcaldeRecord.cargo ?? "Alcalde",
+        cargo: alcaldeRecord.cargo ?? null,
         estamento: "Alcalde",
-        remuneracion_bruta: alcaldeRecord.remuneracion_bruta_mensual ?? 7850000,
-        remuneracion_liquida: alcaldeRecord.remuneracion_liquida_mensual ?? 6050000,
-        grado_eus: String(alcaldeRecord.grado_eus ?? "2"),
+        remuneracion_bruta: alcaldeRecord.remuneracion_bruta_mensual ?? null,
+        remuneracion_liquida: alcaldeRecord.remuneracion_liquida_mensual ?? null,
+        grado_eus: alcaldeRecord.grado_eus ? String(alcaldeRecord.grado_eus) : null,
         formacion: alcaldeRecord.formacion ?? null,
-        fecha_ingreso: alcaldeRecord.fecha_ingreso ?? "2024-12-06",
-        fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-        periodo: "2026-06",
-        partido_alcalde: muni.partido_alcalde ?? "Independiente",
+        fecha_ingreso: alcaldeRecord.fecha_ingreso ?? null,
+        fuente: alcaldeRecord.url ?? alcaldeRecord.fuente ?? null,
+        periodo: alcaldeRecord.periodo ?? alcaldeRecord.fuente_periodo ?? null,
+        partido_alcalde: muni.partido_alcalde ?? null,
       };
     }
-  }
-
-  if (!alcalde) {
-    alcalde = {
-      nombre: muni.alcalde_actual || `Alcalde/sa Titular de ${muni.nombre_comuna}`,
-      cargo: "Alcalde",
-      estamento: "Alcalde",
-      remuneracion_bruta: 7850000,
-      remuneracion_liquida: 6050000,
-      grado_eus: "3",
-      formacion: "Administración / Profesional",
-      fecha_ingreso: "2024-12-06",
-      fuente: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
-      periodo: "2026-06",
-      partido_alcalde: muni.partido_alcalde ?? "Independiente",
-    };
   }
 
   // --- B. PRESUPUESTO SINIM ---
@@ -567,36 +167,32 @@ for (const muni of MUNICIPALIDADES_SEED) {
   if (sinim && (sinim.vigente_clp > 0 || sinim.inicial_clp > 0)) {
     presupuesto = {
       cut,
-      inicial_clp: sinim.inicial_clp || sinim.vigente_clp,
-      vigente_clp: sinim.vigente_clp || sinim.inicial_clp,
-      gasto_personal_clp: sinim.gasto_personal_clp || Math.round((sinim.vigente_clp || sinim.inicial_clp) * 0.28),
-      ingresos_propios_clp: sinim.ingresos_totales_clp,
-      ano: 2025,
-    };
-  } else {
-    const estimado = Math.max(3500000000, Math.round(poblacion_censo_2024 * 580000));
-    presupuesto = {
-      cut,
-      inicial_clp: Math.round(estimado * 0.85),
-      vigente_clp: estimado,
-      gasto_personal_clp: Math.round(estimado * 0.28),
-      ingresos_propios_clp: Math.round(estimado * 0.65),
+      inicial_clp: sinim.inicial_clp || null,
+      vigente_clp: sinim.vigente_clp || null,
+      gasto_personal_clp: sinim.gasto_personal_clp || null,
+      ingresos_propios_clp: sinim.ingresos_totales_clp || null,
       ano: 2025,
     };
   }
 
-  const presVigente = presupuesto.vigente_clp || presupuesto.inicial_clp;
-  const presupuesto_per_capita_clp = Math.round(presVigente / poblacion_censo_2024);
+  const presVigente = presupuesto?.vigente_clp ?? presupuesto?.inicial_clp ?? null;
+  const presupuesto_per_capita_clp = presVigente !== null && poblacion_censo_2024
+    ? Math.round(presVigente / poblacion_censo_2024)
+    : null;
 
   // --- C. RESUMEN PERSONAL CON INTEGRIDAD Y DEDUPLICACIÓN (M4 y M1) ---
   let resumen_personal = null;
   let top_horas_extras = [];
   let top_remuneraciones = [];
+  let anomalias_integridad = [];
 
   if (rawStaff.length > 0) {
+    const v7 = partitionV7Records(rawStaff);
+    const regularStaff = v7.regular;
+    anomalias_integridad = v7.anomalies;
     // 1. Identificar periodo activo mensual representativo para masa salarial mensual
     const periodCounts = new Map();
-    for (const f of rawStaff) {
+    for (const f of regularStaff) {
       const p = f.fuente_periodo || "unknown";
       periodCounts.set(p, (periodCounts.get(p) || 0) + 1);
     }
@@ -609,15 +205,15 @@ for (const muni of MUNICIPALIDADES_SEED) {
         return b[1] - a[1];
       });
     const bestPeriod = sortedPeriods.length > 0 ? sortedPeriods[0][0] : null;
-    const periodStaff = bestPeriod ? rawStaff.filter(f => f.fuente_periodo === bestPeriod) : rawStaff;
+    const periodStaff = bestPeriod ? regularStaff.filter(f => f.fuente_periodo === bestPeriod) : regularStaff;
 
-    // Dotación completa (M4): 100% de la nómina (20.805 para Santiago)
+    // Dotación completa (M4): 100% de la nómina disponible en la fuente oficial.
     let totalPlanta = 0;
     let totalContrata = 0;
     let totalHonorarios = 0;
     let totalCodigoTrabajo = 0;
 
-    for (const f of rawStaff) {
+    for (const f of regularStaff) {
       const tipo = String(f.tipo_contrato ?? "");
       if (tipo === "Planta") totalPlanta++;
       else if (tipo === "Contrata") totalContrata++;
@@ -630,41 +226,16 @@ for (const muni of MUNICIPALIDADES_SEED) {
     let masaHorasExtras = periodStaff.reduce((sum, f) => sum + Number(f.monto_horas_extras_clp ?? 0), 0);
     let totalHorasExtrasHrs = periodStaff.reduce((sum, f) => sum + Number(f.horas_extras_mes_anterior ?? 0), 0);
 
-    // Regla de consistencia presupuestaria (Talca / Comunas con absorción masiva DAEM/Salud)
-    let masaAnual = masaMensual * 12;
-    let notaMetodologica = null;
-
-    if (masaAnual > presVigente && (muni.id === "muni-talca" || masaAnual > presVigente * 1.2)) {
-      const pureMuni = periodStaff.filter(f => {
-        const est = String(f.estamento || "").toLowerCase();
-        const cargo = String(f.cargo || "").toLowerCase();
-        const isEdu = est.includes("docente") || cargo.includes("escuela") || cargo.includes("profesor");
-        const isSalud = est.includes("salud") || cargo.includes("cesfam") || cargo.includes("medico");
-        return !isEdu && !isSalud;
-      });
-
-      const masaMuniCentral = pureMuni.reduce((acc, f) => acc + Number(f.remuneracion_bruta_mensual || 0), 0);
-      if (masaMuniCentral > 0 && masaMuniCentral * 12 < presVigente) {
-        masaMensual = masaMuniCentral;
-        masaAnual = masaMensual * 12;
-      } else if (sinim && sinim.gasto_personal_clp > 0) {
-        masaMensual = Math.round(sinim.gasto_personal_clp / 12);
-        masaAnual = sinim.gasto_personal_clp;
-      } else {
-        masaMensual = Math.round(presVigente * 0.28 / 12);
-        masaAnual = Math.round(presVigente * 0.28);
-      }
-      notaMetodologica = "La masa anual de gestión municipal ($" + (masaAnual / 1e9).toFixed(1) + "B) corresponde al personal de administración central. El total de dotación comunal incluye Salud (CESFAMs) y Educación (DAEM) financiados por transferencias sectoriales del Estado.";
-    }
+    const masaAnual = masaMensual * 12;
 
     // Métricas de calidad D1, D2, D3
-    const sinPagoCount = rawStaff.filter(f => Number(f.remuneracion_bruta_mensual ?? 0) <= 0).length;
-    const microMontoCount = rawStaff.filter(f => Number(f.remuneracion_bruta_mensual ?? 0) > 0 && Number(f.remuneracion_bruta_mensual ?? 0) < 50000).length;
-    const observadosCount = sinPagoCount + microMontoCount;
-    const validosCount = rawStaff.length - sinPagoCount;
+    const sinPagoCount = regularStaff.filter(f => Number(f.remuneracion_bruta_mensual ?? 0) <= 0).length;
+    const microMontoCount = regularStaff.filter(f => Number(f.remuneracion_bruta_mensual ?? 0) > 0 && Number(f.remuneracion_bruta_mensual ?? 0) < 50000).length;
+    const observadosCount = sinPagoCount + microMontoCount + anomalias_integridad.length;
+    const validosCount = regularStaff.length - sinPagoCount;
 
     resumen_personal = {
-      total_funcionarios: rawStaff.length,
+      total_funcionarios: regularStaff.length,
       planta: totalPlanta,
       contrata: totalContrata,
       honorarios: totalHonorarios,
@@ -676,12 +247,13 @@ for (const muni of MUNICIPALIDADES_SEED) {
       registros_observados_count: observadosCount,
       registros_sin_pago_count: sinPagoCount,
       registros_micro_monto_count: microMontoCount,
+      registros_cuarentena_v7_count: anomalias_integridad.length,
       registros_validos_count: validosCount,
-      nota_metodologica: notaMetodologica,
+      nota_metodologica: null,
     };
 
     // 2. Top Horas Extras
-    top_horas_extras = rawStaff
+    top_horas_extras = regularStaff
       .filter(f => Number(f.horas_extras_mes_anterior ?? 0) > 0)
       .sort((a, b) => Number(b.horas_extras_mes_anterior ?? 0) - Number(a.horas_extras_mes_anterior ?? 0))
       .slice(0, 5)
@@ -695,7 +267,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
       }));
 
     // 3. Top Remuneraciones M1: ORDENADO POR SUELDO BRUTO TOTAL (Base + HH.EE.), idéntico criterio al buscador, sobre registros válidos
-    const sortedByBruto = rawStaff
+    const sortedByBruto = regularStaff
       .filter(f => Number(f.remuneracion_bruta_mensual || 0) >= 50000)
       .sort((a, b) => Number(b.remuneracion_bruta_mensual || 0) - Number(a.remuneracion_bruta_mensual || 0));
 
@@ -711,142 +283,44 @@ for (const muni of MUNICIPALIDADES_SEED) {
       const heMonto = Number(f.monto_horas_extras_clp || 0);
       const heHrs = Number(f.horas_extras_mes_anterior || 0);
       const base = Math.max(0, bruto - heMonto);
-      const liquida = Number(f.remuneracion_liquida_mensual || Math.round(bruto * 0.78));
+      const liquida = f.remuneracion_liquida_mensual === null || f.remuneracion_liquida_mensual === undefined
+        ? null
+        : Number(f.remuneracion_liquida_mensual);
 
       topList.push({
         id: f.id,
         nombre: name,
-        cargo: f.cargo || "Funcionario",
+        cargo: f.cargo || null,
         sueldo_base: base,
         horas_extras_monto: heMonto,
         horas_extras_hrs: heHrs,
         remuneracion_bruta: bruto,
         remuneracion_liquida: liquida,
-        estamento: f.estamento || "Profesional",
-        tipo_contrato: f.tipo_contrato || "Planta",
-        grado_eus: f.grado_eus || "10",
-        periodo: f.periodo || "2026-06",
+        estamento: f.estamento || null,
+        tipo_contrato: f.tipo_contrato || null,
+        grado_eus: f.grado_eus || null,
+        periodo: f.periodo || f.fuente_periodo || null,
       });
 
       if (topList.length >= 5) break;
     }
     top_remuneraciones = topList;
-  } else if (sinim && (sinim.total_funcionarios_sinim > 0 || sinim.gasto_personal_clp > 0)) {
-    const totalFunc = sinim.total_funcionarios_sinim || Math.max(80, Math.round(poblacion_censo_2024 / 220));
-    const masaMensual = sinim.gasto_personal_clp > 0 ? Math.round(sinim.gasto_personal_clp / 12) : totalFunc * 1650000;
-    const planta = Math.round(totalFunc * 0.35);
-    const contrata = Math.round(totalFunc * 0.45);
-    const honorarios = Math.round(totalFunc * 0.12);
-    const codigoTrabajo = totalFunc - (planta + contrata + honorarios);
-
-    resumen_personal = {
-      total_funcionarios: totalFunc,
-      planta,
-      contrata,
-      honorarios,
-      codigo_trabajo_salud_educacion: codigoTrabajo,
-      masa_mensual_clp: masaMensual,
-      masa_anual_estimada_clp: masaMensual * 12,
-      masa_horas_extras_clp: Math.round(masaMensual * 0.04),
-      total_horas_extras_hrs: Math.round(totalFunc * 4.5),
-    };
-  } else {
-    const totalFunc = Math.max(60, Math.round(poblacion_censo_2024 / 250));
-    const masaMensual = totalFunc * 1650000;
-    const planta = Math.round(totalFunc * 0.35);
-    const contrata = Math.round(totalFunc * 0.45);
-    const honorarios = Math.round(totalFunc * 0.12);
-    const codigoTrabajo = totalFunc - (planta + contrata + honorarios);
-
-    resumen_personal = {
-      total_funcionarios: totalFunc,
-      planta,
-      contrata,
-      honorarios,
-      codigo_trabajo_salud_educacion: codigoTrabajo,
-      masa_mensual_clp: masaMensual,
-      masa_anual_estimada_clp: masaMensual * 12,
-      masa_horas_extras_clp: Math.round(masaMensual * 0.03),
-      total_horas_extras_hrs: Math.round(totalFunc * 4),
-    };
   }
 
   // --- D. CHILECOMPRA OCDS (M2) ---
-  const fallbackProcesosCount = Math.max(8, Math.round(poblacion_censo_2024 / 1800));
-  const fallbackOrdenesCount = Math.max(16, fallbackProcesosCount * 2);
-  const fallbackProcesosList = [
-    {
-      id: `proc-${muni.id}-1`,
-      ocid_padre: `ocds-70d2nz-${cut}-01`,
-      titulo_proceso: `Suministro de combustible y mantención flota comunal de ${muni.nombre_comuna}`,
-      modalidad: "Licitación Pública",
-      monto_adjudicado_clp: Math.round(presVigente * 0.042),
-      proveedor_adjudicado: "Copec S.A.",
-      fecha_proceso: "2026-07-15T14:30:00Z",
-      ordenes_count: 1,
-      ordenes_compra: [
-        {
-          ocid: `ocds-70d2nz-${cut}-01-OC1`,
-          titulo: `Orden #1: Combustible Diésel Flota`,
-          proveedor: "Copec S.A.",
-          monto_clp: Math.round(presVigente * 0.042),
-          fecha: "2026-07-15T14:30:00Z",
-        },
-      ],
-    },
-    {
-      id: `proc-${muni.id}-2`,
-      ocid_padre: `ocds-70d2nz-${cut}-02`,
-      titulo_proceso: `Servicio de recolección de residuos domiciliarios y aseo urbano`,
-      modalidad: "Licitación Pública",
-      monto_adjudicado_clp: Math.round(presVigente * 0.085),
-      proveedor_adjudicado: "Consorcio Ambiental de Chile SpA",
-      fecha_proceso: "2026-06-20T10:15:00Z",
-      ordenes_count: 1,
-      ordenes_compra: [
-        {
-          ocid: `ocds-70d2nz-${cut}-02-OC1`,
-          titulo: `Orden #1: Operación Mensual Aseo`,
-          proveedor: "Consorcio Ambiental de Chile SpA",
-          monto_clp: Math.round(presVigente * 0.085),
-          fecha: "2026-06-20T10:15:00Z",
-        },
-      ],
-    },
-  ];
-
-  const compras_publicas = findChileCompraForMuni(muni.nombre_comuna, cut, muni.id) || {
-    rut_comprador: `69.${cut.slice(0, 3)}.${cut.slice(3)}-k`,
-    nombre_comprador: `Municipalidad de ${muni.nombre_comuna}`,
-    monto_total_clp: Math.round(presVigente * 0.34),
-    procesos_count: fallbackProcesosCount,
-    ordenes_count: fallbackOrdenesCount,
-    top_compras: fallbackProcesosList.flatMap(p => p.ordenes_compra).slice(0, 5),
-    procesos: fallbackProcesosList,
-    distribucion_modalidades: {
-      licitacion_publica_pct: 71.0,
-      trato_directo_pct: 16.5,
-      convenio_marco_pct: 12.5,
-    },
-  };
+  const compras_publicas = findChileCompraForMuni(muni.rut_juridico ?? null);
 
 
   // --- E. RADIOGRAFÍA COMUNAL (SERVEL + CENSO 2024) ---
-  const padron_electoral = Math.round(poblacion_censo_2024 * 0.815);
-  const participacion_pct = 84.8;
-  const votos_alcalde_pct = Number((46.5 + (muni.nombre_comuna.length % 15) * 1.1).toFixed(1));
-  const viviendas_censo_2024 = censo.dwellings || Math.round(poblacion_censo_2024 / 2.7);
-  const hogares_censo_2024 = Math.round(viviendas_censo_2024 * 0.94);
-
   const radiografia_comunal = {
-    padron_electoral_servel: padron_electoral,
-    participacion_electoral_pct: participacion_pct,
-    votos_alcalde_pct: votos_alcalde_pct,
-    votos_alcalde_total: Math.round(padron_electoral * (participacion_pct / 100) * (votos_alcalde_pct / 100)),
-    viviendas_censo_2024,
-    hogares_censo_2024,
-    fuente_electoral: "SERVEL Elecciones Municipales 2024",
-    fuente_demografica: "INE Censo de Población y Vivienda 2024",
+    padron_electoral_servel: null,
+    participacion_electoral_pct: null,
+    votos_alcalde_pct: null,
+    votos_alcalde_total: null,
+    viviendas_censo_2024: censo?.dwellings ?? null,
+    hogares_censo_2024: null,
+    fuente_electoral: null,
+    fuente_demografica: censo ? "INE Censo de Población y Vivienda 2024" : null,
   };
 
   // --- F. CONCEJO MUNICIPAL SERVEL 2024 ---
@@ -858,29 +332,27 @@ for (const muni of MUNICIPALIDADES_SEED) {
     cut,
     nombre_comuna: muni.nombre_comuna,
     region: muni.region,
-    sitio_web_oficial: muni.sitio_web_oficial || `https://www.municipalidadde${muni.nombre_comuna.toLowerCase().replace(/\s+/g, "")}.cl`,
+    sitio_web_oficial: muni.sitio_web_oficial ?? null,
     tiene_municipalidad_propia: muni.tiene_municipalidad_propia,
     poblacion_censo_2024,
     superficie_km2,
     densidad_hab_km2,
     presupuesto_per_capita_clp,
     alcalde,
-    partido_alcalde: alcalde.partido_alcalde ?? muni.partido_alcalde ?? null,
+    partido_alcalde: alcalde?.partido_alcalde ?? null,
     presupuesto,
     resumen_personal,
     top_horas_extras: (top_horas_extras || []).slice(0, 3),
     top_remuneraciones,
+    anomalias_integridad,
     concejales,
     compras_publicas,
     radiografia_comunal,
     sitio_transparencia_activa: `https://www.portaltransparencia.cl/PortalPdT/directorio-de-organismos-regulados/?org=${encodeURIComponent(muni.nombre_comuna)}`,
-    redes_sociales: {
-      instagram: `https://www.instagram.com/muni_${muni.nombre_comuna.toLowerCase().replace(/[^a-z0-9]/g, "")}`,
-      twitter: `https://twitter.com/search?q=Municipalidad%20${encodeURIComponent(muni.nombre_comuna)}`,
-    },
-    fcm_dependencia_pct: sinim?.fcm_dependencia_pct ?? 45.0,
-    fcm_ingresos_clp: sinim?.fcm_ingresos_clp ?? 0,
-    ingresos_totales_clp: sinim?.ingresos_totales_clp ?? 0,
+    redes_sociales: null,
+    fcm_dependencia_pct: sinim?.fcm_dependencia_pct ?? null,
+    fcm_ingresos_clp: sinim?.fcm_ingresos_clp || null,
+    ingresos_totales_clp: sinim?.ingresos_totales_clp || null,
     auditorias_cgr: audits,
   };
 }
@@ -928,11 +400,12 @@ console.log(`[ÉXITO] Generado dataset liviano (${listData.length} comunas) en d
 // Validaciones Automáticas
 const talca = output["muni-talca"];
 console.log("\n=== VALIDACIONES POST-GENERACIÓN ===");
-console.log(`1. Talca Presupuesto Vigente SINIM: $${(talca.presupuesto.vigente_clp / 1e9).toFixed(2)}B CLP`);
-console.log(`2. Talca Masa Salarial Anual Estimada: $${(talca.resumen_personal.masa_anual_estimada_clp / 1e9).toFixed(2)}B CLP`);
-console.log(`   ¿Masa Anual < Presupuesto?: ${talca.resumen_personal.masa_anual_estimada_clp < talca.presupuesto.vigente_clp ? 'SÍ (VÁLIDO)' : 'NO (ERROR)'}`);
-console.log(`3. Suma de Cards Personal Talca: ${talca.resumen_personal.planta} (Planta) + ${talca.resumen_personal.contrata} (Contrata) + ${talca.resumen_personal.honorarios} (Honorarios) + ${talca.resumen_personal.codigo_trabajo_salud_educacion} (Código Trab/Salud/Educ) = ${talca.resumen_personal.planta + talca.resumen_personal.contrata + talca.resumen_personal.honorarios + talca.resumen_personal.codigo_trabajo_salud_educacion} (Total: ${talca.resumen_personal.total_funcionarios})`);
-console.log(`4. Top Remuneraciones Talca (Deduplicadas):`, talca.top_remuneraciones.map(r => `${r.nombre}: $${r.remuneracion_bruta.toLocaleString("es-CL")}`));
-console.log(`5. Presupuesto Per Cápita Talca: $${talca.presupuesto_per_capita_clp.toLocaleString("es-CL")} CLP`);
-console.log(`6. Concejales Talca: ${talca.concejales.length} concejales con partido y dieta.`);
-console.log(`7. Compras Públicas Talca: $${(talca.compras_publicas.monto_total_clp / 1e9).toFixed(2)}B CLP (${talca.compras_publicas.procesos_count} procesos).`);
+console.log(JSON.stringify({
+  presupuesto_vigente_sinim: talca.presupuesto?.vigente_clp ?? null,
+  masa_salarial_anual_cplt: talca.resumen_personal?.masa_anual_estimada_clp ?? null,
+  funcionarios_cplt: talca.resumen_personal?.total_funcionarios ?? null,
+  top_remuneraciones: talca.top_remuneraciones.length,
+  presupuesto_per_capita: talca.presupuesto_per_capita_clp,
+  concejales_servel: talca.concejales.length,
+  compras_chilecompra: talca.compras_publicas?.monto_total_clp ?? null,
+}, null, 2));

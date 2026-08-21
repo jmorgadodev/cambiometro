@@ -52,31 +52,28 @@ describe("organismos canónicos y clasificación estatal", () => {
     expect(santiago?.cut_si_municipio).toBe("13101");
   });
 
-  it("calcula dotaciones reales no repetidas idénticas", () => {
-    const minsal = getOrganismoById("min-salud");
-    const minagri = getOrganismoById("min-agricultura");
-    const bbnn = getOrganismoById("min-bienesnacionales");
-    const codelco = getOrganismoById("emp-codelco");
+  it("publica dotaciones sólo donde CPLT aporta registros oficiales", () => {
+    const todos = getAllOrganismos();
+    const conDotacion = todos.filter((organismo) => organismo.dotacion_total !== null);
+    const sinCoberturaNoMunicipal = todos.filter((organismo) => organismo.tipo !== "Municipalidad");
 
-    expect(minsal?.dotacion_total).toBeDefined();
-    expect(minagri?.dotacion_total).toBeDefined();
-    expect(bbnn?.dotacion_total).toBeDefined();
-    expect(codelco?.dotacion_total).toBeDefined();
-
-    // Comprobar que MINAGRI y BBNN ya no tienen la dotación dummy idéntica de 850
-    expect(minagri?.dotacion_total).not.toBe(bbnn?.dotacion_total);
-    expect(minagri?.dotacion_total).not.toBe(850);
-    expect(bbnn?.dotacion_total).not.toBe(850);
+    expect(conDotacion).toHaveLength(320);
+    expect(new Set(conDotacion.map((organismo) => organismo.dotacion_total)).size).toBeGreaterThan(1);
+    expect(sinCoberturaNoMunicipal.every((organismo) => organismo.dotacion_total === null)).toBe(true);
   });
 
-  it("vincula compras públicas OCDS de ChileCompra", () => {
-    const minsal = getOrganismoById("min-salud");
-    expect(minsal?.compras_ocds_monto_clp).toBeGreaterThan(0);
-    expect(minsal?.compras_ocds_procesos).toBeGreaterThan(0);
-
+  it("vincula compras públicas sólo con prueba de RUT exacto (R10)", () => {
     const todos = getAllOrganismos();
-    const conCompras = todos.filter((o) => o.compras_ocds_monto_clp > 0);
-    expect(conCompras.length).toBe(todos.length);
+    for (const organismo of todos) {
+      if (organismo.compras_ocds_metodo_enlace === "RUT_EXACTO") {
+        expect(organismo.compras_ocds_rut_comprador).toMatch(/^\d{1,2}(?:\.\d{3}){2}-[0-9K]$/);
+        expect(organismo.compras_ocds_monto_clp).not.toBeNull();
+        expect(organismo.compras_ocds_procesos).not.toBeNull();
+      } else {
+        expect(organismo.compras_ocds_monto_clp).toBeNull();
+        expect(organismo.compras_ocds_procesos).toBeNull();
+      }
+    }
   });
 
   it("resuelve búsqueda por cpltId e id", () => {

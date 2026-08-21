@@ -1,5 +1,5 @@
 {
- "generado_en": "2026-08-10T18:26:09.822Z",
+ "generado_en": "2026-08-21T03:40:17.673Z",
  "fuentes": {
   "camara": {
    "url": "https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId={id}",
@@ -19,7 +19,99 @@
   "2026-06",
   "2026-07"
  ],
+ "asignacion_senado_2026": {
+  "year": 2026,
+  "base_mensual_clp": 11406149,
+  "acumulable": false,
+  "max_transfer_gastos_operacionales_pct": 40,
+  "max_transfer_asesoria_externa_clp": 1230467,
+  "transfer_asesoria_desde": "2026-03-11",
+  "source_url": "https://www.senado.cl/transparencia/personal-de-apoyo-senadores",
+  "retrieved_at": "2026-08-21T03:36:07.686Z",
+  "checksum_sha256": "e1c65ad4d953cf3a4b93533a8e8d0638f4bf20172327b8d4d375183faa401ccf",
+  "transferencias_acreditadas": []
+ },
  "diputados": {
+  "4": {
+   "meses": [],
+   "mes_por_defecto": null,
+   "ficha": {
+    "comunas_distrito": null,
+    "numero_distrito": null,
+    "region": null,
+    "periodo": null,
+    "partido": null,
+    "bancada": null,
+    "foto": null,
+    "redes": {}
+   },
+   "personal_apoyo": [],
+   "mes_personal": null
+  },
+  "5": {
+   "meses": [],
+   "mes_por_defecto": null,
+   "ficha": {
+    "comunas_distrito": null,
+    "numero_distrito": null,
+    "region": null,
+    "periodo": null,
+    "partido": null,
+    "bancada": null,
+    "foto": null,
+    "redes": {}
+   },
+   "personal_apoyo": [],
+   "mes_personal": null
+  },
+  "6": {
+   "meses": [],
+   "mes_por_defecto": null,
+   "ficha": {
+    "comunas_distrito": null,
+    "numero_distrito": null,
+    "region": null,
+    "periodo": null,
+    "partido": null,
+    "bancada": null,
+    "foto": null,
+    "redes": {}
+   },
+   "personal_apoyo": [],
+   "mes_personal": null
+  },
+  "7": {
+   "meses": [],
+   "mes_por_defecto": null,
+   "ficha": {
+    "comunas_distrito": null,
+    "numero_distrito": null,
+    "region": null,
+    "periodo": null,
+    "partido": null,
+    "bancada": null,
+    "foto": null,
+    "redes": {}
+   },
+   "personal_apoyo": [],
+   "mes_personal": null
+  },
+  "8": {
+   "meses": [],
+   "mes_por_defecto": null,
+   "ficha": {
+    "comunas_distrito": null,
+    "numero_distrito": null,
+    "region": null,
+    "periodo": null,
+    "partido": null,
+    "bancada": null,
+    "foto": null,
+    "redes": {}
+   },
+   "personal_apoyo": [],
+   "mes_personal": null
+  },
   "803": {
    "meses": [
     {
@@ -69,7 +161,7 @@
      "cargo": "Profesional",
      "sueldo": 700000,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "31/07/26"
     },
     {
      "tipo": "Contrato",
@@ -99,7 +191,7 @@
      "tipo": "Contrato",
      "nombre": "VALDEBENITO BARRAZA ABRAHAM IGOR",
      "cargo": "Asesor",
-     "sueldo": 760000,
+     "sueldo": 1200000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -110,17 +202,9 @@
      "sueldo": 1781810,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "REYES PUCHI MARIELA CRISTINA",
-     "cargo": "Asesoría de vinculación con el medio local y organizaciones sociales",
-     "sueldo": 589971,
-     "cargo_servel": "",
-     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "815": {
    "meses": [
@@ -206,7 +290,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "843": {
    "meses": [
@@ -316,7 +400,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "872": {
    "meses": [
@@ -426,7 +510,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "915": {
    "meses": [
@@ -528,7 +612,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "986": {
    "meses": [
@@ -630,7 +714,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1009": {
    "meses": [
@@ -716,7 +800,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1012": {
    "meses": [
@@ -834,7 +918,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1013": {
    "meses": [
@@ -920,7 +1004,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1015": {
    "meses": [
@@ -965,14 +1049,6 @@
     }
    },
    "personal_apoyo": [
-    {
-     "tipo": "Contrato",
-     "nombre": "ASTETE MARCHANT DAMARIS ALICIA",
-     "cargo": "Asesor",
-     "sueldo": 1030000,
-     "cargo_servel": "",
-     "cese": "30/06/26"
-    },
     {
      "tipo": "Contrato",
      "nombre": "FERNÁNDEZ CARO GLORIA VERÓNICA",
@@ -1038,7 +1114,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1017": {
    "meses": [
@@ -1103,7 +1179,7 @@
      "tipo": "Contrato",
      "nombre": "JARA BOZA DANIEL NOLBERTO",
      "cargo": "Administrativo",
-     "sueldo": 996667,
+     "sueldo": 1300000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -1125,14 +1201,6 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "MONTOYA RIVAS LUCIANO ANIBAL",
-     "cargo": "Administrativo",
-     "sueldo": 208333,
-     "cargo_servel": "",
-     "cese": "05/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "MUÑOZ DONOSO FRANCIA NICOLE",
      "cargo": "Profesional",
      "sueldo": 1250000,
@@ -1140,7 +1208,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1021": {
    "meses": [
@@ -1258,7 +1326,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1025": {
    "meses": [
@@ -1360,7 +1428,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1028": {
    "meses": [
@@ -1446,7 +1514,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1038": {
    "meses": [
@@ -1548,7 +1616,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1039": {
    "meses": [
@@ -1626,7 +1694,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1044": {
    "meses": [
@@ -1702,9 +1770,17 @@
      "sueldo": 1100000,
      "cargo_servel": "",
      "cese": ""
+    },
+    {
+     "tipo": "Contrato",
+     "nombre": "WALSER BUSTOS STHEFANIA BARBARA",
+     "cargo": "Profesional",
+     "sueldo": 1000000,
+     "cargo_servel": "",
+     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1054": {
    "meses": [
@@ -1777,7 +1853,7 @@
      "tipo": "Contrato",
      "nombre": "RETAMAL ARZOLA GUSTAVO ELIAS",
      "cargo": "Asesor",
-     "sueldo": 1430667,
+     "sueldo": 1480000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -1798,7 +1874,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1056": {
    "meses": [
@@ -1948,7 +2024,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1059": {
    "meses": [
@@ -2050,7 +2126,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1060": {
    "meses": [
@@ -2107,7 +2183,7 @@
      "tipo": "Contrato",
      "nombre": "FABA FACCO VALENTINA ANDREA",
      "cargo": "Asesor",
-     "sueldo": 855000,
+     "sueldo": 1737856,
      "cargo_servel": "",
      "cese": ""
     },
@@ -2136,10 +2212,18 @@
      "cese": ""
     },
     {
+     "tipo": "Contrato",
+     "nombre": "ZAMORA SOTO JUAN ANTONIO",
+     "cargo": "Administrativo",
+     "sueldo": 200000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
      "tipo": "Honorarios",
-     "nombre": "CHALMERS ESPINOZA STEFANIE GRACE",
+     "nombre": "EBNER PAREDES JORGE GENARO",
      "cargo": "Asesoría en gestión y desarrollo de temáticas e interacciones de acercamiento con la sociedad civil",
-     "sueldo": 494132,
+     "sueldo": 200000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -2158,17 +2242,9 @@
      "sueldo": 1769912,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "VILLANUEVA JORQUERA MARIO ALBERTO",
-     "cargo": "Asesoría en gestión y desarrollo de temáticas e interacciones de acercamiento con la sociedad civil",
-     "sueldo": 884956,
-     "cargo_servel": "",
-     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1061": {
    "meses": [
@@ -2215,14 +2291,6 @@
    "personal_apoyo": [
     {
      "tipo": "Contrato",
-     "nombre": "ANACONA SILVA MAURICIO ADOLFO",
-     "cargo": "Profesional",
-     "sueldo": 750000,
-     "cargo_servel": "",
-     "cese": "09/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "ARANCIBIA ESCOBAR GRACE NANCY",
      "cargo": "Profesional",
      "sueldo": 2000000,
@@ -2265,7 +2333,7 @@
      "tipo": "Contrato",
      "nombre": "LINDEMANN VILLALOBOS LUIS ALBERTO",
      "cargo": "Asesor",
-     "sueldo": 774397,
+     "sueldo": 1250000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -2278,7 +2346,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1062": {
    "meses": [
@@ -2335,7 +2403,7 @@
      "tipo": "Contrato",
      "nombre": "ELGUIN ROZAS NORMA MARCELA",
      "cargo": "Profesional",
-     "sueldo": 2103000,
+     "sueldo": 2286503,
      "cargo_servel": "",
      "cese": ""
     },
@@ -2344,14 +2412,6 @@
      "nombre": "GUTIERREZ HERRERA NICOLAS ALFREDO",
      "cargo": "Profesional",
      "sueldo": 1800000,
-     "cargo_servel": "",
-     "cese": ""
-    },
-    {
-     "tipo": "Contrato",
-     "nombre": "LIZAMA GATICA DOMINGO ROBINSON",
-     "cargo": "Asesor",
-     "sueldo": 450000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -2396,7 +2456,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1065": {
    "meses": [
@@ -2466,7 +2526,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1073": {
    "meses": [
@@ -2584,7 +2644,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1074": {
    "meses": [
@@ -2633,7 +2693,7 @@
      "tipo": "Contrato",
      "nombre": "CONTRERAS MONDACA PAMELA LUISA",
      "cargo": "Administrativo",
-     "sueldo": 693333,
+     "sueldo": 1300000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -2644,14 +2704,6 @@
      "sueldo": 2450000,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Contrato",
-     "nombre": "JARA RIVAS DANIEL ENOC",
-     "cargo": "Asesor",
-     "sueldo": 561659,
-     "cargo_servel": "",
-     "cese": "13/06/26"
     },
     {
      "tipo": "Contrato",
@@ -2668,9 +2720,17 @@
      "sueldo": 2200000,
      "cargo_servel": "",
      "cese": ""
+    },
+    {
+     "tipo": "Honorarios",
+     "nombre": "PIEDRA FIERRO JAVIER ANDRES",
+     "cargo": "Asesoría Parlamentaria en Materia Relacionada con Subsidio Eléctrico.",
+     "sueldo": 589971,
+     "cargo_servel": "",
+     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1075": {
    "meses": [
@@ -2725,6 +2785,14 @@
     },
     {
      "tipo": "Contrato",
+     "nombre": "ASENJO CHÁVEZ JOSÉ TOMÁS",
+     "cargo": "Profesional",
+     "sueldo": 1894000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "CASTILLO MELIVILU AMÉRICA PAZ",
      "cargo": "Profesional",
      "sueldo": 1900000,
@@ -2746,17 +2814,9 @@
      "sueldo": 1568024,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Contrato",
-     "nombre": "PARADA DA FONSECA NICOLÁS GERMÁN",
-     "cargo": "Profesional",
-     "sueldo": 2000000,
-     "cargo_servel": "",
-     "cese": "30/06/26"
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1077": {
    "meses": [
@@ -2811,14 +2871,6 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "CHECHILNITZKY SCHURCH ALEXANDRA",
-     "cargo": "Profesional",
-     "sueldo": 2009600,
-     "cargo_servel": "",
-     "cese": "30/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "FUENTES ULLOA MARCOS AURELIO",
      "cargo": "Profesional",
      "sueldo": 1100000,
@@ -2858,7 +2910,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1082": {
    "meses": [
@@ -2950,17 +3002,9 @@
      "sueldo": 2573000,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "LUHR TOLEDO ROBINSON ANDRES",
-     "cargo": "ASESORÍA Y COORDINACIÓN DISTRITAL PARA LA ELABORACIÓN Y RECEPCIÓN DE PROBLEMÁTICAS PARA SU EVALUACIÓ",
-     "sueldo": 1000000,
-     "cargo_servel": "",
-     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1086": {
    "meses": [
@@ -3046,7 +3090,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1087": {
    "meses": [
@@ -3093,17 +3137,9 @@
    "personal_apoyo": [
     {
      "tipo": "Contrato",
-     "nombre": "CASTILLO NAVARRO DENISSE LISETTE",
-     "cargo": "Administrativo",
-     "sueldo": 600000,
-     "cargo_servel": "",
-     "cese": "30/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "DÍAZ FERNÁNDEZ CAMILO IVÁN",
      "cargo": "Asesor",
-     "sueldo": 1000000,
+     "sueldo": 1150000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -3133,6 +3169,14 @@
     },
     {
      "tipo": "Contrato",
+     "nombre": "LARA MERCADO FABIAN ALONSO",
+     "cargo": "Profesional",
+     "sueldo": 1097614,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "MOREL NÚÑEZ MAXIMILIANO ADOLFO",
      "cargo": "Administrativo",
      "sueldo": 600000,
@@ -3157,9 +3201,9 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "SHEJADE FUENTES TOMÁS IGNACIO",
+     "nombre": "SOLANO CHAMORRO MARIA JOSE",
      "cargo": "Profesional",
-     "sueldo": 1500000,
+     "sueldo": 366667,
      "cargo_servel": "",
      "cese": ""
     },
@@ -3172,7 +3216,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1099": {
    "meses": [
@@ -3223,7 +3267,7 @@
      "cargo": "Profesional",
      "sueldo": 635000,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "31/07/26"
     },
     {
      "tipo": "Contrato",
@@ -3258,7 +3302,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1100": {
    "meses": [
@@ -3344,7 +3388,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1102": {
    "meses": [
@@ -3419,7 +3463,7 @@
      "cargo": "Profesional",
      "sueldo": 1068000,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "31/07/26"
     },
     {
      "tipo": "Contrato",
@@ -3454,7 +3498,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1104": {
    "meses": [
@@ -3564,7 +3608,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1105": {
    "meses": [
@@ -3674,7 +3718,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1107": {
    "meses": [
@@ -3761,14 +3805,6 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "LARA MANDIOLA DANIELLA CONSTANZA",
-     "cargo": "Administrativo",
-     "sueldo": 341000,
-     "cargo_servel": "",
-     "cese": "15/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "LATORRE FLORES CONSTANZA BEATRIZ",
      "cargo": "Profesional",
      "sueldo": 1400000,
@@ -3779,7 +3815,7 @@
      "tipo": "Contrato",
      "nombre": "MANSILLA VIGNOLO ÍTALO LEANDRO",
      "cargo": "Administrativo",
-     "sueldo": 550000,
+     "sueldo": 553553,
      "cargo_servel": "",
      "cese": ""
     },
@@ -3806,9 +3842,17 @@
      "sueldo": 1380000,
      "cargo_servel": "",
      "cese": ""
+    },
+    {
+     "tipo": "Honorarios",
+     "nombre": "LARA MANDIOLA DANIELLA CONSTANZA",
+     "cargo": "Elaboración de base de datos sobre problemáticas sociales del distrito 6 para apoyar labor parlament",
+     "sueldo": 682000,
+     "cargo_servel": "",
+     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1108": {
    "meses": [
@@ -3887,19 +3931,19 @@
     },
     {
      "tipo": "Contrato",
+     "nombre": "MORALES PACHECO FERNANDO IGNACIO",
+     "cargo": "Administrativo",
+     "sueldo": 247122,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "OÑATE ESCOBAR MAURICIO IVAN",
      "cargo": "Administrativo",
      "sueldo": 650000,
      "cargo_servel": "Concejal",
      "cese": ""
-    },
-    {
-     "tipo": "Contrato",
-     "nombre": "POVEA PENCHULEF MARTA ANABEL",
-     "cargo": "Administrativo",
-     "sueldo": 500000,
-     "cargo_servel": "",
-     "cese": "30/06/26"
     },
     {
      "tipo": "Contrato",
@@ -3924,9 +3968,17 @@
      "sueldo": 750000,
      "cargo_servel": "",
      "cese": ""
+    },
+    {
+     "tipo": "Contrato",
+     "nombre": "YEVENES TRONCOZO CONSTANZA ARACELI",
+     "cargo": "Administrativo",
+     "sueldo": 350000,
+     "cargo_servel": "",
+     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1110": {
    "meses": [
@@ -4012,7 +4064,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1114": {
    "meses": [
@@ -4059,6 +4111,14 @@
    "personal_apoyo": [
     {
      "tipo": "Contrato",
+     "nombre": "ABARCA VERA MARIA ELIZABETH",
+     "cargo": "Administrativo",
+     "sueldo": 500000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "BELTRÁN GÓMEZ CAROLINA IVONNE",
      "cargo": "Profesional",
      "sueldo": 1200000,
@@ -4099,14 +4159,6 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "LAGOS URTUBIA JAVIER IVAN",
-     "cargo": "Asesor",
-     "sueldo": 1380000,
-     "cargo_servel": "",
-     "cese": "30/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "MANCILLA HUICHAQUEO YASNA MARICEL",
      "cargo": "Administrativo",
      "sueldo": 500000,
@@ -4128,9 +4180,17 @@
      "sueldo": 500000,
      "cargo_servel": "",
      "cese": ""
+    },
+    {
+     "tipo": "Contrato",
+     "nombre": "ZUÑIGA CONTRERAS NOLBERTO ALEXANDER",
+     "cargo": "Administrativo",
+     "sueldo": 650000,
+     "cargo_servel": "",
+     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1116": {
    "meses": [
@@ -4203,9 +4263,9 @@
      "tipo": "Contrato",
      "nombre": "PALACIOS REYES MATIAS EDUARDO",
      "cargo": "Profesional",
-     "sueldo": 1097614,
+     "sueldo": 951265,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "26/07/26"
     },
     {
      "tipo": "Contrato",
@@ -4248,7 +4308,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1117": {
    "meses": [
@@ -4382,7 +4442,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1119": {
    "meses": [
@@ -4500,7 +4560,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1122": {
    "meses": [
@@ -4595,14 +4655,6 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "RUMINOT PARDO NELSON ANDREE",
-     "cargo": "Asesor",
-     "sueldo": 961300,
-     "cargo_servel": "",
-     "cese": ""
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "SOTO DONOSO JOAN ANDRÉS",
      "cargo": "Asesor",
      "sueldo": 941000,
@@ -4618,7 +4670,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1127": {
    "meses": [
@@ -4712,7 +4764,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1128": {
    "meses": [
@@ -4793,7 +4845,7 @@
      "tipo": "Contrato",
      "nombre": "PAILLAO GARCIA CAMILA LILIANA",
      "cargo": "Profesional",
-     "sueldo": 640000,
+     "sueldo": 1200000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -4814,15 +4866,15 @@
      "cese": ""
     },
     {
-     "tipo": "Contrato",
-     "nombre": "VENEGAS NEIRA JOCELYN MARLENE",
-     "cargo": "Asesor",
-     "sueldo": 476667,
+     "tipo": "Honorarios",
+     "nombre": "NÚÑEZ VALENCIA VALERIA JACQUELINE",
+     "cargo": "Asesoría Legislativa en la redacción de proyectos de ley y minutas",
+     "sueldo": 600000,
      "cargo_servel": "",
-     "cese": "11/06/26"
+     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1131": {
    "meses": [
@@ -4932,7 +4984,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1132": {
    "meses": [
@@ -4995,14 +5047,6 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "MUÑOZ CANCINO MACARENA ANDREA",
-     "cargo": "Administrativo",
-     "sueldo": 630000,
-     "cargo_servel": "",
-     "cese": "30/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "VEGA VARAS ALEJANDRA JOSE",
      "cargo": "Profesional",
      "sueldo": 3669057,
@@ -5034,7 +5078,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1133": {
    "meses": [
@@ -5093,7 +5137,7 @@
      "cargo": "Asesor",
      "sueldo": 1700000,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "31/07/26"
     },
     {
      "tipo": "Contrato",
@@ -5144,7 +5188,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1140": {
    "meses": [
@@ -5230,7 +5274,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1141": {
    "meses": [
@@ -5340,7 +5384,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1142": {
    "meses": [
@@ -5387,14 +5431,6 @@
    "personal_apoyo": [
     {
      "tipo": "Contrato",
-     "nombre": "CERDA GAMBOA ALEXIA ELENA",
-     "cargo": "Administrativo",
-     "sueldo": 600000,
-     "cargo_servel": "",
-     "cese": ""
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "GALLEGUILLOS CASTILLO PABLO ENRIQUE",
      "cargo": "Administrativo",
      "sueldo": 700000,
@@ -5413,9 +5449,9 @@
      "tipo": "Contrato",
      "nombre": "MELO CONTRERAS DANIEL",
      "cargo": "Administrativo",
-     "sueldo": 650000,
+     "sueldo": 108333,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "05/07/26"
     },
     {
      "tipo": "Contrato",
@@ -5424,14 +5460,6 @@
      "sueldo": 1170000,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Contrato",
-     "nombre": "ROMÁN CORTÉS MATIAS BENJAMIN",
-     "cargo": "Administrativo",
-     "sueldo": 700000,
-     "cargo_servel": "",
-     "cese": "30/06/26"
     },
     {
      "tipo": "Contrato",
@@ -5450,7 +5478,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1143": {
    "meses": [
@@ -5537,6 +5565,14 @@
     },
     {
      "tipo": "Contrato",
+     "nombre": "SAN MARTÍN LARENAS JESSICA ELIZABETH",
+     "cargo": "Administrativo",
+     "sueldo": 240000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "SILVA FUENTES JORGE ARTURO",
      "cargo": "Asesor",
      "sueldo": 1230000,
@@ -5552,7 +5588,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1146": {
    "meses": [
@@ -5625,7 +5661,7 @@
      "tipo": "Contrato",
      "nombre": "FLORES SEPÚLVEDA ABEL ISAAC",
      "cargo": "Asesor",
-     "sueldo": 1010000,
+     "sueldo": 1099708,
      "cargo_servel": "",
      "cese": ""
     },
@@ -5646,7 +5682,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1148": {
    "meses": [
@@ -5741,14 +5777,6 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "ORTIZ CARMONA JOSÉ CARLOS",
-     "cargo": "Profesional",
-     "sueldo": 140000,
-     "cargo_servel": "",
-     "cese": "02/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "OSSANDÓN FONSECA GABRIEL ANDRÉS",
      "cargo": "Profesional",
      "sueldo": 1483301,
@@ -5772,7 +5800,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1150": {
    "meses": [
@@ -5853,7 +5881,7 @@
      "tipo": "Contrato",
      "nombre": "SALAZAR LLANTEN ALEX",
      "cargo": "Asesor",
-     "sueldo": 1470270,
+     "sueldo": 1620270,
      "cargo_servel": "",
      "cese": ""
     },
@@ -5866,7 +5894,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1152": {
    "meses": [
@@ -5976,7 +6004,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1153": {
    "meses": [
@@ -6047,14 +6075,6 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "COFIÁN CARES NICOLÁS ALEJANDRO",
-     "cargo": "Profesional",
-     "sueldo": 333333,
-     "cargo_servel": "",
-     "cese": "10/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "LAGOS GONZALEZ CRISTOBAL",
      "cargo": "Profesional",
      "sueldo": 2302688,
@@ -6094,7 +6114,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1157": {
    "meses": [
@@ -6178,17 +6198,9 @@
      "sueldo": 2000000,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "LÓPEZ BRAVO EDUARDO PATRICIO",
-     "cargo": "ASESORIA COMUNICACIONAL PARA LA LABOR PARLAMENTARIA",
-     "sueldo": 1243000,
-     "cargo_servel": "",
-     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1159": {
    "meses": [
@@ -6298,7 +6310,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1165": {
    "meses": [
@@ -6400,7 +6412,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1166": {
    "meses": [
@@ -6457,17 +6469,17 @@
      "tipo": "Contrato",
      "nombre": "CARRASCO ROMERO ERIKA CAROLINA",
      "cargo": "Profesional",
-     "sueldo": 1373170,
+     "sueldo": 1500000,
      "cargo_servel": "",
      "cese": ""
     },
     {
      "tipo": "Contrato",
-     "nombre": "GARRIDO CHÁVEZ BASTIÁN ALONSO",
+     "nombre": "CORNEJO ALVAREZ ISIDORA YANICER",
      "cargo": "Profesional",
-     "sueldo": 1250000,
+     "sueldo": 350000,
      "cargo_servel": "",
-     "cese": "30/06/26"
+     "cese": ""
     },
     {
      "tipo": "Contrato",
@@ -6481,7 +6493,7 @@
      "tipo": "Contrato",
      "nombre": "MUÑOZ RIVERA CARLOS MIGUEL",
      "cargo": "Profesional",
-     "sueldo": 1500000,
+     "sueldo": 1700000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -6489,7 +6501,7 @@
      "tipo": "Contrato",
      "nombre": "PRADO LABARCA CLAUDIA ANDREA",
      "cargo": "Asesor",
-     "sueldo": 1396514,
+     "sueldo": 1500000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -6502,7 +6514,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1170": {
    "meses": [
@@ -6596,7 +6608,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1171": {
    "meses": [
@@ -6675,14 +6687,6 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "NORAMBUENA SALDÍAS KEVINN ALEJANDRO",
-     "cargo": "Asesor",
-     "sueldo": 1792000,
-     "cargo_servel": "",
-     "cese": "21/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "OSORIO BUNSTER DIEGO CRISTÓBAL",
      "cargo": "Profesional",
      "sueldo": 2100000,
@@ -6701,20 +6705,12 @@
      "tipo": "Contrato",
      "nombre": "VÁSQUEZ ORELLANA DANIEL EDUARDO",
      "cargo": "Profesional",
-     "sueldo": 341333,
+     "sueldo": 2560000,
      "cargo_servel": "",
-     "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "URRA DEPAULO MICHAEL ANTONIO",
-     "cargo": "Asesoría a la labor parlamentaria en levantamiento de información referente a problemáticas vecinale",
-     "sueldo": 1399062,
-     "cargo_servel": "Concejal",
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1172": {
    "meses": [
@@ -6800,7 +6796,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1173": {
    "meses": [
@@ -6847,14 +6843,6 @@
    "personal_apoyo": [
     {
      "tipo": "Contrato",
-     "nombre": "BIRKE ABAROA MAITE CECILIA",
-     "cargo": "Asesor",
-     "sueldo": 635000,
-     "cargo_servel": "Concejal",
-     "cese": "30/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "CAMPOS CERDA FREDDY ESTEBAN",
      "cargo": "Profesional",
      "sueldo": 1740000,
@@ -6873,17 +6861,17 @@
      "tipo": "Contrato",
      "nombre": "GUERRERO MOLINA ALVARO CAMILO",
      "cargo": "Profesional",
-     "sueldo": 615000,
+     "sueldo": 1353000,
      "cargo_servel": "",
-     "cese": "10/06/26"
+     "cese": ""
     },
     {
      "tipo": "Contrato",
      "nombre": "GUTIERREZ RYBERTT MELISSA NICOLE",
      "cargo": "Profesional",
-     "sueldo": 1845000,
+     "sueldo": 553500,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "09/07/26"
     },
     {
      "tipo": "Contrato",
@@ -6910,7 +6898,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1174": {
    "meses": [
@@ -6957,14 +6945,6 @@
    "personal_apoyo": [
     {
      "tipo": "Contrato",
-     "nombre": "ALARCON DÍAZ FRANCISCO ROBERTO",
-     "cargo": "Asesor",
-     "sueldo": 196000,
-     "cargo_servel": "",
-     "cese": "06/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "BOBADILLA QUIROGA ALEJANDRA",
      "cargo": "Administrativo",
      "sueldo": 750000,
@@ -6996,7 +6976,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1175": {
    "meses": [
@@ -7059,14 +7039,6 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "MACCHIAVELLO MACCHIAVELLO ANDRÉS",
-     "cargo": "Administrativo",
-     "sueldo": 900000,
-     "cargo_servel": "",
-     "cese": "30/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "MANTEROLA ESCOBAR CATALINA BERTA",
      "cargo": "Profesional",
      "sueldo": 1320000,
@@ -7092,8 +7064,8 @@
     {
      "tipo": "Contrato",
      "nombre": "SEPÚLVEDA MACHUCA ZARKO DANILO",
-     "cargo": "Asesor",
-     "sueldo": 940813,
+     "cargo": "Profesional",
+     "sueldo": 1098000,
      "cargo_servel": "Concejal",
      "cese": ""
     },
@@ -7104,17 +7076,9 @@
      "sueldo": 675000,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "LARA FIGUEROA JULIO FERNANDO",
-     "cargo": "Asesoría comunicacional en apoyo a la labor parlamentaria",
-     "sueldo": 120000,
-     "cargo_servel": "",
-     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1176": {
    "meses": [
@@ -7192,7 +7156,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1177": {
    "meses": [
@@ -7271,14 +7235,6 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "FUENTES FERNANDEZ JUAN RODRIGO",
-     "cargo": "Profesional",
-     "sueldo": 440000,
-     "cargo_servel": "",
-     "cese": "11/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "PÉREZ ROJAS NICOLE FERNANDA",
      "cargo": "Profesional",
      "sueldo": 2500000,
@@ -7310,7 +7266,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1178": {
    "meses": [
@@ -7396,7 +7352,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1180": {
    "meses": [
@@ -7476,16 +7432,16 @@
     {
      "tipo": "Contrato",
      "nombre": "BAEZA CONTRERAS MARÍA ANGÉLICA",
-     "cargo": "Asesor",
-     "sueldo": 1000000,
+     "cargo": "Administrativo",
+     "sueldo": 700000,
      "cargo_servel": "",
      "cese": ""
     },
     {
      "tipo": "Contrato",
      "nombre": "CARTER RAMOS ANGEL JESÚS",
-     "cargo": "Asesor",
-     "sueldo": 1000000,
+     "cargo": "Administrativo",
+     "sueldo": 500000,
      "cargo_servel": "Concejal",
      "cese": ""
     },
@@ -7509,12 +7465,12 @@
      "tipo": "Contrato",
      "nombre": "SOTO CIFUENTES CATALINA FRANCISCA",
      "cargo": "Profesional",
-     "sueldo": 1250000,
+     "sueldo": 1450000,
      "cargo_servel": "",
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1181": {
    "meses": [
@@ -7608,7 +7564,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1182": {
    "meses": [
@@ -7702,7 +7658,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1183": {
    "meses": [
@@ -7765,6 +7721,14 @@
     },
     {
      "tipo": "Contrato",
+     "nombre": "LAVIN HUENCHUPIL MARIA VERONICA",
+     "cargo": "Profesional",
+     "sueldo": 435000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "MEDINA CEA CRISTIAN ARIEL",
      "cargo": "Asesor",
      "sueldo": 950000,
@@ -7781,22 +7745,22 @@
     },
     {
      "tipo": "Contrato",
+     "nombre": "SAEZ GALLARDO RENATA ANTONIA",
+     "cargo": "Profesional",
+     "sueldo": 1230000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "TOLOZA LUNA BERNES HUGO",
      "cargo": "Profesional",
      "sueldo": 950000,
      "cargo_servel": "Concejal",
      "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "LAVIN HUENCHUPIL MARIA VERONICA",
-     "cargo": "Asesoría en programas de emprendimiento para pymes con financiamiento público, de apoyo a la función",
-     "sueldo": 1910000,
-     "cargo_servel": "",
-     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1184": {
    "meses": [
@@ -7851,19 +7815,11 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "GUTIÉRREZ CÓRDOVA KARIME IGNACIA",
-     "cargo": "Profesional",
-     "sueldo": 1658975,
-     "cargo_servel": "",
-     "cese": ""
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "MEZZANO SEPULVEDA IVAN FERNANDO",
      "cargo": "Profesional",
-     "sueldo": 1097614,
+     "sueldo": 658568,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "18/07/26"
     },
     {
      "tipo": "Contrato",
@@ -7898,7 +7854,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1186": {
    "meses": [
@@ -8000,7 +7956,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1187": {
    "meses": [
@@ -8075,7 +8031,7 @@
      "cargo": "Administrativo",
      "sueldo": 1522353,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "31/07/26"
     },
     {
      "tipo": "Contrato",
@@ -8086,7 +8042,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1188": {
    "meses": [
@@ -8196,7 +8152,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1189": {
    "meses": [
@@ -8261,15 +8217,23 @@
      "tipo": "Contrato",
      "nombre": "CASTRO LARA ÁLVARO HUMBERTO",
      "cargo": "Administrativo",
-     "sueldo": 426667,
+     "sueldo": 400000,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "15/07/26"
     },
     {
      "tipo": "Contrato",
      "nombre": "MARTÍNEZ GONZÁLEZ MATHIAS GABRIEL",
      "cargo": "Profesional",
-     "sueldo": 1800000,
+     "sueldo": 2000000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
+     "nombre": "SILVA PINILLA CATALINA FRANCISCA",
+     "cargo": "Asesor",
+     "sueldo": 1000000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -8298,7 +8262,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1190": {
    "meses": [
@@ -8392,7 +8356,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1191": {
    "meses": [
@@ -8439,6 +8403,14 @@
    "personal_apoyo": [
     {
      "tipo": "Contrato",
+     "nombre": "CARVAJAL MEDINA PAZ BELEN",
+     "cargo": "Profesional",
+     "sueldo": 156802,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "CORTESE RADOVIC VICENTE JAVIER",
      "cargo": "Asesor",
      "sueldo": 150000,
@@ -8476,17 +8448,9 @@
      "sueldo": 1500000,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "TAVRA MORALES YORDAN ALEXANDER",
-     "cargo": "Asesoría jurídica de apoyo a la labor parlamentaria de la Diputada Valentina Becerra",
-     "sueldo": 600000,
-     "cargo_servel": "",
-     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1192": {
    "meses": [
@@ -8535,7 +8499,7 @@
      "tipo": "Contrato",
      "nombre": "ÁLVAREZ ARIAS MARIELA RUTH",
      "cargo": "Asesor",
-     "sueldo": 1000000,
+     "sueldo": 1300000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -8550,45 +8514,37 @@
     {
      "tipo": "Contrato",
      "nombre": "BAEZ POLGATTI CAMILA ARANZA",
-     "cargo": "Administrativo",
-     "sueldo": 800000,
+     "cargo": "Asesor",
+     "sueldo": 1300000,
      "cargo_servel": "",
      "cese": ""
     },
     {
      "tipo": "Contrato",
-     "nombre": "CONTRERAS ARENAS DIEGO OMAR",
-     "cargo": "Administrativo",
-     "sueldo": 300000,
+     "nombre": "DOMÍNGUEZ BRAVO JOSÉ MIGUEL",
+     "cargo": "Profesional",
+     "sueldo": 1100000,
      "cargo_servel": "",
-     "cese": "10/06/26"
+     "cese": ""
     },
     {
      "tipo": "Contrato",
      "nombre": "FUENTES ARREY PAULA ANGELA",
      "cargo": "Asesor",
-     "sueldo": 2450000,
+     "sueldo": 1400000,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Contrato",
-     "nombre": "MORENO VILLABLANCA LUIS ANTONIO",
-     "cargo": "Administrativo",
-     "sueldo": 554200,
-     "cargo_servel": "",
-     "cese": "30/06/26"
     },
     {
      "tipo": "Contrato",
      "nombre": "VARGAS DAGNIER HERNÁN FELIPE",
      "cargo": "Profesional",
-     "sueldo": 1600000,
+     "sueldo": 1810000,
      "cargo_servel": "",
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1193": {
    "meses": [
@@ -8682,7 +8638,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1194": {
    "meses": [
@@ -8745,6 +8701,14 @@
     },
     {
      "tipo": "Contrato",
+     "nombre": "MALUENDA TERÁN LEONARDO IGNACIO",
+     "cargo": "Profesional",
+     "sueldo": 365648,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "YAÑEZ GUERRERO JUAN ENRIQUE",
      "cargo": "Profesional",
      "sueldo": 2100000,
@@ -8754,21 +8718,21 @@
     {
      "tipo": "Honorarios",
      "nombre": "BECERRA LOBOS CHRISTIAN IVÁN",
-     "cargo": "Asesoría territorial y relacionamiento comunitario para futuros proyectos de ley",
-     "sueldo": 1087015,
+     "cargo": "Asesoría territorial y relacionamiento comunitario para apoyo de la labor parlamentaria",
+     "sueldo": 755000,
      "cargo_servel": "",
      "cese": ""
     },
     {
      "tipo": "Honorarios",
      "nombre": "UGALDE PRIETO ANTONIO ENRIQUE",
-     "cargo": "Asesoría enfocada en desarrollar una estrategia para el desarrollo integral de la provincia de Cauqu",
+     "cargo": "Consultoría enfocada en desarrollar una estrategia para el desarrollo integral de la provincia de Ca",
      "sueldo": 1087015,
      "cargo_servel": "",
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1195": {
    "meses": [
@@ -8815,14 +8779,6 @@
    "personal_apoyo": [
     {
      "tipo": "Contrato",
-     "nombre": "ALARCON QUINTEROS JUAN PABLO",
-     "cargo": "Profesional",
-     "sueldo": 666667,
-     "cargo_servel": "",
-     "cese": "08/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "GARCÍA HERNÁNDEZ JACQUELINE DEL CARMEN",
      "cargo": "Administrativo",
      "sueldo": 688000,
@@ -8857,7 +8813,7 @@
      "tipo": "Contrato",
      "nombre": "PEÑA LIBUY JUAN LUIS SEGUNDO",
      "cargo": "Profesional",
-     "sueldo": 1833333,
+     "sueldo": 2500000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -8894,7 +8850,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1196": {
    "meses": [
@@ -8949,9 +8905,17 @@
     },
     {
      "tipo": "Contrato",
+     "nombre": "ÁLVAREZ TARTARI JOSÉ LUIS",
+     "cargo": "Administrativo",
+     "sueldo": 400000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "BRICEÑO CARRASCO CAMILA IGNACIA",
      "cargo": "Profesional",
-     "sueldo": 1805500,
+     "sueldo": 2355000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -8980,15 +8944,15 @@
      "cese": ""
     },
     {
-     "tipo": "Honorarios",
-     "nombre": "LARA TORRES HUGO HERNÁN",
-     "cargo": "Asesoría prestada a la Diputada Priscilla Castillo en gestión política e institucional, coordinando",
-     "sueldo": 1300000,
+     "tipo": "Contrato",
+     "nombre": "PEREZ HERRERA FABIAN MANUEL",
+     "cargo": "Administrativo",
+     "sueldo": 433333,
      "cargo_servel": "",
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1197": {
    "meses": [
@@ -9090,7 +9054,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1198": {
    "meses": [
@@ -9184,7 +9148,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1199": {
    "meses": [
@@ -9263,14 +9227,6 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "REYES ÁLVAREZ ESTEFANY SOLANGE",
-     "cargo": "Profesional",
-     "sueldo": 130000,
-     "cargo_servel": "",
-     "cese": "03/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "SALAZAR GONZÁLEZ MARTÍN BASTIÁN",
      "cargo": "Profesional",
      "sueldo": 600000,
@@ -9296,13 +9252,13 @@
     {
      "tipo": "Honorarios",
      "nombre": "GALLARDO CESPEDE SEBASTIAN IGNACIO",
-     "cargo": "Asesoría en apoyo a la labor parlamentaria en temas de proyectos de ley medioambientales y permisol",
-     "sueldo": 1100000,
+     "cargo": "Asesoría en apoyo a la labor parlamentaria en comisiones y en temas de proyectos de ley medioambient",
+     "sueldo": 623333,
      "cargo_servel": "",
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1200": {
    "meses": [
@@ -9347,6 +9303,14 @@
     }
    },
    "personal_apoyo": [
+    {
+     "tipo": "Contrato",
+     "nombre": "AGUAYO FIGUEROA PATRICIO MIGUEL",
+     "cargo": "Asesor",
+     "sueldo": 1190000,
+     "cargo_servel": "",
+     "cese": ""
+    },
     {
      "tipo": "Contrato",
      "nombre": "MANCILLA ALVEAR SERGIO",
@@ -9407,12 +9371,12 @@
      "tipo": "Honorarios",
      "nombre": "VILLA CERDA ANGIE KARIME",
      "cargo": "Asesoría profesional en relación a las comisiones de cultura y deporte",
-     "sueldo": 1500000,
+     "sueldo": 800000,
      "cargo_servel": "",
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1201": {
    "meses": [
@@ -9459,14 +9423,6 @@
    "personal_apoyo": [
     {
      "tipo": "Contrato",
-     "nombre": "CONTRERAS ARENAS DIEGO OMAR",
-     "cargo": "Administrativo",
-     "sueldo": 166667,
-     "cargo_servel": "",
-     "cese": "10/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "CORREA QUEZADA PAMELA GLADYS",
      "cargo": "Administrativo",
      "sueldo": 1200000,
@@ -9477,7 +9433,7 @@
      "tipo": "Contrato",
      "nombre": "FIGUEROA CEA HONORINDA VERONICA",
      "cargo": "Administrativo",
-     "sueldo": 920000,
+     "sueldo": 1200000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -9507,6 +9463,14 @@
     },
     {
      "tipo": "Contrato",
+     "nombre": "OYARCE VILLEGAS JUAN SANTIAGO",
+     "cargo": "Administrativo",
+     "sueldo": 553553,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "ROJAS BASCUÑAN AMERICO",
      "cargo": "Asesor",
      "sueldo": 1000000,
@@ -9530,7 +9494,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1202": {
    "meses": [
@@ -9632,7 +9596,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1203": {
    "meses": [
@@ -9699,7 +9663,7 @@
      "cargo": "Administrativo",
      "sueldo": 850000,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "31/07/26"
     },
     {
      "tipo": "Contrato",
@@ -9712,13 +9676,13 @@
     {
      "tipo": "Contrato",
      "nombre": "SEPULVEDA ESPINOZA FERNANDA ISIDORA",
-     "cargo": "Administrativo",
-     "sueldo": 750000,
+     "cargo": "Asesor",
+     "sueldo": 1100000,
      "cargo_servel": "",
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1204": {
    "meses": [
@@ -9813,22 +9777,14 @@
     },
     {
      "tipo": "Honorarios",
-     "nombre": "CARO CARO MAKARENA ALEJANDRA",
-     "cargo": "Asesoría legislativa de apoyo a la función parlamentaria.",
-     "sueldo": 550000,
-     "cargo_servel": "",
-     "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "MORALES VALDERRAMA LUIS HUMBERTO",
-     "cargo": "Asesoría legislativa de apoyo a la función parlamentaria",
-     "sueldo": 500000,
+     "nombre": "FARRÁN VELOSO ANWAR SAID",
+     "cargo": "Asesoría comunicacional de apoyo a la función parlamentaria",
+     "sueldo": 1592920,
      "cargo_servel": "",
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1205": {
    "meses": [
@@ -9914,7 +9870,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1206": {
    "meses": [
@@ -9973,6 +9929,22 @@
      "cargo": "Profesional",
      "sueldo": 1100000,
      "cargo_servel": "",
+     "cese": "31/07/26"
+    },
+    {
+     "tipo": "Contrato",
+     "nombre": "CUEVAS VELOZO SERGIO ENRIQUE",
+     "cargo": "Administrativo",
+     "sueldo": 600000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
+     "nombre": "DIAZ CABRERA LUIS ANTONIO",
+     "cargo": "Administrativo",
+     "sueldo": 1200000,
+     "cargo_servel": "",
      "cese": ""
     },
     {
@@ -10001,17 +9973,9 @@
     },
     {
      "tipo": "Honorarios",
-     "nombre": "CUEVAS MARTÍNEZ MAXIMILIANO ISAAC",
+     "nombre": "ALCAINO GONZALEZ VERONICA ALEJANDRA",
      "cargo": "ASESORIA PARA LA COORDINACIÓN ENTRE REPRESENTANTES DE LA SOCIEDAD CIVIL Y GESTIÓN PARLAMENTARIA TERR",
-     "sueldo": 528038,
-     "cargo_servel": "",
-     "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "DELGADO GOMEZ RODRIGO ANDRES",
-     "cargo": "ASESORIA PARA LA COORDINACIÓN ENTRE REPRESENTANTES DE LA SOCIEDAD CIVIL Y GESTIÓN PARLAMENTARIA TERR",
-     "sueldo": 469000,
+     "sueldo": 1020473,
      "cargo_servel": "",
      "cese": ""
     },
@@ -10025,22 +9989,6 @@
     },
     {
      "tipo": "Honorarios",
-     "nombre": "GAJARDO LECAROS MARISOL ANGÉLICA",
-     "cargo": "ASESORIA PARA LA COORDINACIÓN ENTRE REPRESENTANTES DE LA SOCIEDAD CIVIL Y GESTIÓN PARLAMENTARIA TERR",
-     "sueldo": 528038,
-     "cargo_servel": "Concejal",
-     "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "HERNANDEZ REYES MARCO ANTONIO",
-     "cargo": "ASESORIA PARA LA COORDINACIÓN ENTRE REPRESENTANTES DE LA SOCIEDAD CIVIL Y GESTIÓN PARLAMENTARIA TERR",
-     "sueldo": 612038,
-     "cargo_servel": "",
-     "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
      "nombre": "INOSTROZA PAREDES CLAUDIA CAROLINA",
      "cargo": "Asesoría de apoyo a la función parlamentaria en proyectos relacionados a materias social",
      "sueldo": 2221200,
@@ -10049,38 +9997,14 @@
     },
     {
      "tipo": "Honorarios",
-     "nombre": "PALOMINOS DINAMARCA BASTIAN GIOVANNI",
+     "nombre": "RODRIGUEZ ZUÑIGA PAZ BELEN",
      "cargo": "ASESORIA PARA LA COORDINACIÓN ENTRE REPRESENTANTES DE LA SOCIEDAD CIVIL Y GESTIÓN PARLAMENTARIA TERR",
-     "sueldo": 528038,
-     "cargo_servel": "Concejal",
-     "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "RIOS GOMEZ JOSÉ TOMÁS",
-     "cargo": "ASESORIA PARA LA COORDINACIÓN ENTRE REPRESENTANTES DE LA SOCIEDAD CIVIL Y GESTIÓN PARLAMENTARIA TERR",
-     "sueldo": 150000,
-     "cargo_servel": "",
-     "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "SILVA SOTO LILIAN ROSA",
-     "cargo": "Asesoria para la coordinación entre representantes de la sociedad y gestiones parlamentaria territor",
-     "sueldo": 444000,
-     "cargo_servel": "",
-     "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "VIDELA CHAVEZ AURORA DEL CARMEN",
-     "cargo": "Asesoria para la coordinación entre representantes de la sociedad civil y gestiones parlamentaria te",
-     "sueldo": 528038,
+     "sueldo": 510237,
      "cargo_servel": "Concejal",
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1207": {
    "meses": [
@@ -10125,6 +10049,14 @@
     }
    },
    "personal_apoyo": [
+    {
+     "tipo": "Contrato",
+     "nombre": "AGUILERA ORTEGA CATALINA ALEJANDRA",
+     "cargo": "Profesional",
+     "sueldo": 540000,
+     "cargo_servel": "",
+     "cese": ""
+    },
     {
      "tipo": "Contrato",
      "nombre": "ÁLVAREZ RUBIO ARTURO MIGUEL",
@@ -10172,17 +10104,9 @@
      "sueldo": 1500000,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "ARRIAGADA LÓPEZ EDUARDO ALEJANDRO",
-     "cargo": "Asesor parlamentario para la Comisión de Desarrollo social",
-     "sueldo": 400000,
-     "cargo_servel": "Concejal",
-     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1208": {
    "meses": [
@@ -10241,7 +10165,7 @@
      "cargo": "Profesional",
      "sueldo": 1680000,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "31/07/26"
     },
     {
      "tipo": "Contrato",
@@ -10257,7 +10181,7 @@
      "cargo": "Profesional",
      "sueldo": 900000,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "31/07/26"
     },
     {
      "tipo": "Contrato",
@@ -10289,7 +10213,7 @@
      "cargo": "Profesional",
      "sueldo": 700000,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "31/07/26"
     },
     {
      "tipo": "Contrato",
@@ -10308,7 +10232,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1209": {
    "meses": [
@@ -10365,9 +10289,9 @@
      "tipo": "Contrato",
      "nombre": "CARIAGA FUENTES MARIA JOSÉ",
      "cargo": "Profesional",
-     "sueldo": 900000,
+     "sueldo": 313680,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "17/07/26"
     },
     {
      "tipo": "Contrato",
@@ -10421,12 +10345,12 @@
      "tipo": "Honorarios",
      "nombre": "ROSAS LABORDE CRISTÓBAL FABIAN",
      "cargo": "Asesoría en apoyo parlamentario en materia social territorial",
-     "sueldo": 271088,
+     "sueldo": 542176,
      "cargo_servel": "Concejal",
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1210": {
    "meses": [
@@ -10473,17 +10397,17 @@
    "personal_apoyo": [
     {
      "tipo": "Contrato",
-     "nombre": "CABRERA CARTER DANIELA ANDREA",
-     "cargo": "Profesional",
-     "sueldo": 2800000,
-     "cargo_servel": "",
-     "cese": "30/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "CAMPOS SALAZAR MATÍAS ORLANDO",
      "cargo": "Profesional",
      "sueldo": 2002738,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
+     "nombre": "GUTIÉRREZ CÓRDOVA KARIME IGNACIA",
+     "cargo": "Profesional",
+     "sueldo": 2000000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -10528,7 +10452,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1211": {
    "meses": [
@@ -10639,17 +10563,9 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "VALDES ULLOA CLAUDIA ANDREA",
-     "cargo": "Profesional",
-     "sueldo": 550000,
-     "cargo_servel": "",
-     "cese": "11/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "VARGAS ZAMORANO SERGIO RENÉ",
      "cargo": "Profesional",
-     "sueldo": 1050000,
+     "sueldo": 1500000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -10662,7 +10578,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1212": {
    "meses": [
@@ -10727,7 +10643,7 @@
      "tipo": "Contrato",
      "nombre": "JULIA VEGA BÁRBARA ANDREA",
      "cargo": "Profesional",
-     "sueldo": 1393333,
+     "sueldo": 2200000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -10756,7 +10672,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1213": {
    "meses": [
@@ -10803,17 +10719,17 @@
    "personal_apoyo": [
     {
      "tipo": "Contrato",
-     "nombre": "ALARCÓN VALDÉS PEDRO EDUARDO ALEXIS",
-     "cargo": "Asesor",
-     "sueldo": 696667,
-     "cargo_servel": "",
-     "cese": "22/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "ALONSO HUENUHUEQUE TANIA SOLEDAD",
      "cargo": "Profesional",
      "sueldo": 1100000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
+     "nombre": "ÁLVAREZ CAMPOS TANIA JAVIERA",
+     "cargo": "Profesional",
+     "sueldo": 1600000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -10860,8 +10776,8 @@
     {
      "tipo": "Contrato",
      "nombre": "PALMA ERPEL VIRGINIA BERNARDINA",
-     "cargo": "Administrativo",
-     "sueldo": 1100000,
+     "cargo": "Asesor",
+     "sueldo": 1450000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -10872,17 +10788,9 @@
      "sueldo": 530000,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "ÁLVAREZ CAMPOS TANIA JAVIERA",
-     "cargo": "Asesoría legislativa",
-     "sueldo": 480000,
-     "cargo_servel": "",
-     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1214": {
    "meses": [
@@ -10939,7 +10847,7 @@
      "tipo": "Contrato",
      "nombre": "SALAZAR FIGUEROA PABLO ESTEBAN",
      "cargo": "Asesor",
-     "sueldo": 1415929,
+     "sueldo": 1000000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -10960,7 +10868,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1215": {
    "meses": [
@@ -11062,7 +10970,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1216": {
    "meses": [
@@ -11119,7 +11027,7 @@
      "tipo": "Contrato",
      "nombre": "CIFUENTES FLORES VERONICA XIMENA",
      "cargo": "Profesional",
-     "sueldo": 1100000,
+     "sueldo": 1200000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -11137,26 +11045,18 @@
      "cargo": "Asesor",
      "sueldo": 940813,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "31/07/26"
     },
     {
      "tipo": "Contrato",
      "nombre": "JORQUERA DÍAZ ALEJANDRO TEODORO IGNACIO",
      "cargo": "Asesor",
-     "sueldo": 3402412,
+     "sueldo": 3849000,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Contrato",
-     "nombre": "VILLARROEL MAURE PAZ BELÉN",
-     "cargo": "Asesor",
-     "sueldo": 1624079,
-     "cargo_servel": "",
-     "cese": "30/06/26"
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1217": {
    "meses": [
@@ -11242,7 +11142,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1218": {
    "meses": [
@@ -11312,7 +11212,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1219": {
    "meses": [
@@ -11375,14 +11275,6 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "HERNÁNDEZ SCHMIDT EDUARDO ANDRÉS",
-     "cargo": "Administrativo",
-     "sueldo": 500000,
-     "cargo_servel": "Consejero Regional",
-     "cese": ""
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "MORALES RODRIGUEZ OSCAR EDUARDO",
      "cargo": "Profesional",
      "sueldo": 1000000,
@@ -11430,7 +11322,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1220": {
    "meses": [
@@ -11509,14 +11401,6 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "MARTÍNEZ GONZÁLEZ JUAN ANDRÉS",
-     "cargo": "Profesional",
-     "sueldo": 733333,
-     "cargo_servel": "",
-     "cese": "20/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "QUINTANA FLORES PAULA ANDREA",
      "cargo": "Administrativo",
      "sueldo": 900000,
@@ -11532,7 +11416,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1221": {
    "meses": [
@@ -11618,18 +11502,10 @@
      "cese": ""
     },
     {
-     "tipo": "Contrato",
-     "nombre": "MENA BAZAES PAULA MAGDALENA",
-     "cargo": "Profesional",
-     "sueldo": 41667,
-     "cargo_servel": "",
-     "cese": "01/06/26"
-    },
-    {
      "tipo": "Honorarios",
      "nombre": "RAMOS MUÑOZ ELÍAS ABRAHAM",
      "cargo": "Asesoria Legislativa apoyo en comisiones con los proyectos de ley",
-     "sueldo": 1180000,
+     "sueldo": 1769912,
      "cargo_servel": "",
      "cese": ""
     },
@@ -11642,7 +11518,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1222": {
    "meses": [
@@ -11728,7 +11604,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1223": {
    "meses": [
@@ -11801,9 +11677,9 @@
      "tipo": "Contrato",
      "nombre": "OMEGNA VERGARA ITALO ANDRE HERNAN",
      "cargo": "Asesor",
-     "sueldo": 1800000,
+     "sueldo": 1680000,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "28/07/26"
     },
     {
      "tipo": "Contrato",
@@ -11830,7 +11706,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1224": {
    "meses": [
@@ -11909,6 +11785,14 @@
     },
     {
      "tipo": "Contrato",
+     "nombre": "FARÍAS MICHEL MARÍA LUISA",
+     "cargo": "Administrativo",
+     "sueldo": 700000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "MUÑOZ RAMIREZ IVAN PATRICIO",
      "cargo": "Asesor",
      "sueldo": 1250000,
@@ -11930,17 +11814,9 @@
      "sueldo": 1000000,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "FUENTES ROMERO MARIO LUIS",
-     "cargo": "Asesoría legislativa, redacción de minutas para comisiones de salud y deportes.",
-     "sueldo": 750000,
-     "cargo_servel": "",
-     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1225": {
    "meses": [
@@ -11988,7 +11864,7 @@
     {
      "tipo": "Contrato",
      "nombre": "ARAYA ACEVEDO ROBIN DARIO",
-     "cargo": "Administrativo",
+     "cargo": "Profesional",
      "sueldo": 500000,
      "cargo_servel": "Concejal",
      "cese": ""
@@ -12004,7 +11880,7 @@
     {
      "tipo": "Contrato",
      "nombre": "GONZÁLEZ CONTRERAS SONIA DEL PILAR",
-     "cargo": "Administrativo",
+     "cargo": "Profesional",
      "sueldo": 1500000,
      "cargo_servel": "",
      "cese": ""
@@ -12074,7 +11950,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1226": {
    "meses": [
@@ -12168,7 +12044,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1227": {
    "meses": [
@@ -12262,7 +12138,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1228": {
    "meses": [
@@ -12343,9 +12219,9 @@
      "tipo": "Contrato",
      "nombre": "REHBEIN SCHWERTER LUIS GABRIEL",
      "cargo": "Asesor",
-     "sueldo": 565000,
+     "sueldo": 131833,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "07/07/26"
     },
     {
      "tipo": "Contrato",
@@ -12356,7 +12232,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1229": {
    "meses": [
@@ -12419,9 +12295,25 @@
     },
     {
      "tipo": "Contrato",
+     "nombre": "DONOSO BASCUÑAN GENARO EXEQUIEL SEBASTIAN",
+     "cargo": "Administrativo",
+     "sueldo": 166000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "GONZALEZ SANCHEZ GLADYS",
      "cargo": "Administrativo",
      "sueldo": 700000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
+     "nombre": "GUDELL URETA MATIAS ANDRES",
+     "cargo": "Profesional",
+     "sueldo": 1000000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -12432,14 +12324,6 @@
      "sueldo": 1880000,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Contrato",
-     "nombre": "ONGARO DAMIAN DANIELA ALEJANDRA",
-     "cargo": "Profesional",
-     "sueldo": 1166000,
-     "cargo_servel": "",
-     "cese": "30/06/26"
     },
     {
      "tipo": "Contrato",
@@ -12474,7 +12358,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1230": {
    "meses": [
@@ -12525,23 +12409,15 @@
      "cargo": "Profesional",
      "sueldo": 2850000,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "31/07/26"
     },
     {
      "tipo": "Contrato",
      "nombre": "FUENTES ARREY PAULA ANGELA",
      "cargo": "Asesor",
-     "sueldo": 1550000,
+     "sueldo": 2600000,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Contrato",
-     "nombre": "OJEDA OJEDA JUAN EDUARDO",
-     "cargo": "Administrativo",
-     "sueldo": 800000,
-     "cargo_servel": "",
-     "cese": "30/06/26"
     },
     {
      "tipo": "Contrato",
@@ -12554,37 +12430,29 @@
     {
      "tipo": "Contrato",
      "nombre": "PACHECO GARCÍA SORAYA DE LOURDES",
-     "cargo": "Administrativo",
-     "sueldo": 700000,
+     "cargo": "Asesor",
+     "sueldo": 1000000,
      "cargo_servel": "",
      "cese": ""
     },
     {
      "tipo": "Contrato",
-     "nombre": "QUINTANA DÍAZ GILDA ANDREA",
-     "cargo": "Profesional",
-     "sueldo": 2500000,
-     "cargo_servel": "",
-     "cese": "30/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "RUIZ MANSILLA GUILLERMO ISACC",
-     "cargo": "Administrativo",
-     "sueldo": 800000,
+     "cargo": "Asesor",
+     "sueldo": 1000000,
      "cargo_servel": "",
      "cese": ""
     },
     {
      "tipo": "Contrato",
      "nombre": "VILLAVICENCIO TECA KATTY ALICIA",
-     "cargo": "Administrativo",
-     "sueldo": 700000,
+     "cargo": "Asesor",
+     "sueldo": 1000000,
      "cargo_servel": "",
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1231": {
    "meses": [
@@ -12639,6 +12507,14 @@
     },
     {
      "tipo": "Contrato",
+     "nombre": "ARAYA ARAVENA ÁNGEL EXEQUIEL",
+     "cargo": "Administrativo",
+     "sueldo": 650000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "BILBAO CESPEDES CHRISTIAN ROLAND",
      "cargo": "Administrativo",
      "sueldo": 553553,
@@ -12649,7 +12525,7 @@
      "tipo": "Contrato",
      "nombre": "CEBALLOS ESPINOZA RAÚL ANTONIO",
      "cargo": "Administrativo",
-     "sueldo": 550000,
+     "sueldo": 553553,
      "cargo_servel": "",
      "cese": ""
     },
@@ -12694,7 +12570,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1232": {
    "meses": [
@@ -12804,7 +12680,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1233": {
    "meses": [
@@ -12859,6 +12735,14 @@
     },
     {
      "tipo": "Contrato",
+     "nombre": "JARA GONZÁLEZ CÉSAR ANTONIO",
+     "cargo": "Asesor",
+     "sueldo": 738574,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "OLIVARES PARDO CRISTIAN ENRIQUE",
      "cargo": "Administrativo",
      "sueldo": 1500000,
@@ -12890,7 +12774,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1234": {
    "meses": [
@@ -12992,7 +12876,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1235": {
    "meses": [
@@ -13068,9 +12952,17 @@
      "sueldo": 3474000,
      "cargo_servel": "",
      "cese": ""
+    },
+    {
+     "tipo": "Contrato",
+     "nombre": "FIGUEROA CABELLO FRANCISCO JAVIER",
+     "cargo": "Profesional",
+     "sueldo": 360000,
+     "cargo_servel": "",
+     "cese": "21/07/26"
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1236": {
    "meses": [
@@ -13164,7 +13056,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1237": {
    "meses": [
@@ -13250,7 +13142,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1238": {
    "meses": [
@@ -13346,13 +13238,13 @@
     {
      "tipo": "Honorarios",
      "nombre": "LARA TORRES HUGO HERNÁN",
-     "cargo": "Asesoría prestada al Diputado Alvaro Ortiz en gestión política e institucional, coordinando vínculos",
+     "cargo": "ASESORÍA PRESTADA AL DIPUTADO ÁLVARO ORTIZ VERA EN GESTIÓN POLÍTICA E INSTITUCIONAL, COORDINANDO VÍN",
      "sueldo": 1300000,
      "cargo_servel": "",
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1239": {
    "meses": [
@@ -13433,12 +13325,12 @@
      "tipo": "Contrato",
      "nombre": "ZUÑIGA ARIAS PEDRO ANDRES",
      "cargo": "Administrativo",
-     "sueldo": 539000,
+     "sueldo": 1000000,
      "cargo_servel": "",
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1240": {
    "meses": [
@@ -13548,7 +13440,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1241": {
    "meses": [
@@ -13611,10 +13503,26 @@
     },
     {
      "tipo": "Contrato",
+     "nombre": "CARDENAS VALENZUELA JOANA PAOLA",
+     "cargo": "Administrativo",
+     "sueldo": 334000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "CARTE HERNÁNDEZ JOSÉ CAMILO",
      "cargo": "Administrativo",
      "sueldo": 700000,
      "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
+     "nombre": "CARTES RIFFO HECTOR ALEJANDRO",
+     "cargo": "Profesional",
+     "sueldo": 622000,
+     "cargo_servel": "Concejal",
      "cese": ""
     },
     {
@@ -13635,9 +13543,25 @@
     },
     {
      "tipo": "Contrato",
+     "nombre": "GUTIÉRREZ CÁCERES FELIPE BENJAMÍN",
+     "cargo": "Administrativo",
+     "sueldo": 210000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "RETAMAL MENDEZ PATRICIO DEL TRANSITO",
      "cargo": "Profesional",
      "sueldo": 1250000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
+     "nombre": "RIOS MUÑOZ PABLO ANDRES",
+     "cargo": "Profesional",
+     "sueldo": 318600,
      "cargo_servel": "",
      "cese": ""
     },
@@ -13650,7 +13574,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1242": {
    "meses": [
@@ -13695,6 +13619,22 @@
     }
    },
    "personal_apoyo": [
+    {
+     "tipo": "Contrato",
+     "nombre": "BURGOS OBREQUE BRYAN ISAAC",
+     "cargo": "Administrativo",
+     "sueldo": 314000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
+     "nombre": "CARCAMO OJEDA ANDREA ALEJANDRA",
+     "cargo": "Administrativo",
+     "sueldo": 314000,
+     "cargo_servel": "",
+     "cese": ""
+    },
     {
      "tipo": "Contrato",
      "nombre": "CISTERNA MUÑOZ DORIS ANTONIETA",
@@ -13776,7 +13716,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1243": {
    "meses": [
@@ -13827,15 +13767,7 @@
      "cargo": "Profesional",
      "sueldo": 2600000,
      "cargo_servel": "",
-     "cese": ""
-    },
-    {
-     "tipo": "Contrato",
-     "nombre": "MATTA PARRA RICHARD EDUARDO",
-     "cargo": "Administrativo",
-     "sueldo": 406133,
-     "cargo_servel": "",
-     "cese": "29/06/26"
+     "cese": "31/07/26"
     },
     {
      "tipo": "Contrato",
@@ -13857,12 +13789,12 @@
      "tipo": "Contrato",
      "nombre": "TOALA VERA AMANDA JERALDIN",
      "cargo": "Administrativo",
-     "sueldo": 1000000,
+     "sueldo": 1500000,
      "cargo_servel": "",
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1244": {
    "meses": [
@@ -13946,9 +13878,17 @@
      "sueldo": 2600000,
      "cargo_servel": "",
      "cese": ""
+    },
+    {
+     "tipo": "Honorarios",
+     "nombre": "ROSAS DÍAZ HUGO FABIÁN",
+     "cargo": "Asesoría Informática prestada a la labor parlamentaria en configuración de redes y bases de datos, i",
+     "sueldo": 600000,
+     "cargo_servel": "",
+     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1245": {
    "meses": [
@@ -14026,7 +13966,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1246": {
    "meses": [
@@ -14099,7 +14039,7 @@
      "tipo": "Contrato",
      "nombre": "MATAMALA PEDREROS JUAN ANTONIO",
      "cargo": "Asesor",
-     "sueldo": 1600000,
+     "sueldo": 1920000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -14107,7 +14047,7 @@
      "tipo": "Contrato",
      "nombre": "NEQUEÇAUR FIERRO IGNACIO NICOLAS",
      "cargo": "Asesor",
-     "sueldo": 1000000,
+     "sueldo": 1600000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -14123,9 +14063,9 @@
      "tipo": "Contrato",
      "nombre": "ROJAS ARRIETA FELIPE HUGO",
      "cargo": "Profesional",
-     "sueldo": 700000,
+     "sueldo": 46667,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "02/07/26"
     },
     {
      "tipo": "Contrato",
@@ -14145,22 +14085,14 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "VÁSQUEZ CARRASCO FELIPE ANDRÉS",
-     "cargo": "Administrativo",
-     "sueldo": 60000,
-     "cargo_servel": "",
-     "cese": "02/06/26"
-    },
-    {
-     "tipo": "Contrato",
      "nombre": "VEJAR FUENTES ELIANA",
      "cargo": "Profesional",
      "sueldo": 1300000,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "31/07/26"
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1247": {
    "meses": [
@@ -14254,7 +14186,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1248": {
    "meses": [
@@ -14311,9 +14243,9 @@
      "tipo": "Contrato",
      "nombre": "CONCHA VALDÉS RENATO ALONSO",
      "cargo": "Asesor",
-     "sueldo": 850000,
+     "sueldo": 623333,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "22/07/26"
     },
     {
      "tipo": "Contrato",
@@ -14348,7 +14280,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1249": {
    "meses": [
@@ -14434,7 +14366,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1250": {
    "meses": [
@@ -14552,7 +14484,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1251": {
    "meses": [
@@ -14619,12 +14551,20 @@
      "cargo": "Asesor",
      "sueldo": 1900000,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "31/07/26"
     },
     {
      "tipo": "Contrato",
      "nombre": "CÁRDENAS GAZUD ANA LUISA",
      "cargo": "Asesor",
+     "sueldo": 1250000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
+     "nombre": "GODOY BALBOA CONSTANZA PAMELA",
+     "cargo": "Profesional",
      "sueldo": 1250000,
      "cargo_servel": "",
      "cese": ""
@@ -14647,14 +14587,6 @@
     },
     {
      "tipo": "Honorarios",
-     "nombre": "GODOY BALBOA CONSTANZA PAMELA",
-     "cargo": "ASESORIA LEGISLATIVA",
-     "sueldo": 727000,
-     "cargo_servel": "",
-     "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
      "nombre": "PETRIC MENESES VIVIANA NORMA",
      "cargo": "Asesoría de apoyo a la función parlamentaria en proyectos relacionados a materias sociales",
      "sueldo": 350000,
@@ -14662,7 +14594,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1252": {
    "meses": [
@@ -14748,6 +14680,14 @@
      "cese": ""
     },
     {
+     "tipo": "Contrato",
+     "nombre": "ZÁRATE SARMIENTO MATÍAS",
+     "cargo": "Asesor",
+     "sueldo": 750000,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
      "tipo": "Honorarios",
      "nombre": "CÁRCAMO AYANCAN PAMELA ANDREA",
      "cargo": "Asesoría en diseño y planificación de la estrategia de prensa. Elaboración del clipping diario y seg",
@@ -14756,7 +14696,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1253": {
    "meses": [
@@ -14850,7 +14790,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1254": {
    "meses": [
@@ -14936,7 +14876,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1255": {
    "meses": [
@@ -15038,7 +14978,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1256": {
    "meses": [
@@ -15140,7 +15080,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1257": {
    "meses": [
@@ -15195,11 +15135,11 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "GARAY VEGA MARIO ALBERTO",
-     "cargo": "Administrativo",
-     "sueldo": 600000,
+     "nombre": "GALLARDO GUEIQUEN EDUARDO ENRIQUE",
+     "cargo": "Asesor",
+     "sueldo": 673000,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "31/07/26"
     },
     {
      "tipo": "Contrato",
@@ -15218,7 +15158,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1258": {
    "meses": [
@@ -15328,7 +15268,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1259": {
    "meses": [
@@ -15446,7 +15386,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1260": {
    "meses": [
@@ -15497,7 +15437,7 @@
      "cargo": "Asesor",
      "sueldo": 940813,
      "cargo_servel": "",
-     "cese": ""
+     "cese": "31/07/26"
     },
     {
      "tipo": "Contrato",
@@ -15511,7 +15451,7 @@
      "tipo": "Contrato",
      "nombre": "MALDONADO SANHUEZA JENNIFER CATALINA",
      "cargo": "Profesional",
-     "sueldo": 1100000,
+     "sueldo": 1200000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -15519,7 +15459,7 @@
      "tipo": "Contrato",
      "nombre": "MARÍN VARGAS GUILLERMO ANDRÉS",
      "cargo": "Profesional",
-     "sueldo": 2500000,
+     "sueldo": 2800000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -15535,7 +15475,7 @@
      "tipo": "Contrato",
      "nombre": "REY DOMÍNGUEZ ANTONIA GUADALUPE",
      "cargo": "Profesional",
-     "sueldo": 1500000,
+     "sueldo": 1600000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -15546,25 +15486,9 @@
      "sueldo": 1100000,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "MUÑOZ PÉREZ CRISTIAN ENRIQUE",
-     "cargo": "ASESORIA EN APOYO A LA LABOR PARLAMENTARIA EN MATERIAS DE VIVIENDA",
-     "sueldo": 750000,
-     "cargo_servel": "",
-     "cese": ""
-    },
-    {
-     "tipo": "Honorarios",
-     "nombre": "PINO JÁUREGUI JOSÉ MANUEL",
-     "cargo": "ASESORIA EN APOYO A LA LABOR PARLAMENTARIA EN MATERIAS DE EDUCACIÓN, SALUD, MIGRACIÓN, SEGURIDAD Y P",
-     "sueldo": 550000,
-     "cargo_servel": "",
-     "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1261": {
    "meses": [
@@ -15635,6 +15559,22 @@
     },
     {
      "tipo": "Contrato",
+     "nombre": "HOSSIP ALFARO ABDUL HAMMED",
+     "cargo": "Administrativo",
+     "sueldo": 140000,
+     "cargo_servel": "",
+     "cese": "31/07/26"
+    },
+    {
+     "tipo": "Contrato",
+     "nombre": "LAIMBOCK MUÑOZ CRISTOBAL FELIPE MAXIMILIANO",
+     "cargo": "Administrativo",
+     "sueldo": 276776,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "LUCERO LEAL ÁLVARO MIGUEL",
      "cargo": "Asesor",
      "sueldo": 1500000,
@@ -15645,7 +15585,7 @@
      "tipo": "Contrato",
      "nombre": "MESTRE CAMPOS MARIA DE JESUS",
      "cargo": "Profesional",
-     "sueldo": 1500000,
+     "sueldo": 1600000,
      "cargo_servel": "",
      "cese": ""
     },
@@ -15666,7 +15606,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1262": {
    "meses": [
@@ -15752,7 +15692,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1263": {
    "meses": [
@@ -15807,6 +15747,14 @@
     },
     {
      "tipo": "Contrato",
+     "nombre": "BERNAL PARRA TATIANA PAOLA",
+     "cargo": "Asesor",
+     "sueldo": 940813,
+     "cargo_servel": "",
+     "cese": ""
+    },
+    {
+     "tipo": "Contrato",
      "nombre": "CABRERA APOLOYA DIEGO ARTURO NICANOR",
      "cargo": "Administrativo",
      "sueldo": 600000,
@@ -15831,11 +15779,11 @@
     },
     {
      "tipo": "Contrato",
-     "nombre": "LOAYZA JOFRÉ ISIDORA CONSTANZA",
-     "cargo": "Administrativo",
-     "sueldo": 150000,
+     "nombre": "OLIVARES TAPIA CATALINA PATRICIA",
+     "cargo": "Profesional",
+     "sueldo": 1700000,
      "cargo_servel": "",
-     "cese": "30/06/26"
+     "cese": ""
     },
     {
      "tipo": "Contrato",
@@ -15852,17 +15800,9 @@
      "sueldo": 2000000,
      "cargo_servel": "",
      "cese": ""
-    },
-    {
-     "tipo": "Contrato",
-     "nombre": "YÁÑEZ GULA MARJORIE PAULINA",
-     "cargo": "Profesional",
-     "sueldo": 1500000,
-     "cargo_servel": "Consejero Regional",
-     "cese": "30/06/26"
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   },
   "1264": {
    "meses": [
@@ -15972,7 +15912,7 @@
      "cese": ""
     }
    ],
-   "mes_personal": "junio 2026"
+   "mes_personal": "julio 2026"
   }
  },
  "senadores": {
@@ -44892,283 +44832,6 @@
     "periodo": "2026-03"
    }
   ],
-  "CARTER FERNANDEZ RODOLFO RAFAEL": [
-   {
-    "ano": 2026,
-    "mes": 4,
-    "apellido_paterno": "ALVAREZ",
-    "apellido_materno": "FUENTES",
-    "nombre": "JAIME ARTEMIO",
-    "cargo": "ADMINISTRADOR OFICINA PARLAMENTARIA",
-    "monto": 1200000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-04"
-   },
-   {
-    "ano": 2026,
-    "mes": 4,
-    "apellido_paterno": "MATURANA",
-    "apellido_materno": "MERINO",
-    "nombre": "MARIA SOLEDAD",
-    "cargo": "ASESOR (A) PROFESIONAL",
-    "monto": 3000000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-04"
-   },
-   {
-    "ano": 2026,
-    "mes": 5,
-    "apellido_paterno": "ALAMOS",
-    "apellido_materno": "GARRIDO",
-    "nombre": "LESLIE ELIZABETH",
-    "cargo": "JEFE (A) DE GABINETE",
-    "monto": 3600000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-05"
-   },
-   {
-    "ano": 2026,
-    "mes": 5,
-    "apellido_paterno": "LONGUEIRA",
-    "apellido_materno": "BRINKMANN",
-    "nombre": "JUAN PABLO",
-    "cargo": "JEFE (A) DE GABINETE",
-    "monto": 6500000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-05"
-   },
-   {
-    "ano": 2026,
-    "mes": 5,
-    "apellido_paterno": "ETCHEVERRY",
-    "apellido_materno": "MORALES",
-    "nombre": "JORGE ANDRES",
-    "cargo": "ASESOR (A) COMUNICACIONAL",
-    "monto": 2500000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-05"
-   },
-   {
-    "ano": 2026,
-    "mes": 5,
-    "apellido_paterno": "ALVAREZ",
-    "apellido_materno": "FUENTES",
-    "nombre": "JAIME ARTEMIO",
-    "cargo": "ADMINISTRADOR OFICINA PARLAMENTARIA",
-    "monto": 1200000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-05"
-   },
-   {
-    "ano": 2026,
-    "mes": 5,
-    "apellido_paterno": "MATURANA",
-    "apellido_materno": "MERINO",
-    "nombre": "MARIA SOLEDAD",
-    "cargo": "ASESOR (A) PROFESIONAL",
-    "monto": 3000000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-05"
-   },
-   {
-    "ano": 2026,
-    "mes": 4,
-    "apellido_paterno": "PENA",
-    "apellido_materno": "MORAGA",
-    "nombre": "GABRIELA",
-    "cargo": "ASESOR (A)",
-    "monto": 800000,
-    "calidad_juridica": "HONORARIOS",
-    "periodo": "2026-04"
-   },
-   {
-    "ano": 2026,
-    "mes": 4,
-    "apellido_paterno": "ETCHEVERRY",
-    "apellido_materno": "MORALES",
-    "nombre": "JORGE ANDRES",
-    "cargo": "ASESOR (A) COMUNICACIONAL",
-    "monto": 2500000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-04"
-   },
-   {
-    "ano": 2026,
-    "mes": 4,
-    "apellido_paterno": "ALAMOS",
-    "apellido_materno": "GARRIDO",
-    "nombre": "LESLIE ELIZABETH",
-    "cargo": "JEFE (A) DE GABINETE",
-    "monto": 3600000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-04"
-   },
-   {
-    "ano": 2026,
-    "mes": 4,
-    "apellido_paterno": "LONGUEIRA",
-    "apellido_materno": "BRINKMANN",
-    "nombre": "JUAN PABLO",
-    "cargo": "JEFE (A) DE GABINETE",
-    "monto": 6500000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-04"
-   },
-   {
-    "ano": 2026,
-    "mes": 7,
-    "apellido_paterno": "ALVAREZ",
-    "apellido_materno": "FUENTES",
-    "nombre": "JAIME ARTEMIO",
-    "cargo": "ADMINISTRADOR OFICINA PARLAMENTARIA",
-    "monto": 1200000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-07"
-   },
-   {
-    "ano": 2026,
-    "mes": 7,
-    "apellido_paterno": "MATURANA",
-    "apellido_materno": "MERINO",
-    "nombre": "MARIA SOLEDAD",
-    "cargo": "ASESOR (A) PROFESIONAL",
-    "monto": 3000000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-07"
-   },
-   {
-    "ano": 2026,
-    "mes": 7,
-    "apellido_paterno": "ALAMOS",
-    "apellido_materno": "GARRIDO",
-    "nombre": "LESLIE ELIZABETH",
-    "cargo": "JEFE (A) DE GABINETE",
-    "monto": 3600000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-07"
-   },
-   {
-    "ano": 2026,
-    "mes": 7,
-    "apellido_paterno": "ETCHEVERRY",
-    "apellido_materno": "MORALES",
-    "nombre": "JORGE ANDRES",
-    "cargo": "ASESOR (A) COMUNICACIONAL",
-    "monto": 2500000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-07"
-   },
-   {
-    "ano": 2026,
-    "mes": 7,
-    "apellido_paterno": "MONTT",
-    "apellido_materno": "HIDALGO",
-    "nombre": "GUILLERMO IGNACIO",
-    "cargo": "JEFE (A) DE GABINETE",
-    "monto": 5550000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-07"
-   },
-   {
-    "ano": 2026,
-    "mes": 3,
-    "apellido_paterno": "MATURANA",
-    "apellido_materno": "MERINO",
-    "nombre": "MARIA SOLEDAD",
-    "cargo": "ASESOR (A) PROFESIONAL",
-    "monto": 2000001,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-03"
-   },
-   {
-    "ano": 2026,
-    "mes": 6,
-    "apellido_paterno": "ALVAREZ",
-    "apellido_materno": "FUENTES",
-    "nombre": "JAIME ARTEMIO",
-    "cargo": "ADMINISTRADOR OFICINA PARLAMENTARIA",
-    "monto": 1200000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-06"
-   },
-   {
-    "ano": 2026,
-    "mes": 6,
-    "apellido_paterno": "MATURANA",
-    "apellido_materno": "MERINO",
-    "nombre": "MARIA SOLEDAD",
-    "cargo": "ASESOR (A) PROFESIONAL",
-    "monto": 3000000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-06"
-   },
-   {
-    "ano": 2026,
-    "mes": 6,
-    "apellido_paterno": "ALAMOS",
-    "apellido_materno": "GARRIDO",
-    "nombre": "LESLIE ELIZABETH",
-    "cargo": "JEFE (A) DE GABINETE",
-    "monto": 3600000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-06"
-   },
-   {
-    "ano": 2026,
-    "mes": 6,
-    "apellido_paterno": "LONGUEIRA",
-    "apellido_materno": "BRINKMANN",
-    "nombre": "JUAN PABLO",
-    "cargo": "JEFE (A) DE GABINETE",
-    "monto": 6500000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-06"
-   },
-   {
-    "ano": 2026,
-    "mes": 6,
-    "apellido_paterno": "ETCHEVERRY",
-    "apellido_materno": "MORALES",
-    "nombre": "JORGE ANDRES",
-    "cargo": "ASESOR (A) COMUNICACIONAL",
-    "monto": 2500000,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-06"
-   },
-   {
-    "ano": 2026,
-    "mes": 3,
-    "apellido_paterno": "ALAMOS",
-    "apellido_materno": "GARRIDO",
-    "nombre": "LESLIE ELIZABETH",
-    "cargo": "JEFE (A) DE GABINETE",
-    "monto": 2400001,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-03"
-   },
-   {
-    "ano": 2026,
-    "mes": 3,
-    "apellido_paterno": "LONGUEIRA",
-    "apellido_materno": "BRINKMANN",
-    "nombre": "JUAN PABLO",
-    "cargo": "JEFE (A) DE GABINETE",
-    "monto": 4333333,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-03"
-   },
-   {
-    "ano": 2026,
-    "mes": 3,
-    "apellido_paterno": "ETCHEVERRY",
-    "apellido_materno": "MORALES",
-    "nombre": "JORGE ANDRES",
-    "cargo": "ASESOR (A) COMUNICACIONAL",
-    "monto": 1666667,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-03"
-   }
-  ],
   "CELIS ARAYA RICARDO PATRICIO": [
    {
     "ano": 2026,
@@ -46354,17 +46017,6 @@
    {
     "ano": 2026,
     "mes": 7,
-    "apellido_paterno": "ZAMORA",
-    "apellido_materno": "SOTO",
-    "nombre": "JUAN ANTONIO",
-    "cargo": "COORDINADOR (A) TERRITORIAL",
-    "monto": 121476,
-    "calidad_juridica": "INDEFINIDO",
-    "periodo": "2026-07"
-   },
-   {
-    "ano": 2026,
-    "mes": 7,
     "apellido_paterno": "FERNANDEZ",
     "apellido_materno": "BARRUTI",
     "nombre": "MARIA JOSE",
@@ -46415,6 +46067,17 @@
     "cargo": "SECRETARIA (O)",
     "monto": 1500000,
     "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-07"
+   },
+   {
+    "ano": 2026,
+    "mes": 7,
+    "apellido_paterno": "ZAMORA",
+    "apellido_materno": "SOTO",
+    "nombre": "JUAN ANTONIO",
+    "cargo": "COORDINADOR (A) TERRITORIAL",
+    "monto": 121476,
+    "calidad_juridica": "FQTO.30-06-2026",
     "periodo": "2026-07"
    },
    {
@@ -47023,6 +46686,283 @@
     "monto": 1600000,
     "calidad_juridica": "INDEFINIDO",
     "periodo": "2026-06"
+   }
+  ],
+  "CARTER FERNANDEZ RODOLFO RAFAEL": [
+   {
+    "ano": 2026,
+    "mes": 4,
+    "apellido_paterno": "MATURANA",
+    "apellido_materno": "MERINO",
+    "nombre": "MARIA SOLEDAD",
+    "cargo": "ASESOR (A) PROFESIONAL",
+    "monto": 3000000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-04"
+   },
+   {
+    "ano": 2026,
+    "mes": 5,
+    "apellido_paterno": "ALAMOS",
+    "apellido_materno": "GARRIDO",
+    "nombre": "LESLIE ELIZABETH",
+    "cargo": "JEFE (A) DE GABINETE",
+    "monto": 3600000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-05"
+   },
+   {
+    "ano": 2026,
+    "mes": 5,
+    "apellido_paterno": "LONGUEIRA",
+    "apellido_materno": "BRINKMANN",
+    "nombre": "JUAN PABLO",
+    "cargo": "JEFE (A) DE GABINETE",
+    "monto": 6500000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-05"
+   },
+   {
+    "ano": 2026,
+    "mes": 5,
+    "apellido_paterno": "ETCHEVERRY",
+    "apellido_materno": "MORALES",
+    "nombre": "JORGE ANDRES",
+    "cargo": "ASESOR (A) COMUNICACIONAL",
+    "monto": 2500000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-05"
+   },
+   {
+    "ano": 2026,
+    "mes": 4,
+    "apellido_paterno": "PENA",
+    "apellido_materno": "MORAGA",
+    "nombre": "GABRIELA",
+    "cargo": "ASESOR (A)",
+    "monto": 800000,
+    "calidad_juridica": "HONORARIOS",
+    "periodo": "2026-04"
+   },
+   {
+    "ano": 2026,
+    "mes": 4,
+    "apellido_paterno": "ETCHEVERRY",
+    "apellido_materno": "MORALES",
+    "nombre": "JORGE ANDRES",
+    "cargo": "ASESOR (A) COMUNICACIONAL",
+    "monto": 2500000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-04"
+   },
+   {
+    "ano": 2026,
+    "mes": 4,
+    "apellido_paterno": "ALAMOS",
+    "apellido_materno": "GARRIDO",
+    "nombre": "LESLIE ELIZABETH",
+    "cargo": "JEFE (A) DE GABINETE",
+    "monto": 3600000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-04"
+   },
+   {
+    "ano": 2026,
+    "mes": 7,
+    "apellido_paterno": "ALVAREZ",
+    "apellido_materno": "FUENTES",
+    "nombre": "JAIME ARTEMIO",
+    "cargo": "ADMINISTRADOR OFICINA PARLAMENTARIA",
+    "monto": 1200000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-07"
+   },
+   {
+    "ano": 2026,
+    "mes": 7,
+    "apellido_paterno": "MATURANA",
+    "apellido_materno": "MERINO",
+    "nombre": "MARIA SOLEDAD",
+    "cargo": "ASESOR (A) PROFESIONAL",
+    "monto": 3000000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-07"
+   },
+   {
+    "ano": 2026,
+    "mes": 7,
+    "apellido_paterno": "ALAMOS",
+    "apellido_materno": "GARRIDO",
+    "nombre": "LESLIE ELIZABETH",
+    "cargo": "JEFE (A) DE GABINETE",
+    "monto": 3600000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-07"
+   },
+   {
+    "ano": 2026,
+    "mes": 7,
+    "apellido_paterno": "ETCHEVERRY",
+    "apellido_materno": "MORALES",
+    "nombre": "JORGE ANDRES",
+    "cargo": "ASESOR (A) COMUNICACIONAL",
+    "monto": 2500000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-07"
+   },
+   {
+    "ano": 2026,
+    "mes": 7,
+    "apellido_paterno": "MONTT",
+    "apellido_materno": "HIDALGO",
+    "nombre": "GUILLERMO IGNACIO",
+    "cargo": "JEFE (A) DE GABINETE",
+    "monto": 5550000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-07"
+   },
+   {
+    "ano": 2026,
+    "mes": 6,
+    "apellido_paterno": "ALVAREZ",
+    "apellido_materno": "FUENTES",
+    "nombre": "JAIME ARTEMIO",
+    "cargo": "ADMINISTRADOR OFICINA PARLAMENTARIA",
+    "monto": 1200000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-06"
+   },
+   {
+    "ano": 2026,
+    "mes": 6,
+    "apellido_paterno": "ETCHEVERRY",
+    "apellido_materno": "MORALES",
+    "nombre": "JORGE ANDRES",
+    "cargo": "ASESOR (A) COMUNICACIONAL",
+    "monto": 2500000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-06"
+   },
+   {
+    "ano": 2026,
+    "mes": 5,
+    "apellido_paterno": "ALVAREZ",
+    "apellido_materno": "FUENTES",
+    "nombre": "JAIME ARTEMIO",
+    "cargo": "ADMINISTRADOR OFICINA PARLAMENTARIA",
+    "monto": 1200000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-05"
+   },
+   {
+    "ano": 2026,
+    "mes": 5,
+    "apellido_paterno": "MATURANA",
+    "apellido_materno": "MERINO",
+    "nombre": "MARIA SOLEDAD",
+    "cargo": "ASESOR (A) PROFESIONAL",
+    "monto": 3000000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-05"
+   },
+   {
+    "ano": 2026,
+    "mes": 4,
+    "apellido_paterno": "ALVAREZ",
+    "apellido_materno": "FUENTES",
+    "nombre": "JAIME ARTEMIO",
+    "cargo": "ADMINISTRADOR OFICINA PARLAMENTARIA",
+    "monto": 1200000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-04"
+   },
+   {
+    "ano": 2026,
+    "mes": 4,
+    "apellido_paterno": "LONGUEIRA",
+    "apellido_materno": "BRINKMANN",
+    "nombre": "JUAN PABLO",
+    "cargo": "JEFE (A) DE GABINETE",
+    "monto": 6500000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-04"
+   },
+   {
+    "ano": 2026,
+    "mes": 3,
+    "apellido_paterno": "MATURANA",
+    "apellido_materno": "MERINO",
+    "nombre": "MARIA SOLEDAD",
+    "cargo": "ASESOR (A) PROFESIONAL",
+    "monto": 2000001,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-03"
+   },
+   {
+    "ano": 2026,
+    "mes": 6,
+    "apellido_paterno": "MATURANA",
+    "apellido_materno": "MERINO",
+    "nombre": "MARIA SOLEDAD",
+    "cargo": "ASESOR (A) PROFESIONAL",
+    "monto": 3000000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-06"
+   },
+   {
+    "ano": 2026,
+    "mes": 6,
+    "apellido_paterno": "ALAMOS",
+    "apellido_materno": "GARRIDO",
+    "nombre": "LESLIE ELIZABETH",
+    "cargo": "JEFE (A) DE GABINETE",
+    "monto": 3600000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-06"
+   },
+   {
+    "ano": 2026,
+    "mes": 6,
+    "apellido_paterno": "LONGUEIRA",
+    "apellido_materno": "BRINKMANN",
+    "nombre": "JUAN PABLO",
+    "cargo": "JEFE (A) DE GABINETE",
+    "monto": 6500000,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-06"
+   },
+   {
+    "ano": 2026,
+    "mes": 3,
+    "apellido_paterno": "ALAMOS",
+    "apellido_materno": "GARRIDO",
+    "nombre": "LESLIE ELIZABETH",
+    "cargo": "JEFE (A) DE GABINETE",
+    "monto": 2400001,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-03"
+   },
+   {
+    "ano": 2026,
+    "mes": 3,
+    "apellido_paterno": "LONGUEIRA",
+    "apellido_materno": "BRINKMANN",
+    "nombre": "JUAN PABLO",
+    "cargo": "JEFE (A) DE GABINETE",
+    "monto": 4333333,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-03"
+   },
+   {
+    "ano": 2026,
+    "mes": 3,
+    "apellido_paterno": "ETCHEVERRY",
+    "apellido_materno": "MORALES",
+    "nombre": "JORGE ANDRES",
+    "cargo": "ASESOR (A) COMUNICACIONAL",
+    "monto": 1666667,
+    "calidad_juridica": "INDEFINIDO",
+    "periodo": "2026-03"
    }
   ],
   "CARIOLA OLIVA KAROL AIDA": [

@@ -10,6 +10,12 @@ describe("capa común de datos ETL", () => {
     expect(normalizeSearchText("  René Manuel García  ")).toBe("rene manuel garcia");
   });
 
+  it("ignora campos oficiales no textuales al construir evidencia", () => {
+    expect(normalizeSearchText(["René Manuel García"])).toBe("");
+    expect(normalizeSearchText({ nombre: "René Manuel García" })).toBe("");
+    expect(normalizeSearchText(null)).toBe("");
+  });
+
   it("expone frescura y conteos del snapshot publicado", () => {
     const summary = getSnapshotSummary();
     expect(summary.generatedAt).toBeTruthy();

@@ -34,7 +34,7 @@ function formatCLP(n?: number | null) {
   }).format(n);
 }
 
-function formatCompactCLP(n: number) {
+function formatCompactCLP(n?: number | null) {
   if (!n || n <= 0) return "—";
   if (n >= 1_000_000_000_000) {
     return `$${(n / 1_000_000_000_000).toLocaleString("es-CL", {
@@ -120,6 +120,7 @@ export default function MunicipalidadDetailDashboardClient({
   const auditorias = muniData.auditorias_cgr ?? [];
   const topRemuneraciones = muniData.top_remuneraciones ?? [];
   const topHorasExtras = muniData.top_horas_extras ?? [];
+  const integrityAnomalies = muniData.anomalias_integridad ?? [];
 
   const partidoAlcalde =
     alcalde?.partido_alcalde ||
@@ -1010,6 +1011,28 @@ export default function MunicipalidadDetailDashboardClient({
             )}
           </div>
 
+          {integrityAnomalies.length > 0 && (
+            <div className="card" role="alert" style={{ padding: "1.25rem", borderColor: "var(--bad)" }}>
+              <div className="section-title" style={{ marginBottom: "0.4rem", color: "var(--bad)" }}>
+                Hallazgos de integridad ALTA (V7)
+              </div>
+              <p style={{ margin: "0 0 0.75rem", fontSize: "0.75rem", color: "var(--text-subtle)" }}>
+                Estas filas provienen de la fuente oficial, exceden los límites de plausibilidad y fueron excluidas de totales y rankings normales sin alterar su evidencia.
+              </p>
+              {integrityAnomalies.map((anomaly) => (
+                <div key={anomaly.id} style={{ padding: "0.6rem 0", borderTop: "1px solid var(--border-subtle)", fontSize: "0.76rem" }}>
+                  <strong>{anomaly.record.nombre_completo || anomaly.id}</strong>{" · "}
+                  {anomaly.violations.includes("sueldo_mensual") && `remuneración ${formatCLP(anomaly.record.remuneracion_bruta_mensual)}`}
+                  {anomaly.violations.length > 1 && " · "}
+                  {anomaly.violations.includes("horas_extras") && `${anomaly.record.horas_extras_mes_anterior ?? 0} horas extra`}
+                  {anomaly.source_url && (
+                    <> · <a href={anomaly.source_url} target="_blank" rel="noopener noreferrer">ver fuente oficial ↗</a></>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+
           {/* Top Remuneraciones M1 */}
           {topRemuneraciones.length > 0 && (
             <div className="card" style={{ padding: "1.5rem" }}>
@@ -1121,10 +1144,8 @@ export default function MunicipalidadDetailDashboardClient({
       {/* ═══ PESTAÑA 3: COMPRAS PÚBLICAS (OCDS) (M2) ═════════════════════════ */}
       {activeTab === "compras" && (() => {
         const procesos = compras?.procesos || [];
-        const fallbackOrders = compras?.top_compras || [];
-
-        const totalProcesosCount = compras?.procesos_count || procesos.length || 1;
-        const totalOrdenesCount = compras?.ordenes_count || fallbackOrders.length || totalProcesosCount;
+        const totalProcesosCount = compras?.procesos_count ?? procesos.length;
+        const totalOrdenesCount = compras?.ordenes_count ?? null;
 
         // Filtro por modalidad
         let filteredProcesos = [...procesos];
@@ -1143,7 +1164,7 @@ export default function MunicipalidadDetailDashboardClient({
             p.titulo_proceso.toLowerCase().includes(q) ||
             p.proveedor_adjudicado.toLowerCase().includes(q) ||
             p.ocid_padre.toLowerCase().includes(q) ||
-            p.ordenes_compra.some(o => o.titulo.toLowerCase().includes(q) || o.ocid.toLowerCase().includes(q))
+            p.ordenes_compra.some(o => (o.titulo ?? "").toLowerCase().includes(q) || (o.ocid ?? "").toLowerCase().includes(q))
           );
         }
 
@@ -1165,6 +1186,23 @@ export default function MunicipalidadDetailDashboardClient({
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             {compras ? (
               <>
+                {compras.anomalias_integridad.length > 0 && (
+                  <div className="card" style={{ padding: "1.25rem", border: "1px solid var(--warn)" }}>
+                    <strong style={{ color: "var(--warn)", display: "block", marginBottom: "0.35rem" }}>
+                      Hallazgo de integridad ALTA (V7) · valor oficial preservado
+                    </strong>
+                    <p style={{ margin: 0, fontSize: "0.78rem", color: "var(--text-muted)" }}>
+                      {compras.anomalias_integridad.length} orden(es) oficial(es) fuera del límite de sanidad fueron excluidas de totales y rankings, sin alterar su evidencia de origen.
+                    </p>
+                    <ul style={{ margin: "0.65rem 0 0", paddingLeft: "1.2rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                      {compras.anomalias_integridad.map((anomaly) => (
+                        <li key={anomaly.id ?? `${anomaly.titulo}-${anomaly.monto_oficial_clp}`}>
+                          {anomaly.titulo ?? "Orden oficial sin título"} · {formatCLP(anomaly.monto_oficial_clp)}{anomaly.source_url ? <> · <a href={anomaly.source_url} target="_blank" rel="noopener noreferrer">fuente ↗</a></> : null}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
                 {/* Métricas Generales M2 */}
                 <div
                   style={{
@@ -1203,10 +1241,12 @@ export default function MunicipalidadDetailDashboardClient({
                       </span>
                     </div>
                     <div style={{ fontFamily: "monospace", fontSize: "1.25rem", fontWeight: 900, color: "var(--text-primary)", marginTop: "0.2rem" }}>
-                      {totalProcesosCount} procesos · {totalOrdenesCount} órdenes de compra
+                      {totalProcesosCount} procesos · {totalOrdenesCount ?? "—"} órdenes de compra
                     </div>
                     <div style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: "0.2rem" }}>
-                      {totalOrdenesCount} órdenes de compra agrupadas en {totalProcesosCount} procesos OCDS
+                      {totalOrdenesCount === null
+                        ? "La fuente consultada no entrega un conteo verificable de órdenes"
+                        : `${totalOrdenesCount} órdenes de compra agrupadas en ${totalProcesosCount} procesos OCDS`}
                     </div>
                   </div>
                 </div>
@@ -1466,7 +1506,7 @@ export default function MunicipalidadDetailDashboardClient({
                                           {formatCLP(co.monto_clp)}
                                         </strong>
                                         <a
-                                          href={co.url || `https://api.mercadopublico.cl/APISOCDS/OCDS/award/${encodeURIComponent(co.ocid)}`}
+                                          href={co.url || `https://api.mercadopublico.cl/APISOCDS/OCDS/award/${encodeURIComponent(co.ocid ?? "")}`}
                                           target="_blank"
                                           rel="noopener noreferrer"
                                           style={{ color: "var(--accent)", textDecoration: "none", fontSize: "0.7rem", fontWeight: 700 }}
@@ -1507,7 +1547,9 @@ export default function MunicipalidadDetailDashboardClient({
                     }}
                   >
                     <span>
-                      📌 <strong>Nota OCDS:</strong> {totalOrdenesCount} órdenes de compra agrupadas en {totalProcesosCount} procesos.
+                      📌 <strong>Nota OCDS:</strong> {totalOrdenesCount === null
+                        ? `la fuente acredita ${totalProcesosCount} procesos; no publica un conteo verificable de órdenes.`
+                        : `${totalOrdenesCount} órdenes de compra agrupadas en ${totalProcesosCount} procesos.`}
                     </span>
                     <span style={{ color: "var(--text-subtle)" }}>
                       Fuente: MercadoPúblico / Estándar OCDS ChileCompra
@@ -1769,7 +1811,7 @@ export default function MunicipalidadDetailDashboardClient({
                 </div>
 
                 <div style={{ marginTop: "0.5rem", fontSize: "0.72rem", color: "var(--text-subtle)" }}>
-                  Cobertura nacional: 275 informes SIAPER cruzados en 53 de 346 comunas.
+                  {auditorias.length} informe(s) oficial(es) vinculados a esta comuna en la proyección local.
                 </div>
               </div>
             ) : (
@@ -1783,7 +1825,7 @@ export default function MunicipalidadDetailDashboardClient({
                   }}
                 >
                   <p style={{ color: "var(--text-primary)", fontSize: "0.85rem", margin: "0 0 0.75rem", lineHeight: 1.5 }}>
-                    Se consultaron los 275 informes SIAPER 2024-2026 por CUT <strong>{cut}</strong> y razón social oficial; <strong>0 coincidencias en el período</strong>.
+                    La proyección CGR local no contiene coincidencias verificables para el CUT <strong>{cut}</strong> y la razón social oficial de esta comuna.
                   </p>
                   <div>
                     <a
@@ -1810,7 +1852,7 @@ export default function MunicipalidadDetailDashboardClient({
                   }}
                 >
                   <div style={{ fontWeight: 700, color: "var(--text-primary)", marginBottom: "0.3rem" }}>
-                    📊 Cobertura nacional: 275 informes en 53 de 346 comunas
+                    📊 Cobertura de esta ficha: sin coincidencias verificables
                   </div>
                   <div>
                     Puedes comprobar el funcionamiento del cruce de auditorías en comunas con informes publicados:{" "}

@@ -15,9 +15,9 @@ export interface DetalleRebelde {
 
 export interface SesionRebelde {
   id: string;
-  fecha: string;
-  descripcion: string;
-  tramite: string;
+  fecha: string | null;
+  descripcion: string | null;
+  tramite: string | null;
   url_tramitacion: string | null;
   votosRebeldesCount: number;
   votosMayoriaCount: number;
@@ -29,8 +29,8 @@ export interface DisciplinaBancada {
   totalVotosConscientes: number;
   totalVotosCoincidentes: number;
   totalVotosRebeldes: number;
-  pctDisciplina: number;
-  pctRebelion: number;
+  pctDisciplina: number | null;
+  pctRebelion: number | null;
   topVotosRebeldes: SesionRebelde[];
 }
 
@@ -90,8 +90,8 @@ export interface ConteoOpciones {
 
 export interface FilaVotacionPartido {
   id: string;
-  fecha: string;
-  descripcion: string;
+  fecha: string | null;
+  descripcion: string | null;
   tramite: string | null;
   resultado: string | null;
   si: number;
@@ -150,8 +150,8 @@ export interface PartidoResumenCompleto {
   pctAbst: number;
   pctNoVota: number;
   asistencia: number;
-  pctDisciplina: number;
-  pctRebelion: number;
+  pctDisciplina: number | null;
+  pctRebelion: number | null;
   gastosTotal: number;
   gastosPorMes: Record<string, number>;
   promedioGastoPorParlamentario: number;
@@ -203,8 +203,8 @@ export async function disciplinaDelPartido(partidoId: string): Promise<Disciplin
     totalVotosConscientes: 0,
     totalVotosCoincidentes: 0,
     totalVotosRebeldes: 0,
-    pctDisciplina: 100,
-    pctRebelion: 0,
+    pctDisciplina: null,
+    pctRebelion: null,
     topVotosRebeldes: [],
   };
 }

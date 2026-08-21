@@ -17,10 +17,11 @@
  */
 import puppeteerExtra from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
-import { appendFileSync, existsSync, mkdirSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { readFileIfPresent } from "../safe-file.mjs";
+import { launchFirstAvailable } from "../browser-launch.mjs";
 
 puppeteerExtra.use(StealthPlugin());
 
@@ -33,20 +34,20 @@ const RETRY_WAIT_MS = 20_000;
 const MAX_REINTENTOS = 3;
 const MAX_ERRORES_CONSECUTIVOS = 5;
 
-function browserExecutable() {
+function browserExecutables() {
   const candidates = [
     process.env.PUPPETEER_EXECUTABLE_PATH,
     process.env.CHROME_PATH,
-    process.platform === "win32" ? "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe" : null,
     process.platform === "win32" ? "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe" : null,
+    process.platform === "win32" ? "C:\\Program Files (x86)\\Microsoft\\Edge\\Application\\msedge.exe" : null,
     "/usr/bin/google-chrome",
     "/usr/bin/google-chrome-stable",
     "/usr/bin/chromium",
     "/usr/bin/chromium-browser",
   ].filter(Boolean);
-  const executable = candidates.find((candidate) => existsSync(candidate));
-  if (!executable) throw new Error("CAMARA_GASTOS_BROWSER_NOT_FOUND");
-  return executable;
+  const executables = [...new Set(candidates.filter((candidate) => existsSync(candidate)))];
+  if (executables.length === 0) throw new Error("CAMARA_GASTOS_BROWSER_NOT_FOUND");
+  return executables;
 }
 
 function esperar(ms) {
@@ -180,20 +181,25 @@ export async function fetchGastosCamara({ diputados = [] } = {}) {
   if (nómina.length === 0) return [];
   const totalDiputados = hechos.size + nómina.length;
 
-  const browser = await puppeteerExtra.launch({
-    executablePath: browserExecutable(),
-    headless: "new",
-    userDataDir: join(PROGRESO_DIR, `pptr-etl-${hoyStamp}`),
-    args: [
-      "--no-sandbox",
-      "--disable-setuid-sandbox",
-      "--no-first-run",
-      "--disable-gpu",
-      "--disable-blink-features=AutomationControlled",
-      "--window-size=1366,900",
-      "--lang=es-CL,es",
-    ],
-  });
+  const browserProfile = mkdtempSync(join(PROGRESO_DIR, "pptr-etl-"));
+  const browser = await launchFirstAvailable(
+    browserExecutables(),
+    (executablePath) => puppeteerExtra.launch({
+      executablePath,
+      headless: "new",
+      userDataDir: browserProfile,
+      args: [
+        "--no-sandbox",
+        "--disable-setuid-sandbox",
+        "--no-first-run",
+        "--disable-gpu",
+        "--disable-blink-features=AutomationControlled",
+        "--window-size=1366,900",
+        "--lang=es-CL,es",
+      ],
+    }),
+    (executable, message) => console.warn(`[camara-gastos] navegador no disponible ${executable}: ${message.split("\n")[0]}`),
+  );
 
   const resultados = [];
   let erroresConsecutivos = 0;
@@ -263,6 +269,7 @@ export async function fetchGastosCamara({ diputados = [] } = {}) {
     await page.close();
   } finally {
     await browser.close().catch(() => {});
+    try { rmSync(browserProfile, { recursive: true, force: true }); } catch {}
   }
   return resultados;
 }

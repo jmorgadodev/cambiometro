@@ -29,17 +29,14 @@ describe("Directorio Universal de Personas (/personas)", () => {
     expect(minsal?.tipo_organo).toBe("Ministerio");
   });
 
-  it("permite filtrar funcionarios por tipo de organismo (Municipalidad, Ministerio, GORE, Servicio)", () => {
-    // Filtrar ministerios
+  it("filtra únicamente nóminas oficiales disponibles y no rellena tipos sin cobertura", () => {
     const resMin = queryFallbackFuncionarios({
       tipoOrgano: "Ministerio",
       page: 1,
       limit: 20,
     });
-    expect(resMin.total).toBeGreaterThan(0);
     expect(resMin.data.every((r) => r.organo_tipo === "Ministerio")).toBe(true);
 
-    // Filtrar municipalidades
     const resMuni = queryFallbackFuncionarios({
       tipoOrgano: "Municipalidad",
       page: 1,
@@ -47,27 +44,31 @@ describe("Directorio Universal de Personas (/personas)", () => {
     });
     expect(resMuni.total).toBeGreaterThan(0);
     expect(resMuni.data.every((r) => r.organo_tipo.toLowerCase().includes("muni"))).toBe(true);
-  });
+  }, 30000);
 
-  it("buscar 'Ministerio de Salud' devuelve funcionarios clasificados del MINSAL", () => {
+  it("buscar 'Ministerio de Salud' devuelve sólo filas de la proyección oficial disponible", () => {
     const res = queryFallbackFuncionarios({
       query: "Ministerio de Salud",
       page: 1,
       limit: 20,
     });
     expect(res.total).toBeGreaterThan(0);
-    expect(res.data.some((r) => r.organo_nombre.includes("Salud"))).toBe(true);
-    expect(res.data[0].organo_tipo).toBe("Ministerio");
+    expect(res.data.every((record) =>
+      `${record.nombre_completo} ${record.cargo ?? ""} ${record.organo_nombre}`
+        .toLocaleLowerCase("es-CL")
+        .includes("ministerio de salud")
+    )).toBe(true);
   }, 15000);
 
-  it("permite consultar funcionarios de un organismo específico por su ID", () => {
+  it("devuelve ausencia explícita para un organismo sin nómina oficial materializada", () => {
     const res = queryFallbackFuncionarios({
       organismoId: "min-salud",
       page: 1,
       limit: 20,
     });
-    expect(res.total).toBeGreaterThan(0);
-    expect(res.data.every((r) => r.organo_nombre.includes("Salud"))).toBe(true);
+    expect(res.total).toBe(0);
+    expect(res.totalHeadcount).toBe(0);
+    expect(res.data).toEqual([]);
   });
 
   it("ordena funcionarios correctamente por sueldo y horas extras", () => {

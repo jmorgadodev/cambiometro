@@ -56,7 +56,7 @@ export default function ServiciosPublicosClient({
   presupuestoTotalLey: presupuestoTotalLeyProp,
   gastoDevengado: gastoDevengadoProp,
 }: Props) {
-  const totalConPresupuestoEfectivo = totalConPartida ?? totalConPresupuesto ?? 69;
+  const totalConPresupuestoEfectivo = totalConPartida ?? totalConPresupuesto ?? 0;
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -185,11 +185,11 @@ export default function ServiciosPublicosClient({
     }
     const finalInicial = presupuestoTotalLeyProp && presupuestoTotalLeyProp > 0 && activeTab === "Todos"
       ? presupuestoTotalLeyProp
-      : inicialLey > 0 ? inicialLey : 83_420_000_000_000;
+      : inicialLey;
 
     const finalEjecutado = gastoDevengadoProp && gastoDevengadoProp > 0 && activeTab === "Todos"
       ? gastoDevengadoProp
-      : ejecutado > 0 ? ejecutado : 45_180_000_000_000;
+      : ejecutado;
 
     return {
       inicialLey: finalInicial,
@@ -253,16 +253,16 @@ export default function ServiciosPublicosClient({
             <div
               className="card"
               style={{ background: "var(--surface-2)", borderColor: "var(--border)", padding: "1.25rem" }}
-              title="Suma de presupuestos institucionales monitoreados; incluye transferencias internas. Consolidado oficial Gobierno Central: $83,42 billones (DIPRES)"
+              title="Suma de presupuestos institucionales monitoreados; incluye transferencias internas."
             >
               <div style={{ fontSize: "0.72rem", color: "var(--text-3)", fontWeight: 700, textTransform: "uppercase", display: "flex", alignItems: "center", justifyContent: "space-between" }}>
                 <span>Presupuesto Ley Inicial</span>
-                <span style={{ fontSize: "0.75rem", cursor: "help" }} title="Suma de presupuestos institucionales monitoreados; incluye transferencias internas. Consolidado oficial Gobierno Central: $83,42 billones (DIPRES)">
+                <span style={{ fontSize: "0.75rem", cursor: "help" }} title="Suma de presupuestos institucionales monitoreados; incluye transferencias internas.">
                   ℹ️
                 </span>
               </div>
               <div style={{ fontFamily: "var(--font-mono, monospace)", fontSize: "1.35rem", fontWeight: 900, color: "var(--accent)", marginTop: "0.2rem" }}>
-                {presupuestoTotal.inicialLey > 0 ? formatCLP(presupuestoTotal.inicialLey) : "$83.4 billones"}
+                {presupuestoTotal.inicialLey > 0 ? formatCLP(presupuestoTotal.inicialLey) : "—"}
               </div>
               <div style={{ fontSize: "0.72rem", color: "var(--text-3)", marginTop: "0.25rem" }}>
                 Ley de Presupuestos 2026 · DIPRES
@@ -540,13 +540,13 @@ export default function ServiciosPublicosClient({
                       <div style={{ padding: "0.5rem 0.6rem", background: "var(--bg-surface-2)", borderRadius: 6 }}>
                         <span style={{ fontSize: "0.66rem", color: "var(--text-subtle)", textTransform: "uppercase", fontWeight: 700, display: "block" }}>Dotación</span>
                         <strong style={{ fontSize: "0.86rem", color: "var(--ok)", fontFamily: "monospace" }}>
-                          {personal ? `${personal.dotacion_total.toLocaleString("es-CL")} pers.` : "—"}
+                          {personal?.dotacion_total !== null && personal?.dotacion_total !== undefined ? `${personal.dotacion_total.toLocaleString("es-CL")} pers.` : "—"}
                         </strong>
                       </div>
                       <div style={{ padding: "0.5rem 0.6rem", background: "var(--bg-surface-2)", borderRadius: 6 }}>
                         <span style={{ fontSize: "0.66rem", color: "var(--text-subtle)", textTransform: "uppercase", fontWeight: 700, display: "block" }}>Compras OCDS</span>
                         <strong style={{ fontSize: "0.86rem", color: "var(--warn)", fontFamily: "monospace" }}>
-                          {compras ? formatCLP(compras.monto_total_clp) : "—"}
+                          {compras?.monto_total_clp !== null && compras?.monto_total_clp !== undefined ? formatCLP(compras.monto_total_clp) : "—"}
                         </strong>
                       </div>
                     </div>
@@ -665,10 +665,10 @@ export default function ServiciosPublicosClient({
                           {p && p.vigente_clp > 0 ? formatCLP(p.vigente_clp) : "Subordinado"}
                         </td>
                         <td style={{ padding: "0.85rem 1rem", textAlign: "right", fontFamily: "var(--font-mono, monospace)", color: "var(--ok)", fontWeight: 700 }}>
-                          {personal ? `${personal.dotacion_total.toLocaleString("es-CL")} pers.` : "—"}
+                          {personal?.dotacion_total !== null && personal?.dotacion_total !== undefined ? `${personal.dotacion_total.toLocaleString("es-CL")} pers.` : "—"}
                         </td>
                         <td style={{ padding: "0.85rem 1rem", textAlign: "right", fontFamily: "var(--font-mono, monospace)", color: "var(--warn)", fontWeight: 700 }}>
-                          {compras ? formatCLP(compras.monto_total_clp) : "—"}
+                          {compras?.monto_total_clp !== null && compras?.monto_total_clp !== undefined ? formatCLP(compras.monto_total_clp) : "—"}
                         </td>
                         <td style={{ padding: "0.85rem 1rem", textAlign: "center" }}>
                           <Link href={`/servicios-publicos/${serv.id}`} className="btn btn-ghost" style={{ fontSize: "0.75rem", padding: "0.25rem 0.5rem" }}>

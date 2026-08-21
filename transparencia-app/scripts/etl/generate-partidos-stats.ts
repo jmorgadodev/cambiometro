@@ -2,15 +2,18 @@ import fs from "fs";
 import path from "path";
 import { PARTIDOS_SEED, POLITICOS_SEED } from "../../lib/seed-politicos";
 import { normalizePartidoId } from "../../lib/partido-estadisticas";
+import { resumirGastosAgregables } from "../../lib/gastos-operacionales";
+import { officialSessionMetadata } from "../../lib/session-integrity";
+import type { EtlRecord } from "../../lib/data-source";
 
 console.log("Generando estadísticas avanzadas y completas de partidos...");
 
 interface SessionData {
   id: string;
-  nombre: string;
-  fecha: string;
+  nombre?: string;
+  fecha?: string;
   periodo: string;
-  descripcion: string;
+  descripcion?: string;
   resultado?: string;
   quorum?: string;
   tipo?: string;
@@ -50,9 +53,9 @@ interface EvidenceSource {
 
 interface SesionRebelde {
   id: string;
-  fecha: string;
-  descripcion: string;
-  tramite?: string;
+  fecha: string | null;
+  descripcion: string | null;
+  tramite: string | null;
   url_tramitacion?: string | null;
   votosRebeldesCount: number;
   votosMayoriaCount?: number;
@@ -62,6 +65,9 @@ interface SesionRebelde {
 
 // 2. Cargar evidencias de políticos (gastos de Cámara y Senado reales)
 const polEvPath = path.join(process.cwd(), "data", "politicos-evidences.json");
+if (!fs.existsSync(polEvPath)) {
+  throw new Error(`PARTIDOS_EVIDENCE_REQUIRED: falta ${polEvPath}; no se sobrescribirá la proyección con ceros.`);
+}
 const polEvData: Record<string, EvidenceSource[]> = fs.existsSync(polEvPath)
   ? JSON.parse(fs.readFileSync(polEvPath, "utf8"))
   : {};
@@ -143,6 +149,14 @@ for (const partido of PARTIDOS_SEED) {
     }
 
     if (countInParty > 0) {
+      const metadata = officialSessionMetadata({
+        fecha: ses.fecha,
+        descripcion: ses.descripcion,
+        nombre: ses.nombre,
+        tramite: ses.tramite,
+        resultado: ses.resultado,
+        url_tramitacion: ses.url_tramitacion || ses.url,
+      });
       const emitidosSes = si + no + abst;
       const aparicionesSes = countInParty;
       const pctSi = emitidosSes > 0 ? Math.round((si / emitidosSes) * 100) : 0;
@@ -170,10 +184,10 @@ for (const partido of PARTIDOS_SEED) {
 
           sesionesRebeldes.push({
             id: ses.id,
-            fecha: ses.fecha ? ses.fecha.slice(0, 10) : "2026-08-01",
-            descripcion: ses.descripcion || ses.nombre || "Votación de Sala",
-            tramite: ses.tramite || "Tramitación en Sala",
-            url_tramitacion: ses.url_tramitacion || ses.url || null,
+            fecha: metadata.fecha,
+            descripcion: metadata.descripcion,
+            tramite: metadata.tramite,
+            url_tramitacion: metadata.url_tramitacion,
             votosRebeldesCount: rebeldesEnSesion,
             votosMayoriaCount: maxOpcion,
             opcionMayoria,
@@ -182,33 +196,31 @@ for (const partido of PARTIDOS_SEED) {
         }
       }
 
-      // Limpiar descripción de sesión
-      let descLimpia = ses.descripcion || ses.nombre || "Votación de Sala";
-      if (descLimpia === "1-Otros") descLimpia = "Votación de procedimiento de Sala";
-
       votacionesPartido.push({
         id: ses.id,
-        fecha: ses.fecha ? ses.fecha.slice(0, 10) : "2026-08-01",
-        descripcion: descLimpia,
-        tramite: ses.tramite || "Tramitación en Sala",
-        resultado: ses.resultado || (si > no ? "Aprobado" : "Rechazado"),
+        fecha: metadata.fecha,
+        descripcion: metadata.descripcion,
+        tramite: metadata.tramite,
+        resultado: metadata.resultado,
         si,
         no,
         abst,
         noVota: noVota + disp,
         apariciones: aparicionesSes,
         pctSi,
-        url_tramitacion: ses.url_tramitacion || ses.url || null,
+        url_tramitacion: metadata.url_tramitacion,
         votosNominales: nominales,
       });
 
       // Registrar asistencia por fecha/sesión para todo el período disponible (Cámara y Senado)
-      const fechaKey = ses.fecha ? ses.fecha.slice(0, 10) : "2026-08-01";
-      if (!asistenciaMap[fechaKey]) {
+      const fechaKey = metadata.fecha;
+      if (fechaKey && !asistenciaMap[fechaKey]) {
         asistenciaMap[fechaKey] = { presentes: 0, total: 0, fecha: fechaKey };
       }
-      asistenciaMap[fechaKey].presentes += emitidosSes;
-      asistenciaMap[fechaKey].total += aparicionesSes;
+      if (fechaKey) {
+        asistenciaMap[fechaKey].presentes += emitidosSes;
+        asistenciaMap[fechaKey].total += aparicionesSes;
+      }
     }
   }
 
@@ -229,10 +241,10 @@ for (const partido of PARTIDOS_SEED) {
   // Disciplina general
   const pctDisciplina = totalVotosConscientes > 0
     ? Math.round((totalVotosCoincidentes / totalVotosConscientes) * 1000) / 10
-    : 100;
+    : null;
   const pctRebelion = totalVotosConscientes > 0
     ? Math.round((totalVotosRebeldes / totalVotosConscientes) * 1000) / 10
-    : 0;
+    : null;
 
   const topVotosRebeldes = sesionesRebeldes
     .sort((a, b) => b.votosRebeldesCount - a.votosRebeldesCount)
@@ -257,17 +269,21 @@ for (const partido of PARTIDOS_SEED) {
     const sources = polEvData[pol.id] || [];
     for (const s of sources) {
       if (s.source?.key === "gastos_camara" || s.source?.key === "gastos_senado") {
-        for (const g of (s.records || [])) {
-          const monto = Number(g.monto_clp || g.monto_total || g.monto || 0);
-          if (monto <= 0) continue;
-          const periodo = g.periodo || g.fecha?.slice(0, 7) || "2026-05";
-          const item = g.item || g.concepto || "Gastos operacionales";
-
-          gastosPorMesMap[periodo] = (gastosPorMesMap[periodo] || 0) + monto;
-          gastosPorItemMap[item] = (gastosPorItemMap[item] || 0) + monto;
-          if (gastosPorPolMap[pol.id]) {
-            gastosPorPolMap[pol.id].total += monto;
-          }
+        const records = (s.records || []).map((record, index) => ({
+          ...record,
+          id: `${pol.id}-${s.source?.key}-${index}`,
+          monto_clp: [record.monto_clp, record.monto_total, record.monto]
+            .find((value): value is number => typeof value === "number" && Number.isFinite(value)) ?? null,
+        })) as EtlRecord[];
+        const resumen = resumirGastosAgregables(records);
+        for (const mes of resumen.porMes) {
+          gastosPorMesMap[mes.periodo] = (gastosPorMesMap[mes.periodo] || 0) + mes.total;
+        }
+        for (const item of resumen.porItem) {
+          gastosPorItemMap[item.item] = (gastosPorItemMap[item.item] || 0) + item.total;
+        }
+        if (gastosPorPolMap[pol.id]) {
+          gastosPorPolMap[pol.id].total += resumen.total;
         }
       }
     }

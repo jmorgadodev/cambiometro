@@ -3,6 +3,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { SERVICIOS_PUBLICOS_SEED } from "../../lib/servicios-publicos";
 import { PRESUPUESTO_CONFIG_POR_SERVICIO } from "../../lib/presupuesto";
+import { findBuyerByVerifiedRut } from "./r10-chilecompra.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -16,11 +17,13 @@ export interface OrganismoCanonico {
   tipo: "Municipalidad" | "Ministerio" | "Subsecretaría" | "Servicio" | "GORE" | "Empresa pública" | "Superintendencia";
   partida_capitulo_dipres: string | null;
   cut_si_municipio: string | null;
-  region: string;
-  dotacion_total: number;
-  gasto_mensual_estimado_clp: number;
-  compras_ocds_monto_clp: number;
-  compras_ocds_procesos: number;
+  region: string | null;
+  dotacion_total: number | null;
+  gasto_mensual_estimado_clp: number | null;
+  compras_ocds_monto_clp: number | null;
+  compras_ocds_procesos: number | null;
+  compras_ocds_rut_comprador: string | null;
+  compras_ocds_metodo_enlace: "RUT_EXACTO" | null;
   director_jefe_actual?: string;
   fuente_director?: string;
   sitio_web_oficial?: string;
@@ -59,7 +62,7 @@ function run() {
 
   // 2. Cargar ChileCompra
   const ccPath = path.join(rootDir, "data/lake/projections/v1/chilecompra.json");
-  let ccBuyers: Array<{ name?: string; monto_total_clp?: number; procesos?: number }> = [];
+  let ccBuyers: Array<{ name?: string | null; rut_juridico?: string | null; monto_total_clp?: number | null; procesos?: number | null }> = [];
   if (fs.existsSync(ccPath)) {
     try {
       const cc = JSON.parse(fs.readFileSync(ccPath, "utf8"));
@@ -70,30 +73,16 @@ function run() {
     }
   }
 
-  // Helper para buscar en ChileCompra
-  function matchChileCompra(nombre: string, sigla?: string, tipo?: string) {
-    if (!ccBuyers.length) return { monto: 0, procesos: 0 };
-    const sName = cleanStr(nombre);
-    const sSigla = cleanStr(sigla);
-    const words = sName.split(" ").filter((w) => w.length > 3 && !["ministerio", "servicio", "gobierno", "regional", "nacional", "para", "sobre", "municipalidad", "ilustre"].includes(w));
-
-    const matched = ccBuyers.find((b) => {
-      const bName = cleanStr(b.name || "");
-      if (bName.includes(sName)) return true;
-      if (sSigla.length >= 3 && (bName.startsWith(sSigla + " ") || bName.endsWith(" " + sSigla) || bName.includes(" " + sSigla + " "))) return true;
-      if (tipo === "GORE" && bName.includes("gobierno regional") && words.some((w) => bName.includes(w))) return true;
-      if (tipo === "Municipalidad" && bName.includes("municipalidad") && words.some((w) => bName.includes(w))) return true;
-      if (tipo === "Ministerio" && words.length >= 2 && words.every((w) => bName.includes(w))) return true;
-      return false;
-    });
-
-    if (matched) {
-      return {
-        monto: matched.monto_total_clp || 0,
-        procesos: matched.procesos || 0,
-      };
-    }
-    return { monto: 0, procesos: 0 };
+  function matchChileCompra(rutJuridico?: string | null) {
+    const matched = findBuyerByVerifiedRut(ccBuyers, rutJuridico);
+    return matched
+      ? {
+          monto: matched.monto_total_clp ?? null,
+          procesos: matched.procesos ?? null,
+          rut: matched.rut_juridico ?? null,
+          metodo: "RUT_EXACTO" as const,
+        }
+      : { monto: null, procesos: null, rut: null, metodo: null };
   }
 
   const catalog: OrganismoCanonico[] = [];
@@ -112,11 +101,9 @@ function run() {
     }>;
     for (const [muniId, muni] of Object.entries(munisData)) {
       const cpltId = muniId;
-      const dotacion = cpltCoverageMap.get(muniId) || (muni.poblacion_censo_2024 ? Math.max(120, Math.round(muni.poblacion_censo_2024 * 0.012)) : 280);
+      const dotacion = cpltCoverageMap.get(muniId) ?? null;
       const nombreCanonico = `Municipalidad de ${muni.nombre_comuna || muniId.replace("muni-", "")}`;
-      const cc = matchChileCompra(nombreCanonico, undefined, "Municipalidad");
-      const ccMonto = cc.monto > 0 ? cc.monto : Math.round(dotacion * 14_000_000);
-      const ccProcesos = cc.procesos > 0 ? cc.procesos : Math.max(12, Math.round(dotacion / 15));
+      const cc = matchChileCompra((muni as { rut_juridico?: string | null }).rut_juridico);
 
       catalog.push({
         id: muniId,
@@ -125,13 +112,15 @@ function run() {
         tipo: "Municipalidad",
         partida_capitulo_dipres: null,
         cut_si_municipio: muni.cut || null,
-        region: muni.region || "Región Metropolitana de Santiago",
+        region: muni.region || null,
         dotacion_total: dotacion,
-        gasto_mensual_estimado_clp: dotacion * 1_750_000,
-        compras_ocds_monto_clp: ccMonto,
-        compras_ocds_procesos: ccProcesos,
+        gasto_mensual_estimado_clp: null,
+        compras_ocds_monto_clp: cc.monto,
+        compras_ocds_procesos: cc.procesos,
+        compras_ocds_rut_comprador: cc.rut,
+        compras_ocds_metodo_enlace: cc.metodo,
         director_jefe_actual: muni.alcalde?.nombre || undefined,
-        fuente_director: "CPLT / SERVEL Elecciones Municipales",
+        fuente_director: muni.alcalde?.nombre ? "CPLT / SERVEL Elecciones Municipales" : undefined,
         sitio_web_oficial: muni.sitio_web_oficial || undefined,
         ministerio_dependiente: "Municipalidades de Chile (SUBDERE)",
       });
@@ -160,89 +149,7 @@ function run() {
     else if (serv.tipo_organo === "Superintendencia") tipo = "Superintendencia";
     else if (serv.tipo_organo === "Empresa Pública") tipo = "Empresa pública";
 
-    // Calcular dotación real diferenciada por entidad
-    let dotacion = 320;
-    if (serv.sigla === "CODELCO") dotacion = 18450;
-    else if (serv.sigla === "BANCOESTADO") dotacion = 11200;
-    else if (serv.sigla === "ENAP") dotacion = 3800;
-    else if (serv.sigla === "EFE") dotacion = 2100;
-    else if (serv.sigla === "METRO") dotacion = 5400;
-    else if (serv.sigla === "TVN") dotacion = 850;
-    else if (serv.sigla === "ENAMI") dotacion = 1250;
-    else if (serv.sigla === "SII") dotacion = 4890;
-    else if (serv.sigla === "FONASA") dotacion = 3120;
-    else if (serv.sigla === "IPS") dotacion = 2950;
-    else if (serv.sigla === "SAG") dotacion = 4210;
-    else if (serv.sigla === "CONAF") dotacion = 3980;
-    else if (serv.sigla === "INDAP") dotacion = 1750;
-    else if (serv.sigla === "ADUANAS") dotacion = 2140;
-    else if (serv.sigla === "TGR") dotacion = 1920;
-    else if (serv.sigla === "SRCEI") dotacion = 3380;
-    else if (serv.sigla === "DT") dotacion = 2450;
-    else if (serv.sigla === "SENCE") dotacion = 820;
-    else if (serv.sigla === "SERVIU RM") dotacion = 1180;
-    else if (serv.sigla === "CORFO") dotacion = 740;
-    else if (serv.sigla === "SERNAC") dotacion = 420;
-    else if (tipo === "Ministerio") {
-      if (serv.sigla === "MINSAL") dotacion = 1420;
-      else if (serv.sigla === "MINEDUC") dotacion = 1680;
-      else if (serv.sigla === "MOP") dotacion = 1540;
-      else if (serv.sigla === "MINDEF") dotacion = 920;
-      else if (serv.sigla === "INTERIOR") dotacion = 1150;
-      else if (serv.sigla === "HACIENDA") dotacion = 780;
-      else if (serv.sigla === "MINJUSTICIA") dotacion = 680;
-      else if (serv.sigla === "MINVU") dotacion = 890;
-      else if (serv.sigla === "MDSF") dotacion = 630;
-      else if (serv.sigla === "MINECON") dotacion = 540;
-      else if (serv.sigla === "MINAGRI") dotacion = 610;
-      else if (serv.sigla === "MINTRAB") dotacion = 520;
-      else if (serv.sigla === "MTT") dotacion = 710;
-      else if (serv.sigla === "BBNN") dotacion = 460;
-      else if (serv.sigla === "MINMINERIA") dotacion = 280;
-      else if (serv.sigla === "ENERGIA") dotacion = 310;
-      else if (serv.sigla === "MMA") dotacion = 420;
-      else if (serv.sigla === "MINDEP") dotacion = 260;
-      else if (serv.sigla === "MINMUJERYEG") dotacion = 340;
-      else if (serv.sigla === "CULTURAS") dotacion = 650;
-      else if (serv.sigla === "MINCIENCIA") dotacion = 210;
-      else if (serv.sigla === "SEGPRES") dotacion = 290;
-      else if (serv.sigla === "SEGEGOB") dotacion = 380;
-      else if (serv.sigla === "MINREL") dotacion = 890;
-      else if (serv.sigla === "SEGURIDAD") dotacion = 480;
-      else dotacion = 500;
-    } else if (tipo === "GORE") {
-      if (serv.sigla.includes("RM")) dotacion = 680;
-      else if (serv.sigla.includes("VALPARAÍSO") || serv.sigla.includes("BIOBÍO")) dotacion = 450;
-      else if (serv.sigla.includes("MAULE") || serv.sigla.includes("ARAUCANÍA") || serv.sigla.includes("COQUIMBO")) dotacion = 380;
-      else dotacion = 290;
-    } else if (tipo === "Superintendencia") {
-      if (serv.sigla === "CMF") dotacion = 640;
-      else if (serv.sigla === "SUPER SALUD") dotacion = 410;
-      else if (serv.sigla === "SP") dotacion = 330;
-      else if (serv.sigla === "SEC") dotacion = 370;
-      else if (serv.sigla === "SMA") dotacion = 290;
-      else if (serv.sigla === "SUPEREDUC") dotacion = 350;
-      else dotacion = 300;
-    }
-
-    const cc = matchChileCompra(serv.nombre, serv.sigla, tipo);
-    let ccMonto = cc.monto;
-    let ccProcesos = cc.procesos;
-    if (ccMonto <= 0) {
-      if (tipo === "Ministerio") {
-        ccMonto = 14_500_000_000 + Math.round(dotacion * 8_500_000);
-        ccProcesos = 45 + Math.round(dotacion / 20);
-      } else if (tipo === "GORE") {
-        ccMonto = 8_200_000_000 + Math.round(dotacion * 12_000_000);
-        ccProcesos = 28 + Math.round(dotacion / 15);
-      } else if (tipo === "Empresa pública") {
-        ccMonto = 35_000_000_000 + Math.round(dotacion * 15_000_000);
-        ccProcesos = 110 + Math.round(dotacion / 50);
-      } else {
-        ccMonto = 4_800_000_000 + Math.round(dotacion * 6_000_000);
-        ccProcesos = 22 + Math.round(dotacion / 30);
-      }
-    }
+    const cc = matchChileCompra((serv as { rut_juridico?: string | null }).rut_juridico);
 
     catalog.push({
       id: serv.id,
@@ -252,13 +159,15 @@ function run() {
       tipo,
       partida_capitulo_dipres: dipresCode,
       cut_si_municipio: null,
-      region: tipo === "GORE" ? serv.nombre.replace("Gobierno Regional de ", "").replace("Gobierno Regional del ", "") : "Región Metropolitana de Santiago",
-      dotacion_total: dotacion,
-      gasto_mensual_estimado_clp: dotacion * 2_450_000,
-      compras_ocds_monto_clp: ccMonto,
-      compras_ocds_procesos: ccProcesos,
+      region: tipo === "GORE" ? serv.nombre.replace("Gobierno Regional de ", "").replace("Gobierno Regional del ", "") : null,
+      dotacion_total: null,
+      gasto_mensual_estimado_clp: null,
+      compras_ocds_monto_clp: cc.monto,
+      compras_ocds_procesos: cc.procesos,
+      compras_ocds_rut_comprador: cc.rut,
+      compras_ocds_metodo_enlace: cc.metodo,
       director_jefe_actual: serv.director_jefe_actual,
-      fuente_director: serv.fuente_director || "Diario Oficial / Alta Dirección Pública",
+      fuente_director: serv.fuente_director,
       sitio_web_oficial: serv.sitio_web_oficial,
       ministerio_dependiente: serv.ministerio_dependiente,
     });
@@ -282,10 +191,7 @@ function run() {
         else if (n.includes("gobierno regional") || n.includes("gore")) tipo = "GORE";
         else if (n.includes("empresa") || n.includes("ferrocarril") || n.includes("astillero") || n.includes("puerto")) tipo = "Empresa pública";
 
-        const dotacion = 180 + ((id.split("").reduce((acc: number, c: string) => acc + c.charCodeAt(0), 0)) % 320);
-        const cc = matchChileCompra(org.nombre, org.sigla, tipo);
-        const ccMonto = cc.monto > 0 ? cc.monto : (1_200_000_000 + dotacion * 4_500_000);
-        const ccProcesos = cc.procesos > 0 ? cc.procesos : (12 + (dotacion % 18));
+        const cc = matchChileCompra(org.rut_juridico);
 
         catalog.push({
           id,
@@ -295,15 +201,17 @@ function run() {
           tipo,
           partida_capitulo_dipres: null,
           cut_si_municipio: null,
-          region: "Nacional / Desconcentrado",
-          dotacion_total: dotacion,
-          gasto_mensual_estimado_clp: dotacion * 2_150_000,
-          compras_ocds_monto_clp: ccMonto,
-          compras_ocds_procesos: ccProcesos,
+          region: typeof org.region === "string" && org.region.trim() ? org.region.trim() : null,
+          dotacion_total: null,
+          gasto_mensual_estimado_clp: null,
+          compras_ocds_monto_clp: cc.monto,
+          compras_ocds_procesos: cc.procesos,
+          compras_ocds_rut_comprador: cc.rut,
+          compras_ocds_metodo_enlace: cc.metodo,
           director_jefe_actual: org.director_jefe_actual,
           fuente_director: org.fuente_director,
           sitio_web_oficial: org.sitio_web_oficial,
-          ministerio_dependiente: org.ministerio_dependiente || "Administración Central del Estado",
+          ministerio_dependiente: org.ministerio_dependiente,
         });
         registeredIds.add(id);
       }
@@ -322,8 +230,9 @@ function run() {
   console.log(`   Total instituciones registradas: ${catalog.length}`);
   const conDipres = catalog.filter((o) => o.partida_capitulo_dipres !== null).length;
   console.log(`   Instituciones con código DIPRES: ${conDipres}`);
-  const totalDotacion = catalog.reduce((acc, o) => acc + o.dotacion_total, 0);
-  console.log(`   Suma de dotación total catalogada: ${totalDotacion.toLocaleString("es-CL")} funcionarios.`);
+  const conDotacion = catalog.filter((organismo) => organismo.dotacion_total !== null);
+  const totalDotacion = conDotacion.reduce((acc, organismo) => acc + (organismo.dotacion_total ?? 0), 0);
+  console.log(`   Dotación oficial disponible: ${conDotacion.length}/${catalog.length} instituciones (${totalDotacion.toLocaleString("es-CL")} registros).`);
 }
 
 run();

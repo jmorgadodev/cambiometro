@@ -19,11 +19,13 @@ export interface OrganismoCanonico {
   tipo: TipoOrganismo;
   partida_capitulo_dipres: string | null;
   cut_si_municipio: string | null;
-  region: string;
-  dotacion_total: number;
-  gasto_mensual_estimado_clp: number;
-  compras_ocds_monto_clp: number;
-  compras_ocds_procesos: number;
+  region: string | null;
+  dotacion_total: number | null;
+  gasto_mensual_estimado_clp: number | null;
+  compras_ocds_monto_clp: number | null;
+  compras_ocds_procesos: number | null;
+  compras_ocds_rut_comprador?: string | null;
+  compras_ocds_metodo_enlace?: "RUT_EXACTO" | null;
   director_jefe_actual?: string;
   fuente_director?: string;
   sitio_web_oficial?: string;
@@ -32,16 +34,31 @@ export interface OrganismoCanonico {
 
 let cachedAllOrganismos: OrganismoCanonico[] | null = null;
 
+function enforceR10(organismos: OrganismoCanonico[]): OrganismoCanonico[] {
+  return organismos.map((organismo) => {
+    if (organismo.compras_ocds_metodo_enlace === "RUT_EXACTO" && organismo.compras_ocds_rut_comprador) {
+      return organismo;
+    }
+    return {
+      ...organismo,
+      compras_ocds_monto_clp: null,
+      compras_ocds_procesos: null,
+      compras_ocds_rut_comprador: null,
+      compras_ocds_metodo_enlace: null,
+    };
+  });
+}
+
 function loadAllOrganismos(): OrganismoCanonico[] {
   if (cachedAllOrganismos) return cachedAllOrganismos;
   try {
     const orgPath = path.join(process.cwd(), "data", "lake", "projections", "v1", "organismos.json");
     if (fs.existsSync(orgPath)) {
-      cachedAllOrganismos = JSON.parse(fs.readFileSync(orgPath, "utf8")) as OrganismoCanonico[];
+      cachedAllOrganismos = enforceR10(JSON.parse(fs.readFileSync(orgPath, "utf8")) as OrganismoCanonico[]);
       return cachedAllOrganismos;
     }
   } catch {}
-  cachedAllOrganismos = (organismosStaticJson as unknown) as OrganismoCanonico[];
+  cachedAllOrganismos = enforceR10((organismosStaticJson as unknown) as OrganismoCanonico[]);
   return cachedAllOrganismos;
 }
 

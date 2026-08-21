@@ -3,12 +3,12 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import Icono, { type IconoNombre } from "@/components/ui/Icono";
-import { ETL_SOURCES_DATA, type EtlSourceInfo } from "@/lib/etl-sources-data";
+import { ETL_MUNICIPAL_COVERAGE, ETL_SOURCES_DATA, type EtlSourceInfo } from "@/lib/etl-sources-data";
 
 export type { EtlSourceInfo };
 
 const CATEGORIES: { id: string; label: string; icon: IconoNombre }[] = [
-  { id: "all", label: "Todas las Fuentes (11)", icon: "datos" },
+  { id: "all", label: `Todas las Fuentes (${ETL_SOURCES_DATA.length})`, icon: "datos" },
   { id: "personal", label: "Personal y Nóminas", icon: "personas" },
   { id: "finanzas", label: "Presupuesto y Fondos", icon: "dinero" },
   { id: "compras", label: "Compras Públicas", icon: "compras" },
@@ -37,6 +37,7 @@ export default function EtlHealthDashboardClient() {
     () => ETL_SOURCES_DATA.reduce((acc, s) => acc + s.recordCount, 0),
     []
   );
+  const completeSources = ETL_SOURCES_DATA.filter((source) => source.status === "operational").length;
 
   const formatCLP = (amount: number) =>
     new Intl.NumberFormat("es-CL", {
@@ -58,9 +59,9 @@ export default function EtlHealthDashboardClient() {
         aria-label="Indicadores generales de salud de datos"
       >
         <div className="stat-tile stat-tile--ok">
-          <div className="stat-tile__value">100%</div>
-          <div className="stat-tile__label">Conectores Operativos</div>
-          <div className="stat-tile__hint">11 de 11 fuentes sincronizadas</div>
+          <div className="stat-tile__value">{completeSources} / {ETL_SOURCES_DATA.length}</div>
+          <div className="stat-tile__label">Cobertura completa</div>
+          <div className="stat-tile__hint">El resto declara cobertura parcial</div>
         </div>
         <div className="stat-tile stat-tile--accent">
           <div className="stat-tile__value">+{totalRegistros.toLocaleString("es-CL")}</div>
@@ -68,14 +69,14 @@ export default function EtlHealthDashboardClient() {
           <div className="stat-tile__hint">Indexados y auditados en el Lake</div>
         </div>
         <div className="stat-tile stat-tile--info">
-          <div className="stat-tile__value">346 / 346</div>
+          <div className="stat-tile__value">{ETL_MUNICIPAL_COVERAGE.covered} / {ETL_MUNICIPAL_COVERAGE.total}</div>
           <div className="stat-tile__label">Cobertura Comunal</div>
-          <div className="stat-tile__hint">100% comunas de Chile</div>
+          <div className="stat-tile__hint">Cobertura oficial SINIM disponible</div>
         </div>
         <div className="stat-tile stat-tile--warn">
-          <div className="stat-tile__value">$83,42B</div>
-          <div className="stat-tile__label">Presupuesto Auditado</div>
-          <div className="stat-tile__hint">Ley de Presupuestos 2026</div>
+          <div className="stat-tile__value">Derivado</div>
+          <div className="stat-tile__label">KPIs oficiales</div>
+          <div className="stat-tile__hint">Sin cifras manuales</div>
         </div>
       </section>
 

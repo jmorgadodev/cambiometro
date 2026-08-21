@@ -15,7 +15,7 @@ export interface MunicipalidadListItem {
     partido_alcalde?: string | null;
   } | null;
   presupuesto: {
-    vigente_clp: number;
+    vigente_clp: number | null;
   } | null;
   resumen_personal: {
     total_funcionarios: number;
@@ -33,7 +33,7 @@ export function getMunicipalidadesList(): MunicipalidadListItem[] {
 export function getMunicipalidadesStats() {
   const all = MUNICIPALIDADES_LIST;
   const conAlcalde = all.filter((m) => m.alcalde !== null);
-  const conPresupuesto = all.filter((m) => m.presupuesto && m.presupuesto.vigente_clp > 0);
+  const conPresupuesto = all.filter((m) => (m.presupuesto?.vigente_clp ?? 0) > 0);
   const totalPresupuestoVigente = all.reduce((sum, m) => sum + (m.presupuesto?.vigente_clp ?? 0), 0);
   const totalFuncionarios = all.reduce((sum, m) => sum + (m.resumen_personal?.total_funcionarios ?? 0), 0);
   const totalMasaMensual = all.reduce((sum, m) => sum + (m.resumen_personal?.masa_mensual_clp ?? 0), 0);

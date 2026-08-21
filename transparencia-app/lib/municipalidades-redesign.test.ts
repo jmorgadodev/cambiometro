@@ -14,13 +14,11 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
   const personasUniversalSource = readFileSync(resolve("components/personas/PersonasUniversalClient.tsx"), "utf8");
 
   describe("ALTA — Integridad de Datos", () => {
-    it("1. Talca: masa salarial anual es estrictamente inferior al presupuesto anual SINIM", () => {
-      const talca = getMunicipalidadData("muni-talca");
-      expect(talca).not.toBeNull();
-      expect(talca?.presupuesto?.vigente_clp).toBeGreaterThan(0);
-      expect(talca?.resumen_personal?.masa_anual_estimada_clp).toBeGreaterThan(0);
-      // Validación mandataria
-      expect(talca!.resumen_personal!.masa_anual_estimada_clp).toBeLessThan(talca!.presupuesto!.vigente_clp);
+    it("1. no reescribe masa salarial oficial para forzar consistencia presupuestaria", () => {
+      const builder = readFileSync(resolve("scripts/rebuild-authoritative-municipalidades.mjs"), "utf8");
+      expect(builder).not.toContain("masaMuniCentral");
+      expect(builder).not.toMatch(/presVigente \* 0\.28/);
+      expect(builder).toContain("const masaAnual = masaMensual * 12");
     });
 
     it("2. 4 Cards de personal: Planta + Contrata + Honorarios + Cód. Trabajo / Sectorial suman exactamente el 100% de la dotación", () => {
@@ -41,12 +39,11 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
       }
     });
 
-    it("4. Presupuesto per cápita unificado con fórmula estándar", () => {
+    it("4. Presupuesto per cápita queda ausente sin población INE materializada", () => {
       const talca = getMunicipalidadData("muni-talca");
       expect(talca).not.toBeNull();
-      expect(talca?.presupuesto_per_capita_clp).toBeGreaterThan(0);
-      const expected = Math.round(talca!.presupuesto!.vigente_clp / talca!.poblacion_censo_2024!);
-      expect(talca!.presupuesto_per_capita_clp).toBe(expected);
+      expect(talca?.poblacion_censo_2024).toBeNull();
+      expect(talca?.presupuesto_per_capita_clp).toBeNull();
     });
   });
 
@@ -156,20 +153,11 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
       expect(detailPageSource).toContain("Total");
     });
 
-    it("M2. OCDS: Reconciliar 8 procesos vs 26 órdenes de compra para Santiago", () => {
+    it("M2. R10: Santiago no publica compras sin RUT jurídico oficial en el catálogo", () => {
       const santiago = getMunicipalidadData("muni-santiago");
-      expect(santiago?.compras_publicas).toBeDefined();
-      const cp = santiago!.compras_publicas!;
-      expect(cp.procesos_count).toBe(8);
-      expect(cp.ordenes_count).toBe(26);
-      expect(cp.procesos).toBeDefined();
-      expect(cp.procesos!.length).toBe(8);
-      const sumOrders = cp.procesos!.reduce((acc, p) => acc + p.ordenes_count, 0);
-      expect(sumOrders).toBe(26);
-      // Jerarquía y tooltip visible
-      expect(detailPageSource).toContain("Jerarquía de Contrataciones");
-      expect(detailPageSource).toContain("órdenes de compra agrupadas en");
-      expect(detailPageSource).toContain("procesos OCDS");
+      expect(santiago?.compras_publicas).toBeNull();
+      expect(detailPageSource).toContain("no publica un conteo verificable de órdenes");
+      expect(detailPageSource).toContain("No se registran contrataciones públicas para esta municipalidad");
     });
 
     it("M3. CGR: ≥ 1 comuna con informes CGR renderizados y estado vacío enriquecido", () => {
@@ -179,21 +167,17 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
       expect(lasCondes!.auditorias_cgr![0].titulo).toContain("INFORME FINAL");
 
       // Estado vacío con prueba SIAPER y cobertura
-      expect(detailPageSource).toContain("Se consultaron los 275 informes SIAPER 2024-2026 por CUT");
-      expect(detailPageSource).toContain("Cobertura nacional: 275 informes en 53 de 346 comunas");
+      expect(detailPageSource).toContain("La proyección CGR local no contiene coincidencias verificables para el CUT");
+      expect(detailPageSource).toContain("Cobertura de esta ficha: sin coincidencias verificables");
       expect(listPageSource).toContain("⚖️ CGR:");
     });
 
-    it("M4. Composición de dotación de Santiago suma exactamente 20.805 funcionarios", () => {
+    it("M4. Composición de dotación de Santiago cuadra con la nómina CPLT actual", () => {
       const santiago = getMunicipalidadData("muni-santiago");
       expect(santiago?.resumen_personal).toBeDefined();
       const { planta, contrata, honorarios, codigo_trabajo_salud_educacion, total_funcionarios } = santiago!.resumen_personal!;
-      expect(total_funcionarios).toBe(20805);
-      expect(planta + contrata + honorarios + codigo_trabajo_salud_educacion).toBe(20805);
-      expect(planta).toBe(7211);
-      expect(contrata).toBe(5914);
-      expect(honorarios).toBe(4433);
-      expect(codigo_trabajo_salud_educacion).toBe(3247);
+      expect(total_funcionarios).toBeGreaterThan(0);
+      expect(planta + contrata + honorarios + codigo_trabajo_salud_educacion).toBe(total_funcionarios);
       expect(detailPageSource).toContain("Ámbito de dotación");
     });
   });
@@ -256,7 +240,7 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
     it("A7. Composición: suma cards === contador buscador", () => {
       const santiago = getMunicipalidadData("muni-santiago");
       const sRes = santiago!.resumen_personal!;
-      expect(sRes.planta + sRes.contrata + sRes.honorarios + sRes.codigo_trabajo_salud_educacion).toBe(20805);
+      expect(sRes.planta + sRes.contrata + sRes.honorarios + sRes.codigo_trabajo_salud_educacion).toBe(sRes.total_funcionarios);
     });
 
     it("A8. OCDS: cero 'Proveedor MercadoPublico'; procesos×órdenes reconciliados", () => {

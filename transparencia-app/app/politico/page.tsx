@@ -151,7 +151,7 @@ export default async function PoliticoDirectory({
     const fuentes = evidenciasList.filter((e) => e.records.length > 0).length;
     const sueldo = await remuneracionParaPolitico(politico.nombre_completo);
     const partidoConfig = getPartidoConfig(politico.partido_id || partido?.sigla || "IND");
-    const dietaMonto = DIETA_OFICIAL_PARLAMENTARIA[politico.cargo as "Diputado" | "Senador"] || 7350000;
+    const dietaMonto = DIETA_OFICIAL_PARLAMENTARIA[politico.cargo as "Diputado" | "Senador"];
     const verifiedPhoto = politico.foto_url?.startsWith("https://upload.wikimedia.org/")
       ? politico.foto_url
       : null;

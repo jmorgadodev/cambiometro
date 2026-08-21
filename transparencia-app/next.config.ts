@@ -5,6 +5,11 @@ const nextConfig: NextConfig = {
   turbopack: {
     root: process.cwd(),
   },
+  // Cada worker carga el snapshot ETL oficial (~493 MB). Limitar la concurrencia
+  // evita que la generación estática multiplique ese consumo hasta agotar memoria.
+  experimental: {
+    cpus: 2,
+  },
   allowedDevOrigins: ["127.0.0.1"],
   images: {
     unoptimized: true,

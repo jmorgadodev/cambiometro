@@ -1,6 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import zlib from "node:zlib";
+import { createHash } from "node:crypto";
+import { evaluateProjectionAmount, normalizeProjectionContract, sumKnownAmounts } from "./etl/chilecompra-projection.mjs";
 
 const OUT = "data/lake/projections/v1/chilecompra.json";
 const ROOT = "data/lake/partitions/chilecompra";
@@ -28,6 +30,8 @@ const suppliers = new Map();
 const pairs = new Map();
 const seenContractIds = new Set();
 const seenBuyerContracts = new Map(); // buyerId -> Set of ocids
+const anomalies = [];
+const anomaliesByBuyer = new Map();
 
 // 1. Index Buyers
 for (const mPath of findManifests(ROOT)) {
@@ -38,7 +42,7 @@ for (const mPath of findManifests(ROOT)) {
       const id = "public-body-chilecompra-rut-" + String(d.buyer.rut_juridico || "").replace(/\D/g, "");
       if (id.length < 10) continue;
       if (!buyerById.has(id)) {
-        const name = String(d.buyer.legal_name || d.buyer.name || "").split("|").map((s) => s.trim()).find((s) => s) || id;
+        const name = String(d.buyer.legal_name || d.buyer.name || "").split("|").map((s) => s.trim()).find((s) => s) || null;
         buyerById.set(id, {
           id,
           name,
@@ -61,22 +65,46 @@ for (const mPath of findManifests(ROOT)) {
     if (r.kind !== "contract") continue;
 
     // Deduplicate by record ID
-    const recId = r.id || `${d.ocid || ""}-${d.title || ""}-${d.monto_clp || 0}`;
+    const recId = r.id || `contract-${createHash("sha256").update(JSON.stringify(d)).digest("hex")}`;
     if (seenContractIds.has(recId)) continue;
     seenContractIds.add(recId);
 
-    const monto = typeof d.monto_clp === "number" && d.monto_clp > 0 ? d.monto_clp : 0;
+    const normalized = normalizeProjectionContract(d);
+    const amountEvaluation = evaluateProjectionAmount(normalized.monto_clp);
+    const monto = amountEvaluation.monto_clp;
     const ocid = d.ocid || d.process_id || "";
     const buyerId = buyerByOcid.get(ocid) || null;
     const period = d.period;
-    const prov = (Array.isArray(d.suppliers) ? d.suppliers[0] : null) || null;
-    const provId = prov && prov.id ? "provider-chilecompra-" + String(prov.id).replace(/^CL-MP-/, "") : null;
-    const rawProvName = prov && prov.name ? String(prov.name).split("|")[0].trim() : null;
-    const provName = rawProvName || (provId ? "Proveedor Registrado" : "Proveedor no informado en OCDS");
+    const provId = normalized.proveedor_id;
+    const provName = normalized.proveedor;
 
-    if (provId && monto > 0) {
+    if (amountEvaluation.anomaly) {
+      const anomaly = {
+        id: `chilecompra-v7-${recId}`,
+        ...amountEvaluation.anomaly,
+        buyer_id: buyerId,
+        buyer_name: buyerId ? buyerById.get(buyerId)?.name ?? null : null,
+        ocid,
+        title: normalized.title,
+        proveedor: provName,
+        monto_oficial_clp: normalized.monto_clp,
+        fecha: d.fecha || null,
+        source_url: d.url || r.evidence?.sourceUrl || null,
+        source_anomaly: true,
+        site_disclosure: true,
+        excluded_from_totals_and_rankings: true,
+      };
+      anomalies.push(anomaly);
+      if (buyerId) {
+        const buyerAnomalies = anomaliesByBuyer.get(buyerId) ?? [];
+        buyerAnomalies.push(anomaly);
+        anomaliesByBuyer.set(buyerId, buyerAnomalies);
+      }
+    }
+
+    if (provId && provName && monto !== null) {
       if (!suppliers.has(provId)) {
-        suppliers.set(provId, { id: provId, name: provName || provId, monto_total_clp: 0, procesos: 0, buyers: new Set() });
+        suppliers.set(provId, { id: provId, name: provName, monto_total_clp: 0, procesos: 0, buyers: new Set() });
       }
       const sp = suppliers.get(provId);
       sp.monto_total_clp += monto;
@@ -96,23 +124,25 @@ for (const mPath of findManifests(ROOT)) {
     b.procesos++;
 
     if (period) {
-      if (!b.months.has(period)) b.months.set(period, { period, monto_total_clp: 0, procesos: 0 });
+      if (!b.months.has(period)) b.months.set(period, { period, monto_total_clp: null, procesos: 0 });
       const mo = b.months.get(period);
-      mo.monto_total_clp += monto;
+      if (monto !== null) mo.monto_total_clp = (mo.monto_total_clp ?? 0) + monto;
       mo.procesos++;
     }
 
-    b.top.push({
-      title: String(d.title || "Contratación Pública").slice(0, 180).trim(),
-      proveedor: provName,
-      proveedor_id: provId,
-      monto_clp: monto,
-      fecha: d.fecha || null,
-      url: d.url || (ocid ? `https://api.mercadopublico.cl/APISOCDS/OCDS/award/${ocid.replace(/^ocds-70d2nz-/, "")}` : null),
-      ocid,
-    });
+    if (!amountEvaluation.anomaly) {
+      b.top.push({
+        title: normalized.title?.slice(0, 180) ?? null,
+        proveedor: provName,
+        proveedor_id: provId,
+        monto_clp: monto,
+        fecha: d.fecha || null,
+        url: d.url || (ocid ? `https://api.mercadopublico.cl/APISOCDS/OCDS/award/${ocid.replace(/^ocds-70d2nz-/, "")}` : null),
+        ocid,
+      });
+    }
 
-    if (provId && monto > 0) {
+    if (provId && provName && monto !== null) {
       const pairKey = `${buyerId}|${provId}`;
       if (!pairs.has(pairKey)) pairs.set(pairKey, { buyerId, provId, monto_total_clp: 0, procesos: 0 });
       const pair = pairs.get(pairKey);
@@ -126,15 +156,15 @@ const buyers = [...buyerById.values()]
   .map((b) => {
     // Ordenar todas las compras por fecha descendente y monto descendente
     const sortedTop = b.top.sort((a, c) => {
-      if (c.monto_clp !== a.monto_clp && a.monto_clp > 0 && c.monto_clp > 0) {
+      if (c.monto_clp !== null && a.monto_clp !== null && c.monto_clp !== a.monto_clp) {
         return c.monto_clp - a.monto_clp;
       }
       return String(c.fecha || "").localeCompare(String(a.fecha || ""));
     });
 
-    const sumMonths = [...b.months.values()].reduce((a, m) => a + m.monto_total_clp, 0);
-    const sumTop = sortedTop.reduce((a, t) => a + (t.monto_clp || 0), 0);
-    const monto_total_clp = Math.max(sumMonths, sumTop);
+    const sumMonths = sumKnownAmounts([...b.months.values()].map((month) => month.monto_total_clp));
+    const sumTop = sumKnownAmounts(sortedTop.map((item) => item.monto_clp));
+    const monto_total_clp = sumMonths === null ? sumTop : sumTop === null ? sumMonths : Math.max(sumMonths, sumTop);
 
     return {
       id: b.id,
@@ -144,10 +174,11 @@ const buyers = [...buyerById.values()]
       procesos: Math.max(b.procesos, sortedTop.length),
       months: [...b.months.values()].sort((a, c) => (a.period < c.period ? 1 : -1)).slice(0, 12),
       top: sortedTop.slice(0, 8), // Top 8 compras deduplicadas por comprador
+      anomalies: (anomaliesByBuyer.get(b.id) ?? []).sort((left, right) => left.id.localeCompare(right.id)),
     };
   })
 
-  .sort((a, c) => c.monto_total_clp - a.monto_total_clp);
+  .sort((a, c) => (c.monto_total_clp ?? Number.NEGATIVE_INFINITY) - (a.monto_total_clp ?? Number.NEGATIVE_INFINITY));
 
 const suppliersTop = [...suppliers.values()]
   .map((s) => ({ ...s, buyers: s.buyers.size }))
@@ -165,21 +196,23 @@ const out = {
   buyers,
   suppliers: suppliersTop,
   topPairs,
-  total_adjudicado_clp: buyers.reduce((a, b) => a + b.monto_total_clp, 0),
+  anomalies: anomalies.sort((left, right) => left.id.localeCompare(right.id)),
+  total_adjudicado_clp: sumKnownAmounts(buyers.map((buyer) => buyer.monto_total_clp)),
 };
 
 fs.writeFileSync(OUT, JSON.stringify(out));
 console.log(`✓ Generado ${OUT}`);
 console.log(`  Compradores: ${buyers.length}`);
 console.log(`  Proveedores: ${suppliersTop.length}`);
-console.log(`  Monto Total: $${(out.total_adjudicado_clp / 1e12).toFixed(2)}T CLP`);
+console.log(`  Monto Total: ${out.total_adjudicado_clp === null ? "no disponible" : `$${(out.total_adjudicado_clp / 1e12).toFixed(2)}T CLP`}`);
+console.log(`  Anomalías V7 en cuarentena: ${out.anomalies.length}`);
 
 // Verificar comprador Las Condes
-const lc = buyers.find((b) => b.name.toLowerCase().includes("condes"));
+const lc = buyers.find((b) => b.name?.toLowerCase().includes("condes"));
 if (lc) {
   console.log(`\n🔍 Verificación Las Condes:`);
   console.log(`  Procesos: ${lc.procesos}`);
   console.log(`  Top Compras Guardadas: ${lc.top.length}`);
   console.log(`  Primeros 3 items:`);
-  lc.top.slice(0, 3).forEach((t, i) => console.log(`   ${i + 1}. [${t.ocid}] ${t.titulo || t.title} — $${(t.monto_clp || 0).toLocaleString("es-CL")} (${t.proveedor})`));
+  lc.top.slice(0, 3).forEach((t, i) => console.log(`   ${i + 1}. [${t.ocid}] ${t.title ?? "sin título oficial"} — ${t.monto_clp === null ? "monto no publicado" : `$${t.monto_clp.toLocaleString("es-CL")}`} (${t.proveedor ?? "proveedor no publicado"})`));
 }

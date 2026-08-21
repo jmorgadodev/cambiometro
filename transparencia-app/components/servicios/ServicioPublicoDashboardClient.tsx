@@ -4,6 +4,7 @@ import { useState, useMemo } from "react";
 import Link from "next/link";
 import type { ServicioPublicoEnriquecido, OrdenCompraChileCompra } from "@/lib/servicios-publicos-data";
 import OrganismoFuncionariosList from "@/components/OrganismoFuncionariosList";
+import { evaluateBudgetSourceAnomaly } from "@/lib/budget-integrity";
 
 interface Props {
   servicio: ServicioPublicoEnriquecido;
@@ -103,7 +104,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
               👥 Dotación de Personal
             </div>
             <div style={{ fontFamily: "monospace", fontSize: "1.45rem", fontWeight: 900, color: "var(--ok)" }}>
-              {personal ? `${personal.dotacion_total.toLocaleString("es-CL")} pers.` : "Activa"}
+              {personal?.dotacion_total !== null && personal?.dotacion_total !== undefined ? `${personal.dotacion_total.toLocaleString("es-CL")} pers.` : "—"}
             </div>
             <div style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
               Transparencia Activa CPLT
@@ -126,10 +127,10 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
               🛒 Compras MercadoPúblico
             </div>
             <div style={{ fontFamily: "monospace", fontSize: "1.45rem", fontWeight: 900, color: "var(--warn)" }}>
-              {compras ? formatCompactCLP(compras.monto_total_clp) : "—"}
+              {compras?.monto_total_clp !== null && compras?.monto_total_clp !== undefined ? formatCompactCLP(compras.monto_total_clp) : "—"}
             </div>
             <div style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
-              {compras ? `${compras.procesos_count} órdenes de compra` : "ChileCompra OCDS"}
+              {compras ? `${compras.procesos_count} procesos` : "ChileCompra OCDS"}
             </div>
           </div>
 
@@ -149,7 +150,9 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
               ⚖️ Audiencias & Control CGR
             </div>
             <div style={{ fontFamily: "monospace", fontSize: "1.45rem", fontWeight: 900, color: "var(--info)" }}>
-              {lobby.length > 0 ? `${lobby.length} reuniones` : `${resumenLobby?.audiencias_ministerio_tutelar.length || 3} tutelar`}
+              {lobby.length > 0
+                ? `${lobby.length} reuniones`
+                : `${resumenLobby?.audiencias_ministerio_tutelar.length ?? 0} audiencias`}
             </div>
             <div style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
               {cgr.length} auditorías Contraloría
@@ -340,6 +343,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                         {pres.subtitulos.map((sub, i) => {
                           const rawPct = sub.vigente > 0 ? (sub.ejecutado / sub.vigente) * 100 : sub.ejecutado > 0 ? 9999 : 0;
                           const isOverflow = rawPct > 999.9 || !isFinite(rawPct);
+                          const integrity = evaluateBudgetSourceAnomaly({ ejecutado: sub.ejecutado, vigente: sub.vigente });
                           const pctDisplay = isOverflow ? "⚠ >999%" : `${rawPct.toFixed(1)}%`;
 
                           return (
@@ -349,6 +353,11 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                               </td>
                               <td style={{ padding: "0.65rem 0.8rem", fontWeight: 600, color: "var(--text-primary)" }}>
                                 {sub.denominacion}
+                                {integrity.status === "ALTA" && (
+                                  <span style={{ display: "block", marginTop: "0.2rem", color: "var(--warn)", fontSize: "0.68rem", fontWeight: 800 }}>
+                                    Hallazgo de integridad ALTA (V7) · valor oficial preservado
+                                  </span>
+                                )}
                               </td>
                               <td style={{ padding: "0.65rem 0.8rem", textAlign: "right", fontFamily: "var(--font-mono, monospace)" }}>
                                 {formatCLP(sub.inicial)}
@@ -492,7 +501,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                   <div style={{ padding: "0.85rem", background: "var(--bg-surface-2)", borderRadius: 8 }}>
                     <span style={{ fontSize: "0.68rem", color: "var(--text-subtle)", textTransform: "uppercase", fontWeight: 700 }}>Dotación Activa</span>
                     <div style={{ fontFamily: "monospace", fontSize: "1.3rem", fontWeight: 800, color: "var(--text-primary)", marginTop: "0.2rem" }}>
-                      {personal.dotacion_total.toLocaleString("es-CL")} pers.
+                      {personal.dotacion_total === null ? "—" : `${personal.dotacion_total.toLocaleString("es-CL")} pers.`}
                     </div>
                   </div>
 
@@ -500,12 +509,12 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                     <span style={{ fontSize: "0.68rem", color: "var(--text-subtle)", textTransform: "uppercase", fontWeight: 700 }}>Gasto Mensual Salarios</span>
                     <div
                       style={{ fontFamily: "monospace", fontSize: "1.3rem", fontWeight: 800, color: "var(--ok)", marginTop: "0.2rem" }}
-                      title={`Monto exacto mensual: ${formatCLP(personal.gasto_mensual_clp)}`}
+                      title={personal.gasto_mensual_clp === null ? "Monto oficial no publicado" : `Monto exacto mensual: ${formatCLP(personal.gasto_mensual_clp)}`}
                     >
-                      {formatCompactCLP(personal.gasto_mensual_clp)}
+                      {personal.gasto_mensual_clp === null ? "—" : formatCompactCLP(personal.gasto_mensual_clp)}
                     </div>
                     <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", display: "block", marginTop: "0.2rem" }}>
-                      {formatCLP(personal.gasto_mensual_clp)}
+                      {personal.gasto_mensual_clp === null ? "Monto oficial no publicado" : formatCLP(personal.gasto_mensual_clp)}
                     </span>
                   </div>
                 </div>
@@ -515,23 +524,27 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                   <span style={{ fontSize: "0.72rem", color: "var(--text-subtle)", fontWeight: 700, textTransform: "uppercase", display: "block", marginBottom: "0.6rem" }}>
                     Composición de la Dotación
                   </span>
-                  <div style={{ height: 20, borderRadius: 99, overflow: "hidden", display: "flex", marginBottom: "0.6rem" }}>
-                    <div style={{ width: `${personal.planta_pct}%`, background: "var(--accent)" }} title={`Planta: ${personal.planta_pct}%`} />
-                    <div style={{ width: `${personal.contrata_pct}%`, background: "var(--ok)" }} title={`Contrata: ${personal.contrata_pct}%`} />
-                    <div style={{ width: `${personal.honorarios_pct}%`, background: "var(--warn)" }} title={`Honorarios: ${personal.honorarios_pct}%`} />
-                  </div>
-                  <div style={{ display: "flex", gap: "1rem", fontSize: "0.75rem", flexWrap: "wrap" }}>
-                    {[
-                      { label: "Planta", pct: personal.planta_pct, color: "var(--accent)" },
-                      { label: "Contrata", pct: personal.contrata_pct, color: "var(--ok)" },
-                      { label: "Honorarios", pct: personal.honorarios_pct, color: "var(--warn)" },
-                    ].map((cat) => (
-                      <span key={cat.label} style={{ display: "flex", alignItems: "center", gap: "0.35rem", color: "var(--text-muted)" }}>
-                        <span style={{ display: "inline-block", width: 10, height: 10, background: cat.color, borderRadius: 2 }} />
-                        <strong style={{ color: cat.color }}>{cat.pct}%</strong> {cat.label}
-                      </span>
-                    ))}
-                  </div>
+                  {personal.planta_pct !== null && personal.contrata_pct !== null && personal.honorarios_pct !== null ? (
+                    <>
+                      <div style={{ height: 20, borderRadius: 99, overflow: "hidden", display: "flex", marginBottom: "0.6rem" }}>
+                        <div style={{ width: `${personal.planta_pct}%`, background: "var(--accent)" }} title={`Planta: ${personal.planta_pct}%`} />
+                        <div style={{ width: `${personal.contrata_pct}%`, background: "var(--ok)" }} title={`Contrata: ${personal.contrata_pct}%`} />
+                        <div style={{ width: `${personal.honorarios_pct}%`, background: "var(--warn)" }} title={`Honorarios: ${personal.honorarios_pct}%`} />
+                      </div>
+                      <div style={{ display: "flex", gap: "1rem", fontSize: "0.75rem", flexWrap: "wrap" }}>
+                        {[
+                          { label: "Planta", pct: personal.planta_pct, color: "var(--accent)" },
+                          { label: "Contrata", pct: personal.contrata_pct, color: "var(--ok)" },
+                          { label: "Honorarios", pct: personal.honorarios_pct, color: "var(--warn)" },
+                        ].map((cat) => (
+                          <span key={cat.label} style={{ display: "flex", alignItems: "center", gap: "0.35rem", color: "var(--text-muted)" }}>
+                            <span style={{ display: "inline-block", width: 10, height: 10, background: cat.color, borderRadius: 2 }} />
+                            <strong style={{ color: cat.color }}>{cat.pct}%</strong> {cat.label}
+                          </span>
+                        ))}
+                      </div>
+                    </>
+                  ) : <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>Desglose oficial no publicado.</span>}
                 </div>
               </div>
             </div>
@@ -567,24 +580,42 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                     Contrataciones y Compras Públicas
                   </h2>
                   <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: 0 }}>
-                    Registro de órdenes de compra, licitaciones públicas y tratos directos del organismo.
+                    Adjudicaciones y procesos publicados por ChileCompra para el RUT jurídico del organismo.
                   </p>
                 </div>
 
                 <div style={{ textAlign: "right" }}>
                   <span style={{ fontSize: "0.75rem", color: "var(--text-muted)", display: "block" }}>Total Transado</span>
                   <strong style={{ fontSize: "1.75rem", color: "var(--warn)", fontFamily: "monospace" }}>
-                    {formatCompactCLP(compras.monto_total_clp)}
+                    {compras.monto_total_clp === null ? "—" : formatCompactCLP(compras.monto_total_clp)}
                   </strong>
                 </div>
               </div>
+
+              {compras.anomalias_integridad.length > 0 && (
+                <div style={{ padding: "1rem", marginBottom: "1.5rem", borderRadius: 8, border: "1px solid var(--warn)", background: "var(--surface-2)" }}>
+                  <strong style={{ color: "var(--warn)", display: "block", marginBottom: "0.35rem" }}>
+                    Hallazgo de integridad ALTA (V7) · valor oficial preservado
+                  </strong>
+                  <p style={{ margin: 0, fontSize: "0.82rem", color: "var(--text-muted)" }}>
+                    {compras.anomalias_integridad.length} orden(es) oficial(es) superan el límite de sanidad de $100.000 millones por relación. Se conservan como evidencia, pero sus montos, proveedores y relaciones están excluidos de totales y rankings.
+                  </p>
+                  <ul style={{ margin: "0.65rem 0 0", paddingLeft: "1.2rem", fontSize: "0.78rem", color: "var(--text-muted)" }}>
+                    {compras.anomalias_integridad.map((anomaly) => (
+                      <li key={anomaly.id}>
+                        {anomaly.titulo ?? "Orden oficial sin título"} · {formatCLP(anomaly.monto_oficial_clp)}{anomaly.source_url ? <> · <a href={anomaly.source_url} target="_blank" rel="noopener noreferrer">fuente ↗</a></> : null}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               {/* Distribución de mecanismos de compra */}
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "1rem", marginBottom: "1.5rem" }}>
                 <div style={{ padding: "1rem", background: "var(--surface-2)", borderRadius: 8, border: "1px solid var(--border)" }}>
                   <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block" }}>Licitación Pública</span>
                   <strong style={{ fontSize: "1.3rem", color: "var(--ok)", fontFamily: "monospace" }}>
-                    {compras.pct_licitacion_publica}%
+                    {compras.pct_licitacion_publica === null ? "—" : `${compras.pct_licitacion_publica}%`}
                   </strong>
                   <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", display: "block", marginTop: "0.2rem" }}>
                     Mecanismo concursal
@@ -594,7 +625,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                 <div style={{ padding: "1rem", background: "var(--surface-2)", borderRadius: 8, border: "1px solid var(--border)" }}>
                   <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block" }}>Trato Directo</span>
                   <strong style={{ fontSize: "1.3rem", color: "var(--bad)", fontFamily: "monospace" }}>
-                    {compras.pct_trato_directo}%
+                    {compras.pct_trato_directo === null ? "—" : `${compras.pct_trato_directo}%`}
                   </strong>
                   <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", display: "block", marginTop: "0.2rem" }}>
                     Contratación excepcional
@@ -604,7 +635,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                 <div style={{ padding: "1rem", background: "var(--surface-2)", borderRadius: 8, border: "1px solid var(--border)" }}>
                   <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block" }}>Convenio Marco</span>
                   <strong style={{ fontSize: "1.3rem", color: "var(--accent)", fontFamily: "monospace" }}>
-                    {compras.pct_convenio_marco}%
+                    {compras.pct_convenio_marco === null ? "—" : `${compras.pct_convenio_marco}%`}
                   </strong>
                   <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", display: "block", marginTop: "0.2rem" }}>
                     Catálogo estandarizado
@@ -612,12 +643,12 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                 </div>
 
                 <div style={{ padding: "1rem", background: "var(--surface-2)", borderRadius: 8, border: "1px solid var(--border)" }}>
-                  <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block" }}>Órdenes de Compra</span>
+                  <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", display: "block" }}>Procesos</span>
                   <strong style={{ fontSize: "1.3rem", color: "var(--text-primary)", fontFamily: "monospace" }}>
                     {compras.procesos_count.toLocaleString("es-CL")}
                   </strong>
                   <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", display: "block", marginTop: "0.2rem" }}>
-                    Transacciones emitidas
+                    Procesos OCDS publicados
                   </span>
                 </div>
               </div>
@@ -629,18 +660,21 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                     📊 Serie Mensual de Compras 2026 (Montos Transados en MercadoPúblico)
                   </h3>
                   {(() => {
-                    const maxMonto = Math.max(...compras.serie_mensual_2026.map(m => m.monto_clp));
+                    const montosPublicados = compras.serie_mensual_2026
+                      .map((month) => month.monto_clp)
+                      .filter((amount): amount is number => typeof amount === "number");
+                    const maxMonto = montosPublicados.length > 0 ? Math.max(...montosPublicados) : 0;
                     const barH = 110;
                     return (
                       <div style={{ overflowX: "auto" }}>
                         <div style={{ display: "flex", alignItems: "flex-end", gap: "0.6rem", minWidth: compras.serie_mensual_2026.length * 75, height: barH + 45, paddingTop: "0.5rem" }}>
                           {compras.serie_mensual_2026.map((m) => {
-                            const bPct = maxMonto > 0 ? (m.monto_clp / maxMonto) * barH : 0;
+                            const bPct = maxMonto > 0 && m.monto_clp !== null ? (m.monto_clp / maxMonto) * barH : 0;
                             return (
                               <div key={m.period} style={{ flex: 1, minWidth: 65, display: "flex", flexDirection: "column", alignItems: "center", gap: "0.3rem" }}>
                                 <div style={{ width: "100%", display: "flex", justifyContent: "center", alignItems: "flex-end", height: barH }}>
                                   <div
-                                    title={`${m.period}: ${formatCLP(m.monto_clp)} (${m.procesos_count} órdenes)`}
+                                    title={`${m.period}: ${m.monto_clp === null ? "monto oficial no publicado" : formatCLP(m.monto_clp)} (${m.procesos_count} procesos)`}
                                     style={{
                                       width: "65%",
                                       height: Math.max(4, bPct),
@@ -654,7 +688,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                                   {m.period}
                                 </div>
                                 <div style={{ fontSize: "0.7rem", color: "var(--warn)", fontFamily: "monospace", fontWeight: 700 }}>
-                                  {formatCompactCLP(m.monto_clp)}
+                                  {m.monto_clp === null ? "—" : formatCompactCLP(m.monto_clp)}
                                 </div>
                               </div>
                             );
@@ -711,12 +745,12 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                 </div>
               )}
 
-              {/* Tabla Paginada de Órdenes de Compra (Trazabilidad por Fila) */}
+                  {/* Tabla paginada de adjudicaciones OCDS (trazabilidad por fila) */}
               {ordenes.length > 0 && (
                 <div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.75rem", flexWrap: "wrap", gap: "0.5rem" }}>
                     <h3 style={{ fontSize: "1.05rem", fontWeight: 800, color: "var(--text-primary)", margin: 0 }}>
-                      📋 Registro Detallado de Órdenes de Compra ({ordenes.length} órdenes)
+                      📋 Registro Detallado de Adjudicaciones ({ordenes.length})
                     </h3>
                     <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
                       Página {currentComprasPage} de {totalComprasPages}
@@ -822,7 +856,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
           ) : (
             <div className="card" style={{ padding: "1.75rem" }}>
               <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: 0 }}>
-                Sin órdenes de compra registradas en el período evaluado.
+                Sin enlace verificable por RUT jurídico entre este organismo y ChileCompra; los montos, órdenes y proveedores se mantienen ausentes.
               </p>
             </div>
           )}

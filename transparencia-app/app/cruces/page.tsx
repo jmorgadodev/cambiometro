@@ -5,6 +5,7 @@ import { leerContraloriaV1 } from "@/lib/contraloria-lake";
 import { leerChileCompraV1 } from "@/lib/chilecompra";
 import { leerInfoLobbyV1 } from "@/lib/infolobby";
 import CrucesExplorerClient from "@/components/cruces/CrucesExplorerClient";
+import { getLey19862Summary } from "@/lib/transferencias-data";
 
 export const metadata: Metadata = {
   title: "Explorador de Cruces de Datos Públicos — El Cambiómetro",
@@ -25,9 +26,10 @@ export default async function CrossesPage({
   const contraloria = leerContraloriaV1();
   const chilecompra = leerChileCompraV1();
   const infolobby = leerInfoLobbyV1();
+  const ley19862 = getLey19862Summary();
 
-  const clp = (amount: number) => {
-    if (!amount || amount <= 0) return "$68.450 MM";
+  const clp = (amount: number | null) => {
+    if (amount === null || amount <= 0) return "—";
     return new Intl.NumberFormat("es-CL", {
       style: "currency",
       currency: "CLP",
@@ -36,13 +38,21 @@ export default async function CrossesPage({
     }).format(amount);
   };
 
-  const totalChilecompraMonto =
-    chilecompra?.total_adjudicado_clp && chilecompra.total_adjudicado_clp > 0
-      ? chilecompra.total_adjudicado_clp
-      : chilecompra?.buyers?.reduce((acc, b) => acc + (b.monto_total_clp || 0), 0) || 68_450_000_000;
+  const montosChilecompra = chilecompra?.buyers
+    ?.map((buyer) => buyer.monto_total_clp)
+    .filter((amount): amount is number => typeof amount === "number") ?? [];
+  const totalChilecompraMonto = typeof chilecompra?.total_adjudicado_clp === "number"
+    ? chilecompra.total_adjudicado_clp
+    : montosChilecompra.length > 0
+      ? montosChilecompra.reduce((sum, amount) => sum + amount, 0)
+      : null;
 
-  const totalChilecompraProcesos =
-    chilecompra?.buyers?.reduce((acc, b) => acc + (b.procesos || 0), 0) || 36_813;
+  const procesosChilecompra = chilecompra?.buyers
+    ?.map((buyer) => buyer.procesos)
+    .filter((count): count is number => typeof count === "number") ?? [];
+  const totalChilecompraProcesos = procesosChilecompra.length > 0
+    ? procesosChilecompra.reduce((sum, count) => sum + count, 0)
+    : null;
 
   return (
     <main>
@@ -86,14 +96,14 @@ export default async function CrossesPage({
           <div className="stat-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
             {/* KPI 1 */}
             <div className="stat-tile stat-tile--accent">
-              <div className="stat-tile__value">{crosses.length > 0 ? crosses.length.toLocaleString("es-CL") : "2.140"}</div>
+              <div className="stat-tile__value">{crosses.length.toLocaleString("es-CL")}</div>
               <div className="stat-tile__label">Relaciones en Grafo</div>
-              <div className="stat-tile__hint">118.360 registros vinculados · {crosses.length.toLocaleString("es-CL")} relaciones agregadas</div>
+              <div className="stat-tile__hint">{crosses.length.toLocaleString("es-CL")} relaciones agregadas</div>
             </div>
 
             {/* KPI 2 */}
             <div className="stat-tile stat-tile--ok">
-              <div className="stat-tile__value">{contraloria?.records.length ?? 275}</div>
+              <div className="stat-tile__value">{contraloria?.records.length ?? "—"}</div>
               <div className="stat-tile__label">Auditorías CGR</div>
               <div className="stat-tile__hint">Informes de fiscalización 2025-2026</div>
             </div>
@@ -102,12 +112,12 @@ export default async function CrossesPage({
             <div className="stat-tile stat-tile--warn">
               <div className="stat-tile__value">{clp(totalChilecompraMonto)}</div>
               <div className="stat-tile__label">Compras ChileCompra</div>
-              <div className="stat-tile__hint">{totalChilecompraProcesos.toLocaleString("es-CL")} órdenes OCDS</div>
+              <div className="stat-tile__hint">{totalChilecompraProcesos?.toLocaleString("es-CL") ?? "—"} procesos OCDS</div>
             </div>
 
             {/* KPI 4 */}
             <div className="stat-tile stat-tile--alert">
-              <div className="stat-tile__value">{(infolobby?.count ?? 60336).toLocaleString("es-CL")}</div>
+              <div className="stat-tile__value">{infolobby?.count?.toLocaleString("es-CL") ?? "—"}</div>
               <div className="stat-tile__label">Registros InfoLobby</div>
               <div className="stat-tile__hint">Audiencias, viajes y donativos</div>
             </div>
@@ -139,7 +149,7 @@ export default async function CrossesPage({
             <div className="card" style={{ padding: "1.25rem", background: "var(--surface)", borderColor: "var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>⚖️</span>
-                <span className="badge badge-ok">275 informes</span>
+                <span className="badge badge-ok">{contraloria?.records.length ?? "—"} informes</span>
               </div>
               <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>
                 Contraloría General (CGR)
@@ -156,7 +166,7 @@ export default async function CrossesPage({
             <div className="card" style={{ padding: "1.25rem", background: "var(--surface)", borderColor: "var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>🛒</span>
-                <span className="badge badge-warn">36.813 procesos</span>
+                <span className="badge badge-warn">{totalChilecompraProcesos?.toLocaleString("es-CL") ?? "—"} procesos</span>
               </div>
               <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>
                 ChileCompra MercadoPúblico
@@ -173,7 +183,7 @@ export default async function CrossesPage({
             <div className="card" style={{ padding: "1.25rem", background: "var(--surface)", borderColor: "var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>🤝</span>
-                <span className="badge badge-info">60.336 registros</span>
+                <span className="badge badge-info">{infolobby?.count?.toLocaleString("es-CL") ?? "—"} registros</span>
               </div>
               <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>
                 InfoLobby (Ley 20.730)
@@ -190,7 +200,7 @@ export default async function CrossesPage({
             <div className="card" style={{ padding: "1.25rem", background: "var(--surface)", borderColor: "var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>📑</span>
-                <span className="badge badge-info">361.101 registros</span>
+                <span className="badge badge-info">{ley19862.kpis.total_transfers.toLocaleString("es-CL")} registros</span>
               </div>
               <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>
                 Transferencias Ley 19.862

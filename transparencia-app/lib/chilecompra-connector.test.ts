@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   buildChileCompraListUrl,
+  filterChileCompraRecordsByCutoff,
   fetchChileCompraMonth,
   normalizeOcdsPackage,
   reconcileChileCompraRecords,
@@ -157,6 +158,46 @@ describe("conector ChileCompra OCDS", () => {
     expect(fetchImpl).toHaveBeenCalledTimes(5);
   });
 
+  it("usa el paquete masivo oficial para licitaciones sin pedir tender y award por separado", async () => {
+    const fetchImpl = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url.includes("listaOCDSAgnoMes/")) {
+        return new Response(JSON.stringify({ pagination: { offset: 0, limit: 1, total: 1 }, data: [{
+          ocid: "ocds-70d2nz-123-1-LE26",
+          urlTender: "https://api.mercadopublico.cl/APISOCDS/OCDS/tender/123-1-LE26",
+          urlAward: "https://api.mercadopublico.cl/APISOCDS/OCDS/award/123-1-LE26",
+        }] }), { status: 200 });
+      }
+      throw new Error(`no debe pedir documento individual: ${url}`);
+    });
+    const bulkLicitacionDocuments = new Map([["123-1-LE26", {
+      url: "https://ocds-lic-files.da.mercadopublico.cl/2026/202606.7z#123-1-LE26.json",
+      payload: awardPackage,
+    }]]);
+    const result = await fetchChileCompraMonth({ year: 2026, month: 6, types: ["licitacion"], fetchImpl, bulkLicitacionDocuments, requestsPerSecond: 100, retryBaseMs: 1 });
+    expect(result.documents).toHaveLength(1);
+    expect(result.records.length).toBeGreaterThan(0);
+    expect(fetchImpl).toHaveBeenCalledTimes(1);
+  });
+
+  it("completa por ítem las licitaciones ausentes del paquete masivo", async () => {
+    const fetchImpl = vi.fn(async (input: string | URL | Request) => {
+      const url = String(input);
+      if (url.includes("listaOCDSAgnoMes/")) {
+        return new Response(JSON.stringify({ pagination: { offset: 0, limit: 2, total: 2 }, data: [
+          { ocid: "bulk", urlTender: "https://api.mercadopublico.cl/tender/bulk", urlAward: "https://api.mercadopublico.cl/award/bulk" },
+          { ocid: "missing", urlTender: "https://api.mercadopublico.cl/tender/missing", urlAward: "https://api.mercadopublico.cl/award/missing" },
+        ] }), { status: 200 });
+      }
+      return new Response(JSON.stringify(awardPackage), { status: 200 });
+    });
+    const bulkLicitacionDocuments = new Map([["bulk", { url: "https://ocds-lic-files.da.mercadopublico.cl/2026/202606.7z#bulk.json", payload: awardPackage }]]);
+    const result = await fetchChileCompraMonth({ year: 2026, month: 6, types: ["licitacion"], fetchImpl, bulkLicitacionDocuments, requestsPerSecond: 100 });
+    expect(result.documents).toHaveLength(3);
+    expect(result.bulkCoverage).toEqual({ used: 1, missing: 1 });
+    expect(fetchImpl).toHaveBeenCalledTimes(3);
+  });
+
   it("rechaza cambios incompatibles en el esquema oficial", async () => {
     const fetchImpl = vi.fn(async () => new Response(JSON.stringify({ pagination: { total: 1 }, records: [] }), { status: 200 }));
     await expect(fetchChileCompraMonth({ year: 2026, month: 6, types: ["licitacion"], fetchImpl })).rejects.toThrow("CHILECOMPRA_INVALID_LIST_SCHEMA");
@@ -211,5 +252,15 @@ describe("conector ChileCompra OCDS", () => {
     const result = await fetchChileCompraMonth({ year: 2026, month: 6, types: ["trato_directo"], fetchImpl, requestsPerSecond: 1 });
     expect(result.documents).toHaveLength(1);
     expect(fetchImpl).not.toHaveBeenCalled();
+  });
+
+  it("excluye de la proyección registros posteriores al corte sin reemplazarlos", () => {
+    expect(filterChileCompraRecordsByCutoff([
+      { id: "before", data: { fecha: "2026-08-20T23:59:59Z" } },
+      { id: "after", data: { fecha: "2026-08-21T00:00:00Z" } },
+      { id: "unknown", data: { fecha: null } },
+    ], "2026-08-20")).toEqual([
+      { id: "before", data: { fecha: "2026-08-20T23:59:59Z" } },
+    ]);
   });
 });

@@ -40,40 +40,30 @@ describe("Ficha Comunal Enriquecida (/municipalidades/[id]) y Consolidado (/func
   it("verifica datos enriquecidos de comunas representativas (ej. Maipú, Las Condes, Santiago, Talca)", () => {
     const maipu = getMunicipalidadData("muni-maipu");
     expect(maipu).not.toBeNull();
-    expect(maipu?.poblacion_censo_2024).toBeGreaterThan(500000);
-    expect(maipu?.superficie_km2).toBeGreaterThan(100);
-    expect(maipu?.presupuesto_per_capita_clp).toBeGreaterThan(0);
+    expect(maipu?.poblacion_censo_2024).toBeNull();
+    expect(maipu?.superficie_km2).toBeNull();
+    expect(maipu?.presupuesto_per_capita_clp).toBeNull();
 
     const all = getAllMunicipalidadesData();
     expect(all.length).toBe(MUNICIPALIDADES_SEED.length);
 
-    // Garantizar que el 100% de las 346 comunas tengan alcalde con remuneración bruta registrada
-    const sinSueldo = all.filter((m) => !m.alcalde || !m.alcalde.remuneracion_bruta || m.alcalde.remuneracion_bruta <= 0);
-    expect(sinSueldo.length).toBe(0);
+    // R10 permite ausencia; sólo los registros con evidencia oficial pueden poblar el alcalde.
+    for (const municipalidad of all) {
+      if (!municipalidad.alcalde) continue;
+      expect(municipalidad.alcalde.fuente).toMatch(/^https?:\/\//);
+      expect(municipalidad.alcalde.remuneracion_bruta).toBeGreaterThan(0);
+    }
   });
 
-  it("verifica que el 100% de las 346 municipalidades tengan datos completos y alcaldes válidos", () => {
+  it("mantiene 346 municipalidades sin completar ausencias con valores inventados", () => {
     const all = getAllMunicipalidadesData();
     expect(all.length).toBe(346);
 
     for (const m of all) {
-      expect(m.poblacion_censo_2024).toBeGreaterThan(0);
-      expect(m.superficie_km2).toBeGreaterThan(0);
-      expect(m.resumen_personal?.total_funcionarios).toBeGreaterThan(0);
-      expect(m.alcalde?.remuneracion_bruta).toBeGreaterThanOrEqual(3000000);
+      expect(m.poblacion_censo_2024 === null || m.poblacion_censo_2024 > 0).toBe(true);
+      expect(m.superficie_km2 === null || m.superficie_km2 === undefined || m.superficie_km2 > 0).toBe(true);
+      expect(m.resumen_personal === null || m.resumen_personal.total_funcionarios >= 0).toBe(true);
+      expect(m.alcalde === null || (m.alcalde.remuneracion_bruta ?? 0) > 0).toBe(true);
     }
-
-    // Lolol debe tener al Alcalde
-    const lolol = getMunicipalidadData("muni-lolol");
-    expect(lolol).not.toBeNull();
-    expect(lolol?.alcalde?.cargo).toBe("Alcalde");
-    expect(lolol?.alcalde?.remuneracion_bruta).toBeGreaterThan(6000000);
-    expect(lolol?.poblacion_censo_2024).toBe(7900);
-
-    // Valparaíso debe tener a la Alcaldesa Camila Nieto Hernández
-    const valpo = getMunicipalidadData("muni-valparaiso");
-    expect(valpo).not.toBeNull();
-    expect(valpo?.alcalde?.nombre).toContain("Camila Nieto");
-    expect(valpo?.alcalde?.remuneracion_bruta).toBeGreaterThan(8000000);
   });
 });
