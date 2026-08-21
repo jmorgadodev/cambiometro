@@ -20,4 +20,8 @@ describe("paquete masivo oficial de licitaciones OCDS", () => {
       releases: [compiledRelease],
     });
   });
+
+  it("trata un Record Package oficial vacío como ausencia, sin invalidar el lote mensual", () => {
+    expect(recordPackageFromBulk({ records: [] })).toBeNull();
+  });
 });

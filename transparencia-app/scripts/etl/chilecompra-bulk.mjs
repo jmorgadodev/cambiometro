@@ -11,9 +11,10 @@ export function buildBulkLicitacionUrl(year, month) {
 }
 
 export function recordPackageFromBulk(document) {
-  if (!document || !Array.isArray(document.records) || document.records.length < 1) {
+  if (!document || !Array.isArray(document.records)) {
     throw new Error("CHILECOMPRA_BULK_INVALID_SCHEMA");
   }
+  if (document.records.length === 0) return null;
   const releases = document.records.map((record) => record?.compiledRelease).filter(Boolean);
   if (releases.length !== document.records.length) throw new Error("CHILECOMPRA_BULK_COMPILED_RELEASE_MISSING");
   return { uri: document.uri, publishedDate: document.publishedDate, releases };
@@ -51,11 +52,17 @@ export async function loadOfficialBulkLicitaciones({ year, month, workRoot, fetc
   }
 
   const documents = new Map();
+  const skippedEmptyFiles = [];
   for (const fileName of readdirSync(extractedRoot).filter((name) => name.endsWith(".json")).sort()) {
     const processId = basename(fileName, ".json");
     const raw = JSON.parse(readFileSync(join(extractedRoot, fileName), "utf8"));
-    documents.set(processId, { url: `${url}#${encodeURIComponent(fileName)}`, payload: recordPackageFromBulk(raw) });
+    const payload = recordPackageFromBulk(raw);
+    if (payload === null) {
+      skippedEmptyFiles.push(fileName);
+      continue;
+    }
+    documents.set(processId, { url: `${url}#${encodeURIComponent(fileName)}`, payload });
   }
   if (documents.size < 1) throw new Error("CHILECOMPRA_BULK_EMPTY");
-  return { url, archivePath, documents };
+  return { url, archivePath, documents, skippedEmptyFiles };
 }

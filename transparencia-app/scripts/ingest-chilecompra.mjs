@@ -30,7 +30,7 @@ if (!selectedTypes || selectedTypes.includes("licitacion")) {
   try {
     const bulk = await loadOfficialBulkLicitaciones({ year, month, workRoot: join(outputRoot, ".work") });
     bulkLicitacionDocuments = bulk.documents;
-    process.stderr.write(`${JSON.stringify({ phase: "bulk_licitacion", completed: bulk.documents.size, url: bulk.url })}\n`);
+    process.stderr.write(`${JSON.stringify({ phase: "bulk_licitacion", completed: bulk.documents.size, skippedEmptyFiles: bulk.skippedEmptyFiles.length, url: bulk.url })}\n`);
   } catch (error) {
     process.stderr.write(`${JSON.stringify({ phase: "bulk_licitacion_fallback", error: error instanceof Error ? error.message : String(error) })}\n`);
   }
