@@ -35,6 +35,20 @@ export function analyzeSupportAssignment({ assignment, salaries }) {
   return { assignment: parseClp(assignment), salarySum: validation.salarySum, validation };
 }
 
+export function classifyDisclosedV2({ validation, layerMismatch, siteDisclosure }) {
+  if (layerMismatch) {
+    return { status: "CRITICA", rawStatus: validation.status, sourceAnomaly: false, mitigatedByDisclosure: false };
+  }
+  const sourceAnomaly = validation.status === "ALTA" || validation.status === "CRITICA";
+  const mitigatedByDisclosure = validation.status === "CRITICA" && Boolean(siteDisclosure);
+  return {
+    status: mitigatedByDisclosure ? "ALTA" : validation.status,
+    rawStatus: validation.status,
+    sourceAnomaly,
+    mitigatedByDisclosure,
+  };
+}
+
 export function isCorrectedKaiserCalibration(calibration) {
   return calibration.expenses_may?.official === 4_582_550
     && calibration.expenses_may?.items === 4_582_550

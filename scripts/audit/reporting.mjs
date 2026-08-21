@@ -29,3 +29,16 @@ export function verifyCauseCoverage(findings) {
   if (uncovered.length) throw new Error(`AUDIT_UNCOVERED_ROOT_CAUSES:${uncovered.map((row) => row.id).join(",")}`);
   return true;
 }
+
+export function assertAltaSourceDisclosed(findings) {
+  const invalid = findings.filter((row) => row.status === "ALTA"
+    && (row.detail?.source_anomaly !== true || row.detail?.site_disclosure !== true));
+  if (invalid.length) throw new Error(`AUDIT_ALTA_NOT_DISCLOSED:${invalid.map((row) => row.id).join(",")}`);
+  return true;
+}
+
+export function correctionVerdict({ critical, high, coveragePct }) {
+  if (critical > 0) return "NO";
+  if (high > 0 || coveragePct < 100) return "CON FIXES";
+  return "SI";
+}

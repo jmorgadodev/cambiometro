@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 import {
   analyzeOperationalExpenseGroup,
   analyzeSupportAssignment,
+  classifyDisclosedV2,
   compareRscWithHtml,
   isCorrectedKaiserCalibration,
   reconcileRoster,
@@ -39,6 +40,18 @@ test("control V2 Kaiser conserva los valores y severidad aprobados", () => {
   assert.equal(result.salarySum, 15_250_000);
   assert.equal(result.validation.status, "ALTA");
   assert.equal(result.validation.difference, 3_843_851);
+});
+
+test("V2 solo mitiga una CRITICA cuando la fuente cuadra y el sitio la advierte", () => {
+  const raw = analyzeSupportAssignment({ assignment: 100, salaries: [141] }).validation;
+  assert.deepEqual(classifyDisclosedV2({ validation: raw, layerMismatch: false, siteDisclosure: true }), {
+    status: "ALTA",
+    rawStatus: "CRITICA",
+    sourceAnomaly: true,
+    mitigatedByDisclosure: true,
+  });
+  assert.equal(classifyDisclosedV2({ validation: raw, layerMismatch: false, siteDisclosure: false }).status, "CRITICA");
+  assert.equal(classifyDisclosedV2({ validation: raw, layerMismatch: true, siteDisclosure: true }).status, "CRITICA");
 });
 
 test("calibración Kaiser posterior a FIX-1 exige total V1 corregido", () => {

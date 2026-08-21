@@ -20,6 +20,7 @@ import {
 import {
   analyzeOperationalExpenseGroup,
   analyzeSupportAssignment,
+  classifyDisclosedV2,
   compareRscWithHtml,
   isCorrectedKaiserCalibration,
   politicianSlug,
@@ -236,7 +237,7 @@ async function auditExpenses(rosterMatches, siteSnapshots) {
   return { findings, calibration };
 }
 
-async function auditSupport(rosterMatches, localPersonal) {
+async function auditSupport(rosterMatches, localPersonal, siteDisclosure) {
   const findings = [];
   const officialPage = await fetchWithPolicy(OFFICIAL_SUPPORT_PAGE, { accept: "text/html" });
   const assignment = parseSupportAssignment(officialPage.body);
@@ -254,13 +255,22 @@ async function auditSupport(rosterMatches, localPersonal) {
     const projectedSum = projectedRows.reduce((sum, row) => sum + Number(row.monto ?? 0), 0);
     const v2 = analyzeSupportAssignment({ assignment, salaries: officialRows.map((row) => row.monto) });
     const layerMismatch = officialSum !== projectedSum;
-    const status = layerMismatch ? "ALTA" : v2.validation.status;
+    const classification = classifyDisclosedV2({ validation: v2.validation, layerMismatch, siteDisclosure });
+    const status = classification.status;
     findings.push(makeFinding({
       entity: { type: "parlamentario", id, name: match?.published.nombre_completo ?? officialName }, period,
       category: "personal_apoyo", field: "suma_sueldos_vs_asignacion",
       layers: { oficial: { asignacion: assignment, suma_sueldos: officialSum }, proyeccion: projectedSum, lake: null, sitio: null, difference: v2.validation.difference },
       validation: "V2", status, url: OFFICIAL_SUPPORT_PAGE, method: "RSC",
-      detail: { official_api: OFFICIAL_SUPPORT_URL, layer_mismatch: layerMismatch, source_page_checksum: officialPage.checksum },
+      detail: {
+        official_api: OFFICIAL_SUPPORT_URL,
+        layer_mismatch: layerMismatch,
+        source_page_checksum: officialPage.checksum,
+        raw_v2_status: classification.rawStatus,
+        source_anomaly: classification.sourceAnomaly,
+        site_disclosure: Boolean(siteDisclosure),
+        mitigated_by_disclosure: classification.mitigatedByDisclosure,
+      },
     }));
     if (id === "sen-038" && period === "2026-07") calibration = { assignment, salaries: officialSum, status: v2.validation.status };
   }
@@ -329,6 +339,9 @@ async function main() {
   DEFAULT_SITE_PLACEHOLDER = args.site;
   const personal = JSON.parse(await readFile(resolve(APP_ROOT, "data/personal-apoyo.json"), "utf8"));
   const votes = JSON.parse(await readFile(resolve(APP_ROOT, "data/politicos-votaciones.json"), "utf8"));
+  const supportComponent = await readFile(resolve(APP_ROOT, "components/PersonalApoyoMensual.tsx"), "utf8");
+  const supportDisclosure = supportComponent.includes("Hallazgo de integridad") && supportComponent.includes("evaluacionActiva.status");
+  if (!supportDisclosure) throw new Error("AUDIT_SUPPORT_ANOMALY_NOT_DISCLOSED");
 
   const officialRoster = await fetchParliamentRosters({ fetchImpl: policyFetchResponse });
   const rosterCounts = {
@@ -346,7 +359,7 @@ async function main() {
   const findings = args.calibrateOnly ? [] : auditIdentity(officialRoster, published, reconciliation, siteSnapshots);
   const expenses = await auditExpenses(reconciliation.matches, siteSnapshots);
   findings.push(...expenses.findings);
-  const support = await auditSupport(reconciliation.matches, personal);
+  const support = await auditSupport(reconciliation.matches, personal, supportDisclosure);
   findings.push(...support.findings);
   if (!args.calibrateOnly) findings.push(...auditVotes(votes, published));
 

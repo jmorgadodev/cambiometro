@@ -41,6 +41,12 @@ async function main() {
     readFile(resolve(APP_ROOT, "data/municipalidades-list.json"), "utf8").then(JSON.parse),
     readFile(resolve(APP_ROOT, "data/municipalidades-data.json"), "utf8").then(JSON.parse),
   ]);
+  const budgetDisclosureSources = await Promise.all([
+    readFile(resolve(APP_ROOT, "components/servicios/ServicioPublicoDashboardClient.tsx"), "utf8"),
+    readFile(resolve(APP_ROOT, "app/entidades/[id]/page.tsx"), "utf8"),
+  ]);
+  const budgetDisclosure = budgetDisclosureSources.every((source) => source.includes("Hallazgo de integridad ALTA (V7) · valor oficial preservado"));
+  if (!budgetDisclosure) throw new Error("AUDIT_BUDGET_ANOMALY_NOT_DISCLOSED");
   requireFields(organizations, ["id", "nombre_canonico", "tipo", ...NUMERIC_FIELDS], "organismos");
   if (organizations.length !== 884) throw new Error(`AUDIT_ORGANIZATION_COUNT:${organizations.length}`);
   const publicBodies = organizations.filter((row) => row.tipo !== "Municipalidad");
@@ -77,7 +83,7 @@ async function main() {
       for (const row of sampled) {
         const check = validateV7({ relationAmount: row.ejecutado, annualOrganizationTotal: row.vigente });
         findings.push(finding({ entity, period: "2026", category: "presupuesto", field: `muestra:${row.row_id}`, official: row.vigente, projection: row.ejecutado, lake: row.ejecutado, site: null,
-          validation: "V7", status: check.status, difference: check.difference, url: "https://www.dipres.gob.cl/597/w3-propertyvalue-23076.html", detail: { sample_ratio: 0.1, violations: check.violations },
+          validation: "V7", status: check.status, difference: check.difference, url: "https://www.dipres.gob.cl/597/w3-propertyvalue-23076.html", detail: { sample_ratio: 0.1, violations: check.violations, source_anomaly: check.status === "ALTA", site_disclosure: check.status === "ALTA" && budgetDisclosure, disclosure_label: check.status === "ALTA" ? "Hallazgo de integridad ALTA (V7) · valor oficial preservado" : null },
         }));
       }
     } else {
@@ -138,7 +144,7 @@ async function main() {
           status: anomaly.status,
           difference: anomaly.violations.length,
           url: anomaly.sourceUrl,
-          detail: { violations: anomaly.violations, source_anomaly: true, quarantined: true, excluded_from_totals_and_rankings: true },
+          detail: { violations: anomaly.violations, source_anomaly: true, site_disclosure: true, quarantined: true, excluded_from_totals_and_rankings: true },
         }));
         municipalRowsAudited += 1;
       }
