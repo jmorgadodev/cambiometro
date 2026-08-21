@@ -12,6 +12,7 @@
     "check:links": "node scripts/check-safe-links.mjs",
     "check:innerhtml": "node scripts/check-no-innerhtml.mjs",
     "test": "npm run typecheck && npm run check:tokens && npm run check:links && npm run check:innerhtml && vitest run",
+    "guard:integrity": "node ../scripts/audit/pipeline-guard.mjs",
     "preflight": "npm run lint && npm run test && npm run cf:build",
     "verify:browser": "node scripts/verify-integration.mjs",
     "verify:security": "node scripts/verify-security.mjs",

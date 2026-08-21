@@ -43,6 +43,10 @@ jobs:
         run: npm test
         working-directory: transparencia-app
 
+      - name: Enforce data integrity guards V1-V7
+        run: npm run guard:integrity
+        working-directory: transparencia-app
+
       - name: Check no AI traces
         run: node scripts/check-no-ai-traces.mjs
         working-directory: transparencia-app
