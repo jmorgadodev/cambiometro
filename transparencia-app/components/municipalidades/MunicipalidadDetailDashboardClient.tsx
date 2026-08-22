@@ -193,7 +193,7 @@ export default function MunicipalidadDetailDashboardClient({
                 marginTop: "0.25rem",
               }}
             >
-              Presupuesto Per Cápita: {perCapita > 0 ? `${formatCLP(perCapita)} / hab` : "SUBDERE"}
+              Presupuesto Per Cápita: {perCapita > 0 ? `${formatCLP(perCapita)} / hab` : "—"}
             </div>
           </div>
 
@@ -236,9 +236,7 @@ export default function MunicipalidadDetailDashboardClient({
             >
               {muniData.poblacion_censo_2024
                 ? `${formatNum(muniData.poblacion_censo_2024)} hab.`
-                : personal
-                ? `${formatNum(personal.total_funcionarios)} pers.`
-                : "Nómina"}
+                : "—"}
             </div>
             <div
               style={{
@@ -247,7 +245,9 @@ export default function MunicipalidadDetailDashboardClient({
                 marginTop: "0.25rem",
               }}
             >
-              Nómina Detallada de Funcionarios: {personal ? formatNum(personal.total_funcionarios) : "CPLT"}
+              {muniData.poblacion_censo_2024
+                ? "Censo 2024 INE / SINIM"
+                : "No publicado por la fuente"}
             </div>
           </div>
 
@@ -1689,7 +1689,7 @@ export default function MunicipalidadDetailDashboardClient({
                 <div style={{ padding: "0.75rem", background: "var(--bg-surface-2)", borderRadius: 8 }}>
                   <span style={{ fontSize: "0.65rem", color: "var(--text-subtle)", textTransform: "uppercase", fontWeight: 700 }}>Población 2024</span>
                   <div style={{ fontFamily: "monospace", fontSize: "1.1rem", fontWeight: 800, color: "var(--text-primary)", marginTop: "0.15rem" }}>
-                    {formatNum(muniData.poblacion_censo_2024)} hab.
+                    {muniData.poblacion_censo_2024 ? `${formatNum(muniData.poblacion_censo_2024)} hab.` : "—"}
                   </div>
                 </div>
 
