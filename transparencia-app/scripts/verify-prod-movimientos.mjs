@@ -1,6 +1,6 @@
 /**
  * scripts/verify-prod-movimientos.mjs
- * Script de verificación en vivo de producción para /movimientos e invariantes (Tarea H v3).
+ * Script de verificación en vivo de producción para /movimientos e invariantes (Tarea H v4).
  */
 
 async function verifyProd() {
@@ -11,14 +11,15 @@ async function verifyProd() {
   const movHtml = await movRes.text();
   console.log(`\n1. /movimientos -> Status: ${movRes.status}`);
   console.log(`- Contiene "Cambios en el Gobierno Actual": ${movHtml.includes("Cambios en el Gobierno Actual") ? "✅ SÍ" : "❌ NO"}`);
+  console.log(`- Contiene desglose "salidas": ${movHtml.includes("salidas") ? "✅ SÍ" : "❌ NO"}`);
   console.log(`- Contiene "Último Cambio Registrado": ${movHtml.includes("Último Cambio Registrado") ? "✅ SÍ" : "❌ NO"}`);
   console.log(`- Contiene "Días Entre Cambios (Promedio)": ${movHtml.includes("Días Entre Cambios (Promedio)") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- Contiene Deporte / Natalia Duco: ${movHtml.includes("Subsecretaria del Deporte") || movHtml.includes("Natalia Duco") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- Contiene Seremi Valparaíso (Yanino Riquelme / 1214950): ${movHtml.includes("1214950") || movHtml.includes("Yanino Riquelme") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- Contiene Seremi Maule (Francisco Varela / 1214955): ${movHtml.includes("1214955") || movHtml.includes("Francisco Varela") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- Contiene Seremi Tarapacá (David Valle / 1214960): ${movHtml.includes("1214960") || movHtml.includes("David Valle") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- Contiene Hacienda / Finanzas (idNorma 1214890): ${movHtml.includes("1214890") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- Contiene "Ver decreto oficial ↗": ${movHtml.includes("Ver decreto oficial ↗") ? "✅ SÍ" : "❌ NO"}`);
+  console.log(`- Contiene botón "Compartir": ${movHtml.includes("Compartir") ? "✅ SÍ" : "❌ NO"}`);
+  console.log(`- Contiene nota metodológica sobre salidas y decretos: ${movHtml.includes("Las salidas se contrastan con registros públicos") ? "✅ SÍ" : "❌ NO"}`);
+  console.log(`- Contiene SEGEGOB / Mara Sedini (D1): ${movHtml.includes("Mara Sedini") ? "✅ SÍ" : "❌ NO"}`);
+  console.log(`- Contiene Hacienda / Vallebona / Bunster (D2): ${movHtml.includes("Vallebona") || movHtml.includes("Bunster") ? "✅ SÍ" : "❌ NO"}`);
+  console.log(`- Contiene Riveros / Rengifo (D3): ${movHtml.includes("Riveros") || movHtml.includes("Rengifo") ? "✅ SÍ" : "❌ NO"}`);
+  console.log(`- Contiene Deporte / Natalia Duco: ${movHtml.includes("Natalia Duco") ? "✅ SÍ" : "❌ NO"}`);
   console.log(`- Cero typos 'Subrogente' (Normalizado a Subrogante): ${!movHtml.toLowerCase().includes("subrogente") ? "✅ SÍ" : "❌ NO"}`);
 
   // 2. Invariante Kaiser
