@@ -16,6 +16,8 @@ function formatCLP(n: number) {
 interface OrganismoFuncionariosListProps {
   organismoId: string;
   nombreOrganismo: string;
+  periodo?: string | null;
+  periodoEtiqueta?: string | null;
 }
 
 interface SinPagoItem {
@@ -45,7 +47,12 @@ interface AnomaliaItem {
   urlRegistroOriginal: string;
 }
 
-export default function OrganismoFuncionariosList({ organismoId, nombreOrganismo }: OrganismoFuncionariosListProps) {
+export default function OrganismoFuncionariosList({
+  organismoId,
+  nombreOrganismo,
+  periodo,
+  periodoEtiqueta,
+}: OrganismoFuncionariosListProps) {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("Todos");
@@ -81,6 +88,11 @@ export default function OrganismoFuncionariosList({ organismoId, nombreOrganismo
     return () => clearTimeout(handler);
   }, [search]);
 
+  // Reset page on period change
+  useEffect(() => {
+    setPage(1);
+  }, [periodo]);
+
   // Fetch data
   useEffect(() => {
     async function fetchData() {
@@ -96,6 +108,9 @@ export default function OrganismoFuncionariosList({ organismoId, nombreOrganismo
           page: page.toString(),
           limit: itemsPerPage.toString(),
         });
+        if (periodo && periodo !== "Todos") {
+          params.set("periodo", periodo);
+        }
         const res = await fetch(`/api/funcionarios?${params.toString()}`);
         if (!res.ok) throw new Error("API Error");
         const result = await res.json();
@@ -128,7 +143,7 @@ export default function OrganismoFuncionariosList({ organismoId, nombreOrganismo
       }
     }
     fetchData();
-  }, [debouncedSearch, organismoId, contratoFilter, deptFilter, sortBy, page]);
+  }, [debouncedSearch, organismoId, contratoFilter, deptFilter, sortBy, page, periodo]);
 
   // Construcción del texto de causas para la Caja Ciudadana (§2.3)
   const causasTexto = [

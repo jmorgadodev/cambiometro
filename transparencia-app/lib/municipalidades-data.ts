@@ -25,6 +25,7 @@ export interface PresupuestoSinim {
 
 export interface ResumenPersonal {
   total_funcionarios: number;
+  total_funcionarios_historico?: number;
   planta: number;
   contrata: number;
   honorarios: number;
@@ -38,7 +39,20 @@ export interface ResumenPersonal {
   registros_micro_monto_count?: number;
   registros_cuarentena_v7_count?: number;
   registros_validos_count?: number;
+  es_parcial?: boolean;
+  representatividad_pct?: number;
+  benchmark_count?: number;
   nota_metodologica?: string | null;
+}
+
+export interface PeriodoDisponible {
+  periodo: string;
+  ano: number;
+  mes: number;
+  etiqueta: string;
+  count: number;
+  es_parcial?: boolean;
+  representatividad_pct?: number;
 }
 
 export interface TopFuncionarioHorasExtras {
@@ -202,7 +216,7 @@ export interface MunicipalidadEnriquecida {
   periodo_cplt_reciente?: string | null;
   desfase_meses?: number | null;
   estado_frescura?: "al_dia" | "desfasado" | "sin_datos";
-  periodos_disponibles?: Array<{ periodo: string; etiqueta: string; count: number }>;
+  periodos_disponibles?: PeriodoDisponible[];
   anomalias_integridad?: AnomaliaIntegridadMunicipal[];
 }
 

@@ -182,6 +182,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
 
   // --- C. RESUMEN PERSONAL CON INTEGRIDAD Y DEDUPLICACIÓN (M4 y M1) ---
   let resumen_personal = null;
+  let resumen_personal_por_periodo = {};
   let top_horas_extras = [];
   let top_remuneraciones = [];
   let top_remuneraciones_por_periodo = {};
@@ -224,17 +225,86 @@ for (const muni of MUNICIPALIDADES_SEED) {
       .filter((p) => /^202[4-6]-(?:0[1-9]|1[0-2])$/.test(p))
       .sort((a, b) => b.localeCompare(a));
 
+    const benchmarkCount = validPeriods.length > 0
+      ? Math.max(...validPeriods.map((p) => periodGroups.get(p).length), 1)
+      : 1;
+
+    function buildResumenPersonal(staffList, fullHistoricalLength, benchCount) {
+      let totalPlanta = 0;
+      let totalContrata = 0;
+      let totalHonorarios = 0;
+      let totalCodigoTrabajo = 0;
+
+      for (const f of staffList) {
+        const tipo = String(f.tipo_contrato ?? "");
+        if (tipo === "Planta") totalPlanta++;
+        else if (tipo === "Contrata") totalContrata++;
+        else if (tipo === "Honorarios") totalHonorarios++;
+        else totalCodigoTrabajo++;
+      }
+
+      const masaMensual = staffList.reduce((sum, f) => sum + Number(f.remuneracion_bruta_mensual ?? 0), 0);
+      const masaHorasExtras = staffList.reduce((sum, f) => sum + Number(f.monto_horas_extras_clp ?? 0), 0);
+      const totalHorasExtrasHrs = staffList.reduce((sum, f) => sum + Number(f.horas_extras_mes_anterior ?? 0), 0);
+      const masaAnual = masaMensual * 12;
+
+      const sinPagoCount = staffList.filter(f => Number(f.remuneracion_bruta_mensual ?? 0) <= 0).length;
+      const microMontoCount = staffList.filter(f => Number(f.remuneracion_bruta_mensual ?? 0) > 0 && Number(f.remuneracion_bruta_mensual ?? 0) < 50000).length;
+      const observadosCount = sinPagoCount + microMontoCount;
+      const validosCount = staffList.length - sinPagoCount;
+
+      const repPct = benchCount > 0 ? Number(((staffList.length / benchCount) * 100).toFixed(1)) : 100;
+      const esParcial = benchCount >= 100 && staffList.length < 0.5 * benchCount;
+
+      return {
+        total_funcionarios: staffList.length,
+        total_funcionarios_historico: fullHistoricalLength,
+        planta: totalPlanta,
+        contrata: totalContrata,
+        honorarios: totalHonorarios,
+        codigo_trabajo_salud_educacion: totalCodigoTrabajo,
+        masa_mensual_clp: Math.round(masaMensual),
+        masa_anual_estimada_clp: Math.round(masaAnual),
+        masa_horas_extras_clp: Math.round(masaHorasExtras),
+        total_horas_extras_hrs: totalHorasExtrasHrs,
+        registros_observados_count: observadosCount,
+        registros_sin_pago_count: sinPagoCount,
+        registros_micro_monto_count: microMontoCount,
+        registros_cuarentena_v7_count: anomalias_integridad.length,
+        registros_validos_count: validosCount,
+        es_parcial: esParcial,
+        representatividad_pct: repPct,
+        benchmark_count: benchCount,
+        nota_metodologica: null,
+      };
+    }
+
     if (validPeriods.length > 0) {
-      const consolidated = validPeriods.find((p) => (periodGroups.get(p)?.length || 0) >= 100) || validPeriods[0];
-      periodo_cplt_reciente = consolidated || validPeriods[0];
+      periodos_disponibles = validPeriods.map((p) => {
+        const [y, m] = p.split("-").map(Number);
+        const count = periodGroups.get(p).length;
+        const repPct = benchmarkCount > 0 ? Number(((count / benchmarkCount) * 100).toFixed(1)) : 100;
+        const esParcial = benchmarkCount >= 100 && count < 0.5 * benchmarkCount;
+        return {
+          periodo: p,
+          ano: y,
+          mes: m,
+          etiqueta: formatPeriodoEtiqueta(p),
+          count,
+          es_parcial: esParcial,
+          representatividad_pct: repPct,
+        };
+      });
+
+      // Default: período más reciente representativo (es_parcial === false)
+      const firstRepresentative = periodos_disponibles.find((item) => !item.es_parcial);
+      periodo_cplt_reciente = firstRepresentative?.periodo || validPeriods[0];
       desfase_meses = calcularDesfaseMeses(periodo_cplt_reciente);
       estado_frescura = desfase_meses !== null && desfase_meses <= 3 ? "al_dia" : "desfasado";
 
-      periodos_disponibles = validPeriods.map((p) => ({
-        periodo: p,
-        etiqueta: formatPeriodoEtiqueta(p),
-        count: periodGroups.get(p).length,
-      }));
+      for (const p of validPeriods) {
+        resumen_personal_por_periodo[p] = buildResumenPersonal(periodGroups.get(p) || [], regularStaff.length, benchmarkCount);
+      }
     } else {
       estado_frescura = "sin_datos";
     }
@@ -382,6 +452,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
     partido_alcalde: alcalde?.partido_alcalde ?? null,
     presupuesto,
     resumen_personal,
+    resumen_personal_por_periodo,
     top_horas_extras: (top_horas_extras || []).slice(0, 3),
     top_remuneraciones,
     top_remuneraciones_por_periodo,

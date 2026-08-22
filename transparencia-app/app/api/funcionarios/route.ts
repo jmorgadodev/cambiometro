@@ -71,6 +71,7 @@ export async function GET(request: Request) {
   const administrationId = requestedCommune ? (requestedCommune.administracion_municipal_id ?? organismoId) : organismoId;
   const contrato = params.get("contrato") ?? "Todos";
   const estamento = params.get("estamento") ?? "Todos";
+  const requestedPeriod = params.get("periodo") ?? params.get("fuente_periodo") ?? "Todos";
   const sortBy = params.get("sortBy") ?? "sueldo_desc";
   const soloHorasExtras = params.get("horas_extras") === "true" || params.get("soloHorasExtras") === "true";
   const minSueldo = params.get("min_sueldo") ? Number(params.get("min_sueldo")) : undefined;
@@ -96,7 +97,10 @@ export async function GET(request: Request) {
     if (!manifest.assets.some((asset) => asset.key === partitionKey)) throw new Error("CPLT_PARTITION_NOT_LISTED");
     const partitionObject = await env.PUBLIC_DATA.get(partitionKey);
     if (!partitionObject) throw new Error("CPLT_PARTITION_NOT_FOUND");
-    const allRecords = (await partitionObject.json()) as FuncionarioPublico[];
+    const rawAllRecords = (await partitionObject.json()) as FuncionarioPublico[];
+    const allRecords = requestedPeriod && requestedPeriod !== "Todos"
+      ? rawAllRecords.filter((f) => (f.fuente_periodo || f.periodo) === requestedPeriod)
+      : rawAllRecords;
 
     // Métricas y desglose forense de calidad de datos
     const includeZero = params.get("include_zero") === "true";
@@ -235,6 +239,7 @@ export async function GET(request: Request) {
       tipoOrgano,
       contrato,
       estamento,
+      periodo: requestedPeriod,
       sortBy,
       soloHorasExtras,
       minSueldo,

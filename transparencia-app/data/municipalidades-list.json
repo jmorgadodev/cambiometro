@@ -5512,10 +5512,10 @@
     },
     "resumen_personal": {
       "total_funcionarios": 11483,
-      "masa_mensual_clp": 723866583
+      "masa_mensual_clp": 6969920638
     },
-    "periodo_nomina": "2026-07",
-    "desfase_meses": 1,
+    "periodo_nomina": "2026-06",
+    "desfase_meses": 2,
     "estado_frescura": "al_dia",
     "auditorias_cgr_count": 0
   },
