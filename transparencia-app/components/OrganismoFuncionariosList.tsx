@@ -88,11 +88,6 @@ export default function OrganismoFuncionariosList({
     return () => clearTimeout(handler);
   }, [search]);
 
-  // Reset page on period change
-  useEffect(() => {
-    setPage(1);
-  }, [periodo]);
-
   // Fetch data
   useEffect(() => {
     async function fetchData() {
