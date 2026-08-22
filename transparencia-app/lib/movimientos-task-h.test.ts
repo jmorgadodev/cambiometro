@@ -45,7 +45,7 @@ describe("TAREA H v5: Cierre Correcto de Sucesiones + Regla Verbatim", () => {
       (m) => m.fecha === "2026-08-14" && m.cargo.includes("Subsecretaria del Deporte")
     );
     expect(depSub).toBeDefined();
-    expect(depSub?.salio?.nombre).toContain("Nicolás Otero");
+    expect(depSub?.salio?.nombre).toContain("Andrés Otero");
     expect(depSub?.entro?.nombre).toContain("Sofía Rengifo Ottone");
     expect(depSub?.id_norma).toBe("1215435");
   });

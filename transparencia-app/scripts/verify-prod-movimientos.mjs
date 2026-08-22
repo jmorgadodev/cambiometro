@@ -1,6 +1,6 @@
 /**
  * scripts/verify-prod-movimientos.mjs
- * Script de verificación en vivo de producción para /movimientos e invariantes (Tarea H v5).
+ * Script de verificación en vivo de producción para /movimientos e invariantes (Tarea H v6 — Cierre Definitivo).
  */
 
 async function verifyProd() {
@@ -14,13 +14,17 @@ async function verifyProd() {
   console.log(`- Contiene desglose "salidas": ${movHtml.includes("salidas") ? "✅ SÍ" : "❌ NO"}`);
   console.log(`- Contiene botón "Compartir": ${movHtml.includes("Compartir") ? "✅ SÍ" : "❌ NO"}`);
   console.log(`- Contiene nota metodológica sobre salidas y decretos: ${movHtml.includes("Las salidas se contrastan con registros públicos") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- Contiene SEGEGOB / Mara Sedini: ${movHtml.includes("Mara Sedini") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- Contiene SEGEGOB / Claudio Alvarado: ${movHtml.includes("Claudio Alvarado") ? "✅ SÍ" : "❌ NO"}`);
+
+  // Casos Tarea H v6:
+  console.log(`- 1. SEGEGOB (Sedini Viancos -> Alvarado Andrade): ${movHtml.includes("Sedini Viancos") && movHtml.includes("Alvarado Andrade") ? "✅ SÍ" : "❌ NO"}`);
+  console.log(`- 2. Seguridad & MOP (Steinert -> Arrau -> Louis de Grange Concha): ${movHtml.includes("Steinert") && movHtml.includes("Arrau") && movHtml.includes("Louis de Grange Concha") ? "✅ SÍ" : "❌ NO"}`);
+  console.log(`- 3. Ciencia 11-may (Rafael Araos Bralic -> Carolina Rossi Pantoja): ${movHtml.includes("Rafael Araos Bralic") && movHtml.includes("Carolina Rossi Pantoja") ? "✅ SÍ" : "❌ NO"}`);
+  console.log(`- 4. Seguridad 2-jun (Jouannet -> Giannini; Quintana -> Guerrero): ${movHtml.includes("Jouannet") && movHtml.includes("Giannini") && movHtml.includes("Guerrero") ? "✅ SÍ" : "❌ NO"}`);
+  console.log(`- 5. Mujer 16-jun (Daniela Castro Araya -> Marcia Raphael Mora): ${movHtml.includes("Daniela Castro Araya") && movHtml.includes("Marcia Raphael Mora") ? "✅ SÍ" : "❌ NO"}`);
+  console.log(`- 6. Hacienda (Rodríguez -> Bunster -> Vallebona): ${movHtml.includes("Juan Pablo Rodríguez") && movHtml.includes("Bunster") && movHtml.includes("Vallebona") ? "✅ SÍ" : "❌ NO"}`);
+  console.log(`- 7. Deporte 14-ago (Duco -> Riveros; Otero -> Rengifo): ${movHtml.includes("Natalia Duco") && movHtml.includes("Riveros") && movHtml.includes("Andrés Otero") && movHtml.includes("Rengifo") ? "✅ SÍ" : "❌ NO"}`);
+  console.log(`- 8. Atacama (Sebastián Urrejola / DPP Chañaral): ${movHtml.includes("Sebastián Urrejola") && movHtml.includes("Chañaral") ? "✅ SÍ" : "❌ NO"}`);
   console.log(`- CERO menciones de "Müller" (Gonzalo Müller): ${!movHtml.toLowerCase().includes("müller") && !movHtml.toLowerCase().includes("muller") ? "✅ SÍ (0 Müller)" : "❌ NO"}`);
-  console.log(`- Contiene Deporte / Francisco Riveros: ${movHtml.includes("Francisco Riveros") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- Contiene Deporte / Sofía Rengifo: ${movHtml.includes("Sofía Rengifo") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- Contiene Mujer / Marcia Raphael: ${movHtml.includes("Marcia Raphael") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- Contiene Ciencia / Carolina Rossi: ${movHtml.includes("Carolina Rossi") ? "✅ SÍ" : "❌ NO"}`);
   console.log(`- Cero typos 'Subrogente' (Normalizado a Subrogante): ${!movHtml.toLowerCase().includes("subrogente") ? "✅ SÍ" : "❌ NO"}`);
 
   // 2. /servicios-publicos
@@ -29,6 +33,7 @@ async function verifyProd() {
   console.log(`\n2. /servicios-publicos -> Status: ${servRes.status}`);
   console.log(`- SEGEGOB con Claudio Alvarado: ${servHtml.includes("Claudio Alvarado") ? "✅ SÍ" : "❌ NO"}`);
   console.log(`- Deporte con Francisco Riveros: ${servHtml.includes("Francisco Riveros") ? "✅ SÍ" : "❌ NO"}`);
+  console.log(`- MOP con Louis de Grange: ${servHtml.includes("Louis de Grange") ? "✅ SÍ" : "❌ NO"}`);
   console.log(`- CERO menciones de "Müller": ${!servHtml.toLowerCase().includes("müller") && !servHtml.toLowerCase().includes("muller") ? "✅ SÍ" : "❌ NO"}`);
 
   // 3. Invariante Kaiser
