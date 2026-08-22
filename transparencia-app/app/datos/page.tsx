@@ -77,7 +77,7 @@ export default async function DataObservatoryPage() {
             <p className="eyebrow">Monitor de Datos Abiertos</p>
             <h1>Estado de Conexión y Salud de ETLs</h1>
             <p>
-              Monitoreo en vivo de las {GLOBAL_KPIS.fuentes_operativas} fuentes oficiales + 1 derivada de datos públicos del Estado chileno.
+              Monitoreo en vivo de las {GLOBAL_KPIS.fuentes_operativas} fuentes ({GLOBAL_KPIS.fuentes_oficiales} oficiales + {GLOBAL_KPIS.fuentes_derivadas} derivada) de datos públicos del Estado chileno.
               Verifica cuándo se actualizó cada pipeline, los volúmenes de registros indexados y los
               enlaces directos a los portales oficiales de origen.
             </p>
@@ -98,7 +98,7 @@ export default async function DataObservatoryPage() {
             </div>
             <div>
               <dt>Fuentes Conectadas</dt>
-              <dd>{GLOBAL_KPIS.fuentes_operativas} / {GLOBAL_KPIS.total_fuentes}</dd>
+              <dd>{GLOBAL_KPIS.total_fuentes} ({GLOBAL_KPIS.fuentes_oficiales} oficiales + {GLOBAL_KPIS.fuentes_derivadas} derivada)</dd>
             </div>
           </dl>
         </div>

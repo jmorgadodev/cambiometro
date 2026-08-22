@@ -75,8 +75,43 @@ export default async function HomePage() {
   const totalCatalogRecords = Math.max(records.total, GLOBAL_KPIS.registros_canonicos);
   const operationalSources = ETL_SOURCES_DATA.filter((s) => s.recordCount > 0);
 
+  const websiteJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    name: "El Cambiómetro",
+    url: "https://cambiometro.impulsacv.cl",
+    description: "Plataforma ciudadana de datos públicos y transparencia de Chile.",
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: "https://cambiometro.impulsacv.cl/cruces?q={search_term_string}",
+      },
+      "query-input": "required name=search_term_string",
+    },
+  };
+
+  const organizationJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    name: "El Cambiómetro",
+    url: "https://cambiometro.impulsacv.cl",
+    logo: "https://cambiometro.impulsacv.cl/api/og/site",
+    sameAs: [
+      "https://github.com/jmorgadodev/cambiometro",
+    ],
+  };
+
   return (
     <div className="home-desk">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd).replace(/</g, "\\u003c") }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd).replace(/</g, "\\u003c") }}
+      />
       <section className="home-lead container-main" aria-labelledby="home-title">
         <div className="home-lead__copy">
           <p className="home-kicker"><span aria-hidden="true" /> Plataforma de Datos Públicos</p>
@@ -119,44 +154,46 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <Reveal>
-        <section className="container-main home-workbench" aria-labelledby="workbench-title">
+      {/* 4 Entradas Narrativas de la Plataforma */}
+      <Reveal delay={100}>
+        <section className="container-main home-paths" aria-label="Líneas principales de consulta">
           <div className="home-section-heading">
             <div>
-              <p className="eyebrow">Mesa de análisis</p>
-              <h2 id="workbench-title">Empieza por una pregunta</h2>
+              <p className="eyebrow">Rutas de exploración</p>
+              <h2>Cuatro formas de fiscalizar la información</h2>
             </div>
-            <Link href="/como-funciona">Cómo usamos los datos públicos →</Link>
           </div>
-
-          <div className="home-paths">
+          <div className="home-paths__grid">
             <Link href="/politico" className="home-path">
               <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
                 <Icono nombre="votaciones" size={15} />
-                01 / Decisiones
+                01 / Votaciones
               </span>
-              <h3>¿Cómo votó una autoridad?</h3>
-              <p>Consulta fichas parlamentarias, opciones registradas, asistencia, dietas y probidad.</p>
-              <b>Ver votaciones →</b>
+              <h3>¿Cómo votan tus representantes?</h3>
+              <p>Revisa la asistencia, alineamiento con sus bancadas y posturas en proyectos de ley clave.</p>
+              <b>Ver parlamentarios →</b>
             </Link>
+
+            <Link href="/partidos" className="home-path">
+              <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                <Icono nombre="organismo" size={15} />
+                02 / Bancadas
+              </span>
+              <h3>¿Qué partidos concentran el gasto?</h3>
+              <p>Compara el presupuesto operacional, asesores contratados y cohesión de cada colectividad.</p>
+              <b>Comparar partidos →</b>
+            </Link>
+
             <Link href="/transferencias" className="home-path">
               <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
                 <Icono nombre="dinero" size={15} />
-                02 / Dinero & Fundaciones
+                03 / Recursos
               </span>
-              <h3>¿A quién transfiere el Estado?</h3>
-              <p>Explora más de $17 billones en 361.000 transferencias a fundaciones y privados (Ley 19.862).</p>
-              <b>Explorar transferencias →</b>
+              <h3>¿A dónde van las transferencias?</h3>
+              <p>Explora fondos asignados a fundaciones y corporaciones bajo la Ley 19.862.</p>
+              <b>Ver transferencias →</b>
             </Link>
-            <Link href="/municipalidades" className="home-path">
-              <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                <Icono nombre="territorio" size={15} />
-                03 / Territorio Comunal
-              </span>
-              <h3>¿Cómo gastan las 346 comunas?</h3>
-              <p>Fichas comunales con demografía Censo 2024, finanzas SINIM, alcaldías y compras públicas.</p>
-              <b>Ver municipalidades →</b>
-            </Link>
+
             <Link href="/cruces" className="home-path">
               <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
                 <Icono nombre="cruces" size={15} />
@@ -175,7 +212,7 @@ export default async function HomePage() {
           <div className="home-section-heading">
             <div>
               <p className="eyebrow">Estado de datos</p>
-              <h2 id="sources-title">{GLOBAL_KPIS.fuentes_operativas} fuentes oficiales + 1 derivada (personal de apoyo parlamentario)</h2>
+              <h2 id="sources-title">{GLOBAL_KPIS.fuentes_oficiales} fuentes oficiales + 1 derivada (personal de apoyo parlamentario)</h2>
             </div>
             <Link href="/fuentes">Revisar catálogo de fuentes →</Link>
           </div>
@@ -201,4 +238,3 @@ export default async function HomePage() {
 }
 
 export const dynamic = "force-dynamic";
-

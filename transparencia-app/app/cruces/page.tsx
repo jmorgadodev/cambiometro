@@ -20,6 +20,19 @@ export const metadata: Metadata = {
   description:
     "Cruces documentales trazables entre compras públicas, auditorías de Contraloría, lobby, votaciones y autoridades del Estado chileno.",
   alternates: { canonical: "/cruces" },
+  openGraph: {
+    title: "Explorador de Cruces de Datos Públicos — El Cambiómetro",
+    description:
+      "Cruces documentales trazables entre compras públicas, auditorías de Contraloría, lobby, votaciones y autoridades del Estado chileno.",
+    images: ["https://cambiometro.impulsacv.cl/api/og/site"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Explorador de Cruces de Datos Públicos — El Cambiómetro",
+    description:
+      "Cruces documentales trazables entre compras públicas, auditorías de Contraloría, lobby, votaciones y autoridades del Estado chileno.",
+    images: ["https://cambiometro.impulsacv.cl/api/og/site"],
+  },
 };
 
 export default async function CrossesPage({
@@ -106,7 +119,12 @@ export default async function CrossesPage({
             <div className="stat-tile stat-tile--accent">
               <div className="stat-tile__value">{crosses.length.toLocaleString("es-CL")}</div>
               <div className="stat-tile__label">Relaciones en Grafo</div>
-              <div className="stat-tile__hint">{crosses.length.toLocaleString("es-CL")} relaciones agregadas</div>
+              <div className="stat-tile__hint">
+                {crosses.length.toLocaleString("es-CL")} relaciones agregadas (1.897 relaciones canónicas en el modelo de datos; el grafo muestra los vínculos actualmente indexados).{" "}
+                <Link href="/como-funciona" style={{ color: "var(--accent)", textDecoration: "underline" }}>
+                  Ver metodología →
+                </Link>
+              </div>
             </div>
 
             {/* KPI 2 */}

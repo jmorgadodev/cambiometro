@@ -51,7 +51,7 @@ export default async function FuentesPage() {
             </div>
             <div>
               <dt>Fuentes Públicas</dt>
-              <dd>{GLOBAL_KPIS.fuentes_operativas}</dd>
+              <dd>{GLOBAL_KPIS.total_fuentes} ({GLOBAL_KPIS.fuentes_oficiales} oficiales + {GLOBAL_KPIS.fuentes_derivadas} derivada)</dd>
             </div>
             <div>
               <dt>Actualización</dt>
@@ -68,7 +68,7 @@ export default async function FuentesPage() {
               Catálogo de fuentes integradas
             </h2>
             <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: 0 }}>
-              {sorted.length} fuentes oficiales con {GLOBAL_KPIS.registros_canonicos.toLocaleString("es-CL")} registros compilados.
+              {sorted.length} fuentes ({GLOBAL_KPIS.fuentes_oficiales} oficiales + {GLOBAL_KPIS.fuentes_derivadas} derivada) con {GLOBAL_KPIS.registros_canonicos.toLocaleString("es-CL")} registros compilados.
             </p>
           </div>
 

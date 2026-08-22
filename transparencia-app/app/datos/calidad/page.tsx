@@ -195,6 +195,12 @@ export default async function DataQualityPage() {
               </tbody>
             </table>
           </div>
+
+          <div style={{ marginTop: "0.75rem", padding: "0.75rem 1rem", background: "var(--bg-surface-2)", borderRadius: 8, border: "1px solid var(--border-subtle)" }}>
+            <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", margin: 0, lineHeight: 1.4 }}>
+              ℹ️ <strong>Nota de cobertura histórica:</strong> El total incluye registros históricos de actividad parlamentaria no atribuidos a fuente individual en el catálogo.
+            </p>
+          </div>
         </section>
 
         {/* ─── PRINCIPIOS Y METODOLOGÍA DE CALIDAD ───────────────────────── */}
