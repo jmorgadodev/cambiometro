@@ -30,7 +30,7 @@ export default function RouteTransitionOrb() {
     }
   }, []);
 
-  // Delegacion de eventos en clicks a enlaces internos
+  // Delegacion de eventos en clicks a enlaces internos y antes de descargar pagina
   useEffect(() => {
     function handleAnchorClick(event: MouseEvent) {
       if (
@@ -65,14 +65,28 @@ export default function RouteTransitionOrb() {
         transitionStartRef.current = Date.now();
         setIsTransitioning(true);
         setIsVisible(true);
+
+        const overlay = document.getElementById("route-transition-overlay");
+        if (overlay) {
+          overlay.classList.add("is-active");
+        }
       } catch {
         // Ignorar URLs invalidas
       }
     }
 
+    function handleBeforeUnload() {
+      const overlay = document.getElementById("route-transition-overlay");
+      if (overlay) {
+        overlay.classList.add("is-active");
+      }
+    }
+
     document.addEventListener("click", handleAnchorClick, { capture: true });
+    window.addEventListener("beforeunload", handleBeforeUnload);
     return () => {
       document.removeEventListener("click", handleAnchorClick, { capture: true });
+      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
 
@@ -86,27 +100,30 @@ export default function RouteTransitionOrb() {
     if (prevKeyRef.current !== currentKey) {
       prevKeyRef.current = currentKey;
 
-      if (isTransitioning) {
-        const elapsed = Date.now() - transitionStartRef.current;
-        const minVisibleMs = 350;
-        const remainingMs = Math.max(0, minVisibleMs - elapsed);
+      const elapsed = Date.now() - transitionStartRef.current;
+      const minVisibleMs = 350;
+      const remainingMs = Math.max(0, minVisibleMs - elapsed);
 
-        if (hideTimeoutRef.current) window.clearTimeout(hideTimeoutRef.current);
+      if (hideTimeoutRef.current) window.clearTimeout(hideTimeoutRef.current);
 
-        hideTimeoutRef.current = window.setTimeout(() => {
-          requestAnimationFrame(() => {
-            setIsVisible(false);
-            window.setTimeout(() => {
-              setIsTransitioning(false);
-            }, 200);
-          });
-        }, remainingMs);
-      }
+      hideTimeoutRef.current = window.setTimeout(() => {
+        requestAnimationFrame(() => {
+          const overlay = document.getElementById("route-transition-overlay");
+          if (overlay) {
+            overlay.classList.remove("is-active");
+          }
+          setIsVisible(false);
+          window.setTimeout(() => {
+            setIsTransitioning(false);
+          }, 200);
+        });
+      }, remainingMs);
     }
-  }, [currentKey, isTransitioning]);
+  }, [currentKey]);
 
   return (
     <div
+      id="route-transition-overlay"
       className={`route-transition-overlay ${isVisible ? "is-active" : ""}`}
       role="status"
       aria-live="polite"
