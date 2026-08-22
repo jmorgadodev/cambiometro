@@ -6,6 +6,29 @@ import os from "node:os";
 const BASE_URL = process.env.VERIFY_BASE_URL || "https://cambiometro.impulsacv.cl";
 const screenshotDir = process.env.SCREENSHOT_DIR || os.tmpdir();
 
+const DISTINCT_20_ROUTES = [
+  "/",
+  "/datos",
+  "/fuentes",
+  "/rankings",
+  "/municipalidades",
+  "/municipalidades/muni-maipu",
+  "/municipalidades/muni-lascondes",
+  "/cruces",
+  "/servicios-publicos",
+  "/como-funciona",
+  "/politico",
+  "/partidos",
+  "/transferencias",
+  "/funcionarios",
+  "/personas",
+  "/privacidad",
+  "/donar",
+  "/politico/fabiola-campillai-rojas",
+  "/politico/vanessa-kaiser-barents-von-hohenhagen",
+  "/politico/miguel-becker-alvear",
+];
+
 const DISTINCT_POLITICOS = [
   "/politico/fabiola-campillai-rojas",
   "/politico/vanessa-kaiser-barents-von-hohenhagen",
@@ -15,15 +38,6 @@ const DISTINCT_POLITICOS = [
   "/politico/alvaro-jofre-caceres",
   "/politico/carlos-carvajal-gallardo",
   "/politico/ximena-naranjo-pinto",
-];
-
-const MAIN_ROUTES = [
-  "/",
-  "/municipalidades",
-  "/datos",
-  "/cruces",
-  "/servicios-publicos",
-  "/como-funciona",
 ];
 
 async function runE2E() {
@@ -58,14 +72,17 @@ async function runE2E() {
   await page.goto(BASE_URL, { waitUntil: "networkidle" });
   await page.waitForTimeout(300);
 
-  // Navegar a las rutas principales
-  for (const route of MAIN_ROUTES) {
+  // Stress 20 rutas distintas (criterio Tarea 15)
+  console.log("\n2a. Stress de 20 rutas distintas sin error 1102...");
+  for (const route of DISTINCT_20_ROUTES) {
     const res = await page.goto(`${BASE_URL}${route}`, { waitUntil: "networkidle" });
     const content = await page.content();
     assert(!content.includes("This page couldn't load"), `Error en ruta ${route}: "This page couldn't load"`);
     assert(!content.includes("Application error"), `Error en ruta ${route}: Application error`);
-    console.log(`-> Ruta ${route.padEnd(22)}: HTTP ${res.status()} [OK]`);
+    assert(!content.includes("1102"), `Error en ruta ${route}: Error 1102 detectado`);
+    console.log(`-> Ruta ${route.padEnd(45)}: HTTP ${res.status()} [OK]`);
   }
+  console.log(`   Total: ${DISTINCT_20_ROUTES.length} rutas sin error 1102 ✓`);
 
   // 3. Navegación y comprobación de Header PC y Panel Costo Mensual en fichas
   console.log("\n3. Navegando consecutivamente por 8 fichas políticas distintas con Header PC y Costo Mensual...");

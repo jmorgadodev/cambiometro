@@ -92,6 +92,8 @@ export interface SourceManifest {
   lastUpdated: string | null;
   checksumSha256: string | null;
   recordCount: number;
+  canonicalCount?: number;
+  historicalCount?: number;
   errorCount: number;
   status: SourceStatus;
   statusDetail: string;

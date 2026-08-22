@@ -8,7 +8,7 @@ import { GLOBAL_KPIS } from "@/lib/global-kpis";
 
 export const metadata: Metadata = {
   title: "Estado de Conexión y Salud de Fuentes ETL — El Cambiómetro",
-  description: "Monitor en tiempo real de sincronización, frescura, volumen y salud operativa de las 11 fuentes oficiales de El Cambiómetro.",
+  description: "Monitor en tiempo real de sincronización, frescura, volumen y salud operativa de las 11 fuentes oficiales + 1 derivada de El Cambiómetro.",
   alternates: { canonical: "/datos" },
 };
 
@@ -77,7 +77,7 @@ export default async function DataObservatoryPage() {
             <p className="eyebrow">Monitor de Datos Abiertos</p>
             <h1>Estado de Conexión y Salud de ETLs</h1>
             <p>
-              Monitoreo en vivo de las {GLOBAL_KPIS.fuentes_operativas} fuentes de datos públicos del Estado chileno.
+              Monitoreo en vivo de las {GLOBAL_KPIS.fuentes_operativas} fuentes oficiales + 1 derivada de datos públicos del Estado chileno.
               Verifica cuándo se actualizó cada pipeline, los volúmenes de registros indexados y los
               enlaces directos a los portales oficiales de origen.
             </p>

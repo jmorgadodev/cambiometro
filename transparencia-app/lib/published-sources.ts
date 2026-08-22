@@ -43,6 +43,36 @@ function localCpltManifest(): CpltPublicManifest | null {
   }
 }
 
+export const SOURCE_CANONICAL_COUNTS: Record<string, number> = {
+  "chilecompra": 74142,
+  "transparencia-activa": 1203287,
+  "ley-19862": 11651,
+  "dipres": 15689,
+  "sinim": 3105,
+  "infolobby": 60523,
+  "infoprobidad": 15331,
+  "contraloria": 291,
+  "camara": 19025,
+  "senado": 8138,
+  "servel": 23894,
+  "personal-apoyo": 4092,
+};
+
+export const SOURCE_HISTORICAL_COUNTS: Record<string, number> = {
+  "chilecompra": 888693,
+  "transparencia-activa": 1218136,
+  "ley-19862": 59361,
+  "dipres": 15689,
+  "sinim": 3105,
+  "infolobby": 60523,
+  "infoprobidad": 15331,
+  "contraloria": 291,
+  "camara": 19025,
+  "senado": 8138,
+  "servel": 23894,
+  "personal-apoyo": 4092,
+};
+
 export async function listPublishedSourceManifests(): Promise<SourceManifest[]> {
   const base = await listSourceManifests();
   let catalog: R2PublicCatalog | null = null;
@@ -60,5 +90,10 @@ export async function listPublishedSourceManifests(): Promise<SourceManifest[]> 
   }
   catalog ??= localR2Catalog();
   cplt ??= localCpltManifest();
-  return mergeCpltCatalog(mergeR2Catalog(base, catalog), cplt);
+  const merged = mergeCpltCatalog(mergeR2Catalog(base, catalog), cplt);
+  return merged.map((source) => ({
+    ...source,
+    canonicalCount: SOURCE_CANONICAL_COUNTS[source.id] ?? source.recordCount,
+    historicalCount: SOURCE_HISTORICAL_COUNTS[source.id] ?? source.recordCount,
+  }));
 }

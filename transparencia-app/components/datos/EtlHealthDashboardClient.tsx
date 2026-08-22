@@ -178,10 +178,12 @@ export default function EtlHealthDashboardClient() {
               </div>
 
               <div style={{ textAlign: "right" }}>
-                <strong style={{ display: "block", fontFamily: "monospace", fontSize: "1.15rem", color: "var(--text-primary)" }}>
-                  {fuente.recordCount.toLocaleString("es-CL")}
+                <strong style={{ display: "block", fontFamily: "monospace", fontSize: "0.95rem", color: "var(--text-primary)" }}>
+                  Canónicos: {(fuente.canonicalCount ?? fuente.recordCount).toLocaleString("es-CL")} · Histórico: {(fuente.historicalCount ?? fuente.recordCount).toLocaleString("es-CL")}
                 </strong>
-                <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)" }}>registros catalogados</span>
+                <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", display: "block" }}>
+                  Diferencia por deduplicación y cobertura declarada
+                </span>
               </div>
             </div>
 
