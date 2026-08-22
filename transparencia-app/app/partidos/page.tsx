@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllPartidosSummary } from "@/lib/partido-estadisticas";
+export const revalidate = 300;
 import { POLITICOS_SEED, PARTIDOS_SEED } from "@/lib/seed-politicos";
 import { diputadoIdParaPolitico } from "@/lib/data-source";
 import { personalApoyoParaDiputado } from "@/lib/personal-apoyo";

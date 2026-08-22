@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+export const revalidate = 300;
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactElement } from "react";

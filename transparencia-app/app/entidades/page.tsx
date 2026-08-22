@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+export const revalidate = 300;
 import Link from "next/link";
 import { listEntities } from "@/lib/data-platform-d1";
 
