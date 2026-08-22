@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useCallback, Suspense } from "react";
+import { useMemo, useState, useEffect, useCallback, Suspense, useSyncExternalStore } from "react";
 import { useSearchParams, usePathname } from "next/navigation";
 import {
   MOVIMIENTOS,
@@ -170,11 +170,16 @@ function MovimientosContent() {
     return Object.entries(grupos).sort((a, b) => (a[0] === b[0] ? 0 : a[0] < b[0] ? 1 : -1));
   }, [filtrados]);
 
+  const nowMs = useSyncExternalStore(
+    () => () => {},
+    () => Date.now(),
+    () => 0
+  );
+
   // KPIs 100% DINÁMICOS DESDE EL DATASET
   const {
     totalCambiosGobierno,
     desgloseGobierno,
-    ultFecha,
     ultFechaFormateada,
     haceTexto,
     diasEntreCambios,
@@ -210,9 +215,11 @@ function MovimientosContent() {
       }
 
       // Cálculo de "hace X días" contra fecha actual (nunca hardcodeado)
-      const diffMs = Date.now() - new Date(maxFecha + "T12:00:00Z").getTime();
-      const diffDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
-      haceTxt = diffDays === 0 ? "hoy" : diffDays === 1 ? "hace 1 día" : `hace ${diffDays} días`;
+      if (nowMs !== null) {
+        const diffMs = nowMs - new Date(maxFecha + "T12:00:00Z").getTime();
+        const diffDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
+        haceTxt = diffDays === 0 ? "hoy" : diffDays === 1 ? "hace 1 día" : `hace ${diffDays} días`;
+      }
     }
 
     // Rotación: promedio de días transcurridos desde el 2026-03-11 dividido por total de cambios en el gobierno
@@ -238,7 +245,7 @@ function MovimientosContent() {
       totalEnConfirmacion: enConfirmacion,
       fechaActualizacionTexto: fechaTxt,
     };
-  }, []);
+  }, [nowMs]);
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text-1)" }}>
