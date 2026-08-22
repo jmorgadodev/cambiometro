@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { getMunicipalidadData } from "./municipalidades-data";
 
+// Referencia: docs/datos-abiertos.md (Sección 8: Población Comunal y Presupuesto Per Cápita)
 describe("Fichas Municipales: Población y Presupuesto Per Cápita", () => {
   it("Maipú: la población nunca se confunde con el conteo de la nómina de funcionarios", () => {
     const maipu = getMunicipalidadData("muni-maipu");
