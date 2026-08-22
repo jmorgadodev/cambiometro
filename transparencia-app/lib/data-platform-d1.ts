@@ -25,6 +25,7 @@ const SOURCE_DEFINITIONS: Array<Omit<SourceManifest, "foundPeriods" | "lastUpdat
   { id: "ley-19862", label: "Registro Ley 19.862", organization: "Ministerio de Hacienda", url: "https://www.registros19862.cl/", license: "Registro público", commercialUse: "unknown", expectedCoverage: "Entidades receptoras, transferencias y controles" },
   { id: "transparencia-activa", label: "Transparencia Activa", organization: "Organismos públicos de Chile", url: "https://www.portaltransparencia.cl/", license: "Datos públicos oficiales", commercialUse: "unknown", expectedCoverage: "Nóminas y remuneraciones publicadas" },
   { id: "servel", label: "SERVEL", organization: "Servicio Electoral de Chile", url: "https://www.servel.cl/resultados-preliminares-eleccion-presidencial-y-parlamentarias-2025/", license: "Datos públicos oficiales", commercialUse: "unknown", expectedCoverage: "Resultados, candidaturas, partidos y gastos electorales; la partición 2025 conserva su carácter preliminar" },
+  { id: "ine-censo-2024", label: "INE Censo 2024", organization: "Instituto Nacional de Estadísticas", url: "https://censo2024.ine.gob.cl/resultados/", license: "Datos públicos oficiales", commercialUse: "unknown", expectedCoverage: "Población, hogares y viviendas de las 346 comunas de Chile" },
 ];
 
 export function canonicalSourceId(sourceId: string) {

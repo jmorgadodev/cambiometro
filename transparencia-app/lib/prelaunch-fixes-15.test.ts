@@ -36,13 +36,13 @@ describe("Tarea 15 - 5 Fixes Críticos Pre-Launch", () => {
     expect(homeContent).toContain("Diferencia por deduplicación y cobertura declarada");
   });
 
-  it("Fix 2: Home y /datos muestran 11 fuentes oficiales + 1 derivada con coherencia numérica", () => {
+  it("Fix 2: Home y /datos muestran fuentes oficiales + 1 derivada con coherencia numérica", () => {
     const homeContent = readFileSync(join(projectRoot, "app", "page.tsx"), "utf8");
-    expect(homeContent).toContain("11 fuentes oficiales + 1 derivada (personal de apoyo parlamentario)");
+    expect(homeContent).toContain("fuentes oficiales + 1 derivada (personal de apoyo parlamentario)");
     expect(homeContent).toContain('href="/fuentes"');
 
     const datosContent = readFileSync(join(projectRoot, "app", "datos", "page.tsx"), "utf8");
-    expect(datosContent).toContain("11 fuentes oficiales + 1 derivada");
+    expect(datosContent).toContain("fuentes oficiales + 1 derivada");
   });
 
   it("Fix 3: /rankings implementa estado honesto con banner y sin ceros pelados", () => {

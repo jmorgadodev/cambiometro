@@ -8,7 +8,7 @@ import { GLOBAL_KPIS } from "@/lib/global-kpis";
 
 export const metadata: Metadata = {
   title: "Estado de Conexión y Salud de Fuentes ETL — El Cambiómetro",
-  description: "Monitor en tiempo real de sincronización, frescura, volumen y salud operativa de las 11 fuentes oficiales + 1 derivada de El Cambiómetro.",
+  description: "Monitor en tiempo real de sincronización, frescura, volumen y salud operativa de las fuentes oficiales + 1 derivada de El Cambiómetro.",
   alternates: { canonical: "/datos" },
 };
 

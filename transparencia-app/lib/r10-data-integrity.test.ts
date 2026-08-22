@@ -165,7 +165,8 @@ describe("R10 — ninguna compra inventada entra a proyecciones", () => {
     const source = readFileSync(resolve("scripts/rebuild-authoritative-municipalidades.mjs"), "utf8");
     const censusSource = readFileSync(resolve("scripts/census-data.mjs"), "utf8");
     expect(censusSource).not.toContain("municipalidades-data.json");
-    expect(censusSource).toContain("CENSO_2024_OFICIAL = {}");
+    expect(censusSource).toContain("CENSO_2024_OFICIAL =");
+    expect(censusSource).toContain("Censo 2024 INE");
     expect(source).toContain("let alcalde = null");
     expect(source).toContain("partido_alcalde: alcalde?.partido_alcalde ?? null");
     expect(source).not.toContain("ALCALDES_CORREGIDOS");

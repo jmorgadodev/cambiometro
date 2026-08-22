@@ -56,6 +56,7 @@ export const SOURCE_CANONICAL_COUNTS: Record<string, number> = {
   "senado": 8138,
   "servel": 23894,
   "personal-apoyo": 4092,
+  "ine-censo-2024": 346,
 };
 
 export const SOURCE_HISTORICAL_COUNTS: Record<string, number> = {
@@ -71,6 +72,7 @@ export const SOURCE_HISTORICAL_COUNTS: Record<string, number> = {
   "senado": 8138,
   "servel": 23894,
   "personal-apoyo": 4092,
+  "ine-censo-2024": 346,
 };
 
 export async function listPublishedSourceManifests(): Promise<SourceManifest[]> {

@@ -72,11 +72,17 @@ Este documento consolida las fuentes oficiales, criterios metodológicos, reglas
 
 ---
 
-## 8. Población Comunal y Presupuesto Per Cápita (Censo INE)
+## 8. Población Comunal y Presupuesto Per Cápita (Censo 2024 INE)
 
-- **Estado de Publicación:** El dataset de población desagregada por comuna del **Censo 2024 (Instituto Nacional de Estadísticas - INE)** aún no se encuentra disponible en formato abierto descargable para las 346 comunas.
+- **Fuente Oficial:** Instituto Nacional de Estadísticas (INE) de Chile, Resultados Definitivos Censo de Población y Vivienda 2024 (`https://censo2024.ine.gob.cl/resultados/`).
+- **Cobertura Territorial:** 346 de 346 comunas del país (100% de cobertura sin estimaciones ni imputaciones sintéticas).
+- **Total Nacional:** 18.480.432 habitantes censados (suma verificada contra el reporte oficial del INE con tolerancia cero).
 - **Tratamiento Metodológico (Regla R10):**
   - Conforme a la regla de integridad R10, la plataforma prohíbe el uso de cifras sintéticas o derivadas de nóminas de personal.
-  - Hasta que el INE publique oficialmente el dataset comunal en datos abiertos, el indicador de población comunal y el presupuesto per cápita se presentan como `"No publicado por la fuente"` con valor `"—"`.
+  - La población comunal proviene exclusivamente del dataset oficial del INE identificado por código CUT (Código Único Territorial de 5 dígitos).
+  - El **Presupuesto Municipal Per Cápita** se calcula como:
+    $$\text{Presupuesto Per Cápita} = \text{Math.round}\left(\frac{\text{Presupuesto Vigente SINIM}}{\text{Población Censo 2024 INE}}\right)$$
+  - Se presenta en formato chileno de moneda (`$ / hab.`) citando explícitamente la fuente `"Censo 2024 INE"`.
+
 
 
