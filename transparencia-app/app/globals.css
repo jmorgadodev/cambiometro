@@ -2975,7 +2975,10 @@ html.dark .page-masthead {
   .loading-orb,
   .loading-orb__glow,
   .loading-orb__ring,
-  .loading-orb__core {
+  .loading-orb__core,
+  .initial-splash-orb,
+  .route-transition-overlay,
+  .route-transition-card {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
@@ -3090,6 +3093,62 @@ html.dark .page-masthead {
   100% {
     transform: scale(1.02);
   }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   SPLASH SSR Y OVERLAY GLOBAL DE TRANSICIONES
+═══════════════════════════════════════════════════════════ */
+.initial-splash-orb {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  background: var(--surface);
+  z-index: 99998;
+  pointer-events: none;
+  opacity: 1;
+  visibility: visible;
+  transition: opacity 200ms ease, visibility 200ms ease;
+}
+
+.initial-splash-orb--hidden {
+  opacity: 0;
+  visibility: hidden;
+}
+
+.route-transition-overlay {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 99999;
+  pointer-events: none;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 150ms ease, visibility 150ms ease;
+  background: var(--overlay);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+.route-transition-overlay.is-active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.route-transition-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 1.25rem 2rem;
+  border-radius: 16px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-lg);
 }
 
 /* ═══════════════════════════════════════════════════════════
