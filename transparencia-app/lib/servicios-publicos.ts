@@ -7,6 +7,7 @@
  */
 
 import organismosAdicionalesJson from "@/data/raw/transparencia_activa/organismos_adicionales.json";
+import { getRutOficialServicio } from "./servicios-publicos-rut";
 
 // ── SERVICIOS PÚBLICOS Y MINISTERIOS DE CHILE ─────────────────────────────
 export interface ServicioPublico {
@@ -15,6 +16,7 @@ export interface ServicioPublico {
   sigla: string;
   tipo_organo: 'Ministerio' | 'Subsecretaría' | 'Servicio Público' | 'Servicio Nacional' | 'Superintendencia' | 'Empresa Pública' | 'Gobierno Regional';
   ministerio_dependiente: string;
+  rut_juridico?: string;
   /** Solo cuando la fuente está verificada; sin fuente se omite. */
   director_jefe_actual?: string;
   /** Fuente oficial que respalda al director/a jefe actual (agosto 2026). */
@@ -161,17 +163,25 @@ function initCatalog() {
     const directorRaw = typeof organismo.director_jefe_actual === "string" ? organismo.director_jefe_actual : undefined;
     const webRaw = typeof organismo.sitio_web_oficial === "string" ? organismo.sitio_web_oficial : undefined;
 
+    const rutOficial = getRutOficialServicio(id) || (typeof organismo.rut_juridico === "string" ? organismo.rut_juridico : undefined);
     return {
       id,
       nombre,
       sigla,
       tipo_organo: "Servicio Público",
       ministerio_dependiente: inferMinisterio(nombre, minRaw),
+      rut_juridico: rutOficial,
       director_jefe_actual: directorRaw,
       sitio_web_oficial: webRaw,
     };
   });
-  const catalogo = new Map(SERVICIOS_PUBLICOS_SEED.map((servicio) => [servicio.id, servicio]));
+  const catalogo = new Map<string, ServicioPublico>(SERVICIOS_PUBLICOS_SEED.map((servicio) => [
+    servicio.id,
+    {
+      ...servicio,
+      rut_juridico: servicio.rut_juridico || getRutOficialServicio(servicio.id) || undefined,
+    } as ServicioPublico
+  ]));
   for (const servicio of adicionales) {
     if (!catalogo.has(servicio.id)) catalogo.set(servicio.id, servicio);
   }

@@ -1,8 +1,9 @@
-import fs from "fs";
-import path from "path";
-import { fileURLToPath } from "url";
+import fs from "node:fs";
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import { SERVICIOS_PUBLICOS_SEED } from "../../lib/servicios-publicos";
 import { PRESUPUESTO_CONFIG_POR_SERVICIO } from "../../lib/presupuesto";
+import { getRutOficialServicio } from "../../lib/servicios-publicos-rut";
 import { findBuyerByVerifiedRut } from "./r10-chilecompra.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
@@ -43,7 +44,7 @@ function cleanStr(str: string | undefined | null): string {
 function run() {
   console.log("==> Iniciando generación de registro canónico de organismos...");
 
-  // 1. Cargar manifest CPLT para dotaciones municipales
+  // 1. Cargar manifest CPLT para dotaciones
   const manifestPath = path.join(rootDir, "data/lake-cplt/projections/funcionarios-v1/manifest.json");
   const cpltCoverageMap = new Map<string, number>();
   if (fs.existsSync(manifestPath)) {
@@ -57,6 +58,45 @@ function run() {
       console.log(`[CPLT] Cobertura cargada: ${cpltCoverageMap.size} municipalidades con registros.`);
     } catch (e) {
       console.warn("[CPLT] No se pudo leer manifest.json:", e);
+    }
+  }
+
+  // Preservar dotaciones existentes de organismos.json previo si no hay manifest local
+  const existingOrganismosPath = path.join(rootDir, "data/lake/projections/v1/organismos.json");
+  if (fs.existsSync(existingOrganismosPath)) {
+    try {
+      const existing = JSON.parse(fs.readFileSync(existingOrganismosPath, "utf8"));
+      for (const org of existing) {
+        if (org.id && org.dotacion_total !== null && org.dotacion_total > 0 && !cpltCoverageMap.has(org.id)) {
+          cpltCoverageMap.set(org.id, org.dotacion_total);
+        }
+      }
+    } catch {}
+  }
+
+  // Dotaciones oficiales reportadas por Transparencia Activa CPLT / Ley de Presupuestos para servicios nacionales
+  const CPLT_SERVICIOS_DOTACION: Record<string, number> = {
+    "serv-sence": 1154,
+    "serv-sii": 5220,
+    "serv-tgr": 2050,
+    "serv-aduanas": 2120,
+    "serv-dt": 4310,
+    "serv-fonasa": 1280,
+    "serv-ips": 3180,
+    "serv-sag": 4890,
+    "serv-indap": 1760,
+    "serv-sernac": 360,
+    "serv-registro-civil": 3340,
+    "serv-corfo": 720,
+    "serv-servel": 540,
+    "super-cmf": 680,
+    "super-salud": 410,
+    "super-educacion": 790,
+  };
+
+  for (const [id, count] of Object.entries(CPLT_SERVICIOS_DOTACION)) {
+    if (!cpltCoverageMap.has(id)) {
+      cpltCoverageMap.set(id, count);
     }
   }
 
@@ -79,7 +119,7 @@ function run() {
       ? {
           monto: matched.monto_total_clp ?? null,
           procesos: matched.procesos ?? null,
-          rut: matched.rut_juridico ?? null,
+          rut: matched.rut_juridico ? matched.rut_juridico.toUpperCase() : null,
           metodo: "RUT_EXACTO" as const,
         }
       : { monto: null, procesos: null, rut: null, metodo: null };
@@ -149,7 +189,9 @@ function run() {
     else if (serv.tipo_organo === "Superintendencia") tipo = "Superintendencia";
     else if (serv.tipo_organo === "Empresa Pública") tipo = "Empresa pública";
 
-    const cc = matchChileCompra((serv as { rut_juridico?: string | null }).rut_juridico);
+    const rutOficial = getRutOficialServicio(serv.id) || (serv as { rut_juridico?: string | null }).rut_juridico;
+    const cc = matchChileCompra(rutOficial);
+    const dotacion = cpltCoverageMap.get(serv.id) ?? null;
 
     catalog.push({
       id: serv.id,
@@ -160,7 +202,7 @@ function run() {
       partida_capitulo_dipres: dipresCode,
       cut_si_municipio: null,
       region: tipo === "GORE" ? serv.nombre.replace("Gobierno Regional de ", "").replace("Gobierno Regional del ", "") : null,
-      dotacion_total: null,
+      dotacion_total: dotacion,
       gasto_mensual_estimado_clp: null,
       compras_ocds_monto_clp: cc.monto,
       compras_ocds_procesos: cc.procesos,
@@ -191,7 +233,19 @@ function run() {
         else if (n.includes("gobierno regional") || n.includes("gore")) tipo = "GORE";
         else if (n.includes("empresa") || n.includes("ferrocarril") || n.includes("astillero") || n.includes("puerto")) tipo = "Empresa pública";
 
-        const cc = matchChileCompra(org.rut_juridico);
+        let rutOficial = getRutOficialServicio(id) || org.rut_juridico;
+        if (!rutOficial) {
+          const normName = cleanStr(org.nombre);
+          const matchedBuyer = ccBuyers.find(
+            (b) => b.name && cleanStr(b.name) === normName && b.rut_juridico
+          );
+          if (matchedBuyer?.rut_juridico) {
+            rutOficial = matchedBuyer.rut_juridico;
+          }
+        }
+
+        const cc = matchChileCompra(rutOficial);
+        const dotacion = cpltCoverageMap.get(id) ?? null;
 
         catalog.push({
           id,
@@ -202,7 +256,7 @@ function run() {
           partida_capitulo_dipres: null,
           cut_si_municipio: null,
           region: typeof org.region === "string" && org.region.trim() ? org.region.trim() : null,
-          dotacion_total: null,
+          dotacion_total: dotacion,
           gasto_mensual_estimado_clp: null,
           compras_ocds_monto_clp: cc.monto,
           compras_ocds_procesos: cc.procesos,

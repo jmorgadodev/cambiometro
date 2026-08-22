@@ -183,7 +183,11 @@ export function getServicioPublicoEnriquecido(id: string): ServicioPublicoEnriqu
 
   // 2. Compras públicas: R10 exige enlace jurídico exacto y evidencia OCDS.
   const officialBuyer = orgCanonico?.compras_ocds_metodo_enlace === "RUT_EXACTO"
-    ? leerChileCompraV1()?.buyers.find((buyer) => buyer.rut_juridico === orgCanonico.compras_ocds_rut_comprador) ?? null
+    ? leerChileCompraV1()?.buyers.find(
+        (buyer) =>
+          buyer.rut_juridico?.toUpperCase() ===
+          orgCanonico.compras_ocds_rut_comprador?.toUpperCase()
+      ) ?? null
     : null;
   const supplierAggregates = new Map<string, ProveedorChileCompra>();
   for (const award of officialBuyer?.top ?? []) {
