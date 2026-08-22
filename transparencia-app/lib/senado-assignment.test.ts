@@ -77,4 +77,37 @@ describe("FIX-2 — asignación y transferencias de personal de apoyo Senado", (
     expect(component).toContain("Hallazgo de integridad");
     expect(component).toContain("la diferencia se muestra como hallazgo y no como dato conciliado");
   });
+
+  it("calcula el porcentaje de exceso de Kaiser julio 2026 como +33,7% (+-0.1)", () => {
+    const evalKaiser = evaluateSenateSupport({
+      total_clp: 15_250_000,
+      period: "2026-07",
+      base_mensual_clp: 11_406_149,
+      verified_transfers: [],
+    });
+    const pct = ((evalKaiser.total_clp - evalKaiser.base_mensual_clp) / evalKaiser.base_mensual_clp) * 100;
+    expect(pct).toBeCloseTo(33.7, 1);
+    const formatted = `+${pct.toFixed(1).replace(".", ",")}%`;
+    expect(formatted).toBe("+33,7%");
+  });
+
+  it("calcula y formatea el porcentaje de exceso dinámico para cualquier caso V2", () => {
+    const cases = [
+      { total: 13_390_819, base: 11_406_149, expectedPct: "+17,4%" },
+      { total: 15_250_000, base: 11_406_149, expectedPct: "+33,7%" },
+      { total: 17_109_223, base: 11_406_149, expectedPct: "+50,0%" },
+    ];
+    for (const c of cases) {
+      const res = evaluateSenateSupport({
+        total_clp: c.total,
+        period: "2026-07",
+        base_mensual_clp: c.base,
+        verified_transfers: [],
+      });
+      const pct = ((res.total_clp - res.base_mensual_clp) / res.base_mensual_clp) * 100;
+      const formatted = `+${pct.toFixed(1).replace(".", ",")}%`;
+      expect(formatted).toBe(c.expectedPct);
+    }
+  });
 });
+

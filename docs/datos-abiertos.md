@@ -56,3 +56,17 @@ Este documento consolida las fuentes oficiales, criterios metodológicos, reglas
 - **Oposición:** FA, PS, PC, PPD, PDC, PL, PR, FRVS — *PDC confirmada como oposición: ADN Radio 10-07-2026, Álvaro Ortiz “Somos oposición, pero no de trinchera”.*
 - **Independientes:** IND inalterado.
 - **Dudosos sin fuente dura:** PDG clasificado como oficialismo por inversión editorial; fuentes reales lo describen como bisagra no oficialista (“no somos oficialismo” Infobae 20-07-2026; BioBio 18-02-2026 “será oposición si Kast impulsa agenda valórica”). Se aplica swap igual y se declara clasificación editorial sin fuente dura.
+
+---
+
+## 7. Qué Significa el Hallazgo de Integridad y su Porcentaje (Regla V2)
+
+- **Propósito:** Brindar máxima transparencia y legibilidad ciudadana ante diferencias entre los montos publicados en nóminas oficiales de personal de apoyo parlamentario y las bases mensuales asignadas por el Consejo Resolutivo de Asignaciones Parlamentarias.
+- **Cálculo del Porcentaje de Exceso:**
+  $$\text{Porcentaje de Exceso} = \frac{\text{Total Publicado} - \text{Base Oficial}}{\text{Base Oficial}} \times 100$$
+  El porcentaje se calcula dinámicamente a partir de los datos oficiales de cada período, expresándose en formato chileno con un decimal y signo positivo (por ejemplo, `+17,4%` o `+33,7%`).
+- **Umbrales Metodológicos V2 (cuando no existe traspaso individual acreditado):**
+  - **Hallazgo de Integridad ALTA (exceso de hasta 40%):** Aplica cuando el monto total publicado excede la base mensual oficial hasta en un 40% (ej. caso Kaiser julio 2026 con `+33,7%` de exceso).
+  - **Hallazgo de Integridad CRÍTICA (exceso superior al 40%):** Aplica cuando el monto total publicado supera en más de un 40% la base mensual oficial sin respaldo de transferencias acreditadas.
+- **Declaración de No Imputación:** La presencia de un hallazgo de integridad señala una discrepancia contable o documental respecto al estándar base publicado y no constituye por sí misma una imputación de ilicitud, dolo ni falta administrativa.
+

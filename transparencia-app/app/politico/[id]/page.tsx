@@ -36,10 +36,15 @@ import {
 } from "@/lib/personal-apoyo";
 import { procesarGastosPolitico } from "@/lib/gastos-operacionales";
 import { formatFechaChilena, edadEnAnos } from "@/lib/format";
-import VotacionesHistorial, { type VotacionFila } from "@/components/VotacionesHistorial";
+import type { VotacionFila } from "@/components/VotacionesHistorial";
 import PoliticoTimeline from "@/components/PoliticoTimeline";
 import PoliticoScoreHeader, { type PoliticoHeaderData } from "@/components/PoliticoScoreHeader";
 import PersonalApoyoMensual from "@/components/PersonalApoyoMensual";
+import nextDynamic from "next/dynamic";
+
+const VotacionesHistorial = nextDynamic(() => import("@/components/VotacionesHistorial"), {
+  loading: () => <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-3)" }}>Cargando historial de votaciones...</div>,
+});
 
 interface Props {
   params: Promise<{ id: string }>;

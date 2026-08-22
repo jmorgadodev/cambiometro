@@ -2,6 +2,8 @@
 import { useEffect, useRef, useState } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 
+import LoadingOrb from "@/components/LoadingOrb";
+
 export default function NavigationProgressBar() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
@@ -37,20 +39,38 @@ export default function NavigationProgressBar() {
   if (!active && progress === 0) return null;
 
   return (
-    <div
-      aria-hidden="true"
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        height: "2.5px",
-        width: `${progress}%`,
-        background: "var(--accent)",
-        zIndex: 9999,
-        transition: progress === 100 ? "width 180ms ease-out, opacity 180ms ease" : "width 320ms ease-out",
-        opacity: active || progress < 100 ? 1 : 0,
-        pointerEvents: "none",
-      }}
-    />
+    <>
+      <div
+        aria-hidden="true"
+        style={{
+          position: "fixed",
+          top: 0,
+          left: 0,
+          height: "2.5px",
+          width: `${progress}%`,
+          background: "var(--accent)",
+          zIndex: 9999,
+          transition: progress === 100 ? "width 180ms ease-out, opacity 180ms ease" : "width 320ms ease-out",
+          opacity: active || progress < 100 ? 1 : 0,
+          pointerEvents: "none",
+        }}
+      />
+      {active && (
+        <div
+          aria-hidden="true"
+          style={{
+            position: "fixed",
+            bottom: "1.5rem",
+            right: "1.5rem",
+            zIndex: 9998,
+            pointerEvents: "none",
+            transition: "opacity 200ms ease",
+            opacity: active ? 1 : 0,
+          }}
+        >
+          <LoadingOrb size={44} inline label="" />
+        </div>
+      )}
+    </>
   );
 }

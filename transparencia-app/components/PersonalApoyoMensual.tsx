@@ -242,6 +242,17 @@ export default function PersonalApoyoMensual({
               ? `Hallazgo de integridad ${evaluacionActiva.status}`
               : "Asignación mensual conciliada"}
           </strong>
+          {evaluacionActiva && evaluacionActiva.status !== "OK" && (() => {
+            const baseOficial = Number(senadorPersonal.asignacion.base_mensual_clp);
+            const totalPublicado = Number(evaluacionActiva.total_clp);
+            const pct = baseOficial > 0 ? ((totalPublicado - baseOficial) / baseOficial) * 100 : 0;
+            const pctFormateado = `${pct >= 0 ? "+" : ""}${pct.toFixed(1).replace(".", ",")}%`;
+            return (
+              <div style={{ marginTop: "0.25rem", fontSize: "0.8rem", fontWeight: 700, color: "var(--bad)" }}>
+                Exceso de {pctFormateado} sobre la base mensual oficial
+              </div>
+            );
+          })()}
           <p style={{ margin: "0.35rem 0 0", fontSize: "0.76rem", color: "var(--text-2)" }}>
             Base mensual oficial: {formatCLP(senadorPersonal.asignacion.base_mensual_clp)}.
             {evaluacionActiva

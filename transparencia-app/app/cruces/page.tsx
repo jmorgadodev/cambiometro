@@ -1,11 +1,19 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import nextDynamic from "next/dynamic";
 import { getAllCrosses } from "@/lib/data-platform-v1";
 import { leerContraloriaV1 } from "@/lib/contraloria-lake";
 import { leerChileCompraV1 } from "@/lib/chilecompra";
 import { leerInfoLobbyV1 } from "@/lib/infolobby";
-import CrucesExplorerClient from "@/components/cruces/CrucesExplorerClient";
+import LoadingOrb from "@/components/LoadingOrb";
 import { getLey19862Summary } from "@/lib/transferencias-data";
+
+const CrucesExplorerClient = nextDynamic(
+  () => import("@/components/cruces/CrucesExplorerClient"),
+  {
+    loading: () => <LoadingOrb size={52} label="Cargando cruces documentales..." />,
+  }
+);
 
 export const metadata: Metadata = {
   title: "Explorador de Cruces de Datos Públicos — El Cambiómetro",

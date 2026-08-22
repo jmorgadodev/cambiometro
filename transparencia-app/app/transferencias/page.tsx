@@ -1,7 +1,15 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import TransferenciasExplorerClient from "@/components/transferencias/TransferenciasExplorerClient";
+import dynamic from "next/dynamic";
+import LoadingOrb from "@/components/LoadingOrb";
 import { getLey19862Summary } from "@/lib/transferencias-data";
+
+const TransferenciasExplorerClient = dynamic(
+  () => import("@/components/transferencias/TransferenciasExplorerClient"),
+  {
+    loading: () => <LoadingOrb size={52} label="Cargando transferencias..." />,
+  }
+);
 
 export const metadata: Metadata = {
   title: "Transferencias Ley 19.862 — El Cambiómetro",

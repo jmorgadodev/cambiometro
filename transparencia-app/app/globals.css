@@ -2971,7 +2971,11 @@ html.dark .page-masthead {
   .data-bar__fill,
   .hist-bar__seg,
   .header-search__results,
-  .skeleton-shimmer {
+  .skeleton-shimmer,
+  .loading-orb,
+  .loading-orb__glow,
+  .loading-orb__ring,
+  .loading-orb__core {
     opacity: 1 !important;
     transform: none !important;
     transition: none !important;
@@ -3000,6 +3004,91 @@ html.dark .page-masthead {
   }
   100% {
     background-position: -200% 0;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   LOADING ORB (APPLE STYLE)
+═══════════════════════════════════════════════════════════ */
+.loading-orb {
+  position: relative;
+  border-radius: 50%;
+  overflow: visible;
+}
+
+.loading-orb__glow {
+  position: absolute;
+  inset: -8px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle,
+    var(--accent-glow) 0%,
+    transparent 70%
+  );
+  filter: blur(8px);
+  animation: orb-glow-pulse 2.4s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+
+.loading-orb__ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  padding: 2.5px;
+  background: conic-gradient(
+    from 0deg,
+    var(--accent) 0deg,
+    var(--info) 120deg,
+    var(--brand) 240deg,
+    var(--accent) 360deg
+  );
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask-composite: xor;
+  animation: orb-ring-spin 2.8s linear infinite;
+}
+
+.loading-orb__core {
+  position: absolute;
+  inset: 5px;
+  border-radius: 50%;
+  background: radial-gradient(
+    circle at 35% 35%,
+    var(--surface) 0%,
+    var(--surface-2) 65%,
+    var(--border) 100%
+  );
+  box-shadow: inset 0 1px 3px var(--accent-glow), 0 2px 8px var(--accent-glow);
+  animation: orb-core-breathe 2.4s ease-in-out infinite alternate;
+}
+
+@keyframes orb-ring-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes orb-glow-pulse {
+  0% {
+    transform: scale(0.9);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1.18);
+    opacity: 0.95;
+  }
+}
+
+@keyframes orb-core-breathe {
+  0% {
+    transform: scale(0.95);
+  }
+  100% {
+    transform: scale(1.02);
   }
 }
 
