@@ -1,5 +1,3 @@
-import fs from "node:fs";
-import path from "node:path";
 import { normalizeSearchText } from "./data-source";
 
 export interface RemuneracionCruda {
@@ -21,6 +19,7 @@ interface Registro {
 }
 
 import { getKvCache } from "@/lib/db";
+import dataRemuneraciones from "@/data/remuneraciones-38bis.json";
 
 let registro: Registro | null = null;
 
@@ -31,14 +30,7 @@ async function leerRegistro(): Promise<Registro | null> {
     registro = fromD1;
     return registro;
   }
-  try {
-    const p = path.join(process.cwd(), "data", "remuneraciones-38bis.json");
-    if (fs.existsSync(p)) {
-      registro = JSON.parse(fs.readFileSync(p, "utf-8")) as Registro;
-    }
-  } catch {
-    // ignorar error de lectura local
-  }
+  registro = dataRemuneraciones as Registro;
   return registro;
 }
 

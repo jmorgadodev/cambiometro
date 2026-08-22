@@ -86,9 +86,18 @@ async function runE2E() {
     console.log(`-> Ficha ${politicoRoute.padEnd(48)}: HTTP ${res.status()} [OK - Header PC & Costo Mensual presentes]`);
   }
 
-  // 4. Captura Desktop de Campillai y Kaiser para reporte
-  console.log("\n4. Capturando screenshots Desktop (1440px) de Campillai y Kaiser...");
+  // 4. Captura Desktop de Becker, Kaiser y Campillai para reporte
+  console.log("\n4. Capturando screenshots Desktop (1440px) de Becker, Kaiser y Campillai...");
   
+  // Becker (Fix 14 verificación)
+  await page.goto(`${BASE_URL}/politico/miguel-becker-alvear`, { waitUntil: "networkidle" });
+  await page.waitForTimeout(500);
+  const beckerContent = await page.content();
+  assert(beckerContent.includes("8.239.091"), "La dieta de Becker ($8.239.091) debe estar presente en el panel de costo");
+  const beckerScreenshotPath = path.join(screenshotDir, "desktop-becker.png");
+  await page.screenshot({ path: beckerScreenshotPath, fullPage: false });
+  console.log(`-> Screenshot Desktop Becker: ${beckerScreenshotPath}`);
+
   // Campillai
   await page.goto(`${BASE_URL}/politico/fabiola-campillai-rojas`, { waitUntil: "networkidle" });
   await page.waitForTimeout(500);
@@ -99,6 +108,10 @@ async function runE2E() {
   // Kaiser
   await page.goto(`${BASE_URL}/politico/vanessa-kaiser-barents-von-hohenhagen`, { waitUntil: "networkidle" });
   await page.waitForTimeout(500);
+  const kaiserContent = await page.content();
+  assert(kaiserContent.includes("8.239.091"), "La dieta de Kaiser ($8.239.091) debe estar presente en el panel de costo");
+  assert(kaiserContent.includes("4.582.550"), "Los gastos de Kaiser ($4.582.550) deben estar intactos");
+  assert(kaiserContent.includes("ALTA"), "La alerta ALTA de Kaiser debe estar intacta");
   const kaiserScreenshotPath = path.join(screenshotDir, "desktop-kaiser.png");
   await page.screenshot({ path: kaiserScreenshotPath, fullPage: false });
   console.log(`-> Screenshot Desktop Kaiser: ${kaiserScreenshotPath}`);
