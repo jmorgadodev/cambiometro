@@ -10,8 +10,10 @@ const kpis = {
   relaciones: 1897,
   votaciones: 12111,
   gastos: 690,
-  fuentes_operativas: 12,
-  total_fuentes: 12,
+  fuentes_oficiales: 12,
+  fuentes_derivadas: 1,
+  fuentes_operativas: 13,
+  total_fuentes: 13,
   corte: "Agosto 2026",
   generatedAt: new Date().toISOString(),
 };

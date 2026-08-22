@@ -9,6 +9,22 @@ export const metadata: Metadata = {
   title: "Comparar Representantes — El Cambiómetro",
   description:
     "Compara lado a lado los votaciones, gastos operacionales y equipo de apoyo de dos parlamentarios con datos reales del Congreso.",
+  alternates: {
+    canonical: "/comparar",
+  },
+  openGraph: {
+    title: "Comparar Representantes — El Cambiómetro",
+    description:
+      "Compara lado a lado los votaciones, gastos operacionales y equipo de apoyo de dos parlamentarios con datos reales del Congreso.",
+    images: ["https://cambiometro.impulsacv.cl/api/og/site"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Comparar Representantes — El Cambiómetro",
+    description:
+      "Compara lado a lado los votaciones, gastos operacionales y equipo de apoyo de dos parlamentarios con datos reales del Congreso.",
+    images: ["https://cambiometro.impulsacv.cl/api/og/site"],
+  },
 };
 
 export default async function CompararPage() {

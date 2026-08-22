@@ -4,9 +4,25 @@ import { getSnapshotSummary } from "@/lib/data-source";
 import { CAMBIOS_VERIFICADOS } from "@/lib/public-changes";
 
 export const metadata: Metadata = {
-  title: "Cambios verificados",
+  title: "Cambios verificados — El Cambiómetro",
   description:
     "Registro editorial de cambios de período y alertas que cuentan con una fuente pública verificable.",
+  alternates: {
+    canonical: "/cambios",
+  },
+  openGraph: {
+    title: "Cambios verificados — El Cambiómetro",
+    description:
+      "Registro editorial de cambios de período y alertas que cuentan con una fuente pública verificable.",
+    images: ["https://cambiometro.impulsacv.cl/api/og/site"],
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Cambios verificados — El Cambiómetro",
+    description:
+      "Registro editorial de cambios de período y alertas que cuentan con una fuente pública verificable.",
+    images: ["https://cambiometro.impulsacv.cl/api/og/site"],
+  },
 };
 
 export default function CambiosPage() {

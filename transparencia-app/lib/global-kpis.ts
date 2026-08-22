@@ -7,6 +7,8 @@ export interface GlobalKpis {
   relaciones: number;
   votaciones: number;
   gastos: number;
+  fuentes_oficiales: number;
+  fuentes_derivadas: number;
   fuentes_operativas: number;
   total_fuentes: number;
   corte: string;
@@ -15,7 +17,10 @@ export interface GlobalKpis {
 
 export const GLOBAL_KPIS: GlobalKpis = globalKpisRaw as GlobalKpis;
 
-export const KPI_SCOPES: Record<keyof Omit<GlobalKpis, "corte" | "generatedAt">, { label: string; tooltip: string; href: string }> = {
+export const KPI_SCOPES: Record<
+  keyof Omit<GlobalKpis, "corte" | "generatedAt" | "fuentes_oficiales" | "fuentes_derivadas">,
+  { label: string; tooltip: string; href: string }
+> = {
   registros_canonicos: {
     label: "registros oficiales",
     tooltip: "Total consolidado de actos administrativos, contratos, asistencias, dietas y resoluciones públicas indexadas.",

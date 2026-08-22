@@ -14,11 +14,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const routes = [
     "",
     "/politico",
+    "/personas",
     "/partidos",
     "/comparar",
     "/entidades",
     "/autoridades",
     "/cruces",
+    "/transferencias",
     "/datos",
     "/funcionarios",
     "/municipalidades",

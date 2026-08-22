@@ -25,8 +25,8 @@ export interface Ministro {
 }
 
 export const GABINETE_KAST: Ministro[] = [
-  { ministerio: "Interior y Seguridad Pública", nombre: "Claudio Alvarado Andrade", partido: "UDI", fuente: "T13 / La Tercera 19-05-2026", nota: "biministro Interior · SEGEGOB y vocero de gobierno tras la salida de Mara Sedini" },
-  { ministerio: "Secretaría General de Gobierno (SEGEGOB)", nombre: "Claudio Alvarado Andrade", partido: "UDI", fuente: "T13 / La Tercera 19-05-2026", nota: "sin titular exclusivo desde el 19-05; la vocería la asume el ministro del Interior" },
+  { ministerio: "Interior y Seguridad Pública", nombre: "Claudio Alvarado Andrade", partido: "UDI", fuente: "interior.gob.cl / BCN (D.S. N° 1 de 11-03-2026)", nota: "biministro Interior · SEGEGOB y vocero de gobierno tras la salida de Mara Sedini" },
+  { ministerio: "Secretaría General de Gobierno (SEGEGOB)", nombre: "Claudio Alvarado Andrade", partido: "UDI", fuente: "segegob.cl / BCN (D.S. N° 189 de 19-05-2026)", nota: "biministro Interior · SEGEGOB y vocero de gobierno tras la salida de Mara Sedini (19-05-2026)" },
   { ministerio: "Seguridad Pública", nombre: "Martín Arrau García-Huidobro", partido: "Republicano", fuente: "La Tercera 19-05-2026", nota: "asume tras la remoción de Trinidad Steinert (19-05)" },
   { ministerio: "Economía, Fomento y Turismo", nombre: "Daniel Mas Valdés", partido: "Independiente", fuente: "T13 / Emol 20-01-2026", nota: "biministro de Economía y Minería" },
   { ministerio: "Minería", nombre: "Daniel Mas Valdés", partido: "Independiente", fuente: "T13 / Emol 20-01-2026", nota: "biministro; asumió por el diseño original del gabinete" },

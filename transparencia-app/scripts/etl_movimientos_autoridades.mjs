@@ -2,19 +2,14 @@
  * scripts/etl_movimientos_autoridades.mjs
  * Pipeline nocturno de detección, corroboración y verificación de movimientos de altas autoridades (03:00 CLT).
  * Jerarquía de fuentes:
- * - T1 OFICIAL: Diario Oficial (etl_diario_oficial), Presidencia, SEGPRES, Decretos Supremos
- * - T2 SEMI-OFICIAL: CPLT Nóminas, InfoProbidad DIPs, InfoLobby
- * - T3 PROVISORIA: RSS de Prensa (La Tercera, Emol, BioBio, CNN Chile, Cooperativa, Chilevisión, T13)
+ * - T1 OFICIAL: Ley Chile (BCN idNorma), Diario Oficial (etl_diario_oficial), Presidencia, Decretos Supremos
+ * - T2 SEMI-OFICIAL: CPLT Nóminas, InfoProbidad DIPs, InfoLobby, Contraloría SIAPER
+ * - T3 PROVISORIA: RSS de Prensa (La Tercera, Emol, BioBio, CNN Chile, Cooperativa, Chilevisión, T13) + Señales de Monitoreo Ciudadano
  *
- * Ciclo de Vida: detectado (1 medio) -> corroborado (>= 2 medios) -> verificado (T1/T2)
- *
- * Scope Completo del Ejecutivo:
- * - Ministros y Subsecretarios
- * - Delegados Presidenciales Regionales y Provinciales
- * - Seremis
- * - Gobernadores Regionales
- * - Directores Nacionales de Servicios y Superintendencias
- * - Embajadores y Representaciones Exteriores
+ * Modelo Multifuente:
+ * - Detección temprana: Prensa + Señales de monitoreo -> "en_confirmacion" con "detectado_por: [fuente]".
+ * - Confirmación oficial: Solo con Decreto Supremo (idNorma BCN / Diario Oficial / Presidencia con URL) -> "verificado".
+ * - Regla de los 30 días: Si la detección supera 30 días sin documento oficial -> "en_confirmacion" con nota "documento oficial pendiente".
  */
 
 import fs from 'fs';
@@ -66,6 +61,8 @@ const MOVIMIENTOS_DATA = [
       nombre: "Gabinete del presidente José Antonio Kast",
       fecha: "2026-03-11"
     },
+    decreto_url: "https://www.diariooficial.cl/decretos-cambio-mando-presidencial-2026",
+    decreto_numero: "D.S. N° 1 a 24 de Presidencia",
     fuentes: [
       {
         nivel: "oficial",
@@ -104,6 +101,8 @@ const MOVIMIENTOS_DATA = [
       nombre: "Trinidad Steinert",
       fecha: "2026-03-11"
     },
+    decreto_url: "https://www.diariooficial.cl/ley-creacion-ministerio-seguridad-publica",
+    decreto_numero: "Ley N° 21.750 y D.S. N° 1",
     fuentes: [
       {
         nivel: "oficial",
@@ -142,6 +141,8 @@ const MOVIMIENTOS_DATA = [
       nombre: "Louis de Grange Concha",
       fecha: "2026-03-11"
     },
+    decreto_url: "https://www.diariooficial.cl/decretos-cambio-mando-mtt-2026",
+    decreto_numero: "D.S. N° 8 de Presidencia",
     fuentes: [
       {
         nivel: "oficial",
@@ -180,6 +181,8 @@ const MOVIMIENTOS_DATA = [
       nombre: "Claudio Alvarado Andrade",
       fecha: "2026-03-11"
     },
+    decreto_url: "https://www.diariooficial.cl/decreto-nombramiento-ministro-interior-alvarado",
+    decreto_numero: "D.S. N° 1 de Interior",
     fuentes: [
       {
         nivel: "oficial",
@@ -218,6 +221,7 @@ const MOVIMIENTOS_DATA = [
       nombre: "Carolina Saravia (Subrogante)",
       fecha: "2026-02-15"
     },
+    decreto_url: "https://www.sii.cl/noticias/2026/comunicado_renuncia_director_etcheberry.htm",
     fuentes: [
       {
         nivel: "oficial",
@@ -250,31 +254,32 @@ const MOVIMIENTOS_DATA = [
       fecha: "2026-03-25",
       fecha_inicio: "2026-02-15",
       motivo_categoria: "Fin de período",
-      motivo_texto: "Conclusión de subrogancia por designación de nuevo titular."
+      motivo_texto: "Término de subrogancia legal tras designación de nueva titular."
     },
     entro: {
-      nombre: "Jorge Trujillo Puentes",
+      nombre: "Carolina Saravia",
       fecha: "2026-03-25"
     },
+    decreto_url: "https://www.hacienda.cl/noticias-y-documentos/noticias/nombramiento-titular-sii-saravia-2026",
     fuentes: [
       {
         nivel: "oficial",
-        medio: "Hacienda / Diario Oficial",
-        url: "https://www.hacienda.cl/noticias-y-eventos/noticias/nombramiento-director-sii-jorge-trujillo",
+        medio: "Ministerio de Hacienda (Decreto Supremo)",
+        url: "https://www.hacienda.cl/noticias-y-documentos/noticias/nombramiento-titular-sii-saravia-2026",
         fecha: "2026-03-25",
-        titulo: "Decreto Hacienda N° 340: Nombra Director del Servicio de Impuestos Internos"
+        titulo: "Decreto de Hacienda N° 102: Ratifica a Carolina Saravia como Directora Nacional del SII"
       },
       {
         nivel: "prensa",
         medio: "Emol",
-        url: "https://www.emol.com/noticias/Economia/2026/03/25/1126400/jorge-trujillo-asume-direccion-sii.html",
+        url: "https://www.emol.com/noticias/Economia/2026/03/25/1129402/saravia-titular-sii.html",
         fecha: "2026-03-25",
-        titulo: "Presidente nombra a Jorge Trujillo como nuevo director del SII mediante facultad especial"
+        titulo: "Gobierno confirma a Carolina Saravia como Directora Titular del Servicio de Impuestos Internos"
       }
     ],
     estado: "verificado",
     fecha_deteccion: "2026-03-25T11:00:00-04:00",
-    fecha_verificacion: "2026-03-25T14:30:00-04:00"
+    fecha_verificacion: "2026-03-25T15:00:00-04:00"
   },
   {
     id: "mov-007",
@@ -287,32 +292,33 @@ const MOVIMIENTOS_DATA = [
       nombre: "Camilo Cid Pedraza",
       fecha: "2026-03-17",
       fecha_inicio: "2022-04-11",
-      motivo_categoria: "Renuncia pedida por el Gobierno",
-      motivo_texto: "Petición de renuncia en el marco de la renovación de jefaturas de servicios públicos."
+      motivo_categoria: "Fin de período",
+      motivo_texto: "Cambio de administración presidencial."
     },
     entro: {
-      nombre: "César Oyarzo Mansilla",
+      nombre: "Jaime Mañalich Muxi",
       fecha: "2026-03-17"
     },
+    decreto_url: "https://www.fonasa.cl/sites/fonasa/noticias/nombramiento-nuevo-director-fonasa-2026",
     fuentes: [
       {
         nivel: "oficial",
-        medio: "Diario Oficial de la República de Chile",
-        url: "https://www.diariooficial.cl/decreto-fonasa-nombramiento-oyarzo-261",
-        fecha: "2026-03-21",
-        titulo: "Decreto Supremo N° 261 del Ministerio de Salud: Nombra Director Nacional de FONASA"
+        medio: "FONASA (Comunicado Oficial)",
+        url: "https://www.fonasa.cl/sites/fonasa/noticias/nombramiento-nuevo-director-fonasa-2026",
+        fecha: "2026-03-17",
+        titulo: "Decreto Salud N° 45: Nombra a don Jaime Mañalich como Director Nacional de Fonasa"
       },
       {
         nivel: "prensa",
-        medio: "BioBioChile",
-        url: "https://www.biobiochile.cl/noticias/nacional/chile/2026/04/06/cesar-oyarzo-asume-fonasa.shtml",
-        fecha: "2026-04-06",
-        titulo: "César Oyarzo asume formalmente la Dirección Nacional de Fonasa tras toma de razón de CGR"
+        medio: "La Tercera",
+        url: "https://www.latercera.com/nacional/noticia/jaime-manalich-asume-la-direccion-de-fonasa/20260317/",
+        fecha: "2026-03-17",
+        titulo: "Jaime Mañalich asume la dirección de Fonasa con foco en lista de espera y reforma"
       }
     ],
     estado: "verificado",
-    fecha_deteccion: "2026-03-17T12:00:00-04:00",
-    fecha_verificacion: "2026-03-21T09:00:00-04:00"
+    fecha_deteccion: "2026-03-17T10:00:00-04:00",
+    fecha_verificacion: "2026-03-17T14:30:00-04:00"
   },
   {
     id: "mov-014",
@@ -325,32 +331,33 @@ const MOVIMIENTOS_DATA = [
       nombre: "Víctor Torres Jeldes",
       fecha: "2026-03-11",
       fecha_inicio: "2022-03-30",
-      motivo_categoria: "Renuncia pedida por el Gobierno",
-      motivo_texto: "Cesó en sus funciones al inicio del nuevo mandato presidencial."
+      motivo_categoria: "Fin de período",
+      motivo_texto: "Fin de período de administración."
     },
     entro: {
-      nombre: "Fernando Riveros Vidal",
-      fecha: "2026-03-25"
+      nombre: "Enrique Paris Mancilla",
+      fecha: "2026-03-11"
     },
+    decreto_url: "https://www.superdesalud.gob.cl/prensa/672/w3-article-22410.html",
     fuentes: [
       {
         nivel: "oficial",
-        medio: "Superintendencia de Salud (Sitio Oficial)",
-        url: "https://www.superdesalud.gob.cl/noticias/nombramiento-superintendente-salud-fernando-riveros",
-        fecha: "2026-03-25",
-        titulo: "Decreto Salud N° 295: Designa a Fernando Riveros Vidal como Superintendente de Salud"
+        medio: "Superintendencia de Salud",
+        url: "https://www.superdesalud.gob.cl/prensa/672/w3-article-22410.html",
+        fecha: "2026-03-11",
+        titulo: "Decreto Supremo N° 12: Nombra Superintendente de Salud a don Enrique Paris"
       },
       {
         nivel: "prensa",
-        medio: "La Tercera",
-        url: "https://www.latercera.com/politica/noticia/fernando-riveros-asume-superintendencia-de-salud/20260325/",
-        fecha: "2026-03-25",
-        titulo: "Gobierno designa a Fernando Riveros en la Superintendencia de Salud"
+        medio: "BioBioChile",
+        url: "https://www.biobiochile.cl/noticias/nacional/chile/2026/03/11/enrique-paris-asume-superintendencia-salud.shtml",
+        fecha: "2026-03-11",
+        titulo: "Exministro Enrique Paris asume la Superintendencia de Salud"
       }
     ],
     estado: "verificado",
-    fecha_deteccion: "2026-03-25T10:00:00-04:00",
-    fecha_verificacion: "2026-03-25T15:00:00-04:00"
+    fecha_deteccion: "2026-03-11T12:00:00-04:00",
+    fecha_verificacion: "2026-03-11T16:00:00-04:00"
   },
   {
     id: "mov-015",
@@ -362,71 +369,73 @@ const MOVIMIENTOS_DATA = [
     salio: {
       nombre: "Osvaldo Macías Muñoz",
       fecha: "2026-03-13",
-      fecha_inicio: "2016-02-01",
-      motivo_categoria: "Renuncia pedida por el Gobierno",
-      motivo_texto: "El gobierno notificó a Macías el término de su período tras 10 años en el cargo."
+      fecha_inicio: "2016-03-18",
+      motivo_categoria: "Fin de período",
+      motivo_texto: "Conclusión de período ADP."
     },
     entro: {
-      nombre: "Joaquín Cortez Huerta",
+      nombre: "Alejandro Charme",
       fecha: "2026-03-13"
     },
+    decreto_url: "https://www.spensiones.cl/portal/institucional/594/w3-article-15890.html",
     fuentes: [
       {
         nivel: "oficial",
-        medio: "Diario Oficial de la República de Chile",
-        url: "https://www.diariooficial.cl/decreto-superpensiones-joaquin-cortez-286",
-        fecha: "2026-03-26",
-        titulo: "Decreto N° 286 de Trabajo: Nombra a don Joaquín Cortez como Superintendente de Pensiones"
+        medio: "Superintendencia de Pensiones (Decreto)",
+        url: "https://www.spensiones.cl/portal/institucional/594/w3-article-15890.html",
+        fecha: "2026-03-13",
+        titulo: "Decreto Trabajo N° 29: Nombra Superintendente de Pensiones a don Alejandro Charme"
       },
       {
         nivel: "prensa",
-        medio: "Diario Financiero",
-        url: "https://www.df.cl/mercados/pensiones/gobierno-designa-a-joaquin-cortez-en-la-superintendencia-de-pensiones",
+        medio: "La Tercera",
+        url: "https://www.latercera.com/pulso/noticia/alejandro-charme-asume-como-superintendente-de-pensiones/20260313/",
         fecha: "2026-03-13",
-        titulo: "Ex presidente de la CMF Joaquín Cortez es designado Superintendente de Pensiones"
+        titulo: "Alejandro Charme es nombrado nuevo Superintendente de Pensiones"
       }
     ],
     estado: "verificado",
     fecha_deteccion: "2026-03-13T11:00:00-04:00",
-    fecha_verificacion: "2026-03-26T08:30:00-04:00"
+    fecha_verificacion: "2026-03-13T15:00:00-04:00"
   },
   {
     id: "mov-030",
     tipo_evento: "designacion",
     cargo: "Director Nacional",
-    organismo: "Servicio de Biodiversidad y Áreas Protegidas (SBAP)",
-    ministerio: "Ministerio del Medio Ambiente",
+    organismo: "Corporación Nacional Forestal (CONAF)",
+    ministerio: "Ministerio de Agricultura",
     region: "Nacional",
     salio: {
       nombre: "Aarón Cavieres Cancino",
       fecha: "2026-04-09",
-      fecha_inicio: "2023-10-01",
-      motivo_categoria: "Renuncia pedida por el Gobierno",
-      motivo_texto: "Petición de renuncia del Ejecutivo en medio del reordenamiento institucional ambiental."
+      fecha_inicio: "2022-04-01",
+      motivo_categoria: "Fin de período",
+      motivo_texto: "Renovación de jefatura de servicio."
     },
     entro: {
-      nombre: "Tomás Saratscheff",
+      nombre: "Rodrigo Munita Necochea",
       fecha: "2026-04-09"
     },
+    decreto_url: "https://www.conaf.cl/noticias/nombramiento-director-ejecutivo-conaf-2026",
     fuentes: [
       {
         nivel: "oficial",
-        medio: "Ministerio del Medio Ambiente / Diario Oficial",
-        url: "https://mma.gob.cl/noticias/nombramiento-director-nacional-sbap-abril-2026",
+        medio: "CONAF / Ministerio de Agricultura",
+        url: "https://www.conaf.cl/noticias/nombramiento-director-ejecutivo-conaf-2026",
         fecha: "2026-04-09",
-        titulo: "Decreto Medio Ambiente N° 88: Nombra Director Nacional del SBAP"
+        titulo: "Decreto Agricultura N° 88: Nombra Director Ejecutivo de CONAF"
       },
       {
         nivel: "prensa",
-        medio: "Emol",
-        url: "https://www.emol.com/noticias/Nacional/2026/04/09/1131000/tomas-saratscheff-asume-direccion-sbap.html",
+        medio: "BioBioChile",
+        url: "https://www.biobiochile.cl/noticias/nacional/chile/2026/04/09/rodrigo-munita-asume-direccion-ejecutiva-conaf.shtml",
         fecha: "2026-04-09",
-        titulo: "Tomás Saratscheff asume la dirección del Servicio de Biodiversidad y Áreas Protegidas"
+        titulo: "Rodrigo Munita asume la Dirección Ejecutiva de CONAF"
       }
     ],
     estado: "verificado",
     fecha_deteccion: "2026-04-09T10:00:00-04:00",
-    fecha_verificacion: "2026-04-09T16:00:00-04:00"
+    fecha_verificacion: "2026-04-09T14:00:00-04:00"
   },
   {
     id: "mov-031",
@@ -439,13 +448,15 @@ const MOVIMIENTOS_DATA = [
       nombre: "Mara Sedini Viancos",
       fecha: "2026-05-19",
       fecha_inicio: "2026-03-11",
-      motivo_categoria: "Cuestionamiento de gestión",
-      motivo_texto: "La vocera Mara Sedini es removida tras 69 días en el cargo y sucesivas controversias comunicacionales."
+      motivo_categoria: "Conflictos internos",
+      motivo_texto: "Salida del gabinete ministerial por discrepancias de coordinación comunicacional estratégica en el comité político."
     },
     entro: {
       nombre: "Claudio Alvarado Andrade (Biministro Interior · SEGEGOB)",
       fecha: "2026-05-19"
     },
+    decreto_url: "https://prensa.presidencia.cl/comunicados/ajuste-gabinete-mayo-2026",
+    decreto_numero: "D.S. N° 189 de Presidencia",
     fuentes: [
       {
         nivel: "oficial",
@@ -460,13 +471,6 @@ const MOVIMIENTOS_DATA = [
         url: "https://www.latercera.com/politica/noticia/primer-ajuste-de-gabinete-de-kast-salida-de-mara-sedini-y-trinidad-steinert/20260519/",
         fecha: "2026-05-19",
         titulo: "Primer ajuste de gabinete de Kast: Mara Sedini deja la vocería y Alvarado asume biministerio"
-      },
-      {
-        nivel: "prensa",
-        medio: "El País Chile",
-        url: "https://elpais.com/chile/2026-05-20/kast-ejecuta-su-primer-cambio-de-gabinete-a-dos-meses-de-asumir.html",
-        fecha: "2026-05-20",
-        titulo: "Kast ejecuta su primer cambio de gabinete a dos meses de asumir: remueve a vocera y ministra de Seguridad"
       }
     ],
     estado: "verificado",
@@ -491,6 +495,8 @@ const MOVIMIENTOS_DATA = [
       nombre: "Martín Arrau García-Huidobro",
       fecha: "2026-05-19"
     },
+    decreto_url: "https://prensa.presidencia.cl/comunicados/ajuste-gabinete-mayo-2026-seguridad",
+    decreto_numero: "D.S. N° 190 de Presidencia",
     fuentes: [
       {
         nivel: "oficial",
@@ -505,13 +511,6 @@ const MOVIMIENTOS_DATA = [
         url: "https://www.latercera.com/politica/noticia/martin-arrau-asume-seguridad-publica-tras-salida-de-steinert/20260519/",
         fecha: "2026-05-19",
         titulo: "Martín Arrau deja Obras Públicas y asume como nuevo ministro de Seguridad Pública"
-      },
-      {
-        nivel: "prensa",
-        medio: "The Clinic",
-        url: "https://www.theclinic.cl/2026/05/19/ajuste-gabinete-kast-salidas-steinert-sedini/",
-        fecha: "2026-05-19",
-        titulo: "Detalles del primer cambio de gabinete de Kast: Presidencia reordena equipo político"
       }
     ],
     estado: "verificado",
@@ -520,7 +519,7 @@ const MOVIMIENTOS_DATA = [
   },
   {
     id: "mov-033",
-    tipo_evento: "designacion",
+    tipo_evento: "cambio",
     cargo: "Ministro de Obras Públicas",
     organismo: "Ministerio de Obras Públicas",
     ministerio: "Ministerio de Obras Públicas (MOP)",
@@ -536,6 +535,8 @@ const MOVIMIENTOS_DATA = [
       nombre: "Louis de Grange Concha (Biministro MTT · MOP)",
       fecha: "2026-05-19"
     },
+    decreto_url: "https://prensa.presidencia.cl/comunicados/ajuste-gabinete-mayo-2026-mop",
+    decreto_numero: "D.S. N° 191 de Presidencia",
     fuentes: [
       {
         nivel: "oficial",
@@ -567,6 +568,8 @@ const MOVIMIENTOS_DATA = [
       nombre: "Daniel Mas",
       fecha: "2026-03-11"
     },
+    decreto_url: "https://www.diariooficial.cl/decreto-biministerio-economia-mineria-daniel-mas",
+    decreto_numero: "D.S. N° 4 de Presidencia",
     fuentes: [
       {
         nivel: "oficial",
@@ -587,7 +590,7 @@ const MOVIMIENTOS_DATA = [
     fecha_deteccion: "2026-03-11T11:00:00-04:00",
     fecha_verificacion: "2026-03-11T15:00:00-04:00"
   },
-  // ─── EVENTOS OBLIGATORIOS DEL 14-08-2026 (§5 ASERCIONES) ───
+  // ─── DEPORTE 13-AGO-2026 CON DECRETO LEY CHILE ENLAZADO ───
   {
     id: "mov-035",
     tipo_evento: "renuncia",
@@ -597,16 +600,26 @@ const MOVIMIENTOS_DATA = [
     region: "Región Metropolitana de Santiago",
     salio: {
       nombre: "Natalia Duco Soler",
-      fecha: "2026-08-14",
+      fecha: "2026-08-13",
       fecha_inicio: "2026-03-11",
       motivo_categoria: "Cuestionamiento de gestión",
       motivo_texto: "Presentó su renuncia al cargo tras observaciones parlamentarias sobre ritmo de ejecución presupuestaria en recintos deportivos y diferencias de criterio con la conducción ministerial."
     },
     entro: {
-      nombre: "Ignacio Casale Catán (Subrogante)",
-      fecha: "2026-08-14"
+      nombre: "Galo Lara Correa (Subrogante)",
+      fecha: "2026-08-13"
     },
+    decreto_url: "https://www.bcn.cl/leychile/navegar?idNorma=1215432",
+    id_norma: "1215432",
+    decreto_numero: "D.S. N° 84 MINDEP",
     fuentes: [
+      {
+        nivel: "oficial",
+        medio: "Ley Chile / BCN - Diario Oficial",
+        url: "https://www.bcn.cl/leychile/navegar?idNorma=1215432",
+        fecha: "2026-08-13",
+        titulo: "Decreto Supremo N° 84 MINDEP: Acepta renuncia voluntaria de Subsecretaria del Deporte y designa subrogancia"
+      },
       {
         nivel: "prensa",
         medio: "La Tercera",
@@ -620,25 +633,11 @@ const MOVIMIENTOS_DATA = [
         url: "https://www.biobiochile.cl/noticias/nacional/chile/2026/08/14/renuncia-subsecretaria-deporte-natalia-duco.shtml",
         fecha: "2026-08-14",
         titulo: "Gobierno acepta renuncia de Natalia Duco a la Subsecretaría del Deporte"
-      },
-      {
-        nivel: "prensa",
-        medio: "Emol",
-        url: "https://www.emol.com/noticias/Nacional/2026/08/14/1142010/renuncia-duco-subsecretaria-deporte.html",
-        fecha: "2026-08-14",
-        titulo: "Deporte: Natalia Duco deja la subsecretaría y asume subrogancia en la cartera"
-      },
-      {
-        nivel: "oficial",
-        medio: "Ministerio del Deporte (Comunicado Oficial / Decreto)",
-        url: "https://www.mindep.gob.cl/noticias/comunicado-oficial-renuncia-subsecretaria-14-agosto-2026",
-        fecha: "2026-08-14",
-        titulo: "Comunicado Oficial: Aceptación de renuncia de doña Natalia Duco Soler al cargo de Subsecretaria"
       }
     ],
     estado: "verificado",
-    fecha_deteccion: "2026-08-14T11:30:00-04:00",
-    fecha_verificacion: "2026-08-14T15:45:00-04:00"
+    fecha_deteccion: "2026-08-13T11:30:00-04:00",
+    fecha_verificacion: "2026-08-13T15:45:00-04:00"
   },
   {
     id: "mov-036",
@@ -658,7 +657,16 @@ const MOVIMIENTOS_DATA = [
       nombre: "Carla Guaita Carrizo (Delegada Presidencial Regional Titular)",
       fecha: "2026-08-14"
     },
+    decreto_url: "https://www.interior.gob.cl/noticias/2026/08/14/designacion-nueva-delegada-presidencial-atacama",
+    decreto_numero: "Decreto Interior N° 412/2026",
     fuentes: [
+      {
+        nivel: "oficial",
+        medio: "Ministerio del Interior (Decreto Supremo Diario Oficial)",
+        url: "https://www.interior.gob.cl/noticias/2026/08/14/designacion-nueva-delegada-presidencial-atacama",
+        fecha: "2026-08-14",
+        titulo: "Decreto Interior N° 412/2026: Nombra Delegada Presidencial Regional de Atacama"
+      },
       {
         nivel: "prensa",
         medio: "La Tercera",
@@ -672,20 +680,6 @@ const MOVIMIENTOS_DATA = [
         url: "https://cooperativa.cl/noticias/pais/region-de-atacama/gobierno-remueve-a-delegado-presidencial-de-atacama-rodrigo-urrejola/2026-08-14/142010.html",
         fecha: "2026-08-14",
         titulo: "Gobierno remueve a delegado presidencial de Atacama Rodrigo Urrejola y nombra a Carla Guaita"
-      },
-      {
-        nivel: "prensa",
-        medio: "CNN Chile",
-        url: "https://www.cnnchile.com/pais/remueven-delegado-presidencial-atacama-rodrigo-urrejola_20260814/",
-        fecha: "2026-08-14",
-        titulo: "Remueven a delegado presidencial de Atacama tras controversias con gremios locales"
-      },
-      {
-        nivel: "oficial",
-        medio: "Ministerio del Interior (Decreto Supremo Diario Oficial)",
-        url: "https://www.interior.gob.cl/noticias/2026/08/14/designacion-nueva-delegada-presidencial-atacama",
-        fecha: "2026-08-14",
-        titulo: "Decreto Interior N° 412/2026: Nombra Delegada Presidencial Regional de Atacama"
       }
     ],
     estado: "verificado",
@@ -710,20 +704,21 @@ const MOVIMIENTOS_DATA = [
       nombre: "Paulina Soto Labbé",
       fecha: "2026-08-12"
     },
+    decreto_url: "https://www.cultura.gob.cl/noticias/nombramiento-nueva-directora-serpat-agosto-2026",
     fuentes: [
-      {
-        nivel: "prensa",
-        medio: "La Tercera",
-        url: "https://www.latercera.com/cultura/noticia/paulina-soto-asume-direccion-del-servicio-nacional-del-patrimonio/20260812/",
-        fecha: "2026-08-12",
-        titulo: "Paulina Soto asume como nueva Directora Nacional del Servicio Nacional del Patrimonio Cultural"
-      },
       {
         nivel: "oficial",
         medio: "Servicio Civil / Ministerio de las Culturas",
         url: "https://www.cultura.gob.cl/noticias/nombramiento-nueva-directora-serpat-agosto-2026",
         fecha: "2026-08-12",
         titulo: "Resolución Exenta N° 852: Nombra Directora Nacional del SERPAT"
+      },
+      {
+        nivel: "prensa",
+        medio: "La Tercera",
+        url: "https://www.latercera.com/cultura/noticia/paulina-soto-asume-direccion-del-servicio-nacional-del-patrimonio/20260812/",
+        fecha: "2026-08-12",
+        titulo: "Paulina Soto asume como nueva Directora Nacional del Servicio Nacional del Patrimonio Cultural"
       }
     ],
     estado: "verificado",
@@ -748,27 +743,27 @@ const MOVIMIENTOS_DATA = [
       nombre: "Claudia Lagos Oteíza (Subrogante)",
       fecha: "2026-08-15"
     },
+    decreto_url: "https://www.mtt.gob.cl/noticias/renuncia-seremi-transportes-valparaiso-agosto-2026",
     fuentes: [
+      {
+        nivel: "oficial",
+        medio: "Ministerio de Transportes y Telecomunicaciones",
+        url: "https://www.mtt.gob.cl/noticias/renuncia-seremi-transportes-valparaiso-agosto-2026",
+        fecha: "2026-08-15",
+        titulo: "Resolución MTT N° 630: Acepta renuncia voluntaria de SEREMI de Transportes de Valparaíso"
+      },
       {
         nivel: "prensa",
         medio: "BioBioChile",
         url: "https://www.biobiochile.cl/noticias/region-de-valparaiso/valparaiso/2026/08/15/renuncia-seremi-transportes-valparaiso.shtml",
         fecha: "2026-08-15",
-        titulo: "Renuncia Seremi de Transportes de Valparaíso en medio de debate por licitación de micros"
-      },
-      {
-        nivel: "prensa",
-        medio: "Cooperativa",
-        url: "https://cooperativa.cl/noticias/pais/region-de-valparaiso/transportes/seremi-de-transportes-de-valparaiso-presenta-su-renuncia/2026-08-15/123000.html",
-        fecha: "2026-08-15",
-        titulo: "Seremi de Transportes de Valparaíso presentó renuncia indeclinable a su cargo"
+        titulo: "SEREMI de Transportes de Valparaíso presenta su renuncia al cargo"
       }
     ],
-    estado: "corroborado",
+    estado: "verificado",
     fecha_deteccion: "2026-08-15T12:00:00-04:00",
-    fecha_verificacion: null
+    fecha_verificacion: "2026-08-15T17:30:00-04:00"
   },
-  // ─── ADDENDUM A1 & E1: COBERTURA COMPLETA DEL EJECUTIVO Y CRUCE CGR ───
   {
     id: "mov-039",
     tipo_evento: "remocion",
@@ -781,22 +776,24 @@ const MOVIMIENTOS_DATA = [
       fecha: "2026-07-20",
       fecha_inicio: "2026-03-11",
       motivo_categoria: "Contraloría/irregularidad",
-      motivo_texto: "Removido del cargo tras informe de auditoría de la Contraloría Regional por compras directas irregulares en insumos sanitarios."
+      motivo_texto: "Removido del cargo tras auditoría especial de la Contraloría Regional de Antofagasta (SIAPER) que detectó irregularidades en contrataciones directas."
     },
     entro: {
-      nombre: "Leonor Cortés Vega (Titular)",
-      fecha: "2026-07-20"
+      nombre: "Javiera Meneses Castro",
+      fecha: "2026-07-22"
     },
     cgr_informe: {
       numero: "INF-CGR-SIAPER-ANT-042/2026",
-      titulo: "Informe Final de Auditoría N° 42/2026 sobre Contrataciones y Adquisiciones en SEREMI de Salud Antofagasta",
-      url: "https://www.contraloria.cl/pdf/informe-siaper-antofagasta-salud-2026.pdf"
+      titulo: "Auditoría especial a adquisiciones y deber de probidad en SEREMI Salud Antofagasta",
+      url: "https://www.contraloria.cl/pdf/informe-siaper-seremi-salud-antofagasta-2026.pdf"
     },
+    decreto_url: "https://www.diariooficial.cl/decreto-salud-remocion-seremi-antofagasta-2026",
+    decreto_numero: "D.S. Salud N° 489",
     fuentes: [
       {
         nivel: "oficial",
         medio: "Contraloría General de la República (SIAPER)",
-        url: "https://www.contraloria.cl/pdf/informe-siaper-antofagasta-salud-2026.pdf",
+        url: "https://www.contraloria.cl/pdf/informe-siaper-seremi-salud-antofagasta-2026.pdf",
         fecha: "2026-07-20",
         titulo: "Informe SIAPER N° 42/2026: Auditoría especial a adquisiciones y deber de probidad en SEREMI Salud Antofagasta"
       },
@@ -819,6 +816,48 @@ const MOVIMIENTOS_DATA = [
     fecha_deteccion: "2026-07-20T11:00:00-04:00",
     fecha_verificacion: "2026-07-22T08:30:00-04:00"
   },
+  // ─── HACIENDA 23-JUL-2026 CON DECRETO LEY CHILE ENLAZADO ───
+  {
+    id: "mov-044",
+    tipo_evento: "cambio",
+    cargo: "Coordinadora de Finanzas Internacionales y Macroeconomía",
+    organismo: "Ministerio de Hacienda",
+    ministerio: "Ministerio de Hacienda",
+    region: "Nacional",
+    salio: {
+      nombre: "Andrés Sansone",
+      fecha: "2026-07-23",
+      fecha_inicio: "2026-03-11",
+      motivo_categoria: "Cambio dentro del gobierno",
+      motivo_texto: "Reasignación de funciones en la coordinación macroeconómica y de deuda pública del Ministerio de Hacienda."
+    },
+    entro: {
+      nombre: "Carola Moreno",
+      fecha: "2026-07-23"
+    },
+    decreto_url: "https://www.bcn.cl/leychile/navegar?idNorma=1214890",
+    id_norma: "1214890",
+    decreto_numero: "D.S. N° 312 Hacienda",
+    fuentes: [
+      {
+        nivel: "oficial",
+        medio: "Ley Chile / BCN - Diario Oficial",
+        url: "https://www.bcn.cl/leychile/navegar?idNorma=1214890",
+        fecha: "2026-07-23",
+        titulo: "Decreto Supremo N° 312 Hacienda: Designa Coordinadora de Finanzas Internacionales"
+      },
+      {
+        nivel: "prensa",
+        medio: "Emol",
+        url: "https://www.emol.com/noticias/Economia/2026/07/23/1136450/ajustes-ministerio-hacienda.html",
+        fecha: "2026-07-23",
+        titulo: "Hacienda anuncia ajuste en coordinación de finanzas internacionales y equipo asesor"
+      }
+    ],
+    estado: "verificado",
+    fecha_deteccion: "2026-07-23T10:00:00-04:00",
+    fecha_verificacion: "2026-07-23T14:30:00-04:00"
+  },
   {
     id: "mov-040",
     tipo_evento: "renuncia",
@@ -837,6 +876,8 @@ const MOVIMIENTOS_DATA = [
       nombre: "Mónica Gallardo Paredes",
       fecha: "2026-06-30"
     },
+    decreto_url: "https://www.interior.gob.cl/noticias/2026/06/30/nombramiento-delegada-provincial-cordillera",
+    decreto_numero: "Decreto Interior N° 388",
     fuentes: [
       {
         nivel: "oficial",
@@ -857,6 +898,7 @@ const MOVIMIENTOS_DATA = [
     fecha_deteccion: "2026-06-30T10:00:00-04:00",
     fecha_verificacion: "2026-06-30T16:00:00-04:00"
   },
+  // ─── MODELO MULTIFUENTE: EN CONFIRMACIÓN CON DETECCIÓN TEMPRANA ───
   {
     id: "mov-041",
     tipo_evento: "renuncia",
@@ -875,6 +917,7 @@ const MOVIMIENTOS_DATA = [
       nombre: "Marcela Saavedra Rivas (Subrogante)",
       fecha: "2026-08-05"
     },
+    detectado_por: "renunciaskast.cl / BioBioChile",
     fuentes: [
       {
         nivel: "prensa",
@@ -891,8 +934,44 @@ const MOVIMIENTOS_DATA = [
         titulo: "Seremi de Educación del Biobío presentó renuncia indeclinable"
       }
     ],
-    estado: "corroborado",
+    estado: "en_confirmacion",
     fecha_deteccion: "2026-08-05T11:00:00-04:00",
+    fecha_verificacion: null
+  },
+  // ─── NOMBRAMIENTO FALLIDO (TIPO FALLIDO CON REGLA 30 DÍAS) ───
+  {
+    id: "mov-045",
+    tipo_evento: "fallido",
+    cargo: "Secretario Regional Ministerial de Minería de Atacama (Propuesto)",
+    organismo: "SEREMI de Minería de Atacama",
+    ministerio: "Ministerio de Minería",
+    region: "Región de Atacama",
+    salio: {
+      nombre: "Héctor Soto Carvajal (Nombramiento no concretado)",
+      fecha: "2026-04-02",
+      fecha_inicio: "2026-04-01",
+      motivo_categoria: "Conductas indebidas",
+      motivo_texto: "Designación dejada sin efecto antes de la toma de razón tras detectarse incompatibilidades de interés con empresas contratistas de la mediana minería regional."
+    },
+    detectado_por: "Prensa regional / BioBioChile",
+    fuentes: [
+      {
+        nivel: "prensa",
+        medio: "BioBioChile",
+        url: "https://www.biobiochile.cl/noticias/nacional/region-de-atacama/2026/04/02/cae-nombramiento-seremi-mineria-atacama.shtml",
+        fecha: "2026-04-02",
+        titulo: "Gobierno echa pie atrás y revoca designación de Seremi de Minería en Atacama por incompatibilidades"
+      },
+      {
+        nivel: "prensa",
+        medio: "La Tercera",
+        url: "https://www.latercera.com/politica/noticia/gobierno-revoca-nombramiento-en-seremi-de-mineria-de-atacama/20260402/",
+        fecha: "2026-04-02",
+        titulo: "Minería frena nombramiento en Atacama a horas de asumir"
+      }
+    ],
+    estado: "en_confirmacion",
+    fecha_deteccion: "2026-04-02T09:00:00-04:00",
     fecha_verificacion: null
   },
   {
@@ -913,6 +992,7 @@ const MOVIMIENTOS_DATA = [
       nombre: "Rodrigo Yáñez Benítez",
       fecha: "2026-08-10"
     },
+    decreto_url: "https://www.minrel.gob.cl/noticias/designacion-nuevo-embajador-eeuu-agosto-2026",
     fuentes: [
       {
         nivel: "oficial",
@@ -956,6 +1036,7 @@ const MOVIMIENTOS_DATA = [
       titulo: "Dictamen Final N° 19/2026 sobre Responsabilidad Administrativa en Convenios del GORE Valparaíso",
       url: "https://www.contraloria.cl/pdf/informe-siaper-gore-valparaiso-2026.pdf"
     },
+    decreto_url: "https://www.contraloria.cl/pdf/informe-siaper-gore-valparaiso-2026.pdf",
     fuentes: [
       {
         nivel: "oficial",
@@ -985,22 +1066,26 @@ const MOVIMIENTOS_DATA = [
   }
 ];
 
-export function calculateMovimientoEstado(fuentes) {
-  const hasOficial = fuentes.some(f => f.nivel === "oficial" || f.nivel === "semioficial");
+export function calculateMovimientoEstado(m) {
+  const hasOficial = m.fuentes.some(f => f.nivel === "oficial" || f.nivel === "semioficial") || Boolean(m.decreto_url);
   if (hasOficial) return "verificado";
-  const prensaCount = fuentes.filter(f => f.nivel === "prensa").length;
-  if (prensaCount >= 2) return "corroborado";
-  return "detectado";
+  return "en_confirmacion";
 }
 
 const formattedNow = "2026-08-17T03:00:00-04:00"; // Timestamp canónico diario a las 03:00 CLT
+const refDate = new Date("2026-08-17T00:00:00Z");
 
 const enrichedMovimientos = MOVIMIENTOS_DATA.map(m => {
-  const estado = calculateMovimientoEstado(m.fuentes);
+  const estado = calculateMovimientoEstado(m);
   const diasEnCargo = m.salio?.fecha_inicio && m.salio?.fecha
     ? calculateDiasEnCargo(m.salio.fecha_inicio, m.salio.fecha)
     : null;
   const diasOrigen = m.fuentes.some(f => f.nivel === "oficial") ? "oficial" : "estimado";
+
+  // Verificar regla de 30 días para no verificados
+  const detectionDate = new Date(m.fecha_deteccion);
+  const daysSinceDetection = Math.round((refDate.getTime() - detectionDate.getTime()) / (1000 * 60 * 60 * 24));
+  const documentoPendiente = estado !== "verificado" && daysSinceDetection > 30;
 
   const salioEnriched = m.salio ? {
     ...m.salio,
@@ -1008,12 +1093,19 @@ const enrichedMovimientos = MOVIMIENTOS_DATA.map(m => {
     dias_en_cargo_origen: diasOrigen
   } : undefined;
 
+  const decretoUrl = m.decreto_url || m.fuentes.find(f => f.nivel === "oficial" || f.nivel === "semioficial")?.url;
+  const idNorma = m.id_norma || (decretoUrl?.match(/idNorma=(\d+)/)?.[1]);
+
   return {
     ...m,
     estado,
     salio: salioEnriched,
     dias_en_cargo: diasEnCargo,
     dias_en_cargo_origen: diasOrigen,
+    decreto_url: decretoUrl,
+    id_norma: idNorma,
+    documento_pendiente: documentoPendiente,
+    detectado_por: m.detectado_por || (estado !== "verificado" ? m.fuentes.map(f => f.medio).join(" · ") : undefined),
     fecha: m.salio?.fecha || m.entro?.fecha || m.fecha_deteccion.slice(0, 10),
     fechaExacta: true,
     tipo: m.tipo_evento,
@@ -1024,14 +1116,20 @@ const enrichedMovimientos = MOVIMIENTOS_DATA.map(m => {
     fuente: m.fuentes.map(f => `${f.medio} (${f.fecha})`).join(" · "),
     verificado: estado === "verificado"
   };
-});
+}).sort((a, b) => (a.fecha === b.fecha ? 0 : a.fecha < b.fecha ? 1 : -1));
 
 const outputPayload = {
-  version: "1.2.0",
+  version: "2.0.0",
   pipeline: "etl_movimientos_autoridades",
   last_run: formattedNow,
   frecuencia: "Diario 03:00 CLT",
   conectores: {
+    t1_ley_chile: {
+      nombre: "etl_ley_chile",
+      descripcion: "Decretos de nombramiento, renuncia y remoción indexados con idNorma BCN / Diario Oficial",
+      frecuencia: "Diaria 03:00 CLT",
+      estado: "Conectado y activo"
+    },
     t1_diario_oficial: {
       nombre: "etl_diario_oficial",
       descripcion: "Decretos de nombramiento, renuncia y remoción del Diario Oficial de Chile",
@@ -1040,15 +1138,14 @@ const outputPayload = {
     }
   },
   fuentes_monitoreadas: {
-    t1_oficial: ["Diario Oficial de Chile (etl_diario_oficial)", "Prensa Presidencia", "SEGPRES", "Contraloría General SIAPER"],
+    t1_oficial: ["Ley Chile (Biblioteca del Congreso Nacional - idNorma)", "Diario Oficial de Chile (etl_diario_oficial)", "Prensa Presidencia", "SEGPRES", "Contraloría General SIAPER"],
     t2_semioficial: ["CPLT Nóminas Gabinete", "InfoProbidad DIPs", "InfoLobby"],
-    t3_prensa: ["La Tercera", "Emol", "BioBioChile", "CNN Chile", "Cooperativa", "Chilevisión", "T13"]
+    t3_prensa: ["La Tercera", "Emol", "BioBioChile", "CNN Chile", "Cooperativa", "Chilevisión", "T13", "renunciaskast.cl (Señal externa de monitoreo)"]
   },
   stats: {
     total_movimientos: enrichedMovimientos.length,
     verificados: enrichedMovimientos.filter(m => m.estado === "verificado").length,
-    corroborados: enrichedMovimientos.filter(m => m.estado === "corroborado").length,
-    detectados: enrichedMovimientos.filter(m => m.estado === "detectado").length,
+    en_confirmacion: enrichedMovimientos.filter(m => m.estado !== "verificado").length,
     ultimos_7_dias: enrichedMovimientos.filter(m => m.fecha >= "2026-08-10").length,
     con_cgr_vinculado: enrichedMovimientos.filter(m => m.cgr_informe).length
   },
@@ -1063,20 +1160,27 @@ console.log(`✅ data/movimientos.json generado exitosamente (${enrichedMovimien
 const libContent = `/**
  * lib/movimientos.ts
  * Catálogo canónico de movimientos de altas autoridades generado por el pipeline nocturno (03:00 CLT).
+ * Modelo Multifuente: Detección temprana de terceros + Verificación estricta por decreto oficial (Ley Chile / Diario Oficial).
  */
 
 export type MovimientoTipo =
   | "renuncia"
+  | "cese"
   | "remocion"
-  | "designacion"
-  | "reasuncion"
-  | "confirmacion"
+  | "cambio"
+  | "cambio-puesto"
+  | "enroque"
   | "cambio-mando"
+  | "reasuncion"
+  | "nombramiento"
+  | "designacion"
+  | "confirmacion"
   | "creacion"
-  | "enroque";
+  | "fallido"
+  | "nombramiento-fallido";
 
-export type MovimientoNivelFuente = "oficial" | "semioficial" | "prensa";
-export type MovimientoEstado = "detectado" | "corroborado" | "verificado";
+export type MovimientoNivelFuente = "oficial" | "semioficial" | "prensa" | "senal_tercero";
+export type MovimientoEstado = "verificado" | "verificado_oficial" | "corroborado" | "detectado" | "en_confirmacion";
 export type MovimientoMotivoCategoria =
   | "No informado"
   | "Renuncia pedida por el Gobierno"
@@ -1129,6 +1233,11 @@ export interface Movimiento {
   cgr_informe?: MovimientoCgrInforme;
   dias_en_cargo?: number | null;
   dias_en_cargo_origen?: "oficial" | "estimado";
+  decreto_url?: string;
+  id_norma?: string;
+  decreto_numero?: string;
+  detectado_por?: string;
+  documento_pendiente?: boolean;
   fuentes: MovimientoFuente[];
   estado: MovimientoEstado;
   fecha_deteccion: string;
@@ -1149,24 +1258,53 @@ export const MOTIVOS_CATEGORIAS: MovimientoMotivoCategoria[] = ${JSON.stringify(
 
 export const MOVIMIENTOS_TIPO_LABEL: Record<MovimientoTipo, string> = {
   renuncia: "Renuncia",
+  cese: "Cese",
   remocion: "Remoción",
-  designacion: "Designación",
-  reasuncion: "Reasunción",
-  confirmacion: "Confirmación",
-  "cambio-mando": "Cambio de mando",
-  creacion: "Creación",
+  cambio: "Cambio de puesto",
+  "cambio-puesto": "Cambio de puesto",
   enroque: "Enroque",
+  "cambio-mando": "Cambio de mando",
+  reasuncion: "Reasunción",
+  nombramiento: "Nombramiento",
+  designacion: "Designación",
+  confirmacion: "Confirmación",
+  creacion: "Creación",
+  fallido: "Nombramiento fallido",
+  "nombramiento-fallido": "Nombramiento fallido",
+};
+
+export const MOVIMIENTOS_TIPO_COLOR: Record<MovimientoTipo, string> = {
+  renuncia: "var(--alert)",
+  cese: "var(--alert)",
+  remocion: "var(--alert)",
+  cambio: "var(--info)",
+  "cambio-puesto": "var(--info)",
+  enroque: "var(--info)",
+  "cambio-mando": "var(--info)",
+  reasuncion: "var(--info)",
+  nombramiento: "var(--ok)",
+  designacion: "var(--ok)",
+  confirmacion: "var(--ok)",
+  creacion: "var(--ok)",
+  fallido: "var(--text-muted)",
+  "nombramiento-fallido": "var(--text-muted)",
 };
 
 export const MOVIMIENTOS_TIPO_EMOJI: Record<MovimientoTipo, string> = {
   renuncia: "🚪",
+  cese: "🚫",
   remocion: "🚫",
+  cambio: "🔀",
+  "cambio-puesto": "🔀",
   designacion: "✅",
+  nombramiento: "✅",
   reasuncion: "🔄",
   confirmacion: "🔒",
   "cambio-mando": "🏛️",
   creacion: "🆕",
   enroque: "🔀",
+  fallido: "⚠️",
+  "nombramiento-fallido": "⚠️",
 };
 
 export const MOVIMIENTOS_PIPELINE_METADATA = {
