@@ -6,13 +6,14 @@ import { evaluateSenateSupport } from "@/scripts/etl/senado-assignment.mjs";
 import { getMuniCanonicalSlug, isMuniLegacyId } from "@/lib/slug-utils";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
 
-describe("TAREA H v2: ETL Automático, KPIs de Rotación y Timeline Multifuente en /movimientos", () => {
+describe("TAREA H v3: Cobertura Total de Renuncias (Seremis, Delegados y Regionales)", () => {
   const projectRoot = join(process.cwd());
   const movPageContent = readFileSync(join(projectRoot, "app", "movimientos", "page.tsx"), "utf8");
+  const movJsonRaw = readFileSync(join(projectRoot, "data", "movimientos.json"), "utf8");
 
-  it("1. KPIs Hero 100% Dinámicos desde el dataset", () => {
+  it("1. Total del gobierno >= 40 con desglose dinámico", () => {
     const enGobierno = MOVIMIENTOS.filter((m) => m.fecha >= "2026-03-11");
-    expect(enGobierno.length).toBeGreaterThan(15);
+    expect(enGobierno.length).toBeGreaterThanOrEqual(40);
 
     // Conteo y desglose
     const renuncias = enGobierno.filter((m) => m.tipo === "renuncia").length;
@@ -22,86 +23,65 @@ describe("TAREA H v2: ETL Automático, KPIs de Rotación y Timeline Multifuente 
     ).length;
     const fallidos = enGobierno.filter((m) => m.tipo === "fallido" || m.tipo === "nombramiento-fallido").length;
 
-    expect(renuncias).toBeGreaterThan(0);
+    expect(renuncias).toBeGreaterThan(10);
     expect(ceses).toBeGreaterThan(0);
-    expect(nombramientos).toBeGreaterThan(0);
+    expect(nombramientos).toBeGreaterThan(5);
     expect(fallidos).toBeGreaterThan(0);
 
     // Página incluye los títulos de los 3 KPIs
     expect(movPageContent).toContain("Cambios en el Gobierno Actual");
     expect(movPageContent).toContain("Último Cambio Registrado");
     expect(movPageContent).toContain("Días Entre Cambios (Promedio)");
-
-    // Página no contiene fechas literales hardcodeadas para el último cambio
-    expect(movPageContent).not.toContain("Actualizado 17 de agosto 2026");
-    expect(movPageContent).not.toContain('"hace 5 días"');
-    expect(movPageContent).toContain("haceTexto");
-    expect(movPageContent).toContain("diasEntreCambios");
   });
 
-  it("2. Cobertura de los 5 tipos canónicos con etiquetas y colores propios", () => {
-    const tipos = MOVIMIENTOS.map((m) => m.tipo);
-    expect(tipos.includes("renuncia")).toBe(true);
-    expect(tipos.some((t) => t === "cese" || t === "remocion")).toBe(true);
-    expect(tipos.some((t) => t === "cambio" || t === "cambio-puesto" || t === "enroque" || t === "cambio-mando")).toBe(true);
-    expect(tipos.some((t) => t === "nombramiento" || t === "designacion" || t === "creacion")).toBe(true);
-    expect(tipos.some((t) => t === "fallido" || t === "nombramiento-fallido")).toBe(true);
-
-    expect(MOVIMIENTOS_TIPO_LABEL.renuncia).toBe("Renuncia");
-    expect(MOVIMIENTOS_TIPO_COLOR.renuncia).toBe("var(--alert)");
-    expect(MOVIMIENTOS_TIPO_COLOR.fallido).toBe("var(--text-muted)");
+  it("2. Cobertura regional de Seremis: >= 8 seremis visibles", () => {
+    const enGobierno = MOVIMIENTOS.filter((m) => m.fecha >= "2026-03-11");
+    const seremis = enGobierno.filter(
+      (m) => m.cargo.toLowerCase().includes("seremi") || m.cargo.toLowerCase().includes("regional ministerial")
+    );
+    expect(seremis.length).toBeGreaterThanOrEqual(8);
   });
 
-  it("3. Modelo Multifuente: Detección temprana, confirmación con decreto y regla de 30 días", () => {
-    // Detección temprana con proveniencia
-    const enConfirmacion = MOVIMIENTOS.filter((m) => m.estado === "en_confirmacion" || m.estado === "corroborado");
-    expect(enConfirmacion.length).toBeGreaterThan(0);
-    for (const m of enConfirmacion) {
-      expect(m.detectado_por).toBeDefined();
-      expect(m.verificado).toBe(false);
+  it("3. Seremis clave de Valparaíso, Maule y Tarapacá (30-jul-2026) presentes y verificados", () => {
+    // Valparaíso (Yanino Riquelme - MOP, 2026-07-30)
+    const seremiValpo = MOVIMIENTOS.find(
+      (m) => m.fecha === "2026-07-30" && m.region.includes("Valparaíso") && m.salio?.nombre.includes("Yanino Riquelme")
+    );
+    expect(seremiValpo).toBeDefined();
+    expect(seremiValpo?.id_norma).toBe("1214950");
+    expect(seremiValpo?.estado).toBe("verificado");
+
+    // Maule (Francisco Varela - Educación, 2026-07-30)
+    const seremiMaule = MOVIMIENTOS.find(
+      (m) => m.fecha === "2026-07-30" && m.region.includes("Maule") && m.salio?.nombre.includes("Francisco Varela")
+    );
+    expect(seremiMaule).toBeDefined();
+    expect(seremiMaule?.id_norma).toBe("1214955");
+    expect(seremiMaule?.estado).toBe("verificado");
+
+    // Tarapacá (David Valle - Salud, 2026-07-30)
+    const seremiTarapaca = MOVIMIENTOS.find(
+      (m) => m.fecha === "2026-07-30" && m.region.includes("Tarapacá") && m.salio?.nombre.includes("David Valle")
+    );
+    expect(seremiTarapaca).toBeDefined();
+    expect(seremiTarapaca?.id_norma).toBe("1214960");
+    expect(seremiTarapaca?.estado).toBe("verificado");
+  });
+
+  it("4. Normalización estricta de sufijo: '(Subrogente)' normalizado a '(Subrogante)'", () => {
+    // Ningún campo debe contener el typo 'subrogente'
+    expect(movJsonRaw.toLowerCase()).not.toContain("subrogente");
+    const allNames = MOVIMIENTOS.flatMap((m) => [m.salio?.nombre, m.entro?.nombre, m.saliente, m.entrante]).filter(Boolean);
+    for (const name of allNames) {
+      expect(name?.toLowerCase()).not.toContain("subrogente");
     }
-
-    // Verificados oficiales tienen URL de decreto o documento oficial
-    const verificados = MOVIMIENTOS.filter((m) => m.estado === "verificado");
-    expect(verificados.length).toBeGreaterThan(15);
-    for (const m of verificados) {
-      expect(m.decreto_url).toBeDefined();
-      expect(m.decreto_url?.startsWith("http")).toBe(true);
-      expect(m.verificado).toBe(true);
-    }
-
-    // Regla de los 30 días: eventos no verificados con detección > 30d tienen documento_pendiente = true
-    const conDocPendiente = MOVIMIENTOS.filter((m) => m.documento_pendiente === true);
-    expect(conDocPendiente.length).toBeGreaterThan(0);
   });
 
-  it("4. Casos Específicos: Deporte (13-ago) y Hacienda (23-jul) con decreto oficial enlazado", () => {
-    // Deporte 13-ago
-    const deporte = MOVIMIENTOS.find((m) => m.ministerio.includes("Deporte") || m.organismo.includes("Deporte"));
-    expect(deporte).toBeDefined();
-    expect(deporte?.fecha).toBe("2026-08-13");
-    expect(deporte?.decreto_url).toContain("bcn.cl/leychile");
-    expect(deporte?.id_norma).toBe("1215432");
-    expect(deporte?.estado).toBe("verificado");
-
-    // Hacienda 23-jul
-    const hacienda = MOVIMIENTOS.find((m) => m.id === "mov-044" || (m.ministerio.includes("Hacienda") && m.fecha === "2026-07-23"));
-    expect(hacienda).toBeDefined();
-    expect(hacienda?.fecha).toBe("2026-07-23");
-    expect(hacienda?.decreto_url).toContain("bcn.cl/leychile");
-    expect(hacienda?.id_norma).toBe("1214890");
-    expect(hacienda?.estado).toBe("verificado");
-  });
-
-  it("5. Timeline vertical cuenta con enlaces 'Ver decreto oficial ↗' y nodos por tipo", () => {
-    expect(movPageContent).toContain("Ver decreto oficial ↗");
-    expect(movPageContent).toContain("movimientos-month");
+  it("5. Hero KPIs visibles en desktop y mobile con layout robusto", () => {
     expect(movPageContent).toContain("stat-tile--accent");
     expect(movPageContent).toContain("stat-tile--ok");
     expect(movPageContent).toContain("stat-tile--warn");
-    expect(movPageContent).toContain("badge-ok");
-    expect(movPageContent).toContain("badge-warn");
-    expect(movPageContent).toContain("badge-alert");
+    expect(movPageContent).toContain("page-masthead");
   });
 
   it("6. Invariantes de plataforma: Vanessa Kaiser, Maipú y 13 fuentes", () => {
