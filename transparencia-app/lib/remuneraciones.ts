@@ -26,7 +26,19 @@ let registro: Registro | null = null;
 
 async function leerRegistro(): Promise<Registro | null> {
   if (registro) return registro;
-  registro = await getKvCache<Registro>("remuneraciones-38bis.json");
+  const fromD1 = await getKvCache<Registro>("remuneraciones-38bis.json");
+  if (fromD1) {
+    registro = fromD1;
+    return registro;
+  }
+  try {
+    const p = path.join(process.cwd(), "data", "remuneraciones-38bis.json");
+    if (fs.existsSync(p)) {
+      registro = JSON.parse(fs.readFileSync(p, "utf-8")) as Registro;
+    }
+  } catch {
+    // ignorar error de lectura local
+  }
   return registro;
 }
 
