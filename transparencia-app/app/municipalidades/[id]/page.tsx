@@ -14,13 +14,7 @@ import {
 } from "@/lib/slug-utils";
 
 export function generateStaticParams() {
-  // Emitir slug nuevo (canonical) + ID legado (muni-*) para que la build capture ambos
-  const entries: Array<{ id: string }> = [];
-  for (const { id, slug } of getAllMuniSlugs()) {
-    entries.push({ id: slug }); // slug canónico (URL nueva)
-    if (id !== slug) entries.push({ id });  // ID legado (para 301)
-  }
-  return entries;
+  return getAllMuniSlugs().map(({ slug }) => ({ id: slug }));
 }
 
 export async function generateMetadata({

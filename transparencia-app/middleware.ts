@@ -1,5 +1,16 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import {
+  getMuniCanonicalSlug,
+  isMuniLegacyId,
+  getServicioCanonicalSlug,
+  isServicioLegacyId,
+} from "@/lib/slug-utils";
+import {
+  isLegacyPoliticoId,
+  getPoliticoSlug,
+  getPoliticoByIdOrSlug,
+} from "@/lib/politico-slugs";
 
 function contentSecurityPolicy(nonce: string) {
   const developmentEval = process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : "";
@@ -26,6 +37,42 @@ function contentSecurityPolicy(nonce: string) {
 }
 
 export function middleware(request: NextRequest) {
+  const pathname = request.nextUrl.pathname;
+
+  // Redirecciones 301 permanentes para URLs legadas hacia slugs semánticos
+  if (pathname.startsWith("/municipalidades/")) {
+    const id = pathname.replace("/municipalidades/", "");
+    if (isMuniLegacyId(id)) {
+      const slug = getMuniCanonicalSlug(id);
+      if (slug && slug !== id) {
+        return NextResponse.redirect(new URL(`/municipalidades/${slug}`, request.url), 301);
+      }
+    }
+  }
+
+  if (pathname.startsWith("/servicios-publicos/")) {
+    const id = pathname.replace("/servicios-publicos/", "");
+    if (isServicioLegacyId(id)) {
+      const slug = getServicioCanonicalSlug(id);
+      if (slug && slug !== id) {
+        return NextResponse.redirect(new URL(`/servicios-publicos/${slug}`, request.url), 301);
+      }
+    }
+  }
+
+  if (pathname.startsWith("/politico/")) {
+    const id = pathname.replace("/politico/", "");
+    if (isLegacyPoliticoId(id)) {
+      const pol = getPoliticoByIdOrSlug(id);
+      if (pol) {
+        const slug = getPoliticoSlug(pol);
+        if (slug && slug !== id) {
+          return NextResponse.redirect(new URL(`/politico/${slug}`, request.url), 301);
+        }
+      }
+    }
+  }
+
   const nonce = btoa(crypto.randomUUID());
   const csp = contentSecurityPolicy(nonce);
   const requestHeaders = new Headers(request.headers);
