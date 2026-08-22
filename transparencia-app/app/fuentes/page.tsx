@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { listPublishedSourceManifests } from "@/lib/published-sources";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
 
@@ -35,9 +36,12 @@ export default async function FuentesPage() {
               trazabilidad a su fuente. Esta página lista las fuentes integradas, su estado y la versión de la
               consolidación vigente.
             </p>
-            <p style={{ fontSize: "0.75rem", color: "var(--text-subtle)", marginTop: "0.75rem" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap", marginTop: "0.75rem" }}>
               <span className="badge badge-ok" style={{ fontSize: "0.68rem" }}>Versión {VERSION_FECHA}</span>
-            </p>
+              <Link className="data-link" href="/datos/calidad" style={{ fontSize: "0.82rem", fontWeight: 600 }}>
+                Dashboard de calidad →
+              </Link>
+            </div>
           </div>
 
           <dl className="page-fact-sheet">

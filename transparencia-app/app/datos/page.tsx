@@ -81,6 +81,11 @@ export default async function DataObservatoryPage() {
               Verifica cuándo se actualizó cada pipeline, los volúmenes de registros indexados y los
               enlaces directos a los portales oficiales de origen.
             </p>
+            <div style={{ marginTop: "1rem" }}>
+              <Link className="btn btn-secondary" href="/datos/calidad" style={{ fontSize: "0.85rem", padding: "0.45rem 0.9rem" }}>
+                Ver calidad de datos →
+              </Link>
+            </div>
           </div>
           <dl className="data-observatory__summary" aria-label="Resumen del inventario">
             <div>
