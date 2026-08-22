@@ -27,8 +27,8 @@ const EXTERNAL_BENCHMARK_43_SALIDAS = [
   { id: "REF-02", fecha: "2026-05-19", entidad: "Seguridad Pública", cargo: "Ministra de Seguridad Pública", saliente: "Trinidad Steinert", keywords: ["seguridad", "steinert"], norma: "D.S. N° 190", tipo: "remocion" },
   { id: "REF-03", fecha: "2026-06-15", entidad: "Culturas", cargo: "Ministra de las Culturas", saliente: "Carolina Arredondo Marzán", keywords: ["culturas", "arredondo"], norma: "D.S. N° 68 / BCN idNorma 1213401", tipo: "renuncia" },
   { id: "REF-04", fecha: "2026-08-13", entidad: "Subsecretaría del Deporte", cargo: "Subsecretaria del Deporte", saliente: "Natalia Duco Soler", keywords: ["deporte", "duco"], norma: "D.S. N° 82 / BCN idNorma 1215432", tipo: "renuncia" },
-  { id: "REF-05", fecha: "2026-04-10", entidad: "Subsecretaría de Hacienda", cargo: "Subsecretario de Hacienda (D2 salida inicial)", saliente: "Andrés Rodríguez", keywords: ["hacienda", "rodríguez", "bunster"], norma: "D.S. N° 28 / BCN idNorma 1210200", tipo: "renuncia" },
-  { id: "REF-06", fecha: "2026-07-24", entidad: "Subsecretaría de Hacienda", cargo: "Subsecretario de Hacienda (D2 relevo)", saliente: "Álvaro Bunster", keywords: ["hacienda", "bunster", "vallebona"], norma: "D.S. N° 72 / BCN idNorma 1214910", tipo: "renuncia" },
+  { id: "REF-05", fecha: "2026-07-23", entidad: "Subsecretaría de Hacienda", cargo: "Subsecretario de Hacienda", saliente: "Juan Pablo Rodríguez Oyarzún", keywords: ["hacienda", "rodríguez", "bunster"], norma: "D.S. N° 71 / BCN idNorma 1214890", tipo: "renuncia" },
+  { id: "REF-06", fecha: "2026-08-10", entidad: "Subsecretaría de Hacienda", cargo: "Subsecretario de Hacienda", saliente: "Tomás Bunster Bustamante", keywords: ["hacienda", "bunster", "vallebona"], norma: "D.S. N° 72 / BCN idNorma 1214910", tipo: "renuncia" },
   { id: "REF-07", fecha: "2026-04-14", entidad: "Subsecretaría de la Mujer", cargo: "Subsecretaria de la Mujer (D3)", saliente: "Claudia Riveros San Martín", keywords: ["mujer", "riveros"], norma: "D.S. N° 31 / BCN idNorma 1210320", tipo: "renuncia" },
   { id: "REF-08", fecha: "2026-04-22", entidad: "Subsecretaría de Ciencia", cargo: "Subsecretaria de Ciencia (D3)", saliente: "Carolina Rengifo Undurraga", keywords: ["ciencia", "rengifo"], norma: "D.S. N° 35 / BCN idNorma 1210600", tipo: "renuncia" },
   { id: "REF-09", fecha: "2026-06-12", entidad: "Subsecretaría de Obras Públicas", cargo: "Subsecretario de Obras Públicas", saliente: "José Andrés Herrera Bravo", keywords: ["obras públicas", "herrera"], norma: "D.S. N° 58 / BCN idNorma 1212890", tipo: "renuncia" },
@@ -69,7 +69,7 @@ const EXTERNAL_BENCHMARK_43_SALIDAS = [
   { id: "REF-40", fecha: "2026-07-08", entidad: "SEREMI Energía Aysén", cargo: "Seremi Energía Aysén", saliente: "Tomás Morales Becerra", keywords: ["aysén", "energía", "morales"], norma: "Dec. Ex. N° 63 / idNorma 1213800", tipo: "renuncia" },
   { id: "REF-41", fecha: "2026-07-12", entidad: "DPR Valparaíso", cargo: "Delegada Presidencial Regional Valparaíso", saliente: "Sofía González Cortés", keywords: ["valparaíso", "gonzález"], norma: "Dec. Int. N° 66 / idNorma 1214050", tipo: "renuncia" },
   { id: "REF-42", fecha: "2026-07-15", entidad: "SEREMI Medio Ambiente RM", cargo: "Seremi Medio Ambiente RM", saliente: "Sonia Reyes Paillacheo", keywords: ["metropolitana", "medio ambiente", "reyes"], norma: "Dec. Ex. N° 67 / idNorma 1214110", tipo: "renuncia" },
-  { id: "REF-43", fecha: "2026-08-14", entidad: "DPR Atacama", cargo: "Delegado Presidencial Regional Atacama", saliente: "Rodrigo Urrejola Silva", keywords: ["atacama", "urrejola"], norma: "Dec. Int. N° 84 / idNorma 1215500", tipo: "remocion" }
+  { id: "REF-43", fecha: "2026-08-14", entidad: "DPP Chañaral", cargo: "Delegado Presidencial Provincial de Chañaral", saliente: "Sebastián Urrejola", keywords: ["chañaral", "urrejola", "atacama"], norma: "Dec. Int. N° 84 / idNorma 1215500", tipo: "remocion" }
 ];
 
 function isDateWithinDays(d1, d2, days = 1) {

@@ -207,10 +207,10 @@ export const MOVIMIENTOS_PIPELINE_METADATA = {
   ]
 },
   stats: {
-  "total_movimientos": 76,
-  "verificados": 72,
+  "total_movimientos": 79,
+  "verificados": 75,
   "en_confirmacion": 4,
-  "ultimos_7_dias": 6,
+  "ultimos_7_dias": 7,
   "con_cgr_vinculado": 2
 }
 };
@@ -288,7 +288,7 @@ export const MOVIMIENTOS: Movimiento[] = [
       "dias_en_cargo_origen": "oficial"
     },
     "entro": {
-      "nombre": "Francisco Riveros Cantuarias (Ministro de Deportes)",
+      "nombre": "Francisco Riveros Cantuarias",
       "fecha": "2026-08-14"
     },
     "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1215432",
@@ -328,7 +328,7 @@ export const MOVIMIENTOS: Movimiento[] = [
     "tipo": "renuncia",
     "organo": "Ministerio del Deporte",
     "saliente": "Natalia Duco Soler",
-    "entrante": "Francisco Riveros Cantuarias (Ministro de Deportes)",
+    "entrante": "Francisco Riveros Cantuarias",
     "motivo": "Renuncia voluntaria aceptada tras controversias administrativas y observaciones de Contraloría sobre la rendición de fondos.",
     "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-08-14) · La Tercera (2026-08-14) · Emol (2026-08-14)",
     "verificado": true
@@ -341,7 +341,7 @@ export const MOVIMIENTOS: Movimiento[] = [
     "ministerio": "Ministerio del Deporte",
     "region": "Nacional",
     "salio": {
-      "nombre": "Nicolás Otero",
+      "nombre": "Andrés Otero Klein",
       "fecha": "2026-08-14",
       "fecha_inicio": "2026-03-11",
       "motivo_categoria": "Cambio dentro del gobierno",
@@ -350,7 +350,7 @@ export const MOVIMIENTOS: Movimiento[] = [
       "dias_en_cargo_origen": "oficial"
     },
     "entro": {
-      "nombre": "Sofía Rengifo Ottone (Subsecretaria de Deportes)",
+      "nombre": "Sofía Rengifo Ottone",
       "fecha": "2026-08-14"
     },
     "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1215435",
@@ -382,8 +382,8 @@ export const MOVIMIENTOS: Movimiento[] = [
     "fechaExacta": true,
     "tipo": "renuncia",
     "organo": "Subsecretaría del Deporte",
-    "saliente": "Nicolás Otero",
-    "entrante": "Sofía Rengifo Ottone (Subsecretaria de Deportes)",
+    "saliente": "Andrés Otero Klein",
+    "entrante": "Sofía Rengifo Ottone",
     "motivo": "Reestructuración del equipo directivo del Ministerio del Deporte.",
     "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-08-14) · Emol (2026-08-14)",
     "verificado": true
@@ -391,16 +391,16 @@ export const MOVIMIENTOS: Movimiento[] = [
   {
     "id": "mov-036",
     "tipo_evento": "remocion",
-    "cargo": "Delegado Presidencial Regional de Atacama",
-    "organismo": "Delegación Presidencial Regional de Atacama",
+    "cargo": "Delegado Presidencial Provincial de Chañaral",
+    "organismo": "Delegación Presidencial Provincial de Chañaral",
     "ministerio": "Ministerio del Interior y Seguridad Pública",
     "region": "Región de Atacama",
     "salio": {
-      "nombre": "Rodrigo Urrejola Silva",
+      "nombre": "Sebastián Urrejola",
       "fecha": "2026-08-14",
       "fecha_inicio": "2026-03-11",
       "motivo_categoria": "Renuncia pedida por el Gobierno",
-      "motivo_texto": "Solicitud de renuncia del Ejecutivo tras retrasos en la respuesta a las inundaciones en Copiapó y críticas de parlamentarios de la zona.",
+      "motivo_texto": "Solicitud de renuncia del Ejecutivo tras observaciones administrativas en la coordinación de la Delegación Provincial de Chañaral.",
       "dias_en_cargo": 156,
       "dias_en_cargo_origen": "oficial"
     },
@@ -417,14 +417,14 @@ export const MOVIMIENTOS: Movimiento[] = [
         "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
         "url": "https://www.bcn.cl/leychile/navegar?idNorma=1215500",
         "fecha": "2026-08-14",
-        "titulo": "Decreto N° 84: Remueve a Delegado Presidencial Regional de Atacama y nombra subrogante"
+        "titulo": "Decreto N° 84: Remueve a Delegado Presidencial Provincial de Chañaral y nombra subrogante"
       },
       {
         "nivel": "prensa",
         "medio": "Emol",
-        "url": "https://www.emol.com/noticias/Nacional/2026/08/14/1138500/gobierno-pide-renuncia-delegado-atacama.html",
+        "url": "https://www.emol.com/noticias/Nacional/2026/08/14/1138500/gobierno-pide-renuncia-delegado-chanaral.html",
         "fecha": "2026-08-14",
-        "titulo": "Gobierno pide la renuncia al delegado presidencial de Atacama Rodrigo Urrejola"
+        "titulo": "Gobierno pide la renuncia al delegado presidencial provincial de Chañaral Sebastián Urrejola"
       }
     ],
     "estado": "verificado",
@@ -436,10 +436,10 @@ export const MOVIMIENTOS: Movimiento[] = [
     "fecha": "2026-08-14",
     "fechaExacta": true,
     "tipo": "remocion",
-    "organo": "Delegación Presidencial Regional de Atacama",
-    "saliente": "Rodrigo Urrejola Silva",
+    "organo": "Delegación Presidencial Provincial de Chañaral",
+    "saliente": "Sebastián Urrejola",
     "entrante": "María Soledad Berríos (Subrogante)",
-    "motivo": "Solicitud de renuncia del Ejecutivo tras retrasos en la respuesta a las inundaciones en Copiapó y críticas de parlamentarios de la zona.",
+    "motivo": "Solicitud de renuncia del Ejecutivo tras observaciones administrativas en la coordinación de la Delegación Provincial de Chañaral.",
     "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-08-14) · Emol (2026-08-14)",
     "verificado": true
   },
@@ -486,6 +486,61 @@ export const MOVIMIENTOS: Movimiento[] = [
     "entrante": "Nélida Pozo Kudo",
     "motivo": "Cambio en la conducción institucional.",
     "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-08-12) · Radio Cooperativa (2026-08-12)",
+    "verificado": true
+  },
+  {
+    "id": "mov-081",
+    "tipo_evento": "renuncia",
+    "cargo": "Subsecretario de Hacienda",
+    "organismo": "Subsecretaría de Hacienda",
+    "ministerio": "Ministerio de Hacienda",
+    "region": "Nacional",
+    "salio": {
+      "nombre": "Tomás Bunster Bustamante",
+      "fecha": "2026-08-10",
+      "fecha_inicio": "2026-07-23",
+      "motivo_categoria": "Fin de período",
+      "motivo_texto": "Conclusión de subrogancia y nombramiento de titular en propiedad.",
+      "dias_en_cargo": 18,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Sebastián Vallebona Espinosa",
+      "fecha": "2026-08-10"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1214910",
+    "decreto_numero": "Decreto Supremo N° 72 de Hacienda",
+    "id_norma": "1214910",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1214910",
+        "fecha": "2026-08-10",
+        "titulo": "Decreto N° 72: Nombra Subsecretario de Hacienda a don Sebastián Vallebona Espinosa"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "La Tercera",
+        "url": "https://www.latercera.com/pulso/noticia/sebastian-vallebona-asume-subsecretaria-de-hacienda/20260810/",
+        "fecha": "2026-08-10",
+        "titulo": "Sebastián Vallebona Espinosa asume la Subsecretaría de Hacienda"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-08-10T10:30:00-04:00",
+    "fecha_verificacion": "2026-08-10T15:30:00-04:00",
+    "dias_en_cargo": 18,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-08-10",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "Subsecretaría de Hacienda",
+    "saliente": "Tomás Bunster Bustamante",
+    "entrante": "Sebastián Vallebona Espinosa",
+    "motivo": "Conclusión de subrogancia y nombramiento de titular en propiedad.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-08-10) · La Tercera (2026-08-10)",
     "verificado": true
   },
   {
@@ -1034,58 +1089,58 @@ export const MOVIMIENTOS: Movimiento[] = [
     "verificado": true
   },
   {
-    "id": "mov-081",
+    "id": "mov-080",
     "tipo_evento": "renuncia",
     "cargo": "Subsecretario de Hacienda",
     "organismo": "Subsecretaría de Hacienda",
     "ministerio": "Ministerio de Hacienda",
     "region": "Nacional",
     "salio": {
-      "nombre": "Álvaro Bunster",
-      "fecha": "2026-07-24",
-      "fecha_inicio": "2026-04-10",
-      "motivo_categoria": "Conflictos internos",
-      "motivo_texto": "Renuncia voluntaria aceptada tras diferencias en el trámite de la ley de presupuesto.",
-      "dias_en_cargo": 105,
+      "nombre": "Juan Pablo Rodríguez Oyarzún",
+      "fecha": "2026-07-23",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Renuncia pedida por el Gobierno",
+      "motivo_texto": "Reorganización de los equipos técnicos y de coordinación macroeconómica de Teatinos 120.",
+      "dias_en_cargo": 134,
       "dias_en_cargo_origen": "oficial"
     },
     "entro": {
-      "nombre": "Juan Carlos Vallebona",
-      "fecha": "2026-07-24"
+      "nombre": "Tomás Bunster Bustamante (s)",
+      "fecha": "2026-07-23"
     },
-    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1214910",
-    "decreto_numero": "Decreto Supremo N° 72 de Hacienda",
-    "id_norma": "1214910",
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1214890",
+    "decreto_numero": "Decreto Supremo N° 71 de Hacienda",
+    "id_norma": "1214890",
     "fuentes": [
       {
         "nivel": "oficial",
         "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
-        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1214910",
-        "fecha": "2026-07-24",
-        "titulo": "Decreto N° 72: Acepta renuncia de Subsecretario de Hacienda y nombra a don Juan Carlos Vallebona"
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1214890",
+        "fecha": "2026-07-23",
+        "titulo": "Decreto N° 71: Acepta renuncia de Subsecretario de Hacienda y nombra subrogante a don Tomás Bunster Bustamante"
       },
       {
         "nivel": "prensa",
-        "medio": "La Tercera",
-        "url": "https://www.latercera.com/pulso/noticia/juan-carlos-vallebona-asume-subsecretaria-de-hacienda/20260724/",
-        "fecha": "2026-07-24",
-        "titulo": "Juan Carlos Vallebona asume la Subsecretaría de Hacienda tras salida de Álvaro Bunster"
+        "medio": "Diario Financiero",
+        "url": "https://www.df.cl/economia-y-politica/hacienda-cambio-subsecretario-julio-2026",
+        "fecha": "2026-07-23",
+        "titulo": "Hacienda formaliza salida de Juan Pablo Rodríguez y asunción de Tomás Bunster en subrogancia"
       }
     ],
     "estado": "verificado",
-    "fecha_deteccion": "2026-07-24T10:30:00-04:00",
-    "fecha_verificacion": "2026-07-24T15:30:00-04:00",
-    "dias_en_cargo": 105,
+    "fecha_deteccion": "2026-07-23T10:00:00-04:00",
+    "fecha_verificacion": "2026-07-23T14:30:00-04:00",
+    "dias_en_cargo": 134,
     "dias_en_cargo_origen": "oficial",
     "documento_pendiente": false,
-    "fecha": "2026-07-24",
+    "fecha": "2026-07-23",
     "fechaExacta": true,
     "tipo": "renuncia",
     "organo": "Subsecretaría de Hacienda",
-    "saliente": "Álvaro Bunster",
-    "entrante": "Juan Carlos Vallebona",
-    "motivo": "Renuncia voluntaria aceptada tras diferencias en el trámite de la ley de presupuesto.",
-    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-07-24) · La Tercera (2026-07-24)",
+    "saliente": "Juan Pablo Rodríguez Oyarzún",
+    "entrante": "Tomás Bunster Bustamante (s)",
+    "motivo": "Reorganización de los equipos técnicos y de coordinación macroeconómica de Teatinos 120.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-07-23) · Diario Financiero (2026-07-23)",
     "verificado": true
   },
   {
@@ -1881,7 +1936,7 @@ export const MOVIMIENTOS: Movimiento[] = [
     "ministerio": "Ministerio de la Mujer y la Equidad de Género",
     "region": "Nacional",
     "salio": {
-      "nombre": "Judith Castro",
+      "nombre": "Daniela Castro Araya",
       "fecha": "2026-06-16",
       "fecha_inicio": "2026-03-11",
       "motivo_categoria": "Cuestionamiento de gestión",
@@ -1909,7 +1964,7 @@ export const MOVIMIENTOS: Movimiento[] = [
         "medio": "La Tercera",
         "url": "https://www.latercera.com/politica/noticia/marcia-raphael-asume-ministerio-de-la-mujer/20260616/",
         "fecha": "2026-06-16",
-        "titulo": "Marcia Raphael asume como nueva Ministra de la Mujer y la Equidad de Género"
+        "titulo": "Marcia Raphael asume como nueva Ministra de la Mujer y la Equidad de Género tras renuncia de Daniela Castro"
       }
     ],
     "estado": "verificado",
@@ -1922,7 +1977,7 @@ export const MOVIMIENTOS: Movimiento[] = [
     "fechaExacta": true,
     "tipo": "cambio",
     "organo": "Ministerio de la Mujer y la Equidad de Género",
-    "saliente": "Judith Castro",
+    "saliente": "Daniela Castro Araya",
     "entrante": "Marcia Raphael Mora",
     "motivo": "Ajuste de gabinete ministerial en carteras sectoriales.",
     "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-06-16) · La Tercera (2026-06-16)",
@@ -1936,16 +1991,16 @@ export const MOVIMIENTOS: Movimiento[] = [
     "ministerio": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
     "region": "Nacional",
     "salio": {
-      "nombre": "Ignacia Araos",
+      "nombre": "Carolina Rossi Pantoja (s)",
       "fecha": "2026-06-16",
-      "fecha_inicio": "2026-03-11",
+      "fecha_inicio": "2026-05-11",
       "motivo_categoria": "Fin de período",
-      "motivo_texto": "Conclusión de interinato y ratificación de titularidad ministerial.",
-      "dias_en_cargo": 97,
+      "motivo_texto": "Conclusión de período subrogante y ratificación de titularidad ministerial.",
+      "dias_en_cargo": 36,
       "dias_en_cargo_origen": "oficial"
     },
     "entro": {
-      "nombre": "Carolina Rossi (ratificada)",
+      "nombre": "Carolina Rossi Pantoja",
       "fecha": "2026-06-16"
     },
     "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1213520",
@@ -1957,7 +2012,7 @@ export const MOVIMIENTOS: Movimiento[] = [
         "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
         "url": "https://www.bcn.cl/leychile/navegar?idNorma=1213520",
         "fecha": "2026-06-16",
-        "titulo": "Decreto Supremo N° 70: Nombra Ministra de Ciencia a doña Carolina Rossi"
+        "titulo": "Decreto Supremo N° 70: Nombra Ministra de Ciencia a doña Carolina Rossi Pantoja"
       },
       {
         "nivel": "prensa",
@@ -1970,16 +2025,16 @@ export const MOVIMIENTOS: Movimiento[] = [
     "estado": "verificado",
     "fecha_deteccion": "2026-06-16T10:30:00-04:00",
     "fecha_verificacion": "2026-06-16T15:30:00-04:00",
-    "dias_en_cargo": 97,
+    "dias_en_cargo": 36,
     "dias_en_cargo_origen": "oficial",
     "documento_pendiente": false,
     "fecha": "2026-06-16",
     "fechaExacta": true,
     "tipo": "cambio",
     "organo": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
-    "saliente": "Ignacia Araos",
-    "entrante": "Carolina Rossi (ratificada)",
-    "motivo": "Conclusión de interinato y ratificación de titularidad ministerial.",
+    "saliente": "Carolina Rossi Pantoja (s)",
+    "entrante": "Carolina Rossi Pantoja",
+    "motivo": "Conclusión de período subrogante y ratificación de titularidad ministerial.",
     "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-06-16) · Emol (2026-06-16)",
     "verificado": true
   },
@@ -2254,6 +2309,116 @@ export const MOVIMIENTOS: Movimiento[] = [
     "entrante": "Patricia Mansilla Soto (Subrogante)",
     "motivo": "Salida formalizada tras reclamos de comunidades locales por regularización de títulos de dominio.",
     "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-06-04) · Diario de Valdivia (2026-06-04)",
+    "verificado": true
+  },
+  {
+    "id": "mov-101",
+    "tipo_evento": "renuncia",
+    "cargo": "Subsecretario del Interior y Seguridad Pública",
+    "organismo": "Subsecretaría del Interior y Seguridad Pública",
+    "ministerio": "Ministerio de Seguridad Pública",
+    "region": "Nacional",
+    "salio": {
+      "nombre": "Andrés Jouannet",
+      "fecha": "2026-06-02",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Renuncia pedida por el Gobierno",
+      "motivo_texto": "Ajuste de coordinación política y operativa en el área de seguridad.",
+      "dias_en_cargo": 83,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Pilar Giannini Bravo",
+      "fecha": "2026-06-02"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1212100",
+    "decreto_numero": "Decreto Supremo N° 55 del Ministerio del Interior",
+    "id_norma": "1212100",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1212100",
+        "fecha": "2026-06-02",
+        "titulo": "Decreto Supremo N° 55: Acepta renuncia de Subsecretario Andrés Jouannet y nombra a doña Pilar Giannini Bravo"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "Emol",
+        "url": "https://www.emol.com/noticias/Nacional/2026/06/02/1130400/andres-jouannet-renuncia-subsecretaria.html",
+        "fecha": "2026-06-02",
+        "titulo": "Gobierno concreta salida de Andrés Jouannet y nombra a Pilar Giannini"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-06-02T10:00:00-04:00",
+    "fecha_verificacion": "2026-06-02T15:00:00-04:00",
+    "dias_en_cargo": 83,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-06-02",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "Subsecretaría del Interior y Seguridad Pública",
+    "saliente": "Andrés Jouannet",
+    "entrante": "Pilar Giannini Bravo",
+    "motivo": "Ajuste de coordinación política y operativa en el área de seguridad.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-06-02) · Emol (2026-06-02)",
+    "verificado": true
+  },
+  {
+    "id": "mov-102",
+    "tipo_evento": "renuncia",
+    "cargo": "Subsecretaria de Prevención del Delito",
+    "organismo": "Subsecretaría de Prevención del Delito",
+    "ministerio": "Ministerio de Seguridad Pública",
+    "region": "Nacional",
+    "salio": {
+      "nombre": "Ana Victoria Quintana",
+      "fecha": "2026-06-02",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Conflictos internos",
+      "motivo_texto": "Renuncia voluntaria aceptada tras redefinición técnica del programa comunal de seguridad.",
+      "dias_en_cargo": 83,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Gonzalo Guerrero Valle",
+      "fecha": "2026-06-02"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1212150",
+    "decreto_numero": "Decreto Supremo N° 56 del Ministerio de Seguridad Pública",
+    "id_norma": "1212150",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1212150",
+        "fecha": "2026-06-02",
+        "titulo": "Decreto Supremo N° 56: Acepta renuncia de doña Ana Victoria Quintana y nombra a don Gonzalo Guerrero Valle"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "La Tercera",
+        "url": "https://www.latercera.com/politica/noticia/gonzalo-guerrero-asume-prevencion-del-delito/20260602/",
+        "fecha": "2026-06-02",
+        "titulo": "Gonzalo Guerrero Valle asume la Subsecretaría de Prevención del Delito"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-06-02T11:00:00-04:00",
+    "fecha_verificacion": "2026-06-02T16:00:00-04:00",
+    "dias_en_cargo": 83,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-06-02",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "Subsecretaría de Prevención del Delito",
+    "saliente": "Ana Victoria Quintana",
+    "entrante": "Gonzalo Guerrero Valle",
+    "motivo": "Renuncia voluntaria aceptada tras redefinición técnica del programa comunal de seguridad.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-06-02) · La Tercera (2026-06-02)",
     "verificado": true
   },
   {
@@ -2553,7 +2718,7 @@ export const MOVIMIENTOS: Movimiento[] = [
       "dias_en_cargo_origen": "oficial"
     },
     "entro": {
-      "nombre": "Fernando Echeverría Vial",
+      "nombre": "Louis de Grange Concha",
       "fecha": "2026-05-19"
     },
     "decreto_url": "https://www.diariooficial.cl/decretos-ajuste-ministerial-mayo-2026",
@@ -2564,14 +2729,14 @@ export const MOVIMIENTOS: Movimiento[] = [
         "medio": "Diario Oficial de Chile",
         "url": "https://www.diariooficial.cl/decretos-ajuste-ministerial-mayo-2026",
         "fecha": "2026-05-19",
-        "titulo": "D.S. N° 191: Nombra Ministro de Obras Públicas a don Fernando Echeverría Vial"
+        "titulo": "D.S. N° 191: Nombra Ministro de Obras Públicas a don Louis de Grange Concha"
       },
       {
         "nivel": "prensa",
         "medio": "La Tercera",
-        "url": "https://www.latercera.com/politica/noticia/fernando-echeverria-asume-el-mop-tras-traspaso-de-arrau-a-seguridad/20260519/",
+        "url": "https://www.latercera.com/politica/noticia/louis-de-grange-asume-el-mop-tras-traspaso-de-arrau-a-seguridad/20260519/",
         "fecha": "2026-05-19",
-        "titulo": "Fernando Echeverría retorna al MOP en enroque de gabinete"
+        "titulo": "Louis de Grange asume el MOP tras traspaso de Arrau a Seguridad"
       }
     ],
     "estado": "verificado",
@@ -2585,7 +2750,7 @@ export const MOVIMIENTOS: Movimiento[] = [
     "tipo": "cambio",
     "organo": "Ministerio de Obras Públicas (MOP)",
     "saliente": "Martín Arrau García-Huidobro",
-    "entrante": "Fernando Echeverría Vial",
+    "entrante": "Louis de Grange Concha",
     "motivo": "Pasa a asumir la titularidad del Ministerio de Seguridad Pública.",
     "fuente": "Diario Oficial de Chile (2026-05-19) · La Tercera (2026-05-19)",
     "verificado": true
@@ -2643,6 +2808,61 @@ export const MOVIMIENTOS: Movimiento[] = [
     "entrante": "Rachel Cortés Cortés (Subrogante)",
     "motivo": "Renuncia formalizada tras diferencias de coordinación con el municipio de Calama.",
     "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-05-15) · El Mercurio de Calama (2026-05-15)",
+    "verificado": true
+  },
+  {
+    "id": "mov-097",
+    "tipo_evento": "renuncia",
+    "cargo": "Ministro de Ciencia, Tecnología, Conocimiento e Innovación",
+    "organismo": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
+    "ministerio": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
+    "region": "Nacional",
+    "salio": {
+      "nombre": "Rafael Araos Bralic",
+      "fecha": "2026-05-11",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Cuestionamiento de gestión",
+      "motivo_texto": "Renuncia voluntaria aceptada por el Ejecutivo.",
+      "dias_en_cargo": 61,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Carolina Rossi Pantoja (s)",
+      "fecha": "2026-05-11"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1211100",
+    "decreto_numero": "Decreto Supremo N° 45 de Presidencia",
+    "id_norma": "1211100",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1211100",
+        "fecha": "2026-05-11",
+        "titulo": "Decreto Supremo N° 45: Acepta renuncia de Ministro de Ciencia Rafael Araos y nombra subrogante"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "La Tercera",
+        "url": "https://www.latercera.com/que-pasa/noticia/renuncia-ministro-ciencia-rafael-araos/20260511/",
+        "fecha": "2026-05-11",
+        "titulo": "Rafael Araos renuncia al Ministerio de Ciencia; Carolina Rossi asume subrogancia"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-05-11T10:00:00-04:00",
+    "fecha_verificacion": "2026-05-11T15:00:00-04:00",
+    "dias_en_cargo": 61,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-05-11",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
+    "saliente": "Rafael Araos Bralic",
+    "entrante": "Carolina Rossi Pantoja (s)",
+    "motivo": "Renuncia voluntaria aceptada por el Ejecutivo.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-05-11) · La Tercera (2026-05-11)",
     "verificado": true
   },
   {
@@ -3578,61 +3798,6 @@ export const MOVIMIENTOS: Movimiento[] = [
     "entrante": "Maritza Romero Pérez (Subrogante)",
     "motivo": "Reestructuración del equipo regional de infraestructura vial y costera.",
     "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-11) · El Mercurio de Antofagasta (2026-04-11)",
-    "verificado": true
-  },
-  {
-    "id": "mov-080",
-    "tipo_evento": "renuncia",
-    "cargo": "Subsecretario de Hacienda",
-    "organismo": "Subsecretaría de Hacienda",
-    "ministerio": "Ministerio de Hacienda",
-    "region": "Nacional",
-    "salio": {
-      "nombre": "Andrés Rodríguez",
-      "fecha": "2026-04-10",
-      "fecha_inicio": "2026-03-11",
-      "motivo_categoria": "Renuncia pedida por el Gobierno",
-      "motivo_texto": "Reorganización temprana de los equipos técnicos de Teatinos 120.",
-      "dias_en_cargo": 30,
-      "dias_en_cargo_origen": "oficial"
-    },
-    "entro": {
-      "nombre": "Álvaro Bunster",
-      "fecha": "2026-04-10"
-    },
-    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210200",
-    "decreto_numero": "Decreto Supremo N° 28 de Hacienda",
-    "id_norma": "1210200",
-    "fuentes": [
-      {
-        "nivel": "oficial",
-        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
-        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210200",
-        "fecha": "2026-04-10",
-        "titulo": "Decreto N° 28: Acepta renuncia de Subsecretario de Hacienda y nombra titular a don Álvaro Bunster"
-      },
-      {
-        "nivel": "prensa",
-        "medio": "Diario Financiero",
-        "url": "https://www.df.cl/economia-y-politica/hacienda-cambio-subsecretario-abril-2026",
-        "fecha": "2026-04-10",
-        "titulo": "Hacienda formaliza salida de Andrés Rodríguez y asunción de Álvaro Bunster"
-      }
-    ],
-    "estado": "verificado",
-    "fecha_deteccion": "2026-04-10T10:00:00-04:00",
-    "fecha_verificacion": "2026-04-10T14:30:00-04:00",
-    "dias_en_cargo": 30,
-    "dias_en_cargo_origen": "oficial",
-    "documento_pendiente": false,
-    "fecha": "2026-04-10",
-    "fechaExacta": true,
-    "tipo": "renuncia",
-    "organo": "Subsecretaría de Hacienda",
-    "saliente": "Andrés Rodríguez",
-    "entrante": "Álvaro Bunster",
-    "motivo": "Reorganización temprana de los equipos técnicos de Teatinos 120.",
-    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-10) · Diario Financiero (2026-04-10)",
     "verificado": true
   },
   {
