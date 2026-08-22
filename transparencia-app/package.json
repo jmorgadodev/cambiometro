@@ -61,25 +61,25 @@
     "ingest:cplt-personal": "node --max-old-space-size=4096 scripts/etl/stream-remote-personal.mjs"
   },
   "dependencies": {
-    "@cloudflare/workers-types": "^5.20260804.1",
+    "@cloudflare/workers-types": "^5.20260819.1",
     "@opennextjs/cloudflare": "^1.20.2",
-    "@types/cytoscape": "^3.21.9",
+    "@types/cytoscape": "^3.31.0",
     "csv-parser": "^3.2.1",
-    "cytoscape": "^3.34.0",
+    "cytoscape": "^3.34.1",
     "echarts": "^6.1.0",
     "fflate": "0.8.3",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
     "iconv-lite": "^0.7.3",
     "minisearch": "^7.2.0",
-    "next": "16.3.0",
+    "next": "16.3.1",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "recharts": "^3.10.1",
     "satori": "^0.29.0",
     "saxes": "6.0.0",
     "server-only": "^0.0.1",
-    "wrangler": "^4.119.0"
+    "wrangler": "^4.124.0"
   },
   "devDependencies": {
     "@e965/xlsx": "0.20.3",
