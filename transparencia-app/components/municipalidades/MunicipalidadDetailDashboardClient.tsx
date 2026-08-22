@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 
 import Link from "next/link";
+import AccessibleTooltip from "@/components/ui/AccessibleTooltip";
 import {
   MunicipalidadEnriquecida,
   AlcaldeData,
@@ -257,6 +258,50 @@ export default function MunicipalidadDetailDashboardClient({
               }}
             >
               Presupuesto Per Cápita: {perCapita > 0 ? `${formatCLP(perCapita)} / hab` : "—"}
+            </div>
+            <div
+              style={{
+                fontSize: "0.68rem",
+                color: "var(--text-subtle)",
+                marginTop: "0.35rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.3rem",
+              }}
+            >
+              <span>Cobertura SINIM: 345/346</span>
+              <AccessibleTooltip
+                ariaLabel="Detalle metodológico de cobertura nacional SINIM"
+                content={
+                  <div>
+                    <strong style={{ display: "block", marginBottom: "0.25rem", color: "var(--accent)" }}>
+                      Cobertura Nacional SINIM: 345/346 comunas
+                    </strong>
+                    <span>
+                      La comuna de <strong>Antártica</strong> (sin municipalidad propia) es administrada por la Municipalidad de Cabo de Hornos; sus datos demográficos oficiales son complementados desde el Censo 2024 INE.
+                    </span>
+                  </div>
+                }
+              >
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 14,
+                    height: 14,
+                    borderRadius: "50%",
+                    background: "var(--surface-2)",
+                    border: "1px solid var(--border)",
+                    color: "var(--accent)",
+                    fontSize: "0.6rem",
+                    fontWeight: 700,
+                  }}
+                  title="Ver detalle de cobertura"
+                >
+                  ℹ️
+                </span>
+              </AccessibleTooltip>
             </div>
           </div>
 
@@ -565,11 +610,26 @@ export default function MunicipalidadDetailDashboardClient({
                 style={{
                   fontSize: "0.75rem",
                   color: "var(--text-subtle)",
-                  margin: "0 0 1.25rem",
+                  margin: "0 0 0.75rem",
                 }}
               >
                 Información oficial reportada por la Municipalidad de {nombreComuna}
               </p>
+
+              <div
+                style={{
+                  padding: "0.6rem 0.8rem",
+                  background: "var(--bg-surface-2)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 8,
+                  fontSize: "0.74rem",
+                  color: "var(--text-muted)",
+                  lineHeight: 1.45,
+                  marginBottom: "1rem",
+                }}
+              >
+                🏛️ <strong>Cobertura SINIM: 345/346</strong> · Comuna faltante (Antártica, sin administración propia) es administrada por Cabo de Hornos y complementada desde el Censo 2024 INE.
+              </div>
 
               <div
                 style={{

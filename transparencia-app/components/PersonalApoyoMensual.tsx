@@ -1,7 +1,9 @@
 "use client";
 
 import { useState, useMemo } from "react";
+import Link from "next/link";
 import { formatCLP } from "@/lib/format";
+import AccessibleTooltip from "@/components/ui/AccessibleTooltip";
 import type { AsignacionSenado } from "@/lib/personal-apoyo";
 import type { SenateSupportEvaluation } from "@/scripts/etl/senado-assignment.mjs";
 
@@ -237,19 +239,83 @@ export default function PersonalApoyoMensual({
             background: "var(--surface)",
           }}
         >
-          <strong style={{ fontSize: "0.82rem", color: evaluacionActiva && evaluacionActiva.status !== "OK" ? "var(--bad)" : "var(--text-1)" }}>
-            {evaluacionActiva && evaluacionActiva.status !== "OK"
-              ? `Hallazgo de integridad ${evaluacionActiva.status}`
-              : "Asignación mensual conciliada"}
-          </strong>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", flexWrap: "wrap" }}>
+            <strong style={{ fontSize: "0.82rem", color: evaluacionActiva && evaluacionActiva.status !== "OK" ? "var(--bad)" : "var(--text-1)" }}>
+              {evaluacionActiva && evaluacionActiva.status !== "OK"
+                ? `Hallazgo de integridad ${evaluacionActiva.status}`
+                : "Asignación mensual conciliada"}
+            </strong>
+            {evaluacionActiva && evaluacionActiva.status !== "OK" && (
+              <AccessibleTooltip
+                ariaLabel="Explicación de umbrales metodológicos V2 de integridad"
+                content={
+                  <div>
+                    <strong style={{ display: "block", marginBottom: "0.25rem", color: "var(--accent)" }}>
+                      Umbrales de Validación V2 (Asignaciones)
+                    </strong>
+                    <span>
+                      Exceso ≤40% califica como <strong>ALTA</strong> (preserva el valor oficial publicado sin descartar el registro).
+                      Exceso &gt;40% califica como <strong>CRÍTICA</strong> (aislado en cuarentena).
+                    </span>
+                    <div style={{ marginTop: "0.4rem" }}>
+                      <Link href="/como-funciona#fuentes" className="data-link" style={{ fontSize: "0.72rem", fontWeight: 700 }}>
+                        Ver metodología completa →
+                      </Link>
+                    </div>
+                  </div>
+                }
+              >
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 18,
+                    height: 18,
+                    borderRadius: "50%",
+                    background: "var(--surface-2)",
+                    border: "1px solid var(--border)",
+                    color: "var(--accent)",
+                    fontSize: "0.7rem",
+                    fontWeight: 700,
+                  }}
+                  title="Ver explicación de umbrales V2"
+                >
+                  ℹ️
+                </span>
+              </AccessibleTooltip>
+            )}
+          </div>
           {evaluacionActiva && evaluacionActiva.status !== "OK" && (() => {
             const baseOficial = Number(senadorPersonal.asignacion.base_mensual_clp);
             const totalPublicado = Number(evaluacionActiva.total_clp);
             const pct = baseOficial > 0 ? ((totalPublicado - baseOficial) / baseOficial) * 100 : 0;
             const pctFormateado = `${pct >= 0 ? "+" : ""}${pct.toFixed(1).replace(".", ",")}%`;
             return (
-              <div style={{ marginTop: "0.25rem", fontSize: "0.8rem", fontWeight: 700, color: "var(--bad)" }}>
-                Exceso de {pctFormateado} sobre la base mensual oficial
+              <div style={{ marginTop: "0.25rem", fontSize: "0.8rem", fontWeight: 700, color: "var(--bad)", display: "flex", alignItems: "center", gap: "0.4rem", flexWrap: "wrap" }}>
+                <span>Exceso de {pctFormateado} sobre la base mensual oficial</span>
+                <AccessibleTooltip
+                  ariaLabel="Explicación de porcentaje de exceso sobre la base mensual"
+                  content={
+                    <span>
+                      Diferencia calculada contra la base oficial mensual de {formatCLP(baseOficial)}. Al situarse en {pctFormateado} (≤40%), activa la alerta de integridad <strong>ALTA</strong> según el protocolo de verificación V2.
+                    </span>
+                  }
+                >
+                  <span
+                    style={{
+                      fontSize: "0.7rem",
+                      padding: "0.1rem 0.35rem",
+                      borderRadius: "4px",
+                      background: "var(--surface-2)",
+                      border: "1px solid var(--border)",
+                      color: "var(--text-2)",
+                      cursor: "pointer",
+                    }}
+                  >
+                    ¿Cómo se calcula?
+                  </span>
+                </AccessibleTooltip>
               </div>
             );
           })()}

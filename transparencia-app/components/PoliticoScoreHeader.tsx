@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import ShareButton from "@/components/ShareButton";
+import AccessibleTooltip from "@/components/ui/AccessibleTooltip";
 import type { PoliticoDipInfo } from "@/lib/politico-dip";
 import PoliticoCostoMensual, { type MesCostoData } from "@/components/PoliticoCostoMensual";
 
@@ -351,7 +352,6 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                   padding: "0.75rem 0.6rem",
                   borderRadius: "8px",
                 }}
-                title="Sesiones donde constó presencia en sala pero no se registró emisión de voto."
               >
                 <div
                   className="stat-tile__value"
@@ -359,8 +359,40 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                 >
                   {data.presenteSinVotar}
                 </div>
-                <div className="stat-tile__label" style={{ color: "var(--text-2)", fontSize: "0.7rem", marginTop: "0.2rem" }}>
-                  Presente sin votar
+                <div className="stat-tile__label" style={{ color: "var(--text-2)", fontSize: "0.7rem", marginTop: "0.2rem", display: "flex", alignItems: "center", justifyContent: "center", gap: "0.25rem" }}>
+                  <span>Presente sin votar</span>
+                  <AccessibleTooltip
+                    ariaLabel="Definición reglamentaria de presente sin votar"
+                    content={
+                      <div>
+                        <strong style={{ display: "block", marginBottom: "0.25rem", color: "var(--accent)" }}>
+                          Definición Oficial (Cámara y Senado)
+                        </strong>
+                        <span>
+                          Sesiones donde constó presencia o asistencia formal al inicio pero no se emitió voto efectivo debido a acuerdos de pareo reglamentario entre bancadas, dispensa médica justificada o retiro de sala al momento de la votación nominal.
+                        </span>
+                      </div>
+                    }
+                  >
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: 14,
+                        height: 14,
+                        borderRadius: "50%",
+                        background: "var(--surface)",
+                        border: "1px solid var(--border)",
+                        color: "var(--accent)",
+                        fontSize: "0.6rem",
+                        fontWeight: 700,
+                      }}
+                      title="Ver definición oficial"
+                    >
+                      ℹ️
+                    </span>
+                  </AccessibleTooltip>
                 </div>
               </div>
             </div>

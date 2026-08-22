@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import AccessibleTooltip from "@/components/ui/AccessibleTooltip";
 import type { ServicioPublicoEnriquecido, OrdenCompraChileCompra } from "@/lib/servicios-publicos-data";
 import OrganismoFuncionariosList from "@/components/OrganismoFuncionariosList";
 import { evaluateBudgetSourceAnomaly } from "@/lib/budget-integrity";
@@ -81,10 +82,48 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
               📊 Presupuesto Vigente DIPRES
             </div>
             <div style={{ fontFamily: "monospace", fontSize: "1.45rem", fontWeight: 900, color: "var(--accent)" }}>
-              {pres && pres.vigente_clp > 0 ? formatCompactCLP(pres.vigente_clp) : "Subordinado"}
+              {pres && pres.vigente_clp > 0 ? formatCompactCLP(pres.vigente_clp) : "—"}
             </div>
-            <div style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
-              {pres && pres.vigente_clp > 0 ? `${pres.porcentaje_ejecucion}% ejecutado` : "Presupuesto ministerial"}
+            <div style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: "0.25rem", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+              {pres && pres.vigente_clp > 0 ? (
+                `${pres.porcentaje_ejecucion}% ejecutado`
+              ) : (
+                <>
+                  <span>Organismo sin partida presupuestaria individual · datos agregados desde DIPRES</span>
+                  <AccessibleTooltip
+                    ariaLabel="Explicación de organismo sin partida individual"
+                    content={
+                      <div>
+                        <strong style={{ display: "block", marginBottom: "0.25rem", color: "var(--accent)" }}>
+                          Estructura Presupuestaria DIPRES
+                        </strong>
+                        <span>
+                          Este organismo no posee una partida presupuestaria propia en la Ley de Presupuestos del Sector Público; sus asignaciones operativas se encuentran agregadas dentro de la partida consolidada del <strong>{servicio.ministerio_dependiente}</strong>.
+                        </span>
+                      </div>
+                    }
+                  >
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: 14,
+                        height: 14,
+                        borderRadius: "50%",
+                        background: "var(--surface)",
+                        border: "1px solid var(--border)",
+                        color: "var(--accent)",
+                        fontSize: "0.6rem",
+                        fontWeight: 700,
+                      }}
+                      title="Ver detalle"
+                    >
+                      ℹ️
+                    </span>
+                  </AccessibleTooltip>
+                </>
+              )}
             </div>
           </div>
 
@@ -463,10 +502,10 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
             <div className="card" style={{ padding: "1.75rem" }}>
               <span className="badge badge-info" style={{ marginBottom: "0.5rem" }}>Presupuesto Sectorial Subordinado</span>
               <h2 style={{ fontSize: "1.25rem", margin: "0.2rem 0 0.4rem" }}>
-                Presupuesto Subordinado a Nivel Ministerial
+                Organismo sin partida presupuestaria individual · datos agregados desde DIPRES
               </h2>
               <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", lineHeight: 1.6, margin: "0 0 1rem" }}>
-                Este organismo no cuenta con una partida presupuestaria independiente en la Ley de Presupuestos 2026. Sus recursos operativos y de inversión forman parte de la partida consolidada del <strong>{servicio.ministerio_dependiente}</strong>.
+                Este organismo no cuenta con una partida presupuestaria independiente en la Ley de Presupuestos del Sector Público. Sus recursos operativos y de inversión forman parte de la partida consolidada del <strong>{servicio.ministerio_dependiente}</strong>.
               </p>
               <div style={{ display: "flex", gap: "0.75rem" }}>
                 <Link href="/servicios-publicos" className="btn btn-secondary" style={{ fontSize: "0.82rem" }}>
