@@ -1,14 +1,26 @@
 import type { Metadata } from "next";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { MUNICIPALIDADES_SEED } from "@/lib/seed-politicos";
 import { getMunicipalidadData } from "@/lib/municipalidades-data";
 import { getPartidoConfig } from "@/lib/partidos.config";
 import ShareButton from "@/components/ShareButton";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import MunicipalidadDetailDashboardClient from "@/components/municipalidades/MunicipalidadDetailDashboardClient";
+import {
+  getMuniBySlugOrId,
+  getMuniCanonicalSlug,
+  isMuniLegacyId,
+  getAllMuniSlugs,
+} from "@/lib/slug-utils";
 
 export function generateStaticParams() {
-  return MUNICIPALIDADES_SEED.map((muni) => ({ id: muni.id }));
+  // Emitir slug nuevo (canonical) + ID legado (muni-*) para que la build capture ambos
+  const entries: Array<{ id: string }> = [];
+  for (const { id, slug } of getAllMuniSlugs()) {
+    entries.push({ id: slug }); // slug canónico (URL nueva)
+    if (id !== slug) entries.push({ id });  // ID legado (para 301)
+  }
+  return entries;
 }
 
 export async function generateMetadata({
@@ -17,9 +29,10 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const muni = MUNICIPALIDADES_SEED.find((m) => m.id === id);
+  const muni = getMuniBySlugOrId(id);
   if (!muni) return { title: "Municipalidad No Encontrada — El Cambiómetro" };
-  const muniData = getMunicipalidadData(id);
+  const canonicalSlug = getMuniCanonicalSlug(id) ?? muni.id;
+  const muniData = getMunicipalidadData(muni.id);
   const alcalde = muniData?.alcalde?.nombre ?? muni.alcalde_actual ?? "Alcaldía";
   const ogImage = `https://cambiometro.impulsacv.cl/api/og/site`;
 
@@ -27,7 +40,7 @@ export async function generateMetadata({
     title: `Municipalidad de ${muni.nombre_comuna} — Alcalde ${alcalde}, Sueldos, Censo & Presupuesto | El Cambiómetro`,
     description: `Ficha municipal oficial de ${muni.nombre_comuna}: población Censo 2024, presupuesto per cápita, dependencia FCM, nóminas CPLT, concejo municipal SERVEL 2024 y compras públicas ChileCompra OCDS.`,
     alternates: {
-      canonical: `/municipalidades/${id}`,
+      canonical: `/municipalidades/${canonicalSlug}`,
     },
     openGraph: {
       title: `Municipalidad de ${muni.nombre_comuna} — El Cambiómetro`,
@@ -49,10 +62,16 @@ export default async function MunicipalidadDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const muni = MUNICIPALIDADES_SEED.find((m) => m.id === id);
+  const muni = getMuniBySlugOrId(id);
   if (!muni) notFound();
 
-  const muniData = getMunicipalidadData(id);
+  // 301 permanente si la URL usa el ID legado (muni-*) en vez del slug canónico
+  const canonicalSlug = getMuniCanonicalSlug(id) ?? muni.id;
+  if (isMuniLegacyId(id) || id !== canonicalSlug) {
+    permanentRedirect(`/municipalidades/${canonicalSlug}`);
+  }
+
+  const muniData = getMunicipalidadData(muni.id);
   if (!muniData) notFound();
 
   const alcalde = muniData.alcalde;
@@ -62,18 +81,14 @@ export default async function MunicipalidadDetailPage({
     "Independiente";
   const brandingAlcalde = getPartidoConfig(partidoAlcalde);
 
-  // Enlaces oficiales
+  // Enlaces oficiales verificados (nunca inventar dominios ni URLs heurísticas)
   const webOficial =
     muniData.sitio_web_oficial ??
     muni.sitio_web_oficial ??
-    `https://www.municipalidadde${muni.nombre_comuna
-      .toLowerCase()
-      .replace(/[^a-z0-9]/g, "")}.cl`;
+    null;
   const transparenciaActivaUrl =
     muniData.sitio_transparencia_activa ??
-    `https://www.portaltransparencia.cl/PortalPdT/directorio-de-organismos-regulados/?org=${encodeURIComponent(
-      muni.nombre_comuna
-    )}`;
+    null;
   const sinimUrl = `https://datos.sinim.gov.cl/datos_municipales/`;
 
   const jsonLd = {
@@ -246,35 +261,39 @@ export default async function MunicipalidadDetailPage({
                   paddingTop: "0.5rem",
                 }}
               >
-                <a
-                  href={webOficial}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-ghost"
-                  style={{
-                    fontSize: "0.78rem",
-                    padding: "0.35rem 0.75rem",
-                    borderColor: "var(--border)",
-                    color: "var(--accent)",
-                  }}
-                >
-                  🌐 Web Municipal ↗
-                </a>
+                {webOficial && (
+                  <a
+                    href={webOficial}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-ghost"
+                    style={{
+                      fontSize: "0.78rem",
+                      padding: "0.35rem 0.75rem",
+                      borderColor: "var(--border)",
+                      color: "var(--accent)",
+                    }}
+                  >
+                    🌐 Web oficial ↗
+                  </a>
+                )}
 
-                <a
-                  href={transparenciaActivaUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn btn-ghost"
-                  style={{
-                    fontSize: "0.78rem",
-                    padding: "0.35rem 0.75rem",
-                    borderColor: "var(--border)",
-                    color: "var(--ok)",
-                  }}
-                >
-                  🔍 Transparencia Activa CPLT ↗
-                </a>
+                {transparenciaActivaUrl && (
+                  <a
+                    href={transparenciaActivaUrl}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-ghost"
+                    style={{
+                      fontSize: "0.78rem",
+                      padding: "0.35rem 0.75rem",
+                      borderColor: "var(--border)",
+                      color: "var(--ok)",
+                    }}
+                  >
+                    🔍 Transparencia Activa CPLT ↗
+                  </a>
+                )}
 
                 <a
                   href={sinimUrl}

@@ -3,8 +3,7 @@ import { POLITICOS_SEED } from "@/lib/seed-politicos";
 import { PARTIDOS_SEED } from "@/lib/partidos";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import { getSnapshotSummary } from "@/lib/data-source";
-import { MUNICIPALIDADES_SEED } from "@/lib/municipalidades";
-import { getAllServiciosPublicos } from "@/lib/servicios-publicos";
+import { getAllMuniSlugs, getAllServicioSlugs } from "@/lib/slug-utils";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://cambiometro.impulsacv.cl";
@@ -36,7 +35,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: route === "" ? 1 : 0.8,
   }));
 
-  // Politicos dynamic routes with canonical slugs
+  // Politicos dynamic routes with canonical slugs (already semantic, unchanged)
   const politicos = POLITICOS_SEED.map((politico) => ({
     url: `${baseUrl}/politico/${getPoliticoSlug(politico)}`,
     lastModified,
@@ -44,7 +43,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.9,
   }));
 
-  // Partidos dynamic routes
+  // Partidos dynamic routes (sigla-based, already semantic, unchanged)
   const partidos = PARTIDOS_SEED.map((partido) => ({
     url: `${baseUrl}/partidos/${partido.sigla.toLowerCase()}`,
     lastModified,
@@ -52,17 +51,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.7,
   }));
 
-  // 346 municipalidades — fichas dinámicas
-  const municipalidades = MUNICIPALIDADES_SEED.map((m) => ({
-    url: `${baseUrl}/municipalidades/${m.id}`,
+  // 346 municipalidades — slugs semánticos sin prefijo "muni-"
+  const municipalidades = getAllMuniSlugs().map(({ slug }) => ({
+    url: `${baseUrl}/municipalidades/${slug}`,
     lastModified,
     changeFrequency: "monthly" as const,
     priority: 0.7,
   }));
 
-  // 538 servicios públicos — fichas dinámicas
-  const servicios = getAllServiciosPublicos().map((s) => ({
-    url: `${baseUrl}/servicios-publicos/${s.id}`,
+  // Servicios públicos — slugs semánticos desde nombre completo
+  const servicios = getAllServicioSlugs().map(({ slug }) => ({
+    url: `${baseUrl}/servicios-publicos/${slug}`,
     lastModified,
     changeFrequency: "monthly" as const,
     priority: 0.7,

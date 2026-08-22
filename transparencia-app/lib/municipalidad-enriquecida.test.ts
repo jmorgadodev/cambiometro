@@ -13,7 +13,7 @@ describe("Ficha Comunal Enriquecida (/municipalidades/[id]) y Consolidado (/func
 
   it("verifica las secciones y estructura enriquecida de /municipalidades/[id]", () => {
     // 1. Header con enlaces oficiales
-    expect(pageSource).toContain("Web Municipal");
+    expect(pageSource).toContain("Web oficial");
     expect(pageSource).toContain("Transparencia Activa CPLT");
     expect(pageSource).toContain("Ficha SINIM SUBDERE");
 

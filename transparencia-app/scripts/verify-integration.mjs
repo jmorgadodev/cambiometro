@@ -149,6 +149,7 @@ try {
 
   // Verificación de Ficha Comunal /municipalidades/muni-maipu (7 capas)
   await gotoWithNetworkRetry(`${baseUrl}/municipalidades/muni-maipu`);
+  await page.getByRole("heading", { name: "Municipalidad de Maipú" }).waitFor({ timeout: 10000 }).catch(() => {});
   assert.equal(await page.getByRole("heading", { name: "Municipalidad de Maipú" }).count(), 1);
   assert.equal(await page.getByText("Población Censo INE", { exact: false }).count() > 0, true, "Debe mostrar KPI Censo");
   assert.equal(await page.getByText("Presupuesto Per Cápita", { exact: false }).count() > 0, true, "Debe mostrar Presupuesto Per Cápita");
@@ -166,6 +167,7 @@ try {
   assert.equal(await page.getByRole("button", { name: /Gobiernos Regionales \(16\)/ }).count(), 1, "Debe tener tab GOREs");
 
   await gotoWithNetworkRetry(`${baseUrl}/servicios-publicos/min-agricultura`);
+  await page.getByRole("heading", { name: /Ministerio de Agricultura/ }).waitFor({ timeout: 10000 }).catch(() => {});
   assert.equal(await page.getByRole("heading", { name: /Ministerio de Agricultura/ }).count(), 1);
   assert.equal(await page.getByText("Presupuesto Vigente DIPRES", { exact: false }).count() > 0, true, "Debe mostrar KPI Presupuesto");
   assert.equal(await page.getByText("Dotación de Personal", { exact: false }).count() > 0, true, "Debe mostrar KPI Dotación");

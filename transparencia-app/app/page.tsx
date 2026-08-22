@@ -175,22 +175,24 @@ export default async function HomePage() {
           <div className="home-section-heading">
             <div>
               <p className="eyebrow">Estado de datos</p>
-              <h2 id="sources-title">{operationalSources.length} fuentes con registros disponibles</h2>
+              <h2 id="sources-title">11 fuentes oficiales + 1 derivada (personal de apoyo parlamentario)</h2>
             </div>
-            <Link href="/datos">Revisar todas las fuentes →</Link>
+            <Link href="/fuentes">Revisar catálogo de fuentes →</Link>
           </div>
           <div className="home-source-list">
             {operationalSources.map((source) => (
               <div className="home-source-row" key={source.id}>
                 <span className="source-signal source-signal--partial" aria-hidden="true" />
                 <strong>{source.name}</strong>
-                <span>{source.recordCount.toLocaleString("es-CL")} registros</span>
+                <span>
+                  Canónicos: {(source.canonicalCount ?? source.recordCount).toLocaleString("es-CL")} · Histórico: {(source.historicalCount ?? source.recordCount).toLocaleString("es-CL")}
+                </span>
                 <em>{source.statusText || "Al día (Vigente)"}</em>
               </div>
             ))}
           </div>
           <p className="home-coverage-note">
-            Nóminas oficiales: cada organismo informa con su partición oficial validada. Los pipelines operan de forma automatizada y periódica con trazabilidad al portal de origen.
+            Nóminas oficiales: cada organismo informa con su partición oficial validada. Diferencia por deduplicación y cobertura declarada. Los pipelines operan de forma automatizada y periódica con trazabilidad al portal de origen.
           </p>
         </section>
       </Reveal>

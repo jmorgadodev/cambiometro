@@ -86,7 +86,12 @@ export default async function FuentesPage() {
                   <dl style={{ margin: 0, display: "flex", flexDirection: "column", gap: "0.35rem", fontSize: "0.75rem" }}>
                     <div>
                       <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Registros: </dt>
-                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{source.recordCount.toLocaleString("es-CL")}</dd>
+                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>
+                        Canónicos: {(source.canonicalCount ?? source.recordCount).toLocaleString("es-CL")} · Histórico: {(source.historicalCount ?? source.recordCount).toLocaleString("es-CL")}
+                      </dd>
+                    </div>
+                    <div style={{ fontSize: "0.7rem", color: "var(--text-subtle)", marginTop: "-0.15rem" }}>
+                      Diferencia por deduplicación y cobertura declarada
                     </div>
                     <div>
                       <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Cobertura: </dt>
