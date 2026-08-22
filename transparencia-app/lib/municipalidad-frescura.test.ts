@@ -4,27 +4,80 @@ import { getMunicipalidadesList, getMunicipalidadesStats } from "@/lib/municipal
 import { getMuniCanonicalSlug, isMuniLegacyId, getAllMuniSlugs } from "@/lib/slug-utils";
 import { evaluateSenateSupport } from "@/scripts/etl/senado-assignment.mjs";
 
-describe("Tarea C v2: Frescura y Cobertura de Nóminas Municipales (CPLT)", () => {
-  it("Maipú posee período CPLT reciente (2026-06 / 2026-07) y estado 'al_dia' (≤90 días de desfase)", () => {
+describe("Tarea C v2 & v3: Frescura, Selector Compacto y Reactividad Total por Período (CPLT)", () => {
+  it("Maipú: default es el último período representativo (2026-06) con >=50% de dotación, no el parcial (2026-07)", () => {
     const maipu = getMunicipalidadData("muni-maipu");
     expect(maipu).not.toBeNull();
-    expect(maipu?.periodo_cplt_reciente).toMatch(/^2026-(?:0[67])$/);
+    expect(maipu?.periodo_cplt_reciente).toBe("2026-06");
     expect(maipu?.desfase_meses).toBeLessThanOrEqual(3);
     expect(maipu?.estado_frescura).toBe("al_dia");
+
+    const p202607 = maipu?.periodos_disponibles?.find((p) => p.periodo === "2026-07");
+    expect(p202607).toBeDefined();
+    expect(p202607?.es_parcial).toBe(true);
+    expect(p202607?.count).toBe(239);
+
+    const p202606 = maipu?.periodos_disponibles?.find((p) => p.periodo === "2026-06");
+    expect(p202606).toBeDefined();
+    expect(p202606?.es_parcial).toBe(false);
+    expect(p202606?.count).toBe(4071);
   });
 
-  it("El Top 5 de remuneraciones por defecto en Maipú corresponde al período reciente y no muestra el finiquito de 2024-01", () => {
+  it("Maipú: reactividad total de dotación y composición por estamento según período seleccionado", () => {
+    const maipu = getMunicipalidadData("muni-maipu");
+    const resumenPeriodo = maipu?.resumen_personal_por_periodo;
+    expect(resumenPeriodo).toBeDefined();
+
+    // 2026-06 (mes completo reciente)
+    const r202606 = resumenPeriodo?.["2026-06"];
+    expect(r202606).toBeDefined();
+    expect(r202606?.total_funcionarios).toBe(4071);
+    expect(r202606?.planta).toBe(967);
+    expect(r202606?.contrata).toBe(299);
+    expect(r202606?.honorarios).toBe(2803);
+    expect(r202606?.codigo_trabajo_salud_educacion).toBe(2);
+    expect((r202606?.planta ?? 0) + (r202606?.contrata ?? 0) + (r202606?.honorarios ?? 0) + (r202606?.codigo_trabajo_salud_educacion ?? 0)).toBe(4071);
+
+    // 2024-01 (período histórico)
+    const r202401 = resumenPeriodo?.["2024-01"];
+    expect(r202401).toBeDefined();
+    expect(r202401?.total_funcionarios).toBe(468);
+    expect(r202401?.planta).toBe(12);
+    expect(r202401?.contrata).toBe(26);
+    expect(r202401?.honorarios).toBe(429);
+    expect(r202401?.codigo_trabajo_salud_educacion).toBe(1);
+    expect((r202401?.planta ?? 0) + (r202401?.contrata ?? 0) + (r202401?.honorarios ?? 0) + (r202401?.codigo_trabajo_salud_educacion ?? 0)).toBe(468);
+
+    // 2026-07 (declaración parcial)
+    const r202607 = resumenPeriodo?.["2026-07"];
+    expect(r202607).toBeDefined();
+    expect(r202607?.total_funcionarios).toBe(239);
+    expect(r202607?.es_parcial).toBe(true);
+    expect((r202607?.planta ?? 0) + (r202607?.contrata ?? 0) + (r202607?.honorarios ?? 0) + (r202607?.codigo_trabajo_salud_educacion ?? 0)).toBe(239);
+  });
+
+  it("El Top 5 de remuneraciones por defecto en Maipú corresponde al período 2026-06 y no muestra el finiquito de 2024-01", () => {
     const maipu = getMunicipalidadData("muni-maipu");
     expect(maipu?.top_remuneraciones).toBeDefined();
     expect(maipu?.top_remuneraciones.length).toBeGreaterThan(0);
-    expect(maipu?.top_remuneraciones[0].periodo).toMatch(/^2026-(?:0[67])$/);
+    expect(maipu?.top_remuneraciones[0].periodo).toBe("2026-06");
     expect(maipu?.top_remuneraciones[0].periodo).not.toBe("2024-01");
   });
 
-  it("El historial de períodos (incluyendo 2024-01) se conserva íntegro y navegable en Maipú", () => {
+  it("El historial de períodos (incluyendo 2024-01) se conserva íntegro con estructura jerárquica año/mes", () => {
     const maipu = getMunicipalidadData("muni-maipu");
     expect(maipu?.periodos_disponibles).toBeDefined();
     expect(maipu?.periodos_disponibles?.length).toBeGreaterThanOrEqual(10);
+    
+    // Todos los períodos tienen año y mes
+    for (const p of maipu?.periodos_disponibles || []) {
+      expect(p.ano).toBeGreaterThanOrEqual(2024);
+      expect(p.mes).toBeGreaterThanOrEqual(1);
+      expect(p.mes).toBeLessThanOrEqual(12);
+      expect(typeof p.count).toBe("number");
+      expect(typeof p.es_parcial).toBe("boolean");
+    }
+
     const has202401 = maipu?.periodos_disponibles?.some((p) => p.periodo === "2024-01");
     expect(has202401).toBe(true);
 
@@ -38,7 +91,7 @@ describe("Tarea C v2: Frescura y Cobertura de Nóminas Municipales (CPLT)", () =
     const list = getMunicipalidadesList();
     expect(list.length).toBe(346);
     const maipu = list.find((m) => m.id === "muni-maipu");
-    expect(maipu?.periodo_nomina).toMatch(/^2026-(?:0[67])$/);
+    expect(maipu?.periodo_nomina).toBe("2026-06");
     expect(maipu?.estado_frescura).toBe("al_dia");
 
     const stats = getMunicipalidadesStats();

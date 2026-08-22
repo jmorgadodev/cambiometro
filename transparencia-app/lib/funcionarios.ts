@@ -58,6 +58,7 @@ export interface FuncionarioPublico {
   observaciones?: string;
   fuente?: string;
   fuente_periodo?: string;
+  periodo?: string;
 }
 
 export const FUNCIONARIOS_PUBLICOS_SEED: FuncionarioPublico[] = [];

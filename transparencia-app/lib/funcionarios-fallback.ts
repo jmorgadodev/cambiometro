@@ -88,6 +88,7 @@ export function queryFallbackFuncionarios({
   tipoOrgano = "Todos",
   contrato = "Todos",
   estamento = "Todos",
+  periodo = "Todos",
   sortBy = "sueldo_desc",
   soloHorasExtras = false,
   includeZero = false,
@@ -101,6 +102,7 @@ export function queryFallbackFuncionarios({
   tipoOrgano?: string;
   contrato?: string;
   estamento?: string;
+  periodo?: string;
   sortBy?: string;
   soloHorasExtras?: boolean;
   includeZero?: boolean;
@@ -109,7 +111,12 @@ export function queryFallbackFuncionarios({
   page?: number;
   limit?: number;
 }) {
-  const allForOrg = [...getFallbackFuncionarios(organismoId)];
+  let allForOrg = [...getFallbackFuncionarios(organismoId)];
+  if (periodo && periodo !== "Todos") {
+    allForOrg = allForOrg.filter(
+      (record) => (record.fuente_periodo || record.periodo) === periodo
+    );
+  }
   const amount = (record: FuncionarioPublico) => record.remuneracion_bruta_mensual ?? 0;
   const sinPagoRecords = allForOrg.filter((record) => amount(record) <= 0);
   const microMontoRecords = allForOrg.filter((record) => amount(record) > 0 && amount(record) < 50_000);
