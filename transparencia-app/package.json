@@ -1,6 +1,7 @@
 {
   "name": "transparencia-app",
   "version": "0.1.0",
+  "description": "Plataforma ciudadana de datos públicos de Chile",
   "private": true,
   "scripts": {
     "dev": "next dev",
