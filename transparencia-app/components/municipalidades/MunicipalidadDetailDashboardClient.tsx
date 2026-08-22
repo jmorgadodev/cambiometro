@@ -118,9 +118,22 @@ export default function MunicipalidadDetailDashboardClient({
 
   const radiografia = muniData.radiografia_comunal;
   const auditorias = muniData.auditorias_cgr ?? [];
-  const topRemuneraciones = muniData.top_remuneraciones ?? [];
   const topHorasExtras = muniData.top_horas_extras ?? [];
   const integrityAnomalies = muniData.anomalias_integridad ?? [];
+
+  const periodosDisponibles = muniData.periodos_disponibles || [];
+  const defaultPeriod = muniData.periodo_cplt_reciente || periodosDisponibles[0]?.periodo || "2026-06";
+  const [selectedPeriod, setSelectedPeriod] = useState<string>(defaultPeriod);
+
+  const topRemuneraciones = useMemo(() => {
+    if (muniData.top_remuneraciones_por_periodo && muniData.top_remuneraciones_por_periodo[selectedPeriod]?.length) {
+      return muniData.top_remuneraciones_por_periodo[selectedPeriod];
+    }
+    return muniData.top_remuneraciones ?? [];
+  }, [muniData, selectedPeriod]);
+
+  const desfaseMeses = muniData.desfase_meses ?? null;
+  const esDesfasado = desfaseMeses !== null && desfaseMeses > 3;
 
   const partidoAlcalde =
     alcalde?.partido_alcalde ||
@@ -746,6 +759,75 @@ export default function MunicipalidadDetailDashboardClient({
       {/* ═══ PESTAÑA 2: PERSONAL & REMUNERACIONES (CPLT) ══════════════════════ */}
       {activeTab === "personal" && (
         <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
+          {/* Alerta de Desfase de Transparencia Activa Ley 20.285 (>90 días) */}
+          {esDesfasado && (
+            <div
+              role="alert"
+              style={{
+                padding: "1rem 1.25rem",
+                borderRadius: 10,
+                background: "var(--warn-bg)",
+                border: "1px solid var(--warn)",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.85rem",
+              }}
+            >
+              <span style={{ fontSize: "1.5rem" }}>⚠️</span>
+              <div>
+                <strong style={{ color: "var(--warn)", fontSize: "0.92rem", display: "block" }}>
+                  Nómina con {desfaseMeses} meses de desfase respecto a la fecha actual
+                </strong>
+                <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.4, display: "block", marginTop: "0.2rem" }}>
+                  Fuente oficial: Transparencia Activa CPLT (Ley 20.285). La última declaración publicada por la Municipalidad de {nombreComuna} corresponde al período {muniData.periodo_cplt_reciente || "no informado"}.
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Selector de Períodos Históricos CPLT */}
+          {periodosDisponibles.length > 1 && (
+            <div className="card" style={{ padding: "1rem 1.25rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.6rem" }}>
+                <span style={{ fontSize: "0.75rem", fontWeight: 700, color: "var(--text-muted)", textTransform: "uppercase" }}>
+                  📅 Períodos de nómina disponibles ({periodosDisponibles.length} meses históricos)
+                </span>
+                <span className="badge badge-info" style={{ fontSize: "0.68rem" }}>
+                  Mostrando: {periodosDisponibles.find((p) => p.periodo === selectedPeriod)?.etiqueta || selectedPeriod}
+                </span>
+              </div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem", maxHeight: "160px", overflowY: "auto" }}>
+                {periodosDisponibles.map((p) => {
+                  const activo = p.periodo === selectedPeriod;
+                  return (
+                    <button
+                      key={p.periodo}
+                      type="button"
+                      onClick={() => setSelectedPeriod(p.periodo)}
+                      aria-pressed={activo}
+                      className="capsule"
+                      style={{
+                        cursor: "pointer",
+                        fontFamily: "monospace",
+                        fontSize: "0.72rem",
+                        padding: "0.32rem 0.65rem",
+                        borderRadius: 99,
+                        transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+                        border: activo ? "1px solid var(--accent)" : "1px solid var(--border-subtle)",
+                        background: activo ? "var(--accent)" : "var(--bg-surface-2)",
+                        color: activo ? "var(--bg)" : "var(--text-primary)",
+                        fontWeight: activo ? 800 : 500,
+                        boxShadow: activo ? "0 0 10px var(--accent-glow)" : "none",
+                      }}
+                    >
+                      {p.etiqueta} <span style={{ opacity: 0.7, fontSize: "0.65rem" }}>({p.count.toLocaleString("es-CL")})</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
           {/* Ficha Alcalde/sa + KPIs Personal */}
           <div
             style={{
@@ -1055,7 +1137,7 @@ export default function MunicipalidadDetailDashboardClient({
                   </p>
                 </div>
                 <span className="badge badge-info" style={{ fontSize: "0.7rem", fontFamily: "monospace" }}>
-                  Período CPLT: {topRemuneraciones[0]?.periodo || "2025-2026"}
+                  Período nómina: {selectedPeriod || topRemuneraciones[0]?.periodo || "2026-06"}
                 </span>
               </div>
 

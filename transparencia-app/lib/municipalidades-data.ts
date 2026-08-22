@@ -195,8 +195,14 @@ export interface MunicipalidadEnriquecida {
   auditorias_cgr?: AuditoriaCgrData[];
   presupuesto: PresupuestoSinim | null;
   resumen_personal: ResumenPersonal | null;
+  resumen_personal_por_periodo?: Record<string, ResumenPersonal>;
   top_horas_extras: TopFuncionarioHorasExtras[];
   top_remuneraciones: TopFuncionarioRemuneracion[];
+  top_remuneraciones_por_periodo?: Record<string, TopFuncionarioRemuneracion[]>;
+  periodo_cplt_reciente?: string | null;
+  desfase_meses?: number | null;
+  estado_frescura?: "al_dia" | "desfasado" | "sin_datos";
+  periodos_disponibles?: Array<{ periodo: string; etiqueta: string; count: number }>;
   anomalias_integridad?: AnomaliaIntegridadMunicipal[];
 }
 

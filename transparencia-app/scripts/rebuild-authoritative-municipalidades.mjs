@@ -184,28 +184,108 @@ for (const muni of MUNICIPALIDADES_SEED) {
   let resumen_personal = null;
   let top_horas_extras = [];
   let top_remuneraciones = [];
+  let top_remuneraciones_por_periodo = {};
   let anomalias_integridad = [];
+  let periodo_cplt_reciente = null;
+  let desfase_meses = null;
+  let estado_frescura = "sin_datos";
+  let periodos_disponibles = [];
+
+  const MESES_ES = ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"];
+
+  function formatPeriodoEtiqueta(periodoStr) {
+    if (!periodoStr || !/^\d{4}-\d{2}$/.test(periodoStr)) return periodoStr || "Sin período";
+    const [y, m] = periodoStr.split("-").map(Number);
+    const mesName = MESES_ES[m - 1] || m;
+    return `${mesName} ${y}`;
+  }
+
+  function calcularDesfaseMeses(periodoStr, refYear = 2026, refMonth = 8) {
+    if (!periodoStr || !/^\d{4}-\d{2}$/.test(periodoStr)) return null;
+    const [y, m] = periodoStr.split("-").map(Number);
+    const diff = (refYear - y) * 12 + (refMonth - m);
+    return Math.max(0, diff);
+  }
 
   if (rawStaff.length > 0) {
     const v7 = partitionV7Records(rawStaff);
     const regularStaff = v7.regular;
     anomalias_integridad = v7.anomalies;
-    // 1. Identificar periodo activo mensual representativo para masa salarial mensual
-    const periodCounts = new Map();
+
+    // Agrupar registros válidos por período
+    const periodGroups = new Map();
     for (const f of regularStaff) {
-      const p = f.fuente_periodo || "unknown";
-      periodCounts.set(p, (periodCounts.get(p) || 0) + 1);
+      const p = f.fuente_periodo || f.periodo || "sin_periodo";
+      if (!periodGroups.has(p)) periodGroups.set(p, []);
+      periodGroups.get(p).push(f);
     }
-    const sortedPeriods = Array.from(periodCounts.entries())
-      .filter(([p]) => /^202[4-6]-(?:0[1-9]|1[0-2])$/.test(p))
-      .sort((a, b) => {
-        const a2026 = a[0].startsWith("2026") ? 1 : 0;
-        const b2026 = b[0].startsWith("2026") ? 1 : 0;
-        if (a2026 !== b2026) return b2026 - a2026;
-        return b[1] - a[1];
-      });
-    const bestPeriod = sortedPeriods.length > 0 ? sortedPeriods[0][0] : null;
-    const periodStaff = bestPeriod ? regularStaff.filter(f => f.fuente_periodo === bestPeriod) : regularStaff;
+
+    const validPeriods = Array.from(periodGroups.keys())
+      .filter((p) => /^202[4-6]-(?:0[1-9]|1[0-2])$/.test(p))
+      .sort((a, b) => b.localeCompare(a));
+
+    if (validPeriods.length > 0) {
+      const consolidated = validPeriods.find((p) => (periodGroups.get(p)?.length || 0) >= 100) || validPeriods[0];
+      periodo_cplt_reciente = consolidated || validPeriods[0];
+      desfase_meses = calcularDesfaseMeses(periodo_cplt_reciente);
+      estado_frescura = desfase_meses !== null && desfase_meses <= 3 ? "al_dia" : "desfasado";
+
+      periodos_disponibles = validPeriods.map((p) => ({
+        periodo: p,
+        etiqueta: formatPeriodoEtiqueta(p),
+        count: periodGroups.get(p).length,
+      }));
+    } else {
+      estado_frescura = "sin_datos";
+    }
+
+    function buildTopRemuneraciones(staffList) {
+      const sortedByBruto = staffList
+        .filter((f) => Number(f.remuneracion_bruta_mensual || 0) >= 50000)
+        .sort((a, b) => Number(b.remuneracion_bruta_mensual || 0) - Number(a.remuneracion_bruta_mensual || 0));
+
+      const seenNames = new Set();
+      const topList = [];
+      for (const f of sortedByBruto) {
+        const name = f.nombre_completo.trim();
+        const normKey = name.toLowerCase();
+        if (seenNames.has(normKey)) continue;
+        seenNames.add(normKey);
+
+        const bruto = Number(f.remuneracion_bruta_mensual || 0);
+        const heMonto = Number(f.monto_horas_extras_clp || 0);
+        const heHrs = Number(f.horas_extras_mes_anterior || 0);
+        const base = Math.max(0, bruto - heMonto);
+        const liquida = f.remuneracion_liquida_mensual === null || f.remuneracion_liquida_mensual === undefined
+          ? null
+          : Number(f.remuneracion_liquida_mensual);
+
+        topList.push({
+          id: f.id,
+          nombre: name,
+          cargo: f.cargo || null,
+          sueldo_base: base,
+          horas_extras_monto: heMonto,
+          horas_extras_hrs: heHrs,
+          remuneracion_bruta: bruto,
+          remuneracion_liquida: liquida,
+          estamento: f.estamento || null,
+          tipo_contrato: f.tipo_contrato || null,
+          grado_eus: f.grado_eus || null,
+          periodo: f.periodo || f.fuente_periodo || null,
+        });
+
+        if (topList.length >= 5) break;
+      }
+      return topList;
+    }
+
+    for (const p of validPeriods) {
+      top_remuneraciones_por_periodo[p] = buildTopRemuneraciones(periodGroups.get(p) || []);
+    }
+
+    const activeStaff = periodo_cplt_reciente ? periodGroups.get(periodo_cplt_reciente) || regularStaff : regularStaff;
+    top_remuneraciones = buildTopRemuneraciones(activeStaff);
 
     // Dotación completa (M4): 100% de la nómina disponible en la fuente oficial.
     let totalPlanta = 0;
@@ -222,9 +302,9 @@ for (const muni of MUNICIPALIDADES_SEED) {
     }
 
     // Masa salarial mensual calculada a partir del período activo
-    let masaMensual = periodStaff.reduce((sum, f) => sum + Number(f.remuneracion_bruta_mensual ?? 0), 0);
-    let masaHorasExtras = periodStaff.reduce((sum, f) => sum + Number(f.monto_horas_extras_clp ?? 0), 0);
-    let totalHorasExtrasHrs = periodStaff.reduce((sum, f) => sum + Number(f.horas_extras_mes_anterior ?? 0), 0);
+    let masaMensual = activeStaff.reduce((sum, f) => sum + Number(f.remuneracion_bruta_mensual ?? 0), 0);
+    let masaHorasExtras = activeStaff.reduce((sum, f) => sum + Number(f.monto_horas_extras_clp ?? 0), 0);
+    let totalHorasExtrasHrs = activeStaff.reduce((sum, f) => sum + Number(f.horas_extras_mes_anterior ?? 0), 0);
 
     const masaAnual = masaMensual * 12;
 
@@ -252,8 +332,8 @@ for (const muni of MUNICIPALIDADES_SEED) {
       nota_metodologica: null,
     };
 
-    // 2. Top Horas Extras
-    top_horas_extras = regularStaff
+    // 2. Top Horas Extras sobre período activo
+    top_horas_extras = activeStaff
       .filter(f => Number(f.horas_extras_mes_anterior ?? 0) > 0)
       .sort((a, b) => Number(b.horas_extras_mes_anterior ?? 0) - Number(a.horas_extras_mes_anterior ?? 0))
       .slice(0, 5)
@@ -265,46 +345,6 @@ for (const muni of MUNICIPALIDADES_SEED) {
         monto: Number(f.monto_horas_extras_clp ?? 0),
         estamento: f.estamento,
       }));
-
-    // 3. Top Remuneraciones M1: ORDENADO POR SUELDO BRUTO TOTAL (Base + HH.EE.), idéntico criterio al buscador, sobre registros válidos
-    const sortedByBruto = regularStaff
-      .filter(f => Number(f.remuneracion_bruta_mensual || 0) >= 50000)
-      .sort((a, b) => Number(b.remuneracion_bruta_mensual || 0) - Number(a.remuneracion_bruta_mensual || 0));
-
-    const seenNames = new Set();
-    const topList = [];
-    for (const f of sortedByBruto) {
-      const name = f.nombre_completo.trim();
-      const normKey = name.toLowerCase();
-      if (seenNames.has(normKey)) continue;
-      seenNames.add(normKey);
-
-      const bruto = Number(f.remuneracion_bruta_mensual || 0);
-      const heMonto = Number(f.monto_horas_extras_clp || 0);
-      const heHrs = Number(f.horas_extras_mes_anterior || 0);
-      const base = Math.max(0, bruto - heMonto);
-      const liquida = f.remuneracion_liquida_mensual === null || f.remuneracion_liquida_mensual === undefined
-        ? null
-        : Number(f.remuneracion_liquida_mensual);
-
-      topList.push({
-        id: f.id,
-        nombre: name,
-        cargo: f.cargo || null,
-        sueldo_base: base,
-        horas_extras_monto: heMonto,
-        horas_extras_hrs: heHrs,
-        remuneracion_bruta: bruto,
-        remuneracion_liquida: liquida,
-        estamento: f.estamento || null,
-        tipo_contrato: f.tipo_contrato || null,
-        grado_eus: f.grado_eus || null,
-        periodo: f.periodo || f.fuente_periodo || null,
-      });
-
-      if (topList.length >= 5) break;
-    }
-    top_remuneraciones = topList;
   }
 
   // --- D. CHILECOMPRA OCDS (M2) ---
@@ -344,6 +384,11 @@ for (const muni of MUNICIPALIDADES_SEED) {
     resumen_personal,
     top_horas_extras: (top_horas_extras || []).slice(0, 3),
     top_remuneraciones,
+    top_remuneraciones_por_periodo,
+    periodo_cplt_reciente,
+    desfase_meses,
+    estado_frescura,
+    periodos_disponibles,
     anomalias_integridad,
     concejales,
     compras_publicas,
@@ -390,6 +435,9 @@ const listData = Object.values(output).map((m) => ({
         masa_mensual_clp: m.resumen_personal.masa_mensual_clp,
       }
     : null,
+  periodo_nomina: m.periodo_cplt_reciente ?? null,
+  desfase_meses: m.desfase_meses ?? null,
+  estado_frescura: m.estado_frescura ?? "sin_datos",
   auditorias_cgr_count: (m.auditorias_cgr || []).length,
 }));
 const listDestFile = path.join(root, "data", "municipalidades-list.json");

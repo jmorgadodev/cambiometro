@@ -21,6 +21,9 @@ export interface MunicipalidadListItem {
     total_funcionarios: number;
     masa_mensual_clp: number;
   } | null;
+  periodo_nomina?: string | null;
+  desfase_meses?: number | null;
+  estado_frescura?: "al_dia" | "desfasado" | "sin_datos";
   auditorias_cgr_count?: number;
 }
 
@@ -37,6 +40,9 @@ export function getMunicipalidadesStats() {
   const totalPresupuestoVigente = all.reduce((sum, m) => sum + (m.presupuesto?.vigente_clp ?? 0), 0);
   const totalFuncionarios = all.reduce((sum, m) => sum + (m.resumen_personal?.total_funcionarios ?? 0), 0);
   const totalMasaMensual = all.reduce((sum, m) => sum + (m.resumen_personal?.masa_mensual_clp ?? 0), 0);
+  const alDiaCount = all.filter((m) => m.estado_frescura === "al_dia").length;
+  const desfasadoCount = all.filter((m) => m.estado_frescura === "desfasado").length;
+  const sinDatosCount = all.filter((m) => m.estado_frescura === "sin_datos" || !m.estado_frescura).length;
 
   return {
     totalComunas: all.length,
@@ -45,5 +51,9 @@ export function getMunicipalidadesStats() {
     totalPresupuestoVigente,
     totalFuncionarios,
     totalMasaMensual,
+    alDiaCount,
+    desfasadoCount,
+    sinDatosCount,
   };
 }
+

@@ -60,6 +60,13 @@
       "recordCount": 23894,
       "status": "partial",
       "generatedAt": "2026-08-21T10:02:59.458Z"
+    },
+    "ine": {
+      "recordCount": 346,
+      "coverageCount": 346,
+      "coverageUniverse": 346,
+      "status": "complete",
+      "generatedAt": "2026-08-22T04:47:00.000Z"
     }
   }
 }
