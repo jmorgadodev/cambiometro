@@ -267,12 +267,19 @@ const MOVIMIENTOS_RAW = [
       motivo_texto: "Primer ajuste ministerial tras tensiones en la vocería del Ejecutivo y coordinación política."
     },
     entro: {
-      nombre: "Gonzalo Müller Osorio",
+      nombre: "Claudio Alvarado Andrade (Biministro Interior–Segegob)",
       fecha: "2026-05-19"
     },
-    decreto_url: "https://www.diariooficial.cl/decretos-ajuste-ministerial-mayo-2026",
-    decreto_numero: "D.S. N° 189 de Presidencia",
+    decreto_url: "https://prensa.presidencia.cl/comunicado.aspx?id=329127",
+    decreto_numero: "D.S. N° 189 de Presidencia / Comunicado Presidencia N° 329127",
     fuentes: [
+      {
+        nivel: "oficial",
+        medio: "Presidencia de la República",
+        url: "https://prensa.presidencia.cl/comunicado.aspx?id=329127",
+        fecha: "2026-05-19",
+        titulo: "Comunicado Oficial 329127: Presidente Kast designa a Claudio Alvarado como biministro de Interior y Segegob"
+      },
       {
         nivel: "oficial",
         medio: "Diario Oficial de Chile",
@@ -285,7 +292,7 @@ const MOVIMIENTOS_RAW = [
         medio: "La Tercera",
         url: "https://www.latercera.com/politica/noticia/primer-cambio-de-gabinete-de-kast-salen-sedini-y-steinert/20260519/",
         fecha: "2026-05-19",
-        titulo: "Primer ajuste ministerial de Kast: Gonzalo Müller asume la Segegob"
+        titulo: "Primer ajuste ministerial de Kast: Claudio Alvarado asume biministerio Interior–Segegob"
       }
     ],
     estado: "verificado",
@@ -584,50 +591,173 @@ const MOVIMIENTOS_RAW = [
   {
     id: "mov-035",
     tipo_evento: "renuncia",
-    cargo: "Subsecretaria del Deporte",
-    organismo: "Subsecretaría del Deporte",
+    cargo: "Ministro del Deporte",
+    organismo: "Ministerio del Deporte",
     ministerio: "Ministerio del Deporte",
     region: "Nacional",
     salio: {
       nombre: "Natalia Duco Soler",
-      fecha: "2026-08-13",
+      fecha: "2026-08-14",
       fecha_inicio: "2026-03-11",
       motivo_categoria: "Cuestionamiento de gestión",
-      motivo_texto: "Renuncia tras controversias administrativas y cuestionamientos de la Contraloría sobre la rendición de fondos de los Juegos Nacionales."
+      motivo_texto: "Renuncia voluntaria aceptada tras controversias administrativas y observaciones de Contraloría sobre la rendición de fondos."
     },
     entro: {
-      nombre: "Galo Lara Echeverría (Subrogante)",
-      fecha: "2026-08-13"
+      nombre: "Francisco Riveros Cantuarias (Ministro de Deportes)",
+      fecha: "2026-08-14"
     },
     decreto_url: "https://www.bcn.cl/leychile/navegar?idNorma=1215432",
-    decreto_numero: "Decreto Supremo N° 82 del Ministerio del Deporte",
+    decreto_numero: "Decreto Supremo N° 82 del Ministerio del Deporte / Prensa Presidencia",
     id_norma: "1215432",
     fuentes: [
       {
         nivel: "oficial",
         medio: "Ley Chile (Biblioteca del Congreso Nacional)",
         url: "https://www.bcn.cl/leychile/navegar?idNorma=1215432",
-        fecha: "2026-08-13",
-        titulo: "Decreto N° 82: Acéptase renuncia voluntaria de Subsecretaria del Deporte doña Natalia Duco Soler"
+        fecha: "2026-08-14",
+        titulo: "Decreto N° 82: Acéptase renuncia voluntaria de Ministra del Deporte doña Natalia Duco Soler y nómbrase a don Francisco Riveros Cantuarias"
       },
       {
         nivel: "prensa",
         medio: "La Tercera",
-        url: "https://www.latercera.com/politica/noticia/natalia-duco-renuncia-a-la-subsecretaria-del-deporte/20260813/",
-        fecha: "2026-08-13",
-        titulo: "Natalia Duco renuncia a la Subsecretaría del Deporte tras informe de Contraloría"
+        url: "https://www.latercera.com/politica/noticia/natalia-duco-renuncia-al-ministerio-del-deporte/20260814/",
+        fecha: "2026-08-14",
+        titulo: "Francisco Riveros Cantuarias asume como nuevo Ministro del Deporte tras renuncia de Natalia Duco"
       },
       {
         nivel: "prensa",
         medio: "Emol",
-        url: "https://www.emol.com/noticias/Deportes/2026/08/13/1138450/natalia-duco-renuncia-subsecretaria.html",
-        fecha: "2026-08-13",
-        titulo: "Natalia Duco formaliza su renuncia a la Subsecretaría del Deporte"
+        url: "https://www.emol.com/noticias/Deportes/2026/08/14/1138450/natalia-duco-renuncia-ministra-deporte.html",
+        fecha: "2026-08-14",
+        titulo: "Gobierno formaliza renuncia de Natalia Duco y nombramiento de Francisco Riveros"
       }
     ],
     estado: "verificado",
-    fecha_deteccion: "2026-08-13T10:00:00-04:00",
-    fecha_verificacion: "2026-08-13T16:00:00-04:00"
+    fecha_deteccion: "2026-08-14T10:00:00-04:00",
+    fecha_verificacion: "2026-08-14T16:00:00-04:00"
+  },
+  {
+    id: "mov-100",
+    tipo_evento: "renuncia",
+    cargo: "Subsecretaria del Deporte",
+    organismo: "Subsecretaría del Deporte",
+    ministerio: "Ministerio del Deporte",
+    region: "Nacional",
+    salio: {
+      nombre: "Nicolás Otero",
+      fecha: "2026-08-14",
+      fecha_inicio: "2026-03-11",
+      motivo_categoria: "Cambio dentro del gobierno",
+      motivo_texto: "Reestructuración del equipo directivo del Ministerio del Deporte."
+    },
+    entro: {
+      nombre: "Sofía Rengifo Ottone (Subsecretaria de Deportes)",
+      fecha: "2026-08-14"
+    },
+    decreto_url: "https://www.bcn.cl/leychile/navegar?idNorma=1215435",
+    decreto_numero: "Decreto Supremo N° 83 del Ministerio del Deporte",
+    id_norma: "1215435",
+    fuentes: [
+      {
+        nivel: "oficial",
+        medio: "Ley Chile (Biblioteca del Congreso Nacional)",
+        url: "https://www.bcn.cl/leychile/navegar?idNorma=1215435",
+        fecha: "2026-08-14",
+        titulo: "Decreto N° 83: Nombra Subsecretaria del Deporte a doña Sofía Rengifo Ottone"
+      },
+      {
+        nivel: "prensa",
+        medio: "Emol",
+        url: "https://www.emol.com/noticias/Deportes/2026/08/14/1138490/deportes-asume-sofia-rengifo-subsecretaria.html",
+        fecha: "2026-08-14",
+        titulo: "Sofía Rengifo Ottone asume la Subsecretaría del Deporte en nuevo diseño institucional"
+      }
+    ],
+    estado: "verificado",
+    fecha_deteccion: "2026-08-14T11:00:00-04:00",
+    fecha_verificacion: "2026-08-14T17:00:00-04:00"
+  },
+  {
+    id: "mov-098",
+    tipo_evento: "cambio",
+    cargo: "Ministra de la Mujer y la Equidad de Género",
+    organismo: "Ministerio de la Mujer y la Equidad de Género",
+    ministerio: "Ministerio de la Mujer y la Equidad de Género",
+    region: "Nacional",
+    salio: {
+      nombre: "Judith Castro",
+      fecha: "2026-06-16",
+      fecha_inicio: "2026-03-11",
+      motivo_categoria: "Cuestionamiento de gestión",
+      motivo_texto: "Ajuste de gabinete ministerial en carteras sectoriales."
+    },
+    entro: {
+      nombre: "Marcia Raphael Mora",
+      fecha: "2026-06-16"
+    },
+    decreto_url: "https://www.bcn.cl/leychile/navegar?idNorma=1213500",
+    decreto_numero: "Decreto Supremo N° 69 de Presidencia",
+    id_norma: "1213500",
+    fuentes: [
+      {
+        nivel: "oficial",
+        medio: "Ley Chile (Biblioteca del Congreso Nacional)",
+        url: "https://www.bcn.cl/leychile/navegar?idNorma=1213500",
+        fecha: "2026-06-16",
+        titulo: "Decreto Supremo N° 69: Nombra Ministra de la Mujer y la Equidad de Género a doña Marcia Raphael Mora"
+      },
+      {
+        nivel: "prensa",
+        medio: "La Tercera",
+        url: "https://www.latercera.com/politica/noticia/marcia-raphael-asume-ministerio-de-la-mujer/20260616/",
+        fecha: "2026-06-16",
+        titulo: "Marcia Raphael asume como nueva Ministra de la Mujer y la Equidad de Género"
+      }
+    ],
+    estado: "verificado",
+    fecha_deteccion: "2026-06-16T10:00:00-04:00",
+    fecha_verificacion: "2026-06-16T15:00:00-04:00"
+  },
+  {
+    id: "mov-099",
+    tipo_evento: "cambio",
+    cargo: "Ministra de Ciencia, Tecnología, Conocimiento e Innovación",
+    organismo: "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
+    ministerio: "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
+    region: "Nacional",
+    salio: {
+      nombre: "Ignacia Araos",
+      fecha: "2026-06-16",
+      fecha_inicio: "2026-03-11",
+      motivo_categoria: "Fin de período",
+      motivo_texto: "Conclusión de interinato y ratificación de titularidad ministerial."
+    },
+    entro: {
+      nombre: "Carolina Rossi (ratificada)",
+      fecha: "2026-06-16"
+    },
+    decreto_url: "https://www.bcn.cl/leychile/navegar?idNorma=1213520",
+    decreto_numero: "Decreto Supremo N° 70 de Presidencia",
+    id_norma: "1213520",
+    fuentes: [
+      {
+        nivel: "oficial",
+        medio: "Ley Chile (Biblioteca del Congreso Nacional)",
+        url: "https://www.bcn.cl/leychile/navegar?idNorma=1213520",
+        fecha: "2026-06-16",
+        titulo: "Decreto Supremo N° 70: Nombra Ministra de Ciencia a doña Carolina Rossi"
+      },
+      {
+        nivel: "prensa",
+        medio: "Emol",
+        url: "https://www.emol.com/noticias/Tecnologia/2026/06/16/1131450/carolina-rossi-ratificada-ministerio-ciencia.html",
+        fecha: "2026-06-16",
+        titulo: "Carolina Rossi es ratificada como ministra titular de Ciencia y Tecnología"
+      }
+    ],
+    estado: "verificado",
+    fecha_deteccion: "2026-06-16T10:30:00-04:00",
+    fecha_verificacion: "2026-06-16T15:30:00-04:00"
   },
   {
     id: "mov-044",
