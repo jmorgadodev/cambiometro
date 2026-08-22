@@ -8,6 +8,7 @@ import SiteHeader from "@/components/SiteHeader";
 import PageEntrance from "@/components/PageEntrance";
 import CookieConsent, { CookiePreferencesButton } from "@/components/CookieConsent";
 import NavigationProgressBar from "@/components/NavigationProgressBar";
+import RouteTransitionOrb from "@/components/RouteTransitionOrb";
 import { getDataPlatformSummary } from "@/lib/data-platform-d1";
 import "./globals.css";
 
@@ -114,8 +115,16 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="es" className={`${inter.variable} ${ibmPlexMono.variable}`}>
       <body className="font-sans">
+        <div id="initial-splash-orb" className="initial-splash-orb" role="status" aria-label="Cargando El Cambiómetro...">
+          <div className="loading-orb" style={{ width: "56px", height: "56px" }}>
+            <div className="loading-orb__glow" aria-hidden="true" />
+            <div className="loading-orb__ring" aria-hidden="true" />
+            <div className="loading-orb__core" aria-hidden="true" />
+          </div>
+        </div>
         <a className="skip-link" href="#contenido-principal">Saltar al contenido</a>
         <Suspense fallback={null}>
+          <RouteTransitionOrb />
           <NavigationProgressBar />
         </Suspense>
         <Suspense fallback={<div className="site-header site-header--fallback" aria-hidden="true" />}>

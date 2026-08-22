@@ -300,6 +300,8 @@ try {
   const servedHtml = await (await page.request.get(baseUrl)).text();
   assert(!servedHtml.includes("googletagmanager.com"), "el HTML servido no debe cargar googletagmanager sin GA4_ID");
   assert(!servedHtml.includes("gtag("), "el HTML servido no debe contener llamadas gtag sin GA4_ID");
+  assert(servedHtml.includes('id="initial-splash-orb"'), "el HTML inicial debe contener el splash SSR del orbe");
+  assert(servedHtml.includes("loading-orb"), "el splash SSR debe incluir la estructura del loading-orb");
 
   // M2: capturas 320/390px de /privacidad y del banner de cookies (R9)
   const screenshotDir = process.env.SCREENSHOT_DIR ?? tmpdir();
