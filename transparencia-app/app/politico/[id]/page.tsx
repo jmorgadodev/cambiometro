@@ -1,6 +1,6 @@
 
 import type { Metadata } from "next";
-export const dynamic = "force-dynamic";
+export const revalidate = 300;
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import {
