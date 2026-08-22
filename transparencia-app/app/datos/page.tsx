@@ -183,4 +183,4 @@ export default async function DataObservatoryPage() {
   );
 }
 
-export const revalidate = 300;
+export const dynamic = "force-dynamic";
