@@ -1,3 +1,4 @@
+import { cache } from "react";
 import { getD1Database } from "@/lib/db";
 import type { EntidadD1, RecordD1, RelationD1 } from "@/lib/db";
 import type { D1Database } from "@cloudflare/workers-types";
@@ -176,7 +177,7 @@ export async function searchEntities(query: string, requestedLimit = 25): Promis
   }
 }
 
-export async function getEntity(id: string): Promise<CanonicalEntity | undefined> {
+export const getEntity = cache(async function getEntity(id: string): Promise<CanonicalEntity | undefined> {
   const db = await getD1Database();
   if (!db) return (await bundledPlatform()).getEntity(id);
 
@@ -190,7 +191,7 @@ export async function getEntity(id: string): Promise<CanonicalEntity | undefined
   const sourceIds = [...new Set(rows.flatMap((row) => canonicalEntityFromRow(row).sourceIds))];
   const updatedAt = rows.map((row) => row.updated_at).filter((value): value is string => Boolean(value)).sort().at(-1) ?? null;
   return { ...entity, id: scope.canonicalId, identifiers: uniqueIdentifiers, sourceIds, updatedAt };
-}
+});
 
 export async function getEntitiesByIds(ids: string[]): Promise<CanonicalEntity[]> {
   const uniqueIds = [...new Set(ids)];
