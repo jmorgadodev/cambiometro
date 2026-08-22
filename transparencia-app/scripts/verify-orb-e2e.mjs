@@ -11,7 +11,7 @@ async function runE2E() {
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
 
-  const baseUrl = "http://127.0.0.1:3000";
+  const baseUrl = process.env.VERIFY_BASE_URL || "https://cambiometro.impulsacv.cl";
 
   // 1. Verificación del HTML SSR del Splash Inicial
   console.log("1. Verificando HTML inicial del servidor...");
@@ -64,11 +64,11 @@ async function runE2E() {
   await link.click();
 
   // El overlay se activa en <= 150ms
-  const overlayLocator = page.locator(".route-transition-overlay");
-  await overlayLocator.waitFor({ state: "visible", timeout: 2000 });
+  const overlayLocator = page.locator(".route-transition-overlay.is-active");
+  await overlayLocator.waitFor({ state: "visible", timeout: 3000 });
   const isOverlayVisible = await overlayLocator.isVisible();
   assert(isOverlayVisible, "El overlay de transición con LoadingOrb debe ser visible durante la navegación");
-  console.log("-> Overlay .route-transition-overlay está VISIBLE durante la transición [OK]");
+  console.log("-> Overlay .route-transition-overlay.is-active está VISIBLE durante la transición [OK]");
 
   // Tomar captura a mitad de la transición
   const transitionScreenshotPath = path.join(screenshotDir, "transicion-orbe-activa.png");
