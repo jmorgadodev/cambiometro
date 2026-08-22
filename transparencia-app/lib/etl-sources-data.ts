@@ -34,6 +34,7 @@ const CANONICAL_COUNTS: Record<string, number> = {
   senado: 8138,
   servel: 23894,
   personal_apoyo: 4092,
+  ine: 346,
 };
 
 const HISTORICAL_COUNTS: Record<string, number> = {
@@ -49,6 +50,7 @@ const HISTORICAL_COUNTS: Record<string, number> = {
   senado: 8138,
   servel: 23894,
   personal_apoyo: 4092,
+  ine: 346,
 };
 
 type HealthKey = keyof typeof healthRaw.sources | "personal_apoyo";
@@ -63,6 +65,7 @@ const descriptors: Descriptor[] = [
   { health: "infolobby", id: "etl_infolobby_plataforma", name: "Plataforma InfoLobby", organization: "Consejo para la Transparencia", category: "probidad", frequency: "Diaria", officialUrl: "https://www.infolobby.cl/", description: "Audiencias y registros oficiales disponibles en el corte local.", keyFields: ["Autoridad", "Institución", "Materia", "Fecha"], viewLink: "/cruces#lobby-publico", viewLabel: "Ver audiencias en explorador →" },
   { health: "infoprobidad", id: "etl_infoprobidad_declaraciones", name: "Declaraciones de Intereses y Patrimonio", organization: "Contraloría General de la República · CPLT", category: "probidad", frequency: "Por declaración", officialUrl: "https://www.declaracionjurada.cl/", description: "Declaraciones oficiales disponibles en el corte local.", keyFields: ["Declarante", "Cargo", "Institución", "Fecha"], viewLink: "/personas", viewLabel: "Ver declaraciones de autoridades →" },
   { health: "sinim", id: "etl_sinim_subdere", name: "Sistema Nacional de Información Municipal (SINIM)", organization: "SUBDERE", category: "municipios", frequency: "Anual", officialUrl: "http://www.sinim.gov.cl/", description: "Indicadores municipales oficiales disponibles; la cobertura faltante se conserva como ausencia.", keyFields: ["CUT", "Comuna", "Indicador", "Valor"], viewLink: "/municipalidades", viewLabel: "Ver comparador municipal →" },
+  { health: "ine", id: "etl_ine_censo_2024", name: "INE Censo 2024 (Población y Demografía)", organization: "Instituto Nacional de Estadísticas (INE)", category: "municipios", frequency: "Censal / Definitiva", officialUrl: "https://censo2024.ine.gob.cl/resultados/", description: "Población censada, hogares y viviendas de las 346 comunas de Chile con trazabilidad a la cartografía oficial del INE.", keyFields: ["CUT", "Comuna", "Población", "Viviendas", "Hogares"], viewLink: "/municipalidades", viewLabel: "Ver fichas comunales con demografía →" },
   { health: "contraloria", id: "etl_contraloria_auditorias", name: "Informes de Auditoría CGR", organization: "Contraloría General de la República", category: "probidad", frequency: "Continua", officialUrl: "https://www.contraloria.cl/web/cgr/informes-de-auditoria", description: "Informes y hallazgos oficiales descargados en el corte local.", keyFields: ["Informe", "Entidad", "Materia", "Fecha"], viewLink: "/cruces#fiscalizacion", viewLabel: "Ver fiscalizaciones en explorador →" },
   { health: "camara", id: "etl_camara_diputados", name: "Cámara de Diputadas y Diputados", organization: "Congreso Nacional", category: "parlamento", frequency: "Por publicación", officialUrl: "https://opendata.camara.cl/", description: "Registros oficiales de actividad y gastos presentes en el lake.", keyFields: ["Diputado", "Sesión", "Voto", "Gasto"], viewLink: "/politico", viewLabel: "Ver análisis de diputados →" },
   { health: "senado", id: "etl_senado_republica", name: "Senado de la República", organization: "Congreso Nacional", category: "parlamento", frequency: "Por publicación", officialUrl: "https://www.senado.cl/transparencia/datos-abiertos", description: "Registros oficiales de actividad y gastos presentes en el lake.", keyFields: ["Senador", "Sesión", "Voto", "Gasto"], viewLink: "/politico", viewLabel: "Ver análisis de senadores →" },

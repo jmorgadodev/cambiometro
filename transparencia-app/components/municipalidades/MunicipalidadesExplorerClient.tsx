@@ -16,6 +16,9 @@ interface MunicipalidadesExplorerClientProps {
     totalPresupuestoVigente: number;
     totalFuncionarios: number;
     totalMasaMensual: number;
+    alDiaCount?: number;
+    desfasadoCount?: number;
+    sinDatosCount?: number;
   };
 }
 
@@ -71,6 +74,9 @@ export default function MunicipalidadesExplorerClient({
   const [partidoFilter, setPartidoFilter] = useState(
     searchParams.get("partido") || "Todos"
   );
+  const [frescuraFilter, setFrescuraFilter] = useState(
+    searchParams.get("frescura") || "Todos"
+  );
   const [sortBy, setSortBy] = useState<
     "presupuesto" | "percapita" | "nomina" | "dotacion" | "poblacion" | "nombre"
   >(
@@ -118,6 +124,7 @@ export default function MunicipalidadesExplorerClient({
     if (fcmFilter !== "Todos") params.set("fcm", fcmFilter);
     if (perCapitaFilter !== "Todos") params.set("percapita", perCapitaFilter);
     if (partidoFilter !== "Todos") params.set("partido", partidoFilter);
+    if (frescuraFilter !== "Todos") params.set("frescura", frescuraFilter);
     if (sortBy !== "presupuesto") params.set("sort", sortBy);
     if (sortOrder !== "desc") params.set("order", sortOrder);
     if (page > 1) params.set("page", String(page));
@@ -136,6 +143,7 @@ export default function MunicipalidadesExplorerClient({
     fcmFilter,
     perCapitaFilter,
     partidoFilter,
+    frescuraFilter,
     sortBy,
     sortOrder,
     page,
@@ -194,6 +202,11 @@ export default function MunicipalidadesExplorerClient({
         if (pAlcalde !== partidoFilter) return false;
       }
 
+      // Filtro de Frescura CPLT
+      if (frescuraFilter === "al_dia" && m.estado_frescura !== "al_dia") return false;
+      if (frescuraFilter === "desfasado" && m.estado_frescura !== "desfasado") return false;
+      if (frescuraFilter === "sin_datos" && m.estado_frescura !== "sin_datos") return false;
+
       return true;
     });
   }, [
@@ -204,6 +217,7 @@ export default function MunicipalidadesExplorerClient({
     fcmFilter,
     perCapitaFilter,
     partidoFilter,
+    frescuraFilter,
   ]);
 
   // Ordenamiento reactivo
@@ -267,6 +281,7 @@ export default function MunicipalidadesExplorerClient({
     setFcmFilter("Todos");
     setPerCapitaFilter("Todos");
     setPartidoFilter("Todos");
+    setFrescuraFilter("Todos");
     setSortBy("presupuesto");
     setSortOrder("desc");
     setPage(1);
@@ -539,6 +554,59 @@ export default function MunicipalidadesExplorerClient({
                 }}
               >
                 Gasto Mensual en Personal
+              </div>
+            </div>
+
+            {/* KPI 5: Cumplimiento Transparencia Activa Ley 20.285 */}
+            <div
+              className="card"
+              style={{
+                background: "var(--surface-2)",
+                borderColor: "var(--border)",
+                padding: "1.25rem",
+              }}
+            >
+              <div
+                style={{
+                  fontSize: "0.72rem",
+                  color: "var(--text-3)",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  display: "flex",
+                  justifyContent: "space-between",
+                }}
+              >
+                <span>Transparencia Activa</span>
+                <span
+                  title="Auditoría de cumplimiento Ley 20.285: Municipalidades que mantienen sus nóminas de personal CPLT informadas con menos de 90 días de desfase respecto a la fecha actual."
+                  style={{
+                    color: "var(--ok)",
+                    cursor: "help",
+                    fontSize: "0.68rem",
+                  }}
+                >
+                  Ley 20.285 ⓘ
+                </span>
+              </div>
+              <div
+                style={{
+                  fontFamily: "var(--font-mono, monospace)",
+                  fontSize: "1.35rem",
+                  fontWeight: 900,
+                  color: "var(--ok)",
+                  marginTop: "0.2rem",
+                }}
+              >
+                {stats.alDiaCount ?? 0} / 346
+              </div>
+              <div
+                style={{
+                  fontSize: "0.72rem",
+                  color: "var(--text-3)",
+                  marginTop: "0.25rem",
+                }}
+              >
+                Comunas con nómina al día (≤ 90 días)
               </div>
             </div>
           </div>
@@ -1185,7 +1253,45 @@ export default function MunicipalidadesExplorerClient({
               </select>
             </div>
 
-            {/* 6. Ordenar por */}
+            {/* 6. Frescura de Nómina CPLT */}
+            <div>
+              <label
+                style={{
+                  fontSize: "0.65rem",
+                  fontWeight: 700,
+                  textTransform: "uppercase",
+                  color: "var(--text-subtle)",
+                  display: "block",
+                  marginBottom: "0.2rem",
+                }}
+              >
+                Frescura Nómina
+              </label>
+              <select
+                value={frescuraFilter}
+                onChange={(e) => {
+                  setFrescuraFilter(e.target.value);
+                  setPage(1);
+                }}
+                style={{
+                  width: "100%",
+                  padding: "0.4rem 0.6rem",
+                  background: "var(--bg-surface-2)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 6,
+                  color: "var(--text-primary)",
+                  fontSize: "0.78rem",
+                  cursor: "pointer",
+                }}
+              >
+                <option value="Todos">Cualquier estado</option>
+                <option value="al_dia">✓ Al día (≤ 90 días)</option>
+                <option value="desfasado">⚠️ Con desfase (&gt; 90 días)</option>
+                <option value="sin_datos">Sin nómina CPLT</option>
+              </select>
+            </div>
+
+            {/* 7. Ordenar por */}
             <div>
               <label
                 style={{
@@ -1406,6 +1512,33 @@ export default function MunicipalidadesExplorerClient({
                           >
                             {m.region}
                           </span>
+                          {m.estado_frescura === "al_dia" && (
+                            <span
+                              className="badge badge-ok"
+                              style={{ fontSize: "0.65rem", padding: "0.15rem 0.45rem", fontWeight: 700 }}
+                              title="Nómina informada en los últimos 90 días"
+                            >
+                              ✓ Nómina {m.periodo_nomina}
+                            </span>
+                          )}
+                          {m.estado_frescura === "desfasado" && (
+                            <span
+                              className="badge badge-warn"
+                              style={{ fontSize: "0.65rem", padding: "0.15rem 0.45rem", fontWeight: 700 }}
+                              title={`Nómina con ${m.desfase_meses} meses de desfase oficial`}
+                            >
+                              ⚠️ Desfase {m.desfase_meses}m ({m.periodo_nomina})
+                            </span>
+                          )}
+                          {m.estado_frescura === "sin_datos" && (
+                            <span
+                              className="badge"
+                              style={{ fontSize: "0.65rem", padding: "0.15rem 0.45rem", opacity: 0.7 }}
+                              title="Sin registros de nómina en CPLT"
+                            >
+                              Sin nómina CPLT
+                            </span>
+                          )}
                           {m.auditorias_cgr_count !== undefined && m.auditorias_cgr_count > 0 && (
                             <span
                               className="badge badge-warn"
@@ -1705,6 +1838,14 @@ export default function MunicipalidadesExplorerClient({
                         textAlign: "center",
                       }}
                     >
+                      Nómina CPLT
+                    </th>
+                    <th
+                      style={{
+                        padding: "0.75rem 1rem",
+                        textAlign: "center",
+                      }}
+                    >
                       Acción
                     </th>
                   </tr>
@@ -1854,6 +1995,29 @@ export default function MunicipalidadesExplorerClient({
                           }}
                         >
                           {formatNum(staff)}
+                        </td>
+
+                        <td
+                          style={{
+                            padding: "0.8rem 1rem",
+                            textAlign: "center",
+                          }}
+                        >
+                          {m.estado_frescura === "al_dia" && (
+                            <span className="badge badge-ok" style={{ fontSize: "0.65rem" }} title="Nómina informada en los últimos 90 días">
+                              {m.periodo_nomina}
+                            </span>
+                          )}
+                          {m.estado_frescura === "desfasado" && (
+                            <span className="badge badge-warn" style={{ fontSize: "0.65rem" }} title={`Nómina con ${m.desfase_meses} meses de desfase oficial`}>
+                              ⚠️ {m.periodo_nomina} ({m.desfase_meses}m)
+                            </span>
+                          )}
+                          {m.estado_frescura === "sin_datos" && (
+                            <span className="badge" style={{ fontSize: "0.65rem", opacity: 0.7 }}>
+                              Sin datos
+                            </span>
+                          )}
                         </td>
 
                         <td

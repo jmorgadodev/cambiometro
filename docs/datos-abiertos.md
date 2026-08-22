@@ -84,5 +84,33 @@ Este documento consolida las fuentes oficiales, criterios metodológicos, reglas
     $$\text{Presupuesto Per Cápita} = \text{Math.round}\left(\frac{\text{Presupuesto Vigente SINIM}}{\text{Población Censo 2024 INE}}\right)$$
   - Se presenta en formato chileno de moneda (`$ / hab.`) citando explícitamente la fuente `"Censo 2024 INE"`.
 
+---
+
+## 9. Frescura, Desfases y Cumplimiento de Transparencia Activa Municipal (Ley 20.285)
+
+- **Cadena de Publicación y Trazabilidad:**
+  1. **Declaración Municipal:** Cada municipalidad carga mensualmente sus nóminas de personal (Planta, Contrata, Honorarios y Código del Trabajo) en su respectivo portal de Transparencia Activa.
+  2. **Consolidación Central CPLT:** El Consejo para la Transparencia consolida los datos informados a nivel nacional y publica periódicamente los microdatos abiertos consolidados.
+  3. **Sincronización ETL:** El Cambiómetro procesa, valida (reglas V1–V7) e indexa los registros oficiales manteniendo el historial cronológico completo de cada comuna.
+- **Desfase Individual y Auditoría de Cumplimiento (Ley 20.285):**
+  - Cada municipalidad reporta con su propio ritmo; por ende, **cada comuna posee su propio último período y desfase específico**.
+  - **Cálculo del Desfase:** Se evalúa la diferencia en meses entre el último período informado por el municipio y la fecha de corte actual.
+  - **Umbral de Cumplimiento:**
+    - **Al día (≤ 90 días / ≤ 3 meses):** La municipalidad mantiene su deber de publicación dentro de los plazos regulares de reporte y consolidación.
+    - **Con Desfase (> 90 días):** Se exhibe una advertencia visible de cumplimiento (`⚠️ Nómina con X meses de desfase`), reflejando el rezago informativo sin ocultarlo ni promediarlo.
+    - **Sin Datos:** Se indica expresamente la ausencia de información en la fuente CPLT.
+- **Frecuencia y Desfase Esperado por Fuente Oficial:**
+
+| Fuente Oficial | Organismo Emisor | Frecuencia de Origen | Desfase Esperado de Publicación |
+|---|---|---|---|
+| **Transparencia Activa Municipal** | Municipalidades / CPLT | Mensual (por comuna) | 30 a 60 días |
+| **Ley de Presupuestos (DIPRES)** | Ministerio de Hacienda | Mensual | 30 a 45 días |
+| **Sistema SINIM** | SUBDERE | Anual / Trimestral | 60 a 120 días |
+| **MercadoPúblico OCDS** | Dirección ChileCompra | Continua / Mensual | 1 a 30 días |
+| **InfoLobby / Audiencias** | CPLT | Diaria | 1 a 7 días |
+| **InfoProbidad (Patrimonio)** | CGR / CPLT | Por evento / Declaración | Inmediata tras publicación |
+| **Censo de Población** | INE Chile | Censal / Definitiva | Período de referencia vigente |
+
+
 
 
