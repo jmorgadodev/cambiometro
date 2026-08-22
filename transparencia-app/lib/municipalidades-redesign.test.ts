@@ -39,11 +39,13 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
       }
     });
 
-    it("4. Presupuesto per cápita queda ausente sin población INE materializada", () => {
+    it("4. Presupuesto per cápita calculado con población INE Censo 2024 oficial", () => {
       const talca = getMunicipalidadData("muni-talca");
       expect(talca).not.toBeNull();
-      expect(talca?.poblacion_censo_2024).toBeNull();
-      expect(talca?.presupuesto_per_capita_clp).toBeNull();
+      expect(talca?.poblacion_censo_2024).toBe(232131);
+      expect(talca?.presupuesto_per_capita_clp).toBe(
+        Math.round((talca?.presupuesto?.vigente_clp ?? 0) / 232131)
+      );
     });
   });
 

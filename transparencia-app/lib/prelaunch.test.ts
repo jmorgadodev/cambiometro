@@ -15,8 +15,8 @@ describe("Sanidad global pre-lanzamiento y rutas", () => {
     expect(kpis.relaciones).toBe(1897);
     expect(kpis.votaciones).toBe(12111);
     expect(kpis.gastos).toBe(690);
-    expect(kpis.fuentes_operativas).toBe(11);
-    expect(kpis.total_fuentes).toBe(11);
+    expect(kpis.fuentes_operativas).toBe(12);
+    expect(kpis.total_fuentes).toBe(12);
     expect(kpis.corte).toBe("Agosto 2026");
   });
 

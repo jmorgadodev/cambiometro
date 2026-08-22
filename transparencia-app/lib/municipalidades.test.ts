@@ -13,7 +13,7 @@ describe("catalogo territorial oficial de SUBDERE", () => {
     expect(MUNICIPALIDADES_SEED.every((comuna) => /^\d{5}$/.test(comuna.cut))).toBe(true);
     expect(MUNICIPALIDADES_SEED.every((comuna) => comuna.alcalde_actual === null)).toBe(true);
     expect(MUNICIPALIDADES_SEED.every((comuna) => comuna.partido_alcalde === null)).toBe(true);
-    expect(MUNICIPALIDADES_SEED.every((comuna) => comuna.poblacion_censo_2024 === null)).toBe(true);
+    expect(MUNICIPALIDADES_SEED.every((comuna) => typeof comuna.poblacion_censo_2024 === "number" && comuna.poblacion_censo_2024 > 0)).toBe(true);
   });
 
   it("asocia Antartica a la Municipalidad de Cabo de Hornos", () => {

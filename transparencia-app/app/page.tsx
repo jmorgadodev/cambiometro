@@ -175,7 +175,7 @@ export default async function HomePage() {
           <div className="home-section-heading">
             <div>
               <p className="eyebrow">Estado de datos</p>
-              <h2 id="sources-title">11 fuentes oficiales + 1 derivada (personal de apoyo parlamentario)</h2>
+              <h2 id="sources-title">{GLOBAL_KPIS.fuentes_operativas} fuentes oficiales + 1 derivada (personal de apoyo parlamentario)</h2>
             </div>
             <Link href="/fuentes">Revisar catálogo de fuentes →</Link>
           </div>
