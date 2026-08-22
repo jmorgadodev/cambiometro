@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState, useEffect, useCallback, Suspense, useSyncExternalStore } from "react";
+import { useMemo, useState, useEffect, useCallback, Suspense } from "react";
 import { useSearchParams, usePathname } from "next/navigation";
 import {
   MOVIMIENTOS,
@@ -170,11 +170,7 @@ function MovimientosContent() {
     return Object.entries(grupos).sort((a, b) => (a[0] === b[0] ? 0 : a[0] < b[0] ? 1 : -1));
   }, [filtrados]);
 
-  const nowMs = useSyncExternalStore(
-    () => () => {},
-    () => Date.now(),
-    () => 0
-  );
+  const [nowMs] = useState<number>(() => Date.now());
 
   // KPIs 100% DINÁMICOS DESDE EL DATASET
   const {
