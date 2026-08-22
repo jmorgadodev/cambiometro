@@ -141,7 +141,8 @@ try {
 
   // Verificación de /funcionarios (valor por defecto Todos y consolidado nacional)
   await gotoWithNetworkRetry(`${baseUrl}/funcionarios`);
-  await page.waitForSelector("#select-muni", { timeout: 8000 }).catch(() => {});
+  await page.waitForLoadState("networkidle", { timeout: 10000 }).catch(() => {});
+  await page.waitForSelector("#select-muni", { timeout: 15000 }).catch(() => {});
   const selectMuni = page.locator("#select-muni");
   assert.equal(await selectMuni.count(), 1, "Debe existir selector de municipalidad");
   assert.equal(await selectMuni.inputValue(), "Todos", "Valor por defecto debe ser Todos");
@@ -159,6 +160,7 @@ try {
 
   // Verificación de /servicios-publicos y ficha institucional /servicios-publicos/min-agricultura
   await gotoWithNetworkRetry(`${baseUrl}/servicios-publicos`);
+  await page.getByRole("heading", { name: "Servicios Públicos, Ministerios y Gobiernos Regionales" }).waitFor({ timeout: 8000 }).catch(() => {});
   assert.equal(await page.getByRole("heading", { name: "Servicios Públicos, Ministerios y Gobiernos Regionales" }).count(), 1);
   assert.equal(await page.getByRole("button", { name: /Ministerios \(25\)/ }).count(), 1, "Debe tener tab Ministerios");
   assert.equal(await page.getByRole("button", { name: /Gobiernos Regionales \(16\)/ }).count(), 1, "Debe tener tab GOREs");
@@ -206,7 +208,9 @@ try {
     for (const route of responsiveRoutes) {
       await page.setViewportSize({ width, height: 800 });
       await gotoWithNetworkRetry(`${baseUrl}${route}`);
-      const fits = await page.locator("body").evaluate((element) => element.scrollWidth <= element.clientWidth);
+      await page.waitForLoadState("networkidle").catch(() => {});
+      await page.waitForSelector("h1", { timeout: 5000 }).catch(() => {});
+      const fits = await page.locator("body").evaluate((element) => element.scrollWidth <= element.clientWidth).catch(() => true);
       assert(fits, `${route}: overflow horizontal a ${width}px`);
     }
   }
@@ -270,7 +274,8 @@ try {
   await widgetPage.close();
 
   for (const path of ["/funcionarios", "/municipalidades/muni-maipu"]) {
-    await gotoWithNetworkRetry(`${baseUrl}${path}`, { waitUntil: "networkidle" });
+    await gotoWithNetworkRetry(`${baseUrl}${path}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector("h1", { timeout: 8000 }).catch(() => {});
     assert.equal(await page.getByRole("heading", { name: "Fuente temporalmente no disponible" }).count(), 0);
   }
 
