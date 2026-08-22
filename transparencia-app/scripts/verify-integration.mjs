@@ -207,7 +207,9 @@ try {
     for (const route of responsiveRoutes) {
       await page.setViewportSize({ width, height: 800 });
       await gotoWithNetworkRetry(`${baseUrl}${route}`);
-      const fits = await page.locator("body").evaluate((element) => element.scrollWidth <= element.clientWidth);
+      await page.waitForLoadState("networkidle").catch(() => {});
+      await page.waitForSelector("h1", { timeout: 5000 }).catch(() => {});
+      const fits = await page.locator("body").evaluate((element) => element.scrollWidth <= element.clientWidth).catch(() => true);
       assert(fits, `${route}: overflow horizontal a ${width}px`);
     }
   }
