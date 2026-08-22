@@ -70,3 +70,13 @@ Este documento consolida las fuentes oficiales, criterios metodológicos, reglas
   - **Hallazgo de Integridad CRÍTICA (exceso superior al 40%):** Aplica cuando el monto total publicado supera en más de un 40% la base mensual oficial sin respaldo de transferencias acreditadas.
 - **Declaración de No Imputación:** La presencia de un hallazgo de integridad señala una discrepancia contable o documental respecto al estándar base publicado y no constituye por sí misma una imputación de ilicitud, dolo ni falta administrativa.
 
+---
+
+## 8. Población Comunal y Presupuesto Per Cápita (Censo INE)
+
+- **Estado de Publicación:** El dataset de población desagregada por comuna del **Censo 2024 (Instituto Nacional de Estadísticas - INE)** aún no se encuentra disponible en formato abierto descargable para las 346 comunas.
+- **Tratamiento Metodológico (Regla R10):**
+  - Conforme a la regla de integridad R10, la plataforma prohíbe el uso de cifras sintéticas o derivadas de nóminas de personal.
+  - Hasta que el INE publique oficialmente el dataset comunal en datos abiertos, el indicador de población comunal y el presupuesto per cápita se presentan como `"No publicado por la fuente"` con valor `"—"`.
+
+
