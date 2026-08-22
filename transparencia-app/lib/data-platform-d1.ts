@@ -354,18 +354,19 @@ export async function listSourceManifests(): Promise<SourceManifest[]> {
     }));
   }
 
-  const [recordStats, stateRows] = await Promise.all([
-    db.prepare("SELECT source_id, count(*) as cnt FROM records GROUP BY source_id").all<{source_id: string, cnt: number}>(),
-    db.prepare("SELECT source_id,status,record_count,checksum_sha256,generated_at,last_success_at,error FROM source_state").all<{
-      source_id: string;
-      status: string;
-      record_count: number;
-      checksum_sha256: string | null;
-      generated_at: string | null;
-      last_success_at: string | null;
-      error: string | null;
-    }>(),
-  ]);
+  try {
+    const [recordStats, stateRows] = await Promise.all([
+      db.prepare("SELECT source_id, count(*) as cnt FROM records GROUP BY source_id").all<{source_id: string, cnt: number}>(),
+      db.prepare("SELECT source_id,status,record_count,checksum_sha256,generated_at,last_success_at,error FROM source_state").all<{
+        source_id: string;
+        status: string;
+        record_count: number;
+        checksum_sha256: string | null;
+        generated_at: string | null;
+        last_success_at: string | null;
+        error: string | null;
+      }>(),
+    ]);
 
   const statsBySource = new Map<string, { count: number }>();
   for (const row of recordStats.results) {
@@ -400,6 +401,23 @@ export async function listSourceManifests(): Promise<SourceManifest[]> {
       storageTier: archiveOnly ? "r2" : "d1",
     };
   });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : String(error);
+    if (/no such table:\s*(records|source_state)\b/i.test(message)) {
+      return SOURCE_DEFINITIONS.map(source => ({
+        ...source,
+        foundPeriods: [],
+        lastUpdated: null,
+        checksumSha256: null,
+        recordCount: 0,
+        errorCount: 0,
+        status: "unavailable" as const,
+        statusDetail: "D1 sin materializar en build.",
+        storageTier: "d1" as const,
+      }));
+    }
+    throw error;
+  }
 }
 
 type DataPlatformSummary = { totalRecords: number; updatedAt: string | null };

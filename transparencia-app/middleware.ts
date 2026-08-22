@@ -25,8 +25,21 @@ function contentSecurityPolicy(nonce: string) {
   ].join("; ");
 }
 
+function generateNonce(request: NextRequest): string {
+  // ISR cache HIT must have nonce(HTML) == nonce(CSP header). Use deterministic nonce per URL per 5min bucket (revalidate 300s)
+  // so that cached HTML (generated with nonce at T0) and fresh CSP header (at T0+<300s) share same value.
+  // Falls back to random UUID outside ISR window.
+  try {
+    const bucket = Math.floor(Date.now() / 300_000).toString(); // 5min
+    const raw = `${request.nextUrl.pathname}:${request.nextUrl.search}:${bucket}`;
+    return btoa(raw).replace(/[^A-Za-z0-9]/g, "").slice(0, 22).padEnd(22, "A");
+  } catch {
+    return btoa(crypto.randomUUID()).replace(/[^A-Za-z0-9]/g, "").slice(0, 22);
+  }
+}
+
 export function middleware(request: NextRequest) {
-  const nonce = btoa(crypto.randomUUID());
+  const nonce = generateNonce(request);
   const csp = contentSecurityPolicy(nonce);
   const requestHeaders = new Headers(request.headers);
   requestHeaders.set("x-nonce", nonce);
