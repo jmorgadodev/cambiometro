@@ -12,10 +12,10 @@ export default function RouteTransitionOrb() {
 
   const transitionStartRef = useRef<number>(0);
   const hideTimeoutRef = useRef<number | null>(null);
-  const showTimeoutRef = useRef<number | null>(null);
   const prevKeyRef = useRef<string>("");
 
-  const currentKey = `${pathname}?${searchParams.toString()}`;
+  const searchStr = searchParams?.toString() ?? "";
+  const currentKey = `${pathname}?${searchStr}`;
 
   // Retiro del splash inicial SSR tras la hidratacion
   useEffect(() => {
@@ -34,7 +34,6 @@ export default function RouteTransitionOrb() {
   useEffect(() => {
     function handleAnchorClick(event: MouseEvent) {
       if (
-        event.defaultPrevented ||
         event.button !== 0 ||
         event.metaKey ||
         event.ctrlKey ||
@@ -61,14 +60,11 @@ export default function RouteTransitionOrb() {
         const isSameSearch = targetUrl.search === currentUrl.search;
         if (isSamePath && isSameSearch) return;
 
-        if (showTimeoutRef.current) window.clearTimeout(showTimeoutRef.current);
         if (hideTimeoutRef.current) window.clearTimeout(hideTimeoutRef.current);
 
-        showTimeoutRef.current = window.setTimeout(() => {
-          transitionStartRef.current = Date.now();
-          setIsTransitioning(true);
-          setIsVisible(true);
-        }, 40);
+        transitionStartRef.current = Date.now();
+        setIsTransitioning(true);
+        setIsVisible(true);
       } catch {
         // Ignorar URLs invalidas
       }
@@ -90,11 +86,6 @@ export default function RouteTransitionOrb() {
     if (prevKeyRef.current !== currentKey) {
       prevKeyRef.current = currentKey;
 
-      if (showTimeoutRef.current) {
-        window.clearTimeout(showTimeoutRef.current);
-        showTimeoutRef.current = null;
-      }
-
       if (isTransitioning) {
         const elapsed = Date.now() - transitionStartRef.current;
         const minVisibleMs = 350;
@@ -113,10 +104,6 @@ export default function RouteTransitionOrb() {
       }
     }
   }, [currentKey, isTransitioning]);
-
-  if (!isTransitioning && !isVisible) {
-    return null;
-  }
 
   return (
     <div
