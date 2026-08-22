@@ -215,7 +215,7 @@ export default async function DataQualityPage() {
                 <span>1. Regla R10: Sin Datos Inventados</span>
               </h3>
               <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.5, margin: 0 }}>
-                Si una municipalidad u organismo no publica información en el período consultado, el sistema muestra <strong style={{ color: "var(--text-primary)" }}>"—"</strong> con nota explicativa de origen. NUNCA se interpolan, aproximan o sustituyen cifras faltantes por conteos de otras tablas.
+                Si una municipalidad u organismo no publica información en el período consultado, el sistema muestra <strong style={{ color: "var(--text-primary)" }}>&ldquo;—&rdquo;</strong> con nota explicativa de origen. NUNCA se interpolan, aproximan o sustituyen cifras faltantes por conteos de otras tablas.
               </p>
             </article>
 
