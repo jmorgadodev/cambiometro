@@ -146,7 +146,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
               {personal?.dotacion_total !== null && personal?.dotacion_total !== undefined ? `${personal.dotacion_total.toLocaleString("es-CL")} pers.` : "—"}
             </div>
             <div style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
-              Transparencia Activa CPLT
+              {personal?.dotacion_total !== null && personal?.dotacion_total !== undefined ? "Transparencia Activa CPLT" : "Sin publicaciones en la fuente"}
             </div>
           </div>
 
@@ -169,7 +169,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
               {compras?.monto_total_clp !== null && compras?.monto_total_clp !== undefined ? formatCompactCLP(compras.monto_total_clp) : "—"}
             </div>
             <div style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
-              {compras ? `${compras.procesos_count} procesos` : "ChileCompra OCDS"}
+              {compras ? `${compras.procesos_count.toLocaleString("es-CL")} procesos · ChileCompra OCDS` : "Sin publicaciones en la fuente"}
             </div>
           </div>
 
@@ -894,8 +894,14 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
             </div>
           ) : (
             <div className="card" style={{ padding: "1.75rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                <span className="badge badge-warn">ChileCompra · OCDS</span>
+              </div>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0 0 0.5rem", color: "var(--text-primary)" }}>
+                Sin compras registradas en MercadoPúblico
+              </h3>
               <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: 0 }}>
-                Sin enlace verificable por RUT jurídico entre este organismo y ChileCompra; los montos, órdenes y proveedores se mantienen ausentes.
+                Sin enlace verificable por RUT jurídico entre este organismo y ChileCompra OCDS. Este organismo no registra procesos ni órdenes de compra adjudicadas bajo su RUT jurídico en el estándar OCDS de ChileCompra; los montos se mantienen ausentes sin estimaciones artificiales (Regla R10).
               </p>
             </div>
           )}
