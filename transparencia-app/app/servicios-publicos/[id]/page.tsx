@@ -15,13 +15,7 @@ import {
 } from "@/lib/slug-utils";
 
 export function generateStaticParams() {
-  // Emitir slug canónico + ID legado para que la build capture ambos
-  const entries: Array<{ id: string }> = [];
-  for (const { id, slug } of getAllServicioSlugs()) {
-    entries.push({ id: slug });         // URL nueva (slug canónico)
-    if (id !== slug) entries.push({ id }); // ID legado (para 301)
-  }
-  return entries;
+  return getAllServicioSlugs().map(({ slug }) => ({ id: slug }));
 }
 
 export async function generateMetadata({
