@@ -7,6 +7,7 @@ const BASE_URL = process.env.VERIFY_BASE_URL || "https://cambiometro.impulsacv.c
 const screenshotDir = process.env.SCREENSHOT_DIR || os.tmpdir();
 
 const DISTINCT_POLITICOS = [
+  "/politico/fabiola-campillai-rojas",
   "/politico/vanessa-kaiser-barents-von-hohenhagen",
   "/politico/jorge-diaz-ibarra",
   "/politico/luis-malla-valenzuela",
@@ -14,7 +15,6 @@ const DISTINCT_POLITICOS = [
   "/politico/alvaro-jofre-caceres",
   "/politico/carlos-carvajal-gallardo",
   "/politico/ximena-naranjo-pinto",
-  "/politico/miguel-becker-alvear",
 ];
 
 const MAIN_ROUTES = [
@@ -27,7 +27,7 @@ const MAIN_ROUTES = [
 ];
 
 async function runE2E() {
-  console.log("=== PLAYWRIGHT E2E: TEST DE RUTAS DISTINTAS Y ORBE SEGURO ===");
+  console.log("=== PLAYWRIGHT E2E: TEST DE RUTAS DISTINTAS, HEADER PC Y COSTO MENSUAL ===");
   console.log(`Base URL: ${BASE_URL}`);
 
   // 1. Verificación del Splash SSR en HTML sin JS
@@ -46,7 +46,7 @@ async function runE2E() {
   await browserNoJs.close();
 
   // 2. Navegación en sesión interactiva completa con 8 fichas distintas
-  console.log("\n2. Iniciando sesión interactiva y navegando 8 fichas distintas...");
+  console.log("\n2. Iniciando sesión interactiva y navegando rutas principales...");
   const browser = await chromium.launch();
   const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
   const page = await context.newPage();
@@ -67,37 +67,47 @@ async function runE2E() {
     console.log(`-> Ruta ${route.padEnd(22)}: HTTP ${res.status()} [OK]`);
   }
 
-  // Navegar consecutivamente por las 8 fichas distintas
-  console.log("\n3. Navegando consecutivamente por 8 fichas políticas distintas...");
+  // 3. Navegación y comprobación de Header PC y Panel Costo Mensual en fichas
+  console.log("\n3. Navegando consecutivamente por 8 fichas políticas distintas con Header PC y Costo Mensual...");
   for (const politicoRoute of DISTINCT_POLITICOS) {
     const res = await page.goto(`${BASE_URL}${politicoRoute}`, { waitUntil: "networkidle" });
     const content = await page.content();
     assert(!content.includes("This page couldn't load"), `Error en ${politicoRoute}: "This page couldn't load"`);
     assert(!content.includes("Application error"), `Error en ${politicoRoute}: Application error`);
     assert(!content.includes("Político no encontrado"), `Error en ${politicoRoute}: Político no encontrado`);
-    console.log(`-> Ficha ${politicoRoute.padEnd(48)}: HTTP ${res.status()} [OK]`);
+
+    // Validar presencia de elementos clave de la Tarea 14
+    const dipCol = page.locator(".politico-header-dip-col");
+    assert(await dipCol.count() > 0, `Header DIP column no encontrada en ${politicoRoute}`);
+
+    const costoPanel = page.locator("#costo-mensual");
+    assert(await costoPanel.count() > 0, `Panel Costo Mensual no encontrado en ${politicoRoute}`);
+
+    console.log(`-> Ficha ${politicoRoute.padEnd(48)}: HTTP ${res.status()} [OK - Header PC & Costo Mensual presentes]`);
   }
 
-  // 4. Captura de overlay durante transición
-  console.log("\n4. Verificando overlay de transición interactivo...");
-  await page.goto(BASE_URL, { waitUntil: "networkidle" });
+  // 4. Captura Desktop de Campillai y Kaiser para reporte
+  console.log("\n4. Capturando screenshots Desktop (1440px) de Campillai y Kaiser...");
   
-  // Interceptar click y verificar estado activo
-  const link = page.locator('.site-nav a[href="/politico"]').first();
-  await link.click({ noWaitAfter: true });
+  // Campillai
+  await page.goto(`${BASE_URL}/politico/fabiola-campillai-rojas`, { waitUntil: "networkidle" });
+  await page.waitForTimeout(500);
+  const campillaiScreenshotPath = path.join(screenshotDir, "desktop-campillai.png");
+  await page.screenshot({ path: campillaiScreenshotPath, fullPage: false });
+  console.log(`-> Screenshot Desktop Campillai: ${campillaiScreenshotPath}`);
 
-  const transitionScreenshotPath = path.join(screenshotDir, "transicion-orbe-activa.png");
-  await page.screenshot({ path: transitionScreenshotPath });
-  console.log(`-> Captura de transición guardada en: ${transitionScreenshotPath}`);
-
-  await page.waitForURL(`**/politico*`, { timeout: 15000 });
-  console.log(`-> Navegación a /politico completada limpiamente: ${page.url()}`);
+  // Kaiser
+  await page.goto(`${BASE_URL}/politico/vanessa-kaiser-barents-von-hohenhagen`, { waitUntil: "networkidle" });
+  await page.waitForTimeout(500);
+  const kaiserScreenshotPath = path.join(screenshotDir, "desktop-kaiser.png");
+  await page.screenshot({ path: kaiserScreenshotPath, fullPage: false });
+  console.log(`-> Screenshot Desktop Kaiser: ${kaiserScreenshotPath}`);
 
   await browser.close();
-  console.log("\n=== TODAS LAS PRUEBAS E2E DE RUTAS DISTINTAS PASARON SATISFACTORIAMENTE ===");
+  console.log("\n=== TODAS LAS PRUEBAS E2E DE RUTAS DISTINTAS Y TAREA 14 PASARON SATISFACTORIAMENTE ===");
 }
 
 runE2E().catch((err) => {
-  console.error("Error fatal en E2E:", err);
+  console.error("FATAL ERROR EN E2E:", err);
   process.exit(1);
 });

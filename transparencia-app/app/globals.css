@@ -2764,6 +2764,35 @@ html.dark .page-masthead {
   flex-shrink: 0;
 }
 
+.politico-header-avatar-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  flex-shrink: 0;
+}
+
+.politico-header-avatar-img {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  object-fit: cover;
+  transition: width 0.2s ease, height 0.2s ease;
+}
+
+.politico-header-avatar-fallback {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  border: 3px solid var(--border);
+  background: var(--surface-2);
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  transition: width 0.2s ease, height 0.2s ease;
+}
+
 .politico-header-main {
   flex: 1;
   min-width: 0;
@@ -2805,6 +2834,61 @@ html.dark .page-masthead {
 
 .politico-header-actions-desktop {
   display: block;
+}
+
+.politico-header-dip-col {
+  width: 100%;
+}
+
+.politico-header-bottom-full {
+  width: 100%;
+  margin-top: 1rem;
+}
+
+/* Desktop PC (>= 1024px) */
+@media (min-width: 1024px) {
+  .politico-header-flex {
+    display: grid;
+    grid-template-columns: 180px 1fr 340px;
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  .politico-header-avatar-img {
+    width: 176px;
+    height: 176px;
+  }
+
+  .politico-header-avatar-fallback {
+    width: 176px;
+    height: 176px;
+  }
+
+  .politico-header-dip-col {
+    width: 100%;
+  }
+
+  .politico-header-bottom-full {
+    grid-column: 1 / -1;
+    width: 100%;
+    margin-top: 1.25rem;
+  }
+}
+
+@media (max-width: 1023px) and (min-width: 480px) {
+  .politico-header-top {
+    flex-shrink: 0;
+  }
+  .politico-header-main {
+    flex: 1 1 500px;
+  }
+  .politico-header-dip-col {
+    flex: 1 1 100%;
+    margin-top: 0.5rem;
+  }
+  .politico-header-bottom-full {
+    flex: 1 1 100%;
+  }
 }
 
 @media (max-width: 479px) {
