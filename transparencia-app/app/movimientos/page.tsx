@@ -171,10 +171,12 @@ function MovimientosContent() {
   }, [filtrados]);
 
   const [nowMs] = useState<number>(() => Date.now());
+  const [shareFeedback, setShareFeedback] = useState(false);
 
-  // KPIs 100% DINÁMICOS DESDE EL DATASET
+  // KPIs 100% DINÁMICOS DESDE EL DATASET (RECONCILIACIÓN EXTERNA + TRANSPARENCIA)
   const {
     totalCambiosGobierno,
+    totalSalidas,
     desgloseGobierno,
     ultFechaFormateada,
     haceTexto,
@@ -188,8 +190,12 @@ function MovimientosContent() {
 
     const renuncias = enGobierno.filter((m) => m.tipo === "renuncia").length;
     const ceses = enGobierno.filter((m) => m.tipo === "cese" || m.tipo === "remocion").length;
+    const salidas = renuncias + ceses;
     const nombramientos = enGobierno.filter((m) =>
       m.tipo === "nombramiento" || m.tipo === "designacion" || m.tipo === "creacion" || m.tipo === "confirmacion"
+    ).length;
+    const cambios = enGobierno.filter((m) =>
+      m.tipo === "cambio" || m.tipo === "cambio-puesto" || m.tipo === "enroque" || m.tipo === "cambio-mando" || m.tipo === "reasuncion"
     ).length;
     const fallidos = enGobierno.filter((m) => m.tipo === "fallido" || m.tipo === "nombramiento-fallido").length;
 
@@ -232,7 +238,8 @@ function MovimientosContent() {
 
     return {
       totalCambiosGobierno: totalGob,
-      desgloseGobierno: `${renuncias} renuncias · ${ceses} ceses · ${nombramientos} nombramientos · ${fallidos} nombramientos fallidos`,
+      totalSalidas: salidas,
+      desgloseGobierno: `${salidas} salidas · ${nombramientos} nombramientos · ${cambios} cambios · ${fallidos} fallidos`,
       ultFecha: maxFecha,
       ultFechaFormateada: fechaTxt,
       haceTexto: haceTxt,
@@ -243,24 +250,89 @@ function MovimientosContent() {
     };
   }, [nowMs]);
 
+  // Botón Compartir reactivo para Hero y Toolbar (URL con filtros activos + share nativo)
+  const handleShare = useCallback(() => {
+    if (typeof window === "undefined") return;
+    const url = new URL(window.location.href);
+    if (busqueda.trim()) url.searchParams.set("q", busqueda.trim());
+    else url.searchParams.delete("q");
+    if (filtroTipo !== "todos") url.searchParams.set("tipo", filtroTipo);
+    else url.searchParams.delete("tipo");
+    if (filtroEstado !== "todos") url.searchParams.set("estado", filtroEstado);
+    else url.searchParams.delete("estado");
+    if (filtroMinisterio !== "todos") url.searchParams.set("ministerio", filtroMinisterio);
+    else url.searchParams.delete("ministerio");
+    if (filtroRegion !== "todas") url.searchParams.set("region", filtroRegion);
+    else url.searchParams.delete("region");
+    if (filtroMotivo !== "todos") url.searchParams.set("motivo", filtroMotivo);
+    else url.searchParams.delete("motivo");
+    if (vista !== "timeline") url.searchParams.set("vista", vista);
+    else url.searchParams.delete("vista");
+
+    const shareUrl = url.toString();
+
+    if (navigator.share) {
+      navigator
+        .share({
+          title: "Cambiometro — Movimientos y Salidas de Autoridades",
+          text: `Registro cronológico de movimientos de autoridades (${totalCambiosGobierno} cambios registrados, ${totalSalidas} salidas).`,
+          url: shareUrl,
+        })
+        .catch(() => {});
+    } else if (navigator.clipboard) {
+      navigator.clipboard.writeText(shareUrl);
+      setShareFeedback(true);
+      setTimeout(() => setShareFeedback(false), 2500);
+    }
+  }, [busqueda, filtroTipo, filtroEstado, filtroMinisterio, filtroRegion, filtroMotivo, vista, totalCambiosGobierno, totalSalidas]);
+
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text-1)" }}>
-      {/* ─── 1. HERO MASTHEAD CON LOS 3 KPIS DINÁMICOS ───────────────────────── */}
+      {/* ─── 1. HERO MASTHEAD CON LOS 3 KPIS DINÁMICOS Y BOTÓN COMPARTIR ────── */}
       <section className="page-masthead" style={{ padding: "2.25rem 0 1.75rem", borderBottom: "1px solid var(--border)" }}>
         <div className="container-main">
-          <div style={{ maxWidth: 900, marginBottom: "1.5rem" }}>
-            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.4rem" }}>
-              <span className="live-dot" aria-hidden="true" />
-              <span style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                Pipeline Oficial 03:00 CLT · Sincronizado {fechaActualizacionTexto}
-              </span>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap", marginBottom: "1.5rem" }}>
+            <div style={{ maxWidth: 780 }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.4rem" }}>
+                <span className="live-dot" aria-hidden="true" />
+                <span style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
+                  Pipeline Oficial 03:00 CLT · Sincronizado {fechaActualizacionTexto}
+                </span>
+              </div>
+              <h1 style={{ fontSize: "clamp(1.75rem, 3.2vw, 2.4rem)", fontWeight: 900, margin: "0 0 0.5rem 0", letterSpacing: "-0.02em" }}>
+                Movimientos y Relevos de Autoridades
+              </h1>
+              <p style={{ fontSize: "0.95rem", color: "var(--text-2)", lineHeight: 1.5, margin: 0, fontWeight: 500 }}>
+                Registro cronológico trazable de renuncias, ceses, cambios de puesto y nombramientos en el Poder Ejecutivo. Las salidas se contrastan con registros públicos de seguimiento; la confirmación proviene de decretos.
+              </p>
             </div>
-            <h1 style={{ fontSize: "clamp(1.75rem, 3.2vw, 2.4rem)", fontWeight: 900, margin: "0 0 0.5rem 0", letterSpacing: "-0.02em" }}>
-              Movimientos y Relevos de Autoridades
-            </h1>
-            <p style={{ fontSize: "0.95rem", color: "var(--text-2)", lineHeight: 1.5, margin: 0, fontWeight: 500 }}>
-              Registro cronológico trazable de renuncias, ceses, cambios de puesto y nombramientos en el Poder Ejecutivo. Detección temprana en prensa y confirmación estricta con decretos oficiales de Ley Chile y Diario Oficial.
-            </p>
+
+            {/* BOTÓN COMPARTIR EN EL HERO */}
+            <div>
+              <button
+                type="button"
+                onClick={handleShare}
+                className="btn btn--secondary"
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: "0.45rem",
+                  padding: "0.6rem 1.1rem",
+                  fontSize: "0.88rem",
+                  fontWeight: 700,
+                  borderRadius: "var(--radius-md)",
+                  background: "var(--surface)",
+                  border: "1px solid var(--border)",
+                  color: "var(--text-1)",
+                  cursor: "pointer",
+                  boxShadow: "var(--card-shadow)",
+                  transition: "all 0.15s ease",
+                }}
+                title="Compartir enlace con los filtros activos"
+              >
+                <span aria-hidden="true">🔗</span> {shareFeedback ? "¡Enlace copiado!" : "Compartir"}
+              </button>
+            </div>
           </div>
 
           {/* 3 KPIS HERO DINÁMICOS */}

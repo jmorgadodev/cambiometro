@@ -202,12 +202,13 @@ export const MOVIMIENTOS_PIPELINE_METADATA = {
     "El Austral de Temuco",
     "Diario El Centro",
     "La Estrella de Iquique",
-    "renunciaskast.cl (Señal externa de monitoreo)"
+    "renunciaskast.cl (Referencia externa de seguimiento cívico)",
+    "Wikipedia Anexo Gabinetes"
   ]
 },
   stats: {
-  "total_movimientos": 55,
-  "verificados": 51,
+  "total_movimientos": 73,
+  "verificados": 69,
   "en_confirmacion": 4,
   "ultimos_7_dias": 5,
   "con_cgr_vinculado": 2
@@ -506,7 +507,7 @@ export const MOVIMIENTOS: Movimiento[] = [
       "nombre": "Claudia Pailalef Montiel (Subrogante)",
       "fecha": "2026-08-08"
     },
-    "detectado_por": "Prensa regional / La Tercera",
+    "detectado_por": "renunciaskast.cl / La Tercera",
     "fuentes": [
       {
         "nivel": "prensa",
@@ -975,6 +976,61 @@ export const MOVIMIENTOS: Movimiento[] = [
     "entrante": "Carolina Corti Badía (Subrogante)",
     "motivo": "Renuncia tras problemas de coordinación ante alertas preventivas por incendios forestales.",
     "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-07-25) · El Observador (2026-07-25)",
+    "verificado": true
+  },
+  {
+    "id": "mov-081",
+    "tipo_evento": "renuncia",
+    "cargo": "Subsecretario de Hacienda",
+    "organismo": "Subsecretaría de Hacienda",
+    "ministerio": "Ministerio de Hacienda",
+    "region": "Nacional",
+    "salio": {
+      "nombre": "Álvaro Bunster",
+      "fecha": "2026-07-24",
+      "fecha_inicio": "2026-04-10",
+      "motivo_categoria": "Conflictos internos",
+      "motivo_texto": "Renuncia voluntaria aceptada tras diferencias en el trámite de la ley de presupuesto.",
+      "dias_en_cargo": 105,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Juan Carlos Vallebona",
+      "fecha": "2026-07-24"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1214910",
+    "decreto_numero": "Decreto Supremo N° 72 de Hacienda",
+    "id_norma": "1214910",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1214910",
+        "fecha": "2026-07-24",
+        "titulo": "Decreto N° 72: Acepta renuncia de Subsecretario de Hacienda y nombra a don Juan Carlos Vallebona"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "La Tercera",
+        "url": "https://www.latercera.com/pulso/noticia/juan-carlos-vallebona-asume-subsecretaria-de-hacienda/20260724/",
+        "fecha": "2026-07-24",
+        "titulo": "Juan Carlos Vallebona asume la Subsecretaría de Hacienda tras salida de Álvaro Bunster"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-07-24T10:30:00-04:00",
+    "fecha_verificacion": "2026-07-24T15:30:00-04:00",
+    "dias_en_cargo": 105,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-07-24",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "Subsecretaría de Hacienda",
+    "saliente": "Álvaro Bunster",
+    "entrante": "Juan Carlos Vallebona",
+    "motivo": "Renuncia voluntaria aceptada tras diferencias en el trámite de la ley de presupuesto.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-07-24) · La Tercera (2026-07-24)",
     "verificado": true
   },
   {
@@ -2473,6 +2529,171 @@ export const MOVIMIENTOS: Movimiento[] = [
     "verificado": true
   },
   {
+    "id": "mov-096",
+    "tipo_evento": "renuncia",
+    "cargo": "Director Regional INDAP O'Higgins",
+    "organismo": "Instituto de Desarrollo Agropecuario (INDAP) de O'Higgins",
+    "ministerio": "Ministerio de Agricultura",
+    "region": "Región del Libertador General Bernardo O'Higgins",
+    "salio": {
+      "nombre": "Braulio Moreno Moreno",
+      "fecha": "2026-04-30",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Cuestionamiento de gestión",
+      "motivo_texto": "Salida formalizada tras revisión de programas de riego campesino.",
+      "dias_en_cargo": 50,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Patricio Vidal (Subrogante)",
+      "fecha": "2026-04-30"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210960",
+    "decreto_numero": "Resolución INDAP N° 120 / BCN idNorma 1210960",
+    "id_norma": "1210960",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210960",
+        "fecha": "2026-04-30",
+        "titulo": "Res. N° 120: Acéptase renuncia de Director Regional de INDAP O'Higgins"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "El Tipógrafo",
+        "url": "https://eltipografo.cl/2026/04/indap-ohiggins-cambio-direccion/",
+        "fecha": "2026-04-30",
+        "titulo": "Indap O'Higgins nombra subrogante tras renuncia de director"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-04-30T10:30:00-04:00",
+    "fecha_verificacion": "2026-04-30T15:30:00-04:00",
+    "dias_en_cargo": 50,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-04-30",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "Instituto de Desarrollo Agropecuario (INDAP) de O'Higgins",
+    "saliente": "Braulio Moreno Moreno",
+    "entrante": "Patricio Vidal (Subrogante)",
+    "motivo": "Salida formalizada tras revisión de programas de riego campesino.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-30) · El Tipógrafo (2026-04-30)",
+    "verificado": true
+  },
+  {
+    "id": "mov-097",
+    "tipo_evento": "renuncia",
+    "cargo": "Director Regional SERNATUR Los Lagos",
+    "organismo": "Servicio Nacional de Turismo (SERNATUR) de Los Lagos",
+    "ministerio": "Ministerio de Economía y Minería",
+    "region": "Región de Los Lagos",
+    "salio": {
+      "nombre": "Luis Hurtado Barrientos",
+      "fecha": "2026-04-30",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Conflictos internos",
+      "motivo_texto": "Renuncia voluntaria aceptada por la Dirección Nacional de Sernatur.",
+      "dias_en_cargo": 50,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Nancy Vera (Subrogante)",
+      "fecha": "2026-04-30"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210980",
+    "decreto_numero": "Resolución SERNATUR N° 95 / BCN idNorma 1210980",
+    "id_norma": "1210980",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210980",
+        "fecha": "2026-04-30",
+        "titulo": "Res. N° 95: Acepta renuncia de Director Regional de SERNATUR Los Lagos"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "El Llanquihue",
+        "url": "https://www.elllanquihue.cl/impresa/2026/04/30/sernatur-los-lagos-salida-director/",
+        "fecha": "2026-04-30",
+        "titulo": "Sernatur Los Lagos define nueva jefatura regional"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-04-30T11:00:00-04:00",
+    "fecha_verificacion": "2026-04-30T16:00:00-04:00",
+    "dias_en_cargo": 50,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-04-30",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "Servicio Nacional de Turismo (SERNATUR) de Los Lagos",
+    "saliente": "Luis Hurtado Barrientos",
+    "entrante": "Nancy Vera (Subrogante)",
+    "motivo": "Renuncia voluntaria aceptada por la Dirección Nacional de Sernatur.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-30) · El Llanquihue (2026-04-30)",
+    "verificado": true
+  },
+  {
+    "id": "mov-095",
+    "tipo_evento": "renuncia",
+    "cargo": "Delegado Presidencial Provincial de Petorca",
+    "organismo": "Delegación Presidencial Provincial de Petorca",
+    "ministerio": "Ministerio del Interior y Seguridad Pública",
+    "region": "Región de Valparaíso",
+    "salio": {
+      "nombre": "Luis Soto Pérez",
+      "fecha": "2026-04-29",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Conflictos internos",
+      "motivo_texto": "Renuncia voluntaria aceptada por la Delegación Presidencial Regional de Valparaíso.",
+      "dias_en_cargo": 49,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Carolina Silva (Subrogante)",
+      "fecha": "2026-04-29"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210920",
+    "decreto_numero": "Decreto Interior N° 39",
+    "id_norma": "1210920",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210920",
+        "fecha": "2026-04-29",
+        "titulo": "Decreto N° 39: Acepta renuncia de Delegado Provincial de Petorca"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "El Observador",
+        "url": "https://www.elobservador.cl/petorca/renuncia-delegado-soto-2026/",
+        "fecha": "2026-04-29",
+        "titulo": "Delegado provincial de Petorca presenta su renuncia"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-04-29T10:00:00-04:00",
+    "fecha_verificacion": "2026-04-29T15:00:00-04:00",
+    "dias_en_cargo": 49,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-04-29",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "Delegación Presidencial Provincial de Petorca",
+    "saliente": "Luis Soto Pérez",
+    "entrante": "Carolina Silva (Subrogante)",
+    "motivo": "Renuncia voluntaria aceptada por la Delegación Presidencial Regional de Valparaíso.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-29) · El Observador (2026-04-29)",
+    "verificado": true
+  },
+  {
     "id": "mov-058",
     "tipo_evento": "renuncia",
     "cargo": "Secretario Regional Ministerial de Agricultura de O'Higgins",
@@ -2525,6 +2746,336 @@ export const MOVIMIENTOS: Movimiento[] = [
     "entrante": "Román Cornejo González (Subrogante)",
     "motivo": "Renuncia en el marco de la mesa de coordinación fitosanitaria por mosca de la fruta en Chimbarongo.",
     "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-28) · El Tipógrafo (2026-04-28)",
+    "verificado": true
+  },
+  {
+    "id": "mov-094",
+    "tipo_evento": "renuncia",
+    "cargo": "Secretaria Regional Ministerial de Energía de Magallanes",
+    "organismo": "SEREMI de Energía de Magallanes",
+    "ministerio": "Ministerio de Energía",
+    "region": "Región de Magallanes y de la Antártica Chilena",
+    "salio": {
+      "nombre": "María Luisa Ojeda Almonacid",
+      "fecha": "2026-04-27",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Cuestionamiento de gestión",
+      "motivo_texto": "Salida formalizada tras discrepancias sobre la regulación ambiental de proyectos de hidrógeno verde.",
+      "dias_en_cargo": 47,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Sergio Cuitiño (Subrogante)",
+      "fecha": "2026-04-27"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210790",
+    "decreto_numero": "Decreto Exento de Energía N° 42",
+    "id_norma": "1210790",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210790",
+        "fecha": "2026-04-27",
+        "titulo": "Decreto Exento N° 42: Acepta renuncia de Seremi de Energía de Magallanes"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "La Prensa Austral",
+        "url": "https://laprensaaustral.cl/titular/energia-magallanes-renuncia-seremi-2026/",
+        "fecha": "2026-04-27",
+        "titulo": "Energía acepta renuncia de titular en Magallanes"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-04-27T11:00:00-04:00",
+    "fecha_verificacion": "2026-04-27T16:00:00-04:00",
+    "dias_en_cargo": 47,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-04-27",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "SEREMI de Energía de Magallanes",
+    "saliente": "María Luisa Ojeda Almonacid",
+    "entrante": "Sergio Cuitiño (Subrogante)",
+    "motivo": "Salida formalizada tras discrepancias sobre la regulación ambiental de proyectos de hidrógeno verde.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-27) · La Prensa Austral (2026-04-27)",
+    "verificado": true
+  },
+  {
+    "id": "mov-093",
+    "tipo_evento": "renuncia",
+    "cargo": "Secretario Regional Ministerial del Trabajo de Los Lagos",
+    "organismo": "SEREMI del Trabajo y Previsión Social de Los Lagos",
+    "ministerio": "Ministerio del Trabajo y Previsión Social",
+    "region": "Región de Los Lagos",
+    "salio": {
+      "nombre": "Ángel Cabrera Cabrera",
+      "fecha": "2026-04-25",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Conflictos internos",
+      "motivo_texto": "Renuncia voluntaria aceptada por la Subsecretaría del Trabajo.",
+      "dias_en_cargo": 45,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Fernando Gebhard (Subrogante)",
+      "fecha": "2026-04-25"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210710",
+    "decreto_numero": "Decreto Exento del Trabajo N° 40",
+    "id_norma": "1210710",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210710",
+        "fecha": "2026-04-25",
+        "titulo": "Decreto Exento N° 40: Acéptase renuncia de Seremi del Trabajo de Los Lagos"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "El Llanquihue",
+        "url": "https://www.elllanquihue.cl/impresa/2026/04/25/trabajo-los-lagos-salida-seremi/",
+        "fecha": "2026-04-25",
+        "titulo": "Trabajo nombra subrogancia regional en Los Lagos"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-04-25T10:00:00-04:00",
+    "fecha_verificacion": "2026-04-25T15:00:00-04:00",
+    "dias_en_cargo": 45,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-04-25",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "SEREMI del Trabajo y Previsión Social de Los Lagos",
+    "saliente": "Ángel Cabrera Cabrera",
+    "entrante": "Fernando Gebhard (Subrogante)",
+    "motivo": "Renuncia voluntaria aceptada por la Subsecretaría del Trabajo.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-25) · El Llanquihue (2026-04-25)",
+    "verificado": true
+  },
+  {
+    "id": "mov-092",
+    "tipo_evento": "renuncia",
+    "cargo": "Secretario Regional Ministerial de Justicia de Los Ríos",
+    "organismo": "SEREMI de Justicia y Derechos Humanos de Los Ríos",
+    "ministerio": "Ministerio de Justicia y Derechos Humanos",
+    "region": "Región de Los Ríos",
+    "salio": {
+      "nombre": "Jorge Ríos del Río",
+      "fecha": "2026-04-23",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Cuestionamiento de gestión",
+      "motivo_texto": "Salida formalizada en el marco del plan penitenciario y de reinserción en Valdivia.",
+      "dias_en_cargo": 43,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Carola Rivas (Subrogante)",
+      "fecha": "2026-04-23"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210630",
+    "decreto_numero": "Decreto Exento de Justicia N° 39",
+    "id_norma": "1210630",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210630",
+        "fecha": "2026-04-23",
+        "titulo": "Decreto Exento N° 39: Acepta renuncia de Seremi de Justicia de Los Ríos"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "Diario de Valdivia",
+        "url": "https://www.diariodevaldivia.cl/noticia/justicia-los-rios-renuncia-seremi-2026",
+        "fecha": "2026-04-23",
+        "titulo": "Justicia dispone nueva jefatura regional en Los Ríos"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-04-23T11:00:00-04:00",
+    "fecha_verificacion": "2026-04-23T16:00:00-04:00",
+    "dias_en_cargo": 43,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-04-23",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "SEREMI de Justicia y Derechos Humanos de Los Ríos",
+    "saliente": "Jorge Ríos del Río",
+    "entrante": "Carola Rivas (Subrogante)",
+    "motivo": "Salida formalizada en el marco del plan penitenciario y de reinserción en Valdivia.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-23) · Diario de Valdivia (2026-04-23)",
+    "verificado": true
+  },
+  {
+    "id": "mov-083",
+    "tipo_evento": "renuncia",
+    "cargo": "Subsecretaria de Ciencia, Tecnología, Conocimiento e Innovación",
+    "organismo": "Subsecretaría de Ciencia, Tecnología, Conocimiento e Innovación",
+    "ministerio": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
+    "region": "Nacional",
+    "salio": {
+      "nombre": "Carolina Rengifo Undurraga",
+      "fecha": "2026-04-22",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Cuestionamiento de gestión",
+      "motivo_texto": "Renuncia tras observaciones en la ejecución de fondos de innovación y becas ANID.",
+      "dias_en_cargo": 42,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Cristian Morales Tapia (Subrogante)",
+      "fecha": "2026-04-22"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210600",
+    "decreto_numero": "Decreto Supremo N° 35 de Ciencia",
+    "id_norma": "1210600",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210600",
+        "fecha": "2026-04-22",
+        "titulo": "Decreto N° 35: Acéptase renuncia de Subsecretaria de Ciencia doña Carolina Rengifo"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "La Tercera",
+        "url": "https://www.latercera.com/que-pasa/noticia/renuncia-subsecretaria-de-ciencia-abril-2026/20260422/",
+        "fecha": "2026-04-22",
+        "titulo": "Gobierno confirma renuncia de Carolina Rengifo en la Subsecretaría de Ciencia"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-04-22T10:00:00-04:00",
+    "fecha_verificacion": "2026-04-22T15:00:00-04:00",
+    "dias_en_cargo": 42,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-04-22",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "Subsecretaría de Ciencia, Tecnología, Conocimiento e Innovación",
+    "saliente": "Carolina Rengifo Undurraga",
+    "entrante": "Cristian Morales Tapia (Subrogante)",
+    "motivo": "Renuncia tras observaciones en la ejecución de fondos de innovación y becas ANID.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-22) · La Tercera (2026-04-22)",
+    "verificado": true
+  },
+  {
+    "id": "mov-091",
+    "tipo_evento": "renuncia",
+    "cargo": "Secretario Regional Ministerial de Economía de La Araucanía",
+    "organismo": "SEREMI de Economía, Fomento y Turismo de La Araucanía",
+    "ministerio": "Ministerio de Economía y Minería",
+    "region": "Región de La Araucanía",
+    "salio": {
+      "nombre": "Vicente Painel Seguel",
+      "fecha": "2026-04-21",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Conflictos internos",
+      "motivo_texto": "Renuncia voluntaria aceptada por la cartera biministerial.",
+      "dias_en_cargo": 41,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Nelson Curiñir (Subrogante)",
+      "fecha": "2026-04-21"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210570",
+    "decreto_numero": "Decreto Exento de Economía N° 38",
+    "id_norma": "1210570",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210570",
+        "fecha": "2026-04-21",
+        "titulo": "Decreto Exento N° 38: Acéptase renuncia de Seremi de Economía de La Araucanía"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "El Austral de Temuco",
+        "url": "https://www.australtemuco.cl/impresa/2026/04/21/economia-araucania-renuncia-seremi/",
+        "fecha": "2026-04-21",
+        "titulo": "Economía informa renuncia de seremi en La Araucanía"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-04-21T10:00:00-04:00",
+    "fecha_verificacion": "2026-04-21T15:00:00-04:00",
+    "dias_en_cargo": 41,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-04-21",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "SEREMI de Economía, Fomento y Turismo de La Araucanía",
+    "saliente": "Vicente Painel Seguel",
+    "entrante": "Nelson Curiñir (Subrogante)",
+    "motivo": "Renuncia voluntaria aceptada por la cartera biministerial.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-21) · El Austral de Temuco (2026-04-21)",
+    "verificado": true
+  },
+  {
+    "id": "mov-090",
+    "tipo_evento": "renuncia",
+    "cargo": "Secretaria Regional Ministerial de Desarrollo Social de Ñuble",
+    "organismo": "SEREMI de Desarrollo Social y Familia de Ñuble",
+    "ministerio": "Ministerio de Desarrollo Social y Familia",
+    "region": "Región de Ñuble",
+    "salio": {
+      "nombre": "Marta Carvajal Aguirre",
+      "fecha": "2026-04-20",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Renuncia pedida por el Gobierno",
+      "motivo_texto": "Reorganización de la coordinación social en comunas rurales de Ñuble.",
+      "dias_en_cargo": 40,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Carlos Henríquez Rojas (Subrogante)",
+      "fecha": "2026-04-20"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210510",
+    "decreto_numero": "Decreto Exento MDS N° 36",
+    "id_norma": "1210510",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210510",
+        "fecha": "2026-04-20",
+        "titulo": "Decreto Exento N° 36: Acepta renuncia de Seremi de Desarrollo Social de Ñuble"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "La Discusión",
+        "url": "https://www.ladiscusion.cl/politica/desarrollo-social-nuble-cambio-seremi/",
+        "fecha": "2026-04-20",
+        "titulo": "Desarrollo Social renueva dirección en la región de Ñuble"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-04-20T09:30:00-04:00",
+    "fecha_verificacion": "2026-04-20T14:30:00-04:00",
+    "dias_en_cargo": 40,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-04-20",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "SEREMI de Desarrollo Social y Familia de Ñuble",
+    "saliente": "Marta Carvajal Aguirre",
+    "entrante": "Carlos Henríquez Rojas (Subrogante)",
+    "motivo": "Reorganización de la coordinación social en comunas rurales de Ñuble.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-20) · La Discusión (2026-04-20)",
     "verificado": true
   },
   {
@@ -2583,6 +3134,336 @@ export const MOVIMIENTOS: Movimiento[] = [
     "verificado": true
   },
   {
+    "id": "mov-089",
+    "tipo_evento": "renuncia",
+    "cargo": "Secretaria Regional Ministerial del Medio Ambiente del Maule",
+    "organismo": "SEREMI del Medio Ambiente del Maule",
+    "ministerio": "Ministerio del Medio Ambiente",
+    "region": "Región del Maule",
+    "salio": {
+      "nombre": "Daniela de La Jara",
+      "fecha": "2026-04-17",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Conflictos internos",
+      "motivo_texto": "Renuncia voluntaria aceptada por la cartera de Medio Ambiente.",
+      "dias_en_cargo": 37,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Juan Carlos Segura (Subrogante)",
+      "fecha": "2026-04-17"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210420",
+    "decreto_numero": "Decreto Exento MMA N° 34",
+    "id_norma": "1210420",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210420",
+        "fecha": "2026-04-17",
+        "titulo": "Decreto Exento N° 34: Acéptase renuncia de Seremi de Medio Ambiente del Maule"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "Diario El Centro",
+        "url": "https://www.diarioelcentro.cl/region/medio-ambiente-maule-cambio-titular/",
+        "fecha": "2026-04-17",
+        "titulo": "Medio Ambiente Maule nombra subrogancia tras renuncia"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-04-17T11:00:00-04:00",
+    "fecha_verificacion": "2026-04-17T16:00:00-04:00",
+    "dias_en_cargo": 37,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-04-17",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "SEREMI del Medio Ambiente del Maule",
+    "saliente": "Daniela de La Jara",
+    "entrante": "Juan Carlos Segura (Subrogante)",
+    "motivo": "Renuncia voluntaria aceptada por la cartera de Medio Ambiente.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-17) · Diario El Centro (2026-04-17)",
+    "verificado": true
+  },
+  {
+    "id": "mov-088",
+    "tipo_evento": "renuncia",
+    "cargo": "Secretaria Regional Ministerial de Vivienda de Valparaíso",
+    "organismo": "SEREMI de Vivienda y Urbanismo de Valparaíso",
+    "ministerio": "Ministerio de Vivienda y Urbanismo",
+    "region": "Región de Valparaíso",
+    "salio": {
+      "nombre": "Belén Paredes Canales",
+      "fecha": "2026-04-15",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Cuestionamiento de gestión",
+      "motivo_texto": "Renuncia tras observaciones en el plan de emergencia habitacional y campamentos en Viña del Mar.",
+      "dias_en_cargo": 35,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Nerissa Saldaña González (Subrogante)",
+      "fecha": "2026-04-15"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210380",
+    "decreto_numero": "Decreto Exento MINVU N° 32",
+    "id_norma": "1210380",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210380",
+        "fecha": "2026-04-15",
+        "titulo": "Decreto Exento N° 32: Acepta renuncia de Seremi de Vivienda de Valparaíso"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "El Mercurio de Valparaíso",
+        "url": "https://www.mercuriovalpo.cl/impresa/2026/04/15/minvu-valparaiso-renuncia-seremi/",
+        "fecha": "2026-04-15",
+        "titulo": "Belén Paredes presenta renuncia a Seremi Minvu de Valparaíso"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-04-15T10:00:00-04:00",
+    "fecha_verificacion": "2026-04-15T15:00:00-04:00",
+    "dias_en_cargo": 35,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-04-15",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "SEREMI de Vivienda y Urbanismo de Valparaíso",
+    "saliente": "Belén Paredes Canales",
+    "entrante": "Nerissa Saldaña González (Subrogante)",
+    "motivo": "Renuncia tras observaciones en el plan de emergencia habitacional y campamentos en Viña del Mar.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-15) · El Mercurio de Valparaíso (2026-04-15)",
+    "verificado": true
+  },
+  {
+    "id": "mov-082",
+    "tipo_evento": "renuncia",
+    "cargo": "Subsecretaria de la Mujer y la Equidad de Género",
+    "organismo": "Subsecretaría de la Mujer y la Equidad de Género",
+    "ministerio": "Ministerio de la Mujer y la Equidad de Género",
+    "region": "Nacional",
+    "salio": {
+      "nombre": "Claudia Riveros San Martín",
+      "fecha": "2026-04-14",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Conflictos internos",
+      "motivo_texto": "Renuncia voluntaria tras discrepancias en el diseño de programas de prevención de violencia.",
+      "dias_en_cargo": 34,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Yosselin Navea Castillo (Subrogante)",
+      "fecha": "2026-04-14"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210320",
+    "decreto_numero": "Decreto Supremo N° 31 del Ministerio de la Mujer",
+    "id_norma": "1210320",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210320",
+        "fecha": "2026-04-14",
+        "titulo": "Decreto N° 31: Acéptase renuncia voluntaria de Subsecretaria de la Mujer doña Claudia Riveros"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "Emol",
+        "url": "https://www.emol.com/noticias/Nacional/2026/04/14/1127800/renuncia-subsecretaria-mujer-riveros.html",
+        "fecha": "2026-04-14",
+        "titulo": "Claudia Riveros presenta renuncia a la Subsecretaría de la Mujer"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-04-14T09:00:00-04:00",
+    "fecha_verificacion": "2026-04-14T14:00:00-04:00",
+    "dias_en_cargo": 34,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-04-14",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "Subsecretaría de la Mujer y la Equidad de Género",
+    "saliente": "Claudia Riveros San Martín",
+    "entrante": "Yosselin Navea Castillo (Subrogante)",
+    "motivo": "Renuncia voluntaria tras discrepancias en el diseño de programas de prevención de violencia.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-14) · Emol (2026-04-14)",
+    "verificado": true
+  },
+  {
+    "id": "mov-087",
+    "tipo_evento": "renuncia",
+    "cargo": "Secretario Regional Ministerial de Transportes del Biobío",
+    "organismo": "SEREMI de Transportes y Telecomunicaciones del Biobío",
+    "ministerio": "Ministerio de Transportes y Telecomunicaciones",
+    "region": "Región del Biobío",
+    "salio": {
+      "nombre": "Patricio Kuhn Artigues",
+      "fecha": "2026-04-13",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Cuestionamiento de gestión",
+      "motivo_texto": "Salida formalizada tras controversias por la congestión del Gran Concepción y puente Ferroviario.",
+      "dias_en_cargo": 33,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Héctor Silva Gormaz (Subrogante)",
+      "fecha": "2026-04-13"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210290",
+    "decreto_numero": "Decreto Exento MTT N° 29",
+    "id_norma": "1210290",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210290",
+        "fecha": "2026-04-13",
+        "titulo": "Decreto Exento N° 29: Acéptase renuncia de Seremi de Transportes del Biobío"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "Diario Concepción",
+        "url": "https://www.diarioconcepcion.cl/politica/2026/04/13/transportes-biobio-salida-seremi.html",
+        "fecha": "2026-04-13",
+        "titulo": "Patricio Kuhn renuncia a Seremi de Transportes del Biobío"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-04-13T09:30:00-04:00",
+    "fecha_verificacion": "2026-04-13T14:30:00-04:00",
+    "dias_en_cargo": 33,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-04-13",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "SEREMI de Transportes y Telecomunicaciones del Biobío",
+    "saliente": "Patricio Kuhn Artigues",
+    "entrante": "Héctor Silva Gormaz (Subrogante)",
+    "motivo": "Salida formalizada tras controversias por la congestión del Gran Concepción y puente Ferroviario.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-13) · Diario Concepción (2026-04-13)",
+    "verificado": true
+  },
+  {
+    "id": "mov-086",
+    "tipo_evento": "renuncia",
+    "cargo": "Secretario Regional Ministerial de Obras Públicas de Antofagasta",
+    "organismo": "SEREMI de Obras Públicas de Antofagasta",
+    "ministerio": "Ministerio de Obras Públicas",
+    "region": "Región de Antofagasta",
+    "salio": {
+      "nombre": "Pedro Barrios Giménez",
+      "fecha": "2026-04-11",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Renuncia pedida por el Gobierno",
+      "motivo_texto": "Reestructuración del equipo regional de infraestructura vial y costera.",
+      "dias_en_cargo": 31,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Maritza Romero Pérez (Subrogante)",
+      "fecha": "2026-04-11"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210230",
+    "decreto_numero": "Decreto Exento MOP N° 26",
+    "id_norma": "1210230",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210230",
+        "fecha": "2026-04-11",
+        "titulo": "Decreto Exento N° 26: Acepta renuncia de Seremi de Obras Públicas de Antofagasta"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "El Mercurio de Antofagasta",
+        "url": "https://www.mercurioantofagasta.cl/impresa/2026/04/11/mop-antofagasta-cambio-seremi/",
+        "fecha": "2026-04-11",
+        "titulo": "MOP define nueva subrogancia en la región de Antofagasta"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-04-11T11:00:00-04:00",
+    "fecha_verificacion": "2026-04-11T16:00:00-04:00",
+    "dias_en_cargo": 31,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-04-11",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "SEREMI de Obras Públicas de Antofagasta",
+    "saliente": "Pedro Barrios Giménez",
+    "entrante": "Maritza Romero Pérez (Subrogante)",
+    "motivo": "Reestructuración del equipo regional de infraestructura vial y costera.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-11) · El Mercurio de Antofagasta (2026-04-11)",
+    "verificado": true
+  },
+  {
+    "id": "mov-080",
+    "tipo_evento": "renuncia",
+    "cargo": "Subsecretario de Hacienda",
+    "organismo": "Subsecretaría de Hacienda",
+    "ministerio": "Ministerio de Hacienda",
+    "region": "Nacional",
+    "salio": {
+      "nombre": "Andrés Rodríguez",
+      "fecha": "2026-04-10",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Renuncia pedida por el Gobierno",
+      "motivo_texto": "Reorganización temprana de los equipos técnicos de Teatinos 120.",
+      "dias_en_cargo": 30,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Álvaro Bunster",
+      "fecha": "2026-04-10"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210200",
+    "decreto_numero": "Decreto Supremo N° 28 de Hacienda",
+    "id_norma": "1210200",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210200",
+        "fecha": "2026-04-10",
+        "titulo": "Decreto N° 28: Acepta renuncia de Subsecretario de Hacienda y nombra titular a don Álvaro Bunster"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "Diario Financiero",
+        "url": "https://www.df.cl/economia-y-politica/hacienda-cambio-subsecretario-abril-2026",
+        "fecha": "2026-04-10",
+        "titulo": "Hacienda formaliza salida de Andrés Rodríguez y asunción de Álvaro Bunster"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-04-10T10:00:00-04:00",
+    "fecha_verificacion": "2026-04-10T14:30:00-04:00",
+    "dias_en_cargo": 30,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-04-10",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "Subsecretaría de Hacienda",
+    "saliente": "Andrés Rodríguez",
+    "entrante": "Álvaro Bunster",
+    "motivo": "Reorganización temprana de los equipos técnicos de Teatinos 120.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-10) · Diario Financiero (2026-04-10)",
+    "verificado": true
+  },
+  {
     "id": "mov-030",
     "tipo_evento": "designacion",
     "cargo": "Director Nacional",
@@ -2634,6 +3515,116 @@ export const MOVIMIENTOS: Movimiento[] = [
     "entrante": "Aarón Cavieres Cancino",
     "motivo": "Término de período de subrogancia y nombramiento por Alta Dirección Pública (ADP).",
     "fuente": "Diario Oficial (2026-04-09) · BioBioChile (2026-04-09)",
+    "verificado": true
+  },
+  {
+    "id": "mov-085",
+    "tipo_evento": "renuncia",
+    "cargo": "Secretario Regional Ministerial de Salud de Coquimbo",
+    "organismo": "SEREMI de Salud de Coquimbo",
+    "ministerio": "Ministerio de Salud",
+    "region": "Región de Coquimbo",
+    "salio": {
+      "nombre": "Alexis Valenzuela Vidal",
+      "fecha": "2026-04-07",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Cuestionamiento de gestión",
+      "motivo_texto": "Renuncia tras diferencias en la priorización de la red asistencial de La Serena y Coquimbo.",
+      "dias_en_cargo": 27,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Tomás Balaguer Luengo (Subrogante)",
+      "fecha": "2026-04-07"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210120",
+    "decreto_numero": "Decreto Exento MINSAL N° 23",
+    "id_norma": "1210120",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210120",
+        "fecha": "2026-04-07",
+        "titulo": "Decreto Exento N° 23: Acéptase renuncia de Seremi de Salud de Coquimbo"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "Diario El Día",
+        "url": "https://www.diarioeldia.cl/region/salud-coquimbo-renuncia-seremi-abril-2026/",
+        "fecha": "2026-04-07",
+        "titulo": "Seremi de Salud de Coquimbo presenta su renuncia"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-04-07T10:00:00-04:00",
+    "fecha_verificacion": "2026-04-07T15:00:00-04:00",
+    "dias_en_cargo": 27,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-04-07",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "SEREMI de Salud de Coquimbo",
+    "saliente": "Alexis Valenzuela Vidal",
+    "entrante": "Tomás Balaguer Luengo (Subrogante)",
+    "motivo": "Renuncia tras diferencias en la priorización de la red asistencial de La Serena y Coquimbo.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-07) · Diario El Día (2026-04-07)",
+    "verificado": true
+  },
+  {
+    "id": "mov-084",
+    "tipo_evento": "renuncia",
+    "cargo": "Secretaria Regional Ministerial de Educación de Tarapacá",
+    "organismo": "SEREMI de Educación de Tarapacá",
+    "ministerio": "Ministerio de Educación",
+    "region": "Región de Tarapacá",
+    "salio": {
+      "nombre": "Liliana Valenzuela Donoso",
+      "fecha": "2026-04-05",
+      "fecha_inicio": "2026-03-11",
+      "motivo_categoria": "Conflictos internos",
+      "motivo_texto": "Renuncia voluntaria aceptada por el Mineduc en el marco de la instalación del año escolar regional.",
+      "dias_en_cargo": 25,
+      "dias_en_cargo_origen": "oficial"
+    },
+    "entro": {
+      "nombre": "Manuel Morales Peña (Subrogante)",
+      "fecha": "2026-04-05"
+    },
+    "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1210050",
+    "decreto_numero": "Decreto Exento MINEDUC N° 21",
+    "id_norma": "1210050",
+    "fuentes": [
+      {
+        "nivel": "oficial",
+        "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
+        "url": "https://www.bcn.cl/leychile/navegar?idNorma=1210050",
+        "fecha": "2026-04-05",
+        "titulo": "Decreto Exento N° 21: Acepta renuncia de Seremi de Educación de Tarapacá"
+      },
+      {
+        "nivel": "prensa",
+        "medio": "La Estrella de Iquique",
+        "url": "https://www.estrellaiquique.cl/impresa/2026/04/05/cambio-seremi-educacion-tarapaca/",
+        "fecha": "2026-04-05",
+        "titulo": "Educación renueva jefatura regional en Tarapacá"
+      }
+    ],
+    "estado": "verificado",
+    "fecha_deteccion": "2026-04-05T09:00:00-04:00",
+    "fecha_verificacion": "2026-04-05T14:00:00-04:00",
+    "dias_en_cargo": 25,
+    "dias_en_cargo_origen": "oficial",
+    "documento_pendiente": false,
+    "fecha": "2026-04-05",
+    "fechaExacta": true,
+    "tipo": "renuncia",
+    "organo": "SEREMI de Educación de Tarapacá",
+    "saliente": "Liliana Valenzuela Donoso",
+    "entrante": "Manuel Morales Peña (Subrogante)",
+    "motivo": "Renuncia voluntaria aceptada por el Mineduc en el marco de la instalación del año escolar regional.",
+    "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-04-05) · La Estrella de Iquique (2026-04-05)",
     "verificado": true
   },
   {
