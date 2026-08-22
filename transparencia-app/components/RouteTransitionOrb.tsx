@@ -7,7 +7,6 @@ import LoadingOrb from "@/components/LoadingOrb";
 export default function RouteTransitionOrb() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [isTransitioning, setIsTransitioning] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
 
   const transitionStartRef = useRef<number>(0);
@@ -17,20 +16,17 @@ export default function RouteTransitionOrb() {
   const searchStr = searchParams?.toString() ?? "";
   const currentKey = `${pathname}?${searchStr}`;
 
-  // Retiro del splash inicial SSR tras la hidratacion
+  // Desvanecimiento del splash inicial SSR tras la hidratacion SIN remover el nodo del DOM
   useEffect(() => {
     const splash = document.getElementById("initial-splash-orb");
     if (splash) {
       requestAnimationFrame(() => {
         splash.classList.add("initial-splash-orb--hidden");
-        window.setTimeout(() => {
-          splash.remove();
-        }, 220);
       });
     }
   }, []);
 
-  // Delegacion de eventos en clicks a enlaces internos y antes de descargar pagina
+  // Delegacion de eventos en clicks a enlaces internos gestionada exclusivamente con estado React
   useEffect(() => {
     function handleAnchorClick(event: MouseEvent) {
       if (
@@ -63,34 +59,19 @@ export default function RouteTransitionOrb() {
         if (hideTimeoutRef.current) window.clearTimeout(hideTimeoutRef.current);
 
         transitionStartRef.current = Date.now();
-        setIsTransitioning(true);
         setIsVisible(true);
-
-        const overlay = document.getElementById("route-transition-overlay");
-        if (overlay) {
-          overlay.classList.add("is-active");
-        }
       } catch {
         // Ignorar URLs invalidas
       }
     }
 
-    function handleBeforeUnload() {
-      const overlay = document.getElementById("route-transition-overlay");
-      if (overlay) {
-        overlay.classList.add("is-active");
-      }
-    }
-
     document.addEventListener("click", handleAnchorClick, { capture: true });
-    window.addEventListener("beforeunload", handleBeforeUnload);
     return () => {
       document.removeEventListener("click", handleAnchorClick, { capture: true });
-      window.removeEventListener("beforeunload", handleBeforeUnload);
     };
   }, []);
 
-  // Ocultar cuando la ruta cambia y el nuevo contenido monta
+  // Ocultar cuando la ruta cambia y el nuevo contenido monta, garantizando tiempo minimo de 350ms
   useEffect(() => {
     if (!prevKeyRef.current) {
       prevKeyRef.current = currentKey;
@@ -107,16 +88,7 @@ export default function RouteTransitionOrb() {
       if (hideTimeoutRef.current) window.clearTimeout(hideTimeoutRef.current);
 
       hideTimeoutRef.current = window.setTimeout(() => {
-        requestAnimationFrame(() => {
-          const overlay = document.getElementById("route-transition-overlay");
-          if (overlay) {
-            overlay.classList.remove("is-active");
-          }
-          setIsVisible(false);
-          window.setTimeout(() => {
-            setIsTransitioning(false);
-          }, 200);
-        });
+        setIsVisible(false);
       }, remainingMs);
     }
   }, [currentKey]);
@@ -127,7 +99,7 @@ export default function RouteTransitionOrb() {
       className={`route-transition-overlay ${isVisible ? "is-active" : ""}`}
       role="status"
       aria-live="polite"
-      aria-busy={isTransitioning}
+      aria-busy={isVisible}
       aria-label="Cargando nueva sección..."
     >
       <div className="route-transition-card">
