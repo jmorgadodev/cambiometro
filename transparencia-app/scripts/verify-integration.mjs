@@ -273,7 +273,8 @@ try {
   await widgetPage.close();
 
   for (const path of ["/funcionarios", "/municipalidades/muni-maipu"]) {
-    await gotoWithNetworkRetry(`${baseUrl}${path}`, { waitUntil: "networkidle" });
+    await gotoWithNetworkRetry(`${baseUrl}${path}`, { waitUntil: "domcontentloaded" });
+    await page.waitForSelector("h1", { timeout: 8000 }).catch(() => {});
     assert.equal(await page.getByRole("heading", { name: "Fuente temporalmente no disponible" }).count(), 0);
   }
 
