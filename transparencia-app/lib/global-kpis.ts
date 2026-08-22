@@ -1,3 +1,4 @@
+// trigger CI for docs perf metrics - 2026-08-22
 import globalKpisRaw from "./global-kpis.json";
 
 export interface GlobalKpis {
