@@ -71,7 +71,22 @@ export async function queryTransferencias(params: TransferenciaQueryParams = {})
       // Data query
       const offset = (page - 1) * limit;
       const dataSql = `SELECT id, folio, fecha, periodo, emisor_nombre, emisor_rut, receptor_nombre, receptor_rut, materia, monto_clp, url_registro, clasificacion, comuna FROM transferencias_19862 ${whereClause} ORDER BY ${orderColumn} ${orderDirection} LIMIT ? OFFSET ?`;
-      const { results } = await db.prepare(dataSql).bind(...bindings, limit, offset).all<any>();
+      interface TransferenciaDbRow {
+        id: string;
+        folio?: string;
+        fecha: string;
+        periodo: string;
+        emisor_nombre: string;
+        emisor_rut: string | null;
+        receptor_nombre: string;
+        receptor_rut: string | null;
+        materia: string;
+        monto_clp: number;
+        url_registro: string;
+        clasificacion: string;
+        comuna: string | null;
+      }
+      const { results } = await db.prepare(dataSql).bind(...bindings, limit, offset).all<TransferenciaDbRow>();
 
       if (results && results.length > 0) {
         const data: TransferenciaDetalle[] = results.map((row) => ({

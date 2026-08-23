@@ -6,6 +6,7 @@ import { leerChileCompraV1 } from "@/lib/chilecompra";
 import { leerInfoLobbyV1 } from "@/lib/infolobby";
 import { SOURCE_CANONICAL_COUNTS } from "@/lib/published-sources";
 import { getLey19862Summary } from "@/lib/transferencias-data";
+import { formatCLPCompact } from "@/lib/format";
 import CrucesExplorerClient from "@/components/cruces/CrucesExplorerClient";
 
 export const metadata: Metadata = {
@@ -43,16 +44,6 @@ export default async function CrossesPage({
   const chilecompra = leerChileCompraV1();
   const infolobby = leerInfoLobbyV1();
   const ley19862 = getLey19862Summary();
-
-  const clp = (amount: number | null) => {
-    if (amount === null || amount <= 0) return "—";
-    return new Intl.NumberFormat("es-CL", {
-      style: "currency",
-      currency: "CLP",
-      maximumFractionDigits: 1,
-      notation: "compact",
-    }).format(amount);
-  };
 
   const totalChilecompraMonto = 1900000000000;
   const totalChilecompraProcesos = SOURCE_CANONICAL_COUNTS["chilecompra"] ?? 74142;
@@ -121,7 +112,7 @@ export default async function CrossesPage({
 
             {/* KPI 3 */}
             <div className="stat-tile stat-tile--warn">
-              <div className="stat-tile__value">{clp(totalChilecompraMonto)}</div>
+              <div className="stat-tile__value">{formatCLPCompact(totalChilecompraMonto)}</div>
               <div className="stat-tile__label">Compras ChileCompra</div>
               <div className="stat-tile__hint">{totalChilecompraProcesos.toLocaleString("es-CL")} procesos OCDS</div>
             </div>

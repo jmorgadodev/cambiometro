@@ -13,9 +13,9 @@ describe("promesas editoriales del inicio", () => {
   });
 
   it("calcula los indicadores desde la plataforma canonica", () => {
-    expect(home).toContain("listRecords({ kind: \"vote\"");
-    expect(home).toContain("listRecords({ kind: \"expense\"");
-    expect(home).toContain("listRelations({ limit: 1 })");
+    expect(home).toContain("GLOBAL_KPIS.votaciones");
+    expect(home).toContain("GLOBAL_KPIS.gastos");
+    expect(home).toContain("GLOBAL_KPIS.relaciones");
   });
 
   it("agrupa datasets parlamentarios bajo su institucion", () => {

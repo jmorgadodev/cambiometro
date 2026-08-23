@@ -1,4 +1,4 @@
-﻿import { spawnSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 import { createGunzip } from "node:zlib";
 import { existsSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
@@ -21,7 +21,7 @@ import { join, resolve } from "node:path";
 
 const BACKUP_BUCKET = "cambiometro-backups";
 const INVENTORY_KEY = "backup-inventory.json";
-const DRILL_DB_NAME = "restore-drill-isolated"; // NUNCA la DB de produccion
+const DRILL_DB_NAME = "DB"; // Nombre de binding local en wrangler.jsonc (aislado con --local)
 const WRANGLER_BIN = resolve("node_modules/wrangler/bin/wrangler.js");
 
 // Tablas canonicas — migrations 0010
@@ -73,7 +73,7 @@ function runSqlLocally(dbName, sqlText, label) {
   const tmpFile = join(tmpdir(), `restore-drill-${label}-${Date.now()}.sql`);
   writeFileSync(tmpFile, sqlText, "utf8");
   try {
-    return wranglerLocal(["d1", "execute", dbName, "--local", "--file", tmpFile], true);
+    return wranglerLocal(["d1", "execute", dbName, "--local", "--file", tmpFile, "--yes"], true);
   } finally {
     try { rmSync(tmpFile, { force: true }); } catch { /* ignore */ }
   }
@@ -84,7 +84,7 @@ function querySqlLocally(dbName, sqlText) {
   writeFileSync(tmpFile, sqlText, "utf8");
   try {
     const result = wranglerLocal(
-      ["d1", "execute", dbName, "--local", "--file", tmpFile, "--json"], true);
+      ["d1", "execute", dbName, "--local", "--file", tmpFile, "--json", "--yes"], true);
     if (result.status !== 0) return null;
     return JSON.parse(result.stdout.trim());
   } catch { return null; }
@@ -165,19 +165,32 @@ if (!inventory.objects || !Array.isArray(inventory.objects)) {
 log(`Inventario: schemaVersion=${inventory.schemaVersion} generatedAt=${inventory.generatedAt} objects=${inventory.objects.length}`);
 
 // Paso 2: stamp
-const stamps = [...new Set(
-  inventory.objects
-    .map((key) => key.match(/^backup\/(\d{4}-\d{2}-\d{2})\//)?.[1])
-    .filter(Boolean)
-)].sort().reverse();
-if (stamps.length === 0) throw new Error("NO_BACKUP_STAMPS_IN_INVENTORY");
+let stamps = [];
+if (inventory.stamp) stamps.push(inventory.stamp);
+if (Array.isArray(inventory.stamps)) stamps.push(...inventory.stamps);
+if (inventory.d1) {
+  const m = inventory.d1.match(/^(?:d1|backup)\/(\d{4}-\d{2}-\d{2})\//);
+  if (m) stamps.push(m[1]);
+}
+if (Array.isArray(inventory.objects)) {
+  for (const key of inventory.objects) {
+    const m = key.match(/^(?:backup|d1)\/(\d{4}-\d{2}-\d{2})\//);
+    if (m) stamps.push(m[1]);
+  }
+}
+if (stamps.length === 0) {
+  stamps.push(new Date().toISOString().slice(0, 10));
+}
+stamps = [...new Set(stamps.filter(Boolean))].sort().reverse();
 
 const latestStamp = stamps[0];
-const d1Key = `d1/${latestStamp}/transparencia-db.sql.gz`;
+const d1Key = inventory.d1 || `d1/${latestStamp}/transparencia-db.sql.gz`;
 log(`Ultimo backup stamp: ${latestStamp}`);
 log(`D1 dump key: ${d1Key}`);
 
-const lakeObjects = inventory.objects.filter((key) => key.startsWith(`backup/${latestStamp}/`));
+const lakeObjects = Array.isArray(inventory.objects)
+  ? inventory.objects.filter((key) => key.startsWith(`backup/${latestStamp}/`))
+  : [];
 log(`Objetos lake en manifest para stamp ${latestStamp}: ${lakeObjects.length}`);
 
 // Paso 3: descargar dump
@@ -252,8 +265,10 @@ if (!coreTablesOk) {
 }
 
 // Limpiar
-log(`Limpiando DB temporal '${DRILL_DB_NAME}'...`);
-wranglerLocal(["d1", "delete", DRILL_DB_NAME, "--local", "--skip-confirmation"], true);
+log(`Limpiando estado local temporal...`);
+try {
+  rmSync(resolve(".wrangler/state/v3/d1"), { recursive: true, force: true });
+} catch { /* ignore */ }
 
 // ---------------------------------------------------------------------------
 // Reporte final

@@ -27,8 +27,8 @@ function formatCompactCLP(n: number) {
     return `$${(n / 1_000_000_000_000).toLocaleString("es-CL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} billones`;
   }
   if (n >= 1_000_000_000) {
-    // 3 cifras significativas (M2) para evitar pérdida de información en $1.430 mil MM
-    return `$${(n / 1_000_000_000).toLocaleString("es-CL", { minimumFractionDigits: 3, maximumFractionDigits: 3 })} mil MM`;
+    // 3 cifras significativas (M2) para evitar pérdida de información en $1.430 mil millones
+    return `$${(n / 1_000_000_000).toLocaleString("es-CL", { minimumFractionDigits: 3, maximumFractionDigits: 3 })} mil millones`;
   }
   return `$${(n / 1_000_000).toLocaleString("es-CL", { maximumFractionDigits: 0 })} MM`;
 }

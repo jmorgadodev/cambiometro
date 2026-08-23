@@ -127,7 +127,13 @@ for (const object of sourceObjects) {
   }
 }
 
-const inventory = { schemaVersion: "1.0.0", generatedAt: new Date().toISOString(), objects: sourceObjects.map(({ key }) => key) };
+const inventory = {
+  schemaVersion: "1.0.0",
+  generatedAt: new Date().toISOString(),
+  stamp,
+  d1: `d1/${stamp}/transparencia-db.sql.gz`,
+  objects: sourceObjects.map(({ key }) => key),
+};
 await r2Request("PUT", BACKUP_BUCKET, INVENTORY_KEY, Buffer.from(`${JSON.stringify(inventory, null, 2)}\n`, "utf8"), "application/json");
 
 console.log(JSON.stringify({ action: "backup", stamp, d1: `d1/${stamp}/transparencia-db.sql.gz`, lakeObjects: sourceObjects.length, copied, deletedOld: deleted, retentionWeeks: RETENTION_WEEKS, status: "OK" }, null, 2));

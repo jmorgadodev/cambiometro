@@ -76,7 +76,11 @@ export default async function DataQualityPage() {
               <div className="stat-tile__hint">12 oficiales + 1 derivada parlamentaria</div>
             </div>
 
-            <div className="stat-tile stat-tile--accent">
+            <div
+              className="stat-tile stat-tile--accent"
+              title="Nóminas de personal municipal actualizadas dentro de los últimos 90 días conforme al estándar de transparencia activa del CPLT."
+              aria-label={`Nóminas Municipales ≤90d: ${summary.coberturaMunicipalAlDia} de ${summary.coberturaMunicipalTotal} comunas al día conforme al estándar CPLT`}
+            >
               <div className="stat-tile__value">{summary.coberturaMunicipalAlDia} / {summary.coberturaMunicipalTotal}</div>
               <div className="stat-tile__label">Nóminas Municipales ≤90d</div>
               <div className="stat-tile__hint">Cobertura CPLT Transparencia Activa</div>

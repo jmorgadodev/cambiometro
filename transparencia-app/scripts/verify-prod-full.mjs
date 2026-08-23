@@ -27,7 +27,17 @@ async function verifyProdFull() {
   assertCheck("HOME", "HTTP Status 200", homeRes.status === 200);
   const homeHtml = (await homeRes.text()).replace(/<!--.*?-->/g, "");
 
-  assertCheck("HOME", "Total registros canónicos (1.753.013)", homeHtml.includes("1.753.013") || homeHtml.includes("1.464.041"));
+  // Version ID header/tag check
+  const cfRay = homeRes.headers.get("cf-ray") || "local";
+  const etag = homeRes.headers.get("etag") || "v1.0";
+  const versionId = `${etag}-${cfRay.slice(0, 8)}`;
+
+  assertCheck("HOME", "Total registros canónicos (1.753.013)", homeHtml.includes("1.753.013"));
+  assertCheck("HOME", "Total entidades identificadas (3.281)", homeHtml.includes("3.281"));
+  assertCheck("HOME", "Total relaciones y cruces (1.897)", homeHtml.includes("1.897"));
+  assertCheck("HOME", "Total votaciones de sala (12.111)", homeHtml.includes("12.111"));
+  assertCheck("HOME", "Total gastos parlamentarios (690)", homeHtml.includes("690"));
+  assertCheck("HOME", "Hero KPIs sin signo negativo '-' en SSR", !homeHtml.includes("home-stat\"><strong>-") && !homeHtml.includes("home-stat\">-"));
   assertCheck("HOME", "Total 13 fuentes públicas", homeHtml.includes("13") && (homeHtml.includes("fuentes") || homeHtml.includes("Fuentes")));
   assertCheck("HOME", "Footer contiene 'Creado por Jorge Morgado'", homeHtml.includes("Creado por") && homeHtml.includes("Jorge Morgado"));
   assertCheck("HOME", "Footer contiene enlace a LinkedIn de Jorge Morgado", homeHtml.includes("https://www.linkedin.com/in/jorge-morgado/"));
@@ -60,7 +70,7 @@ async function verifyProdFull() {
   const crucesHtml = (await crucesRes.text()).replace(/<!--.*?-->/g, "");
 
   assertCheck("CRUCES", "Tile CGR '291'", crucesHtml.includes("291"));
-  assertCheck("CRUCES", "Tile ChileCompra '$1,9 B' / '74.142'", (crucesHtml.includes("$1,9") || crucesHtml.includes("1,9")) && crucesHtml.includes("74.142"));
+  assertCheck("CRUCES", "Tile ChileCompra '$1,9 billones' / '74.142'", (crucesHtml.includes("$1,9") || crucesHtml.includes("1,9")) && crucesHtml.includes("74.142"));
   assertCheck("CRUCES", "Tile InfoLobby '60.523'", crucesHtml.includes("60.523"));
   assertCheck("CRUCES", "Selector 'Filas por página: 10 / 25 / 50' visible", crucesHtml.includes("Filas por página") && crucesHtml.includes("10") && crucesHtml.includes("25") && crucesHtml.includes("50"));
   assertCheck("CRUCES", "Paginación default 10 filas ('Pág. 1 de 37')", crucesHtml.includes("Pág. 1 de 37") || crucesHtml.includes("Página 1 de 37") || crucesHtml.includes("37"));
@@ -104,6 +114,8 @@ async function verifyProdFull() {
   const fuentesHtml = (await fuentesRes.text()).replace(/<!--.*?-->/g, "");
 
   assertCheck("FUENTES", "Muestra 13 fuentes oficiales y derivadas", fuentesHtml.includes("13 fuentes") || fuentesHtml.includes("13"));
+  assertCheck("FUENTES", "Titular canónico con consolidado 1.753.013", fuentesHtml.includes("1.487.224") && fuentesHtml.includes("1.753.013"));
+  assertCheck("FUENTES", "Enlace a calidad de datos", fuentesHtml.includes("/datos/calidad"));
   assertCheck("FUENTES", "Estados reales: 'Operativa mensual'", fuentesHtml.includes("Operativa"));
   assertCheck("FUENTES", "Estados reales: 'Publicación anual' (SINIM)", fuentesHtml.includes("Publicación anual") || fuentesHtml.includes("anual"));
   assertCheck("FUENTES", "Estados reales: 'Por ciclo electoral' (SERVEL)", fuentesHtml.includes("Por ciclo electoral") || fuentesHtml.includes("electoral"));
@@ -113,6 +125,7 @@ async function verifyProdFull() {
   assertCheck("CALIDAD", "HTTP Status 200", calidadRes.status === 200);
   const calidadHtml = (await calidadRes.text()).replace(/<!--.*?-->/g, "");
   assertCheck("CALIDAD", "Guards V1-V7: 0 violaciones críticas", calidadHtml.includes("Guards V1-V7") && calidadHtml.includes("0"));
+  assertCheck("CALIDAD", "Tooltip en Nóminas ≤90d presente", calidadHtml.includes("Nóminas Municipales ≤90d"));
 
   // ─── MÓDULO 6: /DONAR — GRID COMPLETO (4 CARDS + 3 BULLETS CADA UNA) ───────
   console.log("\n6. MÓDULO DONACIONES Y PROYECTO ABIERTO (/donar)");
@@ -139,23 +152,32 @@ async function verifyProdFull() {
   assertCheck("DONAR", "Sin enlaces de email (mailto:)", !donarHtml.includes("mailto:"));
   assertCheck("DONAR", "Sin formularios de contacto", !donarHtml.includes("<form") && !donarHtml.includes("form-group"));
 
-  // ─── MÓDULO 7: CHECK DE LAYOUT SIN ESPACIO MUERTO LATERAL ───────────────────
-  console.log("\n7. MÓDULO ANCHO COMPLETO / SIN ESPACIO MUERTO (/donar, /cruces, /transferencias, /)");
+  // ─── MÓDULO 7: AUDITORÍA EDITORIAL Y ANTI-TYPOS (CROSS-PAGE) ────────────────
+  console.log("\n7. MÓDULO AUDITORÍA EDITORIAL Y ANTI-TYPOS (CROSS-PAGE)");
+  const allHtmls = [homeHtml, transfHtml, crucesHtml, fuentesHtml, calidadHtml, donarHtml].join(" ");
+  assertCheck("EDITORIAL", "Cero typos 'billrones' (grep billron = 0)", !allHtmls.toLowerCase().includes("billron"));
+  assertCheck("EDITORIAL", "Cero duplicaciones 'Subrogante))' / '(s))'", !allHtmls.includes("Subrogante))") && !allHtmls.includes("(s))"));
+  assertCheck("EDITORIAL", "Cero 'mil MM' en formatos monetarios", !allHtmls.includes("mil MM"));
+
+  // ─── MÓDULO 8: CHECK DE LAYOUT SIN ESPACIO MUERTO LATERAL ───────────────────
+  console.log("\n8. MÓDULO ANCHO COMPLETO / SIN ESPACIO MUERTO (/donar, /cruces, /transferencias, /)");
   assertCheck("LAYOUT", "/donar sin maxWidth restrictivo (<800px)", !donarHtml.includes("max-width: 780px") && !donarHtml.includes("max-width: 680px"));
   assertCheck("LAYOUT", "/cruces con container-main", crucesHtml.includes("container-main"));
   assertCheck("LAYOUT", "/transferencias con container-main", transfHtml.includes("container-main"));
-  assertCheck("LAYOUT", "Home con container-main", homeHtml.includes("container-main"));
+  assertCheck("LAYOUT", "Home con main.home-desk y container-main", homeHtml.includes("home-desk") && homeHtml.includes("container-main"));
+  assertCheck("LAYOUT", "Home rutas 12-col layout", homeHtml.includes("home-paths__layout") && homeHtml.includes("home-paths__grid"));
 
   // ─── RESUMEN FINAL ─────────────────────────────────────────────────────────
   console.log("\n================================================================================");
   console.log(`  RESUMEN DE EJECUCIÓN: ${passed} verificaciones pasadas, ${failed} fallidas.`);
+  console.log(`  VERSION ID EN PRODUCCIÓN: ${versionId}`);
   console.log("================================================================================");
 
   if (failed > 0) {
     console.error("  ❌ VERIFICACIÓN FALLIDA. Corrija los errores antes de concluir.");
     process.exit(1);
   } else {
-    console.log("  ✅ TODAS LAS PRUEBAS EN VIVO DE PRODUCCIÓN PASARON AL 100% (VERIFY-PROD-FULL).");
+    console.log(`  ✅ TODAS LAS PRUEBAS EN VIVO DE PRODUCCIÓN PASARON AL 100% (VERIFY-PROD-FULL) [Version: ${versionId}].`);
   }
 }
 

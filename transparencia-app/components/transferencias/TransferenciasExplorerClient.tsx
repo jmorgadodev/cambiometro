@@ -40,7 +40,7 @@ function fmtCompact(n: number): string {
     return `$${(n / 1_000_000_000).toLocaleString("es-CL", {
       minimumFractionDigits: 1,
       maximumFractionDigits: 1,
-    })} mil MM`;
+    })} mil millones`;
   if (n >= 1_000_000)
     return `$${(n / 1_000_000).toLocaleString("es-CL", {
       maximumFractionDigits: 0,
@@ -139,8 +139,8 @@ export default function TransferenciasExplorerClient({
           setTotal(json.total || 0);
           setTotalPages(json.totalPages || 1);
         }
-      } catch (err: any) {
-        if (err.name !== "AbortError") {
+      } catch (err: unknown) {
+        if (err instanceof Error && err.name !== "AbortError") {
           console.error("Error fetching transferencias:", err);
         }
       } finally {

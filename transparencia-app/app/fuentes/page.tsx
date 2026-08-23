@@ -60,7 +60,10 @@ export default async function FuentesPage() {
               Catálogo de fuentes integradas
             </h2>
             <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: 0 }}>
-              {GLOBAL_KPIS.total_fuentes} fuentes ({GLOBAL_KPIS.fuentes_oficiales} oficiales + {GLOBAL_KPIS.fuentes_derivadas} derivada) con {summary.totalRegistrosCanonicos.toLocaleString("es-CL")} registros canónicos ({summary.totalRegistrosHistoricos.toLocaleString("es-CL")} históricos) compilados.
+              {summary.totalRegistrosCanonicos.toLocaleString("es-CL")} registros canónicos por fuente · consolidado {GLOBAL_KPIS.registros_canonicos.toLocaleString("es-CL")} (incluye actividad parlamentaria){" "}
+              <Link href="/datos/calidad" className="data-link" style={{ fontSize: "0.85rem", fontWeight: 600 }}>
+                (ver nota en calidad de datos)
+              </Link>
             </p>
           </div>
 

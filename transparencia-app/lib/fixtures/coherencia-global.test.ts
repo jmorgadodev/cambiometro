@@ -73,6 +73,33 @@ describe("Blindaje Anti-Regresión — Coherencia Global del Sitio", () => {
       expect(getMuniCanonicalSlug("muni-maipu")).toBe("maipu");
       expect(isMuniLegacyId("muni-maipu")).toBe(true);
     });
+
+    it("Home KPIs coinciden exactamente con el manifest canónico y con /datos", () => {
+      expect(GLOBAL_KPIS.registros_canonicos).toBe(1753013);
+      expect(GLOBAL_KPIS.entidades).toBe(3281);
+      expect(GLOBAL_KPIS.relaciones).toBe(1897);
+      expect(GLOBAL_KPIS.votaciones).toBe(12111);
+      expect(GLOBAL_KPIS.gastos).toBe(690);
+
+      // Fixture coherencia-global: home == /datos
+      const homeSource = readFileSync(resolve(projectRoot, "app/page.tsx"), "utf8");
+      const datosSource = readFileSync(resolve(projectRoot, "app/datos/page.tsx"), "utf8");
+      expect(homeSource).toContain("GLOBAL_KPIS.registros_canonicos");
+      expect(datosSource).toContain("GLOBAL_KPIS.registros_canonicos");
+      expect(homeSource).toContain("GLOBAL_KPIS.entidades");
+      expect(datosSource).toContain("GLOBAL_KPIS.entidades");
+    });
+
+    it("Montos consolidados ChileCompra y Ley 19.862 son consistentes cross-page", () => {
+      // ChileCompra: 74.142 procesos canónicos y $1,9 billones
+      expect(SOURCE_CANONICAL_COUNTS["chilecompra"]).toBe(74142);
+      // Ley 19.862: 59.361 registros canónicos y $5,01 billones
+      expect(SOURCE_CANONICAL_COUNTS["ley-19862"]).toBe(59361);
+
+      const crucesSource = readFileSync(resolve(projectRoot, "app/cruces/page.tsx"), "utf8");
+      expect(crucesSource).toContain("1900000000000");
+      expect(crucesSource).toContain("chilecompra");
+    });
   });
 
   // ─── 2. AUDITORÍA Y CRAWL INTERNO DEL FOOTER ──────────────────────────────
@@ -136,6 +163,55 @@ describe("Blindaje Anti-Regresión — Coherencia Global del Sitio", () => {
             ).toBe(true);
           }
         }
+      }
+    });
+  });
+
+  // ─── 4. BLINDAJE ANTI-TYPOS Y ESTÁNDARES EDITORIALES ────────────────────────
+  describe("4. Blindaje Anti-Typos y Estándares Editoriales", () => {
+    it("Cero 'billrones' en todo el código fuente de app/, lib/ y components/", () => {
+      const checkDirs = ["app", "lib", "components"];
+      for (const dir of checkDirs) {
+        const fullDir = resolve(projectRoot, dir);
+        const checkFiles = (directory: string) => {
+          const entries = readdirSync(directory, { withFileTypes: true });
+          for (const entry of entries) {
+            const res = resolve(directory, entry.name);
+            if (entry.isDirectory()) {
+              checkFiles(res);
+            } else if ((entry.name.endsWith(".ts") || entry.name.endsWith(".tsx")) && !entry.name.endsWith(".test.ts")) {
+              const content = readFileSync(res, "utf8");
+              expect(content.toLowerCase(), `Archivo ${res} no debe contener 'billron'`).not.toContain("billron");
+            }
+          }
+        };
+        checkFiles(fullDir);
+      }
+    });
+
+    it("Cero 'Subrogante))' o '(s))' en el dataset y código de movimientos", () => {
+      const movContent = readFileSync(resolve(projectRoot, "lib/movimientos.ts"), "utf8");
+      expect(movContent).not.toContain("Subrogante))");
+      expect(movContent).not.toContain("(s))");
+    });
+
+    it("Cero 'mil MM' en formato monetario de componentes y utilitarios", () => {
+      const checkDirs = ["app", "lib", "components"];
+      for (const dir of checkDirs) {
+        const fullDir = resolve(projectRoot, dir);
+        const checkFiles = (directory: string) => {
+          const entries = readdirSync(directory, { withFileTypes: true });
+          for (const entry of entries) {
+            const res = resolve(directory, entry.name);
+            if (entry.isDirectory()) {
+              checkFiles(res);
+            } else if ((entry.name.endsWith(".ts") || entry.name.endsWith(".tsx")) && !entry.name.endsWith(".test.ts")) {
+              const content = readFileSync(res, "utf8");
+              expect(content, `Archivo ${res} no debe contener 'mil MM'`).not.toContain("mil MM");
+            }
+          }
+        };
+        checkFiles(fullDir);
       }
     });
   });

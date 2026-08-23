@@ -47,7 +47,7 @@ function formatCompactCLP(n?: number | null) {
     return `$${(n / 1_000_000_000).toLocaleString("es-CL", {
       minimumFractionDigits: 1,
       maximumFractionDigits: 1,
-    })} mil MM`;
+    })} mil millones`;
   }
   return `$${(n / 1_000_000).toLocaleString("es-CL", {
     maximumFractionDigits: 0,
