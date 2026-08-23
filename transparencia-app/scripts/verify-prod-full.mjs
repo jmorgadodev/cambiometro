@@ -202,6 +202,7 @@ async function verifyProdFull() {
               "User-Agent": "Cambiometro-Verifier/1.0",
               "Connection": "close",
             },
+            signal: AbortSignal.timeout(3500),
           });
           const t1 = performance.now();
           durationMs = Math.round(t1 - t0);
