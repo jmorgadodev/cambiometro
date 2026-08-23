@@ -18,6 +18,7 @@
     "guard:integrity": "node ../scripts/audit/pipeline-guard.mjs",
     "preflight": "npm run lint && npm run test && npm run cf:build",
     "verify:browser": "node scripts/verify-integration.mjs",
+    "verify:security": "node scripts/verify-security.mjs",
     "check:bundle": "node scripts/audit/measure-bundle-size.mjs",
     "smoke:uptime": "node scripts/uptime-smoke.mjs",
     "cf:build": "opennextjs-cloudflare build",
