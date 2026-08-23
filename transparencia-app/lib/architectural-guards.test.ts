@@ -15,7 +15,15 @@ describe("Guardias Arquitectónicos — Fichas /politico/* Estáticas y Zero CPU
     expect(politicoPageContent).toContain("export async function generateStaticParams");
   });
 
-  it("2. Guard: generateStaticParams genera parámetros para los 205 parlamentarios", async () => {
+  it("2. Guard: app/page.tsx (Home) es estática (force-static) y no force-dynamic", () => {
+    const homePagePath = resolve("app/page.tsx");
+    const homePageContent = readFileSync(homePagePath, "utf8");
+    expect(homePageContent).not.toContain('export const dynamic = "force-dynamic"');
+    expect(homePageContent).not.toContain("export const dynamic = 'force-dynamic'");
+    expect(homePageContent).toContain('export const dynamic = "force-static"');
+  });
+
+  it("3. Guard: generateStaticParams genera parámetros para los 205 parlamentarios", async () => {
     const params = await generateStaticParams();
     expect(params.length).toBeGreaterThanOrEqual(205);
 
@@ -27,7 +35,7 @@ describe("Guardias Arquitectónicos — Fichas /politico/* Estáticas y Zero CPU
     }
   });
 
-  it("3. Guard: Índice precomputado data/politicos-votaciones-index.json existe y cubre los 205", () => {
+  it("4. Guard: Índice precomputado data/politicos-votaciones-index.json existe y cubre los 205", () => {
     const indexPath = resolve("data/politicos-votaciones-index.json");
     expect(existsSync(indexPath)).toBe(true);
 
@@ -44,43 +52,46 @@ describe("Guardias Arquitectónicos — Fichas /politico/* Estáticas y Zero CPU
     }
   });
 
-  it("4. Lint Arquitectónico: Prohibir imports estáticos de JSON > 500 KB en rutas app/**", () => {
+  it("5. Lint Arquitectónico: Prohibir imports de JSON > 200 KB en lib/ (cero parse pesado en runtime)", () => {
     function scanDir(dir: string, fileList: string[] = []): string[] {
       const files = readdirSync(dir, { withFileTypes: true });
       for (const file of files) {
         const fullPath = join(dir, file.name);
         if (file.isDirectory()) {
           scanDir(fullPath, fileList);
-        } else if (file.name.endsWith(".tsx") || file.name.endsWith(".ts")) {
+        } else if ((file.name.endsWith(".tsx") || file.name.endsWith(".ts")) && !file.name.includes(".test.")) {
           fileList.push(fullPath);
         }
       }
       return fileList;
     }
 
-    const appFiles = scanDir(resolve("app"));
-    for (const filePath of appFiles) {
+    const libFiles = scanDir(resolve("lib"));
+    for (const filePath of libFiles) {
       const content = readFileSync(filePath, "utf8");
-      const jsonImports = [...content.matchAll(/import\s+.*?from\s+["'](@\/data\/.*?\.json|.*?\.json)["']/g)];
+      const jsonImports = [...content.matchAll(/from\s+["']([^"']+\.json)["']/g)];
 
       for (const match of jsonImports) {
         const importPath = match[1];
         let resolvedJsonPath = "";
-        if (importPath.startsWith("@/data/")) {
-          resolvedJsonPath = resolve("data", importPath.replace("@/data/", ""));
+        if (importPath.startsWith("@/")) {
+          resolvedJsonPath = resolve(importPath.replace("@/", ""));
         } else if (importPath.startsWith("../") || importPath.startsWith("./")) {
           resolvedJsonPath = resolve(join(filePath, "..", importPath));
         }
 
         if (resolvedJsonPath && existsSync(resolvedJsonPath)) {
           const size = statSync(resolvedJsonPath).size;
-          // Si el JSON supera 500 KB, la página DEBE tener generateStaticParams
-          if (size > 500 * 1024) {
-            expect(
-              content.includes("generateStaticParams"),
-              `Archivo ${filePath} importa JSON de ${(size / 1024).toFixed(0)} KB sin generateStaticParams (SSG).`
-            ).toBe(true);
-          }
+          // Prohibir datos pesados como politicos-votaciones (3.7MB+) en lib runtime
+          expect(
+            importPath.includes("politicos-votaciones"),
+            `Archivo ${filePath} no debe importar politicos-votaciones en runtime.`
+          ).toBe(false);
+
+          expect(
+            size,
+            `Archivo ${filePath} importa JSON ${importPath} de ${(size / 1024).toFixed(0)} KB (> 800 KB). Debe leerse en build/ETL o vía assets.`
+          ).toBeLessThanOrEqual(800 * 1024);
         }
       }
     }

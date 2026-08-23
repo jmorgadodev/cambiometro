@@ -430,8 +430,6 @@ function nombreCoincide(nombreVoto: string, nombreSeed: string): boolean {
   return apellidos.every((apellido) => voto.includes(apellido));
 }
 
-import politicosVotacionesSubset from "@/data/lake-subsets/politicos-votaciones.subset.json";
-
 let cachedVotacionesDataset: { votes: Record<string, [string, string][]>; sessions: Record<string, EtlRecord> } | null = null;
 
 function getVotacionesDataset() {
@@ -443,8 +441,7 @@ function getVotacionesDataset() {
       return cachedVotacionesDataset;
     }
   } catch {}
-  cachedVotacionesDataset = politicosVotacionesSubset as unknown as { votes: Record<string, [string, string][]>; sessions: Record<string, EtlRecord> };
-  return cachedVotacionesDataset;
+  return { votes: {}, sessions: {} };
 }
 
 export function getPrecomputedPoliticoProfile(polId: string) {
