@@ -106,7 +106,7 @@ async function verifyProdCruces() {
     "Selector 10 / 25 / 50 presente"
   );
 
-  const pagMatch = html.match(/Pág\.\s*1\s*de\s*(\d+)/i) || html.match(/1\s*\/\s*(\d+)/i) || html.match(/Página\s*1\s*de\s*(\d+)/i);
+  const pagMatch = html.match(/Pág(?:ina)?\.\s*1\s*de\s*(\d+)/i) || html.match(/Página\s*1\s*de\s*(\d+)/i);
   const totalPages = pagMatch ? parseInt(pagMatch[1], 10) : 0;
   assertCheck("Tabla contiene paginación 'Pág. 1 de N' con N >= 30 (default 10 filas)", totalPages >= 30, `Total páginas: ${totalPages || "detectado"}`);
 
@@ -115,9 +115,9 @@ async function verifyProdCruces() {
     headers: { "User-Agent": "Cambiometro-Verifier/1.0", "Cache-Control": "no-cache" },
   });
   const html25 = await res25.text();
-  const pagMatch25 = html25.match(/Pág\.\s*1\s*de\s*(\d+)/i) || html25.match(/1\s*\/\s*(\d+)/i) || html25.match(/Página\s*1\s*de\s*(\d+)/i);
+  const pagMatch25 = html25.match(/Pág(?:ina)?\.\s*1\s*de\s*(\d+)/i) || html25.match(/Página\s*1\s*de\s*(\d+)/i);
   const totalPages25 = pagMatch25 ? parseInt(pagMatch25[1], 10) : 0;
-  assertCheck("Consulta con ?rows=25 calcula total páginas menor a 20 (N ~ 15)", totalPages25 > 0 && totalPages25 < totalPages, `Páginas con rows=25: ${totalPages25}`);
+  assertCheck("Consulta con ?rows=25 calcula total páginas menor a 20 (N ~ 15)", totalPages25 > 0 && totalPages25 < totalPages, `Páginas con rows=25: ${totalPages25} vs default ${totalPages}`);
 
   // Relaciones oficiales en tabla
   assertCheck("Aparece en tabla: Informe 704/2024 (CGR)", html.includes("704/2024") || html.includes("contraloria-cgr-audit-2024-704"));
