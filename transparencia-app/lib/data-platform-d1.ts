@@ -431,10 +431,8 @@ export async function resolveDataPlatformSummary(
       db.prepare("SELECT max(coalesce(last_success_at, generated_at)) AS updated_at FROM source_state").first<{ updated_at: string | null }>(),
     ]);
     return { totalRecords: Number(records?.total ?? 0), updatedAt: state?.updated_at ?? null };
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    if (/no such table:\s*(records|source_state)\b/i.test(message)) return fallback();
-    throw error;
+  } catch {
+    return fallback();
   }
 }
 
