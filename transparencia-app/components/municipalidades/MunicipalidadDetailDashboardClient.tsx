@@ -857,9 +857,21 @@ export default function MunicipalidadDetailDashboardClient({
                   borderTop: "1px solid var(--border-subtle)",
                   fontSize: "0.72rem",
                   color: "var(--text-subtle)",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "0.5rem",
                 }}
               >
-                Fuente: Sistema Nacional de Información Municipal (SINIM / SUBDERE) · Período 2025
+                <span>Fuente: Sistema Nacional de Información Municipal (SINIM / SUBDERE) · Partidas Variables M1 (Inicial), M2 (Vigente), M3 (Ingresos Propios), M4 (Gasto Personal) · Período 2025</span>
+                <a
+                  href="https://datos.sinim.gov.cl/datos_municipales.php"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "var(--accent)", textDecoration: "underline" }}
+                >
+                  datos.sinim.gov.cl ↗
+                </a>
               </div>
             </div>
           </div>

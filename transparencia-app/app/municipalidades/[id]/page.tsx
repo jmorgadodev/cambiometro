@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
 import { MUNICIPALIDADES_SEED } from "@/lib/seed-politicos";
 import { getMunicipalidadData } from "@/lib/municipalidades-data";
+import { getVerifiedMuniRRSS } from "@/lib/municipalidades-rrss";
 import { getPartidoConfig } from "@/lib/partidos.config";
 import ShareButton from "@/components/ShareButton";
 import Breadcrumbs from "@/components/Breadcrumbs";
@@ -234,13 +235,45 @@ export default async function MunicipalidadDetailPage({
                     <span style={{ fontSize: "0.75rem", color: "var(--text-3)" }}>
                       (Grado EUS {alcalde.grado_eus || "1"})
                     </span>
-
+                  </>
+                ) : getVerifiedMuniRRSS(muni.id)?.alcalde_oficial ? (
+                  <>
+                    <span>Alcaldía:</span>
+                    <strong style={{ color: "var(--text-1)" }}>
+                      {getVerifiedMuniRRSS(muni.id)!.alcalde_oficial!.nombre}
+                    </strong>
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "0.35rem",
+                        padding: "0.15rem 0.5rem",
+                        borderRadius: 99,
+                        fontSize: "0.72rem",
+                        fontWeight: 700,
+                        color: "var(--surface)",
+                        backgroundColor: brandingAlcalde.color_oficial,
+                      }}
+                    >
+                      {brandingAlcalde.logo_url && (
+                        /* eslint-disable-next-line @next/next/no-img-element */
+                        <img
+                          src={brandingAlcalde.logo_url}
+                          alt={brandingAlcalde.sigla}
+                          style={{ width: 14, height: 14, borderRadius: 2, objectFit: "contain" }}
+                        />
+                      )}
+                      {brandingAlcalde.sigla || brandingAlcalde.nombre}
+                    </span>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-3)" }}>
+                      (Servel 2024 / BCN)
+                    </span>
                   </>
                 ) : (
                   <>
                     <span>Autoridad comunal:</span>
                     <strong style={{ color: "var(--text-1)" }}>
-                      {muni.alcalde_actual ?? "En actualización"}
+                      {muni.alcalde_actual ?? (muni.tiene_municipalidad_propia ? "En actualización" : "— (Comuna administrada por Cabo de Hornos)")}
                     </strong>
                   </>
                 )}
@@ -303,6 +336,94 @@ export default async function MunicipalidadDetailPage({
                 >
                   📊 Ficha SINIM SUBDERE ↗
                 </a>
+
+                {/* Redes Sociales Oficiales Verificadas (Regla R10: Cero inventadas) */}
+                {muniData.redes_sociales?.twitter && (
+                  <a
+                    href={muniData.redes_sociales.twitter}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-ghost"
+                    style={{
+                      fontSize: "0.78rem",
+                      padding: "0.35rem 0.75rem",
+                      borderColor: "var(--border)",
+                      color: "var(--text-1)",
+                    }}
+                    title="Cuenta Oficial de X / Twitter"
+                  >
+                    𝕏 Twitter ↗
+                  </a>
+                )}
+
+                {muniData.redes_sociales?.instagram && (
+                  <a
+                    href={muniData.redes_sociales.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-ghost"
+                    style={{
+                      fontSize: "0.78rem",
+                      padding: "0.35rem 0.75rem",
+                      borderColor: "var(--border)",
+                      color: "var(--text-1)",
+                    }}
+                    title="Cuenta Oficial de Instagram"
+                  >
+                    📷 Instagram ↗
+                  </a>
+                )}
+
+                {muniData.redes_sociales?.facebook && (
+                  <a
+                    href={muniData.redes_sociales.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-ghost"
+                    style={{
+                      fontSize: "0.78rem",
+                      padding: "0.35rem 0.75rem",
+                      borderColor: "var(--border)",
+                      color: "var(--text-1)",
+                    }}
+                    title="Página Oficial de Facebook"
+                  >
+                    📘 Facebook ↗
+                  </a>
+                )}
+
+                {muniData.redes_sociales?.youtube && (
+                  <a
+                    href={muniData.redes_sociales.youtube}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="btn btn-ghost"
+                    style={{
+                      fontSize: "0.78rem",
+                      padding: "0.35rem 0.75rem",
+                      borderColor: "var(--border)",
+                      color: "var(--text-1)",
+                    }}
+                    title="Canal Oficial de YouTube"
+                  >
+                    📺 YouTube ↗
+                  </a>
+                )}
+
+                {!muni.tiene_municipalidad_propia && (
+                  <span
+                    className="badge"
+                    style={{
+                      fontSize: "0.75rem",
+                      padding: "0.35rem 0.65rem",
+                      background: "var(--surface-2)",
+                      border: "1px solid var(--border)",
+                      color: "var(--text-2)",
+                    }}
+                  >
+                    📍 Comuna sin municipalidad propia (administrada por Cabo de Hornos)
+                  </span>
+                )}
               </div>
             </div>
           </div>
