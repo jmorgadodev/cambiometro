@@ -298,7 +298,7 @@ export default function PersonalApoyoMensual({
                   ariaLabel="Explicación de porcentaje de exceso sobre la base mensual"
                   content={
                     <span>
-                      Diferencia calculada contra la base oficial mensual de {formatCLP(baseOficial)}. Al situarse en {pctFormateado} (≤40%), activa la alerta de integridad <strong>ALTA</strong> según el protocolo de verificación V2.
+                      Diferencia calculada contra la base oficial mensual de {formatCLP(baseOficial)} fijada por el Consejo Resolutivo de Asignaciones Parlamentarias y acuerdo de mesa del Senado (criterio oficial CPLT como denominador). Al situarse en {pctFormateado} (≤40%), activa la alerta de integridad <strong>ALTA</strong> según el protocolo de verificación V2.
                     </span>
                   }
                 >
