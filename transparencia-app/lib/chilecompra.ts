@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import chilecompraStaticJson from "@/data/lake/projections/v1/chilecompra.json";
+import chilecompraStaticJson from "@/data/lake-subsets/chilecompra.subset.json";
 import { legalEntityIdFromRut } from "./legal-rut";
 
 export interface ChileCompraAdjudicacion {

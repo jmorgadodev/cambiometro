@@ -15,7 +15,7 @@ import { leerInfoLobbyV1 } from "@/lib/infolobby";
 import { leerInfoProbidadV1 } from "@/lib/infoprobidad-lake";
 import { getLey19862Summary } from "@/lib/transferencias-data";
 import { leerSinimV1 } from "@/lib/sinim";
-import personalApoyoStaticJson from "@/data/personal-apoyo.json";
+import personalApoyoStaticJson from "@/data/lake-subsets/personal-apoyo.subset.json";
 import { MUNICIPALIDADES_SEED, getFuncionariosPorOrganismo } from "@/lib/seed-politicos";
 import sourceInventoryJson from "@/data/etl/source-inventory.json";
 import type {

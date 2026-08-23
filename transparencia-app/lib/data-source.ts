@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { leerSnapshot } from "@/lib/snapshot";
 import { PARTIDOS_SEED, POLITICOS_SEED } from "@/lib/seed-politicos";
 import { leerInfoProbidadV1 } from "@/lib/infoprobidad-lake";
@@ -428,7 +430,22 @@ function nombreCoincide(nombreVoto: string, nombreSeed: string): boolean {
   return apellidos.every((apellido) => voto.includes(apellido));
 }
 
-import politicosVotaciones from "@/data/politicos-votaciones.json";
+import politicosVotacionesSubset from "@/data/lake-subsets/politicos-votaciones.subset.json";
+
+let cachedVotacionesDataset: { votes: Record<string, [string, string][]>; sessions: Record<string, EtlRecord> } | null = null;
+
+function getVotacionesDataset() {
+  if (cachedVotacionesDataset) return cachedVotacionesDataset;
+  try {
+    const fullPath = path.join(process.cwd(), "data", "politicos-votaciones.json");
+    if (fs.existsSync(fullPath)) {
+      cachedVotacionesDataset = JSON.parse(fs.readFileSync(fullPath, "utf8"));
+      return cachedVotacionesDataset;
+    }
+  } catch {}
+  cachedVotacionesDataset = politicosVotacionesSubset as unknown as { votes: Record<string, [string, string][]>; sessions: Record<string, EtlRecord> };
+  return cachedVotacionesDataset;
+}
 
 export function getVotacionesParaPolitico(
   politico: Pick<Politico, "nombre_completo"> & { id?: string }
@@ -441,8 +458,9 @@ export function getVotacionesParaPolitico(
     polId = seed?.id;
   }
 
-  const allVotes = politicosVotaciones.votes as unknown as Record<string, [string, string][]>;
-  const sessions = politicosVotaciones.sessions as unknown as Record<string, EtlRecord>;
+  const ds = getVotacionesDataset();
+  const allVotes = (ds?.votes || {}) as Record<string, [string, string][]>;
+  const sessions = (ds?.sessions || {}) as Record<string, EtlRecord>;
 
   if (polId && allVotes[polId]) {
     const pVotes = allVotes[polId];

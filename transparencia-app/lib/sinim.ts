@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import sinimStaticJson from "@/data/lake/projections/v1/sinim.json";
+import sinimStaticJson from "@/data/lake-subsets/sinim.subset.json";
 
 export interface SinimIndicador {
   code: string;

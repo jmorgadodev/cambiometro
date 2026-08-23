@@ -5,7 +5,7 @@ import { getKvCache } from "@/lib/db";
 import { diputadoIdParaPolitico } from "@/lib/data-source";
 import { personalApoyoParaDiputado, personalApoyoParaSenador } from "@/lib/personal-apoyo";
 import { COALICION_POR_PARTIDO } from "@/lib/partido-electoral-data";
-import PARTIDOS_STATS_FALLBACK from "@/data/partidos-stats.json";
+import PARTIDOS_STATS_FALLBACK from "@/data/lake-subsets/partidos-stats.subset.json";
 
 export interface DetalleRebelde {
   politico_id: string;

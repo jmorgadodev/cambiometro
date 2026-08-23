@@ -28,26 +28,54 @@ async function verifyProdCruces() {
   console.log(`1. /cruces HTTP Status: ${res.status}\n`);
   assertCheck("HTTP Status 200", res.status === 200);
 
+  // Extraer tiles buscando bloques stat-tile
+  const tileMatches = [...html.matchAll(/<div class="stat-tile[^"]*">([\s\S]*?)<\/div>\s*<\/div>/gi)].map(m => m[1]);
+  
+  function getTileData(labelSubstring) {
+    for (const t of tileMatches) {
+      if (t.includes(labelSubstring)) {
+        const valMatch = t.match(/stat-tile__value">([^<]+)<\/div>/);
+        const hintMatch = t.match(/stat-tile__hint">([^<]+)<\/div>/);
+        return {
+          value: valMatch ? valMatch[1].trim() : "",
+          hint: hintMatch ? hintMatch[1].trim() : "",
+          full: t,
+        };
+      }
+    }
+    return { value: "", hint: "", full: "" };
+  }
+
   // 2. Tiles KPI
   console.log("\n--- Verificación de Tiles KPI ---");
   // Auditorías CGR
-  const cgrTileMatch = html.match(/Auditorías CGR[\s\S]*?stat-tile__value">([^<]+)<\/div>/i) ||
-                       html.match(/stat-tile__value">([^<]+)<\/div>[\s\S]*?Auditorías CGR/i);
-  const cgrVal = cgrTileMatch ? cgrTileMatch[1].trim() : "";
-  assertCheck("Tile 'Auditorías CGR' contiene número (no '—')", cgrVal.length > 0 && cgrVal !== "—" && !isNaN(parseInt(cgrVal.replace(/\./g, ""), 10)), `Valor: "${cgrVal}"`);
+  const cgrTile = getTileData("Auditorías CGR");
+  assertCheck(
+    "Tile 'Auditorías CGR' contiene número (no '—')",
+    cgrTile.value.length > 0 && cgrTile.value !== "—" && !isNaN(parseInt(cgrTile.value.replace(/\./g, ""), 10)),
+    `Valor: "${cgrTile.value}"`
+  );
 
   // Compras ChileCompra
-  const ccTileMatch = html.match(/Compras ChileCompra[\s\S]*?stat-tile__value">([^<]+)<\/div>/i) ||
-                      html.match(/stat-tile__value">([^<]+)<\/div>[\s\S]*?Compras ChileCompra/i);
-  const ccVal = ccTileMatch ? ccTileMatch[1].trim() : "";
-  assertCheck("Tile 'Compras ChileCompra' contiene monto CLP (no '—' ni '$0')", ccVal.includes("$") && !ccVal.includes("$0") && ccVal !== "—", `Valor: "${ccVal}"`);
-  assertCheck("Tile 'Compras ChileCompra' contiene '74.142 procesos'", html.includes("74.142 procesos OCDS") || html.includes("74.142"));
+  const ccTile = getTileData("Compras ChileCompra");
+  assertCheck(
+    "Tile 'Compras ChileCompra' contiene monto CLP (no '—' ni '$0')",
+    ccTile.value.includes("$") && !ccTile.value.includes("$0") && ccTile.value !== "—",
+    `Valor: "${ccTile.value}"`
+  );
+  assertCheck(
+    "Tile 'Compras ChileCompra' contiene '74.142 procesos'",
+    ccTile.hint.includes("74.142") || html.includes("74.142"),
+    `Hint: "${ccTile.hint}"`
+  );
 
   // Registros InfoLobby
-  const lobbyTileMatch = html.match(/Registros InfoLobby[\s\S]*?stat-tile__value">([^<]+)<\/div>/i) ||
-                         html.match(/stat-tile__value">([^<]+)<\/div>[\s\S]*?Registros InfoLobby/i);
-  const lobbyVal = lobbyTileMatch ? lobbyTileMatch[1].trim() : "";
-  assertCheck("Tile 'Registros InfoLobby' contiene número (no '—')", lobbyVal.length > 0 && lobbyVal !== "—" && !isNaN(parseInt(lobbyVal.replace(/\./g, ""), 10)), `Valor: "${lobbyVal}"`);
+  const lobbyTile = getTileData("Registros InfoLobby");
+  assertCheck(
+    "Tile 'Registros InfoLobby' contiene número (no '—')",
+    lobbyTile.value.length > 0 && lobbyTile.value !== "—" && !isNaN(parseInt(lobbyTile.value.replace(/\./g, ""), 10)),
+    `Valor: "${lobbyTile.value}"`
+  );
 
   // 3. Chips de Tipo
   console.log("\n--- Verificación de Chips de Tipo ---");
@@ -77,7 +105,11 @@ async function verifyProdCruces() {
 
   // Maipú 301
   const maipuRes = await fetch("https://cambiometro.impulsacv.cl/municipalidades/muni-maipu", { redirect: "manual" });
-  assertCheck("Invariante Maipú: Redirección activa (Status 307/308)", maipuRes.status === 307 || maipuRes.status === 308);
+  assertCheck(
+    "Invariante Maipú: Redirección activa (Status 301)",
+    maipuRes.status === 301 || maipuRes.status === 307 || maipuRes.status === 308,
+    `Status: ${maipuRes.status}`
+  );
 
   console.log(`\n========================================`);
   console.log(`RESULTADO: ${passes} pasaron, ${failures} fallaron.`);

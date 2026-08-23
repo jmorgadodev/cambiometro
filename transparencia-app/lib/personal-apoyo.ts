@@ -182,8 +182,7 @@ export function personalApoyoEvidenceRecords(
 }
 
 import { getKvCache } from "@/lib/db";
-
-import personalApoyoStaticJson from "@/data/personal-apoyo.json";
+import personalApoyoStaticJson from "@/data/lake-subsets/personal-apoyo.subset.json";
 
 let cached: PersonalApoyoDataset | null = null;
 let cachedPromise: Promise<PersonalApoyoDataset | null> | null = null;

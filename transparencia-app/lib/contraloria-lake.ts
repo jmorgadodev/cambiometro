@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import contraloriaStaticJson from "@/data/lake/projections/v1/contraloria.json";
+import contraloriaStaticJson from "@/data/lake-subsets/contraloria.subset.json";
 import type { CanonicalEntity, EvidenceRecord, RelationEdge } from "@/lib/data-contracts";
 
 export interface ContraloriaProjection {

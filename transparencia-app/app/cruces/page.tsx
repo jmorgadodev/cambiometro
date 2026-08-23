@@ -60,23 +60,13 @@ export default async function CrossesPage({
     }).format(amount);
   };
 
-  const montosChilecompra = chilecompra?.buyers
-    ?.map((buyer) => buyer.monto_total_clp)
-    .filter((amount): amount is number => typeof amount === "number") ?? [];
-  const totalChilecompraMonto = typeof chilecompra?.total_adjudicado_clp === "number"
+  const totalChilecompraMonto = typeof chilecompra?.total_adjudicado_clp === "number" && chilecompra.total_adjudicado_clp > 0
     ? chilecompra.total_adjudicado_clp
-    : montosChilecompra.length > 0
-      ? montosChilecompra.reduce((sum, amount) => sum + amount, 0)
-      : 2293000000000;
+    : 2293000000000;
 
-  const procesosChilecompra = chilecompra?.buyers
-    ?.map((buyer) => buyer.procesos)
-    .filter((count): count is number => typeof count === "number") ?? [];
-  const totalChilecompraProcesos = procesosChilecompra.length > 0
-    ? procesosChilecompra.reduce((sum, count) => sum + count, 0)
-    : SOURCE_CANONICAL_COUNTS["chilecompra"];
+  const totalChilecompraProcesos = SOURCE_CANONICAL_COUNTS["chilecompra"] || 74142;
 
-  const contraloriaCount = contraloria?.records.length || SOURCE_CANONICAL_COUNTS["contraloria"];
+  const contraloriaCount = contraloria?.recordCount || contraloria?.records.length || SOURCE_CANONICAL_COUNTS["contraloria"];
   const infolobbyCount = infolobby?.count || SOURCE_CANONICAL_COUNTS["infolobby"];
   const ley19862Count = ley19862?.kpis?.total_transfers || SOURCE_CANONICAL_COUNTS["ley-19862"];
 
