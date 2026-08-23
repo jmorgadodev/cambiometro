@@ -38,8 +38,11 @@ export default function MovimientosPage() {
   return (
     <Suspense
       fallback={
-        <div style={{ minHeight: "100vh", padding: "4rem 2rem", textAlign: "center", color: "var(--text-muted)" }}>
-          Cargando catálogo de movimientos y rotación institucional...
+        <div style={{ minHeight: "100vh", padding: "2.25rem 0 1.75rem" }} className="container-main">
+          <h1 style={{ fontSize: "clamp(1.75rem, 3.2vw, 2.4rem)", fontWeight: 900, margin: "0 0 0.5rem 0" }}>
+            Movimientos y Relevos de Autoridades
+          </h1>
+          <p style={{ color: "var(--text-2)" }}>Cargando catálogo de movimientos y rotación institucional...</p>
         </div>
       }
     >
@@ -115,13 +118,23 @@ function MovimientosContent() {
     setTimeout(() => setCopiado(false), 2000);
   }, []);
 
-  // Opciones únicas para selectores
+  // Opciones únicas para selectores (deduplicadas y normalizadas)
   const ministeriosUnicos = useMemo(() => {
-    return Array.from(new Set(MOVIMIENTOS.map((m) => m.ministerio).filter(Boolean))).sort();
+    const set = new Set<string>();
+    for (const m of MOVIMIENTOS) {
+      const min = m.ministerio?.trim();
+      if (min) set.add(min);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "es-CL"));
   }, []);
 
   const regionesUnicas = useMemo(() => {
-    return Array.from(new Set(MOVIMIENTOS.map((m) => m.region).filter(Boolean))).sort();
+    const set = new Set<string>();
+    for (const m of MOVIMIENTOS) {
+      const reg = m.region?.trim();
+      if (reg) set.add(reg);
+    }
+    return Array.from(set).sort((a, b) => a.localeCompare(b, "es-CL"));
   }, []);
 
   // Filtrado reactivo
@@ -1022,6 +1035,9 @@ function MovimientosContent() {
         >
           <p style={{ margin: "0 0 0.5rem 0" }}>
             * <strong>Modelo Multifuente y Confirmación Oficial:</strong> El catálogo de movimientos indexa relevos y designaciones a partir de señales de prensa y monitoreo cívico (como <code>renunciaskast.cl</code> y agencias de noticias). Los eventos entran como <em>“En confirmación”</em> y solo son promovidos a <em>“Verificado oficial”</em> cuando cuentan con un Decreto Supremo indexado en Ley Chile (BCN) o el Diario Oficial. Si transcurren más de 30 días sin documento oficial, el registro conserva la advertencia <em>“Documento oficial pendiente”</em> y no se autopromueve.
+          </p>
+          <p style={{ margin: "0 0 0.5rem 0" }}>
+            * <strong>Cobertura Temporal y Registros de Transición:</strong> El dataset histórico consolida 79 movimientos en total, de los cuales 78 corresponden a la gestión de gobierno iniciada el 11 de marzo de 2026 y 1 al período de transición previo debidamente documentado.
           </p>
         </footer>
       </div>

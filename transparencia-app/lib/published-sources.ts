@@ -46,7 +46,7 @@ function localCpltManifest(): CpltPublicManifest | null {
 export const SOURCE_CANONICAL_COUNTS: Record<string, number> = {
   "chilecompra": 74142,
   "transparencia-activa": 1203287,
-  "ley-19862": 11651,
+  "ley-19862": 59361,
   "dipres": 15689,
   "sinim": 3105,
   "infolobby": 60523,

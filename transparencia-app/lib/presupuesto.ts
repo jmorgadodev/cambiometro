@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import presupuestoStaticJson from "@/data/lake/projections/v1/presupuesto.json";
+import presupuestoStaticJson from "@/data/lake-subsets/presupuesto.subset.json";
 
 export interface PresupuestoSubtitulo {
   subtitulo: string;

@@ -132,6 +132,14 @@ export interface CruceLey19862Ref {
   url_transferencia: string;
 }
 
+export interface CruceInfoProbidadRef {
+  id: string;
+  fecha: string;
+  declarante: string;
+  organismo: string;
+  url_declaracion: string;
+}
+
 // ─── 1. MUESTRA OFICIAL DE 5 PARTIDOS POLÍTICOS ──────────────────────────────
 export const PARTIDOS_TRANSPARENCIA_MUESTRA: Record<string, PartidoTransparenciaOficial> = {
   rn: {
@@ -562,6 +570,44 @@ export const CRUCES_LEY19862_MUESTRA: CruceLey19862Ref[] = [
     receiver_rut: "76.465.310-6",
     monto_clp: 219462458,
     url_transferencia: "https://registros19862.gob.cl/transferencia/4585079",
+  },
+];
+
+export const CRUCES_INFOPROBIDAD_MUESTRA: CruceInfoProbidadRef[] = [
+  {
+    id: "http://datos.cplt.cl/datos/infoprobidad/declaracion_161d6f2ccf7f0c912f9c0e0a6715a14a",
+    fecha: "2026-08-01",
+    declarante: "CÉSAR ANDRÉS JARAMILLO GARRIDO",
+    organismo: "PODER JUDICIAL",
+    url_declaracion: "http://datos.cplt.cl/datos/infoprobidad/declaracion_161d6f2ccf7f0c912f9c0e0a6715a14a",
+  },
+  {
+    id: "http://datos.cplt.cl/datos/infoprobidad/declaracion_ec4bc13eae49a9ea0d83deeb4ebd5127",
+    fecha: "2026-08-01",
+    declarante: "TATIANA SAMANTHA DÍAZ COLOMA",
+    organismo: "PODER JUDICIAL",
+    url_declaracion: "http://datos.cplt.cl/datos/infoprobidad/declaracion_ec4bc13eae49a9ea0d83deeb4ebd5127",
+  },
+  {
+    id: "http://datos.cplt.cl/datos/infoprobidad/declaracion_49b6f320fe8ad35fef61dcf5c4ac5d1a",
+    fecha: "2026-07-31",
+    declarante: "RODRIGO EDUARDO PAILLALEF MONNARD",
+    organismo: "PODER JUDICIAL",
+    url_declaracion: "http://datos.cplt.cl/datos/infoprobidad/declaracion_49b6f320fe8ad35fef61dcf5c4ac5d1a",
+  },
+  {
+    id: "http://datos.cplt.cl/datos/infoprobidad/declaracion_84b3d09c78b4ba362e2bc38d6c604825",
+    fecha: "2026-07-31",
+    declarante: "JUAN PATRICIO GARCÍA AGUILERA",
+    organismo: "PODER JUDICIAL",
+    url_declaracion: "http://datos.cplt.cl/datos/infoprobidad/declaracion_84b3d09c78b4ba362e2bc38d6c604825",
+  },
+  {
+    id: "http://datos.cplt.cl/datos/infoprobidad/declaracion_d76ad7f3d46bdc4e3a693d89c5e4f9c5",
+    fecha: "2026-07-31",
+    declarante: "CARLOS ENRIQUE ROJAS RIQUELME",
+    organismo: "PODER JUDICIAL",
+    url_declaracion: "http://datos.cplt.cl/datos/infoprobidad/declaracion_d76ad7f3d46bdc4e3a693d89c5e4f9c5",
   },
 ];
 

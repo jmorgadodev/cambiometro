@@ -28,7 +28,7 @@ function formatCLP(n: number) {
     return `$${(n / 1_000_000_000_000).toLocaleString("es-CL", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} billones`;
   }
   if (n >= 1_000_000_000) {
-    return `$${(n / 1_000_000_000).toLocaleString("es-CL", { minimumFractionDigits: 0, maximumFractionDigits: 0 })} mil MM`;
+    return `$${(n / 1_000_000_000).toLocaleString("es-CL", { minimumFractionDigits: 0, maximumFractionDigits: 0 })} mil millones`;
   }
   return `$${(n / 1_000_000).toLocaleString("es-CL", { maximumFractionDigits: 0 })} MM`;
 }
@@ -148,7 +148,7 @@ export default function ServiciosPublicosClient({
           serv.nombre.toLowerCase().includes(q) ||
           serv.sigla.toLowerCase().includes(q) ||
           (serv.director_jefe_actual ?? "").toLowerCase().includes(q) ||
-          serv.ministerio_dependiente.toLowerCase().includes(q);
+          (serv.ministerio_dependiente ?? "").toLowerCase().includes(q);
 
         const matchPresupuesto = !soloConPresupuesto || serv.presupuesto !== null;
 

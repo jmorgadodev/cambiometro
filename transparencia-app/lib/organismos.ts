@@ -1,6 +1,6 @@
 import fs from "fs";
 import path from "path";
-import organismosStaticJson from "@/data/lake/projections/v1/organismos.json";
+import organismosStaticJson from "@/data/lake-subsets/organismos.subset.json";
 
 export type TipoOrganismo =
   | "Municipalidad"

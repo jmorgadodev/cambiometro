@@ -58,6 +58,6 @@ describe("Auditoría e Integración Global de Datos Conectados", () => {
     const homePage = readFileSync(resolve("app/page.tsx"), "utf8");
     expect(homePage).toContain('href="/transferencias"');
     expect(homePage).toContain("Transferencias Ley 19.862");
-    expect(homePage).toContain("totalCatalogRecords");
+    expect(homePage).toContain("GLOBAL_KPIS.registros_canonicos");
   });
 });

@@ -133,13 +133,11 @@ export default function PersonasUniversalClient({
   const router = useRouter();
   const pathname = usePathname();
 
-  // Tab State
-  const initialTab = (searchParams.get("tab") as PersonaTab) || "parlamentarios";
-  const [activeTab, setActiveTab] = useState<PersonaTab>(
-    ["parlamentarios", "alcaldes", "autoridades", "funcionarios"].includes(initialTab)
-      ? initialTab
-      : "parlamentarios"
-  );
+  // Tab State derived from URL
+  const rawTab = searchParams.get("tab") as PersonaTab | null;
+  const activeTab: PersonaTab = (rawTab && ["parlamentarios", "alcaldes", "autoridades", "funcionarios"].includes(rawTab))
+    ? rawTab
+    : "parlamentarios";
 
   // Search & Filters
   const [search, setSearch] = useState(() => searchParams.get("search") || "");
@@ -293,7 +291,6 @@ export default function PersonasUniversalClient({
 
   // Handle Tab Switch
   const handleTabChange = (newTab: PersonaTab) => {
-    setActiveTab(newTab);
     setPage(1);
     syncUrl({ tab: newTab, page: 1 });
   };

@@ -548,7 +548,7 @@ export const MOVIMIENTOS: Movimiento[] = [
     "tipo_evento": "designacion",
     "cargo": "Embajador de Chile en los Estados Unidos",
     "organismo": "Embajada de Chile en Washington D.C.",
-    "ministerio": "Ministerio de Relaciones Exteriores (MINREL)",
+    "ministerio": "Ministerio de Relaciones Exteriores",
     "region": "Internacional",
     "salio": {
       "nombre": "Juan Gabriel Valdés Soublette",
@@ -4281,7 +4281,7 @@ export const MOVIMIENTOS: Movimiento[] = [
     "tipo_evento": "cambio-mando",
     "cargo": "Ministro de Transportes y Telecomunicaciones",
     "organismo": "Ministerio de Transportes y Telecomunicaciones",
-    "ministerio": "Ministerio de Transportes y Telecomunicaciones (MTT)",
+    "ministerio": "Ministerio de Transportes y Telecomunicaciones",
     "region": "Nacional",
     "salio": {
       "nombre": "Gabinete del presidente Gabriel Boric",
@@ -4335,7 +4335,7 @@ export const MOVIMIENTOS: Movimiento[] = [
     "tipo_evento": "cambio-mando",
     "cargo": "Ministro del Interior",
     "organismo": "Ministerio del Interior y Seguridad Pública",
-    "ministerio": "Ministerio del Interior",
+    "ministerio": "Ministerio del Interior y Seguridad Pública",
     "region": "Nacional",
     "salio": {
       "nombre": "Gabinete Boric",

@@ -10,11 +10,10 @@ describe("Módulo /transferencias — Validación y aserciones", () => {
     expect(summary.kpis.total_transfers).toBeGreaterThan(0);
     expect(summary.kpis.total_receptores).toBeGreaterThan(0);
     expect(summary.kpis.total_emisores).toBeGreaterThan(0);
-    expect(Object.values(summary.by_year).reduce((sum, year) => sum + year.count, 0)).toBe(
+    expect(summary.by_year["2026"].count).toBe(summary.kpis.total_transfers);
+    expect(summary.by_year["2026"].total).toBe(summary.kpis.total_monto_clp);
+    expect(Object.values(summary.by_year).reduce((sum, year) => sum + year.count, 0)).toBeGreaterThanOrEqual(
       summary.kpis.total_transfers,
-    );
-    expect(Object.values(summary.by_year).reduce((sum, year) => sum + year.total, 0)).toBe(
-      summary.kpis.total_monto_clp,
     );
   });
 

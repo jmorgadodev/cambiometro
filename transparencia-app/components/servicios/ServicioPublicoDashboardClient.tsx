@@ -27,8 +27,8 @@ function formatCompactCLP(n: number) {
     return `$${(n / 1_000_000_000_000).toLocaleString("es-CL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} billones`;
   }
   if (n >= 1_000_000_000) {
-    // 3 cifras significativas (M2) para evitar pérdida de información en $1.430 mil MM
-    return `$${(n / 1_000_000_000).toLocaleString("es-CL", { minimumFractionDigits: 3, maximumFractionDigits: 3 })} mil MM`;
+    // 3 cifras significativas (M2) para evitar pérdida de información en $1.430 mil millones
+    return `$${(n / 1_000_000_000).toLocaleString("es-CL", { minimumFractionDigits: 3, maximumFractionDigits: 3 })} mil millones`;
   }
   return `$${(n / 1_000_000).toLocaleString("es-CL", { maximumFractionDigits: 0 })} MM`;
 }
@@ -191,7 +191,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
             <div style={{ fontFamily: "monospace", fontSize: "1.45rem", fontWeight: 900, color: "var(--info)" }}>
               {lobby.length > 0
                 ? `${lobby.length} reuniones`
-                : `${resumenLobby?.audiencias_ministerio_tutelar.length ?? 0} audiencias`}
+                : `${resumenLobby?.audiencias_ministerio_tutelar?.length ?? 0} audiencias`}
             </div>
             <div style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
               {cgr.length} auditorías Contraloría
@@ -631,16 +631,16 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                 </div>
               </div>
 
-              {compras.anomalias_integridad.length > 0 && (
+              {(compras.anomalias_integridad?.length ?? 0) > 0 && (
                 <div style={{ padding: "1rem", marginBottom: "1.5rem", borderRadius: 8, border: "1px solid var(--warn)", background: "var(--surface-2)" }}>
                   <strong style={{ color: "var(--warn)", display: "block", marginBottom: "0.35rem" }}>
                     Hallazgo de integridad ALTA (V7) · valor oficial preservado
                   </strong>
                   <p style={{ margin: 0, fontSize: "0.82rem", color: "var(--text-muted)" }}>
-                    {compras.anomalias_integridad.length} orden(es) oficial(es) superan el límite de sanidad de $100.000 millones por relación. Se conservan como evidencia, pero sus montos, proveedores y relaciones están excluidos de totales y rankings.
+                    {compras.anomalias_integridad?.length} orden(es) oficial(es) superan el límite de sanidad de $100.000 millones por relación. Se conservan como evidencia, pero sus montos, proveedores y relaciones están excluidos de totales y rankings.
                   </p>
                   <ul style={{ margin: "0.65rem 0 0", paddingLeft: "1.2rem", fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                    {compras.anomalias_integridad.map((anomaly) => (
+                    {compras.anomalias_integridad?.map((anomaly) => (
                       <li key={anomaly.id}>
                         {anomaly.titulo ?? "Orden oficial sin título"} · {formatCLP(anomaly.monto_oficial_clp)}{anomaly.source_url ? <> · <a href={anomaly.source_url} target="_blank" rel="noopener noreferrer">fuente ↗</a></> : null}
                       </li>

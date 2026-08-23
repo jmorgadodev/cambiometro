@@ -35,12 +35,17 @@ export const MOTIVOS_CATEGORIAS = [
   "Fin de período"
 ];
 
-// Helper para normalizar sufijos (p. ej. Subrogente -> Subrogante)
+// Helper para normalizar sufijos (p. ej. Subrogente -> Subrogante, Subrogante)) -> Subrogante)
 function normalizeText(str) {
   if (!str || typeof str !== "string") return str;
   return str
     .replace(/\(subrogente\)/gi, "(Subrogante)")
-    .replace(/\bsubrogente\b/gi, "Subrogante");
+    .replace(/\bsubrogente\b/gi, "Subrogante")
+    .replace(/\(Subrogante\)\)+/gi, "(Subrogante)")
+    .replace(/\(s\)\)+/gi, "(s)")
+    .replace(/Ministerio de Relaciones Exteriores \(MINREL\)/g, "Ministerio de Relaciones Exteriores")
+    .replace(/Ministerio de Transportes y Telecomunicaciones \(MTT\)/g, "Ministerio de Transportes y Telecomunicaciones")
+    .replace(/^Ministerio del Interior$/g, "Ministerio del Interior y Seguridad Pública");
 }
 
 // Helper para calcular días en el cargo
