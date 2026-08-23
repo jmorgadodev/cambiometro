@@ -2308,6 +2308,14 @@ html.dark .page-masthead {
   }
   .home-section-heading { align-items: flex-start; flex-direction: column; }
 }
+@media (max-width: 480px) {
+  .home-ledger__grid { grid-template-columns: 1fr; }
+  .home-stat {
+    border-right: 1px solid var(--border);
+    border-left: 1px solid var(--border);
+    border-bottom: 1px solid var(--border);
+  }
+}
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
 }
