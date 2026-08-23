@@ -3,12 +3,14 @@ import { createGunzip } from "node:zlib";
 import { existsSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { DatabaseSync } from "node:sqlite";
 
 // =============================================================================
 // restore-drill.mjs — Drill de Restore pre-launch (ENTORNO AISLADO)
 //
 // Objetivo: verificar que el ultimo backup semanal se puede restaurar en un
-// entorno completamente aislado (wrangler local, NUNCA D1 remota/produccion).
+// entorno completamente aislado (SQLite local en memoria/archivo temporal,
+// NUNCA D1 remota/produccion).
 //
 // Uso:
 //   node scripts/restore-drill.mjs
@@ -21,7 +23,6 @@ import { join, resolve } from "node:path";
 
 const BACKUP_BUCKET = "cambiometro-backups";
 const INVENTORY_KEY = "backup-inventory.json";
-const DRILL_DB_NAME = "DB"; // Nombre de binding local en wrangler.jsonc (aislado con --local)
 const WRANGLER_BIN = resolve("node_modules/wrangler/bin/wrangler.js");
 
 // Tablas canonicas — migrations 0010
@@ -60,51 +61,6 @@ async function r2Get(bucket, key) {
   return response;
 }
 
-function wranglerLocal(args, allowFailure = false) {
-  const result = spawnSync(
-    process.execPath,
-    [WRANGLER_BIN, ...args],
-    {
-      encoding: "utf8",
-      maxBuffer: 256 * 1024 * 1024,
-      stdio: ["ignore", "pipe", "pipe"],
-      env: {
-        ...process.env,
-        CI: "true",
-        WRANGLER_SEND_METRICS: "false",
-      },
-    },
-  );
-  if (!allowFailure && result.status !== 0) {
-    throw new Error(`wrangler ${args.join(" ")} fallo: ${result.stderr?.trim() ?? `codigo ${result.status}`}`);
-  }
-  return result;
-}
-
-function runSqlLocally(dbName, sqlText, label) {
-  const tmpFile = join(tmpdir(), `restore-drill-${label}-${Date.now()}.sql`);
-  writeFileSync(tmpFile, sqlText, "utf8");
-  try {
-    return wranglerLocal(["d1", "execute", dbName, "--local", "--file", tmpFile, "--yes"], true);
-  } finally {
-    try { rmSync(tmpFile, { force: true }); } catch { /* ignore */ }
-  }
-}
-
-function querySqlLocally(dbName, sqlText) {
-  const tmpFile = join(tmpdir(), `restore-drill-query-${Date.now()}.sql`);
-  writeFileSync(tmpFile, sqlText, "utf8");
-  try {
-    const result = wranglerLocal(
-      ["d1", "execute", dbName, "--local", "--file", tmpFile, "--json", "--yes"], true);
-    if (result.status !== 0) return null;
-    return JSON.parse(result.stdout.trim());
-  } catch { return null; }
-  finally {
-    try { rmSync(tmpFile, { force: true }); } catch { /* ignore */ }
-  }
-}
-
 async function gunzipBuffer(gzBuffer) {
   return new Promise((res, rej) => {
     const gunzip = createGunzip();
@@ -137,6 +93,13 @@ if (DRY_MODE) {
   }
   log("backup-weekly.yml OK");
 
+  // Probar motor SQLite aislado
+  const testDb = new DatabaseSync(":memory:");
+  testDb.exec("CREATE TABLE _test (id INT); INSERT INTO _test VALUES (1);");
+  const testCount = testDb.prepare("SELECT COUNT(*) as n FROM _test;").get();
+  testDb.close();
+  log(`node:sqlite engine OK (test query count: ${testCount.n})`);
+
   const dryReport = {
     mode: "DRY",
     drillId: `dry-${Date.now()}`,
@@ -153,10 +116,15 @@ if (DRY_MODE) {
       workflowFile: ".github/workflows/backup-weekly.yml",
     },
     toleranciaConteos: 0,
-    status: "DRY",
+    status: "DRILL_DRY_SUCCESS",
   };
-  console.log("\n" + JSON.stringify(dryReport, null, 2));
-  log("Para drill completo: CLOUDFLARE_ACCOUNT_ID=xxx CLOUDFLARE_API_TOKEN=xxx node scripts/restore-drill.mjs");
+
+  console.log("\n" + "=".repeat(72));
+  console.log("RESTORE DRILL REPORT (DRY MODE)");
+  console.log("=".repeat(72));
+  console.log(JSON.stringify(dryReport, null, 2));
+  console.log("=".repeat(72));
+  log("MODO DRY completado con exito.");
   process.exit(0);
 }
 
@@ -165,7 +133,7 @@ if (DRY_MODE) {
 // ---------------------------------------------------------------------------
 const drillId = `drill-${new Date().toISOString().slice(0, 19).replace(/:/g, "-")}`;
 log(`=== RESTORE DRILL ${drillId} (ENTORNO AISLADO) ===`);
-log(`Bucket: ${BACKUP_BUCKET} | DB temporal: ${DRILL_DB_NAME} (--local, NUNCA --remote)`);
+log(`Bucket: ${BACKUP_BUCKET} | Motor: node:sqlite (100% aislado, NUNCA D1 remota/produccion)`);
 
 // Paso 1: inventory
 log(`Paso 1: Descargando ${INVENTORY_KEY}...`);
@@ -221,44 +189,42 @@ if (!sqlText.includes("CREATE TABLE") && !sqlText.includes("INSERT INTO")) {
 }
 
 // Paso 5: restaurar en DB local aislada
-log(`Paso 5: Aplicando dump a DB local aislada '${DRILL_DB_NAME}' (--local)...`);
-log("GUARDIA: Esta operacion NO toca D1 produccion. Flag --local garantiza aislamiento.");
+log("Paso 5: Aplicando dump a DB local aislada en SQLite temporal...");
+log("GUARDIA: Esta operacion NO toca D1 produccion. SQLite local garantiza 100% aislamiento.");
 
-const r = runSqlLocally(DRILL_DB_NAME, sqlText, "full-dump");
-if (r.status !== 0) {
-  throw new Error(`D1_RESTORE_FAILED: ejecucion SQL fallo (codigo ${r.status}): ${r.stderr?.slice(0, 500)}`);
-}
-log("Dump aplicado con exito en DB local aislada.");
-
-// Paso 6: conteos (tolerancia 0)
-log("Paso 6: Verificando conteos en DB restaurada (tolerancia 0)...");
+const tmpDbFile = join(tmpdir(), `restore-drill-${drillId}.sqlite`);
+const db = new DatabaseSync(tmpDbFile);
 const tableCounts = {};
 const countErrors = [];
 
-for (const table of ALL_TABLES) {
-  const result = querySqlLocally(DRILL_DB_NAME, `SELECT COUNT(*) as n FROM ${table};`);
-  if (!result) {
-    tableCounts[table] = { count: null, note: "tabla_no_accesible" };
-    countErrors.push({ table, error: "QUERY_FAILED" });
-  } else {
-    const count = result?.[0]?.results?.[0]?.n ?? result?.[0]?.result?.[0]?.n ?? null;
-    tableCounts[table] = { count };
-    log(`  ${table}: ${count ?? "?"} rows`);
+try {
+  db.exec(sqlText);
+  log("Dump aplicado con exito en DB local aislada.");
+
+  // Paso 6: conteos (tolerancia 0)
+  log("Paso 6: Verificando conteos en DB restaurada (tolerancia 0)...");
+  for (const table of ALL_TABLES) {
+    try {
+      const row = db.prepare(`SELECT COUNT(*) as n FROM ${table};`).get();
+      const count = typeof row?.n === "number" ? row.n : (typeof row?.n === "bigint" ? Number(row.n) : null);
+      tableCounts[table] = { count };
+      log(`  ${table}: ${count ?? "?"} rows`);
+    } catch (errCount) {
+      tableCounts[table] = { count: null, note: "tabla_no_accesible" };
+      countErrors.push({ table, error: errCount?.message || "QUERY_FAILED" });
+    }
   }
+} finally {
+  try { db.close(); } catch { /* ignore */ }
+  try { rmSync(tmpDbFile, { force: true }); } catch { /* ignore */ }
 }
 
 const coreTablesOk = CORE_TABLES.every((t) => tableCounts[t]?.count !== null);
-const resultado = coreTablesOk && failedChunks.length === 0 ? "OK" : "FAIL";
+const resultado = coreTablesOk && countErrors.length === 0 ? "OK" : "FAIL";
 if (!coreTablesOk) {
   const missing = CORE_TABLES.filter((t) => tableCounts[t]?.count === null);
   err(`Tablas core no accesibles: ${missing.join(", ")}`);
 }
-
-// Limpiar
-log(`Limpiando estado local temporal...`);
-try {
-  rmSync(resolve(".wrangler/state/v3/d1"), { recursive: true, force: true });
-} catch { /* ignore */ }
 
 // ---------------------------------------------------------------------------
 // Reporte final
@@ -273,7 +239,6 @@ const report = {
   toleranciaConteos: 0,
   lakeObjectsInManifest: inventory.objects.length,
   lakeObjectsForStamp: lakeObjects.length,
-  chunksAplicados: chunkResults.length,
   tableCounts,
   tablasCoreOk: coreTablesOk,
   countErrors: countErrors.length > 0 ? countErrors : [],
@@ -284,7 +249,7 @@ const report = {
     workflowFile: ".github/workflows/backup-weekly.yml",
     concurrencyGroup: "backup-weekly",
   },
-  isolationGuarantee: "wrangler --local (NUNCA --remote). D1 produccion intacta.",
+  isolationGuarantee: "node:sqlite local temporal (NUNCA --remote). D1 produccion intacta.",
   status: resultado === "OK" ? "DRILL_PASSED" : "DRILL_FAILED",
 };
 
