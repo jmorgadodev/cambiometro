@@ -212,14 +212,24 @@ try {
       await gotoWithNetworkRetry(`${baseUrl}${route}`);
       await page.waitForLoadState("networkidle").catch(() => {});
       await page.waitForSelector("h1", { timeout: 5000 }).catch(() => {});
-      const fits = await page.evaluate(() => {
+      const info = await page.evaluate(() => {
         const body = document.body;
         const html = document.documentElement;
         const scrollW = Math.max(body.scrollWidth, html.scrollWidth);
         const clientW = Math.max(body.clientWidth, html.clientWidth);
-        return scrollW <= clientW + 1;
-      }).catch(() => true);
-      assert(fits, `${route}: overflow horizontal a ${width}px`);
+        const bad = [];
+        for (const el of document.querySelectorAll("*")) {
+          const r = el.getBoundingClientRect();
+          if (r.right > clientW + 1 || r.width > clientW + 1) {
+            bad.push({ tag: el.tagName, id: el.id, class: el.className, right: Math.round(r.right), width: Math.round(r.width) });
+          }
+        }
+        return { fits: scrollW <= clientW + 1, scrollW, clientW, bad: bad.slice(0, 10) };
+      }).catch(() => ({ fits: true }));
+      if (!info.fits) {
+        console.error(`OVERFLOW DEBUG at ${width}px on ${route}:`, JSON.stringify(info));
+      }
+      assert(info.fits, `${route}: overflow horizontal a ${width}px`);
     }
   }
 
