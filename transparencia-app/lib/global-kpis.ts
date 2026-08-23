@@ -37,8 +37,8 @@ export const KPI_SCOPES: Record<
     href: "/cruces",
   },
   votaciones: {
-    label: "votaciones de sala",
-    tooltip: "Votaciones nominales de proyectos de ley y acuerdos de sala registrados en la Cámara y el Senado.",
+    label: "votaciones de sala (histórico 2022-2026)",
+    tooltip: "Histórico legislativo consolidado (2022-2026) en Cámara y Senado. El período actual 2026-2030 suma 769 eventos indexados en tiempo real.",
     href: "/politico",
   },
   gastos: {

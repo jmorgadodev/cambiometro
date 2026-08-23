@@ -4,16 +4,22 @@ import { getVotacionesParaPolitico } from "@/lib/data-source";
 import { esProcedimental } from "@/components/VotacionesHistorial";
 
 describe("Fixture de Referencia Oficial — Votaciones en Sala y Coherencia Interna", () => {
-  // Muestra obligatoria de auditoría: Kaiser, Bianchi, Winter, Cariola, Schalper
-  const muestraTokens = ["Kaiser", "Bianchi", "Winter", "Cariola", "Schalper"];
+  // Muestra obligatoria de auditoría: Kaiser, Bianchi K., Bianchi C., Winter, Cariola, Schalper
+  const muestraAuditIds = [
+    { id: "sen-038", nombre: "Vanessa Kaiser Barents-Von Hohenhagen", cargo: "Senador" },
+    { id: "sen-048", nombre: "Karim Bianchi Retamales", cargo: "Senador" },
+    { id: "dip-154", nombre: "Carlos Bianchi Chelech", cargo: "Diputado" },
+    { id: "dip-057", nombre: "Gonzalo Winter Etcheberry", cargo: "Diputado" },
+    { id: "sen-017", nombre: "Karol Cariola Oliva", cargo: "Senador" },
+    { id: "dip-068", nombre: "Diego Schalper Sepúlveda", cargo: "Diputado" },
+  ];
 
   it("1. Coherencia Matemática Interna: tiles == historial == denominador de presencia", () => {
-    const pols = POLITICOS_SEED.filter((p) =>
-      muestraTokens.some((token) => p.nombre_completo.toLowerCase().includes(token.toLowerCase()))
-    );
-    expect(pols.length).toBeGreaterThanOrEqual(5);
+    for (const item of muestraAuditIds) {
+      const pol = POLITICOS_SEED.find((p) => p.id === item.id);
+      expect(pol).toBeDefined();
+      if (!pol) continue;
 
-    for (const pol of pols) {
       const votaciones = getVotacionesParaPolitico(pol);
       expect(votaciones.length).toBeGreaterThan(50); // Ingesta completa tiene cientos de votaciones
 
@@ -24,8 +30,8 @@ describe("Fixture de Referencia Oficial — Votaciones en Sala y Coherencia Inte
       let pareo = 0;
       let procedimentales = 0;
 
-      for (const item of votaciones) {
-        const opc = item.voto.opcion.trim().toLowerCase();
+      for (const vItem of votaciones) {
+        const opc = vItem.voto.opcion.trim().toLowerCase();
         if (opc === "afirmativo" || opc === "a favor") afirmativo++;
         else if (opc === "en contra") enContra++;
         else if (opc === "abstención" || opc === "abstencion") abstencion++;
@@ -33,12 +39,12 @@ describe("Fixture de Referencia Oficial — Votaciones en Sala y Coherencia Inte
         else noVota++;
 
         const vFila = {
-          id: item.votacion.id,
-          fecha: item.votacion.fecha ?? "",
-          opcion: item.voto.opcion,
-          descripcion: item.votacion.descripcion ?? "",
-          tipo: item.votacion.tipo ?? null,
-          tramite: (item.votacion as { tramite?: string }).tramite ?? null,
+          id: vItem.votacion.id,
+          fecha: vItem.votacion.fecha ?? "",
+          opcion: vItem.voto.opcion,
+          descripcion: vItem.votacion.descripcion ?? "",
+          tipo: vItem.votacion.tipo ?? null,
+          tramite: (vItem.votacion as { tramite?: string }).tramite ?? null,
         };
         if (esProcedimental(vFila)) procedimentales++;
       }
@@ -57,11 +63,9 @@ describe("Fixture de Referencia Oficial — Votaciones en Sala y Coherencia Inte
     }
   });
 
-  it("2. Muestra de 5 parlamentarios con cobertura ≥99% de eventos", () => {
-    for (const token of muestraTokens) {
-      const pol = POLITICOS_SEED.find((p) =>
-        p.nombre_completo.toLowerCase().includes(token.toLowerCase())
-      );
+  it("2. Muestra completa de parlamentarios con cobertura ≥99% de eventos", () => {
+    for (const item of muestraAuditIds) {
+      const pol = POLITICOS_SEED.find((p) => p.id === item.id);
       expect(pol).toBeDefined();
       if (!pol) continue;
 
@@ -75,7 +79,7 @@ describe("Fixture de Referencia Oficial — Votaciones en Sala y Coherencia Inte
   });
 
   it("3. Padrón nominal de votaciones conserva boletines y enlaces oficiales de tramitación", () => {
-    const pol = POLITICOS_SEED.find((p) => p.nombre_completo.includes("Gonzalo Winter"));
+    const pol = POLITICOS_SEED.find((p) => p.id === "dip-057"); // Gonzalo Winter
     expect(pol).toBeDefined();
     if (!pol) return;
 
