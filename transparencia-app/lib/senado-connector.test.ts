@@ -64,8 +64,8 @@ describe("conector de gastos operacionales del Senado", () => {
   });
 
   it("publica dieta sin RUT personal y valida la identidad contable", () => {
-    const record = normalizeSenateDiet({ id: 160055, attributes: { ano: 2026, mes: 5, rut: "12.615.234-5", unidad_ejecutora: 39, appaterno: "ARAYA", apmaterno: "GUERRERO", nombre: "PEDRO", dieta: 8_239_091, deducciones: 1_754_897, saldo: 6_484_194 } }, { sourceUrl: "x" });
-    expect(record).toMatchObject({ kind: "remuneration", monto_clp: 8_239_091, deductions_clp: 1_754_897, net_clp: 6_484_194, subject_entity_ids: ["senator-cl-ue-39"] });
+    const record = normalizeSenateDiet({ id: 160055, attributes: { ano: 2026, mes: 5, rut: "12.615.234-5", unidad_ejecutora: 39, appaterno: "ARAYA", apmaterno: "GUERRERO", nombre: "PEDRO", dieta: 8_291_039, deducciones: 1_754_897, saldo: 6_536_142 } }, { sourceUrl: "x" });
+    expect(record).toMatchObject({ kind: "remuneration", monto_clp: 8_291_039, deductions_clp: 1_754_897, net_clp: 6_536_142, subject_entity_ids: ["senator-cl-ue-39"] });
     expect(JSON.stringify(record)).not.toContain("12615234");
     expect(() => normalizeSenateDiet({ id: 1, attributes: { ano: 2026, mes: 5, unidad_ejecutora: 39, nombre: "A", dieta: 10, deducciones: 3, saldo: 8 } }, { sourceUrl: "x" })).toThrow("SENADO_INVALID_DIET_TOTALS");
   });

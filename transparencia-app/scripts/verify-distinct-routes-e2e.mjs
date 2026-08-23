@@ -110,7 +110,7 @@ async function runE2E() {
   await page.goto(`${BASE_URL}/politico/miguel-becker-alvear`, { waitUntil: "networkidle" });
   await page.waitForTimeout(500);
   const beckerContent = await page.content();
-  assert(beckerContent.includes("8.239.091"), "La dieta de Becker ($8.239.091) debe estar presente en el panel de costo");
+  assert(beckerContent.includes("8.291.039"), "La dieta de Becker ($8.291.039) debe estar presente en el panel de costo");
   const beckerScreenshotPath = path.join(screenshotDir, "desktop-becker.png");
   await page.screenshot({ path: beckerScreenshotPath, fullPage: false });
   console.log(`-> Screenshot Desktop Becker: ${beckerScreenshotPath}`);
@@ -126,7 +126,7 @@ async function runE2E() {
   await page.goto(`${BASE_URL}/politico/vanessa-kaiser-barents-von-hohenhagen`, { waitUntil: "networkidle" });
   await page.waitForTimeout(500);
   const kaiserContent = await page.content();
-  assert(kaiserContent.includes("8.239.091"), "La dieta de Kaiser ($8.239.091) debe estar presente en el panel de costo");
+  assert(kaiserContent.includes("8.291.039"), "La dieta de Kaiser ($8.291.039) debe estar presente en el panel de costo");
   assert(kaiserContent.includes("4.582.550"), "Los gastos de Kaiser ($4.582.550) deben estar intactos");
   assert(kaiserContent.includes("ALTA"), "La alerta ALTA de Kaiser debe estar intacta");
   const kaiserScreenshotPath = path.join(screenshotDir, "desktop-kaiser.png");

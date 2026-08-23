@@ -12,11 +12,11 @@ import { getPartidoConfig } from "@/lib/partidos.config";
 import PoliticosListClient, { type PoliticoCardData } from "@/components/PoliticosListClient";
 
 const DIETA_OFICIAL_PARLAMENTARIA = {
-  Diputado: 7350000,
-  Senador: 8150000,
-  fuente_url: "https://www.bcn.cl/leychile/navegar?idNorma=1152011",
-  fuente_nombre: "BCN / art. 38 bis Constitución",
-  fecha_actualizacion: "Mayo 2026",
+  Diputado: 8291039,
+  Senador: 8291039,
+  fuente_url: "https://www.senado.cl/transparencia/dietas",
+  fuente_nombre: "Senado / Cámara / art. 38 bis Constitución",
+  fecha_actualizacion: "Marzo 2026",
 };
 
 export const metadata: Metadata = {

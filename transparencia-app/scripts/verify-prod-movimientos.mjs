@@ -40,6 +40,8 @@ async function verifyProd() {
   const kaiserRes = await fetch("https://cambiometro.impulsacv.cl/politico/vanessa-kaiser-barents-von-hohenhagen");
   const kaiserHtml = await kaiserRes.text();
   console.log(`\n3. Ficha Vanessa Kaiser -> Status: ${kaiserRes.status}`);
+  console.log(`- Contiene Dieta Oficial "$8.291.039": ${kaiserHtml.includes("8.291.039") ? "✅ SÍ" : "❌ NO"}`);
+  console.log(`- CERO transposición antigua "$8.239.091": ${!kaiserHtml.includes("8.239.091") ? "✅ SÍ (0 8.239.091)" : "❌ NO"}`);
   console.log(`- Contiene "$4.582.550" / "$15.250.000": ${kaiserHtml.includes("4.582.550") || kaiserHtml.includes("15.250.000") ? "✅ SÍ" : "❌ NO"}`);
   console.log(`- Contiene "+33,7%": ${kaiserHtml.includes("+33,7%") || kaiserHtml.includes("33,7%") ? "✅ SÍ" : "❌ NO"}`);
 
