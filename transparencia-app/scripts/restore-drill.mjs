@@ -61,8 +61,20 @@ async function r2Get(bucket, key) {
 }
 
 function wranglerLocal(args, allowFailure = false) {
-  const result = spawnSync(process.execPath, [WRANGLER_BIN, ...args],
-    { encoding: "utf8", maxBuffer: 256 * 1024 * 1024 });
+  const result = spawnSync(
+    process.execPath,
+    [WRANGLER_BIN, ...args],
+    {
+      encoding: "utf8",
+      maxBuffer: 256 * 1024 * 1024,
+      stdio: ["ignore", "pipe", "pipe"],
+      env: {
+        ...process.env,
+        CI: "true",
+        WRANGLER_SEND_METRICS: "false",
+      },
+    },
+  );
   if (!allowFailure && result.status !== 0) {
     throw new Error(`wrangler ${args.join(" ")} fallo: ${result.stderr?.trim() ?? `codigo ${result.status}`}`);
   }
@@ -212,33 +224,11 @@ if (!sqlText.includes("CREATE TABLE") && !sqlText.includes("INSERT INTO")) {
 log(`Paso 5: Aplicando dump a DB local aislada '${DRILL_DB_NAME}' (--local)...`);
 log("GUARDIA: Esta operacion NO toca D1 produccion. Flag --local garantiza aislamiento.");
 
-const MAX_CHUNK = 4 * 1024 * 1024;
-const sqlLines = sqlText.split("\n");
-let currentChunk = [], currentSize = 0, chunkIndex = 0;
-const chunkResults = [];
-
-for (const line of sqlLines) {
-  const lineBytes = Buffer.byteLength(line + "\n", "utf8");
-  if (currentSize + lineBytes > MAX_CHUNK && currentChunk.length > 0) {
-    log(`  Aplicando chunk ${chunkIndex + 1} (${currentChunk.join("\n").length} bytes)...`);
-    const r = runSqlLocally(DRILL_DB_NAME, currentChunk.join("\n"), `chunk-${chunkIndex}`);
-    chunkResults.push({ chunk: chunkIndex, status: r.status });
-    currentChunk = []; currentSize = 0; chunkIndex++;
-  }
-  currentChunk.push(line);
-  currentSize += lineBytes;
+const r = runSqlLocally(DRILL_DB_NAME, sqlText, "full-dump");
+if (r.status !== 0) {
+  throw new Error(`D1_RESTORE_FAILED: ejecucion SQL fallo (codigo ${r.status}): ${r.stderr?.slice(0, 500)}`);
 }
-if (currentChunk.length > 0) {
-  log(`  Aplicando chunk ${chunkIndex + 1} (${currentChunk.join("\n").length} bytes)...`);
-  const r = runSqlLocally(DRILL_DB_NAME, currentChunk.join("\n"), `chunk-${chunkIndex}`);
-  chunkResults.push({ chunk: chunkIndex, status: r.status });
-}
-
-const failedChunks = chunkResults.filter((c) => c.status !== 0);
-if (failedChunks.length > 0) {
-  throw new Error(`D1_RESTORE_FAILED: ${failedChunks.length} chunks fallaron: ${JSON.stringify(failedChunks)}`);
-}
-log(`Dump aplicado en ${chunkResults.length} chunk(s). Todos OK.`);
+log("Dump aplicado con exito en DB local aislada.");
 
 // Paso 6: conteos (tolerancia 0)
 log("Paso 6: Verificando conteos en DB restaurada (tolerancia 0)...");
