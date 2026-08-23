@@ -52,8 +52,9 @@ async function listObjectsRest(bucket) {
     const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
     if (!response.ok) throw new Error(`R2_LIST_FAILED ${bucket}: HTTP ${response.status}`);
     const page = await response.json();
-    objects.push(...(page.objects ?? []));
-    cursor = page.cursor ?? null;
+    const list = page.result?.objects ?? page.objects ?? [];
+    objects.push(...list);
+    cursor = page.result?.cursor ?? page.cursor ?? null;
   } while (cursor);
   return objects;
 }
