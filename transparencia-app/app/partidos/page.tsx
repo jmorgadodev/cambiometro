@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllPartidosSummary } from "@/lib/partido-estadisticas";
@@ -263,7 +264,9 @@ export default async function PartidosListPage() {
             </p>
           </div>
 
-          <PartidosRankingTable partidos={partidos} />
+          <Suspense fallback={<div style={{ minHeight: 200, display: "grid", placeContent: "center", color: "var(--text-3)" }}>Cargando tabla de partidos...</div>}>
+            <PartidosRankingTable partidos={partidos} />
+          </Suspense>
         </div>
 
         {/* ─── NOTA METODOLÓGICA AMPLIADA ────────────────────────────────────────── */}
