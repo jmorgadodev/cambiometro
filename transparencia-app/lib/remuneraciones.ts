@@ -25,11 +25,6 @@ let registro: Registro | null = null;
 
 async function leerRegistro(): Promise<Registro | null> {
   if (registro) return registro;
-  const fromD1 = await getKvCache<Registro>("remuneraciones-38bis.json");
-  if (fromD1) {
-    registro = fromD1;
-    return registro;
-  }
   registro = dataRemuneraciones as Registro;
   return registro;
 }
