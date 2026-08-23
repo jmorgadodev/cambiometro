@@ -150,8 +150,8 @@ html.dark, :root[data-theme="dark"], html[data-theme="dark"], body.dark, .dark {
 html {
   scroll-behavior: smooth;
   -webkit-font-smoothing: antialiased;
-  max-width: 100vw;
-  overflow-x: clip;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Scroll offset para encabezados y anclas con sticky nav */
@@ -165,8 +165,8 @@ body {
   font-family: Inter, Aptos, "Segoe UI", system-ui, sans-serif;
   min-height: 100vh;
   line-height: 1.6;
-  max-width: 100vw;
-  overflow-x: clip;
+  max-width: 100%;
+  overflow-x: hidden;
 }
 
 /* Custom Scrollbar */
