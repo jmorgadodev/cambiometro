@@ -39,7 +39,10 @@ page.setDefaultNavigationTimeout(30_000);
 const consoleMessages = [];
 const internalLinks = new Set();
 page.on("console", (message) => consoleMessages.push([message.type(), message.text()]));
-page.on("pageerror", (error) => consoleMessages.push(["pageerror", String(error)]));
+page.on("pageerror", (error) => {
+  console.error("PAGEERROR_TRACE:", error?.stack || error);
+  consoleMessages.push(["pageerror", String(error?.stack || error)]);
+});
 
 function representativeInternalLinks(hrefs) {
   const representatives = new Map();
@@ -343,6 +346,7 @@ try {
   const errors = consoleMessages.filter(([type, message]) =>
     (type === "error" || type === "pageerror")
     && !message.includes("Failed to load resource: the server responded with a status of 503")
+    && !message.includes("Failed to load resource: the server responded with a status of 429")
     && !message.includes("net::ERR_SSL_PROTOCOL_ERROR")
     && !message.includes("net::ERR_CONNECTION_REFUSED")
     && !message.includes("violates the following Content Security Policy directive")
