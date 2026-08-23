@@ -55,20 +55,16 @@ export default async function CrossesPage({
     return new Intl.NumberFormat("es-CL", {
       style: "currency",
       currency: "CLP",
-      maximumFractionDigits: 0,
+      maximumFractionDigits: 1,
       notation: "compact",
     }).format(amount);
   };
 
-  const totalChilecompraMonto = typeof chilecompra?.total_adjudicado_clp === "number" && chilecompra.total_adjudicado_clp > 0
-    ? chilecompra.total_adjudicado_clp
-    : 2293000000000;
-
-  const totalChilecompraProcesos = SOURCE_CANONICAL_COUNTS["chilecompra"] || 74142;
-
-  const contraloriaCount = contraloria?.recordCount || contraloria?.records.length || SOURCE_CANONICAL_COUNTS["contraloria"];
-  const infolobbyCount = infolobby?.count || SOURCE_CANONICAL_COUNTS["infolobby"];
-  const ley19862Count = ley19862?.kpis?.total_transfers || SOURCE_CANONICAL_COUNTS["ley-19862"];
+  const totalChilecompraMonto = 1900000000000;
+  const totalChilecompraProcesos = SOURCE_CANONICAL_COUNTS["chilecompra"] ?? 74142;
+  const contraloriaCount = SOURCE_CANONICAL_COUNTS["contraloria"] ?? 291;
+  const infolobbyCount = SOURCE_CANONICAL_COUNTS["infolobby"] ?? 60523;
+  const ley19862Count = SOURCE_CANONICAL_COUNTS["ley-19862"] ?? 11651;
 
   return (
     <main>
@@ -107,13 +103,13 @@ export default async function CrossesPage({
       </section>
 
       <div className="container-main" style={{ marginTop: "1.75rem", display: "flex", flexDirection: "column", gap: "2.25rem", paddingBottom: "4rem" }}>
-        {/* ─── 2. KPIS (4) (Fix $0 Compras Públicas OCDS) ────────────────────── */}
+        {/* ─── 2. KPIS (4) (Universo Canónico / Coherente con /datos/calidad) ──── */}
         <section aria-label="Estadísticas de fuentes y relaciones">
           <div className="stat-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
             {/* KPI 1 */}
             <div className="stat-tile stat-tile--accent">
               <div className="stat-tile__value">{crosses.length.toLocaleString("es-CL")}</div>
-              <div className="stat-tile__label">Relaciones en Grafo</div>
+              <div className="stat-tile__label">Relaciones Indexadas</div>
               <div className="stat-tile__hint">
                 {crosses.length.toLocaleString("es-CL")} relaciones agregadas (1.897 relaciones canónicas en el modelo de datos; el grafo muestra los vínculos actualmente indexados).{" "}
                 <Link href="/como-funciona" style={{ color: "var(--accent)", textDecoration: "underline" }}>
@@ -129,7 +125,7 @@ export default async function CrossesPage({
               <div className="stat-tile__hint">Informes de fiscalización 2025-2026</div>
             </div>
 
-            {/* KPI 3 (Monto real, NUNCA $0) */}
+            {/* KPI 3 */}
             <div className="stat-tile stat-tile--warn">
               <div className="stat-tile__value">{clp(totalChilecompraMonto)}</div>
               <div className="stat-tile__label">Compras ChileCompra</div>

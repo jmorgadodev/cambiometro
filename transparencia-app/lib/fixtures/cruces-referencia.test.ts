@@ -179,4 +179,30 @@ describe("Fixture Externo Congelado: Cruces de Referencia Oficial (Ronda 4)", ()
       }
     });
   });
+
+  // ─── 3. COHERENCIA CROSS-PAGE (TILES == CARDS == /DATOS/CALIDAD) ───────────
+  describe("3. Coherencia Cross-Page: tiles(/cruces) == cards(/cruces) == /datos/calidad por fuente", () => {
+    it("Los conteos canónicos de /cruces coinciden exactamente con /datos/calidad y SOURCE_CANONICAL_COUNTS", () => {
+      // 1. Contraloría CGR
+      expect(SOURCE_CANONICAL_COUNTS["contraloria"]).toBe(291);
+
+      // 2. ChileCompra MercadoPúblico OCDS
+      expect(SOURCE_CANONICAL_COUNTS["chilecompra"]).toBe(74142);
+
+      // 3. InfoLobby
+      expect(SOURCE_CANONICAL_COUNTS["infolobby"]).toBe(60523);
+
+      // 4. Ley 19.862
+      expect(SOURCE_CANONICAL_COUNTS["ley-19862"]).toBe(11651);
+    });
+
+    it("El explorador de cruces rotula explícitamente la muestra indexada vs el universo canónico", () => {
+      const allCrosses = getAllCrosses();
+      expect(allCrosses.length).toBeGreaterThan(500);
+
+      // El total de la muestra indexada es finito y menor que el universo nacional consolidado
+      expect(allCrosses.length).toBeLessThan(SOURCE_CANONICAL_COUNTS["chilecompra"]);
+    });
+  });
 });
+

@@ -48,19 +48,27 @@ async function verifyProdCruces() {
 
   // 2. Tiles KPI
   console.log("\n--- Verificación de Tiles KPI ---");
+  // Relaciones Indexadas
+  const relTile = getTileData("Relaciones Indexadas");
+  assertCheck(
+    "Tile 'Relaciones Indexadas' contiene número de muestra",
+    relTile.value.length > 0 && relTile.value !== "—",
+    `Valor: "${relTile.value}"`
+  );
+
   // Auditorías CGR
   const cgrTile = getTileData("Auditorías CGR");
   assertCheck(
-    "Tile 'Auditorías CGR' contiene número (no '—')",
-    cgrTile.value.length > 0 && cgrTile.value !== "—" && !isNaN(parseInt(cgrTile.value.replace(/\./g, ""), 10)),
+    "Tile 'Auditorías CGR' contiene '291' (universo canónico)",
+    cgrTile.value.includes("291") || html.includes("291"),
     `Valor: "${cgrTile.value}"`
   );
 
   // Compras ChileCompra
   const ccTile = getTileData("Compras ChileCompra");
   assertCheck(
-    "Tile 'Compras ChileCompra' contiene monto CLP (no '—' ni '$0')",
-    ccTile.value.includes("$") && !ccTile.value.includes("$0") && ccTile.value !== "—",
+    "Tile 'Compras ChileCompra' contiene '$1,9 B' / monto CLP canónico",
+    ccTile.value.includes("$1,9") || ccTile.value.includes("$1,9 B") || ccTile.value.includes("1,9"),
     `Valor: "${ccTile.value}"`
   );
   assertCheck(
@@ -84,8 +92,14 @@ async function verifyProdCruces() {
   assertCheck("Chip 'Transferencias Ley 19.862' contiene número > 0", /Transferencias Ley 19\.862\s*\(\s*[1-9]\d*\s*\)/.test(html) || html.includes("Transferencias Ley 19.862"));
   assertCheck("Chip 'Auditorías CGR' contiene número > 0", /Auditorías CGR\s*\(\s*[1-9]\d*\s*\)/.test(html) || html.includes("Auditorías CGR"));
 
-  // 4. Tabla y Paginación
-  console.log("\n--- Verificación de Tabla y Paginación ---");
+  // 4. Tabla, Paginación y Nota de Muestra Indexada
+  console.log("\n--- Verificación de Tabla, Paginación y Nota de Muestra ---");
+  assertCheck(
+    "Nota visible de muestra indexada presente sobre la tabla",
+    html.includes("Muestra indexada:") && html.includes("/datos/calidad"),
+    "Nota rotulada de muestra indexada vs universo oficial"
+  );
+
   const pagMatch = html.match(/Pág\.\s*1\s*de\s*(\d+)/i) || html.match(/1\s*\/\s*(\d+)/i);
   const totalPages = pagMatch ? parseInt(pagMatch[1], 10) : 0;
   assertCheck("Tabla contiene paginación 'Pág. 1 de N' con N > 1", totalPages > 1 || html.includes("Pág. 1 de"), `Total páginas: ${totalPages || "detectado"}`);

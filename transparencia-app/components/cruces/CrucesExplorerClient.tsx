@@ -399,6 +399,34 @@ export default function CrucesExplorerClient({ initialRows, initialQuery = "" }:
             borderColor: "var(--border)",
           }}
         >
+          {/* Nota visible obligatoria: Muestra indexada vs Universo Canónico */}
+          <div
+            style={{
+              padding: "0.75rem 1rem",
+              background: "var(--bg-surface-2)",
+              borderRadius: 8,
+              border: "1px solid var(--border-subtle)",
+              fontSize: "0.82rem",
+              color: "var(--text-muted)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "0.5rem",
+              marginBottom: "0.5rem",
+            }}
+          >
+            <div>
+              📌 <strong>Muestra indexada:</strong> {filteredRows.length.toLocaleString("es-CL")} relaciones (orden por monto/fecha) · los totales por fuente corresponden al universo oficial en{" "}
+              <Link href="/datos/calidad" style={{ color: "var(--accent)", fontWeight: 600, textDecoration: "underline" }}>
+                /datos/calidad
+              </Link>
+            </div>
+            <div style={{ fontWeight: 600, color: "var(--text-primary)", fontSize: "0.78rem" }}>
+              Pág. {currentPage} de {totalPages}
+            </div>
+          </div>
+
           {/* Fila superior: Input de búsqueda y Toggle Vista */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
             <div style={{ flex: "1 1 300px" }}>
