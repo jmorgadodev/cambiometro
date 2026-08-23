@@ -328,7 +328,6 @@ export async function getAllPartidosSummary(): Promise<PartidoResumenCompleto[]>
       const polsConGasto = gastos.porPolitico.filter((p) => p.total > 0).length;
       const promedioGasto = polsConGasto > 0 ? Math.round(gastos.total / polsConGasto) : 0;
       const esIndependiente = partido.id.toLowerCase() === "ind";
-      const normId = normalizePartidoId(partido.id);
       const coalicionInfo = COALICION_POR_PARTIDO[normId] || {
         coalicion: esIndependiente ? ("Independientes" as const) : ("Oposición" as const),
         pacto: "Sin pacto declarado",
