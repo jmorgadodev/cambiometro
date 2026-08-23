@@ -386,7 +386,7 @@ export default async function PoliticoPage({ params }: Props) {
                 <div className="stat-grid" style={{ marginTop: "0.5rem" }}>
                   {[
                     { label: "Votos obtenidos", value: pol.votos_2025.toLocaleString("es-CL"), tone: "stat-tile--accent" },
-                    { label: "Porcentaje", value: `${pol.porcentaje_votos?.toLocaleString("es-CL", { minimumFractionDigits: 2 }) ?? "—"}%`, tone: "" },
+                    { label: "Porcentaje", value: `${pol.porcentaje_votos?.toLocaleString("es-CL", { minimumFractionDigits: 2 }) ?? "—"}% de votos válidos`, tone: "" },
                     { label: "Coalición", value: pol.coalicion ?? "—", tone: "" },
                     { label: "Partido electoral", value: pol.partido_electoral ?? "—", tone: "" },
                   ].map((stat) => (
