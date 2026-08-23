@@ -174,6 +174,14 @@ export default function PersonasUniversalClient({
     conHorasExtras: 0,
   });
 
+  // Sync tab from URL params
+  useEffect(() => {
+    const tabParam = searchParams.get("tab") as PersonaTab | null;
+    if (tabParam && ["parlamentarios", "alcaldes", "autoridades", "funcionarios"].includes(tabParam)) {
+      setActiveTab(tabParam);
+    }
+  }, [searchParams]);
+
   // Debounce search
   useEffect(() => {
     const handler = setTimeout(() => {
