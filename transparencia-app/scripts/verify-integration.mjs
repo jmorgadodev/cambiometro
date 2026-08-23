@@ -212,7 +212,13 @@ try {
       await gotoWithNetworkRetry(`${baseUrl}${route}`);
       await page.waitForLoadState("networkidle").catch(() => {});
       await page.waitForSelector("h1", { timeout: 5000 }).catch(() => {});
-      const fits = await page.locator("body").evaluate((element) => element.scrollWidth <= element.clientWidth).catch(() => true);
+      const fits = await page.evaluate(() => {
+        const body = document.body;
+        const html = document.documentElement;
+        const scrollW = Math.max(body.scrollWidth, html.scrollWidth);
+        const clientW = Math.max(body.clientWidth, html.clientWidth);
+        return scrollW <= clientW + 1;
+      }).catch(() => true);
       assert(fits, `${route}: overflow horizontal a ${width}px`);
     }
   }
