@@ -21,6 +21,8 @@
 
 # production
 /build
+/data/politico-slices/
+/data/politicos-votaciones-index.json
 /data/lake/*
 /data/lake-cplt/
 /data/cplt-category/

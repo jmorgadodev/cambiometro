@@ -5,7 +5,8 @@
   "private": true,
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build:slices": "node scripts/build-politico-slices.mjs",
+    "build": "node scripts/build-politico-slices.mjs && next build",
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
@@ -13,7 +14,7 @@
     "check:links": "node scripts/check-safe-links.mjs",
     "check:innerhtml": "node scripts/check-no-innerhtml.mjs",
     "test:coverage-sweep": "node scripts/coverage-sweep.mjs",
-    "test": "npm run typecheck && npm run check:tokens && npm run check:links && npm run check:innerhtml && npm run test:coverage-sweep && vitest run",
+    "test": "node scripts/build-politico-slices.mjs && npm run typecheck && npm run check:tokens && npm run check:links && npm run check:innerhtml && npm run test:coverage-sweep && vitest run",
     "guard:integrity": "node ../scripts/audit/pipeline-guard.mjs",
     "preflight": "npm run lint && npm run test && npm run cf:build",
     "verify:browser": "node scripts/verify-integration.mjs",

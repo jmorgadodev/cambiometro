@@ -19,6 +19,7 @@ async function verifyProdFull() {
   console.log("  URL Base: https://cambiometro.impulsacv.cl");
   console.log("================================================================================\n");
 
+  const PROD_URL = "https://cambiometro.impulsacv.cl";
   const headers = { "User-Agent": "Cambiometro-Full-Verifier/1.0", "Cache-Control": "no-cache" };
 
   // ─── MÓDULO 1: HOME & GLOBALES ─────────────────────────────────────────────
@@ -172,6 +173,58 @@ async function verifyProdFull() {
   const { runCoverageSweep } = await import("./coverage-sweep.mjs");
   const coverageResult = await runCoverageSweep({ silent: false });
   assertCheck("COBERTURA", "Barrido de cobertura integral (Votaciones, Muestra 5 Fichas, Personal Apoyo, Movimientos, Manifest)", coverageResult.passed);
+
+  // ─── MÓDULO 10: FICHAS /politico/* ESTÁTICAS Y RENDIMIENTO (10 URLs × 2 requests) ──
+  console.log("\n10. MÓDULO FICHAS /politico/* ESTÁTICAS Y RENDIMIENTO (Zero CPU Spikes / 0 Error 1102)");
+  const sampleSlugs = [
+    "diego-ibanez-cotroneo",
+    "carlos-bianchi-chelech",
+    "vanessa-kaiser-barents-von-hohenhagen",
+    "karim-bianchi-retamales",
+    "karol-cariola-oliva",
+    "gonzalo-winter-etcheberry",
+    "diego-schalper-sepulveda",
+    "yasna-provoste-campillay",
+    "luciano-cruz-coke-carvallo",
+    "vlado-mirosevic-verdugo",
+  ];
+
+  for (const slug of sampleSlugs) {
+    for (let reqNum = 1; reqNum <= 2; reqNum++) {
+      let res = null;
+      let durationMs = 0;
+      let html = "";
+      for (let attempt = 1; attempt <= 2; attempt++) {
+        try {
+          const t0 = performance.now();
+          res = await fetch(`${PROD_URL}/politico/${slug}`, {
+            headers: {
+              "User-Agent": "Cambiometro-Verifier/1.0",
+              "Connection": "close",
+            },
+          });
+          const t1 = performance.now();
+          durationMs = Math.round(t1 - t0);
+          html = await res.text();
+          if (res.status === 200) break;
+        } catch {
+          await new Promise((r) => setTimeout(r, 200));
+        }
+      }
+
+      const okStatus = res?.status === 200;
+      const noError1102 = !html.includes("Error 1102") && !html.includes("error code: 1102") && !html.includes("Worker threw exception") && !html.includes("Error 1015");
+      const fastResponse = durationMs < 3000;
+
+      assertCheck(
+        "FICHAS-ESTATICAS",
+        `/politico/${slug} (req #${reqNum}) [Status: ${res?.status ?? "ERR"}, ${durationMs}ms]`,
+        okStatus && noError1102 && fastResponse
+      );
+
+      await new Promise((r) => setTimeout(r, 100));
+    }
+  }
 
   // ─── RESUMEN FINAL ─────────────────────────────────────────────────────────
   console.log("\n================================================================================");
