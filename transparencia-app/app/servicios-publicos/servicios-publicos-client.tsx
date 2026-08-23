@@ -148,7 +148,7 @@ export default function ServiciosPublicosClient({
           serv.nombre.toLowerCase().includes(q) ||
           serv.sigla.toLowerCase().includes(q) ||
           (serv.director_jefe_actual ?? "").toLowerCase().includes(q) ||
-          serv.ministerio_dependiente.toLowerCase().includes(q);
+          (serv.ministerio_dependiente ?? "").toLowerCase().includes(q);
 
         const matchPresupuesto = !soloConPresupuesto || serv.presupuesto !== null;
 
