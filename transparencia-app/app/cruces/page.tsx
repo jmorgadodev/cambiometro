@@ -39,10 +39,12 @@ export const metadata: Metadata = {
 export default async function CrossesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ q?: string }>;
+  searchParams: Promise<{ q?: string; rows?: string }>;
 }) {
   const params = await searchParams;
   const rawQuery = params.q?.trim() ?? "";
+  const rowsParam = Number(params.rows);
+  const initialRowsPerPage = rowsParam === 25 || rowsParam === 50 ? rowsParam : 10;
   const crosses = await getAllCrosses();
 
   const contraloria = leerContraloriaV1();
@@ -142,7 +144,7 @@ export default async function CrossesPage({
         </section>
 
         {/* ─── 3. EXPLORADOR ÚNICO (PRESETS + CHIPS + TABLA + DRAWER) ───────── */}
-        <CrucesExplorerClient initialRows={crosses} initialQuery={rawQuery} />
+        <CrucesExplorerClient initialRows={crosses} initialQuery={rawQuery} initialRowsPerPage={initialRowsPerPage} />
 
         {/* ─── 4. FUENTES Y COBERTURA (Cards con enlaces a módulos existentes) ── */}
         <section aria-label="Fuentes oficiales y cobertura">

@@ -92,17 +92,32 @@ async function verifyProdCruces() {
   assertCheck("Chip 'Transferencias Ley 19.862' contiene número > 0", /Transferencias Ley 19\.862\s*\(\s*[1-9]\d*\s*\)/.test(html) || html.includes("Transferencias Ley 19.862"));
   assertCheck("Chip 'Auditorías CGR' contiene número > 0", /Auditorías CGR\s*\(\s*[1-9]\d*\s*\)/.test(html) || html.includes("Auditorías CGR"));
 
-  // 4. Tabla, Paginación y Nota de Muestra Indexada
-  console.log("\n--- Verificación de Tabla, Paginación y Nota de Muestra ---");
+  // 4. Tabla, Paginación y Selector de Filas
+  console.log("\n--- Verificación de Tabla, Paginación y Selector de Filas ---");
   assertCheck(
     "Nota visible de muestra indexada presente sobre la tabla",
     html.includes("Muestra indexada:") && html.includes("/datos/calidad"),
     "Nota rotulada de muestra indexada vs universo oficial"
   );
 
-  const pagMatch = html.match(/Pág\.\s*1\s*de\s*(\d+)/i) || html.match(/1\s*\/\s*(\d+)/i);
+  assertCheck(
+    "Selector 'Filas por página: 10 / 25 / 50' visible en la tabla",
+    html.includes("Filas por página:") && html.includes(">10<") && html.includes(">25<") && html.includes(">50<"),
+    "Selector 10 / 25 / 50 presente"
+  );
+
+  const pagMatch = html.match(/Pág\.\s*1\s*de\s*(\d+)/i) || html.match(/1\s*\/\s*(\d+)/i) || html.match(/Página\s*1\s*de\s*(\d+)/i);
   const totalPages = pagMatch ? parseInt(pagMatch[1], 10) : 0;
-  assertCheck("Tabla contiene paginación 'Pág. 1 de N' con N > 1", totalPages > 1 || html.includes("Pág. 1 de"), `Total páginas: ${totalPages || "detectado"}`);
+  assertCheck("Tabla contiene paginación 'Pág. 1 de N' con N >= 30 (default 10 filas)", totalPages >= 30, `Total páginas: ${totalPages || "detectado"}`);
+
+  // Fetch con ?rows=25
+  const res25 = await fetch("https://cambiometro.impulsacv.cl/cruces?rows=25", {
+    headers: { "User-Agent": "Cambiometro-Verifier/1.0", "Cache-Control": "no-cache" },
+  });
+  const html25 = await res25.text();
+  const pagMatch25 = html25.match(/Pág\.\s*1\s*de\s*(\d+)/i) || html25.match(/1\s*\/\s*(\d+)/i) || html25.match(/Página\s*1\s*de\s*(\d+)/i);
+  const totalPages25 = pagMatch25 ? parseInt(pagMatch25[1], 10) : 0;
+  assertCheck("Consulta con ?rows=25 calcula total páginas menor a 20 (N ~ 15)", totalPages25 > 0 && totalPages25 < totalPages, `Páginas con rows=25: ${totalPages25}`);
 
   // Relaciones oficiales en tabla
   assertCheck("Aparece en tabla: Informe 704/2024 (CGR)", html.includes("704/2024") || html.includes("contraloria-cgr-audit-2024-704"));
