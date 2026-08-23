@@ -54,14 +54,14 @@ export default async function PartidosListPage() {
 
   // Gráfico de Votaciones de Sala
   const rankingVotos = partidos
-    .filter((p) => (p.votosCamara.emitidos || 0) > 0)
-    .sort((a, b) => (b.votosCamara.emitidos || 0) - (a.votosCamara.emitidos || 0))
+    .filter((p) => (p.votosCamara?.emitidos || 0) > 0)
+    .sort((a, b) => (b.votosCamara?.emitidos || 0) - (a.votosCamara?.emitidos || 0))
     .map((p) => ({
       nombre: p.sigla,
-      si: p.votosCamara.afirmativo || 0,
-      no: p.votosCamara.enContra || 0,
-      abst: p.votosCamara.abstencion || 0,
-      noVota: p.votosCamara.noVota || 0,
+      si: p.votosCamara?.afirmativo || 0,
+      no: p.votosCamara?.enContra || 0,
+      abst: p.votosCamara?.abstencion || 0,
+      noVota: p.votosCamara?.noVota || 0,
     }));
 
   // Top 5 Equipos de Apoyo de Diputados
