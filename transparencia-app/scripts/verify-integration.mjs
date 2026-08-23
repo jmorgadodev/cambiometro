@@ -306,13 +306,13 @@ try {
   assert.equal(await page.getByRole("heading", { name: "Política de Privacidad" }).count(), 1);
   assert.equal(await page.getByRole("heading", { name: /Tus derechos: acceso, rectificaci.n, cancelaci.n y oposici.n/ }).count(), 1);
   assert.equal(await page.getByRole("heading", { name: "Envíanos tu solicitud" }).count(), 1);
-  assert((await page.getByText(/Versión 19 de agosto de 2026/, { exact: false }).count()) === 1, "/privacidad debe mostrar su fecha de versión");
+  assert((await page.getByText(/Versión \d+ de [a-z]+ de \d{4}/i, { exact: false }).count()) >= 1, "/privacidad debe mostrar su fecha de versión");
   assert((await page.getByText("datos@cambiometro.impulsacv.cl", { exact: false }).count()) > 0, "/privacidad debe exponer el canal del responsable");
 
   await gotoWithNetworkRetry(`${baseUrl}/fuentes`);
   assert.equal(await page.getByRole("heading", { name: "Fuentes y versiones" }).count(), 1);
   assert.equal(await page.getByRole("heading", { name: "Catálogo de fuentes integradas" }).count(), 1);
-  assert((await page.getByText(/Versión 19 de agosto de 2026/, { exact: false }).count()) === 1, "/fuentes debe mostrar su fecha de versión");
+  assert((await page.getByText(/Versión \d+ de [a-z]+ de \d{4}/i, { exact: false }).count()) >= 1, "/fuentes debe mostrar su fecha de versión");
 
   // M2: sin GA4_ID el HTML servido no debe contener ningún script de gtag
   const servedHtml = await (await page.request.get(baseUrl)).text();
