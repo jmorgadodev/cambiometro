@@ -191,7 +191,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
             <div style={{ fontFamily: "monospace", fontSize: "1.45rem", fontWeight: 900, color: "var(--info)" }}>
               {lobby.length > 0
                 ? `${lobby.length} reuniones`
-                : `${resumenLobby?.audiencias_ministerio_tutelar.length ?? 0} audiencias`}
+                : `${resumenLobby?.audiencias_ministerio_tutelar?.length ?? 0} audiencias`}
             </div>
             <div style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
               {cgr.length} auditorías Contraloría

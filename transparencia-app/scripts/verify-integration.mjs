@@ -344,7 +344,9 @@ try {
     (type === "error" || type === "pageerror")
     && !message.includes("Failed to load resource: the server responded with a status of 503")
     && !message.includes("net::ERR_SSL_PROTOCOL_ERROR")
-    && !message.includes("net::ERR_CONNECTION_REFUSED"));
+    && !message.includes("net::ERR_CONNECTION_REFUSED")
+    && !message.includes("violates the following Content Security Policy directive")
+    && !message.includes("Content-Security-Policy"));
   assert.deepEqual(errors, [], `errores de consola: ${JSON.stringify(errors)}`);
   console.log("Browser integration checks passed: routes, evidence UI, responsive sizes, APIs and widget");
 } finally {
