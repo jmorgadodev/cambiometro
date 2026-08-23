@@ -77,7 +77,8 @@ try {
   });
   const input = page.locator('input[type="search"], input[placeholder*="uscar"], #omnibox, input[aria-label*="uscar"]').first();
   if ((await input.count()) > 0) {
-    await input.fill(xssPayload);
+    await input.scrollIntoViewIfNeeded().catch(() => {});
+    await input.fill(xssPayload, { force: true });
     await page.waitForTimeout(600);
     const pwned = await page.evaluate(() => window.__xss_pwned);
     assert.equal(pwned, undefined, "el payload XSS se ejecutó en el DOM");
