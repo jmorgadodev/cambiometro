@@ -29,16 +29,16 @@ import { leerInfoLobbyV1 } from "../infolobby";
 
 describe("Fixture Externo Congelado: Referencia Oficial de Partidos, Transferencias y Cruces (Ronda 4)", () => {
   describe("1. Muestra de 5 Partidos Políticos (RN, UDI, PPD, PCCh, PNL) y Regla de Frescura", () => {
-    it("Partido 1: Renovación Nacional (RN)", () => {
+    it("Partido 1: Renovación Nacional (RN - Fix Rol Andrea Balladares / Katherine Martorell)", () => {
       const rn = getPartidoTransparencia("rn");
       expect(rn).not.toBeNull();
       expect(rn?.sigla).toBe("RN");
       expect(rn?.nombre_oficial).toBe("Renovación Nacional");
-      expect(rn?.directiva.presidente).toBe("Rodrigo Galilea Vial");
-      expect(rn?.directiva.secretario_general).toBe("Andrea Balladares Fuentes");
-      expect(rn?.directiva.fecha_asuncion_directiva).toBe("2023-10-09");
+      expect(rn?.directiva.presidente).toBe("Andrea Balladares Letelier");
+      expect(rn?.directiva.secretario_general).toBe("Katherine Martorell Awad");
+      expect(rn?.directiva.fecha_asuncion_directiva).toBe("2026-04-25");
       expect(rn?.directiva.fecha_ultima_verificacion).toBe("2026-08-22");
-      expect(rn?.directiva.fuente_periodistica_confirmacion).toContain("SERVEL");
+      expect(rn?.directiva.fuente_periodistica_confirmacion).toContain("Emol");
       expect(rn?.directiva.declaracion_patrimonio_url).toContain("infoprobidad.cl");
       expect(rn?.financiamiento_publico.recibe_aporte_trimestral).toBe(true);
       expect(rn?.financiamiento_publico.resolucion_servel).toContain("SERVEL");
@@ -48,9 +48,8 @@ describe("Fixture Externo Congelado: Referencia Oficial de Partidos, Transferenc
       expect(rn?.padron_afiliados.fuente_padron_url).toContain("servel.cl");
 
       const frescura = evaluarFrescuraDirectiva(rn!.directiva);
-      expect(frescura.requiereVerificacionPeriodistica).toBe(true);
-      expect(frescura.esMayorDosAnos).toBe(true);
-      expect(frescura.avisoFrescura).toContain("última verificación");
+      expect(frescura.requiereVerificacionPeriodistica).toBe(false);
+      expect(frescura.diasDesdeAsuncion).toBeLessThan(150);
     });
 
     it("Partido 2: Unión Demócrata Independiente (UDI)", () => {
@@ -124,14 +123,15 @@ describe("Fixture Externo Congelado: Referencia Oficial de Partidos, Transferenc
       expect(frescura.esMayorDosAnos).toBe(true);
     });
 
-    it("Partido 5: Partido Nacional Libertario (PNL - Cero datos inventados)", () => {
+    it("Partido 5: Partido Nacional Libertario (PNL - Verificación SERVEL Juan Antonio Urzúa)", () => {
       const pnl = getPartidoTransparencia("pnl");
       expect(pnl).not.toBeNull();
       expect(pnl?.sigla).toBe("PNL");
       expect(pnl?.nombre_oficial).toBe("Partido Nacional Libertario");
       expect(pnl?.directiva.presidente).toBe("Johannes Kaiser Barents-Von Hohenhagen");
-      expect(pnl?.directiva.secretario_general).toBe("Ángel Soto");
-      expect(pnl?.directiva.fecha_asuncion_directiva).toBe("2024-06-11");
+      expect(pnl?.directiva.secretario_general).toBe("Juan Antonio Urzúa Meneses");
+      expect(pnl?.directiva.tesorero).toBe("Karl Heinz Siegfried Lorenz Rothe");
+      expect(pnl?.directiva.fecha_asuncion_directiva).toBe("2025-03-06");
       expect(pnl?.directiva.fecha_ultima_verificacion).toBe("2026-08-22");
       expect(pnl?.directiva.fuente_periodistica_confirmacion).toContain("SERVEL");
       expect(pnl?.directiva.declaracion_patrimonio_url).toContain("infoprobidad.cl");
@@ -151,11 +151,11 @@ describe("Fixture Externo Congelado: Referencia Oficial de Partidos, Transferenc
   describe("2. Barrido de Secretarios Generales (5/5 confirmados)", () => {
     it("Todos los 5 partidos poseen Secretarios Generales verificados con fuente oficial y periodística", () => {
       const secretarios = [
-        { id: "rn", sec: "Andrea Balladares Fuentes", pres: "Rodrigo Galilea Vial" },
+        { id: "rn", sec: "Katherine Martorell Awad", pres: "Andrea Balladares Letelier" },
         { id: "udi", sec: "Juan Antonio Coloma Álamos", pres: "Guillermo Ramírez Diez" },
         { id: "ppd", sec: "Sebastián Vergara", pres: "Raúl Soto Mardones" },
         { id: "pc", sec: "Bárbara Figueroa Sandoval", pres: "Lautaro Carmona Soto" },
-        { id: "pnl", sec: "Ángel Soto", pres: "Johannes Kaiser Barents-Von Hohenhagen" },
+        { id: "pnl", sec: "Juan Antonio Urzúa Meneses", pres: "Johannes Kaiser Barents-Von Hohenhagen" },
       ];
 
       for (const s of secretarios) {
