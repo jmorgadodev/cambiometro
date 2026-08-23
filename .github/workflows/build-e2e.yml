@@ -53,6 +53,10 @@ jobs:
         run: npm run cf:build
         working-directory: transparencia-app
 
+      - name: Verify Worker Runtime Bundle Budget
+        run: node scripts/audit/measure-bundle-size.mjs
+        working-directory: transparencia-app
+
       - name: Install browser for integration checks
         run: npx playwright install --with-deps chromium
         working-directory: transparencia-app
