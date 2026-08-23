@@ -241,7 +241,7 @@ export default async function PoliticoPage({ params }: Props) {
     ? rawCamaraMonth
     : camaraMonthMap[rawCamaraMonth.toLocaleLowerCase("es-CL").split(/\s+/)[0]] ?? "";
   const periodosPersonal = pol.cargo === "Senador"
-    ? [...new Set(apoyoSenador?.registros.map((record: any) => record.periodo).filter(Boolean) ?? [])].sort()
+    ? [...new Set(apoyoSenador?.registros.map((record) => record.periodo).filter(Boolean) ?? [])].sort()
     : camaraMonth ? [camaraMonth] : [];
   const mesesDisponiblesPersonal = periodosPersonal.map((periodo) => ({ periodo, etiqueta: periodo }));
   const ultimoPeriodoPersonal = pol.cargo === "Senador" ? (apoyoSenador?.ultimo_mes ?? "") : camaraMonth;
@@ -276,9 +276,9 @@ export default async function PoliticoPage({ params }: Props) {
 
     let personalVal: number | null = null;
     if (pol.cargo === "Senador") {
-      const recordsMes = apoyoSenador?.registros.filter((r: any) => r.periodo === periodo) ?? [];
+      const recordsMes = apoyoSenador?.registros.filter((r) => r.periodo === periodo) ?? [];
       if (recordsMes.length > 0) {
-        const sumPersonal = recordsMes.reduce((s: number, r: any) => s + (r.monto ?? 0), 0);
+        const sumPersonal = recordsMes.reduce((s: number, r) => s + (r.monto ?? 0), 0);
         personalVal = sumPersonal > 0 ? sumPersonal : null;
       }
     } else if (pol.cargo === "Diputado") {

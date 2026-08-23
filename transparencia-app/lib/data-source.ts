@@ -472,28 +472,28 @@ export function getVotacionesParaPolitico(
 
   const precomputed = polId ? getPrecomputedPoliticoVotaciones(polId) : null;
   if (precomputed && Array.isArray(precomputed.votos)) {
-    return precomputed.votos.map((v: any) => ({
+    return (precomputed.votos as Record<string, unknown>[]).map((v) => ({
       votacion: {
-        id: v.id,
-        fecha: v.fecha,
-        descripcion: v.descripcion,
-        quorum: v.quorum,
-        resultado: v.resultado,
-        tipo: v.tipo,
-        boletin: v.boletin,
-        tramite: v.tramite,
-        informe: v.informe,
-        url_tramitacion: v.url_tramitacion,
-        total_si: v.total_si,
-        total_no: v.total_no,
-        total_abstencion: v.total_abstencion,
-        total_asistencia: v.total_asistencia,
-        url: v.url,
+        id: String(v.id ?? ""),
+        fecha: typeof v.fecha === "string" ? v.fecha : undefined,
+        descripcion: typeof v.descripcion === "string" ? v.descripcion : undefined,
+        quorum: typeof v.quorum === "string" ? v.quorum : undefined,
+        resultado: typeof v.resultado === "string" ? v.resultado : undefined,
+        tipo: typeof v.tipo === "string" ? v.tipo : undefined,
+        boletin: typeof v.boletin === "string" ? v.boletin : undefined,
+        tramite: typeof v.tramite === "string" ? v.tramite : undefined,
+        informe: typeof v.informe === "string" ? v.informe : undefined,
+        url_tramitacion: typeof v.url_tramitacion === "string" ? v.url_tramitacion : undefined,
+        total_si: typeof v.total_si === "string" ? v.total_si : undefined,
+        total_no: typeof v.total_no === "string" ? v.total_no : undefined,
+        total_abstencion: typeof v.total_abstencion === "string" ? v.total_abstencion : undefined,
+        total_asistencia: typeof v.total_asistencia === "string" ? v.total_asistencia : undefined,
+        url: typeof v.url === "string" ? v.url : undefined,
       },
       voto: {
         id: String(polId),
         nombre: politico.nombre_completo,
-        opcion: v.opcion,
+        opcion: String(v.opcion ?? ""),
         opcion_valor: "0",
       },
     }));
