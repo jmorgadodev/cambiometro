@@ -5,16 +5,7 @@ import { getKvCache } from "@/lib/db";
 import { diputadoIdParaPolitico } from "@/lib/data-source";
 import { personalApoyoParaDiputado, personalApoyoParaSenador, leerPersonalApoyo } from "@/lib/personal-apoyo";
 import { COALICION_POR_PARTIDO } from "@/lib/partido-electoral-data";
-import fs from "fs";
-import path from "path";
-
-let PARTIDOS_STATS_FALLBACK: Record<string, unknown> = {};
-try {
-  const p = path.join(process.cwd(), "data", "lake-subsets", "partidos-stats.subset.json");
-  if (fs.existsSync(p)) {
-    PARTIDOS_STATS_FALLBACK = JSON.parse(fs.readFileSync(p, "utf8"));
-  }
-} catch {}
+import PARTIDOS_STATS_FALLBACK from "@/data/lake-subsets/partidos-stats.subset.json";
 
 export interface DetalleRebelde {
   politico_id: string;

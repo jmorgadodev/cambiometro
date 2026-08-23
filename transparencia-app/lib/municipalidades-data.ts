@@ -1,14 +1,5 @@
-import fs from "fs";
-import path from "path";
+import municipalidadesJson from "@/data/municipalidades-data.json";
 import { getVerifiedMuniRRSS } from "./municipalidades-rrss";
-
-let municipalidadesJson: Record<string, unknown> = {};
-try {
-  const p = path.join(process.cwd(), "data", "municipalidades-data.json");
-  if (fs.existsSync(p)) {
-    municipalidadesJson = JSON.parse(fs.readFileSync(p, "utf8"));
-  }
-} catch {}
 
 export interface AlcaldeData {
   nombre: string;

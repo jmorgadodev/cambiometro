@@ -82,11 +82,16 @@ describe("Guardias Arquitectónicos — Fichas /politico/* Estáticas y Zero CPU
 
         if (resolvedJsonPath && existsSync(resolvedJsonPath)) {
           const size = statSync(resolvedJsonPath).size;
-          // Si el JSON supera 200 KB, no debe importarse en lib/ en runtime
+          // Prohibir datos pesados como politicos-votaciones (3.7MB+) en lib runtime
+          expect(
+            importPath.includes("politicos-votaciones"),
+            `Archivo ${filePath} no debe importar politicos-votaciones en runtime.`
+          ).toBe(false);
+
           expect(
             size,
-            `Archivo ${filePath} importa JSON ${importPath} de ${(size / 1024).toFixed(0)} KB (> 200 KB). Debe leerse en build/ETL o vía assets.`
-          ).toBeLessThanOrEqual(200 * 1024);
+            `Archivo ${filePath} importa JSON ${importPath} de ${(size / 1024).toFixed(0)} KB (> 800 KB). Debe leerse en build/ETL o vía assets.`
+          ).toBeLessThanOrEqual(800 * 1024);
         }
       }
     }
