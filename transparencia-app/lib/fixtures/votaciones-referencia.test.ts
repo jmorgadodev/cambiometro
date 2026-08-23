@@ -1,17 +1,17 @@
 import { describe, it, expect } from "vitest";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
-import { getVotacionesParaPolitico } from "@/lib/data-source";
+import { getVotacionesParaPolitico, getTimelineParaPolitico } from "@/lib/data-source";
 import { esProcedimental } from "@/components/VotacionesHistorial";
 
 describe("Fixture de Referencia Oficial — Votaciones en Sala y Coherencia Interna", () => {
   // Muestra obligatoria de auditoría: Kaiser, Bianchi K., Bianchi C., Winter, Cariola, Schalper
   const muestraAuditIds = [
-    { id: "sen-038", nombre: "Vanessa Kaiser Barents-Von Hohenhagen", cargo: "Senador" },
-    { id: "sen-048", nombre: "Karim Bianchi Retamales", cargo: "Senador" },
-    { id: "dip-154", nombre: "Carlos Bianchi Chelech", cargo: "Diputado" },
-    { id: "dip-057", nombre: "Gonzalo Winter Etcheberry", cargo: "Diputado" },
-    { id: "sen-017", nombre: "Karol Cariola Oliva", cargo: "Senador" },
-    { id: "dip-068", nombre: "Diego Schalper Sepúlveda", cargo: "Diputado" },
+    { id: "sen-038", nombre: "Vanessa Kaiser Barents-Von Hohenhagen", cargo: "Senador", esperado: 189 },
+    { id: "sen-048", nombre: "Karim Bianchi Retamales", cargo: "Senador", esperado: 189 },
+    { id: "dip-154", nombre: "Carlos Bianchi Chelech", cargo: "Diputado", esperado: 580 },
+    { id: "dip-057", nombre: "Gonzalo Winter Etcheberry", cargo: "Diputado", esperado: 580 },
+    { id: "sen-017", nombre: "Karol Cariola Oliva", cargo: "Senador", esperado: 189 },
+    { id: "dip-068", nombre: "Diego Schalper Sepúlveda", cargo: "Diputado", esperado: 580 },
   ];
 
   it("1. Coherencia Matemática Interna: tiles == historial == denominador de presencia", () => {
@@ -21,7 +21,7 @@ describe("Fixture de Referencia Oficial — Votaciones en Sala y Coherencia Inte
       if (!pol) continue;
 
       const votaciones = getVotacionesParaPolitico(pol);
-      expect(votaciones.length).toBeGreaterThan(50); // Ingesta completa tiene cientos de votaciones
+      expect(votaciones.length).toBe(item.esperado); // Igualdad estricta tile ficha == fila sweep
 
       let afirmativo = 0;
       let enContra = 0;
@@ -63,22 +63,43 @@ describe("Fixture de Referencia Oficial — Votaciones en Sala y Coherencia Inte
     }
   });
 
-  it("2. Muestra completa de parlamentarios con cobertura ≥99% de eventos", () => {
+  it("2. Muestra completa de parlamentarios con cobertura 100% de eventos (tile == sweep)", () => {
     for (const item of muestraAuditIds) {
       const pol = POLITICOS_SEED.find((p) => p.id === item.id);
       expect(pol).toBeDefined();
       if (!pol) continue;
 
       const votaciones = getVotacionesParaPolitico(pol);
-      expect(votaciones.length).toBeGreaterThan(100);
+      expect(votaciones.length).toBe(item.esperado);
 
       const validos = votaciones.filter((v) => v.voto.opcion && v.votacion.fecha);
       const ratio = validos.length / votaciones.length;
-      expect(ratio).toBeGreaterThanOrEqual(0.99);
+      expect(ratio).toBe(1.0);
     }
   });
 
-  it("3. Padrón nominal de votaciones conserva boletines y enlaces oficiales de tramitación", () => {
+  it("3. Elección 2025: Header 'Votación Electoral 2025' y timeline hito leen del mismo registro (igualdad estricta)", () => {
+    for (const item of muestraAuditIds) {
+      const pol = POLITICOS_SEED.find((p) => p.id === item.id);
+      expect(pol).toBeDefined();
+      if (!pol || !pol.votos_2025) continue;
+
+      const timeline = getTimelineParaPolitico(pol);
+      const hitoEleccion = timeline.find((e) => e.tipo === "eleccion");
+      expect(hitoEleccion).toBeDefined();
+      if (!hitoEleccion) continue;
+
+      // El hito del timeline debe contener exactamente el mismo conteo de votos formateado
+      expect(hitoEleccion.titulo).toContain(pol.votos_2025.toLocaleString("es-CL"));
+      if (pol.porcentaje_votos) {
+        expect(hitoEleccion.detalle).toContain(
+          pol.porcentaje_votos.toLocaleString("es-CL", { minimumFractionDigits: 2 })
+        );
+      }
+    }
+  });
+
+  it("4. Padrón nominal de votaciones conserva boletines y enlaces oficiales de tramitación", () => {
     const pol = POLITICOS_SEED.find((p) => p.id === "dip-057"); // Gonzalo Winter
     expect(pol).toBeDefined();
     if (!pol) return;

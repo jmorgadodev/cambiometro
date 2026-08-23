@@ -125,14 +125,11 @@ export default async function PoliticoPage({ params }: Props) {
       ? cachedData.votaciones
       : getVotacionesParaPolitico(pol);
 
-  const votaciones = rawVotaciones.filter(({ votacion, voto }) => {
-    if (votacion.id && seenVoteKeys.has(`id:${votacion.id}`)) return false;
-    const normDesc = (votacion.descripcion || (votacion as { boletin?: string }).boletin || "").trim().toLowerCase().replace(/\s+/g, " ");
-    const descKey = `desc:${votacion.fecha || ""}_${normDesc}_${voto.opcion}`;
-    if (normDesc && seenVoteKeys.has(descKey)) return false;
-
-    if (votacion.id) seenVoteKeys.add(`id:${votacion.id}`);
-    if (normDesc) seenVoteKeys.add(descKey);
+  const votaciones = rawVotaciones.filter(({ votacion }) => {
+    if (votacion.id) {
+      if (seenVoteKeys.has(`id:${votacion.id}`)) return false;
+      seenVoteKeys.add(`id:${votacion.id}`);
+    }
     return true;
   });
 

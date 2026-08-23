@@ -466,15 +466,11 @@ export function getVotacionesParaPolitico(
     const pVotes = allVotes[polId];
     const result: VotacionDelPolitico[] = [];
     const seenSessionIds = new Set<string>();
-    const seenVotingKeys = new Set<string>();
     for (const [sessionId, opcion] of pVotes) {
       if (seenSessionIds.has(sessionId)) continue;
       seenSessionIds.add(sessionId);
       const session = sessions[sessionId];
       if (!session) continue;
-      const key = `${session.fecha || ""}_${String(session.descripcion || session.boletin || "").trim().toLowerCase()}_${opcion}`;
-      if (seenVotingKeys.has(key)) continue;
-      seenVotingKeys.add(key);
       result.push({
         votacion: session,
         voto: {
