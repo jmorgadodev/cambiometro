@@ -114,7 +114,7 @@ try {
     const response = await gotoWithNetworkRetry(`${baseUrl}${route}`);
     assert(response?.ok(), `${route} HTTP ${response?.status() ?? "sin respuesta"}`);
     if (route === "/autoridades" || route === "/funcionarios") await page.waitForURL("**/personas**", { timeout: 5000 }).catch(() => {});
-    await page.waitForSelector("h1", { state: "attached", timeout: 5000 }).catch(() => {});
+    await page.waitForSelector("h1", { state: "attached", timeout: 15000 }).catch(() => {});
     assert.equal(await page.locator("h1").count(), 1, `${route} debe tener exactamente un h1`);
     const hrefs = await page.locator("a[href]").evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute("href")).filter(Boolean));
     for (const href of hrefs) {
