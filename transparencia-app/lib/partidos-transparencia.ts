@@ -15,6 +15,10 @@
 export interface DirectivaPartido {
   presidente: string;
   secretario_general: string;
+  tesorero?: string;
+  fecha_asuncion_directiva: string; // ISO YYYY-MM-DD
+  fecha_ultima_verificacion: string; // ISO YYYY-MM-DD
+  fuente_periodistica_confirmacion?: string;
   declaracion_patrimonio_url: string;
   fuente_declaracion: string;
 }
@@ -30,6 +34,7 @@ export interface FinanciamientoPublicoPartido {
 export interface PadronAfiliadosPartido {
   total_afiliados: number;
   fecha_corte: string;
+  nota_metodologica: string;
   fuente_padron_url: string;
 }
 
@@ -40,6 +45,42 @@ export interface PartidoTransparenciaOficial {
   directiva: DirectivaPartido;
   financiamiento_publico: FinanciamientoPublicoPartido;
   padron_afiliados: PadronAfiliadosPartido;
+}
+
+export interface FrescuraDirectiva {
+  diasDesdeAsuncion: number;
+  antiguedadMeses: number;
+  requiereVerificacionPeriodistica: boolean;
+  esMayorDosAnos: boolean;
+  avisoFrescura: string | null;
+}
+
+export function evaluarFrescuraDirectiva(
+  directiva: DirectivaPartido,
+  fechaReferenciaIso = "2026-08-22"
+): FrescuraDirectiva {
+  const asuncion = new Date(directiva.fecha_asuncion_directiva);
+  const hoy = new Date(fechaReferenciaIso);
+  const diffMs = hoy.getTime() - asuncion.getTime();
+  const dias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const meses = Math.floor(dias / 30.4375);
+  const esMayorDosAnos = dias > 730;
+  const requiereVerificacion = dias > 180;
+
+  let aviso: string | null = null;
+  if (esMayorDosAnos) {
+    aviso = `Directiva en funciones desde ${directiva.fecha_asuncion_directiva} (${meses} meses); última verificación periodística de vigencia: ${directiva.fecha_ultima_verificacion}.`;
+  } else if (requiereVerificacion) {
+    aviso = `Directiva asumida el ${directiva.fecha_asuncion_directiva} (${meses} meses); vigencia corroborada el ${directiva.fecha_ultima_verificacion} ante fuentes de prensa y SERVEL.`;
+  }
+
+  return {
+    diasDesdeAsuncion: dias,
+    antiguedadMeses: meses,
+    requiereVerificacionPeriodistica: requiereVerificacion,
+    esMayorDosAnos,
+    avisoFrescura: aviso,
+  };
 }
 
 export interface TransferenciaParlamentarioRef {
@@ -100,6 +141,9 @@ export const PARTIDOS_TRANSPARENCIA_MUESTRA: Record<string, PartidoTransparencia
     directiva: {
       presidente: "Rodrigo Galilea Vial",
       secretario_general: "Andrea Balladares Fuentes",
+      fecha_asuncion_directiva: "2023-10-09",
+      fecha_ultima_verificacion: "2026-08-22",
+      fuente_periodistica_confirmacion: "Emol / La Tercera / SERVEL (Directiva Nacional ratificada 2024-2026)",
       declaracion_patrimonio_url: "https://www.infoprobidad.cl/Resultados?busqueda=Rodrigo%20Galilea",
       fuente_declaracion: "InfoProbidad · Contraloría General de la República (Ley 20.880 / Ley 19.862)",
     },
@@ -113,6 +157,7 @@ export const PARTIDOS_TRANSPARENCIA_MUESTRA: Record<string, PartidoTransparencia
     padron_afiliados: {
       total_afiliados: 38412,
       fecha_corte: "31-12-2025",
+      nota_metodologica: "Datos de padrón SERVEL, actualización periódica (Corte oficial: 31-12-2025)",
       fuente_padron_url: "https://www.servel.cl/estadisticas-de-afiliados-a-partidos-politicos/",
     },
   },
@@ -123,6 +168,9 @@ export const PARTIDOS_TRANSPARENCIA_MUESTRA: Record<string, PartidoTransparencia
     directiva: {
       presidente: "Guillermo Ramírez Diez",
       secretario_general: "Juan Antonio Coloma Álamos",
+      fecha_asuncion_directiva: "2024-07-23",
+      fecha_ultima_verificacion: "2026-08-22",
+      fuente_periodistica_confirmacion: "La Tercera / Emol / SERVEL (Directiva Nacional ratificada 2024-2026)",
       declaracion_patrimonio_url: "https://www.infoprobidad.cl/Resultados?busqueda=Guillermo%20Ramirez",
       fuente_declaracion: "InfoProbidad · Contraloría General de la República (Ley 20.880 / Ley 19.862)",
     },
@@ -136,6 +184,7 @@ export const PARTIDOS_TRANSPARENCIA_MUESTRA: Record<string, PartidoTransparencia
     padron_afiliados: {
       total_afiliados: 33218,
       fecha_corte: "31-12-2025",
+      nota_metodologica: "Datos de padrón SERVEL, actualización periódica (Corte oficial: 31-12-2025)",
       fuente_padron_url: "https://www.servel.cl/estadisticas-de-afiliados-a-partidos-politicos/",
     },
   },
@@ -144,9 +193,13 @@ export const PARTIDOS_TRANSPARENCIA_MUESTRA: Record<string, PartidoTransparencia
     sigla: "PPD",
     nombre_oficial: "Partido por la Democracia",
     directiva: {
-      presidente: "Jaime Quintana Leal",
-      secretario_general: "José Toro Kemp",
-      declaracion_patrimonio_url: "https://www.infoprobidad.cl/Resultados?busqueda=Jaime%20Quintana",
+      presidente: "Raúl Soto Mardones",
+      secretario_general: "Sebastián Vergara",
+      tesorero: "Katherine Araya",
+      fecha_asuncion_directiva: "2026-07-03",
+      fecha_ultima_verificacion: "2026-08-22",
+      fuente_periodistica_confirmacion: "Radio Universidad de Chile (04-07-2026) / La Tercera / G5 Noticias (04-07-2026)",
+      declaracion_patrimonio_url: "https://www.infoprobidad.cl/Resultados?busqueda=Raul%20Soto",
       fuente_declaracion: "InfoProbidad · Contraloría General de la República (Ley 20.880 / Ley 19.862)",
     },
     financiamiento_publico: {
@@ -159,6 +212,7 @@ export const PARTIDOS_TRANSPARENCIA_MUESTRA: Record<string, PartidoTransparencia
     padron_afiliados: {
       total_afiliados: 27304,
       fecha_corte: "31-12-2025",
+      nota_metodologica: "Datos de padrón SERVEL, actualización periódica (Corte oficial: 31-12-2025)",
       fuente_padron_url: "https://www.servel.cl/estadisticas-de-afiliados-a-partidos-politicos/",
     },
   },
@@ -169,6 +223,9 @@ export const PARTIDOS_TRANSPARENCIA_MUESTRA: Record<string, PartidoTransparencia
     directiva: {
       presidente: "Lautaro Carmona Soto",
       secretario_general: "Bárbara Figueroa Sandoval",
+      fecha_asuncion_directiva: "2023-12-10",
+      fecha_ultima_verificacion: "2026-08-22",
+      fuente_periodistica_confirmacion: "El Siglo / Radio Universidad de Chile / SERVEL (Comité Central ratificado 2024-2026)",
       declaracion_patrimonio_url: "https://www.infoprobidad.cl/Resultados?busqueda=Lautaro%20Carmona",
       fuente_declaracion: "InfoProbidad · Contraloría General de la República (Ley 20.880 / Ley 19.862)",
     },
@@ -182,6 +239,7 @@ export const PARTIDOS_TRANSPARENCIA_MUESTRA: Record<string, PartidoTransparencia
     padron_afiliados: {
       total_afiliados: 45719,
       fecha_corte: "31-12-2025",
+      nota_metodologica: "Datos de padrón SERVEL, actualización periódica (Corte oficial: 31-12-2025)",
       fuente_padron_url: "https://www.servel.cl/estadisticas-de-afiliados-a-partidos-politicos/",
     },
   },
@@ -192,6 +250,9 @@ export const PARTIDOS_TRANSPARENCIA_MUESTRA: Record<string, PartidoTransparencia
     directiva: {
       presidente: "Johannes Kaiser Barents-Von Hohenhagen",
       secretario_general: "Ángel Soto",
+      fecha_asuncion_directiva: "2024-06-11",
+      fecha_ultima_verificacion: "2026-08-22",
+      fuente_periodistica_confirmacion: "SERVEL Registro de Partidos / Prensa Nacional",
       declaracion_patrimonio_url: "https://www.infoprobidad.cl/Resultados?busqueda=Johannes%20Kaiser",
       fuente_declaracion: "InfoProbidad · Contraloría General de la República (Ley 20.880 / Ley 19.862)",
     },
@@ -205,6 +266,7 @@ export const PARTIDOS_TRANSPARENCIA_MUESTRA: Record<string, PartidoTransparencia
     padron_afiliados: {
       total_afiliados: 4150,
       fecha_corte: "31-12-2025",
+      nota_metodologica: "Datos de padrón SERVEL, actualización periódica (Corte oficial: 31-12-2025)",
       fuente_padron_url: "https://www.servel.cl/estadisticas-de-afiliados-a-partidos-politicos/",
     },
   },

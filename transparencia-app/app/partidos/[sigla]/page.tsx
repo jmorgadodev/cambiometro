@@ -13,7 +13,7 @@ import {
   normalizePartidoId,
 } from "@/lib/partido-estadisticas";
 import { getRadiografiaElectoral } from "@/lib/partido-electoral-data";
-import { getPartidoTransparencia } from "@/lib/partidos-transparencia";
+import { getPartidoTransparencia, evaluarFrescuraDirectiva } from "@/lib/partidos-transparencia";
 import { formatCLP, formatPct, comparePorApellido } from "@/lib/format";
 import ShareButton from "@/components/ShareButton";
 import PartidoDashboardClient from "@/components/partidos/PartidoDashboardClient";
@@ -315,6 +315,31 @@ export default async function PartidoPage({ params }: Props) {
                       <span style={{ color: "var(--text-2)" }}>Secretaría General: </span>
                       <strong style={{ color: "var(--text-1)" }}>{transparencia.directiva.secretario_general}</strong>
                     </div>
+                    {transparencia.directiva.tesorero && (
+                      <div>
+                        <span style={{ color: "var(--text-2)" }}>Tesorería: </span>
+                        <strong style={{ color: "var(--text-1)" }}>{transparencia.directiva.tesorero}</strong>
+                      </div>
+                    )}
+                    <div style={{ fontSize: "0.8rem", color: "var(--text-3)" }}>
+                      Asunción: {transparencia.directiva.fecha_asuncion_directiva} · Última verificación: {transparencia.directiva.fecha_ultima_verificacion}
+                    </div>
+                    {evaluarFrescuraDirectiva(transparencia.directiva).avisoFrescura && (
+                      <div
+                        style={{
+                          fontSize: "0.74rem",
+                          color: "var(--text-2)",
+                          marginTop: "0.35rem",
+                          padding: "0.4rem 0.6rem",
+                          background: "var(--surface-3)",
+                          borderRadius: 6,
+                          border: "1px solid var(--border)",
+                          lineHeight: 1.4,
+                        }}
+                      >
+                        ⏱️ {evaluarFrescuraDirectiva(transparencia.directiva).avisoFrescura}
+                      </div>
+                    )}
                     <div style={{ marginTop: "0.5rem" }}>
                       <a
                         href={transparencia.directiva.declaracion_patrimonio_url}
@@ -391,8 +416,8 @@ export default async function PartidoPage({ params }: Props) {
                         {transparencia.padron_afiliados.total_afiliados.toLocaleString("es-CL")}
                       </strong>
                     </div>
-                    <div style={{ fontSize: "0.8rem", color: "var(--text-3)" }}>
-                      Corte oficial al: {transparencia.padron_afiliados.fecha_corte}
+                    <div style={{ fontSize: "0.78rem", color: "var(--text-3)", lineHeight: 1.4 }}>
+                      {transparencia.padron_afiliados.nota_metodologica}
                     </div>
                     <div style={{ marginTop: "0.5rem" }}>
                       <a
