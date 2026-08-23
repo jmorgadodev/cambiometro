@@ -22,7 +22,7 @@ async function verifyProdFull() {
   const headers = { "User-Agent": "Cambiometro-Full-Verifier/1.0", "Cache-Control": "no-cache" };
 
   // ─── MÓDULO 1: HOME & GLOBALES ─────────────────────────────────────────────
-  console.log("1. MÓDULO HOME Y KPIS GLOBALES (/)");
+  console.log("1. MÓDULO HOME Y FOOTER COMPACTO (/)");
   const homeRes = await fetch("https://cambiometro.impulsacv.cl/", { headers });
   assertCheck("HOME", "HTTP Status 200", homeRes.status === 200);
   const homeHtml = (await homeRes.text()).replace(/<!--.*?-->/g, "");
@@ -31,6 +31,10 @@ async function verifyProdFull() {
   assertCheck("HOME", "Total 13 fuentes públicas", homeHtml.includes("13") && (homeHtml.includes("fuentes") || homeHtml.includes("Fuentes")));
   assertCheck("HOME", "Footer contiene 'Creado por Jorge Morgado'", homeHtml.includes("Creado por") && homeHtml.includes("Jorge Morgado"));
   assertCheck("HOME", "Footer contiene enlace a LinkedIn de Jorge Morgado", homeHtml.includes("https://www.linkedin.com/in/jorge-morgado/"));
+  assertCheck("HOME", "Footer NO contiene columna 'Explorar' (duplicada)", !homeHtml.includes('aria-label="Explorar"') && !homeHtml.includes('>Explorar</h2>'));
+  assertCheck("HOME", "Footer contiene icono SVG de LinkedIn", homeHtml.includes("<svg") && homeHtml.includes("LinkedIn"));
+  assertCheck("HOME", "Footer contiene icono SVG de Instagram", homeHtml.includes("<svg") && homeHtml.includes("Instagram"));
+  assertCheck("HOME", "Footer contiene icono SVG de X", homeHtml.includes("<svg") && (homeHtml.includes("𝕏") || homeHtml.includes("Twitter")));
   assertCheck("HOME", "Footer contiene 'Última consolidación'", homeHtml.includes("Última consolidación") || homeHtml.includes("Corte"));
 
   // ─── MÓDULO 2: FICHAS E INVARIANTES ────────────────────────────────────────
@@ -110,17 +114,37 @@ async function verifyProdFull() {
   const calidadHtml = (await calidadRes.text()).replace(/<!--.*?-->/g, "");
   assertCheck("CALIDAD", "Guards V1-V7: 0 violaciones críticas", calidadHtml.includes("Guards V1-V7") && calidadHtml.includes("0"));
 
-  // ─── MÓDULO 6: /DONAR ─────────────────────────────────────────────────────
+  // ─── MÓDULO 6: /DONAR — GRID COMPLETO (4 CARDS + 3 BULLETS CADA UNA) ───────
   console.log("\n6. MÓDULO DONACIONES Y PROYECTO ABIERTO (/donar)");
   const donarRes = await fetch("https://cambiometro.impulsacv.cl/donar", { headers });
   assertCheck("DONAR", "HTTP Status 200", donarRes.status === 200);
   const donarHtml = (await donarRes.text()).replace(/<!--.*?-->/g, "");
 
-  assertCheck("DONAR", "Crédito a Jorge Morgado", donarHtml.includes("Jorge Morgado"));
+  // Fila 1: Manifiesto Cívico + Por qué donar
+  assertCheck("DONAR", "Card 1: Manifiesto Cívico", donarHtml.includes("Manifiesto Cívico"));
+  assertCheck("DONAR", "Card 2: Card '¿Por qué apoyar?' / 'Por qué donar'", donarHtml.includes("¿Por qué apoyar?"));
+  assertCheck("DONAR", "Bullet 1: Independencia de infraestructura", donarHtml.includes("Independencia de infraestructura"));
+  assertCheck("DONAR", "Bullet 2: Nuevas fuentes oficiales", donarHtml.includes("Nuevas fuentes oficiales"));
+  assertCheck("DONAR", "Bullet 3: Tiempo de auditoría ciudadana", donarHtml.includes("Tiempo de auditoría ciudadana"));
+
+  // Fila 2: Créditos/Autoría + Apoya sin dinero
+  assertCheck("DONAR", "Card 3: Créditos y Autoría (Jorge Morgado)", donarHtml.includes("Autoría y Desarrollo") && donarHtml.includes("Jorge Morgado"));
   assertCheck("DONAR", "Enlace a LinkedIn de Jorge Morgado", donarHtml.includes("https://www.linkedin.com/in/jorge-morgado/"));
+  assertCheck("DONAR", "Card 4: Card '¿Cómo apoyar sin dinero?'", donarHtml.includes("¿Cómo apoyar sin dinero?"));
+  assertCheck("DONAR", "Bullet 4: Difundir el sitio", donarHtml.includes("Difundir el sitio"));
+  assertCheck("DONAR", "Bullet 5: Reportar errores de datos", donarHtml.includes("Reportar errores de datos") || donarHtml.includes("Reportar discrepancias"));
+  assertCheck("DONAR", "Bullet 6: Proponer fuentes públicas", donarHtml.includes("Proponer fuentes públicas"));
+
+  // Restricciones de contacto
   assertCheck("DONAR", "Sin enlaces de email (mailto:)", !donarHtml.includes("mailto:"));
   assertCheck("DONAR", "Sin formularios de contacto", !donarHtml.includes("<form") && !donarHtml.includes("form-group"));
-  assertCheck("DONAR", "Manifiesto cívico de datos abiertos e independencia", donarHtml.includes("Datos públicos") || donarHtml.includes("Independencia") || donarHtml.includes("Código Abierto"));
+
+  // ─── MÓDULO 7: CHECK DE LAYOUT SIN ESPACIO MUERTO LATERAL ───────────────────
+  console.log("\n7. MÓDULO ANCHO COMPLETO / SIN ESPACIO MUERTO (/donar, /cruces, /transferencias, /)");
+  assertCheck("LAYOUT", "/donar sin maxWidth restrictivo (<800px)", !donarHtml.includes("max-width: 780px") && !donarHtml.includes("max-width: 680px"));
+  assertCheck("LAYOUT", "/cruces con container-main", crucesHtml.includes("container-main"));
+  assertCheck("LAYOUT", "/transferencias con container-main", transfHtml.includes("container-main"));
+  assertCheck("LAYOUT", "Home con container-main", homeHtml.includes("container-main"));
 
   // ─── RESUMEN FINAL ─────────────────────────────────────────────────────────
   console.log("\n================================================================================");

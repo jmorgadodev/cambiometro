@@ -1,4 +1,3 @@
-export const dynamic = 'force-dynamic';
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
@@ -6,24 +5,27 @@ import { Suspense } from "react";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
 import SiteHeader from "@/components/SiteHeader";
 import PageEntrance from "@/components/PageEntrance";
-import CookieConsent, { CookiePreferencesButton } from "@/components/CookieConsent";
-import NavigationProgressBar from "@/components/NavigationProgressBar";
 import RouteTransitionOrb from "@/components/RouteTransitionOrb";
+import NavigationProgressBar from "@/components/NavigationProgressBar";
+import CookieConsent, { CookiePreferencesButton } from "@/components/CookieConsent";
 import { getDataPlatformSummary } from "@/lib/data-platform-d1";
 import "./globals.css";
 
-const inter = Inter({ subsets: ["latin"], variable: "--font-inter", display: "swap" });
+const inter = Inter({
+  variable: "--font-sans",
+  subsets: ["latin"],
+  display: "swap",
+});
+
 const ibmPlexMono = IBM_Plex_Mono({
   weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
   variable: "--font-mono",
+  subsets: ["latin"],
   display: "swap",
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://cambiometro.impulsacv.cl"),
-  applicationName: "El Cambiómetro",
-  category: "government data",
+  metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://cambiometro.impulsacv.cl"),
   title: {
     default: "El Cambiómetro — Datos públicos con trazabilidad",
     template: "%s | El Cambiómetro",
@@ -68,17 +70,6 @@ export const metadata: Metadata = {
 
 const FOOTER_GROUPS = [
   {
-    title: "Explorar",
-    links: [
-      ["Análisis Parlamentario", "/politico"],
-      ["Partidos Políticos", "/partidos"],
-      ["Directorio de Personas", "/personas"],
-      ["Municipalidades", "/municipalidades"],
-      ["Funcionarios", "/funcionarios"],
-      ["Servicios públicos", "/servicios-publicos"],
-    ],
-  },
-  {
     title: "Herramientas",
     links: [
       ["Cruces de datos", "/cruces"],
@@ -98,12 +89,35 @@ const FOOTER_GROUPS = [
       ["Cómo usamos los datos", "/como-funciona"],
       ["Política de Privacidad", "/privacidad"],
       ["Donar y apoyar", "/donar"],
-      ["Instagram @cambiometro", "https://www.instagram.com/cambiometro/"],
-      ["𝕏 Twitter / X @cambiometro", "https://x.com/cambiometro"],
-      ["ImpulsaCV", "https://impulsacv.cl"],
     ],
   },
 ] as const;
+
+function InstagramIcon({ size = 15 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <rect width="20" height="20" x="2" y="2" rx="5" ry="5" />
+      <path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z" />
+      <line x1="17.5" x2="17.51" y1="6.5" y2="6.5" />
+    </svg>
+  );
+}
+
+function XIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+    </svg>
+  );
+}
+
+function LinkedInIcon({ size = 15 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M19 3a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h14m-.5 15.5v-5.3a3.26 3.26 0 0 0-3.26-3.26c-.85 0-1.84.52-2.28 1.3v-1.11h-2.79v8.37h2.79v-4.93c0-.77.62-1.4 1.39-1.4a1.4 1.4 0 0 1 1.4 1.4v4.93h2.75M6.46 10.9v7.6H9.2v-7.6H6.46M7.83 6.64a1.66 1.66 0 0 0-1.66 1.66 1.66 1.66 0 0 0 1.66 1.66 1.66 1.66 0 0 0 1.66-1.66z" />
+    </svg>
+  );
+}
 
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
 
@@ -180,21 +194,9 @@ function Footer({ updatedAt, totalRecords }: { updatedAt: string | null; totalRe
             <ul className="site-footer__list">
               {group.links.map(([label, href]) => (
                 <li key={href}>
-                  {href.startsWith("http") ? (
-                    <a
-                      href={href}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="site-footer__link"
-                    >
-                      <span>{label}</span>
-                      <span aria-hidden="true" style={{ fontSize: "0.75rem", opacity: 0.7 }}>↗</span>
-                    </a>
-                  ) : (
-                    <Link href={href} className="site-footer__link">
-                      {label}
-                    </Link>
-                  )}
+                  <Link href={href} className="site-footer__link">
+                    {label}
+                  </Link>
                 </li>
               ))}
             </ul>
@@ -206,14 +208,17 @@ function Footer({ updatedAt, totalRecords }: { updatedAt: string | null; totalRe
         <div className="container-main site-footer__legal">
           <span>© 2026 El Cambiómetro · Información pública verificada</span>
           <span className="site-footer__legal-links">
-            <span>
+            <span style={{ display: "inline-flex", alignItems: "center", gap: "0.35rem" }}>
               Creado por{" "}
               <a
                 href="https://www.linkedin.com/in/jorge-morgado/"
                 target="_blank"
                 rel="noopener noreferrer"
+                aria-label="LinkedIn de Jorge Morgado"
+                style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
               >
-                Jorge Morgado ↗
+                Jorge Morgado
+                <LinkedInIcon size={14} />
               </a>
             </span>
             <span className="site-footer__dot" aria-hidden="true">
@@ -228,13 +233,27 @@ function Footer({ updatedAt, totalRecords }: { updatedAt: string | null; totalRe
             <span className="site-footer__dot" aria-hidden="true">
               ·
             </span>
-            <a href="https://www.instagram.com/cambiometro/" target="_blank" rel="noopener noreferrer">
-              Instagram @cambiometro
+            <a
+              href="https://www.instagram.com/cambiometro/"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Instagram @cambiometro"
+              style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
+            >
+              <InstagramIcon size={14} />
+              Instagram
             </a>
             <span className="site-footer__dot" aria-hidden="true">
               ·
             </span>
-            <a href="https://x.com/cambiometro" target="_blank" rel="noopener noreferrer">
+            <a
+              href="https://x.com/cambiometro"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="𝕏 Twitter / X @cambiometro"
+              style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
+            >
+              <XIcon size={13} />
               𝕏 @cambiometro
             </a>
             <span className="site-footer__dot" aria-hidden="true">

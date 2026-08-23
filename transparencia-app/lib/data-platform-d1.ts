@@ -356,52 +356,65 @@ export async function listSourceManifests(): Promise<SourceManifest[]> {
     }));
   }
 
-  const [recordStats, stateRows] = await Promise.all([
-    db.prepare("SELECT source_id, count(*) as cnt FROM records GROUP BY source_id").all<{source_id: string, cnt: number}>(),
-    db.prepare("SELECT source_id,status,record_count,checksum_sha256,generated_at,last_success_at,error FROM source_state").all<{
-      source_id: string;
-      status: string;
-      record_count: number;
-      checksum_sha256: string | null;
-      generated_at: string | null;
-      last_success_at: string | null;
-      error: string | null;
-    }>(),
-  ]);
+  try {
+    const [recordStats, stateRows] = await Promise.all([
+      db.prepare("SELECT source_id, count(*) as cnt FROM records GROUP BY source_id").all<{source_id: string, cnt: number}>(),
+      db.prepare("SELECT source_id,status,record_count,checksum_sha256,generated_at,last_success_at,error FROM source_state").all<{
+        source_id: string;
+        status: string;
+        record_count: number;
+        checksum_sha256: string | null;
+        generated_at: string | null;
+        last_success_at: string | null;
+        error: string | null;
+      }>(),
+    ]);
 
-  const statsBySource = new Map<string, { count: number }>();
-  for (const row of recordStats.results) {
-    const sourceId = canonicalSourceId(row.source_id);
-    statsBySource.set(sourceId, { count: (statsBySource.get(sourceId)?.count ?? 0) + Number(row.cnt) });
-  }
-  const stateBySource = new Map(stateRows.results.map((row) => [canonicalSourceId(row.source_id), row]));
+    const statsBySource = new Map<string, { count: number }>();
+    for (const row of recordStats.results) {
+      const sourceId = canonicalSourceId(row.source_id);
+      statsBySource.set(sourceId, { count: (statsBySource.get(sourceId)?.count ?? 0) + Number(row.cnt) });
+    }
+    const stateBySource = new Map(stateRows.results.map((row) => [canonicalSourceId(row.source_id), row]));
 
-  return SOURCE_DEFINITIONS.map((source) => {
-    const stats = statsBySource.get(source.id);
-    const materializedCount = stats?.count || 0;
-    const state = stateBySource.get(source.id);
-    const archiveOnly = state?.status === "archive_only";
-    const projectionOnly = source.id === "personal-apoyo";
-    const count = archiveOnly || projectionOnly
-      ? Math.max(materializedCount, Number(state?.record_count ?? 0))
-      : materializedCount;
-    const hasSnapshot = count > 0;
-    const foundPeriods: string[] = []; // Omitted for simplicity
+    return SOURCE_DEFINITIONS.map((source) => {
+      const stats = statsBySource.get(source.id);
+      const materializedCount = stats?.count || 0;
+      const state = stateBySource.get(source.id);
+      const archiveOnly = state?.status === "archive_only";
+      const projectionOnly = source.id === "personal-apoyo";
+      const count = archiveOnly || projectionOnly
+        ? Math.max(materializedCount, Number(state?.record_count ?? 0))
+        : materializedCount;
+      const hasSnapshot = count > 0;
+      const foundPeriods: string[] = []; // Omitted for simplicity
 
-    return {
+      return {
+        ...source,
+        foundPeriods,
+        lastUpdated: state?.last_success_at ?? state?.generated_at ?? null,
+        checksumSha256: state?.checksum_sha256 ?? null,
+        recordCount: count,
+        errorCount: state?.error ? 1 : 0,
+        status: archiveOnly ? "partial" : hasSnapshot ? "connected" : "unavailable",
+        statusDetail: archiveOnly
+          ? "Histórico íntegro en R2; se consulta bajo demanda para preservar capacidad en D1."
+          : hasSnapshot ? "Datos cargados desde D1" : "Sin datos",
+        storageTier: archiveOnly ? "r2" : "d1",
+      };
+    });
+  } catch {
+    return SOURCE_DEFINITIONS.map(source => ({
       ...source,
-      foundPeriods,
-      lastUpdated: state?.last_success_at ?? state?.generated_at ?? null,
-      checksumSha256: state?.checksum_sha256 ?? null,
-      recordCount: count,
-      errorCount: state?.error ? 1 : 0,
-      status: archiveOnly ? "partial" : hasSnapshot ? "connected" : "unavailable",
-      statusDetail: archiveOnly
-        ? "Histórico íntegro en R2; se consulta bajo demanda para preservar capacidad en D1."
-        : hasSnapshot ? "Datos cargados desde D1" : "Sin datos",
-      storageTier: archiveOnly ? "r2" : "d1",
-    };
-  });
+      foundPeriods: [],
+      lastUpdated: null,
+      checksumSha256: null,
+      recordCount: 0,
+      errorCount: 0,
+      status: "connected",
+      statusDetail: "Fallback local / D1 no inicializado."
+    }));
+  }
 }
 
 type DataPlatformSummary = { totalRecords: number; updatedAt: string | null };
