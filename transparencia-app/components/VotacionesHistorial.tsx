@@ -507,10 +507,12 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                   padding: "0.85rem 0.5rem 0.25rem",
                   borderTop: "1px solid var(--border)",
                   marginTop: "0.5rem",
+                  width: "100%",
+                  boxSizing: "border-box",
                 }}
               >
                 {/* Selector de Filas por página */}
-                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.78rem", color: "var(--text-2)" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.78rem", color: "var(--text-2)", flexWrap: "wrap" }}>
                   <span>Filas por página:</span>
                   {[10, 25, 50].map((size) => {
                     const isActive = pageSize === size;
@@ -538,15 +540,15 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                 </div>
 
                 {/* Controles de navegación */}
-                <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-                  <div style={{ display: "flex", gap: "0.35rem" }}>
+                <div style={{ display: "flex", gap: "0.4rem", alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
+                  <div style={{ display: "flex", gap: "0.25rem" }}>
                     <button
                       type="button"
                       onClick={() => setPage(1)}
                       disabled={currentPage <= 1}
                       style={{
-                        padding: "0.35rem 0.65rem",
-                        fontSize: "0.75rem",
+                        padding: "0.3rem 0.55rem",
+                        fontSize: "0.72rem",
                         background: "var(--surface-2)",
                         border: "1px solid var(--border)",
                         borderRadius: 6,
@@ -562,8 +564,8 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                       onClick={() => setPage((p) => Math.max(1, p - 1))}
                       disabled={currentPage <= 1}
                       style={{
-                        padding: "0.35rem 0.65rem",
-                        fontSize: "0.75rem",
+                        padding: "0.3rem 0.55rem",
+                        fontSize: "0.72rem",
                         background: "var(--surface-2)",
                         border: "1px solid var(--border)",
                         borderRadius: 6,
@@ -572,22 +574,22 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                       }}
                       title="Página anterior"
                     >
-                      ‹ Anterior
+                      ‹ Ant.
                     </button>
                   </div>
 
-                  <span style={{ fontSize: "0.78rem", color: "var(--text-2)", fontWeight: 700 }}>
-                    Página {currentPage} de {totalPages} ({filtradas.length} total)
+                  <span style={{ fontSize: "0.74rem", color: "var(--text-2)", fontWeight: 700, textAlign: "center" }}>
+                    {currentPage} / {totalPages} ({filtradas.length})
                   </span>
 
-                  <div style={{ display: "flex", gap: "0.35rem" }}>
+                  <div style={{ display: "flex", gap: "0.25rem" }}>
                     <button
                       type="button"
                       onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
                       disabled={currentPage >= totalPages}
                       style={{
-                        padding: "0.35rem 0.65rem",
-                        fontSize: "0.75rem",
+                        padding: "0.3rem 0.55rem",
+                        fontSize: "0.72rem",
                         background: "var(--surface-2)",
                         border: "1px solid var(--border)",
                         borderRadius: 6,
@@ -596,15 +598,15 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                       }}
                       title="Página siguiente"
                     >
-                      Siguiente ›
+                      Sig. ›
                     </button>
                     <button
                       type="button"
                       onClick={() => setPage(totalPages)}
                       disabled={currentPage >= totalPages}
                       style={{
-                        padding: "0.35rem 0.65rem",
-                        fontSize: "0.75rem",
+                        padding: "0.3rem 0.55rem",
+                        fontSize: "0.72rem",
                         background: "var(--surface-2)",
                         border: "1px solid var(--border)",
                         borderRadius: 6,
