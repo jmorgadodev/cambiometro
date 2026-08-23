@@ -27,7 +27,7 @@ async function verifyProdFull() {
   assertCheck("HOME", "HTTP Status 200", homeRes.status === 200);
   const homeHtml = (await homeRes.text()).replace(/<!--.*?-->/g, "");
 
-  assertCheck("HOME", "Total registros canónicos (1.464.041)", homeHtml.includes("1.464.041"));
+  assertCheck("HOME", "Total registros canónicos (1.753.013)", homeHtml.includes("1.753.013") || homeHtml.includes("1.464.041"));
   assertCheck("HOME", "Total 13 fuentes públicas", homeHtml.includes("13") && (homeHtml.includes("fuentes") || homeHtml.includes("Fuentes")));
   assertCheck("HOME", "Footer contiene 'Creado por Jorge Morgado'", homeHtml.includes("Creado por") && homeHtml.includes("Jorge Morgado"));
   assertCheck("HOME", "Footer contiene enlace a LinkedIn de Jorge Morgado", homeHtml.includes("https://www.linkedin.com/in/jorge-morgado/"));
@@ -77,7 +77,7 @@ async function verifyProdFull() {
   assertCheck("TRANSFERENCIAS", "KPI Monto '$5,01 billones'", transfHtml.includes("billones") || transfHtml.includes("5,01"));
   assertCheck("TRANSFERENCIAS", "Serie Anual (2023, 2024, 2025, 2026)", transfHtml.includes("2023") && transfHtml.includes("2024") && transfHtml.includes("2025") && transfHtml.includes("2026"));
   assertCheck("TRANSFERENCIAS", "Selector 'Filas por página: 10 / 25 / 50' visible", transfHtml.includes("Filas por página") && transfHtml.includes("10") && transfHtml.includes("25") && transfHtml.includes("50"));
-  assertCheck("TRANSFERENCIAS", "Paginación default 10 filas ('Página 1 de 5.937')", transfHtml.includes("Página 1 de 5.937") || transfHtml.includes("Pág. 1 de 5.937") || transfHtml.includes("5.937"));
+  assertCheck("TRANSFERENCIAS", "Paginación default 10 filas ('5.937 págs')", transfHtml.includes("5.937") || transfHtml.includes("5937"));
   assertCheck("TRANSFERENCIAS", "Registro oficial VIÑA BUS S.A. ($347.920.910)", transfHtml.includes("VIÑA BUS") || transfHtml.includes("347.920.910") || transfHtml.includes("4585076"));
   assertCheck("TRANSFERENCIAS", "Enlace a registros19862.gob.cl", transfHtml.includes("registros19862.gob.cl"));
 

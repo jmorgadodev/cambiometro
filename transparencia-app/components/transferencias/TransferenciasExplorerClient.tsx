@@ -605,7 +605,7 @@ export default function TransferenciasExplorerClient({
               </Link>
             </div>
             <div style={{ fontWeight: 600, color: "var(--text-1)", fontSize: "0.78rem" }}>
-              Pág. {page} de {totalPages}
+              Pág. {page} de {fmtNum(totalPages)}
             </div>
           </div>
 
@@ -748,7 +748,7 @@ export default function TransferenciasExplorerClient({
             }}
           >
             <span>
-              Mostrando {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} de <strong>{fmtNum(total)}</strong> transferencias · página {page} de {totalPages}
+              Mostrando {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} de <strong>{fmtNum(total)}</strong> transferencias · página {page} de {fmtNum(totalPages)}
             </span>
             {isLoading && (
               <span style={{ color: "var(--accent)", fontWeight: 600 }}>Cargando transferencias...</span>
@@ -960,7 +960,7 @@ export default function TransferenciasExplorerClient({
                 </div>
 
                 <span style={{ fontSize: "0.78rem", color: "var(--text-2)", fontWeight: 700 }}>
-                  Página {page} de {totalPages}
+                  Página {page} de {fmtNum(totalPages)}
                 </span>
 
                 <div style={{ display: "flex", gap: "0.35rem" }}>
