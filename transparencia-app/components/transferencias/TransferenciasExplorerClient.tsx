@@ -21,6 +21,7 @@ interface Props {
   initialTotal: number;
   initialTotalPages: number;
   initialPage?: number;
+  initialPageSize?: number;
   initialQuery?: string;
   initialYear?: string;
   initialEmisor?: string;
@@ -60,7 +61,8 @@ function fmtDate(fecha: string | null): string {
   return fecha;
 }
 
-const ITEMS_PER_PAGE = 50;
+const DEFAULT_PAGE_SIZE = 10;
+const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 
 export default function TransferenciasExplorerClient({
   kpis,
@@ -71,6 +73,7 @@ export default function TransferenciasExplorerClient({
   initialTotal,
   initialTotalPages,
   initialPage = 1,
+  initialPageSize = DEFAULT_PAGE_SIZE,
   initialQuery = "",
   initialYear = "Todos",
   initialEmisor = "Todos",
@@ -81,6 +84,14 @@ export default function TransferenciasExplorerClient({
   const [emisorFilter, setEmisorFilter] = useState(initialEmisor);
   const [sortBy, setSortBy] = useState<"monto" | "fecha">("monto");
   const [page, setPage] = useState(initialPage);
+  const [pageSize, setPageSize] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const sp = new URLSearchParams(window.location.search);
+      const r = Number(sp.get("rows"));
+      if (r === 25 || r === 50 || r === 10) return r;
+    }
+    return initialPageSize;
+  });
 
   const [transfers, setTransfers] = useState<TransferenciaDetalle[]>(initialTransfers);
   const [total, setTotal] = useState<number>(initialTotal);
@@ -111,7 +122,7 @@ export default function TransferenciasExplorerClient({
       try {
         const params = new URLSearchParams({
           page: String(page),
-          limit: String(ITEMS_PER_PAGE),
+          limit: String(pageSize),
           sort: sortBy,
           order: "desc",
         });
@@ -141,7 +152,21 @@ export default function TransferenciasExplorerClient({
       controller.abort();
       clearTimeout(timeoutId);
     };
-  }, [page, search, yearFilter, emisorFilter, sortBy]);
+  }, [page, pageSize, search, yearFilter, emisorFilter, sortBy]);
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPage(1);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (newSize === DEFAULT_PAGE_SIZE) {
+        url.searchParams.delete("rows");
+      } else {
+        url.searchParams.set("rows", String(newSize));
+      }
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
 
   const handleSearchChange = (v: string) => {
     setSearch(v);
@@ -723,7 +748,7 @@ export default function TransferenciasExplorerClient({
             }}
           >
             <span>
-              Mostrando {(page - 1) * ITEMS_PER_PAGE + 1}–{Math.min(page * ITEMS_PER_PAGE, total)} de <strong>{fmtNum(total)}</strong> transferencias · página {page} de {totalPages}
+              Mostrando {(page - 1) * pageSize + 1}–{Math.min(page * pageSize, total)} de <strong>{fmtNum(total)}</strong> transferencias · página {page} de {totalPages}
             </span>
             {isLoading && (
               <span style={{ color: "var(--accent)", fontWeight: 600 }}>Cargando transferencias...</span>
@@ -853,97 +878,130 @@ export default function TransferenciasExplorerClient({
             </table>
           </div>
 
-          {/* Paginación */}
-          {totalPages > 1 && (
-            <div
-              style={{
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                marginTop: "1rem",
-                flexWrap: "wrap",
-                gap: "0.5rem",
-              }}
-            >
-              <div style={{ display: "flex", gap: "0.35rem" }}>
-                <button
-                  type="button"
-                  onClick={() => setPage(1)}
-                  disabled={page <= 1}
-                  style={{
-                    padding: "0.35rem 0.65rem",
-                    fontSize: "0.75rem",
-                    background: "var(--surface-2)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 6,
-                    color: page <= 1 ? "var(--text-3)" : "var(--text-1)",
-                    cursor: page <= 1 ? "not-allowed" : "pointer",
-                  }}
-                  title="Primera página"
-                >
-                  « Primera
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  disabled={page <= 1}
-                  style={{
-                    padding: "0.35rem 0.65rem",
-                    fontSize: "0.75rem",
-                    background: "var(--surface-2)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 6,
-                    color: page <= 1 ? "var(--text-3)" : "var(--text-1)",
-                    cursor: page <= 1 ? "not-allowed" : "pointer",
-                  }}
-                  title="Página anterior"
-                >
-                  ‹ Anterior
-                </button>
-              </div>
-
-              <span style={{ fontSize: "0.78rem", color: "var(--text-2)", fontWeight: 700 }}>
-                Página {page} de {totalPages}
-              </span>
-
-              <div style={{ display: "flex", gap: "0.35rem" }}>
-                <button
-                  type="button"
-                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={page >= totalPages}
-                  style={{
-                    padding: "0.35rem 0.65rem",
-                    fontSize: "0.75rem",
-                    background: "var(--surface-2)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 6,
-                    color: page >= totalPages ? "var(--text-3)" : "var(--text-1)",
-                    cursor: page >= totalPages ? "not-allowed" : "pointer",
-                  }}
-                  title="Página siguiente"
-                >
-                  Siguiente ›
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setPage(totalPages)}
-                  disabled={page >= totalPages}
-                  style={{
-                    padding: "0.35rem 0.65rem",
-                    fontSize: "0.75rem",
-                    background: "var(--surface-2)",
-                    border: "1px solid var(--border)",
-                    borderRadius: 6,
-                    color: page >= totalPages ? "var(--text-3)" : "var(--text-1)",
-                    cursor: page >= totalPages ? "not-allowed" : "pointer",
-                  }}
-                  title="Última página"
-                >
-                  Última »
-                </button>
-              </div>
+          {/* Paginación y Selector de Filas */}
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              marginTop: "1rem",
+              flexWrap: "wrap",
+              gap: "0.75rem",
+              borderTop: "1px solid var(--border)",
+              paddingTop: "1rem",
+            }}
+          >
+            {/* Izquierda: Selector de Filas por página (10 / 25 / 50) */}
+            <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.75rem", color: "var(--text-3)" }}>
+              <span style={{ fontWeight: 600 }}>Filas por página:</span>
+              {PAGE_SIZE_OPTIONS.map((size) => {
+                const isActive = pageSize === size;
+                return (
+                  <button
+                    key={size}
+                    type="button"
+                    onClick={() => handlePageSizeChange(size)}
+                    style={{
+                      padding: "0.2rem 0.55rem",
+                      fontSize: "0.75rem",
+                      fontWeight: isActive ? 800 : 500,
+                      borderRadius: 6,
+                      border: `1px solid ${isActive ? "var(--accent)" : "var(--border)"}`,
+                      background: isActive ? "var(--accent)" : "var(--surface-2)",
+                      color: isActive ? "var(--bg)" : "var(--text-2)",
+                      cursor: "pointer",
+                      transition: "all 0.15s ease",
+                    }}
+                  >
+                    {size}
+                  </button>
+                );
+              })}
             </div>
-          )}
+
+            {/* Derecha: Paginador («, ‹, Página X de Y, ›, ») */}
+            {totalPages > 1 && (
+              <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
+                <div style={{ display: "flex", gap: "0.35rem" }}>
+                  <button
+                    type="button"
+                    onClick={() => setPage(1)}
+                    disabled={page <= 1}
+                    style={{
+                      padding: "0.35rem 0.65rem",
+                      fontSize: "0.75rem",
+                      background: "var(--surface-2)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 6,
+                      color: page <= 1 ? "var(--text-3)" : "var(--text-1)",
+                      cursor: page <= 1 ? "not-allowed" : "pointer",
+                    }}
+                    title="Primera página"
+                  >
+                    « Primera
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPage((p) => Math.max(1, p - 1))}
+                    disabled={page <= 1}
+                    style={{
+                      padding: "0.35rem 0.65rem",
+                      fontSize: "0.75rem",
+                      background: "var(--surface-2)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 6,
+                      color: page <= 1 ? "var(--text-3)" : "var(--text-1)",
+                      cursor: page <= 1 ? "not-allowed" : "pointer",
+                    }}
+                    title="Página anterior"
+                  >
+                    ‹ Anterior
+                  </button>
+                </div>
+
+                <span style={{ fontSize: "0.78rem", color: "var(--text-2)", fontWeight: 700 }}>
+                  Página {page} de {totalPages}
+                </span>
+
+                <div style={{ display: "flex", gap: "0.35rem" }}>
+                  <button
+                    type="button"
+                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                    disabled={page >= totalPages}
+                    style={{
+                      padding: "0.35rem 0.65rem",
+                      fontSize: "0.75rem",
+                      background: "var(--surface-2)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 6,
+                      color: page >= totalPages ? "var(--text-3)" : "var(--text-1)",
+                      cursor: page >= totalPages ? "not-allowed" : "pointer",
+                    }}
+                    title="Página siguiente"
+                  >
+                    Siguiente ›
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setPage(totalPages)}
+                    disabled={page >= totalPages}
+                    style={{
+                      padding: "0.35rem 0.65rem",
+                      fontSize: "0.75rem",
+                      background: "var(--surface-2)",
+                      border: "1px solid var(--border)",
+                      borderRadius: 6,
+                      color: page >= totalPages ? "var(--text-3)" : "var(--text-1)",
+                      cursor: page >= totalPages ? "not-allowed" : "pointer",
+                    }}
+                    title="Última página"
+                  >
+                    Última »
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* ═══ 3. NOTA METODOLÓGICA ══════════════════════════════════════════ */}

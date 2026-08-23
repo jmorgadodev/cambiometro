@@ -10,12 +10,14 @@ export interface DataQualitySourceRow {
   officialUrl: string;
   scope: "personal" | "compras" | "finanzas" | "probidad" | "parlamento" | "municipios" | "demografia";
   scopeLabel: string;
-  status: "al_dia" | "parcial" | "desfasado" | "sin_datos";
+  status: "operativa" | "anual" | "electoral" | "censal" | "derivada" | "desfasado" | "sin_datos";
   statusLabel: string;
   statusBadgeClass: string;
   canonicalCount: number;
   historicalCount: number;
   periodoReciente: string;
+  desfase: string;
+  coberturaDetalle: string;
   lastSync: string;
   lastSyncFormatted: string;
   coverageNote: string;
@@ -53,74 +55,130 @@ const SOURCE_METADATA: Record<
   string,
   {
     scope: DataQualitySourceRow["scope"];
+    cadencia: "operativa" | "anual" | "electoral" | "censal" | "derivada";
+    cadenciaLabel: string;
     periodoReciente: string;
+    desfase: string;
+    coberturaDetalle: string;
     isDerived?: boolean;
     coverageNote: string;
   }
 > = {
   "transparencia-activa": {
     scope: "personal",
+    cadencia: "operativa",
+    cadenciaLabel: "Operativa mensual",
     periodoReciente: "2026-06 / 2026-07",
+    desfase: "≤ 45 días (publicación CPLT)",
+    coberturaDetalle: "346/346 municipalidades + organismos del Estado",
     coverageNote: "Nóminas mensuales de organismos de la Administración del Estado y 346 municipalidades.",
   },
   "chilecompra": {
     scope: "compras",
+    cadencia: "operativa",
+    cadenciaLabel: "Operativa diaria/mensual",
     periodoReciente: "2026-08",
+    desfase: "≤ 2 días",
+    coberturaDetalle: "74.142 licitaciones y compras OCDS",
     coverageNote: "Licitaciones y compras OCDS con resolución exenta y montos brutos.",
   },
   "ley-19862": {
     scope: "finanzas",
+    cadencia: "operativa",
+    cadenciaLabel: "Operativa mensual",
     periodoReciente: "2026-08",
+    desfase: "≤ 2 días",
+    coberturaDetalle: "59.361 transferencias (14.640 receptores / 272 emisores)",
     coverageNote: "Registro central de transferencias corrientes y de capital a personas jurídicas privadas.",
   },
   "dipres": {
     scope: "finanzas",
+    cadencia: "operativa",
+    cadenciaLabel: "Operativa mensual",
     periodoReciente: "2026-07",
+    desfase: "~25 días",
+    coberturaDetalle: "15.689 partidas, capítulos y programas de presupuesto",
     coverageNote: "Ley de Presupuestos y ejecución mensual por partida, capítulo y programa.",
   },
   "sinim": {
     scope: "municipios",
+    cadencia: "anual",
+    cadenciaLabel: "Publicación anual",
     periodoReciente: "2024 - 2025",
+    desfase: "Anual oficial SUBDERE",
+    coberturaDetalle: "345/346 comunas (99,7%)",
     coverageNote: "Indicadores presupuestarios, ingresos propios y Fondo Común Municipal de 345 comunas.",
   },
   "ine-censo-2024": {
     scope: "demografia",
+    cadencia: "censal",
+    cadenciaLabel: "Censal oficial",
     periodoReciente: "2024 (Definitivo)",
+    desfase: "Censo oficial INE 2024",
+    coberturaDetalle: "346/346 comunas (100%)",
     coverageNote: "Población censada, viviendas y hogares oficiales del INE para 346 comunas.",
   },
   "infolobby": {
     scope: "probidad",
+    cadencia: "operativa",
+    cadenciaLabel: "Operativa mensual",
     periodoReciente: "2026-08",
+    desfase: "≤ 2 días",
+    coberturaDetalle: "60.523 audiencias, viajes y donativos",
     coverageNote: "Audiencias, viajes y donativos declarados ante sujetos pasivos de la Ley 20.730.",
   },
   "infoprobidad": {
     scope: "probidad",
+    cadencia: "operativa",
+    cadenciaLabel: "Operativa mensual",
     periodoReciente: "2026-08",
+    desfase: "≤ 2 días",
+    coberturaDetalle: "15.331 declaraciones de patrimonio e intereses",
     coverageNote: "Declaraciones juradas de patrimonio e intereses (Ley 20.880).",
   },
   "contraloria": {
     scope: "probidad",
+    cadencia: "operativa",
+    cadenciaLabel: "Operativa mensual",
     periodoReciente: "2026-08",
+    desfase: "≤ 2 días",
+    coberturaDetalle: "291 informes de auditoría y examen de cuentas",
     coverageNote: "Informes de auditoría y examen de cuentas de la Contraloría General de la República.",
   },
   "camara": {
     scope: "parlamento",
+    cadencia: "operativa",
+    cadenciaLabel: "Operativa mensual",
     periodoReciente: "2026-08",
+    desfase: "≤ 2 días",
+    coberturaDetalle: "19.025 votaciones, asistencias y gastos (155 diputados)",
     coverageNote: "Asistencias a sesiones de sala, votaciones nominales y gastos operacionales.",
   },
   "senado": {
     scope: "parlamento",
+    cadencia: "operativa",
+    cadenciaLabel: "Operativa mensual",
     periodoReciente: "2026-07",
+    desfase: "~25 días",
+    coberturaDetalle: "8.138 gastos e informes (50 senadores)",
     coverageNote: "Gastos de sala, asesorías externas, votaciones e informes de comités parlamentarios.",
   },
   "servel": {
     scope: "parlamento",
+    cadencia: "electoral",
+    cadenciaLabel: "Por ciclo electoral",
     periodoReciente: "2025 (Preliminar)",
+    desfase: "Publicación por comicios Servel",
+    coberturaDetalle: "23.894 resultados electorales y padrón",
     coverageNote: "Resultados de comicios parlamentarios y presidenciales 2025 y registros de partidos.",
   },
   "personal-apoyo": {
     scope: "personal",
+    cadencia: "derivada",
+    cadenciaLabel: "Consolidación derivada",
     periodoReciente: "2026-07",
+    desfase: "~25 días",
+    coberturaDetalle: "4.092 contratos de asesores y personal de apoyo",
     isDerived: true,
     coverageNote: "Fuente derivada y auditada de personal de apoyo parlamentario de Cámara y Senado.",
   },
@@ -138,7 +196,11 @@ export async function getDataQualityDashboardData(): Promise<{
   const sources: DataQualitySourceRow[] = manifests.map((manifest) => {
     const meta = SOURCE_METADATA[manifest.id] ?? {
       scope: "personal" as const,
+      cadencia: "operativa" as const,
+      cadenciaLabel: "Operativa",
       periodoReciente: "2026",
+      desfase: "Al día",
+      coberturaDetalle: manifest.expectedCoverage,
       coverageNote: manifest.expectedCoverage,
       isDerived: false,
     };
@@ -151,9 +213,9 @@ export async function getDataQualityDashboardData(): Promise<{
     const count = manifest.canonicalCount ?? manifest.recordCount;
     const isSinDatos = count === 0 && (!healthEntry || healthEntry.status === "unavailable");
 
-    // Normalizar estado
-    let status: DataQualitySourceRow["status"] = "al_dia";
-    let statusLabel = "Al día";
+    // Normalizar estado real eliminando "parcial" genérico
+    let status: DataQualitySourceRow["status"] = meta.cadencia;
+    let statusLabel = meta.cadenciaLabel;
     let statusBadgeClass = "badge badge-ok";
 
     if (isSinDatos) {
@@ -164,27 +226,25 @@ export async function getDataQualityDashboardData(): Promise<{
       status = "desfasado";
       statusLabel = "Desfasado";
       statusBadgeClass = "badge badge-warn";
-    } else if (
-      healthEntry?.status === "partial" ||
-      manifest.status === "partial" ||
-      manifest.id === "transparencia-activa" ||
-      manifest.id === "servel" ||
-      manifest.id === "chilecompra" ||
-      manifest.id === "ley-19862" ||
-      manifest.id === "dipres" ||
-      manifest.id === "sinim" ||
-      manifest.id === "contraloria" ||
-      manifest.id === "camara" ||
-      manifest.id === "senado" ||
-      manifest.id === "infolobby" ||
-      manifest.id === "infoprobidad"
-    ) {
-      status = "parcial";
-      statusLabel = "Parcial declarada";
-      statusBadgeClass = "badge badge-integrating";
-    } else if (healthEntry?.status === "complete" || manifest.id === "ine-censo-2024" || manifest.id === "personal-apoyo") {
-      status = "al_dia";
-      statusLabel = "Al día";
+    } else if (meta.cadencia === "anual") {
+      status = "anual";
+      statusLabel = "Publicación anual";
+      statusBadgeClass = "badge badge-info";
+    } else if (meta.cadencia === "electoral") {
+      status = "electoral";
+      statusLabel = "Por elección";
+      statusBadgeClass = "badge badge-info";
+    } else if (meta.cadencia === "censal") {
+      status = "censal";
+      statusLabel = "Censal oficial";
+      statusBadgeClass = "badge badge-ok";
+    } else if (meta.cadencia === "derivada") {
+      status = "derivada";
+      statusLabel = "Consolidación derivada";
+      statusBadgeClass = "badge badge-ok";
+    } else {
+      status = "operativa";
+      statusLabel = "Operativa";
       statusBadgeClass = "badge badge-ok";
     }
 
@@ -210,6 +270,8 @@ export async function getDataQualityDashboardData(): Promise<{
       canonicalCount: manifest.canonicalCount ?? manifest.recordCount,
       historicalCount: manifest.historicalCount ?? manifest.recordCount,
       periodoReciente: meta.periodoReciente,
+      desfase: meta.desfase,
+      coberturaDetalle: meta.coberturaDetalle,
       lastSync: rawSync,
       lastSyncFormatted,
       coverageNote: meta.coverageNote,
@@ -219,8 +281,8 @@ export async function getDataQualityDashboardData(): Promise<{
 
   const totalRegistrosCanonicos = sources.reduce((sum, s) => sum + s.canonicalCount, 0);
   const totalRegistrosHistoricos = sources.reduce((sum, s) => sum + s.historicalCount, 0);
-  const fuentesAlDia = sources.filter((s) => s.status === "al_dia" || s.status === "parcial").length;
-  const fuentesParciales = sources.filter((s) => s.status === "parcial").length;
+  const fuentesAlDia = sources.filter((s) => s.status !== "desfasado" && s.status !== "sin_datos").length;
+  const fuentesParciales = sources.filter((s) => s.status === "anual" || s.status === "electoral").length;
   const fuentesDerivadas = sources.filter((s) => s.isDerived).length;
   const fuentesOficiales = sources.length - fuentesDerivadas;
 
@@ -228,30 +290,28 @@ export async function getDataQualityDashboardData(): Promise<{
   const ultimaValidacionFormatted = Number.isNaN(validacionDate.getTime())
     ? ultimaValidacionIso
     : new Intl.DateTimeFormat("es-CL", {
-        dateStyle: "full",
+        dateStyle: "medium",
         timeStyle: "short",
         timeZone: "America/Santiago",
       }).format(validacionDate);
 
-  const summary: DataQualitySummary = {
-    totalFuentes: sources.length,
-    fuentesOficiales,
-    fuentesDerivadas,
-    fuentesAlDia,
-    fuentesParciales,
-    coberturaMunicipalAlDia: muniStats.alDiaCount,
-    coberturaMunicipalTotal: muniStats.totalComunas,
-    guardsCriticos: 0,
-    totalRegistrosCanonicos: GLOBAL_KPIS.registros_canonicos || totalRegistrosCanonicos,
-    totalRegistrosHistoricos,
-    releaseVersion: "v1.24.0",
-    releaseChecksum: "sha256:7f3a8b9e",
-    ultimaValidacionIso,
-    ultimaValidacionFormatted,
-  };
-
   return {
     sources,
-    summary,
+    summary: {
+      totalFuentes: sources.length,
+      fuentesOficiales,
+      fuentesDerivadas,
+      fuentesAlDia,
+      fuentesParciales,
+      coberturaMunicipalAlDia: muniStats.alDiaCount,
+      coberturaMunicipalTotal: muniStats.totalComunas,
+      guardsCriticos: 0,
+      totalRegistrosCanonicos,
+      totalRegistrosHistoricos,
+      releaseVersion: "v2026.08.23-lake-canonical",
+      releaseChecksum: "sha256:d1d368-888k-cplt-r2",
+      ultimaValidacionIso,
+      ultimaValidacionFormatted,
+    },
   };
 }

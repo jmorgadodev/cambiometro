@@ -23,8 +23,8 @@ export interface TransferenciasQueryResult {
 }
 
 export async function queryTransferencias(params: TransferenciaQueryParams = {}): Promise<TransferenciasQueryResult> {
+  const limit = Math.min(100, Math.max(1, Number(params.limit) || 10));
   const page = Math.max(1, Number(params.page) || 1);
-  const limit = Math.min(100, Math.max(1, Number(params.limit) || 50));
   const search = params.search?.trim() || "";
   const year = params.year?.trim() || "";
   const emisor = params.emisor?.trim() || "";

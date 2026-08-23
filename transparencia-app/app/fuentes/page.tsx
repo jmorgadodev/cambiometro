@@ -1,25 +1,17 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listPublishedSourceManifests } from "@/lib/published-sources";
+import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
 
 export const metadata: Metadata = {
   title: "Fuentes y versiones — El Cambiómetro",
   description:
     "Catálogo de fuentes oficiales del Estado de Chile consultadas por El Cambiómetro, con estado de actualización, períodos cubiertos y versión de la consolidación.",
-};
-
-const VERSION_FECHA = "19 de agosto de 2026";
-
-const STATUS_LABEL: Record<string, { label: string; className: string }> = {
-  connected: { label: "Conectada", className: "badge badge-ok" },
-  partial: { label: "Parcial", className: "badge badge-integrating" },
-  stale: { label: "Desactualizada", className: "badge" },
-  unavailable: { label: "No disponible", className: "badge" },
+  alternates: { canonical: "/fuentes" },
 };
 
 export default async function FuentesPage() {
-  const sources = await listPublishedSourceManifests();
+  const { sources, summary } = await getDataQualityDashboardData();
   const sorted = [...sources].sort((a, b) => a.organization.localeCompare(b.organization, "es"));
 
   return (
@@ -33,11 +25,11 @@ export default async function FuentesPage() {
             </h1>
             <p style={{ color: "var(--text-muted)", fontSize: "0.95rem", lineHeight: 1.6, maxWidth: 720, margin: 0 }}>
               Cada registro publicado por El Cambiómetro proviene de un portal oficial del Estado de Chile y mantiene
-              trazabilidad a su fuente. Esta página lista las fuentes integradas, su estado y la versión de la
-              consolidación vigente.
+              trazabilidad a su fuente. Esta página lista las fuentes integradas, su cadencia de actualización,
+              cobertura declarada y trazabilidad a la consolidación vigente.
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap", marginTop: "0.75rem" }}>
-              <span className="badge badge-ok" style={{ fontSize: "0.68rem" }}>Versión {VERSION_FECHA}</span>
+              <span className="badge badge-ok" style={{ fontSize: "0.68rem" }}>Versión {GLOBAL_KPIS.corte}</span>
               <Link className="data-link" href="/datos/calidad" style={{ fontSize: "0.82rem", fontWeight: 600 }}>
                 Dashboard de calidad →
               </Link>
@@ -46,7 +38,7 @@ export default async function FuentesPage() {
 
           <dl className="page-fact-sheet">
             <div>
-              <dt>Registros Oficiales</dt>
+              <dt>Registros Canónicos</dt>
               <dd>{GLOBAL_KPIS.registros_canonicos.toLocaleString("es-CL")}</dd>
             </div>
             <div>
@@ -68,64 +60,58 @@ export default async function FuentesPage() {
               Catálogo de fuentes integradas
             </h2>
             <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: 0 }}>
-              {sorted.length} fuentes ({GLOBAL_KPIS.fuentes_oficiales} oficiales + {GLOBAL_KPIS.fuentes_derivadas} derivada) con {GLOBAL_KPIS.registros_canonicos.toLocaleString("es-CL")} registros compilados.
+              {GLOBAL_KPIS.total_fuentes} fuentes ({GLOBAL_KPIS.fuentes_oficiales} oficiales + {GLOBAL_KPIS.fuentes_derivadas} derivada) con {summary.totalRegistrosCanonicos.toLocaleString("es-CL")} registros canónicos ({summary.totalRegistrosHistoricos.toLocaleString("es-CL")} históricos) compilados.
             </p>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 300px), 1fr))", gap: "1rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: "1rem" }}>
             {sorted.map((source) => {
-              const status = STATUS_LABEL[source.status] ?? { label: source.status, className: "badge" };
               return (
                 <article key={source.id} className="card" style={{ padding: "1.25rem 1.5rem", display: "flex", flexDirection: "column", gap: "0.5rem" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "0.75rem" }}>
                     <div>
-                      <h3 style={{ fontSize: "1rem", fontWeight: 700, margin: 0, color: "var(--text-primary)" }}>{source.label}</h3>
+                      <h3 style={{ fontSize: "1rem", fontWeight: 700, margin: 0, color: "var(--text-primary)" }}>{source.name}</h3>
                       <span style={{ fontSize: "0.72rem", color: "var(--text-subtle)" }}>{source.organization}</span>
                     </div>
-                    <span className={status.className} style={{ fontSize: "0.68rem", whiteSpace: "nowrap" }}>{status.label}</span>
+                    <span className={source.statusBadgeClass} style={{ fontSize: "0.68rem", whiteSpace: "nowrap" }}>
+                      {source.statusLabel}
+                    </span>
                   </div>
-                  <a href={source.url} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.75rem", color: "var(--accent)" }}>
+
+                  <a href={source.officialUrl} target="_blank" rel="noopener noreferrer" style={{ fontSize: "0.75rem", color: "var(--accent)" }}>
                     Portal oficial ↗
                   </a>
+
                   <dl style={{ margin: 0, display: "flex", flexDirection: "column", gap: "0.35rem", fontSize: "0.75rem" }}>
                     <div>
                       <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Registros: </dt>
                       <dd style={{ display: "inline", color: "var(--text-muted)" }}>
-                        Canónicos: {(source.canonicalCount ?? source.recordCount).toLocaleString("es-CL")} · Histórico: {(source.historicalCount ?? source.recordCount).toLocaleString("es-CL")}
+                        Canónicos: {source.canonicalCount.toLocaleString("es-CL")} · Histórico: {source.historicalCount.toLocaleString("es-CL")}
                       </dd>
                     </div>
                     <div style={{ fontSize: "0.7rem", color: "var(--text-subtle)", marginTop: "-0.15rem" }}>
                       Diferencia por deduplicación y cobertura declarada
                     </div>
                     <div>
-                      <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Cobertura: </dt>
-                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{source.expectedCoverage}</dd>
+                      <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Período reciente: </dt>
+                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{source.periodoReciente}</dd>
                     </div>
-                    {source.foundPeriods.length > 0 && (
-                      <div>
-                        <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Períodos: </dt>
-                        <dd style={{ display: "inline", color: "var(--text-muted)" }}>
-                          {source.foundPeriods.slice(0, 6).join(", ")}
-                          {source.foundPeriods.length > 6 ? ` (+${source.foundPeriods.length - 6})` : ""}
-                        </dd>
-                      </div>
-                    )}
-                    {source.lastUpdated && (
-                      <div>
-                        <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Última actualización: </dt>
-                        <dd style={{ display: "inline", color: "var(--text-muted)" }}>
-                          {new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(source.lastUpdated))}
-                        </dd>
-                      </div>
-                    )}
                     <div>
-                      <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Licencia: </dt>
-                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{source.license}</dd>
+                      <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Desfase / Frescura: </dt>
+                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{source.desfase}</dd>
+                    </div>
+                    <div>
+                      <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Cobertura: </dt>
+                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{source.coberturaDetalle}</dd>
+                    </div>
+                    <div>
+                      <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Última validación ETL: </dt>
+                      <dd style={{ display: "inline", color: "var(--text-muted)" }}>{source.lastSyncFormatted}</dd>
                     </div>
                   </dl>
-                  {source.statusDetail && (
-                    <p style={{ fontSize: "0.72rem", color: "var(--text-subtle)", lineHeight: 1.5, margin: 0 }}>
-                      {source.statusDetail}
+                  {source.coverageNote && (
+                    <p style={{ fontSize: "0.72rem", color: "var(--text-subtle)", lineHeight: 1.5, margin: "0.25rem 0 0 0" }}>
+                      {source.coverageNote}
                     </p>
                   )}
                 </article>
@@ -140,8 +126,9 @@ export default async function FuentesPage() {
             Cada extracción se valida contra el contrato de datos de la plataforma y se publica como una versión
             con checksum. La fecha de corte de la consolidación vigente es{" "}
             <strong style={{ color: "var(--text-primary)" }}>{GLOBAL_KPIS.corte}</strong>, y el detalle de las
-            proyecciones está disponible en <a href="/datos" style={{ color: "var(--accent)" }}>Datos</a> y{" "}
-            <a href="/como-funciona" style={{ color: "var(--accent)" }}>Metodología</a>.
+            proyecciones está disponible en <Link href="/datos" style={{ color: "var(--accent)" }}>Datos</Link>,{" "}
+            <Link href="/datos/calidad" style={{ color: "var(--accent)" }}>Dashboard de Calidad</Link> y{" "}
+            <Link href="/como-funciona" style={{ color: "var(--accent)" }}>Metodología</Link>.
           </p>
         </section>
       </div>

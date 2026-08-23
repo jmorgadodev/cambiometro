@@ -72,7 +72,7 @@ const FOOTER_GROUPS = [
     links: [
       ["Análisis Parlamentario", "/politico"],
       ["Partidos Políticos", "/partidos"],
-      ["Directorio de Personas", "/autoridades"],
+      ["Directorio de Personas", "/personas"],
       ["Municipalidades", "/municipalidades"],
       ["Funcionarios", "/funcionarios"],
       ["Servicios públicos", "/servicios-publicos"],
@@ -82,6 +82,7 @@ const FOOTER_GROUPS = [
     title: "Herramientas",
     links: [
       ["Cruces de datos", "/cruces"],
+      ["Transferencias Ley 19.862", "/transferencias"],
       ["Rankings", "/rankings"],
       ["Comparador", "/comparar"],
       ["Movimientos", "/movimientos"],
@@ -92,8 +93,9 @@ const FOOTER_GROUPS = [
     title: "Plataforma",
     links: [
       ["Fuentes oficiales", "/datos"],
-      ["Cómo usamos los datos", "/como-funciona"],
+      ["Dashboard de Calidad", "/datos/calidad"],
       ["Fuentes y versiones", "/fuentes"],
+      ["Cómo usamos los datos", "/como-funciona"],
       ["Política de Privacidad", "/privacidad"],
       ["Donar y apoyar", "/donar"],
       ["Instagram @cambiometro", "https://www.instagram.com/cambiometro/"],
@@ -205,7 +207,20 @@ function Footer({ updatedAt, totalRecords }: { updatedAt: string | null; totalRe
           <span>© 2026 El Cambiómetro · Información pública verificada</span>
           <span className="site-footer__legal-links">
             <span>
-              Desarrollado por{" "}
+              Creado por{" "}
+              <a
+                href="https://www.linkedin.com/in/jorge-morgado/"
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                Jorge Morgado ↗
+              </a>
+            </span>
+            <span className="site-footer__dot" aria-hidden="true">
+              ·
+            </span>
+            <span>
+              Impulsado por{" "}
               <a href="https://impulsacv.cl" target="_blank" rel="noopener noreferrer">
                 ImpulsaCV ↗
               </a>

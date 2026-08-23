@@ -39,9 +39,12 @@ describe("Footer y pulido móvil", () => {
     expect(cssContent).toContain("padding-block: 8px");
   });
 
-  it("barra final legal contiene © 2026, Información pública verificada, ImpulsaCV ↗, Instagram y X @cambiometro", () => {
+  it("barra final legal contiene © 2026, Información pública verificada, Creado por Jorge Morgado, ImpulsaCV ↗, Instagram y X @cambiometro", () => {
     expect(layoutContent).toContain("© 2026 El Cambiómetro · Información pública verificada");
-    expect(layoutContent).toContain("ImpulsaCV ↗");
+    expect(layoutContent).toContain("Creado por");
+    expect(layoutContent).toContain("Jorge Morgado");
+    expect(layoutContent).toContain("https://www.linkedin.com/in/jorge-morgado/");
+    expect(layoutContent).toContain("ImpulsaCV");
     expect(layoutContent).toContain("Instagram @cambiometro");
     expect(layoutContent).toContain("𝕏 @cambiometro");
     expect(layoutContent).toContain("https://impulsacv.cl");

@@ -76,10 +76,18 @@ describe("Fixture de Referencia Oficial — Transferencias Ley 19.862", () => {
     expect(t4585079?.url).toBe("https://registros19862.gob.cl/transferencia/4585079");
   });
 
-  it("4. Paginación de 50 filas e interactividad de la serie anual", () => {
-    expect(explorerSource).toContain("ITEMS_PER_PAGE = 50");
+  it("4. Paginación default 10 filas, selector 10/25/50 y serie anual", async () => {
+    expect(explorerSource).toContain("DEFAULT_PAGE_SIZE = 10");
+    expect(explorerSource).toContain("PAGE_SIZE_OPTIONS = [10, 25, 50]");
+    expect(explorerSource).toContain("handlePageSizeChange");
     expect(explorerSource).toContain("Serie Anual de Transferencias (2023–2026)");
     expect(explorerSource).toContain("handleYearChange");
     expect(explorerSource).toContain("handleSortChange");
+
+    const res10 = await queryTransferencias({ limit: 10 });
+    expect(res10.totalPages).toBeGreaterThanOrEqual(5930);
+
+    const res50 = await queryTransferencias({ limit: 50 });
+    expect(res50.totalPages).toBeGreaterThanOrEqual(1187);
   });
 });

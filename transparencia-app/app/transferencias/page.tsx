@@ -27,14 +27,17 @@ export const metadata: Metadata = {
 export default async function TransferenciasPage({
   searchParams,
 }: {
-  searchParams?: Promise<{ q?: string; year?: string; emisor?: string; page?: string }>;
+  searchParams?: Promise<{ q?: string; year?: string; emisor?: string; page?: string; rows?: string }>;
 }) {
   const params = searchParams ? await searchParams : {};
   const summary = getLey19862Summary();
 
+  const rowsParam = Number(params.rows);
+  const initialRowsPerPage = rowsParam === 25 || rowsParam === 50 ? rowsParam : 10;
+
   const queryResult = await queryTransferencias({
     page: Number(params.page) || 1,
-    limit: 50,
+    limit: initialRowsPerPage,
     search: params.q || "",
     year: params.year || "",
     emisor: params.emisor || "",
@@ -52,6 +55,7 @@ export default async function TransferenciasPage({
       initialTotal={queryResult.total}
       initialTotalPages={queryResult.totalPages}
       initialPage={queryResult.page}
+      initialPageSize={initialRowsPerPage}
       initialQuery={params.q || ""}
       initialYear={params.year || "Todos"}
       initialEmisor={params.emisor || "Todos"}
