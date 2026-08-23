@@ -46,14 +46,19 @@ export interface PartidoEstadistica {
 let cached: Record<string, PartidoEstadistica> | null = null;
 let cachedPromise: Promise<Record<string, PartidoEstadistica> | null> | null = null;
 
-export async function getPartidoEstadisticas(partidoId: string): Promise<PartidoEstadistica | null> {
-  const normId = normalizePartidoId(partidoId);
+export async function getAllPartidosStats(): Promise<Record<string, PartidoEstadistica>> {
   if (!cached) {
     cachedPromise ??= getKvCache<Record<string, PartidoEstadistica>>("partidos-stats.json");
     const kvData = await cachedPromise;
     cached = kvData || (PARTIDOS_STATS_FALLBACK as unknown as Record<string, PartidoEstadistica>);
   }
-  return cached?.[normId] ?? (PARTIDOS_STATS_FALLBACK as Record<string, unknown>)[normId] as PartidoEstadistica ?? null;
+  return cached ?? (PARTIDOS_STATS_FALLBACK as unknown as Record<string, PartidoEstadistica>);
+}
+
+export async function getPartidoEstadisticas(partidoId: string): Promise<PartidoEstadistica | null> {
+  const normId = normalizePartidoId(partidoId);
+  const all = await getAllPartidosStats();
+  return all?.[normId] ?? (PARTIDOS_STATS_FALLBACK as Record<string, unknown>)[normId] as PartidoEstadistica ?? null;
 }
 
 export function normalizePartidoId(id: string): string {
@@ -271,14 +276,24 @@ export async function getAllPartidosSummary(): Promise<PartidoResumenCompleto[]>
     return pols.length > 0;
   });
 
+  const allStats = await getAllPartidosStats();
+
   const res: PartidoResumenCompleto[] = await Promise.all(
     partidosConRepresentacion.map(async (partido) => {
+      const normId = normalizePartidoId(partido.id);
+      const stats = allStats?.[normId] ?? (PARTIDOS_STATS_FALLBACK as Record<string, unknown>)[normId] as PartidoEstadistica ?? null;
       const escaños = escañosDelPartido(partido.id);
-      const votosCamara = await resumenVotosPartido(partido.id, "votaciones_camara");
-      const votosSenado = await resumenVotosPartido(partido.id, "votaciones_senado");
-      const gastos = await gastosDelPartido(partido.id);
+      const votosCamara = stats?.votosCamara ?? {
+        afirmativo: 0, enContra: 0, abstencion: 0, noVota: 0, dispensado: 0, apariciones: 0, emitidos: 0, asistencia: 0, pctSi: 0, pctNo: 0, pctAbst: 0, pctNoVota: 0
+      };
+      const votosSenado = stats?.votosSenado ?? {
+        afirmativo: 0, enContra: 0, abstencion: 0, noVota: 0, dispensado: 0, apariciones: 0, emitidos: 0, asistencia: 0, pctSi: 0, pctNo: 0, pctAbst: 0, pctNoVota: 0
+      };
+      const gastos = stats?.gastos ?? { total: 0, porMes: [], porItem: [], porPolitico: [] };
+      const disciplina = stats?.disciplina ?? {
+        totalVotosConscientes: 0, totalVotosCoincidentes: 0, totalVotosRebeldes: 0, pctDisciplina: null, pctRebelion: null, topVotosRebeldes: []
+      };
       const apoyo = await personalApoyoDelPartido(partido.id);
-      const disciplina = await disciplinaDelPartido(partido.id);
 
       const emitidosCamara = votosCamara.emitidos || 0;
       const emitidosSenado = votosSenado.emitidos || 0;
