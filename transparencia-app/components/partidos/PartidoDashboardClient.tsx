@@ -453,12 +453,12 @@ export default function PartidoDashboardClient({
         {/* Principales ítems de gasto en Title Case */}
         <div className="card" style={{ padding: "1.25rem" }}>
           <div className="card-title">Principales ítems de gasto</div>
-          {gastos.porItem.length === 0 ? (
+          {(!gastos.porItem || gastos.porItem.length === 0) ? (
             <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Sin gastos publicados para este partido.</p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
-              {gastos.porItem.map((it) => {
-                const titleCaseItem = it.item
+              {gastos.porItem?.map((it) => {
+                const titleCaseItem = (it.item ?? "")
                   .toLowerCase()
                   .split(" ")
                   .map((w) => (w.length > 2 ? w.charAt(0).toUpperCase() + w.slice(1) : w))
@@ -487,7 +487,7 @@ export default function PartidoDashboardClient({
         {/* Gasto acumulado por parlamentario */}
         <div className="card" style={{ padding: "1.25rem" }}>
           <div className="card-title">Gasto acumulado por parlamentario</div>
-          {filasGasto.length === 0 ? (
+          {(!filasGasto || filasGasto.length === 0) ? (
             <p style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>Sin gastos publicados para este partido.</p>
           ) : (
             <div style={{ marginTop: "0.5rem" }}>

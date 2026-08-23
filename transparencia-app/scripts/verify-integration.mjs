@@ -40,8 +40,8 @@ const consoleMessages = [];
 const internalLinks = new Set();
 page.on("console", (message) => consoleMessages.push([message.type(), message.text()]));
 page.on("pageerror", (error) => {
-  console.error("PAGEERROR_TRACE:", error?.stack || error);
-  consoleMessages.push(["pageerror", String(error?.stack || error)]);
+  console.error("PAGEERROR_TRACE on " + page.url() + ":", error?.stack || error);
+  consoleMessages.push(["pageerror", page.url() + " -> " + String(error?.stack || error)]);
 });
 
 function representativeInternalLinks(hrefs) {
