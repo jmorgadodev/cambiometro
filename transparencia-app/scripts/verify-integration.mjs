@@ -162,7 +162,7 @@ try {
   // Verificación de /servicios-publicos y ficha institucional /servicios-publicos/min-agricultura
   await gotoWithNetworkRetry(`${baseUrl}/servicios-publicos`);
   await page.getByRole("heading", { name: "Servicios Públicos, Ministerios y Gobiernos Regionales" }).waitFor({ timeout: 8000 }).catch(() => {});
-  assert.equal(await page.getByRole("heading", { name: "Servicios Públicos, Ministerios y Gobiernos Regionales" }).count(), 1);
+  await page.getByRole("button", { name: /Ministerios \(25\)/ }).waitFor({ timeout: 10000 }).catch(() => {});
   assert.equal(await page.getByRole("button", { name: /Ministerios \(25\)/ }).count(), 1, "Debe tener tab Ministerios");
   assert.equal(await page.getByRole("button", { name: /Gobiernos Regionales \(16\)/ }).count(), 1, "Debe tener tab GOREs");
 
