@@ -224,6 +224,7 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
       <aside
         id="mobile-drawer"
         className={`mobile-drawer${drawerOpen ? " is-open" : ""}`}
+        style={{ display: drawerOpen ? "flex" : "none" }}
         aria-modal="true"
         role="dialog"
         aria-label="Menú de navegación"
