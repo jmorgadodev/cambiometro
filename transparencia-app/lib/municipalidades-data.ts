@@ -1,4 +1,5 @@
 import municipalidadesJson from "@/data/municipalidades-data.json";
+import { getVerifiedMuniRRSS } from "./municipalidades-rrss";
 
 export interface AlcaldeData {
   nombre: string;
@@ -101,6 +102,7 @@ export interface RedesSocialesComunales {
   facebook?: string | null;
   whatsapp?: string | null;
   youtube?: string | null;
+  fuente_verificacion?: string | null;
 }
 
 export interface ConcejalData {
@@ -223,12 +225,19 @@ export interface MunicipalidadEnriquecida {
 export * from "./municipalidades-list";
 
 const MUNICIPALIDADES_DICT = Object.fromEntries(
-  Object.entries(municipalidadesJson as unknown as Record<string, MunicipalidadEnriquecida>).map(([id, municipalidad]) => [
-    id,
-    municipalidad.compras_publicas?.metodo_enlace === "RUT_EXACTO"
-      ? municipalidad
-      : { ...municipalidad, compras_publicas: null },
-  ]),
+  Object.entries(municipalidadesJson as unknown as Record<string, MunicipalidadEnriquecida>).map(([id, municipalidad]) => {
+    const verified = getVerifiedMuniRRSS(id);
+    const enriched: MunicipalidadEnriquecida = {
+      ...municipalidad,
+      sitio_web_oficial: verified?.sitio_web_oficial ?? municipalidad.sitio_web_oficial ?? null,
+      redes_sociales: verified?.redes_sociales ?? municipalidad.redes_sociales ?? null,
+      partido_alcalde: municipalidad.partido_alcalde ?? verified?.alcalde_oficial?.partido ?? null,
+      compras_publicas: municipalidad.compras_publicas?.metodo_enlace === "RUT_EXACTO"
+        ? municipalidad.compras_publicas
+        : null,
+    };
+    return [id, enriched];
+  }),
 ) as Record<string, MunicipalidadEnriquecida>;
 
 export function getMunicipalidadData(id: string): MunicipalidadEnriquecida | null {
@@ -238,4 +247,5 @@ export function getMunicipalidadData(id: string): MunicipalidadEnriquecida | nul
 export function getAllMunicipalidadesData(): MunicipalidadEnriquecida[] {
   return Object.values(MUNICIPALIDADES_DICT);
 }
+
 
