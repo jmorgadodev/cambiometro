@@ -38,8 +38,11 @@ export default function MovimientosPage() {
   return (
     <Suspense
       fallback={
-        <div style={{ minHeight: "100vh", padding: "4rem 2rem", textAlign: "center", color: "var(--text-muted)" }}>
-          Cargando catálogo de movimientos y rotación institucional...
+        <div style={{ minHeight: "100vh", padding: "2.25rem 0 1.75rem" }} className="container-main">
+          <h1 style={{ fontSize: "clamp(1.75rem, 3.2vw, 2.4rem)", fontWeight: 900, margin: "0 0 0.5rem 0" }}>
+            Movimientos y Relevos de Autoridades
+          </h1>
+          <p style={{ color: "var(--text-2)" }}>Cargando catálogo de movimientos y rotación institucional...</p>
         </div>
       }
     >
