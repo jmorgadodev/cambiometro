@@ -631,16 +631,16 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                 </div>
               </div>
 
-              {compras.anomalias_integridad.length > 0 && (
+              {(compras.anomalias_integridad?.length ?? 0) > 0 && (
                 <div style={{ padding: "1rem", marginBottom: "1.5rem", borderRadius: 8, border: "1px solid var(--warn)", background: "var(--surface-2)" }}>
                   <strong style={{ color: "var(--warn)", display: "block", marginBottom: "0.35rem" }}>
                     Hallazgo de integridad ALTA (V7) · valor oficial preservado
                   </strong>
                   <p style={{ margin: 0, fontSize: "0.82rem", color: "var(--text-muted)" }}>
-                    {compras.anomalias_integridad.length} orden(es) oficial(es) superan el límite de sanidad de $100.000 millones por relación. Se conservan como evidencia, pero sus montos, proveedores y relaciones están excluidos de totales y rankings.
+                    {compras.anomalias_integridad?.length} orden(es) oficial(es) superan el límite de sanidad de $100.000 millones por relación. Se conservan como evidencia, pero sus montos, proveedores y relaciones están excluidos de totales y rankings.
                   </p>
                   <ul style={{ margin: "0.65rem 0 0", paddingLeft: "1.2rem", fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                    {compras.anomalias_integridad.map((anomaly) => (
+                    {compras.anomalias_integridad?.map((anomaly) => (
                       <li key={anomaly.id}>
                         {anomaly.titulo ?? "Orden oficial sin título"} · {formatCLP(anomaly.monto_oficial_clp)}{anomaly.source_url ? <> · <a href={anomaly.source_url} target="_blank" rel="noopener noreferrer">fuente ↗</a></> : null}
                       </li>
