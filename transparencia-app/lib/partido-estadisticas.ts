@@ -3,7 +3,7 @@ import type { Politico } from "@/lib/politicos";
 import { COLOR_ABST, COLOR_NO, COLOR_NO_VOTA, COLOR_SI } from "@/lib/colores-votacion";
 import { getKvCache } from "@/lib/db";
 import { diputadoIdParaPolitico } from "@/lib/data-source";
-import { personalApoyoParaDiputado, personalApoyoParaSenador } from "@/lib/personal-apoyo";
+import { personalApoyoParaDiputado, personalApoyoParaSenador, leerPersonalApoyo } from "@/lib/personal-apoyo";
 import { COALICION_POR_PARTIDO } from "@/lib/partido-electoral-data";
 import PARTIDOS_STATS_FALLBACK from "@/data/lake-subsets/partidos-stats.subset.json";
 
@@ -218,6 +218,7 @@ export async function gastosDelPartido(partidoId: string): Promise<GastoPartido>
 /** Agregación de personal de apoyo para todos los miembros de un partido. */
 export async function personalApoyoDelPartido(partidoId: string): Promise<PersonalApoyoPartido> {
   const pols = politicosDelPartido(partidoId);
+  const dataset = await leerPersonalApoyo();
   let totalMensual = 0;
   let totalPersonas = 0;
   let conPersonal = 0;
@@ -225,18 +226,27 @@ export async function personalApoyoDelPartido(partidoId: string): Promise<Person
   for (const pol of pols) {
     if (pol.cargo === "Diputado") {
       const idDip = diputadoIdParaPolitico(pol);
-      const apoyo = await personalApoyoParaDiputado(idDip);
-      if (apoyo.total_mensual > 0) {
-        totalMensual += apoyo.total_mensual;
-        totalPersonas += apoyo.n_personas;
+      const dip = idDip ? dataset?.diputados?.[String(idDip)] : null;
+      const filas = dip?.personal_apoyo ?? [];
+      const total = filas.reduce((tot, f) => tot + (f.sueldo ?? 0), 0);
+      if (total > 0) {
+        totalMensual += total;
+        totalPersonas += filas.length;
         conPersonal += 1;
       }
     } else {
-      const apoyoSen = await personalApoyoParaSenador(pol.nombre_completo);
-      if (apoyoSen.total_2026 > 0) {
-        totalMensual += apoyoSen.total_2026;
-        totalPersonas += apoyoSen.registros.length;
-        conPersonal += 1;
+      const nom = pol.nombre_completo.toUpperCase();
+      const matched = Object.entries(dataset?.senadores ?? {}).find(([ofi]) => {
+        const u = ofi.toUpperCase();
+        return nom.includes(u) || u.includes(nom.split(" ")[0]);
+      });
+      if (matched) {
+        const total = (matched[1] ?? []).reduce((tot, r) => tot + (r.monto ?? 0), 0);
+        if (total > 0) {
+          totalMensual += total;
+          totalPersonas += (matched[1] ?? []).length;
+          conPersonal += 1;
+        }
       }
     }
   }
