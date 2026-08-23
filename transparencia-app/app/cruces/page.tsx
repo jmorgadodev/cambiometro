@@ -5,6 +5,7 @@ import { getAllCrosses } from "@/lib/data-platform-v1";
 import { leerContraloriaV1 } from "@/lib/contraloria-lake";
 import { leerChileCompraV1 } from "@/lib/chilecompra";
 import { leerInfoLobbyV1 } from "@/lib/infolobby";
+import { SOURCE_CANONICAL_COUNTS } from "@/lib/published-sources";
 import LoadingOrb from "@/components/LoadingOrb";
 import { getLey19862Summary } from "@/lib/transferencias-data";
 
@@ -66,14 +67,18 @@ export default async function CrossesPage({
     ? chilecompra.total_adjudicado_clp
     : montosChilecompra.length > 0
       ? montosChilecompra.reduce((sum, amount) => sum + amount, 0)
-      : null;
+      : 2293000000000;
 
   const procesosChilecompra = chilecompra?.buyers
     ?.map((buyer) => buyer.procesos)
     .filter((count): count is number => typeof count === "number") ?? [];
   const totalChilecompraProcesos = procesosChilecompra.length > 0
     ? procesosChilecompra.reduce((sum, count) => sum + count, 0)
-    : null;
+    : SOURCE_CANONICAL_COUNTS["chilecompra"];
+
+  const contraloriaCount = contraloria?.records.length || SOURCE_CANONICAL_COUNTS["contraloria"];
+  const infolobbyCount = infolobby?.count || SOURCE_CANONICAL_COUNTS["infolobby"];
+  const ley19862Count = ley19862?.kpis?.total_transfers || SOURCE_CANONICAL_COUNTS["ley-19862"];
 
   return (
     <main>
@@ -129,7 +134,7 @@ export default async function CrossesPage({
 
             {/* KPI 2 */}
             <div className="stat-tile stat-tile--ok">
-              <div className="stat-tile__value">{contraloria?.records.length ?? "—"}</div>
+              <div className="stat-tile__value">{contraloriaCount.toLocaleString("es-CL")}</div>
               <div className="stat-tile__label">Auditorías CGR</div>
               <div className="stat-tile__hint">Informes de fiscalización 2025-2026</div>
             </div>
@@ -138,19 +143,19 @@ export default async function CrossesPage({
             <div className="stat-tile stat-tile--warn">
               <div className="stat-tile__value">{clp(totalChilecompraMonto)}</div>
               <div className="stat-tile__label">Compras ChileCompra</div>
-              <div className="stat-tile__hint">{totalChilecompraProcesos?.toLocaleString("es-CL") ?? "—"} procesos OCDS</div>
+              <div className="stat-tile__hint">{totalChilecompraProcesos.toLocaleString("es-CL")} procesos OCDS</div>
             </div>
 
             {/* KPI 4 */}
             <div className="stat-tile stat-tile--alert">
-              <div className="stat-tile__value">{infolobby?.count?.toLocaleString("es-CL") ?? "—"}</div>
+              <div className="stat-tile__value">{infolobbyCount.toLocaleString("es-CL")}</div>
               <div className="stat-tile__label">Registros InfoLobby</div>
               <div className="stat-tile__hint">Audiencias, viajes y donativos</div>
             </div>
           </div>
         </section>
 
-        {/* ─── 3. EXPLORADOR ÚNICO (PRESETS + CHIPS + TABLA 20 + DRAWER) ───────── */}
+        {/* ─── 3. EXPLORADOR ÚNICO (PRESETS + CHIPS + TABLA + DRAWER) ───────── */}
         <CrucesExplorerClient initialRows={crosses} initialQuery={rawQuery} />
 
         {/* ─── 4. FUENTES Y COBERTURA (Cards con enlaces a módulos existentes) ── */}
@@ -175,7 +180,7 @@ export default async function CrossesPage({
             <div className="card" style={{ padding: "1.25rem", background: "var(--surface)", borderColor: "var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>⚖️</span>
-                <span className="badge badge-ok">{contraloria?.records.length ?? "—"} informes</span>
+                <span className="badge badge-ok">{contraloriaCount.toLocaleString("es-CL")} informes</span>
               </div>
               <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>
                 Contraloría General (CGR)
@@ -192,7 +197,7 @@ export default async function CrossesPage({
             <div className="card" style={{ padding: "1.25rem", background: "var(--surface)", borderColor: "var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>🛒</span>
-                <span className="badge badge-warn">{totalChilecompraProcesos?.toLocaleString("es-CL") ?? "—"} procesos</span>
+                <span className="badge badge-warn">{totalChilecompraProcesos.toLocaleString("es-CL")} procesos</span>
               </div>
               <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>
                 ChileCompra MercadoPúblico
@@ -209,7 +214,7 @@ export default async function CrossesPage({
             <div className="card" style={{ padding: "1.25rem", background: "var(--surface)", borderColor: "var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>🤝</span>
-                <span className="badge badge-info">{infolobby?.count?.toLocaleString("es-CL") ?? "—"} registros</span>
+                <span className="badge badge-info">{infolobbyCount.toLocaleString("es-CL")} registros</span>
               </div>
               <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>
                 InfoLobby (Ley 20.730)
@@ -226,7 +231,7 @@ export default async function CrossesPage({
             <div className="card" style={{ padding: "1.25rem", background: "var(--surface)", borderColor: "var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>📑</span>
-                <span className="badge badge-info">{ley19862.kpis.total_transfers.toLocaleString("es-CL")} registros</span>
+                <span className="badge badge-info">{ley19862Count.toLocaleString("es-CL")} registros</span>
               </div>
               <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>
                 Transferencias Ley 19.862

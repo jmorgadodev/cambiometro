@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import chilecompraStaticJson from "@/data/lake/projections/v1/chilecompra.json";
 import { legalEntityIdFromRut } from "./legal-rut";
 
 export interface ChileCompraAdjudicacion {
@@ -80,18 +81,19 @@ let cached: ChileCompraProyeccion | null = null;
  * scripts/build-chilecompra-v1.mjs desde las particiones del lake: awards con
  * monto, unidos a su licitación/tender por ocid para recuperar el comprador).
  * Aprovisiona la ficha del comprador, el grafo de adjudicaciones y los rankings
- * de /cruces. Carga con fs + cache.
+ * de /cruces. Carga con fs en scripts locales y fallback a JSON empaquetado en Worker.
  */
 export function leerChileCompraV1(): ChileCompraProyeccion | null {
   if (cached) return cached;
   try {
     const file = path.join(process.cwd(), "data", "lake", "projections", "v1", "chilecompra.json");
-    cached = JSON.parse(fs.readFileSync(file, "utf8")) as ChileCompraProyeccion;
-    return cached;
-  } catch {
-    cached = null;
-    return null;
-  }
+    if (fs.existsSync(file)) {
+      cached = JSON.parse(fs.readFileSync(file, "utf8")) as ChileCompraProyeccion;
+      return cached;
+    }
+  } catch {}
+  cached = (chilecompraStaticJson as unknown) as ChileCompraProyeccion;
+  return cached;
 }
 
 export function chilecompraParaComprador(compradorId: string): ChileCompraComprador | null {

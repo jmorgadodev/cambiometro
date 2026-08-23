@@ -12,7 +12,10 @@ import { leerContraloriaV1 } from "@/lib/contraloria-lake";
 import { leerPresupuestoV1 } from "@/lib/presupuesto";
 import { leerChileCompraV1 } from "@/lib/chilecompra";
 import { leerInfoLobbyV1 } from "@/lib/infolobby";
+import { leerInfoProbidadV1 } from "@/lib/infoprobidad-lake";
+import { getLey19862Summary } from "@/lib/transferencias-data";
 import { leerSinimV1 } from "@/lib/sinim";
+import personalApoyoStaticJson from "@/data/personal-apoyo.json";
 import { MUNICIPALIDADES_SEED, getFuncionariosPorOrganismo } from "@/lib/seed-politicos";
 import sourceInventoryJson from "@/data/etl/source-inventory.json";
 import type {
@@ -221,62 +224,65 @@ records.push(...parliamentaryVotes.records);
 relations.push(...parliamentaryVotes.relations);
 
 try {
+  let personalRaw = personalApoyoStaticJson as {
+    personal?: Array<{
+      id: string;
+      nombre: string;
+      cargo: string;
+      organismo?: string;
+      diputado?: string;
+      monto_clp?: number;
+      periodo?: string;
+      url?: string;
+    }>;
+  };
   const personalFile = path.join(process.cwd(), "data", "personal-apoyo.json");
   if (fs.existsSync(personalFile)) {
-    const personalRaw = JSON.parse(fs.readFileSync(personalFile, "utf8")) as {
-      personal?: Array<{
-        id: string;
-        nombre: string;
-        cargo: string;
-        organismo?: string;
-        diputado?: string;
-        monto_clp?: number;
-        periodo?: string;
-        url?: string;
-      }>;
-    };
-    for (const p of (personalRaw.personal || []).slice(0, 80)) {
-      if (!p.id || !p.nombre || !p.cargo || !p.periodo || !p.url) continue;
-      const personName = p.nombre;
-      const personId = `person-apoyo-${compactId(personName)}`;
-      if (!entities.has(personId)) {
-        entities.set(personId, {
-          id: personId,
-          kind: "person",
-          name: personName,
-          identifiers: [{ scheme: "CONGRESO-PERSONAL", value: personName, isPublic: true, sourceUrl: p.url }],
-          attributes: { cargo: p.cargo, organismo: p.organismo ?? null },
-          sourceIds: ["camara"],
-          updatedAt,
-        });
-      }
-      const recordId = `camara-apoyo-${compactId(p.id)}`;
-      const occurredAt = `${p.periodo}-01`;
-      records.push({
-        id: recordId,
-        kind: "authority",
-        sourceId: "camara",
-        title: `Asesoría: ${personName} · ${p.cargo}`,
-        description: p.diputado ? `Personal de apoyo publicado para ${p.diputado}` : null,
-        occurredAt,
-        period: { from: occurredAt, to: null, label: p.periodo },
-        subjectEntityIds: [personId],
-        objectEntityIds: [CAMARA_ID],
-        amount: typeof p.monto_clp === "number" ? { amountClp: p.monto_clp, currency: "CLP", originalAmount: String(p.monto_clp), originalUnit: "CLP" } : null,
-        evidence: { sourceUrl: p.url, checksumSha256: null, retrievedAt: updatedAt, documentPage: null },
-        data: publicData(p),
-      });
-      relations.push({
-        id: `relation-apoyo-${compactId(p.id)}`,
-        fromId: personId,
-        predicate: "employed_by",
-        toId: CAMARA_ID,
-        evidenceRecordIds: [recordId],
-        period: { from: occurredAt, to: null },
-        reconciliation: { method: "official_id", confidence: 1 },
-        disclaimer: DISCLAIMER,
+    try {
+      personalRaw = JSON.parse(fs.readFileSync(personalFile, "utf8"));
+    } catch {}
+  }
+  for (const p of (personalRaw.personal || []).slice(0, 80)) {
+    if (!p.id || !p.nombre || !p.cargo || !p.periodo || !p.url) continue;
+    const personName = p.nombre;
+    const personId = `person-apoyo-${compactId(personName)}`;
+    if (!entities.has(personId)) {
+      entities.set(personId, {
+        id: personId,
+        kind: "person",
+        name: personName,
+        identifiers: [{ scheme: "CONGRESO-PERSONAL", value: personName, isPublic: true, sourceUrl: p.url }],
+        attributes: { cargo: p.cargo, organismo: p.organismo ?? null },
+        sourceIds: ["camara"],
+        updatedAt,
       });
     }
+    const recordId = `camara-apoyo-${compactId(p.id)}`;
+    const occurredAt = `${p.periodo}-01`;
+    records.push({
+      id: recordId,
+      kind: "authority",
+      sourceId: "camara",
+      title: `Asesoría: ${personName} · ${p.cargo}`,
+      description: p.diputado ? `Personal de apoyo publicado para ${p.diputado}` : null,
+      occurredAt,
+      period: { from: occurredAt, to: null, label: p.periodo },
+      subjectEntityIds: [personId],
+      objectEntityIds: [CAMARA_ID],
+      amount: typeof p.monto_clp === "number" ? { amountClp: p.monto_clp, currency: "CLP", originalAmount: String(p.monto_clp), originalUnit: "CLP" } : null,
+      evidence: { sourceUrl: p.url, checksumSha256: null, retrievedAt: updatedAt, documentPage: null },
+      data: publicData(p),
+    });
+    relations.push({
+      id: `relation-apoyo-${compactId(p.id)}`,
+      fromId: personId,
+      predicate: "employed_by",
+      toId: CAMARA_ID,
+      evidenceRecordIds: [recordId],
+      period: { from: occurredAt, to: null },
+      reconciliation: { method: "official_id", confidence: 1 },
+      disclaimer: DISCLAIMER,
+    });
   }
 } catch (e) {
   // Graceful fallback
@@ -305,27 +311,29 @@ function addUnreconciledRecords(sourceId: string, kind: EvidenceKind, sourceReco
 
 // --- INFOPROBIDAD DECLARACIONES ---
 try {
-  const fullFile = path.join(process.cwd(), "data", "lake", "projections", "v1", "infoprobidad.json");
-  const subsetFile = path.join(process.cwd(), "data", "lake-subsets", "infoprobidad.subset.json");
-  const infoprobidadFile = fs.existsSync(fullFile) ? fullFile : subsetFile;
-  if (fs.existsSync(infoprobidadFile)) {
-    const infoprobidadRaw = JSON.parse(fs.readFileSync(infoprobidadFile, "utf8")) as { records: RawRecord[] };
-    for (const raw of (infoprobidadRaw.records ?? []).slice(0, 250)) {
-      if (!raw.id || !raw.nombre || !raw.fecha || !raw.url) continue;
-      const personName = raw.nombre;
+  const infoprobidad = leerInfoProbidadV1();
+  if (infoprobidad && Array.isArray(infoprobidad.records)) {
+    for (const raw of infoprobidad.records.slice(0, 250)) {
+      if (!raw.id || !raw.nombre || !raw.url) continue;
+      const personName = String(raw.nombre);
       const personId = `person-infoprobidad-${compactId(personName)}`;
+      const sourceUrl = String(raw.url);
+      const rawTitle = typeof raw.title === "string" ? raw.title : `Declaración patrimonial de ${personName}`;
+      const rawFecha = typeof raw.fecha === "string" ? raw.fecha : (raw.periodo ? `${raw.periodo}-01` : "2026-08-01");
+
       if (!entities.has(personId)) {
         entities.set(personId, {
           id: personId,
           kind: "person",
           name: personName,
-          identifiers: [{ scheme: "CPLT-DECLARANTE", value: personName, isPublic: true, sourceUrl: raw.url }],
+          identifiers: [{ scheme: "CPLT-DECLARANTE", value: personName, isPublic: true, sourceUrl }],
           attributes: { office: "Funcionario/a Declarante" },
           sourceIds: ["infoprobidad"],
           updatedAt,
         });
       }
-      const org = (raw.organizations as Array<{ entity_id: string; name: string }>)?.[0];
+      const orgs = (raw.organizations as unknown as Array<{ entity_id?: string; name?: string }>) || [];
+      const org = orgs[0];
       const orgId = org?.entity_id || null;
       const orgName = org?.name || null;
       if (orgId && orgName && !entities.has(orgId)) {
@@ -333,7 +341,7 @@ try {
           id: orgId,
           kind: "public_body",
           name: orgName,
-          identifiers: [{ scheme: "CPLT-ORG", value: orgId, isPublic: true, sourceUrl: raw.url }],
+          identifiers: [{ scheme: "CPLT-ORG", value: orgId, isPublic: true, sourceUrl }],
           attributes: { tipo: "Organismo" },
           sourceIds: ["infoprobidad"],
           updatedAt,
@@ -344,15 +352,15 @@ try {
         id: recordId,
         kind: "declaration",
         sourceId: "infoprobidad",
-        title: raw.title || `Declaración patrimonial de ${personName}`,
+        title: rawTitle,
         description: orgName ? `Declaración de intereses y patrimonio registrada en InfoProbidad ante ${orgName}` : "Declaración de intereses y patrimonio registrada en InfoProbidad",
-        occurredAt: raw.fecha,
-        period: periodFromDate(raw.fecha),
+        occurredAt: rawFecha,
+        period: periodFromDate(rawFecha),
         subjectEntityIds: [personId],
         objectEntityIds: orgId ? [orgId] : [],
         amount: null,
-        evidence: { sourceUrl: raw.url, checksumSha256: null, retrievedAt: updatedAt, documentPage: null },
-        data: publicData(raw),
+        evidence: { sourceUrl, checksumSha256: null, retrievedAt: updatedAt, documentPage: null },
+        data: publicData(raw as Record<string, unknown>),
       });
       if (orgId) {
         relations.push({
@@ -361,7 +369,7 @@ try {
           predicate: "filed_declaration_with",
           toId: orgId,
           evidenceRecordIds: [recordId],
-          period: periodFromDate(raw.fecha),
+          period: periodFromDate(rawFecha),
           reconciliation: { method: "official_infoprobidad_id", confidence: 1 },
           disclaimer: DISCLAIMER,
         });
@@ -638,20 +646,8 @@ if (chilecompra) {
 
 // --- TRANSFERENCIAS LEY 19.862 ---
 try {
-  const leySummaryFile = path.join(process.cwd(), "data", "lake", "projections", "v1", "ley19862-summary.json");
-  if (fs.existsSync(leySummaryFile)) {
-    const leySummary = JSON.parse(fs.readFileSync(leySummaryFile, "utf8")) as {
-      transfers_sample: Array<{
-        id: string;
-        fecha: string;
-        title: string;
-        emitter_name?: string;
-        receiver_name?: string;
-        monto_clp: number;
-        url?: string;
-      }>;
-    };
-
+  const leySummary = getLey19862Summary();
+  if (leySummary && Array.isArray(leySummary.transfers_sample)) {
     for (const t of (leySummary.transfers_sample ?? []).slice(0, 350)) {
       if (!t.id || !t.emitter_name || !t.receiver_name || !t.title || !t.fecha || !t.url || !Number.isFinite(t.monto_clp)) continue;
       const emisorName = t.emitter_name;
@@ -696,7 +692,7 @@ try {
         objectEntityIds: [receptorId],
         amount: t.monto_clp > 0 ? { amountClp: t.monto_clp, currency: "CLP", originalAmount: String(t.monto_clp), originalUnit: "CLP" } : null,
         evidence: { sourceUrl: t.url, checksumSha256: null, retrievedAt: updatedAt, documentPage: null },
-        data: publicData(t),
+        data: publicData(t as unknown as Record<string, unknown>),
       });
 
       relations.push({

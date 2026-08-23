@@ -183,20 +183,24 @@ export function personalApoyoEvidenceRecords(
 
 import { getKvCache } from "@/lib/db";
 
+import personalApoyoStaticJson from "@/data/personal-apoyo.json";
+
 let cached: PersonalApoyoDataset | null = null;
 let cachedPromise: Promise<PersonalApoyoDataset | null> | null = null;
 
-/** Carga el dataset de personal de apoyo desde el caché KV en D1. */
+/** Carga el dataset de personal de apoyo desde el caché KV en D1 o fallback estático. */
 export async function leerPersonalApoyo(): Promise<PersonalApoyoDataset | null> {
   if (!cached) {
     cachedPromise ??= (async () => {
       const fromD1 = await getKvCache<PersonalApoyoDataset>("personal-apoyo.json");
       if (fromD1) return fromD1;
       try {
-        return JSON.parse(fs.readFileSync(path.join(process.cwd(), "data", "personal-apoyo.json"), "utf8")) as PersonalApoyoDataset;
-      } catch {
-        return null;
-      }
+        const file = path.join(process.cwd(), "data", "personal-apoyo.json");
+        if (fs.existsSync(file)) {
+          return JSON.parse(fs.readFileSync(file, "utf8")) as PersonalApoyoDataset;
+        }
+      } catch {}
+      return (personalApoyoStaticJson as unknown) as PersonalApoyoDataset;
     })();
     cached = await cachedPromise;
   }

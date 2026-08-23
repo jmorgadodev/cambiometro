@@ -114,7 +114,7 @@ export function getTipoCruceBadge(row: CrossEdge): {
   return { tipo: "Cruce Institucional", badgeClass: "badge-neutral" };
 }
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 50;
 
 export default function CrucesExplorerClient({ initialRows, initialQuery = "" }: Props) {
   const [query, setQuery] = useState(initialQuery);

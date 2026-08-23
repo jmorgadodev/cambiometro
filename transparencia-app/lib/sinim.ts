@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import sinimStaticJson from "@/data/lake/projections/v1/sinim.json";
 
 export interface SinimIndicador {
   code: string;
@@ -35,18 +36,19 @@ let cached: SinimProyeccion | null = null;
  * 345 municipalidades de Chile (una por comuna con municipio), 9 indicadores
  * financieros (presupuesto inicial/vigente, ingresos, gastos, FCM, transferencias,
  * gastos en personal) y de personal (funcionarios). Alimenta el panel SINIM en la
- * ficha de municipalidad. Carga con fs + cache.
+ * ficha de municipalidad. Carga con fs en scripts locales y fallback a JSON empaquetado en Worker.
  */
 export function leerSinimV1(): SinimProyeccion | null {
   if (cached) return cached;
   try {
     const file = path.join(process.cwd(), "data", "lake", "projections", "v1", "sinim.json");
-    cached = JSON.parse(fs.readFileSync(file, "utf8")) as SinimProyeccion;
-    return cached;
-  } catch {
-    cached = null;
-    return null;
-  }
+    if (fs.existsSync(file)) {
+      cached = JSON.parse(fs.readFileSync(file, "utf8")) as SinimProyeccion;
+      return cached;
+    }
+  } catch {}
+  cached = (sinimStaticJson as unknown) as SinimProyeccion;
+  return cached;
 }
 
 export function sinimParaMunicipio(municipioId: string): SinimMunicipio | null {
