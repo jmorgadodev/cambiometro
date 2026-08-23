@@ -80,7 +80,7 @@ async function getWithNetworkRetry(url, attempts = 6) {
   throw lastError;
 }
 
-async function gotoWithNetworkRetry(url, options = { waitUntil: "domcontentloaded" }, attempts = 6) {
+async function gotoWithNetworkRetry(url, options = { waitUntil: "domcontentloaded" }, attempts = 8) {
   await throttleProd();
   let lastError;
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
@@ -95,7 +95,7 @@ async function gotoWithNetworkRetry(url, options = { waitUntil: "domcontentloade
       return response;
     } catch (error) {
       lastError = error;
-      if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, 750 * attempt));
+      if (attempt < attempts) await new Promise((resolve) => setTimeout(resolve, 1000 * attempt));
     }
   }
   throw lastError;
