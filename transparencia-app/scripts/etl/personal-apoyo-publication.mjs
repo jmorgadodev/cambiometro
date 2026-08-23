@@ -1,7 +1,19 @@
 const DEFAULT_MINIMUMS = { diputados: 100, filasCamara: 500, oficinasSenado: 40, filasSenado: 500 };
 
 export function mergePersonalApoyoDeputies(previous = {}, refreshed = {}) {
-  return { ...previous, ...refreshed };
+  const result = { ...previous };
+  for (const [id, deputy] of Object.entries(refreshed)) {
+    if ((!deputy?.personal_apoyo || deputy.personal_apoyo.length === 0) && previous[id]?.personal_apoyo?.length > 0) {
+      result[id] = {
+        ...deputy,
+        personal_apoyo: previous[id].personal_apoyo,
+        mes_personal: previous[id].mes_personal ?? deputy.mes_personal,
+      };
+    } else {
+      result[id] = deputy;
+    }
+  }
+  return result;
 }
 
 export function validatePersonalApoyoDataset(dataset, minimums = DEFAULT_MINIMUMS) {

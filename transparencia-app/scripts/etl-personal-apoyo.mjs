@@ -274,6 +274,11 @@ async function main() {
     for (const rows of Object.values(senadores)) for (const r of rows) r.periodo = `${r.ano}-${String(r.mes).padStart(2, "0")}`;
   }
 
+  if (Object.keys(senadores).length === 0 && previo?.senadores && Object.keys(previo.senadores).length > 0) {
+    senadores = previo.senadores;
+    mesesSenado = new Set(previo.meses_senado_disponibles ?? []);
+  }
+
   const out = {
     generado_en: new Date().toISOString(),
     fuentes: {
