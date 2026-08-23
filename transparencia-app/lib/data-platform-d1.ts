@@ -433,7 +433,9 @@ export async function resolveDataPlatformSummary(
     return { totalRecords: Number(records?.total ?? 0), updatedAt: state?.updated_at ?? null };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
-    if (/no such table:\s*(records|source_state)\b/i.test(message)) return fallback();
+    if (/no such table:\s*(records|source_state)\b/i.test(message) || /internal error/i.test(message)) {
+      return fallback();
+    }
     throw error;
   }
 }

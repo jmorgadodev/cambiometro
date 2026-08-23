@@ -423,7 +423,7 @@ if (fs.existsSync(votPath)) {
   const usedSessionIds = new Set();
 
   for (const [polId, votesList] of Object.entries(rawVotes)) {
-    const sliced = Array.isArray(votesList) ? votesList.slice(0, 20) : [];
+    const sliced = Array.isArray(votesList) ? votesList : [];
     compactVotes[polId] = sliced;
     for (const [sessionId] of sliced) {
       usedSessionIds.add(sessionId);

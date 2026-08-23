@@ -86,12 +86,12 @@ export function esProcedimental(v: VotacionFila): boolean {
   );
 }
 
-
 export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: Props) {
   const [filtroOpcion, setFiltroOpcion] = useState<string>("todas");
   const [filtroProcedimental, setFiltroProcedimental] = useState<"todos" | "sustantivos" | "procedimentales">("todos");
   const [busqueda, setBusqueda] = useState<string>("");
-  const [visible, setVisible] = useState<number>(30);
+  const [page, setPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(10);
   const [detallesExpandidos, setDetallesExpandidos] = useState<Record<string, boolean>>({});
 
   const toggleDetalle = (id: string) => {
@@ -163,6 +163,18 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
       .sort((a, b) => (b.fecha ?? "").localeCompare(a.fecha ?? ""));
   }, [votaciones, filtroOpcion, filtroProcedimental, busqueda]);
 
+  const totalPages = Math.max(1, Math.ceil(filtradas.length / pageSize));
+  const currentPage = Math.min(page, totalPages);
+  const paginadas = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return filtradas.slice(startIndex, startIndex + pageSize);
+  }, [filtradas, currentPage, pageSize]);
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPage(1);
+  };
+
   const humanizar = (texto: string) =>
     texto.toLocaleLowerCase("es-CL").replace(/(^|\s)\S/g, (m) => m.toUpperCase());
 
@@ -174,7 +186,6 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
     if (!raw || /^(decreto|oficio|archivo|proyecto de ley|resolución|proyecto de acuerdo|informe)\s*$/i.test(raw) || raw.length < 10) {
       return votacion.boletin ? `Proyecto de Ley (Boletín N° ${votacion.boletin})` : "Materia no catalogada — ver tramitación oficial";
     }
-    // For senate long descriptions, extract first 120 chars and capitalize nicely
     if (raw.length > 120) {
       const firstSentence = raw.split(/[.;]/)[0].trim();
       if (firstSentence.length >= 20 && firstSentence.length <= 120) {
@@ -211,7 +222,7 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                 className="stat-tile stat-tile--accent"
                 onClick={() => {
                   setFiltroOpcion("todas");
-                  setVisible(30);
+                  setPage(1);
                 }}
                 aria-pressed={filtroOpcion === "todas"}
                 title="Mostrar todas las votaciones"
@@ -235,7 +246,7 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                     className={["stat-tile", activa ? "stat-tile--accent" : ficha.tone].filter(Boolean).join(" ")}
                     onClick={() => {
                       setFiltroOpcion(activa ? "todas" : ficha.target);
-                      setVisible(30);
+                      setPage(1);
                     }}
                     aria-pressed={activa}
                     title={activa ? "Quitar filtro" : `Filtrar votaciones: ${ficha.label}`}
@@ -274,7 +285,7 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
               value={busqueda}
               onChange={(e) => {
                 setBusqueda(e.target.value);
-                setVisible(30);
+                setPage(1);
               }}
               placeholder={`Buscar en ${stats.total} votaciones (materia, boletín, quórum)…`}
               aria-label="Buscar votación"
@@ -303,7 +314,7 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                   type="button"
                   onClick={() => {
                     setFiltroProcedimental(chip.id as "todos" | "sustantivos" | "procedimentales");
-                    setVisible(30);
+                    setPage(1);
                   }}
                   className="capsule"
                   style={{
@@ -330,7 +341,7 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
             </p>
           ) : (
             <div style={{ display: "flex", flexDirection: "column", gap: "0.85rem" }}>
-              {filtradas.slice(0, visible).map((votacion) => {
+              {paginadas.map((votacion) => {
                 const si = parseInt(votacion.total_si ?? "0") || 0;
                 const no = parseInt(votacion.total_no ?? "0") || 0;
                 const abs = parseInt(votacion.total_abstencion ?? "0") || 0;
@@ -485,16 +496,130 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
                 );
               })}
 
-              {filtradas.length > visible && (
-                <button
-                  type="button"
-                  className="btn btn-ghost"
-                  style={{ width: "100%", marginTop: "0.5rem", padding: "0.6rem" }}
-                  onClick={() => setVisible((current) => current + 50)}
-                >
-                  Cargar más ({filtradas.length - visible} restantes)
-                </button>
-              )}
+              {/* ─── BARRA DE PAGINACIÓN ESTÁNDAR (10 / 25 / 50) ─────────────── */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  flexWrap: "wrap",
+                  gap: "0.75rem",
+                  padding: "0.85rem 0.5rem 0.25rem",
+                  borderTop: "1px solid var(--border)",
+                  marginTop: "0.5rem",
+                  width: "100%",
+                  boxSizing: "border-box",
+                }}
+              >
+                {/* Selector de Filas por página */}
+                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem", fontSize: "0.78rem", color: "var(--text-2)", flexWrap: "wrap" }}>
+                  <span>Filas por página:</span>
+                  {[10, 25, 50].map((size) => {
+                    const isActive = pageSize === size;
+                    return (
+                      <button
+                        key={size}
+                        type="button"
+                        onClick={() => handlePageSizeChange(size)}
+                        style={{
+                          padding: "0.25rem 0.55rem",
+                          fontSize: "0.75rem",
+                          fontWeight: isActive ? 800 : 500,
+                          borderRadius: 6,
+                          border: isActive ? "1px solid var(--accent)" : "1px solid var(--border)",
+                          background: isActive ? "var(--accent)" : "var(--surface-2)",
+                          color: isActive ? "var(--bg)" : "var(--text-2)",
+                          cursor: "pointer",
+                          transition: "all 0.15s ease",
+                        }}
+                      >
+                        {size}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {/* Controles de navegación */}
+                <div style={{ display: "flex", gap: "0.4rem", alignItems: "center", flexWrap: "wrap", justifyContent: "flex-end" }}>
+                  <div style={{ display: "flex", gap: "0.25rem" }}>
+                    <button
+                      type="button"
+                      onClick={() => setPage(1)}
+                      disabled={currentPage <= 1}
+                      style={{
+                        padding: "0.3rem 0.55rem",
+                        fontSize: "0.72rem",
+                        background: "var(--surface-2)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 6,
+                        color: currentPage <= 1 ? "var(--text-3)" : "var(--text-1)",
+                        cursor: currentPage <= 1 ? "not-allowed" : "pointer",
+                      }}
+                      title="Primera página"
+                    >
+                      « Primera
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPage((p) => Math.max(1, p - 1))}
+                      disabled={currentPage <= 1}
+                      style={{
+                        padding: "0.3rem 0.55rem",
+                        fontSize: "0.72rem",
+                        background: "var(--surface-2)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 6,
+                        color: currentPage <= 1 ? "var(--text-3)" : "var(--text-1)",
+                        cursor: currentPage <= 1 ? "not-allowed" : "pointer",
+                      }}
+                      title="Página anterior"
+                    >
+                      ‹ Ant.
+                    </button>
+                  </div>
+
+                  <span style={{ fontSize: "0.74rem", color: "var(--text-2)", fontWeight: 700, textAlign: "center" }}>
+                    {currentPage} / {totalPages} ({filtradas.length})
+                  </span>
+
+                  <div style={{ display: "flex", gap: "0.25rem" }}>
+                    <button
+                      type="button"
+                      onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                      disabled={currentPage >= totalPages}
+                      style={{
+                        padding: "0.3rem 0.55rem",
+                        fontSize: "0.72rem",
+                        background: "var(--surface-2)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 6,
+                        color: currentPage >= totalPages ? "var(--text-3)" : "var(--text-1)",
+                        cursor: currentPage >= totalPages ? "not-allowed" : "pointer",
+                      }}
+                      title="Página siguiente"
+                    >
+                      Sig. ›
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setPage(totalPages)}
+                      disabled={currentPage >= totalPages}
+                      style={{
+                        padding: "0.3rem 0.55rem",
+                        fontSize: "0.72rem",
+                        background: "var(--surface-2)",
+                        border: "1px solid var(--border)",
+                        borderRadius: 6,
+                        color: currentPage >= totalPages ? "var(--text-3)" : "var(--text-1)",
+                        cursor: currentPage >= totalPages ? "not-allowed" : "pointer",
+                      }}
+                      title="Última página"
+                    >
+                      Última »
+                    </button>
+                  </div>
+                </div>
+              </div>
             </div>
           )}
         </>
