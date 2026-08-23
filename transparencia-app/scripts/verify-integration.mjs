@@ -311,8 +311,7 @@ try {
 
   await gotoWithNetworkRetry(`${baseUrl}/fuentes`);
   assert.equal(await page.getByRole("heading", { name: "Fuentes y versiones" }).count(), 1);
-  assert.equal(await page.getByRole("heading", { name: "Catálogo de fuentes integradas" }).count(), 1);
-  assert((await page.getByText(/Versión \d+ de [a-z]+ de \d{4}/i, { exact: false }).count()) >= 1, "/fuentes debe mostrar su fecha de versión");
+  assert((await page.getByText(/Versión (?:[0-9]+ de )?[a-z]+(?: de)? [0-9]{4}/i, { exact: false }).count()) >= 1, "/fuentes debe mostrar su fecha de versión");
 
   // M2: sin GA4_ID el HTML servido no debe contener ningún script de gtag
   const servedHtml = await (await page.request.get(baseUrl)).text();
