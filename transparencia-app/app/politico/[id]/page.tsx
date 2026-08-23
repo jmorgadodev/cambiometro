@@ -1,6 +1,5 @@
 
 import type { Metadata } from "next";
-export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { notFound, permanentRedirect } from "next/navigation";
 import {
@@ -12,8 +11,16 @@ import {
   getPoliticoSlug,
   isLegacyPoliticoId,
 } from "@/lib/politico-slugs";
+
+export async function generateStaticParams() {
+  return POLITICOS_SEED.map((pol) => ({
+    id: getPoliticoSlug(pol),
+  }));
+}
 import {
   getVotacionesParaPolitico,
+  getPrecomputedPoliticoProfile,
+  getPrecomputedPoliticoVotaciones,
   getTimelineParaPolitico,
   getEntidadesRelacionadas,
   getGastosParaPolitico,
@@ -98,33 +105,11 @@ export default async function PoliticoPage({ params }: Props) {
 
   const partido = PARTIDOS_SEED.find((p) => p.id === pol.partido_id);
   
-  // D1 Cache Migration: Fetch from D1 instead of the 36MB JSON file
-  const cachedData = await getPoliticoDataCache(pol.id);
-  const canonicalGastos = await getCanonicalGastosParaPolitico({
-    cargo: pol.cargo,
-    nombreCompleto: pol.nombre_completo,
-    camaraId: diputadoIdParaPolitico(pol),
-  });
-  const gastos = canonicalGastos.length > 0
-    ? canonicalGastos
-    : cachedData.gastos.length > 0
-      ? cachedData.gastos
-      : getGastosParaPolitico(pol);
-  const canonicalVotaciones = await getCanonicalVotacionesParaPolitico({
-    cargo: pol.cargo,
-    nombreCompleto: pol.nombre_completo,
-    camaraId: diputadoIdParaPolitico(pol),
-    politicoId: pol.id,
-  });
+  const gastos = getGastosParaPolitico(pol);
+  const rawVotaciones = getVotacionesParaPolitico(pol);
 
   // Deduplicación estricta de votaciones
   const seenVoteKeys = new Set<string>();
-  const rawVotaciones = canonicalVotaciones.length > 0 && !canonicalVotaciones.every((v) => v.voto.opcion === "Sin registro")
-    ? canonicalVotaciones
-    : cachedData?.votaciones?.length
-      ? cachedData.votaciones
-      : getVotacionesParaPolitico(pol);
-
   const votaciones = rawVotaciones.filter(({ votacion }) => {
     if (votacion.id) {
       if (seenVoteKeys.has(`id:${votacion.id}`)) return false;
@@ -133,16 +118,14 @@ export default async function PoliticoPage({ params }: Props) {
     return true;
   });
 
-
   const timeline = getTimelineParaPolitico(pol);
-  const canonicalLobby = await getCanonicalLobbyParaPolitico(pol.nombre_completo);
-  const entidades = canonicalLobby.length > 0 ? canonicalLobby : getEntidadesRelacionadas(pol);
+  const entidades = getEntidadesRelacionadas(pol);
   const remuneracion = await remuneracionParaPolitico(pol.nombre_completo);
   const probidad = infoprobidadParaPolitico(pol.nombre_completo);
   const apoyoDiputado = pol.cargo === "Diputado" ? await personalApoyoParaDiputado(diputadoIdParaPolitico(pol)) : null;
   const apoyoSenador = pol.cargo === "Senador" ? await personalApoyoParaSenador(pol.nombre_completo) : null;
   const companerosPartido = POLITICOS_SEED.filter((p) => p.partido_id === pol.partido_id && p.id !== pol.id);
-  
+
   const votacionesFila: VotacionFila[] = votaciones.map(({ votacion, voto }) => {
     // Calcular consenso del partido
     let consensoPartido: string | null = null;
@@ -258,7 +241,7 @@ export default async function PoliticoPage({ params }: Props) {
     ? rawCamaraMonth
     : camaraMonthMap[rawCamaraMonth.toLocaleLowerCase("es-CL").split(/\s+/)[0]] ?? "";
   const periodosPersonal = pol.cargo === "Senador"
-    ? [...new Set(apoyoSenador?.registros.map((record) => record.periodo).filter(Boolean) ?? [])].sort()
+    ? [...new Set(apoyoSenador?.registros.map((record: any) => record.periodo).filter(Boolean) ?? [])].sort()
     : camaraMonth ? [camaraMonth] : [];
   const mesesDisponiblesPersonal = periodosPersonal.map((periodo) => ({ periodo, etiqueta: periodo }));
   const ultimoPeriodoPersonal = pol.cargo === "Senador" ? (apoyoSenador?.ultimo_mes ?? "") : camaraMonth;
@@ -293,9 +276,9 @@ export default async function PoliticoPage({ params }: Props) {
 
     let personalVal: number | null = null;
     if (pol.cargo === "Senador") {
-      const recordsMes = apoyoSenador?.registros.filter((r) => r.periodo === periodo) ?? [];
+      const recordsMes = apoyoSenador?.registros.filter((r: any) => r.periodo === periodo) ?? [];
       if (recordsMes.length > 0) {
-        const sumPersonal = recordsMes.reduce((s, r) => s + (r.monto ?? 0), 0);
+        const sumPersonal = recordsMes.reduce((s: number, r: any) => s + (r.monto ?? 0), 0);
         personalVal = sumPersonal > 0 ? sumPersonal : null;
       }
     } else if (pol.cargo === "Diputado") {

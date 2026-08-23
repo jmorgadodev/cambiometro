@@ -447,6 +447,18 @@ function getVotacionesDataset() {
   return cachedVotacionesDataset;
 }
 
+export function getPrecomputedPoliticoProfile(polId: string) {
+  try {
+    const slicePath = path.join(process.cwd(), "data", "politico-slices", `${polId}.json`);
+    if (fs.existsSync(slicePath)) {
+      return JSON.parse(fs.readFileSync(slicePath, "utf8"));
+    }
+  } catch {}
+  return null;
+}
+
+export const getPrecomputedPoliticoVotaciones = getPrecomputedPoliticoProfile;
+
 export function getVotacionesParaPolitico(
   politico: Pick<Politico, "nombre_completo"> & { id?: string }
 ): VotacionDelPolitico[] {
@@ -456,6 +468,35 @@ export function getVotacionesParaPolitico(
       (p) => normalizeSearchText(p.nombre_completo) === normalizeSearchText(politico.nombre_completo)
     );
     polId = seed?.id;
+  }
+
+  const precomputed = polId ? getPrecomputedPoliticoVotaciones(polId) : null;
+  if (precomputed && Array.isArray(precomputed.votos)) {
+    return precomputed.votos.map((v: any) => ({
+      votacion: {
+        id: v.id,
+        fecha: v.fecha,
+        descripcion: v.descripcion,
+        quorum: v.quorum,
+        resultado: v.resultado,
+        tipo: v.tipo,
+        boletin: v.boletin,
+        tramite: v.tramite,
+        informe: v.informe,
+        url_tramitacion: v.url_tramitacion,
+        total_si: v.total_si,
+        total_no: v.total_no,
+        total_abstencion: v.total_abstencion,
+        total_asistencia: v.total_asistencia,
+        url: v.url,
+      },
+      voto: {
+        id: String(polId),
+        nombre: politico.nombre_completo,
+        opcion: v.opcion,
+        opcion_valor: "0",
+      },
+    }));
   }
 
   const ds = getVotacionesDataset();
