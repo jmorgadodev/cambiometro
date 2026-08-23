@@ -287,13 +287,13 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem", marginBottom: "1.5rem" }}>
                 <div>
                   <span className="badge badge-info" style={{ marginBottom: "0.4rem" }}>
-                    DIPRES · Ley de Presupuestos 2026 · Partida {pres.partida} {pres.programa ? `· Prog. ${pres.programa}` : ""} {pres.capitulo ? `· Cap. ${pres.capitulo}` : ""}
+                    DIPRES · Ley Nº 21.796 (Presupuestos 2026) · Partida {pres.partida} {pres.capitulo ? `· Cap. ${pres.capitulo}` : ""} {pres.programa ? `· Prog. ${pres.programa}` : ""}
                   </span>
                   <h2 style={{ fontSize: "1.35rem", fontWeight: 800, margin: "0.2rem 0 0.3rem", color: "var(--text-primary)" }}>
-                    Presupuesto y Ejecución Fiscal Oficial
+                    Presupuesto y Ejecución Fiscal Oficial (Ley 21.796)
                   </h2>
                   <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: 0 }}>
-                    Datos consolidados desde la Dirección de Presupuestos (DIPRES) y el Ministerio de Hacienda.
+                    Datos oficiales consolidados desde la Dirección de Presupuestos (DIPRES), Ministerio de Hacienda y Ley de Presupuestos del Sector Público 2026 (<a href="https://www.bcn.cl/leychile/navegar?idNorma=1219410" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>BCN Ley 21.796 · idNorma 1219410</a>).
                   </p>
                 </div>
 
