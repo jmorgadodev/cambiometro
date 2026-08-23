@@ -13,6 +13,7 @@ import {
   normalizePartidoId,
 } from "@/lib/partido-estadisticas";
 import { getRadiografiaElectoral } from "@/lib/partido-electoral-data";
+import { getPartidoTransparencia } from "@/lib/partidos-transparencia";
 import { formatCLP, formatPct, comparePorApellido } from "@/lib/format";
 import ShareButton from "@/components/ShareButton";
 import PartidoDashboardClient from "@/components/partidos/PartidoDashboardClient";
@@ -106,6 +107,8 @@ export default async function PartidoPage({ params }: Props) {
   const polsConGasto = gastos.porPolitico.filter((p) => p.total > 0).length;
   const promedioGasto = polsConGasto > 0 ? Math.round(gastos.total / polsConGasto) : 0;
   const pctCongreso = Math.round((escaños.total / 205) * 1000) / 10;
+
+  const transparencia = getPartidoTransparencia(partido.id);
 
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -261,6 +264,158 @@ export default async function PartidoPage({ params }: Props) {
       </section>
 
       <div className="container-main" style={{ padding: "2.5rem 1.5rem" }}>
+        {/* Ficha Institucional y Transparencia Ley 19.862 / SERVEL / InfoProbidad */}
+        {!esIndependiente && (
+          <section
+            className="card-flat"
+            style={{
+              background: "var(--surface-2)",
+              border: "1px solid var(--border)",
+              borderRadius: "12px",
+              padding: "1.5rem",
+              marginBottom: "2rem",
+            }}
+          >
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "space-between",
+                alignItems: "center",
+                flexWrap: "wrap",
+                gap: "0.5rem",
+                marginBottom: "1rem",
+                borderBottom: "1px solid var(--border)",
+                paddingBottom: "0.75rem",
+              }}
+            >
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <span style={{ fontSize: "1.1rem" }}>🏛️</span>
+                <h2 style={{ fontSize: "1.1rem", fontWeight: 800, margin: 0, color: "var(--text-1)" }}>
+                  Transparencia Institucional, Directiva y Financiamiento Público
+                </h2>
+              </div>
+              <span className="badge badge-info" style={{ fontSize: "0.75rem" }}>
+                SERVEL · CGR · Ley 19.862
+              </span>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(280px, 1fr))", gap: "1.5rem" }}>
+              {/* 1. Directiva y Declaración de Patrimonio */}
+              <div>
+                <h3 style={{ fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-3)", marginBottom: "0.5rem" }}>
+                  Directiva Nacional Registrada
+                </h3>
+                {transparencia ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontSize: "0.9rem" }}>
+                    <div>
+                      <span style={{ color: "var(--text-2)" }}>Presidencia: </span>
+                      <strong style={{ color: "var(--text-1)" }}>{transparencia.directiva.presidente}</strong>
+                    </div>
+                    <div>
+                      <span style={{ color: "var(--text-2)" }}>Secretaría General: </span>
+                      <strong style={{ color: "var(--text-1)" }}>{transparencia.directiva.secretario_general}</strong>
+                    </div>
+                    <div style={{ marginTop: "0.5rem" }}>
+                      <a
+                        href={transparencia.directiva.declaracion_patrimonio_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-ghost"
+                        style={{ fontSize: "0.75rem", padding: "0.25rem 0.6rem", borderColor: "var(--border)", color: "var(--accent)" }}
+                      >
+                        📋 Ver Declaración de Patrimonio e Intereses (InfoProbidad) ↗
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: "0.85rem", color: "var(--text-3)" }}>
+                    Directiva en proceso de actualización ante el SERVEL.
+                  </div>
+                )}
+              </div>
+
+              {/* 2. Financiamiento Público SERVEL */}
+              <div>
+                <h3 style={{ fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-3)", marginBottom: "0.5rem" }}>
+                  Financiamiento Público (FCM / Aportes Trimestrales)
+                </h3>
+                {transparencia ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontSize: "0.9rem" }}>
+                    <div>
+                      <span style={{ color: "var(--text-2)" }}>Régimen: </span>
+                      <strong style={{ color: "var(--text-1)" }}>{transparencia.financiamiento_publico.norma_legal}</strong>
+                    </div>
+                    <div>
+                      <span style={{ color: "var(--text-2)" }}>Resolución: </span>
+                      <span style={{ color: "var(--text-1)", fontSize: "0.85rem" }}>
+                        {transparencia.financiamiento_publico.resolucion_servel}
+                      </span>
+                    </div>
+                    {transparencia.financiamiento_publico.monto_anual_referencia_clp && (
+                      <div>
+                        <span style={{ color: "var(--text-2)" }}>Monto anual asignado: </span>
+                        <strong style={{ color: "var(--money)" }}>
+                          {formatCLP(transparencia.financiamiento_publico.monto_anual_referencia_clp)}
+                        </strong>
+                      </div>
+                    )}
+                    <div style={{ marginTop: "0.5rem" }}>
+                      <a
+                        href={transparencia.financiamiento_publico.fuente_resolucion_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-ghost"
+                        style={{ fontSize: "0.75rem", padding: "0.25rem 0.6rem", borderColor: "var(--border)", color: "var(--accent)" }}
+                      >
+                        🏛️ Portal Aportes Trimestrales SERVEL ↗
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: "0.85rem", color: "var(--text-3)" }}>
+                    Sin asignación declarada en la última resolución pública.
+                  </div>
+                )}
+              </div>
+
+              {/* 3. Padrón de Afiliados Activos */}
+              <div>
+                <h3 style={{ fontSize: "0.85rem", textTransform: "uppercase", letterSpacing: "0.05em", color: "var(--text-3)", marginBottom: "0.5rem" }}>
+                  Padrón de Militantes Activos (SERVEL)
+                </h3>
+                {transparencia ? (
+                  <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem", fontSize: "0.9rem" }}>
+                    <div>
+                      <span style={{ color: "var(--text-2)" }}>Afiliados registrados: </span>
+                      <strong style={{ color: "var(--text-1)", fontSize: "1.1rem" }}>
+                        {transparencia.padron_afiliados.total_afiliados.toLocaleString("es-CL")}
+                      </strong>
+                    </div>
+                    <div style={{ fontSize: "0.8rem", color: "var(--text-3)" }}>
+                      Corte oficial al: {transparencia.padron_afiliados.fecha_corte}
+                    </div>
+                    <div style={{ marginTop: "0.5rem" }}>
+                      <a
+                        href={transparencia.padron_afiliados.fuente_padron_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="btn btn-ghost"
+                        style={{ fontSize: "0.75rem", padding: "0.25rem 0.6rem", borderColor: "var(--border)", color: "var(--accent)" }}
+                      >
+                        📊 Estadísticas Oficiales SERVEL ↗
+                      </a>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ fontSize: "0.85rem", color: "var(--text-3)" }}>
+                    Padrón en consolidación ante el Servicio Electoral.
+                  </div>
+                )}
+              </div>
+            </div>
+          </section>
+        )}
+
         {/* Dashboard Cliente Interactivo */}
         <PartidoDashboardClient
           partido={partido}
