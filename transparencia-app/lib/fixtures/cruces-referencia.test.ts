@@ -193,7 +193,7 @@ describe("Fixture Externo Congelado: Cruces de Referencia Oficial (Ronda 4)", ()
       expect(SOURCE_CANONICAL_COUNTS["infolobby"]).toBe(60523);
 
       // 4. Ley 19.862
-      expect(SOURCE_CANONICAL_COUNTS["ley-19862"]).toBe(11651);
+      expect(SOURCE_CANONICAL_COUNTS["ley-19862"]).toBe(59361);
     });
 
     it("El explorador de cruces rotula explícitamente la muestra indexada vs el universo canónico", () => {

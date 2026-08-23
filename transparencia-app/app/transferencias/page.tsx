@@ -1,20 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import dynamic from "next/dynamic";
-import LoadingOrb from "@/components/LoadingOrb";
 import { getLey19862Summary } from "@/lib/transferencias-data";
-
-const TransferenciasExplorerClient = dynamic(
-  () => import("@/components/transferencias/TransferenciasExplorerClient"),
-  {
-    loading: () => <LoadingOrb size={52} label="Cargando transferencias..." />,
-  }
-);
+import { queryTransferencias } from "@/lib/transferencias-d1";
+import TransferenciasExplorerClient from "@/components/transferencias/TransferenciasExplorerClient";
 
 export const metadata: Metadata = {
   title: "Transferencias Ley 19.862 — El Cambiómetro",
   description:
-    "Explora las transferencias de fondos públicos del Estado de Chile registradas bajo la Ley 19.862, con cobertura y trazabilidad a la fuente oficial.",
+    "Explora las 59.361 transferencias de fondos públicos del Estado de Chile registradas bajo la Ley 19.862, con cobertura y trazabilidad a la fuente oficial registros19862.gob.cl.",
   openGraph: {
     title: "Transferencias Ley 19.862 — El Cambiómetro",
     description:
@@ -31,32 +24,37 @@ export const metadata: Metadata = {
   alternates: { canonical: "/transferencias" },
 };
 
-export default function TransferenciasPage() {
+export default async function TransferenciasPage({
+  searchParams,
+}: {
+  searchParams?: Promise<{ q?: string; year?: string; emisor?: string; page?: string }>;
+}) {
+  const params = searchParams ? await searchParams : {};
   const summary = getLey19862Summary();
 
-  if (!summary || !summary.kpis) {
-    return (
-      <main style={{ padding: "4rem 2rem", textAlign: "center" }}>
-        <h1>Datos de transferencias no disponibles</h1>
-        <p>
-          El archivo de resumen de la Ley 19.862 no está disponible en este entorno.
-        </p>
-        <Link href="/" style={{ color: "var(--accent)" }}>
-          ← Volver al inicio
-        </Link>
-      </main>
-    );
-  }
+  const queryResult = await queryTransferencias({
+    page: Number(params.page) || 1,
+    limit: 50,
+    search: params.q || "",
+    year: params.year || "",
+    emisor: params.emisor || "",
+    sortBy: "monto",
+    sortOrder: "desc",
+  });
 
   return (
     <TransferenciasExplorerClient
-      kpis={summary.kpis}
+      kpis={queryResult.kpis}
       topReceptores={summary.top_receptores.slice(0, 10)}
       topEmisores={summary.top_emisores.slice(0, 10)}
-      byYear={summary.by_year}
-      transfers={summary.transfers_sample.map((t) => ({
-        ...t,
-      }))}
+      byYear={queryResult.by_year}
+      initialTransfers={queryResult.data}
+      initialTotal={queryResult.total}
+      initialTotalPages={queryResult.totalPages}
+      initialPage={queryResult.page}
+      initialQuery={params.q || ""}
+      initialYear={params.year || "Todos"}
+      initialEmisor={params.emisor || "Todos"}
       generatedAt={summary.generatedAt}
     />
   );

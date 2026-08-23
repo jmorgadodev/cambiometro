@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect, useRef, useTransition } from "react";
 import Link from "next/link";
+import type { TransferenciaDetalle, Ley19862Summary, ReceptorResumen, EmisorResumen } from "@/lib/transferencias-data";
 
 // ── Tipos ──────────────────────────────────────────────────────────────────────
 interface KPIs {
@@ -11,37 +12,18 @@ interface KPIs {
   total_emisores: number;
 }
 
-interface TopEntry {
-  name: string;
-  rut: string;
-  class: string | null;
-  total_clp: number;
-  count: number;
-  top_emisores?: string[];
-}
-
-interface Transfer {
-  id: string;
-  fecha: string | null;
-  period: string | null;
-  title: string | null;
-  description: string | null;
-  classification: string | null;
-  emitter_name: string | null;
-  emitter_rut: string | null;
-  receiver_name: string | null;
-  receiver_rut: string | null;
-  monto_clp: number;
-  url: string | null;
-  municipality: string | null;
-}
-
 interface Props {
   kpis: KPIs;
-  topReceptores: TopEntry[];
-  topEmisores: TopEntry[];
+  topReceptores: ReceptorResumen[];
+  topEmisores: EmisorResumen[];
   byYear: Record<string, { count: number; total: number }>;
-  transfers: Transfer[];
+  initialTransfers: TransferenciaDetalle[];
+  initialTotal: number;
+  initialTotalPages: number;
+  initialPage?: number;
+  initialQuery?: string;
+  initialYear?: string;
+  initialEmisor?: string;
   generatedAt: string;
 }
 
@@ -78,57 +60,88 @@ function fmtDate(fecha: string | null): string {
   return fecha;
 }
 
-const ITEMS_PER_PAGE = 20;
+const ITEMS_PER_PAGE = 50;
+
 export default function TransferenciasExplorerClient({
   kpis,
   topReceptores,
   topEmisores,
   byYear,
-  transfers,
+  initialTransfers,
+  initialTotal,
+  initialTotalPages,
+  initialPage = 1,
+  initialQuery = "",
+  initialYear = "Todos",
+  initialEmisor = "Todos",
   generatedAt,
 }: Props) {
-  const [search, setSearch] = useState("");
-  const [yearFilter, setYearFilter] = useState("Todos");
-  const [emisorFilter, setEmisorFilter] = useState("Todos");
-  const [page, setPage] = useState(1);
+  const [search, setSearch] = useState(initialQuery);
+  const [yearFilter, setYearFilter] = useState(initialYear);
+  const [emisorFilter, setEmisorFilter] = useState(initialEmisor);
+  const [sortBy, setSortBy] = useState<"monto" | "fecha">("monto");
+  const [page, setPage] = useState(initialPage);
+
+  const [transfers, setTransfers] = useState<TransferenciaDetalle[]>(initialTransfers);
+  const [total, setTotal] = useState<number>(initialTotal);
+  const [totalPages, setTotalPages] = useState<number>(initialTotalPages);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isPending, startTransition] = useTransition();
+
+  const isInitialMount = useRef(true);
 
   // Lista única de organismos emisores para el select
   const emisoresOptions = useMemo(() => {
     const set = new Set<string>();
     for (const e of topEmisores) if (e.name) set.add(e.name);
-    for (const t of transfers) if (t.emitter_name) set.add(t.emitter_name);
+    for (const t of initialTransfers) if (t.emitter_name) set.add(t.emitter_name);
     return Array.from(set).sort();
-  }, [topEmisores, transfers]);
+  }, [topEmisores, initialTransfers]);
 
-  // ── Filtrado interactivo en tiempo real (< 200 ms) ───────────────────────────
-  const filtered = useMemo(() => {
-    const q = search.toLowerCase().trim();
-    return transfers.filter((t) => {
-      const matchYear =
-        yearFilter === "Todos" ||
-        t.period === yearFilter ||
-        (t.fecha && t.fecha.startsWith(yearFilter));
+  // Carga remota o filtrado reactivo
+  useEffect(() => {
+    if (isInitialMount.current) {
+      isInitialMount.current = false;
+      return;
+    }
 
-      const matchEmisor =
-        emisorFilter === "Todos" ||
-        (t.emitter_name && t.emitter_name.toLowerCase() === emisorFilter.toLowerCase());
+    const controller = new AbortController();
+    const timeoutId = setTimeout(async () => {
+      setIsLoading(true);
+      try {
+        const params = new URLSearchParams({
+          page: String(page),
+          limit: String(ITEMS_PER_PAGE),
+          sort: sortBy,
+          order: "desc",
+        });
+        if (search.trim()) params.set("q", search.trim());
+        if (yearFilter !== "Todos") params.set("year", yearFilter);
+        if (emisorFilter !== "Todos") params.set("emisor", emisorFilter);
 
-      const matchSearch =
-        !q ||
-        (t.title && t.title.toLowerCase().includes(q)) ||
-        (t.description && t.description.toLowerCase().includes(q)) ||
-        (t.receiver_name && t.receiver_name.toLowerCase().includes(q)) ||
-        (t.emitter_name && t.emitter_name.toLowerCase().includes(q)) ||
-        (t.receiver_rut && t.receiver_rut.toLowerCase().includes(q)) ||
-        (t.emitter_rut && t.emitter_rut.toLowerCase().includes(q)) ||
-        (t.municipality && t.municipality.toLowerCase().includes(q));
+        const res = await fetch(`/api/v1/transferencias?${params.toString()}`, {
+          signal: controller.signal,
+        });
+        if (res.ok) {
+          const json = await res.json();
+          setTransfers(json.data || []);
+          setTotal(json.total || 0);
+          setTotalPages(json.totalPages || 1);
+        }
+      } catch (err: any) {
+        if (err.name !== "AbortError") {
+          console.error("Error fetching transferencias:", err);
+        }
+      } finally {
+        setIsLoading(false);
+      }
+    }, 150);
 
-      return matchYear && matchEmisor && matchSearch;
-    });
-  }, [transfers, search, yearFilter, emisorFilter]);
-
-  const totalPages = Math.max(1, Math.ceil(filtered.length / ITEMS_PER_PAGE));
-  const paginated = filtered.slice((page - 1) * ITEMS_PER_PAGE, page * ITEMS_PER_PAGE);
+    return () => {
+      controller.abort();
+      clearTimeout(timeoutId);
+    };
+  }, [page, search, yearFilter, emisorFilter, sortBy]);
 
   const handleSearchChange = (v: string) => {
     setSearch(v);
@@ -145,6 +158,11 @@ export default function TransferenciasExplorerClient({
     setPage(1);
   };
 
+  const handleSortChange = (newSort: "monto" | "fecha") => {
+    setSortBy(newSort);
+    setPage(1);
+  };
+
   // ── Serie anual (4 barras 2023-2026) ─────────────────────────────────────────
   const yearChartData = useMemo(() => {
     return Object.entries(byYear).map(([yr, info]) => {
@@ -158,10 +176,9 @@ export default function TransferenciasExplorerClient({
   }, [byYear]);
 
   const yearsOptions = useMemo(() => ["Todos", ...Object.keys(byYear).sort()], [byYear]);
-
   const maxYearVal = Math.max(1, ...yearChartData.map((d) => d.value));
 
-  // Max value para barras de receptores y emisores
+  // Max value para barras de rankings top 10
   const maxReceptorVal = Math.max(1, ...topReceptores.slice(0, 10).map((r) => r.total_clp));
   const maxEmisorVal = Math.max(1, ...topEmisores.slice(0, 10).map((e) => e.total_clp));
 
@@ -204,7 +221,7 @@ export default function TransferenciasExplorerClient({
             }}
           >
             Registro oficial de transferencias del Estado de Chile a entidades receptoras bajo la Ley 19.862.
-            Explore quién recibe fondos, qué organismo emite y el desglose de montos con trazabilidad por fila a <code>registros19862.gob.cl</code>.
+            Explore quién recibe fondos, qué organismo emite y el desglose de montos con trazabilidad oficial a <code>registros19862.gob.cl</code>.
           </p>
 
           {/* KPIs Principales */}
@@ -225,7 +242,7 @@ export default function TransferenciasExplorerClient({
               {
                 label: "Total Transferencias",
                 value: fmtNum(kpis.total_transfers),
-                sub: "Registros de transferencias",
+                sub: "59.361 registros oficiales indexados",
                 color: "var(--info)",
               },
               {
@@ -300,10 +317,10 @@ export default function TransferenciasExplorerClient({
             }}
           >
             <div style={{ fontWeight: 700, fontSize: "1rem", color: "var(--text-1)", marginBottom: "0.2rem" }}>
-              🏆 Top 10 Entidades Receptoras
+              🏆 Muestra Ranking: Top 10 Entidades Receptoras
             </div>
             <p style={{ fontSize: "0.75rem", color: "var(--text-3)", margin: "0 0 1rem 0" }}>
-              Click en cualquier barra para filtrar el explorador inferior
+              Haz clic en cualquier entidad para filtrar el explorador inferior
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
@@ -377,10 +394,10 @@ export default function TransferenciasExplorerClient({
             }}
           >
             <div style={{ fontWeight: 700, fontSize: "1rem", color: "var(--text-1)", marginBottom: "0.2rem" }}>
-              📤 Top 10 Organismos Emisores
+              📤 Muestra Ranking: Top 10 Organismos Emisores
             </div>
             <p style={{ fontSize: "0.75rem", color: "var(--text-3)", margin: "0 0 1rem 0" }}>
-              Click en cualquier barra para filtrar el explorador inferior
+              Haz clic en cualquier organismo para filtrar el explorador inferior
             </p>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
@@ -458,7 +475,7 @@ export default function TransferenciasExplorerClient({
             📅 Serie Anual de Transferencias (2023–2026)
           </div>
           <p style={{ fontSize: "0.75rem", color: "var(--text-3)", margin: "0 0 1.25rem 0" }}>
-            Monto total y volumen de transferencias por año. Click en cualquier barra para filtrar el explorador por ese año.
+            Monto consolidado y volumen de transferencias por año oficial. Haz clic en cualquier barra para filtrar el explorador por ese año.
           </p>
 
           <div
@@ -480,7 +497,7 @@ export default function TransferenciasExplorerClient({
                   onClick={() => handleYearChange(isActive ? "Todos" : d.label)}
                   style={{
                     background: isActive ? "var(--surface-2)" : "transparent",
-                    border: isActive ? "1px solid var(--accent)" : "1px solid var(--border)",
+                    border: isActive ? "2px solid var(--accent)" : "1px solid var(--border)",
                     borderRadius: 6,
                     padding: "0.75rem 0.5rem",
                     display: "flex",
@@ -489,6 +506,7 @@ export default function TransferenciasExplorerClient({
                     gap: "0.4rem",
                     cursor: "pointer",
                     textAlign: "center",
+                    transition: "all 0.15s ease",
                   }}
                   title={d.extra}
                 >
@@ -499,7 +517,7 @@ export default function TransferenciasExplorerClient({
                   <div
                     style={{
                       width: "100%",
-                      height: "60px",
+                      height: "70px",
                       display: "flex",
                       alignItems: "flex-end",
                       justifyContent: "center",
@@ -528,8 +546,9 @@ export default function TransferenciasExplorerClient({
           </div>
         </div>
 
-        {/* ── EXPLORADOR DE TRANSFERENCIAS (PRIMERAS 20 FILAS VISIBLES AL CARGAR) ── */}
+        {/* ── EXPLORADOR DE TRANSFERENCIAS (PÁGINAS DE 50 FILAS SOBRE UNIVERSO COMPLETO) ── */}
         <div
+          id="tabla-transferencias-explorador"
           style={{
             background: "var(--surface)",
             border: "1px solid var(--border)",
@@ -537,12 +556,40 @@ export default function TransferenciasExplorerClient({
             padding: "1.25rem",
           }}
         >
+          {/* Banner de Muestra Indexada / Universo Oficial Rotulado */}
+          <div
+            style={{
+              padding: "0.75rem 1rem",
+              background: "var(--surface-2)",
+              border: "1px solid var(--border)",
+              borderRadius: 6,
+              marginBottom: "1rem",
+              fontSize: "0.8rem",
+              color: "var(--text-2)",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              flexWrap: "wrap",
+              gap: "0.5rem",
+            }}
+          >
+            <div>
+              📌 <strong>Explorador de Transferencias Ley 19.862:</strong> {fmtNum(total)} transferencias oficiales registradas · datos trazables a <code>registros19862.gob.cl</code> · coherente con{" "}
+              <Link href="/datos/calidad" style={{ color: "var(--accent)", fontWeight: 600, textDecoration: "underline" }}>
+                /datos/calidad
+              </Link>
+            </div>
+            <div style={{ fontWeight: 600, color: "var(--text-1)", fontSize: "0.78rem" }}>
+              Pág. {page} de {totalPages}
+            </div>
+          </div>
+
           <div style={{ marginBottom: "1rem" }}>
             <div style={{ fontWeight: 700, fontSize: "1rem", color: "var(--text-1)", marginBottom: "0.2rem" }}>
               🔍 Explorador de Transferencias
             </div>
             <p style={{ fontSize: "0.75rem", color: "var(--text-3)", margin: 0 }}>
-              Busque por nombre, RUT, organismo emisor o receptor. Registros trazables con enlace oficial a registros19862.gob.cl.
+              Busque por nombre, RUT, organismo emisor o receptor. Registros trazables con enlace oficial a <code>registros19862.gob.cl</code>.
             </p>
           </div>
 
@@ -560,7 +607,7 @@ export default function TransferenciasExplorerClient({
             <div style={{ flex: "1 1 240px", minWidth: 200 }}>
               <input
                 type="search"
-                placeholder="🔍 Buscar por nombre, RUT, organismo..."
+                placeholder="🔍 Buscar por nombre, RUT, organismo o materia..."
                 value={search}
                 onChange={(e) => handleSearchChange(e.target.value)}
                 style={{
@@ -619,6 +666,24 @@ export default function TransferenciasExplorerClient({
               ))}
             </select>
 
+            {/* Selector de Orden */}
+            <select
+              value={sortBy}
+              onChange={(e) => handleSortChange(e.target.value as "monto" | "fecha")}
+              style={{
+                padding: "0.45rem 0.65rem",
+                background: "var(--surface-2)",
+                border: "1px solid var(--border)",
+                borderRadius: 6,
+                color: "var(--text-1)",
+                fontSize: "0.8rem",
+                cursor: "pointer",
+              }}
+            >
+              <option value="monto">Ordenar: Mayor Monto</option>
+              <option value="fecha">Ordenar: Más Recientes</option>
+            </select>
+
             {/* Botón para limpiar filtros */}
             {(search || yearFilter !== "Todos" || emisorFilter !== "Todos") && (
               <button
@@ -658,8 +723,11 @@ export default function TransferenciasExplorerClient({
             }}
           >
             <span>
-              Mostrando <strong>{Math.min(ITEMS_PER_PAGE, filtered.length)}</strong> de <strong>{fmtNum(filtered.length)}</strong> registros · página {page} de {totalPages}
+              Mostrando {(page - 1) * ITEMS_PER_PAGE + 1}–{Math.min(page * ITEMS_PER_PAGE, total)} de <strong>{fmtNum(total)}</strong> transferencias · página {page} de {totalPages}
             </span>
+            {isLoading && (
+              <span style={{ color: "var(--accent)", fontWeight: 600 }}>Cargando transferencias...</span>
+            )}
           </div>
 
           {/* TABLA LIMPIA (HAIRLINES, SIN CHIPS PESADOS) */}
@@ -685,7 +753,7 @@ export default function TransferenciasExplorerClient({
                 </tr>
               </thead>
               <tbody>
-                {paginated.length === 0 ? (
+                {transfers.length === 0 ? (
                   <tr>
                     <td
                       colSpan={6}
@@ -699,12 +767,14 @@ export default function TransferenciasExplorerClient({
                     </td>
                   </tr>
                 ) : (
-                  paginated.map((t, i) => (
+                  transfers.map((t, i) => (
                     <tr
                       key={t.id || i}
                       style={{
                         borderBottom: "1px solid var(--border)",
                         verticalAlign: "middle",
+                        contentVisibility: "auto",
+                        containIntrinsicSize: "auto 54px",
                       }}
                     >
                       {/* Fecha */}
@@ -795,43 +865,83 @@ export default function TransferenciasExplorerClient({
                 gap: "0.5rem",
               }}
             >
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.max(1, p - 1))}
-                disabled={page <= 1}
-                style={{
-                  padding: "0.35rem 0.75rem",
-                  fontSize: "0.78rem",
-                  background: "var(--surface-2)",
-                  border: "1px solid var(--border)",
-                  borderRadius: 6,
-                  color: page <= 1 ? "var(--text-3)" : "var(--text-1)",
-                  cursor: page <= 1 ? "not-allowed" : "pointer",
-                }}
-              >
-                ← Anterior
-              </button>
+              <div style={{ display: "flex", gap: "0.35rem" }}>
+                <button
+                  type="button"
+                  onClick={() => setPage(1)}
+                  disabled={page <= 1}
+                  style={{
+                    padding: "0.35rem 0.65rem",
+                    fontSize: "0.75rem",
+                    background: "var(--surface-2)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 6,
+                    color: page <= 1 ? "var(--text-3)" : "var(--text-1)",
+                    cursor: page <= 1 ? "not-allowed" : "pointer",
+                  }}
+                  title="Primera página"
+                >
+                  « Primera
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  disabled={page <= 1}
+                  style={{
+                    padding: "0.35rem 0.65rem",
+                    fontSize: "0.75rem",
+                    background: "var(--surface-2)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 6,
+                    color: page <= 1 ? "var(--text-3)" : "var(--text-1)",
+                    cursor: page <= 1 ? "not-allowed" : "pointer",
+                  }}
+                  title="Página anterior"
+                >
+                  ‹ Anterior
+                </button>
+              </div>
 
-              <span style={{ fontSize: "0.78rem", color: "var(--text-2)" }}>
-                Página <strong>{page}</strong> de <strong>{totalPages}</strong>
+              <span style={{ fontSize: "0.78rem", color: "var(--text-2)", fontWeight: 700 }}>
+                Página {page} de {totalPages}
               </span>
 
-              <button
-                type="button"
-                onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                disabled={page >= totalPages}
-                style={{
-                  padding: "0.35rem 0.75rem",
-                  fontSize: "0.78rem",
-                  background: "var(--surface-2)",
-                  border: "1px solid var(--border)",
-                  borderRadius: 6,
-                  color: page >= totalPages ? "var(--text-3)" : "var(--text-1)",
-                  cursor: page >= totalPages ? "not-allowed" : "pointer",
-                }}
-              >
-                Siguiente →
-              </button>
+              <div style={{ display: "flex", gap: "0.35rem" }}>
+                <button
+                  type="button"
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  disabled={page >= totalPages}
+                  style={{
+                    padding: "0.35rem 0.65rem",
+                    fontSize: "0.75rem",
+                    background: "var(--surface-2)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 6,
+                    color: page >= totalPages ? "var(--text-3)" : "var(--text-1)",
+                    cursor: page >= totalPages ? "not-allowed" : "pointer",
+                  }}
+                  title="Página siguiente"
+                >
+                  Siguiente ›
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setPage(totalPages)}
+                  disabled={page >= totalPages}
+                  style={{
+                    padding: "0.35rem 0.65rem",
+                    fontSize: "0.75rem",
+                    background: "var(--surface-2)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 6,
+                    color: page >= totalPages ? "var(--text-3)" : "var(--text-1)",
+                    cursor: page >= totalPages ? "not-allowed" : "pointer",
+                  }}
+                  title="Última página"
+                >
+                  Última »
+                </button>
+              </div>
             </div>
           )}
         </div>

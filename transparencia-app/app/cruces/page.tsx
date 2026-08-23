@@ -58,7 +58,7 @@ export default async function CrossesPage({
   const totalChilecompraProcesos = SOURCE_CANONICAL_COUNTS["chilecompra"] ?? 74142;
   const contraloriaCount = SOURCE_CANONICAL_COUNTS["contraloria"] ?? 291;
   const infolobbyCount = SOURCE_CANONICAL_COUNTS["infolobby"] ?? 60523;
-  const ley19862Count = SOURCE_CANONICAL_COUNTS["ley-19862"] ?? 11651;
+  const ley19862Count = SOURCE_CANONICAL_COUNTS["ley-19862"] ?? 59361;
 
   return (
     <main>
