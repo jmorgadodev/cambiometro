@@ -19,6 +19,19 @@ function wrangler(args, allowFailure = false) {
   return command(process.execPath, [resolve("node_modules/wrangler/bin/wrangler.js"), ...args, "--remote"], allowFailure);
 }
 
+function wranglerWithRetry(args, retries = 3) {
+  let attempt = 0;
+  while (attempt < retries) {
+    attempt += 1;
+    const res = wrangler(args, true);
+    if (res.status === 0) return res;
+    if (attempt === retries) {
+      throw new Error(`wrangler ${args.join(" ")} fallo tras ${retries} intentos: ${res.stderr?.trim() ?? `codigo ${res.status}`}`);
+    }
+    spawnSync(process.execPath, ["-e", `setTimeout(()=>null, ${attempt * 3000})`]);
+  }
+}
+
 function verifyAsset(outputRoot, metadata) {
   const filePath = join(outputRoot, metadata.key);
   if (!existsSync(filePath)) throw new Error(`PUBLICATION_MISSING_ASSET: ${metadata.key}`);
@@ -105,15 +118,15 @@ if (publishR2) {
   const activationManifests = r2Plan.puts.filter((asset) => asset.key.endsWith("/manifest.json"));
 
   for (const asset of r2Plan.puts.filter((item) => !activationManifests.includes(item))) {
-    wrangler(["r2", "object", "put", `${bucket}/${asset.key}`, "--file", join(outputRoot, asset.key)]);
+    wranglerWithRetry(["r2", "object", "put", `${bucket}/${asset.key}`, "--file", join(outputRoot, asset.key)]);
   }
-  for (const key of r2Plan.deletes) wrangler(["r2", "object", "delete", `${bucket}/${key}`]);
+  for (const key of r2Plan.deletes) wranglerWithRetry(["r2", "object", "delete", `${bucket}/${key}`]);
   for (const manifest of activationManifests) {
-    wrangler(["r2", "object", "put", `${bucket}/${manifest.key}`, "--file", join(outputRoot, manifest.key), "--content-type", "application/json"]);
+    wranglerWithRetry(["r2", "object", "put", `${bucket}/${manifest.key}`, "--file", join(outputRoot, manifest.key), "--content-type", "application/json"]);
   }
 
   writeFileAtomic(inventoryPath, `${JSON.stringify(r2Plan.inventory, null, 2)}\n`, "utf8");
-  wrangler(["r2", "object", "put", `${bucket}/${inventoryKey}`, "--file", inventoryPath, "--content-type", "application/json"]);
+  wranglerWithRetry(["r2", "object", "put", `${bucket}/${inventoryKey}`, "--file", inventoryPath, "--content-type", "application/json"]);
   console.log(JSON.stringify({
     action: r2Plan.action,
     usedBytes: r2Plan.projectedBytes,
