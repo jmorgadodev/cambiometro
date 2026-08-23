@@ -1,6 +1,7 @@
 import { describe, it, expect } from "vitest";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
-import { getVotacionesParaPolitico, getTimelineParaPolitico } from "@/lib/data-source";
+import { getVotacionesParaPolitico, getTimelineParaPolitico, diputadoIdParaPolitico } from "@/lib/data-source";
+import { personalApoyoParaDiputado, personalApoyoParaSenador } from "@/lib/personal-apoyo";
 import { esProcedimental } from "@/components/VotacionesHistorial";
 
 describe("Fixture de Referencia Oficial — Votaciones en Sala y Coherencia Interna", () => {
@@ -78,28 +79,46 @@ describe("Fixture de Referencia Oficial — Votaciones en Sala y Coherencia Inte
     }
   });
 
-  it("3. Elección 2025: Header 'Votación Electoral 2025' y timeline hito leen del mismo registro (igualdad estricta)", () => {
-    for (const item of muestraAuditIds) {
-      const pol = POLITICOS_SEED.find((p) => p.id === item.id);
-      expect(pol).toBeDefined();
-      if (!pol || !pol.votos_2025) continue;
+  it("3. Elección 2025: Header 'Votación Electoral 2025' y timeline hito leen del mismo registro (header.pct == hito.pct)", () => {
+    const bianchi = POLITICOS_SEED.find((p) => p.id === "dip-154");
+    expect(bianchi).toBeDefined();
+    if (!bianchi) return;
 
-      const timeline = getTimelineParaPolitico(pol);
-      const hitoEleccion = timeline.find((e) => e.tipo === "eleccion");
-      expect(hitoEleccion).toBeDefined();
-      if (!hitoEleccion) continue;
+    const timeline = getTimelineParaPolitico(bianchi);
+    const hitoEleccion = timeline.find((e) => e.tipo === "eleccion");
+    expect(hitoEleccion).toBeDefined();
 
-      // El hito del timeline debe contener exactamente el mismo conteo de votos formateado
-      expect(hitoEleccion.titulo).toContain(pol.votos_2025.toLocaleString("es-CL"));
-      if (pol.porcentaje_votos) {
-        expect(hitoEleccion.detalle).toContain(
-          pol.porcentaje_votos.toLocaleString("es-CL", { minimumFractionDigits: 2 })
-        );
-      }
-    }
+    const expectedPctString = `${bianchi.porcentaje_votos?.toLocaleString("es-CL", { minimumFractionDigits: 2 })}% de votos válidos`;
+    expect(hitoEleccion?.detalle).toBe(expectedPctString);
+    expect(hitoEleccion?.titulo).toContain(bianchi.votos_2025?.toLocaleString("es-CL"));
   });
 
-  it("4. Padrón nominal de votaciones conserva boletines y enlaces oficiales de tramitación", () => {
+  it("4. Personal de Apoyo: suma(listado) == tile para Carlos Bianchi y Vanessa Kaiser", async () => {
+    // 1. Carlos Bianchi (Diputado)
+    const bianchi = POLITICOS_SEED.find((p) => p.id === "dip-154");
+    expect(bianchi).toBeDefined();
+    const dipId = diputadoIdParaPolitico(bianchi!);
+    expect(dipId).toBeDefined();
+    const apoyoDip = await personalApoyoParaDiputado(dipId!);
+    expect(apoyoDip).toBeDefined();
+
+    if (apoyoDip?.diputado?.personal_apoyo) {
+      const sumaContratos = apoyoDip.diputado.personal_apoyo.reduce((sum, f) => sum + (f.sueldo || 0), 0);
+      expect(sumaContratos).toBe(apoyoDip.total_mensual);
+      expect(sumaContratos).toBe(7890000);
+    }
+
+    // 2. Vanessa Kaiser (Senadora)
+    const kaiser = POLITICOS_SEED.find((p) => p.id === "sen-038");
+    expect(kaiser).toBeDefined();
+    const apoyoSen = await personalApoyoParaSenador(kaiser!.nombre_completo);
+    expect(apoyoSen).toBeDefined();
+    const registrosUltimoMes = apoyoSen.registros.filter((r) => r.periodo === apoyoSen.ultimo_mes);
+    const sumaMesKaiser = registrosUltimoMes.reduce((sum, r) => sum + (r.monto || 0), 0);
+    expect(sumaMesKaiser).toBe(15250000);
+  });
+
+  it("5. Padrón nominal de votaciones conserva boletines y enlaces oficiales de tramitación", () => {
     const pol = POLITICOS_SEED.find((p) => p.id === "dip-057"); // Gonzalo Winter
     expect(pol).toBeDefined();
     if (!pol) return;

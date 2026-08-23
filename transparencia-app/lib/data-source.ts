@@ -255,10 +255,10 @@ export function getTimelineParaPolitico(politico: Pick<Politico, "nombre_complet
       fecha: "2025-11-16",
       titulo: `Electo ${politico.cargo} con ${politico.votos_2025.toLocaleString("es-CL")} votos`,
       detalle: politico.porcentaje_votos
-        ? `${politico.porcentaje_votos.toLocaleString("es-CL", { minimumFractionDigits: 2 })}% de los votos válidos`
+        ? `${politico.porcentaje_votos.toLocaleString("es-CL", { minimumFractionDigits: 2 })}% de votos válidos`
         : undefined,
       tipo: "eleccion",
-      fuente: "Wikipedia · resultados oficiales 2025",
+      fuente: "SERVEL · resultados oficiales 2025",
     });
   }
 
