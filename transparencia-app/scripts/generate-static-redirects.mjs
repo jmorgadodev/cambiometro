@@ -17,6 +17,7 @@ const politicoRedirects = JSON.parse(await readFile(join(root, "data", "generate
 const redirects = [
   "/autoridades /personas?tab=parlamentarios 301",
   "/funcionarios /personas?tab=funcionarios 301",
+  "/partidos/independientes /partidos/ind 301",
   ...MUNICIPALIDADES_SEED.map((municipalidad) =>
     `/municipalidades/${municipalidad.id} /municipalidades/${slugify(municipalidad.nombre_comuna)} 301`),
   ...politicoRedirects.map(({ from, to }) => `/politico/${from} /politico/${to} 301`),
