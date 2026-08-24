@@ -71,6 +71,7 @@ interface PersonasUniversalClientProps {
   autoridades: AutoridadItem[];
   organismos: OrganismoOption[];
   totalFuncionariosEstimados?: number;
+  initialTab?: PersonaTab;
 }
 
 function formatCLP(n?: number | null) {
@@ -128,6 +129,7 @@ export default function PersonasUniversalClient({
   autoridades,
   organismos,
   totalFuncionariosEstimados = 1203287,
+  initialTab = "parlamentarios",
 }: PersonasUniversalClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -137,7 +139,7 @@ export default function PersonasUniversalClient({
   const rawTab = searchParams.get("tab") as PersonaTab | null;
   const activeTab: PersonaTab = (rawTab && ["parlamentarios", "alcaldes", "autoridades", "funcionarios"].includes(rawTab))
     ? rawTab
-    : "parlamentarios";
+    : initialTab;
 
   // Search & Filters
   const [search, setSearch] = useState(() => searchParams.get("search") || "");
