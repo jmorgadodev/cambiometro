@@ -199,7 +199,7 @@ export default async function EntityPage({ params }: { params: Promise<{ id: str
           <dl className="page-fact-sheet">
             <div><dt>Evidencias</dt><dd>{allRecords.length}</dd></div>
             <div><dt>Relaciones</dt><dd>{relations.length}</dd></div>
-            <div><dt>Fuentes</dt><dd>{entity.sourceIds.join(", ")}</dd></div>
+            <div><dt>Fuentes</dt><dd>{(entity.sourceIds ?? []).join(", ") || "—"}</dd></div>
           </dl>
         </div>
       </section>
