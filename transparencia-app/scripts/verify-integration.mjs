@@ -362,7 +362,7 @@ try {
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 800 });
     await gotoWithNetworkRetry(`${baseUrl}/privacidad`, { waitUntil: "domcontentloaded" });
-    await page.locator("#form-solicitud").waitFor({ state: "visible", timeout: 10000 });
+    await page.locator("#form-solicitud:visible").waitFor({ state: "visible", timeout: 10000 });
     await page.waitForTimeout(1500);
     await page.screenshot({ path: join(screenshotDir, `privacidad-${width}.png`), fullPage: true });
 
