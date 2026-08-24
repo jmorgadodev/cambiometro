@@ -150,7 +150,7 @@ try {
   await gotoWithNetworkRetry(baseUrl);
   assert.equal(await page.getByRole("heading", { name: /Transparencia, votaciones y gastos p.blicos|Sigue las decisiones p.blicas/ }).count(), 1);
   assert.equal(await page.getByRole("link", { name: /Explorar parlamentarios/ }).count(), 1);
-  await page.waitForLoadState("networkidle");
+  await page.waitForTimeout(500);
   await page.screenshot({ path: join(tmpdir(), "transparencia-home-desktop.png"), fullPage: true });
 
   await gotoWithNetworkRetry(`${baseUrl}/cruces`);
