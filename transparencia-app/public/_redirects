@@ -1,5 +1,6 @@
 /autoridades /personas?tab=parlamentarios 301
 /funcionarios /personas?tab=funcionarios 301
+/partidos/independientes /partidos/ind 301
 /municipalidades/muni-iquique /municipalidades/iquique 301
 /municipalidades/muni-altohospicio /municipalidades/alto-hospicio 301
 /municipalidades/muni-pozoalmonte /municipalidades/pozo-almonte 301
