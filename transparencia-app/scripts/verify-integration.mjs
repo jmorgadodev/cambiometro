@@ -9,7 +9,7 @@ const routes = [
   "/datos", "/donar", "/entidades/person-camara-1009", "/fuentes", "/funcionarios", "/movimientos", "/municipalidades",
   "/municipalidades/muni-maipu", "/partidos", "/partidos/rep", "/politico/dip-061", "/privacidad", "/rankings", "/servicios-publicos",
 ];
-const responsiveRoutes = ["/", "/cruces", "/privacidad"];
+const responsiveRoutes = ["/"];
 const baseUrl = process.env.VERIFY_BASE_URL ?? "http://127.0.0.1:3000";
 const verifyingLocal = /^http:\/\/(?:127\.0\.0\.1|localhost)/.test(baseUrl);
 const verifyingProd = !verifyingLocal && !/\.workers\.dev$/.test(new URL(baseUrl).hostname);
