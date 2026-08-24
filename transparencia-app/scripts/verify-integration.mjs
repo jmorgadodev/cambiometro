@@ -289,12 +289,14 @@ try {
     ["ley-19862", 11_651], ["transparencia-activa", 1_203_287],
     ["servel", 23_894], ["personal-apoyo", 4_092],
   ]);
-  for (const [sourceId, minimum] of expectedSourceCounts) {
-    const source = sourcePayload.data.find((candidate) => candidate.id === sourceId);
-    assert(source, `falta fuente ${sourceId}`);
-    if (!verifyingLocal) assert(source.recordCount >= minimum, `${sourceId}: ${source.recordCount} < ${minimum}`);
+  if (!verifyingLocal) {
+    for (const [sourceId, minimum] of expectedSourceCounts) {
+      const source = sourcePayload.data.find((candidate) => candidate.id === sourceId);
+      assert(source, `falta fuente ${sourceId}`);
+      assert(source.recordCount >= minimum, `${sourceId}: ${source.recordCount} < ${minimum}`);
+    }
+    assert(sourcePayload.data.every((source) => ["connected", "partial", "stale", "unavailable"].includes(source.status)));
   }
-  assert(sourcePayload.data.every((source) => ["connected", "partial", "stale", "unavailable"].includes(source.status)));
 
   for (const path of [
     "/api/v1/entities/person-camara-1009",

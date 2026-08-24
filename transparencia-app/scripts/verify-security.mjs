@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { chromium } from "playwright";
 
 const baseUrl = process.env.VERIFY_BASE_URL ?? "http://127.0.0.1:3000";
+const apiBaseUrl = process.env.VERIFY_API_URL ?? baseUrl;
 
 const REQUIRED_HEADERS = [
   "strict-transport-security",
@@ -62,7 +63,7 @@ try {
 
   // S4: sin reflexión XSS en la búsqueda (API y DOM).
   const xssPayload = `<img src=x onerror="window.__xss_pwned=1">`;
-  const searchResponse = await page.request.get(`${baseUrl}/api/v1/search`, {
+  const searchResponse = await page.request.get(`${apiBaseUrl}/api/v1/search`, {
     params: { q: xssPayload },
   });
   assert.equal(searchResponse.status(), 200, "búsqueda con payload XSS debe responder 200");
