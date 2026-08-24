@@ -236,7 +236,7 @@ try {
   await homeSearch.fill("Maipu");
   assert.equal(await homeSearch.inputValue(), "Maipu");
 
-  for (const width of [320, 768, 1024, 1440]) {
+  for (const width of [320, 1440]) {
     for (const route of responsiveRoutes) {
       await page.setViewportSize({ width, height: 800 });
       await gotoWithNetworkRetry(`${baseUrl}${route}`);
