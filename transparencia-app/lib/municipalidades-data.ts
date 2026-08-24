@@ -1,4 +1,7 @@
+import fs from "node:fs";
+import path from "node:path";
 import { getVerifiedMuniRRSS } from "./municipalidades-rrss";
+import { MUNICIPALIDADES_LIST } from "./municipalidades-list";
 
 export interface AlcaldeData {
   nombre: string;
@@ -229,13 +232,64 @@ function getMuniDict(): Record<string, MunicipalidadEnriquecida> {
   if (_muniDict) return _muniDict;
   let raw: Record<string, MunicipalidadEnriquecida> = {};
   try {
-    const fs = require("node:fs");
-    const path = require("node:path");
     const p = path.join(process.cwd(), "data", "municipalidades-data.json");
     if (fs.existsSync(p)) {
       raw = JSON.parse(fs.readFileSync(p, "utf8"));
     }
   } catch {}
+
+  if (Object.keys(raw).length === 0) {
+    for (const item of MUNICIPALIDADES_LIST) {
+      raw[item.id] = {
+        id: item.id,
+        cut: item.cut,
+        nombre_comuna: item.nombre_comuna,
+        region: item.region,
+        sitio_web_oficial: null,
+        tiene_municipalidad_propia: item.tiene_municipalidad_propia,
+        poblacion_censo_2024: item.poblacion_censo_2024,
+        presupuesto_per_capita_clp: item.presupuesto_per_capita_clp,
+        fcm_dependencia_pct: item.fcm_dependencia_pct,
+        partido_alcalde: item.partido_alcalde,
+        alcalde: item.alcalde ? {
+          nombre: item.alcalde.nombre,
+          cargo: "Alcalde",
+          estamento: "Alcaldía",
+          remuneracion_bruta: null,
+          remuneracion_liquida: null,
+          grado_eus: null,
+          formacion: null,
+          fecha_ingreso: null,
+          fuente: null,
+          partido_alcalde: item.partido_alcalde,
+        } : null,
+        presupuesto: item.presupuesto ? {
+          cut: item.cut,
+          inicial_clp: null,
+          vigente_clp: item.presupuesto.vigente_clp,
+          gasto_personal_clp: null,
+          ingresos_propios_clp: null,
+          ano: 2025,
+        } : null,
+        resumen_personal: item.resumen_personal ? {
+          total_funcionarios: item.resumen_personal.total_funcionarios,
+          planta: 0,
+          contrata: 0,
+          honorarios: 0,
+          codigo_trabajo_salud_educacion: 0,
+          masa_mensual_clp: item.resumen_personal.masa_mensual_clp,
+          masa_anual_estimada_clp: item.resumen_personal.masa_mensual_clp * 12,
+          masa_horas_extras_clp: 0,
+          total_horas_extras_hrs: 0,
+        } : null,
+        top_horas_extras: [],
+        top_remuneraciones: [],
+        estado_frescura: item.estado_frescura,
+        desfase_meses: item.desfase_meses,
+        periodo_cplt_reciente: item.periodo_nomina,
+      };
+    }
+  }
 
   _muniDict = Object.fromEntries(
     Object.entries(raw).map(([id, municipalidad]) => {

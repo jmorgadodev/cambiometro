@@ -1,3 +1,5 @@
+import fs from "node:fs";
+import path from "node:path";
 import { POLITICOS_SEED, PARTIDOS_SEED } from "@/lib/seed-politicos";
 import type { Politico } from "@/lib/politicos";
 import { COLOR_ABST, COLOR_NO, COLOR_NO_VOTA, COLOR_SI } from "@/lib/colores-votacion";
@@ -47,8 +49,6 @@ let cachedPromise: Promise<Record<string, PartidoEstadistica> | null> | null = n
 
 function getFallbackPartidosStats(): Record<string, PartidoEstadistica> {
   try {
-    const fs = require("node:fs");
-    const path = require("node:path");
     const p = path.join(process.cwd(), "data", "lake-subsets", "partidos-stats.subset.json");
     if (fs.existsSync(p)) {
       return JSON.parse(fs.readFileSync(p, "utf8"));
