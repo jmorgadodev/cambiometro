@@ -337,6 +337,7 @@ try {
 
   // M2: /privacidad y /fuentes con fecha de versión visible
   await gotoWithNetworkRetry(`${baseUrl}/privacidad`);
+  await page.getByRole("heading", { name: "Política de Privacidad" }).waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await page.getByRole("heading", { name: "Política de Privacidad" }).count(), 1);
   assert.equal(await page.getByRole("heading", { name: /Tus derechos: acceso, rectificaci.n, cancelaci.n y oposici.n/ }).count(), 1);
   assert.equal(await page.getByRole("heading", { name: "Envíanos tu solicitud" }).count(), 1);
