@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 const out = join(fileURLToPath(new URL("../", import.meta.url)), "out");
 const scriptDir = join(out, "inline-scripts");
 await mkdir(scriptDir, { recursive: true });
+const rscRevealShim = `(()=>{const g=globalThis,q=g.__cmRcPending||(g.__cmRcPending=[]);if(typeof g.$RC!=="function"){let current;Object.defineProperty(g,"$RC",{configurable:true,get(){return current??((...args)=>q.push(args));},set(fn){current=fn;for(const args of q.splice(0))fn(...args);}});}})();`;
 async function walk(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     const file = join(dir, entry.name);
@@ -30,7 +31,7 @@ async function walk(dir) {
         return currentGroup.bodies.length === 1 ? currentGroup.marker : "";
       });
       for (const group of groups) {
-        const body = group.bodies.join("\n;\n");
+        const body = `${rscRevealShim}\n${group.bodies.join("\n;\n")}`;
         const id = crypto.createHash("sha256").update(body).digest("hex").slice(0, 16);
         await writeFile(join(scriptDir, `${id}.js`), body);
         html = html.replace(group.marker, `<script src="/inline-scripts/${id}.js"></script>`);
