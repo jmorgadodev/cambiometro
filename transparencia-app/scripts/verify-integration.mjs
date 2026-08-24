@@ -43,6 +43,15 @@ const isRateLimited = (response) => [429, 503].includes(response?.status());
 
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+if (apiBaseUrl !== baseUrl) {
+  await page.route(`${baseUrl}/api/**`, async (route) => {
+    const target = new URL(route.request().url());
+    const apiOrigin = new URL(apiBaseUrl);
+    target.protocol = apiOrigin.protocol;
+    target.host = apiOrigin.host;
+    await route.continue({ url: target.toString() });
+  });
+}
 page.setDefaultTimeout(15_000);
 page.setDefaultNavigationTimeout(30_000);
 const consoleMessages = [];
