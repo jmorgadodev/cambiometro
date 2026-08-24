@@ -395,6 +395,9 @@ try {
     && !message.includes("Failed to load resource: the server responded with a status of 429")
     && !message.includes("net::ERR_SSL_PROTOCOL_ERROR")
     && !message.includes("net::ERR_CONNECTION_REFUSED")
+    // Pages dev does not emulate Cloudflare's same-host Worker route; the
+    // browser/API contract is verified through VERIFY_API_URL above.
+    && !(verifyingLocal && message.includes("Failed to load resource: the server responded with a status of 404"))
     // Next's static export intentionally hydrates client-only Suspense
     // boundaries after the HTML shell; React reports this recoverable bailout
     // as #419 in the local production bundle.
