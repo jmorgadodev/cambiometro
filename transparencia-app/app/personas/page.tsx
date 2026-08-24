@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
 import { MUNICIPALIDADES_SEED } from "@/lib/municipalidades";
@@ -123,12 +124,25 @@ export default function PersonasPage() {
   }));
 
   return (
-    <PersonasUniversalClient
-      parlamentarios={parlamentarios}
-      alcaldes={alcaldes}
-      autoridades={autoridades}
-      organismos={organismosOptions}
-      totalFuncionariosEstimados={1203287}
-    />
+    <Suspense
+      fallback={
+        <div className="container-main" style={{ padding: "2.5rem 0 2rem", minHeight: "60vh" }}>
+          <h1 style={{ fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)", fontWeight: 900, color: "var(--text-1)", margin: "0 0 0.5rem 0" }}>
+            Directorio de Personas del Estado
+          </h1>
+          <p style={{ fontSize: "0.9rem", color: "var(--text-2)", margin: 0, lineHeight: 1.6 }}>
+            Cargando catálogo consolidado de personas y autoridades...
+          </p>
+        </div>
+      }
+    >
+      <PersonasUniversalClient
+        parlamentarios={parlamentarios}
+        alcaldes={alcaldes}
+        autoridades={autoridades}
+        organismos={organismosOptions}
+        totalFuncionariosEstimados={1203287}
+      />
+    </Suspense>
   );
 }

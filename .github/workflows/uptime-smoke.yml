@@ -1,26 +1,36 @@
-name: Uptime smoke
+name: Uptime Smoke Cron (5 min)
 
 on:
   schedule:
-    - cron: "*/10 * * * *"
+    - cron: "*/5 * * * *"
   workflow_dispatch:
 
 concurrency:
-  group: uptime-smoke
+  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
 
 jobs:
   smoke:
+    name: Production Uptime Smoke Check
     runs-on: ubuntu-latest
     timeout-minutes: 5
+
     steps:
-      - name: Check public Pages and API routes
-        shell: bash
-        run: |
-          set -euo pipefail
-          base="https://cambiometro.impulsacv.cl"
-          for path in / /politico /municipalidades /servicios-publicos /entidades /transferencias /api/v1/health/data; do
-            status=$(curl --silent --show-error --location --output /dev/null --write-out '%{http_code}' --max-time 20 "$base$path")
-            test "$status" -ge 200 -a "$status" -lt 500
-            echo "$path $status"
-          done
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Run Uptime Smoke Check
+        working-directory: transparencia-app
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PROD_URL: "https://cambiometro.impulsacv.cl"
+        run: node scripts/uptime-smoke.mjs

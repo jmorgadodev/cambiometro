@@ -131,9 +131,12 @@ describe("Rediseño Integral de /cruces — Cruces Reales en Todos los Chips", (
     }
   });
 
-  it("X4. Preserva orden C3, presets, paginación 20 y skeleton", () => {
+  it("X4. Preserva orden C3, presets, paginación default 10 con selector 10/25/50 (?rows) y skeleton", () => {
     expect(pageSource).toContain("Un cruce es una relación documental entre autoridades, organismos, proveedores y auditorías, respaldada por identificadores oficiales.");
-    expect(explorerSource).toContain("PAGE_SIZE = 20");
+    expect(explorerSource).toContain("DEFAULT_PAGE_SIZE = 10");
+    expect(explorerSource).toContain("PAGE_SIZE_OPTIONS = [10, 25, 50]");
+    expect(explorerSource).toContain("Filas por página:");
+    expect(explorerSource).toContain('url.searchParams.set("rows"');
     expect(explorerSource).toContain("handleApplyPreset");
     expect(drawerSource).toContain("showSkeleton");
   });

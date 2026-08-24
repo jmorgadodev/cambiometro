@@ -26,6 +26,7 @@ data/raw/servel/
 social/
 backups/
 tmp/
+transparencia-app/artifacts/
 .open-next/
 .next/
 node_modules/

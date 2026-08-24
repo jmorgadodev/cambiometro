@@ -10,8 +10,16 @@ import {
   getPoliticoByIdOrSlug,
   getPoliticoSlug,
 } from "@/lib/politico-slugs";
+
+export async function generateStaticParams() {
+  return POLITICOS_SEED.map((pol) => ({
+    id: getPoliticoSlug(pol),
+  }));
+}
 import {
   getVotacionesParaPolitico,
+  getPrecomputedPoliticoProfile,
+  getPrecomputedPoliticoVotaciones,
   getTimelineParaPolitico,
   getEntidadesRelacionadas,
   getGastosParaPolitico,
@@ -34,17 +42,18 @@ import {
 } from "@/lib/personal-apoyo";
 import { procesarGastosPolitico } from "@/lib/gastos-operacionales";
 import { formatFechaChilena, edadEnAnos } from "@/lib/format";
-import VotacionesHistorial, { type VotacionFila } from "@/components/VotacionesHistorial";
+import type { VotacionFila } from "@/components/VotacionesHistorial";
 import PoliticoTimeline from "@/components/PoliticoTimeline";
 import PoliticoScoreHeader, { type PoliticoHeaderData } from "@/components/PoliticoScoreHeader";
 import PersonalApoyoMensual from "@/components/PersonalApoyoMensual";
+import nextDynamic from "next/dynamic";
+
+const VotacionesHistorial = nextDynamic(() => import("@/components/VotacionesHistorial"), {
+  loading: () => <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-3)" }}>Cargando historial de votaciones...</div>,
+});
 
 interface Props {
   params: Promise<{ id: string }>;
-}
-
-export function generateStaticParams() {
-  return POLITICOS_SEED.map((politico) => ({ id: getPoliticoSlug(politico) }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -91,54 +100,27 @@ export default async function PoliticoPage({ params }: Props) {
 
   const partido = PARTIDOS_SEED.find((p) => p.id === pol.partido_id);
   
-  // D1 Cache Migration: Fetch from D1 instead of the 36MB JSON file
-  const cachedData = await getPoliticoDataCache(pol.id);
-  const canonicalGastos = await getCanonicalGastosParaPolitico({
-    cargo: pol.cargo,
-    nombreCompleto: pol.nombre_completo,
-    camaraId: diputadoIdParaPolitico(pol),
-  });
-  const gastos = canonicalGastos.length > 0
-    ? canonicalGastos
-    : cachedData.gastos.length > 0
-      ? cachedData.gastos
-      : getGastosParaPolitico(pol);
-  const canonicalVotaciones = await getCanonicalVotacionesParaPolitico({
-    cargo: pol.cargo,
-    nombreCompleto: pol.nombre_completo,
-    camaraId: diputadoIdParaPolitico(pol),
-    politicoId: pol.id,
-  });
+  const gastos = getGastosParaPolitico(pol);
+  const rawVotaciones = getVotacionesParaPolitico(pol);
 
   // Deduplicación estricta de votaciones
   const seenVoteKeys = new Set<string>();
-  const rawVotaciones = canonicalVotaciones.length > 0 && !canonicalVotaciones.every((v) => v.voto.opcion === "Sin registro")
-    ? canonicalVotaciones
-    : cachedData?.votaciones?.length
-      ? cachedData.votaciones
-      : getVotacionesParaPolitico(pol);
-
-  const votaciones = rawVotaciones.filter(({ votacion, voto }) => {
-    if (votacion.id && seenVoteKeys.has(`id:${votacion.id}`)) return false;
-    const normDesc = (votacion.descripcion || (votacion as { boletin?: string }).boletin || "").trim().toLowerCase().replace(/\s+/g, " ");
-    const descKey = `desc:${votacion.fecha || ""}_${normDesc}_${voto.opcion}`;
-    if (normDesc && seenVoteKeys.has(descKey)) return false;
-
-    if (votacion.id) seenVoteKeys.add(`id:${votacion.id}`);
-    if (normDesc) seenVoteKeys.add(descKey);
+  const votaciones = rawVotaciones.filter(({ votacion }) => {
+    if (votacion.id) {
+      if (seenVoteKeys.has(`id:${votacion.id}`)) return false;
+      seenVoteKeys.add(`id:${votacion.id}`);
+    }
     return true;
   });
 
-
   const timeline = getTimelineParaPolitico(pol);
-  const canonicalLobby = await getCanonicalLobbyParaPolitico(pol.nombre_completo);
-  const entidades = canonicalLobby.length > 0 ? canonicalLobby : getEntidadesRelacionadas(pol);
+  const entidades = getEntidadesRelacionadas(pol);
   const remuneracion = await remuneracionParaPolitico(pol.nombre_completo);
   const probidad = infoprobidadParaPolitico(pol.nombre_completo);
   const apoyoDiputado = pol.cargo === "Diputado" ? await personalApoyoParaDiputado(diputadoIdParaPolitico(pol)) : null;
   const apoyoSenador = pol.cargo === "Senador" ? await personalApoyoParaSenador(pol.nombre_completo) : null;
   const companerosPartido = POLITICOS_SEED.filter((p) => p.partido_id === pol.partido_id && p.id !== pol.id);
-  
+
   const votacionesFila: VotacionFila[] = votaciones.map(({ votacion, voto }) => {
     // Calcular consenso del partido
     let consensoPartido: string | null = null;
@@ -245,6 +227,82 @@ export default async function PoliticoPage({ params }: Props) {
   const pctAsistencia = totalSesiones > 0 ? Math.min(100, Math.round((presentes / totalSesiones) * 100)) : null;
   const pctEmitioVoto = presentes > 0 ? Math.min(100, Math.round((votosEmitidos / presentes) * 100)) : null;
 
+  const camaraMonthMap: Record<string, string> = {
+    enero: "2026-01", febrero: "2026-02", marzo: "2026-03", abril: "2026-04",
+    mayo: "2026-05", junio: "2026-06", julio: "2026-07", agosto: "2026-08",
+  };
+  const rawCamaraMonth = apoyoDiputado?.diputado?.mes_personal?.trim() ?? "";
+  const camaraMonth = /^2026-\d{2}$/.test(rawCamaraMonth)
+    ? rawCamaraMonth
+    : camaraMonthMap[rawCamaraMonth.toLocaleLowerCase("es-CL").split(/\s+/)[0]] ?? "";
+  const periodosPersonal = pol.cargo === "Senador"
+    ? [...new Set(apoyoSenador?.registros.map((record) => record.periodo).filter(Boolean) ?? [])].sort()
+    : camaraMonth ? [camaraMonth] : [];
+  const mesesDisponiblesPersonal = periodosPersonal.map((periodo) => ({ periodo, etiqueta: periodo }));
+  const ultimoPeriodoPersonal = pol.cargo === "Senador" ? (apoyoSenador?.ultimo_mes ?? "") : camaraMonth;
+
+  // ── Consolidar datos para el Panel Costo Mensual ──
+  const monthLabels: Record<string, string> = {
+    "01": "Enero", "02": "Febrero", "03": "Marzo", "04": "Abril",
+    "05": "Mayo", "06": "Junio", "07": "Julio", "08": "Agosto",
+    "09": "Septiembre", "10": "Octubre", "11": "Noviembre", "12": "Diciembre",
+  };
+
+  const periodosSet = new Set<string>();
+  for (const m of mesesGastos) {
+    if (m.periodo) periodosSet.add(m.periodo);
+  }
+  for (const p of periodosPersonal) {
+    if (p) periodosSet.add(p);
+  }
+
+  const periodosOrdenados = [...periodosSet].sort();
+  const periodosFinales = periodosOrdenados.length > 0
+    ? periodosOrdenados
+    : ["2026-03", "2026-04", "2026-05"];
+
+  const mesesCosto = periodosFinales.map((periodo) => {
+    const parts = periodo.split("-");
+    const labelMes = parts.length === 2 && monthLabels[parts[1]] ? `${monthLabels[parts[1]]} ${parts[0]}` : periodo;
+
+    const sueldo = remuneracion?.bruto_mensual ?? null;
+    const mesGasto = mesesGastos.find((m) => m.periodo === periodo);
+    const gastosVal = mesGasto && mesGasto.total > 0 ? mesGasto.total : null;
+
+    let personalVal: number | null = null;
+    if (pol.cargo === "Senador") {
+      const recordsMes = apoyoSenador?.registros.filter((r) => r.periodo === periodo) ?? [];
+      if (recordsMes.length > 0) {
+        const sumPersonal = recordsMes.reduce((s: number, r) => s + (r.monto ?? 0), 0);
+        personalVal = sumPersonal > 0 ? sumPersonal : null;
+      }
+    } else if (pol.cargo === "Diputado") {
+      if (periodo === camaraMonth && (apoyoDiputado?.total_mensual ?? 0) > 0) {
+        personalVal = apoyoDiputado!.total_mensual;
+      }
+    }
+
+    return {
+      periodo,
+      etiqueta: labelMes,
+      sueldo,
+      gastos: gastosVal,
+      personal: personalVal,
+    };
+  });
+
+  let ultimoPeriodoConDatos = "";
+  for (let i = mesesCosto.length - 1; i >= 0; i--) {
+    const mc = mesesCosto[i];
+    if (mc.gastos !== null || mc.personal !== null || mc.sueldo !== null) {
+      ultimoPeriodoConDatos = mc.periodo;
+      break;
+    }
+  }
+  if (!ultimoPeriodoConDatos && mesesCosto.length > 0) {
+    ultimoPeriodoConDatos = mesesCosto[mesesCosto.length - 1].periodo;
+  }
+
   const headerData: PoliticoHeaderData = {
     id: pol.id,
     nombre_completo: pol.nombre_completo,
@@ -270,21 +328,12 @@ export default async function PoliticoPage({ params }: Props) {
     presenteSinVotar: votaciones.filter((v) => ["no vota", "sin emitir", "no emite"].includes((v.voto.opcion ?? "").toLowerCase())).length,
     sesionesPresentes: presentes,
     totalSesiones,
+    costoData: {
+      meses: mesesCosto,
+      ultimoPeriodoConDatos,
+      fuenteSueldoUrl: FUENTE_REMUNERACIONES.url,
+    },
   };
-
-  const camaraMonthMap: Record<string, string> = {
-    enero: "2026-01", febrero: "2026-02", marzo: "2026-03", abril: "2026-04",
-    mayo: "2026-05", junio: "2026-06", julio: "2026-07", agosto: "2026-08",
-  };
-  const rawCamaraMonth = apoyoDiputado?.diputado?.mes_personal?.trim() ?? "";
-  const camaraMonth = /^2026-\d{2}$/.test(rawCamaraMonth)
-    ? rawCamaraMonth
-    : camaraMonthMap[rawCamaraMonth.toLocaleLowerCase("es-CL").split(/\s+/)[0]] ?? "";
-  const periodosPersonal = pol.cargo === "Senador"
-    ? [...new Set(apoyoSenador?.registros.map((record) => record.periodo).filter(Boolean) ?? [])].sort()
-    : camaraMonth ? [camaraMonth] : [];
-  const mesesDisponiblesPersonal = periodosPersonal.map((periodo) => ({ periodo, etiqueta: periodo }));
-  const ultimoPeriodoPersonal = pol.cargo === "Senador" ? (apoyoSenador?.ultimo_mes ?? "") : camaraMonth;
 
   return (
     <div style={{ minHeight: "100vh" }}>
@@ -315,7 +364,7 @@ export default async function PoliticoPage({ params }: Props) {
                 <div className="stat-grid" style={{ marginTop: "0.5rem" }}>
                   {[
                     { label: "Votos obtenidos", value: pol.votos_2025.toLocaleString("es-CL"), tone: "stat-tile--accent" },
-                    { label: "Porcentaje", value: `${pol.porcentaje_votos?.toLocaleString("es-CL", { minimumFractionDigits: 2 }) ?? "—"}%`, tone: "" },
+                    { label: "Porcentaje", value: `${pol.porcentaje_votos?.toLocaleString("es-CL", { minimumFractionDigits: 2 }) ?? "—"}% de votos válidos`, tone: "" },
                     { label: "Coalición", value: pol.coalicion ?? "—", tone: "" },
                     { label: "Partido electoral", value: pol.partido_electoral ?? "—", tone: "" },
                   ].map((stat) => (

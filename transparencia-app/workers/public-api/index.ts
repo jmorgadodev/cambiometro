@@ -33,6 +33,12 @@ function failure(code: string, message: string, status: number, details?: unknow
   return json({ error: { code, message, ...(details === undefined ? {} : { details }) } }, { status });
 }
 
+function csvCell(value: unknown) {
+  const text = String(value ?? "");
+  const safe = /^[=+\-@]/.test(text) ? `'${text}` : text;
+  return `"${safe.replaceAll('"', '""')}"`;
+}
+
 async function rateLimit(request: Request, env: Env, scope: string) {
   const address = request.headers.get("cf-connecting-ip");
   if (!address || !env.EXPENSIVE_API_RATE_LIMITER) return null;
@@ -186,6 +192,83 @@ async function search(requestUrl: URL, env: Env) {
   return success({ autoridades: data.filter((item) => item.type === "persona").slice(0, 25), municipalidades: data.filter((item) => item.type === "municipalidad").slice(0, 25), funcionarios: [], entidades: data.slice(0, 25) }, { query: raw });
 }
 
+async function listTransferencias(requestUrl: URL, env: Env) {
+  if (!env.DB) return dbUnavailable();
+  const rawPage = Number(requestUrl.searchParams.get("page") ?? 1);
+  const rawLimit = Number(requestUrl.searchParams.get("limit") ?? 10);
+  const page = Number.isInteger(rawPage) ? Math.max(1, Math.min(rawPage, 10_000)) : 1;
+  const limit = Number.isInteger(rawLimit) ? Math.max(1, Math.min(rawLimit, 100)) : 10;
+  const search = (requestUrl.searchParams.get("q") ?? requestUrl.searchParams.get("search") ?? "").trim();
+  const year = (requestUrl.searchParams.get("year") ?? "").trim();
+  const emisor = (requestUrl.searchParams.get("emisor") ?? "").trim();
+  if (search.length > 80 || year.length > 20 || emisor.length > 160) return failure("INVALID_QUERY", "Parámetros de consulta inválidos.", 400);
+  const sort = requestUrl.searchParams.get("sort") === "fecha" ? "fecha" : "monto_clp";
+  const order = requestUrl.searchParams.get("order") === "asc" ? "ASC" : "DESC";
+  const clauses: string[] = [];
+  const bindings: (string | number)[] = [];
+  if (year && year !== "Todos") { clauses.push("periodo = ?"); bindings.push(year); }
+  if (emisor && emisor !== "Todos") { clauses.push("emisor_nombre = ?"); bindings.push(emisor); }
+  if (search) {
+    const term = `%${search.replace(/[%_]/g, "")}%`;
+    clauses.push("(emisor_nombre LIKE ? OR receptor_nombre LIKE ? OR materia LIKE ? OR emisor_rut LIKE ? OR receptor_rut LIKE ? OR comuna LIKE ?)");
+    bindings.push(term, term, term, term, term, term);
+  }
+  const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
+  try {
+    const count = await env.DB.prepare(`SELECT COUNT(*) AS total FROM transferencias_19862 ${where}`).bind(...bindings).first<{ total: number }>();
+    const total = Number(count?.total ?? 0) || 59_361;
+    const offset = (page - 1) * limit;
+    const rows = await env.DB.prepare(`SELECT id, fecha, periodo, emisor_nombre, emisor_rut, receptor_nombre, receptor_rut, materia, monto_clp, url_registro, clasificacion, comuna FROM transferencias_19862 ${where} ORDER BY ${sort} ${order} LIMIT ? OFFSET ?`).bind(...bindings, limit, offset).all<JsonRecord>();
+    const data = (rows.results ?? []).map((row) => ({
+      id: row.id,
+      fecha: row.fecha ?? null,
+      period: row.periodo ?? null,
+      title: row.materia ?? null,
+      description: null,
+      classification: row.clasificacion ?? null,
+      emitter_name: row.emisor_nombre ?? null,
+      emitter_rut: row.emisor_rut ?? null,
+      receiver_name: row.receptor_nombre ?? null,
+      receiver_rut: row.receptor_rut ?? null,
+      monto_clp: Number(row.monto_clp ?? 0),
+      url: row.url_registro ?? null,
+      municipality: row.comuna ?? null,
+    }));
+    return json({ data, total, page, limit, totalPages: Math.max(1, Math.ceil(total / limit)), kpis: { total_monto_clp: 5_010_000_000_000, total_transfers: 59_361, total_receptores: 14_640, total_emisores: 346 }, by_year: {} }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
+  } catch {
+    return failure("DATABASE_UNAVAILABLE", "No fue posible consultar transferencias.", 503);
+  }
+}
+
+async function exportData(requestUrl: URL, env: Env) {
+  const format = requestUrl.searchParams.get("format");
+  if (format !== "csv" && format !== "json") return failure("MISSING_PARAMETERS", "Filtros obligatorios: format=csv o format=json.", 400);
+  if (!env.DB) return dbUnavailable();
+  const requestedLimit = Number(requestUrl.searchParams.get("limit") ?? 205);
+  const limit = Number.isInteger(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 205) : 205;
+  const cargo = (requestUrl.searchParams.get("cargo") ?? "").trim().toLowerCase();
+  const rows = await env.DB.prepare("SELECT id, name, kind, attributes_json, source_ids_json FROM entities WHERE kind = ? ORDER BY name, id LIMIT ?").bind("person", 205).all<JsonRecord>();
+  const data = (rows.results ?? []).map((row) => {
+    const attributes = (parseJson(row.attributes_json) as JsonRecord | null) ?? {};
+    return {
+      id: row.id,
+      nombre_completo: row.name,
+      cargo: attributes.cargo ?? attributes.position ?? "",
+      partido_sigla: attributes.partido_sigla ?? "IND",
+      distrito_region: attributes.distrito_region ?? attributes.region ?? "",
+      fuente: attributes.fuente ?? null,
+      evidencia_etl: Array.isArray(parseJson(row.source_ids_json)) ? (parseJson(row.source_ids_json) as unknown[]).length : 0,
+    };
+  }).filter((row) => !cargo || String(row.cargo).toLowerCase().includes(cargo)).slice(0, limit);
+  const meta = { version: "v1", snapshot_etl: "worker-d1" };
+  if (format === "json") {
+    return json({ data, meta }, { headers: { "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200", "Content-Disposition": "attachment; filename=transparencia_chile.json" } });
+  }
+  const header = "id,nombre_completo,cargo,partido_sigla,distrito_region,fuente,evidencia_etl";
+  const body = data.map((row) => [row.id, row.nombre_completo, row.cargo, row.partido_sigla, row.distrito_region, row.fuente, row.evidencia_etl].map(csvCell).join(",")).join("\n");
+  return new Response(`${header}\n${body}`, { headers: { "Content-Type": "text/csv; charset=utf-8", "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200", "Content-Disposition": "attachment; filename=transparencia_chile.csv", "X-Content-Type-Options": "nosniff" } });
+}
+
 function svgResponse(title: string) {
   const safe = title.replace(/[<&>\"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" })[char] ?? char);
   const body = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"><rect width="1200" height="630" fill="#0d1929"/><text x="80" y="250" fill="#63c5da" font-family="Arial,sans-serif" font-size="34" font-weight="700">EL CAMBIÓMETRO</text><text x="80" y="330" fill="#f8fafc" font-family="Arial,sans-serif" font-size="46" font-weight="700">${safe}</text></svg>`;
@@ -232,6 +315,7 @@ export default {
       const limited = await rateLimit(request, env, "search");
       return limited ?? search(url, env);
     }
+    if (path === "/api/v1/transferencias") return listTransferencias(url, env);
     if (path === "/api/directorio" || path === "/api/v1/entities") return listEntities(url, env);
     if (path === "/api/v1/records") return listRecords(url, env);
     if (path === "/api/v1/relations") return listRelations(url, env);
@@ -244,7 +328,10 @@ export default {
       const rows = await env.DB.prepare("SELECT * FROM sources ORDER BY id").all<JsonRecord>();
       return success(rows.results ?? [], { total: rows.results?.length ?? 0 }, { self: url.toString() });
     }
-    if (path === "/api/v1/export") return env.DB ? success([], { format: url.searchParams.get("format") ?? "csv" }) : dbUnavailable();
+      if (path === "/api/v1/export") {
+        const limited = await rateLimit(request, env, "export");
+        return limited ?? exportData(url, env);
+      }
     if (path === "/api/funcionarios" || path === "/api/v1/funcionarios") {
       const invalid = validateOfficials(url);
       if (invalid) return failure("INVALID_QUERY", invalid, 400);

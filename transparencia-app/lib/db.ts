@@ -1,3 +1,4 @@
+import { cache } from "react";
 import type { D1Database } from '@cloudflare/workers-types';
 
 import type { EtlRecord, VotacionDelPolitico } from "@/lib/data-source";
@@ -26,7 +27,7 @@ export interface PoliticoCacheData {
     stats: Array<Record<string, unknown>>;
 }
 
-export async function getPoliticoDataCache(politicoId: string): Promise<PoliticoCacheData> {
+export const getPoliticoDataCache = cache(async function getPoliticoDataCache(politicoId: string): Promise<PoliticoCacheData> {
     const db = await getD1Database();
     if (!db) return { gastos: [], votaciones: [], stats: [] };
     try {
@@ -45,9 +46,9 @@ export async function getPoliticoDataCache(politicoId: string): Promise<Politico
         console.error("Error en getPoliticoDataCache:", e);
         return { gastos: [], votaciones: [], stats: [] };
     }
-}
+});
 
-export async function getKvCache<T>(key: string): Promise<T | null> {
+export const getKvCache = cache(async function getKvCache<T>(key: string): Promise<T | null> {
     const db = await getD1Database();
     if (!db) return null;
     try {
@@ -61,7 +62,7 @@ export async function getKvCache<T>(key: string): Promise<T | null> {
         console.error(`Error en getKvCache para ${key}:`, e);
         return null;
     }
-}
+});
 
 export interface GastoOperacionalD1 {
     id: string;

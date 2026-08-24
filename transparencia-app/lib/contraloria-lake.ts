@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import contraloriaStaticJson from "@/data/lake-subsets/contraloria.subset.json";
 import type { CanonicalEntity, EvidenceRecord, RelationEdge } from "@/lib/data-contracts";
 
 export interface ContraloriaProjection {
@@ -18,8 +19,7 @@ let cached: ContraloriaProjection | null = null;
 /**
  * Proyección v1 de auditorías de Contraloría (generada por
  * scripts/build-contraloria-v1.mjs desde las particiones del lake).
- * Carga con fs + cache (igual patrón que leerSnapshot) para no inflar
- * la compilación de routes con JSON grandes.
+ * Carga con fs en scripts locales y fallback a JSON empaquetado en Worker.
  */
 export function leerContraloriaV1(): ContraloriaProjection | null {
   if (cached) return cached;
@@ -32,10 +32,11 @@ export function leerContraloriaV1(): ContraloriaProjection | null {
       "v1",
       "contraloria.json",
     );
-    cached = JSON.parse(fs.readFileSync(file, "utf8")) as ContraloriaProjection;
-    return cached;
-  } catch {
-    cached = null;
-    return null;
-  }
+    if (fs.existsSync(file)) {
+      cached = JSON.parse(fs.readFileSync(file, "utf8")) as ContraloriaProjection;
+      return cached;
+    }
+  } catch {}
+  cached = (contraloriaStaticJson as unknown) as ContraloriaProjection;
+  return cached;
 }

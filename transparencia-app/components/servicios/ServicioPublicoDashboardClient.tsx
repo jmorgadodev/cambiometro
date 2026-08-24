@@ -2,6 +2,7 @@
 
 import { useState, useMemo } from "react";
 import Link from "next/link";
+import AccessibleTooltip from "@/components/ui/AccessibleTooltip";
 import type { ServicioPublicoEnriquecido, OrdenCompraChileCompra } from "@/lib/servicios-publicos-data";
 import OrganismoFuncionariosList from "@/components/OrganismoFuncionariosList";
 import { evaluateBudgetSourceAnomaly } from "@/lib/budget-integrity";
@@ -26,8 +27,8 @@ function formatCompactCLP(n: number) {
     return `$${(n / 1_000_000_000_000).toLocaleString("es-CL", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} billones`;
   }
   if (n >= 1_000_000_000) {
-    // 3 cifras significativas (M2) para evitar pérdida de información en $1.430 mil MM
-    return `$${(n / 1_000_000_000).toLocaleString("es-CL", { minimumFractionDigits: 3, maximumFractionDigits: 3 })} mil MM`;
+    // 3 cifras significativas (M2) para evitar pérdida de información en $1.430 mil millones
+    return `$${(n / 1_000_000_000).toLocaleString("es-CL", { minimumFractionDigits: 3, maximumFractionDigits: 3 })} mil millones`;
   }
   return `$${(n / 1_000_000).toLocaleString("es-CL", { maximumFractionDigits: 0 })} MM`;
 }
@@ -81,10 +82,48 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
               📊 Presupuesto Vigente DIPRES
             </div>
             <div style={{ fontFamily: "monospace", fontSize: "1.45rem", fontWeight: 900, color: "var(--accent)" }}>
-              {pres && pres.vigente_clp > 0 ? formatCompactCLP(pres.vigente_clp) : "Subordinado"}
+              {pres && pres.vigente_clp > 0 ? formatCompactCLP(pres.vigente_clp) : "—"}
             </div>
-            <div style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
-              {pres && pres.vigente_clp > 0 ? `${pres.porcentaje_ejecucion}% ejecutado` : "Presupuesto ministerial"}
+            <div style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: "0.25rem", display: "flex", alignItems: "center", gap: "0.25rem" }}>
+              {pres && pres.vigente_clp > 0 ? (
+                `${pres.porcentaje_ejecucion}% ejecutado`
+              ) : (
+                <>
+                  <span>Organismo sin partida presupuestaria individual · datos agregados desde DIPRES</span>
+                  <AccessibleTooltip
+                    ariaLabel="Explicación de organismo sin partida individual"
+                    content={
+                      <div>
+                        <strong style={{ display: "block", marginBottom: "0.25rem", color: "var(--accent)" }}>
+                          Estructura Presupuestaria DIPRES
+                        </strong>
+                        <span>
+                          Este organismo no posee una partida presupuestaria propia en la Ley de Presupuestos del Sector Público; sus asignaciones operativas se encuentran agregadas dentro de la partida consolidada del <strong>{servicio.ministerio_dependiente}</strong>.
+                        </span>
+                      </div>
+                    }
+                  >
+                    <span
+                      style={{
+                        display: "inline-flex",
+                        alignItems: "center",
+                        justifyContent: "center",
+                        width: 14,
+                        height: 14,
+                        borderRadius: "50%",
+                        background: "var(--surface)",
+                        border: "1px solid var(--border)",
+                        color: "var(--accent)",
+                        fontSize: "0.6rem",
+                        fontWeight: 700,
+                      }}
+                      title="Ver detalle"
+                    >
+                      ℹ️
+                    </span>
+                  </AccessibleTooltip>
+                </>
+              )}
             </div>
           </div>
 
@@ -107,7 +146,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
               {personal?.dotacion_total !== null && personal?.dotacion_total !== undefined ? `${personal.dotacion_total.toLocaleString("es-CL")} pers.` : "—"}
             </div>
             <div style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
-              Transparencia Activa CPLT
+              {personal?.dotacion_total !== null && personal?.dotacion_total !== undefined ? "Transparencia Activa CPLT" : "Sin publicaciones en la fuente"}
             </div>
           </div>
 
@@ -130,7 +169,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
               {compras?.monto_total_clp !== null && compras?.monto_total_clp !== undefined ? formatCompactCLP(compras.monto_total_clp) : "—"}
             </div>
             <div style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
-              {compras ? `${compras.procesos_count} procesos` : "ChileCompra OCDS"}
+              {compras ? `${compras.procesos_count.toLocaleString("es-CL")} procesos · ChileCompra OCDS` : "Sin publicaciones en la fuente"}
             </div>
           </div>
 
@@ -152,7 +191,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
             <div style={{ fontFamily: "monospace", fontSize: "1.45rem", fontWeight: 900, color: "var(--info)" }}>
               {lobby.length > 0
                 ? `${lobby.length} reuniones`
-                : `${resumenLobby?.audiencias_ministerio_tutelar.length ?? 0} audiencias`}
+                : `${resumenLobby?.audiencias_ministerio_tutelar?.length ?? 0} audiencias`}
             </div>
             <div style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
               {cgr.length} auditorías Contraloría
@@ -248,13 +287,13 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem", marginBottom: "1.5rem" }}>
                 <div>
                   <span className="badge badge-info" style={{ marginBottom: "0.4rem" }}>
-                    DIPRES · Ley de Presupuestos 2026 · Partida {pres.partida} {pres.programa ? `· Prog. ${pres.programa}` : ""} {pres.capitulo ? `· Cap. ${pres.capitulo}` : ""}
+                    DIPRES · Ley Nº 21.796 (Presupuestos 2026) · Partida {pres.partida} {pres.capitulo ? `· Cap. ${pres.capitulo}` : ""} {pres.programa ? `· Prog. ${pres.programa}` : ""}
                   </span>
                   <h2 style={{ fontSize: "1.35rem", fontWeight: 800, margin: "0.2rem 0 0.3rem", color: "var(--text-primary)" }}>
-                    Presupuesto y Ejecución Fiscal Oficial
+                    Presupuesto y Ejecución Fiscal Oficial (Ley 21.796)
                   </h2>
                   <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: 0 }}>
-                    Datos consolidados desde la Dirección de Presupuestos (DIPRES) y el Ministerio de Hacienda.
+                    Datos oficiales consolidados desde la Dirección de Presupuestos (DIPRES), Ministerio de Hacienda y Ley de Presupuestos del Sector Público 2026 (<a href="https://www.bcn.cl/leychile/navegar?idNorma=1219410" target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>BCN Ley 21.796 · idNorma 1219410</a>).
                   </p>
                 </div>
 
@@ -463,10 +502,10 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
             <div className="card" style={{ padding: "1.75rem" }}>
               <span className="badge badge-info" style={{ marginBottom: "0.5rem" }}>Presupuesto Sectorial Subordinado</span>
               <h2 style={{ fontSize: "1.25rem", margin: "0.2rem 0 0.4rem" }}>
-                Presupuesto Subordinado a Nivel Ministerial
+                Organismo sin partida presupuestaria individual · datos agregados desde DIPRES
               </h2>
               <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", lineHeight: 1.6, margin: "0 0 1rem" }}>
-                Este organismo no cuenta con una partida presupuestaria independiente en la Ley de Presupuestos 2026. Sus recursos operativos y de inversión forman parte de la partida consolidada del <strong>{servicio.ministerio_dependiente}</strong>.
+                Este organismo no cuenta con una partida presupuestaria independiente en la Ley de Presupuestos del Sector Público. Sus recursos operativos y de inversión forman parte de la partida consolidada del <strong>{servicio.ministerio_dependiente}</strong>.
               </p>
               <div style={{ display: "flex", gap: "0.75rem" }}>
                 <Link href="/servicios-publicos" className="btn btn-secondary" style={{ fontSize: "0.82rem" }}>
@@ -592,16 +631,16 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                 </div>
               </div>
 
-              {compras.anomalias_integridad.length > 0 && (
+              {(compras.anomalias_integridad?.length ?? 0) > 0 && (
                 <div style={{ padding: "1rem", marginBottom: "1.5rem", borderRadius: 8, border: "1px solid var(--warn)", background: "var(--surface-2)" }}>
                   <strong style={{ color: "var(--warn)", display: "block", marginBottom: "0.35rem" }}>
                     Hallazgo de integridad ALTA (V7) · valor oficial preservado
                   </strong>
                   <p style={{ margin: 0, fontSize: "0.82rem", color: "var(--text-muted)" }}>
-                    {compras.anomalias_integridad.length} orden(es) oficial(es) superan el límite de sanidad de $100.000 millones por relación. Se conservan como evidencia, pero sus montos, proveedores y relaciones están excluidos de totales y rankings.
+                    {compras.anomalias_integridad?.length} orden(es) oficial(es) superan el límite de sanidad de $100.000 millones por relación. Se conservan como evidencia, pero sus montos, proveedores y relaciones están excluidos de totales y rankings.
                   </p>
                   <ul style={{ margin: "0.65rem 0 0", paddingLeft: "1.2rem", fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                    {compras.anomalias_integridad.map((anomaly) => (
+                    {compras.anomalias_integridad?.map((anomaly) => (
                       <li key={anomaly.id}>
                         {anomaly.titulo ?? "Orden oficial sin título"} · {formatCLP(anomaly.monto_oficial_clp)}{anomaly.source_url ? <> · <a href={anomaly.source_url} target="_blank" rel="noopener noreferrer">fuente ↗</a></> : null}
                       </li>
@@ -855,8 +894,14 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
             </div>
           ) : (
             <div className="card" style={{ padding: "1.75rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.5rem" }}>
+                <span className="badge badge-warn">ChileCompra · OCDS</span>
+              </div>
+              <h3 style={{ fontSize: "1.1rem", fontWeight: 800, margin: "0 0 0.5rem", color: "var(--text-primary)" }}>
+                Sin compras registradas en MercadoPúblico
+              </h3>
               <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: 0 }}>
-                Sin enlace verificable por RUT jurídico entre este organismo y ChileCompra; los montos, órdenes y proveedores se mantienen ausentes.
+                Sin enlace verificable por RUT jurídico entre este organismo y ChileCompra OCDS. Este organismo no registra procesos ni órdenes de compra adjudicadas bajo su RUT jurídico en el estándar OCDS de ChileCompra; los montos se mantienen ausentes sin estimaciones artificiales (Regla R10).
               </p>
             </div>
           )}

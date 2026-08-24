@@ -16,7 +16,11 @@ import {
 interface Props {
   initialRows: CrossEdge[];
   initialQuery?: string;
+  initialRowsPerPage?: number;
 }
+
+export const DEFAULT_PAGE_SIZE = 10;
+export const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 
 const PRESET_CRUCES = [
   {
@@ -114,9 +118,11 @@ export function getTipoCruceBadge(row: CrossEdge): {
   return { tipo: "Cruce Institucional", badgeClass: "badge-neutral" };
 }
 
-const PAGE_SIZE = 20;
-
-export default function CrucesExplorerClient({ initialRows, initialQuery = "" }: Props) {
+export default function CrucesExplorerClient({
+  initialRows,
+  initialQuery = "",
+  initialRowsPerPage = DEFAULT_PAGE_SIZE,
+}: Props) {
   const [query, setQuery] = useState(initialQuery);
   const [selectedChip, setSelectedChip] = useState<string>("todos");
   const [viewMode, setViewMode] = useState<"table" | "graph">("table");
@@ -125,6 +131,14 @@ export default function CrucesExplorerClient({ initialRows, initialQuery = "" }:
   const [loadingRowId, setLoadingRowId] = useState<string | null>(null);
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [pageSize, setPageSize] = useState<number>(() => {
+    if (typeof window !== "undefined") {
+      const urlParams = new URLSearchParams(window.location.search);
+      const r = Number(urlParams.get("rows"));
+      if (r === 10 || r === 25 || r === 50) return r;
+    }
+    return initialRowsPerPage === 25 || initialRowsPerPage === 50 ? initialRowsPerPage : DEFAULT_PAGE_SIZE;
+  });
   const [isPending, startTransition] = useTransition();
 
   // Conteo reactivo por Chip sobre el universo total
@@ -287,9 +301,23 @@ export default function CrucesExplorerClient({ initialRows, initialQuery = "" }:
     }
   };
 
-  const totalPages = Math.max(1, Math.ceil(filteredRows.length / PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize));
   const currentPage = Math.min(Math.max(1, page), totalPages);
-  const paginatedRows = filteredRows.slice((currentPage - 1) * PAGE_SIZE, currentPage * PAGE_SIZE);
+  const paginatedRows = filteredRows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+
+  const handlePageSizeChange = (newSize: number) => {
+    setPageSize(newSize);
+    setPage(1);
+    if (typeof window !== "undefined") {
+      const url = new URL(window.location.href);
+      if (newSize === DEFAULT_PAGE_SIZE) {
+        url.searchParams.delete("rows");
+      } else {
+        url.searchParams.set("rows", String(newSize));
+      }
+      window.history.replaceState({}, "", url.toString());
+    }
+  };
 
   const handleQueryChange = (val: string) => {
     setQuery(val);
@@ -399,6 +427,34 @@ export default function CrucesExplorerClient({ initialRows, initialQuery = "" }:
             borderColor: "var(--border)",
           }}
         >
+          {/* Nota visible obligatoria: Muestra indexada vs Universo Canónico */}
+          <div
+            style={{
+              padding: "0.75rem 1rem",
+              background: "var(--bg-surface-2)",
+              borderRadius: 8,
+              border: "1px solid var(--border-subtle)",
+              fontSize: "0.82rem",
+              color: "var(--text-muted)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              flexWrap: "wrap",
+              gap: "0.5rem",
+              marginBottom: "0.5rem",
+            }}
+          >
+            <div>
+              📌 <strong>Muestra indexada:</strong> {filteredRows.length.toLocaleString("es-CL")} relaciones (orden por monto/fecha) · los totales por fuente corresponden al universo oficial en{" "}
+              <Link href="/datos/calidad" style={{ color: "var(--accent)", fontWeight: 600, textDecoration: "underline" }}>
+                /datos/calidad
+              </Link>
+            </div>
+            <div style={{ fontWeight: 600, color: "var(--text-primary)", fontSize: "0.78rem" }}>
+              Pág. {currentPage} de {totalPages}
+            </div>
+          </div>
+
           {/* Fila superior: Input de búsqueda y Toggle Vista */}
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
             <div style={{ flex: "1 1 300px" }}>
@@ -544,6 +600,8 @@ export default function CrucesExplorerClient({ initialRows, initialQuery = "" }:
                               borderBottom: "1px solid var(--border-subtle)",
                               cursor: "pointer",
                               transition: "background 0.1s ease",
+                              contentVisibility: "auto",
+                              containIntrinsicSize: "auto 54px",
                             }}
                           >
                             {/* 1. Entidad Origen */}
@@ -656,24 +714,55 @@ export default function CrucesExplorerClient({ initialRows, initialQuery = "" }:
                 </table>
               </div>
 
-              {/* Paginador a 20 items */}
-              {totalPages > 1 && (
-                <div
-                  style={{
-                    display: "flex",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    padding: "0.85rem 1.25rem",
-                    borderTop: "1px solid var(--border)",
-                    background: "var(--bg-surface-2)",
-                    flexWrap: "wrap",
-                    gap: "0.75rem",
-                  }}
-                >
+              {/* Paginador y Selector de Filas por página */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "space-between",
+                  alignItems: "center",
+                  padding: "0.85rem 1.25rem",
+                  borderTop: "1px solid var(--border)",
+                  background: "var(--bg-surface-2)",
+                  flexWrap: "wrap",
+                  gap: "0.75rem",
+                }}
+              >
+                {/* Izquierda: Info de rango + Selector de Filas (10 / 25 / 50) */}
+                <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
                   <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                    Mostrando {(currentPage - 1) * PAGE_SIZE + 1}–{Math.min(currentPage * PAGE_SIZE, filteredRows.length)} de {filteredRows.length.toLocaleString("es-CL")} relaciones
+                    Mostrando {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filteredRows.length)} de {filteredRows.length.toLocaleString("es-CL")} relaciones
                   </span>
 
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                    <span style={{ fontWeight: 600 }}>Filas por página:</span>
+                    {PAGE_SIZE_OPTIONS.map((size) => {
+                      const isActive = pageSize === size;
+                      return (
+                        <button
+                          key={size}
+                          type="button"
+                          onClick={() => handlePageSizeChange(size)}
+                          style={{
+                            padding: "0.2rem 0.55rem",
+                            fontSize: "0.75rem",
+                            fontWeight: isActive ? 800 : 500,
+                            borderRadius: 6,
+                            border: `1px solid ${isActive ? "var(--accent)" : "var(--border)"}`,
+                            background: isActive ? "var(--accent)" : "var(--bg-surface)",
+                            color: isActive ? "var(--bg-surface)" : "var(--text-muted)",
+                            cursor: "pointer",
+                            transition: "all 0.15s ease",
+                          }}
+                        >
+                          {size}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+
+                {/* Derecha: Paginador («, ‹, Página X de Y, ›, ») */}
+                {totalPages > 1 && (
                   <div style={{ display: "flex", gap: "0.4rem", alignItems: "center" }}>
                     <button
                       type="button"
@@ -681,6 +770,7 @@ export default function CrucesExplorerClient({ initialRows, initialQuery = "" }:
                       onClick={() => setPage(1)}
                       className="btn btn-secondary btn-sm"
                       style={{ fontSize: "0.72rem", opacity: currentPage <= 1 ? 0.4 : 1 }}
+                      title="Primera página"
                     >
                       « Primera
                     </button>
@@ -690,6 +780,7 @@ export default function CrucesExplorerClient({ initialRows, initialQuery = "" }:
                       onClick={() => setPage(currentPage - 1)}
                       className="btn btn-secondary btn-sm"
                       style={{ fontSize: "0.72rem", opacity: currentPage <= 1 ? 0.4 : 1 }}
+                      title="Página anterior"
                     >
                       ‹ Anterior
                     </button>
@@ -702,6 +793,7 @@ export default function CrucesExplorerClient({ initialRows, initialQuery = "" }:
                       onClick={() => setPage(currentPage + 1)}
                       className="btn btn-secondary btn-sm"
                       style={{ fontSize: "0.72rem", opacity: currentPage >= totalPages ? 0.4 : 1 }}
+                      title="Página siguiente"
                     >
                       Siguiente ›
                     </button>
@@ -711,12 +803,13 @@ export default function CrucesExplorerClient({ initialRows, initialQuery = "" }:
                       onClick={() => setPage(totalPages)}
                       className="btn btn-secondary btn-sm"
                       style={{ fontSize: "0.72rem", opacity: currentPage >= totalPages ? 0.4 : 1 }}
+                      title="Última página"
                     >
                       Última »
                     </button>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
         )}

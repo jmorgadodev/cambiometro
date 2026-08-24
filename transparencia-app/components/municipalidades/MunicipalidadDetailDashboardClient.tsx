@@ -3,6 +3,7 @@
 import { useState, useMemo } from "react";
 
 import Link from "next/link";
+import AccessibleTooltip from "@/components/ui/AccessibleTooltip";
 import {
   MunicipalidadEnriquecida,
   AlcaldeData,
@@ -46,7 +47,7 @@ function formatCompactCLP(n?: number | null) {
     return `$${(n / 1_000_000_000).toLocaleString("es-CL", {
       minimumFractionDigits: 1,
       maximumFractionDigits: 1,
-    })} mil MM`;
+    })} mil millones`;
   }
   return `$${(n / 1_000_000).toLocaleString("es-CL", {
     maximumFractionDigits: 0,
@@ -118,9 +119,72 @@ export default function MunicipalidadDetailDashboardClient({
 
   const radiografia = muniData.radiografia_comunal;
   const auditorias = muniData.auditorias_cgr ?? [];
-  const topRemuneraciones = muniData.top_remuneraciones ?? [];
   const topHorasExtras = muniData.top_horas_extras ?? [];
   const integrityAnomalies = muniData.anomalias_integridad ?? [];
+
+  const periodosDisponibles = useMemo(() => muniData.periodos_disponibles || [], [muniData]);
+  const defaultPeriod = muniData.periodo_cplt_reciente || periodosDisponibles.find((p) => !p.es_parcial)?.periodo || periodosDisponibles[0]?.periodo || "2026-06";
+  const [selectedPeriod, setSelectedPeriod] = useState<string>(defaultPeriod);
+
+  const availableYears = useMemo(() => {
+    const yearsSet = new Set<number>();
+    for (const p of periodosDisponibles) {
+      if (p.ano) {
+        yearsSet.add(p.ano);
+      } else {
+        const y = Number(p.periodo.split("-")[0]);
+        if (!isNaN(y)) yearsSet.add(y);
+      }
+    }
+    return Array.from(yearsSet).sort((a, b) => b - a);
+  }, [periodosDisponibles]);
+
+  const defaultYear = useMemo(() => {
+    const y = Number(defaultPeriod.split("-")[0]);
+    return !isNaN(y) && availableYears.includes(y) ? y : availableYears[0] || 2026;
+  }, [defaultPeriod, availableYears]);
+
+  const [selectedYear, setSelectedYear] = useState<number>(defaultYear);
+
+  const monthsInSelectedYear = useMemo(() => {
+    return periodosDisponibles.filter((p) => {
+      const y = p.ano || Number(p.periodo.split("-")[0]);
+      return y === selectedYear;
+    });
+  }, [periodosDisponibles, selectedYear]);
+
+  const handleYearChange = (year: number) => {
+    setSelectedYear(year);
+    const monthsForYear = periodosDisponibles.filter((p) => (p.ano || Number(p.periodo.split("-")[0])) === year);
+    if (monthsForYear.length > 0) {
+      const isCurrentInYear = monthsForYear.some((p) => p.periodo === selectedPeriod);
+      if (!isCurrentInYear) {
+        const bestMonth = monthsForYear.find((p) => !p.es_parcial) || monthsForYear[0];
+        setSelectedPeriod(bestMonth.periodo);
+      }
+    }
+  };
+
+  const selectedPeriodInfo = useMemo(() => {
+    return periodosDisponibles.find((p) => p.periodo === selectedPeriod) || null;
+  }, [periodosDisponibles, selectedPeriod]);
+
+  const currentResumenPersonal = useMemo(() => {
+    if (selectedPeriod && muniData.resumen_personal_por_periodo?.[selectedPeriod]) {
+      return muniData.resumen_personal_por_periodo[selectedPeriod];
+    }
+    return muniData.resumen_personal;
+  }, [muniData, selectedPeriod]);
+
+  const topRemuneraciones = useMemo(() => {
+    if (muniData.top_remuneraciones_por_periodo && muniData.top_remuneraciones_por_periodo[selectedPeriod]?.length) {
+      return muniData.top_remuneraciones_por_periodo[selectedPeriod];
+    }
+    return muniData.top_remuneraciones ?? [];
+  }, [muniData, selectedPeriod]);
+
+  const desfaseMeses = muniData.desfase_meses ?? null;
+  const esDesfasado = desfaseMeses !== null && desfaseMeses > 3;
 
   const partidoAlcalde =
     alcalde?.partido_alcalde ||
@@ -193,7 +257,51 @@ export default function MunicipalidadDetailDashboardClient({
                 marginTop: "0.25rem",
               }}
             >
-              Presupuesto Per Cápita: {perCapita > 0 ? `${formatCLP(perCapita)} / hab` : "SUBDERE"}
+              Presupuesto Per Cápita: {perCapita > 0 ? `${formatCLP(perCapita)} / hab` : "—"}
+            </div>
+            <div
+              style={{
+                fontSize: "0.68rem",
+                color: "var(--text-subtle)",
+                marginTop: "0.35rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.3rem",
+              }}
+            >
+              <span>Cobertura SINIM: 345/346</span>
+              <AccessibleTooltip
+                ariaLabel="Detalle metodológico de cobertura nacional SINIM"
+                content={
+                  <div>
+                    <strong style={{ display: "block", marginBottom: "0.25rem", color: "var(--accent)" }}>
+                      Cobertura Nacional SINIM: 345/346 comunas
+                    </strong>
+                    <span>
+                      La comuna de <strong>Antártica</strong> (sin municipalidad propia) es administrada por la Municipalidad de Cabo de Hornos; sus datos demográficos oficiales son complementados desde el Censo 2024 INE.
+                    </span>
+                  </div>
+                }
+              >
+                <span
+                  style={{
+                    display: "inline-flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    width: 14,
+                    height: 14,
+                    borderRadius: "50%",
+                    background: "var(--surface-2)",
+                    border: "1px solid var(--border)",
+                    color: "var(--accent)",
+                    fontSize: "0.6rem",
+                    fontWeight: 700,
+                  }}
+                  title="Ver detalle de cobertura"
+                >
+                  ℹ️
+                </span>
+              </AccessibleTooltip>
             </div>
           </div>
 
@@ -236,9 +344,7 @@ export default function MunicipalidadDetailDashboardClient({
             >
               {muniData.poblacion_censo_2024
                 ? `${formatNum(muniData.poblacion_censo_2024)} hab.`
-                : personal
-                ? `${formatNum(personal.total_funcionarios)} pers.`
-                : "Nómina"}
+                : "—"}
             </div>
             <div
               style={{
@@ -247,7 +353,9 @@ export default function MunicipalidadDetailDashboardClient({
                 marginTop: "0.25rem",
               }}
             >
-              Nómina Detallada de Funcionarios: {personal ? formatNum(personal.total_funcionarios) : "CPLT"}
+              {muniData.poblacion_censo_2024
+                ? "Censo 2024 INE / SINIM"
+                : "No publicado por la fuente"}
             </div>
           </div>
 
@@ -502,11 +610,26 @@ export default function MunicipalidadDetailDashboardClient({
                 style={{
                   fontSize: "0.75rem",
                   color: "var(--text-subtle)",
-                  margin: "0 0 1.25rem",
+                  margin: "0 0 0.75rem",
                 }}
               >
                 Información oficial reportada por la Municipalidad de {nombreComuna}
               </p>
+
+              <div
+                style={{
+                  padding: "0.6rem 0.8rem",
+                  background: "var(--bg-surface-2)",
+                  border: "1px solid var(--border)",
+                  borderRadius: 8,
+                  fontSize: "0.74rem",
+                  color: "var(--text-muted)",
+                  lineHeight: 1.45,
+                  marginBottom: "1rem",
+                }}
+              >
+                🏛️ <strong>Cobertura SINIM: 345/346</strong> · Comuna faltante (Antártica, sin administración propia) es administrada por Cabo de Hornos y complementada desde el Censo 2024 INE.
+              </div>
 
               <div
                 style={{
@@ -734,9 +857,21 @@ export default function MunicipalidadDetailDashboardClient({
                   borderTop: "1px solid var(--border-subtle)",
                   fontSize: "0.72rem",
                   color: "var(--text-subtle)",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  flexWrap: "wrap",
+                  gap: "0.5rem",
                 }}
               >
-                Fuente: Sistema Nacional de Información Municipal (SINIM / SUBDERE) · Período 2025
+                <span>Fuente: Sistema Nacional de Información Municipal (SINIM / SUBDERE) · Partidas Variables M1 (Inicial), M2 (Vigente), M3 (Ingresos Propios), M4 (Gasto Personal) · Período 2025</span>
+                <a
+                  href="https://datos.sinim.gov.cl/datos_municipales.php"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  style={{ color: "var(--accent)", textDecoration: "underline" }}
+                >
+                  datos.sinim.gov.cl ↗
+                </a>
               </div>
             </div>
           </div>
@@ -746,6 +881,152 @@ export default function MunicipalidadDetailDashboardClient({
       {/* ═══ PESTAÑA 2: PERSONAL & REMUNERACIONES (CPLT) ══════════════════════ */}
       {activeTab === "personal" && (
         <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
+          {/* Alerta de Desfase de Transparencia Activa Ley 20.285 (>90 días) */}
+          {esDesfasado && (
+            <div
+              role="alert"
+              style={{
+                padding: "1rem 1.25rem",
+                borderRadius: 10,
+                background: "var(--warn-bg)",
+                border: "1px solid var(--warn)",
+                display: "flex",
+                alignItems: "center",
+                gap: "0.85rem",
+              }}
+            >
+              <span style={{ fontSize: "1.5rem" }}>⚠️</span>
+              <div>
+                <strong style={{ color: "var(--warn)", fontSize: "0.92rem", display: "block" }}>
+                  Nómina con {desfaseMeses} meses de desfase respecto a la fecha actual
+                </strong>
+                <span style={{ fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.4, display: "block", marginTop: "0.2rem" }}>
+                  Fuente oficial: Transparencia Activa CPLT (Ley 20.285). La última declaración publicada por la Municipalidad de {nombreComuna} corresponde al período {muniData.periodo_cplt_reciente || "no informado"}.
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Selector Compacto Jerárquico de Períodos Históricos CPLT (Año -> Mes) */}
+          {periodosDisponibles.length > 0 && (
+            <div className="card" style={{ padding: "1.25rem" }}>
+              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.85rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <span style={{ fontSize: "0.85rem", fontWeight: 800, color: "var(--text-primary)" }}>
+                    📅 Declaraciones de Nómina CPLT
+                  </span>
+                  <span className="badge" style={{ fontSize: "0.68rem", background: "var(--bg-surface-2)", border: "1px solid var(--border-subtle)" }}>
+                    {periodosDisponibles.length} meses históricos
+                  </span>
+                </div>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  {selectedPeriodInfo?.es_parcial && (
+                    <span className="badge badge-warn" style={{ fontSize: "0.68rem" }}>
+                      ⚠️ Declaración parcial ({selectedPeriodInfo.count.toLocaleString("es-CL")} reg.)
+                    </span>
+                  )}
+                  <span className="badge badge-info" style={{ fontSize: "0.72rem", fontFamily: "monospace" }}>
+                    Período activo: {selectedPeriodInfo?.etiqueta || selectedPeriod}
+                  </span>
+                </div>
+              </div>
+
+              {/* Nivel 1: Selector de Año */}
+              {availableYears.length > 1 && (
+                <div style={{ marginBottom: "0.75rem" }}>
+                  <div style={{ fontSize: "0.68rem", color: "var(--text-subtle)", fontWeight: 700, textTransform: "uppercase", marginBottom: "0.35rem" }}>
+                    1. Seleccionar Año
+                  </div>
+                  <div role="tablist" aria-label="Años disponibles" style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
+                    {availableYears.map((year) => {
+                      const isActive = year === selectedYear;
+                      return (
+                        <button
+                          key={year}
+                          type="button"
+                          role="tab"
+                          aria-selected={isActive}
+                          aria-pressed={isActive}
+                          onClick={() => handleYearChange(year)}
+                          className="btn-year"
+                          style={{
+                            cursor: "pointer",
+                            fontFamily: "monospace",
+                            fontSize: "0.8rem",
+                            padding: "0.35rem 0.85rem",
+                            borderRadius: 8,
+                            fontWeight: isActive ? 800 : 600,
+                            border: isActive ? "2px solid var(--accent)" : "1px solid var(--border)",
+                            background: isActive ? "var(--accent)" : "var(--bg-surface-2)",
+                            color: isActive ? "var(--bg)" : "var(--text-primary)",
+                            transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+                          }}
+                        >
+                          {year}
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
+              )}
+
+              {/* Nivel 2: Meses disponibles del año seleccionado (máx 12) */}
+              <div>
+                <div style={{ fontSize: "0.68rem", color: "var(--text-subtle)", fontWeight: 700, textTransform: "uppercase", marginBottom: "0.35rem" }}>
+                  2. Mes de nómina ({monthsInSelectedYear.length} disponibles en {selectedYear})
+                </div>
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
+                  {monthsInSelectedYear.map((p) => {
+                    const activo = p.periodo === selectedPeriod;
+                    return (
+                      <button
+                        key={p.periodo}
+                        type="button"
+                        onClick={() => setSelectedPeriod(p.periodo)}
+                        aria-pressed={activo}
+                        aria-label={`Seleccionar período ${p.etiqueta}`}
+                        className="capsule"
+                        style={{
+                          cursor: "pointer",
+                          fontFamily: "monospace",
+                          fontSize: "0.74rem",
+                          padding: "0.35rem 0.7rem",
+                          borderRadius: 99,
+                          transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
+                          border: activo
+                            ? "1px solid var(--accent)"
+                            : p.es_parcial
+                            ? "1px dashed var(--warn)"
+                            : "1px solid var(--border-subtle)",
+                          background: activo
+                            ? "var(--accent)"
+                            : p.es_parcial
+                            ? "var(--warn-bg)"
+                            : "var(--bg-surface-2)",
+                          color: activo
+                            ? "var(--bg)"
+                            : p.es_parcial
+                            ? "var(--warn)"
+                            : "var(--text-primary)",
+                          fontWeight: activo ? 800 : 500,
+                          boxShadow: activo ? "0 0 10px var(--accent-glow)" : "none",
+                          display: "inline-flex",
+                          alignItems: "center",
+                          gap: "0.3rem",
+                        }}
+                      >
+                        <span>{p.etiqueta}</span>
+                        <span style={{ opacity: 0.8, fontSize: "0.66rem" }}>
+                          ({p.count.toLocaleString("es-CL")}{p.es_parcial ? " ⚠️" : ""})
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+          )}
+
           {/* Ficha Alcalde/sa + KPIs Personal */}
           <div
             style={{
@@ -809,7 +1090,6 @@ export default function MunicipalidadDetailDashboardClient({
                   {brandingAlcalde.sigla || brandingAlcalde.nombre}
                 </span>
               </div>
-
 
               <div
                 style={{
@@ -888,7 +1168,7 @@ export default function MunicipalidadDetailDashboardClient({
             </div>
 
             {/* Dotación & Composición (M4) */}
-            {personal && (
+            {currentResumenPersonal && (
               <div className="card" style={{ padding: "1.5rem" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.2rem" }}>
                   <div
@@ -909,15 +1189,20 @@ export default function MunicipalidadDetailDashboardClient({
                     Ámbito ⓘ
                   </span>
                 </div>
-                <p
-                  style={{
-                    fontSize: "0.75rem",
-                    color: "var(--text-subtle)",
-                    margin: "0 0 1rem",
-                  }}
-                >
-                  Total de {formatNum(personal.total_funcionarios)} funcionarios registrados (100% de la nómina activa)
-                </p>
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.4rem", margin: "0 0 0.8rem" }}>
+                  <p
+                    style={{
+                      fontSize: "0.75rem",
+                      color: "var(--text-subtle)",
+                      margin: 0,
+                    }}
+                  >
+                    Dotación de <strong>{formatNum(currentResumenPersonal.total_funcionarios)}</strong> funcionarios en <strong>{selectedPeriodInfo?.etiqueta || selectedPeriod}</strong>
+                  </p>
+                  <span className="badge badge-info" style={{ fontSize: "0.68rem", fontFamily: "monospace" }}>
+                    Período: {selectedPeriodInfo?.etiqueta || selectedPeriod}
+                  </span>
+                </div>
 
                 {/* Stacked bar */}
                 <div
@@ -931,31 +1216,31 @@ export default function MunicipalidadDetailDashboardClient({
                 >
                   <div
                     style={{
-                      width: `${(personal.planta / (personal.total_funcionarios || 1)) * 100}%`,
+                      width: `${(currentResumenPersonal.planta / (currentResumenPersonal.total_funcionarios || 1)) * 100}%`,
                       background: "var(--accent)",
                     }}
-                    title={`Planta: ${personal.planta}`}
+                    title={`Planta: ${currentResumenPersonal.planta}`}
                   />
                   <div
                     style={{
-                      width: `${(personal.contrata / (personal.total_funcionarios || 1)) * 100}%`,
+                      width: `${(currentResumenPersonal.contrata / (currentResumenPersonal.total_funcionarios || 1)) * 100}%`,
                       background: "var(--ok)",
                     }}
-                    title={`Contrata: ${personal.contrata}`}
+                    title={`Contrata: ${currentResumenPersonal.contrata}`}
                   />
                   <div
                     style={{
-                      width: `${(personal.honorarios / (personal.total_funcionarios || 1)) * 100}%`,
+                      width: `${(currentResumenPersonal.honorarios / (currentResumenPersonal.total_funcionarios || 1)) * 100}%`,
                       background: "var(--warn)",
                     }}
-                    title={`Honorarios: ${personal.honorarios}`}
+                    title={`Honorarios: ${currentResumenPersonal.honorarios}`}
                   />
                   <div
                     style={{
-                      width: `${(personal.codigo_trabajo_salud_educacion / (personal.total_funcionarios || 1)) * 100}%`,
+                      width: `${(currentResumenPersonal.codigo_trabajo_salud_educacion / (currentResumenPersonal.total_funcionarios || 1)) * 100}%`,
                       background: "var(--info)",
                     }}
-                    title={`Salud / Educación: ${personal.codigo_trabajo_salud_educacion}`}
+                    title={`Salud / Educación: ${currentResumenPersonal.codigo_trabajo_salud_educacion}`}
                   />
                 </div>
 
@@ -969,32 +1254,52 @@ export default function MunicipalidadDetailDashboardClient({
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", color: "var(--text-muted)" }}>
                     <span style={{ width: 10, height: 10, background: "var(--accent)", borderRadius: 2 }} />
-                    <strong>{formatNum(personal.planta)}</strong> Planta
+                    <strong>{formatNum(currentResumenPersonal.planta)}</strong> Planta
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", color: "var(--text-muted)" }}>
                     <span style={{ width: 10, height: 10, background: "var(--ok)", borderRadius: 2 }} />
-                    <strong>{formatNum(personal.contrata)}</strong> Contrata
+                    <strong>{formatNum(currentResumenPersonal.contrata)}</strong> Contrata
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", color: "var(--text-muted)" }}>
                     <span style={{ width: 10, height: 10, background: "var(--warn)", borderRadius: 2 }} />
-                    <strong>{formatNum(personal.honorarios)}</strong> Honorarios
+                    <strong>{formatNum(currentResumenPersonal.honorarios)}</strong> Honorarios
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", color: "var(--text-muted)" }}>
                     <span style={{ width: 10, height: 10, background: "var(--info)", borderRadius: 2 }} />
-                    <strong>{formatNum(personal.codigo_trabajo_salud_educacion)}</strong> Salud/Educación
+                    <strong>{formatNum(currentResumenPersonal.codigo_trabajo_salud_educacion)}</strong> Salud/Educación
                   </div>
                 </div>
 
-                {personal.registros_observados_count ? (
+                {currentResumenPersonal.masa_mensual_clp ? (
+                  <div style={{ marginTop: "0.75rem", fontSize: "0.73rem", color: "var(--text-muted)" }}>
+                    Masa salarial mensual del período: <strong style={{ color: "var(--ok)", fontFamily: "monospace" }}>{formatCLP(currentResumenPersonal.masa_mensual_clp)}</strong>
+                  </div>
+                ) : null}
+
+                {/* Nota al pie: Total histórico consolidado deduplicado */}
+                <div
+                  style={{
+                    marginTop: "0.75rem",
+                    paddingTop: "0.6rem",
+                    borderTop: "1px solid var(--border-subtle)",
+                    fontSize: "0.7rem",
+                    color: "var(--text-subtle)",
+                    lineHeight: 1.35,
+                  }}
+                >
+                  * Total histórico consolidado en el sistema: <strong>{formatNum(muniData.resumen_personal?.total_funcionarios || 0)}</strong> personas físicas registradas a lo largo de {periodosDisponibles.length} declaraciones mensuales CPLT.
+                </div>
+
+                {currentResumenPersonal.es_parcial && (
                   <div
                     style={{
                       marginTop: "0.75rem",
                       padding: "0.45rem 0.65rem",
-                      background: "var(--bg-surface-2)",
+                      background: "var(--warn-bg)",
                       borderRadius: 6,
-                      border: "1px solid var(--border)",
+                      border: "1px solid var(--warn)",
                       fontSize: "0.72rem",
-                      color: "var(--text-muted)",
+                      color: "var(--warn)",
                       display: "flex",
                       alignItems: "center",
                       gap: "0.4rem",
@@ -1002,11 +1307,10 @@ export default function MunicipalidadDetailDashboardClient({
                   >
                     <span>⚠️</span>
                     <span>
-                      <strong>{formatNum(personal.registros_observados_count)} registros observados por calidad de dato</strong>
-                      {personal.registros_sin_pago_count !== undefined ? ` (${personal.registros_sin_pago_count} sin pago · ${personal.registros_micro_monto_count || 0} parciales)` : ""}
+                      <strong>Declaración parcial:</strong> Este período registra {formatNum(currentResumenPersonal.total_funcionarios)} funcionarios (publicación preliminar o segmentada en la fuente CPLT).
                     </span>
                   </div>
-                ) : null}
+                )}
               </div>
             )}
           </div>
@@ -1034,31 +1338,35 @@ export default function MunicipalidadDetailDashboardClient({
           )}
 
           {/* Top Remuneraciones M1 */}
-          {topRemuneraciones.length > 0 && (
-            <div className="card" style={{ padding: "1.5rem" }}>
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.5rem" }}>
-                <div>
-                  <div
-                    className="section-title"
-                    style={{ marginBottom: "0.2rem" }}
-                  >
-                    📋 Top Remuneraciones Brutas Totales
-                  </div>
-                  <p
-                    style={{
-                      fontSize: "0.75rem",
-                      color: "var(--text-subtle)",
-                      margin: 0,
-                    }}
-                  >
-                    Ordenado por sueldo bruto total (base + horas extras), con idéntico criterio que el buscador de funcionarios.
-                  </p>
+          <div className="card" style={{ padding: "1.5rem" }}>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.5rem" }}>
+              <div>
+                <div
+                  className="section-title"
+                  style={{ marginBottom: "0.2rem" }}
+                >
+                  📋 Top Remuneraciones Brutas Totales
                 </div>
-                <span className="badge badge-info" style={{ fontSize: "0.7rem", fontFamily: "monospace" }}>
-                  Período CPLT: {topRemuneraciones[0]?.periodo || "2025-2026"}
-                </span>
+                <p
+                  style={{
+                    fontSize: "0.75rem",
+                    color: "var(--text-subtle)",
+                    margin: 0,
+                  }}
+                >
+                  Ordenado por sueldo bruto total (base + horas extras), con idéntico criterio que el buscador de funcionarios.
+                </p>
               </div>
+              <span className="badge badge-info" style={{ fontSize: "0.7rem", fontFamily: "monospace" }}>
+                Período nómina: {selectedPeriodInfo?.etiqueta || selectedPeriod}
+              </span>
+            </div>
 
+            {topRemuneraciones.length === 0 ? (
+              <div style={{ padding: "1rem", color: "var(--text-muted)", fontSize: "0.8rem", textAlign: "center" }}>
+                Sin registros de remuneraciones informadas en {selectedPeriodInfo?.etiqueta || selectedPeriod}.
+              </div>
+            ) : (
               <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", marginTop: "1rem" }}>
                 {topRemuneraciones.map((r, i) => (
                   <div
@@ -1106,8 +1414,8 @@ export default function MunicipalidadDetailDashboardClient({
                   </div>
                 ))}
               </div>
-            </div>
-          )}
+            )}
+          </div>
 
           {/* Nómina Interactiva Completa */}
           <div className="card" style={{ padding: "1.75rem" }}>
@@ -1129,13 +1437,15 @@ export default function MunicipalidadDetailDashboardClient({
                   margin: 0,
                 }}
               >
-                Consulta directa de toda la dotación de la Municipalidad de {nombreComuna} con sueldos brutos, líquidos, estamentos y asignaciones.
+                Consulta directa de la dotación de la Municipalidad de {nombreComuna} en el período {selectedPeriodInfo?.etiqueta || selectedPeriod} con sueldos brutos, líquidos, estamentos y asignaciones.
               </p>
             </div>
 
             <OrganismoFuncionariosList
               organismoId={muniData.id}
               nombreOrganismo={`Municipalidad de ${nombreComuna}`}
+              periodo={selectedPeriod}
+              periodoEtiqueta={selectedPeriodInfo?.etiqueta || selectedPeriod}
             />
           </div>
         </div>
@@ -1186,16 +1496,16 @@ export default function MunicipalidadDetailDashboardClient({
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
             {compras ? (
               <>
-                {compras.anomalias_integridad.length > 0 && (
+                {(compras.anomalias_integridad?.length ?? 0) > 0 && (
                   <div className="card" style={{ padding: "1.25rem", border: "1px solid var(--warn)" }}>
                     <strong style={{ color: "var(--warn)", display: "block", marginBottom: "0.35rem" }}>
                       Hallazgo de integridad ALTA (V7) · valor oficial preservado
                     </strong>
                     <p style={{ margin: 0, fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                      {compras.anomalias_integridad.length} orden(es) oficial(es) fuera del límite de sanidad fueron excluidas de totales y rankings, sin alterar su evidencia de origen.
+                      {compras.anomalias_integridad?.length} orden(es) oficial(es) fuera del límite de sanidad fueron excluidas de totales y rankings, sin alterar su evidencia de origen.
                     </p>
                     <ul style={{ margin: "0.65rem 0 0", paddingLeft: "1.2rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>
-                      {compras.anomalias_integridad.map((anomaly) => (
+                      {compras.anomalias_integridad?.map((anomaly) => (
                         <li key={anomaly.id ?? `${anomaly.titulo}-${anomaly.monto_oficial_clp}`}>
                           {anomaly.titulo ?? "Orden oficial sin título"} · {formatCLP(anomaly.monto_oficial_clp)}{anomaly.source_url ? <> · <a href={anomaly.source_url} target="_blank" rel="noopener noreferrer">fuente ↗</a></> : null}
                         </li>
@@ -1689,7 +1999,7 @@ export default function MunicipalidadDetailDashboardClient({
                 <div style={{ padding: "0.75rem", background: "var(--bg-surface-2)", borderRadius: 8 }}>
                   <span style={{ fontSize: "0.65rem", color: "var(--text-subtle)", textTransform: "uppercase", fontWeight: 700 }}>Población 2024</span>
                   <div style={{ fontFamily: "monospace", fontSize: "1.1rem", fontWeight: 800, color: "var(--text-primary)", marginTop: "0.15rem" }}>
-                    {formatNum(muniData.poblacion_censo_2024)} hab.
+                    {muniData.poblacion_censo_2024 ? `${formatNum(muniData.poblacion_censo_2024)} hab.` : "—"}
                   </div>
                 </div>
 

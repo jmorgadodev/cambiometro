@@ -46,3 +46,71 @@ Este documento consolida las fuentes oficiales, criterios metodológicos, reglas
   1. **Preservación:** El registro original se mantiene intacto en el data lake como evidencia histórica inalterada.
   2. **Rotulación:** La ficha correspondiente exhibe un aviso de **"Hallazgo de Integridad ALTA (V7)"** documentando la orden o registro observado y enlazando a la fuente pública.
   3. **Exclusión de Agregados:** Dichos montos quedan excluidos del cálculo de totales transados, promedios y rankings comunales o institucionales para evitar distorsiones estadísticas.
+
+---
+
+## 6. Coaliciones de Gobierno y Oposición (desde 11-03-2026)
+
+- **Criterio:** Clasificación editorial de oficialismo/oposición según gobierno en ejercicio desde el 11-03-2026; revisada manualmente el 22-08-2026 tras feedback externo.
+- **Oficialismo (gobierno Kast):** UDI, RN, Evópoli, DEM, AMA, REP, PNL, PSC, PDG — *DEM/AMA/Evópoli confirmados en gabinete 02-02-2026 (Emol: Ximena Rincón ministra Energía por Demócratas, Francisco Undurraga ministro Cultura por Evópoli, Andrés Jouannet subsecretario Seguridad por Amarillos).*
+- **Oposición:** FA, PS, PC, PPD, PDC, PL, PR, FRVS — *PDC confirmada como oposición: ADN Radio 10-07-2026, Álvaro Ortiz “Somos oposición, pero no de trinchera”.*
+- **Independientes:** IND inalterado.
+- **Dudosos sin fuente dura:** PDG clasificado como oficialismo por inversión editorial; fuentes reales lo describen como bisagra no oficialista (“no somos oficialismo” Infobae 20-07-2026; BioBio 18-02-2026 “será oposición si Kast impulsa agenda valórica”). Se aplica swap igual y se declara clasificación editorial sin fuente dura.
+
+---
+
+## 7. Qué Significa el Hallazgo de Integridad y su Porcentaje (Regla V2)
+
+- **Propósito:** Brindar máxima transparencia y legibilidad ciudadana ante diferencias entre los montos publicados en nóminas oficiales de personal de apoyo parlamentario y las bases mensuales asignadas por el Consejo Resolutivo de Asignaciones Parlamentarias.
+- **Cálculo del Porcentaje de Exceso:**
+  $$\text{Porcentaje de Exceso} = \frac{\text{Total Publicado} - \text{Base Oficial}}{\text{Base Oficial}} \times 100$$
+  El porcentaje se calcula dinámicamente a partir de los datos oficiales de cada período, expresándose en formato chileno con un decimal y signo positivo (por ejemplo, `+17,4%` o `+33,7%`).
+- **Umbrales Metodológicos V2 (cuando no existe traspaso individual acreditado):**
+  - **Hallazgo de Integridad ALTA (exceso de hasta 40%):** Aplica cuando el monto total publicado excede la base mensual oficial hasta en un 40% (ej. caso Kaiser julio 2026 con `+33,7%` de exceso).
+  - **Hallazgo de Integridad CRÍTICA (exceso superior al 40%):** Aplica cuando el monto total publicado supera en más de un 40% la base mensual oficial sin respaldo de transferencias acreditadas.
+- **Declaración de No Imputación:** La presencia de un hallazgo de integridad señala una discrepancia contable o documental respecto al estándar base publicado y no constituye por sí misma una imputación de ilicitud, dolo ni falta administrativa.
+
+---
+
+## 8. Población Comunal y Presupuesto Per Cápita (Censo 2024 INE)
+
+- **Fuente Oficial:** Instituto Nacional de Estadísticas (INE) de Chile, Resultados Definitivos Censo de Población y Vivienda 2024 (`https://censo2024.ine.gob.cl/resultados/`).
+- **Cobertura Territorial:** 346 de 346 comunas del país (100% de cobertura sin estimaciones ni imputaciones sintéticas).
+- **Total Nacional:** 18.480.432 habitantes censados (suma verificada contra el reporte oficial del INE con tolerancia cero).
+- **Tratamiento Metodológico (Regla R10):**
+  - Conforme a la regla de integridad R10, la plataforma prohíbe el uso de cifras sintéticas o derivadas de nóminas de personal.
+  - La población comunal proviene exclusivamente del dataset oficial del INE identificado por código CUT (Código Único Territorial de 5 dígitos).
+  - El **Presupuesto Municipal Per Cápita** se calcula como:
+    $$\text{Presupuesto Per Cápita} = \text{Math.round}\left(\frac{\text{Presupuesto Vigente SINIM}}{\text{Población Censo 2024 INE}}\right)$$
+  - Se presenta en formato chileno de moneda (`$ / hab.`) citando explícitamente la fuente `"Censo 2024 INE"`.
+
+---
+
+## 9. Frescura, Desfases y Cumplimiento de Transparencia Activa Municipal (Ley 20.285)
+
+- **Cadena de Publicación y Trazabilidad:**
+  1. **Declaración Municipal:** Cada municipalidad carga mensualmente sus nóminas de personal (Planta, Contrata, Honorarios y Código del Trabajo) en su respectivo portal de Transparencia Activa.
+  2. **Consolidación Central CPLT:** El Consejo para la Transparencia consolida los datos informados a nivel nacional y publica periódicamente los microdatos abiertos consolidados.
+  3. **Sincronización ETL:** El Cambiómetro procesa, valida (reglas V1–V7) e indexa los registros oficiales manteniendo el historial cronológico completo de cada comuna.
+- **Desfase Individual y Auditoría de Cumplimiento (Ley 20.285):**
+  - Cada municipalidad reporta con su propio ritmo; por ende, **cada comuna posee su propio último período y desfase específico**.
+  - **Cálculo del Desfase:** Se evalúa la diferencia en meses entre el último período informado por el municipio y la fecha de corte actual.
+  - **Umbral de Cumplimiento:**
+    - **Al día (≤ 90 días / ≤ 3 meses):** La municipalidad mantiene su deber de publicación dentro de los plazos regulares de reporte y consolidación.
+    - **Con Desfase (> 90 días):** Se exhibe una advertencia visible de cumplimiento (`⚠️ Nómina con X meses de desfase`), reflejando el rezago informativo sin ocultarlo ni promediarlo.
+    - **Sin Datos:** Se indica expresamente la ausencia de información en la fuente CPLT.
+- **Frecuencia y Desfase Esperado por Fuente Oficial:**
+
+| Fuente Oficial | Organismo Emisor | Frecuencia de Origen | Desfase Esperado de Publicación |
+|---|---|---|---|
+| **Transparencia Activa Municipal** | Municipalidades / CPLT | Mensual (por comuna) | 30 a 60 días |
+| **Ley de Presupuestos (DIPRES)** | Ministerio de Hacienda | Mensual | 30 a 45 días |
+| **Sistema SINIM** | SUBDERE | Anual / Trimestral | 60 a 120 días |
+| **MercadoPúblico OCDS** | Dirección ChileCompra | Continua / Mensual | 1 a 30 días |
+| **InfoLobby / Audiencias** | CPLT | Diaria | 1 a 7 días |
+| **InfoProbidad (Patrimonio)** | CGR / CPLT | Por evento / Declaración | Inmediata tras publicación |
+| **Censo de Población** | INE Chile | Censal / Definitiva | Período de referencia vigente |
+
+
+
+

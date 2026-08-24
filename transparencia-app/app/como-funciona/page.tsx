@@ -58,7 +58,7 @@ export default async function HowItWorksPage() {
             </div>
             <div>
               <dt>Fuentes Públicas</dt>
-              <dd>{GLOBAL_KPIS.fuentes_operativas}</dd>
+              <dd>{GLOBAL_KPIS.total_fuentes} ({GLOBAL_KPIS.fuentes_oficiales} oficiales + {GLOBAL_KPIS.fuentes_derivadas} derivada)</dd>
             </div>
             <div>
               <dt>Cobertura</dt>

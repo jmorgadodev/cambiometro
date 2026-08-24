@@ -7,6 +7,7 @@
  */
 
 import organismosAdicionalesJson from "@/data/raw/transparencia_activa/organismos_adicionales.json";
+import { getRutOficialServicio } from "./servicios-publicos-rut";
 
 // ── SERVICIOS PÚBLICOS Y MINISTERIOS DE CHILE ─────────────────────────────
 export interface ServicioPublico {
@@ -15,6 +16,7 @@ export interface ServicioPublico {
   sigla: string;
   tipo_organo: 'Ministerio' | 'Subsecretaría' | 'Servicio Público' | 'Servicio Nacional' | 'Superintendencia' | 'Empresa Pública' | 'Gobierno Regional';
   ministerio_dependiente: string;
+  rut_juridico?: string;
   /** Solo cuando la fuente está verificada; sin fuente se omite. */
   director_jefe_actual?: string;
   /** Fuente oficial que respalda al director/a jefe actual (agosto 2026). */
@@ -24,38 +26,38 @@ export interface ServicioPublico {
 
 export const SERVICIOS_PUBLICOS_SEED: ServicioPublico[] = [
   // ── 25 MINISTERIOS DE ESTADO DE CHILE (gabinete 2026, verificado) ─────────
-  { id: 'min-interior', nombre: 'Ministerio del Interior y Seguridad Pública', sigla: 'INTERIOR', tipo_organo: 'Ministerio', ministerio_dependiente: 'Interior', director_jefe_actual: 'Claudio Alvarado Andrade', sitio_web_oficial: 'https://www.interior.gob.cl' },
+  { id: 'min-interior', nombre: 'Ministerio del Interior y Seguridad Pública', sigla: 'INTERIOR', tipo_organo: 'Ministerio', ministerio_dependiente: 'Interior', director_jefe_actual: 'Claudio Alvarado Andrade', fuente_director: 'interior.gob.cl / BCN — Ministro del Interior y Seguridad Pública (D.S. N° 1 de 11-03-2026)', sitio_web_oficial: 'https://www.interior.gob.cl' },
   { id: 'min-seguridad', nombre: 'Ministerio de Seguridad Pública', sigla: 'SEGURIDAD', tipo_organo: 'Ministerio', ministerio_dependiente: 'Seguridad Pública', director_jefe_actual: 'Martín Arrau García-Huidobro', sitio_web_oficial: 'https://www.seguridadpublica.gob.cl' },
   { id: 'min-rrhh', nombre: 'Ministerio de Relaciones Exteriores', sigla: 'MINREL', tipo_organo: 'Ministerio', ministerio_dependiente: 'Relaciones Exteriores', director_jefe_actual: 'Francisco Pérez Mackenna', sitio_web_oficial: 'https://www.minrel.gob.cl' },
   { id: 'min-defensa', nombre: 'Ministerio de Defensa Nacional', sigla: 'MINDEF', tipo_organo: 'Ministerio', ministerio_dependiente: 'Defensa Nacional', director_jefe_actual: 'Fernando Barros Tocornal', sitio_web_oficial: 'https://www.defensa.cl' },
   { id: 'min-hacienda', nombre: 'Ministerio de Hacienda', sigla: 'HACIENDA', tipo_organo: 'Ministerio', ministerio_dependiente: 'Hacienda', director_jefe_actual: 'Jorge Quiroz Castro', sitio_web_oficial: 'https://www.hacienda.cl' },
   { id: 'min-segpres', nombre: 'Ministerio Secretaría General de la Presidencia', sigla: 'SEGPRES', tipo_organo: 'Ministerio', ministerio_dependiente: 'SEGPRES', director_jefe_actual: 'José García Ruminot', sitio_web_oficial: 'https://www.segpres.cl' },
-  { id: 'min-segegob', nombre: 'Ministerio Secretaría General de Gobierno', sigla: 'SEGEGOB', tipo_organo: 'Ministerio', ministerio_dependiente: 'SEGEGOB', director_jefe_actual: 'Claudio Alvarado Andrade', sitio_web_oficial: 'https://www.segegob.cl' },
+  { id: 'min-segegob', nombre: 'Ministerio Secretaría General de Gobierno', sigla: 'SEGEGOB', tipo_organo: 'Ministerio', ministerio_dependiente: 'SEGEGOB', director_jefe_actual: 'Claudio Alvarado Andrade', fuente_director: 'segegob.cl / BCN — Ministro Secretario General de Gobierno (biministro Interior · SEGEGOB, D.S. N° 189 de 19-05-2026)', sitio_web_oficial: 'https://www.segegob.cl' },
   { id: 'min-economia', nombre: 'Ministerio de Economía, Fomento y Turismo', sigla: 'MINECON', tipo_organo: 'Ministerio', ministerio_dependiente: 'Economía', director_jefe_actual: 'Daniel Mas Valdés', sitio_web_oficial: 'https://www.economia.cl' },
   { id: 'min-desarrollosocial', nombre: 'Ministerio de Desarrollo Social y Familia', sigla: 'MDSF', tipo_organo: 'Ministerio', ministerio_dependiente: 'Desarrollo Social', director_jefe_actual: 'María Jesús Wulf Le May', sitio_web_oficial: 'https://www.desarrollosocialyfamilia.gob.cl' },
   { id: 'min-educacion', nombre: 'Ministerio de Educación', sigla: 'MINDUC', tipo_organo: 'Ministerio', ministerio_dependiente: 'Educación', director_jefe_actual: 'María Paz Arzola González', sitio_web_oficial: 'https://www.mineduc.cl' },
   { id: 'min-justicia', nombre: 'Ministerio de Justicia y Derechos Humanos', sigla: 'MINJUSTICIA', tipo_organo: 'Ministerio', ministerio_dependiente: 'Justicia', director_jefe_actual: 'Fernando Rabat Celis', sitio_web_oficial: 'https://www.minjusticia.gob.cl' },
   { id: 'min-trabajo', nombre: 'Ministerio del Trabajo y Previsión Social', sigla: 'MINTRAB', tipo_organo: 'Ministerio', ministerio_dependiente: 'Trabajo', director_jefe_actual: 'Tomás Rau Binder', sitio_web_oficial: 'https://www.mintrab.gob.cl' },
-  { id: 'min-mop', nombre: 'Ministerio de Obras Públicas', sigla: 'MOP', tipo_organo: 'Ministerio', ministerio_dependiente: 'Obras Públicas', director_jefe_actual: 'Louis de Grange Concha', sitio_web_oficial: 'https://www.mop.cl' },
-  { id: 'min-salud', nombre: 'Ministerio de Salud', sigla: 'MINSAL', tipo_organo: 'Ministerio', ministerio_dependiente: 'Salud', director_jefe_actual: 'May Chomali Garib', sitio_web_oficial: 'https://www.minsal.cl' },
+  { id: 'min-mop', nombre: 'Ministerio de Obras Públicas', sigla: 'MOP', tipo_organo: 'Ministerio', ministerio_dependiente: 'Obras Públicas', director_jefe_actual: 'Louis de Grange Concha', fuente_director: 'mop.cl / BCN — Ministro de Obras Públicas (D.S. N° 189 de 19-05-2026)', sitio_web_oficial: 'https://www.mop.cl' },
+  { id: 'min-salud', nombre: 'Ministerio de Salud', sigla: 'MINSAL', tipo_organo: 'Ministerio', ministerio_dependiente: 'Salud', director_jefe_actual: 'May Chomali Garib', fuente_director: 'minsal.cl / BCN — Ministra de Salud (D.S. N° 1 de 11-03-2026)', sitio_web_oficial: 'https://www.minsal.cl' },
   { id: 'min-minvu', nombre: 'Ministerio de Vivienda y Urbanismo', sigla: 'MINVU', tipo_organo: 'Ministerio', ministerio_dependiente: 'Vivienda', director_jefe_actual: 'Iván Poduje Capdeville', sitio_web_oficial: 'https://www.minvu.cl' },
   { id: 'min-agricultura', nombre: 'Ministerio de Agricultura', sigla: 'MINAGRI', tipo_organo: 'Ministerio', ministerio_dependiente: 'Agricultura', director_jefe_actual: 'Jaime Campos Quiroga', sitio_web_oficial: 'https://www.minagri.gob.cl' },
   { id: 'min-mineria', nombre: 'Ministerio de Minería', sigla: 'MINMINERIA', tipo_organo: 'Ministerio', ministerio_dependiente: 'Minería', director_jefe_actual: 'Daniel Mas Valdés', sitio_web_oficial: 'https://www.minmineria.cl' },
-  { id: 'min-mtt', nombre: 'Ministerio de Transportes y Telecomunicaciones', sigla: 'MTT', tipo_organo: 'Ministerio', ministerio_dependiente: 'Transportes', director_jefe_actual: 'Louis de Grange Concha', sitio_web_oficial: 'https://www.mtt.gob.cl' },
+  { id: 'min-mtt', nombre: 'Ministerio de Transportes y Telecomunicaciones', sigla: 'MTT', tipo_organo: 'Ministerio', ministerio_dependiente: 'Transportes', director_jefe_actual: 'Louis de Grange Concha', fuente_director: 'mtt.gob.cl / BCN — Ministro de Transportes y Telecomunicaciones (biministro)', sitio_web_oficial: 'https://www.mtt.gob.cl' },
   { id: 'min-bienesnacionales', nombre: 'Ministerio de Bienes Nacionales', sigla: 'BBNN', tipo_organo: 'Ministerio', ministerio_dependiente: 'Bienes Nacionales', director_jefe_actual: 'Catalina Parot Donoso', sitio_web_oficial: 'https://www.bienesnacionales.cl' },
   { id: 'min-energia', nombre: 'Ministerio de Energía', sigla: 'ENERGIA', tipo_organo: 'Ministerio', ministerio_dependiente: 'Energía', director_jefe_actual: 'Ximena Rincón González', sitio_web_oficial: 'https://www.energia.gob.cl' },
   { id: 'min-mma', nombre: 'Ministerio del Medio Ambiente', sigla: 'MMA', tipo_organo: 'Ministerio', ministerio_dependiente: 'Medio Ambiente', director_jefe_actual: 'Francisca Toledo Echegaray', sitio_web_oficial: 'https://mma.gob.cl' },
-  { id: 'min-mindep', nombre: 'Ministerio del Deporte', sigla: 'MINDEP', tipo_organo: 'Ministerio', ministerio_dependiente: 'Deporte', director_jefe_actual: 'Natalia Duco Soler', sitio_web_oficial: 'https://www.mindep.cl' },
-  { id: 'min-minmujeryeg', nombre: 'Ministerio de la Mujer y la Equidad de Género', sigla: 'MINMUJERYEG', tipo_organo: 'Ministerio', ministerio_dependiente: 'Mujer y Equidad de Género', director_jefe_actual: 'Judith Marín Morales', sitio_web_oficial: 'https://minmujeryeg.gob.cl' },
+  { id: 'min-mindep', nombre: 'Ministerio del Deporte', sigla: 'MINDEP', tipo_organo: 'Ministerio', ministerio_dependiente: 'Deporte', director_jefe_actual: 'Francisco Riveros Cantuarias', fuente_director: 'mindep.cl / Presidencia — Ministro del Deporte (14-08-2026)', sitio_web_oficial: 'https://www.mindep.cl' },
+  { id: 'min-minmujeryeg', nombre: 'Ministerio de la Mujer y la Equidad de Género', sigla: 'MINMUJERYEG', tipo_organo: 'Ministerio', ministerio_dependiente: 'Mujer y Equidad de Género', director_jefe_actual: 'Marcia Raphael Mora', fuente_director: 'minmujeryeg.gob.cl / Presidencia — Ministra de la Mujer (16-06-2026)', sitio_web_oficial: 'https://minmujeryeg.gob.cl' },
   { id: 'min-cultura', nombre: 'Ministerio de las Culturas, las Artes y el Patrimonio', sigla: 'CULTURAS', tipo_organo: 'Ministerio', ministerio_dependiente: 'Culturas', director_jefe_actual: 'Francisco Undurraga Gazitúa', sitio_web_oficial: 'https://www.cultura.gob.cl' },
-  { id: 'min-ciencia', nombre: 'Ministerio de Ciencia, Tecnología, Conocimiento e Innovación', sigla: 'MINCIENCIA', tipo_organo: 'Ministerio', ministerio_dependiente: 'Ciencia', director_jefe_actual: 'Ximena Lincolao Pilquián', sitio_web_oficial: 'https://www.minciencia.gob.cl' },
+  { id: 'min-ciencia', nombre: 'Ministerio de Ciencia, Tecnología, Conocimiento e Innovación', sigla: 'MINCIENCIA', tipo_organo: 'Ministerio', ministerio_dependiente: 'Ciencia', director_jefe_actual: 'Carolina Rossi', fuente_director: 'minciencia.gob.cl / Presidencia — Ministra de Ciencia (ratificada 16-06-2026)', sitio_web_oficial: 'https://www.minciencia.gob.cl' },
 
   // ── SERVICIOS NACIONALES & SUBSECRETARÍAS CLAVE ─────────────────────────
-  { id: 'serv-sii', nombre: 'Servicio de Impuestos Internos', sigla: 'SII', tipo_organo: 'Servicio Nacional', ministerio_dependiente: 'Hacienda', director_jefe_actual: 'Jorge Trujillo', sitio_web_oficial: 'https://www.sii.cl' },
+  { id: 'serv-sii', nombre: 'Servicio de Impuestos Internos', sigla: 'SII', tipo_organo: 'Servicio Nacional', ministerio_dependiente: 'Hacienda', director_jefe_actual: 'Jorge Trujillo', fuente_director: 'sii.cl / BCN — Director Nacional del Servicio de Impuestos Internos', sitio_web_oficial: 'https://www.sii.cl' },
   { id: 'serv-tgr', nombre: 'Tesorería General de la República', sigla: 'TGR', tipo_organo: 'Servicio Nacional', ministerio_dependiente: 'Hacienda', director_jefe_actual: 'Hernán Nobizelli Reyes', sitio_web_oficial: 'https://www.tgr.cl' },
   { id: 'serv-aduanas', nombre: 'Servicio Nacional de Aduanas', sigla: 'ADUANAS', tipo_organo: 'Servicio Nacional', ministerio_dependiente: 'Hacienda', director_jefe_actual: 'Alejandra Arriaza Loeb', sitio_web_oficial: 'https://www.aduana.cl' },
   { id: 'serv-dt', nombre: 'Dirección del Trabajo', sigla: 'DT', tipo_organo: 'Servicio Nacional', ministerio_dependiente: 'Trabajo', director_jefe_actual: 'David Oddó', sitio_web_oficial: 'https://www.dt.gob.cl' },
-  { id: 'serv-fonasa', nombre: 'Fondo Nacional de Salud', sigla: 'FONASA', tipo_organo: 'Servicio Nacional', ministerio_dependiente: 'Salud', director_jefe_actual: 'César Oyarzo', sitio_web_oficial: 'https://www.fonasa.cl' },
+  { id: 'serv-fonasa', nombre: 'Fondo Nacional de Salud', sigla: 'FONASA', tipo_organo: 'Servicio Nacional', ministerio_dependiente: 'Salud', director_jefe_actual: 'César Oyarzo', fuente_director: 'fonasa.cl / BCN — Director Nacional del Fondo Nacional de Salud', sitio_web_oficial: 'https://www.fonasa.cl' },
   { id: 'serv-ips', nombre: 'Instituto de Previsión Social', sigla: 'IPS', tipo_organo: 'Servicio Nacional', ministerio_dependiente: 'Trabajo', director_jefe_actual: 'Juan José Cárcamo Hemmelmann', sitio_web_oficial: 'https://www.ips.gob.cl' },
   { id: 'serv-sag', nombre: 'Servicio Agrícola y Ganadero', sigla: 'SAG', tipo_organo: 'Servicio Nacional', ministerio_dependiente: 'Agricultura', director_jefe_actual: 'Domingo Rojas', sitio_web_oficial: 'https://www.sag.gob.cl' },
   { id: 'serv-conaf', nombre: 'Corporación Nacional Forestal', sigla: 'CONAF', tipo_organo: 'Servicio Nacional', ministerio_dependiente: 'Agricultura', director_jefe_actual: 'Aída Baldini Urrutia', sitio_web_oficial: 'https://www.conaf.cl' },
@@ -161,17 +163,25 @@ function initCatalog() {
     const directorRaw = typeof organismo.director_jefe_actual === "string" ? organismo.director_jefe_actual : undefined;
     const webRaw = typeof organismo.sitio_web_oficial === "string" ? organismo.sitio_web_oficial : undefined;
 
+    const rutOficial = getRutOficialServicio(id) || (typeof organismo.rut_juridico === "string" ? organismo.rut_juridico : undefined);
     return {
       id,
       nombre,
       sigla,
       tipo_organo: "Servicio Público",
       ministerio_dependiente: inferMinisterio(nombre, minRaw),
+      rut_juridico: rutOficial,
       director_jefe_actual: directorRaw,
       sitio_web_oficial: webRaw,
     };
   });
-  const catalogo = new Map(SERVICIOS_PUBLICOS_SEED.map((servicio) => [servicio.id, servicio]));
+  const catalogo = new Map<string, ServicioPublico>(SERVICIOS_PUBLICOS_SEED.map((servicio) => [
+    servicio.id,
+    {
+      ...servicio,
+      rut_juridico: servicio.rut_juridico || getRutOficialServicio(servicio.id) || undefined,
+    } as ServicioPublico
+  ]));
   for (const servicio of adicionales) {
     if (!catalogo.has(servicio.id)) catalogo.set(servicio.id, servicio);
   }

@@ -40,9 +40,7 @@ export function classifyFuncionarioRecord(f: {
   const targetUrl =
     f.url ||
     f.fuente ||
-    `https://www.portaltransparencia.cl/PortalPdT/directorio-de-organismos-regulados/?org=${encodeURIComponent(
-      f.organo_nombre || "Municipalidad"
-    )}`;
+    "https://www.portaltransparencia.cl/";
 
   if (bruto <= 0) {
     return {

@@ -25,8 +25,8 @@ export interface Ministro {
 }
 
 export const GABINETE_KAST: Ministro[] = [
-  { ministerio: "Interior y Seguridad Pública", nombre: "Claudio Alvarado Andrade", partido: "UDI", fuente: "T13 / La Tercera 19-05-2026", nota: "biministro Interior · SEGEGOB y vocero de gobierno tras la salida de Mara Sedini" },
-  { ministerio: "Secretaría General de Gobierno (SEGEGOB)", nombre: "Claudio Alvarado Andrade", partido: "UDI", fuente: "T13 / La Tercera 19-05-2026", nota: "sin titular exclusivo desde el 19-05; la vocería la asume el ministro del Interior" },
+  { ministerio: "Interior y Seguridad Pública", nombre: "Claudio Alvarado Andrade", partido: "UDI", fuente: "interior.gob.cl / BCN (D.S. N° 1 de 11-03-2026)", nota: "biministro Interior · SEGEGOB y vocero de gobierno tras la salida de Mara Sedini" },
+  { ministerio: "Secretaría General de Gobierno (SEGEGOB)", nombre: "Claudio Alvarado Andrade", partido: "UDI", fuente: "segegob.cl / BCN (D.S. N° 189 de 19-05-2026)", nota: "biministro Interior · SEGEGOB y vocero de gobierno tras la salida de Mara Sedini (19-05-2026)" },
   { ministerio: "Seguridad Pública", nombre: "Martín Arrau García-Huidobro", partido: "Republicano", fuente: "La Tercera 19-05-2026", nota: "asume tras la remoción de Trinidad Steinert (19-05)" },
   { ministerio: "Economía, Fomento y Turismo", nombre: "Daniel Mas Valdés", partido: "Independiente", fuente: "T13 / Emol 20-01-2026", nota: "biministro de Economía y Minería" },
   { ministerio: "Minería", nombre: "Daniel Mas Valdés", partido: "Independiente", fuente: "T13 / Emol 20-01-2026", nota: "biministro; asumió por el diseño original del gabinete" },
@@ -46,8 +46,8 @@ export const GABINETE_KAST: Ministro[] = [
   { ministerio: "Energía", nombre: "Ximena Rincón González", partido: "Demócratas", fuente: "energia.gob.cl 11-03-2026", nota: "ex senadora y ex ministra (periodos anteriores)" },
   { ministerio: "Medio Ambiente", nombre: "Francisca Ignacia Toledo Echegaray", partido: "Independiente", fuente: "mma.gob.cl 30-03-2026 · La Tercera 21-01-2026", nota: "" },
   { ministerio: "Culturas, las Artes y el Patrimonio", nombre: "Francisco Undurraga Gazitúa", partido: "Evópoli", fuente: "cultura.gob.cl (página oficial ministro)", nota: "" },
-  { ministerio: "Deporte", nombre: "Natalia Duco Soler", partido: "Independiente", fuente: "BioBioChile / Emol 20-01-2026", nota: "ex atleta olímpica (4 JJ.OO.)" },
-  { ministerio: "Mujer y Equidad de Género", nombre: "Judith Makarena Marín Morales", partido: "PSC", fuente: "ADN Radio 20-01-2026", nota: "secretaria general del PSC" },
-  { ministerio: "Ciencia, Tecnología, Conocimiento e Innovación", nombre: "Ximena Fabiola Lincolao Pilquián", partido: "Independiente", fuente: "es.wikipedia.org (Anexo gabinete 2026) · T13 19-05-2026", nota: "" },
+  { ministerio: "Deporte", nombre: "Francisco Riveros Cantuarias", partido: "Independiente", fuente: "mindep.cl 14-08-2026 / Presidencia Comunicado", nota: "asume tras renuncia de Natalia Duco Soler (14-08-2026)" },
+  { ministerio: "Mujer y Equidad de Género", nombre: "Marcia Raphael Mora", partido: "RN", fuente: "minmujeryeg.gob.cl / Presidencia (16-06-2026)", nota: "asume tras ajuste ministerial de junio (16-06-2026)" },
+  { ministerio: "Ciencia, Tecnología, Conocimiento e Innovación", nombre: "Carolina Rossi", partido: "Independiente", fuente: "minciencia.gob.cl / Presidencia (16-06-2026)", nota: "ratificada titular tras ajuste ministerial (16-06-2026)" },
   { ministerio: "Bienes Nacionales", nombre: "María Catalina Parot Donoso", partido: "Evópoli", fuente: "bienesnacionales.cl 11-03-2026", nota: "reincidente en la cartera (2010-2012)" },
 ];

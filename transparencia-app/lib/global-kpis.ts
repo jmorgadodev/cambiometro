@@ -1,3 +1,4 @@
+// trigger CI for docs perf metrics - 2026-08-22
 import globalKpisRaw from "./global-kpis.json";
 
 export interface GlobalKpis {
@@ -6,6 +7,8 @@ export interface GlobalKpis {
   relaciones: number;
   votaciones: number;
   gastos: number;
+  fuentes_oficiales: number;
+  fuentes_derivadas: number;
   fuentes_operativas: number;
   total_fuentes: number;
   corte: string;
@@ -14,7 +17,10 @@ export interface GlobalKpis {
 
 export const GLOBAL_KPIS: GlobalKpis = globalKpisRaw as GlobalKpis;
 
-export const KPI_SCOPES: Record<keyof Omit<GlobalKpis, "corte" | "generatedAt">, { label: string; tooltip: string; href: string }> = {
+export const KPI_SCOPES: Record<
+  keyof Omit<GlobalKpis, "corte" | "generatedAt" | "fuentes_oficiales" | "fuentes_derivadas">,
+  { label: string; tooltip: string; href: string }
+> = {
   registros_canonicos: {
     label: "registros oficiales",
     tooltip: "Total consolidado de actos administrativos, contratos, asistencias, dietas y resoluciones públicas indexadas.",
@@ -31,8 +37,8 @@ export const KPI_SCOPES: Record<keyof Omit<GlobalKpis, "corte" | "generatedAt">,
     href: "/cruces",
   },
   votaciones: {
-    label: "votaciones de sala",
-    tooltip: "Votaciones nominales de proyectos de ley y acuerdos de sala registrados en la Cámara y el Senado.",
+    label: "votaciones de sala (histórico 2022-2026)",
+    tooltip: "Histórico legislativo consolidado (2022-2026) en Cámara y Senado. El período actual 2026-2030 suma 769 eventos indexados en tiempo real.",
     href: "/politico",
   },
   gastos: {

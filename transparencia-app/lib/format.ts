@@ -21,7 +21,7 @@ export function formatCLPCompact(amount: number): string {
   }
   if (abs >= 1_000_000_000) {
     const val = amount / 1_000_000_000;
-    return `$${val.toLocaleString("es-CL", { minimumFractionDigits: 0, maximumFractionDigits: 1 })} mil MM`;
+    return `$${val.toLocaleString("es-CL", { minimumFractionDigits: 0, maximumFractionDigits: 1 })} mil millones`;
   }
   if (abs >= 1_000_000) {
     const val = amount / 1_000_000;

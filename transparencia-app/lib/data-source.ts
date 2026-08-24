@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { leerSnapshot } from "@/lib/snapshot";
 import { PARTIDOS_SEED, POLITICOS_SEED } from "@/lib/seed-politicos";
 import { leerInfoProbidadV1 } from "@/lib/infoprobidad-lake";
@@ -253,10 +255,10 @@ export function getTimelineParaPolitico(politico: Pick<Politico, "nombre_complet
       fecha: "2025-11-16",
       titulo: `Electo ${politico.cargo} con ${politico.votos_2025.toLocaleString("es-CL")} votos`,
       detalle: politico.porcentaje_votos
-        ? `${politico.porcentaje_votos.toLocaleString("es-CL", { minimumFractionDigits: 2 })}% de los votos válidos`
+        ? `${politico.porcentaje_votos.toLocaleString("es-CL", { minimumFractionDigits: 2 })}% de votos válidos`
         : undefined,
       tipo: "eleccion",
-      fuente: "Wikipedia · resultados oficiales 2025",
+      fuente: "SERVEL · resultados oficiales 2025",
     });
   }
 
@@ -428,12 +430,31 @@ function nombreCoincide(nombreVoto: string, nombreSeed: string): boolean {
   return apellidos.every((apellido) => voto.includes(apellido));
 }
 
-let politicosVotacionesCache: { votes: Record<string, [string, string][]>; sessions: Record<string, EtlRecord> } | null = null;
-function readPoliticosVotaciones() {
-  politicosVotacionesCache ??= JSON.parse(readFileSync(join(process.cwd(), "data", "politicos-votaciones.json"), "utf8")) as typeof politicosVotacionesCache;
-  if (!politicosVotacionesCache) throw new Error("politicos-votaciones.json vacío");
-  return politicosVotacionesCache;
+let cachedVotacionesDataset: { votes: Record<string, [string, string][]>; sessions: Record<string, EtlRecord> } | null = null;
+
+function getVotacionesDataset() {
+  if (cachedVotacionesDataset) return cachedVotacionesDataset;
+  try {
+    const fullPath = path.join(process.cwd(), "data", "politicos-votaciones.json");
+    if (fs.existsSync(fullPath)) {
+      cachedVotacionesDataset = JSON.parse(fs.readFileSync(fullPath, "utf8"));
+      return cachedVotacionesDataset;
+    }
+  } catch {}
+  return { votes: {}, sessions: {} };
 }
+
+export function getPrecomputedPoliticoProfile(polId: string) {
+  try {
+    const slicePath = path.join(process.cwd(), "data", "politico-slices", `${polId}.json`);
+    if (fs.existsSync(slicePath)) {
+      return JSON.parse(fs.readFileSync(slicePath, "utf8"));
+    }
+  } catch {}
+  return null;
+}
+
+export const getPrecomputedPoliticoVotaciones = getPrecomputedPoliticoProfile;
 
 export function getVotacionesParaPolitico(
   politico: Pick<Politico, "nombre_completo"> & { id?: string }
@@ -446,23 +467,48 @@ export function getVotacionesParaPolitico(
     polId = seed?.id;
   }
 
-  const politicosVotaciones = readPoliticosVotaciones();
-  const allVotes = politicosVotaciones.votes;
-  const sessions = politicosVotaciones.sessions;
+  const precomputed = polId ? getPrecomputedPoliticoVotaciones(polId) : null;
+  if (precomputed && Array.isArray(precomputed.votos)) {
+    return (precomputed.votos as Record<string, unknown>[]).map((v) => ({
+      votacion: {
+        id: String(v.id ?? ""),
+        fecha: typeof v.fecha === "string" ? v.fecha : undefined,
+        descripcion: typeof v.descripcion === "string" ? v.descripcion : undefined,
+        quorum: typeof v.quorum === "string" ? v.quorum : undefined,
+        resultado: typeof v.resultado === "string" ? v.resultado : undefined,
+        tipo: typeof v.tipo === "string" ? v.tipo : undefined,
+        boletin: typeof v.boletin === "string" ? v.boletin : undefined,
+        tramite: typeof v.tramite === "string" ? v.tramite : undefined,
+        informe: typeof v.informe === "string" ? v.informe : undefined,
+        url_tramitacion: typeof v.url_tramitacion === "string" ? v.url_tramitacion : undefined,
+        total_si: typeof v.total_si === "string" ? v.total_si : undefined,
+        total_no: typeof v.total_no === "string" ? v.total_no : undefined,
+        total_abstencion: typeof v.total_abstencion === "string" ? v.total_abstencion : undefined,
+        total_asistencia: typeof v.total_asistencia === "string" ? v.total_asistencia : undefined,
+        url: typeof v.url === "string" ? v.url : undefined,
+      },
+      voto: {
+        id: String(polId),
+        nombre: politico.nombre_completo,
+        opcion: String(v.opcion ?? ""),
+        opcion_valor: "0",
+      },
+    }));
+  }
+
+  const ds = getVotacionesDataset();
+  const allVotes = (ds?.votes || {}) as Record<string, [string, string][]>;
+  const sessions = (ds?.sessions || {}) as Record<string, EtlRecord>;
 
   if (polId && allVotes[polId]) {
     const pVotes = allVotes[polId];
     const result: VotacionDelPolitico[] = [];
     const seenSessionIds = new Set<string>();
-    const seenVotingKeys = new Set<string>();
     for (const [sessionId, opcion] of pVotes) {
       if (seenSessionIds.has(sessionId)) continue;
       seenSessionIds.add(sessionId);
       const session = sessions[sessionId];
       if (!session) continue;
-      const key = `${session.fecha || ""}_${String(session.descripcion || session.boletin || "").trim().toLowerCase()}_${opcion}`;
-      if (seenVotingKeys.has(key)) continue;
-      seenVotingKeys.add(key);
       result.push({
         votacion: session,
         voto: {
@@ -509,5 +555,3 @@ export async function getAllPoliticosWithEvidence() {
     evidencia: await getEvidenceForPolitico(politico),
   })));
 }
-import { readFileSync } from "node:fs";
-import { join } from "node:path";

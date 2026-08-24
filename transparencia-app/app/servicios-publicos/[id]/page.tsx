@@ -7,9 +7,15 @@ import { POLITICOS_SEED } from "@/lib/seed-politicos";
 import ShareButton from "@/components/ShareButton";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import ServicioPublicoDashboardClient from "@/components/servicios/ServicioPublicoDashboardClient";
+import {
+  getServicioBySlugOrId,
+  getServicioCanonicalSlug,
+  isServicioLegacyId,
+  getAllServicioSlugs,
+} from "@/lib/slug-utils";
 
 export function generateStaticParams() {
-  return SERVICIOS_PUBLICOS_SEED.map((s) => ({ id: s.id }));
+  return getAllServicioSlugs().map(({ slug }) => ({ id: slug }));
 }
 
 export async function generateMetadata({
@@ -18,14 +24,18 @@ export async function generateMetadata({
   params: Promise<{ id: string }>;
 }): Promise<Metadata> {
   const { id } = await params;
-  const servicio = getServicioPublicoEnriquecido(id);
+  const servicio = getServicioBySlugOrId(id);
   if (!servicio) return { title: "Servicio No Encontrado — El Cambiómetro" };
+  const canonicalSlug = getServicioCanonicalSlug(id) ?? id;
 
   const ogImage = `https://cambiometro.impulsacv.cl/api/og/site`;
 
   return {
     title: `${servicio.nombre} (${servicio.sigla || servicio.tipo_organo}) — Presupuesto DIPRES, Personal & Compras | El Cambiómetro`,
     description: `Dashboard institucional de ${servicio.nombre}: presupuesto DIPRES 2026, dotación de personal CPLT, compras públicas en MercadoPúblico, audiencias de lobby y auditorías CGR.`,
+    alternates: {
+      canonical: `/servicios-publicos/${canonicalSlug}`,
+    },
     openGraph: {
       title: `${servicio.nombre} — El Cambiómetro`,
       description: `Presupuesto Ley DIPRES, compras públicas, lobby y dotación oficial de ${servicio.nombre}.`,
@@ -46,8 +56,14 @@ export default async function ServicioPublicoDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const servicio = getServicioPublicoEnriquecido(id);
+  const servicio = getServicioBySlugOrId(id);
   if (!servicio) notFound();
+
+  const canonicalSlug = getServicioCanonicalSlug(id) ?? id;
+  void isServicioLegacyId;
+
+  const enriquecido = getServicioPublicoEnriquecido(servicio.id);
+  if (!enriquecido) notFound();
 
   const politicoMatch = servicio.director_jefe_actual
     ? POLITICOS_SEED.find(
@@ -78,14 +94,14 @@ export default async function ServicioPublicoDetailPage({
             <Breadcrumbs
               items={[
                 { label: "Servicios Públicos", href: "/servicios-publicos" },
-                ...(servicio.ministerio_dependiente ? [{ label: servicio.ministerio_dependiente, href: `/servicios-publicos?search=${encodeURIComponent(servicio.ministerio_dependiente)}` }] : []),
-                { label: servicio.sigla || servicio.nombre },
+                ...(enriquecido.ministerio_dependiente ? [{ label: enriquecido.ministerio_dependiente, href: `/servicios-publicos?search=${encodeURIComponent(enriquecido.ministerio_dependiente)}` }] : []),
+                { label: enriquecido.sigla || enriquecido.nombre },
               ]}
             />
 
             <ShareButton
-              title={`${servicio.nombre} (${servicio.sigla || servicio.tipo_organo})`}
-              text={`Revisa el presupuesto DIPRES, personal y compras públicas de ${servicio.nombre} en El Cambiómetro.`}
+              title={`${enriquecido.nombre} (${enriquecido.sigla || enriquecido.tipo_organo})`}
+              text={`Revisa el presupuesto DIPRES, personal y compras públicas de ${enriquecido.nombre} en El Cambiómetro.`}
               captureTargetId="servicio-capture-zone"
               variant="primary"
             />
@@ -107,7 +123,7 @@ export default async function ServicioPublicoDetailPage({
                 flexShrink: 0,
               }}
             >
-              {servicio.tipo_organo === "Gobierno Regional" ? "🗺️" : servicio.tipo_organo === "Superintendencia" ? "⚖️" : servicio.tipo_organo === "Empresa Pública" ? "⛏️" : "🏛️"}
+              {enriquecido.tipo_organo === "Gobierno Regional" ? "🗺️" : enriquecido.tipo_organo === "Superintendencia" ? "⚖️" : enriquecido.tipo_organo === "Empresa Pública" ? "⛏️" : "🏛️"}
             </div>
 
             {/* Datos Principales */}
@@ -121,9 +137,9 @@ export default async function ServicioPublicoDetailPage({
                   marginBottom: "0.4rem",
                 }}
               >
-                <span className="badge badge-info">{servicio.tipo_organo}</span>
-                <span className="badge badge-ok">Dependencia: {servicio.ministerio_dependiente}</span>
-                {servicio.presupuesto && (
+                <span className="badge badge-info">{enriquecido.tipo_organo}</span>
+                <span className="badge badge-ok">Dependencia: {enriquecido.ministerio_dependiente}</span>
+                {enriquecido.presupuesto && (
                   <span className="badge badge-ok">Presupuesto DIPRES 2026</span>
                 )}
               </div>
@@ -137,15 +153,15 @@ export default async function ServicioPublicoDetailPage({
                   letterSpacing: "-0.02em",
                 }}
               >
-                {servicio.nombre} {servicio.sigla ? `(${servicio.sigla})` : ""}
+                {enriquecido.nombre} {enriquecido.sigla ? `(${enriquecido.sigla})` : ""}
               </h1>
 
               {/* Autoridad Titular */}
               <div style={{ fontSize: "0.95rem", color: "var(--text-2)", marginBottom: "1rem" }}>
-                {servicio.director_jefe_actual ? (
+                {enriquecido.director_jefe_actual ? (
                   <>
                     Autoridad Titular / Directiva:{" "}
-                    <strong style={{ color: "var(--text-1)" }}>{servicio.director_jefe_actual}</strong>
+                    <strong style={{ color: "var(--text-1)" }}>{enriquecido.director_jefe_actual}</strong>
                     {politicoMatch && (
                       <Link
                         href={`/politico/${politicoMatch.id}`}
@@ -167,9 +183,9 @@ export default async function ServicioPublicoDetailPage({
 
               {/* Enlaces Oficiales */}
               <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-                {servicio.sitio_web_oficial && (
+                {enriquecido.sitio_web_oficial && (
                   <a
-                    href={servicio.sitio_web_oficial}
+                    href={enriquecido.sitio_web_oficial}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="btn btn-secondary"
@@ -188,7 +204,7 @@ export default async function ServicioPublicoDetailPage({
                   ⚖️ Transparencia Activa CPLT
                 </a>
                 <a
-                  href={`https://x.com/search?q=${encodeURIComponent(servicio.nombre)}&f=live`}
+                  href={`https://x.com/search?q=${encodeURIComponent(enriquecido.nombre)}&f=live`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="btn btn-ghost"
@@ -204,7 +220,7 @@ export default async function ServicioPublicoDetailPage({
 
       {/* ═══ 2. DASHBOARD Y PESTAÑAS INTERACTIVAS (DIPRES, PERSONAL, COMPRAS, LOBBY) ═══ */}
       <div className="container-main" style={{ marginTop: "2rem" }}>
-        <ServicioPublicoDashboardClient servicio={servicio} politicoId={politicoMatch?.id ?? null} />
+        <ServicioPublicoDashboardClient servicio={enriquecido} politicoId={politicoMatch?.id ?? null} />
       </div>
     </div>
   );

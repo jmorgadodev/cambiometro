@@ -21,6 +21,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { Suspense } from "react";
+
 export default function ServiciosPublicosPage() {
   const todosLosServicios = getAllServiciosPublicosEnriquecidos();
   const serviciosConPolitico = todosLosServicios.map((serv) => {
@@ -57,12 +59,33 @@ export default function ServiciosPublicosPage() {
   }
 
   return (
-    <ServiciosPublicosClient
-      servicios={serviciosConPolitico}
-      totalServicios={totalServicios}
-      totalConPartida={totalConPartida}
-      presupuestoTotalLey={presupuestoTotalLey}
-      gastoDevengado={gastoDevengado}
-    />
+    <Suspense
+      fallback={
+        <div className="container-main" style={{ padding: "2.5rem 0 2rem", minHeight: "60vh" }}>
+          <h1
+            style={{
+              fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)",
+              fontWeight: 900,
+              color: "var(--text-1)",
+              margin: "0 0 0.5rem",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            Servicios Públicos, Ministerios y Gobiernos Regionales
+          </h1>
+          <p style={{ color: "var(--text-2)", fontSize: "0.95rem" }}>
+            Cargando directorio oficial consolidado de instituciones del Estado...
+          </p>
+        </div>
+      }
+    >
+      <ServiciosPublicosClient
+        servicios={serviciosConPolitico}
+        totalServicios={totalServicios}
+        totalConPartida={totalConPartida}
+        presupuestoTotalLey={presupuestoTotalLey}
+        gastoDevengado={gastoDevengado}
+      />
+    </Suspense>
   );
 }

@@ -26,20 +26,19 @@ export default function MunicipalidadesPage() {
   return (
     <Suspense
       fallback={
-        <div
-          style={{
-            minHeight: "100vh",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            background: "var(--bg)",
-            color: "var(--text-2)",
-          }}
-        >
-          <div className="text-center">
-            <div className="text-3xl animate-spin mb-3">🏛️</div>
-            <p className="text-sm font-medium">Cargando directorio de 346 municipalidades...</p>
-          </div>
+        <div className="container-main" style={{ padding: "2rem 0", minHeight: "60vh" }}>
+          <h1
+            style={{
+              fontSize: "clamp(1.75rem, 3.5vw, 2.5rem)",
+              fontWeight: 900,
+              color: "var(--text-1)",
+              margin: "0 0 0.5rem",
+              letterSpacing: "-0.02em",
+            }}
+          >
+            Directorio de las 346 Municipalidades
+          </h1>
+          <p style={{ color: "var(--text-2)" }}>Cargando catálogo oficial de 346 comunas...</p>
         </div>
       }
     >

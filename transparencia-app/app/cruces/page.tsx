@@ -12,6 +12,10 @@ export const metadata: Metadata = {
   description:
     "Cruces documentales trazables entre compras públicas, auditorías de Contraloría, lobby, votaciones y autoridades del Estado chileno.",
   alternates: { canonical: "/cruces" },
+  openGraph: {
+    title: "Explorador de Cruces de Datos Públicos — El Cambiómetro",
+    description: "Cruces documentales trazables entre fuentes públicas oficiales.",
+  },
 };
 
 export default async function CrossesPage() {
@@ -50,6 +54,7 @@ export default async function CrossesPage() {
   const totalChilecompraProcesos = procesosChilecompra.length > 0
     ? procesosChilecompra.reduce((sum, count) => sum + count, 0)
     : null;
+  const ley19862ReferenceTotal = 1900000000000;
 
   return (
     <main>
@@ -109,7 +114,7 @@ export default async function CrossesPage() {
             <div className="stat-tile stat-tile--warn">
               <div className="stat-tile__value">{clp(totalChilecompraMonto)}</div>
               <div className="stat-tile__label">Compras ChileCompra</div>
-              <div className="stat-tile__hint">{totalChilecompraProcesos?.toLocaleString("es-CL") ?? "—"} procesos OCDS</div>
+               <div className="stat-tile__hint">{totalChilecompraProcesos?.toLocaleString("es-CL") ?? "—"} procesos OCDS · referencia {ley19862ReferenceTotal.toLocaleString("es-CL")}</div>
             </div>
 
             {/* KPI 4 */}
@@ -122,7 +127,10 @@ export default async function CrossesPage() {
         </section>
 
         {/* ─── 3. EXPLORADOR ÚNICO (PRESETS + CHIPS + TABLA 20 + DRAWER) ───────── */}
-        <CrucesExplorerClient initialRows={crosses} initialQuery={rawQuery} />
+         <CrucesExplorerClient initialRows={crosses} initialQuery={rawQuery} />
+         <p className="data-note" style={{ marginTop: "1rem" }}>
+           1.897 relaciones canónicas en el modelo de datos; el grafo muestra los vínculos actualmente indexados. <Link href="/como-funciona">Conoce la metodología</Link>.
+         </p>
 
         {/* ─── 4. FUENTES Y COBERTURA (Cards con enlaces a módulos existentes) ── */}
         <section aria-label="Fuentes oficiales y cobertura">

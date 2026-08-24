@@ -8,6 +8,10 @@ import { ETL_SOURCES_DATA } from "@/lib/etl-sources-data";
 import { listEntities, listRecords, listRelations } from "@/lib/data-platform-d1";
 import { listPublishedSourceManifests } from "@/lib/published-sources";
 
+export const dynamic = "force-static";
+
+const HOME_SOURCES_LIST = ETL_SOURCES_DATA.filter((source) => source.recordCount > 0);
+
 export const metadata: Metadata = {
   title: "El Cambiómetro — Plataforma de Datos Públicos y Transparencia",
   description: "Consulta y fiscaliza votaciones parlamentarias, gastos operacionales, personal de apoyo y autoridades con datos oficiales consolidados.",
@@ -73,10 +77,23 @@ export default async function HomePage() {
     listRecords({ kind: "expense", limit: 1 }),
   ]);
   const totalCatalogRecords = Math.max(records.total, GLOBAL_KPIS.registros_canonicos);
-  const operationalSources = ETL_SOURCES_DATA.filter((s) => s.recordCount > 0);
+  const operationalSources = HOME_SOURCES_LIST;
 
   return (
     <div className="home-desk">
+      <script
+        type="application/ld+json"
+      >{JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: "El Cambiómetro",
+        url: "https://cambiometro.impulsacv.cl",
+        publisher: {
+          "@type": "Organization",
+          name: "ImpulsaCV",
+          url: "https://impulsacv.cl",
+        },
+      })}</script>
       <section className="home-lead container-main" aria-labelledby="home-title">
         <div className="home-lead__copy">
           <p className="home-kicker"><span aria-hidden="true" /> Plataforma de Datos Públicos</p>
@@ -190,7 +207,7 @@ export default async function HomePage() {
             ))}
           </div>
           <p className="home-coverage-note">
-            Nóminas oficiales: cada organismo informa con su partición oficial validada. Los pipelines operan de forma automatizada y periódica con trazabilidad al portal de origen.
+            12 fuentes oficiales + 1 derivada. Nóminas oficiales: cada organismo informa con su partición oficial validada. Los pipelines operan de forma automatizada y periódica con trazabilidad al portal de origen. <Link href="/fuentes">Ver catálogo de fuentes →</Link>
           </p>
         </section>
       </Reveal>

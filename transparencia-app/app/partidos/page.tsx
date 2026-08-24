@@ -1,9 +1,10 @@
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllPartidosSummary } from "@/lib/partido-estadisticas";
 import { POLITICOS_SEED, PARTIDOS_SEED } from "@/lib/seed-politicos";
 import { diputadoIdParaPolitico } from "@/lib/data-source";
-import { personalApoyoParaDiputado } from "@/lib/personal-apoyo";
+import { leerPersonalApoyo } from "@/lib/personal-apoyo";
 import { formatCLP, formatPct } from "@/lib/format";
 import RankingVotosChart from "@/components/partidos/RankingVotosChart";
 import PartidosRankingTable from "@/components/partidos/PartidosRankingTable";
@@ -54,32 +55,34 @@ export default async function PartidosListPage() {
 
   // Gráfico de Votaciones de Sala
   const rankingVotos = partidos
-    .filter((p) => (p.votosCamara.emitidos || 0) > 0)
-    .sort((a, b) => (b.votosCamara.emitidos || 0) - (a.votosCamara.emitidos || 0))
+    .filter((p) => (p.votosCamara?.emitidos || 0) > 0)
+    .sort((a, b) => (b.votosCamara?.emitidos || 0) - (a.votosCamara?.emitidos || 0))
     .map((p) => ({
       nombre: p.sigla,
-      si: p.votosCamara.afirmativo || 0,
-      no: p.votosCamara.enContra || 0,
-      abst: p.votosCamara.abstencion || 0,
-      noVota: p.votosCamara.noVota || 0,
+      si: p.votosCamara?.afirmativo || 0,
+      no: p.votosCamara?.enContra || 0,
+      abst: p.votosCamara?.abstencion || 0,
+      noVota: p.votosCamara?.noVota || 0,
     }));
 
   // Top 5 Equipos de Apoyo de Diputados
-  const topEquiposDiputadosRaw = await Promise.all(
-    POLITICOS_SEED.filter((p) => p.cargo === "Diputado").map(async (politico) => {
-      const apoyo = await personalApoyoParaDiputado(diputadoIdParaPolitico(politico));
-      const partido = PARTIDOS_SEED.find((pr) => pr.id === politico.partido_id);
-      return {
-        id: politico.id,
-        nombre: politico.nombre_completo,
-        partido: partido?.sigla ?? "IND",
-        distrito: politico.numero_distrito ? `Distrito ${politico.numero_distrito}` : null,
-        foto_url: politico.foto_url || "/default-avatar.png",
-        total: apoyo.total_mensual,
-        n: apoyo.n_personas,
-      };
-    })
-  );
+  const datasetApoyo = await leerPersonalApoyo();
+  const topEquiposDiputadosRaw = POLITICOS_SEED.filter((p) => p.cargo === "Diputado").map((politico) => {
+    const diputadoCamaraId = diputadoIdParaPolitico(politico);
+    const diputado = diputadoCamaraId ? datasetApoyo?.diputados?.[String(diputadoCamaraId)] ?? null : null;
+    const filas = diputado?.personal_apoyo ?? [];
+    const total = filas.reduce((tot, f) => tot + (f.sueldo ?? 0), 0);
+    const partido = PARTIDOS_SEED.find((pr) => pr.id === politico.partido_id);
+    return {
+      id: politico.id,
+      nombre: politico.nombre_completo,
+      partido: partido?.sigla ?? "IND",
+      distrito: politico.numero_distrito ? `Distrito ${politico.numero_distrito}` : null,
+      foto_url: politico.foto_url || "/default-avatar.png",
+      total,
+      n: filas.length,
+    };
+  });
 
   const topEquiposDiputados: TopEquipoDiputado[] = topEquiposDiputadosRaw
     .filter((r) => r.total > 0)
@@ -261,7 +264,9 @@ export default async function PartidosListPage() {
             </p>
           </div>
 
-          <PartidosRankingTable partidos={partidos} />
+          <Suspense fallback={<div style={{ minHeight: 200, display: "grid", placeContent: "center", color: "var(--text-3)" }}>Cargando tabla de partidos...</div>}>
+            <PartidosRankingTable partidos={partidos} />
+          </Suspense>
         </div>
 
         {/* ─── NOTA METODOLÓGICA AMPLIADA ────────────────────────────────────────── */}

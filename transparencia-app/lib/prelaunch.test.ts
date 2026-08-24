@@ -15,8 +15,10 @@ describe("Sanidad global pre-lanzamiento y rutas", () => {
     expect(kpis.relaciones).toBe(1897);
     expect(kpis.votaciones).toBe(12111);
     expect(kpis.gastos).toBe(690);
-    expect(kpis.fuentes_operativas).toBe(11);
-    expect(kpis.total_fuentes).toBe(11);
+    expect(kpis.fuentes_oficiales).toBe(12);
+    expect(kpis.fuentes_derivadas).toBe(1);
+    expect(kpis.fuentes_operativas).toBe(13);
+    expect(kpis.total_fuentes).toBe(13);
     expect(kpis.corte).toBe("Agosto 2026");
   });
 
@@ -71,7 +73,7 @@ describe("Sanidad global pre-lanzamiento y rutas", () => {
     expect(homeContent).toContain("GLOBAL_KPIS");
     expect(homeContent).toContain("KPI_SCOPES");
     expect(homeContent).toContain("title={item.tooltip}");
-    expect(homeContent).toContain("operationalSources");
+    expect(homeContent).toContain("HOME_SOURCES_LIST");
   });
 
   it("Sección 2. /datos muestra 11 / 11 fuentes y registros canónicos", () => {

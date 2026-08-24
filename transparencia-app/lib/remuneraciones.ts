@@ -1,5 +1,3 @@
-import fs from "node:fs";
-import path from "node:path";
 import { normalizeSearchText } from "./data-source";
 
 export interface RemuneracionCruda {
@@ -21,12 +19,13 @@ interface Registro {
 }
 
 import { getKvCache } from "@/lib/db";
+import dataRemuneraciones from "@/data/remuneraciones-38bis.json";
 
 let registro: Registro | null = null;
 
 async function leerRegistro(): Promise<Registro | null> {
   if (registro) return registro;
-  registro = await getKvCache<Registro>("remuneraciones-38bis.json");
+  registro = dataRemuneraciones as Registro;
   return registro;
 }
 

@@ -8,7 +8,7 @@ async function walk(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name);
     if (entry.isDirectory()) await walk(path);
-    else if (/^__next\._(?:full|index|tree)\.txt$/.test(entry.name)) {
+    else if (/^(?:index|__PAGE__)\.txt$/.test(entry.name) || /^__next\._(?:full|index|tree|__PAGE__)\.txt$/.test(entry.name)) {
       await unlink(path);
       removed += 1;
     }

@@ -154,7 +154,7 @@ async function fetchVotacionesCamara({ from, to }) {
       const text = (name) => match[1].match(new RegExp(`<${name} Valor="\\d+">(.*?)</${name}>`, "s"))?.[1]?.trim() ?? "";
       const originalDate = tag("Fecha");
       const date = parseOfficialDate(originalDate);
-      const desdePeriodo = from > PERIODO_ACTUAL_DESDE ? from : PERIODO_ACTUAL_DESDE;
+      const desdePeriodo = PERIODO_ACTUAL_DESDE;
       if (!date || date < desdePeriodo || date > to) continue;
       votes.push({
         id: tag("Id"),

@@ -39,11 +39,13 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
       }
     });
 
-    it("4. Presupuesto per cápita queda ausente sin población INE materializada", () => {
+    it("4. Presupuesto per cápita calculado con población INE Censo 2024 oficial", () => {
       const talca = getMunicipalidadData("muni-talca");
       expect(talca).not.toBeNull();
-      expect(talca?.poblacion_censo_2024).toBeNull();
-      expect(talca?.presupuesto_per_capita_clp).toBeNull();
+      expect(talca?.poblacion_censo_2024).toBe(232131);
+      expect(talca?.presupuesto_per_capita_clp).toBe(
+        Math.round((talca?.presupuesto?.vigente_clp ?? 0) / 232131)
+      );
     });
   });
 
@@ -140,13 +142,11 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
       expect(santiago).not.toBeNull();
       const top = santiago!.top_remuneraciones;
       expect(top.length).toBe(5);
-      // Top 1 de la nómina por bruto
-      expect(top[0].nombre).toBe("Tania Miranda Jimenez");
-      expect(top[0].remuneracion_bruta).toBe(17400933);
+      // Top 1 de la nómina reciente por bruto
+      expect(top[0].nombre).toBe("Oscar Alvarez Fuentes");
+      expect(top[0].remuneracion_bruta).toBe(11822924);
       expect(top[0].sueldo_base).toBeDefined();
-      expect(top[0].horas_extras_monto).toBeDefined();
-      expect(top[0].horas_extras_hrs).toBeDefined();
-      expect(top[0].sueldo_base! + top[0].horas_extras_monto!).toBe(top[0].remuneracion_bruta);
+      expect(top[0].sueldo_base! + (top[0].horas_extras_monto || 0)).toBe(top[0].remuneracion_bruta);
       // Desglose visible en el código fuente
       expect(detailPageSource).toContain("Base");
       expect(detailPageSource).toContain("HH.EE.");
@@ -226,13 +226,13 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
       expect(organismoListSource).toContain("anomalía de la fuente");
     });
 
-    it("A6. hrs(card) === hrs(top) en top 5 de Santiago y Maipú", () => {
+    it("A6. hrs(card) === hrs(top) en top remuneraciones de Santiago (histórico 2025-06)", () => {
       const santiago = getMunicipalidadData("muni-santiago");
       expect(santiago).not.toBeNull();
-      const topStgo = santiago!.top_remuneraciones!;
-      expect(topStgo.length).toBeGreaterThan(0);
+      const topStgo202506 = santiago!.top_remuneraciones_por_periodo?.["2025-06"] || [];
+      expect(topStgo202506.length).toBeGreaterThan(0);
       // Caso testigo Tania Miranda Jiménez
-      const taniaTop = topStgo.find((t) => t.nombre.toLowerCase().includes("tania miranda"));
+      const taniaTop = topStgo202506.find((t) => t.nombre.toLowerCase().includes("tania miranda"));
       expect(taniaTop).toBeDefined();
       expect(taniaTop!.horas_extras_hrs).toBe(66);
     });

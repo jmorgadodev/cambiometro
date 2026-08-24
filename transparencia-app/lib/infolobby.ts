@@ -1,5 +1,6 @@
 import fs from "fs";
 import path from "path";
+import infolobbyStaticJson from "@/data/lake-subsets/infolobby.subset.json";
 import type { EtlRecord } from "@/lib/data-source";
 
 export type LobbyEventKind = "audience" | "travel" | "gift";
@@ -42,7 +43,7 @@ let cached: InfoLobbyProjection | null = null;
  * scripts/build-infolobby-v1.mjs desde las particiones del lake.
  * La ficha del político prioriza estos registros —con sujetos pasivos y
  * organismo oficial— sobre la ventana legacy del snapshot ETL. Las tablas de
- * /cruces usan los agregados `sujetos` y `organismos`. Carga con fs + cache.
+ * /cruces usan los agregados `sujetos` y `organismos`. Carga con fs en scripts locales y fallback a JSON empaquetado en Worker.
  */
 export function leerInfoLobbyV1(): InfoLobbyProjection | null {
   if (cached) return cached;
@@ -62,12 +63,11 @@ export function leerInfoLobbyV1(): InfoLobbyProjection | null {
       "infolobby.subset.json",
     );
     const targetFile = fs.existsSync(fullFile) ? fullFile : subsetFile;
-    if (!fs.existsSync(targetFile)) return null;
-
-    cached = JSON.parse(fs.readFileSync(targetFile, "utf8")) as InfoLobbyProjection;
-    return cached;
-  } catch {
-    cached = null;
-    return null;
-  }
+    if (fs.existsSync(targetFile)) {
+      cached = JSON.parse(fs.readFileSync(targetFile, "utf8")) as InfoLobbyProjection;
+      return cached;
+    }
+  } catch {}
+  cached = (infolobbyStaticJson as unknown) as InfoLobbyProjection;
+  return cached;
 }

@@ -1,7 +1,13 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { getVerifiedMuniRRSS } from "./municipalidades-rrss";
 
-const municipalidadesJson = JSON.parse(readFileSync(join(process.cwd(), "data", "municipalidades-data.json"), "utf8"));
+let municipalidadesJson: unknown = {};
+try {
+  municipalidadesJson = JSON.parse(readFileSync(join(process.cwd(), "data", "municipalidades-data.json"), "utf8"));
+} catch {
+  // Static builds have the source file; edge/runtime consumers use published slices.
+}
 
 export interface AlcaldeData {
   nombre: string;
@@ -28,6 +34,7 @@ export interface PresupuestoSinim {
 
 export interface ResumenPersonal {
   total_funcionarios: number;
+  total_funcionarios_historico?: number;
   planta: number;
   contrata: number;
   honorarios: number;
@@ -41,7 +48,20 @@ export interface ResumenPersonal {
   registros_micro_monto_count?: number;
   registros_cuarentena_v7_count?: number;
   registros_validos_count?: number;
+  es_parcial?: boolean;
+  representatividad_pct?: number;
+  benchmark_count?: number;
   nota_metodologica?: string | null;
+}
+
+export interface PeriodoDisponible {
+  periodo: string;
+  ano: number;
+  mes: number;
+  etiqueta: string;
+  count: number;
+  es_parcial?: boolean;
+  representatividad_pct?: number;
 }
 
 export interface TopFuncionarioHorasExtras {
@@ -90,6 +110,7 @@ export interface RedesSocialesComunales {
   facebook?: string | null;
   whatsapp?: string | null;
   youtube?: string | null;
+  fuente_verificacion?: string | null;
 }
 
 export interface ConcejalData {
@@ -198,20 +219,33 @@ export interface MunicipalidadEnriquecida {
   auditorias_cgr?: AuditoriaCgrData[];
   presupuesto: PresupuestoSinim | null;
   resumen_personal: ResumenPersonal | null;
+  resumen_personal_por_periodo?: Record<string, ResumenPersonal>;
   top_horas_extras: TopFuncionarioHorasExtras[];
   top_remuneraciones: TopFuncionarioRemuneracion[];
+  top_remuneraciones_por_periodo?: Record<string, TopFuncionarioRemuneracion[]>;
+  periodo_cplt_reciente?: string | null;
+  desfase_meses?: number | null;
+  estado_frescura?: "al_dia" | "desfasado" | "sin_datos";
+  periodos_disponibles?: PeriodoDisponible[];
   anomalias_integridad?: AnomaliaIntegridadMunicipal[];
 }
 
 export * from "./municipalidades-list";
 
 const MUNICIPALIDADES_DICT = Object.fromEntries(
-  Object.entries(municipalidadesJson as unknown as Record<string, MunicipalidadEnriquecida>).map(([id, municipalidad]) => [
-    id,
-    municipalidad.compras_publicas?.metodo_enlace === "RUT_EXACTO"
-      ? municipalidad
-      : { ...municipalidad, compras_publicas: null },
-  ]),
+  Object.entries(municipalidadesJson as unknown as Record<string, MunicipalidadEnriquecida>).map(([id, municipalidad]) => {
+    const verified = getVerifiedMuniRRSS(id);
+    const enriched: MunicipalidadEnriquecida = {
+      ...municipalidad,
+      sitio_web_oficial: verified?.sitio_web_oficial ?? municipalidad.sitio_web_oficial ?? null,
+      redes_sociales: verified?.redes_sociales ?? municipalidad.redes_sociales ?? null,
+      partido_alcalde: municipalidad.partido_alcalde ?? verified?.alcalde_oficial?.partido ?? null,
+      compras_publicas: municipalidad.compras_publicas?.metodo_enlace === "RUT_EXACTO"
+        ? municipalidad.compras_publicas
+        : null,
+    };
+    return [id, enriched];
+  }),
 ) as Record<string, MunicipalidadEnriquecida>;
 
 export function getMunicipalidadData(id: string): MunicipalidadEnriquecida | null {
@@ -221,4 +255,5 @@ export function getMunicipalidadData(id: string): MunicipalidadEnriquecida | nul
 export function getAllMunicipalidadesData(): MunicipalidadEnriquecida[] {
   return Object.values(MUNICIPALIDADES_DICT);
 }
+
 

@@ -9,6 +9,8 @@ export interface EtlSourceInfo {
   lastUpdated: string;
   lastUpdatedRelative: string;
   recordCount: number;
+  canonicalCount: number;
+  historicalCount: number;
   financialAmountClp?: number;
   status: "operational" | "updated" | "official_lag";
   statusText: string;
@@ -19,8 +21,40 @@ export interface EtlSourceInfo {
   viewLabel: string;
 }
 
-type HealthKey = keyof typeof healthRaw.sources;
-type Descriptor = Omit<EtlSourceInfo, "recordCount" | "financialAmountClp" | "lastUpdated" | "lastUpdatedRelative" | "status" | "statusText"> & { health: HealthKey };
+const CANONICAL_COUNTS: Record<string, number> = {
+  cplt: 1203287,
+  dipres: 15689,
+  ley19862: 59361,
+  chilecompra: 74142,
+  infolobby: 60523,
+  infoprobidad: 15331,
+  sinim: 3105,
+  contraloria: 291,
+  camara: 19025,
+  senado: 8138,
+  servel: 23894,
+  personal_apoyo: 4092,
+  ine: 346,
+};
+
+const HISTORICAL_COUNTS: Record<string, number> = {
+  cplt: 1218136,
+  dipres: 15689,
+  ley19862: 59361,
+  chilecompra: 888693,
+  infolobby: 60523,
+  infoprobidad: 15331,
+  sinim: 3105,
+  contraloria: 291,
+  camara: 19025,
+  senado: 8138,
+  servel: 23894,
+  personal_apoyo: 4092,
+  ine: 346,
+};
+
+type HealthKey = keyof typeof healthRaw.sources | "personal_apoyo";
+type Descriptor = Omit<EtlSourceInfo, "recordCount" | "canonicalCount" | "historicalCount" | "financialAmountClp" | "lastUpdated" | "lastUpdatedRelative" | "status" | "statusText"> & { health: HealthKey };
 const dateLabel = (value: string) => `Corte ${new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(value))}`;
 
 const descriptors: Descriptor[] = [
@@ -31,6 +65,7 @@ const descriptors: Descriptor[] = [
   { health: "infolobby", id: "etl_infolobby_plataforma", name: "Plataforma InfoLobby", organization: "Consejo para la Transparencia", category: "probidad", frequency: "Diaria", officialUrl: "https://www.infolobby.cl/", description: "Audiencias y registros oficiales disponibles en el corte local.", keyFields: ["Autoridad", "Institución", "Materia", "Fecha"], viewLink: "/cruces#lobby-publico", viewLabel: "Ver audiencias en explorador →" },
   { health: "infoprobidad", id: "etl_infoprobidad_declaraciones", name: "Declaraciones de Intereses y Patrimonio", organization: "Contraloría General de la República · CPLT", category: "probidad", frequency: "Por declaración", officialUrl: "https://www.declaracionjurada.cl/", description: "Declaraciones oficiales disponibles en el corte local.", keyFields: ["Declarante", "Cargo", "Institución", "Fecha"], viewLink: "/personas", viewLabel: "Ver declaraciones de autoridades →" },
   { health: "sinim", id: "etl_sinim_subdere", name: "Sistema Nacional de Información Municipal (SINIM)", organization: "SUBDERE", category: "municipios", frequency: "Anual", officialUrl: "http://www.sinim.gov.cl/", description: "Indicadores municipales oficiales disponibles; la cobertura faltante se conserva como ausencia.", keyFields: ["CUT", "Comuna", "Indicador", "Valor"], viewLink: "/municipalidades", viewLabel: "Ver comparador municipal →" },
+  { health: "ine", id: "etl_ine_censo_2024", name: "INE Censo 2024 (Población y Demografía)", organization: "Instituto Nacional de Estadísticas (INE)", category: "municipios", frequency: "Censal / Definitiva", officialUrl: "https://censo2024.ine.gob.cl/resultados/", description: "Población censada, hogares y viviendas de las 346 comunas de Chile con trazabilidad a la cartografía oficial del INE.", keyFields: ["CUT", "Comuna", "Población", "Viviendas", "Hogares"], viewLink: "/municipalidades", viewLabel: "Ver fichas comunales con demografía →" },
   { health: "contraloria", id: "etl_contraloria_auditorias", name: "Informes de Auditoría CGR", organization: "Contraloría General de la República", category: "probidad", frequency: "Continua", officialUrl: "https://www.contraloria.cl/web/cgr/informes-de-auditoria", description: "Informes y hallazgos oficiales descargados en el corte local.", keyFields: ["Informe", "Entidad", "Materia", "Fecha"], viewLink: "/cruces#fiscalizacion", viewLabel: "Ver fiscalizaciones en explorador →" },
   { health: "camara", id: "etl_camara_diputados", name: "Cámara de Diputadas y Diputados", organization: "Congreso Nacional", category: "parlamento", frequency: "Por publicación", officialUrl: "https://opendata.camara.cl/", description: "Registros oficiales de actividad y gastos presentes en el lake.", keyFields: ["Diputado", "Sesión", "Voto", "Gasto"], viewLink: "/politico", viewLabel: "Ver análisis de diputados →" },
   { health: "senado", id: "etl_senado_republica", name: "Senado de la República", organization: "Congreso Nacional", category: "parlamento", frequency: "Por publicación", officialUrl: "https://www.senado.cl/transparencia/datos-abiertos", description: "Registros oficiales de actividad y gastos presentes en el lake.", keyFields: ["Senador", "Sesión", "Voto", "Gasto"], viewLink: "/politico", viewLabel: "Ver análisis de senadores →" },
@@ -38,15 +73,21 @@ const descriptors: Descriptor[] = [
 ];
 
 export const ETL_SOURCES_DATA: EtlSourceInfo[] = descriptors.map(({ health, ...descriptor }) => {
-  const state = healthRaw.sources[health];
+  const state = health === "personal_apoyo" ? null : healthRaw.sources[health as keyof typeof healthRaw.sources];
+  const canonicalCount = CANONICAL_COUNTS[health] ?? state?.recordCount ?? 0;
+  const historicalCount = HISTORICAL_COUNTS[health] ?? state?.recordCount ?? canonicalCount;
+  const generatedAt = state?.generatedAt ?? "2026-08-21T10:02:59.458Z";
+
   return {
     ...descriptor,
-    recordCount: state.recordCount,
-    ...("financialAmountClp" in state && typeof state.financialAmountClp === "number" ? { financialAmountClp: state.financialAmountClp } : {}),
-    lastUpdated: state.generatedAt,
-    lastUpdatedRelative: dateLabel(state.generatedAt),
-    status: state.status === "complete" ? "operational" : "official_lag",
-    statusText: state.status === "complete" ? "Cobertura completa" : "Cobertura parcial declarada",
+    recordCount: canonicalCount,
+    canonicalCount,
+    historicalCount,
+    ...(state && "financialAmountClp" in state && typeof state.financialAmountClp === "number" ? { financialAmountClp: state.financialAmountClp } : {}),
+    lastUpdated: generatedAt,
+    lastUpdatedRelative: dateLabel(generatedAt),
+    status: state?.status === "complete" ? "operational" : "official_lag",
+    statusText: state?.status === "complete" ? "Cobertura completa" : "Cobertura parcial declarada",
   };
 });
 
