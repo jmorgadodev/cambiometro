@@ -154,6 +154,9 @@ try {
   await page.screenshot({ path: join(tmpdir(), "transparencia-home-desktop.png"), fullPage: true });
 
   await gotoWithNetworkRetry(`${baseUrl}/cruces`);
+  await page.getByRole("heading", { name: /Explorador de Cruces/ }).first().waitFor({ state: "visible", timeout: 15_000 });
+  await page.getByRole("heading", { name: /Cruces Destacados/ }).first().waitFor({ state: "visible", timeout: 15_000 });
+  await page.getByRole("heading", { name: /Fuentes Oficiales/ }).first().waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await page.getByRole("heading", { name: /Explorador de Cruces/ }).count(), 1);
   assert.equal(await page.getByRole("heading", { name: /Cruces Destacados/ }).count(), 1);
   assert.equal(await page.getByRole("heading", { name: /Fuentes Oficiales/ }).count(), 1);
