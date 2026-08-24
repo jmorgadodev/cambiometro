@@ -82,7 +82,7 @@ async function getWithNetworkRetry(url, attempts = 6) {
       // Static Pages navigation resolves before client hydration has exposed
       // the page landmarks. Wait for the stable shell once per navigation so
       // subsequent semantic assertions are not timing-dependent.
-      await page.waitForSelector("h1:visible", { state: "visible", timeout: 15_000 }).catch(() => {});
+      await page.waitForSelector("h1:visible", { state: "visible", timeout: 3_000 }).catch(() => {});
       await page.waitForTimeout(250);
       return response;
     } catch (error) {
