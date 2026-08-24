@@ -32,5 +32,6 @@ jobs:
         working-directory: transparencia-app
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PROD_URL: "https://cambiometro.impulsacv.cl"
+          PROD_URL: "https://cambiometro.pages.dev"
+          API_URL: "https://cambiometro.impulsacv.cl"
         run: node scripts/uptime-smoke.mjs

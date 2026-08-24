@@ -1,6 +1,7 @@
 import { execSync } from "node:child_process";
 
 const PROD_BASE = process.env.PROD_URL || "https://cambiometro.impulsacv.cl";
+const API_BASE = process.env.API_URL || PROD_BASE;
 
 const ROUTES = [
   "/",
@@ -16,7 +17,8 @@ const ROUTES = [
 ];
 
 async function checkRoute(path) {
-  const url = `${PROD_BASE}${path}`;
+  const origin = path.startsWith("/api/") ? API_BASE : PROD_BASE;
+  const url = `${origin}${path}`;
   const t0 = performance.now();
   let res;
   let errorMsg = "";
