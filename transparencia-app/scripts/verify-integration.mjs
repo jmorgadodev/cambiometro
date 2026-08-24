@@ -11,6 +11,7 @@ const routes = [
 ];
 const responsiveRoutes = ["/"];
 const baseUrl = process.env.VERIFY_BASE_URL ?? "http://127.0.0.1:3000";
+const apiBaseUrl = process.env.VERIFY_API_URL ?? baseUrl;
 const verifyingLocal = /^http:\/\/(?:127\.0\.0\.1|localhost)/.test(baseUrl);
 const verifyingProd = !verifyingLocal && !/\.workers\.dev$/.test(new URL(baseUrl).hostname);
 const staticRedirects = new Map(
@@ -277,11 +278,11 @@ try {
     ["/api/og/site", 200], ["/api/og/dip-061", 200],
   ];
   for (const [path, status] of legacyChecks) {
-    const response = await page.request.get(`${baseUrl}${path}`);
+    const response = await page.request.get(`${apiBaseUrl}${path}`);
     assert.equal(response.status(), status, `${path} HTTP ${response.status()}`);
   }
 
-  const sources = await page.request.get(`${baseUrl}/api/v1/sources`);
+  const sources = await page.request.get(`${apiBaseUrl}/api/v1/sources`);
   const sourcePayload = await sources.json();
   const expectedSourceCounts = new Map([
     ["chilecompra", 74_142], ["dipres", 15_689], ["sinim", 3_105],
@@ -301,20 +302,21 @@ try {
     "/api/v1/relations?from_id=person-camara-1009&limit=10",
     "/api/v1/crosses?entity_id=person-camara-1009&limit=10",
   ]) {
-    const response = await page.request.get(`${baseUrl}${path}`);
+    const response = await page.request.get(`${apiBaseUrl}${path}`);
     assert(response.ok(), `${path} HTTP ${response.status()}`);
     const payload = await response.json();
     assert("data" in payload && "meta" in payload && "links" in payload, `${path}: contrato uniforme`);
   }
   assert.equal((await page.request.get(`${baseUrl}/rankings`)).status(), 200);
 
-  const commercial = await page.request.get(`${baseUrl}/api/v1/commercial/keys`);
+  const commercial = await page.request.get(`${apiBaseUrl}/api/v1/commercial/keys`);
   assert.equal(commercial.status(), 503);
-  const push = await page.request.post(`${baseUrl}/api/push`, { data: { politico_id: "dip-061", endpoint: "https://example.test/push", keys: { p256dh: "x", auth: "y" } } });
+  const push = await page.request.post(`${apiBaseUrl}/api/push`, { data: { politico_id: "dip-061", endpoint: "https://example.test/push", keys: { p256dh: "x", auth: "y" } } });
   assert.equal(push.status(), 405);
 
   const widgetPage = await browser.newPage();
-  await widgetPage.setContent(`<!DOCTYPE html><html><body><main><script src="${baseUrl}/widget.js" data-politico="dip-061"></script></main></body></html>`, { waitUntil: "networkidle" });
+  const widgetApiOrigin = apiBaseUrl !== baseUrl ? ` data-api-origin="${apiBaseUrl}"` : "";
+  await widgetPage.setContent(`<!DOCTYPE html><html><body><main><script src="${baseUrl}/widget.js" data-politico="dip-061"${widgetApiOrigin}></script></main></body></html>`, { waitUntil: "networkidle" });
   const widgetCard = widgetPage.locator(".transparencia-widget").locator("article");
   await widgetCard.waitFor({ state: "visible", timeout: 15000 });
   await widgetCard.locator(".name").waitFor({ state: "visible", timeout: 15000 });
@@ -327,7 +329,7 @@ try {
     assert.equal(await page.getByRole("heading", { name: "Fuente temporalmente no disponible" }).count(), 0);
   }
 
-  const health = await page.request.get(`${baseUrl}/api/v1/health/data`);
+  const health = await page.request.get(`${apiBaseUrl}/api/v1/health/data`);
   const healthText = await health.text();
   assert(!healthText.includes("publishedVersion") && !healthText.includes('"id":"run-'), "health no debe filtrar ids o versiones internas");
 

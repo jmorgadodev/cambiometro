@@ -10,7 +10,7 @@
     if (!politicoId || script.getAttribute("data-loaded")) return;
     script.setAttribute("data-loaded", "true");
 
-    const origin = new URL(script.src, document.baseURI).origin;
+    const origin = script.getAttribute("data-api-origin") || new URL(script.src, document.baseURI).origin;
     const host = document.createElement("div");
     host.className = "transparencia-widget";
     host.setAttribute("aria-live", "polite");

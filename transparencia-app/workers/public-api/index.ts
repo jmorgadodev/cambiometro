@@ -95,6 +95,12 @@ function politico(row: JsonRecord) {
     id: row.id,
     kind: "politico",
     name: row.nombre_completo,
+    nombre_completo: row.nombre_completo,
+    cargo: row.cargo ?? null,
+    partido: row.partido_id ? { id: row.partido_id, sigla: String(row.partido_id).toUpperCase() } : null,
+    distrito_region: row.distrito_region ?? null,
+    evidencia: [],
+    url_ficha: `/politico/${row.id}`,
     identifiers: [],
     attributes: {
       cargo: row.cargo ?? null,
@@ -358,7 +364,9 @@ export default {
       if (!env.DB) return dbUnavailable();
       const id = decodeURIComponent(path.split("/").at(-1) ?? "");
       const row = await env.DB.prepare("SELECT * FROM politicos WHERE id = ? LIMIT 1").bind(id).first<JsonRecord>();
-      return row ? success(politico(row), { id }, { self: url.toString() }) : failure("NOT_FOUND", "Político no encontrado.", 404, { id });
+      return row
+        ? success(politico(row), { id, snapshot_etl: { generatedAtChile: row.updated_at ?? "Agosto 2026" } }, { self: url.toString() })
+        : failure("NOT_FOUND", "Político no encontrado.", 404, { id });
     }
     if (path.startsWith("/api/v1/entities/")) {
       if (!env.DB) return dbUnavailable();
