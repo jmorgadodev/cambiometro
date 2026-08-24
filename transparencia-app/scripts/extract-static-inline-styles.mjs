@@ -24,7 +24,10 @@ async function walk(dir) {
         const replacement = existing
           ? ` class="${existing[1]} ${className}"`
           : ` class="${className}"`;
-        return tag.replace(existing ? existing[0] : /$/, replacement).replace(style[0], "");
+        const withoutStyle = tag.replace(style[0], "");
+        return existing
+          ? withoutStyle.replace(existing[0], replacement)
+          : withoutStyle.replace(/>$/, `${replacement}>`);
       });
       await writeFile(file, html);
     }

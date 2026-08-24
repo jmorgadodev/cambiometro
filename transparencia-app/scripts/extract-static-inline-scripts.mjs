@@ -12,16 +12,28 @@ async function walk(dir) {
     if (entry.isDirectory() && file !== scriptDir) await walk(file);
     else if (entry.name.endsWith(".html")) {
       let html = await readFile(file, "utf8");
-      const bodies = [];
+      const groups = [];
+      let currentGroup = null;
       html = html.replace(/<script([^>]*)>([\s\S]*?)<\/script>/gi, (tag, attrs, body) => {
-        if (/\bsrc\s*=|application\/ld\+json/i.test(attrs) || !body.trim()) return tag;
-        bodies.push(body);
-        return "";
+        if (/\bsrc\s*=|application\/ld\+json/i.test(attrs) || !body.trim()) {
+          currentGroup = null;
+          return tag;
+        }
+        if (!currentGroup) {
+          currentGroup = {
+            bodies: [],
+            marker: `__INLINE_SCRIPT_${crypto.randomUUID()}__`,
+          };
+          groups.push(currentGroup);
+        }
+        currentGroup.bodies.push(body);
+        return currentGroup.bodies.length === 1 ? currentGroup.marker : "";
       });
-      if (bodies.length) {
-        const id = crypto.createHash("sha256").update(bodies.join("\n")).digest("hex").slice(0, 16);
-        await writeFile(join(scriptDir, `${id}.js`), bodies.join("\n"));
-        html = html.replace("</body>", `<script src="/inline-scripts/${id}.js"></script></body>`);
+      for (const group of groups) {
+        const body = group.bodies.join("\n;\n");
+        const id = crypto.createHash("sha256").update(body).digest("hex").slice(0, 16);
+        await writeFile(join(scriptDir, `${id}.js`), body);
+        html = html.replace(group.marker, `<script src="/inline-scripts/${id}.js"></script>`);
       }
       await writeFile(file, html);
     }
