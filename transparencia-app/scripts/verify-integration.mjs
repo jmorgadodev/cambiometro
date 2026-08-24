@@ -204,6 +204,7 @@ try {
   // La ficha canónica de entidad se sirve como página estática; las fichas
   // parlamentarias mantienen su navegación propia sin depender de D1.
   await gotoWithNetworkRetry(`${baseUrl}/entidades/person-camara-1009`);
+  await page.locator(".person-entity__nav").waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await page.locator(".person-entity__nav").count(), 1, "la ficha debe mostrar navegación continua");
 
   await gotoWithNetworkRetry(`${baseUrl}/datos`);
