@@ -201,10 +201,8 @@ try {
   assert.equal(await page.getByText("Compras MercadoPúblico", { exact: false }).count() > 0, true, "Debe mostrar KPI Compras");
   assert.equal(await page.getByRole("button", { name: /Nómina & Remuneraciones/ }).count(), 1, "Debe tener tab Nómina");
 
-  await gotoWithNetworkRetry(`${baseUrl}/entidades/person-camara-1009`);
-  await page.waitForURL("**/politico/**", { timeout: 5000 }).catch(() => {});
-  assert(page.url().includes("/politico/"), "la entidad parlamentaria debe redirigir a /politico");
-
+  // La ficha canónica de entidad se sirve como página estática; las fichas
+  // parlamentarias mantienen su navegación propia sin depender de D1.
   await gotoWithNetworkRetry(`${baseUrl}/entidades/person-camara-1009`);
   assert.equal(await page.locator(".person-entity__nav").count(), 1, "la ficha debe mostrar navegación continua");
 
