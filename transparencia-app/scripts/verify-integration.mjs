@@ -344,6 +344,7 @@ try {
   assert((await page.getByText("datos@cambiometro.impulsacv.cl", { exact: false }).count()) > 0, "/privacidad debe exponer el canal del responsable");
 
   await gotoWithNetworkRetry(`${baseUrl}/fuentes`);
+  await page.getByRole("heading", { name: "Fuentes y versiones" }).waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await page.getByRole("heading", { name: "Fuentes y versiones" }).count(), 1);
   assert((await page.getByText(/Versión (?:[0-9]+ de )?[a-z]+(?: de)? [0-9]{4}/i, { exact: false }).count()) >= 1, "/fuentes debe mostrar su fecha de versión");
 
