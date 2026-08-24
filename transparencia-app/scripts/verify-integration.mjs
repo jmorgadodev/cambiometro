@@ -368,7 +368,10 @@ try {
 
   const homeResponse = await page.request.get(baseUrl);
   assert.equal(homeResponse.headers()["x-powered-by"], undefined);
-  assert(homeResponse.headers()["content-security-policy"]?.includes("nonce-"));
+  const staticCsp = homeResponse.headers()["content-security-policy"] ?? "";
+  assert(staticCsp.includes("script-src 'self'"), "CSP estática debe restringir scripts al mismo origen");
+  assert(!staticCsp.includes("'unsafe-inline'"), "CSP estática no debe permitir unsafe-inline");
+  assert(!staticCsp.includes("nonce-"), "CSP estática no debe depender de nonce por request");
 
   const errors = consoleMessages.filter(([type, message]) =>
     (type === "error" || type === "pageerror")
