@@ -313,6 +313,14 @@ export function buildAllPoliticoSlices() {
 
   const outputPath = resolve("data/politicos-votaciones-index.json");
   writeFileSync(outputPath, JSON.stringify(index), "utf8");
+  mkdirSync(resolve("data/generated"), { recursive: true });
+  writeFileSync(
+    resolve("data/generated/politico-redirects.json"),
+    JSON.stringify(POLITICOS_SEED
+      .filter((pol) => pol.id.startsWith("dip-") || pol.id.startsWith("sen-"))
+      .map((pol) => ({ from: pol.id, to: getPoliticoSlug(pol) }))),
+    "utf8",
+  );
 
   console.log(`[build-politico-slices] Éxito: ${totalPoliticos} parlamentarios procesados (${totalVotosIndexados} votos totales).`);
   console.log(`[build-politico-slices] Slices individuales guardados en data/politico-slices/ (*.json < 200 KB).`);
