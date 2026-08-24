@@ -366,7 +366,7 @@ try {
     await page.waitForTimeout(1500);
     await page.screenshot({ path: join(screenshotDir, `privacidad-${width}.png`), fullPage: true });
 
-    await gotoWithNetworkRetry(baseUrl, { waitUntil: "networkidle" });
+    await gotoWithNetworkRetry(baseUrl, { waitUntil: "domcontentloaded" });
     const banner = page.locator(".cookie-consent");
     await banner.waitFor({ state: "visible", timeout: 5000 });
     await page.screenshot({ path: join(screenshotDir, `cookie-banner-${width}.png`), fullPage: false });
