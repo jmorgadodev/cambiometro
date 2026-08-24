@@ -240,7 +240,7 @@ try {
     for (const route of responsiveRoutes) {
       await page.setViewportSize({ width, height: 800 });
       await gotoWithNetworkRetry(`${baseUrl}${route}`);
-      await page.waitForLoadState("networkidle").catch(() => {});
+      await page.waitForLoadState("networkidle", { timeout: 5_000 }).catch(() => {});
       await page.waitForSelector("h1", { timeout: 5000 }).catch(() => {});
       const info = await page.evaluate(() => {
         const body = document.body;
