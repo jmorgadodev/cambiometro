@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { tmpdir } from "node:os";
 import { chromium } from "playwright";
@@ -12,6 +13,13 @@ const responsiveRoutes = ["/", "/cruces", "/politico/dip-061", "/privacidad", "/
 const baseUrl = process.env.VERIFY_BASE_URL ?? "http://127.0.0.1:3000";
 const verifyingLocal = /^http:\/\/(?:127\.0\.0\.1|localhost)/.test(baseUrl);
 const verifyingProd = !verifyingLocal && !/\.workers\.dev$/.test(new URL(baseUrl).hostname);
+const staticRedirects = new Map(
+  readFileSync(join(process.cwd(), "public", "_redirects"), "utf8")
+    .split("\n")
+    .map((line) => line.trim().split(/\s+/))
+    .filter(([from, to]) => from && to)
+    .map(([from, to]) => [from.replace(/\/$/, "") || "/", to]),
+);
 // El rate limiter edge de producción (30 req/60s por IP) exige espaciar cada
 // request en la verificación completa: <=25 req/min + backoff exponencial ante
 // 429/503 (rate limiting). En local/staging no hay límite que respetar.
@@ -106,7 +114,12 @@ async function checkInternalLinks(hrefs, batchSize = 1) {
   for (let index = 0; index < links.length; index += batchSize) {
     const batch = links.slice(index, index + batchSize);
     await Promise.all(batch.map(async (href) => {
-      const response = await getWithNetworkRetry(`${baseUrl}${href}`);
+      let response = await getWithNetworkRetry(`${baseUrl}${href}`);
+      if (!response.ok() && verifyingLocal) {
+        const pathname = new URL(href, baseUrl).pathname.replace(/\/$/, "") || "/";
+        const fallback = staticRedirects.get(pathname);
+        if (fallback) response = await getWithNetworkRetry(`${baseUrl}${fallback}`);
+      }
       assert(response.ok(), `enlace interno ${href} HTTP ${response.status()}`);
     }));
   }
@@ -114,7 +127,12 @@ async function checkInternalLinks(hrefs, batchSize = 1) {
 
 try {
   for (const route of routes) {
-    const response = await gotoWithNetworkRetry(`${baseUrl}${route}`);
+    let response = await gotoWithNetworkRetry(`${baseUrl}${route}`);
+    if (!response?.ok() && verifyingLocal) {
+      const pathname = new URL(route, baseUrl).pathname.replace(/\/$/, "") || "/";
+      const fallback = staticRedirects.get(pathname);
+      if (fallback) response = await gotoWithNetworkRetry(`${baseUrl}${fallback}`);
+    }
     assert(response?.ok(), `${route} HTTP ${response?.status() ?? "sin respuesta"}`);
     if (route === "/autoridades" || route === "/funcionarios") await page.waitForURL("**/personas**", { timeout: 5000 }).catch(() => {});
     await page.waitForSelector("h1:visible", { state: "visible", timeout: 15000 }).catch(() => {});
