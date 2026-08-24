@@ -5,7 +5,6 @@ import { getKvCache } from "@/lib/db";
 import { diputadoIdParaPolitico } from "@/lib/data-source";
 import { personalApoyoParaDiputado, personalApoyoParaSenador, leerPersonalApoyo } from "@/lib/personal-apoyo";
 import { COALICION_POR_PARTIDO } from "@/lib/partido-electoral-data";
-import PARTIDOS_STATS_FALLBACK from "@/data/lake-subsets/partidos-stats.subset.json";
 
 export interface DetalleRebelde {
   politico_id: string;
@@ -46,19 +45,31 @@ export interface PartidoEstadistica {
 let cached: Record<string, PartidoEstadistica> | null = null;
 let cachedPromise: Promise<Record<string, PartidoEstadistica> | null> | null = null;
 
+function getFallbackPartidosStats(): Record<string, PartidoEstadistica> {
+  try {
+    const fs = require("node:fs");
+    const path = require("node:path");
+    const p = path.join(process.cwd(), "data", "lake-subsets", "partidos-stats.subset.json");
+    if (fs.existsSync(p)) {
+      return JSON.parse(fs.readFileSync(p, "utf8"));
+    }
+  } catch {}
+  return {};
+}
+
 export async function getAllPartidosStats(): Promise<Record<string, PartidoEstadistica>> {
   if (!cached) {
     cachedPromise ??= getKvCache<Record<string, PartidoEstadistica>>("partidos-stats.json");
     const kvData = await cachedPromise;
-    cached = kvData || (PARTIDOS_STATS_FALLBACK as unknown as Record<string, PartidoEstadistica>);
+    cached = kvData || getFallbackPartidosStats();
   }
-  return cached ?? (PARTIDOS_STATS_FALLBACK as unknown as Record<string, PartidoEstadistica>);
+  return cached ?? getFallbackPartidosStats();
 }
 
 export async function getPartidoEstadisticas(partidoId: string): Promise<PartidoEstadistica | null> {
   const normId = normalizePartidoId(partidoId);
   const all = await getAllPartidosStats();
-  return all?.[normId] ?? (PARTIDOS_STATS_FALLBACK as Record<string, unknown>)[normId] as PartidoEstadistica ?? null;
+  return all?.[normId] ?? getFallbackPartidosStats()[normId] ?? null;
 }
 
 export function normalizePartidoId(id: string): string {
@@ -281,7 +292,7 @@ export async function getAllPartidosSummary(): Promise<PartidoResumenCompleto[]>
   const res: PartidoResumenCompleto[] = await Promise.all(
     partidosConRepresentacion.map(async (partido) => {
       const normId = normalizePartidoId(partido.id);
-      const stats = allStats?.[normId] ?? (PARTIDOS_STATS_FALLBACK as Record<string, unknown>)[normId] as PartidoEstadistica ?? null;
+      const stats = allStats?.[normId] ?? getFallbackPartidosStats()[normId] ?? null;
       const escaños = escañosDelPartido(partido.id);
       const votosCamara = stats?.votosCamara ?? {
         afirmativo: 0, enContra: 0, abstencion: 0, noVota: 0, dispensado: 0, apariciones: 0, emitidos: 0, asistencia: 0, pctSi: 0, pctNo: 0, pctAbst: 0, pctNoVota: 0

@@ -12,6 +12,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/datos" },
 };
 
+export const dynamic = "force-static";
+
 const ANALYSIS_LINES = [
   {
     id: "parlamento",
@@ -187,5 +189,3 @@ export default async function DataObservatoryPage() {
     </div>
   );
 }
-
-export const dynamic = "force-dynamic";

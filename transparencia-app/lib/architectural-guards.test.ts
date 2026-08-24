@@ -52,22 +52,52 @@ describe("Guardias Arquitectónicos — Fichas /politico/* Estáticas y Zero CPU
     }
   });
 
-  it("5. Lint Arquitectónico: Prohibir imports de JSON > 200 KB en lib/ (cero parse pesado en runtime)", () => {
+  it("5. Guard: 100% de las páginas en app/** son estáticas / SSG (cero force-dynamic en page.tsx)", () => {
+    function findPageFiles(dir: string, list: string[] = []): string[] {
+      const files = readdirSync(dir, { withFileTypes: true });
+      for (const file of files) {
+        const fullPath = join(dir, file.name);
+        if (file.isDirectory() && file.name !== "api") {
+          findPageFiles(fullPath, list);
+        } else if (file.name === "page.tsx") {
+          list.push(fullPath);
+        }
+      }
+      return list;
+    }
+
+    const pages = findPageFiles(resolve("app"));
+    expect(pages.length).toBeGreaterThanOrEqual(15);
+
+    for (const pagePath of pages) {
+      const content = readFileSync(pagePath, "utf8");
+      expect(
+        content,
+        `Página ${pagePath} no debe tener export const dynamic = "force-dynamic"`
+      ).not.toContain('export const dynamic = "force-dynamic"');
+      expect(
+        content,
+        `Página ${pagePath} no debe tener export const dynamic = 'force-dynamic'`
+      ).not.toContain("export const dynamic = 'force-dynamic'");
+    }
+  });
+
+  it("6. Lint Arquitectónico: Prohibir imports de JSON > 200 KB en lib/** y app/** (runtime liviano)", () => {
     function scanDir(dir: string, fileList: string[] = []): string[] {
       const files = readdirSync(dir, { withFileTypes: true });
       for (const file of files) {
         const fullPath = join(dir, file.name);
         if (file.isDirectory()) {
           scanDir(fullPath, fileList);
-        } else if ((file.name.endsWith(".tsx") || file.name.endsWith(".ts")) && !file.name.includes(".test.")) {
+        } else if ((file.name.endsWith(".tsx") || file.name.endsWith(".ts")) && !file.name.includes(".test.") && !file.name.includes("fixtures")) {
           fileList.push(fullPath);
         }
       }
       return fileList;
     }
 
-    const libFiles = scanDir(resolve("lib"));
-    for (const filePath of libFiles) {
+    const runtimeFiles = [...scanDir(resolve("lib")), ...scanDir(resolve("app"))];
+    for (const filePath of runtimeFiles) {
       const content = readFileSync(filePath, "utf8");
       const jsonImports = [...content.matchAll(/from\s+["']([^"']+\.json)["']/g)];
 
@@ -82,16 +112,10 @@ describe("Guardias Arquitectónicos — Fichas /politico/* Estáticas y Zero CPU
 
         if (resolvedJsonPath && existsSync(resolvedJsonPath)) {
           const size = statSync(resolvedJsonPath).size;
-          // Prohibir datos pesados como politicos-votaciones (3.7MB+) en lib runtime
-          expect(
-            importPath.includes("politicos-votaciones"),
-            `Archivo ${filePath} no debe importar politicos-votaciones en runtime.`
-          ).toBe(false);
-
           expect(
             size,
-            `Archivo ${filePath} importa JSON ${importPath} de ${(size / 1024).toFixed(0)} KB (> 800 KB). Debe leerse en build/ETL o vía assets.`
-          ).toBeLessThanOrEqual(800 * 1024);
+            `Archivo ${filePath} importa JSON ${importPath} de ${(size / 1024).toFixed(0)} KB (> 200 KB). Debe leerse en build/ETL o vía fetch estático.`
+          ).toBeLessThanOrEqual(200 * 1024);
         }
       }
     }

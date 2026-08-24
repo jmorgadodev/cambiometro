@@ -24,23 +24,18 @@ export const metadata: Metadata = {
   alternates: { canonical: "/transferencias" },
 };
 
-export default async function TransferenciasPage({
-  searchParams,
-}: {
-  searchParams?: Promise<{ q?: string; year?: string; emisor?: string; page?: string; rows?: string }>;
-}) {
-  const params = searchParams ? await searchParams : {};
-  const summary = getLey19862Summary();
+export const dynamic = "force-static";
 
-  const rowsParam = Number(params.rows);
-  const initialRowsPerPage = rowsParam === 25 || rowsParam === 50 ? rowsParam : 10;
+export default async function TransferenciasPage() {
+  const summary = getLey19862Summary();
+  const initialRowsPerPage = 10;
 
   const queryResult = await queryTransferencias({
-    page: Number(params.page) || 1,
+    page: 1,
     limit: initialRowsPerPage,
-    search: params.q || "",
-    year: params.year || "",
-    emisor: params.emisor || "",
+    search: "",
+    year: "",
+    emisor: "",
     sortBy: "monto",
     sortOrder: "desc",
   });
@@ -56,9 +51,9 @@ export default async function TransferenciasPage({
       initialTotalPages={queryResult.totalPages}
       initialPage={queryResult.page}
       initialPageSize={initialRowsPerPage}
-      initialQuery={params.q || ""}
-      initialYear={params.year || "Todos"}
-      initialEmisor={params.emisor || "Todos"}
+      initialQuery=""
+      initialYear="Todos"
+      initialEmisor="Todos"
       generatedAt={summary.generatedAt}
     />
   );

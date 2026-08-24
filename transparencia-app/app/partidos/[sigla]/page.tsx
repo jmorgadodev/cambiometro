@@ -23,6 +23,22 @@ interface Props {
   params: Promise<{ sigla: string }>;
 }
 
+export function generateStaticParams() {
+  const list: Array<{ sigla: string }> = [];
+  for (const p of PARTIDOS_SEED) {
+    if (p.id === "ind") {
+      list.push({ sigla: "independientes" });
+      list.push({ sigla: "ind" });
+    } else {
+      list.push({ sigla: p.sigla.toLowerCase() });
+      if (p.id.toLowerCase() !== p.sigla.toLowerCase()) {
+        list.push({ sigla: p.id.toLowerCase() });
+      }
+    }
+  }
+  return list;
+}
+
 function findPartido(siglaParam: string) {
   const norm = normalizePartidoId(siglaParam);
   return (

@@ -10,6 +10,8 @@ export const metadata: Metadata = {
   alternates: { canonical: "/datos/calidad" },
 };
 
+export const dynamic = "force-static";
+
 export default async function DataQualityPage() {
   const { sources, summary } = await getDataQualityDashboardData();
 
@@ -287,5 +289,3 @@ export default async function DataQualityPage() {
     </div>
   );
 }
-
-export const dynamic = "force-dynamic";

@@ -1,4 +1,3 @@
-import municipalidadesJson from "@/data/municipalidades-data.json";
 import { getVerifiedMuniRRSS } from "./municipalidades-rrss";
 
 export interface AlcaldeData {
@@ -224,28 +223,45 @@ export interface MunicipalidadEnriquecida {
 
 export * from "./municipalidades-list";
 
-const MUNICIPALIDADES_DICT = Object.fromEntries(
-  Object.entries(municipalidadesJson as unknown as Record<string, MunicipalidadEnriquecida>).map(([id, municipalidad]) => {
-    const verified = getVerifiedMuniRRSS(id);
-    const enriched: MunicipalidadEnriquecida = {
-      ...municipalidad,
-      sitio_web_oficial: verified?.sitio_web_oficial ?? municipalidad.sitio_web_oficial ?? null,
-      redes_sociales: verified?.redes_sociales ?? municipalidad.redes_sociales ?? null,
-      partido_alcalde: municipalidad.partido_alcalde ?? verified?.alcalde_oficial?.partido ?? null,
-      compras_publicas: municipalidad.compras_publicas?.metodo_enlace === "RUT_EXACTO"
-        ? municipalidad.compras_publicas
-        : null,
-    };
-    return [id, enriched];
-  }),
-) as Record<string, MunicipalidadEnriquecida>;
+let _muniDict: Record<string, MunicipalidadEnriquecida> | null = null;
+
+function getMuniDict(): Record<string, MunicipalidadEnriquecida> {
+  if (_muniDict) return _muniDict;
+  let raw: Record<string, MunicipalidadEnriquecida> = {};
+  try {
+    const fs = require("node:fs");
+    const path = require("node:path");
+    const p = path.join(process.cwd(), "data", "municipalidades-data.json");
+    if (fs.existsSync(p)) {
+      raw = JSON.parse(fs.readFileSync(p, "utf8"));
+    }
+  } catch {}
+
+  _muniDict = Object.fromEntries(
+    Object.entries(raw).map(([id, municipalidad]) => {
+      const verified = getVerifiedMuniRRSS(id);
+      const enriched: MunicipalidadEnriquecida = {
+        ...municipalidad,
+        sitio_web_oficial: verified?.sitio_web_oficial ?? municipalidad.sitio_web_oficial ?? null,
+        redes_sociales: verified?.redes_sociales ?? municipalidad.redes_sociales ?? null,
+        partido_alcalde: municipalidad.partido_alcalde ?? verified?.alcalde_oficial?.partido ?? null,
+        compras_publicas: municipalidad.compras_publicas?.metodo_enlace === "RUT_EXACTO"
+          ? municipalidad.compras_publicas
+          : null,
+      };
+      return [id, enriched];
+    }),
+  ) as Record<string, MunicipalidadEnriquecida>;
+
+  return _muniDict;
+}
 
 export function getMunicipalidadData(id: string): MunicipalidadEnriquecida | null {
-  return MUNICIPALIDADES_DICT[id] ?? null;
+  return getMuniDict()[id] ?? null;
 }
 
 export function getAllMunicipalidadesData(): MunicipalidadEnriquecida[] {
-  return Object.values(MUNICIPALIDADES_DICT);
+  return Object.values(getMuniDict());
 }
 
 

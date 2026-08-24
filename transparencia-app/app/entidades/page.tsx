@@ -17,28 +17,20 @@ const KIND_LABEL: Record<string, { label: string; emoji: string; badge: string }
 
 const PAGE_SIZE = 40;
 
-export default async function EntidadesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string; kind?: string; cursor?: string }>;
-}) {
-  const params = await searchParams;
-  const query = params.q?.trim() ?? "";
-  const kindFilter = params.kind ?? "";
-  const cursor = params.cursor;
+export const dynamic = "force-static";
+
+export default async function EntidadesPage() {
+  const query: string = "";
+  const kindFilter: string = "";
+  const cursor = undefined;
 
   const result = await listEntities({
-    kind: kindFilter as ("person" | "public_body" | "supplier" | "municipality") | undefined,
+    kind: kindFilter ? (kindFilter as "person" | "public_body" | "supplier" | "municipality") : undefined,
     limit: PAGE_SIZE,
     cursor,
   });
 
-  // Filter by search query client-side (the listEntities API doesn't support text search)
-  const filtered = query
-    ? result.data.filter((entity) =>
-        entity.name.toLocaleLowerCase("es-CL").includes(query.toLocaleLowerCase("es-CL"))
-      )
-    : result.data;
+  const filtered = result.data || [];
 
   const allKindCounts = await listEntities({ limit: 1 });
 

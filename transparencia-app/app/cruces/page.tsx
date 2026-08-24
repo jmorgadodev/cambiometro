@@ -25,19 +25,14 @@ export const metadata: Metadata = {
     title: "Explorador de Cruces de Datos Públicos — El Cambiómetro",
     description:
       "Cruces documentales trazables entre compras públicas, auditorías de Contraloría, lobby, votaciones y autoridades del Estado chileno.",
-    images: ["https://cambiometro.impulsacv.cl/api/og/site"],
   },
 };
 
-export default async function CrossesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string; rows?: string }>;
-}) {
-  const params = await searchParams;
-  const rawQuery = params.q?.trim() ?? "";
-  const rowsParam = Number(params.rows);
-  const initialRowsPerPage = rowsParam === 25 || rowsParam === 50 ? rowsParam : 10;
+export const dynamic = "force-static";
+
+export default async function CrossesPage() {
+  const rawQuery = "";
+  const initialRowsPerPage = 10;
   const crosses = await getAllCrosses();
 
   const contraloria = leerContraloriaV1();
@@ -226,5 +221,3 @@ export default async function CrossesPage({
     </main>
   );
 }
-
-export const dynamic = "force-dynamic";

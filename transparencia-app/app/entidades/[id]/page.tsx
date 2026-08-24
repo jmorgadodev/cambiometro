@@ -16,8 +16,24 @@ import EntityEvidenceAccordionExplorer from "@/components/records/EntityEvidence
 import { traducirPredicado, traducirTipoEntidad, formatNombreInstitucional } from "@/lib/diccionario-cruces";
 import { evaluateBudgetSourceAnomaly } from "@/lib/budget-integrity";
 import type { Metadata } from "next";
+import { POLITICOS_SEED } from "@/lib/seed-politicos";
+import { SERVICIOS_PUBLICOS_SEED } from "@/lib/servicios-publicos";
+import { MUNICIPALIDADES_SEED } from "@/lib/municipalidades";
 
-export const dynamic = "force-dynamic";
+export function generateStaticParams() {
+  const ids: Array<{ id: string }> = [];
+  for (const pol of POLITICOS_SEED) {
+    ids.push({ id: pol.id });
+    ids.push({ id: `pol-${pol.id}` });
+  }
+  for (const serv of SERVICIOS_PUBLICOS_SEED) {
+    ids.push({ id: serv.id });
+  }
+  for (const muni of MUNICIPALIDADES_SEED) {
+    ids.push({ id: muni.id });
+  }
+  return ids;
+}
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
