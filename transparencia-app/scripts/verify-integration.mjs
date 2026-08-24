@@ -216,7 +216,7 @@ try {
   await page.screenshot({ path: join(tmpdir(), "cambiometro-datos-desktop.png"), fullPage: true });
 
   await gotoWithNetworkRetry(`${baseUrl}/politico/dip-061`);
-  await page.locator(".section-title", { hasText: "Gastos Operacionales Rendidos" }).waitFor({ state: "visible", timeout: 15_000 });
+  await page.locator(".section-title", { hasText: "Gastos Operacionales Rendidos" }).first().waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await page.locator(".section-title", { hasText: "Gastos Operacionales Rendidos" }).count(), 1);
   if (!verifyingLocal) {
     assert.equal(await page.getByText(/Sin rendiciones publicadas/).count(), 0, "staging debe usar gastos canonicos de D1");
