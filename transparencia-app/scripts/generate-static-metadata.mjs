@@ -13,8 +13,8 @@ async function collectHtml(directory) {
     const absolute = join(directory, entry.name);
     if (entry.isDirectory()) paths.push(...await collectHtml(absolute));
     else if (entry.name === "index.html") {
-      const path = relative(outDir, absolute).replace(/\\/g, "/").replace(/\/index\.html$/, "");
-      if (!path.startsWith("api/") && path !== "404") paths.push(path ? `/${path}` : "/");
+      const path = relative(outDir, absolute).replace(/\\/g, "/").replace(/(^|\/)index\.html$/, "");
+      if (!path.startsWith("api/") && path !== "404" && path !== "_not-found") paths.push(path ? `/${path}` : "/");
     }
   }
   return paths;
