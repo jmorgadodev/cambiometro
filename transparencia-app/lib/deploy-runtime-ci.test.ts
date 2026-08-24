@@ -9,7 +9,8 @@ describe("validación runtime de despliegue", () => {
       "utf8",
     );
 
-    expect(workflow).toContain("wrangler d1 migrations apply transparencia-db --local");
+    expect(workflow).toContain("for migration in migrations/*.sql");
+    expect(workflow).toContain("wrangler d1 execute transparencia-db --local --config workers/public-api/wrangler.jsonc");
     expect(workflow).toContain("fixtures/d1-browser.sql");
     expect(workflow).toContain("wrangler dev --local --config workers/public-api/wrangler.jsonc --port 8788");
     expect(workflow).toContain("wrangler pages dev out --port 3003");
