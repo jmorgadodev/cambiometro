@@ -90,6 +90,23 @@ function entity(row: JsonRecord) {
   };
 }
 
+function politico(row: JsonRecord) {
+  return {
+    id: row.id,
+    kind: "politico",
+    name: row.nombre_completo,
+    identifiers: [],
+    attributes: {
+      cargo: row.cargo ?? null,
+      partidoId: row.partido_id ?? null,
+      distritoRegion: row.distrito_region ?? null,
+      twitterHandle: row.twitter_handle ?? null,
+    },
+    sourceIds: [],
+    updatedAt: null,
+  };
+}
+
 function record(row: JsonRecord) {
   return {
     id: row.id,
@@ -337,7 +354,13 @@ export default {
       if (invalid) return failure("INVALID_QUERY", invalid, 400);
       return env.DB ? success([], { total: 0, sourceStatus: "partial" }) : dbUnavailable();
     }
-    if (path.startsWith("/api/v1/entities/") || path.startsWith("/api/v1/politico/")) {
+    if (path.startsWith("/api/v1/politico/")) {
+      if (!env.DB) return dbUnavailable();
+      const id = decodeURIComponent(path.split("/").at(-1) ?? "");
+      const row = await env.DB.prepare("SELECT * FROM politicos WHERE id = ? LIMIT 1").bind(id).first<JsonRecord>();
+      return row ? success(politico(row), { id }, { self: url.toString() }) : failure("NOT_FOUND", "Político no encontrado.", 404, { id });
+    }
+    if (path.startsWith("/api/v1/entities/")) {
       if (!env.DB) return dbUnavailable();
       const id = decodeURIComponent(path.split("/").at(-1) ?? "");
       const row = await env.DB.prepare("SELECT * FROM entities WHERE id = ? LIMIT 1").bind(id).first<JsonRecord>();
