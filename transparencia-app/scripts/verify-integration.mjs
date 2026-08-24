@@ -209,6 +209,8 @@ try {
   assert.equal(await visibleEntityNav.count(), 1, "la ficha debe mostrar una navegación continua visible");
 
   await gotoWithNetworkRetry(`${baseUrl}/datos`);
+  await page.getByRole("heading", { name: "Líneas de análisis sustentadas por datos" }).first().waitFor({ state: "visible", timeout: 15_000 });
+  await page.getByRole("heading", { name: "Estado de cada fuente" }).first().waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await page.getByRole("heading", { name: "Líneas de análisis sustentadas por datos" }).count(), 1);
   assert.equal(await page.getByRole("heading", { name: "Estado de cada fuente" }).count(), 1);
   await page.screenshot({ path: join(tmpdir(), "cambiometro-datos-desktop.png"), fullPage: true });
