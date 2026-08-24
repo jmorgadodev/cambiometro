@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 const out = join(fileURLToPath(new URL("../", import.meta.url)), "out");
 const scriptDir = join(out, "inline-scripts");
 await mkdir(scriptDir, { recursive: true });
-const rscRevealShim = `(()=>{const g=globalThis,q=g.__cmRcPending||(g.__cmRcPending=[]);if(typeof g.$RC!=="function"){let current;Object.defineProperty(g,"$RC",{configurable:true,get(){return current??((...args)=>q.push(args));},set(fn){current=fn;for(const args of q.splice(0))fn(...args);}});}})();`;
+const rscRevealShim = `(()=>{const g=globalThis,q=g.__cmRcPending||(g.__cmRcPending=[]),d=Object.getOwnPropertyDescriptor(g,"$RC");if(!d||typeof d.get!=="function"||!d.get.__cmRcShim){const existing=typeof g.$RC==="function"?g.$RC:null;let current=existing;const get=()=>current??((...args)=>q.push(args));get.__cmRcShim=true;Object.defineProperty(g,"$RC",{configurable:true,get,set(fn){current=fn;for(const args of q.splice(0))fn(...args);}});}})();`;
 async function walk(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     const file = join(dir, entry.name);
