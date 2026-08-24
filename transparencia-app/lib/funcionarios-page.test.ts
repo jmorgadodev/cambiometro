@@ -6,10 +6,8 @@ describe("experiencia y usabilidad de nóminas de funcionarios municipales (/fun
   const page = readFileSync(resolve("app/funcionarios/page.tsx"), "utf8");
   const client = readFileSync(resolve("components/GlobalFuncionariosClient.tsx"), "utf8");
 
-  it("la página /funcionarios redirige permanentemente a /personas?tab=funcionarios", () => {
-    expect(page).toContain("redirect(");
-    expect(page).toContain("/personas?tab=funcionarios");
-    expect(page).toContain("RedirectType.replace");
+  it("la página /funcionarios conserva el acceso al directorio", () => {
+    expect(readFileSync(resolve("public/_redirects"), "utf8")).toContain("/funcionarios /personas?tab=funcionarios 301");
   });
 
   it("incorpora selector de vista entre cards y tabla compacta", () => {

@@ -1,11 +1,28 @@
 import { describe, expect, it } from "vitest";
-import { GET as getSources } from "../app/api/v1/sources/route";
-import { GET as getEntity } from "../app/api/v1/entities/[id]/route";
-import { GET as getRecords } from "../app/api/v1/records/route";
-import { GET as getRelations } from "../app/api/v1/relations/route";
-import { GET as getCrosses } from "../app/api/v1/crosses/route";
-import { GET as getPolitico } from "../app/api/v1/politico/[id]/route";
+import api from "../workers/public-api/index";
 import { parseRelationQuery } from "./api-v1";
+
+function testEnv() {
+  const statement = (sql: string, bindings: unknown[] = []) => ({
+    bind(...values: unknown[]) {
+      return statement(sql, values);
+    },
+    async first<T>() {
+      if (sql.includes("count(*)")) return { total: sql.includes("relations") ? 2 : sql.includes("records") ? 4 : 1 } as T;
+      if (sql.includes("WHERE id = ?")) return bindings[0] === "no-existe" ? null : { id: bindings[0], kind: "person", name: "Persona de prueba", identifiers_json: "[]", attributes_json: "{}", source_ids_json: "[]" } as T;
+      return null;
+    },
+    async all<T>() {
+      if (sql.includes("FROM sources")) return { results: [{ id: "camara", status: "available" }] } as T;
+      if (sql.includes("FROM records")) return { results: [{ id: "record-1", kind: "vote", source_id: "camara", title: "Votación", description: null, occurred_at: "2026-01-01", period_json: "{}", subject_entity_ids_json: "[]", object_entity_ids_json: "[]", amount_json: null, evidence_json: "{}", data_json: "{}" }, { id: "record-2", kind: "vote", source_id: "camara", title: "Votación 2", description: null, occurred_at: "2026-01-02", period_json: "{}", subject_entity_ids_json: "[]", object_entity_ids_json: "[]", amount_json: null, evidence_json: "{}", data_json: "{}" }] } as T;
+      if (sql.includes("FROM relations")) return { results: [{ id: "relation-1", from_id: "person-1", predicate: "cast_vote", to_id: "record-1", evidence_record_ids_json: '["record-1"]', period_json: "{}", reconciliation_json: "{}" }] } as T;
+      return { results: [] } as T;
+    },
+  });
+  return { DB: { prepare: (sql: string) => statement(sql) } } as never;
+}
+
+const fetchApi = (url: string) => api.fetch(new Request(url), testEnv());
 
 describe("API canónica v1", () => {
   it("acepta entity_id como ancla bidireccional de relaciones", () => {
@@ -20,7 +37,7 @@ describe("API canónica v1", () => {
   });
 
   it("entrega fuentes en el contrato uniforme y sin conexiones sobredimensionadas", async () => {
-    const response = await getSources(new Request("https://example.test/api/v1/sources"));
+    const response = await fetchApi("https://example.test/api/v1/sources");
     const payload = await response.json();
 
     expect(response.status).toBe(200);
@@ -31,7 +48,7 @@ describe("API canónica v1", () => {
   });
 
   it("filtra y pagina registros con un enlace next reproducible", async () => {
-    const response = await getRecords(new Request("https://example.test/api/v1/records?source=camara&kind=vote&limit=2"));
+    const response = await fetchApi("https://example.test/api/v1/records?source=camara&kind=vote&limit=2");
     const payload = await response.json();
 
     expect(response.status).toBe(200);
@@ -41,7 +58,7 @@ describe("API canónica v1", () => {
   }, 20_000);
 
   it("rechaza filtros inválidos con el error uniforme", async () => {
-    const response = await getRecords(new Request("https://example.test/api/v1/records?kind=delito"));
+    const response = await fetchApi("https://example.test/api/v1/records?kind=delito");
     const payload = await response.json();
 
     expect(response.status).toBe(400);
@@ -55,15 +72,12 @@ describe("API canónica v1", () => {
   });
 
   it.each(["votaciones_senado", "gastos_camara", "gastos_senado"])("acepta la fuente ETL canónica %s", async (source) => {
-    const response = await getRecords(new Request(`https://example.test/api/v1/records?source=${source}&limit=2`));
+    const response = await fetchApi(`https://example.test/api/v1/records?source=${source}&limit=2`);
     expect(response.status).toBe(200);
   });
 
   it("devuelve 404 uniforme para una entidad desconocida", async () => {
-    const response = await getEntity(
-      new Request("https://example.test/api/v1/entities/no-existe"),
-      { params: Promise.resolve({ id: "no-existe" }) },
-    );
+    const response = await fetchApi("https://example.test/api/v1/entities/no-existe");
     expect(await response.json()).toEqual({
       error: { code: "NOT_FOUND", message: "Entidad no encontrada.", details: { id: "no-existe" } },
     });
@@ -71,9 +85,9 @@ describe("API canónica v1", () => {
   });
 
   it("expone relaciones y cruces con la misma cadena de evidencia", async () => {
-    const relationsResponse = await getRelations(new Request("https://example.test/api/v1/relations?predicate=cast_vote&limit=1"));
+    const relationsResponse = await fetchApi("https://example.test/api/v1/relations?predicate=cast_vote&limit=1");
     const relationPayload = await relationsResponse.json();
-    const crossesResponse = await getCrosses(new Request("https://example.test/api/v1/crosses?predicate=cast_vote&limit=1"));
+    const crossesResponse = await fetchApi("https://example.test/api/v1/crosses?predicate=cast_vote&limit=1");
     const crossesPayload = await crossesResponse.json();
 
     expect(relationPayload.data).toHaveLength(1);
@@ -85,7 +99,7 @@ describe("API canónica v1", () => {
 
   it("permite embeber fichas mediante CORS solamente de lectura", async () => {
     const request = new Request("https://example.test/api/v1/politico/dip-061");
-    const response = await getPolitico(request, { params: Promise.resolve({ id: "dip-061" }) });
+    const response = await api.fetch(request, testEnv());
     const payload = await response.json();
 
     expect(response.status).toBe(200);

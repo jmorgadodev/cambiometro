@@ -187,5 +187,3 @@ export default async function DataObservatoryPage() {
     </div>
   );
 }
-
-export const dynamic = "force-dynamic";

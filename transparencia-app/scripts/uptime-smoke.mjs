@@ -4,9 +4,15 @@ const PROD_BASE = process.env.PROD_URL || "https://cambiometro.impulsacv.cl";
 
 const ROUTES = [
   "/",
+  "/politico",
+  "/municipalidades",
+  "/servicios-publicos",
+  "/entidades",
   "/politico/vanessa-kaiser-barents-von-hohenhagen",
   "/transferencias",
   "/cruces",
+  "/api/v1/health/data",
+  "/api/v1/search?q=Kaiser",
 ];
 
 async function checkRoute(path) {

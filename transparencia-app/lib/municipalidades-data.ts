@@ -1,5 +1,13 @@
-import municipalidadesJson from "@/data/municipalidades-data.json";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { getVerifiedMuniRRSS } from "./municipalidades-rrss";
+
+let municipalidadesJson: unknown = {};
+try {
+  municipalidadesJson = JSON.parse(readFileSync(join(process.cwd(), "data", "municipalidades-data.json"), "utf8"));
+} catch {
+  // Static builds have the source file; edge/runtime consumers use published slices.
+}
 
 export interface AlcaldeData {
   nombre: string;

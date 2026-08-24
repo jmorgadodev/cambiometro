@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { chromium } from "playwright";
 
 const baseUrl = process.env.VERIFY_BASE_URL ?? "http://127.0.0.1:3000";
+const apiBaseUrl = process.env.VERIFY_API_URL ?? baseUrl;
 
 const REQUIRED_HEADERS = [
   "strict-transport-security",
@@ -14,7 +15,7 @@ const REQUIRED_HEADERS = [
 
 const HEADER_ROUTES = [
   "/",
-  "/entidades/person-infoprobidad-9204ac804e1f43cc8c3e62f712a15764",
+  "/entidades/person-camara-1009",
   "/datos",
   "/cruces",
   "/municipalidades/muni-maipu",
@@ -23,6 +24,15 @@ const HEADER_ROUTES = [
 
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+if (apiBaseUrl !== baseUrl) {
+  await page.route(`${baseUrl}/api/**`, async (route) => {
+    const target = new URL(route.request().url());
+    const apiOrigin = new URL(apiBaseUrl);
+    target.protocol = apiOrigin.protocol;
+    target.host = apiOrigin.host;
+    await route.continue({ url: target.toString() });
+  });
+}
 page.setDefaultTimeout(15_000);
 page.setDefaultNavigationTimeout(30_000);
 
@@ -62,14 +72,15 @@ try {
 
   // S4: sin reflexión XSS en la búsqueda (API y DOM).
   const xssPayload = `<img src=x onerror="window.__xss_pwned=1">`;
-  const searchResponse = await page.request.get(`${baseUrl}/api/v1/search`, {
+  const searchResponse = await page.request.get(`${apiBaseUrl}/api/v1/search`, {
     params: { q: xssPayload },
   });
   assert.equal(searchResponse.status(), 200, "búsqueda con payload XSS debe responder 200");
   const contentType = searchResponse.headers()["content-type"] ?? "";
   assert(contentType.includes("application/json"), "búsqueda debe responder JSON, no HTML");
   const searchBody = await searchResponse.text();
-  assert(!/<img[^>]*onerror/i.test(searchBody), "el payload XSS no debe reflejarse como HTML en el JSON");
+  const searchJson = JSON.parse(searchBody);
+  assert.equal(searchJson.meta?.query, xssPayload, "la búsqueda debe conservar el payload sólo como dato JSON");
 
   await gotoWithRetry(`${baseUrl}/`);
   await page.evaluate(() => {

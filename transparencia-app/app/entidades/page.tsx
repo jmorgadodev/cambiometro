@@ -17,15 +17,10 @@ const KIND_LABEL: Record<string, { label: string; emoji: string; badge: string }
 
 const PAGE_SIZE = 40;
 
-export default async function EntidadesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string; kind?: string; cursor?: string }>;
-}) {
-  const params = await searchParams;
-  const query = params.q?.trim() ?? "";
-  const kindFilter = params.kind ?? "";
-  const cursor = params.cursor;
+export default async function EntidadesPage() {
+  const query: string = "";
+  const kindFilter: string = "";
+  const cursor = undefined;
 
   const result = await listEntities({
     kind: kindFilter as ("person" | "public_body" | "supplier" | "municipality") | undefined,

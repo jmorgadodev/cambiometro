@@ -43,6 +43,10 @@ jobs:
         run: npm test
         working-directory: transparencia-app
 
+      - name: Static architecture and Worker type guards
+        run: node scripts/check-static-architecture.mjs && npm run api:typecheck
+        working-directory: transparencia-app
+
       - name: Enforce data integrity guards V1-V7
         run: npm run guard:integrity
         working-directory: transparencia-app

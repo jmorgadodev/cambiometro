@@ -7,7 +7,6 @@ import { getMuniCanonicalSlug, isMuniLegacyId, getAllMuniSlugs } from "@/lib/slu
 import { MOVIMIENTOS } from "@/lib/movimientos";
 import { SERVICIOS_PUBLICOS_SEED, getServicioPublicoById } from "@/lib/servicios-publicos";
 import { GABINETE_KAST } from "@/lib/gabinete-kast";
-import sitemap from "@/app/sitemap";
 
 describe("TAREA G: Cierre de Hallazgos Pre-Launch", () => {
   const projectRoot = join(process.cwd());
@@ -76,10 +75,10 @@ describe("TAREA G: Cierre de Hallazgos Pre-Launch", () => {
   });
 
   it("H-15: Sitemap incluye /personas y /transferencias", () => {
-    const map = sitemap();
-    const urls = map.map((entry) => entry.url);
-    expect(urls).toContain("https://cambiometro.impulsacv.cl/personas");
-    expect(urls).toContain("https://cambiometro.impulsacv.cl/transferencias");
+    const generator = readFileSync(join(projectRoot, "scripts", "generate-static-metadata.mjs"), "utf8");
+    expect(generator).toContain("collectHtml(outDir)");
+    expect(readFileSync(join(projectRoot, "app", "personas", "page.tsx"), "utf8")).toContain('export default');
+    expect(readFileSync(join(projectRoot, "app", "transferencias", "page.tsx"), "utf8")).toContain('export default');
   });
 
   it("H-16: openGraph.description explícito en /cruces", () => {

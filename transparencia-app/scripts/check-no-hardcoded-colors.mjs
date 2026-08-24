@@ -29,7 +29,7 @@ function getAllFiles(dirPath, arrayOfFiles = []) {
   files.forEach((file) => {
     const fullPath = path.join(dirPath, file);
     if (fs.statSync(fullPath).isDirectory()) {
-      if (!['node_modules', '.next', '.git', '.open-next', 'artifacts', 'scratch'].includes(file)) {
+      if (!['node_modules', '.next', '.git', 'artifacts', 'scratch'].includes(file)) {
         getAllFiles(fullPath, arrayOfFiles);
       }
     } else {

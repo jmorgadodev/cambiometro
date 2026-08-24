@@ -23,6 +23,10 @@ interface Props {
   params: Promise<{ sigla: string }>;
 }
 
+export function generateStaticParams() {
+  return PARTIDOS_SEED.map((partido) => ({ sigla: partido.sigla.toLowerCase() }));
+}
+
 function findPartido(siglaParam: string) {
   const norm = normalizePartidoId(siglaParam);
   return (

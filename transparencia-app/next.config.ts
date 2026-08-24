@@ -1,6 +1,8 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  output: "export",
+  trailingSlash: true,
   poweredByHeader: false,
   turbopack: {
     root: process.cwd(),
@@ -21,65 +23,7 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  productionBrowserSourceMaps: false, // Security: Disable source maps in production to prevent reverse engineering
-  async headers() {
-    return [
-      {
-        source: "/_next/static/:path*",
-        headers: [
-          { key: "Cache-Control", value: "public, max-age=31536000, immutable" },
-        ],
-      },
-      {
-        source: "/api/og/:path*",
-        headers: [
-          { key: "Cache-Control", value: "public, s-maxage=86400, stale-while-revalidate=3600" },
-        ],
-      },
-      {
-        source: "/widget.js",
-        headers: [
-          { key: "Cross-Origin-Resource-Policy", value: "cross-origin" },
-          { key: "Access-Control-Allow-Origin", value: "*" },
-        ],
-      },
-      {
-        source: "/((?!widget\\.js).*)",
-        headers: [
-          {
-            key: "X-DNS-Prefetch-Control",
-            value: "on",
-          },
-          {
-            key: "Strict-Transport-Security",
-            value: "max-age=63072000; includeSubDomains; preload",
-          },
-          {
-            key: "X-XSS-Protection",
-            value: "0",
-          },
-          {
-            key: "X-Frame-Options",
-            value: "DENY",
-          },
-          {
-            key: "X-Content-Type-Options",
-            value: "nosniff",
-          },
-          {
-            key: "Referrer-Policy",
-            value: "strict-origin-when-cross-origin",
-          },
-          {
-            key: "Permissions-Policy",
-            value: "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()",
-          },
-          { key: "Cross-Origin-Opener-Policy", value: "same-origin" },
-          { key: "Cross-Origin-Resource-Policy", value: "same-origin" },
-        ],
-      },
-    ];
-  },
+  productionBrowserSourceMaps: false,
 };
 
 export default nextConfig;

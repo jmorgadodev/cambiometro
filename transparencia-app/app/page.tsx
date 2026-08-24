@@ -4,6 +4,13 @@ import StatCounter from "@/components/StatCounter";
 import Reveal from "@/components/Reveal";
 import Icono from "@/components/ui/Icono";
 import { GLOBAL_KPIS, KPI_SCOPES } from "@/lib/global-kpis";
+import { ETL_SOURCES_DATA } from "@/lib/etl-sources-data";
+import { listEntities, listRecords, listRelations } from "@/lib/data-platform-d1";
+import { listPublishedSourceManifests } from "@/lib/published-sources";
+
+export const dynamic = "force-static";
+
+const HOME_SOURCES_LIST = ETL_SOURCES_DATA.filter((source) => source.recordCount > 0);
 
 export const metadata: Metadata = {
   title: "El Cambiómetro — Plataforma de Datos Públicos y Transparencia",
@@ -60,146 +67,33 @@ const HOME_KPIS = [
   },
 ];
 
-const HOME_SOURCES_LIST = [
-  {
-    id: "cplt",
-    name: "Transparencia Activa CPLT",
-    organization: "Consejo para la Transparencia (CPLT)",
-    href: "/funcionarios",
-    isDerived: false,
-  },
-  {
-    id: "dipres",
-    name: "Ley de Presupuestos de la Nación",
-    organization: "Dirección de Presupuestos (DIPRES)",
-    href: "/servicios-publicos",
-    isDerived: false,
-  },
-  {
-    id: "ley19862",
-    name: "Registro Central de Colaboradores (Ley 19.862)",
-    organization: "Ministerio de Hacienda",
-    href: "/transferencias",
-    isDerived: false,
-  },
-  {
-    id: "chilecompra",
-    name: "ChileCompra / MercadoPúblico OCDS",
-    organization: "Dirección ChileCompra",
-    href: "/cruces",
-    isDerived: false,
-  },
-  {
-    id: "infolobby",
-    name: "Plataforma InfoLobby",
-    organization: "Consejo para la Transparencia",
-    href: "/cruces#lobby-publico",
-    isDerived: false,
-  },
-  {
-    id: "infoprobidad",
-    name: "Declaraciones de Intereses y Patrimonio",
-    organization: "Contraloría General de la República · CPLT",
-    href: "/personas",
-    isDerived: false,
-  },
-  {
-    id: "sinim",
-    name: "Sistema Nacional de Información Municipal (SINIM)",
-    organization: "SUBDERE",
-    href: "/municipalidades",
-    isDerived: false,
-  },
-  {
-    id: "ine",
-    name: "INE Censo 2024 (Población y Demografía)",
-    organization: "Instituto Nacional de Estadísticas (INE)",
-    href: "/municipalidades",
-    isDerived: false,
-  },
-  {
-    id: "contraloria",
-    name: "Informes de Auditoría CGR",
-    organization: "Contraloría General de la República",
-    href: "/cruces#fiscalizacion",
-    isDerived: false,
-  },
-  {
-    id: "camara",
-    name: "Cámara de Diputadas y Diputados",
-    organization: "Congreso Nacional",
-    href: "/politico",
-    isDerived: false,
-  },
-  {
-    id: "senado",
-    name: "Senado de la República",
-    organization: "Congreso Nacional",
-    href: "/politico",
-    isDerived: false,
-  },
-  {
-    id: "servel",
-    name: "SERVEL (Resultados Electorales)",
-    organization: "Servicio Electoral de Chile",
-    href: "/partidos",
-    isDerived: false,
-  },
-  {
-    id: "personal_apoyo",
-    name: "Personal de Apoyo Parlamentario",
-    organization: "Congreso Nacional",
-    href: "/politico",
-    isDerived: true,
-  },
-];
-
 export default async function HomePage() {
-  const consolidationDate = new Date(GLOBAL_KPIS.generatedAt);
-  const formattedConsolidationDate = Number.isNaN(consolidationDate.getTime())
-    ? GLOBAL_KPIS.corte
-    : new Intl.DateTimeFormat("es-CL", {
-        dateStyle: "medium",
-        timeZone: "America/Santiago",
-      }).format(consolidationDate);
-
-  const websiteJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "WebSite",
-    name: "El Cambiómetro",
-    url: "https://cambiometro.impulsacv.cl",
-    description: "Plataforma ciudadana de datos públicos y transparencia de Chile.",
-    potentialAction: {
-      "@type": "SearchAction",
-      target: {
-        "@type": "EntryPoint",
-        urlTemplate: "https://cambiometro.impulsacv.cl/cruces?q={search_term_string}",
-      },
-      "query-input": "required name=search_term_string",
-    },
-  };
-
-  const organizationJsonLd = {
-    "@context": "https://schema.org",
-    "@type": "Organization",
-    name: "El Cambiómetro",
-    url: "https://cambiometro.impulsacv.cl",
-    logo: "https://cambiometro.impulsacv.cl/api/og/site",
-    sameAs: [
-      "https://github.com/jmorgadodev/cambiometro",
-    ],
-  };
+  const [sources, entities, records, relations, votes, expenses] = await Promise.all([
+    listPublishedSourceManifests(),
+    listEntities({ limit: 1 }),
+    listRecords({ limit: 1 }),
+    listRelations({ limit: 1 }),
+    listRecords({ kind: "vote", limit: 1 }),
+    listRecords({ kind: "expense", limit: 1 }),
+  ]);
+  const totalCatalogRecords = Math.max(records.total, GLOBAL_KPIS.registros_canonicos);
+  const operationalSources = HOME_SOURCES_LIST;
 
   return (
-    <main className="home-desk">
+    <div className="home-desk">
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteJsonLd).replace(/</g, "\\u003c") }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd).replace(/</g, "\\u003c") }}
-      />
+      >{JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "WebSite",
+        name: "El Cambiómetro",
+        url: "https://cambiometro.impulsacv.cl",
+        publisher: {
+          "@type": "Organization",
+          name: "ImpulsaCV",
+          url: "https://impulsacv.cl",
+        },
+      })}</script>
       <section className="home-lead container-main" aria-labelledby="home-title">
         <div className="home-lead__copy">
           <p className="home-kicker"><span aria-hidden="true" /> Plataforma de Datos Públicos</p>
@@ -242,97 +136,82 @@ export default async function HomePage() {
         </div>
       </section>
 
-      {/* 4 Entradas Narrativas de la Plataforma (Grid 12 cols: 4 header + 8 cards 2x2) */}
-      <Reveal delay={100}>
-        <section className="container-main home-paths" aria-label="Líneas principales de consulta">
-          <div className="home-paths__layout">
-            <div className="home-paths__header">
-              <p className="eyebrow">Rutas de exploración</p>
-              <h2>Cuatro formas de fiscalizar la información</h2>
-              <p className="home-paths__desc">
-                Accede a módulos diseñados para auditar votaciones, compras públicas, transferencias y redes institucionales.
-              </p>
+      <Reveal>
+        <section className="container-main home-workbench" aria-labelledby="workbench-title">
+          <div className="home-section-heading">
+            <div>
+              <p className="eyebrow">Mesa de análisis</p>
+              <h2 id="workbench-title">Empieza por una pregunta</h2>
             </div>
-            <div className="home-paths__grid">
-              <Link href="/politico" className="home-path">
-                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                  <Icono nombre="votaciones" size={15} />
-                  01 / Votaciones
-                </span>
-                <h3>¿Cómo votan tus representantes?</h3>
-                <p>Revisa la asistencia, alineamiento con sus bancadas y posturas en proyectos de ley clave.</p>
-                <b>Ver parlamentarios →</b>
-              </Link>
+            <Link href="/como-funciona">Cómo usamos los datos públicos →</Link>
+          </div>
 
-              <Link href="/partidos" className="home-path">
-                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                  <Icono nombre="organismo" size={15} />
-                  02 / Bancadas
-                </span>
-                <h3>¿Qué partidos concentran el gasto?</h3>
-                <p>Compara el presupuesto operacional, asesores contratados y cohesión de cada colectividad.</p>
-                <b>Comparar partidos →</b>
-              </Link>
-
-              <Link href="/transferencias" className="home-path">
-                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                  <Icono nombre="dinero" size={15} />
-                  03 / Recursos
-                </span>
-                <h3>¿A dónde van las transferencias?</h3>
-                <p>Explora fondos asignados a fundaciones y corporaciones bajo la Ley 19.862.</p>
-                <b>Ver transferencias →</b>
-              </Link>
-
-              <Link href="/cruces" className="home-path">
-                <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                  <Icono nombre="cruces" size={15} />
-                  04 / Relaciones
-                </span>
-                <h3>¿Qué entidades están conectadas?</h3>
-                <p>Filtra relaciones y abre la evidencia que respalda cada vínculo publicado.</p>
-                <b>Abrir explorador →</b>
-              </Link>
-            </div>
+          <div className="home-paths">
+            <Link href="/politico" className="home-path">
+              <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                <Icono nombre="votaciones" size={15} />
+                01 / Decisiones
+              </span>
+              <h3>¿Cómo votó una autoridad?</h3>
+              <p>Consulta fichas parlamentarias, opciones registradas, asistencia, dietas y probidad.</p>
+              <b>Ver votaciones →</b>
+            </Link>
+            <Link href="/transferencias" className="home-path">
+              <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                <Icono nombre="dinero" size={15} />
+                02 / Dinero & Fundaciones
+              </span>
+              <h3>¿A quién transfiere el Estado?</h3>
+              <p>Explora más de $17 billones en 361.000 transferencias a fundaciones y privados (Ley 19.862).</p>
+              <b>Explorar transferencias →</b>
+            </Link>
+            <Link href="/municipalidades" className="home-path">
+              <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                <Icono nombre="territorio" size={15} />
+                03 / Territorio Comunal
+              </span>
+              <h3>¿Cómo gastan las 346 comunas?</h3>
+              <p>Fichas comunales con demografía Censo 2024, finanzas SINIM, alcaldías y compras públicas.</p>
+              <b>Ver municipalidades →</b>
+            </Link>
+            <Link href="/cruces" className="home-path">
+              <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
+                <Icono nombre="cruces" size={15} />
+                04 / Relaciones
+              </span>
+              <h3>¿Qué entidades están conectadas?</h3>
+              <p>Filtra relaciones y abre la evidencia que respalda cada vínculo publicado.</p>
+              <b>Abrir explorador →</b>
+            </Link>
           </div>
         </section>
       </Reveal>
 
-      {/* Estado de datos simplificado: 13 fuentes compactas sin tablas de conteo */}
       <Reveal delay={150}>
         <section className="container-main home-sources" aria-labelledby="sources-title">
           <div className="home-section-heading">
             <div>
               <p className="eyebrow">Estado de datos</p>
-              <h2 id="sources-title">12 fuentes oficiales + 1 derivada</h2>
-              <p className="home-sources__sync">Última consolidación: {formattedConsolidationDate}</p>
+              <h2 id="sources-title">{operationalSources.length} fuentes con registros disponibles</h2>
             </div>
-            <Link href="/fuentes">Revisar catálogo de fuentes →</Link>
+            <Link href="/datos">Revisar todas las fuentes →</Link>
           </div>
-
-          <div className="home-source-list--compact">
-            {HOME_SOURCES_LIST.map((source) => (
-              <Link href={source.href} key={source.id} className="home-source-item">
-                <span className="source-signal source-signal--connected" aria-hidden="true" />
-                <div className="home-source-item__info">
-                  <div className="home-source-item__name">
-                    <strong>{source.name}</strong>
-                    {source.isDerived && <span className="badge badge-derived">derivada</span>}
-                  </div>
-                  <span className="home-source-item__org">{source.organization}</span>
-                </div>
-                <span className="home-source-item__arrow" aria-hidden="true">→</span>
-              </Link>
+          <div className="home-source-list">
+            {operationalSources.map((source) => (
+              <div className="home-source-row" key={source.id}>
+                <span className="source-signal source-signal--partial" aria-hidden="true" />
+                <strong>{source.name}</strong>
+                <span>{source.recordCount.toLocaleString("es-CL")} registros</span>
+                <em>{source.statusText || "Al día (Vigente)"}</em>
+              </div>
             ))}
           </div>
-
           <p className="home-coverage-note">
-            Conteos y cobertura por fuente en <Link href="/fuentes" className="data-link">/fuentes</Link> y <Link href="/datos/calidad" className="data-link">/datos/calidad</Link>. Los pipelines operan de forma automatizada y periódica con trazabilidad al portal de origen.
+            12 fuentes oficiales + 1 derivada. Nóminas oficiales: cada organismo informa con su partición oficial validada. Los pipelines operan de forma automatizada y periódica con trazabilidad al portal de origen. <Link href="/fuentes">Ver catálogo de fuentes →</Link>
           </p>
         </section>
       </Reveal>
-    </main>
+    </div>
   );
 }
 
-export const dynamic = "force-static";

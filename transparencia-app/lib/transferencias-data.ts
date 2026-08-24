@@ -1,6 +1,5 @@
-import fs from "fs";
-import path from "path";
-import leySummarySubset from "@/data/lake-subsets/ley19862.subset.json";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 export interface ReceptorResumen {
   name: string;
@@ -49,17 +48,27 @@ export interface Ley19862Summary {
   transfers_sample: TransferenciaDetalle[];
 }
 
-let cachedLeySummary: Ley19862Summary | null = null;
-
 export function getLey19862Summary(): Ley19862Summary {
-  if (cachedLeySummary) return cachedLeySummary;
-  try {
-    const fullPath = path.join(process.cwd(), "data", "lake", "projections", "v1", "ley19862-summary.json");
-    if (fs.existsSync(fullPath)) {
-      cachedLeySummary = JSON.parse(fs.readFileSync(fullPath, "utf8")) as Ley19862Summary;
-      return cachedLeySummary;
+  for (const candidate of [
+    join(process.cwd(), "data", "generated", "transferencias", "summary.json"),
+    join(process.cwd(), "data", "lake", "projections", "v1", "ley19862-summary.json"),
+  ]) {
+    try {
+      const parsed = JSON.parse(readFileSync(candidate, "utf8")) as Ley19862Summary;
+      if (parsed.transfers_sample.length >= 1000 || candidate.endsWith("ley19862-summary.json")) return parsed;
+    } catch {
+      // The generated compact projection is the production path; the source
+      // projection keeps local tests and development useful before prebuild.
     }
-  } catch {}
-  cachedLeySummary = leySummarySubset as unknown as Ley19862Summary;
-  return cachedLeySummary;
+  }
+  {
+    return {
+      generatedAt: "",
+      kpis: { total_monto_clp: 0, total_transfers: 0, total_receptores: 0, total_emisores: 0 },
+      by_year: {},
+      top_receptores: [],
+      top_emisores: [],
+      transfers_sample: [],
+    };
+  }
 }

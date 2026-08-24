@@ -5,7 +5,14 @@ import { getKvCache } from "@/lib/db";
 import { diputadoIdParaPolitico } from "@/lib/data-source";
 import { personalApoyoParaDiputado, personalApoyoParaSenador, leerPersonalApoyo } from "@/lib/personal-apoyo";
 import { COALICION_POR_PARTIDO } from "@/lib/partido-electoral-data";
-import PARTIDOS_STATS_FALLBACK from "@/data/lake-subsets/partidos-stats.subset.json";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+let PARTIDOS_STATS_FALLBACK: Record<string, unknown> = {};
+try {
+  PARTIDOS_STATS_FALLBACK = JSON.parse(readFileSync(join(process.cwd(), "data", "lake-subsets", "partidos-stats.subset.json"), "utf8"));
+} catch {
+  // The Worker/API path does not bundle the local build-only fallback.
+}
 
 export interface DetalleRebelde {
   politico_id: string;

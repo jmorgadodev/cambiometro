@@ -287,5 +287,3 @@ export default async function DataQualityPage() {
     </div>
   );
 }
-
-export const dynamic = "force-dynamic";

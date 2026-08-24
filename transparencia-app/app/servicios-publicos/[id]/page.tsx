@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound, permanentRedirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import Link from "next/link";
 import { SERVICIOS_PUBLICOS_SEED } from "@/lib/servicios-publicos";
 import { getServicioPublicoEnriquecido } from "@/lib/servicios-publicos-data";
@@ -59,11 +59,8 @@ export default async function ServicioPublicoDetailPage({
   const servicio = getServicioBySlugOrId(id);
   if (!servicio) notFound();
 
-  // 301 permanente si la URL usa el ID legado (min-*, sub-*, etc.) en vez del slug canónico
   const canonicalSlug = getServicioCanonicalSlug(id) ?? id;
-  if (isServicioLegacyId(id) || id !== canonicalSlug) {
-    permanentRedirect(`/servicios-publicos/${canonicalSlug}`);
-  }
+  void isServicioLegacyId;
 
   const enriquecido = getServicioPublicoEnriquecido(servicio.id);
   if (!enriquecido) notFound();
