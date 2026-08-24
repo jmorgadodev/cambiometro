@@ -5,7 +5,7 @@ import { chromium } from "playwright";
 
 const routes = [
   "/", "/autoridades", "/calculadora", "/cambios", "/como-funciona", "/comparar", "/cruces",
-  "/datos", "/donar", "/entidades/person-infoprobidad-9204ac804e1f43cc8c3e62f712a15764", "/fuentes", "/funcionarios", "/movimientos", "/municipalidades",
+  "/datos", "/donar", "/entidades/person-camara-1009", "/fuentes", "/funcionarios", "/movimientos", "/municipalidades",
   "/municipalidades/muni-maipu", "/partidos", "/partidos/rep", "/politico/dip-061", "/privacidad", "/rankings", "/servicios-publicos",
 ];
 const responsiveRoutes = ["/", "/cruces", "/politico/dip-061", "/privacidad", "/fuentes"];
@@ -182,7 +182,7 @@ try {
   await page.waitForURL("**/politico/**", { timeout: 5000 }).catch(() => {});
   assert(page.url().includes("/politico/"), "la entidad parlamentaria debe redirigir a /politico");
 
-  await gotoWithNetworkRetry(`${baseUrl}/entidades/person-infoprobidad-9204ac804e1f43cc8c3e62f712a15764`);
+  await gotoWithNetworkRetry(`${baseUrl}/entidades/person-camara-1009`);
   assert.equal(await page.locator(".person-entity__nav").count(), 1, "la ficha debe mostrar navegación continua");
 
   await gotoWithNetworkRetry(`${baseUrl}/datos`);

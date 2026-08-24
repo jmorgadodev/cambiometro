@@ -14,7 +14,7 @@ const REQUIRED_HEADERS = [
 
 const HEADER_ROUTES = [
   "/",
-  "/entidades/person-infoprobidad-9204ac804e1f43cc8c3e62f712a15764",
+  "/entidades/person-camara-1009",
   "/datos",
   "/cruces",
   "/municipalidades/muni-maipu",
