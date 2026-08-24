@@ -3,7 +3,9 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
-const source = JSON.parse(await readFile(join(root, "data", "entidades-canonica.json"), "utf8"));
+const sourcePath = join(root, "data", "entidades-canonica.json");
+const fallbackPath = join(root, "data", "catalog", "entities-routes.json");
+const source = JSON.parse(await readFile(sourcePath, "utf8").catch(() => readFile(fallbackPath, "utf8")));
 const entities = Array.isArray(source) ? source : source.entities ?? [];
 await mkdir(join(root, "data", "generated"), { recursive: true });
 await writeFile(join(root, "data", "generated", "entity-routes.json"), JSON.stringify(entities.map((entity) => ({ id: entity.id }))));

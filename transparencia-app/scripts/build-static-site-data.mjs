@@ -31,8 +31,8 @@ const transferManifest = writeChunkedJson({
   pageSize: 50,
 });
 
-const canonical = await readJson("data/entidades-canonica.json");
-const entities = canonical.entities ?? [];
+const canonical = await readJson("data/entidades-canonica.json").catch(() => readJson("data/catalog/entities-routes.json"));
+const entities = Array.isArray(canonical) ? canonical : canonical.entities ?? [];
 await writeFile(join(publicDataDir, "search-index.json"), `${JSON.stringify(entities.map(({ id, kind, name }) => ({ id, kind, name })))}\n`);
 const checksum = (value) => crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
 const siteManifest = {
