@@ -12,7 +12,6 @@ const ROUTES = [
   "/politico/vanessa-kaiser-barents-von-hohenhagen",
   "/transferencias",
   "/cruces",
-  "/api/v1/health/data",
   "/api/v1/search?q=Kaiser",
 ];
 
