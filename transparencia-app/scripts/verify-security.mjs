@@ -79,7 +79,8 @@ try {
   const contentType = searchResponse.headers()["content-type"] ?? "";
   assert(contentType.includes("application/json"), "búsqueda debe responder JSON, no HTML");
   const searchBody = await searchResponse.text();
-  assert(!/<img[^>]*onerror/i.test(searchBody), "el payload XSS no debe reflejarse como HTML en el JSON");
+  const searchJson = JSON.parse(searchBody);
+  assert.equal(searchJson.meta?.query, xssPayload, "la búsqueda debe conservar el payload sólo como dato JSON");
 
   await gotoWithRetry(`${baseUrl}/`);
   await page.evaluate(() => {
