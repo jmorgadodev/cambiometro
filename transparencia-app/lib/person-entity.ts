@@ -79,13 +79,15 @@ function normalizeName(value: string) {
 }
 
 function verifiedAttributePhoto(entity: CanonicalEntity) {
-  const candidate = entity.attributes.photo_url ?? entity.attributes.photoUrl ?? entity.attributes.image;
+  const attributes = entity.attributes ?? {};
+  const candidate = attributes.photo_url ?? attributes.photoUrl ?? attributes.image;
   return typeof candidate === "string" && candidate.startsWith("https://upload.wikimedia.org/")
     ? candidate
     : null;
 }
 
 export function personEntityPresentation(entity: CanonicalEntity) {
+  const attributes = entity.attributes ?? {};
   const historicalPhoto = VERIFIED_HISTORICAL_PHOTOS[entity.id];
   const politician = POLITICOS_SEED.find(
     (item) => normalizeName(item.nombre_completo) === normalizeName(entity.name),
@@ -105,7 +107,7 @@ export function personEntityPresentation(entity: CanonicalEntity) {
     photoSourceUrl: historicalPhoto?.sourceUrl ?? null,
     politicianPath: politician ? `/politico/${getPoliticoSlug(politician)}` : null,
     initials: initials || "P",
-    role: typeof entity.attributes.role === "string" ? entity.attributes.role : null,
+    role: typeof attributes.role === "string" ? attributes.role : null,
   };
 }
 
