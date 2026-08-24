@@ -267,9 +267,10 @@ try {
   await page.setViewportSize({ width: 320, height: 800 });
   await gotoWithNetworkRetry(baseUrl);
   await page.getByRole("button", { name: "Secciones" }).click();
-  await page.locator("#mobile-drawer").waitFor({ state: "visible", timeout: 5000 });
-  assert(await page.locator("#mobile-drawer").isVisible(), "Drawer móvil debe ser visible tras click");
-  assert(await page.locator("#mobile-drawer nav").isVisible(), "Navegación del drawer móvil debe ser visible");
+  const visibleMobileDrawer = page.locator("#mobile-drawer:visible");
+  await visibleMobileDrawer.waitFor({ state: "visible", timeout: 5000 });
+  assert(await visibleMobileDrawer.isVisible(), "Drawer móvil debe ser visible tras click");
+  assert(await visibleMobileDrawer.locator("nav").isVisible(), "Navegación del drawer móvil debe ser visible");
   await page.screenshot({ path: join(tmpdir(), "transparencia-home-mobile.png"), fullPage: true });
 
   const legacyChecks = [
