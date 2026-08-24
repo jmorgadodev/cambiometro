@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import organismosStaticJson from "@/data/lake/projections/v1/organismos.json";
 
 export type TipoOrganismo =
   | "Municipalidad"
@@ -58,7 +57,7 @@ function loadAllOrganismos(): OrganismoCanonico[] {
       return cachedAllOrganismos;
     }
   } catch {}
-  cachedAllOrganismos = enforceR10((organismosStaticJson as unknown) as OrganismoCanonico[]);
+  cachedAllOrganismos = [];
   return cachedAllOrganismos;
 }
 

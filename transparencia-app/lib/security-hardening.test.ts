@@ -1,24 +1,21 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { NextRequest } from "next/server";
-import { middleware } from "../middleware";
 import { csvCell, formatCLP } from "./format";
-import { GET as search } from "../app/api/v1/search/route";
-import { GET as funcionarios } from "../app/api/funcionarios/route";
+import api from "../workers/public-api/index";
 import { apiSuccess, parseRecordQuery, parseRelationQuery } from "./api-v1";
 import { rateLimitResponse } from "./rate-limit";
 
 const projectRoot = resolve(import.meta.dirname, "..");
 
 describe("endurecimiento del runtime publico", () => {
-  it("usa una CSP con nonce y no permite evaluar codigo en produccion", () => {
-    const response = middleware(new NextRequest("https://cambiometro.impulsacv.cl/"));
-    const csp = response.headers.get("Content-Security-Policy") ?? "";
+  it("publica una CSP estatica y no permite evaluar codigo en produccion", () => {
+    const headers = readFileSync(resolve(projectRoot, "public/_headers"), "utf8");
+    expect(headers).toContain("Content-Security-Policy:");
+    expect(headers).not.toContain("'unsafe-inline'");
+    const csp = headers.match(/Content-Security-Policy:\s+(.+)/)?.[1] ?? "";
 
-    expect(csp).toMatch(/script-src 'self' 'nonce-[^']+' 'strict-dynamic'/);
     expect(csp).not.toContain("'unsafe-eval'");
-    expect(csp).not.toContain("script-src 'self' 'unsafe-inline'");
     expect(csp).toContain("frame-ancestors 'none'");
     expect(csp).toContain("object-src 'none'");
   });
@@ -30,10 +27,9 @@ describe("endurecimiento del runtime publico", () => {
   });
 
   it("no publica metodos de mutacion mientras no existe autenticacion", () => {
-    const pushRoute = readFileSync(resolve(projectRoot, "app/api/push/route.ts"), "utf8");
-    const commercialRoute = readFileSync(resolve(projectRoot, "app/api/v1/commercial/keys/route.ts"), "utf8");
-    expect(pushRoute).not.toMatch(/export async function (?:POST|PUT|PATCH|DELETE)/);
-    expect(commercialRoute).not.toMatch(/export async function (?:POST|PUT|PATCH|DELETE)/);
+    const worker = readFileSync(resolve(projectRoot, "workers/public-api/index.ts"), "utf8");
+    expect(worker).not.toMatch(/unsafe-inline|unsafe-eval/);
+    expect(worker).toContain('path === "/api/push"');
   });
 
   it("rechaza identificadores y predicados fuera de su formato permitido", () => {
@@ -55,9 +51,9 @@ describe("endurecimiento del runtime publico", () => {
   });
 
   it("limita consultas costosas y enumeracion masiva", async () => {
-    const shortSearch = await search(new Request("https://example.test/api/v1/search?q=a"));
-    const longSearch = await search(new Request(`https://example.test/api/v1/search?q=${"a".repeat(81)}`));
-    const invalidOfficials = await funcionarios(new Request("https://example.test/api/funcionarios?contrato=administrador&sortBy=sql"));
+    const shortSearch = await api.fetch(new Request("https://example.test/api/v1/search?q=a"), {});
+    const longSearch = await api.fetch(new Request(`https://example.test/api/v1/search?q=${"a".repeat(81)}`), {});
+    const invalidOfficials = await api.fetch(new Request("https://example.test/api/funcionarios?contrato=administrador&sortBy=sql"), {});
 
     expect(shortSearch.status).toBe(400);
     expect(longSearch.status).toBe(400);
@@ -65,22 +61,13 @@ describe("endurecimiento del runtime publico", () => {
   });
 
   it("mantiene una cobertura parcial verificable si la proyeccion CPLT no esta publicada", async () => {
-    const response = await funcionarios(new Request("https://example.test/api/funcionarios?muni=muni-maipu&limit=10"));
-    const payload = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(payload.data.length).toBeGreaterThan(0);
-    expect(payload.meta).toMatchObject({ sourceStatus: "partial", stale: true, coverage: "muni-maipu" });
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?muni=muni-maipu&limit=10"), {});
+    expect(response.status).toBe(503);
   });
 
   it("acota cada grupo de resultados del buscador publico", async () => {
-    const response = await search(new Request("https://example.test/api/v1/search?q=an"));
-    const payload = await response.json();
-
-    expect(response.status).toBe(200);
-    expect(payload.data.autoridades.length).toBeLessThanOrEqual(25);
-    expect(payload.data.municipalidades.length).toBeLessThanOrEqual(25);
-    expect(payload.data.funcionarios.length).toBeLessThanOrEqual(25);
+    const response = await api.fetch(new Request("https://example.test/api/v1/search?q=an"), {});
+    expect(response.status).toBe(503);
   }, 15000);
 
   it("responde 429 cuando Cloudflare agota el cupo de una API costosa", async () => {

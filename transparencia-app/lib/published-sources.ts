@@ -1,6 +1,5 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { SourceManifest } from "@/lib/data-contracts";
 import { listSourceManifests } from "@/lib/data-platform-d1";
 import { mergeR2Catalog, type R2PublicCatalog } from "@/lib/r2-catalog";
@@ -45,20 +44,7 @@ function localCpltManifest(): CpltPublicManifest | null {
 
 export async function listPublishedSourceManifests(): Promise<SourceManifest[]> {
   const base = await listSourceManifests();
-  let catalog: R2PublicCatalog | null = null;
-  let cplt: CpltPublicManifest | null = null;
-  try {
-    const { env } = await getCloudflareContext({ async: true });
-    const [catalogObject, cpltObject] = await Promise.all([
-      env.PUBLIC_DATA?.get("catalog/v1/manifest.json"),
-      env.PUBLIC_DATA?.get("projections/funcionarios-v1/manifest.json"),
-    ]);
-    catalog = catalogObject ? await catalogObject.json<R2PublicCatalog>() : null;
-    cplt = cpltObject ? await cpltObject.json<CpltPublicManifest>() : null;
-  } catch {
-    // Next local no tiene bindings; se usan los últimos manifiestos validados.
-  }
-  catalog ??= localR2Catalog();
-  cplt ??= localCpltManifest();
+  const catalog: R2PublicCatalog | null = localR2Catalog();
+  const cplt: CpltPublicManifest | null = localCpltManifest();
   return mergeCpltCatalog(mergeR2Catalog(base, catalog), cplt);
 }

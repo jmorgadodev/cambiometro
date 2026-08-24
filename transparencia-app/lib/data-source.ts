@@ -428,7 +428,12 @@ function nombreCoincide(nombreVoto: string, nombreSeed: string): boolean {
   return apellidos.every((apellido) => voto.includes(apellido));
 }
 
-import politicosVotaciones from "@/data/politicos-votaciones.json";
+let politicosVotacionesCache: { votes: Record<string, [string, string][]>; sessions: Record<string, EtlRecord> } | null = null;
+function readPoliticosVotaciones() {
+  politicosVotacionesCache ??= JSON.parse(readFileSync(join(process.cwd(), "data", "politicos-votaciones.json"), "utf8")) as typeof politicosVotacionesCache;
+  if (!politicosVotacionesCache) throw new Error("politicos-votaciones.json vacío");
+  return politicosVotacionesCache;
+}
 
 export function getVotacionesParaPolitico(
   politico: Pick<Politico, "nombre_completo"> & { id?: string }
@@ -441,8 +446,9 @@ export function getVotacionesParaPolitico(
     polId = seed?.id;
   }
 
-  const allVotes = politicosVotaciones.votes as unknown as Record<string, [string, string][]>;
-  const sessions = politicosVotaciones.sessions as unknown as Record<string, EtlRecord>;
+  const politicosVotaciones = readPoliticosVotaciones();
+  const allVotes = politicosVotaciones.votes;
+  const sessions = politicosVotaciones.sessions;
 
   if (polId && allVotes[polId]) {
     const pVotes = allVotes[polId];
@@ -503,3 +509,5 @@ export async function getAllPoliticosWithEvidence() {
     evidencia: await getEvidenceForPolitico(politico),
   })));
 }
+import { readFileSync } from "node:fs";
+import { join } from "node:path";

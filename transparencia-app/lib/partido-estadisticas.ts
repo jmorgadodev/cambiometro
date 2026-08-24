@@ -5,7 +5,11 @@ import { getKvCache } from "@/lib/db";
 import { diputadoIdParaPolitico } from "@/lib/data-source";
 import { personalApoyoParaDiputado, personalApoyoParaSenador } from "@/lib/personal-apoyo";
 import { COALICION_POR_PARTIDO } from "@/lib/partido-electoral-data";
-import PARTIDOS_STATS_FALLBACK from "@/data/partidos-stats.json";
+let partidosStatsFallback: Record<string, PartidoEstadistica> | null = null;
+function getPartidosStatsFallback() {
+  partidosStatsFallback ??= JSON.parse(readFileSync(join(process.cwd(), "data", "partidos-stats.json"), "utf8")) as Record<string, PartidoEstadistica>;
+  return partidosStatsFallback;
+}
 
 export interface DetalleRebelde {
   politico_id: string;
@@ -51,9 +55,9 @@ export async function getPartidoEstadisticas(partidoId: string): Promise<Partido
   if (!cached) {
     cachedPromise ??= getKvCache<Record<string, PartidoEstadistica>>("partidos-stats.json");
     const kvData = await cachedPromise;
-    cached = kvData || (PARTIDOS_STATS_FALLBACK as unknown as Record<string, PartidoEstadistica>);
+    cached = kvData || getPartidosStatsFallback();
   }
-  return cached?.[normId] ?? (PARTIDOS_STATS_FALLBACK as Record<string, unknown>)[normId] as PartidoEstadistica ?? null;
+  return cached?.[normId] ?? getPartidosStatsFallback()[normId] ?? null;
 }
 
 export function normalizePartidoId(id: string): string {
@@ -351,3 +355,5 @@ export async function getAllPartidosSummary(): Promise<PartidoResumenCompleto[]>
     return b.totalEscaños - a.totalEscaños;
   });
 }
+import { readFileSync } from "node:fs";
+import { join } from "node:path";

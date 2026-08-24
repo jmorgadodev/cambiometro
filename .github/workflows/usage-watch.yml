@@ -27,5 +27,5 @@ jobs:
           echo "$response"
           echo "======================================================="
           echo "Recuerda: El Spending Limit en GitHub Settings debe ser $0 USD."
-          echo "Deploy siempre local con: npx opennextjs-cloudflare deploy"
+          echo "El despliegue se realiza mediante Pages y el Worker API separado, con promoción explícita."
           echo "======================================================="

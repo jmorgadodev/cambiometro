@@ -1,9 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { GET } from "../app/api/og/site/route";
+import api from "../workers/public-api/index";
 
 describe("GET /api/og/site", () => {
   it("dispone de una ruta estática estable que siempre devuelve SVG", async () => {
-    const response = await GET();
+    const response = await api.fetch(new Request("https://example.test/api/og/site"), {});
     const body = await response.text();
 
     expect(response.status).toBe(200);

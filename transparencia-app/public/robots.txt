@@ -1,0 +1,20 @@
+User-agent: *
+Allow: /
+Allow: /api/og/
+Disallow: /api/
+Disallow: /_next/
+
+User-agent: GPTBot
+Disallow: /
+
+User-agent: ClaudeBot
+Disallow: /
+
+User-agent: CCBot
+Disallow: /
+
+User-agent: Google-Extended
+Disallow: /
+
+Sitemap: https://cambiometro.impulsacv.cl/sitemap.xml
+Host: https://cambiometro.impulsacv.cl

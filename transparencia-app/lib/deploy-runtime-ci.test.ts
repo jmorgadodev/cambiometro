@@ -11,12 +11,13 @@ describe("validación runtime de despliegue", () => {
 
     expect(workflow).toContain("wrangler d1 migrations apply transparencia-db --local");
     expect(workflow).toContain("fixtures/d1-browser.sql");
-    expect(workflow).toContain("wrangler dev --local --port 3003");
+    expect(workflow).toContain("wrangler dev --local --config workers/public-api/wrangler.jsonc --port 8788");
+    expect(workflow).toContain("wrangler pages dev out --port 3003");
     expect(workflow).not.toContain("npm run start -- -p 3003");
   });
 
   it("define staging de solo lectura con el Worker separado y la D1 autorizada", () => {
-    const config = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), "wrangler.jsonc"), "utf8"));
+    const config = JSON.parse(fs.readFileSync(path.resolve(process.cwd(), "workers", "public-api", "wrangler.jsonc"), "utf8"));
     const staging = config.env.staging;
 
     expect(staging.name).toBe("cambiometro-staging");

@@ -14,14 +14,11 @@ export const metadata: Metadata = {
   alternates: { canonical: "/cruces" },
 };
 
-export default async function CrossesPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string }>;
-}) {
-  const params = await searchParams;
-  const rawQuery = params.q?.trim() ?? "";
-  const crosses = await getAllCrosses();
+export default async function CrossesPage() {
+  const rawQuery = "";
+  // Keep the HTML shell small; the explorer can request further records from
+  // the indexed Worker API without serializing the complete lake into RSC.
+  const crosses = (await getAllCrosses()).slice(0, 120);
 
   const contraloria = leerContraloriaV1();
   const chilecompra = leerChileCompraV1();
@@ -224,5 +221,3 @@ export default async function CrossesPage({
     </main>
   );
 }
-
-export const dynamic = "force-dynamic";

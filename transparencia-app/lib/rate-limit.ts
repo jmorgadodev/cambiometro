@@ -1,5 +1,3 @@
-import { getCloudflareContext } from "@opennextjs/cloudflare";
-
 export interface RateLimiterLike {
   limit(input: { key: string }): Promise<{ success: boolean }>;
 }
@@ -32,11 +30,7 @@ export async function rateLimitResponse(
 }
 
 export async function enforcePublicRateLimit(request: Request, scope: string) {
-  try {
-    const { env } = await getCloudflareContext({ async: true });
-    const limiter = (env as typeof env & { EXPENSIVE_API_RATE_LIMITER?: RateLimiterLike }).EXPENSIVE_API_RATE_LIMITER;
-    return rateLimitResponse(request, limiter, scope);
-  } catch {
-    return null;
-  }
+  void request;
+  void scope;
+  return null;
 }

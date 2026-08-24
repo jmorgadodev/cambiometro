@@ -1,8 +1,7 @@
 
 import type { Metadata } from "next";
-export const dynamic = "force-dynamic";
 import Link from "next/link";
-import { notFound, permanentRedirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import {
   POLITICOS_SEED,
   PARTIDOS_SEED,
@@ -10,7 +9,6 @@ import {
 import {
   getPoliticoByIdOrSlug,
   getPoliticoSlug,
-  isLegacyPoliticoId,
 } from "@/lib/politico-slugs";
 import {
   getVotacionesParaPolitico,
@@ -43,6 +41,10 @@ import PersonalApoyoMensual from "@/components/PersonalApoyoMensual";
 
 interface Props {
   params: Promise<{ id: string }>;
+}
+
+export function generateStaticParams() {
+  return POLITICOS_SEED.map((politico) => ({ id: getPoliticoSlug(politico) }));
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -85,11 +87,7 @@ export default async function PoliticoPage({ params }: Props) {
   const pol = getPoliticoByIdOrSlug(id);
   if (!pol) notFound();
 
-  // Redirect 301 permanente si la URL usa un ID antiguo o no canonical
   const canonicalSlug = getPoliticoSlug(pol);
-  if (isLegacyPoliticoId(id) || id !== canonicalSlug) {
-    permanentRedirect(`/politico/${canonicalSlug}`);
-  }
 
   const partido = PARTIDOS_SEED.find((p) => p.id === pol.partido_id);
   

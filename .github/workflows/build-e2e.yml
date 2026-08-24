@@ -20,7 +20,7 @@ concurrency:
 
 jobs:
   build-and-e2e:
-    name: OpenNext Cloudflare Build & Playwright Verification
+    name: Static Pages & API Worker Build Verification
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
@@ -49,8 +49,8 @@ jobs:
         run: npm audit --omit=dev --audit-level=high
         working-directory: transparencia-app
 
-      - name: Build Cloudflare Worker artifact
-        run: npm run cf:build
+      - name: Build static Pages artifact and guards
+        run: npm run pages:build && npm run api:size
         working-directory: transparencia-app
 
       - name: Install browser for integration checks
@@ -60,7 +60,7 @@ jobs:
       - name: Prepare isolated local D1 fixture
         working-directory: transparencia-app
         run: |
-          npx wrangler d1 migrations apply transparencia-db --local
+          npx wrangler d1 migrations apply transparencia-db --local --config workers/public-api/wrangler.jsonc
           npx wrangler d1 execute transparencia-db --local --file fixtures/d1-browser.sql
 
       - name: Verify routes, APIs, responsive UI and widget
@@ -70,9 +70,11 @@ jobs:
           TURNSTILE_SECRET_KEY: 1x0000000000000000000000000000000AA
           NEXT_PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
         run: |
-          npx wrangler dev --local --port 3003 --log-level warn > /tmp/cambiometro-worker.log 2>&1 &
-          server_pid=$!
-          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          npx wrangler dev --local --config workers/public-api/wrangler.jsonc --port 8788 --log-level warn > /tmp/cambiometro-api.log 2>&1 &
+          api_pid=$!
+          npx wrangler pages dev out --port 3003 --proxy 8788 --log-level warn > /tmp/cambiometro-pages.log 2>&1 &
+          pages_pid=$!
+          trap 'kill "$api_pid" "$pages_pid" 2>/dev/null || true' EXIT
           ready=""
           for attempt in {1..30}; do
             if curl --fail --silent http://127.0.0.1:3003/ > /dev/null; then
@@ -82,7 +84,8 @@ jobs:
             sleep 1
           done
           if [ -z "$ready" ]; then
-            cat /tmp/cambiometro-worker.log
+            cat /tmp/cambiometro-api.log
+            cat /tmp/cambiometro-pages.log
             exit 1
           fi
           npm run verify:browser

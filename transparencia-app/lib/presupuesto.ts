@@ -1,6 +1,5 @@
 import fs from "fs";
 import path from "path";
-import presupuestoStaticJson from "@/data/lake/projections/v1/presupuesto.json";
 
 export interface PresupuestoSubtitulo {
   subtitulo: string;
@@ -52,8 +51,7 @@ export function leerPresupuestoV1(): PresupuestoProyeccion | null {
       return cached;
     }
   } catch {}
-  cached = (presupuestoStaticJson as unknown) as PresupuestoProyeccion;
-  return cached;
+  return null;
 }
 
 export function presupuestoParaPrograma(programId: string): PresupuestoPrograma | null {

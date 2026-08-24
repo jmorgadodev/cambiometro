@@ -1,4 +1,7 @@
-import municipalidadesJson from "@/data/municipalidades-data.json";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+
+const municipalidadesJson = JSON.parse(readFileSync(join(process.cwd(), "data", "municipalidades-data.json"), "utf8"));
 
 export interface AlcaldeData {
   nombre: string;

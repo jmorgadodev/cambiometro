@@ -25,15 +25,10 @@ export const metadata: Metadata = {
     "Listado completo de los 155 diputados y 50 senadores del período 2026-2030 con acceso a la ficha de transparencia de cada uno.",
 };
 
-export default async function PoliticoDirectory({
-  searchParams,
-}: {
-  searchParams: Promise<{ q?: string; cargo?: "Diputado" | "Senador" }>;
-}) {
-  const params = await searchParams;
-  const rawQuery = params.q?.trim() ?? "";
+export default async function PoliticoDirectory() {
+  const rawQuery = "";
   const query = normalizeSearchText(rawQuery);
-  const cargoFilter = params.cargo;
+  const cargoFilter = undefined;
 
   const filtrados = POLITICOS_SEED.filter((politico) => {
     if (cargoFilter && politico.cargo !== cargoFilter) return false;
