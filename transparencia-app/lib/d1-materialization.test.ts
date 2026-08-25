@@ -49,6 +49,11 @@ describe("materializacion del lake a D1", () => {
     expect(script).toContain('[wranglerBin, "--config", wranglerConfig, ...args]');
   });
 
+  it("apunta las migraciones D1 al directorio compartido del proyecto", () => {
+    const config = readFileSync(resolve("workers/public-api/wrangler.jsonc"), "utf8");
+    expect(config).toContain('"migrations_dir": "../../migrations"');
+  });
+
   it("limpia staging si una importación falla antes de activar la fuente", () => {
     const script = readFileSync(resolve("scripts/materialize-d1.mjs"), "utf8");
     expect(script).toContain("DELETE FROM stage_entities WHERE run_id=${sql(runId)}");
