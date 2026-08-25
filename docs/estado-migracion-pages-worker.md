@@ -1205,3 +1205,30 @@ se ejecute; todavía no es evidencia de que D1 productiva ya esté poblada, pues
 no se ejecutó ningún workflow de mutación desde este checkout. Antes de
 promover el Worker se debe ejecutar el workflow en Actions y conservar en el
 registro el conteo, checksum, health y respuesta paginada.
+
+### Incidente reproducido de nonce/CSP en OpenNext — 2026-08-25
+
+El E2E de sólo lectura contra el dominio vigente reprodujo el problema que
+deja fichas sin hidratar: el HTML prerenderizado se entrega con un nonce, pero
+la respuesta tenía `Cache-Control: s-maxage=31536000`. En una petición
+posterior el middleware genera otro nonce para el CSP, mientras el HTML puede
+seguir viniendo de caché con el anterior. Chromium registró violaciones CSP y
+la ficha municipal llegó sin `h1`.
+
+Se agregó una prueba en `transparencia-app/lib/middleware.test.ts` y el
+middleware de rollback ahora marca el HTML como `private, no-store, max-age=0`
+con `CDN-Cache-Control: no-store` y
+`Cloudflare-CDN-Cache-Control: no-store`. La prueba reproduce el caso y pasa
+localmente; esto no se aplica al export Pages porque su staging excluye el
+middleware.
+
+El intento de usar todos los hashes inline como CSP estática fue descartado:
+el generador produjo una línea de 831.799 bytes con 15.395 hashes. Cloudflare
+Pages limita cada línea de `_headers` a 2.000 caracteres, así que esa salida
+no es desplegable. No se dejó ese artefacto en `public/_headers` ni en Git.
+
+El build OpenNext (`npm run cf:build`) tampoco es actualmente reproducible
+desde este checkout porque `next.config.ts` ya declara `output: "export"` y
+la ruta histórica `app/api/og/[id]` sigue en el árbol fuente. El rollback
+conocido sigue siendo el deployment existente; antes de retirar OpenNext se
+debe conservar un build/configuración de rollback reproducible por separado.

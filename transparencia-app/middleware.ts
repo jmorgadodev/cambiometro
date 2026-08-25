@@ -81,6 +81,15 @@ export function middleware(request: NextRequest) {
 
   const response = NextResponse.next({ request: { headers: requestHeaders } });
   response.headers.set("Content-Security-Policy", csp);
+  // El HTML prerenderizado contiene el nonce generado arriba. No se puede
+  // servir desde CDN con s-maxage: una respuesta cacheada conserva el nonce
+  // viejo mientras el middleware calcula uno nuevo y el navegador bloquea
+  // toda la hidratación (fichas quedan con spinner o sin contenido).
+  if (!pathname.startsWith("/api/")) {
+    response.headers.set("Cache-Control", "private, no-store, max-age=0");
+    response.headers.set("CDN-Cache-Control", "no-store");
+    response.headers.set("Cloudflare-CDN-Cache-Control", "no-store");
+  }
   // El CSP real ya está endurecido en producción; el modo Report-Only se usa
   // solo para validar directivas nuevas sin riesgo (staging, CSP_REPORT_ONLY=true).
   if (process.env.CSP_REPORT_ONLY === "true") {
