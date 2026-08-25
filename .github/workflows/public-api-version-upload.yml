@@ -1,0 +1,56 @@
+name: Public API Worker - upload version candidate
+
+on:
+  workflow_dispatch:
+    inputs:
+      message:
+        description: "Mensaje asociado a la versión candidata"
+        required: false
+        default: "Candidate pública verificada desde la rama de migración"
+
+concurrency:
+  group: public-api-version-upload
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  upload:
+    name: Validate and upload Worker version (sin promoción)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+      - name: Install dependencies
+        working-directory: transparencia-app
+        run: npm ci
+      - name: Validate Worker
+        working-directory: transparencia-app
+        run: |
+          npm run worker:check
+          npm run worker:test
+          npm run worker:bundle
+      - name: Upload version candidate without promotion
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+          VERSION_MESSAGE: ${{ inputs.message }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx wrangler versions upload \
+            --config workers/public-api/wrangler.jsonc \
+            --name cambiometro-public-api \
+            --tag "candidate-${GITHUB_SHA}" \
+            --message "$VERSION_MESSAGE" \
+            | tee worker-version-upload.log
+          grep -Eiq 'version.?id|uploaded' worker-version-upload.log
+          echo "La versión fue subida; no se ejecutó versions deploy ni se cambió la ruta." >> "$GITHUB_STEP_SUMMARY"
+          cat worker-version-upload.log >> "$GITHUB_STEP_SUMMARY"

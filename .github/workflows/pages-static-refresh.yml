@@ -27,6 +27,11 @@ on:
         type: boolean
         required: false
         default: false
+      deploy_preview:
+        description: "Publicar un preview Pages aislado sin tocar producción"
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: pages-static-refresh
@@ -130,6 +135,18 @@ jobs:
           path: transparencia-app/out
           if-no-files-found: error
           retention-days: 7
+
+      - name: Publish isolated Pages preview
+        if: github.event_name == 'workflow_dispatch' && inputs.deploy_preview == true
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+          PREVIEW_BRANCH: preview-${{ github.run_id }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx wrangler pages deploy out --project-name cambiometro --branch "$PREVIEW_BRANCH" --commit-hash "${GITHUB_SHA:0:40}" --commit-message "Pages preview ${GITHUB_SHA}"
 
       # Los workflow_run exitosos de ETL son el refresco automático sin costo.
       # La ejecución manual exige activar deploy_pages explícitamente. El

@@ -1376,6 +1376,17 @@ desplegar Pages/Worker en preview, realizar crawl frío productivo y obtener
 deployment/version IDs. Mientras eso no ocurra, no existe evidencia de
 producción ni autorización para cambiar CNAME o promover el cutover.
 
+Para continuar sin mutar tráfico se añadieron dos operaciones manuales:
+`pages-static-refresh.yml` acepta `deploy_preview=true` y publica una rama
+Pages `preview-<run_id>`; `public-api-version-upload.yml` valida y ejecuta
+`wrangler versions upload` sin ejecutar `versions deploy`. La promoción sigue
+siendo una acción separada, y los comandos de rollback permanecen:
+
+```bash
+npm run pages:rollback -- <pages-deployment-id>
+npx wrangler rollback <worker-version-id> --name cambiometro-public-api
+```
+
 ### Incidente CI del widget y corrección CSP — 2026-08-25
 
 El run `32814866419` validó correctamente datos R2, export Pages, bundle y
