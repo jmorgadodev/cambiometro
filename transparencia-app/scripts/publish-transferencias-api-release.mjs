@@ -17,6 +17,8 @@ const registeredThrough = process.env.TRANSFER_RELEASE_REGISTERED_THROUGH
 
 const UPLOAD_CONCURRENCY = 8;
 const UPLOAD_TIMEOUT_MS = 120_000;
+const UPLOAD_MAX_ATTEMPTS = 3;
+const UPLOAD_RETRY_DELAY_MS = 1_500;
 
 function wrangler(args) {
   const command = process.platform === "win32" ? "npx.cmd" : "npx";
@@ -38,13 +40,30 @@ function wrangler(args) {
   });
 }
 
+function wait(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
 async function put(key, file, contentType = "application/json") {
-  await wrangler(["r2", "object", "put", `${bucket}/${key}`, "--file", file, "--content-type", contentType]);
+  let lastError;
+  for (let attempt = 1; attempt <= UPLOAD_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      await wrangler(["r2", "object", "put", `${bucket}/${key}`, "--file", file, "--content-type", contentType]);
+      return;
+    } catch (error) {
+      lastError = error;
+      if (attempt < UPLOAD_MAX_ATTEMPTS) await wait(UPLOAD_RETRY_DELAY_MS * attempt);
+    }
+  }
+  throw lastError;
 }
 
 async function putInBatches(entries) {
   for (let index = 0; index < entries.length; index += UPLOAD_CONCURRENCY) {
-    await Promise.all(entries.slice(index, index + UPLOAD_CONCURRENCY).map(({ key, file, contentType }) => put(key, file, contentType)));
+    const results = await Promise.allSettled(entries.slice(index, index + UPLOAD_CONCURRENCY)
+      .map(({ key, file, contentType }) => put(key, file, contentType)));
+    const failure = results.find((result) => result.status === "rejected");
+    if (failure?.status === "rejected") throw failure.reason;
   }
 }
 
