@@ -955,3 +955,16 @@ del ETL.
 
 La evidencia de Actions debe leerse por run y commit. Hasta que Quality y Pages
 terminen verdes sobre este ajuste, la migración sigue sin criterio de promoción.
+
+Evidencia posterior del checkout limpio:
+
+- Pages + Worker dry-run `32795541360`, commit `b534dae`: verde en 10m21s;
+  build estático, `pages:verify`, coherencia, checks y bundle completados.
+- Quality `32796566007`, commit `0eb1c88`: verde en 4m25s; todos los pasos
+  completados. El fallo previo `32796170690` fue sólo la allowlist faltante de
+  `Bearer` en `pages-rollback.mjs`, ya corregida en `0eb1c88`.
+- Los warnings de lint permanecen históricos y no bloquean el job; no se
+  desactivó ningún guard por ellos.
+
+Esto habilita continuar con revisión de preview, Worker/D1/R2 productivos y
+crawl frío, pero no autoriza todavía merge a `main`, cambio DNS ni promoción.
