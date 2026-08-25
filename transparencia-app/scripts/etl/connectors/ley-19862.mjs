@@ -92,14 +92,14 @@ export function normalizeTransferCsv(csv, { sourceUrl }) {
 
 function retryableNetworkError(error) {
   const code = error?.cause?.code ?? error?.code;
-  return error instanceof TypeError || ["EAI_AGAIN", "ECONNRESET", "ETIMEDOUT", "ENETUNREACH", "EHOSTUNREACH"].includes(code);
+  return error instanceof TypeError || ["EAI_AGAIN", "ECONNRESET", "ETIMEDOUT", "UND_ERR_CONNECT_TIMEOUT", "ENETUNREACH", "EHOSTUNREACH"].includes(code);
 }
 
 function wait(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-export async function fetchTransferMonth({ year, month, fetchImpl = fetch, timeoutMs = 180_000, maxAttempts = 3, retryDelayMs = 1_000 }) {
+export async function fetchTransferMonth({ year, month, fetchImpl = fetch, timeoutMs = 180_000, maxAttempts = 5, retryDelayMs = 1_000 }) {
   const sourceUrl = buildTransferReportUrl(year, month);
   let response;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
