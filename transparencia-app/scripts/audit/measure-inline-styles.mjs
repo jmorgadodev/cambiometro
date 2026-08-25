@@ -34,7 +34,6 @@ function isLiteral(node) {
   if (ts.isStringLiteral(node) || ts.isNumericLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) return true;
   if (node.kind === ts.SyntaxKind.TrueKeyword || node.kind === ts.SyntaxKind.FalseKeyword || node.kind === ts.SyntaxKind.NullKeyword) return true;
   if (ts.isPrefixUnaryExpression(node) && node.operator === ts.SyntaxKind.MinusToken) return ts.isNumericLiteral(node.operand);
-  if (ts.isConditionalExpression(node)) return isLiteral(node.whenTrue) && isLiteral(node.whenFalse);
   return false;
 }
 

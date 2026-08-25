@@ -1262,11 +1262,12 @@ rojo hasta resolver la CSP de forma compatible con la hidratación, en lugar de
 aceptar un header inválido o silenciar el check.
 
 La medición reproducible `npm run audit:inline-styles` encontró 3.286 usos de
-`style`, de los cuales 3.170 son objetos estáticos extraíbles, 115 dependen de
-estado/datos React y uno usa una expresión externa. Esto acota la próxima
-migración CSP: primero se pueden extraer los 3.170 estilos estáticos; los 116
-restantes requieren convertir colores, porcentajes, transiciones y estilos de
-componentes interactivos a clases/atributos CSS sin romper la hidratación.
+`style`: 3.022 objetos son literales directos extraíbles, 263 dependen de
+estado/datos React y uno usa una expresión externa. La guardia ya no considera
+condicionales como literales estáticos; esto evita subestimar el trabajo CSP.
+La próxima migración debe convertir los 3.022 estilos directos a clases CSS y
+resolver los 264 restantes (colores, porcentajes, transiciones y estilos de
+componentes interactivos) sin romper la hidratación.
 
 También se corrigió `scripts/verify-prod-full.mjs`: el contrato del Worker se
 lee como `payload.data.total` y `payload.data.data[]`, y la verificación ahora
@@ -1274,3 +1275,19 @@ detecta explícitamente el caso peligroso de nonce con `s-maxage` compartido.
 Así la doble pasada productiva no confundirá una respuesta API válida con un
 fallo de forma, ni permitirá cerrar el incidente de hidratación sin comprobar
 el cache-control real.
+
+La ejecución de diagnóstico contra la producción vigente del 2026-08-25
+terminó con 108 verificaciones pasadas y 11 fallidas. Pasaron Kaiser
+(`$8.291.039`, `+33,7%`), Bianchi, la redirección 301 de Maipú, los tiles de
+cruces, fuentes, calidad y los estados editoriales. Fallaron deliberadamente:
+
+- nonce CSP servido junto con `s-maxage=31536000`;
+- total/paginación estática de transferencias, que devolvió `0` en ese
+  OpenNext, y `/api/v1/transferencias` con 503;
+- latencias de `/rankings` (13.303 ms), `/cambios` (13.262 ms),
+  `/funcionarios` (23.171 ms), Karim (22.704 ms), Concepción (22.661 ms) y
+  Hacienda (22.691 ms).
+
+Las respuestas fueron 200, pero las latencias incumplen el objetivo de 700 ms
+y el navegador registró violaciones CSP en el dominio actual. Esta salida es
+una línea base de OpenNext, no evidencia de aprobación del cutover.
