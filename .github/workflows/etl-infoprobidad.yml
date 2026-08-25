@@ -67,6 +67,7 @@ jobs:
           npm run ingest:infoprobidad -- --from "$from_date" --to "$to_date" --concurrency 2
           npm run data:lake:projection:infoprobidad
           npm run data:build:subsets
+          npm run data:lake
           npm run data:publish
 
       - name: Publicar entradas estáticas versionadas para Pages

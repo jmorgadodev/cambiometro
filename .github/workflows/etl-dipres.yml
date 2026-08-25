@@ -62,6 +62,7 @@ jobs:
           npm run ingest:dipres -- --year "$target_year"
           npm run data:lake:projection:presupuesto
           npm run data:build:subsets
+          npm run data:lake
           npm run data:publish
 
       - name: Publicar entradas estáticas versionadas para Pages
