@@ -49,6 +49,25 @@ jobs:
         run: npm audit --omit=dev --audit-level=high
         working-directory: transparencia-app
 
+      - name: Hydrate official CPLT partitions from R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          CPLT_ALLOW_UNAVAILABLE: "1"
+        run: npm run data:hydrate:cplt
+
+      - name: Hydrate official transfers from R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          mkdir -p data/lake/catalog/v1
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+          npm run data:hydrate:ley19862
+          npm run data:verify:full:ley19862
+
       - name: Build static Pages artifact and guards
         run: npm run pages:build && npm run api:size
         working-directory: transparencia-app

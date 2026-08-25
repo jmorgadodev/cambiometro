@@ -1067,3 +1067,11 @@ Node. Se regeneró únicamente `transparencia-app/package-lock.json` con
 `npm install --package-lock-only --ignore-scripts` y
 `npm ci --ignore-scripts --dry-run` pasó localmente. Debe repetirse el check
 remoto sobre el commit correctivo antes de cerrar el PR.
+
+El primer E2E del commit correctivo avanzó hasta `pages:build` y reveló una
+segunda diferencia entre workflows: `build-e2e.yml` no hidrataba CPLT ni Ley
+19.862 antes de construir, mientras `pages-static-check.yml` y el refresco
+automático sí lo hacían. Se corrigió el workflow para descargar el catálogo
+desde R2, hidratar ambas fuentes y verificar el universo de transferencias
+antes de levantar Pages local. Así el checkout limpio usa la misma secuencia
+de datos que el artefacto publicable.
