@@ -1,6 +1,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { POLITICOS_SEED } from "../lib/politicos-source.ts";
+import { buildTransferCoverageRow } from "./etl/transfer-coverage.mjs";
 
 const USER_AGENT = "Cambiometro-Coverage-Sweep/1.0 (+https://cambiometro.impulsacv.cl)";
 const REQUEST_TIMEOUT_MS = 25_000;
@@ -168,8 +169,16 @@ export async function runCoverageSweep({ silent = false } = {}) {
   });
 
   // 6. Universos Canónicos vs Manifest
+  const transferManifestPath = resolve("public/data/transferencias/manifest.json");
+  const transferSummaryPath = resolve("data/generated/transferencias/summary.json");
+  const transferFallbackPath = resolve("data/lake/projections/v1/ley19862-summary.json");
+  const transferPath = [transferManifestPath, transferSummaryPath, transferFallbackPath].find((path) => existsSync(path));
+  const transferData = transferPath ? JSON.parse(readFileSync(transferPath, "utf8")) : {};
+  const transferCoverage = transferPath?.endsWith("manifest.json")
+    ? buildTransferCoverageRow({ totalRows: transferData.totalRows, totalMontoClp: transferData.expected?.totalMontoClp })
+    : buildTransferCoverageRow({ totalRows: transferData.kpis?.total_transfers, totalMontoClp: transferData.kpis?.total_monto_clp });
   const universos = [
-    { modulo: "Transferencias Ley 19.862", indexado: "59.361 registros ($5,01 billones)", universo: "59.361 manifest", nota: "registros19862.gob.cl", pass: true },
+    transferCoverage,
     { modulo: "ChileCompra Compradores / Órdenes", indexado: "74.142 compradores ($1,9 billones)", universo: "74.142 manifest", nota: "Mercado Público", pass: true },
     { modulo: "InfoLobby Audiencias", indexado: "60.523 audiencias", universo: "60.523 manifest", nota: "InfoLobby CPLT", pass: true },
     { modulo: "Contraloría General (CGR) Auditorías", indexado: "291 informes", universo: "291 manifest", nota: "CGR Portal", pass: true },

@@ -147,6 +147,35 @@ async function main() {
   };
   await navigationContext.close();
 
+  const detailContext = await browser.newContext();
+  const detailPage = await detailContext.newPage();
+  const detailErrors = [];
+  const detailBadResponses = [];
+  detailPage.on("pageerror", (error) => detailErrors.push(error.message));
+  detailPage.on("console", (message) => {
+    if (message.type() === "error") detailErrors.push(message.text());
+  });
+  detailPage.on("response", (response) => {
+    if (response.url().includes("127.0.0.1") && response.status() >= 400) {
+      detailBadResponses.push({ path: new URL(response.url()).pathname, status: response.status() });
+    }
+  });
+  await detailPage.goto(`${baseUrl}/municipalidades/maipu`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+  const payrollTab = detailPage.getByRole("button", { name: /Nómina\s*&\s*Remuneraciones|Nómina Detallada/i }).first();
+  await payrollTab.click();
+  await detailPage.waitForTimeout(waitMs);
+  const detailBody = await detailPage.locator("body").innerText();
+  const municipalityPayroll = {
+    payrollTab: await payrollTab.count() > 0,
+    title: detailBody.includes("Buscador y Nómina Completa de Funcionarios"),
+    summary: detailBody.match(/Mostrando\s+[\d.]+\s+funcionarios navegables/)?.[0] ?? null,
+    spinner: spinnerPattern.test(detailBody),
+    error: /Nómina no disponible|no está disponible temporalmente/i.test(detailBody),
+    errors: detailErrors,
+    badResponses: detailBadResponses,
+  };
+  await detailContext.close();
+
   const legacyResponse = await fetch(`${baseUrl}/municipalidades/muni-maipu`, { redirect: "manual" });
   const legacyRedirect = { status: legacyResponse.status, location: legacyResponse.headers.get("location") };
 
@@ -166,10 +195,15 @@ async function main() {
   failures.push(check(municipalityNavigation.path === "/municipalidades/" && municipalityNavigation.ok, "Navegación /politico → /municipalidades"));
   failures.push(check(navigationErrors.length === 0, "Errores durante navegación", { navigationErrors }));
   failures.push(check(navigationBadResponses.length === 0, "Recursos 4xx/5xx durante navegación", { navigationBadResponses }));
+  failures.push(check(municipalityPayroll.payrollTab && municipalityPayroll.title, "Ficha Maipú: pestaña de nómina visible", { municipalityPayroll }));
+  failures.push(check(Boolean(municipalityPayroll.summary), "Ficha Maipú: nómina con registros navegables", { municipalityPayroll }));
+  failures.push(check(!municipalityPayroll.spinner && !municipalityPayroll.error, "Ficha Maipú: sin spinner ni error de nómina", { municipalityPayroll }));
+  failures.push(check(municipalityPayroll.errors.length === 0, "Ficha Maipú: errores de navegador", { municipalityPayroll }));
+  failures.push(check(municipalityPayroll.badResponses.length === 0, "Ficha Maipú: recursos 4xx/5xx", { municipalityPayroll }));
   failures.push(check(legacyRedirect.status === 301 && legacyRedirect.location === "/municipalidades/maipu", "Redirect legacy Maipú", { legacyRedirect }));
 
   const failed = failures.filter(Boolean);
-  console.log(JSON.stringify({ baseUrl, waitMs, routes, navigation: { politicianNavigation, municipalityNavigation, navigationErrors, navigationBadResponses }, legacyRedirect, passed: failures.length - failed.length, failed }, null, 2));
+  console.log(JSON.stringify({ baseUrl, waitMs, routes, navigation: { politicianNavigation, municipalityNavigation, navigationErrors, navigationBadResponses }, municipalityPayroll, legacyRedirect, passed: failures.length - failed.length, failed }, null, 2));
   if (failed.length > 0) process.exitCode = 1;
 }
 

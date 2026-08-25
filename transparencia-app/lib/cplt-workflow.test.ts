@@ -37,6 +37,13 @@ describe("automatizacion CPLT nacional", () => {
     expect(publisher).toContain("for (const manifest of activationManifests)");
   });
 
+  it("hidrata el respaldo estático CPLT desde el manifiesto R2 antes de Pages", () => {
+    const pagesWorkflow = readFileSync(resolve(process.cwd(), "../.github/workflows/pages-static-refresh.yml"), "utf8");
+    const packageJson = readFileSync(resolve(process.cwd(), "package.json"), "utf8");
+    expect(packageJson).toContain('"data:hydrate:cplt-static": "node scripts/hydrate-cplt-static-fallback.mjs"');
+    expect(pagesWorkflow).toContain("npm run data:hydrate:cplt-static -- --required");
+  });
+
   it("no genera un indice nacional que exceda el limite de objeto R2", () => {
     const etl = readFileSync(resolve(process.cwd(), "scripts/etl/stream-remote-personal.mjs"), "utf8");
     const projectionPublisher = readFileSync(resolve(process.cwd(), "scripts/publish-cplt-projections.mjs"), "utf8");

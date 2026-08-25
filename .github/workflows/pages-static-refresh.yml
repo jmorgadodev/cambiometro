@@ -65,12 +65,23 @@ jobs:
           mkdir -p data/lake/catalog/v1
           npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
 
+      - name: Hidratar respaldo estático CPLT desde R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:hydrate:cplt-static -- --required
+
       - name: Hidratar entradas estáticas versionadas desde R2
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
-        run: npm run data:hydrate:static -- --required --required-all
+        run: npm run data:hydrate:static -- --required
+
+      - name: Verificar fallback municipal completo
+        working-directory: transparencia-app
+        run: npm run check:static-input-fallback
 
       - name: Hidratar universo completo y validar checksums
         working-directory: transparencia-app

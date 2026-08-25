@@ -50,6 +50,7 @@ if (summary.kpis?.total_transfers !== manifest.totalRows) fail("summary total_tr
 if (summary.kpis?.total_monto_clp !== manifest.expected?.totalMontoClp) fail("summary amount differs from manifest");
 if (summary.kpis?.total_receptores !== manifest.expected?.totalReceptores) fail("summary receivers differs from manifest");
 if (summary.kpis?.total_emisores !== manifest.expected?.totalEmisores) fail("summary emitters differs from manifest");
+if (!allowSample && (!manifest.registeredThrough || !/^\d{4}-\d{2}-\d{2}$/.test(manifest.registeredThrough))) fail("registeredThrough is missing or invalid");
 const years = Object.values(summary.by_year ?? {});
 if (years.reduce((sum, item) => sum + Number(item.count ?? 0), 0) !== manifest.totalRows) fail("summary by_year count differs from manifest");
 if (years.reduce((sum, item) => sum + Number(item.total ?? 0), 0) !== manifest.expected?.totalMontoClp) fail("summary by_year amount differs from manifest");

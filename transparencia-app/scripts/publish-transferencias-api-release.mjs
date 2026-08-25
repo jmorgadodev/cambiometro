@@ -11,6 +11,9 @@ const bucket = process.env.LEY19862_R2_BUCKET ?? "transparencia-public-data";
 const source = process.env.LEY19862_SOURCE_ROOT
   ? resolve(process.env.LEY19862_SOURCE_ROOT)
   : join(root, "data", "lake", "partitions", "ley-19862");
+const registeredThrough = process.env.TRANSFER_RELEASE_REGISTERED_THROUGH
+  ?? process.env.LEY_19862_REGISTERED_THROUGH
+  ?? null;
 
 const UPLOAD_CONCURRENCY = 8;
 const UPLOAD_TIMEOUT_MS = 120_000;
@@ -48,7 +51,7 @@ async function putInBatches(entries) {
 const staging = mkdtempSync(join(tmpdir(), "cambiometro-transfer-api-"));
 try {
   if (!existsSync(source)) throw new Error(`TRANSFER_API_SOURCE_MISSING: ${source}`);
-  const release = await buildTransferenciasStatic({ source, output: staging });
+  const release = await buildTransferenciasStatic({ source, output: staging, registeredThrough });
   if (!release) throw new Error("TRANSFER_API_RELEASE_EMPTY");
   const { manifest } = release;
   assertMinimumTransferRows(manifest.totalRows);

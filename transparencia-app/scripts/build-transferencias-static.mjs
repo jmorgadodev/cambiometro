@@ -4,6 +4,7 @@ import { createGunzip } from "node:zlib";
 import { createInterface } from "node:readline";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
+import { filterRecordsForRelease, inferReleaseCutoff } from "./etl/transfer-release-cutoff.mjs";
 
 export const PAGE_SIZE = 50;
 
@@ -80,18 +81,34 @@ function clearOutput(directory) {
   }
 }
 
-export async function buildTransferenciasStatic({ source = sourceRoot, output = outputRoot, generatedAt = new Date().toISOString() } = {}) {
+export async function buildTransferenciasStatic({
+  source = sourceRoot,
+  output = outputRoot,
+  generatedAt = new Date().toISOString(),
+  registeredThrough = process.env.TRANSFER_RELEASE_REGISTERED_THROUGH ?? process.env.LEY_19862_REGISTERED_THROUGH ?? null,
+} = {}) {
   if (!hasFullTransferSource(source)) return null;
-  const rows = [];
-  const ids = new Set();
+  const rawRecords = [];
+  let sourceRows = 0;
   for (const artifact of findArtifacts(source)) {
     for (const line of await readJsonLines(artifact.file)) {
-      const row = normalize(line);
-      if (!row) continue;
-      if (ids.has(row.id)) throw new Error(`TRANSFER_STATIC_DUPLICATE_ID: ${row.id}`);
-      ids.add(row.id);
-      rows.push(row);
+      sourceRows += 1;
+      rawRecords.push(line);
     }
+  }
+  const filtered = filterRecordsForRelease(rawRecords, { registeredThrough });
+  if (filtered.missingRegisteredAt > 0) {
+    throw new Error(`TRANSFER_STATIC_REGISTERED_AT_MISSING: ${filtered.missingRegisteredAt}`);
+  }
+  const effectiveRegisteredThrough = filtered.registeredThrough ?? inferReleaseCutoff(rawRecords);
+  const rows = [];
+  const ids = new Set();
+  for (const line of filtered.records) {
+    const row = normalize(line);
+    if (!row) continue;
+    if (ids.has(row.id)) throw new Error(`TRANSFER_STATIC_DUPLICATE_ID: ${row.id}`);
+    ids.add(row.id);
+    rows.push(row);
   }
   if (!rows.length) throw new Error("TRANSFER_STATIC_EMPTY_DATASET");
   rows.sort((a, b) => b.monto_clp - a.monto_clp || String(b.fecha ?? "").localeCompare(String(a.fecha ?? "")) || a.id.localeCompare(b.id));
@@ -142,8 +159,12 @@ export async function buildTransferenciasStatic({ source = sourceRoot, output = 
     }
   }
   const rank = (a, b) => b.total_clp - a.total_clp || a.name.localeCompare(b.name, "es");
+  const referenceSample = [...rows]
+    .sort((a, b) => String(a.fecha ?? "").localeCompare(String(b.fecha ?? "")) || a.id.localeCompare(b.id))
+    .slice(0, 1000);
   const summary = {
     generatedAt,
+    registeredThrough: effectiveRegisteredThrough,
     kpis: {
       total_monto_clp: rows.reduce((sum, row) => sum + row.monto_clp, 0),
       total_transfers: rows.length,
@@ -153,12 +174,15 @@ export async function buildTransferenciasStatic({ source = sourceRoot, output = 
     by_year: Object.fromEntries(Object.entries(byYear).sort(([a], [b]) => a.localeCompare(b))),
     top_receptores: [...receivers.values()].sort(rank).slice(0, 10),
     top_emisores: [...emitters.values()].sort(rank).slice(0, 10),
-    transfers_sample: rows.slice(0, 100),
+    transfers_sample: referenceSample,
   };
   const manifest = {
     schemaVersion: 1,
     dataset: "ley-19862-transferencias",
     generatedAt,
+    registeredThrough: effectiveRegisteredThrough,
+    sourceRows,
+    excludedAfterCutoff: filtered.excludedAfterCutoff,
     totalRows: rows.length,
     pageSize: PAGE_SIZE,
     totalPages: pages.length,

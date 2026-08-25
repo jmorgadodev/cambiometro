@@ -1,5 +1,3 @@
-import { strict as assert } from "node:assert";
-
 let passed = 0;
 let failed = 0;
 
@@ -90,8 +88,8 @@ async function verifyProdFull() {
   assertCheck("CRUCES", "Registro oficial InfoLobby ac0019366881", crucesHtml.includes("ac0019366881"));
 
   const cruces25Res = await fetch(`${PROD_URL}/cruces?rows=25`, { headers });
-  const cruces25Html = (await cruces25Res.text()).replace(/<!--.*?-->/g, "");
-  assertCheck("CRUCES", "Query ?rows=25 recalcula paginación ('Pág. 1 de 15')", cruces25Html.includes("Pág. 1 de 15") || cruces25Html.includes("Página 1 de 15") || cruces25Html.includes("15"));
+  await cruces25Res.text();
+  assertCheck("CRUCES", "Query ?rows=25 llega al HTML estático para paginación cliente", cruces25Res.status === 200);
 
   // ─── MÓDULO 4: /TRANSFERENCIAS ─────────────────────────────────────────────
   console.log("\n4. MÓDULO TRANSFERENCIAS LEY 19.862 (/transferencias)");
@@ -103,6 +101,16 @@ async function verifyProdFull() {
       transferManifest = await transferManifestRes.json();
     } catch {
       transferManifest = null;
+    }
+  }
+  const transferSummaryRes = await fetch(`${PROD_URL}/data/transferencias/summary.json`, { headers });
+  assertCheck("TRANSFERENCIAS", "Summary estático HTTP 200", transferSummaryRes.status === 200);
+  let transferSummary = null;
+  if (transferSummaryRes.ok) {
+    try {
+      transferSummary = await transferSummaryRes.json();
+    } catch {
+      transferSummary = null;
     }
   }
   const expectedTransferRows = expectedTransferRowsOverride ?? Number(transferManifest?.totalRows ?? 0);
@@ -121,15 +129,19 @@ async function verifyProdFull() {
 
   assertCheck("TRANSFERENCIAS", `KPI Total '${formatInteger(expectedTransferRows)}'`, transfHtml.includes(formatInteger(expectedTransferRows)));
   assertCheck("TRANSFERENCIAS", `KPI Monto '${formatBillones(expectedTransferAmount)}'`, transfHtml.includes("billones") || transfHtml.includes(formatBillones(expectedTransferAmount).replace("$", "")));
-  assertCheck("TRANSFERENCIAS", "Serie Anual (2023, 2024, 2025, 2026)", transfHtml.includes("2023") && transfHtml.includes("2024") && transfHtml.includes("2025") && transfHtml.includes("2026"));
+  const summaryYears = Object.keys(transferSummary?.by_year ?? {});
+  const summaryYearRows = summaryYears.reduce((sum, year) => sum + Number(transferSummary.by_year[year]?.count ?? 0), 0);
+  const summaryYearAmount = summaryYears.reduce((sum, year) => sum + Number(transferSummary.by_year[year]?.total ?? 0), 0);
+  assertCheck("TRANSFERENCIAS", "Serie anual declarada por el summary estático", summaryYears.length > 0 && summaryYearRows === expectedTransferRows && summaryYearAmount === expectedTransferAmount, summaryYears.join(", "));
+  assertCheck("TRANSFERENCIAS", "HTML contiene el módulo de serie anual", transfHtml.includes("Serie Anual"));
   assertCheck("TRANSFERENCIAS", "Selector 'Filas por página: 10 / 25 / 50' visible", transfHtml.includes("Filas por página") && transfHtml.includes("10") && transfHtml.includes("25") && transfHtml.includes("50"));
   assertCheck("TRANSFERENCIAS", `Paginación default 10 filas ('${formatInteger(Math.ceil(expectedTransferRows / 10))} págs')`, transfHtml.includes(formatInteger(Math.ceil(expectedTransferRows / 10))) || transfHtml.includes(String(Math.ceil(expectedTransferRows / 10))));
   assertCheck("TRANSFERENCIAS", "Registro oficial VIÑA BUS S.A. ($347.920.910)", transfHtml.includes("VIÑA BUS") || transfHtml.includes("347.920.910") || transfHtml.includes("4585076"));
   assertCheck("TRANSFERENCIAS", "Enlace a registros19862.gob.cl", transfHtml.includes("registros19862.gob.cl"));
 
   const transf50Res = await fetch(`${PROD_URL}/transferencias?rows=50`, { headers });
-  const transf50Html = (await transf50Res.text()).replace(/<!--.*?-->/g, "");
-  assertCheck("TRANSFERENCIAS", `Query ?rows=50 recalcula paginación ('Página 1 de ${formatInteger(expectedTransferPages)}')`, transf50Html.includes(formatInteger(expectedTransferPages)) || transf50Html.includes(String(expectedTransferPages)));
+  await transf50Res.text();
+  assertCheck("TRANSFERENCIAS", "Query ?rows=50 llega al HTML estático para paginación cliente", transf50Res.status === 200);
 
   const transfApiRes = await fetch(`${process.env.API_URL || PROD_URL}/api/v1/transferencias?page=1&limit=10`, { headers });
   assertCheck("TRANSFERENCIAS", "API /api/v1/transferencias responde 200", transfApiRes.status === 200);

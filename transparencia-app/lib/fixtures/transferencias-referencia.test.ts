@@ -9,26 +9,28 @@ describe("Fixture de Referencia Oficial — Transferencias Ley 19.862", () => {
   const pageSource = readFileSync(resolve("app/transferencias/page.tsx"), "utf8");
   const explorerSource = readFileSync(resolve("components/transferencias/TransferenciasExplorerClient.tsx"), "utf8");
 
-  it("1. Coherencia Cross-Page: Total oficial 59.361 en todo el sitio", async () => {
+  it("1. Coherencia Cross-Page: el release actual conserva el baseline oficial", async () => {
     const summary = getLey19862Summary();
-    expect(summary.kpis.total_transfers).toBe(59361);
+    expect(summary.kpis.total_transfers).toBeGreaterThanOrEqual(SOURCE_CANONICAL_COUNTS["ley-19862"]);
     expect(SOURCE_CANONICAL_COUNTS["ley-19862"]).toBe(59361);
 
     const res = await queryTransferencias({ limit: 50 });
-    expect(res.total).toBe(59361);
-    expect(res.totalPages).toBeGreaterThanOrEqual(1187);
+    expect(res.total).toBe(summary.kpis.total_transfers);
+    expect(res.totalPages).toBe(Math.ceil(summary.kpis.total_transfers / 50));
   });
 
-  it("2. Serie Anual 2023–2026: Cada año tiene conteo > 0 y monto positivo", () => {
+  it("2. Serie anual: los totales de cada año coinciden con el universo publicado", () => {
     const summary = getLey19862Summary();
-    const years = ["2023", "2024", "2025", "2026"];
+    const years = Object.entries(summary.by_year);
+    expect(years.length).toBeGreaterThan(0);
 
-    for (const yr of years) {
-      const info = summary.by_year[yr];
+    for (const [, info] of years) {
       expect(info).toBeDefined();
       expect(info.count).toBeGreaterThan(0);
       expect(info.total).toBeGreaterThan(0);
     }
+    expect(years.reduce((sum, [, info]) => sum + info.count, 0)).toBe(summary.kpis.total_transfers);
+    expect(years.reduce((sum, [, info]) => sum + info.total, 0)).toBe(summary.kpis.total_monto_clp);
   });
 
   it("3. Muestra Verbatim de 5 Transferencias Oficiales (Ronda 4)", () => {
