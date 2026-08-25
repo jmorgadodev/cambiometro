@@ -13,24 +13,31 @@ const slugify = (value) => value
   .replace(/-+/g, "-");
 
 const root = fileURLToPath(new URL("../", import.meta.url));
+const redirectVariants = (from, to) => [
+  `${from} ${to} 301`,
+  `${from}/ ${to} 301`,
+];
 const politicoRedirects = JSON.parse(await readFile(join(root, "data", "generated", "politico-redirects.json"), "utf8").catch(() => "[]"));
 const serviceSource = await readFile(join(root, "lib", "servicios-publicos.ts"), "utf8");
 const serviceRedirects = [...serviceSource.matchAll(/\{ id: '([^']+)', nombre: '([^']+)'/g)]
-  .map(([, id, name]) => `/servicios-publicos/${id} /servicios-publicos/${slugify(name)} 301`);
+  .map(([, id, name]) => ({
+    from: `/servicios-publicos/${id}`,
+    to: `/servicios-publicos/${slugify(name)}`,
+  }));
+const simpleRedirects = [
+  ["/autoridades", "/personas?tab=parlamentarios"],
+  ["/funcionarios", "/personas?tab=funcionarios"],
+  ["/partidos/independientes", "/partidos/ind"],
+];
 const redirects = [
-  "/autoridades /personas?tab=parlamentarios 301",
-  "/funcionarios /personas?tab=funcionarios 301",
-  "/partidos/independientes /partidos/ind 301",
+  ...simpleRedirects.flatMap(([from, to]) => redirectVariants(from, to)),
   ...MUNICIPALIDADES_SEED.flatMap((municipalidad) => {
     const from = `/municipalidades/${municipalidad.id}`;
     const to = `/municipalidades/${slugify(municipalidad.nombre_comuna)}`;
     return [`${from} ${to} 301`, `${from}/ ${to} 301`];
   }),
-  ...serviceRedirects,
-  ...politicoRedirects.flatMap(({ from, to }) => [
-    `/politico/${from} /politico/${to} 301`,
-    `/politico/${from}/ /politico/${to} 301`,
-  ]),
+  ...serviceRedirects.flatMap(({ from, to }) => redirectVariants(from, to)),
+  ...politicoRedirects.flatMap(({ from, to }) => redirectVariants(`/politico/${from}`, `/politico/${to}`)),
 ].join("\n") + "\n";
 await writeFile(join(root, "public", "_redirects"), redirects);
 await mkdir(join(root, "out"), { recursive: true });
