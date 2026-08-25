@@ -90,16 +90,31 @@ export function normalizeTransferCsv(csv, { sourceUrl }) {
   return records;
 }
 
+function positiveIntegerEnv(name, fallback) {
+  const value = Number(process.env[name]);
+  return Number.isSafeInteger(value) && value > 0 ? value : fallback;
+}
+
 function retryableNetworkError(error) {
   const code = error?.cause?.code ?? error?.code;
-  return error instanceof TypeError || ["EAI_AGAIN", "ECONNRESET", "ETIMEDOUT", "UND_ERR_CONNECT_TIMEOUT", "ENETUNREACH", "EHOSTUNREACH"].includes(code);
+  return error instanceof TypeError
+    || error?.name === "TimeoutError"
+    || error?.name === "AbortError"
+    || ["EAI_AGAIN", "ECONNRESET", "ETIMEDOUT", "UND_ERR_CONNECT_TIMEOUT", "ENETUNREACH", "EHOSTUNREACH"].includes(code);
 }
 
 function wait(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-export async function fetchTransferMonth({ year, month, fetchImpl = fetch, timeoutMs = 180_000, maxAttempts = 5, retryDelayMs = 1_000 }) {
+export async function fetchTransferMonth({
+  year,
+  month,
+  fetchImpl = fetch,
+  timeoutMs = positiveIntegerEnv("LEY_19862_TIMEOUT_MS", 180_000),
+  maxAttempts = positiveIntegerEnv("LEY_19862_MAX_ATTEMPTS", 5),
+  retryDelayMs = positiveIntegerEnv("LEY_19862_RETRY_DELAY_MS", 1_000),
+}) {
   const sourceUrl = buildTransferReportUrl(year, month);
   let response;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
