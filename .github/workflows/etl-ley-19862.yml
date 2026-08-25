@@ -90,11 +90,15 @@ jobs:
             fi
             for target_month in $(seq 1 "$last_month"); do
               npm run ingest:ley-19862 -- --year "$target_year" --month "$target_month"
-              npm run data:lake:projection:ley19862
-              npm run data:build:subsets
-              npm run data:lake
+              # Cada ingest publica sólo su partición para que el siguiente
+              # ciclo pueda continuar aunque el origen falle transitoriamente.
+              # La guardia del universo completo corre una sola vez al final.
               npm run data:publish
             done
+            npm run data:lake:projection:ley19862
+            npm run data:build:subsets
+            npm run data:lake
+            npm run data:publish
           else
             period=$(date -u -d '1 month ago' +%Y-%m)
             target_year="${INPUT_YEAR:-${period%-*}}"
