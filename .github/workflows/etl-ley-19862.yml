@@ -104,6 +104,11 @@ jobs:
           LEY_19862_MAX_ATTEMPTS: 8
           LEY_19862_RETRY_DELAY_MS: 3000
         run: |
+          if [[ -n "${LEY_19862_SOURCE_BRIDGE_URL:-}" ]]; then
+            export LEY_19862_TIMEOUT_MS=30000
+            export LEY_19862_MAX_ATTEMPTS=2
+            export LEY_19862_RETRY_DELAY_MS=1000
+          fi
           if [[ "$FULL_BACKFILL" == "true" ]]; then
             target_year="${INPUT_YEAR:-$(date -u +%Y)}"
             last_month=12

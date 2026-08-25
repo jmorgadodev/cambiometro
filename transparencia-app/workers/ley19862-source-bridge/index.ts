@@ -47,6 +47,7 @@ const handler = {
     try {
       const upstream = await fetch(transferUrl(year, month), {
         headers: { "User-Agent": "TransparenciaChile-ETL/3.0", Accept: "text/csv" },
+        signal: AbortSignal.timeout(25_000),
       });
       if (!upstream.ok) {
         upstream.body?.cancel();
