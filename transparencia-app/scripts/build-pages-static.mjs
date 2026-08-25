@@ -135,6 +135,10 @@ const staticHeaders = `/*
 /widget.js
   Cross-Origin-Resource-Policy: cross-origin
   Access-Control-Allow-Origin: *
+
+/widget.css
+  Cross-Origin-Resource-Policy: cross-origin
+  Access-Control-Allow-Origin: *
 `;
 
 async function run(command, args) {

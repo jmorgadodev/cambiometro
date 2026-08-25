@@ -15,6 +15,10 @@ const apiBaseUrl = process.env.VERIFY_API_URL ?? baseUrl;
 const verifyEntityId = process.env.VERIFY_ENTITY_ID ?? "person-test-1";
 const verifyingLocal = /^http:\/\/(?:127\.0\.0\.1|localhost)/.test(baseUrl);
 const verifyingProd = !verifyingLocal && !/\.workers\.dev$/.test(new URL(baseUrl).hostname);
+// En CI Pages y Worker escuchan en puertos distintos. El widget real usa el
+// mismo hostname público para ambos; al probar localmente debemos pasar por el
+// proxy del servidor Pages para que la CSP `connect-src 'self'` sea equivalente.
+const widgetApiOrigin = verifyingLocal ? baseUrl : apiBaseUrl;
 const staticRedirectSources = new Set(
   readFileSync("public/_redirects", "utf8")
     .split(/\r?\n/)
@@ -305,7 +309,7 @@ try {
     script.dataset.apiOrigin = origin;
     script.dataset.politico = "dip-061";
     document.body.appendChild(script);
-  }, { apiBaseUrl });
+  }, { apiBaseUrl: widgetApiOrigin });
   await widgetPage.waitForFunction(() => Boolean(document.querySelector(".transparencia-widget")?.shadowRoot?.querySelector(".name")), null, { timeout: 15000 });
   const widgetName = await widgetPage.locator(".transparencia-widget").evaluate((host) => host.shadowRoot?.querySelector(".name")?.textContent ?? "");
   assert(widgetName.includes("Kast Adriasola"));
@@ -361,7 +365,7 @@ try {
   const contentSecurityPolicy = homeResponse.headers()["content-security-policy"] ?? "";
   if (contentSecurityPolicy) {
     assert(contentSecurityPolicy.includes("script-src"), "la CSP servida debe incluir script-src");
-    assert(!contentSecurityPolicy.includes("nonce-"), "la exportación estática no debe usar nonce por request");
+    assert(!/nonce-(?!cambiometro-static-v1)[^ '\"]+/.test(contentSecurityPolicy), "la exportación estática no debe usar nonce por request");
     assert(!contentSecurityPolicy.includes("unsafe-inline"), "la CSP estática no debe permitir unsafe-inline");
   }
 

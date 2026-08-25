@@ -42,6 +42,10 @@ const headers = `/_next/static/*
 /widget.js
   Cross-Origin-Resource-Policy: cross-origin
   Access-Control-Allow-Origin: *
+
+/widget.css
+  Cross-Origin-Resource-Policy: cross-origin
+  Access-Control-Allow-Origin: *
 `;
 const cspLine = headers.split(/\r?\n/).find((line) => line.includes("Content-Security-Policy:"));
 if (!cspLine || cspLine.length > 2_000) {

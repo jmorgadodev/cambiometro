@@ -1375,3 +1375,23 @@ workflow mensual con secretos reales, verificar el manifest publicado en R2,
 desplegar Pages/Worker en preview, realizar crawl frío productivo y obtener
 deployment/version IDs. Mientras eso no ocurra, no existe evidencia de
 producción ni autorización para cambiar CNAME o promover el cutover.
+
+### Incidente CI del widget y corrección CSP — 2026-08-25
+
+El run `32814866419` validó correctamente datos R2, export Pages, bundle y
+navegador, pero falló en `verify:browser` esperando el nombre del widget. La
+reproducción local mostró dos causas separadas: el test apuntaba directamente
+al puerto del Worker, incompatible con `connect-src 'self'`, y `widget.js`
+creaba un `<style>` inline dentro del Shadow DOM, que violaba `style-src`.
+
+Se corrigió el test para que, cuando Pages y Worker estén en puertos locales
+distintos, el widget use el proxy de Pages (el equivalente local del dominio
+único). El widget ahora carga `public/widget.css` como hoja externa y publica
+headers CORS/CORP para `widget.js` y `widget.css`; no se agregó
+`unsafe-inline`.
+
+Evidencia posterior: el widget renderizó `José Antonio Kast Adriasola`, el
+escaneo de cuatro rutas principales más el widget registró cero mensajes CSP,
+`verify:browser` terminó verde, `verify:security` terminó verde y el artefacto
+Pages quedó en 7.065 archivos, con cero fallas de rutas. El arreglo está
+pendiente de la nueva ejecución CI antes de continuar a preview.
