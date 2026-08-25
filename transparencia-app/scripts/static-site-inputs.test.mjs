@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { describe, it } from "vitest";
 import {
   assertStaticInputManifest,
+  assertStaticInputManifestComplete,
   buildStaticInputEntries,
   buildStaticInputManifest,
   parseRequestedStaticFiles,
@@ -34,5 +35,20 @@ describe("static site input release", () => {
       () => parseRequestedStaticFiles({ files: ["data/lake/partitions/secret.json"] }),
       /STATIC_INPUT_FILE_NOT_ALLOWED/,
     );
+  });
+
+  it("detects a partial release before Pages can hydrate stale checkout files", () => {
+    const root = mkdtempSync(join(tmpdir(), "cambiometro-static-inputs-partial-"));
+    try {
+      const file = "data/lake-subsets/chilecompra.subset.json";
+      const target = join(root, file.replaceAll("/", "\\"));
+      mkdirSync(join(root, "data", "lake-subsets"), { recursive: true });
+      writeFileSync(target, "{}\n", "utf8");
+      const entries = buildStaticInputEntries({ root, files: [file], releaseId: "b".repeat(64) });
+      const manifest = buildStaticInputManifest({ entries });
+      assert.throws(() => assertStaticInputManifestComplete(manifest), /STATIC_INPUT_MANIFEST_INCOMPLETE/);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });

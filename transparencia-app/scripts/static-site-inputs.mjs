@@ -145,3 +145,11 @@ export function assertStaticInputManifest(manifest) {
   }
   return manifest;
 }
+
+export function assertStaticInputManifestComplete(manifest) {
+  assertStaticInputManifest(manifest);
+  const available = new Set(manifest.files.map((file) => file.path));
+  const missing = STATIC_SITE_FILE_PATHS.filter((file) => !available.has(file));
+  if (missing.length > 0) throw new Error(`STATIC_INPUT_MANIFEST_INCOMPLETE: ${missing.join(",")}`);
+  return manifest;
+}

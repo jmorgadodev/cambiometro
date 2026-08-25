@@ -1,11 +1,12 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
-import { assertStaticInputManifest, resolveSafeStaticPath, sha256Buffer } from "./static-site-inputs.mjs";
+import { assertStaticInputManifest, assertStaticInputManifestComplete, resolveSafeStaticPath, sha256Buffer } from "./static-site-inputs.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const bucket = argument("--bucket", "transparencia-public-data");
 const required = process.argv.includes("--required");
+const requiredAll = process.argv.includes("--required-all");
 const requiredFiles = argument("--required-files", "").split(",").map((value) => value.trim()).filter(Boolean);
 const manifestFile = argument("--manifest-file", "");
 const localManifestPath = manifestFile ? resolve(root, manifestFile) : resolve(root, ".static-site-release-manifest.json");
@@ -45,6 +46,7 @@ if (manifestFile) {
 }
 
 assertStaticInputManifest(manifest);
+if (requiredAll) assertStaticInputManifestComplete(manifest);
 const availableFiles = new Set(manifest.files.map((entry) => entry.path));
 for (const requiredFile of requiredFiles) {
   if (!availableFiles.has(requiredFile)) throw new Error(`STATIC_INPUT_REQUIRED_FILE_MISSING: ${requiredFile}`);
