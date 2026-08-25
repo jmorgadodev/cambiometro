@@ -133,6 +133,7 @@ function transportUrl(sourceUrl, year, month) {
   const bridge = String(process.env.LEY_19862_SOURCE_BRIDGE_URL ?? "").trim();
   if (!bridge) return sourceUrl;
   const url = new URL(bridge);
+  if (url.pathname === "/") url.pathname = "/fetch";
   url.searchParams.set("year", String(year));
   url.searchParams.set("month", String(month));
   return url.toString();
