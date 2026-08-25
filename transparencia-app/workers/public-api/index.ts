@@ -83,6 +83,15 @@ interface TransferSearchEntry {
   m: number;
 }
 
+function isCompleteTransferManifest(value: TransferApiManifest | null): value is TransferApiManifest {
+  if (!value || value.schemaVersion !== 1 || !value.dataset || !value.checksumSha256) return false;
+  if (!Number.isInteger(value.totalRows) || value.totalRows < 1) return false;
+  if (!Number.isInteger(value.pageSize) || value.pageSize < 1) return false;
+  if (!Number.isInteger(value.totalPages) || value.totalPages < 1 || !Array.isArray(value.pages) || value.pages.length !== value.totalPages) return false;
+  if (!value.pages.every((page, index) => page.page === index + 1 && page.count >= 0 && Boolean(page.key))) return false;
+  return Boolean(value.searchIndex?.key && Number.isInteger(value.searchIndex.count) && value.searchIndex.count === value.totalRows);
+}
+
 interface CpltManifest {
   generatedAt: string;
   version: string;
@@ -94,13 +103,17 @@ async function r2Json<T>(bucket: R2Bucket | undefined, key: string): Promise<T |
   if (!bucket) return null;
   const object = await bucket.get(key);
   if (!object) return null;
-  return object.json<T>();
+  try {
+    return await object.json<T>();
+  } catch {
+    return null;
+  }
 }
 
 async function health(env: Env) {
   const transferManifest = await r2Json<TransferApiManifest>(env.PUBLIC_DATA, "projections/transferencias-v1/manifest.json");
   const d1 = Boolean(env.DB);
-  const r2 = Boolean(transferManifest);
+  const r2 = isCompleteTransferManifest(transferManifest);
   const ok = d1 && r2;
   return success({
     ok,
@@ -132,7 +145,7 @@ function transferApiRow(row: JsonRecord) {
 
 async function listTransferenciasFromR2(requestUrl: URL, env: Env) {
   const manifest = await r2Json<TransferApiManifest>(env.PUBLIC_DATA, "projections/transferencias-v1/manifest.json");
-  if (!manifest || manifest.schemaVersion !== 1 || !manifest.totalRows || !manifest.pages?.length || !manifest.searchIndex?.key) {
+  if (!isCompleteTransferManifest(manifest)) {
     return failure("DATASET_UNAVAILABLE", "El release completo de transferencias no está publicado.", 503);
   }
   const rawPage = Number(requestUrl.searchParams.get("page") ?? 1);

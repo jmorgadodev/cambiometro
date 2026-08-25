@@ -35,8 +35,15 @@ function transferR2Env() {
       totalPages: 1188,
       checksumSha256: "release-checksum",
       expected: { totalMontoClp: 5011094170302, totalReceptores: 14640, totalEmisores: 272 },
-      pages: [{ page: 1, count: 2, key: "projections/transferencias-v1/releases/release-checksum/p-0001.json" }],
-      searchIndex: { key: "projections/transferencias-v1/releases/release-checksum/search-index.json", count: 2 },
+      pages: [
+        { page: 1, count: 2, key: "projections/transferencias-v1/releases/release-checksum/p-0001.json" },
+        ...Array.from({ length: 1187 }, (_, index) => ({
+          page: index + 2,
+          count: 50,
+          key: `projections/transferencias-v1/releases/release-checksum/p-${String(index + 2).padStart(4, "0")}.json`,
+        })),
+      ],
+      searchIndex: { key: "projections/transferencias-v1/releases/release-checksum/search-index.json", count: 59361 },
     },
     "projections/transferencias-v1/releases/release-checksum/p-0001.json": [
       { id: "tr-1", fecha: "2026-08-01", period: "2026", title: "Fondo educacional", emitter_name: "MINEDUC", receiver_name: "VIÑA BUS S.A.", monto_clp: 347920910, url: "https://registros19862.gob.cl/registro/tr-1" },
@@ -81,6 +88,17 @@ describe("API canónica v1", () => {
 
     expect(response.status).toBe(200);
     expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, transferRows: 59361 });
+  });
+
+  it("devuelve 503 estructurado cuando el manifest R2 está corrupto", async () => {
+    const response = await api.fetch(new Request("https://example.test/api/v1/health"), {
+      ...(testEnv() as object),
+      PUBLIC_DATA: { get: async () => ({ json: async () => { throw new Error("invalid json"); } }) },
+    } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(payload.data).toMatchObject({ ok: false, d1: true, r2: false, transferRows: 0 });
   });
 
   it("acepta entity_id como ancla bidireccional de relaciones", () => {
