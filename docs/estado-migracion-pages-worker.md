@@ -968,3 +968,50 @@ Evidencia posterior del checkout limpio:
 
 Esto habilita continuar con revisión de preview, Worker/D1/R2 productivos y
 crawl frío, pero no autoriza todavía merge a `main`, cambio DNS ni promoción.
+
+### Auditoría de continuidad — 2026-08-25
+
+Se confirmó que el checkout que se debe subir es únicamente
+`C:\\Users\\jorge\\Proyectos\\cambiometro-public`. El checkout de auditoría
+anterior queda fuera de alcance. La rama de trabajo está limpia y sincronizada
+con GitHub en `5db27fc`; los artefactos `out/`, `.pages-static/`, chunks CPLT,
+slices políticos y payloads municipales siguen ignorados y no forman parte del
+repositorio.
+
+La guardia `verify-pages-static.mjs` ahora valida el universo completo del
+artefacto, no sólo Maipú: exige 346 directorios/IDs municipales, manifiesto
+legible por municipio, período por defecto, cada payload y sus conteos; además
+valida las dos copias (ID y slug), las 205 rutas HTML y la concordancia de
+votos de cada slice político. `pages:verify` pasó con `CPLT_ALLOW_UNAVAILABLE=1`:
+4.645 HTML, 7.061 archivos, 281 municipalidades disponibles, 64 marcadas
+`unavailable`, una `not_applicable` (Antártica), 410 slices políticos y cero
+fallos de checksum/enlaces. Sin ese flag, el guard falla deliberadamente porque
+la fuente CPLT actual no tiene las 64 particiones; nunca se rellenan con datos
+inventados.
+
+El refresco automático quedó conectado en
+`.github/workflows/pages-static-refresh.yml` a todos los workflows ETL. Cuando
+un ETL termina exitosamente en `main`, el workflow hidrata R2, construye,
+verifica datos, navegador, crawl y Worker, conserva el artefacto y publica
+Pages con `WRANGLER_TOKEN`. Una ejecución manual no publica salvo que active
+`deploy_pages=true`. Esta publicación actualiza Pages y no cambia el dominio
+personalizado; el Worker se mantiene separado porque las actualizaciones de
+D1/R2 no requieren una versión nueva de código.
+
+La guardia de producción (`verify-prod-full.mjs`) ahora tiene timeout de 10 s
+por request y devuelve `status 0` en vez de quedarse bloqueada en Windows. La
+pasada de sólo lectura sobre el dominio actual confirmó que sigue siendo
+OpenNext: home y fichas responden, pero `/api/v1/transferencias` no responde
+200 y el paginador de transferencias queda en cero; además `/` y `/partidos`
+superaron 700 ms en el crawl frío. `https://cambiometro.pages.dev/` sí entrega
+el export estático nuevo. Esto es una falla del servicio actualmente publicado,
+no una razón para relajar los gates.
+
+Los commits `e5ac55d` y `5db27fc` tienen Quality y Pages/Worker dry-run verdes
+en Actions (`32797754073` y `32797754133`). El PR histórico de esta rama queda
+conflictivo con `main` porque `main` recibió otras modificaciones sobre 25
+archivos (páginas, scripts de producción, `package.json` y configuración del
+Worker). No se resolvió seleccionando una versión a ciegas; antes del merge se
+debe crear una integración controlada y repetir tests, build, navegador y
+crawl. Hasta entonces el dominio sigue con OpenNext y no existe Pages
+deployment ID ni Worker version ID nuevos.
