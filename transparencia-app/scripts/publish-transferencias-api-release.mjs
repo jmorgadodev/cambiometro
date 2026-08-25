@@ -2,7 +2,7 @@ import { existsSync, mkdtempSync } from "node:fs";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
 import { assertMinimumTransferRows } from "./etl/transfer-release-guard.mjs";
 
@@ -12,14 +12,37 @@ const source = process.env.LEY19862_SOURCE_ROOT
   ? resolve(process.env.LEY19862_SOURCE_ROOT)
   : join(root, "data", "lake", "partitions", "ley-19862");
 
+const UPLOAD_CONCURRENCY = 8;
+const UPLOAD_TIMEOUT_MS = 120_000;
+
 function wrangler(args) {
   const command = process.platform === "win32" ? "npx.cmd" : "npx";
-  const result = spawnSync(command, ["wrangler", ...args, "--remote"], { cwd: root, encoding: "utf8", stdio: "inherit", shell: false });
-  if (result.status !== 0) throw new Error(`TRANSFER_API_R2_PUBLISH_FAILED: ${args.join(" ")}`);
+  return new Promise((resolve, reject) => {
+    const child = spawn(command, ["wrangler", ...args, "--remote"], { cwd: root, stdio: "inherit", shell: false });
+    const timer = setTimeout(() => {
+      child.kill();
+      reject(new Error(`TRANSFER_API_R2_PUBLISH_TIMEOUT: ${args.join(" ")}`));
+    }, UPLOAD_TIMEOUT_MS);
+    child.once("error", (error) => {
+      clearTimeout(timer);
+      reject(error);
+    });
+    child.once("exit", (code) => {
+      clearTimeout(timer);
+      if (code === 0) resolve();
+      else reject(new Error(`TRANSFER_API_R2_PUBLISH_FAILED: ${args.join(" ")}`));
+    });
+  });
 }
 
-function put(key, file, contentType = "application/json") {
-  wrangler(["r2", "object", "put", `${bucket}/${key}`, "--file", file, "--content-type", contentType]);
+async function put(key, file, contentType = "application/json") {
+  await wrangler(["r2", "object", "put", `${bucket}/${key}`, "--file", file, "--content-type", contentType]);
+}
+
+async function putInBatches(entries) {
+  for (let index = 0; index < entries.length; index += UPLOAD_CONCURRENCY) {
+    await Promise.all(entries.slice(index, index + UPLOAD_CONCURRENCY).map(({ key, file, contentType }) => put(key, file, contentType)));
+  }
 }
 
 const staging = mkdtempSync(join(tmpdir(), "cambiometro-transfer-api-"));
@@ -46,9 +69,9 @@ try {
   const pointer = join(staging, "api-manifest.json");
   await mkdir(staging, { recursive: true });
   await writeFile(pointer, `${JSON.stringify(apiManifest, null, 2)}\n`, "utf8");
-  for (const page of apiManifest.pages) put(page.key, join(staging, page.path.split("/").pop()));
-  put(apiManifest.searchIndex.key, join(staging, "search-index.json"));
-  put("projections/transferencias-v1/manifest.json", pointer);
+  await putInBatches(apiManifest.pages.map((page) => ({ key: page.key, file: join(staging, page.path.split("/").pop()) })));
+  await put(apiManifest.searchIndex.key, join(staging, "search-index.json"));
+  await put("projections/transferencias-v1/manifest.json", pointer);
   console.log(JSON.stringify({ bucket, dataset: apiManifest.dataset, totalRows: apiManifest.totalRows, totalPages: apiManifest.totalPages, checksumSha256: apiManifest.checksumSha256, releasePrefix }, null, 2));
 } finally {
   await rm(staging, { recursive: true, force: true });
