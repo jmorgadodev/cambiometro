@@ -90,10 +90,32 @@ export function normalizeTransferCsv(csv, { sourceUrl }) {
   return records;
 }
 
-export async function fetchTransferMonth({ year, month, fetchImpl = fetch, timeoutMs = 180_000 }) {
+function retryableNetworkError(error) {
+  const code = error?.cause?.code ?? error?.code;
+  return error instanceof TypeError || ["EAI_AGAIN", "ECONNRESET", "ETIMEDOUT", "ENETUNREACH", "EHOSTUNREACH"].includes(code);
+}
+
+function wait(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
+export async function fetchTransferMonth({ year, month, fetchImpl = fetch, timeoutMs = 180_000, maxAttempts = 3, retryDelayMs = 1_000 }) {
   const sourceUrl = buildTransferReportUrl(year, month);
-  const response = await fetchImpl(sourceUrl, { headers: { "User-Agent": "TransparenciaChile-ETL/3.0", Accept: "text/csv" }, signal: AbortSignal.timeout(timeoutMs) });
-  if (!response.ok) throw new Error(`LEY_19862_HTTP_${response.status}`);
+  let response;
+  for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+    try {
+      response = await fetchImpl(sourceUrl, { headers: { "User-Agent": "TransparenciaChile-ETL/3.0", Accept: "text/csv" }, signal: AbortSignal.timeout(timeoutMs) });
+      if (!response.ok) {
+        if (response.status < 500 || attempt === maxAttempts) throw new Error(`LEY_19862_HTTP_${response.status}`);
+      } else {
+        break;
+      }
+    } catch (error) {
+      if (!retryableNetworkError(error) || attempt === maxAttempts) throw error;
+    }
+    await wait(retryDelayMs * attempt);
+  }
+  if (!response?.ok) throw new Error(`LEY_19862_HTTP_${response?.status ?? "UNKNOWN"}`);
   const original = Buffer.from(await response.arrayBuffer());
   const text = new TextDecoder("utf-8").decode(original);
   const records = normalizeTransferCsv(text, { sourceUrl });

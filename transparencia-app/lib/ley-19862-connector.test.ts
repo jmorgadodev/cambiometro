@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildTransferReportUrl, normalizeTransferCsv } from "../scripts/etl/connectors/ley-19862.mjs";
+import { buildTransferReportUrl, fetchTransferMonth, normalizeTransferCsv } from "../scripts/etl/connectors/ley-19862.mjs";
 
 const csv = `\uFEFFFOLIO;FECHA_DECRETO;FECHA_INGRESO;PERIODO;OBJETIVO_APORTE;MARCO_LEGAL;CLASIFICACION;EMISORA_RUT;EMISORA_NOMBRE;EMISORA_CLASE;RECEPTORA_RUT;RECEPTORA_NOMBRE;RECEPTORA_CLASE;MONTO;COMUNA\r
 4562225;01-01-2025;11-12-2025;2025;"Programa; cuidados";"Decreto 1";"Transferencias corrientes (subtítulo 24)";60.103.000-4;"MINISTERIO DE DESARROLLO SOCIAL";"Ministerio o servicio público";61.961.000-8;"SERVICIO NACIONAL DEL ADULTO MAYOR";"Ministerio o servicio público";5623137440;Santiago\r
@@ -32,5 +32,27 @@ describe("conector Registro Ley 19.862", () => {
   it("rechaza montos y schemas incompatibles", () => {
     expect(() => normalizeTransferCsv(csv.replace("5623137440", "monto desconocido"), { sourceUrl: "x" })).toThrow("LEY_19862_INVALID_AMOUNT");
     expect(() => normalizeTransferCsv("FOLIO;OTRA_COLUMNA\n1;x", { sourceUrl: "x" })).toThrow("LEY_19862_INVALID_SCHEMA");
+  });
+
+  it("reintenta fallas de red y errores 5xx, pero no 4xx", async () => {
+    let attempts = 0;
+    const result = await fetchTransferMonth({
+      year: 2025,
+      month: 1,
+      fetchImpl: async () => {
+        attempts += 1;
+        if (attempts === 1) throw Object.assign(new TypeError("fetch failed"), { cause: { code: "EAI_AGAIN" } });
+        if (attempts === 2) return new Response("", { status: 503 });
+        return new Response(csv, { status: 200 });
+      },
+    });
+    expect(attempts).toBe(3);
+    expect(result.records).toHaveLength(1);
+
+    await expect(fetchTransferMonth({
+      year: 2025,
+      month: 1,
+      fetchImpl: async () => new Response("", { status: 404 }),
+    })).rejects.toThrow("LEY_19862_HTTP_404");
   });
 });
