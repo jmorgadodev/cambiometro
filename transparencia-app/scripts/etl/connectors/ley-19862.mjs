@@ -113,13 +113,14 @@ function wait(milliseconds) {
 
 async function fetchWithCurl(sourceUrl, timeoutMs) {
   const binary = process.platform === "win32" ? "curl.exe" : "curl";
+  const curlTimeoutMs = Math.min(timeoutMs, 60_000);
   const { stdout } = await execFileAsync(binary, [
     "--fail-with-body",
     "--location",
-    "--retry", "3",
+    "--retry", "1",
     "--retry-all-errors",
-    "--connect-timeout", String(Math.max(10, Math.ceil(timeoutMs / 1000))),
-    "--max-time", String(Math.max(30, Math.ceil(timeoutMs / 1000))),
+    "--connect-timeout", String(Math.max(10, Math.ceil(curlTimeoutMs / 1000))),
+    "--max-time", String(Math.max(30, Math.ceil(curlTimeoutMs / 1000))),
     "--user-agent", "TransparenciaChile-ETL/3.0",
     "--header", "Accept: text/csv",
     sourceUrl,
