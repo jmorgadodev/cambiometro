@@ -2,7 +2,7 @@
 
 /** Descarga la publicación CPLT versionada de R2 para el build Pages. */
 
-import { mkdirSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { basename, join, resolve } from "node:path";
 import { spawn } from "node:child_process";
@@ -26,14 +26,26 @@ async function main() {
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   const assets = (manifest.assets ?? []).filter((asset) => asset.key.endsWith(".json") && !asset.key.endsWith("/manifest.json"));
   const allowUnavailable = process.env.CPLT_ALLOW_UNAVAILABLE === "1";
+  const canonicalPath = resolve("data/catalog/communes.json");
+  const canonical = existsSync(canonicalPath) ? JSON.parse(readFileSync(canonicalPath, "utf8")).communes ?? [] : [];
+  const canonicalIds = canonical.map((commune) => commune.id).filter(Boolean);
+  if (canonicalIds.length !== 346 || new Set(canonicalIds).size !== 346) {
+    throw new Error(`CPLT_CANONICAL_CENSUS_INVALID: esperaba 346 ids únicos y encontré ${canonicalIds.length}`);
+  }
   if (!allowUnavailable && assets.length !== 346) {
     throw new Error(`CPLT_R2_ASSET_COUNT_INVALID: esperaba 346 y encontré ${assets.length}`);
   }
   if (allowUnavailable && (assets.length === 0 || assets.length > 346)) {
     throw new Error(`CPLT_R2_ASSET_COUNT_INVALID: encontré ${assets.length} particiones para un censo de 346`);
   }
-  if (!Array.isArray(manifest.coverage) || manifest.coverage.length !== 346 || manifest.coverageSummary?.censusComplete !== true) {
+  const coverageIsValid = Array.isArray(manifest.coverage)
+    && manifest.coverage.length === 346
+    && manifest.coverageSummary?.censusComplete === true;
+  if (!coverageIsValid && !allowUnavailable) {
     throw new Error("CPLT_R2_COVERAGE_CENSUS_INVALID");
+  }
+  if (!coverageIsValid) {
+    console.warn("CPLT_R2_COVERAGE_METADATA_INCOMPLETE: se usará el catálogo canónico y se marcarán faltantes como unavailable");
   }
   const versionRoot = join(root, "versions", manifest.version);
   rmSync(versionRoot, { recursive: true, force: true });
@@ -57,7 +69,14 @@ async function main() {
   await Promise.all(workers);
   const downloaded = readdirSync(versionRoot).filter((name) => name.endsWith(".json"));
   if (downloaded.length !== assets.length) throw new Error(`CPLT_R2_DOWNLOAD_COUNT_INVALID: esperaba ${assets.length} y descargué ${downloaded.length}`);
-  console.log(JSON.stringify({ bucket, version: manifest.version, partitions: downloaded.length, census: 346, allowUnavailable, generatedAt: manifest.generatedAt }, null, 2));
+  const missing = canonicalIds.filter((id) => !existsSync(join(versionRoot, `${id}.json`)));
+  if (missing.length > 0 && !allowUnavailable) {
+    throw new Error(`CPLT_R2_CANONICAL_PARTITIONS_MISSING: ${missing.length}`);
+  }
+  for (const id of missing) writeFileSync(join(versionRoot, `${id}.json`), "[]\n", "utf8");
+  const materialized = readdirSync(versionRoot).filter((name) => name.endsWith(".json"));
+  if (materialized.length !== 346) throw new Error(`CPLT_R2_CANONICAL_MATERIALIZATION_INVALID: ${materialized.length}`);
+  console.log(JSON.stringify({ bucket, version: manifest.version, partitions: downloaded.length, placeholders: missing.length, census: 346, allowUnavailable, generatedAt: manifest.generatedAt }, null, 2));
 }
 
 main().catch((error) => {
