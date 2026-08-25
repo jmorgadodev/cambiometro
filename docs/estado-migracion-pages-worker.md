@@ -1165,3 +1165,43 @@ npx wrangler rollback <worker-version-id> --name cambiometro-public-api
 Mientras CSP, cobertura CPLT estricta, decisión del universo de transferencias
 y verificación productiva doble sigan pendientes, se conserva OpenNext como
 rollback y no se promueve Pages.
+
+### Cierre de la brecha R2 → D1 de transferencias — 2026-08-25
+
+La auditoría del checkout confirmó que el ETL mensual de Ley 19.862 publicaba
+el catálogo y los artefactos completos en R2, pero terminaba sin ejecutar
+`data:materialize` en D1. Esa diferencia explicaba que la UI estática pudiera
+leer el release de R2 mientras `/api/v1/transferencias` devolvía
+`DATASET_UNAVAILABLE` (503) cuando la tabla productiva aún no existía o estaba
+vacía.
+
+### Estado remoto posterior a la auditoría — 2026-08-25
+
+En el commit `9c3d1cf` los checks remotos observados fueron:
+
+- `Quality (Lint, Types & Unit Tests)`: verde, run `32806603516`.
+- `Pages static + public API check`: verde, run `32806600028`.
+- `Security Scan (Secrets & Audit)`: verde, run `32806603579`.
+- `Build and E2E Verification`: compilación, hidratación R2, guards de datos,
+  bundle Worker y `verify:browser` verdes; el run `32806603518` terminó rojo
+  sólo en `verify:security` porque `/` no recibió
+  `Content-Security-Policy` desde el servidor estático.
+
+La conclusión operativa es que las rutas y los datos no deben tocarse para
+resolver ese rojo: el fallo está en la generación/aplicación de headers. La
+publicación Pages sigue bloqueada hasta que `out/_headers` emita una CSP
+compatible con la hidratación real y el navegador confirme cero violaciones.
+El código de API y la paridad R2 → D1 quedan separados de esa decisión.
+
+El workflow `.github/workflows/etl-ley-19862-full.yml` ahora, después de
+confirmar el catálogo remoto, materializa exclusivamente `ley-19862` mediante
+el materializador oficial. La misma ejecución comprueba después que
+`COUNT(*)` de `transferencias_19862` en D1 sea igual a `recordCount` del
+catálogo R2. El paso usa los secretos existentes de producción y no agrega
+servicios ni datos versionados al repositorio.
+
+Esto corrige la actualización automática del API cuando el workflow mensual
+se ejecute; todavía no es evidencia de que D1 productiva ya esté poblada, pues
+no se ejecutó ningún workflow de mutación desde este checkout. Antes de
+promover el Worker se debe ejecutar el workflow en Actions y conservar en el
+registro el conteo, checksum, health y respuesta paginada.

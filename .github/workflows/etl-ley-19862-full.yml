@@ -75,3 +75,25 @@ jobs:
         run: |
           npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.remote.json --remote
           node -e "const fs=require('fs');const local=JSON.parse(fs.readFileSync('data/lake/catalog/v1/manifest.json'));const remote=JSON.parse(fs.readFileSync('data/lake/catalog/v1/manifest.remote.json'));const a=local.sources.find(x=>x.id==='ley-19862');const b=remote.sources.find(x=>x.id==='ley-19862');if(!a||!b||a.recordCount!==b.recordCount)process.exit(1);console.log(JSON.stringify({source:'ley-19862',recordCount:b.recordCount,status:b.status}));"
+      - name: Materializar transferencias en D1 productiva
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          ETL_RUN_ID: ley-19862-${{ github.run_id }}-${{ github.run_attempt }}
+          ETL_CADENCE: monthly
+        run: npm run data:materialize -- --database transparencia-db --bucket transparencia-public-data --remote --sources ley-19862
+      - name: Verificar paridad D1 contra el catálogo R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        shell: bash
+        run: |
+          expected="$(node -e "const fs=require('fs');const m=JSON.parse(fs.readFileSync('data/lake/catalog/v1/manifest.remote.json'));const s=m.sources.find(x=>x.id==='ley-19862');if(!s)process.exit(1);process.stdout.write(String(s.recordCount));")"
+          npx wrangler d1 execute transparencia-db --remote --command "SELECT COUNT(*) AS total FROM transferencias_19862" --json > /tmp/cambiometro-transferencias-d1.json
+          actual="$(node -e "const fs=require('fs');const p=JSON.parse(fs.readFileSync('/tmp/cambiometro-transferencias-d1.json'));process.stdout.write(String(p?.[0]?.results?.[0]?.total ?? ''));" )"
+          test -n "$actual"
+          test "$actual" = "$expected"
+          echo "D1/R2 parity OK: $actual transferencias"
