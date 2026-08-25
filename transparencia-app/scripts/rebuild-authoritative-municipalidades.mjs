@@ -99,6 +99,7 @@ function findChileCompraForMuni(rutJuridico) {
 // 4. Cargar CPLT Staff Files
 const cpltDirCandidates = [
   path.join(root, "data", "lake", "projections", "funcionarios-v1"),
+  path.join(root, "data", "lake-cplt", "projections", "funcionarios-v1"),
   path.join(root, "data", "lake-cplt", "projections", "funcionarios-v1", "current"),
 ];
 const cpltDir = cpltDirCandidates.find((candidate) => fs.existsSync(candidate)) ?? cpltDirCandidates[0];
