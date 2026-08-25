@@ -1058,3 +1058,12 @@ de producción doble pasada. El siguiente agente debe cerrar el merge, subir
 la rama, esperar los checks del commit integrado y repetir la misma evidencia
 en preview antes de cualquier promoción. Si falla un gate, se conserva
 OpenNext y se ejecutan sólo los rollbacks registrados en este documento.
+
+El primer push del merge (`5f9a2c5`) fue rechazado por Actions en `npm ci`
+porque el `package.json` ya declaraba `@opennextjs/cloudflare` pero el lockfile
+integrado no contenía esa dependencia ni su árbol. El diagnóstico fue
+determinista (`npm ci` listó los paquetes faltantes), no un fallo de red ni de
+Node. Se regeneró únicamente `transparencia-app/package-lock.json` con
+`npm install --package-lock-only --ignore-scripts` y
+`npm ci --ignore-scripts --dry-run` pasó localmente. Debe repetirse el check
+remoto sobre el commit correctivo antes de cerrar el PR.
