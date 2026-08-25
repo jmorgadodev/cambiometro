@@ -88,6 +88,8 @@ La auditoría de higiene del checkout confirmó que no hay salidas de build, `ou
 
 La automatización no cambia DNS, no promueve una versión de Worker y no debe hacerlo hasta completar el crawl frío, E2E, invariantes y rollback.
 
+Los ETL automáticos usan `contents: read`; ya no escriben datasets ni commits en GitHub. La única excepción es `backfill.yml`, que conserva `contents: write` porque publica Releases históricos bajo demanda.
+
 Para publicar una fuente estática desde un ETL se usa un grupo explícito, por ejemplo:
 
 ```bash

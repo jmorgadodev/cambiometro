@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:
-      contents: write
+      contents: read
     environment: production
     env:
       GH_TOKEN: ${{ github.token }}
