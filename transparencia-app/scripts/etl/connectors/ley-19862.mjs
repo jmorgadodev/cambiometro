@@ -175,7 +175,7 @@ export async function fetchTransferMonth({
     }
     await wait(retryDelayMs * attempt);
   }
-  if (lastError && fetchImpl === fetch) {
+  if (lastError && fetchImpl === fetch && !String(process.env.LEY_19862_SOURCE_BRIDGE_URL ?? "").trim()) {
     try {
       const data = await fetchWithCurl(requestUrl, timeoutMs, headers);
       response = { ok: true, arrayBuffer: async () => data };
@@ -184,6 +184,7 @@ export async function fetchTransferMonth({
       throw curlError;
     }
   }
+  if (lastError) throw lastError;
   if (!response?.ok) throw new Error(`LEY_19862_HTTP_${response?.status ?? "UNKNOWN"}`);
   const original = Buffer.from(await response.arrayBuffer());
   const text = new TextDecoder("utf-8").decode(original);
