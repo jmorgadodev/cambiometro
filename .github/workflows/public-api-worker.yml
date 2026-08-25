@@ -26,7 +26,7 @@ on:
         required: false
         default: ""
       deploy_staging:
-        description: "Desplegar Worker staging aislado con D1/R2 existentes, sin tráfico productivo"
+        description: "Desplegar Worker preview de solo lectura con D1/R2 existentes, sin tráfico productivo"
         type: boolean
         required: false
         default: false
@@ -144,7 +144,7 @@ jobs:
           echo "Rollback exacto: npx wrangler rollback ${WORKER_VERSION_ID} --name cambiometro-public-api"
 
   staging:
-    name: Desplegar Worker staging aislado
+    name: Desplegar Worker preview sin ruta productiva
     needs: validate
     if: github.event_name == 'workflow_dispatch' && inputs.deploy_staging == true
     runs-on: ubuntu-latest
@@ -159,7 +159,7 @@ jobs:
       - name: Instalar dependencias
         working-directory: transparencia-app
         run: npm ci
-      - name: Desplegar staging sin ruta productiva
+      - name: Desplegar preview sin ruta productiva
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -169,5 +169,5 @@ jobs:
           test -n "$CLOUDFLARE_API_TOKEN"
           npx wrangler deploy \
             --config workers/public-api/wrangler.jsonc \
-            --env staging \
-            --message "API staging ${GITHUB_SHA}"
+            --env preview \
+            --message "API preview ${GITHUB_SHA}"
