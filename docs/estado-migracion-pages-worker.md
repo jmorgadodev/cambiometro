@@ -143,7 +143,7 @@ El lint de fuentes se ejecuta sin entrar a los artefactos `.pages-static` ni
 
 ## Auditoría de contenido versionado en Git
 
-El checkout conserva 16 archivos rastreados de más de 200 KB, todos todavía
+El checkout conserva 17 archivos rastreados de más de 200 KB, todos todavía
 necesarios como entradas de build o fixtures de fuentes que aún no tienen
 hidratación automática completa. En esta pasada sí se retiraron del índice,
 sin borrar los archivos locales, las 346 particiones CPLT y tres JSON de
@@ -169,7 +169,12 @@ La coherencia del snapshot no debe confundirse con la disponibilidad de las 59.3
 
 Se corrigió una incoherencia heredada en `by_year`: `a173d39` tenía sólo el bloque 2026 coherente con sus KPIs, pero un commit posterior añadió bloques 2023–2025 sin cambiar los totales. Se retiraron esos bloques obsoletos y `data:verify:coherence` ahora verifica también la suma anual de conteos y montos.
 
-La fuente se reporta como `partial` y las particiones full están ignoradas por Git, por lo que no están en este checkout. El script `npm run data:verify:coherence` valida la coherencia del snapshot sin fingir que la muestra es el universo completo. Para una validación estricta del universo se debe ejecutar con `--require-full` en el workspace ETL/R2/D1 que sí contenga las particiones.
+La fuente se reporta como `partial` y las particiones full están ignoradas por
+Git; por eso no llegan a un checkout limpio, aunque pueden existir localmente
+después de hidratar R2. El script `npm run data:verify:coherence` valida la
+coherencia del snapshot sin fingir que la muestra es el universo completo. Para
+una validación estricta del universo se debe ejecutar con `--require-full` en
+el workspace ETL/R2/D1 que sí contenga las particiones.
 
 Además, una consulta directa posterior a la fuente viva produjo un conteo/monto distinto al snapshot fijado. Eso debe tratarse como diferencia de versión de fuente: antes de regenerar se necesita fijar release, fecha y checksum del artefacto autorizado. No se deben recortar ni combinar filas en forma manual para hacer coincidir `59.361`.
 
@@ -1404,5 +1409,74 @@ headers CORS/CORP para `widget.js` y `widget.css`; no se agregó
 Evidencia posterior: el widget renderizó `José Antonio Kast Adriasola`, el
 escaneo de cuatro rutas principales más el widget registró cero mensajes CSP,
 `verify:browser` terminó verde, `verify:security` terminó verde y el artefacto
-Pages quedó en 7.065 archivos, con cero fallas de rutas. El arreglo está
-pendiente de la nueva ejecución CI antes de continuar a preview.
+Pages quedó en 7.065 archivos, con cero fallas de rutas. El run posterior
+`32817982573` terminó verde el 2026-08-25: export Pages, hidratación R2,
+bundle Worker, rutas, APIs, UI responsive y widget.
+
+### Auditoría de continuidad del checkout correcto — 2026-08-25
+
+Esta auditoría se ejecutó exclusivamente en
+`C:\Users\jorge\Proyectos\cambiometro-public`, rama
+`feature/tarea-p-v3-static-site`, commit `1044871` (`10448713e160...`). El
+checkout local quedó limpio y el PR #73 sigue abierto contra `main`; no se
+ejecutó merge, deploy, cambio de CNAME ni promoción de Worker.
+
+Los gates remotos del commit están verdes:
+
+- Build/E2E `32817982573`: verde, 8m21s.
+- Quality `32817982339`: verde.
+- Quality duplicado `32817977085`: verde.
+- Security `32817982367`: verde.
+- PR #73: `OPEN`, `mergeStateStatus=CLEAN`.
+
+El guard de frontera reportó 755 archivos versionados y cero artefactos
+generados indebidos. `out/`, `.next/`, `.open-next/`, `.wrangler/`, chunks,
+slices, particiones CPLT y artefactos de auditoría JSON están excluidos del
+repositorio. Permanecen versionados 17 archivos mayores de 200 KB porque son
+entradas de build/fixtures activos, módulos fuente o `package-lock.json`; no
+se eliminaron a ciegas porque romperían el build conocido y los ETL. La lista
+exacta se obtiene con `git ls-files` y el inventario de esta auditoría.
+
+Los 17 archivos versionados mayores de 200 KB son:
+
+```text
+data/politicos-votaciones.json
+data/lake/projections/v1/chilecompra.json
+data/lake/projections/v1/ley19862-summary.json
+data/lake-subsets/politicos-votaciones.subset.json
+data/partidos-stats.json
+data/catalog/entities-routes.json
+data/lake/projections/v1/sinim.json
+data/personal-apoyo.json
+data/lake/projections/v1/contraloria.json
+data/lake/projections/v1/presupuesto.json
+data/municipalidades-data.json
+data/lake/projections/v1/organismos.json
+data/lake-subsets/partidos-stats.subset.json
+data/catalog/communes.json
+package-lock.json
+lib/funcionarios-source.ts
+lib/municipalidades.ts
+```
+
+Estos archivos no son artefactos generados de Pages: los JSON son fixtures o
+entradas requeridas por el build/ETL actual, los dos módulos son código fuente
+y el lockfile es necesario para instalaciones reproducibles. Los payloads
+full, slices y resultados de build sí permanecen fuera de Git.
+
+La verificación normal `npm run data:verify:coherence` está verde para el
+snapshot fijado de 59.361 filas y `$5.011.094.170.302`. La verificación estricta
+`npm run data:verify:coherence -- --require-full` falla de forma deliberada:
+las particiones full locales contienen 59.544 filas y
+`$5.013.581.357.467`. Es una divergencia de release de la fuente oficial; se
+debe fijar un manifest/checksum y regenerar todos los derivados juntos antes
+de publicar, nunca recortar o combinar filas manualmente. Hasta entonces, el
+sitio debe tratar el snapshot pinned y el release full como universos
+separados y no declarar paridad completa.
+
+Conclusión operativa: la base de código y el pipeline están listos para un
+preview reversible, pero la migración todavía no está cerrada en producción.
+El siguiente paso correcto es validar un único release de transferencias en
+R2/D1, ejecutar preview Pages y upload de versión Worker sin promoción, y sólo
+después repetir crawl frío, `verify-prod-full` doble y smoke. OpenNext y el
+dominio actual permanecen como rollback.
