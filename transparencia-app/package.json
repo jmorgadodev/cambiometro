@@ -27,7 +27,7 @@
   "pages:build": "node scripts/build-politico-slices.mjs && node scripts/build-transferencias-static.mjs && node scripts/build-funcionarios-static.mjs && node scripts/build-pages-static.mjs",
   "data:build:funcionarios-static": "node scripts/build-funcionarios-static.mjs",
   "data:hydrate:cplt": "node scripts/hydrate-cplt-from-r2.mjs",
-    "pages:verify": "node scripts/verify-pages-static.mjs && node scripts/verify-pages-route-links.mjs",
+    "pages:verify": "node scripts/verify-static-export.mjs && node scripts/verify-pages-static.mjs && node scripts/verify-pages-route-links.mjs",
     "verify:pages-browser": "node scripts/verify-pages-browser.mjs",
     "pages:crawl": "node scripts/verify-pages-crawl.mjs",
     "pages:rollback": "node scripts/pages-rollback.mjs",

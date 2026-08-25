@@ -24,6 +24,12 @@ if (oversized.length) throw new Error(`Assets sobre 25 MiB: ${oversized.map((fil
 const routes = ["index.html", "politico/index.html", "municipalidades/index.html", "servicios-publicos/index.html", "entidades/index.html", "transferencias/index.html"];
 for (const route of routes) if (!relativeFiles.includes(route)) throw new Error(`Falta ruta estática: ${route}`);
 const staticHeaders = readFileSync(join(out, "_headers"), "utf8");
+const headerLines = staticHeaders.split(/\r?\n/);
+const headerRules = headerLines.filter((line) => line.trim() && !/^[ \t]/.test(line));
+const oversizedHeaderLines = headerLines.filter((line) => line.length > 2_000);
+if (headerRules.length > 100) throw new Error(`Pages admite como máximo 100 reglas _headers; se encontraron ${headerRules.length}`);
+if (oversizedHeaderLines.length > 0) throw new Error(`Una línea de _headers supera 2.000 caracteres: ${oversizedHeaderLines[0].length}`);
+if (!headerLines.some((line) => /^\s+Content-Security-Policy:/.test(line))) throw new Error("out/_headers no publica Content-Security-Policy");
 if (/unsafe-inline|unsafe-eval/.test(staticHeaders)) throw new Error("CSP insegura en _headers");
 const bytes = files.reduce((sum, file) => sum + statSync(file).size, 0);
 console.log(JSON.stringify({ files: files.length, html: html.length, bytes, routes }));

@@ -1252,3 +1252,11 @@ reconstruirse sin editar archivos a mano.
 Verificación local: `npm run cf:build` terminó con `OpenNext build complete` y
 `next.config.ts` quedó restaurado. El artefacto `.open-next` es generado e
 ignorado; no se incorpora al repositorio.
+
+El guard `verify-static-export.mjs` ahora forma parte de `pages:verify` y
+comprueba CSP presente, máximo de 100 reglas y máximo de 2.000 caracteres por
+línea. En el artefacto actual falla de forma intencional con
+`out/_headers no publica Content-Security-Policy`; el generador de hashes
+también se niega a escribir una política de 831.799 caracteres. El CI queda
+rojo hasta resolver la CSP de forma compatible con la hidratación, en lugar de
+aceptar un header inválido o silenciar el check.

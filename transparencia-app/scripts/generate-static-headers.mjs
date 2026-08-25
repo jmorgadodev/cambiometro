@@ -43,6 +43,10 @@ const headers = `/_next/static/*
   Cross-Origin-Resource-Policy: cross-origin
   Access-Control-Allow-Origin: *
 `;
+const cspLine = headers.split(/\r?\n/).find((line) => line.includes("Content-Security-Policy:"));
+if (!cspLine || cspLine.length > 2_000) {
+  throw new Error(`STATIC_CSP_EXCEEDS_PAGES_HEADER_LIMIT: ${cspLine?.length ?? 0} caracteres`);
+}
 await writeFile(join(root, "public", "_headers"), headers);
 await mkdir(join(root, "out"), { recursive: true });
 await writeFile(join(root, "out", "_headers"), headers);
