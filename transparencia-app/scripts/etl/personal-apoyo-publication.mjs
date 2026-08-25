@@ -3,17 +3,31 @@ const DEFAULT_MINIMUMS = { diputados: 100, filasCamara: 500, oficinasSenado: 40,
 export function mergePersonalApoyoDeputies(previous = {}, refreshed = {}) {
   const result = { ...previous };
   for (const [id, deputy] of Object.entries(refreshed)) {
-    if ((!deputy?.personal_apoyo || deputy.personal_apoyo.length === 0) && previous[id]?.personal_apoyo?.length > 0) {
-      result[id] = {
-        ...deputy,
-        personal_apoyo: previous[id].personal_apoyo,
-        mes_personal: previous[id].mes_personal ?? deputy.mes_personal,
-      };
-    } else {
-      result[id] = deputy;
+    const prior = previous[id];
+    const next = { ...deputy };
+    if ((!deputy?.personal_apoyo || deputy.personal_apoyo.length === 0) && prior?.personal_apoyo?.length > 0) {
+      next.personal_apoyo = prior.personal_apoyo;
+      next.mes_personal = prior.mes_personal ?? deputy.mes_personal;
     }
+    // Una respuesta bloqueada o una página cuyo markup cambió no puede borrar
+    // la identidad oficial ya publicada del diputado.
+    if (!deputy?.ficha?.region && prior?.ficha?.region) next.ficha = prior.ficha;
+    result[id] = next;
   }
   return result;
+}
+
+export function assertUsableOfficialHtml(body, source = "official") {
+  const text = String(body ?? "");
+  const blocked = [
+    /Attention Required!\s*\|\s*Cloudflare/i,
+    /Please enable cookies/i,
+    /Sorry, you have been blocked/i,
+    /Why have I been blocked\?/i,
+  ].some((pattern) => pattern.test(text));
+  if (blocked) throw new Error(`PERSONAL_APOYO_SOURCE_BLOCKED: ${source}`);
+  if (text.trim().length < 256) throw new Error(`PERSONAL_APOYO_SOURCE_EMPTY: ${source}`);
+  return text;
 }
 
 export function validatePersonalApoyoDataset(dataset, minimums = DEFAULT_MINIMUMS) {
