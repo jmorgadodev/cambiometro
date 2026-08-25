@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  assertUsableOfficialHtml,
   mergePersonalApoyoDeputies,
   splitPersonalApoyoJson,
   validatePersonalApoyoDataset,
@@ -67,6 +68,37 @@ describe("publicación del personal de apoyo", () => {
       "1002": historical["1002"],
       "1077": refreshed["1077"],
     });
+  });
+
+  it("conserva la ficha anterior si la fuente nueva no trae identidad", () => {
+    const previous: Record<string, Record<string, unknown>> = {
+      "1009": {
+        ficha: { region: "Metropolitana", partido: "Independiente" },
+        personal_apoyo: [{ nombre: "PERSONA PUBLICADA", sueldo: 449171 }],
+        mes_personal: "julio 2026",
+      },
+    };
+    const refreshed: Record<string, Record<string, unknown>> = {
+      "1009": {
+        ficha: { region: null, partido: null },
+        personal_apoyo: [{ nombre: "PERSONA NUEVA", sueldo: 500000 }],
+        mes_personal: "agosto 2026",
+      },
+    };
+
+    const merged = mergePersonalApoyoDeputies(previous, refreshed) as Record<string, Record<string, unknown>>;
+    expect(merged["1009"]).toMatchObject({
+      ficha: previous["1009"].ficha,
+      personal_apoyo: refreshed["1009"].personal_apoyo,
+    });
+  });
+
+  it("rechaza una página de bloqueo antes de publicar datos", () => {
+    expect(() => assertUsableOfficialHtml("<html>Attention Required! | Cloudflare</html>", "camara"))
+      .toThrow("PERSONAL_APOYO_SOURCE_BLOCKED");
+    expect(() => assertUsableOfficialHtml("<html>ok</html>", "camara"))
+      .toThrow("PERSONAL_APOYO_SOURCE_EMPTY");
+    expect(assertUsableOfficialHtml("<html>" + "x".repeat(300) + "</html>", "camara")).toContain("xxx");
   });
 
   it("el ETL automatico preserva historia y no vuelve a borrar IDs fuera de nomina", () => {

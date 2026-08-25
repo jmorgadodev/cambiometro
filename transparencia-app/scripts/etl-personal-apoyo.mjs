@@ -2,7 +2,7 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import fs from "node:fs";
 import { externalText } from "./etl/safe-text.mjs";
-import { mergePersonalApoyoDeputies } from "./etl/personal-apoyo-publication.mjs";
+import { assertUsableOfficialHtml, mergePersonalApoyoDeputies } from "./etl/personal-apoyo-publication.mjs";
 import { parseSenadoAssignmentPolicy } from "./etl/senado-assignment.mjs";
 
 const UA =
@@ -27,8 +27,10 @@ function curlHtml(url, { post = false, jar = null } = {}) {
   }
   args.push(url);
   try {
-    return execFileSync(CURL, args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, stdio: ["ignore", "pipe", "ignore"] });
+    const body = execFileSync(CURL, args, { encoding: "utf8", maxBuffer: 64 * 1024 * 1024, stdio: ["ignore", "pipe", "ignore"] });
+    return assertUsableOfficialHtml(body, url);
   } catch (e) {
+    if (String(e?.message ?? "").startsWith("PERSONAL_APOYO_SOURCE_")) throw e;
     throw new Error(`curl ${e.status ?? ""}: ${String(e.stderr ?? e.message).slice(0, 200)}`);
   }
 }
