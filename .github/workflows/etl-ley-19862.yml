@@ -82,6 +82,8 @@ jobs:
           echo "LEY_19862_SOURCE_BRIDGE_URL=$bridge_url" >> "$GITHUB_ENV"
           echo "LEY_19862_SOURCE_BRIDGE_TOKEN=$bridge_token" >> "$GITHUB_ENV"
           echo "Bridge URL: $bridge_url"
+          bridge_health="$(curl --fail --silent --show-error --location --max-time 10 "$bridge_url/health")"
+          echo "Bridge health: $bridge_health"
           probe_file="$(mktemp)"
           trap 'rm -f "$secrets_file" "$probe_file"' EXIT
           curl --fail --silent --show-error --location \

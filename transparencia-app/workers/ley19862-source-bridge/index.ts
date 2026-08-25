@@ -35,6 +35,9 @@ function denied() {
 const handler = {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    if (url.pathname === "/health" && request.method === "GET") {
+      return Response.json({ ok: true, tokenConfigured: Boolean(env.SOURCE_BRIDGE_TOKEN) }, { headers: { "Cache-Control": "no-store" } });
+    }
     if (url.pathname !== "/fetch" || request.method !== "GET") return denied();
     if (!tokenMatches(request.headers.get("X-Source-Bridge-Token") ?? "", env.SOURCE_BRIDGE_TOKEN ?? "")) return denied();
 
