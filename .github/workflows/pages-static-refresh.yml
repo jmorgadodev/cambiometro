@@ -5,6 +5,14 @@ on:
     workflows:
       - "ETL completo mensual - Ley 19.862"
       - "ETL Mensual - CPLT Nóminas Transparencia Activa"
+      - "ETL Diario - Parlamento, Movimientos y Diario Oficial"
+      - "ETL Semanal - ChileCompra OCDS"
+      - "ETL Mensual - Contraloría General (CGR)"
+      - "ETL Trimestral - DIPRES Presupuestos"
+      - "ETL Semanal - InfoLobby"
+      - "ETL Mensual - InfoProbidad DIP"
+      - "ETL Bajo Demanda - SERVEL Resultados Electorales"
+      - "ETL Semestral - SINIM Finanzas Municipales"
     types: [completed]
   workflow_dispatch:
     inputs:
@@ -14,6 +22,11 @@ on:
       through_month:
         description: "Mes final incluido (1-12)"
         required: false
+      deploy_pages:
+        description: "Publicar en Pages producción después de todos los gates"
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: pages-static-refresh
@@ -119,3 +132,18 @@ jobs:
           path: transparencia-app/out
           if-no-files-found: error
           retention-days: 7
+
+      # Los workflow_run exitosos de ETL son el refresco automático sin costo.
+      # La ejecución manual exige activar deploy_pages explícitamente. El
+      # despliegue no toca el dominio personalizado: primero actualiza el
+      # proyecto Pages y conserva OpenNext como rollback hasta el cutover.
+      - name: Publish verified artifact to Cloudflare Pages production
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_run' || inputs.deploy_pages == true)
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx wrangler pages deploy out --project-name cambiometro
