@@ -10,6 +10,35 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const readJson = (file) => readFile(join(root, file), "utf8").then(JSON.parse);
 await import("./generate-static-params.mjs");
 
+function summarizeTransferSample(rows, generatedAt) {
+  const byYear = {};
+  const receivers = new Set();
+  const emitters = new Set();
+  for (const row of rows) {
+    const year = row.fecha?.slice?.(0, 4) ?? row.period ?? row.periodo ?? "";
+    if (year) {
+      byYear[year] ??= { count: 0, total: 0 };
+      byYear[year].count += 1;
+      byYear[year].total += Number(row.monto_clp ?? 0);
+    }
+    if (row.receiver_name ?? row.receptor_nombre) receivers.add(row.receiver_name ?? row.receptor_nombre);
+    if (row.emitter_name ?? row.emisor_nombre) emitters.add(row.emitter_name ?? row.emisor_nombre);
+  }
+  return {
+    generatedAt,
+    kpis: {
+      total_monto_clp: rows.reduce((sum, row) => sum + Number(row.monto_clp ?? 0), 0),
+      total_transfers: rows.length,
+      total_receptores: receivers.size,
+      total_emisores: emitters.size,
+    },
+    by_year: byYear,
+    top_receptores: [],
+    top_emisores: [],
+    transfers_sample: rows,
+  };
+}
+
 const generatedDir = join(root, "data", "generated");
 const publicDataDir = join(root, "public", "data");
 const transferDir = join(publicDataDir, "transferencias");
@@ -25,8 +54,16 @@ const pinnedSummary = await readJson("data/lake/projections/v1/ley19862-summary.
 const fullRelease = existsSync(fullSource)
   ? await buildTransferenciasStatic({ source: fullSource, output: transferDir })
   : null;
-const summary = fullRelease?.summary ?? pinnedSummary;
 if (!fullRelease && !allowSample) throw new Error("STATIC_DATA_FULL_TRANSFER_RELEASE_EMPTY");
+
+const sampleRows = pinnedSummary.transfers_sample ?? [];
+const transferManifest = fullRelease?.manifest ?? writeChunkedJson({
+  outputDir: transferDir,
+  dataset: "ley-19862-transferencias",
+  rows: sampleRows,
+  pageSize: 50,
+});
+const summary = fullRelease?.summary ?? summarizeTransferSample(sampleRows, pinnedSummary.generatedAt);
 
 const compactSummary = {
   generatedAt: summary.generatedAt,
@@ -36,13 +73,9 @@ const compactSummary = {
   top_emisores: (summary.top_emisores ?? []).slice(0, 10),
   transfers_sample: summary.transfers_sample ?? [],
 };
-await writeFile(join(generatedDir, "transferencias", "summary.json"), `${JSON.stringify(compactSummary)}\n`);
-const transferManifest = fullRelease?.manifest ?? writeChunkedJson({
-  outputDir: transferDir,
-  dataset: "ley-19862-transferencias",
-  rows: summary.transfers_sample ?? [],
-  pageSize: 50,
-});
+const summaryContent = `${JSON.stringify(compactSummary)}\n`;
+await writeFile(join(generatedDir, "transferencias", "summary.json"), summaryContent);
+await writeFile(join(transferDir, "summary.json"), summaryContent);
 
 const canonical = await readJson("data/entidades-canonica.json").catch(() => readJson("data/catalog/entities-routes.json"));
 const entities = Array.isArray(canonical) ? canonical : canonical.entities ?? [];

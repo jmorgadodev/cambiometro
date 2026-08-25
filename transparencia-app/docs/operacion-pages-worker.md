@@ -58,9 +58,9 @@ El build genera `out/`, `public/data/` y artefactos de Worker. Son salidas repro
 
 ### Última verificación local auditada
 
-Ejecutada desde `C:\Users\jorge\Proyectos\cambiometro-public\transparencia-app` en la rama `codex/operational-static-pages-worker`:
+Ejecutada desde `C:\Users\jorge\Proyectos\cambiometro-public\transparencia-app` en la rama de trabajo de la migración estática:
 
-- `npm test`: 124 archivos y 687 tests aprobados.
+- `npm test`: 125 archivos y 693 tests aprobados.
 - `npm run lint`: 0 errores; quedan 156 warnings preexistentes que no bloquean el build.
 - `npm run coverage:sweep`: todas las métricas canónicas aprobadas, incluyendo 769 votaciones, 155 diputados, 50 senadores, 79 movimientos, 59.361 filas de fixture, 74.142 ChileCompra, 60.523 InfoLobby y 291 informes CGR.
 - `npm run api:size`: Worker de 82.186 bytes, límite 1.000.000.
@@ -68,6 +68,7 @@ Ejecutada desde `C:\Users\jorge\Proyectos\cambiometro-public\transparencia-app` 
 - Release local generado: 59.544 filas, 1.191 páginas, monto `5.013.581.357.467`, checksum `13b9de4b9d4c07ad4a46afb9b4b4a9fdc9def947f0839544ce12def1b83e5c35`.
 - `npm run check:transfer-release`: conteo, monto, páginas, índice y checksum coherentes.
 - `npm run verify:static:browser`: 75/75 verificaciones aprobadas; cero spinners, overlays, errores de navegador o recursos 4xx/5xx en las rutas críticas. También validó Kaiser, Bianchi, Maipú y el redirect 301.
+- El fixture de PR (`ALLOW_STATIC_SAMPLE=1`) también usa el mismo esquema de manifest que producción: build validado con 5.016 HTML, 15.192 archivos y 1.000 filas de muestra coherentes. Nunca se permite ese bypass en Pages producción.
 - El Worker expone `/api/v1/health` y `/api/v1/health/data`; ambos devuelven 200 sólo cuando D1 y el manifest completo de transferencias en R2 están disponibles, y 503 con el diagnóstico de bindings si falta alguno.
 - `uptime-smoke.mjs` prueba home, listados, ficha Kaiser, transferencias, cruces, health y búsqueda. En Actions exige `CAMBIOMETRO_UPTIME_TOKEN` y lo envía únicamente como `X-Cambiometro-Uptime-Token` a `/api/*`, para coincidir con la excepción WAF limitada.
 

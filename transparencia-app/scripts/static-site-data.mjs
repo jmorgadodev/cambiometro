@@ -37,14 +37,43 @@ export function sha256Json(value) {
   return crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
 }
 
+function sha256Text(value) {
+  return crypto.createHash("sha256").update(value, "utf8").digest("hex");
+}
+
 export function writeChunkedJson({ outputDir, dataset, rows, pageSize = 50 }) {
   const chunks = chunkRows(rows, pageSize);
   fs.mkdirSync(outputDir, { recursive: true });
+  const transferPages = [];
   for (const [index, chunk] of chunks.entries()) {
     const filename = `p-${String(index + 1).padStart(4, "0")}.json`;
-    fs.writeFileSync(path.join(outputDir, filename), `${JSON.stringify(chunk)}\n`, "utf8");
+    const content = `${JSON.stringify(chunk)}\n`;
+    fs.writeFileSync(path.join(outputDir, filename), content, "utf8");
+    if (dataset === "ley-19862-transferencias") {
+      transferPages.push({
+        page: index + 1,
+        path: `/data/transferencias/${filename}`,
+        count: chunk.length,
+        sha256: sha256Text(content),
+      });
+    }
   }
-  const manifest = buildChunkManifest(dataset, rows.length, pageSize, sha256Json(rows));
+  const manifest = dataset === "ley-19862-transferencias"
+    ? {
+        schemaVersion: 1,
+        dataset,
+        totalRows: rows.length,
+        pageSize,
+        totalPages: transferPages.length,
+        pages: transferPages,
+        checksumSha256: sha256Text(rows.map((row) => JSON.stringify(row)).join("\n")),
+        expected: {
+          totalMontoClp: rows.reduce((sum, row) => sum + Number(row.monto_clp ?? 0), 0),
+          totalReceptores: new Set(rows.map((row) => row.receiver_name ?? row.receptor_nombre).filter(Boolean)).size,
+          totalEmisores: new Set(rows.map((row) => row.emitter_name ?? row.emisor_nombre).filter(Boolean)).size,
+        },
+      }
+    : buildChunkManifest(dataset, rows.length, pageSize, sha256Json(rows));
   if (dataset === "ley-19862-transferencias") {
     const searchRows = rows.map((row, index) => ({
       i: index,
@@ -61,7 +90,7 @@ export function writeChunkedJson({ outputDir, dataset, rows, pageSize = 50 }) {
     manifest.searchIndex = {
       path: "/data/transferencias/search-index.json",
       count: searchRows.length,
-      sha256: sha256Json(searchRows),
+      sha256: sha256Text(`${JSON.stringify(searchRows)}\n`),
     };
   }
   fs.writeFileSync(path.join(outputDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
