@@ -2,12 +2,13 @@ import { describe, expect, it } from "vitest";
 import api from "../workers/public-api/index";
 import { parseRelationQuery } from "./api-v1";
 
-function testEnv() {
+function testEnv(transferRows = 59361) {
   const statement = (sql: string, bindings: unknown[] = []) => ({
     bind(...values: unknown[]) {
       return statement(sql, values);
     },
     async first<T>() {
+      if (sql.includes("FROM transferencias_19862")) return { total: transferRows } as T;
       if (sql.includes("count(*)")) return { total: sql.includes("relations") ? 2 : sql.includes("records") ? 4 : 1 } as T;
       if (sql.includes("WHERE id = ?")) return bindings[0] === "no-existe" ? null : { id: bindings[0], kind: "person", name: "Persona de prueba", identifiers_json: "[]", attributes_json: "{}", source_ids_json: "[]" } as T;
       return null;
@@ -88,6 +89,15 @@ describe("API canónica v1", () => {
 
     expect(response.status).toBe(200);
     expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, transferRows: 59361 });
+  });
+
+  it("mantiene health en 503 cuando D1 y el manifest R2 no comparten universo", async () => {
+    const env = { ...(testEnv(59360) as object), ...(transferR2Env() as object) } as never;
+    const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(payload.data).toMatchObject({ ok: false, d1: true, r2: true, d1TransferRows: 59360, transferRows: 59361, d1Consistent: false });
   });
 
   it("devuelve 503 estructurado cuando el manifest R2 está corrupto", async () => {

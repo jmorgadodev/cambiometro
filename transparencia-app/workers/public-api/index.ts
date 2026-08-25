@@ -110,18 +110,35 @@ async function r2Json<T>(bucket: R2Bucket | undefined, key: string): Promise<T |
   }
 }
 
+async function transferManifest(env: Env) {
+  const manifest = await r2Json<TransferApiManifest>(env.PUBLIC_DATA, "projections/transferencias-v1/manifest.json");
+  return isCompleteTransferManifest(manifest) ? manifest : null;
+}
+
 async function health(env: Env) {
-  const transferManifest = await r2Json<TransferApiManifest>(env.PUBLIC_DATA, "projections/transferencias-v1/manifest.json");
+  const manifest = await transferManifest(env);
   const d1 = Boolean(env.DB);
-  const r2 = isCompleteTransferManifest(transferManifest);
-  const ok = d1 && r2;
+  const r2 = Boolean(manifest);
+  let d1TransferRows = 0;
+  if (d1) {
+    try {
+      const result = await env.DB?.prepare("SELECT count(*) AS total FROM transferencias_19862").first<{ total: number }>();
+      d1TransferRows = Number(result?.total ?? 0);
+    } catch {
+      d1TransferRows = 0;
+    }
+  }
+  const d1Consistent = Boolean(d1 && manifest && d1TransferRows === manifest.totalRows);
+  const ok = d1 && r2 && d1Consistent;
   return success({
     ok,
     service: "cambiometro-public-api",
     d1,
     r2,
-    transferRows: transferManifest?.totalRows ?? 0,
-    generatedAt: transferManifest?.generatedAt ?? null,
+    d1TransferRows,
+    d1Consistent,
+    transferRows: manifest?.totalRows ?? 0,
+    generatedAt: manifest?.generatedAt ?? null,
   }, {}, {}, ok ? 200 : 503);
 }
 
@@ -515,7 +532,11 @@ async function listTransferencias(requestUrl: URL, env: Env) {
       municipality: row.comuna ?? null,
     }));
     if (total > 0 || data.length > 0) {
-      return json({ data, total, page, limit, totalPages: Math.max(1, Math.ceil(total / limit)), kpis: { total_monto_clp: 5_011_094_170_302, total_transfers: total, total_receptores: 14_640, total_emisores: 272 }, by_year: {}, sourceStatus: "d1" }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
+      const manifest = await transferManifest(env);
+      const kpis = manifest?.expected
+        ? { total_monto_clp: manifest.expected.totalMontoClp ?? 0, total_transfers: manifest.totalRows, total_receptores: manifest.expected.totalReceptores ?? 0, total_emisores: manifest.expected.totalEmisores ?? 0 }
+        : { total_monto_clp: 0, total_transfers: total, total_receptores: 0, total_emisores: 0 };
+      return json({ data, total, page, limit, totalPages: Math.max(1, Math.ceil(total / limit)), kpis, by_year: {}, sourceStatus: "d1" }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
     }
     return listTransferenciasFromR2(requestUrl, env);
   } catch {
