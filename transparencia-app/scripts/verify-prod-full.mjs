@@ -21,7 +21,7 @@ async function fetchHttp(url, options = {}) {
       .map(([k, v]) => `-H "${k}: ${v}"`)
       .join(" ");
 
-    const cmd = `curl.exe -s -i ${redirectFlag} ${headerFlags} "${url}"`;
+    const cmd = `curl.exe -s -i --connect-timeout 5 --max-time 10 ${redirectFlag} ${headerFlags} "${url}"`;
     const raw = execSync(cmd, { encoding: "utf8", maxBuffer: 15 * 1024 * 1024 });
 
     const headerEndIndex = raw.indexOf("\r\n\r\n") !== -1 ? raw.indexOf("\r\n\r\n") : raw.indexOf("\n\n");
@@ -50,7 +50,19 @@ async function fetchHttp(url, options = {}) {
     };
   }
 
-  return fetch(url, options);
+  return fetch(url, { ...options, signal: options.signal ?? AbortSignal.timeout(10000) });
+}
+
+function unavailableResponse(error) {
+  const message = error instanceof Error ? error.message : String(error);
+  return {
+    status: 0,
+    ok: false,
+    error: message,
+    headers: { get: () => null },
+    text: async () => "",
+    json: async () => { throw new Error(message); },
+  };
 }
 
 async function fetchWithRetry(url, options = {}, maxRetries = 3) {
@@ -61,7 +73,7 @@ async function fetchWithRetry(url, options = {}, maxRetries = 3) {
         return res;
       }
     } catch (err) {
-      if (attempt === maxRetries) throw err;
+      if (attempt === maxRetries) return unavailableResponse(err);
     }
     await new Promise((r) => setTimeout(r, 600 * attempt));
   }
