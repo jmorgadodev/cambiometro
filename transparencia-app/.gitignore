@@ -19,6 +19,7 @@
 /.open-next/
 /.wrangler/
 /.pages-static/
+.next.config.pages-backup.ts
 .dist/
 workers/public-api/.dist/
 workers/public-api/.wrangler/

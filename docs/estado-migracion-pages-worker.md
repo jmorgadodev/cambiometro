@@ -1232,3 +1232,23 @@ desde este checkout porque `next.config.ts` ya declara `output: "export"` y
 la ruta histórica `app/api/og/[id]` sigue en el árbol fuente. El rollback
 conocido sigue siendo el deployment existente; antes de retirar OpenNext se
 debe conservar un build/configuración de rollback reproducible por separado.
+
+La corrida de Actions sobre `09767a3` (`Build and E2E Verification`, run
+`32808312266`) confirmó la misma frontera: build estático, hidratación oficial
+R2, bundle Worker, `verify:browser` y fixture D1 pasan; `verify:security` falla
+únicamente porque el servidor estático no recibe `Content-Security-Policy`.
+No se debe convertir ese rojo en un bypass: es el gate que evita promover un
+Pages funcional pero sin la postura de seguridad exigida.
+
+### Rollback OpenNext reproducible — 2026-08-25
+
+Se añadió `transparencia-app/next.config.opennext.ts` y el script
+`scripts/build-open-next-rollback.mjs`. `npm run cf:build`, `npm run preview` y
+`npm run deploy` cambian temporalmente a la configuración OpenNext, ejecutan el
+build y restauran `next.config.ts` incluso si el proceso termina con error.
+Así el build Pages conserva `output: "export"` y el rollback histórico puede
+reconstruirse sin editar archivos a mano.
+
+Verificación local: `npm run cf:build` terminó con `OpenNext build complete` y
+`next.config.ts` quedó restaurado. El artefacto `.open-next` es generado e
+ignorado; no se incorpora al repositorio.
