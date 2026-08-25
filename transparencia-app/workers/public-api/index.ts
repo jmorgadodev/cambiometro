@@ -4,6 +4,7 @@ export interface Env {
   DB?: D1Database;
   PUBLIC_DATA?: R2Bucket;
   TURNSTILE_SECRET_KEY?: string;
+  READ_ONLY_PREVIEW?: string;
   EXPENSIVE_API_RATE_LIMITER?: { limit(input: { key: string }): Promise<{ success: boolean }> };
 }
 
@@ -598,6 +599,7 @@ function validateOfficials(url: URL) {
 }
 
 async function requestSubmission(request: Request, env: Env) {
+  if (env.READ_ONLY_PREVIEW === "1") return failure("READ_ONLY_PREVIEW", "El preview remoto sólo permite lecturas.", 503);
   if (!env.DB) return dbUnavailable();
   let body: JsonRecord;
   try { body = await request.json() as JsonRecord; } catch { return failure("INVALID_BODY", "El cuerpo debe ser JSON válido.", 400); }

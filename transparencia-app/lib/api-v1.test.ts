@@ -128,6 +128,17 @@ describe("API canónica v1", () => {
     expect(payload.data).toMatchObject({ ok: false, d1: true, r2: false, transferRows: 0 });
   });
 
+  it("bloquea escrituras D1 en el perfil remoto de preview", async () => {
+    const response = await api.fetch(new Request("https://example.test/api/v1/requests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tipo: "informacion", email: "preview@example.test", descripcion: "Solicitud de prueba del preview." }),
+    }), { ...testEnv(), READ_ONLY_PREVIEW: "1" } as never);
+
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ error: { code: "READ_ONLY_PREVIEW" } });
+  });
+
   it("acepta entity_id como ancla bidireccional de relaciones", () => {
     expect(
       parseRelationQuery(

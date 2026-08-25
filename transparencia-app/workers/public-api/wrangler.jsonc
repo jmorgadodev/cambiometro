@@ -49,6 +49,7 @@
       "workers_dev": true,
       "preview_urls": true,
       "routes": [],
+      "vars": { "READ_ONLY_PREVIEW": "1" },
       "observability": { "enabled": true },
       "d1_databases": [
         {
