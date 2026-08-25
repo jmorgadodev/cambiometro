@@ -5,6 +5,7 @@ import { chromium } from "playwright";
 
 const root = join(process.cwd(), "out");
 const port = Number(process.env.STATIC_VERIFY_PORT || 0);
+const remoteBaseUrl = process.env.STATIC_VERIFY_BASE_URL?.replace(/\/+$/, "");
 const waitMs = 5_200;
 const spinnerPattern = /Cargando contenido|Cargando municipalidades|Cargando transferencias|Cargando funcionarios|Cargando historial/i;
 const mime = {
@@ -59,6 +60,7 @@ function check(condition, message, details = {}) {
 }
 
 async function checkRoute(browser, baseUrl, route, markers) {
+  const monitoredOrigin = new URL(baseUrl).origin;
   const context = await browser.newContext();
   const page = await context.newPage();
   const errors = [];
@@ -70,7 +72,7 @@ async function checkRoute(browser, baseUrl, route, markers) {
     }
   });
   page.on("response", (response) => {
-    if (response.url().includes("127.0.0.1") && response.status() >= 400) {
+    if (response.url().startsWith(monitoredOrigin) && response.status() >= 400) {
       badResponses.push({ path: new URL(response.url()).pathname, status: response.status() });
     }
   });
@@ -101,9 +103,13 @@ async function checkRoute(browser, baseUrl, route, markers) {
 }
 
 async function main() {
-  await new Promise((resolve) => server.listen(port, "127.0.0.1", resolve));
-  const address = server.address();
-  const baseUrl = `http://127.0.0.1:${typeof address === "object" ? address.port : port}`;
+  let baseUrl = remoteBaseUrl;
+  if (!baseUrl) {
+    await new Promise((resolve) => server.listen(port, "127.0.0.1", resolve));
+    const address = server.address();
+    baseUrl = `http://127.0.0.1:${typeof address === "object" ? address.port : port}`;
+  }
+  const monitoredOrigin = new URL(baseUrl).origin;
   const browser = await chromium.launch({ headless: true });
 
   const cases = [
@@ -128,7 +134,7 @@ async function main() {
   const navigationBadResponses = [];
   navigationPage.on("pageerror", (error) => navigationErrors.push(error.message));
   navigationPage.on("response", (response) => {
-    if (response.url().includes("127.0.0.1") && response.status() >= 400) {
+    if (response.url().startsWith(monitoredOrigin) && response.status() >= 400) {
       navigationBadResponses.push({ path: new URL(response.url()).pathname, status: response.status() });
     }
   });
@@ -156,7 +162,7 @@ async function main() {
     if (message.type() === "error") detailErrors.push(message.text());
   });
   detailPage.on("response", (response) => {
-    if (response.url().includes("127.0.0.1") && response.status() >= 400) {
+    if (response.url().startsWith(monitoredOrigin) && response.status() >= 400) {
       detailBadResponses.push({ path: new URL(response.url()).pathname, status: response.status() });
     }
   });
@@ -180,7 +186,7 @@ async function main() {
   const legacyRedirect = { status: legacyResponse.status, location: legacyResponse.headers.get("location") };
 
   await browser.close();
-  await new Promise((resolve) => server.close(resolve));
+  if (server.listening) await new Promise((resolve) => server.close(resolve));
 
   const failures = [];
   for (const result of routes) {
