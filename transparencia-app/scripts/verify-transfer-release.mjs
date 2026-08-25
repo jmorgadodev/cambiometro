@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
+import { assertMinimumTransferRows } from "./etl/transfer-release-guard.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const transferRoot = join(root, "public", "data", "transferencias");
@@ -15,6 +16,13 @@ if (manifest.schemaVersion !== 1) fail("schemaVersion must be 1");
 if (manifest.dataset !== "ley-19862-transferencias") fail(`unexpected dataset ${manifest.dataset}`);
 const allowSample = process.env.ALLOW_STATIC_SAMPLE === "1";
 if (!Number.isInteger(manifest.totalRows) || (!allowSample && manifest.totalRows <= 1000)) fail(`full dataset required, got ${manifest.totalRows}`);
+if (!allowSample) {
+  try {
+    assertMinimumTransferRows(manifest.totalRows);
+  } catch (error) {
+    fail(error.message);
+  }
+}
 if (manifest.pageSize !== 50) fail(`pageSize must be 50, got ${manifest.pageSize}`);
 if (manifest.totalPages !== Math.ceil(manifest.totalRows / manifest.pageSize)) fail("totalPages does not match totalRows/pageSize");
 if (!Array.isArray(manifest.pages) || manifest.pages.length !== manifest.totalPages) fail("pages does not match totalPages");
