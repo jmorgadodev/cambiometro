@@ -69,12 +69,11 @@ jobs:
         run: |
           set -euo pipefail
           bridge_token="$(openssl rand -hex 32)"
-          secrets_file="$(mktemp)"
-          trap 'rm -f "$secrets_file"' EXIT
-          printf '{"SOURCE_BRIDGE_TOKEN":"%s"}\n' "$bridge_token" > "$secrets_file"
+          printf '%s' "$bridge_token" | npx wrangler secret put SOURCE_BRIDGE_TOKEN \
+            --config workers/ley19862-source-bridge/wrangler.jsonc \
+            --name cambiometro-ley19862-source
           bridge_output="$(npx wrangler deploy \
             --config workers/ley19862-source-bridge/wrangler.jsonc \
-            --secrets-file "$secrets_file" \
             --message "Official source bridge ${GITHUB_SHA}" 2>&1 | tee /tmp/ley19862-source-bridge.log)"
           bridge_url="$(printf '%s\n' "$bridge_output" | grep -Eo 'https://[^[:space:]]+\.workers\.dev' | tail -n 1 | sed 's/[[:punct:]]*$//' || true)"
           test -n "$bridge_url"
@@ -85,7 +84,7 @@ jobs:
           bridge_health="$(curl --fail --silent --show-error --location --max-time 10 "$bridge_url/health")"
           echo "Bridge health: $bridge_health"
           probe_file="$(mktemp)"
-          trap 'rm -f "$secrets_file" "$probe_file"' EXIT
+          trap 'rm -f "$probe_file"' EXIT
           curl --fail --silent --show-error --location \
             --connect-timeout 10 --max-time 45 \
             --header "X-Source-Bridge-Token: $bridge_token" \
