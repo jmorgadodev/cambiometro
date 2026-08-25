@@ -126,6 +126,11 @@ jobs:
               last_month="$(date -u +%m)"
             fi
             for target_month in $(seq 1 "$last_month"); do
+              if [[ "$target_month" == "1" ]]; then
+                export LEY_19862_REPLACE_CATALOG=true
+              else
+                unset LEY_19862_REPLACE_CATALOG
+              fi
               npm run ingest:ley-19862 -- --year "$target_year" --month "$target_month"
               # Cada ingest publica sólo su partición para que el siguiente
               # ciclo pueda continuar aunque el origen falle transitoriamente.

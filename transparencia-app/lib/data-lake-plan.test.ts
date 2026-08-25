@@ -140,6 +140,20 @@ describe("plan de publicación del lago estático", () => {
     expect(plan.assets.some((item: { key: string }) => item.key === "sources/dipres/manifest.json")).toBe(false);
   });
 
+  it("reemplaza las particiones de una fuente cuando inicia un backfill limpio", () => {
+    const plan = buildLakePlan({ actualizado_en: "2026-01-31T00:00:00Z", fuentes: { "ley-19862": [{
+      id: "transfer-jan", fecha: "2026-01-02", kind: "transfer", url: "https://registros19862.gob.cl/transferencia/jan",
+      receiver: { entity_id: "legal-cl-receiver", name: "Receptor", class: "Institución privada", rut_juridico: "70.000.000-2" },
+      subject_entity_ids: ["legal-cl-emitter"], object_entity_ids: ["legal-cl-receiver"],
+    }] } }, {
+      existingCatalog: { partitions: [
+        { id: "ley-19862/2025/12", sourceId: "ley-19862", period: "2025-12", releaseTag: "old", manifestKey: "old", recordCount: 11651, checksumSha256: "old", status: "partial" },
+      ] },
+      replaceSourceIds: ["ley-19862"],
+    });
+    expect(plan.catalog.partitions.map((partition: { id: string }) => partition.id)).toEqual(["ley-19862/2026/01"]);
+  });
+
   it("publica fichas e índices cruzables usando sólo identificadores oficiales", () => {
     const plan = buildLakePlan({ actualizado_en: "2025-01-31T00:00:00Z", fuentes: { "ley-19862": [{ id: "transfer-1", fecha: "2025-01-02", kind: "transfer", url: "https://registros19862.gob.cl/transferencia/1", emitter: { entity_id: "legal-cl-a", name: "Emisor", class: "Ministerio o servicio público", rut_juridico: "60.000.000-1" }, receiver: { entity_id: "legal-cl-b", name: "Receptor", class: "Institución privada", rut_juridico: "70.000.000-2" }, subject_entity_ids: ["legal-cl-a"], object_entity_ids: ["legal-cl-b"] }] } });
     expect(entityAsset(plan, "ley-19862")).toBeDefined();

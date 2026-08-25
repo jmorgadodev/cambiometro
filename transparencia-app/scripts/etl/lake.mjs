@@ -277,6 +277,7 @@ export function buildLakePlan(snapshot, options = {}) {
   const originalAssets = options.originalAssets ?? [];
   const existingCatalog = options.existingCatalog ?? null;
   const existingEntityBundles = options.existingEntityBundles ?? {};
+  const replaceSourceIds = new Set(options.replaceSourceIds ?? []);
   const fallbackDate = new Date(snapshot.actualizado_en ?? "1970-01-01T00:00:00.000Z");
   if (Number.isNaN(fallbackDate.getTime())) throw new Error("INVALID_SNAPSHOT_DATE");
   const groups = new Map();
@@ -428,6 +429,7 @@ export function buildLakePlan(snapshot, options = {}) {
     explicitPeriodsBySource.set(partition.sourceId, periods);
   }
   const retainedPartitions = (existingCatalog?.partitions ?? []).filter((partition) => {
+    if (replaceSourceIds.has(partition.sourceId)) return false;
     if (producedPartitionIds.has(partition.id)) return false;
     const explicitPeriods = explicitPeriodsBySource.get(partition.sourceId);
     if (!explicitPeriods) return true;

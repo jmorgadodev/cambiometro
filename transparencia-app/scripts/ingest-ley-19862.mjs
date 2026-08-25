@@ -44,6 +44,7 @@ const plan = buildLakePlan(snapshot, {
   sourceInventory,
   existingCatalog,
   existingEntityBundles,
+  replaceSourceIds: process.env.LEY_19862_REPLACE_CATALOG === "true" ? ["ley-19862"] : [],
   originalAssets: [{ sourceId: "ley-19862", year, month, ...result.original }],
 });
 
