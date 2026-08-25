@@ -238,7 +238,8 @@ try {
 
   if (!verifyingLocal) {
     await gotoWithNetworkRetry(`${baseUrl}/politico/sen-042`, { waitUntil: "networkidle" });
-    assert.equal(await page.getByText("InfoLobby · ley 20.730", { exact: true }).count(), 1, "la ficha debe enlazar audiencias de InfoLobby");
+    assert.equal(await page.getByText("Lobby Registrado (InfoLobby)", { exact: true }).count(), 1, "la ficha debe mostrar el bloque de audiencias InfoLobby");
+    assert.equal(await page.getByText(/Ley 20\.730/).count(), 1, "la ficha debe identificar la base legal de InfoLobby");
   }
 
   await gotoWithNetworkRetry(baseUrl);
