@@ -137,6 +137,12 @@ async function verifyProdFull() {
   assertCheck("INVARIANTES", "Dieta Kaiser: $8.291.039", kaiserHtml.includes("8.291.039"));
   assertCheck("INVARIANTES", "Asignación Kaiser: +33,7%", kaiserHtml.includes("+33,7%") || kaiserHtml.includes("33,7%"));
 
+  const carlosBianchiRes = await fetchWithRetry(`${PROD_URL}/politico/carlos-bianchi-chelech`, { headers });
+  assertCheck("INVARIANTES", "Ficha Carlos Bianchi HTTP 200", carlosBianchiRes.status === 200);
+  const carlosBianchiHtml = (await carlosBianchiRes.text()).replace(/<!--.*?-->/g, "");
+  assertCheck("INVARIANTES", "Bianchi porcentaje: 25.009 / 24,89%", carlosBianchiHtml.includes("25.009") && carlosBianchiHtml.includes("24,89%"));
+  assertCheck("INVARIANTES", "Bianchi votaciones: 580 Cámara / 189 Senado", carlosBianchiHtml.includes("580") && carlosBianchiHtml.includes("189"));
+
   await new Promise((r) => setTimeout(r, 250));
 
   const maipuRes = await fetchWithRetry(`${PROD_URL}/municipalidades/muni-maipu`, { redirect: "manual", headers });

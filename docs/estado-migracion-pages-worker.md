@@ -1319,3 +1319,9 @@ cruces, fuentes, calidad y los estados editoriales. Fallaron deliberadamente:
 Las respuestas fueron 200, pero las latencias incumplen el objetivo de 700 ms
 y el navegador registró violaciones CSP en el dominio actual. Esta salida es
 una línea base de OpenNext, no evidencia de aprobación del cutover.
+
+Después de esa corrida se reforzó `verify-prod-full.mjs` para que la próxima
+pasada también compruebe explícitamente en la ficha de Carlos Bianchi
+`25.009`, `24,89%`, `580` votos de Cámara y `189` de Senado. La salida 108/11
+es, por tanto, la evidencia capturada antes de añadir esas tres aserciones
+específicas; no se presenta como una corrida nueva ni como doble pasada.
