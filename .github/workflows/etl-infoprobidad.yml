@@ -66,7 +66,15 @@ jobs:
           to_date="${INPUT_TO:-$(date -u +%F)}"
           npm run ingest:infoprobidad -- --from "$from_date" --to "$to_date" --concurrency 2
           npm run data:lake:projection:infoprobidad
+          npm run data:build:subsets
           npm run data:publish
+
+      - name: Publicar entradas estáticas versionadas para Pages
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:publish:static -- --groups infoprobidad
 
       - name: Refrescar catálogo maestro antes de materializar
         working-directory: transparencia-app

@@ -60,7 +60,16 @@ jobs:
         run: |
           target_year="${INPUT_YEAR:-$(date -u -d '1 year ago' +%Y)}"
           npm run ingest:sinim -- --year "$target_year"
+          npm run data:lake:projection:sinim
+          npm run data:build:subsets
           npm run data:publish
+
+      - name: Publicar entradas estáticas versionadas para Pages
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:publish:static -- --groups sinim
 
       - name: Refrescar catálogo maestro antes de materializar
         working-directory: transparencia-app

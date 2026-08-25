@@ -74,6 +74,8 @@ data/lake/projections/v1/*.json
 /public/data/transferencias/
 /public/data/search-index.json
 /public/data/static-site-manifest.json
+/data/static-site-release/
+/.static-site-release-manifest*
 /workers/public-api/dist/
 /workers/public-api/dist-check/
 /workers/public-api/workers/

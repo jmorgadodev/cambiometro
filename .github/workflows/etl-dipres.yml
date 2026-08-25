@@ -60,7 +60,16 @@ jobs:
         run: |
           target_year="${INPUT_YEAR:-$(date -u +%Y)}"
           npm run ingest:dipres -- --year "$target_year"
+          npm run data:lake:projection:presupuesto
+          npm run data:build:subsets
           npm run data:publish
+
+      - name: Publicar entradas estáticas versionadas para Pages
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:publish:static -- --groups dipres
 
       - name: Refrescar catálogo maestro antes de materializar
         working-directory: transparencia-app

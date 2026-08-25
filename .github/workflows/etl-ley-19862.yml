@@ -66,7 +66,16 @@ jobs:
           target_year="${INPUT_YEAR:-${period%-*}}"
           target_month="${INPUT_MONTH:-$((10#${period#*-}))}"
           npm run ingest:ley-19862 -- --year "$target_year" --month "$target_month"
+          npm run data:lake:projection:ley19862
+          npm run data:build:subsets
           npm run data:publish
+
+      - name: Publicar entradas estáticas versionadas para Pages
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:publish:static -- --groups ley19862
 
       - name: Publicar release completo para Pages y Worker
         working-directory: transparencia-app
