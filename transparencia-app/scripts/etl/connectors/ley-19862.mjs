@@ -1,5 +1,9 @@
 import { createHash } from "node:crypto";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { parseDelimited } from "./dipres.mjs";
+
+const execFileAsync = promisify(execFile);
 
 const REPORT_URL = "https://registros19862.gob.cl/reporte/transferencias";
 const REQUIRED_COLUMNS = ["FOLIO", "FECHA_DECRETO", "FECHA_INGRESO", "PERIODO", "EMISORA_RUT", "EMISORA_NOMBRE", "RECEPTORA_RUT", "RECEPTORA_NOMBRE", "MONTO"];
@@ -107,6 +111,22 @@ function wait(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
+async function fetchWithCurl(sourceUrl, timeoutMs) {
+  const binary = process.platform === "win32" ? "curl.exe" : "curl";
+  const { stdout } = await execFileAsync(binary, [
+    "--fail-with-body",
+    "--location",
+    "--retry", "3",
+    "--retry-all-errors",
+    "--connect-timeout", String(Math.max(10, Math.ceil(timeoutMs / 1000))),
+    "--max-time", String(Math.max(30, Math.ceil(timeoutMs / 1000))),
+    "--user-agent", "TransparenciaChile-ETL/3.0",
+    "--header", "Accept: text/csv",
+    sourceUrl,
+  ], { encoding: "buffer", maxBuffer: 64 * 1024 * 1024 });
+  return Buffer.isBuffer(stdout) ? stdout : Buffer.from(stdout);
+}
+
 export async function fetchTransferMonth({
   year,
   month,
@@ -117,6 +137,7 @@ export async function fetchTransferMonth({
 }) {
   const sourceUrl = buildTransferReportUrl(year, month);
   let response;
+  let lastError = null;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
       response = await fetchImpl(sourceUrl, { headers: { "User-Agent": "TransparenciaChile-ETL/3.0", Accept: "text/csv" }, signal: AbortSignal.timeout(timeoutMs) });
@@ -126,9 +147,20 @@ export async function fetchTransferMonth({
         break;
       }
     } catch (error) {
-      if (!retryableNetworkError(error) || attempt === maxAttempts) throw error;
+      lastError = error;
+      if (!retryableNetworkError(error)) throw error;
+      if (attempt === maxAttempts) break;
     }
     await wait(retryDelayMs * attempt);
+  }
+  if (lastError && fetchImpl === fetch) {
+    try {
+      const data = await fetchWithCurl(sourceUrl, timeoutMs);
+      response = { ok: true, arrayBuffer: async () => data };
+    } catch (curlError) {
+      curlError.cause = lastError;
+      throw curlError;
+    }
   }
   if (!response?.ok) throw new Error(`LEY_19862_HTTP_${response?.status ?? "UNKNOWN"}`);
   const original = Buffer.from(await response.arrayBuffer());
