@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { gunzipSync } from "node:zlib";
 import { buildLakePlan } from "./etl/lake.mjs";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -29,7 +30,21 @@ if (existsSync(existingCatalogPath)) {
     console.warn(`[WARN] Ignorando catálogo inválido o vacío: ${e.message}`);
   }
 }
-const plan = buildLakePlan(snapshot, { sourceInventory, existingCatalog });
+function readExistingProjection(key) {
+  if (!key) return [];
+  const path = resolve(outputRoot, key);
+  if (!path.startsWith(`${outputRoot}${sep}`) || !existsSync(path)) return [];
+  const text = gunzipSync(readFileSync(path)).toString("utf8").trim();
+  return text ? text.split("\n").map((line) => JSON.parse(line)) : [];
+}
+
+const existingEntityBundles = Object.fromEntries((existingCatalog?.sources ?? [])
+  .filter((source) => source.entityKey || source.entityIndexKey)
+  .map((source) => [source.id, {
+    entities: readExistingProjection(source.entityKey),
+    indexes: readExistingProjection(source.entityIndexKey),
+  }]));
+const plan = buildLakePlan(snapshot, { sourceInventory, existingCatalog, existingEntityBundles });
 const publishPlan = {
   schemaVersion: "1.0.0",
   generatedAt: snapshot.actualizado_en ?? null,
