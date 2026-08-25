@@ -56,6 +56,9 @@ jobs:
 
       - name: Preparar workspace ETL sin datasets versionados
         working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: npm run etl:prepare -- --download-projections --sources ley-19862
 
       - name: Hidratar particiones históricas de transferencias desde R2
