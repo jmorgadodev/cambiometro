@@ -129,10 +129,17 @@ export default function OrganismoFuncionariosList({
           params.set("periodo", periodo);
         }
         const staticManifest = await fetchJson("/data/funcionarios/manifest.json", 3_000).catch(() => null);
-        const staticEntry = staticManifest?.files?.find?.((entry: { id?: string; rows?: number }) => entry.id === organismoId && Number(entry.rows) > 0);
+        const staticEntry = staticManifest?.files?.find?.((entry: { id?: string; rows?: number; chunks?: Array<{ path?: string }> }) => entry.id === organismoId && Number(entry.rows) > 0);
         const readStatic = async () => {
-          const staticResponse = await fetchJson(`/data/funcionarios/${encodeURIComponent(organismoId)}.json`, 8_000);
-          if (!Array.isArray(staticResponse)) throw new Error("STATIC_PAYROLL_INVALID");
+          const chunkPaths = Array.isArray(staticEntry?.chunks)
+            ? staticEntry.chunks.map((chunk: { path?: string }) => chunk.path).filter((path: unknown): path is string => typeof path === "string" && path.length > 0)
+            : [];
+          const paths = chunkPaths.length > 0
+            ? chunkPaths
+            : [`/data/funcionarios/${encodeURIComponent(organismoId)}.json`];
+          const payloads = await Promise.all(paths.map((path: string) => fetchJson(path, 8_000)));
+          const staticResponse = payloads.flat();
+          if (!payloads.every(Array.isArray)) throw new Error("STATIC_PAYROLL_INVALID");
           return queryStaticFuncionarios(staticResponse, {
             query: debouncedSearch,
             contrato: contratoFilter,

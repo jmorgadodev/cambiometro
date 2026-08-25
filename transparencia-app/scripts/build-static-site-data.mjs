@@ -5,6 +5,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { writeChunkedJson } from "./static-site-data.mjs";
 import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
+import { chunkJsonRows } from "./static-payroll.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const readJson = (file) => readFile(join(root, file), "utf8").then(JSON.parse);
@@ -118,15 +119,41 @@ for (const entry of await readdir(cpltRoot, { withFileTypes: true })) {
     continue;
   }
   if (!Array.isArray(parsed) || parsed.length === 0) continue;
-  const output = join(publicFuncionariosDir, entry.name);
-  await writeFile(output, content);
-  funcionariosFiles.push({
-    id: entry.name.replace(/\.json$/, ""),
-    path: `/data/funcionarios/${entry.name}`,
-    rows: parsed.length,
-    bytes: content.byteLength,
-    checksumSha256: crypto.createHash("sha256").update(content).digest("hex"),
-  });
+  const id = entry.name.replace(/\.json$/, "");
+  const chunks = chunkJsonRows(parsed);
+  if (chunks.length === 1) {
+    const output = join(publicFuncionariosDir, entry.name);
+    await writeFile(output, content);
+    funcionariosFiles.push({
+      id,
+      path: `/data/funcionarios/${entry.name}`,
+      rows: parsed.length,
+      bytes: content.byteLength,
+      checksumSha256: crypto.createHash("sha256").update(content).digest("hex"),
+    });
+  } else {
+    const chunkDir = join(publicFuncionariosDir, id);
+    await mkdir(chunkDir, { recursive: true });
+    const chunkManifest = [];
+    for (const [index, rows] of chunks.entries()) {
+      const chunkName = `p-${String(index + 1).padStart(4, "0")}.json`;
+      const chunkContent = `${JSON.stringify(rows)}\n`;
+      await writeFile(join(chunkDir, chunkName), chunkContent);
+      chunkManifest.push({
+        path: `/data/funcionarios/${id}/${chunkName}`,
+        rows: rows.length,
+        bytes: Buffer.byteLength(chunkContent),
+        checksumSha256: crypto.createHash("sha256").update(chunkContent).digest("hex"),
+      });
+    }
+    funcionariosFiles.push({
+      id,
+      chunks: chunkManifest,
+      rows: parsed.length,
+      bytes: content.byteLength,
+      checksumSha256: crypto.createHash("sha256").update(content).digest("hex"),
+    });
+  }
 }
 funcionariosFiles.sort((left, right) => left.id.localeCompare(right.id));
 const funcionariosManifest = {
