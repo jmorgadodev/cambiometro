@@ -1084,6 +1084,8 @@ llamada inválida; no se relajó el límite del bundle ni se omitió la auditor�
 
 El E2E posterior falló al levantar Pages local porque Wrangler detectó el
 `wrangler.jsonc` OpenNext del directorio raíz y buscó `.open-next/assets`.
-El artefacto estático estaba correcto. El workflow se ajustó para ejecutar
-`wrangler pages dev .` desde `out/`, manteniendo el proxy al Worker local y
-aislando la prueba Pages de la configuración OpenNext de rollback.
+Incluso aislando el directorio, esta versión local de Wrangler respondió 404
+para `out/index.html`. El artefacto estático estaba correcto. El workflow usa
+ahora `serve out` para la superficie HTML estática y mantiene Wrangler
+separado en el puerto del Worker API; esta es la misma estrategia determinista
+del refresco Pages y no cambia el runtime de producción.
