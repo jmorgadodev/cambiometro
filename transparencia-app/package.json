@@ -69,6 +69,7 @@
     "ingest:sinim": "node scripts/ingest-sinim.mjs",
     "ingest:ley-19862": "node scripts/ingest-ley-19862.mjs",
     "data:backfill:ley19862": "node scripts/backfill-ley-19862-full.mjs",
+    "data:hydrate:ley19862": "node scripts/hydrate-ley19862-from-r2.mjs",
     "data:verify:r2:ley19862": "node scripts/verify-r2-ley19862-release.mjs",
     "ingest:contraloria": "node scripts/ingest-contraloria.mjs",
     "ingest:senado": "node scripts/ingest-senado.mjs",
