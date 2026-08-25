@@ -21,8 +21,11 @@ const redirects = [
   "/autoridades /personas?tab=parlamentarios 301",
   "/funcionarios /personas?tab=funcionarios 301",
   "/partidos/independientes /partidos/ind 301",
-  ...MUNICIPALIDADES_SEED.map((municipalidad) =>
-    `/municipalidades/${municipalidad.id} /municipalidades/${slugify(municipalidad.nombre_comuna)} 301`),
+  ...MUNICIPALIDADES_SEED.flatMap((municipalidad) => {
+    const from = `/municipalidades/${municipalidad.id}`;
+    const to = `/municipalidades/${slugify(municipalidad.nombre_comuna)}`;
+    return [`${from} ${to} 301`, `${from}/ ${to} 301`];
+  }),
   ...serviceRedirects,
   ...politicoRedirects.map(({ from, to }) => `/politico/${from} /politico/${to} 301`),
 ].join("\n") + "\n";
