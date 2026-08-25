@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import ley19862Subset from "@/data/lake-subsets/ley19862.subset.json";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { SourceManifest } from "@/lib/data-contracts";
 import { listSourceManifests } from "@/lib/data-platform-d1";
@@ -46,7 +47,7 @@ function localCpltManifest(): CpltPublicManifest | null {
 export const SOURCE_CANONICAL_COUNTS: Record<string, number> = {
   "chilecompra": 74142,
   "transparencia-activa": 1203287,
-  "ley-19862": 59361,
+  "ley-19862": Number(ley19862Subset.kpis?.total_transfers ?? 59361),
   "dipres": 15689,
   "sinim": 3105,
   "infolobby": 60523,

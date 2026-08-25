@@ -1,6 +1,8 @@
-import { execSync } from "node:child_process";
+import { spawnSync } from "node:child_process";
 
 const PROD_BASE = process.env.PROD_URL || "https://cambiometro.impulsacv.cl";
+const API_BASE = process.env.API_URL || PROD_BASE;
+const UPTIME_TOKEN = process.env.UPTIME_TOKEN || "";
 
 const ROUTES = [
   "/",
@@ -10,17 +12,27 @@ const ROUTES = [
   "/municipalidades",
   "/transferencias",
   "/cruces",
+  "/politico/vanessa-kaiser-barents-von-hohenhagen",
 ];
 
-async function checkRoute(path) {
-  const url = `${PROD_BASE}${path}`;
+const API_ROUTES = [
+  "/api/v1/health",
+  "/api/v1/search?q=maipu",
+  "/api/funcionarios?muni=muni-maipu&periodo=2026-06&limit=1",
+];
+
+async function checkRoute(path, base = PROD_BASE) {
+  const url = `${base}${path}`;
   const t0 = performance.now();
   let res;
   let errorMsg = "";
 
   try {
     res = await fetch(url, {
-      headers: { "User-Agent": "Cambiometro-UptimeSmoke/1.0" },
+      headers: {
+        "User-Agent": "Cambiometro-UptimeSmoke/1.0",
+        ...(UPTIME_TOKEN ? { "X-Cambiometro-Uptime-Token": UPTIME_TOKEN } : {}),
+      },
       signal: AbortSignal.timeout(5000),
     });
   } catch (err) {
@@ -53,7 +65,7 @@ async function checkRoute(path) {
 }
 
 export async function runUptimeSmoke() {
-  console.log(`[uptime-smoke] Iniciando verificación de uptime para ${PROD_BASE} (${ROUTES.length} rutas)...`);
+  console.log(`[uptime-smoke] Pages=${PROD_BASE} API=${API_BASE} (${ROUTES.length} páginas + ${API_ROUTES.length} APIs)...`);
   const results = [];
   let allPass = true;
 
@@ -68,6 +80,17 @@ export async function runUptimeSmoke() {
     }
   }
 
+  for (const route of API_ROUTES) {
+    const result = await checkRoute(route, API_BASE);
+    results.push(result);
+    if (!result.isOk) {
+      allPass = false;
+      console.error(`❌ FAIL API: ${result.path} -> Status ${result.status}, Tiempo ${result.durationMs}ms, Ray-ID: ${result.rayId}, Error: ${result.errorMsg || (result.has1102 ? "Error 1102 (CPU)" : "Status != 200")}`);
+    } else {
+      console.log(`✅ PASS API: ${result.path} -> Status 200, ${result.durationMs}ms, Ray-ID: ${result.rayId}`);
+    }
+  }
+
   if (!allPass) {
     const failures = results.filter((r) => !r.isOk);
     for (const f of failures) {
@@ -77,7 +100,8 @@ export async function runUptimeSmoke() {
       if (process.env.GITHUB_ACTIONS && process.env.GITHUB_TOKEN) {
         try {
           console.log(`[uptime-smoke] Creando issue en GitHub: "${issueTitle}"...`);
-          execSync(`gh issue create --title "${issueTitle}" --body "${issueBody.replace(/"/g, '\\"')}"`, { stdio: "inherit" });
+          const issue = spawnSync("gh", ["issue", "create", "--title", issueTitle, "--body", issueBody], { stdio: "inherit", shell: false });
+          if (issue.status !== 0) throw new Error(`gh issue create terminó con ${issue.status ?? "señal"}`);
         } catch (e) {
           console.error(`[uptime-smoke] Error al crear issue:`, e.message);
         }

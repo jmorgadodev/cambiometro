@@ -4,6 +4,8 @@ import { getFuncionariosPorOrganismo } from "@/lib/funcionarios";
 import { legalEntityIdFromRut } from "@/lib/legal-rut";
 import { MUNICIPALIDADES_SEED } from "@/lib/municipalidades";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
+import { getPoliticoSlug } from "@/lib/politico-slugs";
+import { getMuniCanonicalSlug } from "@/lib/slug-utils";
 import { readR2Entity } from "@/lib/r2-entities";
 import { getCloudflareContext } from "@opennextjs/cloudflare";
 import evidenceStats from "@/data/politicos-evidences-stats.json";
@@ -37,7 +39,7 @@ export async function GET(request: Request) {
       region: politico.distrito_region,
       evidencia_etl: (evidenceStats[politico.id as keyof typeof evidenceStats] ?? [])
         .reduce((total, source) => total + source.count, 0),
-      url: `/politico/${politico.id}`,
+      url: `/politico/${getPoliticoSlug(politico)}`,
     }));
   const authorities = authorityMatches.slice(0, 25);
 
@@ -50,7 +52,7 @@ export async function GET(request: Request) {
       alcalde: municipalidad.alcalde_actual,
       partido: municipalidad.partido_alcalde,
       region: municipalidad.region,
-      url: `/municipalidades/${municipalidad.id}`,
+      url: `/municipalidades/${getMuniCanonicalSlug(municipalidad.id)}`,
     }));
   const municipalidades = municipalityMatches.slice(0, 25);
 

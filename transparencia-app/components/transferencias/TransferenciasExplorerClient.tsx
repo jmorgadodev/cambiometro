@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef, useTransition } from "react";
-import Link from "next/link";
+import { useState, useMemo, useEffect, useRef } from "react";
+import Link from "@/components/SiteLink";
 import type { TransferenciaDetalle, Ley19862Summary, ReceptorResumen, EmisorResumen } from "@/lib/transferencias-data";
 
 // ── Tipos ──────────────────────────────────────────────────────────────────────
@@ -64,6 +64,33 @@ function fmtDate(fecha: string | null): string {
 const DEFAULT_PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 
+interface StaticSearchEntry {
+  i: number;
+  p: number;
+  y: string | null;
+  d: string | null;
+  e: string | null;
+  r: string | null;
+  t: string | null;
+  m: number;
+}
+
+interface StaticManifest {
+  totalRows: number;
+  totalPages: number;
+  pageSize: number;
+  pages: Array<{ page: number; path: string }>;
+  searchIndex: { path: string };
+}
+
+function matchesSearch(entry: StaticSearchEntry, query: string): boolean {
+  if (!query) return true;
+  const needle = query.toLocaleLowerCase("es-CL");
+  return [entry.t, entry.e, entry.r, entry.y]
+    .filter(Boolean)
+    .some((value) => value!.toLocaleLowerCase("es-CL").includes(needle));
+}
+
 export default function TransferenciasExplorerClient({
   kpis,
   topReceptores,
@@ -97,7 +124,8 @@ export default function TransferenciasExplorerClient({
   const [total, setTotal] = useState<number>(initialTotal);
   const [totalPages, setTotalPages] = useState<number>(initialTotalPages);
   const [isLoading, setIsLoading] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
 
   const isInitialMount = useRef(true);
 
@@ -109,7 +137,8 @@ export default function TransferenciasExplorerClient({
     return Array.from(set).sort();
   }, [topEmisores, initialTransfers]);
 
-  // Carga remota o filtrado reactivo
+  // Carga del manifest e índice estáticos publicados en Pages. La API Worker
+  // sigue disponible para clientes externos, pero la UI no depende de ella.
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
@@ -117,42 +146,68 @@ export default function TransferenciasExplorerClient({
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(async () => {
+    const timeoutId = window.setTimeout(() => controller.abort(), 5000);
+    const loadId = window.setTimeout(async () => {
       setIsLoading(true);
+      setLoadError(null);
       try {
-        const params = new URLSearchParams({
-          page: String(page),
-          limit: String(pageSize),
-          sort: sortBy,
-          order: "desc",
-        });
-        if (search.trim()) params.set("q", search.trim());
-        if (yearFilter !== "Todos") params.set("year", yearFilter);
-        if (emisorFilter !== "Todos") params.set("emisor", emisorFilter);
-
-        const res = await fetch(`/api/v1/transferencias?${params.toString()}`, {
-          signal: controller.signal,
-        });
-        if (res.ok) {
-          const json = await res.json();
-          setTransfers(json.data || []);
-          setTotal(json.total || 0);
-          setTotalPages(json.totalPages || 1);
+        const manifestResponse = await fetch("/data/transferencias/manifest.json", { signal: controller.signal, cache: "no-store" });
+        if (!manifestResponse.ok) throw new Error(`manifest HTTP ${manifestResponse.status}`);
+        const manifest = await manifestResponse.json() as StaticManifest;
+        if (!manifest.totalRows || !manifest.pages?.length || !manifest.searchIndex?.path) {
+          throw new Error("manifest incompleto");
         }
+        const indexResponse = await fetch(manifest.searchIndex.path, { signal: controller.signal, cache: "no-store" });
+        if (!indexResponse.ok) throw new Error(`índice HTTP ${indexResponse.status}`);
+        const index = await indexResponse.json() as StaticSearchEntry[];
+        const normalizedSearch = search.trim();
+        const matching = index.filter((entry) => {
+          if (yearFilter !== "Todos" && entry.y !== yearFilter) return false;
+          if (emisorFilter !== "Todos" && entry.e !== emisorFilter) return false;
+          return matchesSearch(entry, normalizedSearch);
+        });
+        matching.sort((left, right) => {
+          if (sortBy === "fecha") return String(right.d ?? "").localeCompare(String(left.d ?? "")) || right.m - left.m;
+          return right.m - left.m || String(right.d ?? "").localeCompare(String(left.d ?? ""));
+        });
+        const matchingPage = matching.slice((page - 1) * pageSize, page * pageSize);
+        const pageNumbers = [...new Set(matchingPage.map((entry) => entry.p))];
+        const pageRows = await Promise.all(pageNumbers.map(async (pageNumber) => {
+          const pageInfo = manifest.pages.find((candidate) => candidate.page === pageNumber);
+          if (!pageInfo) throw new Error(`chunk ${pageNumber} ausente`);
+          const response = await fetch(pageInfo.path, { signal: controller.signal, cache: "no-store" });
+          if (!response.ok) throw new Error(`chunk ${pageNumber} HTTP ${response.status}`);
+          return await response.json() as TransferenciaDetalle[];
+        }));
+        const byIndex = new Map<number, TransferenciaDetalle>();
+        pageNumbers.forEach((pageNumber, pageIndex) => {
+          pageRows[pageIndex].forEach((row, rowIndex) => byIndex.set((pageNumber - 1) * manifest.pageSize + rowIndex, row));
+        });
+        setTransfers(matchingPage.map((entry) => byIndex.get(entry.i)).filter((row): row is TransferenciaDetalle => Boolean(row)));
+        setTotal(matching.length);
+        setTotalPages(Math.max(1, Math.ceil(matching.length / pageSize)));
       } catch (err: unknown) {
-        if (err instanceof Error && err.name !== "AbortError") {
-          console.error("Error fetching transferencias:", err);
+        if (err instanceof Error && err.name === "AbortError") {
+          setLoadError("La carga tardó demasiado. Reintenta para volver a consultar los datos publicados.");
+        } else {
+          console.error("Error cargando chunks de transferencias:", err);
+          setLoadError("No se pudo cargar el índice de transferencias. Revisa tu conexión y reintenta.");
         }
+        setTransfers([]);
+        setTotal(0);
+        setTotalPages(1);
       } finally {
+        window.clearTimeout(timeoutId);
         setIsLoading(false);
       }
     }, 150);
 
     return () => {
       controller.abort();
-      clearTimeout(timeoutId);
+      window.clearTimeout(loadId);
+      window.clearTimeout(timeoutId);
     };
-  }, [page, pageSize, search, yearFilter, emisorFilter, sortBy]);
+  }, [page, pageSize, search, yearFilter, emisorFilter, sortBy, retryNonce]);
 
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);
@@ -188,7 +243,7 @@ export default function TransferenciasExplorerClient({
     setPage(1);
   };
 
-  // ── Serie anual (4 barras 2023-2026) ─────────────────────────────────────────
+  // ── Serie anual derivada del manifest vigente ────────────────────────────────
   const yearChartData = useMemo(() => {
     return Object.entries(byYear).map(([yr, info]) => {
       return {
@@ -267,7 +322,7 @@ export default function TransferenciasExplorerClient({
               {
                 label: "Total Transferencias",
                 value: fmtNum(kpis.total_transfers),
-                sub: "59.361 registros oficiales indexados",
+                sub: `${fmtNum(kpis.total_transfers)} registros oficiales indexados`,
                 color: "var(--info)",
               },
               {
@@ -487,7 +542,7 @@ export default function TransferenciasExplorerClient({
           </div>
         </div>
 
-        {/* ── SERIE ANUAL 2023-2026 (4 BARRAS) ───────────────────────────────── */}
+        {/* ── SERIE ANUAL DEL MANIFEST VIGENTE ────────────────────────────────── */}
         <div
           style={{
             background: "var(--surface)",
@@ -497,7 +552,7 @@ export default function TransferenciasExplorerClient({
           }}
         >
           <div style={{ fontWeight: 700, fontSize: "1rem", color: "var(--text-1)", marginBottom: "0.2rem" }}>
-            📅 Serie Anual de Transferencias (2023–2026)
+            📅 Serie Anual de Transferencias
           </div>
           <p style={{ fontSize: "0.75rem", color: "var(--text-3)", margin: "0 0 1.25rem 0" }}>
             Monto consolidado y volumen de transferencias por año oficial. Haz clic en cualquier barra para filtrar el explorador por ese año.
@@ -754,6 +809,13 @@ export default function TransferenciasExplorerClient({
               <span style={{ color: "var(--accent)", fontWeight: 600 }}>Cargando transferencias...</span>
             )}
           </div>
+
+          {loadError && (
+            <div role="alert" style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.75rem", padding: "0.75rem 1rem", marginBottom: "1rem", border: "1px solid var(--border)", borderRadius: 6, color: "var(--text-2)" }}>
+              <span>{loadError}</span>
+              <button type="button" className="btn btn-secondary btn-sm" onClick={() => setRetryNonce((value) => value + 1)}>Reintentar</button>
+            </div>
+          )}
 
           {/* TABLA LIMPIA (HAIRLINES, SIN CHIPS PESADOS) */}
           <div style={{ overflowX: "auto", border: "1px solid var(--border)", borderRadius: 6 }}>

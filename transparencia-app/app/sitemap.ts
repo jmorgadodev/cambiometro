@@ -5,6 +5,8 @@ import { getPoliticoSlug } from "@/lib/politico-slugs";
 import { getSnapshotSummary } from "@/lib/data-source";
 import { getAllMuniSlugs, getAllServicioSlugs } from "@/lib/slug-utils";
 
+export const dynamic = "force-static";
+
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = "https://cambiometro.impulsacv.cl";
   const snapshot = getSnapshotSummary();

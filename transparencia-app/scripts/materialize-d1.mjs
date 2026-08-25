@@ -6,7 +6,7 @@ import readline from "node:readline";
 import { spawnSync } from "node:child_process";
 import { createGunzip } from "node:zlib";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
-import { canonicalizeLakeRecord, D1_ARCHIVE_ONLY_SOURCES, entityFromRosterMember, relationsFromLakeRecord, selectMaterializedPartitions, sourceStateChecksum } from "./etl/materialize.mjs";
+import { canonicalizeLakeRecord, D1_ARCHIVE_ONLY_SOURCES, entityFromRosterMember, relationsFromLakeRecord, selectMaterializedPartitions, sourceStateChecksum, transferenciaFromLakeRecord } from "./etl/materialize.mjs";
 import { fetchParliamentRosters } from "./etl/parliament-rosters.mjs";
 import { reconcilePersonAliases } from "./etl/person-reconciliation.mjs";
 
@@ -157,6 +157,11 @@ function stageRelation(writer, relation) {
   writer.add(`INSERT OR REPLACE INTO stage_relations (run_id,id,from_id,predicate,to_id,evidence_record_ids_json,period_json,reconciliation_json,disclaimer) VALUES (${sql(runId)},${sql(relation.id)},${sql(relation.fromId)},${sql(relation.predicate)},${sql(relation.toId)},${sql(relation.evidenceRecordIds)},${sql(relation.period)},${sql(relation.reconciliation)},${sql(relation.disclaimer)});`);
 }
 
+function stageTransferencia(writer, row) {
+  if (!row) return;
+  writer.add(`INSERT OR REPLACE INTO stage_transferencias_19862 (run_id,id,folio,fecha,periodo,emisor_nombre,emisor_rut,receptor_nombre,receptor_rut,materia,monto_clp,url_registro,clasificacion,comuna) VALUES (${sql(runId)},${sql(row.id)},${sql(row.folio)},${sql(row.fecha)},${sql(row.periodo)},${sql(row.emisorNombre)},${sql(row.emisorRut)},${sql(row.receptorNombre)},${sql(row.receptorRut)},${sql(row.materia)},${row.montoClp},${sql(row.urlRegistro)},${sql(row.clasificacion)},${sql(row.comuna)});`);
+}
+
 async function main() {
   if (isRemote && !dryRun && !allowLocalAuth) requireCloudflareDataCredentials();
   const catalogPath = join(lakeRoot, "catalog", "v1", "manifest.json");
@@ -181,7 +186,7 @@ async function main() {
   }
 
   if (!dryRun) wrangler(["d1", "migrations", "apply", database, isRemote ? "--remote" : "--local"]);
-  executeSql(`INSERT OR REPLACE INTO etl_runs (id,cadence,status,started_at,catalog_version,catalog_checksum,source_count) VALUES (${sql(runId)},${sql(cadence)},'running',CURRENT_TIMESTAMP,${sql(catalog.generatedAt)},${sql(sha256(catalogBuffer))},${sourcesToMaterialize.length});\nDELETE FROM stage_entities WHERE run_id=${sql(runId)};\nDELETE FROM stage_records WHERE run_id=${sql(runId)};\nDELETE FROM stage_relations WHERE run_id=${sql(runId)};`, "start");
+  executeSql(`INSERT OR REPLACE INTO etl_runs (id,cadence,status,started_at,catalog_version,catalog_checksum,source_count) VALUES (${sql(runId)},${sql(cadence)},'running',CURRENT_TIMESTAMP,${sql(catalog.generatedAt)},${sql(sha256(catalogBuffer))},${sourcesToMaterialize.length});\nDELETE FROM stage_entities WHERE run_id=${sql(runId)};\nDELETE FROM stage_records WHERE run_id=${sql(runId)};\nDELETE FROM stage_relations WHERE run_id=${sql(runId)};\nDELETE FROM stage_transferencias_19862 WHERE run_id=${sql(runId)};`, "start");
 
   const writer = new StageWriter();
   const entityIds = new Set();
@@ -240,6 +245,11 @@ DELETE FROM stage_entities WHERE run_id=${sql(runId)};`, "entities");
         partitionCount += 1;
         counts.set(partition.sourceId, (counts.get(partition.sourceId) ?? 0) + 1);
         for (const entity of raw.data?.entities ?? []) stageEntity(writer, entity, partition.sourceId, entityIds);
+        if (partition.sourceId === "ley-19862") {
+          const transferencia = transferenciaFromLakeRecord(raw);
+          if (!transferencia) throw new Error(`D1_TRANSFERENCIA_INVALID_ROW: ${raw.id}`);
+          stageTransferencia(writer, transferencia);
+        }
         const record = canonicalizeLakeRecord(raw);
         stageRecord(writer, record);
         for (const relation of relationsFromLakeRecord(raw)) stageRelation(writer, relation);
@@ -308,6 +318,13 @@ WHERE published.id IS NULL AND staged.id IS NULL;`, "total");
 SELECT id,kind,name,identifiers_json,attributes_json,source_ids_json,updated_at
 FROM stage_entities WHERE run_id=${sql(runId)};
 DELETE FROM stage_entities WHERE run_id=${sql(runId)};`, `publish-record-entities-${source.id}`);
+    if (source.id === "ley-19862") {
+      executeSql(`DELETE FROM transferencias_19862;
+INSERT INTO transferencias_19862 (id,folio,fecha,periodo,emisor_nombre,emisor_rut,receptor_nombre,receptor_rut,materia,monto_clp,url_registro,clasificacion,comuna,updated_at)
+SELECT id,folio,fecha,periodo,emisor_nombre,emisor_rut,receptor_nombre,receptor_rut,materia,monto_clp,url_registro,clasificacion,comuna,CURRENT_TIMESTAMP
+FROM stage_transferencias_19862 WHERE run_id=${sql(runId)};
+DELETE FROM stage_transferencias_19862 WHERE run_id=${sql(runId)};`, `publish-transferencias-${source.id}`);
+    }
     executeSql(`DELETE FROM relations WHERE source_id=${sql(source.id)};`, `cleanup-relations-${source.id}`);
     executeSql(`DELETE FROM record_subjects WHERE record_id IN (SELECT id FROM records WHERE source_id=${sql(source.id)});
 DELETE FROM record_objects WHERE record_id IN (SELECT id FROM records WHERE source_id=${sql(source.id)});
@@ -338,6 +355,7 @@ WHERE status='pending_change' AND missing_streak>=2;
 DELETE FROM stage_entities WHERE run_id=${sql(runId)};
 DELETE FROM stage_records WHERE run_id=${sql(runId)};
 DELETE FROM stage_relations WHERE run_id=${sql(runId)};
+DELETE FROM stage_transferencias_19862 WHERE run_id=${sql(runId)};
 DELETE FROM mandate_snapshot WHERE run_id=${sql(runId)};`;
   executeSql(finalizeRun, "finalize-run");
   console.log(JSON.stringify({
@@ -373,6 +391,7 @@ Opciones:
 DELETE FROM stage_entities WHERE run_id=${sql(runId)};
 DELETE FROM stage_records WHERE run_id=${sql(runId)};
 DELETE FROM stage_relations WHERE run_id=${sql(runId)};
+DELETE FROM stage_transferencias_19862 WHERE run_id=${sql(runId)};
 DELETE FROM mandate_snapshot WHERE run_id=${sql(runId)};`, "failure", true);
     console.error("[materialize-d1]", error);
     process.exitCode = 1;

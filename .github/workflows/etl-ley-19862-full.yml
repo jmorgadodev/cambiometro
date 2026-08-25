@@ -1,0 +1,77 @@
+name: ETL completo mensual - Ley 19.862
+
+on:
+  schedule:
+    - cron: "0 6 2 * *"
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "Año que se reconstruirá (YYYY)"
+        required: false
+      through_month:
+        description: "Mes final incluido (1-12)"
+        required: false
+
+concurrency:
+  group: etl-ley-19862-full
+  cancel-in-progress: true
+
+jobs:
+  rebuild-r2:
+    name: Reconstruir año vigente y publicar R2
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: write
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+      - name: Instalar dependencias
+        run: npm ci
+        working-directory: transparencia-app
+      - name: Exigir credenciales Cloudflare
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+      - name: Descargar catálogo vigente
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          mkdir -p data/lake/catalog/v1
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+      - name: Reconstruir desde CSV oficial sin mezclar períodos anteriores
+        working-directory: transparencia-app
+        env:
+          INPUT_YEAR: ${{ inputs.year }}
+          INPUT_MONTH: ${{ inputs.through_month }}
+        run: |
+          year="${INPUT_YEAR:-$(date -u +%Y)}"
+          month="${INPUT_MONTH:-$(date -u +%-m)}"
+          npm run data:backfill:ley19862 -- --year "$year" --through-month "$month"
+          npm run data:verify:full:ley19862
+          npm run data:verify:r2:ley19862
+      - name: Publicar releases inmutables y R2
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:publish
+      - name: Confirmar catálogo R2 publicado
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.remote.json --remote
+          node -e "const fs=require('fs');const local=JSON.parse(fs.readFileSync('data/lake/catalog/v1/manifest.json'));const remote=JSON.parse(fs.readFileSync('data/lake/catalog/v1/manifest.remote.json'));const a=local.sources.find(x=>x.id==='ley-19862');const b=remote.sources.find(x=>x.id==='ley-19862');if(!a||!b||a.recordCount!==b.recordCount)process.exit(1);console.log(JSON.stringify({source:'ley-19862',recordCount:b.recordCount,status:b.status}));"

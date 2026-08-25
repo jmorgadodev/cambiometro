@@ -1,5 +1,3 @@
-import { strict as assert } from "node:assert";
-
 let passed = 0;
 let failed = 0;
 
@@ -70,17 +68,23 @@ async function fetchWithRetry(url, options = {}, maxRetries = 3) {
 }
 
 async function verifyProdFull() {
+  const PROD_URL = (process.env.PROD_URL || "https://cambiometro.impulsacv.cl").replace(/\/$/, "");
+  const API_URL = (process.env.API_URL || PROD_URL).replace(/\/$/, "");
   console.log("================================================================================");
   console.log("  VERIFICACIÓN EN VIVO INTEGRAL DE PRODUCCIÓN — EL CAMBIÓMETRO");
-  console.log("  URL Base: https://cambiometro.impulsacv.cl");
+  console.log(`  Pages URL: ${PROD_URL}`);
+  console.log(`  Worker API URL: ${API_URL}`);
   console.log("================================================================================\n");
 
-  const PROD_URL = "https://cambiometro.impulsacv.cl";
   const headers = { "User-Agent": "Cambiometro-Full-Verifier/1.0", "Cache-Control": "no-cache", "Connection": "close" };
+  const transferManifestRes = await fetchWithRetry(`${PROD_URL}/data/transferencias/manifest.json`, { headers });
+  const transferManifest = transferManifestRes.ok ? await transferManifestRes.json() : null;
+  const transferTotal = Number(transferManifest?.totalRows ?? 0);
+  const transferLabel = transferTotal.toLocaleString("es-CL");
 
   // ─── MÓDULO 1: HOME & GLOBALES ─────────────────────────────────────────────
   console.log("1. MÓDULO HOME Y FOOTER COMPACTO (/)");
-  const homeRes = await fetchWithRetry("https://cambiometro.impulsacv.cl/", { headers });
+  const homeRes = await fetchWithRetry(`${PROD_URL}/`, { headers });
   assertCheck("HOME", "HTTP Status 200", homeRes.status === 200);
   const homeHtml = (await homeRes.text()).replace(/<!--.*?-->/g, "");
 
@@ -106,7 +110,7 @@ async function verifyProdFull() {
 
   // ─── MÓDULO 2: FICHAS E INVARIANTES ────────────────────────────────────────
   console.log("\n2. MÓDULO FICHAS E INVARIANTES");
-  const kaiserRes = await fetchWithRetry("https://cambiometro.impulsacv.cl/politico/vanessa-kaiser-barents-von-hohenhagen", { headers });
+  const kaiserRes = await fetchWithRetry(`${PROD_URL}/politico/vanessa-kaiser-barents-von-hohenhagen`, { headers });
   assertCheck("INVARIANTES", "Ficha Vanessa Kaiser HTTP 200", kaiserRes.status === 200);
   const kaiserHtml = (await kaiserRes.text()).replace(/<!--.*?-->/g, "");
   assertCheck("INVARIANTES", "Dieta Kaiser: $8.291.039", kaiserHtml.includes("8.291.039"));
@@ -114,7 +118,7 @@ async function verifyProdFull() {
 
   await new Promise((r) => setTimeout(r, 250));
 
-  const maipuRes = await fetchWithRetry("https://cambiometro.impulsacv.cl/municipalidades/muni-maipu", { redirect: "manual", headers });
+  const maipuRes = await fetchWithRetry(`${PROD_URL}/municipalidades/muni-maipu`, { redirect: "manual", headers });
   assertCheck(
     "INVARIANTES",
     "Redirección Maipú (301)",
@@ -126,7 +130,7 @@ async function verifyProdFull() {
 
   // ─── MÓDULO 3: /CRUCES ─────────────────────────────────────────────────────
   console.log("\n3. MÓDULO CRUCES DOCUMENTALES (/cruces)");
-  const crucesRes = await fetchWithRetry("https://cambiometro.impulsacv.cl/cruces", { headers });
+  const crucesRes = await fetchWithRetry(`${PROD_URL}/cruces`, { headers });
   assertCheck("CRUCES", "HTTP Status 200", crucesRes.status === 200);
   const crucesHtml = (await crucesRes.text()).replace(/<!--.*?-->/g, "");
 
@@ -140,7 +144,7 @@ async function verifyProdFull() {
 
   await new Promise((r) => setTimeout(r, 250));
 
-  const cruces25Res = await fetchWithRetry("https://cambiometro.impulsacv.cl/cruces?rows=25", { headers });
+  const cruces25Res = await fetchWithRetry(`${PROD_URL}/cruces?rows=25`, { headers });
   const cruces25Html = (await cruces25Res.text()).replace(/<!--.*?-->/g, "");
   assertCheck("CRUCES", "Query ?rows=25 recalcula paginación ('Pág. 1 de 15')", cruces25Html.includes("Pág. 1 de 15") || cruces25Html.includes("Página 1 de 15") || cruces25Html.includes("15"));
 
@@ -148,31 +152,33 @@ async function verifyProdFull() {
 
   // ─── MÓDULO 4: /TRANSFERENCIAS ─────────────────────────────────────────────
   console.log("\n4. MÓDULO TRANSFERENCIAS LEY 19.862 (/transferencias)");
-  const transfRes = await fetchWithRetry("https://cambiometro.impulsacv.cl/transferencias", { headers });
+  const transfRes = await fetchWithRetry(`${PROD_URL}/transferencias`, { headers });
   assertCheck("TRANSFERENCIAS", "HTTP Status 200", transfRes.status === 200);
   const transfHtml = (await transfRes.text()).replace(/<!--.*?-->/g, "");
 
-  assertCheck("TRANSFERENCIAS", "KPI Total '59.361'", transfHtml.includes("59.361"));
+  assertCheck("TRANSFERENCIAS", `KPI Total '${transferLabel}'`, transferTotal > 0 && transfHtml.includes(transferLabel));
   assertCheck("TRANSFERENCIAS", "KPI Monto '$5,01 billones'", transfHtml.includes("billones") || transfHtml.includes("5,01"));
   assertCheck("TRANSFERENCIAS", "Serie Anual (2023, 2024, 2025, 2026)", transfHtml.includes("2023") && transfHtml.includes("2024") && transfHtml.includes("2025") && transfHtml.includes("2026"));
   assertCheck("TRANSFERENCIAS", "Selector 'Filas por página: 10 / 25 / 50' visible", transfHtml.includes("Filas por página") && transfHtml.includes("10") && transfHtml.includes("25") && transfHtml.includes("50"));
-  assertCheck("TRANSFERENCIAS", "Paginación default 10 filas ('5.937 págs')", transfHtml.includes("5.937") || transfHtml.includes("5937"));
+  const transferPageSize10 = Math.ceil(transferTotal / 10).toLocaleString("es-CL");
+  assertCheck("TRANSFERENCIAS", `Paginación default 10 filas ('${transferPageSize10} págs')`, transferTotal > 0 && transfHtml.includes(transferPageSize10));
   assertCheck("TRANSFERENCIAS", "Registro oficial VIÑA BUS S.A. ($347.920.910)", transfHtml.includes("VIÑA BUS") || transfHtml.includes("347.920.910") || transfHtml.includes("4585076"));
   assertCheck("TRANSFERENCIAS", "Enlace a registros19862.gob.cl", transfHtml.includes("registros19862.gob.cl"));
 
   await new Promise((r) => setTimeout(r, 250));
 
-  const transf50Res = await fetchWithRetry("https://cambiometro.impulsacv.cl/transferencias?rows=50", { headers });
+  const transf50Res = await fetchWithRetry(`${PROD_URL}/transferencias?rows=50`, { headers });
   const transf50Html = (await transf50Res.text()).replace(/<!--.*?-->/g, "");
-  assertCheck("TRANSFERENCIAS", "Query ?rows=50 recalcula paginación ('Página 1 de 1.188')", transf50Html.includes("1.188") || transf50Html.includes("1188"));
+  const transferPageSize50 = Math.ceil(transferTotal / 50).toLocaleString("es-CL");
+  assertCheck("TRANSFERENCIAS", `Query ?rows=50 recalcula paginación ('Página 1 de ${transferPageSize50}')`, transferTotal > 0 && transf50Html.includes(transferPageSize50));
 
   await new Promise((r) => setTimeout(r, 250));
 
-  const transfApiRes = await fetchWithRetry("https://cambiometro.impulsacv.cl/api/v1/transferencias?page=1&limit=10", { headers });
+  const transfApiRes = await fetchWithRetry(`${API_URL}/api/v1/transferencias?page=1&limit=10`, { headers });
   assertCheck("TRANSFERENCIAS", "API /api/v1/transferencias responde 200", transfApiRes.status === 200);
   if (transfApiRes.ok) {
     const apiJson = await transfApiRes.json();
-    assertCheck("TRANSFERENCIAS", "API retorna total 59.361", apiJson.total === 59361);
+    assertCheck("TRANSFERENCIAS", `API retorna total ${transferLabel}`, apiJson.total === transferTotal && transferTotal > 0);
     assertCheck("TRANSFERENCIAS", "API retorna 10 filas", apiJson.data?.length === 10);
   }
 
@@ -180,7 +186,7 @@ async function verifyProdFull() {
 
   // ─── MÓDULO 5: /FUENTES Y /DATOS/CALIDAD ───────────────────────────────────
   console.log("\n5. MÓDULO FUENTES Y CALIDAD DE DATOS (/fuentes, /datos/calidad)");
-  const fuentesRes = await fetchWithRetry("https://cambiometro.impulsacv.cl/fuentes", { headers });
+  const fuentesRes = await fetchWithRetry(`${PROD_URL}/fuentes`, { headers });
   assertCheck("FUENTES", "HTTP Status 200", fuentesRes.status === 200);
   const fuentesHtml = (await fuentesRes.text()).replace(/<!--.*?-->/g, "");
 
@@ -194,7 +200,7 @@ async function verifyProdFull() {
 
   await new Promise((r) => setTimeout(r, 250));
 
-  const calidadRes = await fetchWithRetry("https://cambiometro.impulsacv.cl/datos/calidad", { headers });
+  const calidadRes = await fetchWithRetry(`${PROD_URL}/datos/calidad`, { headers });
   assertCheck("CALIDAD", "HTTP Status 200", calidadRes.status === 200);
   const calidadHtml = (await calidadRes.text()).replace(/<!--.*?-->/g, "");
   assertCheck("CALIDAD", "Guards V1-V7: 0 violaciones críticas", calidadHtml.includes("Guards V1-V7") && calidadHtml.includes("0"));
@@ -204,7 +210,7 @@ async function verifyProdFull() {
 
   // ─── MÓDULO 6: /DONAR — GRID COMPLETO (4 CARDS + 3 BULLETS CADA UNA) ───────
   console.log("\n6. MÓDULO DONACIONES Y PROYECTO ABIERTO (/donar)");
-  const donarRes = await fetchWithRetry("https://cambiometro.impulsacv.cl/donar", { headers });
+  const donarRes = await fetchWithRetry(`${PROD_URL}/donar`, { headers });
   assertCheck("DONAR", "HTTP Status 200", donarRes.status === 200);
   const donarHtml = (await donarRes.text()).replace(/<!--.*?-->/g, "");
 

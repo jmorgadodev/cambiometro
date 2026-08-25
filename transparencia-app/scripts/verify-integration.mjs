@@ -5,11 +5,12 @@ import { chromium } from "playwright";
 
 const routes = [
   "/", "/autoridades", "/calculadora", "/cambios", "/como-funciona", "/comparar", "/cruces",
-  "/datos", "/donar", "/entidades/person-infoprobidad-9204ac804e1f43cc8c3e62f712a15764", "/fuentes", "/funcionarios", "/movimientos", "/municipalidades",
+  "/datos", "/donar", "/entidades/person-test-1", "/fuentes", "/funcionarios", "/movimientos", "/municipalidades",
   "/municipalidades/muni-maipu", "/partidos", "/partidos/rep", "/politico/dip-061", "/privacidad", "/rankings", "/servicios-publicos",
 ];
 const responsiveRoutes = ["/", "/cruces", "/politico/dip-061", "/privacidad", "/fuentes"];
 const baseUrl = process.env.VERIFY_BASE_URL ?? "http://127.0.0.1:3000";
+const verifyEntityId = process.env.VERIFY_ENTITY_ID ?? "person-test-1";
 const verifyingLocal = /^http:\/\/(?:127\.0\.0\.1|localhost)/.test(baseUrl);
 const verifyingProd = !verifyingLocal && !/\.workers\.dev$/.test(new URL(baseUrl).hostname);
 // El rate limiter edge de producción (30 req/60s por IP) exige espaciar cada
@@ -182,7 +183,7 @@ try {
   await page.waitForURL("**/politico/**", { timeout: 5000 }).catch(() => {});
   assert(page.url().includes("/politico/"), "la entidad parlamentaria debe redirigir a /politico");
 
-  await gotoWithNetworkRetry(`${baseUrl}/entidades/person-infoprobidad-9204ac804e1f43cc8c3e62f712a15764`);
+  await gotoWithNetworkRetry(`${baseUrl}/entidades/person-test-1`);
   assert.equal(await page.locator(".person-entity__nav").count(), 1, "la ficha debe mostrar navegación continua");
 
   await gotoWithNetworkRetry(`${baseUrl}/datos`);
@@ -205,6 +206,7 @@ try {
     assert.equal(await page.getByText("InfoLobby · ley 20.730", { exact: true }).count(), 1, "la ficha debe enlazar audiencias de InfoLobby");
   }
 
+  await page.setViewportSize({ width: 1440, height: 1000 });
   await gotoWithNetworkRetry(baseUrl);
   const homeSearch = page.locator("#home-search");
   await homeSearch.fill("Maipu");
@@ -270,10 +272,10 @@ try {
   assert(sourcePayload.data.every((source) => ["connected", "partial", "stale", "unavailable"].includes(source.status)));
 
   for (const path of [
-    "/api/v1/entities/person-camara-1009",
-    "/api/v1/records?entity_id=person-camara-1009&limit=10",
-    "/api/v1/relations?from_id=person-camara-1009&limit=10",
-    "/api/v1/crosses?entity_id=person-camara-1009&limit=10",
+    `/api/v1/entities/${verifyEntityId}`,
+    `/api/v1/records?entity_id=${verifyEntityId}&limit=10`,
+    `/api/v1/relations?from_id=${verifyEntityId}&limit=10`,
+    `/api/v1/crosses?entity_id=${verifyEntityId}&limit=10`,
   ]) {
     const response = await page.request.get(`${baseUrl}${path}`);
     assert(response.ok(), `${path} HTTP ${response.status()}`);

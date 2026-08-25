@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useId } from "react";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import Image from "next/image";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import type { Politico } from "@/lib/seed-politicos";

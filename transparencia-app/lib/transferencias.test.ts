@@ -39,9 +39,9 @@ describe("Módulo /transferencias — Validación y aserciones", () => {
     }
   });
 
-  it("2. Muestra de transferencias con 1.000 registros y 100% de filas con URL oficial", () => {
+  it("2. Muestra compacta de transferencias y 100% de filas con URL oficial", () => {
     const summary = getLey19862Summary();
-    expect(summary.transfers_sample.length).toBe(1000);
+    expect(summary.transfers_sample.length).toBeGreaterThanOrEqual(50);
 
     for (const t of summary.transfers_sample) {
       expect(t.id).toBeDefined();

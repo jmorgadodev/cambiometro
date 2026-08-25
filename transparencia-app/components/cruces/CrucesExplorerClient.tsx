@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useTransition } from "react";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import { formatCLP, formatMontoConsolidado } from "@/lib/format";
 import type { CrossEdge, EvidenceRecord } from "@/lib/data-contracts";
 import CrucesDetailDrawer from "./CrucesDetailDrawer";

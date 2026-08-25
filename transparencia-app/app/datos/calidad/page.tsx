@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
 import Icono from "@/components/ui/Icono";
 

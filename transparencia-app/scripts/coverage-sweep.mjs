@@ -54,6 +54,10 @@ export async function runCoverageSweep({ silent = false } = {}) {
   const movimientosPath = resolve("data/movimientos.json");
   const movimientosRaw = existsSync(movimientosPath) ? JSON.parse(readFileSync(movimientosPath, "utf8")) : {};
   const movimientosList = Array.isArray(movimientosRaw) ? movimientosRaw : (movimientosRaw.movimientos || []);
+  const transferSummaryPath = resolve("data/lake-subsets/ley19862.subset.json");
+  const transferSummary = existsSync(transferSummaryPath)
+    ? JSON.parse(readFileSync(transferSummaryPath, "utf8"))
+    : { kpis: { total_transfers: 0, total_monto_clp: 0 } };
 
   // 2. Votaciones de Sala Oficiales vs Indexadas (Período 2026-2030)
   const { camaraOfficial, senadoOfficial } = await fetchOfficialChambersCounts();
@@ -169,7 +173,13 @@ export async function runCoverageSweep({ silent = false } = {}) {
 
   // 6. Universos Canónicos vs Manifest
   const universos = [
-    { modulo: "Transferencias Ley 19.862", indexado: "59.361 registros ($5,01 billones)", universo: "59.361 manifest", nota: "registros19862.gob.cl", pass: true },
+    {
+      modulo: "Transferencias Ley 19.862",
+      indexado: `${Number(transferSummary.kpis?.total_transfers ?? 0).toLocaleString("es-CL")} registros`,
+      universo: `${Number(transferSummary.kpis?.total_transfers ?? 0).toLocaleString("es-CL")} manifest`,
+      nota: "registros19862.gob.cl",
+      pass: Number(transferSummary.kpis?.total_transfers ?? 0) > 0 && Number(transferSummary.kpis?.total_monto_clp ?? 0) > 0,
+    },
     { modulo: "ChileCompra Compradores / Órdenes", indexado: "74.142 compradores ($1,9 billones)", universo: "74.142 manifest", nota: "Mercado Público", pass: true },
     { modulo: "InfoLobby Audiencias", indexado: "60.523 audiencias", universo: "60.523 manifest", nota: "InfoLobby CPLT", pass: true },
     { modulo: "Contraloría General (CGR) Auditorías", indexado: "291 informes", universo: "291 manifest", nota: "CGR Portal", pass: true },

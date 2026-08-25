@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import { listEntities } from "@/lib/data-platform-d1";
 
 export const metadata: Metadata = {

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import StatCounter from "@/components/StatCounter";
 import Reveal from "@/components/Reveal";
 import Icono from "@/components/ui/Icono";

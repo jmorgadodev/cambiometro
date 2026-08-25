@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import AccessibleTooltip from "@/components/ui/AccessibleTooltip";
 import {
   MunicipalidadEnriquecida,
@@ -1446,6 +1446,7 @@ export default function MunicipalidadDetailDashboardClient({
               nombreOrganismo={`Municipalidad de ${nombreComuna}`}
               periodo={selectedPeriod}
               periodoEtiqueta={selectedPeriodInfo?.etiqueta || selectedPeriod}
+              staticBaseUrl={`/data/funcionarios/${muniData.id}`}
             />
           </div>
         </div>
@@ -2166,15 +2167,15 @@ export default function MunicipalidadDetailDashboardClient({
                   </div>
                   <div>
                     Puedes comprobar el funcionamiento del cruce de auditorías en comunas con informes publicados:{" "}
-                    <Link href="/municipalidades/muni-lascondes" style={{ color: "var(--accent)", fontWeight: 700 }}>
+                    <Link href="/municipalidades/las-condes" style={{ color: "var(--accent)", fontWeight: 700 }}>
                       Las Condes
                     </Link>
                     {", "}
-                    <Link href="/municipalidades/muni-quilicura" style={{ color: "var(--accent)", fontWeight: 700 }}>
+                    <Link href="/municipalidades/quilicura" style={{ color: "var(--accent)", fontWeight: 700 }}>
                       Quilicura
                     </Link>
                     {", "}
-                    <Link href="/municipalidades/muni-chillan" style={{ color: "var(--accent)", fontWeight: 700 }}>
+                    <Link href="/municipalidades/chillan" style={{ color: "var(--accent)", fontWeight: 700 }}>
                       Chillán
                     </Link>
                     .

@@ -1,6 +1,7 @@
-import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
+import { readFileSync, writeFileSync, mkdirSync, existsSync, rmSync, copyFileSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { POLITICOS_SEED } from "../lib/politicos-source.ts";
+import { evaluateSenateSupport } from "./etl/senado-assignment.mjs";
 
 function slugifyNombre(nombre) {
   return nombre
@@ -41,6 +42,11 @@ function nameSequenceMatches(seedName, otherName) {
   return matches.length >= 2;
 }
 
+function sameNameTokens(left, right) {
+  const normalize = (value) => normalizeSearchText(value).split(" ").filter(Boolean).sort().join("|");
+  return normalize(left) === normalize(right);
+}
+
 function esProcedimental(vFila) {
   const desc = (vFila.descripcion || "").toLowerCase();
   const tramite = (vFila.tramite || "").toLowerCase();
@@ -79,6 +85,13 @@ export function buildAllPoliticoSlices() {
   if (!existsSync(slicesDir)) {
     mkdirSync(slicesDir, { recursive: true });
   }
+
+  // Los slices se publican como assets estáticos. El Worker no puede leer el
+  // filesystem de `data/` en runtime, y tampoco debemos embutir 93 MB en su
+  // bundle. Este directorio queda ignorado por Git y se regenera en cada build.
+  const publicSlicesDir = resolve("public/data/politico-slices");
+  rmSync(publicSlicesDir, { recursive: true, force: true });
+  mkdirSync(publicSlicesDir, { recursive: true });
 
   const index = {};
   let totalPoliticos = 0;
@@ -249,12 +262,29 @@ export function buildAllPoliticoSlices() {
         const total_2026 = registros.reduce((total, r) => total + (r.monto ?? 0), 0);
         const ultimo_mes = registros[0]?.periodo ?? "";
         const asignacion = personalApoyoData.asignacion_senado_2026 ?? null;
+        const transferencias = (asignacion?.transferencias_acreditadas ?? [])
+          .filter((transferencia) => sameNameTokens(transferencia.senador, matched[0]));
+        const totalesPorPeriodo = registros.reduce((totales, registro) => {
+          totales[registro.periodo] = (totales[registro.periodo] ?? 0) + (registro.monto ?? 0);
+          return totales;
+        }, {});
+        const evaluaciones = asignacion
+          ? Object.fromEntries(Object.entries(totalesPorPeriodo).map(([periodo, total]) => [
+            periodo,
+            evaluateSenateSupport({
+              total_clp: total,
+              period: periodo,
+              base_mensual_clp: asignacion.base_mensual_clp,
+              verified_transfers: transferencias,
+            }),
+          ]))
+          : {};
         apoyoSenador = {
           registros,
           total_2026,
           ultimo_mes,
           asignacion,
-          evaluaciones: {},
+          evaluaciones,
         };
       }
     }
@@ -309,6 +339,8 @@ export function buildAllPoliticoSlices() {
     const sliceJson = JSON.stringify(entry);
     writeFileSync(join(slicesDir, `${pol.id}.json`), sliceJson, "utf8");
     writeFileSync(join(slicesDir, `${slug}.json`), sliceJson, "utf8");
+    copyFileSync(join(slicesDir, `${pol.id}.json`), join(publicSlicesDir, `${pol.id}.json`));
+    copyFileSync(join(slicesDir, `${slug}.json`), join(publicSlicesDir, `${slug}.json`));
   }
 
   const outputPath = resolve("data/politicos-votaciones-index.json");

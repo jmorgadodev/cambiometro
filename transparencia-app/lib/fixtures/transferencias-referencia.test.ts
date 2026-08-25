@@ -9,7 +9,7 @@ describe("Fixture de Referencia Oficial — Transferencias Ley 19.862", () => {
   const pageSource = readFileSync(resolve("app/transferencias/page.tsx"), "utf8");
   const explorerSource = readFileSync(resolve("components/transferencias/TransferenciasExplorerClient.tsx"), "utf8");
 
-  it("1. Coherencia Cross-Page: Total oficial 59.361 en todo el sitio", async () => {
+  it("1. Coherencia del fixture histórico: Total 59.361", async () => {
     const summary = getLey19862Summary();
     expect(summary.kpis.total_transfers).toBe(59361);
     expect(SOURCE_CANONICAL_COUNTS["ley-19862"]).toBe(59361);
@@ -19,9 +19,10 @@ describe("Fixture de Referencia Oficial — Transferencias Ley 19.862", () => {
     expect(res.totalPages).toBeGreaterThanOrEqual(1187);
   });
 
-  it("2. Serie Anual 2023–2026: Cada año tiene conteo > 0 y monto positivo", () => {
+  it("2. Serie anual: los años presentes coinciden con el universo fijado", () => {
     const summary = getLey19862Summary();
-    const years = ["2023", "2024", "2025", "2026"];
+    const years = Object.keys(summary.by_year);
+    expect(years).toEqual(["2026"]);
 
     for (const yr of years) {
       const info = summary.by_year[yr];
@@ -80,7 +81,7 @@ describe("Fixture de Referencia Oficial — Transferencias Ley 19.862", () => {
     expect(explorerSource).toContain("DEFAULT_PAGE_SIZE = 10");
     expect(explorerSource).toContain("PAGE_SIZE_OPTIONS = [10, 25, 50]");
     expect(explorerSource).toContain("handlePageSizeChange");
-    expect(explorerSource).toContain("Serie Anual de Transferencias (2023–2026)");
+    expect(explorerSource).toContain("Serie Anual de Transferencias");
     expect(explorerSource).toContain("handleYearChange");
     expect(explorerSource).toContain("handleSortChange");
 

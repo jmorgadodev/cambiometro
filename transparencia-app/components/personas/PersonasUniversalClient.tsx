@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
+import { getMuniCanonicalSlug } from "@/lib/slug-utils";
 import { getPartidoBranding } from "@/lib/partidos.config";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import type { FuncionarioPublico } from "@/lib/funcionarios";
@@ -1094,7 +1095,7 @@ export default function PersonasUniversalClient({
                 {paginatedAlcaldes.map((a) => (
                   <Link
                     key={a.muni_id}
-                    href={`/municipalidades/${a.muni_id}`}
+                    href={`/municipalidades/${getMuniCanonicalSlug(a.muni_id) ?? a.muni_id}`}
                     style={{
                       display: "flex",
                       flexDirection: "column",
@@ -1195,7 +1196,7 @@ export default function PersonasUniversalClient({
                         </td>
                         <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
                           <Link
-                            href={`/municipalidades/${a.muni_id}`}
+                            href={`/municipalidades/${getMuniCanonicalSlug(a.muni_id) ?? a.muni_id}`}
                             style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textDecoration: "none" }}
                           >
                             Ver Comuna →

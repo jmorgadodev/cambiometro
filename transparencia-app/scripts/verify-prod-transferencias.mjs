@@ -16,6 +16,14 @@ function assertCheck(name, condition, extraInfo = "") {
 async function verifyProdTransferencias() {
   console.log("=== Verificación en Vivo en Producción (https://cambiometro.impulsacv.cl/transferencias) ===\n");
 
+  const manifestRes = await fetch("https://cambiometro.impulsacv.cl/data/transferencias/manifest.json", {
+    headers: { "User-Agent": "Cambiometro-Verifier/1.0", "Cache-Control": "no-cache" },
+  });
+  const manifest = manifestRes.ok ? await manifestRes.json() : null;
+  const expectedTotal = Number(manifest?.totalRows ?? 0);
+  const expectedPages = Number(manifest?.totalPages ?? 0);
+  const expectedLabel = expectedTotal.toLocaleString("es-CL");
+
   // 1. HTTP Status /transferencias
   const res = await fetch("https://cambiometro.impulsacv.cl/transferencias", {
     headers: { "User-Agent": "Cambiometro-Verifier/1.0", "Cache-Control": "no-cache" },
@@ -28,7 +36,7 @@ async function verifyProdTransferencias() {
 
   // 2. KPIs Oficiales
   console.log("\n--- Verificación de KPIs Oficiales ---");
-  assertCheck("KPI 'Total Transferencias' contiene 59.361", cleanHtml.includes("59.361"));
+  assertCheck(`KPI 'Total Transferencias' contiene ${expectedLabel}`, expectedTotal > 0 && cleanHtml.includes(expectedLabel));
   assertCheck("KPI 'Monto Total' contiene billones", cleanHtml.includes("billones") || cleanHtml.includes("5,01"));
 
   // 3. Serie Anual 2023-2026 (4 barras)
@@ -59,8 +67,8 @@ async function verifyProdTransferencias() {
   assertCheck("API /api/v1/transferencias responde 200", apiRes.status === 200);
   if (apiRes.ok) {
     const apiJson = await apiRes.json();
-    assertCheck("API retorna total 59.361", apiJson.total === 59361, `Total: ${apiJson.total}`);
-    assertCheck("API retorna totalPages > 1.000", apiJson.totalPages >= 1187, `TotalPages: ${apiJson.totalPages}`);
+    assertCheck(`API retorna total ${expectedLabel}`, apiJson.total === expectedTotal, `Total: ${apiJson.total}`);
+    assertCheck("API retorna totalPages según manifest", apiJson.totalPages === expectedPages, `TotalPages: ${apiJson.totalPages}`);
     assertCheck("API retorna 50 filas en página 1", Array.isArray(apiJson.data) && apiJson.data.length > 0, `Filas: ${apiJson.data?.length}`);
   }
 

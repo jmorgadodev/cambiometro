@@ -1,7 +1,7 @@
 import type { EvidenceKind, EvidenceRecord, CursorPage } from "@/lib/data-contracts";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import { notFound, redirect } from "next/navigation";
-import { getEntitiesByIds, getEntity, listRecords, listRelations } from "@/lib/data-platform-d1";
+import { getEntitiesByIds, getEntity, listEntities, listRecords, listRelations } from "@/lib/data-platform-d1";
 import { presupuestoParaPrograma } from "@/lib/presupuesto";
 import { chilecompraParaComprador } from "@/lib/chilecompra";
 import { sinimParaMunicipio } from "@/lib/sinim";
@@ -19,8 +19,38 @@ import type { Metadata } from "next";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
 import { SERVICIOS_PUBLICOS_SEED } from "@/lib/servicios-publicos";
 import { MUNICIPALIDADES_SEED } from "@/lib/municipalidades";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 
-export function generateStaticParams() {
+// La ficha se pre-renderiza con la vista por defecto. Los filtros y pestañas
+// se mantienen como navegación del cliente; no se permite que query params
+// conviertan esta ruta en SSR durante el export de Pages.
+export const dynamic = "force-static";
+
+async function getBuildCanonicalEntityIds() {
+  const indexPath = path.join(process.cwd(), "data", "entidades-canonica.json");
+  if (!existsSync(indexPath)) {
+    // El índice canónico puede vivir sólo en D1/R2 durante el ETL. En ese
+    // caso, el fallback compacto de build se pagina completo para que una
+    // entidad enlazada desde /entidades nunca quede fuera de Pages.
+    const ids: string[] = [];
+    let cursor: string | undefined;
+    for (let page = 0; page < 200; page += 1) {
+      const result = await listEntities({ limit: 100, cursor });
+      ids.push(...result.data.map((entity) => entity.id));
+      if (!result.nextCursor || result.data.length === 0) break;
+      cursor = result.nextCursor;
+    }
+    return ids.length > 0 ? ids : ["public-body-camara"];
+  }
+
+  const payload = JSON.parse(readFileSync(indexPath, "utf8")) as {
+    entities?: Array<{ id?: string }>;
+  };
+  return (payload.entities ?? []).map((entity) => entity.id).filter((id): id is string => Boolean(id));
+}
+
+export async function generateStaticParams() {
   const ids: Array<{ id: string }> = [];
   for (const pol of POLITICOS_SEED) {
     ids.push({ id: pol.id });
@@ -31,6 +61,9 @@ export function generateStaticParams() {
   }
   for (const muni of MUNICIPALIDADES_SEED) {
     ids.push({ id: muni.id });
+  }
+  for (const id of await getBuildCanonicalEntityIds()) {
+    ids.push({ id });
   }
   return ids;
 }
@@ -154,7 +187,6 @@ export default async function EntityPage({
       allRecords = directMatches;
     }
   }
-  console.log(`[EntityPage DEBUG] id=${id}, d1Entity=${Boolean(d1Entity)}, platformRecords=${platformRecords.length}, extraRecords=${extraRecords.length}, allRecords=${allRecords.length}`);
   const entitySourceIds = Array.isArray(entity.sourceIds) ? entity.sourceIds : [];
   const presentedEntity = supportRecords.length > 0 && !entitySourceIds.includes("personal-apoyo")
     ? { ...entity, sourceIds: [...entitySourceIds, "personal-apoyo"] }

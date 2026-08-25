@@ -35,6 +35,10 @@ jobs:
         run: npm ci
         working-directory: transparencia-app
 
+      - name: Verify repository boundary
+        run: npm run audit:repo-boundary
+        working-directory: transparencia-app
+
       - name: Lint
         run: npm run lint
         working-directory: transparencia-app
@@ -47,12 +51,24 @@ jobs:
         run: npm run guard:integrity
         working-directory: transparencia-app
 
+      - name: Verify pinned data coherence
+        run: npm run data:verify:coherence
+        working-directory: transparencia-app
+
       - name: Check no AI traces
         run: node scripts/check-no-ai-traces.mjs
         working-directory: transparencia-app
 
       - name: Check no private assets
         run: node scripts/check-no-private-assets.mjs
+        working-directory: transparencia-app
+
+      - name: Guard runtime data imports under 200 KB
+        run: node scripts/audit/scan-bundle-imports.mjs
+        working-directory: transparencia-app
+
+      - name: Test public API Worker contracts
+        run: npm run worker:test && npm run worker:check && npm run worker:bundle
         working-directory: transparencia-app
 
       - name: Check staging D1 isolated (C1)

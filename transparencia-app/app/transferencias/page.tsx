@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
-import { getLey19862Summary } from "@/lib/transferencias-data";
-import { queryTransferencias } from "@/lib/transferencias-d1";
+import { getStaticTransferencias } from "@/lib/transferencias-static";
 import TransferenciasExplorerClient from "@/components/transferencias/TransferenciasExplorerClient";
 
 export const metadata: Metadata = {
   title: "Transferencias Ley 19.862 — El Cambiómetro",
   description:
-    "Explora las 59.361 transferencias de fondos públicos del Estado de Chile registradas bajo la Ley 19.862, con cobertura y trazabilidad a la fuente oficial registros19862.gob.cl.",
+    "Explora transferencias de fondos públicos del Estado de Chile registradas bajo la Ley 19.862, con cobertura y trazabilidad a la fuente oficial registros19862.gob.cl.",
   openGraph: {
     title: "Transferencias Ley 19.862 — El Cambiómetro",
     description:
@@ -27,29 +25,23 @@ export const metadata: Metadata = {
 export const dynamic = "force-static";
 
 export default async function TransferenciasPage() {
-  const summary = getLey19862Summary();
+  const staticData = getStaticTransferencias();
+  const summary = staticData.summary;
   const initialRowsPerPage = 10;
-
-  const queryResult = await queryTransferencias({
-    page: 1,
-    limit: initialRowsPerPage,
-    search: "",
-    year: "",
-    emisor: "",
-    sortBy: "monto",
-    sortOrder: "desc",
-  });
+  const initialTransfers = staticData.initialTransfers.slice(0, initialRowsPerPage);
+  const initialTotal = staticData.manifest?.totalRows ?? summary.kpis.total_transfers;
+  const initialTotalPages = staticData.manifest?.totalPages ?? Math.max(1, Math.ceil(initialTotal / initialRowsPerPage));
 
   return (
     <TransferenciasExplorerClient
-      kpis={queryResult.kpis}
+      kpis={summary.kpis}
       topReceptores={summary.top_receptores.slice(0, 10)}
       topEmisores={summary.top_emisores.slice(0, 10)}
-      byYear={queryResult.by_year}
-      initialTransfers={queryResult.data}
-      initialTotal={queryResult.total}
-      initialTotalPages={queryResult.totalPages}
-      initialPage={queryResult.page}
+      byYear={summary.by_year}
+      initialTransfers={initialTransfers}
+      initialTotal={initialTotal}
+      initialTotalPages={initialTotalPages}
+      initialPage={1}
       initialPageSize={initialRowsPerPage}
       initialQuery=""
       initialYear="Todos"

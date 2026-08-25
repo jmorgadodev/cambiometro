@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import { formatCLP } from "@/lib/format";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import type { PartidoResumenCompleto } from "@/lib/partido-estadisticas";

@@ -5,7 +5,6 @@ import { remuneracionParaPolitico } from "@/lib/remuneraciones";
 import { personalApoyoParaSenador, personalApoyoParaDiputado } from "@/lib/personal-apoyo";
 import { evaluateSenateSupport } from "@/scripts/etl/senado-assignment.mjs";
 import dataRemuneraciones from "@/data/remuneraciones-38bis.json";
-import dataPersonal from "@/data/personal-apoyo.json";
 
 /**
  * Fixture Externo Congelado: Referencia Oficial de Parlamento (Ronda 1 — Auditoría Periodística)

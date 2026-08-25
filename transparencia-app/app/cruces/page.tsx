@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import { getAllCrosses } from "@/lib/data-platform-v1";
 import { leerContraloriaV1 } from "@/lib/contraloria-lake";
 import { leerChileCompraV1 } from "@/lib/chilecompra";
 import { leerInfoLobbyV1 } from "@/lib/infolobby";
 import { SOURCE_CANONICAL_COUNTS } from "@/lib/published-sources";
-import { getLey19862Summary } from "@/lib/transferencias-data";
+import { getStaticTransferencias } from "@/lib/transferencias-static";
 import { formatCLPCompact } from "@/lib/format";
 import CrucesExplorerClient from "@/components/cruces/CrucesExplorerClient";
 
@@ -38,13 +38,14 @@ export default async function CrossesPage() {
   const contraloria = leerContraloriaV1();
   const chilecompra = leerChileCompraV1();
   const infolobby = leerInfoLobbyV1();
-  const ley19862 = getLey19862Summary();
+  const transferenciasStatic = getStaticTransferencias();
+  const ley19862 = transferenciasStatic.summary;
 
   const totalChilecompraMonto = 1900000000000;
   const totalChilecompraProcesos = SOURCE_CANONICAL_COUNTS["chilecompra"] ?? 74142;
   const contraloriaCount = SOURCE_CANONICAL_COUNTS["contraloria"] ?? 291;
   const infolobbyCount = SOURCE_CANONICAL_COUNTS["infolobby"] ?? 60523;
-  const ley19862Count = SOURCE_CANONICAL_COUNTS["ley-19862"] ?? 59361;
+  const ley19862Count = transferenciasStatic.manifest?.totalRows ?? ley19862.kpis.total_transfers;
 
   return (
     <main>

@@ -1,5 +1,3 @@
-import fs from "fs";
-import path from "path";
 import leySummarySubset from "@/data/lake-subsets/ley19862.subset.json";
 
 export interface ReceptorResumen {
@@ -49,17 +47,9 @@ export interface Ley19862Summary {
   transfers_sample: TransferenciaDetalle[];
 }
 
-let cachedLeySummary: Ley19862Summary | null = null;
-
 export function getLey19862Summary(): Ley19862Summary {
-  if (cachedLeySummary) return cachedLeySummary;
-  try {
-    const fullPath = path.join(process.cwd(), "data", "lake", "projections", "v1", "ley19862-summary.json");
-    if (fs.existsSync(fullPath)) {
-      cachedLeySummary = JSON.parse(fs.readFileSync(fullPath, "utf8")) as Ley19862Summary;
-      return cachedLeySummary;
-    }
-  } catch {}
-  cachedLeySummary = leySummarySubset as unknown as Ley19862Summary;
-  return cachedLeySummary;
+  // El runtime usa sólo el snapshot compacto versionado. El resumen completo
+  // de la fuente viva se genera en public/data/transferencias durante el build
+  // estático y no se importa en app/lib ni se embebe en el Worker.
+  return leySummarySubset as unknown as Ley19862Summary;
 }

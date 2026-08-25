@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import Image from "next/image";
 import type { ReactElement } from "react";
 import { PARTIDOS_SEED, POLITICOS_SEED } from "@/lib/seed-politicos";

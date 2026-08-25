@@ -2,7 +2,7 @@
 
 import { useState, useMemo } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import { formatCLP, formatPct } from "@/lib/format";
 import type { PartidoResumenCompleto } from "@/lib/partido-estadisticas";
 

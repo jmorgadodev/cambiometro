@@ -33,4 +33,6 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PROD_URL: "https://cambiometro.impulsacv.cl"
+          API_URL: "https://cambiometro.impulsacv.cl"
+          UPTIME_TOKEN: ${{ secrets.UPTIME_TOKEN }}
         run: node scripts/uptime-smoke.mjs

@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import Link from "next/link";
+import { useEffect, useMemo, useState } from "react";
+import Link from "@/components/SiteLink";
 import { formatCLP } from "@/lib/format";
 import AccessibleTooltip from "@/components/ui/AccessibleTooltip";
 import type { AsignacionSenado } from "@/lib/personal-apoyo";
@@ -41,6 +41,7 @@ export interface PersonalApoyoProps {
     evaluaciones: Record<string, SenateSupportEvaluation>;
   } | null;
   fuenteUrl?: string;
+  dataUrl?: string;
 }
 
 const MONTH_MAP: Record<string, string> = {
@@ -74,20 +75,51 @@ export default function PersonalApoyoMensual({
   diputadoPersonal,
   senadorPersonal,
   fuenteUrl,
+  dataUrl,
 }: PersonalApoyoProps) {
-  const [periodoSeleccionado, setPeriodoSeleccionado] = useState(
-    ultimoPeriodo || mesesDisponibles[mesesDisponibles.length - 1]?.periodo || ""
-  );
-
+  const [senadorPersonalState, setSenadorPersonalState] = useState(senadorPersonal);
   const esSenador = cargo === "Senador";
+
+  useEffect(() => {
+    if (!esSenador || senadorPersonalState?.asignacion || !dataUrl) return;
+    let cancelled = false;
+    fetch(dataUrl)
+      .then((response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return response.json() as Promise<{ apoyoSenador?: PersonalApoyoProps["senadorPersonal"] }>;
+      })
+      .then((payload) => {
+        if (!cancelled && payload.apoyoSenador) setSenadorPersonalState(payload.apoyoSenador);
+      })
+      .catch(() => {
+        // La ficha conserva el fallback visible de cero/fuente no disponible;
+        // nunca deja un spinner permanente si el asset no está publicado.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, [dataUrl, esSenador, senadorPersonalState?.asignacion]);
+
+  const periodosDesdeDatos = useMemo(() => {
+    if (!esSenador) return [];
+    return [...new Set(senadorPersonalState?.registros.map((record) => record.periodo).filter(Boolean) ?? [])]
+      .sort()
+      .map((periodo) => ({ periodo, etiqueta: periodo }));
+  }, [esSenador, senadorPersonalState]);
+  const meses = mesesDisponibles.length > 0 ? mesesDisponibles : periodosDesdeDatos;
+  const ultimo = ultimoPeriodo || senadorPersonalState?.ultimo_mes || meses.at(-1)?.periodo || "";
+  const [periodoSeleccionado, setPeriodoSeleccionado] = useState(
+    ultimo
+  );
+  const periodoActivo = periodoSeleccionado || ultimo;
   const mesDiputadoOficial = normalizeCamaraMonth(diputadoPersonal?.mes_personal);
 
   // Datos filtrados para el mes seleccionado
   const { filas, totalMensual, totalAcumulado2026, personasContratadas } = useMemo(() => {
     if (esSenador) {
-      const all = senadorPersonal?.registros ?? [];
+      const all = senadorPersonalState?.registros ?? [];
       const acumulado = all.reduce((sum, r) => sum + (r.monto ?? 0), 0);
-      const enMes = all.filter((r) => r.periodo === periodoSeleccionado);
+      const enMes = all.filter((r) => r.periodo === periodoActivo);
       const totalMes = enMes.reduce((sum, r) => sum + (r.monto ?? 0), 0);
       return {
         filas: enMes
@@ -108,9 +140,9 @@ export default function PersonalApoyoMensual({
       const allDip = diputadoPersonal?.personal_apoyo ?? [];
       const totalMes = allDip.reduce((sum, f) => sum + (f.sueldo ?? 0), 0);
       const coincideMes =
-        periodoSeleccionado === mesDiputadoOficial ||
-        periodoSeleccionado === "2026-06" ||
-        (mesesDisponibles.length > 0 && periodoSeleccionado === mesesDisponibles[mesesDisponibles.length - 1]?.periodo);
+        periodoActivo === mesDiputadoOficial ||
+        periodoActivo === "2026-06" ||
+        (meses.length > 0 && periodoActivo === meses[meses.length - 1]?.periodo);
 
       if (coincideMes && allDip.length > 0) {
         return {
@@ -138,18 +170,18 @@ export default function PersonalApoyoMensual({
         personasContratadas: 0,
       };
     }
-  }, [esSenador, senadorPersonal, diputadoPersonal, periodoSeleccionado, mesDiputadoOficial, mesesDisponibles]);
+  }, [esSenador, senadorPersonalState, diputadoPersonal, periodoActivo, mesDiputadoOficial, meses]);
 
   const mesActivoEtiqueta =
-    mesesDisponibles.find((m) => m.periodo === periodoSeleccionado)?.etiqueta ?? periodoSeleccionado;
-  const evaluacionActiva = senadorPersonal?.evaluaciones[periodoSeleccionado];
+    meses.find((m) => m.periodo === periodoActivo)?.etiqueta ?? periodoActivo;
+  const evaluacionActiva = senadorPersonalState?.evaluaciones[periodoActivo];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
       {/* Selector de Meses */}
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
-        {mesesDisponibles.map((m) => {
-          const activo = m.periodo === periodoSeleccionado;
+        {meses.map((m) => {
+          const activo = m.periodo === periodoActivo;
           return (
             <button
               key={m.periodo}
@@ -229,7 +261,7 @@ export default function PersonalApoyoMensual({
         </div>
       </div>
 
-      {esSenador && senadorPersonal?.asignacion && (
+      {esSenador && senadorPersonalState?.asignacion && (
         <div
           role={evaluacionActiva && evaluacionActiva.status !== "OK" ? "alert" : undefined}
           style={{
@@ -287,7 +319,7 @@ export default function PersonalApoyoMensual({
             )}
           </div>
           {evaluacionActiva && evaluacionActiva.status !== "OK" && (() => {
-            const baseOficial = Number(senadorPersonal.asignacion.base_mensual_clp);
+            const baseOficial = Number(senadorPersonalState.asignacion.base_mensual_clp);
             const totalPublicado = Number(evaluacionActiva.total_clp);
             const pct = baseOficial > 0 ? ((totalPublicado - baseOficial) / baseOficial) * 100 : 0;
             const pctFormateado = `${pct >= 0 ? "+" : ""}${pct.toFixed(1).replace(".", ",")}%`;
@@ -320,7 +352,7 @@ export default function PersonalApoyoMensual({
             );
           })()}
           <p style={{ margin: "0.35rem 0 0", fontSize: "0.76rem", color: "var(--text-2)" }}>
-            Base mensual oficial: {formatCLP(senadorPersonal.asignacion.base_mensual_clp)}.
+            Base mensual oficial: {formatCLP(senadorPersonalState.asignacion.base_mensual_clp)}.
             {evaluacionActiva
               ? ` Total publicado: ${formatCLP(evaluacionActiva.total_clp)}; traspaso individual acreditado: ${formatCLP(evaluacionActiva.verified_transfer_clp)}; diferencia sin respaldo: ${formatCLP(evaluacionActiva.unexplained_clp)}.`
               : " No hay una evaluación comparable para este período."}

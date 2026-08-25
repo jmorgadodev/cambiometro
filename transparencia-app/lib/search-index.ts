@@ -3,6 +3,7 @@ import { POLITICOS_SEED, PARTIDOS_SEED } from "@/lib/seed-politicos";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import { getAllServiciosPublicos } from "@/lib/servicios-publicos";
 import { MUNICIPALIDADES_SEED } from "@/lib/municipalidades";
+import { getMuniCanonicalSlug } from "@/lib/slug-utils";
 
 export interface SearchDoc {
   id: string;
@@ -73,7 +74,7 @@ export function getSearchDocs(): SearchDoc[] {
       subtitle: `Municipalidad · ${mun.region}`,
       category: "Municipalidad",
       categoryCode: "muni",
-      url: `/municipalidades/${mun.id}`,
+      url: `/municipalidades/${getMuniCanonicalSlug(mun.id) ?? mun.id}`,
       keywords: `${mun.nombre_comuna} ${mun.region} ${mun.cut} ${mun.alcalde_actual || ""}`,
     });
   }

@@ -1,6 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import { getAllPartidosSummary } from "@/lib/partido-estadisticas";
 import { POLITICOS_SEED, PARTIDOS_SEED } from "@/lib/seed-politicos";
 import { diputadoIdParaPolitico } from "@/lib/data-source";

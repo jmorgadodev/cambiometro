@@ -176,9 +176,15 @@ export async function searchEntities(query: string, requestedLimit = 25): Promis
     const { results } = await db.prepare(sql).bind(...tokens.map((token) => `%${token}%`)).all<EntidadD1>();
     return results.map(canonicalEntityFromRow);
   } catch {
-    const fallbackSql = `SELECT * FROM entities WHERE ${where} ORDER BY name, id LIMIT ${limit}`;
-    const { results } = await db.prepare(fallbackSql).bind(...tokens.map((token) => `%${token}%`)).all<EntidadD1>();
-    return results.map(canonicalEntityFromRow);
+    try {
+      const fallbackSql = `SELECT * FROM entities WHERE ${where} ORDER BY name, id LIMIT ${limit}`;
+      const { results } = await db.prepare(fallbackSql).bind(...tokens.map((token) => `%${token}%`)).all<EntidadD1>();
+      return results.map(canonicalEntityFromRow);
+    } catch {
+      // El preview local puede tener un D1 vacío o incompleto. No conviertas
+      // la ausencia de una tabla en un 500 si existe el índice estático.
+      return (await bundledPlatform()).searchEntities(query, requestedLimit);
+    }
   }
 }
 

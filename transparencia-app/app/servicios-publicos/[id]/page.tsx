@@ -1,9 +1,10 @@
 import type { Metadata } from "next";
 import { notFound, permanentRedirect } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import { SERVICIOS_PUBLICOS_SEED } from "@/lib/servicios-publicos";
 import { getServicioPublicoEnriquecido } from "@/lib/servicios-publicos-data";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
+import { getPoliticoSlug } from "@/lib/politico-slugs";
 import ShareButton from "@/components/ShareButton";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import ServicioPublicoDashboardClient from "@/components/servicios/ServicioPublicoDashboardClient";
@@ -167,7 +168,7 @@ export default async function ServicioPublicoDetailPage({
                     <strong style={{ color: "var(--text-1)" }}>{enriquecido.director_jefe_actual}</strong>
                     {politicoMatch && (
                       <Link
-                        href={`/politico/${politicoMatch.id}`}
+                        href={`/politico/${getPoliticoSlug(politicoMatch)}`}
                         style={{
                           marginLeft: "0.5rem",
                           fontSize: "0.78rem",

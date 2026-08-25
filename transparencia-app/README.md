@@ -13,6 +13,36 @@ npm run build
 npm run cf:build
 ```
 
+## Build estático y fuentes de datos
+
+La variante Pages se construye sólo después de hidratar las fuentes oficiales;
+no se deben commitear `out/`, `.pages-static/`, chunks ni slices derivados:
+
+```bash
+npm run data:hydrate:cplt
+npm run data:verify:full:ley19862
+$env:CPLT_ALLOW_UNAVAILABLE='1'; npm run pages:build
+$env:CPLT_ALLOW_UNAVAILABLE='1'; npm run pages:verify
+npm run verify:pages-browser
+VERIFY_BASE_URL=http://127.0.0.1:8788 npm run pages:crawl
+```
+
+`CPLT_ALLOW_UNAVAILABLE=1` significa que el censo de 346 municipalidades está
+completo y que una municipalidad sin archivo oficial queda marcada como
+`unavailable`; nunca rellena filas. La verificación de la fuente viva de Ley
+19.862 se calcula desde las particiones descargadas, no desde el fixture
+histórico de 59.361 filas. La auditoría del límite de GitHub es:
+`npm run audit:repo-boundary`.
+
+`pages:crawl` requiere un servidor estático sobre `out/` y verifica todas las
+rutas HTML derivadas del export y del sitemap; falla ante cualquier 404/5xx,
+1102 o listado principal por sobre 700 ms.
+
+El estado, las decisiones de rollback y la evidencia local quedan en
+`../docs/estado-migracion-pages-worker.md`. El checkout OpenNext sigue siendo
+el rollback conocido-bueno hasta que el Worker tenga paridad contractual y se
+complete la verificación de producción.
+
 Con la aplicación levantada, `npm run verify:browser` comprueba rutas, contratos API, teclado, ausencia de overflow y vistas de 320, 768, 1024 y 1440 px.
 
 ## Datos

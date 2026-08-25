@@ -1,0 +1,114 @@
+name: Pages estático - refresco seguro de datos
+
+on:
+  workflow_run:
+    workflows:
+      - "ETL completo mensual - Ley 19.862"
+      - "ETL Mensual - CPLT Nóminas Transparencia Activa"
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "Año oficial a reconstruir (YYYY)"
+        required: false
+      through_month:
+        description: "Mes final incluido (1-12)"
+        required: false
+
+concurrency:
+  group: pages-static-refresh
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  build-verify-artifact:
+    name: Rebuild Pages, verify and retain artifact
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    # El export completo de fichas canónicas es deliberadamente exhaustivo;
+    # el runner gratuito puede terminarlo en ~26 min y necesita margen para
+    # hidratar fuentes y ejecutar las guardias sin cortar un release válido.
+    timeout-minutes: 60
+    steps:
+      - name: Checkout source from the successful ETL run
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: transparencia-app
+
+      - name: Hydrate official CPLT partitions from R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:hydrate:cplt
+
+      - name: Rebuild the complete official transfer source
+        working-directory: transparencia-app
+        env:
+          INPUT_YEAR: ${{ inputs.year }}
+          INPUT_MONTH: ${{ inputs.through_month }}
+        shell: bash
+        run: |
+          year="${INPUT_YEAR:-$(date -u +%Y)}"
+          month="${INPUT_MONTH:-$(date -u +%-m)}"
+          npm run data:backfill:ley19862 -- --year "$year" --through-month "$month"
+          npm run data:verify:r2:ley19862
+          npm run data:verify:full:ley19862
+
+      - name: Build static Pages output
+        run: npm run pages:build
+        working-directory: transparencia-app
+        env:
+          REQUIRE_COMPLETE_CPLT: "1"
+          CPLT_ALLOW_UNAVAILABLE: "1"
+
+      - name: Verify static census, chunks and data coherence
+        working-directory: transparencia-app
+        run: |
+          npm run pages:verify
+          npm run data:verify:coherence
+          npm run worker:check
+          npm run worker:test
+          npm run worker:bundle
+        env:
+          REQUIRE_COMPLETE_CPLT: "1"
+          CPLT_ALLOW_UNAVAILABLE: "1"
+
+      - name: Install Chromium and verify fresh-browser routes
+        working-directory: transparencia-app
+        run: |
+          npx playwright install --with-deps chromium
+          # The Pages artifact is intentionally verified as a plain static
+          # directory. Wrangler discovers the app's OpenNext wrangler config
+          # in this checkout and serves its .open-next assets instead of out/;
+          # serve provides the same document/static-file surface for this
+          # pre-promotion smoke and keeps the workflow deterministic.
+          nohup npx --yes serve@14 out -l 8788 >/tmp/cambiometro-pages.log 2>&1 &
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8788/ >/dev/null; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8788/ >/dev/null
+          VERIFY_BASE_URL=http://127.0.0.1:8788 npm run verify:pages-browser
+          VERIFY_BASE_URL=http://127.0.0.1:8788 CRAWL_CONCURRENCY=16 npm run pages:crawl
+
+      - name: Retain Pages artifact for manual preview/promotion
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-static-${{ github.sha }}
+          path: transparencia-app/out
+          if-no-files-found: error
+          retention-days: 7
