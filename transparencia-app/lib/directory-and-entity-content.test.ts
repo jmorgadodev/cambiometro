@@ -51,6 +51,7 @@ describe("experiencia visual de personas", () => {
     expect(autoridadesPage).not.toContain("redirect(");
     expect(readFileSync(resolve("public/_redirects"), "utf8")).toContain("/autoridades /personas?tab=parlamentarios 301");
     expect(readFileSync(resolve("public/_redirects"), "utf8")).toContain("/municipalidades/muni-maipu/ /municipalidades/maipu 301");
+    expect(readFileSync(resolve("public/_redirects"), "utf8")).toContain("/politico/dip-031/ /politico/sofia-gonzalez-cortes 301");
     expect(autoridadesExplorer).toContain("getPoliticoSlug(pol)");
     expect(autoridadesExplorer).not.toContain("/entidades/person-");
   });

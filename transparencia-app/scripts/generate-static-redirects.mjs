@@ -27,7 +27,10 @@ const redirects = [
     return [`${from} ${to} 301`, `${from}/ ${to} 301`];
   }),
   ...serviceRedirects,
-  ...politicoRedirects.map(({ from, to }) => `/politico/${from} /politico/${to} 301`),
+  ...politicoRedirects.flatMap(({ from, to }) => [
+    `/politico/${from} /politico/${to} 301`,
+    `/politico/${from}/ /politico/${to} 301`,
+  ]),
 ].join("\n") + "\n";
 await writeFile(join(root, "public", "_redirects"), redirects);
 await mkdir(join(root, "out"), { recursive: true });
