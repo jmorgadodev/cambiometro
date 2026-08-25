@@ -20,6 +20,7 @@ no se deben commitear `out/`, `.pages-static/`, chunks ni slices derivados:
 
 ```bash
 npm run data:hydrate:cplt
+npm run data:hydrate:ley19862
 npm run data:verify:full:ley19862
 $env:CPLT_ALLOW_UNAVAILABLE='1'; npm run pages:build
 $env:CPLT_ALLOW_UNAVAILABLE='1'; npm run pages:verify

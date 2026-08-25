@@ -921,3 +921,37 @@ npx wrangler rollback <worker-version-id> --name cambiometro-public-api
 El primer comando usa la API Pages Write y exige confirmación explícita; el
 segundo debe ejecutarse con el `wrangler.jsonc` del Worker y el version ID
 registrado durante la publicación.
+
+### Actualización de checkout limpio y CI — 2026-08-25
+
+La rama `feature/tarea-p-v3-static-site` contiene ahora `b534dae` y se mantiene
+separada de `main`. Los cambios de esta sesión sí fueron enviados a la rama de
+trabajo, pero no hubo merge, deploy, cambio de CNAME ni promoción de Worker.
+
+El build de Pages ya no intenta consultar el portal vivo de Ley 19.862 durante
+CI: `data:hydrate:ley19862` descarga desde el catálogo versionado de R2,
+verifica SHA-256 y sólo materializa el año más reciente. En el catálogo remoto
+hay una entrada histórica `2025-01` que se ignora deliberadamente; el release
+vigente 2026 produce 59.544 filas, monto `5.013.581.357.467` y 1.191 chunks.
+El snapshot histórico fijado de 59.361 filas y monto `5.011.094.170.302` sigue
+siendo otro universo de pruebas y no se combina con el release vivo.
+
+La publicación CPLT de R2 contiene 320 particiones reales y metadatos de
+cobertura incompletos. CI conserva el censo canónico de 346 municipalidades:
+hidrata las particiones disponibles y materializa `unavailable` explícito para
+los IDs sin publicación oficial. El modo estricto continúa fallando si se
+solicita una cobertura completa; el modo de build usa
+`CPLT_ALLOW_UNAVAILABLE=1` y no inventa registros.
+
+Los JSON grandes de `docs/auditoria/` siguen excluidos por
+`audit:repo-boundary`; no se agregan al repositorio. `pipeline-guard.mjs` los
+exige por defecto en una auditoría local, pero CI invoca explícitamente
+`--allow-missing-reports` para ejecutar el guard de consistencia de gabinete y
+dejar registrada la ausencia como artefacto local generado. Los guards de
+coherencia, imports, tests, Worker y datos continúan ejecutándose en el
+checkout limpio. Esto explica por qué el ETL podía estar verde y Quality fallar
+antes: el fallo era una dependencia de tres JSON ignorados, no una incoherencia
+del ETL.
+
+La evidencia de Actions debe leerse por run y commit. Hasta que Quality y Pages
+terminen verdes sobre este ajuste, la migración sigue sin criterio de promoción.

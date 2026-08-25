@@ -55,8 +55,11 @@ jobs:
         run: npm test
         working-directory: transparencia-app
 
-      - name: Enforce data integrity guards V1-V7
-        run: npm run guard:integrity
+      - name: Enforce data integrity consistency guard
+        # Los reportes JSON de la re-auditoría son artefactos locales generados y
+        # están excluidos por audit:repo-boundary; los guards de datos fuente y
+        # coherencia permanecen activos en los pasos siguientes.
+        run: npm run guard:integrity -- --allow-missing-reports
         working-directory: transparencia-app
 
       - name: Verify pinned data coherence

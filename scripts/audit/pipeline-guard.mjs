@@ -188,22 +188,37 @@ export function verifyConsistencyGabineteMovimientos(rootDir) {
 async function main(argv = process.argv.slice(2)) {
   const root = resolve(fileURLToPath(new URL("../..", import.meta.url)));
   const docs = resolve(root, "docs", "auditoria");
-  const paths = argv.length ? argv.map((path) => resolve(path)) : DEFAULT_REPORTS.map((name) => resolve(docs, name));
-  const reports = await Promise.all(paths.map(async (path) => JSON.parse(await readFile(path, "utf8"))));
+  const allowMissingReports = argv.includes("--allow-missing-reports");
+  const reportArgs = argv.filter((arg) => arg !== "--allow-missing-reports");
+  const paths = reportArgs.length ? reportArgs.map((path) => resolve(path)) : DEFAULT_REPORTS.map((name) => resolve(docs, name));
+  const missingReports = paths.filter((path) => !existsSync(path));
+
+  if (missingReports.length > 0 && !(allowMissingReports && reportArgs.length === 0)) {
+    throw new Error(`AUDIT_REPORTS_MISSING: ${missingReports.join(", ")}. Los reportes son artefactos locales generados; usa --allow-missing-reports sólo en CI sin esos artefactos.`);
+  }
+
+  const reports = missingReports.length === 0
+    ? await Promise.all(paths.map(async (path) => JSON.parse(await readFile(path, "utf8"))))
+    : [];
   const result = evaluatePipelineReports(reports);
+  const reportsSkipped = missingReports.length > 0;
 
   // Ejecutar Guard de Consistencia Institucional
   const consistency = verifyConsistencyGabineteMovimientos(root);
 
   const { criticalIds, ...summary } = result;
-  const overallOk = result.ok && consistency.ok;
+  const overallOk = (reportsSkipped || result.ok) && consistency.ok;
 
   console.log(
     JSON.stringify(
       {
         guard: "V1-V7",
         reports: paths,
+        reports_skipped: reportsSkipped,
+        reports_skip_reason: reportsSkipped ? "Artefactos JSON generados fuera del checkout; la frontera del repositorio impide trackearlos." : null,
+        reports_audit_ok: reportsSkipped ? null : result.ok,
         ...summary,
+        ok: overallOk,
         critical_ids_sample: criticalIds.slice(0, 25),
         consistency_guard: {
           ok: consistency.ok,
