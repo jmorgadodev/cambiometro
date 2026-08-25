@@ -97,6 +97,21 @@ async function r2Json<T>(bucket: R2Bucket | undefined, key: string): Promise<T |
   return object.json<T>();
 }
 
+async function health(env: Env) {
+  const transferManifest = await r2Json<TransferApiManifest>(env.PUBLIC_DATA, "projections/transferencias-v1/manifest.json");
+  const d1 = Boolean(env.DB);
+  const r2 = Boolean(transferManifest);
+  const ok = d1 && r2;
+  return success({
+    ok,
+    service: "cambiometro-public-api",
+    d1,
+    r2,
+    transferRows: transferManifest?.totalRows ?? 0,
+    generatedAt: transferManifest?.generatedAt ?? null,
+  }, {}, {}, ok ? 200 : 503);
+}
+
 function transferApiRow(row: JsonRecord) {
   return {
     id: row.id,
@@ -577,10 +592,9 @@ export default {
     if (path === "/api/v1/crosses") return listRelations(url, env, true);
     if (path === "/api/v1/alertas") return success([]);
     if (path === "/api/v1/commercial/keys") return failure("COMMERCIAL_API_UNAVAILABLE", "La API comercial no está disponible.", 503);
+    if (path === "/api/v1/health") return health(env);
     if (path === "/api/v1/health/data") {
-      const transferManifest = await r2Json<TransferApiManifest>(env.PUBLIC_DATA, "projections/transferencias-v1/manifest.json");
-      const ok = Boolean(env.DB || transferManifest);
-      return success({ ok, d1: Boolean(env.DB), r2: Boolean(transferManifest), transferRows: transferManifest?.totalRows ?? 0 }, {}, {}, ok ? 200 : 503);
+      return health(env);
     }
     if (path === "/api/v1/sources") {
       if (!env.DB) return dbUnavailable();

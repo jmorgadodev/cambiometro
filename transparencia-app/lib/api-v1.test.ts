@@ -74,6 +74,15 @@ function officialsR2Env() {
 }
 
 describe("API canónica v1", () => {
+  it("expone health 200 sólo cuando D1 y el release R2 están disponibles", async () => {
+    const env = { ...(testEnv() as object), ...(transferR2Env() as object) } as never;
+    const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, transferRows: 59361 });
+  });
+
   it("acepta entity_id como ancla bidireccional de relaciones", () => {
     expect(
       parseRelationQuery(

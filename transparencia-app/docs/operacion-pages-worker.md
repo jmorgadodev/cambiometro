@@ -68,6 +68,8 @@ Ejecutada desde `C:\Users\jorge\Proyectos\cambiometro-public\transparencia-app` 
 - Release local generado: 59.544 filas, 1.191 páginas, monto `5.013.581.357.467`, checksum `13b9de4b9d4c07ad4a46afb9b4b4a9fdc9def947f0839544ce12def1b83e5c35`.
 - `npm run check:transfer-release`: conteo, monto, páginas, índice y checksum coherentes.
 - `npm run verify:static:browser`: 75/75 verificaciones aprobadas; cero spinners, overlays, errores de navegador o recursos 4xx/5xx en las rutas críticas. También validó Kaiser, Bianchi, Maipú y el redirect 301.
+- El Worker expone `/api/v1/health` y `/api/v1/health/data`; ambos devuelven 200 sólo cuando D1 y el manifest completo de transferencias en R2 están disponibles, y 503 con el diagnóstico de bindings si falta alguno.
+- `uptime-smoke.mjs` prueba home, listados, ficha Kaiser, transferencias, cruces, health y búsqueda. En Actions exige `CAMBIOMETRO_UPTIME_TOKEN` y lo envía únicamente como `X-Cambiometro-Uptime-Token` a `/api/*`, para coincidir con la excepción WAF limitada.
 
 El consolidado municipal CPLT se escribe en `data/lake-cplt/projections/funcionarios-v1`; el rebuild municipal busca esa ruta antes de la compatibilidad histórica `current`. Los directorios `out/`, `.next/`, `dist/`, `public/data/` y los índices/slices generados se limpian después de verificar y están excluidos de Git. Antes de continuar, `git status --short` debe permanecer vacío.
 
