@@ -72,6 +72,47 @@ describe("public-api Worker", () => {
     expect(payload.data.funcionarios[0]?.nombre).toBe("Jorge Funcionario");
   });
 
+  it("sirve transferencias completas desde el release R2 cuando D1 no tiene espacio", async () => {
+    const row = {
+      id: "transfer-1",
+      fecha: "2026-08-01",
+      period: "2026-08",
+      title: "Aporte oficial",
+      description: null,
+      classification: null,
+      emitter_name: "Municipalidad de Maipú",
+      emitter_rut: null,
+      receiver_name: "Receptor oficial",
+      receiver_rut: null,
+      monto_clp: 100,
+      url: "https://registros19862.gob.cl/registro/1",
+      municipality: "Maipú",
+    };
+    const env = {
+      PUBLIC_DATA: bucket({
+        "projections/transferencias-v1/manifest.json": {
+          schemaVersion: 1,
+          dataset: "ley-19862-transferencias",
+          generatedAt: "2026-08-25T00:00:00.000Z",
+          totalRows: 1,
+          pageSize: 50,
+          totalPages: 1,
+          checksumSha256: "abc",
+          releasePrefix: "projections/transferencias-v1/releases/abc",
+          pages: [{ page: 1, count: 1, key: "projections/transferencias-v1/releases/abc/p-0001.json", sha256: "def" }],
+          searchIndex: { key: "projections/transferencias-v1/releases/abc/search-index.json", count: 1, sha256: "ghi" },
+        },
+        "projections/transferencias-v1/releases/abc/p-0001.json": [row],
+      }),
+    } as unknown as Env;
+    const response = await worker.fetch(new Request("https://example.test/api/v1/transferencias?page=1&limit=50"), env);
+    const payload = await response.json() as { data: Array<{ id: string }>; total: number; sourceStatus: string };
+    expect(response.status).toBe(200);
+    expect(payload.total).toBe(1);
+    expect(payload.data[0]?.id).toBe("transfer-1");
+    expect(payload.sourceStatus).toBe("complete");
+  });
+
   it("sirve la nómina municipal desde R2 cuando D1 aún no está materializada", async () => {
     const env = {
       PUBLIC_DATA: bucket({

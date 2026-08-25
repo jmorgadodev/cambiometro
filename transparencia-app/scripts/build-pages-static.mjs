@@ -119,6 +119,7 @@ const staticTsconfig = JSON.stringify({
 const staticRedirects = `/municipalidades/muni-maipu /municipalidades/maipu 301\n/politico/sen-038 /politico/vanessa-kaiser-barents-von-hohenhagen 301\n`;
 
 const staticHeaders = `/*
+  Content-Security-Policy: default-src 'self'; base-uri 'self'; object-src 'none'; frame-ancestors 'none'; form-action 'self'; script-src 'self' 'nonce-cambiometro-static-v1' https://challenges.cloudflare.com; style-src 'self' 'nonce-cambiometro-static-v1'; style-src-attr 'unsafe-hashes' 'sha256-zlqnbDt84zf1iSefLU/ImC54isoprH/MRiVZGskwexk=' 'sha256-Ljkfty1t/woMLT2x9Iz6T/lBNwFLz47mVMsI0TvizTY='; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' https://cambiometro.impulsacv.cl https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; worker-src 'self' blob:; manifest-src 'self'; upgrade-insecure-requests
   Strict-Transport-Security: max-age=63072000; includeSubDomains; preload
   X-DNS-Prefetch-Control: on
   X-Frame-Options: DENY
@@ -143,6 +144,17 @@ async function run(command, args) {
     child.on("exit", (code, signal) => {
       if (code === 0) resolve();
       else reject(new Error(`${command} terminó con ${code ?? signal}`));
+    });
+  });
+}
+
+async function runFromCheckout(script, args) {
+  await new Promise((resolve, reject) => {
+    const child = spawn(process.execPath, [path.join(appRoot, "scripts", script), ...args], { cwd: appRoot, stdio: "inherit", shell: false });
+    child.on("error", reject);
+    child.on("exit", (code, signal) => {
+      if (code === 0) resolve();
+      else reject(new Error(`${script} terminó con ${code ?? signal}`));
     });
   });
 }
@@ -203,6 +215,7 @@ async function main() {
   await writeFile(path.join(stageRoot, "package.json"), staticPackage, "utf8");
   await writeFile(path.join(stageRoot, "tsconfig.json"), staticTsconfig, "utf8");
   await writeTransferReleaseOverride();
+  await runFromCheckout("prepare-static-csp.mjs", [`--root=${stageRoot}`]);
 
   const nextBin = process.platform === "win32"
     ? path.join(appRoot, "node_modules", ".bin", "next.cmd")
@@ -247,6 +260,7 @@ async function main() {
     }
     await cp(path.join(stageRoot, "out"), outputRoot, { recursive: true });
     const prunedRouteDataFiles = await prunePagesOutput(outputRoot);
+    await runFromCheckout("finalize-static-csp.mjs", [`--root=${outputRoot}`]);
     await writeFile(path.join(outputRoot, "_redirects"), staticRedirects, "utf8");
     await writeFile(path.join(outputRoot, "_headers"), staticHeaders, "utf8");
     console.log(`[pages] salida estática: ${outputRoot}; archivos RSC auxiliares eliminados: ${prunedRouteDataFiles}`);

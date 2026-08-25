@@ -144,7 +144,9 @@ export async function buildTransferStatic({ root = resolve(dirname(fileURLToPath
     y: row.period,
     d: row.fecha,
     e: row.emitter_name,
+    er: row.emitter_rut,
     r: row.receiver_name,
+    rr: row.receiver_rut,
     t: row.title,
     m: row.monto_clp,
   }));

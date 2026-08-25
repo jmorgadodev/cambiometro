@@ -101,7 +101,10 @@ async function verifyProdFull() {
   const homeCsp = homeRes.headers.get("content-security-policy") || "";
   const homeCacheControl = homeRes.headers.get("cache-control") || "";
   assertCheck("SECURITY", "HTML publica Content-Security-Policy", homeCsp.includes("script-src"));
-  if (homeCsp.includes("nonce-")) {
+  if (homeCsp.includes("nonce-cambiometro-static-v1")) {
+    assertCheck("SECURITY", "CSP Pages usa nonce estático conocido", !homeCsp.match(/nonce-(?!cambiometro-static-v1)[^ '\"]+/));
+    assertCheck("SECURITY", "CSP Pages no permite unsafe-inline", !homeCsp.includes("unsafe-inline"));
+  } else if (homeCsp.includes("nonce-")) {
     assertCheck("SECURITY", "HTML con nonce no se sirve desde caché compartida", /no-store|private/.test(homeCacheControl), homeCacheControl || "sin Cache-Control");
   } else {
     assertCheck("SECURITY", "CSP estática no usa nonce por request", !homeCsp.includes("nonce-"));

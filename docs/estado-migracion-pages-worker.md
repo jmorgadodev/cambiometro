@@ -15,9 +15,10 @@ actual del checkout.
 El sitio actual de producción sigue siendo OpenNext y no está cerrado para
 cutover: la ficha municipal falla hidratación cuando el HTML prerenderizado con
 nonce se sirve con `s-maxage=31536000`; el endpoint actual de transferencias
-responde 503; y seis rutas frías exceden 700 ms. En el branch, el E2E funcional
-de rutas pasa, pero el gate Pages sigue rojo de forma intencional porque
-`out/_headers` todavía no publica una CSP estática válida.
+responde 503; y seis rutas frías exceden 700 ms. En el branch, el artefacto
+Pages ya pasa localmente exportación, navegador, crawl y CSP; el Worker local
+también pasa con el fallback R2. Falta todavía probar y promover ambos en
+preview/producción.
 
 La última verificación productiva de sólo lectura terminó en **108 pasadas y 11
 fallas**. No existe un Pages deployment ID ni un Worker version ID nuevo. La
@@ -1325,3 +1326,52 @@ pasada también compruebe explícitamente en la ficha de Carlos Bianchi
 `25.009`, `24,89%`, `580` votos de Cámara y `189` de Senado. La salida 108/11
 es, por tanto, la evidencia capturada antes de añadir esas tres aserciones
 específicas; no se presenta como una corrida nueva ni como doble pasada.
+
+### Cierre local de CSP Pages y fallback R2 del Worker — 2026-08-25
+
+El checkout correcto ya tiene una transformación de build acotada para CSP:
+`scripts/prepare-static-csp.mjs` usa el AST de TypeScript sólo en el staging de
+Pages y convirtió 3.288 props `style` de 87 archivos en clases deterministas.
+`scripts/finalize-static-csp.mjs` genera el CSS externo
+`/_next/static/css/csp-inline-styles.css` con 2.061 reglas y 188.353 bytes.
+La política estática usa únicamente el nonce fijo de assets
+`cambiometro-static-v1`; no contiene `unsafe-inline` ni `unsafe-eval`, y la
+línea CSP de `out/_headers` mide 653 caracteres. Las dos declaraciones de
+estilo residuales del framework están limitadas mediante hashes exactos.
+
+Evidencia local posterior a esa implementación:
+
+- `npm run pages:build`: 4.647 rutas, 4.645 HTML; release Ley 19.862 de
+  59.544 filas, 1.191 páginas, suma `5.013.581.357.467` y checksum
+  `13b9de4b9d4c07ad4a46afb9b4b4a9fdc9def947f0839544ce12def1b83e5c35`.
+- `CPLT_ALLOW_UNAVAILABLE=1 npm run pages:verify`: 7.064 archivos,
+  720.079.202 bytes, cero rutas fallidas, cero RSC auxiliares y asset mayor
+  de 15,9 MB; dentro de los límites de Pages.
+- `npm run verify:pages-browser`: 10/10 rutas críticas en 200, sin spinner,
+  overlay, error de consola o respuesta de recurso inválida; navegación
+  home → político → ficha → municipalidad → Maipú verde. Transferencias
+  mostró 59.544 filas y 1.191 páginas.
+- `CRAWL_CONCURRENCY=16 npm run pages:crawl`: 4.643 rutas, cero fallas,
+  cero lentas; máximo 83 ms y p95 44 ms en el servidor estático local.
+- `VERIFY_BASE_URL=http://127.0.0.1:8788 VERIFY_API_URL=http://127.0.0.1:8789
+  npm run verify:security`: seis rutas con cabeceras completas y búsqueda
+  sin reflexión XSS. El Worker local se ejecutó separado del servidor Pages.
+- `npm run worker:check`, `npm run worker:test` (6 pruebas) y
+  `npm run worker:bundle`: verde; 30,06 KiB upload / 9,30 KiB gzip.
+
+La API de transferencias ya no queda bloqueada por el tamaño de D1. Se añadió
+`scripts/publish-transferencias-api-release.mjs`, que publica páginas de 50,
+índice de búsqueda y un manifest puntero inmutable bajo
+`projections/transferencias-v1/` en R2. El Worker intenta D1 cuando existe y
+cae al release R2 con el mismo contrato, filtros, paginación, checksum y
+`sourceStatus: complete` cuando D1 está ausente o vacío. La prueba unitaria
+reproduce exactamente ese caso. La materialización D1 quedó como optimización
+opcional del ETL; el gate obligatorio es la paridad del manifest R2 contra el
+catálogo oficial. Esto evita que un límite de almacenamiento deje el endpoint
+en 503 o fuerce una muestra inventada.
+
+Esta sección sólo documenta verificación local. Sigue pendiente ejecutar el
+workflow mensual con secretos reales, verificar el manifest publicado en R2,
+desplegar Pages/Worker en preview, realizar crawl frío productivo y obtener
+deployment/version IDs. Mientras eso no ocurra, no existe evidencia de
+producción ni autorización para cambiar CNAME o promover el cutover.

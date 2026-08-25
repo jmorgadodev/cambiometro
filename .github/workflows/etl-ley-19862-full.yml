@@ -73,9 +73,17 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: |
-          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.remote.json --remote
-          node -e "const fs=require('fs');const local=JSON.parse(fs.readFileSync('data/lake/catalog/v1/manifest.json'));const remote=JSON.parse(fs.readFileSync('data/lake/catalog/v1/manifest.remote.json'));const a=local.sources.find(x=>x.id==='ley-19862');const b=remote.sources.find(x=>x.id==='ley-19862');if(!a||!b||a.recordCount!==b.recordCount)process.exit(1);console.log(JSON.stringify({source:'ley-19862',recordCount:b.recordCount,status:b.status}));"
+           npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.remote.json --remote
+           node -e "const fs=require('fs');const local=JSON.parse(fs.readFileSync('data/lake/catalog/v1/manifest.json'));const remote=JSON.parse(fs.readFileSync('data/lake/catalog/v1/manifest.remote.json'));const a=local.sources.find(x=>x.id==='ley-19862');const b=remote.sources.find(x=>x.id==='ley-19862');if(!a||!b||a.recordCount!==b.recordCount)process.exit(1);console.log(JSON.stringify({source:'ley-19862',recordCount:b.recordCount,status:b.status}));"
+      - name: Publicar release API de transferencias en R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:publish:transfer-api
       - name: Materializar transferencias en D1 productiva
+        id: materialize
+        continue-on-error: true
         working-directory: transparencia-app
         env:
           GH_TOKEN: ${{ github.token }}
@@ -84,7 +92,16 @@ jobs:
           ETL_RUN_ID: ley-19862-${{ github.run_id }}-${{ github.run_attempt }}
           ETL_CADENCE: monthly
         run: npm run data:materialize -- --database transparencia-db --bucket transparencia-public-data --remote --sources ley-19862
-      - name: Verificar paridad D1 contra el catálogo R2
+      - name: Verificar release API en R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          npx wrangler r2 object get transparencia-public-data/projections/transferencias-v1/manifest.json --file data/lake/transfer-api.remote.json --remote
+          node -e "const fs=require('fs');const c=JSON.parse(fs.readFileSync('data/lake/catalog/v1/manifest.remote.json'));const e=c.sources.find(x=>x.id==='ley-19862');const m=JSON.parse(fs.readFileSync('data/lake/transfer-api.remote.json'));if(!e||m.totalRows!==e.recordCount||m.dataset!=='ley-19862-transferencias'||m.pages.length!==m.totalPages)process.exit(1);console.log(JSON.stringify({source:'ley-19862',totalRows:m.totalRows,totalPages:m.totalPages,checksumSha256:m.checksumSha256}));"
+      - name: Verificar paridad D1 contra el catálogo R2 si D1 quedó materializada
+        if: ${{ steps.materialize.outcome == 'success' }}
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

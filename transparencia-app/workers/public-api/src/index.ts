@@ -61,6 +61,48 @@ type TransferRow = {
   comuna: string | null;
 };
 
+type TransferStaticRow = {
+  id: string;
+  fecha: string | null;
+  period: string | null;
+  title: string | null;
+  description: string | null;
+  classification: string | null;
+  emitter_name: string | null;
+  emitter_rut: string | null;
+  receiver_name: string | null;
+  receiver_rut: string | null;
+  monto_clp: number;
+  url: string;
+  municipality: string | null;
+};
+
+type TransferR2IndexRow = {
+  i: number;
+  p: number;
+  y: string | null;
+  d: string | null;
+  e: string | null;
+  er: string | null;
+  r: string | null;
+  rr: string | null;
+  t: string | null;
+  m: number;
+};
+
+type TransferR2Manifest = {
+  schemaVersion: number;
+  dataset: string;
+  generatedAt: string;
+  totalRows: number;
+  pageSize: number;
+  totalPages: number;
+  checksumSha256: string;
+  releasePrefix: string;
+  pages: Array<{ page: number; count: number; key: string; sha256: string }>;
+  searchIndex: { key: string; count: number; sha256: string };
+};
+
 type CanonicalRecordRow = {
   id: string;
   kind: string;
@@ -170,7 +212,10 @@ const jsonHeaders = {
 };
 
 function response(data: unknown, status = 200, cache = 300, extra: HeadersInit = {}) {
-  return new Response(JSON.stringify(data), {
+  // Mantiene el contrato JSON, pero evita que una respuesta copiada dentro de
+  // HTML pueda interpretar etiquetas aportadas por una consulta del usuario.
+  const body = JSON.stringify(data).replaceAll("<", "\\u003c").replaceAll(">", "\\u003e");
+  return new Response(body, {
     status,
     headers: {
       ...jsonHeaders,
@@ -296,7 +341,6 @@ function transferData(row: TransferRow) {
 
 async function transferencias(request: Request, env: Env) {
   if (await limited(request, env, "transferencias")) return error("RATE_LIMITED", "Demasiadas consultas.", 429);
-  if (!env.DB) return error("DATABASE_UNAVAILABLE", "D1 no está disponible.", 503);
   const url = new URL(request.url);
   const page = positive(url.searchParams.get("page"), 1, 100000);
   const limit = positive(url.searchParams.get("limit") ?? url.searchParams.get("pageSize"), 50, 100);
@@ -317,8 +361,9 @@ async function transferencias(request: Request, env: Env) {
   const where = conditions.length ? ` WHERE ${conditions.join(" AND ")}` : "";
   const offset = (page - 1) * limit;
   try {
+    if (!env.DB) throw new Error("D1_NOT_BOUND");
     const available = await env.DB.prepare("SELECT 1 AS ok FROM transferencias_19862 LIMIT 1").first<{ ok: number }>();
-    if (!available) return error("DATASET_UNAVAILABLE", "La proyección completa de transferencias todavía no está publicada en D1.", 503);
+    if (!available) throw new Error("D1_DATASET_EMPTY");
     const count = await env.DB.prepare(`SELECT COUNT(*) AS total FROM transferencias_19862${where}`).bind(...bindings).first<{ total: number }>();
     const total = Number(count?.total ?? 0);
     const result = await env.DB.prepare(
@@ -328,7 +373,69 @@ async function transferencias(request: Request, env: Env) {
     const data = (result.results ?? []).map(transferData);
     return response({ data, total, page, limit, totalPages: Math.max(1, Math.ceil(total / limit)), sourceStatus: "complete" }, 200, 3600);
   } catch {
-    return error("DATASET_UNAVAILABLE", "La proyección completa de transferencias todavía no está publicada en D1.", 503);
+    return transferenciasFromR2(request, env, { page, limit, searchValue, year, emisor, sort, direction });
+  }
+}
+
+async function transferenciasFromR2(
+  request: Request,
+  env: Env,
+  filters: { page: number; limit: number; searchValue: string; year: string; emisor: string; sort: "fecha" | "monto_clp"; direction: "ASC" | "DESC" },
+) {
+  const publicData = env.PUBLIC_DATA;
+  if (!publicData) return error("DATASET_UNAVAILABLE", "La proyección completa de transferencias no está publicada.", 503);
+  try {
+    const manifestObject = await publicData.get("projections/transferencias-v1/manifest.json");
+    if (!manifestObject) throw new Error("TRANSFER_API_MANIFEST_NOT_FOUND");
+    const manifest = await manifestObject.json<TransferR2Manifest>();
+    if (manifest.dataset !== "ley-19862-transferencias" || manifest.totalRows <= 0 || manifest.pages.length !== manifest.totalPages) {
+      throw new Error("TRANSFER_API_MANIFEST_INVALID");
+    }
+    const pageMap = new Map(manifest.pages.map((item) => [item.page, item]));
+    const offset = (filters.page - 1) * filters.limit;
+    const hasFilters = Boolean(filters.searchValue || filters.year || filters.emisor || filters.sort === "fecha" || filters.direction === "ASC");
+
+    if (!hasFilters) {
+      const page = pageMap.get(filters.page);
+      const object = page ? await publicData.get(page.key) : null;
+      const data = object ? await object.json<TransferStaticRow[]>() : [];
+      return response({ data, total: manifest.totalRows, page: filters.page, limit: filters.limit, totalPages: manifest.totalPages, sourceStatus: "complete", source: "R2 release" }, 200, 3600);
+    }
+
+    const indexObject = await publicData.get(manifest.searchIndex.key);
+    if (!indexObject) throw new Error("TRANSFER_API_SEARCH_INDEX_NOT_FOUND");
+    const index = await indexObject.json<TransferR2IndexRow[]>();
+    const query = normalized(filters.searchValue);
+    const year = normalized(filters.year);
+    const emisor = normalized(filters.emisor);
+    const matching = index.filter((item) => {
+      const period = normalized(item.y);
+      const matchesYear = !year || year === "todos" || period === year || period.startsWith(`${year}-`);
+      const matchesEmisor = !emisor || emisor === "todos" || normalized(item.e) === emisor;
+      const haystack = [item.e, item.er, item.r, item.rr, item.t].map(normalized).join(" ");
+      return matchesYear && matchesEmisor && (!query || haystack.includes(query));
+    });
+    matching.sort((left, right) => {
+      const comparison = filters.sort === "fecha"
+        ? String(left.d ?? "").localeCompare(String(right.d ?? ""))
+        : Number(left.m ?? 0) - Number(right.m ?? 0);
+      return (filters.direction === "ASC" ? comparison : -comparison) || left.i - right.i;
+    });
+    const selected = matching.slice(offset, offset + filters.limit);
+    const pagesNeeded = [...new Set(selected.map((item) => item.p))];
+    if (pagesNeeded.length > 48) throw new Error("TRANSFER_API_FILTER_TOO_BROAD");
+    const loaded = new Map<number, TransferStaticRow[]>();
+    await Promise.all(pagesNeeded.map(async (pageNumber) => {
+      const page = pageMap.get(pageNumber);
+      if (!page) throw new Error("TRANSFER_API_PAGE_NOT_LISTED");
+      const object = await publicData.get(page.key);
+      if (!object) throw new Error("TRANSFER_API_PAGE_NOT_FOUND");
+      loaded.set(pageNumber, await object.json<TransferStaticRow[]>());
+    }));
+    const data = selected.map((item) => loaded.get(item.p)?.[item.i - (item.p - 1) * manifest.pageSize]).filter(Boolean);
+    return response({ data, total: matching.length, page: filters.page, limit: filters.limit, totalPages: Math.max(1, Math.ceil(matching.length / filters.limit)), sourceStatus: "complete", source: "R2 release" }, 200, 3600);
+  } catch {
+    return error("DATASET_UNAVAILABLE", "La proyección completa de transferencias no está disponible en R2.", 503);
   }
 }
 
