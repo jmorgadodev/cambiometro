@@ -61,6 +61,7 @@ El build genera `out/`, `public/data/` y artefactos de Worker. Son salidas repro
 - `etl-cplt.yml` publica la proyección CPLT en R2.
 - `etl-ley-19862.yml` publica las fuentes y el release completo de transferencias.
 - `pages-static-refresh.yml` recupera el release desde R2, construye Pages, verifica rutas y tamaño del Worker y publica Pages sólo cuando el disparador se ejecuta sobre `main` o se solicita manualmente.
+- `public-api-worker.yml` valida el Worker en cada cambio relevante; en `main` sube una versión candidata sin promover tráfico y guarda el listado/version ID como artefacto. La promoción requiere `workflow_dispatch`, `promote_version=true` y el version ID exacto.
 - `uptime-smoke.yml` verifica las rutas Pages y el origen API separado.
 
 La automatización no cambia DNS, no promueve una versión de Worker y no debe hacerlo hasta completar el crawl frío, E2E, invariantes y rollback.
@@ -75,6 +76,8 @@ El 25-ago-2026, desde el checkout correcto y sin credenciales Cloudflare locales
 - No se hicieron deploys, cambios de CNAME, WAF ni promoción de Worker; por tanto no existen todavía deployment ID de Pages ni version ID del Worker que registrar.
 
 Esta evidencia es el punto de partida para el siguiente agente: primero debe obtener el token con permisos R2/D1/Pages/Workers, ejecutar el workflow con el release completo, probar preview, y sólo después hacer el cutover y correr `verify-prod-full` dos veces.
+
+El workflow de Worker usa `npx wrangler versions upload` para separar upload de promoción, como exige el modelo de versiones de Cloudflare. Al promover, deja impreso el rollback exacto: `npx wrangler rollback <worker-version-id> --name cambiometro-public-api`.
 
 ## Cutover y rollback
 

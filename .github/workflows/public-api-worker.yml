@@ -1,0 +1,139 @@
+name: Worker API - validar y versionar candidato
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "transparencia-app/workers/public-api/**"
+      - "transparencia-app/package.json"
+      - "transparencia-app/package-lock.json"
+      - ".github/workflows/public-api-worker.yml"
+  workflow_dispatch:
+    inputs:
+      upload_version:
+        description: "Subir una versión candidata sin promover tráfico"
+        type: boolean
+        required: false
+        default: false
+      promote_version:
+        description: "Promover el version ID indicado al 100% (acción productiva)"
+        type: boolean
+        required: false
+        default: false
+      worker_version_id:
+        description: "Version ID exacto para promoción; obligatorio sólo si promote_version=true"
+        type: string
+        required: false
+        default: ""
+
+concurrency:
+  group: public-api-worker-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validar Worker API
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+      - name: Instalar dependencias
+        working-directory: transparencia-app
+        run: npm ci
+      - name: Typecheck del Worker
+        working-directory: transparencia-app
+        run: npm run api:typecheck
+      - name: Guard de tamaño del Worker
+        working-directory: transparencia-app
+        run: npm run api:size
+
+  upload:
+    name: Subir versión candidata sin promover
+    needs: validate
+    if: github.event_name == 'push' || inputs.upload_version == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+      - name: Instalar dependencias
+        working-directory: transparencia-app
+        run: npm ci
+      - name: Subir versión Worker y conservar evidencia
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          tag="sha-${GITHUB_SHA}"
+          npx wrangler versions upload \
+            --config workers/public-api/wrangler.jsonc \
+            --name cambiometro-public-api \
+            --tag "$tag" \
+            --message "API candidate ${GITHUB_SHA}" \
+            --preview-alias "candidate-${GITHUB_RUN_ID}" \
+            2>&1 | tee worker-version-upload.txt
+          npx wrangler versions list \
+            --config workers/public-api/wrangler.jsonc \
+            --name cambiometro-public-api \
+            --json > worker-versions.json
+      - name: Publicar evidencia de versión
+        uses: actions/upload-artifact@v4
+        with:
+          name: worker-version-${{ github.sha }}
+          path: |
+            transparencia-app/worker-version-upload.txt
+            transparencia-app/worker-versions.json
+          if-no-files-found: error
+          retention-days: 30
+
+  promote:
+    name: Promover Worker confirmado
+    needs: validate
+    if: github.event_name == 'workflow_dispatch' && inputs.promote_version == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+      - name: Instalar dependencias
+        working-directory: transparencia-app
+        run: npm ci
+      - name: Validar version ID explícito
+        env:
+          WORKER_VERSION_ID: ${{ inputs.worker_version_id }}
+        run: test -n "$WORKER_VERSION_ID"
+      - name: Promover versión al 100%
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+          WORKER_VERSION_ID: ${{ inputs.worker_version_id }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx wrangler versions deploy \
+            --config workers/public-api/wrangler.jsonc \
+            --name cambiometro-public-api \
+            "${WORKER_VERSION_ID}@100" \
+            --message "Promote ${WORKER_VERSION_ID}" \
+            --yes
+          echo "Rollback exacto: npx wrangler rollback ${WORKER_VERSION_ID} --name cambiometro-public-api"
