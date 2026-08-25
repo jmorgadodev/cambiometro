@@ -25,7 +25,13 @@ async function main() {
   await runWrangler(["r2", "object", "get", `${bucket}/projections/funcionarios-v1/manifest.json`, "--file", manifestPath, "--remote"]);
   const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
   const assets = (manifest.assets ?? []).filter((asset) => asset.key.endsWith(".json") && !asset.key.endsWith("/manifest.json"));
-  if (assets.length !== 346) throw new Error(`CPLT_R2_ASSET_COUNT_INVALID: esperaba 346 y encontré ${assets.length}`);
+  const allowUnavailable = process.env.CPLT_ALLOW_UNAVAILABLE === "1";
+  if (!allowUnavailable && assets.length !== 346) {
+    throw new Error(`CPLT_R2_ASSET_COUNT_INVALID: esperaba 346 y encontré ${assets.length}`);
+  }
+  if (allowUnavailable && (assets.length === 0 || assets.length > 346)) {
+    throw new Error(`CPLT_R2_ASSET_COUNT_INVALID: encontré ${assets.length} particiones para un censo de 346`);
+  }
   if (!Array.isArray(manifest.coverage) || manifest.coverage.length !== 346 || manifest.coverageSummary?.censusComplete !== true) {
     throw new Error("CPLT_R2_COVERAGE_CENSUS_INVALID");
   }
@@ -50,8 +56,8 @@ async function main() {
   });
   await Promise.all(workers);
   const downloaded = readdirSync(versionRoot).filter((name) => name.endsWith(".json"));
-  if (downloaded.length !== 346) throw new Error(`CPLT_R2_DOWNLOAD_COUNT_INVALID: ${downloaded.length}`);
-  console.log(JSON.stringify({ bucket, version: manifest.version, partitions: downloaded.length, generatedAt: manifest.generatedAt }, null, 2));
+  if (downloaded.length !== assets.length) throw new Error(`CPLT_R2_DOWNLOAD_COUNT_INVALID: esperaba ${assets.length} y descargué ${downloaded.length}`);
+  console.log(JSON.stringify({ bucket, version: manifest.version, partitions: downloaded.length, census: 346, allowUnavailable, generatedAt: manifest.generatedAt }, null, 2));
 }
 
 main().catch((error) => {

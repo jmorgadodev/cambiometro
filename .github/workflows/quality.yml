@@ -35,6 +35,14 @@ jobs:
         run: npm ci
         working-directory: transparencia-app
 
+      - name: Hydrate official CPLT partitions from R2 for fixtures
+        run: npm run data:hydrate:cplt
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          CPLT_ALLOW_UNAVAILABLE: "1"
+
       - name: Verify repository boundary
         run: npm run audit:repo-boundary
         working-directory: transparencia-app

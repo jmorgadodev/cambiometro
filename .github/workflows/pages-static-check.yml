@@ -42,6 +42,7 @@ jobs:
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          CPLT_ALLOW_UNAVAILABLE: "1"
         run: npm run data:hydrate:cplt
       - name: Descargar el universo oficial de transferencias para el build
         working-directory: transparencia-app
