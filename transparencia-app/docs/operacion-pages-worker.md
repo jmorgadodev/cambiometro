@@ -71,6 +71,8 @@ Ejecutada desde `C:\Users\jorge\Proyectos\cambiometro-public\transparencia-app` 
 
 El consolidado municipal CPLT se escribe en `data/lake-cplt/projections/funcionarios-v1`; el rebuild municipal busca esa ruta antes de la compatibilidad histórica `current`. Los directorios `out/`, `.next/`, `dist/`, `public/data/` y los índices/slices generados se limpian después de verificar y están excluidos de Git. Antes de continuar, `git status --short` debe permanecer vacío.
 
+La auditoría de higiene del checkout confirmó que no hay salidas de build, `out/`, `.next/`, `dist/`, chunks, slices ni manifests generados rastreados por Git. Sí permanecen algunos snapshots grandes versionados de referencia (por ejemplo, votaciones y proyecciones base) porque tests, desarrollo local y el fallback E2E todavía los leen directamente. No deben eliminarse con `git rm` hasta que el workflow de fixtures/hydration los reemplace; hacerlo ahora rompería builds limpios y pruebas aunque producción use R2. La reducción segura ya aplicada es que los ETL diarios dejaron de hacer commits automáticos de datasets: los nuevos releases viven en R2 y el repositorio sólo recibe código, workflows y documentación.
+
 ## Flujo automático
 
 - `etl-cplt.yml` publica la proyección CPLT en R2.
