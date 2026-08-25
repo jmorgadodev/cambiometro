@@ -59,6 +59,7 @@ jobs:
           npm run ingest:servel
           npm run data:lake:projection:servel
           npm run data:build:subsets
+          npm run data:lake
           npm run data:publish
 
       - name: Publicar entradas estáticas versionadas para Pages
