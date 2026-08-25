@@ -79,7 +79,7 @@ export default function PoliticosListClient({
           const slug = getPoliticoSlug(politico);
 
           return (
-            <Link className="politician-card" href={`/politico/${slug}`} key={politico.id}>
+            <Link className="politician-card" href={`/politico/${slug}`} prefetch={false} key={politico.id}>
               <div className="politician-card__photo">
                 {verifiedPhoto ? (
                   <Image

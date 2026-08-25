@@ -91,6 +91,7 @@ export default async function EntidadesPage() {
               const active = kindFilter === kind;
               return (
                 <Link
+                  prefetch={false}
                   key={kind}
                   href={href}
                   className={`btn ${active ? "btn-primary" : "btn-ghost"}`}
@@ -126,7 +127,7 @@ export default async function EntidadesPage() {
             <div className="empty-state">
               <strong>Sin entidades que coincidan con los filtros</strong>
               <p>Prueba ampliar la búsqueda o cambiar el tipo de entidad.</p>
-              <Link href="/entidades" className="btn btn-ghost">Ver todas las entidades</Link>
+              <Link prefetch={false} href="/entidades" className="btn btn-ghost">Ver todas las entidades</Link>
             </div>
           ) : (
             <div className="table-shell">
@@ -190,7 +191,7 @@ export default async function EntidadesPage() {
                           ))}
                         </td>
                         <td>
-                          <Link className="data-link" href={`/entidades/${entity.id}`}>
+                          <Link prefetch={false} className="data-link" href={`/entidades/${entity.id}`}>
                             Ver ficha ↗
                           </Link>
                         </td>
@@ -207,6 +208,7 @@ export default async function EntidadesPage() {
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: "1.5rem", gap: "1rem" }}>
               {cursor && (
                 <Link
+                  prefetch={false}
                   href={`/entidades?${kindFilter ? `kind=${kindFilter}&` : ""}${query ? `q=${encodeURIComponent(query)}&` : ""}`}
                   className="btn btn-ghost"
                 >
@@ -215,6 +217,7 @@ export default async function EntidadesPage() {
               )}
               {result.nextCursor && (
                 <Link
+                  prefetch={false}
                   href={`/entidades?${kindFilter ? `kind=${kindFilter}&` : ""}${query ? `q=${encodeURIComponent(query)}&` : ""}cursor=${result.nextCursor}`}
                   className="btn btn-ghost"
                   style={{ marginLeft: "auto" }}
@@ -243,7 +246,7 @@ export default async function EntidadesPage() {
               { href: "/cruces", label: "🔗 Explorar cruces →" },
               { href: "/rankings", label: "📊 Rankings SERVEL" },
             ].map(({ href, label }) => (
-              <Link key={href} href={href} className="btn btn-ghost" style={{ fontSize: "0.82rem" }}>
+              <Link prefetch={false} key={href} href={href} className="btn btn-ghost" style={{ fontSize: "0.82rem" }}>
                 {label}
               </Link>
             ))}

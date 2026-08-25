@@ -8,7 +8,10 @@ async function walk(dir) {
   for (const entry of await readdir(dir, { withFileTypes: true })) {
     const path = join(dir, entry.name);
     if (entry.isDirectory()) await walk(path);
-    else if (/^(?:index|__PAGE__)\.txt$/.test(entry.name) || /^__next\._(?:full|index|tree|__PAGE__)\.txt$/.test(entry.name)) {
+    // Keep index.txt: the static App Router requests it during a client
+    // transition. Link prefetch is disabled for the static UI, so the tree
+    // metadata is not needed and can be removed to stay below Pages limits.
+    else if (/^__PAGE__\.txt$/.test(entry.name) || /^__next\._(?:full|index|tree|__PAGE__)\.txt$/.test(entry.name)) {
       await unlink(path);
       removed += 1;
     }

@@ -156,7 +156,7 @@ function Footer({ updatedAt, totalRecords }: { updatedAt: string | null; totalRe
     <footer className="site-footer">
       <div className="container-main site-footer__grid">
         <div className="site-footer__about">
-          <Link href="/" className="site-brand site-brand--footer" aria-label="El Cambiómetro, inicio">
+          <Link href="/" prefetch={false} className="site-brand site-brand--footer" aria-label="El Cambiómetro, inicio">
             <Image
               src="/brand/el-cambiometro-mark.svg"
               alt="Símbolo dial El Cambiómetro"
@@ -189,7 +189,7 @@ function Footer({ updatedAt, totalRecords }: { updatedAt: string | null; totalRe
             <ul className="site-footer__list">
               {group.links.map(([label, href]) => (
                 <li key={href}>
-                  <Link href={href} className="site-footer__link">
+                  <Link href={href} prefetch={false} className="site-footer__link">
                     {label}
                   </Link>
                 </li>

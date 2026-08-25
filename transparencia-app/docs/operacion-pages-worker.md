@@ -31,6 +31,8 @@ La discrepancia es de versión, no se corrige recortando filas. Antes de producc
 
 La página estática y el manifest deben leer el mismo resumen generado. El selector de `data/generated/transferencias/summary.json` no debe descartarlo por conservar sólo una muestra compacta. Los `loading.tsx` de segmentos se retiraron del export estático porque producían límites RSC incompletos y React #419 durante hidratación; los loaders de datos de cliente conservan estados visibles de carga, vacío, error y reintento.
 
+El export App Router también genera metadatos internos (`index.txt`, `__PAGE__` y `__next._*`). Para mantener el sitio bajo el límite de 20.000 archivos de Pages y conservar la navegación real, el build conserva sólo `index.txt`, elimina los metadatos de árbol/página y desactiva el prefetch de los enlaces internos estáticos. El resultado esperado es aproximadamente 16.363 archivos, cero metadatos de árbol y transiciones que cargan el `index.html` de la ruta destino.
+
 La nómina CPLT se publica en R2 bajo `projections/funcionarios-v1/manifest.json` y una proyección por organismo. El Worker lee la proyección solicitada, filtra, ordena y pagina; no embebe el dataset en el bundle.
 
 ## Flujo local
@@ -44,11 +46,12 @@ npm run pages:verify
 npm run api:typecheck
 npm run api:size
 npm test
+npm run verify:static:browser
 ```
 
 El build genera `out/`, `public/data/` y artefactos de Worker. Son salidas reproducibles y no deben commitearse. La publicación de datos requiere credenciales de Cloudflare y sólo se ejecuta desde CI o con autorización explícita.
 
-La prueba local de navegador debe abrir un contexto nuevo y esperar al menos 5 segundos en `/`, `/municipalidades`, `/municipalidades/maipu`, `/politico`, una ficha política, `/cruces`, `/transferencias`, `/funcionarios` y `/entidades`. El criterio es HTTP 200, cero errores de React/CSP, cero overlay activo y ausencia de textos de carga permanentes.
+`npm run verify:static:browser` levanta un servidor local del directorio `out/`, abre un contexto nuevo por ruta y espera 5,2 segundos. Comprueba `/`, listados, `/cruces`, `/transferencias`, `/funcionarios`, `/entidades`, las fichas Kaiser/Bianchi/Maipú, dos navegaciones internas, el redirect `/municipalidades/muni-maipu` y la ausencia de errores, recursos 4xx/5xx, overlays o spinners permanentes. El criterio general es HTTP 200, cero errores de React/CSP, cero overlay activo y ausencia de textos de carga permanentes.
 
 ## Flujo automático
 

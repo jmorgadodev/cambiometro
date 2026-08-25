@@ -103,8 +103,8 @@ export default async function HomePage() {
             del Estado de Chile para facilitar la fiscalización y la rendición de cuentas ciudadana.
           </p>
           <div className="home-actions">
-            <Link className="btn btn-primary" href="/politico">Explorar parlamentarios</Link>
-            <Link className="btn btn-ghost" href="/transferencias">Transferencias Ley 19.862</Link>
+            <Link prefetch={false} className="btn btn-primary" href="/politico">Explorar parlamentarios</Link>
+            <Link prefetch={false} className="btn btn-ghost" href="/transferencias">Transferencias Ley 19.862</Link>
           </div>
         </div>
 
@@ -123,6 +123,7 @@ export default async function HomePage() {
         <div className="container-main home-ledger__grid">
           {HOME_KPIS.map((item, index) => (
             <Link
+              prefetch={false}
               href={item.href}
               className="home-stat"
               key={item.key}
@@ -143,11 +144,11 @@ export default async function HomePage() {
               <p className="eyebrow">Mesa de análisis</p>
               <h2 id="workbench-title">Empieza por una pregunta</h2>
             </div>
-            <Link href="/como-funciona">Cómo usamos los datos públicos →</Link>
+            <Link prefetch={false} href="/como-funciona">Cómo usamos los datos públicos →</Link>
           </div>
 
           <div className="home-paths">
-            <Link href="/politico" className="home-path">
+            <Link prefetch={false} href="/politico" className="home-path">
               <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
                 <Icono nombre="votaciones" size={15} />
                 01 / Decisiones
@@ -156,7 +157,7 @@ export default async function HomePage() {
               <p>Consulta fichas parlamentarias, opciones registradas, asistencia, dietas y probidad.</p>
               <b>Ver votaciones →</b>
             </Link>
-            <Link href="/transferencias" className="home-path">
+            <Link prefetch={false} href="/transferencias" className="home-path">
               <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
                 <Icono nombre="dinero" size={15} />
                 02 / Dinero & Fundaciones
@@ -165,7 +166,7 @@ export default async function HomePage() {
               <p>Explora más de $17 billones en 361.000 transferencias a fundaciones y privados (Ley 19.862).</p>
               <b>Explorar transferencias →</b>
             </Link>
-            <Link href="/municipalidades" className="home-path">
+            <Link prefetch={false} href="/municipalidades" className="home-path">
               <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
                 <Icono nombre="territorio" size={15} />
                 03 / Territorio Comunal
@@ -174,7 +175,7 @@ export default async function HomePage() {
               <p>Fichas comunales con demografía Censo 2024, finanzas SINIM, alcaldías y compras públicas.</p>
               <b>Ver municipalidades →</b>
             </Link>
-            <Link href="/cruces" className="home-path">
+            <Link prefetch={false} href="/cruces" className="home-path">
               <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
                 <Icono nombre="cruces" size={15} />
                 04 / Relaciones
@@ -194,7 +195,7 @@ export default async function HomePage() {
               <p className="eyebrow">Estado de datos</p>
               <h2 id="sources-title">{operationalSources.length} fuentes con registros disponibles</h2>
             </div>
-            <Link href="/datos">Revisar todas las fuentes →</Link>
+            <Link prefetch={false} href="/datos">Revisar todas las fuentes →</Link>
           </div>
           <div className="home-source-list">
             {operationalSources.map((source) => (
@@ -207,7 +208,7 @@ export default async function HomePage() {
             ))}
           </div>
           <p className="home-coverage-note">
-            12 fuentes oficiales + 1 derivada. Nóminas oficiales: cada organismo informa con su partición oficial validada. Los pipelines operan de forma automatizada y periódica con trazabilidad al portal de origen. <Link href="/fuentes">Ver catálogo de fuentes →</Link>
+            12 fuentes oficiales + 1 derivada. Nóminas oficiales: cada organismo informa con su partición oficial validada. Los pipelines operan de forma automatizada y periódica con trazabilidad al portal de origen. <Link prefetch={false} href="/fuentes">Ver catálogo de fuentes →</Link>
           </p>
         </section>
       </Reveal>

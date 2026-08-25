@@ -20,6 +20,7 @@
     "guard:integrity": "node ../scripts/audit/pipeline-guard.mjs",
     "preflight": "npm run lint && npm run test && npm run pages:build && npm run api:size",
     "verify:browser": "node scripts/verify-integration.mjs",
+    "verify:static:browser": "node scripts/verify-static-browser.mjs",
     "verify:security": "node scripts/verify-security.mjs",
     "pages:build": "node scripts/build-politico-slices.mjs && node scripts/build-static-site-data.mjs && next build && node scripts/extract-static-inline-styles.mjs && node scripts/extract-static-inline-scripts.mjs && node scripts/prune-next-static-artifacts.mjs && node scripts/generate-static-metadata.mjs && node scripts/generate-static-headers.mjs && node scripts/generate-static-redirects.mjs && node scripts/verify-static-export.mjs",
     "pages:verify": "node scripts/verify-static-export.mjs",

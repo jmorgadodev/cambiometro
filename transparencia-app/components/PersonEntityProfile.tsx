@@ -56,7 +56,7 @@ export default function PersonEntityProfile({
                 Esta es una ficha técnica de evidencia cruda. Para ver la información consolidada de votaciones, asistencia, gastos operacionales y personal de apoyo, accede a su ficha principal.
               </span>
             </div>
-            <Link href={politicoPath} className="btn btn-primary" style={{ fontSize: "0.82rem", padding: "0.55rem 1rem", textDecoration: "none", whiteSpace: "nowrap" }}>
+            <Link prefetch={false} href={politicoPath} className="btn btn-primary" style={{ fontSize: "0.82rem", padding: "0.55rem 1rem", textDecoration: "none", whiteSpace: "nowrap" }}>
               Ver Ficha de Transparencia →
             </Link>
           </div>
@@ -103,7 +103,7 @@ export default function PersonEntityProfile({
                 ) : null}
               </p>
               {politicoPath ? (
-                <Link className="btn btn-primary" href={politicoPath}>
+                <Link prefetch={false} className="btn btn-primary" href={politicoPath}>
                   Abrir Ficha de Transparencia Completa
                 </Link>
               ) : null}
@@ -179,7 +179,7 @@ export default function PersonEntityProfile({
                     </strong>
                   </div>
                   <h3 style={{ fontSize: "0.95rem", margin: "0.3rem 0 0.2rem", fontWeight: 700 }}>
-                    <Link href={`/entidades/${relation.counterpartId}`} style={{ color: "var(--accent)", textDecoration: "none" }}>
+                    <Link prefetch={false} href={`/entidades/${relation.counterpartId}`} style={{ color: "var(--accent)", textDecoration: "none" }}>
                       {counterpartNames[relation.counterpartId] ?? relation.counterpartId}
                     </Link>
                   </h3>
