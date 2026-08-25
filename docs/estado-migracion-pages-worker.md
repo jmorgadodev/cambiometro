@@ -1081,3 +1081,9 @@ después por una llamada obsoleta a `npm run api:size`, script que no existe en
 este checkout. El guard vigente es `scripts/audit/measure-bundle-size.mjs` y
 ya se ejecuta en el paso siguiente del workflow. Se retiró únicamente esa
 llamada inválida; no se relajó el límite del bundle ni se omitió la auditoría.
+
+El E2E posterior falló al levantar Pages local porque Wrangler detectó el
+`wrangler.jsonc` OpenNext del directorio raíz y buscó `.open-next/assets`.
+El artefacto estático estaba correcto. El workflow se ajustó para ejecutar
+`wrangler pages dev .` desde `out/`, manteniendo el proxy al Worker local y
+aislando la prueba Pages de la configuración OpenNext de rollback.
