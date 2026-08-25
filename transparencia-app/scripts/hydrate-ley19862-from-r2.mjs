@@ -36,9 +36,14 @@ async function download(key, destination, expectedChecksum = null) {
 async function main() {
   if (!existsSync(catalogPath)) throw new Error(`LEY_19862_CATALOG_MISSING: ${catalogPath}`);
   const catalog = JSON.parse(readFileSync(catalogPath, "utf8"));
-  const partitions = (catalog.partitions ?? [])
+  const allPartitions = (catalog.partitions ?? [])
     .filter((partition) => partition.sourceId === "ley-19862")
     .sort((left, right) => String(left.id).localeCompare(String(right.id)));
+  const latestYear = allPartitions
+    .map((partition) => Number(String(partition.id).split("/")[1]))
+    .filter(Number.isInteger)
+    .sort((left, right) => right - left)[0];
+  const partitions = allPartitions.filter((partition) => String(partition.id).split("/")[1] === String(latestYear));
   if (partitions.length === 0) throw new Error("LEY_19862_R2_PARTITIONS_MISSING");
 
   const sourceRoot = join(lakeRoot, "partitions", "ley-19862");
@@ -60,7 +65,7 @@ async function main() {
 
   const downloaded = readdirSync(sourceRoot, { recursive: true }).filter((name) => String(name).endsWith("manifest.json"));
   if (downloaded.length !== partitions.length) throw new Error(`LEY_19862_R2_PARTITION_COUNT_INVALID: ${downloaded.length}/${partitions.length}`);
-  console.log(JSON.stringify({ bucket, source: "ley-19862", partitions: partitions.length, recordCount: partitions.reduce((sum, partition) => sum + Number(partition.recordCount ?? 0), 0), generatedAt: catalog.generatedAt }, null, 2));
+  console.log(JSON.stringify({ bucket, source: "ley-19862", year: latestYear, partitions: partitions.length, ignoredHistoricalPartitions: allPartitions.length - partitions.length, recordCount: partitions.reduce((sum, partition) => sum + Number(partition.recordCount ?? 0), 0), generatedAt: catalog.generatedAt }, null, 2));
 }
 
 main().catch((error) => {

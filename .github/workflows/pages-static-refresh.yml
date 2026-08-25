@@ -66,6 +66,9 @@ jobs:
 
       - name: Hidratar el universo oficial de transferencias publicado en R2
         working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         shell: bash
         run: |
           npm run data:hydrate:ley19862
