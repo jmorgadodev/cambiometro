@@ -59,6 +59,8 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           INPUT_YEAR: ${{ inputs.year }}
           INPUT_MONTH: ${{ inputs.month }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: |
           target_year="${INPUT_YEAR:-$(date -u +%Y)}"
           target_month="${INPUT_MONTH:-$((10#$(date -u +%m)))}"
