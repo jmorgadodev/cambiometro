@@ -21,6 +21,7 @@
     "verify:browser": "node scripts/verify-integration.mjs",
     "verify:security": "node scripts/verify-security.mjs",
     "check:bundle": "node scripts/audit/measure-bundle-size.mjs",
+    "audit:inline-styles": "node scripts/audit/measure-inline-styles.mjs",
     "smoke:uptime": "node scripts/uptime-smoke.mjs",
     "cf:build": "node scripts/build-open-next-rollback.mjs",
     "cf:build:rollback": "node scripts/build-open-next-rollback.mjs",

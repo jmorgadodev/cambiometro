@@ -1260,3 +1260,10 @@ línea. En el artefacto actual falla de forma intencional con
 también se niega a escribir una política de 831.799 caracteres. El CI queda
 rojo hasta resolver la CSP de forma compatible con la hidratación, en lugar de
 aceptar un header inválido o silenciar el check.
+
+La medición reproducible `npm run audit:inline-styles` encontró 3.286 usos de
+`style`, de los cuales 3.170 son objetos estáticos extraíbles, 115 dependen de
+estado/datos React y uno usa una expresión externa. Esto acota la próxima
+migración CSP: primero se pueden extraer los 3.170 estilos estáticos; los 116
+restantes requieren convertir colores, porcentajes, transiciones y estilos de
+componentes interactivos a clases/atributos CSS sin romper la hidratación.
