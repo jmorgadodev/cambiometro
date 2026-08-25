@@ -96,3 +96,21 @@ jobs:
       - name: Consolidar, validar y publicar lote completo
         working-directory: transparencia-app
         run: npm run data:finalize:cplt
+
+      - name: Recuperar proyecciones estáticas vigentes para reconstruir agregados
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:hydrate:static -- --required --required-files data/lake/projections/v1/sinim.json,data/lake/projections/v1/chilecompra.json,data/lake/projections/v1/contraloria.json
+
+      - name: Reconstruir ficha agregada de las 346 municipalidades
+        working-directory: transparencia-app
+        run: node --experimental-strip-types scripts/rebuild-authoritative-municipalidades.mjs
+
+      - name: Publicar agregados municipales para Pages
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:publish:static -- --groups municipalidades

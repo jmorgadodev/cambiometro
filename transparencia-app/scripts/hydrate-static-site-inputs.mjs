@@ -6,6 +6,7 @@ import { assertStaticInputManifest, resolveSafeStaticPath, sha256Buffer } from "
 const root = resolve(import.meta.dirname, "..");
 const bucket = argument("--bucket", "transparencia-public-data");
 const required = process.argv.includes("--required");
+const requiredFiles = argument("--required-files", "").split(",").map((value) => value.trim()).filter(Boolean);
 const manifestFile = argument("--manifest-file", "");
 const localManifestPath = manifestFile ? resolve(root, manifestFile) : resolve(root, ".static-site-release-manifest.json");
 const remoteKey = "projections/static-site-v1/manifest.json";
@@ -44,6 +45,10 @@ if (manifestFile) {
 }
 
 assertStaticInputManifest(manifest);
+const availableFiles = new Set(manifest.files.map((entry) => entry.path));
+for (const requiredFile of requiredFiles) {
+  if (!availableFiles.has(requiredFile)) throw new Error(`STATIC_INPUT_REQUIRED_FILE_MISSING: ${requiredFile}`);
+}
 for (const entry of manifest.files) {
   const target = resolveSafeStaticPath(root, entry.path);
   mkdirSync(dirname(target), { recursive: true });

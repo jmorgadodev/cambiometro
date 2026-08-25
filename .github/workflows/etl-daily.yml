@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     permissions:
-      contents: write
+      contents: read
     environment: production
     steps:
       - uses: actions/checkout@v5
@@ -124,20 +124,28 @@ jobs:
           ETL_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
         run: npm run data:materialize -- --database transparencia-db --remote --sources camara,votaciones_senado
 
+      - name: Regenerar cache estático completo de votaciones
+        working-directory: transparencia-app
+        run: npm run ingest:votaciones-full
+
+      - name: Promover personal de apoyo al workspace de Pages
+        working-directory: transparencia-app
+        shell: bash
+        run: cp /tmp/personal-apoyo-next.json data/personal-apoyo.json
+
       - name: Ejecutar ETL de Movimientos de Autoridades (Ley Chile y Diario Oficial)
         working-directory: transparencia-app
         run: node scripts/etl_movimientos_autoridades.mjs
 
-      - name: Auto-commit catalogo de movimientos (acotado a data/movimientos.json y lib/movimientos.ts)
-        shell: bash
+      - name: Construir subsets y publicar entradas estáticas
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add transparencia-app/data/movimientos.json transparencia-app/lib/movimientos.ts
-          if ! git diff --staged --quiet; then
-            git commit -m "chore(etl): sincronizar catalogo diario de movimientos de autoridades [skip ci]"
-            git push origin main || echo "Direct push to protected branch main skipped."
-          else
-            echo "Sin cambios en catalogo de movimientos."
-          fi
+          npm run data:build:subsets
+          npm run data:publish:static -- --groups parlamento
+
+      # Las salidas generadas quedan en R2 mediante el manifiesto estático;
+      # no se hacen commits automáticos de datasets al repositorio.
 

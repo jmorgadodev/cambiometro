@@ -40,6 +40,17 @@ export const STATIC_SITE_FILE_GROUPS = Object.freeze({
     "data/lake/projections/v1/sinim.json",
     "data/lake-subsets/sinim.subset.json",
   ],
+  parlamento: [
+    "data/politicos-votaciones.json",
+    "data/lake-subsets/politicos-votaciones.subset.json",
+    "data/personal-apoyo.json",
+    "data/lake-subsets/personal-apoyo.subset.json",
+    "data/movimientos.json",
+  ],
+  municipalidades: [
+    "data/municipalidades-data.json",
+    "data/municipalidades-list.json",
+  ],
 });
 
 export const STATIC_SITE_FILE_PATHS = Object.freeze(

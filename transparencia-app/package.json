@@ -68,6 +68,7 @@
     "ingest:senado": "node scripts/ingest-senado.mjs",
     "ingest:servel": "node scripts/ingest-servel.mjs",
     "ingest:camara-attendance": "node scripts/ingest-camara-attendance.mjs",
+    "ingest:votaciones-full": "node scripts/ingest-votaciones-full.mjs",
     "ingest:infolobby": "node scripts/ingest-infolobby.mjs",
     "ingest:infoprobidad": "node scripts/ingest-infoprobidad.mjs",
     "etl:personal-apoyo": "node scripts/etl-personal-apoyo.mjs",
