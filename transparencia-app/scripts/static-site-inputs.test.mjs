@@ -16,7 +16,7 @@ describe("static site input release", () => {
     const root = mkdtempSync(join(tmpdir(), "cambiometro-static-inputs-"));
     try {
       const file = "data/lake-subsets/chilecompra.subset.json";
-      const target = join(root, file.replaceAll("/", "\\"));
+      const target = join(root, "data", "lake-subsets", "chilecompra.subset.json");
       mkdirSync(join(root, "data", "lake-subsets"), { recursive: true });
       writeFileSync(target, "{\"generatedAt\":\"test\"}\n", "utf8");
       const requested = parseRequestedStaticFiles({ groups: ["chilecompra"] });
@@ -41,7 +41,7 @@ describe("static site input release", () => {
     const root = mkdtempSync(join(tmpdir(), "cambiometro-static-inputs-partial-"));
     try {
       const file = "data/lake-subsets/chilecompra.subset.json";
-      const target = join(root, file.replaceAll("/", "\\"));
+      const target = join(root, "data", "lake-subsets", "chilecompra.subset.json");
       mkdirSync(join(root, "data", "lake-subsets"), { recursive: true });
       writeFileSync(target, "{}\n", "utf8");
       const entries = buildStaticInputEntries({ root, files: [file], releaseId: "b".repeat(64) });

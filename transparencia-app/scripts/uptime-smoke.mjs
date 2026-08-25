@@ -29,7 +29,8 @@ export function validateSmokeConfiguration({ githubActions = false, uptimeToken 
 }
 
 const UPTIME_TOKEN = process.env.UPTIME_TOKEN?.trim() ?? "";
-validateSmokeConfiguration({ githubActions: Boolean(process.env.GITHUB_ACTIONS), uptimeToken: UPTIME_TOKEN });
+const isMainScript = process.argv[1]?.endsWith("uptime-smoke.mjs");
+if (isMainScript) validateSmokeConfiguration({ githubActions: Boolean(process.env.GITHUB_ACTIONS), uptimeToken: UPTIME_TOKEN });
 
 async function checkRoute(path) {
   const origin = path.startsWith("/api/") ? API_BASE : PROD_BASE;
@@ -109,6 +110,6 @@ export async function runUptimeSmoke() {
   console.log(`[uptime-smoke] Todas las rutas operativas (200 OK, <5s, 0 Error 1102).`);
 }
 
-if (process.argv[1]?.endsWith("uptime-smoke.mjs")) {
+if (isMainScript) {
   runUptimeSmoke();
 }
