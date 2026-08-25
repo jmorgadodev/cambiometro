@@ -20,14 +20,14 @@ La producción observada antes del cutover todavía servía OpenNext en `cambiom
 
 ## Contratos de datos
 
-Las transferencias se generan desde `data/lake/partitions/ley-19862`, nunca desde un sample cuando el release completo está disponible. El build crea `public/data/transferencias/` con páginas de 50 filas, índice de búsqueda, resumen y manifest con checksum.
+Las transferencias se generan desde `data/lake/partitions/ley-19862`. El build exige ese lake completo y falla si sólo existe la proyección/sample; nunca publica un sitio parcial. Crea `public/data/transferencias/` con páginas de 50 filas, índice de búsqueda, resumen y manifest con checksum.
 
 Hay dos snapshots que no deben mezclarse:
 
 - snapshot canónico fijado en el repositorio: 59.361 filas y `$5.011.094.170.302`;
 - release R2 local observado durante la auditoría: 59.544 filas y `$5.013.581.357.467`, checksum `13b9de4b9d4c07ad4a46afb9b4b4a9fdc9def947f0839544ce12def1b83e5c35`.
 
-La discrepancia es de versión, no se corrige recortando filas. Antes de producción se debe elegir un release, publicar su manifest en Pages y R2 y hacer que las verificaciones usen ese mismo checksum.
+La discrepancia es de versión, no se corrige recortando filas. El guard `npm run check:transfer-release` verifica que las páginas, el resumen, el índice de búsqueda y `static-site-manifest.json` tengan exactamente el mismo conteo, monto y SHA-256. El release que genere el ETL pasa a ser la fuente de verdad; los fixtures 59.361 sirven como regresión histórica, no como límite artificial para impedir actualizaciones válidas.
 
 La página estática y el manifest deben leer el mismo resumen generado. El selector de `data/generated/transferencias/summary.json` no debe descartarlo por conservar sólo una muestra compacta. Los `loading.tsx` de segmentos se retiraron del export estático porque producían límites RSC incompletos y React #419 durante hidratación; los loaders de datos de cliente conservan estados visibles de carga, vacío, error y reintento.
 
@@ -47,11 +47,14 @@ npm run api:typecheck
 npm run api:size
 npm test
 npm run verify:static:browser
+npm run check:transfer-release
 ```
 
 El build genera `out/`, `public/data/` y artefactos de Worker. Son salidas reproducibles y no deben commitearse. La publicación de datos requiere credenciales de Cloudflare y sólo se ejecuta desde CI o con autorización explícita.
 
 `npm run verify:static:browser` levanta un servidor local del directorio `out/`, abre un contexto nuevo por ruta y espera 5,2 segundos. Comprueba `/`, listados, `/cruces`, `/transferencias`, `/funcionarios`, `/entidades`, las fichas Kaiser/Bianchi/Maipú, dos navegaciones internas, el redirect `/municipalidades/muni-maipu` y la ausencia de errores, recursos 4xx/5xx, overlays o spinners permanentes. El criterio general es HTTP 200, cero errores de React/CSP, cero overlay activo y ausencia de textos de carga permanentes.
+
+`verify-prod-full.mjs` toma por defecto conteo, monto y páginas desde el manifest publicado. Para auditar el snapshot histórico fijo se pueden pasar `EXPECTED_TRANSFER_ROWS=59361`, `EXPECTED_TRANSFER_AMOUNT=5011094170302` y `EXPECTED_TRANSFER_PAGES=1188`; así las invariantes de regresión no bloquean releases nuevos que pasen la coherencia criptográfica.
 
 ## Flujo automático
 
@@ -61,6 +64,17 @@ El build genera `out/`, `public/data/` y artefactos de Worker. Son salidas repro
 - `uptime-smoke.yml` verifica las rutas Pages y el origen API separado.
 
 La automatización no cambia DNS, no promueve una versión de Worker y no debe hacerlo hasta completar el crawl frío, E2E, invariantes y rollback.
+
+## Estado externo comprobado
+
+El 25-ago-2026, desde el checkout correcto y sin credenciales Cloudflare locales (`wrangler whoami` respondió `You are not authenticated`), se verificó sólo lectura:
+
+- `https://cambiometro.pages.dev/` responde 200, pero su `data/transferencias/manifest.json` todavía contiene el snapshot parcial de 1.000 filas y 20 páginas.
+- `https://cambiometro.impulsacv.cl/` todavía entrega HTML OpenNext con nonce por request.
+- `https://cambiometro.impulsacv.cl/api/v1/transferencias?page=1&limit=1` responde 503 `DATABASE_UNAVAILABLE`.
+- No se hicieron deploys, cambios de CNAME, WAF ni promoción de Worker; por tanto no existen todavía deployment ID de Pages ni version ID del Worker que registrar.
+
+Esta evidencia es el punto de partida para el siguiente agente: primero debe obtener el token con permisos R2/D1/Pages/Workers, ejecutar el workflow con el release completo, probar preview, y sólo después hacer el cutover y correr `verify-prod-full` dos veces.
 
 ## Cutover y rollback
 

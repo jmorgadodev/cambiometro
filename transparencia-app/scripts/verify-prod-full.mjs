@@ -21,9 +21,9 @@ async function verifyProdFull() {
   console.log("================================================================================\n");
 
   const headers = { "User-Agent": "Cambiometro-Full-Verifier/1.0", "Cache-Control": "no-cache" };
-  const expectedTransferRows = Number(process.env.EXPECTED_TRANSFER_ROWS || 59361);
-  const expectedTransferAmount = Number(process.env.EXPECTED_TRANSFER_AMOUNT || 5011094170302);
-  const expectedTransferPages = Number(process.env.EXPECTED_TRANSFER_PAGES || Math.ceil(expectedTransferRows / 50));
+  const expectedTransferRowsOverride = process.env.EXPECTED_TRANSFER_ROWS ? Number(process.env.EXPECTED_TRANSFER_ROWS) : null;
+  const expectedTransferAmountOverride = process.env.EXPECTED_TRANSFER_AMOUNT ? Number(process.env.EXPECTED_TRANSFER_AMOUNT) : null;
+  const expectedTransferPagesOverride = process.env.EXPECTED_TRANSFER_PAGES ? Number(process.env.EXPECTED_TRANSFER_PAGES) : null;
 
   function formatInteger(value) {
     return new Intl.NumberFormat("es-CL").format(value);
@@ -105,8 +105,11 @@ async function verifyProdFull() {
       transferManifest = null;
     }
   }
+  const expectedTransferRows = expectedTransferRowsOverride ?? Number(transferManifest?.totalRows ?? 0);
+  const expectedTransferAmount = expectedTransferAmountOverride ?? Number(transferManifest?.expected?.totalMontoClp ?? 0);
+  const expectedTransferPages = expectedTransferPagesOverride ?? Number(transferManifest?.totalPages ?? 0);
   assertCheck("TRANSFERENCIAS", "Manifest schemaVersion 1", transferManifest?.schemaVersion === 1);
-  assertCheck("TRANSFERENCIAS", `Manifest totalRows ${formatInteger(expectedTransferRows)}`, transferManifest?.totalRows === expectedTransferRows, `actual: ${transferManifest?.totalRows ?? "n/a"}`);
+  assertCheck("TRANSFERENCIAS", expectedTransferRowsOverride === null ? "Manifest contiene el universo completo" : `Manifest totalRows ${formatInteger(expectedTransferRows)}`, Number.isInteger(transferManifest?.totalRows) && transferManifest.totalRows > 1000 && transferManifest.totalRows === expectedTransferRows, `actual: ${transferManifest?.totalRows ?? "n/a"}`);
   assertCheck("TRANSFERENCIAS", `Manifest totalPages ${formatInteger(expectedTransferPages)}`, transferManifest?.totalPages === expectedTransferPages, `actual: ${transferManifest?.totalPages ?? "n/a"}`);
   assertCheck("TRANSFERENCIAS", "Manifest pages coincide con totalPages", Array.isArray(transferManifest?.pages) && transferManifest.pages.length === expectedTransferPages);
   assertCheck("TRANSFERENCIAS", "Manifest checksum SHA-256 presente", /^[a-f0-9]{64}$/i.test(transferManifest?.checksumSha256 || ""));

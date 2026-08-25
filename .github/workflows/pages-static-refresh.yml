@@ -85,7 +85,7 @@ jobs:
           npm run pages:verify
           npm run api:typecheck
           npm run api:size
-          node -e "const fs=require('node:fs'); const m=JSON.parse(fs.readFileSync('public/data/transferencias/manifest.json','utf8')); const expectedRows=59361; const expectedAmount=5011094170302; if(m.totalRows !== expectedRows || m.totalPages !== 1188 || m.expected?.totalMontoClp !== expectedAmount) throw new Error('release fuera del snapshot canónico: '+JSON.stringify({totalRows:m.totalRows,totalPages:m.totalPages,totalMontoClp:m.expected?.totalMontoClp,expectedRows,expectedAmount})); console.log(JSON.stringify({totalRows:m.totalRows,totalPages:m.totalPages,totalMontoClp:m.expected.totalMontoClp,checksumSha256:m.checksumSha256}));"
+          npm run check:transfer-release
 
       - name: Guardar artefacto Pages
         uses: actions/upload-artifact@v4
