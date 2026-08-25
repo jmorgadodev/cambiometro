@@ -111,12 +111,10 @@ jobs:
         working-directory: transparencia-app
         run: |
           npx playwright install --with-deps chromium
-          # The Pages artifact is intentionally verified as a plain static
-          # directory. Wrangler discovers the app's OpenNext wrangler config
-          # in this checkout and serves its .open-next assets instead of out/;
-          # serve provides the same document/static-file surface for this
-          # pre-promotion smoke and keeps the workflow deterministic.
-          nohup npx --yes serve@14 out -l 8788 >/tmp/cambiometro-pages.log 2>&1 &
+          # Serve out/ with the Pages _headers and _redirects rules applied.
+          # Wrangler discovers the app's OpenNext config in this checkout and
+          # otherwise serves .open-next instead of the static artifact.
+          nohup node scripts/serve-pages-static.mjs --port 8788 >/tmp/cambiometro-pages.log 2>&1 &
           for attempt in {1..30}; do
             if curl --fail --silent http://127.0.0.1:8788/ >/dev/null; then break; fi
             sleep 1

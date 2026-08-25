@@ -49,7 +49,10 @@
         meta.textContent = [politico.cargo, politico.partido && politico.partido.sigla, politico.distrito_region].filter(Boolean).join(" · ");
         const status = document.createElement("div");
         status.className = "status";
-        status.textContent = evidenceCount + " registros ETL asociados · corte " + (payload.meta.snapshot_etl.generatedAtChile || "sin fecha");
+        const snapshotDate = payload.meta && payload.meta.snapshot_etl && payload.meta.snapshot_etl.generatedAtChile
+          ? payload.meta.snapshot_etl.generatedAtChile
+          : (payload.meta && (payload.meta.checkedAt || payload.meta.generatedAt)) || "sin fecha";
+        status.textContent = evidenceCount + " registros ETL asociados · corte " + snapshotDate;
         const link = document.createElement("a");
         link.href = politico.url_ficha;
         link.target = "_blank";

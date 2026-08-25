@@ -621,10 +621,12 @@ async function dataHealth(request: Request, env: Env) {
       generatedAt: row.generated_at ?? null,
       lastSuccessAt: row.last_success_at ?? null,
       error: row.error ?? null,
-      publishedVersion: row.published_version ?? null,
     }));
     const healthy = sourceRows.length > 0 && sourceRows.every((row) => ["success", "connected", "partial", "archive_only"].includes(String(row.status)) && !row.error);
-    return response({ data: { status: healthy ? "healthy" : "degraded", latestRun: latest ?? null, sources: sourceRows }, meta: { version: "v1", checkedAt: new Date().toISOString(), totalSources: sourceRows.length, healthySources: sourceRows.filter((row) => !row.error).length }, links: { self: request.url } }, healthy ? 200 : 503, 0);
+    const publicLatestRun = latest
+      ? { status: latest.status ?? null, startedAt: latest.started_at ?? null, finishedAt: latest.finished_at ?? null }
+      : null;
+    return response({ data: { status: healthy ? "healthy" : "degraded", latestRun: publicLatestRun, sources: sourceRows }, meta: { version: "v1", checkedAt: new Date().toISOString(), totalSources: sourceRows.length, healthySources: sourceRows.filter((row) => !row.error).length }, links: { self: request.url } }, healthy ? 200 : 503, 0);
   } catch {
     return response({ data: { status: "unavailable", latestRun: null, sources: [] }, meta: { version: "v1", checkedAt: new Date().toISOString(), reason: "DATA_HEALTH_UNAVAILABLE" }, links: { self: request.url } }, 503, 0);
   }

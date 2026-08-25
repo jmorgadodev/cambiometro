@@ -13,7 +13,7 @@ describe("validación runtime de despliegue", () => {
     expect(workflow).toContain("wrangler d1 execute transparencia-db --local --config workers/public-api/wrangler.jsonc");
     expect(workflow).toContain("fixtures/d1-browser.sql");
     expect(workflow).toContain("wrangler dev --local --config workers/public-api/wrangler.jsonc --port 8788");
-    expect(workflow).toContain("wrangler pages dev out --port 3003");
+    expect(workflow).toContain("API_ORIGIN=http://127.0.0.1:8788 node scripts/serve-pages-static.mjs --port 3003");
     expect(workflow).not.toContain("npm run start -- -p 3003");
   });
 

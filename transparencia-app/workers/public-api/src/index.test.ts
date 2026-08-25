@@ -131,4 +131,13 @@ describe("public-api Worker", () => {
       expect(response.status).not.toBe(404);
     }
   });
+
+  it("no expone identificadores ni versiones internas en salud de datos", async () => {
+    const env = { DB: database({ hasTransferRows: false }) } as unknown as Env;
+    const response = await worker.fetch(new Request("https://example.test/api/v1/health/data"), env);
+    const text = await response.text();
+    expect(text).not.toContain("publishedVersion");
+    expect(text).not.toContain('"id":"run-');
+    expect(text).toContain('"latestRun"');
+  });
 });

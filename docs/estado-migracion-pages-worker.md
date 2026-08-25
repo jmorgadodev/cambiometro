@@ -1089,3 +1089,79 @@ para `out/index.html`. El artefacto estático estaba correcto. El workflow usa
 ahora `serve out` para la superficie HTML estática y mantiene Wrangler
 separado en el puerto del Worker API; esta es la misma estrategia determinista
 del refresco Pages y no cambia el runtime de producción.
+
+### Auditoría de carga y coherencia posterior — 2026-08-25
+
+Se corrigieron cuatro fallos que podían dejar apartados vacíos o aparentar una
+carga infinita:
+
+- `/autoridades` y `/funcionarios` ahora renderizan el contenido de Personas
+  como fallback estático, aunque el servidor local no procese `_redirects`.
+- El verificador usa rutas canónicas estáticas y separa `VERIFY_BASE_URL`
+  (Pages) de `VERIFY_API_URL` (Worker). Los alias que deben redirigir se
+  omiten sólo al verificar enlaces contra el servidor local, no en Pages.
+- `widget.js` ya no asume que la respuesta de health contiene
+  `meta.snapshot_etl`; usa una fecha alternativa segura.
+- `/api/v1/health/data` del Worker ya no expone `publishedVersion` ni el ID
+  interno de `etl_runs`; se agregó una prueba específica del contrato público.
+
+El arnés local versionado es `scripts/serve-pages-static.mjs`. Sirve `out/`,
+aplica `_redirects` y `_headers` cuando existen, y proxifica `/api/*` a
+`API_ORIGIN`. Esto reproduce el enrutamiento Pages + Worker sin volver a
+levantar OpenNext; la prueba `lib/deploy-runtime-ci.test.ts` exige esa
+separación.
+
+Evidencia local del checkout correcto después de estas correcciones:
+
+- `npm run pages:build`: verde; 4.647 rutas SSG, 4.645 HTML finales y 23.215
+  auxiliares RSC podados.
+- `CPLT_ALLOW_UNAVAILABLE=1 npm run pages:verify`: verde; 7.061 archivos,
+  346 municipios censados, 281 disponibles, 64 `unavailable`, 1
+  `not_applicable`, cero fallos de checksum y cero enlaces rotos.
+- `npm run verify:browser` con Pages en `3003` y Worker en `8788`: verde;
+  rutas, responsive, APIs, widget, navegación y datos sin spinner persistente,
+  404 ni error de consola.
+- `npm run verify:pages-browser`: verde en 10 rutas principales; cero
+  overlays/spinners, cero respuestas no válidas. El reporte completo registra
+  59.544 transferencias y 1.191 páginas del release vivo.
+- `npm run pages:crawl`: verde; 4.643 rutas, cero fallos, máximo 63 ms,
+  p95 de 34 ms y cero rutas lentas.
+- `npm test`: verde; 124 archivos y 689 pruebas. `npm run lint -- --quiet`,
+  typecheck, Worker check/test y coherencia de datos también verdes.
+- Bundle Worker: 28,17 KiB de upload y 8,66 KiB gzip; límite 1 MiB verde.
+
+Hay dos universos de transferencia que no se deben mezclar. El release vivo
+de R2 que construye Pages contiene 59.544 filas, suma
+`5.013.581.357.467` CLP, checksum
+`13b9de4b9d4c07ad4a46afb9b4b4a9fdc9def947f0839544ce12def1b83e5c35` y 1.191
+chunks. El snapshot histórico fijado por los fixtures contiene 59.361 filas y
+`5.011.094.170.302` CLP; `npm run data:verify:coherence` lo confirma de forma
+independiente. La discrepancia es temporal/versionada y debe resolverse con
+una decisión de release antes de afirmar las invariantes históricas en
+producción; no se alteró el ETL ni se recortó el release vivo para forzar
+59.361.
+
+La puerta CSP sigue abierta deliberadamente. El artefacto Pages generado en
+este checkout no emite todavía `Content-Security-Policy`, porque el árbol
+actual contiene miles de estilos React inline y más de 8.000 scripts RSC inline
+únicos; aplicar `style-src 'self'` sin una migración completa rompe la
+hidratación y provoca React #412. Un intento de externalización por script
+superó 20.000 archivos y fue retirado por completo. Por eso
+`npm run verify:security` falla ahora por ausencia de la cabecera CSP y no se
+considera evidencia de producción. No se añadió `unsafe-inline`; este gate
+debe cerrarse con una estrategia CSP compatible y una prueba de consola antes
+del cutover.
+
+El checkout sigue sin merge a `main`, deploy de Pages, promoción del Worker,
+cambio de CNAME ni workflow de uptime verde en Actions. No existen todavía
+Pages deployment ID ni Worker version ID nuevos. Los comandos preparados para
+rollback son:
+
+```bash
+CONFIRM_PAGES_ROLLBACK=1 npm run pages:rollback -- <pages-deployment-id>
+npx wrangler rollback <worker-version-id> --name cambiometro-public-api
+```
+
+Mientras CSP, cobertura CPLT estricta, decisión del universo de transferencias
+y verificación productiva doble sigan pendientes, se conserva OpenNext como
+rollback y no se promueve Pages.
