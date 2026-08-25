@@ -1075,3 +1075,9 @@ automático sí lo hacían. Se corrigió el workflow para descargar el catálogo
 desde R2, hidratar ambas fuentes y verificar el universo de transferencias
 antes de levantar Pages local. Así el checkout limpio usa la misma secuencia
 de datos que el artefacto publicable.
+
+El E2E siguiente alcanzó la compilación completa (4.671 rutas SSG) y falló
+después por una llamada obsoleta a `npm run api:size`, script que no existe en
+este checkout. El guard vigente es `scripts/audit/measure-bundle-size.mjs` y
+ya se ejecuta en el paso siguiente del workflow. Se retiró únicamente esa
+llamada inválida; no se relajó el límite del bundle ni se omitió la auditoría.

@@ -69,7 +69,7 @@ jobs:
           npm run data:verify:full:ley19862
 
       - name: Build static Pages artifact and guards
-        run: npm run pages:build && npm run api:size
+        run: npm run pages:build
         working-directory: transparencia-app
 
       - name: Verify Worker Runtime Bundle Budget
