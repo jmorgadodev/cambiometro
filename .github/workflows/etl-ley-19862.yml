@@ -56,7 +56,7 @@ jobs:
 
       - name: Preparar workspace ETL sin datasets versionados
         working-directory: transparencia-app
-        run: npm run etl:prepare
+        run: npm run etl:prepare -- --download-projections --sources ley-19862
 
       - name: Hidratar particiones históricas de transferencias desde R2
         if: ${{ inputs.full_backfill != true }}
