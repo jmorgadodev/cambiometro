@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { PARTIDOS_SEED, SCORES_SEED } from "@/lib/seed-politicos";
 import {
@@ -446,19 +447,21 @@ export default async function PartidoPage({ params }: Props) {
         )}
 
         {/* Dashboard Cliente Interactivo */}
-        <PartidoDashboardClient
-          partido={partido}
-          esIndependiente={esIndependiente}
-          votosCamara={votosCamara}
-          votosSenado={votosSenado}
-          votacionesTodas={votacionesTodas}
-          serieAsistencia={serieAsistencia}
-          disciplina={disciplina}
-          radiografia={radiografia}
-          gastos={gastos}
-          politicos={politicosPartido}
-          scores={scoresPartido}
-        />
+        <Suspense fallback={null}>
+          <PartidoDashboardClient
+            partido={partido}
+            esIndependiente={esIndependiente}
+            votosCamara={votosCamara}
+            votosSenado={votosSenado}
+            votacionesTodas={votacionesTodas}
+            serieAsistencia={serieAsistencia}
+            disciplina={disciplina}
+            radiografia={radiografia}
+            gastos={gastos}
+            politicos={politicosPartido}
+            scores={scoresPartido}
+          />
+        </Suspense>
 
         <p style={{ fontSize: "0.7rem", color: "var(--text-3)", marginTop: "2.5rem", lineHeight: 1.6 }}>
           Votos: registros oficiales de votación de sala (opendata.congreso.cl). Asistencia = votos emitidos (Sí + No +

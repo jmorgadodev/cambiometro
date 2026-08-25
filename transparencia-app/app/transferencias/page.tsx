@@ -7,7 +7,7 @@ import TransferenciasExplorerClient from "@/components/transferencias/Transferen
 export const metadata: Metadata = {
   title: "Transferencias Ley 19.862 — El Cambiómetro",
   description:
-    "Explora las 59.361 transferencias de fondos públicos del Estado de Chile registradas bajo la Ley 19.862, con cobertura y trazabilidad a la fuente oficial registros19862.gob.cl.",
+    "Explora las transferencias de fondos públicos del Estado de Chile registradas bajo la Ley 19.862, con cobertura y trazabilidad a la fuente oficial registros19862.gob.cl.",
   openGraph: {
     title: "Transferencias Ley 19.862 — El Cambiómetro",
     description:

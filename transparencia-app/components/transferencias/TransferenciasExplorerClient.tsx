@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useMemo, useEffect, useRef, useTransition } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import Link from "next/link";
-import type { TransferenciaDetalle, Ley19862Summary, ReceptorResumen, EmisorResumen } from "@/lib/transferencias-data";
+import type { TransferenciaDetalle, ReceptorResumen, EmisorResumen } from "@/lib/transferencias-data";
 
 // ── Tipos ──────────────────────────────────────────────────────────────────────
 interface KPIs {
@@ -64,6 +64,36 @@ function fmtDate(fecha: string | null): string {
 const DEFAULT_PAGE_SIZE = 10;
 const PAGE_SIZE_OPTIONS = [10, 25, 50] as const;
 
+interface StaticSearchEntry {
+  i: number;
+  p: number;
+  y: string | null;
+  d: string | null;
+  e: string | null;
+  r: string | null;
+  t: string | null;
+  m: number;
+}
+
+interface StaticManifest {
+  totalRows: number;
+  totalPages: number;
+  pageSize: number;
+  pages: Array<string | { page: number; path: string }>;
+  searchIndex?: { path: string };
+}
+
+function staticPagePath(manifest: StaticManifest, page: number) {
+  const candidate = manifest.pages[page - 1];
+  return typeof candidate === "string" ? candidate : candidate?.path ?? null;
+}
+
+function matchesStaticSearch(entry: StaticSearchEntry, query: string) {
+  if (!query) return true;
+  const needle = query.toLocaleLowerCase("es-CL");
+  return [entry.t, entry.e, entry.r, entry.y].filter(Boolean).some((value) => value!.toLocaleLowerCase("es-CL").includes(needle));
+}
+
 export default function TransferenciasExplorerClient({
   kpis,
   topReceptores,
@@ -97,7 +127,8 @@ export default function TransferenciasExplorerClient({
   const [total, setTotal] = useState<number>(initialTotal);
   const [totalPages, setTotalPages] = useState<number>(initialTotalPages);
   const [isLoading, setIsLoading] = useState(false);
-  const [isPending, startTransition] = useTransition();
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [retryNonce, setRetryNonce] = useState(0);
 
   const isInitialMount = useRef(true);
 
@@ -109,7 +140,8 @@ export default function TransferenciasExplorerClient({
     return Array.from(set).sort();
   }, [topEmisores, initialTransfers]);
 
-  // Carga remota o filtrado reactivo
+  // Pages sirve el universo completo en chunks; el Worker queda como
+  // fallback de compatibilidad para releases antiguos y consumidores externos.
   useEffect(() => {
     if (isInitialMount.current) {
       isInitialMount.current = false;
@@ -117,42 +149,70 @@ export default function TransferenciasExplorerClient({
     }
 
     const controller = new AbortController();
-    const timeoutId = setTimeout(async () => {
+    const timeoutId = window.setTimeout(() => controller.abort(), 5000);
+    const loadId = window.setTimeout(async () => {
       setIsLoading(true);
+      setLoadError(null);
       try {
-        const params = new URLSearchParams({
-          page: String(page),
-          limit: String(pageSize),
-          sort: sortBy,
-          order: "desc",
-        });
-        if (search.trim()) params.set("q", search.trim());
-        if (yearFilter !== "Todos") params.set("year", yearFilter);
-        if (emisorFilter !== "Todos") params.set("emisor", emisorFilter);
-
-        const res = await fetch(`/api/v1/transferencias?${params.toString()}`, {
-          signal: controller.signal,
-        });
-        if (res.ok) {
-          const json = await res.json();
+        const manifestResponse = await fetch("/data/transferencias/manifest.json", { signal: controller.signal, cache: "no-store" });
+        if (manifestResponse.ok) {
+          const manifest = await manifestResponse.json() as StaticManifest;
+          if (!manifest.totalRows || !manifest.pages?.length || !manifest.searchIndex?.path) throw new Error("manifest incompleto");
+          const indexResponse = await fetch(manifest.searchIndex.path, { signal: controller.signal, cache: "no-store" });
+          if (!indexResponse.ok) throw new Error(`índice HTTP ${indexResponse.status}`);
+          const index = await indexResponse.json() as StaticSearchEntry[];
+          const matching = index.filter((entry) =>
+            (yearFilter === "Todos" || entry.y === yearFilter)
+            && (emisorFilter === "Todos" || entry.e === emisorFilter)
+            && matchesStaticSearch(entry, search.trim()),
+          );
+          matching.sort((left, right) => sortBy === "fecha"
+            ? String(right.d ?? "").localeCompare(String(left.d ?? "")) || right.m - left.m
+            : right.m - left.m || String(right.d ?? "").localeCompare(String(left.d ?? "")));
+          const selected = matching.slice((page - 1) * pageSize, page * pageSize);
+          const pageNumbers = [...new Set(selected.map((entry) => entry.p))];
+          const chunks = await Promise.all(pageNumbers.map(async (pageNumber) => {
+            const path = staticPagePath(manifest, pageNumber);
+            if (!path) throw new Error(`chunk ${pageNumber} ausente`);
+            const response = await fetch(path, { signal: controller.signal, cache: "no-store" });
+            if (!response.ok) throw new Error(`chunk ${pageNumber} HTTP ${response.status}`);
+            return [pageNumber, await response.json() as TransferenciaDetalle[]] as const;
+          }));
+          const rowsByIndex = new Map<number, TransferenciaDetalle>();
+          for (const [pageNumber, rows] of chunks) rows.forEach((row, rowIndex) => rowsByIndex.set((pageNumber - 1) * manifest.pageSize + rowIndex, row));
+          setTransfers(selected.map((entry) => rowsByIndex.get(entry.i)).filter((row): row is TransferenciaDetalle => Boolean(row)));
+          setTotal(matching.length);
+          setTotalPages(Math.max(1, Math.ceil(matching.length / pageSize)));
+        } else {
+          const params = new URLSearchParams({ page: String(page), limit: String(pageSize), sort: sortBy, order: "desc" });
+          if (search.trim()) params.set("q", search.trim());
+          if (yearFilter !== "Todos") params.set("year", yearFilter);
+          if (emisorFilter !== "Todos") params.set("emisor", emisorFilter);
+          const response = await fetch(`/api/v1/transferencias?${params.toString()}`, { signal: controller.signal });
+          if (!response.ok) throw new Error(`API HTTP ${response.status}`);
+          const json = await response.json();
           setTransfers(json.data || []);
           setTotal(json.total || 0);
           setTotalPages(json.totalPages || 1);
         }
       } catch (err: unknown) {
-        if (err instanceof Error && err.name !== "AbortError") {
-          console.error("Error fetching transferencias:", err);
-        }
+        if (err instanceof Error && err.name === "AbortError") setLoadError("La carga tardó demasiado. Reintenta para volver a consultar los datos publicados.");
+        else setLoadError("No se pudo cargar el índice de transferencias. Revisa tu conexión y reintenta.");
+        setTransfers([]);
+        setTotal(0);
+        setTotalPages(1);
       } finally {
+        window.clearTimeout(timeoutId);
         setIsLoading(false);
       }
     }, 150);
 
     return () => {
       controller.abort();
-      clearTimeout(timeoutId);
+      window.clearTimeout(loadId);
+      window.clearTimeout(timeoutId);
     };
-  }, [page, pageSize, search, yearFilter, emisorFilter, sortBy]);
+  }, [page, pageSize, search, yearFilter, emisorFilter, sortBy, retryNonce]);
 
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);
@@ -248,6 +308,9 @@ export default function TransferenciasExplorerClient({
             Registro oficial de transferencias del Estado de Chile a entidades receptoras bajo la Ley 19.862.
             Explore quién recibe fondos, qué organismo emite y el desglose de montos con trazabilidad oficial a <code>registros19862.gob.cl</code>.
           </p>
+          <p style={{ margin: "-0.75rem 0 1.25rem", fontSize: "0.72rem", color: "var(--text-3)" }}>
+            Corte de datos: {generatedAt ? generatedAt.slice(0, 10) : "no disponible"} · el detalle se carga desde chunks estáticos verificables.
+          </p>
 
           {/* KPIs Principales */}
           <div
@@ -267,7 +330,7 @@ export default function TransferenciasExplorerClient({
               {
                 label: "Total Transferencias",
                 value: fmtNum(kpis.total_transfers),
-                sub: "59.361 registros oficiales indexados",
+                sub: `${fmtNum(kpis.total_transfers)} registros oficiales indexados`,
                 color: "var(--info)",
               },
               {
@@ -754,6 +817,15 @@ export default function TransferenciasExplorerClient({
               <span style={{ color: "var(--accent)", fontWeight: 600 }}>Cargando transferencias...</span>
             )}
           </div>
+
+          {loadError && (
+            <div role="alert" style={{ marginBottom: "0.75rem", padding: "0.75rem 1rem", border: "1px solid var(--warn)", borderRadius: 6, color: "var(--text-1)", background: "var(--surface-2)" }}>
+              <strong>No se pudo cargar el detalle.</strong> {loadError}{" "}
+              <button type="button" onClick={() => setRetryNonce((value) => value + 1)} style={{ color: "var(--accent)", fontWeight: 700, textDecoration: "underline", background: "transparent", border: 0, cursor: "pointer" }}>
+                Reintentar
+              </button>
+            </div>
+          )}
 
           {/* TABLA LIMPIA (HAIRLINES, SIN CHIPS PESADOS) */}
           <div style={{ overflowX: "auto", border: "1px solid var(--border)", borderRadius: 6 }}>

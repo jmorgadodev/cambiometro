@@ -51,6 +51,235 @@ function dbUnavailable() {
   return failure("DATABASE_UNAVAILABLE", "D1 no esta disponible.", 503, undefined);
 }
 
+interface TransferApiPage {
+  page: number;
+  count: number;
+  key: string;
+}
+
+interface TransferApiManifest {
+  schemaVersion: number;
+  dataset: string;
+  generatedAt: string;
+  totalRows: number;
+  pageSize: number;
+  totalPages: number;
+  pages: TransferApiPage[];
+  searchIndex: { key: string; count: number };
+  checksumSha256: string;
+  expected?: { totalMontoClp?: number; totalReceptores?: number; totalEmisores?: number };
+}
+
+interface TransferSearchEntry {
+  i: number;
+  p: number;
+  y: string | null;
+  d: string | null;
+  e: string | null;
+  er?: string | null;
+  r: string | null;
+  rr?: string | null;
+  t: string | null;
+  m: number;
+}
+
+interface CpltManifest {
+  generatedAt: string;
+  version: string;
+  assets: Array<{ key: string }>;
+  coverage?: Array<{ communeId: string; administrationId: string; status: string }>;
+}
+
+async function r2Json<T>(bucket: R2Bucket | undefined, key: string): Promise<T | null> {
+  if (!bucket) return null;
+  const object = await bucket.get(key);
+  if (!object) return null;
+  return object.json<T>();
+}
+
+function transferApiRow(row: JsonRecord) {
+  return {
+    id: row.id,
+    fecha: row.fecha ?? null,
+    period: row.period ?? row.periodo ?? null,
+    title: row.title ?? row.materia ?? null,
+    description: row.description ?? null,
+    classification: row.classification ?? row.clasificacion ?? null,
+    emitter_name: row.emitter_name ?? row.emisor_nombre ?? null,
+    emitter_rut: row.emitter_rut ?? row.emisor_rut ?? null,
+    receiver_name: row.receiver_name ?? row.receptor_nombre ?? null,
+    receiver_rut: row.receiver_rut ?? row.receptor_rut ?? null,
+    monto_clp: Number(row.monto_clp ?? 0),
+    url: row.url ?? row.url_registro ?? null,
+    municipality: row.municipality ?? row.comuna ?? null,
+  };
+}
+
+async function listTransferenciasFromR2(requestUrl: URL, env: Env) {
+  const manifest = await r2Json<TransferApiManifest>(env.PUBLIC_DATA, "projections/transferencias-v1/manifest.json");
+  if (!manifest || manifest.schemaVersion !== 1 || !manifest.totalRows || !manifest.pages?.length || !manifest.searchIndex?.key) {
+    return failure("DATASET_UNAVAILABLE", "El release completo de transferencias no está publicado.", 503);
+  }
+  const rawPage = Number(requestUrl.searchParams.get("page") ?? 1);
+  const rawLimit = Number(requestUrl.searchParams.get("limit") ?? 10);
+  const page = Number.isInteger(rawPage) ? Math.max(1, Math.min(rawPage, manifest.totalPages)) : 1;
+  const limit = Number.isInteger(rawLimit) ? Math.max(1, Math.min(rawLimit, 100)) : 10;
+  const search = (requestUrl.searchParams.get("q") ?? requestUrl.searchParams.get("search") ?? "").trim().toLocaleLowerCase();
+  const year = (requestUrl.searchParams.get("year") ?? "").trim();
+  const emisor = (requestUrl.searchParams.get("emisor") ?? "").trim().toLocaleLowerCase();
+  const sort = requestUrl.searchParams.get("sort") === "fecha" ? "fecha" : "monto";
+
+  if (!search && (!year || year === "Todos") && (!emisor || emisor === "Todos") && sort === "monto") {
+    const pageInfo = manifest.pages[page - 1];
+    const rows = await r2Json<JsonRecord[]>(env.PUBLIC_DATA, pageInfo.key);
+    if (!rows) return failure("DATASET_UNAVAILABLE", "El chunk de transferencias no está disponible.", 503);
+    const data = rows.map(transferApiRow);
+    return json({
+      data,
+      total: manifest.totalRows,
+      page,
+      limit,
+      totalPages: manifest.totalPages,
+      kpis: {
+        total_monto_clp: manifest.expected?.totalMontoClp ?? 0,
+        total_transfers: manifest.totalRows,
+        total_receptores: manifest.expected?.totalReceptores ?? 0,
+        total_emisores: manifest.expected?.totalEmisores ?? 0,
+      },
+      by_year: {},
+      sourceStatus: "complete",
+      checksumSha256: manifest.checksumSha256,
+    }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
+  }
+
+  const index = await r2Json<TransferSearchEntry[]>(env.PUBLIC_DATA, manifest.searchIndex.key);
+  if (!index) return failure("DATASET_UNAVAILABLE", "El índice de transferencias no está disponible.", 503);
+  const selected = index.filter((entry) => {
+    const haystack = [entry.e, entry.er, entry.r, entry.rr, entry.t, entry.y].filter(Boolean).join(" ").toLocaleLowerCase();
+    return (!search || haystack.includes(search))
+      && (!year || year === "Todos" || entry.y === year)
+      && (!emisor || emisor === "Todos" || String(entry.e ?? "").toLocaleLowerCase() === emisor);
+  });
+  selected.sort((left, right) => sort === "fecha"
+    ? String(right.d ?? "").localeCompare(String(left.d ?? "")) || right.m - left.m
+    : right.m - left.m || String(right.d ?? "").localeCompare(String(left.d ?? "")));
+  const total = selected.length;
+  const selectedPage = selected.slice((page - 1) * limit, page * limit);
+  const pageNumbers = [...new Set(selectedPage.map((entry) => entry.p))];
+  const chunks = await Promise.all(pageNumbers.map(async (pageNumber) => {
+    const pageInfo = manifest.pages[pageNumber - 1];
+    const rows = await r2Json<JsonRecord[]>(env.PUBLIC_DATA, pageInfo.key);
+    if (!rows) throw new Error(`R2_TRANSFER_PAGE_MISSING:${pageNumber}`);
+    return [pageNumber, rows] as const;
+  }));
+  const rowsByIndex = new Map<number, JsonRecord>();
+  for (const [pageNumber, rows] of chunks) rows.forEach((row, rowIndex) => rowsByIndex.set((pageNumber - 1) * manifest.pageSize + rowIndex, row));
+  return json({
+    data: selectedPage.map((entry) => rowsByIndex.get(entry.i)).filter((row): row is JsonRecord => Boolean(row)).map(transferApiRow),
+    total,
+    page,
+    limit,
+    totalPages: Math.max(1, Math.ceil(total / limit)),
+    kpis: {
+      total_monto_clp: manifest.expected?.totalMontoClp ?? 0,
+      total_transfers: manifest.totalRows,
+      total_receptores: manifest.expected?.totalReceptores ?? 0,
+      total_emisores: manifest.expected?.totalEmisores ?? 0,
+    },
+    by_year: {},
+    sourceStatus: "complete",
+    checksumSha256: manifest.checksumSha256,
+  }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
+}
+
+function normalized(value: unknown) {
+  return String(value ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL").trim();
+}
+
+function officialSalary(row: JsonRecord) {
+  const value = Number(row.remuneracion_bruta_mensual ?? 0);
+  return Number.isFinite(value) ? value : 0;
+}
+
+function officialsResponse(rows: JsonRecord[], requestUrl: URL, generatedAt: string, sourceStatus: string, coverage: string) {
+  const query = normalized(requestUrl.searchParams.get("query"));
+  const contract = requestUrl.searchParams.get("contrato") ?? "Todos";
+  const estamento = normalized(requestUrl.searchParams.get("estamento") ?? "Todos");
+  const sortBy = requestUrl.searchParams.get("sortBy") ?? "sueldo_desc";
+  const includeZero = requestUrl.searchParams.get("include_zero") === "true";
+  const onlyAnomalies = requestUrl.searchParams.get("anomalias") === "true";
+  const soloHorasExtras = requestUrl.searchParams.get("horas_extras") === "true" || requestUrl.searchParams.get("soloHorasExtras") === "true";
+  const minSalary = requestUrl.searchParams.get("min_sueldo") ? Number(requestUrl.searchParams.get("min_sueldo")) : undefined;
+  const maxSalary = requestUrl.searchParams.get("max_sueldo") ? Number(requestUrl.searchParams.get("max_sueldo")) : undefined;
+  const period = requestUrl.searchParams.get("periodo") ?? requestUrl.searchParams.get("fuente_periodo") ?? "Todos";
+  const allRecords = period !== "Todos" ? rows.filter((row) => String(row.fuente_periodo ?? row.periodo ?? "") === period) : rows;
+  const withoutPayment = allRecords.filter((row) => officialSalary(row) <= 0);
+  const microAmount = allRecords.filter((row) => officialSalary(row) > 0 && officialSalary(row) < 50_000);
+  const completeSalary = allRecords.filter((row) => officialSalary(row) >= 50_000);
+  let filtered = includeZero ? [...allRecords] : onlyAnomalies ? [...microAmount] : allRecords.filter((row) => officialSalary(row) > 0);
+  if (query) filtered = filtered.filter((row) => normalized(`${row.nombre_completo ?? ""} ${row.cargo ?? ""} ${row.formacion ?? ""}`).includes(query));
+  if (contract !== "Todos") filtered = filtered.filter((row) => normalized(row.tipo_contrato).includes(normalized(contract)));
+  if (estamento && estamento !== "todos") filtered = filtered.filter((row) => normalized(row.estamento).includes(estamento));
+  if (soloHorasExtras) filtered = filtered.filter((row) => Number(row.horas_extras_mes_anterior ?? 0) > 0);
+  if (Number.isFinite(minSalary)) filtered = filtered.filter((row) => officialSalary(row) >= Number(minSalary));
+  if (Number.isFinite(maxSalary)) filtered = filtered.filter((row) => officialSalary(row) <= Number(maxSalary));
+  filtered.sort((left, right) => {
+    if (sortBy === "sueldo_asc") return officialSalary(left) - officialSalary(right);
+    if (sortBy === "horas_extras_desc") return Number(right.horas_extras_mes_anterior ?? 0) - Number(left.horas_extras_mes_anterior ?? 0);
+    if (sortBy === "nombre_asc") return String(left.nombre_completo ?? "").localeCompare(String(right.nombre_completo ?? ""), "es-CL");
+    if (sortBy === "nombre_desc") return String(right.nombre_completo ?? "").localeCompare(String(left.nombre_completo ?? ""), "es-CL");
+    return officialSalary(right) - officialSalary(left);
+  });
+  const pageValue = Number(requestUrl.searchParams.get("page") ?? 1);
+  const limitValue = Number(requestUrl.searchParams.get("limit") ?? 20);
+  const page = Number.isInteger(pageValue) ? Math.max(1, Math.min(pageValue, 1_000)) : 1;
+  const limit = Number.isInteger(limitValue) ? Math.max(1, Math.min(limitValue, 100)) : 20;
+  const validSalary = completeSalary.reduce((sum, row) => sum + officialSalary(row), 0);
+  const total = filtered.length;
+  const data = filtered.slice((page - 1) * limit, page * limit);
+  return json({
+    data,
+    meta: {
+      total,
+      totalHeadcount: allRecords.length,
+      sinPagoCount: withoutPayment.length,
+      microMontoCount: microAmount.length,
+      sueldoCompletoCount: completeSalary.length,
+      observadosCount: withoutPayment.length + microAmount.length,
+      page,
+      totalPages: Math.max(1, Math.ceil(total / limit)),
+      limit,
+      updatedAt: generatedAt,
+      communeId: coverage,
+      sourceStatus,
+      stats: {
+        totalMuni: allRecords.length,
+        totalValidos: completeSalary.length,
+        promedioSueldo: completeSalary.length ? Math.round(validSalary / completeSalary.length) : 0,
+        conHorasExtras: completeSalary.filter((row) => Number(row.horas_extras_mes_anterior ?? 0) > 0).length,
+        observadosCount: withoutPayment.length + microAmount.length,
+        sinPagoCount: withoutPayment.length,
+        microMontoCount: microAmount.length,
+      },
+    },
+    links: { self: requestUrl.toString() },
+  }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
+}
+
+async function listFuncionariosFromR2(requestUrl: URL, env: Env) {
+  const organism = requestUrl.searchParams.get("muni") ?? requestUrl.searchParams.get("organismo") ?? "Todos";
+  if (!organism || organism === "Todos") {
+    return failure("DATASET_SCOPE_REQUIRED", "La nómina nacional requiere el índice D1; consulta una municipalidad para acceder a la proyección oficial.", 503);
+  }
+  const manifest = await r2Json<CpltManifest>(env.PUBLIC_DATA, "projections/funcionarios-v1/manifest.json");
+  if (!manifest?.version || !Array.isArray(manifest.assets)) return failure("DATASET_UNAVAILABLE", "La nómina oficial no está publicada.", 503);
+  const key = manifest.assets.find((asset) => asset.key === `projections/funcionarios-v1/versions/${manifest.version}/${organism}.json`)?.key;
+  if (!key) return failure("DATASET_UNAVAILABLE", "No existe una nómina publicada para este organismo.", 404, { organism });
+  const rows = await r2Json<JsonRecord[]>(env.PUBLIC_DATA, key);
+  if (!rows) return failure("DATASET_UNAVAILABLE", "La nómina oficial no está disponible temporalmente.", 503);
+  return officialsResponse(rows, requestUrl, manifest.generatedAt, "r2", organism);
+}
+
 function limitFrom(url: URL) {
   const raw = Number(url.searchParams.get("limit") ?? 25);
   return Number.isInteger(raw) ? Math.min(Math.max(raw, 1), 100) : 25;
@@ -216,7 +445,6 @@ async function search(requestUrl: URL, env: Env) {
 }
 
 async function listTransferencias(requestUrl: URL, env: Env) {
-  if (!env.DB) return dbUnavailable();
   const rawPage = Number(requestUrl.searchParams.get("page") ?? 1);
   const rawLimit = Number(requestUrl.searchParams.get("limit") ?? 10);
   const page = Number.isInteger(rawPage) ? Math.max(1, Math.min(rawPage, 10_000)) : 1;
@@ -227,6 +455,7 @@ async function listTransferencias(requestUrl: URL, env: Env) {
   if (search.length > 80 || year.length > 20 || emisor.length > 160) return failure("INVALID_QUERY", "Parámetros de consulta inválidos.", 400);
   const sort = requestUrl.searchParams.get("sort") === "fecha" ? "fecha" : "monto_clp";
   const order = requestUrl.searchParams.get("order") === "asc" ? "ASC" : "DESC";
+  if (!env.DB) return listTransferenciasFromR2(requestUrl, env);
   const clauses: string[] = [];
   const bindings: (string | number)[] = [];
   if (year && year !== "Todos") { clauses.push("periodo = ?"); bindings.push(year); }
@@ -239,7 +468,7 @@ async function listTransferencias(requestUrl: URL, env: Env) {
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
   try {
     const count = await env.DB.prepare(`SELECT COUNT(*) AS total FROM transferencias_19862 ${where}`).bind(...bindings).first<{ total: number }>();
-    const total = Number(count?.total ?? 0) || 59_361;
+    const total = Number(count?.total ?? 0);
     const offset = (page - 1) * limit;
     const rows = await env.DB.prepare(`SELECT id, fecha, periodo, emisor_nombre, emisor_rut, receptor_nombre, receptor_rut, materia, monto_clp, url_registro, clasificacion, comuna FROM transferencias_19862 ${where} ORDER BY ${sort} ${order} LIMIT ? OFFSET ?`).bind(...bindings, limit, offset).all<JsonRecord>();
     const data = (rows.results ?? []).map((row) => ({
@@ -257,9 +486,12 @@ async function listTransferencias(requestUrl: URL, env: Env) {
       url: row.url_registro ?? null,
       municipality: row.comuna ?? null,
     }));
-    return json({ data, total, page, limit, totalPages: Math.max(1, Math.ceil(total / limit)), kpis: { total_monto_clp: 5_010_000_000_000, total_transfers: 59_361, total_receptores: 14_640, total_emisores: 346 }, by_year: {} }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
+    if (total > 0 || data.length > 0) {
+      return json({ data, total, page, limit, totalPages: Math.max(1, Math.ceil(total / limit)), kpis: { total_monto_clp: 5_011_094_170_302, total_transfers: total, total_receptores: 14_640, total_emisores: 272 }, by_year: {}, sourceStatus: "d1" }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
+    }
+    return listTransferenciasFromR2(requestUrl, env);
   } catch {
-    return failure("DATABASE_UNAVAILABLE", "No fue posible consultar transferencias.", 503);
+    return listTransferenciasFromR2(requestUrl, env);
   }
 }
 
@@ -345,20 +577,24 @@ export default {
     if (path === "/api/v1/crosses") return listRelations(url, env, true);
     if (path === "/api/v1/alertas") return success([]);
     if (path === "/api/v1/commercial/keys") return failure("COMMERCIAL_API_UNAVAILABLE", "La API comercial no está disponible.", 503);
-    if (path === "/api/v1/health/data") return env.DB ? success({ ok: true }) : dbUnavailable();
+    if (path === "/api/v1/health/data") {
+      const transferManifest = await r2Json<TransferApiManifest>(env.PUBLIC_DATA, "projections/transferencias-v1/manifest.json");
+      const ok = Boolean(env.DB || transferManifest);
+      return success({ ok, d1: Boolean(env.DB), r2: Boolean(transferManifest), transferRows: transferManifest?.totalRows ?? 0 }, {}, {}, ok ? 200 : 503);
+    }
     if (path === "/api/v1/sources") {
       if (!env.DB) return dbUnavailable();
       const rows = await env.DB.prepare("SELECT * FROM sources ORDER BY id").all<JsonRecord>();
       return success(rows.results ?? [], { total: rows.results?.length ?? 0 }, { self: url.toString() });
     }
-      if (path === "/api/v1/export") {
+    if (path === "/api/v1/export") {
         const limited = await rateLimit(request, env, "export");
         return limited ?? exportData(url, env);
       }
     if (path === "/api/funcionarios" || path === "/api/v1/funcionarios") {
       const invalid = validateOfficials(url);
       if (invalid) return failure("INVALID_QUERY", invalid, 400);
-      return env.DB ? success([], { total: 0, sourceStatus: "partial" }) : dbUnavailable();
+      return listFuncionariosFromR2(url, env);
     }
     if (path.startsWith("/api/v1/politico/")) {
       if (!env.DB) return dbUnavailable();

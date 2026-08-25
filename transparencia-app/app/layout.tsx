@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { Suspense } from "react";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
 import SiteHeader from "@/components/SiteHeader";
 import PageEntrance from "@/components/PageEntrance";
@@ -139,17 +138,11 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           </div>
         </div>
         <a className="skip-link" href="#contenido-principal">Saltar al contenido</a>
-        <Suspense fallback={null}>
-          <RouteTransitionOrb />
-          <NavigationProgressBar />
-        </Suspense>
-        <Suspense fallback={<div className="site-header site-header--fallback" aria-hidden="true" />}>
-          <SiteHeader updatedAt={updatedAt} totalRecords={totalRecords} />
-        </Suspense>
+        <RouteTransitionOrb />
+        <NavigationProgressBar />
+        <SiteHeader updatedAt={updatedAt} totalRecords={totalRecords} />
         <PageEntrance>
-          <Suspense fallback={<div className="container-main" aria-hidden="true" />}>
-            <main id="contenido-principal">{children}</main>
-          </Suspense>
+          <main id="contenido-principal">{children}</main>
         </PageEntrance>
         <Footer updatedAt={updatedAt} totalRecords={totalRecords} />
         <CookieConsent />

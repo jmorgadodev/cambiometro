@@ -45,6 +45,25 @@ export function writeChunkedJson({ outputDir, dataset, rows, pageSize = 50 }) {
     fs.writeFileSync(path.join(outputDir, filename), `${JSON.stringify(chunk)}\n`, "utf8");
   }
   const manifest = buildChunkManifest(dataset, rows.length, pageSize, sha256Json(rows));
+  if (dataset === "ley-19862-transferencias") {
+    const searchRows = rows.map((row, index) => ({
+      i: index,
+      p: Math.floor(index / pageSize) + 1,
+      y: row.period ?? row.periodo ?? null,
+      d: row.fecha ?? null,
+      e: row.emitter_name ?? row.emisor_nombre ?? null,
+      r: row.receiver_name ?? row.receptor_nombre ?? null,
+      t: row.title ?? row.materia ?? null,
+      m: Number(row.monto_clp ?? 0),
+    }));
+    const searchPath = path.join(outputDir, "search-index.json");
+    fs.writeFileSync(searchPath, `${JSON.stringify(searchRows)}\n`, "utf8");
+    manifest.searchIndex = {
+      path: "/data/transferencias/search-index.json",
+      count: searchRows.length,
+      sha256: sha256Json(searchRows),
+    };
+  }
   fs.writeFileSync(path.join(outputDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
   return manifest;
 }

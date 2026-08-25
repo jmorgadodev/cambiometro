@@ -40,6 +40,8 @@
     "data:lake:projection:infolobby": "node scripts/build-infolobby-v1.mjs",
     "data:lake:projection:ley19862": "node scripts/build-ley19862-v1.mjs",
     "data:publish": "node scripts/publish-data-lake.mjs --releases --r2",
+    "data:publish:transfer-api": "node scripts/publish-transferencias-api-release.mjs",
+    "data:hydrate:ley19862": "node scripts/hydrate-ley19862-from-r2.mjs",
     "data:materialize": "node scripts/materialize-d1.mjs",
     "data:materialize:dry": "node scripts/materialize-d1.mjs --dry-run",
     "data:catalog:reconcile": "node scripts/reconcile-release-catalog.mjs",

@@ -1,19 +1,27 @@
 import crypto from "node:crypto";
+import { existsSync } from "node:fs";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { writeChunkedJson } from "./static-site-data.mjs";
+import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const readJson = (file) => readFile(join(root, file), "utf8").then(JSON.parse);
 await import("./generate-static-params.mjs");
 
-const summary = await readJson("data/lake/projections/v1/ley19862-summary.json");
+const pinnedSummary = await readJson("data/lake/projections/v1/ley19862-summary.json");
 const generatedDir = join(root, "data", "generated");
 const publicDataDir = join(root, "public", "data");
 const transferDir = join(publicDataDir, "transferencias");
 await mkdir(join(generatedDir, "transferencias"), { recursive: true });
 await mkdir(publicDataDir, { recursive: true });
+
+const fullSource = join(root, "data", "lake", "partitions", "ley-19862");
+const fullRelease = existsSync(fullSource)
+  ? await buildTransferenciasStatic({ source: fullSource, output: transferDir })
+  : null;
+const summary = fullRelease?.summary ?? pinnedSummary;
 
 const compactSummary = {
   generatedAt: summary.generatedAt,
@@ -24,12 +32,12 @@ const compactSummary = {
   transfers_sample: summary.transfers_sample ?? [],
 };
 await writeFile(join(generatedDir, "transferencias", "summary.json"), `${JSON.stringify(compactSummary)}\n`);
-const transferManifest = writeChunkedJson({
-  outputDir: transferDir,
-  dataset: "ley-19862-transferencias",
-  rows: summary.transfers_sample ?? [],
-  pageSize: 50,
-});
+const transferManifest = fullRelease?.manifest ?? writeChunkedJson({
+    outputDir: transferDir,
+    dataset: "ley-19862-transferencias",
+    rows: summary.transfers_sample ?? [],
+    pageSize: 50,
+  });
 
 const canonical = await readJson("data/entidades-canonica.json").catch(() => readJson("data/catalog/entities-routes.json"));
 const entities = Array.isArray(canonical) ? canonical : canonical.entities ?? [];
