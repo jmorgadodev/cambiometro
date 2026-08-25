@@ -6,6 +6,12 @@
   "compatibility_flags": ["nodejs_compat"],
   "minify": true,
   "workers_dev": true,
+  "routes": [
+    {
+      "pattern": "cambiometro.impulsacv.cl/api/*",
+      "zone_name": "impulsacv.cl"
+    }
+  ],
   "d1_databases": [
     {
       "binding": "DB",

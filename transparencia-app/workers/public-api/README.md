@@ -21,6 +21,15 @@ npx wrangler deploy --config workers/public-api/wrangler.jsonc --dry-run
 npx wrangler dev --config workers/public-api/wrangler.jsonc --local
 ```
 
+La configuración declara la ruta de producción
+`cambiometro.impulsacv.cl/api/*`; `--dry-run` no la activa. El despliegue
+promueve una versión del Worker y debe registrar el `version_id` que devuelve
+Wrangler antes de cambiar Pages/DNS. Rollback exacto:
+
+```bash
+npx wrangler rollback <worker-version-id> --name cambiometro-public-api
+```
+
 Para habilitar el formulario en el Worker se debe configurar el secreto fuera
 del repositorio, una sola vez por entorno:
 
