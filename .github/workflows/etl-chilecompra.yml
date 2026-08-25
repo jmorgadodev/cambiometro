@@ -64,6 +64,7 @@ jobs:
           npm run ingest:chilecompra -- --year "$target_year" --month "$target_month" --concurrency 24 --rate 5
           npm run data:lake:projection:chilecompra
           npm run data:build:subsets
+          npm run data:lake
           npm run data:publish
 
       - name: Publicar entradas estáticas versionadas para Pages

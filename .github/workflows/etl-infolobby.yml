@@ -67,6 +67,7 @@ jobs:
           npm run ingest:infolobby -- --from "$from_date" --to "$to_date"
           npm run data:lake:projection:infolobby
           npm run data:build:subsets
+          npm run data:lake
           npm run data:publish
 
       - name: Publicar entradas estáticas versionadas para Pages
