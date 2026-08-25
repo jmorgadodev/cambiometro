@@ -1,12 +1,35 @@
 # Estado de la migración Pages + Worker
 
-Fecha de auditoría: 24-08-2026
-Checkout auditado: `feature/tarea-p-v3-static-site` en `d3c6fa2`
+Fecha de auditoría: 25-08-2026
+Checkout auditado: `feature/tarea-p-v3-static-site` en `31c3a5d`
 Repositorio: `C:\Users\jorge\Proyectos\cambiometro-public`
+
+## Estado ejecutivo vigente — 2026-08-25
+
+La carpeta correcta está confirmada y el trabajo se está haciendo sólo allí.
+La rama contiene los cambios de migración y está publicada en el PR #73 contra
+`main`; no se hizo merge, deploy Pages, promoción del Worker ni cambio DNS.
+El baseline histórico `d3c6fa2` se conserva como referencia, no como el estado
+actual del checkout.
+
+El sitio actual de producción sigue siendo OpenNext y no está cerrado para
+cutover: la ficha municipal falla hidratación cuando el HTML prerenderizado con
+nonce se sirve con `s-maxage=31536000`; el endpoint actual de transferencias
+responde 503; y seis rutas frías exceden 700 ms. En el branch, el E2E funcional
+de rutas pasa, pero el gate Pages sigue rojo de forma intencional porque
+`out/_headers` todavía no publica una CSP estática válida.
+
+La última verificación productiva de sólo lectura terminó en **108 pasadas y 11
+fallas**. No existe un Pages deployment ID ni un Worker version ID nuevo. La
+decisión segura es mantener OpenNext y continuar con los gates locales/preview;
+no usar el verde de ETL como autorización de lanzamiento.
 
 ## Decisión de seguridad
 
-El checkout conocido-bueno sigue siendo OpenNext. No se hizo deploy, no se cambió DNS y no se promovió ningún Worker. Las correcciones locales están sin commit y no se han mezclado con `main`; el baseline de referencia sigue identificado por `d3c6fa2`.
+El checkout conocido-bueno de producción sigue siendo OpenNext. No se hizo
+deploy, no se cambió DNS y no se promovió ningún Worker. Las correcciones están
+commiteadas en la rama de trabajo, pero aún no se han mezclado con `main`; el
+baseline de referencia sigue identificado por `d3c6fa2`.
 
 La migración sólo puede continuar después de que el sitio estático, el Worker, los datos completos y el rollback estén probados juntos. No se debe usar el resultado verde del ETL como autorización de cutover.
 
@@ -203,7 +226,11 @@ posterior a estos cambios.
 
 Hoy `etl-ley-19862-full.yml` reconstruye y publica R2 mensualmente; `build-e2e.yml` valida el artefacto OpenNext en cada push/PR; y `uptime-smoke.yml` corre cada cinco minutos contra producción. La consulta API ya puede leer R2 sin ampliar D1. Todavía no existe una cadena segura ETL → build Pages → preview → promoción, por lo que no se añadió un deploy automático que pudiera reemplazar OpenNext sin gates. La secuencia restante de costo cero es: ETL publica release inmutable → build genera slices/assets → `data:verify:coherence` y censo → preview Pages/Worker → smoke/crawl → promoción manual protegida.
 
-`uptime-smoke.yml` ahora separa `PROD_URL` y `API_URL`, conserva el cron `*/5 * * * *`, prueba la home, listados, ficha Vanessa y `/api/v1/search?q=maipu`, y puede enviar `X-Cambiometro-Uptime-Token` desde el secreto `UPTIME_TOKEN`. Aún no existe evidencia de un run verde posterior a estos cambios porque no se ha hecho push ni deploy.
+`uptime-smoke.yml` conserva el cron `*/5 * * * *`, prueba la home, listados,
+ficha Vanessa y APIs, y puede enviar `X-Cambiometro-Uptime-Token` desde el
+secreto `UPTIME_TOKEN`. El workflow está publicado, pero aún no existe
+evidencia de un run verde de producción posterior a estos cambios: el dominio
+actual todavía no enruta `/api/v1/health` al Worker nuevo.
 
 Rollback preparado:
 
@@ -217,11 +244,12 @@ Si falla un gate crítico, se conserva OpenNext y se pospone el cutover.
 ## Estado de esta sesión de auditoría
 
 - Checkout correcto confirmado: `C:\Users\jorge\Proyectos\cambiometro-public`.
-- Rama local: `feature/tarea-p-v3-static-site`; `main` remoto sigue en
-  `0632de2`; no se hizo merge, push ni deploy.
-- Verde local: `typecheck`, lint dirigido, `pages:build`, `pages:verify`,
-  `worker:check`, `worker:bundle` y navegador aislado de Pages para home,
-  Maipú y Cámara.
+- Rama local: `feature/tarea-p-v3-static-site` en `31c3a5d`; el PR sigue abierto
+  contra `main`; no se hizo merge ni deploy.
+- Verde local: `typecheck`, lint, `pages:build`, `worker:check`, `worker:bundle`,
+  pruebas unitarias/ETL y navegador aislado de Pages para home, Maipú y
+  Cámara. `pages:verify` se detiene ahora en el guard CSP porque el artefacto
+  todavía no publica una política válida.
 - No cerrado: datos y bindings productivos del Worker, transferencias full en
   D1/R2 productiva, censo de entidades completo, CSP estática, crawl frío y
   verificación productiva doble. La superficie de contratos Worker ya está
