@@ -46,12 +46,16 @@ describe("materializacion del lake a D1", () => {
   it("usa la configuracion del Worker para operaciones D1 y R2 remotas", () => {
     const script = readFileSync(resolve("scripts/materialize-d1.mjs"), "utf8");
     expect(script).toContain('const wranglerConfig = resolve("workers/public-api/wrangler.jsonc")');
-    expect(script).toContain('[wranglerBin, "--config", wranglerConfig, ...args]');
+    expect(script).toContain('[wranglerBin, "--config", config, ...args]');
   });
 
-  it("apunta las migraciones D1 al directorio compartido del proyecto", () => {
-    const config = readFileSync(resolve("workers/public-api/wrangler.jsonc"), "utf8");
-    expect(config).toContain('"migrations_dir": "../../migrations"');
+  it("usa una configuracion ubicada junto a migrations para aplicar D1", () => {
+    const script = readFileSync(resolve("scripts/materialize-d1.mjs"), "utf8");
+    const config = readFileSync(resolve("wrangler.d1.jsonc"), "utf8");
+    expect(script).toContain('const wranglerMigrationConfig = resolve("wrangler.d1.jsonc")');
+    expect(script).toContain('function wranglerMigrations(args, allowFailure = false)');
+    expect(script).toContain('wrangler(["d1", "migrations", ...args], allowFailure, wranglerMigrationConfig)');
+    expect(config).toContain('"database_name": "transparencia-db"');
   });
 
   it("limpia staging si una importación falla antes de activar la fuente", () => {
