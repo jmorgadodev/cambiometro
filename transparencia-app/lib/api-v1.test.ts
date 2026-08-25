@@ -133,7 +133,7 @@ describe("API canónica v1", () => {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ tipo: "informacion", email: "preview@example.test", descripcion: "Solicitud de prueba del preview." }),
-    }), { ...testEnv(), READ_ONLY_PREVIEW: "1" } as never);
+    }), { ...(testEnv() as object), READ_ONLY_PREVIEW: "1" } as never);
 
     expect(response.status).toBe(503);
     expect(await response.json()).toMatchObject({ error: { code: "READ_ONLY_PREVIEW" } });
