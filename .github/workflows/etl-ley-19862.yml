@@ -61,6 +61,28 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: npm run etl:prepare -- --download-projections --sources ley-19862
 
+      - name: Publicar bridge privado para el origen oficial
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+        run: |
+          set -euo pipefail
+          bridge_token="$(openssl rand -hex 32)"
+          secrets_file="$(mktemp)"
+          trap 'rm -f "$secrets_file"' EXIT
+          printf '{"SOURCE_BRIDGE_TOKEN":"%s"}\n' "$bridge_token" > "$secrets_file"
+          bridge_output="$(npx wrangler deploy \
+            --config workers/ley19862-source-bridge/wrangler.jsonc \
+            --secrets-file "$secrets_file" \
+            --message "Official source bridge ${GITHUB_SHA}" 2>&1 | tee /tmp/ley19862-source-bridge.log)"
+          bridge_url="$(printf '%s\n' "$bridge_output" | grep -Eo 'https://[^[:space:]]+\.workers\.dev' | tail -n 1 | sed 's/[[:punct:]]*$//' || true)"
+          test -n "$bridge_url"
+          echo "::add-mask::$bridge_token"
+          echo "LEY_19862_SOURCE_BRIDGE_URL=$bridge_url" >> "$GITHUB_ENV"
+          echo "LEY_19862_SOURCE_BRIDGE_TOKEN=$bridge_token" >> "$GITHUB_ENV"
+          echo "Bridge URL: $bridge_url"
+
       - name: Hidratar particiones históricas de transferencias desde R2
         if: ${{ inputs.full_backfill != true }}
         working-directory: transparencia-app

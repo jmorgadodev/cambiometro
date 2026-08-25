@@ -25,4 +25,34 @@ describe("conector Ley 19.862", () => {
     expect(attempts).toBe(2);
     expect(result.records).toHaveLength(1);
   });
+
+  it("usa el bridge sólo como transporte y conserva la URL oficial", async () => {
+    const previousUrl = process.env.LEY_19862_SOURCE_BRIDGE_URL;
+    const previousToken = process.env.LEY_19862_SOURCE_BRIDGE_TOKEN;
+    let requestedUrl = "";
+    let requestedToken = "";
+    process.env.LEY_19862_SOURCE_BRIDGE_URL = "https://source.example.workers.dev/fetch";
+    process.env.LEY_19862_SOURCE_BRIDGE_TOKEN = "test-token";
+    try {
+      const result = await fetchTransferMonth({
+        year: 2026,
+        month: 2,
+        fetchImpl: async (url, options) => {
+          requestedUrl = String(url);
+          requestedToken = options.headers["X-Source-Bridge-Token"];
+          return { ok: true, arrayBuffer: async () => Buffer.from(csv) };
+        },
+      });
+      expect(new URL(requestedUrl).pathname).toBe("/fetch");
+      expect(new URL(requestedUrl).searchParams.get("year")).toBe("2026");
+      expect(new URL(requestedUrl).searchParams.get("month")).toBe("2");
+      expect(requestedToken).toBe("test-token");
+      expect(result.original.url).toContain("https://registros19862.gob.cl/reporte/transferencias");
+    } finally {
+      if (previousUrl === undefined) delete process.env.LEY_19862_SOURCE_BRIDGE_URL;
+      else process.env.LEY_19862_SOURCE_BRIDGE_URL = previousUrl;
+      if (previousToken === undefined) delete process.env.LEY_19862_SOURCE_BRIDGE_TOKEN;
+      else process.env.LEY_19862_SOURCE_BRIDGE_TOKEN = previousToken;
+    }
+  });
 });

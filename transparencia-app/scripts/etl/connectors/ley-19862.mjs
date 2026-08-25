@@ -111,9 +111,10 @@ function wait(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-async function fetchWithCurl(sourceUrl, timeoutMs) {
+async function fetchWithCurl(sourceUrl, timeoutMs, headers = {}) {
   const binary = process.platform === "win32" ? "curl.exe" : "curl";
   const curlTimeoutMs = Math.min(timeoutMs, 60_000);
+  const headerArguments = Object.entries(headers).flatMap(([name, value]) => ["--header", `${name}: ${value}`]);
   const { stdout } = await execFileAsync(binary, [
     "--fail-with-body",
     "--location",
@@ -122,10 +123,26 @@ async function fetchWithCurl(sourceUrl, timeoutMs) {
     "--connect-timeout", String(Math.max(10, Math.ceil(curlTimeoutMs / 1000))),
     "--max-time", String(Math.max(30, Math.ceil(curlTimeoutMs / 1000))),
     "--user-agent", "TransparenciaChile-ETL/3.0",
-    "--header", "Accept: text/csv",
+    ...headerArguments,
     sourceUrl,
   ], { encoding: "buffer", maxBuffer: 64 * 1024 * 1024 });
   return Buffer.isBuffer(stdout) ? stdout : Buffer.from(stdout);
+}
+
+function transportUrl(sourceUrl, year, month) {
+  const bridge = String(process.env.LEY_19862_SOURCE_BRIDGE_URL ?? "").trim();
+  if (!bridge) return sourceUrl;
+  const url = new URL(bridge);
+  url.searchParams.set("year", String(year));
+  url.searchParams.set("month", String(month));
+  return url.toString();
+}
+
+function requestHeaders() {
+  const headers = { "User-Agent": "TransparenciaChile-ETL/3.0", Accept: "text/csv" };
+  const token = String(process.env.LEY_19862_SOURCE_BRIDGE_TOKEN ?? "").trim();
+  if (token) headers["X-Source-Bridge-Token"] = token;
+  return headers;
 }
 
 export async function fetchTransferMonth({
@@ -137,14 +154,17 @@ export async function fetchTransferMonth({
   retryDelayMs = positiveIntegerEnv("LEY_19862_RETRY_DELAY_MS", 1_000),
 }) {
   const sourceUrl = buildTransferReportUrl(year, month);
+  const requestUrl = transportUrl(sourceUrl, year, month);
+  const headers = requestHeaders();
   let response;
   let lastError = null;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
-      response = await fetchImpl(sourceUrl, { headers: { "User-Agent": "TransparenciaChile-ETL/3.0", Accept: "text/csv" }, signal: AbortSignal.timeout(timeoutMs) });
+      response = await fetchImpl(requestUrl, { headers, signal: AbortSignal.timeout(timeoutMs) });
       if (!response.ok) {
         if (response.status < 500 || attempt === maxAttempts) throw new Error(`LEY_19862_HTTP_${response.status}`);
       } else {
+        lastError = null;
         break;
       }
     } catch (error) {
@@ -156,7 +176,7 @@ export async function fetchTransferMonth({
   }
   if (lastError && fetchImpl === fetch) {
     try {
-      const data = await fetchWithCurl(sourceUrl, timeoutMs);
+      const data = await fetchWithCurl(requestUrl, timeoutMs, headers);
       response = { ok: true, arrayBuffer: async () => data };
     } catch (curlError) {
       curlError.cause = lastError;
