@@ -18,7 +18,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
-      contents: write
+      contents: read
     environment: production
     steps:
       - uses: actions/checkout@v5
@@ -57,7 +57,16 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: |
           npm run ingest:servel
+          npm run data:lake:projection:servel
+          npm run data:build:subsets
           npm run data:publish
+
+      - name: Publicar entradas estáticas versionadas para Pages
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:publish:static -- --groups servel
 
       - name: Refrescar catálogo maestro antes de materializar
         working-directory: transparencia-app

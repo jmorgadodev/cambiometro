@@ -12,9 +12,25 @@ const ROUTES = [
   "/politico/vanessa-kaiser-barents-von-hohenhagen",
   "/transferencias",
   "/cruces",
-  "/api/v1/health/data",
+  "/api/v1/health",
   "/api/v1/search?q=Kaiser",
 ];
+
+export function buildRequestHeaders(path, uptimeToken = "") {
+  const headers = { "User-Agent": "Cambiometro-UptimeSmoke/1.0" };
+  if (path.startsWith("/api/") && uptimeToken) headers["X-Cambiometro-Uptime-Token"] = uptimeToken;
+  return headers;
+}
+
+export function validateSmokeConfiguration({ githubActions = false, uptimeToken = "" } = {}) {
+  if (githubActions && !uptimeToken) {
+    throw new Error("UPTIME_TOKEN_MISSING: configura el secreto CAMBIOMETRO_UPTIME_TOKEN antes de ejecutar el smoke en Actions.");
+  }
+}
+
+const UPTIME_TOKEN = process.env.UPTIME_TOKEN?.trim() ?? "";
+const isMainScript = process.argv[1]?.endsWith("uptime-smoke.mjs");
+if (isMainScript) validateSmokeConfiguration({ githubActions: Boolean(process.env.GITHUB_ACTIONS), uptimeToken: UPTIME_TOKEN });
 
 async function checkRoute(path) {
   const origin = path.startsWith("/api/") ? API_BASE : PROD_BASE;
@@ -25,7 +41,7 @@ async function checkRoute(path) {
 
   try {
     res = await fetch(url, {
-      headers: { "User-Agent": "Cambiometro-UptimeSmoke/1.0" },
+      headers: buildRequestHeaders(path, UPTIME_TOKEN),
       signal: AbortSignal.timeout(5000),
     });
   } catch (err) {
@@ -94,6 +110,6 @@ export async function runUptimeSmoke() {
   console.log(`[uptime-smoke] Todas las rutas operativas (200 OK, <5s, 0 Error 1102).`);
 }
 
-if (process.argv[1]?.endsWith("uptime-smoke.mjs")) {
+if (isMainScript) {
   runUptimeSmoke();
 }

@@ -18,6 +18,6 @@ export default defineConfig({
     ],
   },
   test: {
-    include: ["lib/**/*.test.ts", "workers/**/*.test.ts"],
+    include: ["lib/**/*.test.ts", "workers/**/*.test.ts", "scripts/static-site-inputs.test.mjs"],
   },
 });

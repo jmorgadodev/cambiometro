@@ -446,7 +446,7 @@ export default function CrucesExplorerClient({
           >
             <div>
               📌 <strong>Muestra indexada:</strong> {filteredRows.length.toLocaleString("es-CL")} relaciones (orden por monto/fecha) · los totales por fuente corresponden al universo oficial en{" "}
-              <Link href="/datos/calidad" style={{ color: "var(--accent)", fontWeight: 600, textDecoration: "underline" }}>
+              <Link prefetch={false} href="/datos/calidad" style={{ color: "var(--accent)", fontWeight: 600, textDecoration: "underline" }}>
                 /datos/calidad
               </Link>
             </div>

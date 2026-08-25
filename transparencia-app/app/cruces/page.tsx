@@ -129,7 +129,7 @@ export default async function CrossesPage() {
         {/* ─── 3. EXPLORADOR ÚNICO (PRESETS + CHIPS + TABLA 20 + DRAWER) ───────── */}
          <CrucesExplorerClient initialRows={crosses} initialQuery={rawQuery} />
          <p className="data-note" style={{ marginTop: "1rem" }}>
-           1.897 relaciones canónicas en el modelo de datos; el grafo muestra los vínculos actualmente indexados. <Link href="/como-funciona">Conoce la metodología</Link>.
+           1.897 relaciones canónicas en el modelo de datos; el grafo muestra los vínculos actualmente indexados. <Link prefetch={false} href="/como-funciona">Conoce la metodología</Link>.
          </p>
 
         {/* ─── 4. FUENTES Y COBERTURA (Cards con enlaces a módulos existentes) ── */}
@@ -162,7 +162,7 @@ export default async function CrossesPage() {
               <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", margin: "0.3rem 0 0.85rem", lineHeight: 1.4 }}>
                 Informes finales de auditoría y dictámenes vinculados a servicios públicos y municipios.
               </p>
-              <Link href="/servicios-publicos" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem", width: "100%", textAlign: "center" }}>
+              <Link prefetch={false} href="/servicios-publicos" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem", width: "100%", textAlign: "center" }}>
                 Ver en Servicios Públicos →
               </Link>
             </div>
@@ -179,7 +179,7 @@ export default async function CrossesPage() {
               <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", margin: "0.3rem 0 0.85rem", lineHeight: 1.4 }}>
                 Licitaciones públicas, tratos directos y convenios marco unificados por OCID oficial.
               </p>
-              <Link href="/servicios-publicos" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem", width: "100%", textAlign: "center" }}>
+              <Link prefetch={false} href="/servicios-publicos" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem", width: "100%", textAlign: "center" }}>
                 Ver Compras Públicas →
               </Link>
             </div>
@@ -196,7 +196,7 @@ export default async function CrossesPage() {
               <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", margin: "0.3rem 0 0.85rem", lineHeight: 1.4 }}>
                 Registro de audiencias sostenidas con autoridades, viajes financiados y donativos.
               </p>
-              <Link href="/politico" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem", width: "100%", textAlign: "center" }}>
+              <Link prefetch={false} href="/politico" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem", width: "100%", textAlign: "center" }}>
                 Ver Autoridades y Lobby →
               </Link>
             </div>
@@ -213,7 +213,7 @@ export default async function CrossesPage() {
               <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", margin: "0.3rem 0 0.85rem", lineHeight: 1.4 }}>
                 Aportes y transferencias del Estado a personas jurídicas y entidades privadas receptoras.
               </p>
-              <Link href="/transferencias" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem", width: "100%", textAlign: "center" }}>
+              <Link prefetch={false} href="/transferencias" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem", width: "100%", textAlign: "center" }}>
                 Ver Módulo Transferencias →
               </Link>
             </div>

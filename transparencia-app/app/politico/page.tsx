@@ -98,7 +98,7 @@ export default async function PoliticoDirectory() {
               return (
                 <tr key={politico.id} style={{ position: "relative" }} className="hover-row">
                   <td>
-                    <Link href={`/politico/${slug}`} style={{ position: "absolute", inset: 0, zIndex: 1 }} aria-label={`Ficha de ${politico.nombre_completo}`} />
+                    <Link prefetch={false} href={`/politico/${slug}`} style={{ position: "absolute", inset: 0, zIndex: 1 }} aria-label={`Ficha de ${politico.nombre_completo}`} />
                     <span className="rank-number">{index + 1}</span>
                   </td>
                   <td>
@@ -195,13 +195,13 @@ export default async function PoliticoDirectory() {
 
       <div className="container-main page-layout">
         <div className="politico-filters" role="group" aria-label="Filtrar por cámara">
-          <Link className="btn btn-ghost" href="/politico" aria-current={!cargoFilter ? "page" : undefined}>
+          <Link prefetch={false} className="btn btn-ghost" href="/politico" aria-current={!cargoFilter ? "page" : undefined}>
             Todos ({POLITICOS_SEED.length})
           </Link>
-          <Link className="btn btn-ghost" href="/politico?cargo=Diputado" aria-current={cargoFilter === "Diputado" ? "page" : undefined}>
+          <Link prefetch={false} className="btn btn-ghost" href="/politico?cargo=Diputado" aria-current={cargoFilter === "Diputado" ? "page" : undefined}>
             Cámara ({POLITICOS_SEED.filter((p) => p.cargo === "Diputado").length})
           </Link>
-          <Link className="btn btn-ghost" href="/politico?cargo=Senador" aria-current={cargoFilter === "Senador" ? "page" : undefined}>
+          <Link prefetch={false} className="btn btn-ghost" href="/politico?cargo=Senador" aria-current={cargoFilter === "Senador" ? "page" : undefined}>
             Senado ({POLITICOS_SEED.filter((p) => p.cargo === "Senador").length})
           </Link>
         </div>
@@ -268,7 +268,7 @@ export default async function PoliticoDirectory() {
               Puede ser un parlamentario fuera del período 2026-2030, una persona de otra institución
               o un dato que aún no publicamos. Probá con apellido, partido o región.
             </p>
-            <Link className="btn btn-primary" href="/politico">Ver listado completo</Link>
+            <Link prefetch={false} className="btn btn-primary" href="/politico">Ver listado completo</Link>
           </div>
         )}
 

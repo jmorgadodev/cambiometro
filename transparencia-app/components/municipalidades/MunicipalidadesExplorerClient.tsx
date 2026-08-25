@@ -723,6 +723,7 @@ export default function MunicipalidadesExplorerClient({
                       <Link
                         key={m.id}
                         href={`/municipalidades/${m.id}`}
+                        prefetch={false}
                         style={{
                           textDecoration: "none",
                           color: "inherit",
@@ -1481,6 +1482,7 @@ export default function MunicipalidadesExplorerClient({
                 <Link
                   key={m.id}
                   href={`/municipalidades/${m.id}`}
+                  prefetch={false}
                   className="card hover-card"
                   style={{
                     textDecoration: "none",
@@ -1875,6 +1877,7 @@ export default function MunicipalidadesExplorerClient({
                           <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                             <Link
                               href={`/municipalidades/${m.id}`}
+                              prefetch={false}
                               style={{
                                 fontWeight: 700,
                                 color: "var(--text-primary)",
@@ -2028,6 +2031,7 @@ export default function MunicipalidadesExplorerClient({
                         >
                           <Link
                             href={`/municipalidades/${m.id}`}
+                            prefetch={false}
                             className="btn btn-ghost"
                             style={{
                               fontSize: "0.72rem",

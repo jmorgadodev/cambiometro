@@ -10,7 +10,7 @@ export default function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
     <nav aria-label="Migas de pan" className="breadcrumbs-nav">
       <ol className="breadcrumbs-list">
         <li className="breadcrumbs-item">
-          <Link href="/" className="breadcrumbs-link">Inicio</Link>
+          <Link href="/" prefetch={false} className="breadcrumbs-link">Inicio</Link>
         </li>
         {items.map((item, idx) => {
           const isLast = idx === items.length - 1;
@@ -22,7 +22,7 @@ export default function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
                   {item.label}
                 </span>
               ) : (
-                <Link href={item.href} className="breadcrumbs-link">
+                <Link href={item.href} prefetch={false} className="breadcrumbs-link">
                   {item.label}
                 </Link>
               )}

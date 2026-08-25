@@ -152,6 +152,7 @@ export default async function EntityPage({ params }: { params: Promise<{ id: str
                 🔗 Viene desde el explorador de cruces documentales
               </div>
               <Link
+                prefetch={false}
                 href="/cruces"
                 className="btn btn-secondary btn-sm"
                 style={{
@@ -187,6 +188,7 @@ export default async function EntityPage({ params }: { params: Promise<{ id: str
               <div style={{ marginTop: "0.35rem", fontSize: "0.82rem", color: "var(--text-muted)" }}>
                 Institución matriz:{" "}
                 <Link
+                  prefetch={false}
                   href={`/entidades/${entity.attributes.parentEntityId}`}
                   style={{ color: "var(--accent)", textDecoration: "none", fontWeight: 600 }}
                 >
@@ -204,7 +206,7 @@ export default async function EntityPage({ params }: { params: Promise<{ id: str
         </div>
       </section>
       <div className="container-main entity-layout">
-        <nav className="entity-tabs" aria-label="Secciones de la ficha">{TABS.map((tab) => <Link key={tab.id} className={selected.id === tab.id ? "is-active" : ""} href={`?tab=${tab.id}`}>{tab.label}</Link>)}</nav>
+        <nav className="entity-tabs" aria-label="Secciones de la ficha">{TABS.map((tab) => <Link prefetch={false} key={tab.id} className={selected.id === tab.id ? "is-active" : ""} href={`?tab=${tab.id}`}>{tab.label}</Link>)}</nav>
         <section>
           <div className="section-heading"><div><p className="eyebrow">{selected.label}</p><h2>Evidencia publicada</h2></div></div>
           {selected.id === "dinero" && presupuesto && (
@@ -318,12 +320,12 @@ export default async function EntityPage({ params }: { params: Promise<{ id: str
           {selected.id === "fiscalizaciones" && alertas.areas.size > 0 && (
             <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem", marginBottom: "1.25rem", padding: "0.9rem", borderRadius: 10, border: "1px solid var(--border-subtle)", background: "var(--bg-surface-2)" }}>
               <div style={{ fontSize: "0.72rem", fontWeight: 700, color: "var(--text-muted)" }}>Alertas por área y región · Contraloría General</div>
-              {query.area || query.region ? <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}><span className="status-label status-label--info">Filtro activo</span>{query.area && <span>{query.area}</span>}{query.region && <span>{query.region}</span>}<Link href={`?${qparams({ area: "", region: "" })}`} style={{ fontSize: "0.72rem" }}>Quitar filtros ✕</Link></div> : null}
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>{[...alertas.areas.entries()].sort(([, a], [, b]) => b - a).map(([area, count]) => <Link key={area} href={`?${qparams({ area, region: "" })}`} style={{ fontSize: "0.7rem", fontFamily: "monospace", padding: "0.25rem 0.55rem", borderRadius: 999, border: "1px solid", borderColor: query.area === area ? "var(--accent)" : "var(--border-subtle)", color: query.area === area ? "var(--accent)" : "var(--text-muted)", textDecoration: "none", background: query.area === area ? "var(--accent-soft, var(--bg-surface))" : "transparent" }}>{area} · {count}</Link>)}</div>
-              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>{[...alertas.regiones.entries()].sort(([, a], [, b]) => b - a).map(([region, count]) => <Link key={region} href={`?${qparams({ area: "", region })}`} style={{ fontSize: "0.7rem", fontFamily: "monospace", padding: "0.25rem 0.55rem", borderRadius: 999, border: "1px solid", borderColor: query.region === region ? "var(--accent)" : "var(--border-subtle)", color: query.region === region ? "var(--accent)" : "var(--text-muted)", textDecoration: "none", background: query.region === region ? "var(--accent-soft, var(--bg-surface))" : "transparent" }}>{region} · {count}</Link>)}</div>
+              {query.area || query.region ? <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}><span className="status-label status-label--info">Filtro activo</span>{query.area && <span>{query.area}</span>}{query.region && <span>{query.region}</span>}<Link prefetch={false} href={`?${qparams({ area: "", region: "" })}`} style={{ fontSize: "0.72rem" }}>Quitar filtros ✕</Link></div> : null}
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>{[...alertas.areas.entries()].sort(([, a], [, b]) => b - a).map(([area, count]) => <Link prefetch={false} key={area} href={`?${qparams({ area, region: "" })}`} style={{ fontSize: "0.7rem", fontFamily: "monospace", padding: "0.25rem 0.55rem", borderRadius: 999, border: "1px solid", borderColor: query.area === area ? "var(--accent)" : "var(--border-subtle)", color: query.area === area ? "var(--accent)" : "var(--text-muted)", textDecoration: "none", background: query.area === area ? "var(--accent-soft, var(--bg-surface))" : "transparent" }}>{area} · {count}</Link>)}</div>
+              <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>{[...alertas.regiones.entries()].sort(([, a], [, b]) => b - a).map(([region, count]) => <Link prefetch={false} key={region} href={`?${qparams({ area: "", region })}`} style={{ fontSize: "0.7rem", fontFamily: "monospace", padding: "0.25rem 0.55rem", borderRadius: 999, border: "1px solid", borderColor: query.region === region ? "var(--accent)" : "var(--border-subtle)", color: query.region === region ? "var(--accent)" : "var(--text-muted)", textDecoration: "none", background: query.region === region ? "var(--accent-soft, var(--bg-surface))" : "transparent" }}>{region} · {count}</Link>)}</div>
             </div>
           )}
-          {selected.id === "relaciones" && (relations.length === 0 ? <div className="empty-state"><strong>Sin relaciones verificadas</strong></div> : <div className="evidence-list">{relations.map((relation) => { const counterpart = relation.fromId === id ? relation.toId : relation.fromId; return <article key={relation.id}><div><span className="status-label status-label--info">{traducirPredicado(relation.predicate)}</span></div><h3><Link href={`/entidades/${counterpart}`}>{counterpart}</Link></h3><p>{relation.disclaimer}</p><small>Método: <code>{relation.reconciliation.method === "official_id" ? "Identificador oficial" : relation.reconciliation.method}</code></small></article>; })}</div>)}
+          {selected.id === "relaciones" && (relations.length === 0 ? <div className="empty-state"><strong>Sin relaciones verificadas</strong></div> : <div className="evidence-list">{relations.map((relation) => { const counterpart = relation.fromId === id ? relation.toId : relation.fromId; return <article key={relation.id}><div><span className="status-label status-label--info">{traducirPredicado(relation.predicate)}</span></div><h3><Link prefetch={false} href={`/entidades/${counterpart}`}>{counterpart}</Link></h3><p>{relation.disclaimer}</p><small>Método: <code>{relation.reconciliation.method === "official_id" ? "Identificador oficial" : relation.reconciliation.method}</code></small></article>; })}</div>)}
           {selected.id !== "relaciones" && selected.id !== "fuentes" && (
             records.length === 0 ? (
               <div className="empty-state">

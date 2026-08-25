@@ -21,6 +21,17 @@ async function verifyProdFull() {
   console.log("================================================================================\n");
 
   const headers = { "User-Agent": "Cambiometro-Full-Verifier/1.0", "Cache-Control": "no-cache" };
+  const expectedTransferRowsOverride = process.env.EXPECTED_TRANSFER_ROWS ? Number(process.env.EXPECTED_TRANSFER_ROWS) : null;
+  const expectedTransferAmountOverride = process.env.EXPECTED_TRANSFER_AMOUNT ? Number(process.env.EXPECTED_TRANSFER_AMOUNT) : null;
+  const expectedTransferPagesOverride = process.env.EXPECTED_TRANSFER_PAGES ? Number(process.env.EXPECTED_TRANSFER_PAGES) : null;
+
+  function formatInteger(value) {
+    return new Intl.NumberFormat("es-CL").format(value);
+  }
+
+  function formatBillones(value) {
+    return `$${(value / 1_000_000_000_000).toLocaleString("es-CL", { maximumFractionDigits: 2 })} billones`;
+  }
 
   // ─── MÓDULO 1: HOME & GLOBALES ─────────────────────────────────────────────
   console.log("1. MÓDULO HOME Y FOOTER COMPACTO (/)");
@@ -84,27 +95,47 @@ async function verifyProdFull() {
 
   // ─── MÓDULO 4: /TRANSFERENCIAS ─────────────────────────────────────────────
   console.log("\n4. MÓDULO TRANSFERENCIAS LEY 19.862 (/transferencias)");
+  const transferManifestRes = await fetch(`${PROD_URL}/data/transferencias/manifest.json`, { headers });
+  assertCheck("TRANSFERENCIAS", "Manifest estático HTTP 200", transferManifestRes.status === 200);
+  let transferManifest = null;
+  if (transferManifestRes.ok) {
+    try {
+      transferManifest = await transferManifestRes.json();
+    } catch {
+      transferManifest = null;
+    }
+  }
+  const expectedTransferRows = expectedTransferRowsOverride ?? Number(transferManifest?.totalRows ?? 0);
+  const expectedTransferAmount = expectedTransferAmountOverride ?? Number(transferManifest?.expected?.totalMontoClp ?? 0);
+  const expectedTransferPages = expectedTransferPagesOverride ?? Number(transferManifest?.totalPages ?? 0);
+  assertCheck("TRANSFERENCIAS", "Manifest schemaVersion 1", transferManifest?.schemaVersion === 1);
+  assertCheck("TRANSFERENCIAS", expectedTransferRowsOverride === null ? "Manifest contiene el universo completo" : `Manifest totalRows ${formatInteger(expectedTransferRows)}`, Number.isInteger(transferManifest?.totalRows) && transferManifest.totalRows > 1000 && transferManifest.totalRows === expectedTransferRows, `actual: ${transferManifest?.totalRows ?? "n/a"}`);
+  assertCheck("TRANSFERENCIAS", `Manifest totalPages ${formatInteger(expectedTransferPages)}`, transferManifest?.totalPages === expectedTransferPages, `actual: ${transferManifest?.totalPages ?? "n/a"}`);
+  assertCheck("TRANSFERENCIAS", "Manifest pages coincide con totalPages", Array.isArray(transferManifest?.pages) && transferManifest.pages.length === expectedTransferPages);
+  assertCheck("TRANSFERENCIAS", "Manifest checksum SHA-256 presente", /^[a-f0-9]{64}$/i.test(transferManifest?.checksumSha256 || ""));
+  assertCheck("TRANSFERENCIAS", `Manifest totalMontoClp ${formatInteger(expectedTransferAmount)}`, transferManifest?.expected?.totalMontoClp === expectedTransferAmount, `actual: ${transferManifest?.expected?.totalMontoClp ?? "n/a"}`);
+
   const transfRes = await fetch(`${PROD_URL}/transferencias`, { headers });
   assertCheck("TRANSFERENCIAS", "HTTP Status 200", transfRes.status === 200);
   const transfHtml = (await transfRes.text()).replace(/<!--.*?-->/g, "");
 
-  assertCheck("TRANSFERENCIAS", "KPI Total '59.361'", transfHtml.includes("59.361"));
-  assertCheck("TRANSFERENCIAS", "KPI Monto '$5,01 billones'", transfHtml.includes("billones") || transfHtml.includes("5,01"));
+  assertCheck("TRANSFERENCIAS", `KPI Total '${formatInteger(expectedTransferRows)}'`, transfHtml.includes(formatInteger(expectedTransferRows)));
+  assertCheck("TRANSFERENCIAS", `KPI Monto '${formatBillones(expectedTransferAmount)}'`, transfHtml.includes("billones") || transfHtml.includes(formatBillones(expectedTransferAmount).replace("$", "")));
   assertCheck("TRANSFERENCIAS", "Serie Anual (2023, 2024, 2025, 2026)", transfHtml.includes("2023") && transfHtml.includes("2024") && transfHtml.includes("2025") && transfHtml.includes("2026"));
   assertCheck("TRANSFERENCIAS", "Selector 'Filas por página: 10 / 25 / 50' visible", transfHtml.includes("Filas por página") && transfHtml.includes("10") && transfHtml.includes("25") && transfHtml.includes("50"));
-  assertCheck("TRANSFERENCIAS", "Paginación default 10 filas ('5.937 págs')", transfHtml.includes("5.937") || transfHtml.includes("5937"));
+  assertCheck("TRANSFERENCIAS", `Paginación default 10 filas ('${formatInteger(Math.ceil(expectedTransferRows / 10))} págs')`, transfHtml.includes(formatInteger(Math.ceil(expectedTransferRows / 10))) || transfHtml.includes(String(Math.ceil(expectedTransferRows / 10))));
   assertCheck("TRANSFERENCIAS", "Registro oficial VIÑA BUS S.A. ($347.920.910)", transfHtml.includes("VIÑA BUS") || transfHtml.includes("347.920.910") || transfHtml.includes("4585076"));
   assertCheck("TRANSFERENCIAS", "Enlace a registros19862.gob.cl", transfHtml.includes("registros19862.gob.cl"));
 
   const transf50Res = await fetch(`${PROD_URL}/transferencias?rows=50`, { headers });
   const transf50Html = (await transf50Res.text()).replace(/<!--.*?-->/g, "");
-  assertCheck("TRANSFERENCIAS", "Query ?rows=50 recalcula paginación ('Página 1 de 1.188')", transf50Html.includes("1.188") || transf50Html.includes("1188"));
+  assertCheck("TRANSFERENCIAS", `Query ?rows=50 recalcula paginación ('Página 1 de ${formatInteger(expectedTransferPages)}')`, transf50Html.includes(formatInteger(expectedTransferPages)) || transf50Html.includes(String(expectedTransferPages)));
 
   const transfApiRes = await fetch(`${process.env.API_URL || PROD_URL}/api/v1/transferencias?page=1&limit=10`, { headers });
   assertCheck("TRANSFERENCIAS", "API /api/v1/transferencias responde 200", transfApiRes.status === 200);
   if (transfApiRes.ok) {
     const apiJson = await transfApiRes.json();
-    assertCheck("TRANSFERENCIAS", "API retorna total 59.361", apiJson.total === 59361);
+    assertCheck("TRANSFERENCIAS", `API retorna total ${formatInteger(expectedTransferRows)}`, apiJson.total === expectedTransferRows);
     assertCheck("TRANSFERENCIAS", "API retorna 10 filas", apiJson.data?.length === 10);
   }
 

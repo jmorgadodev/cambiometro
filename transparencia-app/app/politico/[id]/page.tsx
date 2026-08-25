@@ -591,7 +591,7 @@ export default async function PoliticoPage({ params }: Props) {
                           </span>
                           <span style={{ display: "flex", gap: "0.6rem", alignItems: "center" }}>
                             {organismoLink && (
-                              <Link href={`/entidades/${organismoLink}`} style={{ fontSize: "0.65rem", color: "var(--accent)", textDecoration: "none" }}>
+                              <Link prefetch={false} href={`/entidades/${organismoLink}`} style={{ fontSize: "0.65rem", color: "var(--accent)", textDecoration: "none" }}>
                                 Organismo ↗
                               </Link>
                             )}

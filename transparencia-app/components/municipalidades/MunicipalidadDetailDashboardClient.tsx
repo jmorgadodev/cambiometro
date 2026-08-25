@@ -2166,15 +2166,15 @@ export default function MunicipalidadDetailDashboardClient({
                   </div>
                   <div>
                     Puedes comprobar el funcionamiento del cruce de auditorías en comunas con informes publicados:{" "}
-                    <Link href="/municipalidades/muni-lascondes" style={{ color: "var(--accent)", fontWeight: 700 }}>
+                    <Link prefetch={false} href="/municipalidades/muni-lascondes" style={{ color: "var(--accent)", fontWeight: 700 }}>
                       Las Condes
                     </Link>
                     {", "}
-                    <Link href="/municipalidades/muni-quilicura" style={{ color: "var(--accent)", fontWeight: 700 }}>
+                    <Link prefetch={false} href="/municipalidades/muni-quilicura" style={{ color: "var(--accent)", fontWeight: 700 }}>
                       Quilicura
                     </Link>
                     {", "}
-                    <Link href="/municipalidades/muni-chillan" style={{ color: "var(--accent)", fontWeight: 700 }}>
+                    <Link prefetch={false} href="/municipalidades/muni-chillan" style={{ color: "var(--accent)", fontWeight: 700 }}>
                       Chillán
                     </Link>
                     .

@@ -1,0 +1,119 @@
+name: Pages estático - refresco automático verificable
+
+on:
+  workflow_run:
+    workflows:
+      - "ETL Mensual - Ley 19.862 Transferencias del Estado"
+      - "ETL Diario - Parlamento, Movimientos y Diario Oficial"
+      - "ETL Mensual - CPLT Nóminas Transparencia Activa"
+      - "ETL Semanal - ChileCompra OCDS"
+      - "ETL Mensual - Contraloría General (CGR)"
+      - "ETL Semanal - InfoLobby"
+      - "ETL Mensual - InfoProbidad DIP"
+      - "ETL Trimestral - DIPRES Presupuestos"
+      - "ETL Bajo Demanda - SERVEL Resultados Electorales"
+      - "ETL Semestral - SINIM Finanzas Municipales"
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      publish_pages:
+        description: "Publicar el artefacto verificado en Pages producción"
+        type: boolean
+        required: false
+        default: false
+      preview_branch:
+        description: "Rama Pages de preview; vacío para no publicar preview"
+        required: false
+        default: ""
+
+concurrency:
+  group: pages-static-refresh
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-verify-publish:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout del commit que produjo el release ETL
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+        working-directory: transparencia-app
+
+      - name: Recuperar catálogo R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          mkdir -p data/lake/catalog/v1
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+
+      - name: Hidratar entradas estáticas versionadas desde R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:hydrate:static -- --required --required-all
+
+      - name: Hidratar universo completo y validar checksums
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          npm run data:hydrate:ley19862
+          npm run data:lake:projection:ley19862
+          npm run data:publish:transfer-api
+
+      - name: Construir Pages estático
+        working-directory: transparencia-app
+        run: npm run pages:build
+
+      - name: Verificar censo, chunks, metadata y bundle Worker
+        working-directory: transparencia-app
+        run: |
+          npm run pages:verify
+          npm run api:typecheck
+          npm run api:size
+          npm run check:transfer-release
+
+      - name: Guardar artefacto Pages
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-static-${{ github.sha }}
+          path: transparencia-app/out
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Publicar preview Pages aislado
+        if: inputs.preview_branch != ''
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+        run: npx wrangler pages deploy out --project-name cambiometro --branch "${{ inputs.preview_branch }}" --commit-hash "${GITHUB_SHA:0:40}" --commit-message "Pages preview ${GITHUB_SHA}"
+
+      - name: Publicar Pages producción después de todos los gates
+        if: (github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main') || inputs.publish_pages == true
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+        run: npx wrangler pages deploy out --project-name cambiometro --commit-message "Static refresh ${GITHUB_SHA}"

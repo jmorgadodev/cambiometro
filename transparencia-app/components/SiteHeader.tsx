@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import React, { useEffect, useState, startTransition } from "react";
 import Icono from "@/components/ui/Icono";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
@@ -54,7 +54,6 @@ interface SiteHeaderProps {
 
 export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
 
@@ -123,7 +122,7 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
       <header className="site-header">
         {/* ─── FILA 1: DESKTOP (≥1024px) / FILA ÚNICA MÓVIL (<1024px) ───────── */}
         <div className="container-main site-header__primary">
-          <Link href="/" className="site-brand" aria-label="El Cambiómetro, inicio">
+          <Link href="/" prefetch={false} className="site-brand" aria-label="El Cambiómetro, inicio">
             <Image
               src="/brand/el-cambiometro-mark.svg"
               alt="Símbolo dial El Cambiómetro"
@@ -142,6 +141,7 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
             {/* Chip de corte (Solo visible en Desktop ≥1024px) */}
             <Link
               href="/como-funciona#fuentes"
+              prefetch={false}
               className="snapshot-stamp"
               aria-label={`Corte oficial: ${displayTotal.toLocaleString("es-CL")} registros`}
             >
@@ -194,13 +194,9 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
                     <Link
                       key={item.href}
                       href={item.href}
+                      prefetch={false}
                       className="site-nav__link"
                       aria-current={isActive ? "page" : undefined}
-                      onMouseEnter={() => {
-                        try {
-                          router.prefetch(item.href);
-                        } catch {}
-                      }}
                     >
                       {item.label}
                     </Link>
@@ -262,14 +258,10 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
                     <li key={`m-${item.href}`}>
                       <Link
                         href={item.href}
+                        prefetch={false}
                         className={`mobile-drawer__link${isActive ? " is-active" : ""}`}
                         aria-current={isActive ? "page" : undefined}
                         onClick={() => setDrawerOpen(false)}
-                        onMouseEnter={() => {
-                          try {
-                            router.prefetch(item.href);
-                          } catch {}
-                        }}
                       >
                         <span>{item.label}</span>
                         {isActive && <Icono nombre="check" size={14} style={{ color: "var(--accent)" }} />}
@@ -286,6 +278,7 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
           {/* Chip de corte en el drawer */}
           <Link
             href="/como-funciona#fuentes"
+            prefetch={false}
             className="drawer-snapshot-stamp"
             onClick={() => setDrawerOpen(false)}
             aria-label={`Corte de datos: ${displayTotal.toLocaleString("es-CL")} registros`}
@@ -319,6 +312,7 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
             </a>
             <Link
               href="/donar"
+              prefetch={false}
               className="btn btn-primary drawer-donate-btn"
               onClick={() => setDrawerOpen(false)}
             >

@@ -50,6 +50,10 @@ jobs:
         working-directory: transparencia-app
 
       - name: Build static Pages artifact and guards
+        env:
+          # E2E usa la proyección fixture porque los secretos R2 no están
+          # disponibles en PRs. Pages producción nunca define esta variable.
+          ALLOW_STATIC_SAMPLE: "1"
         run: npm run pages:build && npm run api:size
         working-directory: transparencia-app
 
