@@ -56,6 +56,21 @@ El build genera `out/`, `public/data/` y artefactos de Worker. Son salidas repro
 
 `verify-prod-full.mjs` toma por defecto conteo, monto y páginas desde el manifest publicado. Para auditar el snapshot histórico fijo se pueden pasar `EXPECTED_TRANSFER_ROWS=59361`, `EXPECTED_TRANSFER_AMOUNT=5011094170302` y `EXPECTED_TRANSFER_PAGES=1188`; así las invariantes de regresión no bloquean releases nuevos que pasen la coherencia criptográfica.
 
+### Última verificación local auditada
+
+Ejecutada desde `C:\Users\jorge\Proyectos\cambiometro-public\transparencia-app` en la rama `codex/operational-static-pages-worker`:
+
+- `npm test`: 124 archivos y 687 tests aprobados.
+- `npm run lint`: 0 errores; quedan 156 warnings preexistentes que no bloquean el build.
+- `npm run coverage:sweep`: todas las métricas canónicas aprobadas, incluyendo 769 votaciones, 155 diputados, 50 senadores, 79 movimientos, 59.361 filas de fixture, 74.142 ChileCompra, 60.523 InfoLobby y 291 informes CGR.
+- `npm run api:size`: Worker de 82.186 bytes, límite 1.000.000.
+- `npm run pages:build`: 5.016 HTML, 3.881 parámetros de entidades, cero rutas dinámicas `ƒ`, 16.363 archivos y 517.450.820 bytes.
+- Release local generado: 59.544 filas, 1.191 páginas, monto `5.013.581.357.467`, checksum `13b9de4b9d4c07ad4a46afb9b4b4a9fdc9def947f0839544ce12def1b83e5c35`.
+- `npm run check:transfer-release`: conteo, monto, páginas, índice y checksum coherentes.
+- `npm run verify:static:browser`: 75/75 verificaciones aprobadas; cero spinners, overlays, errores de navegador o recursos 4xx/5xx en las rutas críticas. También validó Kaiser, Bianchi, Maipú y el redirect 301.
+
+El consolidado municipal CPLT se escribe en `data/lake-cplt/projections/funcionarios-v1`; el rebuild municipal busca esa ruta antes de la compatibilidad histórica `current`. Los directorios `out/`, `.next/`, `dist/`, `public/data/` y los índices/slices generados se limpian después de verificar y están excluidos de Git. Antes de continuar, `git status --short` debe permanecer vacío.
+
 ## Flujo automático
 
 - `etl-cplt.yml` publica la proyección CPLT en R2.
