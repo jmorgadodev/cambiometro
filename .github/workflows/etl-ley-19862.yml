@@ -53,6 +53,13 @@ jobs:
         working-directory: transparencia-app
         run: npm run etl:prepare
 
+      - name: Hidratar particiones históricas de transferencias desde R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:hydrate:ley19862
+
       - name: Ingerir y proyectar Transferencias Ley 19.862
         working-directory: transparencia-app
         env:
