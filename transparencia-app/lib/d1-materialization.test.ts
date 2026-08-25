@@ -43,6 +43,12 @@ describe("materializacion del lake a D1", () => {
     expect(script).not.toMatch(/`BEGIN;|\nBEGIN;|\nCOMMIT;/);
   });
 
+  it("usa la configuracion del Worker para operaciones D1 y R2 remotas", () => {
+    const script = readFileSync(resolve("scripts/materialize-d1.mjs"), "utf8");
+    expect(script).toContain('const wranglerConfig = resolve("workers/public-api/wrangler.jsonc")');
+    expect(script).toContain('[wranglerBin, "--config", wranglerConfig, ...args]');
+  });
+
   it("limpia staging si una importación falla antes de activar la fuente", () => {
     const script = readFileSync(resolve("scripts/materialize-d1.mjs"), "utf8");
     expect(script).toContain("DELETE FROM stage_entities WHERE run_id=${sql(runId)}");

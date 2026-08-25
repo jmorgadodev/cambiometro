@@ -30,6 +30,7 @@ if (!Number.isSafeInteger(stageBatchSize) || stageBatchSize < 100 || stageBatchS
   throw new Error("D1_INVALID_STAGE_BATCH_SIZE");
 }
 const wranglerBin = resolve("node_modules/wrangler/bin/wrangler.js");
+const wranglerConfig = resolve("workers/public-api/wrangler.jsonc");
 const work = mkdtempSync(join(tmpdir(), "cambiometro-d1-"));
 const showHelp = process.argv.includes("--help") || process.argv.includes("-h");
 
@@ -40,7 +41,7 @@ function command(binary, args, allowFailure = false) {
 }
 
 function wrangler(args, allowFailure = false) {
-  return command(process.execPath, [wranglerBin, ...args], allowFailure);
+  return command(process.execPath, [wranglerBin, "--config", wranglerConfig, ...args], allowFailure);
 }
 
 function sha256(buffer) {
