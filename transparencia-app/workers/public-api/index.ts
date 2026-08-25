@@ -129,7 +129,11 @@ async function health(env: Env) {
     }
   }
   const d1Consistent = Boolean(d1 && manifest && d1TransferRows === manifest.totalRows);
-  const ok = d1 && r2 && d1Consistent;
+  // R2 contiene el release completo que consume el sitio estático. D1 puede
+  // no tener todavía la tabla de transferencias (o estar vacío) durante una
+  // activación ETL; en ese caso el servicio sigue listo porque la ruta API
+  // usa el release R2. Un universo D1 parcial y no vacío sí es un bloqueo.
+  const ok = Boolean(r2 && (!d1 || d1Consistent || d1TransferRows === 0));
   return success({
     ok,
     service: "cambiometro-public-api",
@@ -501,6 +505,8 @@ async function listTransferencias(requestUrl: URL, env: Env) {
   const sort = requestUrl.searchParams.get("sort") === "fecha" ? "fecha" : "monto_clp";
   const order = requestUrl.searchParams.get("order") === "asc" ? "ASC" : "DESC";
   if (!env.DB) return listTransferenciasFromR2(requestUrl, env);
+  const manifest = await transferManifest(env);
+  if (!manifest) return listTransferenciasFromR2(requestUrl, env);
   const clauses: string[] = [];
   const bindings: (string | number)[] = [];
   if (year && year !== "Todos") { clauses.push("periodo = ?"); bindings.push(year); }
@@ -512,6 +518,8 @@ async function listTransferencias(requestUrl: URL, env: Env) {
   }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
   try {
+    const universe = await env.DB.prepare("SELECT COUNT(*) AS total FROM transferencias_19862").first<{ total: number }>();
+    if (Number(universe?.total ?? 0) !== manifest.totalRows) return listTransferenciasFromR2(requestUrl, env);
     const count = await env.DB.prepare(`SELECT COUNT(*) AS total FROM transferencias_19862 ${where}`).bind(...bindings).first<{ total: number }>();
     const total = Number(count?.total ?? 0);
     const offset = (page - 1) * limit;
@@ -532,8 +540,7 @@ async function listTransferencias(requestUrl: URL, env: Env) {
       municipality: row.comuna ?? null,
     }));
     if (total > 0 || data.length > 0) {
-      const manifest = await transferManifest(env);
-      const kpis = manifest?.expected
+      const kpis = manifest.expected
         ? { total_monto_clp: manifest.expected.totalMontoClp ?? 0, total_transfers: manifest.totalRows, total_receptores: manifest.expected.totalReceptores ?? 0, total_emisores: manifest.expected.totalEmisores ?? 0 }
         : { total_monto_clp: 0, total_transfers: total, total_receptores: 0, total_emisores: 0 };
       return json({ data, total, page, limit, totalPages: Math.max(1, Math.ceil(total / limit)), kpis, by_year: {}, sourceStatus: "d1" }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });

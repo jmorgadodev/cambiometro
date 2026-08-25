@@ -100,6 +100,23 @@ describe("API canónica v1", () => {
     expect(payload.data).toMatchObject({ ok: false, d1: true, r2: true, d1TransferRows: 59360, transferRows: 59361, d1Consistent: false });
   });
 
+  it("mantiene health listo cuando R2 completo está disponible aunque D1 aún no tenga la tabla de transferencias", async () => {
+    const env = {
+      ...(transferR2Env() as object),
+      DB: {
+        prepare: (sql: string) => {
+          if (sql.includes("FROM transferencias_19862")) throw new Error("no such table: transferencias_19862");
+          throw new Error(`Unexpected health query: ${sql}`);
+        },
+      },
+    } as never;
+    const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 0, d1Consistent: false, transferRows: 59361 });
+  });
+
   it("devuelve 503 estructurado cuando el manifest R2 está corrupto", async () => {
     const response = await api.fetch(new Request("https://example.test/api/v1/health"), {
       ...(testEnv() as object),
@@ -204,6 +221,35 @@ describe("API canónica v1", () => {
     expect(payload.data[0].receiver_name).toBe("VIÑA BUS S.A.");
     expect(payload.kpis.total_transfers).toBe(59361);
     expect(payload.sourceStatus).toBe("complete");
+  });
+
+  it("ignora D1 desactualizada y conserva el universo R2 como fuente coherente", async () => {
+    const staleRow = {
+      id: "stale-1",
+      fecha: "2025-01-01",
+      periodo: "2025",
+      emisor_nombre: "D1 desactualizada",
+      receptor_nombre: "D1 desactualizada",
+      materia: "Dato antiguo",
+      monto_clp: 1,
+      clasificacion: "Antiguo",
+      comuna: "Santiago",
+    };
+    const statement = (sql: string) => ({
+      bind() { return this; },
+      async first<T>() { return (sql.includes("COUNT") ? { total: 1 } : null) as T; },
+      async all<T>() { return { results: [staleRow] } as T; },
+    });
+    const response = await api.fetch(new Request("https://example.test/api/v1/transferencias?page=1&limit=1"), {
+      ...(transferR2Env() as object),
+      DB: { prepare: (sql: string) => statement(sql) },
+    } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.sourceStatus).toBe("complete");
+    expect(payload.total).toBe(59361);
+    expect(payload.data[0].id).toBe("tr-1");
   });
 
   it("sirve y filtra funcionarios desde la proyección CPLT de R2", async () => {
