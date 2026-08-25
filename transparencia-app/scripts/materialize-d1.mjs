@@ -31,6 +31,7 @@ if (!Number.isSafeInteger(stageBatchSize) || stageBatchSize < 100 || stageBatchS
 }
 const wranglerBin = resolve("node_modules/wrangler/bin/wrangler.js");
 const wranglerConfig = resolve("workers/public-api/wrangler.jsonc");
+const wranglerMigrationConfig = resolve("wrangler.d1.jsonc");
 const work = mkdtempSync(join(tmpdir(), "cambiometro-d1-"));
 const showHelp = process.argv.includes("--help") || process.argv.includes("-h");
 
@@ -40,8 +41,12 @@ function command(binary, args, allowFailure = false) {
   return result;
 }
 
-function wrangler(args, allowFailure = false) {
-  return command(process.execPath, [wranglerBin, "--config", wranglerConfig, ...args], allowFailure);
+function wrangler(args, allowFailure = false, config = wranglerConfig) {
+  return command(process.execPath, [wranglerBin, "--config", config, ...args], allowFailure);
+}
+
+function wranglerMigrations(args, allowFailure = false) {
+  return wrangler(["d1", "migrations", ...args], allowFailure, wranglerMigrationConfig);
 }
 
 function sha256(buffer) {
@@ -181,7 +186,7 @@ async function main() {
     expectedCounts.set(partition.sourceId, (expectedCounts.get(partition.sourceId) ?? 0) + partition.recordCount);
   }
 
-  if (!dryRun) wrangler(["d1", "migrations", "apply", database, isRemote ? "--remote" : "--local"]);
+  if (!dryRun) wranglerMigrations(["apply", database, isRemote ? "--remote" : "--local"]);
   executeSql(`INSERT OR REPLACE INTO etl_runs (id,cadence,status,started_at,catalog_version,catalog_checksum,source_count) VALUES (${sql(runId)},${sql(cadence)},'running',CURRENT_TIMESTAMP,${sql(catalog.generatedAt)},${sql(sha256(catalogBuffer))},${sourcesToMaterialize.length});\nDELETE FROM stage_entities WHERE run_id=${sql(runId)};\nDELETE FROM stage_records WHERE run_id=${sql(runId)};\nDELETE FROM stage_relations WHERE run_id=${sql(runId)};`, "start");
 
   const writer = new StageWriter();
