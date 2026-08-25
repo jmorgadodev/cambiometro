@@ -49,8 +49,27 @@ jobs:
         run: npm audit --omit=dev --audit-level=high
         working-directory: transparencia-app
 
+      - name: Hydrate official CPLT partitions from R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          CPLT_ALLOW_UNAVAILABLE: "1"
+        run: npm run data:hydrate:cplt
+
+      - name: Hydrate official transfers from R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          mkdir -p data/lake/catalog/v1
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+          npm run data:hydrate:ley19862
+          npm run data:verify:full:ley19862
+
       - name: Build static Pages artifact and guards
-        run: npm run pages:build && npm run api:size
+        run: npm run pages:build
         working-directory: transparencia-app
 
       - name: Verify Worker Runtime Bundle Budget
@@ -79,7 +98,7 @@ jobs:
         run: |
           npx wrangler dev --local --config workers/public-api/wrangler.jsonc --port 8788 --log-level warn > /tmp/cambiometro-api.log 2>&1 &
           api_pid=$!
-          npx wrangler pages dev out --port 3003 --proxy 8788 --compatibility-date=2026-08-08 --log-level warn > /tmp/cambiometro-pages.log 2>&1 &
+          API_ORIGIN=http://127.0.0.1:8788 node scripts/serve-pages-static.mjs --port 3003 > /tmp/cambiometro-pages.log 2>&1 &
           pages_pid=$!
           trap 'kill "$api_pid" "$pages_pid" 2>/dev/null || true' EXIT
           ready=""

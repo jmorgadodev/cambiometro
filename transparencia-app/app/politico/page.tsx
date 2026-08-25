@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import Image from "next/image";
 import type { ReactElement } from "react";
 import { PARTIDOS_SEED, POLITICOS_SEED } from "@/lib/seed-politicos";
@@ -25,9 +25,11 @@ export const metadata: Metadata = {
     "Listado completo de los 155 diputados y 50 senadores del período 2026-2030 con acceso a la ficha de transparencia de cada uno.",
 };
 
+export const dynamic = "force-static";
+
 export default async function PoliticoDirectory() {
   const rawQuery = "";
-  const query = normalizeSearchText(rawQuery);
+  const query = "";
   const cargoFilter = undefined;
 
   const filtrados = POLITICOS_SEED.filter((politico) => {

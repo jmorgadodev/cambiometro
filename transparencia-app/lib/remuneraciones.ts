@@ -18,7 +18,6 @@ interface Registro {
   congreso: RemuneracionCruda[];
 }
 
-import { getKvCache } from "@/lib/db";
 import dataRemuneraciones from "@/data/remuneraciones-38bis.json";
 
 let registro: Registro | null = null;

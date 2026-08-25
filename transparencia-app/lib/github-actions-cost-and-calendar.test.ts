@@ -48,14 +48,14 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     }
   });
 
-  it("4. Calendario ETL: Los 10 procesos oficiales tienen sus crons exactos en YAML", () => {
+  it("4. Calendario ETL: los procesos oficiales tienen sus crons exactos en YAML", () => {
     const cronMap: Record<string, string | null> = {
       "etl-daily.yml": "0 7 * * *",
       "etl-chilecompra.yml": "0 8 * * 1",
       "etl-infolobby.yml": "30 8 * * 1",
       "etl-contraloria.yml": "0 9 2 * *",
       "etl-cplt.yml": "0 9 5 * *",
-      "etl-ley-19862.yml": "0 9 8 * *",
+      "etl-ley-19862-full.yml": "0 6 2 * *",
       "etl-infoprobidad.yml": "0 9 10 * *",
       "etl-dipres.yml": "0 9 1 1,4,7,10 *",
       "etl-sinim.yml": "0 9 1 3,9 *",

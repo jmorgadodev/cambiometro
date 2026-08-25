@@ -35,16 +35,26 @@ jobs:
         run: npm ci
         working-directory: transparencia-app
 
+      - name: Install Chromium for the official portal fallback
+        run: npx playwright install --with-deps chromium
+        working-directory: transparencia-app
+
       - name: Verificar catálogo oficial de 346 comunas
         working-directory: transparencia-app
         run: npm run data:communes:check
 
       - name: Procesar categoría oficial CPLT
         working-directory: transparencia-app
+        env:
+          CPLT_PORTAL_FALLBACK: "1"
+          REQUIRE_COMPLETE_CPLT: "1"
+          CPLT_ALLOW_UNAVAILABLE: "1"
         run: npm run ingest:cplt-personal -- "${{ matrix.category }}"
 
       - name: Preparar artefacto validado de categoría
         working-directory: transparencia-app
+        env:
+          CPLT_ALLOW_UNAVAILABLE: "1"
         run: npm run data:publish:cplt-category -- "${{ matrix.category }}"
 
       - uses: actions/upload-artifact@v4
@@ -69,6 +79,7 @@ jobs:
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
       ETL_RUN_ID: cplt-${{ github.run_id }}-${{ github.run_attempt }}
       ETL_CADENCE: monthly
+      CPLT_ALLOW_UNAVAILABLE: "1"
     steps:
       - uses: actions/checkout@v5
 

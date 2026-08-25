@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import type { ServicioPublicoEnriquecido } from "@/lib/servicios-publicos-data";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import ShareButton from "@/components/ShareButton";

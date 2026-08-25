@@ -1,0 +1,164 @@
+name: Pages estático - refresco seguro de datos
+
+on:
+  workflow_run:
+    workflows:
+      - "ETL completo mensual - Ley 19.862"
+      - "ETL Mensual - CPLT Nóminas Transparencia Activa"
+      - "ETL Diario - Parlamento, Movimientos y Diario Oficial"
+      - "ETL Semanal - ChileCompra OCDS"
+      - "ETL Mensual - Contraloría General (CGR)"
+      - "ETL Trimestral - DIPRES Presupuestos"
+      - "ETL Semanal - InfoLobby"
+      - "ETL Mensual - InfoProbidad DIP"
+      - "ETL Bajo Demanda - SERVEL Resultados Electorales"
+      - "ETL Semestral - SINIM Finanzas Municipales"
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      year:
+        description: "Año oficial a reconstruir (YYYY)"
+        required: false
+      through_month:
+        description: "Mes final incluido (1-12)"
+        required: false
+      deploy_pages:
+        description: "Publicar en Pages producción después de todos los gates"
+        type: boolean
+        required: false
+        default: false
+      deploy_preview:
+        description: "Publicar un preview Pages aislado sin tocar producción"
+        type: boolean
+        required: false
+        default: false
+
+concurrency:
+  group: pages-static-refresh
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  actions: write
+
+jobs:
+  build-verify-artifact:
+    name: Rebuild Pages, verify and retain artifact
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    # El export completo de fichas canónicas es deliberadamente exhaustivo;
+    # el runner gratuito puede terminarlo en ~26 min y necesita margen para
+    # hidratar fuentes y ejecutar las guardias sin cortar un release válido.
+    timeout-minutes: 60
+    steps:
+      - name: Checkout source from the successful ETL run
+        uses: actions/checkout@v5
+        with:
+          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+        working-directory: transparencia-app
+
+      - name: Hydrate official CPLT partitions from R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          CPLT_ALLOW_UNAVAILABLE: "1"
+        run: npm run data:hydrate:cplt
+      - name: Descargar catálogo vigente de transferencias desde R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          mkdir -p data/lake/catalog/v1
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+
+      - name: Hidratar el universo oficial de transferencias publicado en R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        shell: bash
+        run: |
+          npm run data:hydrate:ley19862
+          npm run data:verify:r2:ley19862
+          npm run data:verify:full:ley19862
+
+      - name: Build static Pages output
+        run: npm run pages:build
+        working-directory: transparencia-app
+        env:
+          REQUIRE_COMPLETE_CPLT: "1"
+          CPLT_ALLOW_UNAVAILABLE: "1"
+
+      - name: Verify static census, chunks and data coherence
+        working-directory: transparencia-app
+        run: |
+          npm run pages:verify
+          npm run data:verify:coherence
+          npm run worker:check
+          npm run worker:test
+          npm run worker:bundle
+        env:
+          REQUIRE_COMPLETE_CPLT: "1"
+          CPLT_ALLOW_UNAVAILABLE: "1"
+
+      - name: Install Chromium and verify fresh-browser routes
+        working-directory: transparencia-app
+        run: |
+          npx playwright install --with-deps chromium
+          # Serve out/ with the Pages _headers and _redirects rules applied.
+          # Wrangler discovers the app's OpenNext config in this checkout and
+          # otherwise serves .open-next instead of the static artifact.
+          nohup node scripts/serve-pages-static.mjs --port 8788 >/tmp/cambiometro-pages.log 2>&1 &
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:8788/ >/dev/null; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:8788/ >/dev/null
+          VERIFY_BASE_URL=http://127.0.0.1:8788 npm run verify:pages-browser
+          VERIFY_BASE_URL=http://127.0.0.1:8788 CRAWL_CONCURRENCY=16 npm run pages:crawl
+
+      - name: Retain Pages artifact for manual preview/promotion
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-static-${{ github.sha }}
+          path: transparencia-app/out
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Publish isolated Pages preview
+        if: github.event_name == 'workflow_dispatch' && inputs.deploy_preview == true
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+          PREVIEW_BRANCH: preview-${{ github.run_id }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx wrangler pages deploy out --project-name cambiometro --branch "$PREVIEW_BRANCH" --commit-hash "${GITHUB_SHA:0:40}" --commit-message "Pages preview ${GITHUB_SHA}"
+
+      # Los workflow_run exitosos de ETL son el refresco automático sin costo.
+      # La ejecución manual exige activar deploy_pages explícitamente. El
+      # despliegue no toca el dominio personalizado: primero actualiza el
+      # proyecto Pages y conserva OpenNext como rollback hasta el cutover.
+      - name: Publish verified artifact to Cloudflare Pages production
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'workflow_run' || inputs.deploy_pages == true)
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx wrangler pages deploy out --project-name cambiometro

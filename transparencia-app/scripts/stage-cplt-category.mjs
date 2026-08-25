@@ -17,6 +17,15 @@ if (!existsSync(validation) || !existsSync(coverage) || !existsSync(projections)
 rmSync(target, { recursive: true, force: true });
 mkdirSync(target, { recursive: true });
 cpSync(projections, join(target, "projections"), { recursive: true });
+const coverageReport = JSON.parse(readFileSync(coverage, "utf8"));
+for (const item of coverageReport.coverage ?? []) {
+  if (item.status === "not_applicable" || (item.status === "unavailable" && process.env.CPLT_ALLOW_UNAVAILABLE === "1")) {
+    const filePath = join(target, "projections", `${item.communeId}.json`);
+    if (!existsSync(filePath)) writeFileSync(filePath, "[]\n");
+  } else if (item.status === "available" && !existsSync(join(target, "projections", `${item.communeId}.json`))) {
+    throw new Error(`CPLT_CATEGORY_PARTITION_MISSING: ${category}/${item.communeId}`);
+  }
+}
 writeFileSync(join(target, "validation.json"), readFileSync(validation));
 writeFileSync(join(target, "coverage.json"), readFileSync(coverage));
 console.log(JSON.stringify({ category, target }));

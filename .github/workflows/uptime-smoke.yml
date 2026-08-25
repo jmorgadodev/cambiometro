@@ -26,12 +26,13 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 22
+          node-version: 20
 
       - name: Run Uptime Smoke Check
         working-directory: transparencia-app
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PROD_URL: "https://cambiometro.pages.dev"
+          PROD_URL: "https://cambiometro.impulsacv.cl"
           API_URL: "https://cambiometro.impulsacv.cl"
+          UPTIME_TOKEN: ${{ secrets.UPTIME_TOKEN }}
         run: node scripts/uptime-smoke.mjs

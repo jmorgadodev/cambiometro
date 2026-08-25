@@ -117,30 +117,34 @@ export async function listEntities(params: { kind?: CanonicalEntity["kind"]; sou
   const db = await getD1Database();
   if (!db) return (await bundledPlatform()).listEntities(params);
 
-  const limit = Math.min(100, Math.max(1, Math.trunc(params.limit || 20)));
-  const offset = decodeCursor(params.cursor);
+  try {
+    const limit = Math.min(100, Math.max(1, Math.trunc(params.limit || 20)));
+    const offset = decodeCursor(params.cursor);
 
-  let query = "SELECT * FROM entities WHERE 1=1";
-  const bindings: unknown[] = [];
+    let query = "SELECT * FROM entities WHERE 1=1";
+    const bindings: unknown[] = [];
 
-  if (params.kind) {
-    query += " AND kind = ?";
-    bindings.push(params.kind);
+    if (params.kind) {
+      query += " AND kind = ?";
+      bindings.push(params.kind);
+    }
+    if (params.source) {
+      query += " AND source_ids_json LIKE ?";
+      bindings.push(`%${params.source}%`);
+    }
+
+    const countResult = await db.prepare(query.replace("SELECT *", "SELECT count(*) as total")).bind(...bindings).first<{total: number}>();
+    const total = countResult?.total || 0;
+
+    query += ` LIMIT ${limit} OFFSET ${offset}`;
+    const { results } = await db.prepare(query).bind(...bindings).all<EntidadD1>();
+
+    const data = results.map(canonicalEntityFromRow);
+
+    return makeCursorPage(data, total, limit, offset);
+  } catch {
+    return (await bundledPlatform()).listEntities(params);
   }
-  if (params.source) {
-    query += " AND source_ids_json LIKE ?";
-    bindings.push(`%${params.source}%`);
-  }
-
-  const countResult = await db.prepare(query.replace("SELECT *", "SELECT count(*) as total")).bind(...bindings).first<{total: number}>();
-  const total = countResult?.total || 0;
-
-  query += ` LIMIT ${limit} OFFSET ${offset}`;
-  const { results } = await db.prepare(query).bind(...bindings).all<EntidadD1>();
-
-  const data = results.map(canonicalEntityFromRow);
-
-  return makeCursorPage(data, total, limit, offset);
 }
 
 function entitySearchTokens(query: string) {
@@ -172,9 +176,15 @@ export async function searchEntities(query: string, requestedLimit = 25): Promis
     const { results } = await db.prepare(sql).bind(...tokens.map((token) => `%${token}%`)).all<EntidadD1>();
     return results.map(canonicalEntityFromRow);
   } catch {
-    const fallbackSql = `SELECT * FROM entities WHERE ${where} ORDER BY name, id LIMIT ${limit}`;
-    const { results } = await db.prepare(fallbackSql).bind(...tokens.map((token) => `%${token}%`)).all<EntidadD1>();
-    return results.map(canonicalEntityFromRow);
+    try {
+      const fallbackSql = `SELECT * FROM entities WHERE ${where} ORDER BY name, id LIMIT ${limit}`;
+      const { results } = await db.prepare(fallbackSql).bind(...tokens.map((token) => `%${token}%`)).all<EntidadD1>();
+      return results.map(canonicalEntityFromRow);
+    } catch {
+      // El preview local puede tener un D1 vacío o incompleto. No conviertas
+      // la ausencia de una tabla en un 500 si existe el índice estático.
+      return (await bundledPlatform()).searchEntities(query, requestedLimit);
+    }
   }
 }
 
@@ -182,16 +192,20 @@ export const getEntity = cache(async function getEntity(id: string): Promise<Can
   const db = await getD1Database();
   if (!db) return (await bundledPlatform()).getEntity(id);
 
-  const scope = await resolveEntityScope(db, id);
-  const rows = await selectRowsByIds<EntidadD1>(db, "entities", scope.ids);
-  const canonicalRow = rows.find((row) => row.id === scope.canonicalId) ?? rows.find((row) => row.id === id);
-  if (!canonicalRow) return (await bundledPlatform()).getEntity(id);
-  const entity = canonicalEntityFromRow(canonicalRow);
-  const identifiers = rows.flatMap((row) => canonicalEntityFromRow(row).identifiers);
-  const uniqueIdentifiers = [...new Map(identifiers.map((identifier) => [`${identifier.scheme}|${identifier.value}`, identifier])).values()];
-  const sourceIds = [...new Set(rows.flatMap((row) => canonicalEntityFromRow(row).sourceIds))];
-  const updatedAt = rows.map((row) => row.updated_at).filter((value): value is string => Boolean(value)).sort().at(-1) ?? null;
-  return { ...entity, id: scope.canonicalId, identifiers: uniqueIdentifiers, sourceIds, updatedAt };
+  try {
+    const scope = await resolveEntityScope(db, id);
+    const rows = await selectRowsByIds<EntidadD1>(db, "entities", scope.ids);
+    const canonicalRow = rows.find((row) => row.id === scope.canonicalId) ?? rows.find((row) => row.id === id);
+    if (!canonicalRow) return (await bundledPlatform()).getEntity(id);
+    const entity = canonicalEntityFromRow(canonicalRow);
+    const identifiers = rows.flatMap((row) => canonicalEntityFromRow(row).identifiers);
+    const uniqueIdentifiers = [...new Map(identifiers.map((identifier) => [`${identifier.scheme}|${identifier.value}`, identifier])).values()];
+    const sourceIds = [...new Set(rows.flatMap((row) => canonicalEntityFromRow(row).sourceIds))];
+    const updatedAt = rows.map((row) => row.updated_at).filter((value): value is string => Boolean(value)).sort().at(-1) ?? null;
+    return { ...entity, id: scope.canonicalId, identifiers: uniqueIdentifiers, sourceIds, updatedAt };
+  } catch {
+    return (await bundledPlatform()).getEntity(id);
+  }
 });
 
 export async function getEntitiesByIds(ids: string[]): Promise<CanonicalEntity[]> {
@@ -204,140 +218,154 @@ export async function getEntitiesByIds(ids: string[]): Promise<CanonicalEntity[]
     return entities.filter((entity): entity is CanonicalEntity => Boolean(entity));
   }
 
-  const rows = await selectRowsByIds<EntidadD1>(db, "entities", uniqueIds);
-  return rows.map(canonicalEntityFromRow);
+  try {
+    const rows = await selectRowsByIds<EntidadD1>(db, "entities", uniqueIds);
+    return rows.map(canonicalEntityFromRow);
+  } catch {
+    const platform = await bundledPlatform();
+    const entities = await Promise.all(uniqueIds.map((id) => platform.getEntity(id)));
+    return entities.filter((entity): entity is CanonicalEntity => Boolean(entity));
+  }
 }
 
 export async function listRecords(params: { entityId?: string; kind?: EvidenceKind; source?: string; from?: string; to?: string; limit?: number; cursor?: string } = {}) {
   const db = await getD1Database();
   if (!db) return (await bundledPlatform()).listRecords(params);
 
-  const limit = Math.min(100, Math.max(1, Math.trunc(params.limit || 20)));
-  const offset = decodeCursor(params.cursor);
+  try {
+    const limit = Math.min(100, Math.max(1, Math.trunc(params.limit || 20)));
+    const offset = decodeCursor(params.cursor);
 
-  let query = "SELECT * FROM records WHERE 1=1";
-  const bindings: unknown[] = [];
-  const entityScope = params.entityId ? await resolveEntityScope(db, params.entityId) : undefined;
+    let query = "SELECT * FROM records WHERE 1=1";
+    const bindings: unknown[] = [];
+    const entityScope = params.entityId ? await resolveEntityScope(db, params.entityId) : undefined;
 
-  if (entityScope) {
-    const placeholders = entityScope.ids.map(() => "?").join(",");
-    query += ` AND (EXISTS (SELECT 1 FROM record_subjects WHERE record_subjects.record_id=records.id AND record_subjects.entity_id IN (${placeholders})) OR EXISTS (SELECT 1 FROM record_objects WHERE record_objects.record_id=records.id AND record_objects.entity_id IN (${placeholders})))`;
-    bindings.push(...entityScope.ids, ...entityScope.ids);
-  }
-  if (params.kind) {
-    query += " AND kind = ?";
-    bindings.push(params.kind);
-  }
-  if (params.source) {
-    query += " AND source_id = ?";
-    bindings.push(params.source);
-  }
-  if (params.from) {
-    query += " AND occurred_at >= ?";
-    bindings.push(params.from);
-  }
-  if (params.to) {
-    query += " AND occurred_at <= ?";
-    bindings.push(params.to);
-  }
+    if (entityScope) {
+      const placeholders = entityScope.ids.map(() => "?").join(",");
+      query += ` AND (EXISTS (SELECT 1 FROM record_subjects WHERE record_subjects.record_id=records.id AND record_subjects.entity_id IN (${placeholders})) OR EXISTS (SELECT 1 FROM record_objects WHERE record_objects.record_id=records.id AND record_objects.entity_id IN (${placeholders})))`;
+      bindings.push(...entityScope.ids, ...entityScope.ids);
+    }
+    if (params.kind) {
+      query += " AND kind = ?";
+      bindings.push(params.kind);
+    }
+    if (params.source) {
+      query += " AND source_id = ?";
+      bindings.push(params.source);
+    }
+    if (params.from) {
+      query += " AND occurred_at >= ?";
+      bindings.push(params.from);
+    }
+    if (params.to) {
+      query += " AND occurred_at <= ?";
+      bindings.push(params.to);
+    }
 
-  const countResult = await db.prepare(query.replace("SELECT *", "SELECT count(*) as total")).bind(...bindings).first<{total: number}>();
-  const total = countResult?.total || 0;
+    const countResult = await db.prepare(query.replace("SELECT *", "SELECT count(*) as total")).bind(...bindings).first<{total: number}>();
+    const total = countResult?.total || 0;
 
-  query += ` LIMIT ${limit} OFFSET ${offset}`;
-  const { results } = await db.prepare(query).bind(...bindings).all<RecordD1>();
+    query += ` LIMIT ${limit} OFFSET ${offset}`;
+    const { results } = await db.prepare(query).bind(...bindings).all<RecordD1>();
 
-  const data = results.map(evidenceRecordFromRow).map((record) => entityScope ? ({
-    ...record,
-    subjectEntityIds: record.subjectEntityIds.map((entityId) => canonicalizeScopedId(entityId, [entityScope])),
-    objectEntityIds: record.objectEntityIds.map((entityId) => canonicalizeScopedId(entityId, [entityScope])),
-  }) : record);
+    const data = results.map(evidenceRecordFromRow).map((record) => entityScope ? ({
+      ...record,
+      subjectEntityIds: record.subjectEntityIds.map((entityId) => canonicalizeScopedId(entityId, [entityScope])),
+      objectEntityIds: record.objectEntityIds.map((entityId) => canonicalizeScopedId(entityId, [entityScope])),
+    }) : record);
 
-  if (data.length === 0) {
+    if (data.length === 0) {
+      return (await bundledPlatform()).listRecords(params);
+    }
+
+    return makeCursorPage(data, total, limit, offset);
+  } catch {
     return (await bundledPlatform()).listRecords(params);
   }
-
-  return makeCursorPage(data, total, limit, offset);
 }
 
 export async function listRelations(params: { entityId?: string; fromId?: string; toId?: string; predicate?: string; limit?: number; cursor?: string } = {}) {
   const db = await getD1Database();
   if (!db) return (await bundledPlatform()).listRelations(params);
 
-  const limit = Math.min(100, Math.max(1, Math.trunc(params.limit || 20)));
-  const offset = decodeCursor(params.cursor);
+  try {
+    const limit = Math.min(100, Math.max(1, Math.trunc(params.limit || 20)));
+    const offset = decodeCursor(params.cursor);
 
-  let query = `WITH relation_view AS (
-    SELECT id,from_id,predicate,to_id,evidence_record_ids_json,period_json,reconciliation_json,disclaimer,source_id
-    FROM relations
-    UNION ALL
-    SELECT 'virtual-' || records.id || '-' || subjects.entity_id || '-' || objects.entity_id,
-      subjects.entity_id,
-      CASE records.kind
-        WHEN 'authority' THEN 'holds_mandate_in'
-        WHEN 'vote' THEN 'has_vote_record'
-        WHEN 'attendance' THEN 'has_attendance_record'
-        WHEN 'expense' THEN 'has_expense_record'
-        WHEN 'contract' THEN 'contracted_with'
-        WHEN 'purchase' THEN 'purchased_from'
-        WHEN 'transfer' THEN 'transferred_to'
-        WHEN 'lobby' THEN 'has_lobby_record'
-        ELSE 'has_evidence'
-      END,
-      objects.entity_id,
-      json_array(records.id),records.period_json,
-      json_object('method','official_id','confidence',1),
-      'La relacion documental no implica irregularidad ni responsabilidad.',
-      records.source_id
-    FROM record_subjects subjects
-    JOIN record_objects objects ON objects.record_id=subjects.record_id
-    JOIN records ON records.id=subjects.record_id
-    WHERE records.source_id IN ('camara','gastos_camara','gastos_senado','votaciones_senado','infolobby','chilecompra','ley-19862')
-  ) SELECT * FROM relation_view WHERE 1=1`;
-  const bindings: unknown[] = [];
-  const entityScope = params.entityId ? await resolveEntityScope(db, params.entityId) : undefined;
-  const fromScope = !params.entityId && params.fromId ? await resolveEntityScope(db, params.fromId) : undefined;
-  const toScope = params.toId ? await resolveEntityScope(db, params.toId) : undefined;
+    let query = `WITH relation_view AS (
+      SELECT id,from_id,predicate,to_id,evidence_record_ids_json,period_json,reconciliation_json,disclaimer,source_id
+      FROM relations
+      UNION ALL
+      SELECT 'virtual-' || records.id || '-' || subjects.entity_id || '-' || objects.entity_id,
+        subjects.entity_id,
+        CASE records.kind
+          WHEN 'authority' THEN 'holds_mandate_in'
+          WHEN 'vote' THEN 'has_vote_record'
+          WHEN 'attendance' THEN 'has_attendance_record'
+          WHEN 'expense' THEN 'has_expense_record'
+          WHEN 'contract' THEN 'contracted_with'
+          WHEN 'purchase' THEN 'purchased_from'
+          WHEN 'transfer' THEN 'transferred_to'
+          WHEN 'lobby' THEN 'has_lobby_record'
+          ELSE 'has_evidence'
+        END,
+        objects.entity_id,
+        json_array(records.id),records.period_json,
+        json_object('method','official_id','confidence',1),
+        'La relacion documental no implica irregularidad ni responsabilidad.',
+        records.source_id
+      FROM record_subjects subjects
+      JOIN record_objects objects ON objects.record_id=subjects.record_id
+      JOIN records ON records.id=subjects.record_id
+      WHERE records.source_id IN ('camara','gastos_camara','gastos_senado','votaciones_senado','infolobby','chilecompra','ley-19862')
+    ) SELECT * FROM relation_view WHERE 1=1`;
+    const bindings: unknown[] = [];
+    const entityScope = params.entityId ? await resolveEntityScope(db, params.entityId) : undefined;
+    const fromScope = !params.entityId && params.fromId ? await resolveEntityScope(db, params.fromId) : undefined;
+    const toScope = params.toId ? await resolveEntityScope(db, params.toId) : undefined;
 
-  if (entityScope) {
-    const placeholders = entityScope.ids.map(() => "?").join(",");
-    query += ` AND (from_id IN (${placeholders}) OR to_id IN (${placeholders}))`;
-    bindings.push(...entityScope.ids, ...entityScope.ids);
-  } else if (fromScope) {
-    query += ` AND from_id IN (${fromScope.ids.map(() => "?").join(",")})`;
-    bindings.push(...fromScope.ids);
-  }
-  if (toScope) {
-    query += ` AND to_id IN (${toScope.ids.map(() => "?").join(",")})`;
-    bindings.push(...toScope.ids);
-  }
-  if (params.predicate) {
-    query += " AND predicate = ?";
-    bindings.push(params.predicate);
-  }
+    if (entityScope) {
+      const placeholders = entityScope.ids.map(() => "?").join(",");
+      query += ` AND (from_id IN (${placeholders}) OR to_id IN (${placeholders}))`;
+      bindings.push(...entityScope.ids, ...entityScope.ids);
+    } else if (fromScope) {
+      query += ` AND from_id IN (${fromScope.ids.map(() => "?").join(",")})`;
+      bindings.push(...fromScope.ids);
+    }
+    if (toScope) {
+      query += ` AND to_id IN (${toScope.ids.map(() => "?").join(",")})`;
+      bindings.push(...toScope.ids);
+    }
+    if (params.predicate) {
+      query += " AND predicate = ?";
+      bindings.push(params.predicate);
+    }
 
-  const countResult = await db.prepare(query.replace("SELECT *", "SELECT count(*) as total")).bind(...bindings).first<{total: number}>();
-  const total = countResult?.total || 0;
+    const countResult = await db.prepare(query.replace("SELECT *", "SELECT count(*) as total")).bind(...bindings).first<{total: number}>();
+    const total = countResult?.total || 0;
 
-  query += ` LIMIT ${limit} OFFSET ${offset}`;
-  const { results } = await db.prepare(query).bind(...bindings).all<RelationD1>();
+    query += ` LIMIT ${limit} OFFSET ${offset}`;
+    const { results } = await db.prepare(query).bind(...bindings).all<RelationD1>();
 
-  const data: RelationEdge[] = results.map((r: RelationD1) => ({
-    id: r.id,
-    fromId: canonicalizeScopedId(r.from_id, [entityScope, fromScope, toScope]),
-    predicate: r.predicate,
-    toId: canonicalizeScopedId(r.to_id, [entityScope, fromScope, toScope]),
-    evidenceRecordIds: JSON.parse(r.evidence_record_ids_json),
-    period: JSON.parse(r.period_json),
-    reconciliation: JSON.parse(r.reconciliation_json),
-    disclaimer: r.disclaimer
-  }));
+    const data: RelationEdge[] = results.map((r: RelationD1) => ({
+      id: r.id,
+      fromId: canonicalizeScopedId(r.from_id, [entityScope, fromScope, toScope]),
+      predicate: r.predicate,
+      toId: canonicalizeScopedId(r.to_id, [entityScope, fromScope, toScope]),
+      evidenceRecordIds: JSON.parse(r.evidence_record_ids_json),
+      period: JSON.parse(r.period_json),
+      reconciliation: JSON.parse(r.reconciliation_json),
+      disclaimer: r.disclaimer
+    }));
 
-  if (data.length === 0) {
+    if (data.length === 0) {
+      return (await bundledPlatform()).listRelations(params);
+    }
+
+    return makeCursorPage(data, total, limit, offset);
+  } catch {
     return (await bundledPlatform()).listRelations(params);
   }
-
-  return makeCursorPage(data, total, limit, offset);
 }
 
 export async function listSourceManifests(): Promise<SourceManifest[]> {

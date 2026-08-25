@@ -26,6 +26,7 @@ data/raw/servel/
 social/
 backups/
 tmp/
+docs/auditoria/*.json
 transparencia-app/artifacts/
 .open-next/
 .next/

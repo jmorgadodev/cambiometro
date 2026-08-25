@@ -1,13 +1,7 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
+import fs from "node:fs";
+import path from "node:path";
 import { getVerifiedMuniRRSS } from "./municipalidades-rrss";
-
-let municipalidadesJson: unknown = {};
-try {
-  municipalidadesJson = JSON.parse(readFileSync(join(process.cwd(), "data", "municipalidades-data.json"), "utf8"));
-} catch {
-  // Static builds have the source file; edge/runtime consumers use published slices.
-}
+import { MUNICIPALIDADES_LIST } from "./municipalidades-list";
 
 export interface AlcaldeData {
   nombre: string;
@@ -232,28 +226,96 @@ export interface MunicipalidadEnriquecida {
 
 export * from "./municipalidades-list";
 
-const MUNICIPALIDADES_DICT = Object.fromEntries(
-  Object.entries(municipalidadesJson as unknown as Record<string, MunicipalidadEnriquecida>).map(([id, municipalidad]) => {
-    const verified = getVerifiedMuniRRSS(id);
-    const enriched: MunicipalidadEnriquecida = {
-      ...municipalidad,
-      sitio_web_oficial: verified?.sitio_web_oficial ?? municipalidad.sitio_web_oficial ?? null,
-      redes_sociales: verified?.redes_sociales ?? municipalidad.redes_sociales ?? null,
-      partido_alcalde: municipalidad.partido_alcalde ?? verified?.alcalde_oficial?.partido ?? null,
-      compras_publicas: municipalidad.compras_publicas?.metodo_enlace === "RUT_EXACTO"
-        ? municipalidad.compras_publicas
-        : null,
-    };
-    return [id, enriched];
-  }),
-) as Record<string, MunicipalidadEnriquecida>;
+let _muniDict: Record<string, MunicipalidadEnriquecida> | null = null;
+
+function getMuniDict(): Record<string, MunicipalidadEnriquecida> {
+  if (_muniDict) return _muniDict;
+  let raw: Record<string, MunicipalidadEnriquecida> = {};
+  try {
+    const p = path.join(process.cwd(), "data", "municipalidades-data.json");
+    if (fs.existsSync(p)) {
+      raw = JSON.parse(fs.readFileSync(p, "utf8"));
+    }
+  } catch {}
+
+  if (Object.keys(raw).length === 0) {
+    for (const item of MUNICIPALIDADES_LIST) {
+      raw[item.id] = {
+        id: item.id,
+        cut: item.cut,
+        nombre_comuna: item.nombre_comuna,
+        region: item.region,
+        sitio_web_oficial: null,
+        tiene_municipalidad_propia: item.tiene_municipalidad_propia,
+        poblacion_censo_2024: item.poblacion_censo_2024,
+        presupuesto_per_capita_clp: item.presupuesto_per_capita_clp,
+        fcm_dependencia_pct: item.fcm_dependencia_pct,
+        partido_alcalde: item.partido_alcalde,
+        alcalde: item.alcalde ? {
+          nombre: item.alcalde.nombre,
+          cargo: "Alcalde",
+          estamento: "Alcaldía",
+          remuneracion_bruta: null,
+          remuneracion_liquida: null,
+          grado_eus: null,
+          formacion: null,
+          fecha_ingreso: null,
+          fuente: null,
+          partido_alcalde: item.partido_alcalde,
+        } : null,
+        presupuesto: item.presupuesto ? {
+          cut: item.cut,
+          inicial_clp: null,
+          vigente_clp: item.presupuesto.vigente_clp,
+          gasto_personal_clp: null,
+          ingresos_propios_clp: null,
+          ano: 2025,
+        } : null,
+        resumen_personal: item.resumen_personal ? {
+          total_funcionarios: item.resumen_personal.total_funcionarios,
+          planta: 0,
+          contrata: 0,
+          honorarios: 0,
+          codigo_trabajo_salud_educacion: 0,
+          masa_mensual_clp: item.resumen_personal.masa_mensual_clp,
+          masa_anual_estimada_clp: item.resumen_personal.masa_mensual_clp * 12,
+          masa_horas_extras_clp: 0,
+          total_horas_extras_hrs: 0,
+        } : null,
+        top_horas_extras: [],
+        top_remuneraciones: [],
+        estado_frescura: item.estado_frescura,
+        desfase_meses: item.desfase_meses,
+        periodo_cplt_reciente: item.periodo_nomina,
+      };
+    }
+  }
+
+  _muniDict = Object.fromEntries(
+    Object.entries(raw).map(([id, municipalidad]) => {
+      const verified = getVerifiedMuniRRSS(id);
+      const enriched: MunicipalidadEnriquecida = {
+        ...municipalidad,
+        sitio_web_oficial: verified?.sitio_web_oficial ?? municipalidad.sitio_web_oficial ?? null,
+        redes_sociales: verified?.redes_sociales ?? municipalidad.redes_sociales ?? null,
+        partido_alcalde: municipalidad.partido_alcalde ?? verified?.alcalde_oficial?.partido ?? null,
+        compras_publicas: municipalidad.compras_publicas?.metodo_enlace === "RUT_EXACTO"
+          ? municipalidad.compras_publicas
+          : null,
+      };
+      return [id, enriched];
+    }),
+  ) as Record<string, MunicipalidadEnriquecida>;
+
+  return _muniDict;
+}
 
 export function getMunicipalidadData(id: string): MunicipalidadEnriquecida | null {
-  return MUNICIPALIDADES_DICT[id] ?? null;
+  return getMuniDict()[id] ?? null;
 }
 
 export function getAllMunicipalidadesData(): MunicipalidadEnriquecida[] {
-  return Object.values(MUNICIPALIDADES_DICT);
+  return Object.values(getMuniDict());
 }
 
 

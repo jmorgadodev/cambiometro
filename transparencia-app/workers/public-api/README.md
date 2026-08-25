@@ -1,0 +1,48 @@
+# `workers/public-api`
+
+Worker independiente para `/api/*`. No importa datasets ni código de páginas:
+consulta únicamente D1/R2 mediante bindings y mantiene límites, paginación y
+`Cache-Control` en el borde.
+
+Las rutas canónicas implementadas son health, search, sources, entities,
+records, relations, crosses, alertas, político, directorio, funcionarios,
+transferencias, export, health/data y OG. También conserva las respuestas
+explícitas de disponibilidad para commercial keys/push y recibe reportes CSP
+sin bloquear el navegador. Transferencias intenta la tabla D1 indexada y, si
+esa proyección no cabe o aún no existe, consulta el release inmutable de R2 en
+`projections/transferencias-v1/manifest.json`. El ETL publica ese release con
+`npm run data:publish:transfer-api`; el manifest es el contrato de conteo,
+checksum y páginas de 50. El Worker nunca importa datasets ni snapshots de
+`app/`.
+
+## Desarrollo
+
+Desde `transparencia-app/`:
+
+```bash
+npx wrangler deploy --config workers/public-api/wrangler.jsonc --dry-run
+npx wrangler dev --config workers/public-api/wrangler.jsonc --local
+```
+
+La configuración declara la ruta de producción
+`cambiometro.impulsacv.cl/api/*`; `--dry-run` no la activa. El despliegue
+promueve una versión del Worker y debe registrar el `version_id` que devuelve
+Wrangler antes de cambiar Pages/DNS. Rollback exacto:
+
+```bash
+npx wrangler rollback <worker-version-id> --name cambiometro-public-api
+```
+
+Para habilitar el formulario en el Worker se debe configurar el secreto fuera
+del repositorio, una sola vez por entorno:
+
+```bash
+npx wrangler secret put TURNSTILE_SECRET --config workers/public-api/wrangler.jsonc
+```
+
+Sin ese secreto el endpoint `/api/v1/requests` responde `403` y no escribe en
+D1. No se debe sustituir por un valor de prueba ni agregarlo a `wrangler.jsonc`.
+
+Este Worker no se promueve ni se enruta al dominio hasta que el release R2 de
+transferencias, el censo de contratos y los gates de Pages estén verdes. D1 es
+una optimización; no se debe bloquear el API ni sustituir R2 por fixtures.

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import { listEntities, listRecords } from "@/lib/data-platform-d1";
 import { listPublishedSourceManifests } from "@/lib/published-sources";
 import EtlHealthDashboardClient from "@/components/datos/EtlHealthDashboardClient";
@@ -11,6 +11,8 @@ export const metadata: Metadata = {
   description: "Monitor en tiempo real de sincronización, frescura, volumen y salud operativa de las fuentes oficiales + 1 derivada de El Cambiómetro.",
   alternates: { canonical: "/datos" },
 };
+
+export const dynamic = "force-static";
 
 const ANALYSIS_LINES = [
   {

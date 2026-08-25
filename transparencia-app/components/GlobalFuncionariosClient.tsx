@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
+import { getMuniCanonicalSlug } from "@/lib/slug-utils";
 import type { FuncionarioPublico } from "@/lib/seed-politicos";
 import { MUNICIPALIDADES_SEED } from "@/lib/municipalidades";
 import {
@@ -657,7 +658,7 @@ export default function GlobalFuncionariosClient() {
 
             {activeMuni ? (
               <Link
-                href={`/municipalidades/${activeMuni.id}`}
+                href={`/municipalidades/${getMuniCanonicalSlug(activeMuni.id) ?? activeMuni.id}`}
                 className="btn btn-secondary"
                 style={{ fontSize: "0.8rem", padding: "0.45rem 0.9rem", alignSelf: "center" }}
               >

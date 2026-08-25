@@ -1,24 +1,70 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
-import type { CanonicalEntity, EvidenceKind, EvidenceRecord, RelationEdge } from "@/lib/data-contracts";
-import Link from "next/link";
+import type { EvidenceKind, EvidenceRecord, CursorPage } from "@/lib/data-contracts";
+import Link from "@/components/SiteLink";
 import { notFound } from "next/navigation";
+import { getEntitiesByIds, getEntity, listEntities, listRecords, listRelations } from "@/lib/data-platform-d1";
 import { presupuestoParaPrograma } from "@/lib/presupuesto";
 import { chilecompraParaComprador } from "@/lib/chilecompra";
 import { sinimParaMunicipio } from "@/lib/sinim";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { readR2Entity, readR2EntityIndex } from "@/lib/r2-entities";
+import { readR2EvidenceRecords } from "@/lib/r2-records";
+import { personalApoyoEvidenceParaEntidad } from "@/lib/personal-apoyo";
 import PersonEntityProfile from "@/components/PersonEntityProfile";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import EntityEvidenceAccordionExplorer from "@/components/records/EntityEvidenceAccordionExplorer";
 import { traducirPredicado, traducirTipoEntidad, formatNombreInstitucional } from "@/lib/diccionario-cruces";
 import { evaluateBudgetSourceAnomaly } from "@/lib/budget-integrity";
 import type { Metadata } from "next";
+import { POLITICOS_SEED } from "@/lib/seed-politicos";
+import { SERVICIOS_PUBLICOS_SEED } from "@/lib/servicios-publicos";
+import { MUNICIPALIDADES_SEED } from "@/lib/municipalidades";
+import { existsSync, readFileSync } from "node:fs";
+import path from "node:path";
 
-export function generateStaticParams() {
-  try {
-    return JSON.parse(readFileSync(join(process.cwd(), "data", "generated", "entity-routes.json"), "utf8")) as Array<{ id: string }>;
-  } catch {
-    return [];
+// La ficha se pre-renderiza con la vista por defecto. Los filtros y pestañas
+// se mantienen como navegación del cliente; no se permite que query params
+// conviertan esta ruta en SSR durante el export de Pages.
+export const dynamic = "force-static";
+
+async function getBuildCanonicalEntityIds() {
+  const indexPath = path.join(process.cwd(), "data", "entidades-canonica.json");
+  if (!existsSync(indexPath)) {
+    // El índice canónico puede vivir sólo en D1/R2 durante el ETL. En ese
+    // caso, el fallback compacto de build se pagina completo para que una
+    // entidad enlazada desde /entidades nunca quede fuera de Pages.
+    const ids: string[] = [];
+    let cursor: string | undefined;
+    for (let page = 0; page < 200; page += 1) {
+      const result = await listEntities({ limit: 100, cursor });
+      ids.push(...result.data.map((entity) => entity.id));
+      if (!result.nextCursor || result.data.length === 0) break;
+      cursor = result.nextCursor;
+    }
+    return ids.length > 0 ? ids : ["public-body-camara"];
   }
+
+  const payload = JSON.parse(readFileSync(indexPath, "utf8")) as {
+    entities?: Array<{ id?: string }>;
+  };
+  return (payload.entities ?? []).map((entity) => entity.id).filter((id): id is string => Boolean(id));
+}
+
+export async function generateStaticParams() {
+  const ids: Array<{ id: string }> = [];
+  for (const pol of POLITICOS_SEED) {
+    ids.push({ id: pol.id });
+    ids.push({ id: `pol-${pol.id}` });
+  }
+  for (const serv of SERVICIOS_PUBLICOS_SEED) {
+    ids.push({ id: serv.id });
+  }
+  for (const muni of MUNICIPALIDADES_SEED) {
+    ids.push({ id: muni.id });
+  }
+  for (const id of await getBuildCanonicalEntityIds()) {
+    ids.push({ id });
+  }
+  return ids;
 }
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
@@ -42,32 +88,90 @@ const TABS: Array<{ id: string; label: string; kinds?: EvidenceKind[] }> = [
   { id: "fuentes", label: "Fuentes" },
 ];
 
-interface EntityPayload {
-  entity: CanonicalEntity;
-  records: EvidenceRecord[];
-  relations: RelationEdge[];
+async function loadAllRecords(id: string) {
+  const all: EvidenceRecord[] = [];
+  let cursor: string | undefined;
+  for (let page = 0; page < 20; page += 1) {
+    const res = await listRecords({ entityId: id, limit: 100, cursor });
+    all.push(...res.data);
+    if (!res.nextCursor || res.data.length === 0) break;
+    cursor = res.nextCursor;
+  }
+  return all;
 }
 
-function readEntityPayload(id: string): EntityPayload | null {
+async function runtimeEntity(id: string) {
   try {
-    return JSON.parse(readFileSync(join(process.cwd(), "data", "generated", "entities", `${id}.json`), "utf8")) as EntityPayload;
+    const { env } = await getCloudflareContext({ async: true });
+    if (!env.PUBLIC_DATA) return null;
+    const [entity, index] = await Promise.all([readR2Entity(env.PUBLIC_DATA, id), readR2EntityIndex(env.PUBLIC_DATA, id)]);
+    if (!entity) return null;
+    const sourceIds = index?.sourceIds ?? (index ? [index.sourceId] : entity.sourceIds);
+    const all: EvidenceRecord[] = [];
+    let cursor: string | undefined;
+    for (let page = 0; page < 20; page += 1) {
+      try {
+        const res: CursorPage<EvidenceRecord> | null = await readR2EvidenceRecords(env.PUBLIC_DATA, { source: sourceIds, entityId: id, limit: 100, cursor });
+        if (!res) break;
+        all.push(...res.data);
+        if (!res.nextCursor || res.data.length === 0) break;
+        cursor = res.nextCursor;
+      } catch {
+        break;
+      }
+    }
+    return { entity, records: all, relations: index?.relations ?? [] };
   } catch {
     return null;
   }
 }
 
-export default async function EntityPage({ params }: { params: Promise<{ id: string }> }) {
+export default async function EntityPage({
+  params,
+  searchParams,
+}: {
+  params: Promise<{ id: string }>;
+  searchParams: Promise<{
+    tab?: string;
+    area?: string;
+    region?: string;
+    from_cruce?: string;
+    q?: string;
+    cat?: string;
+  }>;
+}) {
   const { id } = await params;
 
-  const query: { tab?: string; area?: string; region?: string; from_cruce?: string; q?: string; cat?: string } = {};
+  const query = await searchParams;
   const selectedId = query.tab ?? "resumen";
   const selected = TABS.find((tab) => tab.id === selectedId) ?? TABS[0];
-  const payload = readEntityPayload(id);
-  const entity = payload?.entity;
-  if (!entity || !payload) notFound();
+  const d1Entity = await getEntity(id);
+  const runtime = d1Entity ? null : await runtimeEntity(id);
+  const entity = d1Entity ?? runtime?.entity;
+  if (!entity) notFound();
 
-  const supportRecords: EvidenceRecord[] = [];
-  const allRecords = payload.records;
+  const platformRecords = d1Entity ? await loadAllRecords(id) : (runtime?.records ?? []);
+  const extraRes = await listRecords({ entityId: id, limit: 100 });
+  const extraRecords = extraRes?.data ?? [];
+  const supportRecords = entity.kind === "person" ? await personalApoyoEvidenceParaEntidad(entity) : [];
+  let allRecords = [...new Map(
+    platformRecords.concat(extraRecords).concat(supportRecords).map((record) => [record.id, record]),
+  ).values()];
+
+  if (allRecords.length === 0) {
+    const platform = await import("@/lib/data-platform-v1");
+    const allKnown = platform.listRecords({ limit: 1000 }).data;
+    const directMatches = allKnown.filter(
+      (r) =>
+        r.subjectEntityIds.includes(id) ||
+        r.objectEntityIds.includes(id) ||
+        (r.title && r.title.toLowerCase().includes(entity.name.toLowerCase())) ||
+        (entity.name && JSON.stringify(r.data || {}).toLowerCase().includes(entity.name.toLowerCase()))
+    );
+    if (directMatches.length > 0) {
+      allRecords = directMatches;
+    }
+  }
   const entitySourceIds = Array.isArray(entity.sourceIds) ? entity.sourceIds : [];
   const presentedEntity = supportRecords.length > 0 && !entitySourceIds.includes("personal-apoyo")
     ? { ...entity, sourceIds: [...entitySourceIds, "personal-apoyo"] }
@@ -90,15 +194,19 @@ export default async function EntityPage({ params }: { params: Promise<{ id: str
     },
     { areas: new Map<string, number>(), regiones: new Map<string, number>() },
   );
-  const relations = payload.relations;
+  const related = await listRelations({ fromId: id, limit: 100 });
+  const objectRelated = await listRelations({ toId: id, limit: 100 });
+  const directRelated = await listRelations({ entityId: id, limit: 100 });
+  const rawRelations = (d1Entity ? related.data.concat(objectRelated.data) : (runtime?.relations ?? [])).concat(directRelated?.data ?? []);
+  const relations = [...new Map(rawRelations.map((r) => [r.id, r])).values()];
   if (entity.kind === "person") {
     const counterpartIds = [...new Set(relations.map((relation) =>
       relation.fromId === id ? relation.toId : relation.fromId
     ))];
-    const counterpartNames = Object.fromEntries(counterpartIds.map((counterpartId) => {
-      const counterpart = readEntityPayload(counterpartId)?.entity;
-      return [counterpartId, counterpart?.name ?? counterpartId];
-    }));
+    const counterparts = counterpartIds.length > 0 ? await getEntitiesByIds(counterpartIds) : [];
+    const counterpartNames = Object.fromEntries(
+      counterparts.map((counterpart) => [counterpart.id, counterpart.name]),
+    );
     return (
       <main>
         <PersonEntityProfile
@@ -199,7 +307,7 @@ export default async function EntityPage({ params }: { params: Promise<{ id: str
           <dl className="page-fact-sheet">
             <div><dt>Evidencias</dt><dd>{allRecords.length}</dd></div>
             <div><dt>Relaciones</dt><dd>{relations.length}</dd></div>
-            <div><dt>Fuentes</dt><dd>{(entity.sourceIds ?? []).join(", ") || "—"}</dd></div>
+            <div><dt>Fuentes</dt><dd>{entity.sourceIds.join(", ")}</dd></div>
           </dl>
         </div>
       </section>

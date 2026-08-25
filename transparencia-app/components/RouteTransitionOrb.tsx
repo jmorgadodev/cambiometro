@@ -11,6 +11,7 @@ export default function RouteTransitionOrb() {
 
   const transitionStartRef = useRef<number>(0);
   const hideTimeoutRef = useRef<number | null>(null);
+  const maxVisibleTimeoutRef = useRef<number | null>(null);
   const prevKeyRef = useRef<string>("");
 
   const searchStr = searchParams?.toString() ?? "";
@@ -19,11 +20,20 @@ export default function RouteTransitionOrb() {
   // Desvanecimiento del splash inicial SSR tras la hidratacion SIN remover el nodo del DOM
   useEffect(() => {
     const splash = document.getElementById("initial-splash-orb");
-    if (splash) {
-      requestAnimationFrame(() => {
-        splash.classList.add("initial-splash-orb--hidden");
-      });
-    }
+    if (!splash) return;
+
+    let removeTimeout: number | null = null;
+    const frame = window.requestAnimationFrame(() => {
+      splash.classList.add("initial-splash-orb--hidden");
+      // El splash es SSR-only. Retirarlo evita dejar un loader oculto en el
+      // árbol accesible y permite que los crawlers/E2E vean sólo contenido real.
+      removeTimeout = window.setTimeout(() => splash.remove(), 300);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(frame);
+      if (removeTimeout) window.clearTimeout(removeTimeout);
+    };
   }, []);
 
   // Delegacion de eventos en clicks a enlaces internos gestionada exclusivamente con estado React
@@ -92,6 +102,33 @@ export default function RouteTransitionOrb() {
       }, remainingMs);
     }
   }, [currentKey]);
+
+  // Una navegación rota no puede dejar el overlay activo indefinidamente.
+  useEffect(() => {
+    if (!isVisible) return;
+
+    if (maxVisibleTimeoutRef.current) window.clearTimeout(maxVisibleTimeoutRef.current);
+    maxVisibleTimeoutRef.current = window.setTimeout(() => {
+      setIsVisible(false);
+      maxVisibleTimeoutRef.current = null;
+    }, 5000);
+
+    return () => {
+      if (maxVisibleTimeoutRef.current) {
+        window.clearTimeout(maxVisibleTimeoutRef.current);
+        maxVisibleTimeoutRef.current = null;
+      }
+    };
+  }, [isVisible]);
+
+  useEffect(() => () => {
+    if (hideTimeoutRef.current) window.clearTimeout(hideTimeoutRef.current);
+    if (maxVisibleTimeoutRef.current) window.clearTimeout(maxVisibleTimeoutRef.current);
+  }, []);
+
+  // No dejes un loader oculto en el DOM: los tests y las tecnologías de apoyo
+  // deben ver únicamente un overlay mientras existe una navegación real.
+  if (!isVisible) return null;
 
   return (
     <div

@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import Icono, { type IconoNombre } from "@/components/ui/Icono";
 import { ETL_MUNICIPAL_COVERAGE, ETL_SOURCES_DATA, type EtlSourceInfo } from "@/lib/etl-sources-data";
 

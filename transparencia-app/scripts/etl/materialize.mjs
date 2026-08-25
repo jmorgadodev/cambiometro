@@ -28,6 +28,59 @@ function canonicalAmount(record, data) {
     : null;
 }
 
+function text(value) {
+  const normalized = value == null ? "" : String(value).trim();
+  return normalized || null;
+}
+
+function integer(value) {
+  const normalized = typeof value === "string" ? value.replace(/\./g, "").replace(/,/g, ".") : value;
+  const parsed = Number(normalized);
+  return Number.isSafeInteger(parsed) && parsed >= 0 ? parsed : null;
+}
+
+/**
+ * Maps the official lake shape to the query-optimized D1 transfer table.
+ * Returning null is intentional: incomplete source rows must not become
+ * plausible-looking records in the public API.
+ */
+export function transferenciaFromLakeRecord(record) {
+  if (!record?.id || record.sourceId !== "ley-19862") return null;
+  const data = record.data && typeof record.data === "object" ? record.data : {};
+  const emitter = data.emitter && typeof data.emitter === "object" ? data.emitter : {};
+  const receiver = data.receiver && typeof data.receiver === "object" ? data.receiver : {};
+  const id = text(data.id ?? record.id);
+  const fecha = text(data.fecha ?? record.occurredAt);
+  const periodo = text(data.period ?? data.PERIODO ?? data.budget_period ?? (fecha ? fecha.slice(0, 4) : null));
+  const emisorNombre = text(emitter.name ?? data.emitter_name);
+  const receptorNombre = text(receiver.name ?? data.receiver_name);
+  const materia = text(data.title ?? record.title ?? data.objective);
+  const montoClp = integer(data.monto_clp ?? data.amount ?? record.amount?.value);
+  const folio = text(data.folio);
+  const urlRegistro = text(data.url ?? data.report_url)
+    ?? (folio ? `https://registros19862.gob.cl/transferencia/${encodeURIComponent(folio)}` : null);
+
+  if (!id || !fecha || !periodo || !emisorNombre || !receptorNombre || !materia || montoClp === null || !urlRegistro) {
+    return null;
+  }
+
+  return {
+    id,
+    folio,
+    fecha,
+    periodo,
+    emisorNombre,
+    emisorRut: text(emitter.rut_juridico ?? data.emitter_rut),
+    receptorNombre,
+    receptorRut: text(receiver.rut_juridico ?? data.receiver_rut),
+    materia,
+    montoClp,
+    urlRegistro,
+    clasificacion: text(data.classification ?? data.clasificacion),
+    comuna: text(data.municipality ?? data.comuna),
+  };
+}
+
 export const D1_ARCHIVE_ONLY_SOURCES = new Set(["servel"]);
 
 export function selectMaterializedPartitions(partitions, { includeAllHistory = false } = {}) {

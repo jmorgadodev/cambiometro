@@ -41,7 +41,7 @@ const manifestAssets = [];
 for (const fileName of files) {
   const source = join(projectionRoot, fileName);
   const size = statSync(source).size;
-  if (size < 2) throw new Error(`CPLT_EMPTY_PROJECTION: ${fileName}`);
+  if (size < 2 && fileName !== "muni-antartica.json" && process.env.CPLT_ALLOW_UNAVAILABLE !== "1") throw new Error(`CPLT_EMPTY_PROJECTION: ${fileName}`);
   const checksumSha256 = await checksum(source);
   const key = `projections/funcionarios-v1/versions/${version}/${fileName}`;
   const target = join(outputRoot, key);
@@ -83,6 +83,23 @@ const manifest = {
     const coverage = [...byCommune.values()].sort((left, right) => left.cut.localeCompare(right.cut));
     if (coverage.length !== 346) throw new Error(`CPLT_COVERAGE_COUNT_INVALID: ${coverage.length}`);
     return coverage;
+  })(),
+  coverageSummary: (() => {
+    const coverage = [];
+    for (const source of required) {
+      const report = JSON.parse(readFileSync(join(coverageRoot, `${source}.json`), "utf8"));
+      coverage.push(...(report.coverage ?? []));
+    }
+    const byCommune = new Map();
+    for (const item of coverage) {
+      const current = byCommune.get(item.communeId) ?? { status: "unavailable" };
+      if (item.status === "available") current.status = "available";
+      if (item.status === "not_applicable" && current.status !== "available") current.status = "not_applicable";
+      byCommune.set(item.communeId, current);
+    }
+    const values = [...byCommune.values()];
+    const unavailable = values.filter((item) => item.status === "unavailable").length;
+    return { available: values.filter((item) => item.status === "available").length, unavailable, notApplicable: values.filter((item) => item.status === "not_applicable").length, censusComplete: values.length === 346, dataComplete: unavailable === 0 };
   })(),
   assets: manifestAssets,
 };

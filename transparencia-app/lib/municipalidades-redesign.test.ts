@@ -51,7 +51,8 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
 
   describe("ALTA — Listado /municipalidades", () => {
     it("5. Fila/card 100% clickable mediante enlaces semánticos <Link>", () => {
-      expect(listPageSource).toContain("href={`/municipalidades/${m.id}`}");
+      expect(listPageSource).toContain("getMuniCanonicalSlug(m.id)");
+      expect(listPageSource).toContain("href={`/municipalidades/${getMuniCanonicalSlug(m.id) ?? m.id}`}");
     });
 
     it("6. Paginación segura configurada en 15-20 filas", () => {

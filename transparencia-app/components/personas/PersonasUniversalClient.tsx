@@ -2,7 +2,8 @@
 
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
+import { getMuniCanonicalSlug } from "@/lib/slug-utils";
 import { getPartidoBranding } from "@/lib/partidos.config";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import type { FuncionarioPublico } from "@/lib/funcionarios";
@@ -71,6 +72,7 @@ interface PersonasUniversalClientProps {
   autoridades: AutoridadItem[];
   organismos: OrganismoOption[];
   totalFuncionariosEstimados?: number;
+  initialTab?: PersonaTab;
 }
 
 function formatCLP(n?: number | null) {
@@ -128,6 +130,7 @@ export default function PersonasUniversalClient({
   autoridades,
   organismos,
   totalFuncionariosEstimados = 1203287,
+  initialTab = "parlamentarios",
 }: PersonasUniversalClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -137,7 +140,7 @@ export default function PersonasUniversalClient({
   const rawTab = searchParams.get("tab") as PersonaTab | null;
   const activeTab: PersonaTab = (rawTab && ["parlamentarios", "alcaldes", "autoridades", "funcionarios"].includes(rawTab))
     ? rawTab
-    : "parlamentarios";
+    : initialTab;
 
   // Search & Filters
   const [search, setSearch] = useState(() => searchParams.get("search") || "");
@@ -1092,7 +1095,7 @@ export default function PersonasUniversalClient({
                 {paginatedAlcaldes.map((a) => (
                   <Link
                     key={a.muni_id}
-                    href={`/municipalidades/${a.muni_id}`}
+                    href={`/municipalidades/${getMuniCanonicalSlug(a.muni_id) ?? a.muni_id}`}
                     style={{
                       display: "flex",
                       flexDirection: "column",
@@ -1193,7 +1196,7 @@ export default function PersonasUniversalClient({
                         </td>
                         <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
                           <Link
-                            href={`/municipalidades/${a.muni_id}`}
+                            href={`/municipalidades/${getMuniCanonicalSlug(a.muni_id) ?? a.muni_id}`}
                             style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textDecoration: "none" }}
                           >
                             Ver Comuna →

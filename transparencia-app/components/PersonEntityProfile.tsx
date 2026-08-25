@@ -1,5 +1,5 @@
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import type { CanonicalEntity, EvidenceRecord, RelationEdge } from "@/lib/data-contracts";
 import {

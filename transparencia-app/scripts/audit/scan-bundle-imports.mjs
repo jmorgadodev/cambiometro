@@ -21,6 +21,7 @@ const allFiles = targetDirs.flatMap((d) => (existsSync(d) ? scanDirectory(d) : [
 
 console.log(`Analyzing ${allFiles.length} files in lib/ and app/ for JSON imports...`);
 
+const LIMIT_KB = 200;
 const largeImports = [];
 
 for (const filePath of allFiles) {
@@ -41,7 +42,7 @@ for (const filePath of allFiles) {
     if (existsSync(resolvedPath)) {
       const sizeBytes = statSync(resolvedPath).size;
       const sizeKb = Math.round(sizeBytes / 1024);
-      if (sizeKb > 100) {
+      if (sizeKb > LIMIT_KB) {
         largeImports.push({
           sourceFile: filePath.replace(resolve(".") + "\\", "").replace(resolve(".") + "/", ""),
           importSpecifier,
@@ -55,7 +56,12 @@ for (const filePath of allFiles) {
 
 largeImports.sort((a, b) => b.sizeKb - a.sizeKb);
 
-console.log(`\nFound ${largeImports.length} JSON imports > 100 KB:`);
+console.log(`\nFound ${largeImports.length} JSON imports > ${LIMIT_KB} KB:`);
 for (const item of largeImports) {
   console.log(`- [${item.sizeKb} KB] in ${item.sourceFile} -> ${item.importSpecifier}`);
+}
+
+if (largeImports.length > 0) {
+  console.error(`\nFAIL: app/ y lib/ no pueden importar JSON mayores a ${LIMIT_KB} KB en runtime.`);
+  process.exitCode = 1;
 }

@@ -1,5 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import ley19862Subset from "@/data/lake-subsets/ley19862.subset.json";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { SourceManifest } from "@/lib/data-contracts";
 import { listSourceManifests } from "@/lib/data-platform-d1";
 import { mergeR2Catalog, type R2PublicCatalog } from "@/lib/r2-catalog";
@@ -45,7 +47,7 @@ function localCpltManifest(): CpltPublicManifest | null {
 export const SOURCE_CANONICAL_COUNTS: Record<string, number> = {
   "chilecompra": 74142,
   "transparencia-activa": 1203287,
-  "ley-19862": 59361,
+  "ley-19862": Number(ley19862Subset.kpis?.total_transfers ?? 59361),
   "dipres": 15689,
   "sinim": 3105,
   "infolobby": 60523,
@@ -76,8 +78,21 @@ export const SOURCE_HISTORICAL_COUNTS: Record<string, number> = {
 
 export async function listPublishedSourceManifests(): Promise<SourceManifest[]> {
   const base = await listSourceManifests();
-  const catalog = localR2Catalog();
-  const cplt = localCpltManifest();
+  let catalog: R2PublicCatalog | null = null;
+  let cplt: CpltPublicManifest | null = null;
+  try {
+    const { env } = await getCloudflareContext({ async: true });
+    const [catalogObject, cpltObject] = await Promise.all([
+      env.PUBLIC_DATA?.get("catalog/v1/manifest.json"),
+      env.PUBLIC_DATA?.get("projections/funcionarios-v1/manifest.json"),
+    ]);
+    catalog = catalogObject ? await catalogObject.json<R2PublicCatalog>() : null;
+    cplt = cpltObject ? await cpltObject.json<CpltPublicManifest>() : null;
+  } catch {
+    // Next local no tiene bindings; se usan los últimos manifiestos validados.
+  }
+  catalog ??= localR2Catalog();
+  cplt ??= localCpltManifest();
   const merged = mergeCpltCatalog(mergeR2Catalog(base, catalog), cplt);
   return merged.map((source) => ({
     ...source,

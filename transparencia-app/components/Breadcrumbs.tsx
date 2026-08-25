@@ -1,4 +1,4 @@
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 
 export interface BreadcrumbItem {
   label: string;

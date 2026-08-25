@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import AccessibleTooltip from "@/components/ui/AccessibleTooltip";
 import type { ServicioPublicoEnriquecido, OrdenCompraChileCompra } from "@/lib/servicios-publicos-data";
 import OrganismoFuncionariosList from "@/components/OrganismoFuncionariosList";

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
 import Icono from "@/components/ui/Icono";
 
@@ -9,6 +9,8 @@ export const metadata: Metadata = {
     "Monitor público de integridad, frescura, volumen canónico e histórico, cobertura municipal y validación de guards V1-V7 de las 13 fuentes oficiales del Estado de Chile.",
   alternates: { canonical: "/datos/calidad" },
 };
+
+export const dynamic = "force-static";
 
 export default async function DataQualityPage() {
   const { sources, summary } = await getDataQualityDashboardData();

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import DonaPartido from "@/components/partidos/DonaPartido";
 import VotosPartidoChart, { type FilaVotosChart } from "@/components/partidos/VotosPartidoChart";
 import AsistenciaPartidoChart from "@/components/partidos/AsistenciaPartidoChart";

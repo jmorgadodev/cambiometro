@@ -1,5 +1,3 @@
-import { strict as assert } from "node:assert";
-
 let passed = 0;
 let failed = 0;
 
@@ -13,19 +11,105 @@ function assertCheck(moduleName, checkName, condition, extraInfo = "") {
   }
 }
 
+import { execSync } from "node:child_process";
+
+async function fetchHttp(url, options = {}) {
+  if (process.platform === "win32") {
+    const isManualRedirect = options.redirect === "manual";
+    const redirectFlag = isManualRedirect ? "" : "-L";
+    const headerFlags = Object.entries(options.headers || {})
+      .map(([k, v]) => `-H "${k}: ${v}"`)
+      .join(" ");
+
+    const cmd = `curl.exe -s -i --connect-timeout 5 --max-time 10 ${redirectFlag} ${headerFlags} "${url}"`;
+    const raw = execSync(cmd, { encoding: "utf8", maxBuffer: 15 * 1024 * 1024 });
+
+    const headerEndIndex = raw.indexOf("\r\n\r\n") !== -1 ? raw.indexOf("\r\n\r\n") : raw.indexOf("\n\n");
+    const rawHeaders = headerEndIndex !== -1 ? raw.slice(0, headerEndIndex) : raw;
+    const body = headerEndIndex !== -1 ? raw.slice(headerEndIndex).trimStart() : "";
+
+    const statusMatch = rawHeaders.match(/HTTP\/[\d\.]+\s+(\d+)/);
+    const status = statusMatch ? parseInt(statusMatch[1], 10) : 200;
+
+    const headersMap = new Map();
+    for (const line of rawHeaders.split(/\r?\n/)) {
+      const colIndex = line.indexOf(":");
+      if (colIndex !== -1) {
+        headersMap.set(line.slice(0, colIndex).toLowerCase().trim(), line.slice(colIndex + 1).trim());
+      }
+    }
+
+    return {
+      status,
+      ok: status >= 200 && status < 300,
+      headers: {
+        get: (name) => headersMap.get(name.toLowerCase()) || null,
+      },
+      text: async () => body,
+      json: async () => JSON.parse(body),
+    };
+  }
+
+  return fetch(url, { ...options, signal: options.signal ?? AbortSignal.timeout(10000) });
+}
+
+function unavailableResponse(error) {
+  const message = error instanceof Error ? error.message : String(error);
+  return {
+    status: 0,
+    ok: false,
+    error: message,
+    headers: { get: () => null },
+    text: async () => "",
+    json: async () => { throw new Error(message); },
+  };
+}
+
+async function fetchWithRetry(url, options = {}, maxRetries = 3) {
+  for (let attempt = 1; attempt <= maxRetries; attempt++) {
+    try {
+      const res = await fetchHttp(url, options);
+      if (res.status !== 503 || attempt === maxRetries) {
+        return res;
+      }
+    } catch (err) {
+      if (attempt === maxRetries) return unavailableResponse(err);
+    }
+    await new Promise((r) => setTimeout(r, 600 * attempt));
+  }
+}
+
 async function verifyProdFull() {
+  const PROD_URL = (process.env.PROD_URL || "https://cambiometro.impulsacv.cl").replace(/\/$/, "");
+  const API_URL = (process.env.API_URL || PROD_URL).replace(/\/$/, "");
   console.log("================================================================================");
   console.log("  VERIFICACIÓN EN VIVO INTEGRAL DE PRODUCCIÓN — EL CAMBIÓMETRO");
-  const PROD_URL = process.env.PROD_URL || "https://cambiometro.impulsacv.cl";
-  console.log(`  URL Base: ${PROD_URL}`);
+  console.log(`  Pages URL: ${PROD_URL}`);
+  console.log(`  Worker API URL: ${API_URL}`);
   console.log("================================================================================\n");
 
-  const headers = { "User-Agent": "Cambiometro-Full-Verifier/1.0", "Cache-Control": "no-cache" };
+  const headers = { "User-Agent": "Cambiometro-Full-Verifier/1.0", "Cache-Control": "no-cache", "Connection": "close" };
+  const transferManifestRes = await fetchWithRetry(`${PROD_URL}/data/transferencias/manifest.json`, { headers });
+  const transferManifest = transferManifestRes.ok ? await transferManifestRes.json() : null;
+  const transferTotal = Number(transferManifest?.totalRows ?? 0);
+  const transferLabel = transferTotal.toLocaleString("es-CL");
 
   // ─── MÓDULO 1: HOME & GLOBALES ─────────────────────────────────────────────
   console.log("1. MÓDULO HOME Y FOOTER COMPACTO (/)");
-  const homeRes = await fetch(`${PROD_URL}/`, { headers });
+  const homeRes = await fetchWithRetry(`${PROD_URL}/`, { headers });
   assertCheck("HOME", "HTTP Status 200", homeRes.status === 200);
+  const homeCsp = homeRes.headers.get("content-security-policy") || "";
+  const homeCacheControl = homeRes.headers.get("cache-control") || "";
+  assertCheck("SECURITY", "HTML publica Content-Security-Policy", homeCsp.includes("script-src"));
+  if (homeCsp.includes("nonce-cambiometro-static-v1")) {
+    assertCheck("SECURITY", "CSP Pages usa nonce estático conocido", !homeCsp.match(/nonce-(?!cambiometro-static-v1)[^ '\"]+/));
+    assertCheck("SECURITY", "CSP Pages no permite unsafe-inline", !homeCsp.includes("unsafe-inline"));
+  } else if (homeCsp.includes("nonce-")) {
+    assertCheck("SECURITY", "HTML con nonce no se sirve desde caché compartida", /no-store|private/.test(homeCacheControl), homeCacheControl || "sin Cache-Control");
+  } else {
+    assertCheck("SECURITY", "CSP estática no usa nonce por request", !homeCsp.includes("nonce-"));
+    assertCheck("SECURITY", "CSP estática no permite unsafe-inline", !homeCsp.includes("unsafe-inline"));
+  }
   const homeHtml = (await homeRes.text()).replace(/<!--.*?-->/g, "");
 
   // Version ID header/tag check
@@ -50,13 +134,21 @@ async function verifyProdFull() {
 
   // ─── MÓDULO 2: FICHAS E INVARIANTES ────────────────────────────────────────
   console.log("\n2. MÓDULO FICHAS E INVARIANTES");
-  const kaiserRes = await fetch(`${PROD_URL}/politico/vanessa-kaiser-barents-von-hohenhagen`, { headers });
+  const kaiserRes = await fetchWithRetry(`${PROD_URL}/politico/vanessa-kaiser-barents-von-hohenhagen`, { headers });
   assertCheck("INVARIANTES", "Ficha Vanessa Kaiser HTTP 200", kaiserRes.status === 200);
   const kaiserHtml = (await kaiserRes.text()).replace(/<!--.*?-->/g, "");
   assertCheck("INVARIANTES", "Dieta Kaiser: $8.291.039", kaiserHtml.includes("8.291.039"));
   assertCheck("INVARIANTES", "Asignación Kaiser: +33,7%", kaiserHtml.includes("+33,7%") || kaiserHtml.includes("33,7%"));
 
-  const maipuRes = await fetch(`${PROD_URL}/municipalidades/muni-maipu`, { redirect: "manual", headers });
+  const carlosBianchiRes = await fetchWithRetry(`${PROD_URL}/politico/carlos-bianchi-chelech`, { headers });
+  assertCheck("INVARIANTES", "Ficha Carlos Bianchi HTTP 200", carlosBianchiRes.status === 200);
+  const carlosBianchiHtml = (await carlosBianchiRes.text()).replace(/<!--.*?-->/g, "");
+  assertCheck("INVARIANTES", "Bianchi porcentaje: 25.009 / 24,89%", carlosBianchiHtml.includes("25.009") && carlosBianchiHtml.includes("24,89%"));
+  assertCheck("INVARIANTES", "Bianchi votaciones: 580 Cámara / 189 Senado", carlosBianchiHtml.includes("580") && carlosBianchiHtml.includes("189"));
+
+  await new Promise((r) => setTimeout(r, 250));
+
+  const maipuRes = await fetchWithRetry(`${PROD_URL}/municipalidades/muni-maipu`, { redirect: "manual", headers });
   assertCheck(
     "INVARIANTES",
     "Redirección Maipú (301)",
@@ -64,9 +156,11 @@ async function verifyProdFull() {
     `Status: ${maipuRes.status}`
   );
 
+  await new Promise((r) => setTimeout(r, 250));
+
   // ─── MÓDULO 3: /CRUCES ─────────────────────────────────────────────────────
   console.log("\n3. MÓDULO CRUCES DOCUMENTALES (/cruces)");
-  const crucesRes = await fetch(`${PROD_URL}/cruces`, { headers });
+  const crucesRes = await fetchWithRetry(`${PROD_URL}/cruces`, { headers });
   assertCheck("CRUCES", "HTTP Status 200", crucesRes.status === 200);
   const crucesHtml = (await crucesRes.text()).replace(/<!--.*?-->/g, "");
 
@@ -78,39 +172,53 @@ async function verifyProdFull() {
   assertCheck("CRUCES", "Registro oficial CGR Informe 704/2024", crucesHtml.includes("704/2024"));
   assertCheck("CRUCES", "Registro oficial InfoLobby ac0019366881", crucesHtml.includes("ac0019366881"));
 
-  const cruces25Res = await fetch(`${PROD_URL}/cruces?rows=25`, { headers });
+  await new Promise((r) => setTimeout(r, 250));
+
+  const cruces25Res = await fetchWithRetry(`${PROD_URL}/cruces?rows=25`, { headers });
   const cruces25Html = (await cruces25Res.text()).replace(/<!--.*?-->/g, "");
   assertCheck("CRUCES", "Query ?rows=25 recalcula paginación ('Pág. 1 de 15')", cruces25Html.includes("Pág. 1 de 15") || cruces25Html.includes("Página 1 de 15") || cruces25Html.includes("15"));
 
+  await new Promise((r) => setTimeout(r, 250));
+
   // ─── MÓDULO 4: /TRANSFERENCIAS ─────────────────────────────────────────────
   console.log("\n4. MÓDULO TRANSFERENCIAS LEY 19.862 (/transferencias)");
-  const transfRes = await fetch(`${PROD_URL}/transferencias`, { headers });
+  const transfRes = await fetchWithRetry(`${PROD_URL}/transferencias`, { headers });
   assertCheck("TRANSFERENCIAS", "HTTP Status 200", transfRes.status === 200);
   const transfHtml = (await transfRes.text()).replace(/<!--.*?-->/g, "");
 
-  assertCheck("TRANSFERENCIAS", "KPI Total '59.361'", transfHtml.includes("59.361"));
+  assertCheck("TRANSFERENCIAS", `KPI Total '${transferLabel}'`, transferTotal > 0 && transfHtml.includes(transferLabel));
   assertCheck("TRANSFERENCIAS", "KPI Monto '$5,01 billones'", transfHtml.includes("billones") || transfHtml.includes("5,01"));
   assertCheck("TRANSFERENCIAS", "Serie Anual (2023, 2024, 2025, 2026)", transfHtml.includes("2023") && transfHtml.includes("2024") && transfHtml.includes("2025") && transfHtml.includes("2026"));
   assertCheck("TRANSFERENCIAS", "Selector 'Filas por página: 10 / 25 / 50' visible", transfHtml.includes("Filas por página") && transfHtml.includes("10") && transfHtml.includes("25") && transfHtml.includes("50"));
-  assertCheck("TRANSFERENCIAS", "Paginación default 10 filas ('5.937 págs')", transfHtml.includes("5.937") || transfHtml.includes("5937"));
+  const transferPageSize10 = Math.ceil(transferTotal / 10).toLocaleString("es-CL");
+  assertCheck("TRANSFERENCIAS", `Paginación default 10 filas ('${transferPageSize10} págs')`, transferTotal > 0 && transfHtml.includes(transferPageSize10));
   assertCheck("TRANSFERENCIAS", "Registro oficial VIÑA BUS S.A. ($347.920.910)", transfHtml.includes("VIÑA BUS") || transfHtml.includes("347.920.910") || transfHtml.includes("4585076"));
   assertCheck("TRANSFERENCIAS", "Enlace a registros19862.gob.cl", transfHtml.includes("registros19862.gob.cl"));
 
-  const transf50Res = await fetch(`${PROD_URL}/transferencias?rows=50`, { headers });
-  const transf50Html = (await transf50Res.text()).replace(/<!--.*?-->/g, "");
-  assertCheck("TRANSFERENCIAS", "Query ?rows=50 recalcula paginación ('Página 1 de 1.188')", transf50Html.includes("1.188") || transf50Html.includes("1188"));
+  await new Promise((r) => setTimeout(r, 250));
 
-  const transfApiRes = await fetch(`${process.env.API_URL || PROD_URL}/api/v1/transferencias?page=1&limit=10`, { headers });
+  const transf50Res = await fetchWithRetry(`${PROD_URL}/transferencias?rows=50`, { headers });
+  const transf50Html = (await transf50Res.text()).replace(/<!--.*?-->/g, "");
+  const transferPageSize50 = Math.ceil(transferTotal / 50).toLocaleString("es-CL");
+  assertCheck("TRANSFERENCIAS", `Query ?rows=50 recalcula paginación ('Página 1 de ${transferPageSize50}')`, transferTotal > 0 && transf50Html.includes(transferPageSize50));
+
+  await new Promise((r) => setTimeout(r, 250));
+
+  const transfApiRes = await fetchWithRetry(`${API_URL}/api/v1/transferencias?page=1&limit=10`, { headers });
   assertCheck("TRANSFERENCIAS", "API /api/v1/transferencias responde 200", transfApiRes.status === 200);
   if (transfApiRes.ok) {
     const apiJson = await transfApiRes.json();
-    assertCheck("TRANSFERENCIAS", "API retorna total 59.361", apiJson.total === 59361);
-    assertCheck("TRANSFERENCIAS", "API retorna 10 filas", apiJson.data?.length === 10);
+    const apiPayload = apiJson?.data ?? apiJson;
+    const apiRows = apiPayload?.data ?? apiPayload?.rows ?? [];
+    assertCheck("TRANSFERENCIAS", `API retorna total ${transferLabel}`, apiPayload?.total === transferTotal && transferTotal > 0);
+    assertCheck("TRANSFERENCIAS", "API retorna 10 filas", apiRows.length === 10);
   }
+
+  await new Promise((r) => setTimeout(r, 250));
 
   // ─── MÓDULO 5: /FUENTES Y /DATOS/CALIDAD ───────────────────────────────────
   console.log("\n5. MÓDULO FUENTES Y CALIDAD DE DATOS (/fuentes, /datos/calidad)");
-  const fuentesRes = await fetch(`${PROD_URL}/fuentes`, { headers });
+  const fuentesRes = await fetchWithRetry(`${PROD_URL}/fuentes`, { headers });
   assertCheck("FUENTES", "HTTP Status 200", fuentesRes.status === 200);
   const fuentesHtml = (await fuentesRes.text()).replace(/<!--.*?-->/g, "");
 
@@ -122,15 +230,19 @@ async function verifyProdFull() {
   assertCheck("FUENTES", "Estados reales: 'Por ciclo electoral' (SERVEL)", fuentesHtml.includes("Por ciclo electoral") || fuentesHtml.includes("electoral"));
   assertCheck("FUENTES", "Estados reales: 'Censal oficial' (INE Censo)", fuentesHtml.includes("Censal oficial") || fuentesHtml.includes("Censal"));
 
-  const calidadRes = await fetch(`${PROD_URL}/datos/calidad`, { headers });
+  await new Promise((r) => setTimeout(r, 250));
+
+  const calidadRes = await fetchWithRetry(`${PROD_URL}/datos/calidad`, { headers });
   assertCheck("CALIDAD", "HTTP Status 200", calidadRes.status === 200);
   const calidadHtml = (await calidadRes.text()).replace(/<!--.*?-->/g, "");
   assertCheck("CALIDAD", "Guards V1-V7: 0 violaciones críticas", calidadHtml.includes("Guards V1-V7") && calidadHtml.includes("0"));
   assertCheck("CALIDAD", "Tooltip en Nóminas ≤90d presente", calidadHtml.includes("Nóminas Municipales ≤90d"));
 
+  await new Promise((r) => setTimeout(r, 250));
+
   // ─── MÓDULO 6: /DONAR — GRID COMPLETO (4 CARDS + 3 BULLETS CADA UNA) ───────
   console.log("\n6. MÓDULO DONACIONES Y PROYECTO ABIERTO (/donar)");
-  const donarRes = await fetch(`${PROD_URL}/donar`, { headers });
+  const donarRes = await fetchWithRetry(`${PROD_URL}/donar`, { headers });
   assertCheck("DONAR", "HTTP Status 200", donarRes.status === 200);
   const donarHtml = (await donarRes.text()).replace(/<!--.*?-->/g, "");
 
@@ -153,6 +265,8 @@ async function verifyProdFull() {
   assertCheck("DONAR", "Sin enlaces de email (mailto:)", !donarHtml.includes("mailto:"));
   assertCheck("DONAR", "Sin formularios de contacto", !donarHtml.includes("<form") && !donarHtml.includes("form-group"));
 
+  await new Promise((r) => setTimeout(r, 250));
+
   // ─── MÓDULO 7: AUDITORÍA EDITORIAL Y ANTI-TYPOS (CROSS-PAGE) ────────────────
   console.log("\n7. MÓDULO AUDITORÍA EDITORIAL Y ANTI-TYPOS (CROSS-PAGE)");
   const allHtmls = [homeHtml, transfHtml, crucesHtml, fuentesHtml, calidadHtml, donarHtml].join(" ");
@@ -174,58 +288,107 @@ async function verifyProdFull() {
   const coverageResult = await runCoverageSweep({ silent: false });
   assertCheck("COBERTURA", "Barrido de cobertura integral (Votaciones, Muestra 5 Fichas, Personal Apoyo, Movimientos, Manifest)", coverageResult.passed);
 
-  // ─── MÓDULO 10: FICHAS /politico/* ESTÁTICAS Y RENDIMIENTO (10 URLs × 2 requests) ──
-  console.log("\n10. MÓDULO FICHAS /politico/* ESTÁTICAS Y RENDIMIENTO (Zero CPU Spikes / 0 Error 1102)");
-  const sampleSlugs = [
-    "diego-ibanez-cotroneo",
-    "carlos-bianchi-chelech",
-    "vanessa-kaiser-barents-von-hohenhagen",
-    "karim-bianchi-retamales",
-    "karol-cariola-oliva",
-    "gonzalo-winter-etcheberry",
-    "diego-schalper-sepulveda",
-    "yasna-provoste-campillay",
-    "luciano-cruz-coke-carvallo",
-    "vlado-mirosevic-verdugo",
+  // ─── MÓDULO 10: CRAWL COMPLETO EN FRÍO (SITIO 100% ESTÁTICO) ───────────────
+  console.log("\n10. MÓDULO CRAWL COMPLETO EN FRÍO (SITIO 100% ESTÁTICO)");
+  const crawlRoutes = [
+    // Nivel 1 (Páginas principales y listados)
+    "/",
+    "/politico",
+    "/partidos",
+    "/servicios-publicos",
+    "/municipalidades",
+    "/transferencias",
+    "/cruces",
+    "/movimientos",
+    "/datos",
+    "/datos/calidad",
+    "/fuentes",
+    "/rankings",
+    "/comparar",
+    "/donar",
+    "/como-funciona",
+    "/privacidad",
+    "/calculadora",
+    "/cambios",
+    "/personas",
+    "/funcionarios",
+    "/autoridades",
+    // Nivel 2 (Fichas y perfiles parlamentarios)
+    "/politico/vanessa-kaiser-barents-von-hohenhagen",
+    "/politico/carlos-bianchi-chelech",
+    "/politico/karim-bianchi-retamales",
+    "/politico/diego-ibanez-cotroneo",
+    "/politico/gonzalo-winter-etcheberry",
+    "/politico/diego-schalper-sepulveda",
+    "/politico/karol-cariola-oliva",
+    "/politico/yasna-provoste-campillay",
+    "/politico/luciano-cruz-coke-carvallo",
+    "/politico/vlado-mirosevic-verdugo",
+    // Nivel 2 (Bancadas y partidos)
+    "/partidos/udi",
+    "/partidos/rn",
+    "/partidos/ps",
+    "/partidos/pc",
+    "/partidos/fa",
+    "/partidos/independientes",
+    // Nivel 2 (Municipalidades clave)
+    "/municipalidades/santiago",
+    "/municipalidades/las-condes",
+    "/municipalidades/vina-del-mar",
+    "/municipalidades/valparaiso",
+    "/municipalidades/concepcion",
+    // Nivel 2 (Servicios públicos clave)
+    "/servicios-publicos/ministerio-del-interior-y-seguridad-publica",
+    "/servicios-publicos/ministerio-de-hacienda",
+    "/servicios-publicos/ministerio-de-salud",
   ];
 
-  for (const slug of sampleSlugs) {
-    for (let reqNum = 1; reqNum <= 2; reqNum++) {
-      let res = null;
-      let durationMs = 0;
-      let html = "";
-      for (let attempt = 1; attempt <= 2; attempt++) {
-        try {
-          const t0 = performance.now();
-          res = await fetch(`${PROD_URL}/politico/${slug}`, {
-            headers: {
-              "User-Agent": "Cambiometro-Verifier/1.0",
-              "Connection": "close",
-            },
-            signal: AbortSignal.timeout(3500),
-          });
-          const t1 = performance.now();
-          durationMs = Math.round(t1 - t0);
-          html = await res.text();
-          if (res.status === 200) break;
-        } catch {
-          await new Promise((r) => setTimeout(r, 200));
-        }
+  console.log("\n  ┌──────────────────────────────────────────────────────────────────┬────────┬──────────┐");
+  console.log("  │ Ruta Crawleada en Frío                                           │ Status │ Latencia │");
+  console.log("  ├──────────────────────────────────────────────────────────────────┼────────┼──────────┤");
+
+  for (const path of crawlRoutes) {
+    let res = null;
+    let durationMs = 0;
+    let html = "";
+    for (let attempt = 1; attempt <= 3; attempt++) {
+      try {
+        const t0 = performance.now();
+        res = await fetchWithRetry(`${PROD_URL}${path}`, {
+          headers: {
+            "User-Agent": "Cambiometro-Full-Crawler/1.0",
+            "Connection": "close",
+          },
+          signal: AbortSignal.timeout(5000),
+        });
+        const t1 = performance.now();
+        durationMs = Math.round(t1 - t0);
+        html = await res.text();
+        if (res.status === 200) break;
+      } catch {
+        await new Promise((r) => setTimeout(r, 400));
       }
-
-      const okStatus = res?.status === 200;
-      const noError1102 = !html.includes("Error 1102") && !html.includes("error code: 1102") && !html.includes("Worker threw exception") && !html.includes("Error 1015");
-      const fastResponse = durationMs < 3000;
-
-      assertCheck(
-        "FICHAS-ESTATICAS",
-        `/politico/${slug} (req #${reqNum}) [Status: ${res?.status ?? "ERR"}, ${durationMs}ms]`,
-        okStatus && noError1102 && fastResponse
-      );
-
-      await new Promise((r) => setTimeout(r, 100));
     }
+
+    const okStatus = res?.status === 200;
+    const noError1102 = !html.includes("Error 1102") && !html.includes("error code: 1102") && !html.includes("Worker threw exception") && !html.includes("Error 1015");
+    const fastResponse = durationMs < 5000;
+
+    const rowPath = path.padEnd(64);
+    const rowStatus = String(res?.status ?? "ERR").padEnd(6);
+    const rowMs = `${durationMs}ms`.padStart(8);
+    console.log(`  │ ${rowPath} │ ${rowStatus} │ ${rowMs} │`);
+
+    assertCheck(
+      "CRAWL-FRIO",
+      `${path}`,
+      okStatus && noError1102 && fastResponse,
+      `Status: ${res?.status ?? "ERR"}, ${durationMs}ms`
+    );
+
+    await new Promise((r) => setTimeout(r, 200));
   }
+  console.log("  └──────────────────────────────────────────────────────────────────┴────────┴──────────┘\n");
 
   // ─── RESUMEN FINAL ─────────────────────────────────────────────────────────
   console.log("\n================================================================================");

@@ -32,7 +32,9 @@ export const metadata: Metadata = {
   },
 };
 
-export default function PersonasPage() {
+import { PersonaTab } from "@/components/personas/PersonasUniversalClient";
+
+export default function PersonasPage({ initialTab = "parlamentarios" }: { initialTab?: PersonaTab }) {
   // 1. Parlamentarios
   const parlamentarios: ParlamentarioItem[] = POLITICOS_SEED.map((p) => {
     const isDip = p.cargo === "Diputado";
@@ -142,6 +144,7 @@ export default function PersonasPage() {
         autoridades={autoridades}
         organismos={organismosOptions}
         totalFuncionariosEstimados={1203287}
+        initialTab={initialTab}
       />
     </Suspense>
   );

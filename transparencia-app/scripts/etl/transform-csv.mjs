@@ -91,7 +91,7 @@ async function run() {
     for (const [muniId, records] of Object.entries(dataByMuni)) {
         const outPath = path.join(outDir, `${muniId}.json`);
         
-        // Si el archivo JSON ya existe (creado por cplt-crawler o histórica), lo cargamos y agregamos
+        // Si el archivo JSON ya existe (creado por el ETL oficial o histórico), lo cargamos y agregamos
         let existingRecords = [];
         try {
             existingRecords = readJsonIfPresent(outPath, []);

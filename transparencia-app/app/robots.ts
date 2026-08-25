@@ -1,0 +1,17 @@
+import { MetadataRoute } from "next";
+
+export const dynamic = "force-static";
+
+export default function robots(): MetadataRoute.Robots {
+  const baseUrl = "https://cambiometro.impulsacv.cl";
+
+  return {
+    rules: [
+      { userAgent: "*", allow: ["/", "/api/og/"], disallow: ["/api/", "/_next/"] },
+      { userAgent: ["GPTBot", "ClaudeBot", "CCBot", "Google-Extended"], disallow: "/" },
+      { userAgent: "PerplexityBot", allow: "/" },
+    ],
+    sitemap: `${baseUrl}/sitemap.xml`,
+    host: baseUrl,
+  };
+}

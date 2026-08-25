@@ -18,10 +18,19 @@
 /out/
 /.open-next/
 /.wrangler/
+/.pages-static/
+.next.config.pages-backup.ts
+.dist/
+workers/public-api/.dist/
+workers/public-api/.wrangler/
+workers/public-api/workers/
 
 # production
 /build
 /data/politico-slices/
+/public/data/politico-slices/
+/public/data/transferencias/
+/public/data/funcionarios/
 /data/politicos-votaciones-index.json
 /data/lake/*
 /data/lake-cplt/
@@ -30,6 +39,7 @@
 !/data/lake/projections/
 !/data/lake/projections/v1/
 !/data/lake/projections/v1/*.json
+/data/lake/projections/funcionarios-v1/
 /tmp/
 /backups/
 __pycache__/

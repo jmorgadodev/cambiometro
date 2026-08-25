@@ -5,6 +5,7 @@ import os from "node:os";
 
 const BASE_URL = process.env.VERIFY_BASE_URL || "https://cambiometro.impulsacv.cl";
 const screenshotDir = process.env.SCREENSHOT_DIR || os.tmpdir();
+const hasCloudflare1102 = (content) => /(?:cloudflare|error|status|code)[^\d]{0,24}1102/i.test(content);
 
 const DISTINCT_20_ROUTES = [
   "/",
@@ -79,7 +80,7 @@ async function runE2E() {
     const content = await page.content();
     assert(!content.includes("This page couldn't load"), `Error en ruta ${route}: "This page couldn't load"`);
     assert(!content.includes("Application error"), `Error en ruta ${route}: Application error`);
-    assert(!content.includes("1102"), `Error en ruta ${route}: Error 1102 detectado`);
+    assert(!hasCloudflare1102(content), `Error en ruta ${route}: Error 1102 detectado`);
     console.log(`-> Ruta ${route.padEnd(45)}: HTTP ${res.status()} [OK]`);
   }
   console.log(`   Total: ${DISTINCT_20_ROUTES.length} rutas sin error 1102 ✓`);

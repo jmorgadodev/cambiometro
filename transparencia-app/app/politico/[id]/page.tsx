@@ -1,6 +1,6 @@
 
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import { notFound } from "next/navigation";
 import {
   POLITICOS_SEED,
@@ -19,33 +19,23 @@ export async function generateStaticParams() {
 import {
   getVotacionesParaPolitico,
   getPrecomputedPoliticoProfile,
-  getPrecomputedPoliticoVotaciones,
   getTimelineParaPolitico,
   getEntidadesRelacionadas,
   getGastosParaPolitico,
   diputadoIdParaPolitico,
 } from "@/lib/data-source";
-import { getPoliticoDataCache } from "@/lib/db";
-import {
-  getCanonicalGastosParaPolitico,
-  getCanonicalLobbyParaPolitico,
-  getCanonicalVotacionesParaPolitico,
-} from "@/lib/politico-canonical";
 import { FUENTE_REMUNERACIONES, mesRemuneraciones, remuneracionParaPolitico } from "@/lib/remuneraciones";
 import { servelParaPolitico } from "@/lib/servel";
 import { infoprobidadParaPolitico } from "@/lib/infoprobidad";
 import { getDipParaPolitico } from "@/lib/politico-dip";
 import GastosMensuales from "./gastos-mensuales";
-import {
-  personalApoyoParaDiputado,
-  personalApoyoParaSenador,
-} from "@/lib/personal-apoyo";
 import { procesarGastosPolitico } from "@/lib/gastos-operacionales";
 import { formatFechaChilena, edadEnAnos } from "@/lib/format";
 import type { VotacionFila } from "@/components/VotacionesHistorial";
 import PoliticoTimeline from "@/components/PoliticoTimeline";
 import PoliticoScoreHeader, { type PoliticoHeaderData } from "@/components/PoliticoScoreHeader";
 import PersonalApoyoMensual from "@/components/PersonalApoyoMensual";
+import type { PersonalApoyoDiputado, PersonalApoyoSenador } from "@/lib/personal-apoyo";
 import nextDynamic from "next/dynamic";
 
 const VotacionesHistorial = nextDynamic(() => import("@/components/VotacionesHistorial"), {
@@ -55,6 +45,10 @@ const VotacionesHistorial = nextDynamic(() => import("@/components/VotacionesHis
 interface Props {
   params: Promise<{ id: string }>;
 }
+
+// La ficha se compone exclusivamente con snapshots versionados durante el
+// build. Evita que el Worker intente leer slices desde un filesystem efímero.
+export const dynamic = "force-static";
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
@@ -100,8 +94,43 @@ export default async function PoliticoPage({ params }: Props) {
 
   const partido = PARTIDOS_SEED.find((p) => p.id === pol.partido_id);
   
-  const gastos = getGastosParaPolitico(pol);
-  const rawVotaciones = getVotacionesParaPolitico(pol);
+  // Los slices se generan antes de `next build`. Leerlos aquí permite que
+  // cada ficha quede completa en el HTML prerenderizado, sin depender de
+  // filesystem ni D1 durante el primer request del Worker.
+  const precomputed = getPrecomputedPoliticoProfile(pol.id) as {
+    votos?: Array<Record<string, unknown>>;
+    gastos?: ReturnType<typeof getGastosParaPolitico>;
+    apoyoDiputado?: PersonalApoyoDiputado;
+    apoyoSenador?: PersonalApoyoSenador;
+  } | null;
+
+  const gastos = precomputed?.gastos ?? getGastosParaPolitico(pol);
+  const rawVotaciones = precomputed?.votos?.map((v) => ({
+    votacion: {
+      id: String(v.id ?? ""),
+      fecha: typeof v.fecha === "string" ? v.fecha : undefined,
+      descripcion: typeof v.descripcion === "string" ? v.descripcion : undefined,
+      quorum: typeof v.quorum === "string" ? v.quorum : undefined,
+      resultado: typeof v.resultado === "string" ? v.resultado : undefined,
+      tipo: typeof v.tipo === "string" ? v.tipo : undefined,
+      boletin: typeof v.boletin === "string" ? v.boletin : undefined,
+      tramite: typeof v.tramite === "string" ? v.tramite : undefined,
+      informe: typeof v.informe === "string" ? v.informe : undefined,
+      url_tramitacion: typeof v.url_tramitacion === "string" ? v.url_tramitacion : undefined,
+      total_si: typeof v.total_si === "string" ? v.total_si : undefined,
+      total_no: typeof v.total_no === "string" ? v.total_no : undefined,
+      total_abstencion: typeof v.total_abstencion === "string" ? v.total_abstencion : undefined,
+      total_asistencia: typeof v.total_asistencia === "string" ? v.total_asistencia : undefined,
+      url: typeof v.url === "string" ? v.url : undefined,
+      votos: [],
+    },
+    voto: {
+      id: pol.id,
+      nombre: pol.nombre_completo,
+      opcion: String(v.opcion ?? ""),
+      opcion_valor: "0",
+    },
+  })) ?? getVotacionesParaPolitico(pol);
 
   // Deduplicación estricta de votaciones
   const seenVoteKeys = new Set<string>();
@@ -117,8 +146,8 @@ export default async function PoliticoPage({ params }: Props) {
   const entidades = getEntidadesRelacionadas(pol);
   const remuneracion = await remuneracionParaPolitico(pol.nombre_completo);
   const probidad = infoprobidadParaPolitico(pol.nombre_completo);
-  const apoyoDiputado = pol.cargo === "Diputado" ? await personalApoyoParaDiputado(diputadoIdParaPolitico(pol)) : null;
-  const apoyoSenador = pol.cargo === "Senador" ? await personalApoyoParaSenador(pol.nombre_completo) : null;
+  const apoyoDiputado = pol.cargo === "Diputado" ? precomputed?.apoyoDiputado ?? null : null;
+  const apoyoSenador = pol.cargo === "Senador" ? precomputed?.apoyoSenador ?? null : null;
   const companerosPartido = POLITICOS_SEED.filter((p) => p.partido_id === pol.partido_id && p.id !== pol.id);
 
   const votacionesFila: VotacionFila[] = votaciones.map(({ votacion, voto }) => {
@@ -427,6 +456,7 @@ export default async function PoliticoPage({ params }: Props) {
                 fuenteUrl={pol.cargo === "Diputado"
                   ? `https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=${diputadoIdParaPolitico(pol) ?? ""}`
                   : apoyoSenador?.asignacion?.source_url ?? "https://www.senado.cl/transparencia/personal-de-apoyo-senadores"}
+                dataUrl={`/data/politico-slices/${pol.id}.json`}
               />
             </div>
           </div>
@@ -788,7 +818,11 @@ export default async function PoliticoPage({ params }: Props) {
               Fuente: {pol.cargo === "Diputado" ? "opendata.camara.cl" : "senado.cl"} ↗
             </span>
           </div>
-          <VotacionesHistorial votaciones={votacionesFila} cargo={pol.cargo} />
+          <VotacionesHistorial
+            votaciones={votacionesFila}
+            cargo={pol.cargo}
+            dataUrl={`/data/politico-slices/${pol.id}.json`}
+          />
         </div>
 
       </div>

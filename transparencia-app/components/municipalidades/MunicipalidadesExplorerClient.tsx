@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
+import { getMuniCanonicalSlug } from "@/lib/slug-utils";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { MunicipalidadListItem } from "@/lib/municipalidades-list";
 import { getPartidoConfig } from "@/lib/partidos.config";
@@ -722,7 +723,7 @@ export default function MunicipalidadesExplorerClient({
                     return (
                       <Link
                         key={m.id}
-                        href={`/municipalidades/${m.id}`}
+                        href={`/municipalidades/${getMuniCanonicalSlug(m.id) ?? m.id}`}
                         style={{
                           textDecoration: "none",
                           color: "inherit",
@@ -1480,7 +1481,7 @@ export default function MunicipalidadesExplorerClient({
               return (
                 <Link
                   key={m.id}
-                  href={`/municipalidades/${m.id}`}
+                  href={`/municipalidades/${getMuniCanonicalSlug(m.id) ?? m.id}`}
                   className="card hover-card"
                   style={{
                     textDecoration: "none",
@@ -1874,7 +1875,7 @@ export default function MunicipalidadesExplorerClient({
                         <td style={{ padding: "0.8rem 1rem" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                             <Link
-                              href={`/municipalidades/${m.id}`}
+                              href={`/municipalidades/${getMuniCanonicalSlug(m.id) ?? m.id}`}
                               style={{
                                 fontWeight: 700,
                                 color: "var(--text-primary)",
@@ -2027,7 +2028,7 @@ export default function MunicipalidadesExplorerClient({
                           }}
                         >
                           <Link
-                            href={`/municipalidades/${m.id}`}
+                          href={`/municipalidades/${getMuniCanonicalSlug(m.id) ?? m.id}`}
                             className="btn btn-ghost"
                             style={{
                               fontSize: "0.72rem",

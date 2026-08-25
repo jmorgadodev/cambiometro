@@ -211,6 +211,9 @@ export async function getDataQualityDashboardData(): Promise<{
     const rawSync = healthEntry?.generatedAt || manifest.lastUpdated || ultimaValidacionIso;
 
     const count = manifest.canonicalCount ?? manifest.recordCount;
+    const coberturaDetalle = manifest.id === "ley-19862"
+      ? `${count.toLocaleString("es-CL")} transferencias (14.640 receptores / 272 emisores)`
+      : meta.coberturaDetalle;
     const isSinDatos = count === 0 && (!healthEntry || healthEntry.status === "unavailable");
 
     // Normalizar estado real eliminando "parcial" genérico
@@ -271,7 +274,7 @@ export async function getDataQualityDashboardData(): Promise<{
       historicalCount: manifest.historicalCount ?? manifest.recordCount,
       periodoReciente: meta.periodoReciente,
       desfase: meta.desfase,
-      coberturaDetalle: meta.coberturaDetalle,
+      coberturaDetalle,
       lastSync: rawSync,
       lastSyncFormatted,
       coverageNote: meta.coverageNote,

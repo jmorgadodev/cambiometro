@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect } from "react";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import { formatMontoConsolidado } from "@/lib/format";
 import type { CrossEdge, EvidenceRecord } from "@/lib/data-contracts";
 

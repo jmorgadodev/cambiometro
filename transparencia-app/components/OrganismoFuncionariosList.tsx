@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import type { FuncionarioPublico } from "@/lib/funcionarios";
 import {
   formatEstamentoCorto,
   formatTipoContrato,
   getInitials,
 } from "@/lib/estamentos-format";
-import { classifyFuncionarioRecord, type AnomaliaInfo } from "@/lib/funcionarios-quality";
+import { classifyFuncionarioRecord } from "@/lib/funcionarios-quality";
 
 function formatCLP(n: number) {
   return new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(n);
@@ -18,6 +18,7 @@ interface OrganismoFuncionariosListProps {
   nombreOrganismo: string;
   periodo?: string | null;
   periodoEtiqueta?: string | null;
+  staticBaseUrl?: string;
 }
 
 interface SinPagoItem {
@@ -47,11 +48,24 @@ interface AnomaliaItem {
   urlRegistroOriginal: string;
 }
 
+interface StaticPeriodManifest {
+  path?: string;
+  totalRows?: number;
+  completeRows?: number;
+}
+
+interface StaticMunicipalityManifest {
+  defaultPeriod?: string | null;
+  periods?: Record<string, StaticPeriodManifest>;
+  sourceStatus?: "available" | "unavailable" | "not_applicable";
+}
+
 export default function OrganismoFuncionariosList({
   organismoId,
   nombreOrganismo,
   periodo,
   periodoEtiqueta,
+  staticBaseUrl,
 }: OrganismoFuncionariosListProps) {
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");
@@ -67,6 +81,38 @@ export default function OrganismoFuncionariosList({
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [emptyMessage, setEmptyMessage] = useState<string | null>(null);
+  const [staticRecords, setStaticRecords] = useState<FuncionarioPublico[] | null>(null);
+
+  const staticView = useMemo(() => {
+    if (!staticBaseUrl || !staticRecords) return null;
+    const query = debouncedSearch.trim().toLocaleLowerCase("es-CL");
+    const filtered = staticRecords.filter((record) => {
+      if (query && ![record.nombre_completo, record.cargo, record.formacion]
+        .filter(Boolean)
+        .some((value) => String(value).toLocaleLowerCase("es-CL").includes(query))) return false;
+      if (contratoFilter !== "Todos" && !String(record.tipo_contrato ?? "").toLocaleLowerCase("es-CL").includes(contratoFilter.toLocaleLowerCase("es-CL"))) return false;
+      if (deptFilter !== "Todos" && !String(record.estamento ?? "").toLocaleLowerCase("es-CL").includes(deptFilter.toLocaleLowerCase("es-CL"))) return false;
+      return true;
+    });
+    filtered.sort((left, right) => {
+      if (sortBy === "nombre_asc") return left.nombre_completo.localeCompare(right.nombre_completo, "es-CL");
+      if (sortBy === "horas_extras_desc") return (right.horas_extras_mes_anterior || 0) - (left.horas_extras_mes_anterior || 0);
+      if (sortBy === "sueldo_asc") return (left.remuneracion_bruta_mensual || 0) - (right.remuneracion_bruta_mensual || 0);
+      return (right.remuneracion_bruta_mensual || 0) - (left.remuneracion_bruta_mensual || 0);
+    });
+    const pages = Math.max(1, Math.ceil(filtered.length / itemsPerPage));
+    const safePage = Math.min(page, pages);
+    return {
+      data: filtered.slice((safePage - 1) * itemsPerPage, safePage * itemsPerPage),
+      total: filtered.length,
+      totalPages: pages,
+    };
+  }, [staticBaseUrl, staticRecords, debouncedSearch, contratoFilter, deptFilter, sortBy, page]);
+
+  const visibleData = staticView?.data ?? data;
+  const visibleTotal = staticView?.total ?? total;
+  const visibleTotalPages = staticView?.totalPages ?? totalPages;
 
   // Calidad de datos forense (Sección 1 y 2)
   const [observadosCount, setObservadosCount] = useState(0);
@@ -88,8 +134,91 @@ export default function OrganismoFuncionariosList({
     return () => clearTimeout(handler);
   }, [search]);
 
-  // Fetch data
+  // Pages carga la proyección completa del período desde un asset estático.
+  // El Worker queda como contrato externo y fallback cuando este componente
+  // se reutiliza fuera del build Pages.
   useEffect(() => {
+    if (!staticBaseUrl) return;
+    let activo = true;
+
+    const resetStats = () => {
+      setData([]);
+      setTotal(0);
+      setTotalHeadcount(0);
+      setTotalPages(1);
+      setObservadosCount(0);
+      setSinPagoCount(0);
+      setMicroMontoCount(0);
+      setSueldoCompletoCount(0);
+      setCausasBreakdown({});
+      setAnomaliasList([]);
+      setSinPagoList([]);
+    };
+
+    (async () => {
+      // Defer the reset to the async branch so React does not treat this
+      // effect as a synchronous state cascade when the selected period changes.
+      await Promise.resolve();
+      if (!activo) return;
+      setIsLoading(true);
+      setErrorMessage(null);
+      setEmptyMessage(null);
+      setStaticRecords(null);
+      const manifestResponse = await fetch(`${staticBaseUrl}/manifest.json`, { cache: "force-cache" });
+      if (!manifestResponse.ok) throw new Error(`MANIFEST_HTTP_${manifestResponse.status}`);
+      const municipalityManifest = await manifestResponse.json() as StaticMunicipalityManifest;
+      const periods = municipalityManifest.periods ?? {};
+      const requestedPeriod = periodo && periodo !== "Todos" ? periodo : null;
+      const resolvedPeriod = requestedPeriod && periods[requestedPeriod]
+        ? requestedPeriod
+        : municipalityManifest.defaultPeriod && periods[municipalityManifest.defaultPeriod]
+          ? municipalityManifest.defaultPeriod
+          : Object.keys(periods).sort().at(-1) ?? null;
+      const periodEntry = resolvedPeriod ? periods[resolvedPeriod] : null;
+
+      if (!resolvedPeriod || !periodEntry || Number(periodEntry.totalRows ?? periodEntry.completeRows ?? 0) <= 0) {
+        if (!activo) return;
+        resetStats();
+        setStaticRecords([]);
+        setEmptyMessage(municipalityManifest.sourceStatus === "not_applicable"
+          ? "Esta comuna no tiene municipalidad propia; la administración corresponde a otra municipalidad registrada."
+          : "La nómina oficial CPLT aún no está publicada para esta municipalidad.");
+        return;
+      }
+
+      const payloadPath = periodEntry.path ?? `${staticBaseUrl}/${encodeURIComponent(resolvedPeriod)}.json`;
+      const response = await fetch(payloadPath, { cache: "force-cache" });
+      if (!response.ok) throw new Error(`PAYLOAD_HTTP_${response.status}`);
+      const result = await response.json() as { data?: FuncionarioPublico[]; meta?: Record<string, unknown> };
+      if (!Array.isArray(result.data)) throw new Error("STATIC_DATA_INVALID");
+      if (!activo) return;
+      const meta = result.meta ?? {};
+      setStaticRecords(result.data);
+      setTotalHeadcount(Number(meta.totalHeadcount ?? result.data.length));
+      setObservadosCount(Number(meta.observadosCount ?? 0));
+      setSinPagoCount(Number(meta.sinPagoCount ?? 0));
+      setMicroMontoCount(Number(meta.microMontoCount ?? 0));
+      setSueldoCompletoCount(Number(meta.sueldoCompletoCount ?? 0));
+      setCausasBreakdown((meta.causasBreakdown as Record<string, number> | undefined) ?? {});
+      setAnomaliasList((meta.anomaliasSample as AnomaliaItem[] | undefined) ?? []);
+      setSinPagoList((meta.sinPagoSample as SinPagoItem[] | undefined) ?? []);
+    })()
+      .catch(() => {
+        if (!activo) return;
+        resetStats();
+        setStaticRecords(null);
+        setErrorMessage("La nómina oficial no está disponible temporalmente.");
+      })
+      .finally(() => {
+        if (activo) setIsLoading(false);
+      });
+    return () => {
+      activo = false;
+    };
+  }, [staticBaseUrl, periodo]);
+
+  useEffect(() => {
+    if (staticBaseUrl) return;
     async function fetchData() {
       setIsLoading(true);
       setErrorMessage(null);
@@ -103,9 +232,7 @@ export default function OrganismoFuncionariosList({
           page: page.toString(),
           limit: itemsPerPage.toString(),
         });
-        if (periodo && periodo !== "Todos") {
-          params.set("periodo", periodo);
-        }
+        if (periodo && periodo !== "Todos") params.set("periodo", periodo);
         const res = await fetch(`/api/funcionarios?${params.toString()}`);
         if (!res.ok) throw new Error("API Error");
         const result = await res.json();
@@ -138,7 +265,7 @@ export default function OrganismoFuncionariosList({
       }
     }
     fetchData();
-  }, [debouncedSearch, organismoId, contratoFilter, deptFilter, sortBy, page, periodo]);
+  }, [staticBaseUrl, debouncedSearch, organismoId, contratoFilter, deptFilter, sortBy, page, periodo]);
 
   // Construcción del texto de causas para la Caja Ciudadana (§2.3)
   const causasTexto = [
@@ -348,7 +475,7 @@ export default function OrganismoFuncionariosList({
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1rem", fontSize: "0.82rem", color: "var(--text-muted)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
           <span>
-            Mostrando <strong>{total.toLocaleString("es-CL")}</strong> funcionarios navegables{" "}
+            Mostrando <strong>{visibleTotal.toLocaleString("es-CL")}</strong> funcionarios navegables{" "}
             {totalHeadcount > 0 ? (
               <span style={{ color: "var(--text-subtle)" }}>
                 (Dotación total: {totalHeadcount.toLocaleString("es-CL")} = {sueldoCompletoCount.toLocaleString("es-CL")} sueldos regulares + {microMontoCount.toLocaleString("es-CL")} anomalías + {sinPagoCount.toLocaleString("es-CL")} sin pago)
@@ -367,7 +494,7 @@ export default function OrganismoFuncionariosList({
           )}
         </div>
 
-        {totalPages > 1 && <span>Página {page} de {totalPages}</span>}
+        {visibleTotalPages > 1 && <span>Página {page} de {visibleTotalPages}</span>}
       </div>
 
       {/* Grilla Principal */}
@@ -380,13 +507,20 @@ export default function OrganismoFuncionariosList({
           <h3 style={{ margin: 0, color: "var(--text-primary)" }}>Nómina no disponible</h3>
           <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginTop: "0.5rem" }}>{errorMessage}</p>
         </div>
-      ) : data.length === 0 ? (
+      ) : emptyMessage ? (
+        <div className="card" role="status" style={{ textAlign: "center", padding: "2.5rem" }}>
+          <h3 style={{ margin: 0, color: "var(--text-primary)" }}>Sin nómina publicada</h3>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginTop: "0.5rem" }}>
+            {emptyMessage} ({nombreOrganismo}, período {periodoEtiqueta || periodo || "seleccionado"}).
+          </p>
+        </div>
+      ) : visibleData.length === 0 ? (
         <div style={{ padding: "3rem", textAlign: "center", color: "var(--text-muted)" }}>
           No se encontraron funcionarios que coincidan con la búsqueda.
         </div>
       ) : (
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(310px, 1fr))", gap: "1rem" }}>
-          {data.map((func) => {
+          {visibleData.map((func) => {
             const estamentoStyle = formatEstamentoCorto(func.estamento);
             const contratoStyle = formatTipoContrato(func.tipo_contrato);
             const initials = getInitials(func.nombre_completo);
@@ -530,7 +664,7 @@ export default function OrganismoFuncionariosList({
       )}
 
       {/* Paginación */}
-      {totalPages > 1 && (
+      {visibleTotalPages > 1 && (
         <div style={{ display: "flex", justifyContent: "center", gap: "0.5rem", marginTop: "1.5rem" }}>
           <button
             type="button"
@@ -542,14 +676,14 @@ export default function OrganismoFuncionariosList({
             ← Anterior
           </button>
           <span style={{ fontSize: "0.8rem", alignSelf: "center", color: "var(--text-muted)" }}>
-            {page} / {totalPages}
+            {page} / {visibleTotalPages}
           </span>
           <button
             type="button"
-            onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-            disabled={page === totalPages}
+            onClick={() => setPage((p) => Math.min(visibleTotalPages, p + 1))}
+            disabled={page === visibleTotalPages}
             className="btn btn-secondary"
-            style={{ padding: "0.35rem 0.75rem", fontSize: "0.8rem", opacity: page === totalPages ? 0.5 : 1 }}
+            style={{ padding: "0.35rem 0.75rem", fontSize: "0.8rem", opacity: page === visibleTotalPages ? 0.5 : 1 }}
           >
             Siguiente →
           </button>

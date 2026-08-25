@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "next/navigation";
 import React, { useEffect, useState, startTransition } from "react";
 import Icono from "@/components/ui/Icono";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
@@ -54,7 +54,6 @@ interface SiteHeaderProps {
 
 export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
 
@@ -196,11 +195,6 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
                       href={item.href}
                       className="site-nav__link"
                       aria-current={isActive ? "page" : undefined}
-                      onMouseEnter={() => {
-                        try {
-                          router.prefetch(item.href);
-                        } catch {}
-                      }}
                     >
                       {item.label}
                     </Link>
@@ -265,11 +259,6 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
                         className={`mobile-drawer__link${isActive ? " is-active" : ""}`}
                         aria-current={isActive ? "page" : undefined}
                         onClick={() => setDrawerOpen(false)}
-                        onMouseEnter={() => {
-                          try {
-                            router.prefetch(item.href);
-                          } catch {}
-                        }}
                       >
                         <span>{item.label}</span>
                         {isActive && <Icono nombre="check" size={14} style={{ color: "var(--accent)" }} />}

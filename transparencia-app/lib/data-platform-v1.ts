@@ -71,7 +71,20 @@ const CAMARA_ID = "public-body-camara";
 const DISCLAIMER = "La relación documental no implica irregularidad ni responsabilidad.";
 
 function compactId(value: string): string {
-  return value.split(/[\/#]/).filter(Boolean).at(-1)?.replace(/[^a-zA-Z0-9_-]/g, "-") ?? "sin-id";
+  const raw = value.split(/[\/#]/).filter(Boolean).at(-1) ?? "sin-id";
+  const normalized = raw.replace(/[^a-zA-Z0-9_-]/g, "-").replace(/^-+|-+$/g, "");
+  if (normalized.length <= 120) return normalized || "sin-id";
+
+  // Algunos nombres de gestor de InfoLobby contienen listas completas de
+  // personas y pueden superar varios miles de caracteres. Un ID así no es
+  // exportable como segmento de URL en Next/Pages. Conservamos un prefijo
+  // legible y añadimos un hash estable para evitar colisiones entre nombres.
+  let hash = 2166136261;
+  for (let index = 0; index < raw.length; index += 1) {
+    hash ^= raw.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return `${normalized.slice(0, 96)}-${(hash >>> 0).toString(16)}`;
 }
 
 function periodFromDate(value?: string) {

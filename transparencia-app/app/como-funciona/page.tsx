@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import { listPublishedSourceManifests } from "@/lib/published-sources";
 import Icono, { type IconoNombre } from "@/components/ui/Icono";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";

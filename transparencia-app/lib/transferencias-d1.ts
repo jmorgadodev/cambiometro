@@ -1,6 +1,8 @@
 import { getD1Database } from "@/lib/db";
 import { getLey19862Summary, type TransferenciaDetalle, type Ley19862Summary } from "@/lib/transferencias-data";
 import { SOURCE_CANONICAL_COUNTS } from "@/lib/published-sources";
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import { readR2EvidenceRecords } from "@/lib/r2-records";
 
 export interface TransferenciaQueryParams {
   page?: number;
@@ -20,6 +22,114 @@ export interface TransferenciasQueryResult {
   totalPages: number;
   kpis: Ley19862Summary["kpis"];
   by_year: Record<string, { count: number; total: number }>;
+  sourceStatus?: "complete" | "partial" | "fallback";
+}
+
+type TransferEvidence = {
+  id: string;
+  occurredAt: string | null;
+  amount?: { amountClp?: number | null } | null;
+  data: Record<string, unknown>;
+};
+
+function text(value: unknown): string | null {
+  const normalized = value == null ? "" : String(value).trim();
+  return normalized || null;
+}
+
+function transferFromEvidence(record: TransferEvidence): TransferenciaDetalle | null {
+  const raw = record.data ?? {};
+  const emitter = raw.emitter && typeof raw.emitter === "object" ? raw.emitter as Record<string, unknown> : {};
+  const receiver = raw.receiver && typeof raw.receiver === "object" ? raw.receiver as Record<string, unknown> : {};
+  const amount = Number(raw.monto_clp ?? record.amount?.amountClp);
+  if (!record.id || !Number.isSafeInteger(amount) || amount < 0) return null;
+  return {
+    id: text(raw.id) ?? record.id,
+    fecha: text(raw.fecha) ?? record.occurredAt,
+    period: text(raw.period ?? raw.budget_period) ?? record.occurredAt?.slice(0, 4) ?? null,
+    title: text(raw.title ?? raw.objective),
+    description: text(raw.description ?? raw.legal_framework),
+    classification: text(raw.classification),
+    emitter_name: text(emitter.name ?? raw.emitter_name),
+    emitter_rut: text(emitter.rut_juridico ?? raw.emitter_rut),
+    receiver_name: text(receiver.name ?? raw.receiver_name),
+    receiver_rut: text(receiver.rut_juridico ?? raw.receiver_rut),
+    monto_clp: amount,
+    url: text(raw.url ?? raw.report_url),
+    municipality: text(raw.municipality ?? raw.comuna),
+  };
+}
+
+function summarizeTransfers(rows: TransferenciaDetalle[]): Pick<TransferenciasQueryResult, "kpis" | "by_year"> {
+  const receivers = new Set(rows.map((row) => row.receiver_rut || row.receiver_name).filter(Boolean));
+  const emitters = new Set(rows.map((row) => row.emitter_rut || row.emitter_name).filter(Boolean));
+  const byYear: Record<string, { count: number; total: number }> = {};
+  for (const row of rows) {
+    const year = row.fecha?.slice(0, 4) ?? row.period ?? "";
+    if (!year) continue;
+    byYear[year] ??= { count: 0, total: 0 };
+    byYear[year].count += 1;
+    byYear[year].total += row.monto_clp;
+  }
+  return {
+    kpis: {
+      total_monto_clp: rows.reduce((total, row) => total + row.monto_clp, 0),
+      total_transfers: rows.length,
+      total_receptores: receivers.size,
+      total_emisores: emitters.size,
+    },
+    by_year: byYear,
+  };
+}
+
+async function queryTransferenciasFromR2(params: {
+  search: string;
+  year: string;
+  emisor: string;
+  sortBy: "monto" | "fecha";
+  sortOrder: "asc" | "desc";
+  page: number;
+  limit: number;
+}): Promise<TransferenciasQueryResult | null> {
+  try {
+    const { env } = await getCloudflareContext({ async: true });
+    if (!env.PUBLIC_DATA) return null;
+    const archive = await readR2EvidenceRecords(env.PUBLIC_DATA, {
+      source: "ley-19862",
+      limit: 100_000,
+    });
+    if (!archive) return null;
+    let rows = archive.data
+      .map((record) => transferFromEvidence(record as unknown as TransferEvidence))
+      .filter((row): row is TransferenciaDetalle => Boolean(row));
+    if (params.year && params.year !== "Todos") rows = rows.filter((row) => row.period === params.year || row.fecha?.startsWith(params.year));
+    if (params.emisor && params.emisor !== "Todos") rows = rows.filter((row) => row.emitter_name?.toLocaleLowerCase("es-CL") === params.emisor.toLocaleLowerCase("es-CL"));
+    if (params.search) {
+      const query = params.search.toLocaleLowerCase("es-CL");
+      rows = rows.filter((row) => [row.title, row.emitter_name, row.receiver_name, row.emitter_rut, row.receiver_rut, row.municipality]
+        .some((value) => value?.toLocaleLowerCase("es-CL").includes(query)));
+    }
+    rows.sort((left, right) => {
+      const comparison = params.sortBy === "fecha"
+        ? (left.fecha ?? "").localeCompare(right.fecha ?? "")
+        : left.monto_clp - right.monto_clp;
+      return params.sortOrder === "asc" ? comparison : -comparison;
+    });
+    const summary = summarizeTransfers(rows);
+    const offset = (params.page - 1) * params.limit;
+    return {
+      data: rows.slice(offset, offset + params.limit),
+      total: rows.length,
+      page: params.page,
+      limit: params.limit,
+      totalPages: Math.max(1, Math.ceil(rows.length / params.limit)),
+      ...summary,
+      sourceStatus: "partial",
+    };
+  } catch (error) {
+    console.warn("R2 query transferencias fallback to projection:", error);
+    return null;
+  }
 }
 
 export async function queryTransferencias(params: TransferenciaQueryParams = {}): Promise<TransferenciasQueryResult> {
@@ -113,12 +223,16 @@ export async function queryTransferencias(params: TransferenciaQueryParams = {})
           totalPages: Math.max(1, Math.ceil(total / limit)),
           kpis: summary.kpis,
           by_year: summary.by_year,
+          sourceStatus: "complete",
         };
       }
     } catch (error) {
       console.warn("D1 query transferencias fallback to projection:", error);
     }
   }
+
+  const r2Result = await queryTransferenciasFromR2({ search, year, emisor, sortBy, sortOrder, page, limit });
+  if (r2Result) return r2Result;
 
   // Fallback: In-memory filtering over summary
   let list = summary.transfers_sample || [];
@@ -166,5 +280,6 @@ export async function queryTransferencias(params: TransferenciaQueryParams = {})
     totalPages,
     kpis: summary.kpis,
     by_year: summary.by_year,
+    sourceStatus: "fallback",
   };
 }

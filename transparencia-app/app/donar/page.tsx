@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 
 export const metadata: Metadata = {
   title: "Proyecto Cívico y Apoyo — El Cambiómetro",

@@ -24,7 +24,19 @@ interface Props {
 }
 
 export function generateStaticParams() {
-  return PARTIDOS_SEED.map((partido) => ({ sigla: partido.sigla.toLowerCase() }));
+  const list: Array<{ sigla: string }> = [];
+  for (const p of PARTIDOS_SEED) {
+    if (p.id === "ind") {
+      list.push({ sigla: "independientes" });
+      list.push({ sigla: "ind" });
+    } else {
+      list.push({ sigla: p.sigla.toLowerCase() });
+      if (p.id.toLowerCase() !== p.sigla.toLowerCase()) {
+        list.push({ sigla: p.id.toLowerCase() });
+      }
+    }
+  }
+  return list;
 }
 
 function findPartido(siglaParam: string) {

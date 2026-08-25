@@ -89,6 +89,12 @@ async function processStream(tipo, url, outputDir) {
   console.log(`\n[+] Iniciando descarga de ${tipo}: ${url}`);
   const response = await fetch(url);
   if (!response.ok || !response.body) {
+    if (response.status === 404 && process.env.CPLT_PORTAL_FALLBACK === "1") {
+      console.warn(`[WARN] ${url} ya no existe; usando el Portal de Transparencia oficial por organismo para ${tipo}.`);
+      const { runPortalPersonal } = await import("./portal-transparencia-personal.mjs");
+      await runPortalPersonal({ targetTipo: tipo, outputDir });
+      return;
+    }
     throw new Error(`CPLT_DOWNLOAD_FAILED: ${tipo} respondio ${response.status} ${response.statusText}`);
   }
 
@@ -189,6 +195,12 @@ async function processStream(tipo, url, outputDir) {
       recordCount: commune.tiene_municipalidad_propia ? count : 0,
     };
   });
+  if (process.env.REQUIRE_COMPLETE_CPLT === "1" && process.env.CPLT_ALLOW_UNAVAILABLE !== "1") {
+    const unavailable = coverage.filter((item) => item.status === "unavailable");
+    if (unavailable.length > 0) {
+      throw new Error(`CPLT_INCOMPLETE_COVERAGE: ${tipo} tiene ${unavailable.length} municipalidades sin registros`);
+    }
+  }
   fs.writeFileSync(path.join(coverageDir, `${normalized(tipo)}.json`), JSON.stringify({
     sourceId: `cplt-personal-${normalized(tipo)}`,
     sourceUrl: url,

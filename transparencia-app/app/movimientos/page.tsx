@@ -12,8 +12,9 @@ import {
   type MovimientoMotivoCategoria,
   type Movimiento,
 } from "@/lib/movimientos";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
+import { getPoliticoSlug } from "@/lib/politico-slugs";
 
 const MESES = [
   "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio",
@@ -876,7 +877,7 @@ function MovimientosContent() {
                                 <strong style={{ color: "var(--alert)" }}>
                                   {(() => {
                                     const p = POLITICOS_SEED.find((x) => x.nombre_completo.toLowerCase() === mov.saliente!.toLowerCase());
-                                    if (p) return <Link href={`/politico/${p.id}`} style={{ color: "var(--alert)", textDecoration: "underline" }}>{mov.saliente}</Link>;
+                                    if (p) return <Link href={`/politico/${getPoliticoSlug(p)}`} style={{ color: "var(--alert)", textDecoration: "underline" }}>{mov.saliente}</Link>;
                                     return <Link href={`/cruces?q=${encodeURIComponent(mov.saliente!)}`} style={{ color: "var(--alert)", textDecoration: "underline" }}>{mov.saliente}</Link>;
                                   })()}
                                 </strong>
@@ -893,7 +894,7 @@ function MovimientosContent() {
                                 <strong style={{ color: "var(--ok)" }}>
                                   {(() => {
                                     const p = POLITICOS_SEED.find((x) => x.nombre_completo.toLowerCase() === mov.entrante!.toLowerCase());
-                                    if (p) return <Link href={`/politico/${p.id}`} style={{ color: "var(--ok)", textDecoration: "underline" }}>{mov.entrante}</Link>;
+                                    if (p) return <Link href={`/politico/${getPoliticoSlug(p)}`} style={{ color: "var(--ok)", textDecoration: "underline" }}>{mov.entrante}</Link>;
                                     return <Link href={`/cruces?q=${encodeURIComponent(mov.entrante!)}`} style={{ color: "var(--ok)", textDecoration: "underline" }}>{mov.entrante}</Link>;
                                   })()}
                                 </strong>

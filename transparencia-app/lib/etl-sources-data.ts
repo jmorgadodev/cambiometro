@@ -1,4 +1,5 @@
 import healthRaw from "@/data/etl/source-health.json";
+import ley19862Subset from "@/data/lake-subsets/ley19862.subset.json";
 
 export interface EtlSourceInfo {
   id: string;
@@ -24,7 +25,7 @@ export interface EtlSourceInfo {
 const CANONICAL_COUNTS: Record<string, number> = {
   cplt: 1203287,
   dipres: 15689,
-  ley19862: 59361,
+  ley19862: Number(ley19862Subset.kpis?.total_transfers ?? healthRaw.sources.ley19862?.recordCount ?? 59361),
   chilecompra: 74142,
   infolobby: 60523,
   infoprobidad: 15331,

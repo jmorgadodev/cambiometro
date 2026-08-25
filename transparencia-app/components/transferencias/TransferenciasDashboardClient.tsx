@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo } from "react";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import type { Ley19862Summary, ReceptorResumen, EmisorResumen, TransferenciaDetalle } from "@/lib/transferencias-data";
 
 interface Props {

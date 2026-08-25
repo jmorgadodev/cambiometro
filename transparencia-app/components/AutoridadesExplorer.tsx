@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import { POLITICOS_SEED, PARTIDOS_SEED } from "@/lib/seed-politicos";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import { comparePorApellido } from "@/lib/format";

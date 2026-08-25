@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import ShareButton from "@/components/ShareButton";
 import AccessibleTooltip from "@/components/ui/AccessibleTooltip";
 import type { PoliticoDipInfo } from "@/lib/politico-dip";

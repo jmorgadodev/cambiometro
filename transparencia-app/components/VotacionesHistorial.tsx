@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { formatFechaChilena } from "@/lib/format";
 
 export interface VotacionFila {
@@ -27,6 +27,33 @@ export interface VotacionFila {
 interface Props {
   votaciones: VotacionFila[];
   cargo?: "Diputado" | "Senador" | "Alcalde" | "Gobernador" | "Consejero Regional" | "Concejal" | "Ministro" | "Subsecretario" | "Convencional";
+  dataUrl?: string;
+}
+
+function normalizarSliceVotaciones(value: unknown): VotacionFila[] {
+  if (!value || typeof value !== "object") return [];
+  const votos = (value as { votos?: unknown }).votos;
+  if (!Array.isArray(votos)) return [];
+
+  return votos
+    .filter((v): v is Record<string, unknown> => Boolean(v) && typeof v === "object")
+    .map((v) => ({
+      id: String(v.id ?? ""),
+      fecha: typeof v.fecha === "string" ? v.fecha : "",
+      opcion: typeof v.opcion === "string" ? v.opcion : "",
+      descripcion: typeof v.descripcion === "string" ? v.descripcion : "Votación en sala",
+      url: typeof v.url === "string" ? v.url : undefined,
+      tipo: typeof v.tipo === "string" ? v.tipo : null,
+      quorum: typeof v.quorum === "string" ? v.quorum : null,
+      resultado: typeof v.resultado === "string" ? v.resultado : null,
+      total_si: typeof v.total_si === "string" ? v.total_si : null,
+      total_no: typeof v.total_no === "string" ? v.total_no : null,
+      total_abstencion: typeof v.total_abstencion === "string" ? v.total_abstencion : null,
+      boletin: typeof v.boletin === "string" ? v.boletin : null,
+      url_tramitacion: typeof v.url_tramitacion === "string" ? v.url_tramitacion : null,
+      tramite: typeof v.tramite === "string" ? v.tramite : null,
+      informe: typeof v.informe === "string" ? v.informe : null,
+    }));
 }
 
 const OPCION_COLOR: Record<string, string> = {
@@ -86,13 +113,41 @@ export function esProcedimental(v: VotacionFila): boolean {
   );
 }
 
-export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: Props) {
+export default function VotacionesHistorial({ votaciones: initialVotaciones, cargo = "Diputado", dataUrl }: Props) {
+  const [votaciones, setVotaciones] = useState<VotacionFila[]>(initialVotaciones);
+  const [estadoCarga, setEstadoCarga] = useState<"loading" | "ready" | "empty" | "error">(
+    initialVotaciones.length > 0 || !dataUrl ? (initialVotaciones.length > 0 ? "ready" : "empty") : "loading"
+  );
+  const [intento, setIntento] = useState(0);
   const [filtroOpcion, setFiltroOpcion] = useState<string>("todas");
   const [filtroProcedimental, setFiltroProcedimental] = useState<"todos" | "sustantivos" | "procedimentales">("todos");
   const [busqueda, setBusqueda] = useState<string>("");
   const [page, setPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(10);
   const [detallesExpandidos, setDetallesExpandidos] = useState<Record<string, boolean>>({});
+
+  useEffect(() => {
+    if (!dataUrl || initialVotaciones.length > 0) return;
+
+    let activo = true;
+    fetch(dataUrl, { headers: { Accept: "application/json" } })
+      .then(async (response) => {
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return normalizarSliceVotaciones(await response.json());
+      })
+      .then((cargadas) => {
+        if (!activo) return;
+        setVotaciones(cargadas);
+        setEstadoCarga(cargadas.length > 0 ? "ready" : "empty");
+      })
+      .catch(() => {
+        if (activo) setEstadoCarga("error");
+      });
+
+    return () => {
+      activo = false;
+    };
+  }, [dataUrl, initialVotaciones.length, intento]);
 
   const toggleDetalle = (id: string) => {
     setDetallesExpandidos((prev) => ({ ...prev, [id]: !prev[id] }));
@@ -206,7 +261,14 @@ export default function VotacionesHistorial({ votaciones, cargo = "Diputado" }: 
 
   return (
     <div className="votaciones-historial">
-      {votaciones.length === 0 ? (
+      {estadoCarga === "loading" ? (
+        <p className="votaciones-historial__vacio" role="status">Cargando votaciones de sala…</p>
+      ) : estadoCarga === "error" ? (
+        <div className="votaciones-historial__vacio" role="alert">
+          <p>No fue posible cargar las votaciones de esta ficha.</p>
+          <button type="button" onClick={() => { setEstadoCarga("loading"); setIntento((value) => value + 1); }}>Reintentar</button>
+        </div>
+      ) : votaciones.length === 0 ? (
         <p className="votaciones-historial__vacio">
           {cargo === "Diputado"
             ? "Sin votaciones en sala registradas para este período en la fuente oficial."

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import Link from "next/link";
+import Link from "@/components/SiteLink";
 import Image from "next/image";
 import { Suspense } from "react";
 import { Inter, IBM_Plex_Mono } from "next/font/google";

@@ -1,3 +1,5 @@
-export default function AutoridadesRedirectPage() {
-  return null;
+import PersonasPage from "@/app/personas/page";
+
+export default function AutoridadesPage() {
+  return <PersonasPage initialTab="parlamentarios" />;
 }

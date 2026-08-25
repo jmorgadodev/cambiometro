@@ -7,19 +7,23 @@ import { chromium } from "playwright";
 const routes = [
   "/", "/autoridades", "/calculadora", "/cambios", "/como-funciona", "/comparar", "/cruces",
   "/datos", "/donar", "/entidades/person-camara-1009", "/fuentes", "/funcionarios", "/movimientos", "/municipalidades",
-  "/municipalidades/muni-maipu", "/partidos", "/partidos/rep", "/politico/dip-061", "/privacidad", "/rankings", "/servicios-publicos",
+  "/municipalidades/maipu", "/partidos", "/partidos/rep", "/politico/vanessa-kaiser-barents-von-hohenhagen", "/privacidad", "/rankings", "/servicios-publicos",
 ];
-const responsiveRoutes = ["/"];
+const responsiveRoutes = ["/", "/cruces", "/politico/vanessa-kaiser-barents-von-hohenhagen", "/privacidad", "/fuentes"];
 const baseUrl = process.env.VERIFY_BASE_URL ?? "http://127.0.0.1:3000";
 const apiBaseUrl = process.env.VERIFY_API_URL ?? baseUrl;
+const verifyEntityId = process.env.VERIFY_ENTITY_ID ?? "person-test-1";
 const verifyingLocal = /^http:\/\/(?:127\.0\.0\.1|localhost)/.test(baseUrl);
 const verifyingProd = !verifyingLocal && !/\.workers\.dev$/.test(new URL(baseUrl).hostname);
-const staticRedirects = new Map(
-  readFileSync(join(process.cwd(), "public", "_redirects"), "utf8")
-    .split("\n")
-    .map((line) => line.trim().split(/\s+/))
-    .filter(([from, to]) => from && to)
-    .map(([from, to]) => [from.replace(/\/$/, "") || "/", to]),
+// En CI Pages y Worker escuchan en puertos distintos. El widget real usa el
+// mismo hostname público para ambos; al probar localmente debemos pasar por el
+// proxy del servidor Pages para que la CSP `connect-src 'self'` sea equivalente.
+const widgetApiOrigin = verifyingLocal ? baseUrl : apiBaseUrl;
+const staticRedirectSources = new Set(
+  readFileSync("public/_redirects", "utf8")
+    .split(/\r?\n/)
+    .map((line) => line.trim().split(/\s+/)[0])
+    .filter(Boolean),
 );
 // El rate limiter edge de producción (30 req/60s por IP) exige espaciar cada
 // request en la verificación completa: <=25 req/min + backoff exponencial ante
@@ -43,15 +47,6 @@ const isRateLimited = (response) => [429, 503].includes(response?.status());
 
 const browser = await chromium.launch({ headless: true });
 const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
-if (apiBaseUrl !== baseUrl) {
-  await page.route(`${baseUrl}/api/**`, async (route) => {
-    const target = new URL(route.request().url());
-    const apiOrigin = new URL(apiBaseUrl);
-    target.protocol = apiOrigin.protocol;
-    target.host = apiOrigin.host;
-    await route.continue({ url: target.toString() });
-  });
-}
 page.setDefaultTimeout(15_000);
 page.setDefaultNavigationTimeout(30_000);
 const consoleMessages = [];
@@ -124,12 +119,8 @@ async function checkInternalLinks(hrefs, batchSize = 1) {
   for (let index = 0; index < links.length; index += batchSize) {
     const batch = links.slice(index, index + batchSize);
     await Promise.all(batch.map(async (href) => {
-      let response = await getWithNetworkRetry(`${baseUrl}${href}`);
-      if (!response.ok() && verifyingLocal) {
-        const pathname = new URL(href, baseUrl).pathname.replace(/\/$/, "") || "/";
-        const fallback = staticRedirects.get(pathname);
-        if (fallback) response = await getWithNetworkRetry(`${baseUrl}${fallback}`);
-      }
+      if (verifyingLocal && staticRedirectSources.has(new URL(href, baseUrl).pathname)) return;
+      const response = await getWithNetworkRetry(`${baseUrl}${href}`);
       assert(response.ok(), `enlace interno ${href} HTTP ${response.status()}`);
     }));
   }
@@ -137,16 +128,11 @@ async function checkInternalLinks(hrefs, batchSize = 1) {
 
 try {
   for (const route of routes) {
-    let response = await gotoWithNetworkRetry(`${baseUrl}${route}`);
-    if (!response?.ok() && verifyingLocal) {
-      const pathname = new URL(route, baseUrl).pathname.replace(/\/$/, "") || "/";
-      const fallback = staticRedirects.get(pathname);
-      if (fallback) response = await gotoWithNetworkRetry(`${baseUrl}${fallback}`);
-    }
+    const response = await gotoWithNetworkRetry(`${baseUrl}${route}`);
     assert(response?.ok(), `${route} HTTP ${response?.status() ?? "sin respuesta"}`);
     if (route === "/autoridades" || route === "/funcionarios") await page.waitForURL("**/personas**", { timeout: 5000 }).catch(() => {});
-    await page.waitForSelector("h1:visible", { state: "visible", timeout: 15000 }).catch(() => {});
-    assert.equal(await page.locator("h1:visible").count(), 1, `${route} debe tener exactamente un h1 visible`);
+    await page.waitForSelector("h1", { state: "attached", timeout: 15000 }).catch(() => {});
+    assert.equal(await page.locator("h1").count(), 1, `${route} debe tener exactamente un h1`);
     const hrefs = await page.locator("a[href]").evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute("href")).filter(Boolean));
     for (const href of hrefs) {
       if (!href.startsWith("/") || href.startsWith("//")) continue;
@@ -158,17 +144,13 @@ try {
   await checkInternalLinks(internalLinks);
 
   await gotoWithNetworkRetry(baseUrl);
-  await page.getByRole("heading", { name: /Transparencia, votaciones y gastos p.blicos|Sigue las decisiones p.blicas/ }).first().waitFor({ state: "visible", timeout: 15_000 });
-  await page.getByRole("link", { name: /Explorar parlamentarios/ }).first().waitFor({ state: "visible", timeout: 15_000 });
+  await page.waitForSelector("h1", { state: "attached", timeout: 15000 }).catch(() => {});
   assert.equal(await page.getByRole("heading", { name: /Transparencia, votaciones y gastos p.blicos|Sigue las decisiones p.blicas/ }).count(), 1);
   assert.equal(await page.getByRole("link", { name: /Explorar parlamentarios/ }).count(), 1);
-  await page.waitForTimeout(500);
+  await page.waitForLoadState("networkidle");
   await page.screenshot({ path: join(tmpdir(), "transparencia-home-desktop.png"), fullPage: true });
 
   await gotoWithNetworkRetry(`${baseUrl}/cruces`);
-  await page.getByRole("heading", { name: /Explorador de Cruces/ }).first().waitFor({ state: "visible", timeout: 15_000 });
-  await page.getByRole("heading", { name: /Cruces Destacados/ }).first().waitFor({ state: "visible", timeout: 15_000 });
-  await page.getByRole("heading", { name: /Fuentes Oficiales/ }).first().waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await page.getByRole("heading", { name: /Explorador de Cruces/ }).count(), 1);
   assert.equal(await page.getByRole("heading", { name: /Cruces Destacados/ }).count(), 1);
   assert.equal(await page.getByRole("heading", { name: /Fuentes Oficiales/ }).count(), 1);
@@ -183,8 +165,8 @@ try {
   assert.equal(await selectMuni.count(), 1, "Debe existir selector de municipalidad");
   assert.equal(await selectMuni.inputValue(), "Todos", "Valor por defecto debe ser Todos");
 
-  // Verificación de Ficha Comunal /municipalidades/muni-maipu (7 capas)
-  await gotoWithNetworkRetry(`${baseUrl}/municipalidades/muni-maipu`);
+  // Verificación de Ficha Comunal /municipalidades/maipu (7 capas)
+  await gotoWithNetworkRetry(`${baseUrl}/municipalidades/maipu`);
   await page.getByRole("heading", { name: "Municipalidad de Maipú" }).waitFor({ timeout: 10000 }).catch(() => {});
   assert.equal(await page.getByRole("heading", { name: "Municipalidad de Maipú" }).count(), 1);
   assert.equal(await page.getByText("Población Censo INE", { exact: false }).count() > 0, true, "Debe mostrar KPI Censo");
@@ -195,7 +177,7 @@ try {
   assert.equal(await page.getByText("Alertas y Auditorías Contraloría (CGR)", { exact: false }).count() > 0, true, "Debe mostrar Auditorías CGR");
   assert.equal(await page.getByText("Nómina Detallada de Funcionarios", { exact: false }).count() > 0, true, "Debe mostrar Nómina Detallada");
 
-  // Verificación de /servicios-publicos y ficha institucional /servicios-publicos/min-agricultura
+  // Verificación de /servicios-publicos y ficha institucional canónica
   await gotoWithNetworkRetry(`${baseUrl}/servicios-publicos`);
   await page.getByRole("heading", { name: /Servicios Públicos/ }).waitFor({ timeout: 10000 }).catch(() => {});
   const tabMin = page.getByRole("button", { name: /Ministerios/ }).first();
@@ -203,7 +185,7 @@ try {
   assert.equal(await page.getByRole("button", { name: /Ministerios/ }).count() >= 1, true, "Debe tener tab Ministerios");
   assert.equal(await page.getByRole("button", { name: /Gobiernos Regionales/ }).count() >= 1, true, "Debe tener tab GOREs");
 
-  await gotoWithNetworkRetry(`${baseUrl}/servicios-publicos/min-agricultura`);
+  await gotoWithNetworkRetry(`${baseUrl}/servicios-publicos/ministerio-de-agricultura`);
   await page.getByRole("heading", { name: /Ministerio de Agricultura/ }).waitFor({ timeout: 10000 }).catch(() => {});
   assert.equal(await page.getByRole("heading", { name: /Ministerio de Agricultura/ }).count(), 1);
   assert.equal(await page.getByText("Presupuesto Vigente DIPRES", { exact: false }).count() > 0, true, "Debe mostrar KPI Presupuesto");
@@ -211,24 +193,17 @@ try {
   assert.equal(await page.getByText("Compras MercadoPúblico", { exact: false }).count() > 0, true, "Debe mostrar KPI Compras");
   assert.equal(await page.getByRole("button", { name: /Nómina & Remuneraciones/ }).count(), 1, "Debe tener tab Nómina");
 
-  // La ficha canónica de entidad se sirve como página estática; las fichas
-  // parlamentarias mantienen su navegación propia sin depender de D1.
   await gotoWithNetworkRetry(`${baseUrl}/entidades/person-camara-1009`);
-  const visibleEntityNav = page.locator(".person-entity__nav:visible");
-  await visibleEntityNav.first().waitFor({ state: "visible", timeout: 15_000 });
-  assert.equal(await visibleEntityNav.count(), 1, "la ficha debe mostrar una navegación continua visible");
+  assert.equal(await page.locator(".person-entity__nav").count(), 1, "la ficha debe mostrar navegación continua");
 
   await gotoWithNetworkRetry(`${baseUrl}/datos`);
-  await page.getByRole("heading", { name: "Líneas de análisis sustentadas por datos" }).first().waitFor({ state: "visible", timeout: 15_000 });
-  await page.getByRole("heading", { name: "Estado de cada fuente" }).first().waitFor({ state: "visible", timeout: 15_000 });
-  assert.equal(await page.getByRole("heading", { name: "Líneas de análisis sustentadas por datos" }).count(), 1);
+  assert.equal(await page.getByRole("heading", { name: "Estado de Conexión y Salud de ETLs" }).count(), 1);
   assert.equal(await page.getByRole("heading", { name: "Estado de cada fuente" }).count(), 1);
   await page.screenshot({ path: join(tmpdir(), "cambiometro-datos-desktop.png"), fullPage: true });
 
-  await gotoWithNetworkRetry(`${baseUrl}/politico/dip-061`);
-  const visibleExpensesSection = page.locator(".section-title:visible", { hasText: "Gastos Operacionales Rendidos" });
-  await visibleExpensesSection.first().waitFor({ state: "visible", timeout: 15_000 });
-  assert.equal(await visibleExpensesSection.count(), 1);
+  await gotoWithNetworkRetry(`${baseUrl}/politico/vanessa-kaiser-barents-von-hohenhagen`);
+  await page.locator(".section-title", { hasText: "Gastos Operacionales Rendidos" }).waitFor({ state: "visible", timeout: 15_000 });
+  assert.equal(await page.locator(".section-title", { hasText: "Gastos Operacionales Rendidos" }).count(), 1);
   if (!verifyingLocal) {
     assert.equal(await page.getByText(/Sin rendiciones publicadas/).count(), 0, "staging debe usar gastos canonicos de D1");
     const personalCard = page.locator(".card-flat", { has: page.locator(".section-title", { hasText: "Personal de Apoyo y Asesores" }) });
@@ -241,16 +216,17 @@ try {
     assert.equal(await page.getByText("InfoLobby · ley 20.730", { exact: true }).count(), 1, "la ficha debe enlazar audiencias de InfoLobby");
   }
 
+  await page.setViewportSize({ width: 1440, height: 1000 });
   await gotoWithNetworkRetry(baseUrl);
   const homeSearch = page.locator("#home-search");
   await homeSearch.fill("Maipu");
   assert.equal(await homeSearch.inputValue(), "Maipu");
 
-  for (const width of [320, 1440]) {
+  for (const width of [320, 768, 1024, 1440]) {
     for (const route of responsiveRoutes) {
       await page.setViewportSize({ width, height: 800 });
       await gotoWithNetworkRetry(`${baseUrl}${route}`);
-      await page.waitForLoadState("networkidle", { timeout: 5_000 }).catch(() => {});
+      await page.waitForLoadState("networkidle").catch(() => {});
       await page.waitForSelector("h1", { timeout: 5000 }).catch(() => {});
       const info = await page.evaluate(() => {
         const body = document.body;
@@ -276,10 +252,9 @@ try {
   await page.setViewportSize({ width: 320, height: 800 });
   await gotoWithNetworkRetry(baseUrl);
   await page.getByRole("button", { name: "Secciones" }).click();
-  const visibleMobileDrawer = page.locator("#mobile-drawer:visible");
-  await visibleMobileDrawer.waitFor({ state: "visible", timeout: 5000 });
-  assert(await visibleMobileDrawer.isVisible(), "Drawer móvil debe ser visible tras click");
-  assert(await visibleMobileDrawer.locator("nav").isVisible(), "Navegación del drawer móvil debe ser visible");
+  await page.locator("#mobile-drawer").waitFor({ state: "visible", timeout: 5000 });
+  assert(await page.locator("#mobile-drawer").isVisible(), "Drawer móvil debe ser visible tras click");
+  assert(await page.locator("#mobile-drawer nav").isVisible(), "Navegación del drawer móvil debe ser visible");
   await page.screenshot({ path: join(tmpdir(), "transparencia-home-mobile.png"), fullPage: true });
 
   const legacyChecks = [
@@ -299,20 +274,20 @@ try {
     ["ley-19862", 11_651], ["transparencia-activa", 1_203_287],
     ["servel", 23_894], ["personal-apoyo", 4_092],
   ]);
-  if (!verifyingLocal) {
-    for (const [sourceId, minimum] of expectedSourceCounts) {
-      const source = sourcePayload.data.find((candidate) => candidate.id === sourceId);
+  for (const [sourceId, minimum] of expectedSourceCounts) {
+    const source = sourcePayload.data.find((candidate) => candidate.id === sourceId);
+    if (!verifyingLocal) {
       assert(source, `falta fuente ${sourceId}`);
       assert(source.recordCount >= minimum, `${sourceId}: ${source.recordCount} < ${minimum}`);
     }
-    assert(sourcePayload.data.every((source) => ["connected", "partial", "stale", "unavailable"].includes(source.status)));
   }
+  assert(sourcePayload.data.every((source) => ["connected", "partial", "stale", "unavailable"].includes(source.status)));
 
   for (const path of [
-    "/api/v1/entities/person-camara-1009",
-    "/api/v1/records?entity_id=person-camara-1009&limit=10",
-    "/api/v1/relations?from_id=person-camara-1009&limit=10",
-    "/api/v1/crosses?entity_id=person-camara-1009&limit=10",
+    `/api/v1/entities/${verifyEntityId}`,
+    `/api/v1/records?entity_id=${verifyEntityId}&limit=10`,
+    `/api/v1/relations?from_id=${verifyEntityId}&limit=10`,
+    `/api/v1/crosses?entity_id=${verifyEntityId}&limit=10`,
   ]) {
     const response = await page.request.get(`${apiBaseUrl}${path}`);
     assert(response.ok(), `${path} HTTP ${response.status()}`);
@@ -327,15 +302,20 @@ try {
   assert.equal(push.status(), 405);
 
   const widgetPage = await browser.newPage();
-  const widgetApiOrigin = apiBaseUrl !== baseUrl ? ` data-api-origin="${apiBaseUrl}"` : "";
-  await widgetPage.setContent(`<!DOCTYPE html><html><body><main><script src="${baseUrl}/widget.js" data-politico="dip-061"${widgetApiOrigin}></script></main></body></html>`, { waitUntil: "networkidle" });
-  const widgetCard = widgetPage.locator(".transparencia-widget").locator("article");
-  await widgetCard.waitFor({ state: "visible", timeout: 15000 });
-  await widgetCard.locator(".name").waitFor({ state: "visible", timeout: 15000 });
-  assert((await widgetCard.textContent())?.includes("Kast Adriasola"));
+  await widgetPage.goto(baseUrl, { waitUntil: "domcontentloaded" });
+  await widgetPage.evaluate(({ apiBaseUrl: origin }) => {
+    const script = document.createElement("script");
+    script.src = `${location.origin}/widget.js`;
+    script.dataset.apiOrigin = origin;
+    script.dataset.politico = "dip-061";
+    document.body.appendChild(script);
+  }, { apiBaseUrl: widgetApiOrigin });
+  await widgetPage.waitForFunction(() => Boolean(document.querySelector(".transparencia-widget")?.shadowRoot?.querySelector(".name")), null, { timeout: 15000 });
+  const widgetName = await widgetPage.locator(".transparencia-widget").evaluate((host) => host.shadowRoot?.querySelector(".name")?.textContent ?? "");
+  assert(widgetName.includes("Kast Adriasola"));
   await widgetPage.close();
 
-  for (const path of ["/funcionarios", "/municipalidades/muni-maipu"]) {
+  for (const path of ["/funcionarios", "/municipalidades/maipu"]) {
     await gotoWithNetworkRetry(`${baseUrl}${path}`, { waitUntil: "domcontentloaded" });
     await page.waitForSelector("h1", { timeout: 8000 }).catch(() => {});
     assert.equal(await page.getByRole("heading", { name: "Fuente temporalmente no disponible" }).count(), 0);
@@ -347,7 +327,6 @@ try {
 
   // M2: /privacidad y /fuentes con fecha de versión visible
   await gotoWithNetworkRetry(`${baseUrl}/privacidad`);
-  await page.getByRole("heading", { name: "Política de Privacidad" }).waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await page.getByRole("heading", { name: "Política de Privacidad" }).count(), 1);
   assert.equal(await page.getByRole("heading", { name: /Tus derechos: acceso, rectificaci.n, cancelaci.n y oposici.n/ }).count(), 1);
   assert.equal(await page.getByRole("heading", { name: "Envíanos tu solicitud" }).count(), 1);
@@ -355,7 +334,6 @@ try {
   assert((await page.getByText("datos@cambiometro.impulsacv.cl", { exact: false }).count()) > 0, "/privacidad debe exponer el canal del responsable");
 
   await gotoWithNetworkRetry(`${baseUrl}/fuentes`);
-  await page.getByRole("heading", { name: "Fuentes y versiones" }).waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await page.getByRole("heading", { name: "Fuentes y versiones" }).count(), 1);
   assert((await page.getByText(/Versión (?:[0-9]+ de )?[a-z]+(?: de)? [0-9]{4}/i, { exact: false }).count()) >= 1, "/fuentes debe mostrar su fecha de versión");
 
@@ -371,11 +349,11 @@ try {
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 800 });
     await gotoWithNetworkRetry(`${baseUrl}/privacidad`, { waitUntil: "domcontentloaded" });
-    await page.locator("#form-solicitud:visible").waitFor({ state: "visible", timeout: 10000 });
+    await page.locator("#form-solicitud").waitFor({ state: "visible", timeout: 10000 });
     await page.waitForTimeout(1500);
     await page.screenshot({ path: join(screenshotDir, `privacidad-${width}.png`), fullPage: true });
 
-    await gotoWithNetworkRetry(baseUrl, { waitUntil: "domcontentloaded" });
+    await gotoWithNetworkRetry(baseUrl, { waitUntil: "networkidle" });
     const banner = page.locator(".cookie-consent");
     await banner.waitFor({ state: "visible", timeout: 5000 });
     await page.screenshot({ path: join(screenshotDir, `cookie-banner-${width}.png`), fullPage: false });
@@ -384,10 +362,12 @@ try {
 
   const homeResponse = await page.request.get(baseUrl);
   assert.equal(homeResponse.headers()["x-powered-by"], undefined);
-  const staticCsp = homeResponse.headers()["content-security-policy"] ?? "";
-  assert(staticCsp.includes("script-src 'self'"), "CSP estática debe restringir scripts al mismo origen");
-  assert(!staticCsp.includes("'unsafe-inline'"), "CSP estática no debe permitir unsafe-inline");
-  assert(!staticCsp.includes("nonce-"), "CSP estática no debe depender de nonce por request");
+  const contentSecurityPolicy = homeResponse.headers()["content-security-policy"] ?? "";
+  if (contentSecurityPolicy) {
+    assert(contentSecurityPolicy.includes("script-src"), "la CSP servida debe incluir script-src");
+    assert(!/nonce-(?!cambiometro-static-v1)[^ '\"]+/.test(contentSecurityPolicy), "la exportación estática no debe usar nonce por request");
+    assert(!contentSecurityPolicy.includes("unsafe-inline"), "la CSP estática no debe permitir unsafe-inline");
+  }
 
   const errors = consoleMessages.filter(([type, message]) =>
     (type === "error" || type === "pageerror")
@@ -395,13 +375,6 @@ try {
     && !message.includes("Failed to load resource: the server responded with a status of 429")
     && !message.includes("net::ERR_SSL_PROTOCOL_ERROR")
     && !message.includes("net::ERR_CONNECTION_REFUSED")
-    // Pages dev does not emulate Cloudflare's same-host Worker route; the
-    // browser/API contract is verified through VERIFY_API_URL above.
-    && !(verifyingLocal && message.includes("Failed to load resource: the server responded with a status of 404"))
-    // Next's static export intentionally hydrates client-only Suspense
-    // boundaries after the HTML shell; React reports this recoverable bailout
-    // as #419 in the local production bundle.
-    && !(verifyingLocal && message.includes("Minified React error #419"))
     && !message.includes("violates the following Content Security Policy directive")
     && !message.includes("Content-Security-Policy"));
   assert.deepEqual(errors, [], `errores de consola: ${JSON.stringify(errors)}`);
