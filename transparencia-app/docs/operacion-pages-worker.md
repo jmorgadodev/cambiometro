@@ -20,7 +20,7 @@ La producción observada antes del cutover todavía servía OpenNext en `cambiom
 
 ## Contratos de datos
 
-Las transferencias se generan desde `data/lake/partitions/ley-19862`. El build exige ese lake completo y falla si sólo existe la proyección/sample; nunca publica un sitio parcial. Crea `public/data/transferencias/` con páginas de 50 filas, índice de búsqueda, resumen y manifest con checksum.
+Las transferencias se generan desde `data/lake/partitions/ley-19862`. El build exige ese lake completo y falla si sólo existe la proyección/sample; nunca publica un sitio parcial. Crea `public/data/transferencias/` con páginas de 50 filas, índice de búsqueda, resumen y manifest con checksum. El único bypass es `ALLOW_STATIC_SAMPLE=1`, reservado al workflow E2E de PR para levantar fixtures locales; nunca se define en Pages producción.
 
 Hay dos snapshots que no deben mezclarse:
 

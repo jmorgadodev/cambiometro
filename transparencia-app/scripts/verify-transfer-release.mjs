@@ -13,7 +13,8 @@ const fail = (message) => { throw new Error(`TRANSFER_RELEASE_INVALID: ${message
 const manifest = await readJson(join(transferRoot, "manifest.json"));
 if (manifest.schemaVersion !== 1) fail("schemaVersion must be 1");
 if (manifest.dataset !== "ley-19862-transferencias") fail(`unexpected dataset ${manifest.dataset}`);
-if (!Number.isInteger(manifest.totalRows) || manifest.totalRows <= 1000) fail(`full dataset required, got ${manifest.totalRows}`);
+const allowSample = process.env.ALLOW_STATIC_SAMPLE === "1";
+if (!Number.isInteger(manifest.totalRows) || (!allowSample && manifest.totalRows <= 1000)) fail(`full dataset required, got ${manifest.totalRows}`);
 if (manifest.pageSize !== 50) fail(`pageSize must be 50, got ${manifest.pageSize}`);
 if (manifest.totalPages !== Math.ceil(manifest.totalRows / manifest.pageSize)) fail("totalPages does not match totalRows/pageSize");
 if (!Array.isArray(manifest.pages) || manifest.pages.length !== manifest.totalPages) fail("pages does not match totalPages");
