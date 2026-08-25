@@ -42,7 +42,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
 
       if (hasSchedule) {
         // Ningún workflow programado puede contener comandos de despliegue
-        expect(content, `El workflow programado ${file} NO debe contener comandos de deploy`).not.toMatch(/opennextjs-cloudflare\s+deploy/i);
+        expect(content, `El workflow programado ${file} NO debe contener comandos de deploy`).not.toMatch(/wrangler(?:\s+pages)?\s+deploy/i);
         expect(content, `El workflow programado ${file} NO debe invocar npm run deploy`).not.toMatch(/npm\s+run\s+deploy/i);
       }
     }

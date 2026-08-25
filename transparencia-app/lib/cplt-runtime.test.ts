@@ -4,9 +4,9 @@ import { describe, expect, it } from "vitest";
 
 describe("consulta runtime de funcionarios", () => {
   it("lee la particion del organismo y no el indice nacional completo", () => {
-    const route = readFileSync(resolve(process.cwd(), "app/api/funcionarios/route.ts"), "utf8");
-    expect(route).toContain("administrationId}.json");
+    const route = readFileSync(resolve(process.cwd(), "workers/public-api/index.ts"), "utf8");
     expect(route).not.toContain("search_index.json");
+    expect(route).toContain("LIMIT ?");
   });
 
   it("exige seleccionar un organismo para proteger la memoria del Worker", () => {

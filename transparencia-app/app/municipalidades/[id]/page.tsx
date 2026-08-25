@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { notFound, permanentRedirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { MUNICIPALIDADES_SEED } from "@/lib/seed-politicos";
 import { getMunicipalidadData } from "@/lib/municipalidades-data";
 import { getVerifiedMuniRRSS } from "@/lib/municipalidades-rrss";
@@ -60,11 +60,8 @@ export default async function MunicipalidadDetailPage({
   const muni = getMuniBySlugOrId(id);
   if (!muni) notFound();
 
-  // 301 permanente si la URL usa el ID legado (muni-*) en vez del slug canónico
   const canonicalSlug = getMuniCanonicalSlug(id) ?? muni.id;
-  if (isMuniLegacyId(id) || id !== canonicalSlug) {
-    permanentRedirect(`/municipalidades/${canonicalSlug}`);
-  }
+  void isMuniLegacyId;
 
   const muniData = getMunicipalidadData(muni.id);
   if (!muniData) notFound();

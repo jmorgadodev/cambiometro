@@ -1,22 +1,14 @@
 import { cache } from "react";
 import type { D1Database } from '@cloudflare/workers-types';
 
-import { getCloudflareContext } from "@opennextjs/cloudflare";
 import type { EtlRecord, VotacionDelPolitico } from "@/lib/data-source";
 
 export async function getD1Database(): Promise<D1Database | null> {
-    try {
-        const { env } = await getCloudflareContext({ async: true });
-        if (env && env.DB) {
-            return env.DB as unknown as D1Database;
-        }
-    } catch (e) {
-        // Fallback or ignore if not in Cloudflare context
-    }
-    
+    // Static Pages builds must resolve against the checked-in/build-generated
+    // projections. D1 is an API/Worker binding and is never a page runtime.
+    if (process.env.NEXT_PHASE === "phase-production-build") return null;
     const nodeEnv = process.env as unknown as { DB?: D1Database };
     if (!nodeEnv.DB) {
-        console.warn("D1 Database not bound. Make sure to run with Cloudflare workers/OpenNext preview, or mock the binding for local node scripts.");
         return null;
     }
     return nodeEnv.DB;

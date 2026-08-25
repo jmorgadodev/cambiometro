@@ -27,10 +27,11 @@ describe("observatorio de datos", () => {
 
   it("queda enlazado desde la navegación y el sitemap", () => {
     const header = readFileSync(join(projectRoot, "components", "SiteHeader.tsx"), "utf8");
-    const sitemap = readFileSync(join(projectRoot, "app", "sitemap.ts"), "utf8");
+    const sitemap = readFileSync(join(projectRoot, "scripts", "generate-static-metadata.mjs"), "utf8");
 
     expect(header).toContain('{ href: "/datos", label: "Datos" }');
-    expect(sitemap).toContain('"/datos"');
+    expect(sitemap).toContain("sitemap.xml");
+    expect(sitemap).toContain('entry.name === "index.html"');
   });
 
   it("explica límites antes de proponer nuevas líneas de análisis", () => {

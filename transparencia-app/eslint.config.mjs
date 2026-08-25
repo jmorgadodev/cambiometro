@@ -10,6 +10,9 @@ const eslintConfig = defineConfig([
     // Default ignores of eslint-config-next:
     ".next/**",
     ".open-next/**",
+    "workers/public-api/dist/**",
+    "workers/public-api/dist-check/**",
+    "workers/public-api/workers/**",
     ".wrangler/**",
     ".pages-static/**",
     "workers/public-api/.dist/**",

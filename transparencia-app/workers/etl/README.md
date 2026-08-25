@@ -23,7 +23,7 @@ La arquitectura final del proyecto prescinde de infraestructura de runtime:
 ## Qué contiene
 
 - `cron.ts` — orquestador del worker (retirado de producción; conservado como referencia).
-- `wrangler.toml` — configuración histórica aislada; la app usa `wrangler.jsonc` en su raíz.
+- `wrangler.toml` — configuración histórica aislada; la API pública usa `workers/public-api/wrangler.jsonc`.
 - `scrapers/` — módulos de ingesta (infoprobidad, congreso-gastos, infolobby,
   mercadopublico, cplt-transparencia). Sus endpoints reales son la referencia canónica
   que `scripts/etl.mjs` replicó en Node puro.

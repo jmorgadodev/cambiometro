@@ -79,6 +79,13 @@ data/lake/projections/v1/*.json
 /data/etl/latest.json
 /data/etl/status.json
 /data/entidades-canonica*.json
+/data/generated/
+/public/data/transferencias/
+/public/data/search-index.json
+/public/data/static-site-manifest.json
+/workers/public-api/dist/
+/workers/public-api/dist-check/
+/workers/public-api/workers/
 !/data/partidos-stats.json
 /data/politicos-evidences*.json
 !/data/politicos-evidences-stats.json

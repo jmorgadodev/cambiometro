@@ -1,6 +1,6 @@
 import type { EvidenceKind, EvidenceRecord, CursorPage } from "@/lib/data-contracts";
 import Link from "@/components/SiteLink";
-import { notFound, redirect } from "next/navigation";
+import { notFound } from "next/navigation";
 import { getEntitiesByIds, getEntity, listEntities, listRecords, listRelations } from "@/lib/data-platform-d1";
 import { presupuestoParaPrograma } from "@/lib/presupuesto";
 import { chilecompraParaComprador } from "@/lib/chilecompra";
@@ -9,7 +9,6 @@ import { getCloudflareContext } from "@opennextjs/cloudflare";
 import { readR2Entity, readR2EntityIndex } from "@/lib/r2-entities";
 import { readR2EvidenceRecords } from "@/lib/r2-records";
 import { personalApoyoEvidenceParaEntidad } from "@/lib/personal-apoyo";
-import { politicoIdFromEntityId } from "@/lib/politico-canonical";
 import PersonEntityProfile from "@/components/PersonEntityProfile";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import EntityEvidenceAccordionExplorer from "@/components/records/EntityEvidenceAccordionExplorer";
@@ -143,12 +142,6 @@ export default async function EntityPage({
 }) {
   const { id } = await params;
 
-  // Redirección permanente si la entidad corresponde a un parlamentario / autoridad con ficha completa en /politico
-  const directPoliticoId = politicoIdFromEntityId(id);
-  if (directPoliticoId) {
-    redirect(`/politico/${directPoliticoId}`);
-  }
-
   const query = await searchParams;
   const selectedId = query.tab ?? "resumen";
   const selected = TABS.find((tab) => tab.id === selectedId) ?? TABS[0];
@@ -156,14 +149,6 @@ export default async function EntityPage({
   const runtime = d1Entity ? null : await runtimeEntity(id);
   const entity = d1Entity ?? runtime?.entity;
   if (!entity) notFound();
-
-  // Si la entidad es de tipo persona y corresponde a un parlamentario, redirigir a su ficha de transparencia
-  if (entity.kind === "person") {
-    const matchedPoliticoId = politicoIdFromEntityId(entity.id, entity.name);
-    if (matchedPoliticoId) {
-      redirect(`/politico/${matchedPoliticoId}`);
-    }
-  }
 
   const platformRecords = d1Entity ? await loadAllRecords(id) : (runtime?.records ?? []);
   const extraRes = await listRecords({ entityId: id, limit: 100 });
@@ -215,9 +200,6 @@ export default async function EntityPage({
   const rawRelations = (d1Entity ? related.data.concat(objectRelated.data) : (runtime?.relations ?? [])).concat(directRelated?.data ?? []);
   const relations = [...new Map(rawRelations.map((r) => [r.id, r])).values()];
   if (entity.kind === "person") {
-    if (query.tab && TABS.some((tab) => tab.id === query.tab)) {
-      redirect(`/entidades/${id}#${selected.id}`);
-    }
     const counterpartIds = [...new Set(relations.map((relation) =>
       relation.fromId === id ? relation.toId : relation.fromId
     ))];

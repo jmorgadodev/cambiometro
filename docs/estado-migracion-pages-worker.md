@@ -1015,3 +1015,46 @@ Worker). No se resolvió seleccionando una versión a ciegas; antes del merge se
 debe crear una integración controlada y repetir tests, build, navegador y
 crawl. Hasta entonces el dominio sigue con OpenNext y no existe Pages
 deployment ID ni Worker version ID nuevos.
+
+### Integración controlada con `main` — 2026-08-25
+
+Se inició un merge sin promoción ni deploy desde `origin/main` hacia
+`feature/tarea-p-v3-static-site`. En los conflictos se conservaron
+explícitamente las versiones de la rama de migración para las rutas API,
+`middleware.ts`, `open-next.config.ts` y la configuración OpenNext del sitio,
+porque son el rollback conocido-bueno. También se restauraron las rutas API
+que `main` había eliminado; esto mantiene disponible la superficie de
+compatibilidad mientras Pages y el Worker se validan por separado.
+
+La ficha de entidad-persona dejó de redirigir automáticamente a una ficha de
+político. La página conserva ahora su ruta canónica y renderiza el perfil
+continuamente, evitando el salto que dejaba fichas estáticas o navegaciones
+incompletas. Se añadió además un entorno Wrangler `staging` aislado, sin ruta
+de producción y con bindings declarativos, para satisfacer la guardia C1 sin
+riesgo de apuntar pruebas locales a producción.
+
+Evidencia local del árbol integrado antes de cerrar el merge:
+
+- `npm test`: 124 archivos y 688 pruebas verdes, incluyendo los 15 tests ETL.
+- `npm run lint -- --quiet`: verde.
+- `npm run pages:build`: 4.647 rutas HTML, 205 políticos, 346 municipios y
+  3.510 entidades; se podaron 23.215 auxiliares RSC.
+- `npm run pages:verify`: 4.645 HTML, 7.061 archivos, sin texto de rutas
+  Next dinámicas y el índice de búsqueda de 13.504.043 bytes.
+- `npm run worker:check`, `npm run worker:test` (4/4) y bundle Worker:
+  28,13 KiB de upload / 8,63 KiB gzip, bajo el límite de 1 MiB.
+- Navegador Playwright: 10/10 rutas principales, navegación
+  `/` → `/politico` → ficha → `/municipalidades` → Maipú, pestañas CPLT y
+  estados vacío/no aplicable, sin spinner, overlay, respuesta fallida ni error
+  de consola.
+- Crawl local frío: 4.643 rutas, cero fallos, cero lentas, máximo 373 ms y
+  p95 de 50 ms.
+- `npm run audit:repo-boundary`: verde; los artefactos generados no entran al
+  repositorio.
+
+Este resultado sólo prueba el checkout integrado. Todavía no existe merge a
+`main`, Pages deployment ID, Worker version ID, cambio de CNAME ni evidencia
+de producción doble pasada. El siguiente agente debe cerrar el merge, subir
+la rama, esperar los checks del commit integrado y repetir la misma evidencia
+en preview antes de cualquier promoción. Si falla un gate, se conserva
+OpenNext y se ejecutan sólo los rollbacks registrados en este documento.

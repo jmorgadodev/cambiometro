@@ -32,5 +32,25 @@
       "simple": { "limit": 120, "period": 60 }
     }
   ],
-  "observability": { "enabled": true }
+  "observability": { "enabled": true },
+  "env": {
+    "staging": {
+      "name": "cambiometro-staging",
+      "workers_dev": true,
+      "routes": [],
+      "r2_buckets": [
+        {
+          "binding": "PUBLIC_DATA",
+          "bucket_name": "transparencia-public-data"
+        }
+      ],
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "transparencia-db-staging-LOCAL",
+          "database_id": "00000000-0000-0000-0000-000000000000"
+        }
+      ]
+    }
+  }
 }

@@ -9,7 +9,7 @@ import { resolve, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..");
-const WRANGLER_PATH = resolve(ROOT, "wrangler.jsonc");
+const WRANGLER_PATH = resolve(ROOT, "workers", "public-api", "wrangler.jsonc");
 
 const ZERO_ID = "00000000-0000-0000-0000-000000000000";
 // Allowlist para futuros IDs de staging remoto explícitamente aprobados (vacía hasta decisión).

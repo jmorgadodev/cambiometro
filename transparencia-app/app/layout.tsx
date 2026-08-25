@@ -147,7 +147,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           <SiteHeader updatedAt={updatedAt} totalRecords={totalRecords} />
         </Suspense>
         <PageEntrance>
-          <main id="contenido-principal">{children}</main>
+          <Suspense fallback={<div className="container-main" aria-hidden="true" />}>
+            <main id="contenido-principal">{children}</main>
+          </Suspense>
         </PageEntrance>
         <Footer updatedAt={updatedAt} totalRecords={totalRecords} />
         <CookieConsent />
