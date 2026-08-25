@@ -4,7 +4,7 @@
 
 El repositorio que se sube es `C:\Users\jorge\Proyectos\cambiometro-public`. El repositorio `cambiometro-audit` no forma parte del producto.
 
-La rama de trabajo de esta corrección nace de `origin/main` (`0632de2`, agosto de 2026). La rama histórica de la migración estática quedó desfasada respecto de `main`; no debe mergearse a ciegas.
+La rama de trabajo de esta corrección nace de `origin/main` (`3be7ad1`, agosto de 2026). La rama histórica de la migración estática quedó desfasada respecto de `main`; no debe mergearse a ciegas.
 
 ## Diagnóstico del falso verde
 
@@ -60,7 +60,7 @@ El build genera `out/`, `public/data/` y artefactos de Worker. Son salidas repro
 
 Ejecutada desde `C:\Users\jorge\Proyectos\cambiometro-public\transparencia-app` en la rama de trabajo de la migración estática:
 
-- `npm test`: 125 archivos y 693 tests aprobados.
+- `npm test`: 125 archivos y 696 tests aprobados.
 - `npm run lint`: 0 errores; quedan 156 warnings preexistentes que no bloquean el build.
 - `npm run coverage:sweep`: todas las métricas canónicas aprobadas, incluyendo 769 votaciones, 155 diputados, 50 senadores, 79 movimientos, 59.361 filas de fixture, 74.142 ChileCompra, 60.523 InfoLobby y 291 informes CGR.
 - `npm run api:size`: Worker de 82.186 bytes, límite 1.000.000.
@@ -74,6 +74,17 @@ Ejecutada desde `C:\Users\jorge\Proyectos\cambiometro-public\transparencia-app` 
 - Los workflows ETL que publican el lake deben ejecutar `data:lake` después de generar proyecciones/subsets y antes de `data:publish`; sin `data/lake/publish-plan.json`, la ingestión puede terminar bien pero la publicación falla antes de R2.
 - Los workflows que usan `data:publish --releases --r2` necesitan `contents: write` acotado al job para crear releases versionados; eso no autoriza commits y el ETL no ejecuta comandos de escritura Git.
 - `uptime-smoke.mjs` prueba home, listados, ficha Kaiser, transferencias, cruces, health y búsqueda. En Actions exige `CAMBIOMETRO_UPTIME_TOKEN` y lo envía únicamente como `X-Cambiometro-Uptime-Token` a `/api/*`, para coincidir con la excepción WAF limitada.
+
+### Recuperación ETL verificada el 25-ago-2026
+
+La cadena de recuperación se ejecutó desde `main`, con un solo publicador a la vez para no mezclar punteros de R2:
+
+- El refresco Pages `32843610649` falló correctamente al exigir un manifiesto estático R2 que todavía no existía; no compiló con datos antiguos de forma silenciosa.
+- InfoLobby primero falló por `data/lake/publish-plan.json` ausente y después por permisos de Releases. Tras corregir ambos guardas, el backfill `32847591253` terminó verde con `60.523` registros y materializó D1 con `historyPolicy: hot_d1_full_r2`.
+- ChileCompra primero quedó bloqueado por `GH_TOKEN` y luego por credenciales Cloudflare faltantes en el publicador. El run `32849138169` terminó verde con `74.142` registros históricos preservados; la API bulk oficial respondió 403 y por eso no se inventaron filas nuevas ni monto de la ventana incremental. `puts: 0` significa que el histórico ya estaba publicado, no que el dataset se haya borrado.
+- Las correcciones de publicación quedaron en `main` mediante los PR #131, #133, #134, #136, #137 y #138. El materializador D1 usa `workers/public-api/wrangler.jsonc` para consultas y `wrangler.d1.jsonc` sólo para migraciones; la configuración dedicada detecta las 13 migraciones reales en `transparencia-app/migrations`.
+
+La ejecución de Contraloría `32849407008` sigue descargando documentos oficiales de forma secuencial; su paso de credenciales, catálogo y workspace ya está verde. No se debe disparar el siguiente ETL hasta conocer su resultado final.
 
 El consolidado municipal CPLT se escribe en `data/lake-cplt/projections/funcionarios-v1`; el rebuild municipal busca esa ruta antes de la compatibilidad histórica `current`. Los directorios `out/`, `.next/`, `dist/`, `public/data/` y los índices/slices generados se limpian después de verificar y están excluidos de Git. Antes de continuar, `git status --short` debe permanecer vacío.
 
