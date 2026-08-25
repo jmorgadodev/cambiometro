@@ -1267,3 +1267,10 @@ estado/datos React y uno usa una expresión externa. Esto acota la próxima
 migración CSP: primero se pueden extraer los 3.170 estilos estáticos; los 116
 restantes requieren convertir colores, porcentajes, transiciones y estilos de
 componentes interactivos a clases/atributos CSS sin romper la hidratación.
+
+También se corrigió `scripts/verify-prod-full.mjs`: el contrato del Worker se
+lee como `payload.data.total` y `payload.data.data[]`, y la verificación ahora
+detecta explícitamente el caso peligroso de nonce con `s-maxage` compartido.
+Así la doble pasada productiva no confundirá una respuesta API válida con un
+fallo de forma, ni permitirá cerrar el incidente de hidratación sin comprobar
+el cache-control real.

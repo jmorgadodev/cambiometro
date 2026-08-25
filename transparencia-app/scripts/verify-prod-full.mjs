@@ -98,6 +98,15 @@ async function verifyProdFull() {
   console.log("1. MÓDULO HOME Y FOOTER COMPACTO (/)");
   const homeRes = await fetchWithRetry(`${PROD_URL}/`, { headers });
   assertCheck("HOME", "HTTP Status 200", homeRes.status === 200);
+  const homeCsp = homeRes.headers.get("content-security-policy") || "";
+  const homeCacheControl = homeRes.headers.get("cache-control") || "";
+  assertCheck("SECURITY", "HTML publica Content-Security-Policy", homeCsp.includes("script-src"));
+  if (homeCsp.includes("nonce-")) {
+    assertCheck("SECURITY", "HTML con nonce no se sirve desde caché compartida", /no-store|private/.test(homeCacheControl), homeCacheControl || "sin Cache-Control");
+  } else {
+    assertCheck("SECURITY", "CSP estática no usa nonce por request", !homeCsp.includes("nonce-"));
+    assertCheck("SECURITY", "CSP estática no permite unsafe-inline", !homeCsp.includes("unsafe-inline"));
+  }
   const homeHtml = (await homeRes.text()).replace(/<!--.*?-->/g, "");
 
   // Version ID header/tag check
@@ -190,8 +199,10 @@ async function verifyProdFull() {
   assertCheck("TRANSFERENCIAS", "API /api/v1/transferencias responde 200", transfApiRes.status === 200);
   if (transfApiRes.ok) {
     const apiJson = await transfApiRes.json();
-    assertCheck("TRANSFERENCIAS", `API retorna total ${transferLabel}`, apiJson.total === transferTotal && transferTotal > 0);
-    assertCheck("TRANSFERENCIAS", "API retorna 10 filas", apiJson.data?.length === 10);
+    const apiPayload = apiJson?.data ?? apiJson;
+    const apiRows = apiPayload?.data ?? apiPayload?.rows ?? [];
+    assertCheck("TRANSFERENCIAS", `API retorna total ${transferLabel}`, apiPayload?.total === transferTotal && transferTotal > 0);
+    assertCheck("TRANSFERENCIAS", "API retorna 10 filas", apiRows.length === 10);
   }
 
   await new Promise((r) => setTimeout(r, 250));
