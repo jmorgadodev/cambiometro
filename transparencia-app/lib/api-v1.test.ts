@@ -9,6 +9,7 @@ function testEnv(transferRows = 59361) {
     },
     async first<T>() {
       if (sql.includes("FROM transferencias_19862")) return { total: transferRows } as T;
+      if (sql.includes("FROM politicos")) return null;
       if (sql.includes("count(*)")) return { total: sql.includes("relations") ? 2 : sql.includes("records") ? 4 : 1 } as T;
       if (sql.includes("WHERE id = ?")) return bindings[0] === "no-existe" ? null : { id: bindings[0], kind: "person", name: "Persona de prueba", identifiers_json: "[]", attributes_json: "{}", source_ids_json: "[]" } as T;
       return null;

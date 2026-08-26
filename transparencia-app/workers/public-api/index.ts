@@ -1,5 +1,7 @@
 import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
 
+import { POLITICOS_SEED } from "../../lib/politicos-source";
+
 export interface Env {
   DB?: D1Database;
   PUBLIC_DATA?: R2Bucket;
@@ -656,7 +658,24 @@ export default {
     if (path.startsWith("/api/v1/politico/")) {
       if (!env.DB) return dbUnavailable();
       const id = decodeURIComponent(path.split("/").at(-1) ?? "");
-      const row = await env.DB.prepare("SELECT * FROM politicos WHERE id = ? LIMIT 1").bind(id).first<JsonRecord>();
+      let row = await env.DB.prepare("SELECT * FROM politicos WHERE id = ? LIMIT 1").bind(id).first<JsonRecord>();
+      // The current ETL publishes canonical people in `entities`; the legacy
+      // `politicos` table may be empty while migrations are being rolled out.
+      // Keep the public legacy contract available from the compact roster,
+      // while records/evidence continue to come from D1/R2 endpoints.
+      if (!row) {
+        const seed = POLITICOS_SEED.find((candidate) => candidate.id === id);
+        if (seed) {
+          row = {
+            id: seed.id,
+            nombre_completo: seed.nombre_completo,
+            cargo: seed.cargo,
+            partido_id: seed.partido_id,
+            distrito_region: seed.distrito_region,
+            numero_distrito: seed.numero_distrito ?? null,
+          };
+        }
+      }
       return row
         ? success(politico(row), { id, snapshot_etl: { generatedAtChile: row.updated_at ?? "Agosto 2026" } }, { self: url.toString() })
         : failure("NOT_FOUND", "Político no encontrado.", 404, { id });
