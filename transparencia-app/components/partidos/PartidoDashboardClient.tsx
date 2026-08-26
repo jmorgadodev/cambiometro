@@ -559,7 +559,7 @@ export default function PartidoDashboardClient({
           const gM = gastos.porPolitico.find((g) => g.politico_id === pol.id);
 
           return (
-            <Link
+            <Link prefetch={false}
               key={pol.id}
               href={`/politico/${getPoliticoSlug(pol)}`}
               className="politician-card"
@@ -808,7 +808,7 @@ export default function PartidoDashboardClient({
                     const badgeText = isSi ? "A favor (Sí)" : isNo ? "En contra (No)" : isAbst ? "Abstención" : "Ausente / No Vota";
 
                     return (
-                      <Link
+                      <Link prefetch={false}
                         key={v.politico_id}
                         href={`/politico/${getPoliticoSlug(v.politico_id)}`}
                         style={{

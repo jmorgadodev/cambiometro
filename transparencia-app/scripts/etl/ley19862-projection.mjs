@@ -1,3 +1,5 @@
+import { filterRecordsForRelease, inferReleaseCutoff } from "./transfer-release-cutoff.mjs";
+
 function textOrNull(value) {
   const text = typeof value === "string" ? value.trim() : "";
   return text || null;
@@ -50,8 +52,13 @@ function aggregate(records, key) {
     }));
 }
 
-export function buildLey19862Projection(records, { generatedAt, sampleSize = 1000 } = {}) {
-  const valid = records
+export function buildLey19862Projection(records, { generatedAt, sampleSize = 1000, registeredThrough } = {}) {
+  const filtered = filterRecordsForRelease(records, { registeredThrough });
+  if (filtered.missingRegisteredAt > 0) {
+    throw new Error(`LEY_19862_REGISTERED_AT_MISSING: ${filtered.missingRegisteredAt}`);
+  }
+  const effectiveRegisteredThrough = filtered.registeredThrough ?? inferReleaseCutoff(records);
+  const valid = filtered.records
     .map((record) => record?.data ?? record)
     .filter(
       (record) =>
@@ -85,6 +92,9 @@ export function buildLey19862Projection(records, { generatedAt, sampleSize = 100
     source: {
       id: "ley-19862",
       method: "official-monthly-csv",
+      registeredThrough: effectiveRegisteredThrough,
+      sourceRows: records.length,
+      excludedAfterCutoff: filtered.excludedAfterCutoff,
       periods: Object.keys(byYear).sort(),
     },
     kpis: {

@@ -25,6 +25,15 @@ describe("automatizacion CPLT nacional", () => {
     expect(etl).toContain("municipalidad\\b|^municipio");
   });
 
+  it("usa el host oficial canónico y conserva fallback ante cambios del host legado", () => {
+    const etl = readFileSync(resolve(process.cwd(), "scripts/etl/stream-remote-personal.mjs"), "utf8");
+    expect(etl).toContain("https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos");
+    expect(etl).toContain("https://www.cplt.cl/transparencia_activa/datoabierto/archivos");
+    expect(etl).toContain("RETRYABLE_STATUSES");
+    expect(etl).toContain('Accept: "text/csv,*/*"');
+    expect(etl).toContain("CPLT_DOWNLOAD_FAILED");
+  });
+
   it("usa releases mensuales para no superar 1.000 assets", () => {
     const publisher = readFileSync(resolve(process.cwd(), "scripts/publish-cplt-projections.mjs"), "utf8");
     expect(publisher).toContain("latest.slice(0, 7)");
@@ -35,6 +44,13 @@ describe("automatizacion CPLT nacional", () => {
     const publisher = readFileSync(resolve(process.cwd(), "scripts/publish-data-lake.mjs"), "utf8");
     expect(publisher).toContain('asset.key.endsWith("/manifest.json")');
     expect(publisher).toContain("for (const manifest of activationManifests)");
+  });
+
+  it("hidrata el respaldo estático CPLT desde el manifiesto R2 antes de Pages", () => {
+    const pagesWorkflow = readFileSync(resolve(process.cwd(), "../.github/workflows/pages-static-refresh.yml"), "utf8");
+    const packageJson = readFileSync(resolve(process.cwd(), "package.json"), "utf8");
+    expect(packageJson).toContain('"data:hydrate:cplt-static": "node scripts/hydrate-cplt-static-fallback.mjs"');
+    expect(pagesWorkflow).toContain("npm run data:hydrate:cplt-static -- --required");
   });
 
   it("no genera un indice nacional que exceda el limite de objeto R2", () => {

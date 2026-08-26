@@ -21,6 +21,11 @@ on:
         type: boolean
         required: false
         default: false
+      record_pages_deployment:
+        description: "Registrar el deployment productivo más reciente sin reconstruir"
+        type: boolean
+        required: false
+        default: false
       preview_branch:
         description: "Rama Pages de preview; vacío para no publicar preview"
         required: false
@@ -35,7 +40,7 @@ permissions:
 
 jobs:
   build-verify-publish:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: (github.event_name == 'workflow_dispatch' && inputs.record_pages_deployment != true) || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -65,12 +70,23 @@ jobs:
           mkdir -p data/lake/catalog/v1
           npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
 
-      - name: Hidratar entradas estáticas versionadas desde R2
+      - name: Hidratar respaldo estático CPLT desde R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:hydrate:cplt-static -- --required
+
+      - name: Hidratar entradas estáticas completas desde R2
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: npm run data:hydrate:static -- --required --required-all
+
+      - name: Verificar fallback municipal completo
+        working-directory: transparencia-app
+        run: npm run check:static-input-fallback
 
       - name: Hidratar universo completo y validar checksums
         working-directory: transparencia-app
@@ -116,4 +132,91 @@ jobs:
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
-        run: npx wrangler pages deploy out --project-name cambiometro --commit-message "Static refresh ${GITHUB_SHA}"
+        # El workflow ejecuta checkout en detached HEAD. Sin --branch,
+        # Wrangler crea el alias "head" y no reemplaza el deployment
+        # canónico de Pages; la rama productiva debe ser explícita.
+        run: npx wrangler pages deploy out --project-name cambiometro --branch main --commit-hash "$GITHUB_SHA" --commit-message "Static refresh ${GITHUB_SHA}"
+
+      - name: Registrar deployment Pages productivo y rollback
+        if: ${{ success() && ((github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main') || inputs.publish_pages == true) }}
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+          PAGES_COMMIT_SHA: ${{ github.sha }}
+        run: |
+          curl --fail --silent --show-error \
+            --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/cambiometro/deployments" \
+            > pages-deployments.json
+          node -e '
+            const fs = require("node:fs");
+            const payload = JSON.parse(fs.readFileSync("pages-deployments.json", "utf8"));
+            const deployments = Array.isArray(payload.result) ? payload.result : [];
+            const matching = deployments.filter((item) => item.deployment_trigger?.metadata?.commit_hash === process.env.PAGES_COMMIT_SHA);
+            const production = deployments.filter((item) => item.environment === "production" && item.is_skipped !== true);
+            const candidates = production.length > 0 ? production : deployments;
+            const deployment = matching[0] ?? [...candidates].sort((a, b) => Date.parse(b.created_on ?? 0) - Date.parse(a.created_on ?? 0))[0];
+            if (!deployment?.id) throw new Error(`No se encontró deployment Pages productivo para ${process.env.PAGES_COMMIT_SHA}`);
+            if (matching.length === 0) console.warn(`No hubo match por commit; se registra el deployment productivo más reciente (${deployment.id})`);
+            console.log(`Pages deployment ID: ${deployment.id}`);
+            console.log(`Pages deployment URL: ${deployment.url ?? "n/a"}`);
+            console.log(`Rollback exacto: npm run pages:rollback -- ${deployment.id}`);
+          '
+
+      - name: Guardar metadata del deployment Pages
+        if: ${{ success() && ((github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main') || inputs.publish_pages == true) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-production-deployment-${{ github.sha }}
+          path: transparencia-app/pages-deployments.json
+          if-no-files-found: error
+          retention-days: 30
+
+  record-pages-production-deployment:
+    if: github.event_name == 'workflow_dispatch' && inputs.record_pages_deployment == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Instalar Wrangler
+        run: npm ci
+        working-directory: transparencia-app
+
+      - name: Registrar deployment Pages productivo existente
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+        run: |
+          curl --fail --silent --show-error \
+            --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/cambiometro/deployments" \
+            > pages-deployments.json
+          node -e '
+            const fs = require("node:fs");
+            const payload = JSON.parse(fs.readFileSync("pages-deployments.json", "utf8"));
+            const deployments = Array.isArray(payload.result) ? payload.result : [];
+            const production = deployments.filter((item) => item.environment === "production" && item.is_skipped !== true);
+            const candidates = production.length > 0 ? production : deployments;
+            const deployment = [...candidates].sort((a, b) => Date.parse(b.created_on ?? 0) - Date.parse(a.created_on ?? 0))[0];
+            if (!deployment?.id) throw new Error("No se encontró deployment Pages productivo");
+            console.log(`Pages deployment ID: ${deployment.id}`);
+            console.log(`Pages deployment URL: ${deployment.url ?? "n/a"}`);
+            console.log(`Rollback exacto: npm run pages:rollback -- ${deployment.id}`);
+          '
+
+      - name: Guardar metadata del deployment Pages existente
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-production-deployment-existing-${{ github.sha }}
+          path: transparencia-app/pages-deployments.json
+          if-no-files-found: error
+          retention-days: 30

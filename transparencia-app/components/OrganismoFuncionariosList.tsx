@@ -8,6 +8,7 @@ import {
   getInitials,
 } from "@/lib/estamentos-format";
 import { classifyFuncionarioRecord, type AnomaliaInfo } from "@/lib/funcionarios-quality";
+import { queryStaticFuncionarios } from "@/lib/funcionarios-static";
 
 function formatCLP(n: number) {
   return new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(n);
@@ -67,6 +68,8 @@ export default function OrganismoFuncionariosList({
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [sourceStatus, setSourceStatus] = useState<"api" | "static" | "static-fallback" | "unavailable">("api");
+  const [retryNonce, setRetryNonce] = useState(0);
 
   // Calidad de datos forense (Sección 1 y 2)
   const [observadosCount, setObservadosCount] = useState(0);
@@ -90,9 +93,28 @@ export default function OrganismoFuncionariosList({
 
   // Fetch data
   useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+
+    async function fetchJson(url: string, timeoutMs: number) {
+      const requestController = new AbortController();
+      const onLifetimeAbort = () => requestController.abort();
+      controller.signal.addEventListener("abort", onLifetimeAbort, { once: true });
+      const timer = window.setTimeout(() => requestController.abort(), timeoutMs);
+      try {
+        const response = await fetch(url, { signal: requestController.signal, cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
+      } finally {
+        window.clearTimeout(timer);
+        controller.signal.removeEventListener("abort", onLifetimeAbort);
+      }
+    }
+
     async function fetchData() {
       setIsLoading(true);
       setErrorMessage(null);
+      setSourceStatus("api");
       try {
         const params = new URLSearchParams({
           query: debouncedSearch,
@@ -106,21 +128,61 @@ export default function OrganismoFuncionariosList({
         if (periodo && periodo !== "Todos") {
           params.set("periodo", periodo);
         }
-        const res = await fetch(`/api/funcionarios?${params.toString()}`);
-        if (!res.ok) throw new Error("API Error");
-        const result = await res.json();
-        setData(result.data);
-        setTotal(result.meta.total);
-        setTotalHeadcount(result.meta.totalHeadcount || result.meta.stats?.totalMuni || result.meta.total);
-        setTotalPages(result.meta.totalPages);
-        setObservadosCount(result.meta.observadosCount || result.meta.stats?.observadosCount || 0);
-        setSinPagoCount(result.meta.sinPagoCount || result.meta.stats?.sinPagoCount || 0);
-        setMicroMontoCount(result.meta.microMontoCount || result.meta.stats?.microMontoCount || 0);
-        setSueldoCompletoCount(result.meta.sueldoCompletoCount || result.meta.stats?.totalValidos || 0);
-        setCausasBreakdown(result.meta.causasBreakdown || {});
-        setAnomaliasList(result.meta.anomaliasSample || []);
-        setSinPagoList(result.meta.sinPagoSample || []);
-      } catch {
+        const staticManifest = await fetchJson("/data/funcionarios/manifest.json", 3_000).catch(() => null);
+        const staticEntry = staticManifest?.files?.find?.((entry: { id?: string; rows?: number; chunks?: Array<{ path?: string }> }) => entry.id === organismoId && Number(entry.rows) > 0);
+        const unavailableEntry = staticManifest?.unavailableMunicipalities?.find?.((entry: { id?: string; status?: string; recordCount?: number }) => entry.id === organismoId);
+        const readStatic = async () => {
+          const chunkPaths = Array.isArray(staticEntry?.chunks)
+            ? staticEntry.chunks.map((chunk: { path?: string }) => chunk.path).filter((path: unknown): path is string => typeof path === "string" && path.length > 0)
+            : [];
+          const paths = chunkPaths.length > 0
+            ? chunkPaths
+            : [`/data/funcionarios/${encodeURIComponent(organismoId)}.json`];
+          const payloads = await Promise.all(paths.map((path: string) => fetchJson(path, 8_000)));
+          const staticResponse = payloads.flat();
+          if (!payloads.every(Array.isArray)) throw new Error("STATIC_PAYROLL_INVALID");
+          return queryStaticFuncionarios(staticResponse, {
+            query: debouncedSearch,
+            contrato: contratoFilter,
+            estamento: deptFilter,
+            sortBy,
+            periodo: periodo ?? undefined,
+            page,
+            limit: itemsPerPage,
+          });
+        };
+        let result;
+        if (staticEntry) {
+          try {
+            result = await readStatic();
+            if (active) setSourceStatus("static");
+          } catch {
+            result = await fetchJson(`/api/funcionarios?${params.toString()}`, 3_000);
+            if (active) setSourceStatus("api");
+          }
+        } else {
+          try {
+            result = await fetchJson(`/api/funcionarios?${params.toString()}`, 3_000);
+          } catch {
+            if (unavailableEntry) throw new Error("STATIC_PAYROLL_NOT_PUBLISHED");
+            result = await readStatic();
+            if (active) setSourceStatus("static-fallback");
+          }
+        }
+        if (!active) return;
+        setData(result.data ?? []);
+        setTotal(result.meta?.total ?? 0);
+        setTotalHeadcount(result.meta?.totalHeadcount || result.meta?.stats?.totalMuni || result.meta?.total || 0);
+        setTotalPages(result.meta?.totalPages ?? 1);
+        setObservadosCount(result.meta?.observadosCount || result.meta?.stats?.observadosCount || 0);
+        setSinPagoCount(result.meta?.sinPagoCount || result.meta?.stats?.sinPagoCount || 0);
+        setMicroMontoCount(result.meta?.microMontoCount || result.meta?.stats?.microMontoCount || 0);
+        setSueldoCompletoCount(result.meta?.sueldoCompletoCount || result.meta?.stats?.totalValidos || 0);
+        setCausasBreakdown(result.meta?.causasBreakdown || {});
+        setAnomaliasList(result.meta?.anomaliasSample || []);
+        setSinPagoList(result.meta?.sinPagoSample || []);
+      } catch (error) {
+        if (!active || controller.signal.aborted) return;
         setData([]);
         setTotal(0);
         setTotalHeadcount(0);
@@ -132,13 +194,22 @@ export default function OrganismoFuncionariosList({
         setCausasBreakdown({});
         setAnomaliasList([]);
         setSinPagoList([]);
-        setErrorMessage("La nómina oficial no está disponible temporalmente.");
+        setSourceStatus("unavailable");
+        setErrorMessage(error instanceof Error && error.message === "STATIC_PAYROLL_INVALID"
+          ? "La proyección local de esta municipalidad no tiene un formato oficial válido."
+          : error instanceof Error && error.message === "STATIC_PAYROLL_NOT_PUBLISHED"
+            ? "La fuente oficial reportó esta municipalidad, pero no publicó registros de nómina para el corte disponible."
+            : "La nómina oficial no está disponible temporalmente.");
       } finally {
-        setIsLoading(false);
+        if (active) setIsLoading(false);
       }
     }
     fetchData();
-  }, [debouncedSearch, organismoId, contratoFilter, deptFilter, sortBy, page, periodo]);
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [debouncedSearch, organismoId, contratoFilter, deptFilter, sortBy, page, periodo, retryNonce]);
 
   // Construcción del texto de causas para la Caja Ciudadana (§2.3)
   const causasTexto = [
@@ -369,6 +440,16 @@ export default function OrganismoFuncionariosList({
 
         {totalPages > 1 && <span>Página {page} de {totalPages}</span>}
       </div>
+      {sourceStatus === "static-fallback" && (
+        <div className="card-flat" role="status" style={{ marginBottom: "1rem", padding: "0.75rem 1rem", fontSize: "0.78rem", color: "var(--text-muted)" }}>
+          El Worker API no respondió; se está mostrando la última proyección oficial estática disponible para esta municipalidad.
+        </div>
+      )}
+      {sourceStatus === "static" && (
+        <div role="status" style={{ marginBottom: "1rem", fontSize: "0.74rem", color: "var(--text-subtle)" }}>
+          Fuente: proyección oficial estática generada en el último build.
+        </div>
+      )}
 
       {/* Grilla Principal */}
       {isLoading ? (
@@ -379,6 +460,9 @@ export default function OrganismoFuncionariosList({
         <div className="card" role="status" style={{ textAlign: "center", padding: "2.5rem" }}>
           <h3 style={{ margin: 0, color: "var(--text-primary)" }}>Nómina no disponible</h3>
           <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginTop: "0.5rem" }}>{errorMessage}</p>
+          <button type="button" className="btn btn-secondary" onClick={() => setRetryNonce((value) => value + 1)}>
+            Reintentar
+          </button>
         </div>
       ) : data.length === 0 ? (
         <div style={{ padding: "3rem", textAlign: "center", color: "var(--text-muted)" }}>

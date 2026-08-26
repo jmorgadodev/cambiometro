@@ -25,6 +25,11 @@ on:
         type: string
         required: false
         default: ""
+      deploy_staging:
+        description: "Desplegar Worker preview de solo lectura con D1/R2 existentes, sin tráfico productivo"
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   group: public-api-worker-${{ github.ref }}
@@ -137,3 +142,32 @@ jobs:
             --message "Promote ${WORKER_VERSION_ID}" \
             --yes
           echo "Rollback exacto: npx wrangler rollback ${WORKER_VERSION_ID} --name cambiometro-public-api"
+
+  staging:
+    name: Desplegar Worker preview sin ruta productiva
+    needs: validate
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy_staging == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+      - name: Instalar dependencias
+        working-directory: transparencia-app
+        run: npm ci
+      - name: Desplegar preview sin ruta productiva
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          npx wrangler deploy \
+            --config workers/public-api/wrangler.jsonc \
+            --env preview \
+            --message "API preview ${GITHUB_SHA}"

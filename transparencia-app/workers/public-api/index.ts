@@ -1,9 +1,12 @@
 import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
 
+import { POLITICOS_SEED } from "../../lib/politicos-source";
+
 export interface Env {
   DB?: D1Database;
   PUBLIC_DATA?: R2Bucket;
   TURNSTILE_SECRET_KEY?: string;
+  READ_ONLY_PREVIEW?: string;
   EXPENSIVE_API_RATE_LIMITER?: { limit(input: { key: string }): Promise<{ success: boolean }> };
 }
 
@@ -120,6 +123,7 @@ async function health(env: Env) {
   const d1 = Boolean(env.DB);
   const r2 = Boolean(manifest);
   let d1TransferRows = 0;
+  let d1ReleaseChecksum: string | null = null;
   if (d1) {
     try {
       const result = await env.DB?.prepare("SELECT count(*) AS total FROM transferencias_19862").first<{ total: number }>();
@@ -127,19 +131,35 @@ async function health(env: Env) {
     } catch {
       d1TransferRows = 0;
     }
+    try {
+      const release = await env.DB?.prepare("SELECT checksum_sha256 FROM transferencias_19862_release WHERE singleton = 1").first<{ checksum_sha256: string }>();
+      d1ReleaseChecksum = release?.checksum_sha256 ?? null;
+    } catch {
+      d1ReleaseChecksum = null;
+    }
   }
-  const d1Consistent = Boolean(d1 && manifest && d1TransferRows === manifest.totalRows);
-  const ok = d1 && r2 && d1Consistent;
-  return success({
+  // Transferencias has an intentional R2 fallback. The production D1 is
+  // already close to its storage limit, so the complete release must not be
+  // duplicated there just to make health green. A missing/stale optional
+  // projection is reported, while the canonical R2 release remains healthy.
+  const d1Consistent = Boolean(d1 && manifest && d1TransferRows === manifest.totalRows && d1ReleaseChecksum === manifest.checksumSha256);
+  const ok = Boolean(r2);
+  return json({
+    data: {
     ok,
     service: "cambiometro-public-api",
     d1,
     r2,
     d1TransferRows,
     d1Consistent,
+    d1ReleaseChecksum,
+    transferSource: d1Consistent ? "d1" : "r2",
     transferRows: manifest?.totalRows ?? 0,
     generatedAt: manifest?.generatedAt ?? null,
-  }, {}, {}, ok ? 200 : 503);
+    },
+    meta: {},
+    links: {},
+  }, { status: ok ? 200 : 503, headers: { "Cache-Control": "no-store" } });
 }
 
 function transferApiRow(row: JsonRecord) {
@@ -167,24 +187,36 @@ async function listTransferenciasFromR2(requestUrl: URL, env: Env) {
   }
   const rawPage = Number(requestUrl.searchParams.get("page") ?? 1);
   const rawLimit = Number(requestUrl.searchParams.get("limit") ?? 10);
-  const page = Number.isInteger(rawPage) ? Math.max(1, Math.min(rawPage, manifest.totalPages)) : 1;
   const limit = Number.isInteger(rawLimit) ? Math.max(1, Math.min(rawLimit, 100)) : 10;
+  const requestedPage = Number.isInteger(rawPage) ? Math.max(1, rawPage) : 1;
   const search = (requestUrl.searchParams.get("q") ?? requestUrl.searchParams.get("search") ?? "").trim().toLocaleLowerCase();
   const year = (requestUrl.searchParams.get("year") ?? "").trim();
   const emisor = (requestUrl.searchParams.get("emisor") ?? "").trim().toLocaleLowerCase();
   const sort = requestUrl.searchParams.get("sort") === "fecha" ? "fecha" : "monto";
 
   if (!search && (!year || year === "Todos") && (!emisor || emisor === "Todos") && sort === "monto") {
-    const pageInfo = manifest.pages[page - 1];
-    const rows = await r2Json<JsonRecord[]>(env.PUBLIC_DATA, pageInfo.key);
-    if (!rows) return failure("DATASET_UNAVAILABLE", "El chunk de transferencias no está disponible.", 503);
-    const data = rows.map(transferApiRow);
+    const totalPages = Math.max(1, Math.ceil(manifest.totalRows / limit));
+    const page = Math.min(requestedPage, totalPages);
+    const startIndex = (page - 1) * limit;
+    const endIndex = Math.min(startIndex + limit, manifest.totalRows);
+    const firstPhysicalPage = Math.floor(startIndex / manifest.pageSize) + 1;
+    const lastPhysicalPage = Math.floor((endIndex - 1) / manifest.pageSize) + 1;
+    const physicalPages = await Promise.all(
+      manifest.pages.slice(firstPhysicalPage - 1, lastPhysicalPage).map(async (pageInfo) => {
+        const rows = await r2Json<JsonRecord[]>(env.PUBLIC_DATA, pageInfo.key);
+        if (!rows) throw new Error(`R2_TRANSFER_PAGE_MISSING:${pageInfo.page}`);
+        return rows;
+      }),
+    ).catch(() => null);
+    if (!physicalPages) return failure("DATASET_UNAVAILABLE", "El chunk de transferencias no está disponible.", 503);
+    const offsetInPhysicalRows = startIndex - (firstPhysicalPage - 1) * manifest.pageSize;
+    const data = physicalPages.flat().slice(offsetInPhysicalRows, offsetInPhysicalRows + limit).map(transferApiRow);
     return json({
       data,
       total: manifest.totalRows,
       page,
       limit,
-      totalPages: manifest.totalPages,
+      totalPages,
       kpis: {
         total_monto_clp: manifest.expected?.totalMontoClp ?? 0,
         total_transfers: manifest.totalRows,
@@ -209,6 +241,7 @@ async function listTransferenciasFromR2(requestUrl: URL, env: Env) {
     ? String(right.d ?? "").localeCompare(String(left.d ?? "")) || right.m - left.m
     : right.m - left.m || String(right.d ?? "").localeCompare(String(left.d ?? "")));
   const total = selected.length;
+  const page = Math.min(requestedPage, Math.max(1, Math.ceil(total / limit)));
   const selectedPage = selected.slice((page - 1) * limit, page * limit);
   const pageNumbers = [...new Set(selectedPage.map((entry) => entry.p))];
   const chunks = await Promise.all(pageNumbers.map(async (pageNumber) => {
@@ -501,6 +534,8 @@ async function listTransferencias(requestUrl: URL, env: Env) {
   const sort = requestUrl.searchParams.get("sort") === "fecha" ? "fecha" : "monto_clp";
   const order = requestUrl.searchParams.get("order") === "asc" ? "ASC" : "DESC";
   if (!env.DB) return listTransferenciasFromR2(requestUrl, env);
+  const manifest = await transferManifest(env);
+  if (!manifest) return listTransferenciasFromR2(requestUrl, env);
   const clauses: string[] = [];
   const bindings: (string | number)[] = [];
   if (year && year !== "Todos") { clauses.push("periodo = ?"); bindings.push(year); }
@@ -512,6 +547,9 @@ async function listTransferencias(requestUrl: URL, env: Env) {
   }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
   try {
+    const universe = await env.DB.prepare("SELECT COUNT(*) AS total FROM transferencias_19862").first<{ total: number }>();
+    const release = await env.DB.prepare("SELECT checksum_sha256 FROM transferencias_19862_release WHERE singleton = 1").first<{ checksum_sha256: string }>();
+    if (Number(universe?.total ?? 0) !== manifest.totalRows || release?.checksum_sha256 !== manifest.checksumSha256) return listTransferenciasFromR2(requestUrl, env);
     const count = await env.DB.prepare(`SELECT COUNT(*) AS total FROM transferencias_19862 ${where}`).bind(...bindings).first<{ total: number }>();
     const total = Number(count?.total ?? 0);
     const offset = (page - 1) * limit;
@@ -532,8 +570,7 @@ async function listTransferencias(requestUrl: URL, env: Env) {
       municipality: row.comuna ?? null,
     }));
     if (total > 0 || data.length > 0) {
-      const manifest = await transferManifest(env);
-      const kpis = manifest?.expected
+      const kpis = manifest.expected
         ? { total_monto_clp: manifest.expected.totalMontoClp ?? 0, total_transfers: manifest.totalRows, total_receptores: manifest.expected.totalReceptores ?? 0, total_emisores: manifest.expected.totalEmisores ?? 0 }
         : { total_monto_clp: 0, total_transfers: total, total_receptores: 0, total_emisores: 0 };
       return json({ data, total, page, limit, totalPages: Math.max(1, Math.ceil(total / limit)), kpis, by_year: {}, sourceStatus: "d1" }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
@@ -573,6 +610,57 @@ async function exportData(requestUrl: URL, env: Env) {
   return new Response(`${header}\n${body}`, { headers: { "Content-Type": "text/csv; charset=utf-8", "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200", "Content-Disposition": "attachment; filename=transparencia_chile.csv", "X-Content-Type-Options": "nosniff" } });
 }
 
+async function listSources(requestUrl: URL, env: Env) {
+  if (!env.DB) return dbUnavailable();
+  try {
+    const rows = await env.DB.prepare(`
+      SELECT
+        sources.*,
+        COALESCE((SELECT COUNT(*) FROM records WHERE records.source_id = sources.id), 0) AS materialized_count,
+        source_state.status AS state_status,
+        source_state.record_count AS state_record_count,
+        source_state.checksum_sha256 AS state_checksum_sha256,
+        source_state.generated_at AS state_generated_at,
+        source_state.last_success_at AS state_last_success_at,
+        source_state.published_version AS state_published_version
+      FROM sources
+      LEFT JOIN source_state ON source_state.source_id = sources.id
+      ORDER BY sources.id
+    `).all<JsonRecord>();
+    const data = (rows.results ?? []).map((row) => {
+      const materializedCount = Number(row.materialized_count ?? 0);
+      const stateCount = Number(row.state_record_count ?? 0);
+      const stateStatus = String(row.state_status ?? "");
+      const projectionOnly = row.id === "personal-apoyo";
+      const archiveOnly = stateStatus === "archive_only";
+      const recordCount = archiveOnly || projectionOnly ? Math.max(materializedCount, stateCount) : materializedCount;
+      const status = archiveOnly ? "partial" : recordCount > 0 ? "connected" : "unavailable";
+      return {
+        ...row,
+        materialized_count: undefined,
+        state_status: undefined,
+        state_record_count: undefined,
+        state_checksum_sha256: undefined,
+        state_generated_at: undefined,
+        state_last_success_at: undefined,
+        state_published_version: undefined,
+        recordCount,
+        status,
+        checksumSha256: row.state_checksum_sha256 ?? null,
+        lastUpdated: row.state_last_success_at ?? row.state_generated_at ?? null,
+        publishedVersion: row.state_published_version ?? null,
+        statusDetail: archiveOnly
+          ? "Histórico íntegro en R2; se consulta bajo demanda para preservar capacidad en D1."
+          : recordCount > 0 ? "Datos cargados desde D1" : "Sin datos publicados.",
+      };
+    });
+    return success(data, { total: data.length }, { self: requestUrl.toString() });
+  } catch {
+    const rows = await env.DB.prepare("SELECT * FROM sources ORDER BY id").all<JsonRecord>();
+    return success((rows.results ?? []).map((row) => ({ ...row, recordCount: 0, status: "unavailable" })), { total: rows.results?.length ?? 0 }, { self: requestUrl.toString() });
+  }
+}
+
 function svgResponse(title: string) {
   const safe = title.replace(/[<&>\"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" })[char] ?? char);
   const body = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"><rect width="1200" height="630" fill="#0d1929"/><text x="80" y="250" fill="#63c5da" font-family="Arial,sans-serif" font-size="34" font-weight="700">EL CAMBIÓMETRO</text><text x="80" y="330" fill="#f8fafc" font-family="Arial,sans-serif" font-size="46" font-weight="700">${safe}</text></svg>`;
@@ -591,6 +679,7 @@ function validateOfficials(url: URL) {
 }
 
 async function requestSubmission(request: Request, env: Env) {
+  if (env.READ_ONLY_PREVIEW === "1") return failure("READ_ONLY_PREVIEW", "El preview remoto sólo permite lecturas.", 503);
   if (!env.DB) return dbUnavailable();
   let body: JsonRecord;
   try { body = await request.json() as JsonRecord; } catch { return failure("INVALID_BODY", "El cuerpo debe ser JSON válido.", 400); }
@@ -631,9 +720,7 @@ export default {
       return health(env);
     }
     if (path === "/api/v1/sources") {
-      if (!env.DB) return dbUnavailable();
-      const rows = await env.DB.prepare("SELECT * FROM sources ORDER BY id").all<JsonRecord>();
-      return success(rows.results ?? [], { total: rows.results?.length ?? 0 }, { self: url.toString() });
+      return listSources(url, env);
     }
     if (path === "/api/v1/export") {
         const limited = await rateLimit(request, env, "export");
@@ -647,7 +734,24 @@ export default {
     if (path.startsWith("/api/v1/politico/")) {
       if (!env.DB) return dbUnavailable();
       const id = decodeURIComponent(path.split("/").at(-1) ?? "");
-      const row = await env.DB.prepare("SELECT * FROM politicos WHERE id = ? LIMIT 1").bind(id).first<JsonRecord>();
+      let row = await env.DB.prepare("SELECT * FROM politicos WHERE id = ? LIMIT 1").bind(id).first<JsonRecord>();
+      // The current ETL publishes canonical people in `entities`; the legacy
+      // `politicos` table may be empty while migrations are being rolled out.
+      // Keep the public legacy contract available from the compact roster,
+      // while records/evidence continue to come from D1/R2 endpoints.
+      if (!row) {
+        const seed = POLITICOS_SEED.find((candidate) => candidate.id === id);
+        if (seed) {
+          row = {
+            id: seed.id,
+            nombre_completo: seed.nombre_completo,
+            cargo: seed.cargo,
+            partido_id: seed.partido_id,
+            distrito_region: seed.distrito_region,
+            numero_distrito: seed.numero_distrito ?? null,
+          };
+        }
+      }
       return row
         ? success(politico(row), { id, snapshot_etl: { generatedAtChile: row.updated_at ?? "Agosto 2026" } }, { self: url.toString() })
         : failure("NOT_FOUND", "Político no encontrado.", 404, { id });

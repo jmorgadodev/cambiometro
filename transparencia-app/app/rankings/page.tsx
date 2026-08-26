@@ -102,7 +102,7 @@ export default function RankingsPage() {
                           <td>{c.party ?? "—"}</td>
                           <td style={{ fontFamily: "monospace" }}>{n(c.votes_total)}</td>
                           <td>{c.elected ? "✓" : "—"}</td>
-                          <td><Link className="data-link" href={`/cruces?q=${encodeURIComponent(c.name)}`}>Buscar ficha ↗</Link></td>
+                          <td><Link prefetch={false} className="data-link" href={`/cruces?q=${encodeURIComponent(c.name)}`}>Buscar ficha ↗</Link></td>
                         </tr>
                       ))
                     ) : (

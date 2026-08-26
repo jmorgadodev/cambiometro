@@ -8,7 +8,9 @@ function testEnv(transferRows = 59361) {
       return statement(sql, values);
     },
     async first<T>() {
+      if (sql.includes("FROM transferencias_19862_release")) return { checksum_sha256: "release-checksum" } as T;
       if (sql.includes("FROM transferencias_19862")) return { total: transferRows } as T;
+      if (sql.includes("FROM politicos")) return null;
       if (sql.includes("count(*)")) return { total: sql.includes("relations") ? 2 : sql.includes("records") ? 4 : 1 } as T;
       if (sql.includes("WHERE id = ?")) return bindings[0] === "no-existe" ? null : { id: bindings[0], kind: "person", name: "Persona de prueba", identifiers_json: "[]", attributes_json: "{}", source_ids_json: "[]" } as T;
       return null;
@@ -82,22 +84,40 @@ function officialsR2Env() {
 }
 
 describe("API canónica v1", () => {
-  it("expone health 200 sólo cuando D1 y el release R2 están disponibles", async () => {
+  it("expone health 200 cuando el release R2 canónico está disponible", async () => {
     const env = { ...(testEnv() as object), ...(transferR2Env() as object) } as never;
     const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, transferRows: 59361 });
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, transferRows: 59361, d1ReleaseChecksum: "release-checksum", transferSource: "d1" });
   });
 
-  it("mantiene health en 503 cuando D1 y el manifest R2 no comparten universo", async () => {
+  it("mantiene health operativo y marca D1 inconsistente cuando R2 tiene el release canónico", async () => {
     const env = { ...(testEnv(59360) as object), ...(transferR2Env() as object) } as never;
     const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
     const payload = await response.json();
 
-    expect(response.status).toBe(503);
-    expect(payload.data).toMatchObject({ ok: false, d1: true, r2: true, d1TransferRows: 59360, transferRows: 59361, d1Consistent: false });
+    expect(response.status).toBe(200);
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 59360, transferRows: 59361, d1Consistent: false, transferSource: "r2" });
+  });
+
+  it("mantiene health operativo cuando la proyección D1 opcional aún no existe", async () => {
+    const env = {
+      ...(transferR2Env() as object),
+      DB: {
+        prepare: (sql: string) => {
+          if (sql.includes("FROM transferencias_19862")) throw new Error("no such table: transferencias_19862");
+          throw new Error(`Unexpected health query: ${sql}`);
+        },
+      },
+    } as never;
+    const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 0, d1Consistent: false, transferSource: "r2", transferRows: 59361 });
   });
 
   it("devuelve 503 estructurado cuando el manifest R2 está corrupto", async () => {
@@ -109,6 +129,17 @@ describe("API canónica v1", () => {
 
     expect(response.status).toBe(503);
     expect(payload.data).toMatchObject({ ok: false, d1: true, r2: false, transferRows: 0 });
+  });
+
+  it("bloquea escrituras D1 en el perfil remoto de preview", async () => {
+    const response = await api.fetch(new Request("https://example.test/api/v1/requests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tipo: "informacion", email: "preview@example.test", descripcion: "Solicitud de prueba del preview." }),
+    }), { ...(testEnv() as object), READ_ONLY_PREVIEW: "1" } as never);
+
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ error: { code: "READ_ONLY_PREVIEW" } });
   });
 
   it("acepta entity_id como ancla bidireccional de relaciones", () => {
@@ -204,6 +235,46 @@ describe("API canónica v1", () => {
     expect(payload.data[0].receiver_name).toBe("VIÑA BUS S.A.");
     expect(payload.kpis.total_transfers).toBe(59361);
     expect(payload.sourceStatus).toBe("complete");
+  });
+
+  it("respeta limit y paginación lógica aunque R2 use chunks de 50 filas", async () => {
+    const response = await api.fetch(new Request("https://example.test/api/v1/transferencias?page=1&limit=1"), transferR2Env());
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toHaveLength(1);
+    expect(payload.data[0].id).toBe("tr-1");
+    expect(payload.limit).toBe(1);
+    expect(payload.totalPages).toBe(59361);
+  });
+
+  it("ignora D1 desactualizada y conserva el universo R2 como fuente coherente", async () => {
+    const staleRow = {
+      id: "stale-1",
+      fecha: "2025-01-01",
+      periodo: "2025",
+      emisor_nombre: "D1 desactualizada",
+      receptor_nombre: "D1 desactualizada",
+      materia: "Dato antiguo",
+      monto_clp: 1,
+      clasificacion: "Antiguo",
+      comuna: "Santiago",
+    };
+    const statement = (sql: string) => ({
+      bind() { return this; },
+      async first<T>() { return (sql.includes("COUNT") ? { total: 1 } : null) as T; },
+      async all<T>() { return { results: [staleRow] } as T; },
+    });
+    const response = await api.fetch(new Request("https://example.test/api/v1/transferencias?page=1&limit=1"), {
+      ...(transferR2Env() as object),
+      DB: { prepare: (sql: string) => statement(sql) },
+    } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.sourceStatus).toBe("complete");
+    expect(payload.total).toBe(59361);
+    expect(payload.data[0].id).toBe("tr-1");
   });
 
   it("sirve y filtra funcionarios desde la proyección CPLT de R2", async () => {

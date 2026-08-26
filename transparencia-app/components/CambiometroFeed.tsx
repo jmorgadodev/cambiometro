@@ -52,10 +52,10 @@ export default function CambiometroFeed({ cambios }: Props) {
               <time dateTime={cambio.fechaIso}>{formatPublicDate(cambio.fechaIso)}</time>
               <div>
                 <p><span className="status-label status-label--info">Inicio de período</span> {cambio.cargo}</p>
-                <h3><Link href={getPoliticoPath(cambio.politicoId)}>{cambio.politico}</Link></h3>
+                <h3><Link prefetch={false} href={getPoliticoPath(cambio.politicoId)}>{cambio.politico}</Link></h3>
                 <p>{cambio.descripcion}</p>
               </div>
-              <Link href={getPoliticoPath(cambio.politicoId)} aria-label={`Ver ficha de ${cambio.politico}`}>↗</Link>
+              <Link prefetch={false} href={getPoliticoPath(cambio.politicoId)} aria-label={`Ver ficha de ${cambio.politico}`}>↗</Link>
             </article>
           ))
         )}

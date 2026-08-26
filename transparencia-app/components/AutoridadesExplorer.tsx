@@ -336,7 +336,7 @@ export default function AutoridadesExplorer() {
                   </div>
                 </div>
 
-                <Link
+                <Link prefetch={false}
                   href={`/politico/${getPoliticoSlug(pol)}`}
                   className="btn btn-secondary"
                   style={{
@@ -379,7 +379,7 @@ export default function AutoridadesExplorer() {
                 return (
                   <tr key={pol.id} style={{ borderTop: "1px solid var(--border-subtle)" }} className="hover-row">
                     <td style={{ padding: "0.75rem 1rem" }}>
-                      <Link
+                      <Link prefetch={false}
                         href={`/politico/${slug}`}
                         style={{ display: "flex", alignItems: "center", gap: "0.6rem", textDecoration: "none", color: "inherit" }}
                       >
@@ -410,7 +410,7 @@ export default function AutoridadesExplorer() {
                     <td style={{ padding: "0.75rem 0.75rem" }}>{pol.cargo}</td>
                     <td style={{ padding: "0.75rem 0.75rem", color: "var(--text-subtle)" }}>{pol.distrito_region}</td>
                     <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
-                      <Link href={`/politico/${slug}`} className="data-link" style={{ fontSize: "0.78rem" }}>
+                      <Link prefetch={false} href={`/politico/${slug}`} className="data-link" style={{ fontSize: "0.78rem" }}>
                         Ver ficha →
                       </Link>
                     </td>

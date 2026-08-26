@@ -35,14 +35,18 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     }
   });
 
-  it("3. CERO pasos de deploy en workflows de cron / ETL (Deploy SIEMPRE es local)", () => {
+  it("3. Los ETL no despliegan Pages ni el Worker público; el bridge interno es la única excepción", () => {
     for (const file of workflowFiles) {
       const content = fs.readFileSync(path.join(workflowsDir, file), "utf8");
       const hasSchedule = content.includes("schedule:") || content.includes("cron:");
 
       if (hasSchedule) {
-        // Ningún workflow programado puede contener comandos de despliegue
-        expect(content, `El workflow programado ${file} NO debe contener comandos de deploy`).not.toMatch(/wrangler(?:\s+pages)?\s+deploy/i);
+        const isLeySourceBridge = file === "etl-ley-19862.yml"
+          && content.includes("workers/ley19862-source-bridge/wrangler.jsonc")
+          && content.includes("--name cambiometro-ley19862-source");
+        const deployCommands = content.match(/wrangler(?:\s+pages)?\s+deploy/gi) ?? [];
+        if (isLeySourceBridge) expect(deployCommands).toHaveLength(1);
+        else expect(content, `El workflow programado ${file} NO debe contener comandos de deploy`).not.toMatch(/wrangler(?:\s+pages)?\s+deploy/i);
         expect(content, `El workflow programado ${file} NO debe invocar npm run deploy`).not.toMatch(/npm\s+run\s+deploy/i);
       }
     }

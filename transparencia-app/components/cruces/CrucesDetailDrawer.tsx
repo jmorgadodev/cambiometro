@@ -135,7 +135,7 @@ export default function CrucesDetailDrawer({ cross, isLoading = false, onClose }
                 <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "var(--text-1)", marginTop: "0.15rem" }}>
                   {formatNombreInstitucional(cross.fromEntity.name).display}
                 </div>
-                <Link
+                <Link prefetch={false}
                   href={`/entidades/${cross.fromEntity.id}?from_cruce=${encodeURIComponent(cross.relation.id)}&q=${encodeURIComponent(cross.toEntity.name)}#reg-${cross.evidence[0]?.id || ""}`}
                   style={{ fontSize: "0.75rem", color: "var(--accent)", textDecoration: "none", marginTop: "0.3rem", display: "inline-block", fontWeight: 600 }}
                 >
@@ -150,7 +150,7 @@ export default function CrucesDetailDrawer({ cross, isLoading = false, onClose }
                 <div style={{ fontWeight: 700, fontSize: "0.95rem", color: "var(--text-1)", marginTop: "0.15rem" }}>
                   {formatNombreInstitucional(cross.toEntity.name).display}
                 </div>
-                <Link
+                <Link prefetch={false}
                   href={`/entidades/${cross.toEntity.id}?from_cruce=${encodeURIComponent(cross.relation.id)}&q=${encodeURIComponent(cross.fromEntity.name)}#reg-${cross.evidence[0]?.id || ""}`}
                   style={{ fontSize: "0.75rem", color: "var(--accent)", textDecoration: "none", marginTop: "0.3rem", display: "inline-block", fontWeight: 600 }}
                 >

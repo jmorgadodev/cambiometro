@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listEntities, listRecords } from "@/lib/data-platform-d1";
-import { listPublishedSourceManifests } from "@/lib/published-sources";
 import EtlHealthDashboardClient from "@/components/datos/EtlHealthDashboardClient";
 import Icono from "@/components/ui/Icono";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
+import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
 
 export const metadata: Metadata = {
   title: "Estado de Conexión y Salud de Fuentes ETL — El Cambiómetro",
@@ -66,7 +65,7 @@ const ANALYSIS_LINES = [
 ] as const;
 
 export default async function DataObservatoryPage() {
-  const sources = await listPublishedSourceManifests();
+  const entityCount = getStaticEntityCatalog().total || GLOBAL_KPIS.entidades;
 
   return (
     <div>
@@ -82,7 +81,7 @@ export default async function DataObservatoryPage() {
               enlaces directos a los portales oficiales de origen.
             </p>
             <div style={{ marginTop: "1rem" }}>
-              <Link className="btn btn-secondary" href="/datos/calidad" style={{ fontSize: "0.85rem", padding: "0.45rem 0.9rem" }}>
+              <Link prefetch={false} className="btn btn-secondary" href="/datos/calidad" style={{ fontSize: "0.85rem", padding: "0.45rem 0.9rem" }}>
                 Ver calidad de datos →
               </Link>
             </div>
@@ -94,7 +93,7 @@ export default async function DataObservatoryPage() {
             </div>
             <div>
               <dt>Entidades y Sujetos</dt>
-              <dd>{GLOBAL_KPIS.entidades.toLocaleString("es-CL")}</dd>
+              <dd>{entityCount.toLocaleString("es-CL")}</dd>
             </div>
             <div>
               <dt>Fuentes Conectadas</dt>
@@ -137,7 +136,7 @@ export default async function DataObservatoryPage() {
                   ))}
                 </ul>
                 <p className="data-observatory__caveat">{line.caveat}</p>
-                <Link className="data-link" href={line.href}>
+                <Link prefetch={false} className="data-link" href={line.href}>
                   {line.linkLabel} →
                 </Link>
               </article>

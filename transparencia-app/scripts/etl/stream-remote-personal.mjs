@@ -7,12 +7,26 @@ import { createCpltRecordId, getCpltColumn, parseCpltColumns, parseCpltHeader, p
 import { createMunicipalityRegistry } from "./municipality-registry.mjs";
 import { validatePublication } from "./validation.mjs";
 
-const URLS = [
-  { tipo: "Planta", url: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv" },
-  { tipo: "Contrata", url: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalContrata.csv" },
-  { tipo: "Honorarios", url: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalContratohonorarios.csv" },
-  { tipo: "CodigoTrabajo", url: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalCodigotrabajo.csv" },
+const SOURCE_BASES = [
+  "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos",
+  "https://www.cplt.cl/transparencia_activa/datoabierto/archivos",
 ];
+
+const URLS = [
+  { tipo: "Planta", fileName: "TA_PersonalPlanta.csv" },
+  { tipo: "Contrata", fileName: "TA_PersonalContrata.csv" },
+  { tipo: "Honorarios", fileName: "TA_PersonalContratohonorarios.csv" },
+  { tipo: "CodigoTrabajo", fileName: "TA_PersonalCodigotrabajo.csv" },
+].map(({ tipo, fileName }) => ({
+  tipo,
+  urls: SOURCE_BASES.map((base) => `${base}/${fileName}`),
+}));
+
+const RETRYABLE_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
+
+function wait(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 function normalized(value) {
   return String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
@@ -85,12 +99,35 @@ function mergeById(previous, current) {
   return [...records.values()];
 }
 
-async function processStream(tipo, url, outputDir) {
-  console.log(`\n[+] Iniciando descarga de ${tipo}: ${url}`);
-  const response = await fetch(url);
-  if (!response.ok || !response.body) {
-    throw new Error(`CPLT_DOWNLOAD_FAILED: ${tipo} respondio ${response.status} ${response.statusText}`);
+async function downloadSource(tipo, urls) {
+  const failures = [];
+  for (const url of urls) {
+    for (let attempt = 1; attempt <= 3; attempt += 1) {
+      try {
+        const response = await fetch(url, {
+          headers: {
+            Accept: "text/csv,*/*",
+            "User-Agent": "cambiometro-etl/1.0 (+https://cambiometro.impulsacv.cl)",
+          },
+        });
+        if (response.ok && response.body) {
+          return { response, sourceUrl: response.url || url };
+        }
+
+        failures.push(`${url} -> ${response.status} ${response.statusText} (intento ${attempt})`);
+        if (!RETRYABLE_STATUSES.has(response.status)) break;
+      } catch (error) {
+        failures.push(`${url} -> ${error instanceof Error ? error.message : String(error)} (intento ${attempt})`);
+      }
+      await wait(2_000 * attempt);
+    }
   }
+  throw new Error(`CPLT_DOWNLOAD_FAILED: ${tipo}; ${failures.join("; ")}`);
+}
+
+async function processStream(tipo, urls, outputDir) {
+  console.log(`\n[+] Iniciando descarga de ${tipo}: ${urls.join(" | ")}`);
+  const { response, sourceUrl } = await downloadSource(tipo, urls);
 
   const decodedStream = Readable.fromWeb(response.body).pipe(iconv.decodeStream("win1252"));
   const lines = readline.createInterface({ input: decodedStream, crlfDelay: Infinity });
@@ -142,7 +179,7 @@ async function processStream(tipo, url, outputDir) {
   const organismoByRecordId = new Map();
   const records = [...latestByOfficial.values()].map((latest) => {
     const { organismoId } = latest;
-    const funcionario = parseCpltRecord({ line: latest.line, header, tipo, organismoId, sourceUrl: url, deferId: true });
+    const funcionario = parseCpltRecord({ line: latest.line, header, tipo, organismoId, sourceUrl, deferId: true });
     if (!funcionario) throw new Error(`CPLT_LATEST_RECORD_INVALID: ${organismoId}`);
     funcionario.id = createCpltRecordId(funcionario._stableKey);
     delete funcionario._stableKey;
@@ -191,7 +228,7 @@ async function processStream(tipo, url, outputDir) {
   });
   fs.writeFileSync(path.join(coverageDir, `${normalized(tipo)}.json`), JSON.stringify({
     sourceId: `cplt-personal-${normalized(tipo)}`,
-    sourceUrl: url,
+    sourceUrl,
     generatedAt: new Date().toISOString(),
     coverage,
   }, null, 2));
@@ -200,7 +237,7 @@ async function processStream(tipo, url, outputDir) {
   fs.mkdirSync(validationDir, { recursive: true });
   fs.writeFileSync(path.join(validationDir, `${normalized(tipo)}.json`), JSON.stringify({
     ...report,
-    sourceUrl: url,
+    sourceUrl,
     linesProcessed,
     generatedAt: new Date().toISOString(),
   }, null, 2));
@@ -218,7 +255,7 @@ async function run() {
     : URLS;
   if (selected.length === 0) throw new Error(`CPLT_UNKNOWN_TYPE: ${targetTipo}`);
 
-  for (const { tipo, url } of selected) await processStream(tipo, url, outputDir);
+  for (const { tipo, urls } of selected) await processStream(tipo, urls, outputDir);
 
   if (globalThis.DISCOVERED_ORGANISMOS) {
     const filePath = path.join(outputDir, "organismos_adicionales.json");

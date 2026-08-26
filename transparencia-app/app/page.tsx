@@ -5,8 +5,7 @@ import Reveal from "@/components/Reveal";
 import Icono from "@/components/ui/Icono";
 import { GLOBAL_KPIS, KPI_SCOPES } from "@/lib/global-kpis";
 import { ETL_SOURCES_DATA } from "@/lib/etl-sources-data";
-import { listEntities, listRecords, listRelations } from "@/lib/data-platform-d1";
-import { listPublishedSourceManifests } from "@/lib/published-sources";
+import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
 
 export const dynamic = "force-static";
 
@@ -68,16 +67,11 @@ const HOME_KPIS = [
 ];
 
 export default async function HomePage() {
-  const [sources, entities, records, relations, votes, expenses] = await Promise.all([
-    listPublishedSourceManifests(),
-    listEntities({ limit: 1 }),
-    listRecords({ limit: 1 }),
-    listRelations({ limit: 1 }),
-    listRecords({ kind: "vote", limit: 1 }),
-    listRecords({ kind: "expense", limit: 1 }),
-  ]);
-  const totalCatalogRecords = Math.max(records.total, GLOBAL_KPIS.registros_canonicos);
+  const entityCount = getStaticEntityCatalog().total;
   const operationalSources = HOME_SOURCES_LIST;
+  const resolvedHomeKpis = HOME_KPIS.map((item) => item.key === "entidades"
+    ? { ...item, value: entityCount || item.value }
+    : item);
 
   return (
     <div className="home-desk">
@@ -121,7 +115,7 @@ export default async function HomePage() {
       {/* Banda de KPIs Globales con Tooltip de Ámbito */}
       <section className="home-ledger" aria-label="Cobertura actual consolidada">
         <div className="container-main home-ledger__grid">
-          {HOME_KPIS.map((item, index) => (
+          {resolvedHomeKpis.map((item, index) => (
             <Link
               prefetch={false}
               href={item.href}

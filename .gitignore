@@ -26,7 +26,11 @@ data/raw/servel/
 social/
 backups/
 tmp/
+/.pages-dev-test/
+/.tmp-worker-artifact-*/
+docs/auditoria-local-*.md
 transparencia-app/artifacts/
+/transparencia-app/pages-deployments.json
 .open-next/
 .next/
 node_modules/

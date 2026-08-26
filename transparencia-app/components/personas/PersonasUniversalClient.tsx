@@ -243,6 +243,19 @@ export default function PersonasUniversalClient({
   useEffect(() => {
     if (activeTab !== "funcionarios") return;
 
+    // The Worker serves scoped projections only. Do not issue a national
+    // request that is guaranteed to return DATASET_SCOPE_REQUIRED; the UI
+    // renders an explicit selection state instead of a red network error.
+    if (organismoFilter === "Todos") {
+      const timer = setTimeout(() => {
+        setFuncionariosData([]);
+        setFuncionariosTotal(0);
+        setFuncionariosStats({ totalMuni: 0, promedioSueldo: 0, conHorasExtras: 0 });
+        setFuncionariosLoading(false);
+      }, 0);
+      return () => clearTimeout(timer);
+    }
+
     let isMounted = true;
     const timer = setTimeout(() => {
       setFuncionariosLoading(true);
@@ -877,7 +890,7 @@ export default function PersonasUniversalClient({
                   const asistPct = p.asistencia_sala_pct ?? null;
                   const asistColor = asistPct === null ? "var(--text-3)" : asistPct >= 85 ? "var(--ok)" : asistPct >= 70 ? "var(--warn)" : "var(--bad)";
                   return (
-                    <Link
+                    <Link prefetch={false}
                       key={p.id}
                       href={`/politico/${getPoliticoSlug(p.id)}`}
                       style={{
@@ -1065,7 +1078,7 @@ export default function PersonasUniversalClient({
                             {p.asistencia_sala_pct ? `${p.asistencia_sala_pct}%` : "—"}
                           </td>
                           <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
-                            <Link
+                            <Link prefetch={false}
                               href={`/politico/${getPoliticoSlug(p.id)}`}
                               style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textDecoration: "none" }}
                             >
@@ -1090,7 +1103,7 @@ export default function PersonasUniversalClient({
             {viewMode === "cards" ? (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem" }}>
                 {paginatedAlcaldes.map((a) => (
-                  <Link
+                  <Link prefetch={false}
                     key={a.muni_id}
                     href={`/municipalidades/${a.muni_id}`}
                     style={{
@@ -1192,7 +1205,7 @@ export default function PersonasUniversalClient({
                           {a.grado_eus ? `Grado ${a.grado_eus}` : "—"}
                         </td>
                         <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
-                          <Link
+                          <Link prefetch={false}
                             href={`/municipalidades/${a.muni_id}`}
                             style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textDecoration: "none" }}
                           >
@@ -1263,7 +1276,7 @@ export default function PersonasUniversalClient({
                     </div>
 
                     <div style={{ marginTop: "0.75rem", paddingTop: "0.65rem", borderTop: "1px solid var(--border)" }}>
-                      <Link
+                      <Link prefetch={false}
                         href={`/servicios-publicos/${aut.id}`}
                         style={{
                           display: "block",
@@ -1313,7 +1326,7 @@ export default function PersonasUniversalClient({
                           {aut.dotacion_total === null ? "—" : aut.dotacion_total.toLocaleString("es-CL")}
                         </td>
                         <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
-                          <Link
+                          <Link prefetch={false}
                             href={`/servicios-publicos/${aut.id}`}
                             style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textDecoration: "none" }}
                           >
@@ -1347,9 +1360,13 @@ export default function PersonasUniversalClient({
             ) : funcionariosData.length === 0 ? (
               <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 16, padding: "3rem", textAlign: "center" }}>
                 <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>🔍</div>
-                <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--text-1)", margin: "0 0 0.5rem" }}>No se encontraron funcionarios</h3>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--text-1)", margin: "0 0 0.5rem" }}>
+                  {organismoFilter === "Todos" ? "Selecciona un organismo" : "No se encontraron funcionarios"}
+                </h3>
                 <p style={{ fontSize: "0.85rem", color: "var(--text-3)", maxWidth: 420, margin: "0 auto 1.5rem" }}>
-                  Prueba cambiando los filtros de organismo, tipo, contrato o término de búsqueda.
+                  {organismoFilter === "Todos"
+                    ? "Elige un organismo para consultar su nómina oficial y usar la búsqueda de funcionarios."
+                    : "Prueba cambiando los filtros de organismo, tipo, contrato o término de búsqueda."}
                 </p>
                 <button
                   onClick={() => {

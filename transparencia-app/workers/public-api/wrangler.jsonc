@@ -6,6 +6,7 @@
   "compatibility_flags": ["nodejs_compat"],
   "minify": true,
   "workers_dev": false,
+  "preview_urls": true,
   "routes": [
     { "pattern": "cambiometro.impulsacv.cl/api/*", "zone_name": "impulsacv.cl" }
   ],
@@ -34,6 +35,27 @@
           "binding": "DB",
           "database_name": "transparencia-db-staging-LOCAL",
           "database_id": "00000000-0000-0000-0000-000000000000"
+        }
+      ],
+      "r2_buckets": [
+        { "binding": "PUBLIC_DATA", "bucket_name": "transparencia-public-data" }
+      ],
+      "ratelimits": [
+        { "name": "EXPENSIVE_API_RATE_LIMITER", "namespace_id": "47012", "simple": { "limit": 30, "period": 60 } }
+      ]
+    },
+    "preview": {
+      "name": "cambiometro-public-api-preview",
+      "workers_dev": true,
+      "preview_urls": true,
+      "routes": [],
+      "vars": { "READ_ONLY_PREVIEW": "1" },
+      "observability": { "enabled": true },
+      "d1_databases": [
+        {
+          "binding": "DB",
+          "database_name": "transparencia-db",
+          "database_id": "3731487c-ed6b-401e-a33d-7ecf15bfd229"
         }
       ],
       "r2_buckets": [

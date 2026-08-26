@@ -7,13 +7,26 @@ const root = resolve(import.meta.dirname, "..");
 const bucket = process.env.LEY_19862_R2_BUCKET ?? "transparencia-public-data";
 const lakeRoot = join(root, "data", "lake");
 const catalogPath = join(lakeRoot, "catalog", "v1", "manifest.json");
+const DOWNLOAD_TIMEOUT_MS = Number(process.env.LEY_19862_R2_DOWNLOAD_TIMEOUT_MS ?? 180_000);
+const DOWNLOAD_MAX_ATTEMPTS = Number(process.env.LEY_19862_R2_DOWNLOAD_ATTEMPTS ?? 3);
+const DOWNLOAD_RETRY_DELAY_MS = 2_000;
 
-function runWrangler(args) {
+function runWrangler(args, timeoutMs = DOWNLOAD_TIMEOUT_MS) {
   const command = process.platform === "win32" ? "npx.cmd" : "npx";
   return new Promise((resolvePromise, reject) => {
     const child = spawn(command, ["wrangler", ...args], { cwd: root, stdio: "inherit", shell: false });
-    child.on("error", reject);
-    child.on("exit", (code) => code === 0 ? resolvePromise() : reject(new Error(`wrangler terminó con ${code}`)));
+    const timer = setTimeout(() => {
+      child.kill();
+      reject(new Error(`LEY_19862_R2_COMMAND_TIMEOUT: ${args.join(" ")}`));
+    }, timeoutMs);
+    child.on("error", (error) => {
+      clearTimeout(timer);
+      reject(error);
+    });
+    child.on("exit", (code) => {
+      clearTimeout(timer);
+      code === 0 ? resolvePromise() : reject(new Error(`wrangler terminó con ${code}`));
+    });
   });
 }
 
@@ -23,8 +36,23 @@ function checksum(file) {
 
 async function download(key, destination, expectedChecksum) {
   mkdirSync(dirname(destination), { recursive: true });
-  await runWrangler(["r2", "object", "get", `${bucket}/${key}`, "--file", destination, "--remote"]);
-  if (expectedChecksum && checksum(destination) !== expectedChecksum) throw new Error(`LEY_19862_R2_CHECKSUM_INVALID: ${key}`);
+  let lastError;
+  for (let attempt = 1; attempt <= DOWNLOAD_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      console.log(`[ley19862] descarga ${key} (${attempt}/${DOWNLOAD_MAX_ATTEMPTS})`);
+      await runWrangler(["r2", "object", "get", `${bucket}/${key}`, "--file", destination, "--remote"]);
+      if (expectedChecksum && checksum(destination) !== expectedChecksum) {
+        throw new Error(`LEY_19862_R2_CHECKSUM_INVALID: ${key}`);
+      }
+      return;
+    } catch (error) {
+      lastError = error;
+      if (attempt < DOWNLOAD_MAX_ATTEMPTS) {
+        await new Promise((resolvePromise) => setTimeout(resolvePromise, DOWNLOAD_RETRY_DELAY_MS * attempt));
+      }
+    }
+  }
+  throw lastError;
 }
 
 if (!existsSync(catalogPath)) throw new Error(`LEY_19862_CATALOG_MISSING: ${catalogPath}`);

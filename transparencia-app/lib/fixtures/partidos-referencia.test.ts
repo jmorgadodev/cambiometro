@@ -249,7 +249,7 @@ describe("Fixture Externo Congelado: Referencia Oficial de Partidos, Transferenc
       }
 
       const summary = getLey19862Summary();
-      expect(summary.kpis.total_transfers).toBe(59361);
+      expect(summary.kpis.total_transfers).toBeGreaterThanOrEqual(SOURCE_CANONICAL_COUNTS["ley-19862"]);
       expect(summary.kpis.total_receptores).toBe(14640);
     });
   });

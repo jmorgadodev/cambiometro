@@ -1,5 +1,9 @@
 import { createHash } from "node:crypto";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
 import { parseDelimited } from "./dipres.mjs";
+
+const execFileAsync = promisify(execFile);
 
 const REPORT_URL = "https://registros19862.gob.cl/reporte/transferencias";
 const REQUIRED_COLUMNS = ["FOLIO", "FECHA_DECRETO", "FECHA_INGRESO", "PERIODO", "EMISORA_RUT", "EMISORA_NOMBRE", "RECEPTORA_RUT", "RECEPTORA_NOMBRE", "MONTO"];
@@ -90,31 +94,97 @@ export function normalizeTransferCsv(csv, { sourceUrl }) {
   return records;
 }
 
+function positiveIntegerEnv(name, fallback) {
+  const value = Number(process.env[name]);
+  return Number.isSafeInteger(value) && value > 0 ? value : fallback;
+}
+
 function retryableNetworkError(error) {
   const code = error?.cause?.code ?? error?.code;
-  return error instanceof TypeError || ["EAI_AGAIN", "ECONNRESET", "ETIMEDOUT", "UND_ERR_CONNECT_TIMEOUT", "ENETUNREACH", "EHOSTUNREACH"].includes(code);
+  return error instanceof TypeError
+    || error?.name === "TimeoutError"
+    || error?.name === "AbortError"
+    || ["EAI_AGAIN", "ECONNRESET", "ETIMEDOUT", "UND_ERR_CONNECT_TIMEOUT", "ENETUNREACH", "EHOSTUNREACH"].includes(code);
 }
 
 function wait(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
-export async function fetchTransferMonth({ year, month, fetchImpl = fetch, timeoutMs = 180_000, maxAttempts = 5, retryDelayMs = 1_000 }) {
+async function fetchWithCurl(sourceUrl, timeoutMs, headers = {}) {
+  const binary = process.platform === "win32" ? "curl.exe" : "curl";
+  const curlTimeoutMs = Math.min(timeoutMs, 60_000);
+  const headerArguments = Object.entries(headers).flatMap(([name, value]) => ["--header", `${name}: ${value}`]);
+  const { stdout } = await execFileAsync(binary, [
+    "--fail-with-body",
+    "--location",
+    "--retry", "1",
+    "--retry-all-errors",
+    "--connect-timeout", String(Math.max(10, Math.ceil(curlTimeoutMs / 1000))),
+    "--max-time", String(Math.max(30, Math.ceil(curlTimeoutMs / 1000))),
+    "--user-agent", "TransparenciaChile-ETL/3.0",
+    ...headerArguments,
+    sourceUrl,
+  ], { encoding: "buffer", maxBuffer: 64 * 1024 * 1024 });
+  return Buffer.isBuffer(stdout) ? stdout : Buffer.from(stdout);
+}
+
+function transportUrl(sourceUrl, year, month) {
+  const bridge = String(process.env.LEY_19862_SOURCE_BRIDGE_URL ?? "").trim();
+  if (!bridge) return sourceUrl;
+  const url = new URL(bridge);
+  if (url.pathname === "/") url.pathname = "/fetch";
+  url.searchParams.set("year", String(year));
+  url.searchParams.set("month", String(month));
+  return url.toString();
+}
+
+function requestHeaders() {
+  const headers = { "User-Agent": "TransparenciaChile-ETL/3.0", Accept: "text/csv" };
+  const token = String(process.env.LEY_19862_SOURCE_BRIDGE_TOKEN ?? "").trim();
+  if (token) headers["X-Source-Bridge-Token"] = token;
+  return headers;
+}
+
+export async function fetchTransferMonth({
+  year,
+  month,
+  fetchImpl = fetch,
+  timeoutMs = positiveIntegerEnv("LEY_19862_TIMEOUT_MS", 180_000),
+  maxAttempts = positiveIntegerEnv("LEY_19862_MAX_ATTEMPTS", 5),
+  retryDelayMs = positiveIntegerEnv("LEY_19862_RETRY_DELAY_MS", 1_000),
+}) {
   const sourceUrl = buildTransferReportUrl(year, month);
+  const requestUrl = transportUrl(sourceUrl, year, month);
+  const headers = requestHeaders();
   let response;
+  let lastError = null;
   for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
     try {
-      response = await fetchImpl(sourceUrl, { headers: { "User-Agent": "TransparenciaChile-ETL/3.0", Accept: "text/csv" }, signal: AbortSignal.timeout(timeoutMs) });
+      response = await fetchImpl(requestUrl, { headers, signal: AbortSignal.timeout(timeoutMs) });
       if (!response.ok) {
         if (response.status < 500 || attempt === maxAttempts) throw new Error(`LEY_19862_HTTP_${response.status}`);
       } else {
+        lastError = null;
         break;
       }
     } catch (error) {
-      if (!retryableNetworkError(error) || attempt === maxAttempts) throw error;
+      lastError = error;
+      if (!retryableNetworkError(error)) throw error;
+      if (attempt === maxAttempts) break;
     }
     await wait(retryDelayMs * attempt);
   }
+  if (lastError && fetchImpl === fetch && !String(process.env.LEY_19862_SOURCE_BRIDGE_URL ?? "").trim()) {
+    try {
+      const data = await fetchWithCurl(requestUrl, timeoutMs, headers);
+      response = { ok: true, arrayBuffer: async () => data };
+    } catch (curlError) {
+      curlError.cause = lastError;
+      throw curlError;
+    }
+  }
+  if (lastError) throw lastError;
   if (!response?.ok) throw new Error(`LEY_19862_HTTP_${response?.status ?? "UNKNOWN"}`);
   const original = Buffer.from(await response.arrayBuffer());
   const text = new TextDecoder("utf-8").decode(original);

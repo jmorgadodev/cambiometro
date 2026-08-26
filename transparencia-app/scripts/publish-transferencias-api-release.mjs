@@ -11,9 +11,14 @@ const bucket = process.env.LEY19862_R2_BUCKET ?? "transparencia-public-data";
 const source = process.env.LEY19862_SOURCE_ROOT
   ? resolve(process.env.LEY19862_SOURCE_ROOT)
   : join(root, "data", "lake", "partitions", "ley-19862");
+const registeredThrough = process.env.TRANSFER_RELEASE_REGISTERED_THROUGH
+  ?? process.env.LEY_19862_REGISTERED_THROUGH
+  ?? null;
 
 const UPLOAD_CONCURRENCY = 8;
 const UPLOAD_TIMEOUT_MS = 120_000;
+const UPLOAD_MAX_ATTEMPTS = 3;
+const UPLOAD_RETRY_DELAY_MS = 1_500;
 
 function wrangler(args) {
   const command = process.platform === "win32" ? "npx.cmd" : "npx";
@@ -35,20 +40,37 @@ function wrangler(args) {
   });
 }
 
+function wait(milliseconds) {
+  return new Promise((resolve) => setTimeout(resolve, milliseconds));
+}
+
 async function put(key, file, contentType = "application/json") {
-  await wrangler(["r2", "object", "put", `${bucket}/${key}`, "--file", file, "--content-type", contentType]);
+  let lastError;
+  for (let attempt = 1; attempt <= UPLOAD_MAX_ATTEMPTS; attempt += 1) {
+    try {
+      await wrangler(["r2", "object", "put", `${bucket}/${key}`, "--file", file, "--content-type", contentType]);
+      return;
+    } catch (error) {
+      lastError = error;
+      if (attempt < UPLOAD_MAX_ATTEMPTS) await wait(UPLOAD_RETRY_DELAY_MS * attempt);
+    }
+  }
+  throw lastError;
 }
 
 async function putInBatches(entries) {
   for (let index = 0; index < entries.length; index += UPLOAD_CONCURRENCY) {
-    await Promise.all(entries.slice(index, index + UPLOAD_CONCURRENCY).map(({ key, file, contentType }) => put(key, file, contentType)));
+    const results = await Promise.allSettled(entries.slice(index, index + UPLOAD_CONCURRENCY)
+      .map(({ key, file, contentType }) => put(key, file, contentType)));
+    const failure = results.find((result) => result.status === "rejected");
+    if (failure?.status === "rejected") throw failure.reason;
   }
 }
 
 const staging = mkdtempSync(join(tmpdir(), "cambiometro-transfer-api-"));
 try {
   if (!existsSync(source)) throw new Error(`TRANSFER_API_SOURCE_MISSING: ${source}`);
-  const release = await buildTransferenciasStatic({ source, output: staging });
+  const release = await buildTransferenciasStatic({ source, output: staging, registeredThrough });
   if (!release) throw new Error("TRANSFER_API_RELEASE_EMPTY");
   const { manifest } = release;
   assertMinimumTransferRows(manifest.totalRows);

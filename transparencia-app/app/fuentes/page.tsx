@@ -30,7 +30,7 @@ export default async function FuentesPage() {
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap", marginTop: "0.75rem" }}>
               <span className="badge badge-ok" style={{ fontSize: "0.68rem" }}>Versión {GLOBAL_KPIS.corte}</span>
-              <Link className="data-link" href="/datos/calidad" style={{ fontSize: "0.82rem", fontWeight: 600 }}>
+              <Link prefetch={false} className="data-link" href="/datos/calidad" style={{ fontSize: "0.82rem", fontWeight: 600 }}>
                 Dashboard de calidad →
               </Link>
             </div>
@@ -61,7 +61,7 @@ export default async function FuentesPage() {
             </h2>
             <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", margin: 0 }}>
               {summary.totalRegistrosCanonicos.toLocaleString("es-CL")} registros canónicos por fuente · consolidado {GLOBAL_KPIS.registros_canonicos.toLocaleString("es-CL")} (incluye actividad parlamentaria){" "}
-              <Link href="/datos/calidad" className="data-link" style={{ fontSize: "0.85rem", fontWeight: 600 }}>
+              <Link prefetch={false} href="/datos/calidad" className="data-link" style={{ fontSize: "0.85rem", fontWeight: 600 }}>
                 (ver nota en calidad de datos)
               </Link>
             </p>
@@ -129,9 +129,9 @@ export default async function FuentesPage() {
             Cada extracción se valida contra el contrato de datos de la plataforma y se publica como una versión
             con checksum. La fecha de corte de la consolidación vigente es{" "}
             <strong style={{ color: "var(--text-primary)" }}>{GLOBAL_KPIS.corte}</strong>, y el detalle de las
-            proyecciones está disponible en <Link href="/datos" style={{ color: "var(--accent)" }}>Datos</Link>,{" "}
-            <Link href="/datos/calidad" style={{ color: "var(--accent)" }}>Dashboard de Calidad</Link> y{" "}
-            <Link href="/como-funciona" style={{ color: "var(--accent)" }}>Metodología</Link>.
+            proyecciones está disponible en <Link prefetch={false} href="/datos" style={{ color: "var(--accent)" }}>Datos</Link>,{" "}
+            <Link prefetch={false} href="/datos/calidad" style={{ color: "var(--accent)" }}>Dashboard de Calidad</Link> y{" "}
+            <Link prefetch={false} href="/como-funciona" style={{ color: "var(--accent)" }}>Metodología</Link>.
           </p>
         </section>
       </div>

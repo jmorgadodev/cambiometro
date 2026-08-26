@@ -5,6 +5,8 @@ import { chromium } from "playwright";
 
 const root = join(process.cwd(), "out");
 const port = Number(process.env.STATIC_VERIFY_PORT || 0);
+const remoteBaseUrl = process.env.STATIC_VERIFY_BASE_URL?.replace(/\/+$/, "");
+const staticApiBaseUrl = process.env.STATIC_VERIFY_API_URL?.replace(/\/+$/, "");
 const waitMs = 5_200;
 const spinnerPattern = /Cargando contenido|Cargando municipalidades|Cargando transferencias|Cargando funcionarios|Cargando historial/i;
 const mime = {
@@ -58,8 +60,31 @@ function check(condition, message, details = {}) {
   return condition ? null : { message, ...details };
 }
 
-async function checkRoute(browser, baseUrl, route, markers) {
+async function createContext(browser) {
   const context = await browser.newContext();
+  if (!staticApiBaseUrl) return context;
+
+  await context.route("**/api/**", async (route) => {
+    const requestUrl = new URL(route.request().url());
+    const upstreamUrl = `${staticApiBaseUrl}${requestUrl.pathname}${requestUrl.search}`;
+    const upstream = await fetch(upstreamUrl, {
+      method: route.request().method(),
+      // Playwright returns request headers as a plain object (not Map entries).
+      headers: route.request().headers(),
+      body: ["GET", "HEAD"].includes(route.request().method()) ? undefined : route.request().postDataBuffer(),
+    });
+    await route.fulfill({
+      status: upstream.status,
+      headers: Object.fromEntries(upstream.headers.entries()),
+      body: Buffer.from(await upstream.arrayBuffer()),
+    });
+  });
+  return context;
+}
+
+async function checkRoute(browser, baseUrl, route, markers) {
+  const monitoredOrigin = new URL(baseUrl).origin;
+  const context = await createContext(browser);
   const page = await context.newPage();
   const errors = [];
   const badResponses = [];
@@ -70,7 +95,7 @@ async function checkRoute(browser, baseUrl, route, markers) {
     }
   });
   page.on("response", (response) => {
-    if (response.url().includes("127.0.0.1") && response.status() >= 400) {
+    if (response.url().startsWith(monitoredOrigin) && response.status() >= 400) {
       badResponses.push({ path: new URL(response.url()).pathname, status: response.status() });
     }
   });
@@ -101,9 +126,13 @@ async function checkRoute(browser, baseUrl, route, markers) {
 }
 
 async function main() {
-  await new Promise((resolve) => server.listen(port, "127.0.0.1", resolve));
-  const address = server.address();
-  const baseUrl = `http://127.0.0.1:${typeof address === "object" ? address.port : port}`;
+  let baseUrl = remoteBaseUrl;
+  if (!baseUrl) {
+    await new Promise((resolve) => server.listen(port, "127.0.0.1", resolve));
+    const address = server.address();
+    baseUrl = `http://127.0.0.1:${typeof address === "object" ? address.port : port}`;
+  }
+  const monitoredOrigin = new URL(baseUrl).origin;
   const browser = await chromium.launch({ headless: true });
 
   const cases = [
@@ -122,13 +151,13 @@ async function main() {
   const routes = [];
   for (const item of cases) routes.push(await checkRoute(browser, baseUrl, item.route, item.markers));
 
-  const navigationContext = await browser.newContext();
+  const navigationContext = await createContext(browser);
   const navigationPage = await navigationContext.newPage();
   const navigationErrors = [];
   const navigationBadResponses = [];
   navigationPage.on("pageerror", (error) => navigationErrors.push(error.message));
   navigationPage.on("response", (response) => {
-    if (response.url().includes("127.0.0.1") && response.status() >= 400) {
+    if (response.url().startsWith(monitoredOrigin) && response.status() >= 400) {
       navigationBadResponses.push({ path: new URL(response.url()).pathname, status: response.status() });
     }
   });
@@ -147,11 +176,40 @@ async function main() {
   };
   await navigationContext.close();
 
+  const detailContext = await createContext(browser);
+  const detailPage = await detailContext.newPage();
+  const detailErrors = [];
+  const detailBadResponses = [];
+  detailPage.on("pageerror", (error) => detailErrors.push(error.message));
+  detailPage.on("console", (message) => {
+    if (message.type() === "error") detailErrors.push(message.text());
+  });
+  detailPage.on("response", (response) => {
+    if (response.url().startsWith(monitoredOrigin) && response.status() >= 400) {
+      detailBadResponses.push({ path: new URL(response.url()).pathname, status: response.status() });
+    }
+  });
+  await detailPage.goto(`${baseUrl}/municipalidades/maipu`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+  const payrollTab = detailPage.getByRole("button", { name: /Nómina\s*&\s*Remuneraciones|Nómina Detallada/i }).first();
+  await payrollTab.click();
+  await detailPage.waitForTimeout(waitMs);
+  const detailBody = await detailPage.locator("body").innerText();
+  const municipalityPayroll = {
+    payrollTab: await payrollTab.count() > 0,
+    title: detailBody.includes("Buscador y Nómina Completa de Funcionarios"),
+    summary: detailBody.match(/Mostrando\s+[\d.]+\s+funcionarios navegables/)?.[0] ?? null,
+    spinner: spinnerPattern.test(detailBody),
+    error: /Nómina no disponible|no está disponible temporalmente/i.test(detailBody),
+    errors: detailErrors,
+    badResponses: detailBadResponses,
+  };
+  await detailContext.close();
+
   const legacyResponse = await fetch(`${baseUrl}/municipalidades/muni-maipu`, { redirect: "manual" });
   const legacyRedirect = { status: legacyResponse.status, location: legacyResponse.headers.get("location") };
 
   await browser.close();
-  await new Promise((resolve) => server.close(resolve));
+  if (server.listening) await new Promise((resolve) => server.close(resolve));
 
   const failures = [];
   for (const result of routes) {
@@ -166,10 +224,15 @@ async function main() {
   failures.push(check(municipalityNavigation.path === "/municipalidades/" && municipalityNavigation.ok, "Navegación /politico → /municipalidades"));
   failures.push(check(navigationErrors.length === 0, "Errores durante navegación", { navigationErrors }));
   failures.push(check(navigationBadResponses.length === 0, "Recursos 4xx/5xx durante navegación", { navigationBadResponses }));
+  failures.push(check(municipalityPayroll.payrollTab && municipalityPayroll.title, "Ficha Maipú: pestaña de nómina visible", { municipalityPayroll }));
+  failures.push(check(Boolean(municipalityPayroll.summary), "Ficha Maipú: nómina con registros navegables", { municipalityPayroll }));
+  failures.push(check(!municipalityPayroll.spinner && !municipalityPayroll.error, "Ficha Maipú: sin spinner ni error de nómina", { municipalityPayroll }));
+  failures.push(check(municipalityPayroll.errors.length === 0, "Ficha Maipú: errores de navegador", { municipalityPayroll }));
+  failures.push(check(municipalityPayroll.badResponses.length === 0, "Ficha Maipú: recursos 4xx/5xx", { municipalityPayroll }));
   failures.push(check(legacyRedirect.status === 301 && legacyRedirect.location === "/municipalidades/maipu", "Redirect legacy Maipú", { legacyRedirect }));
 
   const failed = failures.filter(Boolean);
-  console.log(JSON.stringify({ baseUrl, waitMs, routes, navigation: { politicianNavigation, municipalityNavigation, navigationErrors, navigationBadResponses }, legacyRedirect, passed: failures.length - failed.length, failed }, null, 2));
+  console.log(JSON.stringify({ baseUrl, waitMs, routes, navigation: { politicianNavigation, municipalityNavigation, navigationErrors, navigationBadResponses }, municipalityPayroll, legacyRedirect, passed: failures.length - failed.length, failed }, null, 2));
   if (failed.length > 0) process.exitCode = 1;
 }
 

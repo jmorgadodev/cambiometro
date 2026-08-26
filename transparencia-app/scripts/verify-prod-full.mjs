@@ -1,5 +1,3 @@
-import { strict as assert } from "node:assert";
-
 let passed = 0;
 let failed = 0;
 
@@ -21,6 +19,7 @@ async function verifyProdFull() {
   console.log("================================================================================\n");
 
   const headers = { "User-Agent": "Cambiometro-Full-Verifier/1.0", "Cache-Control": "no-cache" };
+  const API_URL = process.env.API_URL || PROD_URL;
   const expectedTransferRowsOverride = process.env.EXPECTED_TRANSFER_ROWS ? Number(process.env.EXPECTED_TRANSFER_ROWS) : null;
   const expectedTransferAmountOverride = process.env.EXPECTED_TRANSFER_AMOUNT ? Number(process.env.EXPECTED_TRANSFER_AMOUNT) : null;
   const expectedTransferPagesOverride = process.env.EXPECTED_TRANSFER_PAGES ? Number(process.env.EXPECTED_TRANSFER_PAGES) : null;
@@ -39,13 +38,18 @@ async function verifyProdFull() {
   assertCheck("HOME", "HTTP Status 200", homeRes.status === 200);
   const homeHtml = (await homeRes.text()).replace(/<!--.*?-->/g, "");
 
+  const staticManifestRes = await fetch(`${PROD_URL}/data/static-site-manifest.json`, { headers });
+  assertCheck("HOME", "Manifiesto estático HTTP 200", staticManifestRes.status === 200);
+  const staticManifest = staticManifestRes.ok ? await staticManifestRes.json().catch(() => null) : null;
+  const canonicalCount = Number(staticManifest?.datasets?.entities?.count ?? 0);
+
   // Version ID header/tag check
   const cfRay = homeRes.headers.get("cf-ray") || "local";
   const etag = homeRes.headers.get("etag") || "v1.0";
   const versionId = `${etag}-${cfRay.slice(0, 8)}`;
 
   assertCheck("HOME", "Total registros canónicos (1.753.013)", homeHtml.includes("1.753.013"));
-  assertCheck("HOME", "Total entidades identificadas (3.281)", homeHtml.includes("3.281"));
+  assertCheck("HOME", `Total entidades identificadas (${formatInteger(canonicalCount)})`, canonicalCount > 0 && homeHtml.includes(formatInteger(canonicalCount)));
   assertCheck("HOME", "Total relaciones y cruces (1.897)", homeHtml.includes("1.897"));
   assertCheck("HOME", "Total votaciones de sala (12.111)", homeHtml.includes("12.111"));
   assertCheck("HOME", "Total gastos parlamentarios (690)", homeHtml.includes("690"));
@@ -67,6 +71,12 @@ async function verifyProdFull() {
   assertCheck("INVARIANTES", "Dieta Kaiser: $8.291.039", kaiserHtml.includes("8.291.039"));
   assertCheck("INVARIANTES", "Asignación Kaiser: +33,7%", kaiserHtml.includes("+33,7%") || kaiserHtml.includes("33,7%"));
 
+  const bianchiRes = await fetch(`${PROD_URL}/politico/carlos-bianchi-chelech`, { headers });
+  assertCheck("INVARIANTES", "Ficha Carlos Bianchi HTTP 200", bianchiRes.status === 200);
+  const bianchiHtml = (await bianchiRes.text()).replace(/<!--.*?-->/g, "");
+  assertCheck("INVARIANTES", "Bianchi: 25.009 y 24,89%", bianchiHtml.includes("25.009") && bianchiHtml.includes("24,89%"));
+  assertCheck("INVARIANTES", "Bianchi: 580 votos cámara y 189 senado", bianchiHtml.includes("580") && bianchiHtml.includes("189"));
+
   const maipuRes = await fetch(`${PROD_URL}/municipalidades/muni-maipu`, { redirect: "manual", headers });
   assertCheck(
     "INVARIANTES",
@@ -74,6 +84,8 @@ async function verifyProdFull() {
     maipuRes.status === 301 || maipuRes.status === 307 || maipuRes.status === 308,
     `Status: ${maipuRes.status}`
   );
+  const maipuLocation = maipuRes.headers.get("location");
+  assertCheck("INVARIANTES", "Redirección Maipú apunta a /municipalidades/maipu", maipuLocation ? new URL(maipuLocation, PROD_URL).pathname === "/municipalidades/maipu" : false);
 
   // ─── MÓDULO 3: /CRUCES ─────────────────────────────────────────────────────
   console.log("\n3. MÓDULO CRUCES DOCUMENTALES (/cruces)");
@@ -82,16 +94,16 @@ async function verifyProdFull() {
   const crucesHtml = (await crucesRes.text()).replace(/<!--.*?-->/g, "");
 
   assertCheck("CRUCES", "Tile CGR '291'", crucesHtml.includes("291"));
-  assertCheck("CRUCES", "Tile ChileCompra '$1,9 billones' / '74.142'", (crucesHtml.includes("$1,9") || crucesHtml.includes("1,9")) && crucesHtml.includes("74.142"));
+  assertCheck("CRUCES", "Tile ChileCompra '74.142'", crucesHtml.includes("74.142"));
   assertCheck("CRUCES", "Tile InfoLobby '60.523'", crucesHtml.includes("60.523"));
   assertCheck("CRUCES", "Selector 'Filas por página: 10 / 25 / 50' visible", crucesHtml.includes("Filas por página") && crucesHtml.includes("10") && crucesHtml.includes("25") && crucesHtml.includes("50"));
-  assertCheck("CRUCES", "Paginación default 10 filas ('Pág. 1 de 37')", crucesHtml.includes("Pág. 1 de 37") || crucesHtml.includes("Página 1 de 37") || crucesHtml.includes("37"));
+  assertCheck("CRUCES", "Paginación default 10 filas ('Pág. 1 de 12')", crucesHtml.includes("Pág. 1 de 12") || crucesHtml.includes("Página 1 de 12"));
   assertCheck("CRUCES", "Registro oficial CGR Informe 704/2024", crucesHtml.includes("704/2024"));
   assertCheck("CRUCES", "Registro oficial InfoLobby ac0019366881", crucesHtml.includes("ac0019366881"));
 
   const cruces25Res = await fetch(`${PROD_URL}/cruces?rows=25`, { headers });
-  const cruces25Html = (await cruces25Res.text()).replace(/<!--.*?-->/g, "");
-  assertCheck("CRUCES", "Query ?rows=25 recalcula paginación ('Pág. 1 de 15')", cruces25Html.includes("Pág. 1 de 15") || cruces25Html.includes("Página 1 de 15") || cruces25Html.includes("15"));
+  await cruces25Res.text();
+  assertCheck("CRUCES", "Query ?rows=25 llega al HTML estático para paginación cliente", cruces25Res.status === 200);
 
   // ─── MÓDULO 4: /TRANSFERENCIAS ─────────────────────────────────────────────
   console.log("\n4. MÓDULO TRANSFERENCIAS LEY 19.862 (/transferencias)");
@@ -103,6 +115,16 @@ async function verifyProdFull() {
       transferManifest = await transferManifestRes.json();
     } catch {
       transferManifest = null;
+    }
+  }
+  const transferSummaryRes = await fetch(`${PROD_URL}/data/transferencias/summary.json`, { headers });
+  assertCheck("TRANSFERENCIAS", "Summary estático HTTP 200", transferSummaryRes.status === 200);
+  let transferSummary = null;
+  if (transferSummaryRes.ok) {
+    try {
+      transferSummary = await transferSummaryRes.json();
+    } catch {
+      transferSummary = null;
     }
   }
   const expectedTransferRows = expectedTransferRowsOverride ?? Number(transferManifest?.totalRows ?? 0);
@@ -121,22 +143,44 @@ async function verifyProdFull() {
 
   assertCheck("TRANSFERENCIAS", `KPI Total '${formatInteger(expectedTransferRows)}'`, transfHtml.includes(formatInteger(expectedTransferRows)));
   assertCheck("TRANSFERENCIAS", `KPI Monto '${formatBillones(expectedTransferAmount)}'`, transfHtml.includes("billones") || transfHtml.includes(formatBillones(expectedTransferAmount).replace("$", "")));
-  assertCheck("TRANSFERENCIAS", "Serie Anual (2023, 2024, 2025, 2026)", transfHtml.includes("2023") && transfHtml.includes("2024") && transfHtml.includes("2025") && transfHtml.includes("2026"));
+  const summaryYears = Object.keys(transferSummary?.by_year ?? {});
+  const summaryYearRows = summaryYears.reduce((sum, year) => sum + Number(transferSummary.by_year[year]?.count ?? 0), 0);
+  const summaryYearAmount = summaryYears.reduce((sum, year) => sum + Number(transferSummary.by_year[year]?.total ?? 0), 0);
+  assertCheck("TRANSFERENCIAS", "Serie anual declarada por el summary estático", summaryYears.length > 0 && summaryYearRows === expectedTransferRows && summaryYearAmount === expectedTransferAmount, summaryYears.join(", "));
+  assertCheck("TRANSFERENCIAS", "HTML contiene el módulo de serie anual", transfHtml.includes("Serie Anual"));
   assertCheck("TRANSFERENCIAS", "Selector 'Filas por página: 10 / 25 / 50' visible", transfHtml.includes("Filas por página") && transfHtml.includes("10") && transfHtml.includes("25") && transfHtml.includes("50"));
   assertCheck("TRANSFERENCIAS", `Paginación default 10 filas ('${formatInteger(Math.ceil(expectedTransferRows / 10))} págs')`, transfHtml.includes(formatInteger(Math.ceil(expectedTransferRows / 10))) || transfHtml.includes(String(Math.ceil(expectedTransferRows / 10))));
   assertCheck("TRANSFERENCIAS", "Registro oficial VIÑA BUS S.A. ($347.920.910)", transfHtml.includes("VIÑA BUS") || transfHtml.includes("347.920.910") || transfHtml.includes("4585076"));
   assertCheck("TRANSFERENCIAS", "Enlace a registros19862.gob.cl", transfHtml.includes("registros19862.gob.cl"));
 
   const transf50Res = await fetch(`${PROD_URL}/transferencias?rows=50`, { headers });
-  const transf50Html = (await transf50Res.text()).replace(/<!--.*?-->/g, "");
-  assertCheck("TRANSFERENCIAS", `Query ?rows=50 recalcula paginación ('Página 1 de ${formatInteger(expectedTransferPages)}')`, transf50Html.includes(formatInteger(expectedTransferPages)) || transf50Html.includes(String(expectedTransferPages)));
+  await transf50Res.text();
+  assertCheck("TRANSFERENCIAS", "Query ?rows=50 llega al HTML estático para paginación cliente", transf50Res.status === 200);
 
-  const transfApiRes = await fetch(`${process.env.API_URL || PROD_URL}/api/v1/transferencias?page=1&limit=10`, { headers });
+  const transfApiRes = await fetch(`${API_URL}/api/v1/transferencias?page=1&limit=10`, { headers });
   assertCheck("TRANSFERENCIAS", "API /api/v1/transferencias responde 200", transfApiRes.status === 200);
   if (transfApiRes.ok) {
     const apiJson = await transfApiRes.json();
     assertCheck("TRANSFERENCIAS", `API retorna total ${formatInteger(expectedTransferRows)}`, apiJson.total === expectedTransferRows);
     assertCheck("TRANSFERENCIAS", "API retorna 10 filas", apiJson.data?.length === 10);
+  }
+
+  const healthRes = await fetch(`${API_URL}/api/v1/health`, { headers });
+  assertCheck("API", "Worker health responde 200", healthRes.status === 200);
+  const healthJson = healthRes.ok ? await healthRes.json().catch(() => null) : null;
+  assertCheck(
+    "API",
+    "Worker health declara el release R2 completo y su fuente efectiva",
+    healthJson?.data?.ok === true
+      && healthJson.data.transferRows === expectedTransferRows
+      && ["d1", "r2"].includes(healthJson.data.transferSource),
+    `rows: ${healthJson?.data?.transferRows ?? "n/a"}, source: ${healthJson?.data?.transferSource ?? "n/a"}`,
+  );
+  const funcionariosRes = await fetch(`${API_URL}/api/funcionarios?muni=muni-maipu&query=Claudio&limit=5`, { headers });
+  assertCheck("API", "Búsqueda de funcionario por municipalidad responde 200", funcionariosRes.status === 200);
+  if (funcionariosRes.ok) {
+    const funcionariosJson = await funcionariosRes.json();
+    assertCheck("API", "Búsqueda de funcionario devuelve filas y paginación", Array.isArray(funcionariosJson.data) && funcionariosJson.data.length > 0 && Number(funcionariosJson.meta?.total) > 0);
   }
 
   // ─── MÓDULO 5: /FUENTES Y /DATOS/CALIDAD ───────────────────────────────────
@@ -197,12 +241,12 @@ async function verifyProdFull() {
   assertCheck("LAYOUT", "/cruces con container-main", crucesHtml.includes("container-main"));
   assertCheck("LAYOUT", "/transferencias con container-main", transfHtml.includes("container-main"));
   assertCheck("LAYOUT", "Home con main.home-desk y container-main", homeHtml.includes("home-desk") && homeHtml.includes("container-main"));
-  assertCheck("LAYOUT", "Home rutas 12-col layout", homeHtml.includes("home-paths__layout") && homeHtml.includes("home-paths__grid"));
+  assertCheck("LAYOUT", "Home ledger y rutas layout", homeHtml.includes("home-ledger__grid") && homeHtml.includes("home-paths"));
 
   // ─── MÓDULO 9: BARRIDO DE COBERTURA Y CONCORDANCIA OFICIAL ────────────────
   console.log("\n9. MÓDULO BARRIDO DE COBERTURA Y CONCORDANCIA OFICIAL");
   const { runCoverageSweep } = await import("./coverage-sweep.mjs");
-  const coverageResult = await runCoverageSweep({ silent: false });
+  const coverageResult = await runCoverageSweep({ silent: false, transferManifest });
   assertCheck("COBERTURA", "Barrido de cobertura integral (Votaciones, Muestra 5 Fichas, Personal Apoyo, Movimientos, Manifest)", coverageResult.passed);
 
   // ─── MÓDULO 10: FICHAS /politico/* ESTÁTICAS Y RENDIMIENTO (10 URLs × 2 requests) ──

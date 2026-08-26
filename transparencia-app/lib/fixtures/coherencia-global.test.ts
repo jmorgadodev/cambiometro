@@ -88,17 +88,20 @@ describe("Blindaje Anti-Regresión — Coherencia Global del Sitio", () => {
       expect(datosSource).toContain("GLOBAL_KPIS.registros_canonicos");
       expect(homeSource).toContain("GLOBAL_KPIS.entidades");
       expect(datosSource).toContain("GLOBAL_KPIS.entidades");
+      expect(homeSource).toContain("getStaticEntityCatalog().total");
+      expect(datosSource).toContain("const entityCount = getStaticEntityCatalog().total || GLOBAL_KPIS.entidades");
     });
 
     it("Montos consolidados ChileCompra y Ley 19.862 son consistentes cross-page", () => {
-      // ChileCompra: 74.142 procesos canónicos y $1,9 billones
+      // ChileCompra: 74.142 registros canónicos. El monto agregado sólo se
+      // muestra cuando la proyección vigente lo publica explícitamente.
       expect(SOURCE_CANONICAL_COUNTS["chilecompra"]).toBe(74142);
       // Ley 19.862: 59.361 registros canónicos y $5,01 billones
       expect(SOURCE_CANONICAL_COUNTS["ley-19862"]).toBe(59361);
 
       const crucesSource = readFileSync(resolve(projectRoot, "app/cruces/page.tsx"), "utf8");
-      expect(crucesSource).toContain("1900000000000");
-      expect(crucesSource).toContain("chilecompra");
+      expect(crucesSource).toContain("SOURCE_CANONICAL_COUNTS");
+      expect(crucesSource).toContain("chilecompraCanonicalCount");
     });
   });
 

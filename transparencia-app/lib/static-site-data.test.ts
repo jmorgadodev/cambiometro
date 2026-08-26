@@ -3,8 +3,27 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { buildChunkManifest, chunkRows, writeChunkedJson } from "../scripts/static-site-data.mjs";
+import { chunkJsonRows, listUnavailableMunicipalities } from "../scripts/static-payroll.mjs";
 
 describe("static site data", () => {
+  it("divide nóminas grandes por bytes sin perder filas", () => {
+    const rows = Array.from({ length: 9 }, (_, index) => ({ id: index, text: "x".repeat(40) }));
+    const chunks = chunkJsonRows(rows, 300);
+
+    expect(chunks.flat()).toEqual(rows);
+    expect(chunks.every((chunk) => Buffer.byteLength(JSON.stringify(chunk)) <= 300)).toBe(true);
+    expect(chunks.length).toBeGreaterThan(1);
+  });
+
+  it("distingue cobertura oficial de municipalidades sin registros publicados", () => {
+    expect(listUnavailableMunicipalities([
+      { communeId: "muni-a", status: "available", recordCount: 2, cut: "2026-07" },
+      { communeId: "muni-b", status: "unavailable", recordCount: 0, cut: "2026-07" },
+    ], [{ id: "muni-a" }])).toEqual([
+      { id: "muni-b", status: "unavailable", recordCount: 0, cut: "2026-07" },
+    ]);
+  });
+
   it("divide filas en páginas numeradas de tamaño estable", () => {
     const rows = Array.from({ length: 105 }, (_, index) => ({ id: index + 1 }));
 

@@ -663,7 +663,7 @@ export default function TransferenciasExplorerClient({
           >
             <div>
               📌 <strong>Explorador de Transferencias Ley 19.862:</strong> {fmtNum(total)} transferencias oficiales registradas · datos trazables a <code>registros19862.gob.cl</code> · coherente con{" "}
-              <Link href="/datos/calidad" style={{ color: "var(--accent)", fontWeight: 600, textDecoration: "underline" }}>
+              <Link prefetch={false} href="/datos/calidad" style={{ color: "var(--accent)", fontWeight: 600, textDecoration: "underline" }}>
                 /datos/calidad
               </Link>
             </div>
