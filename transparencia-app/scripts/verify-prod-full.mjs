@@ -167,6 +167,15 @@ async function verifyProdFull() {
 
   const healthRes = await fetch(`${API_URL}/api/v1/health`, { headers });
   assertCheck("API", "Worker health responde 200", healthRes.status === 200);
+  const healthJson = healthRes.ok ? await healthRes.json().catch(() => null) : null;
+  assertCheck(
+    "API",
+    "Worker health declara el release R2 completo y su fuente efectiva",
+    healthJson?.data?.ok === true
+      && healthJson.data.transferRows === expectedTransferRows
+      && ["d1", "r2"].includes(healthJson.data.transferSource),
+    `rows: ${healthJson?.data?.transferRows ?? "n/a"}, source: ${healthJson?.data?.transferSource ?? "n/a"}`,
+  );
   const funcionariosRes = await fetch(`${API_URL}/api/funcionarios?muni=muni-maipu&query=Claudio&limit=5`, { headers });
   assertCheck("API", "Búsqueda de funcionario por municipalidad responde 200", funcionariosRes.status === 200);
   if (funcionariosRes.ok) {
