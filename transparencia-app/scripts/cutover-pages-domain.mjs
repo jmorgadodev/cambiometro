@@ -14,7 +14,7 @@ if (apply && process.env.CAMBIOMETRO_CUTOVER_CONFIRM !== "CAMBIOMETRO_CONFIRM_CU
 
 const apiBase = "https://api.cloudflare.com/client/v4";
 
-async function cf(path, options = {}) {
+async function cfRequest(path, options = {}) {
   const response = await fetch(`${apiBase}${path}`, {
     ...options,
     headers: {
@@ -24,11 +24,58 @@ async function cf(path, options = {}) {
     },
   });
   const body = await response.json().catch(() => ({}));
+  return { response, body };
+}
+
+async function cf(path, options = {}) {
+  const { response, body } = await cfRequest(path, options);
   if (!response.ok || body.success !== true) {
     const details = (body.errors ?? []).map((error) => error.message).join("; ");
     throw new Error(`CLOUDFLARE_API_FAILED:${response.status}:${details || path}`);
   }
   return body.result;
+}
+
+async function ensureWafUptimeException(zoneId) {
+  const path = `/zones/${zoneId}/rulesets/phases/http_request_firewall_custom/entrypoint`;
+  const expression = `(http.host eq "${hostname}" and http.request.uri.path eq "/" and http.request.headers["x-cambiometro-uptime-token"][0] eq "${uptimeToken}")`;
+  const rule = {
+    ref: "cambiometro_uptime_root",
+    description: "Cambiometro uptime probe root exception",
+    action: "skip",
+    action_parameters: {
+      phases: ["http_request_sbfm", "http_request_firewall_managed"],
+      products: ["bic", "waf", "securityLevel", "uaBlock", "zoneLockdown"],
+    },
+    expression,
+    enabled: true,
+  };
+  const current = await cfRequest(path);
+  if (current.response.status === 200 && current.body.success === true) {
+    const rules = Array.isArray(current.body.result?.rules) ? current.body.result.rules : [];
+    const existing = rules.find((candidate) => candidate.ref === rule.ref);
+    if (existing) return { action: "waf-uptime-exception-present", id: existing.id };
+    const added = await cf(`${path}/rules`, {
+      method: "POST",
+      body: JSON.stringify({ ...rule, position: { before: "" } }),
+    });
+    return { action: "waf-uptime-exception-created", id: added.id };
+  }
+  if (current.response.status === 404) {
+    const created = await cf(`/zones/${zoneId}/rulesets`, {
+      method: "POST",
+      body: JSON.stringify({
+        name: "Cambiometro uptime root exception",
+        description: "Limited exception for the GitHub uptime probe at the public root",
+        kind: "zone",
+        phase: "http_request_firewall_custom",
+        rules: [rule],
+      }),
+    });
+    return { action: "waf-uptime-exception-created", id: created.id };
+  }
+  const details = (current.body.errors ?? []).map((error) => error.message).join("; ");
+  throw new Error(`CLOUDFLARE_API_FAILED:${current.response.status}:${details || path}`);
 }
 
 function printRecord(record) {
@@ -198,6 +245,8 @@ if (refreshedDesired) {
 
 const publicUrl = `https://${hostname}`;
 if (!uptimeToken) throw new Error("UPTIME_TOKEN_MISSING");
+const wafException = await ensureWafUptimeException(zone.id);
+console.log(JSON.stringify(wafException));
 const htmlResponse = await fetch(`${publicUrl}/?pages_cutover_probe=${Date.now()}`, {
   headers: {
     "User-Agent": "Cambiometro-Cutover/1.0",
