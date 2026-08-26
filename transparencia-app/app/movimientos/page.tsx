@@ -392,7 +392,7 @@ function MovimientosContent() {
               <div className="stat-tile__label">Días Entre Cambios (Promedio)</div>
               <div className="stat-tile__hint">
                 1 relevo cada ~{diasEntreCambios} días ·{" "}
-                <Link href="/como-funciona" style={{ color: "var(--accent)", textDecoration: "underline" }}>
+                <Link prefetch={false} href="/como-funciona" style={{ color: "var(--accent)", textDecoration: "underline" }}>
                   Metodología →
                 </Link>
               </div>
@@ -876,8 +876,8 @@ function MovimientosContent() {
                                 <strong style={{ color: "var(--alert)" }}>
                                   {(() => {
                                     const p = POLITICOS_SEED.find((x) => x.nombre_completo.toLowerCase() === mov.saliente!.toLowerCase());
-                                    if (p) return <Link href={`/politico/${p.id}`} style={{ color: "var(--alert)", textDecoration: "underline" }}>{mov.saliente}</Link>;
-                                    return <Link href={`/cruces?q=${encodeURIComponent(mov.saliente!)}`} style={{ color: "var(--alert)", textDecoration: "underline" }}>{mov.saliente}</Link>;
+                                    if (p) return <Link prefetch={false} href={`/politico/${p.id}`} style={{ color: "var(--alert)", textDecoration: "underline" }}>{mov.saliente}</Link>;
+                                    return <Link prefetch={false} href={`/cruces?q=${encodeURIComponent(mov.saliente!)}`} style={{ color: "var(--alert)", textDecoration: "underline" }}>{mov.saliente}</Link>;
                                   })()}
                                 </strong>
                               </span>
@@ -893,8 +893,8 @@ function MovimientosContent() {
                                 <strong style={{ color: "var(--ok)" }}>
                                   {(() => {
                                     const p = POLITICOS_SEED.find((x) => x.nombre_completo.toLowerCase() === mov.entrante!.toLowerCase());
-                                    if (p) return <Link href={`/politico/${p.id}`} style={{ color: "var(--ok)", textDecoration: "underline" }}>{mov.entrante}</Link>;
-                                    return <Link href={`/cruces?q=${encodeURIComponent(mov.entrante!)}`} style={{ color: "var(--ok)", textDecoration: "underline" }}>{mov.entrante}</Link>;
+                                    if (p) return <Link prefetch={false} href={`/politico/${p.id}`} style={{ color: "var(--ok)", textDecoration: "underline" }}>{mov.entrante}</Link>;
+                                    return <Link prefetch={false} href={`/cruces?q=${encodeURIComponent(mov.entrante!)}`} style={{ color: "var(--ok)", textDecoration: "underline" }}>{mov.entrante}</Link>;
                                   })()}
                                 </strong>
                               </span>

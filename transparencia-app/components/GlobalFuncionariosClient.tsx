@@ -656,7 +656,7 @@ export default function GlobalFuncionariosClient() {
             )}
 
             {activeMuni ? (
-              <Link
+              <Link prefetch={false}
                 href={`/municipalidades/${activeMuni.id}`}
                 className="btn btn-secondary"
                 style={{ fontSize: "0.8rem", padding: "0.45rem 0.9rem", alignSelf: "center" }}
@@ -664,7 +664,7 @@ export default function GlobalFuncionariosClient() {
                 Ficha Comunal ↗
               </Link>
             ) : (
-              <Link
+              <Link prefetch={false}
                 href="/municipalidades"
                 className="btn btn-secondary"
                 style={{ fontSize: "0.8rem", padding: "0.45rem 0.9rem", alignSelf: "center" }}

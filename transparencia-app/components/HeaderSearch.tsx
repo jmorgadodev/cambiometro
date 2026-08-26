@@ -144,13 +144,13 @@ export default function HeaderSearch() {
           ) : !isLoading && results.length === 0 ? (
             <div role="status" className="header-search__message">
               <p>Sin coincidencias verificadas para “{query}”.</p>
-              <Link href={`/politico?q=${encodeURIComponent(query.trim())}`} onClick={() => setIsOpen(false)}>
+              <Link prefetch={false} href={`/politico?q=${encodeURIComponent(query.trim())}`} onClick={() => setIsOpen(false)}>
                 Ver listado de diputados y senadores con “{query.trim()}” →
               </Link>
             </div>
           ) : (
             results.map((result) => (
-              <Link
+              <Link prefetch={false}
                 key={`${result.type}-${result.id}`}
                 href={result.url}
                 role="option"

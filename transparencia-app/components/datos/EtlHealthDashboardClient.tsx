@@ -239,7 +239,7 @@ export default function EtlHealthDashboardClient() {
                 Origen de Datos Abiertos del Estado ↗
               </a>
 
-              <Link
+              <Link prefetch={false}
                 href={fuente.viewLink}
                 style={{
                   fontSize: "0.78rem",

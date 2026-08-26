@@ -508,7 +508,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                 Este organismo no cuenta con una partida presupuestaria independiente en la Ley de Presupuestos del Sector Público. Sus recursos operativos y de inversión forman parte de la partida consolidada del <strong>{servicio.ministerio_dependiente}</strong>.
               </p>
               <div style={{ display: "flex", gap: "0.75rem" }}>
-                <Link href="/servicios-publicos" className="btn btn-secondary" style={{ fontSize: "0.82rem" }}>
+                <Link prefetch={false} href="/servicios-publicos" className="btn btn-secondary" style={{ fontSize: "0.82rem" }}>
                   Ver Ministerios y Partidas Principales →
                 </Link>
               </div>

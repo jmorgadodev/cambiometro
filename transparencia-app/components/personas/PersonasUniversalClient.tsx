@@ -877,7 +877,7 @@ export default function PersonasUniversalClient({
                   const asistPct = p.asistencia_sala_pct ?? null;
                   const asistColor = asistPct === null ? "var(--text-3)" : asistPct >= 85 ? "var(--ok)" : asistPct >= 70 ? "var(--warn)" : "var(--bad)";
                   return (
-                    <Link
+                    <Link prefetch={false}
                       key={p.id}
                       href={`/politico/${getPoliticoSlug(p.id)}`}
                       style={{
@@ -1065,7 +1065,7 @@ export default function PersonasUniversalClient({
                             {p.asistencia_sala_pct ? `${p.asistencia_sala_pct}%` : "—"}
                           </td>
                           <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
-                            <Link
+                            <Link prefetch={false}
                               href={`/politico/${getPoliticoSlug(p.id)}`}
                               style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textDecoration: "none" }}
                             >
@@ -1090,7 +1090,7 @@ export default function PersonasUniversalClient({
             {viewMode === "cards" ? (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem" }}>
                 {paginatedAlcaldes.map((a) => (
-                  <Link
+                  <Link prefetch={false}
                     key={a.muni_id}
                     href={`/municipalidades/${a.muni_id}`}
                     style={{
@@ -1192,7 +1192,7 @@ export default function PersonasUniversalClient({
                           {a.grado_eus ? `Grado ${a.grado_eus}` : "—"}
                         </td>
                         <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
-                          <Link
+                          <Link prefetch={false}
                             href={`/municipalidades/${a.muni_id}`}
                             style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textDecoration: "none" }}
                           >
@@ -1263,7 +1263,7 @@ export default function PersonasUniversalClient({
                     </div>
 
                     <div style={{ marginTop: "0.75rem", paddingTop: "0.65rem", borderTop: "1px solid var(--border)" }}>
-                      <Link
+                      <Link prefetch={false}
                         href={`/servicios-publicos/${aut.id}`}
                         style={{
                           display: "block",
@@ -1313,7 +1313,7 @@ export default function PersonasUniversalClient({
                           {aut.dotacion_total === null ? "—" : aut.dotacion_total.toLocaleString("es-CL")}
                         </td>
                         <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
-                          <Link
+                          <Link prefetch={false}
                             href={`/servicios-publicos/${aut.id}`}
                             style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textDecoration: "none" }}
                           >

@@ -275,10 +275,10 @@ export default async function DataQualityPage() {
             </p>
           </div>
           <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-            <Link className="btn btn-secondary" href="/fuentes" style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}>
+            <Link prefetch={false} className="btn btn-secondary" href="/fuentes" style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}>
               Ver catálogo de fuentes →
             </Link>
-            <Link className="btn btn-secondary" href="/datos" style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}>
+            <Link prefetch={false} className="btn btn-secondary" href="/datos" style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}>
               Monitor de salud de ETLs →
             </Link>
           </div>

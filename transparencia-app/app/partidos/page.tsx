@@ -135,7 +135,7 @@ export default async function PartidosListPage() {
           >
             {/* KPI 1: Mayor Escaños */}
             {partidoMasEscaños && (
-              <Link
+              <Link prefetch={false}
                 href={`/partidos/${partidoMasEscaños.slug}`}
                 className="card-flat hover-row"
                 style={{ padding: "1rem", textDecoration: "none", color: "inherit", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 10 }}
@@ -155,7 +155,7 @@ export default async function PartidosListPage() {
 
             {/* KPI 2: Mayor Gasto Acumulado */}
             {partidoMasGasto && (
-              <Link
+              <Link prefetch={false}
                 href={`/partidos/${partidoMasGasto.slug}`}
                 className="card-flat hover-row"
                 style={{ padding: "1rem", textDecoration: "none", color: "inherit", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 10 }}
@@ -174,7 +174,7 @@ export default async function PartidosListPage() {
 
             {/* KPI 3: Mayor Promedio por Parlamentario */}
             {partidoMasGastoPromedio && (
-              <Link
+              <Link prefetch={false}
                 href={`/partidos/${partidoMasGastoPromedio.slug}`}
                 className="card-flat hover-row"
                 style={{ padding: "1rem", textDecoration: "none", color: "inherit", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 10 }}
@@ -193,7 +193,7 @@ export default async function PartidosListPage() {
 
             {/* KPI 4: Mayor Asistencia */}
             {partidoMasAsistencia && (
-              <Link
+              <Link prefetch={false}
                 href={`/partidos/${partidoMasAsistencia.slug}`}
                 className="card-flat hover-row"
                 style={{ padding: "1rem", textDecoration: "none", color: "inherit", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 10 }}
@@ -212,7 +212,7 @@ export default async function PartidosListPage() {
 
             {/* KPI 5: Mayor Personal de Apoyo */}
             {partidoMasPersonal && (
-              <Link
+              <Link prefetch={false}
                 href={`/partidos/${partidoMasPersonal.slug}`}
                 className="card-flat hover-row"
                 style={{ padding: "1rem", textDecoration: "none", color: "inherit", background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 10 }}

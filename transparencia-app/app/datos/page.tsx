@@ -82,7 +82,7 @@ export default async function DataObservatoryPage() {
               enlaces directos a los portales oficiales de origen.
             </p>
             <div style={{ marginTop: "1rem" }}>
-              <Link className="btn btn-secondary" href="/datos/calidad" style={{ fontSize: "0.85rem", padding: "0.45rem 0.9rem" }}>
+              <Link prefetch={false} className="btn btn-secondary" href="/datos/calidad" style={{ fontSize: "0.85rem", padding: "0.45rem 0.9rem" }}>
                 Ver calidad de datos →
               </Link>
             </div>
@@ -137,7 +137,7 @@ export default async function DataObservatoryPage() {
                   ))}
                 </ul>
                 <p className="data-observatory__caveat">{line.caveat}</p>
-                <Link className="data-link" href={line.href}>
+                <Link prefetch={false} className="data-link" href={line.href}>
                   {line.linkLabel} →
                 </Link>
               </article>

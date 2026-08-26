@@ -179,10 +179,10 @@ export default async function HowItWorksPage() {
           </div>
 
           <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-            <Link href="/politico" className="btn btn-primary" style={{ padding: "0.65rem 1.25rem" }}>
+            <Link prefetch={false} href="/politico" className="btn btn-primary" style={{ padding: "0.65rem 1.25rem" }}>
               Ver Parlamentarios
             </Link>
-            <Link href="/partidos" className="btn btn-secondary" style={{ padding: "0.65rem 1.25rem" }}>
+            <Link prefetch={false} href="/partidos" className="btn btn-secondary" style={{ padding: "0.65rem 1.25rem" }}>
               Ranking de Partidos
             </Link>
           </div>

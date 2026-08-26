@@ -1458,7 +1458,7 @@ export default function MunicipalidadesExplorerClient({
             </button>
           </div>
         ) : viewMode === "cards" ? (
-          /* VISTA EN TARJETAS (100% CLICKABLE ENVOLVIENDO EN <Link>) */
+          /* VISTA EN TARJETAS (100% CLICKABLE ENVOLVIENDO EN <Link prefetch={false}>) */
           <div
             style={{
               display: "grid",
