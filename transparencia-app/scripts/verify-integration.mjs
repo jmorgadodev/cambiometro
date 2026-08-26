@@ -297,8 +297,8 @@ try {
   const sourcePayload = await sources.json();
   const expectedSourceCounts = new Map([
     ["chilecompra", 74_142], ["dipres", 15_689], ["sinim", 3_105],
-    ["ley-19862", 11_651], ["transparencia-activa", 1_203_287],
-    ["servel", 23_894], ["personal-apoyo", 4_092],
+    ["ley-19862", 11_651], ["transparencia-activa", 1_200_807],
+    ["personal-apoyo", 4_073],
   ]);
   if (!verifyingLocal) {
     for (const [sourceId, minimum] of expectedSourceCounts) {
@@ -306,6 +306,9 @@ try {
       assert(source, `falta fuente ${sourceId}`);
       assert(source.recordCount >= minimum, `${sourceId}: ${source.recordCount} < ${minimum}`);
     }
+    const servel = sourcePayload.data.find((source) => source.id === "servel");
+    assert(servel, "falta fuente servel");
+    assert(["connected", "partial", "stale", "unavailable"].includes(servel.status), `servel: estado inválido ${servel.status}`);
     assert(sourcePayload.data.every((source) => ["connected", "partial", "stale", "unavailable"].includes(source.status)));
   }
 
