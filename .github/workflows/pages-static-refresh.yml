@@ -21,6 +21,11 @@ on:
         type: boolean
         required: false
         default: false
+      record_pages_deployment:
+        description: "Registrar el deployment productivo más reciente sin reconstruir"
+        type: boolean
+        required: false
+        default: false
       preview_branch:
         description: "Rama Pages de preview; vacío para no publicar preview"
         required: false
@@ -35,7 +40,7 @@ permissions:
 
 jobs:
   build-verify-publish:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: (github.event_name == 'workflow_dispatch' && inputs.record_pages_deployment != true) || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -145,8 +150,10 @@ jobs:
             const fs = require("node:fs");
             const payload = JSON.parse(fs.readFileSync("pages-deployments.json", "utf8"));
             const deployments = Array.isArray(payload) ? payload : (payload.result ?? []);
-            const deployment = deployments.find((item) => item.deployment_trigger?.metadata?.commit_hash === process.env.PAGES_COMMIT_SHA);
+            const matching = deployments.filter((item) => item.deployment_trigger?.metadata?.commit_hash === process.env.PAGES_COMMIT_SHA);
+            const deployment = matching[0] ?? [...deployments].sort((a, b) => Date.parse(b.created_on ?? 0) - Date.parse(a.created_on ?? 0))[0];
             if (!deployment?.id) throw new Error(`No se encontró deployment Pages productivo para ${process.env.PAGES_COMMIT_SHA}`);
+            if (matching.length === 0) console.warn(`No hubo match por commit; se registra el deployment productivo más reciente (${deployment.id})`);
             console.log(`Pages deployment ID: ${deployment.id}`);
             console.log(`Pages deployment URL: ${deployment.url ?? "n/a"}`);
             console.log(`Rollback exacto: npm run pages:rollback -- ${deployment.id}`);
@@ -157,6 +164,49 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: pages-production-deployment-${{ github.sha }}
+          path: transparencia-app/pages-deployments.json
+          if-no-files-found: error
+          retention-days: 30
+
+  record-pages-production-deployment:
+    if: github.event_name == 'workflow_dispatch' && inputs.record_pages_deployment == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Instalar Wrangler
+        run: npm ci
+        working-directory: transparencia-app
+
+      - name: Registrar deployment Pages productivo existente
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+        run: |
+          npx wrangler pages deployment list --project-name cambiometro --environment production --json > pages-deployments.json
+          node -e '
+            const fs = require("node:fs");
+            const payload = JSON.parse(fs.readFileSync("pages-deployments.json", "utf8"));
+            const deployments = Array.isArray(payload) ? payload : (payload.result ?? []);
+            const deployment = [...deployments].sort((a, b) => Date.parse(b.created_on ?? 0) - Date.parse(a.created_on ?? 0))[0];
+            if (!deployment?.id) throw new Error("No se encontró deployment Pages productivo");
+            console.log(`Pages deployment ID: ${deployment.id}`);
+            console.log(`Pages deployment URL: ${deployment.url ?? "n/a"}`);
+            console.log(`Rollback exacto: npm run pages:rollback -- ${deployment.id}`);
+          '
+
+      - name: Guardar metadata del deployment Pages existente
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-production-deployment-existing-${{ github.sha }}
           path: transparencia-app/pages-deployments.json
           if-no-files-found: error
           retention-days: 30
