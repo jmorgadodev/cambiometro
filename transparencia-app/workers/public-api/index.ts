@@ -583,6 +583,57 @@ async function exportData(requestUrl: URL, env: Env) {
   return new Response(`${header}\n${body}`, { headers: { "Content-Type": "text/csv; charset=utf-8", "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200", "Content-Disposition": "attachment; filename=transparencia_chile.csv", "X-Content-Type-Options": "nosniff" } });
 }
 
+async function listSources(requestUrl: URL, env: Env) {
+  if (!env.DB) return dbUnavailable();
+  try {
+    const rows = await env.DB.prepare(`
+      SELECT
+        sources.*,
+        COALESCE((SELECT COUNT(*) FROM records WHERE records.source_id = sources.id), 0) AS materialized_count,
+        source_state.status AS state_status,
+        source_state.record_count AS state_record_count,
+        source_state.checksum_sha256 AS state_checksum_sha256,
+        source_state.generated_at AS state_generated_at,
+        source_state.last_success_at AS state_last_success_at,
+        source_state.published_version AS state_published_version
+      FROM sources
+      LEFT JOIN source_state ON source_state.source_id = sources.id
+      ORDER BY sources.id
+    `).all<JsonRecord>();
+    const data = (rows.results ?? []).map((row) => {
+      const materializedCount = Number(row.materialized_count ?? 0);
+      const stateCount = Number(row.state_record_count ?? 0);
+      const stateStatus = String(row.state_status ?? "");
+      const projectionOnly = row.id === "personal-apoyo";
+      const archiveOnly = stateStatus === "archive_only";
+      const recordCount = archiveOnly || projectionOnly ? Math.max(materializedCount, stateCount) : materializedCount;
+      const status = archiveOnly ? "partial" : recordCount > 0 ? "connected" : "unavailable";
+      return {
+        ...row,
+        materialized_count: undefined,
+        state_status: undefined,
+        state_record_count: undefined,
+        state_checksum_sha256: undefined,
+        state_generated_at: undefined,
+        state_last_success_at: undefined,
+        state_published_version: undefined,
+        recordCount,
+        status,
+        checksumSha256: row.state_checksum_sha256 ?? null,
+        lastUpdated: row.state_last_success_at ?? row.state_generated_at ?? null,
+        publishedVersion: row.state_published_version ?? null,
+        statusDetail: archiveOnly
+          ? "Histórico íntegro en R2; se consulta bajo demanda para preservar capacidad en D1."
+          : recordCount > 0 ? "Datos cargados desde D1" : "Sin datos publicados.",
+      };
+    });
+    return success(data, { total: data.length }, { self: requestUrl.toString() });
+  } catch {
+    const rows = await env.DB.prepare("SELECT * FROM sources ORDER BY id").all<JsonRecord>();
+    return success((rows.results ?? []).map((row) => ({ ...row, recordCount: 0, status: "unavailable" })), { total: rows.results?.length ?? 0 }, { self: requestUrl.toString() });
+  }
+}
+
 function svgResponse(title: string) {
   const safe = title.replace(/[<&>\"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;" })[char] ?? char);
   const body = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630" viewBox="0 0 1200 630"><rect width="1200" height="630" fill="#0d1929"/><text x="80" y="250" fill="#63c5da" font-family="Arial,sans-serif" font-size="34" font-weight="700">EL CAMBIÓMETRO</text><text x="80" y="330" fill="#f8fafc" font-family="Arial,sans-serif" font-size="46" font-weight="700">${safe}</text></svg>`;
@@ -642,9 +693,7 @@ export default {
       return health(env);
     }
     if (path === "/api/v1/sources") {
-      if (!env.DB) return dbUnavailable();
-      const rows = await env.DB.prepare("SELECT * FROM sources ORDER BY id").all<JsonRecord>();
-      return success(rows.results ?? [], { total: rows.results?.length ?? 0 }, { self: url.toString() });
+      return listSources(url, env);
     }
     if (path === "/api/v1/export") {
         const limited = await rateLimit(request, env, "export");
