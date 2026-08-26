@@ -247,11 +247,13 @@ export default function PersonasUniversalClient({
     // request that is guaranteed to return DATASET_SCOPE_REQUIRED; the UI
     // renders an explicit selection state instead of a red network error.
     if (organismoFilter === "Todos") {
-      setFuncionariosData([]);
-      setFuncionariosTotal(0);
-      setFuncionariosStats({ totalMuni: 0, promedioSueldo: 0, conHorasExtras: 0 });
-      setFuncionariosLoading(false);
-      return;
+      const timer = setTimeout(() => {
+        setFuncionariosData([]);
+        setFuncionariosTotal(0);
+        setFuncionariosStats({ totalMuni: 0, promedioSueldo: 0, conHorasExtras: 0 });
+        setFuncionariosLoading(false);
+      }, 0);
+      return () => clearTimeout(timer);
     }
 
     let isMounted = true;
