@@ -87,6 +87,14 @@ const apiRoutes = workerRoutes.filter((route) => String(route.pattern ?? "").toL
 if (legacyRoutes.length > 1) {
   throw new Error(`LEGACY_HOST_ROUTES_AMBIGUOUS:${legacyRoutes.map((route) => route.id).join(",")}`);
 }
+const workerDomains = await cf(`/accounts/${accountId}/workers/domains?hostname=${encodeURIComponent(hostname)}`);
+const legacyWorkerDomains = workerDomains.filter((domain) => String(domain.hostname ?? "").toLowerCase() === hostname.toLowerCase());
+if (legacyWorkerDomains.length > 1) {
+  throw new Error(`LEGACY_WORKER_DOMAINS_AMBIGUOUS:${legacyWorkerDomains.map((domain) => domain.id).join(",")}`);
+}
+if (legacyWorkerDomains.some((domain) => String(domain.service ?? "").toLowerCase() === "cambiometro-public-api")) {
+  throw new Error("API_WORKER_CUSTOM_DOMAIN_CONFLICT: no se desvincula el Worker API");
+}
 let records = await cf(`/zones/${zone.id}/dns_records?name=${encodeURIComponent(hostname)}&per_page=100`);
 
 console.log(JSON.stringify({
@@ -107,6 +115,7 @@ console.log(JSON.stringify({
     legacyHostRoute: legacyRoutes.map((route) => ({ id: route.id, pattern: route.pattern, script: route.script ?? null })),
     apiRoutes: apiRoutes.map((route) => ({ id: route.id, pattern: route.pattern, script: route.script ?? null })),
   },
+  workerCustomDomains: legacyWorkerDomains.map((domain) => ({ id: domain.id, hostname: domain.hostname, service: domain.service ?? null })),
   dnsRecords: records.map((record) => ({ type: record.type, name: record.name, content: record.content, proxied: record.proxied })),
 }, null, 2));
 
@@ -118,6 +127,7 @@ if (!apply) {
     action: "dry-run",
     wouldRegisterPagesDomain: !registeredDomain,
     wouldDeleteLegacyHostRoute: legacyRoutes.map((route) => ({ id: route.id, pattern: route.pattern, script: route.script ?? null })),
+    wouldDetachLegacyWorkerCustomDomain: legacyWorkerDomains.map((domain) => ({ id: domain.id, hostname: domain.hostname, service: domain.service ?? null })),
     wouldDeleteRecords: conflicting.map((record) => ({ id: record.id, type: record.type, content: record.content })),
     wouldCreateOrUpdateCname: !desired || desired.proxied !== true,
   }, null, 2));
@@ -141,7 +151,16 @@ for (const route of legacyRoutes) {
   console.log(JSON.stringify({ action: "legacy-host-route-deleted", id: route.id, pattern: route.pattern, script: route.script ?? null }));
 }
 
-if (legacyRoutes.length > 0) {
+// OpenNext can also be attached as a Worker Custom Domain. Cloudflare then
+// owns the AAAA 100:: placeholder and rejects direct DNS deletion until the
+// old Worker domain is detached. Only the exact public hostname is eligible;
+// the API Worker is protected above and remains on /api/*.
+for (const domain of legacyWorkerDomains) {
+  await cf(`/accounts/${accountId}/workers/domains/${domain.id}`, { method: "DELETE" });
+  console.log(JSON.stringify({ action: "legacy-worker-custom-domain-detached", id: domain.id, hostname: domain.hostname, service: domain.service ?? null }));
+}
+
+if (legacyRoutes.length > 0 || legacyWorkerDomains.length > 0) {
   records = await cf(`/zones/${zone.id}/dns_records?name=${encodeURIComponent(hostname)}&per_page=100`);
 }
 
