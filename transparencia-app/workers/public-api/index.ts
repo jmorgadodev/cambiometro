@@ -174,24 +174,36 @@ async function listTransferenciasFromR2(requestUrl: URL, env: Env) {
   }
   const rawPage = Number(requestUrl.searchParams.get("page") ?? 1);
   const rawLimit = Number(requestUrl.searchParams.get("limit") ?? 10);
-  const page = Number.isInteger(rawPage) ? Math.max(1, Math.min(rawPage, manifest.totalPages)) : 1;
   const limit = Number.isInteger(rawLimit) ? Math.max(1, Math.min(rawLimit, 100)) : 10;
+  const requestedPage = Number.isInteger(rawPage) ? Math.max(1, rawPage) : 1;
   const search = (requestUrl.searchParams.get("q") ?? requestUrl.searchParams.get("search") ?? "").trim().toLocaleLowerCase();
   const year = (requestUrl.searchParams.get("year") ?? "").trim();
   const emisor = (requestUrl.searchParams.get("emisor") ?? "").trim().toLocaleLowerCase();
   const sort = requestUrl.searchParams.get("sort") === "fecha" ? "fecha" : "monto";
 
   if (!search && (!year || year === "Todos") && (!emisor || emisor === "Todos") && sort === "monto") {
-    const pageInfo = manifest.pages[page - 1];
-    const rows = await r2Json<JsonRecord[]>(env.PUBLIC_DATA, pageInfo.key);
-    if (!rows) return failure("DATASET_UNAVAILABLE", "El chunk de transferencias no está disponible.", 503);
-    const data = rows.map(transferApiRow);
+    const totalPages = Math.max(1, Math.ceil(manifest.totalRows / limit));
+    const page = Math.min(requestedPage, totalPages);
+    const startIndex = (page - 1) * limit;
+    const endIndex = Math.min(startIndex + limit, manifest.totalRows);
+    const firstPhysicalPage = Math.floor(startIndex / manifest.pageSize) + 1;
+    const lastPhysicalPage = Math.floor((endIndex - 1) / manifest.pageSize) + 1;
+    const physicalPages = await Promise.all(
+      manifest.pages.slice(firstPhysicalPage - 1, lastPhysicalPage).map(async (pageInfo) => {
+        const rows = await r2Json<JsonRecord[]>(env.PUBLIC_DATA, pageInfo.key);
+        if (!rows) throw new Error(`R2_TRANSFER_PAGE_MISSING:${pageInfo.page}`);
+        return rows;
+      }),
+    ).catch(() => null);
+    if (!physicalPages) return failure("DATASET_UNAVAILABLE", "El chunk de transferencias no está disponible.", 503);
+    const offsetInPhysicalRows = startIndex - (firstPhysicalPage - 1) * manifest.pageSize;
+    const data = physicalPages.flat().slice(offsetInPhysicalRows, offsetInPhysicalRows + limit).map(transferApiRow);
     return json({
       data,
       total: manifest.totalRows,
       page,
       limit,
-      totalPages: manifest.totalPages,
+      totalPages,
       kpis: {
         total_monto_clp: manifest.expected?.totalMontoClp ?? 0,
         total_transfers: manifest.totalRows,
@@ -216,6 +228,7 @@ async function listTransferenciasFromR2(requestUrl: URL, env: Env) {
     ? String(right.d ?? "").localeCompare(String(left.d ?? "")) || right.m - left.m
     : right.m - left.m || String(right.d ?? "").localeCompare(String(left.d ?? "")));
   const total = selected.length;
+  const page = Math.min(requestedPage, Math.max(1, Math.ceil(total / limit)));
   const selectedPage = selected.slice((page - 1) * limit, page * limit);
   const pageNumbers = [...new Set(selectedPage.map((entry) => entry.p))];
   const chunks = await Promise.all(pageNumbers.map(async (pageNumber) => {

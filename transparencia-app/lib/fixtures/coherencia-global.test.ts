@@ -88,6 +88,8 @@ describe("Blindaje Anti-Regresión — Coherencia Global del Sitio", () => {
       expect(datosSource).toContain("GLOBAL_KPIS.registros_canonicos");
       expect(homeSource).toContain("GLOBAL_KPIS.entidades");
       expect(datosSource).toContain("GLOBAL_KPIS.entidades");
+      expect(homeSource).toContain("entities.total || item.value");
+      expect(datosSource).toContain("const entityCount = entities.total || GLOBAL_KPIS.entidades");
     });
 
     it("Montos consolidados ChileCompra y Ley 19.862 son consistentes cross-page", () => {

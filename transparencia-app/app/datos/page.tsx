@@ -66,7 +66,11 @@ const ANALYSIS_LINES = [
 ] as const;
 
 export default async function DataObservatoryPage() {
-  const sources = await listPublishedSourceManifests();
+  const [sources, entities] = await Promise.all([
+    listPublishedSourceManifests(),
+    listEntities({ limit: 1 }),
+  ]);
+  const entityCount = entities.total || GLOBAL_KPIS.entidades;
 
   return (
     <div>
@@ -94,7 +98,7 @@ export default async function DataObservatoryPage() {
             </div>
             <div>
               <dt>Entidades y Sujetos</dt>
-              <dd>{GLOBAL_KPIS.entidades.toLocaleString("es-CL")}</dd>
+              <dd>{entityCount.toLocaleString("es-CL")}</dd>
             </div>
             <div>
               <dt>Fuentes Conectadas</dt>

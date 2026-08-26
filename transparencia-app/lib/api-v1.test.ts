@@ -235,6 +235,17 @@ describe("API canónica v1", () => {
     expect(payload.sourceStatus).toBe("complete");
   });
 
+  it("respeta limit y paginación lógica aunque R2 use chunks de 50 filas", async () => {
+    const response = await api.fetch(new Request("https://example.test/api/v1/transferencias?page=1&limit=1"), transferR2Env());
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toHaveLength(1);
+    expect(payload.data[0].id).toBe("tr-1");
+    expect(payload.limit).toBe(1);
+    expect(payload.totalPages).toBe(59361);
+  });
+
   it("ignora D1 desactualizada y conserva el universo R2 como fuente coherente", async () => {
     const staleRow = {
       id: "stale-1",

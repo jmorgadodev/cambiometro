@@ -78,6 +78,9 @@ export default async function HomePage() {
   ]);
   const totalCatalogRecords = Math.max(records.total, GLOBAL_KPIS.registros_canonicos);
   const operationalSources = HOME_SOURCES_LIST;
+  const resolvedHomeKpis = HOME_KPIS.map((item) => item.key === "entidades"
+    ? { ...item, value: entities.total || item.value }
+    : item);
 
   return (
     <div className="home-desk">
@@ -121,7 +124,7 @@ export default async function HomePage() {
       {/* Banda de KPIs Globales con Tooltip de Ámbito */}
       <section className="home-ledger" aria-label="Cobertura actual consolidada">
         <div className="container-main home-ledger__grid">
-          {HOME_KPIS.map((item, index) => (
+          {resolvedHomeKpis.map((item, index) => (
             <Link
               prefetch={false}
               href={item.href}
