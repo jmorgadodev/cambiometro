@@ -73,7 +73,7 @@ Ejecutada desde `C:\Users\jorge\Proyectos\cambiometro-public\transparencia-app` 
 - La auditoría del lake local encontró una diferencia de frescura, no IDs duplicados: el snapshot versionado `source-health.json` (21-ago) registra 59.361 filas y `$5.011.094.170.302`, mientras el lake completo regenerado el 24-ago contiene 59.544 IDs únicos y `$5.013.581.357.467` (183 filas nuevas, `$2.487.187.165`). El workflow de Pages hidrata el lake completo y regenera la proyección antes de construir; no se debe mezclar el snapshot antiguo con el release nuevo. El health del Worker además compara el conteo D1 contra el manifest R2 y devuelve 503 si difieren.
 - Los workflows ETL que publican el lake deben ejecutar `data:lake` después de generar proyecciones/subsets y antes de `data:publish`; sin `data/lake/publish-plan.json`, la ingestión puede terminar bien pero la publicación falla antes de R2.
 - Los workflows que usan `data:publish --releases --r2` necesitan `contents: write` acotado al job para crear releases versionados; eso no autoriza commits y el ETL no ejecuta comandos de escritura Git.
-- `uptime-smoke.mjs` prueba home, listados, ficha Kaiser, transferencias, cruces, health y búsqueda. En Actions exige `CAMBIOMETRO_UPTIME_TOKEN` y lo envía únicamente como `X-Cambiometro-Uptime-Token` a `/api/*`, para coincidir con la excepción WAF limitada.
+- `uptime-smoke.mjs` prueba home, listados, ficha Kaiser, transferencias, cruces, health y búsqueda. En Actions exige `CAMBIOMETRO_UPTIME_TOKEN` y lo envía como `X-Cambiometro-Uptime-Token` a todas las rutas monitoreadas; la excepción WAF debe cubrir como mínimo la raíz `/` y los endpoints API.
 
 El consolidado municipal CPLT se escribe en `data/lake-cplt/projections/funcionarios-v1`; el rebuild municipal busca esa ruta antes de la compatibilidad histórica `current`. Los directorios `out/`, `.next/`, `dist/`, `public/data/` y los índices/slices generados se limpian después de verificar y están excluidos de Git. Antes de continuar, `git status --short` debe permanecer vacío.
 
@@ -106,6 +106,15 @@ Los datos grandes y los artefactos reproducibles permanecen fuera de GitHub: lak
 Si un ETL termina verde pero no publica su grupo estático, D1/R2 puede estar actualizado mientras Pages queda con el release anterior. La guardia correcta es revisar el log de `data:publish:static` y el checksum del manifiesto R2 antes de investigar la UI.
 
 ## Estado externo comprobado
+
+### Verificación posterior al cutover — 26-ago-2026
+
+- El dominio público ya sirve Pages: `/`, `/politico/`, `/municipalidades/` y `/api/v1/health` devolvieron `200` desde una red externa. La respuesta pública usa CSP estática sin nonce ni `unsafe-inline`.
+- El Worker API conserva `/api/*`; `GET /api/v1/health` devuelve `200`. Un `HEAD` sobre ese endpoint devuelve `405` porque el contrato permite `GET`, no es una caída del API.
+- Pages deployment activo: `1e02ca1b-8476-4de0-aa5f-008dcb8264e0` (`https://1e02ca1b.cambiometro.pages.dev`). Worker version promovida: `3ea6312f-6f6e-4185-9ee7-0cb2891e17c0`.
+- La ruta Cloudflare confirmada es `cambiometro.impulsacv.cl/api/*` hacia `cambiometro-public-api`; el Custom Domain antiguo de OpenNext fue retirado y el CNAME ahora apunta a `cambiometro.pages.dev`.
+- El smoke manual de Actions `33017384201` sigue rojo sólo en `/`: `403` desde un runner GitHub. Las otras nueve rutas, incluidos `/politico`, `/municipalidades`, la ficha Kaiser, `/transferencias`, `/cruces`, `/api/v1/health` y búsqueda, devolvieron `200`.
+- Por lo anterior, la migración técnica está aplicada, pero el cierre de producción queda pendiente de que la regla WAF guardada coincida realmente con el token `CAMBIOMETRO_UPTIME_TOKEN` y cubra la raíz. No se debe declarar `uptime-smoke` verde ni cerrar el cutover mientras `/` siga en `403` desde Actions.
 
 El 25-ago-2026, desde el checkout correcto y sin credenciales Cloudflare locales (`wrangler whoami` respondió `You are not authenticated`), se verificó sólo lectura:
 
