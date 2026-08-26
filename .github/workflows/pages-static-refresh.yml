@@ -77,12 +77,12 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: npm run data:hydrate:cplt-static -- --required
 
-      - name: Hidratar entradas estáticas versionadas desde R2
+      - name: Hidratar entradas estáticas completas desde R2
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
-        run: npm run data:hydrate:static -- --required
+        run: npm run data:hydrate:static -- --required --required-all
 
       - name: Verificar fallback municipal completo
         working-directory: transparencia-app
