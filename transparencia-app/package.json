@@ -16,6 +16,7 @@
     "check:staging-isolated": "node scripts/check-staging-isolated.mjs",
     "test:coverage-sweep": "node scripts/coverage-sweep.mjs",
     "smoke:uptime": "node scripts/uptime-smoke.mjs",
+    "verify:cold-crawl": "node scripts/cold-crawl.mjs",
     "test": "npm run typecheck && npm run api:typecheck && npm run check:static-architecture && npm run check:tokens && npm run check:links && npm run check:innerhtml && vitest run",
     "guard:integrity": "node ../scripts/audit/pipeline-guard.mjs",
     "preflight": "npm run lint && npm run test && npm run pages:build && npm run api:size",
