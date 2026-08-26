@@ -32,6 +32,8 @@ const ALLOWLIST = {
   "scripts/backup-weekly.mjs": ["bearer"], // Authorization: Bearer $CLOUDFLARE_API_TOKEN (R2 API)
   "scripts/restore-drill.mjs": ["bearer"], // Authorization: Bearer $CLOUDFLARE_API_TOKEN (R2 API)
   "scripts/verify-lake-manifests.mjs": ["bearer"], // allow if uses Bearer for R2
+  "scripts/pages-rollback.mjs": ["bearer"], // Authorization: Bearer $CLOUDFLARE_API_TOKEN (Pages API)
+  "lib/pages-rollback.test.ts": ["bearer"], // regression for the Pages API authorization header
 };
 
 const SELF = new Set(["check-no-ai-traces.mjs", "check-no-private-assets.mjs"]);
