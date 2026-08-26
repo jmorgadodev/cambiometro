@@ -162,17 +162,17 @@ export default function GlobalFuncionariosClient() {
 
   // Fetch data
   useEffect(() => {
-    if (muniFilter === "Todos") {
-      setData([]);
-      setTotal(0);
-      setTotalPages(1);
-      setStats(null);
-      setErrorMessage(null);
-      setIsLoading(false);
-      return;
-    }
-
     async function fetchData() {
+      if (muniFilter === "Todos") {
+        setData([]);
+        setTotal(0);
+        setTotalPages(1);
+        setStats(null);
+        setErrorMessage(null);
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       setErrorMessage(null);
       try {
