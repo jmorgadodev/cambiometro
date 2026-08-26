@@ -18,6 +18,7 @@ const ROUTES = [
 
 export function buildRequestHeaders(path, uptimeToken = "") {
   const headers = { "User-Agent": "Cambiometro-UptimeSmoke/1.0" };
+  // The limited WAF exception also protects the Pages home request, not only /api/*.
   if (uptimeToken) headers["X-Cambiometro-Uptime-Token"] = uptimeToken;
   return headers;
 }

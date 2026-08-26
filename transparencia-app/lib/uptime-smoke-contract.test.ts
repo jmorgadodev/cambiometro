@@ -11,6 +11,10 @@ describe("uptime smoke contract", () => {
       "User-Agent": "Cambiometro-UptimeSmoke/1.0",
       "X-Cambiometro-Uptime-Token": "secret",
     });
+    expect(buildRequestHeaders("/politico", "secret")).toEqual({
+      "User-Agent": "Cambiometro-UptimeSmoke/1.0",
+      "X-Cambiometro-Uptime-Token": "secret",
+    });
   });
 
   it("rejects a GitHub Actions run without the protected smoke secret", () => {
