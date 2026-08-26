@@ -1,0 +1,51 @@
+name: Pages domain cutover (manual y verificable)
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply_dns:
+        description: "Aplicar Pages custom domain y CNAME exacto"
+        type: boolean
+        required: true
+        default: false
+      confirmation:
+        description: "Escribir CAMBIOMETRO_CONFIRM_CUTOVER sólo para aplicar"
+        type: string
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  cutover:
+    name: Preflight/aplicar dominio Pages
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+      UPTIME_TOKEN: ${{ secrets.CAMBIOMETRO_UPTIME_TOKEN }}
+      CAMBIOMETRO_CUTOVER_CONFIRM: ${{ inputs.confirmation }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - name: Validar configuración
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          if [ "${{ inputs.apply_dns }}" = "true" ]; then
+            test "$CAMBIOMETRO_CUTOVER_CONFIRM" = "CAMBIOMETRO_CONFIRM_CUTOVER"
+          fi
+      - name: Ejecutar preflight o cutover
+        working-directory: transparencia-app
+        env:
+          CUTOVER_MODE: ${{ inputs.apply_dns }}
+        run: |
+          if [ "$CUTOVER_MODE" = "true" ]; then
+            node scripts/cutover-pages-domain.mjs --apply
+          else
+            node scripts/cutover-pages-domain.mjs
+          fi
