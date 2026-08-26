@@ -6,6 +6,11 @@ import { leerChileCompraV1 } from "@/lib/chilecompra";
 import { leerInfoLobbyV1 } from "@/lib/infolobby";
 import CrucesExplorerClient from "@/components/cruces/CrucesExplorerClient";
 import { getLey19862Summary } from "@/lib/transferencias-data";
+import { SOURCE_CANONICAL_COUNTS } from "@/lib/published-sources";
+import {
+  CRUCES_CGR_MUESTRA,
+  CRUCES_INFOLOBBY_MUESTRA,
+} from "@/lib/partidos-transparencia";
 
 export const metadata: Metadata = {
   title: "Explorador de Cruces de Datos Públicos — El Cambiómetro",
@@ -28,6 +33,9 @@ export default async function CrossesPage() {
   const chilecompra = leerChileCompraV1();
   const infolobby = leerInfoLobbyV1();
   const ley19862 = getLey19862Summary();
+  const cgrCanonicalCount = SOURCE_CANONICAL_COUNTS.contraloria;
+  const chilecompraCanonicalCount = SOURCE_CANONICAL_COUNTS.chilecompra;
+  const infolobbyCanonicalCount = SOURCE_CANONICAL_COUNTS.infolobby;
 
   const clp = (amount: number | null) => {
     if (amount === null || amount <= 0) return "—";
@@ -48,13 +56,10 @@ export default async function CrossesPage() {
       ? montosChilecompra.reduce((sum, amount) => sum + amount, 0)
       : null;
 
-  const procesosChilecompra = chilecompra?.buyers
-    ?.map((buyer) => buyer.procesos)
-    .filter((count): count is number => typeof count === "number") ?? [];
-  const totalChilecompraProcesos = procesosChilecompra.length > 0
-    ? procesosChilecompra.reduce((sum, count) => sum + count, 0)
-    : null;
-  const ley19862ReferenceTotal = 1900000000000;
+  const cgrIndexedCount = contraloria?.records.length ?? 0;
+  const infolobbyIndexedCount = infolobby?.count ?? 0;
+  const cgrReference = CRUCES_CGR_MUESTRA[0];
+  const infolobbyReference = CRUCES_INFOLOBBY_MUESTRA[0];
 
   return (
     <main>
@@ -105,32 +110,54 @@ export default async function CrossesPage() {
 
             {/* KPI 2 */}
             <div className="stat-tile stat-tile--ok">
-              <div className="stat-tile__value">{contraloria?.records.length ?? "—"}</div>
+              <div className="stat-tile__value">{cgrCanonicalCount.toLocaleString("es-CL")}</div>
               <div className="stat-tile__label">Auditorías CGR</div>
-              <div className="stat-tile__hint">Informes de fiscalización 2025-2026</div>
+              <div className="stat-tile__hint">Universo canónico · {cgrIndexedCount.toLocaleString("es-CL")} informes indexados en esta vista</div>
             </div>
 
-            {/* KPI 3 (Monto real, NUNCA $0) */}
+            {/* KPI 3: el conteo canónico es estable; el monto sólo se muestra si
+                la proyección publicada trae un agregado válido. */}
             <div className="stat-tile stat-tile--warn">
-              <div className="stat-tile__value">{clp(totalChilecompraMonto)}</div>
-              <div className="stat-tile__label">Compras ChileCompra</div>
-               <div className="stat-tile__hint">{totalChilecompraProcesos?.toLocaleString("es-CL") ?? "—"} procesos OCDS · referencia {ley19862ReferenceTotal.toLocaleString("es-CL")}</div>
+              <div className="stat-tile__value">{chilecompraCanonicalCount.toLocaleString("es-CL")}</div>
+              <div className="stat-tile__label">Registros ChileCompra</div>
+              <div className="stat-tile__hint">Universo OCDS publicado · {clp(totalChilecompraMonto)} monto consolidado disponible</div>
             </div>
 
             {/* KPI 4 */}
             <div className="stat-tile stat-tile--alert">
-              <div className="stat-tile__value">{infolobby?.count?.toLocaleString("es-CL") ?? "—"}</div>
+              <div className="stat-tile__value">{infolobbyCanonicalCount.toLocaleString("es-CL")}</div>
               <div className="stat-tile__label">Registros InfoLobby</div>
-              <div className="stat-tile__hint">Audiencias, viajes y donativos</div>
+              <div className="stat-tile__hint">Universo canónico · {infolobbyIndexedCount.toLocaleString("es-CL")} registros indexados en esta vista</div>
             </div>
           </div>
         </section>
 
         {/* ─── 3. EXPLORADOR ÚNICO (PRESETS + CHIPS + TABLA 20 + DRAWER) ───────── */}
          <CrucesExplorerClient initialRows={crosses} initialQuery={rawQuery} />
-         <p className="data-note" style={{ marginTop: "1rem" }}>
+        <p className="data-note" style={{ marginTop: "1rem" }}>
            1.897 relaciones canónicas en el modelo de datos; el grafo muestra los vínculos actualmente indexados. <Link prefetch={false} href="/como-funciona">Conoce la metodología</Link>.
          </p>
+
+        <section className="card" aria-label="Referencias oficiales verificables" style={{ padding: "1.25rem" }}>
+          <h2 style={{ fontSize: "1.05rem", margin: "0 0 0.35rem", color: "var(--text-primary)" }}>
+            Referencias oficiales verificables
+          </h2>
+          <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", margin: "0 0 0.75rem", lineHeight: 1.5 }}>
+            Muestras congeladas del corte publicado para comprobar que los identificadores y enlaces oficiales sobreviven al export estático.
+          </p>
+          <ul style={{ margin: 0, paddingLeft: "1.2rem", display: "grid", gap: "0.4rem", fontSize: "0.8rem" }}>
+            <li>
+              <a href={cgrReference.url_oficial} target="_blank" rel="noreferrer" style={{ color: "var(--accent)" }}>
+                CGR Informe {cgrReference.numero_informe}
+              </a>{" "}· {cgrReference.entidad}
+            </li>
+            <li>
+              <a href={infolobbyReference.url_audiencia} target="_blank" rel="noreferrer" style={{ color: "var(--accent)" }}>
+                InfoLobby {infolobbyReference.id.split("-")[1]}
+              </a>{" "}· {infolobbyReference.sujeto_pasivo}
+            </li>
+          </ul>
+        </section>
 
         {/* ─── 4. FUENTES Y COBERTURA (Cards con enlaces a módulos existentes) ── */}
         <section aria-label="Fuentes oficiales y cobertura">
@@ -154,7 +181,7 @@ export default async function CrossesPage() {
             <div className="card" style={{ padding: "1.25rem", background: "var(--surface)", borderColor: "var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>⚖️</span>
-                <span className="badge badge-ok">{contraloria?.records.length ?? "—"} informes</span>
+                 <span className="badge badge-ok">{cgrCanonicalCount.toLocaleString("es-CL")} informes</span>
               </div>
               <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>
                 Contraloría General (CGR)
@@ -171,7 +198,7 @@ export default async function CrossesPage() {
             <div className="card" style={{ padding: "1.25rem", background: "var(--surface)", borderColor: "var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>🛒</span>
-                <span className="badge badge-warn">{totalChilecompraProcesos?.toLocaleString("es-CL") ?? "—"} procesos</span>
+                <span className="badge badge-warn">{chilecompraCanonicalCount.toLocaleString("es-CL")} registros</span>
               </div>
               <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>
                 ChileCompra MercadoPúblico
@@ -188,7 +215,7 @@ export default async function CrossesPage() {
             <div className="card" style={{ padding: "1.25rem", background: "var(--surface)", borderColor: "var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>🤝</span>
-                <span className="badge badge-info">{infolobby?.count?.toLocaleString("es-CL") ?? "—"} registros</span>
+                 <span className="badge badge-info">{infolobbyCanonicalCount.toLocaleString("es-CL")} registros</span>
               </div>
               <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>
                 InfoLobby (Ley 20.730)

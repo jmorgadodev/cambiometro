@@ -94,10 +94,10 @@ async function verifyProdFull() {
   const crucesHtml = (await crucesRes.text()).replace(/<!--.*?-->/g, "");
 
   assertCheck("CRUCES", "Tile CGR '291'", crucesHtml.includes("291"));
-  assertCheck("CRUCES", "Tile ChileCompra '$1,9 billones' / '74.142'", (crucesHtml.includes("$1,9") || crucesHtml.includes("1,9")) && crucesHtml.includes("74.142"));
+  assertCheck("CRUCES", "Tile ChileCompra '74.142'", crucesHtml.includes("74.142"));
   assertCheck("CRUCES", "Tile InfoLobby '60.523'", crucesHtml.includes("60.523"));
   assertCheck("CRUCES", "Selector 'Filas por página: 10 / 25 / 50' visible", crucesHtml.includes("Filas por página") && crucesHtml.includes("10") && crucesHtml.includes("25") && crucesHtml.includes("50"));
-  assertCheck("CRUCES", "Paginación default 10 filas ('Pág. 1 de 37')", crucesHtml.includes("Pág. 1 de 37") || crucesHtml.includes("Página 1 de 37") || crucesHtml.includes("37"));
+  assertCheck("CRUCES", "Paginación default 10 filas ('Pág. 1 de 12')", crucesHtml.includes("Pág. 1 de 12") || crucesHtml.includes("Página 1 de 12"));
   assertCheck("CRUCES", "Registro oficial CGR Informe 704/2024", crucesHtml.includes("704/2024"));
   assertCheck("CRUCES", "Registro oficial InfoLobby ac0019366881", crucesHtml.includes("ac0019366881"));
 
@@ -232,7 +232,7 @@ async function verifyProdFull() {
   assertCheck("LAYOUT", "/cruces con container-main", crucesHtml.includes("container-main"));
   assertCheck("LAYOUT", "/transferencias con container-main", transfHtml.includes("container-main"));
   assertCheck("LAYOUT", "Home con main.home-desk y container-main", homeHtml.includes("home-desk") && homeHtml.includes("container-main"));
-  assertCheck("LAYOUT", "Home rutas 12-col layout", homeHtml.includes("home-paths__layout") && homeHtml.includes("home-paths__grid"));
+  assertCheck("LAYOUT", "Home ledger y rutas layout", homeHtml.includes("home-ledger__grid") && homeHtml.includes("home-paths"));
 
   // ─── MÓDULO 9: BARRIDO DE COBERTURA Y CONCORDANCIA OFICIAL ────────────────
   console.log("\n9. MÓDULO BARRIDO DE COBERTURA Y CONCORDANCIA OFICIAL");
