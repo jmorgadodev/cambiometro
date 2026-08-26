@@ -131,3 +131,32 @@ jobs:
         # Wrangler crea el alias "head" y no reemplaza el deployment
         # canónico de Pages; la rama productiva debe ser explícita.
         run: npx wrangler pages deploy out --project-name cambiometro --branch main --commit-hash "$GITHUB_SHA" --commit-message "Static refresh ${GITHUB_SHA}"
+
+      - name: Registrar deployment Pages productivo y rollback
+        if: ${{ success() && ((github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main') || inputs.publish_pages == true) }}
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+          PAGES_COMMIT_SHA: ${{ github.sha }}
+        run: |
+          npx wrangler pages deployment list --project-name cambiometro --environment production --json > pages-deployments.json
+          node -e '
+            const fs = require("node:fs");
+            const payload = JSON.parse(fs.readFileSync("pages-deployments.json", "utf8"));
+            const deployments = Array.isArray(payload) ? payload : (payload.result ?? []);
+            const deployment = deployments.find((item) => item.deployment_trigger?.metadata?.commit_hash === process.env.PAGES_COMMIT_SHA);
+            if (!deployment?.id) throw new Error(`No se encontró deployment Pages productivo para ${process.env.PAGES_COMMIT_SHA}`);
+            console.log(`Pages deployment ID: ${deployment.id}`);
+            console.log(`Pages deployment URL: ${deployment.url ?? "n/a"}`);
+            console.log(`Rollback exacto: npm run pages:rollback -- ${deployment.id}`);
+          '
+
+      - name: Guardar metadata del deployment Pages
+        if: ${{ success() && ((github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main') || inputs.publish_pages == true) }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-production-deployment-${{ github.sha }}
+          path: transparencia-app/pages-deployments.json
+          if-no-files-found: error
+          retention-days: 30
