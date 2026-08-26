@@ -5,6 +5,8 @@ import type { ReactElement } from "react";
 import { PARTIDOS_SEED, POLITICOS_SEED } from "@/lib/seed-politicos";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import { getEvidenceForPolitico, normalizeSearchText } from "@/lib/data-source";
+import { getGastosParaPolitico } from "@/lib/data-source";
+import { procesarGastosPolitico } from "@/lib/gastos-operacionales";
 import { FUENTE_REMUNERACIONES, mesRemuneraciones, remuneracionParaPolitico } from "@/lib/remuneraciones";
 import { getGastosAgregadosD1 } from "@/lib/db";
 import { comparePorApellido } from "@/lib/format";
@@ -144,6 +146,8 @@ export default async function PoliticoDirectory() {
     const partido = PARTIDOS_SEED.find((p) => p.id === politico.partido_id);
     const evidenciasList = await getEvidenceForPolitico(politico);
     const fuentes = evidenciasList.filter((e) => e.records.length > 0).length;
+    const gastos = getGastosParaPolitico(politico);
+    const gastosProcesados = procesarGastosPolitico(gastos);
     const sueldo = await remuneracionParaPolitico(politico.nombre_completo);
     const partidoConfig = getPartidoConfig(politico.partido_id || partido?.sigla || "IND");
     const dietaMonto = DIETA_OFICIAL_PARLAMENTARIA[politico.cargo as "Diputado" | "Senador"];
@@ -165,6 +169,10 @@ export default async function PoliticoDirectory() {
       dietaMonto,
       verifiedPhoto,
       initials,
+      gastosTotal: gastosProcesados.totalAcumulado,
+      gastosPeriodos: gastosProcesados.meses.length,
+      gastosRegistros: gastos.length,
+      gastosUltimoPeriodo: gastosProcesados.ultimoPeriodo || null,
     };
   }))).sort((a, b) => comparePorApellido(a.politico.nombre_completo, b.politico.nombre_completo));
 

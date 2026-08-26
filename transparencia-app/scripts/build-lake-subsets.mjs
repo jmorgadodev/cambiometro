@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { buildExpenseSubset, EXPENSE_SOURCES, readExpenseSnapshot } from "./expense-release.mjs";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -12,6 +13,24 @@ const subsetsDir = path.join(dataDir, "lake-subsets");
 
 if (!fs.existsSync(subsetsDir)) {
   fs.mkdirSync(subsetsDir, { recursive: true });
+}
+
+// 0. GASTOS OPERACIONALES: payload completo y compacto para Pages.
+// Se lee el artefacto del ETL, nunca una muestra ni datos inventados. Si el
+// snapshot no está disponible (p.ej. un checkout local limpio), no se borra el
+// último artefacto generado: la publicación anterior sigue siendo válida.
+const expenseSnapshot = readExpenseSnapshot(rootDir);
+if (expenseSnapshot?.fuentes) {
+  for (const sourceId of EXPENSE_SOURCES) {
+    if (!Object.prototype.hasOwnProperty.call(expenseSnapshot.fuentes, sourceId)) continue;
+    const records = Array.isArray(expenseSnapshot.fuentes[sourceId]) ? expenseSnapshot.fuentes[sourceId] : [];
+    const subset = buildExpenseSubset({ sourceId, records, generatedAt: expenseSnapshot.actualizado_en || undefined });
+    const filename = `${sourceId.replace("gastos_", "gastos-")}.subset.json`;
+    const outputPath = path.join(subsetsDir, filename);
+    fs.writeFileSync(outputPath, JSON.stringify(subset), "utf8");
+    const sizeKb = (fs.statSync(outputPath).size / 1024).toFixed(1);
+    console.log(`[subset] Generado ${filename}: ${subset.recordCount} registros, ${subset.politicianCount} parlamentarios (${sizeKb} KB)`);
+  }
 }
 
 // 1. GENERAR SUBSET DE INFOPROBIDAD

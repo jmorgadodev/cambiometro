@@ -1,0 +1,98 @@
+name: ETL Mensual - Gastos Operacionales Congreso
+
+on:
+  schedule:
+    - cron: "30 8 2 * *" # segundo día del mes, después de la publicación oficial
+  workflow_dispatch:
+
+concurrency:
+  group: etl-expenses
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  ingest-publish-materialize:
+    name: Cámara y Senado — gastos rendidos completos
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+        working-directory: transparencia-app
+
+      - name: Instalar Chromium para el conector WebForms de Cámara
+        working-directory: transparencia-app
+        run: |
+          npx playwright install --with-deps chromium
+          echo "PUPPETEER_EXECUTABLE_PATH=$(node -e \"process.stdout.write(require('playwright').chromium.executablePath())\")" >> "$GITHUB_ENV"
+
+      - name: Exigir credenciales de datos
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_DATA_API_TOKEN"
+
+      - name: Recuperar catálogo vigente
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          mkdir -p data/lake/catalog/v1
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+
+      - name: Preparar workspace ETL
+        working-directory: transparencia-app
+        run: npm run etl:prepare
+
+      - name: Ingerir nómina y gastos oficiales de ambas cámaras
+        working-directory: transparencia-app
+        run: npm run etl -- --from "2026-01-01" --to "$(date -u +%F)" --source camara,gastos_camara,gastos_senado
+
+      - name: Construir y publicar lake
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          npm run data:lake -- --exclude-source infolobby,infoprobidad
+          npm run data:publish
+
+      - name: Materializar gastos en D1 productiva
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          ETL_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-expenses
+        run: npm run data:materialize -- --database transparencia-db --remote --sources gastos_camara,gastos_senado
+
+      - name: Generar subsets estáticos completos
+        working-directory: transparencia-app
+        run: npm run data:build:subsets
+
+      - name: Verificar release de gastos antes de publicarlo
+        working-directory: transparencia-app
+        run: node scripts/verify-expense-release.mjs --required
+
+      - name: Publicar gastos como entradas autorizadas de Pages
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:publish:static -- --groups gastos

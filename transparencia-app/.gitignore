@@ -22,6 +22,7 @@
 # production
 /build
 /data/politico-slices/
+/data/lake-subsets/gastos-*.subset.json
 /data/politicos-votaciones-index.json
 /data/lake/*
 /data/lake-cplt/

@@ -398,8 +398,14 @@ export function diputadoIdParaPolitico(politico: Pick<Politico, "nombre_completo
  * recientes primero.
  */
 export function getGastosParaPolitico(
-  politico: Pick<Politico, "nombre_completo"> & { cargo?: Politico["cargo"] }
+  politico: Pick<Politico, "nombre_completo"> & { id?: string; cargo?: Politico["cargo"] }
 ): EtlRecord[] {
+  // Pages export no dispone de snapshot.json. Las fichas precalculadas son la
+  // fuente estática canónica y evitan que el primer render dependa del API.
+  if (politico.id) {
+    const profile = getPrecomputedPoliticoProfile(politico.id);
+    if (Array.isArray(profile?.gastos)) return profile.gastos as EtlRecord[];
+  }
   if (politico.cargo === "Diputado") {
     const diputadoId = diputadoIdParaPolitico(politico);
     if (!diputadoId) return [];

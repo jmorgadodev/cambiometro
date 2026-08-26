@@ -18,6 +18,6 @@ export default defineConfig({
     ],
   },
   test: {
-    include: ["lib/**/*.test.ts", "workers/**/*.test.ts", "scripts/static-site-inputs.test.mjs", "scripts/etl/transfer-release-cutoff.test.mjs", "scripts/etl/connectors/**/*.test.mjs"],
+    include: ["lib/**/*.test.ts", "workers/**/*.test.ts", "scripts/static-site-inputs.test.mjs", "scripts/expense-release.test.mjs", "scripts/etl/transfer-release-cutoff.test.mjs", "scripts/etl/connectors/**/*.test.mjs"],
   },
 });
