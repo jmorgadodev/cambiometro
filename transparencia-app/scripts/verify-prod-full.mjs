@@ -19,6 +19,7 @@ async function verifyProdFull() {
   console.log("================================================================================\n");
 
   const headers = { "User-Agent": "Cambiometro-Full-Verifier/1.0", "Cache-Control": "no-cache" };
+  const API_URL = process.env.API_URL || PROD_URL;
   const expectedTransferRowsOverride = process.env.EXPECTED_TRANSFER_ROWS ? Number(process.env.EXPECTED_TRANSFER_ROWS) : null;
   const expectedTransferAmountOverride = process.env.EXPECTED_TRANSFER_AMOUNT ? Number(process.env.EXPECTED_TRANSFER_AMOUNT) : null;
   const expectedTransferPagesOverride = process.env.EXPECTED_TRANSFER_PAGES ? Number(process.env.EXPECTED_TRANSFER_PAGES) : null;
@@ -37,13 +38,18 @@ async function verifyProdFull() {
   assertCheck("HOME", "HTTP Status 200", homeRes.status === 200);
   const homeHtml = (await homeRes.text()).replace(/<!--.*?-->/g, "");
 
+  const staticManifestRes = await fetch(`${PROD_URL}/data/static-site-manifest.json`, { headers });
+  assertCheck("HOME", "Manifiesto estático HTTP 200", staticManifestRes.status === 200);
+  const staticManifest = staticManifestRes.ok ? await staticManifestRes.json().catch(() => null) : null;
+  const canonicalCount = Number(staticManifest?.datasets?.entities?.count ?? 0);
+
   // Version ID header/tag check
   const cfRay = homeRes.headers.get("cf-ray") || "local";
   const etag = homeRes.headers.get("etag") || "v1.0";
   const versionId = `${etag}-${cfRay.slice(0, 8)}`;
 
   assertCheck("HOME", "Total registros canónicos (1.753.013)", homeHtml.includes("1.753.013"));
-  assertCheck("HOME", "Total entidades identificadas (3.281)", homeHtml.includes("3.281"));
+  assertCheck("HOME", `Total entidades identificadas (${formatInteger(canonicalCount)})`, canonicalCount > 0 && homeHtml.includes(formatInteger(canonicalCount)));
   assertCheck("HOME", "Total relaciones y cruces (1.897)", homeHtml.includes("1.897"));
   assertCheck("HOME", "Total votaciones de sala (12.111)", homeHtml.includes("12.111"));
   assertCheck("HOME", "Total gastos parlamentarios (690)", homeHtml.includes("690"));
@@ -65,6 +71,12 @@ async function verifyProdFull() {
   assertCheck("INVARIANTES", "Dieta Kaiser: $8.291.039", kaiserHtml.includes("8.291.039"));
   assertCheck("INVARIANTES", "Asignación Kaiser: +33,7%", kaiserHtml.includes("+33,7%") || kaiserHtml.includes("33,7%"));
 
+  const bianchiRes = await fetch(`${PROD_URL}/politico/carlos-bianchi-chelech`, { headers });
+  assertCheck("INVARIANTES", "Ficha Carlos Bianchi HTTP 200", bianchiRes.status === 200);
+  const bianchiHtml = (await bianchiRes.text()).replace(/<!--.*?-->/g, "");
+  assertCheck("INVARIANTES", "Bianchi: 25.009 y 24,89%", bianchiHtml.includes("25.009") && bianchiHtml.includes("24,89%"));
+  assertCheck("INVARIANTES", "Bianchi: 580 votos cámara y 189 senado", bianchiHtml.includes("580") && bianchiHtml.includes("189"));
+
   const maipuRes = await fetch(`${PROD_URL}/municipalidades/muni-maipu`, { redirect: "manual", headers });
   assertCheck(
     "INVARIANTES",
@@ -72,6 +84,8 @@ async function verifyProdFull() {
     maipuRes.status === 301 || maipuRes.status === 307 || maipuRes.status === 308,
     `Status: ${maipuRes.status}`
   );
+  const maipuLocation = maipuRes.headers.get("location");
+  assertCheck("INVARIANTES", "Redirección Maipú apunta a /municipalidades/maipu", maipuLocation ? new URL(maipuLocation, PROD_URL).pathname === "/municipalidades/maipu" : false);
 
   // ─── MÓDULO 3: /CRUCES ─────────────────────────────────────────────────────
   console.log("\n3. MÓDULO CRUCES DOCUMENTALES (/cruces)");
@@ -143,12 +157,21 @@ async function verifyProdFull() {
   await transf50Res.text();
   assertCheck("TRANSFERENCIAS", "Query ?rows=50 llega al HTML estático para paginación cliente", transf50Res.status === 200);
 
-  const transfApiRes = await fetch(`${process.env.API_URL || PROD_URL}/api/v1/transferencias?page=1&limit=10`, { headers });
+  const transfApiRes = await fetch(`${API_URL}/api/v1/transferencias?page=1&limit=10`, { headers });
   assertCheck("TRANSFERENCIAS", "API /api/v1/transferencias responde 200", transfApiRes.status === 200);
   if (transfApiRes.ok) {
     const apiJson = await transfApiRes.json();
     assertCheck("TRANSFERENCIAS", `API retorna total ${formatInteger(expectedTransferRows)}`, apiJson.total === expectedTransferRows);
     assertCheck("TRANSFERENCIAS", "API retorna 10 filas", apiJson.data?.length === 10);
+  }
+
+  const healthRes = await fetch(`${API_URL}/api/v1/health`, { headers });
+  assertCheck("API", "Worker health responde 200", healthRes.status === 200);
+  const funcionariosRes = await fetch(`${API_URL}/api/funcionarios?muni=muni-maipu&query=Claudio&limit=5`, { headers });
+  assertCheck("API", "Búsqueda de funcionario por municipalidad responde 200", funcionariosRes.status === 200);
+  if (funcionariosRes.ok) {
+    const funcionariosJson = await funcionariosRes.json();
+    assertCheck("API", "Búsqueda de funcionario devuelve filas y paginación", Array.isArray(funcionariosJson.data) && funcionariosJson.data.length > 0 && Number(funcionariosJson.meta?.total) > 0);
   }
 
   // ─── MÓDULO 5: /FUENTES Y /DATOS/CALIDAD ───────────────────────────────────
