@@ -85,6 +85,7 @@ La auditoría de higiene del checkout confirmó que no hay salidas de build, `ou
 - `etl-ley-19862.yml` publica las fuentes y el release completo de transferencias.
 - Los ETL que alimentan páginas estáticas construyen su proyección y publican sólo las entradas autorizadas por `scripts/static-site-inputs.mjs`. El script `data:publish:static` crea releases inmutables bajo `projections/static-site-v1/releases/<sha256>/` y actualiza el puntero `projections/static-site-v1/manifest.json` después de subir todos los archivos.
 - El ETL diario publica el grupo `parlamento`: votaciones completas, personal de apoyo, movimientos y sus subsets. El ETL CPLT reconstruye `municipalidades-data.json` y `municipalidades-list.json` a partir de la nómina recién consolidada y de las proyecciones SINIM, ChileCompra y CGR hidratadas desde R2; publica el grupo `municipalidades` sin hacer commit de esos artefactos generados. El workflow diario ya no hace commits automáticos de datasets.
+- `etl-expenses.yml` ejecuta por separado los conectores oficiales de gastos de Cámara y Senado, genera ambos subsets completos, materializa `gastos_camara`/`gastos_senado` en D1, valida el release y publica el grupo estático `gastos`. Se mantiene separado porque el conector WebForms de Cámara es lento y puede activar rate limiting.
 - `pages-static-refresh.yml` descarga ese puntero con `data:hydrate:static -- --required --required-all`, exige las 22 entradas autorizadas, valida tamaño y SHA-256 de cada archivo y recién después ejecuta el build. Si falta el manifiesto o está incompleto, el workflow falla; no compila Pages silenciosamente con JSON antiguo del checkout. Los ETL parciales usan `--required-files` porque sólo reconstruyen su grupo.
 - `pages-static-refresh.yml` recupera el release desde R2, construye Pages, verifica rutas y tamaño del Worker y publica Pages sólo cuando el disparador se ejecuta sobre `main` o se solicita manualmente.
 - `public-api-worker.yml` valida el Worker en cada cambio relevante; en `main` sube una versión candidata sin promover tráfico y guarda el listado/version ID como artefacto. La promoción requiere `workflow_dispatch`, `promote_version=true` y el version ID exacto.
@@ -106,6 +107,31 @@ Los datos grandes y los artefactos reproducibles permanecen fuera de GitHub: lak
 Si un ETL termina verde pero no publica su grupo estático, D1/R2 puede estar actualizado mientras Pages queda con el release anterior. La guardia correcta es revisar el log de `data:publish:static` y el checksum del manifiesto R2 antes de investigar la UI.
 
 ## Estado externo comprobado
+
+### Auditoría de Gastos Operacionales Rendidos — 26-ago-2026
+
+El faltante observado en `/politico` no era ausencia del módulo de interfaz. El estado antes de esta corrección era:
+
+| Capa | Existe | Falta o problema |
+|---|---:|---|
+| ETL Cámara | Sí | El conector oficial WebForms no se ejecutaba en `etl-daily` |
+| ETL Senado | Sí | El conector oficial existía, pero no se publicaba en el release estático |
+| Worker/D1 Cámara | 16.275 registros | No llegaban al HTML estático de Pages |
+| Worker/D1 Senado | 0 registros observados | Debe poblarse con el workflow de gastos y quedar validado |
+| Fichas `/politico/[id]` | 205 páginas HTTP 200 | Las 205 mostraban el bloque vacío “Sin registros” |
+| Tarjetas `/politico` | Sí | No mostraban resumen de gastos |
+| Slices estáticos | Sí | Se construían con `gastos: []` porque Pages no hidrata `latest.json` |
+| Inputs Pages/R2 | Sí, para otras fuentes | No incluían subsets de gastos |
+
+La solución incorporada mantiene una sola fuente autorizada: `data/etl/latest.json` producido por los conectores oficiales. `scripts/build-lake-subsets.mjs` genera los subsets compactos completos `gastos-camara.subset.json` y `gastos-senado.subset.json`; no genera muestras ni datos inventados. El nuevo workflow `etl-expenses.yml` los publica a R2, materializa ambos orígenes en D1 y dispara el refresco estático de Pages. El build de slices los consume y las tarjetas muestran total, períodos, último período y cantidad de filas; la ficha conserva el desglose mensual y el enlace de fuente.
+
+`verify-prod-full.mjs` ahora marca como fallida la producción si Kaiser o Bianchi vuelven a mostrar el bloque vacío, o si el Worker devuelve cero filas para cualquiera de las dos fuentes. El objetivo es que un falso verde de infraestructura no oculte otra vez la ausencia de datos visibles.
+
+La guardia `node scripts/verify-expense-release.mjs --required` bloquea un release si faltan los dos subsets, hay IDs duplicados, checksum incorrecto, montos/períodos inválidos o filas que no llegaron a una ficha. Por seguridad, el cambio de código aún no significa que producción ya tenga el nuevo contenido: primero debe ejecutarse con éxito `ETL Mensual - Gastos Operacionales Congreso`, y luego `Pages estático - refresco automático verificable`. Hasta ese momento la producción continuará mostrando el release estático anterior.
+
+La auditoría también separa cobertura de datos de funcionamiento del sitio. En el mismo release se observaron 3.881 entidades, 59.912 transferencias, 205 fichas políticas y 346 municipalidades; funcionarios tenía 320 disponibles de 346 esperados. Esos números no se alteran por este cambio y siguen requiriendo sus propias guardias.
+
+Los subsets de gastos y los slices generados están ignorados en Git. El repositorio conserva código, workflows, contratos y documentación; los datos completos viven en R2/D1 y sólo cruzan a Pages mediante el manifiesto con checksum.
 
 ### Verificación posterior al cutover — 26-ago-2026
 

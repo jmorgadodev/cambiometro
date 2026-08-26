@@ -70,12 +70,20 @@ async function verifyProdFull() {
   const kaiserHtml = (await kaiserRes.text()).replace(/<!--.*?-->/g, "");
   assertCheck("INVARIANTES", "Dieta Kaiser: $8.291.039", kaiserHtml.includes("8.291.039"));
   assertCheck("INVARIANTES", "Asignación Kaiser: +33,7%", kaiserHtml.includes("+33,7%") || kaiserHtml.includes("33,7%"));
+  assertCheck("GASTOS", "Kaiser tiene rendiciones operacionales publicadas", kaiserHtml.includes("Gastos Operacionales Rendidos") && !/Sin registros de gastos operacionales rendidos/i.test(kaiserHtml));
 
   const bianchiRes = await fetch(`${PROD_URL}/politico/carlos-bianchi-chelech`, { headers });
   assertCheck("INVARIANTES", "Ficha Carlos Bianchi HTTP 200", bianchiRes.status === 200);
   const bianchiHtml = (await bianchiRes.text()).replace(/<!--.*?-->/g, "");
   assertCheck("INVARIANTES", "Bianchi: 25.009 y 24,89%", bianchiHtml.includes("25.009") && bianchiHtml.includes("24,89%"));
   assertCheck("INVARIANTES", "Bianchi: 580 votos cámara y 189 senado", bianchiHtml.includes("580") && bianchiHtml.includes("189"));
+  assertCheck("GASTOS", "Bianchi tiene rendiciones operacionales publicadas", bianchiHtml.includes("Gastos Operacionales Rendidos") && !/Sin registros de gastos operacionales rendidos/i.test(bianchiHtml));
+
+  for (const source of ["gastos_camara", "gastos_senado"]) {
+    const expenseRes = await fetch(`${API_URL}/api/v1/records?source=${source}&limit=1`, { headers });
+    const expenseJson = expenseRes.ok ? await expenseRes.json().catch(() => null) : null;
+    assertCheck("GASTOS", `Worker ${source} responde con filas`, expenseRes.status === 200 && Number(expenseJson?.meta?.total) > 0, `total: ${expenseJson?.meta?.total ?? "n/a"}`);
+  }
 
   const maipuRes = await fetch(`${PROD_URL}/municipalidades/muni-maipu`, { redirect: "manual", headers });
   assertCheck(

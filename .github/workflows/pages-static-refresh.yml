@@ -13,6 +13,7 @@ on:
       - "ETL Trimestral - DIPRES Presupuestos"
       - "ETL Bajo Demanda - SERVEL Resultados Electorales"
       - "ETL Semestral - SINIM Finanzas Municipales"
+      - "ETL Mensual - Gastos Operacionales Congreso"
     types: [completed]
   workflow_dispatch:
     inputs:

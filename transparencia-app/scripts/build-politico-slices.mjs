@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { POLITICOS_SEED } from "../lib/politicos-source.ts";
+import { readExpenseSubset } from "./expense-release.mjs";
 
 function slugifyNombre(nombre) {
   return nombre
@@ -68,6 +69,15 @@ export function buildAllPoliticoSlices() {
 
   const snapshotPath = resolve("data/snapshot.json");
   const snapshot = existsSync(snapshotPath) ? JSON.parse(readFileSync(snapshotPath, "utf8")) : {};
+  const staticExpenses = Object.fromEntries(["gastos_camara", "gastos_senado"].map((sourceId) => {
+    const subset = readExpenseSubset(process.cwd(), sourceId);
+    return [sourceId, subset?.records ?? null];
+  }));
+  const expenseSources = {
+    ...(snapshot.fuentes ?? {}),
+    ...(staticExpenses.gastos_camara ? { gastos_camara: staticExpenses.gastos_camara } : {}),
+    ...(staticExpenses.gastos_senado ? { gastos_senado: staticExpenses.gastos_senado } : {}),
+  };
 
   const paPath = resolve("data/personal-apoyo.json");
   const personalApoyoData = existsSync(paPath) ? JSON.parse(readFileSync(paPath, "utf8")) : null;
@@ -262,11 +272,11 @@ export function buildAllPoliticoSlices() {
     // Calcular gastos
     let gastos = [];
     if (pol.cargo === "Diputado" && diputadoId) {
-      gastos = (snapshot.fuentes?.gastos_camara ?? [])
+      gastos = (expenseSources.gastos_camara ?? [])
         .filter((record) => String(record.diputado_id) === diputadoId)
         .sort((a, b) => (b.fecha ?? "").localeCompare(a.fecha ?? ""));
     } else if (pol.cargo === "Senador") {
-      gastos = (snapshot.fuentes?.gastos_senado ?? [])
+      gastos = (expenseSources.gastos_senado ?? [])
         .filter((record) => Boolean(record.nombre) && nameSequenceMatches(pol.nombre_completo, record.nombre ?? ""))
         .sort((a, b) => (b.fecha ?? "").localeCompare(a.fecha ?? ""));
     }
