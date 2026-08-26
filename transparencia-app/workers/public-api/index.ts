@@ -123,6 +123,7 @@ async function health(env: Env) {
   const d1 = Boolean(env.DB);
   const r2 = Boolean(manifest);
   let d1TransferRows = 0;
+  let d1ReleaseChecksum: string | null = null;
   if (d1) {
     try {
       const result = await env.DB?.prepare("SELECT count(*) AS total FROM transferencias_19862").first<{ total: number }>();
@@ -130,13 +131,15 @@ async function health(env: Env) {
     } catch {
       d1TransferRows = 0;
     }
+    try {
+      const release = await env.DB?.prepare("SELECT checksum_sha256 FROM transferencias_19862_release WHERE singleton = 1").first<{ checksum_sha256: string }>();
+      d1ReleaseChecksum = release?.checksum_sha256 ?? null;
+    } catch {
+      d1ReleaseChecksum = null;
+    }
   }
-  const d1Consistent = Boolean(d1 && manifest && d1TransferRows === manifest.totalRows);
-  // R2 contiene el release completo que consume el sitio estático. D1 puede
-  // no tener todavía la tabla de transferencias (o estar vacío) durante una
-  // activación ETL; en ese caso el servicio sigue listo porque la ruta API
-  // usa el release R2. Un universo D1 parcial y no vacío sí es un bloqueo.
-  const ok = Boolean(r2 && (!d1 || d1Consistent || d1TransferRows === 0));
+  const d1Consistent = Boolean(d1 && manifest && d1TransferRows === manifest.totalRows && d1ReleaseChecksum === manifest.checksumSha256);
+  const ok = Boolean(r2 && (!d1 || d1Consistent));
   return success({
     ok,
     service: "cambiometro-public-api",
@@ -144,6 +147,7 @@ async function health(env: Env) {
     r2,
     d1TransferRows,
     d1Consistent,
+    d1ReleaseChecksum,
     transferRows: manifest?.totalRows ?? 0,
     generatedAt: manifest?.generatedAt ?? null,
   }, {}, {}, ok ? 200 : 503);

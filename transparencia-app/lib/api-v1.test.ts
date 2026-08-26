@@ -8,6 +8,7 @@ function testEnv(transferRows = 59361) {
       return statement(sql, values);
     },
     async first<T>() {
+      if (sql.includes("FROM transferencias_19862_release")) return { checksum_sha256: "release-checksum" } as T;
       if (sql.includes("FROM transferencias_19862")) return { total: transferRows } as T;
       if (sql.includes("FROM politicos")) return null;
       if (sql.includes("count(*)")) return { total: sql.includes("relations") ? 2 : sql.includes("records") ? 4 : 1 } as T;
@@ -89,7 +90,7 @@ describe("API canónica v1", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, transferRows: 59361 });
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, transferRows: 59361, d1ReleaseChecksum: "release-checksum" });
   });
 
   it("mantiene health en 503 cuando D1 y el manifest R2 no comparten universo", async () => {
@@ -101,7 +102,7 @@ describe("API canónica v1", () => {
     expect(payload.data).toMatchObject({ ok: false, d1: true, r2: true, d1TransferRows: 59360, transferRows: 59361, d1Consistent: false });
   });
 
-  it("mantiene health listo cuando R2 completo está disponible aunque D1 aún no tenga la tabla de transferencias", async () => {
+  it("falla cerrado cuando D1 aún no tiene la tabla de transferencias", async () => {
     const env = {
       ...(transferR2Env() as object),
       DB: {
@@ -114,8 +115,8 @@ describe("API canónica v1", () => {
     const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
     const payload = await response.json();
 
-    expect(response.status).toBe(200);
-    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 0, d1Consistent: false, transferRows: 59361 });
+    expect(response.status).toBe(503);
+    expect(payload.data).toMatchObject({ ok: false, d1: true, r2: true, d1TransferRows: 0, d1Consistent: false, transferRows: 59361 });
   });
 
   it("devuelve 503 estructurado cuando el manifest R2 está corrupto", async () => {
