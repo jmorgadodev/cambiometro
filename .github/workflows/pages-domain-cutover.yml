@@ -8,7 +8,7 @@ on:
   workflow_dispatch:
     inputs:
       apply_dns:
-        description: "Aplicar Pages custom domain y CNAME exacto"
+        description: "Conservar cambiometro.impulsacv.cl y cambiar sólo su origen a Pages"
         type: boolean
         required: true
         default: false
