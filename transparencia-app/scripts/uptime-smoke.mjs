@@ -18,7 +18,7 @@ const ROUTES = [
 
 export function buildRequestHeaders(path, uptimeToken = "") {
   const headers = { "User-Agent": "Cambiometro-UptimeSmoke/1.0" };
-  if (path.startsWith("/api/") && uptimeToken) headers["X-Cambiometro-Uptime-Token"] = uptimeToken;
+  if (uptimeToken) headers["X-Cambiometro-Uptime-Token"] = uptimeToken;
   return headers;
 }
 
