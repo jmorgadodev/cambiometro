@@ -28,7 +28,9 @@ jobs:
     timeout-minutes: 10
     env:
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-      CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+      # Separate token: WRANGLER_TOKEN can deploy Pages/Worker but is not
+      # authorized for Pages custom domains or zone DNS mutations.
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_CUTOVER_TOKEN }}
       UPTIME_TOKEN: ${{ secrets.CAMBIOMETRO_UPTIME_TOKEN }}
       CAMBIOMETRO_CUTOVER_CONFIRM: ${{ inputs.confirmation }}
     steps:
