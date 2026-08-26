@@ -75,7 +75,9 @@ if (!successfulProduction) {
   throw new Error("PAGES_PRODUCTION_DEPLOYMENT_NOT_VERIFIED");
 }
 
-const domains = await cf(`/accounts/${accountId}/pages/projects/${projectName}/domains?per_page=100`);
+// Pages custom-domain listing rejects per_page values above its API maximum.
+// The project has a single production hostname, so the default first page is sufficient.
+const domains = await cf(`/accounts/${accountId}/pages/projects/${projectName}/domains`);
 const registeredDomain = domains.find((domain) => String(domain.name ?? "").toLowerCase() === hostname.toLowerCase());
 const records = await cf(`/zones/${zone.id}/dns_records?name=${encodeURIComponent(hostname)}&per_page=100`);
 
