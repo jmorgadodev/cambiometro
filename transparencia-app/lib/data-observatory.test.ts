@@ -21,7 +21,7 @@ describe("observatorio de datos", () => {
     ]) {
       expect(page).toContain(`"${source}"`);
     }
-    expect(page).toContain("listPublishedSourceManifests()");
+    expect(page).toContain("getStaticEntityCatalog().total");
     expect(page).not.toMatch(/\b(152|173|16275|74142)\b/);
   });
 

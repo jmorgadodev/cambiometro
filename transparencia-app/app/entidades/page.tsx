@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listEntities } from "@/lib/data-platform-d1";
+import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
 
 export const metadata: Metadata = {
   title: "Entidades Canónicas — El Cambiómetro",
@@ -22,11 +22,12 @@ export default async function EntidadesPage() {
   const kindFilter: string = "";
   const cursor = undefined;
 
-  const result = await listEntities({
-    kind: kindFilter as ("person" | "public_body" | "supplier" | "municipality") | undefined,
-    limit: PAGE_SIZE,
-    cursor,
-  });
+  const catalog = getStaticEntityCatalog();
+  const result = {
+    data: catalog.firstPage,
+    total: catalog.total,
+    nextCursor: null,
+  };
 
   // Filter by search query client-side (the listEntities API doesn't support text search)
   const filtered = query
@@ -35,7 +36,7 @@ export default async function EntidadesPage() {
       )
     : result.data;
 
-  const allKindCounts = await listEntities({ limit: 1 });
+  const allKindCounts = { total: catalog.total };
 
   return (
     <main>

@@ -185,6 +185,19 @@ await writeFile(join(publicFuncionariosDir, "manifest.json"), `${JSON.stringify(
 
 const canonical = await readJson("data/entidades-canonica.json").catch(() => readJson("data/catalog/entities-routes.json"));
 const entities = Array.isArray(canonical) ? canonical : canonical.entities ?? [];
+const entityCountsByKind = {};
+for (const entity of entities) entityCountsByKind[entity.kind] = (entityCountsByKind[entity.kind] ?? 0) + 1;
+const entityPageSize = 40;
+const entityCatalogSummary = {
+  schemaVersion: 1,
+  generatedAt: new Date().toISOString(),
+  total: entities.length,
+  pageSize: entityPageSize,
+  firstPage: entities.slice(0, entityPageSize),
+  countsByKind: entityCountsByKind,
+  sourceChecksumSha256: checksum(entities.map(({ id }) => id)),
+};
+await writeFile(join(generatedDir, "entity-catalog.json"), `${JSON.stringify(entityCatalogSummary)}\n`);
 await writeFile(join(publicDataDir, "search-index.json"), `${JSON.stringify(entities.map(({ id, kind, name }) => ({ id, kind, name })))}\n`);
 const siteManifest = {
   schemaVersion: 1,

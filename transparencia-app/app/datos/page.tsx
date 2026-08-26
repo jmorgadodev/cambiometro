@@ -1,10 +1,9 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listEntities, listRecords } from "@/lib/data-platform-d1";
-import { listPublishedSourceManifests } from "@/lib/published-sources";
 import EtlHealthDashboardClient from "@/components/datos/EtlHealthDashboardClient";
 import Icono from "@/components/ui/Icono";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
+import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
 
 export const metadata: Metadata = {
   title: "Estado de Conexión y Salud de Fuentes ETL — El Cambiómetro",
@@ -66,11 +65,7 @@ const ANALYSIS_LINES = [
 ] as const;
 
 export default async function DataObservatoryPage() {
-  const [sources, entities] = await Promise.all([
-    listPublishedSourceManifests(),
-    listEntities({ limit: 1 }),
-  ]);
-  const entityCount = entities.total || GLOBAL_KPIS.entidades;
+  const entityCount = getStaticEntityCatalog().total || GLOBAL_KPIS.entidades;
 
   return (
     <div>

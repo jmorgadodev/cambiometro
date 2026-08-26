@@ -25,5 +25,10 @@ const routes = ["index.html", "politico/index.html", "municipalidades/index.html
 for (const route of routes) if (!relativeFiles.includes(route)) throw new Error(`Falta ruta estática: ${route}`);
 const staticHeaders = readFileSync(join(out, "_headers"), "utf8");
 if (/unsafe-inline|unsafe-eval/.test(staticHeaders)) throw new Error("CSP insegura en _headers");
+const staticManifest = JSON.parse(readFileSync(join(out, "data", "static-site-manifest.json"), "utf8"));
+const entityCatalog = JSON.parse(readFileSync(join(root, "data", "generated", "entity-catalog.json"), "utf8"));
+if (staticManifest.datasets?.entities?.count !== entityCatalog.total) {
+  throw new Error(`Universo de entidades incoherente: manifest=${staticManifest.datasets?.entities?.count} catalog=${entityCatalog.total}`);
+}
 const bytes = files.reduce((sum, file) => sum + statSync(file).size, 0);
 console.log(JSON.stringify({ files: files.length, html: html.length, bytes, routes }));
