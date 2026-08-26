@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 
 const PROD_BASE = process.env.PROD_URL || "https://cambiometro.impulsacv.cl";
 const API_BASE = process.env.API_URL || PROD_BASE;
@@ -98,7 +98,10 @@ export async function runUptimeSmoke() {
       if (process.env.GITHUB_ACTIONS && process.env.GITHUB_TOKEN) {
         try {
           console.log(`[uptime-smoke] Creando issue en GitHub: "${issueTitle}"...`);
-          execSync(`gh issue create --title "${issueTitle}" --body "${issueBody.replace(/"/g, '\\"')}"`, { stdio: "inherit" });
+          execFileSync("gh", ["issue", "create", "--title", issueTitle, "--body-file", "-"], {
+            input: issueBody,
+            stdio: ["pipe", "inherit", "inherit"],
+          });
         } catch (e) {
           console.error(`[uptime-smoke] Error al crear issue:`, e.message);
         }
