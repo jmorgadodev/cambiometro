@@ -138,8 +138,12 @@ async function health(env: Env) {
       d1ReleaseChecksum = null;
     }
   }
+  // Transferencias has an intentional R2 fallback. The production D1 is
+  // already close to its storage limit, so the complete release must not be
+  // duplicated there just to make health green. A missing/stale optional
+  // projection is reported, while the canonical R2 release remains healthy.
   const d1Consistent = Boolean(d1 && manifest && d1TransferRows === manifest.totalRows && d1ReleaseChecksum === manifest.checksumSha256);
-  const ok = Boolean(r2 && (!d1 || d1Consistent));
+  const ok = Boolean(r2);
   return success({
     ok,
     service: "cambiometro-public-api",
@@ -148,6 +152,7 @@ async function health(env: Env) {
     d1TransferRows,
     d1Consistent,
     d1ReleaseChecksum,
+    transferSource: d1Consistent ? "d1" : "r2",
     transferRows: manifest?.totalRows ?? 0,
     generatedAt: manifest?.generatedAt ?? null,
   }, {}, {}, ok ? 200 : 503);
@@ -539,7 +544,8 @@ async function listTransferencias(requestUrl: URL, env: Env) {
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
   try {
     const universe = await env.DB.prepare("SELECT COUNT(*) AS total FROM transferencias_19862").first<{ total: number }>();
-    if (Number(universe?.total ?? 0) !== manifest.totalRows) return listTransferenciasFromR2(requestUrl, env);
+    const release = await env.DB.prepare("SELECT checksum_sha256 FROM transferencias_19862_release WHERE singleton = 1").first<{ checksum_sha256: string }>();
+    if (Number(universe?.total ?? 0) !== manifest.totalRows || release?.checksum_sha256 !== manifest.checksumSha256) return listTransferenciasFromR2(requestUrl, env);
     const count = await env.DB.prepare(`SELECT COUNT(*) AS total FROM transferencias_19862 ${where}`).bind(...bindings).first<{ total: number }>();
     const total = Number(count?.total ?? 0);
     const offset = (page - 1) * limit;

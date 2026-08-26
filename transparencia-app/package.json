@@ -54,7 +54,6 @@
     "check:static-input-fallback": "node scripts/verify-static-input-fallback.mjs",
     "data:build:subsets": "node scripts/build-lake-subsets.mjs",
     "data:materialize": "node scripts/materialize-d1.mjs",
-    "data:materialize:transferencias": "node scripts/materialize-transferencias-d1.mjs",
     "data:materialize:dry": "node scripts/materialize-d1.mjs --dry-run",
     "data:catalog:reconcile": "node scripts/reconcile-release-catalog.mjs",
     "data:publish:cplt": "node scripts/publish-cplt-projections.mjs --releases --r2",

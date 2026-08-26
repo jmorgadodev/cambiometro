@@ -182,11 +182,3 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
           ETL_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
         run: npm run data:materialize -- --database transparencia-db --remote --sources ley-19862
-
-      - name: Materializar proyección indexada de transferencias para el Worker
-        working-directory: transparencia-app
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
-          ETL_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-transferencias
-        run: npm run data:materialize:transferencias -- --database transparencia-db --remote

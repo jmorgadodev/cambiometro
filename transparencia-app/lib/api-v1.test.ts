@@ -84,25 +84,25 @@ function officialsR2Env() {
 }
 
 describe("API canónica v1", () => {
-  it("expone health 200 sólo cuando D1 y el release R2 están disponibles", async () => {
+  it("expone health 200 cuando el release R2 canónico está disponible", async () => {
     const env = { ...(testEnv() as object), ...(transferR2Env() as object) } as never;
     const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, transferRows: 59361, d1ReleaseChecksum: "release-checksum" });
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, transferRows: 59361, d1ReleaseChecksum: "release-checksum", transferSource: "d1" });
   });
 
-  it("mantiene health en 503 cuando D1 y el manifest R2 no comparten universo", async () => {
+  it("mantiene health operativo y marca D1 inconsistente cuando R2 tiene el release canónico", async () => {
     const env = { ...(testEnv(59360) as object), ...(transferR2Env() as object) } as never;
     const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
     const payload = await response.json();
 
-    expect(response.status).toBe(503);
-    expect(payload.data).toMatchObject({ ok: false, d1: true, r2: true, d1TransferRows: 59360, transferRows: 59361, d1Consistent: false });
+    expect(response.status).toBe(200);
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 59360, transferRows: 59361, d1Consistent: false, transferSource: "r2" });
   });
 
-  it("falla cerrado cuando D1 aún no tiene la tabla de transferencias", async () => {
+  it("mantiene health operativo cuando la proyección D1 opcional aún no existe", async () => {
     const env = {
       ...(transferR2Env() as object),
       DB: {
@@ -115,8 +115,8 @@ describe("API canónica v1", () => {
     const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
     const payload = await response.json();
 
-    expect(response.status).toBe(503);
-    expect(payload.data).toMatchObject({ ok: false, d1: true, r2: true, d1TransferRows: 0, d1Consistent: false, transferRows: 59361 });
+    expect(response.status).toBe(200);
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 0, d1Consistent: false, transferSource: "r2", transferRows: 59361 });
   });
 
   it("devuelve 503 estructurado cuando el manifest R2 está corrupto", async () => {
