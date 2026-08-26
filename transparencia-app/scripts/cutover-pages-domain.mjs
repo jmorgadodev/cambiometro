@@ -197,8 +197,12 @@ if (refreshedDesired) {
 }
 
 const publicUrl = `https://${hostname}`;
+if (!uptimeToken) throw new Error("UPTIME_TOKEN_MISSING");
 const htmlResponse = await fetch(`${publicUrl}/?pages_cutover_probe=${Date.now()}`, {
-  headers: { "User-Agent": "Cambiometro-Cutover/1.0" },
+  headers: {
+    "User-Agent": "Cambiometro-Cutover/1.0",
+    "X-Cambiometro-Uptime-Token": uptimeToken,
+  },
   signal: AbortSignal.timeout(20_000),
 });
 const html = await htmlResponse.text();
@@ -207,7 +211,6 @@ if (htmlResponse.status !== 200 || !html.includes("Cambiómetro") || /nonce-|uns
   throw new Error(`PAGES_PUBLIC_VERIFY_FAILED:${htmlResponse.status}`);
 }
 
-if (!uptimeToken) throw new Error("UPTIME_TOKEN_MISSING");
 const apiResponse = await fetch(`${publicUrl}/api/v1/health?cutover_probe=${Date.now()}`, {
   headers: { "X-Cambiometro-Uptime-Token": uptimeToken },
   signal: AbortSignal.timeout(20_000),
