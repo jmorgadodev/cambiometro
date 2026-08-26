@@ -141,6 +141,27 @@ jobs:
             "${WORKER_VERSION_ID}@100" \
             --message "Promote ${WORKER_VERSION_ID}" \
             --yes
+          # `versions deploy` publica el código, pero Wrangler no aplica
+          # automáticamente los cambios de Routes. Aplicar explícitamente
+          # la ruta evita que una versión sana quede invisible detrás de
+          # OpenNext y que /api/* siga respondiendo 404.
+          npx wrangler triggers deploy \
+            --config workers/public-api/wrangler.jsonc \
+            --name cambiometro-public-api \
+            --routes "cambiometro.impulsacv.cl/api/*"
+          for attempt in 1 2 3 4 5; do
+            if curl --fail --silent --show-error --max-time 10 \
+              "https://cambiometro.impulsacv.cl/api/v1/health?deploy_probe=${GITHUB_RUN_ID}" \
+              | grep -q '"ok":true'; then
+              echo "Health productivo confirmado después de aplicar la Route."
+              break
+            fi
+            if [ "$attempt" -eq 5 ]; then
+              echo "Health productivo no confirmó la Route después de la promoción." >&2
+              exit 1
+            fi
+            sleep 5
+          done
           echo "Rollback exacto: npx wrangler rollback ${WORKER_VERSION_ID} --name cambiometro-public-api"
 
   staging:
