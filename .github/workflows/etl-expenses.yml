@@ -35,7 +35,8 @@ jobs:
         working-directory: transparencia-app
         run: |
           npx playwright install --with-deps chromium
-          echo "PUPPETEER_EXECUTABLE_PATH=$(node -e \"process.stdout.write(require('playwright').chromium.executablePath())\")" >> "$GITHUB_ENV"
+          browser_path="$(node -e 'process.stdout.write(require("playwright").chromium.executablePath())')"
+          echo "PUPPETEER_EXECUTABLE_PATH=$browser_path" >> "$GITHUB_ENV"
 
       - name: Exigir credenciales de datos
         shell: bash
