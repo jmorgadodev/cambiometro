@@ -69,7 +69,8 @@ async function createContext(browser) {
     const upstreamUrl = `${staticApiBaseUrl}${requestUrl.pathname}${requestUrl.search}`;
     const upstream = await fetch(upstreamUrl, {
       method: route.request().method(),
-      headers: Object.fromEntries(route.request().headers()),
+      // Playwright returns request headers as a plain object (not Map entries).
+      headers: route.request().headers(),
       body: ["GET", "HEAD"].includes(route.request().method()) ? undefined : route.request().postDataBuffer(),
     });
     await route.fulfill({

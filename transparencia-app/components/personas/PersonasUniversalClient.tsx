@@ -243,6 +243,17 @@ export default function PersonasUniversalClient({
   useEffect(() => {
     if (activeTab !== "funcionarios") return;
 
+    // The Worker serves scoped projections only. Do not issue a national
+    // request that is guaranteed to return DATASET_SCOPE_REQUIRED; the UI
+    // renders an explicit selection state instead of a red network error.
+    if (organismoFilter === "Todos") {
+      setFuncionariosData([]);
+      setFuncionariosTotal(0);
+      setFuncionariosStats({ totalMuni: 0, promedioSueldo: 0, conHorasExtras: 0 });
+      setFuncionariosLoading(false);
+      return;
+    }
+
     let isMounted = true;
     const timer = setTimeout(() => {
       setFuncionariosLoading(true);
@@ -1347,9 +1358,13 @@ export default function PersonasUniversalClient({
             ) : funcionariosData.length === 0 ? (
               <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 16, padding: "3rem", textAlign: "center" }}>
                 <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>🔍</div>
-                <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--text-1)", margin: "0 0 0.5rem" }}>No se encontraron funcionarios</h3>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--text-1)", margin: "0 0 0.5rem" }}>
+                  {organismoFilter === "Todos" ? "Selecciona un organismo" : "No se encontraron funcionarios"}
+                </h3>
                 <p style={{ fontSize: "0.85rem", color: "var(--text-3)", maxWidth: 420, margin: "0 auto 1.5rem" }}>
-                  Prueba cambiando los filtros de organismo, tipo, contrato o término de búsqueda.
+                  {organismoFilter === "Todos"
+                    ? "Elige un organismo para consultar su nómina oficial y usar la búsqueda de funcionarios."
+                    : "Prueba cambiando los filtros de organismo, tipo, contrato o término de búsqueda."}
                 </p>
                 <button
                   onClick={() => {

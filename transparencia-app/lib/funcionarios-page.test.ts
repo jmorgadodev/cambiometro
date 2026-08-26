@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 describe("experiencia y usabilidad de nóminas de funcionarios municipales (/funcionarios)", () => {
   const page = readFileSync(resolve("app/funcionarios/page.tsx"), "utf8");
   const client = readFileSync(resolve("components/GlobalFuncionariosClient.tsx"), "utf8");
+  const personasClient = readFileSync(resolve("components/personas/PersonasUniversalClient.tsx"), "utf8");
 
   it("la página /funcionarios conserva el acceso al directorio", () => {
     expect(readFileSync(resolve("public/_redirects"), "utf8")).toContain("/funcionarios /personas?tab=funcionarios 301");
@@ -39,5 +40,10 @@ describe("experiencia y usabilidad de nóminas de funcionarios municipales (/fun
     expect(client).toContain("Resumen de Nómina Oficial");
     expect(client).toContain("Funcionarios en nómina");
     expect(client).toContain("Sueldo bruto promedio");
+  });
+
+  it("no consulta el Worker con alcance nacional no soportado", () => {
+    expect(personasClient).toContain('if (organismoFilter === "Todos")');
+    expect(personasClient).toContain("Selecciona un organismo");
   });
 });
