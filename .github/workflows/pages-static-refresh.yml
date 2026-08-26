@@ -147,7 +147,7 @@ jobs:
         run: |
           curl --fail --silent --show-error \
             --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/cambiometro/deployments?per_page=100" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/cambiometro/deployments" \
             > pages-deployments.json
           node -e '
             const fs = require("node:fs");
@@ -198,7 +198,7 @@ jobs:
         run: |
           curl --fail --silent --show-error \
             --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/cambiometro/deployments?per_page=100" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/cambiometro/deployments" \
             > pages-deployments.json
           node -e '
             const fs = require("node:fs");
