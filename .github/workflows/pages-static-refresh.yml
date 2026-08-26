@@ -145,11 +145,13 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
           PAGES_COMMIT_SHA: ${{ github.sha }}
         run: |
-          npx wrangler pages deployment list --project-name cambiometro --environment production --json > pages-deployments.json
+          npx wrangler pages deployment list --project-name cambiometro --json > pages-deployments.json
           node -e '
             const fs = require("node:fs");
             const payload = JSON.parse(fs.readFileSync("pages-deployments.json", "utf8"));
-            const deployments = Array.isArray(payload) ? payload : (payload.result ?? []);
+            const deployments = Array.isArray(payload)
+              ? payload
+              : (Array.isArray(payload.result) ? payload.result : (payload.result?.deployments ?? payload.deployments ?? []));
             const matching = deployments.filter((item) => item.deployment_trigger?.metadata?.commit_hash === process.env.PAGES_COMMIT_SHA);
             const deployment = matching[0] ?? [...deployments].sort((a, b) => Date.parse(b.created_on ?? 0) - Date.parse(a.created_on ?? 0))[0];
             if (!deployment?.id) throw new Error(`No se encontró deployment Pages productivo para ${process.env.PAGES_COMMIT_SHA}`);
@@ -191,11 +193,13 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
         run: |
-          npx wrangler pages deployment list --project-name cambiometro --environment production --json > pages-deployments.json
+          npx wrangler pages deployment list --project-name cambiometro --json > pages-deployments.json
           node -e '
             const fs = require("node:fs");
             const payload = JSON.parse(fs.readFileSync("pages-deployments.json", "utf8"));
-            const deployments = Array.isArray(payload) ? payload : (payload.result ?? []);
+            const deployments = Array.isArray(payload)
+              ? payload
+              : (Array.isArray(payload.result) ? payload.result : (payload.result?.deployments ?? payload.deployments ?? []));
             const deployment = [...deployments].sort((a, b) => Date.parse(b.created_on ?? 0) - Date.parse(a.created_on ?? 0))[0];
             if (!deployment?.id) throw new Error("No se encontró deployment Pages productivo");
             console.log(`Pages deployment ID: ${deployment.id}`);
