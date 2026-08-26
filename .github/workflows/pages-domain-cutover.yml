@@ -1,5 +1,9 @@
 name: Pages domain cutover (manual y verificable)
 
+concurrency:
+  group: pages-domain-cutover
+  cancel-in-progress: true
+
 on:
   workflow_dispatch:
     inputs:
