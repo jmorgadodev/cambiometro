@@ -21,3 +21,15 @@ export function chunkJsonRows(rows, maxBytes = STATIC_PAYROLL_CHUNK_BYTES) {
   if (current.length > 0) chunks.push(current);
   return chunks;
 }
+
+export function listUnavailableMunicipalities(coverage, files) {
+  const available = new Set((files ?? []).map((file) => file?.id).filter(Boolean));
+  return (coverage ?? [])
+    .filter((entry) => entry?.communeId && !available.has(entry.communeId))
+    .map((entry) => ({
+      id: entry.communeId,
+      status: entry.status ?? "unavailable",
+      recordCount: Number(entry.recordCount ?? 0),
+      cut: entry.cut ?? null,
+    }));
+}

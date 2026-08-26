@@ -5,7 +5,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { writeChunkedJson } from "./static-site-data.mjs";
 import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
-import { chunkJsonRows } from "./static-payroll.mjs";
+import { chunkJsonRows, listUnavailableMunicipalities } from "./static-payroll.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const readJson = (file) => readFile(join(root, file), "utf8").then(JSON.parse);
@@ -105,6 +105,16 @@ try {
 cpltRoots.push(join(root, "data", "lake", "projections", "funcionarios-v1"));
 const cpltRoot = cpltRoots.find((candidate) => existsSync(candidate));
 if (!cpltRoot) throw new Error("STATIC_CPLT_PROJECTION_SOURCE_MISSING: hydrate funcionarios-v1 before building Pages");
+const cpltManifestPath = join(root, "data", "lake-cplt", "projections", "funcionarios-v1", "manifest.json");
+let cpltCoverage = [];
+if (existsSync(cpltManifestPath)) {
+  try {
+    const cpltManifest = JSON.parse(await readFile(cpltManifestPath, "utf8"));
+    cpltCoverage = Array.isArray(cpltManifest.coverage) ? cpltManifest.coverage : [];
+  } catch {
+    cpltCoverage = [];
+  }
+}
 await rm(publicFuncionariosDir, { recursive: true, force: true });
 await mkdir(publicFuncionariosDir, { recursive: true });
 const funcionariosFiles = [];
@@ -162,6 +172,12 @@ const funcionariosManifest = {
   generatedAt: new Date().toISOString(),
   expectedMunicipalities: 346,
   availableMunicipalities: funcionariosFiles.length,
+  // Cobertura significa que la fuente reportó la municipalidad; available
+  // significa que la proyección trae al menos un registro. Son universos
+  // distintos y deben quedar visibles para que la UI no prometa datos que la
+  // fuente oficial no publicó.
+  coverage: cpltCoverage,
+  unavailableMunicipalities: listUnavailableMunicipalities(cpltCoverage, funcionariosFiles),
   files: funcionariosFiles,
   checksumSha256: checksum(funcionariosFiles),
 };

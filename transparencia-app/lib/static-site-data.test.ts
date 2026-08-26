@@ -3,7 +3,7 @@ import { mkdtempSync, readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { buildChunkManifest, chunkRows, writeChunkedJson } from "../scripts/static-site-data.mjs";
-import { chunkJsonRows } from "../scripts/static-payroll.mjs";
+import { chunkJsonRows, listUnavailableMunicipalities } from "../scripts/static-payroll.mjs";
 
 describe("static site data", () => {
   it("divide nóminas grandes por bytes sin perder filas", () => {
@@ -13,6 +13,15 @@ describe("static site data", () => {
     expect(chunks.flat()).toEqual(rows);
     expect(chunks.every((chunk) => Buffer.byteLength(JSON.stringify(chunk)) <= 300)).toBe(true);
     expect(chunks.length).toBeGreaterThan(1);
+  });
+
+  it("distingue cobertura oficial de municipalidades sin registros publicados", () => {
+    expect(listUnavailableMunicipalities([
+      { communeId: "muni-a", status: "available", recordCount: 2, cut: "2026-07" },
+      { communeId: "muni-b", status: "unavailable", recordCount: 0, cut: "2026-07" },
+    ], [{ id: "muni-a" }])).toEqual([
+      { id: "muni-b", status: "unavailable", recordCount: 0, cut: "2026-07" },
+    ]);
   });
 
   it("divide filas en páginas numeradas de tamaño estable", () => {

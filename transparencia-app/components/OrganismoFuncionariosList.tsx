@@ -130,6 +130,7 @@ export default function OrganismoFuncionariosList({
         }
         const staticManifest = await fetchJson("/data/funcionarios/manifest.json", 3_000).catch(() => null);
         const staticEntry = staticManifest?.files?.find?.((entry: { id?: string; rows?: number; chunks?: Array<{ path?: string }> }) => entry.id === organismoId && Number(entry.rows) > 0);
+        const unavailableEntry = staticManifest?.unavailableMunicipalities?.find?.((entry: { id?: string; status?: string; recordCount?: number }) => entry.id === organismoId);
         const readStatic = async () => {
           const chunkPaths = Array.isArray(staticEntry?.chunks)
             ? staticEntry.chunks.map((chunk: { path?: string }) => chunk.path).filter((path: unknown): path is string => typeof path === "string" && path.length > 0)
@@ -163,6 +164,7 @@ export default function OrganismoFuncionariosList({
           try {
             result = await fetchJson(`/api/funcionarios?${params.toString()}`, 3_000);
           } catch {
+            if (unavailableEntry) throw new Error("STATIC_PAYROLL_NOT_PUBLISHED");
             result = await readStatic();
             if (active) setSourceStatus("static-fallback");
           }
@@ -195,7 +197,9 @@ export default function OrganismoFuncionariosList({
         setSourceStatus("unavailable");
         setErrorMessage(error instanceof Error && error.message === "STATIC_PAYROLL_INVALID"
           ? "La proyección local de esta municipalidad no tiene un formato oficial válido."
-          : "La nómina oficial no está disponible temporalmente.");
+          : error instanceof Error && error.message === "STATIC_PAYROLL_NOT_PUBLISHED"
+            ? "La fuente oficial reportó esta municipalidad, pero no publicó registros de nómina para el corte disponible."
+            : "La nómina oficial no está disponible temporalmente.");
       } finally {
         if (active) setIsLoading(false);
       }
