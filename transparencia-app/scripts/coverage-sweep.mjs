@@ -41,7 +41,7 @@ async function fetchOfficialChambersCounts() {
   return { camaraOfficial, senadoOfficial };
 }
 
-export async function runCoverageSweep({ silent = false } = {}) {
+export async function runCoverageSweep({ silent = false, transferManifest = null } = {}) {
   const rows = [];
   let allPassed = true;
 
@@ -173,8 +173,8 @@ export async function runCoverageSweep({ silent = false } = {}) {
   const transferSummaryPath = resolve("data/generated/transferencias/summary.json");
   const transferFallbackPath = resolve("data/lake/projections/v1/ley19862-summary.json");
   const transferPath = [transferManifestPath, transferSummaryPath, transferFallbackPath].find((path) => existsSync(path));
-  const transferData = transferPath ? JSON.parse(readFileSync(transferPath, "utf8")) : {};
-  const transferCoverage = transferPath?.endsWith("manifest.json")
+  const transferData = transferManifest ?? (transferPath ? JSON.parse(readFileSync(transferPath, "utf8")) : {});
+  const transferCoverage = transferManifest || transferPath?.endsWith("manifest.json")
     ? buildTransferCoverageRow({ totalRows: transferData.totalRows, totalMontoClp: transferData.expected?.totalMontoClp })
     : buildTransferCoverageRow({ totalRows: transferData.kpis?.total_transfers, totalMontoClp: transferData.kpis?.total_monto_clp });
   const universos = [

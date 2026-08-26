@@ -237,7 +237,7 @@ async function verifyProdFull() {
   // ─── MÓDULO 9: BARRIDO DE COBERTURA Y CONCORDANCIA OFICIAL ────────────────
   console.log("\n9. MÓDULO BARRIDO DE COBERTURA Y CONCORDANCIA OFICIAL");
   const { runCoverageSweep } = await import("./coverage-sweep.mjs");
-  const coverageResult = await runCoverageSweep({ silent: false });
+  const coverageResult = await runCoverageSweep({ silent: false, transferManifest });
   assertCheck("COBERTURA", "Barrido de cobertura integral (Votaciones, Muestra 5 Fichas, Personal Apoyo, Movimientos, Manifest)", coverageResult.passed);
 
   // ─── MÓDULO 10: FICHAS /politico/* ESTÁTICAS Y RENDIMIENTO (10 URLs × 2 requests) ──
