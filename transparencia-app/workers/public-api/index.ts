@@ -144,7 +144,7 @@ async function health(env: Env) {
   // projection is reported, while the canonical R2 release remains healthy.
   const d1Consistent = Boolean(d1 && manifest && d1TransferRows === manifest.totalRows && d1ReleaseChecksum === manifest.checksumSha256);
   const ok = Boolean(r2);
-  return success({
+  const response = success({
     ok,
     service: "cambiometro-public-api",
     d1,
@@ -156,6 +156,10 @@ async function health(env: Env) {
     transferRows: manifest?.totalRows ?? 0,
     generatedAt: manifest?.generatedAt ?? null,
   }, {}, {}, ok ? 200 : 503);
+  // Health is an operational signal, not cacheable content. Caching a prior
+  // 503 can make smoke checks report a failed deployment after recovery.
+  response.headers.set("Cache-Control", "no-store");
+  return response;
 }
 
 function transferApiRow(row: JsonRecord) {
