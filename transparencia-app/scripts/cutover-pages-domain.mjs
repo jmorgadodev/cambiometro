@@ -47,12 +47,33 @@ const zone = zones.find((candidate) => candidate.name === zoneName);
 if (!zone?.id) throw new Error(`CLOUDFLARE_ZONE_NOT_FOUND:${zoneName}`);
 
 const deployments = await cf(`/accounts/${accountId}/pages/projects/${projectName}/deployments?per_page=20`);
-const successfulProduction = deployments.find((deployment) => (
-  deployment.environment === "production" &&
-  deployment.is_skipped !== true &&
-  ["success", "successfully_deployed", "completed"].includes(String(deployment.latest_stage?.name ?? deployment.stage ?? "").toLowerCase())
-));
-if (!successfulProduction) throw new Error("PAGES_PRODUCTION_DEPLOYMENT_NOT_VERIFIED");
+const failedDeploymentStates = new Set(["failure", "failed", "error", "canceled", "cancelled"]);
+const successfulDeploymentStates = new Set(["success", "successful", "successfully_deployed", "completed"]);
+const productionDeployments = deployments
+  .filter((deployment) => deployment.environment === "production" && deployment.is_skipped !== true && deployment.id)
+  .sort((left, right) => String(right.created_on ?? "").localeCompare(String(left.created_on ?? "")));
+const successfulProduction = productionDeployments.find((deployment) => {
+  const stage = deployment.latest_stage ?? {};
+  const states = [stage.name, stage.status, deployment.status, deployment.stage]
+    .filter(Boolean)
+    .map((state) => String(state).toLowerCase());
+  const explicitlyFailed = states.some((state) => failedDeploymentStates.has(state));
+  const completed = states.some((state) => successfulDeploymentStates.has(state)) || Boolean(stage.ended_on || deployment.completed_on);
+  return !explicitlyFailed && (completed || states.length === 0);
+});
+if (!successfulProduction) {
+  console.error(JSON.stringify({
+    productionDeployments: productionDeployments.map((deployment) => ({
+      id: deployment.id,
+      environment: deployment.environment,
+      status: deployment.status ?? null,
+      stage: deployment.stage ?? null,
+      latestStage: deployment.latest_stage ?? null,
+      createdOn: deployment.created_on ?? null,
+    })),
+  }, null, 2));
+  throw new Error("PAGES_PRODUCTION_DEPLOYMENT_NOT_VERIFIED");
+}
 
 const domains = await cf(`/accounts/${accountId}/pages/projects/${projectName}/domains?per_page=100`);
 const registeredDomain = domains.find((domain) => String(domain.name ?? "").toLowerCase() === hostname.toLowerCase());
@@ -67,6 +88,9 @@ console.log(JSON.stringify({
     id: successfulProduction.id,
     url: successfulProduction.url ?? null,
     createdOn: successfulProduction.created_on ?? null,
+    status: successfulProduction.status ?? null,
+    stage: successfulProduction.stage ?? null,
+    latestStage: successfulProduction.latest_stage ?? null,
   },
   pagesDomainRegistered: Boolean(registeredDomain),
   dnsRecords: records.map((record) => ({ type: record.type, name: record.name, content: record.content, proxied: record.proxied })),
