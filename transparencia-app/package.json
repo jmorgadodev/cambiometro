@@ -33,6 +33,7 @@
     "api:size": "node scripts/verify-worker-size.mjs",
     "api:dev": "wrangler dev --config workers/public-api/wrangler.jsonc",
     "pages:rollback": "node scripts/pages-rollback.mjs",
+    "pages:domain:cutover": "node scripts/cutover-pages-domain.mjs",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "etl": "node scripts/etl.mjs",
     "etl:prepare": "node scripts/prepare-etl-workspace.mjs",
