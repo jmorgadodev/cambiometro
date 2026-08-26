@@ -162,6 +162,16 @@ export default function GlobalFuncionariosClient() {
 
   // Fetch data
   useEffect(() => {
+    if (muniFilter === "Todos") {
+      setData([]);
+      setTotal(0);
+      setTotalPages(1);
+      setStats(null);
+      setErrorMessage(null);
+      setIsLoading(false);
+      return;
+    }
+
     async function fetchData() {
       setIsLoading(true);
       setErrorMessage(null);
@@ -605,13 +615,13 @@ export default function GlobalFuncionariosClient() {
             </span>
             <div>
               <span style={{ fontSize: "0.72rem", color: "var(--accent)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                {activeMuni ? "Resumen de Nómina Oficial" : "Consolidado Nacional · Transparencia Activa"}
+                {activeMuni ? "Resumen de Nómina Oficial" : "Consulta por municipalidad"}
               </span>
               <h2 style={{ fontSize: "1.15rem", margin: "0.1rem 0 0.2rem 0", color: "var(--text-primary)" }}>
-                {activeMuni ? `Municipalidad de ${activeMuni.nombre_comuna}` : "Todas las Municipalidades de Chile"}
+                {activeMuni ? `Municipalidad de ${activeMuni.nombre_comuna}` : "Selecciona una municipalidad para consultar su nómina"}
               </h2>
               <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-                {activeMuni ? `${activeMuni.region ?? "Chile"} · CUT: ${activeMuni.cut ?? "—"}` : "346 Comunas del Territorio Nacional"}
+                {activeMuni ? `${activeMuni.region ?? "Chile"} · CUT: ${activeMuni.cut ?? "—"}` : "La consulta nacional requiere elegir una comuna"}
               </span>
             </div>
           </div>
@@ -629,7 +639,7 @@ export default function GlobalFuncionariosClient() {
                 Funcionarios en nómina
               </span>
               <strong style={{ fontSize: "1.1rem", color: "var(--text-primary)" }}>
-                {(stats.totalMuni ?? total).toLocaleString("es-CL")}
+                {activeMuni ? (stats.totalMuni ?? total).toLocaleString("es-CL") : "—"}
               </strong>
             </div>
 
@@ -689,7 +699,7 @@ export default function GlobalFuncionariosClient() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
           <span style={{ fontSize: "0.92rem", fontWeight: 700, color: "var(--text-primary)" }}>
-            {isLoading ? "Consultando nómina..." : `${total.toLocaleString("es-CL")} funcionarios encontrados`}
+            {isLoading ? "Consultando nómina..." : activeMuni ? `${total.toLocaleString("es-CL")} funcionarios encontrados` : "Selecciona una municipalidad para comenzar"}
           </span>
           {hasActiveFilters && (
             <span className="badge badge-info" style={{ fontSize: "0.7rem" }}>
@@ -1094,9 +1104,9 @@ export default function GlobalFuncionariosClient() {
           }}
         >
           <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🔍</div>
-          <h3 style={{ fontSize: "1.1rem", margin: "0 0 0.5rem 0" }}>No se encontraron funcionarios</h3>
+          <h3 style={{ fontSize: "1.1rem", margin: "0 0 0.5rem 0" }}>{activeMuni ? "No se encontraron funcionarios" : "Selecciona una municipalidad"}</h3>
           <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", maxWidth: 450, margin: "0 auto 1.25rem" }}>
-            No hay registros que coincidan con los filtros aplicados en esta municipalidad.
+            {activeMuni ? "No hay registros que coincidan con los filtros aplicados en esta municipalidad." : "Elige una comuna en el selector para consultar datos oficiales y usar la búsqueda de funcionarios."}
           </p>
           <button
             type="button"

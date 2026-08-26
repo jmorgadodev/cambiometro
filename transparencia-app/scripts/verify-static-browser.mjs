@@ -6,6 +6,7 @@ import { chromium } from "playwright";
 const root = join(process.cwd(), "out");
 const port = Number(process.env.STATIC_VERIFY_PORT || 0);
 const remoteBaseUrl = process.env.STATIC_VERIFY_BASE_URL?.replace(/\/+$/, "");
+const staticApiBaseUrl = process.env.STATIC_VERIFY_API_URL?.replace(/\/+$/, "");
 const waitMs = 5_200;
 const spinnerPattern = /Cargando contenido|Cargando municipalidades|Cargando transferencias|Cargando funcionarios|Cargando historial/i;
 const mime = {
@@ -59,9 +60,30 @@ function check(condition, message, details = {}) {
   return condition ? null : { message, ...details };
 }
 
+async function createContext(browser) {
+  const context = await browser.newContext();
+  if (!staticApiBaseUrl) return context;
+
+  await context.route("**/api/**", async (route) => {
+    const requestUrl = new URL(route.request().url());
+    const upstreamUrl = `${staticApiBaseUrl}${requestUrl.pathname}${requestUrl.search}`;
+    const upstream = await fetch(upstreamUrl, {
+      method: route.request().method(),
+      headers: Object.fromEntries(route.request().headers()),
+      body: ["GET", "HEAD"].includes(route.request().method()) ? undefined : route.request().postDataBuffer(),
+    });
+    await route.fulfill({
+      status: upstream.status,
+      headers: Object.fromEntries(upstream.headers.entries()),
+      body: Buffer.from(await upstream.arrayBuffer()),
+    });
+  });
+  return context;
+}
+
 async function checkRoute(browser, baseUrl, route, markers) {
   const monitoredOrigin = new URL(baseUrl).origin;
-  const context = await browser.newContext();
+  const context = await createContext(browser);
   const page = await context.newPage();
   const errors = [];
   const badResponses = [];
@@ -128,7 +150,7 @@ async function main() {
   const routes = [];
   for (const item of cases) routes.push(await checkRoute(browser, baseUrl, item.route, item.markers));
 
-  const navigationContext = await browser.newContext();
+  const navigationContext = await createContext(browser);
   const navigationPage = await navigationContext.newPage();
   const navigationErrors = [];
   const navigationBadResponses = [];
@@ -153,7 +175,7 @@ async function main() {
   };
   await navigationContext.close();
 
-  const detailContext = await browser.newContext();
+  const detailContext = await createContext(browser);
   const detailPage = await detailContext.newPage();
   const detailErrors = [];
   const detailBadResponses = [];
