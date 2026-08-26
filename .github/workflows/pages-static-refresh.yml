@@ -127,4 +127,7 @@ jobs:
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
-        run: npx wrangler pages deploy out --project-name cambiometro --commit-message "Static refresh ${GITHUB_SHA}"
+        # El workflow ejecuta checkout en detached HEAD. Sin --branch,
+        # Wrangler crea el alias "head" y no reemplaza el deployment
+        # canónico de Pages; la rama productiva debe ser explícita.
+        run: npx wrangler pages deploy out --project-name cambiometro --branch main --commit-hash "$GITHUB_SHA" --commit-message "Static refresh ${GITHUB_SHA}"
