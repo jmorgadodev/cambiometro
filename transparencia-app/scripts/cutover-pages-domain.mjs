@@ -79,7 +79,15 @@ if (!successfulProduction) {
 // The project has a single production hostname, so the default first page is sufficient.
 const domains = await cf(`/accounts/${accountId}/pages/projects/${projectName}/domains`);
 const registeredDomain = domains.find((domain) => String(domain.name ?? "").toLowerCase() === hostname.toLowerCase());
-const records = await cf(`/zones/${zone.id}/dns_records?name=${encodeURIComponent(hostname)}&per_page=100`);
+const workerRoutes = await cf(`/zones/${zone.id}/workers/routes`);
+const broadHostPattern = `${hostname}/*`.toLowerCase();
+const apiPattern = `${hostname}/api/*`.toLowerCase();
+const legacyRoutes = workerRoutes.filter((route) => String(route.pattern ?? "").toLowerCase() === broadHostPattern);
+const apiRoutes = workerRoutes.filter((route) => String(route.pattern ?? "").toLowerCase() === apiPattern);
+if (legacyRoutes.length > 1) {
+  throw new Error(`LEGACY_HOST_ROUTES_AMBIGUOUS:${legacyRoutes.map((route) => route.id).join(",")}`);
+}
+let records = await cf(`/zones/${zone.id}/dns_records?name=${encodeURIComponent(hostname)}&per_page=100`);
 
 console.log(JSON.stringify({
   mode: apply ? "apply" : "preflight",
@@ -95,6 +103,10 @@ console.log(JSON.stringify({
     latestStage: successfulProduction.latest_stage ?? null,
   },
   pagesDomainRegistered: Boolean(registeredDomain),
+  workerRoutes: {
+    legacyHostRoute: legacyRoutes.map((route) => ({ id: route.id, pattern: route.pattern, script: route.script ?? null })),
+    apiRoutes: apiRoutes.map((route) => ({ id: route.id, pattern: route.pattern, script: route.script ?? null })),
+  },
   dnsRecords: records.map((record) => ({ type: record.type, name: record.name, content: record.content, proxied: record.proxied })),
 }, null, 2));
 
@@ -105,6 +117,7 @@ if (!apply) {
   console.log(JSON.stringify({
     action: "dry-run",
     wouldRegisterPagesDomain: !registeredDomain,
+    wouldDeleteLegacyHostRoute: legacyRoutes.map((route) => ({ id: route.id, pattern: route.pattern, script: route.script ?? null })),
     wouldDeleteRecords: conflicting.map((record) => ({ id: record.id, type: record.type, content: record.content })),
     wouldCreateOrUpdateCname: !desired || desired.proxied !== true,
   }, null, 2));
@@ -119,19 +132,35 @@ if (!registeredDomain) {
   console.log(JSON.stringify({ action: "pages-domain-registered", name: added.name ?? hostname, status: added.status ?? null }));
 }
 
-for (const record of conflicting) {
+// The old OpenNext deployment used a catch-all Worker route. The reserved
+// AAAA 100:: record is managed by that route and Cloudflare rejects deleting
+// it directly while the route exists. Remove only the exact catch-all for the
+// public hostname; the narrower /api/* Worker route is intentionally kept.
+for (const route of legacyRoutes) {
+  await cf(`/zones/${zone.id}/workers/routes/${route.id}`, { method: "DELETE" });
+  console.log(JSON.stringify({ action: "legacy-host-route-deleted", id: route.id, pattern: route.pattern, script: route.script ?? null }));
+}
+
+if (legacyRoutes.length > 0) {
+  records = await cf(`/zones/${zone.id}/dns_records?name=${encodeURIComponent(hostname)}&per_page=100`);
+}
+
+const refreshedDesired = records.find((record) => record.type === "CNAME" && record.content.replace(/\.$/, "").toLowerCase() === pagesTarget);
+const refreshedConflicting = records.filter((record) => record.type === "A" || record.type === "AAAA" || (record.type === "CNAME" && record.id !== refreshedDesired?.id));
+
+for (const record of refreshedConflicting) {
   printRecord(record);
   await cf(`/zones/${zone.id}/dns_records/${record.id}`, { method: "DELETE" });
   console.log(JSON.stringify({ action: "dns-record-deleted", id: record.id, type: record.type }));
 }
 
-if (desired) {
-  if (desired.proxied !== true) {
-    await cf(`/zones/${zone.id}/dns_records/${desired.id}`, {
+if (refreshedDesired) {
+  if (refreshedDesired.proxied !== true) {
+    await cf(`/zones/${zone.id}/dns_records/${refreshedDesired.id}`, {
       method: "PATCH",
       body: JSON.stringify({ proxied: true, ttl: 1 }),
     });
-    console.log(JSON.stringify({ action: "dns-cname-proxied", id: desired.id }));
+    console.log(JSON.stringify({ action: "dns-cname-proxied", id: refreshedDesired.id }));
   }
 } else {
   const created = await cf(`/zones/${zone.id}/dns_records`, {
