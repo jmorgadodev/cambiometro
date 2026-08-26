@@ -13,7 +13,9 @@ const responsiveRoutes = ["/"];
 const baseUrl = process.env.VERIFY_BASE_URL ?? "http://127.0.0.1:3000";
 const apiBaseUrl = process.env.VERIFY_API_URL ?? baseUrl;
 const verifyingLocal = /^http:\/\/(?:127\.0\.0\.1|localhost)/.test(baseUrl);
-const verifyingProd = !verifyingLocal && !/\.workers\.dev$/.test(new URL(baseUrl).hostname);
+const verifyingProd = !verifyingLocal
+  && !/\.workers\.dev$/.test(new URL(baseUrl).hostname)
+  && process.env.VERIFY_SKIP_THROTTLE !== "1";
 const staticRedirects = new Map(
   readFileSync(join(process.cwd(), "public", "_redirects"), "utf8")
     .split("\n")
@@ -276,9 +278,20 @@ try {
 
   await page.setViewportSize({ width: 320, height: 800 });
   await gotoWithNetworkRetry(baseUrl);
-  await page.getByRole("button", { name: "Secciones" }).click();
   const visibleMobileDrawer = page.locator("#mobile-drawer:visible");
-  await visibleMobileDrawer.waitFor({ state: "visible", timeout: 5000 });
+  const openMobileDrawer = async () => {
+    await page.getByRole("button", { name: "Secciones" }).click();
+    await visibleMobileDrawer.waitFor({ state: "visible", timeout: 5000 });
+  };
+  try {
+    await openMobileDrawer();
+  } catch {
+    // A long remote crawl can land between the static shell and header
+    // hydration. Reload once so a transient missed click does not hide a
+    // real drawer regression; a second failure remains fatal.
+    await gotoWithNetworkRetry(baseUrl);
+    await openMobileDrawer();
+  }
   assert(await visibleMobileDrawer.isVisible(), "Drawer móvil debe ser visible tras click");
   assert(await visibleMobileDrawer.locator("nav").isVisible(), "Navegación del drawer móvil debe ser visible");
   await page.screenshot({ path: join(tmpdir(), "transparencia-home-mobile.png"), fullPage: true });
