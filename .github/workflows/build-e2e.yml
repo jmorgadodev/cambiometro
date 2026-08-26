@@ -54,7 +54,7 @@ jobs:
           # E2E usa la proyección fixture porque los secretos R2 no están
           # disponibles en PRs. Pages producción nunca define esta variable.
           ALLOW_STATIC_SAMPLE: "1"
-        run: npm run pages:build && npm run api:size
+        run: npm run pages:build && npm run pages:verify && npm run api:size
         working-directory: transparencia-app
 
       - name: Verify Worker Runtime Bundle Budget
