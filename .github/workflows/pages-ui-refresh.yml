@@ -192,3 +192,39 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
         run: npx wrangler pages deploy out --project-name cambiometro --branch main --commit-hash "$GITHUB_SHA" --commit-message "Pages UI release ${GITHUB_SHA}"
+
+      - name: Registrar deployment Pages productivo y rollback
+        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.publish_pages == true && inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER' }}
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+          PAGES_COMMIT_SHA: ${{ github.sha }}
+        run: |
+          curl --fail --silent --show-error \
+            --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/cambiometro/deployments" \
+            > pages-deployments.json
+          node -e '
+            const fs = require("node:fs");
+            const payload = JSON.parse(fs.readFileSync("pages-deployments.json", "utf8"));
+            const deployments = Array.isArray(payload.result) ? payload.result : [];
+            const matching = deployments.filter((item) => item.deployment_trigger?.metadata?.commit_hash === process.env.PAGES_COMMIT_SHA);
+            const production = deployments.filter((item) => item.environment === "production" && item.is_skipped !== true);
+            const candidates = production.length > 0 ? production : deployments;
+            const deployment = matching[0] ?? [...candidates].sort((a, b) => Date.parse(b.created_on ?? 0) - Date.parse(a.created_on ?? 0))[0];
+            if (!deployment?.id) throw new Error(`No se encontró deployment Pages productivo para ${process.env.PAGES_COMMIT_SHA}`);
+            if (matching.length === 0) console.warn(`No hubo match por commit; se registra el deployment productivo más reciente (${deployment.id})`);
+            console.log(`Pages deployment ID: ${deployment.id}`);
+            console.log(`Pages deployment URL: ${deployment.url ?? "n/a"}`);
+            console.log(`Rollback exacto: npm run pages:rollback -- ${deployment.id}`);
+          '
+
+      - name: Guardar metadata del deployment Pages
+        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.publish_pages == true && inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-ui-production-deployment-${{ github.sha }}
+          path: transparencia-app/pages-deployments.json
+          if-no-files-found: error
+          retention-days: 30
