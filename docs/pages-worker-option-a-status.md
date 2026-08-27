@@ -46,6 +46,13 @@ La comprobación read-only del health productivo actual también devolvió
 guardia falla explícitamente con `API_TRANSFER_UNIVERSE_MISMATCH` hasta que el
 Worker/R2 productivos se actualicen y su checksum coincida.
 
+La prueba de navegador read-only del dominio confirmó además que producción
+continúa sirviendo el stack anterior: `/votaciones-destacadas` devuelve 404 y
+la consola reporta violaciones CSP por scripts inline, Cloudflare Insights y
+Google Tag Manager. El E2E ya no ignora esos mensajes; el workflow de
+producción fallará hasta que el deployment Pages estático y la configuración
+Cloudflare estén realmente activos.
+
 Todavía falta ejecutar contra producción real, después de una aprobación
 explícita: doble `verify-prod-full` separada por diez minutos, crawl frío del
 dominio, primer run verde de `uptime-smoke`, inspección CSP en DevTools y

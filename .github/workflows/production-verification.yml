@@ -42,6 +42,8 @@ jobs:
         env:
           PROD_URL: ${{ vars.CAMBIOMETRO_PROD_URL || 'https://cambiometro.impulsacv.cl' }}
           API_URL: ${{ vars.CAMBIOMETRO_API_URL || 'https://cambiometro.impulsacv.cl' }}
+          VERIFY_BASE_URL: ${{ vars.CAMBIOMETRO_PROD_URL || 'https://cambiometro.impulsacv.cl' }}
+          VERIFY_API_URL: ${{ vars.CAMBIOMETRO_API_URL || 'https://cambiometro.impulsacv.cl' }}
           UPTIME_TOKEN: ${{ secrets.CAMBIOMETRO_UPTIME_TOKEN }}
           VERIFY_THEME_BROWSER: "1"
           VERIFY_SECOND_DELAY_MS: ${{ inputs.second_pass_delay_ms }}
@@ -49,6 +51,7 @@ jobs:
           COLD_CRAWL_OUTPUT: artifacts/cold-crawl-production.json
         run: |
           mkdir -p artifacts
+          npm run verify:browser 2>&1 | tee artifacts/browser-production.log
           npm run verify:prod:double 2>&1 | tee artifacts/verify-prod-double.log
           npm run verify:cold-crawl 2>&1 | tee artifacts/cold-crawl-output.log
       - name: Upload production evidence
