@@ -172,3 +172,95 @@ Si falla una página, aparece un spinner permanente, falta un chunk, hay un 5xx/
 4. Ejecutar `verify-prod-full` dos veces y el crawl frío completo.
 5. Registrar deployment ID, version ID, evidencia de headers/CSP y comandos de rollback.
 6. Sólo después cambiar CNAME y verificar que el dominio dejó de servir OpenNext.
+
+## Evidencia de producción posterior al release 13f1c5b
+
+Esta sección reemplaza los estados pendientes de las notas anteriores. La
+verificación se ejecutó contra `https://cambiometro.impulsacv.cl` desde el
+checkout correcto el 26/27-ago-2026.
+
+### Publicación
+
+- `main`: `13f1c5b8558c2dcc6b54522aad33aaea82135e94`.
+- GitHub Actions: `33032542057`, resultado `success`.
+- Pages deployment: `0cd3adf2-864f-4e99-bc32-7ec5c02b8519`.
+- Pages URL: `https://0cd3adf2.cambiometro.pages.dev`.
+- Artefacto: 17.198 archivos, 5.017 HTML, 1.915.556.093 bytes.
+- Worker: no se modificó ni se promovió una versión nueva en este release. La
+  versión pública existente continúa siendo
+  `3ea6312f-6f6e-4185-9ee7-0cb2891e17c0`.
+
+Rollbacks exactos:
+
+```bash
+npm run pages:rollback -- 0cd3adf2-864f-4e99-bc32-7ec5c02b8519
+npx wrangler rollback 3ea6312f-6f6e-4185-9ee7-0cb2891e17c0 \
+  --name cambiometro-public-api
+```
+
+### Datos y aplicación
+
+- `/data/gastos-operacionales/manifest.json`: 22.788 filas, 456 páginas,
+  `$5.826.806.080`, checksum
+  `d5bca5843bc5daabacbedb327f52a275cf99059dc0ebb8e970017e1ab790c456`.
+- Distribución: 16.275 Cámara + 6.513 Senado. Las 1.288 rendiciones
+  históricas que no corresponden al directorio vigente se conservan en el
+  índice general, sin atribuirlas a otra persona.
+- La ruta pública nueva `/gastos-operacionales/` responde `200` y carga sus
+  chunks estáticos. Kaiser y Bianchi muestran el bloque `Gastos Operacionales
+  Rendidos` en sus fichas.
+- Transferencias: 59.912 filas, 1.199 páginas, `$5.020.688.584.211`, checksum
+  `2144da2a41d67a8fef109273242b72fb8c321ce2eb45c81b0cbcf1252ab43838`.
+
+### Verificaciones ejecutadas
+
+- `verify-prod-full.mjs`: pasada 1 y pasada 2, separadas exactamente 600.000
+  ms; ambas `116 verificaciones pasadas, 0 fallidas`.
+- Invariantes comprobadas: dieta Kaiser `$8.291.039`, asignación `+33,7%`,
+  Bianchi `25.009 / 24,89%`, `580` votos Cámara y `189` Senado, Maipú `301`
+  hacia `/municipalidades/maipu`, Worker de gastos Cámara/Senado con filas,
+  `74.142` ChileCompra, `60.523` InfoLobby y `291` CGR.
+- Crawl frío: 5.014/5.014 rutas del sitemap en `200`, 0 fallidas, 0 `1102`,
+  0 `5xx`; máximo 2.339 ms, promedio 670 ms. Las rutas principales quedaron
+  registradas en `artifacts/cold-crawl-latest.json` (artefacto local ignorado
+  por Git). La tabla completa ruta → status → ms está en ese JSON.
+- `uptime-smoke.mjs` local: 10/10 rutas en `200`, incluyendo home, listados,
+  ficha Kaiser, `/api/v1/health` y `/api/v1/search?q=Kaiser`.
+- Navegador Playwright en contexto nuevo: todas las rutas críticas cargan sin
+  spinner ni overlay; la nómina Maipú muestra 159 funcionarios y los chunks
+  responden. El output completo queda localmente en
+  `verify-static-browser-prod.log`.
+
+### Pendientes externos que impiden declarar cierre absoluto
+
+- El workflow `Uptime Smoke Cron (5 min)` está visible y conserva `*/5 * * * *`,
+  pero el run `33034690421` sigue fallando sólo en `/` con `403`; las otras 9
+  rutas pasan. El secreto `CAMBIOMETRO_UPTIME_TOKEN` llega a Actions, por lo
+  que la excepción WAF guardada no coincide con ese valor o no incluye la raíz.
+  Debe corregirse en Cloudflare y repetirse el run; no se debe relajar el
+  workflow ni eliminar la comprobación de home.
+- Playwright registró 50 violaciones CSP de infraestructura inyectada por
+  Cloudflare (`/cdn-cgi`/JavaScript Detections e
+  `static.cloudflareinsights.com`) en las rutas probadas. La aplicación no
+  generó errores, no hay `unsafe-inline` en la CSP estática y los spinners no
+  reaparecen. Para dejar la consola en cero hay que desactivar Browser
+  Insights/JavaScript Detections de la zona, o configurar esa inyección para
+  respetar la CSP; no se debe agregar `unsafe-inline`.
+- El endpoint nacional `/api/funcionarios` sin `muni` responde `503
+  DATASET_SCOPE_REQUIRED` por diseño cuando no existe el índice D1 nacional.
+  La consulta municipal usada por el contrato (`muni=muni-maipu`) responde
+  `200` con filas y paginación; `/api/v1/search` también responde `200`.
+
+Los outputs de auditoría completos son locales e ignorados por Git:
+
+```text
+transparencia-app/verify-prod-pass1-full.log
+transparencia-app/verify-prod-double-full.log
+transparencia-app/verify-static-browser-prod.log
+transparencia-app/cold-crawl-prod.log
+transparencia-app/artifacts/cold-crawl-latest.json
+```
+
+El checkout mantiene `git status --short` limpio: no se agregan `out/`,
+`.next/`, `public/data/`, chunks, slices ni logs de verificación al
+repositorio.
