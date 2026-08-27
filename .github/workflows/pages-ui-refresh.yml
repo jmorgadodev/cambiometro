@@ -96,11 +96,35 @@ jobs:
             transparencia-app/data/municipalidades-data.json
             transparencia-app/data/municipalidades-list.json
 
-      - name: Rechazar interfaz sin snapshot de datos
+      - name: Recuperar snapshot publicado desde R2 sin ejecutar ETL
         if: steps.data-cache.outputs.cache-hit != 'true'
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: |
-          echo "No existe un snapshot validado para esta versión de datos. Ejecuta el workflow 'Pages estático - refresco automático verificable' primero."
-          exit 1
+          npm run data:hydrate:cplt-static -- --required
+          npm run data:hydrate:static -- --required --required-all
+          npm run check:static-input-fallback
+          npm run data:hydrate:ley19862
+          npm run data:lake:projection:ley19862
+
+      - name: Guardar snapshot recuperado para próximos cambios de interfaz
+        if: steps.data-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          key: pages-static-data-${{ steps.data-version.outputs.key }}
+          path: |
+            transparencia-app/data/lake/catalog
+            transparencia-app/data/lake/partitions/ley-19862
+            transparencia-app/data/lake/projections/v1
+            transparencia-app/data/lake-subsets
+            transparencia-app/data/lake-cplt
+            transparencia-app/data/politicos-votaciones.json
+            transparencia-app/data/personal-apoyo.json
+            transparencia-app/data/movimientos.json
+            transparencia-app/data/municipalidades-data.json
+            transparencia-app/data/municipalidades-list.json
 
       - name: Construir Pages sin hidratar ETL
         run: npm run pages:build
