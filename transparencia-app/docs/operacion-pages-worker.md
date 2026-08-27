@@ -433,3 +433,46 @@ La consola del navegador sigue registrando únicamente la inyección externa de
 Cloudflare/GTM bloqueada por la CSP estricta (`script-src 'self'
 https://challenges.cloudflare.com`). No se añadió `unsafe-inline`; el cierre
 completo de CSP/WAF requiere corregir esa configuración de infraestructura.
+
+### Verificación posterior al release `9728be4` — run `33091980932`
+
+La doble pasada se ejecutó inmediatamente después del deployment y con la
+segunda pasada exactamente `600000 ms` después:
+
+| Pasada | Inicio UTC | Resultado |
+|---|---|---|
+| 1/2 | `2026-08-27T16:13:08.204Z` | 100 aprobadas, 17 fallidas |
+| 2/2 | `2026-08-27T16:24:00.394Z` | 100 aprobadas, 17 fallidas |
+
+Las 17 fallas de cada pasada son derivadas del mismo bloqueo de Cloudflare en
+`/`: el runner recibe `403`, el probe de tema no alcanza `networkidle` y los
+marcadores SSR del home no pueden leerse. En cambio, el módulo completo de
+fichas, gastos, Maipú, cruces, transferencias, API, fuentes, calidad,
+`769 = 580 Cámara + 189 Senado`, snapshots, registros canónicos y las fichas
+estáticas de rendimiento pasan. El resumen de cada pasada es literalmente:
+`100 verificaciones pasadas, 17 fallidas`.
+
+El crawl frío tampoco pudo comenzar porque el sitemap recibió `403`
+(`SITEMAP_HTTP_403`). Por ello todavía no se debe declarar cero 1102/5xx en el
+crawl desde GitHub Actions, aunque las comprobaciones directas locales y de
+producción del dominio sí respondieron `200` para las rutas principales.
+
+El smoke `33092012558` fue `9/10`: `/politico`, `/municipalidades`,
+`/servicios-publicos`, `/entidades`, Kaiser, `/transferencias`, `/cruces`,
+`/api/v1/health` y `/api/v1/search?q=Kaiser` respondieron `200`; sólo `/`
+respondió `403` desde el runner. Se creó el issue automático #237.
+
+Outputs completos descargados localmente como artefactos ignorados por Git:
+
+```text
+transparencia-app/artifacts/production-verification-33091980932/production-verification-33091980932/verify-prod-double.log
+transparencia-app/artifacts/production-verification-33091980932/production-verification-33091980932/browser-production.log
+transparencia-app/artifacts/production-verification-33091980932/production-verification-33091980932/cold-crawl-output.log
+transparencia-app/artifacts/themes-production-20260827/
+```
+
+En el dominio, la auditoría específica de temas generó `12` capturas (4 rutas
+por 3 temas), comprobó persistencia de Papel/Oscuro/Noche y encontró cero
+violaciones axe AA. La auditoría de consola confirma que los únicos mensajes
+son la inyección externa Cloudflare/GTM que la CSP bloquea; el código del sitio
+no añade `unsafe-inline`.
