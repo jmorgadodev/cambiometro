@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import React, { useEffect, useState, startTransition } from "react";
 import Icono from "@/components/ui/Icono";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
+import { THEME_ORDER, type ThemeName } from "@/lib/theme-tokens";
 
 /**
  * Orden narrativo canónico por clústeres estructurados:
@@ -20,6 +21,7 @@ export const NAV_CLUSTERS = [
     items: [
       { href: "/politico", label: "Análisis Parlamentario" },
       { href: "/partidos", label: "Partidos" },
+      { href: "/votaciones-destacadas", label: "Votaciones destacadas" },
       { href: "/personas", label: "Directorio de Personas" },
     ],
   },
@@ -55,26 +57,19 @@ interface SiteHeaderProps {
 export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
+  const [theme, setTheme] = useState<ThemeName>("paper");
 
   const displayTotal = totalRecords && totalRecords > 0 ? totalRecords : GLOBAL_KPIS.registros_canonicos;
   const displayCorte = updatedAt || GLOBAL_KPIS.corte;
 
-  // Sincronizar tema claro / oscuro desde localStorage o media query
+  // Papel es el valor predeterminado; nunca se usa el tema del sistema.
   useEffect(() => {
     const id = requestAnimationFrame(() => {
       const savedTheme = localStorage.getItem("cambiometro-theme");
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const shouldBeDark = savedTheme ? savedTheme === "dark" : prefersDark;
-      if (shouldBeDark) {
-        document.documentElement.classList.add("dark");
-        document.documentElement.setAttribute("data-theme", "dark");
-        setIsDark(true);
-      } else {
-        document.documentElement.classList.remove("dark");
-        document.documentElement.setAttribute("data-theme", "light");
-        setIsDark(false);
-      }
+      const nextTheme: ThemeName = savedTheme === "dark" || savedTheme === "night" || savedTheme === "paper" ? savedTheme : "paper";
+      document.documentElement.classList.toggle("dark", nextTheme === "dark");
+      document.documentElement.setAttribute("data-theme", nextTheme);
+      setTheme(nextTheme);
     });
     return () => cancelAnimationFrame(id);
   }, []);
@@ -104,18 +99,15 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
   }, [drawerOpen]);
 
   const toggleTheme = () => {
-    const nextDark = !isDark;
-    setIsDark(nextDark);
-    if (nextDark) {
-      document.documentElement.classList.add("dark");
-      document.documentElement.setAttribute("data-theme", "dark");
-      localStorage.setItem("cambiometro-theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      document.documentElement.setAttribute("data-theme", "light");
-      localStorage.setItem("cambiometro-theme", "light");
-    }
+    const nextTheme = THEME_ORDER[(THEME_ORDER.indexOf(theme) + 1) % THEME_ORDER.length];
+    setTheme(nextTheme);
+    document.documentElement.classList.toggle("dark", nextTheme === "dark");
+    document.documentElement.setAttribute("data-theme", nextTheme);
+    localStorage.setItem("cambiometro-theme", nextTheme);
   };
+
+  const themeLabels: Record<ThemeName, string> = { paper: "Papel", dark: "Oscuro", night: "Noche" };
+  const nextTheme = THEME_ORDER[(THEME_ORDER.indexOf(theme) + 1) % THEME_ORDER.length];
 
   return (
     <>
@@ -157,10 +149,11 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
               type="button"
               className="theme-toggle-btn"
               onClick={toggleTheme}
-              aria-label={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
-              title={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+              aria-label={`Tema actual: ${themeLabels[theme]}. Cambiar a ${themeLabels[nextTheme]}`}
+              title={`Tema: ${themeLabels[theme]} · siguiente: ${themeLabels[nextTheme]}`}
             >
-              <Icono nombre={isDark ? "sun" : "moon"} size={18} />
+              <Icono nombre={theme === "paper" ? "sun" : "moon"} size={18} />
+              <span className="sr-only">{themeLabels[theme]}</span>
             </button>
 
             {/* Botón de Secciones (Solo visible en móvil <1024px, touch target ≥ 44px) */}

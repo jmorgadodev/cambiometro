@@ -30,6 +30,11 @@ on:
         type: boolean
         required: false
         default: false
+      confirmation:
+        description: "Escribir CAMBIOMETRO_CONFIRM_CUTOVER sólo para promover producción"
+        type: string
+        required: false
+        default: ""
 
 concurrency:
   group: public-api-worker-${{ github.ref }}
@@ -125,7 +130,10 @@ jobs:
       - name: Validar version ID explícito
         env:
           WORKER_VERSION_ID: ${{ inputs.worker_version_id }}
-        run: test -n "$WORKER_VERSION_ID"
+          CAMBIOMETRO_CONFIRM_CUTOVER: ${{ inputs.confirmation }}
+        run: |
+          test -n "$WORKER_VERSION_ID"
+          test "$CAMBIOMETRO_CONFIRM_CUTOVER" = "CAMBIOMETRO_CONFIRM_CUTOVER"
       - name: Promover versión al 100%
         working-directory: transparencia-app
         env:

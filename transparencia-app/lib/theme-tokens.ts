@@ -20,76 +20,87 @@ export interface ThemeTokens {
   info: string;
   infoBg: string;
   money: string;
+  onAccent: string;
+  highlight: string;
+  link: string;
+  focus: string;
+  series: [string, string, string, string, string, string];
 }
 
-export const LIGHT_TOKENS: ThemeTokens = {
-  bg: "#F6F8FB",
+export type ThemeName = "paper" | "dark" | "night";
+export const THEME_ORDER: ThemeName[] = ["paper", "dark", "night"];
+
+export const PAPER_TOKENS: ThemeTokens = {
+  bg: "#F6F5F2",
   surface: "#FFFFFF",
-  surface2: "#F1F5F9",
-  border: "#DBE4EE",
-  text1: "#0B1526",
-  text2: "#3E4C5E",
-  text3: "#5A6B7F",
-  accent: "#0553B0",
+  surface2: "#FBFAF8",
+  border: "#E4E2DC",
+  text1: "#101828",
+  text2: "#475467",
+  text3: "#475467",
+  accent: "#0E7C66",
   ok: "#067647",
   okBg: "#E8F7EF",
   bad: "#B42318",
   badBg: "#FEECEA",
-  warn: "#A15C07",
+  warn: "#B54708",
   warnBg: "#FFF4E0",
-  info: "#175CD3",
-  infoBg: "#EFF4FF",
+  info: "#0E7C66",
+  infoBg: "#E7F3EF",
   money: "#067647",
+  onAccent: "#FFFFFF", highlight: "#B45309", link: "#0E7C66", focus: "#0E7C66",
+  series: ["#0E7C66", "#B45309", "#7C5CBF", "#A83A5A", "#4E7A27", "#8A6D3B"],
 };
 
 export const DARK_TOKENS: ThemeTokens = {
-  bg: "#0B1220",
-  surface: "#121A2B",
-  surface2: "#1B2537",
-  border: "#2A3650",
-  text1: "#F1F5F9",
-  text2: "#C6D2E0",
-  text3: "#9AAABF",
-  accent: "#4DA3FF",
-  ok: "#34D399",
-  okBg: "#10281F",
-  bad: "#F87171",
-  badBg: "#2B1518",
-  warn: "#FBBF24",
-  warnBg: "#2A2010",
-  info: "#60A5FA",
-  infoBg: "#14213A",
-  money: "#34D399",
+  bg: "#151719", surface: "#1D2023", surface2: "#212428", border: "#2A2E33",
+  text1: "#E8E6E1", text2: "#A3A8AD", text3: "#A3A8AD", accent: "#34B39A",
+  ok: "#4CC38A", okBg: "#10281F", bad: "#F97066", badBg: "#351A19",
+  warn: "#F5A524", warnBg: "#332613", info: "#3FBFA8", infoBg: "#15302B", money: "#4CC38A",
+  onAccent: "#0B2A22", highlight: "#E8A33D", link: "#3FBFA8", focus: "#34B39A",
+  series: ["#32A58F", "#D18B2C", "#9678D2", "#C65373", "#679D38", "#A58455"],
 };
 
-export function getThemeTokens(themeOrIsDark: boolean | "dark" | "light" = false): ThemeTokens {
-  const isDark = typeof themeOrIsDark === "string" ? themeOrIsDark === "dark" : Boolean(themeOrIsDark);
-  return isDark ? DARK_TOKENS : LIGHT_TOKENS;
+export const NIGHT_TOKENS: ThemeTokens = {
+  bg: "#0A0B0B", surface: "#121313", surface2: "#161818", border: "#1F2222",
+  text1: "#D6D3CC", text2: "#8B8E89", text3: "#8B8E89", accent: "#2FA08C",
+  ok: "#3DA97C", okBg: "#10251E", bad: "#E0655C", badBg: "#2A1514",
+  warn: "#D19236", warnBg: "#2A2115", info: "#3AA793", infoBg: "#12231F", money: "#3DA97C",
+  onAccent: "#06201B", highlight: "#C98A3D", link: "#3AA793", focus: "#2FA08C",
+  series: ["#2EAD97", "#E19D48", "#9B7FDC", "#C95170", "#679D38", "#A48255"],
+};
+
+// Compatibility alias for charts and older consumers.
+export const LIGHT_TOKENS = PAPER_TOKENS;
+
+export function getThemeTokens(themeOrIsDark: boolean | ThemeName | "light" = "paper"): ThemeTokens {
+  if (themeOrIsDark === true || themeOrIsDark === "dark") return DARK_TOKENS;
+  if (themeOrIsDark === "night") return NIGHT_TOKENS;
+  return PAPER_TOKENS;
 }
 
-export function useThemeTokens(): ThemeTokens {
-  const [isDark, setIsDark] = useState<boolean>(() => {
-    if (typeof document === "undefined") return false;
-    return (
-      document.documentElement.classList.contains("dark") ||
-      document.documentElement.getAttribute("data-theme") === "dark"
-    );
+export function useThemeName(): ThemeName {
+  const [theme, setTheme] = useState<ThemeName>(() => {
+    if (typeof document === "undefined") return "paper";
+    const value = document.documentElement.getAttribute("data-theme");
+    return value === "dark" || value === "night" || value === "paper" ? value : "paper";
   });
 
   useEffect(() => {
     if (typeof document === "undefined") return;
 
-    const checkDark = () => {
-      const darkActive =
-        document.documentElement.classList.contains("dark") ||
-        document.documentElement.getAttribute("data-theme") === "dark";
-      setIsDark(darkActive);
+    const applyTheme = (next: ThemeName) => {
+      document.documentElement.setAttribute("data-theme", next);
+      document.documentElement.classList.toggle("dark", next === "dark");
+      setTheme(next);
     };
-
-    checkDark();
+    const saved = localStorage.getItem("cambiometro-theme");
+    const next = saved === "dark" || saved === "night" || saved === "paper" ? saved : "paper";
+    applyTheme(next);
 
     const observer = new MutationObserver(() => {
-      checkDark();
+      const value = document.documentElement.getAttribute("data-theme");
+      if (value === "dark" || value === "night" || value === "paper") setTheme(value);
     });
 
     observer.observe(document.documentElement, {
@@ -100,5 +111,9 @@ export function useThemeTokens(): ThemeTokens {
     return () => observer.disconnect();
   }, []);
 
-  return isDark ? DARK_TOKENS : LIGHT_TOKENS;
+  return theme;
+}
+
+export function useThemeTokens(): ThemeTokens {
+  return getThemeTokens(useThemeName());
 }

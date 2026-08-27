@@ -158,7 +158,7 @@ export default function VotosPartidoChart({
             ? datosOrdenados.map((d) => ({
                 value: d.si > 0 ? d.si : 0,
                 itemStyle: {
-                  color: tokens.ok,
+                  color: tokens.series[0],
                   borderColor: selectedVotacionId === d.id ? tokens.text1 : "transparent",
                   borderWidth: selectedVotacionId === d.id ? 2 : 0,
                 },
@@ -174,7 +174,7 @@ export default function VotosPartidoChart({
             ? datosOrdenados.map((d) => ({
                 value: d.no > 0 ? d.no : 0,
                 itemStyle: {
-                  color: tokens.bad,
+                  color: tokens.series[1],
                   borderColor: selectedVotacionId === d.id ? tokens.text1 : "transparent",
                   borderWidth: selectedVotacionId === d.id ? 2 : 0,
                 },
@@ -190,7 +190,7 @@ export default function VotosPartidoChart({
             ? datosOrdenados.map((d) => ({
                 value: d.abst > 0 ? d.abst : 0,
                 itemStyle: {
-                  color: tokens.warn,
+                  color: tokens.series[2],
                   borderColor: selectedVotacionId === d.id ? tokens.text1 : "transparent",
                   borderWidth: selectedVotacionId === d.id ? 2 : 0,
                 },
@@ -206,7 +206,7 @@ export default function VotosPartidoChart({
             ? datosOrdenados.map((d) => ({
                 value: d.noVota > 0 ? d.noVota : 0,
                 itemStyle: {
-                  color: tokens.text3,
+                  color: tokens.series[3],
                   borderColor: selectedVotacionId === d.id ? tokens.text1 : "transparent",
                   borderWidth: selectedVotacionId === d.id ? 2 : 0,
                 },
@@ -228,10 +228,10 @@ export default function VotosPartidoChart({
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
         <div style={{ display: "flex", gap: "0.4rem", flexWrap: "wrap" }}>
           {[
-            ["si", "Sí", tokens.ok],
-            ["no", "No", tokens.bad],
-            ["abst", "Abstención", tokens.warn],
-            ["noVota", "No vota", tokens.text3],
+            ["si", "Sí", tokens.series[0]],
+            ["no", "No", tokens.series[1]],
+            ["abst", "Abstención", tokens.series[2]],
+            ["noVota", "No vota", tokens.series[3]],
           ].map(([key, label, color]) => {
             const active = visible.has(key as "si" | "no" | "abst" | "noVota");
             return (

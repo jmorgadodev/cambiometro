@@ -4,7 +4,7 @@ import { dirname, join, resolve } from "node:path";
 import { createGunzip } from "node:zlib";
 import { createInterface } from "node:readline";
 import { buildLey19862Projection } from "./etl/ley19862-projection.mjs";
-import { assertMinimumTransferRows } from "./etl/transfer-release-guard.mjs";
+import { assertCanonicalTransferRelease } from "./etl/transfer-release-guard.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const sourceRoot = join(root, "data", "lake", "partitions", "ley-19862");
@@ -42,7 +42,7 @@ const generatedAt = new Date(
   Math.max(...files.map((item) => new Date(JSON.parse(readFileSync(join(dirname(item.file), "manifest.json"), "utf8")).generatedAt).getTime())),
 ).toISOString();
 const projection = buildLey19862Projection(records, { generatedAt, registeredThrough });
-assertMinimumTransferRows(projection.kpis.total_transfers);
+assertCanonicalTransferRelease({ totalRows: projection.kpis.total_transfers, totalMontoClp: projection.kpis.total_monto_clp });
 projection.source.periods = files.map((item) => item.period);
 mkdirSync(dirname(output), { recursive: true });
 writeFileSync(output, `${JSON.stringify(projection, null, 2)}\n`, "utf8");

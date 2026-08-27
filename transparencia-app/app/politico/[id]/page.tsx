@@ -47,6 +47,7 @@ import PoliticoTimeline from "@/components/PoliticoTimeline";
 import PoliticoScoreHeader, { type PoliticoHeaderData } from "@/components/PoliticoScoreHeader";
 import PersonalApoyoMensual from "@/components/PersonalApoyoMensual";
 import nextDynamic from "next/dynamic";
+import { cohesionForPolitico } from "@/lib/cohesion-bancadas";
 
 const VotacionesHistorial = nextDynamic(() => import("@/components/VotacionesHistorial"), {
   loading: () => <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-3)" }}>Cargando historial de votaciones...</div>,
@@ -99,6 +100,7 @@ export default async function PoliticoPage({ params }: Props) {
   const canonicalSlug = getPoliticoSlug(pol);
 
   const partido = PARTIDOS_SEED.find((p) => p.id === pol.partido_id);
+  const cohesion = cohesionForPolitico(partido?.sigla ?? "IND", pol.cargo);
   
   const gastos = getGastosParaPolitico(pol);
   const rawVotaciones = getVotacionesParaPolitico(pol);
@@ -342,6 +344,12 @@ export default async function PoliticoPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
       <PoliticoScoreHeader data={headerData} />
+
+      <div className="container-main" style={{ paddingTop: "1rem" }}>
+        <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.82rem" }}>
+          Su bancada vota unida {cohesion?.cohesion_pct != null ? `${cohesion.cohesion_pct}%` : "Sin muestra"} · {cohesion?.camara ?? pol.cargo}
+        </p>
+      </div>
 
       <div className="container-main" style={{ paddingTop: "2rem", paddingBottom: "2rem" }}>
         

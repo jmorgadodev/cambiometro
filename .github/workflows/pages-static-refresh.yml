@@ -32,6 +32,11 @@ on:
         type: boolean
         required: false
         default: false
+      confirm_cutover:
+        description: "Escribir CAMBIOMETRO_CONFIRM_CUTOVER sólo para publicar producción"
+        type: string
+        required: false
+        default: ""
       preview_branch:
         description: "Rama Pages de preview; vacío para no publicar preview"
         required: false
@@ -149,7 +154,7 @@ jobs:
         run: npx wrangler pages deploy out --project-name cambiometro --branch "${{ inputs.preview_branch }}" --commit-hash "${GITHUB_SHA:0:40}" --commit-message "Pages preview ${GITHUB_SHA}"
 
       - name: Publicar Pages producción después de todos los gates
-        if: (github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main') || (github.event_name == 'push' && github.ref == 'refs/heads/main') || inputs.publish_pages == true
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_pages == true && inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER'
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -160,7 +165,7 @@ jobs:
         run: npx wrangler pages deploy out --project-name cambiometro --branch main --commit-hash "$GITHUB_SHA" --commit-message "Static refresh ${GITHUB_SHA}"
 
       - name: Registrar deployment Pages productivo y rollback
-        if: ${{ success() && ((github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main') || (github.event_name == 'push' && github.ref == 'refs/heads/main') || inputs.publish_pages == true) }}
+        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.publish_pages == true && inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER' }}
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -187,7 +192,7 @@ jobs:
           '
 
       - name: Guardar metadata del deployment Pages
-        if: ${{ success() && ((github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main') || (github.event_name == 'push' && github.ref == 'refs/heads/main') || inputs.publish_pages == true) }}
+        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.publish_pages == true && inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER' }}
         uses: actions/upload-artifact@v4
         with:
           name: pages-production-deployment-${{ github.sha }}

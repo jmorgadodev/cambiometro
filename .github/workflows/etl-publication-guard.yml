@@ -1,0 +1,46 @@
+name: ETL publication guard
+
+on:
+  workflow_run:
+    workflows:
+      - "ETL Mensual - Ley 19.862 Transferencias del Estado"
+      - "ETL Diario - Parlamento, Movimientos y Diario Oficial"
+      - "ETL Mensual - CPLT Nóminas Transparencia Activa"
+      - "ETL Semanal - ChileCompra OCDS"
+      - "ETL Mensual - Contraloría General (CGR)"
+      - "ETL Semanal - InfoLobby"
+      - "ETL Mensual - InfoProbidad DIP"
+      - "ETL Trimestral - DIPRES Presupuestos"
+      - "ETL Bajo Demanda - SERVEL Resultados Electorales"
+      - "ETL Semestral - SINIM Finanzas Municipales"
+      - "ETL Mensual - Gastos Operacionales Congreso"
+    types: [completed]
+  workflow_dispatch:
+
+concurrency:
+  group: etl-publication-guard
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - name: Verificar publicación R2/D1 y manifest Pages
+        working-directory: transparencia-app
+        env:
+          PROD_URL: ${{ vars.PROD_URL || 'https://cambiometro.impulsacv.cl' }}
+          API_URL: ${{ vars.API_URL || 'https://cambiometro.impulsacv.cl' }}
+          UPTIME_TOKEN: ${{ secrets.CAMBIOMETRO_UPTIME_TOKEN }}
+          ETL_WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          ETL_COMPLETED_AT: ${{ github.event.workflow_run.updated_at }}
+          EXPECTED_TRANSFER_ROWS: "59361"
+        run: node scripts/verify-etl-freshness.mjs

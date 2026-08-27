@@ -7,7 +7,7 @@ import { chromium } from "playwright";
 const routes = [
   "/", "/autoridades", "/calculadora", "/cambios", "/como-funciona", "/comparar", "/cruces",
   "/datos", "/donar", "/entidades/person-camara-1009", "/fuentes", "/funcionarios", "/movimientos", "/municipalidades",
-  "/municipalidades/muni-maipu", "/partidos", "/partidos/rep", "/politico/dip-061", "/privacidad", "/rankings", "/servicios-publicos",
+  "/municipalidades/muni-maipu", "/partidos", "/partidos/rep", "/politico/dip-061", "/privacidad", "/rankings", "/servicios-publicos", "/votaciones-destacadas",
 ];
 const responsiveRoutes = ["/"];
 const baseUrl = process.env.VERIFY_BASE_URL ?? "http://127.0.0.1:3000";
@@ -42,9 +42,13 @@ async function throttleProd() {
 }
 
 const isRateLimited = (response) => [429, 503].includes(response?.status());
+const uptimeToken = process.env.UPTIME_TOKEN?.trim() ?? "";
 
 const browser = await chromium.launch({ headless: true });
-const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+const browserContext = await browser.newContext({
+  extraHTTPHeaders: uptimeToken ? { "X-Cambiometro-Uptime-Token": uptimeToken } : {},
+});
+const page = await browserContext.newPage({ viewport: { width: 1440, height: 1000 } });
 if (apiBaseUrl !== baseUrl) {
   await page.route(`${baseUrl}/api/**`, async (route) => {
     const target = new URL(route.request().url());
@@ -145,6 +149,7 @@ try {
       const fallback = staticRedirects.get(pathname);
       if (fallback) response = await gotoWithNetworkRetry(`${baseUrl}${fallback}`);
     }
+    console.log(`[BROWSER] ${route} -> ${response?.status() ?? "sin respuesta"}`);
     assert(response?.ok(), `${route} HTTP ${response?.status() ?? "sin respuesta"}`);
     if (route === "/autoridades" || route === "/funcionarios") await page.waitForURL("**/personas**", { timeout: 5000 }).catch(() => {});
     await page.waitForSelector("h1:visible", { state: "visible", timeout: 15000 }).catch(() => {});
@@ -343,7 +348,7 @@ try {
   const push = await page.request.post(`${apiBaseUrl}/api/push`, { data: { politico_id: "dip-061", endpoint: "https://example.test/push", keys: { p256dh: "x", auth: "y" } } });
   assert.equal(push.status(), 405);
 
-  const widgetPage = await browser.newPage();
+  const widgetPage = await browserContext.newPage();
   const widgetApiOrigin = apiBaseUrl !== baseUrl ? ` data-api-origin="${apiBaseUrl}"` : "";
   await widgetPage.setContent(`<!DOCTYPE html><html><body><main><script src="${baseUrl}/widget.js" data-politico="dip-061"${widgetApiOrigin}></script></main></body></html>`, { waitUntil: "networkidle" });
   const widgetCard = widgetPage.locator(".transparencia-widget").locator("article");
@@ -419,10 +424,16 @@ try {
     // boundaries after the HTML shell; React reports this recoverable bailout
     // as #419 in the local production bundle.
     && !(verifyingLocal && message.includes("Minified React error #419"))
-    && !message.includes("violates the following Content Security Policy directive")
-    && !message.includes("Content-Security-Policy"));
+  );
   assert.deepEqual(errors, [], `errores de consola: ${JSON.stringify(errors)}`);
   console.log("Browser integration checks passed: routes, evidence UI, responsive sizes, APIs and widget");
 } finally {
+  const cspViolations = consoleMessages
+    .filter(([, message]) => /Content Security Policy|violates the following Content Security Policy directive|static\.cloudflareinsights\.com|googletagmanager\.com/i.test(message))
+    .map(([type, message]) => `${type}: ${message}`);
+  if (cspViolations.length > 0) {
+    console.error(`[BROWSER] CSP violations observed (${cspViolations.length}):\n${cspViolations.join("\n")}`);
+  }
+  await browserContext.close();
   await browser.close();
 }

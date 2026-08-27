@@ -129,7 +129,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     : GLOBAL_KPIS.corte;
 
   return (
-    <html lang="es" className={`${inter.variable} ${ibmPlexMono.variable}`}>
+    <html lang="es" data-theme="paper" className={`${inter.variable} ${ibmPlexMono.variable}`}>
       <body className="font-sans">
         <div id="initial-splash-orb" className="initial-splash-orb" role="status" aria-label="Cargando El Cambiómetro...">
           <div className="loading-orb" style={{ width: "56px", height: "56px" }}>

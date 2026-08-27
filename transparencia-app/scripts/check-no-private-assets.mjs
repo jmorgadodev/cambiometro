@@ -34,6 +34,7 @@ const ALLOWLIST = {
   "scripts/verify-lake-manifests.mjs": ["bearer"], // allow if uses Bearer for R2
   "scripts/pages-rollback.mjs": ["bearer"], // Authorization: Bearer $CLOUDFLARE_API_TOKEN (Pages API)
   "scripts/cutover-pages-domain.mjs": ["bearer"], // Authorization: Bearer $CLOUDFLARE_API_TOKEN (Pages/DNS API)
+  "scripts/cloudflare-production-guard.mjs": ["bearer"], // Authorization: Bearer $CLOUDFLARE_API_TOKEN (scoped WAF API)
   "lib/pages-rollback.test.ts": ["bearer"], // regression for the Pages API authorization header
 };
 

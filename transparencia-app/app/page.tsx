@@ -6,6 +6,7 @@ import Icono from "@/components/ui/Icono";
 import { GLOBAL_KPIS, KPI_SCOPES } from "@/lib/global-kpis";
 import { ETL_SOURCES_DATA } from "@/lib/etl-sources-data";
 import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
+import { VOTACIONES_DESTACADAS } from "@/lib/votaciones-destacadas";
 
 export const dynamic = "force-static";
 
@@ -72,6 +73,7 @@ export default async function HomePage() {
   const resolvedHomeKpis = HOME_KPIS.map((item) => item.key === "entidades"
     ? { ...item, value: entityCount || item.value }
     : item);
+  const highlightedVotes = [...VOTACIONES_DESTACADAS].sort((a, b) => b.fecha.localeCompare(a.fecha)).slice(0, 5);
 
   return (
     <div className="home-desk">
@@ -178,6 +180,18 @@ export default async function HomePage() {
               <p>Filtra relaciones y abre la evidencia que respalda cada vínculo publicado.</p>
               <b>Abrir explorador →</b>
             </Link>
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal delay={100}>
+        <section className="container-main home-sources" aria-labelledby="highlighted-votes-title">
+          <div className="home-section-heading">
+            <div><p className="eyebrow">Seguimiento legislativo</p><h2 id="highlighted-votes-title">Votaciones destacadas</h2></div>
+            <Link prefetch={false} href="/votaciones-destacadas">Ver selección completa →</Link>
+          </div>
+          <div className="home-source-list">
+            {highlightedVotes.map((vote) => <article className="home-source-row" key={vote.votacion_id}><span className="source-signal source-signal--partial" aria-hidden="true" /><strong>{vote.boletin}</strong><span>{vote.camara} · {vote.fecha}</span><em>{vote.resultado}</em></article>)}
           </div>
         </section>
       </Reveal>
