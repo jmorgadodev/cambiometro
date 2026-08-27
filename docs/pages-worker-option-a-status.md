@@ -156,8 +156,9 @@ esta auditoría que indique que el cierre productivo ya está aprobado.
 
 ### Código y candidato Pages
 
-- `main` está limpio y sincronizado en `f49995e`; no se trabaja desde
-  `cambiometro-audit`.
+- `main` está limpio y sincronizado en `cc5dc4a` (la implementación funcional
+  permanece en `f49995e` y `cc5dc4a` sólo integra documentación); no se trabaja
+  desde `cambiometro-audit`.
 - El refresco Pages `33054333038` terminó `success` sobre `8d5f2be`; generó el
   artefacto `pages-static-8d5f2be03149e2352427219e4d770c56251eb8f0`, ID
   `9639677162`, de `198.100.519` bytes. El job de promoción productiva quedó
@@ -238,3 +239,24 @@ No se declara cerrado el cutover hasta que Cloudflare permita esas lecturas
 desde Actions y pasen nuevamente todos los gates. Mientras tanto, el preview
 queda disponible para la siguiente promoción controlada y el repositorio no
 rastrea `out/`, `.next/`, `public/data/`, logs ni artefactos generados.
+
+## Comprobación de navegador público — 27-ago-2026
+
+Se ejecutó `npm run verify:browser` desde un contexto local limpio contra
+`https://cambiometro.impulsacv.cl`, sin reutilizar cookies ni sesión. Las rutas
+principales y las fichas respondieron `200`, pero el dominio aún sirve una
+versión anterior: `/votaciones-destacadas` respondió `404`.
+
+El navegador registró `87` violaciones CSP. Las fuentes observadas fueron
+scripts inline inyectados por la infraestructura y cargas de
+`static.cloudflareinsights.com` y `www.googletagmanager.com`, que no están en
+la política estática del candidato. Esto confirma que el problema no se
+resuelve agregando `unsafe-inline`: Cloudflare Insights, JavaScript
+Detections/Browser Integrity y la inyección de Analytics deben desactivarse o
+configurarse para respetar la CSP, o debe crearse una excepción de producto
+limitada para el hostname. La CSP de aplicación conserva `style-src 'self'` y
+no se relajó.
+
+El resultado no cambia el criterio: no promover una nueva versión hasta que
+el hostname público sirva el candidato correcto, la consola quede sin
+violaciones y Actions pueda leer raíz y sitemap sin `403 challenge`.
