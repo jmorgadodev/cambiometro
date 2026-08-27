@@ -2,28 +2,73 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
-import { spawnSync } from "node:child_process";
+import { spawn } from "node:child_process";
 
 const root = resolve(import.meta.dirname, "..");
 const bucket = argument("--bucket", "transparencia-public-data");
 const required = process.argv.includes("--required");
 const remoteManifestKey = "projections/funcionarios-v1/manifest.json";
 const outputRoot = join(root, "data", "lake-cplt", "projections", "funcionarios-v1");
+const downloadTimeoutMs = Number(process.env.CPLT_R2_DOWNLOAD_TIMEOUT_MS ?? 180_000);
+const downloadAttempts = Number(process.env.CPLT_R2_DOWNLOAD_ATTEMPTS ?? 3);
+const retryDelayMs = Number(process.env.CPLT_R2_RETRY_DELAY_MS ?? 2_000);
 
 function argument(name, fallback) {
   const index = process.argv.indexOf(name);
   return index >= 0 ? process.argv[index + 1] ?? fallback : fallback;
 }
 
-function wrangler(args, allowFailure = false) {
+function runWrangler(args, { allowFailure = false, timeoutMs = downloadTimeoutMs } = {}) {
   const bin = resolve(root, "node_modules/wrangler/bin/wrangler.js");
-  const result = spawnSync(process.execPath, [bin, ...args, "--remote"], {
-    cwd: root,
-    encoding: "utf8",
-    stdio: allowFailure ? "pipe" : "inherit",
+  return new Promise((resolvePromise, reject) => {
+    const child = spawn(process.execPath, [bin, ...args, "--remote"], {
+      cwd: root,
+      stdio: allowFailure ? ["ignore", "pipe", "pipe"] : "inherit",
+    });
+    let stdout = "";
+    let stderr = "";
+    if (allowFailure) {
+      child.stdout.on("data", (chunk) => { stdout += chunk; });
+      child.stderr.on("data", (chunk) => { stderr += chunk; });
+    }
+    const timer = setTimeout(() => {
+      child.kill();
+      reject(new Error(`CPLT_R2_COMMAND_TIMEOUT: ${args.join(" ")}`));
+    }, timeoutMs);
+    child.on("error", (error) => {
+      clearTimeout(timer);
+      reject(error);
+    });
+    child.on("close", (code) => {
+      clearTimeout(timer);
+      if (code === 0) resolvePromise({ status: 0, stdout, stderr });
+      else if (allowFailure) resolvePromise({ status: code ?? 1, stdout, stderr });
+      else reject(new Error(`WRANGLER_FAILED:${args.join(" ")}`));
+    });
   });
-  if (!allowFailure && result.status !== 0) throw new Error(`WRANGLER_FAILED:${args.join(" ")}`);
-  return result;
+}
+
+async function downloadObject(key, destination, expectedSize, expectedChecksum) {
+  mkdirSync(join(destination, ".."), { recursive: true });
+  let lastError;
+  for (let attempt = 1; attempt <= downloadAttempts; attempt += 1) {
+    try {
+      console.log(`[cplt] descarga ${key} (${attempt}/${downloadAttempts})`);
+      await runWrangler(["r2", "object", "get", `${bucket}/${key}`, "--file", destination]);
+      const content = readFileSync(destination);
+      if (content.byteLength !== expectedSize || sha256(content) !== expectedChecksum) {
+        throw new Error(`CPLT_STATIC_CHECKSUM_MISMATCH:${key}`);
+      }
+      return;
+    } catch (error) {
+      lastError = error;
+      rmSync(destination, { force: true });
+      if (attempt < downloadAttempts) {
+        await new Promise((resolvePromise) => setTimeout(resolvePromise, retryDelayMs * attempt));
+      }
+    }
+  }
+  throw lastError;
 }
 
 function sha256(value) {
@@ -54,7 +99,7 @@ function validateManifest(manifest) {
 const temporaryRoot = mkdtempSync(join(tmpdir(), "cambiometro-cplt-static-"));
 try {
   const remoteManifest = join(temporaryRoot, "manifest.json");
-  const result = wrangler(["r2", "object", "get", `${bucket}/${remoteManifestKey}`, "--file", remoteManifest], true);
+  const result = await runWrangler(["r2", "object", "get", `${bucket}/${remoteManifestKey}`, "--file", remoteManifest], { allowFailure: true });
   if (result.status !== 0 || !existsSync(remoteManifest)) {
     if (required) throw new Error("CPLT_STATIC_REMOTE_MANIFEST_MISSING");
     console.log(JSON.stringify({ action: "skipped", reason: "remote-manifest-missing" }));
@@ -70,13 +115,9 @@ try {
     const fileName = asset.key.split("/").at(-1);
     const target = join(versionRoot, fileName);
     const downloaded = `${target}.download`;
-    wrangler(["r2", "object", "get", `${bucket}/${asset.key}`, "--file", downloaded]);
-    const content = readFileSync(downloaded);
+    await downloadObject(asset.key, downloaded, asset.size, asset.checksumSha256);
+    writeFileSync(target, readFileSync(downloaded));
     rmSync(downloaded, { force: true });
-    if (content.byteLength !== asset.size || sha256(content) !== asset.checksumSha256) {
-      throw new Error(`CPLT_STATIC_CHECKSUM_MISMATCH:${asset.key}`);
-    }
-    writeFileSync(target, content);
   }
 
   mkdirSync(outputRoot, { recursive: true });
