@@ -43,6 +43,17 @@ export interface VotacionBancadaDetalle {
   abstencion: number;
   noVota: number;
   cuotaMayoria: number | null;
+  opcionMayoritaria: "Afirmativo" | "En Contra" | "Abstención" | null;
+  disenso: number;
+}
+
+export interface VotacionAnalisis {
+  opcionMayoritaria: "Afirmativo" | "En Contra" | "Abstención" | null;
+  mayoriaPct: number;
+  participacionPct: number;
+  bancadasConMuestra: number;
+  bancadasAlineadas: number;
+  bancadasConDisenso: number;
 }
 
 export interface VotacionDestacadaDetalle {
@@ -68,6 +79,7 @@ export interface VotacionDestacadaDetalle {
     efectivos: number;
     margenMayoria: number;
   };
+  analisis: VotacionAnalisis;
   nominales: VotacionNominalDetalle[];
   bancadas: VotacionBancadaDetalle[];
 }
@@ -116,6 +128,20 @@ function normalizeOption(value: string | undefined): OpcionVotacion {
 function recalculateResult(afirmativo: number, enContra: number, abstencion: number): VotacionDestacada["resultado"] {
   if (afirmativo === 0 && enContra === 0 && abstencion === 0) return "En trámite";
   return afirmativo > enContra && afirmativo >= abstencion ? "Aprobado" : "Rechazado";
+}
+
+function majorityOption(afirmativo: number, enContra: number, abstencion: number): VotacionAnalisis["opcionMayoritaria"] {
+  const ordered = [
+    { option: "Afirmativo" as const, value: afirmativo },
+    { option: "En Contra" as const, value: enContra },
+    { option: "Abstención" as const, value: abstencion },
+  ];
+  const winner = ordered.reduce((best, current) => current.value > best.value ? current : best, ordered[0]);
+  return winner.value > 0 ? winner.option : null;
+}
+
+function roundOne(value: number): number {
+  return Math.round(value * 10) / 10;
 }
 
 /**
@@ -174,6 +200,8 @@ export function getVotacionDestacadaDetalle(votacionId: string): VotacionDestaca
       abstencion: 0,
       noVota: 0,
       cuotaMayoria: null,
+      opcionMayoritaria: null,
+      disenso: 0,
     };
     existing.miembros += 1;
     if (vote.opcion === "Afirmativo") existing.afirmativo += 1;
@@ -181,13 +209,20 @@ export function getVotacionDestacadaDetalle(votacionId: string): VotacionDestaca
     else if (vote.opcion === "Abstención") existing.abstencion += 1;
     else existing.noVota += 1;
     existing.efectivos = existing.afirmativo + existing.enContra + existing.abstencion;
-    existing.cuotaMayoria = existing.efectivos > 0
-      ? Math.round((Math.max(existing.afirmativo, existing.enContra, existing.abstencion) / existing.efectivos) * 1000) / 10
-      : null;
+    existing.opcionMayoritaria = majorityOption(existing.afirmativo, existing.enContra, existing.abstencion);
+    const maxVotes = Math.max(existing.afirmativo, existing.enContra, existing.abstencion);
+    existing.cuotaMayoria = existing.efectivos > 0 ? roundOne((maxVotes / existing.efectivos) * 100) : null;
+    existing.disenso = existing.efectivos > 0 ? existing.efectivos - maxVotes : 0;
     byParty.set(vote.partido_id, existing);
   }
 
   const resultadoRecalculado = recalculateResult(afirmativo, enContra, abstencion);
+  const opcionMayoritaria = majorityOption(afirmativo, enContra, abstencion);
+  const bancadas = [...byParty.values()].sort((a, b) => b.efectivos - a.efectivos || a.sigla.localeCompare(b.sigla));
+  const bancadasConMuestra = bancadas.filter((bancada) => bancada.efectivos > 0);
+  const bancadasAlineadas = opcionMayoritaria
+    ? bancadasConMuestra.filter((bancada) => bancada.opcionMayoritaria === opcionMayoritaria).length
+    : 0;
   return {
     votacion_id: entry.votacion_id,
     boletin: entry.boletin,
@@ -203,7 +238,15 @@ export function getVotacionDestacadaDetalle(votacionId: string): VotacionDestaca
     descripcionOficial: session.descripcion ?? session.nombre ?? null,
     fuente_url: entry.fuente_url,
     totales: { padron: nominales.length, afirmativo, enContra, abstencion, noVota, efectivos, margenMayoria },
+    analisis: {
+      opcionMayoritaria,
+      mayoriaPct: efectivos > 0 && opcionMayoritaria ? roundOne((Math.max(afirmativo, enContra, abstencion) / efectivos) * 100) : 0,
+      participacionPct: nominales.length > 0 ? roundOne((efectivos / nominales.length) * 100) : 0,
+      bancadasConMuestra: bancadasConMuestra.length,
+      bancadasAlineadas,
+      bancadasConDisenso: bancadasConMuestra.filter((bancada) => bancada.disenso > 0).length,
+    },
     nominales,
-    bancadas: [...byParty.values()].sort((a, b) => b.efectivos - a.efectivos || a.sigla.localeCompare(b.sigla)),
+    bancadas,
   };
 }

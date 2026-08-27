@@ -477,6 +477,12 @@ body {
 .featured-vote-dialog details { margin-top: 1rem; padding-top: .75rem; border-top: 1px solid var(--border); }
 .featured-vote-dialog summary { color: var(--accent); cursor: pointer; font-size: .78rem; font-weight: 700; }
 .featured-vote__bars { display: grid; align-content: start; gap: .8rem; padding: 1rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); }
+.featured-vote__signal-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: .6rem; margin-bottom: 1.25rem; }
+.featured-vote__signal { display: grid; gap: .3rem; min-width: 0; padding: .85rem .9rem; border: 1px solid var(--border); border-radius: 9px; background: var(--surface-2); }
+.featured-vote__signal > span { color: var(--text-2); font-size: .68rem; font-weight: 700; text-transform: uppercase; letter-spacing: .04em; }
+.featured-vote__signal strong { color: var(--text-1); font-family: var(--font-mono); font-size: 1.15rem; }
+.featured-vote__signal small { color: var(--text-2); font-size: .68rem; line-height: 1.4; }
+.featured-vote__callout { padding: .75rem .85rem; border-left: 3px solid var(--accent); background: var(--surface-2); }
 .featured-vote__bar-row { display: grid; grid-template-columns: minmax(120px, 1fr) 2fr 3.3rem; gap: .6rem; align-items: center; }
 .featured-vote__bar-label { display: flex; justify-content: space-between; gap: .5rem; color: var(--text-2); font-size: .72rem; }
 .featured-vote__bar-label strong, .featured-vote__bar-row small { color: var(--text-1); font-family: var(--font-mono); font-size: .7rem; }
@@ -485,11 +491,15 @@ body {
 .featured-vote__bar-row small { text-align: right; }
 .featured-vote__party-list { display: grid; gap: .45rem; margin-top: 1rem; }
 .featured-vote__party-row { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: .8rem .9rem; border: 1px solid var(--border); border-radius: 8px; background: var(--surface-2); }
-.featured-vote__party-row > div:first-child { display: grid; gap: .25rem; }
-.featured-vote__party-row > div:first-child strong { color: var(--accent); font-family: var(--font-mono); font-size: .8rem; }
-.featured-vote__party-row > div:first-child span, .featured-vote__party-stat span { color: var(--text-2); font-size: .7rem; }
+.featured-vote__party-main { display: grid; min-width: 0; gap: .35rem; }
+.featured-vote__party-name { display: grid; gap: .25rem; }
+.featured-vote__party-name strong { color: var(--accent); font-family: var(--font-mono); font-size: .8rem; }
+.featured-vote__party-name span, .featured-vote__party-stat span, .featured-vote__party-insight { color: var(--text-2); font-size: .7rem; }
+.featured-vote__party-votes { display: flex; flex-wrap: wrap; gap: .45rem .75rem; font-size: .68rem; font-family: var(--font-mono); }
+.featured-vote__party-insight { line-height: 1.35; }
 .featured-vote__party-stat { display: grid; gap: .2rem; flex-shrink: 0; text-align: right; }
 .featured-vote__party-stat strong { color: var(--text-1); font-family: var(--font-mono); font-size: .85rem; }
+.featured-vote__party-link { margin-top: .15rem; padding: 0; border: 0; background: transparent; color: var(--accent); font: inherit; font-size: .66rem; font-weight: 800; cursor: pointer; text-decoration: underline; text-underline-offset: .15rem; }
 .featured-vote__filters { margin: 1rem 0; }
 .featured-vote__nominal-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .4rem; margin: 0; padding: 0; list-style: none; }
 .featured-vote__nominal-row { display: flex; align-items: center; justify-content: space-between; gap: .5rem; min-width: 0; padding: .6rem .7rem; border: 1px solid var(--border); border-radius: 7px; background: var(--surface-2); }
@@ -503,7 +513,7 @@ body {
 .featured-vote-dialog__footer a { color: var(--accent); font-weight: 700; text-decoration: none; }
 @media (max-width: 700px) {
   .featured-vote__metrics { grid-template-columns: repeat(2, 1fr); }
-  .featured-vote__analysis-grid, .featured-vote__nominal-list { grid-template-columns: 1fr; }
+  .featured-vote__signal-grid, .featured-vote__analysis-grid, .featured-vote__nominal-list { grid-template-columns: 1fr; }
   .featured-vote-card__top, .featured-vote-dialog__section-heading, .featured-vote-dialog__footer { align-items: start; flex-direction: column; }
   .featured-vote__bar-row { grid-template-columns: 1fr 1.3fr 3rem; }
 }
