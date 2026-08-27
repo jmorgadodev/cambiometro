@@ -21,7 +21,7 @@ export const NAV_CLUSTERS = [
     items: [
       { href: "/politico", label: "Análisis Parlamentario" },
       { href: "/partidos", label: "Partidos" },
-      { href: "/votaciones-destacadas", label: "Votaciones destacadas" },
+      { href: "/votaciones-destacadas/", label: "Votaciones destacadas" },
       { href: "/personas", label: "Directorio de Personas" },
     ],
   },

@@ -29,7 +29,9 @@ const simpleRedirects = [
   ["/funcionarios", "/personas?tab=funcionarios"],
   ["/partidos/independientes", "/partidos/ind"],
 ];
+const canonicalRedirects = ["/votaciones-destacadas /votaciones-destacadas/ 301"];
 const redirects = [
+  ...canonicalRedirects,
   ...simpleRedirects.flatMap(([from, to]) => redirectVariants(from, to)),
   ...MUNICIPALIDADES_SEED.flatMap((municipalidad) => {
     const from = `/municipalidades/${municipalidad.id}`;
