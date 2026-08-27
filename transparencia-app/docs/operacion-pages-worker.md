@@ -476,3 +476,26 @@ por 3 temas), comprobó persistencia de Papel/Oscuro/Noche y encontró cero
 violaciones axe AA. La auditoría de consola confirma que los únicos mensajes
 son la inyección externa Cloudflare/GTM que la CSP bloquea; el código del sitio
 no añade `unsafe-inline`.
+
+### Preflight WAF posterior — run `33096104366`
+
+El preflight protegido se ejecutó en modo lectura el `2026-08-27` usando los
+secretos reales del entorno `production`; no aplicó cambios en WAF, DNS ni RUM.
+Confirmó:
+
+- Regla activa `28645f6a4f3e40eb8f51836bb32d7614`, descripción
+  `cambiometro-uptime-root-exception`, acción `skip` y alcance limitado al
+  hostname productivo, `/`, `/api/*` y el header de uptime.
+- `expressionMatchesSecret: true`: el secreto de GitHub coincide con la
+  expresión publicada.
+- La raíz sigue respondiendo `403` con `cf-mitigated: challenge` y
+  `cdn-cgi/challenge-platform` desde GitHub Actions.
+- La consulta de Bot Management devuelve `403 Authentication error`, por lo
+  que todavía no se puede confirmar ni ajustar Bot Fight Mode/JavaScript
+  Detections con el token actual.
+
+Este resultado separa el bloqueo de infraestructura de la aplicación: no se
+debe relajar la CSP ni ampliar la excepción WAF. Para cerrar el smoke y el
+crawl productivo se necesita un token con permiso de Bot Management o el ajuste
+equivalente en Cloudflare para que la monitorización autorizada no reciba el
+desafío.
