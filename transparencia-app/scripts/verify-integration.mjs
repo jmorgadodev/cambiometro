@@ -151,7 +151,13 @@ try {
     }
     console.log(`[BROWSER] ${route} -> ${response?.status() ?? "sin respuesta"}`);
     assert(response?.ok(), `${route} HTTP ${response?.status() ?? "sin respuesta"}`);
-    if (route === "/autoridades" || route === "/funcionarios") await page.waitForURL("**/personas**", { timeout: 5000 }).catch(() => {});
+    if (route === "/autoridades" || route === "/funcionarios") {
+      const redirectTarget = route === "/autoridades" ? "/personas?tab=parlamentarios" : "/personas?tab=funcionarios";
+      await page.waitForURL("**/personas**", { timeout: 5000 }).catch(() => {});
+      // `next dev` serves the static redirect source as an empty page; Pages
+      // applies `_redirects`. Verify the destination in both environments.
+      if (!page.url().includes("/personas")) await gotoWithNetworkRetry(`${baseUrl}${redirectTarget}`);
+    }
     await page.waitForSelector("h1:visible", { state: "visible", timeout: 15000 }).catch(() => {});
     assert.equal(await page.locator("h1:visible").count(), 1, `${route} debe tener exactamente un h1 visible`);
     const hrefs = await page.locator("a[href]").evaluateAll((anchors) => anchors.map((anchor) => anchor.getAttribute("href")).filter(Boolean));
@@ -165,9 +171,9 @@ try {
   await checkInternalLinks(internalLinks);
 
   await gotoWithNetworkRetry(baseUrl);
-  await page.getByRole("heading", { name: /Transparencia, votaciones y gastos p.blicos|Sigue las decisiones p.blicas/ }).first().waitFor({ state: "visible", timeout: 15_000 });
+  await page.getByRole("heading", { name: /La información pública no debería perderse|Transparencia, votaciones y gastos p.blicos|Sigue las decisiones p.blicas/ }).first().waitFor({ state: "visible", timeout: 15_000 });
   await page.getByRole("link", { name: /Explorar parlamentarios/ }).first().waitFor({ state: "visible", timeout: 15_000 });
-  assert.equal(await page.getByRole("heading", { name: /Transparencia, votaciones y gastos p.blicos|Sigue las decisiones p.blicas/ }).count(), 1);
+  assert.equal(await page.getByRole("heading", { name: /La información pública no debería perderse|Transparencia, votaciones y gastos p.blicos|Sigue las decisiones p.blicas/ }).count(), 1);
   assert.equal(await page.getByRole("link", { name: /Explorar parlamentarios/ }).count(), 1);
   await page.waitForTimeout(500);
   await page.screenshot({ path: join(tmpdir(), "transparencia-home-desktop.png"), fullPage: true });
