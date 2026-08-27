@@ -434,6 +434,11 @@ try {
     && !(verifyingLocal && message.includes("Minified React error #419"))
   );
   assert.deepEqual(errors, [], `errores de consola: ${JSON.stringify(errors)}`);
+
+  const cspViolations = consoleMessages
+    .filter(([, message]) => /Content Security Policy|violates the following Content Security Policy directive|static\.cloudflareinsights\.com|googletagmanager\.com/i.test(message))
+    .map(([type, message]) => `${type}: ${message}`);
+  assert.deepEqual(cspViolations, [], `violaciones CSP: ${JSON.stringify(cspViolations)}`);
   console.log("Browser integration checks passed: routes, evidence UI, responsive sizes, APIs and widget");
 } finally {
   const cspViolations = consoleMessages
