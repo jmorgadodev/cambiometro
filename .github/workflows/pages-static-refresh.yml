@@ -105,11 +105,11 @@ jobs:
 
       - name: Verificar export estático y censo
         working-directory: transparencia-app
-        run: npm run verify-static-export
+        run: node scripts/verify-static-export.mjs
 
       - name: Verificar release de transferencias
         working-directory: transparencia-app
-        run: npm run verify-transfer-release
+        run: node scripts/verify-transfer-release.mjs
 
       - name: Verificar universo de fichas
         working-directory: transparencia-app
