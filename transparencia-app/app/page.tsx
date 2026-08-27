@@ -90,28 +90,53 @@ export default async function HomePage() {
           url: "https://impulsacv.cl",
         },
       })}</script>
-      <section className="home-lead container-main" aria-labelledby="home-title">
-        <div className="home-lead__copy">
-          <p className="home-kicker"><span aria-hidden="true" /> Plataforma de Datos Públicos</p>
-          <h1 id="home-title">Transparencia, votaciones y gastos públicos al alcance de todos.</h1>
-          <p>
-            El Cambiómetro compila, consolida y visualiza información de fuentes públicas oficiales
-            del Estado de Chile para facilitar la fiscalización y la rendición de cuentas ciudadana.
-          </p>
-          <div className="home-actions">
-            <Link prefetch={false} className="btn btn-primary" href="/politico">Explorar parlamentarios</Link>
-            <Link prefetch={false} className="btn btn-ghost" href="/transferencias">Transferencias Ley 19.862</Link>
+      <section className="home-hero" aria-labelledby="home-title">
+        <div className="container-main home-lead">
+          <div className="home-lead__copy">
+            <div className="home-kicker"><span aria-hidden="true" /> Plataforma de datos públicos <span className="home-kicker__cut">Corte {GLOBAL_KPIS.corte}</span></div>
+            <h1 id="home-title">La información pública <em>no debería perderse.</em></h1>
+            <p className="home-lead__intro">
+              El Cambiómetro convierte fuentes dispersas del Estado de Chile en evidencia que puedes
+              buscar, comparar y revisar desde el documento original.
+            </p>
+            <div className="home-actions">
+              <Link prefetch={false} className="btn btn-primary" href="/politico">Explorar parlamentarios <span aria-hidden="true">→</span></Link>
+              <Link prefetch={false} className="btn btn-ghost" href="/datos">Ver las fuentes <span aria-hidden="true">↗</span></Link>
+            </div>
+            <div className="home-hero__proof">
+              <span className="home-hero__proof-dot" aria-hidden="true" />
+              <span><strong>{operationalSources.length} fuentes oficiales</strong> con registros disponibles</span>
+              <Link prefetch={false} href="/como-funciona#fuentes">Cómo se valida →</Link>
+            </div>
+          </div>
+
+          <div className="home-hero__aside">
+            <div className="home-evidence-card">
+              <div className="home-evidence-card__topline">
+                <span>Ficha de trazabilidad <b>0001</b></span>
+                <span className="home-evidence-card__status"><span aria-hidden="true" /> Activo</span>
+              </div>
+              <div className="home-evidence-card__headline">
+                <span>Un punto de entrada para fiscalizar</span>
+                <strong>Pregunta → fuente → evidencia</strong>
+              </div>
+              <dl className="home-evidence-card__facts">
+                <div><dt>Registros indexados</dt><dd>{GLOBAL_KPIS.registros_canonicos.toLocaleString("es-CL")}</dd></div>
+                <div><dt>Entidades identificadas</dt><dd>{entityCount.toLocaleString("es-CL")}</dd></div>
+                <div><dt>Fuentes conectadas</dt><dd>{operationalSources.length}</dd></div>
+              </dl>
+              <div className="home-evidence-card__rule" aria-hidden="true" />
+              <form className="home-query" action="/cruces" role="search">
+                <label htmlFor="home-search">Buscar en los registros</label>
+                <div className="home-query__control">
+                  <input id="home-search" name="q" type="search" minLength={2} maxLength={80} placeholder="Persona, institución o concepto" autoComplete="off" />
+                  <button type="submit">Buscar</button>
+                </div>
+                <small>Busca una autoridad, fundación, partido, organismo o proveedor.</small>
+              </form>
+            </div>
           </div>
         </div>
-
-        <form className="home-query" action="/cruces" role="search">
-          <label htmlFor="home-search">Buscar en los registros</label>
-          <div>
-            <input id="home-search" name="q" type="search" minLength={2} maxLength={80} placeholder="Nombre, institución o concepto" autoComplete="off" />
-            <button type="submit">Buscar</button>
-          </div>
-          <small>Prueba con una autoridad, fundación, partido, organismo o proveedor.</small>
-        </form>
       </section>
 
       {/* Banda de KPIs Globales con Tooltip de Ámbito */}
@@ -126,8 +151,9 @@ export default async function HomePage() {
               title={item.tooltip}
               aria-label={`${item.label}: ${item.value.toLocaleString("es-CL")}. ${item.tooltip}`}
             >
+              <span className="home-stat__index" aria-hidden="true">0{index + 1}</span>
               <StatCounter value={item.value} delay={index * 100} />
-              <span>{item.label}</span>
+              <span className="home-stat__label">{item.label}</span>
             </Link>
           ))}
         </div>
@@ -144,54 +170,54 @@ export default async function HomePage() {
           </div>
 
           <div className="home-paths">
-            <Link prefetch={false} href="/politico" className="home-path">
-              <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                <Icono nombre="votaciones" size={15} />
-                01 / Decisiones
-              </span>
+            <Link prefetch={false} href="/politico" className="home-path home-path--lead">
+              <span className="home-path__icon"><Icono nombre="votaciones" size={18} /></span>
+              <span className="home-path__eyebrow">Decisiones públicas</span>
               <h3>¿Cómo votó una autoridad?</h3>
-              <p>Consulta fichas parlamentarias, opciones registradas, asistencia, dietas y probidad.</p>
-              <b>Ver votaciones →</b>
+              <p>Consulta votaciones, asistencia, dietas y declaraciones con la fuente oficial a la vista.</p>
+              <b>Ver análisis parlamentario <span aria-hidden="true">→</span></b>
             </Link>
-            <Link prefetch={false} href="/transferencias" className="home-path">
-              <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                <Icono nombre="dinero" size={15} />
-                02 / Dinero & Fundaciones
-              </span>
-              <h3>¿A quién transfiere el Estado?</h3>
-              <p>Explora más de $17 billones en 361.000 transferencias a fundaciones y privados (Ley 19.862).</p>
-              <b>Explorar transferencias →</b>
-            </Link>
-            <Link prefetch={false} href="/municipalidades" className="home-path">
-              <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                <Icono nombre="territorio" size={15} />
-                03 / Territorio Comunal
-              </span>
-              <h3>¿Cómo gastan las 346 comunas?</h3>
-              <p>Fichas comunales con demografía Censo 2024, finanzas SINIM, alcaldías y compras públicas.</p>
-              <b>Ver municipalidades →</b>
-            </Link>
-            <Link prefetch={false} href="/cruces" className="home-path">
-              <span style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
-                <Icono nombre="cruces" size={15} />
-                04 / Relaciones
-              </span>
-              <h3>¿Qué entidades están conectadas?</h3>
-              <p>Filtra relaciones y abre la evidencia que respalda cada vínculo publicado.</p>
-              <b>Abrir explorador →</b>
-            </Link>
+            <div className="home-paths__stack">
+              <Link prefetch={false} href="/transferencias" className="home-path">
+                <span className="home-path__icon"><Icono nombre="dinero" size={16} /></span>
+                <span className="home-path__eyebrow">Dinero y fundaciones</span>
+                <h3>¿A quién transfiere el Estado?</h3>
+                <p>Explora Transferencias Ley 19.862, emisor, receptor y monto.</p>
+                <b>Explorar transferencias <span aria-hidden="true">→</span></b>
+              </Link>
+              <Link prefetch={false} href="/municipalidades" className="home-path">
+                <span className="home-path__icon"><Icono nombre="territorio" size={16} /></span>
+                <span className="home-path__eyebrow">Territorio comunal</span>
+                <h3>¿Cómo se gobiernan 346 comunas?</h3>
+                <p>Compara demografía, finanzas, alcaldías y compras públicas.</p>
+                <b>Ver municipalidades <span aria-hidden="true">→</span></b>
+              </Link>
+              <Link prefetch={false} href="/cruces" className="home-path">
+                <span className="home-path__icon"><Icono nombre="cruces" size={16} /></span>
+                <span className="home-path__eyebrow">Relaciones documentales</span>
+                <h3>¿Qué entidades están conectadas?</h3>
+                <p>Filtra vínculos y abre la evidencia que respalda cada relación.</p>
+                <b>Abrir explorador <span aria-hidden="true">→</span></b>
+              </Link>
+            </div>
           </div>
         </section>
       </Reveal>
 
       <Reveal delay={100}>
-        <section className="container-main home-sources" aria-labelledby="highlighted-votes-title">
+        <section className="container-main home-sources home-featured-votes" aria-labelledby="highlighted-votes-title">
           <div className="home-section-heading">
             <div><p className="eyebrow">Seguimiento legislativo</p><h2 id="highlighted-votes-title">Votaciones destacadas</h2></div>
             <Link prefetch={false} href="/votaciones-destacadas/">Ver selección completa →</Link>
           </div>
-          <div className="home-source-list">
-            {highlightedVotes.map((vote) => <article className="home-source-row" key={vote.votacion_id}><span className="source-signal source-signal--partial" aria-hidden="true" /><strong>{vote.boletin}</strong><span>{vote.camara} · {vote.fecha}</span><em>{vote.resultado}</em></article>)}
+          <div className="home-vote-list">
+            {highlightedVotes.map((vote) => (
+              <article className="home-vote-row" key={vote.votacion_id}>
+                <time dateTime={vote.fecha}>{vote.fecha}</time>
+                <div className="home-vote-row__content"><strong>{vote.boletin}</strong><h3>{vote.titulo}</h3><span>{vote.camara}</span></div>
+                <span className="home-vote-row__result" data-result={vote.resultado}>{vote.resultado}</span>
+              </article>
+            ))}
           </div>
         </section>
       </Reveal>
@@ -200,23 +226,25 @@ export default async function HomePage() {
         <section className="container-main home-sources" aria-labelledby="sources-title">
           <div className="home-section-heading">
             <div>
-              <p className="eyebrow">Estado de datos</p>
+              <p className="eyebrow">Estado de datos / catálogo vivo</p>
               <h2 id="sources-title">{operationalSources.length} fuentes con registros disponibles</h2>
             </div>
             <Link prefetch={false} href="/datos">Revisar todas las fuentes →</Link>
           </div>
-          <div className="home-source-list">
-            {operationalSources.map((source) => (
-              <div className="home-source-row" key={source.id}>
-                <span className="source-signal source-signal--partial" aria-hidden="true" />
-                <strong>{source.name}</strong>
-                <span>{source.recordCount.toLocaleString("es-CL")} registros</span>
-                <em>{source.statusText || "Al día (Vigente)"}</em>
-              </div>
+          <p className="home-sources__intro">Cada tarjeta indica qué fuente está conectada, cuántos registros tiene disponibles y dónde continuar la revisión.</p>
+          <div className="home-source-grid">
+            {operationalSources.map((source, sourceIndex) => (
+              <Link prefetch={false} className="home-source-card" href={source.viewLink} key={source.id}>
+                <div className="home-source-card__top"><span className="home-source-card__number">{String(sourceIndex + 1).padStart(2, "0")}</span><span className="home-source-card__status" data-status={source.status}><span aria-hidden="true" />{source.statusText || "Disponible"}</span></div>
+                <h3>{source.name}</h3>
+                <p>{source.organization}</p>
+                <div className="home-source-card__metric"><strong>{source.recordCount.toLocaleString("es-CL")}</strong><span>registros disponibles</span></div>
+                <div className="home-source-card__footer"><span>{source.frequency}</span><b>Explorar <span aria-hidden="true">↗</span></b></div>
+              </Link>
             ))}
           </div>
           <p className="home-coverage-note">
-            12 fuentes oficiales + 1 derivada. Nóminas oficiales: cada organismo informa con su partición oficial validada. Los pipelines operan de forma automatizada y periódica con trazabilidad al portal de origen. <Link prefetch={false} href="/fuentes">Ver catálogo de fuentes →</Link>
+            <strong>Cómo leer este catálogo.</strong> Son 12 fuentes oficiales con registros disponibles; sus cortes pueden tener cobertura parcial declarada por el organismo. Los pipelines operan de forma automatizada y cada ficha conserva la trazabilidad al portal de origen. <Link prefetch={false} href="/fuentes">Ver metodología y fuentes →</Link>
           </p>
         </section>
       </Reveal>
