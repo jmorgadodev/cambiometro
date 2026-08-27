@@ -499,3 +499,19 @@ debe relajar la CSP ni ampliar la excepción WAF. Para cerrar el smoke y el
 crawl productivo se necesita un token con permiso de Bot Management o el ajuste
 equivalente en Cloudflare para que la monitorización autorizada no reciba el
 desafío.
+
+### Verificación integral posterior a la corrección del probe — 27-ago-2026
+
+Se ejecutó una pasada directa contra `https://cambiometro.impulsacv.cl` con
+`VERIFY_THEME_BROWSER=1`, después de corregir la condición de carrera del
+atributo `data-theme` en `verify-prod-full.mjs`.
+
+- Resultado: **119 verificaciones aprobadas, 0 fallidas**.
+- Temas: Papel, Oscuro y Noche aplicaron sus tokens y persistieron correctamente.
+- Invariantes: Kaiser, Bianchi, Maipú, 769 votaciones, 155 diputados, 50
+  senadores, transferencias, API, fuentes y fichas estáticas pasaron.
+- Release de transferencias observado: 59.912 filas, 1.199 páginas y
+  `$5.020.688.584.211`.
+- Esta fue una pasada única directa. La doble pasada y el crawl frío desde
+  GitHub Actions continúan pendientes hasta retirar el challenge 403 de
+  Cloudflare para el runner.
