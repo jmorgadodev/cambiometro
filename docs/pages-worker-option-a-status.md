@@ -94,6 +94,16 @@ el header secreto de uptime. No se agrega `unsafe-inline` a CSP.
 - `33041213475` y `33042027955`: smoke productivo 9/10; API, listados y ficha
   pasan, pero `/` continúa en 403. Se generaron los incidentes GitHub #198 y
   #200.
+- `33042554365`: preflight WAF read-only posterior al merge; confirmó
+  `expressionMatchesSecret=true` y el alcance correcto de la regla. Continúa
+  fallando únicamente por la inyección CSP del stack anterior.
+- `33042337269`: doble verificación productiva con ambas pasadas ejecutadas
+  (05:24:11 y 05:34:55 UTC). Cada pasada obtuvo 91 verificaciones correctas y
+  26 fallidas; la portada recibió 403 desde el runner, el sitemap del crawl
+  recibió 403 y producción sigue publicando 59.912 transferencias/1.199
+  páginas en vez de 59.361/1.188. El artefacto completo quedó descargado en
+  el directorio temporal `cambiometro-prod-33042337269` del equipo de
+  verificación.
 
 No existe Pages deployment ID nuevo: ningún despliegue Pages fue promovido.
 Se conserva como rollback conocido-bueno `0cd3adf2-864f-4e99-bc32-7ec5c02b8519`.
