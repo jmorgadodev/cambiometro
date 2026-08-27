@@ -37,6 +37,7 @@ jobs:
           # no usar un preview como si fuera producción.
           PROD_URL: ${{ vars.CAMBIOMETRO_PROD_URL || 'https://cambiometro.impulsacv.cl' }}
           API_URL: ${{ vars.CAMBIOMETRO_API_URL || 'https://cambiometro.impulsacv.cl' }}
-          # Debe coincidir con la excepción WAF limitada para tráfico de monitorización.
+          # Debe coincidir con la excepción WAF limitada para tráfico de
+          # monitorización en / y /api/*; no reemplazarlo por un bypass global.
           UPTIME_TOKEN: ${{ secrets.CAMBIOMETRO_UPTIME_TOKEN }}
         run: node scripts/uptime-smoke.mjs
