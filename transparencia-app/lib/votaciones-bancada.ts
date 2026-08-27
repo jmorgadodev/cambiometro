@@ -7,6 +7,8 @@ export interface VotacionBancadaShare {
   pct: number;
 }
 
+export type VotacionBancadaSort = "representacion" | "cohesion" | "disenso" | "participacion";
+
 function roundOne(value: number): number {
   return Math.round(value * 10) / 10;
 }
@@ -30,4 +32,32 @@ export function getVotacionBancadaShares(party: VotacionBancadaDetalle): Votacio
   const largest = shares.reduce((best, share, index) => share.value > shares[best].value ? index : best, 0);
   shares[largest].pct = roundOne(shares[largest].pct + (100 - shares.reduce((sum, share) => sum + share.pct, 0)));
   return shares;
+}
+
+export function bancadaParticipacion(party: VotacionBancadaDetalle): number {
+  return party.miembros > 0 ? party.efectivos / party.miembros : 0;
+}
+
+export function bancadaDisensoPct(party: VotacionBancadaDetalle): number {
+  return party.efectivos > 0 ? party.disenso / party.efectivos : 0;
+}
+
+/**
+ * Returns a stable copy for the interactive comparison controls. The source
+ * order remains untouched so static rendering and nominal links stay stable.
+ */
+export function sortVotacionBancadas(
+  parties: VotacionBancadaDetalle[],
+  sort: VotacionBancadaSort,
+): VotacionBancadaDetalle[] {
+  return [...parties].sort((left, right) => {
+    const value = (party: VotacionBancadaDetalle) => {
+      if (sort === "cohesion") return party.cuotaMayoria ?? -1;
+      if (sort === "disenso") return bancadaDisensoPct(party);
+      if (sort === "participacion") return bancadaParticipacion(party);
+      return party.efectivos;
+    };
+    const difference = value(right) - value(left);
+    return difference || left.sigla.localeCompare(right.sigla);
+  });
 }
