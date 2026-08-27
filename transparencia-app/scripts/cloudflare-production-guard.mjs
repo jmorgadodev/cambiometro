@@ -36,6 +36,7 @@ const entryPoint = rulesets.find((ruleset) => ruleset.phase === "http_request_fi
 if (!entryPoint?.id) throw new Error("WAF_ENTRYPOINT_RULESET_NOT_FOUND");
 const detail = await cf(`/zones/${zone.id}/rulesets/${entryPoint.id}`);
 const rules = Array.isArray(detail.rules) ? detail.rules : [];
+const botManagement = await cf(`/zones/${zone.id}/bot_management`).catch(() => null);
 const ruleId = process.env.CF_WAF_RULE_ID?.trim();
 const rule = (ruleId ? rules.find((candidate) => candidate.id === ruleId) : null)
   || rules.find((candidate) => /cambiometro|uptime/i.test(`${candidate.description || ""} ${candidate.expression || ""}`));
@@ -57,7 +58,15 @@ const ruleSummary = rules.map((candidate) => ({
   action: candidate.action,
   enabled: candidate.enabled,
 }));
-console.log(JSON.stringify({ mode: apply ? "apply" : "preflight", zone: zoneName, hostname, rule: publicRule, ruleSummary, desired: { expression: expression.replace(uptimeToken, "<secret>") }, expressionMatchesSecret: rule.expression === expression }, null, 2));
+const botSummary = botManagement ? {
+  fight_mode: botManagement.fight_mode,
+  enable_js: botManagement.enable_js,
+  sbfm_definitely_automated: botManagement.sbfm_definitely_automated,
+  sbfm_likely_automated: botManagement.sbfm_likely_automated,
+  sbfm_static_resource_protection: botManagement.sbfm_static_resource_protection,
+  sbfm_verified_bots: botManagement.sbfm_verified_bots,
+} : null;
+console.log(JSON.stringify({ mode: apply ? "apply" : "preflight", zone: zoneName, hostname, rule: publicRule, ruleSummary, botManagement: botSummary, desired: { expression: expression.replace(uptimeToken, "<secret>") }, expressionMatchesSecret: rule.expression === expression }, null, 2));
 
 if (apply) {
   await cf(`/zones/${zone.id}/rulesets/${entryPoint.id}/rules/${rule.id}`, {
