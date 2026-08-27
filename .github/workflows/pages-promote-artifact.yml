@@ -1,0 +1,100 @@
+name: Pages producción - promover artefacto verificado
+
+on:
+  workflow_dispatch:
+    inputs:
+      source_run_id:
+        description: "ID de la ejecución Pages estática verde cuyo artefacto se promoverá"
+        required: true
+        type: string
+      confirm_cutover:
+        description: "Debe ser CAMBIOMETRO_CONFIRM_CUTOVER"
+        required: true
+        type: string
+
+concurrency:
+  group: pages-production-promotion
+  cancel-in-progress: false
+
+permissions:
+  actions: read
+  contents: read
+
+jobs:
+  promote:
+    if: inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Instalar herramientas de verificación
+        run: npm ci
+        working-directory: transparencia-app
+
+      - name: Resolver ejecución y descargar artefacto Pages
+        id: source
+        env:
+          GH_TOKEN: ${{ github.token }}
+          SOURCE_RUN_ID: ${{ inputs.source_run_id }}
+        run: |
+          source_sha="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}" --jq .head_sha)"
+          source_conclusion="$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${SOURCE_RUN_ID}" --jq .conclusion)"
+          test "$source_conclusion" = "success"
+          echo "run_id=$SOURCE_RUN_ID" >> "$GITHUB_OUTPUT"
+          echo "sha=$source_sha" >> "$GITHUB_OUTPUT"
+          gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "pages-static-${source_sha}" --dir transparencia-app/out
+          test -s transparencia-app/out/index.html
+
+      - name: Verificar artefacto antes de promover
+        working-directory: transparencia-app
+        run: node scripts/verify-static-export.mjs
+
+      - name: Publicar artefacto verificado en Pages producción
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+        run: npx wrangler pages deploy out --project-name cambiometro --branch main --commit-hash "$SOURCE_SHA" --commit-message "Promote verified Pages artifact $SOURCE_SHA"
+
+      - name: Registrar deployment y rollback exacto
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+          SOURCE_SHA: ${{ steps.source.outputs.sha }}
+        run: |
+          curl --fail --silent --show-error \
+            --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/cambiometro/deployments" \
+            > pages-deployments.json
+          node -e '
+            const fs = require("node:fs");
+            const payload = JSON.parse(fs.readFileSync("pages-deployments.json", "utf8"));
+            const deployments = Array.isArray(payload.result) ? payload.result : [];
+            const matching = deployments.filter((item) => item.deployment_trigger?.metadata?.commit_hash === process.env.SOURCE_SHA);
+            const deployment = matching[0] ?? [...deployments].sort((a, b) => Date.parse(b.created_on ?? 0) - Date.parse(a.created_on ?? 0))[0];
+            if (!deployment?.id) throw new Error("No se encontró el deployment Pages promovido");
+            console.log(`Pages deployment ID: ${deployment.id}`);
+            console.log(`Pages deployment URL: ${deployment.url ?? "n/a"}`);
+            console.log(`Rollback exacto: npm run pages:rollback -- ${deployment.id}`);
+          '
+
+      - name: Confirmar landing publicada
+        env:
+          PROD_URL: https://cambiometro.impulsacv.cl
+        run: |
+          curl --fail --silent --show-error --location "$PROD_URL/" | grep -F "La información pública no debería perderse"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pages-production-promotion-${{ steps.source.outputs.sha }}
+          path: pages-deployments.json
+          if-no-files-found: error
+          retention-days: 30
