@@ -3,6 +3,7 @@ import {
   assertCanonicalTransferRelease,
   assertMinimumTransferRows,
   CANONICAL_MIN_TRANSFER_ROWS,
+  CANONICAL_MIN_TRANSFER_TOTAL_CLP,
   CANONICAL_TRANSFER_ROWS,
   CANONICAL_TRANSFER_TOTAL_CLP,
 } from "../scripts/etl/transfer-release-guard.mjs";
@@ -14,15 +15,26 @@ describe("guardia del release de transferencias", () => {
     expect(assertMinimumTransferRows(CANONICAL_MIN_TRANSFER_ROWS + 183)).toBe(CANONICAL_MIN_TRANSFER_ROWS + 183);
   });
 
-  it("acepta sólo el universo y monto canónicos para publicar", () => {
+  it("acepta el baseline y releases oficiales posteriores", () => {
     expect(assertCanonicalTransferRelease({
       totalRows: CANONICAL_TRANSFER_ROWS,
       totalMontoClp: CANONICAL_TRANSFER_TOTAL_CLP,
     })).toBe(true);
+    expect(assertCanonicalTransferRelease({
+      totalRows: CANONICAL_TRANSFER_ROWS + 551,
+      totalMontoClp: CANONICAL_MIN_TRANSFER_TOTAL_CLP + 9_594_414_040,
+    })).toBe(true);
+  });
+
+  it("rechaza releases por debajo del baseline de filas o monto", () => {
     expect(() => assertCanonicalTransferRelease({
-      totalRows: CANONICAL_TRANSFER_ROWS + 183,
-      totalMontoClp: CANONICAL_TRANSFER_TOTAL_CLP,
-    })).toThrow("TRANSFER_RELEASE_CANONICAL_MISMATCH");
+      totalRows: CANONICAL_MIN_TRANSFER_ROWS - 1,
+      totalMontoClp: CANONICAL_MIN_TRANSFER_TOTAL_CLP,
+    })).toThrow("TRANSFER_RELEASE_INCOMPLETE");
+    expect(() => assertCanonicalTransferRelease({
+      totalRows: CANONICAL_MIN_TRANSFER_ROWS,
+      totalMontoClp: CANONICAL_MIN_TRANSFER_TOTAL_CLP - 1,
+    })).toThrow("TRANSFER_RELEASE_INCOMPLETE");
   });
 
   it("rechaza un release mensual que perdió el histórico", () => {
