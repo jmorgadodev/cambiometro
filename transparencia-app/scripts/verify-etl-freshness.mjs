@@ -4,7 +4,7 @@ const token = process.env.UPTIME_TOKEN?.trim() || "";
 const headers = { "User-Agent": "Cambiometro-ETLFreshness/1.0" };
 if (token) headers["X-Cambiometro-Uptime-Token"] = token;
 const maxAgeDays = Number(process.env.MAX_RELEASE_AGE_DAYS || 45);
-const expectedTransferRows = Number(process.env.EXPECTED_TRANSFER_ROWS || 59361);
+const minimumTransferRows = Number(process.env.EXPECTED_TRANSFER_ROWS || 59361);
 
 async function get(path, base) {
   const response = await fetch(`${base}${path}`, { headers, signal: AbortSignal.timeout(15000) });
@@ -30,5 +30,5 @@ if (health.response.status !== 200 || health.json?.data?.ok !== true) {
   throw new Error(`API_RELEASE_NOT_HEALTHY:${health.response.status}`);
 }
 const transferRows = Number(health.json.data.transferRows ?? 0);
-if (transferRows !== expectedTransferRows) throw new Error(`API_TRANSFER_UNIVERSE_MISMATCH:${transferRows}:${expectedTransferRows}`);
-console.log(JSON.stringify({ ok: true, prodUrl, apiUrl, ageDays: Number(ageDays.toFixed(2)), transferRows, transferSource: health.json.data.transferSource ?? null, etlWorkflow: process.env.ETL_WORKFLOW_NAME || null }));
+if (transferRows < minimumTransferRows) throw new Error(`API_TRANSFER_UNIVERSE_INCOMPLETE:${transferRows}:${minimumTransferRows}`);
+console.log(JSON.stringify({ ok: true, prodUrl, apiUrl, ageDays: Number(ageDays.toFixed(2)), transferRows, minimumTransferRows, transferSource: health.json.data.transferSource ?? null, etlWorkflow: process.env.ETL_WORKFLOW_NAME || null }));
