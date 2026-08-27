@@ -84,6 +84,7 @@ export function buildAllPoliticoSlices() {
   };
 
   const senateExpensesByPolitico = new Map();
+  const unassignedSenateExpenses = [];
   for (const record of expenseSources.gastos_senado ?? []) {
     const candidates = POLITICOS_SEED
       .filter((politico) => politico.cargo === "Senador")
@@ -95,6 +96,12 @@ export function buildAllPoliticoSlices() {
       const assigned = senateExpensesByPolitico.get(best.id) ?? [];
       assigned.push(record);
       senateExpensesByPolitico.set(best.id, assigned);
+    } else {
+      // The official release also contains valid historical senators who are
+      // not part of the current 2026-2030 directory. Keep these rows in a
+      // dedicated public slice instead of dropping them or misattributing
+      // them to a current politician.
+      unassignedSenateExpenses.push(record);
     }
   }
 
@@ -339,6 +346,17 @@ export function buildAllPoliticoSlices() {
     writeFileSync(join(slicesDir, `${slug}.json`), sliceJson, "utf8");
   }
 
+  writeFileSync(
+    join(slicesDir, "gastos-operacionales.json"),
+    JSON.stringify({
+      id: "gastos-operacionales",
+      nombre: "Gastos Operacionales Rendidos",
+      cargo: "Registros oficiales no atribuibles al directorio vigente",
+      gastos: unassignedSenateExpenses,
+    }),
+    "utf8",
+  );
+
   const outputPath = resolve("data/politicos-votaciones-index.json");
   writeFileSync(outputPath, JSON.stringify(index), "utf8");
   mkdirSync(resolve("data/generated"), { recursive: true });
@@ -352,6 +370,7 @@ export function buildAllPoliticoSlices() {
 
   console.log(`[build-politico-slices] Éxito: ${totalPoliticos} parlamentarios procesados (${totalVotosIndexados} votos totales).`);
   console.log(`[build-politico-slices] Slices individuales guardados en data/politico-slices/ (*.json < 200 KB).`);
+  console.log(`[build-politico-slices] ${unassignedSenateExpenses.length} rendiciones históricas conservadas en gastos-operacionales.json.`);
   console.log(`[build-politico-slices] Índice consolidado guardado en ${outputPath}`);
   return index;
 }

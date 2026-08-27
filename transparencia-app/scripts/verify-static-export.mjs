@@ -21,7 +21,7 @@ if (html.length === 0) throw new Error("out/ no contiene HTML");
 if (files.length > 20_000) throw new Error(`Pages supera 20.000 archivos: ${files.length}`);
 const oversized = files.filter((file) => statSync(file).size > 25 * 1024 * 1024);
 if (oversized.length) throw new Error(`Assets sobre 25 MiB: ${oversized.map((file) => relative(out, file)).join(", ")}`);
-const routes = ["index.html", "politico/index.html", "municipalidades/index.html", "servicios-publicos/index.html", "entidades/index.html", "transferencias/index.html"];
+const routes = ["index.html", "politico/index.html", "municipalidades/index.html", "servicios-publicos/index.html", "entidades/index.html", "transferencias/index.html", "gastos-operacionales/index.html"];
 for (const route of routes) if (!relativeFiles.includes(route)) throw new Error(`Falta ruta estática: ${route}`);
 const staticHeaders = readFileSync(join(out, "_headers"), "utf8");
 if (/unsafe-inline|unsafe-eval/.test(staticHeaders)) throw new Error("CSP insegura en _headers");
