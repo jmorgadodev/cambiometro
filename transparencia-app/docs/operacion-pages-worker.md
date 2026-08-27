@@ -310,3 +310,44 @@ incompatible con la CSP, el cierre operativo permanece pendiente: la CSP de
 la aplicación sigue estricta y no se debe añadir `unsafe-inline`. Los logs y
 el JSON completo del crawl sólo deben registrarse como artefactos ignorados,
 no como archivos versionados.
+
+### Publicación de interfaz — `e78cc72` / 27-ago-2026
+
+Este release contiene únicamente la mejora del análisis de votaciones y la
+reparación de assets estáticos. No ejecuta ETL, no cambia D1/R2 y no promueve
+el Worker.
+
+- PR: [#231](https://github.com/jmorgadodev/cambiometro/pull/231), todos los
+  checks CI verdes.
+- Pages workflow: `33085766641`, resultado `success`.
+- Pages deployment: `f82dbf23-b06c-4c75-8fb3-088fced53d4a`.
+- Pages URL: `https://f82dbf23.cambiometro.pages.dev`.
+- Worker vigente: `3ea6312f-6f6e-4185-9ee7-0cb2891e17c0` (sin cambios).
+
+La ficha de votación incluye barras apiladas comparables por bancada,
+leyenda porcentual y acceso al padrón nominal. `Lilian Betancurt Delgado`
+aparece como diputada del PDG; el partido informa que no tiene senadores en
+el padrón vigente. Los chunks dinámicos codificados de político y
+municipalidad responden `200` en Pages, corrigiendo el `404` que podía dejar
+la hidratación incompleta.
+
+Rollback exacto:
+
+```bash
+npm run pages:rollback -- f82dbf23-b06c-4c75-8fb3-088fced53d4a
+npx wrangler rollback 3ea6312f-6f6e-4185-9ee7-0cb2891e17c0 \
+  --name cambiometro-public-api
+```
+
+Comprobación directa posterior: `/`, `/votaciones-destacadas/`,
+`/partidos/pdg/`, los chunks codificados y `/api/v1/health` responden; el
+Worker conserva el snapshot productivo de transferencias de `59.912` filas.
+La interacción de análisis comprobó 18 composiciones de bancada y encontró a
+Lilian en el padrón nominal.
+
+El smoke productivo `33086705923` quedó en `9/10`: `/` recibió `403` desde el
+runner de GitHub y las otras nueve rutas, incluida la API, pasaron. La doble
+verificación `33086674446` se lanzó con una segunda pasada a 600.000 ms; su
+resultado y sus artefactos se registran al finalizar. El bloqueo restante es
+Cloudflare en la raíz y la inyección CSP de infraestructura; no se debe
+resolver relajando la CSP con `unsafe-inline`.
