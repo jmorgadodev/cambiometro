@@ -1,0 +1,168 @@
+name: Pages estático - cambios de interfaz sin refresco ETL
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "transparencia-app/app/**"
+      - "transparencia-app/components/**"
+      - "transparencia-app/public/_headers"
+      - "transparencia-app/public/_redirects"
+      - "transparencia-app/next.config.ts"
+      - "transparencia-app/tsconfig.json"
+  workflow_dispatch:
+    inputs:
+      publish_pages:
+        description: "Publicar el artefacto de interfaz verificado en Pages producción"
+        type: boolean
+        required: false
+        default: false
+      confirm_cutover:
+        description: "Escribir CAMBIOMETRO_CONFIRM_CUTOVER sólo para publicar producción"
+        type: string
+        required: false
+        default: ""
+      preview_branch:
+        description: "Rama Pages de preview; vacío para no publicar preview"
+        required: false
+        default: ""
+
+concurrency:
+  group: pages-ui-refresh
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-verify-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+        working-directory: transparencia-app
+
+      - name: Recuperar manifiestos de datos publicados
+        id: data-version
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          mkdir -p data/lake/catalog/v1 .ci-data-version
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+          npx wrangler r2 object get transparencia-public-data/projections/static-site-v1/manifest.json --file .ci-data-version/static-site-manifest.json --remote
+          npx wrangler r2 object get transparencia-public-data/projections/funcionarios-v1/manifest.json --file .ci-data-version/funcionarios-manifest.json --remote
+          node -e '
+            const fs = require("node:fs");
+            const crypto = require("node:crypto");
+            const files = [
+              "data/lake/catalog/v1/manifest.json",
+              ".ci-data-version/static-site-manifest.json",
+              ".ci-data-version/funcionarios-manifest.json",
+            ];
+            const hash = crypto.createHash("sha256");
+            for (const file of files) hash.update(fs.readFileSync(file));
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `key=${hash.digest("hex")}\\n`);
+          '
+
+      - name: Restaurar snapshot validado por checksum
+        id: data-cache
+        uses: actions/cache/restore@v4
+        with:
+          key: pages-static-data-${{ steps.data-version.outputs.key }}
+          path: |
+            transparencia-app/data/lake/catalog
+            transparencia-app/data/lake/partitions/ley-19862
+            transparencia-app/data/lake/projections/v1
+            transparencia-app/data/lake-subsets
+            transparencia-app/data/lake-cplt
+            transparencia-app/data/politicos-votaciones.json
+            transparencia-app/data/personal-apoyo.json
+            transparencia-app/data/movimientos.json
+            transparencia-app/data/municipalidades-data.json
+            transparencia-app/data/municipalidades-list.json
+
+      - name: Rechazar interfaz sin snapshot de datos
+        if: steps.data-cache.outputs.cache-hit != 'true'
+        run: |
+          echo "No existe un snapshot validado para esta versión de datos. Ejecuta el workflow 'Pages estático - refresco automático verificable' primero."
+          exit 1
+
+      - name: Construir Pages sin hidratar ETL
+        run: npm run pages:build
+        working-directory: transparencia-app
+
+      - name: Verificar export, datos y fichas
+        run: npm run pages:verify && npm run api:typecheck && npm run api:size
+        working-directory: transparencia-app
+
+      - name: Instalar navegador para E2E
+        run: npx playwright install --with-deps chromium
+        working-directory: transparencia-app
+
+      - name: Preparar D1 local de integración
+        working-directory: transparencia-app
+        run: |
+          for migration in migrations/*.sql; do
+            npx wrangler d1 execute transparencia-db --local --config workers/public-api/wrangler.jsonc --file "$migration"
+          done
+          npx wrangler d1 execute transparencia-db --local --config workers/public-api/wrangler.jsonc --file fixtures/d1-browser.sql
+
+      - name: Verificar navegador, temas y CSP
+        working-directory: transparencia-app
+        env:
+          VERIFY_BASE_URL: http://127.0.0.1:3003
+          VERIFY_API_URL: http://127.0.0.1:8788
+          TURNSTILE_SECRET_KEY: 1x0000000000000000000000000000000AA
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+        run: |
+          npx wrangler dev --local --config workers/public-api/wrangler.jsonc --port 8788 --log-level warn > /tmp/cambiometro-api.log 2>&1 &
+          api_pid=$!
+          npx wrangler pages dev out --port 3003 --proxy 8788 --compatibility-date=2026-08-08 --log-level warn > /tmp/cambiometro-pages.log 2>&1 &
+          pages_pid=$!
+          trap 'kill "$api_pid" "$pages_pid" 2>/dev/null || true' EXIT
+          ready=""
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3003/ > /dev/null; then ready="yes"; break; fi
+            sleep 1
+          done
+          if [ -z "$ready" ]; then cat /tmp/cambiometro-api.log; cat /tmp/cambiometro-pages.log; exit 1; fi
+          npm run verify:browser
+          npm run verify:themes
+          npm run verify:security
+
+      - name: Guardar artefacto Pages
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-ui-${{ github.sha }}
+          path: transparencia-app/out
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Publicar preview Pages
+        if: inputs.preview_branch != ''
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+        run: npx wrangler pages deploy out --project-name cambiometro --branch "${{ inputs.preview_branch }}" --commit-hash "${GITHUB_SHA:0:40}" --commit-message "Pages UI preview ${GITHUB_SHA}"
+
+      - name: Publicar Pages producción sólo con confirmación
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_pages == true && inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER'
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+        run: npx wrangler pages deploy out --project-name cambiometro --branch main --commit-hash "$GITHUB_SHA" --commit-message "Pages UI release ${GITHUB_SHA}"
