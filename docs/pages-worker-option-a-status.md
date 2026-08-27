@@ -238,3 +238,24 @@ No se declara cerrado el cutover hasta que Cloudflare permita esas lecturas
 desde Actions y pasen nuevamente todos los gates. Mientras tanto, el preview
 queda disponible para la siguiente promoción controlada y el repositorio no
 rastrea `out/`, `.next/`, `public/data/`, logs ni artefactos generados.
+
+## Comprobación de navegador público — 27-ago-2026
+
+Se ejecutó `npm run verify:browser` desde un contexto local limpio contra
+`https://cambiometro.impulsacv.cl`, sin reutilizar cookies ni sesión. Las rutas
+principales y las fichas respondieron `200`, pero el dominio aún sirve una
+versión anterior: `/votaciones-destacadas` respondió `404`.
+
+El navegador registró `87` violaciones CSP. Las fuentes observadas fueron
+scripts inline inyectados por la infraestructura y cargas de
+`static.cloudflareinsights.com` y `www.googletagmanager.com`, que no están en
+la política estática del candidato. Esto confirma que el problema no se
+resuelve agregando `unsafe-inline`: Cloudflare Insights, JavaScript
+Detections/Browser Integrity y la inyección de Analytics deben desactivarse o
+configurarse para respetar la CSP, o debe crearse una excepción de producto
+limitada para el hostname. La CSP de aplicación conserva `style-src 'self'` y
+no se relajó.
+
+El resultado no cambia el criterio: no promover una nueva versión hasta que
+el hostname público sirva el candidato correcto, la consola quede sin
+violaciones y Actions pueda leer raíz y sitemap sin `403 challenge`.
