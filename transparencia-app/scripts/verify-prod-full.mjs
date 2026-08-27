@@ -16,7 +16,7 @@ function normalizeHex(value) {
   return /^#[0-9A-F]{3}$/.test(hex) ? `#${[...hex.slice(1)].map((digit) => digit + digit).join("")}` : hex;
 }
 
-async function verifyThemePersistence(PROD_URL) {
+async function verifyThemePersistence(PROD_URL, requestHeaders) {
   if (process.env.VERIFY_THEME_BROWSER !== "1") {
     console.log("  ℹ️ [THEME] navegador omitido; use VERIFY_THEME_BROWSER=1 para la verificación interactiva.");
     return;
@@ -30,11 +30,11 @@ async function verifyThemePersistence(PROD_URL) {
       night: ["#0A0B0B", "#121313", "#D6D3CC", "#2FA08C"],
     };
     for (const [theme, tokens] of Object.entries(expected)) {
-      const context = await browser.newContext();
+      const context = await browser.newContext({ extraHTTPHeaders: requestHeaders });
       const page = await context.newPage();
-      await page.goto(`${PROD_URL}/?theme_probe=${theme}`, { waitUntil: "networkidle", timeout: 30_000 });
+      await page.goto(`${PROD_URL}/?theme_probe=${theme}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
       await page.evaluate((value) => { localStorage.setItem("cambiometro-theme", value); }, theme);
-      await page.reload({ waitUntil: "networkidle", timeout: 30_000 });
+      await page.reload({ waitUntil: "domcontentloaded", timeout: 30_000 });
       const values = await page.evaluate(() => {
         const style = getComputedStyle(document.documentElement);
         return [document.documentElement.dataset.theme, style.getPropertyValue("--bg").trim().toUpperCase(), style.getPropertyValue("--surface").trim().toUpperCase(), style.getPropertyValue("--text").trim().toUpperCase(), style.getPropertyValue("--accent").trim().toUpperCase()];
@@ -76,7 +76,7 @@ async function verifyProdFull() {
   const homeRes = await fetch(`${PROD_URL}/`, { headers });
   assertCheck("HOME", "HTTP Status 200", homeRes.status === 200);
   const homeHtml = (await homeRes.text()).replace(/<!--.*?-->/g, "");
-  await verifyThemePersistence(PROD_URL);
+  await verifyThemePersistence(PROD_URL, headers);
 
   const staticManifestRes = await fetch(`${PROD_URL}/data/static-site-manifest.json`, { headers });
   assertCheck("HOME", "Manifiesto estático HTTP 200", staticManifestRes.status === 200);
