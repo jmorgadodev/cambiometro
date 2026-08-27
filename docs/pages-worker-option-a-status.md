@@ -156,8 +156,9 @@ esta auditoría que indique que el cierre productivo ya está aprobado.
 
 ### Código y candidato Pages
 
-- `main` está limpio y sincronizado en `f49995e`; no se trabaja desde
-  `cambiometro-audit`.
+- `main` está limpio y sincronizado en `cc5dc4a` (la implementación funcional
+  permanece en `f49995e` y `cc5dc4a` sólo integra esta documentación); no se
+  trabaja desde `cambiometro-audit`.
 - El refresco Pages `33054333038` terminó `success` sobre `8d5f2be`; generó el
   artefacto `pages-static-8d5f2be03149e2352427219e4d770c56251eb8f0`, ID
   `9639677162`, de `198.100.519` bytes. El job de promoción productiva quedó
