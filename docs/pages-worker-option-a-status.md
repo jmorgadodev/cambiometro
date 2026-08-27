@@ -104,6 +104,24 @@ el header secreto de uptime. No se agrega `unsafe-inline` a CSP.
   páginas en vez de 59.361/1.188. El artefacto completo quedó descargado en
   el directorio temporal `cambiometro-prod-33042337269` del equipo de
   verificación.
+- `33043359229`: segunda corrida doble con ambas pasadas ejecutadas (05:43:23
+  y 05:54:03 UTC). Repitió 91 correctas y 26 fallidas en cada pasada; el
+  crawl autenticado también recibió `SITEMAP_HTTP_403`. El artefacto completo
+  quedó publicado en GitHub Actions como `production-verification-33043359229`
+  (artifact ID `9634916487`).
+- `33044032375`: preflight WAF con diagnóstico seguro; confirmó
+  `expressionMatchesSecret=true`, la regla `28645f6a4f3e40eb8f51836bb32d7614`
+  y `cf-mitigated=challenge`/`403` en `/`, con HTML de
+  `/cdn-cgi/challenge-platform/`. El 403 proviene de una protección Bot
+  Fight/Challenge fuera de la excepción WAF; no se habilitará una excepción
+  global ni se desactivará protección sin una decisión explícita.
+
+La documentación de Cloudflare confirma que Bot Fight Mode no puede omitirse
+con una regla Skip. Para liberar de forma segura el runner se debe desactivar
+Bot Fight Mode y usar una modalidad con excepciones (SBFM/Bot Management), o
+autorizar una IP fija controlada; los runners hospedados de GitHub no tienen
+una IP única estable. Referencias: [Skip options de WAF](https://developers.cloudflare.com/waf/custom-rules/skip/options/)
+y [Bot Fight Mode](https://developers.cloudflare.com/bots/get-started/bot-fight-mode/).
 
 No existe Pages deployment ID nuevo: ningún despliegue Pages fue promovido.
 Se conserva como rollback conocido-bueno `0cd3adf2-864f-4e99-bc32-7ec5c02b8519`.
