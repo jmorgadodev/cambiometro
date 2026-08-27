@@ -103,13 +103,29 @@ jobs:
         working-directory: transparencia-app
         run: npm run pages:build
 
-      - name: Verificar censo, chunks, metadata y bundle Worker
+      - name: Verificar export estático y censo
         working-directory: transparencia-app
-        run: |
-          npm run pages:verify
-          npm run api:typecheck
-          npm run api:size
-          npm run check:transfer-release
+        run: npm run verify-static-export
+
+      - name: Verificar release de transferencias
+        working-directory: transparencia-app
+        run: npm run verify-transfer-release
+
+      - name: Verificar universo de fichas
+        working-directory: transparencia-app
+        run: npm run verify:detail-universe
+
+      - name: Verificar release de gastos y slices
+        working-directory: transparencia-app
+        run: node scripts/verify-expense-release.mjs --verify-slices
+
+      - name: Verificar tipos del Worker
+        working-directory: transparencia-app
+        run: npm run api:typecheck
+
+      - name: Verificar tamaño del Worker
+        working-directory: transparencia-app
+        run: npm run api:size
 
       - name: Guardar artefacto Pages
         uses: actions/upload-artifact@v4
