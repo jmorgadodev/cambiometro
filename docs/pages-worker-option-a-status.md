@@ -81,6 +81,23 @@ El workflow Cloudflare es de sólo lectura por defecto. `--apply` exige la
 variable `CAMBIOMETRO_CONFIRM_CUTOVER`, el hostname exacto, `/` o `/api/*` y
 el header secreto de uptime. No se agrega `unsafe-inline` a CSP.
 
+## Corridas productivas registradas
+
+- `33041504758`: Worker candidato subido sin promoción; version ID
+  `2633eef6-777e-4a21-91e4-a482d98781bc`; bundle 131,95 KiB.
+- `33041504766`: refresco Pages rechazado antes de publicar porque R2 reportó
+  59.912 filas y el gate canónico exige 59.361.
+- `33041645334`: preflight WAF read-only; encontró la regla
+  `28645f6a4f3e40eb8f51836bb32d7614`, pero la CSP antigua seguía dinámica.
+- `33041993122`: aplicación WAF limitada exitosa; luego falló sólo el gate de
+  CSP dinámica del stack anterior.
+- `33041213475` y `33042027955`: smoke productivo 9/10; API, listados y ficha
+  pasan, pero `/` continúa en 403. Se generaron los incidentes GitHub #198 y
+  #200.
+
+No existe Pages deployment ID nuevo: ningún despliegue Pages fue promovido.
+Se conserva como rollback conocido-bueno `0cd3adf2-864f-4e99-bc32-7ec5c02b8519`.
+
 ## Rollback preparado
 
 ```bash
