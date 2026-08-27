@@ -43,8 +43,21 @@ if (!rule?.id) throw new Error("WAF_UPTIME_RULE_NOT_FOUND: define CF_WAF_RULE_ID
 
 if (!uptimeToken) throw new Error("UPTIME_TOKEN_MISSING");
 const expression = `(http.host eq "${hostname}" and (http.request.uri.path eq "/" or starts_with(http.request.uri.path, "/api/")) and http.request.headers["x-cambiometro-uptime-token"][0] eq "${uptimeToken.replaceAll('\\', "\\\\").replaceAll('"', '\\"')}")`;
-const publicRule = { id: rule.id, description: rule.description || "Cambiometro uptime limited access", action: rule.action, enabled: rule.enabled, expression: rule.expression };
-console.log(JSON.stringify({ mode: apply ? "apply" : "preflight", zone: zoneName, hostname, rule: publicRule, desired: { expression: expression.replace(uptimeToken, "<secret>") }, expressionMatchesSecret: rule.expression === expression }, null, 2));
+const publicRule = {
+  id: rule.id,
+  description: rule.description || "Cambiometro uptime limited access",
+  action: rule.action,
+  enabled: rule.enabled,
+  expression: rule.expression,
+  action_parameters: rule.action_parameters,
+};
+const ruleSummary = rules.map((candidate) => ({
+  id: candidate.id,
+  description: candidate.description || "",
+  action: candidate.action,
+  enabled: candidate.enabled,
+}));
+console.log(JSON.stringify({ mode: apply ? "apply" : "preflight", zone: zoneName, hostname, rule: publicRule, ruleSummary, desired: { expression: expression.replace(uptimeToken, "<secret>") }, expressionMatchesSecret: rule.expression === expression }, null, 2));
 
 if (apply) {
   await cf(`/zones/${zone.id}/rulesets/${entryPoint.id}/rules/${rule.id}`, {
@@ -78,6 +91,21 @@ for (const path of ["/", "/politico", "/partidos", "/cruces"]) {
   });
   const text = await response.text();
   const csp = response.headers.get("content-security-policy") || "";
+  console.log(JSON.stringify({
+    probe: path,
+    status: response.status,
+    headers: {
+      "cf-mitigated": response.headers.get("cf-mitigated"),
+      "cf-ray": response.headers.get("cf-ray"),
+      server: response.headers.get("server"),
+      "cf-cache-status": response.headers.get("cf-cache-status"),
+      "content-type": response.headers.get("content-type"),
+    },
+    bodyMarkers: {
+      error1020: /error 1020|error code:\s*1020/i.test(text),
+      challengePlatform: /cdn-cgi\/challenge-platform/i.test(text),
+    },
+  }, null, 2));
   if (response.status >= 500 || /error code:\s*1102|worker threw exception/i.test(text)) throw new Error(`PUBLIC_EDGE_FAILED:${path}:${response.status}`);
   if (/unsafe-inline|unsafe-eval|nonce-/i.test(csp)) throw new Error(`CSP_WEAK_OR_DYNAMIC:${path}`);
   console.log(JSON.stringify({ path, status: response.status, cspStatic: true, bytes: text.length }));
