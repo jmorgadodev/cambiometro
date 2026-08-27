@@ -14,7 +14,8 @@ import { formatCLP, formatFechaCorta } from "@/lib/format";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import { useThemeTokens } from "@/lib/theme-tokens";
 import type { Politico, ScoreProbidad } from "@/lib/seed-politicos";
-import type { GastoPartido, SerieAsistencia, DisciplinaBancada } from "@/lib/partido-estadisticas";
+import type { ConteoOpciones, GastoPartido, SerieAsistencia, DisciplinaBancada } from "@/lib/partido-estadisticas";
+import { etiquetaVotosPorCamara } from "@/lib/partido-votos-label";
 import type { RadiografiaElectoral } from "@/lib/partido-electoral-data";
 
 interface PartidoDashboardClientProps {
@@ -26,20 +27,8 @@ interface PartidoDashboardClientProps {
     logo_url?: string;
   };
   esIndependiente: boolean;
-  votosCamara: {
-    emitidos: number;
-    afirmativo: number;
-    enContra: number;
-    abstencion: number;
-    noVota: number;
-  };
-  votosSenado: {
-    emitidos: number;
-    afirmativo: number;
-    enContra: number;
-    abstencion: number;
-    noVota: number;
-  };
+  votosCamara: ConteoOpciones;
+  votosSenado: ConteoOpciones;
   votacionesTodas: FilaVotosChart[];
   serieAsistencia: SerieAsistencia[];
   disciplina?: DisciplinaBancada;
@@ -66,6 +55,7 @@ export default function PartidoDashboardClient({
   const router = useRouter();
   const pathname = usePathname();
   const tokens = useThemeTokens();
+  const senadores = useMemo(() => politicos.filter((politico) => politico.cargo === "Senador"), [politicos]);
 
   // ─── ESTADOS DE FILTRO INTERACTIVO CON URL INITIALIZATION ────────────────────
   const [filtroVoto, setFiltroVoto] = useState<string | null>(() => searchParams.get("voto") || null);
@@ -327,19 +317,29 @@ export default function PartidoDashboardClient({
               <span className="badge" style={{ fontSize: "0.7rem" }}>Sala</span>
             </div>
             <p style={{ fontSize: "0.72rem", color: "var(--text-3)", marginBottom: "0.75rem" }}>
-              {votosSenado.emitidos.toLocaleString("es-CL")} votos emitidos por sus senadores en sala
+              {etiquetaVotosPorCamara("Senado", senadores.length, votosSenado)}
             </p>
-            <DonaPartido
-              camaraNombre="Senado"
-              selectedSegment={filtroVoto}
-              onSelectSegment={handleSelectDonutSegment}
-              sectores={[
-                { name: "Sí", value: votosSenado.afirmativo, color: tokens.ok },
-                { name: "No", value: votosSenado.enContra, color: tokens.bad },
-                { name: "Abstención", value: votosSenado.abstencion, color: tokens.warn },
-                { name: "No vota", value: votosSenado.noVota, color: tokens.text3 },
-              ]}
-            />
+            {senadores.length === 0 ? (
+              <div role="status" style={{ minHeight: 230, display: "grid", alignContent: "center", gap: "0.5rem", padding: "1rem", border: "1px dashed var(--border)", borderRadius: 10, background: "var(--surface-2)" }}>
+                <strong style={{ color: "var(--text-1)" }}>Esta bancada no tiene senadores en el padrón vigente.</strong>
+                <span style={{ color: "var(--text-2)", fontSize: "0.8rem", lineHeight: 1.5 }}>Los votos de sus integrantes, incluida Lilian Betancurt Delgado, se contabilizan en la Cámara de Diputadas y Diputados.</span>
+                <Link href="#votaciones-bancada" style={{ color: "var(--accent)", fontSize: "0.8rem", fontWeight: 700 }}>Ver votaciones de Cámara →</Link>
+              </div>
+            ) : votosSenado.apariciones === 0 ? (
+              <div role="status" style={{ minHeight: 230, display: "grid", alignContent: "center", padding: "1rem", border: "1px dashed var(--border)", borderRadius: 10, background: "var(--surface-2)", color: "var(--text-2)", fontSize: "0.8rem" }}>Hay senadores en el padrón, pero la fuente aún no publicó registros para esta bancada.</div>
+            ) : (
+              <DonaPartido
+                camaraNombre="Senado"
+                selectedSegment={filtroVoto}
+                onSelectSegment={handleSelectDonutSegment}
+                sectores={[
+                  { name: "Sí", value: votosSenado.afirmativo, color: tokens.ok },
+                  { name: "No", value: votosSenado.enContra, color: tokens.bad },
+                  { name: "Abstención", value: votosSenado.abstencion, color: tokens.warn },
+                  { name: "No vota", value: votosSenado.noVota, color: tokens.text3 },
+                ]}
+              />
+            )}
           </div>
         </div>
       </div>
@@ -350,7 +350,7 @@ export default function PartidoDashboardClient({
       )}
 
       {/* ─── VOTACIONES RECIENTES CON SELECTOR Y MODAL ─────────────────── */}
-      <div className="card" style={{ padding: "1.25rem", marginTop: "1.5rem" }}>
+      <div id="votaciones-bancada" className="card" style={{ padding: "1.25rem", marginTop: "1.5rem" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem" }}>
           <div>
             <div className="card-title" style={{ margin: 0 }}>Votaciones recientes en la Cámara</div>
