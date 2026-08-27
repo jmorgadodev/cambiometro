@@ -44,6 +44,7 @@ jobs:
           test -n "$CLOUDFLARE_API_TOKEN"
           if [ "${{ inputs.apply_dns }}" = "true" ]; then
             test "$CAMBIOMETRO_CUTOVER_CONFIRM" = "CAMBIOMETRO_CONFIRM_CUTOVER"
+            test -n "$UPTIME_TOKEN"
           fi
       - name: Ejecutar preflight o cutover
         working-directory: transparencia-app

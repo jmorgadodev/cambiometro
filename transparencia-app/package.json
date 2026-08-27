@@ -11,6 +11,8 @@
     "check:tokens": "node scripts/check-no-hardcoded-colors.mjs",
     "check:etl-calendar": "node scripts/verify-etl-calendar.mjs",
     "check:generated": "node scripts/verify-generated-artifacts.mjs",
+    "check:production-gates": "node scripts/verify-production-gates.mjs",
+    "check:etl-freshness": "node scripts/verify-etl-freshness.mjs",
     "check:cloudflare": "node scripts/cloudflare-production-guard.mjs",
     "check:votaciones-destacadas": "node scripts/verify-votaciones-destacadas.mjs",
     "check:links": "node scripts/check-safe-links.mjs",

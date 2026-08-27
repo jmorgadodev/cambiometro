@@ -11,6 +11,7 @@ if (!accountId || !apiToken) throw new Error("CLOUDFLARE_CREDENTIALS_MISSING");
 if (apply && process.env.CAMBIOMETRO_CUTOVER_CONFIRM !== "CAMBIOMETRO_CONFIRM_CUTOVER") {
   throw new Error("CUTOVER_CONFIRMATION_MISSING");
 }
+if (apply && !uptimeToken) throw new Error("UPTIME_TOKEN_MISSING_BEFORE_DNS_MUTATION");
 
 const apiBase = "https://api.cloudflare.com/client/v4";
 
@@ -210,7 +211,6 @@ if (htmlResponse.status !== 200 || !html.includes("Cambiómetro") || /nonce-|uns
   throw new Error(`PAGES_PUBLIC_VERIFY_FAILED:${htmlResponse.status}`);
 }
 
-if (!uptimeToken) throw new Error("UPTIME_TOKEN_MISSING");
 const apiResponse = await fetch(`${publicUrl}/api/v1/health?cutover_probe=${Date.now()}`, {
   headers: { "X-Cambiometro-Uptime-Token": uptimeToken },
   signal: AbortSignal.timeout(20_000),

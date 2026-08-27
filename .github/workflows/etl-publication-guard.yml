@@ -40,4 +40,7 @@ jobs:
           PROD_URL: ${{ vars.PROD_URL || 'https://cambiometro.impulsacv.cl' }}
           API_URL: ${{ vars.API_URL || 'https://cambiometro.impulsacv.cl' }}
           UPTIME_TOKEN: ${{ secrets.CAMBIOMETRO_UPTIME_TOKEN }}
+          ETL_WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          ETL_COMPLETED_AT: ${{ github.event.workflow_run.updated_at }}
+          EXPECTED_TRANSFER_ROWS: "59361"
         run: node scripts/verify-etl-freshness.mjs

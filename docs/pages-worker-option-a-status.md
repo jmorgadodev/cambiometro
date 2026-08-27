@@ -41,6 +41,11 @@ se permite en el workflow de publicación: `pages-static-refresh.yml` usa
 de publicar. Un ETL verde sin publicación R2/D1 queda bloqueado por
 `etl-publication-guard.yml`.
 
+La comprobación read-only del health productivo actual también devolvió
+`transferRows=59912`, mientras que el release objetivo exige `59361`. La nueva
+guardia falla explícitamente con `API_TRANSFER_UNIVERSE_MISMATCH` hasta que el
+Worker/R2 productivos se actualicen y su checksum coincida.
+
 Todavía falta ejecutar contra producción real, después de una aprobación
 explícita: doble `verify-prod-full` separada por diez minutos, crawl frío del
 dominio, primer run verde de `uptime-smoke`, inspección CSP en DevTools y
