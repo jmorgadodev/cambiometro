@@ -6,6 +6,8 @@ on:
     paths:
       - "transparencia-app/app/**"
       - "transparencia-app/components/**"
+      - "transparencia-app/lib/**"
+      - "transparencia-app/scripts/**"
       - "transparencia-app/public/_headers"
       - "transparencia-app/public/_redirects"
       - "transparencia-app/next.config.ts"
