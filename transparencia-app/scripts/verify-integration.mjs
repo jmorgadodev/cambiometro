@@ -232,12 +232,20 @@ try {
   assert.equal(await page.getByRole("heading", { name: "Estado de cada fuente" }).count(), 1);
   await page.screenshot({ path: join(tmpdir(), "cambiometro-datos-desktop.png"), fullPage: true });
 
-  await gotoWithNetworkRetry(`${baseUrl}/politico/dip-061`);
+  // dip-061 es José Antonio Kast y no tiene rendiciones publicadas en el
+  // corte vigente. Carlos Bianchi (dip-154 / prmId 1110) sí forma parte del
+  // release canónico y permite verificar que la ficha estática no cae en el
+  // estado "Sin rendiciones".
+  await gotoWithNetworkRetry(`${baseUrl}/politico/dip-154`);
   const visibleExpensesSection = page.locator(".section-title:visible", { hasText: "Gastos Operacionales Rendidos" });
   await visibleExpensesSection.first().waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await visibleExpensesSection.count(), 1);
   if (!verifyingLocal) {
-    assert.equal(await page.getByText(/Sin rendiciones publicadas/).count(), 0, "staging debe usar gastos canonicos de D1");
+    // El corte más reciente puede estar publicado con $0 mientras la fuente
+    // aún no rinde ese mes. El criterio correcto es que existan rendiciones
+    // históricas en la ficha y no que desaparezca el aviso de ese mes.
+    assert.equal(await page.getByText(/Sin registros de gastos operacionales rendidos en el período para esta autoridad/).count(), 0, "staging debe mostrar gastos canónicos");
+    assert.equal(await page.getByText(/Total acumulado/).count(), 1, "la ficha debe mostrar el acumulado histórico de gastos");
     const personalCard = page.locator(".card-flat", { has: page.locator(".section-title", { hasText: "Personal de Apoyo y Asesores" }) });
     assert.equal(await personalCard.count(), 1);
     assert((await personalCard.innerText()).length > 100, "la ficha debe detallar personal oficial");
