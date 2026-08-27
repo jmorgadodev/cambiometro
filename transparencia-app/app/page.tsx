@@ -188,7 +188,7 @@ export default async function HomePage() {
         <section className="container-main home-sources" aria-labelledby="highlighted-votes-title">
           <div className="home-section-heading">
             <div><p className="eyebrow">Seguimiento legislativo</p><h2 id="highlighted-votes-title">Votaciones destacadas</h2></div>
-            <Link prefetch={false} href="/votaciones-destacadas">Ver selección completa →</Link>
+            <Link prefetch={false} href="/votaciones-destacadas/">Ver selección completa →</Link>
           </div>
           <div className="home-source-list">
             {highlightedVotes.map((vote) => <article className="home-source-row" key={vote.votacion_id}><span className="source-signal source-signal--partial" aria-hidden="true" /><strong>{vote.boletin}</strong><span>{vote.camara} · {vote.fecha}</span><em>{vote.resultado}</em></article>)}
