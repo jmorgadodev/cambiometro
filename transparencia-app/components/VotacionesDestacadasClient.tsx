@@ -9,7 +9,13 @@ import type {
   VotacionDestacadaDetalle,
   VotacionNominalDetalle,
 } from "@/lib/votaciones-destacadas";
-import { getVotacionBancadaShares, type VotacionBancadaShare } from "@/lib/votaciones-bancada";
+import {
+  bancadaParticipacion,
+  getVotacionBancadaShares,
+  sortVotacionBancadas,
+  type VotacionBancadaShare,
+  type VotacionBancadaSort,
+} from "@/lib/votaciones-bancada";
 
 const OPTION_LABELS: Array<{ key: OpcionVotacion; label: string; color: string }> = [
   { key: "Afirmativo", label: "A favor", color: "var(--success)" },
@@ -19,6 +25,8 @@ const OPTION_LABELS: Array<{ key: OpcionVotacion; label: string; color: string }
 ];
 
 function formatNumber(value: number) { return value.toLocaleString("es-CL"); }
+
+function formatPct(value: number) { return `${value.toFixed(1).replace(".", ",")} %`; }
 
 function formatDate(value: string) {
   return new Intl.DateTimeFormat("es-CL", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${value}T12:00:00Z`));
@@ -59,11 +67,24 @@ function VoteBar({ label, value, total, color }: { label: string; value: number;
   return <div className="featured-vote__bar-row"><div className="featured-vote__bar-label"><span>{label}</span><strong>{formatNumber(value)}</strong></div><div className="featured-vote__bar-track" aria-hidden="true"><span style={{ width: `${percentage}%`, background: color }} /></div><small>{percentage.toFixed(1).replace(".", ",")} %</small></div>;
 }
 
-function PartyRow({ party, onOpenNominal }: { party: VotacionBancadaDetalle; onOpenNominal: (sigla: string) => void }) {
+function PartyRow({
+  party,
+  selected,
+  canSelect,
+  onToggle,
+  onOpenNominal,
+}: {
+  party: VotacionBancadaDetalle;
+  selected: boolean;
+  canSelect: boolean;
+  onToggle: (sigla: string) => void;
+  onOpenNominal: (sigla: string) => void;
+}) {
   const shares = getVotacionBancadaShares(party);
-  return <div className="featured-vote__party-row">
+  return <div className={`featured-vote__party-row${selected ? " is-selected" : ""}`}>
     <div className="featured-vote__party-main">
       <div className="featured-vote__party-name"><strong>{party.sigla}</strong><span>{party.nombre} · {party.miembros} miembros en el padrón</span></div>
+      <label className="featured-vote__party-select"><input type="checkbox" checked={selected} disabled={!selected && !canSelect} onChange={() => onToggle(party.sigla)} />Comparar</label>
       <div className="featured-vote__party-votes" aria-label={`Composición de votos de ${party.sigla}`}>
         <span style={{ color: "var(--success)" }}>A favor {formatNumber(party.afirmativo)}</span>
         <span style={{ color: "var(--danger)" }}>En contra {formatNumber(party.enContra)}</span>
@@ -86,6 +107,7 @@ function PartyRow({ party, onOpenNominal }: { party: VotacionBancadaDetalle; onO
     <div className="featured-vote__party-stat">
       <strong>{party.cuotaMayoria === null ? "—" : `${party.cuotaMayoria.toFixed(1).replace(".", ",")} %`}</strong>
       <span>{formatNumber(party.efectivos)} efectivos</span>
+      <span>{formatPct(bancadaParticipacion(party) * 100)} participación</span>
       <span>{optionLabel(party.opcionMayoritaria)}</span>
       <button type="button" className="featured-vote__party-link" onClick={() => onOpenNominal(party.sigla)}>Ver padrón →</button>
     </div>
@@ -97,11 +119,39 @@ function NominalRow({ vote }: { vote: VotacionNominalDetalle }) {
   return <li className="featured-vote__nominal-row"><Link href={`/politico/${vote.slug}`} prefetch={false}><strong>{vote.nombre}</strong><span>{vote.partido_sigla} · {vote.cargo}</span></Link><span className="featured-vote__option" style={{ color: option.color, borderColor: option.color }}>{option.label}</span></li>;
 }
 
+function DecisionMap({ detail }: { detail: VotacionDestacadaDetalle }) {
+  const segments = OPTION_LABELS.map((option) => {
+    const key = option.key === "Afirmativo" ? "afirmativo" : option.key === "En Contra" ? "enContra" : option.key === "Abstención" ? "abstencion" : "noVota";
+    return { ...option, value: detail.totales[key] };
+  });
+  return <section className="featured-vote__decision-map" aria-labelledby="featured-vote-decision-map-title">
+    <div className="featured-vote__section-title"><div><h3 id="featured-vote-decision-map-title">Mapa de decisión</h3><p>La barra usa el padrón completo: muestra qué proporción votó y qué parte no emitió una opción.</p></div><strong>{formatNumber(detail.totales.padron)} integrantes</strong></div>
+    <div className="featured-vote__decision-track" role="img" aria-label={`Mapa de decisión: ${segments.map((segment) => `${segment.label} ${formatNumber(segment.value)}`).join(", ")}`}>
+      {segments.map((segment) => <span key={segment.key} style={{ width: `${detail.totales.padron > 0 ? (segment.value / detail.totales.padron) * 100 : 0}%`, background: segment.color }} title={`${segment.label}: ${formatNumber(segment.value)}`} />)}
+    </div>
+    <div className="featured-vote__decision-legend">{segments.map((segment) => <span key={segment.key}><i style={{ background: segment.color }} /><strong>{formatNumber(segment.value)}</strong> {segment.label}</span>)}</div>
+  </section>;
+}
+
+function ComparisonCard({ party }: { party: VotacionBancadaDetalle }) {
+  const shares = getVotacionBancadaShares(party);
+  return <article className="featured-vote__comparison-card">
+    <div className="featured-vote__comparison-card-heading"><strong>{party.sigla}</strong><span>{party.nombre}</span></div>
+    <div className="featured-vote__comparison-card-metrics"><strong>{party.cuotaMayoria === null ? "—" : formatPct(party.cuotaMayoria)}</strong><span>cohesión</span><strong>{formatPct(bancadaParticipacion(party) * 100)}</strong><span>participación</span></div>
+    <div className="featured-vote__party-composition" role="img" aria-label={`Comparación ${party.sigla}: ${shares.map((share) => `${share.label} ${formatPct(share.pct)}`).join(", ")}`}>
+      {shares.map((share) => <span key={share.key} style={{ width: `${share.pct}%`, background: shareColor(share) }} title={`${share.label}: ${formatPct(share.pct)}`} />)}
+    </div>
+    <div className="featured-vote__comparison-card-footer"><span>{formatNumber(party.efectivos)} efectivos de {formatNumber(party.miembros)}</span><span>{party.disenso === 0 ? "Sin disenso" : `${formatNumber(party.disenso)} distintos de la mayoría`}</span></div>
+  </article>;
+}
+
 function VoteDetailDialog({ detail, onClose }: { detail: VotacionDestacadaDetalle; onClose: () => void }) {
   const [tab, setTab] = useState<"resumen" | "bancadas" | "nominal">("resumen");
   const [option, setOption] = useState<"Todas" | OpcionVotacion>("Todas");
   const [party, setParty] = useState("Todas");
   const [query, setQuery] = useState("");
+  const [bancadaSort, setBancadaSort] = useState<VotacionBancadaSort>("representacion");
+  const [selectedParties, setSelectedParties] = useState<string[]>([]);
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => { if (event.key === "Escape") onClose(); };
@@ -118,6 +168,8 @@ function VoteDetailDialog({ detail, onClose }: { detail: VotacionDestacadaDetall
     const haystack = `${vote.nombre} ${vote.partido_sigla} ${vote.partido_nombre}`.toLocaleLowerCase("es");
     return matchesOption && matchesParty && haystack.includes(query.trim().toLocaleLowerCase("es"));
   }), [detail.nominales, option, party, query]);
+  const sortedBancadas = useMemo(() => sortVotacionBancadas(detail.bancadas, bancadaSort), [detail.bancadas, bancadaSort]);
+  const selectedBancadas = useMemo(() => detail.bancadas.filter((entry) => selectedParties.includes(entry.sigla)), [detail.bancadas, selectedParties]);
   const totalEffective = detail.totales.efectivos;
   const mostDividedParty = useMemo(() => detail.bancadas
     .filter((partyEntry) => partyEntry.efectivos > 0 && partyEntry.disenso > 0)
@@ -125,6 +177,8 @@ function VoteDetailDialog({ detail, onClose }: { detail: VotacionDestacadaDetall
   const alignedPct = detail.analisis.bancadasConMuestra > 0
     ? Math.round((detail.analisis.bancadasAlineadas / detail.analisis.bancadasConMuestra) * 1000) / 10
     : 0;
+  const mostCohesiveParty = detail.bancadas.filter((entry) => entry.cuotaMayoria !== null).sort((left, right) => (right.cuotaMayoria ?? -1) - (left.cuotaMayoria ?? -1))[0];
+  const mostPresentParty = detail.bancadas.slice().sort((left, right) => bancadaParticipacion(right) - bancadaParticipacion(left))[0];
 
   return <div className="featured-vote-dialog" role="dialog" aria-modal="true" aria-labelledby="featured-vote-detail-title" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
     <section className="featured-vote-dialog__panel">
@@ -138,6 +192,12 @@ function VoteDetailDialog({ detail, onClose }: { detail: VotacionDestacadaDetall
             <div className="featured-vote__signal"><span>Opción mayoritaria</span><strong style={{ color: optionColor(detail.analisis.opcionMayoritaria) }}>{optionLabel(detail.analisis.opcionMayoritaria)}</strong><small>{detail.analisis.mayoriaPct.toFixed(1).replace(".", ",")} % de los votos efectivos</small></div>
             <div className="featured-vote__signal"><span>Alineamiento de bancadas</span><strong>{alignedPct.toFixed(1).replace(".", ",")} %</strong><small>{detail.analisis.bancadasAlineadas} de {detail.analisis.bancadasConMuestra} con la mayoría de sala</small></div>
           </div>
+          <DecisionMap detail={detail} />
+          <div className="featured-vote__insight-grid" aria-label="Comparaciones destacadas">
+            <div className="featured-vote__insight"><span>Bancada más cohesionada</span><strong>{mostCohesiveParty?.sigla ?? "—"}</strong><small>{mostCohesiveParty?.cuotaMayoria == null ? "Sin muestra efectiva" : `${formatPct(mostCohesiveParty.cuotaMayoria)} de sus votos efectivos siguieron una opción`}</small></div>
+            <div className="featured-vote__insight"><span>Mayor presencia en sala</span><strong>{mostPresentParty?.sigla ?? "—"}</strong><small>{mostPresentParty ? `${formatPct(bancadaParticipacion(mostPresentParty) * 100)} de su padrón emitió una opción` : "Sin muestra efectiva"}</small></div>
+            <div className="featured-vote__insight"><span>Bancadas con disenso</span><strong>{detail.analisis.bancadasConDisenso}</strong><small>colectividades con al menos un voto distinto de su mayoría</small></div>
+          </div>
           <div className="featured-vote__analysis-grid">
             <div>
               <h3>Qué ocurrió</h3>
@@ -150,7 +210,12 @@ function VoteDetailDialog({ detail, onClose }: { detail: VotacionDestacadaDetall
             <div className="featured-vote__bars"><h3>Votos efectivos</h3><VoteBar label="A favor" value={detail.totales.afirmativo} total={totalEffective} color="var(--success)" /><VoteBar label="En contra" value={detail.totales.enContra} total={totalEffective} color="var(--danger)" /><VoteBar label="Abstención" value={detail.totales.abstencion} total={totalEffective} color="var(--warning)" /><VoteBar label="No vota / sin emisión" value={detail.totales.noVota} total={detail.totales.padron} color="var(--text-3)" /></div>
           </div>
         </div>}
-        {tab === "bancadas" && <div><div className="featured-vote-dialog__section-heading"><div><h3>Cómo votaron las bancadas</h3><p>Cuota de la opción mayoritaria sobre sus votos efectivos en esta sesión. Abre el padrón de una bancada para revisar cada nombre.</p></div><span>{detail.bancadas.length} colectividades</span></div><div className="featured-vote__party-list">{detail.bancadas.map((partyEntry) => <PartyRow key={partyEntry.partido_id} party={partyEntry} onOpenNominal={(sigla) => { setParty(sigla); setTab("nominal"); }} />)}</div></div>}
+        {tab === "bancadas" && <div>
+          <div className="featured-vote-dialog__section-heading"><div><h3>Cómo votaron las bancadas</h3><p>Compara la composición completa del padrón, la participación y el disenso. La cohesión mide cuánto concentró cada bancada su voto efectivo en la opción más votada.</p></div><span>{detail.bancadas.length} colectividades</span></div>
+          <div className="featured-vote__party-toolbar"><label>Ordenar por<select aria-label="Ordenar bancadas por" value={bancadaSort} onChange={(event) => setBancadaSort(event.target.value as VotacionBancadaSort)}><option value="representacion">Votos efectivos</option><option value="cohesion">Cohesión</option><option value="disenso">Disenso</option><option value="participacion">Participación</option></select></label><span>{selectedParties.length} de 3 bancadas comparadas</span></div>
+          {selectedBancadas.length > 0 && <section className="featured-vote__comparison" aria-labelledby="featured-vote-comparison-title"><div className="featured-vote__section-title"><div><h3 id="featured-vote-comparison-title">Comparación seleccionada</h3><p>La misma escala permite leer diferencias de alineamiento y participación entre las bancadas elegidas.</p></div><button type="button" className="featured-vote__clear-comparison" onClick={() => setSelectedParties([])}>Limpiar</button></div><div className="featured-vote__comparison-grid">{selectedBancadas.map((partyEntry) => <ComparisonCard key={partyEntry.partido_id} party={partyEntry} />)}</div></section>}
+          <div className="featured-vote__party-list">{sortedBancadas.map((partyEntry) => <PartyRow key={partyEntry.partido_id} party={partyEntry} selected={selectedParties.includes(partyEntry.sigla)} canSelect={selectedParties.length < 3} onToggle={(sigla) => setSelectedParties((current) => current.includes(sigla) ? current.filter((value) => value !== sigla) : current.length < 3 ? [...current, sigla] : current)} onOpenNominal={(sigla) => { setParty(sigla); setTab("nominal"); }} />)}</div>
+        </div>}
         {tab === "nominal" && <div><div className="featured-vote-dialog__section-heading"><div><h3>Padrón nominal</h3><p>Busca una persona, filtra por bancada u opción y abre su ficha.</p></div><span>{formatNumber(filteredNominal.length)} resultados</span></div><div className="featured-vote__filters"><label>Buscar<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nombre o bancada" /></label><label>Opción<select value={option} onChange={(event) => setOption(event.target.value as "Todas" | OpcionVotacion)}><option>Todas</option>{OPTION_LABELS.map((entry) => <option key={entry.key}>{entry.key}</option>)}</select></label><label>Bancada<select value={party} onChange={(event) => setParty(event.target.value)}>{parties.map((value) => <option key={value}>{value}</option>)}</select></label></div><ul className="featured-vote__nominal-list">{filteredNominal.map((vote) => <NominalRow key={vote.politico_id} vote={vote} />)}</ul>{filteredNominal.length === 0 && <p className="featured-vote__empty" role="status">No hay integrantes que coincidan con estos filtros.</p>}</div>}
       </div>
       <footer className="featured-vote-dialog__footer"><span>Fuente: padrón nominal consolidado por El Cambiómetro.</span><a href={detail.fuente_url} target="_blank" rel="noreferrer">Abrir registro oficial ↗</a></footer>

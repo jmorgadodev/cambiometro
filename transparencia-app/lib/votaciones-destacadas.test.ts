@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getVotacionDestacadaDetalle } from "./votaciones-destacadas";
-import { getVotacionBancadaShares } from "./votaciones-bancada";
+import { bancadaDisensoPct, bancadaParticipacion, getVotacionBancadaShares, sortVotacionBancadas } from "./votaciones-bancada";
 
 describe("votaciones destacadas", () => {
   it("expone el padrón nominal, el resultado recalculado y el agrupamiento por bancada", () => {
@@ -52,5 +52,22 @@ describe("votaciones destacadas", () => {
     expect(shares.reduce((total, share) => total + share.value, 0)).toBe(pdg!.miembros);
     expect(shares.reduce((total, share) => total + share.pct, 0)).toBe(100);
     expect(shares.every((share) => share.pct >= 0 && share.pct <= 100)).toBe(true);
+  });
+
+  it("permite ordenar bancadas por participación y disenso sin mutar la fuente", () => {
+    const detail = getVotacionDestacadaDetalle("camara-vot-89749");
+    const source = detail!.bancadas;
+    const originalOrder = source.map((party) => party.sigla);
+    const byParticipation = sortVotacionBancadas(source, "participacion");
+    const byDissent = sortVotacionBancadas(source, "disenso");
+
+    expect(source).not.toBe(byParticipation);
+    expect(byParticipation[0].efectivos / byParticipation[0].miembros).toBeGreaterThanOrEqual(
+      bancadaParticipacion(byParticipation.at(-1)!),
+    );
+    expect(bancadaDisensoPct(byDissent[0])).toBeGreaterThanOrEqual(
+      bancadaDisensoPct(byDissent.at(-1)!),
+    );
+    expect(source.map((party) => party.sigla)).toEqual(originalOrder);
   });
 });
