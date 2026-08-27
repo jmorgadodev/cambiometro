@@ -149,6 +149,7 @@ try {
       const fallback = staticRedirects.get(pathname);
       if (fallback) response = await gotoWithNetworkRetry(`${baseUrl}${fallback}`);
     }
+    console.log(`[BROWSER] ${route} -> ${response?.status() ?? "sin respuesta"}`);
     assert(response?.ok(), `${route} HTTP ${response?.status() ?? "sin respuesta"}`);
     if (route === "/autoridades" || route === "/funcionarios") await page.waitForURL("**/personas**", { timeout: 5000 }).catch(() => {});
     await page.waitForSelector("h1:visible", { state: "visible", timeout: 15000 }).catch(() => {});
@@ -427,6 +428,12 @@ try {
   assert.deepEqual(errors, [], `errores de consola: ${JSON.stringify(errors)}`);
   console.log("Browser integration checks passed: routes, evidence UI, responsive sizes, APIs and widget");
 } finally {
+  const cspViolations = consoleMessages
+    .filter(([, message]) => /Content Security Policy|violates the following Content Security Policy directive|static\.cloudflareinsights\.com|googletagmanager\.com/i.test(message))
+    .map(([type, message]) => `${type}: ${message}`);
+  if (cspViolations.length > 0) {
+    console.error(`[BROWSER] CSP violations observed (${cspViolations.length}):\n${cspViolations.join("\n")}`);
+  }
   await browserContext.close();
   await browser.close();
 }
