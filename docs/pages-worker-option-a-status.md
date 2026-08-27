@@ -46,6 +46,12 @@ La comprobación read-only del health productivo actual también devolvió
 guardia falla explícitamente con `API_TRANSFER_UNIVERSE_MISMATCH` hasta que el
 Worker/R2 productivos se actualicen y su checksum coincida.
 
+El código ya incluye la migración `0014_transferencias_19862.sql` y el paso
+`data:materialize:transfer` para poblar D1 en lotes con el checksum del release.
+La materialización sólo acepta el universo canónico de 59.361 filas y
+`$5.011.094.170.302`; no convierte el release productivo actual de 59.912 en
+un dato válido.
+
 La prueba de navegador read-only del dominio confirmó además que producción
 continúa sirviendo el stack anterior: `/votaciones-destacadas` devuelve 404 y
 la consola reporta violaciones CSP por scripts inline, Cloudflare Insights y

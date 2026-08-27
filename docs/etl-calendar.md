@@ -36,6 +36,12 @@ tras un ETL verde, que el release está visible tanto en el manifest estático
 como en el health del Worker; un ETL verde sin publicación queda rojo y genera
 una alerta.
 
+El ETL de Ley 19.862 publica primero el release canónico de 59.361 filas y
+`$5.011.094.170.302` en R2; después aplica la migración y materializa la misma
+proyección en `transferencias_19862` de D1 por lotes, registrando su checksum.
+Cualquier conteo o monto distinto deja el workflow rojo y evita que se
+publique una versión incompatible.
+
 El bloqueo conocido de `camara.cl` para runners de GitHub Actions sigue siendo
 un incidente operativo, no se oculta con un fallback incompleto. Si el origen
 oficial bloquea al runner, el ETL debe fallar y no publicar un lote parcial; la

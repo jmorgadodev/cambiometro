@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
-import { assertMinimumTransferRows } from "./etl/transfer-release-guard.mjs";
+import { assertCanonicalTransferRelease } from "./etl/transfer-release-guard.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const transferRoot = join(root, "public", "data", "transferencias");
@@ -18,7 +18,7 @@ const allowSample = process.env.ALLOW_STATIC_SAMPLE === "1";
 if (!Number.isInteger(manifest.totalRows) || (!allowSample && manifest.totalRows <= 1000)) fail(`full dataset required, got ${manifest.totalRows}`);
 if (!allowSample) {
   try {
-    assertMinimumTransferRows(manifest.totalRows);
+    assertCanonicalTransferRelease({ totalRows: manifest.totalRows, totalMontoClp: manifest.expected?.totalMontoClp });
   } catch (error) {
     fail(error.message);
   }

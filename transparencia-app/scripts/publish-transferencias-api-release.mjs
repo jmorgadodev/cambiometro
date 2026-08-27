@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawn } from "node:child_process";
 import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
-import { assertMinimumTransferRows } from "./etl/transfer-release-guard.mjs";
+import { assertCanonicalTransferRelease } from "./etl/transfer-release-guard.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const bucket = process.env.LEY19862_R2_BUCKET ?? "transparencia-public-data";
@@ -73,7 +73,7 @@ try {
   const release = await buildTransferenciasStatic({ source, output: staging, registeredThrough });
   if (!release) throw new Error("TRANSFER_API_RELEASE_EMPTY");
   const { manifest } = release;
-  assertMinimumTransferRows(manifest.totalRows);
+  assertCanonicalTransferRelease({ totalRows: manifest.totalRows, totalMontoClp: manifest.expected.totalMontoClp });
   const releasePrefix = `projections/transferencias-v1/releases/${manifest.checksumSha256}`;
   const apiManifest = {
     schemaVersion: 1,
