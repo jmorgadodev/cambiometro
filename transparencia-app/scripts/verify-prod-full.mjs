@@ -35,6 +35,7 @@ async function verifyThemePersistence(PROD_URL, requestHeaders) {
       await page.goto(`${PROD_URL}/?theme_probe=${theme}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
       await page.evaluate((value) => { localStorage.setItem("cambiometro-theme", value); }, theme);
       await page.reload({ waitUntil: "domcontentloaded", timeout: 30_000 });
+      await page.waitForFunction((value) => document.documentElement.dataset.theme === value, theme, { timeout: 5_000 });
       const values = await page.evaluate(() => {
         const style = getComputedStyle(document.documentElement);
         return [document.documentElement.dataset.theme, style.getPropertyValue("--bg").trim().toUpperCase(), style.getPropertyValue("--surface").trim().toUpperCase(), style.getPropertyValue("--text").trim().toUpperCase(), style.getPropertyValue("--accent").trim().toUpperCase()];
