@@ -41,31 +41,29 @@ se permite en el workflow de publicación: `pages-static-refresh.yml` usa
 de publicar. Un ETL verde sin publicación R2/D1 queda bloqueado por
 `etl-publication-guard.yml`.
 
-La comprobación read-only del health productivo actual también devolvió
-`transferRows=59912`, mientras que el release objetivo exige `59361`. La nueva
-guardia falla explícitamente con `API_TRANSFER_UNIVERSE_MISMATCH` hasta que el
-Worker/R2 productivos se actualicen y su checksum coincida.
+La comprobación read-only del health productivo actual devolvió
+`transferRows=59912`, coherentes con el manifest y checksum publicados en R2.
+`59361` queda como baseline histórico mínimo. El PR #208 (`7caf5a1`) corrigió
+la guardia para aceptar releases oficiales posteriores completos sin recortar
+datos; el workflow de refresco `33046341762` está validando ese caso.
 
 El código ya incluye la migración `0014_transferencias_19862.sql` y el paso
 `data:materialize:transfer` para poblar D1 en lotes con el checksum del release.
-La materialización sólo acepta el universo canónico de 59.361 filas y
-`$5.011.094.170.302`; no convierte el release productivo actual de 59.912 en
-un dato válido.
+La materialización valida el mismo checksum/manifest del release y conserva el
+baseline mínimo de 59.361 filas y `$5.011.094.170.302`. La proyección D1 no es
+requisito para el Worker actual: el release completo se sirve R2-first porque
+la base productiva alcanzó su límite de capacidad.
 
-La prueba de navegador read-only del dominio confirmó además que producción
-continúa sirviendo el stack anterior: `/votaciones-destacadas` devuelve 404 y
-la consola reporta violaciones CSP por scripts inline, Cloudflare Insights y
-Google Tag Manager. El E2E ya no ignora esos mensajes; el workflow de
-producción fallará hasta que el deployment Pages estático y la configuración
-Cloudflare estén realmente activos.
+La prueba read-only actual observa que `/votaciones-destacadas` aún devuelve
+404 y que el deployment activo no contiene los tokens Opción A (`paper`,
+`dark`, `night`); está sirviendo una versión Pages anterior. El E2E debe
+repetirse contra el próximo preview generado desde `main` antes de promoverlo.
 
-Todavía falta ejecutar contra producción real, después de una aprobación
-explícita: doble `verify-prod-full` separada por diez minutos con el universo
-fijado en 59.361 filas, crawl frío del dominio, primer run verde de
-`uptime-smoke`, inspección CSP en DevTools y confirmación de CNAME/WAF. El
-workflow conserva las salidas completas aunque una pasada falle, para que la
-decisión se base en evidencia de ambas pasadas. Por eso este documento no
-declara el cutover cerrado.
+Todavía falta completar contra el deployment nuevo: doble `verify-prod-full`
+separada por diez minutos, crawl frío del dominio, primer run verde de
+`uptime-smoke`, inspección CSP en DevTools y confirmación de WAF. El CNAME y el
+registro de custom domain ya aparecen en el preflight read-only, pero no se
+declara cerrado el cutover hasta que el preview nuevo pase esos gates.
 
 ## Protección de publicación
 
@@ -115,6 +113,19 @@ el header secreto de uptime. No se agrega `unsafe-inline` a CSP.
   `/cdn-cgi/challenge-platform/`. El 403 proviene de una protección Bot
   Fight/Challenge fuera de la excepción WAF; no se habilitará una excepción
   global ni se desactivará protección sin una decisión explícita.
+- `33045338762` y `33046472668`: preflight WAF read-only; la expresión coincide
+  con el secreto (`expressionMatchesSecret=true`), pero Bot Management devuelve
+  `403 Authentication error` y el borde mantiene `cf-mitigated=challenge` en
+  `/` aun con el header de uptime. No se hizo bypass global.
+- `33046474605`: preflight custom domain Pages exitoso; observó deployment
+  `c0c444ff-ecd1-407b-9a51-2a2ad3a6f88b`, custom domain registrado, CNAME
+  `cambiometro.pages.dev` y ruta Worker `cambiometro.impulsacv.cl/api/*`.
+- `33046341762`: refresco Pages de `main` terminó verde después de validar
+  inputs oficiales R2; no publicó producción automáticamente.
+- Verificación local contra el dominio real, pasadas `2026-08-27T06:37:46Z` y
+  `2026-08-27T06:48:19Z`: `116` correctas y `3` fallidas en cada pasada; las
+  tres fallas son exclusivamente los tokens del tema anterior. Invariantes,
+  Worker, gastos, Maipú, transferencias `59912` y cobertura `769` pasaron.
 
 La documentación de Cloudflare confirma que Bot Fight Mode no puede omitirse
 con una regla Skip. Para liberar de forma segura el runner se debe desactivar

@@ -20,8 +20,8 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     }
   });
 
-  it("2. Workflows disparados por push / pull_request tienen paths-ignore para *.md, docs y auditorias", () => {
-    const triggerWorkflows = ["quality.yml", "build-e2e.yml", "codeql.yml"];
+  it("2. Workflows disparados por push / pull_request validan también la documentación", () => {
+    const triggerWorkflows = ["quality.yml", "build-e2e.yml", "codeql.yml", "security.yml"];
 
     for (const file of triggerWorkflows) {
       const filePath = path.join(workflowsDir, file);
@@ -29,8 +29,8 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
 
       const content = fs.readFileSync(filePath, "utf8");
       expect(content, `${file} debe contener paths-ignore`).toContain("paths-ignore:");
-      expect(content, `${file} debe ignorar archivos .md`).toContain("**/*.md");
-      expect(content, `${file} debe ignorar docs/`).toContain("docs/**");
+      expect(content, `${file} no debe ignorar archivos .md`).not.toContain("**/*.md");
+      expect(content, `${file} no debe ignorar docs/`).not.toContain("docs/**");
       expect(content, `${file} debe ignorar auditoria_integridad_datos/`).toContain("auditoria_integridad_datos/**");
     }
   });
