@@ -107,6 +107,9 @@ for (const path of ["/", "/politico", "/partidos", "/cruces"]) {
     },
   }, null, 2));
   if (response.status >= 500 || /error code:\s*1102|worker threw exception/i.test(text)) throw new Error(`PUBLIC_EDGE_FAILED:${path}:${response.status}`);
+  if (response.status === 403 && (response.headers.get("cf-mitigated") === "challenge" || /cdn-cgi\/challenge-platform/i.test(text))) {
+    throw new Error(`PUBLIC_EDGE_CHALLENGE:${path}`);
+  }
   if (/unsafe-inline|unsafe-eval|nonce-/i.test(csp)) throw new Error(`CSP_WEAK_OR_DYNAMIC:${path}`);
   console.log(JSON.stringify({ path, status: response.status, cspStatic: true, bytes: text.length }));
 }
