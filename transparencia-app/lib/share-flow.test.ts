@@ -32,15 +32,15 @@ describe("Ficha móvil: compartir en X, nombre y tarjetas", () => {
   });
 
   describe("Fix 2: Botón Compartir con texto blanco de alto contraste", () => {
-    it("posee clase .share-btn--primary con color blanco #ffffff y font-weight 700", () => {
+    it("posee clase .share-btn--primary con el texto del token de contraste y font-weight 700", () => {
       expect(cssContent).toContain(".share-btn--primary");
-      expect(cssContent).toContain("color: #ffffff");
+      expect(cssContent).toContain("color: var(--on-accent)");
       expect(cssContent).toContain("font-weight: 700");
     });
 
-    it("asegura que el icono SVG herede el color blanco", () => {
+    it("asegura que el icono SVG herede el token de contraste", () => {
       expect(cssContent).toContain(".share-btn--primary svg");
-      expect(cssContent).toContain("stroke: #ffffff");
+      expect(cssContent).toContain("stroke: var(--on-accent)");
     });
 
     it("cumple con tap target mínimo de 44px", () => {

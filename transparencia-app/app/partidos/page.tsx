@@ -10,6 +10,7 @@ import RankingVotosChart from "@/components/partidos/RankingVotosChart";
 import PartidosRankingTable from "@/components/partidos/PartidosRankingTable";
 import TopGastosBancadas, { type TopEquipoDiputado } from "@/components/partidos/TopGastosBancadas";
 import ShareButton from "@/components/ShareButton";
+import { readPublishedCohesion } from "@/lib/cohesion-bancadas";
 
 export const metadata: Metadata = {
   title: "Partidos Políticos y Bancadas 2026-2030 — El Cambiómetro",
@@ -30,6 +31,7 @@ export const metadata: Metadata = {
 
 export default async function PartidosListPage() {
   const partidos = await getAllPartidosSummary();
+  const cohesion = readPublishedCohesion();
 
   // Partidos no independientes para KPIs
   const partidosInstitucionales = partidos.filter((p) => !p.esIndependiente);
@@ -252,6 +254,12 @@ export default async function PartidosListPage() {
           {/* Top Gastos y Asignaciones */}
           <TopGastosBancadas topEquiposDiputados={topEquiposDiputados} partidos={partidos} />
         </div>
+
+        <section className="card" aria-labelledby="cohesion-title" style={{ padding: "1.5rem" }}>
+          <h2 id="cohesion-title" style={{ fontSize: "1.25rem", margin: "0 0 0.35rem", color: "var(--text-primary)" }}>Bancadas más unidas</h2>
+          <p style={{ color: "var(--text-muted)", fontSize: "0.8rem", margin: "0 0 1rem" }}>Cuota promedio de la opción mayoritaria por votación, sobre votos efectivos. Ausencias y “No Vota” quedan fuera.</p>
+          {cohesion.length > 0 ? <div style={{ display: "grid", gap: "0.65rem" }}>{cohesion.slice(0, 10).map((row) => <div key={`${row.sigla}-${row.camara}`} style={{ display: "grid", gridTemplateColumns: "110px 1fr 70px", gap: "0.75rem", alignItems: "center" }}><span style={{ color: "var(--text-primary)", fontWeight: 700 }}>{row.sigla} <small style={{ color: "var(--text-muted)", fontWeight: 400 }}>{row.camara}</small></span><span role="img" aria-label={`${row.cohesion_pct}% de cohesión`} style={{ height: 8, background: "var(--surface-2)", borderRadius: 999, overflow: "hidden" }}><span aria-hidden="true" style={{ display: "block", width: `${row.cohesion_pct}%`, height: "100%", background: "var(--accent)", borderRadius: 999 }} /></span><strong style={{ color: "var(--accent)", textAlign: "right" }}>{row.cohesion_pct}%</strong></div>)}</div> : <p style={{ color: "var(--text-muted)" }}>La cohesión se publica al ejecutar el build estático.</p>}
+        </section>
 
         {/* ─── TABLA RANKING GENERAL DE PARTIDOS ────────────────────────────────────────── */}
         <div>

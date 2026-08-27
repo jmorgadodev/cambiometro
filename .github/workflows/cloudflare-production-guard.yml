@@ -1,0 +1,55 @@
+name: Cloudflare production guard (preflight by default)
+
+on:
+  workflow_dispatch:
+    inputs:
+      apply:
+        description: "Aplicar la regla WAF y, opcionalmente, desactivar RUM"
+        type: boolean
+        required: true
+        default: false
+      disable_rum:
+        description: "Desactivar la inyección Web Analytics/RUM (requiere CF_RUM_SITE_ID)"
+        type: boolean
+        required: true
+        default: false
+      confirmation:
+        description: "Escribir CAMBIOMETRO_CONFIRM_CUTOVER sólo para aplicar"
+        type: string
+        required: false
+        default: ""
+
+concurrency:
+  group: cloudflare-production-guard
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  guard:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - name: Ejecutar preflight o aplicación protegida
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_CUTOVER_TOKEN }}
+          UPTIME_TOKEN: ${{ secrets.CAMBIOMETRO_UPTIME_TOKEN }}
+          CF_WAF_RULE_ID: ${{ vars.CF_WAF_RULE_ID }}
+          CF_RUM_SITE_ID: ${{ vars.CF_RUM_SITE_ID }}
+          CAMBIOMETRO_CONFIRM_CUTOVER: ${{ inputs.confirmation }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          test -n "$UPTIME_TOKEN"
+          args=""
+          if [ "${{ inputs.apply }}" = "true" ]; then args="$args --apply"; fi
+          if [ "${{ inputs.disable_rum }}" = "true" ]; then args="$args --disable-rum"; fi
+          node scripts/cloudflare-production-guard.mjs $args

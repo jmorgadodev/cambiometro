@@ -1,0 +1,90 @@
+[
+  {
+    "votacion_id": "camara-vot-89749",
+    "boletin": "18210-06",
+    "camara": "Cámara",
+    "fecha": "2026-08-12",
+    "titulo": "Votación registrada del Boletín N° 18210-06",
+    "resumen": "La Cámara registró 133 votos a favor, ninguno en contra y una abstención. El padrón nominal de la sesión informa resultado aprobado.",
+    "resultado": "Aprobado",
+    "tags": ["legislación", "seguimiento"],
+    "fuente_url": "https://opendata.camara.cl/camaradiputados/WServices/WSLegislativo.asmx/retornarVotacionDetalle?prmVotacionId=89749"
+  },
+  {
+    "votacion_id": "camara-vot-89750",
+    "boletin": "16777-07",
+    "camara": "Cámara",
+    "fecha": "2026-08-12",
+    "titulo": "Votación registrada del Boletín N° 16777-07",
+    "resumen": "La Cámara registró 134 votos a favor y no registró votos en contra ni abstenciones. El padrón nominal de la sesión informa resultado aprobado.",
+    "resultado": "Aprobado",
+    "tags": ["legislación", "seguimiento"],
+    "fuente_url": "https://opendata.camara.cl/camaradiputados/WServices/WSLegislativo.asmx/retornarVotacionDetalle?prmVotacionId=89750"
+  },
+  {
+    "votacion_id": "senado-vot-10985",
+    "boletin": "16777-07",
+    "camara": "Senado",
+    "fecha": "2026-03-24",
+    "titulo": "Votación del Senado sobre el Boletín N° 16777-07",
+    "resumen": "El Senado registró 28 votos a favor y no registró votos en contra ni abstenciones. El padrón nominal de la sesión informa resultado aprobado.",
+    "resultado": "Aprobado",
+    "tags": ["legislación", "Senado"],
+    "fuente_url": "https://web-back.senado.cl/api/votes?id_sesion=10131"
+  },
+  {
+    "votacion_id": "camara-vot-89633",
+    "boletin": "18389-04",
+    "camara": "Cámara",
+    "fecha": "2026-08-05",
+    "titulo": "Votación registrada del Boletín N° 18389-04",
+    "resumen": "La Cámara registró 64 votos a favor, 75 en contra y una abstención. El padrón nominal de la sesión informa resultado rechazado.",
+    "resultado": "Rechazado",
+    "tags": ["legislación", "seguimiento"],
+    "fuente_url": "https://opendata.camara.cl/camaradiputados/WServices/WSLegislativo.asmx/retornarVotacionDetalle?prmVotacionId=89633"
+  },
+  {
+    "votacion_id": "camara-vot-89867",
+    "boletin": "17324-33",
+    "camara": "Cámara",
+    "fecha": "2026-08-19",
+    "titulo": "Votación registrada del Boletín N° 17324-33",
+    "resumen": "La Cámara registró 62 votos a favor, 18 en contra y 42 abstenciones. El padrón nominal de la sesión informa resultado aprobado.",
+    "resultado": "Aprobado",
+    "tags": ["presupuesto", "seguimiento"],
+    "fuente_url": "https://opendata.camara.cl/camaradiputados/WServices/WSLegislativo.asmx/retornarVotacionDetalle?prmVotacionId=89867"
+  },
+  {
+    "votacion_id": "camara-vot-89844",
+    "boletin": "12786-12",
+    "camara": "Cámara",
+    "fecha": "2026-08-18",
+    "titulo": "Votación registrada del Boletín N° 12786-12",
+    "resumen": "La Cámara registró 54 votos a favor, 65 en contra y siete abstenciones. El padrón nominal de la sesión informa resultado rechazado.",
+    "resultado": "Rechazado",
+    "tags": ["legislación", "seguimiento"],
+    "fuente_url": "https://opendata.camara.cl/camaradiputados/WServices/WSLegislativo.asmx/retornarVotacionDetalle?prmVotacionId=89844"
+  },
+  {
+    "votacion_id": "senado-vot-11274",
+    "boletin": "18279-10",
+    "camara": "Senado",
+    "fecha": "2026-08-19",
+    "titulo": "Acuerdo internacional sobre actividades remuneradas",
+    "resumen": "El Senado registró 17 votos a favor y no registró votos en contra ni abstenciones. El padrón nominal de la sesión informa resultado aprobado.",
+    "resultado": "Aprobado",
+    "tags": ["tratado", "Senado"],
+    "fuente_url": "https://web-back.senado.cl/api/votes?id_sesion=10257"
+  },
+  {
+    "votacion_id": "senado-vot-11264",
+    "boletin": "18302-11",
+    "camara": "Senado",
+    "fecha": "2026-08-19",
+    "titulo": "Acceso a alimentos libres de gluten",
+    "resumen": "El Senado registró 25 votos a favor y no registró votos en contra ni abstenciones. El padrón nominal de la sesión informa resultado aprobado.",
+    "resultado": "Aprobado",
+    "tags": ["salud", "Senado"],
+    "fuente_url": "https://web-back.senado.cl/api/votes?id_sesion=10257"
+  }
+]

@@ -100,4 +100,14 @@ jobs:
             exit 1
           fi
           npm run verify:browser
+          npm run verify:themes
           npm run verify:security
+
+      - name: Upload theme evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: theme-screenshots-${{ github.sha }}
+          path: transparencia-app/artifacts/themes
+          if-no-files-found: warn
+          retention-days: 14

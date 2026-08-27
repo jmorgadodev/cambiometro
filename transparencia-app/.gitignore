@@ -72,9 +72,12 @@ data/lake/projections/v1/*.json
 /data/etl/status.json
 /data/entidades-canonica*.json
 /data/generated/
+/data/cohesion-bancadas.json
+/public/data/
 /public/data/transferencias/
 /public/data/search-index.json
 /public/data/static-site-manifest.json
+/public/data/cohesion-bancadas.json
 /public/data/funcionarios/
 /data/static-site-release/
 /.static-site-release-manifest*

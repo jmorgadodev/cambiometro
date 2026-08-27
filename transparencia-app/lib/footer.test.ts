@@ -67,8 +67,8 @@ describe("Footer compacto y pulido móvil", () => {
     expect(cssContent).toContain("grid-column: 1 / -1");
   });
 
-  it("botón de búsqueda en home tiene texto blanco legible con alto contraste", () => {
+  it("botón de búsqueda en home usa el token de contraste", () => {
     expect(cssContent).toContain(".home-query button");
-    expect(cssContent).toContain("color: #ffffff");
+    expect(cssContent).toContain("color: var(--on-accent)");
   });
 });

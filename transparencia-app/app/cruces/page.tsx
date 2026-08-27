@@ -147,12 +147,12 @@ export default async function CrossesPage() {
           </p>
           <ul style={{ margin: 0, paddingLeft: "1.2rem", display: "grid", gap: "0.4rem", fontSize: "0.8rem" }}>
             <li>
-              <a href={cgrReference.url_oficial} target="_blank" rel="noreferrer" style={{ color: "var(--accent)" }}>
+              <a href={cgrReference.url_oficial} target="_blank" rel="noreferrer" style={{ color: "var(--accent)", textDecoration: "underline", textUnderlineOffset: "0.15em" }}>
                 CGR Informe {cgrReference.numero_informe}
               </a>{" "}· {cgrReference.entidad}
             </li>
             <li>
-              <a href={infolobbyReference.url_audiencia} target="_blank" rel="noreferrer" style={{ color: "var(--accent)" }}>
+              <a href={infolobbyReference.url_audiencia} target="_blank" rel="noreferrer" style={{ color: "var(--accent)", textDecoration: "underline", textUnderlineOffset: "0.15em" }}>
                 InfoLobby {infolobbyReference.id.split("-")[1]}
               </a>{" "}· {infolobbyReference.sujeto_pasivo}
             </li>

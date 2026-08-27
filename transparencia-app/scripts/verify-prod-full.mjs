@@ -11,6 +11,43 @@ function assertCheck(moduleName, checkName, condition, extraInfo = "") {
   }
 }
 
+function normalizeHex(value) {
+  const hex = String(value).toUpperCase();
+  return /^#[0-9A-F]{3}$/.test(hex) ? `#${[...hex.slice(1)].map((digit) => digit + digit).join("")}` : hex;
+}
+
+async function verifyThemePersistence(PROD_URL) {
+  if (process.env.VERIFY_THEME_BROWSER !== "1") {
+    console.log("  ℹ️ [THEME] navegador omitido; use VERIFY_THEME_BROWSER=1 para la verificación interactiva.");
+    return;
+  }
+  try {
+    const { chromium } = await import("playwright");
+    const browser = await chromium.launch({ headless: true });
+    const expected = {
+      paper: ["#F6F5F2", "#FFFFFF", "#101828", "#0E7C66"],
+      dark: ["#151719", "#1D2023", "#E8E6E1", "#34B39A"],
+      night: ["#0A0B0B", "#121313", "#D6D3CC", "#2FA08C"],
+    };
+    for (const [theme, tokens] of Object.entries(expected)) {
+      const context = await browser.newContext();
+      const page = await context.newPage();
+      await page.goto(`${PROD_URL}/?theme_probe=${theme}`, { waitUntil: "networkidle", timeout: 30_000 });
+      await page.evaluate((value) => { localStorage.setItem("cambiometro-theme", value); }, theme);
+      await page.reload({ waitUntil: "networkidle", timeout: 30_000 });
+      const values = await page.evaluate(() => {
+        const style = getComputedStyle(document.documentElement);
+        return [document.documentElement.dataset.theme, style.getPropertyValue("--bg").trim().toUpperCase(), style.getPropertyValue("--surface").trim().toUpperCase(), style.getPropertyValue("--text").trim().toUpperCase(), style.getPropertyValue("--accent").trim().toUpperCase()];
+      });
+      assertCheck("THEME", `${theme}: localStorage y tokens aplicados`, values[0] === theme && values.slice(1).every((value, index) => normalizeHex(value) === normalizeHex(tokens[index])), JSON.stringify(values));
+      await context.close();
+    }
+    await browser.close();
+  } catch (error) {
+    assertCheck("THEME", "Playwright pudo comprobar persistencia y tokens", false, error.message);
+  }
+}
+
 async function verifyProdFull() {
   console.log("================================================================================");
   console.log("  VERIFICACIÓN EN VIVO INTEGRAL DE PRODUCCIÓN — EL CAMBIÓMETRO");
@@ -19,6 +56,8 @@ async function verifyProdFull() {
   console.log("================================================================================\n");
 
   const headers = { "User-Agent": "Cambiometro-Full-Verifier/1.0", "Cache-Control": "no-cache" };
+  const uptimeToken = process.env.UPTIME_TOKEN?.trim();
+  if (uptimeToken) headers["X-Cambiometro-Uptime-Token"] = uptimeToken;
   const API_URL = process.env.API_URL || PROD_URL;
   const expectedTransferRowsOverride = process.env.EXPECTED_TRANSFER_ROWS ? Number(process.env.EXPECTED_TRANSFER_ROWS) : null;
   const expectedTransferAmountOverride = process.env.EXPECTED_TRANSFER_AMOUNT ? Number(process.env.EXPECTED_TRANSFER_AMOUNT) : null;
@@ -37,6 +76,7 @@ async function verifyProdFull() {
   const homeRes = await fetch(`${PROD_URL}/`, { headers });
   assertCheck("HOME", "HTTP Status 200", homeRes.status === 200);
   const homeHtml = (await homeRes.text()).replace(/<!--.*?-->/g, "");
+  await verifyThemePersistence(PROD_URL);
 
   const staticManifestRes = await fetch(`${PROD_URL}/data/static-site-manifest.json`, { headers });
   assertCheck("HOME", "Manifiesto estático HTTP 200", staticManifestRes.status === 200);
