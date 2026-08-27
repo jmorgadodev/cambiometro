@@ -148,3 +148,93 @@ Referencias conocidas antes de este cierre: Pages
 `0cd3adf2-864f-4e99-bc32-7ec5c02b8519` y Worker
 `3ea6312f-6f6e-4185-9ee7-0cb2891e17c0`. No se presentan como IDs de una nueva
 publicación.
+
+## Estado operativo comprobado — 27-ago-2026
+
+Esta sección es la referencia vigente y reemplaza cualquier cifra anterior de
+esta auditoría que indique que el cierre productivo ya está aprobado.
+
+### Código y candidato Pages
+
+- `main` está limpio y sincronizado en `f49995e`; no se trabaja desde
+  `cambiometro-audit`.
+- El refresco Pages `33054333038` terminó `success` sobre `8d5f2be`; generó el
+  artefacto `pages-static-8d5f2be03149e2352427219e4d770c56251eb8f0`, ID
+  `9639677162`, de `198.100.519` bytes. El job de promoción productiva quedó
+  omitido.
+- El preview verificable es `https://codex-static-1c8bd09.cambiometro.pages.dev`
+  (deployment corto `f917c34f`; run `33050990340`; artefacto `9638212276`).
+  Browser, chunks, invariantes, crawl frío y temas pasaron en ese candidato.
+
+### Datos y verificaciones del candidato
+
+- Transferencias: `59.912` filas, `1.199` páginas, monto total
+  `$5.020.688.584.211`, checksum
+  `2144da2a41d67a8fef109273242b72fb8c321ce2eb45c81b0cbcf1252ab43838`.
+  `59.361` y `$5.011.094.170.302` permanecen como baseline histórico mínimo;
+  no se recorta un release oficial más nuevo.
+- Gastos rendidos: `16.275` filas Cámara y `6.513` Senado. La ficha de Carlos
+  Bianchi usa el registro correcto `dip-154`; un mes pendiente en cero no
+  oculta su historial acumulado.
+- El crawl del preview cubrió `5.015/5.015` rutas: `200` en todas, cero 404,
+  5xx y 1102; máximo `555 ms`, promedio `253 ms`, y las rutas principales
+  bajo `700 ms`.
+- Temas: `12/12` capturas y axe WCAG AA sin violaciones en las cuatro vistas.
+  El navegador estático pasó sin spinner permanente, overlay, errores de
+  consola ni recursos fallidos.
+
+### Producción real: doble pasada bloqueada por Cloudflare
+
+La corrida oficial `33054809647` ejecutó ambas pasadas y guardó el artefacto
+`production-verification-33054809647` (ID `9639503790`). No es evidencia verde:
+
+- Pasada 1: `2026-08-27T08:37:54.515Z`, `100` correctas y `17` fallidas.
+- Pasada 2: `2026-08-27T08:48:49.999Z`, `100` correctas y `17` fallidas.
+- En ambas, el runner recibió `403` con `cf-mitigated: challenge` en `/`; el
+  crawl abortó con `SITEMAP_HTTP_403`. Las invariantes de fichas, gastos,
+  transferencias, Worker y cobertura que sí alcanzaron a ejecutarse pasaron.
+- El crawl no puede declararse como cero-fallos de producción mientras el
+  runner no pueda leer la raíz y el sitemap.
+
+Desde una red externa la raíz responde `200` y el API responde `200`, pero eso
+no reemplaza el gate de Actions: el uptime reciente sigue rojo por el mismo
+challenge en `/`. La regla Skip WAF existente sí coincide con el secreto
+(`expressionMatchesSecret=true`), pero no omite Bot Fight Mode. No se debe
+abrir globalmente el API ni agregar `unsafe-inline` a la CSP. La acción pendiente
+es una excepción de producto anti-bots para el hostname exacto y el tráfico
+controlado de verificación, o migrar a una modalidad de protección que admita
+Skip; después hay que repetir smoke, crawl y las dos pasadas.
+
+Comprobación pública adicional de esta fecha:
+
+| URL | Resultado |
+|---|---|
+| `/` | `200`, pero no es el candidato nuevo |
+| `/votaciones-destacadas/` | `404` en el deployment público actual |
+| `/api/v1/health` | `200`, Worker activo |
+| `/data/transferencias/manifest.json` | `200`, release `59.912` |
+| Preview `/votaciones-destacadas/` | `200` |
+
+Por tanto, no existe un Pages deployment ID nuevo promovido ni un Worker
+version ID nuevo de este cierre. Se mantienen como referencias de rollback los
+IDs conocidos-buenos:
+
+```bash
+npm run pages:rollback -- 0cd3adf2-864f-4e99-bc32-7ec5c02b8519
+npx wrangler rollback 3ea6312f-6f6e-4185-9ee7-0cb2891e17c0 \
+  --name cambiometro-public-api
+```
+
+Los logs completos de la corrida están en el artefacto de Actions y, durante
+la auditoría local, en:
+
+```text
+C:\Users\jorge\AppData\Local\Temp\cambiometro-prod-evidence-33054809647\browser-production.log
+C:\Users\jorge\AppData\Local\Temp\cambiometro-prod-evidence-33054809647\cold-crawl-output.log
+C:\Users\jorge\AppData\Local\Temp\cambiometro-prod-evidence-33054809647\verify-prod-double.log
+```
+
+No se declara cerrado el cutover hasta que Cloudflare permita esas lecturas
+desde Actions y pasen nuevamente todos los gates. Mientras tanto, el preview
+queda disponible para la siguiente promoción controlada y el repositorio no
+rastrea `out/`, `.next/`, `public/data/`, logs ni artefactos generados.
