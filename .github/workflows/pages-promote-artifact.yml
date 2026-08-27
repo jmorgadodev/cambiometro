@@ -96,8 +96,12 @@ jobs:
       - name: Confirmar landing publicada
         env:
           PROD_URL: https://cambiometro.impulsacv.cl
+          UPTIME_TOKEN: ${{ secrets.CAMBIOMETRO_UPTIME_TOKEN }}
         run: |
-          curl --fail --silent --show-error --location "$PROD_URL/" | grep -F "La información pública no debería perderse"
+          test -n "$UPTIME_TOKEN"
+          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 \
+            --header "X-Cambiometro-Uptime-Token: $UPTIME_TOKEN" \
+            "$PROD_URL/" | grep -F "La información pública"
 
       - uses: actions/upload-artifact@v4
         with:
