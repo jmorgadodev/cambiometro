@@ -260,3 +260,22 @@ no se relajó.
 El resultado no cambia el criterio: no promover una nueva versión hasta que
 el hostname público sirva el candidato correcto, la consola quede sin
 violaciones y Actions pueda leer raíz y sitemap sin `403 challenge`.
+
+## Refresh Pages completo posterior a las guardias — 27-ago-2026
+
+El run `33058745683` terminó `success` sobre `main` en `7567b40`. Completó,
+en orden, la hidratación CPLT, las entradas estáticas, el fallback municipal,
+el universo completo de transferencias con checksum, el build estático, el
+censo, el release de gastos, el universo de fichas, el typecheck y el límite
+del Worker.
+
+- Artefacto Pages: `pages-static-7567b401ec41963e11859b800f8183e1589277cc`.
+- Artifact ID: `9641585448`.
+- Tamaño: `198.112.958` bytes.
+- Digest: `sha256:4783a4ea04abc802d21115aa3ba561216c9f3aa5767f9ded5d21b3aed81f81a5`.
+- Los pasos `Publicar preview Pages aislado`, `Publicar Pages producción` y
+  `Registrar deployment Pages` quedaron omitidos; no hubo promoción accidental.
+
+Este artefacto es el candidato más reciente. Aún requiere preview/crawl y los
+gates del hostname real después de corregir el challenge Cloudflare; el éxito
+del build no equivale a producción cerrada.
