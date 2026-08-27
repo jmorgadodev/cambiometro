@@ -1,6 +1,11 @@
 name: Pages estático - refresco automático verificable
 
 on:
+  push:
+    branches: [main]
+    paths:
+      - "transparencia-app/**"
+      - ".github/workflows/pages-static-refresh.yml"
   workflow_run:
     workflows:
       - "ETL Mensual - Ley 19.862 Transferencias del Estado"
@@ -41,7 +46,7 @@ permissions:
 
 jobs:
   build-verify-publish:
-    if: (github.event_name == 'workflow_dispatch' && inputs.record_pages_deployment != true) || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+    if: (github.event_name == 'workflow_dispatch' && inputs.record_pages_deployment != true) || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
@@ -144,7 +149,7 @@ jobs:
         run: npx wrangler pages deploy out --project-name cambiometro --branch "${{ inputs.preview_branch }}" --commit-hash "${GITHUB_SHA:0:40}" --commit-message "Pages preview ${GITHUB_SHA}"
 
       - name: Publicar Pages producción después de todos los gates
-        if: (github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main') || inputs.publish_pages == true
+        if: (github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main') || (github.event_name == 'push' && github.ref == 'refs/heads/main') || inputs.publish_pages == true
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -155,7 +160,7 @@ jobs:
         run: npx wrangler pages deploy out --project-name cambiometro --branch main --commit-hash "$GITHUB_SHA" --commit-message "Static refresh ${GITHUB_SHA}"
 
       - name: Registrar deployment Pages productivo y rollback
-        if: ${{ success() && ((github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main') || inputs.publish_pages == true) }}
+        if: ${{ success() && ((github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main') || (github.event_name == 'push' && github.ref == 'refs/heads/main') || inputs.publish_pages == true) }}
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -182,7 +187,7 @@ jobs:
           '
 
       - name: Guardar metadata del deployment Pages
-        if: ${{ success() && ((github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main') || inputs.publish_pages == true) }}
+        if: ${{ success() && ((github.event_name == 'workflow_run' && github.event.workflow_run.head_branch == 'main') || (github.event_name == 'push' && github.ref == 'refs/heads/main') || inputs.publish_pages == true) }}
         uses: actions/upload-artifact@v4
         with:
           name: pages-production-deployment-${{ github.sha }}
