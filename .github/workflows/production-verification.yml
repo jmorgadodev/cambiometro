@@ -46,9 +46,10 @@ jobs:
           VERIFY_API_URL: ${{ vars.CAMBIOMETRO_API_URL || 'https://cambiometro.impulsacv.cl' }}
           UPTIME_TOKEN: ${{ secrets.CAMBIOMETRO_UPTIME_TOKEN }}
           VERIFY_THEME_BROWSER: "1"
-          EXPECTED_TRANSFER_ROWS: "59361"
-          EXPECTED_TRANSFER_AMOUNT: "5011094170302"
-          EXPECTED_TRANSFER_PAGES: "1188"
+          # La verificación usa el manifest publicado como release efectivo.
+          # Los guards de build mantienen 59.361 y $5.011.094.170.302 como
+          # mínimos históricos; producción puede servir un release posterior
+          # completo sin que el verificador lo marque como inconsistente.
           VERIFY_SECOND_DELAY_MS: ${{ inputs.second_pass_delay_ms }}
           COLD_CRAWL_CONCURRENCY: ${{ inputs.cold_crawl_concurrency }}
           COLD_CRAWL_OUTPUT: artifacts/cold-crawl-production.json
