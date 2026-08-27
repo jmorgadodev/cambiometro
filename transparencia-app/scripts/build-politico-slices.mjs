@@ -28,18 +28,22 @@ function normalizeSearchText(text) {
     .trim();
 }
 
-function nameSequenceMatches(seedName, otherName) {
+// A fuzzy match is useful for the official Senate feed because it varies
+// punctuation and surname order. It must nevertheless produce one owner per
+// record: filtering every politician independently can assign a shared
+// surname (for example, two politicians named Bianchi) to multiple slices.
+function nameMatchScore(seedName, otherName) {
   const normA = normalizeSearchText(seedName);
   const normB = normalizeSearchText(otherName);
-  if (!normA || !normB) return false;
-  if (normA === normB || normA.includes(normB) || normB.includes(normA)) return true;
+  if (!normA || !normB) return 0;
+  if (normA === normB) return 10000;
+  if (normA.includes(normB) || normB.includes(normA)) return 8000 - Math.abs(normA.length - normB.length);
 
   const tokensA = normA.split(" ").filter((t) => t.length > 2);
   const tokensB = normB.split(" ").filter((t) => t.length > 2);
-  if (tokensA.length < 2 || tokensB.length < 2) return false;
-
+  if (tokensA.length < 2 || tokensB.length < 2) return 0;
   const matches = tokensA.filter((t) => tokensB.includes(t));
-  return matches.length >= 2;
+  return matches.length >= 2 ? matches.length * 100 - Math.abs(tokensA.length - tokensB.length) : 0;
 }
 
 function esProcedimental(vFila) {
@@ -78,6 +82,21 @@ export function buildAllPoliticoSlices() {
     ...(staticExpenses.gastos_camara ? { gastos_camara: staticExpenses.gastos_camara } : {}),
     ...(staticExpenses.gastos_senado ? { gastos_senado: staticExpenses.gastos_senado } : {}),
   };
+
+  const senateExpensesByPolitico = new Map();
+  for (const record of expenseSources.gastos_senado ?? []) {
+    const candidates = POLITICOS_SEED
+      .filter((politico) => politico.cargo === "Senador")
+      .map((politico) => ({ politico, score: nameMatchScore(politico.nombre_completo, record.nombre ?? "") }))
+      .filter(({ score }) => score > 0)
+      .sort((left, right) => right.score - left.score || left.politico.id.localeCompare(right.politico.id));
+    const best = candidates[0]?.politico;
+    if (best) {
+      const assigned = senateExpensesByPolitico.get(best.id) ?? [];
+      assigned.push(record);
+      senateExpensesByPolitico.set(best.id, assigned);
+    }
+  }
 
   const paPath = resolve("data/personal-apoyo.json");
   const personalApoyoData = existsSync(paPath) ? JSON.parse(readFileSync(paPath, "utf8")) : null;
@@ -276,8 +295,7 @@ export function buildAllPoliticoSlices() {
         .filter((record) => String(record.diputado_id) === diputadoId)
         .sort((a, b) => (b.fecha ?? "").localeCompare(a.fecha ?? ""));
     } else if (pol.cargo === "Senador") {
-      gastos = (expenseSources.gastos_senado ?? [])
-        .filter((record) => Boolean(record.nombre) && nameSequenceMatches(pol.nombre_completo, record.nombre ?? ""))
+      gastos = (senateExpensesByPolitico.get(pol.id) ?? [])
         .sort((a, b) => (b.fecha ?? "").localeCompare(a.fecha ?? ""));
     }
 
