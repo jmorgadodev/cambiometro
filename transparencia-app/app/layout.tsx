@@ -119,6 +119,14 @@ function LinkedInIcon({ size = 15 }: { size?: number }) {
   );
 }
 
+function TikTokIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M16.7 3c.3 2.1 1.5 3.4 3.3 3.5v3.1c-1.7.2-3.1-.4-4.2-1.3v6.2c0 4.2-3.1 6.5-6.4 6.5A5.2 5.2 0 0 1 4 15.8c0-3.1 2.5-5.5 5.6-5.5.3 0 .7 0 1 .1v3.2a2.7 2.7 0 0 0-1-.2 2.4 2.4 0 1 0 2.5 2.4V3h4.6Z" />
+    </svg>
+  );
+}
+
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -251,6 +259,19 @@ function Footer({ updatedAt, totalRecords }: { updatedAt: string | null; totalRe
             >
               <XIcon size={13} />
               𝕏 @cambiometro
+            </a>
+            <span className="site-footer__dot" aria-hidden="true">
+              ·
+            </span>
+            <a
+              href="https://www.tiktok.com/@cambiometro"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="TikTok @cambiometro"
+              style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
+            >
+              <TikTokIcon size={13} />
+              TikTok @cambiometro
             </a>
             <span className="site-footer__dot" aria-hidden="true">
               ·

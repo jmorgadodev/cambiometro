@@ -43,7 +43,7 @@ describe("Footer compacto y pulido móvil", () => {
     expect(cssContent).toContain("padding-block: 4px");
   });
 
-  it("barra final legal contiene © 2026, Creado por Jorge Morgado, ImpulsaCV ↗, iconos SVG de Instagram, X y LinkedIn", () => {
+  it("barra final legal contiene © 2026, autoría, ImpulsaCV y enlaces de RRSS", () => {
     expect(layoutContent).toContain("© 2026 El Cambiómetro · Información pública verificada");
     expect(layoutContent).toContain("Creado por");
     expect(layoutContent).toContain("Jorge Morgado");
@@ -51,10 +51,12 @@ describe("Footer compacto y pulido móvil", () => {
     expect(layoutContent).toContain("LinkedInIcon");
     expect(layoutContent).toContain("InstagramIcon");
     expect(layoutContent).toContain("XIcon");
+    expect(layoutContent).toContain("TikTokIcon");
     expect(layoutContent).toContain("ImpulsaCV");
     expect(layoutContent).toContain("https://impulsacv.cl");
     expect(layoutContent).toContain("https://www.instagram.com/cambiometro/");
     expect(layoutContent).toContain("https://x.com/cambiometro");
+    expect(layoutContent).toContain("https://www.tiktok.com/@cambiometro");
   });
 
   it("desktop (>=1024px) cuenta con grid compacto de 3 columnas (brand + 2 nav)", () => {

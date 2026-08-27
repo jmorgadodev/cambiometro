@@ -105,6 +105,7 @@ async function verifyProdFull() {
   assertCheck("HOME", "Footer contiene icono SVG de LinkedIn", homeHtml.includes("<svg") && homeHtml.includes("LinkedIn"));
   assertCheck("HOME", "Footer contiene icono SVG de Instagram", homeHtml.includes("<svg") && homeHtml.includes("Instagram"));
   assertCheck("HOME", "Footer contiene icono SVG de X", homeHtml.includes("<svg") && (homeHtml.includes("𝕏") || homeHtml.includes("Twitter")));
+  assertCheck("HOME", "Footer contiene enlace de TikTok @cambiometro", homeHtml.includes("https://www.tiktok.com/@cambiometro") && homeHtml.includes("TikTok"));
   assertCheck("HOME", "Footer contiene 'Última consolidación'", homeHtml.includes("Última consolidación") || homeHtml.includes("Corte"));
 
   // ─── MÓDULO 2: FICHAS E INVARIANTES ────────────────────────────────────────
