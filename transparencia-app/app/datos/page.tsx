@@ -23,6 +23,16 @@ const ANALYSIS_LINES = [
     caveat: "Las fuentes diarias atrasadas se marcan como tales; un registro faltante no se interpreta como ausencia.",
   },
   {
+    id: "gastos-operacionales",
+    eyebrow: "Universo completo",
+    title: "Gastos operacionales rendidos",
+    description: "Rendiciones de Cámara y Senado por período, autoridad, ítem y monto, incluyendo registros históricos que no pertenecen al directorio parlamentario vigente.",
+    sources: ["gastos_camara", "gastos_senado"],
+    href: "/gastos-operacionales",
+    linkLabel: "Consultar todas las rendiciones",
+    caveat: "Los nombres históricos se conservan como fueron publicados y no se atribuyen a autoridades actuales.",
+  },
+  {
     id: "dinero",
     eyebrow: "Disponible ahora",
     title: "Transferencias y compras públicas",

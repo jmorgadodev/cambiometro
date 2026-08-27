@@ -73,6 +73,7 @@ const FOOTER_GROUPS = [
     links: [
       ["Cruces de datos", "/cruces"],
       ["Transferencias Ley 19.862", "/transferencias"],
+      ["Gastos Operacionales Rendidos", "/gastos-operacionales"],
       ["Rankings", "/rankings"],
       ["Comparador", "/comparar"],
       ["Movimientos", "/movimientos"],

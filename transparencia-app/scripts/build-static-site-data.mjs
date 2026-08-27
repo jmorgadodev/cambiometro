@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { writeChunkedJson } from "./static-site-data.mjs";
 import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
 import { chunkJsonRows, listUnavailableMunicipalities } from "./static-payroll.mjs";
+import { readExpenseSubset } from "./expense-release.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const readJson = (file) => readFile(join(root, file), "utf8").then(JSON.parse);
@@ -43,13 +44,63 @@ function summarizeTransferSample(rows, generatedAt) {
 const generatedDir = join(root, "data", "generated");
 const publicDataDir = join(root, "public", "data");
 const transferDir = join(publicDataDir, "transferencias");
+const expenseDir = join(publicDataDir, "gastos-operacionales");
 const publicFuncionariosDir = join(publicDataDir, "funcionarios");
+const allowSample = process.env.ALLOW_STATIC_SAMPLE === "1";
 const checksum = (value) => crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
 await mkdir(join(generatedDir, "transferencias"), { recursive: true });
 await mkdir(publicDataDir, { recursive: true });
 
+// Publicar el universo completo de rendiciones operacionales en chunks. Las
+// fichas actuales consumen sus propios slices; este índice conserva además
+// las rendiciones históricas de autoridades que ya no pertenecen al
+// directorio vigente, sin inventar una atribución.
+const expenseRows = ["gastos_camara", "gastos_senado"].flatMap((sourceId) => {
+  const subset = readExpenseSubset(root, sourceId);
+  return (subset?.records ?? []).map((record) => ({ ...record, sourceId }));
+}).sort((left, right) => String(right.fecha ?? "").localeCompare(String(left.fecha ?? "")) || right.monto_clp - left.monto_clp || left.id.localeCompare(right.id));
+if (!expenseRows.length && !allowSample) throw new Error("STATIC_EXPENSE_RELEASE_EMPTY");
+await rm(expenseDir, { recursive: true, force: true });
+await mkdir(expenseDir, { recursive: true });
+const expensePageSize = 50;
+const expensePages = [];
+for (let offset = 0; offset < expenseRows.length; offset += expensePageSize) {
+  const page = Math.floor(offset / expensePageSize) + 1;
+  const filename = `p-${String(page).padStart(4, "0")}.json`;
+  const content = `${JSON.stringify(expenseRows.slice(offset, offset + expensePageSize))}\n`;
+  await writeFile(join(expenseDir, filename), content);
+  expensePages.push({ page, path: `/data/gastos-operacionales/${filename}`, count: Math.min(expensePageSize, expenseRows.length - offset), sha256: crypto.createHash("sha256").update(content).digest("hex") });
+}
+const expenseSearchRows = expenseRows.map((row, index) => ({
+  i: index,
+  p: Math.floor(index / expensePageSize) + 1,
+  n: row.nombre ?? null,
+  y: row.periodo,
+  d: row.fecha,
+  t: row.item,
+  m: row.monto_clp,
+  s: row.sourceId,
+}));
+const expenseSearchContent = `${JSON.stringify(expenseSearchRows)}\n`;
+await writeFile(join(expenseDir, "search-index.json"), expenseSearchContent);
+const expenseManifest = {
+  schemaVersion: 1,
+  dataset: "gastos-operacionales-rendidos",
+  generatedAt: new Date().toISOString(),
+  totalRows: expenseRows.length,
+  pageSize: expensePageSize,
+  totalPages: expensePages.length,
+  pages: expensePages,
+  searchIndex: { path: "/data/gastos-operacionales/search-index.json", count: expenseSearchRows.length, sha256: crypto.createHash("sha256").update(expenseSearchContent).digest("hex") },
+  checksumSha256: crypto.createHash("sha256").update(JSON.stringify(expenseRows)).digest("hex"),
+  expected: {
+    totalMontoClp: expenseRows.reduce((sum, row) => sum + row.monto_clp, 0),
+    bySource: Object.fromEntries(["gastos_camara", "gastos_senado"].map((sourceId) => [sourceId, expenseRows.filter((row) => row.sourceId === sourceId).length])),
+  },
+};
+await writeFile(join(expenseDir, "manifest.json"), `${JSON.stringify(expenseManifest, null, 2)}\n`);
+
 const fullSource = join(root, "data", "lake", "partitions", "ley-19862");
-const allowSample = process.env.ALLOW_STATIC_SAMPLE === "1";
 if (!existsSync(fullSource) && !allowSample) {
   throw new Error("STATIC_DATA_FULL_TRANSFER_SOURCE_MISSING: hydrate the complete Ley 19.862 lake before building Pages");
 }
