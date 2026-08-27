@@ -44,7 +44,7 @@ if (!rule?.id) throw new Error("WAF_UPTIME_RULE_NOT_FOUND: define CF_WAF_RULE_ID
 if (!uptimeToken) throw new Error("UPTIME_TOKEN_MISSING");
 const expression = `(http.host eq "${hostname}" and (http.request.uri.path eq "/" or starts_with(http.request.uri.path, "/api/")) and http.request.headers["x-cambiometro-uptime-token"][0] eq "${uptimeToken.replaceAll('\\', "\\\\").replaceAll('"', '\\"')}")`;
 const publicRule = { id: rule.id, description: rule.description || "Cambiometro uptime limited access", action: rule.action, enabled: rule.enabled, expression: rule.expression };
-console.log(JSON.stringify({ mode: apply ? "apply" : "preflight", zone: zoneName, hostname, rule: publicRule, desired: { expression: expression.replace(uptimeToken, "<secret>") } }, null, 2));
+console.log(JSON.stringify({ mode: apply ? "apply" : "preflight", zone: zoneName, hostname, rule: publicRule, desired: { expression: expression.replace(uptimeToken, "<secret>") }, expressionMatchesSecret: rule.expression === expression }, null, 2));
 
 if (apply) {
   await cf(`/zones/${zone.id}/rulesets/${entryPoint.id}/rules/${rule.id}`, {
