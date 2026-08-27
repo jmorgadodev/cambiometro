@@ -5,6 +5,16 @@ const baseUrl = (process.env.PROD_URL || "https://cambiometro.impulsacv.cl").rep
 const concurrency = Number(process.env.COLD_CRAWL_CONCURRENCY || 32);
 const timeoutMs = Number(process.env.COLD_CRAWL_TIMEOUT_MS || 10000);
 const outputPath = resolve(process.env.COLD_CRAWL_OUTPUT || "artifacts/cold-crawl-latest.json");
+const uptimeToken = process.env.UPTIME_TOKEN?.trim() || "";
+
+function requestHeaders() {
+  return {
+    "User-Agent": "Cambiometro-Cold-Crawl/1.0",
+    "Cache-Control": "no-cache, no-store",
+    Pragma: "no-cache",
+    ...(uptimeToken ? { "X-Cambiometro-Uptime-Token": uptimeToken } : {}),
+  };
+}
 
 function parseSitemap(xml) {
   return [...xml.matchAll(/<loc>\s*([^<]+?)\s*<\/loc>/gi)]
@@ -29,11 +39,7 @@ async function checkUrl(url, index) {
   let body = "";
   try {
     response = await fetch(coldUrl, {
-      headers: {
-        "User-Agent": "Cambiometro-Cold-Crawl/1.0",
-        "Cache-Control": "no-cache, no-store",
-        Pragma: "no-cache",
-      },
+      headers: requestHeaders(),
       redirect: "follow",
       signal: AbortSignal.timeout(timeoutMs),
     });
@@ -64,7 +70,7 @@ async function crawl(urls) {
 }
 
 const sitemapResponse = await fetch(`${baseUrl}/sitemap.xml`, {
-  headers: { "User-Agent": "Cambiometro-Cold-Crawl/1.0", "Cache-Control": "no-cache, no-store" },
+  headers: requestHeaders(),
   signal: AbortSignal.timeout(timeoutMs),
 });
 if (!sitemapResponse.ok) throw new Error(`SITEMAP_HTTP_${sitemapResponse.status}`);
