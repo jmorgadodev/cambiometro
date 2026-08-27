@@ -264,3 +264,49 @@ transparencia-app/artifacts/cold-crawl-latest.json
 El checkout mantiene `git status --short` limpio: no se agregan `out/`,
 `.next/`, `public/data/`, chunks, slices ni logs de verificación al
 repositorio.
+
+### Publicación de interfaz — 27-ago-2026
+
+Este release contiene únicamente cambios de interfaz y análisis derivado de
+datos ya publicados. No ejecuta ETL, no cambia D1/R2 y no promueve el Worker.
+
+- `main`: `5ce7448b46fe7ce66e65c36f714c25cfbd3ea746` (PR #228).
+- Pages deployment: `a5b5008a-9ecf-465a-9699-df65303ce8af`.
+- Pages URL: `https://a5b5008a.cambiometro.pages.dev`.
+- Worker vigente: `3ea6312f-6f6e-4185-9ee7-0cb2891e17c0`.
+- El dominio `https://cambiometro.impulsacv.cl` entrega la nueva UI con HTTP
+  `200` en `/`, `/votaciones-destacadas/` y `/partidos/pdg/`.
+- La ficha de votación ahora muestra participación efectiva, opción
+  mayoritaria, alineamiento de bancadas, composición de votos y acceso al
+  padrón nominal.
+- PDG: `Lilian Betancurt Delgado` se muestra como diputada; el partido no tiene
+  senadores en el padrón vigente y la página lo informa explícitamente.
+- Producción mantiene el snapshot existente de transferencias: `59.912`
+  filas, `1.199` páginas y `$5.020.688.584.211`; el API devuelve el mismo
+  total. No se sustituyó por el snapshot histórico de `59.361` filas.
+
+Rollback exacto de esta publicación:
+
+```bash
+npm run pages:rollback -- a5b5008a-9ecf-465a-9699-df65303ce8af
+npx wrangler rollback 3ea6312f-6f6e-4185-9ee7-0cb2891e17c0 \
+  --name cambiometro-public-api
+```
+
+La verificación oficial de producción se ejecutó en Actions mediante el run
+`33080620233`, con doble pasada separada por 10 minutos. Ambas pasadas
+registraron `100` checks aprobados y `17` fallidos, todos derivados del mismo
+`403` de Cloudflare sobre `/`; fichas, gastos, Maipú, transferencias, API,
+fuentes, cobertura, `769` votaciones y las muestras estáticas pasaron. El
+crawl frío no pudo comenzar porque el sitemap recibió el mismo `403`.
+
+El smoke `33081921420` confirmó `9/10` rutas verdes: `/`, y sólo `/`, quedó
+en `403`; `/politico`, `/municipalidades`, `/servicios-publicos`, `/entidades`,
+Kaiser, `/transferencias`, `/cruces`, `/api/v1/health` y la búsqueda API
+respondieron `200`. El workflow creó el issue automático #230.
+
+Mientras Cloudflare siga desafiando al runner o inyectando JavaScript/GTM
+incompatible con la CSP, el cierre operativo permanece pendiente: la CSP de
+la aplicación sigue estricta y no se debe añadir `unsafe-inline`. Los logs y
+el JSON completo del crawl sólo deben registrarse como artefactos ignorados,
+no como archivos versionados.
