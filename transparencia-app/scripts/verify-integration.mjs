@@ -170,6 +170,33 @@ try {
 
   await checkInternalLinks(internalLinks);
 
+  // Verificación del análisis interactivo de una votación destacada. Esta
+  // guardia protege el valor principal de la página: no basta con que el
+  // listado cargue; el usuario debe poder abrir las tres capas del detalle,
+  // comparar bancadas y encontrar una persona en el padrón nominal.
+  await gotoWithNetworkRetry(`${baseUrl}/votaciones-destacadas/`);
+  const analysisButton = page.getByRole("button", { name: "Abrir análisis" }).first();
+  await analysisButton.waitFor({ state: "visible", timeout: 15_000 });
+  await analysisButton.click();
+  const featuredDialog = page.locator(".featured-vote-dialog:visible");
+  await featuredDialog.waitFor({ state: "visible", timeout: 5_000 });
+  assert.equal(await featuredDialog.locator("[role=tab]").count(), 3, "Detalle destacado debe ofrecer tres capas");
+  assert.equal(await featuredDialog.getByText("Mapa de decisión", { exact: true }).count(), 1, "Detalle destacado debe mostrar el mapa de decisión");
+  assert.equal(await featuredDialog.getByText(/Bancada más cohesionada/i, { exact: true }).count(), 1, "Detalle destacado debe mostrar lecturas de bancada");
+
+  await featuredDialog.getByRole("tab", { name: "Bancadas" }).click();
+  assert((await featuredDialog.locator(".featured-vote__party-row").count()) >= 2, "Detalle destacado debe mostrar bancadas comparables");
+  const comparisonInputs = featuredDialog.locator("input[type=checkbox]");
+  assert((await comparisonInputs.count()) >= 3, "Detalle destacado debe permitir seleccionar bancadas");
+  for (let index = 0; index < 3; index += 1) await comparisonInputs.nth(index).check();
+  assert.equal(await featuredDialog.locator(".featured-vote__comparison-card").count(), 3, "Detalle destacado debe comparar hasta tres bancadas");
+
+  await featuredDialog.getByRole("tab", { name: "Padrón nominal" }).click();
+  const nominalSearch = featuredDialog.locator('input[placeholder="Nombre o bancada"]');
+  await nominalSearch.fill("Lilian Betancurt");
+  assert.equal(await featuredDialog.getByText("Lilian Betancurt Delgado", { exact: true }).count(), 1, "El padrón nominal debe encontrar a Lilian Betancurt Delgado");
+  await featuredDialog.getByRole("button", { name: "Cerrar análisis" }).click();
+
   await gotoWithNetworkRetry(baseUrl);
   await page.getByRole("heading", { name: /La información pública no debería perderse|Transparencia, votaciones y gastos p.blicos|Sigue las decisiones p.blicas/ }).first().waitFor({ state: "visible", timeout: 15_000 });
   await page.getByRole("link", { name: /Explorar parlamentarios/ }).first().waitFor({ state: "visible", timeout: 15_000 });
