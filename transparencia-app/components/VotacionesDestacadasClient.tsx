@@ -23,6 +23,20 @@ function formatDate(value: string) {
   return new Intl.DateTimeFormat("es-CL", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${value}T12:00:00Z`));
 }
 
+function optionLabel(value: "Afirmativo" | "En Contra" | "Abstención" | null): string {
+  if (value === "Afirmativo") return "A favor";
+  if (value === "En Contra") return "En contra";
+  if (value === "Abstención") return "Abstención";
+  return "Sin mayoría";
+}
+
+function optionColor(value: "Afirmativo" | "En Contra" | "Abstención" | null): string {
+  if (value === "Afirmativo") return "var(--success)";
+  if (value === "En Contra") return "var(--danger)";
+  if (value === "Abstención") return "var(--warning)";
+  return "var(--text-3)";
+}
+
 function resultStyle(result: VotacionDestacada["resultado"]) {
   if (result === "Aprobado") return { color: "var(--success)", background: "color-mix(in srgb, var(--success) 12%, transparent)" };
   if (result === "Rechazado") return { color: "var(--danger)", background: "color-mix(in srgb, var(--danger) 12%, transparent)" };
@@ -40,8 +54,30 @@ function VoteBar({ label, value, total, color }: { label: string; value: number;
   return <div className="featured-vote__bar-row"><div className="featured-vote__bar-label"><span>{label}</span><strong>{formatNumber(value)}</strong></div><div className="featured-vote__bar-track" aria-hidden="true"><span style={{ width: `${percentage}%`, background: color }} /></div><small>{percentage.toFixed(1).replace(".", ",")} %</small></div>;
 }
 
-function PartyRow({ party }: { party: VotacionBancadaDetalle }) {
-  return <div className="featured-vote__party-row"><div><strong>{party.sigla}</strong><span>{party.nombre} · {party.miembros} miembros en el padrón</span></div><div className="featured-vote__party-stat"><strong>{party.cuotaMayoria === null ? "—" : `${party.cuotaMayoria.toFixed(1).replace(".", ",")} %`}</strong><span>{formatNumber(party.efectivos)} efectivos</span></div></div>;
+function PartyRow({ party, onOpenNominal }: { party: VotacionBancadaDetalle; onOpenNominal: (sigla: string) => void }) {
+  return <div className="featured-vote__party-row">
+    <div className="featured-vote__party-main">
+      <div className="featured-vote__party-name"><strong>{party.sigla}</strong><span>{party.nombre} · {party.miembros} miembros en el padrón</span></div>
+      <div className="featured-vote__party-votes" aria-label={`Composición de votos de ${party.sigla}`}>
+        <span style={{ color: "var(--success)" }}>A favor {formatNumber(party.afirmativo)}</span>
+        <span style={{ color: "var(--danger)" }}>En contra {formatNumber(party.enContra)}</span>
+        <span style={{ color: "var(--warning)" }}>Abstención {formatNumber(party.abstencion)}</span>
+      </div>
+      <small className="featured-vote__party-insight">
+        {party.cuotaMayoria === null
+          ? "Sin votos efectivos en esta sesión"
+          : party.disenso === 0
+            ? "Votación unánime entre sus votos efectivos"
+            : `${formatNumber(party.disenso)} voto${party.disenso === 1 ? "" : "s"} distinto${party.disenso === 1 ? "" : "s"} de su mayoría`}
+      </small>
+    </div>
+    <div className="featured-vote__party-stat">
+      <strong>{party.cuotaMayoria === null ? "—" : `${party.cuotaMayoria.toFixed(1).replace(".", ",")} %`}</strong>
+      <span>{formatNumber(party.efectivos)} efectivos</span>
+      <span>{optionLabel(party.opcionMayoritaria)}</span>
+      <button type="button" className="featured-vote__party-link" onClick={() => onOpenNominal(party.sigla)}>Ver padrón →</button>
+    </div>
+  </div>;
 }
 
 function NominalRow({ vote }: { vote: VotacionNominalDetalle }) {
@@ -71,7 +107,12 @@ function VoteDetailDialog({ detail, onClose }: { detail: VotacionDestacadaDetall
     return matchesOption && matchesParty && haystack.includes(query.trim().toLocaleLowerCase("es"));
   }), [detail.nominales, option, party, query]);
   const totalEffective = detail.totales.efectivos;
-  const majority = detail.totales.afirmativo >= detail.totales.enContra && detail.totales.afirmativo >= detail.totales.abstencion ? "A favor" : detail.totales.enContra >= detail.totales.abstencion ? "En contra" : "Abstención";
+  const mostDividedParty = useMemo(() => detail.bancadas
+    .filter((partyEntry) => partyEntry.efectivos > 0 && partyEntry.disenso > 0)
+    .sort((a, b) => (b.disenso / b.efectivos) - (a.disenso / a.efectivos))[0], [detail.bancadas]);
+  const alignedPct = detail.analisis.bancadasConMuestra > 0
+    ? Math.round((detail.analisis.bancadasAlineadas / detail.analisis.bancadasConMuestra) * 1000) / 10
+    : 0;
 
   return <div className="featured-vote-dialog" role="dialog" aria-modal="true" aria-labelledby="featured-vote-detail-title" onMouseDown={(event) => { if (event.target === event.currentTarget) onClose(); }}>
     <section className="featured-vote-dialog__panel">
@@ -79,8 +120,25 @@ function VoteDetailDialog({ detail, onClose }: { detail: VotacionDestacadaDetall
       <div className="featured-vote__metrics" aria-label="Resumen cuantitativo de la votación"><div><strong>{formatNumber(detail.totales.padron)}</strong><span>padrón de la sala</span></div><div><strong>{formatNumber(detail.totales.efectivos)}</strong><span>votos efectivos</span></div><div><strong>{formatNumber(detail.totales.margenMayoria)}</strong><span>votos de margen</span></div><div><strong><ResultBadge result={detail.resultadoRecalculado} /></strong><span>resultado recalculado</span></div></div>
       <nav className="featured-vote-dialog__tabs" aria-label="Capas del análisis">{([["resumen", "Lectura rápida"], ["bancadas", "Bancadas"], ["nominal", "Padrón nominal"]] as const).map(([value, label]) => <button key={value} type="button" role="tab" aria-selected={tab === value} className={tab === value ? "is-active" : ""} onClick={() => setTab(value)}>{label}</button>)}</nav>
       <div className="featured-vote-dialog__body">
-        {tab === "resumen" && <div className="featured-vote__analysis-grid"><div><h3>Qué ocurrió</h3><p className="featured-vote__lead">{detail.resumen}</p><p>El padrón produce un resultado <strong>{detail.resultadoRecalculado.toLowerCase()}</strong>: la opción mayoritaria fue <strong>{majority}</strong>, con un margen de {formatNumber(detail.totales.margenMayoria)} voto{detail.totales.margenMayoria === 1 ? "" : "s"} sobre la siguiente alternativa.</p>{detail.descripcionOficial && <details><summary>Descripción oficial completa</summary><p>{detail.descripcionOficial}</p></details>}</div><div className="featured-vote__bars"><h3>Votos efectivos</h3><VoteBar label="A favor" value={detail.totales.afirmativo} total={totalEffective} color="var(--success)" /><VoteBar label="En contra" value={detail.totales.enContra} total={totalEffective} color="var(--danger)" /><VoteBar label="Abstención" value={detail.totales.abstencion} total={totalEffective} color="var(--warning)" /><VoteBar label="No vota / sin emisión" value={detail.totales.noVota} total={detail.totales.padron} color="var(--text-3)" /></div></div>}
-        {tab === "bancadas" && <div><div className="featured-vote-dialog__section-heading"><div><h3>Cómo votaron las bancadas</h3><p>Cuota de la opción mayoritaria sobre sus votos efectivos en esta sesión.</p></div><span>{detail.bancadas.length} colectividades</span></div><div className="featured-vote__party-list">{detail.bancadas.map((partyEntry) => <PartyRow key={partyEntry.partido_id} party={partyEntry} />)}</div></div>}
+        {tab === "resumen" && <div>
+          <div className="featured-vote__signal-grid" aria-label="Señales de lectura de la votación">
+            <div className="featured-vote__signal"><span>Participación efectiva</span><strong>{detail.analisis.participacionPct.toFixed(1).replace(".", ",")} %</strong><small>{formatNumber(detail.totales.efectivos)} de {formatNumber(detail.totales.padron)} integrantes emitieron una opción</small></div>
+            <div className="featured-vote__signal"><span>Opción mayoritaria</span><strong style={{ color: optionColor(detail.analisis.opcionMayoritaria) }}>{optionLabel(detail.analisis.opcionMayoritaria)}</strong><small>{detail.analisis.mayoriaPct.toFixed(1).replace(".", ",")} % de los votos efectivos</small></div>
+            <div className="featured-vote__signal"><span>Alineamiento de bancadas</span><strong>{alignedPct.toFixed(1).replace(".", ",")} %</strong><small>{detail.analisis.bancadasAlineadas} de {detail.analisis.bancadasConMuestra} con la mayoría de sala</small></div>
+          </div>
+          <div className="featured-vote__analysis-grid">
+            <div>
+              <h3>Qué ocurrió</h3>
+              <p className="featured-vote__lead">{detail.resumen}</p>
+              <p>El padrón produce un resultado <strong>{detail.resultadoRecalculado.toLowerCase()}</strong>: la opción mayoritaria fue <strong>{optionLabel(detail.analisis.opcionMayoritaria)}</strong>, con un margen de {formatNumber(detail.totales.margenMayoria)} voto{detail.totales.margenMayoria === 1 ? "" : "s"} sobre la siguiente alternativa.</p>
+              {mostDividedParty && <p className="featured-vote__callout"><strong>Lectura de bancada:</strong> {mostDividedParty.sigla} fue la más dividida: {mostDividedParty.disenso} de sus {mostDividedParty.efectivos} votos efectivos no siguieron su opción mayoritaria.</p>}
+              {detail.tramite && <p><strong>Tramitación:</strong> {detail.tramite}</p>}
+              {detail.descripcionOficial && <details><summary>Descripción oficial completa</summary><p>{detail.descripcionOficial}</p></details>}
+            </div>
+            <div className="featured-vote__bars"><h3>Votos efectivos</h3><VoteBar label="A favor" value={detail.totales.afirmativo} total={totalEffective} color="var(--success)" /><VoteBar label="En contra" value={detail.totales.enContra} total={totalEffective} color="var(--danger)" /><VoteBar label="Abstención" value={detail.totales.abstencion} total={totalEffective} color="var(--warning)" /><VoteBar label="No vota / sin emisión" value={detail.totales.noVota} total={detail.totales.padron} color="var(--text-3)" /></div>
+          </div>
+        </div>}
+        {tab === "bancadas" && <div><div className="featured-vote-dialog__section-heading"><div><h3>Cómo votaron las bancadas</h3><p>Cuota de la opción mayoritaria sobre sus votos efectivos en esta sesión. Abre el padrón de una bancada para revisar cada nombre.</p></div><span>{detail.bancadas.length} colectividades</span></div><div className="featured-vote__party-list">{detail.bancadas.map((partyEntry) => <PartyRow key={partyEntry.partido_id} party={partyEntry} onOpenNominal={(sigla) => { setParty(sigla); setTab("nominal"); }} />)}</div></div>}
         {tab === "nominal" && <div><div className="featured-vote-dialog__section-heading"><div><h3>Padrón nominal</h3><p>Busca una persona, filtra por bancada u opción y abre su ficha.</p></div><span>{formatNumber(filteredNominal.length)} resultados</span></div><div className="featured-vote__filters"><label>Buscar<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nombre o bancada" /></label><label>Opción<select value={option} onChange={(event) => setOption(event.target.value as "Todas" | OpcionVotacion)}><option>Todas</option>{OPTION_LABELS.map((entry) => <option key={entry.key}>{entry.key}</option>)}</select></label><label>Bancada<select value={party} onChange={(event) => setParty(event.target.value)}>{parties.map((value) => <option key={value}>{value}</option>)}</select></label></div><ul className="featured-vote__nominal-list">{filteredNominal.map((vote) => <NominalRow key={vote.politico_id} vote={vote} />)}</ul>{filteredNominal.length === 0 && <p className="featured-vote__empty" role="status">No hay integrantes que coincidan con estos filtros.</p>}</div>}
       </div>
       <footer className="featured-vote-dialog__footer"><span>Fuente: padrón nominal consolidado por El Cambiómetro.</span><a href={detail.fuente_url} target="_blank" rel="noreferrer">Abrir registro oficial ↗</a></footer>

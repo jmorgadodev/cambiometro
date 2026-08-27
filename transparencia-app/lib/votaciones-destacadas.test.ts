@@ -20,4 +20,18 @@ describe("votaciones destacadas", () => {
     );
     expect(detail?.bancadas.some((bancada) => bancada.sigla === "PDG")).toBe(true);
   });
+
+  it("expone señales interpretables sin confundir padrón, participación y mayoría", () => {
+    const detail = getVotacionDestacadaDetalle("camara-vot-89749");
+
+    expect(detail?.analisis.participacionPct).toBe(
+      Math.round((detail!.totales.efectivos / detail!.totales.padron) * 1000) / 10,
+    );
+    expect(detail?.analisis.opcionMayoritaria).toBe("Afirmativo");
+    expect(detail?.analisis.mayoriaPct).toBe(
+      Math.round((detail!.totales.afirmativo / detail!.totales.efectivos) * 1000) / 10,
+    );
+    expect(detail?.analisis.bancadasConMuestra).toBeGreaterThan(0);
+    expect(detail?.bancadas.every((bancada) => bancada.opcionMayoritaria === null || bancada.disenso >= 0)).toBe(true);
+  });
 });
