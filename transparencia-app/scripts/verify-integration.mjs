@@ -298,8 +298,14 @@ try {
   await page.setViewportSize({ width: 320, height: 800 });
   await gotoWithNetworkRetry(baseUrl);
   const visibleMobileDrawer = page.locator("#mobile-drawer:visible");
+  const mobileMenuButton = page.getByRole("button", { name: /abrir menú de secciones/i });
   const openMobileDrawer = async () => {
-    await page.getByRole("button", { name: "Secciones" }).click();
+    await page.waitForFunction(() => window.innerWidth < 1024);
+    await mobileMenuButton.waitFor({ state: "visible", timeout: 5000 });
+    await mobileMenuButton.click();
+    await mobileMenuButton.getAttribute("aria-expanded").then((expanded) => {
+      assert.equal(expanded, "true", "El botón de secciones debe quedar expandido tras el click");
+    });
     await visibleMobileDrawer.waitFor({ state: "visible", timeout: 5000 });
   };
   try {
