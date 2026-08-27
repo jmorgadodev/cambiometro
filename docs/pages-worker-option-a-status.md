@@ -279,3 +279,36 @@ del Worker.
 Este artefacto es el candidato más reciente. Aún requiere preview/crawl y los
 gates del hostname real después de corregir el challenge Cloudflare; el éxito
 del build no equivale a producción cerrada.
+
+## Comprobación final posterior — 27-ago-2026 10:06 UTC
+
+Se repitió el preflight read-only de Cloudflare en Actions:
+`33061574989` ([ejecución](https://github.com/jmorgadodev/cambiometro/actions/runs/33061574989)).
+Falló de forma segura con `PUBLIC_EDGE_CHALLENGE:/`. La regla
+`28645f6a4f3e40eb8f51836bb32d7614` continúa habilitada, con expresión exacta
+para `cambiometro.impulsacv.cl`, `/` o `/api/*` y el secreto real de uptime
+(`expressionMatchesSecret=true`), pero Bot Management devuelve
+`403 Authentication error` y el borde responde `403` con
+`cf-mitigated: challenge`. No se modificó WAF, DNS, Pages ni el Worker.
+
+Comprobaciones públicas del mismo momento: `/` `200` (712 ms),
+`/api/v1/health` `200` (991 ms), `/sitemap.xml` `200` (324 ms) y
+`/votaciones-destacadas/` `404` (277 ms). La última ruta sí existe en `main` y
+responde `200` en el preview Pages; el `404` confirma que el dominio público
+todavía sirve el deployment Pages anterior.
+
+La ejecución local de `npm run pages:build` en un checkout sin hidratar falló
+antes de `next build` con `STATIC_EXPENSE_RELEASE_EMPTY`, porque no existen
+localmente `data/lake-subsets/gastos-camara.subset.json` ni
+`gastos-senado.subset.json`. Es el comportamiento esperado para un checkout
+sin los artefactos privados de R2: `pages-static-refresh.yml` los hidrata con
+`data:hydrate:static --required --required-all` antes de construir y no permite
+`ALLOW_STATIC_SAMPLE=1` para publicar. El fallo no produjo cambios rastreados
+ni agregó datos generados al repositorio.
+
+Guardias repetidas localmente después de la revisión: calendario ETL `11/11`,
+votaciones destacadas `8/8` y Worker `135.119` bytes frente al límite de
+`1.000.000`. El cierre productivo continúa bloqueado exclusivamente por el
+challenge anti-bots, el deployment Pages antiguo y la CSP inyectada que ya fue
+observada en el navegador público. No se debe promover ni cambiar el CNAME
+hasta resolver esos tres puntos y repetir las dos pasadas de producción.
