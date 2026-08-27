@@ -382,3 +382,54 @@ El smoke `33086705923` volvió a confirmar `9/10`: `/` `403` desde el runner
 de GitHub; los otros nueve endpoints pasaron, incluido `/api/v1/health` y la
 búsqueda de Kaiser. Se abrió el issue automático #232. El workflow conserva
 el cron `*/5 * * * *`.
+
+### Publicación de interfaz — `9728be4` / 27-ago-2026
+
+Este release publica únicamente la mejora visual e interactiva del detalle de
+`/votaciones-destacadas/`. La data, los ETL, D1, R2 y el Worker no cambiaron.
+El workflow reutilizó el snapshot validado/cacheado y terminó correctamente en
+`7m28s`.
+
+- PR: [#236](https://github.com/jmorgadodev/cambiometro/pull/236), checks CI verdes.
+- Workflow Pages: `33090235172`, resultado `success`.
+- Pages deployment ID: `d3974c8a-36c3-4c81-80de-345d4345eaaf`.
+- Pages URL: `https://d3974c8a.cambiometro.pages.dev`.
+- Worker vigente: `3ea6312f-6f6e-4185-9ee7-0cb2891e17c0` (sin cambios).
+
+El detalle productivo ahora muestra mapa de decisiones, indicadores de
+participación/cohesión/disenso, ordenamiento de bancadas, comparación de hasta
+tres colectividades y padrón nominal con búsqueda. La prueba de navegador
+confirmó 18 bancadas, tres selecciones comparables y el registro de `Lilian
+Betancurt Delgado`. `/partidos/pdg/` confirma `14 diputados y 0 senadores` y
+conserva el historial de votos de Lilian.
+
+Rollback exacto de esta publicación:
+
+```bash
+npm run pages:rollback -- d3974c8a-36c3-4c81-80de-345d4345eaaf
+npx wrangler rollback 3ea6312f-6f6e-4185-9ee7-0cb2891e17c0 \
+  --name cambiometro-public-api
+```
+
+La comprobación directa posterior obtuvo `200` en `/`,
+`/votaciones-destacadas/`, `/partidos/pdg/`, `/api/v1/health` y el manifest de
+transferencias. La producción mantiene `59.912` filas, `1.199` páginas y
+`$5.020.688.584.211`; no se ejecutó ningún ETL.
+
+El smoke posterior `33092012558` volvió a quedar en `9/10`: `/politico`,
+`/municipalidades`, `/servicios-publicos`, `/entidades`, Kaiser,
+`/transferencias`, `/cruces`, `/api/v1/health` y la búsqueda API dieron `200`.
+Sólo `/` recibió `403` del runner de GitHub y se abrió el issue automático
+[#237](https://github.com/jmorgadodev/cambiometro/issues/237). Desde una
+conexión directa al dominio, `/` respondió `200`.
+
+La evidencia del navegador se conserva como artefacto local ignorado por Git:
+
+```text
+transparencia-app/artifacts/votaciones-detalle-comparador-production-20260827.png
+```
+
+La consola del navegador sigue registrando únicamente la inyección externa de
+Cloudflare/GTM bloqueada por la CSP estricta (`script-src 'self'
+https://challenges.cloudflare.com`). No se añadió `unsafe-inline`; el cierre
+completo de CSP/WAF requiere corregir esa configuración de infraestructura.
