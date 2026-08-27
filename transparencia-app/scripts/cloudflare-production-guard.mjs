@@ -27,6 +27,23 @@ async function cf(path, options = {}) {
   return body.result;
 }
 
+async function resolveRumSiteId() {
+  const configured = process.env.CF_RUM_SITE_ID?.trim();
+  if (configured) return configured;
+  const sites = await cf(`/accounts/${accountId}/rum/site_info/list?per_page=100`);
+  const candidates = (Array.isArray(sites) ? sites : []).filter((site) => {
+    const rules = Array.isArray(site.rules) ? site.rules : [];
+    return rules.some((rule) => rule.host === hostname || rule.zone_tag === zone.id)
+      || site.ruleset?.zone_tag === zone.id;
+  });
+  if (candidates.length !== 1) {
+    throw new Error(`CF_RUM_SITE_ID_NOT_UNIQUE_FOR_HOSTNAME:${hostname}:${candidates.length}`);
+  }
+  const siteId = candidates[0].site_tag ?? candidates[0].id;
+  if (!siteId) throw new Error(`CF_RUM_SITE_ID_MISSING_FOR_HOSTNAME:${hostname}`);
+  return siteId;
+}
+
 const zones = await cf(`/zones?name=${encodeURIComponent(zoneName)}&status=active&per_page=50`);
 const zone = zones.find((candidate) => candidate.name === zoneName);
 if (!zone?.id) throw new Error(`CLOUDFLARE_ZONE_NOT_FOUND:${zoneName}`);
@@ -89,8 +106,7 @@ if (apply) {
 }
 
 if (disableRum) {
-  const rumSiteId = process.env.CF_RUM_SITE_ID?.trim();
-  if (!rumSiteId) throw new Error("CF_RUM_SITE_ID_MISSING_FOR_DISABLE_RUM");
+  const rumSiteId = await resolveRumSiteId();
   await cf(`/accounts/${accountId}/rum/site_info/${rumSiteId}`, {
     method: "PUT",
     body: JSON.stringify({ auto_install: false, enabled: false, zone_tag: zone.id }),
