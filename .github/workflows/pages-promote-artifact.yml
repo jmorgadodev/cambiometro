@@ -52,9 +52,16 @@ jobs:
           gh run download "$SOURCE_RUN_ID" --repo "$GITHUB_REPOSITORY" --name "pages-static-${source_sha}" --dir transparencia-app/out
           test -s transparencia-app/out/index.html
 
-      - name: Verificar artefacto antes de promover
+      - name: Verificar archivos del artefacto antes de promover
         working-directory: transparencia-app
-        run: node scripts/verify-static-export.mjs
+        run: |
+          test -s out/index.html
+          test -s out/_headers
+          test -s out/_redirects
+          test -s out/data/static-site-manifest.json
+          test -s out/sitemap.xml
+          test -s out/robots.txt
+          test -s out/404.html
 
       - name: Publicar artefacto verificado en Pages producción
         working-directory: transparencia-app
