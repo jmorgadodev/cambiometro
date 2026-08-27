@@ -94,7 +94,10 @@ async function verifyProdFull() {
   assertCheck("HOME", "Total votaciones de sala (12.111)", homeHtml.includes("12.111"));
   assertCheck("HOME", "Total gastos parlamentarios (690)", homeHtml.includes("690"));
   assertCheck("HOME", "Hero KPIs sin signo negativo '-' en SSR", !homeHtml.includes("home-stat\"><strong>-") && !homeHtml.includes("home-stat\">-"));
-  assertCheck("HOME", "Total 13 fuentes públicas", homeHtml.includes("13") && (homeHtml.includes("fuentes") || homeHtml.includes("Fuentes")));
+  // Home muestra sólo las fuentes oficiales con registros disponibles (12).
+  // /fuentes también incluye una fuente derivada y por eso se valida como 13
+  // en el módulo correspondiente; no mezclar ambos universos.
+  assertCheck("HOME", "Total 12 fuentes oficiales con registros", homeHtml.includes("12 fuentes oficiales"));
   assertCheck("HOME", "Footer contiene 'Creado por Jorge Morgado'", homeHtml.includes("Creado por") && homeHtml.includes("Jorge Morgado"));
   assertCheck("HOME", "Footer contiene enlace a LinkedIn de Jorge Morgado", homeHtml.includes("https://www.linkedin.com/in/jorge-morgado/"));
   assertCheck("HOME", "Footer NO contiene columna 'Explorar' (duplicada)", !homeHtml.includes('aria-label="Explorar"') && !homeHtml.includes('>Explorar</h2>'));
