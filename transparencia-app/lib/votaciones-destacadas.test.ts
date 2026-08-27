@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { getVotacionDestacadaDetalle } from "./votaciones-destacadas";
+import { getVotacionBancadaShares } from "./votaciones-bancada";
 
 describe("votaciones destacadas", () => {
   it("expone el padrón nominal, el resultado recalculado y el agrupamiento por bancada", () => {
@@ -33,5 +34,23 @@ describe("votaciones destacadas", () => {
     );
     expect(detail?.analisis.bancadasConMuestra).toBeGreaterThan(0);
     expect(detail?.bancadas.every((bancada) => bancada.opcionMayoritaria === null || bancada.disenso >= 0)).toBe(true);
+  });
+
+  it("normaliza la composición de cada bancada para una barra comparable", () => {
+    const detail = getVotacionDestacadaDetalle("camara-vot-89749");
+    const pdg = detail?.bancadas.find((bancada) => bancada.sigla === "PDG");
+
+    expect(pdg).toBeDefined();
+    const shares = getVotacionBancadaShares(pdg!);
+
+    expect(shares.map((share) => share.key)).toEqual([
+      "Afirmativo",
+      "En Contra",
+      "Abstención",
+      "No Vota",
+    ]);
+    expect(shares.reduce((total, share) => total + share.value, 0)).toBe(pdg!.miembros);
+    expect(shares.reduce((total, share) => total + share.pct, 0)).toBe(100);
+    expect(shares.every((share) => share.pct >= 0 && share.pct <= 100)).toBe(true);
   });
 });

@@ -9,6 +9,7 @@ import type {
   VotacionDestacadaDetalle,
   VotacionNominalDetalle,
 } from "@/lib/votaciones-destacadas";
+import { getVotacionBancadaShares, type VotacionBancadaShare } from "@/lib/votaciones-bancada";
 
 const OPTION_LABELS: Array<{ key: OpcionVotacion; label: string; color: string }> = [
   { key: "Afirmativo", label: "A favor", color: "var(--success)" },
@@ -37,6 +38,10 @@ function optionColor(value: "Afirmativo" | "En Contra" | "Abstención" | null): 
   return "var(--text-3)";
 }
 
+function shareColor(share: VotacionBancadaShare): string {
+  return optionColor(share.key === "No Vota" ? null : share.key);
+}
+
 function resultStyle(result: VotacionDestacada["resultado"]) {
   if (result === "Aprobado") return { color: "var(--success)", background: "color-mix(in srgb, var(--success) 12%, transparent)" };
   if (result === "Rechazado") return { color: "var(--danger)", background: "color-mix(in srgb, var(--danger) 12%, transparent)" };
@@ -55,6 +60,7 @@ function VoteBar({ label, value, total, color }: { label: string; value: number;
 }
 
 function PartyRow({ party, onOpenNominal }: { party: VotacionBancadaDetalle; onOpenNominal: (sigla: string) => void }) {
+  const shares = getVotacionBancadaShares(party);
   return <div className="featured-vote__party-row">
     <div className="featured-vote__party-main">
       <div className="featured-vote__party-name"><strong>{party.sigla}</strong><span>{party.nombre} · {party.miembros} miembros en el padrón</span></div>
@@ -62,6 +68,12 @@ function PartyRow({ party, onOpenNominal }: { party: VotacionBancadaDetalle; onO
         <span style={{ color: "var(--success)" }}>A favor {formatNumber(party.afirmativo)}</span>
         <span style={{ color: "var(--danger)" }}>En contra {formatNumber(party.enContra)}</span>
         <span style={{ color: "var(--warning)" }}>Abstención {formatNumber(party.abstencion)}</span>
+      </div>
+      <div className="featured-vote__party-composition" role="img" aria-label={`Distribución de ${party.sigla}: ${shares.map((share) => `${share.label} ${share.pct.toFixed(1).replace(".", ",")} %`).join(", ")}`}>
+        {shares.map((share) => <span key={share.key} style={{ width: `${share.pct}%`, background: shareColor(share) }} title={`${share.label}: ${share.pct.toFixed(1).replace(".", ",")} %`} />)}
+      </div>
+      <div className="featured-vote__party-legend" aria-label={`Porcentajes de ${party.sigla}`}>
+        {shares.filter((share) => share.value > 0).map((share) => <span key={share.key}><i style={{ background: shareColor(share) }} />{share.label} {share.pct.toFixed(1).replace(".", ",")} %</span>)}
       </div>
       <small className="featured-vote__party-insight">
         {party.cuotaMayoria === null
