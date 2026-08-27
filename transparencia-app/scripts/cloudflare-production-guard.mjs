@@ -51,7 +51,7 @@ if (apply) {
     method: "PATCH",
     body: JSON.stringify({
       action: "skip",
-      action_parameters: { phases: ["http_request_firewall_managed", "http_request_sbfm"], products: ["bic", "hot", "ratelimit", "securityLevel", "uablock", "waf"] },
+      action_parameters: { phases: ["http_request_firewall_managed", "http_request_sbfm"], products: ["bic", "hot", "securityLevel", "waf"] },
       expression,
       description: rule.description || "Cambiometro uptime limited access",
       enabled: true,
