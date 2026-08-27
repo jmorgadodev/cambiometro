@@ -515,3 +515,23 @@ atributo `data-theme` en `verify-prod-full.mjs`.
 - Esta fue una pasada única directa. La doble pasada y el crawl frío desde
   GitHub Actions continúan pendientes hasta retirar el challenge 403 de
   Cloudflare para el runner.
+
+### Actualización de interfaz — TikTok y verificación final — 27-ago-2026
+
+El enlace oficial `https://www.tiktok.com/@cambiometro` se añadió al bloque de
+redes sociales del footer con etiqueta accesible y apertura en nueva pestaña.
+Se integró mediante PR #246 (`92aca59`) y se publicó sin ejecutar ETL ni
+modificar D1/R2.
+
+- Pages deployment: `27797c40-39b1-4b5b-a736-8cdb997257ef`
+- Preview: `https://27797c40.cambiometro.pages.dev`
+- Verificación HTTP del dominio: `200`, enlace TikTok presente.
+- Verificación Playwright: `200`, un enlace TikTok presente en el DOM.
+- `verify-prod-full.mjs` con `API_URL` apuntando al dominio raíz:
+  **120 aprobadas, 0 fallidas**.
+- Rollback Pages: `npm run pages:rollback -- 27797c40-39b1-4b5b-a736-8cdb997257ef`
+
+La primera ejecución de la verificación se hizo con `API_URL` duplicando el
+prefijo `/api`, y produjo falsos negativos en el Worker. La segunda ejecución
+usó la URL raíz correcta y confirmó gastos, transferencias, health, búsqueda,
+temas, invariantes y footer.
