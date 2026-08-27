@@ -351,3 +351,34 @@ verificación `33086674446` se lanzó con una segunda pasada a 600.000 ms; su
 resultado y sus artefactos se registran al finalizar. El bloqueo restante es
 Cloudflare en la raíz y la inyección CSP de infraestructura; no se debe
 resolver relajando la CSP con `unsafe-inline`.
+
+### Evidencia completa — verificación `33086674446`
+
+La doble pasada terminó el 27-ago-2026 en `12m44s`, con la segunda pasada
+separada exactamente por `600000 ms`:
+
+| Pasada | Inicio UTC | Resultado |
+|---|---|---|
+| 1/2 | `2026-08-27T15:15:10.400Z` | 100 aprobadas, 17 fallidas |
+| 2/2 | `2026-08-27T15:25:56.773Z` | 100 aprobadas, 17 fallidas |
+
+Las 17 fallas de cada pasada son comprobaciones derivadas de `/` (`HTTP
+403`), más el probe de tema que no pudo navegar y los elementos del home/footer
+que por ello no pudieron leerse. Las fichas, invariantes, transferencias,
+API, fuentes, calidad, cobertura `769 = 580 Cámara + 189 Senado`, y muestras
+estáticas pasaron. El crawl terminó con `SITEMAP_HTTP_403`, por lo que no hay
+base para declarar todavía cero `1102`, cero `5xx` o crawl completo desde
+Actions.
+
+Outputs completos descargados localmente (artefacto ignorado por Git):
+
+```text
+transparencia-app/artifacts/production-verification-33086674446/production-verification-33086674446/verify-prod-double.log
+transparencia-app/artifacts/production-verification-33086674446/production-verification-33086674446/browser-production.log
+transparencia-app/artifacts/production-verification-33086674446/production-verification-33086674446/cold-crawl-output.log
+```
+
+El smoke `33086705923` volvió a confirmar `9/10`: `/` `403` desde el runner
+de GitHub; los otros nueve endpoints pasaron, incluido `/api/v1/health` y la
+búsqueda de Kaiser. Se abrió el issue automático #232. El workflow conserva
+el cron `*/5 * * * *`.
