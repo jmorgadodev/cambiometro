@@ -35,12 +35,26 @@ export function runVerificationPass(passNumber) {
 }
 
 export async function runDoubleVerification({ delayMs = parseDelayMs() } = {}) {
+  const failures = [];
   console.log(`=== verify-prod-full: pasada 1/2 (${new Date().toISOString()}) ===`);
-  await runVerificationPass(1);
+  try {
+    await runVerificationPass(1);
+  } catch (error) {
+    failures.push(error);
+    console.error(`=== verify-prod-full: pasada 1/2 falló: ${error.message} ===`);
+  }
   console.log(`=== verify-prod-full: esperando ${delayMs} ms para la pasada 2/2 ===`);
   await sleep(delayMs);
   console.log(`=== verify-prod-full: pasada 2/2 (${new Date().toISOString()}) ===`);
-  await runVerificationPass(2);
+  try {
+    await runVerificationPass(2);
+  } catch (error) {
+    failures.push(error);
+    console.error(`=== verify-prod-full: pasada 2/2 falló: ${error.message} ===`);
+  }
+  if (failures.length > 0) {
+    throw new Error(`Doble verificación fallida: ${failures.length}/2 pasadas con errores.`);
+  }
   console.log("=== verify-prod-full: ambas pasadas verdes ===");
 }
 

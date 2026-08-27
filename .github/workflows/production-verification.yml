@@ -46,14 +46,25 @@ jobs:
           VERIFY_API_URL: ${{ vars.CAMBIOMETRO_API_URL || 'https://cambiometro.impulsacv.cl' }}
           UPTIME_TOKEN: ${{ secrets.CAMBIOMETRO_UPTIME_TOKEN }}
           VERIFY_THEME_BROWSER: "1"
+          EXPECTED_TRANSFER_ROWS: "59361"
+          EXPECTED_TRANSFER_AMOUNT: "5011094170302"
+          EXPECTED_TRANSFER_PAGES: "1188"
           VERIFY_SECOND_DELAY_MS: ${{ inputs.second_pass_delay_ms }}
           COLD_CRAWL_CONCURRENCY: ${{ inputs.cold_crawl_concurrency }}
           COLD_CRAWL_OUTPUT: artifacts/cold-crawl-production.json
         run: |
           mkdir -p artifacts
+          set +e
           npm run verify:browser 2>&1 | tee artifacts/browser-production.log
+          browser_status=${PIPESTATUS[0]}
           npm run verify:prod:double 2>&1 | tee artifacts/verify-prod-double.log
+          double_status=${PIPESTATUS[0]}
           npm run verify:cold-crawl 2>&1 | tee artifacts/cold-crawl-output.log
+          crawl_status=${PIPESTATUS[0]}
+          if [ "$browser_status" -ne 0 ] || [ "$double_status" -ne 0 ] || [ "$crawl_status" -ne 0 ]; then
+            echo "Production verification failed: browser=$browser_status double=$double_status crawl=$crawl_status" >&2
+            exit 1
+          fi
       - name: Upload production evidence
         if: always()
         uses: actions/upload-artifact@v4

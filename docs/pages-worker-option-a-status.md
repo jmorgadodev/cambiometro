@@ -54,9 +54,12 @@ producción fallará hasta que el deployment Pages estático y la configuración
 Cloudflare estén realmente activos.
 
 Todavía falta ejecutar contra producción real, después de una aprobación
-explícita: doble `verify-prod-full` separada por diez minutos, crawl frío del
-dominio, primer run verde de `uptime-smoke`, inspección CSP en DevTools y
-confirmación de CNAME/WAF. Por eso este documento no declara el cutover cerrado.
+explícita: doble `verify-prod-full` separada por diez minutos con el universo
+fijado en 59.361 filas, crawl frío del dominio, primer run verde de
+`uptime-smoke`, inspección CSP en DevTools y confirmación de CNAME/WAF. El
+workflow conserva las salidas completas aunque una pasada falle, para que la
+decisión se base en evidencia de ambas pasadas. Por eso este documento no
+declara el cutover cerrado.
 
 ## Protección de publicación
 
