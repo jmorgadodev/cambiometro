@@ -31,4 +31,19 @@ if (health.response.status !== 200 || health.json?.data?.ok !== true) {
 }
 const transferRows = Number(health.json.data.transferRows ?? 0);
 if (transferRows < minimumTransferRows) throw new Error(`API_TRANSFER_UNIVERSE_INCOMPLETE:${transferRows}:${minimumTransferRows}`);
-console.log(JSON.stringify({ ok: true, prodUrl, apiUrl, ageDays: Number(ageDays.toFixed(2)), transferRows, minimumTransferRows, transferSource: health.json.data.transferSource ?? null, etlWorkflow: process.env.ETL_WORKFLOW_NAME || null }));
+
+const etlWorkflow = process.env.ETL_WORKFLOW_NAME || "";
+let movement = null;
+if (/movimientos/i.test(etlWorkflow)) {
+  const movementResponse = await get("/data/movimientos.json", prodUrl);
+  if (movementResponse.response.status !== 200) throw new Error(`MOVIMIENTOS_RELEASE_NOT_PUBLISHED:${movementResponse.response.status}`);
+  const payload = movementResponse.json;
+  const lastSuccess = Date.parse(payload?.last_success_at || payload?.last_run || "");
+  if (!Number.isFinite(lastSuccess)) throw new Error("MOVIMIENTOS_LAST_SUCCESS_MISSING");
+  if (Number.isFinite(etlCompletedAt) && lastSuccess + 5 * 60_000 < etlCompletedAt) throw new Error("MOVIMIENTOS_RELEASE_NOT_REFRESHED_AFTER_ETL");
+  if (!Array.isArray(payload?.movimientos) || payload.movimientos.length < 79) throw new Error("MOVIMIENTOS_UNIVERSE_INCOMPLETE");
+  if (!/^[a-f0-9]{64}$/i.test(payload?.checksum_sha256 || "")) throw new Error("MOVIMIENTOS_CHECKSUM_MISSING");
+  if (!payload.source_health?.some((source) => source.tier === "official" && source.ok === true)) throw new Error("MOVIMIENTOS_OFFICIAL_SOURCE_UNAVAILABLE");
+  movement = { total: payload.movimientos.length, lastSuccess: new Date(lastSuccess).toISOString(), checksum: payload.checksum_sha256 };
+}
+console.log(JSON.stringify({ ok: true, prodUrl, apiUrl, ageDays: Number(ageDays.toFixed(2)), transferRows, minimumTransferRows, transferSource: health.json.data.transferSource ?? null, etlWorkflow, movement }));

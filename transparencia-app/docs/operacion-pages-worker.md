@@ -81,10 +81,33 @@ La auditoría de higiene del checkout confirmó que no hay salidas de build, `ou
 
 ## Flujo automático
 
+### Operación diaria de Movimientos
+
+El workflow `ETL Diario - Movimientos de Autoridades` se ejecuta a las 07:00
+UTC (`03:00` durante horario de verano de Chile y `04:00` durante horario de
+invierno). Antes de procesar fuentes recupera desde R2 el último snapshot
+válido; si el manifest de R2 todavía no existe, usa el baseline versionado como
+respaldo inicial. Cámara y `personal_apoyo` no son una dependencia de este
+workflow.
+
+El flujo conserva el snapshot anterior ante un bloqueo total y falla de forma
+visible. Una ejecución exitosa actualiza el grupo `movimientos` en R2 y
+dispara `pages-static-refresh.yml`; Pages sólo se construye cuando el snapshot
+tiene checksum, al menos 79 registros y una fuente oficial disponible. Para
+probarlo manualmente desde GitHub Actions se puede usar `workflow_dispatch` en
+ese workflow, y luego revisar el artefacto `movimientos-run-<run_id>`.
+
+Las páginas oficiales se usan como detectores de señales. Un titular no se
+convierte automáticamente en un movimiento estructurado: para evitar atribuir
+una autoridad o un cargo incorrectos, los registros nuevos requieren evidencia
+oficial con los campos del contrato. Las señales quedan visibles como
+`en_confirmacion` y pueden incorporar RSS provisionales mediante la variable de
+entorno de Actions `MOVIMIENTOS_PROVISIONAL_SOURCES`.
+
 - `etl-cplt.yml` publica la proyección CPLT en R2.
 - `etl-ley-19862.yml` publica las fuentes y el release completo de transferencias.
 - Los ETL que alimentan páginas estáticas construyen su proyección y publican sólo las entradas autorizadas por `scripts/static-site-inputs.mjs`. El script `data:publish:static` crea releases inmutables bajo `projections/static-site-v1/releases/<sha256>/` y actualiza el puntero `projections/static-site-v1/manifest.json` después de subir todos los archivos.
-- El ETL diario publica el grupo `parlamento`: votaciones completas, personal de apoyo, movimientos y sus subsets. El ETL CPLT reconstruye `municipalidades-data.json` y `municipalidades-list.json` a partir de la nómina recién consolidada y de las proyecciones SINIM, ChileCompra y CGR hidratadas desde R2; publica el grupo `municipalidades` sin hacer commit de esos artefactos generados. El workflow diario ya no hace commits automáticos de datasets.
+- El ETL diario publica el grupo `parlamento`: votaciones completas y personal de apoyo. Movimientos se ejecuta en `etl-movimientos.yml` de forma independiente para que un bloqueo de Cámara no congele su actualización; publica el grupo `movimientos` y registra salud de fuentes, conteos y checksum. El ETL CPLT reconstruye `municipalidades-data.json` y `municipalidades-list.json` a partir de la nómina recién consolidada y de las proyecciones SINIM, ChileCompra y CGR hidratadas desde R2; publica el grupo `municipalidades` sin hacer commit de esos artefactos generados. Los workflows no hacen commits automáticos de datasets.
 - `etl-expenses.yml` ejecuta por separado los conectores oficiales de gastos de Cámara y Senado, genera ambos subsets completos, materializa `gastos_camara`/`gastos_senado` en D1, valida el release y publica el grupo estático `gastos`. Se mantiene separado porque el conector WebForms de Cámara es lento y puede activar rate limiting.
 - `pages-static-refresh.yml` descarga ese puntero con `data:hydrate:static -- --required --required-all`, exige las 22 entradas autorizadas, valida tamaño y SHA-256 de cada archivo y recién después ejecuta el build. Si falta el manifiesto o está incompleto, el workflow falla; no compila Pages silenciosamente con JSON antiguo del checkout. Los ETL parciales usan `--required-files` porque sólo reconstruyen su grupo.
 - `pages-static-refresh.yml` recupera el release desde R2, construye Pages, verifica rutas y tamaño del Worker y publica Pages sólo cuando el disparador se ejecuta sobre `main` o se solicita manualmente.

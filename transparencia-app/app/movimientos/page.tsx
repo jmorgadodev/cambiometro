@@ -7,6 +7,7 @@ import {
   MOVIMIENTOS_TIPO_LABEL,
   MOVIMIENTOS_TIPO_COLOR,
   MOVIMIENTOS_TIPO_EMOJI,
+  MOVIMIENTOS_PIPELINE_METADATA,
   MOTIVOS_CATEGORIAS,
   type MovimientoTipo,
   type MovimientoMotivoCategoria,
@@ -34,6 +35,17 @@ function formatFechaCorta(fechaStr: string): string {
   return `${dia}·${MESES_ABR[mesIndex] || parts[1]}·${anio}`;
 }
 
+function formatPipelineTimestamp(value?: string): string {
+  if (!value) return "sin registro";
+  const timestamp = new Date(value);
+  if (Number.isNaN(timestamp.getTime())) return "sin registro";
+  return timestamp.toLocaleString("es-CL", {
+    dateStyle: "medium",
+    timeStyle: "short",
+    timeZone: "America/Santiago",
+  });
+}
+
 export default function MovimientosPage() {
   return (
     <Suspense
@@ -54,6 +66,7 @@ export default function MovimientosPage() {
 function MovimientosContent() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const señalesPendientes = MOVIMIENTOS_PIPELINE_METADATA.signals ?? [];
 
   // Estados de filtrado sincronizados con URL
   const [filtroTipo, setFiltroTipo] = useState<MovimientoTipo | "todos">(() => {
@@ -197,6 +210,8 @@ function MovimientosContent() {
     totalVerificados,
     totalEnConfirmacion,
     fechaActualizacionTexto,
+    ultimaEjecucionTexto,
+    senalesEnConfirmacion,
   } = useMemo(() => {
     const enGobierno = MOVIMIENTOS.filter((m) => m.fecha >= "2026-03-11");
     const totalGob = enGobierno.length;
@@ -260,6 +275,10 @@ function MovimientosContent() {
       totalVerificados: verificados,
       totalEnConfirmacion: enConfirmacion,
       fechaActualizacionTexto: fechaTxt,
+      ultimaEjecucionTexto: formatPipelineTimestamp(
+        MOVIMIENTOS_PIPELINE_METADATA.last_success_at ?? MOVIMIENTOS_PIPELINE_METADATA.last_run,
+      ),
+      senalesEnConfirmacion: Number(MOVIMIENTOS_PIPELINE_METADATA.stats.signals_en_confirmacion ?? 0),
     };
   }, [nowMs]);
 
@@ -309,7 +328,7 @@ function MovimientosContent() {
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.4rem" }}>
                 <span className="live-dot" aria-hidden="true" />
                 <span style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                  Pipeline Oficial 03:00 CLT · Sincronizado {fechaActualizacionTexto}
+                  Pipeline diario · Última ejecución exitosa {ultimaEjecucionTexto} · Último evento {fechaActualizacionTexto}
                 </span>
               </div>
               <h1 style={{ fontSize: "clamp(1.75rem, 3.2vw, 2.4rem)", fontWeight: 900, margin: "0 0 0.5rem 0", letterSpacing: "-0.02em" }}>
@@ -318,6 +337,11 @@ function MovimientosContent() {
               <p style={{ fontSize: "0.95rem", color: "var(--text-2)", lineHeight: 1.5, margin: 0, fontWeight: 500 }}>
                 Registro cronológico trazable de renuncias, ceses, cambios de puesto y nombramientos en el Poder Ejecutivo. Las salidas se contrastan con registros públicos de seguimiento; la confirmación proviene de decretos.
               </p>
+              {senalesEnConfirmacion > 0 && (
+                <p style={{ fontSize: "0.8rem", color: "var(--warning, var(--warn))", lineHeight: 1.45, margin: "0.65rem 0 0", fontWeight: 600 }}>
+                  {senalesEnConfirmacion} señal{senalesEnConfirmacion === 1 ? "" : "es"} detectada{senalesEnConfirmacion === 1 ? "" : "s"} en confirmación; no se cuentan como movimientos oficiales.
+                </p>
+              )}
             </div>
 
             {/* BOTÓN COMPARTIR EN EL HERO */}
@@ -400,6 +424,27 @@ function MovimientosContent() {
           </div>
         </div>
       </section>
+
+      {señalesPendientes.length > 0 && (
+        <section className="container-main" aria-labelledby="signals-heading" style={{ paddingTop: "1.25rem" }}>
+          <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 10, padding: "1rem 1.2rem" }}>
+            <h2 id="signals-heading" style={{ fontSize: "0.95rem", margin: "0 0 0.35rem", color: "var(--text-1)" }}>
+              Señales en confirmación
+            </h2>
+            <p style={{ margin: "0 0 0.7rem", color: "var(--text-2)", fontSize: "0.82rem", lineHeight: 1.45 }}>
+              Estas señales fueron detectadas en fuentes públicas y todavía no se contabilizan como movimientos oficiales.
+            </p>
+            <ul style={{ margin: 0, paddingLeft: "1.15rem", color: "var(--text-2)", fontSize: "0.8rem", lineHeight: 1.5 }}>
+              {señalesPendientes.slice(0, 5).map((signal) => (
+                <li key={signal.signal_id}>
+                  {signal.url ? <a href={signal.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>{signal.title}</a> : signal.title}
+                  <span style={{ color: "var(--text-muted)", marginLeft: "0.35rem" }}>({signal.source_label})</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </section>
+      )}
 
       {/* ─── 2. BARRA DE HERRAMIENTAS, FILTROS Y BÚSQUEDA ──────────────────────── */}
       <div

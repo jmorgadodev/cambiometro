@@ -7,6 +7,7 @@ import { writeChunkedJson } from "./static-site-data.mjs";
 import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
 import { chunkJsonRows, listUnavailableMunicipalities } from "./static-payroll.mjs";
 import { readExpenseSubset } from "./expense-release.mjs";
+import { validateMovementPayload } from "./movimientos-pipeline.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const readJson = (file) => readFile(join(root, file), "utf8").then(JSON.parse);
@@ -50,6 +51,24 @@ const allowSample = process.env.ALLOW_STATIC_SAMPLE === "1";
 const checksum = (value) => crypto.createHash("sha256").update(JSON.stringify(value)).digest("hex");
 await mkdir(join(generatedDir, "transferencias"), { recursive: true });
 await mkdir(publicDataDir, { recursive: true });
+
+// El snapshot de movimientos se publica como un asset verificable además de
+// importarse en el bundle estático. Así el navegador, los verificadores y el
+// build pueden comparar exactamente el mismo contenido publicado.
+const movimientosContent = await readFile(join(root, "data", "movimientos.json"), "utf8");
+const movimientosPayload = JSON.parse(movimientosContent);
+if (!Array.isArray(movimientosPayload.movimientos) || movimientosPayload.movimientos.length < 79) {
+  throw new Error("STATIC_MOVIMIENTOS_RELEASE_INCOMPLETE");
+}
+if (!allowSample) validateMovementPayload(movimientosPayload);
+await writeFile(join(publicDataDir, "movimientos.json"), movimientosContent);
+const movimientosRelease = {
+  count: movimientosPayload.movimientos.length,
+  checksumSha256: crypto.createHash("sha256").update(movimientosContent).digest("hex"),
+  pipelineChecksumSha256: movimientosPayload.checksum_sha256 ?? null,
+  lastSuccessAt: movimientosPayload.last_success_at ?? movimientosPayload.last_run ?? null,
+  lastEventDate: movimientosPayload.last_event_date ?? null,
+};
 
 // Publicar el universo completo de rendiciones operacionales en chunks. Las
 // fichas actuales consumen sus propios slices; este índice conserva además
@@ -258,6 +277,7 @@ const siteManifest = {
     transferencias: transferManifest,
     funcionarios: { count: funcionariosFiles.length, expectedMunicipalities: 346, checksumSha256: funcionariosManifest.checksumSha256 },
     search: { count: entities.length, checksumSha256: checksum(entities.map(({ id, name }) => ({ id, name }))) },
+    movimientos: movimientosRelease,
   },
   expectedUniverse: { politicos: 205, municipalidades: 346, serviciosPublicos: 72, entidades: entities.length },
 };

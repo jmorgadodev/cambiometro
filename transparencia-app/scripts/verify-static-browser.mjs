@@ -140,6 +140,7 @@ async function main() {
     { route: "/politico", markers: ["Diputados y Senadores"] },
     { route: "/municipalidades", markers: ["Directorio de las 346 Municipalidades"] },
     { route: "/cruces", markers: ["Cruces"] },
+    { route: "/movimientos", markers: ["Movimientos y Relevos de Autoridades", "79"] },
     { route: "/transferencias", markers: ["Transferencias"] },
     { route: "/funcionarios", markers: ["Directorio de Personas"] },
     { route: "/entidades", markers: ["Entidades"] },

@@ -4,7 +4,8 @@ on:
   workflow_run:
     workflows:
       - "ETL Mensual - Ley 19.862 Transferencias del Estado"
-      - "ETL Diario - Parlamento, Movimientos y Diario Oficial"
+      - "ETL Diario - Parlamento y Diario Oficial"
+      - "ETL Diario - Movimientos de Autoridades"
       - "ETL Mensual - CPLT Nóminas Transparencia Activa"
       - "ETL Semanal - ChileCompra OCDS"
       - "ETL Mensual - Contraloría General (CGR)"
