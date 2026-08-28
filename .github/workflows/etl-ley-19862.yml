@@ -166,9 +166,43 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: npm run data:publish:transfer-api
 
-      - name: Materializar transferencia completa en D1
+      - name: Materializar proyección D1 cuando haya capacidad
+        id: materialize-transfer-d1
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
-        run: npm run data:materialize:transfer -- --database transparencia-db
+        shell: bash
+        run: |
+          set +e
+          log_file="$GITHUB_WORKSPACE/transparencia-app/transfer-d1-materialization.log"
+          npm run data:materialize:transfer -- --database transparencia-db >"$log_file" 2>&1
+          status=$?
+          cat "$log_file"
+          if [ "$status" -eq 0 ]; then
+            echo "D1 transfer projection materialized successfully." >> "$GITHUB_STEP_SUMMARY"
+            echo "status=materialized" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if grep -Eq 'Exceeded maximum DB size|code: 7500' "$log_file"; then
+            echo "::warning::D1 no tiene capacidad para duplicar el release completo; R2 permanece como fuente canónica y la API usará su fallback validado."
+            {
+              echo "### Transferencias: D1 opcional"
+              echo "- Estado: `skipped_r2_canonical`"
+              echo "- Motivo: límite de tamaño D1 (Cloudflare code 7500)"
+              echo "- Fuente canónica: release completo validado en R2"
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "status=skipped_r2_canonical" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Materialización D1 falló por un motivo no permitido; se aborta el ETL." >&2
+          exit "$status"
+
+      - name: Registrar diagnóstico de materialización D1
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: transfer-d1-materialization-${{ github.run_id }}
+          path: transparencia-app/transfer-d1-materialization.log
+          if-no-files-found: ignore
+          retention-days: 30
