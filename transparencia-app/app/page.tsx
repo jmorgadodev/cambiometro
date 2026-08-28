@@ -8,11 +8,22 @@ import { ETL_SOURCES_DATA } from "@/lib/etl-sources-data";
 import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
 import { VOTACIONES_DESTACADAS } from "@/lib/votaciones-destacadas";
 import { tituloVotacionLegible } from "@/lib/votaciones-format";
-import { MOVIMIENTOS } from "@/lib/movimientos";
+import { MOVIMIENTOS_HOME_SUMMARY } from "@/lib/movimientos";
+import { formatFechaCorta } from "@/lib/format";
 
 export const dynamic = "force-static";
 
 const HOME_SOURCES_LIST = ETL_SOURCES_DATA.filter((source) => source.recordCount > 0);
+
+// Selección editorial para la Home: impacto público, quórum y diversidad de
+// materias. El listado completo y sus filtros viven en /votaciones-destacadas.
+const HOME_FEATURED_VOTE_IDS = [
+  "senado-vot-11264",
+  "camara-vot-89844",
+  "senado-vot-11274",
+  "camara-vot-89749",
+  "camara-vot-89750",
+] as const;
 
 export const metadata: Metadata = {
   title: "El Cambiómetro — Plataforma de Datos Públicos y Transparencia",
@@ -75,7 +86,11 @@ export default async function HomePage() {
   const resolvedHomeKpis = HOME_KPIS.map((item) => item.key === "entidades"
     ? { ...item, value: entityCount || item.value }
     : item);
-  const highlightedVotes = [...VOTACIONES_DESTACADAS].sort((a, b) => b.fecha.localeCompare(a.fecha)).slice(0, 5);
+  const votesById = new Map(VOTACIONES_DESTACADAS.map((vote) => [vote.votacion_id, vote]));
+  const highlightedVotes = HOME_FEATURED_VOTE_IDS.flatMap((id) => {
+    const vote = votesById.get(id);
+    return vote ? [vote] : [];
+  });
 
   return (
     <div className="home-desk">
@@ -205,9 +220,15 @@ export default async function HomePage() {
               <Link prefetch={false} href="/movimientos" className="home-path home-path--movement">
                 <span className="home-path__icon"><Icono nombre="etl" size={16} /></span>
                 <span className="home-path__eyebrow">Seguimiento de autoridades</span>
-                <h3>¿Qué movimientos se han informado?</h3>
-                <p>Revisa cambios, nombramientos y señales anunciadas, separadas de los movimientos ya verificados.</p>
-                <b>Ver movimientos <span aria-hidden="true">→</span></b>
+                <h3>¿Qué cambió desde el 11 de marzo?</h3>
+                <p>Un resumen del gobierno actual: los hechos verificados quedan separados de los casos en confirmación.</p>
+                <div className="home-movement-summary" aria-label="Resumen de movimientos desde el 11 de marzo de 2026">
+                  <div><strong>{MOVIMIENTOS_HOME_SUMMARY.total}</strong><span>movimientos</span></div>
+                  <div><strong>{MOVIMIENTOS_HOME_SUMMARY.renuncias}</strong><span>renuncias</span></div>
+                  <div><strong>{MOVIMIENTOS_HOME_SUMMARY.enConfirmacion}</strong><span>en confirmación</span></div>
+                </div>
+                <span className="home-path__meta">{MOVIMIENTOS_HOME_SUMMARY.verificados} verificados · último evento {formatFechaCorta(MOVIMIENTOS_HOME_SUMMARY.ultimoEvento)}</span>
+                <b>Ver historial y fuentes <span aria-hidden="true">→</span></b>
               </Link>
             </div>
           </div>
@@ -233,8 +254,8 @@ export default async function HomePage() {
             <Link prefetch={false} href="/movimientos" className="home-discovery-card">
               <span className="home-discovery-card__icon"><Icono nombre="etl" size={20} /></span>
               <span className="home-discovery-card__label">Actualidad</span>
-              <strong>{MOVIMIENTOS.length} movimientos en seguimiento</strong>
-              <span>Consulta el estado de confirmación y la fuente de cada cambio.</span>
+              <strong>{MOVIMIENTOS_HOME_SUMMARY.renuncias} renuncias desde el 11 de marzo</strong>
+              <span>{MOVIMIENTOS_HOME_SUMMARY.verificados} hechos verificados y {MOVIMIENTOS_HOME_SUMMARY.enConfirmacion} en confirmación.</span>
             </Link>
             <Link prefetch={false} href="/municipalidades" className="home-discovery-card">
               <span className="home-discovery-card__icon"><Icono nombre="datos" size={20} /></span>
@@ -252,11 +273,12 @@ export default async function HomePage() {
             <div><p className="eyebrow">Seguimiento legislativo</p><h2 id="highlighted-votes-title">Votaciones destacadas</h2></div>
             <Link prefetch={false} href="/votaciones-destacadas/">Ver selección completa →</Link>
           </div>
+          <p className="home-featured-votes__intro">Una selección de proyectos con impacto público, quórum relevante o materias que conviene entender en contexto.</p>
           <div className="home-vote-list">
             {highlightedVotes.map((vote) => (
               <article className="home-vote-row" key={vote.votacion_id}>
                 <time dateTime={vote.fecha}>{vote.fecha}</time>
-                <div className="home-vote-row__content"><strong>{vote.boletin}</strong><h3>{tituloVotacionLegible(vote)}</h3><span>{vote.camara}</span></div>
+                <div className="home-vote-row__content"><strong>{vote.boletin}</strong><h3>{tituloVotacionLegible(vote)}</h3><p>{vote.resumen}</p><span>{vote.camara}</span></div>
                 <span className="home-vote-row__result" data-result={vote.resultado}>{vote.resultado}</span>
               </article>
             ))}

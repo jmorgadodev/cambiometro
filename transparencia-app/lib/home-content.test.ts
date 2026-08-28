@@ -30,10 +30,20 @@ describe("promesas editoriales del inicio", () => {
     expect(home).toContain("diputados y senadores");
   });
 
-  it("mantiene cinco preguntas de análisis y hace visible el seguimiento de movimientos", () => {
-    expect(home).toContain("¿Qué movimientos se han informado?");
+  it("mantiene cinco preguntas de análisis y resume el seguimiento de movimientos", () => {
+    expect(home).toContain("¿Qué cambió desde el 11 de marzo?");
+    expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.renuncias");
+    expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.enConfirmacion");
     expect(home).toContain('href="/movimientos"');
     expect(home).toContain("home-path--movement");
+  });
+
+  it("usa una selección editorial estable y muestra el resumen factual de cada votación", () => {
+    expect(home).toContain("HOME_FEATURED_VOTE_IDS");
+    expect(home).toContain("impacto público, quórum relevante");
+    expect(home).toContain("{vote.resumen}");
+    expect(home).toContain('"senado-vot-11264"');
+    expect(home).toContain('"camara-vot-89844"');
   });
 
   it("presenta el alcance histórico de las votaciones sin reducirlo al corte actual", () => {
