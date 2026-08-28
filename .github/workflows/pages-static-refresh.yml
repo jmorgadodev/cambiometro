@@ -45,11 +45,10 @@ on:
         default: ""
 
 concurrency:
-  group: pages-static-refresh
-  # Un ETL completado en paralelo no debe cancelar un refresh ya iniciado.
-  # Esto es especialmente importante para Movimientos: otro ETL puede terminar
-  # mientras Pages hidrata R2 y su evento puede quedar en skipped.
-  cancel-in-progress: false
+  # Cada ETL tiene su propia cola. Así se conserva la cancelación de ejecuciones
+  # duplicadas, pero Parlamento no cancela un refresh de Movimientos en curso.
+  group: pages-static-refresh-${{ github.event_name == 'workflow_run' && github.event.workflow_run.name || github.event_name }}
+  cancel-in-progress: true
 
 permissions:
   contents: read
