@@ -190,7 +190,7 @@ export async function getDataQualityDashboardData(): Promise<{
 }> {
   const manifests = await listPublishedSourceManifests();
   const muniStats = getMunicipalidadesStats();
-  const healthSources = healthRaw.sources as Record<string, { generatedAt?: string; status?: string }>;
+  const healthSources = healthRaw.sources as Record<string, { generatedAt?: string | null; status?: string }>;
   const ultimaValidacionIso = healthRaw.generatedAt || "2026-08-21T10:10:54.809Z";
 
   const sources: DataQualitySourceRow[] = manifests.map((manifest) => {
