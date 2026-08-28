@@ -23,4 +23,21 @@ describe("promesas editoriales del inicio", () => {
     expect(canonicalSourceId("gastos_camara")).toBe("camara");
     expect(canonicalSourceId("contraloria")).toBe("contraloria");
   });
+
+  it("envía la búsqueda del inicio al directorio parlamentario", () => {
+    expect(home).toContain('<form className="home-query" action="/politico" role="search">');
+    expect(home).toContain('placeholder="Nombre, partido, distrito o región"');
+    expect(home).toContain("diputados y senadores");
+  });
+
+  it("mantiene cinco preguntas de análisis y hace visible el seguimiento de movimientos", () => {
+    expect(home).toContain("¿Qué movimientos se han informado?");
+    expect(home).toContain('href="/movimientos"');
+    expect(home).toContain("home-path--movement");
+  });
+
+  it("presenta el alcance histórico de las votaciones sin reducirlo al corte actual", () => {
+    expect(home).toContain("Votaciones de sala históricas");
+    expect(home).toContain("Cámara + Senado · 2022–2026");
+  });
 });
