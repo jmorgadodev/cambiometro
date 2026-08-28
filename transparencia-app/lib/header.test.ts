@@ -72,6 +72,7 @@ describe("Header y navegación global", () => {
 
   it("reglas de CSS: touch targets ≥ 44px, sticky header, drawer transition < 200ms", () => {
     expect(cssContent).toContain("position: sticky");
+    expect(cssContent).toContain("overflow-x: clip");
     expect(cssContent).toContain("min-height: 44px");
     expect(cssContent).toContain("min-width: 44px");
     expect(cssContent).toContain("transition: transform 180ms");
