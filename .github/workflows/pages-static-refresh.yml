@@ -45,7 +45,9 @@ on:
         default: ""
 
 concurrency:
-  group: pages-static-refresh
+  # Cada ETL tiene su propia cola. Así se conserva la cancelación de ejecuciones
+  # duplicadas, pero Parlamento no cancela un refresh de Movimientos en curso.
+  group: pages-static-refresh-${{ github.event_name == 'workflow_run' && github.event.workflow_run.name || github.event_name }}
   cancel-in-progress: true
 
 permissions:
