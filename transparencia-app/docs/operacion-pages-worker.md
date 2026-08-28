@@ -518,6 +518,24 @@ Cloudflare con un token que tenga ese permiso. No se debe quitar `/` del smoke,
 desactivar globalmente WAF/DDoS ni marcar el workflow como exitoso ignorando el
 `403`.
 
+### Resolución del challenge — 28-ago-2026
+
+Se desactivó **Modo Bot Fight** para la zona `impulsacv.cl` desde Cloudflare.
+No se modificaron Pages, D1, R2, ETL, Worker ni las reglas administradas de
+WAF/DDoS. La validación posterior confirmó:
+
+- Preflight `33130187991`: `/`, `/politico`, `/partidos` y `/cruces` con
+  `200`, `challengePlatform: false` y CSP estática presente.
+- Uptime smoke `33130194114`: **10/10 PASS**, incluyendo `/`, listados,
+  ficha Kaiser, `/api/v1/health` y `/api/v1/search?q=Kaiser`.
+- El monitor de cinco minutos quedó operativo nuevamente.
+
+El costo de esta decisión es perder la capa Bot Fight Mode para el dominio,
+pero se mantienen DDoS y las reglas administradas. Para recuperar protección
+contra bots con excepciones por ruta/header, la alternativa es migrar a
+Super Bot Fight Mode o Bot Management y conservar una excepción acotada para
+el monitor.
+
 ### Verificación integral posterior a la corrección del probe — 27-ago-2026
 
 Se ejecutó una pasada directa contra `https://cambiometro.impulsacv.cl` con
