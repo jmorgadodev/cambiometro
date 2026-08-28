@@ -455,6 +455,8 @@ try {
   assert.equal(homeResponse.headers()["x-powered-by"], undefined);
   const staticCsp = homeResponse.headers()["content-security-policy"] ?? "";
   assert(staticCsp.includes("script-src 'self'"), "CSP estática debe restringir scripts al mismo origen");
+  assert(staticCsp.includes("https://www.googletagmanager.com"), "CSP permite gtag.js sólo desde Google Tag Manager");
+  assert(staticCsp.includes("https://www.google-analytics.com"), "CSP permite conexión GA4 sólo al endpoint oficial");
   assert(!staticCsp.includes("'unsafe-inline'"), "CSP estática no debe permitir unsafe-inline");
   assert(!staticCsp.includes("nonce-"), "CSP estática no debe depender de nonce por request");
 

@@ -62,6 +62,13 @@ function loadGtag() {
   window.gtag = function gtag(...args: unknown[]) {
     dataLayer.push(args);
   };
+  window.gtag("consent", "default", {
+    ad_storage: "denied",
+    ad_user_data: "denied",
+    ad_personalization: "denied",
+    analytics_storage: "denied",
+    wait_for_update: 500,
+  });
 
   const script = document.createElement("script");
   script.async = true;
@@ -69,8 +76,25 @@ function loadGtag() {
   script.setAttribute("data-consent", "granted");
   document.head.appendChild(script);
 
+  window.gtag("consent", "update", {
+    ad_storage: "granted",
+    ad_user_data: "granted",
+    ad_personalization: "granted",
+    analytics_storage: "granted",
+  });
   window.gtag("js", new Date());
   window.gtag("config", id, { anonymize_ip: true });
+}
+
+function updateGtagConsent(choice: ConsentChoice) {
+  if (typeof window === "undefined" || !window.gtag) return;
+  const value = choice === "granted" ? "granted" : "denied";
+  window.gtag("consent", "update", {
+    ad_storage: value,
+    ad_user_data: value,
+    ad_personalization: value,
+    analytics_storage: value,
+  });
 }
 
 export default function CookieConsent() {
@@ -89,6 +113,7 @@ export default function CookieConsent() {
 
   const choose = (choice: ConsentChoice) => {
     storeConsent(choice);
+    updateGtagConsent(choice);
     setReopened(false);
   };
 

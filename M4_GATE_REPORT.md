@@ -17,7 +17,7 @@
 - **6 cabeceras en 6 rutas:** `/`, `/privacidad`, `/fuentes`, `/about`, `/contacto`, `/politicas` — todas con status **200** y encabezados de versión presentes (`version: 2026.08.20`).
 - **XSS limpio:** No hay vectores de XSS detectables (revisión de `document.querySelectorAll('[on*]')` y templates).
 - **429 en ráfaga (stub):** El rate limiter edge (ns 47011, 30 req/60s) devuelve **429 JSON** con `retryAfter` cuando se dispara tráfico intenso; el stub en `verify-integration.mjs` validó el backoff exponencial (base 5s, cap 60s, attempts 6).
-- **/privacidad y /fuentes 200 con versión:** Ambas rutas responden **200** y el body contiene `version: 2026.08.20` + metadatos de la última ETL. No hay `gtag` ni analytics en el response.
+- **/privacidad y /fuentes 200 con versión:** Ambas rutas responden **200** y el body contiene `version: 2026.08.20` + metadatos de la última ETL. El cargador de GA4 permanece post-consentimiento; la auditoría de navegador debe validar la integración externa de Cloudflare antes de declarar CSP cerrada.
 - **Capturas 320/390px:** Generadas por `verify-m2-prod.mjs` — widget Turnstile real visible, iframe de `challenges.cloudflare.com` con site key `0x4AAAAAAEVKZOTbdd4h_AsT`.
 
 #### 8.2 CI verde con protection activa
@@ -45,7 +45,7 @@
 ### 3. Estado general
 - **FASE 1:** Cerrada oficialmente después de M4. No pasar a FASE 2.
 - **FASE 2:** No iniciada. Items pendientes de FASE 1 (workflow verification, drill de restauración) quedan como deuda técnica para cuando condiciones lo permitan (token REST válido, disco suficiente).
-- **Sitio producción:** https://cambiometro.impulsacv.cl — operativo, sin gtag, CSP OK, Turnstile widget verificado (site key `0x4AAAAAAEVKZOTbdd4h_AsT`).
+- **Sitio producción:** https://cambiometro.impulsacv.cl — operativo, pero la auditoría posterior detectó inyección externa de Google Tag y violaciones CSP en navegador; este punto no debe considerarse cerrado hasta retirar la duplicación en Cloudflare/Zaraz y repetir la prueba.
 - **Último deploy:** Version ID `NyTIlbYhOeKpKq0bpxcfZ` (deploy por secret put de Turnstile key).
 - **Archivos modificados/new:** 12 archivos en M3+M4 (`.github/workflows/`, `docs/`, `transparencia-app/scripts/`), sin código de aplicación modificado.
 
