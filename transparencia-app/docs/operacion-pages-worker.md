@@ -500,6 +500,24 @@ crawl productivo se necesita un token con permiso de Bot Management o el ajuste
 equivalente en Cloudflare para que la monitorización autorizada no reciba el
 desafío.
 
+### Revalidación del bloqueo — run `33129776241`
+
+El preflight de solo lectura se repitió el `2026-08-28` antes de continuar con
+nuevos ajustes de interfaz. El resultado fue idéntico:
+
+- La expresión de la excepción WAF coincide con el secreto real
+  (`expressionMatchesSecret: true`).
+- La raíz `/` todavía devuelve `403`, `cf-mitigated: challenge` y
+  `challengePlatform: true` al runner de GitHub.
+- La consulta de Bot Management todavía devuelve
+  `CLOUDFLARE_API_FAILED:403:Authentication error`.
+
+Conclusión operativa: no es un fallo de Pages, ETL, D1, R2 ni del Worker. La
+corrección definitiva debe hacerse en la configuración de Bots/Challenges de
+Cloudflare con un token que tenga ese permiso. No se debe quitar `/` del smoke,
+desactivar globalmente WAF/DDoS ni marcar el workflow como exitoso ignorando el
+`403`.
+
 ### Verificación integral posterior a la corrección del probe — 27-ago-2026
 
 Se ejecutó una pasada directa contra `https://cambiometro.impulsacv.cl` con
