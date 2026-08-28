@@ -6,7 +6,7 @@ import Icono from "@/components/ui/Icono";
 import { GLOBAL_KPIS, KPI_SCOPES } from "@/lib/global-kpis";
 import { ETL_SOURCES_DATA } from "@/lib/etl-sources-data";
 import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
-import { VOTACIONES_DESTACADAS } from "@/lib/votaciones-destacadas";
+import { tituloVotacionLegible, VOTACIONES_DESTACADAS } from "@/lib/votaciones-destacadas";
 import { MOVIMIENTOS } from "@/lib/movimientos";
 
 export const dynamic = "force-static";
@@ -255,7 +255,7 @@ export default async function HomePage() {
             {highlightedVotes.map((vote) => (
               <article className="home-vote-row" key={vote.votacion_id}>
                 <time dateTime={vote.fecha}>{vote.fecha}</time>
-                <div className="home-vote-row__content"><strong>{vote.boletin}</strong><h3>{vote.titulo}</h3><span>{vote.camara}</span></div>
+                <div className="home-vote-row__content"><strong>{vote.boletin}</strong><h3>{tituloVotacionLegible(vote)}</h3><span>{vote.camara}</span></div>
                 <span className="home-vote-row__result" data-result={vote.resultado}>{vote.resultado}</span>
               </article>
             ))}

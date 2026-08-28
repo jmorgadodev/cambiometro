@@ -443,6 +443,12 @@ body {
 .featured-votes-page__filters { padding: .85rem; margin-bottom: 1.25rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); }
 .featured-votes-page__filters label, .featured-vote__filters label { display: grid; gap: .3rem; color: var(--text-2); font-size: .7rem; font-weight: 700; }
 .featured-votes-page__filters select, .featured-vote__filters input, .featured-vote__filters select { min-width: 10rem; padding: .55rem .7rem; border: 1px solid var(--border); border-radius: 7px; background: var(--surface); color: var(--text-1); font: inherit; }
+.featured-vote-camera-filter { display: grid; gap: .3rem; }
+.featured-vote-camera-filter__label { color: var(--text-2); font-size: .7rem; font-weight: 700; }
+.featured-vote-camera-filter > div { display: inline-flex; gap: .35rem; }
+.featured-vote-camera-filter button { min-height: 2.15rem; padding: .45rem .8rem; border: 1px solid var(--border); border-radius: 7px; background: var(--surface); color: var(--text-2); font: inherit; font-size: .75rem; font-weight: 750; cursor: pointer; }
+.featured-vote-camera-filter button:hover, .featured-vote-camera-filter button.is-active { border-color: var(--accent); background: var(--accent); color: var(--on-accent); }
+.featured-vote-camera-filter small { color: var(--text-3); font-size: .65rem; }
 .featured-vote__filters input { min-width: 15rem; }
 .featured-votes-list { display: grid; gap: 1rem; }
 .featured-vote-card { padding: 1.25rem; border: 1px solid var(--border); border-top: 3px solid var(--accent); border-radius: 10px; background: var(--surface); }
