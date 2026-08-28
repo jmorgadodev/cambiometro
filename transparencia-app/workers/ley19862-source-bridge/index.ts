@@ -17,9 +17,16 @@ function transferUrl(year: number, month: number) {
   return `${OFFICIAL_ORIGIN}/reporte/transferencias?${params}`;
 }
 
-function tokenMatches(provided: string, expected: string) {
-  const left = new TextEncoder().encode(provided);
-  const right = new TextEncoder().encode(expected);
+export function tokenMatches(provided: string, expected: string) {
+  // `wrangler secret put` reads from stdin and may preserve a final newline.
+  // The runner sends the generated token as a header without that newline.
+  // Normalize only surrounding whitespace; the token remains otherwise exact.
+  const normalizedProvided = provided.trim();
+  const normalizedExpected = expected.trim();
+  if (!normalizedProvided || !normalizedExpected) return false;
+
+  const left = new TextEncoder().encode(normalizedProvided);
+  const right = new TextEncoder().encode(normalizedExpected);
   const length = Math.max(left.length, right.length);
   let difference = left.length ^ right.length;
   for (let index = 0; index < length; index += 1) {
