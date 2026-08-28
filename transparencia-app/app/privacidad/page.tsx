@@ -5,6 +5,7 @@ export const metadata: Metadata = {
   title: "Política de Privacidad — El Cambiómetro",
   description:
     "Cómo El Cambiómetro trata los datos personales: finalidad por categoría, fuentes, base de legitimación, plazos de conservación, derechos ARCO y el canal de solicitudes conforme a la Ley 21.715.",
+  alternates: { canonical: "/privacidad" },
 };
 
 const VERSION_FECHA = "19 de agosto de 2026";

@@ -80,7 +80,14 @@ const expenseRows = ["gastos_camara", "gastos_senado"].flatMap((sourceId) => {
   const subset = readExpenseSubset(root, sourceId);
   return (subset?.records ?? []).map((record) => ({ ...record, sourceId }));
 }).sort((left, right) => String(right.fecha ?? "").localeCompare(String(left.fecha ?? "")) || right.monto_clp - left.monto_clp || left.id.localeCompare(right.id));
-if (!expenseRows.length && !allowSample) throw new Error("STATIC_EXPENSE_RELEASE_EMPTY");
+if (!expenseRows.length && !allowSample) {
+  throw new Error([
+    "STATIC_EXPENSE_RELEASE_EMPTY: no hay un release de gastos operacionales en este checkout.",
+    "Este dato no se versiona en Git; hidrátalo desde R2 antes de construir Pages:",
+    "npm run data:hydrate:static -- --required --required-files data/lake-subsets/gastos-camara.subset.json,data/lake-subsets/gastos-senado.subset.json",
+    "Luego vuelve a ejecutar npm run pages:build.",
+  ].join("\n"));
+}
 await rm(expenseDir, { recursive: true, force: true });
 await mkdir(expenseDir, { recursive: true });
 const expensePageSize = 50;

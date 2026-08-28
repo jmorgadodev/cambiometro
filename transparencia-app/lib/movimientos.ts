@@ -145,3 +145,31 @@ export const MOVIMIENTOS_PIPELINE_METADATA = {
   source_health: payload.source_health ?? [],
   signals: payload.signals ?? [],
 };
+
+/**
+ * Resumen editorial de la Home, calculado desde el mismo snapshot que usa
+ * /movimientos. La fecha de inicio del gobierno es parte del corte
+ * metodológico; los conteos nunca se escriben a mano en la página.
+ */
+export const MOVIMIENTOS_GOBIERNO_DESDE = "2026-03-11";
+
+const movimientosGobierno = MOVIMIENTOS.filter((movement) => movement.fecha >= MOVIMIENTOS_GOBIERNO_DESDE);
+const esVerificado = (movement: Movimiento) => ["verificado", "verificado_oficial", "corroborado"].includes(movement.estado);
+const esRenuncia = (movement: Movimiento) => movement.tipo_evento === "renuncia" || movement.tipo === "renuncia";
+const fechaComoDiaUtc = (value: string) => Date.parse(`${value.slice(0, 10)}T00:00:00Z`);
+const ultimoEvento = movimientosGobierno.reduce((latest, movement) => movement.fecha > latest ? movement.fecha : latest, "");
+const ultimoCorte = payload.last_run?.slice(0, 10) ?? ultimoEvento;
+const diasSinCambios = Number.isFinite(fechaComoDiaUtc(ultimoCorte)) && Number.isFinite(fechaComoDiaUtc(ultimoEvento))
+  ? Math.max(0, Math.round((fechaComoDiaUtc(ultimoCorte) - fechaComoDiaUtc(ultimoEvento)) / 86_400_000))
+  : 0;
+
+export const MOVIMIENTOS_HOME_SUMMARY = {
+  desde: MOVIMIENTOS_GOBIERNO_DESDE,
+  total: movimientosGobierno.length,
+  renuncias: movimientosGobierno.filter(esRenuncia).length,
+  verificados: movimientosGobierno.filter(esVerificado).length,
+  enConfirmacion: movimientosGobierno.filter((movement) => movement.estado === "en_confirmacion").length,
+  ultimoEvento,
+  ultimoCorte,
+  diasSinCambios,
+} as const;

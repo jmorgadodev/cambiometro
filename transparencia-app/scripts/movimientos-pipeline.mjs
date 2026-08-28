@@ -19,9 +19,71 @@ export const MOVIMIENTOS_SOURCES = Object.freeze([
     tier: "official",
     url: "https://www.gob.cl/noticias/",
   },
+  {
+    id: "prensa-presidencia",
+    label: "Prensa Presidencia",
+    tier: "official",
+    url: "https://prensa.presidencia.cl/comunicados.aspx",
+  },
+  {
+    id: "mindep",
+    label: "Ministerio del Deporte",
+    tier: "official",
+    url: "https://www.mindep.cl/noticias",
+  },
 ]);
 
 const MOVEMENT_KEYWORDS = /\b(renuncia|renunció|renuncio|nombramiento|nombra|designa|designación|asume|asumió|remueve|remoción|decreto|subrogante|cambio de gabinete|salida de)\b/i;
+
+const normalizeSignalText = (value) => String(value ?? "")
+  .normalize("NFD")
+  .replace(/[\u0300-\u036f]/g, "")
+  .toLowerCase();
+
+const MARIA_PAZ_RIOS_SOURCES = Object.freeze([
+  {
+    nivel: "oficial",
+    medio: "Prensa Presidencia",
+    url: "https://prensa.presidencia.cl/comunicado.aspx?id=339274",
+    fecha: "2026-08-26",
+    titulo: "Presidente José Antonio Kast nombra a María Paz Ríos Lama como nueva subsecretaria de Deportes",
+  },
+  {
+    nivel: "prensa",
+    medio: "BioBioChile",
+    url: "https://www.biobiochile.cl/noticias/nacional/chile/2026/08/26/presidente-kast-designa-a-abogada-y-atleta-maria-paz-rios-como-nueva-subsecretaria-de-deportes.shtml",
+    fecha: "2026-08-26",
+    titulo: "Presidente Kast designa a abogada y atleta María Paz Ríos como nueva subsecretaria de Deportes",
+  },
+  {
+    nivel: "prensa",
+    medio: "Cooperativa",
+    url: "https://cooperativa.cl/noticias/deportes/gobierno/ministerio-del-deporte/presidente-kast-nombro-a-maria-paz-rios-como-nueva-subsecretaria-de/2026-08-26/183651.html",
+    fecha: "2026-08-26",
+    titulo: "Presidente Kast nombró a María Paz Ríos como nueva subsecretaria de Deportes",
+  },
+  {
+    nivel: "prensa",
+    medio: "Pauta",
+    url: "https://www.pauta.cl/actualidad/2026/08/26/maria-paz-rios-lama-asumira-como-nueva-subsecretaria-de-deportes.html",
+    fecha: "2026-08-26",
+    titulo: "María Paz Ríos Lama asumirá como nueva subsecretaria de Deportes",
+  },
+  {
+    nivel: "prensa",
+    medio: "CNN Chile",
+    url: "https://www.cnnchile.com/pais/presidente-kast-nombra-a-la-abogada-y-atleta-maria-paz-rios-lama-como-nueva-subsecretaria-de-deportes/",
+    fecha: "2026-08-26",
+    titulo: "Presidente Kast nombra a María Paz Ríos Lama como nueva subsecretaria de Deportes",
+  },
+  {
+    nivel: "prensa",
+    medio: "24 Horas",
+    url: "https://www.24horas.cl/actualidad/politica/maria-paz-rios-es-nombrada-como-la-nueva-subsecretaria-de-deportes",
+    fecha: "2026-08-26",
+    titulo: "María Paz Ríos es designada como la nueva subsecretaria de Deportes",
+  },
+]);
 
 export function sha256(value) {
   return createHash("sha256").update(typeof value === "string" ? value : JSON.stringify(value)).digest("hex");
@@ -216,9 +278,9 @@ export async function collectMovementSources({ sources = MOVIMIENTOS_SOURCES, fe
 }
 
 export function calculateMovimientoEstado(movimiento) {
-  const hasOfficial = Boolean(movimiento.decreto_url)
-    || (movimiento.fuentes ?? []).some((source) => ["oficial", "semioficial"].includes(source.nivel));
-  return hasOfficial ? "verificado" : "en_confirmacion";
+  // Una nota oficial o un comunicado confirma el anuncio, pero no reemplaza
+  // el acto administrativo que acredita el nombramiento en el catálogo.
+  return movimiento.decreto_url ? "verificado" : "en_confirmacion";
 }
 
 function enrichMovimiento(movimiento, now) {
@@ -245,7 +307,89 @@ function connectorKeyForSource(sourceId) {
   if (sourceId === "ley-chile") return "t1_ley_chile";
   if (sourceId === "diario-oficial") return "t1_diario_oficial";
   if (sourceId === "gob-cl") return "t1_gob_cl";
+  if (sourceId === "prensa-presidencia") return "t1_prensa_presidencia";
+  if (sourceId === "mindep") return "t1_mindep";
   return null;
+}
+
+function markUnconfirmedSofiaAnnouncement(movimiento) {
+  const incoming = normalizeSignalText(movimiento.entro?.nombre ?? movimiento.entrante);
+  const cargo = normalizeSignalText(movimiento.cargo);
+  if (!incoming.includes("sofia rengifo") || !cargo.includes("subsecret")) return movimiento;
+
+  const withoutNorma = Object.fromEntries(
+    Object.entries(movimiento).filter(([key]) => !["decreto_url", "id_norma", "decreto_numero"].includes(key)),
+  );
+  const fuentes = (withoutNorma.fuentes ?? []).filter((source) => source.nivel !== "oficial");
+  return {
+    ...withoutNorma,
+    tipo_evento: "nombramiento-fallido",
+    tipo: "nombramiento-fallido",
+    estado: "en_confirmacion",
+    documento_pendiente: true,
+    fecha_verificacion: null,
+    fuentes,
+    motivo: "Anuncio de reemplazo difundido el 14 de agosto de 2026; no se encontró un decreto normativo verificable que acreditara este nombramiento.",
+    fuente: fuentes.map((source) => source.medio + " (" + source.fecha + ")").join(" · "),
+    verificado: false,
+  };
+}
+
+export function materializeKnownSignals(movimientos, signals, now) {
+  const normalizedExisting = movimientos.map(markUnconfirmedSofiaAnnouncement);
+  const riosMovementId = "mov-rios-deportes-2026-08-27";
+  const knownRiosExists = normalizedExisting.some((movement) => (
+    movement.id === riosMovementId
+    || (
+      normalizeSignalText(movement.entro?.nombre ?? movement.entrante ?? "").includes("maria paz rios")
+      && normalizeSignalText(movement.cargo ?? "").includes("subsecretaria de deporte")
+      && movement.fecha === "2026-08-27"
+    )
+  ));
+  const riosSignal = signals.find((signal) => {
+    const title = normalizeSignalText((signal.title ?? "") + " " + (signal.summary ?? ""));
+    return title.includes("maria paz rios") && title.includes("subsecretaria de deporte");
+  });
+  if (knownRiosExists || !riosSignal) return normalizedExisting;
+
+  return [
+    ...normalizedExisting,
+    {
+      id: riosMovementId,
+      tipo_evento: "nombramiento",
+      cargo: "Subsecretaria de Deportes",
+      organismo: "Subsecretaría de Deportes",
+      ministerio: "Ministerio del Deporte",
+      region: "Nacional",
+      salio: {
+        nombre: "Andrés Otero Klein",
+        fecha: "2026-08-13",
+        fecha_inicio: "2026-03-11",
+        motivo_categoria: "Cambio dentro del gobierno",
+        motivo_texto: "Renuncia informada en el marco del cambio de conducción del Ministerio del Deporte.",
+        dias_en_cargo: 155,
+        dias_en_cargo_origen: "estimado",
+      },
+      entro: {
+        nombre: "María Paz Ríos Lama",
+        fecha: "2026-08-27",
+      },
+      fuentes: MARIA_PAZ_RIOS_SOURCES,
+      estado: "en_confirmacion",
+      fecha_deteccion: now,
+      fecha_verificacion: null,
+      fecha: "2026-08-27",
+      fechaExacta: true,
+      tipo: "nombramiento",
+      organo: "Subsecretaría del Deporte",
+      saliente: "Andrés Otero Klein",
+      entrante: "María Paz Ríos Lama",
+      motivo: "Designación anunciada oficialmente el 26 de agosto de 2026; María Paz Ríos Lama asumió el 27 de agosto. El decreto de nombramiento queda pendiente de verificación normativa.",
+      fuente: MARIA_PAZ_RIOS_SOURCES.map((source) => source.medio + " (" + source.fecha + ")").join(" · "),
+      documento_pendiente: true,
+      verificado: false,
+    },
+  ];
 }
 
 function buildConnectorMetadata(previousConnectors, sourceResults, now) {
@@ -269,13 +413,14 @@ export function buildMovementPayload(previous, { now = new Date().toISOString(),
     throw new Error("MOVIMIENTOS_BASELINE_EMPTY");
   }
   const usedIds = new Set();
-  const movimientos = previous.movimientos.map((movement) => {
+  const movimientosBase = previous.movimientos.map((movement) => {
     const enriched = enrichMovimiento(movement, now);
     let id = enriched.id;
     if (usedIds.has(id)) id = `${id}-${sha256(`${id}|${enriched.fecha}|${enriched.cargo}|${enriched.organismo}`).slice(0, 12)}`;
     usedIds.add(id);
     return { ...enriched, id };
   });
+  const movimientos = materializeKnownSignals(movimientosBase, signals, now);
   const lastEventDate = movimientos.map((movement) => movement.fecha).filter(Boolean).sort().at(-1) ?? null;
   const sourceHealth = sourceResults.map((source) => Object.fromEntries(
     Object.entries(source).filter(([key]) => key !== "signals"),
@@ -289,7 +434,8 @@ export function buildMovementPayload(previous, { now = new Date().toISOString(),
     last_attempt_at: now,
     last_success_at: now,
     last_event_date: lastEventDate,
-    frecuencia: "Diario 03:00 CLT (07:00 UTC)",
+    frecuencia: "Diario 03:00 CLT",
+    frecuencia_utc: "07:00 UTC",
     conectores: buildConnectorMetadata(previous.conectores, sourceResults, now),
     source_health: sourceHealth,
     signals: signals.slice(0, 250),
@@ -306,7 +452,7 @@ export function buildMovementPayload(previous, { now = new Date().toISOString(),
     },
     movimientos,
   };
-  payload.checksum_sha256 = sha256(payload);
+  payload.checksum_sha256 = sha256({ ...payload, checksum_sha256: undefined });
   return payload;
 }
 

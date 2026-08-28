@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Servicios Públicos, Ministerios y Gobiernos Regionales — El Cambiómetro",
   description:
     "Directorio oficial consolidado de las instituciones del Estado de Chile: 25 ministerios, 16 gobiernos regionales, superintendencias, empresas públicas y servicios nacionales. Presupuestos DIPRES 2026, dotación de personal y compras públicas en MercadoPúblico.",
+  alternates: { canonical: "/servicios-publicos" },
   openGraph: {
     title: "Servicios Públicos y Ministerios de Chile — El Cambiómetro",
     description: "Presupuestos Ley DIPRES 2026, dotación de personal, compras públicas y autoridades verificadas del Estado de Chile.",

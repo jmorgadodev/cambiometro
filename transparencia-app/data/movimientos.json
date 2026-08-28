@@ -1,20 +1,44 @@
 {
-  "version": "4.0.0",
+  "version": "5.0.0",
   "pipeline": "etl_movimientos_autoridades",
-  "last_run": "2026-08-17T03:00:00-04:00",
+  "last_run": "2026-08-28T13:08:06.256Z",
   "frecuencia": "Diario 03:00 CLT",
   "conectores": {
     "t1_ley_chile": {
       "nombre": "etl_ley_chile",
       "descripcion": "Decretos de nombramiento, renuncia, remoción y subrogancias indexados con idNorma BCN / Diario Oficial en todos los niveles (ministros, subsecretarios, seremis, delegados y directores)",
       "frecuencia": "Diaria 03:00 CLT",
-      "estado": "Conectado y activo"
+      "estado": "Disponible",
+      "ultima_consulta": "2026-08-28T13:08:06.351Z",
+      "http_status": 200,
+      "error": null
     },
     "t1_diario_oficial": {
       "nombre": "etl_diario_oficial",
       "descripcion": "Decretos y resoluciones del Diario Oficial de Chile para autoridades nacionales y regionales",
       "frecuencia": "Diaria 03:00 CLT",
-      "estado": "Conectado y activo"
+      "estado": "Disponible",
+      "ultima_consulta": "2026-08-28T13:08:07.063Z",
+      "http_status": 200,
+      "error": null
+    },
+    "t1_gob_cl": {
+      "estado": "Disponible",
+      "ultima_consulta": "2026-08-28T13:08:06.640Z",
+      "http_status": 200,
+      "error": null
+    },
+    "t1_prensa_presidencia": {
+      "estado": "Disponible",
+      "ultima_consulta": "2026-08-28T13:08:06.378Z",
+      "http_status": 200,
+      "error": null
+    },
+    "t1_mindep": {
+      "estado": "Disponible",
+      "ultima_consulta": "2026-08-28T13:08:07.500Z",
+      "http_status": 200,
+      "error": null
     }
   },
   "fuentes_monitoreadas": {
@@ -49,11 +73,12 @@
     ]
   },
   "stats": {
-    "total_movimientos": 79,
-    "verificados": 75,
-    "en_confirmacion": 4,
-    "ultimos_7_dias": 7,
-    "con_cgr_vinculado": 2
+    "total_movimientos": 80,
+    "verificados": 74,
+    "en_confirmacion": 6,
+    "ultimos_7_dias": 1,
+    "con_cgr_vinculado": 2,
+    "signals_en_confirmacion": 7
   },
   "movimientos": [
     {
@@ -175,7 +200,7 @@
     },
     {
       "id": "mov-100",
-      "tipo_evento": "renuncia",
+      "tipo_evento": "nombramiento-fallido",
       "cargo": "Subsecretaria del Deporte",
       "organismo": "Subsecretaría del Deporte",
       "ministerio": "Ministerio del Deporte",
@@ -193,17 +218,7 @@
         "nombre": "Sofía Rengifo Ottone",
         "fecha": "2026-08-14"
       },
-      "decreto_url": "https://www.bcn.cl/leychile/navegar?idNorma=1215435",
-      "decreto_numero": "Decreto Supremo N° 83 del Ministerio del Deporte",
-      "id_norma": "1215435",
       "fuentes": [
-        {
-          "nivel": "oficial",
-          "medio": "Ley Chile (Biblioteca del Congreso Nacional)",
-          "url": "https://www.bcn.cl/leychile/navegar?idNorma=1215435",
-          "fecha": "2026-08-14",
-          "titulo": "Decreto N° 83: Nombra Subsecretaria del Deporte a doña Sofía Rengifo Ottone"
-        },
         {
           "nivel": "prensa",
           "medio": "Emol",
@@ -212,21 +227,21 @@
           "titulo": "Sofía Rengifo Ottone asume la Subsecretaría del Deporte en nuevo diseño institucional"
         }
       ],
-      "estado": "verificado",
+      "estado": "en_confirmacion",
       "fecha_deteccion": "2026-08-14T11:00:00-04:00",
-      "fecha_verificacion": "2026-08-14T17:00:00-04:00",
+      "fecha_verificacion": null,
       "dias_en_cargo": 156,
       "dias_en_cargo_origen": "oficial",
-      "documento_pendiente": false,
+      "documento_pendiente": true,
       "fecha": "2026-08-14",
       "fechaExacta": true,
-      "tipo": "renuncia",
+      "tipo": "nombramiento-fallido",
       "organo": "Subsecretaría del Deporte",
       "saliente": "Andrés Otero Klein",
       "entrante": "Sofía Rengifo Ottone",
-      "motivo": "Reestructuración del equipo directivo del Ministerio del Deporte.",
-      "fuente": "Ley Chile (Biblioteca del Congreso Nacional) (2026-08-14) · Emol (2026-08-14)",
-      "verificado": true
+      "motivo": "Anuncio de reemplazo difundido el 14 de agosto de 2026; no se encontró un decreto normativo verificable que acreditara este nombramiento.",
+      "fuente": "Emol (2026-08-14)",
+      "verificado": false
     },
     {
       "id": "mov-036",
@@ -4373,6 +4388,241 @@
       "motivo": "Renuncia en medio de la controversia por el no pago de contribuciones de un inmueble de su propiedad.",
       "fuente": "Servicio de Impuestos Internos (Comunicado) (2026-02-15) · La Tercera (2026-02-15)",
       "verificado": true
+    },
+    {
+      "id": "mov-rios-deportes-2026-08-27",
+      "tipo_evento": "nombramiento",
+      "cargo": "Subsecretaria de Deportes",
+      "organismo": "Subsecretaría de Deportes",
+      "ministerio": "Ministerio del Deporte",
+      "region": "Nacional",
+      "salio": {
+        "nombre": "Andrés Otero Klein",
+        "fecha": "2026-08-13",
+        "fecha_inicio": "2026-03-11",
+        "motivo_categoria": "Cambio dentro del gobierno",
+        "motivo_texto": "Renuncia informada en el marco del cambio de conducción del Ministerio del Deporte.",
+        "dias_en_cargo": 155,
+        "dias_en_cargo_origen": "estimado"
+      },
+      "entro": {
+        "nombre": "María Paz Ríos Lama",
+        "fecha": "2026-08-27"
+      },
+      "fuentes": [
+        {
+          "nivel": "oficial",
+          "medio": "Prensa Presidencia",
+          "url": "https://prensa.presidencia.cl/comunicado.aspx?id=339274",
+          "fecha": "2026-08-26",
+          "titulo": "Presidente José Antonio Kast nombra a María Paz Ríos Lama como nueva subsecretaria de Deportes"
+        },
+        {
+          "nivel": "prensa",
+          "medio": "BioBioChile",
+          "url": "https://www.biobiochile.cl/noticias/nacional/chile/2026/08/26/presidente-kast-designa-a-abogada-y-atleta-maria-paz-rios-como-nueva-subsecretaria-de-deportes.shtml",
+          "fecha": "2026-08-26",
+          "titulo": "Presidente Kast designa a abogada y atleta María Paz Ríos como nueva subsecretaria de Deportes"
+        },
+        {
+          "nivel": "prensa",
+          "medio": "Cooperativa",
+          "url": "https://cooperativa.cl/noticias/deportes/gobierno/ministerio-del-deporte/presidente-kast-nombro-a-maria-paz-rios-como-nueva-subsecretaria-de/2026-08-26/183651.html",
+          "fecha": "2026-08-26",
+          "titulo": "Presidente Kast nombró a María Paz Ríos como nueva subsecretaria de Deportes"
+        },
+        {
+          "nivel": "prensa",
+          "medio": "Pauta",
+          "url": "https://www.pauta.cl/actualidad/2026/08/26/maria-paz-rios-lama-asumira-como-nueva-subsecretaria-de-deportes.html",
+          "fecha": "2026-08-26",
+          "titulo": "María Paz Ríos Lama asumirá como nueva subsecretaria de Deportes"
+        },
+        {
+          "nivel": "prensa",
+          "medio": "CNN Chile",
+          "url": "https://www.cnnchile.com/pais/presidente-kast-nombra-a-la-abogada-y-atleta-maria-paz-rios-lama-como-nueva-subsecretaria-de-deportes/",
+          "fecha": "2026-08-26",
+          "titulo": "Presidente Kast nombra a María Paz Ríos Lama como nueva subsecretaria de Deportes"
+        },
+        {
+          "nivel": "prensa",
+          "medio": "24 Horas",
+          "url": "https://www.24horas.cl/actualidad/politica/maria-paz-rios-es-nombrada-como-la-nueva-subsecretaria-de-deportes",
+          "fecha": "2026-08-26",
+          "titulo": "María Paz Ríos es designada como la nueva subsecretaria de Deportes"
+        }
+      ],
+      "estado": "en_confirmacion",
+      "fecha_deteccion": "2026-08-28T13:04:30.697Z",
+      "fecha_verificacion": null,
+      "fecha": "2026-08-27",
+      "fechaExacta": true,
+      "tipo": "nombramiento",
+      "organo": "Subsecretaría del Deporte",
+      "saliente": "Andrés Otero Klein",
+      "entrante": "María Paz Ríos Lama",
+      "motivo": "Designación anunciada oficialmente el 26 de agosto de 2026; María Paz Ríos Lama asumió el 27 de agosto. El decreto de nombramiento queda pendiente de verificación normativa.",
+      "fuente": "Prensa Presidencia (2026-08-26) · BioBioChile (2026-08-26) · Cooperativa (2026-08-26) · Pauta (2026-08-26) · CNN Chile (2026-08-26) · 24 Horas (2026-08-26)",
+      "documento_pendiente": true,
+      "verificado": false
     }
-  ]
+  ],
+  "last_attempt_at": "2026-08-28T13:08:06.256Z",
+  "last_success_at": "2026-08-28T13:08:06.256Z",
+  "last_event_date": "2026-08-27",
+  "source_health": [
+    {
+      "id": "ley-chile",
+      "label": "Ley Chile / BCN",
+      "tier": "official",
+      "url": "https://www.bcn.cl/leychile/navegar/",
+      "ok": true,
+      "status": 200,
+      "bytes": 9602,
+      "fetchedAt": "2026-08-28T13:08:06.351Z"
+    },
+    {
+      "id": "diario-oficial",
+      "label": "Diario Oficial",
+      "tier": "official",
+      "url": "https://www.diariooficial.interior.gob.cl/edicionelectronica/",
+      "ok": true,
+      "status": 200,
+      "bytes": 38913,
+      "fetchedAt": "2026-08-28T13:08:07.063Z"
+    },
+    {
+      "id": "gob-cl",
+      "label": "Gob.cl Noticias",
+      "tier": "official",
+      "url": "https://www.gob.cl/noticias/",
+      "ok": true,
+      "status": 200,
+      "bytes": 26301,
+      "fetchedAt": "2026-08-28T13:08:06.640Z"
+    },
+    {
+      "id": "prensa-presidencia",
+      "label": "Prensa Presidencia",
+      "tier": "official",
+      "url": "https://prensa.presidencia.cl/comunicados.aspx",
+      "ok": true,
+      "status": 200,
+      "bytes": 42201,
+      "fetchedAt": "2026-08-28T13:08:06.378Z"
+    },
+    {
+      "id": "mindep",
+      "label": "Ministerio del Deporte",
+      "tier": "official",
+      "url": "https://www.mindep.cl/noticias",
+      "ok": true,
+      "status": 200,
+      "bytes": 1695633,
+      "fetchedAt": "2026-08-28T13:08:07.500Z"
+    }
+  ],
+  "signals": [
+    {
+      "title": "Presidente José Antonio Kast nombra a María Paz Ríos Lama como nueva subsecretaria de Deportes",
+      "url": "https://prensa.presidencia.cl/comunicado.aspx?id=339274",
+      "date": null,
+      "summary": "",
+      "fase": "anunciado",
+      "status": "en_confirmacion",
+      "source_id": "prensa-presidencia",
+      "source_label": "Prensa Presidencia",
+      "source_tier": "official",
+      "detected_at": "2026-08-28T13:08:06.378Z",
+      "signal_id": "signal-0dceab326b5d2fa3abbdf3ee",
+      "tipo": "nombramiento"
+    },
+    {
+      "title": "Presidente José Antonio Kast nombra a María Paz Ríos Lama como nueva subsecretaria de Deportes",
+      "url": "https://prensa.presidencia.cl/comunicado.aspx?id=339274",
+      "date": null,
+      "summary": "",
+      "fase": "anunciado",
+      "status": "en_confirmacion",
+      "source_id": "mindep",
+      "source_label": "Ministerio del Deporte",
+      "source_tier": "official",
+      "detected_at": "2026-08-28T13:08:07.500Z",
+      "signal_id": "signal-693feb7c3b8e6bf305d61016",
+      "tipo": "nombramiento"
+    },
+    {
+      "title": "Presidente José Antonio Kast nombra a Francisco Riveros como nuevo ministro del Deporte",
+      "url": "https://prensa.presidencia.cl/comunicado.aspx?id=338171",
+      "date": null,
+      "summary": "",
+      "fase": "anunciado",
+      "status": "en_confirmacion",
+      "source_id": "mindep",
+      "source_label": "Ministerio del Deporte",
+      "source_tier": "official",
+      "detected_at": "2026-08-28T13:08:07.500Z",
+      "signal_id": "signal-e6b77e699eb3c586e03b80d2",
+      "tipo": "nombramiento"
+    },
+    {
+      "title": "Presidente Boric nombra a través de Alta Dirección Pública al director nacional del Instituto Nacional de Deportes",
+      "url": "https://www.mindep.cl/actividades/noticias/2127",
+      "date": null,
+      "summary": "",
+      "fase": "anunciado",
+      "status": "en_confirmacion",
+      "source_id": "mindep",
+      "source_label": "Ministerio del Deporte",
+      "source_tier": "official",
+      "detected_at": "2026-08-28T13:08:07.500Z",
+      "signal_id": "signal-d15e59f699b967b8f383b6cc",
+      "tipo": "nombramiento"
+    },
+    {
+      "title": "Ministerio del Deporte informa nombramiento de Macarena Chandía Pino como Seremi en O’Higgins",
+      "url": "https://www.mindep.cl/actividades/noticias/2035",
+      "date": null,
+      "summary": "",
+      "fase": "anunciado",
+      "status": "en_confirmacion",
+      "source_id": "mindep",
+      "source_label": "Ministerio del Deporte",
+      "source_tier": "official",
+      "detected_at": "2026-08-28T13:08:07.500Z",
+      "signal_id": "signal-b1adb7723798151183204e46",
+      "tipo": "nombramiento"
+    },
+    {
+      "title": "Designación de secretario ejecutivo interino en Plan Olímpico",
+      "url": "https://www.mindep.cl/actividades/noticias/2034",
+      "date": null,
+      "summary": "",
+      "fase": "anunciado",
+      "status": "en_confirmacion",
+      "source_id": "mindep",
+      "source_label": "Ministerio del Deporte",
+      "source_tier": "official",
+      "detected_at": "2026-08-28T13:08:07.500Z",
+      "signal_id": "signal-decf09efad439aed9ed7da11",
+      "tipo": "nombramiento"
+    },
+    {
+      "title": "Presidente de la República nombra Directora Nacional del IND",
+      "url": "https://www.mindep.cl/actividades/noticias/1634",
+      "date": null,
+      "summary": "",
+      "fase": "anunciado",
+      "status": "en_confirmacion",
+      "source_id": "mindep",
+      "source_label": "Ministerio del Deporte",
+      "source_tier": "official",
+      "detected_at": "2026-08-28T13:08:07.500Z",
+      "signal_id": "signal-a7dc9a5c4f21a83dfd6a2164",
+      "tipo": "nombramiento"
+    }
+  ],
+  "checksum_sha256": "bbf092656ee6a637be1f3e9851f1dbd95d33f6f56aac5e891998934470f1e9bf",
+  "frecuencia_utc": "07:00 UTC"
 }

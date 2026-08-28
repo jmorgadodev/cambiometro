@@ -33,9 +33,10 @@ jobs:
         with:
           path: |
             transparencia-app/.next/cache
-          key: ${{ runner.os }}-nextjs-${{ hashFiles('transparencia-app/package-lock.json') }}-${{ hashFiles('transparencia-app/app/**') }}
-          restore-keys: |
-            ${{ runner.os }}-nextjs-${{ hashFiles('transparencia-app/package-lock.json') }}-
+          # Next puede prerenderar datos leídos desde lib/data durante el build.
+          # La clave debe invalidarse también para esos inputs; de lo contrario
+          # un cache antiguo puede servir HTML sin los detalles recién agregados.
+          key: ${{ runner.os }}-nextjs-${{ hashFiles('transparencia-app/package-lock.json', 'transparencia-app/app/**', 'transparencia-app/components/**', 'transparencia-app/lib/**', 'transparencia-app/data/**', 'transparencia-app/scripts/**', 'transparencia-app/public/**', 'transparencia-app/next.config.ts') }}
 
       - name: Install dependencies
         run: npm ci

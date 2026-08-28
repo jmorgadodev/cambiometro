@@ -37,7 +37,7 @@ export const KPI_SCOPES: Record<
     href: "/cruces",
   },
   votaciones: {
-    label: "votaciones de sala (histórico 2022-2026)",
+    label: "votaciones de sala históricas",
     tooltip: "Histórico legislativo consolidado (2022-2026) en Cámara y Senado. El período actual 2026-2030 suma 769 eventos indexados en tiempo real.",
     href: "/politico",
   },

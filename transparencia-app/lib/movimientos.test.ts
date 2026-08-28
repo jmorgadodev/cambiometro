@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
-import { MOVIMIENTOS } from "./movimientos";
+import { MOVIMIENTOS, MOVIMIENTOS_HOME_SUMMARY } from "./movimientos";
 
 describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV y Anatomía de Card", () => {
   const root = process.cwd();
@@ -29,6 +29,10 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
   it("1b. cada movimiento tiene un identificador único", () => {
     const ids = MOVIMIENTOS.map((movement) => movement.id);
     expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("1c. el resumen de la Home se recalcula desde el corte del gobierno actual", () => {
+    expect(MOVIMIENTOS_HOME_SUMMARY).toMatchObject({ desde: "2026-03-11", total: 79, renuncias: 55, verificados: 73, enConfirmacion: 6 });
   });
 
   it("2. Eventos obligatorios del 14-08-2026 presentes (Duco/Deporte y Urrejola/Atacama) con fuentes de prensa", () => {

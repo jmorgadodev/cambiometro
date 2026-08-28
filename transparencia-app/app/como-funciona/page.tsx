@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "Cómo usamos los datos públicos — El Cambiómetro",
   description:
     "Conoce cómo El Cambiómetro compila, consolida y presenta la información de fuentes oficiales para facilitar la fiscalización y transparencia ciudadana.",
+  alternates: { canonical: "/como-funciona" },
 };
 
 const PILARES: { icon: IconoNombre; title: string; text: string }[] = [

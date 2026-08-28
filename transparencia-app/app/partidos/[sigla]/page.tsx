@@ -52,6 +52,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `Bancada ${partido.sigla} (${nombre}) — El Cambiómetro`,
     description: `Ficha de fiscalización de la bancada ${partido.sigla}: escaños, votaciones en sala, asistencia, gastos operacionales y personal de apoyo compilados por El Cambiómetro.`,
+    alternates: {
+      canonical: `/partidos/${partido.sigla.toLowerCase()}`,
+    },
     openGraph: {
       title: `Bancada ${partido.sigla}: Votaciones y Gastos`,
       description: `Revisa la evidencia oficial de ${partido.sigla} en El Cambiómetro.`,

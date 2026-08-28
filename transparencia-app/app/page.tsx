@@ -7,10 +7,23 @@ import { GLOBAL_KPIS, KPI_SCOPES } from "@/lib/global-kpis";
 import { ETL_SOURCES_DATA } from "@/lib/etl-sources-data";
 import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
 import { VOTACIONES_DESTACADAS } from "@/lib/votaciones-destacadas";
+import { tituloVotacionLegible } from "@/lib/votaciones-format";
+import { MOVIMIENTOS_HOME_SUMMARY } from "@/lib/movimientos";
+import { formatFechaCorta } from "@/lib/format";
 
 export const dynamic = "force-static";
 
 const HOME_SOURCES_LIST = ETL_SOURCES_DATA.filter((source) => source.recordCount > 0);
+
+// Selección editorial para la Home: impacto público, quórum y diversidad de
+// materias. El listado completo y sus filtros viven en /votaciones-destacadas.
+const HOME_FEATURED_VOTE_IDS = [
+  "senado-vot-11264",
+  "camara-vot-89844",
+  "senado-vot-11274",
+  "camara-vot-89749",
+  "camara-vot-89750",
+] as const;
 
 export const metadata: Metadata = {
   title: "El Cambiómetro — Plataforma de Datos Públicos y Transparencia",
@@ -73,7 +86,11 @@ export default async function HomePage() {
   const resolvedHomeKpis = HOME_KPIS.map((item) => item.key === "entidades"
     ? { ...item, value: entityCount || item.value }
     : item);
-  const highlightedVotes = [...VOTACIONES_DESTACADAS].sort((a, b) => b.fecha.localeCompare(a.fecha)).slice(0, 5);
+  const votesById = new Map(VOTACIONES_DESTACADAS.map((vote) => [vote.votacion_id, vote]));
+  const highlightedVotes = HOME_FEATURED_VOTE_IDS.flatMap((id) => {
+    const vote = votesById.get(id);
+    return vote ? [vote] : [];
+  });
 
   return (
     <div className="home-desk">
@@ -126,13 +143,13 @@ export default async function HomePage() {
                 <div><dt>Fuentes conectadas</dt><dd>{operationalSources.length}</dd></div>
               </dl>
               <div className="home-evidence-card__rule" aria-hidden="true" />
-              <form className="home-query" action="/cruces" role="search">
+              <form className="home-query" action="/politico" role="search">
                 <label htmlFor="home-search">Buscar en los registros</label>
                 <div className="home-query__control">
-                  <input id="home-search" name="q" type="search" minLength={2} maxLength={80} placeholder="Persona, institución o concepto" autoComplete="off" />
+                  <input id="home-search" name="q" type="search" minLength={2} maxLength={80} placeholder="Nombre, partido, distrito o región" autoComplete="off" />
                   <button type="submit">Buscar</button>
                 </div>
-                <small>Busca una autoridad, fundación, partido, organismo o proveedor.</small>
+                <small>Busca diputados y senadores por nombre, partido, distrito o región.</small>
               </form>
             </div>
           </div>
@@ -153,7 +170,8 @@ export default async function HomePage() {
             >
               <span className="home-stat__index" aria-hidden="true">0{index + 1}</span>
               <StatCounter value={item.value} delay={index * 100} />
-              <span className="home-stat__label">{item.label}</span>
+              <span className="home-stat__label">{item.key === "votaciones" ? "Votaciones de sala históricas" : item.label}</span>
+              {item.key === "votaciones" && <small className="home-stat__scope">Cámara + Senado · 2022–2026</small>}
             </Link>
           ))}
         </div>
@@ -174,7 +192,13 @@ export default async function HomePage() {
               <span className="home-path__icon"><Icono nombre="votaciones" size={18} /></span>
               <span className="home-path__eyebrow">Decisiones públicas</span>
               <h3>¿Cómo votó una autoridad?</h3>
-              <p>Consulta votaciones, asistencia, dietas y declaraciones con la fuente oficial a la vista.</p>
+              <p>Consulta votaciones, asistencia, dieta, gastos operacionales rendidos, asesores, declaraciones, relaciones y fuentes oficiales.</p>
+              <span className="home-path__features" aria-label="Contenido de la ficha">
+                <span>Votaciones y asistencia</span>
+                <span>Dietas y gastos rendidos</span>
+                <span>Asesores y declaraciones</span>
+                <span>Relaciones y fuentes</span>
+              </span>
               <b>Ver análisis parlamentario <span aria-hidden="true">→</span></b>
             </Link>
             <div className="home-paths__stack">
@@ -199,7 +223,73 @@ export default async function HomePage() {
                 <p>Filtra vínculos y abre la evidencia que respalda cada relación.</p>
                 <b>Abrir explorador <span aria-hidden="true">→</span></b>
               </Link>
+              <Link prefetch={false} href="/personas" className="home-path">
+                <span className="home-path__icon"><Icono nombre="personas" size={16} /></span>
+                <span className="home-path__eyebrow">Directorio de personas</span>
+                <h3>¿Quiénes ocupan los cargos públicos?</h3>
+                <p>Parlamentarios, autoridades y nóminas oficiales en un solo directorio consultable.</p>
+                <b>Explorar directorio <span aria-hidden="true">→</span></b>
+              </Link>
             </div>
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal delay={50}>
+        <section className="container-main home-movement-feature" aria-labelledby="home-movement-title">
+          <div className="home-section-heading">
+            <div>
+              <p className="eyebrow">Seguimiento de autoridades</p>
+              <h2 id="home-movement-title">Lo último que cambió en el Estado</h2>
+            </div>
+            <Link prefetch={false} href="/movimientos">Ver historial completo →</Link>
+          </div>
+          <div className="home-movement-feature__body">
+            <div className="home-movement-feature__copy">
+              <p className="eyebrow">Corte de movimientos</p>
+              <h3>Cambios que vale la pena seguir</h3>
+              <p>Una lectura breve de renuncias, nombramientos y cambios anunciados. Los movimientos en confirmación se mantienen separados hasta contar con respaldo normativo.</p>
+              <span className="home-path__meta">{MOVIMIENTOS_HOME_SUMMARY.total} movimientos · {MOVIMIENTOS_HOME_SUMMARY.renuncias} renuncias · {MOVIMIENTOS_HOME_SUMMARY.verificados} verificados · {MOVIMIENTOS_HOME_SUMMARY.enConfirmacion} en confirmación</span>
+              <Link prefetch={false} href="/movimientos" className="home-movement-feature__cta">Ver movimientos y fuentes <span aria-hidden="true">→</span></Link>
+            </div>
+            <div className="home-movement-timeline" aria-label="Línea de tiempo de movimientos desde el 11 de marzo de 2026">
+              <div className="home-movement-timeline__track" aria-hidden="true" />
+              <div className="home-movement-timeline__step"><span>{formatFechaCorta(MOVIMIENTOS_HOME_SUMMARY.desde)}</span><strong>Inicio del periodo</strong></div>
+              <div className="home-movement-timeline__step"><span>{formatFechaCorta(MOVIMIENTOS_HOME_SUMMARY.ultimoEvento)}</span><strong>Último cambio</strong></div>
+              <div className="home-movement-timeline__step"><span>{MOVIMIENTOS_HOME_SUMMARY.diasSinCambios} días</span><strong>sin cambios al corte</strong></div>
+            </div>
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal delay={75}>
+        <section className="container-main home-discovery" aria-labelledby="discovery-title">
+          <div className="home-section-heading">
+            <div>
+              <p className="eyebrow">Territorio y actualidad</p>
+              <h2 id="discovery-title">También puedes seguir lo que cambia</h2>
+            </div>
+            <Link prefetch={false} href="/datos">Ver el catálogo de datos →</Link>
+          </div>
+          <div className="home-discovery-grid">
+            <Link prefetch={false} href="/municipalidades" className="home-discovery-card">
+              <span className="home-discovery-card__icon"><Icono nombre="territorio" size={20} /></span>
+              <span className="home-discovery-card__label">Municipios</span>
+              <strong>346 comunas con ficha territorial</strong>
+              <span>Demografía Censo 2024, alcaldías, finanzas y compras públicas.</span>
+            </Link>
+            <Link prefetch={false} href="/movimientos" className="home-discovery-card">
+              <span className="home-discovery-card__icon"><Icono nombre="etl" size={20} /></span>
+              <span className="home-discovery-card__label">Actualidad</span>
+              <strong>{MOVIMIENTOS_HOME_SUMMARY.renuncias} renuncias desde el 11 de marzo</strong>
+              <span>{MOVIMIENTOS_HOME_SUMMARY.verificados} hechos verificados y {MOVIMIENTOS_HOME_SUMMARY.enConfirmacion} en confirmación.</span>
+            </Link>
+            <Link prefetch={false} href="/municipalidades" className="home-discovery-card">
+              <span className="home-discovery-card__icon"><Icono nombre="datos" size={20} /></span>
+              <span className="home-discovery-card__label">Datos censales</span>
+              <strong>INE Censo 2024 en el territorio</strong>
+              <span>Compara población, viviendas y hogares desde la fuente oficial.</span>
+            </Link>
           </div>
         </section>
       </Reveal>
@@ -210,11 +300,12 @@ export default async function HomePage() {
             <div><p className="eyebrow">Seguimiento legislativo</p><h2 id="highlighted-votes-title">Votaciones destacadas</h2></div>
             <Link prefetch={false} href="/votaciones-destacadas/">Ver selección completa →</Link>
           </div>
+          <p className="home-featured-votes__intro">Una selección de proyectos con impacto público, quórum relevante o materias que conviene entender en contexto.</p>
           <div className="home-vote-list">
             {highlightedVotes.map((vote) => (
               <article className="home-vote-row" key={vote.votacion_id}>
                 <time dateTime={vote.fecha}>{vote.fecha}</time>
-                <div className="home-vote-row__content"><strong>{vote.boletin}</strong><h3>{vote.titulo}</h3><span>{vote.camara}</span></div>
+                <div className="home-vote-row__content"><strong>{vote.boletin}</strong><h3>{tituloVotacionLegible(vote)}</h3><p>{vote.resumen}</p><span>{vote.camara}</span></div>
                 <span className="home-vote-row__result" data-result={vote.resultado}>{vote.resultado}</span>
               </article>
             ))}

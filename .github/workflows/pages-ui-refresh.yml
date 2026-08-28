@@ -126,6 +126,10 @@ jobs:
             transparencia-app/data/municipalidades-data.json
             transparencia-app/data/municipalidades-list.json
 
+      - name: Regenerar salud de fuentes desde el snapshot publicado
+        working-directory: transparencia-app
+        run: npm run data:health
+
       - name: Construir Pages sin hidratar ETL
         run: npm run pages:build
         working-directory: transparencia-app

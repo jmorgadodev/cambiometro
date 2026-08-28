@@ -3,8 +3,9 @@ import Link from "next/link";
 import { leerServelV1 } from "@/lib/servel";
 
 export const metadata: Metadata = {
-  title: "Rankings electorales 2025 · SERVEL",
+  title: "Rankings electorales 2025 · SERVEL | El Cambiómetro",
   description: "Resultados oficiales de la elección general 2025-11-16: candidatos más votados y pactos por contienda.",
+  alternates: { canonical: "/rankings" },
 };
 
 const CONTEST_LABEL: Record<string, string> = {

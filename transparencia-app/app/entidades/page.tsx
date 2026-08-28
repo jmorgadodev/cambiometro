@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Entidades Canónicas — El Cambiómetro",
   description:
     "Catálogo de personas, organismos, proveedores y municipalidades indexados en la plataforma de evidencia pública. Busca y cruza entidades con documentos oficiales.",
+  alternates: { canonical: "/entidades" },
 };
 
 const KIND_LABEL: Record<string, { label: string; emoji: string; badge: string }> = {

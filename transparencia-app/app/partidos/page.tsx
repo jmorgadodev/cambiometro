@@ -16,6 +16,7 @@ export const metadata: Metadata = {
   title: "Partidos Políticos y Bancadas 2026-2030 — El Cambiómetro",
   description:
     "Evidencia comparativa por partido: escaños en el Congreso, votaciones de sala (Cámara y Senado), asistencia, gastos operacionales y personal de apoyo con datos públicos oficiales.",
+  alternates: { canonical: "/partidos" },
   openGraph: {
     title: "Partidos Políticos y Bancadas 2026-2030 — El Cambiómetro",
     description: "Comparativa de votaciones, asistencia y gastos operacionales de todas las bancadas del Congreso Nacional.",

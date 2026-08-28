@@ -53,7 +53,7 @@ const HISTORICAL_COUNTS: Record<string, number> = {
   ine: 346,
 };
 
-type HealthKey = keyof typeof healthRaw.sources | "personal_apoyo";
+type HealthKey = keyof typeof healthRaw.sources | "personal_apoyo" | "ine";
 type Descriptor = Omit<EtlSourceInfo, "recordCount" | "canonicalCount" | "historicalCount" | "financialAmountClp" | "lastUpdated" | "lastUpdatedRelative" | "status" | "statusText"> & { health: HealthKey };
 const dateLabel = (value: string) => `Corte ${new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(value))}`;
 

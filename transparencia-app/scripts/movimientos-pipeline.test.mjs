@@ -3,6 +3,7 @@ import {
   buildMovementPayload,
   calculateMovimientoEstado,
   collectMovementSources,
+  materializeKnownSignals,
   normalizeMovementPayload,
   parseMovementSignals,
   sha256,
@@ -32,7 +33,32 @@ describe("pipeline automático de movimientos", () => {
 
   it("mantiene el estado provisional cuando no hay fuente oficial", () => {
     expect(calculateMovimientoEstado({ fuentes: [{ nivel: "prensa" }] })).toBe("en_confirmacion");
-    expect(calculateMovimientoEstado({ fuentes: [{ nivel: "oficial" }] })).toBe("verificado");
+    expect(calculateMovimientoEstado({ fuentes: [{ nivel: "oficial" }] })).toBe("en_confirmacion");
+    expect(calculateMovimientoEstado({ decreto_url: "https://www.bcn.cl/leychile/navegar?idNorma=1", fuentes: [{ nivel: "oficial" }] })).toBe("verificado");
+  });
+
+  it("materializa una señal oficial de nombramiento y corrige el anuncio previo no corroborado", () => {
+    const previous = [
+      {
+        id: "mov-100",
+        cargo: "Subsecretaria del Deporte",
+        estado: "verificado",
+        decreto_url: "https://www.bcn.cl/leychile/navegar?idNorma=1215435",
+        entro: { nombre: "Sofía Rengifo Ottone", fecha: "2026-08-14" },
+        fuentes: [{ nivel: "oficial", medio: "Ley Chile", url: "https://www.bcn.cl/leychile/navegar?idNorma=1215435", fecha: "2026-08-14" }],
+      },
+    ];
+    const result = materializeKnownSignals(previous, [{
+      title: "Presidente Kast nombra a María Paz Ríos Lama como nueva subsecretaria de Deportes",
+      summary: "",
+      url: "https://prensa.presidencia.cl/comunicado.aspx?id=339274",
+    }], "2026-08-28T07:00:00.000Z");
+    expect(result).toHaveLength(2);
+    expect(result[0].tipo_evento).toBe("nombramiento-fallido");
+    expect(result[0].estado).toBe("en_confirmacion");
+    expect(result[0].decreto_url).toBeUndefined();
+    expect(result[1]).toMatchObject({ id: "mov-rios-deportes-2026-08-27", entrante: "María Paz Ríos Lama", estado: "en_confirmacion", documento_pendiente: true });
+    expect(result[1].fuentes.some((source) => source.medio === "Prensa Presidencia")).toBe(true);
   });
 
   it("declara bloqueo cuando ninguna fuente oficial responde", async () => {
