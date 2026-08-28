@@ -47,17 +47,21 @@ test("rechaza folios duplicados", () => {
   );
 });
 
-test("colapsa sólo duplicados exactos cuando el release se reconstruye con solapamiento", () => {
-  const result = buildLey19862Projection([record("1", 10), record("1", 10)], { dedupeExact: true });
+test("colapsa duplicados por ID cuando el release se reconstruye con solapamiento", () => {
+  const result = buildLey19862Projection([record("1", 10), record("1", 10)], { dedupeById: true });
   assert.equal(result.source.sourceRows, 2);
   assert.equal(result.source.duplicateExactRows, 1);
+  assert.equal(result.source.duplicateConflictingRows, 0);
   assert.equal(result.kpis.total_transfers, 1);
   assert.equal(result.kpis.total_monto_clp, 10);
 });
 
-test("rechaza un folio repetido con contenido contradictorio aunque se permita deduplicar", () => {
-  assert.throws(
-    () => buildLey19862Projection([record("1", 10), record("1", 11)], { dedupeExact: true }),
-    /LEY_19862_DUPLICATE_ID/,
-  );
+test("conserva la versión más reciente de un folio contradictorio y lo cuenta", () => {
+  const result = buildLey19862Projection([
+    record("1", 10, { registered_at: "2026-08-01" }),
+    record("1", 11, { registered_at: "2026-08-24" }),
+  ], { dedupeById: true });
+  assert.equal(result.source.duplicateConflictingRows, 1);
+  assert.equal(result.kpis.total_transfers, 1);
+  assert.equal(result.kpis.total_monto_clp, 11);
 });

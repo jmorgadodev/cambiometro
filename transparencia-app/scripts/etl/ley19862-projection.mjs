@@ -53,7 +53,25 @@ function aggregate(records, key) {
     }));
 }
 
-export function buildLey19862Projection(records, { generatedAt, sampleSize = 1000, registeredThrough, dedupeExact = false } = {}) {
+function recordDate(record, ...keys) {
+  for (const key of keys) {
+    const value = String(record?.[key] ?? "").slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  }
+  return "";
+}
+
+function preferredDuplicate(previous, candidate) {
+  const previousRegistered = recordDate(previous, "registered_at", "fecha_ingreso");
+  const candidateRegistered = recordDate(candidate, "registered_at", "fecha_ingreso");
+  if (candidateRegistered !== previousRegistered) return candidateRegistered > previousRegistered ? candidate : previous;
+  const previousEvent = recordDate(previous, "fecha");
+  const candidateEvent = recordDate(candidate, "fecha");
+  if (candidateEvent !== previousEvent) return candidateEvent > previousEvent ? candidate : previous;
+  return stableStringify(candidate) > stableStringify(previous) ? candidate : previous;
+}
+
+export function buildLey19862Projection(records, { generatedAt, sampleSize = 1000, registeredThrough, dedupeById = false } = {}) {
   const filtered = filterRecordsForRelease(records, { registeredThrough });
   if (filtered.missingRegisteredAt > 0) {
     throw new Error(`LEY_19862_REGISTERED_AT_MISSING: ${filtered.missingRegisteredAt}`);
@@ -73,14 +91,19 @@ export function buildLey19862Projection(records, { generatedAt, sampleSize = 100
   const seen = new Set();
   const unique = [];
   let duplicateExactRows = 0;
+  let duplicateConflictingRows = 0;
   const recordsById = new Map();
   for (const record of candidates) {
     const previous = recordsById.get(record.id);
     if (previous) {
-      if (!dedupeExact || stableStringify(previous) !== stableStringify(record)) {
+      if (!dedupeById) {
         throw new Error(`LEY_19862_DUPLICATE_ID: ${record.id}`);
       }
-      duplicateExactRows += 1;
+      if (stableStringify(previous) === stableStringify(record)) duplicateExactRows += 1;
+      else duplicateConflictingRows += 1;
+      const selected = preferredDuplicate(previous, record);
+      recordsById.set(record.id, selected);
+      unique[unique.indexOf(previous)] = selected;
       continue;
     }
     recordsById.set(record.id, record);
@@ -111,6 +134,7 @@ export function buildLey19862Projection(records, { generatedAt, sampleSize = 100
       registeredThrough: effectiveRegisteredThrough,
       sourceRows: records.length,
       duplicateExactRows,
+      duplicateConflictingRows,
       excludedAfterCutoff: filtered.excludedAfterCutoff,
       periods: Object.keys(byYear).sort(),
     },
