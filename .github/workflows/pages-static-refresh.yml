@@ -43,6 +43,11 @@ on:
         description: "Rama Pages de preview; vacío para no publicar preview"
         required: false
         default: ""
+      repair_transfer_api_pointer:
+        description: "Regenerar el puntero API desde el lake R2 validado (sólo reparación operativa)"
+        type: boolean
+        required: false
+        default: false
 
 concurrency:
   # Cada ETL tiene su propia cola. Así se conserva la cancelación de ejecuciones
@@ -107,7 +112,9 @@ jobs:
             ];
             const hash = crypto.createHash("sha256");
             for (const file of files) hash.update(fs.readFileSync(file));
-            fs.appendFileSync(process.env.GITHUB_OUTPUT, `key=${hash.digest("hex")}\\n`);
+            let key = hash.digest("hex");
+            if ("${{ inputs.repair_transfer_api_pointer }}" === "true") key += "-${{ github.run_id }}";
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `key=${key}\\n`);
           '
 
       - name: Restaurar snapshot de datos validado
@@ -164,6 +171,14 @@ jobs:
       - name: Regenerar salud de fuentes desde el snapshot publicado
         working-directory: transparencia-app
         run: npm run data:health
+
+      - name: Reparar puntero API desde el lake R2 validado
+        if: inputs.repair_transfer_api_pointer == true
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:publish:transfer-api
 
       - name: Guardar snapshot validado para builds de interfaz
         if: steps.data-cache.outputs.cache-hit != 'true'
