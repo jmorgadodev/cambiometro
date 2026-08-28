@@ -141,6 +141,33 @@ async function checkInternalLinks(hrefs, batchSize = 1) {
   }
 }
 
+async function verifyWidgetInColdContext() {
+  const widgetContext = await browser.newContext({
+    extraHTTPHeaders: uptimeToken ? { "X-Cambiometro-Uptime-Token": uptimeToken } : {},
+  });
+  const widgetPage = await widgetContext.newPage();
+  if (apiBaseUrl !== baseUrl) {
+    await widgetPage.route(`${baseUrl}/api/**`, async (route) => {
+      const target = new URL(route.request().url());
+      const apiOrigin = new URL(apiBaseUrl);
+      target.protocol = apiOrigin.protocol;
+      target.host = apiOrigin.host;
+      await route.continue({ url: target.toString() });
+    });
+  }
+
+  try {
+    const widgetApiOrigin = apiBaseUrl !== baseUrl ? ` data-api-origin="${apiBaseUrl}"` : "";
+    await widgetPage.setContent(`<!DOCTYPE html><html><body><main><script src="${baseUrl}/widget.js" data-politico="dip-061"${widgetApiOrigin}></script></main></body></html>`, { waitUntil: "networkidle" });
+    const widgetCard = widgetPage.locator(".transparencia-widget").locator("article");
+    await widgetCard.waitFor({ state: "visible", timeout: 15_000 });
+    await widgetCard.locator(".name").waitFor({ state: "visible", timeout: 15_000 });
+    assert((await widgetCard.textContent())?.includes("Kast Adriasola"));
+  } finally {
+    await widgetContext.close();
+  }
+}
+
 try {
   for (const route of routes) {
     let response = await gotoWithNetworkRetry(`${baseUrl}${route}`);
@@ -168,6 +195,10 @@ try {
     }
   }
 
+  // Probar el widget antes del crawl exhaustivo: representa una visita nueva
+  // y evita que el propio verificador agote el rate limit antes de validar el
+  // contrato público del embed.
+  await verifyWidgetInColdContext();
   await checkInternalLinks(internalLinks);
 
   // Verificación del análisis interactivo de una votación destacada. Esta
@@ -394,15 +425,6 @@ try {
   assert.equal(commercial.status(), 503);
   const push = await page.request.post(`${apiBaseUrl}/api/push`, { data: { politico_id: "dip-061", endpoint: "https://example.test/push", keys: { p256dh: "x", auth: "y" } } });
   assert.equal(push.status(), 405);
-
-  const widgetPage = await browserContext.newPage();
-  const widgetApiOrigin = apiBaseUrl !== baseUrl ? ` data-api-origin="${apiBaseUrl}"` : "";
-  await widgetPage.setContent(`<!DOCTYPE html><html><body><main><script src="${baseUrl}/widget.js" data-politico="dip-061"${widgetApiOrigin}></script></main></body></html>`, { waitUntil: "networkidle" });
-  const widgetCard = widgetPage.locator(".transparencia-widget").locator("article");
-  await widgetCard.waitFor({ state: "visible", timeout: 15000 });
-  await widgetCard.locator(".name").waitFor({ state: "visible", timeout: 15000 });
-  assert((await widgetCard.textContent())?.includes("Kast Adriasola"));
-  await widgetPage.close();
 
   for (const path of ["/funcionarios", "/municipalidades/muni-maipu"]) {
     await gotoWithNetworkRetry(`${baseUrl}${path}`, { waitUntil: "domcontentloaded" });
