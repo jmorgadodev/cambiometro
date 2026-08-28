@@ -221,6 +221,12 @@ try {
   // listado cargue; el usuario debe poder abrir las tres capas del detalle,
   // comparar bancadas y encontrar una persona en el padrón nominal.
   await gotoWithNetworkRetry(`${baseUrl}/votaciones-destacadas/`);
+  const cameraFilter = page.locator(".featured-vote-camera-filter");
+  assert.equal(
+    await cameraFilter.getByRole("button", { name: "Senado", exact: true }).getAttribute("aria-pressed"),
+    "true",
+    "Votaciones destacadas debe iniciar filtrada por Senado",
+  );
   const analysisButton = page.getByRole("button", { name: "Abrir análisis" }).first();
   await analysisButton.waitFor({ state: "visible", timeout: 15_000 });
   await analysisButton.click();
@@ -239,8 +245,8 @@ try {
 
   await featuredDialog.getByRole("tab", { name: "Padrón nominal" }).click();
   const nominalSearch = featuredDialog.locator('input[placeholder="Nombre o bancada"]');
-  await nominalSearch.fill("Lilian Betancurt");
-  assert.equal(await featuredDialog.getByText("Lilian Betancurt Delgado", { exact: true }).count(), 1, "El padrón nominal debe encontrar a Lilian Betancurt Delgado");
+  await nominalSearch.fill("Pedro Araya");
+  assert.equal(await featuredDialog.getByText("Pedro Araya Guerrero", { exact: true }).count(), 1, "El padrón nominal debe encontrar a Pedro Araya Guerrero");
   await featuredDialog.getByRole("button", { name: "Cerrar análisis" }).click();
 
   await gotoWithNetworkRetry(baseUrl);
