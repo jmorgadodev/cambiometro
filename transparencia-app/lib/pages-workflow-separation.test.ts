@@ -14,5 +14,7 @@ describe("separación de workflows Pages", () => {
     expect(staticRefresh).toContain("workflow_run:");
     expect(staticRefresh).toContain("name: Regenerar salud de fuentes desde el snapshot publicado");
     expect(staticRefresh).toContain("run: npm run data:health");
+    expect(uiRefresh).toContain("name: Regenerar salud de fuentes desde el snapshot publicado");
+    expect(uiRefresh).toContain("run: npm run data:health");
   });
 });
