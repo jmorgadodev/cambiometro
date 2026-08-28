@@ -224,6 +224,22 @@ describe("API canónica v1", () => {
     expect(payload.links.self).toBe(request.url);
   });
 
+  it("acepta el preflight CORS del widget sin habilitar métodos de escritura", async () => {
+    const response = await api.fetch(new Request("https://example.test/api/v1/politico/dip-061", {
+      method: "OPTIONS",
+      headers: {
+        Origin: "null",
+        "Access-Control-Request-Method": "GET",
+        "Access-Control-Request-Headers": "x-cambiometro-uptime-token",
+      },
+    }), testEnv());
+
+    expect(response.status).toBe(204);
+    expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
+    expect(response.headers.get("Access-Control-Allow-Methods")).toBe("GET, OPTIONS");
+    expect(response.headers.get("Access-Control-Allow-Headers")).toContain("X-Cambiometro-Uptime-Token");
+  });
+
   it("sirve transferencias completas desde R2 cuando D1 está vacío", async () => {
     const request = new Request("https://example.test/api/v1/transferencias?page=1&limit=1&q=VIÑA");
     const response = await api.fetch(request, transferR2Env());

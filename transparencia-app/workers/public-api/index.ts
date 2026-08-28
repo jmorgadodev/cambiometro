@@ -18,6 +18,9 @@ const JSON_HEADERS = {
   "X-Robots-Tag": "noindex, nofollow, noarchive",
   "X-Content-Type-Options": "nosniff",
   "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type, X-Cambiometro-Uptime-Token",
+  "Access-Control-Max-Age": "600",
   "Permissions-Policy": "camera=(), microphone=(), geolocation=(), payment=(), usb=(), browsing-topics=()",
   "Cross-Origin-Opener-Policy": "same-origin",
 };
@@ -698,6 +701,7 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
     const path = url.pathname.replace(/\/$/, "") || "/";
+    if (request.method === "OPTIONS") return new Response(null, { status: 204, headers: JSON_HEADERS });
     if (path === "/api/push") return request.method === "GET" ? json({ enabled: false }) : failure("METHOD_NOT_ALLOWED", "Método no permitido.", 405);
     if (path === "/api/og/site") return svgResponse("Transparencia pública de Chile");
     if (path.startsWith("/api/og/")) return svgResponse("Ficha pública");
