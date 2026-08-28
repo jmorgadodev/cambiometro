@@ -34,8 +34,23 @@ export function sha256(value) {
  */
 export function normalizeMovementPayload(payload) {
   if (!payload || typeof payload !== "object") return payload;
+  const usedIds = new Set();
+  const movimientos = Array.isArray(payload.movimientos)
+    ? payload.movimientos.map((movement) => {
+      const originalId = String(movement?.id ?? "");
+      let id = originalId;
+      if (usedIds.has(id)) {
+        id = `${originalId}-${sha256(`${originalId}|${movement?.fecha ?? ""}|${movement?.cargo ?? ""}|${movement?.organismo ?? ""}`).slice(0, 12)}`;
+        let suffix = 2;
+        while (usedIds.has(id)) id = `${originalId}-${suffix++}`;
+      }
+      usedIds.add(id);
+      return id === movement?.id ? movement : { ...movement, id };
+    })
+    : payload.movimientos;
   const normalized = {
     ...payload,
+    movimientos,
     last_attempt_at: payload.last_attempt_at ?? payload.last_run ?? null,
     last_success_at: payload.last_success_at ?? payload.last_run ?? null,
     checksum_sha256: undefined,
