@@ -9,7 +9,7 @@ import type {
   VotacionDestacadaDetalle,
   VotacionNominalDetalle,
 } from "@/lib/votaciones-destacadas";
-import { tituloVotacionLegible } from "@/lib/votaciones-destacadas";
+import { tituloVotacionLegible } from "@/lib/votaciones-format";
 import {
   bancadaParticipacion,
   getVotacionBancadaShares,

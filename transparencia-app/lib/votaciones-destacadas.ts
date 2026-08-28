@@ -20,14 +20,6 @@ export interface VotacionDestacada {
 export const VOTACIONES_DESTACADAS = entries as VotacionDestacada[];
 
 /** Make generic boletin titles understandable without inventing a project name. */
-export function tituloVotacionLegible(
-  entry: Pick<VotacionDestacada, "titulo" | "boletin">,
-  tipo?: string | null,
-): string {
-  if (!/^Votación registrada del Boletín/u.test(entry.titulo)) return entry.titulo;
-  return `${tipo || "Votación de proyecto"} · Boletín N° ${entry.boletin}`;
-}
-
 export type OpcionVotacion = "Afirmativo" | "En Contra" | "Abstención" | "No Vota" | "Dispensado" | "Pareo";
 
 export interface VotacionNominalDetalle {

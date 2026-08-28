@@ -6,7 +6,8 @@ import Icono from "@/components/ui/Icono";
 import { GLOBAL_KPIS, KPI_SCOPES } from "@/lib/global-kpis";
 import { ETL_SOURCES_DATA } from "@/lib/etl-sources-data";
 import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
-import { tituloVotacionLegible, VOTACIONES_DESTACADAS } from "@/lib/votaciones-destacadas";
+import { VOTACIONES_DESTACADAS } from "@/lib/votaciones-destacadas";
+import { tituloVotacionLegible } from "@/lib/votaciones-format";
 import { MOVIMIENTOS } from "@/lib/movimientos";
 
 export const dynamic = "force-static";
