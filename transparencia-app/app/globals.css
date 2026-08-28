@@ -456,6 +456,9 @@ body {
 .featured-vote-card h2 { max-width: 48rem; margin: .35rem 0 .25rem; font-size: clamp(1.05rem, 2vw, 1.35rem); line-height: 1.25; }
 .featured-vote-card__boletin, .featured-vote-card__summary { color: var(--text-2); font-size: .8rem; line-height: 1.5; }
 .featured-vote-card__boletin { margin: 0; font-family: var(--font-mono); }
+.featured-vote-card__reading { display: grid; gap: .25rem; max-width: 70rem; margin: 1rem 0; padding: .8rem .9rem; border-left: 3px solid var(--accent); background: var(--surface-2); color: var(--text-2); font-size: .78rem; line-height: 1.5; }
+.featured-vote-card__reading strong { color: var(--text-1); }
+.featured-vote-card__reading span { color: var(--text-2); }
 .featured-vote-card__summary { max-width: 70rem; margin: 1rem 0; }
 .featured-vote__result { display: inline-flex; flex-shrink: 0; padding: .35rem .6rem; border: 1px solid currentColor; border-radius: 999px; font-size: .7rem; font-weight: 800; }
 .featured-vote-card__evidence { display: flex; flex-wrap: wrap; gap: .75rem 1.5rem; padding: .7rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); color: var(--text-2); font-size: .72rem; }
@@ -2292,8 +2295,8 @@ html.dark .page-masthead {
 .home-source-card__status[data-status="updated"] > span { background: var(--accent); }
 .home-source-card__status[data-status="official_lag"] { color: var(--warning); }
 .home-source-card__status[data-status="official_lag"] > span { background: var(--warning); }
-.home-source-card h3 { margin: 1.35rem 0 .25rem; color: var(--text-1); font-size: .95rem; font-weight: 750; letter-spacing: -.02em; line-height: 1.2; }
-.home-source-card p { min-height: 2.2em; margin: 0; overflow: hidden; color: var(--text-2); font-size: .72rem; line-height: 1.45; text-overflow: ellipsis; }
+.home-source-card h3 { margin: 1.35rem 0 .25rem; color: var(--text-1); font-size: .95rem; font-weight: 750; letter-spacing: -.02em; line-height: 1.2; text-align: center; }
+.home-source-card p { min-height: 2.2em; margin: 0; overflow: hidden; color: var(--text-2); font-size: .72rem; line-height: 1.45; text-align: center; text-overflow: ellipsis; }
 .home-source-card__metric { display: flex; align-items: baseline; gap: .4rem; margin-top: 1.15rem; }
 .home-source-card__metric strong { color: var(--text-1); font-family: var(--font-mono); font-size: 1.35rem; letter-spacing: -.045em; }
 .home-source-card__metric span { color: var(--text-2); font-size: .62rem; }

@@ -205,7 +205,8 @@ function VoteDetailDialog({ detail, onClose }: { detail: VotacionDestacadaDetall
               <p className="featured-vote__lead">{detail.resumen}</p>
               <p>El padrón produce un resultado <strong>{detail.resultadoRecalculado.toLowerCase()}</strong>: la opción mayoritaria fue <strong>{optionLabel(detail.analisis.opcionMayoritaria)}</strong>, con un margen de {formatNumber(detail.totales.margenMayoria)} voto{detail.totales.margenMayoria === 1 ? "" : "s"} sobre la siguiente alternativa.</p>
               {mostDividedParty && <p className="featured-vote__callout"><strong>Lectura de bancada:</strong> {mostDividedParty.sigla} fue la más dividida: {mostDividedParty.disenso} de sus {mostDividedParty.efectivos} votos efectivos no siguieron su opción mayoritaria.</p>}
-              {detail.tramite && <p><strong>Tramitación:</strong> {detail.tramite}</p>}
+              {detail.tramite && <p><strong>Etapa registrada:</strong> {detail.tramite}</p>}
+              {detail.tramiteUrl && <p><a href={detail.tramiteUrl} target="_blank" rel="noreferrer"><strong>Ver tramitación oficial del proyecto ↗</strong></a></p>}
               {detail.descripcionOficial && <details><summary>Descripción oficial completa</summary><p>{detail.descripcionOficial}</p></details>}
             </div>
             <div className="featured-vote__bars"><h3>Votos efectivos</h3><VoteBar label="A favor" value={detail.totales.afirmativo} total={totalEffective} color="var(--success)" /><VoteBar label="En contra" value={detail.totales.enContra} total={totalEffective} color="var(--danger)" /><VoteBar label="Abstención" value={detail.totales.abstencion} total={totalEffective} color="var(--warning)" /><VoteBar label="No vota / sin emisión" value={detail.totales.noVota} total={detail.totales.padron} color="var(--text-3)" /></div>

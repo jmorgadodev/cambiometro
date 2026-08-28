@@ -69,6 +69,7 @@ export interface VotacionDestacadaDetalle {
   quorum: string | null;
   tipo: string | null;
   tramite: string | null;
+  tramiteUrl: string | null;
   descripcionOficial: string | null;
   fuente_url: string;
   totales: {
@@ -236,6 +237,7 @@ export function getVotacionDestacadaDetalle(votacionId: string): VotacionDestaca
     quorum: session.quorum ?? null,
     tipo: session.tipo ?? null,
     tramite: session.tramite ?? null,
+    tramiteUrl: session.url_tramitacion ?? null,
     descripcionOficial: session.descripcion ?? session.nombre ?? null,
     fuente_url: entry.fuente_url,
     totales: { padron: nominales.length, afirmativo, enContra, abstencion, noVota, efectivos, margenMayoria },

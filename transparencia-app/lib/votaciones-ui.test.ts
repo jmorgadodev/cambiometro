@@ -21,4 +21,10 @@ describe("interfaz de votaciones destacadas", () => {
     expect(tituloVotacionLegible({ titulo: "Votación registrada del Boletín N° 17324-33", boletin: "17324-33" }, "Proyecto de Ley"))
       .toBe("Proyecto de Ley · Boletín N° 17324-33");
   });
+
+  it("explica la ficha y enlaza la tramitación oficial cuando existe", () => {
+    expect(client).toContain("Ver tramitación oficial del proyecto ↗");
+    expect(client).toContain("Etapa registrada:");
+    expect(readFileSync(resolve(import.meta.dirname, "./votaciones-destacadas.ts"), "utf8")).toContain("tramiteUrl: session.url_tramitacion ?? null");
+  });
 });
