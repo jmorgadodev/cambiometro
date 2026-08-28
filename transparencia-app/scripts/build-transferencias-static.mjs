@@ -5,6 +5,7 @@ import { createInterface } from "node:readline";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { filterRecordsForRelease, inferReleaseCutoff } from "./etl/transfer-release-cutoff.mjs";
+import { stableStringify } from "./etl/core.mjs";
 
 export const PAGE_SIZE = 50;
 
@@ -15,6 +16,21 @@ const outputRoot = join(root, "public", "data", "transferencias");
 const text = (value) => typeof value === "string" && value.trim() ? value.trim() : null;
 const first = (...values) => values.map(text).find(Boolean) ?? null;
 const sha256 = (value) => createHash("sha256").update(value).digest("hex");
+
+function rowDate(row, ...keys) {
+  for (const key of keys) {
+    const value = String(row?.[key] ?? "").slice(0, 10);
+    if (/^\d{4}-\d{2}-\d{2}$/.test(value)) return value;
+  }
+  return "";
+}
+
+function preferredDuplicate(previous, candidate) {
+  const previousRegistered = rowDate(previous, "registered_at", "fecha");
+  const candidateRegistered = rowDate(candidate, "registered_at", "fecha");
+  if (candidateRegistered !== previousRegistered) return candidateRegistered > previousRegistered ? candidate : previous;
+  return stableStringify(candidate) > stableStringify(previous) ? candidate : previous;
+}
 
 export function hasFullTransferSource(source = sourceRoot) {
   return existsSync(source) && readdirSync(source, { withFileTypes: true }).some((year) => year.isDirectory());
@@ -102,13 +118,23 @@ export async function buildTransferenciasStatic({
   }
   const effectiveRegisteredThrough = filtered.registeredThrough ?? inferReleaseCutoff(rawRecords);
   const rows = [];
-  const ids = new Set();
+  const rowsById = new Map();
+  let duplicateExactRows = 0;
+  let duplicateConflictingRows = 0;
   for (const line of filtered.records) {
     const row = normalize(line);
     if (!row) continue;
-    if (ids.has(row.id)) throw new Error(`TRANSFER_STATIC_DUPLICATE_ID: ${row.id}`);
-    ids.add(row.id);
-    rows.push(row);
+    const previous = rowsById.get(row.id);
+    if (!previous) {
+      rowsById.set(row.id, row);
+      rows.push(row);
+      continue;
+    }
+    if (stableStringify(previous) === stableStringify(row)) duplicateExactRows += 1;
+    else duplicateConflictingRows += 1;
+    const selected = preferredDuplicate(previous, row);
+    rowsById.set(row.id, selected);
+    rows[rows.indexOf(previous)] = selected;
   }
   if (!rows.length) throw new Error("TRANSFER_STATIC_EMPTY_DATASET");
   rows.sort((a, b) => b.monto_clp - a.monto_clp || String(b.fecha ?? "").localeCompare(String(a.fecha ?? "")) || a.id.localeCompare(b.id));
@@ -182,6 +208,8 @@ export async function buildTransferenciasStatic({
     generatedAt,
     registeredThrough: effectiveRegisteredThrough,
     sourceRows,
+    duplicateExactRows,
+    duplicateConflictingRows,
     excludedAfterCutoff: filtered.excludedAfterCutoff,
     totalRows: rows.length,
     pageSize: PAGE_SIZE,
