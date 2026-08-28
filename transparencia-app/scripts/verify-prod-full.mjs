@@ -204,7 +204,10 @@ async function verifyProdFull() {
   assertCheck("MOVIMIENTOS", "HTTP Status 200", movimientosRes.status === 200);
   const movimientosHtml = (await movimientosRes.text()).replace(/<!--.*?-->/g, "");
   assertCheck("MOVIMIENTOS", "Página contiene el encabezado", movimientosHtml.includes("Movimientos y Relevos de Autoridades"));
-  assertCheck("MOVIMIENTOS", "Página sin spinner permanente", !movimientosHtml.includes("Cargando catálogo"));
+  // Static export prerenders the Suspense fallback before the client mounts.
+  // Validate that it does not contain the global transition overlay; the
+  // hydrated loader is covered by verify-prod-movimientos/verify:browser.
+  assertCheck("MOVIMIENTOS", "SSR sin overlay de transición", !movimientosHtml.includes('id="route-transition-overlay"'));
   const movimientosSnapshotRes = await fetch(`${PROD_URL}/data/movimientos.json`, { headers });
   assertCheck("MOVIMIENTOS", "Snapshot estático HTTP 200", movimientosSnapshotRes.status === 200);
   const movimientosSnapshot = movimientosSnapshotRes.ok ? await movimientosSnapshotRes.json().catch(() => null) : null;

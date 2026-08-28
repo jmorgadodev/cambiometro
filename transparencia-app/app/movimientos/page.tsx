@@ -54,7 +54,18 @@ export default function MovimientosPage() {
           <h1 style={{ fontSize: "clamp(1.75rem, 3.2vw, 2.4rem)", fontWeight: 900, margin: "0 0 0.5rem 0" }}>
             Movimientos y Relevos de Autoridades
           </h1>
-          <p style={{ color: "var(--text-2)" }}>Cargando catálogo de movimientos y rotación institucional...</p>
+          <div
+            className="movement-page-skeleton"
+            aria-hidden="true"
+            style={{
+              width: "min(30rem, 100%)",
+              height: "1rem",
+              marginTop: "0.75rem",
+              borderRadius: "999px",
+              background: "var(--surface-2)",
+              border: "1px solid var(--border)",
+            }}
+          />
         </div>
       }
     >
