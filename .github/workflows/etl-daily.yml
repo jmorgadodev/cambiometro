@@ -1,4 +1,4 @@
-name: ETL Diario - Parlamento, Movimientos y Diario Oficial
+name: ETL Diario - Parlamento y Diario Oficial
 
 on:
   schedule:
@@ -132,10 +132,6 @@ jobs:
         working-directory: transparencia-app
         shell: bash
         run: cp /tmp/personal-apoyo-next.json data/personal-apoyo.json
-
-      - name: Ejecutar ETL de Movimientos de Autoridades (Ley Chile y Diario Oficial)
-        working-directory: transparencia-app
-        run: node scripts/etl_movimientos_autoridades.mjs
 
       - name: Construir subsets y publicar entradas estáticas
         working-directory: transparencia-app

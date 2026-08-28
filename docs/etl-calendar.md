@@ -1,67 +1,39 @@
 # Calendario operativo de ETL
 
-Este documento describe cuándo se ejecuta cada ETL y cómo se publica el release.
-Los cron de GitHub Actions se interpretan en UTC. La columna local está expresada
-en `America/Santiago`: durante el horario de invierno corresponde a UTC−4 y
-durante el horario de verano a UTC−3. Los cambios oficiales de hora de Chile se
-aplican automáticamente por la zona horaria; no se cambian los cron UTC.
-
-La fuente de verdad ejecutable es `.github/etl-calendar.json`. La guardia
-`npm run check:etl-calendar` compara ese manifiesto con los workflows y falla si
-aparece un desfase, un workflow programado sin documentar o si se omite
-`etl-expenses.yml`.
+Los schedules de GitHub Actions se declaran en UTC. El portal opera con la
+zona horaria `America/Santiago`, que cambia entre horario de invierno y
+verano. Por eso el mismo cron `0 7 * * *` se muestra como 04:00 en invierno y
+03:00 en verano.
 
 | ETL | Cron UTC | Hora local aproximada |
-|---|---:|---|
-| Parlamento, movimientos y Diario Oficial | `0 7 * * *` | 04:00 invierno / 03:00 verano |
+| --- | --- | --- |
+| Parlamento y Diario Oficial | `0 7 * * *` | 04:00 invierno / 03:00 verano |
+| Movimientos de autoridades | `0 7 * * *` | 04:00 invierno / 03:00 verano |
 | ChileCompra | `0 8 * * 1` | Lunes 05:00 invierno / 04:00 verano |
 | InfoLobby | `30 8 * * 1` | Lunes 05:30 invierno / 04:30 verano |
 | Contraloría | `0 9 2 * *` | Día 2, 06:00 invierno / 05:00 verano |
 | CPLT | `0 9 5 * *` | Día 5, 06:00 invierno / 05:00 verano |
 | Ley 19.862 | `0 9 8 * *` | Día 8, 06:00 invierno / 05:00 verano |
 | InfoProbidad | `0 9 10 * *` | Día 10, 06:00 invierno / 05:00 verano |
-| DIPRES | `0 9 1 1,4,7,10 *` | Día 1, 06:00 invierno / 05:00 verano |
-| SINIM | `0 9 1 3,9 *` | Día 1, 06:00 invierno / 05:00 verano |
+| DIPRES | `0 9 1 1,4,7,10 *` | Día 1 del trimestre, 06:00 invierno / 05:00 verano |
+| SINIM | `0 9 1 3,9 *` | Día 1 de marzo y septiembre, 06:00 invierno / 05:00 verano |
 | Gastos operacionales rendidos | `30 8 2 * *` | Día 2, 05:30 invierno / 04:30 verano |
-| SERVEL | — | Sólo `workflow_dispatch` |
+| SERVEL | Sin schedule | Sólo `workflow_dispatch` |
 
-## Publicación y frescura
+## Regla de publicación
 
-Cada ETL debe terminar después de validar el lote completo y publicar sus
-artefactos en R2/D1. El workflow `pages-static-refresh.yml` escucha los ETL
-publicables y reconstruye/verifica el artefacto Pages desde el manifiesto R2,
-sin reutilizar datos parciales del checkout. La promoción productiva queda
-protegida por confirmación manual. `etl-publication-guard.yml` comprueba,
-tras un ETL verde, que el release está visible tanto en el manifest estático
-como en el health del Worker; un ETL verde sin publicación queda rojo y genera
-una alerta.
+Un ETL puede dejar su resultado en R2/D1, pero Pages sólo se refresca después
+de que el workflow termina correctamente. Cada workflow debe publicar un
+resumen de fuentes, conteos, checksum y fecha de publicación. Si una fuente
+obligatoria está bloqueada, el job falla y se conserva el último snapshot
+válido; no se publica un dataset parcial con apariencia de éxito.
 
-El ETL de Ley 19.862 publica primero el release canónico de 59.361 filas y
-`$5.011.094.170.302` en R2; después aplica la migración y materializa la misma
-proyección en `transferencias_19862` de D1 por lotes, registrando su checksum.
-Cualquier conteo o monto distinto deja el workflow rojo y evita que se
-publique una versión incompatible.
+Movimientos tiene workflow propio para que un bloqueo de la página de personal
+de Cámara no impida actualizar el catálogo de autoridades. La fecha de la
+última ejecución y la fecha del último movimiento son metadatos distintos.
 
-El bloqueo conocido de `camara.cl` para runners de GitHub Actions sigue siendo
-un incidente operativo, no se oculta con un fallback incompleto. Si el origen
-oficial bloquea al runner, el ETL debe fallar y no publicar un lote parcial; la
-resolución requiere permitir el runner oficial o habilitar una ingesta
-autorizada.
-
-## Higiene del repositorio
-
-El checkout contiene código, workflows, documentación, semillas canónicas y
-fixtures necesarios para reproducir CI. Se mantienen fuera de Git los
-artefactos reproducibles (`out/`, `.next/`, `public/data/`, slices, lake de
-trabajo, logs y bundles). Los snapshots grandes versionados sólo se conservan
-cuando un test limpio o el fallback local los lee directamente; antes de
-eliminarlos debe existir un workflow de hidratación equivalente y pasar un
-checkout limpio completo.
-
-## Rollback
-
-```bash
-npm run pages:rollback -- <pages-deployment-id>
-npx wrangler rollback <worker-version-id> \
-  --name cambiometro-public-api
-```
+Las fuentes provisionales RSS autorizadas se configuran en la variable de
+entorno `MOVIMIENTOS_PROVISIONAL_SOURCES` como una lista separada por comas.
+No se guardan credenciales ni se agregan URLs de medios directamente al código:
+si una fuente no está configurada, el pipeline la reporta como ausente y no
+convierte titulares en hechos estructurados.

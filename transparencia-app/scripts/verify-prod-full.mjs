@@ -49,6 +49,41 @@ async function verifyThemePersistence(PROD_URL, requestHeaders) {
   }
 }
 
+async function verifyAnalyticsConsent(PROD_URL, requestHeaders) {
+  if (process.env.VERIFY_BROWSER !== "1") {
+    console.log("  ℹ️ [ANALYTICS] navegador omitido; use VERIFY_BROWSER=1 para probar consentimiento y CSP.");
+    return;
+  }
+  const { chromium } = await import("playwright");
+  const browser = await chromium.launch({ headless: true });
+  try {
+    const run = async (choice) => {
+      const context = await browser.newContext({ extraHTTPHeaders: requestHeaders });
+      const requests = [];
+      const consoleErrors = [];
+      const page = await context.newPage();
+      page.on("request", (request) => {
+        if (/googletagmanager\.com|google-analytics\.com|analytics\.google\.com/i.test(request.url())) requests.push(request.url());
+      });
+      page.on("console", (message) => {
+        if (message.type() === "error" && /Content Security Policy|googletagmanager|google-analytics/i.test(message.text())) consoleErrors.push(message.text());
+      });
+      await page.goto(`${PROD_URL}/?analytics_probe=${choice}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+      await page.getByRole("button", { name: choice === "granted" ? "Aceptar" : "Rechazar" }).click({ timeout: 5_000 });
+      await page.waitForTimeout(1_500);
+      await context.close();
+      return { requests, consoleErrors };
+    };
+    const denied = await run("denied");
+    assertCheck("ANALYTICS", "rechazo no genera solicitudes Google", denied.requests.length === 0, JSON.stringify(denied.requests));
+    const granted = await run("granted");
+    assertCheck("ANALYTICS", "aceptación no duplica Google Tag", granted.requests.filter((url) => /googletagmanager\.com\/gtag\/js/i.test(url)).length <= 1, JSON.stringify(granted.requests));
+    assertCheck("ANALYTICS", "consentimiento y Tag no generan violaciones CSP", denied.consoleErrors.length === 0 && granted.consoleErrors.length === 0, JSON.stringify([...denied.consoleErrors, ...granted.consoleErrors]));
+  } finally {
+    await browser.close();
+  }
+}
+
 async function verifyProdFull() {
   console.log("================================================================================");
   console.log("  VERIFICACIÓN EN VIVO INTEGRAL DE PRODUCCIÓN — EL CAMBIÓMETRO");
@@ -78,6 +113,11 @@ async function verifyProdFull() {
   assertCheck("HOME", "HTTP Status 200", homeRes.status === 200);
   const homeHtml = (await homeRes.text()).replace(/<!--.*?-->/g, "");
   await verifyThemePersistence(PROD_URL, headers);
+  try {
+    await verifyAnalyticsConsent(PROD_URL, headers);
+  } catch (error) {
+    assertCheck("ANALYTICS", "Playwright pudo comprobar consentimiento y CSP", false, error.message);
+  }
 
   const staticManifestRes = await fetch(`${PROD_URL}/data/static-site-manifest.json`, { headers });
   assertCheck("HOME", "Manifiesto estático HTTP 200", staticManifestRes.status === 200);
@@ -157,6 +197,23 @@ async function verifyProdFull() {
   const cruces25Res = await fetch(`${PROD_URL}/cruces?rows=25`, { headers });
   await cruces25Res.text();
   assertCheck("CRUCES", "Query ?rows=25 llega al HTML estático para paginación cliente", cruces25Res.status === 200);
+
+  // ─── MÓDULO 3B: MOVIMIENTOS AUTOMÁTICOS ────────────────────────────────────
+  console.log("\n3B. MÓDULO MOVIMIENTOS DE AUTORIDADES (/movimientos)");
+  const movimientosRes = await fetch(`${PROD_URL}/movimientos/`, { headers });
+  assertCheck("MOVIMIENTOS", "HTTP Status 200", movimientosRes.status === 200);
+  const movimientosHtml = (await movimientosRes.text()).replace(/<!--.*?-->/g, "");
+  assertCheck("MOVIMIENTOS", "Página contiene el encabezado", movimientosHtml.includes("Movimientos y Relevos de Autoridades"));
+  assertCheck("MOVIMIENTOS", "Página sin spinner permanente", !movimientosHtml.includes("Cargando catálogo"));
+  const movimientosSnapshotRes = await fetch(`${PROD_URL}/data/movimientos.json`, { headers });
+  assertCheck("MOVIMIENTOS", "Snapshot estático HTTP 200", movimientosSnapshotRes.status === 200);
+  const movimientosSnapshot = movimientosSnapshotRes.ok ? await movimientosSnapshotRes.json().catch(() => null) : null;
+  assertCheck("MOVIMIENTOS", "Pipeline identificado", movimientosSnapshot?.pipeline === "etl_movimientos_autoridades");
+  assertCheck("MOVIMIENTOS", "Universo histórico preservado (>=79)", Number(movimientosSnapshot?.movimientos?.length ?? 0) >= 79, `total: ${movimientosSnapshot?.movimientos?.length ?? "n/a"}`);
+  assertCheck("MOVIMIENTOS", "Checksum SHA-256 presente", /^[a-f0-9]{64}$/i.test(movimientosSnapshot?.checksum_sha256 || ""));
+  assertCheck("MOVIMIENTOS", "Última ejecución exitosa presente", Number.isFinite(Date.parse(movimientosSnapshot?.last_success_at || movimientosSnapshot?.last_run || "")));
+  assertCheck("MOVIMIENTOS", "Fuente oficial disponible", movimientosSnapshot?.source_health?.some((source) => source.tier === "official" && source.ok === true));
+  assertCheck("MOVIMIENTOS", "Estado en_confirmacion preservado", movimientosSnapshot?.movimientos?.some((movement) => movement.estado === "en_confirmacion"));
 
   // ─── MÓDULO 4: /TRANSFERENCIAS ─────────────────────────────────────────────
   console.log("\n4. MÓDULO TRANSFERENCIAS LEY 19.862 (/transferencias)");

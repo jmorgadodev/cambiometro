@@ -26,6 +26,11 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
     expect(json.movimientos.length).toBeGreaterThan(0);
   });
 
+  it("1b. cada movimiento tiene un identificador único", () => {
+    const ids = MOVIMIENTOS.map((movement) => movement.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
   it("2. Eventos obligatorios del 14-08-2026 presentes (Duco/Deporte y Urrejola/Atacama) con fuentes de prensa", () => {
     // Duco / Deporte
     const duco = MOVIMIENTOS.find(

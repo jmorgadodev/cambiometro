@@ -123,7 +123,7 @@ flowchart TD
 
 ### 9. Movimientos de Autoridades (`data/movimientos.json` / `etl_movimientos_autoridades`)
 * **Propósito:** Monitoreo diario de renuncias, remociones, designaciones y cambios de gabinete en altas autoridades del Estado.
-* **Volumen:** **23 movimientos catalogados** (incluye ministros, subsecretarios, seremis, delegados presidenciales, directores de servicios y GOREs).
+* **Volumen:** el snapshot histórico conserva **79 movimientos** como mínimo (incluye ministros, subsecretarios, seremis, delegados presidenciales, directores de servicios y GOREs); el total puede crecer cuando se confirman nuevas señales.
 * **Jerarquía de fuentes:** T1 Oficial (Diario Oficial, Decretos Supremos), T2 Semi-oficial (CPLT, InfoProbidad, InfoLobby) y T3 Prensa (RSS de 7 medios nacionales).
 * **Ciclo de vida:** `detectado` (1 medio) → `corroborado` (≥ 2 medios) → `verificado` (T1/T2).
 * **Campos extraídos:** `id`, `tipo_evento`, `cargo`, `organismo`, `ministerio`, `region`, `salio`, `entro`, `fuentes`, `estado`, `fecha_deteccion`, `fecha_verificacion`.
