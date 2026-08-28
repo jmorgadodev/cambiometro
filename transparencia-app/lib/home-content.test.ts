@@ -41,10 +41,11 @@ describe("promesas editoriales del inicio", () => {
     expect(home).toContain("Cámara + Senado · 2022–2026");
   });
 
-  it("mantiene centrado sólo el texto descriptivo de las fuentes", () => {
+  it("centra el bloque central de las fuentes y conserva las bandas laterales", () => {
     const styles = readFileSync(resolve(import.meta.dirname, "../app/globals.css"), "utf8");
     expect(styles).toContain(".home-source-card h3 { margin: 1.35rem 0 .25rem; color: var(--text-1); font-size: .95rem; font-weight: 750; letter-spacing: -.02em; line-height: 1.2; text-align: center; }");
     expect(styles).toContain(".home-source-card p { min-height: 2.2em; margin: 0; overflow: hidden; color: var(--text-2); font-size: .72rem; line-height: 1.45; text-align: center; text-overflow: ellipsis; }");
-    expect(styles).not.toContain(".home-source-card__metric { text-align: center;");
+    expect(styles).toContain(".home-source-card__metric { display: flex; align-items: baseline; justify-content: center; gap: .4rem; margin-top: 1.15rem; }");
+    expect(styles).toContain(".home-source-card__top, .home-source-card__footer { display: flex; align-items: center; justify-content: space-between;");
   });
 });

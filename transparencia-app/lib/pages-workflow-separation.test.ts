@@ -12,5 +12,7 @@ describe("separación de workflows Pages", () => {
     expect(uiRefresh).toContain('      - "transparencia-app/lib/**"');
     expect(uiRefresh).toContain('      - "transparencia-app/scripts/**"');
     expect(staticRefresh).toContain("workflow_run:");
+    expect(staticRefresh).toContain("name: Regenerar salud de fuentes desde el snapshot publicado");
+    expect(staticRefresh).toContain("run: npm run data:health");
   });
 });

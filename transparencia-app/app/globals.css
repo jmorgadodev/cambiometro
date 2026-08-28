@@ -2297,7 +2297,7 @@ html.dark .page-masthead {
 .home-source-card__status[data-status="official_lag"] > span { background: var(--warning); }
 .home-source-card h3 { margin: 1.35rem 0 .25rem; color: var(--text-1); font-size: .95rem; font-weight: 750; letter-spacing: -.02em; line-height: 1.2; text-align: center; }
 .home-source-card p { min-height: 2.2em; margin: 0; overflow: hidden; color: var(--text-2); font-size: .72rem; line-height: 1.45; text-align: center; text-overflow: ellipsis; }
-.home-source-card__metric { display: flex; align-items: baseline; gap: .4rem; margin-top: 1.15rem; }
+.home-source-card__metric { display: flex; align-items: baseline; justify-content: center; gap: .4rem; margin-top: 1.15rem; }
 .home-source-card__metric strong { color: var(--text-1); font-family: var(--font-mono); font-size: 1.35rem; letter-spacing: -.045em; }
 .home-source-card__metric span { color: var(--text-2); font-size: .62rem; }
 .home-source-card__footer { margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--border); color: var(--text-2); font-family: var(--font-mono); font-size: .62rem; }

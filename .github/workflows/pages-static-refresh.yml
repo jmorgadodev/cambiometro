@@ -158,6 +158,10 @@ jobs:
           npm run data:lake:projection:ley19862
           npm run data:publish:transfer-api
 
+      - name: Regenerar salud de fuentes desde el snapshot publicado
+        working-directory: transparencia-app
+        run: npm run data:health
+
       - name: Guardar snapshot validado para builds de interfaz
         if: steps.data-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
