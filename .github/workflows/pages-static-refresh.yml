@@ -46,7 +46,10 @@ on:
 
 concurrency:
   group: pages-static-refresh
-  cancel-in-progress: true
+  # Un ETL completado en paralelo no debe cancelar un refresh ya iniciado.
+  # Esto es especialmente importante para Movimientos: otro ETL puede terminar
+  # mientras Pages hidrata R2 y su evento puede quedar en skipped.
+  cancel-in-progress: false
 
 permissions:
   contents: read
