@@ -188,7 +188,7 @@ jobs:
             echo "::warning::D1 no tiene capacidad para duplicar el release completo; R2 permanece como fuente canónica y la API usará su fallback validado."
             {
               echo "### Transferencias: D1 opcional"
-              echo "- Estado: `skipped_r2_canonical`"
+              echo "- Estado: skipped_r2_canonical"
               echo "- Motivo: límite de tamaño D1 (Cloudflare code 7500)"
               echo "- Fuente canónica: release completo validado en R2"
             } >> "$GITHUB_STEP_SUMMARY"
