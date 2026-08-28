@@ -46,3 +46,18 @@ test("rechaza folios duplicados", () => {
     /LEY_19862_DUPLICATE_ID/,
   );
 });
+
+test("colapsa sólo duplicados exactos cuando el release se reconstruye con solapamiento", () => {
+  const result = buildLey19862Projection([record("1", 10), record("1", 10)], { dedupeExact: true });
+  assert.equal(result.source.sourceRows, 2);
+  assert.equal(result.source.duplicateExactRows, 1);
+  assert.equal(result.kpis.total_transfers, 1);
+  assert.equal(result.kpis.total_monto_clp, 10);
+});
+
+test("rechaza un folio repetido con contenido contradictorio aunque se permita deduplicar", () => {
+  assert.throws(
+    () => buildLey19862Projection([record("1", 10), record("1", 11)], { dedupeExact: true }),
+    /LEY_19862_DUPLICATE_ID/,
+  );
+});
