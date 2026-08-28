@@ -3,6 +3,7 @@ import {
   buildMovementPayload,
   calculateMovimientoEstado,
   collectMovementSources,
+  normalizeMovementPayload,
   parseMovementSignals,
   sha256,
   validateMovementPayload,
@@ -60,5 +61,14 @@ describe("pipeline automático de movimientos", () => {
     expect(payload.conectores.t1_ley_chile.http_status).toBeNull();
     expect(payload.checksum_sha256).toBe(sha256({ ...payload, checksum_sha256: undefined }));
     expect(() => validateMovementPayload({ ...payload, movimientos: Array(78).fill(payload.movimientos[0]) })).toThrow("MOVIMIENTOS_UNIVERSE_INCOMPLETE");
+  });
+
+  it("normaliza snapshots históricos sin modificar sus movimientos", () => {
+    const legacy = { ...baseline, last_run: "2026-08-17T03:00:00-04:00" };
+    const normalized = normalizeMovementPayload(legacy);
+    expect(normalized.movimientos).toEqual(legacy.movimientos);
+    expect(normalized.last_attempt_at).toBe(legacy.last_run);
+    expect(normalized.last_success_at).toBe(legacy.last_run);
+    expect(normalized.checksum_sha256).toBe(sha256({ ...normalized, checksum_sha256: undefined }));
   });
 });

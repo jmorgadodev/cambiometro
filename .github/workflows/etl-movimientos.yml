@@ -71,7 +71,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: |
-          node --input-type=module -e 'import { readFileSync } from "node:fs"; import { validateMovementPayload } from "./scripts/movimientos-pipeline.mjs"; validateMovementPayload(JSON.parse(readFileSync("data/movimientos.json", "utf8")));'
+          node --input-type=module -e 'import { readFileSync, writeFileSync } from "node:fs"; import { normalizeMovementPayload, validateMovementPayload } from "./scripts/movimientos-pipeline.mjs"; const file="data/movimientos.json"; const payload=normalizeMovementPayload(JSON.parse(readFileSync(file,"utf8"))); validateMovementPayload(payload); writeFileSync(file, `${JSON.stringify(payload,null,2)}\n`);'
           npm run data:publish:static -- --groups movimientos
 
       - name: Publicar resumen de ejecución

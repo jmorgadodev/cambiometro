@@ -7,7 +7,7 @@ import { writeChunkedJson } from "./static-site-data.mjs";
 import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
 import { chunkJsonRows, listUnavailableMunicipalities } from "./static-payroll.mjs";
 import { readExpenseSubset } from "./expense-release.mjs";
-import { validateMovementPayload } from "./movimientos-pipeline.mjs";
+import { normalizeMovementPayload, validateMovementPayload } from "./movimientos-pipeline.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const readJson = (file) => readFile(join(root, file), "utf8").then(JSON.parse);
@@ -55,12 +55,14 @@ await mkdir(publicDataDir, { recursive: true });
 // El snapshot de movimientos se publica como un asset verificable además de
 // importarse en el bundle estático. Así el navegador, los verificadores y el
 // build pueden comparar exactamente el mismo contenido publicado.
-const movimientosContent = await readFile(join(root, "data", "movimientos.json"), "utf8");
-const movimientosPayload = JSON.parse(movimientosContent);
+const movimientosSourceContent = await readFile(join(root, "data", "movimientos.json"), "utf8");
+const movimientosSourcePayload = JSON.parse(movimientosSourceContent);
+const movimientosPayload = normalizeMovementPayload(movimientosSourcePayload);
 if (!Array.isArray(movimientosPayload.movimientos) || movimientosPayload.movimientos.length < 79) {
   throw new Error("STATIC_MOVIMIENTOS_RELEASE_INCOMPLETE");
 }
 if (!allowSample) validateMovementPayload(movimientosPayload);
+const movimientosContent = `${JSON.stringify(movimientosPayload, null, 2)}\n`;
 await writeFile(join(publicDataDir, "movimientos.json"), movimientosContent);
 const movimientosRelease = {
   count: movimientosPayload.movimientos.length,

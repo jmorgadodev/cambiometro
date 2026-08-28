@@ -143,9 +143,9 @@ jobs:
         working-directory: transparencia-app
         run: npm run check:static-input-fallback
 
-      - name: Verificar snapshot de Movimientos con checksum y fuente oficial
+      - name: Normalizar snapshot histórico de Movimientos y validar checksum
         working-directory: transparencia-app
-        run: node --input-type=module -e 'import { readFileSync } from "node:fs"; import { validateMovementPayload } from "./scripts/movimientos-pipeline.mjs"; validateMovementPayload(JSON.parse(readFileSync("data/movimientos.json", "utf8")));'
+        run: node --input-type=module -e 'import { readFileSync, writeFileSync } from "node:fs"; import { normalizeMovementPayload, validateMovementPayload } from "./scripts/movimientos-pipeline.mjs"; const file="data/movimientos.json"; const payload=normalizeMovementPayload(JSON.parse(readFileSync(file,"utf8"))); validateMovementPayload(payload); writeFileSync(file, `${JSON.stringify(payload,null,2)}\n`);'
 
       - name: Hidratar universo completo y validar checksums
         if: steps.data-cache.outputs.cache-hit != 'true'

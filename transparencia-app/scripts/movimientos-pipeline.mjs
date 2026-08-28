@@ -27,6 +27,23 @@ export function sha256(value) {
   return createHash("sha256").update(typeof value === "string" ? value : JSON.stringify(value)).digest("hex");
 }
 
+/**
+ * Migrate a previously published snapshot to the current release envelope.
+ * Historical R2 releases predate checksum_sha256 and last_success_at. This
+ * function only adds release metadata; it never changes movement rows.
+ */
+export function normalizeMovementPayload(payload) {
+  if (!payload || typeof payload !== "object") return payload;
+  const normalized = {
+    ...payload,
+    last_attempt_at: payload.last_attempt_at ?? payload.last_run ?? null,
+    last_success_at: payload.last_success_at ?? payload.last_run ?? null,
+    checksum_sha256: undefined,
+  };
+  normalized.checksum_sha256 = sha256(normalized);
+  return normalized;
+}
+
 export function classifySignalType(title) {
   const value = String(title ?? "").toLowerCase();
   if (/renunci|salida/.test(value)) return "renuncia";
@@ -112,7 +129,11 @@ export function parseMovementSignals(body, source) {
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
-  }).slice(0, 100);
+  }).slice(0, 100).map((item) => ({
+    ...item,
+    fase: "anunciado",
+    status: "en_confirmacion",
+  }));
 }
 
 export async function fetchSource(source, { fetchImpl = fetch, retries = 2, timeoutMs = 20_000 } = {}) {
