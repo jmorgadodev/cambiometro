@@ -1,62 +1,58 @@
-/**
- * scripts/verify-prod-movimientos.mjs
- * Script de verificación en vivo de producción para /movimientos e invariantes (Tarea H v6 — Cierre Definitivo).
- */
+/** Verifica la ruta y el snapshot estático publicado de Movimientos. */
+const base = (process.env.PROD_URL || "https://cambiometro.impulsacv.cl").replace(/\/$/, "");
+const headers = { "User-Agent": "Cambiometro-MovimientosVerifier/2.0", "Cache-Control": "no-cache" };
+if (process.env.UPTIME_TOKEN) headers["X-Cambiometro-Uptime-Token"] = process.env.UPTIME_TOKEN;
 
-async function verifyProd() {
-  console.log("=== Verificación en Vivo en Producción (https://cambiometro.impulsacv.cl) ===");
-
-  // 1. /movimientos
-  const movRes = await fetch("https://cambiometro.impulsacv.cl/movimientos");
-  const movHtml = await movRes.text();
-  console.log(`\n1. /movimientos -> Status: ${movRes.status}`);
-  console.log(`- Contiene "Cambios en el Gobierno Actual": ${movHtml.includes("Cambios en el Gobierno Actual") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- Contiene desglose "salidas": ${movHtml.includes("salidas") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- Contiene botón "Compartir": ${movHtml.includes("Compartir") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- Contiene nota metodológica sobre salidas y decretos: ${movHtml.includes("Las salidas se contrastan con registros públicos") ? "✅ SÍ" : "❌ NO"}`);
-
-  // Casos Tarea H v6:
-  console.log(`- 1. SEGEGOB (Sedini Viancos -> Alvarado Andrade): ${movHtml.includes("Sedini Viancos") && movHtml.includes("Alvarado Andrade") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- 2. Seguridad & MOP (Steinert -> Arrau -> Louis de Grange Concha): ${movHtml.includes("Steinert") && movHtml.includes("Arrau") && movHtml.includes("Louis de Grange Concha") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- 3. Ciencia 11-may (Rafael Araos Bralic -> Carolina Rossi Pantoja): ${movHtml.includes("Rafael Araos Bralic") && movHtml.includes("Carolina Rossi Pantoja") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- 4. Seguridad 2-jun (Jouannet -> Giannini; Quintana -> Guerrero): ${movHtml.includes("Jouannet") && movHtml.includes("Giannini") && movHtml.includes("Guerrero") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- 5. Mujer 16-jun (Daniela Castro Araya -> Marcia Raphael Mora): ${movHtml.includes("Daniela Castro Araya") && movHtml.includes("Marcia Raphael Mora") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- 6. Hacienda (Rodríguez -> Bunster -> Vallebona): ${movHtml.includes("Juan Pablo Rodríguez") && movHtml.includes("Bunster") && movHtml.includes("Vallebona") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- 7. Deporte 14-ago (Duco -> Riveros; Otero -> Rengifo): ${movHtml.includes("Natalia Duco") && movHtml.includes("Riveros") && movHtml.includes("Andrés Otero") && movHtml.includes("Rengifo") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- 8. Atacama (Sebastián Urrejola / DPP Chañaral): ${movHtml.includes("Sebastián Urrejola") && movHtml.includes("Chañaral") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- CERO menciones de "Müller" (Gonzalo Müller): ${!movHtml.toLowerCase().includes("müller") && !movHtml.toLowerCase().includes("muller") ? "✅ SÍ (0 Müller)" : "❌ NO"}`);
-  console.log(`- Cero typos 'Subrogente' (Normalizado a Subrogante): ${!movHtml.toLowerCase().includes("subrogente") ? "✅ SÍ" : "❌ NO"}`);
-
-  // 2. /servicios-publicos
-  const servRes = await fetch("https://cambiometro.impulsacv.cl/servicios-publicos");
-  const servHtml = await servRes.text();
-  console.log(`\n2. /servicios-publicos -> Status: ${servRes.status}`);
-  console.log(`- SEGEGOB con Claudio Alvarado: ${servHtml.includes("Claudio Alvarado") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- Deporte con Francisco Riveros: ${servHtml.includes("Francisco Riveros") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- MOP con Louis de Grange: ${servHtml.includes("Louis de Grange") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- CERO menciones de "Müller": ${!servHtml.toLowerCase().includes("müller") && !servHtml.toLowerCase().includes("muller") ? "✅ SÍ" : "❌ NO"}`);
-
-  // 3. Invariante Kaiser (3 requests to avoid warm-instance stale cache)
-  let kaiserHtml = "";
-  let kaiserStatus = 0;
-  for (let attempt = 0; attempt < 3; attempt++) {
-    const kaiserRes = await fetch("https://cambiometro.impulsacv.cl/politico/vanessa-kaiser-barents-von-hohenhagen");
-    kaiserStatus = kaiserRes.status;
-    const html = await kaiserRes.text();
-    if (html.includes("8.291.039")) { kaiserHtml = html; break; }
-    if (attempt === 2) kaiserHtml = html;
-  }
-  console.log(`\n3. Ficha Vanessa Kaiser -> Status: ${kaiserStatus}`);
-  console.log(`- Contiene Dieta Oficial "$8.291.039": ${kaiserHtml.includes("8.291.039") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- CERO transposición antigua "$8.239.091": ${!kaiserHtml.includes("8.239.091") ? "✅ SÍ (0 8.239.091)" : "❌ NO"}`);
-  console.log(`- Contiene "$4.582.550" / "$15.250.000": ${kaiserHtml.includes("4.582.550") || kaiserHtml.includes("15.250.000") ? "✅ SÍ" : "❌ NO"}`);
-  console.log(`- Contiene "+33,7%": ${kaiserHtml.includes("+33,7%") || kaiserHtml.includes("33,7%") ? "✅ SÍ" : "❌ NO"}`);
-
-  // 4. Invariante Maipú 301
-  const muniRedirectRes = await fetch("https://cambiometro.impulsacv.cl/municipalidades/muni-maipu", { redirect: "manual" });
-  console.log(`\n4. Redirección /municipalidades/muni-maipu -> Status: ${muniRedirectRes.status} (Location: ${muniRedirectRes.headers.get("location")})`);
-
-  console.log("\n=== Verificación Finalizada ===");
+function assert(condition, message) {
+  if (!condition) throw new Error(`MOVIMIENTOS_VERIFY_FAILED:${message}`);
+  console.log(`✅ ${message}`);
 }
 
-verifyProd().catch(console.error);
+const page = await fetch(`${base}/movimientos/`, { headers, signal: AbortSignal.timeout(15_000) });
+assert(page.status === 200, `/movimientos responde ${page.status}`);
+const pageHtml = await page.text();
+assert(pageHtml.includes("Movimientos y Relevos de Autoridades"), "la página contiene el encabezado de Movimientos");
+
+// Pages serves static HTML and the records are completed by the browser. Do
+// not inspect the raw HTML for the post-hydration spinner: that caused a
+// false negative against the known-good production page.
+const { chromium } = await import("playwright");
+const browser = await chromium.launch({ headless: true });
+try {
+  const context = await browser.newContext({ extraHTTPHeaders: headers });
+  const browserPage = await context.newPage();
+  const browserErrors = [];
+  browserPage.on("console", (message) => {
+    if (message.type() === "error") browserErrors.push(message.text());
+  });
+  browserPage.on("pageerror", (error) => browserErrors.push(error.message));
+  await browserPage.goto(`${base}/movimientos/`, { waitUntil: "networkidle", timeout: 30_000 });
+  const hydratedText = await browserPage.locator("body").innerText();
+  assert(hydratedText.includes("Movimientos y Relevos de Autoridades"), "el encabezado aparece tras hidratar");
+  assert(!hydratedText.includes("Cargando catálogo") && !hydratedText.includes("Cargando contenido..."), "la página hidratada no deja un spinner");
+  assert(browserErrors.length === 0, `la página hidratada no registra errores de navegador${browserErrors.length ? `: ${browserErrors.join(" | ")}` : ""}`);
+  await context.close();
+} finally {
+  await browser.close();
+}
+
+const snapshot = await fetch(`${base}/data/movimientos.json`, { headers, signal: AbortSignal.timeout(15_000) });
+assert(snapshot.status === 200, "/data/movimientos.json responde 200");
+const payload = await snapshot.json();
+assert(payload.pipeline === "etl_movimientos_autoridades", "el snapshot identifica el pipeline correcto");
+assert(Array.isArray(payload.movimientos) && payload.movimientos.length >= 79, `universo preservado (${payload.movimientos?.length ?? 0})`);
+assert(/^[a-f0-9]{64}$/i.test(payload.checksum_sha256 || ""), "checksum SHA-256 presente");
+assert(Number.isFinite(Date.parse(payload.last_success_at || payload.last_run)), "última ejecución exitosa presente");
+assert(Array.isArray(payload.source_health) && payload.source_health.some((source) => source.tier === "official" && source.ok === true), "al menos una fuente oficial publicada como disponible");
+assert(payload.movimientos.some((movement) => movement.estado === "en_confirmacion"), "estado en_confirmacion visible");
+assert(payload.movimientos.every((movement) => movement.id && movement.fuentes?.length), "todos los movimientos tienen ID y fuente");
+
+console.log(JSON.stringify({
+  ok: true,
+  total: payload.movimientos.length,
+  last_success_at: payload.last_success_at || payload.last_run,
+  last_event_date: payload.last_event_date || null,
+  checksum_sha256: payload.checksum_sha256,
+  officialSources: payload.source_health.filter((source) => source.tier === "official" && source.ok).map((source) => source.id),
+  signals: payload.stats?.signals_en_confirmacion ?? payload.signals?.length ?? 0,
+}, null, 2));

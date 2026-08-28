@@ -1,0 +1,84 @@
+name: ETL Diario - Movimientos de Autoridades
+
+on:
+  schedule:
+    - cron: "0 7 * * *" # 03:00 America/Santiago en horario de invierno
+  workflow_dispatch:
+
+concurrency:
+  group: etl-movimientos
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ingest-publish:
+    name: Detectar, validar y publicar movimientos
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Instalar dependencias
+        working-directory: transparencia-app
+        run: npm ci
+
+      - name: Exigir credenciales R2
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_DATA_API_TOKEN"
+
+      - name: Recuperar último snapshot válido desde R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p .ci-movimientos
+          if npx wrangler r2 object get transparencia-public-data/projections/static-site-v1/manifest.json --file .ci-movimientos/static-site-manifest.json --remote; then
+            MOVIMIENTOS_KEY=$(node --input-type=module -e 'import { readFileSync } from "node:fs"; const m=JSON.parse(readFileSync(".ci-movimientos/static-site-manifest.json","utf8")); const e=m.files?.find((file)=>file.path==="data/movimientos.json"); if(!e?.key) process.exit(1); process.stdout.write(e.key);')
+            npx wrangler r2 object get "transparencia-public-data/$MOVIMIENTOS_KEY" --file data/movimientos.previous.json --remote
+          else
+            echo "::warning::No hay manifest estático en R2; se usa el baseline versionado como respaldo."
+            cp data/movimientos.json data/movimientos.previous.json
+          fi
+
+      - name: Ejecutar ETL independiente de Cámara
+        working-directory: transparencia-app
+        env:
+          MOVIMIENTOS_RUN_REPORT: data/generated/movimientos-run.json
+          MOVIMIENTOS_INPUT: data/movimientos.previous.json
+          MOVIMIENTOS_PROVISIONAL_SOURCES: ${{ vars.MOVIMIENTOS_PROVISIONAL_SOURCES }}
+        run: npm run etl:movimientos
+
+      - name: Validar snapshot y publicar grupo estático
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          node --input-type=module -e 'import { readFileSync } from "node:fs"; import { validateMovementPayload } from "./scripts/movimientos-pipeline.mjs"; validateMovementPayload(JSON.parse(readFileSync("data/movimientos.json", "utf8")));'
+          npm run data:publish:static -- --groups movimientos
+
+      - name: Publicar resumen de ejecución
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: movimientos-run-${{ github.run_id }}
+          path: transparencia-app/data/generated/movimientos-run.json
+          if-no-files-found: warn
+          retention-days: 30

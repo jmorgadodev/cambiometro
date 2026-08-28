@@ -23,7 +23,7 @@ Registro de los tratamientos de datos personales efectuados por El Cambiómetro,
 ### GA4 solo post-consentimiento
 
 - El banner de cookies tiene como valor por defecto **rechazado**: sin consentimiento no se carga ningún script de medición.
-- gtag.js se inyecta en el cliente únicamente si existe `NEXT_PUBLIC_GA4_ID` configurado Y el usuario aceptó. Sin `GA4_ID` no existe ningún script gtag en el HTML servido (verificado por E2E sobre el HTML servido, no solo por tests).
+- gtag.js se inyecta en el cliente únicamente si existe `NEXT_PUBLIC_GA4_ID` configurado Y el usuario aceptó. La aplicación es la única integración canónica: cualquier inyección duplicada desde Cloudflare/Zaraz debe permanecer desactivada. La verificación de producción prueba rechazo, aceptación y ausencia de duplicados.
 - La inyección se realiza con `document.createElement` (nunca `innerHTML`), cumpliendo el guard `check-no-innerhtml`.
 
 ### Anonimización

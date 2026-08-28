@@ -47,6 +47,9 @@ export const STATIC_SITE_FILE_GROUPS = Object.freeze({
     "data/lake-subsets/personal-apoyo.subset.json",
     "data/movimientos.json",
   ],
+  movimientos: [
+    "data/movimientos.json",
+  ],
   gastos: [
     "data/lake-subsets/gastos-camara.subset.json",
     "data/lake-subsets/gastos-senado.subset.json",

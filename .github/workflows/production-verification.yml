@@ -46,6 +46,7 @@ jobs:
           VERIFY_API_URL: ${{ vars.CAMBIOMETRO_API_URL || 'https://cambiometro.impulsacv.cl' }}
           UPTIME_TOKEN: ${{ secrets.CAMBIOMETRO_UPTIME_TOKEN }}
           VERIFY_THEME_BROWSER: "1"
+          VERIFY_BROWSER: "1"
           # La verificación usa el manifest publicado como release efectivo.
           # Los guards de build mantienen 59.361 y $5.011.094.170.302 como
           # mínimos históricos; producción puede servir un release posterior

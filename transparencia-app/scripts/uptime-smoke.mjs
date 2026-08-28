@@ -12,6 +12,7 @@ const ROUTES = [
   "/politico/vanessa-kaiser-barents-von-hohenhagen",
   "/transferencias",
   "/cruces",
+  "/movimientos",
   "/api/v1/health",
   "/api/v1/search?q=Kaiser",
 ];
@@ -60,7 +61,28 @@ async function checkRoute(path) {
   }
 
   const has1102 = text.includes("Error 1102") || text.includes("error code: 1102") || text.includes("Worker threw exception");
-  const isOk = status === 200 && durationMs <= 5000 && !has1102;
+  let movementAssetStatus = null;
+  let movementOk = true;
+  if (path === "/movimientos") {
+    // The page is static and its records are hydrated by the browser. Validate
+    // the canonical JSON asset instead of relying on SSR text in the HTML.
+    try {
+      const movementAsset = await fetch(`${PROD_BASE}/data/movimientos.json`, {
+        headers: buildRequestHeaders("/data/movimientos.json", UPTIME_TOKEN),
+        signal: AbortSignal.timeout(5000),
+      });
+      movementAssetStatus = movementAsset.status;
+      const movementJson = await movementAsset.json();
+      movementOk = movementAsset.ok
+        && movementJson?.pipeline === "etl_movimientos_autoridades"
+        && Array.isArray(movementJson?.movimientos)
+        && movementJson.movimientos.length >= 79
+        && !text.includes("MOVIMIENTOS_ALL_OFFICIAL_SOURCES_BLOCKED");
+    } catch {
+      movementOk = false;
+    }
+  }
+  const isOk = status === 200 && durationMs <= 5000 && movementOk && !has1102;
 
   return {
     path,
@@ -70,6 +92,7 @@ async function checkRoute(path) {
     rayId,
     isOk,
     has1102,
+    movementAssetStatus,
     errorMsg,
   };
 }

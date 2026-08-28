@@ -10,7 +10,8 @@ on:
   workflow_run:
     workflows:
       - "ETL Mensual - Ley 19.862 Transferencias del Estado"
-      - "ETL Diario - Parlamento, Movimientos y Diario Oficial"
+      - "ETL Diario - Parlamento y Diario Oficial"
+      - "ETL Diario - Movimientos de Autoridades"
       - "ETL Mensual - CPLT Nóminas Transparencia Activa"
       - "ETL Semanal - ChileCompra OCDS"
       - "ETL Mensual - Contraloría General (CGR)"
@@ -141,6 +142,10 @@ jobs:
       - name: Verificar fallback municipal completo
         working-directory: transparencia-app
         run: npm run check:static-input-fallback
+
+      - name: Verificar snapshot de Movimientos con checksum y fuente oficial
+        working-directory: transparencia-app
+        run: node --input-type=module -e 'import { readFileSync } from "node:fs"; import { validateMovementPayload } from "./scripts/movimientos-pipeline.mjs"; validateMovementPayload(JSON.parse(readFileSync("data/movimientos.json", "utf8")));'
 
       - name: Hidratar universo completo y validar checksums
         if: steps.data-cache.outputs.cache-hit != 'true'

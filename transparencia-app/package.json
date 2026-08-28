@@ -24,6 +24,7 @@
     "smoke:uptime": "node scripts/uptime-smoke.mjs",
     "verify:cold-crawl": "node scripts/cold-crawl.mjs",
     "verify:prod:double": "node scripts/verify-prod-double.mjs",
+    "verify:prod:movimientos": "node scripts/verify-prod-movimientos.mjs",
     "test": "npm run typecheck && npm run api:typecheck && npm run check:static-architecture && npm run check:tokens && npm run check:links && npm run check:innerhtml && vitest run",
     "guard:integrity": "node ../scripts/audit/pipeline-guard.mjs",
     "preflight": "npm run lint && npm run test && npm run pages:build && npm run api:size",
@@ -87,6 +88,7 @@
     "ingest:infolobby": "node scripts/ingest-infolobby.mjs",
     "ingest:infoprobidad": "node scripts/ingest-infoprobidad.mjs",
     "etl:personal-apoyo": "node scripts/etl-personal-apoyo.mjs",
+    "etl:movimientos": "node scripts/etl_movimientos_autoridades.mjs",
     "poll:personal-apoyo": "node scripts/poll-camara-personal-apoyo.mjs",
     "data:publish:personal-apoyo": "node scripts/publish-personal-apoyo.mjs",
     "ingest:cplt-personal": "node --max-old-space-size=4096 scripts/etl/stream-remote-personal.mjs"
