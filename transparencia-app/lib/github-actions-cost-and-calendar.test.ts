@@ -124,4 +124,16 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(content).not.toContain("schedule:");
     expect(content).toContain("api.github.com/users/$OWNER/settings/billing/actions");
   });
+
+  it("8. Ley 19.862 mantiene R2 canónico cuando D1 alcanza su límite", () => {
+    const content = fs.readFileSync(path.join(workflowsDir, "etl-ley-19862.yml"), "utf8");
+
+    expect(content).toContain("D1 opcional");
+    expect(content).toContain("Exceeded maximum DB size");
+    expect(content).toContain("code: 7500");
+    expect(content).toContain("R2 permanece como fuente canónica");
+    expect(content).toContain("se aborta el ETL");
+    expect(content).toContain("status=skipped_r2_canonical");
+    expect(content).toContain("transfer-d1-materialization-${{ github.run_id }}");
+  });
 });
