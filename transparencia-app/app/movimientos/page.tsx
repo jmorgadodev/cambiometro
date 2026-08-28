@@ -337,6 +337,9 @@ function MovimientosContent() {
               <p style={{ fontSize: "0.95rem", color: "var(--text-2)", lineHeight: 1.5, margin: 0, fontWeight: 500 }}>
                 Registro cronológico trazable de renuncias, ceses, cambios de puesto y nombramientos en el Poder Ejecutivo. Las salidas se contrastan con registros públicos de seguimiento; la confirmación proviene de decretos.
               </p>
+              <p style={{ fontSize: "0.82rem", color: "var(--text-2)", lineHeight: 1.45, margin: "0.65rem 0 0", maxWidth: 720 }}>
+                Un anuncio se informa de inmediato como <strong style={{ color: "var(--warning, var(--warn))" }}>en confirmación</strong>. Sólo cuando aparece el decreto o resolución oficial se actualiza el registro como <strong style={{ color: "var(--success, var(--ok))" }}>verificado oficial</strong>; el anuncio no se cuenta dos veces.
+              </p>
               {senalesEnConfirmacion > 0 && (
                 <p style={{ fontSize: "0.8rem", color: "var(--warning, var(--warn))", lineHeight: 1.45, margin: "0.65rem 0 0", fontWeight: 600 }}>
                   {senalesEnConfirmacion} señal{senalesEnConfirmacion === 1 ? "" : "es"} detectada{senalesEnConfirmacion === 1 ? "" : "s"} en confirmación; no se cuentan como movimientos oficiales.
@@ -432,13 +435,13 @@ function MovimientosContent() {
               Señales en confirmación
             </h2>
             <p style={{ margin: "0 0 0.7rem", color: "var(--text-2)", fontSize: "0.82rem", lineHeight: 1.45 }}>
-              Estas señales fueron detectadas en fuentes públicas y todavía no se contabilizan como movimientos oficiales.
+              Estas señales corresponden a anuncios detectados en fuentes públicas. Se informan desde ahora, pero todavía no se contabilizan como movimientos oficiales ni cambian por sí solas la autoridad registrada.
             </p>
             <ul style={{ margin: 0, paddingLeft: "1.15rem", color: "var(--text-2)", fontSize: "0.8rem", lineHeight: 1.5 }}>
               {señalesPendientes.slice(0, 5).map((signal) => (
                 <li key={signal.signal_id}>
                   {signal.url ? <a href={signal.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>{signal.title}</a> : signal.title}
-                  <span style={{ color: "var(--text-muted)", marginLeft: "0.35rem" }}>({signal.source_label})</span>
+                  <span style={{ color: "var(--text-muted)", marginLeft: "0.35rem" }}>({signal.source_label} · Anunciado · en confirmación)</span>
                 </li>
               ))}
             </ul>
@@ -722,7 +725,7 @@ function MovimientosContent() {
                       {mov.estado === "verificado" ? (
                         <span className="badge badge-ok" style={{ fontSize: "0.7rem" }}>Verificado</span>
                       ) : (
-                        <span className="badge badge-warn" style={{ fontSize: "0.7rem" }}>En confirmación</span>
+                        <span className="badge badge-warn" style={{ fontSize: "0.7rem" }}>Anunciado · en confirmación</span>
                       )}
                     </td>
                     <td style={{ padding: "0.65rem 0.85rem", whiteSpace: "nowrap" }}>
@@ -886,7 +889,7 @@ function MovimientosContent() {
                                 </span>
                               ) : (
                                 <span className="badge badge-warn" style={{ fontSize: "0.72rem" }}>
-                                  ⏱ En confirmación
+                                  Anunciado · en confirmación
                                 </span>
                               )}
 

@@ -166,6 +166,7 @@ export async function collectMovementSources({ sources = MOVIMIENTOS_SOURCES, fe
     source_label: source.label,
     source_tier: source.tier,
     detected_at: source.fetchedAt,
+    fase: "anunciado",
     status: "en_confirmacion",
     signal_id: `signal-${sha256(`${source.id}|${signal.url}|${signal.title}|${signal.date ?? ""}`).slice(0, 24)}`,
     tipo: classifySignalType(signal.title),

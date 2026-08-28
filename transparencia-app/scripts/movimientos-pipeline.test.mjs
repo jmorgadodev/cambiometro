@@ -25,6 +25,8 @@ describe("pipeline automático de movimientos", () => {
     );
     expect(signals).toHaveLength(1);
     expect(signals[0].title).toContain("nombramiento");
+    expect(signals[0].fase).toBe("anunciado");
+    expect(signals[0].status).toBe("en_confirmacion");
   });
 
   it("mantiene el estado provisional cuando no hay fuente oficial", () => {

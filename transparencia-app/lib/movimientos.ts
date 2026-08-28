@@ -83,6 +83,7 @@ export interface MovimientoSignal {
   date: string | null;
   summary: string;
   detected_at: string;
+  fase: "anunciado";
   status: "en_confirmacion";
   tipo: MovimientoTipo;
 }
