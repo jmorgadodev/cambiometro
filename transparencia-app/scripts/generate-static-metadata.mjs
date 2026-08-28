@@ -43,7 +43,7 @@ const routes = (await collectHtml(outDir))
 // `lastmod` is optional. Do not claim that every URL changed on every build;
 // stale timestamps make the sitemap less trustworthy for crawlers.
 const urlset = routes
-  .map((route) => `<url><loc>${route === "/" ? baseUrl : `${baseUrl}${route}/`}</loc></url>`)
+  .map((route) => "<url><loc>" + (route === "/" ? baseUrl + "/" : baseUrl + route + "/") + "</loc></url>")
   .join("");
 const sitemap = `<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">${urlset}</urlset>\n`;
 await mkdir(join(outDir, "_meta"), { recursive: true });
