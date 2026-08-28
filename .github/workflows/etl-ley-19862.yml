@@ -85,13 +85,27 @@ jobs:
           echo "Bridge health: $bridge_health"
           probe_file="$(mktemp)"
           trap 'rm -f "$probe_file"' EXIT
-          curl --fail --silent --show-error --location \
+          if curl --fail --silent --show-error --location \
             --connect-timeout 10 --max-time 45 \
             --header "X-Source-Bridge-Token: $bridge_token" \
-            "$bridge_url/fetch?year=2026&month=1" --output "$probe_file"
-          probe_bytes="$(stat -c '%s' "$probe_file")"
-          test "$probe_bytes" -gt 1000
-          echo "Official source bridge probe bytes: $probe_bytes"
+            "$bridge_url/fetch?year=2026&month=1" --output "$probe_file"; then
+            probe_bytes="$(stat -c '%s' "$probe_file")"
+            if [ "$probe_bytes" -gt 1000 ]; then
+              echo "Official source bridge probe bytes: $probe_bytes"
+            else
+              echo "::warning::El bridge oficial devolvió un payload demasiado pequeño; se usará directamente registros19862.gob.cl."
+              unset LEY_19862_SOURCE_BRIDGE_URL
+              unset LEY_19862_SOURCE_BRIDGE_TOKEN
+              echo "LEY_19862_SOURCE_BRIDGE_URL=" >> "$GITHUB_ENV"
+              echo "LEY_19862_SOURCE_BRIDGE_TOKEN=" >> "$GITHUB_ENV"
+            fi
+          else
+            echo "::warning::El bridge oficial no pasó la prueba autenticada; se usará directamente registros19862.gob.cl y el ETL fallará si esa fuente también está bloqueada."
+            unset LEY_19862_SOURCE_BRIDGE_URL
+            unset LEY_19862_SOURCE_BRIDGE_TOKEN
+            echo "LEY_19862_SOURCE_BRIDGE_URL=" >> "$GITHUB_ENV"
+            echo "LEY_19862_SOURCE_BRIDGE_TOKEN=" >> "$GITHUB_ENV"
+          fi
 
       - name: Hidratar particiones históricas de transferencias desde R2
         if: ${{ inputs.full_backfill != true }}
