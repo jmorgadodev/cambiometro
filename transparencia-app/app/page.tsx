@@ -192,7 +192,13 @@ export default async function HomePage() {
               <span className="home-path__icon"><Icono nombre="votaciones" size={18} /></span>
               <span className="home-path__eyebrow">Decisiones públicas</span>
               <h3>¿Cómo votó una autoridad?</h3>
-              <p>Consulta votaciones, asistencia, dietas y declaraciones con la fuente oficial a la vista.</p>
+              <p>Consulta votaciones, asistencia, dieta, gastos operacionales rendidos, asesores, declaraciones, relaciones y fuentes oficiales.</p>
+              <span className="home-path__features" aria-label="Contenido de la ficha">
+                <span>Votaciones y asistencia</span>
+                <span>Dietas y gastos rendidos</span>
+                <span>Asesores y declaraciones</span>
+                <span>Relaciones y fuentes</span>
+              </span>
               <b>Ver análisis parlamentario <span aria-hidden="true">→</span></b>
             </Link>
             <div className="home-paths__stack">
@@ -217,20 +223,40 @@ export default async function HomePage() {
                 <p>Filtra vínculos y abre la evidencia que respalda cada relación.</p>
                 <b>Abrir explorador <span aria-hidden="true">→</span></b>
               </Link>
-              <Link prefetch={false} href="/movimientos" className="home-path home-path--movement">
-                <span className="home-path__icon"><Icono nombre="etl" size={16} /></span>
-                <span className="home-path__eyebrow">Seguimiento de autoridades</span>
-                <h3>¿Qué cambió desde el 11 de marzo?</h3>
-                <p>Una lectura rápida del gobierno actual, antes de entrar al historial completo y sus fuentes.</p>
-                <div className="home-movement-timeline" aria-label="Línea de tiempo de movimientos desde el 11 de marzo de 2026">
-                  <div className="home-movement-timeline__track" aria-hidden="true" />
-                  <div className="home-movement-timeline__step"><span>{formatFechaCorta(MOVIMIENTOS_HOME_SUMMARY.desde)}</span><strong>Inicio del periodo</strong></div>
-                  <div className="home-movement-timeline__step"><span>{formatFechaCorta(MOVIMIENTOS_HOME_SUMMARY.ultimoEvento)}</span><strong>Último cambio</strong></div>
-                  <div className="home-movement-timeline__step"><span>{MOVIMIENTOS_HOME_SUMMARY.diasSinCambios} días</span><strong>sin cambios al corte</strong></div>
-                </div>
-                <span className="home-path__meta">{MOVIMIENTOS_HOME_SUMMARY.total} movimientos · {MOVIMIENTOS_HOME_SUMMARY.renuncias} renuncias · {MOVIMIENTOS_HOME_SUMMARY.verificados} verificados · {MOVIMIENTOS_HOME_SUMMARY.enConfirmacion} en confirmación</span>
-                <b>Ver historial y fuentes <span aria-hidden="true">→</span></b>
+              <Link prefetch={false} href="/personas" className="home-path">
+                <span className="home-path__icon"><Icono nombre="personas" size={16} /></span>
+                <span className="home-path__eyebrow">Directorio de personas</span>
+                <h3>¿Quiénes ocupan los cargos públicos?</h3>
+                <p>Parlamentarios, autoridades y nóminas oficiales en un solo directorio consultable.</p>
+                <b>Explorar directorio <span aria-hidden="true">→</span></b>
               </Link>
+            </div>
+          </div>
+        </section>
+      </Reveal>
+
+      <Reveal delay={50}>
+        <section className="container-main home-movement-feature" aria-labelledby="home-movement-title">
+          <div className="home-section-heading">
+            <div>
+              <p className="eyebrow">Seguimiento de autoridades</p>
+              <h2 id="home-movement-title">Lo último que cambió en el Estado</h2>
+            </div>
+            <Link prefetch={false} href="/movimientos">Ver historial completo →</Link>
+          </div>
+          <div className="home-movement-feature__body">
+            <div className="home-movement-feature__copy">
+              <p className="eyebrow">Corte de movimientos</p>
+              <h3>Cambios que vale la pena seguir</h3>
+              <p>Una lectura breve de renuncias, nombramientos y cambios anunciados. Los movimientos en confirmación se mantienen separados hasta contar con respaldo normativo.</p>
+              <span className="home-path__meta">{MOVIMIENTOS_HOME_SUMMARY.total} movimientos · {MOVIMIENTOS_HOME_SUMMARY.renuncias} renuncias · {MOVIMIENTOS_HOME_SUMMARY.verificados} verificados · {MOVIMIENTOS_HOME_SUMMARY.enConfirmacion} en confirmación</span>
+              <Link prefetch={false} href="/movimientos" className="home-movement-feature__cta">Ver movimientos y fuentes <span aria-hidden="true">→</span></Link>
+            </div>
+            <div className="home-movement-timeline" aria-label="Línea de tiempo de movimientos desde el 11 de marzo de 2026">
+              <div className="home-movement-timeline__track" aria-hidden="true" />
+              <div className="home-movement-timeline__step"><span>{formatFechaCorta(MOVIMIENTOS_HOME_SUMMARY.desde)}</span><strong>Inicio del periodo</strong></div>
+              <div className="home-movement-timeline__step"><span>{formatFechaCorta(MOVIMIENTOS_HOME_SUMMARY.ultimoEvento)}</span><strong>Último cambio</strong></div>
+              <div className="home-movement-timeline__step"><span>{MOVIMIENTOS_HOME_SUMMARY.diasSinCambios} días</span><strong>sin cambios al corte</strong></div>
             </div>
           </div>
         </section>

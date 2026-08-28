@@ -30,15 +30,23 @@ describe("promesas editoriales del inicio", () => {
     expect(home).toContain("diputados y senadores");
   });
 
-  it("mantiene cinco preguntas de análisis y resume el seguimiento de movimientos", () => {
-    expect(home).toContain("¿Qué cambió desde el 11 de marzo?");
+  it("mantiene cinco preguntas de análisis y separa el seguimiento de movimientos", () => {
+    expect(home).toContain("Directorio de personas");
+    expect(home).toContain("¿Quiénes ocupan los cargos públicos?");
+    expect(home).toContain("home-movement-feature");
     expect(home).toContain("home-movement-timeline");
     expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.diasSinCambios");
     expect(home).toContain("Último cambio");
     expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.renuncias");
     expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.enConfirmacion");
     expect(home).toContain('href="/movimientos"');
-    expect(home).toContain("home-path--movement");
+    expect(home).not.toContain("home-path--movement");
+  });
+
+  it("explica el alcance de la ficha parlamentaria", () => {
+    expect(home).toContain("gastos operacionales rendidos");
+    expect(home).toContain("Asesores y declaraciones");
+    expect(home).toContain("Relaciones y fuentes");
   });
 
   it("usa una selección editorial estable y muestra el resumen factual de cada votación", () => {

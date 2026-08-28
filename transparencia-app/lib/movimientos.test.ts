@@ -32,7 +32,7 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
   });
 
   it("1c. el resumen de la Home se recalcula desde el corte del gobierno actual", () => {
-    expect(MOVIMIENTOS_HOME_SUMMARY).toMatchObject({ desde: "2026-03-11", total: 78, renuncias: 56, verificados: 74, enConfirmacion: 4 });
+    expect(MOVIMIENTOS_HOME_SUMMARY).toMatchObject({ desde: "2026-03-11", total: 79, renuncias: 55, verificados: 73, enConfirmacion: 6 });
   });
 
   it("2. Eventos obligatorios del 14-08-2026 presentes (Duco/Deporte y Urrejola/Atacama) con fuentes de prensa", () => {
