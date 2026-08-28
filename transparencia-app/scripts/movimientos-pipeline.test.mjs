@@ -71,4 +71,15 @@ describe("pipeline automático de movimientos", () => {
     expect(normalized.last_success_at).toBe(legacy.last_run);
     expect(normalized.checksum_sha256).toBe(sha256({ ...normalized, checksum_sha256: undefined }));
   });
+
+  it("renombra duplicados históricos de forma estable sin eliminar filas", () => {
+    const legacy = {
+      ...baseline,
+      movimientos: [baseline.movimientos[0], { ...baseline.movimientos[1], id: baseline.movimientos[0].id }],
+    };
+    const normalized = normalizeMovementPayload(legacy);
+    expect(normalized.movimientos).toHaveLength(2);
+    expect(new Set(normalized.movimientos.map((movement) => movement.id)).size).toBe(2);
+    expect(normalized.movimientos[1].id).toMatch(/^mov-1-[a-f0-9]{12}$/);
+  });
 });
