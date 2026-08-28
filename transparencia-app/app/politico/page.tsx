@@ -22,9 +22,10 @@ const DIETA_OFICIAL_PARLAMENTARIA = {
 };
 
 export const metadata: Metadata = {
-  title: "Diputados y Senadores 2026-2030",
+  title: "Diputados y Senadores 2026-2030 | El Cambiómetro",
   description:
     "Listado completo de los 155 diputados y 50 senadores del período 2026-2030 con acceso a la ficha de transparencia de cada uno.",
+  alternates: { canonical: "/politico" },
 };
 
 export default async function PoliticoDirectory() {

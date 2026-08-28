@@ -27,7 +27,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://cambiometro.impulsacv.cl"),
   title: {
     default: "El Cambiómetro — Datos públicos con trazabilidad",
-    template: "%s | El Cambiómetro",
+    template: "%s",
   },
   description:
     "Explora autoridades, instituciones y nóminas públicas de Chile con fecha de corte, procedencia y enlaces a sus fuentes.",

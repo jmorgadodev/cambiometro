@@ -75,6 +75,21 @@ diseño. Los cambios de código pasan por el refresco de UI; los cambios de dato
 disparan este refresco estático y ambos usan los mismos gates antes de
 publicar.
 
+## SEO estático
+
+Cada página indexable debe declarar su propio rel="canonical" con la URL
+canónica y barra final. El build genera sitemap.xml usando sólo páginas
+canónicas, excluye alias con redirección 301 y no inventa lastmod igual para
+todo el sitio. robots.txt mantiene el sitemap público y bloquea /api/ y
+/_next/ sin bloquear las páginas.
+
+El guard npm run check:seo valida títulos, descripciones, canonicals, ausencia
+de noindex inesperado y correspondencia exacta entre HTML y sitemap. Después
+de publicar un cambio, se debe enviar o volver a validar
+https://cambiometro.impulsacv.cl/sitemap.xml en Google Search Console y usar
+Inspección de URL para las páginas prioritarias. El sitemap ayuda a descubrir
+URLs, pero no garantiza su indexación.
+
 ## Qué significa el bloqueo
 
 Este error no indica que se hayan perdido los datos históricos ni que la

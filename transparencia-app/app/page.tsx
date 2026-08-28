@@ -221,13 +221,14 @@ export default async function HomePage() {
                 <span className="home-path__icon"><Icono nombre="etl" size={16} /></span>
                 <span className="home-path__eyebrow">Seguimiento de autoridades</span>
                 <h3>¿Qué cambió desde el 11 de marzo?</h3>
-                <p>Un resumen del gobierno actual: los hechos verificados quedan separados de los casos en confirmación.</p>
-                <div className="home-movement-summary" aria-label="Resumen de movimientos desde el 11 de marzo de 2026">
-                  <div><strong>{MOVIMIENTOS_HOME_SUMMARY.total}</strong><span>movimientos</span></div>
-                  <div><strong>{MOVIMIENTOS_HOME_SUMMARY.renuncias}</strong><span>renuncias</span></div>
-                  <div><strong>{MOVIMIENTOS_HOME_SUMMARY.enConfirmacion}</strong><span>en confirmación</span></div>
+                <p>Una lectura rápida del gobierno actual, antes de entrar al historial completo y sus fuentes.</p>
+                <div className="home-movement-timeline" aria-label="Línea de tiempo de movimientos desde el 11 de marzo de 2026">
+                  <div className="home-movement-timeline__track" aria-hidden="true" />
+                  <div className="home-movement-timeline__step"><span>{formatFechaCorta(MOVIMIENTOS_HOME_SUMMARY.desde)}</span><strong>Inicio del periodo</strong></div>
+                  <div className="home-movement-timeline__step"><span>{formatFechaCorta(MOVIMIENTOS_HOME_SUMMARY.ultimoEvento)}</span><strong>Último cambio</strong></div>
+                  <div className="home-movement-timeline__step"><span>{MOVIMIENTOS_HOME_SUMMARY.diasSinCambios} días</span><strong>sin cambios al corte</strong></div>
                 </div>
-                <span className="home-path__meta">{MOVIMIENTOS_HOME_SUMMARY.verificados} verificados · último evento {formatFechaCorta(MOVIMIENTOS_HOME_SUMMARY.ultimoEvento)}</span>
+                <span className="home-path__meta">{MOVIMIENTOS_HOME_SUMMARY.total} movimientos · {MOVIMIENTOS_HOME_SUMMARY.renuncias} renuncias · {MOVIMIENTOS_HOME_SUMMARY.verificados} verificados · {MOVIMIENTOS_HOME_SUMMARY.enConfirmacion} en confirmación</span>
                 <b>Ver historial y fuentes <span aria-hidden="true">→</span></b>
               </Link>
             </div>

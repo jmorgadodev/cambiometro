@@ -32,6 +32,9 @@ describe("promesas editoriales del inicio", () => {
 
   it("mantiene cinco preguntas de análisis y resume el seguimiento de movimientos", () => {
     expect(home).toContain("¿Qué cambió desde el 11 de marzo?");
+    expect(home).toContain("home-movement-timeline");
+    expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.diasSinCambios");
+    expect(home).toContain("Último cambio");
     expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.renuncias");
     expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.enConfirmacion");
     expect(home).toContain('href="/movimientos"');

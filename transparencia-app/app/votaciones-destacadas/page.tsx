@@ -5,6 +5,7 @@ import { getVotacionDestacadaDetalle, VOTACIONES_DESTACADAS } from "@/lib/votaci
 export const metadata: Metadata = {
   title: "Votaciones destacadas — El Cambiómetro",
   description: "Selección editorial de votaciones nominales verificables del Congreso Nacional.",
+  alternates: { canonical: "/votaciones-destacadas" },
 };
 
 export default function VotacionesDestacadasPage() {

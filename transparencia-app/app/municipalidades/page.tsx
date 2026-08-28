@@ -6,6 +6,7 @@ import MunicipalidadesExplorerClient from "@/components/municipalidades/Municipa
 export const metadata: Metadata = {
   title: "Directorio de Municipalidades de Chile — Presupuestos SINIM, Dotación CPLT y Alcaldes | El Cambiómetro",
   description: "Explorador oficial de las 346 municipalidades de Chile: presupuestos vigentes SINIM, gasto en personal, sueldos de alcaldes, dependencia FCM, concejos municipales SERVEL 2024 y compras públicas OCDS.",
+  alternates: { canonical: "/municipalidades" },
   openGraph: {
     title: "Directorio de Municipalidades de Chile — El Cambiómetro",
     description: "Presupuestos SINIM, dotaciones de personal CPLT y sueldos de autoridades de las 346 comunas de Chile.",
