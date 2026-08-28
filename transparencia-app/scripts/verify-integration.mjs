@@ -146,6 +146,16 @@ async function verifyWidgetInColdContext() {
     extraHTTPHeaders: uptimeToken ? { "X-Cambiometro-Uptime-Token": uptimeToken } : {},
   });
   const widgetPage = await widgetContext.newPage();
+  const widgetApiStatuses = [];
+  const widgetRequestFailures = [];
+  const widgetConsoleMessages = [];
+  widgetPage.on("response", (response) => {
+    if (response.url().includes("/api/v1/politico/")) widgetApiStatuses.push(response.status());
+  });
+  widgetPage.on("requestfailed", (request) => {
+    if (request.url().includes("/api/v1/politico/")) widgetRequestFailures.push(request.failure()?.errorText || "unknown");
+  });
+  widgetPage.on("console", (message) => widgetConsoleMessages.push(`${message.type()}: ${message.text()}`));
   if (apiBaseUrl !== baseUrl) {
     await widgetPage.route(`${baseUrl}/api/**`, async (route) => {
       const target = new URL(route.request().url());
@@ -161,7 +171,12 @@ async function verifyWidgetInColdContext() {
     await widgetPage.setContent(`<!DOCTYPE html><html><body><main><script src="${baseUrl}/widget.js" data-politico="dip-061"${widgetApiOrigin}></script></main></body></html>`, { waitUntil: "networkidle" });
     const widgetCard = widgetPage.locator(".transparencia-widget").locator("article");
     await widgetCard.waitFor({ state: "visible", timeout: 15_000 });
-    await widgetCard.locator(".name").waitFor({ state: "visible", timeout: 15_000 });
+    try {
+      await widgetCard.locator(".name").waitFor({ state: "visible", timeout: 15_000 });
+    } catch (error) {
+      console.error(`[WIDGET] API statuses=${JSON.stringify(widgetApiStatuses)} requestFailures=${JSON.stringify(widgetRequestFailures)} card=${JSON.stringify(await widgetCard.textContent())} console=${JSON.stringify(widgetConsoleMessages)}`);
+      throw error;
+    }
     assert((await widgetCard.textContent())?.includes("Kast Adriasola"));
   } finally {
     await widgetContext.close();
