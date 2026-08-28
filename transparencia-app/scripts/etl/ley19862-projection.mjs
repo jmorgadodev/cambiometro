@@ -1,4 +1,5 @@
 import { filterRecordsForRelease, inferReleaseCutoff } from "./transfer-release-cutoff.mjs";
+import { stableStringify } from "./core.mjs";
 
 function textOrNull(value) {
   const text = typeof value === "string" ? value.trim() : "";
@@ -52,13 +53,13 @@ function aggregate(records, key) {
     }));
 }
 
-export function buildLey19862Projection(records, { generatedAt, sampleSize = 1000, registeredThrough } = {}) {
+export function buildLey19862Projection(records, { generatedAt, sampleSize = 1000, registeredThrough, dedupeExact = false } = {}) {
   const filtered = filterRecordsForRelease(records, { registeredThrough });
   if (filtered.missingRegisteredAt > 0) {
     throw new Error(`LEY_19862_REGISTERED_AT_MISSING: ${filtered.missingRegisteredAt}`);
   }
   const effectiveRegisteredThrough = filtered.registeredThrough ?? inferReleaseCutoff(records);
-  const valid = filtered.records
+  const candidates = filtered.records
     .map((record) => record?.data ?? record)
     .filter(
       (record) =>
@@ -67,10 +68,25 @@ export function buildLey19862Projection(records, { generatedAt, sampleSize = 100
         Number.isSafeInteger(record.monto_clp) &&
         record.monto_clp >= 0 &&
         textOrNull(record.id),
-    )
-    .sort((a, b) => stableCompare(a.fecha, b.fecha) || stableCompare(a.id, b.id));
+    );
 
   const seen = new Set();
+  const unique = [];
+  let duplicateExactRows = 0;
+  const recordsById = new Map();
+  for (const record of candidates) {
+    const previous = recordsById.get(record.id);
+    if (previous) {
+      if (!dedupeExact || stableStringify(previous) !== stableStringify(record)) {
+        throw new Error(`LEY_19862_DUPLICATE_ID: ${record.id}`);
+      }
+      duplicateExactRows += 1;
+      continue;
+    }
+    recordsById.set(record.id, record);
+    unique.push(record);
+  }
+  const valid = unique.sort((a, b) => stableCompare(a.fecha, b.fecha) || stableCompare(a.id, b.id));
   for (const record of valid) {
     if (seen.has(record.id)) throw new Error(`LEY_19862_DUPLICATE_ID: ${record.id}`);
     seen.add(record.id);
@@ -94,6 +110,7 @@ export function buildLey19862Projection(records, { generatedAt, sampleSize = 100
       method: "official-monthly-csv",
       registeredThrough: effectiveRegisteredThrough,
       sourceRows: records.length,
+      duplicateExactRows,
       excludedAfterCutoff: filtered.excludedAfterCutoff,
       periods: Object.keys(byYear).sort(),
     },

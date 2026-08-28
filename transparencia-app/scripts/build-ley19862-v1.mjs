@@ -41,7 +41,9 @@ for (const item of files) records.push(...(await readPartition(item.file)));
 const generatedAt = new Date(
   Math.max(...files.map((item) => new Date(JSON.parse(readFileSync(join(dirname(item.file), "manifest.json"), "utf8")).generatedAt).getTime())),
 ).toISOString();
-const projection = buildLey19862Projection(records, { generatedAt, registeredThrough });
+// Monthly ingestion can overlap the last published period. Exact duplicates
+// are collapsed by stable ID; conflicting rows still abort the build.
+const projection = buildLey19862Projection(records, { generatedAt, registeredThrough, dedupeExact: true });
 assertCanonicalTransferRelease({ totalRows: projection.kpis.total_transfers, totalMontoClp: projection.kpis.total_monto_clp });
 projection.source.periods = files.map((item) => item.period);
 mkdirSync(dirname(output), { recursive: true });
