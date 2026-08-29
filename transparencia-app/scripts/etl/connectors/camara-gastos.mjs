@@ -34,6 +34,13 @@ const RETRY_WAIT_MS = 20_000;
 const MAX_REINTENTOS = 3;
 const MAX_ERRORES_CONSECUTIVOS = 5;
 
+export function assertCamaraExpenseComplete(completed, expected) {
+  if (!Number.isSafeInteger(completed) || !Number.isSafeInteger(expected) || expected < 1 || completed < expected) {
+    throw new Error(`CAMARA_GASTOS_INCOMPLETE: ${completed}/${expected} diputados completados`);
+  }
+  return true;
+}
+
 function browserExecutables() {
   const candidates = [
     process.env.PUPPETEER_EXECUTABLE_PATH,
@@ -179,7 +186,8 @@ export async function fetchGastosCamara({ diputados = [] } = {}) {
     .filter((diputado) => diputado.id)
     .filter((diputado) => !hechos.has(diputado.id));
   if (nómina.length === 0) return [];
-  const totalDiputados = hechos.size + nómina.length;
+  const expectedIds = new Set(diputados.map((diputado) => String(diputado.id)).filter(Boolean));
+  const totalDiputados = expectedIds.size;
 
   const browserProfile = mkdtempSync(join(PROGRESO_DIR, "pptr-etl-"));
   const browser = await launchFirstAvailable(
@@ -266,6 +274,7 @@ export async function fetchGastosCamara({ diputados = [] } = {}) {
       }
     }
     console.log(`[camara-gastos] fin: ${resultados.length} registros, ${hechos.size}/${totalDiputados} diputados completados`);
+    assertCamaraExpenseComplete([...expectedIds].filter((id) => hechos.has(id)).length, totalDiputados);
     await page.close();
   } finally {
     await browser.close().catch(() => {});

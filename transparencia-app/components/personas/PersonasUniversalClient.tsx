@@ -166,6 +166,8 @@ export default function PersonasUniversalClient({
   const [funcionariosData, setFuncionariosData] = useState<FuncionarioPublico[]>([]);
   const [funcionariosTotal, setFuncionariosTotal] = useState(0);
   const [funcionariosLoading, setFuncionariosLoading] = useState(false);
+  const [funcionariosError, setFuncionariosError] = useState<string | null>(null);
+  const [funcionariosRetry, setFuncionariosRetry] = useState(0);
   const [funcionariosStats, setFuncionariosStats] = useState({
     totalMuni: 0,
     promedioSueldo: 0,
@@ -242,23 +244,11 @@ export default function PersonasUniversalClient({
   // Fetch Funcionarios cuando la pestaña activa es "funcionarios"
   useEffect(() => {
     if (activeTab !== "funcionarios") return;
-
-    // The Worker serves scoped projections only. Do not issue a national
-    // request that is guaranteed to return DATASET_SCOPE_REQUIRED; the UI
-    // renders an explicit selection state instead of a red network error.
-    if (organismoFilter === "Todos") {
-      const timer = setTimeout(() => {
-        setFuncionariosData([]);
-        setFuncionariosTotal(0);
-        setFuncionariosStats({ totalMuni: 0, promedioSueldo: 0, conHorasExtras: 0 });
-        setFuncionariosLoading(false);
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-
     let isMounted = true;
+    const controller = new AbortController();
     const timer = setTimeout(() => {
       setFuncionariosLoading(true);
+      setFuncionariosError(null);
 
       const params = new URLSearchParams();
       if (debouncedSearch) params.set("query", debouncedSearch);
@@ -267,29 +257,39 @@ export default function PersonasUniversalClient({
       if (contratoFilter !== "Todos") params.set("contrato", contratoFilter);
       if (estamentoFilter !== "Todos") params.set("estamento", estamentoFilter);
       if (soloHorasExtras) params.set("horas_extras", "true");
+      // El directorio debe mostrar también las filas nominales sin pago
+      // informado; son registros oficiales y no deben desaparecer del total.
+      params.set("include_zero", "true");
       params.set("sortBy", sortFuncionarios);
       params.set("page", String(page));
       params.set("limit", String(ITEMS_PER_PAGE));
 
-      fetch(`/api/funcionarios?${params.toString()}`)
-        .then((res) => res.json())
+      fetch(`/api/funcionarios?${params.toString()}`, { signal: controller.signal })
+        .then(async (res) => {
+          const json = await res.json();
+          if (!res.ok) throw new Error(json?.error?.message || "No se pudo consultar el directorio.");
+          return json;
+        })
         .then((json) => {
           if (!isMounted) return;
           if (json.data && Array.isArray(json.data)) {
             setFuncionariosData(json.data);
-            setFuncionariosTotal(json.pagination?.total || json.data.length);
-            if (json.pagination?.stats) {
-              setFuncionariosStats(json.pagination.stats);
+            const pagination = json.pagination ?? json.meta ?? {};
+            setFuncionariosTotal(pagination.total ?? json.data.length);
+            if (pagination.stats) {
+              setFuncionariosStats(pagination.stats);
             }
           } else {
             setFuncionariosData([]);
             setFuncionariosTotal(0);
           }
         })
-        .catch(() => {
+        .catch((error: unknown) => {
+          if (error instanceof DOMException && error.name === "AbortError") return;
           if (!isMounted) return;
           setFuncionariosData([]);
           setFuncionariosTotal(0);
+          setFuncionariosError(error instanceof Error ? error.message : "No se pudo consultar el directorio.");
         })
         .finally(() => {
           if (isMounted) setFuncionariosLoading(false);
@@ -299,8 +299,9 @@ export default function PersonasUniversalClient({
     return () => {
       isMounted = false;
       clearTimeout(timer);
+      controller.abort();
     };
-  }, [activeTab, debouncedSearch, organismoFilter, tipoFilter, contratoFilter, estamentoFilter, soloHorasExtras, sortFuncionarios, page]);
+  }, [activeTab, debouncedSearch, organismoFilter, tipoFilter, contratoFilter, estamentoFilter, soloHorasExtras, sortFuncionarios, page, funcionariosRetry]);
 
   // Handle Tab Switch
   const handleTabChange = (newTab: PersonaTab) => {
@@ -874,8 +875,18 @@ export default function PersonasUniversalClient({
               ? "alcaldes de Chile"
               : activeTab === "autoridades"
               ? "altas autoridades institucionales"
-              : "funcionarios públicos clasificados"}
+              : "registros laborales oficiales"}
           </div>
+          {activeTab === "funcionarios" && (
+            <a
+              href={`/api/v1/export?dataset=funcionarios&format=csv&page=${page}&limit=${ITEMS_PER_PAGE}${debouncedSearch ? `&query=${encodeURIComponent(debouncedSearch)}` : ""}${organismoFilter !== "Todos" ? `&muni=${encodeURIComponent(organismoFilter)}` : ""}${contratoFilter !== "Todos" ? `&contrato=${encodeURIComponent(contratoFilter)}` : ""}${estamentoFilter !== "Todos" ? `&estamento=${encodeURIComponent(estamentoFilter)}` : ""}`}
+              className="btn btn-secondary btn-sm"
+              download
+              style={{ fontSize: "0.75rem" }}
+            >
+              Descargar este bloque (CSV)
+            </a>
+          )}
         </div>
 
         {/* ========================================================================= */}
@@ -1361,15 +1372,19 @@ export default function PersonasUniversalClient({
               <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 16, padding: "3rem", textAlign: "center" }}>
                 <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>🔍</div>
                 <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--text-1)", margin: "0 0 0.5rem" }}>
-                  {organismoFilter === "Todos" ? "Selecciona un organismo" : "No se encontraron funcionarios"}
+                  {funcionariosError ? "No se pudo consultar el directorio" : "No se encontraron funcionarios"}
                 </h3>
                 <p style={{ fontSize: "0.85rem", color: "var(--text-3)", maxWidth: 420, margin: "0 auto 1.5rem" }}>
-                  {organismoFilter === "Todos"
-                    ? "Elige un organismo para consultar su nómina oficial y usar la búsqueda de funcionarios."
+                  {funcionariosError
+                    ? funcionariosError
                     : "Prueba cambiando los filtros de organismo, tipo, contrato o término de búsqueda."}
                 </p>
                 <button
                   onClick={() => {
+                    if (funcionariosError) {
+                      setFuncionariosRetry((value) => value + 1);
+                      return;
+                    }
                     setSearch("");
                     setTipoFilter("Todos");
                     setOrganismoFilter("Todos");
@@ -1381,7 +1396,7 @@ export default function PersonasUniversalClient({
                   className="btn btn-primary"
                   style={{ fontSize: "0.8rem", padding: "0.5rem 1rem" }}
                 >
-                  Restablecer todos los filtros
+                  {funcionariosError ? "Reintentar consulta" : "Restablecer todos los filtros"}
                 </button>
               </div>
             ) : viewMode === "cards" ? (

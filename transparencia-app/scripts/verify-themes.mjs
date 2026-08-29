@@ -4,6 +4,7 @@ import { chromium } from "playwright";
 import { AxeBuilder } from "@axe-core/playwright";
 
 const baseUrl = (process.env.VERIFY_BASE_URL || "http://127.0.0.1:3003").replace(/\/$/, "");
+const apiBaseUrl = (process.env.VERIFY_API_URL || baseUrl).replace(/\/$/, "");
 const outputDir = process.env.THEME_SCREENSHOTS_DIR || join(process.cwd(), "artifacts", "themes");
 const routes = [
   ["home", "/"],
@@ -30,7 +31,18 @@ for (const [routeName, route] of routes) {
     const context = await browser.newContext();
     const page = await context.newPage();
     const consoleErrors = [];
+    const failedResponses = [];
     page.on("console", (message) => { if (message.type() === "error") consoleErrors.push(message.text()); });
+    page.on("response", (response) => {
+      if (response.status() >= 400) failedResponses.push(`${response.status()} ${response.url()}`);
+    });
+    if (apiBaseUrl !== baseUrl) {
+      await page.route(`${baseUrl}/api/**`, async (route) => {
+        const requestUrl = new URL(route.request().url());
+        const apiUrl = new URL(`${requestUrl.pathname}${requestUrl.search}`, apiBaseUrl);
+        await route.continue({ url: apiUrl.toString() });
+      });
+    }
     await page.goto(`${baseUrl}${route}`, { waitUntil: "networkidle", timeout: 30_000 });
     await page.evaluate((value) => { localStorage.setItem("cambiometro-theme", value); document.documentElement.setAttribute("data-theme", value); }, theme);
     await page.reload({ waitUntil: "networkidle", timeout: 30_000 });
@@ -46,6 +58,7 @@ for (const [routeName, route] of routes) {
     await page.screenshot({ path: join(outputDir, `${routeName}-${theme}.png`), fullPage: true });
     await context.close();
     if (consoleErrors.length) failures.push(`${route} ${theme}: errores consola ${consoleErrors.join(" | ")}`);
+    if (failedResponses.length) failures.push(`${route} ${theme}: respuestas HTTP fallidas ${failedResponses.join(" | ")}`);
   }
 }
 await browser.close();

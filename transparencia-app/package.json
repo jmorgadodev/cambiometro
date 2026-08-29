@@ -45,6 +45,7 @@
     "pages:domain:cutover": "node scripts/cutover-pages-domain.mjs",
     "cf-typegen": "wrangler types --env-interface CloudflareEnv cloudflare-env.d.ts",
     "etl": "node scripts/etl.mjs",
+    "etl:expenses:local": "node scripts/etl-expenses-local.mjs",
     "etl:prepare": "node scripts/prepare-etl-workspace.mjs",
     "data:lake": "node scripts/build-data-lake.mjs",
     "data:lake:dry": "node scripts/build-data-lake.mjs --dry-run",

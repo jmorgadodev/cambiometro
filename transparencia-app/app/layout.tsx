@@ -132,6 +132,14 @@ function TikTokIcon({ size = 14 }: { size?: number }) {
   );
 }
 
+function FacebookIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M13.5 21v-8h2.75l.4-3h-3.15V8.08c0-.87.24-1.46 1.5-1.46h1.76V3.94c-.3-.04-1.34-.14-2.55-.14-2.52 0-4.25 1.54-4.25 4.37V10H7.1v3h2.86v8h3.54Z" />
+    </svg>
+  );
+}
+
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
@@ -243,42 +251,21 @@ function Footer({ updatedAt, totalRecords }: { updatedAt: string | null; totalRe
             <span className="site-footer__dot" aria-hidden="true">
               ·
             </span>
-            <a
-              href="https://www.instagram.com/cambiometro/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram @cambiometro"
-              style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
-            >
-              <InstagramIcon size={14} />
-              Instagram
-            </a>
-            <span className="site-footer__dot" aria-hidden="true">
-              ·
+            <span aria-label="Redes sociales de El Cambiómetro" style={{ display: "inline-flex", alignItems: "center", gap: "0.55rem" }}>
+              <a href="https://www.instagram.com/cambiometro/" target="_blank" rel="noopener noreferrer" aria-label="Instagram @cambiometro" title="Instagram @cambiometro" style={{ display: "inline-flex", alignItems: "center" }}>
+                <InstagramIcon size={14} />
+              </a>
+              <a href="https://x.com/cambiometro" target="_blank" rel="noopener noreferrer" aria-label="X @cambiometro" title="X @cambiometro" style={{ display: "inline-flex", alignItems: "center" }}>
+                <XIcon size={13} />
+              </a>
+              <a href="https://www.tiktok.com/@cambiometro" target="_blank" rel="noopener noreferrer" aria-label="TikTok @cambiometro" title="TikTok @cambiometro" style={{ display: "inline-flex", alignItems: "center" }}>
+                <TikTokIcon size={13} />
+              </a>
+              <a href="https://www.facebook.com/profile.php?id=61593925561451" target="_blank" rel="noopener noreferrer" aria-label="Facebook Cambiometro" title="Facebook Cambiometro" style={{ display: "inline-flex", alignItems: "center" }}>
+                <FacebookIcon size={14} />
+              </a>
+              <span className="sr-only">@cambiometro</span>
             </span>
-            <a
-              href="https://x.com/cambiometro"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="𝕏 Twitter / X @cambiometro"
-              style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
-            >
-              <XIcon size={13} />
-              𝕏 @cambiometro
-            </a>
-            <span className="site-footer__dot" aria-hidden="true">
-              ·
-            </span>
-            <a
-              href="https://www.tiktok.com/@cambiometro"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="TikTok @cambiometro"
-              style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
-            >
-              <TikTokIcon size={13} />
-              TikTok @cambiometro
-            </a>
             <span className="site-footer__dot" aria-hidden="true">
               ·
             </span>

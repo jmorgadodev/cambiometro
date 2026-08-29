@@ -9,6 +9,7 @@ describe("scripts ETL ejecutados por GitHub Actions", () => {
       "scripts/etl/municipality-registry.mjs",
       "scripts/update-commune-catalog.mjs",
       "scripts/publish-cplt-projections.mjs",
+      "scripts/etl-expenses-local.mjs",
       "scripts/ingest-cplt-nacional.mjs",
       "scripts/stage-cplt-category.mjs",
       "scripts/merge-cplt-category-artifacts.mjs",

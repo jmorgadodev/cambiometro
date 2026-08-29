@@ -14,7 +14,7 @@ permissions:
 
 jobs:
   ingest-publish-materialize:
-    name: Cámara y Senado — gastos rendidos completos
+    name: Senado — conserva el release de Cámara publicado localmente
     runs-on: ubuntu-latest
     timeout-minutes: 240
     environment: production
@@ -30,13 +30,6 @@ jobs:
       - name: Instalar dependencias
         run: npm ci
         working-directory: transparencia-app
-
-      - name: Instalar Chromium para el conector WebForms de Cámara
-        working-directory: transparencia-app
-        run: |
-          npx playwright install --with-deps chromium
-          browser_path="$(node -e 'process.stdout.write(require("playwright").chromium.executablePath())')"
-          echo "PUPPETEER_EXECUTABLE_PATH=$browser_path" >> "$GITHUB_ENV"
 
       - name: Exigir credenciales de datos
         shell: bash
@@ -56,13 +49,20 @@ jobs:
           mkdir -p data/lake/catalog/v1
           npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
 
+      - name: Recuperar los subconjuntos vigentes antes de actualizar Senado
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: node scripts/etl-expenses-local.mjs --hydrate-only --force
+
       - name: Preparar workspace ETL
         working-directory: transparencia-app
         run: npm run etl:prepare
 
-      - name: Ingerir nómina y gastos oficiales de ambas cámaras
+      - name: Ingerir gastos oficiales de Senado (Cámara se ejecuta localmente)
         working-directory: transparencia-app
-        run: npm run etl -- --from "2026-01-01" --to "$(date -u +%F)" --source camara,gastos_camara,gastos_senado
+        run: npm run etl -- --from "2026-01-01" --to "$(date -u +%F)" --source gastos_senado
 
       - name: Construir y publicar lake
         working-directory: transparencia-app
@@ -81,7 +81,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
           ETL_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-expenses
-        run: npm run data:materialize -- --database transparencia-db --remote --sources gastos_camara,gastos_senado
+        run: npm run data:materialize -- --database transparencia-db --remote --sources gastos_senado
 
       - name: Generar subsets estáticos completos
         working-directory: transparencia-app

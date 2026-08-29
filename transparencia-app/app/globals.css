@@ -3774,3 +3774,16 @@ html.dark .page-masthead {
   border-radius: 8px;
 }
 
+.cruces-record-filters .input {
+  min-width: 0;
+}
+
+@media (max-width: 760px) {
+  .cruces-record-filters {
+    grid-template-columns: 1fr 1fr !important;
+  }
+
+  .cruces-record-filters input[type="search"] {
+    grid-column: 1 / -1;
+  }
+}

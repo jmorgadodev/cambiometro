@@ -5,6 +5,7 @@ import { leerContraloriaV1 } from "@/lib/contraloria-lake";
 import { leerChileCompraV1 } from "@/lib/chilecompra";
 import { leerInfoLobbyV1 } from "@/lib/infolobby";
 import CrucesExplorerClient from "@/components/cruces/CrucesExplorerClient";
+import CrucesSourceRecords from "@/components/cruces/CrucesSourceRecords";
 import { getLey19862Summary } from "@/lib/transferencias-data";
 import { SOURCE_CANONICAL_COUNTS } from "@/lib/published-sources";
 import {
@@ -134,6 +135,11 @@ export default async function CrossesPage() {
 
         {/* ─── 3. EXPLORADOR ÚNICO (PRESETS + CHIPS + TABLA 20 + DRAWER) ───────── */}
          <CrucesExplorerClient initialRows={crosses} initialQuery={rawQuery} />
+        <CrucesSourceRecords counts={{
+          chilecompra: chilecompraCanonicalCount,
+          infolobby: infolobbyCanonicalCount,
+          contraloria: cgrCanonicalCount,
+        }} />
         <p className="data-note" style={{ marginTop: "1rem" }}>
            1.897 relaciones canónicas en el modelo de datos; el grafo muestra los vínculos actualmente indexados. <Link prefetch={false} href="/como-funciona">Conoce la metodología</Link>.
          </p>

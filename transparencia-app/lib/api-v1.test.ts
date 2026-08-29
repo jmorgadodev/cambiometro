@@ -84,6 +84,38 @@ function officialsR2Env() {
 }
 
 describe("API canónica v1", () => {
+  it("consulta el directorio nacional por páginas sin exigir muni", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1203287,
+        pageSize: 2,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 2 }],
+        shards: {},
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [
+        { id: "func-1", n: "Claudio Adaros", c: "Analista", o: "Municipalidad de Maipú", t: "Contrata", e: "Profesional", b: 5894314 },
+        { id: "func-2", n: "Otra Persona", c: "Auxiliar", o: "Municipalidad de Maipú", t: "Planta", e: "Auxiliar", b: 900000 },
+      ],
+    };
+    const env = {
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?limit=2&include_zero=true"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toHaveLength(2);
+    expect(payload.meta.totalHeadcount).toBe(1203287);
+    expect(payload.meta.total).toBe(1203287);
+  });
+
   it("expone health 200 cuando el release R2 canónico está disponible", async () => {
     const env = { ...(testEnv() as object), ...(transferR2Env() as object) } as never;
     const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
@@ -302,5 +334,16 @@ describe("API canónica v1", () => {
     expect(payload.meta.sourceStatus).toBe("r2");
     expect(payload.meta.total).toBe(1);
     expect(payload.data[0].nombre_completo).toBe("Claudio Adaros");
+  });
+
+  it("ofrece la descarga segmentada del bloque consultado", async () => {
+    const request = new Request("https://example.test/api/v1/export?dataset=funcionarios&format=csv&muni=muni-maipu&page=1&limit=2");
+    const response = await api.fetch(request, officialsR2Env());
+    const body = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toContain("text/csv");
+    expect(body).toContain("nombre_completo");
+    expect(body).toContain("Claudio Adaros");
   });
 });

@@ -104,6 +104,34 @@ interface CpltManifest {
   version: string;
   assets: Array<{ key: string }>;
   coverage?: Array<{ communeId: string; administrationId: string; status: string }>;
+  searchIndex?: { key: string };
+}
+
+interface OfficialsSearchIndex {
+  schemaVersion: number;
+  totalRows: number;
+  pageSize: number;
+  pages: Array<{ page: number; key: string; count: number }>;
+  shards: Record<string, string>;
+}
+
+interface CompactOfficialRow {
+  id: string;
+  n?: string;
+  c?: string;
+  o?: string;
+  ot?: string;
+  t?: string;
+  e?: string;
+  b?: number;
+  l?: number;
+  h?: number;
+  x?: number;
+  g?: string;
+  fi?: string;
+  p?: string;
+  u?: string;
+  oid?: string;
 }
 
 async function r2Json<T>(bucket: R2Bucket | undefined, key: string): Promise<T | null> {
@@ -296,12 +324,14 @@ function officialsResponse(rows: JsonRecord[], requestUrl: URL, generatedAt: str
   const minSalary = requestUrl.searchParams.get("min_sueldo") ? Number(requestUrl.searchParams.get("min_sueldo")) : undefined;
   const maxSalary = requestUrl.searchParams.get("max_sueldo") ? Number(requestUrl.searchParams.get("max_sueldo")) : undefined;
   const period = requestUrl.searchParams.get("periodo") ?? requestUrl.searchParams.get("fuente_periodo") ?? "Todos";
+  const type = normalized(requestUrl.searchParams.get("tipo") ?? "Todos");
   const allRecords = period !== "Todos" ? rows.filter((row) => String(row.fuente_periodo ?? row.periodo ?? "") === period) : rows;
   const withoutPayment = allRecords.filter((row) => officialSalary(row) <= 0);
   const microAmount = allRecords.filter((row) => officialSalary(row) > 0 && officialSalary(row) < 50_000);
   const completeSalary = allRecords.filter((row) => officialSalary(row) >= 50_000);
   let filtered = includeZero ? [...allRecords] : onlyAnomalies ? [...microAmount] : allRecords.filter((row) => officialSalary(row) > 0);
-  if (query) filtered = filtered.filter((row) => normalized(`${row.nombre_completo ?? ""} ${row.cargo ?? ""} ${row.formacion ?? ""}`).includes(query));
+  if (query) filtered = filtered.filter((row) => normalized(`${row.nombre_completo ?? ""} ${row.cargo ?? ""} ${row.organo_nombre ?? ""} ${row.formacion ?? ""}`).includes(query));
+  if (type && type !== "todos") filtered = filtered.filter((row) => normalized(row.organo_tipo).includes(type));
   if (contract !== "Todos") filtered = filtered.filter((row) => normalized(row.tipo_contrato).includes(normalized(contract)));
   if (estamento && estamento !== "todos") filtered = filtered.filter((row) => normalized(row.estamento).includes(estamento));
   if (soloHorasExtras) filtered = filtered.filter((row) => Number(row.horas_extras_mes_anterior ?? 0) > 0);
@@ -350,13 +380,112 @@ function officialsResponse(rows: JsonRecord[], requestUrl: URL, generatedAt: str
   }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
 }
 
+function compactOfficialRow(row: CompactOfficialRow): JsonRecord {
+  return {
+    id: row.id,
+    nombre_completo: row.n ?? "",
+    cargo: row.c ?? "",
+    organo_nombre: row.o ?? row.oid ?? "",
+    organo_tipo: row.ot ?? "",
+    tipo_contrato: row.t ?? "",
+    estamento: row.e ?? "",
+    remuneracion_bruta_mensual: Number(row.b ?? 0),
+    remuneracion_liquida_mensual: row.l == null ? null : Number(row.l),
+    horas_extras_mes_anterior: Number(row.h ?? 0),
+    monto_horas_extras_clp: Number(row.x ?? 0),
+    grado_eus: row.g ?? null,
+    fecha_ingreso: row.fi ?? null,
+    fuente_periodo: row.p ?? null,
+    periodo: row.p ?? null,
+    url: row.u ?? null,
+  };
+}
+
+function compactOfficialRows(value: unknown): JsonRecord[] {
+  if (!Array.isArray(value)) return [];
+  return value.map((row) => compactOfficialRow(row as CompactOfficialRow));
+}
+
+async function listFuncionariosFromD1(requestUrl: URL, env: Env): Promise<Response | null> {
+  if (!env.DB) return null;
+  const limit = limitFrom(requestUrl);
+  const pageRaw = Number(requestUrl.searchParams.get("page") ?? 1);
+  const page = Number.isInteger(pageRaw) ? Math.max(1, Math.min(pageRaw, 100_000)) : 1;
+  const offset = (page - 1) * limit;
+  const query = normalized(requestUrl.searchParams.get("query") ?? requestUrl.searchParams.get("q"));
+  const organism = requestUrl.searchParams.get("muni") ?? requestUrl.searchParams.get("organismo") ?? "Todos";
+  const contract = requestUrl.searchParams.get("contrato") ?? "Todos";
+  const estamento = requestUrl.searchParams.get("estamento") ?? "Todos";
+  const type = requestUrl.searchParams.get("tipo") ?? "Todos";
+  const clauses: string[] = [];
+  const bindings: (string | number)[] = [];
+  if (organism !== "Todos") { clauses.push("organo_id = ?"); bindings.push(organism); }
+  if (query) { const pattern = `%${query.replace(/[%_]/g, "")}%`; clauses.push("(nombre_completo LIKE ? COLLATE NOCASE OR cargo LIKE ? COLLATE NOCASE OR organo_id LIKE ? COLLATE NOCASE)"); bindings.push(pattern, pattern, pattern); }
+  if (contract !== "Todos") { clauses.push("tipo_contrato = ?"); bindings.push(contract); }
+  if (estamento !== "Todos") { clauses.push("estamento LIKE ? COLLATE NOCASE"); bindings.push(`%${estamento.replace(/[%_]/g, "")}%`); }
+  if (type !== "Todos") { clauses.push("organo_tipo LIKE ? COLLATE NOCASE"); bindings.push(`%${type.replace(/[%_]/g, "")}%`); }
+  const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
+  const order = requestUrl.searchParams.get("sortBy") === "nombre_asc" ? "nombre_completo ASC, id ASC" : requestUrl.searchParams.get("sortBy") === "nombre_desc" ? "nombre_completo DESC, id DESC" : "remuneracion_bruta_mensual DESC, id ASC";
+  try {
+    const totalRow = await env.DB.prepare(`SELECT COUNT(*) AS total FROM funcionarios_publicos ${where}`).bind(...bindings).first<{ total: number }>();
+    const rows = await env.DB.prepare(`SELECT id, nombre_completo, cargo, organo_id, organo_tipo, estamento, tipo_contrato, remuneracion_bruta_mensual, fecha_ingreso FROM funcionarios_publicos ${where} ORDER BY ${order} LIMIT ? OFFSET ?`).bind(...bindings, limit, offset).all<JsonRecord>();
+    const total = Number(totalRow?.total ?? 0);
+    // Una tabla histórica puede existir en D1 pero estar vacía mientras el
+    // release completo vive en R2. En ese caso dejamos que continúe el
+    // fallback de R2 en lugar de presentar un directorio falsamente vacío.
+    if (total === 0) return null;
+    const data = (rows.results ?? []).map((row) => ({
+      ...row,
+      organo_nombre: row.organo_id,
+      remuneracion_liquida_mensual: null,
+      horas_extras_mes_anterior: 0,
+      monto_horas_extras_clp: 0,
+      fuente: "Transparencia Activa CPLT",
+    }));
+    return json({ data, meta: { total, totalHeadcount: total, page, totalPages: Math.max(1, Math.ceil(total / limit)), limit, updatedAt: null, sourceStatus: "d1", stats: { totalMuni: total, totalValidos: data.filter((row) => officialSalary(row) >= 50_000).length, promedioSueldo: 0, conHorasExtras: 0, observadosCount: 0, sinPagoCount: 0, microMontoCount: 0 } }, links: { self: requestUrl.toString() } });
+  } catch (error) {
+    if (String(error).match(/no such table|no such column|internal error/i)) return null;
+    throw error;
+  }
+}
+
 async function listFuncionariosFromR2(requestUrl: URL, env: Env) {
   const organism = requestUrl.searchParams.get("muni") ?? requestUrl.searchParams.get("organismo") ?? "Todos";
-  if (!organism || organism === "Todos") {
-    return failure("DATASET_SCOPE_REQUIRED", "La nómina nacional requiere el índice D1; consulta una municipalidad para acceder a la proyección oficial.", 503);
-  }
   const manifest = await r2Json<CpltManifest>(env.PUBLIC_DATA, "projections/funcionarios-v1/manifest.json");
   if (!manifest?.version || !Array.isArray(manifest.assets)) return failure("DATASET_UNAVAILABLE", "La nómina oficial no está publicada.", 503);
+
+  if (!organism || organism === "Todos") {
+    const indexKey = manifest.searchIndex?.key ?? `projections/funcionarios-v1/versions/${manifest.version}/search_index.json`;
+    const index = await r2Json<OfficialsSearchIndex | CompactOfficialRow[]>(env.PUBLIC_DATA, indexKey);
+    if (Array.isArray(index)) {
+      return officialsResponse(compactOfficialRows(index), requestUrl, manifest.generatedAt, "r2-search-legacy", "Todos");
+    }
+    if (!index?.pages?.length || !Number.isInteger(index.totalRows)) return failure("DATASET_UNAVAILABLE", "La búsqueda nacional no está publicada temporalmente.", 503);
+    const query = normalized(requestUrl.searchParams.get("query") ?? requestUrl.searchParams.get("q"));
+    const requestedPage = Number(requestUrl.searchParams.get("page") ?? 1);
+    const page = Number.isInteger(requestedPage) ? Math.max(1, Math.min(requestedPage, index.pages.length)) : 1;
+    let rows: JsonRecord[] = [];
+    if (query) {
+      const first = query.replace(/^[^a-z0-9]+/i, "").charAt(0) || "_";
+      const shardKey = index.shards?.[first] ?? index.shards?.[first.toLocaleLowerCase("es-CL")];
+      if (shardKey) rows = compactOfficialRows(await r2Json<CompactOfficialRow[]>(env.PUBLIC_DATA, shardKey));
+    } else {
+      const pageKey = index.pages.find((item) => item.page === page)?.key;
+      if (pageKey) rows = compactOfficialRows(await r2Json<CompactOfficialRow[]>(env.PUBLIC_DATA, pageKey));
+    }
+    const response = officialsResponse(rows, requestUrl, manifest.generatedAt, "r2-search", "Todos");
+    if (!query && rows.length > 0) {
+      const payload = await response.json() as JsonRecord;
+      const meta = (payload.meta as JsonRecord) ?? {};
+      meta.total = index.totalRows;
+      meta.totalHeadcount = index.totalRows;
+      meta.page = page;
+      meta.totalPages = index.pages.length;
+      payload.meta = meta;
+      return json(payload, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
+    }
+    return response;
+  }
   const key = manifest.assets.find((asset) => asset.key === `projections/funcionarios-v1/versions/${manifest.version}/${organism}.json`)?.key;
   if (!key) return failure("DATASET_UNAVAILABLE", "No existe una nómina publicada para este organismo.", 404, { organism });
   const rows = await r2Json<JsonRecord[]>(env.PUBLIC_DATA, key);
@@ -480,17 +609,30 @@ async function listRecords(requestUrl: URL, env: Env) {
   const offset = offsetFrom(requestUrl);
   const source = requestUrl.searchParams.get("source");
   const kind = requestUrl.searchParams.get("kind");
+  const query = requestUrl.searchParams.get("q")?.trim() ?? requestUrl.searchParams.get("query")?.trim() ?? "";
+  const from = requestUrl.searchParams.get("from")?.trim() ?? "";
+  const to = requestUrl.searchParams.get("to")?.trim() ?? "";
+  const entityId = requestUrl.searchParams.get("entity_id")?.trim() ?? "";
   const validKinds = new Set(["authority", "purchase", "contract", "expense", "budget_execution", "transfer", "audit", "declaration", "lobby", "vote", "attendance", "remuneration"]);
   if (kind && !validKinds.has(kind)) return failure("INVALID_QUERY", "Parámetros de consulta inválidos.", 400, { kind: `Valor no permitido: ${kind}` });
+  if (query.length > 80 || from.length > 32 || to.length > 32 || entityId.length > 160) return failure("INVALID_QUERY", "Parámetros de consulta inválidos.", 400);
   const clauses: string[] = [];
   const bindings: string[] = [];
   if (source) { clauses.push("source_id = ?"); bindings.push(source); }
   if (kind) { clauses.push("kind = ?"); bindings.push(kind); }
+  if (query) {
+    const pattern = `%${query.replace(/[%_]/g, "")}%`;
+    clauses.push("(title LIKE ? COLLATE NOCASE OR description LIKE ? COLLATE NOCASE OR data_json LIKE ? COLLATE NOCASE)");
+    bindings.push(pattern, pattern, pattern);
+  }
+  if (from) { clauses.push("occurred_at >= ?"); bindings.push(from); }
+  if (to) { clauses.push("occurred_at <= ?"); bindings.push(to); }
+  if (entityId) { clauses.push("(subject_entity_ids_json LIKE ? OR object_entity_ids_json LIKE ?)"); bindings.push(`%${entityId}%`, `%${entityId}%`); }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
   const total = await env.DB.prepare(`SELECT count(*) AS total FROM records ${where}`).bind(...bindings).first<{ total: number }>();
   const rows = await env.DB.prepare(`SELECT * FROM records ${where} ORDER BY occurred_at DESC, id LIMIT ? OFFSET ?`).bind(...bindings, limit, offset).all<JsonRecord>();
   const totalCount = Number(total?.total ?? 0);
-  return success((rows.results ?? []).map(record), { total: totalCount, limit }, pageLinks(requestUrl, offset, limit, totalCount));
+  return success((rows.results ?? []).map(record), { total: totalCount, limit, page: Math.floor(offset / limit) + 1, totalPages: Math.max(1, Math.ceil(totalCount / limit)) }, pageLinks(requestUrl, offset, limit, totalCount));
 }
 
 async function listRelations(requestUrl: URL, env: Env, crosses = false) {
@@ -591,6 +733,7 @@ async function listTransferencias(requestUrl: URL, env: Env) {
 async function exportData(requestUrl: URL, env: Env) {
   const format = requestUrl.searchParams.get("format");
   if (format !== "csv" && format !== "json") return failure("MISSING_PARAMETERS", "Filtros obligatorios: format=csv o format=json.", 400);
+  if (requestUrl.searchParams.get("dataset") === "funcionarios") return exportFuncionarios(requestUrl, env, format);
   if (!env.DB) return dbUnavailable();
   const requestedLimit = Number(requestUrl.searchParams.get("limit") ?? 205);
   const limit = Number.isInteger(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 205) : 205;
@@ -615,6 +758,29 @@ async function exportData(requestUrl: URL, env: Env) {
   const header = "id,nombre_completo,cargo,partido_sigla,distrito_region,fuente,evidencia_etl";
   const body = data.map((row) => [row.id, row.nombre_completo, row.cargo, row.partido_sigla, row.distrito_region, row.fuente, row.evidencia_etl].map(csvCell).join(",")).join("\n");
   return new Response(`${header}\n${body}`, { headers: { "Content-Type": "text/csv; charset=utf-8", "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200", "Content-Disposition": "attachment; filename=transparencia_chile.csv", "X-Content-Type-Options": "nosniff" } });
+}
+
+async function exportFuncionarios(requestUrl: URL, env: Env, format: "csv" | "json") {
+  const limitValue = Number(requestUrl.searchParams.get("limit") ?? 100);
+  const limit = Number.isInteger(limitValue) ? Math.min(Math.max(limitValue, 1), 500) : 100;
+  const pageValue = Number(requestUrl.searchParams.get("page") ?? 1);
+  const page = Number.isInteger(pageValue) ? Math.max(1, Math.min(pageValue, 100_000)) : 1;
+  const sourceUrl = new URL(requestUrl);
+  sourceUrl.searchParams.set("page", String(page));
+  sourceUrl.searchParams.set("limit", String(limit));
+  const response = await (await listFuncionariosFromD1(sourceUrl, env)) ?? await listFuncionariosFromR2(sourceUrl, env);
+  if (!response.ok) return response;
+  const payload = await response.json() as JsonRecord;
+  const data = Array.isArray(payload.data) ? payload.data as JsonRecord[] : [];
+  const filename = `funcionarios-bloque-${String(page).padStart(5, "0")}`;
+  if (format === "json") {
+    return json({ data, meta: { ...(payload.meta as JsonRecord ?? {}), export: "segmentada", block: page } }, {
+      headers: { "Cache-Control": "public, max-age=300, s-maxage=3600", "Content-Disposition": `attachment; filename=${filename}.json` },
+    });
+  }
+  const columns = ["id", "nombre_completo", "cargo", "organo_nombre", "tipo_contrato", "estamento", "remuneracion_bruta_mensual", "fecha_ingreso"];
+  const body = data.map((row) => columns.map((column) => csvCell(row[column])).join(",")).join("\n");
+  return new Response(`${columns.join(",")}\n${body}\n`, { headers: { "Content-Type": "text/csv; charset=utf-8", "Cache-Control": "public, max-age=300, s-maxage=3600", "Content-Disposition": `attachment; filename=${filename}.csv`, "X-Content-Type-Options": "nosniff" } });
 }
 
 async function listSources(requestUrl: URL, env: Env) {
@@ -737,7 +903,8 @@ export default {
     if (path === "/api/funcionarios" || path === "/api/v1/funcionarios") {
       const invalid = validateOfficials(url);
       if (invalid) return failure("INVALID_QUERY", invalid, 400);
-      return listFuncionariosFromR2(url, env);
+      const d1 = await listFuncionariosFromD1(url, env);
+      return d1 ?? listFuncionariosFromR2(url, env);
     }
     if (path.startsWith("/api/v1/politico/")) {
       if (!env.DB) return dbUnavailable();
