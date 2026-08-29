@@ -64,10 +64,16 @@ async function verifyAnalyticsConsent(PROD_URL, requestHeaders) {
     const run = async (choice) => {
       const context = await browser.newContext({ extraHTTPHeaders: requestHeaders });
       const requests = [];
+      const pageViewEvents = [];
       const consoleErrors = [];
       const page = await context.newPage();
       page.on("request", (request) => {
-        if (/googletagmanager\.com|google-analytics\.com|analytics\.google\.com/i.test(request.url())) requests.push(request.url());
+        const url = request.url();
+        if (/googletagmanager\.com|google-analytics\.com|analytics\.google\.com/i.test(url)) requests.push(url);
+        if (/google-analytics\.com\/g\/collect/i.test(url)) {
+          const payload = `${url}&${request.postData() ?? ""}`;
+          if (/(?:^|[?&])en=page_view(?:&|$)/.test(payload)) pageViewEvents.push(url);
+        }
       });
       page.on("console", (message) => {
         if (message.type() === "error" && /Content Security Policy|googletagmanager|google-analytics/i.test(message.text())) consoleErrors.push(message.text());
@@ -75,14 +81,20 @@ async function verifyAnalyticsConsent(PROD_URL, requestHeaders) {
       await page.goto(`${PROD_URL}/?analytics_probe=${choice}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
       await page.getByRole("button", { name: choice === "granted" ? "Aceptar" : "Rechazar" }).click({ timeout: 5_000 });
       await page.waitForTimeout(1_500);
+      if (choice === "granted") {
+        await page.getByRole("link", { name: "Movimientos", exact: true }).first().click();
+        await page.waitForURL(/\/movimientos\/?$/, { timeout: 10_000 });
+        await page.waitForTimeout(1_500);
+      }
       await context.close();
-      return { requests, consoleErrors };
+      return { requests, pageViewEvents, consoleErrors };
     };
     const denied = await run("denied");
     assertCheck("ANALYTICS", "rechazo no genera solicitudes Google", denied.requests.length === 0, JSON.stringify(denied.requests));
     const granted = await run("granted");
     const loaderRequests = granted.requests.filter((url) => /googletagmanager\.com\/(?:gtag\/js|gtm\.js)/i.test(url));
     assertCheck("ANALYTICS", "aceptación no duplica Google Tag", loaderRequests.length <= 1, JSON.stringify(granted.requests));
+    assertCheck("ANALYTICS", "un page_view por ruta (inicio + navegación)", granted.pageViewEvents.length === 2, JSON.stringify(granted.pageViewEvents));
     if (requireAnalytics) {
       assertCheck("ANALYTICS", "existe un ID de medición configurado", expectedMode !== null, "configuración ausente");
       if (expectedMode === "ga4") {
