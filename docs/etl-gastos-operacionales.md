@@ -24,8 +24,10 @@ En el equipo que permanecerá encendido:
    de `transparencia-app`.
 2. Instalar Chrome o Edge. El conector usa un navegador headless y trabaja de forma
    secuencial para no provocar un nuevo rate limit.
-3. Ejecutar el configurador único; solicitará el Account ID y el token sin mostrarlo
-   mientras se escribe, registrará la tarea y probará R2 sin consultar Cámara:
+3. Ejecutar el configurador único; solicitará el token sin mostrarlo mientras se
+   escribe e intentará descubrir automáticamente el Account ID de la cuenta Jorge.
+   Si el token no tiene permiso para listar cuentas, solicitará el Account ID como
+   alternativa. Luego registrará la tarea y probará R2 sin consultar Cámara:
 
    ```powershell
    cd C:\Users\jorge\Proyectos\cambiometro-public\transparencia-app
