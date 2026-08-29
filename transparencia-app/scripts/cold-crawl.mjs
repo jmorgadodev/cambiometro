@@ -4,6 +4,8 @@ import { dirname, resolve } from "node:path";
 const baseUrl = (process.env.PROD_URL || "https://cambiometro.impulsacv.cl").replace(/\/$/, "");
 const concurrency = Number(process.env.COLD_CRAWL_CONCURRENCY || 32);
 const timeoutMs = Number(process.env.COLD_CRAWL_TIMEOUT_MS || 10000);
+const maxRetries = Number(process.env.COLD_CRAWL_RETRIES || 2);
+const retryDelayMs = Number(process.env.COLD_CRAWL_RETRY_DELAY_MS || 500);
 const outputPath = resolve(process.env.COLD_CRAWL_OUTPUT || "artifacts/cold-crawl-latest.json");
 const uptimeToken = process.env.UPTIME_TOKEN?.trim() || "";
 
@@ -31,33 +33,54 @@ function routeDepth(url) {
 }
 
 async function checkUrl(url, index) {
-  const coldUrl = new URL(url);
-  coldUrl.searchParams.set("__cold_crawl", `${Date.now()}-${index}`);
-  const started = performance.now();
-  let response = null;
-  let error = null;
-  let body = "";
-  try {
-    response = await fetch(coldUrl, {
-      headers: requestHeaders(),
-      redirect: "follow",
-      signal: AbortSignal.timeout(timeoutMs),
-    });
-    body = await response.text();
-  } catch (caught) {
-    error = caught instanceof Error ? caught.message : String(caught);
+  const route = new URL(url).pathname;
+  let initialStatus = null;
+  let initialError = null;
+
+  for (let attempt = 0; attempt <= maxRetries; attempt += 1) {
+    const coldUrl = new URL(url);
+    coldUrl.searchParams.set("__cold_crawl", `${Date.now()}-${index}-${attempt}`);
+    const started = performance.now();
+    let response = null;
+    let error = null;
+    let body = "";
+    try {
+      response = await fetch(coldUrl, {
+        headers: requestHeaders(),
+        redirect: "follow",
+        signal: AbortSignal.timeout(timeoutMs),
+      });
+      body = await response.text();
+    } catch (caught) {
+      error = caught instanceof Error ? caught.message : String(caught);
+    }
+    const ms = Math.round(performance.now() - started);
+    const status = response?.status ?? 0;
+    const bodyHas1102 = /(?:error code:\s*1102|error\s+1102|worker threw exception)/i.test(body);
+    const ok = status >= 200 && status < 400 && !bodyHas1102;
+    if (initialStatus === null) initialStatus = status;
+    if (initialError === null && error) initialError = error;
+
+    const retryable = status === 0 || status >= 500 || bodyHas1102;
+    if (ok || !retryable || attempt === maxRetries) {
+      return {
+        route,
+        status,
+        ms,
+        ok,
+        bodyHas1102,
+        error,
+        attempts: attempt + 1,
+        retries: attempt,
+        initialStatus,
+        initialError,
+      };
+    }
+
+    await new Promise((resolvePromise) => setTimeout(resolvePromise, retryDelayMs * (2 ** attempt)));
   }
-  const ms = Math.round(performance.now() - started);
-  const status = response?.status ?? 0;
-  const bodyHas1102 = /(?:error code:\s*1102|error\s+1102|worker threw exception)/i.test(body);
-  return {
-    route: new URL(url).pathname,
-    status,
-    ms,
-    ok: status >= 200 && status < 400 && !bodyHas1102,
-    bodyHas1102,
-    error,
-  };
+
+  throw new Error(`No se pudo completar el crawl de ${route}`);
 }
 
 async function crawl(urls) {
@@ -91,9 +114,12 @@ const report = {
   level12Count: level12.length,
   concurrency,
   timeoutMs,
+  maxRetries,
+  retryDelayMs,
   total: results.length,
   ok: results.filter((result) => result.ok).length,
   failed: results.filter((result) => !result.ok).length,
+  recovered: results.filter((result) => result.ok && result.retries > 0).length,
   status: byStatus,
   maxMs: Math.max(...results.map((result) => result.ms)),
   averageMs: Math.round(results.reduce((sum, result) => sum + result.ms, 0) / results.length),
@@ -109,6 +135,7 @@ console.log(JSON.stringify({
   total: report.total,
   ok: report.ok,
   failed: report.failed,
+  recovered: report.recovered,
   status: report.status,
   maxMs: report.maxMs,
   averageMs: report.averageMs,

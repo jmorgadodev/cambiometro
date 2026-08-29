@@ -53,6 +53,9 @@ jobs:
           # completo sin que el verificador lo marque como inconsistente.
           VERIFY_SECOND_DELAY_MS: ${{ inputs.second_pass_delay_ms }}
           COLD_CRAWL_CONCURRENCY: ${{ inputs.cold_crawl_concurrency }}
+          # Reintenta únicamente 5xx/1102/red; los 4xx siguen fallando de inmediato.
+          # El reporte conserva initialStatus para hacer visible cualquier respuesta transitoria.
+          COLD_CRAWL_RETRIES: "2"
           COLD_CRAWL_OUTPUT: artifacts/cold-crawl-production.json
         run: |
           mkdir -p artifacts
