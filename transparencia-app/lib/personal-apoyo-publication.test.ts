@@ -123,9 +123,12 @@ describe("publicación del personal de apoyo", () => {
 
   it("el workflow parlamentario parte de la ultima proyeccion valida para conservar historia", () => {
     const workflow = readFileSync(resolve("..", ".github", "workflows", "etl-daily.yml"), "utf8");
-    expect(workflow).toContain("projections/personal-apoyo-v1/personal-apoyo.json");
-    expect(workflow).toContain("--input /tmp/personal-apoyo-current.json");
-    expect(workflow).toContain("--output /tmp/personal-apoyo-next.json");
-    expect(workflow).toContain("--input /tmp/personal-apoyo-next.json");
+    const personalWorkflow = readFileSync(resolve("..", ".github", "workflows", "etl-personal-apoyo.yml"), "utf8");
+    expect(workflow).not.toContain("projections/personal-apoyo-v1/personal-apoyo.json");
+    expect(personalWorkflow).toContain("projections/personal-apoyo-v1/personal-apoyo.json");
+    expect(personalWorkflow).toContain("--input /tmp/personal-apoyo-current.json");
+    expect(personalWorkflow).toContain("--output /tmp/personal-apoyo-next.json");
+    expect(personalWorkflow).toContain("--input /tmp/personal-apoyo-next.json");
+    expect(personalWorkflow).toContain('cron: "0 7 * * *"');
   });
 });
