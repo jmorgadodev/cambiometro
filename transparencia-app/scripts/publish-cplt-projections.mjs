@@ -33,11 +33,111 @@ const version = latest.replace(/[:.]/g, "-");
 // Un release por versión evita superar el límite de 1.000 assets de GitHub Releases:
 // cada lote nacional publica más de 300 archivos versionados.
 const releaseTag = `data-cplt-personal-${version}`;
-const files = readdirSync(projectionRoot).filter((name) => name.endsWith(".json")).sort();
+const files = readdirSync(projectionRoot).filter((name) => name.endsWith(".json") && name !== "search_index.json").sort();
 if (files.length < 1) throw new Error("CPLT_MISSING_PROJECTIONS");
 
+// La UI no puede buscar 1,2 millones de filas cargando el universo completo en
+// el navegador. Generamos una capa de consulta paginada para el Worker: páginas
+// para navegación sin filtro y shards por primera letra para búsquedas de
+// nombre, cargo u organismo. Los JSON originales permanecen intactos.
+const searchIndexRoot = join(projectionRoot, "search_index");
+mkdirSync(searchIndexRoot, { recursive: true });
+const compactRows = [];
+const byShard = new Map();
+const normalizeSearch = (value) => String(value ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL");
+for (const fileName of files) {
+  const source = join(projectionRoot, fileName);
+  let rows;
+  try { rows = JSON.parse(readFileSync(source, "utf8")); } catch { continue; }
+  if (!Array.isArray(rows)) continue;
+  const organismId = fileName.replace(/\.json$/, "");
+  rows.forEach((row, index) => {
+    const compact = {
+      id: String(row.id ?? `${organismId}-${index + 1}`),
+      n: row.nombre_completo ?? "",
+      c: row.cargo ?? "",
+      o: row.organo_nombre ?? organismId,
+      ot: row.organo_tipo ?? "",
+      t: row.tipo_contrato ?? "",
+      e: row.estamento ?? "",
+      b: Number(row.remuneracion_bruta_mensual ?? 0),
+      l: row.remuneracion_liquida_mensual == null ? undefined : Number(row.remuneracion_liquida_mensual),
+      h: Number(row.horas_extras_mes_anterior ?? 0),
+      x: Number(row.monto_horas_extras_clp ?? 0),
+      g: row.grado_eus ?? undefined,
+      fi: row.fecha_ingreso ?? undefined,
+      p: row.fuente_periodo ?? row.periodo ?? undefined,
+      u: row.url ?? row.url_fuente ?? undefined,
+      oid: organismId,
+    };
+    compactRows.push(compact);
+    const shardKeys = new Set([compact.n, compact.c, compact.o].flatMap((value) => normalizeSearch(value)
+      .split(/\s+/)
+      .map((token) => token.replace(/^[^a-z0-9]+/i, "").charAt(0))
+      .filter(Boolean)));
+    for (const shard of shardKeys) {
+      if (!byShard.has(shard)) byShard.set(shard, []);
+      byShard.get(shard).push(compact);
+    }
+  });
+}
+compactRows.sort((left, right) => normalizeSearch(left.n).localeCompare(normalizeSearch(right.n), "es-CL") || left.id.localeCompare(right.id));
+const searchPageSize = 10_000;
+const searchAssets = [];
+const writeGeneratedAsset = async (filePath, key) => {
+  const data = readFileSync(filePath);
+  const checksumSha256 = createHash("sha256").update(data).digest("hex");
+  const metadata = { key, checksumSha256, size: data.byteLength, sourcePath: filePath };
+  searchAssets.push(metadata);
+  return metadata;
+};
+const pages = [];
+for (let offset = 0; offset < compactRows.length; offset += searchPageSize) {
+  const page = Math.floor(offset / searchPageSize) + 1;
+  const filePath = join(searchIndexRoot, `p-${String(page).padStart(4, "0")}.json`);
+  writeFileSync(filePath, `${JSON.stringify(compactRows.slice(offset, offset + searchPageSize))}\n`);
+  pages.push({ page, count: Math.min(searchPageSize, compactRows.length - offset), key: `projections/funcionarios-v1/versions/${version}/search_index/p-${String(page).padStart(4, "0")}.json` });
+  await writeGeneratedAsset(filePath, pages.at(-1).key);
+}
+const shards = {};
+for (const [shard, rows] of byShard) {
+  const filePath = join(searchIndexRoot, `${shard}.json`);
+  writeFileSync(filePath, `${JSON.stringify(rows)}\n`);
+  shards[shard] = `projections/funcionarios-v1/versions/${version}/search_index/${shard}.json`;
+  await writeGeneratedAsset(filePath, shards[shard]);
+}
+const searchIndexPath = join(projectionRoot, "search_index.json");
+const searchIndex = {
+  schemaVersion: 1,
+  dataset: "transparencia-activa-funcionarios",
+  totalRows: compactRows.length,
+  pageSize: searchPageSize,
+  pages,
+  shards,
+};
+writeFileSync(searchIndexPath, `${JSON.stringify(searchIndex, null, 2)}\n`);
+const searchIndexKey = `projections/funcionarios-v1/versions/${version}/search_index.json`;
+const searchIndexMetadata = await writeGeneratedAsset(searchIndexPath, searchIndexKey);
+for (const asset of searchAssets) {
+  if (asset.key === searchIndexKey) continue;
+  // writeGeneratedAsset ya calculó el checksum de cada página/shard.
+}
+
 const assets = [];
-const manifestAssets = [];
+const manifestAssets = [searchIndexMetadata, ...searchAssets.filter((asset) => asset.key !== searchIndexKey)];
+for (const asset of manifestAssets) {
+  const target = join(outputRoot, asset.key);
+  mkdirSync(dirname(target), { recursive: true });
+  copyFileSync(asset.sourcePath, target);
+  assets.push({
+    key: asset.key,
+    checksumSha256: asset.checksumSha256,
+    size: asset.size,
+    releaseTag,
+    releaseAssetName: `cplt-${version}-${asset.key.replaceAll("/", "-")}`,
+  });
+  delete asset.sourcePath;
+}
 for (const fileName of files) {
   const source = join(projectionRoot, fileName);
   const size = statSync(source).size;
@@ -59,6 +159,7 @@ const manifest = {
   version,
   recordCount: validations.reduce((total, report) => total + report.recordCount, 0),
   sources: validations.map(({ sourceId, sourceUrl, recordCount, checksumSha256 }) => ({ sourceId, sourceUrl, recordCount, checksumSha256 })),
+  searchIndex: { key: searchIndexKey, totalRows: compactRows.length, pageSize: searchPageSize },
   coverage: (() => {
     const byCommune = new Map();
     for (const source of required) {

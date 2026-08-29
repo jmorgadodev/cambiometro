@@ -42,8 +42,9 @@ describe("experiencia y usabilidad de nóminas de funcionarios municipales (/fun
     expect(client).toContain("Sueldo bruto promedio");
   });
 
-  it("no consulta el Worker con alcance nacional no soportado", () => {
-    expect(personasClient).toContain('if (organismoFilter === "Todos")');
-    expect(personasClient).toContain("Selecciona un organismo");
+  it("consulta el Worker también con alcance nacional", () => {
+    expect(personasClient).not.toContain('if (organismoFilter === "Todos") {');
+    expect(personasClient).toContain("include_zero");
+    expect(personasClient).toContain("Reintentar consulta");
   });
 });
