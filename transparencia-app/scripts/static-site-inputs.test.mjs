@@ -9,9 +9,15 @@ import {
   buildStaticInputEntries,
   buildStaticInputManifest,
   parseRequestedStaticFiles,
+  STATIC_SITE_FILE_GROUPS,
 } from "./static-site-inputs.mjs";
 
 describe("static site input release", () => {
+  it("keeps Movimientos isolated from the Parlamento release group", () => {
+    assert.ok(!STATIC_SITE_FILE_GROUPS.parlamento.includes("data/movimientos.json"));
+    assert.ok(STATIC_SITE_FILE_GROUPS.movimientos.includes("data/movimientos.json"));
+  });
+
   it("builds and validates a checksum manifest from an allowed group", () => {
     const root = mkdtempSync(join(tmpdir(), "cambiometro-static-inputs-"));
     try {
