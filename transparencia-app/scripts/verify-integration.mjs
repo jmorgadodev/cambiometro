@@ -130,11 +130,12 @@ async function checkInternalLinks(hrefs, batchSize = 1) {
   for (let index = 0; index < links.length; index += batchSize) {
     const batch = links.slice(index, index + batchSize);
     await Promise.all(batch.map(async (href) => {
-      let response = await getWithNetworkRetry(`${baseUrl}${href}`);
+      const targetOrigin = href.startsWith("/api/") ? apiBaseUrl : baseUrl;
+      let response = await getWithNetworkRetry(`${targetOrigin}${href}`);
       if (!response.ok() && verifyingLocal) {
         const pathname = new URL(href, baseUrl).pathname.replace(/\/$/, "") || "/";
         const fallback = staticRedirects.get(pathname);
-        if (fallback) response = await getWithNetworkRetry(`${baseUrl}${fallback}`);
+        if (fallback) response = await getWithNetworkRetry(`${targetOrigin}${fallback}`);
       }
       assert(response.ok(), `enlace interno ${href} HTTP ${response.status()}`);
     }));
