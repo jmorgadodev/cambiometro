@@ -180,17 +180,33 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: npm run data:publish:transfer-api
 
+      - name: Resolver D1 dedicada de transferencias
+        id: transfer-d1-config
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_DATA_API_TOKEN"
+          config="$RUNNER_TEMP/cambiometro-transfer-d1.jsonc"
+          node scripts/ensure-transfer-d1.mjs --create --output "$config"
+          echo "config=$config" >> "$GITHUB_OUTPUT"
+          echo "database=cambiometro-transferencias" >> "$GITHUB_OUTPUT"
+
       - name: Materializar proyección D1 cuando haya capacidad
         id: materialize-transfer-d1
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          TRANSFER_D1_CONFIG: ${{ steps.transfer-d1-config.outputs.config }}
+          TRANSFER_D1_DATABASE: ${{ steps.transfer-d1-config.outputs.database }}
         shell: bash
         run: |
           set +e
           log_file="$GITHUB_WORKSPACE/transparencia-app/transfer-d1-materialization.log"
-          npm run data:materialize:transfer -- --database transparencia-db >"$log_file" 2>&1
+          npm run data:materialize:transfer -- --database "$TRANSFER_D1_DATABASE" --config "$TRANSFER_D1_CONFIG" >"$log_file" 2>&1
           status=$?
           cat "$log_file"
           if [ "$status" -eq 0 ]; then

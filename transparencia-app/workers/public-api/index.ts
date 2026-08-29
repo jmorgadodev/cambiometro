@@ -4,6 +4,7 @@ import { POLITICOS_SEED } from "../../lib/politicos-source";
 
 export interface Env {
   DB?: D1Database;
+  TRANSFERS_DB?: D1Database;
   PUBLIC_DATA?: R2Bucket;
   TURNSTILE_SECRET_KEY?: string;
   READ_ONLY_PREVIEW?: string;
@@ -124,28 +125,29 @@ async function transferManifest(env: Env) {
 async function health(env: Env) {
   const manifest = await transferManifest(env);
   const d1 = Boolean(env.DB);
+  const transferDb = env.TRANSFERS_DB ?? env.DB;
+  const transferD1 = Boolean(transferDb);
   const r2 = Boolean(manifest);
   let d1TransferRows = 0;
   let d1ReleaseChecksum: string | null = null;
-  if (d1) {
+  if (transferD1) {
     try {
-      const result = await env.DB?.prepare("SELECT count(*) AS total FROM transferencias_19862").first<{ total: number }>();
+      const result = await transferDb?.prepare("SELECT count(*) AS total FROM transferencias_19862").first<{ total: number }>();
       d1TransferRows = Number(result?.total ?? 0);
     } catch {
       d1TransferRows = 0;
     }
     try {
-      const release = await env.DB?.prepare("SELECT checksum_sha256 FROM transferencias_19862_release WHERE singleton = 1").first<{ checksum_sha256: string }>();
+      const release = await transferDb?.prepare("SELECT checksum_sha256 FROM transferencias_19862_release WHERE singleton = 1").first<{ checksum_sha256: string }>();
       d1ReleaseChecksum = release?.checksum_sha256 ?? null;
     } catch {
       d1ReleaseChecksum = null;
     }
   }
-  // Transferencias has an intentional R2 fallback. The production D1 is
-  // already close to its storage limit, so the complete release must not be
-  // duplicated there just to make health green. A missing/stale optional
-  // projection is reported, while the canonical R2 release remains healthy.
-  const d1Consistent = Boolean(d1 && manifest && d1TransferRows === manifest.totalRows && d1ReleaseChecksum === manifest.checksumSha256);
+  // The dedicated transfer projection is preferred when available. R2 remains
+  // the canonical fallback so a partial refresh never takes the public API
+  // offline.
+  const d1Consistent = Boolean(transferD1 && manifest && d1TransferRows === manifest.totalRows && d1ReleaseChecksum === manifest.checksumSha256);
   const ok = Boolean(r2);
   return json({
     data: {
@@ -155,6 +157,7 @@ async function health(env: Env) {
     r2,
     d1TransferRows,
     d1Consistent,
+    transferD1,
     d1ReleaseChecksum,
     transferSource: d1Consistent ? "d1" : "r2",
     transferRows: manifest?.totalRows ?? 0,
@@ -536,7 +539,8 @@ async function listTransferencias(requestUrl: URL, env: Env) {
   if (search.length > 80 || year.length > 20 || emisor.length > 160) return failure("INVALID_QUERY", "Parámetros de consulta inválidos.", 400);
   const sort = requestUrl.searchParams.get("sort") === "fecha" ? "fecha" : "monto_clp";
   const order = requestUrl.searchParams.get("order") === "asc" ? "ASC" : "DESC";
-  if (!env.DB) return listTransferenciasFromR2(requestUrl, env);
+  const transferDb = env.TRANSFERS_DB ?? env.DB;
+  if (!transferDb) return listTransferenciasFromR2(requestUrl, env);
   const manifest = await transferManifest(env);
   if (!manifest) return listTransferenciasFromR2(requestUrl, env);
   const clauses: string[] = [];
@@ -550,13 +554,13 @@ async function listTransferencias(requestUrl: URL, env: Env) {
   }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
   try {
-    const universe = await env.DB.prepare("SELECT COUNT(*) AS total FROM transferencias_19862").first<{ total: number }>();
-    const release = await env.DB.prepare("SELECT checksum_sha256 FROM transferencias_19862_release WHERE singleton = 1").first<{ checksum_sha256: string }>();
+    const universe = await transferDb.prepare("SELECT COUNT(*) AS total FROM transferencias_19862").first<{ total: number }>();
+    const release = await transferDb.prepare("SELECT checksum_sha256 FROM transferencias_19862_release WHERE singleton = 1").first<{ checksum_sha256: string }>();
     if (Number(universe?.total ?? 0) !== manifest.totalRows || release?.checksum_sha256 !== manifest.checksumSha256) return listTransferenciasFromR2(requestUrl, env);
-    const count = await env.DB.prepare(`SELECT COUNT(*) AS total FROM transferencias_19862 ${where}`).bind(...bindings).first<{ total: number }>();
+    const count = await transferDb.prepare(`SELECT COUNT(*) AS total FROM transferencias_19862 ${where}`).bind(...bindings).first<{ total: number }>();
     const total = Number(count?.total ?? 0);
     const offset = (page - 1) * limit;
-    const rows = await env.DB.prepare(`SELECT id, fecha, periodo, emisor_nombre, emisor_rut, receptor_nombre, receptor_rut, materia, monto_clp, url_registro, clasificacion, comuna FROM transferencias_19862 ${where} ORDER BY ${sort} ${order} LIMIT ? OFFSET ?`).bind(...bindings, limit, offset).all<JsonRecord>();
+    const rows = await transferDb.prepare(`SELECT id, fecha, periodo, emisor_nombre, emisor_rut, receptor_nombre, receptor_rut, materia, monto_clp, url_registro, clasificacion, comuna FROM transferencias_19862 ${where} ORDER BY ${sort} ${order} LIMIT ? OFFSET ?`).bind(...bindings, limit, offset).all<JsonRecord>();
     const data = (rows.results ?? []).map((row) => ({
       id: row.id,
       fecha: row.fecha ?? null,
