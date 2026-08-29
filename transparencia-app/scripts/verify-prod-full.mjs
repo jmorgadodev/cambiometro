@@ -283,11 +283,16 @@ async function verifyProdFull() {
   const healthJson = healthRes.ok ? await healthRes.json().catch(() => null) : null;
   assertCheck(
     "API",
-    "Worker health declara el release R2 completo y su fuente efectiva",
+    "Worker health declara la D1 dedicada completa y su fuente efectiva",
     healthJson?.data?.ok === true
       && healthJson.data.transferRows === expectedTransferRows
-      && ["d1", "r2"].includes(healthJson.data.transferSource),
-    `rows: ${healthJson?.data?.transferRows ?? "n/a"}, source: ${healthJson?.data?.transferSource ?? "n/a"}`,
+      && healthJson.data.transferSource === "d1"
+      && healthJson.data.transferD1 === true
+      && healthJson.data.d1Consistent === true
+      && healthJson.data.d1TransferRows === expectedTransferRows
+      && typeof healthJson.data.d1ReleaseChecksum === "string"
+      && healthJson.data.d1ReleaseChecksum === manifest.checksumSha256,
+    `rows: ${healthJson?.data?.transferRows ?? "n/a"}, d1Rows: ${healthJson?.data?.d1TransferRows ?? "n/a"}, source: ${healthJson?.data?.transferSource ?? "n/a"}, consistent: ${healthJson?.data?.d1Consistent ?? "n/a"}`,
   );
   const funcionariosRes = await fetch(`${API_URL}/api/funcionarios?muni=muni-maipu&query=Claudio&limit=5`, { headers });
   assertCheck("API", "Búsqueda de funcionario por municipalidad responde 200", funcionariosRes.status === 200);
