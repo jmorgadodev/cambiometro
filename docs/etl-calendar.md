@@ -8,6 +8,7 @@ verano. Por eso el mismo cron `0 7 * * *` se muestra como 04:00 en invierno y
 | ETL | Cron UTC | Hora local aproximada |
 | --- | --- | --- |
 | Parlamento y Diario Oficial | `0 7 * * *` | 04:00 invierno / 03:00 verano |
+| Personal de apoyo parlamentario | `0 7 * * *` | 04:00 invierno / 03:00 verano |
 | Movimientos de autoridades | `0 7 * * *` | 04:00 invierno / 03:00 verano |
 | ChileCompra | `0 8 * * 1` | Lunes 05:00 invierno / 04:00 verano |
 | InfoLobby | `30 8 * * 1` | Lunes 05:30 invierno / 04:30 verano |
@@ -28,9 +29,12 @@ resumen de fuentes, conteos, checksum y fecha de publicación. Si una fuente
 obligatoria está bloqueada, el job falla y se conserva el último snapshot
 válido; no se publica un dataset parcial con apariencia de éxito.
 
-Movimientos tiene workflow propio para que un bloqueo de la página de personal
-de Cámara no impida actualizar el catálogo de autoridades. La fecha de la
-última ejecución y la fecha del último movimiento son metadatos distintos.
+Movimientos y personal de apoyo tienen workflows propios para que un bloqueo
+de la página de personal de Cámara no impida actualizar el catálogo de
+autoridades ni la actividad parlamentaria. Si Cámara bloquea personal, ese
+workflow falla visiblemente y conserva su último snapshot válido; no se
+publican datos parciales. La fecha de la última ejecución y la fecha del
+último movimiento son metadatos distintos.
 
 Las fuentes provisionales RSS autorizadas se configuran en la variable de
 entorno `MOVIMIENTOS_PROVISIONAL_SOURCES` como una lista separada por comas.

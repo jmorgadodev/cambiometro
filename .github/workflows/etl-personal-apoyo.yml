@@ -1,0 +1,86 @@
+name: ETL Diario - Personal de apoyo parlamentario
+
+on:
+  schedule:
+    - cron: "0 7 * * *" # 03:00 America/Santiago en horario de verano
+  workflow_dispatch:
+
+concurrency:
+  group: etl-personal-apoyo
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  ingest-publish:
+    name: Personal Cámara y Senado
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Instalar dependencias
+        working-directory: transparencia-app
+        run: npm ci
+
+      - name: Exigir credenciales de datos
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_DATA_API_TOKEN"
+
+      - name: Recuperar último snapshot válido desde R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! npx wrangler r2 object get transparencia-public-data/projections/personal-apoyo-v1/personal-apoyo.json --file /tmp/personal-apoyo-current.json --remote; then
+            echo "::warning::No hay snapshot remoto de personal de apoyo; se usa el baseline versionado."
+            cp data/personal-apoyo.json /tmp/personal-apoyo-current.json
+          fi
+
+      - name: Ejecutar ETL desde la última proyección válida
+        working-directory: transparencia-app
+        run: npm run etl:personal-apoyo -- --input /tmp/personal-apoyo-current.json --output /tmp/personal-apoyo-next.json
+
+      - name: Publicar personal de apoyo en R2 y D1
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          ETL_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-personal-apoyo
+        run: npm run data:publish:personal-apoyo -- --input /tmp/personal-apoyo-next.json --database transparencia-db --bucket transparencia-public-data --remote
+
+      - name: Publicar entrada estática validada para Pages
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          cp /tmp/personal-apoyo-next.json data/personal-apoyo.json
+          npm run data:publish:static -- --files data/personal-apoyo.json
+
+      - name: Publicar resumen y diagnóstico
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: personal-apoyo-run-${{ github.run_id }}
+          path: |
+            transparencia-app/data/personal-apoyo.json
+            transparencia-app/data/generated
+          if-no-files-found: warn
+          retention-days: 30

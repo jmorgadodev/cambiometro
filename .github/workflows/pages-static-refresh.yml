@@ -12,6 +12,7 @@ on:
       - "ETL Mensual - Ley 19.862 Transferencias del Estado"
       - "ETL Diario - Parlamento y Diario Oficial"
       - "ETL Diario - Movimientos de Autoridades"
+      - "ETL Diario - Personal de apoyo parlamentario"
       - "ETL Mensual - CPLT Nóminas Transparencia Activa"
       - "ETL Semanal - ChileCompra OCDS"
       - "ETL Mensual - Contraloría General (CGR)"
