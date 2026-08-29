@@ -19,7 +19,10 @@ const source = resolve(
   argument("--source", join(root, "data", "lake", "partitions", "ley-19862")),
 );
 const dryRun = process.argv.includes("--dry-run");
-const batchSize = Number(argument("--batch-size", "500"));
+// Keep each remote SQL statement comfortably below SQLite's statement-size
+// limit. The row count and checksum remain unchanged; only upload batching
+// changes.
+const batchSize = Number(argument("--batch-size", "50"));
 if (!Number.isSafeInteger(batchSize) || batchSize < 50 || batchSize > 1000)
   throw new Error("TRANSFER_D1_INVALID_BATCH_SIZE");
 
