@@ -221,6 +221,9 @@ try {
   // listado cargue; el usuario debe poder abrir las tres capas del detalle,
   // comparar bancadas y encontrar una persona en el padrón nominal.
   await gotoWithNetworkRetry(`${baseUrl}/votaciones-destacadas/`);
+  // La página es HTML estático, pero el botón de análisis requiere que React
+  // termine de hidratar antes de evaluar el click en runners lentos.
+  await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
   const cameraFilter = page.locator(".featured-vote-camera-filter");
   assert.equal(
     await cameraFilter.getByRole("button", { name: "Senado", exact: true }).getAttribute("aria-pressed"),
