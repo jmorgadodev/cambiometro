@@ -206,7 +206,7 @@ jobs:
         run: |
           set +e
           log_file="$GITHUB_WORKSPACE/transparencia-app/transfer-d1-materialization.log"
-          npm run data:materialize:transfer -- --database "$TRANSFER_D1_DATABASE" --config "$TRANSFER_D1_CONFIG" >"$log_file" 2>&1
+          npm run data:materialize:transfer -- --database "$TRANSFER_D1_DATABASE" --config "$TRANSFER_D1_CONFIG" --batch-size 50 >"$log_file" 2>&1
           status=$?
           cat "$log_file"
           if [ "$status" -eq 0 ]; then
