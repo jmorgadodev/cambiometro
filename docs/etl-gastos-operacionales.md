@@ -24,9 +24,16 @@ En el equipo que permanecerá encendido:
    de `transparencia-app`.
 2. Instalar Chrome o Edge. El conector usa un navegador headless y trabaja de forma
    secuencial para no provocar un nuevo rate limit.
-3. Configurar fuera de Git las variables `CLOUDFLARE_ACCOUNT_ID` y
-   `CLOUDFLARE_API_TOKEN`. El token debe tener sólo acceso necesario a R2 para leer
-   y escribir el bucket `transparencia-public-data`.
+3. Ejecutar el configurador único; solicitará el Account ID y el token sin mostrarlo
+   mientras se escribe, registrará la tarea y probará R2 sin consultar Cámara:
+
+   ```powershell
+   cd C:\Users\jorge\Proyectos\cambiometro-public\transparencia-app
+   powershell -ExecutionPolicy Bypass -File .\scripts\configure-etl-expenses-local.ps1
+   ```
+
+   El token debe tener sólo acceso necesario a R2 para leer y escribir el bucket
+   `transparencia-public-data`. El configurador guarda las variables fuera de Git.
 4. Iniciar sesión con GitHub CLI (`gh auth login`) si se desea que el runner
    dispare automáticamente el refresco de Pages.
 5. Probar manualmente, sólo cuando corresponda ejecutar una extracción:
