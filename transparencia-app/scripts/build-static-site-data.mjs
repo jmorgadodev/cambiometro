@@ -135,8 +135,12 @@ if (!existsSync(fullSource) && !allowSample) {
 const pinnedSummary = await readJson("data/lake/projections/v1/ley19862-summary.json");
 const registeredThrough = process.env.TRANSFER_RELEASE_REGISTERED_THROUGH
   ?? process.env.LEY_19862_REGISTERED_THROUGH
-  ?? pinnedSummary.source?.registeredThrough
   ?? null;
+// Do not inherit the cutoff embedded in the previous projection summary.
+// That summary can be older than the freshly hydrated lake and would make
+// Pages publish fewer rows than the API release built from the same source.
+// When no explicit cutoff is supplied, both publishers derive metadata from
+// the complete hydrated lake without excluding newer official records.
 const fullRelease = existsSync(fullSource)
   ? await buildTransferenciasStatic({ source: fullSource, output: transferDir, registeredThrough })
   : null;
