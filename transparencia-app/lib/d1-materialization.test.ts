@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 import { canonicalizeLakeRecord, entityFromRosterMember, relationsFromLakeRecord, selectMaterializedPartitions, sourceStateChecksum } from "../scripts/etl/materialize.mjs";
@@ -56,6 +56,11 @@ describe("materializacion del lake a D1", () => {
     expect(script).toContain('function wranglerMigrations(args, allowFailure = false)');
     expect(script).toContain('wrangler(["d1", "migrations", ...args], allowFailure, wranglerMigrationConfig)');
     expect(config).toContain('"database_name": "transparencia-db"');
+  });
+
+  it("mantiene la proyeccion de transferencias fuera de la D1 compartida", () => {
+    expect(existsSync(resolve("migrations/0014_transferencias_19862.sql"))).toBe(false);
+    expect(existsSync(resolve("migrations-transferencias/0001_transferencias_19862.sql"))).toBe(true);
   });
 
   it("limpia staging si una importación falla antes de activar la fuente", () => {
