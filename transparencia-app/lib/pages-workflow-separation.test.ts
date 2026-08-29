@@ -26,6 +26,10 @@ describe("separación de workflows Pages", () => {
     expect(uiRefresh).toContain("name: Hidratar release API canónico de transferencias para Pages");
     expect(uiRefresh).toContain("scripts/hydrate-transfer-api-release.mjs");
     expect(uiRefresh).toContain("TRANSFER_STATIC_CANONICAL_MANIFEST_FILE=");
+    expect(uiRefresh).toContain("id: transfer-release-cache");
+    expect(uiRefresh).toContain("pages-ui-transfer-release-v1-");
+    expect(uiRefresh).toContain("transparencia-app/public/data/transferencias");
+    expect(uiRefresh).toContain("if: steps.transfer-release-cache.outputs.cache-hit != 'true'");
     expect(uiRefresh).toContain("name: Verificar coherencia con el release API de R2");
     expect(uiRefresh).toContain("scripts/verify-transfer-r2-consistency.mjs");
   });
