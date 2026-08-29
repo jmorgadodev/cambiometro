@@ -149,6 +149,10 @@ export default function CookieConsent() {
   const choose = (choice: ConsentChoice) => {
     storeConsent(choice);
     updateGtagConsent(choice);
+    // En el export estático no dependemos únicamente del siguiente render de
+    // React para cargar la medición: el consentimiento explícito del usuario
+    // es el punto seguro para insertar el tracker.
+    if (choice === "granted") loadTracking();
     setReopened(false);
   };
 
