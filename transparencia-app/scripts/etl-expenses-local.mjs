@@ -68,6 +68,8 @@ function wrangler(args, label = "WRANGLER") {
 }
 
 function npm(args, label) {
+  const npmCli = resolve(root, "node_modules", "npm", "bin", "npm-cli.js");
+  if (existsSync(npmCli)) return run(process.execPath, [npmCli, ...args], label);
   return run(process.platform === "win32" ? "npm.cmd" : "npm", args, label);
 }
 
