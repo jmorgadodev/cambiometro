@@ -56,6 +56,10 @@ async function verifyAnalyticsConsent(PROD_URL, requestHeaders) {
   }
   const { chromium } = await import("playwright");
   const browser = await chromium.launch({ headless: true });
+  const expectedGa4Id = process.env.EXPECTED_GA4_ID?.trim();
+  const expectedGtmId = process.env.EXPECTED_GTM_ID?.trim();
+  const expectedMode = expectedGtmId ? "gtm" : expectedGa4Id ? "ga4" : null;
+  const requireAnalytics = process.env.REQUIRE_ANALYTICS === "1";
   try {
     const run = async (choice) => {
       const context = await browser.newContext({ extraHTTPHeaders: requestHeaders });
@@ -77,7 +81,18 @@ async function verifyAnalyticsConsent(PROD_URL, requestHeaders) {
     const denied = await run("denied");
     assertCheck("ANALYTICS", "rechazo no genera solicitudes Google", denied.requests.length === 0, JSON.stringify(denied.requests));
     const granted = await run("granted");
-    assertCheck("ANALYTICS", "aceptación no duplica Google Tag", granted.requests.filter((url) => /googletagmanager\.com\/gtag\/js/i.test(url)).length <= 1, JSON.stringify(granted.requests));
+    const loaderRequests = granted.requests.filter((url) => /googletagmanager\.com\/(?:gtag\/js|gtm\.js)/i.test(url));
+    assertCheck("ANALYTICS", "aceptación no duplica Google Tag", loaderRequests.length <= 1, JSON.stringify(granted.requests));
+    if (requireAnalytics) {
+      assertCheck("ANALYTICS", "existe un ID de medición configurado", expectedMode !== null, "configuración ausente");
+      if (expectedMode === "ga4") {
+        const expectedUrl = `gtag/js?id=${encodeURIComponent(expectedGa4Id)}`;
+        assertCheck("ANALYTICS", "aceptación carga el GA4 esperado una sola vez", loaderRequests.filter((url) => url.includes(expectedUrl)).length === 1, expectedUrl);
+      } else if (expectedMode === "gtm") {
+        const expectedUrl = `gtm.js?id=${encodeURIComponent(expectedGtmId)}`;
+        assertCheck("ANALYTICS", "aceptación carga el contenedor GTM esperado una sola vez", loaderRequests.filter((url) => url.includes(expectedUrl)).length === 1, expectedUrl);
+      }
+    }
     assertCheck("ANALYTICS", "consentimiento y Tag no generan violaciones CSP", denied.consoleErrors.length === 0 && granted.consoleErrors.length === 0, JSON.stringify([...denied.consoleErrors, ...granted.consoleErrors]));
   } finally {
     await browser.close();
@@ -291,7 +306,7 @@ async function verifyProdFull() {
       && healthJson.data.d1Consistent === true
       && healthJson.data.d1TransferRows === expectedTransferRows
       && typeof healthJson.data.d1ReleaseChecksum === "string"
-      && healthJson.data.d1ReleaseChecksum === manifest.checksumSha256,
+      && healthJson.data.d1ReleaseChecksum === transferManifest?.checksumSha256,
     `rows: ${healthJson?.data?.transferRows ?? "n/a"}, d1Rows: ${healthJson?.data?.d1TransferRows ?? "n/a"}, source: ${healthJson?.data?.transferSource ?? "n/a"}, consistent: ${healthJson?.data?.d1Consistent ?? "n/a"}`,
   );
   const funcionariosRes = await fetch(`${API_URL}/api/funcionarios?muni=muni-maipu&query=Claudio&limit=5`, { headers });

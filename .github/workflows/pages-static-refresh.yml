@@ -210,6 +210,10 @@ jobs:
 
       - name: Construir Pages estático
         working-directory: transparencia-app
+        env:
+          NEXT_PUBLIC_GA4_ID: ${{ vars.NEXT_PUBLIC_GA4_ID }}
+          NEXT_PUBLIC_GTM_ID: ${{ vars.NEXT_PUBLIC_GTM_ID }}
+          NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ vars.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }}
         run: npm run pages:build
 
       - name: Verificar coherencia con el release API de R2
