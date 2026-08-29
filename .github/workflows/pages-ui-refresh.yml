@@ -132,7 +132,15 @@ jobs:
         working-directory: transparencia-app
         run: npm run data:health
 
+      - name: Restaurar release canónico de transferencias por checksum
+        id: transfer-release-cache
+        uses: actions/cache/restore@v4
+        with:
+          key: pages-ui-transfer-release-v1-${{ hashFiles('transparencia-app/.ci-data-version/transfer-api-manifest.json') }}
+          path: transparencia-app/public/data/transferencias
+
       - name: Hidratar release API canónico de transferencias para Pages
+        if: steps.transfer-release-cache.outputs.cache-hit != 'true'
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -141,6 +149,17 @@ jobs:
           node scripts/hydrate-transfer-api-release.mjs \
             --manifest .ci-data-version/transfer-api-manifest.json \
             --output public/data/transferencias
+
+      - name: Guardar release canónico de transferencias por checksum
+        if: steps.transfer-release-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          key: pages-ui-transfer-release-v1-${{ hashFiles('transparencia-app/.ci-data-version/transfer-api-manifest.json') }}
+          path: transparencia-app/public/data/transferencias
+
+      - name: Fijar manifest canónico para el build
+        working-directory: transparencia-app
+        run: |
           echo "TRANSFER_STATIC_CANONICAL_MANIFEST_FILE=$GITHUB_WORKSPACE/transparencia-app/public/data/transferencias/manifest.json" >> "$GITHUB_ENV"
 
       - name: Construir Pages sin hidratar ETL
