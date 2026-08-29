@@ -96,6 +96,8 @@ const FOOTER_GROUPS = [
   },
 ] as const;
 
+const GA4_ID = process.env.NEXT_PUBLIC_GA4_ID?.trim();
+
 function InstagramIcon({ size = 15 }: { size?: number }) {
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
@@ -142,6 +144,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
   return (
     <html lang="es" data-theme="paper" className={`${inter.variable} ${ibmPlexMono.variable}`}>
       <body className="font-sans">
+        {GA4_ID ? <script src="/tracking-consent.js" data-ga4-id={GA4_ID} defer /> : null}
         <div id="initial-splash-orb" className="initial-splash-orb" role="status" aria-label="Cargando El Cambiómetro...">
           <div className="loading-orb" style={{ width: "56px", height: "56px" }}>
             <div className="loading-orb__glow" aria-hidden="true" />
