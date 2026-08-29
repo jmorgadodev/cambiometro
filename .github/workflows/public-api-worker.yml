@@ -92,7 +92,7 @@ jobs:
         run: |
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_DATA_API_TOKEN"
-          config="$RUNNER_TEMP/cambiometro-public-api.jsonc"
+          config="$GITHUB_WORKSPACE/transparencia-app/.ci-transfer-d1-worker.jsonc"
           node scripts/ensure-transfer-d1.mjs --worker-config --create --output "$config"
           echo "config=$config" >> "$GITHUB_OUTPUT"
       - name: Subir versión Worker y conservar evidencia
@@ -152,7 +152,7 @@ jobs:
         run: |
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_DATA_API_TOKEN"
-          config="$RUNNER_TEMP/cambiometro-public-api.jsonc"
+          config="$GITHUB_WORKSPACE/transparencia-app/.ci-transfer-d1-worker.jsonc"
           node scripts/ensure-transfer-d1.mjs --worker-config --create --output "$config"
           echo "config=$config" >> "$GITHUB_OUTPUT"
       - name: Validar version ID explícito
@@ -230,7 +230,7 @@ jobs:
         run: |
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_DATA_API_TOKEN"
-          config="$RUNNER_TEMP/cambiometro-public-api.jsonc"
+          config="$GITHUB_WORKSPACE/transparencia-app/.ci-transfer-d1-worker.jsonc"
           node scripts/ensure-transfer-d1.mjs --worker-config --create --output "$config"
           echo "config=$config" >> "$GITHUB_OUTPUT"
       - name: Desplegar preview sin ruta productiva
