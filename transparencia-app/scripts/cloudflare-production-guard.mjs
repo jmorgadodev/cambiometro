@@ -5,6 +5,7 @@ const zoneName = process.env.CLOUDFLARE_ZONE || "impulsacv.cl";
 const hostname = process.env.PAGES_HOSTNAME || "cambiometro.impulsacv.cl";
 const apply = process.argv.includes("--apply");
 const disableRum = process.argv.includes("--disable-rum");
+const disableJs = process.argv.includes("--disable-js");
 const expectedConfirmation = "CAMBIOMETRO_CONFIRM_CUTOVER";
 
 if (!accountId || !apiToken) throw new Error("CLOUDFLARE_CREDENTIALS_MISSING");
@@ -12,6 +13,7 @@ if (apply && process.env.CAMBIOMETRO_CONFIRM_CUTOVER !== expectedConfirmation) {
   throw new Error("CLOUDFLARE_APPLY_CONFIRMATION_MISSING");
 }
 if (disableRum && !apply) throw new Error("DISABLE_RUM_REQUIRES_APPLY");
+if (disableJs && !apply) throw new Error("DISABLE_JS_REQUIRES_APPLY");
 
 const apiBase = "https://api.cloudflare.com/client/v4";
 async function cf(path, options = {}) {
@@ -112,6 +114,14 @@ if (disableRum) {
     body: JSON.stringify({ auto_install: false, enabled: false, zone_tag: zone.id }),
   });
   console.log(JSON.stringify({ action: "rum-disabled", siteId: rumSiteId }));
+}
+
+if (disableJs) {
+  await cf(`/zones/${zone.id}/bot_management`, {
+    method: "PUT",
+    body: JSON.stringify({ enable_js: false }),
+  });
+  console.log(JSON.stringify({ action: "bot-js-detection-disabled", hostname, setting: "enable_js=false" }));
 }
 
 const publicUrl = `https://${hostname}`;
