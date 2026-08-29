@@ -31,6 +31,9 @@ if (health.response.status !== 200 || health.json?.data?.ok !== true) {
 }
 const transferRows = Number(health.json.data.transferRows ?? 0);
 if (transferRows < minimumTransferRows) throw new Error(`API_TRANSFER_UNIVERSE_INCOMPLETE:${transferRows}:${minimumTransferRows}`);
+if (health.json.data.transferSource !== "d1" || health.json.data.transferD1 !== true || health.json.data.d1Consistent !== true) {
+  throw new Error(`API_TRANSFER_D1_NOT_CONSISTENT:${health.json.data.transferSource ?? "unknown"}`);
+}
 
 const etlWorkflow = process.env.ETL_WORKFLOW_NAME || "";
 let movement = null;

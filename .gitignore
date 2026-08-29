@@ -31,6 +31,9 @@ tmp/
 docs/auditoria-local-*.md
 transparencia-app/artifacts/
 /transparencia-app/pages-deployments.json
+.ci-transfer-d1*.jsonc
+.ci-evidence-prod-*/
+/artifacts/
 .open-next/
 .next/
 node_modules/

@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "transparencia-app/workers/public-api/**"
+      - "transparencia-app/scripts/ensure-transfer-d1.mjs"
+      - "transparencia-app/migrations-transferencias/**"
       - "transparencia-app/package.json"
       - "transparencia-app/package-lock.json"
       - ".github/workflows/public-api-worker.yml"
@@ -81,24 +83,38 @@ jobs:
       - name: Instalar dependencias
         working-directory: transparencia-app
         run: npm ci
+      - name: Resolver binding D1 dedicada de transferencias
+        id: transfer-config
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_DATA_API_TOKEN"
+          config="$RUNNER_TEMP/cambiometro-public-api.jsonc"
+          node scripts/ensure-transfer-d1.mjs --worker-config --create --output "$config"
+          echo "config=$config" >> "$GITHUB_OUTPUT"
       - name: Subir versión Worker y conservar evidencia
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          TRANSFER_CONFIG: ${{ steps.transfer-config.outputs.config }}
         run: |
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_API_TOKEN"
           tag="sha-${GITHUB_SHA}"
           npx wrangler versions upload \
-            --config workers/public-api/wrangler.jsonc \
+            --config "$TRANSFER_CONFIG" \
             --name cambiometro-public-api \
             --tag "$tag" \
             --message "API candidate ${GITHUB_SHA}" \
             --preview-alias "candidate-${GITHUB_RUN_ID}" \
             2>&1 | tee worker-version-upload.txt
           npx wrangler versions list \
-            --config workers/public-api/wrangler.jsonc \
+            --config "$TRANSFER_CONFIG" \
             --name cambiometro-public-api \
             --json > worker-versions.json
       - name: Publicar evidencia de versión
@@ -127,6 +143,18 @@ jobs:
       - name: Instalar dependencias
         working-directory: transparencia-app
         run: npm ci
+      - name: Resolver binding D1 dedicada de transferencias
+        id: transfer-config
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_DATA_API_TOKEN"
+          config="$RUNNER_TEMP/cambiometro-public-api.jsonc"
+          node scripts/ensure-transfer-d1.mjs --worker-config --create --output "$config"
+          echo "config=$config" >> "$GITHUB_OUTPUT"
       - name: Validar version ID explícito
         env:
           WORKER_VERSION_ID: ${{ inputs.worker_version_id }}
@@ -139,14 +167,16 @@ jobs:
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
           UPTIME_TOKEN: ${{ secrets.CAMBIOMETRO_UPTIME_TOKEN }}
           WORKER_VERSION_ID: ${{ inputs.worker_version_id }}
+          TRANSFER_CONFIG: ${{ steps.transfer-config.outputs.config }}
         run: |
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$UPTIME_TOKEN"
           npx wrangler versions deploy \
-            --config workers/public-api/wrangler.jsonc \
+            --config "$TRANSFER_CONFIG" \
             --name cambiometro-public-api \
             "${WORKER_VERSION_ID}@100" \
             --message "Promote ${WORKER_VERSION_ID}" \
@@ -156,7 +186,7 @@ jobs:
           # la ruta evita que una versión sana quede invisible detrás de
           # OpenNext y que /api/* siga respondiendo 404.
           npx wrangler triggers deploy \
-            --config workers/public-api/wrangler.jsonc \
+            --config "$TRANSFER_CONFIG" \
             --name cambiometro-public-api \
             --routes "cambiometro.impulsacv.cl/api/*"
           for attempt in 1 2 3 4 5; do
@@ -191,15 +221,28 @@ jobs:
       - name: Instalar dependencias
         working-directory: transparencia-app
         run: npm ci
+      - name: Resolver binding D1 dedicada de transferencias
+        id: transfer-config
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_DATA_API_TOKEN"
+          config="$RUNNER_TEMP/cambiometro-public-api.jsonc"
+          node scripts/ensure-transfer-d1.mjs --worker-config --create --output "$config"
+          echo "config=$config" >> "$GITHUB_OUTPUT"
       - name: Desplegar preview sin ruta productiva
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+          TRANSFER_CONFIG: ${{ steps.transfer-config.outputs.config }}
         run: |
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_API_TOKEN"
           npx wrangler deploy \
-            --config workers/public-api/wrangler.jsonc \
+            --config "$TRANSFER_CONFIG" \
             --env preview \
             --message "API preview ${GITHUB_SHA}"
