@@ -256,6 +256,23 @@ describe("API canónica v1", () => {
     expect(payload.links.self).toBe(request.url);
   });
 
+  it("usa el roster compacto si la tabla legacy de políticos no está disponible", async () => {
+    const failingEnv = {
+      DB: {
+        prepare: () => ({
+          bind: () => ({
+            first: async () => { throw new Error("legacy table unavailable"); },
+          }),
+        }),
+      },
+    } as never;
+    const response = await api.fetch(new Request("https://example.test/api/v1/politico/dip-061"), failingEnv);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.id).toBe("dip-061");
+  });
+
   it("acepta el preflight CORS del widget sin habilitar métodos de escritura", async () => {
     const response = await api.fetch(new Request("https://example.test/api/v1/politico/dip-061", {
       method: "OPTIONS",

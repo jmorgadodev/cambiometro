@@ -909,7 +909,15 @@ export default {
     if (path.startsWith("/api/v1/politico/")) {
       if (!env.DB) return dbUnavailable();
       const id = decodeURIComponent(path.split("/").at(-1) ?? "");
-      let row = await env.DB.prepare("SELECT * FROM politicos WHERE id = ? LIMIT 1").bind(id).first<JsonRecord>();
+      let row: JsonRecord | null = null;
+      try {
+        row = await env.DB.prepare("SELECT * FROM politicos WHERE id = ? LIMIT 1").bind(id).first<JsonRecord>();
+      } catch {
+        // A partially migrated or briefly locked legacy table must not turn
+        // the public roster endpoint into a 500 when the compact seed can
+        // still serve the canonical politician identity.
+        row = null;
+      }
       // The current ETL publishes canonical people in `entities`; the legacy
       // `politicos` table may be empty while migrations are being rolled out.
       // Keep the public legacy contract available from the compact roster,
