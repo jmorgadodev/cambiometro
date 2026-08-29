@@ -26,6 +26,10 @@ const batchSize = Number(argument("--batch-size", "50"));
 if (!Number.isSafeInteger(batchSize) || batchSize < 50 || batchSize > 1000)
   throw new Error("TRANSFER_D1_INVALID_BATCH_SIZE");
 
+const maxTransientRetries = Number(argument("--max-transient-retries", "5"));
+if (!Number.isSafeInteger(maxTransientRetries) || maxTransientRetries < 0 || maxTransientRetries > 8)
+  throw new Error("TRANSFER_D1_INVALID_RETRY_COUNT");
+
 function argument(name, fallback) {
   const index = process.argv.indexOf(name);
   return index >= 0 ? (process.argv[index + 1] ?? fallback) : fallback;
@@ -36,7 +40,18 @@ function sql(value) {
   return `'${String(value).replaceAll("\0", "").replaceAll("'", "''")}'`;
 }
 
-function runWrangler(args, allowFailure = false) {
+function transientFailure(error) {
+  const output = [error?.message, error?.stdout, error?.stderr]
+    .filter(Boolean)
+    .join("\n");
+  return /fetch failed|ECONNRESET|ECONNREFUSED|ETIMEDOUT|EAI_AGAIN|ENETUNREACH|socket hang up|network|rate limit|too many requests|\b429\b|temporar/i.test(output);
+}
+
+function wait(milliseconds) {
+  Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, milliseconds);
+}
+
+function runWrangler(args, allowFailure = false, options = {}) {
   const bin = resolve(root, "node_modules", "wrangler", "bin", "wrangler.js");
   try {
     return execFileSync(
@@ -45,7 +60,7 @@ function runWrangler(args, allowFailure = false) {
       {
         cwd: root,
         encoding: "utf8",
-        stdio: allowFailure ? "pipe" : "inherit",
+        stdio: allowFailure || options.capture ? "pipe" : "inherit",
       },
     );
   } catch (error) {
@@ -58,7 +73,22 @@ function executeSql(work, text, label) {
   if (dryRun) return;
   const file = join(work, `${label}.sql`);
   writeFileSync(file, `${text}\n`, "utf8");
-  runWrangler(["d1", "execute", database, "--remote", "--file", file]);
+  const args = ["d1", "execute", database, "--remote", "--file", file];
+  for (let attempt = 0; ; attempt += 1) {
+    try {
+      runWrangler(args, false, { capture: true });
+      if (label.startsWith("batch-"))
+        console.log(`D1 ${label} materializado (intento ${attempt + 1}).`);
+      return;
+    } catch (error) {
+      if (!transientFailure(error) || attempt >= maxTransientRetries) throw error;
+      const delay = Math.min(30_000, 2_000 * 2 ** attempt);
+      console.warn(
+        `D1 ${label}: fallo transitorio de red; reintento ${attempt + 1}/${maxTransientRetries} en ${delay} ms.`,
+      );
+      wait(delay);
+    }
+  }
 }
 
 function releaseRows(staging, manifest) {
