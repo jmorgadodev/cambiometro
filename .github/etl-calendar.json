@@ -3,6 +3,7 @@
   "cronTimezone": "UTC",
   "entries": [
     { "workflow": "etl-daily.yml", "name": "Parlamento y Diario Oficial", "cronUtc": "0 7 * * *", "local": "Diario 04:00 invierno / 03:00 verano" },
+    { "workflow": "etl-personal-apoyo.yml", "name": "Personal de apoyo parlamentario", "cronUtc": "0 7 * * *", "local": "Diario 04:00 invierno / 03:00 verano" },
     { "workflow": "etl-movimientos.yml", "name": "Movimientos de autoridades", "cronUtc": "0 7 * * *", "local": "Diario 04:00 invierno / 03:00 verano" },
     { "workflow": "etl-chilecompra.yml", "name": "ChileCompra", "cronUtc": "0 8 * * 1", "local": "Lunes 05:00 invierno / 04:00 verano" },
     { "workflow": "etl-infolobby.yml", "name": "InfoLobby", "cronUtc": "30 8 * * 1", "local": "Lunes 05:30 invierno / 04:30 verano" },
