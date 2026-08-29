@@ -13,6 +13,11 @@ on:
         type: boolean
         required: true
         default: false
+      disable_js_detection:
+        description: "Desactivar únicamente JavaScript Detection de Bot Fight para evitar inyección inline CSP"
+        type: boolean
+        required: true
+        default: false
       confirmation:
         description: "Escribir CAMBIOMETRO_CONFIRM_CUTOVER sólo para aplicar"
         type: string
@@ -52,4 +57,5 @@ jobs:
           args=""
           if [ "${{ inputs.apply }}" = "true" ]; then args="$args --apply"; fi
           if [ "${{ inputs.disable_rum }}" = "true" ]; then args="$args --disable-rum"; fi
+          if [ "${{ inputs.disable_js_detection }}" = "true" ]; then args="$args --disable-js"; fi
           node scripts/cloudflare-production-guard.mjs $args
