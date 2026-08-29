@@ -17,4 +17,16 @@ describe("separación de workflows Pages", () => {
     expect(uiRefresh).toContain("name: Regenerar salud de fuentes desde el snapshot publicado");
     expect(uiRefresh).toContain("run: npm run data:health");
   });
+
+  it("fija cada build de interfaz al release canónico vigente de transferencias", () => {
+    const uiRefresh = readFileSync(resolve(process.cwd(), "../.github/workflows/pages-ui-refresh.yml"), "utf8");
+
+    expect(uiRefresh).toContain("projections/transferencias-v1/manifest.json");
+    expect(uiRefresh).toContain('".ci-data-version/transfer-api-manifest.json"');
+    expect(uiRefresh).toContain("name: Hidratar release API canónico de transferencias para Pages");
+    expect(uiRefresh).toContain("scripts/hydrate-transfer-api-release.mjs");
+    expect(uiRefresh).toContain("TRANSFER_STATIC_CANONICAL_MANIFEST_FILE=");
+    expect(uiRefresh).toContain("name: Verificar coherencia con el release API de R2");
+    expect(uiRefresh).toContain("scripts/verify-transfer-r2-consistency.mjs");
+  });
 });
