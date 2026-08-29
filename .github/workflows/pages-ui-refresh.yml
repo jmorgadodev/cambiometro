@@ -66,6 +66,7 @@ jobs:
           npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
           npx wrangler r2 object get transparencia-public-data/projections/static-site-v1/manifest.json --file .ci-data-version/static-site-manifest.json --remote
           npx wrangler r2 object get transparencia-public-data/projections/funcionarios-v1/manifest.json --file .ci-data-version/funcionarios-manifest.json --remote
+          npx wrangler r2 object get transparencia-public-data/projections/transferencias-v1/manifest.json --file .ci-data-version/transfer-api-manifest.json --remote
           node -e '
             const fs = require("node:fs");
             const crypto = require("node:crypto");
@@ -73,6 +74,7 @@ jobs:
               "data/lake/catalog/v1/manifest.json",
               ".ci-data-version/static-site-manifest.json",
               ".ci-data-version/funcionarios-manifest.json",
+              ".ci-data-version/transfer-api-manifest.json",
             ];
             const hash = crypto.createHash("sha256");
             for (const file of files) hash.update(fs.readFileSync(file));
@@ -130,6 +132,17 @@ jobs:
         working-directory: transparencia-app
         run: npm run data:health
 
+      - name: Hidratar release API canónico de transferencias para Pages
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          node scripts/hydrate-transfer-api-release.mjs \
+            --manifest .ci-data-version/transfer-api-manifest.json \
+            --output public/data/transferencias
+          echo "TRANSFER_STATIC_CANONICAL_MANIFEST_FILE=$GITHUB_WORKSPACE/transparencia-app/public/data/transferencias/manifest.json" >> "$GITHUB_ENV"
+
       - name: Construir Pages sin hidratar ETL
         env:
           NEXT_PUBLIC_GA4_ID: ${{ vars.NEXT_PUBLIC_GA4_ID }}
@@ -137,6 +150,13 @@ jobs:
           NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ vars.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }}
         run: npm run pages:build
         working-directory: transparencia-app
+
+      - name: Verificar coherencia con el release API de R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: node scripts/verify-transfer-r2-consistency.mjs
 
       - name: Verificar export, datos y fichas
         run: npm run pages:verify && npm run api:typecheck && npm run api:size
