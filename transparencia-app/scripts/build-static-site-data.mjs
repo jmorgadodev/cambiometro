@@ -1,7 +1,7 @@
 import crypto from "node:crypto";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
-import { join } from "node:path";
+import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { writeChunkedJson } from "./static-site-data.mjs";
 import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
@@ -141,9 +141,17 @@ const registeredThrough = process.env.TRANSFER_RELEASE_REGISTERED_THROUGH
 // Pages publish fewer rows than the API release built from the same source.
 // When no explicit cutoff is supplied, both publishers derive metadata from
 // the complete hydrated lake without excluding newer official records.
-const fullRelease = existsSync(fullSource)
-  ? await buildTransferenciasStatic({ source: fullSource, output: transferDir, registeredThrough })
+const canonicalManifestFile = process.env.TRANSFER_STATIC_CANONICAL_MANIFEST_FILE
+  ? resolve(process.env.TRANSFER_STATIC_CANONICAL_MANIFEST_FILE)
   : null;
+const canonicalManifest = canonicalManifestFile && existsSync(canonicalManifestFile)
+  ? JSON.parse(readFileSync(canonicalManifestFile, "utf8"))
+  : null;
+const fullRelease = canonicalManifest
+  ? { manifest: canonicalManifest, summary: JSON.parse(readFileSync(join(transferDir, "summary.json"), "utf8")) }
+  : existsSync(fullSource)
+    ? await buildTransferenciasStatic({ source: fullSource, output: transferDir, registeredThrough })
+    : null;
 if (!fullRelease && !allowSample) throw new Error("STATIC_DATA_FULL_TRANSFER_RELEASE_EMPTY");
 
 const sampleRows = pinnedSummary.transfers_sample ?? [];
