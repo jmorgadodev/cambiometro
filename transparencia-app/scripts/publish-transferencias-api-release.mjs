@@ -79,6 +79,7 @@ try {
     schemaVersion: 1,
     dataset: manifest.dataset,
     generatedAt: manifest.generatedAt,
+    registeredThrough: manifest.registeredThrough,
     totalRows: manifest.totalRows,
     pageSize: manifest.pageSize,
     totalPages: manifest.totalPages,
