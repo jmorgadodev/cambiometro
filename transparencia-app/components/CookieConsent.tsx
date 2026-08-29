@@ -1,11 +1,13 @@
 "use client";
 
 import React, { useEffect, useState, useSyncExternalStore } from "react";
+import { usePathname } from "next/navigation";
 
 declare global {
   interface Window {
     dataLayer?: unknown[];
     gtag?: (...args: unknown[]) => void;
+    __cambiometroTracking?: { mode: "ga4" | "gtm"; id: string };
   }
 }
 
@@ -16,6 +18,25 @@ const CONSENT_CHANGED_EVENT = "cambiometro:consent-changed";
 export type ConsentChoice = "granted" | "denied";
 
 const GA4_ID = process.env.NEXT_PUBLIC_GA4_ID?.trim();
+const GTM_ID = process.env.NEXT_PUBLIC_GTM_ID?.trim();
+
+const CONSENT_VALUES = (value: "granted" | "denied") => ({
+  ad_storage: value,
+  ad_user_data: value,
+  ad_personalization: value,
+  analytics_storage: value,
+});
+
+function ensureDataLayer() {
+  if (typeof window === "undefined") return null;
+  if (!Array.isArray(window.dataLayer)) window.dataLayer = [];
+  if (!window.gtag) {
+    window.gtag = (...args: unknown[]) => {
+      window.dataLayer?.push(args);
+    };
+  }
+  return window.dataLayer;
+}
 
 function readStoredConsent(): ConsentChoice | null {
   try {
@@ -49,57 +70,67 @@ function subscribeConsent(onChange: () => void) {
 }
 
 /**
- * Carga gtag.js solo cuando existe GA4_ID configurado y el usuario otorgó
+ * Carga la integración elegida solo cuando existe un ID configurado y el usuario otorgó
  * consentimiento. El script se inyecta con document.createElement: nunca
  * aparece en el HTML servido por el servidor (default = rechazado).
  */
-function loadGtag() {
-  const id = GA4_ID;
-  if (!id || typeof window === "undefined" || window.dataLayer) return;
+function loadTracking() {
+  if (typeof window === "undefined" || window.__cambiometroTracking) return;
+  const mode = GTM_ID ? "gtm" : GA4_ID ? "ga4" : null;
+  const id = GTM_ID ?? GA4_ID;
+  if (!mode || !id || !/^(?:GTM|G)-[A-Z0-9_-]+$/i.test(id)) return;
 
-  const dataLayer: unknown[] = [];
-  Object.defineProperty(window, "dataLayer", { configurable: true, value: dataLayer });
-  window.gtag = function gtag(...args: unknown[]) {
-    dataLayer.push(args);
-  };
-  window.gtag("consent", "default", {
-    ad_storage: "denied",
-    ad_user_data: "denied",
-    ad_personalization: "denied",
-    analytics_storage: "denied",
-    wait_for_update: 500,
-  });
+  const dataLayer = ensureDataLayer();
+  if (!dataLayer || !window.gtag) return;
+  window.gtag("consent", "default", { ...CONSENT_VALUES("denied"), wait_for_update: 500 });
 
   const script = document.createElement("script");
   script.async = true;
-  script.src = `https://www.googletagmanager.com/gtag/js?id=${id}`;
+  script.src = mode === "gtm"
+    ? `https://www.googletagmanager.com/gtm.js?id=${encodeURIComponent(id)}`
+    : `https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(id)}`;
   script.setAttribute("data-consent", "granted");
+  script.setAttribute("data-cambiometro-tracker", mode);
   document.head.appendChild(script);
+  window.__cambiometroTracking = { mode, id };
 
-  window.gtag("consent", "update", {
-    ad_storage: "granted",
-    ad_user_data: "granted",
-    ad_personalization: "granted",
-    analytics_storage: "granted",
-  });
-  window.gtag("js", new Date());
-  window.gtag("config", id, { anonymize_ip: true });
+  window.gtag("consent", "update", CONSENT_VALUES("granted"));
+  if (mode === "gtm") {
+    window.dataLayer?.push({ "gtm.start": Date.now(), event: "gtm.js" });
+  }
+  if (mode === "ga4") {
+    window.gtag("js", new Date());
+    // Los page_view se envían manualmente para cubrir navegación cliente sin duplicados.
+    window.gtag("config", id, { anonymize_ip: true, send_page_view: false });
+  }
 }
 
 function updateGtagConsent(choice: ConsentChoice) {
   if (typeof window === "undefined" || !window.gtag) return;
   const value = choice === "granted" ? "granted" : "denied";
-  window.gtag("consent", "update", {
-    ad_storage: value,
-    ad_user_data: value,
-    ad_personalization: value,
-    analytics_storage: value,
-  });
+  window.gtag("consent", "update", CONSENT_VALUES(value));
+  window.dataLayer?.push({ event: "cambiometro_consent_update", ...CONSENT_VALUES(value) });
+}
+
+function trackPageView(pathname: string) {
+  if (typeof window === "undefined" || !window.__cambiometroTracking) return;
+  const payload = {
+    page_title: document.title,
+    page_location: window.location.href,
+    page_path: pathname,
+  };
+  if (window.__cambiometroTracking.mode === "ga4") {
+    window.gtag?.("event", "page_view", payload);
+  } else {
+    // El contenedor GTM debe tener una etiqueta GA4 activada por este evento.
+    window.dataLayer?.push({ event: "cambiometro_page_view", ...payload });
+  }
 }
 
 export default function CookieConsent() {
   const consent = useSyncExternalStore(subscribeConsent, readStoredConsent, () => "denied");
   const [reopened, setReopened] = useState(false);
+  const pathname = usePathname();
 
   useEffect(() => {
     const reopen = () => setReopened(true);
@@ -108,8 +139,12 @@ export default function CookieConsent() {
   }, []);
 
   useEffect(() => {
-    if (consent === "granted") loadGtag();
+    if (consent === "granted") loadTracking();
   }, [consent]);
+
+  useEffect(() => {
+    if (consent === "granted" && pathname) trackPageView(pathname);
+  }, [consent, pathname]);
 
   const choose = (choice: ConsentChoice) => {
     storeConsent(choice);

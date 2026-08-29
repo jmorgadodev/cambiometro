@@ -65,6 +65,9 @@ export const metadata: Metadata = {
     images: ["/api/og/site"],
   },
   robots: { index: true, follow: true },
+  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+    : undefined,
 };
 
 const FOOTER_GROUPS = [

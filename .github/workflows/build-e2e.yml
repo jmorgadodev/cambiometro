@@ -51,6 +51,9 @@ jobs:
           # E2E usa la proyección fixture porque los secretos R2 no están
           # disponibles en PRs. Pages producción nunca define esta variable.
           ALLOW_STATIC_SAMPLE: "1"
+          NEXT_PUBLIC_GA4_ID: ${{ vars.NEXT_PUBLIC_GA4_ID }}
+          NEXT_PUBLIC_GTM_ID: ${{ vars.NEXT_PUBLIC_GTM_ID }}
+          NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ vars.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }}
         run: npm run pages:build && npm run pages:verify && npm run api:size
         working-directory: transparencia-app
 
