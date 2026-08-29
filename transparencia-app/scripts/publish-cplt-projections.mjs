@@ -73,7 +73,7 @@ for (const fileName of files) {
     compactRows.push(compact);
     const shardKeys = new Set([compact.n, compact.c, compact.o].flatMap((value) => normalizeSearch(value)
       .split(/\s+/)
-      .map((token) => token.replace(/^[^a-z0-9]+/i, "").charAt(0))
+      .map((token) => token.replace(/^[^a-z0-9]+/i, "").slice(0, 2))
       .filter(Boolean)));
     for (const shard of shardKeys) {
       if (!byShard.has(shard)) byShard.set(shard, []);
@@ -100,11 +100,19 @@ for (let offset = 0; offset < compactRows.length; offset += searchPageSize) {
   await writeGeneratedAsset(filePath, pages.at(-1).key);
 }
 const shards = {};
+const searchShardSize = 25_000;
 for (const [shard, rows] of byShard) {
-  const filePath = join(searchIndexRoot, `${shard}.json`);
-  writeFileSync(filePath, `${JSON.stringify(rows)}\n`);
-  shards[shard] = `projections/funcionarios-v1/versions/${version}/search_index/${shard}.json`;
-  await writeGeneratedAsset(filePath, shards[shard]);
+  const shardKeys = [];
+  for (let offset = 0; offset < rows.length; offset += searchShardSize) {
+    const part = Math.floor(offset / searchShardSize) + 1;
+    const fileName = `${shard}-${String(part).padStart(3, "0")}.json`;
+    const filePath = join(searchIndexRoot, fileName);
+    const key = `projections/funcionarios-v1/versions/${version}/search_index/${fileName}`;
+    writeFileSync(filePath, `${JSON.stringify(rows.slice(offset, offset + searchShardSize))}\n`);
+    shardKeys.push(key);
+    await writeGeneratedAsset(filePath, key);
+  }
+  shards[shard] = shardKeys.length === 1 ? shardKeys[0] : shardKeys;
 }
 const searchIndexPath = join(projectionRoot, "search_index.json");
 const searchIndex = {

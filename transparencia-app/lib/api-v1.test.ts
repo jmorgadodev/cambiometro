@@ -116,6 +116,43 @@ describe("API canónica v1", () => {
     expect(payload.meta.total).toBe(1203287);
   });
 
+  it("consulta todos los fragmentos de un shard nacional dividido", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 2,
+        pageSize: 10000,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 2 }],
+        shards: {
+          cl: [
+            "projections/funcionarios-v1/versions/2026-08-25/search_index/cl-001.json",
+            "projections/funcionarios-v1/versions/2026-08-25/search_index/cl-002.json",
+          ],
+        },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/cl-001.json": [
+        { id: "func-1", n: "Claudio Adaros", c: "Analista", o: "Municipalidad de Maipú", b: 5894314 },
+      ],
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/cl-002.json": [
+        { id: "func-2", n: "Claudia Araya", c: "Abogada", o: "Municipalidad de Maipú", b: 1900000 },
+      ],
+    };
+    const env = {
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?query=Cla&include_zero=true&limit=10"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.map((row: { id: string }) => row.id)).toEqual(["func-1", "func-2"]);
+  });
+
   it("expone health 200 cuando el release R2 canónico está disponible", async () => {
     const env = { ...(testEnv() as object), ...(transferR2Env() as object) } as never;
     const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
