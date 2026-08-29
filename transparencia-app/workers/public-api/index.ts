@@ -112,7 +112,7 @@ interface OfficialsSearchIndex {
   totalRows: number;
   pageSize: number;
   pages: Array<{ page: number; key: string; count: number }>;
-  shards: Record<string, string>;
+  shards: Record<string, string | string[]>;
 }
 
 interface CompactOfficialRow {
@@ -466,9 +466,14 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env) {
     const page = Number.isInteger(requestedPage) ? Math.max(1, Math.min(requestedPage, index.pages.length)) : 1;
     let rows: JsonRecord[] = [];
     if (query) {
-      const first = query.replace(/^[^a-z0-9]+/i, "").charAt(0) || "_";
-      const shardKey = index.shards?.[first] ?? index.shards?.[first.toLocaleLowerCase("es-CL")];
-      if (shardKey) rows = compactOfficialRows(await r2Json<CompactOfficialRow[]>(env.PUBLIC_DATA, shardKey));
+      const token = query.replace(/^[^a-z0-9]+/i, "");
+      const prefix = token.slice(0, 2) || "_";
+      const shardValue = index.shards?.[prefix]
+        ?? index.shards?.[prefix.charAt(0)]
+        ?? index.shards?.[prefix.toLocaleLowerCase("es-CL")];
+      const shardKeys = Array.isArray(shardValue) ? shardValue : shardValue ? [shardValue] : [];
+      const shardRows = await Promise.all(shardKeys.map((key) => r2Json<CompactOfficialRow[]>(env.PUBLIC_DATA, key)));
+      rows = shardRows.flatMap((value) => compactOfficialRows(value));
     } else {
       const pageKey = index.pages.find((item) => item.page === page)?.key;
       if (pageKey) rows = compactOfficialRows(await r2Json<CompactOfficialRow[]>(env.PUBLIC_DATA, pageKey));
