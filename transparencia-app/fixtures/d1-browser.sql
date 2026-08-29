@@ -12,6 +12,15 @@ INSERT OR REPLACE INTO entities (id,kind,name,identifiers_json,attributes_json,s
 ('public-body-camara','public_body','Cámara de Diputadas y Diputados','[]','{"country":"CL"}','["camara"]',CURRENT_TIMESTAMP),
 ('public-body-cgr','public_body','Contraloría General de la República','[]','{"country":"CL"}','["contraloria"]',CURRENT_TIMESTAMP);
 
+INSERT OR REPLACE INTO funcionarios_publicos (
+  id, rut, nombre_completo, organo_id, organo_tipo, cargo, estamento,
+  tipo_contrato, remuneracion_bruta_mensual, fecha_ingreso
+) VALUES (
+  'fixture-funcionario-1', '11.111.111-1', 'Funcionario de prueba',
+  'muni-santiago', 'municipalidad', 'Profesional de prueba', 'Profesional',
+  'Contrata', 1500000, '2026-01-02'
+);
+
 INSERT OR REPLACE INTO records (id,kind,source_id,title,description,occurred_at,period_json,subject_entity_ids_json,object_entity_ids_json,amount_json,evidence_json,data_json)
 VALUES (
   'fixture-vote-camara-1009',
