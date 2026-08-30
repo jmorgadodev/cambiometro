@@ -95,8 +95,9 @@ if (publishReleases) {
       const stagedPath = join(releaseStaging, asset.releaseAssetName);
       copyFileSync(join(outputRoot, asset.key), stagedPath);
       const verifyRemote = () => {
-        const downloaded = command("gh", ["release", "download", tag, "--pattern", asset.releaseAssetName, "--dir", releaseVerifyRoot, "--clobber"], true);
-        const downloadedPath = join(releaseVerifyRoot, asset.releaseAssetName);
+        const verifyDir = mkdtempSync(join(releaseVerifyRoot, "asset-"));
+        const downloaded = command("gh", ["release", "download", tag, "--pattern", asset.releaseAssetName, "--dir", verifyDir], true);
+        const downloadedPath = join(verifyDir, asset.releaseAssetName);
         if (downloaded.status !== 0 || !existsSync(downloadedPath)) return false;
         const remoteChecksum = createHash("sha256").update(readFileSync(downloadedPath)).digest("hex");
         if (remoteChecksum !== asset.checksumSha256) throw new Error(`IMMUTABLE_RELEASE_CONFLICT: ${tag}/${asset.releaseAssetName}`);
