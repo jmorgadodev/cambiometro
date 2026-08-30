@@ -107,7 +107,17 @@ if (publishReleases) {
       while (attempts < 3) {
         attempts += 1;
         const result = command("gh", ["release", "upload", tag, stagedPath], true);
-        if (result.status === 0) break;
+        if (result.status === 0) {
+          // Mantener el índice en memoria evita que dos assets generados con
+          // el mismo nombre se vuelvan a subir dentro de esta ejecución.
+          // GitHub Releases es inmutable por nombre: el segundo encuentro
+          // debe tratarse como idempotente y conservar su checksum.
+          existingAssets.set(asset.releaseAssetName, {
+            name: asset.releaseAssetName,
+            digest: `sha256:${asset.checksumSha256}`,
+          });
+          break;
+        }
         // La subida puede haber llegado al servidor aunque la CLI reciba un
         // error de red. Antes de reintentar, consulta el release: si el asset
         // ya existe y conserva exactamente su digest, la operación es
