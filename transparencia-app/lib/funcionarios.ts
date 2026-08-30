@@ -28,6 +28,7 @@ export type TipoOrganoFuncionario =
 export interface FuncionarioPublico {
   id: string;
   nombre_completo: string;
+  organo_id?: string;
   organo_nombre: string;
   organo_tipo: TipoOrganoFuncionario;
   cargo: string;

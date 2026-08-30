@@ -143,6 +143,7 @@ export default function PersonasPage() {
         autoridades={autoridades}
         organismos={organismosOptions}
         totalFuncionariosEstimados={1203287}
+        totalMunicipalidades={MUNICIPALIDADES_SEED.length}
       />
     </Suspense>
   );

@@ -114,6 +114,55 @@ for (const [shard, rows] of byShard) {
   }
   shards[shard] = shardKeys.length === 1 ? shardKeys[0] : shardKeys;
 }
+
+// Índices de posiciones: permiten combinar filtros nacionales sin duplicar
+// las 1,2 millones de filas ni leer todas las páginas en cada consulta. Cada
+// número apunta a la posición de la fila en `compactRows`, ordenado por nombre.
+const compactSearch = (value) => normalizeSearch(value).replace(/[^a-z0-9]/g, "");
+const compactContract = (value) => compactSearch(value).replace("codigodeltrabajo", "codigotrabajo");
+const compactOrgType = (value) => compactSearch(value).replace("gobiernoregional", "gore");
+const filterDefinitions = [
+  ...[
+    ["planta", "planta"],
+    ["contrata", "contrata"],
+    ["honorarios", "honorarios"],
+    ["codigotrabajo", "codigotrabajo"],
+  ].map(([key, needle]) => ({ key: `contrato:${key}`, matches: (row) => compactContract(row.t).includes(needle) })),
+  ...[
+    ["directivo", "directiv"],
+    ["profesional", "profesional"],
+    ["tecnico", "tecnic"],
+    ["administrativo", "administrativ"],
+    ["auxiliar", "auxiliar"],
+    ["salud", "salud"],
+    ["educacion", "educa"],
+  ].map(([key, needle]) => ({ key: `estamento:${key}`, matches: (row) => compactSearch(row.e).includes(needle) })),
+  ...[
+    ["municipalidad", "municip"],
+    ["ministerio", "minister"],
+    ["subsecretaria", "subsecret"],
+    ["servicio", "servicio"],
+    ["gore", "gore"],
+    ["empresa publica", "empresapublic"],
+    ["superintendencia", "superintend"],
+  ].map(([key, needle]) => ({ key: `tipo:${key}`, matches: (row) => compactOrgType(row.ot).includes(compactOrgType(needle)) })),
+  { key: "cargo:alcalde", matches: (row) => /^(alcalde|alcaldesa)(\s|$)/.test(normalizeSearch(row.c).trim()) },
+  { key: "horas_extras:true", matches: (row) => Number(row.h ?? 0) > 0 },
+];
+const filters = {};
+for (const definition of filterDefinitions) {
+  const positions = [];
+  compactRows.forEach((row, position) => {
+    if (definition.matches(row)) positions.push(position);
+  });
+  const hash = createHash("sha256").update(definition.key).digest("hex").slice(0, 16);
+  const fileName = `filter-${hash}.json`;
+  const filePath = join(searchIndexRoot, fileName);
+  const key = `projections/funcionarios-v1/versions/${version}/search_index/${fileName}`;
+  writeFileSync(filePath, `${JSON.stringify(positions)}\n`);
+  await writeGeneratedAsset(filePath, key);
+  filters[definition.key] = { key, count: positions.length };
+}
 const searchIndexPath = join(projectionRoot, "search_index.json");
 const searchIndex = {
   schemaVersion: 1,
@@ -122,6 +171,7 @@ const searchIndex = {
   pageSize: searchPageSize,
   pages,
   shards,
+  filters,
 };
 writeFileSync(searchIndexPath, `${JSON.stringify(searchIndex, null, 2)}\n`);
 const searchIndexKey = `projections/funcionarios-v1/versions/${version}/search_index.json`;

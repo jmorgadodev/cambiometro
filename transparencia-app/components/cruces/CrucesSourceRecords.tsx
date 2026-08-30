@@ -23,6 +23,54 @@ const SOURCES: Array<{ id: SourceId; label: string; description: string }> = [
 
 const PAGE_SIZE = 25;
 
+function text(value: unknown) {
+  if (value === null || value === undefined || value === "") return null;
+  if (Array.isArray(value)) return value.map((item) => typeof item === "object" && item !== null && "name" in item ? String(item.name) : String(item)).join(", ");
+  return String(value);
+}
+
+function recordFacts(record: SourceRecord, source: SourceId) {
+  const data = record.data ?? {};
+  const facts: Array<{ label: string; value: string | null }> = [];
+  if (source === "chilecompra") {
+    facts.push(
+      { label: "OCID", value: text(data.ocid) },
+      { label: "Tipo de proceso", value: text(data.procurement_type) },
+      { label: "Etapa", value: text(data.stage) },
+      { label: "Período de origen", value: text(data.source_period ?? data.period) },
+    );
+  } else if (source === "infolobby") {
+    facts.push(
+      { label: "Tipo de registro", value: text(data.lobby_event_kind) },
+      { label: "Sujeto pasivo", value: text(data.sujeto_pasivo) },
+      { label: "Cargo", value: text(data.cargo) },
+      { label: "Organismo", value: text(data.organismo) },
+      { label: "Destino o materia", value: text(data.destino ?? data.descripcion) },
+      { label: "Financista", value: text(data.financistas) },
+    );
+  } else if (source === "contraloria") {
+    facts.push(
+      { label: "Número de informe", value: text(data.report_number) },
+      { label: "Servicio fiscalizado", value: text(data.service) },
+      { label: "Tipo de informe", value: text(data.report_type) },
+      { label: "Región", value: text(data.region) },
+      { label: "Unidad CGR", value: text(data.cgr_unit) },
+    );
+  } else {
+    facts.push(
+      { label: "Persona declarante", value: text(data.nombre) },
+      { label: "Organismo", value: text(data.organizations) },
+      { label: "Método de conciliación", value: text(data.reconciliation_method) },
+    );
+  }
+  return facts.filter((fact) => fact.value);
+}
+
+function sourceUrl(record: SourceRecord) {
+  const value = record.evidence?.sourceUrl;
+  return typeof value === "string" && /^https?:\/\//i.test(value) ? value : null;
+}
+
 export default function CrucesSourceRecords({ counts }: { counts?: Partial<Record<SourceId, number>> }) {
   const [source, setSource] = useState<SourceId>("chilecompra");
   const [query, setQuery] = useState("");
@@ -136,7 +184,28 @@ export default function CrucesSourceRecords({ counts }: { counts?: Partial<Recor
                   <td style={{ whiteSpace: "nowrap", color: "var(--text-muted)", fontSize: "0.78rem" }}>{row.occurredAt || "—"}</td>
                   <td style={{ minWidth: 220, fontWeight: 700, color: "var(--text-primary)" }}>{row.title || row.id}</td>
                   <td style={{ minWidth: 280, color: "var(--text-muted)", fontSize: "0.8rem" }}>{row.description || "Registro oficial publicado por la fuente."}</td>
-                  <td><details><summary style={{ cursor: "pointer", color: "var(--accent)", fontSize: "0.78rem" }}>Ver JSON</summary><pre style={{ maxWidth: 360, whiteSpace: "pre-wrap", fontSize: "0.68rem" }}>{JSON.stringify(row.data ?? row.evidence ?? {}, null, 2)}</pre></details></td>
+                  <td style={{ minWidth: 220 }}>
+                    <details>
+                      <summary style={{ cursor: "pointer", color: "var(--accent)", fontSize: "0.78rem", fontWeight: 700 }}>Ver detalle</summary>
+                      <dl style={{ display: "grid", gridTemplateColumns: "minmax(110px, auto) minmax(160px, 1fr)", gap: "0.35rem 0.65rem", margin: "0.65rem 0", fontSize: "0.72rem" }}>
+                        {recordFacts(row, source).map((fact) => (
+                          <div key={fact.label} style={{ display: "contents" }}>
+                            <dt style={{ color: "var(--text-muted)", fontWeight: 700 }}>{fact.label}</dt>
+                            <dd style={{ margin: 0, color: "var(--text-primary)", overflowWrap: "anywhere" }}>{fact.value}</dd>
+                          </div>
+                        ))}
+                      </dl>
+                      {sourceUrl(row) && (
+                        <a href={sourceUrl(row) ?? undefined} target="_blank" rel="noreferrer" style={{ color: "var(--accent)", fontSize: "0.72rem", fontWeight: 700 }}>
+                          Fuente oficial ↗
+                        </a>
+                      )}
+                      <details style={{ marginTop: "0.65rem" }}>
+                        <summary style={{ cursor: "pointer", color: "var(--text-muted)", fontSize: "0.68rem" }}>Ver datos técnicos</summary>
+                        <pre style={{ maxWidth: 520, maxHeight: 300, overflow: "auto", whiteSpace: "pre-wrap", fontSize: "0.64rem" }}>{JSON.stringify({ data: row.data ?? {}, evidence: row.evidence ?? {} }, null, 2)}</pre>
+                      </details>
+                    </details>
+                  </td>
                 </tr>
               ))}
             </tbody>

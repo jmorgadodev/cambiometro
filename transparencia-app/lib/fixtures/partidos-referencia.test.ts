@@ -250,7 +250,9 @@ describe("Fixture Externo Congelado: Referencia Oficial de Partidos, Transferenc
 
       const summary = getLey19862Summary();
       expect(summary.kpis.total_transfers).toBeGreaterThanOrEqual(SOURCE_CANONICAL_COUNTS["ley-19862"]);
-      expect(summary.kpis.total_receptores).toBe(14640);
+      // La Ley 19.862 es incremental: una actualización válida puede sumar
+      // receptores sin invalidar el universo canónico previamente publicado.
+      expect(summary.kpis.total_receptores).toBeGreaterThanOrEqual(14640);
     });
   });
 });
