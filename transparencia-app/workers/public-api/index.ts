@@ -135,6 +135,8 @@ interface CompactOfficialRow {
   oid?: string;
 }
 
+type CompactOfficialTokenEntry = [token: string, positions: number[]];
+
 async function r2Json<T>(bucket: R2Bucket | undefined, key: string): Promise<T | null> {
   if (!bucket) return null;
   const object = await bucket.get(key);
@@ -552,14 +554,40 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env) {
     let page = Number.isInteger(requestedPage) ? Math.max(1, Math.min(requestedPage, totalPages)) : 1;
     let rows: JsonRecord[] = [];
     if (query) {
-      const token = query.replace(/^[^a-z0-9]+/i, "");
-      const prefix = token.slice(0, 2) || "_";
-      const shardValue = index.shards?.[prefix]
-        ?? index.shards?.[prefix.charAt(0)]
-        ?? index.shards?.[prefix.toLocaleLowerCase("es-CL")];
-      const shardKeys = Array.isArray(shardValue) ? shardValue : shardValue ? [shardValue] : [];
-      const shardRows = await Promise.all(shardKeys.map((key) => r2Json<CompactOfficialRow[]>(env.PUBLIC_DATA, key)));
-      rows = shardRows.flatMap((value) => compactOfficialRows(value));
+      const queryTokens = [...new Set(query.split(/\s+/).map((value) => value.replace(/[^a-z0-9]/gi, "")).filter((value) => value.length >= 2))];
+      const tokenPositionLists = await Promise.all(queryTokens.map(async (token) => {
+        const prefix = token.slice(0, 2);
+        const shardValue = index.shards?.[prefix];
+        const shardKeys = Array.isArray(shardValue) ? shardValue : shardValue ? [shardValue] : [];
+        const shardParts = await Promise.all(shardKeys.map((key) => r2Json<CompactOfficialTokenEntry[]>(env.PUBLIC_DATA, key)));
+        if (shardParts.some((entries) => !Array.isArray(entries))) return null;
+        return [...new Set(shardParts
+          .flatMap((entries) => entries ?? [])
+          .filter((entry) => Array.isArray(entry) && typeof entry[0] === "string" && entry[0].startsWith(token) && Array.isArray(entry[1]))
+          .flatMap((entry) => entry[1])
+          .filter(Number.isInteger))].sort((left, right) => left - right);
+      }));
+      if (queryTokens.length === 0 || tokenPositionLists.some((positions) => positions === null)) {
+        return failure("DATASET_UNAVAILABLE", "Un índice nacional de búsqueda no está disponible.", 503);
+      }
+      let positions = intersectSortedPositions(tokenPositionLists as number[][]);
+      if (filterKeys.length > 0) {
+        const filterDescriptors = filterKeys.map((key) => index.filters?.[key]);
+        if (filterDescriptors.some((descriptor) => !descriptor)) {
+          return failure("DATASET_UNAVAILABLE", "Los índices nacionales de filtros aún no están publicados.", 503, { filters: filterKeys });
+        }
+        const filterPositions = await Promise.all(filterDescriptors.map((descriptor) => r2Json<number[]>(env.PUBLIC_DATA, descriptor!.key)));
+        if (filterPositions.some((values) => !Array.isArray(values))) {
+          return failure("DATASET_UNAVAILABLE", "Un índice nacional de filtros no está disponible.", 503, { filters: filterKeys });
+        }
+        positions = intersectSortedPositions([positions, ...(filterPositions as number[][])]);
+      }
+      resultTotal = positions.length;
+      totalPages = Math.max(1, Math.ceil(resultTotal / limit));
+      page = Number.isInteger(requestedPage) ? Math.max(1, Math.min(requestedPage, totalPages)) : 1;
+      const selectedRows = await officialsAtPositions(index, positions.slice((page - 1) * limit, page * limit), env);
+      if (selectedRows === null) return failure("DATASET_UNAVAILABLE", "Una página del directorio nacional no está disponible.", 503);
+      rows = selectedRows;
     } else if (filterKeys.length > 0) {
       const filterDescriptors = filterKeys.map((key) => index.filters?.[key]);
       if (filterDescriptors.some((descriptor) => !descriptor)) {
@@ -591,9 +619,12 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env) {
       const baseOffset = (firstPhysicalPage - 1) * index.pageSize;
       rows = compactOfficialRows(physicalRows.flatMap((value) => value ?? [])).slice(start - baseOffset, end - baseOffset);
     }
-    const responseUrl = query ? requestUrl : new URL(requestUrl);
-    if (!query) {
-      responseUrl.searchParams.set("page", "1");
+    const responseUrl = new URL(requestUrl);
+    responseUrl.searchParams.set("page", "1");
+    if (query) {
+      responseUrl.searchParams.delete("query");
+      responseUrl.searchParams.delete("q");
+    } else {
       responseUrl.searchParams.set("sortBy", "nombre_asc");
     }
     const response = officialsResponse(rows, responseUrl, manifest.generatedAt, "r2-search", "Todos");
@@ -608,7 +639,15 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env) {
       payload.meta = meta;
       return json(payload, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
     }
-    return response;
+    const payload = await response.json() as JsonRecord;
+    const meta = (payload.meta as JsonRecord) ?? {};
+    meta.total = resultTotal;
+    meta.totalHeadcount = index.totalRows;
+    meta.page = page;
+    meta.totalPages = totalPages;
+    meta.limit = limit;
+    payload.meta = meta;
+    return json(payload, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
   }
   const key = manifest.assets.find((asset) => asset.key === `projections/funcionarios-v1/versions/${manifest.version}/${organism}.json`)?.key;
   if (!key) return failure("DATASET_UNAVAILABLE", "No existe una nómina publicada para este organismo.", 404, { organism });
