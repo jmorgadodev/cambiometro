@@ -98,6 +98,20 @@ if (publishReleases) {
         attempts += 1;
         const result = command("gh", ["release", "upload", tag, stagedPath], true);
         if (result.status === 0) break;
+        // La subida puede haber llegado al servidor aunque la CLI reciba un
+        // error de red. Antes de reintentar, consulta el release: si el asset
+        // ya existe y conserva exactamente su digest, la operación es
+        // idempotente y se puede continuar sin duplicar la carga.
+        const alreadyExists = /already exists/i.test(result.stderr ?? "");
+        if (alreadyExists) {
+          const refreshed = command("gh", ["release", "view", tag, "--json", "assets"], true);
+          if (refreshed.status === 0) {
+            const remoteAssets = JSON.parse(refreshed.stdout).assets ?? [];
+            const remote = remoteAssets.find((item) => item.name === asset.releaseAssetName);
+            if (remote?.digest === `sha256:${asset.checksumSha256}`) break;
+            if (remote) throw new Error(`IMMUTABLE_RELEASE_CONFLICT: ${tag}/${asset.releaseAssetName}`);
+          }
+        }
         if (attempts === 3) throw new Error(`gh release upload fallo tras 3 intentos: codigo ${result.status} ${result.stderr?.trim() ? `(${result.stderr.trim()})` : ""}`);
         spawnSync(process.execPath, ["-e", "setTimeout(()=>null, 5000)"]);
       }
