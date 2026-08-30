@@ -75,6 +75,7 @@ if (oversizedR2Asset) {
 if (publishReleases) {
   if (!process.env.GH_TOKEN?.trim()) throw new Error("PUBLICATION_MISSING_SECRET: GH_TOKEN");
   const releaseStaging = mkdtempSync(join(tmpdir(), "cambiometro-releases-"));
+  const releaseVerifyRoot = mkdtempSync(join(tmpdir(), "cambiometro-release-verify-"));
   const grouped = Map.groupBy(assets, (asset) => asset.releaseTag);
   for (const [tag, releaseAssets] of grouped) {
     const releaseView = command("gh", ["release", "view", tag, "--json", "assets"], true);
@@ -93,6 +94,15 @@ if (publishReleases) {
       }
       const stagedPath = join(releaseStaging, asset.releaseAssetName);
       copyFileSync(join(outputRoot, asset.key), stagedPath);
+      const verifyRemote = () => {
+        const verifyDir = mkdtempSync(join(releaseVerifyRoot, "asset-"));
+        const downloaded = command("gh", ["release", "download", tag, "--pattern", asset.releaseAssetName, "--dir", verifyDir], true);
+        const downloadedPath = join(verifyDir, asset.releaseAssetName);
+        if (downloaded.status !== 0 || !existsSync(downloadedPath)) return false;
+        const remoteChecksum = createHash("sha256").update(readFileSync(downloadedPath)).digest("hex");
+        if (remoteChecksum !== asset.checksumSha256) throw new Error(`IMMUTABLE_RELEASE_CONFLICT: ${tag}/${asset.releaseAssetName}`);
+        return true;
+      };
       let attempts = 0;
       while (attempts < 3) {
         attempts += 1;
@@ -119,6 +129,10 @@ if (publishReleases) {
                 break;
               }
               if (remote) throw new Error(`IMMUTABLE_RELEASE_CONFLICT: ${tag}/${asset.releaseAssetName}`);
+            }
+            if (!verifiedExisting && verifyRemote()) {
+              verifiedExisting = true;
+              break;
             }
             if (check < 3) spawnSync(process.execPath, ["-e", "setTimeout(()=>null, 5000)"]);
           }
