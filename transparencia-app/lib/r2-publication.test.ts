@@ -9,6 +9,7 @@ it("no permite reemplazar assets de una Release inmutable", () => {
   const publisher = readFileSync(resolve("scripts/publish-data-lake.mjs"), "utf8");
   expect(publisher).not.toContain('"--clobber"');
   expect(publisher).toContain("IMMUTABLE_RELEASE_CONFLICT");
+  expect(publisher.indexOf("for (const key of r2Plan.deletes)")).toBeLessThan(publisher.indexOf("for (const asset of r2Plan.puts"));
 });
 
 describe("publicación caliente en R2", () => {
@@ -67,5 +68,29 @@ describe("publicación caliente en R2", () => {
       "projections/funcionarios-v1/versions/2026-08-12/search_index.json",
       "projections/funcionarios-v1/manifest.json",
     ]);
+  });
+
+  it("retiene la version anterior como rollback y elimina proyecciones historicas obsoletas", () => {
+    const prefix = "projections/funcionarios-v1/versions";
+    const plan = planR2Publication([
+      asset("projections/funcionarios-v1/manifest.json", 5, "manifest-v4"),
+      asset(`${prefix}/2026-08-30/search_index.json`, 30, "v4"),
+    ], {
+      objects: [
+        { key: `${prefix}/2026-08-13/search_index.json`, size: 30, checksumSha256: "v1" },
+        { key: `${prefix}/2026-08-15/search_index.json`, size: 30, checksumSha256: "v2" },
+        { key: `${prefix}/2026-08-26/search_index.json`, size: 30, checksumSha256: "v3" },
+        { key: "projections/otro-v1/versions/2026-08-01/data.json", size: 10, checksumSha256: "other" },
+      ],
+    }, 100);
+
+    expect(plan.deletes).toEqual([
+      `${prefix}/2026-08-13/search_index.json`,
+      `${prefix}/2026-08-15/search_index.json`,
+    ]);
+    expect(plan.inventory.objects.map((item: { key: string }) => item.key)).toContain(`${prefix}/2026-08-26/search_index.json`);
+    expect(plan.inventory.objects.map((item: { key: string }) => item.key)).toContain(`${prefix}/2026-08-30/search_index.json`);
+    expect(plan.inventory.objects.map((item: { key: string }) => item.key)).toContain("projections/otro-v1/versions/2026-08-01/data.json");
+    expect(plan.ratio).toBeLessThan(0.9);
   });
 });
