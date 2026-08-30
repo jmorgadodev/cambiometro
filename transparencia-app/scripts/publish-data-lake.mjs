@@ -104,13 +104,25 @@ if (publishReleases) {
         // idempotente y se puede continuar sin duplicar la carga.
         const alreadyExists = /already exists/i.test(result.stderr ?? "");
         if (alreadyExists) {
-          const refreshed = command("gh", ["release", "view", tag, "--json", "assets"], true);
-          if (refreshed.status === 0) {
-            const remoteAssets = JSON.parse(refreshed.stdout).assets ?? [];
-            const remote = remoteAssets.find((item) => item.name === asset.releaseAssetName);
-            if (remote?.digest === `sha256:${asset.checksumSha256}`) break;
-            if (remote) throw new Error(`IMMUTABLE_RELEASE_CONFLICT: ${tag}/${asset.releaseAssetName}`);
+          // GitHub puede confirmar el conflicto antes de hacer visible el
+          // asset en `release view`. Esperamos brevemente y consultamos varias
+          // veces para distinguir esa consistencia eventual de un conflicto
+          // real de contenido.
+          let verifiedExisting = false;
+          for (let check = 1; check <= 3; check += 1) {
+            const refreshed = command("gh", ["release", "view", tag, "--json", "assets"], true);
+            if (refreshed.status === 0) {
+              const remoteAssets = JSON.parse(refreshed.stdout).assets ?? [];
+              const remote = remoteAssets.find((item) => item.name === asset.releaseAssetName);
+              if (remote?.digest === `sha256:${asset.checksumSha256}`) {
+                verifiedExisting = true;
+                break;
+              }
+              if (remote) throw new Error(`IMMUTABLE_RELEASE_CONFLICT: ${tag}/${asset.releaseAssetName}`);
+            }
+            if (check < 3) spawnSync(process.execPath, ["-e", "setTimeout(()=>null, 5000)"]);
           }
+          if (verifiedExisting) break;
         }
         if (attempts === 3) throw new Error(`gh release upload fallo tras 3 intentos: codigo ${result.status} ${result.stderr?.trim() ? `(${result.stderr.trim()})` : ""}`);
         spawnSync(process.execPath, ["-e", "setTimeout(()=>null, 5000)"]);
