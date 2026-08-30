@@ -71,17 +71,26 @@ for (const fileName of files) {
       oid: organismId,
     };
     compactRows.push(compact);
-    const shardKeys = new Set([compact.n, compact.c, compact.o].flatMap((value) => normalizeSearch(value)
-      .split(/\s+/)
-      .map((token) => token.replace(/^[^a-z0-9]+/i, "").slice(0, 2))
-      .filter(Boolean)));
-    for (const shard of shardKeys) {
-      if (!byShard.has(shard)) byShard.set(shard, []);
-      byShard.get(shard).push(compact);
-    }
   });
 }
 compactRows.sort((left, right) => normalizeSearch(left.n).localeCompare(normalizeSearch(right.n), "es-CL") || left.id.localeCompare(right.id));
+// Índice invertido palabra -> posiciones. La versión anterior repetía cada
+// ficha completa por cada prefijo de nombre, cargo y organismo, multiplicando
+// varios GiB. Cada token se almacena una sola vez por shard y el Worker
+// intersecta sus posiciones antes de cargar sólo las fichas solicitadas.
+compactRows.forEach((row, position) => {
+  const tokens = new Set([row.n, row.c, row.o].flatMap((value) => normalizeSearch(value)
+    .split(/\s+/)
+    .map((token) => token.replace(/[^a-z0-9]/gi, ""))
+    .filter((token) => token.length >= 2)));
+  for (const token of tokens) {
+    const shard = token.slice(0, 2);
+    if (!byShard.has(shard)) byShard.set(shard, new Map());
+    const tokenMap = byShard.get(shard);
+    if (!tokenMap.has(token)) tokenMap.set(token, []);
+    tokenMap.get(token).push(position);
+  }
+});
 const searchPageSize = 10_000;
 const searchAssets = [];
 const writeGeneratedAsset = async (filePath, key) => {
@@ -100,18 +109,31 @@ for (let offset = 0; offset < compactRows.length; offset += searchPageSize) {
   await writeGeneratedAsset(filePath, pages.at(-1).key);
 }
 const shards = {};
-const searchShardSize = 25_000;
-for (const [shard, rows] of byShard) {
+const searchShardReferenceLimit = 250_000;
+for (const [shard, tokenMap] of byShard) {
   const shardKeys = [];
-  for (let offset = 0; offset < rows.length; offset += searchShardSize) {
-    const part = Math.floor(offset / searchShardSize) + 1;
+  let part = 1;
+  let entries = [];
+  let references = 0;
+  const writeShardPart = async () => {
+    if (entries.length === 0) return;
     const fileName = `${shard}-${String(part).padStart(3, "0")}.json`;
     const filePath = join(searchIndexRoot, fileName);
     const key = `projections/funcionarios-v1/versions/${version}/search_index/${fileName}`;
-    writeFileSync(filePath, `${JSON.stringify(rows.slice(offset, offset + searchShardSize))}\n`);
+    writeFileSync(filePath, `${JSON.stringify(entries)}\n`);
     shardKeys.push(key);
     await writeGeneratedAsset(filePath, key);
+    part += 1;
+    entries = [];
+    references = 0;
+  };
+  for (const entry of [...tokenMap.entries()].sort(([left], [right]) => left.localeCompare(right, "es-CL"))) {
+    const nextReferences = entry[1].length;
+    if (entries.length > 0 && references + nextReferences > searchShardReferenceLimit) await writeShardPart();
+    entries.push(entry);
+    references += nextReferences;
   }
+  await writeShardPart();
   shards[shard] = shardKeys.length === 1 ? shardKeys[0] : shardKeys;
 }
 
