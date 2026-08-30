@@ -74,6 +74,7 @@ function officialsR2Env() {
     "projections/funcionarios-v1/versions/2026-08-25/muni-maipu.json": [
       { id: "func-1", nombre_completo: "Claudio Adaros", cargo: "Analista", tipo_contrato: "Contrata", estamento: "Profesional", remuneracion_bruta_mensual: 5894314, url: "https://www.cplt.cl/" },
       { id: "func-2", nombre_completo: "Otra Persona", cargo: "Auxiliar", tipo_contrato: "Planta", estamento: "Auxiliar", remuneracion_bruta_mensual: 900000, url: "https://www.cplt.cl/" },
+      { id: "func-3", nombre_completo: "Persona Laboral", cargo: "Administrativa", tipo_contrato: "Código del Trabajo", estamento: "Administrativo", remuneracion_bruta_mensual: 1200000, url: "https://www.cplt.cl/" },
     ],
   };
   return {
@@ -114,6 +115,97 @@ describe("API canónica v1", () => {
     expect(payload.data).toHaveLength(2);
     expect(payload.meta.totalHeadcount).toBe(1203287);
     expect(payload.meta.total).toBe(1203287);
+  });
+
+  it("pagina el universo nacional de forma continua aunque R2 use bloques físicos mayores", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 6,
+        pageSize: 3,
+        pages: [
+          { page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 3 },
+          { page: 2, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0002.json", count: 3 },
+        ],
+        shards: {},
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [
+        { id: "func-1", n: "Persona 1", b: 1 },
+        { id: "func-2", n: "Persona 2", b: 2 },
+        { id: "func-3", n: "Persona 3", b: 3 },
+      ],
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0002.json": [
+        { id: "func-4", n: "Persona 4", b: 4 },
+        { id: "func-5", n: "Persona 5", b: 5 },
+        { id: "func-6", n: "Persona 6", b: 6 },
+      ],
+    };
+    const env = {
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?page=2&limit=2&include_zero=true&sortBy=nombre_asc"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.map((row: { id: string }) => row.id)).toEqual(["func-3", "func-4"]);
+    expect(payload.meta).toMatchObject({ total: 6, page: 2, totalPages: 3, limit: 2 });
+  });
+
+  it("combina filtros nacionales usando índices de posiciones sin perder filas", async () => {
+    const base = "projections/funcionarios-v1/versions/2026-08-25/search_index";
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: `${base}.json` },
+      },
+      [`${base}.json`]: {
+        schemaVersion: 1,
+        totalRows: 6,
+        pageSize: 3,
+        pages: [
+          { page: 1, key: `${base}/p-0001.json`, count: 3 },
+          { page: 2, key: `${base}/p-0002.json`, count: 3 },
+        ],
+        shards: {},
+        filters: {
+          "contrato:planta": { key: `${base}/filter-planta.json`, count: 3 },
+          "estamento:profesional": { key: `${base}/filter-profesional.json`, count: 4 },
+          "cargo:alcalde": { key: `${base}/filter-alcalde.json`, count: 2 },
+        },
+      },
+      [`${base}/p-0001.json`]: [
+        { id: "func-1", n: "Persona 1", c: "Alcaldesa", t: "Planta", e: "Profesional", b: 1 },
+        { id: "func-2", n: "Persona 2", t: "Contrata", e: "Profesional", b: 2 },
+        { id: "func-3", n: "Persona 3", t: "Planta", e: "Auxiliar", b: 3 },
+      ],
+      [`${base}/p-0002.json`]: [
+        { id: "func-4", n: "Persona 4", c: "Alcalde", t: "Planta", e: "Profesional", b: 4 },
+        { id: "func-5", n: "Persona 5", t: "Contrata", e: "Profesional", b: 5 },
+        { id: "func-6", n: "Persona 6", t: "Honorarios", e: "Auxiliar", b: 6 },
+      ],
+      [`${base}/filter-planta.json`]: [0, 2, 3],
+      [`${base}/filter-profesional.json`]: [0, 1, 3, 4],
+      [`${base}/filter-alcalde.json`]: [0, 3],
+    };
+    const env = {
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?contrato=Planta&estamento=Profesional&cargo=alcalde&page=1&limit=20&include_zero=true&sortBy=nombre_asc"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.map((row: { id: string }) => row.id)).toEqual(["func-1", "func-4"]);
+    expect(payload.meta).toMatchObject({ total: 2, page: 1, totalPages: 1, limit: 20 });
   });
 
   it("consulta todos los fragmentos de un shard nacional dividido", async () => {
@@ -388,6 +480,16 @@ describe("API canónica v1", () => {
     expect(payload.meta.sourceStatus).toBe("r2");
     expect(payload.meta.total).toBe(1);
     expect(payload.data[0].nombre_completo).toBe("Claudio Adaros");
+  });
+
+  it("normaliza Código del Trabajo al aplicar el filtro contractual", async () => {
+    const request = new Request("https://example.test/api/funcionarios?muni=muni-maipu&contrato=CodigoTrabajo&include_zero=true&limit=10");
+    const response = await api.fetch(request, officialsR2Env());
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.total).toBe(1);
+    expect(payload.data[0].id).toBe("func-3");
   });
 
   it("ofrece la descarga segmentada del bloque consultado", async () => {

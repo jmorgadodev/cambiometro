@@ -113,6 +113,7 @@ interface OfficialsSearchIndex {
   pageSize: number;
   pages: Array<{ page: number; key: string; count: number }>;
   shards: Record<string, string | string[]>;
+  filters?: Record<string, { key: string; count: number }>;
 }
 
 interface CompactOfficialRow {
@@ -308,6 +309,18 @@ function normalized(value: unknown) {
   return String(value ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL").trim();
 }
 
+function compactNormalized(value: unknown) {
+  return normalized(value).replace(/[^a-z0-9]/g, "");
+}
+
+function canonicalContract(value: unknown) {
+  return compactNormalized(value).replace("codigodeltrabajo", "codigotrabajo");
+}
+
+function canonicalOrgType(value: unknown) {
+  return compactNormalized(value).replace("gobiernoregional", "gore");
+}
+
 function officialSalary(row: JsonRecord) {
   const value = Number(row.remuneracion_bruta_mensual ?? 0);
   return Number.isFinite(value) ? value : 0;
@@ -325,14 +338,23 @@ function officialsResponse(rows: JsonRecord[], requestUrl: URL, generatedAt: str
   const maxSalary = requestUrl.searchParams.get("max_sueldo") ? Number(requestUrl.searchParams.get("max_sueldo")) : undefined;
   const period = requestUrl.searchParams.get("periodo") ?? requestUrl.searchParams.get("fuente_periodo") ?? "Todos";
   const type = normalized(requestUrl.searchParams.get("tipo") ?? "Todos");
+  const position = normalized(requestUrl.searchParams.get("cargo") ?? "Todos");
   const allRecords = period !== "Todos" ? rows.filter((row) => String(row.fuente_periodo ?? row.periodo ?? "") === period) : rows;
   const withoutPayment = allRecords.filter((row) => officialSalary(row) <= 0);
   const microAmount = allRecords.filter((row) => officialSalary(row) > 0 && officialSalary(row) < 50_000);
   const completeSalary = allRecords.filter((row) => officialSalary(row) >= 50_000);
   let filtered = includeZero ? [...allRecords] : onlyAnomalies ? [...microAmount] : allRecords.filter((row) => officialSalary(row) > 0);
   if (query) filtered = filtered.filter((row) => normalized(`${row.nombre_completo ?? ""} ${row.cargo ?? ""} ${row.organo_nombre ?? ""} ${row.formacion ?? ""}`).includes(query));
-  if (type && type !== "todos") filtered = filtered.filter((row) => normalized(row.organo_tipo).includes(type));
-  if (contract !== "Todos") filtered = filtered.filter((row) => normalized(row.tipo_contrato).includes(normalized(contract)));
+  if (type && type !== "todos") filtered = filtered.filter((row) => canonicalOrgType(row.organo_tipo).includes(canonicalOrgType(type)));
+  if (position && position !== "todos") {
+    filtered = filtered.filter((row) => position === "alcalde"
+      ? /^(alcalde|alcaldesa)(\s|$)/.test(normalized(row.cargo))
+      : normalized(row.cargo).includes(position));
+  }
+  if (contract !== "Todos") {
+    const contractKey = canonicalContract(contract);
+    filtered = filtered.filter((row) => canonicalContract(row.tipo_contrato).includes(contractKey));
+  }
   if (estamento && estamento !== "todos") filtered = filtered.filter((row) => normalized(row.estamento).includes(estamento));
   if (soloHorasExtras) filtered = filtered.filter((row) => Number(row.horas_extras_mes_anterior ?? 0) > 0);
   if (Number.isFinite(minSalary)) filtered = filtered.filter((row) => officialSalary(row) >= Number(minSalary));
@@ -346,7 +368,7 @@ function officialsResponse(rows: JsonRecord[], requestUrl: URL, generatedAt: str
   });
   const pageValue = Number(requestUrl.searchParams.get("page") ?? 1);
   const limitValue = Number(requestUrl.searchParams.get("limit") ?? 20);
-  const page = Number.isInteger(pageValue) ? Math.max(1, Math.min(pageValue, 1_000)) : 1;
+  const page = Number.isInteger(pageValue) ? Math.max(1, Math.min(pageValue, 100_000)) : 1;
   const limit = Number.isInteger(limitValue) ? Math.max(1, Math.min(limitValue, 100)) : 20;
   const validSalary = completeSalary.reduce((sum, row) => sum + officialSalary(row), 0);
   const total = filtered.length;
@@ -386,6 +408,7 @@ function compactOfficialRow(row: CompactOfficialRow): JsonRecord {
     nombre_completo: row.n ?? "",
     cargo: row.c ?? "",
     organo_nombre: row.o ?? row.oid ?? "",
+    organo_id: row.oid ?? "",
     organo_tipo: row.ot ?? "",
     tipo_contrato: row.t ?? "",
     estamento: row.e ?? "",
@@ -406,6 +429,59 @@ function compactOfficialRows(value: unknown): JsonRecord[] {
   return value.map((row) => compactOfficialRow(row as CompactOfficialRow));
 }
 
+function officialFilterKeys(requestUrl: URL) {
+  const keys: string[] = [];
+  const values = [
+    ["contrato", requestUrl.searchParams.get("contrato") ?? "Todos"],
+    ["estamento", requestUrl.searchParams.get("estamento") ?? "Todos"],
+    ["tipo", requestUrl.searchParams.get("tipo") ?? "Todos"],
+    ["cargo", requestUrl.searchParams.get("cargo") ?? "Todos"],
+  ];
+  for (const [name, value] of values) {
+    const normalizedValue = normalized(value);
+    if (normalizedValue && normalizedValue !== "todos") keys.push(`${name}:${normalizedValue}`);
+  }
+  if (requestUrl.searchParams.get("horas_extras") === "true" || requestUrl.searchParams.get("soloHorasExtras") === "true") {
+    keys.push("horas_extras:true");
+  }
+  return keys;
+}
+
+function intersectSortedPositions(lists: number[][]) {
+  if (lists.length === 0) return [];
+  return [...lists].sort((left, right) => left.length - right.length).reduce((left, right) => {
+    const intersection: number[] = [];
+    let leftIndex = 0;
+    let rightIndex = 0;
+    while (leftIndex < left.length && rightIndex < right.length) {
+      if (left[leftIndex] === right[rightIndex]) {
+        intersection.push(left[leftIndex]);
+        leftIndex += 1;
+        rightIndex += 1;
+      } else if (left[leftIndex] < right[rightIndex]) {
+        leftIndex += 1;
+      } else {
+        rightIndex += 1;
+      }
+    }
+    return intersection;
+  });
+}
+
+async function officialsAtPositions(index: OfficialsSearchIndex, positions: number[], env: Env) {
+  if (positions.length === 0) return [];
+  const physicalPages = [...new Set(positions.map((position) => Math.floor(position / index.pageSize) + 1))];
+  const loaded = await Promise.all(physicalPages.map(async (pageNumber) => {
+    const page = index.pages.find((item) => item.page === pageNumber);
+    if (!page) return null;
+    const rows = await r2Json<CompactOfficialRow[]>(env.PUBLIC_DATA, page.key);
+    return rows ? [pageNumber, rows] as const : null;
+  }));
+  if (loaded.some((entry) => entry === null)) return null;
+  const byPage = new Map(loaded.filter((entry): entry is readonly [number, CompactOfficialRow[]] => entry !== null));
+  return compactOfficialRows(positions.map((position) => byPage.get(Math.floor(position / index.pageSize) + 1)?.[position % index.pageSize]).filter(Boolean));
+}
+
 async function listFuncionariosFromD1(requestUrl: URL, env: Env): Promise<Response | null> {
   if (!env.DB) return null;
   const limit = limitFrom(requestUrl);
@@ -417,6 +493,7 @@ async function listFuncionariosFromD1(requestUrl: URL, env: Env): Promise<Respon
   const contract = requestUrl.searchParams.get("contrato") ?? "Todos";
   const estamento = requestUrl.searchParams.get("estamento") ?? "Todos";
   const type = requestUrl.searchParams.get("tipo") ?? "Todos";
+  const position = normalized(requestUrl.searchParams.get("cargo") ?? "Todos");
   const clauses: string[] = [];
   const bindings: (string | number)[] = [];
   if (organism !== "Todos") { clauses.push("organo_id = ?"); bindings.push(organism); }
@@ -424,6 +501,10 @@ async function listFuncionariosFromD1(requestUrl: URL, env: Env): Promise<Respon
   if (contract !== "Todos") { clauses.push("tipo_contrato = ?"); bindings.push(contract); }
   if (estamento !== "Todos") { clauses.push("estamento LIKE ? COLLATE NOCASE"); bindings.push(`%${estamento.replace(/[%_]/g, "")}%`); }
   if (type !== "Todos") { clauses.push("organo_tipo LIKE ? COLLATE NOCASE"); bindings.push(`%${type.replace(/[%_]/g, "")}%`); }
+  if (position && position !== "todos") {
+    if (position === "alcalde") clauses.push("(LOWER(cargo) = 'alcalde' OR LOWER(cargo) = 'alcaldesa' OR LOWER(cargo) LIKE 'alcalde %' OR LOWER(cargo) LIKE 'alcaldesa %')");
+    else { clauses.push("cargo LIKE ? COLLATE NOCASE"); bindings.push(`%${position.replace(/[%_]/g, "")}%`); }
+  }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
   const order = requestUrl.searchParams.get("sortBy") === "nombre_asc" ? "nombre_completo ASC, id ASC" : requestUrl.searchParams.get("sortBy") === "nombre_desc" ? "nombre_completo DESC, id DESC" : "remuneracion_bruta_mensual DESC, id ASC";
   try {
@@ -463,7 +544,12 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env) {
     if (!index?.pages?.length || !Number.isInteger(index.totalRows)) return failure("DATASET_UNAVAILABLE", "La búsqueda nacional no está publicada temporalmente.", 503);
     const query = normalized(requestUrl.searchParams.get("query") ?? requestUrl.searchParams.get("q"));
     const requestedPage = Number(requestUrl.searchParams.get("page") ?? 1);
-    const page = Number.isInteger(requestedPage) ? Math.max(1, Math.min(requestedPage, index.pages.length)) : 1;
+    const requestedLimit = Number(requestUrl.searchParams.get("limit") ?? 20);
+    const limit = Number.isInteger(requestedLimit) ? Math.max(1, Math.min(requestedLimit, 100)) : 20;
+    const filterKeys = officialFilterKeys(requestUrl);
+    let resultTotal = index.totalRows;
+    let totalPages = Math.max(1, Math.ceil(resultTotal / limit));
+    let page = Number.isInteger(requestedPage) ? Math.max(1, Math.min(requestedPage, totalPages)) : 1;
     let rows: JsonRecord[] = [];
     if (query) {
       const token = query.replace(/^[^a-z0-9]+/i, "");
@@ -474,18 +560,51 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env) {
       const shardKeys = Array.isArray(shardValue) ? shardValue : shardValue ? [shardValue] : [];
       const shardRows = await Promise.all(shardKeys.map((key) => r2Json<CompactOfficialRow[]>(env.PUBLIC_DATA, key)));
       rows = shardRows.flatMap((value) => compactOfficialRows(value));
+    } else if (filterKeys.length > 0) {
+      const filterDescriptors = filterKeys.map((key) => index.filters?.[key]);
+      if (filterDescriptors.some((descriptor) => !descriptor)) {
+        return failure("DATASET_UNAVAILABLE", "Los índices nacionales de filtros aún no están publicados.", 503, { filters: filterKeys });
+      }
+      const positionLists = await Promise.all(filterDescriptors.map((descriptor) => r2Json<number[]>(env.PUBLIC_DATA, descriptor!.key)));
+      if (positionLists.some((positions) => !Array.isArray(positions))) {
+        return failure("DATASET_UNAVAILABLE", "Un índice nacional de filtros no está disponible.", 503, { filters: filterKeys });
+      }
+      const positions = intersectSortedPositions(positionLists as number[][]);
+      resultTotal = positions.length;
+      totalPages = Math.max(1, Math.ceil(resultTotal / limit));
+      page = Number.isInteger(requestedPage) ? Math.max(1, Math.min(requestedPage, totalPages)) : 1;
+      const selected = positions.slice((page - 1) * limit, page * limit);
+      const selectedRows = await officialsAtPositions(index, selected, env);
+      if (selectedRows === null) return failure("DATASET_UNAVAILABLE", "Una página del directorio nacional no está disponible.", 503);
+      rows = selectedRows;
     } else {
-      const pageKey = index.pages.find((item) => item.page === page)?.key;
-      if (pageKey) rows = compactOfficialRows(await r2Json<CompactOfficialRow[]>(env.PUBLIC_DATA, pageKey));
+      // Las páginas físicas de R2 contienen hasta 10.000 filas, mientras que
+      // la API expone páginas pequeñas. Traducimos el offset público al rango
+      // físico correspondiente para no saltar miles de registros entre una
+      // página y la siguiente.
+      const start = (page - 1) * limit;
+      const end = Math.min(start + limit, index.totalRows);
+      const firstPhysicalPage = Math.floor(start / index.pageSize) + 1;
+      const lastPhysicalPage = Math.floor(Math.max(start, end - 1) / index.pageSize) + 1;
+      const physicalPages = index.pages.filter((item) => item.page >= firstPhysicalPage && item.page <= lastPhysicalPage);
+      const physicalRows = await Promise.all(physicalPages.map((item) => r2Json<CompactOfficialRow[]>(env.PUBLIC_DATA, item.key)));
+      const baseOffset = (firstPhysicalPage - 1) * index.pageSize;
+      rows = compactOfficialRows(physicalRows.flatMap((value) => value ?? [])).slice(start - baseOffset, end - baseOffset);
     }
-    const response = officialsResponse(rows, requestUrl, manifest.generatedAt, "r2-search", "Todos");
-    if (!query && rows.length > 0) {
+    const responseUrl = query ? requestUrl : new URL(requestUrl);
+    if (!query) {
+      responseUrl.searchParams.set("page", "1");
+      responseUrl.searchParams.set("sortBy", "nombre_asc");
+    }
+    const response = officialsResponse(rows, responseUrl, manifest.generatedAt, "r2-search", "Todos");
+    if (!query) {
       const payload = await response.json() as JsonRecord;
       const meta = (payload.meta as JsonRecord) ?? {};
-      meta.total = index.totalRows;
+      meta.total = resultTotal;
       meta.totalHeadcount = index.totalRows;
       meta.page = page;
-      meta.totalPages = index.pages.length;
+      meta.totalPages = totalPages;
+      meta.limit = limit;
       payload.meta = meta;
       return json(payload, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
     }

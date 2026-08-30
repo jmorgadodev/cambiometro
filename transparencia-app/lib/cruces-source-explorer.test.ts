@@ -15,4 +15,12 @@ describe("explorador de registros de Cruces", () => {
     expect(client).toContain("ChileCompra");
     expect(client).toContain("InfoLobby");
   });
+
+  it("explica cada registro con campos legibles y conserva la evidencia oficial", () => {
+    expect(client).toContain("recordFacts");
+    expect(client).toContain("Fuente oficial");
+    expect(client).toContain("Ver datos técnicos");
+    expect(client).toContain("Sujeto pasivo");
+    expect(client).toContain("Número de informe");
+  });
 });

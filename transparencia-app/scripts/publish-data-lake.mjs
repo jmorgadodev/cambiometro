@@ -53,6 +53,7 @@ const bucketIndex = process.argv.indexOf("--bucket");
 const bucket = bucketIndex >= 0 ? process.argv[bucketIndex + 1] : "transparencia-public-data";
 const publishReleases = process.argv.includes("--releases");
 const publishR2 = process.argv.includes("--r2");
+const releaseManifestsOnly = process.argv.includes("--release-manifests-only");
 const allowLocalAuth = process.argv.includes("--local-auth") && !process.env.CI;
 if (!publishReleases && !publishR2) throw new Error("Indica --releases, --r2 o ambos");
 
@@ -76,7 +77,9 @@ if (publishReleases) {
   if (!process.env.GH_TOKEN?.trim()) throw new Error("PUBLICATION_MISSING_SECRET: GH_TOKEN");
   const releaseStaging = mkdtempSync(join(tmpdir(), "cambiometro-releases-"));
   const releaseVerifyRoot = mkdtempSync(join(tmpdir(), "cambiometro-release-verify-"));
-  const grouped = Map.groupBy(assets, (asset) => asset.releaseTag);
+  const releaseCatalog = releaseManifestsOnly ? assets.filter((asset) => asset.key.endsWith("/manifest.json")) : assets;
+  if (releaseCatalog.length === 0) throw new Error("PUBLICATION_RELEASE_MANIFEST_MISSING");
+  const grouped = Map.groupBy(releaseCatalog, (asset) => asset.releaseTag);
   for (const [tag, releaseAssets] of grouped) {
     const releaseView = command("gh", ["release", "view", tag, "--json", "assets"], true);
     let existingAssets = new Map();

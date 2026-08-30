@@ -97,6 +97,29 @@ jobs:
         working-directory: transparencia-app
         run: npm run data:finalize:cplt
 
+      - name: Archivar catálogo de checksums en GitHub Releases
+        id: archive_release
+        continue-on-error: true
+        timeout-minutes: 5
+        working-directory: transparencia-app
+        run: npm run data:archive:cplt
+
+      - name: Informar estado del archivo secundario
+        if: always()
+        shell: bash
+        run: |
+          if [ "${{ steps.archive_release.outcome }}" = "failure" ]; then
+            echo "::warning::Archivo GitHub Releases no crítico falló; R2 ya fue validado y activado como fuente productiva."
+            {
+              echo "### Archivo GitHub Releases no crítico"
+              echo "- Estado: advertencia"
+              echo "- La publicación canónica R2 y el registro de estado CPLT terminaron antes de este respaldo."
+              echo "- El sitio y Pages pueden continuar usando el snapshot validado de R2."
+            } >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "### Archivo GitHub Releases no crítico: completado" >> "$GITHUB_STEP_SUMMARY"
+          fi
+
       - name: Recuperar proyecciones estáticas vigentes para reconstruir agregados
         working-directory: transparencia-app
         env:

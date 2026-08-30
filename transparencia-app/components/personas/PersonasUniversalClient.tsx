@@ -71,6 +71,7 @@ interface PersonasUniversalClientProps {
   autoridades: AutoridadItem[];
   organismos: OrganismoOption[];
   totalFuncionariosEstimados?: number;
+  totalMunicipalidades?: number;
 }
 
 function formatCLP(n?: number | null) {
@@ -128,6 +129,7 @@ export default function PersonasUniversalClient({
   autoridades,
   organismos,
   totalFuncionariosEstimados = 1203287,
+  totalMunicipalidades = 346,
 }: PersonasUniversalClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -138,6 +140,7 @@ export default function PersonasUniversalClient({
   const activeTab: PersonaTab = (rawTab && ["parlamentarios", "alcaldes", "autoridades", "funcionarios"].includes(rawTab))
     ? rawTab
     : "parlamentarios";
+  const isCpltDirectoryTab = activeTab === "funcionarios" || activeTab === "alcaldes";
 
   // Search & Filters
   const [search, setSearch] = useState(() => searchParams.get("search") || "");
@@ -150,7 +153,10 @@ export default function PersonasUniversalClient({
   const [soloHorasExtras, setSoloHorasExtras] = useState(() => searchParams.get("extras") === "true");
   const [partidoFilter, setPartidoFilter] = useState(() => searchParams.get("partido") || "Todos");
   const [regionFilter, setRegionFilter] = useState(() => searchParams.get("region") || "Todas");
-  const [sortFuncionarios, setSortFuncionarios] = useState(() => searchParams.get("sort") || "sueldo_desc");
+  // El índice nacional de R2 está ordenado alfabéticamente para permitir
+  // recorrer el universo completo sin cargarlo en memoria. Los órdenes por
+  // remuneración se aplican cuando se acota a un organismo.
+  const [sortFuncionarios, setSortFuncionarios] = useState(() => searchParams.get("sort") || "nombre_asc");
   const [viewMode, setViewMode] = useState<"cards" | "table">(() => (searchParams.get("view") as "cards" | "table") || "cards");
   const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
 
@@ -227,8 +233,9 @@ export default function PersonasUniversalClient({
       const nextRegion = opts.region !== undefined ? opts.region : regionFilter;
       if (nextRegion !== "Todas") params.set("region", nextRegion);
 
-      const nextSort = opts.sort !== undefined ? opts.sort : sortFuncionarios;
-      if (nextSort !== "sueldo_desc") params.set("sort", nextSort);
+      const requestedSort = opts.sort !== undefined ? opts.sort : sortFuncionarios;
+      const nextSort = nextOrg === "Todos" ? "nombre_asc" : requestedSort;
+      if (nextSort !== "nombre_asc") params.set("sort", nextSort);
 
       const nextView = opts.view !== undefined ? opts.view : viewMode;
       if (nextView !== "cards") params.set("view", nextView);
@@ -241,9 +248,11 @@ export default function PersonasUniversalClient({
     [activeTab, search, tipoFilter, organismoFilter, contratoFilter, estamentoFilter, soloHorasExtras, partidoFilter, regionFilter, sortFuncionarios, viewMode, page, router, pathname]
   );
 
-  // Fetch Funcionarios cuando la pestaña activa es "funcionarios"
+  // La nómina nacional de CPLT alimenta tanto el directorio completo como la
+  // vista de alcaldes. Así no se limita esta última a los dos nombres que
+  // también están enriquecidos en las fichas municipales estáticas.
   useEffect(() => {
-    if (activeTab !== "funcionarios") return;
+    if (!isCpltDirectoryTab) return;
     let isMounted = true;
     const controller = new AbortController();
     const timer = setTimeout(() => {
@@ -252,15 +261,22 @@ export default function PersonasUniversalClient({
 
       const params = new URLSearchParams();
       if (debouncedSearch) params.set("query", debouncedSearch);
-      if (organismoFilter !== "Todos") params.set("muni", organismoFilter);
-      if (tipoFilter !== "Todos") params.set("tipo", tipoFilter);
-      if (contratoFilter !== "Todos") params.set("contrato", contratoFilter);
-      if (estamentoFilter !== "Todos") params.set("estamento", estamentoFilter);
-      if (soloHorasExtras) params.set("horas_extras", "true");
+      if (activeTab === "alcaldes") {
+        params.set("cargo", "alcalde");
+        params.set("tipo", "Municipalidad");
+      } else {
+        if (organismoFilter !== "Todos") params.set("muni", organismoFilter);
+        if (tipoFilter !== "Todos") params.set("tipo", tipoFilter);
+      }
+      if (activeTab === "funcionarios") {
+        if (contratoFilter !== "Todos") params.set("contrato", contratoFilter);
+        if (estamentoFilter !== "Todos") params.set("estamento", estamentoFilter);
+        if (soloHorasExtras) params.set("horas_extras", "true");
+      }
       // El directorio debe mostrar también las filas nominales sin pago
       // informado; son registros oficiales y no deben desaparecer del total.
       params.set("include_zero", "true");
-      params.set("sortBy", sortFuncionarios);
+      params.set("sortBy", activeTab === "alcaldes" || organismoFilter === "Todos" ? "nombre_asc" : sortFuncionarios);
       params.set("page", String(page));
       params.set("limit", String(ITEMS_PER_PAGE));
 
@@ -301,7 +317,7 @@ export default function PersonasUniversalClient({
       clearTimeout(timer);
       controller.abort();
     };
-  }, [activeTab, debouncedSearch, organismoFilter, tipoFilter, contratoFilter, estamentoFilter, soloHorasExtras, sortFuncionarios, page, funcionariosRetry]);
+  }, [activeTab, isCpltDirectoryTab, debouncedSearch, organismoFilter, tipoFilter, contratoFilter, estamentoFilter, soloHorasExtras, sortFuncionarios, page, funcionariosRetry]);
 
   // Handle Tab Switch
   const handleTabChange = (newTab: PersonaTab) => {
@@ -401,7 +417,7 @@ export default function PersonasUniversalClient({
     activeTab === "parlamentarios"
       ? filteredParlamentarios.length
       : activeTab === "alcaldes"
-      ? filteredAlcaldes.length
+      ? funcionariosTotal
       : activeTab === "autoridades"
       ? filteredAutoridades.length
       : funcionariosTotal;
@@ -450,8 +466,8 @@ export default function PersonasUniversalClient({
                   <div style={{ fontSize: "0.68rem", color: "var(--text-3)", fontWeight: 600 }}>Parlamentarios</div>
                 </div>
                 <div style={{ textAlign: "center", padding: "0 0.5rem", borderLeft: "1px solid var(--border)" }}>
-                  <div style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--text-1)" }}>{alcaldes.length}</div>
-                  <div style={{ fontSize: "0.68rem", color: "var(--text-3)", fontWeight: 600 }}>Alcaldes</div>
+                  <div style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--text-1)" }}>{totalMunicipalidades}</div>
+                  <div style={{ fontSize: "0.68rem", color: "var(--text-3)", fontWeight: 600 }}>Comunas cubiertas</div>
                 </div>
                 <div style={{ textAlign: "center", padding: "0 0.5rem", borderLeft: "1px solid var(--border)" }}>
                   <div style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--text-1)" }}>{autoridades.length}</div>
@@ -468,7 +484,7 @@ export default function PersonasUniversalClient({
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", borderBottom: "1px solid var(--border)", paddingBottom: "0.5rem" }}>
               {[
                 { id: "parlamentarios" as PersonaTab, label: "🏛️ Parlamentarios", count: String(parlamentarios.length) },
-                { id: "alcaldes" as PersonaTab, label: "🏙️ Alcaldes", count: String(alcaldes.length) },
+                { id: "alcaldes" as PersonaTab, label: "🏙️ Alcaldes", count: activeTab === "alcaldes" && funcionariosTotal > 0 ? funcionariosTotal.toLocaleString("es-CL") : "CPLT" },
                 { id: "autoridades" as PersonaTab, label: "⚖️ Altas autoridades DIP", count: String(autoridades.length) },
                 { id: "funcionarios" as PersonaTab, label: "📋 Funcionarios", count: "CPLT" },
               ].map((t) => {
@@ -626,29 +642,7 @@ export default function PersonasUniversalClient({
             )}
 
             {activeTab === "alcaldes" && (
-              <select
-                value={regionFilter}
-                onChange={(e) => {
-                  setRegionFilter(e.target.value);
-                  setPage(1);
-                  syncUrl({ region: e.target.value, page: 1 });
-                }}
-                style={{
-                  padding: "0.6rem 0.8rem",
-                  background: "var(--surface-2)",
-                  border: "1px solid var(--border)",
-                  borderRadius: 8,
-                  fontSize: "0.85rem",
-                  color: "var(--text-1)",
-                }}
-              >
-                <option value="Todas">Todas las regiones de Chile</option>
-                {uniqueRegiones.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </select>
+              <span className="badge badge-info">Nómina nacional CPLT · 346 comunas con cobertura declarada</span>
             )}
 
             {activeTab === "autoridades" && (
@@ -827,7 +821,7 @@ export default function PersonasUniversalClient({
               <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                 <span style={{ color: "var(--text-3)", fontWeight: 600 }}>Ordenar:</span>
                 <select
-                  value={sortFuncionarios}
+                  value={organismoFilter === "Todos" ? "nombre_asc" : sortFuncionarios}
                   onChange={(e) => {
                     setSortFuncionarios(e.target.value);
                     setPage(1);
@@ -841,7 +835,7 @@ export default function PersonasUniversalClient({
                     color: "var(--text-1)",
                   }}
                 >
-                  {SORTS_FUNCIONARIOS.map((s) => (
+                  {SORTS_FUNCIONARIOS.filter((s) => organismoFilter !== "Todos" || s.id === "nombre_asc").map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.label}
                     </option>
@@ -877,9 +871,9 @@ export default function PersonasUniversalClient({
               ? "altas autoridades institucionales"
               : "registros laborales oficiales"}
           </div>
-          {activeTab === "funcionarios" && (
+          {isCpltDirectoryTab && (
             <a
-              href={`/api/v1/export?dataset=funcionarios&format=csv&page=${page}&limit=${ITEMS_PER_PAGE}${debouncedSearch ? `&query=${encodeURIComponent(debouncedSearch)}` : ""}${organismoFilter !== "Todos" ? `&muni=${encodeURIComponent(organismoFilter)}` : ""}${contratoFilter !== "Todos" ? `&contrato=${encodeURIComponent(contratoFilter)}` : ""}${estamentoFilter !== "Todos" ? `&estamento=${encodeURIComponent(estamentoFilter)}` : ""}`}
+              href={`/api/v1/export?dataset=funcionarios&format=csv&page=${page}&limit=${ITEMS_PER_PAGE}${activeTab === "alcaldes" ? "&cargo=alcalde&tipo=Municipalidad" : ""}${debouncedSearch ? `&query=${encodeURIComponent(debouncedSearch)}` : ""}${activeTab === "funcionarios" && organismoFilter !== "Todos" ? `&muni=${encodeURIComponent(organismoFilter)}` : ""}${activeTab === "funcionarios" && contratoFilter !== "Todos" ? `&contrato=${encodeURIComponent(contratoFilter)}` : ""}${activeTab === "funcionarios" && estamentoFilter !== "Todos" ? `&estamento=${encodeURIComponent(estamentoFilter)}` : ""}`}
               className="btn btn-secondary btn-sm"
               download
               style={{ fontSize: "0.75rem" }}
@@ -1109,7 +1103,7 @@ export default function PersonasUniversalClient({
         {/* ========================================================================= */}
         {/* TAB 2: ALCALDES */}
         {/* ========================================================================= */}
-        {activeTab === "alcaldes" && (
+        {activeTab === "alcaldes" && funcionariosError !== null && (
           <>
             {viewMode === "cards" ? (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem" }}>
@@ -1356,7 +1350,7 @@ export default function PersonasUniversalClient({
         {/* ========================================================================= */}
         {/* TAB 4: FUNCIONARIOS */}
         {/* ========================================================================= */}
-        {activeTab === "funcionarios" && (
+        {isCpltDirectoryTab && !(activeTab === "alcaldes" && funcionariosError !== null) && (
           <>
             {funcionariosLoading ? (
               viewMode === "cards" ? (
@@ -1372,11 +1366,13 @@ export default function PersonasUniversalClient({
               <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 16, padding: "3rem", textAlign: "center" }}>
                 <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>🔍</div>
                 <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--text-1)", margin: "0 0 0.5rem" }}>
-                  {funcionariosError ? "No se pudo consultar el directorio" : "No se encontraron funcionarios"}
+                  {funcionariosError ? "No se pudo consultar el directorio" : activeTab === "alcaldes" ? "No se encontraron alcaldes en la nómina publicada" : "No se encontraron funcionarios"}
                 </h3>
                 <p style={{ fontSize: "0.85rem", color: "var(--text-3)", maxWidth: 420, margin: "0 auto 1.5rem" }}>
                   {funcionariosError
                     ? funcionariosError
+                    : activeTab === "alcaldes"
+                    ? "Prueba con otro nombre o comuna. Esta vista consulta cargos de alcalde y alcaldesa publicados por CPLT."
                     : "Prueba cambiando los filtros de organismo, tipo, contrato o término de búsqueda."}
                 </p>
                 <button

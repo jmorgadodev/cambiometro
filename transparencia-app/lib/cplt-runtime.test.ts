@@ -5,8 +5,14 @@ import { describe, expect, it } from "vitest";
 describe("consulta runtime de funcionarios", () => {
   it("lee particiones por organismo y un índice nacional paginado", () => {
     const route = readFileSync(resolve(process.cwd(), "workers/public-api/index.ts"), "utf8");
+    const publisher = readFileSync(resolve(process.cwd(), "scripts/publish-cplt-projections.mjs"), "utf8");
     expect(route).toContain("search_index.json");
     expect(route).toContain("searchIndex");
+    expect(route).toContain("intersectSortedPositions");
+    expect(publisher).toContain("filterDefinitions");
+    expect(publisher).toContain('"horas_extras:true"');
+    expect(publisher).toContain('"cargo:alcalde"');
+    expect(route).toContain('requestUrl.searchParams.get("cargo")');
     expect(route).toContain("LIMIT ?");
   });
 

@@ -20,6 +20,16 @@ describe("automatizacion CPLT nacional", () => {
     expect(packageJson).toContain("record-cplt-source-state.mjs --remote");
   });
 
+  it("no bloquea R2 ni Pages cuando falla el archivo secundario de GitHub Releases", () => {
+    const packageJson = readFileSync(resolve(process.cwd(), "package.json"), "utf8");
+    expect(packageJson).toContain('"data:finalize:cplt": "node scripts/merge-cplt-category-artifacts.mjs && node scripts/publish-cplt-projections.mjs --r2 && node scripts/record-cplt-source-state.mjs --remote"');
+    expect(packageJson).toContain('"data:archive:cplt": "node scripts/publish-data-lake.mjs --output data/lake-cplt --releases --release-manifests-only"');
+    expect(readFileSync(resolve(process.cwd(), "scripts/publish-data-lake.mjs"), "utf8")).toContain("releaseManifestsOnly ? assets.filter");
+    expect(workflow).toContain("npm run data:archive:cplt");
+    expect(workflow).toContain("continue-on-error: true");
+    expect(workflow).toContain("Archivo GitHub Releases no crítico");
+  });
+
   it("limita la proyeccion a administraciones municipales", () => {
     const etl = readFileSync(resolve(process.cwd(), "scripts/etl/stream-remote-personal.mjs"), "utf8");
     expect(etl).toContain("municipalidad\\b|^municipio");
