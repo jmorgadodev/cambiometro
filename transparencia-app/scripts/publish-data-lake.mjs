@@ -129,7 +129,10 @@ if (publishReleases) {
           // veces para distinguir esa consistencia eventual de un conflicto
           // real de contenido.
           let verifiedExisting = false;
-          for (let check = 1; check <= 3; check += 1) {
+          // El endpoint de upload puede reservar el nombre antes de que el
+          // asset aparezca en los endpoints de lectura. Esperamos hasta dos
+          // minutos antes de declarar la publicación fallida.
+          for (let check = 1; check <= 12; check += 1) {
             const refreshed = command("gh", ["release", "view", tag, "--json", "assets"], true);
             if (refreshed.status === 0) {
               const remoteAssets = JSON.parse(refreshed.stdout).assets ?? [];
@@ -144,7 +147,7 @@ if (publishReleases) {
               verifiedExisting = true;
               break;
             }
-            if (check < 3) spawnSync(process.execPath, ["-e", "setTimeout(()=>null, 5000)"]);
+            if (check < 12) spawnSync(process.execPath, ["-e", "setTimeout(()=>null, 10000)"]);
           }
           if (verifiedExisting) break;
         }
