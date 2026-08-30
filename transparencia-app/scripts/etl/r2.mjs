@@ -41,12 +41,47 @@ function publicationRank(key) {
   return 0;
 }
 
+function projectionVersion(key) {
+  const match = key.match(/^projections\/([^/]+)\/versions\/([^/]+)\//);
+  return match ? { dataset: match[1], version: match[2] } : null;
+}
+
+function pruneObsoleteProjectionVersions(desired, previous, assets) {
+  const incomingByDataset = new Map();
+  for (const asset of assets) {
+    const parsed = projectionVersion(asset.key);
+    if (!parsed) continue;
+    if (!incomingByDataset.has(parsed.dataset)) incomingByDataset.set(parsed.dataset, new Set());
+    incomingByDataset.get(parsed.dataset).add(parsed.version);
+  }
+
+  for (const [dataset, incomingVersions] of incomingByDataset) {
+    const previousVersions = new Set();
+    for (const key of previous.keys()) {
+      const parsed = projectionVersion(key);
+      if (parsed?.dataset === dataset) previousVersions.add(parsed.version);
+    }
+    const rollbackVersion = [...previousVersions].sort().at(-1);
+    const retained = new Set(incomingVersions);
+    if (rollbackVersion) retained.add(rollbackVersion);
+
+    for (const key of previous.keys()) {
+      const parsed = projectionVersion(key);
+      if (parsed?.dataset === dataset && !retained.has(parsed.version)) desired.delete(key);
+    }
+  }
+}
+
 export function planR2Publication(assets, previousInventory = { objects: [] }, limitBytes = DEFAULT_LIMIT_BYTES) {
   if (!Number.isSafeInteger(limitBytes) || limitBytes < 1) throw new Error("INVALID_R2_LIMIT");
   const hot = selectHotAssets(assets);
   const previous = new Map((previousInventory.objects ?? []).map((object) => [object.key, object]));
   const desired = new Map(previous);
   for (const asset of hot) desired.set(asset.key, asset);
+  // Cada proyección versionada conserva la candidata entrante y la versión
+  // activa previa como rollback. Las copias más antiguas no son referenciadas
+  // por ningún manifiesto y duplican gigabytes sin aportar disponibilidad.
+  pruneObsoleteProjectionVersions(desired, previous, hot);
   const previousBytes = [...previous.values()].reduce((total, object) => total + object.size, 0);
   let projectedBytes = [...desired.values()].reduce((total, object) => total + object.size, 0);
   let ratio = projectedBytes / limitBytes;

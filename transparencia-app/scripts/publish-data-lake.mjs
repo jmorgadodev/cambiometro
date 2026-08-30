@@ -173,10 +173,12 @@ if (publishR2) {
   const r2Plan = planR2Publication(assets, previous);
   const activationManifests = r2Plan.puts.filter((asset) => asset.key.endsWith("/manifest.json"));
 
+  // Sólo se eliminan particiones frías o versiones históricas no activas.
+  // Liberarlas antes de subir evita superar transitoriamente la cuota R2.
+  for (const key of r2Plan.deletes) wranglerWithRetry(["r2", "object", "delete", `${bucket}/${key}`]);
   for (const asset of r2Plan.puts.filter((item) => !activationManifests.includes(item))) {
     wranglerWithRetry(["r2", "object", "put", `${bucket}/${asset.key}`, "--file", join(outputRoot, asset.key)]);
   }
-  for (const key of r2Plan.deletes) wranglerWithRetry(["r2", "object", "delete", `${bucket}/${key}`]);
   for (const manifest of activationManifests) {
     wranglerWithRetry(["r2", "object", "put", `${bucket}/${manifest.key}`, "--file", join(outputRoot, manifest.key), "--content-type", "application/json"]);
   }
