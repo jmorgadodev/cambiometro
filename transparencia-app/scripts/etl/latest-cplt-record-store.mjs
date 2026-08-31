@@ -34,7 +34,11 @@ export class LatestCpltRecordStore {
   }
 
   upsert({ stableKey, period, line, organismoId }) {
-    this.upsertStatement.run(stableKey, period, line, organismoId);
+    // Las líneas llegan como substrings de un bloque decodificado grande. Una
+    // copia propia evita que V8 retenga el bloque completo mientras SQLite
+    // termina la transacción de este registro.
+    const ownedLine = Buffer.from(line, "utf8").toString("utf8");
+    this.upsertStatement.run(stableKey, period, ownedLine, organismoId);
     this.pending += 1;
     if (this.pending >= 10_000) this.flush();
   }

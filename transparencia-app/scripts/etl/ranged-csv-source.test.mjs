@@ -76,4 +76,48 @@ describe("readRangedTextLines", () => {
     ]);
     expect(ranges.filter((range) => range === "16-31")).toHaveLength(2);
   });
+
+  it("procesa muchos bloques y límites CRLF sin conservar arreglos de líneas", async () => {
+    const rows = Array.from({ length: 4_096 }, (_, index) => `Persona ${index};Municipalidad de Maipu`);
+    const payload = Buffer.from(`${rows.join("\r\n")}\r\n`, "latin1");
+    const server = http.createServer((request, response) => {
+      if (request.method === "HEAD") {
+        response.writeHead(200, {
+          "accept-ranges": "bytes",
+          "content-length": payload.length,
+          etag: '"fixture-many-blocks"',
+        });
+        response.end();
+        return;
+      }
+
+      const match = /^bytes=(\d+)-(\d+)$/.exec(String(request.headers.range));
+      if (!match) {
+        response.writeHead(400).end();
+        return;
+      }
+      const start = Number(match[1]);
+      const end = Math.min(Number(match[2]), payload.length - 1);
+      response.writeHead(206, {
+        "content-range": `bytes ${start}-${end}/${payload.length}`,
+        "content-length": end - start + 1,
+        etag: '"fixture-many-blocks"',
+      });
+      response.end(payload.subarray(start, end + 1));
+    });
+    servers.push(server);
+    server.listen(0, "127.0.0.1");
+    await once(server, "listening");
+    const address = server.address();
+    const url = `http://127.0.0.1:${address.port}/many.csv`;
+
+    const received = [];
+    for await (const line of readRangedTextLines({
+      urls: [url],
+      chunkSize: 257,
+      retryDelaysMs: [0],
+    })) received.push(line);
+
+    expect(received).toEqual(rows);
+  });
 });
