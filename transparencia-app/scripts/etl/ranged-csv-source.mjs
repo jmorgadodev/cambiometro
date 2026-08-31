@@ -104,18 +104,30 @@ export async function* readRangedTextLines({
   onSource?.(source);
 
   let carry = "";
+  let body = null;
+  let decodedChunk = "";
   for (let start = 0; start < source.totalBytes; start += chunkSize) {
     const end = Math.min(start + chunkSize - 1, source.totalBytes - 1);
-    const body = await fetchRange({
+    body = await fetchRange({
       ...source,
       start,
       end,
       fetchImpl,
       retryDelaysMs,
     });
-    const pieces = `${carry}${iconv.decode(body, "win1252")}`.split(/\r?\n/);
-    carry = pieces.pop() ?? "";
-    for (const line of pieces) yield line;
+    decodedChunk = `${carry}${iconv.decode(body, "win1252")}`;
+    let lineStart = 0;
+    for (let index = 0; index < decodedChunk.length; index += 1) {
+      if (decodedChunk.charCodeAt(index) !== 10) continue;
+      const lineEnd = index > lineStart && decodedChunk.charCodeAt(index - 1) === 13
+        ? index - 1
+        : index;
+      yield decodedChunk.slice(lineStart, lineEnd);
+      lineStart = index + 1;
+    }
+    carry = decodedChunk.slice(lineStart);
+    body = null;
+    decodedChunk = "";
   }
   if (carry) yield carry;
 }
