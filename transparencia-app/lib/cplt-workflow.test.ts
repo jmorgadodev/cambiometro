@@ -37,11 +37,14 @@ describe("automatizacion CPLT nacional", () => {
 
   it("usa el host oficial canónico y conserva fallback ante cambios del host legado", () => {
     const etl = readFileSync(resolve(process.cwd(), "scripts/etl/stream-remote-personal.mjs"), "utf8");
+    const rangedSource = readFileSync(resolve(process.cwd(), "scripts/etl/ranged-csv-source.mjs"), "utf8");
     expect(etl).toContain("https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos");
     expect(etl).toContain("https://www.cplt.cl/transparencia_activa/datoabierto/archivos");
-    expect(etl).toContain("RETRYABLE_STATUSES");
-    expect(etl).toContain('Accept: "text/csv,*/*"');
-    expect(etl).toContain("CPLT_DOWNLOAD_FAILED");
+    expect(etl).toContain("readRangedTextLines");
+    expect(rangedSource).toContain("RETRYABLE_STATUSES");
+    expect(rangedSource).toContain('Accept: "text/csv,*/*"');
+    expect(rangedSource).toContain('Range: `bytes=${start}-${end}`');
+    expect(rangedSource).toContain("CPLT_RANGE_DOWNLOAD_FAILED");
   });
 
   it("usa releases mensuales para no superar 1.000 assets", () => {

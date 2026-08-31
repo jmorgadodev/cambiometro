@@ -1,10 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
-import readline from "node:readline";
-import { Readable } from "node:stream";
-import iconv from "iconv-lite";
 import { createCpltRecordId, getCpltColumn, parseCpltColumns, parseCpltHeader, parseCpltIdentity, parseCpltRecord } from "./cplt-personal.mjs";
 import { createMunicipalityRegistry } from "./municipality-registry.mjs";
+import { readRangedTextLines } from "./ranged-csv-source.mjs";
 import { validatePublication } from "./validation.mjs";
 
 const SOURCE_BASES = [
@@ -21,12 +19,6 @@ const URLS = [
   tipo,
   urls: SOURCE_BASES.map((base) => `${base}/${fileName}`),
 }));
-
-const RETRYABLE_STATUSES = new Set([408, 425, 429, 500, 502, 503, 504]);
-
-function wait(ms) {
-  return new Promise((resolve) => setTimeout(resolve, ms));
-}
 
 function normalized(value) {
   return String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
@@ -99,38 +91,16 @@ function mergeById(previous, current) {
   return [...records.values()];
 }
 
-async function downloadSource(tipo, urls) {
-  const failures = [];
-  for (const url of urls) {
-    for (let attempt = 1; attempt <= 3; attempt += 1) {
-      try {
-        const response = await fetch(url, {
-          headers: {
-            Accept: "text/csv,*/*",
-            "User-Agent": "cambiometro-etl/1.0 (+https://cambiometro.impulsacv.cl)",
-          },
-        });
-        if (response.ok && response.body) {
-          return { response, sourceUrl: response.url || url };
-        }
-
-        failures.push(`${url} -> ${response.status} ${response.statusText} (intento ${attempt})`);
-        if (!RETRYABLE_STATUSES.has(response.status)) break;
-      } catch (error) {
-        failures.push(`${url} -> ${error instanceof Error ? error.message : String(error)} (intento ${attempt})`);
-      }
-      await wait(2_000 * attempt);
-    }
-  }
-  throw new Error(`CPLT_DOWNLOAD_FAILED: ${tipo}; ${failures.join("; ")}`);
-}
-
 async function processStream(tipo, urls, outputDir) {
   console.log(`\n[+] Iniciando descarga de ${tipo}: ${urls.join(" | ")}`);
-  const { response, sourceUrl } = await downloadSource(tipo, urls);
-
-  const decodedStream = Readable.fromWeb(response.body).pipe(iconv.decodeStream("win1252"));
-  const lines = readline.createInterface({ input: decodedStream, crlfDelay: Infinity });
+  let sourceUrl = urls[0];
+  const lines = readRangedTextLines({
+    urls,
+    onSource: (source) => {
+      sourceUrl = source.sourceUrl;
+      console.log(`    [INFO] ${tipo}: ${source.totalBytes} bytes; descarga reanudable por rangos`);
+    },
+  });
   const latestByOfficial = new Map();
   const unknownMunicipalities = new Set();
   let header = null;
