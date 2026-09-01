@@ -43,6 +43,10 @@ const FUENTES = [
   { organismo: "Registros Ley 19.862", portal: "https://www.registros19862.cl", datos: "Transferencias de fondos públicos" },
   { organismo: "Consejo para la Transparencia", portal: "https://www.consejotransparencia.cl", datos: "Nómina nacional de funcionarios (transparencia activa)" },
   { organismo: "SERVEL", portal: "https://www.servel.cl", datos: "Resultados electorales" },
+  { organismo: "InfoLobby", portal: "https://www.infolobby.cl", datos: "Audiencias, viajes y donativos declarados" },
+  { organismo: "InfoProbidad", portal: "https://www.infoprobidad.cl", datos: "Declaraciones de intereses y patrimonio" },
+  { organismo: "Contraloría General de la República", portal: "https://www.contraloria.cl", datos: "Informes de auditoría y examen de cuentas" },
+  { organismo: "Instituto Nacional de Estadísticas", portal: "https://www.ine.gob.cl", datos: "Censo 2024: población, viviendas y hogares" },
 ];
 
 const DERECHOS = [
@@ -88,7 +92,7 @@ export default function PrivacidadPage() {
 
       <div className="container-main" style={{ padding: "2.5rem 1.5rem 4rem", display: "flex", flexDirection: "column", gap: "2.5rem" }}>
 
-        <section className="privacy-request-panel">
+        <section className="privacy-category-section">
           <div className="privacy-request-panel__heading">
             <h2 style={{ fontSize: "1.3rem", margin: "0 0 0.25rem 0", color: "var(--text-primary)" }}>
               Finalidad del tratamiento por categoría
@@ -97,9 +101,9 @@ export default function PrivacidadPage() {
               Tratamos únicamente los datos estrictamente necesarios para cada finalidad.
             </p>
           </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))", gap: "1rem" }}>
+          <div className="privacy-category-grid">
             {CATEGORIAS.map((categoria) => (
-              <article key={categoria.titulo} className="card" style={{ padding: "1.25rem 1.5rem", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+              <article key={categoria.titulo} className="card privacy-category-card" style={{ padding: "1.25rem 1.5rem", display: "flex", flexDirection: "column", gap: "0.6rem" }}>
                 <h3 style={{ fontSize: "1rem", fontWeight: 700, margin: 0, color: "var(--text-primary)" }}>{categoria.titulo}</h3>
                 <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.6, margin: 0 }}>{categoria.finalidad}</p>
                 <dl style={{ margin: 0, display: "flex", flexDirection: "column", gap: "0.5rem", fontSize: "0.78rem" }}>
@@ -134,8 +138,8 @@ export default function PrivacidadPage() {
           </div>
         </section>
 
-        <section>
-          <div style={{ marginBottom: "1.25rem" }}>
+        <section className="privacy-form-layout">
+          <div className="privacy-form-layout__heading" style={{ marginBottom: "1.25rem" }}>
             <h2 style={{ fontSize: "1.3rem", margin: "0 0 0.25rem 0", color: "var(--text-primary)" }}>
               Tus derechos: acceso, rectificación, cancelación y oposición
             </h2>

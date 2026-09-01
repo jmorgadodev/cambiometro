@@ -3805,6 +3805,13 @@ html.dark .page-masthead {
 .privacy-request-panel__heading h2 { margin: .2rem 0 .4rem; font-size: 1.4rem; }
 .privacy-request-panel__heading p { margin: 0; color: var(--text-muted); font-size: .84rem; line-height: 1.6; }
 .privacy-request-panel__card { width: 100%; max-width: 52rem; padding: 1.75rem; }
+.privacy-category-section { display: grid; gap: 1rem; }
+.privacy-category-section .privacy-request-panel__heading { position: static; }
+.privacy-category-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
+.privacy-category-card { min-height: 0; }
+.privacy-form-layout { display: grid; grid-template-columns: minmax(15rem, .72fr) minmax(0, 1.28fr); gap: 2rem; align-items: start; }
+.privacy-form-layout__heading { position: sticky; top: 7rem; }
+.privacy-form-layout .privacy-request-panel__card { max-width: none; }
 .privacy-request-form { display: grid; gap: 1rem; }
 .privacy-request-form__grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1rem; }
 .privacy-request-form__turnstile { display: grid; gap: .65rem; padding: .9rem; border: 1px solid var(--border); border-radius: 10px; background: var(--bg-surface-2); }
@@ -3823,6 +3830,9 @@ html.dark .page-masthead {
 @media (max-width: 760px) {
   .privacy-request-panel { grid-template-columns: 1fr; }
   .privacy-request-panel__heading { position: static; }
+  .privacy-category-grid { grid-template-columns: 1fr; }
+  .privacy-form-layout { grid-template-columns: 1fr; }
+  .privacy-form-layout__heading { position: static; }
   .privacy-request-panel__card { padding: 1.1rem; }
   .privacy-request-form__grid { grid-template-columns: 1fr; }
   .cruces-record-filters {

@@ -171,12 +171,17 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
           CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
           UPTIME_TOKEN: ${{ secrets.CAMBIOMETRO_UPTIME_TOKEN }}
+          TURNSTILE_SECRET_KEY: ${{ secrets.TURNSTILE_SECRET_KEY }}
           WORKER_VERSION_ID: ${{ inputs.worker_version_id }}
           TRANSFER_CONFIG: ${{ steps.transfer-config.outputs.config }}
         run: |
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_API_TOKEN"
           test -n "$UPTIME_TOKEN"
+          test -n "$TURNSTILE_SECRET_KEY"
+          printf '%s' "$TURNSTILE_SECRET_KEY" | npx wrangler secret put TURNSTILE_SECRET_KEY \
+            --config "$TRANSFER_CONFIG" \
+            --name cambiometro-public-api
           npx wrangler versions deploy \
             --config "$TRANSFER_CONFIG" \
             --name cambiometro-public-api \
