@@ -1100,11 +1100,26 @@ export default {
       const limited = await rateLimit(request, env, "search");
       return limited ?? search(url, env);
     }
-    if (path === "/api/v1/transferencias") return listTransferencias(url, env);
-    if (path === "/api/directorio" || path === "/api/v1/entities") return listEntities(url, env);
-    if (path === "/api/v1/records") return listRecords(url, env);
-    if (path === "/api/v1/relations") return listRelations(url, env);
-    if (path === "/api/v1/crosses") return listRelations(url, env, true);
+    if (path === "/api/v1/transferencias") {
+      const limited = await rateLimit(request, env, "transferencias");
+      return limited ?? listTransferencias(url, env);
+    }
+    if (path === "/api/directorio" || path === "/api/v1/entities") {
+      const limited = await rateLimit(request, env, "entities");
+      return limited ?? listEntities(url, env);
+    }
+    if (path === "/api/v1/records") {
+      const limited = await rateLimit(request, env, "records");
+      return limited ?? listRecords(url, env);
+    }
+    if (path === "/api/v1/relations") {
+      const limited = await rateLimit(request, env, "relations");
+      return limited ?? listRelations(url, env);
+    }
+    if (path === "/api/v1/crosses") {
+      const limited = await rateLimit(request, env, "crosses");
+      return limited ?? listRelations(url, env, true);
+    }
     if (path === "/api/v1/alertas") return success([]);
     if (path === "/api/v1/commercial/keys") return failure("COMMERCIAL_API_UNAVAILABLE", "La API comercial no está disponible.", 503);
     if (path === "/api/v1/health") return health(env);
@@ -1112,7 +1127,8 @@ export default {
       return health(env);
     }
     if (path === "/api/v1/sources") {
-      return listSources(url, env);
+      const limited = await rateLimit(request, env, "sources");
+      return limited ?? listSources(url, env);
     }
     if (path === "/api/v1/export") {
         const limited = await rateLimit(request, env, "export");
@@ -1121,6 +1137,8 @@ export default {
     if (path === "/api/funcionarios" || path === "/api/v1/funcionarios") {
       const invalid = validateOfficials(url);
       if (invalid) return failure("INVALID_QUERY", invalid, 400);
+      const limited = await rateLimit(request, env, "funcionarios");
+      if (limited) return limited;
       const d1 = await listFuncionariosFromD1(url, env);
       return d1 ?? listFuncionariosFromR2(url, env);
     }
