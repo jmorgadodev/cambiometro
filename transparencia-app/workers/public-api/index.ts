@@ -85,6 +85,31 @@ async function databaseSafe(query: Promise<Response>) {
   }
 }
 
+async function cachedPublicGet(request: Request, producer: () => Promise<Response>) {
+  // Las consultas públicas son inmutables por URL durante el ciclo de
+  // publicación. Cachearlas en el edge evita repetir COUNT/SELECT costosos en
+  // cada visita y protege el cupo gratuito de rows_read de D1. Si Cache API no
+  // está disponible en un test o entorno local, se conserva el comportamiento
+  // normal sin alterar el contrato.
+  let cache: Cache;
+  try {
+    cache = (caches as CacheStorage & { default: Cache }).default;
+  } catch {
+    return producer();
+  }
+  try {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+  } catch {
+    return producer();
+  }
+  const response = await producer();
+  if (response.ok) {
+    try { await cache.put(request, response.clone()); } catch { /* cache opcional */ }
+  }
+  return response;
+}
+
 interface TransferApiPage {
   page: number;
   count: number;
@@ -1159,7 +1184,7 @@ export default {
     if (request.method !== "GET") return failure("METHOD_NOT_ALLOWED", "Método no permitido.", 405);
     if (path === "/api/v1/search") {
       const limited = await rateLimit(request, env, "search");
-      return limited ?? databaseSafe(search(url, env));
+      return limited ?? cachedPublicGet(request, () => databaseSafe(search(url, env)));
     }
     if (path === "/api/v1/transferencias") {
       const limited = await rateLimit(request, env, "transferencias");
@@ -1171,15 +1196,15 @@ export default {
     }
     if (path === "/api/v1/records") {
       const limited = await rateLimit(request, env, "records");
-      return limited ?? databaseSafe(listRecords(url, env));
+      return limited ?? cachedPublicGet(request, () => databaseSafe(listRecords(url, env)));
     }
     if (path === "/api/v1/relations") {
       const limited = await rateLimit(request, env, "relations");
-      return limited ?? databaseSafe(listRelations(url, env));
+      return limited ?? cachedPublicGet(request, () => databaseSafe(listRelations(url, env)));
     }
     if (path === "/api/v1/crosses") {
       const limited = await rateLimit(request, env, "crosses");
-      return limited ?? databaseSafe(listRelations(url, env, true));
+      return limited ?? cachedPublicGet(request, () => databaseSafe(listRelations(url, env, true)));
     }
     if (path === "/api/v1/alertas") return success([]);
     if (path === "/api/v1/commercial/keys") return failure("COMMERCIAL_API_UNAVAILABLE", "La API comercial no está disponible.", 503);
@@ -1189,7 +1214,7 @@ export default {
     }
     if (path === "/api/v1/sources") {
       const limited = await rateLimit(request, env, "sources");
-      return limited ?? databaseSafe(listSources(url, env));
+      return limited ?? cachedPublicGet(request, () => databaseSafe(listSources(url, env)));
     }
     if (path === "/api/v1/export") {
         const limited = await rateLimit(request, env, "export");
