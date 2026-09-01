@@ -1,8 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { getVotacionDestacadaDetalle } from "./votaciones-destacadas";
+import { getVotingFreshness, getVotacionDestacadaDetalle } from "./votaciones-destacadas";
 import { bancadaDisensoPct, bancadaParticipacion, getVotacionBancadaShares, sortVotacionBancadas } from "./votaciones-bancada";
 
 describe("votaciones destacadas", () => {
+  it("distingue la fecha de revisión automática de la última votación nominal", () => {
+    const freshness = getVotingFreshness();
+
+    expect(freshness.reviewedAt).toMatch(/^\d{4}-\d{2}-\d{2}T/);
+    expect(freshness.latestVoteDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(freshness.reviewedAt!.slice(0, 10) >= freshness.latestVoteDate!).toBe(true);
+    expect(freshness.totalSessions).toBeGreaterThan(0);
+  });
+
   it("expone el padrón nominal, el resultado recalculado y el agrupamiento por bancada", () => {
     const detail = getVotacionDestacadaDetalle("camara-vot-89749");
 

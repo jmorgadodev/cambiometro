@@ -27,4 +27,12 @@ describe("interfaz de votaciones destacadas", () => {
     expect(client).toContain("Etapa registrada:");
     expect(readFileSync(resolve(import.meta.dirname, "./votaciones-destacadas.ts"), "utf8")).toContain("tramiteUrl: session.url_tramitacion ?? null");
   });
+
+  it("explica por separado la revisión del pipeline y la última votación", () => {
+    const page = readFileSync(resolve(import.meta.dirname, "../app/page.tsx"), "utf8");
+    expect(page).toContain("Última revisión automática");
+    expect(page).toContain("Última votación nominal");
+    expect(client).toContain("Última revisión automática");
+    expect(client).toContain("Última votación nominal");
+  });
 });

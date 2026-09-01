@@ -3787,3 +3787,36 @@ html.dark .page-masthead {
     grid-column: 1 / -1;
   }
 }
+.voting-freshness {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.75rem;
+  margin-block: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.voting-freshness > span {
+  display: grid;
+  gap: 0.25rem;
+  color: var(--text);
+}
+
+.voting-freshness > span strong {
+  color: var(--muted);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.voting-freshness > small {
+  grid-column: 1 / -1;
+  color: var(--muted);
+}
+
+@media (max-width: 640px) {
+  .voting-freshness {
+    grid-template-columns: 1fr;
+  }
+}

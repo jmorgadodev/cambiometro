@@ -101,8 +101,16 @@ interface SessionSource {
 }
 
 interface VotingSource {
+  generatedAt?: string;
+  totalSessions?: number;
   sessions: Record<string, SessionSource>;
   votes: Record<string, [string, string][]>;
+}
+
+export interface VotingFreshness {
+  reviewedAt: string | null;
+  latestVoteDate: string | null;
+  totalSessions: number;
 }
 
 let votingSourceCache: VotingSource | null = null;
@@ -115,6 +123,20 @@ function loadVotingSource(): VotingSource {
     votingSourceCache = { sessions: {}, votes: {} };
   }
   return votingSourceCache;
+}
+
+export function getVotingFreshness(): VotingFreshness {
+  const source = loadVotingSource();
+  const dates = Object.values(source.sessions)
+    .map((session) => session.fecha)
+    .filter((date): date is string => Boolean(date))
+    .sort((left, right) => right.localeCompare(left));
+
+  return {
+    reviewedAt: source.generatedAt ?? null,
+    latestVoteDate: dates[0] ?? null,
+    totalSessions: source.totalSessions ?? Object.keys(source.sessions).length,
+  };
 }
 
 function normalizeOption(value: string | undefined): OpcionVotacion {

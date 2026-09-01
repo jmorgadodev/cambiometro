@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import VotacionesDestacadasClient from "@/components/VotacionesDestacadasClient";
-import { getVotacionDestacadaDetalle, VOTACIONES_DESTACADAS } from "@/lib/votaciones-destacadas";
+import { getVotingFreshness, getVotacionDestacadaDetalle, VOTACIONES_DESTACADAS } from "@/lib/votaciones-destacadas";
 
 export const metadata: Metadata = {
   title: "Votaciones destacadas — El Cambiómetro",
@@ -9,11 +9,12 @@ export const metadata: Metadata = {
 };
 
 export default function VotacionesDestacadasPage() {
+  const freshness = getVotingFreshness();
   const details = Object.fromEntries(
     VOTACIONES_DESTACADAS.flatMap((entry) => {
       const detail = getVotacionDestacadaDetalle(entry.votacion_id);
       return detail ? [[entry.votacion_id, detail] as const] : [];
     }),
   );
-  return <VotacionesDestacadasClient entries={VOTACIONES_DESTACADAS} details={details} />;
+  return <VotacionesDestacadasClient entries={VOTACIONES_DESTACADAS} details={details} freshness={freshness} />;
 }
