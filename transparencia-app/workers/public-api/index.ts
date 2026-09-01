@@ -967,7 +967,6 @@ async function listSources(requestUrl: URL, env: Env) {
     const rows = await env.DB.prepare(`
       SELECT
         sources.*,
-        COALESCE((SELECT COUNT(*) FROM records WHERE records.source_id = sources.id), 0) AS materialized_count,
         source_state.status AS state_status,
         source_state.record_count AS state_record_count,
         source_state.checksum_sha256 AS state_checksum_sha256,
@@ -979,16 +978,17 @@ async function listSources(requestUrl: URL, env: Env) {
       ORDER BY sources.id
     `).all<JsonRecord>();
     const data = (rows.results ?? []).map((row) => {
-      const materializedCount = Number(row.materialized_count ?? 0);
       const stateCount = Number(row.state_record_count ?? 0);
       const stateStatus = String(row.state_status ?? "");
-      const projectionOnly = row.id === "personal-apoyo";
       const archiveOnly = stateStatus === "archive_only";
-      const recordCount = archiveOnly || projectionOnly ? Math.max(materializedCount, stateCount) : materializedCount;
+      // source_state es el contador de publicación validado por el ETL. No
+      // volver a contar records aquí: el histórico puede superar el millón
+      // de filas y ese COUNT(*) por fuente agota rápidamente el cupo diario
+      // gratuito de D1 cuando el catálogo se consulta repetidamente.
+      const recordCount = stateCount;
       const status = archiveOnly ? "partial" : recordCount > 0 ? "connected" : "unavailable";
       return {
         ...row,
-        materialized_count: undefined,
         state_status: undefined,
         state_record_count: undefined,
         state_checksum_sha256: undefined,
