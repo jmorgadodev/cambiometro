@@ -117,6 +117,44 @@ describe("API canónica v1", () => {
     expect(payload.meta.total).toBe(1203287);
   });
 
+  it("usa R2 si D1 está temporalmente sin cuota de lectura", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1203287,
+        pageSize: 2,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 2 }],
+        shards: {},
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [
+        { id: "func-1", n: "Claudio Adaros", c: "Analista", o: "Municipalidad de Maipú", t: "Contrata", e: "Profesional", b: 5894314 },
+      ],
+    };
+    const statement = {
+      bind() { return statement; },
+      async first() { throw new Error("D1_ERROR: daily rows_read quota exceeded"); },
+      async all() { throw new Error("D1_ERROR: daily rows_read quota exceeded"); },
+    };
+    const env = {
+      DB: { prepare: () => statement },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?limit=1&include_zero=true"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data[0].nombre_completo).toBe("Claudio Adaros");
+    expect(payload.meta.totalHeadcount).toBe(1203287);
+    expect(payload.meta.sourceStatus).toBe("r2-search");
+  });
+
   it("pagina el universo nacional de forma continua aunque R2 use bloques físicos mayores", async () => {
     const files: Record<string, unknown> = {
       "projections/funcionarios-v1/manifest.json": {
