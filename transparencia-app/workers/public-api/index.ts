@@ -374,6 +374,10 @@ function normalized(value: unknown) {
   return String(value ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL").trim();
 }
 
+function politicoSlug(value: unknown) {
+  return normalized(value).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
+}
+
 function compactNormalized(value: unknown) {
   return normalized(value).replace(/[^a-z0-9]/g, "");
 }
@@ -937,11 +941,26 @@ async function search(requestUrl: URL, env: Env) {
 async function searchFromR2(requestUrl: URL, env: Env) {
   const raw = requestUrl.searchParams.get("q")?.trim() ?? "";
   if (raw.length < 2 || raw.length > 80) return failure("INVALID_QUERY", "La búsqueda debe tener entre 2 y 80 caracteres.", 400);
-  const rows = await canonicalEntitiesFromR2(env);
-  if (!rows) return dbUnavailable();
   const normalize = (value: unknown) => String(value ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL");
   const needle = normalize(raw);
-  const data = rows
+  // Parlamentarios no viven en la tabla nacional de funcionarios CPLT. Se
+  // mantienen en el catálogo pequeño y versionado del Worker, por lo que la
+  // búsqueda del home sigue encontrando diputados y senadores aunque D1 esté
+  // temporalmente sin cuota de lectura.
+  const politicians = POLITICOS_SEED
+    .filter((politico) => normalize(`${politico.nombre_completo} ${politico.cargo} ${politico.partido_electoral ?? ""} ${politico.distrito_region ?? ""}`).includes(needle))
+    .slice(0, 75)
+    .map((politico) => ({
+      id: politico.id,
+      type: "persona",
+      nombre: politico.nombre_completo,
+      url: `/politico/${politicoSlug(politico.nombre_completo)}`,
+      cargo: politico.cargo,
+      partido: politico.partido_electoral ?? politico.partido_id,
+      region: politico.distrito_region,
+    }));
+  const rows = await canonicalEntitiesFromR2(env);
+  const entities = (rows ?? [])
     .filter((row) => normalize(row.name).includes(needle))
     .slice(0, 75)
     .map((row) => {
@@ -949,6 +968,11 @@ async function searchFromR2(requestUrl: URL, env: Env) {
       const type = item.kind === "person" ? "persona" : item.kind === "municipality" ? "municipalidad" : item.kind === "supplier" ? "proveedor" : "organismo";
       return { id: item.id, type, nombre: item.name, url: `/entidades/${item.id}`, ...(item.attributes as JsonRecord) };
     });
+  // Preserve the canonical entity result first when both catalogs contain the
+  // same person; append the parliamentary catalog so it fills the gap when
+  // D1/R2 does not have an entity row for that politician.
+  const data = [...entities, ...politicians].slice(0, 75);
+  if (data.length === 0 && !rows) return dbUnavailable();
   return success({ autoridades: data.filter((item) => item.type === "persona").slice(0, 25), municipalidades: data.filter((item) => item.type === "municipalidad").slice(0, 25), funcionarios: [], entidades: data.slice(0, 25) }, { query: raw, sourceStatus: "r2-catalog" });
 }
 

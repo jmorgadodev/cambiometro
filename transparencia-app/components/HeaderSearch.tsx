@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 
 interface SearchResult {
-  type: "politico" | "municipalidad" | "funcionario" | "entidad";
+  type: "politico" | "persona" | "municipalidad" | "funcionario" | "entidad";
   id: string;
   nombre: string;
   url: string;
@@ -26,6 +26,7 @@ interface SearchPayload {
 
 const TYPE_LABELS: Record<SearchResult["type"], string> = {
   politico: "Autoridad",
+  persona: "Autoridad",
   municipalidad: "Municipalidad",
   funcionario: "Funcionario/a",
   entidad: "Entidad jurídica",
