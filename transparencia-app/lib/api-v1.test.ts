@@ -155,6 +155,40 @@ describe("API canónica v1", () => {
     expect(payload.meta.sourceStatus).toBe("r2-search");
   });
 
+  it("mantiene el directorio consultable desde el catálogo R2 si D1 falla", async () => {
+    const files: Record<string, unknown> = {
+      "projections/static-site-v1/manifest.json": {
+        schemaVersion: 1,
+        dataset: "cambiometro-static-site-inputs",
+        files: [{
+          path: "data/catalog/entities-routes.json",
+          key: "projections/static-site-v1/releases/catalog/data/catalog/entities-routes.json",
+        }],
+      },
+      "projections/static-site-v1/releases/catalog/data/catalog/entities-routes.json": [
+        { id: "person-1", kind: "person", name: "Ana Pérez", identifiers: [], attributes: { office: "Diputada" }, sourceIds: ["camara"] },
+        { id: "municipality-1", kind: "municipality", name: "Municipalidad de Maipú", identifiers: [], attributes: {}, sourceIds: ["sinim"] },
+      ],
+    };
+    const statement = {
+      bind() { return statement; },
+      async first() { throw new Error("D1_ERROR: daily rows_read quota exceeded"); },
+      async all() { throw new Error("D1_ERROR: daily rows_read quota exceeded"); },
+    };
+    const env = {
+      DB: { prepare: () => statement },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/directorio?q=maipu&limit=1"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toHaveLength(1);
+    expect(payload.data[0]).toMatchObject({ id: "municipality-1", name: "Municipalidad de Maipú" });
+    expect(payload.meta).toMatchObject({ total: 1, limit: 1 });
+  });
+
   it("pagina el universo nacional de forma continua aunque R2 use bloques físicos mayores", async () => {
     const files: Record<string, unknown> = {
       "projections/funcionarios-v1/manifest.json": {

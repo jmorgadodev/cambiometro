@@ -91,6 +91,18 @@ jobs:
           mkdir -p data/lake/catalog/v1
           npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
 
+      - name: Publicar catálogo canónico para fallback del directorio
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -s data/catalog/entities-routes.json
+          npx wrangler r2 object put transparencia-public-data/projections/entities-v1/entities-routes.json \
+            --file data/catalog/entities-routes.json \
+            --content-type application/json \
+            --remote
+
       - name: Resolver versión del snapshot estático
         id: data-version
         working-directory: transparencia-app
