@@ -12,7 +12,10 @@ export class LatestCpltRecordStore {
 
   upsert({ stableKey, period, record, organismoId, recordId = record?.id || stableKey }) {
     if (!stableKey || !period || !record || !organismoId) throw new Error("CPLT_STORE_INVALID_RECORD");
-    const current = this.index.get(stableKey);
+    // Usar el ID corto como clave evita conservar por accidente los strings
+    // cortados desde el bloque CSV de 32 MB que originó stableKey.
+    const indexKey = recordId;
+    const current = this.index.get(indexKey);
     // Los períodos se comparan lexicográficamente en formato YYYY-MM. Si el
     // registro ya publicado es igual o más reciente no hay que serializarlo.
     if (current && period <= current.period) return;
@@ -30,7 +33,7 @@ export class LatestCpltRecordStore {
     }
     const offset = this.recordOffset;
     this.recordOffset += encoded.length;
-    this.index.set(stableKey, {
+    this.index.set(indexKey, {
       period,
       offset,
       length: encoded.length - 1,
@@ -56,6 +59,17 @@ export class LatestCpltRecordStore {
 
   *values() {
     for (const row of this.index.values()) {
+      yield {
+        period: row.period,
+        record: this.readRecord(Number(row.offset), Number(row.length)),
+        organismoId: row.organismoId,
+      };
+    }
+  }
+
+  *valuesSortedByRecordId() {
+    const entries = [...this.index.values()].sort((left, right) => left.recordId.localeCompare(right.recordId));
+    for (const row of entries) {
       yield {
         period: row.period,
         record: this.readRecord(Number(row.offset), Number(row.length)),
