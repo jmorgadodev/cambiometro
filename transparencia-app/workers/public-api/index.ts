@@ -967,7 +967,6 @@ async function listSources(requestUrl: URL, env: Env) {
     const rows = await env.DB.prepare(`
       SELECT
         sources.*,
-        COALESCE((SELECT COUNT(*) FROM records WHERE records.source_id = sources.id), 0) AS materialized_count,
         source_state.status AS state_status,
         source_state.record_count AS state_record_count,
         source_state.checksum_sha256 AS state_checksum_sha256,
@@ -979,16 +978,17 @@ async function listSources(requestUrl: URL, env: Env) {
       ORDER BY sources.id
     `).all<JsonRecord>();
     const data = (rows.results ?? []).map((row) => {
-      const materializedCount = Number(row.materialized_count ?? 0);
       const stateCount = Number(row.state_record_count ?? 0);
       const stateStatus = String(row.state_status ?? "");
-      const projectionOnly = row.id === "personal-apoyo";
       const archiveOnly = stateStatus === "archive_only";
-      const recordCount = archiveOnly || projectionOnly ? Math.max(materializedCount, stateCount) : materializedCount;
+      // source_state es el contador de publicación validado por el ETL. No
+      // volver a contar records aquí: el histórico puede superar el millón
+      // de filas y ese COUNT(*) por fuente agota rápidamente el cupo diario
+      // gratuito de D1 cuando el catálogo se consulta repetidamente.
+      const recordCount = stateCount;
       const status = archiveOnly ? "partial" : recordCount > 0 ? "connected" : "unavailable";
       return {
         ...row,
-        materialized_count: undefined,
         state_status: undefined,
         state_record_count: undefined,
         state_checksum_sha256: undefined,
@@ -1100,11 +1100,26 @@ export default {
       const limited = await rateLimit(request, env, "search");
       return limited ?? search(url, env);
     }
-    if (path === "/api/v1/transferencias") return listTransferencias(url, env);
-    if (path === "/api/directorio" || path === "/api/v1/entities") return listEntities(url, env);
-    if (path === "/api/v1/records") return listRecords(url, env);
-    if (path === "/api/v1/relations") return listRelations(url, env);
-    if (path === "/api/v1/crosses") return listRelations(url, env, true);
+    if (path === "/api/v1/transferencias") {
+      const limited = await rateLimit(request, env, "transferencias");
+      return limited ?? listTransferencias(url, env);
+    }
+    if (path === "/api/directorio" || path === "/api/v1/entities") {
+      const limited = await rateLimit(request, env, "entities");
+      return limited ?? listEntities(url, env);
+    }
+    if (path === "/api/v1/records") {
+      const limited = await rateLimit(request, env, "records");
+      return limited ?? listRecords(url, env);
+    }
+    if (path === "/api/v1/relations") {
+      const limited = await rateLimit(request, env, "relations");
+      return limited ?? listRelations(url, env);
+    }
+    if (path === "/api/v1/crosses") {
+      const limited = await rateLimit(request, env, "crosses");
+      return limited ?? listRelations(url, env, true);
+    }
     if (path === "/api/v1/alertas") return success([]);
     if (path === "/api/v1/commercial/keys") return failure("COMMERCIAL_API_UNAVAILABLE", "La API comercial no está disponible.", 503);
     if (path === "/api/v1/health") return health(env);
@@ -1112,7 +1127,8 @@ export default {
       return health(env);
     }
     if (path === "/api/v1/sources") {
-      return listSources(url, env);
+      const limited = await rateLimit(request, env, "sources");
+      return limited ?? listSources(url, env);
     }
     if (path === "/api/v1/export") {
         const limited = await rateLimit(request, env, "export");
@@ -1121,6 +1137,8 @@ export default {
     if (path === "/api/funcionarios" || path === "/api/v1/funcionarios") {
       const invalid = validateOfficials(url);
       if (invalid) return failure("INVALID_QUERY", invalid, 400);
+      const limited = await rateLimit(request, env, "funcionarios");
+      if (limited) return limited;
       const d1 = await listFuncionariosFromD1(url, env);
       return d1 ?? listFuncionariosFromR2(url, env);
     }

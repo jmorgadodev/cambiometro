@@ -330,6 +330,28 @@ describe("API canónica v1", () => {
     expect(payload.data.some((source: { status: string }) => source.status === "connected")).toBe(false);
   });
 
+  it("usa los conteos publicados y no escanea el histórico al listar fuentes", async () => {
+    const prepared: string[] = [];
+    const db = {
+      prepare(sql: string) {
+        prepared.push(sql);
+        const statement = {
+          bind() { return statement; },
+          async all() { return { results: [] }; },
+        };
+        return statement;
+      },
+    };
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/sources"),
+      { DB: db } as never,
+    );
+
+    expect(response.status).toBe(200);
+    expect(prepared.some((sql) => /COUNT\(\*\).*FROM records/i.test(sql))).toBe(false);
+    expect(prepared.some((sql) => /source_state\.record_count/i.test(sql))).toBe(true);
+  });
+
   it("filtra y pagina registros con un enlace next reproducible", async () => {
     const response = await fetchApi("https://example.test/api/v1/records?source=camara&kind=vote&limit=2");
     const payload = await response.json();
