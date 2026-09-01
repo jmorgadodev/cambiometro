@@ -64,6 +64,17 @@ export class LatestCpltRecordStore {
     }
   }
 
+  *valuesSortedByRecordId() {
+    const entries = [...this.index.values()].sort((left, right) => left.recordId.localeCompare(right.recordId));
+    for (const row of entries) {
+      yield {
+        period: row.period,
+        record: this.readRecord(Number(row.offset), Number(row.length)),
+        organismoId: row.organismoId,
+      };
+    }
+  }
+
   *groupsByOrganismo() {
     const entries = [...this.index.values()].sort((left, right) => {
       const organismOrder = left.organismoId.localeCompare(right.organismoId);

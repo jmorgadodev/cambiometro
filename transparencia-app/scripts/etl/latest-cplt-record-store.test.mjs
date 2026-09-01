@@ -33,4 +33,16 @@ describe("LatestCpltRecordStore", () => {
     store.close();
     expect(fs.existsSync(databasePath)).toBe(false);
   });
+
+  it("permite validar el lote en orden estable aunque la fuente llegue desordenada", () => {
+    const directory = fs.mkdtempSync(path.join(os.tmpdir(), "cplt-latest-sorted-"));
+    temporaryDirectories.push(directory);
+    const databasePath = path.join(directory, "latest.sqlite");
+    const store = new LatestCpltRecordStore(databasePath);
+
+    store.upsert({ stableKey: "zeta", period: "2026-01", record: { nombre: "Zeta" }, organismoId: "maipu", recordId: "func-zeta" });
+    store.upsert({ stableKey: "alfa", period: "2026-01", record: { nombre: "Alfa" }, organismoId: "maipu", recordId: "func-alfa" });
+
+    expect([...store.valuesSortedByRecordId()].map(({ record }) => record.nombre)).toEqual(["Alfa", "Zeta"]);
+  });
 });

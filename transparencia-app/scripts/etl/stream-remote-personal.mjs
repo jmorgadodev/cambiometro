@@ -167,7 +167,7 @@ async function processStream(tipo, urls, outputDir) {
   const report = validatePublicationStream({
     sourceId: `cplt-personal-${normalized(tipo)}`,
     records: (function* finalizedRecords() {
-      for (const latest of latestByOfficial.values()) {
+      for (const latest of latestByOfficial.valuesSortedByRecordId()) {
         const funcionario = latest.record;
         if (!funcionario) throw new Error(`CPLT_LATEST_RECORD_INVALID: ${latest.organismoId}`);
         funcionario.id = createCpltRecordId(funcionario._stableKey);
