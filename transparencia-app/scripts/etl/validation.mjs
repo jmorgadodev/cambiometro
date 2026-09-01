@@ -68,6 +68,50 @@ export function validatePublication({
   return { sourceId, recordCount: records.length, checksumSha256, status: "valid" };
 }
 
+/**
+ * Valida y calcula el checksum de un iterable ordenado por id sin conservar
+ * todos los registros en memoria. Se usa para fuentes CPLT de varios GB.
+ */
+export function validatePublicationStream({
+  sourceId,
+  records,
+  minimumCount = 1,
+  previousCount = null,
+  minimumRetainedRatio = 0.5,
+}) {
+  if (!sourceId || !records || typeof records[Symbol.iterator] !== "function") fail("ETL_INVALID_INPUT", "sourceId y records son obligatorios");
+  if (!Number.isSafeInteger(minimumCount) || minimumCount < 0) fail("ETL_INVALID_INPUT", "minimumCount invalido");
+
+  const checksum = createHash("sha256");
+  let count = 0;
+  let previousId = null;
+  for (const record of records) {
+    const id = typeof record?.id === "string" ? record.id.trim() : "";
+    if (!id) fail("ETL_MISSING_ID", `${sourceId} contiene un registro sin id`);
+    if (previousId !== null && id <= previousId) {
+      fail(id === previousId ? "ETL_DUPLICATE_ID" : "ETL_STREAM_NOT_SORTED", `${sourceId} repitio o desordeno ${id}`);
+    }
+    previousId = id;
+
+    const evidence = sourceUrl(record);
+    if (typeof evidence !== "string" || !/^https:\/\//i.test(evidence)) {
+      fail("ETL_MISSING_SOURCE", `${sourceId}/${id} no tiene una URL HTTPS oficial`);
+    }
+    const date = recordDate(record);
+    if (date !== null && !/^\d{4}-\d{2}-\d{2}/.test(String(date))) {
+      fail("ETL_INVALID_DATE", `${sourceId}/${id} tiene fecha invalida`);
+    }
+    if (count > 0) checksum.update("\n");
+    checksum.update(stableStringify(record));
+    count += 1;
+  }
+  if (count < minimumCount) fail("ETL_EMPTY_SOURCE", `${sourceId} produjo ${count} registros; minimo ${minimumCount}`);
+  if (Number.isSafeInteger(previousCount) && previousCount > 0 && count / previousCount < minimumRetainedRatio) {
+    fail("ETL_UNEXPECTED_DROP", `${sourceId} retuvo ${((count / previousCount) * 100).toFixed(1)}% del lote anterior`);
+  }
+  return { sourceId, recordCount: count, checksumSha256: checksum.digest("hex"), status: "valid" };
+}
+
 export function validateAsset({ name, size, recordCount, minimumBytes = 128, minimumCount = 1 }) {
   const valid = typeof name === "string"
     && name.length > 0

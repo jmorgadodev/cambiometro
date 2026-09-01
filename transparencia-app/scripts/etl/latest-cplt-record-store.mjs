@@ -15,27 +15,30 @@ export class LatestCpltRecordStore {
         stable_key TEXT PRIMARY KEY,
         period TEXT NOT NULL,
         record_json TEXT NOT NULL,
-        organismo_id TEXT NOT NULL
+        organismo_id TEXT NOT NULL,
+        record_id TEXT NOT NULL
       ) WITHOUT ROWID;
     `);
     this.upsertStatement = this.database.prepare(`
-      INSERT INTO latest_records (stable_key, period, record_json, organismo_id)
-      VALUES (?, ?, ?, ?)
+      INSERT INTO latest_records (stable_key, period, record_json, organismo_id, record_id)
+      VALUES (?, ?, ?, ?, ?)
       ON CONFLICT(stable_key) DO UPDATE SET
         period = excluded.period,
         record_json = excluded.record_json,
-        organismo_id = excluded.organismo_id
+        organismo_id = excluded.organismo_id,
+        record_id = excluded.record_id
       WHERE excluded.period > latest_records.period
     `);
+    this.database.exec("CREATE INDEX latest_records_by_organism ON latest_records (organismo_id, record_id)");
     this.countStatement = this.database.prepare("SELECT COUNT(*) AS total FROM latest_records");
     this.database.exec("BEGIN");
     this.pending = 0;
     this.closed = false;
   }
 
-  upsert({ stableKey, period, record, organismoId }) {
+  upsert({ stableKey, period, record, organismoId, recordId = record?.id || stableKey }) {
     if (!stableKey || !period || !record || !organismoId) throw new Error("CPLT_STORE_INVALID_RECORD");
-    this.upsertStatement.run(stableKey, period, JSON.stringify(record), organismoId);
+    this.upsertStatement.run(stableKey, period, JSON.stringify(record), organismoId, recordId);
     this.pending += 1;
     if (this.pending >= 10_000) this.flush();
   }
@@ -55,7 +58,7 @@ export class LatestCpltRecordStore {
     const statement = this.database.prepare(`
       SELECT period, record_json, organismo_id AS organismoId
       FROM latest_records
-      ORDER BY stable_key
+      ORDER BY record_id
     `);
     for (const row of statement.iterate()) {
       yield {
@@ -64,6 +67,26 @@ export class LatestCpltRecordStore {
         organismoId: row.organismoId,
       };
     }
+  }
+
+  *groupsByOrganismo() {
+    this.flush();
+    const statement = this.database.prepare(`
+      SELECT period, record_json, organismo_id AS organismoId
+      FROM latest_records
+      ORDER BY organismo_id, record_id
+    `);
+    let currentOrganismoId = null;
+    let records = [];
+    for (const row of statement.iterate()) {
+      if (currentOrganismoId !== null && row.organismoId !== currentOrganismoId) {
+        yield { organismoId: currentOrganismoId, records };
+        records = [];
+      }
+      currentOrganismoId = row.organismoId;
+      records.push({ period: row.period, record: JSON.parse(row.record_json), organismoId: row.organismoId });
+    }
+    if (currentOrganismoId !== null) yield { organismoId: currentOrganismoId, records };
   }
 
   close() {
