@@ -239,6 +239,24 @@ describe("API canónica v1", () => {
     expect(payload.meta.sourceStatus).toBe("r2-catalog");
   });
 
+  it("mantiene diputados y senadores buscables aunque D1 y el catálogo R2 no respondan", async () => {
+    const env = {
+      DB: { prepare: () => { throw new Error("D1_ERROR: daily rows_read quota exceeded"); } },
+      PUBLIC_DATA: { get: async () => null },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/search?q=Vanessa%20Kaiser"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.autoridades[0]).toMatchObject({
+      id: "sen-038",
+      nombre: "Vanessa Kaiser Barents-Von Hohenhagen",
+      type: "persona",
+      url: "/politico/vanessa-kaiser-barents-von-hohenhagen",
+    });
+  });
+
   it("no propaga un error 1101 cuando una consulta histórica agota D1", async () => {
     const env = {
       DB: { prepare: () => { throw new Error("D1_ERROR: daily rows_read quota exceeded"); } },
