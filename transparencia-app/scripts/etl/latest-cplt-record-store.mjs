@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import { DatabaseSync } from "node:sqlite";
+import { deflateSync, inflateSync } from "node:zlib";
 
 export class LatestCpltRecordStore {
   constructor(filePath) {
@@ -14,17 +15,17 @@ export class LatestCpltRecordStore {
       CREATE TABLE latest_records (
         stable_key TEXT PRIMARY KEY,
         period TEXT NOT NULL,
-        record_json TEXT NOT NULL,
+        record_blob BLOB NOT NULL,
         organismo_id TEXT NOT NULL,
         record_id TEXT NOT NULL
       ) WITHOUT ROWID;
     `);
     this.upsertStatement = this.database.prepare(`
-      INSERT INTO latest_records (stable_key, period, record_json, organismo_id, record_id)
+      INSERT INTO latest_records (stable_key, period, record_blob, organismo_id, record_id)
       VALUES (?, ?, ?, ?, ?)
       ON CONFLICT(stable_key) DO UPDATE SET
         period = excluded.period,
-        record_json = excluded.record_json,
+        record_blob = excluded.record_blob,
         organismo_id = excluded.organismo_id,
         record_id = excluded.record_id
       WHERE excluded.period > latest_records.period
@@ -38,7 +39,10 @@ export class LatestCpltRecordStore {
 
   upsert({ stableKey, period, record, organismoId, recordId = record?.id || stableKey }) {
     if (!stableKey || !period || !record || !organismoId) throw new Error("CPLT_STORE_INVALID_RECORD");
-    this.upsertStatement.run(stableKey, period, JSON.stringify(record), organismoId, recordId);
+    // El snapshot intermedio puede superar cientos de miles de filas y cada
+    // JSON textual queda retenido por SQLite. Comprimirlo como BLOB reduce la
+    // memoria de la base temporal sin alterar el registro que se publica.
+    this.upsertStatement.run(stableKey, period, deflateSync(JSON.stringify(record)), organismoId, recordId);
     this.pending += 1;
     if (this.pending >= 10_000) this.flush();
   }
@@ -56,14 +60,14 @@ export class LatestCpltRecordStore {
   *values() {
     this.flush();
     const statement = this.database.prepare(`
-      SELECT period, record_json, organismo_id AS organismoId
+      SELECT period, record_blob, organismo_id AS organismoId
       FROM latest_records
       ORDER BY record_id
     `);
     for (const row of statement.iterate()) {
       yield {
         period: row.period,
-        record: JSON.parse(row.record_json),
+        record: JSON.parse(inflateSync(row.record_blob).toString("utf8")),
         organismoId: row.organismoId,
       };
     }
@@ -72,7 +76,7 @@ export class LatestCpltRecordStore {
   *groupsByOrganismo() {
     this.flush();
     const statement = this.database.prepare(`
-      SELECT period, record_json, organismo_id AS organismoId
+      SELECT period, record_blob, organismo_id AS organismoId
       FROM latest_records
       ORDER BY organismo_id, record_id
     `);
@@ -84,7 +88,7 @@ export class LatestCpltRecordStore {
         records = [];
       }
       currentOrganismoId = row.organismoId;
-      records.push({ period: row.period, record: JSON.parse(row.record_json), organismoId: row.organismoId });
+      records.push({ period: row.period, record: JSON.parse(inflateSync(row.record_blob).toString("utf8")), organismoId: row.organismoId });
     }
     if (currentOrganismoId !== null) yield { organismoId: currentOrganismoId, records };
   }
