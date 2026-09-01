@@ -1200,8 +1200,14 @@ export default {
       if (invalid) return failure("INVALID_QUERY", invalid, 400);
       const limited = await rateLimit(request, env, "funcionarios");
       if (limited) return limited;
+      // El universo nacional vive en el índice paginado de R2. Consultar D1
+      // primero obliga a contar/leer hasta 1,2M filas y puede agotar el cupo
+      // gratuito de rows_read antes de llegar al fallback canónico. R2 es la
+      // fuente primaria; D1 sólo rescata un release R2 ausente o incompleto.
+      const r2 = await listFuncionariosFromR2(url, env);
+      if (r2.status < 500) return r2;
       const d1 = await listFuncionariosFromD1(url, env);
-      return d1 ?? listFuncionariosFromR2(url, env);
+      return d1 ?? r2;
     }
     if (path.startsWith("/api/v1/politico/")) {
       if (!env.DB) return dbUnavailable();
