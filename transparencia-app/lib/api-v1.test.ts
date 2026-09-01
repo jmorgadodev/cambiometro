@@ -221,6 +221,24 @@ describe("API canónica v1", () => {
     expect(payload.meta).toMatchObject({ total: 1, limit: 1 });
   });
 
+  it("mantiene la búsqueda del home disponible desde el catálogo R2", async () => {
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse para la búsqueda del catálogo"); } },
+      PUBLIC_DATA: {
+        get: async (key: string) => key === "projections/entities-v1/entities-routes.json"
+          ? { json: async <T>() => [{ id: "person-1", kind: "person", name: "Vanessa Kaiser", attributes: { cargo: "Senadora" }, identifiers: [], sourceIds: [] }] as T }
+          : null,
+      },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/search?q=Kaiser"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.autoridades[0]).toMatchObject({ nombre: "Vanessa Kaiser", type: "persona" });
+    expect(payload.meta.sourceStatus).toBe("r2-catalog");
+  });
+
   it("no propaga un error 1101 cuando una consulta histórica agota D1", async () => {
     const env = {
       DB: { prepare: () => { throw new Error("D1_ERROR: daily rows_read quota exceeded"); } },
@@ -466,6 +484,29 @@ describe("API canónica v1", () => {
     expect(response.status).toBe(200);
     expect(prepared.some((sql) => /COUNT\(\*\).*FROM records/i.test(sql))).toBe(false);
     expect(prepared.some((sql) => /source_state\.record_count/i.test(sql))).toBe(true);
+  });
+
+  it("sirve el catálogo de fuentes desde R2 si D1 agotó su cuota", async () => {
+    const env = {
+      DB: { prepare: () => { throw new Error("D1_ERROR: daily rows_read quota exceeded"); } },
+      PUBLIC_DATA: {
+        get: async (key: string) => {
+          if (key === "projections/sources-v1/source-inventory.json") {
+            return { json: async <T>() => ({ sources: [{ id: "camara", label: "Cámara", status: "partial" }] }) as T };
+          }
+          if (key === "projections/sources-v1/source-health.json") {
+            return { json: async <T>() => ({ sources: { camara: { recordCount: 19025, status: "partial", generatedAt: "2026-08-21T00:00:00.000Z" } } }) as T };
+          }
+          return null;
+        },
+      },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/sources"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data[0]).toMatchObject({ id: "camara", recordCount: 19025, status: "connected" });
   });
 
   it("filtra y pagina registros con un enlace next reproducible", async () => {
