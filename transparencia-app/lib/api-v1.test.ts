@@ -257,6 +257,26 @@ describe("API canónica v1", () => {
     });
   });
 
+  it("no duplica una persona cuando existe en ambos catálogos", async () => {
+    const files: Record<string, unknown> = {
+      "projections/entities-v1/entities-routes.json": [
+        { id: "person-camara-1110", kind: "person", name: "Carlos Bianchi Chelech", attributes: {}, identifiers: [], sourceIds: [] },
+      ],
+    };
+    const env = {
+      DB: { prepare: () => { throw new Error("D1_ERROR: daily rows_read quota exceeded"); } },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/search?q=Bianchi"), env);
+    const payload = await response.json();
+    const matches = payload.data.autoridades.filter((item: { nombre: string }) => item.nombre === "Carlos Bianchi Chelech");
+
+    expect(response.status).toBe(200);
+    expect(matches).toHaveLength(1);
+    expect(matches[0].url).toBe("/politico/carlos-bianchi-chelech");
+  });
+
   it("no propaga un error 1101 cuando una consulta histórica agota D1", async () => {
     const env = {
       DB: { prepare: () => { throw new Error("D1_ERROR: daily rows_read quota exceeded"); } },
