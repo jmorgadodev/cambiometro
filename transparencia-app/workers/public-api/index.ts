@@ -73,6 +73,18 @@ function dbUnavailable() {
   return failure("DATABASE_UNAVAILABLE", "D1 no esta disponible.", 503, undefined);
 }
 
+async function databaseSafe(query: Promise<Response>) {
+  try {
+    return await query;
+  } catch {
+    // Ningún error de un binding debe propagarse como 1101 al navegador. El
+    // cliente recibe una respuesta uniforme y puede mostrar su estado de
+    // reintento mientras la fuente alternativa o el siguiente reset están
+    // disponibles.
+    return dbUnavailable();
+  }
+}
+
 interface TransferApiPage {
   page: number;
   count: number;
@@ -122,6 +134,10 @@ interface CpltManifest {
   searchIndex?: { key: string };
 }
 
+interface StaticSiteManifest {
+  files: Array<{ path: string; key: string }>;
+}
+
 interface OfficialsSearchIndex {
   schemaVersion: number;
   totalRows: number;
@@ -154,7 +170,14 @@ type CompactOfficialTokenEntry = [token: string, positions: number[]];
 
 async function r2Json<T>(bucket: R2Bucket | undefined, key: string): Promise<T | null> {
   if (!bucket) return null;
-  const object = await bucket.get(key);
+  let object;
+  try {
+    object = await bucket.get(key);
+  } catch {
+    // R2 debe comportarse como una fuente degradable: un fallo temporal del
+    // binding no puede convertirse en un 1101 de Cloudflare para el cliente.
+    return null;
+  }
   if (!object) return null;
   try {
     return await object.json<T>();
@@ -713,6 +736,34 @@ function entity(row: JsonRecord) {
   };
 }
 
+async function canonicalEntitiesFromR2(env: Env) {
+  const manifest = await r2Json<StaticSiteManifest>(env.PUBLIC_DATA, "projections/static-site-v1/manifest.json");
+  const entry = manifest?.files?.find((file) => file.path === "data/catalog/entities-routes.json");
+  const keys = [entry?.key, "projections/entities-v1/entities-routes.json"].filter((key): key is string => Boolean(key));
+  for (const key of keys) {
+    const rows = await r2Json<JsonRecord[]>(env.PUBLIC_DATA, key);
+    if (Array.isArray(rows)) return rows;
+  }
+  return null;
+}
+
+async function listEntitiesFromR2(requestUrl: URL, env: Env) {
+  const rows = await canonicalEntitiesFromR2(env);
+  if (!rows) return null;
+  const limit = limitFrom(requestUrl);
+  const offset = offsetFrom(requestUrl);
+  const kind = requestUrl.searchParams.get("kind");
+  const query = requestUrl.searchParams.get("q")?.trim().slice(0, 80) ?? "";
+  const normalizeEntitySearch = (value: unknown) => String(value ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL");
+  const normalizedQuery = normalizeEntitySearch(query);
+  const filtered = rows
+    .filter((row) => !kind || row.kind === kind)
+    .filter((row) => !normalizedQuery || normalizeEntitySearch(row.name).includes(normalizedQuery))
+    .sort((left, right) => String(left.name ?? "").localeCompare(String(right.name ?? ""), "es-CL") || String(left.id ?? "").localeCompare(String(right.id ?? "")));
+  const total = filtered.length;
+  return success(filtered.slice(offset, offset + limit).map(entity), { total, limit }, pageLinks(requestUrl, offset, limit, total));
+}
+
 function politico(row: JsonRecord) {
   return {
     id: row.id,
@@ -768,7 +819,7 @@ function relation(row: JsonRecord) {
 }
 
 async function listEntities(requestUrl: URL, env: Env) {
-  if (!env.DB) return dbUnavailable();
+  if (!env.DB) return await listEntitiesFromR2(requestUrl, env) ?? failure("DATASET_UNAVAILABLE", "El directorio no está disponible temporalmente.", 503);
   const limit = limitFrom(requestUrl);
   const offset = offsetFrom(requestUrl);
   const kind = requestUrl.searchParams.get("kind");
@@ -778,10 +829,17 @@ async function listEntities(requestUrl: URL, env: Env) {
   if (kind) { clauses.push("kind = ?"); bindings.push(kind); }
   if (query) { clauses.push("name LIKE ?"); bindings.push(`%${query.slice(0, 80)}%`); }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
-  const total = await env.DB.prepare(`SELECT count(*) AS total FROM entities ${where}`).bind(...bindings).first<{ total: number }>();
-  const rows = await env.DB.prepare(`SELECT * FROM entities ${where} ORDER BY name, id LIMIT ? OFFSET ?`).bind(...bindings, limit, offset).all<JsonRecord>();
-  const totalCount = Number(total?.total ?? 0);
-  return success((rows.results ?? []).map(entity), { total: totalCount, limit }, pageLinks(requestUrl, offset, limit, totalCount));
+  try {
+    const total = await env.DB.prepare(`SELECT count(*) AS total FROM entities ${where}`).bind(...bindings).first<{ total: number }>();
+    const rows = await env.DB.prepare(`SELECT * FROM entities ${where} ORDER BY name, id LIMIT ? OFFSET ?`).bind(...bindings, limit, offset).all<JsonRecord>();
+    const totalCount = Number(total?.total ?? 0);
+    return success((rows.results ?? []).map(entity), { total: totalCount, limit }, pageLinks(requestUrl, offset, limit, totalCount));
+  } catch {
+    // El plan gratuito de D1 puede agotar rows_read antes del siguiente reset.
+    // El catálogo canónico R2 mantiene el directorio consultable sin cargarlo
+    // completo en el navegador y evita exponer el error 1101 al público.
+    return await listEntitiesFromR2(requestUrl, env) ?? failure("DATABASE_UNAVAILABLE", "La base de datos no está disponible temporalmente.", 503);
+  }
 }
 
 async function listRecords(requestUrl: URL, env: Env) {
@@ -1101,7 +1159,7 @@ export default {
     if (request.method !== "GET") return failure("METHOD_NOT_ALLOWED", "Método no permitido.", 405);
     if (path === "/api/v1/search") {
       const limited = await rateLimit(request, env, "search");
-      return limited ?? search(url, env);
+      return limited ?? databaseSafe(search(url, env));
     }
     if (path === "/api/v1/transferencias") {
       const limited = await rateLimit(request, env, "transferencias");
@@ -1113,15 +1171,15 @@ export default {
     }
     if (path === "/api/v1/records") {
       const limited = await rateLimit(request, env, "records");
-      return limited ?? listRecords(url, env);
+      return limited ?? databaseSafe(listRecords(url, env));
     }
     if (path === "/api/v1/relations") {
       const limited = await rateLimit(request, env, "relations");
-      return limited ?? listRelations(url, env);
+      return limited ?? databaseSafe(listRelations(url, env));
     }
     if (path === "/api/v1/crosses") {
       const limited = await rateLimit(request, env, "crosses");
-      return limited ?? listRelations(url, env, true);
+      return limited ?? databaseSafe(listRelations(url, env, true));
     }
     if (path === "/api/v1/alertas") return success([]);
     if (path === "/api/v1/commercial/keys") return failure("COMMERCIAL_API_UNAVAILABLE", "La API comercial no está disponible.", 503);
@@ -1131,11 +1189,11 @@ export default {
     }
     if (path === "/api/v1/sources") {
       const limited = await rateLimit(request, env, "sources");
-      return limited ?? listSources(url, env);
+      return limited ?? databaseSafe(listSources(url, env));
     }
     if (path === "/api/v1/export") {
         const limited = await rateLimit(request, env, "export");
-        return limited ?? exportData(url, env);
+        return limited ?? databaseSafe(exportData(url, env));
       }
     if (path === "/api/funcionarios" || path === "/api/v1/funcionarios") {
       const invalid = validateOfficials(url);
