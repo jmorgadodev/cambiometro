@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { createCpltRecordId, getCpltColumn, parseCpltColumns, parseCpltHeader, parseCpltIdentity, parseCpltRecord } from "./cplt-personal.mjs";
+import { createCpltRecordId, parseCpltColumns, parseCpltHeader, parseCpltIdentity, parseCpltRecord, scanCpltCell } from "./cplt-personal.mjs";
 import { LatestCpltRecordStore } from "./latest-cplt-record-store.mjs";
 import { createMunicipalityRegistry } from "./municipality-registry.mjs";
 import { readRangedTextLines } from "./ranged-csv-source.mjs";
@@ -115,16 +115,16 @@ async function processStream(tipo, urls, outputDir) {
         header = parseCpltHeader(line);
         continue;
       }
-      if (!line.trim()) continue;
+      if (line.length === 0) continue;
       if (linesProcessed % 500_000 === 0) {
         console.log(`    [INFO] ${tipo}: ${linesProcessed} lineas; ${latestByOfficial.size} registros municipales vigentes unicos`);
       }
 
-      const columns = parseCpltColumns(line);
-      const year = Number(getCpltColumn(columns, header, "anyo", "año"));
+      const year = Number(scanCpltCell(line, header, "anyo", "año"));
       if (!Number.isInteger(year) || year < 2024) continue;
-      const organismoNombre = getCpltColumn(columns, header, "organismo_nombre", "organismo nombre");
+      const organismoNombre = scanCpltCell(line, header, "organismo_nombre", "organismo nombre");
       if (!/^(?:(?:i|ilustre) )?municipalidad\b|^municipio\b/.test(normalized(organismoNombre))) continue;
+      const columns = parseCpltColumns(line);
       let organismoId;
       try {
         organismoId = resolveOrganismoId(organismoNombre);

@@ -58,7 +58,31 @@ function cell(columns, header, ...names) {
 }
 
 export function getCpltCell(line, header, ...names) {
-  return cell(String(line).split(";"), header, ...names);
+  return scanCpltCell(line, header, ...names);
+}
+
+export function scanCpltCell(line, header, ...names) {
+  let targetIndex;
+  for (const name of names) {
+    const index = header.get(normalized(name));
+    if (index !== undefined) {
+      targetIndex = index;
+      break;
+    }
+  }
+  if (targetIndex === undefined) return "";
+
+  const text = typeof line === "string" ? line : String(line);
+  let columnIndex = 0;
+  let columnStart = 0;
+  for (let index = 0; index <= text.length; index += 1) {
+    if (index < text.length && text.charCodeAt(index) !== 59) continue;
+    if (columnIndex === targetIndex) return text.slice(columnStart, index).trim();
+    if (columnIndex > targetIndex) break;
+    columnIndex += 1;
+    columnStart = index + 1;
+  }
+  return "";
 }
 
 export function parseCpltColumns(line) {
