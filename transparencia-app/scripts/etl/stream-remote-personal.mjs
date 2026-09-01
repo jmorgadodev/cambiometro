@@ -30,6 +30,15 @@ function titleCase(value) {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
 }
 
+function memoryUsageMb() {
+  const usage = process.memoryUsage();
+  return {
+    heap: Math.round(usage.heapUsed / 1024 / 1024),
+    rss: Math.round(usage.rss / 1024 / 1024),
+    external: Math.round(usage.external / 1024 / 1024),
+  };
+}
+
 function loadOrganismosMap() {
   const map = {};
   const files = [
@@ -117,7 +126,8 @@ async function processStream(tipo, urls, outputDir) {
       }
       if (line.length === 0) continue;
       if (linesProcessed % 500_000 === 0) {
-        console.log(`    [INFO] ${tipo}: ${linesProcessed} lineas; ${latestByOfficial.size} registros municipales vigentes unicos`);
+        const memory = memoryUsageMb();
+        console.log(`    [INFO] ${tipo}: ${linesProcessed} lineas; ${latestByOfficial.size} registros municipales vigentes unicos; memoria heap=${memory.heap}MB rss=${memory.rss}MB externa=${memory.external}MB`);
       }
 
       const year = Number(scanCpltCell(line, header, "anyo", "año"));
