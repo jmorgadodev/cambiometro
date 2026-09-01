@@ -541,12 +541,12 @@ async function listFuncionariosFromD1(requestUrl: URL, env: Env): Promise<Respon
       fuente: "Transparencia Activa CPLT",
     }));
     return json({ data, meta: { total, totalHeadcount: total, page, totalPages: Math.max(1, Math.ceil(total / limit)), limit, updatedAt: null, sourceStatus: "d1", stats: { totalMuni: total, totalValidos: data.filter((row) => officialSalary(row) >= 50_000).length, promedioSueldo: 0, conHorasExtras: 0, observadosCount: 0, sinPagoCount: 0, microMontoCount: 0 } }, links: { self: requestUrl.toString() } });
-  } catch (error) {
-    // D1 puede devolver 1101 cuando se agota rows_read o atraviesa una
-    // ventana transitoria de cuota. El índice nacional en R2 es la fuente
-    // de respaldo y no debe quedar oculto por una excepción del binding.
-    if (String(error).match(/no such table|no such column|internal error|rows[_ ]read|quota|limit exceeded/i)) return null;
-    throw error;
+  } catch {
+    // Cualquier fallo del binding D1 (incluido el 1101 que Cloudflare emite
+    // al agotar rows_read) debe activar la fuente canónica paginada en R2.
+    // El mensaje del binding no es estable entre ejecuciones, por lo que no
+    // se puede depender de reconocer una cadena concreta.
+    return null;
   }
 }
 
