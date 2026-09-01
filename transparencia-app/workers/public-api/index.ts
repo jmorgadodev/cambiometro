@@ -73,6 +73,18 @@ function dbUnavailable() {
   return failure("DATABASE_UNAVAILABLE", "D1 no esta disponible.", 503, undefined);
 }
 
+async function databaseSafe(query: Promise<Response>) {
+  try {
+    return await query;
+  } catch {
+    // Ningún error de un binding debe propagarse como 1101 al navegador. El
+    // cliente recibe una respuesta uniforme y puede mostrar su estado de
+    // reintento mientras la fuente alternativa o el siguiente reset están
+    // disponibles.
+    return dbUnavailable();
+  }
+}
+
 interface TransferApiPage {
   page: number;
   count: number;
@@ -1147,7 +1159,7 @@ export default {
     if (request.method !== "GET") return failure("METHOD_NOT_ALLOWED", "Método no permitido.", 405);
     if (path === "/api/v1/search") {
       const limited = await rateLimit(request, env, "search");
-      return limited ?? search(url, env);
+      return limited ?? databaseSafe(search(url, env));
     }
     if (path === "/api/v1/transferencias") {
       const limited = await rateLimit(request, env, "transferencias");
@@ -1159,15 +1171,15 @@ export default {
     }
     if (path === "/api/v1/records") {
       const limited = await rateLimit(request, env, "records");
-      return limited ?? listRecords(url, env);
+      return limited ?? databaseSafe(listRecords(url, env));
     }
     if (path === "/api/v1/relations") {
       const limited = await rateLimit(request, env, "relations");
-      return limited ?? listRelations(url, env);
+      return limited ?? databaseSafe(listRelations(url, env));
     }
     if (path === "/api/v1/crosses") {
       const limited = await rateLimit(request, env, "crosses");
-      return limited ?? listRelations(url, env, true);
+      return limited ?? databaseSafe(listRelations(url, env, true));
     }
     if (path === "/api/v1/alertas") return success([]);
     if (path === "/api/v1/commercial/keys") return failure("COMMERCIAL_API_UNAVAILABLE", "La API comercial no está disponible.", 503);
@@ -1177,11 +1189,11 @@ export default {
     }
     if (path === "/api/v1/sources") {
       const limited = await rateLimit(request, env, "sources");
-      return limited ?? listSources(url, env);
+      return limited ?? databaseSafe(listSources(url, env));
     }
     if (path === "/api/v1/export") {
         const limited = await rateLimit(request, env, "export");
-        return limited ?? exportData(url, env);
+        return limited ?? databaseSafe(exportData(url, env));
       }
     if (path === "/api/funcionarios" || path === "/api/v1/funcionarios") {
       const invalid = validateOfficials(url);
