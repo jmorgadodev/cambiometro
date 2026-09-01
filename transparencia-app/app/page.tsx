@@ -6,7 +6,7 @@ import Icono from "@/components/ui/Icono";
 import { GLOBAL_KPIS, KPI_SCOPES } from "@/lib/global-kpis";
 import { ETL_SOURCES_DATA } from "@/lib/etl-sources-data";
 import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
-import { VOTACIONES_DESTACADAS } from "@/lib/votaciones-destacadas";
+import { getVotingFreshness, VOTACIONES_DESTACADAS } from "@/lib/votaciones-destacadas";
 import { tituloVotacionLegible } from "@/lib/votaciones-format";
 import { MOVIMIENTOS_HOME_SUMMARY } from "@/lib/movimientos";
 import { formatFechaCorta } from "@/lib/format";
@@ -14,6 +14,13 @@ import { formatFechaCorta } from "@/lib/format";
 export const dynamic = "force-static";
 
 const HOME_SOURCES_LIST = ETL_SOURCES_DATA.filter((source) => source.recordCount > 0);
+const VOTING_FRESHNESS = getVotingFreshness();
+
+function formatVotingDate(value: string | null) {
+  if (!value) return "Sin fecha publicada";
+  const date = value.slice(0, 10);
+  return new Intl.DateTimeFormat("es-CL", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${date}T12:00:00Z`));
+}
 
 // Selección editorial para la Home: impacto público, quórum y diversidad de
 // materias. El listado completo y sus filtros viven en /votaciones-destacadas.
@@ -301,6 +308,11 @@ export default async function HomePage() {
             <Link prefetch={false} href="/votaciones-destacadas/">Ver selección completa →</Link>
           </div>
           <p className="home-featured-votes__intro">Una selección de proyectos con impacto público, quórum relevante o materias que conviene entender en contexto.</p>
+          <div className="voting-freshness" role="status" aria-label="Frescura de las votaciones parlamentarias">
+            <span><strong>Última revisión automática</strong>{formatVotingDate(VOTING_FRESHNESS.reviewedAt)}</span>
+            <span><strong>Última votación nominal</strong>{formatVotingDate(VOTING_FRESHNESS.latestVoteDate)}</span>
+            <small>El pipeline puede quedar al día sin sumar registros cuando no hubo nuevas votaciones de Sala.</small>
+          </div>
           <div className="home-vote-list">
             {highlightedVotes.map((vote) => (
               <article className="home-vote-row" key={vote.votacion_id}>

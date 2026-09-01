@@ -38,6 +38,10 @@ export interface InfoLobbyProjection {
 
 let cached: InfoLobbyProjection | null = null;
 
+function isUsableProjection(value: InfoLobbyProjection | null): value is InfoLobbyProjection {
+  return Boolean(value && Array.isArray(value.records) && value.records.length > 0);
+}
+
 /**
  * Proyección v1 de registros InfoLobby (ley 20.730) generada por
  * scripts/build-infolobby-v1.mjs desde las particiones del lake.
@@ -62,12 +66,16 @@ export function leerInfoLobbyV1(): InfoLobbyProjection | null {
       "lake-subsets",
       "infolobby.subset.json",
     );
-    const targetFile = fs.existsSync(fullFile) ? fullFile : subsetFile;
-    if (fs.existsSync(targetFile)) {
-      cached = JSON.parse(fs.readFileSync(targetFile, "utf8")) as InfoLobbyProjection;
-      return cached;
+    for (const targetFile of [fullFile, subsetFile]) {
+      if (!fs.existsSync(targetFile)) continue;
+      const candidate = JSON.parse(fs.readFileSync(targetFile, "utf8")) as InfoLobbyProjection;
+      if (isUsableProjection(candidate)) {
+        cached = candidate;
+        return cached;
+      }
     }
   } catch {}
-  cached = (infolobbyStaticJson as unknown) as InfoLobbyProjection;
+  const bundled = (infolobbyStaticJson as unknown) as InfoLobbyProjection;
+  cached = isUsableProjection(bundled) ? bundled : null;
   return cached;
 }
