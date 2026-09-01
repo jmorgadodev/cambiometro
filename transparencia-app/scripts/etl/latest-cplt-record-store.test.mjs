@@ -19,15 +19,15 @@ describe("LatestCpltRecordStore", () => {
     const databasePath = path.join(directory, "latest.sqlite");
     const store = new LatestCpltRecordStore(databasePath);
 
-    store.upsert({ stableKey: "persona-a", period: "2025-12", line: "anterior", organismoId: "maipu" });
-    store.upsert({ stableKey: "persona-b", period: "2026-01", line: "unico", organismoId: "santiago" });
-    store.upsert({ stableKey: "persona-a", period: "2026-02", line: "vigente", organismoId: "maipu" });
-    store.upsert({ stableKey: "persona-a", period: "2026-01", line: "atrasado", organismoId: "maipu" });
+    store.upsert({ stableKey: "persona-a", period: "2025-12", record: { nombre: "anterior" }, organismoId: "maipu" });
+    store.upsert({ stableKey: "persona-b", period: "2026-01", record: { nombre: "unico" }, organismoId: "santiago" });
+    store.upsert({ stableKey: "persona-a", period: "2026-02", record: { nombre: "vigente" }, organismoId: "maipu" });
+    store.upsert({ stableKey: "persona-a", period: "2026-01", record: { nombre: "atrasado" }, organismoId: "maipu" });
 
     expect(store.size).toBe(2);
     expect([...store.values()]).toEqual([
-      { period: "2026-02", line: "vigente", organismoId: "maipu" },
-      { period: "2026-01", line: "unico", organismoId: "santiago" },
+      { period: "2026-02", record: { nombre: "vigente" }, organismoId: "maipu" },
+      { period: "2026-01", record: { nombre: "unico" }, organismoId: "santiago" },
     ]);
 
     store.close();
