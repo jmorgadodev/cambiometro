@@ -20,6 +20,6 @@ describe("prefiltro acotado de nóminas CPLT", () => {
 
     expect(yearPrefilter).toBeGreaterThan(-1);
     expect(municipalityPrefilter).toBeGreaterThan(yearPrefilter);
-    expect(fullParse).toBeGreaterThan(municipalityPrefilter);
+    expect(fullParse).toBe(-1);
   });
 });

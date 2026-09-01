@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { createCpltRecordId, parseCpltColumns, parseCpltHeader, parseCpltIdentity, parseCpltRecord, scanCpltCell } from "./cplt-personal.mjs";
+import { createCpltRecordId, parseCpltHeader, parseCpltIdentity, parseCpltRecord, scanCpltCell } from "./cplt-personal.mjs";
 import { LatestCpltRecordStore } from "./latest-cplt-record-store.mjs";
 import { createMunicipalityRegistry } from "./municipality-registry.mjs";
 import { readRangedTextLines } from "./ranged-csv-source.mjs";
@@ -134,7 +134,6 @@ async function processStream(tipo, urls, outputDir) {
       if (!Number.isInteger(year) || year < 2024) continue;
       const organismoNombre = scanCpltCell(line, header, "organismo_nombre", "organismo nombre");
       if (!/^(?:(?:i|ilustre) )?municipalidad\b|^municipio\b/.test(normalized(organismoNombre))) continue;
-      const columns = parseCpltColumns(line);
       let organismoId;
       try {
         organismoId = resolveOrganismoId(organismoNombre);
@@ -145,7 +144,7 @@ async function processStream(tipo, urls, outputDir) {
         }
         throw error;
       }
-      const identity = parseCpltIdentity({ columns, header, tipo, organismoId });
+      const identity = parseCpltIdentity({ line, header, tipo, organismoId });
       if (!identity) continue;
 
       latestByOfficial.upsert({ stableKey: identity.stableKey, line, organismoId, period: identity.period });
