@@ -18,6 +18,6 @@ export default defineConfig({
     ],
   },
   test: {
-    include: ["lib/**/*.test.ts", "workers/**/*.test.ts", "scripts/static-site-inputs.test.mjs", "scripts/expense-release.test.mjs", "scripts/movimientos-pipeline.test.mjs", "scripts/etl-expenses-local.test.mjs", "scripts/etl/*.test.mjs", "scripts/etl/connectors/**/*.test.mjs"],
+    include: ["lib/**/*.test.ts", "workers/**/*.test.ts", "scripts/static-site-inputs.test.mjs", "scripts/expense-release.test.mjs", "scripts/movimientos-pipeline.test.mjs", "scripts/etl-expenses-local.test.mjs", "scripts/etl/transfer-release-cutoff.test.mjs", "scripts/etl/ranged-csv-source.test.mjs", "scripts/etl/latest-cplt-record-store.test.mjs", "scripts/etl/connectors/**/*.test.mjs"],
   },
 });
