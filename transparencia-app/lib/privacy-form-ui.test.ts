@@ -20,4 +20,17 @@ describe("canal de solicitudes de privacidad", () => {
       expect(source).toContain("NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}");
     }
   });
+
+  it("sólo tolera el 400 de Turnstile productivo cuando se verifica en localhost", () => {
+    const verifier = readFileSync(
+      resolve(import.meta.dirname, "../scripts/verify-integration.mjs"),
+      "utf8",
+    );
+
+    expect(verifier).toContain("/^https:\\/\\/challenges\\.cloudflare\\.com\\//.test(locationUrl)");
+    expect(verifier).toContain('message.includes("Failed to load resource: the server responded with a status of 400")');
+    expect(verifier).not.toContain(
+      'verifyingLocal && message.includes("Failed to load resource: the server responded with a status of 400")\n    )',
+    );
+  });
 });
