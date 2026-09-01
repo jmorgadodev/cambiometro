@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { createCpltRecordId, parseCpltHeader, parseCpltIdentity, parseCpltRecord, scanCpltCell } from "./cplt-personal.mjs";
+import { createCpltRecordId, parseCpltHeader, parseCpltRecord, scanCpltCell } from "./cplt-personal.mjs";
 import { LatestCpltRecordStore } from "./latest-cplt-record-store.mjs";
 import { createMunicipalityRegistry } from "./municipality-registry.mjs";
 import { readRangedTextLines } from "./ranged-csv-source.mjs";
@@ -144,10 +144,14 @@ async function processStream(tipo, urls, outputDir) {
         }
         throw error;
       }
-      const identity = parseCpltIdentity({ line, header, tipo, organismoId });
-      if (!identity) continue;
-
-      latestByOfficial.upsert({ stableKey: identity.stableKey, line, organismoId, period: identity.period });
+      const funcionario = parseCpltRecord({ line, header, tipo, organismoId, sourceUrl, deferId: true });
+      if (!funcionario) continue;
+      latestByOfficial.upsert({
+        stableKey: funcionario._stableKey,
+        period: funcionario.fuente_periodo,
+        record: funcionario,
+        organismoId,
+      });
     }
   } catch (error) {
     latestByOfficial.close();
@@ -164,7 +168,7 @@ async function processStream(tipo, urls, outputDir) {
   try {
     for (const latest of latestByOfficial.values()) {
       const { organismoId } = latest;
-      const funcionario = parseCpltRecord({ line: latest.line, header, tipo, organismoId, sourceUrl, deferId: true });
+      const funcionario = latest.record;
       if (!funcionario) throw new Error(`CPLT_LATEST_RECORD_INVALID: ${organismoId}`);
       funcionario.id = createCpltRecordId(funcionario._stableKey);
       delete funcionario._stableKey;

@@ -14,16 +14,16 @@ export class LatestCpltRecordStore {
       CREATE TABLE latest_records (
         stable_key TEXT PRIMARY KEY,
         period TEXT NOT NULL,
-        line TEXT NOT NULL,
+        record_json TEXT NOT NULL,
         organismo_id TEXT NOT NULL
       ) WITHOUT ROWID;
     `);
     this.upsertStatement = this.database.prepare(`
-      INSERT INTO latest_records (stable_key, period, line, organismo_id)
+      INSERT INTO latest_records (stable_key, period, record_json, organismo_id)
       VALUES (?, ?, ?, ?)
       ON CONFLICT(stable_key) DO UPDATE SET
         period = excluded.period,
-        line = excluded.line,
+        record_json = excluded.record_json,
         organismo_id = excluded.organismo_id
       WHERE excluded.period > latest_records.period
     `);
@@ -33,12 +33,9 @@ export class LatestCpltRecordStore {
     this.closed = false;
   }
 
-  upsert({ stableKey, period, line, organismoId }) {
-    // Las líneas llegan como substrings de un bloque decodificado grande. Una
-    // copia propia evita que V8 retenga el bloque completo mientras SQLite
-    // termina la transacción de este registro.
-    const ownedLine = Buffer.from(line, "utf8").toString("utf8");
-    this.upsertStatement.run(stableKey, period, ownedLine, organismoId);
+  upsert({ stableKey, period, record, organismoId }) {
+    if (!stableKey || !period || !record || !organismoId) throw new Error("CPLT_STORE_INVALID_RECORD");
+    this.upsertStatement.run(stableKey, period, JSON.stringify(record), organismoId);
     this.pending += 1;
     if (this.pending >= 10_000) this.flush();
   }
@@ -56,11 +53,17 @@ export class LatestCpltRecordStore {
   *values() {
     this.flush();
     const statement = this.database.prepare(`
-      SELECT period, line, organismo_id AS organismoId
+      SELECT period, record_json, organismo_id AS organismoId
       FROM latest_records
       ORDER BY stable_key
     `);
-    yield* statement.iterate();
+    for (const row of statement.iterate()) {
+      yield {
+        period: row.period,
+        record: JSON.parse(row.record_json),
+        organismoId: row.organismoId,
+      };
+    }
   }
 
   close() {
