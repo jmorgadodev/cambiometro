@@ -185,6 +185,23 @@ jobs:
         working-directory: transparencia-app
         run: npm run data:health
 
+      - name: Publicar catálogo de salud para fallback R2 de la API
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -s data/etl/source-inventory.json
+          test -s data/etl/source-health.json
+          npx wrangler r2 object put transparencia-public-data/projections/sources-v1/source-inventory.json \
+            --file data/etl/source-inventory.json \
+            --content-type application/json \
+            --remote
+          npx wrangler r2 object put transparencia-public-data/projections/sources-v1/source-health.json \
+            --file data/etl/source-health.json \
+            --content-type application/json \
+            --remote
+
       - name: Reparar puntero API desde el lake R2 validado
         if: inputs.repair_transfer_api_pointer == true
         working-directory: transparencia-app

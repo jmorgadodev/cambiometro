@@ -85,6 +85,31 @@ async function databaseSafe(query: Promise<Response>) {
   }
 }
 
+async function cachedPublicGet(request: Request, producer: () => Promise<Response>) {
+  // Las consultas públicas son inmutables por URL durante el ciclo de
+  // publicación. Cachearlas en el edge evita repetir COUNT/SELECT costosos en
+  // cada visita y protege el cupo gratuito de rows_read de D1. Si Cache API no
+  // está disponible en un test o entorno local, se conserva el comportamiento
+  // normal sin alterar el contrato.
+  let cache: Cache;
+  try {
+    cache = (caches as CacheStorage & { default: Cache }).default;
+  } catch {
+    return producer();
+  }
+  try {
+    const cached = await cache.match(request);
+    if (cached) return cached;
+  } catch {
+    return producer();
+  }
+  const response = await producer();
+  if (response.ok) {
+    try { await cache.put(request, response.clone()); } catch { /* cache opcional */ }
+  }
+  return response;
+}
+
 interface TransferApiPage {
   page: number;
   count: number;
@@ -909,6 +934,24 @@ async function search(requestUrl: URL, env: Env) {
   return success({ autoridades: data.filter((item) => item.type === "persona").slice(0, 25), municipalidades: data.filter((item) => item.type === "municipalidad").slice(0, 25), funcionarios: [], entidades: data.slice(0, 25) }, { query: raw });
 }
 
+async function searchFromR2(requestUrl: URL, env: Env) {
+  const raw = requestUrl.searchParams.get("q")?.trim() ?? "";
+  if (raw.length < 2 || raw.length > 80) return failure("INVALID_QUERY", "La búsqueda debe tener entre 2 y 80 caracteres.", 400);
+  const rows = await canonicalEntitiesFromR2(env);
+  if (!rows) return dbUnavailable();
+  const normalize = (value: unknown) => String(value ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL");
+  const needle = normalize(raw);
+  const data = rows
+    .filter((row) => normalize(row.name).includes(needle))
+    .slice(0, 75)
+    .map((row) => {
+      const item = entity(row);
+      const type = item.kind === "person" ? "persona" : item.kind === "municipality" ? "municipalidad" : item.kind === "supplier" ? "proveedor" : "organismo";
+      return { id: item.id, type, nombre: item.name, url: `/entidades/${item.id}`, ...(item.attributes as JsonRecord) };
+    });
+  return success({ autoridades: data.filter((item) => item.type === "persona").slice(0, 25), municipalidades: data.filter((item) => item.type === "municipalidad").slice(0, 25), funcionarios: [], entidades: data.slice(0, 25) }, { query: raw, sourceStatus: "r2-catalog" });
+}
+
 async function listTransferencias(requestUrl: URL, env: Env) {
   const rawPage = Number(requestUrl.searchParams.get("page") ?? 1);
   const rawLimit = Number(requestUrl.searchParams.get("limit") ?? 10);
@@ -1023,7 +1066,7 @@ async function exportFuncionarios(requestUrl: URL, env: Env, format: "csv" | "js
 }
 
 async function listSources(requestUrl: URL, env: Env) {
-  if (!env.DB) return dbUnavailable();
+  if (!env.DB) return await listSourcesFromR2(requestUrl, env) ?? dbUnavailable();
   try {
     const rows = await env.DB.prepare(`
       SELECT
@@ -1068,9 +1111,50 @@ async function listSources(requestUrl: URL, env: Env) {
     });
     return success(data, { total: data.length }, { self: requestUrl.toString() });
   } catch {
-    const rows = await env.DB.prepare("SELECT * FROM sources ORDER BY id").all<JsonRecord>();
-    return success((rows.results ?? []).map((row) => ({ ...row, recordCount: 0, status: "unavailable" })), { total: rows.results?.length ?? 0 }, { self: requestUrl.toString() });
+    // El catálogo R2 mantiene el estado de las fuentes disponible aunque el
+    // límite diario de D1 esté temporalmente agotado. No repetir otra consulta
+    // a D1 en este camino, porque sólo aumentaría rows_read sin recuperar el
+    // servicio.
+    return await listSourcesFromR2(requestUrl, env) ?? dbUnavailable();
   }
+}
+
+async function listSourcesFromR2(requestUrl: URL, env: Env) {
+  const [inventory, health] = await Promise.all([
+    r2Json<{ sources?: JsonRecord[] }>(env.PUBLIC_DATA, "projections/sources-v1/source-inventory.json"),
+    r2Json<{ sources?: Record<string, JsonRecord> }>(env.PUBLIC_DATA, "projections/sources-v1/source-health.json"),
+  ]);
+  if (!inventory?.sources?.length && !health?.sources) return null;
+  const inventoryById = new Map((inventory?.sources ?? []).map((source) => [String(source.id), source]));
+  const ids = [...new Set([
+    ...(inventory?.sources ?? []).map((source) => String(source.id)),
+    ...Object.keys(health?.sources ?? {}),
+  ])].sort();
+  const labels: Record<string, string> = {
+    camara: "Cámara", chilecompra: "ChileCompra OCDS", cplt: "Transparencia Activa CPLT",
+    contraloria: "Contraloría General", dipres: "DIPRES", ine: "INE Censo 2024",
+    infolobby: "InfoLobby", infoprobidad: "InfoProbidad", "ley-19862": "Ley 19.862",
+    senado: "Senado", servel: "SERVEL", sinim: "SINIM",
+  };
+  const data = ids.map((id) => {
+    const source = inventoryById.get(id) ?? {};
+    const state = health?.sources?.[id] ?? {};
+    const recordCount = Number(state.recordCount ?? source.recordCount ?? 0);
+    const stateStatus = String(state.status ?? source.status ?? "unavailable");
+    return {
+      ...source,
+      id,
+      label: source.label ?? labels[id] ?? id,
+      recordCount,
+      status: stateStatus === "archive_only" ? "partial" : recordCount > 0 ? "connected" : "unavailable",
+      checksumSha256: state.checksumSha256 ?? source.indexChecksumSha256 ?? null,
+      lastUpdated: state.lastSuccessAt ?? state.last_success_at ?? state.generatedAt ?? source.generatedAt ?? null,
+      statusDetail: stateStatus === "archive_only"
+        ? "Histórico íntegro en R2; se consulta bajo demanda."
+        : recordCount > 0 ? "Datos publicados en el lake." : "Sin datos publicados.",
+    };
+  });
+  return success(data, { total: data.length }, { self: requestUrl.toString() });
 }
 
 function svgResponse(title: string) {
@@ -1159,7 +1243,10 @@ export default {
     if (request.method !== "GET") return failure("METHOD_NOT_ALLOWED", "Método no permitido.", 405);
     if (path === "/api/v1/search") {
       const limited = await rateLimit(request, env, "search");
-      return limited ?? databaseSafe(search(url, env));
+      return limited ?? cachedPublicGet(request, async () => {
+        const r2 = await searchFromR2(url, env);
+        return r2.status < 500 ? r2 : databaseSafe(search(url, env));
+      });
     }
     if (path === "/api/v1/transferencias") {
       const limited = await rateLimit(request, env, "transferencias");
@@ -1171,15 +1258,15 @@ export default {
     }
     if (path === "/api/v1/records") {
       const limited = await rateLimit(request, env, "records");
-      return limited ?? databaseSafe(listRecords(url, env));
+      return limited ?? cachedPublicGet(request, () => databaseSafe(listRecords(url, env)));
     }
     if (path === "/api/v1/relations") {
       const limited = await rateLimit(request, env, "relations");
-      return limited ?? databaseSafe(listRelations(url, env));
+      return limited ?? cachedPublicGet(request, () => databaseSafe(listRelations(url, env)));
     }
     if (path === "/api/v1/crosses") {
       const limited = await rateLimit(request, env, "crosses");
-      return limited ?? databaseSafe(listRelations(url, env, true));
+      return limited ?? cachedPublicGet(request, () => databaseSafe(listRelations(url, env, true)));
     }
     if (path === "/api/v1/alertas") return success([]);
     if (path === "/api/v1/commercial/keys") return failure("COMMERCIAL_API_UNAVAILABLE", "La API comercial no está disponible.", 503);
@@ -1189,7 +1276,7 @@ export default {
     }
     if (path === "/api/v1/sources") {
       const limited = await rateLimit(request, env, "sources");
-      return limited ?? databaseSafe(listSources(url, env));
+      return limited ?? cachedPublicGet(request, () => databaseSafe(listSources(url, env)));
     }
     if (path === "/api/v1/export") {
         const limited = await rateLimit(request, env, "export");

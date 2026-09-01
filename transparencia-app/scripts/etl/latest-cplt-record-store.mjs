@@ -1,104 +1,92 @@
 import fs from "node:fs";
-import { DatabaseSync } from "node:sqlite";
-import { deflateSync, inflateSync } from "node:zlib";
 
 export class LatestCpltRecordStore {
   constructor(filePath) {
     this.filePath = filePath;
-    this.database = new DatabaseSync(filePath);
-    this.database.exec(`
-      PRAGMA journal_mode = OFF;
-      PRAGMA synchronous = OFF;
-      PRAGMA temp_store = FILE;
-      PRAGMA cache_size = -65536;
-      PRAGMA mmap_size = 0;
-      CREATE TABLE latest_records (
-        stable_key TEXT PRIMARY KEY,
-        period TEXT NOT NULL,
-        record_blob BLOB NOT NULL,
-        organismo_id TEXT NOT NULL,
-        record_id TEXT NOT NULL
-      ) WITHOUT ROWID;
-    `);
-    this.upsertStatement = this.database.prepare(`
-      INSERT INTO latest_records (stable_key, period, record_blob, organismo_id, record_id)
-      VALUES (?, ?, ?, ?, ?)
-      ON CONFLICT(stable_key) DO UPDATE SET
-        period = excluded.period,
-        record_blob = excluded.record_blob,
-        organismo_id = excluded.organismo_id,
-        record_id = excluded.record_id
-      WHERE excluded.period > latest_records.period
-    `);
-    this.database.exec("CREATE INDEX latest_records_by_organism ON latest_records (organismo_id, record_id)");
-    this.countStatement = this.database.prepare("SELECT COUNT(*) AS total FROM latest_records");
-    this.database.exec("BEGIN");
-    this.pending = 0;
+    this.recordFilePath = `${filePath}.records`;
+    this.recordFd = fs.openSync(this.recordFilePath, "w+");
+    this.index = new Map();
+    this.recordOffset = 0;
     this.closed = false;
   }
 
   upsert({ stableKey, period, record, organismoId, recordId = record?.id || stableKey }) {
     if (!stableKey || !period || !record || !organismoId) throw new Error("CPLT_STORE_INVALID_RECORD");
-    // El snapshot intermedio puede superar cientos de miles de filas y cada
-    // JSON textual queda retenido por SQLite. Comprimirlo como BLOB reduce la
-    // memoria de la base temporal sin alterar el registro que se publica.
-    this.upsertStatement.run(stableKey, period, deflateSync(JSON.stringify(record)), organismoId, recordId);
-    this.pending += 1;
-    if (this.pending >= 10_000) this.flush();
-  }
+    const current = this.index.get(stableKey);
+    // Los períodos se comparan lexicográficamente en formato YYYY-MM. Si el
+    // registro ya publicado es igual o más reciente no hay que serializarlo.
+    if (current && period <= current.period) return;
 
-  flush() {
-    if (this.pending === 0) return;
-    this.database.exec("COMMIT; BEGIN");
-    this.pending = 0;
+    const encoded = Buffer.from(`${JSON.stringify(record)}\n`, "utf8");
+    let written = 0;
+    while (written < encoded.length) {
+      written += fs.writeSync(
+        this.recordFd,
+        encoded,
+        written,
+        encoded.length - written,
+        this.recordOffset + written,
+      );
+    }
+    const offset = this.recordOffset;
+    this.recordOffset += encoded.length;
+    this.index.set(stableKey, {
+      period,
+      offset,
+      length: encoded.length - 1,
+      organismoId,
+      recordId,
+    });
   }
 
   get size() {
-    return Number(this.countStatement.get().total);
+    return this.index.size;
+  }
+
+  readRecord(offset, length) {
+    const buffer = Buffer.allocUnsafe(length);
+    let read = 0;
+    while (read < length) {
+      const chunk = fs.readSync(this.recordFd, buffer, read, length - read, offset + read);
+      if (chunk === 0) throw new Error("CPLT_STORE_RECORD_TRUNCATED");
+      read += chunk;
+    }
+    return JSON.parse(buffer.toString("utf8"));
   }
 
   *values() {
-    this.flush();
-    const statement = this.database.prepare(`
-      SELECT period, record_blob, organismo_id AS organismoId
-      FROM latest_records
-      ORDER BY record_id
-    `);
-    for (const row of statement.iterate()) {
+    for (const row of this.index.values()) {
       yield {
         period: row.period,
-        record: JSON.parse(inflateSync(row.record_blob).toString("utf8")),
+        record: this.readRecord(Number(row.offset), Number(row.length)),
         organismoId: row.organismoId,
       };
     }
   }
 
   *groupsByOrganismo() {
-    this.flush();
-    const statement = this.database.prepare(`
-      SELECT period, record_blob, organismo_id AS organismoId
-      FROM latest_records
-      ORDER BY organismo_id, record_id
-    `);
+    const entries = [...this.index.values()].sort((left, right) => {
+      const organismOrder = left.organismoId.localeCompare(right.organismoId);
+      return organismOrder || left.recordId.localeCompare(right.recordId);
+    });
     let currentOrganismoId = null;
     let records = [];
-    for (const row of statement.iterate()) {
+    for (const row of entries) {
       if (currentOrganismoId !== null && row.organismoId !== currentOrganismoId) {
         yield { organismoId: currentOrganismoId, records };
         records = [];
       }
       currentOrganismoId = row.organismoId;
-      records.push({ period: row.period, record: JSON.parse(inflateSync(row.record_blob).toString("utf8")), organismoId: row.organismoId });
+      records.push({ period: row.period, record: this.readRecord(Number(row.offset), Number(row.length)), organismoId: row.organismoId });
     }
     if (currentOrganismoId !== null) yield { organismoId: currentOrganismoId, records };
   }
 
   close() {
     if (this.closed) return;
-    if (this.pending > 0) this.database.exec("COMMIT");
-    else this.database.exec("ROLLBACK");
-    this.database.close();
+    fs.closeSync(this.recordFd);
     this.closed = true;
     fs.rmSync(this.filePath, { force: true });
+    fs.rmSync(this.recordFilePath, { force: true });
   }
 }
