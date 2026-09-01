@@ -5,12 +5,28 @@ import { tituloVotacionLegible } from "./votaciones-format";
 
 describe("interfaz de votaciones destacadas", () => {
   const client = readFileSync(resolve(import.meta.dirname, "../components/VotacionesDestacadasClient.tsx"), "utf8");
+  const annualExplorer = readFileSync(resolve(import.meta.dirname, "../components/VotacionesAnualesExplorer.tsx"), "utf8");
 
   it("ofrece un filtro explícito por cámara con Senado como selección inicial", () => {
     expect(client).toContain('useState<"Cámara" | "Senado">("Senado")');
     expect(client).toContain('aria-label="Filtrar por cámara"');
     expect(client).toContain("Cámara");
     expect(client).toContain("Senado");
+    expect(client).not.toContain("Senado se muestra primero para facilitar la lectura del detalle.");
+  });
+
+  it("muestra las 769 votaciones del año con búsqueda y paginación", () => {
+    const page = readFileSync(resolve(import.meta.dirname, "../app/votaciones-destacadas/page.tsx"), "utf8");
+    expect(page).toContain("getVotacionesAnuales");
+    expect(annualExplorer).toContain("Todas las votaciones de 2026");
+    expect(annualExplorer).toContain("VOTING_PAGE_SIZE");
+    expect(annualExplorer).toContain("Buscar por materia o boletín");
+  });
+
+  it("permite abrir desde la home el análisis de cada votación destacada", () => {
+    const page = readFileSync(resolve(import.meta.dirname, "../app/page.tsx"), "utf8");
+    expect(page).toContain("?votacion=${vote.votacion_id}");
+    expect(client).toContain("new URLSearchParams(window.location.search)");
   });
 
   it("describe el boletín sin repetir una etiqueta genérica como título", () => {

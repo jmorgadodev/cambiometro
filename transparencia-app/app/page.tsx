@@ -317,7 +317,7 @@ export default async function HomePage() {
             {highlightedVotes.map((vote) => (
               <article className="home-vote-row" key={vote.votacion_id}>
                 <time dateTime={vote.fecha}>{vote.fecha}</time>
-                <div className="home-vote-row__content"><strong>{vote.boletin}</strong><h3>{tituloVotacionLegible(vote)}</h3><p>{vote.resumen}</p><span>{vote.camara}</span></div>
+                <div className="home-vote-row__content"><strong>{vote.boletin}</strong><h3>{tituloVotacionLegible(vote)}</h3><p>{vote.resumen}</p><span>{vote.camara}</span><Link prefetch={false} href={`/votaciones-destacadas/?votacion=${vote.votacion_id}`}>Abrir análisis →</Link></div>
                 <span className="home-vote-row__result" data-result={vote.resultado}>{vote.resultado}</span>
               </article>
             ))}

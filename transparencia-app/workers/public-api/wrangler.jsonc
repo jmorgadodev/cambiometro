@@ -20,6 +20,13 @@
   "r2_buckets": [
     { "binding": "PUBLIC_DATA", "bucket_name": "transparencia-public-data" }
   ],
+  "send_email": [
+    {
+      "name": "EMAIL",
+      "destination_address": "Jorge.morgado.b@gmail.com",
+      "allowed_sender_addresses": ["solicitudes@impulsacv.cl"]
+    }
+  ],
   "ratelimits": [
     { "name": "EXPENSIVE_API_RATE_LIMITER", "namespace_id": "47011", "simple": { "limit": 30, "period": 60 } }
   ],

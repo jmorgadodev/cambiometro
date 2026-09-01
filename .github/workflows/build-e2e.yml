@@ -54,6 +54,7 @@ jobs:
           NEXT_PUBLIC_GA4_ID: ${{ vars.NEXT_PUBLIC_GA4_ID }}
           NEXT_PUBLIC_GTM_ID: ${{ vars.NEXT_PUBLIC_GTM_ID }}
           NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ vars.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
         run: npm run pages:build && npm run pages:verify && npm run api:size
         working-directory: transparencia-app
 

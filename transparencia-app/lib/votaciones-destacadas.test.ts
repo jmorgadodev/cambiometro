@@ -1,8 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { getVotingFreshness, getVotacionDestacadaDetalle } from "./votaciones-destacadas";
+import { getVotingFreshness, getVotacionDestacadaDetalle, getVotacionesAnuales } from "./votaciones-destacadas";
 import { bancadaDisensoPct, bancadaParticipacion, getVotacionBancadaShares, sortVotacionBancadas } from "./votaciones-bancada";
 
 describe("votaciones destacadas", () => {
+  it("expone el universo anual completo, no sólo la selección editorial", () => {
+    const entries = getVotacionesAnuales();
+
+    expect(entries).toHaveLength(769);
+    expect(entries.filter((entry) => entry.camara === "Senado")).toHaveLength(189);
+    expect(entries.filter((entry) => entry.camara === "Cámara")).toHaveLength(580);
+    expect(entries.every((entry) => entry.fecha.startsWith("2026-"))).toBe(true);
+    expect(entries.find((entry) => entry.votacion_id === "camara-vot-89867")).toEqual(
+      expect.objectContaining({ boletin: "17324-33", camara: "Cámara" }),
+    );
+  });
+
   it("distingue la fecha de revisión automática de la última votación nominal", () => {
     const freshness = getVotingFreshness();
 
