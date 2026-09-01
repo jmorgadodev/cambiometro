@@ -4,7 +4,7 @@ import { createCpltRecordId, parseCpltHeader, parseCpltRecord, scanCpltCell } fr
 import { LatestCpltRecordStore } from "./latest-cplt-record-store.mjs";
 import { createMunicipalityRegistry } from "./municipality-registry.mjs";
 import { readRangedTextLines } from "./ranged-csv-source.mjs";
-import { validatePublication } from "./validation.mjs";
+import { validatePublicationStream } from "./validation.mjs";
 
 const SOURCE_BASES = [
   "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos",
@@ -151,6 +151,7 @@ async function processStream(tipo, urls, outputDir) {
         period: funcionario.fuente_periodo,
         record: funcionario,
         organismoId,
+        recordId: createCpltRecordId(funcionario._stableKey),
       });
     }
   } catch (error) {
@@ -163,30 +164,24 @@ async function processStream(tipo, urls, outputDir) {
     throw new Error(`CPLT_UNKNOWN_MUNICIPALITIES: ${JSON.stringify([...unknownMunicipalities].sort())}`);
   }
 
-  const organismoByRecordId = new Map();
-  const records = [];
-  try {
-    for (const latest of latestByOfficial.values()) {
-      const { organismoId } = latest;
-      const funcionario = latest.record;
-      if (!funcionario) throw new Error(`CPLT_LATEST_RECORD_INVALID: ${organismoId}`);
-      funcionario.id = createCpltRecordId(funcionario._stableKey);
-      delete funcionario._stableKey;
-      organismoByRecordId.set(funcionario.id, organismoId);
-      records.push(funcionario);
-    }
-  } finally {
-    latestByOfficial.close();
-  }
-  const report = validatePublication({
+  const report = validatePublicationStream({
     sourceId: `cplt-personal-${normalized(tipo)}`,
-    records,
+    records: (function* finalizedRecords() {
+      for (const latest of latestByOfficial.values()) {
+        const funcionario = latest.record;
+        if (!funcionario) throw new Error(`CPLT_LATEST_RECORD_INVALID: ${latest.organismoId}`);
+        funcionario.id = createCpltRecordId(funcionario._stableKey);
+        delete funcionario._stableKey;
+        yield funcionario;
+      }
+    })(),
     minimumCount: 1,
   });
 
   const projectionsDir = path.join(outputDir, "projections", "funcionarios-v1");
   fs.mkdirSync(projectionsDir, { recursive: true });
-  const grouped = new Map();
+  // Elimina la categoría anterior leyendo un archivo municipal por vez.
+  // Nunca se conserva el universo completo en memoria.
   for (const fileName of fs.readdirSync(projectionsDir)) {
     if (!fileName.endsWith(".json")) continue;
     const filePath = path.join(projectionsDir, fileName);
@@ -194,22 +189,26 @@ async function processStream(tipo, urls, outputDir) {
     fs.writeFileSync(filePath, JSON.stringify(retained));
   }
 
-  for (const funcionario of records) {
-    const organismoId = organismoByRecordId.get(funcionario.id);
-    if (!grouped.has(organismoId)) grouped.set(organismoId, []);
-    grouped.get(organismoId).push(funcionario);
-  }
-
-  for (const [organismoId, current] of grouped) {
-    const filePath = path.join(projectionsDir, `${organismoId}.json`);
+  const groupedCounts = new Map();
+  for (const group of latestByOfficial.groupsByOrganismo()) {
+    const current = group.records.map(({ record }) => {
+      if (!record) throw new Error(`CPLT_LATEST_RECORD_INVALID: ${group.organismoId}`);
+      record.id = createCpltRecordId(record._stableKey);
+      delete record._stableKey;
+      return record;
+    });
+    groupedCounts.set(group.organismoId, current.length);
+    const filePath = path.join(projectionsDir, `${group.organismoId}.json`);
     fs.writeFileSync(filePath, JSON.stringify(mergeById(readJsonArray(filePath), current)));
   }
+
+  latestByOfficial.close();
 
   const coverageDir = path.join(outputDir, "coverage");
   fs.mkdirSync(coverageDir, { recursive: true });
   const coverage = COMMUNES.map((commune) => {
     const administrationId = commune.administracion_municipal_id;
-    const count = grouped.get(administrationId)?.length ?? 0;
+    const count = groupedCounts.get(administrationId) ?? 0;
     return {
       communeId: commune.id,
       cut: commune.cut,
