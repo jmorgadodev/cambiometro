@@ -2,14 +2,29 @@ import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
 
 import { POLITICOS_SEED } from "../../lib/politicos-source";
 
+interface EmailSender {
+  send(message: {
+    to: string;
+    from: string | { email: string; name: string };
+    replyTo?: string;
+    subject: string;
+    text?: string;
+    html?: string;
+  }): Promise<unknown>;
+}
+
 export interface Env {
   DB?: D1Database;
   TRANSFERS_DB?: D1Database;
   PUBLIC_DATA?: R2Bucket;
+  EMAIL?: EmailSender;
   TURNSTILE_SECRET_KEY?: string;
   READ_ONLY_PREVIEW?: string;
   EXPENSIVE_API_RATE_LIMITER?: { limit(input: { key: string }): Promise<{ success: boolean }> };
 }
+
+const PRIVACY_REQUEST_RECIPIENT = "Jorge.morgado.b@gmail.com";
+const PRIVACY_REQUEST_SENDER = "solicitudes@impulsacv.cl";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -1022,12 +1037,52 @@ async function requestSubmission(request: Request, env: Env) {
   const tipo = typeof body.tipo === "string" ? body.tipo : "";
   const email = typeof body.email === "string" ? body.email.trim() : "";
   const descripcion = typeof body.descripcion === "string" ? body.descripcion.trim() : "";
+  const nombre = typeof body.nombre === "string" ? body.nombre.trim().slice(0, 120) : "";
+  const turnstileToken = typeof body.turnstileToken === "string" ? body.turnstileToken.trim() : "";
   if (!new Set(["rectificacion", "cancelacion", "oposicion", "acceso", "informacion", "otro"]).has(tipo)) return failure("INVALID_TYPE", "Tipo de solicitud no válido.", 400);
   if (!/^[^@\s]{1,120}@[^@\s]{1,120}\.[A-Za-z]{2,}$/.test(email)) return failure("INVALID_EMAIL", "Correo electrónico no válido.", 400);
   if (descripcion.length < 10 || descripcion.length > 4000) return failure("INVALID_DESCRIPTION", "La descripción debe tener entre 10 y 4000 caracteres.", 400);
   if (body.website) return failure("SPAM_DETECTED", "Solicitud rechazada.", 400);
-  const result = await env.DB.prepare("INSERT INTO data_requests (tipo, nombre, email, descripcion, ip_hash, estado) VALUES (?, ?, ?, ?, ?, 'recibida')").bind(tipo, String(body.nombre ?? "").slice(0, 120), email, descripcion, "worker").run();
-  return json({ data: { id: result.meta?.last_row_id ?? null, estado: "recibida" } }, { status: 201, headers: { "Cache-Control": "no-store" } });
+  if (!turnstileToken) return failure("TURNSTILE_REQUIRED", "Completa el desafío de verificación para enviar la solicitud.", 400);
+  if (turnstileToken.length > 2048) return failure("TURNSTILE_INVALID", "El desafío de verificación no es válido.", 400);
+  if (!env.TURNSTILE_SECRET_KEY) return failure("TURNSTILE_NOT_CONFIGURED", "La verificación anti-bots no está configurada. Intenta más tarde.", 503);
+
+  const remoteIp = request.headers.get("CF-Connecting-IP") ?? "";
+  const turnstileBody = new FormData();
+  turnstileBody.set("secret", env.TURNSTILE_SECRET_KEY);
+  turnstileBody.set("response", turnstileToken);
+  if (remoteIp) turnstileBody.set("remoteip", remoteIp);
+  let turnstileResult: { success?: boolean };
+  try {
+    const response = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
+      method: "POST",
+      body: turnstileBody,
+    });
+    turnstileResult = await response.json() as { success?: boolean };
+  } catch {
+    return failure("TURNSTILE_UNAVAILABLE", "No fue posible validar el desafío. Intenta nuevamente.", 503);
+  }
+  if (!turnstileResult.success) return failure("TURNSTILE_FAILED", "El desafío de verificación expiró o no fue válido. Complétalo nuevamente.", 400);
+  if (!env.EMAIL) return failure("EMAIL_NOT_CONFIGURED", "El canal de correo no está configurado. Intenta más tarde.", 503);
+
+  const ipDigest = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(`${env.TURNSTILE_SECRET_KEY}:${remoteIp || "unknown"}`));
+  const ipHash = Array.from(new Uint8Array(ipDigest), (byte) => byte.toString(16).padStart(2, "0")).join("");
+  const result = await env.DB.prepare("INSERT INTO data_requests (tipo, nombre, email, descripcion, ip_hash, estado) VALUES (?, ?, ?, ?, ?, 'recibida')").bind(tipo, nombre, email, descripcion, ipHash).run();
+  const id = result.meta?.last_row_id ?? null;
+  const escapeHtml = (value: string) => value.replace(/[&<>\"']/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;" })[char] ?? char);
+  try {
+    await env.EMAIL.send({
+      to: PRIVACY_REQUEST_RECIPIENT,
+      from: { email: PRIVACY_REQUEST_SENDER, name: "El Cambiómetro" },
+      replyTo: email,
+      subject: `Solicitud de privacidad #${id ?? "nueva"} · ${tipo}`,
+      text: `Tipo: ${tipo}\nNombre: ${nombre || "No informado"}\nCorreo: ${email}\n\n${descripcion}`,
+      html: `<h2>Nueva solicitud de privacidad</h2><p><strong>Tipo:</strong> ${escapeHtml(tipo)}</p><p><strong>Nombre:</strong> ${escapeHtml(nombre || "No informado")}</p><p><strong>Correo:</strong> ${escapeHtml(email)}</p><p><strong>Descripción:</strong></p><p>${escapeHtml(descripcion).replace(/\n/g, "<br>")}</p>`,
+    });
+  } catch {
+    return json({ data: { id, estado: "recibida", notificacion: "pendiente" } }, { status: 202, headers: { "Cache-Control": "no-store" } });
+  }
+  return json({ data: { id, estado: "recibida", notificacion: "enviada" } }, { status: 201, headers: { "Cache-Control": "no-store" } });
 }
 
 export default {

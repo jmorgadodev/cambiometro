@@ -62,7 +62,10 @@ page.setDefaultTimeout(15_000);
 page.setDefaultNavigationTimeout(30_000);
 const consoleMessages = [];
 const internalLinks = new Set();
-page.on("console", (message) => consoleMessages.push([message.type(), message.text()]));
+page.on("console", (message) => {
+  const locationUrl = message.location()?.url ?? "";
+  consoleMessages.push([message.type(), message.text(), locationUrl]);
+});
 page.on("pageerror", (error) => {
   console.error("PAGEERROR_TRACE on " + page.url() + ":", error?.stack || error);
   consoleMessages.push(["pageerror", page.url() + " -> " + String(error?.stack || error)]);
@@ -467,6 +470,11 @@ try {
   assert.equal(await page.getByRole("heading", { name: "Política de Privacidad" }).count(), 1);
   assert.equal(await page.getByRole("heading", { name: /Tus derechos: acceso, rectificaci.n, cancelaci.n y oposici.n/ }).count(), 1);
   assert.equal(await page.getByRole("heading", { name: "Envíanos tu solicitud" }).count(), 1);
+  assert.equal(
+    await page.getByText("Completa el desafío de verificación para enviar la solicitud.", { exact: true }).count(),
+    1,
+    "/privacidad debe explicar el desafío antes de enviar",
+  );
   assert((await page.getByText(/Versión \d+ de [a-z]+ de \d{4}/i, { exact: false }).count()) >= 1, "/privacidad debe mostrar su fecha de versión");
   assert((await page.getByText("datos@cambiometro.impulsacv.cl", { exact: false }).count()) > 0, "/privacidad debe exponer el canal del responsable");
 
@@ -507,7 +515,7 @@ try {
   assert(!staticCsp.includes("'unsafe-inline'"), "CSP estática no debe permitir unsafe-inline");
   assert(!staticCsp.includes("nonce-"), "CSP estática no debe depender de nonce por request");
 
-  const errors = consoleMessages.filter(([type, message]) =>
+  const errors = consoleMessages.filter(([type, message, locationUrl = ""]) =>
     (type === "error" || type === "pageerror")
     && !message.includes("Failed to load resource: the server responded with a status of 503")
     && !message.includes("Failed to load resource: the server responded with a status of 429")
@@ -516,6 +524,15 @@ try {
     // Pages dev does not emulate Cloudflare's same-host Worker route; the
     // browser/API contract is verified through VERIFY_API_URL above.
     && !(verifyingLocal && message.includes("Failed to load resource: the server responded with a status of 404"))
+    // A production Turnstile widget rejects localhost because that hostname is
+    // intentionally absent from its allowlist. The deployed widget and its
+    // server-side Siteverify contract are checked separately. Ignore only the
+    // challenge resource itself; every other local HTTP 400 remains fatal.
+    && !(
+      verifyingLocal
+      && message.includes("Failed to load resource: the server responded with a status of 400")
+      && /^https:\/\/challenges\.cloudflare\.com\//.test(locationUrl)
+    )
     // Next's static export intentionally hydrates client-only Suspense
     // boundaries after the HTML shell; React reports this recoverable bailout
     // as #419 in the local production bundle.

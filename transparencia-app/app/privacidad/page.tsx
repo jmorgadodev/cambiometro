@@ -88,8 +88,8 @@ export default function PrivacidadPage() {
 
       <div className="container-main" style={{ padding: "2.5rem 1.5rem 4rem", display: "flex", flexDirection: "column", gap: "2.5rem" }}>
 
-        <section>
-          <div style={{ marginBottom: "1.25rem" }}>
+        <section className="privacy-request-panel">
+          <div className="privacy-request-panel__heading">
             <h2 style={{ fontSize: "1.3rem", margin: "0 0 0.25rem 0", color: "var(--text-primary)" }}>
               Finalidad del tratamiento por categoría
             </h2>
@@ -169,7 +169,7 @@ export default function PrivacidadPage() {
               protege el canal contra el envío automatizado de solicitudes.
             </p>
           </div>
-          <div className="card" style={{ padding: "1.75rem", maxWidth: 720 }}>
+          <div className="card privacy-request-panel__card">
             <PrivacyRequestForm siteKey={process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY?.trim() ?? ""} />
           </div>
         </section>

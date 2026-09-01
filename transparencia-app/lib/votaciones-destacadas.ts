@@ -19,6 +19,22 @@ export interface VotacionDestacada {
 
 export const VOTACIONES_DESTACADAS = entries as VotacionDestacada[];
 
+export interface VotacionAnual {
+  votacion_id: string;
+  boletin: string | null;
+  camara: "Cámara" | "Senado";
+  fecha: string;
+  titulo: string;
+  resumen: string;
+  resultado: "Aprobado" | "Rechazado" | "En trámite";
+  quorum: string | null;
+  tipo: string | null;
+  fuente_url: string;
+  tramite_url: string | null;
+  votos: { favor: number; contra: number; abstencion: number };
+  destacada: boolean;
+}
+
 /** Make generic boletin titles understandable without inventing a project name. */
 export type OpcionVotacion = "Afirmativo" | "En Contra" | "Abstención" | "No Vota" | "Dispensado" | "Pareo";
 
@@ -98,6 +114,10 @@ interface SessionSource {
   url_tramitacion?: string;
   tramite?: string;
   fuente?: "camara" | "senado";
+  boletin?: string | null;
+  total_si?: string;
+  total_no?: string;
+  total_abstencion?: string;
 }
 
 interface VotingSource {
@@ -137,6 +157,59 @@ export function getVotingFreshness(): VotingFreshness {
     latestVoteDate: dates[0] ?? null,
     totalSessions: source.totalSessions ?? Object.keys(source.sessions).length,
   };
+}
+
+function annualResult(value: string | undefined): VotacionAnual["resultado"] {
+  if (value === "Aprobado" || value === "Rechazado") return value;
+  return "En trámite";
+}
+
+function compactText(value: string | undefined, fallback: string): string {
+  const text = (value ?? "").replace(/\s+/g, " ").trim();
+  if (!text) return fallback;
+  return text.length > 260 ? `${text.slice(0, 257).trimEnd()}…` : text;
+}
+
+/** Compact catalog for browsing every nominal vote without embedding every roster in the page. */
+export function getVotacionesAnuales(year = "2026"): VotacionAnual[] {
+  const source = loadVotingSource();
+  const highlighted = new Map(VOTACIONES_DESTACADAS.map((entry) => [entry.votacion_id, entry]));
+
+  return Object.values(source.sessions)
+    .filter((session) => session.fecha?.startsWith(`${year}-`))
+    .map((session) => {
+      const editorial = highlighted.get(session.id);
+      const camara = session.fuente === "senado" ? "Senado" : "Cámara";
+      const boletin = session.boletin?.replaceAll(".", "") || editorial?.boletin || null;
+      const genericTitle = boletin
+        ? `${session.tipo || "Votación de proyecto"} · Boletín N° ${boletin}`
+        : session.tipo || "Votación nominal de Sala";
+      const officialText = compactText(session.nombre ?? session.descripcion, genericTitle);
+      const title = editorial && !/^Votación registrada del Boletín/u.test(editorial.titulo)
+        ? editorial.titulo
+        : officialText;
+
+      return {
+        votacion_id: session.id,
+        boletin,
+        camara,
+        fecha: session.fecha!,
+        titulo: title === `Boletín N° ${boletin}` ? genericTitle : title,
+        resumen: editorial?.resumen ?? compactText(session.descripcion, "Registro nominal publicado por la corporación correspondiente."),
+        resultado: annualResult(session.resultado),
+        quorum: session.quorum ?? null,
+        tipo: session.tipo ?? null,
+        fuente_url: session.url ?? editorial?.fuente_url ?? "https://www.congreso.cl/",
+        tramite_url: session.url_tramitacion ?? null,
+        votos: {
+          favor: Number(session.total_si) || 0,
+          contra: Number(session.total_no) || 0,
+          abstencion: Number(session.total_abstencion) || 0,
+        },
+        destacada: Boolean(editorial),
+      } satisfies VotacionAnual;
+    })
+    .sort((left, right) => right.fecha.localeCompare(left.fecha) || right.votacion_id.localeCompare(left.votacion_id));
 }
 
 function normalizeOption(value: string | undefined): OpcionVotacion {

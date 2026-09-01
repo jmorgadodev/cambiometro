@@ -2,9 +2,11 @@
 
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
+import VotacionesAnualesExplorer from "@/components/VotacionesAnualesExplorer";
 import type {
   OpcionVotacion,
   VotingFreshness,
+  VotacionAnual,
   VotacionBancadaDetalle,
   VotacionDestacada,
   VotacionDestacadaDetalle,
@@ -226,7 +228,7 @@ function VoteDetailDialog({ detail, onClose }: { detail: VotacionDestacadaDetall
   </div>;
 }
 
-export default function VotacionesDestacadasClient({ entries, details, freshness }: { entries: VotacionDestacada[]; details: Record<string, VotacionDestacadaDetalle>; freshness: VotingFreshness }) {
+export default function VotacionesDestacadasClient({ entries, annualEntries, details, freshness }: { entries: VotacionDestacada[]; annualEntries: VotacionAnual[]; details: Record<string, VotacionDestacadaDetalle>; freshness: VotingFreshness }) {
   const [tag, setTag] = useState("Todas");
   const [camara, setCamara] = useState<"Cámara" | "Senado">("Senado");
   const [resultado, setResultado] = useState("Todos");
@@ -235,9 +237,26 @@ export default function VotacionesDestacadasClient({ entries, details, freshness
   const filtered = useMemo(() => entries.filter((entry) => (tag === "Todas" || entry.tags.includes(tag)) && entry.camara === camara && (resultado === "Todos" || entry.resultado === resultado)).sort((a, b) => b.fecha.localeCompare(a.fecha)), [entries, tag, camara, resultado]);
   const selected = selectedId ? details[selectedId] : undefined;
 
+  useEffect(() => {
+    const id = new URLSearchParams(window.location.search).get("votacion");
+    if (!id || !details[id]) return;
+    const timer = window.setTimeout(() => setSelectedId(id), 0);
+    return () => window.clearTimeout(timer);
+  }, [details]);
+
+  const openDetail = (id: string) => {
+    setSelectedId(id);
+    window.history.replaceState(null, "", `${window.location.pathname}?votacion=${encodeURIComponent(id)}`);
+  };
+
+  const closeDetail = () => {
+    setSelectedId(null);
+    window.history.replaceState(null, "", window.location.pathname);
+  };
+
   return <div className="page-shell featured-votes-page" style={{ minHeight: "100vh" }}>
     <header className="page-masthead"><div className="container-main"><span className="eyebrow">Congreso Nacional · análisis nominal</span><h1>Votaciones destacadas</h1><p>Lee cada votación en tres capas: qué decidió la sala, cómo se distribuyeron las bancadas y qué marcó cada integrante. Los resultados se recalculan desde el padrón publicado.</p></div></header>
-    <main className="container-main featured-votes-page__main"><div className="featured-votes-page__intro"><div><span className="eyebrow">Explorador editorial</span><h2>Decisiones que merecen contexto</h2></div><p>{filtered.length} de {entries.length} votaciones visibles</p></div><div className="voting-freshness" role="status" aria-label="Frescura de las votaciones parlamentarias"><span><strong>Última revisión automática</strong>{freshness.reviewedAt ? formatDate(freshness.reviewedAt.slice(0, 10)) : "Sin fecha publicada"}</span><span><strong>Última votación nominal</strong>{freshness.latestVoteDate ? formatDate(freshness.latestVoteDate) : "Sin fecha publicada"}</span><small>{formatNumber(freshness.totalSessions)} votaciones verificadas. Una revisión sin nuevas sesiones mantiene la fecha del último evento.</small></div><div className="featured-votes-page__filters" role="group" aria-label="Filtros de votaciones destacadas"><label>Etiqueta<select value={tag} onChange={(event) => setTag(event.target.value)}>{tags.map((value) => <option key={value}>{value}</option>)}</select></label><div className="featured-vote-camera-filter"><span className="featured-vote-camera-filter__label">Cámara</span><div role="group" aria-label="Filtrar por cámara">{(["Senado", "Cámara"] as const).map((value) => <button key={value} type="button" aria-pressed={camara === value} className={camara === value ? "is-active" : ""} onClick={() => setCamara(value)}>{value}</button>)}</div><small>Senado se muestra primero para facilitar la lectura del detalle.</small></div><label>Resultado<select value={resultado} onChange={(event) => setResultado(event.target.value)}><option>Todos</option><option>Aprobado</option><option>Rechazado</option><option>En trámite</option><option>Retirado</option></select></label></div><div className="featured-votes-list">{filtered.map((entry) => { const detail = details[entry.votacion_id]; return <article key={entry.votacion_id} className="featured-vote-card"><div className="featured-vote-card__top"><div><span className="eyebrow">{entry.camara} · {formatDate(entry.fecha)}</span><h2>{tituloVotacionLegible(entry, detail?.tipo)}</h2><p className="featured-vote-card__boletin">Boletín {entry.boletin} · {entry.tags.join(" · ")}</p></div><ResultBadge result={entry.resultado} /></div><p className="featured-vote-card__summary">{entry.resumen}</p>{detail && <div className="featured-vote-card__evidence"><span><strong>{formatNumber(detail.totales.efectivos)}</strong> efectivos</span><span><strong>{formatNumber(detail.totales.padron)}</strong> en padrón</span><span><strong>{detail.bancadas.length}</strong> bancadas visibles</span></div>}<div className="featured-vote-card__actions"><button type="button" className="btn btn-primary" onClick={() => setSelectedId(entry.votacion_id)}>Abrir análisis</button><a href={entry.fuente_url} target="_blank" rel="noreferrer" className="btn btn-secondary">Fuente oficial ↗</a></div></article>; })}</div>{filtered.length === 0 && <p className="featured-vote__empty" role="status">No hay votaciones para estos filtros.</p>}</main>
-    {selected && <VoteDetailDialog detail={selected} onClose={() => setSelectedId(null)} />}
+    <main className="container-main featured-votes-page__main"><div className="featured-votes-page__intro"><div><span className="eyebrow">Explorador editorial</span><h2>Decisiones que merecen contexto</h2></div><p>{filtered.length} de {entries.length} votaciones visibles</p></div><div className="voting-freshness" role="status" aria-label="Frescura de las votaciones parlamentarias"><span><strong>Última revisión automática</strong>{freshness.reviewedAt ? formatDate(freshness.reviewedAt.slice(0, 10)) : "Sin fecha publicada"}</span><span><strong>Última votación nominal</strong>{freshness.latestVoteDate ? formatDate(freshness.latestVoteDate) : "Sin fecha publicada"}</span><small>{formatNumber(freshness.totalSessions)} votaciones verificadas. Una revisión sin nuevas sesiones mantiene la fecha del último evento.</small></div><div className="featured-votes-page__filters" role="group" aria-label="Filtros de votaciones destacadas"><label>Etiqueta<select value={tag} onChange={(event) => setTag(event.target.value)}>{tags.map((value) => <option key={value}>{value}</option>)}</select></label><div className="featured-vote-camera-filter"><span className="featured-vote-camera-filter__label">Cámara</span><div role="group" aria-label="Filtrar por cámara">{(["Senado", "Cámara"] as const).map((value) => <button key={value} type="button" aria-pressed={camara === value} className={camara === value ? "is-active" : ""} onClick={() => setCamara(value)}>{value}</button>)}</div></div><label>Resultado<select value={resultado} onChange={(event) => setResultado(event.target.value)}><option>Todos</option><option>Aprobado</option><option>Rechazado</option><option>En trámite</option><option>Retirado</option></select></label></div><div className="featured-votes-list">{filtered.map((entry) => { const detail = details[entry.votacion_id]; return <article key={entry.votacion_id} className="featured-vote-card"><div className="featured-vote-card__top"><div><span className="eyebrow">{entry.camara} · {formatDate(entry.fecha)}</span><h2>{tituloVotacionLegible(entry, detail?.tipo)}</h2><p className="featured-vote-card__boletin">Boletín {entry.boletin} · {entry.tags.join(" · ")}</p></div><ResultBadge result={entry.resultado} /></div><p className="featured-vote-card__summary">{entry.resumen}</p>{detail && <div className="featured-vote-card__evidence"><span><strong>{formatNumber(detail.totales.efectivos)}</strong> efectivos</span><span><strong>{formatNumber(detail.totales.padron)}</strong> en padrón</span><span><strong>{detail.bancadas.length}</strong> bancadas visibles</span></div>}<div className="featured-vote-card__actions"><button type="button" className="btn btn-primary" onClick={() => openDetail(entry.votacion_id)}>Abrir análisis</button><a href={entry.fuente_url} target="_blank" rel="noreferrer" className="btn btn-secondary">Fuente oficial ↗</a></div></article>; })}</div>{filtered.length === 0 && <p className="featured-vote__empty" role="status">No hay votaciones para estos filtros.</p>}<VotacionesAnualesExplorer entries={annualEntries} onOpenDetail={openDetail} /></main>
+    {selected && <VoteDetailDialog detail={selected} onClose={closeDetail} />}
   </div>;
 }
