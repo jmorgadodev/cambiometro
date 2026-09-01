@@ -9,6 +9,8 @@ describe("automatizacion CPLT nacional", () => {
     expect(workflow).toContain("matrix:");
     expect(workflow).toContain("category: [Planta, Contrata, Honorarios, CodigoTrabajo]");
     expect(workflow).toContain("npm run data:publish:cplt-category");
+    const packageJson = readFileSync(resolve(process.cwd(), "package.json"), "utf8");
+    expect(packageJson).toContain('"ingest:cplt-personal": "node --max-old-space-size=6144');
   });
 
   it("solo activa el manifiesto global despues de completar todas las categorias", () => {
