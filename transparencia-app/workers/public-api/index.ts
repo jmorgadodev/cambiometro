@@ -968,10 +968,17 @@ async function searchFromR2(requestUrl: URL, env: Env) {
       const type = item.kind === "person" ? "persona" : item.kind === "municipality" ? "municipalidad" : item.kind === "supplier" ? "proveedor" : "organismo";
       return { id: item.id, type, nombre: item.name, url: `/entidades/${item.id}`, ...(item.attributes as JsonRecord) };
     });
-  // Preserve the canonical entity result first when both catalogs contain the
-  // same person; append the parliamentary catalog so it fills the gap when
-  // D1/R2 does not have an entity row for that politician.
-  const data = [...entities, ...politicians].slice(0, 75);
+  // Merge the two catalogs by normalized name. The canonical catalog may have
+  // the same person under an entity id while the parliamentary catalog has the
+  // richer /politico route; keep only one visible result in that case.
+  const merged = new Map<string, (typeof entities)[number]>();
+  for (const item of entities) merged.set(normalize(item.nombre), item);
+  for (const item of politicians) {
+    const key = normalize(item.nombre);
+    const current = merged.get(key);
+    if (!current || current.url.startsWith("/entidades/")) merged.set(key, item);
+  }
+  const data = [...merged.values()].slice(0, 75);
   if (data.length === 0 && !rows) return dbUnavailable();
   return success({ autoridades: data.filter((item) => item.type === "persona").slice(0, 25), municipalidades: data.filter((item) => item.type === "municipalidad").slice(0, 25), funcionarios: [], entidades: data.slice(0, 25) }, { query: raw, sourceStatus: "r2-catalog" });
 }
