@@ -54,5 +54,10 @@ forma visible y no inventa ni publica un universo parcial.
 4. Confirmar filas, checksum, manifest y publicación estática.
 5. Dejar el cron nuevamente en modo incremental.
 
+Si se necesita recuperar primero la interfaz estática mientras D1 sigue sin
+cuota, el workflow diario admite la ejecución manual con
+`skip_d1=true`. Esa opción publica y verifica el snapshot R2, deja D1
+explícitamente pospuesto en el resumen y nunca se usa en el cron programado.
+
 La API pública continúa disponible desde R2 mientras D1 se recupera; el
 materializado fallido no reemplaza el último snapshot válido.

@@ -16,6 +16,11 @@ on:
         required: false
         type: boolean
         default: false
+      skip_d1:
+        description: Publicar el snapshot estático aunque D1 esté temporalmente sin cuota (sólo recuperación)
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: etl-daily
@@ -101,6 +106,7 @@ jobs:
         run: npm run data:publish
 
       - name: Materializar D1 y registrar ejecución
+        if: inputs.skip_d1 != true
         working-directory: transparencia-app
         env:
           GH_TOKEN: ${{ github.token }}
@@ -108,6 +114,10 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
           ETL_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
         run: npm run data:materialize -- --database transparencia-db --remote --sources camara,votaciones_senado
+
+      - name: Registrar D1 pospuesto por recuperación R2
+        if: inputs.skip_d1 == true
+        run: echo "::warning::D1 pospuesto por solicitud manual; se publica el snapshot R2 y el materializado D1 queda para la siguiente ventana de cuota."
 
       - name: Actualizar cache estático de votaciones incremental
         working-directory: transparencia-app
