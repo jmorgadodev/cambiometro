@@ -1,0 +1,53 @@
+# ETL incremental y protección del cupo gratuito
+
+## Qué se ejecuta diariamente
+
+El workflow `etl-daily.yml` mantiene el rango de ingestión con solapamiento y
+fusiona los registros por identificador estable. El regenerador de
+votaciones (`ingest:votaciones-full`) funciona en modo incremental por defecto:
+
+- consulta el listado oficial para detectar altas y cambios;
+- vuelve a pedir detalles sólo desde siete días antes de la fecha de ejecución;
+- conserva los detalles históricos del último snapshot válido;
+- ante una respuesta parcial o un fallo temporal no elimina sesiones ya
+  publicadas;
+- reintenta los registros recientes en la siguiente ejecución.
+
+El rango de siete días evita perder una publicación tardía o una corrección
+oficial sin volver a descargar todo el histórico.
+
+## Reconstrucción completa
+
+La reconstrucción completa es excepcional y sólo se usa para un backfill
+controlado:
+
+```bash
+npm run ingest:votaciones-full -- --full
+```
+
+El workflow permite activarla manualmente con `full_votaciones=true`. No debe
+activarse en el cron diario. La corrección del histórico debe ejecutarse una
+vez, verificarse y luego volver al modo incremental.
+
+## Transferencias y D1
+
+El release completo con checksum publicado en R2 es la fuente pública normal
+de `/api/v1/transferencias`. Esto evita que cada consulta haga `COUNT` y
+consultas filtradas sobre las decenas de miles de filas de D1, que fue la
+causa del agotamiento del límite gratuito `rows_read`.
+
+D1 queda disponible para una validación o contingencia explícita mediante la
+variable de Worker `PREFER_TRANSFER_D1=1`. No se configura en producción como
+camino normal. Si R2 no contiene un release completo, la API responde 503 de
+forma visible y no inventa ni publica un universo parcial.
+
+## Orden de recuperación después de un límite D1
+
+1. No repetir el materializado remoto durante el mismo día UTC.
+2. Esperar el restablecimiento del cupo gratuito.
+3. Ejecutar el backfill completo sólo si la verificación detectó faltantes.
+4. Confirmar filas, checksum, manifest y publicación estática.
+5. Dejar el cron nuevamente en modo incremental.
+
+La API pública continúa disponible desde R2 mientras D1 se recupera; el
+materializado fallido no reemplaza el último snapshot válido.

@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import api from "../workers/public-api/index";
 import { parseRelationQuery } from "./api-v1";
 
@@ -662,6 +662,44 @@ describe("API canónica v1", () => {
     expect(payload.data[0].id).toBe("tr-1");
     expect(payload.limit).toBe(1);
     expect(payload.totalPages).toBe(59361);
+  });
+
+  it("usa R2 como fuente pública por defecto sin consultar D1", async () => {
+    const prepare = vi.fn(() => {
+      throw new Error("D1 no debe consultarse en el camino público");
+    });
+    const response = await api.fetch(new Request("https://example.test/api/v1/transferencias?page=1&limit=1"), {
+      ...(transferR2Env() as object),
+      DB: { prepare },
+    } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.sourceStatus).toBe("complete");
+    expect(payload.total).toBe(59361);
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it("mantiene D1 disponible sólo cuando se activa explícitamente", async () => {
+    const response = await api.fetch(new Request("https://example.test/api/v1/transferencias?page=1&limit=1"), {
+      ...(transferR2Env() as object),
+      PREFER_TRANSFER_D1: "1",
+      DB: {
+        prepare: (sql: string) => ({
+          bind() { return this; },
+          async first<T>() {
+            if (sql.includes("transferencias_19862_release")) return { checksum_sha256: "release-checksum" } as T;
+            return { total: 59361 } as T;
+          },
+          async all<T>() { return { results: [{ id: "d1-1", fecha: "2026-08-01", periodo: "2026", emisor_nombre: "D1", receptor_nombre: "R", materia: "M", monto_clp: 1, url_registro: "https://registros19862.gob.cl/registro/d1-1" }] } as T; },
+        }),
+      },
+    } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.sourceStatus).toBe("d1");
+    expect(payload.data[0].id).toBe("d1-1");
   });
 
   it("ignora D1 desactualizada y conserva el universo R2 como fuente coherente", async () => {

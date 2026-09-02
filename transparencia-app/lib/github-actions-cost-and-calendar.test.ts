@@ -136,4 +136,16 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(content).toContain("status=skipped_r2_canonical");
     expect(content).toContain("transfer-d1-materialization-${{ github.run_id }}");
   });
+
+  it("9. Las votaciones usan incremental diario y reservan el full para backfill", () => {
+    const workflow = fs.readFileSync(path.join(workflowsDir, "etl-daily.yml"), "utf8");
+    const ingest = fs.readFileSync(path.resolve(root, "scripts", "ingest-votaciones-full.mjs"), "utf8");
+
+    expect(workflow).toContain("full_votaciones:");
+    expect(workflow).toContain("FULL_VOTACIONES");
+    expect(workflow).toContain("npm run ingest:votaciones-full -- --full");
+    expect(ingest).toContain("const REFRESH_FROM");
+    expect(ingest).toContain("function cachedSession");
+    expect(ingest).toContain("if (cached && !shouldRefresh(vote.fecha)) return cached");
+  });
 });

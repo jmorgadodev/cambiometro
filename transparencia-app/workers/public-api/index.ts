@@ -17,6 +17,12 @@ export interface Env {
   DB?: D1Database;
   TRANSFERS_DB?: D1Database;
   PUBLIC_DATA?: R2Bucket;
+  /**
+   * Emergency-only switch for validating the dedicated D1 projection. The
+   * public path remains R2-first so normal traffic does not consume the D1
+   * free-tier rows_read quota.
+   */
+  PREFER_TRANSFER_D1?: string;
   EMAIL?: EmailSender;
   TURNSTILE_SECRET_KEY?: string;
   READ_ONLY_PREVIEW?: string;
@@ -992,6 +998,14 @@ async function listTransferencias(requestUrl: URL, env: Env) {
   const year = (requestUrl.searchParams.get("year") ?? "").trim();
   const emisor = (requestUrl.searchParams.get("emisor") ?? "").trim();
   if (search.length > 80 || year.length > 20 || emisor.length > 160) return failure("INVALID_QUERY", "Parámetros de consulta inválidos.", 400);
+
+  // R2 is the published, checksummed release and is the cost-safe default.
+  // The former D1-first path performed an unfiltered COUNT plus a filtered
+  // COUNT for every uncached query, which could exhaust the free-tier
+  // rows_read quota even when the complete release was already in R2. D1 is
+  // retained for an explicit operational validation/contingency only.
+  if (env.PREFER_TRANSFER_D1 !== "1") return listTransferenciasFromR2(requestUrl, env);
+
   const sort = requestUrl.searchParams.get("sort") === "fecha" ? "fecha" : "monto_clp";
   const order = requestUrl.searchParams.get("order") === "asc" ? "ASC" : "DESC";
   const transferDb = env.TRANSFERS_DB ?? env.DB;

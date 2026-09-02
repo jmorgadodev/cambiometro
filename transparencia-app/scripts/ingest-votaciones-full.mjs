@@ -5,6 +5,22 @@ import { POLITICOS_SEED } from "../lib/politicos-source.ts";
 const USER_AGENT = "Cambiometro-ETL/1.0 (+https://cambiometro.impulsacv.cl)";
 const REQUEST_TIMEOUT_MS = 30_000;
 const PERIODO_ACTUAL_DESDE = "2026-03-11";
+const FULL_REBUILD = process.argv.includes("--full");
+
+function readArgument(name) {
+  const index = process.argv.indexOf(name);
+  return index >= 0 ? process.argv[index + 1] : undefined;
+}
+
+function isoDateDaysAgo(days) {
+  return new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString().slice(0, 10);
+}
+
+// The official list endpoints remain the source of truth. This local cache is
+// only used to avoid re-downloading unchanged vote details between daily
+// runs; --full deliberately bypasses it for a controlled backfill.
+const REFRESH_FROM = readArgument("--from") || isoDateDaysAgo(7);
+const REFRESH_TO = readArgument("--to") || new Date().toISOString().slice(0, 10);
 
 function normalizeText(value) {
   if (typeof value !== "string") return "";
@@ -29,6 +45,33 @@ function nameMatches(candidate, reference) {
     if (cSurnames[0] === rSurnames[0] && cSurnames[1] === rSurnames[1]) return true;
   }
   return false;
+}
+
+const previousPath = resolve("data/politicos-votaciones.json");
+const previousPayload = existsSync(previousPath)
+  ? JSON.parse(readFileSync(previousPath, "utf8"))
+  : null;
+const previousSessions = new Map(Object.entries(previousPayload?.sessions ?? {}));
+const previousVotesBySession = new Map();
+for (const [polId, entries] of Object.entries(previousPayload?.votes ?? {})) {
+  const politician = POLITICOS_SEED.find((pol) => pol.id === polId);
+  for (const entry of Array.isArray(entries) ? entries : []) {
+    if (!Array.isArray(entry) || entry.length < 2) continue;
+    const [sessionId, option] = entry;
+    const votes = previousVotesBySession.get(sessionId) ?? [];
+    votes.push({ polId, nombre: politician?.nombre_completo ?? polId, opcion: option });
+    previousVotesBySession.set(sessionId, votes);
+  }
+}
+
+function cachedSession(sessionId) {
+  const metadata = previousSessions.get(sessionId);
+  if (!metadata) return null;
+  return { ...metadata, votos: previousVotesBySession.get(sessionId) ?? [] };
+}
+
+function shouldRefresh(date) {
+  return FULL_REBUILD || date >= REFRESH_FROM && date <= REFRESH_TO;
 }
 
 // Load diputados IDs
@@ -128,6 +171,9 @@ async function fetchCamaraVotaciones() {
   console.log(`[ingest-votaciones] Cámara: ${rawVotes.length} votaciones desde ${PERIODO_ACTUAL_DESDE}. Descargando detalles concurrentes...`);
 
   const detailed = await mapConcurrent(rawVotes, 12, async (vote) => {
+    const sessionId = `camara-vot-${vote.id}`;
+    const cached = cachedSession(sessionId);
+    if (cached && !shouldRefresh(vote.fecha)) return cached;
     const detailUrl = `https://opendata.camara.cl/camaradiputados/WServices/WSLegislativo.asmx/retornarVotacionDetalle?prmVotacionId=${vote.id}`;
     const dRes = await fetch(detailUrl, { headers: { "User-Agent": USER_AGENT }, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) });
     if (!dRes.ok) return null;
@@ -174,7 +220,16 @@ async function fetchCamaraVotaciones() {
     };
   });
 
-  return detailed.filter(Boolean);
+  const refreshed = detailed.filter(Boolean);
+  const refreshedIds = new Set(refreshed.map((session) => session.id));
+  // A transient detail failure must not delete an already published session.
+  // The next run can retry it while the last valid evidence remains visible.
+  for (const vote of rawVotes) {
+    const sessionId = `camara-vot-${vote.id}`;
+    const cached = cachedSession(sessionId);
+    if (cached && !refreshedIds.has(sessionId)) refreshed.push(cached);
+  }
+  return refreshed;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -206,8 +261,14 @@ async function fetchSenadoVotaciones() {
 
   console.log(`[ingest-votaciones] Senado: ${sessions.length} sesiones desde ${PERIODO_ACTUAL_DESDE}. Descargando votos por sesión...`);
 
-  const senadoVotes = [];
-  await mapConcurrent(sessions, 6, async (session) => {
+  const refreshedBySession = await mapConcurrent(sessions, 6, async (session) => {
+    const cached = [...previousSessions.entries()]
+      .filter(([, metadata]) => metadata.fuente === "senado" && String(metadata.url ?? "").includes(`id_sesion=${session.id}`))
+      .map(([sessionId]) => cachedSession(sessionId))
+      .filter(Boolean);
+    if (cached.length > 0 && !shouldRefresh(session.fecha)) return cached;
+
+    const votesForSession = [];
     try {
       const [vRes, aRes] = await Promise.all([
         fetch(`https://web-back.senado.cl/api/votes?id_sesion=${session.id}`, { headers: { "User-Agent": USER_AGENT }, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) }),
@@ -269,7 +330,7 @@ async function fetchSenadoVotaciones() {
           }
         }
 
-        senadoVotes.push({
+        votesForSession.push({
           id: `senado-vot-${id}`,
           nombre: vote.TEMA || (boletin ? `Boletín N° ${boletin}` : `Votación Senado ${id}`),
           fecha,
@@ -292,15 +353,28 @@ async function fetchSenadoVotaciones() {
     } catch (err) {
       console.warn(`[WARN] error en sesion senado ${session.id}:`, err.message);
     }
+    return votesForSession;
   });
 
-  return senadoVotes;
+  const refreshed = refreshedBySession.flat().filter(Boolean);
+  const refreshedIds = new Set(refreshed.map((session) => session.id));
+  // Keep the last valid Senate session when an official endpoint has a
+  // transient failure; it will be retried on the next overlapping run.
+  for (const [sessionId, metadata] of previousSessions.entries()) {
+    if (metadata.fuente !== "senado" || refreshedIds.has(sessionId)) continue;
+    if (sessions.some((session) => String(metadata.url ?? "").includes(`id_sesion=${session.id}`))) {
+      const cached = cachedSession(sessionId);
+      if (cached) refreshed.push(cached);
+    }
+  }
+  return refreshed;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
 // CONSOLIDACIÓN FINAL
 // ─────────────────────────────────────────────────────────────────────────────
 async function main() {
+  console.log(`[ingest-votaciones] Modo ${FULL_REBUILD ? "reconstrucción completa" : `incremental (detalles desde ${REFRESH_FROM})`}.`);
   const [camaraSessions, senadoSessions] = await Promise.all([
     fetchCamaraVotaciones(),
     fetchSenadoVotaciones(),
@@ -309,6 +383,16 @@ async function main() {
   console.log(`[ingest-votaciones] Consolidando: ${camaraSessions.length} Cámara + ${senadoSessions.length} Senado...`);
 
   const allSessions = [...camaraSessions, ...senadoSessions];
+  const currentIds = new Set(allSessions.map((session) => session.id));
+  // Never turn a partial upstream response into a destructive publication.
+  // Historical sessions absent from this run remain from the last valid
+  // snapshot and are replaced only when their official detail is refreshed.
+  for (const [sessionId] of previousSessions) {
+    if (!currentIds.has(sessionId)) {
+      const cached = cachedSession(sessionId);
+      if (cached) allSessions.push(cached);
+    }
+  }
   allSessions.sort((a, b) => b.fecha.localeCompare(a.fecha) || b.id.localeCompare(a.id));
 
   const sessionsMap = {};
