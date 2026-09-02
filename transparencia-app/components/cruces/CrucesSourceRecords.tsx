@@ -14,6 +14,14 @@ interface SourceRecord {
   evidence?: Record<string, unknown>;
 }
 
+interface SourceResponseMeta {
+  sourceStatus?: string;
+  sourceBackend?: string;
+  availability?: string;
+  expectedTotal?: number;
+  reason?: string;
+}
+
 const SOURCES: Array<{ id: SourceId; label: string; description: string }> = [
   { id: "chilecompra", label: "ChileCompra", description: "Compras, contratos y proveedores publicados." },
   { id: "infolobby", label: "InfoLobby", description: "Audiencias, sujetos pasivos y organismos." },
@@ -81,6 +89,7 @@ export default function CrucesSourceRecords({ counts }: { counts?: Partial<Recor
   const [page, setPage] = useState(1);
   const [rows, setRows] = useState<SourceRecord[]>([]);
   const [total, setTotal] = useState(0);
+  const [responseMeta, setResponseMeta] = useState<SourceResponseMeta | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
@@ -107,11 +116,13 @@ export default function CrucesSourceRecords({ counts }: { counts?: Partial<Recor
         .then((payload) => {
           setRows(Array.isArray(payload.data) ? payload.data : []);
           setTotal(Number(payload.meta?.total ?? 0));
+          setResponseMeta(payload.meta ?? null);
         })
         .catch((cause: unknown) => {
           if (cause instanceof DOMException && cause.name === "AbortError") return;
           setRows([]);
           setTotal(0);
+          setResponseMeta(null);
           setError(cause instanceof Error ? cause.message : "No se pudieron consultar los registros.");
         })
         .finally(() => {
@@ -156,6 +167,28 @@ export default function CrucesSourceRecords({ counts }: { counts?: Partial<Recor
         ))}
       </div>
 
+      {responseMeta && responseMeta.sourceStatus && responseMeta.sourceStatus !== "complete" && (
+        <div
+          role="status"
+          style={{
+            marginBottom: "0.85rem",
+            padding: "0.8rem 0.95rem",
+            border: "1px solid var(--warning)",
+            borderRadius: 8,
+            background: "color-mix(in srgb, var(--warning) 10%, transparent)",
+            color: "var(--text-primary)",
+            fontSize: "0.78rem",
+            lineHeight: 1.5,
+          }}
+        >
+          <strong>Detalle temporalmente no disponible para esta fuente.</strong>{" "}
+          {typeof responseMeta.expectedTotal === "number" && responseMeta.expectedTotal > 0
+            ? `El universo esperado es ${responseMeta.expectedTotal.toLocaleString("es-CL")} registros; esta respuesta no contiene sus filas.`
+            : "El servicio conserva el último estado conocido y no publica una respuesta parcial como completa."}{" "}
+          {responseMeta.reason ? `Motivo: ${responseMeta.reason}.` : "Reintenta más tarde o consulta la fuente oficial."}
+        </div>
+      )}
+
       <div className="cruces-record-filters" style={{ display: "grid", gridTemplateColumns: "minmax(220px, 2fr) minmax(150px, 1fr) repeat(3, minmax(130px, 1fr))", gap: "0.55rem", marginBottom: "0.85rem" }}>
         <input type="search" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Entidad, proveedor, autoridad o materia" className="input" aria-label="Buscar entidad, proveedor o autoridad" />
         <input type="search" value={entityId} onChange={(event) => { setEntityId(event.target.value); setPage(1); }} placeholder="ID de entidad" className="input" aria-label="Filtrar por ID de entidad" />
@@ -173,7 +206,11 @@ export default function CrucesSourceRecords({ counts }: { counts?: Partial<Recor
           <button type="button" className="btn btn-secondary btn-sm" onClick={() => setRetry((value) => value + 1)}>Reintentar consulta</button>
         </div>
       ) : rows.length === 0 ? (
-        <p style={{ padding: "1.5rem 0", textAlign: "center", color: "var(--text-muted)" }}>No hay registros para estos filtros.</p>
+        <p style={{ padding: "1.5rem 0", textAlign: "center", color: "var(--text-muted)" }}>
+          {responseMeta?.sourceStatus && responseMeta.sourceStatus !== "complete"
+            ? "No se muestran filas porque la fuente no entregó el detalle completo."
+            : "No hay registros para estos filtros."}
+        </p>
       ) : (
         <div style={{ overflowX: "auto" }}>
           <table className="data-table" style={{ width: "100%" }}>

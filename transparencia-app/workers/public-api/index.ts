@@ -1,6 +1,7 @@
 import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
 
 import { POLITICOS_SEED } from "../../lib/politicos-source";
+import { readR2EvidenceRecords } from "../../lib/r2-records";
 
 interface EmailSender {
   send(message: {
@@ -1013,6 +1014,43 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
     if (candidateRows.length > 0) {
       rawRows = candidateRows;
       break;
+    }
+  }
+
+  // The static-site projection is intentionally compact and is not the full
+  // source record set. When D1 is unavailable, use the versioned lake
+  // partition for sources whose complete records are published in R2. The
+  // helper applies filters and pagination before returning the response, so
+  // the dataset is never embedded in the Worker bundle or sent to the client
+  // in one response.
+  if ((source === "chilecompra" || source === "contraloria") && env.PUBLIC_DATA) {
+    try {
+      const offset = offsetFrom(requestUrl);
+      const limit = limitFrom(requestUrl);
+      const lake = await readR2EvidenceRecords(env.PUBLIC_DATA, {
+        source,
+        query: requestUrl.searchParams.get("q")?.trim() ?? requestUrl.searchParams.get("query")?.trim() ?? undefined,
+        entityId: requestUrl.searchParams.get("entity_id")?.trim() || undefined,
+        kind: requestUrl.searchParams.get("kind")?.trim() as never || undefined,
+        from: requestUrl.searchParams.get("from")?.trim() || undefined,
+        to: requestUrl.searchParams.get("to")?.trim() || undefined,
+        limit,
+        cursor: offset > 0 ? `v1_${offset.toString(36)}` : undefined,
+      });
+      if (lake) {
+        return success(lake.data, {
+          total: lake.total,
+          limit,
+          page: Math.floor(offset / limit) + 1,
+          totalPages: Math.max(1, Math.ceil(lake.total / limit)),
+          sourceBackend: "r2-lake",
+          sourceStatus: "complete",
+          publishedRows: lake.total,
+          nextCursor: lake.nextCursor,
+        }, pageLinks(requestUrl, offset, limit, lake.total));
+      }
+    } catch {
+      // Fall through to the compact projection/degraded response below.
     }
   }
   if (rawRows.length === 0) return null;

@@ -1,4 +1,4 @@
-import type { SourceManifest } from "@/lib/data-contracts";
+import type { SourceManifest } from "./data-contracts";
 
 export interface R2PublicCatalog {
   schemaVersion: string;
