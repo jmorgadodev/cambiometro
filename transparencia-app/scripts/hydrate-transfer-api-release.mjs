@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 import { spawn } from "node:child_process";
 
@@ -60,6 +60,15 @@ async function download(key, file, expectedChecksum) {
     }
   }
   throw lastError;
+}
+
+async function downloadIfChanged(key, file, expectedChecksum, expectedSize, existing) {
+  if (existing?.sha256 === expectedChecksum && (!expectedSize || existing.size === expectedSize) && existsSync(file)) {
+    const current = readFileSync(file);
+    if (sha256(current) === expectedChecksum && (!expectedSize || current.byteLength === expectedSize)) return false;
+  }
+  await download(key, file, expectedChecksum);
+  return true;
 }
 
 function validateManifest(manifest) {
@@ -125,7 +134,13 @@ if (!existsSync(manifestFile)) throw new Error(`TRANSFER_API_MANIFEST_MISSING:${
 const remoteManifest = JSON.parse(readFileSync(manifestFile, "utf8"));
 validateManifest(remoteManifest);
 mkdirSync(output, { recursive: true });
-for (const file of readdirSync(output)) if (/^p-\d{4}\.json$/.test(file) || ["manifest.json", "search-index.json", "summary.json"].includes(file)) rmSync(join(output, file), { force: true });
+let existingManifest = null;
+try {
+  existingManifest = JSON.parse(readFileSync(join(output, "manifest.json"), "utf8"));
+} catch {
+  existingManifest = null;
+}
+const existingPages = new Map((existingManifest?.pages ?? []).map((page) => [page.path, page]));
 
 const queue = remoteManifest.pages.map((page) => ({
   ...page,
@@ -134,12 +149,18 @@ const queue = remoteManifest.pages.map((page) => ({
 const workers = Array.from({ length: Math.min(DOWNLOAD_CONCURRENCY, queue.length) }, async () => {
   while (queue.length) {
     const page = queue.shift();
-    if (page) await download(page.key, page.destination, page.sha256);
+    if (page) await downloadIfChanged(page.key, page.destination, page.sha256, page.size, existingPages.get(page.path));
   }
 });
 await Promise.all(workers);
 const searchDestination = join(output, "search-index.json");
-await download(remoteManifest.searchIndex.key, searchDestination, remoteManifest.searchIndex.sha256);
+await downloadIfChanged(
+  remoteManifest.searchIndex.key,
+  searchDestination,
+  remoteManifest.searchIndex.sha256,
+  remoteManifest.searchIndex.size,
+  existingManifest?.searchIndex,
+);
 
 const rows = [];
 for (const page of remoteManifest.pages) rows.push(...JSON.parse(readFileSync(join(output, page.path.split("/").at(-1)), "utf8")));
