@@ -1029,7 +1029,7 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
   // helper applies filters and pagination before returning the response, so
   // the dataset is never embedded in the Worker bundle or sent to the client
   // in one response.
-  if ((source === "chilecompra" || source === "contraloria") && env.PUBLIC_DATA) {
+  if ((source === "chilecompra" || source === "contraloria" || source === "infolobby") && env.PUBLIC_DATA) {
     try {
       const offset = offsetFrom(requestUrl);
       const limit = limitFrom(requestUrl);

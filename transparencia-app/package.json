@@ -63,6 +63,7 @@
     "data:hydrate:ley19862": "node scripts/hydrate-ley19862-from-r2.mjs",
     "data:publish:static": "node scripts/publish-static-site-inputs.mjs",
     "data:hydrate:static": "node scripts/hydrate-static-site-inputs.mjs",
+    "check:static-input-quality": "node scripts/verify-static-input-quality.mjs",
     "data:hydrate:cplt-static": "node scripts/hydrate-cplt-static-fallback.mjs",
     "check:static-input-fallback": "node scripts/verify-static-input-fallback.mjs",
     "check:cplt-freshness": "node scripts/verify-cplt-source-freshness.mjs",
