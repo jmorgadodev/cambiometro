@@ -289,6 +289,42 @@ describe("API canónica v1", () => {
     expect(payload).toMatchObject({ error: { code: "DATABASE_UNAVAILABLE" } });
   });
 
+  it("sirve gastos operacionales desde el release R2 cuando D1 está agotado", async () => {
+    const files: Record<string, unknown> = {
+      "projections/static-site-v1/manifest.json": {
+        files: [{ path: "data/lake-subsets/gastos-camara.subset.json", key: "releases/expenses/camara.json" }],
+      },
+      "releases/expenses/camara.json": {
+        schemaVersion: 1,
+        sourceId: "gastos_camara",
+        generatedAt: "2026-09-02T00:00:00.000Z",
+        recordCount: 1,
+        records: [{
+          id: "expense-1",
+          diputado_id: "1009",
+          nombre: "Diputado de prueba",
+          fecha: "2026-08-01",
+          periodo: "2026-08",
+          item: "Traslado",
+          monto_clp: 10000,
+          url: "https://www.camara.cl/registro/expense-1",
+          fuente: "Cámara de Diputados",
+        }],
+      },
+    };
+    const env = {
+      DB: { prepare: () => { throw new Error("D1_ERROR: daily rows_read quota exceeded"); } },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/records?source=gastos_camara&limit=1"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta).toMatchObject({ total: 1, sourceBackend: "r2" });
+    expect(payload.data[0]).toMatchObject({ id: "expense-1", kind: "expense", sourceId: "gastos_camara", title: "Traslado" });
+  });
+
   it("pagina el universo nacional de forma continua aunque R2 use bloques físicos mayores", async () => {
     const files: Record<string, unknown> = {
       "projections/funcionarios-v1/manifest.json": {

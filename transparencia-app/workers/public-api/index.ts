@@ -170,6 +170,25 @@ interface StaticSiteManifest {
   files: Array<{ path: string; key: string }>;
 }
 
+interface ExpenseSubset {
+  schemaVersion: number;
+  sourceId: "gastos_camara" | "gastos_senado";
+  generatedAt?: string;
+  recordCount: number;
+  checksumSha256?: string;
+  records: Array<{
+    id: string;
+    diputado_id?: string;
+    nombre?: string;
+    fecha: string;
+    periodo: string;
+    item: string;
+    monto_clp: number;
+    url: string;
+    fuente: string;
+  }>;
+}
+
 interface OfficialsSearchIndex {
   schemaVersion: number;
   totalRows: number;
@@ -841,6 +860,75 @@ function record(row: JsonRecord) {
   };
 }
 
+function expenseRecord(row: ExpenseSubset["records"][number], sourceId: ExpenseSubset["sourceId"]): JsonRecord {
+  const subjectEntityIds = sourceId === "gastos_camara" && row.diputado_id
+    ? [`person-camara-${row.diputado_id}`]
+    : [];
+  return {
+    id: row.id,
+    kind: "expense",
+    sourceId,
+    title: row.item,
+    description: row.nombre ?? null,
+    occurredAt: row.fecha,
+    period: { periodo: row.periodo },
+    subjectEntityIds,
+    objectEntityIds: [],
+    amount: { amountClp: row.monto_clp, currency: "CLP" },
+    evidence: { url: row.url, fuente: row.fuente },
+    data: row,
+  };
+}
+
+async function listExpensesFromR2(requestUrl: URL, env: Env): Promise<Response | null> {
+  const requestedSource = requestUrl.searchParams.get("source")?.trim();
+  const requestedKind = requestUrl.searchParams.get("kind")?.trim();
+  const expenseSources: ExpenseSubset["sourceId"][] = ["gastos_camara", "gastos_senado"];
+  if (requestedSource && !expenseSources.includes(requestedSource as ExpenseSubset["sourceId"])) return null;
+  if (requestedKind && requestedKind !== "expense") return null;
+
+  const manifest = await r2Json<StaticSiteManifest>(env.PUBLIC_DATA, "projections/static-site-v1/manifest.json");
+  if (!manifest?.files?.length) return null;
+  const sourceIds = requestedSource ? [requestedSource as ExpenseSubset["sourceId"]] : expenseSources;
+  const subsets = await Promise.all(sourceIds.map(async (sourceId) => {
+    const path = `data/lake-subsets/${sourceId.replace("gastos_", "gastos-")}.subset.json`;
+    const entry = manifest.files.find((file) => file.path === path);
+    if (!entry) return null;
+    return await r2Json<ExpenseSubset>(env.PUBLIC_DATA, entry.key);
+  }));
+  if (subsets.some((subset) => !subset || !Array.isArray(subset.records))) return null;
+
+  const query = normalized(requestUrl.searchParams.get("q") ?? requestUrl.searchParams.get("query"));
+  const from = requestUrl.searchParams.get("from")?.trim() ?? "";
+  const to = requestUrl.searchParams.get("to")?.trim() ?? "";
+  const entityId = normalized(requestUrl.searchParams.get("entity_id"));
+  if (query.length > 80 || from.length > 32 || to.length > 32 || entityId.length > 160) {
+    return failure("INVALID_QUERY", "Parámetros de consulta inválidos.", 400);
+  }
+  const normalize = (value: unknown) => normalized(value);
+  const rows = subsets.flatMap((subset) => subset!.records.map((row) => ({ row, sourceId: subset!.sourceId })));
+  const filtered = rows
+    .filter(({ row }) => !query || normalize(`${row.id} ${row.nombre} ${row.item} ${row.fuente}`).includes(query))
+    .filter(({ row }) => !from || row.fecha >= from)
+    .filter(({ row }) => !to || row.fecha <= to)
+    .filter(({ row }) => !entityId || normalize(`${row.diputado_id ?? ""} ${row.nombre ?? ""}`).includes(entityId))
+    .sort((left, right) => right.row.fecha.localeCompare(left.row.fecha) || right.row.id.localeCompare(left.row.id));
+
+  const limit = limitFrom(requestUrl);
+  const offset = offsetFrom(requestUrl);
+  const total = filtered.length;
+  const data = filtered.slice(offset, offset + limit).map(({ row, sourceId }) => expenseRecord(row, sourceId));
+  return success(data, {
+    total,
+    limit,
+    page: Math.floor(offset / limit) + 1,
+    totalPages: Math.max(1, Math.ceil(total / limit)),
+    source: requestedSource ?? "gastos_operacionales",
+    updatedAt: subsets.reduce((latest, subset) => String(subset!.generatedAt ?? "") > latest ? String(subset!.generatedAt ?? "") : latest, ""),
+    sourceBackend: "r2",
+  }, pageLinks(requestUrl, offset, limit, total));
+}
+
 function relation(row: JsonRecord) {
   const evidenceRecordIds = parseJson(row.evidence_record_ids_json);
   return {
@@ -1305,7 +1393,18 @@ export default {
     }
     if (path === "/api/v1/records") {
       const limited = await rateLimit(request, env, "records");
-      return limited ?? cachedPublicGet(request, () => databaseSafe(listRecords(url, env)));
+      return limited ?? cachedPublicGet(request, async () => {
+        // Los releases de gastos son completos, versionados y ya están en R2.
+        // Consultarlos primero evita consumir rows_read de D1 y mantiene el
+        // contrato público disponible cuando la cuota gratuita se agota.
+        const expenseSource = url.searchParams.get("source")?.startsWith("gastos_");
+        const expenseKind = url.searchParams.get("kind") === "expense";
+        if (expenseSource || expenseKind) {
+          const r2 = await listExpensesFromR2(url, env);
+          if (r2) return r2;
+        }
+        return databaseSafe(listRecords(url, env));
+      });
     }
     if (path === "/api/v1/relations") {
       const limited = await rateLimit(request, env, "relations");
