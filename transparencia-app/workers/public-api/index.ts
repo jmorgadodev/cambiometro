@@ -1004,10 +1004,17 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
     `data/lake/projections/v1/${source}.json`,
     `data/lake-subsets/${source}.subset.json`,
   ];
-  const entry = candidatePaths.map((path) => manifest.files.find((file) => file.path === path)).find(Boolean);
-  if (!entry) return null;
-  const payload = await r2Json<JsonRecord>(env.PUBLIC_DATA, entry.key);
-  const rawRows = Array.isArray(payload) ? payload : Array.isArray(payload?.records) ? payload.records : [];
+  let rawRows: unknown[] = [];
+  for (const path of candidatePaths) {
+    const entry = manifest.files.find((file) => file.path === path);
+    if (!entry) continue;
+    const payload = await r2Json<JsonRecord>(env.PUBLIC_DATA, entry.key);
+    const candidateRows = Array.isArray(payload) ? payload : Array.isArray(payload?.records) ? payload.records : [];
+    if (candidateRows.length > 0) {
+      rawRows = candidateRows;
+      break;
+    }
+  }
   if (rawRows.length === 0) return null;
 
   const query = normalized(requestUrl.searchParams.get("q") ?? requestUrl.searchParams.get("query"));
