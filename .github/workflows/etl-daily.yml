@@ -11,6 +11,11 @@ on:
       to:
         description: Fecha final YYYY-MM-DD
         required: false
+      full_votaciones:
+        description: Reconstruir todos los detalles oficiales de votaciones (sólo para backfill)
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: etl-daily
@@ -104,9 +109,17 @@ jobs:
           ETL_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
         run: npm run data:materialize -- --database transparencia-db --remote --sources camara,votaciones_senado
 
-      - name: Regenerar cache estático completo de votaciones
+      - name: Actualizar cache estático de votaciones incremental
         working-directory: transparencia-app
-        run: npm run ingest:votaciones-full
+        env:
+          FULL_VOTACIONES: ${{ inputs.full_votaciones }}
+        shell: bash
+        run: |
+          if [[ "$FULL_VOTACIONES" == "true" ]]; then
+            npm run ingest:votaciones-full -- --full
+          else
+            npm run ingest:votaciones-full
+          fi
 
       - name: Construir subsets y publicar entradas estáticas
         working-directory: transparencia-app
