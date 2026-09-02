@@ -308,17 +308,20 @@ async function verifyProdFull() {
   const healthRes = await fetch(`${API_URL}/api/v1/health`, { headers });
   assertCheck("API", "Worker health responde 200", healthRes.status === 200);
   const healthJson = healthRes.ok ? await healthRes.json().catch(() => null) : null;
+  const healthUsesCanonicalR2 = healthJson?.data?.transferSource === "r2"
+    && healthJson.data.r2 === true;
+  const healthUsesOptInD1 = healthJson?.data?.transferSource === "d1"
+    && healthJson.data.transferD1 === true
+    && healthJson.data.d1Consistent === true
+    && healthJson.data.d1TransferRows === expectedTransferRows
+    && typeof healthJson.data.d1ReleaseChecksum === "string"
+    && healthJson.data.d1ReleaseChecksum === transferManifest?.checksumSha256;
   assertCheck(
     "API",
-    "Worker health declara la D1 dedicada completa y su fuente efectiva",
+    "Worker health declara un release de transferencias coherente (R2 canónico o D1 opt-in)",
     healthJson?.data?.ok === true
       && healthJson.data.transferRows === expectedTransferRows
-      && healthJson.data.transferSource === "d1"
-      && healthJson.data.transferD1 === true
-      && healthJson.data.d1Consistent === true
-      && healthJson.data.d1TransferRows === expectedTransferRows
-      && typeof healthJson.data.d1ReleaseChecksum === "string"
-      && healthJson.data.d1ReleaseChecksum === transferManifest?.checksumSha256,
+      && (healthUsesCanonicalR2 || healthUsesOptInD1),
     `rows: ${healthJson?.data?.transferRows ?? "n/a"}, d1Rows: ${healthJson?.data?.d1TransferRows ?? "n/a"}, source: ${healthJson?.data?.transferSource ?? "n/a"}, consistent: ${healthJson?.data?.d1Consistent ?? "n/a"}`,
   );
   const funcionariosRes = await fetch(`${API_URL}/api/funcionarios?muni=muni-maipu&query=Claudio&limit=5`, { headers });

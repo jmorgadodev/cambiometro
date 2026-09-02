@@ -423,7 +423,7 @@ describe("API canónica v1", () => {
   });
 
   it("expone health 200 cuando el release R2 canónico está disponible", async () => {
-    const env = { ...(testEnv() as object), ...(transferR2Env() as object) } as never;
+    const env = { ...(testEnv() as object), ...(transferR2Env() as object), PREFER_TRANSFER_D1: "1", HEALTH_CHECK_D1: "1" } as never;
     const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
     const payload = await response.json();
 
@@ -433,12 +433,27 @@ describe("API canónica v1", () => {
   });
 
   it("mantiene health operativo y marca D1 inconsistente cuando R2 tiene el release canónico", async () => {
-    const env = { ...(testEnv(59360) as object), ...(transferR2Env() as object) } as never;
+    const env = { ...(testEnv(59360) as object), ...(transferR2Env() as object), HEALTH_CHECK_D1: "1" } as never;
     const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
     const payload = await response.json();
 
     expect(response.status).toBe(200);
     expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 59360, transferRows: 59361, d1Consistent: false, transferSource: "r2" });
+  });
+
+  it("no consulta el COUNT de transferencias en health por defecto", async () => {
+    const prepare = vi.fn(() => {
+      throw new Error("health no debe leer la tabla de transferencias");
+    });
+    const response = await api.fetch(new Request("https://example.test/api/v1/health"), {
+      ...(transferR2Env() as object),
+      DB: { prepare },
+    } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 0, d1Consistent: false, transferSource: "r2" });
+    expect(prepare).not.toHaveBeenCalled();
   });
 
   it("mantiene health operativo cuando la proyección D1 opcional aún no existe", async () => {
