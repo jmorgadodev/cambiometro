@@ -142,11 +142,12 @@ function indexedRecordMatches(record: EvidenceRecord, params: {
 
 async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeof readR2EvidenceRecords>[1]) {
   const sourceIds = Array.isArray(params.source) ? params.source : [params.source];
-  if (sourceIds.length !== 1 || sourceIds[0] !== "chilecompra") return null;
-  const manifestObject = await bucket.get("indexes/v1/chilecompra/manifest.json");
+  if (sourceIds.length !== 1 || !["chilecompra", "infolobby"].includes(sourceIds[0])) return null;
+  const sourceId = sourceIds[0];
+  const manifestObject = await bucket.get(`indexes/v1/${sourceId}/manifest.json`);
   if (!manifestObject) return null;
   const manifest = await manifestObject.json<IndexedRecordsManifest>();
-  if (manifest.schemaVersion !== 1 || manifest.sourceId !== "chilecompra" || !Array.isArray(manifest.pages)) return null;
+  if (manifest.schemaVersion !== 1 || manifest.sourceId !== sourceId || !Array.isArray(manifest.pages)) return null;
   const offset = cursorOffset(params.cursor);
   const limit = Math.min(Math.max(params.limit, 1), 100);
   const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || params.from || params.to);
