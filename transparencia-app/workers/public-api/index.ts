@@ -1147,34 +1147,64 @@ async function listTransferencias(requestUrl: URL, env: Env) {
   }
 }
 
-async function exportData(requestUrl: URL, env: Env) {
-  const format = requestUrl.searchParams.get("format");
-  if (format !== "csv" && format !== "json") return failure("MISSING_PARAMETERS", "Filtros obligatorios: format=csv o format=json.", 400);
-  if (requestUrl.searchParams.get("dataset") === "funcionarios") return exportFuncionarios(requestUrl, env, format);
-  if (!env.DB) return dbUnavailable();
-  const requestedLimit = Number(requestUrl.searchParams.get("limit") ?? 205);
-  const limit = Number.isInteger(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 205) : 205;
-  const cargo = (requestUrl.searchParams.get("cargo") ?? "").trim().toLowerCase();
-  const rows = await env.DB.prepare("SELECT id, name, kind, attributes_json, source_ids_json FROM entities WHERE kind = ? ORDER BY name, id LIMIT ?").bind("person", 205).all<JsonRecord>();
-  const data = (rows.results ?? []).map((row) => {
-    const attributes = (parseJson(row.attributes_json) as JsonRecord | null) ?? {};
-    return {
-      id: row.id,
-      nombre_completo: row.name,
-      cargo: attributes.cargo ?? attributes.position ?? "",
-      partido_sigla: attributes.partido_sigla ?? "IND",
-      distrito_region: attributes.distrito_region ?? attributes.region ?? "",
-      fuente: attributes.fuente ?? null,
-      evidencia_etl: Array.isArray(parseJson(row.source_ids_json)) ? (parseJson(row.source_ids_json) as unknown[]).length : 0,
-    };
-  }).filter((row) => !cargo || String(row.cargo).toLowerCase().includes(cargo)).slice(0, limit);
-  const meta = { version: "v1", snapshot_etl: "worker-d1" };
+function exportEntityRow(row: JsonRecord) {
+  const attributes = (parseJson(row.attributes_json ?? row.attributes) as JsonRecord | null) ?? {};
+  const sourceIds = parseJson(row.source_ids_json ?? row.sourceIds);
+  return {
+    id: row.id,
+    nombre_completo: row.name,
+    cargo: attributes.cargo ?? attributes.position ?? attributes.office ?? "",
+    partido_sigla: attributes.partido_sigla ?? attributes.party ?? "IND",
+    distrito_region: attributes.distrito_region ?? attributes.region ?? "",
+    fuente: attributes.fuente ?? null,
+    evidencia_etl: Array.isArray(sourceIds) ? sourceIds.length : 0,
+  };
+}
+
+function exportEntityResponse(data: JsonRecord[], format: "csv" | "json", snapshot: string) {
+  const meta = { version: "v1", snapshot_etl: snapshot };
   if (format === "json") {
     return json({ data, meta }, { headers: { "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200", "Content-Disposition": "attachment; filename=transparencia_chile.json" } });
   }
   const header = "id,nombre_completo,cargo,partido_sigla,distrito_region,fuente,evidencia_etl";
   const body = data.map((row) => [row.id, row.nombre_completo, row.cargo, row.partido_sigla, row.distrito_region, row.fuente, row.evidencia_etl].map(csvCell).join(",")).join("\n");
   return new Response(`${header}\n${body}`, { headers: { "Content-Type": "text/csv; charset=utf-8", "Cache-Control": "public, max-age=86400, s-maxage=86400, stale-while-revalidate=43200", "Content-Disposition": "attachment; filename=transparencia_chile.csv", "X-Content-Type-Options": "nosniff" } });
+}
+
+async function exportEntitiesFromR2(requestUrl: URL, env: Env, format: "csv" | "json") {
+  const rows = await canonicalEntitiesFromR2(env);
+  if (!rows) return null;
+  const requestedLimit = Number(requestUrl.searchParams.get("limit") ?? 205);
+  const limit = Number.isInteger(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 205) : 205;
+  const cargo = (requestUrl.searchParams.get("cargo") ?? "").trim().toLowerCase();
+  const data = rows
+    .filter((row) => row.kind === "person")
+    .map(exportEntityRow)
+    .filter((row) => !cargo || String(row.cargo).toLowerCase().includes(cargo))
+    .sort((left, right) => String(left.nombre_completo ?? "").localeCompare(String(right.nombre_completo ?? ""), "es-CL") || String(left.id ?? "").localeCompare(String(right.id ?? "")))
+    .slice(0, limit);
+  return exportEntityResponse(data, format, "r2-catalog");
+}
+
+async function exportData(requestUrl: URL, env: Env) {
+  const format = requestUrl.searchParams.get("format");
+  if (format !== "csv" && format !== "json") return failure("MISSING_PARAMETERS", "Filtros obligatorios: format=csv o format=json.", 400);
+  if (requestUrl.searchParams.get("dataset") === "funcionarios") return exportFuncionarios(requestUrl, env, format);
+  if (!env.DB) return await exportEntitiesFromR2(requestUrl, env, format) ?? dbUnavailable();
+  const requestedLimit = Number(requestUrl.searchParams.get("limit") ?? 205);
+  const limit = Number.isInteger(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 205) : 205;
+  const cargo = (requestUrl.searchParams.get("cargo") ?? "").trim().toLowerCase();
+  try {
+    const rows = await env.DB.prepare("SELECT id, name, kind, attributes_json, source_ids_json FROM entities WHERE kind = ? ORDER BY name, id LIMIT ?").bind("person", 205).all<JsonRecord>();
+    const data = (rows.results ?? []).map(exportEntityRow)
+      .filter((row) => !cargo || String(row.cargo).toLowerCase().includes(cargo))
+      .slice(0, limit);
+    if (data.length > 0) return exportEntityResponse(data, format, "worker-d1");
+  } catch {
+    // El catálogo R2 es el release público validado y evita que el agotamiento
+    // de rows_read convierta una exportación de lectura en un 503.
+  }
+  return await exportEntitiesFromR2(requestUrl, env, format) ?? dbUnavailable();
 }
 
 async function exportFuncionarios(requestUrl: URL, env: Env, format: "csv" | "json") {
