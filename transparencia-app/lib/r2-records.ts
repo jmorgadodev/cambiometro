@@ -131,7 +131,9 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
     const manifestObject = await readHotOrArchivedObject(bucket, partition.manifestKey, releaseTag, manifestAssetName);
     if (!manifestObject) continue;
     const manifest = await manifestObject.json<PartitionManifest>();
-    const artifacts = manifest.artifacts.filter((artifact) => /records\.jsonl\.gz(?:\.part-\d+)?$/.test(artifact.key)).sort((a, b) => a.key.localeCompare(b.key));
+    const artifacts = manifest.artifacts
+      .filter((artifact) => /records(?:-[^/]+)?\.jsonl\.gz(?:\.part-\d+)?$/.test(artifact.key))
+      .sort((a, b) => a.key.localeCompare(b.key));
     const chunks = [];
     for (const artifact of artifacts) {
       const object = await readHotOrArchivedObject(bucket, artifact.key, releaseTag, artifact.releaseAssetName);
