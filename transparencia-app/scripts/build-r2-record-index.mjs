@@ -50,6 +50,7 @@ const archivePath = resolve(outDir, "records.jsonl");
 let archive = "";
 const pages = [];
 const search = new Map();
+const searchCounts = new Map();
 const searchableText = (record) => {
   const values = [record.id, record.kind, record.occurredAt];
   const collect = (value, depth = 0) => {
@@ -80,6 +81,7 @@ for (let index = 0; index < records.length; index += 1) {
     const current = search.get(term) ?? [];
     if (current.length === 0 || current[current.length - 1] !== pageIndex) current.push(pageIndex);
     search.set(term, current);
+    searchCounts.set(term, (searchCounts.get(term) ?? 0) + 1);
   }
 }
 
@@ -87,6 +89,8 @@ writeFileSync(archivePath, archive, "utf8");
 const searchObject = Object.fromEntries([...search.entries()].sort(([left], [right]) => left.localeCompare(right)));
 const searchPath = resolve(outDir, "search.json");
 writeFileSync(searchPath, JSON.stringify(searchObject), "utf8");
+const searchCountsPath = resolve(outDir, "search-counts.json");
+writeFileSync(searchCountsPath, JSON.stringify(Object.fromEntries([...searchCounts.entries()].sort(([left], [right]) => left.localeCompare(right)))), "utf8");
 const manifest = {
   schemaVersion: 1,
   sourceId: source,
@@ -94,6 +98,7 @@ const manifest = {
   pageSize,
   recordArchiveKey: `indexes/v1/${source}/records.jsonl`,
   searchIndexKey: `indexes/v1/${source}/search.json`,
+  searchCountIndexKey: `indexes/v1/${source}/search-counts.json`,
   pages,
 };
 writeFileSync(resolve(outDir, "manifest.json"), JSON.stringify(manifest, null, 2), "utf8");
