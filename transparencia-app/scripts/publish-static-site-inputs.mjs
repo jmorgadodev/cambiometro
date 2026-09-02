@@ -3,6 +3,7 @@ import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import {
   assertStaticInputManifest,
+  assertStaticInputContentQuality,
   buildStaticInputEntries,
   buildStaticInputManifest,
   parseRequestedStaticFiles,
@@ -64,8 +65,10 @@ if (!localOnly) {
   mkdirSync(releaseDir, { recursive: true });
   for (const entry of freshEntries) {
     const source = resolveSafeStaticPath(root, entry.path);
+    const content = readFileSync(source);
+    assertStaticInputContentQuality(entry.path, content);
     const staged = join(releaseDir, entry.path.replaceAll("/", "__"));
-    writeFileSync(staged, readFileSync(source));
+    writeFileSync(staged, content);
     runWrangler(["r2", "object", "put", `${bucket}/${entry.key}`, "--file", staged, "--content-type", "application/json"]);
   }
   const manifestPath = join(output, "manifest.json");
