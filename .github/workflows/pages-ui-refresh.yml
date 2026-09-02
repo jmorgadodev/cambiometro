@@ -105,7 +105,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: |
-          npm run data:hydrate:cplt-static -- --required
+          npm run data:hydrate:cplt-static -- --required --pages-only
           npm run data:hydrate:static -- --required --required-all
           npm run check:static-input-fallback
           npm run data:hydrate:ley19862
