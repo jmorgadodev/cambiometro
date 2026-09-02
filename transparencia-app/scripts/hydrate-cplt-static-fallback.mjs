@@ -1,8 +1,9 @@
 import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
-import { join, resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { spawn } from "node:child_process";
+import { cpltStaticAssetRelativePath } from "./cplt-static-assets.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const bucket = argument("--bucket", "transparencia-public-data");
@@ -86,9 +87,7 @@ function validateManifest(manifest) {
     throw new Error(`CPLT_STATIC_COVERAGE_INVALID:${manifest.coverage?.length ?? 0}`);
   }
   for (const asset of manifest.assets) {
-    if (!/^projections\/funcionarios-v1\/versions\/[^/]+\/[A-Za-z0-9._-]+\.json$/.test(asset.key ?? "")) {
-      throw new Error(`CPLT_STATIC_ASSET_KEY_INVALID:${asset.key}`);
-    }
+    cpltStaticAssetRelativePath(asset.key, manifest.version);
     if (!Number.isSafeInteger(asset.size) || asset.size < 2 || !/^[a-f0-9]{64}$/i.test(asset.checksumSha256 ?? "")) {
       throw new Error(`CPLT_STATIC_ASSET_METADATA_INVALID:${asset.key}`);
     }
@@ -112,8 +111,9 @@ try {
   mkdirSync(versionRoot, { recursive: true });
 
   for (const asset of manifest.assets) {
-    const fileName = asset.key.split("/").at(-1);
-    const target = join(versionRoot, fileName);
+    const relativePath = cpltStaticAssetRelativePath(asset.key, manifest.version);
+    const target = join(versionRoot, relativePath);
+    mkdirSync(dirname(target), { recursive: true });
     const downloaded = `${target}.download`;
     await downloadObject(asset.key, downloaded, asset.size, asset.checksumSha256);
     writeFileSync(target, readFileSync(downloaded));
