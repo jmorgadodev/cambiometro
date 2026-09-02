@@ -159,6 +159,8 @@ async function processStream(tipo, urls, outputDir) {
     throw error;
   }
 
+  latestByOfficial.flush();
+
   if (unknownMunicipalities.size > 0) {
     latestByOfficial.close();
     throw new Error(`CPLT_UNKNOWN_MUNICIPALITIES: ${JSON.stringify([...unknownMunicipalities].sort())}`);

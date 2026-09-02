@@ -44,5 +44,6 @@ describe("LatestCpltRecordStore", () => {
     store.upsert({ stableKey: "alfa", period: "2026-01", record: { nombre: "Alfa" }, organismoId: "maipu", recordId: "func-alfa" });
 
     expect([...store.valuesSortedByRecordId()].map(({ record }) => record.nombre)).toEqual(["Alfa", "Zeta"]);
+    store.close();
   });
 });
