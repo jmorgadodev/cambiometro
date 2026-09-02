@@ -761,9 +761,15 @@ function limitFrom(url: URL) {
 
 function offsetFrom(url: URL) {
   const cursor = url.searchParams.get("cursor");
-  if (!cursor) return 0;
-  const match = /^v1_(\d+)$/.exec(cursor);
-  return match ? Number(match[1]) : 0;
+  if (cursor) {
+    const match = /^v1_([0-9a-z]+)$/.exec(cursor);
+    return match ? Number.parseInt(match[1], 36) : 0;
+  }
+  const explicitOffset = Number(url.searchParams.get("offset"));
+  if (Number.isInteger(explicitOffset) && explicitOffset > 0) return explicitOffset;
+  const page = Number(url.searchParams.get("page"));
+  if (Number.isInteger(page) && page > 1) return (page - 1) * limitFrom(url);
+  return 0;
 }
 
 function pageLinks(url: URL, offset: number, limit: number, total: number) {
