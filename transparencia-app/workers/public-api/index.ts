@@ -26,6 +26,7 @@ export interface Env {
   EMAIL?: EmailSender;
   TURNSTILE_SECRET_KEY?: string;
   READ_ONLY_PREVIEW?: string;
+  HEALTH_CHECK_D1?: string;
   EXPENSIVE_API_RATE_LIMITER?: { limit(input: { key: string }): Promise<{ success: boolean }> };
 }
 
@@ -228,9 +229,10 @@ async function health(env: Env) {
   const transferDb = env.TRANSFERS_DB ?? env.DB;
   const transferD1 = Boolean(transferDb);
   const r2 = Boolean(manifest);
+  const checkD1 = env.HEALTH_CHECK_D1 === "1";
   let d1TransferRows = 0;
   let d1ReleaseChecksum: string | null = null;
-  if (transferD1) {
+  if (transferD1 && checkD1) {
     try {
       const result = await transferDb?.prepare("SELECT count(*) AS total FROM transferencias_19862").first<{ total: number }>();
       d1TransferRows = Number(result?.total ?? 0);
@@ -247,7 +249,7 @@ async function health(env: Env) {
   // The dedicated transfer projection is preferred when available. R2 remains
   // the canonical fallback so a partial refresh never takes the public API
   // offline.
-  const d1Consistent = Boolean(transferD1 && manifest && d1TransferRows === manifest.totalRows && d1ReleaseChecksum === manifest.checksumSha256);
+  const d1Consistent = Boolean(checkD1 && transferD1 && manifest && d1TransferRows === manifest.totalRows && d1ReleaseChecksum === manifest.checksumSha256);
   const ok = Boolean(r2);
   return json({
     data: {
@@ -259,7 +261,7 @@ async function health(env: Env) {
     d1Consistent,
     transferD1,
     d1ReleaseChecksum,
-    transferSource: d1Consistent ? "d1" : "r2",
+    transferSource: d1Consistent && env.PREFER_TRANSFER_D1 === "1" ? "d1" : "r2",
     transferRows: manifest?.totalRows ?? 0,
     generatedAt: manifest?.generatedAt ?? null,
     },

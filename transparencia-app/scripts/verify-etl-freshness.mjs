@@ -40,10 +40,15 @@ const transferRows = Number(health.json.data.transferRows ?? 0);
 const d1TransferRows = Number(health.json.data.d1TransferRows ?? 0);
 if (!Number.isInteger(transferRows) || transferRows <= 1000) throw new Error(`API_TRANSFER_UNIVERSE_INCOMPLETE:${transferRows}`);
 if (minimumTransferRows > 0 && transferRows < minimumTransferRows) throw new Error(`API_TRANSFER_UNIVERSE_INCOMPLETE:${transferRows}:${minimumTransferRows}`);
-if (health.json.data.transferSource !== "d1" || health.json.data.transferD1 !== true || health.json.data.d1Consistent !== true) {
-  throw new Error(`API_TRANSFER_D1_NOT_CONSISTENT:${health.json.data.transferSource ?? "unknown"}`);
+const transferSource = health.json.data.transferSource;
+if (transferSource === "d1") {
+  if (health.json.data.transferD1 !== true || health.json.data.d1Consistent !== true) {
+    throw new Error(`API_TRANSFER_D1_NOT_CONSISTENT:${transferSource}`);
+  }
+  if (d1TransferRows !== transferRows) throw new Error(`API_TRANSFER_D1_ROW_COUNT_MISMATCH:${d1TransferRows}:${transferRows}`);
+} else if (transferSource !== "r2" || health.json.data.r2 !== true) {
+  throw new Error(`API_TRANSFER_SOURCE_NOT_CANONICAL:${transferSource ?? "unknown"}`);
 }
-if (d1TransferRows !== transferRows) throw new Error(`API_TRANSFER_D1_ROW_COUNT_MISMATCH:${d1TransferRows}:${transferRows}`);
 
 const etlWorkflow = process.env.ETL_WORKFLOW_NAME || "";
 let movement = null;
@@ -59,4 +64,4 @@ if (/movimientos/i.test(etlWorkflow)) {
   if (!payload.source_health?.some((source) => source.tier === "official" && source.ok === true)) throw new Error("MOVIMIENTOS_OFFICIAL_SOURCE_UNAVAILABLE");
   movement = { total: payload.movimientos.length, lastSuccess: new Date(lastSuccess).toISOString(), checksum: payload.checksum_sha256 };
 }
-console.log(JSON.stringify({ ok: true, prodUrl, apiUrl, ageDays: Number(ageDays.toFixed(2)), transferRows, d1TransferRows, minimumTransferRows, transferSource: health.json.data.transferSource ?? null, etlWorkflow, movement }));
+console.log(JSON.stringify({ ok: true, prodUrl, apiUrl, ageDays: Number(ageDays.toFixed(2)), transferRows, d1TransferRows, minimumTransferRows, transferSource, etlWorkflow, movement }));

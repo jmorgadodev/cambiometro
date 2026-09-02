@@ -36,9 +36,14 @@ de `/api/v1/transferencias`. Esto evita que cada consulta haga `COUNT` y
 consultas filtradas sobre las decenas de miles de filas de D1, que fue la
 causa del agotamiento del límite gratuito `rows_read`.
 
-D1 queda disponible para una validación o contingencia explícita mediante la
-variable de Worker `PREFER_TRANSFER_D1=1`. No se configura en producción como
-camino normal. Si R2 no contiene un release completo, la API responde 503 de
+El endpoint `/api/v1/health` tampoco cuenta la tabla de transferencias en su
+camino normal: sólo comprueba que el binding D1 exista y que el manifest R2
+sea válido. La comprobación de filas y checksum de D1 se activa únicamente
+para una auditoría puntual con `HEALTH_CHECK_D1=1`.
+
+D1 queda disponible para una validación o contingencia explícita mediante las
+variables de Worker `PREFER_TRANSFER_D1=1` y `HEALTH_CHECK_D1=1`. No se
+configuran en producción como camino normal. Si R2 no contiene un release completo, la API responde 503 de
 forma visible y no inventa ni publica un universo parcial.
 
 ## Orden de recuperación después de un límite D1
