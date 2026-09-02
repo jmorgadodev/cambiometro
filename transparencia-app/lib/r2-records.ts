@@ -1,5 +1,5 @@
-import type { EvidenceRecord } from "@/lib/data-contracts";
-import type { R2PublicCatalog } from "@/lib/r2-catalog";
+import type { EvidenceRecord } from "./data-contracts";
+import type { R2PublicCatalog } from "./r2-catalog";
 
 interface LakeRecord {
   id: string;
@@ -107,6 +107,7 @@ function cursorOffset(cursor?: string) {
 
 export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   source: string | string[];
+  query?: string;
   entityId?: string;
   recordIds?: string[];
   kind?: EvidenceRecord["kind"];
@@ -152,6 +153,10 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
       if (params.entityId && !record.subjectEntityIds.includes(params.entityId) && !record.objectEntityIds.includes(params.entityId)) continue;
       if (params.recordIds && !params.recordIds.includes(record.id)) continue;
       if (params.kind && record.kind !== params.kind) continue;
+      if (params.query) {
+        const haystack = JSON.stringify({ id: record.id, title: record.title, description: record.description, data: record.data }).toLocaleLowerCase("es-CL");
+        if (!haystack.includes(params.query.toLocaleLowerCase("es-CL"))) continue;
+      }
       if (params.from && date < params.from) continue;
       if (params.to && date > params.to) continue;
       records.push(record);
