@@ -3,11 +3,12 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { spawn } from "node:child_process";
-import { cpltStaticAssetRelativePath } from "./cplt-static-assets.mjs";
+import { cpltStaticAssetRelativePath, cpltStaticAssetsForPages } from "./cplt-static-assets.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const bucket = argument("--bucket", "transparencia-public-data");
 const required = process.argv.includes("--required");
+const pagesOnly = process.argv.includes("--pages-only");
 const remoteManifestKey = "projections/funcionarios-v1/manifest.json";
 const outputRoot = join(root, "data", "lake-cplt", "projections", "funcionarios-v1");
 const downloadTimeoutMs = Number(process.env.CPLT_R2_DOWNLOAD_TIMEOUT_MS ?? 180_000);
@@ -110,7 +111,8 @@ try {
   rmSync(versionRoot, { recursive: true, force: true });
   mkdirSync(versionRoot, { recursive: true });
 
-  for (const asset of manifest.assets) {
+  const assetsToHydrate = pagesOnly ? cpltStaticAssetsForPages(manifest.assets) : manifest.assets;
+  for (const asset of assetsToHydrate) {
     const relativePath = cpltStaticAssetRelativePath(asset.key, manifest.version);
     const target = join(versionRoot, relativePath);
     mkdirSync(dirname(target), { recursive: true });
@@ -122,7 +124,7 @@ try {
 
   mkdirSync(outputRoot, { recursive: true });
   writeFileSync(join(outputRoot, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`);
-  console.log(JSON.stringify({ action: "hydrated", version: manifest.version, files: manifest.assets.length, coverage: manifest.coverage.length }, null, 2));
+  console.log(JSON.stringify({ action: "hydrated", version: manifest.version, files: assetsToHydrate.length, skippedSearchAssets: manifest.assets.length - assetsToHydrate.length, coverage: manifest.coverage.length }, null, 2));
 } finally {
   rmSync(temporaryRoot, { recursive: true, force: true });
 }
