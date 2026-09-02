@@ -13,6 +13,15 @@ function errorMessage(error) {
   return error instanceof Error ? error.message : String(error);
 }
 
+// V8 puede conservar el bloque UTF-16 completo cuando se entrega un
+// `slice()` como subcadena. En los CSV de CPLT cada bloque pesa 32 MB y una
+// fila retenida por el parser conservaría el bloque entero. La recodificación
+// crea una cadena independiente y permite que el bloque anterior sea
+// recolectado después de procesar sus filas.
+function detachText(value) {
+  return Buffer.from(value, "utf8").toString("utf8");
+}
+
 async function inspectSource(urls, fetchImpl, retryDelaysMs) {
   const failures = [];
   for (const candidate of urls) {
@@ -122,12 +131,12 @@ export async function* readRangedTextLines({
       const lineEnd = index > lineStart && decodedChunk.charCodeAt(index - 1) === 13
         ? index - 1
         : index;
-      yield decodedChunk.slice(lineStart, lineEnd);
+      yield detachText(decodedChunk.slice(lineStart, lineEnd));
       lineStart = index + 1;
     }
     carry = decodedChunk.slice(lineStart);
     body = null;
     decodedChunk = "";
   }
-  if (carry) yield carry;
+  if (carry) yield detachText(carry);
 }
