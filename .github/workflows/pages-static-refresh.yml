@@ -148,6 +148,7 @@ jobs:
             transparencia-app/data/movimientos.json
             transparencia-app/data/municipalidades-data.json
             transparencia-app/data/municipalidades-list.json
+            transparencia-app/public/data/transferencias
 
       - name: Hidratar respaldo estático CPLT desde R2
         if: steps.data-cache.outputs.cache-hit != 'true'
@@ -228,6 +229,7 @@ jobs:
             transparencia-app/data/movimientos.json
             transparencia-app/data/municipalidades-data.json
             transparencia-app/data/municipalidades-list.json
+            transparencia-app/public/data/transferencias
 
       - name: Hidratar release API canónico de transferencias para Pages
         working-directory: transparencia-app
