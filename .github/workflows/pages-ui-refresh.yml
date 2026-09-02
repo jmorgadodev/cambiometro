@@ -99,6 +99,7 @@ jobs:
             transparencia-app/data/movimientos.json
             transparencia-app/data/municipalidades-data.json
             transparencia-app/data/municipalidades-list.json
+            transparencia-app/public/data/transferencias
 
       - name: Recuperar snapshot publicado desde R2 sin ejecutar ETL
         if: steps.data-cache.outputs.cache-hit != 'true'
@@ -129,6 +130,7 @@ jobs:
             transparencia-app/data/movimientos.json
             transparencia-app/data/municipalidades-data.json
             transparencia-app/data/municipalidades-list.json
+            transparencia-app/public/data/transferencias
 
       - name: Regenerar salud de fuentes desde el snapshot publicado
         working-directory: transparencia-app
@@ -139,6 +141,8 @@ jobs:
         uses: actions/cache/restore@v4
         with:
           key: pages-ui-transfer-release-v1-${{ hashFiles('transparencia-app/.ci-data-version/transfer-api-manifest.json') }}
+          restore-keys: |
+            pages-ui-transfer-release-v1-
           path: transparencia-app/public/data/transferencias
 
       - name: Hidratar release API canónico de transferencias para Pages
