@@ -13,7 +13,7 @@
  *     --output .tmp-r2-chilecompra-index
  */
 
-import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { gunzipSync } from "node:zlib";
 
@@ -26,11 +26,23 @@ for (let index = 2; index < process.argv.length; index += 1) {
 
 const source = args.get("source") ?? "";
 const input = args.get("input") ?? "";
+const inputDir = args.get("input-dir") ?? "";
 const output = args.get("output") ?? "";
-if (!source || !input || !output) throw new Error("Usage requires --source, --input and --output");
+if (!source || (!input && !inputDir) || (input && inputDir) || !output) throw new Error("Usage requires --source, --input or --input-dir and --output");
 
 const pageSize = 50;
-const lines = gunzipSync(readFileSync(resolve(input))).toString("utf8").split("\n").filter(Boolean);
+const inputPaths = input
+  ? [resolve(input)]
+  : readdirSync(resolve(inputDir), { recursive: true, withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith(".jsonl.gz"))
+    .map((entry) => resolve(entry.parentPath ?? inputDir, entry.name))
+    .sort();
+if (inputPaths.length === 0) throw new Error("No .jsonl.gz inputs found");
+const lines = inputPaths.flatMap((path) => gunzipSync(readFileSync(path)).toString("utf8").split("\n").filter(Boolean));
+const records = lines.map((line) => JSON.parse(line));
+if (inputDir) {
+  records.sort((left, right) => String(right.occurredAt ?? "").localeCompare(String(left.occurredAt ?? "")) || String(left.id).localeCompare(String(right.id)));
+}
 
 const outDir = resolve(output);
 mkdirSync(outDir, { recursive: true });
@@ -39,25 +51,31 @@ let archive = "";
 const pages = [];
 const search = new Map();
 const searchableText = (record) => {
-  const data = record.data ?? {};
-  const people = [data.buyer, ...(Array.isArray(data.suppliers) ? data.suppliers : []), ...(Array.isArray(data.recipients) ? data.recipients : [])];
-  return [
-    record.id, record.kind, record.occurredAt, data.title, data.description, data.period,
-    data.organismo, data.organismo_nombre, data.institution, data.institution_name,
-    data.provider, data.provider_name, data.receptor, data.receptor_name,
-    ...people.flatMap((person) => [person?.id, person?.name, person?.legal_name, person?.rut_juridico]),
-  ].filter((value) => typeof value === "string" || typeof value === "number").join(" ").toLocaleLowerCase("es-CL");
+  const values = [record.id, record.kind, record.occurredAt];
+  const collect = (value, depth = 0) => {
+    if (typeof value === "string" || typeof value === "number") {
+      const text = String(value);
+      // Avoid indexing long URLs and opaque payloads while retaining names,
+      // institutions, identifiers, subjects and short descriptions.
+      if (text.length <= 240 && !/^https?:\/\//i.test(text)) values.push(text);
+      return;
+    }
+    if (depth >= 5 || value === null || typeof value !== "object") return;
+    for (const child of Object.values(value)) collect(child, depth + 1);
+  };
+  collect(record.data);
+  return values.join(" ").toLocaleLowerCase("es-CL");
 };
-for (let index = 0; index < lines.length; index += 1) {
+for (let index = 0; index < records.length; index += 1) {
   if (index % pageSize === 0) {
     const offset = Buffer.byteLength(archive, "utf8");
     pages.push({ offset, length: 0 });
   }
   const pageIndex = Math.floor(index / pageSize);
-  const line = `${lines[index]}\n`;
+  const line = `${JSON.stringify(records[index])}\n`;
   archive += line;
   pages[pageIndex].length += Buffer.byteLength(line, "utf8");
-  const haystack = searchableText(JSON.parse(lines[index]));
+  const haystack = searchableText(records[index]);
   for (const term of new Set(haystack.match(/[\p{L}\p{N}]{3,}/gu) ?? [])) {
     const current = search.get(term) ?? [];
     if (current.length === 0 || current[current.length - 1] !== pageIndex) current.push(pageIndex);

@@ -6,6 +6,35 @@ import { readR2EvidenceRecords } from "@/lib/r2-records";
 afterEach(() => vi.unstubAllGlobals());
 
 describe("archivo histórico en GitHub Releases", () => {
+  it("pagina InfoLobby desde el índice de rangos sin inflar el archivo completo", async () => {
+    const records = [
+      { id: "infolobby-2", sourceId: "infolobby", kind: "lobby", occurredAt: "2026-07-02", evidence: { sourceUrl: "https://infolobby.test/2" }, data: { organismo: "Ministerio de Salud", sujeto_pasivo: "Ana Pérez" } },
+      { id: "infolobby-1", sourceId: "infolobby", kind: "lobby", occurredAt: "2026-07-01", evidence: { sourceUrl: "https://infolobby.test/1" }, data: { organismo: "Presidencia de la República", sujeto_pasivo: "Luis Soto" } },
+    ];
+    const archive = new TextEncoder().encode(records.map((record) => `${JSON.stringify(record)}\n`).join("")).buffer;
+    const firstLength = new TextEncoder().encode(`${JSON.stringify(records[0])}\n`).byteLength;
+    const objects = new Map<string, ArrayBuffer>([
+      ["indexes/v1/infolobby/manifest.json", new TextEncoder().encode(JSON.stringify({ schemaVersion: 1, sourceId: "infolobby", totalRows: 2, pageSize: 1, recordArchiveKey: "indexes/v1/infolobby/records.jsonl", searchIndexKey: "indexes/v1/infolobby/search.json", pages: [{ offset: 0, length: firstLength }, { offset: firstLength, length: archive.byteLength - firstLength }] })).buffer],
+      ["indexes/v1/infolobby/records.jsonl", archive],
+      ["indexes/v1/infolobby/search.json", new TextEncoder().encode(JSON.stringify({ presidencia: [1], ministerio: [0] })).buffer],
+    ]);
+    const bucket: Parameters<typeof readR2EvidenceRecords>[0] = {
+      async get(key, options) {
+        const value = objects.get(key);
+        if (!value) return null;
+        const bytes = new Uint8Array(value);
+        const range = options?.range;
+        const sliced = range ? bytes.slice(range.offset, range.offset + range.length).buffer : value;
+        return { json: async <T>() => JSON.parse(new TextDecoder().decode(sliced)) as T, arrayBuffer: async () => sliced };
+      },
+    };
+
+    const result = await readR2EvidenceRecords(bucket, { source: "infolobby", query: "presidencia", limit: 10 });
+
+    expect(result).toMatchObject({ total: 1, limit: 10 });
+    expect(result?.data[0]).toMatchObject({ id: "infolobby-1", sourceId: "infolobby" });
+  });
+
   it("valida y recachea una partición fría ausente de R2", async () => {
     const lakeRecord = {
       id: "contraloria-audit-1",
