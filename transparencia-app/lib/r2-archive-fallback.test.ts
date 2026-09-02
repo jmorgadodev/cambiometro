@@ -20,7 +20,7 @@ describe("archivo histórico en GitHub Releases", () => {
     const manifest = {
       projectionChecksumSha256: checksum,
       artifacts: [{
-        key: "partitions/contraloria/2026/01/records.jsonl.gz",
+        key: `partitions/contraloria/2026/01/records-${checksum}.jsonl.gz`,
         checksumSha256: checksum,
         releaseAssetName: "contraloria-2026-01-records.jsonl.gz",
       }],
@@ -65,7 +65,7 @@ describe("archivo histórico en GitHub Releases", () => {
     expect(result?.data).toHaveLength(1);
     expect(result?.data[0]).toMatchObject({ kind: "audit", title: "Informe oficial 1" });
     expect(cached.has("partitions/contraloria/2026/01/manifest.json")).toBe(true);
-    expect(cached.has("partitions/contraloria/2026/01/records.jsonl.gz")).toBe(true);
+    expect(cached.has(`partitions/contraloria/2026/01/records-${checksum}.jsonl.gz`)).toBe(true);
   });
 
   it("rechaza un artefacto cuyo checksum no coincide", async () => {
