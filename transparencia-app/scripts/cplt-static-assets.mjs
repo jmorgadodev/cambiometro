@@ -18,3 +18,7 @@ export function cpltStaticAssetRelativePath(key, version) {
   }
   return relativePath;
 }
+
+export function cpltStaticAssetsForPages(assets) {
+  return assets.filter((asset) => !asset.key.includes("/search_index/"));
+}
