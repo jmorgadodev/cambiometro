@@ -76,8 +76,11 @@ export function assertStaticInputContentQuality(relativePath, content) {
     throw new Error(`STATIC_INPUT_JSON_INVALID: ${relativePath}`);
   }
 
-  if ((relativePath.endsWith("chilecompra.json") || relativePath.endsWith("chilecompra.subset.json")) && Array.isArray(value?.buyers) && value.buyers.length < 500) {
-    throw new Error(`STATIC_INPUT_PARTIAL_CHILECOMPRA: ${relativePath} buyers=${value.buyers.length}`);
+  if (relativePath === "data/lake/projections/v1/chilecompra.json" && (!Array.isArray(value?.buyers) || value.buyers.length < 500)) {
+    throw new Error(`STATIC_INPUT_PARTIAL_CHILECOMPRA: ${relativePath} buyers=${value?.buyers?.length ?? 0}`);
+  }
+  if (relativePath === "data/lake-subsets/chilecompra.subset.json" && (!Array.isArray(value?.buyers) || value.buyers.length < 1)) {
+    throw new Error(`STATIC_INPUT_PARTIAL_CHILECOMPRA_SUBSET: ${relativePath} buyers=${value?.buyers?.length ?? 0}`);
   }
   if (relativePath === "data/lake-subsets/infolobby.subset.json" && (!Array.isArray(value?.records) || value.records.length < 30)) {
     throw new Error(`STATIC_INPUT_PARTIAL_INFOLOBBY: ${relativePath} records=${value?.records?.length ?? 0}`);

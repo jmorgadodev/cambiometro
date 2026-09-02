@@ -166,6 +166,10 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: npm run data:hydrate:static -- --required --required-all
 
+      - name: Verificar calidad semántica de entradas estáticas
+        working-directory: transparencia-app
+        run: npm run check:static-input-quality
+
       - name: Verificar fallback municipal completo
         working-directory: transparencia-app
         run: npm run check:static-input-fallback

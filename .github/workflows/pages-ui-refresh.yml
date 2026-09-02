@@ -114,6 +114,10 @@ jobs:
           npm run data:hydrate:ley19862
           npm run data:lake:projection:ley19862
 
+      - name: Verificar calidad semántica de entradas estáticas
+        working-directory: transparencia-app
+        run: npm run check:static-input-quality
+
       - name: Guardar snapshot recuperado para próximos cambios de interfaz
         if: steps.data-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
