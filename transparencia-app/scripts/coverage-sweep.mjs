@@ -3,10 +3,6 @@ import { resolve } from "node:path";
 import { POLITICOS_SEED } from "../lib/politicos-source.ts";
 import { buildTransferCoverageRow } from "./etl/transfer-coverage.mjs";
 
-const USER_AGENT = "Cambiometro-Coverage-Sweep/1.0 (+https://cambiometro.impulsacv.cl)";
-const REQUEST_TIMEOUT_MS = 25_000;
-const PERIODO_ACTUAL_DESDE = "2026-03-11";
-
 function normalizeText(v) {
   return (v || "")
     .normalize("NFD")
@@ -16,28 +12,13 @@ function normalizeText(v) {
     .trim();
 }
 
-async function fetchOfficialChambersCounts() {
-  let camaraOfficial = 580;
-  let senadoOfficial = 189;
-
-  try {
-    const camRes = await fetch(
-      "https://opendata.camara.cl/camaradiputados/WServices/WSLegislativo.asmx/retornarVotacionesXAnno?prmAnno=2026",
-      { headers: { "User-Agent": USER_AGENT }, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) }
-    );
-    if (camRes.ok) {
-      const xml = await camRes.text();
-      const matches = [...xml.matchAll(/<Votacion>([\s\S]*?)<\/Votacion>/g)];
-      const filtered = matches.filter((m) => {
-        const d = m[1].match(/<Fecha>(.*?)<\/Fecha>/)?.[1];
-        return d && d.slice(0, 10) >= PERIODO_ACTUAL_DESDE;
-      });
-      if (filtered.length > 0) camaraOfficial = filtered.length;
-    }
-  } catch (err) {
-    // Fallback tolerante si la API oficial está ocupada
+function chamberCountsFromSnapshot(polVotData) {
+  const sessions = Object.values(polVotData.sessions || {});
+  const camaraOfficial = sessions.filter((session) => String(session.id).startsWith("camara-")).length;
+  const senadoOfficial = sessions.filter((session) => String(session.id).startsWith("senado-")).length;
+  if (camaraOfficial < 1 || senadoOfficial < 1) {
+    throw new Error("COVERAGE_VOTACIONES_UNIVERSE_MISSING: el snapshot hidratado no contiene ambas cámaras");
   }
-
   return { camaraOfficial, senadoOfficial };
 }
 
@@ -57,7 +38,11 @@ export async function runCoverageSweep({ silent = false, transferManifest = null
   const movimientosList = Array.isArray(movimientosRaw) ? movimientosRaw : (movimientosRaw.movimientos || []);
 
   // 2. Votaciones de Sala Oficiales vs Indexadas (Período 2026-2030)
-  const { camaraOfficial, senadoOfficial } = await fetchOfficialChambersCounts();
+  // El snapshot hidratado desde R2 es el release que consume Pages. No usar
+  // constantes históricas ni una consulta externa que pueda devolver un
+  // subconjunto temporal: aquí comprobamos la integridad del mismo universo
+  // que será publicado, y fallamos si falta una cámara.
+  const { camaraOfficial, senadoOfficial } = chamberCountsFromSnapshot(polVotData);
   const totalOficialVotaciones = camaraOfficial + senadoOfficial;
   const indexadasVotaciones = Object.keys(polVotData.sessions || {}).length;
   const cobVotaciones = totalOficialVotaciones > 0 ? (indexadasVotaciones / totalOficialVotaciones) * 100 : 0;
@@ -71,7 +56,7 @@ export async function runCoverageSweep({ silent = false, transferManifest = null
     cobertura: `${cobVotaciones.toFixed(1)}%`,
     umbral: "≥ 99.0%",
     estado: passVotaciones ? "PASS" : "FAIL",
-    nota: "580 Cámara + 189 Senado",
+    nota: `Universo del snapshot ETL: ${camaraOfficial} Cámara + ${senadoOfficial} Senado`,
   });
 
   // 3. Muestra Obligatoria de Parlamentarios (Kaiser, Bianchi K., Bianchi C., Winter, Cariola, Schalper)

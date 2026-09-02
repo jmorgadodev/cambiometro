@@ -63,6 +63,34 @@ export const STATIC_SITE_FILE_PATHS = Object.freeze(
   [...new Set(Object.values(STATIC_SITE_FILE_GROUPS).flat())],
 );
 
+/**
+ * Minimum semantic checks for inputs that feed static pages. A valid JSON
+ * checksum alone is not enough: an ETL can publish a syntactically valid
+ * sample and silently erase the navigable source catalog.
+ */
+export function assertStaticInputContentQuality(relativePath, content) {
+  let value;
+  try {
+    value = JSON.parse(Buffer.from(content).toString("utf8"));
+  } catch {
+    throw new Error(`STATIC_INPUT_JSON_INVALID: ${relativePath}`);
+  }
+
+  if ((relativePath.endsWith("chilecompra.json") || relativePath.endsWith("chilecompra.subset.json")) && Array.isArray(value?.buyers) && value.buyers.length < 500) {
+    throw new Error(`STATIC_INPUT_PARTIAL_CHILECOMPRA: ${relativePath} buyers=${value.buyers.length}`);
+  }
+  if (relativePath === "data/lake-subsets/infolobby.subset.json" && (!Array.isArray(value?.records) || value.records.length < 30)) {
+    throw new Error(`STATIC_INPUT_PARTIAL_INFOLOBBY: ${relativePath} records=${value?.records?.length ?? 0}`);
+  }
+  if (relativePath === "data/politicos-votaciones.json") {
+    const sessions = Object.keys(value?.sessions ?? {});
+    if (sessions.length < 1 || Number(value?.totalSessions) !== sessions.length) {
+      throw new Error(`STATIC_INPUT_PARTIAL_VOTACIONES: ${relativePath} sessions=${sessions.length}`);
+    }
+  }
+  return value;
+}
+
 export function sha256Buffer(value) {
   return createHash("sha256").update(value).digest("hex");
 }

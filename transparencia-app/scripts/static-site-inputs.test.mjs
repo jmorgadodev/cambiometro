@@ -6,6 +6,7 @@ import { describe, it } from "vitest";
 import {
   assertStaticInputManifest,
   assertStaticInputManifestComplete,
+  assertStaticInputContentQuality,
   buildStaticInputEntries,
   buildStaticInputManifest,
   parseRequestedStaticFiles,
@@ -56,5 +57,16 @@ describe("static site input release", () => {
     } finally {
       rmSync(root, { recursive: true, force: true });
     }
+  });
+
+  it("rejects syntactically valid but incomplete source catalogs", () => {
+    assert.throws(
+      () => assertStaticInputContentQuality("data/lake-subsets/chilecompra.subset.json", JSON.stringify({ buyers: [] })),
+      /STATIC_INPUT_PARTIAL_CHILECOMPRA/,
+    );
+    assert.throws(
+      () => assertStaticInputContentQuality("data/lake-subsets/infolobby.subset.json", JSON.stringify({ records: [] })),
+      /STATIC_INPUT_PARTIAL_INFOLOBBY/,
+    );
   });
 });

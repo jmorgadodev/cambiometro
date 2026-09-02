@@ -1,7 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
-import { assertStaticInputManifest, assertStaticInputManifestComplete, resolveSafeStaticPath, sha256Buffer } from "./static-site-inputs.mjs";
+import { assertStaticInputContentQuality, assertStaticInputManifest, assertStaticInputManifestComplete, resolveSafeStaticPath, sha256Buffer } from "./static-site-inputs.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const bucket = argument("--bucket", "transparencia-public-data");
@@ -77,6 +77,7 @@ for (const entry of manifest.files) {
     rmSync(temporary, { force: true });
     throw new Error(`STATIC_INPUT_CHECKSUM_MISMATCH: ${entry.path}`);
   }
+  assertStaticInputContentQuality(entry.path, data);
   writeFileSync(target, data);
   rmSync(temporary, { force: true });
 }

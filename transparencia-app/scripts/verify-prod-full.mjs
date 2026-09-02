@@ -1,3 +1,6 @@
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
+
 let passed = 0;
 let failed = 0;
 
@@ -126,6 +129,11 @@ async function verifyProdFull() {
   const expectedTransferAmountOverride = process.env.EXPECTED_TRANSFER_AMOUNT ? Number(process.env.EXPECTED_TRANSFER_AMOUNT) : null;
   const expectedTransferPagesOverride = process.env.EXPECTED_TRANSFER_PAGES ? Number(process.env.EXPECTED_TRANSFER_PAGES) : null;
 
+  const votingSnapshotPath = resolve("data/politicos-votaciones.json");
+  const votingSnapshot = existsSync(votingSnapshotPath)
+    ? JSON.parse(readFileSync(votingSnapshotPath, "utf8"))
+    : null;
+
   function formatInteger(value) {
     return new Intl.NumberFormat("es-CL").format(value);
   }
@@ -188,7 +196,14 @@ async function verifyProdFull() {
   assertCheck("INVARIANTES", "Ficha Carlos Bianchi HTTP 200", bianchiRes.status === 200);
   const bianchiHtml = (await bianchiRes.text()).replace(/<!--.*?-->/g, "");
   assertCheck("INVARIANTES", "Bianchi: 25.009 y 24,89%", bianchiHtml.includes("25.009") && bianchiHtml.includes("24,89%"));
-  assertCheck("INVARIANTES", "Bianchi: 580 votos cámara y 189 senado", bianchiHtml.includes("580") && bianchiHtml.includes("189"));
+  const bianchiCameraVotes = Number(votingSnapshot?.votes?.["dip-154"]?.length ?? 0);
+  const bianchiSenateVotes = Number(votingSnapshot?.votes?.["sen-048"]?.length ?? 0);
+  assertCheck(
+    "INVARIANTES",
+    "Bianchi: votos de ambas cámaras coinciden con el snapshot publicado",
+    bianchiCameraVotes > 0 && bianchiSenateVotes > 0 && bianchiHtml.includes(formatInteger(bianchiCameraVotes)) && bianchiHtml.includes(formatInteger(bianchiSenateVotes)),
+    `Cámara ${formatInteger(bianchiCameraVotes)} · Senado ${formatInteger(bianchiSenateVotes)}`,
+  );
   assertCheck("GASTOS", "Bianchi tiene rendiciones operacionales publicadas", bianchiHtml.includes("Gastos Operacionales Rendidos") && !/Sin registros de gastos operacionales rendidos/i.test(bianchiHtml));
 
   for (const source of ["gastos_camara", "gastos_senado"]) {
