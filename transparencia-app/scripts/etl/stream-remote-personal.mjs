@@ -104,10 +104,12 @@ function mergeById(previous, current) {
 async function processStream(tipo, urls, outputDir) {
   console.log(`\n[+] Iniciando descarga de ${tipo}: ${urls.join(" | ")}`);
   let sourceUrl = urls[0];
+  let sourceValidator = null;
   const lines = readRangedTextLines({
     urls,
     onSource: (source) => {
       sourceUrl = source.sourceUrl;
+      sourceValidator = source.validator;
       console.log(`    [INFO] ${tipo}: ${source.totalBytes} bytes; descarga reanudable por rangos`);
     },
   });
@@ -231,6 +233,7 @@ async function processStream(tipo, urls, outputDir) {
   fs.writeFileSync(path.join(validationDir, `${normalized(tipo)}.json`), JSON.stringify({
     ...report,
     sourceUrl,
+    sourceValidator,
     linesProcessed,
     generatedAt: new Date().toISOString(),
   }, null, 2));

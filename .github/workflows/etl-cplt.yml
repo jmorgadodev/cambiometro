@@ -14,8 +14,38 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  cplt-source-check:
+    name: Verificar frescura de fuentes CPLT
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    outputs:
+      changed: ${{ steps.freshness.outputs.changed }}
+    env:
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+        working-directory: transparencia-app
+      - name: Comparar ETag/Last-Modified con el manifest publicado
+        id: freshness
+        working-directory: transparencia-app
+        run: npm run check:cplt-freshness
+      - name: Registrar corrida omitida por fuente sin cambios
+        if: steps.freshness.outputs.changed == 'false'
+        run: echo "No hubo cambios en los cuatro CSV oficiales; se omite la descarga completa." >> "$GITHUB_STEP_SUMMARY"
+
   cplt-categories:
     name: Ingesta Nóminas CPLT (${{ matrix.category }})
+    needs: cplt-source-check
+    if: needs.cplt-source-check.outputs.changed == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 300
     strategy:
@@ -57,7 +87,8 @@ jobs:
 
   cplt-finalize:
     name: Consolidación y Publicación R2 / D1
-    needs: cplt-categories
+    needs: [cplt-source-check, cplt-categories]
+    if: needs.cplt-source-check.outputs.changed == 'true' && needs.cplt-categories.result == 'success'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     permissions:

@@ -238,7 +238,7 @@ const manifest = {
   generatedAt: latest,
   version,
   recordCount: validations.reduce((total, report) => total + report.recordCount, 0),
-  sources: validations.map(({ sourceId, sourceUrl, recordCount, checksumSha256 }) => ({ sourceId, sourceUrl, recordCount, checksumSha256 })),
+  sources: validations.map(({ sourceId, sourceUrl, sourceValidator, recordCount, checksumSha256 }) => ({ sourceId, sourceUrl, sourceValidator, recordCount, checksumSha256 })),
   searchIndex: { key: searchIndexKey, totalRows: compactRows.length, pageSize: searchPageSize },
   coverage: (() => {
     const byCommune = new Map();

@@ -65,6 +65,7 @@
     "data:hydrate:static": "node scripts/hydrate-static-site-inputs.mjs",
     "data:hydrate:cplt-static": "node scripts/hydrate-cplt-static-fallback.mjs",
     "check:static-input-fallback": "node scripts/verify-static-input-fallback.mjs",
+    "check:cplt-freshness": "node scripts/verify-cplt-source-freshness.mjs",
     "data:build:subsets": "node scripts/build-lake-subsets.mjs",
     "data:materialize": "node scripts/materialize-d1.mjs",
     "data:materialize:dry": "node scripts/materialize-d1.mjs --dry-run",

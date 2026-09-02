@@ -14,7 +14,7 @@ describe("automatizacion CPLT nacional", () => {
   });
 
   it("solo activa el manifiesto global despues de completar todas las categorias", () => {
-    expect(workflow).toContain("needs: cplt-categories");
+    expect(workflow).toContain("needs: [cplt-source-check, cplt-categories]");
     expect(workflow).toContain("npm run data:finalize:cplt");
     expect(workflow).not.toContain("npm run ingest:cplt-personal -- Planta\n          npm run ingest:cplt-personal -- Contrata");
     expect(workflow).toContain("ETL_RUN_ID: cplt-${{ github.run_id }}-${{ github.run_attempt }}");
