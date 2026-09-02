@@ -21,7 +21,7 @@ interface R2ObjectBodyLike {
 }
 
 interface R2BucketLike {
-  get(key: string): Promise<R2ObjectBodyLike | null>;
+  get(key: string, options?: { range?: { offset: number; length: number } }): Promise<R2ObjectBodyLike | null>;
   put?(key: string, value: ArrayBuffer): Promise<unknown>;
 }
 
@@ -105,6 +105,90 @@ function cursorOffset(cursor?: string) {
   return Number.parseInt(cursor.slice(3), 36);
 }
 
+interface IndexedRecordsManifest {
+  schemaVersion: number;
+  sourceId: string;
+  totalRows: number;
+  pageSize: number;
+  recordArchiveKey: string;
+  pages: Array<{ offset: number; length: number }>;
+  searchIndexKey?: string;
+}
+
+function searchTerms(query: string) {
+  return [...new Set(query.toLocaleLowerCase("es-CL").match(/[\p{L}\p{N}]{3,}/gu) ?? [])];
+}
+
+function indexedRecordMatches(record: EvidenceRecord, params: {
+  entityId?: string;
+  recordIds?: string[];
+  kind?: EvidenceRecord["kind"];
+  from?: string;
+  to?: string;
+  query?: string;
+}) {
+  const date = record.occurredAt?.slice(0, 10) ?? "";
+  if (params.entityId && !record.subjectEntityIds.includes(params.entityId) && !record.objectEntityIds.includes(params.entityId)) return false;
+  if (params.recordIds && !params.recordIds.includes(record.id)) return false;
+  if (params.kind && record.kind !== params.kind) return false;
+  if (params.from && date < params.from) return false;
+  if (params.to && date > params.to) return false;
+  if (params.query) {
+    const haystack = JSON.stringify({ id: record.id, title: record.title, description: record.description, data: record.data }).toLocaleLowerCase("es-CL");
+    if (!haystack.includes(params.query.toLocaleLowerCase("es-CL"))) return false;
+  }
+  return true;
+}
+
+async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeof readR2EvidenceRecords>[1]) {
+  const sourceIds = Array.isArray(params.source) ? params.source : [params.source];
+  if (sourceIds.length !== 1 || sourceIds[0] !== "chilecompra") return null;
+  const manifestObject = await bucket.get("indexes/v1/chilecompra/manifest.json");
+  if (!manifestObject) return null;
+  const manifest = await manifestObject.json<IndexedRecordsManifest>();
+  if (manifest.schemaVersion !== 1 || manifest.sourceId !== "chilecompra" || !Array.isArray(manifest.pages)) return null;
+  const offset = cursorOffset(params.cursor);
+  const limit = Math.min(Math.max(params.limit, 1), 100);
+  let candidatePages = manifest.pages.map((_, index) => index);
+  const query = params.query?.trim();
+  if (query && manifest.searchIndexKey) {
+    const searchObject = await bucket.get(manifest.searchIndexKey);
+    if (!searchObject) return null;
+    const index = await searchObject.json<Record<string, number[]>>();
+    const terms = searchTerms(query);
+    if (terms.length > 0) {
+      const pageSets = terms.map((term) => new Set(index[term] ?? []));
+      if (pageSets.some((pages) => pages.size === 0)) return { data: [], total: 0, limit, nextCursor: null };
+      candidatePages = [...pageSets[0]].filter((page) => pageSets.every((pages) => pages.has(page))).sort((a, b) => a - b);
+    }
+  }
+
+  const selected: EvidenceRecord[] = [];
+  let total = 0;
+  for (const pageIndex of candidatePages) {
+    const page = manifest.pages[pageIndex];
+    const object = await bucket.get(manifest.recordArchiveKey, { range: page });
+    if (!object) return null;
+    const pageText = new TextDecoder().decode(await object.arrayBuffer());
+    for (const line of pageText.split("\n")) {
+      if (!line) continue;
+      const lakeRecord = JSON.parse(line) as LakeRecord;
+      const record = projectLakeEvidence(lakeRecord, null, null);
+      if (!indexedRecordMatches(record, params)) continue;
+      if (total >= offset && selected.length < limit) selected.push(record);
+      total += 1;
+    }
+  }
+  return {
+    data: selected,
+    total: query || params.entityId || params.recordIds || params.kind || params.from || params.to ? total : manifest.totalRows,
+    limit,
+    nextCursor: offset + selected.length < (query || params.entityId || params.recordIds || params.kind || params.from || params.to ? total : manifest.totalRows)
+      ? `v1_${(offset + selected.length).toString(36)}`
+      : null,
+  };
+}
+
 export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   source: string | string[];
   query?: string;
@@ -116,6 +200,8 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   limit: number;
   cursor?: string;
 }) {
+  const indexed = await readIndexedRecords(bucket, params);
+  if (indexed) return indexed;
   const catalogObject = await bucket.get("catalog/v1/manifest.json");
   if (!catalogObject) return null;
   const catalog = await catalogObject.json<R2PublicCatalog>();
