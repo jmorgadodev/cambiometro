@@ -12,6 +12,15 @@ const manifestFile = argument("--manifest-file", "");
 const localManifestPath = manifestFile ? resolve(root, manifestFile) : resolve(root, ".static-site-release-manifest.json");
 const remoteKey = "projections/static-site-v1/manifest.json";
 
+function readExistingManifest() {
+  if (!existsSync(localManifestPath)) return null;
+  try {
+    return JSON.parse(readFileSync(localManifestPath, "utf8"));
+  } catch {
+    return null;
+  }
+}
+
 function argument(name, fallback = "") {
   const index = process.argv.indexOf(name);
   return index >= 0 ? process.argv[index + 1] ?? fallback : fallback;
@@ -48,12 +57,19 @@ if (manifestFile) {
 assertStaticInputManifest(manifest);
 if (requiredAll) assertStaticInputManifestComplete(manifest);
 const availableFiles = new Set(manifest.files.map((entry) => entry.path));
+const existingManifest = readExistingManifest();
+const existingFiles = new Map((existingManifest?.files ?? []).map((entry) => [entry.path, entry]));
 for (const requiredFile of requiredFiles) {
   if (!availableFiles.has(requiredFile)) throw new Error(`STATIC_INPUT_REQUIRED_FILE_MISSING: ${requiredFile}`);
 }
 for (const entry of manifest.files) {
   const target = resolveSafeStaticPath(root, entry.path);
   mkdirSync(dirname(target), { recursive: true });
+  const existing = existingFiles.get(entry.path);
+  if (existing?.size === entry.size && existing.checksumSha256 === entry.checksumSha256 && existsSync(target)) {
+    const current = readFileSync(target);
+    if (current.byteLength === entry.size && sha256Buffer(current) === entry.checksumSha256) continue;
+  }
   const temporary = `${target}.download`;
   wrangler(["r2", "object", "get", `${bucket}/${entry.key}`, "--file", temporary]);
   const data = readFileSync(temporary);

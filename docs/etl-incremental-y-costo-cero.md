@@ -61,3 +61,13 @@ explícitamente pospuesto en el resumen y nunca se usa en el cron programado.
 
 La API pública continúa disponible desde R2 mientras D1 se recupera; el
 materializado fallido no reemplaza el último snapshot válido.
+
+## Hidratación incremental de Pages
+
+El caché de GitHub Actions usa una clave exacta para cada manifiesto, pero
+restaura también la clave anterior como fallback. Los hidratadores comparan
+tamaño y SHA-256 por archivo antes de descargar. Por eso un cambio en un
+dataset no obliga a volver a descargar CPLT, transferencias y proyecciones que
+siguen iguales: sólo se descargan los objetos nuevos o cuyo checksum cambió.
+Si no existe un caché previo, el primer build sí debe hidratar el universo
+completo.

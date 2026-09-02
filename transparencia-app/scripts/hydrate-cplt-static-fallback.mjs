@@ -108,14 +108,25 @@ try {
 
   const manifest = validateManifest(JSON.parse(readFileSync(remoteManifest, "utf8")));
   const versionRoot = join(outputRoot, "versions", manifest.version);
-  rmSync(versionRoot, { recursive: true, force: true });
   mkdirSync(versionRoot, { recursive: true });
+  let existingManifest = null;
+  try {
+    existingManifest = JSON.parse(readFileSync(join(outputRoot, "manifest.json"), "utf8"));
+  } catch {
+    existingManifest = null;
+  }
+  const existingAssets = new Map((existingManifest?.assets ?? []).map((asset) => [asset.key, asset]));
 
   const assetsToHydrate = pagesOnly ? cpltStaticAssetsForPages(manifest.assets) : manifest.assets;
   for (const asset of assetsToHydrate) {
     const relativePath = cpltStaticAssetRelativePath(asset.key, manifest.version);
     const target = join(versionRoot, relativePath);
     mkdirSync(dirname(target), { recursive: true });
+    const existing = existingAssets.get(asset.key);
+    if (existing?.size === asset.size && existing.checksumSha256 === asset.checksumSha256 && existsSync(target)) {
+      const current = readFileSync(target);
+      if (current.byteLength === asset.size && sha256(current) === asset.checksumSha256) continue;
+    }
     const downloaded = `${target}.download`;
     await downloadObject(asset.key, downloaded, asset.size, asset.checksumSha256);
     writeFileSync(target, readFileSync(downloaded));
