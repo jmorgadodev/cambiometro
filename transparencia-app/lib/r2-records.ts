@@ -149,6 +149,7 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
   if (manifest.schemaVersion !== 1 || manifest.sourceId !== "chilecompra" || !Array.isArray(manifest.pages)) return null;
   const offset = cursorOffset(params.cursor);
   const limit = Math.min(Math.max(params.limit, 1), 100);
+  const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || params.from || params.to);
   let candidatePages = manifest.pages.map((_, index) => index);
   const query = params.query?.trim();
   if (query && manifest.searchIndexKey) {
@@ -162,12 +163,27 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
       candidatePages = [...pageSets[0]].filter((page) => pageSets.every((pages) => pages.has(page))).sort((a, b) => a - b);
     }
   }
+  if (!hasFilters) {
+    const pageIndex = Math.floor(offset / manifest.pageSize);
+    candidatePages = pageIndex < manifest.pages.length ? [pageIndex] : [];
+  }
 
   const selected: EvidenceRecord[] = [];
   let total = 0;
-  for (const pageIndex of candidatePages) {
-    const page = manifest.pages[pageIndex];
-    const object = await bucket.get(manifest.recordArchiveKey, { range: page });
+  for (let index = 0; index < candidatePages.length;) {
+    const firstPageIndex = candidatePages[index];
+    let lastPageIndex = firstPageIndex;
+    while (index + 1 < candidatePages.length
+      && candidatePages[index + 1] === lastPageIndex + 1
+      && manifest.pages[candidatePages[index + 1]].offset + manifest.pages[candidatePages[index + 1]].length - manifest.pages[firstPageIndex].offset <= 1_000_000) {
+      index += 1;
+      lastPageIndex = candidatePages[index];
+    }
+    const firstPage = manifest.pages[firstPageIndex];
+    const lastPage = manifest.pages[lastPageIndex];
+    const object = await bucket.get(manifest.recordArchiveKey, {
+      range: { offset: firstPage.offset, length: lastPage.offset + lastPage.length - firstPage.offset },
+    });
     if (!object) return null;
     const pageText = new TextDecoder().decode(await object.arrayBuffer());
     for (const line of pageText.split("\n")) {
@@ -178,12 +194,14 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
       if (total >= offset && selected.length < limit) selected.push(record);
       total += 1;
     }
+    index += 1;
   }
+  const resultTotal = hasFilters ? total : manifest.totalRows;
   return {
     data: selected,
-    total: query || params.entityId || params.recordIds || params.kind || params.from || params.to ? total : manifest.totalRows,
+    total: resultTotal,
     limit,
-    nextCursor: offset + selected.length < (query || params.entityId || params.recordIds || params.kind || params.from || params.to ? total : manifest.totalRows)
+    nextCursor: offset + selected.length < resultTotal
       ? `v1_${(offset + selected.length).toString(36)}`
       : null,
   };
