@@ -113,6 +113,7 @@ interface IndexedRecordsManifest {
   recordArchiveKey: string;
   pages: Array<{ offset: number; length: number }>;
   searchIndexKey?: string;
+  searchCountIndexKey?: string;
 }
 
 function searchTerms(query: string) {
@@ -153,12 +154,20 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
   const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || params.from || params.to);
   let candidatePages = manifest.pages.map((_, index) => index);
   const query = params.query?.trim();
+  let indexedQueryTotal: number | null = null;
   if (query && manifest.searchIndexKey) {
     const searchObject = await bucket.get(manifest.searchIndexKey);
     if (!searchObject) return null;
     const index = await searchObject.json<Record<string, number[]>>();
     const terms = searchTerms(query);
     if (terms.length > 0) {
+      if (terms.length === 1 && manifest.searchCountIndexKey && !params.entityId && !params.recordIds && !params.kind && !params.from && !params.to) {
+        const countObject = await bucket.get(manifest.searchCountIndexKey);
+        if (countObject) {
+          const counts = await countObject.json<Record<string, number>>();
+          indexedQueryTotal = counts[terms[0]] ?? 0;
+        }
+      }
       const pageSets = terms.map((term) => new Set(index[term] ?? []));
       if (pageSets.some((pages) => pages.size === 0)) return { data: [], total: 0, limit, nextCursor: null };
       candidatePages = [...pageSets[0]].filter((page) => pageSets.every((pages) => pages.has(page))).sort((a, b) => a - b);
@@ -171,7 +180,8 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
 
   const selected: EvidenceRecord[] = [];
   let total = 0;
-  for (let index = 0; index < candidatePages.length;) {
+  let exhausted = false;
+  for (let index = 0; index < candidatePages.length && !exhausted;) {
     const firstPageIndex = candidatePages[index];
     let lastPageIndex = firstPageIndex;
     while (index + 1 < candidatePages.length
@@ -194,10 +204,14 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
       if (!indexedRecordMatches(record, params)) continue;
       if (total >= offset && selected.length < limit) selected.push(record);
       total += 1;
+      if (indexedQueryTotal !== null && selected.length >= limit && total >= offset + limit) {
+        exhausted = true;
+        break;
+      }
     }
     index += 1;
   }
-  const resultTotal = hasFilters ? total : manifest.totalRows;
+  const resultTotal = indexedQueryTotal ?? (hasFilters ? total : manifest.totalRows);
   return {
     data: selected,
     total: resultTotal,
