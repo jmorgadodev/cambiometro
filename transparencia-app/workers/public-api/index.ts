@@ -929,6 +929,138 @@ async function listExpensesFromR2(requestUrl: URL, env: Env): Promise<Response |
   }, pageLinks(requestUrl, offset, limit, total));
 }
 
+function r2Record(row: JsonRecord, source: string): JsonRecord {
+  if (typeof row.sourceId === "string" && typeof row.title === "string" && (row.data !== undefined || row.evidence !== undefined)) {
+    return {
+      id: row.id,
+      kind: row.kind ?? null,
+      sourceId: row.sourceId,
+      title: row.title,
+      description: row.description ?? null,
+      occurredAt: row.occurredAt ?? row.fecha ?? null,
+      period: row.period ?? {},
+      subjectEntityIds: row.subjectEntityIds ?? [],
+      objectEntityIds: row.objectEntityIds ?? [],
+      amount: row.amount ?? null,
+      evidence: row.evidence ?? {},
+      data: row.data ?? {},
+    };
+  }
+  if (source === "infoprobidad") {
+    const organizations = Array.isArray(row.organizations) ? row.organizations : [];
+    return {
+      id: row.id,
+      kind: "declaration",
+      sourceId: source,
+      title: row.title ?? `Declaración de intereses y patrimonio de ${row.nombre ?? "persona declarante"}`,
+      description: null,
+      occurredAt: row.fecha ?? null,
+      period: { label: row.fecha ?? null },
+      subjectEntityIds: organizations.map((item) => (item as JsonRecord)?.entity_id).filter((value): value is string => typeof value === "string"),
+      objectEntityIds: [],
+      amount: null,
+      evidence: { sourceUrl: row.url ?? null },
+      data: row,
+    };
+  }
+  if (source === "infolobby") {
+    return {
+      id: row.id,
+      kind: "lobby",
+      sourceId: source,
+      title: row.materia ?? row.title ?? row.id,
+      description: row.materia ?? null,
+      occurredAt: row.fecha ?? null,
+      period: { label: row.fecha ?? null },
+      subjectEntityIds: row.sujeto_pasivo_id ? [row.sujeto_pasivo_id] : [],
+      objectEntityIds: row.organismo_id ? [row.organismo_id] : [],
+      amount: null,
+      evidence: { sourceUrl: row.url ?? null, fuente: row.fuente ?? null },
+      data: row,
+    };
+  }
+  return {
+    id: row.id,
+    kind: row.kind ?? "record",
+    sourceId: source,
+    title: row.title ?? row.id,
+    description: row.description ?? null,
+    occurredAt: row.occurredAt ?? row.fecha ?? null,
+    period: row.period ?? {},
+    subjectEntityIds: row.subjectEntityIds ?? [],
+    objectEntityIds: row.objectEntityIds ?? [],
+    amount: row.amount ?? null,
+    evidence: row.evidence ?? { sourceUrl: row.url ?? null },
+    data: row.data ?? row,
+  };
+}
+
+async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | null> {
+  const source = requestUrl.searchParams.get("source")?.trim();
+  if (!source) return null;
+  const manifest = await r2Json<StaticSiteManifest>(env.PUBLIC_DATA, "projections/static-site-v1/manifest.json");
+  if (!manifest?.files?.length) return null;
+  const candidatePaths = [
+    `data/lake/projections/v1/${source}.json`,
+    `data/lake-subsets/${source}.subset.json`,
+  ];
+  const entry = candidatePaths.map((path) => manifest.files.find((file) => file.path === path)).find(Boolean);
+  if (!entry) return null;
+  const payload = await r2Json<JsonRecord>(env.PUBLIC_DATA, entry.key);
+  const rawRows = Array.isArray(payload) ? payload : Array.isArray(payload?.records) ? payload.records : [];
+  if (rawRows.length === 0) return null;
+
+  const query = normalized(requestUrl.searchParams.get("q") ?? requestUrl.searchParams.get("query"));
+  const from = requestUrl.searchParams.get("from")?.trim() ?? "";
+  const to = requestUrl.searchParams.get("to")?.trim() ?? "";
+  const entityId = normalized(requestUrl.searchParams.get("entity_id"));
+  const kind = requestUrl.searchParams.get("kind")?.trim();
+  const validKinds = new Set(["authority", "purchase", "contract", "expense", "budget_execution", "transfer", "audit", "declaration", "lobby", "vote", "attendance", "remuneration"]);
+  if (query.length > 80 || from.length > 32 || to.length > 32 || entityId.length > 160 || (kind && !validKinds.has(kind))) {
+    return failure("INVALID_QUERY", "Parámetros de consulta inválidos.", 400);
+  }
+  const rows = rawRows.map((row) => r2Record(row as JsonRecord, source));
+  const searchable = (row: JsonRecord) => normalized(JSON.stringify({ id: row.id, title: row.title, description: row.description, data: row.data }));
+  const filtered = rows
+    .filter((row) => !kind || row.kind === kind)
+    .filter((row) => !query || searchable(row).includes(query))
+    .filter((row) => !from || String(row.occurredAt ?? "") >= from)
+    .filter((row) => !to || String(row.occurredAt ?? "") <= to)
+    .filter((row) => !entityId || normalized(JSON.stringify({ subjectEntityIds: row.subjectEntityIds, objectEntityIds: row.objectEntityIds, data: row.data })).includes(entityId))
+    .sort((left, right) => String(right.occurredAt ?? "").localeCompare(String(left.occurredAt ?? "")) || String(right.id ?? "").localeCompare(String(left.id ?? "")));
+  const limit = limitFrom(requestUrl);
+  const offset = offsetFrom(requestUrl);
+  const total = filtered.length;
+  return success(filtered.slice(offset, offset + limit), {
+    total,
+    limit,
+    page: Math.floor(offset / limit) + 1,
+    totalPages: Math.max(1, Math.ceil(total / limit)),
+    sourceBackend: "r2",
+    sourceStatus: source === "infoprobidad" ? "complete" : "partial",
+    publishedRows: rawRows.length,
+  }, pageLinks(requestUrl, offset, limit, total));
+}
+
+function recordsUnavailable(requestUrl: URL, reason: string) {
+  const limit = limitFrom(requestUrl);
+  const offset = offsetFrom(requestUrl);
+  const source = requestUrl.searchParams.get("source")?.trim() ?? null;
+  const expectedTotals: Record<string, number> = { chilecompra: 74142, infolobby: 60523, contraloria: 291, infoprobidad: 15331 };
+  return success([], {
+    total: 0,
+    limit,
+    page: Math.floor(offset / limit) + 1,
+    totalPages: 1,
+    sourceBackend: "none",
+    sourceStatus: "temporarily-unavailable",
+    availability: "summary-only-or-d1-quota",
+    requestedSource: source,
+    expectedTotal: source ? expectedTotals[source] ?? null : null,
+    reason,
+  }, pageLinks(requestUrl, offset, limit, 0));
+}
+
 function relation(row: JsonRecord) {
   const evidenceRecordIds = parseJson(row.evidence_record_ids_json);
   return {
@@ -968,7 +1100,7 @@ async function listEntities(requestUrl: URL, env: Env) {
 }
 
 async function listRecords(requestUrl: URL, env: Env) {
-  if (!env.DB) return dbUnavailable();
+  if (!env.DB) return await listRecordsFromR2(requestUrl, env) ?? (requestUrl.searchParams.has("source") || requestUrl.searchParams.has("entity_id") ? recordsUnavailable(requestUrl, "d1-unavailable") : dbUnavailable());
   const limit = limitFrom(requestUrl);
   const offset = offsetFrom(requestUrl);
   const source = requestUrl.searchParams.get("source");
@@ -993,10 +1125,17 @@ async function listRecords(requestUrl: URL, env: Env) {
   if (to) { clauses.push("occurred_at <= ?"); bindings.push(to); }
   if (entityId) { clauses.push("(subject_entity_ids_json LIKE ? OR object_entity_ids_json LIKE ?)"); bindings.push(`%${entityId}%`, `%${entityId}%`); }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
-  const total = await env.DB.prepare(`SELECT count(*) AS total FROM records ${where}`).bind(...bindings).first<{ total: number }>();
-  const rows = await env.DB.prepare(`SELECT * FROM records ${where} ORDER BY occurred_at DESC, id LIMIT ? OFFSET ?`).bind(...bindings, limit, offset).all<JsonRecord>();
-  const totalCount = Number(total?.total ?? 0);
-  return success((rows.results ?? []).map(record), { total: totalCount, limit, page: Math.floor(offset / limit) + 1, totalPages: Math.max(1, Math.ceil(totalCount / limit)) }, pageLinks(requestUrl, offset, limit, totalCount));
+  try {
+    const total = await env.DB.prepare(`SELECT count(*) AS total FROM records ${where}`).bind(...bindings).first<{ total: number }>();
+    const rows = await env.DB.prepare(`SELECT * FROM records ${where} ORDER BY occurred_at DESC, id LIMIT ? OFFSET ?`).bind(...bindings, limit, offset).all<JsonRecord>();
+    const totalCount = Number(total?.total ?? 0);
+    return success((rows.results ?? []).map(record), { total: totalCount, limit, page: Math.floor(offset / limit) + 1, totalPages: Math.max(1, Math.ceil(totalCount / limit)) }, pageLinks(requestUrl, offset, limit, totalCount));
+  } catch {
+    // R2 contiene las proyecciones publicadas que pueden consultarse sin
+    // volver a consumir rows_read. Si una fuente sólo tiene resumen, la
+    // respuesta 200 degradada lo declara explícitamente y no inventa filas.
+    return await listRecordsFromR2(requestUrl, env) ?? (requestUrl.searchParams.has("source") || requestUrl.searchParams.has("entity_id") ? recordsUnavailable(requestUrl, "d1-quota-or-binding") : dbUnavailable());
+  }
 }
 
 async function listRelations(requestUrl: URL, env: Env, crosses = false) {
