@@ -143,17 +143,23 @@ export async function main() {
 
     const previous = readExpenseSubset(root, "gastos_camara");
     const fresh = await fetchGastosCamara({ diputados: loadDeputies() });
+    console.log(`[etl-expenses-local] extracción Cámara recibida: ${fresh.length} registros`);
     const merged = mergeExpenseRecords(previous?.records ?? [], fresh);
+    console.log(`[etl-expenses-local] fusionando snapshot: ${previous?.recordCount ?? 0} anteriores + ${fresh.length} nuevos = ${merged.length} IDs`);
     const subset = buildExpenseSubset({ sourceId: "gastos_camara", records: merged, generatedAt: new Date().toISOString() });
     if (previous && subset.recordCount < previous.recordCount) throw new Error(`EXPENSE_LOCAL_RECORDS_DECREASED:${previous.recordCount}->${subset.recordCount}`);
     if (subset.recordCount === 0) throw new Error("EXPENSE_LOCAL_EMPTY");
+    console.log(`[etl-expenses-local] subset validado en memoria: ${subset.recordCount} registros (${subset.checksumSha256})`);
     writeSubset("gastos_camara", subset);
 
+    console.log("[etl-expenses-local] verificando release antes de publicar");
     run(process.execPath, ["scripts/verify-expense-release.mjs", "--required"], "EXPENSE_VERIFY");
+    console.log("[etl-expenses-local] publicando grupo estático gastos en R2");
     npm(["run", "data:publish:static", "--", "--groups", "gastos"], "EXPENSE_STATIC_PUBLISH");
 
     const verifyWork = mkdtempSync(join(tmpdir(), "cambiometro-expenses-verify-"));
     try {
+      console.log("[etl-expenses-local] comprobando checksum publicado en R2");
       downloadExpenseSubsets(verifyWork);
       const published = readExpenseSubset(root, "gastos-camara");
       if (published?.checksumSha256 !== subset.checksumSha256) throw new Error("EXPENSE_LOCAL_PUBLISHED_CHECKSUM_MISMATCH:gastos_camara");
