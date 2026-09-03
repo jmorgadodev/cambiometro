@@ -15,6 +15,7 @@ const ROUTES = [
   "/movimientos",
   "/api/v1/health",
   "/api/v1/search?q=Kaiser",
+  "/api/v1/records?source=infolobby&limit=1",
 ];
 
 export function buildRequestHeaders(path, uptimeToken = "") {
