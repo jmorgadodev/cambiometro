@@ -223,7 +223,9 @@ async function main() {
     executeSql(`INSERT OR REPLACE INTO sources (id,label,organization,official_url,license,expected_coverage,created_at,updated_at) VALUES ${sourceValues};
 INSERT OR REPLACE INTO entities SELECT id,kind,name,identifiers_json,attributes_json,source_ids_json,updated_at FROM stage_entities WHERE run_id=${sql(runId)};
 DELETE FROM stage_entities WHERE run_id=${sql(runId)};`, "entities");
-    clearLegacyRelations();
+    // A source-scoped refresh must not scan the entire relations table. The
+    // legacy cleanup is maintenance for a full rebuild, not part of every ETL.
+    if (requestedSourceIds.size === 0) clearLegacyRelations();
   }
 
   for (const partition of catalog.partitions) {
