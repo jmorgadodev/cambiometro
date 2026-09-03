@@ -17,7 +17,7 @@
  */
 import puppeteerExtra from "puppeteer-extra";
 import StealthPlugin from "puppeteer-extra-plugin-stealth";
-import { appendFileSync, existsSync, mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, mkdtempSync, renameSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { readFileIfPresent } from "../safe-file.mjs";
@@ -39,6 +39,43 @@ export function assertCamaraExpenseComplete(completed, expected) {
     throw new Error(`CAMARA_GASTOS_INCOMPLETE: ${completed}/${expected} diputados completados`);
   }
   return true;
+}
+
+/**
+ * A progress marker is only resumable when the corresponding result
+ * checkpoint exists. The old runner could leave all IDs marked after a later
+ * phase failed, causing a retry to return an empty extraction.
+ */
+export function resumableCamaraIds(progressIds = [], checkpointIds = []) {
+  const checkpoints = new Set(checkpointIds.map((id) => String(id)));
+  return new Set(progressIds.map((id) => String(id)).filter((id) => checkpoints.has(id)));
+}
+
+function checkpointPath(checkpointDir, diputadoId) {
+  return join(checkpointDir, `diputado-${String(diputadoId)}.json`);
+}
+
+function loadCheckpoints(checkpointDir, diputados) {
+  const recordsById = new Map();
+  for (const diputado of diputados) {
+    const path = checkpointPath(checkpointDir, diputado.id);
+    const raw = readFileIfPresent(path, "utf8");
+    if (!raw) continue;
+    try {
+      const records = JSON.parse(raw);
+      if (Array.isArray(records)) recordsById.set(String(diputado.id), records);
+    } catch (error) {
+      console.warn(`[camara-gastos] checkpoint inválido para ${diputado.id}; se volverá a consultar`);
+    }
+  }
+  return recordsById;
+}
+
+function writeCheckpoint(checkpointDir, diputadoId, records) {
+  const target = checkpointPath(checkpointDir, diputadoId);
+  const staged = `${target}.next`;
+  writeFileSync(staged, `${JSON.stringify(records)}\n`, "utf8");
+  renameSync(staged, target);
 }
 
 function browserExecutables() {
@@ -181,13 +218,22 @@ export async function fetchGastosCamara({ diputados = [] } = {}) {
   const progresoFile = join(PROGRESO_DIR, `camara-gastos-progreso-${hoyStamp}.txt`);
   const previousProgress = readFileIfPresent(progresoFile, "utf8");
   const hechos = new Set(previousProgress?.split(/\r?\n/).filter(Boolean) ?? []);
+  const checkpointDir = join(PROGRESO_DIR, `camara-gastos-resultados-${hoyStamp}`);
+  mkdirSync(checkpointDir, { recursive: true });
+  const checkpoints = loadCheckpoints(checkpointDir, diputados);
+  const completedIds = resumableCamaraIds(hechos, checkpoints.keys());
+  const cachedResults = [...completedIds].flatMap((id) => checkpoints.get(id) ?? []);
   const nómina = diputados
     .map((diputado) => ({ id: String(diputado.id), nombre: String(diputado.nombre ?? "") }))
     .filter((diputado) => diputado.id)
-    .filter((diputado) => !hechos.has(diputado.id));
-  if (nómina.length === 0) return [];
+    .filter((diputado) => !completedIds.has(diputado.id));
   const expectedIds = new Set(diputados.map((diputado) => String(diputado.id)).filter(Boolean));
   const totalDiputados = expectedIds.size;
+  if (nómina.length === 0) {
+    assertCamaraExpenseComplete(completedIds.size, totalDiputados);
+    console.log(`[camara-gastos] checkpoint completo: ${cachedResults.length} registros, ${completedIds.size}/${totalDiputados} diputados`);
+    return cachedResults;
+  }
 
   const browserProfile = mkdtempSync(join(PROGRESO_DIR, "pptr-etl-"));
   const browser = await launchFirstAvailable(
@@ -209,7 +255,7 @@ export async function fetchGastosCamara({ diputados = [] } = {}) {
     (executable, message) => console.warn(`[camara-gastos] navegador no disponible ${executable}: ${message.split("\n")[0]}`),
   );
 
-  const resultados = [];
+  const resultados = [...cachedResults];
   let erroresConsecutivos = 0;
   try {
     const page = await browser.newPage();
@@ -237,6 +283,7 @@ export async function fetchGastosCamara({ diputados = [] } = {}) {
       }
       erroresConsecutivos = 0;
       await esperar(PACE_MS);
+      const diputadoResultados = [];
       for (const mes of meses) {
         if (erroresConsecutivos >= MAX_ERRORES_CONSECUTIVOS) break;
         try {
@@ -244,7 +291,7 @@ export async function fetchGastosCamara({ diputados = [] } = {}) {
           if (respuesta.nodata) break;
           const mesPad = String(mes).padStart(2, "0");
           for (const registro of respuesta.filas) {
-            resultados.push({
+            diputadoResultados.push({
               id: `${diputado.id}-${anno}-${mesPad}-${registro.item
                 .normalize("NFD")
                 .replace(/[\u0300-\u036f]/g, "")
@@ -269,12 +316,15 @@ export async function fetchGastosCamara({ diputados = [] } = {}) {
         }
       }
       if (erroresConsecutivos === 0) {
+        writeCheckpoint(checkpointDir, diputado.id, diputadoResultados);
+        resultados.push(...diputadoResultados);
         appendFileSync(progresoFile, `${diputado.id}\n`);
         hechos.add(diputado.id);
+        completedIds.add(diputado.id);
       }
     }
-    console.log(`[camara-gastos] fin: ${resultados.length} registros, ${hechos.size}/${totalDiputados} diputados completados`);
-    assertCamaraExpenseComplete([...expectedIds].filter((id) => hechos.has(id)).length, totalDiputados);
+    console.log(`[camara-gastos] fin: ${resultados.length} registros, ${completedIds.size}/${totalDiputados} diputados completados`);
+    assertCamaraExpenseComplete(completedIds.size, totalDiputados);
     await page.close();
   } finally {
     await browser.close().catch(() => {});
