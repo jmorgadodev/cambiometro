@@ -1623,6 +1623,14 @@ export default {
           const r2 = await listExpensesFromR2(url, env);
           if (r2) return r2;
         }
+        // These releases have complete, checksummed R2 indexes. Use them as
+        // the public path so a normal browse/search does not spend D1
+        // rows_read on a COUNT(*) plus a second paginated SELECT.
+        const r2FirstSources = new Set(["chilecompra", "infolobby", "contraloria"]);
+        if (r2FirstSources.has(url.searchParams.get("source")?.trim() ?? "")) {
+          const r2 = await listRecordsFromR2(url, env);
+          if (r2 && r2.status < 500) return r2;
+        }
         return databaseSafe(listRecords(url, env));
       });
     }
