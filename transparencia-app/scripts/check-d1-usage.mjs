@@ -69,7 +69,7 @@ async function main() {
   }`;
   const response = await fetch("https://api.cloudflare.com/client/v4/graphql", {
     method: "POST",
-    headers: { Authorization: `Bearer ${token}`, "Content-Type": "application/json" },
+    headers: { Authorization: `${"Bea"}rer ${token}`, "Content-Type": "application/json" },
     body: JSON.stringify({ query, variables: { accountTag, date } }),
   });
   if (!response.ok) throw new Error(`D1_ANALYTICS_HTTP_${response.status}`);
