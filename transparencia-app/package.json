@@ -23,6 +23,7 @@
     "check:staging-isolated": "node scripts/check-staging-isolated.mjs",
     "test:coverage-sweep": "node scripts/coverage-sweep.mjs",
     "smoke:uptime": "node scripts/uptime-smoke.mjs",
+    "d1:post-reset:preflight": "node scripts/d1-post-reset-preflight.mjs",
     "verify:cold-crawl": "node scripts/cold-crawl.mjs",
     "verify:prod:double": "node scripts/verify-prod-double.mjs",
     "verify:prod:movimientos": "node scripts/verify-prod-movimientos.mjs",
