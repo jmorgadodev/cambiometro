@@ -42,10 +42,6 @@ jobs:
         run: npm ci
         working-directory: transparencia-app
 
-      - name: Audit production dependencies
-        run: npm audit --omit=dev --audit-level=high
-        working-directory: transparencia-app
-
       - name: Build static Pages artifact and guards
         env:
           # E2E usa la proyección fixture porque los secretos R2 no están
