@@ -608,6 +608,42 @@ describe("API canónica v1", () => {
     expect(payload.links.next).toContain("cursor=v1_");
   }, 20_000);
 
+  it("prefiere el índice R2 para fuentes completas y evita consultar D1", async () => {
+    const archive = JSON.stringify({
+      id: "lobby-1",
+      sourceId: "infolobby",
+      kind: "lobby",
+      occurredAt: "2026-08-01",
+      evidence: { sourceUrl: "https://www.infolobby.cl/1" },
+      data: { title: "Audiencia pública", subject_entity_ids: [], object_entity_ids: [] },
+    }) + "\n";
+    const manifest = {
+      schemaVersion: 1,
+      sourceId: "infolobby",
+      totalRows: 1,
+      pageSize: 1,
+      recordArchiveKey: "indexes/v1/infolobby/archive.jsonl.gz",
+      pages: [{ offset: 0, length: new TextEncoder().encode(archive).byteLength }],
+    };
+    const prepare = vi.fn(() => { throw new Error("D1 no debe consultarse para InfoLobby indexado"); });
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/static-site-v1/manifest.json") return { json: async <T>() => ({ files: [{ path: "placeholder", key: "placeholder" }] }) as T };
+        if (key === "indexes/v1/infolobby/manifest.json") return { json: async <T>() => manifest as T };
+        if (key === manifest.recordArchiveKey) return { arrayBuffer: async () => new TextEncoder().encode(archive).buffer };
+        return null;
+      },
+    };
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/records?source=infolobby&limit=1"), { DB: { prepare }, PUBLIC_DATA } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.sourceBackend).toBe("r2-lake");
+    expect(payload.data[0].id).toBe("lobby-1");
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
   it("rechaza filtros inválidos con el error uniforme", async () => {
     const response = await fetchApi("https://example.test/api/v1/records?kind=delito");
     const payload = await response.json();
