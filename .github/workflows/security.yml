@@ -41,5 +41,22 @@ jobs:
         working-directory: transparencia-app
 
       - name: Audit production dependencies
-        run: npm audit --omit=dev --audit-level=high
+        run: |
+          set +e
+          audit_output=$(npm audit --omit=dev --audit-level=high \
+            --fetch-retries=1 \
+            --fetch-retry-mintimeout=1000 \
+            --fetch-retry-maxtimeout=5000 \
+            --fetch-timeout=30000 2>&1)
+          audit_status=$?
+          set -e
+          printf '%s\n' "$audit_output"
+          if [ "$audit_status" -eq 0 ]; then
+            exit 0
+          fi
+          if printf '%s\n' "$audit_output" | grep -Eqi 'npm warn audit (429|5[0-9][0-9])|audit endpoint returned an error|ENOAUDIT|ECONNRESET|ETIMEDOUT'; then
+            echo "::warning title=Registro npm no disponible::La auditoría no pudo consultar el servicio externo; CodeQL y Gitleaks permanecen obligatorios."
+            exit 0
+          fi
+          exit "$audit_status"
         working-directory: transparencia-app
