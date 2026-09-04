@@ -62,3 +62,8 @@ adicional por partición para garantizar que un día con cambios no vuelva a
 recorrer todo el histórico de D1. Si el primer ETL posterior al reinicio
 supera el umbral, detenerse y corregir esa partición; no activar el plan pago
 ni ejecutar `--full-history` como solución.
+
+El ETL de transferencias también quedó protegido: cuando la release completa
+de Ley 19.862 conserva el mismo checksum, `--skip-unchanged` evita reconstruir
+la D1 dedicada. Si el checksum cambia, la reconstrucción completa se mantiene
+intencionalmente atómica y validada antes de activarse.

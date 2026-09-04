@@ -11,6 +11,7 @@ import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
 import { assertCanonicalTransferRelease } from "./etl/transfer-release-guard.mjs";
+import { shouldSkipTransferMaterialization } from "./etl/transfer-materialization.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const database = argument("--database", "transparencia-db");
@@ -19,6 +20,7 @@ const source = resolve(
   argument("--source", join(root, "data", "lake", "partitions", "ley-19862")),
 );
 const dryRun = process.argv.includes("--dry-run");
+const skipUnchanged = process.argv.includes("--skip-unchanged");
 // Keep each remote SQL statement comfortably below SQLite's statement-size
 // limit. The row count and checksum remain unchanged; only upload batching
 // changes.
@@ -107,26 +109,30 @@ function releaseRows(staging, manifest) {
   return rows;
 }
 
-const work = mkdtempSync(join(tmpdir(), "cambiometro-transfer-d1-"));
-const staging = join(work, "release");
-try {
-  if (!existsSync(source))
-    throw new Error(`TRANSFER_D1_SOURCE_MISSING:${source}`);
-  const release = await buildTransferenciasStatic({ source, output: staging });
-  if (!release) throw new Error("TRANSFER_D1_RELEASE_EMPTY");
-  const { manifest } = release;
-  assertCanonicalTransferRelease({
-    totalRows: manifest.totalRows,
-    totalMontoClp: manifest.expected.totalMontoClp,
-  });
-  const rows = releaseRows(staging, manifest);
-  const releaseChecksum = createHash("sha256")
-    .update(rows.map((row) => JSON.stringify(row)).join("\n"))
-    .digest("hex");
-  if (releaseChecksum !== manifest.checksumSha256)
-    throw new Error("TRANSFER_D1_RELEASE_CHECKSUM_INVALID");
+function activeReleaseChecksum() {
+  const output = runWrangler(
+    [
+      "d1",
+      "execute",
+      database,
+      "--remote",
+      "--command",
+      "SELECT checksum_sha256 FROM transferencias_19862_release WHERE singleton = 1",
+      "--json",
+    ],
+    true,
+    { capture: true },
+  );
+  if (output === null) throw new Error("TRANSFER_D1_RELEASE_CHECKSUM_QUERY_FAILED");
+  try {
+    const payload = JSON.parse(output);
+    return payload?.[0]?.results?.[0]?.checksum_sha256 ?? null;
+  } catch {
+    throw new Error("TRANSFER_D1_RELEASE_CHECKSUM_RESPONSE_INVALID");
+  }
+}
 
-  if (!dryRun) runWrangler(["d1", "migrations", "apply", database, "--remote"]);
+function materializeRelease(manifest, rows) {
   // Build the next release in isolation. The current table stays readable
   // until the validated stage is swapped in, so a failed batch never exposes
   // a partial release and the API can safely fall back to R2.
@@ -181,7 +187,7 @@ CREATE INDEX idx_transferencias_19862_stage_search ON transferencias_19862_stage
 `,
     "stage-indexes",
   );
-  // D1 executes a SQL file in auto-commit mode. The release marker is written
+  // D1 executes SQL files in auto-commit mode. The release marker is written
   // last; until that marker matches the R2 checksum, the Worker deliberately
   // serves the canonical R2 release even if an activation command is
   // interrupted.
@@ -202,10 +208,44 @@ INSERT INTO transferencias_19862_release (singleton,checksum_sha256,total_rows,t
 `,
     "activate-release",
   );
+}
+
+const work = mkdtempSync(join(tmpdir(), "cambiometro-transfer-d1-"));
+const staging = join(work, "release");
+try {
+  if (!existsSync(source))
+    throw new Error(`TRANSFER_D1_SOURCE_MISSING:${source}`);
+  const release = await buildTransferenciasStatic({ source, output: staging });
+  if (!release) throw new Error("TRANSFER_D1_RELEASE_EMPTY");
+  const { manifest } = release;
+  assertCanonicalTransferRelease({
+    totalRows: manifest.totalRows,
+    totalMontoClp: manifest.expected.totalMontoClp,
+  });
+  const rows = releaseRows(staging, manifest);
+  const releaseChecksum = createHash("sha256")
+    .update(rows.map((row) => JSON.stringify(row)).join("\n"))
+    .digest("hex");
+  if (releaseChecksum !== manifest.checksumSha256)
+    throw new Error("TRANSFER_D1_RELEASE_CHECKSUM_INVALID");
+
+  if (!dryRun) runWrangler(["d1", "migrations", "apply", database, "--remote"]);
+  let status = dryRun ? "validated" : "materialized";
+  if (skipUnchanged && !dryRun) {
+    const previousChecksum = activeReleaseChecksum();
+    if (shouldSkipTransferMaterialization(previousChecksum, manifest.checksumSha256)) {
+      status = "skipped";
+      console.log(JSON.stringify({ status, database, checksumSha256: manifest.checksumSha256 }, null, 2));
+    } else {
+      materializeRelease(manifest, rows);
+    }
+  } else {
+    materializeRelease(manifest, rows);
+  }
   console.log(
     JSON.stringify(
       {
-        status: dryRun ? "validated" : "materialized",
+        status,
         database,
         totalRows: manifest.totalRows,
         totalMontoClp: manifest.expected.totalMontoClp,
