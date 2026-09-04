@@ -10,16 +10,21 @@ import { getVotingFreshness, VOTACIONES_DESTACADAS } from "@/lib/votaciones-dest
 import { tituloVotacionLegible } from "@/lib/votaciones-format";
 import { MOVIMIENTOS_HOME_SUMMARY } from "@/lib/movimientos";
 import { formatFechaCorta } from "@/lib/format";
+import { getLandingSummary, sourceKeyForHomeSource } from "@/lib/landing-summary-runtime";
 
 export const dynamic = "force-static";
 
-const HOME_SOURCES_LIST = ETL_SOURCES_DATA.filter((source) => source.recordCount > 0);
 const VOTING_FRESHNESS = getVotingFreshness();
 
 function formatVotingDate(value: string | null) {
   if (!value) return "Sin fecha publicada";
   const date = value.slice(0, 10);
   return new Intl.DateTimeFormat("es-CL", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${date}T12:00:00Z`));
+}
+
+function formatLandingDate(value: string | null) {
+  if (!value) return null;
+  return new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(value));
 }
 
 // Selección editorial para la Home: impacto público, quórum y diversidad de
@@ -88,8 +93,24 @@ const HOME_KPIS = [
 ];
 
 export default async function HomePage() {
-  const entityCount = getStaticEntityCatalog().total;
+  const landingSummary = getLandingSummary();
+  const sourceSnapshots = new Map(landingSummary.sources.map((source) => [source.id, source]));
+  const homeSources = ETL_SOURCES_DATA.map((source) => {
+    const sourceKey = sourceKeyForHomeSource(source.id);
+    const snapshot = sourceKey ? sourceSnapshots.get(sourceKey) : undefined;
+    if (!snapshot || snapshot.recordCount <= 0) return source;
+    return {
+      ...source,
+      recordCount: snapshot.recordCount,
+      lastUpdated: snapshot.generatedAt ?? source.lastUpdated,
+      lastUpdatedRelative: snapshot.generatedAt ? `Corte ${new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(snapshot.generatedAt))}` : source.lastUpdatedRelative,
+      status: snapshot.status === "complete" ? "operational" : source.status,
+      statusText: snapshot.status === "complete" ? "Cobertura completa" : source.statusText,
+    };
+  }).filter((source) => source.recordCount > 0);
+  const HOME_SOURCES_LIST = homeSources;
   const operationalSources = HOME_SOURCES_LIST;
+  const entityCount = getStaticEntityCatalog().total;
   const resolvedHomeKpis = HOME_KPIS.map((item) => item.key === "entidades"
     ? { ...item, value: entityCount || item.value }
     : item);
@@ -117,7 +138,7 @@ export default async function HomePage() {
       <section className="home-hero" aria-labelledby="home-title">
         <div className="container-main home-lead">
           <div className="home-lead__copy">
-            <div className="home-kicker"><span aria-hidden="true" /> Plataforma de datos públicos <span className="home-kicker__cut">Corte {GLOBAL_KPIS.corte}</span></div>
+            <div className="home-kicker"><span aria-hidden="true" /> Plataforma de datos públicos <span className="home-kicker__cut">Corte {formatLandingDate(landingSummary.dataUpdatedAt) ?? GLOBAL_KPIS.corte}</span></div>
             <h1 id="home-title">La información pública <em>no debería perderse.</em></h1>
             <p className="home-lead__intro">
               El Cambiómetro convierte fuentes dispersas del Estado de Chile en evidencia que puedes
@@ -334,7 +355,7 @@ export default async function HomePage() {
             </div>
             <Link prefetch={false} href="/datos">Revisar todas las fuentes →</Link>
           </div>
-          <p className="home-sources__intro">Cada tarjeta indica qué fuente está conectada, cuántos registros tiene disponibles y dónde continuar la revisión.</p>
+          <p className="home-sources__intro">Cada tarjeta indica qué fuente está conectada, cuántos registros tiene disponibles y dónde continuar la revisión. Corte generado automáticamente: {formatLandingDate(landingSummary.dataUpdatedAt) ?? "sin fecha publicada"}.</p>
           <div className="home-source-grid">
             {operationalSources.map((source, sourceIndex) => (
               <Link prefetch={false} className="home-source-card" href={source.viewLink} key={source.id}>
