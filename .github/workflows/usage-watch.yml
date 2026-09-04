@@ -7,6 +7,9 @@ concurrency:
   group: usage-watch
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   check-usage:
     name: Check GitHub Actions Minutes & Limit
@@ -29,3 +32,28 @@ jobs:
           echo "Recuerda: El Spending Limit en GitHub Settings debe ser $0 USD."
           echo "El despliegue se realiza mediante Pages y el Worker API separado, con promoción explícita."
           echo "======================================================="
+
+  check-d1:
+    name: Check D1 Free Tier Usage
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - name: Consultar Analytics D1 sin ejecutar SQL
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+          D1_USAGE_OUTPUT: d1-usage.json
+        run: node scripts/check-d1-usage.mjs
+      - name: Conservar evidencia de uso
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d1-usage-${{ github.run_id }}
+          path: transparencia-app/d1-usage.json
+          if-no-files-found: warn
+          retention-days: 31
