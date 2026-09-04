@@ -33,6 +33,8 @@ transparencia-app/artifacts/
 /transparencia-app/pages-deployments.json
 .ci-transfer-d1*.jsonc
 .ci-evidence-prod-*/
+.ci-evidence-worker-*/
+.tmp-*
 /artifacts/
 .open-next/
 .next/
@@ -44,3 +46,6 @@ out.json
 data/lake/.work/
 data/lake/originals/
 data/lake/partitions/
+transparencia-app/data/lake-repair/
+transparencia-app/projections/
+transparencia-app/transparencia-app/
