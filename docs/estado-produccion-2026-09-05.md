@@ -12,21 +12,21 @@ si falla una validación, se conserva la publicación anterior.
 
 ## Evidencia de la ejecución
 
-- ETL Movimientos: run `33975348933`, `success`, 33 s.
-- Refresco y publicación Pages: run `33975381944`, `success`, 5m32s.
-- Pages deployment: `e70fc84b-498c-4211-bfab-bcfb7d4791b2`.
-- Preview del deployment: <https://e70fc84b.cambiometro.pages.dev>.
+- ETL Movimientos: run `33977700697`, `success`.
+- Refresco y publicación Pages: run `33977739174`, `success`, 5m32s.
+- Pages deployment: `ad28b34d-7846-4240-ae83-a343ec010f19`.
+- Preview del deployment: <https://ad28b34d.cambiometro.pages.dev>.
 - Dominio: <https://cambiometro.impulsacv.cl>.
 - Worker productivo sin cambios: `5e091180-d59b-4a72-8618-10b8898e5a98`.
-- Guardia ETL: run `33975381928`, `success`; confirmó la publicación automática
+- Guardia ETL: run `33977739231`, `success`; confirmó la publicación automática
   posterior al ETL.
 
 ## Datos visibles
 
 - `data/movimientos.json`: HTTP 200, 82 registros.
-- `last_success_at`: `2026-09-05T15:37:31.418Z`.
+- `last_success_at`: `2026-09-05T16:23:45.876Z`.
 - `last_event_date`: `2026-09-02`.
-- Checksum: `64771806b4f1fcb444c4975f123112e9ed22f4f9cccafe5eed198f61de26a4ce`.
+- Checksum: `82a165223878096bd600cf10b9b0c429476400b0fdb5bb002f499fdb3a0e2b8d`.
 - Alonso Velásquez: evento 2-sep; Radio Paulina 3-sep y declaración oficial
   MINVU 2-sep; estado `en_confirmacion` hasta contar con acto administrativo.
 - Patricio Löhr: evento 1-sep; Emol 2-sep; estado `en_confirmacion` hasta contar
@@ -51,7 +51,8 @@ La API pública de fuentes reporta las 11 fuentes del catálogo como conectadas 
 con datos publicados en el lake. Dentro del ETL específico de Movimientos hay
 un conector con incidencia no bloqueante:
 
-- `gob.cl`: HTTP 403 temporal.
+- `gob.cl`: HTTP 403 desde el runner de GitHub; también se probaron variantes
+  públicas del mismo host (`/`, `?p=1` y `?page=1`) sin éxito.
 - Prensa Presidencia: HTTP 200 después de agregar el intermedio público Sectigo
   que el servidor no entrega.
 
@@ -71,7 +72,7 @@ no se ejecutó ninguna materialización D1 ni se consumió el límite diario.
 ## Rollback
 
 ```bash
-npm run pages:rollback -- e70fc84b-498c-4211-bfab-bcfb7d4791b2
+npm run pages:rollback -- ad28b34d-7846-4240-ae83-a343ec010f19
 
 npx wrangler rollback 5e091180-d59b-4a72-8618-10b8898e5a98 \
   --name cambiometro-public-api
