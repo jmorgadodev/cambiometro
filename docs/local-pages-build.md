@@ -59,7 +59,10 @@ El flujo operativo es:
    se va a publicar.
 4. El build y sus guardias deben pasar antes de generar el artefacto `out/`.
    Si falla la descarga, checksum, integridad o build, no se publica una
-   versión nueva y queda vigente la última publicación válida.
+   versión nueva y queda vigente la última publicación válida. Después del
+   cutover inicial, el mismo workflow de refresco publica automáticamente el
+   artefacto cuando el disparador es un ETL exitoso; los cambios de interfaz
+   mantienen su publicación manual con confirmación explícita.
 
 Las tarjetas del inicio muestran el **conteo canónico** de cada fuente. Ese
 conteo es distinto del conteo bruto del catálogo: por ejemplo, puede excluir
