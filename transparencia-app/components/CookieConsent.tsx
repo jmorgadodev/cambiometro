@@ -64,7 +64,9 @@ function storeConsent(choice: ConsentChoice) {
 function loadTracking() {
   if (typeof window === "undefined" || window.__cambiometroTracking) return;
   const mode = GTM_ID ? "gtm" : GA4_ID ? "ga4" : null;
-  const id = GTM_ID ?? GA4_ID;
+  // GTM puede existir como variable vacía en Pages; en ese caso debe caer a
+  // GA4, no bloquear la medición por usar nullish coalescing.
+  const id = GTM_ID || GA4_ID;
   if (!mode || !id || !/^(?:GTM|G)-[A-Z0-9_-]+$/i.test(id)) return;
 
   const dataLayer = ensureDataLayer();
