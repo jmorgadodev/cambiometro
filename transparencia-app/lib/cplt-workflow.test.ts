@@ -15,16 +15,17 @@ describe("automatizacion CPLT nacional", () => {
 
   it("solo activa el manifiesto global despues de completar todas las categorias", () => {
     expect(workflow).toContain("needs: [cplt-source-check, cplt-categories]");
-    expect(workflow).toContain("npm run data:finalize:cplt");
+    expect(workflow).toContain("npm run data:finalize:cplt:r2");
     expect(workflow).not.toContain("npm run ingest:cplt-personal -- Planta\n          npm run ingest:cplt-personal -- Contrata");
     expect(workflow).toContain("ETL_RUN_ID: cplt-${{ github.run_id }}-${{ github.run_attempt }}");
     const packageJson = readFileSync(resolve(process.cwd(), "package.json"), "utf8");
-    expect(packageJson).toContain("record-cplt-source-state.mjs --remote");
+    expect(packageJson).toContain('"data:record:cplt-state": "node scripts/record-cplt-source-state.mjs"');
   });
 
   it("no bloquea R2 ni Pages cuando falla el archivo secundario de GitHub Releases", () => {
     const packageJson = readFileSync(resolve(process.cwd(), "package.json"), "utf8");
-    expect(packageJson).toContain('"data:finalize:cplt": "node scripts/merge-cplt-category-artifacts.mjs && node scripts/publish-cplt-projections.mjs --r2 && node scripts/record-cplt-source-state.mjs --remote"');
+    expect(packageJson).toContain('"data:finalize:cplt": "npm run data:finalize:cplt:r2 && npm run data:record:cplt-state -- --remote"');
+    expect(packageJson).toContain('"data:finalize:cplt:r2": "node scripts/merge-cplt-category-artifacts.mjs && node scripts/publish-cplt-projections.mjs --r2"');
     expect(packageJson).toContain('"data:archive:cplt": "node scripts/publish-data-lake.mjs --output data/lake-cplt --releases --release-manifests-only"');
     expect(readFileSync(resolve(process.cwd(), "scripts/publish-data-lake.mjs"), "utf8")).toContain("releaseManifestsOnly ? assets.filter");
     expect(workflow).toContain("npm run data:archive:cplt");
