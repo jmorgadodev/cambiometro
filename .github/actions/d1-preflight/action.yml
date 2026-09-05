@@ -32,18 +32,23 @@ runs:
       run: |
         set +e
         node transparencia-app/scripts/check-d1-usage.mjs "$(date -u +%F)"
+        usage_status=$?
 
         proceed=false
         peak_percent=100
         reason="usage-unavailable"
         if [[ -s "$D1_USAGE_OUTPUT" ]]; then
           peak_percent="$(node -e 'const fs=require("fs"); const report=JSON.parse(fs.readFileSync(process.argv[1], "utf8")); process.stdout.write(String(Math.max(Number(report.readPercent ?? 100), Number(report.writePercent ?? 100))))' "$D1_USAGE_OUTPUT" 2>/dev/null)"
-          if [[ "$peak_percent" =~ ^[0-9]+([.][0-9]+)?$ ]] && node -e 'process.exit(Number(process.argv[1]) < Number(process.argv[2]) ? 0 : 1)' "$peak_percent" "$D1_THRESHOLD_PERCENT"; then
+          if [[ "$usage_status" -eq 0 && "$peak_percent" =~ ^[0-9]+([.][0-9]+)?$ ]] && node -e 'process.exit(Number(process.argv[1]) < Number(process.argv[2]) ? 0 : 1)' "$peak_percent" "$D1_THRESHOLD_PERCENT"; then
             proceed=true
             reason="below-threshold"
+          elif [[ "$usage_status" -ne 0 ]]; then
+            reason="usage-unavailable"
           else
             reason="threshold-reached"
           fi
+        elif [[ "$usage_status" -ne 0 ]]; then
+          node -e 'const fs=require("fs"); const output=process.env.D1_USAGE_OUTPUT; const date=process.argv[1]; fs.mkdirSync(require("path").dirname(output), { recursive: true }); fs.writeFileSync(output, JSON.stringify({ date, status: "unavailable", reason: "D1_ANALYTICS_UNAUTHORIZED_OR_UNAVAILABLE" }, null, 2) + "\n")' "$(date -u +%F)"
         fi
 
         {
