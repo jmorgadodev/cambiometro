@@ -1443,7 +1443,13 @@ async function exportFuncionarios(requestUrl: URL, env: Env, format: "csv" | "js
   const sourceUrl = new URL(requestUrl);
   sourceUrl.searchParams.set("page", String(page));
   sourceUrl.searchParams.set("limit", String(limit));
-  const response = await (await listFuncionariosFromD1(sourceUrl, env)) ?? await listFuncionariosFromR2(sourceUrl, env);
+  // The complete national directory is published as a paginated R2 index.
+  // Keep D1 only as a rescue path for an unavailable R2 release; exporting a
+  // block must never start with COUNT/SELECT over the 1.2M-row table.
+  const r2Response = await listFuncionariosFromR2(sourceUrl, env);
+  const response = r2Response.status < 500
+    ? r2Response
+    : await listFuncionariosFromD1(sourceUrl, env) ?? r2Response;
   if (!response.ok) return response;
   const payload = await response.json() as JsonRecord;
   const data = Array.isArray(payload.data) ? payload.data as JsonRecord[] : [];
@@ -1692,7 +1698,7 @@ export default {
     }
     if (path === "/api/v1/export") {
         const limited = await rateLimit(request, env, "export");
-        return limited ?? databaseSafe(exportData(url, env));
+        return limited ?? cachedPublicGet(request, () => databaseSafe(exportData(url, env)));
       }
     if (path === "/api/funcionarios" || path === "/api/v1/funcionarios") {
       const invalid = validateOfficials(url);
