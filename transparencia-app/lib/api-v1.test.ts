@@ -294,6 +294,35 @@ describe("API canónica v1", () => {
     expect(prepare).not.toHaveBeenCalled();
   });
 
+  it("usa el conteo publicado para records por fuente sin escanear records", async () => {
+    const prepared: string[] = [];
+    const db = {
+      prepare(sql: string) {
+        prepared.push(sql);
+        const statement = {
+          bind() { return statement; },
+          async first<T>() {
+            if (/FROM source_state/i.test(sql)) return { total: 29890 } as T;
+            return null;
+          },
+          async all<T>() { return { results: [] } as T; },
+        };
+        return statement;
+      },
+    };
+
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/records?source=camara&limit=1"),
+      { DB: db } as never,
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.total).toBe(29890);
+    expect(prepared.some((sql) => /COUNT\(\*\).*FROM records/i.test(sql))).toBe(false);
+    expect(prepared.some((sql) => /FROM source_state/i.test(sql))).toBe(true);
+  });
+
   it("filtra registros por las tablas normalizadas y no por LIKE sobre JSON", async () => {
     const prepared: string[] = [];
     const db = {
