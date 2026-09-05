@@ -1074,6 +1074,9 @@ function MovimientosContent() {
 
                               <div>
                                 <strong style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>Fuentes y Evidencias Trazables:</strong>
+                                <p style={{ margin: "0.25rem 0 0", fontSize: "0.74rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
+                                  <strong>Fecha del evento:</strong> {formatFechaCorta(mov.fecha)}. La fecha entre paréntesis en cada fuente corresponde a su <strong>fecha de publicación</strong>; puede ser posterior al cambio efectivo.
+                                </p>
                                 <ul style={{ margin: "0.3rem 0 0 0", paddingLeft: "1.2rem", fontSize: "0.78rem", color: "var(--text-2)" }}>
                                   {mov.fuentes.map((f, fIdx) => (
                                     <li key={fIdx}>

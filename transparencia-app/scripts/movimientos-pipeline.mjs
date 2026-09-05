@@ -483,7 +483,7 @@ const KNOWN_ANNOUNCED_MOVEMENTS = Object.freeze([
       ministerio: "Ministerio de Transportes y Telecomunicaciones",
       region: "Región de Arica y Parinacota",
       salio: { nombre: "Patricio Löhr Tapia", fecha: "2026-09-01" },
-      fuentes: [sourceFromSignal(signal, "2026-09-01")],
+      fuentes: mergeMovementSources(PATRICIO_LOHR_SOURCES, sourceFromSignal(signal, "2026-09-01")),
       estado: "en_confirmacion",
       fecha_deteccion: now,
       fecha_verificacion: null,
@@ -514,6 +514,37 @@ const ALONSO_VELASQUEZ_SOURCES = Object.freeze([
     url: "https://radiopaulina.cl/2026/09/03/entrevero-irreconciliable-ex-seremi-de-vivienda-de-tarapaca-justifico-su-salida-por-un-desencuentro-con-el-ministro-poduje/",
     fecha: "2026-09-03",
     titulo: "Ex seremi de Vivienda de Tarapacá justificó su salida por un desencuentro con el ministro Poduje",
+  },
+  {
+    nivel: "prensa",
+    medio: "Pauta",
+    url: "https://www.pauta.cl/actualidad/2026/09/03/renuncia-seremi-de-vivienda-de-tarapaca-ya-son-35-las-salidas-en-el-gobierno-de-kast.html",
+    fecha: "2026-09-03",
+    titulo: "Renuncia seremi de Vivienda de Tarapacá: ya son 35 las salidas en el Gobierno de Kast",
+  },
+]);
+
+const PATRICIO_LOHR_SOURCES = Object.freeze([
+  {
+    nivel: "prensa",
+    medio: "ADN Radio",
+    url: "https://www.adnradio.cl/2026/09/01/gobierno-pide-renuncia-a-seremi-de-transportes-de-arica-tras-denuncia-por-presuntas-presiones-a-funcionaria-de-la-dgac/",
+    fecha: "2026-09-01",
+    titulo: "Gobierno pide renuncia a seremi de Transportes de Arica tras denuncia por presiones a funcionaria de la DGAC",
+  },
+  {
+    nivel: "prensa",
+    medio: "BioBioChile",
+    url: "https://www.biobiochile.cl/noticias/nacional/region-de-arica-y-parinacota/2026/09/01/gobierno-pide-renuncia-a-seremi-de-transportes-de-arica-tras-denuncia-por-presiones-en-aeropuerto.shtml",
+    fecha: "2026-09-01",
+    titulo: "Gobierno pide la renuncia al seremi de Transportes de Arica por presuntas presiones",
+  },
+  {
+    nivel: "prensa",
+    medio: "Emol",
+    url: "https://www.emol.com/noticias/Nacional/2026/09/02/1210280/renuncia-seremi-transportes-de-arica.html",
+    fecha: "2026-09-02",
+    titulo: "Van 34: Renuncia seremi de Transportes de Arica tras acusaciones de conflicto de interés",
   },
 ]);
 

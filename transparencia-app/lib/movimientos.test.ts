@@ -89,6 +89,11 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
     expect(movimientosPageSource).toContain("Copiar enlace");
   });
 
+  it("4b. Explica la diferencia entre fecha efectiva y fecha de publicación de la fuente", () => {
+    expect(movimientosPageSource).toContain("Fecha del evento");
+    expect(movimientosPageSource).toContain("fecha de publicación");
+  });
+
   it("5. Días en el cargo calculado para autoridades salientes con origen", () => {
     const withDays = MOVIMIENTOS.filter((m) => m.dias_en_cargo !== undefined && m.dias_en_cargo !== null);
     expect(withDays.length).toBeGreaterThanOrEqual(10);
