@@ -1530,11 +1530,31 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
     r2Json<{ sources?: Record<string, JsonRecord> }>(env.PUBLIC_DATA, "projections/sources-v1/source-health.json"),
   ]);
   if (!inventory?.sources?.length && !health?.sources) return null;
-  const inventoryById = new Map((inventory?.sources ?? []).map((source) => [String(source.id), source]));
-  const ids = [...new Set([
-    ...(inventory?.sources ?? []).map((source) => String(source.id)),
-    ...Object.keys(health?.sources ?? {}),
-  ])].sort();
+  // El inventario histórico conserva dos identificadores que ya no deben
+  // aparecer como fuentes separadas: `ley19862` es el alias antiguo de
+  // `ley-19862`, y `transparencia-activa` es un catálogo legado del portal
+  // que no tiene un release publicado en el lake. Si se dejan pasar ambos,
+  // la landing muestra 13 fuentes y dos estados "sin conexión" aunque el
+  // universo publicado sea el de 12 fuentes con datos.
+  const canonicalSourceId = (value: string) => {
+    if (value === "ley19862") return "ley-19862";
+    return value;
+  };
+  const legacyInventoryIds = new Set(["transparencia-activa"]);
+  const inventoryById = new Map<string, JsonRecord>();
+  for (const source of inventory?.sources ?? []) {
+    const rawId = String(source.id ?? "");
+    if (!rawId || legacyInventoryIds.has(rawId)) continue;
+    const id = canonicalSourceId(rawId);
+    inventoryById.set(id, { ...(inventoryById.get(id) ?? {}), ...source, id });
+  }
+  const healthById = new Map<string, JsonRecord>();
+  for (const [rawId, state] of Object.entries(health?.sources ?? {})) {
+    if (legacyInventoryIds.has(rawId)) continue;
+    const id = canonicalSourceId(rawId);
+    healthById.set(id, { ...(healthById.get(id) ?? {}), ...state });
+  }
+  const ids = [...new Set([...inventoryById.keys(), ...healthById.keys()])].sort();
   const labels: Record<string, string> = {
     camara: "Cámara", chilecompra: "ChileCompra OCDS", cplt: "Transparencia Activa CPLT",
     contraloria: "Contraloría General", dipres: "DIPRES", ine: "INE Censo 2024",
@@ -1543,7 +1563,7 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
   };
   const data = ids.map((id) => {
     const source = inventoryById.get(id) ?? {};
-    const state = health?.sources?.[id] ?? {};
+    const state = healthById.get(id) ?? {};
     const recordCount = Number(state.recordCount ?? source.recordCount ?? 0);
     const stateStatus = String(state.status ?? source.status ?? "unavailable");
     return {

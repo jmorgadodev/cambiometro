@@ -649,6 +649,48 @@ describe("API canónica v1", () => {
     expect(payload.data[0]).toMatchObject({ id: "camara", recordCount: 19025, status: "connected" });
   });
 
+  it("normaliza alias históricos y no publica catálogos legados como fuentes sin datos", async () => {
+    const prepare = vi.fn(() => {
+      throw new Error("D1 no debe consultarse para normalizar el inventario R2");
+    });
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/sources-v1/source-inventory.json") {
+          return {
+            json: async <T>() => ({
+              sources: [
+                { id: "ley-19862", label: "Registro Ley 19.862" },
+                { id: "transparencia-activa", label: "Portal de Transparencia" },
+              ],
+            }) as T,
+          };
+        }
+        if (key === "projections/sources-v1/source-health.json") {
+          return {
+            json: async <T>() => ({
+              sources: {
+                ley19862: { recordCount: 59912, status: "partial", generatedAt: "2026-09-02T00:00:00.000Z" },
+                "transparencia-activa": { recordCount: 0, status: "partial" },
+              },
+            }) as T,
+          };
+        }
+        return null;
+      },
+    };
+
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/sources"),
+      { DB: { prepare }, PUBLIC_DATA } as never,
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toHaveLength(1);
+    expect(payload.data[0]).toMatchObject({ id: "ley-19862", recordCount: 59912, status: "connected" });
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
   it("filtra y pagina registros con un enlace next reproducible", async () => {
     const response = await fetchApi("https://example.test/api/v1/records?source=camara&kind=vote&limit=2");
     const payload = await response.json();
