@@ -41,5 +41,16 @@ diarios y de almacenamiento del plan.
 5. `health` informa `transferD1`, `d1TransferRows`, `d1ReleaseChecksum`,
    `d1Consistent` y `transferSource`. R2 sigue siendo el fallback seguro.
 
+### Reparación sin reingerir el origen
+
+Si la base dedicada queda vacía o desfasada, no se debe ejecutar de nuevo el
+ETL oficial ni reconstruir desde particiones históricas locales. El workflow
+manual `.github/workflows/repair-transfer-d1.yml` descarga el manifest y las
+páginas del release canónico de R2, valida el checksum y materializa exactamente
+ese release en `cambiometro-transferencias`. Exige escribir
+`REPAIR_TRANSFER_D1`, pasa primero por el preflight de cuota y falla si la
+métrica no está disponible o supera el 60%; en ambos casos R2 continúa siendo
+la fuente pública y no se realiza una escritura parcial.
+
 No se guardan UUIDs ni configuraciones generadas con secretos en el repositorio.
 Los archivos temporales se crean en el runner y están excluidos por `.gitignore`.
