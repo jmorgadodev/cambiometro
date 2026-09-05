@@ -63,6 +63,10 @@ jobs:
           MOVIMIENTOS_RUN_REPORT: data/generated/movimientos-run.json
           MOVIMIENTOS_INPUT: data/movimientos.previous.json
           MOVIMIENTOS_PROVISIONAL_SOURCES: ${{ vars.MOVIMIENTOS_PROVISIONAL_SOURCES }}
+          # Prensa Presidencia entrega una cadena TLS que Node no resuelve con
+          # su bundle aislado. Usar el almacén CA del runner conserva la
+          # validación del certificado y evita marcar la fuente como caída.
+          NODE_USE_SYSTEM_CA: "1"
         run: npm run etl:movimientos
 
       - name: Validar snapshot y publicar grupo estático
