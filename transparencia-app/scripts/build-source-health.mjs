@@ -25,6 +25,10 @@ const health = {
     infolobby: { recordCount: count("infolobby"), status: source.get("infolobby")?.status ?? "partial", generatedAt: catalog.generatedAt },
     infoprobidad: { recordCount: count("infoprobidad"), status: source.get("infoprobidad")?.status ?? "partial", generatedAt: catalog.generatedAt },
     sinim: { recordCount: count("sinim"), coverageCount: sinim.total, coverageUniverse: municipalities.length, status: source.get("sinim")?.status ?? "partial", generatedAt: sinim.generatedAt },
+    // El Censo 2024 se materializa en las fichas comunales, no como una
+    // partición del lago. Debe seguir figurando en el catálogo operativo para
+    // que la API, la landing y el dashboard de calidad compartan el universo.
+    ine: { recordCount: municipalities.length, coverageCount: municipalities.length, coverageUniverse: municipalities.length, status: "complete", generatedAt: catalog.generatedAt },
     contraloria: { recordCount: count("contraloria"), status: source.get("contraloria")?.status ?? "partial", generatedAt: catalog.generatedAt },
     camara: { recordCount: count("camara", "gastos_camara"), status: "partial", generatedAt: catalog.generatedAt },
     senado: { recordCount: count("senado", "gastos_senado", "votaciones_senado"), status: "partial", generatedAt: catalog.generatedAt },
@@ -32,7 +36,12 @@ const health = {
   },
 };
 
+const healthSourceCount = Object.keys(health.sources).length;
+if (healthSourceCount < 12 || health.sources.ine.recordCount !== municipalities.length) {
+  throw new Error(`SOURCE_HEALTH_INCOMPLETE: expected at least 12 sources including INE, got ${healthSourceCount}`);
+}
+
 const output = join(root, "data", "etl", "source-health.json");
 mkdirSync(dirname(output), { recursive: true });
 writeFileSync(output, `${JSON.stringify(health, null, 2)}\n`, "utf8");
-console.log(JSON.stringify({ output, generatedAt, sources: Object.keys(health.sources).length }, null, 2));
+console.log(JSON.stringify({ output, generatedAt, sources: healthSourceCount }, null, 2));
