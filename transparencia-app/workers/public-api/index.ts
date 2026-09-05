@@ -100,22 +100,35 @@ async function cachedPublicGet(request: Request, producer: () => Promise<Respons
   // está disponible en un test o entorno local, se conserva el comportamiento
   // normal sin alterar el contrato.
   let cache: Cache;
+  const marked = (response: Response, status: string) => {
+    const copy = new Response(response.body, response);
+    copy.headers.set("X-Cambiometro-Cache", status);
+    return copy;
+  };
   try {
     cache = (caches as CacheStorage & { default: Cache }).default;
   } catch {
-    return producer();
+    return marked(await producer(), "BYPASS");
   }
   try {
     const cached = await cache.match(request);
-    if (cached) return cached;
+    if (cached) return marked(cached, "HIT");
   } catch {
-    return producer();
+    return marked(await producer(), "BYPASS");
   }
   const response = await producer();
   if (response.ok) {
-    try { await cache.put(request, response.clone()); } catch { /* cache opcional */ }
+    try {
+      const stored = response.clone();
+      // Cache API does not support stale-while-revalidate/stale-if-error.
+      // Store a supported TTL and expose hits so production can prove reuse.
+      stored.headers.set("Cache-Control", "public, max-age=30, s-maxage=300");
+      await cache.put(request, stored);
+    } catch {
+      return marked(response, "BYPASS");
+    }
   }
-  return response;
+  return marked(response, "MISS");
 }
 
 interface TransferApiPage {
@@ -1619,7 +1632,7 @@ export default {
     }
     if (path === "/api/directorio" || path === "/api/v1/entities") {
       const limited = await rateLimit(request, env, "entities");
-      return limited ?? listEntities(url, env);
+      return limited ?? cachedPublicGet(request, () => listEntities(url, env));
     }
     if (path === "/api/v1/records") {
       const limited = await rateLimit(request, env, "records");
