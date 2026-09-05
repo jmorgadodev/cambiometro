@@ -37,6 +37,15 @@ export const MOVIMIENTOS_SOURCES = Object.freeze([
   },
 ]);
 
+// gob.cl sometimes applies its edge policy differently to the news path and
+// the public home page. Keep recovery limited to the same official host; a
+// failure of every URL remains visible in source_health.
+const GOB_CL_URL_VARIANTS = Object.freeze([
+  "https://www.gob.cl/",
+  "https://www.gob.cl/noticias/?p=1",
+  "https://www.gob.cl/noticias/?page=1",
+]);
+
 const MOVEMENT_KEYWORDS = /\b(renuncia|renunció|renuncio|nombramiento|nombra|designa|designación|asume|asumió|remueve|remoción|decreto|subrogante|cambio de gabinete|salida de)\b/i;
 
 const normalizeSignalText = (value) => String(value ?? "")
@@ -162,6 +171,11 @@ function readHtmlArticleDate(body) {
     || "";
   const match = String(raw).match(/\d{4}-\d{2}-\d{2}/);
   return match?.[0] ?? null;
+}
+
+function sourceUrls(source) {
+  if (source.id !== "gob-cl") return [source.url];
+  return [...new Set([source.url, ...GOB_CL_URL_VARIANTS])];
 }
 
 function normalizeUrl(href, baseUrl) {
@@ -297,32 +311,35 @@ async function fetchPrensaWithSystemCurl(source, timeoutMs) {
 export async function fetchSource(source, { fetchImpl = fetch, retries = 2, timeoutMs = 20_000 } = {}) {
   let lastError;
   for (let attempt = 0; attempt <= retries; attempt += 1) {
-    try {
-      const response = await fetchImpl(source.url, {
-        headers: {
-          Accept: "text/html,application/xhtml+xml,application/json,application/xml;q=0.9,*/*;q=0.8",
-          "User-Agent": "El-Cambiometro-MovimientosETL/1.0 (+https://cambiometro.impulsacv.cl/fuentes)",
-        },
-        signal: AbortSignal.timeout(timeoutMs),
-      });
-      const body = await response.text();
-      if (!response.ok) throw new Error(`HTTP_${response.status}`);
-      if (body.length < 128) throw new Error("SOURCE_BODY_TOO_SHORT");
-      if (/cf-chl-|challenge-platform|just a moment\.\.\.|enable javascript and cookies/i.test(body)) {
-        throw new Error("SOURCE_CHALLENGE_PAGE");
+    for (const url of sourceUrls(source)) {
+      try {
+        const response = await fetchImpl(url, {
+          headers: {
+            Accept: "text/html,application/xhtml+xml,application/json,application/xml;q=0.9,*/*;q=0.8",
+            "User-Agent": "El-Cambiometro-MovimientosETL/1.0 (+https://cambiometro.impulsacv.cl/fuentes)",
+          },
+          signal: AbortSignal.timeout(timeoutMs),
+        });
+        const body = await response.text();
+        if (!response.ok) throw new Error(`HTTP_${response.status}`);
+        if (body.length < 128) throw new Error("SOURCE_BODY_TOO_SHORT");
+        if (/cf-chl-|challenge-platform|just a moment\.\.\.|enable javascript and cookies/i.test(body)) {
+          throw new Error("SOURCE_CHALLENGE_PAGE");
+        }
+        return {
+          ...source,
+          ok: true,
+          status: response.status,
+          bytes: Buffer.byteLength(body),
+          fetchedAt: new Date().toISOString(),
+          resolved_url: url === source.url ? undefined : url,
+          signals: parseMovementSignals(body, { ...source, url, contentType: response.headers.get("content-type") ?? "" }),
+        };
+      } catch (error) {
+        lastError = error;
       }
-      return {
-        ...source,
-        ok: true,
-        status: response.status,
-        bytes: Buffer.byteLength(body),
-        fetchedAt: new Date().toISOString(),
-        signals: parseMovementSignals(body, { ...source, contentType: response.headers.get("content-type") ?? "" }),
-      };
-    } catch (error) {
-      lastError = error;
-      if (attempt < retries) await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
     }
+    if (attempt < retries) await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
   }
   // Keep the workaround narrow: only the known official endpoint with the
   // broken chain gets the system-curl fallback, and only for real production
