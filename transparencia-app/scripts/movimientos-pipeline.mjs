@@ -1,4 +1,8 @@
 import { createHash } from "node:crypto";
+import { execFile } from "node:child_process";
+import { promisify } from "node:util";
+
+const execFileAsync = promisify(execFile);
 
 export const MOVIMIENTOS_SOURCES = Object.freeze([
   {
@@ -246,6 +250,50 @@ export function parseMovementSignals(body, source) {
   }));
 }
 
+/**
+ * Prensa Presidencia occasionally serves a certificate chain that Node's
+ * bundled CA cannot build on GitHub-hosted runners. Use the runner's curl
+ * (which validates certificates against the operating-system trust store) as
+ * a narrow fallback for this one official source. This does not disable TLS
+ * verification and is intentionally not used for arbitrary URLs.
+ */
+async function fetchPrensaWithSystemCurl(source, timeoutMs) {
+  const { stdout } = await execFileAsync("curl", [
+    "--silent",
+    "--show-error",
+    "--location",
+    "--max-time",
+    String(Math.max(1, Math.ceil(timeoutMs / 1000))),
+    "--user-agent",
+    "El-Cambiometro-MovimientosETL/1.0 (+https://cambiometro.impulsacv.cl/fuentes)",
+    "--write-out",
+    "\n__CAMBIOMETRO_STATUS__:%{http_code}\n__CAMBIOMETRO_TYPE__:%{content_type}\n",
+    source.url,
+  ], { maxBuffer: 4 * 1024 * 1024, windowsHide: true });
+  const statusMarker = "\n__CAMBIOMETRO_STATUS__:";
+  const typeMarker = "\n__CAMBIOMETRO_TYPE__:";
+  const statusIndex = stdout.lastIndexOf(statusMarker);
+  const typeIndex = stdout.lastIndexOf(typeMarker);
+  if (statusIndex < 0 || typeIndex < 0 || typeIndex < statusIndex) throw new Error("CURL_RESPONSE_METADATA_MISSING");
+  const body = stdout.slice(0, statusIndex);
+  const status = Number.parseInt(stdout.slice(statusIndex + statusMarker.length, typeIndex).trim(), 10);
+  const contentType = stdout.slice(typeIndex + typeMarker.length).trim();
+  if (!Number.isInteger(status)) throw new Error("CURL_STATUS_INVALID");
+  if (status < 200 || status >= 300) throw new Error(`HTTP_${status}`);
+  if (body.length < 128) throw new Error("SOURCE_BODY_TOO_SHORT");
+  if (/cf-chl-|challenge-platform|just a moment\.\.\.|enable javascript and cookies/i.test(body)) {
+    throw new Error("SOURCE_CHALLENGE_PAGE");
+  }
+  return {
+    ...source,
+    ok: true,
+    status,
+    bytes: Buffer.byteLength(body),
+    fetchedAt: new Date().toISOString(),
+    signals: parseMovementSignals(body, { ...source, contentType }),
+  };
+}
+
 export async function fetchSource(source, { fetchImpl = fetch, retries = 2, timeoutMs = 20_000 } = {}) {
   let lastError;
   for (let attempt = 0; attempt <= retries; attempt += 1) {
@@ -274,6 +322,16 @@ export async function fetchSource(source, { fetchImpl = fetch, retries = 2, time
     } catch (error) {
       lastError = error;
       if (attempt < retries) await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
+    }
+  }
+  // Keep the workaround narrow: only the known official endpoint with the
+  // broken chain gets the system-curl fallback, and only for real production
+  // fetches. Tests that inject fetchImpl remain deterministic.
+  if (source.id === "prensa-presidencia" && fetchImpl === globalThis.fetch) {
+    try {
+      return await fetchPrensaWithSystemCurl(source, timeoutMs);
+    } catch (error) {
+      lastError = error;
     }
   }
   return {
