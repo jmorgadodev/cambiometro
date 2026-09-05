@@ -14,8 +14,8 @@ si falla una validación, se conserva la publicación anterior.
 
 - ETL Movimientos: run `33977700697`, `success`.
 - Refresco y publicación Pages: run `33977739174`, `success`, 5m32s.
-- Pages deployment: `ad28b34d-7846-4240-ae83-a343ec010f19`.
-- Preview del deployment: <https://ad28b34d.cambiometro.pages.dev>.
+- Pages deployment vigente: `bb61b5e8-2a77-4a5a-ba68-dee6286eb4a0`.
+- Preview del deployment: <https://bb61b5e8.cambiometro.pages.dev>.
 - Dominio: <https://cambiometro.impulsacv.cl>.
 - Worker productivo: `291bab62-d89d-426f-b1e5-3d1cb9c92e76`, promovido al 100%
   por el workflow `33982168319`.
@@ -42,12 +42,13 @@ como confirmados oficialmente.
 
 - `npm run verify:prod:movimientos`: todos los checks verdes; sin spinner ni
   errores de navegador.
-- `verify-prod-full.mjs` posterior a la promoción del Worker: `127/127`, sin
-  fallos.
-- `verify-prod-full.mjs` con navegador, CSP, consentimiento y temas: `134/134`,
+- `verify-prod-full.mjs` posterior a la promoción del Worker: `136/136`, sin
+  fallos. El guard de GA4 acepta el evento observado por red o el evento
+  `page_view` en `dataLayer`, sin relajar el consentimiento ni la detección de
+  duplicados.
+- `verify-prod-full.mjs` con navegador, CSP, consentimiento y temas: `136/136`,
   sin fallos; GA4 sólo se carga tras aceptar consentimiento, no se duplica y
-  registra un `page_view` por ruta navegada. Versión reportada por el verificador:
-  `v1.0-a3671a16`.
+  registra un `page_view` para home y otro para la navegación a Movimientos.
 - `npm run smoke:uptime`: `12/12` rutas HTTP 200, incluyendo home, listados,
   ficha, `/movimientos` y endpoints del Worker.
 - `/api/v1/relations` y `/api/v1/crosses` anclados a una entidad: HTTP 200,
@@ -58,8 +59,11 @@ como confirmados oficialmente.
 
 ## Fuentes pendientes
 
-La API pública de fuentes reporta las 11 fuentes del catálogo como conectadas y
-con datos publicados en el lake. Dentro del ETL específico de Movimientos hay
+La API pública de fuentes reporta las 12 fuentes del catálogo como conectadas y
+con datos publicados en el lake: Cámara, ChileCompra, Contraloría, CPLT,
+DIPRES, INE Censo 2024, InfoLobby, InfoProbidad, Ley 19.862, Senado, SERVEL
+y SINIM. La etiqueta `Cobertura parcial declarada` describe el alcance del
+snapshot, no una conexión caída. Dentro del ETL específico de Movimientos hay
 un conector con incidencia no bloqueante:
 
 - `gob.cl`: HTTP 403 desde el runner de GitHub; también se probaron variantes
@@ -70,7 +74,15 @@ un conector con incidencia no bloqueante:
 Ley Chile, Diario Oficial, Mindep, Prensa Presidencia, Radio Paulina y Emol están
 disponibles en el snapshot actual. `gob.cl` queda visible como 403 del runner de
 GitHub; no se desactiva su protección ni se publica un snapshot vacío o parcial
-como si fuera exitoso.
+como si fuera exitoso. El endpoint de fuentes sigue respondiendo 12/12
+`connected` porque el catálogo publicado está disponible; el detalle de salud
+del ETL conserva el 403 para diagnóstico.
+
+La página `/movimientos/` muestra ambas referencias para evitar confundirlas:
+última ejecución exitosa `05-09-2026 12:23` (Chile) y último evento `02-09-2026`.
+Alonso Velásquez y Patricio Löhr están publicados como `en_confirmacion`, con
+sus fuentes y fecha de evento; no se promueven a oficiales hasta encontrar el
+acto administrativo correspondiente.
 
 ## D1 y costo
 
@@ -86,7 +98,7 @@ ninguna materialización D1 manual.
 ## Rollback
 
 ```bash
-npm run pages:rollback -- ad28b34d-7846-4240-ae83-a343ec010f19
+npm run pages:rollback -- bb61b5e8-2a77-4a5a-ba68-dee6286eb4a0
 
 npx wrangler rollback 291bab62-d89d-426f-b1e5-3d1cb9c92e76 \
   --name cambiometro-public-api
