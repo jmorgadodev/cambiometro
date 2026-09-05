@@ -12,21 +12,21 @@ si falla una validación, se conserva la publicación anterior.
 
 ## Evidencia de la ejecución
 
-- ETL Movimientos: run `33971936836`, `success`, 43 s.
-- Refresco y publicación Pages: run `33971973943`, `success`, 5m29s.
-- Pages deployment: `562aaa89-cd1e-49e3-8700-5569930ef6f2`.
-- Preview del deployment: <https://562aaa89.cambiometro.pages.dev>.
+- ETL Movimientos: run `33975348933`, `success`, 33 s.
+- Refresco y publicación Pages: run `33975381944`, `success`, 5m32s.
+- Pages deployment: `e70fc84b-498c-4211-bfab-bcfb7d4791b2`.
+- Preview del deployment: <https://e70fc84b.cambiometro.pages.dev>.
 - Dominio: <https://cambiometro.impulsacv.cl>.
 - Worker productivo sin cambios: `5e091180-d59b-4a72-8618-10b8898e5a98`.
-- Guardia ETL: run `33971973944`, `success`; esperó 17 intentos hasta que
-  Pages estuvo visible y eliminó el falso negativo anterior.
+- Guardia ETL: run `33975381928`, `success`; confirmó la publicación automática
+  posterior al ETL.
 
 ## Datos visibles
 
 - `data/movimientos.json`: HTTP 200, 82 registros.
-- `last_success_at`: `2026-09-05T14:29:22.159Z`.
+- `last_success_at`: `2026-09-05T15:37:31.418Z`.
 - `last_event_date`: `2026-09-02`.
-- Checksum: `3195d6005d831c0b38f56b2f108a559128afb8ff92fc977006753f534303dc14`.
+- Checksum: `64771806b4f1fcb444c4975f123112e9ed22f4f9cccafe5eed198f61de26a4ce`.
 - Alonso Velásquez: evento 2-sep; Radio Paulina 3-sep y declaración oficial
   MINVU 2-sep; estado `en_confirmacion` hasta contar con acto administrativo.
 - Patricio Löhr: evento 1-sep; Emol 2-sep; estado `en_confirmacion` hasta contar
@@ -49,14 +49,16 @@ como confirmados oficialmente.
 
 La API pública de fuentes reporta las 11 fuentes del catálogo como conectadas y
 con datos publicados en el lake. Dentro del ETL específico de Movimientos hay
-dos conectores con incidencia no bloqueante:
+un conector con incidencia no bloqueante:
 
 - `gob.cl`: HTTP 403 temporal.
-- Prensa Presidencia: fallo de fetch.
+- Prensa Presidencia: HTTP 200 después de agregar el intermedio público Sectigo
+  que el servidor no entrega.
 
-Ley Chile, Diario Oficial, Mindep, Radio Paulina y Emol están disponibles en el
-snapshot actual. Las incidencias quedan visibles en `source_health`; no se
-publica un snapshot vacío o parcial como si fuera exitoso.
+Ley Chile, Diario Oficial, Mindep, Prensa Presidencia, Radio Paulina y Emol están
+disponibles en el snapshot actual. `gob.cl` queda visible como 403 del runner de
+GitHub; no se desactiva su protección ni se publica un snapshot vacío o parcial
+como si fuera exitoso.
 
 ## D1 y costo
 
