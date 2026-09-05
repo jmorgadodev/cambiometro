@@ -40,3 +40,31 @@ No se recomienda actualizar el plan Workers para resolver esta alerta. La
 operación permanece dentro del nivel gratuito si los ETL de baja frecuencia
 materializan sólo cambios y las lecturas públicas siguen el camino R2-first.
 
+## Actualización posterior — Worker promovido y guardia por fuente
+
+El PR que evitó el `COUNT(*)` completo para consultas paginadas por una sola
+fuente pasó todos los checks y se integró en `main` como `c5e27d1`. La versión
+`ec5d1cce-d02b-4ff4-8f69-3c6a6f66a8b0` se promovió al 100% mediante el workflow
+`33993243005`; rollback exacto:
+
+```bash
+npx wrangler rollback ec5d1cce-d02b-4ff4-8f69-3c6a6f66a8b0 \
+  --name cambiometro-public-api
+```
+
+La nueva ruta usa `source_state.record_count` y una sola página de `records`
+para `source=...`, sin cambiar la respuesta pública. El bundle medido es de
+165,87 KiB (30,58 KiB gzip), frente al límite de 1 MiB.
+
+La medición posterior (`usage-watch`, run `33993326516`) quedó en 5.877.827
+rows_read (117,56%) y 488 rows_written (0,49%). El exceso pertenece al ciclo
+ya consumido; no se puede corregir retroactivamente. La prueba de capacidad
+queda para el siguiente reinicio UTC: se debe repetir la consulta de fuente y
+observar que el crecimiento corresponda a la página solicitada, no al
+histórico completo.
+
+La auditoría productiva adicional confirmó 12 fuentes en estado `connected`
+desde el inventario R2. El endpoint de `records` para Cámara devolvió 200,
+pero mientras dura el agotamiento D1 declara `temporarily-unavailable`; no es
+un 5xx ni una pérdida del release. ChileCompra continuó respondiendo desde R2.
+
