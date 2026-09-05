@@ -49,6 +49,17 @@ assert(Array.isArray(payload.source_health) && payload.source_health.some((sourc
 assert(payload.movimientos.some((movement) => movement.estado === "en_confirmacion"), "estado en_confirmacion visible");
 assert(payload.movimientos.every((movement) => movement.id && movement.fuentes?.length), "todos los movimientos tienen ID y fuente");
 
+const alonso = payload.movimientos.find((movement) => movement.id === "mov-alonso-velasquez-2026-09-03");
+assert(alonso?.fecha === "2026-09-02", "Alonso conserva la fecha efectiva del evento (02-09-2026)");
+assert(alonso?.fuentes?.some((source) => source.medio === "Radio Paulina" && source.fecha === "2026-09-03"), "Alonso conserva la fecha de publicación de Radio Paulina (03-09-2026)");
+assert(alonso?.fuentes?.some((source) => source.nivel === "oficial"), "Alonso conserva referencia oficial MINVU");
+assert(alonso?.estado === "en_confirmacion" && alonso?.documento_pendiente === true, "Alonso no se presenta como oficial sin acto administrativo");
+
+const patricio = payload.movimientos.find((movement) => movement.id === "mov-patricio-lohr-2026-09-01");
+assert(patricio?.fecha === "2026-09-01", "Patricio conserva la fecha efectiva del evento (01-09-2026)");
+assert(patricio?.fuentes?.some((source) => source.medio === "Emol" && source.fecha === "2026-09-02"), "Patricio conserva la fecha de publicación de Emol (02-09-2026)");
+assert(patricio?.estado === "en_confirmacion" && patricio?.documento_pendiente === true, "Patricio no se presenta como oficial sin acto administrativo");
+
 console.log(JSON.stringify({
   ok: true,
   total: payload.movimientos.length,
