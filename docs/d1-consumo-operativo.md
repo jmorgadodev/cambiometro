@@ -19,6 +19,14 @@ de la respuesta y sus consultas D1. La copia almacenada usa una caducidad de
 300 segundos compatible con Cache API. Los errores no se almacenan.
 La caché es por centro de datos y URL; no equivale a una caché global.
 
+Desde el 5 de septiembre de 2026, `GET /api/v1/records` exige al menos un
+alcance (`source`, `kind`, `q`/`query`, `entity_id`, `from` o `to`). Una consulta
+sin filtros ejecutaba `COUNT(*)` y una página sobre todo el histórico; ya no se
+permite porque no la necesita la interfaz pública y podía consumir cientos de
+miles de `rows_read` por solicitud automatizada. Las consultas paginadas por
+fuente, incluidos los releases completos de R2 para ChileCompra, InfoLobby y
+Contraloría, mantienen el contrato de datos y siguen disponibles.
+
 ## Vigilancia automática
 
 `usage-watch.yml` consulta Analytics cada hora en el minuto 15 UTC, incluida

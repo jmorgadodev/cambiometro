@@ -278,16 +278,20 @@ describe("API canónica v1", () => {
     expect(matches[0].url).toBe("/politico/carlos-bianchi-chelech");
   });
 
-  it("no propaga un error 1101 cuando una consulta histórica agota D1", async () => {
+  it("no ejecuta un escaneo global de registros sin alcance", async () => {
+    const prepare = vi.fn(() => {
+      throw new Error("D1 no debe consultarse para un escaneo global");
+    });
     const env = {
-      DB: { prepare: () => { throw new Error("D1_ERROR: daily rows_read quota exceeded"); } },
+      DB: { prepare },
     } as never;
 
     const response = await api.fetch(new Request("https://example.test/api/v1/records?limit=1"), env);
     const payload = await response.json();
 
-    expect(response.status).toBe(503);
-    expect(payload).toMatchObject({ error: { code: "DATABASE_UNAVAILABLE" } });
+    expect(response.status).toBe(400);
+    expect(payload).toMatchObject({ error: { code: "RECORD_SCOPE_REQUIRED" } });
+    expect(prepare).not.toHaveBeenCalled();
   });
 
   it("filtra registros por las tablas normalizadas y no por LIKE sobre JSON", async () => {
