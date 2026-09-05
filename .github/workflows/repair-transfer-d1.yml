@@ -1,0 +1,139 @@
+name: Reparación D1 dedicada de transferencias (manual)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirmation:
+        description: "Escribe REPAIR_TRANSFER_D1 para autorizar la materialización"
+        required: true
+        type: string
+
+concurrency:
+  group: cambiometro-transfer-d1-repair
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    name: Materializar D1 desde release R2 canónico
+    if: inputs.confirmation == 'REPAIR_TRANSFER_D1'
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Instalar dependencias
+        working-directory: transparencia-app
+        run: npm ci
+
+      - name: Descargar únicamente el release canónico de R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          mkdir -p .ci-data-version
+          npx wrangler r2 object get \
+            transparencia-public-data/projections/transferencias-v1/manifest.json \
+            --file .ci-data-version/transfer-api-manifest.json --remote
+
+      - name: Hidratar páginas del release R2 sin consultar D1
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:hydrate:transfer-api
+
+      - name: Preflight de cuota D1
+        id: d1-quota
+        uses: ./.github/actions/d1-preflight
+        with:
+          threshold-percent: "60"
+          output: transparencia-app/d1-preflight.json
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+
+      - name: No continuar sin métrica de cuota válida
+        if: steps.d1-quota.outputs.proceed != 'true'
+        run: |
+          echo "D1 no está bajo el umbral seguro; R2 permanece como fuente canónica."
+          exit 1
+
+      - name: Resolver base D1 dedicada
+        id: transfer-d1
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          config="$RUNNER_TEMP/cambiometro-transfer-d1.jsonc"
+          node scripts/ensure-transfer-d1.mjs --create --output "$config"
+          echo "config=$config" >> "$GITHUB_OUTPUT"
+
+      - name: Materializar release exacto de R2 en D1
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          TRANSFER_D1_CONFIG: ${{ steps.transfer-d1.outputs.config }}
+        run: |
+          set -o pipefail
+          npm run data:materialize:transfer -- \
+            --database cambiometro-transferencias \
+            --config "$TRANSFER_D1_CONFIG" \
+            --release-manifest .ci-data-version/transfer-api-manifest.json \
+            --release-dir public/data/transferencias \
+            --batch-size 50 --skip-unchanged \
+            2>&1 | tee transfer-d1-repair.log
+
+      - name: Verificar health y coherencia D1/R2
+        env:
+          UPTIME_TOKEN: ${{ secrets.CAMBIOMETRO_UPTIME_TOKEN }}
+        run: |
+          set -euo pipefail
+          curl --fail --silent --show-error \
+            --header "X-Cambiometro-Uptime-Token: $UPTIME_TOKEN" \
+            "https://cambiometro.impulsacv.cl/api/v1/health?d1_repair=${GITHUB_RUN_ID}" \
+            > health-after-repair.json
+          node -e '
+            const fs = require("fs");
+            const payload = JSON.parse(fs.readFileSync("health-after-repair.json", "utf8")).data;
+            if (!payload?.ok || payload.transferD1 !== true || payload.d1Consistent !== true) {
+              throw new Error(`TRANSFER_D1_REPAIR_NOT_CONSISTENT:${JSON.stringify(payload)}`);
+            }
+            if (payload.d1TransferRows !== payload.transferRows) {
+              throw new Error(`TRANSFER_D1_REPAIR_ROW_MISMATCH:${payload.d1TransferRows}:${payload.transferRows}`);
+            }
+            console.log(JSON.stringify({
+              transferRows: payload.transferRows,
+              d1TransferRows: payload.d1TransferRows,
+              d1Consistent: payload.d1Consistent,
+              d1ReleaseChecksum: payload.d1ReleaseChecksum,
+            }, null, 2));
+          '
+
+      - name: Guardar evidencia de reparación
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: transfer-d1-repair-${{ github.run_id }}
+          path: |
+            transparencia-app/d1-preflight.json
+            transparencia-app/transfer-d1-repair.log
+            health-after-repair.json
+          if-no-files-found: ignore
+          retention-days: 30

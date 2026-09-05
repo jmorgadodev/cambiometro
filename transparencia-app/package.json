@@ -62,6 +62,7 @@
     "data:publish:transfer-api": "node scripts/publish-transferencias-api-release.mjs",
     "data:materialize:transfer": "node scripts/materialize-transferencias-d1.mjs",
     "data:hydrate:ley19862": "node scripts/hydrate-ley19862-from-r2.mjs",
+    "data:hydrate:transfer-api": "node scripts/hydrate-transfer-api-release.mjs",
     "data:publish:static": "node scripts/publish-static-site-inputs.mjs",
     "data:build:landing-summary": "node --experimental-strip-types scripts/build-landing-summary.mjs",
     "data:hydrate:static": "node scripts/hydrate-static-site-inputs.mjs",

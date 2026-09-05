@@ -21,9 +21,13 @@ function sha256(value) {
 }
 
 function runWrangler(args) {
-  const command = process.platform === "win32" ? "npx.cmd" : "npx";
+  // Calling npx.cmd with shell:false raises EINVAL on Windows. Invoke the
+  // checked-in Wrangler entrypoint through the current Node runtime instead;
+  // this is equivalent on CI and works for local release verification too.
+  const command = process.execPath;
+  const wranglerBin = resolve(root, "node_modules", "wrangler", "bin", "wrangler.js");
   return new Promise((resolvePromise, reject) => {
-    const child = spawn(command, ["wrangler", ...args, "--remote"], {
+    const child = spawn(command, [wranglerBin, ...args, "--remote"], {
       cwd: root,
       stdio: "ignore",
       shell: false,

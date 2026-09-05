@@ -11,7 +11,15 @@ describe("proyección D1 dedicada de transferencias", () => {
   it("acepta una configuración Wrangler dedicada sin cambiar el destino por defecto", () => {
     expect(script).toContain('argument("--config", "wrangler.d1.jsonc")');
     expect(script).toContain('argument("--database", "transparencia-db")');
+    expect(script).toContain('argument("--release-manifest", "")');
+    expect(script).toContain('argument("--release-dir", "")');
     expect(script).toContain("transferencias_19862_stage");
+  });
+
+  it("permite materializar el release canónico descargado desde R2", () => {
+    expect(script).toContain("TRANSFER_D1_RELEASE_MANIFEST_INVALID");
+    expect(script).toContain("releaseStaging");
+    expect(script).toContain("validateReleaseManifest(manifest)");
   });
 
   it("activa el release sólo después de construir el staging y escribir el marcador", () => {

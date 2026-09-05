@@ -19,6 +19,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       "etl-ley-19862.yml", "etl-movimientos.yml", "etl-personal-apoyo.yml", "etl-servel.yml",
       "etl-sinim.yml",
     ]);
+    const serializedMutations = new Set(["repair-transfer-d1.yml"]);
 
     for (const file of workflowFiles) {
       const content = fs.readFileSync(path.join(workflowsDir, file), "utf8");
@@ -26,6 +27,9 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       if (staticPublishers.has(file)) {
         expect(content, `El workflow ${file} debe compartir la cola de publicación estática`).toMatch(/group:\s*cambiometro-static-publication/);
         expect(content, `El workflow ${file} no debe cancelar otra publicación estática`).toMatch(/cancel-in-progress:\s*false/);
+      } else if (serializedMutations.has(file)) {
+        expect(content, `El workflow ${file} debe usar una cola propia`).toMatch(/group:\s*cambiometro-transfer-d1-repair/);
+        expect(content, `El workflow ${file} no debe cancelar una reparación D1 activa`).toMatch(/cancel-in-progress:\s*false/);
       } else {
         expect(content, `El workflow ${file} debe conservar cancel-in-progress: true`).toMatch(/cancel-in-progress:\s*true/);
       }

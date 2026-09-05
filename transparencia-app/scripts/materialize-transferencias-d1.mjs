@@ -16,6 +16,8 @@ import { shouldSkipTransferMaterialization } from "./etl/transfer-materializatio
 const root = resolve(import.meta.dirname, "..");
 const database = argument("--database", "transparencia-db");
 const wranglerConfig = resolve(root, argument("--config", "wrangler.d1.jsonc"));
+const releaseManifestFile = argument("--release-manifest", "");
+const releaseDirArgument = argument("--release-dir", "");
 const source = resolve(
   argument("--source", join(root, "data", "lake", "partitions", "ley-19862")),
 );
@@ -107,6 +109,19 @@ function releaseRows(staging, manifest) {
       `TRANSFER_D1_ROW_COUNT_INVALID:${rows.length}:${manifest.totalRows}`,
     );
   return rows;
+}
+
+function validateReleaseManifest(manifest) {
+  if (manifest?.schemaVersion !== 1 || manifest.dataset !== "ley-19862-transferencias")
+    throw new Error("TRANSFER_D1_RELEASE_MANIFEST_INVALID");
+  if (!Number.isSafeInteger(manifest.totalRows) || manifest.totalRows <= 0)
+    throw new Error("TRANSFER_D1_RELEASE_ROW_COUNT_INVALID");
+  if (!Array.isArray(manifest.pages) || manifest.pages.length !== manifest.totalPages)
+    throw new Error("TRANSFER_D1_RELEASE_PAGE_COUNT_INVALID");
+  if (!/^[a-f0-9]{64}$/i.test(manifest.checksumSha256 ?? ""))
+    throw new Error("TRANSFER_D1_RELEASE_CHECKSUM_MISSING");
+  if (!manifest.expected || !Number.isSafeInteger(manifest.expected.totalMontoClp))
+    throw new Error("TRANSFER_D1_RELEASE_TOTAL_MISSING");
 }
 
 function activeReleaseChecksum() {
@@ -213,16 +228,30 @@ INSERT INTO transferencias_19862_release (singleton,checksum_sha256,total_rows,t
 const work = mkdtempSync(join(tmpdir(), "cambiometro-transfer-d1-"));
 const staging = join(work, "release");
 try {
-  if (!existsSync(source))
-    throw new Error(`TRANSFER_D1_SOURCE_MISSING:${source}`);
-  const release = await buildTransferenciasStatic({ source, output: staging });
+  let release;
+  if (releaseManifestFile) {
+    const manifestPath = resolve(releaseManifestFile);
+    const releaseDir = resolve(releaseDirArgument || join(root, "public", "data", "transferencias"));
+    if (!existsSync(manifestPath))
+      throw new Error(`TRANSFER_D1_RELEASE_MANIFEST_MISSING:${manifestPath}`);
+    if (!existsSync(releaseDir))
+      throw new Error(`TRANSFER_D1_RELEASE_DIR_MISSING:${releaseDir}`);
+    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+    validateReleaseManifest(manifest);
+    release = { manifest, staging: releaseDir };
+  } else {
+    if (!existsSync(source))
+      throw new Error(`TRANSFER_D1_SOURCE_MISSING:${source}`);
+    release = await buildTransferenciasStatic({ source, output: staging });
+  }
   if (!release) throw new Error("TRANSFER_D1_RELEASE_EMPTY");
   const { manifest } = release;
+  const releaseStaging = release.staging ?? staging;
   assertCanonicalTransferRelease({
     totalRows: manifest.totalRows,
     totalMontoClp: manifest.expected.totalMontoClp,
   });
-  const rows = releaseRows(staging, manifest);
+  const rows = releaseRows(releaseStaging, manifest);
   const releaseChecksum = createHash("sha256")
     .update(rows.map((row) => JSON.stringify(row)).join("\n"))
     .digest("hex");
