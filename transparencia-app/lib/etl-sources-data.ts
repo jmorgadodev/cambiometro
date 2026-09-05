@@ -87,7 +87,7 @@ export const ETL_SOURCES_DATA: EtlSourceInfo[] = descriptors.map(({ health, ...d
     lastUpdated: generatedAt,
     lastUpdatedRelative: dateLabel(generatedAt),
     status: state?.status === "complete" ? "operational" : "official_lag",
-    statusText: state?.status === "complete" ? "Cobertura completa" : "Cobertura parcial declarada",
+    statusText: state?.status === "complete" ? "Cobertura completa" : "Conectada · cobertura parcial declarada",
   };
 });
 
