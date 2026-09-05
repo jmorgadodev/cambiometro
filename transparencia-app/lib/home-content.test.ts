@@ -2,6 +2,7 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { canonicalSourceId } from "./data-platform-d1";
+import { ETL_SOURCES_DATA } from "./etl-sources-data";
 
 describe("promesas editoriales del inicio", () => {
   const home = readFileSync(resolve(import.meta.dirname, "../app/page.tsx"), "utf8");
@@ -16,6 +17,10 @@ describe("promesas editoriales del inicio", () => {
     expect(home).toContain("GLOBAL_KPIS.votaciones");
     expect(home).toContain("GLOBAL_KPIS.gastos");
     expect(home).toContain("GLOBAL_KPIS.relaciones");
+  });
+
+  it("distingue una fuente conectada de una cobertura parcial", () => {
+    expect(ETL_SOURCES_DATA.some((source) => source.statusText === "Conectada · cobertura parcial declarada")).toBe(true);
   });
 
   it("agrupa datasets parlamentarios bajo su institucion", () => {
