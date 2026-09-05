@@ -10,8 +10,8 @@ on:
         required: false
 
 concurrency:
-  group: etl-cplt
-  cancel-in-progress: true
+  group: cambiometro-static-publication
+  cancel-in-progress: false
 
 jobs:
   cplt-source-check:

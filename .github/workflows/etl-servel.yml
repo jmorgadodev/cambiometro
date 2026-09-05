@@ -9,8 +9,8 @@ on:
         default: Elección o recalificación de candidaturas
 
 concurrency:
-  group: etl-servel
-  cancel-in-progress: true
+  group: cambiometro-static-publication
+  cancel-in-progress: false
 
 jobs:
   ingest-publish-materialize:

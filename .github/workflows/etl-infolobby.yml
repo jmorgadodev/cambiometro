@@ -13,8 +13,8 @@ on:
         required: false
 
 concurrency:
-  group: etl-infolobby
-  cancel-in-progress: true
+  group: cambiometro-static-publication
+  cancel-in-progress: false
 
 jobs:
   ingest-publish-materialize:

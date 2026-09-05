@@ -10,13 +10,25 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
 
   const workflowFiles = fs.readdirSync(workflowsDir).filter((f) => f.endsWith(".yml") || f.endsWith(".yaml"));
 
-  it("1. TODOS los workflows tienen concurrency con cancel-in-progress: true", () => {
+  it("1. TODOS los workflows tienen concurrency y serializan las publicaciones estáticas", () => {
     expect(workflowFiles.length).toBeGreaterThanOrEqual(10);
+
+    const staticPublishers = new Set([
+      "etl-chilecompra.yml", "etl-contraloria.yml", "etl-cplt.yml", "etl-daily.yml",
+      "etl-dipres.yml", "etl-expenses.yml", "etl-infolobby.yml", "etl-infoprobidad.yml",
+      "etl-ley-19862.yml", "etl-movimientos.yml", "etl-personal-apoyo.yml", "etl-servel.yml",
+      "etl-sinim.yml",
+    ]);
 
     for (const file of workflowFiles) {
       const content = fs.readFileSync(path.join(workflowsDir, file), "utf8");
       expect(content, `El workflow ${file} debe tener bloque concurrency`).toContain("concurrency:");
-      expect(content, `El workflow ${file} debe tener cancel-in-progress: true`).toMatch(/cancel-in-progress:\s*true/);
+      if (staticPublishers.has(file)) {
+        expect(content, `El workflow ${file} debe compartir la cola de publicación estática`).toMatch(/group:\s*cambiometro-static-publication/);
+        expect(content, `El workflow ${file} no debe cancelar otra publicación estática`).toMatch(/cancel-in-progress:\s*false/);
+      } else {
+        expect(content, `El workflow ${file} debe conservar cancel-in-progress: true`).toMatch(/cancel-in-progress:\s*true/);
+      }
     }
   });
 
