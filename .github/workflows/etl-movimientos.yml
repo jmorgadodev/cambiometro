@@ -6,8 +6,8 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: etl-movimientos
-  cancel-in-progress: true
+  group: cambiometro-static-publication
+  cancel-in-progress: false
 
 permissions:
   contents: read

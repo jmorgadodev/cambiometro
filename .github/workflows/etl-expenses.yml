@@ -12,8 +12,8 @@ on:
         default: false
 
 concurrency:
-  group: etl-expenses
-  cancel-in-progress: true
+  group: cambiometro-static-publication
+  cancel-in-progress: false
 
 permissions:
   contents: write

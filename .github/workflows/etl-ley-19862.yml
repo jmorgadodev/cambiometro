@@ -18,8 +18,8 @@ on:
         required: false
 
 concurrency:
-  group: etl-ley-19862
-  cancel-in-progress: true
+  group: cambiometro-static-publication
+  cancel-in-progress: false
 
 jobs:
   ingest-publish-materialize:
