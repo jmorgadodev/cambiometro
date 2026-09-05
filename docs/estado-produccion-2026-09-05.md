@@ -71,7 +71,7 @@ no se ejecutó ninguna materialización D1 ni se consumió el límite diario.
 ## Rollback
 
 ```bash
-npm run pages:rollback -- 562aaa89-cd1e-49e3-8700-5569930ef6f2
+npm run pages:rollback -- e70fc84b-498c-4211-bfab-bcfb7d4791b2
 
 npx wrangler rollback 5e091180-d59b-4a72-8618-10b8898e5a98 \
   --name cambiometro-public-api
