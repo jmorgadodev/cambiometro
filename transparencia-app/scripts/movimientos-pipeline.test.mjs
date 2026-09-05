@@ -161,6 +161,27 @@ describe("pipeline automático de movimientos", () => {
     expect(result.hasOfficialSource).toBe(false);
   });
 
+  it("usa sólo variantes oficiales de gob.cl cuando la ruta de noticias está bloqueada", async () => {
+    const requested = [];
+    const canonicalUrl = "https://www.gob.cl/noticias/";
+    const result = await collectMovementSources({
+      sources: [{ id: "gob-cl", label: "Gob.cl", tier: "official", url: canonicalUrl }],
+      retries: 0,
+      fetchImpl: async (url) => {
+        requested.push(url);
+        if (url === canonicalUrl) return new Response("blocked", { status: 403 });
+        return new Response(
+          `<html><a href="/noticia">Gobierno anuncia nombramiento de autoridad</a>${" ".repeat(128)}</html>`,
+          { status: 200, headers: { "content-type": "text/html" } },
+        );
+      },
+    });
+    expect(result.hasOfficialSource).toBe(true);
+    expect(result.results[0]).toMatchObject({ ok: true, status: 200, resolved_url: "https://www.gob.cl/" });
+    expect(requested).toEqual([canonicalUrl, "https://www.gob.cl/"]);
+    expect(result.signals).toHaveLength(1);
+  });
+
   it("actualiza metadata, preserva el baseline y genera checksum", () => {
     const payload = buildMovementPayload(baseline, {
       now: "2026-08-28T07:00:00.000Z",
