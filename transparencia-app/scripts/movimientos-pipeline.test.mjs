@@ -31,6 +31,19 @@ describe("pipeline automático de movimientos", () => {
     expect(signals[0].status).toBe("en_confirmacion");
   });
 
+  it("lee titulares, fecha y resumen de una página de noticia", () => {
+    const signals = parseMovementSignals(
+      '<html><head><meta property="og:title" content="Alonso Velásquez renuncia como seremi de Vivienda de Tarapacá"><meta property="article:published_time" content="2026-09-03T09:00:00-04:00"><meta name="description" content="El Ministerio de Vivienda informó la salida de la autoridad regional."></head></html>',
+      { url: "https://radio.example/noticia", contentType: "text/html" },
+    );
+    expect(signals).toHaveLength(1);
+    expect(signals[0]).toMatchObject({
+      title: "Alonso Velásquez renuncia como seremi de Vivienda de Tarapacá",
+      date: "2026-09-03",
+      summary: "El Ministerio de Vivienda informó la salida de la autoridad regional.",
+    });
+  });
+
   it("mantiene el estado provisional cuando no hay fuente oficial", () => {
     expect(calculateMovimientoEstado({ fuentes: [{ nivel: "prensa" }] })).toBe("en_confirmacion");
     expect(calculateMovimientoEstado({ fuentes: [{ nivel: "oficial" }] })).toBe("en_confirmacion");
@@ -59,6 +72,41 @@ describe("pipeline automático de movimientos", () => {
     expect(result[0].decreto_url).toBeUndefined();
     expect(result[1]).toMatchObject({ id: "mov-rios-deportes-2026-08-27", entrante: "María Paz Ríos Lama", estado: "en_confirmacion", documento_pendiente: true });
     expect(result[1].fuentes.some((source) => source.medio === "Prensa Presidencia")).toBe(true);
+  });
+
+  it("materializa señales periodísticas conocidas como anuncios en confirmación", () => {
+    const result = materializeKnownSignals([], [
+      {
+        title: "Alonso Velásquez renuncia como seremi de Vivienda de Tarapacá",
+        summary: "El Ministerio de Vivienda informó la salida de la autoridad regional.",
+        url: "https://radiopaulina.cl/2026/09/03/renuncia-seremi-vivienda-tarapaca/",
+        date: "2026-09-03",
+        source_label: "Radio Paulina",
+        source_tier: "provisional",
+      },
+      {
+        title: "Gobierno pide la renuncia a seremi de Transportes de Arica, Patricio Löhr",
+        summary: "La salida ocurrió tras una denuncia de funcionarios de la DGAC.",
+        url: "https://www.adnradio.cl/2026/09/01/gobierno-pide-renuncia-seremi-transportes-arica/",
+        date: "2026-09-01",
+        source_label: "ADN Radio",
+        source_tier: "provisional",
+      },
+    ], "2026-09-05T07:00:00.000Z");
+    expect(result).toHaveLength(2);
+    expect(result).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        id: "mov-alonso-velasquez-2026-09-03",
+        estado: "en_confirmacion",
+        fecha: "2026-09-03",
+      }),
+      expect.objectContaining({
+        id: "mov-patricio-lohr-2026-09-01",
+        estado: "en_confirmacion",
+        fecha: "2026-09-01",
+      }),
+    ]));
+    expect(result.every((movement) => movement.documento_pendiente)).toBe(true);
   });
 
   it("declara bloqueo cuando ninguna fuente oficial responde", async () => {

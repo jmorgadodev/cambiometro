@@ -42,6 +42,18 @@ No se guardan credenciales ni se agregan URLs de medios directamente al código:
 si una fuente no está configurada, el pipeline la reporta como ausente y no
 convierte titulares en hechos estructurados.
 
+La configuración operativa actual incorpora dos páginas de prensa para detectar
+anuncios recientes que todavía no tienen decreto publicado:
+
+- Radio Paulina: renuncia de Alonso Velásquez, Seremi de Vivienda de Tarapacá
+  (03-09-2026).
+- Emol: salida de Patricio Löhr, Seremi de Transportes de Arica y Parinacota
+  (02-09-2026; el evento se registra con fecha efectiva 01-09-2026).
+
+Estos enlaces sólo alimentan señales `en_confirmacion`; no convierten una nota
+de prensa en confirmación oficial ni reemplazan la consulta diaria de Ley
+Chile y Diario Oficial.
+
 ## Política incremental y cuota D1
 
 Los procesos diarios de votaciones consultan sólo una ventana reciente con
