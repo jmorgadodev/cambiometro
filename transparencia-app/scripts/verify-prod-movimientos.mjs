@@ -2,13 +2,15 @@
 const base = (process.env.PROD_URL || "https://cambiometro.impulsacv.cl").replace(/\/$/, "");
 const headers = { "User-Agent": "Cambiometro-MovimientosVerifier/2.0", "Cache-Control": "no-cache" };
 if (process.env.UPTIME_TOKEN) headers["X-Cambiometro-Uptime-Token"] = process.env.UPTIME_TOKEN;
+const cacheBust = `verify=${Date.now()}`;
+const productionUrl = (path) => `${base}${path}${path.includes("?") ? "&" : "?"}${cacheBust}`;
 
 function assert(condition, message) {
   if (!condition) throw new Error(`MOVIMIENTOS_VERIFY_FAILED:${message}`);
   console.log(`✅ ${message}`);
 }
 
-const page = await fetch(`${base}/movimientos/`, { headers, signal: AbortSignal.timeout(15_000) });
+const page = await fetch(productionUrl("/movimientos/"), { headers, signal: AbortSignal.timeout(15_000) });
 assert(page.status === 200, `/movimientos responde ${page.status}`);
 const pageHtml = await page.text();
 assert(pageHtml.includes("Movimientos y Relevos de Autoridades"), "la página contiene el encabezado de Movimientos");
@@ -26,7 +28,7 @@ try {
     if (message.type() === "error") browserErrors.push(message.text());
   });
   browserPage.on("pageerror", (error) => browserErrors.push(error.message));
-  await browserPage.goto(`${base}/movimientos/`, { waitUntil: "networkidle", timeout: 30_000 });
+  await browserPage.goto(productionUrl("/movimientos/"), { waitUntil: "networkidle", timeout: 30_000 });
   const hydratedText = await browserPage.locator("body").innerText();
   assert(hydratedText.includes("Movimientos y Relevos de Autoridades"), "el encabezado aparece tras hidratar");
   assert(!hydratedText.includes("Cargando catálogo") && !hydratedText.includes("Cargando contenido..."), "la página hidratada no deja un spinner");
@@ -36,7 +38,7 @@ try {
   await browser.close();
 }
 
-const snapshot = await fetch(`${base}/data/movimientos.json`, { headers, signal: AbortSignal.timeout(15_000) });
+const snapshot = await fetch(productionUrl("/data/movimientos.json"), { headers, signal: AbortSignal.timeout(15_000) });
 assert(snapshot.status === 200, "/data/movimientos.json responde 200");
 const payload = await snapshot.json();
 assert(payload.pipeline === "etl_movimientos_autoridades", "el snapshot identifica el pipeline correcto");
