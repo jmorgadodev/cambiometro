@@ -27,6 +27,21 @@ miles de `rows_read` por solicitud automatizada. Las consultas paginadas por
 fuente, incluidos los releases completos de R2 para ChileCompra, InfoLobby y
 Contraloría, mantienen el contrato de datos y siguen disponibles.
 
+La misma optimización quedó publicada en el Worker `c5e27d1` el 5 de
+septiembre de 2026. Cuando una consulta sólo lleva `source`, el total se toma
+de `source_state.record_count` y la tabla `records` sólo recibe la página
+solicitada. Los filtros adicionales (`kind`, texto, entidad o fechas) siguen
+usando un conteo exacto porque el contador de publicación no puede representar
+ese subconjunto. La versión productiva es `ec5d1cce-d02b-4ff4-8f69-3c6a6f66a8b0`
+y mide 165,87 KiB sin comprimir (30,58 KiB gzip).
+
+La comprobación del 5 de septiembre todavía observó 5.877.827/5.000.000
+rows_read (117,56%): corresponde al consumo acumulado antes de que esta
+versión quedara activa y no se puede borrar retroactivamente. La validación
+definitiva es la medición posterior al próximo reinicio UTC; mientras tanto,
+las respuestas con D1 agotada degradan de forma explícita y no publican datos
+inventados.
+
 ## Vigilancia automática
 
 `usage-watch.yml` consulta Analytics cada hora en el minuto 15 UTC, incluida
