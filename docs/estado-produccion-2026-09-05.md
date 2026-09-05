@@ -14,8 +14,8 @@ si falla una validación, se conserva la publicación anterior.
 
 - ETL Movimientos: run `33977700697`, `success`.
 - Refresco y publicación Pages: run `33977739174`, `success`, 5m32s.
-- Pages deployment vigente: `bb61b5e8-2a77-4a5a-ba68-dee6286eb4a0`.
-- Preview del deployment: <https://bb61b5e8.cambiometro.pages.dev>.
+- Pages deployment vigente: `f481b348-3755-4e31-9bf0-41bae0e9773f`.
+- Preview del deployment: <https://f481b348.cambiometro.pages.dev>.
 - Dominio: <https://cambiometro.impulsacv.cl>.
 - Worker productivo: `291bab62-d89d-426f-b1e5-3d1cb9c92e76`, promovido al 100%
   por el workflow `33982168319`.
@@ -49,6 +49,9 @@ como confirmados oficialmente.
 - `verify-prod-full.mjs` con navegador, CSP, consentimiento y temas: `136/136`,
   sin fallos; GA4 sólo se carga tras aceptar consentimiento, no se duplica y
   registra un `page_view` para home y otro para la navegación a Movimientos.
+- La landing muestra `Conectada · cobertura parcial declarada` para distinguir
+  una fuente conectada de una cobertura incompleta del snapshot. El cambio fue
+  publicado por el workflow `33987712311` sin refrescar ETL.
 - `npm run smoke:uptime`: `12/12` rutas HTTP 200, incluyendo home, listados,
   ficha, `/movimientos` y endpoints del Worker.
 - `/api/v1/relations` y `/api/v1/crosses` anclados a una entidad: HTTP 200,
@@ -98,7 +101,7 @@ ninguna materialización D1 manual.
 ## Rollback
 
 ```bash
-npm run pages:rollback -- bb61b5e8-2a77-4a5a-ba68-dee6286eb4a0
+npm run pages:rollback -- f481b348-3755-4e31-9bf0-41bae0e9773f
 
 npx wrangler rollback 291bab62-d89d-426f-b1e5-3d1cb9c92e76 \
   --name cambiometro-public-api
