@@ -1,9 +1,15 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import api from "../workers/public-api/index";
+import api, { cacheControlForStorage } from "../workers/public-api/index";
 
 afterEach(() => vi.unstubAllGlobals());
 
 describe("public directory cache", () => {
+  it("preserves the endpoint TTL while removing unsupported stale directives", () => {
+    expect(cacheControlForStorage("public, max-age=30, s-maxage=3600, stale-while-revalidate=86400"))
+      .toBe("public, max-age=30, s-maxage=3600");
+    expect(cacheControlForStorage(null)).toBe("public, max-age=30, s-maxage=300");
+  });
+
   it("prefers the published R2 catalog before touching D1", async () => {
     const prepare = vi.fn(() => ({
       bind() { return this; },
