@@ -49,13 +49,6 @@ jobs:
             transparencia-public-data/projections/transferencias-v1/manifest.json \
             --file .ci-data-version/transfer-api-manifest.json --remote
 
-      - name: Hidratar páginas del release R2 sin consultar D1
-        working-directory: transparencia-app
-        env:
-          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
-        run: npm run data:hydrate:transfer-api
-
       - name: Preflight de cuota D1
         id: d1-quota
         uses: ./.github/actions/d1-preflight
@@ -71,6 +64,13 @@ jobs:
         run: |
           echo "D1 no está bajo el umbral seguro; R2 permanece como fuente canónica."
           exit 1
+
+      - name: Hidratar páginas del release R2 sin consultar D1
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:hydrate:transfer-api
 
       - name: Resolver base D1 dedicada
         id: transfer-d1
