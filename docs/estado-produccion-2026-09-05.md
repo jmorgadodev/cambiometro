@@ -19,8 +19,9 @@ si falla una validación, se conserva la publicación anterior.
 - Pages deployment vigente: `b5183bc1-16a3-43b6-af2a-bbe4ea7638a6`.
 - Preview del deployment: <https://b5183bc1.cambiometro.pages.dev>.
 - Dominio: <https://cambiometro.impulsacv.cl>.
-- Worker productivo: `291bab62-d89d-426f-b1e5-3d1cb9c92e76`, promovido al 100%
-  por el workflow `33982168319`.
+- Worker productivo: `59793783-e8bd-4a21-a5e4-25ea38054b18`, promovido al 100%
+  por el workflow `33991051734` después de pasar validación, typecheck, guard
+  de tamaño y health productivo. Bundle: 165,73 KiB (30,51 KiB gzip).
 - Worker anterior conocido-bueno: `5e091180-d59b-4a72-8618-10b8898e5a98`.
 - Guardia ETL: run `33977739231`, `success`; confirmó la publicación automática
   posterior al ETL.
@@ -63,6 +64,10 @@ como confirmados oficialmente.
 - `/api/v1/relations` y `/api/v1/crosses` anclados a una entidad: HTTP 200,
   `sourceBackend=r2-entity-index`, `total=18`; ya no requieren el COUNT/SELECT
   de D1 para ese flujo.
+- `GET /api/v1/records?limit=1` sin alcance devuelve `400
+  RECORD_SCOPE_REQUIRED` antes de consultar D1; las consultas por fuente siguen
+  paginadas y operativas. Esto evita que crawlers disparen un `COUNT(*)` global
+  sobre el histórico.
 - El build/E2E, lint, tipos, seguridad y CodeQL de los PR de operación quedaron
   verdes.
 
@@ -97,7 +102,7 @@ acto administrativo correspondiente.
 
 La API de transferencias permanece R2-first: health productivo reporta
 `transferSource=r2`, `transferRows=60351` y `d1TransferRows=0`. Las relaciones
-ancladas también son R2-first desde el Worker `291bab...`. El monitor de uso
+ancladas también son R2-first desde el Worker `59793783...`. El monitor de uso
 `33980663597` registró `4.676.009 / 5.000.000` rows read (`93,52%`) en el día;
 el preflight del ETL mantiene pospuesta la materialización D1 sobre el umbral
 de seguridad y no requiere aumentar el plan. La consulta local `wrangler d1
@@ -109,7 +114,7 @@ ninguna materialización D1 manual.
 ```bash
 npm run pages:rollback -- b5183bc1-16a3-43b6-af2a-bbe4ea7638a6
 
-npx wrangler rollback 291bab62-d89d-426f-b1e5-3d1cb9c92e76 \
+npx wrangler rollback 59793783-e8bd-4a21-a5e4-25ea38054b18 \
   --name cambiometro-public-api
 ```
 
