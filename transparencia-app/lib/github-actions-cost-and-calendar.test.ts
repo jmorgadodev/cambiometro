@@ -115,13 +115,17 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(md).not.toContain("brief");
   });
 
-  it("7. usage-watch.yml existe y es estrictamente workflow_dispatch (cero minutos en crons)", () => {
+  it("7. vigilancia D1 horaria usa Analytics y runner estándar; billing sólo manual", () => {
     const watchPath = path.join(workflowsDir, "usage-watch.yml");
     expect(fs.existsSync(watchPath)).toBe(true);
     const content = fs.readFileSync(watchPath, "utf8");
 
     expect(content).toContain("workflow_dispatch:");
-    expect(content).not.toContain("schedule:");
+    expect(content).toContain('cron: "15 * * * *"');
+    expect(content).toContain("if: github.event_name == 'workflow_dispatch'");
+    expect(content).toContain("runs-on: ubuntu-latest");
+    expect(content).toContain("node scripts/check-d1-usage.mjs");
+    expect(content).not.toMatch(/d1\s+execute|data:materialize|npm\s+run\s+etl/);
     expect(content).toContain("api.github.com/users/$OWNER/settings/billing/actions");
   });
 

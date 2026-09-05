@@ -1,6 +1,8 @@
 name: Watch GitHub Actions Usage & Billing
 
 on:
+  schedule:
+    - cron: "15 * * * *" # Analytics only, including 00:15 UTC after the quota reset.
   workflow_dispatch:
 
 concurrency:
@@ -13,6 +15,7 @@ permissions:
 jobs:
   check-usage:
     name: Check GitHub Actions Minutes & Limit
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -35,6 +38,7 @@ jobs:
 
   check-d1:
     name: Check D1 Free Tier Usage
+    if: github.event_name == 'workflow_dispatch' || github.event.repository.private == false
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
