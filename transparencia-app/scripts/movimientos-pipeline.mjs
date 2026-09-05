@@ -391,7 +391,7 @@ const KNOWN_ANNOUNCED_MOVEMENTS = Object.freeze([
       organo: "SEREMI de Vivienda y Urbanismo de Tarapacá",
       saliente: "Alonso Velásquez",
       motivo: "Renuncia voluntaria informada públicamente; los motivos no están detallados en la comunicación oficial disponible.",
-      fuente: sourceLabelForSignal(signal),
+      fuente: sourceLabelsForMovement(mergeMovementSources(ALONSO_VELASQUEZ_SOURCES, signal)),
       documento_pendiente: true,
       verificado: false,
     }),
@@ -418,7 +418,7 @@ const KNOWN_ANNOUNCED_MOVEMENTS = Object.freeze([
       organo: "SEREMI de Transportes y Telecomunicaciones de Arica y Parinacota",
       saliente: "Patricio Löhr Tapia",
       motivo: "Renuncia solicitada por el Gobierno tras una denuncia reportada por funcionarios de la DGAC; el acto administrativo queda pendiente de verificación.",
-      fuente: sourceLabelForSignal(signal),
+      fuente: sourceLabelsForMovement([sourceFromSignal(signal, "2026-09-01")]),
       documento_pendiente: true,
       verificado: false,
     }),
@@ -442,10 +442,6 @@ const ALONSO_VELASQUEZ_SOURCES = Object.freeze([
   },
 ]);
 
-function sourceLabelForSignal(signal) {
-  return `${signal.source_label ?? signal.source_id ?? "Fuente provisional"} (${signal.date ?? "fecha no indicada"})`;
-}
-
 function sourceFromSignal(signal, fallbackDate) {
   return {
     nivel: signal.source_tier === "official" ? "oficial" : "prensa",
@@ -460,6 +456,25 @@ function mergeMovementSources(sources, signal) {
   const candidates = [...(sources ?? [])];
   if (signal?.url && !candidates.some((source) => source.url === signal.url)) candidates.push(sourceFromSignal(signal, signal.date));
   return candidates;
+}
+
+function mergeMovementSourceLists(...lists) {
+  const sources = [];
+  const seen = new Set();
+  for (const list of lists) {
+    for (const source of Array.isArray(list) ? list : []) {
+      if (!source?.url || seen.has(source.url)) continue;
+      seen.add(source.url);
+      sources.push(source);
+    }
+  }
+  return sources;
+}
+
+function sourceLabelsForMovement(sources) {
+  return sources
+    .map((source) => `${source.medio ?? "Fuente"} (${source.fecha ?? "fecha no indicada"})`)
+    .join(" · ");
 }
 
 export function materializeKnownSignals(movimientos, signals, now) {
@@ -515,12 +530,42 @@ export function materializeKnownSignals(movimientos, signals, now) {
     });
 
   for (const definition of KNOWN_ANNOUNCED_MOVEMENTS) {
-    if (result.some((movement) => movement.id === definition.id)) continue;
     const candidates = signals.filter((candidate) => definition.matches.test(normalizeSignalText(`${candidate.title ?? ""} ${candidate.summary ?? ""}`)));
     const signal = candidates.find((candidate) => definition.prefer?.test(normalizeSignalText(`${candidate.title ?? ""} ${candidate.summary ?? ""}`)) && candidate.date)
       ?? candidates.find((candidate) => candidate.date)
       ?? candidates[0];
-    if (signal) result.push(definition.build(signal, now));
+    if (!signal) continue;
+
+    const existingIndex = result.findIndex((movement) => (
+      movement.id === definition.id
+      || definition.matches.test(normalizeSignalText(`${movement.saliente ?? movement.salio?.nombre ?? ""} ${movement.cargo ?? ""} ${movement.region ?? ""}`))
+    ));
+    const rebuilt = definition.build(signal, now);
+    if (existingIndex === -1) {
+      result.push(rebuilt);
+      continue;
+    }
+
+    // Reconcile known signals on every run. A previous provisional row must
+    // receive newly discovered sources instead of being skipped by its ID.
+    // Never downgrade a row that already has a decree or verified status.
+    const existing = result[existingIndex];
+    const mergedSources = mergeMovementSourceLists(existing.fuentes, rebuilt.fuentes);
+    if (existing.decreto_url || existing.estado === "verificado") {
+      result[existingIndex] = {
+        ...existing,
+        fuentes: mergedSources,
+        fuente: sourceLabelsForMovement(mergedSources),
+        fecha_deteccion: now,
+      };
+    } else {
+      result[existingIndex] = {
+        ...existing,
+        ...rebuilt,
+        fuentes: mergedSources,
+        fuente: sourceLabelsForMovement(mergedSources),
+      };
+    }
   }
   return result;
 }

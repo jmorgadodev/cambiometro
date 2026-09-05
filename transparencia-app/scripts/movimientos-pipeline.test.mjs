@@ -114,6 +114,40 @@ describe("pipeline automático de movimientos", () => {
     ]));
   });
 
+  it("reconcilia un anuncio ya publicado y agrega la fuente oficial sin duplicarlo", () => {
+    const previous = [{
+      id: "mov-alonso-velasquez-2026-09-03",
+      cargo: "Secretario Regional Ministerial de Vivienda y Urbanismo de Tarapacá",
+      region: "Región de Tarapacá",
+      salio: { nombre: "Alonso Velásquez", fecha: "2026-09-03" },
+      fecha: "2026-09-03",
+      estado: "en_confirmacion",
+      fuentes: [{
+        nivel: "prensa",
+        medio: "Radio Paulina",
+        url: "https://radiopaulina.cl/2026/09/03/entrevero-irreconciliable-ex-seremi-de-vivienda-de-tarapaca-justifico-su-salida-por-un-desencuentro-con-el-ministro-poduje/",
+        fecha: "2026-09-03",
+      }],
+    }];
+    const result = materializeKnownSignals(previous, [{
+      title: "Alonso Velásquez renuncia como seremi de Vivienda de Tarapacá",
+      url: "https://radiopaulina.cl/2026/09/03/entrevero-irreconciliable-ex-seremi-de-vivienda-de-tarapaca-justifico-su-salida-por-un-desencuentro-con-el-ministro-poduje/",
+      date: "2026-09-03",
+      source_label: "Radio Paulina",
+      source_tier: "provisional",
+    }], "2026-09-05T13:00:00.000Z");
+    expect(result).toHaveLength(1);
+    expect(result[0]).toMatchObject({
+      fecha: "2026-09-02",
+      salio: { nombre: "Alonso Velásquez", fecha: "2026-09-02" },
+      estado: "en_confirmacion",
+    });
+    expect(result[0].fuentes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ medio: "Ministerio de Vivienda y Urbanismo", nivel: "oficial" }),
+      expect.objectContaining({ medio: "Radio Paulina" }),
+    ]));
+  });
+
   it("declara bloqueo cuando ninguna fuente oficial responde", async () => {
     const result = await collectMovementSources({
       sources: [
