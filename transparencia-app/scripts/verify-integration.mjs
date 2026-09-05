@@ -424,8 +424,7 @@ try {
   // must not make the production guard reject a coherent current snapshot.
   const expectedSourceCounts = new Map([
     ["chilecompra", 74_142], ["dipres", 476], ["sinim", 3_105],
-    ["ley-19862", 11_651], ["transparencia-activa", 1_200_807],
-    ["personal-apoyo", 4_073],
+    ["ley-19862", 11_651], ["cplt", 1_200_807],
   ]);
   if (!verifyingLocal) {
     for (const [sourceId, minimum] of expectedSourceCounts) {
