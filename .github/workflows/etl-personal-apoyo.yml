@@ -57,13 +57,32 @@ jobs:
         working-directory: transparencia-app
         run: npm run etl:personal-apoyo -- --input /tmp/personal-apoyo-current.json --output /tmp/personal-apoyo-next.json
 
+      - name: Preflight de cuota D1 antes de publicar el materializado
+        id: d1-quota
+        uses: ./.github/actions/d1-preflight
+        with:
+          threshold-percent: "60"
+          output: transparencia-app/d1-preflight.json
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+
       - name: Publicar personal de apoyo en R2 y D1
+        if: steps.d1-quota.outputs.proceed == 'true'
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
           ETL_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-personal-apoyo
         run: npm run data:publish:personal-apoyo -- --input /tmp/personal-apoyo-next.json --database transparencia-db --bucket transparencia-public-data --remote
+
+      - name: Publicar personal de apoyo sólo en R2 por cuota
+        if: steps.d1-quota.outputs.proceed != 'true'
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:publish:personal-apoyo -- --input /tmp/personal-apoyo-next.json --bucket transparencia-public-data --remote --skip-d1
 
       - name: Publicar entrada estática validada para Pages
         working-directory: transparencia-app
@@ -84,3 +103,12 @@ jobs:
             transparencia-app/data/generated
           if-no-files-found: warn
           retention-days: 30
+
+      - name: Conservar diagnóstico de preflight D1
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d1-preflight-personal-apoyo-${{ github.run_id }}
+          path: transparencia-app/d1-preflight.json
+          if-no-files-found: warn
+          retention-days: 31
