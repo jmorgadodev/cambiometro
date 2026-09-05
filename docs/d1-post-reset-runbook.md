@@ -32,17 +32,21 @@ SQL; aun así, no hace falta repetirlo mientras el límite esté bloqueado.
    confirmar que el nuevo día comenzó con el nivel esperado. No ejecutar SQL.
    Los ETL también ejecutan automáticamente el preflight reutilizable
    `.github/actions/d1-preflight` antes de cualquier materialización remota.
-4. Si el uso está bajo el umbral, hacer una única petición de health:
+4. El workflow programado `d1-post-reset-probe.yml` ejecuta esta comprobación
+   automáticamente a las `00:15 UTC`: consulta Analytics y, sólo si no está
+   en estado crítico, hace una única petición paginada a Cámara (`limit=1`).
+   Si D1 sigue crítica, conserva el reporte y no llama a la API ni ejecuta SQL.
+5. Si el uso está bajo el umbral, hacer una única petición de health:
 
    ```powershell
    curl.exe -fsS https://cambiometro.impulsacv.cl/api/v1/health
    ```
 
-5. Ejecutar primero el ETL incremental correspondiente, sin `--full-history`.
+6. Ejecutar primero el ETL incremental correspondiente, sin `--full-history`.
    En la materialización usar `--skip-unchanged`.
-6. Verificar que el snapshot/R2, manifest, checksum y publicación estática
+7. Verificar que el snapshot/R2, manifest, checksum y publicación estática
    correspondan a la misma versión.
-7. No ejecutar backfills históricos ni smoke completo hasta confirmar el uso
+8. No ejecutar backfills históricos ni smoke completo hasta confirmar el uso
    posterior a los pasos anteriores.
 
 ## Interpretación
