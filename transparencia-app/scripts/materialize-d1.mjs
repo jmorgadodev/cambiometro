@@ -51,6 +51,14 @@ function wranglerMigrations(args, allowFailure = false) {
   return wrangler(["d1", "migrations", ...args], allowFailure, wranglerMigrationConfig);
 }
 
+let migrationsReady = dryRun;
+
+function ensureMigrations() {
+  if (migrationsReady) return;
+  wranglerMigrations(["apply", database, isRemote ? "--remote" : "--local"]);
+  migrationsReady = true;
+}
+
 function sha256(buffer) {
   return createHash("sha256").update(buffer).digest("hex");
 }
@@ -180,10 +188,19 @@ async function main() {
   const catalogErrors = selectedCatalogSources.filter((source) => source.error);
   if (catalogErrors.length > 0) throw new Error(`D1_CATALOG_SOURCE_ERRORS: ${catalogErrors.map((source) => source.id).join(",")}`);
   let sourcesToMaterialize = selectedCatalogSources;
-  if (!dryRun) wranglerMigrations(["apply", database, isRemote ? "--remote" : "--local"]);
   if (skipUnchanged && isRemote && selectedCatalogSources.length > 0) {
     const ids = selectedCatalogSources.map((source) => sql(source.id)).join(",");
-    const previousStates = new Map(queryRows(`SELECT source_id,checksum_sha256 FROM source_state WHERE source_id IN (${ids})`)
+    let previousStateRows;
+    try {
+      previousStateRows = queryRows(`SELECT source_id,checksum_sha256 FROM source_state WHERE source_id IN (${ids})`);
+    } catch {
+      // A new database may not have migrations yet. Bootstrap it once and
+      // retry; on an exhausted quota this remains a visible failure instead
+      // of silently rebuilding a source.
+      ensureMigrations();
+      previousStateRows = queryRows(`SELECT source_id,checksum_sha256 FROM source_state WHERE source_id IN (${ids})`);
+    }
+    const previousStates = new Map(previousStateRows
       .map((row) => [String(row.source_id), row]));
     sourcesToMaterialize = changedSources(selectedCatalogSources, catalog.partitions, previousStates);
     if (sourcesToMaterialize.length === 0) {
@@ -191,6 +208,7 @@ async function main() {
       return;
     }
   }
+  ensureMigrations();
   const selectedSourceIds = new Set(sourcesToMaterialize.map((source) => source.id));
   const selectedPartitions = selectMaterializedPartitions(catalog.partitions, { includeAllHistory })
     .filter((partition) => selectedSourceIds.has(partition.sourceId));
