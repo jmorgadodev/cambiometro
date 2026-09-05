@@ -98,7 +98,8 @@ describe("pipeline automático de movimientos", () => {
       expect.objectContaining({
         id: "mov-alonso-velasquez-2026-09-03",
         estado: "en_confirmacion",
-        fecha: "2026-09-03",
+        fecha: "2026-09-02",
+        salio: { nombre: "Alonso Velásquez", fecha: "2026-09-02" },
       }),
       expect.objectContaining({
         id: "mov-patricio-lohr-2026-09-01",
@@ -107,6 +108,10 @@ describe("pipeline automático de movimientos", () => {
       }),
     ]));
     expect(result.every((movement) => movement.documento_pendiente)).toBe(true);
+    expect(result.find((movement) => movement.id === "mov-alonso-velasquez-2026-09-03").fuentes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ medio: "Ministerio de Vivienda y Urbanismo", nivel: "oficial", fecha: "2026-09-02" }),
+      expect.objectContaining({ medio: "Radio Paulina", fecha: "2026-09-03" }),
+    ]));
   });
 
   it("declara bloqueo cuando ninguna fuente oficial responde", async () => {
