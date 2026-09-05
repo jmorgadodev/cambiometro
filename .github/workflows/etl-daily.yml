@@ -121,11 +121,11 @@ jobs:
           usage_status=$?
           proceed=false
           if [[ -s "$D1_USAGE_OUTPUT" ]]; then
-            read_percent=$(node -e 'const fs=require("fs"); const report=JSON.parse(fs.readFileSync(process.argv[1], "utf8")); process.stdout.write(String(report.readPercent ?? 100));' "$D1_USAGE_OUTPUT")
-            if node -e 'process.exit(Number(process.argv[1]) < Number(process.argv[2]) ? 0 : 1)' "$read_percent" "$D1_THRESHOLD_PERCENT"; then
+            usage_percent=$(node -e 'const fs=require("fs"); const report=JSON.parse(fs.readFileSync(process.argv[1], "utf8")); process.stdout.write(String(Math.max(report.readPercent ?? 100, report.writePercent ?? 100)));' "$D1_USAGE_OUTPUT")
+            if node -e 'process.exit(Number(process.argv[1]) < Number(process.argv[2]) ? 0 : 1)' "$usage_percent" "$D1_THRESHOLD_PERCENT"; then
               proceed=true
             fi
-            echo "D1 preflight: ${read_percent}% rows_read; threshold ${D1_THRESHOLD_PERCENT}%"
+            echo "D1 preflight: ${usage_percent}% peak (rows_read/rows_written); threshold ${D1_THRESHOLD_PERCENT}%"
           else
             echo "::warning::No se pudo leer el uso D1; se omite materialización por seguridad."
           fi
