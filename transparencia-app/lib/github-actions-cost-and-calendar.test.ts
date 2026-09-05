@@ -175,6 +175,8 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       "etl-ley-19862.yml",
       "etl-servel.yml",
       "etl-sinim.yml",
+      "etl-personal-apoyo.yml",
+      "etl-cplt.yml",
     ];
 
     for (const name of workflows) {
@@ -183,5 +185,14 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       expect(content, name).toContain('threshold-percent: "60"');
       expect(content, name).toContain("steps.d1-quota.outputs.proceed == 'true'");
     }
+  });
+
+  it("12. Los ETL de personal y CPLT preservan R2 cuando D1 se pospone", () => {
+    const personal = fs.readFileSync(path.join(workflowsDir, "etl-personal-apoyo.yml"), "utf8");
+    const cplt = fs.readFileSync(path.join(workflowsDir, "etl-cplt.yml"), "utf8");
+    expect(personal).toContain("--skip-d1");
+    expect(personal).toContain("Publicar personal de apoyo sólo en R2 por cuota");
+    expect(cplt).toContain("data:finalize:cplt:r2");
+    expect(cplt).toContain("Registrar D1 CPLT pospuesto por cuota");
   });
 });
