@@ -14,8 +14,10 @@ si falla una validación, se conserva la publicación anterior.
 
 - ETL Movimientos: run `33977700697`, `success`.
 - Refresco y publicación Pages: run `33977739174`, `success`, 5m32s.
-- Pages deployment vigente: `f481b348-3755-4e31-9bf0-41bae0e9773f`.
-- Preview del deployment: <https://f481b348.cambiometro.pages.dev>.
+- Build/E2E del ajuste de Movimientos: run `33989323453`, `success`.
+- Promoción controlada Pages: run `33989679783`, `success`.
+- Pages deployment vigente: `b5183bc1-16a3-43b6-af2a-bbe4ea7638a6`.
+- Preview del deployment: <https://b5183bc1.cambiometro.pages.dev>.
 - Dominio: <https://cambiometro.impulsacv.cl>.
 - Worker productivo: `291bab62-d89d-426f-b1e5-3d1cb9c92e76`, promovido al 100%
   por el workflow `33982168319`.
@@ -42,6 +44,10 @@ como confirmados oficialmente.
 
 - `npm run verify:prod:movimientos`: todos los checks verdes; sin spinner ni
   errores de navegador.
+- Verificación posterior al ajuste de fechas: Alonso y Patricio siguen visibles
+  como anuncios `en_confirmacion`; los anuncios recientes ya no muestran la
+  alerta incorrecta `>30d`. El encabezado separa `último aviso` (03-09-2026)
+  de `último evento` (02-09-2026).
 - `verify-prod-full.mjs` posterior a la promoción del Worker: `136/136`, sin
   fallos. El guard de GA4 acepta el evento observado por red o el evento
   `page_view` en `dataLayer`, sin relajar el consentimiento ni la detección de
@@ -101,7 +107,7 @@ ninguna materialización D1 manual.
 ## Rollback
 
 ```bash
-npm run pages:rollback -- f481b348-3755-4e31-9bf0-41bae0e9773f
+npm run pages:rollback -- b5183bc1-16a3-43b6-af2a-bbe4ea7638a6
 
 npx wrangler rollback 291bab62-d89d-426f-b1e5-3d1cb9c92e76 \
   --name cambiometro-public-api
