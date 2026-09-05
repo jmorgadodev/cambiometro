@@ -8,7 +8,7 @@ verano. Por eso el mismo cron `0 7 * * *` se muestra como 04:00 en invierno y
 | ETL | Cron UTC | Hora local aproximada |
 | --- | --- | --- |
 | Parlamento y Diario Oficial | `0 7 * * *` | 04:00 invierno / 03:00 verano |
-| Personal de apoyo parlamentario | `0 7 * * *` | 04:00 invierno / 03:00 verano |
+| Personal de apoyo parlamentario | `0 7 * * 1` | Lunes 04:00 invierno / 03:00 verano |
 | Movimientos de autoridades | `0 7 * * *` | 04:00 invierno / 03:00 verano |
 | ChileCompra | `0 8 * * 1` | Lunes 05:00 invierno / 04:00 verano |
 | InfoLobby | `30 8 * * 1` | Lunes 05:30 invierno / 04:30 verano |
@@ -41,3 +41,21 @@ entorno `MOVIMIENTOS_PROVISIONAL_SOURCES` como una lista separada por comas.
 No se guardan credenciales ni se agregan URLs de medios directamente al código:
 si una fuente no está configurada, el pipeline la reporta como ausente y no
 convierte titulares en hechos estructurados.
+
+## Política incremental y cuota D1
+
+Los procesos diarios de votaciones consultan sólo una ventana reciente con
+solapamiento de siete días. Ese solapamiento permite incorporar correcciones
+oficiales sin volver a recorrer todo el período desde el inicio. Un backfill
+deliberado puede usar el rango `--from`/`--to` y, para gastos de Senado,
+`--full-history`.
+
+Los gastos de Senado se ejecutan mensualmente y consultan el último release más
+un mes de solapamiento. El lake conserva las particiones históricas; no se
+eliminan registros por reducir la ventana de extracción.
+
+La materialización D1 usa `--skip-unchanged`: primero compara el checksum de
+cada fuente con `source_state` y termina sin reconstruir entidades, registros ni
+relaciones cuando no hubo cambios. La consulta de control es acotada. Los
+datasets de lectura masiva deben seguir sirviéndose desde R2/Pages o mediante
+consultas D1 paginadas e indexadas.

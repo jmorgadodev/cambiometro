@@ -289,6 +289,32 @@ describe("API canónica v1", () => {
     expect(payload).toMatchObject({ error: { code: "DATABASE_UNAVAILABLE" } });
   });
 
+  it("filtra registros por las tablas normalizadas y no por LIKE sobre JSON", async () => {
+    const prepared: string[] = [];
+    const db = {
+      prepare(sql: string) {
+        prepared.push(sql);
+        const statement = {
+          bind() { return statement; },
+          async first<T>() { return { total: 0 } as T; },
+          async all<T>() { return { results: [] } as T; },
+        };
+        return statement;
+      },
+    };
+
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/records?entity_id=person-1&limit=10"),
+      { DB: db } as never,
+    );
+
+    expect(response.status).toBe(200);
+    expect(prepared.join("\n")).toContain("FROM record_subjects");
+    expect(prepared.join("\n")).toContain("FROM record_objects");
+    expect(prepared.join("\n")).not.toContain("subject_entity_ids_json LIKE");
+    expect(prepared.join("\n")).not.toContain("object_entity_ids_json LIKE");
+  });
+
   it("sirve gastos operacionales desde el release R2 cuando D1 está agotado", async () => {
     const files: Record<string, unknown> = {
       "projections/static-site-v1/manifest.json": {

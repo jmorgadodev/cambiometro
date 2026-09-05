@@ -4,6 +4,12 @@ on:
   schedule:
     - cron: "30 8 2 * *" # segundo día del mes, después de la publicación oficial
   workflow_dispatch:
+    inputs:
+      full_history:
+        description: Reconstruir todos los meses publicados (sólo backfill o bootstrap)
+        required: false
+        type: boolean
+        default: false
 
 concurrency:
   group: etl-expenses
@@ -60,9 +66,13 @@ jobs:
         working-directory: transparencia-app
         run: npm run etl:prepare
 
-      - name: Ingerir gastos oficiales de Senado (Cámara se ejecuta localmente)
+      - name: Ingerir gastos oficiales de Senado de forma incremental
         working-directory: transparencia-app
-        run: npm run etl -- --from "2026-01-01" --to "$(date -u +%F)" --source gastos_senado
+        shell: bash
+        run: |
+          full_history=""
+          if [[ "${{ inputs.full_history }}" == "true" ]]; then full_history="--full-history"; fi
+          npm run etl -- --from "$(date -u -d '60 days ago' +%F)" --to "$(date -u +%F)" --source gastos_senado $full_history
 
       - name: Construir y publicar lake
         working-directory: transparencia-app
@@ -86,7 +96,7 @@ jobs:
           set +e
           log_file="$(mktemp)"
           trap 'rm -f "$log_file"' EXIT
-          npm run data:materialize -- --database transparencia-db --remote --sources gastos_senado >"$log_file" 2>&1
+          npm run data:materialize -- --database transparencia-db --remote --skip-unchanged --sources gastos_senado >"$log_file" 2>&1
           status=$?
           cat "$log_file"
           if [ "$status" -eq 0 ]; then

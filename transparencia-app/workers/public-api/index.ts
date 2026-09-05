@@ -1174,7 +1174,15 @@ async function listRecords(requestUrl: URL, env: Env) {
   }
   if (from) { clauses.push("occurred_at >= ?"); bindings.push(from); }
   if (to) { clauses.push("occurred_at <= ?"); bindings.push(to); }
-  if (entityId) { clauses.push("(subject_entity_ids_json LIKE ? OR object_entity_ids_json LIKE ?)"); bindings.push(`%${entityId}%`, `%${entityId}%`); }
+  if (entityId) {
+    // The JSON columns are retained for compatibility, but filtering them
+    // with a leading-wildcard LIKE forces a scan of the whole records table.
+    // The materializer already normalizes both sides into indexed tables.
+    // EXISTS lets D1 use idx_record_subjects_entity/idx_record_objects_entity
+    // for both the count and the paged result.
+    clauses.push("(EXISTS (SELECT 1 FROM record_subjects WHERE record_subjects.record_id = records.id AND record_subjects.entity_id = ?) OR EXISTS (SELECT 1 FROM record_objects WHERE record_objects.record_id = records.id AND record_objects.entity_id = ?))");
+    bindings.push(entityId, entityId);
+  }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
   try {
     const total = await env.DB.prepare(`SELECT count(*) AS total FROM records ${where}`).bind(...bindings).first<{ total: number }>();

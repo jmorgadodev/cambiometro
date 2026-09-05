@@ -2,7 +2,7 @@ name: ETL Diario - Personal de apoyo parlamentario
 
 on:
   schedule:
-    - cron: "0 7 * * *" # 03:00 America/Santiago en horario de verano
+    - cron: "0 7 * * 1" # lunes 03:00 America/Santiago en horario de verano
   workflow_dispatch:
 
 concurrency:

@@ -23,6 +23,8 @@ import { fetchVotacionesSenado } from "./etl/connectors/senado-votaciones.mjs";
 import { assertSuccessfulRun } from "./etl/validation.mjs";
 import { readJsonIfPresent, writeFileAtomic } from "./etl/safe-file.mjs";
 import { mergeRecordsById } from "./etl/history.mjs";
+import { resolveIncrementalFrom } from "./etl/incremental-window.mjs";
+import { expenseMonthWindow } from "./etl/expense-window.mjs";
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const dataDirectory = join(scriptDirectory, "..", "data", "etl");
@@ -33,6 +35,7 @@ const USER_AGENT = "Cambiometro-ETL/1.0 (+https://cambiometro.impulsacv.cl)";
 const REQUEST_TIMEOUT_MS = 30_000;
 const BULK_REQUEST_TIMEOUT_MS = 180_000;
 const DRY_RUN = process.argv.includes("--dry-run");
+const FULL_HISTORY = process.argv.includes("--full-history");
 const SOURCE_KEYS = new Set(["infoprobidad", "infolobby", "camara", "votaciones_camara", "votaciones_senado", "gastos_senado", "gastos_camara"]);
 const PERIODO_ACTUAL_DESDE = "2026-03-11";
 
@@ -136,7 +139,7 @@ async function fetchVoteDetail(base, vote) {
   return { ...vote, votos: individualVotes, url };
 }
 
-async function fetchVotacionesCamara({ from, to }) {
+async function fetchVotacionesCamara({ from, to, minimumFrom = PERIODO_ACTUAL_DESDE }) {
   const base = "https://opendata.camara.cl/camaradiputados/WServices/WSLegislativo.asmx";
   const votes = [];
   for (let year = Number(from.slice(0, 4)); year <= Number(to.slice(0, 4)); year += 1) {
@@ -154,8 +157,7 @@ async function fetchVotacionesCamara({ from, to }) {
       const text = (name) => match[1].match(new RegExp(`<${name} Valor="\\d+">(.*?)</${name}>`, "s"))?.[1]?.trim() ?? "";
       const originalDate = tag("Fecha");
       const date = parseOfficialDate(originalDate);
-      const desdePeriodo = PERIODO_ACTUAL_DESDE;
-      if (!date || date < desdePeriodo || date > to) continue;
+      if (!date || date < minimumFrom || date > to) continue;
       votes.push({
         id: tag("Id"),
         descripcion: tag("Descripcion"),
@@ -217,10 +219,14 @@ async function fetchVotacionesCamara({ from, to }) {
  * para que la ficha muestre la serie mensual real. Cada registro conserva el
  * monto (CLP) y el concepto rendido por el ejecutor.
  */
-async function fetchGastosSenado() {
+async function fetchGastosSenado({ fullHistory = false } = {}) {
   const latest = await discoverLatestSenateExpensePeriod();
   const months = [];
-  for (let month = 1; month <= latest.month; month += 1) {
+  // El lake conserva particiones anteriores. El proceso mensual sólo necesita
+  // el release más reciente y un mes de solapamiento; --full-history queda
+  // reservado para backfills deliberados o un bootstrap sin lake publicado.
+  const { firstMonth, lastMonth } = expenseMonthWindow(latest.month, { fullHistory });
+  for (let month = firstMonth; month <= lastMonth; month += 1) {
     months.push(await fetchSenateOperationalExpenses({ year: latest.year, month }));
   }
   const records = months.flatMap((result) => result.records);
@@ -282,6 +288,15 @@ async function main() {
   const now = new Date();
   const options = parseOptions();
   const previous = readJsonIfPresent(latestPath, null);
+  const voteFrom = resolveIncrementalFrom({
+    requestedFrom: options.from,
+    minimumFrom: PERIODO_ACTUAL_DESDE,
+    previousRecords: [
+      ...(previous?.fuentes?.votaciones_camara ?? []),
+      ...(previous?.fuentes?.votaciones_senado ?? []),
+    ],
+    overlapDays: 7,
+  });
   const summary = {
     fecha_ejecucion: now.toISOString(),
     hora_chile: now.toLocaleString("es-CL", { timeZone: "America/Santiago" }),
@@ -319,16 +334,18 @@ async function main() {
   });
   await runSource({
     key: "votaciones_camara", label: "Votaciones Cámara", selected: options.sources, previous, snapshot, summary,
-    summaryKey: "votaciones_ingresadas", minimum: 0, preserveHistory: true, load: () => fetchVotacionesCamara(options),
+    summaryKey: "votaciones_ingresadas", minimum: 0, preserveHistory: true,
+    load: () => fetchVotacionesCamara({ ...options, from: voteFrom }),
   });
   await runSource({
     key: "votaciones_senado", label: "Votaciones Senado", selected: options.sources, previous, snapshot, summary,
     summaryKey: "votaciones_senado_ingresadas", minimum: 0, preserveHistory: true,
-    load: () => fetchVotacionesSenado({ legislatura: 374, desde: PERIODO_ACTUAL_DESDE, to: options.to }),
+    load: () => fetchVotacionesSenado({ legislatura: 374, desde: voteFrom, to: options.to }),
   });
   await runSource({
     key: "gastos_senado", label: "Gastos Operacionales Senado", selected: options.sources, previous, snapshot, summary,
-    summaryKey: "gastos_senado_ingresados", minimum: 0, preserveHistory: true, load: fetchGastosSenado,
+    summaryKey: "gastos_senado_ingresados", minimum: 0, preserveHistory: true,
+    load: () => fetchGastosSenado({ fullHistory: FULL_HISTORY }),
   });
   await runSource({
     key: "gastos_camara", label: "Gastos Operacionales Cámara", selected: options.sources, previous, snapshot, summary,

@@ -7,6 +7,7 @@ import { spawnSync } from "node:child_process";
 import { createGunzip } from "node:zlib";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
 import { canonicalizeLakeRecord, D1_ARCHIVE_ONLY_SOURCES, entityFromRosterMember, relationsFromLakeRecord, selectMaterializedPartitions, sourceStateChecksum } from "./etl/materialize.mjs";
+import { changedSources } from "./etl/materialize-incremental.mjs";
 import { fetchParliamentRosters } from "./etl/parliament-rosters.mjs";
 import { reconcilePersonAliases } from "./etl/person-reconciliation.mjs";
 
@@ -21,6 +22,7 @@ const lakeRoot = resolve(argument("--lake", "data/lake"));
 const isRemote = process.argv.includes("--remote");
 const dryRun = process.argv.includes("--dry-run");
 const includeAllHistory = process.argv.includes("--all-history");
+const skipUnchanged = process.argv.includes("--skip-unchanged");
 const requestedSourceIds = new Set((argument("--sources", "") ?? "").split(",").map((value) => value.trim()).filter(Boolean));
 const allowLocalAuth = process.argv.includes("--local-auth") && !process.env.CI;
 const runId = process.env.ETL_RUN_ID?.trim() || `local-${Date.now()}`;
@@ -170,14 +172,26 @@ async function main() {
   const catalogBuffer = readFileSync(catalogPath);
   const catalog = JSON.parse(catalogBuffer.toString("utf8"));
   if (!Array.isArray(catalog.partitions) || !Array.isArray(catalog.sources)) throw new Error("D1_INVALID_CATALOG");
-  const sourcesToMaterialize = requestedSourceIds.size > 0
+  const selectedCatalogSources = requestedSourceIds.size > 0
     ? catalog.sources.filter((source) => requestedSourceIds.has(source.id))
     : catalog.sources;
-  const missingSources = [...requestedSourceIds].filter((sourceId) => !sourcesToMaterialize.some((source) => source.id === sourceId));
+  const missingSources = [...requestedSourceIds].filter((sourceId) => !selectedCatalogSources.some((source) => source.id === sourceId));
   if (missingSources.length > 0) throw new Error(`D1_UNKNOWN_SOURCES: ${missingSources.join(",")}`);
-  const selectedSourceIds = new Set(sourcesToMaterialize.map((source) => source.id));
-  const catalogErrors = sourcesToMaterialize.filter((source) => source.error);
+  const catalogErrors = selectedCatalogSources.filter((source) => source.error);
   if (catalogErrors.length > 0) throw new Error(`D1_CATALOG_SOURCE_ERRORS: ${catalogErrors.map((source) => source.id).join(",")}`);
+  let sourcesToMaterialize = selectedCatalogSources;
+  if (!dryRun) wranglerMigrations(["apply", database, isRemote ? "--remote" : "--local"]);
+  if (skipUnchanged && isRemote && selectedCatalogSources.length > 0) {
+    const ids = selectedCatalogSources.map((source) => sql(source.id)).join(",");
+    const previousStates = new Map(queryRows(`SELECT source_id,checksum_sha256 FROM source_state WHERE source_id IN (${ids})`)
+      .map((row) => [String(row.source_id), row]));
+    sourcesToMaterialize = changedSources(selectedCatalogSources, catalog.partitions, previousStates);
+    if (sourcesToMaterialize.length === 0) {
+      console.log(JSON.stringify({ status: "skipped", reason: "source-checksum-unchanged", sources: selectedCatalogSources.map((source) => source.id) }, null, 2));
+      return;
+    }
+  }
+  const selectedSourceIds = new Set(sourcesToMaterialize.map((source) => source.id));
   const selectedPartitions = selectMaterializedPartitions(catalog.partitions, { includeAllHistory })
     .filter((partition) => selectedSourceIds.has(partition.sourceId));
   const selectedPartitionIds = new Set(selectedPartitions.map((partition) => partition.id));
@@ -186,7 +200,6 @@ async function main() {
     expectedCounts.set(partition.sourceId, (expectedCounts.get(partition.sourceId) ?? 0) + partition.recordCount);
   }
 
-  if (!dryRun) wranglerMigrations(["apply", database, isRemote ? "--remote" : "--local"]);
   executeSql(`INSERT OR REPLACE INTO etl_runs (id,cadence,status,started_at,catalog_version,catalog_checksum,source_count) VALUES (${sql(runId)},${sql(cadence)},'running',CURRENT_TIMESTAMP,${sql(catalog.generatedAt)},${sql(sha256(catalogBuffer))},${sourcesToMaterialize.length});\nDELETE FROM stage_entities WHERE run_id=${sql(runId)};\nDELETE FROM stage_records WHERE run_id=${sql(runId)};\nDELETE FROM stage_relations WHERE run_id=${sql(runId)};`, "start");
 
   const writer = new StageWriter();
@@ -371,6 +384,7 @@ Opciones:
   --dry-run            Validar artefactos y paridad sin escribir D1
   --all-history        Materializar también históricos extensos (requiere D1 con capacidad suficiente)
   --sources <ids>      Materializar sólo las fuentes indicadas, separadas por coma
+  --skip-unchanged     Salir sin reconstruir si source_state ya tiene los mismos checksums
   --stage-batch <n>    Sentencias por importación de staging (por defecto: 5000)
   --local-auth         Usar la sesion local de Wrangler (prohibido en CI)
   --help, -h           Mostrar esta ayuda`);

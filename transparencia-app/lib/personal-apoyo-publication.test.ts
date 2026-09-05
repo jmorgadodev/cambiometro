@@ -129,6 +129,6 @@ describe("publicación del personal de apoyo", () => {
     expect(personalWorkflow).toContain("--input /tmp/personal-apoyo-current.json");
     expect(personalWorkflow).toContain("--output /tmp/personal-apoyo-next.json");
     expect(personalWorkflow).toContain("--input /tmp/personal-apoyo-next.json");
-    expect(personalWorkflow).toContain('cron: "0 7 * * *"');
+    expect(personalWorkflow).toContain('cron: "0 7 * * 1"');
   });
 });
