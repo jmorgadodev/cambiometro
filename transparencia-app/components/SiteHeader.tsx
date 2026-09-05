@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
-import React, { useEffect, useState, startTransition } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Icono from "@/components/ui/Icono";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
 import { THEME_ORDER, type ThemeName } from "@/lib/theme-tokens";
@@ -58,6 +58,7 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [theme, setTheme] = useState<ThemeName>("paper");
+  const previousPathname = useRef(pathname);
 
   const displayTotal = totalRecords && totalRecords > 0 ? totalRecords : GLOBAL_KPIS.registros_canonicos;
   const displayCorte = updatedAt || GLOBAL_KPIS.corte;
@@ -74,9 +75,14 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
     return () => cancelAnimationFrame(id);
   }, []);
 
-  // Cerrar drawer al cambiar de ruta
+  // Cerrar el drawer sólo después de una navegación real. Ejecutar un
+  // setState diferido en el montaje competía con el primer click del botón
+  // en el shell estático y podía devolver aria-expanded a false.
   useEffect(() => {
-    startTransition(() => setDrawerOpen(false));
+    if (previousPathname.current !== pathname) {
+      previousPathname.current = pathname;
+      setDrawerOpen(false);
+    }
   }, [pathname]);
 
   // Manejo de tecla Escape y bloqueo de scroll al abrir drawer
