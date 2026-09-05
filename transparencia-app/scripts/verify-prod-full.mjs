@@ -212,11 +212,21 @@ async function verifyProdFull() {
   const bianchiSenateVotes = Number(votingSnapshot?.votes?.["sen-048"]?.length ?? 0);
   assertCheck(
     "INVARIANTES",
-    "Bianchi: votos de ambas cámaras coinciden con el snapshot publicado",
-    bianchiCameraVotes > 0 && bianchiSenateVotes > 0 && bianchiHtml.includes(formatInteger(bianchiCameraVotes)) && bianchiHtml.includes(formatInteger(bianchiSenateVotes)),
-    `Cámara ${formatInteger(bianchiCameraVotes)} · Senado ${formatInteger(bianchiSenateVotes)}`,
+    "Carlos Bianchi: votaciones de Cámara coinciden con el snapshot publicado",
+    bianchiCameraVotes > 0 && bianchiHtml.includes(formatInteger(bianchiCameraVotes)),
+    `Cámara ${formatInteger(bianchiCameraVotes)}`,
   );
   assertCheck("GASTOS", "Bianchi tiene rendiciones operacionales publicadas", bianchiHtml.includes("Gastos Operacionales Rendidos") && !/Sin registros de gastos operacionales rendidos/i.test(bianchiHtml));
+
+  const karimRes = await fetch(`${PROD_URL}/politico/karim-bianchi-retamales`, { headers });
+  assertCheck("INVARIANTES", "Ficha Karim Bianchi HTTP 200", karimRes.status === 200);
+  const karimHtml = (await karimRes.text()).replace(/<!--.*?-->/g, "");
+  assertCheck(
+    "INVARIANTES",
+    "Karim Bianchi: votaciones de Senado coinciden con el snapshot publicado",
+    bianchiSenateVotes > 0 && karimHtml.includes(formatInteger(bianchiSenateVotes)),
+    `Senado ${formatInteger(bianchiSenateVotes)}`,
+  );
 
   for (const source of ["gastos_camara", "gastos_senado"]) {
     const expenseRes = await fetch(`${API_URL}/api/v1/records?source=${source}&limit=1`, { headers });
