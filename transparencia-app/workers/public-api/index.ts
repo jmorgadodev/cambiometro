@@ -1178,9 +1178,11 @@ async function listRecords(requestUrl: URL, env: Env) {
     // The JSON columns are retained for compatibility, but filtering them
     // with a leading-wildcard LIKE forces a scan of the whole records table.
     // The materializer already normalizes both sides into indexed tables.
-    // EXISTS lets D1 use idx_record_subjects_entity/idx_record_objects_entity
-    // for both the count and the paged result.
-    clauses.push("(EXISTS (SELECT 1 FROM record_subjects WHERE record_subjects.record_id = records.id AND record_subjects.entity_id = ?) OR EXISTS (SELECT 1 FROM record_objects WHERE record_objects.record_id = records.id AND record_objects.entity_id = ?))");
+    // Fetch the matching record IDs from the normalized, indexed tables first.
+    // An OR-correlated EXISTS still made SQLite scan `records` in production;
+    // the IN/UNION shape lets D1 use the entity-leading indexes for both the
+    // count and the paged result.
+    clauses.push("records.id IN (SELECT record_id FROM record_subjects WHERE entity_id = ? UNION SELECT record_id FROM record_objects WHERE entity_id = ?)");
     bindings.push(entityId, entityId);
   }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
