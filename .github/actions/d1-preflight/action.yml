@@ -1,0 +1,60 @@
+name: D1 quota preflight
+description: Check Cloudflare D1 free-tier usage before any remote materialization
+inputs:
+  threshold-percent:
+    description: Maximum peak usage percentage allowed before deferring D1
+    required: false
+    default: "60"
+  output:
+    description: JSON report path relative to the repository root
+    required: false
+    default: "d1-preflight.json"
+outputs:
+  proceed:
+    description: Whether the workflow may materialize D1
+    value: ${{ steps.preflight.outputs.proceed }}
+  peak-percent:
+    description: Peak rows_read/rows_written usage percentage
+    value: ${{ steps.preflight.outputs.peak_percent }}
+  reason:
+    description: Decision explanation
+    value: ${{ steps.preflight.outputs.reason }}
+runs:
+  using: composite
+  steps:
+    - id: preflight
+      shell: bash
+      env:
+        CLOUDFLARE_ACCOUNT_ID: ${{ env.CLOUDFLARE_ACCOUNT_ID }}
+        CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
+        D1_USAGE_OUTPUT: ${{ inputs.output }}
+        D1_THRESHOLD_PERCENT: ${{ inputs.threshold-percent }}
+      run: |
+        set +e
+        node transparencia-app/scripts/check-d1-usage.mjs "$(date -u +%F)"
+
+        proceed=false
+        peak_percent=100
+        reason="usage-unavailable"
+        if [[ -s "$D1_USAGE_OUTPUT" ]]; then
+          peak_percent="$(node -e 'const fs=require("fs"); const report=JSON.parse(fs.readFileSync(process.argv[1], "utf8")); process.stdout.write(String(Math.max(Number(report.readPercent ?? 100), Number(report.writePercent ?? 100))))' "$D1_USAGE_OUTPUT" 2>/dev/null)"
+          if [[ "$peak_percent" =~ ^[0-9]+([.][0-9]+)?$ ]] && node -e 'process.exit(Number(process.argv[1]) < Number(process.argv[2]) ? 0 : 1)' "$peak_percent" "$D1_THRESHOLD_PERCENT"; then
+            proceed=true
+            reason="below-threshold"
+          else
+            reason="threshold-reached"
+          fi
+        fi
+
+        {
+          echo "D1 preflight decision: proceed=$proceed peak=${peak_percent}% threshold=${D1_THRESHOLD_PERCENT}% reason=$reason"
+          if [[ "$proceed" != "true" ]]; then
+            echo "D1 materialization deferred; R2/static publication remains canonical."
+          fi
+        } >> "$GITHUB_STEP_SUMMARY"
+        echo "proceed=$proceed" >> "$GITHUB_OUTPUT"
+        echo "peak_percent=$peak_percent" >> "$GITHUB_OUTPUT"
+        echo "reason=$reason" >> "$GITHUB_OUTPUT"
+        # Analytics failures and quota warnings are fail-safe: skip D1, do not
+        # fail source ingestion or publish a partial D1 update.
+        exit 0

@@ -163,4 +163,25 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(workflow).toContain("D1_THRESHOLD_PERCENT: 60");
     expect(workflow).toContain("Math.max(report.readPercent ?? 100, report.writePercent ?? 100)");
   });
+
+  it("11. Todo ETL que materializa D1 tiene el preflight fail-safe de cuota", () => {
+    const workflows = [
+      "etl-chilecompra.yml",
+      "etl-contraloria.yml",
+      "etl-dipres.yml",
+      "etl-expenses.yml",
+      "etl-infolobby.yml",
+      "etl-infoprobidad.yml",
+      "etl-ley-19862.yml",
+      "etl-servel.yml",
+      "etl-sinim.yml",
+    ];
+
+    for (const name of workflows) {
+      const content = fs.readFileSync(path.join(workflowsDir, name), "utf8");
+      expect(content, name).toContain("uses: ./.github/actions/d1-preflight");
+      expect(content, name).toContain('threshold-percent: "60"');
+      expect(content, name).toContain("steps.d1-quota.outputs.proceed == 'true'");
+    }
+  });
 });

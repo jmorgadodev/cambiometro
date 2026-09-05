@@ -80,7 +80,18 @@ jobs:
         run: |
           npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
 
+      - name: Preflight de cuota D1 antes de materializar
+        id: d1-quota
+        uses: ./.github/actions/d1-preflight
+        with:
+          threshold-percent: "60"
+          output: transparencia-app/d1-preflight.json
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+
       - name: Materializar D1 y registrar ejecución
+        if: steps.d1-quota.outputs.proceed == 'true'
         working-directory: transparencia-app
         env:
           GH_TOKEN: ${{ github.token }}
@@ -88,3 +99,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
           ETL_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
         run: npm run data:materialize -- --database transparencia-db --remote --skip-unchanged --sources sinim
+
+      - name: Registrar D1 pospuesto por cuota
+        if: steps.d1-quota.outputs.proceed != 'true'
+        run: echo "::warning::D1 de SINIM pospuesto por cuota alta o métrica ilegible; R2/Pages conserva el release canónico."

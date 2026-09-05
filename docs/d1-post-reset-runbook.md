@@ -30,6 +30,8 @@ SQL; aun así, no hace falta repetirlo mientras el límite esté bloqueado.
    El resultado debe ser `"status": "ready"` y `"network": "not-called"`.
 3. Ejecutar una sola vez el workflow manual `usage-watch.yml`, sólo para
    confirmar que el nuevo día comenzó con el nivel esperado. No ejecutar SQL.
+   Los ETL también ejecutan automáticamente el preflight reutilizable
+   `.github/actions/d1-preflight` antes de cualquier materialización remota.
 4. Si el uso está bajo el umbral, hacer una única petición de health:
 
    ```powershell
@@ -49,6 +51,9 @@ SQL; aun así, no hace falta repetirlo mientras el límite esté bloqueado.
 - `ready`: sólo autoriza comenzar la secuencia; no significa que D1 ya esté
   bajo el umbral ni que el ETL sea seguro sin medirlo.
 - `critical` en `usage-watch`: detener materialización y conservar R2/Pages.
+- `warning` (60% o más): los ETL omiten D1 automáticamente y continúan con
+  R2/Pages. Si Analytics no se puede leer, el comportamiento es el mismo por
+  seguridad; la omisión queda en el resumen y en el artefacto `d1-preflight`.
 
 El límite gratuito de D1 se reinicia diariamente a las 00:00 UTC. Las horas
 locales pueden variar según el horario de invierno/verano de Chile; se debe
@@ -57,11 +62,14 @@ usar siempre la hora UTC mostrada por Cloudflare.
 ## Qué queda pendiente después de la prueba
 
 La estrategia incremental y `--skip-unchanged` ya evitan trabajo cuando un
-checksum no cambia. Las votaciones diarias todavía requieren una optimización
-adicional por partición para garantizar que un día con cambios no vuelva a
-recorrer todo el histórico de D1. Si el primer ETL posterior al reinicio
-supera el umbral, detenerse y corregir esa partición; no activar el plan pago
-ni ejecutar `--full-history` como solución.
+checksum no cambia. Todos los ETL con materialización remota quedan además
+protegidos por el mismo preflight: sólo escriben D1 por debajo del 60% del
+límite diario, y publican el snapshot canónico en R2 cuando D1 se pospone.
+Las votaciones diarias todavía requieren una optimización adicional por
+partición para garantizar que un día con cambios no vuelva a recorrer todo el
+histórico de D1. Si el primer ETL posterior al reinicio supera el umbral, el
+workflow se mantiene en R2/Pages y no se debe activar el plan pago ni ejecutar
+`--full-history` como solución.
 
 El ETL de transferencias también quedó protegido: cuando la release completa
 de Ley 19.862 conserva el mismo checksum, `--skip-unchanged` evita reconstruir
