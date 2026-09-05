@@ -876,4 +876,17 @@ describe("API canónica v1", () => {
     expect(body).toContain("nombre_completo");
     expect(body).toContain("Claudio Adaros");
   });
+
+  it("sirve la descarga segmentada desde R2 sin consultar D1 cuando el índice está disponible", async () => {
+    const prepare = vi.fn(() => { throw new Error("D1 no debe consultarse para exportar el directorio"); });
+    const response = await api.fetch(new Request("https://example.test/api/v1/export?dataset=funcionarios&format=json&muni=muni-maipu&page=1&limit=2"), {
+      ...(officialsR2Env() as object),
+      DB: { prepare },
+    } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.export).toBe("segmentada");
+    expect(prepare).not.toHaveBeenCalled();
+  });
 });
