@@ -161,5 +161,6 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(workflow).toContain("proceed=false");
     expect(workflow).toContain("steps.d1-quota.outputs.proceed == 'true'");
     expect(workflow).toContain("D1_THRESHOLD_PERCENT: 60");
+    expect(workflow).toContain("Math.max(report.readPercent ?? 100, report.writePercent ?? 100)");
   });
 });
