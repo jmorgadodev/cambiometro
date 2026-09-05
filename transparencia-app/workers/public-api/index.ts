@@ -1206,7 +1206,7 @@ async function listRecords(requestUrl: URL, env: Env) {
   if (!env.DB) return await listRecordsFromR2(requestUrl, env) ?? (requestUrl.searchParams.has("source") || requestUrl.searchParams.has("entity_id") ? recordsUnavailable(requestUrl, "d1-unavailable") : dbUnavailable());
   const limit = limitFrom(requestUrl);
   const offset = offsetFrom(requestUrl);
-  const source = requestUrl.searchParams.get("source");
+  const source = requestUrl.searchParams.get("source")?.trim() ?? "";
   const kind = requestUrl.searchParams.get("kind");
   const query = requestUrl.searchParams.get("q")?.trim() ?? requestUrl.searchParams.get("query")?.trim() ?? "";
   const from = requestUrl.searchParams.get("from")?.trim() ?? "";
@@ -1239,7 +1239,16 @@ async function listRecords(requestUrl: URL, env: Env) {
   }
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
   try {
-    const total = await env.DB.prepare(`SELECT count(*) AS total FROM records ${where}`).bind(...bindings).first<{ total: number }>();
+    // Para el caso más común (una fuente y paginación), el ETL ya publicó
+    // el conteo validado en source_state. Repetir COUNT(*) sobre records
+    // consume una fila leída por cada registro de la fuente en cada caché
+    // fría, aunque el resultado no haya cambiado. Los filtros adicionales
+    // conservan el COUNT exacto porque el contador publicado no los puede
+    // representar.
+    const sourceOnly = Boolean(source && !kind && !query && !from && !to && !entityId);
+    const total = sourceOnly
+      ? await env.DB.prepare("SELECT record_count AS total FROM source_state WHERE source_id = ?").bind(source).first<{ total: number }>()
+      : await env.DB.prepare(`SELECT count(*) AS total FROM records ${where}`).bind(...bindings).first<{ total: number }>();
     const rows = await env.DB.prepare(`SELECT * FROM records ${where} ORDER BY occurred_at DESC, id LIMIT ? OFFSET ?`).bind(...bindings, limit, offset).all<JsonRecord>();
     const totalCount = Number(total?.total ?? 0);
     return success((rows.results ?? []).map(record), { total: totalCount, limit, page: Math.floor(offset / limit) + 1, totalPages: Math.max(1, Math.ceil(totalCount / limit)) }, pageLinks(requestUrl, offset, limit, totalCount));
