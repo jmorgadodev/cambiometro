@@ -93,6 +93,15 @@ async function databaseSafe(query: Promise<Response>) {
   }
 }
 
+export function cacheControlForStorage(value: string | null) {
+  const directives = String(value ?? "")
+    .split(",")
+    .map((directive) => directive.trim())
+    .filter(Boolean)
+    .filter((directive) => !/^stale-(?:while-revalidate|if-error)\b/i.test(directive));
+  return directives.length > 0 ? directives.join(", ") : "public, max-age=30, s-maxage=300";
+}
+
 async function cachedPublicGet(request: Request, producer: () => Promise<Response>) {
   // Las consultas públicas son inmutables por URL durante el ciclo de
   // publicación. Cachearlas en el edge evita repetir COUNT/SELECT costosos en
@@ -121,8 +130,9 @@ async function cachedPublicGet(request: Request, producer: () => Promise<Respons
     try {
       const stored = response.clone();
       // Cache API does not support stale-while-revalidate/stale-if-error.
-      // Store a supported TTL and expose hits so production can prove reuse.
-      stored.headers.set("Cache-Control", "public, max-age=30, s-maxage=300");
+      // Preserve the endpoint's supported public TTL so expensive D1-backed
+      // responses are not forced to expire after five minutes.
+      stored.headers.set("Cache-Control", cacheControlForStorage(stored.headers.get("Cache-Control")));
       await cache.put(request, stored);
     } catch {
       return marked(response, "BYPASS");
