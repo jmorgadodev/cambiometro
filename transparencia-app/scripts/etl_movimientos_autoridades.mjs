@@ -27,11 +27,26 @@ function configuredSources() {
   if (!raw) return MOVIMIENTOS_SOURCES;
   const provisional = raw.split(",").map((url) => url.trim()).filter(Boolean).map((url, index) => ({
     id: `provisional-${index + 1}`,
-    label: `Fuente provisional ${index + 1}`,
+    label: provisionalLabel(url, index),
     tier: "provisional",
     url,
   }));
   return [...MOVIMIENTOS_SOURCES, ...provisional];
+}
+
+function provisionalLabel(url, index) {
+  try {
+    const host = new URL(url).hostname.replace(/^www\./, "");
+    const knownLabels = {
+      "radiopaulina.cl": "Radio Paulina",
+      "emol.com": "Emol",
+      "adnradio.cl": "ADN Radio",
+      "pauta.cl": "Pauta",
+    };
+    return knownLabels[host] ?? host;
+  } catch {
+    return `Fuente provisional ${index + 1}`;
+  }
 }
 
 function writeReport(report) {

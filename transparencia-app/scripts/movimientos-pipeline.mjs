@@ -143,6 +143,23 @@ function decodeHtml(value) {
     .trim();
 }
 
+function readHtmlMeta(body, attribute, value) {
+  const escaped = String(value).replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+  const expression = new RegExp(`<meta\\b[^>]*${attribute}=["']${escaped}["'][^>]*content=["']([^"']+)["'][^>]*>`, "i");
+  const reverseExpression = new RegExp(`<meta\\b[^>]*content=["']([^"']+)["'][^>]*${attribute}=["']${escaped}["'][^>]*>`, "i");
+  return decodeHtml(body.match(expression)?.[1] ?? body.match(reverseExpression)?.[1] ?? "");
+}
+
+function readHtmlArticleDate(body) {
+  const raw = readHtmlMeta(body, "property", "article:published_time")
+    || readHtmlMeta(body, "name", "date")
+    || readHtmlMeta(body, "itemprop", "datePublished")
+    || body.match(/<time\b[^>]*datetime=["']([^"']+)["']/i)?.[1]
+    || "";
+  const match = String(raw).match(/\d{4}-\d{2}-\d{2}/);
+  return match?.[0] ?? null;
+}
+
 function normalizeUrl(href, baseUrl) {
   try {
     const url = new URL(href, baseUrl);
@@ -197,6 +214,22 @@ export function parseMovementSignals(body, source) {
       const title = decodeHtml(match[2]);
       if (!title || !MOVEMENT_KEYWORDS.test(title)) continue;
       items.push({ title, url: normalizeUrl(match[1], source.url), date: null, summary: "" });
+    }
+
+    // Las fuentes provisionales suelen recibirse como URL de un artículo,
+    // no como un índice RSS. Lee sólo sus metadatos públicos para no perder
+    // anuncios cuando la página no contiene un enlace al propio titular.
+    const metaTitle = readHtmlMeta(text, "property", "og:title")
+      || readHtmlMeta(text, "name", "twitter:title")
+      || decodeHtml(text.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? "");
+    const metaSummary = readHtmlMeta(text, "name", "description") || readHtmlMeta(text, "property", "og:description");
+    if (metaTitle && MOVEMENT_KEYWORDS.test(`${metaTitle} ${metaSummary}`)) {
+      items.push({
+        title: metaTitle,
+        url: source.url,
+        date: readHtmlArticleDate(text),
+        summary: metaSummary,
+      });
     }
   }
 
@@ -335,6 +368,77 @@ function markUnconfirmedSofiaAnnouncement(movimiento) {
   };
 }
 
+const KNOWN_ANNOUNCED_MOVEMENTS = Object.freeze([
+  {
+    id: "mov-alonso-velasquez-2026-09-03",
+    matches: /alonso vel[aá]squez|seremi.{0,80}vivienda.{0,80}tarapac[aá].{0,80}renunc|renunc.{0,80}seremi.{0,80}vivienda.{0,80}tarapac[aá]/i,
+    prefer: /alonso vel[aá]squez/i,
+    build: (signal, now) => ({
+      id: "mov-alonso-velasquez-2026-09-03",
+      tipo_evento: "renuncia",
+      cargo: "Secretario Regional Ministerial de Vivienda y Urbanismo de Tarapacá",
+      organismo: "SEREMI de Vivienda y Urbanismo de Tarapacá",
+      ministerio: "Ministerio de Vivienda y Urbanismo",
+      region: "Región de Tarapacá",
+      salio: { nombre: "Alonso Velásquez", fecha: "2026-09-03" },
+      fuentes: [sourceFromSignal(signal, "2026-09-03")],
+      estado: "en_confirmacion",
+      fecha_deteccion: now,
+      fecha_verificacion: null,
+      fecha: "2026-09-03",
+      fechaExacta: true,
+      tipo: "renuncia",
+      organo: "SEREMI de Vivienda y Urbanismo de Tarapacá",
+      saliente: "Alonso Velásquez",
+      motivo: "Renuncia voluntaria informada públicamente; los motivos no están detallados en la comunicación oficial disponible.",
+      fuente: sourceLabelForSignal(signal),
+      documento_pendiente: true,
+      verificado: false,
+    }),
+  },
+  {
+    id: "mov-patricio-lohr-2026-09-01",
+    matches: /patricio l[oö]hr|seremi.{0,80}transportes.{0,80}arica.{0,80}renunc|gobierno.{0,80}renuncia.{0,80}seremi.{0,80}transportes.{0,80}arica/i,
+    prefer: /patricio l[oö]hr/i,
+    build: (signal, now) => ({
+      id: "mov-patricio-lohr-2026-09-01",
+      tipo_evento: "renuncia",
+      cargo: "Secretario Regional Ministerial de Transportes y Telecomunicaciones de Arica y Parinacota",
+      organismo: "SEREMI de Transportes y Telecomunicaciones de Arica y Parinacota",
+      ministerio: "Ministerio de Transportes y Telecomunicaciones",
+      region: "Región de Arica y Parinacota",
+      salio: { nombre: "Patricio Löhr Tapia", fecha: "2026-09-01" },
+      fuentes: [sourceFromSignal(signal, "2026-09-01")],
+      estado: "en_confirmacion",
+      fecha_deteccion: now,
+      fecha_verificacion: null,
+      fecha: "2026-09-01",
+      fechaExacta: true,
+      tipo: "renuncia",
+      organo: "SEREMI de Transportes y Telecomunicaciones de Arica y Parinacota",
+      saliente: "Patricio Löhr Tapia",
+      motivo: "Renuncia solicitada por el Gobierno tras una denuncia reportada por funcionarios de la DGAC; el acto administrativo queda pendiente de verificación.",
+      fuente: sourceLabelForSignal(signal),
+      documento_pendiente: true,
+      verificado: false,
+    }),
+  },
+]);
+
+function sourceLabelForSignal(signal) {
+  return `${signal.source_label ?? signal.source_id ?? "Fuente provisional"} (${signal.date ?? "fecha no indicada"})`;
+}
+
+function sourceFromSignal(signal, fallbackDate) {
+  return {
+    nivel: signal.source_tier === "official" ? "oficial" : "prensa",
+    medio: signal.source_label ?? signal.source_id ?? "Fuente provisional",
+    url: signal.url,
+    fecha: signal.date ?? fallbackDate,
+    titulo: signal.title,
+  };
+}
+
 export function materializeKnownSignals(movimientos, signals, now) {
   const normalizedExisting = movimientos.map(markUnconfirmedSofiaAnnouncement);
   const riosMovementId = "mov-rios-deportes-2026-08-27";
@@ -350,11 +454,8 @@ export function materializeKnownSignals(movimientos, signals, now) {
     const title = normalizeSignalText((signal.title ?? "") + " " + (signal.summary ?? ""));
     return title.includes("maria paz rios") && title.includes("subsecretaria de deporte");
   });
-  if (knownRiosExists || !riosSignal) return normalizedExisting;
-
-  return [
-    ...normalizedExisting,
-    {
+  const result = [...normalizedExisting];
+  if (!knownRiosExists && riosSignal) result.push({
       id: riosMovementId,
       tipo_evento: "nombramiento",
       cargo: "Subsecretaria de Deportes",
@@ -388,8 +489,17 @@ export function materializeKnownSignals(movimientos, signals, now) {
       fuente: MARIA_PAZ_RIOS_SOURCES.map((source) => source.medio + " (" + source.fecha + ")").join(" · "),
       documento_pendiente: true,
       verificado: false,
-    },
-  ];
+    });
+
+  for (const definition of KNOWN_ANNOUNCED_MOVEMENTS) {
+    if (result.some((movement) => movement.id === definition.id)) continue;
+    const candidates = signals.filter((candidate) => definition.matches.test(normalizeSignalText(`${candidate.title ?? ""} ${candidate.summary ?? ""}`)));
+    const signal = candidates.find((candidate) => definition.prefer?.test(normalizeSignalText(`${candidate.title ?? ""} ${candidate.summary ?? ""}`)) && candidate.date)
+      ?? candidates.find((candidate) => candidate.date)
+      ?? candidates[0];
+    if (signal) result.push(definition.build(signal, now));
+  }
+  return result;
 }
 
 function buildConnectorMetadata(previousConnectors, sourceResults, now) {
