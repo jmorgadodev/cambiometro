@@ -380,12 +380,12 @@ const KNOWN_ANNOUNCED_MOVEMENTS = Object.freeze([
       organismo: "SEREMI de Vivienda y Urbanismo de Tarapacá",
       ministerio: "Ministerio de Vivienda y Urbanismo",
       region: "Región de Tarapacá",
-      salio: { nombre: "Alonso Velásquez", fecha: "2026-09-03" },
-      fuentes: [sourceFromSignal(signal, "2026-09-03")],
+      salio: { nombre: "Alonso Velásquez", fecha: "2026-09-02" },
+      fuentes: mergeMovementSources(ALONSO_VELASQUEZ_SOURCES, signal),
       estado: "en_confirmacion",
       fecha_deteccion: now,
       fecha_verificacion: null,
-      fecha: "2026-09-03",
+      fecha: "2026-09-02",
       fechaExacta: true,
       tipo: "renuncia",
       organo: "SEREMI de Vivienda y Urbanismo de Tarapacá",
@@ -425,6 +425,23 @@ const KNOWN_ANNOUNCED_MOVEMENTS = Object.freeze([
   },
 ]);
 
+const ALONSO_VELASQUEZ_SOURCES = Object.freeze([
+  {
+    nivel: "oficial",
+    medio: "Ministerio de Vivienda y Urbanismo",
+    url: "https://www.minvu.gob.cl/noticia/declaracion-publica-6/",
+    fecha: "2026-09-02",
+    titulo: "Declaración pública: Alonso Velásquez presenta su renuncia al cargo de Seremi de Tarapacá",
+  },
+  {
+    nivel: "prensa",
+    medio: "Radio Paulina",
+    url: "https://radiopaulina.cl/2026/09/03/entrevero-irreconciliable-ex-seremi-de-vivienda-de-tarapaca-justifico-su-salida-por-un-desencuentro-con-el-ministro-poduje/",
+    fecha: "2026-09-03",
+    titulo: "Ex seremi de Vivienda de Tarapacá justificó su salida por un desencuentro con el ministro Poduje",
+  },
+]);
+
 function sourceLabelForSignal(signal) {
   return `${signal.source_label ?? signal.source_id ?? "Fuente provisional"} (${signal.date ?? "fecha no indicada"})`;
 }
@@ -437,6 +454,12 @@ function sourceFromSignal(signal, fallbackDate) {
     fecha: signal.date ?? fallbackDate,
     titulo: signal.title,
   };
+}
+
+function mergeMovementSources(sources, signal) {
+  const candidates = [...(sources ?? [])];
+  if (signal?.url && !candidates.some((source) => source.url === signal.url)) candidates.push(sourceFromSignal(signal, signal.date));
+  return candidates;
 }
 
 export function materializeKnownSignals(movimientos, signals, now) {

@@ -42,11 +42,12 @@ No se guardan credenciales ni se agregan URLs de medios directamente al código:
 si una fuente no está configurada, el pipeline la reporta como ausente y no
 convierte titulares en hechos estructurados.
 
-La configuración operativa actual incorpora dos páginas de prensa para detectar
-anuncios recientes que todavía no tienen decreto publicado:
+La configuración operativa actual incorpora fuentes oficiales y páginas de
+prensa para detectar anuncios recientes que todavía no tienen decreto publicado:
 
-- Radio Paulina: renuncia de Alonso Velásquez, Seremi de Vivienda de Tarapacá
-  (03-09-2026).
+- Ministerio de Vivienda y Urbanismo: renuncia de Alonso Velásquez, Seremi de
+  Vivienda de Tarapacá, efectiva el 02-09-2026; Radio Paulina informó el caso
+  el 03-09-2026. La ficha conserva ambas fechas separadas.
 - Emol: salida de Patricio Löhr, Seremi de Transportes de Arica y Parinacota
   (02-09-2026; el evento se registra con fecha efectiva 01-09-2026).
 
