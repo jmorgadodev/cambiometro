@@ -82,6 +82,23 @@ function dbUnavailable() {
   return failure("DATABASE_UNAVAILABLE", "D1 no esta disponible.", 503, undefined);
 }
 
+function recordsScopeRequired(requestUrl: URL) {
+  return failure(
+    "RECORD_SCOPE_REQUIRED",
+    "Indique una fuente, tipo, entidad, texto o rango de fechas para consultar registros paginados.",
+    400,
+    {
+      requiredAnyOf: ["source", "kind", "q", "query", "entity_id", "from", "to"],
+      reason: "unbounded-record-scan-disabled",
+    },
+  );
+}
+
+function hasRecordScope(requestUrl: URL) {
+  return ["source", "kind", "q", "query", "entity_id", "from", "to"]
+    .some((key) => Boolean(requestUrl.searchParams.get(key)?.trim()));
+}
+
 async function databaseSafe(query: Promise<Response>) {
   try {
     return await query;
@@ -1180,6 +1197,12 @@ async function listEntities(requestUrl: URL, env: Env) {
 }
 
 async function listRecords(requestUrl: URL, env: Env) {
+  // The unfiltered endpoint used to execute COUNT(*) + SELECT over the full
+  // records table. It is not needed by the public UI (Cruces always sends a
+  // source) and can exhaust D1 rows_read when crawlers request it repeatedly.
+  // Keep scoped queries and all R2-backed releases available, but fail before
+  // touching D1 when no bounded scope was supplied.
+  if (env.DB && !hasRecordScope(requestUrl)) return recordsScopeRequired(requestUrl);
   if (!env.DB) return await listRecordsFromR2(requestUrl, env) ?? (requestUrl.searchParams.has("source") || requestUrl.searchParams.has("entity_id") ? recordsUnavailable(requestUrl, "d1-unavailable") : dbUnavailable());
   const limit = limitFrom(requestUrl);
   const offset = offsetFrom(requestUrl);
