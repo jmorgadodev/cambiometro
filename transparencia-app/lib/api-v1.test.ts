@@ -309,6 +309,7 @@ describe("API canónica v1", () => {
     );
 
     expect(response.status).toBe(200);
+    expect(prepared.join("\n")).toContain("records.id IN");
     expect(prepared.join("\n")).toContain("FROM record_subjects");
     expect(prepared.join("\n")).toContain("FROM record_objects");
     expect(prepared.join("\n")).not.toContain("subject_entity_ids_json LIKE");
