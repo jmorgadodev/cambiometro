@@ -100,17 +100,49 @@ if (!sitemapResponse.ok) throw new Error(`SITEMAP_HTTP_${sitemapResponse.status}
 const sitemapUrls = parseSitemap(await sitemapResponse.text());
 if (sitemapUrls.length === 0) throw new Error("SITEMAP_EMPTY");
 
-const level12 = sitemapUrls.filter((url) => routeDepth(url) <= 2);
-const results = await crawl(sitemapUrls);
+const principalRoutes = [
+  "/",
+  "/autoridades/",
+  "/cambios/",
+  "/calculadora/",
+  "/comparar/",
+  "/cruces/",
+  "/datos/",
+  "/donar/",
+  "/entidades/",
+  "/fuentes/",
+  "/funcionarios/",
+  "/gastos-operacionales/",
+  "/movimientos/",
+  "/municipalidades/",
+  "/partidos/",
+  "/personas/",
+  "/politico/",
+  "/privacidad/",
+  "/rankings/",
+  "/servicios-publicos/",
+  "/transferencias/",
+  "/votaciones-destacadas/",
+  "/como-funciona/",
+];
+const crawlUrls = [...new Set([
+  ...sitemapUrls,
+  ...principalRoutes.map((route) => `${baseUrl}${route}`),
+])];
+const level12 = crawlUrls.filter((url) => routeDepth(url) <= 2);
+const results = await crawl(crawlUrls);
 const byStatus = Object.fromEntries([...new Set(results.map((result) => result.status))]
   .sort((a, b) => a - b)
   .map((status) => [status, results.filter((result) => result.status === status).length]));
-const principalRoutes = ["/", "/politico", "/municipalidades", "/cruces", "/transferencias", "/funcionarios", "/entidades", "/datos", "/fuentes"];
 const principal = results.filter((result) => principalRoutes.includes(result.route));
+const principalByRoute = new Map(principal.map((result) => [result.route, result]));
+const missingPrincipal = principalRoutes.filter((route) => !principalByRoute.has(route));
+if (missingPrincipal.length > 0) throw new Error(`PRINCIPAL_ROUTES_MISSING:${missingPrincipal.join(",")}`);
 const report = {
   generatedAt: new Date().toISOString(),
   baseUrl,
   sitemapCount: sitemapUrls.length,
+  requestedCount: crawlUrls.length,
   level12Count: level12.length,
   concurrency,
   timeoutMs,
@@ -131,6 +163,7 @@ await writeFile(outputPath, `${JSON.stringify(report, null, 2)}\n`, "utf8");
 console.log(JSON.stringify({
   output: outputPath,
   sitemapCount: report.sitemapCount,
+  requestedCount: report.requestedCount,
   level12Count: report.level12Count,
   total: report.total,
   ok: report.ok,
