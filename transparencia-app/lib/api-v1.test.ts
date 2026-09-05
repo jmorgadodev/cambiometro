@@ -602,6 +602,30 @@ describe("API canónica v1", () => {
     expect(prepared.some((sql) => /source_state\.record_count/i.test(sql))).toBe(true);
   });
 
+  it("prefiere el inventario R2 y evita D1 cuando está publicado", async () => {
+    const prepare = vi.fn(() => {
+      throw new Error("D1 no debe consultarse para el inventario público");
+    });
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/sources-v1/source-inventory.json") {
+          return { json: async <T>() => ({ sources: [{ id: "chilecompra", label: "ChileCompra" }] }) as T };
+        }
+        if (key === "projections/sources-v1/source-health.json") {
+          return { json: async <T>() => ({ sources: { chilecompra: { recordCount: 74142, status: "connected" } } }) as T };
+        }
+        return null;
+      },
+    };
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/sources"), { DB: { prepare }, PUBLIC_DATA } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data[0]).toMatchObject({ id: "chilecompra", recordCount: 74142, status: "connected" });
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
   it("sirve el catálogo de fuentes desde R2 si D1 agotó su cuota", async () => {
     const env = {
       DB: { prepare: () => { throw new Error("D1_ERROR: daily rows_read quota exceeded"); } },

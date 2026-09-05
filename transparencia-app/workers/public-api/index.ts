@@ -1465,7 +1465,13 @@ async function exportFuncionarios(requestUrl: URL, env: Env, format: "csv" | "js
 }
 
 async function listSources(requestUrl: URL, env: Env) {
-  if (!env.DB) return await listSourcesFromR2(requestUrl, env) ?? dbUnavailable();
+  // El inventario y el estado de publicación ya se generan en R2. Usarlos
+  // primero evita repetir una consulta al catálogo D1 en cada expiración de
+  // caché y mantiene la página de fuentes disponible durante un agotamiento
+  // de rows_read.
+  const published = await listSourcesFromR2(requestUrl, env);
+  if (published) return published;
+  if (!env.DB) return dbUnavailable();
   try {
     const rows = await env.DB.prepare(`
       SELECT
