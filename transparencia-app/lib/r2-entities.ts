@@ -1,5 +1,5 @@
-import type { CanonicalEntity, RelationEdge } from "@/lib/data-contracts";
-import type { R2PublicCatalog } from "@/lib/r2-catalog";
+import type { CanonicalEntity, RelationEdge } from "./data-contracts";
+import type { R2PublicCatalog } from "./r2-catalog";
 
 export interface R2ObjectBodyLike {
   json<T>(): Promise<T>;

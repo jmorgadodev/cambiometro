@@ -2,6 +2,7 @@ import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
 
 import { POLITICOS_SEED } from "../../lib/politicos-source";
 import { readR2EvidenceRecords } from "../../lib/r2-records";
+import { readR2EntityIndex } from "../../lib/r2-entities";
 
 interface EmailSender {
   send(message: {
@@ -1228,6 +1229,12 @@ async function listRecords(requestUrl: URL, env: Env) {
 }
 
 async function listRelations(requestUrl: URL, env: Env, crosses = false) {
+  // Las fichas consultan una entidad concreta. Sus relaciones ya viven en
+  // los índices JSONL de R2; leerlas primero evita COUNT(*) + SELECT sobre
+  // toda la tabla de D1 en cada visita. D1 queda como respaldo para consultas
+  // globales o releases antiguos.
+  const published = await listRelationsFromR2(requestUrl, env, crosses);
+  if (published) return published;
   if (!env.DB) return dbUnavailable();
   const limit = limitFrom(requestUrl);
   const offset = offsetFrom(requestUrl);
@@ -1246,6 +1253,35 @@ async function listRelations(requestUrl: URL, env: Env, crosses = false) {
     return crosses ? { relation: value, evidence: value.evidenceRecordIds.map((id) => ({ id })) } : value;
   });
   return success(data, { total: totalCount, limit }, pageLinks(requestUrl, offset, limit, totalCount));
+}
+
+async function listRelationsFromR2(requestUrl: URL, env: Env, crosses: boolean): Promise<Response | null> {
+  const anchor = requestUrl.searchParams.get("entity_id") ?? requestUrl.searchParams.get("from_id");
+  if (!anchor || !env.PUBLIC_DATA) return null;
+  try {
+    const index = await readR2EntityIndex(env.PUBLIC_DATA, anchor);
+    if (!index) return null;
+    const predicate = requestUrl.searchParams.get("predicate");
+    const filtered = index.relations
+      .filter((value) => !predicate || value.predicate === predicate)
+      .sort((left, right) => left.id.localeCompare(right.id));
+    const limit = limitFrom(requestUrl);
+    const offset = offsetFrom(requestUrl);
+    const data = filtered.slice(offset, offset + limit).map((value) => crosses
+      ? { relation: value, evidence: value.evidenceRecordIds.map((id: string) => ({ id })) }
+      : value);
+    return success(data, {
+      total: filtered.length,
+      limit,
+      page: Math.floor(offset / limit) + 1,
+      sourceBackend: "r2-entity-index",
+      sourceStatus: "complete",
+    }, pageLinks(requestUrl, offset, limit, filtered.length));
+  } catch {
+    // Un índice R2 ausente o ilegible no rompe el contrato: se usa el respaldo
+    // D1 existente para conservar compatibilidad durante una transición.
+    return null;
+  }
 }
 
 async function search(requestUrl: URL, env: Env) {
