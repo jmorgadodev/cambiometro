@@ -17,7 +17,9 @@ si falla una validación, se conserva la publicación anterior.
 - Pages deployment: `ad28b34d-7846-4240-ae83-a343ec010f19`.
 - Preview del deployment: <https://ad28b34d.cambiometro.pages.dev>.
 - Dominio: <https://cambiometro.impulsacv.cl>.
-- Worker productivo sin cambios: `5e091180-d59b-4a72-8618-10b8898e5a98`.
+- Worker productivo: `291bab62-d89d-426f-b1e5-3d1cb9c92e76`, promovido al 100%
+  por el workflow `33982168319`.
+- Worker anterior conocido-bueno: `5e091180-d59b-4a72-8618-10b8898e5a98`.
 - Guardia ETL: run `33977739231`, `success`; confirmó la publicación automática
   posterior al ETL.
 
@@ -40,8 +42,17 @@ como confirmados oficialmente.
 
 - `npm run verify:prod:movimientos`: todos los checks verdes; sin spinner ni
   errores de navegador.
-- `npm run smoke:uptime`: 12/12 rutas HTTP 200, sin 1102 ni errores, incluyendo
-  `/movimientos`, `/api/v1/health` y búsqueda.
+- `verify-prod-full.mjs` posterior a la promoción del Worker: `127/127`, sin
+  fallos.
+- `verify-prod-full.mjs` con navegador, CSP, consentimiento y temas: `134/134`,
+  sin fallos; GA4 sólo se carga tras aceptar consentimiento, no se duplica y
+  registra un `page_view` por ruta navegada. Versión reportada por el verificador:
+  `v1.0-a3671a16`.
+- `npm run smoke:uptime`: `12/12` rutas HTTP 200, incluyendo home, listados,
+  ficha, `/movimientos` y endpoints del Worker.
+- `/api/v1/relations` y `/api/v1/crosses` anclados a una entidad: HTTP 200,
+  `sourceBackend=r2-entity-index`, `total=18`; ya no requieren el COUNT/SELECT
+  de D1 para ese flujo.
 - El build/E2E, lint, tipos, seguridad y CodeQL de los PR de operación quedaron
   verdes.
 
@@ -64,17 +75,20 @@ como si fuera exitoso.
 ## D1 y costo
 
 La API de transferencias permanece R2-first: health productivo reporta
-`transferSource=r2`, `transferRows=60351` y `d1TransferRows=0`. Esto evita
-consultas D1 innecesarias y no requiere aumentar el plan. La consulta local
-`wrangler d1 list` sigue bloqueada por permisos del token usado en el equipo;
-no se ejecutó ninguna materialización D1 ni se consumió el límite diario.
+`transferSource=r2`, `transferRows=60351` y `d1TransferRows=0`. Las relaciones
+ancladas también son R2-first desde el Worker `291bab...`. El monitor de uso
+`33980663597` registró `4.676.009 / 5.000.000` rows read (`93,52%`) en el día;
+el preflight del ETL mantiene pospuesta la materialización D1 sobre el umbral
+de seguridad y no requiere aumentar el plan. La consulta local `wrangler d1
+list` sigue bloqueada por permisos del token usado en el equipo; no se ejecutó
+ninguna materialización D1 manual.
 
 ## Rollback
 
 ```bash
 npm run pages:rollback -- ad28b34d-7846-4240-ae83-a343ec010f19
 
-npx wrangler rollback 5e091180-d59b-4a72-8618-10b8898e5a98 \
+npx wrangler rollback 291bab62-d89d-426f-b1e5-3d1cb9c92e76 \
   --name cambiometro-public-api
 ```
 
