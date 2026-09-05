@@ -63,11 +63,11 @@ jobs:
           MOVIMIENTOS_RUN_REPORT: data/generated/movimientos-run.json
           MOVIMIENTOS_INPUT: data/movimientos.previous.json
           MOVIMIENTOS_PROVISIONAL_SOURCES: ${{ vars.MOVIMIENTOS_PROVISIONAL_SOURCES }}
-          # Prensa Presidencia entrega una cadena TLS que Node 22 no resuelve
-          # con su bundle aislado. Esta opción usa el almacén CA del runner,
-          # conserva la validación del certificado y evita marcar la fuente
-          # como caída.
+          # El servidor de Prensa Presidencia omite su intermedio Sectigo.
+          # Se agrega sólo ese intermedio público y se conserva la validación
+          # TLS normal; nunca se usa NODE_TLS_REJECT_UNAUTHORIZED=0.
           NODE_OPTIONS: "--use-system-ca"
+          NODE_EXTRA_CA_CERTS: ${{ github.workspace }}/transparencia-app/config/certs/sectigo-public-server-authentication-ca-ov-r36.pem
         run: npm run etl:movimientos
 
       - name: Validar snapshot y publicar grupo estático
