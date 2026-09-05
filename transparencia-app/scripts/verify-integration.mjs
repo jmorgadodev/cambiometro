@@ -419,8 +419,11 @@ try {
 
   const sources = await page.request.get(`${apiBaseUrl}/api/v1/sources`);
   const sourcePayload = await sources.json();
+  // DIPRES is published as the canonical 476-row program projection. The
+  // larger historical figure (15,689) belongs to a different release and
+  // must not make the production guard reject a coherent current snapshot.
   const expectedSourceCounts = new Map([
-    ["chilecompra", 74_142], ["dipres", 15_689], ["sinim", 3_105],
+    ["chilecompra", 74_142], ["dipres", 476], ["sinim", 3_105],
     ["ley-19862", 11_651], ["transparencia-activa", 1_200_807],
     ["personal-apoyo", 4_073],
   ]);
