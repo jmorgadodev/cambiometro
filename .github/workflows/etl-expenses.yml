@@ -84,7 +84,18 @@ jobs:
           npm run data:lake -- --exclude-source infolobby,infoprobidad
           npm run data:publish
 
+      - name: Preflight de cuota D1 antes de materializar
+        id: d1-quota
+        uses: ./.github/actions/d1-preflight
+        with:
+          threshold-percent: "60"
+          output: transparencia-app/d1-preflight.json
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+
       - name: Materializar gastos en D1 productiva
+        if: steps.d1-quota.outputs.proceed == 'true'
         working-directory: transparencia-app
         env:
           GH_TOKEN: ${{ github.token }}
@@ -108,6 +119,19 @@ jobs:
             exit 0
           fi
           exit "$status"
+
+      - name: Registrar D1 pospuesto por cuota
+        if: steps.d1-quota.outputs.proceed != 'true'
+        run: echo "::warning::D1 de gastos pospuesto por cuota alta o métrica ilegible; R2/Pages conserva el release canónico."
+
+      - name: Conservar diagnóstico de preflight D1
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d1-preflight-expenses-${{ github.run_id }}
+          path: transparencia-app/d1-preflight.json
+          if-no-files-found: warn
+          retention-days: 31
 
       - name: Generar subsets estáticos completos
         working-directory: transparencia-app

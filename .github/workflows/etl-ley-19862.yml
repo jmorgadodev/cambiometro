@@ -180,8 +180,19 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: npm run data:publish:transfer-api
 
+      - name: Preflight de cuota D1 antes de materializar
+        id: d1-quota
+        uses: ./.github/actions/d1-preflight
+        with:
+          threshold-percent: "60"
+          output: transparencia-app/d1-preflight.json
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+
       - name: Resolver D1 dedicada de transferencias
         id: transfer-d1-config
+        if: steps.d1-quota.outputs.proceed == 'true'
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -196,6 +207,7 @@ jobs:
 
       - name: Materializar proyección D1 cuando haya capacidad
         id: materialize-transfer-d1
+        if: steps.d1-quota.outputs.proceed == 'true'
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -236,3 +248,7 @@ jobs:
           path: transparencia-app/transfer-d1-materialization.log
           if-no-files-found: ignore
           retention-days: 30
+
+      - name: Registrar D1 de transferencias pospuesto por cuota
+        if: steps.d1-quota.outputs.proceed != 'true'
+        run: echo "::warning::D1 de transferencias pospuesto por cuota alta o métrica ilegible; R2 permanece como fuente canónica."
