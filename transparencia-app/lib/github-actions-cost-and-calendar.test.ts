@@ -152,4 +152,14 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(ingest).toContain("function cachedSession");
     expect(ingest).toContain("if (cached && !shouldRefresh(vote.fecha)) return cached");
   });
+
+  it("10. El ETL diario omite D1 cuando la cuota ya está elevada", () => {
+    const workflow = fs.readFileSync(path.join(workflowsDir, "etl-daily.yml"), "utf8");
+
+    expect(workflow).toContain("id: d1-quota");
+    expect(workflow).toContain("D1_USAGE_OUTPUT: d1-preflight.json");
+    expect(workflow).toContain("proceed=false");
+    expect(workflow).toContain("steps.d1-quota.outputs.proceed == 'true'");
+    expect(workflow).toContain("D1_THRESHOLD_PERCENT: 60");
+  });
 });
