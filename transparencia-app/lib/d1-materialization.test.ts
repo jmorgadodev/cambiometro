@@ -84,6 +84,15 @@ describe("materializacion del lake a D1", () => {
     expect(script).toContain("if (requestedSourceIds.size === 0) clearLegacyRelations();");
   });
 
+  it("evalua checksums antes de aplicar migrations en ejecuciones incrementales", () => {
+    const script = readFileSync(resolve("scripts/materialize-d1.mjs"), "utf8");
+    const checksumCheck = script.indexOf("const previousStates = new Map");
+    const migrationCall = script.indexOf("ensureMigrations();", checksumCheck);
+
+    expect(checksumCheck).toBeGreaterThan(-1);
+    expect(migrationCall).toBeGreaterThan(checksumCheck);
+  });
+
   it("publica las entidades descubiertas dentro de los registros antes de activar la fuente", () => {
     const script = readFileSync(resolve("scripts/materialize-d1.mjs"), "utf8");
     const finalizeSource = script.slice(script.indexOf("function finalizeSource"));
