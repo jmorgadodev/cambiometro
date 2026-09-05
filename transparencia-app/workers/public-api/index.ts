@@ -1140,7 +1140,12 @@ function relation(row: JsonRecord) {
 }
 
 async function listEntities(requestUrl: URL, env: Env) {
-  if (!env.DB) return await listEntitiesFromR2(requestUrl, env) ?? failure("DATASET_UNAVAILABLE", "El directorio no está disponible temporalmente.", 503);
+  // El catálogo R2 es la proyección publicada y paginable del directorio.
+  // Debe ser la fuente pública principal: listar entidades desde D1 requiere
+  // COUNT(*) y ORDER BY sobre todo el universo en cada acceso frío.
+  const published = await listEntitiesFromR2(requestUrl, env);
+  if (published) return published;
+  if (!env.DB) return failure("DATASET_UNAVAILABLE", "El directorio no está disponible temporalmente.", 503);
   const limit = limitFrom(requestUrl);
   const offset = offsetFrom(requestUrl);
   const kind = requestUrl.searchParams.get("kind");
