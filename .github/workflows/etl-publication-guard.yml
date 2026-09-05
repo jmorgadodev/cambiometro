@@ -30,7 +30,10 @@ jobs:
   verify:
     if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    # Pages hidrata desde R2, construye y publica después del ETL. En los
+    # releases grandes el despliegue puede superar los 10 minutos; la guardia
+    # debe esperar el resultado real antes de declarar un falso negativo.
+    timeout-minutes: 35
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
@@ -44,4 +47,6 @@ jobs:
           UPTIME_TOKEN: ${{ secrets.CAMBIOMETRO_UPTIME_TOKEN }}
           ETL_WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
           ETL_COMPLETED_AT: ${{ github.event.workflow_run.updated_at }}
+          STATIC_RELEASE_WAIT_MS: "1800000"
+          STATIC_RELEASE_POLL_MS: "20000"
         run: node scripts/verify-etl-freshness.mjs

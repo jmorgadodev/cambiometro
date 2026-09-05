@@ -314,7 +314,12 @@ jobs:
         run: npx wrangler pages deploy out --project-name cambiometro --branch "${{ inputs.preview_branch }}" --commit-hash "${GITHUB_SHA:0:40}" --commit-message "Pages preview ${GITHUB_SHA}"
 
       - name: Publicar Pages producción después de todos los gates
-        if: github.event_name == 'workflow_dispatch' && inputs.publish_pages == true && inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER'
+        # Los refrescos disparados por un ETL ya pasan todos los gates de
+        # integridad, censo, bundle y export estático de este mismo job. Una
+        # vez hecho el cutover inicial, deben actualizar producción solos para
+        # que Movimientos y las tarjetas de fuentes no queden congelados.
+        # Los cambios de interfaz conservan el gate manual de confirmación.
+        if: (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || (github.event_name == 'workflow_dispatch' && inputs.publish_pages == true && inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER')
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -325,7 +330,7 @@ jobs:
         run: npx wrangler pages deploy out --project-name cambiometro --branch main --commit-hash "$GITHUB_SHA" --commit-message "Static refresh ${GITHUB_SHA}"
 
       - name: Registrar deployment Pages productivo y rollback
-        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.publish_pages == true && inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER' }}
+        if: ${{ success() && ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || (github.event_name == 'workflow_dispatch' && inputs.publish_pages == true && inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER')) }}
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -352,7 +357,7 @@ jobs:
           '
 
       - name: Guardar metadata del deployment Pages
-        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.publish_pages == true && inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER' }}
+        if: ${{ success() && ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || (github.event_name == 'workflow_dispatch' && inputs.publish_pages == true && inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER')) }}
         uses: actions/upload-artifact@v4
         with:
           name: pages-production-deployment-${{ github.sha }}
