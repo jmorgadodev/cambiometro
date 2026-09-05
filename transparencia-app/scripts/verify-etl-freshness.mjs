@@ -7,7 +7,8 @@ const maxAgeDays = Number(process.env.MAX_RELEASE_AGE_DAYS || 45);
 const minimumTransferRows = Number(process.env.EXPECTED_TRANSFER_ROWS || 0);
 
 async function get(path, base) {
-  const response = await fetch(`${base}${path}`, { headers, signal: AbortSignal.timeout(15000) });
+  const separator = path.includes("?") ? "&" : "?";
+  const response = await fetch(`${base}${path}${separator}verify=${encodeURIComponent(process.env.GITHUB_RUN_ID || Date.now())}`, { headers, signal: AbortSignal.timeout(15000), cache: "no-store" });
   const text = await response.text();
   let json = null;
   try { json = JSON.parse(text); } catch {}

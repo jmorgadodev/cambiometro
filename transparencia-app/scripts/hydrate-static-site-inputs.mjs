@@ -7,7 +7,9 @@ const root = resolve(import.meta.dirname, "..");
 const bucket = argument("--bucket", "transparencia-public-data");
 const required = process.argv.includes("--required");
 const requiredAll = process.argv.includes("--required-all");
+const force = process.argv.includes("--force");
 const requiredFiles = argument("--required-files", "").split(",").map((value) => value.trim()).filter(Boolean);
+const onlyFiles = argument("--only-files", "").split(",").map((value) => value.trim()).filter(Boolean);
 const manifestFile = argument("--manifest-file", "");
 const localManifestPath = manifestFile ? resolve(root, manifestFile) : resolve(root, ".static-site-release-manifest.json");
 const remoteKey = "projections/static-site-v1/manifest.json";
@@ -63,10 +65,11 @@ for (const requiredFile of requiredFiles) {
   if (!availableFiles.has(requiredFile)) throw new Error(`STATIC_INPUT_REQUIRED_FILE_MISSING: ${requiredFile}`);
 }
 for (const entry of manifest.files) {
+  if (onlyFiles.length > 0 && !onlyFiles.includes(entry.path)) continue;
   const target = resolveSafeStaticPath(root, entry.path);
   mkdirSync(dirname(target), { recursive: true });
   const existing = existingFiles.get(entry.path);
-  if (existing?.size === entry.size && existing.checksumSha256 === entry.checksumSha256 && existsSync(target)) {
+  if (!force && existing?.size === entry.size && existing.checksumSha256 === entry.checksumSha256 && existsSync(target)) {
     const current = readFileSync(target);
     if (current.byteLength === entry.size && sha256Buffer(current) === entry.checksumSha256) continue;
   }

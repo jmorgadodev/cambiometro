@@ -166,6 +166,17 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: npm run data:hydrate:static -- --required --required-all
 
+      - name: Rehidratar Movimientos desde el release vigente de R2
+        # La caché de Pages puede ser válida para los datasets pesados y, a la
+        # vez, contener un snapshot de Movimientos anterior. Este archivo es
+        # pequeño y debe seguir siempre el checksum que acaba de publicar el
+        # ETL, sin invalidar ni volver a descargar el resto del data lake.
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:hydrate:static -- --required --required-files data/movimientos.json --only-files data/movimientos.json --force
+
       - name: Verificar calidad semántica de entradas estáticas
         working-directory: transparencia-app
         run: npm run check:static-input-quality
