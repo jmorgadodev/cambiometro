@@ -111,6 +111,12 @@ describe("pipeline automático de movimientos", () => {
     expect(result.find((movement) => movement.id === "mov-alonso-velasquez-2026-09-03").fuentes).toEqual(expect.arrayContaining([
       expect.objectContaining({ medio: "Ministerio de Vivienda y Urbanismo", nivel: "oficial", fecha: "2026-09-02" }),
       expect.objectContaining({ medio: "Radio Paulina", fecha: "2026-09-03" }),
+      expect.objectContaining({ medio: "Pauta", fecha: "2026-09-03" }),
+    ]));
+    expect(result.find((movement) => movement.id === "mov-patricio-lohr-2026-09-01").fuentes).toEqual(expect.arrayContaining([
+      expect.objectContaining({ medio: "ADN Radio", fecha: "2026-09-01" }),
+      expect.objectContaining({ medio: "BioBioChile", fecha: "2026-09-01" }),
+      expect.objectContaining({ medio: "Emol", fecha: "2026-09-02" }),
     ]));
   });
 
