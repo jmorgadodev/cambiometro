@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from "vitest";
+import { gzipSync } from "node:zlib";
 import api from "../workers/public-api/index";
 import { parseRelationQuery } from "./api-v1";
 
@@ -775,6 +776,48 @@ describe("API canónica v1", () => {
     expect(crossesPayload.data[0].relation.id).toBe(relationPayload.data[0].id);
     expect(crossesPayload.data[0].evidence[0].id).toBe(relationPayload.data[0].evidenceRecordIds[0]);
     expect(crossesPayload.data[0].relation.disclaimer).toContain("no implica irregularidad");
+  });
+
+  it("usa el índice de relaciones R2 para fichas sin consultar D1", async () => {
+    const relation = {
+      id: "relation-r2-1",
+      fromId: "person-camara-1002",
+      predicate: "cast_vote",
+      toId: "record-1",
+      evidenceRecordIds: ["record-1"],
+      period: {},
+      reconciliation: { method: "official_id", confidence: 1 },
+      disclaimer: "Una relación documental no implica irregularidad ni responsabilidad.",
+    };
+    const catalog = {
+      schemaVersion: "1",
+      generatedAt: "2026-09-05T00:00:00.000Z",
+      sources: [{ id: "camara", foundPeriods: [], recordCount: 1, status: "connected", entityIndexKey: "indexes/v1/camara/entity-index.jsonl.gz" }],
+      partitions: [],
+    };
+    const compressed = gzipSync(`${JSON.stringify({
+      id: "person-camara-1002",
+      sourceId: "camara",
+      evidenceRecordIds: ["record-1"],
+      relations: [relation],
+    })}\n`);
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse cuando existe el índice R2"); } },
+      PUBLIC_DATA: {
+        get: async (key: string) => {
+          if (key === "catalog/v1/manifest.json") return { json: async <T>() => catalog as T };
+          if (key === "indexes/v1/camara/entity-index.jsonl.gz") return { arrayBuffer: async () => compressed.buffer.slice(compressed.byteOffset, compressed.byteOffset + compressed.byteLength) };
+          return null;
+        },
+      },
+    } as never;
+    const response = await api.fetch(new Request("https://example.test/api/v1/relations?entity_id=person-camara-1002&limit=1"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toHaveLength(1);
+    expect(payload.data[0]).toMatchObject({ id: "relation-r2-1", fromId: "person-camara-1002" });
+    expect(payload.meta).toMatchObject({ sourceBackend: "r2-entity-index", total: 1 });
   });
 
   it("permite embeber fichas mediante CORS solamente de lectura", async () => {
