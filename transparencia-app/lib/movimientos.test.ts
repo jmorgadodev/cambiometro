@@ -1,7 +1,11 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
-import { MOVIMIENTOS, MOVIMIENTOS_HOME_SUMMARY } from "./movimientos";
+import {
+  isMovimientoDocumentoPendienteMayor30,
+  MOVIMIENTOS,
+  MOVIMIENTOS_HOME_SUMMARY,
+} from "./movimientos";
 
 describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV y Anatomía de Card", () => {
   const root = process.cwd();
@@ -120,5 +124,12 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
         expect(hasOficial).toBe(true);
       }
     }
+  });
+
+  it("9. No marca anuncios recientes como documentos atrasados", () => {
+    const now = Date.parse("2026-09-05T12:00:00Z");
+    expect(isMovimientoDocumentoPendienteMayor30({ documento_pendiente: true, fecha: "2026-09-02" }, now)).toBe(false);
+    expect(isMovimientoDocumentoPendienteMayor30({ documento_pendiente: true, fecha: "2026-07-01" }, now)).toBe(true);
+    expect(isMovimientoDocumentoPendienteMayor30({ documento_pendiente: false, fecha: "2026-07-01" }, now)).toBe(false);
   });
 });

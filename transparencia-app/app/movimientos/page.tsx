@@ -9,6 +9,7 @@ import {
   MOVIMIENTOS_TIPO_EMOJI,
   MOVIMIENTOS_PIPELINE_METADATA,
   MOTIVOS_CATEGORIAS,
+  isMovimientoDocumentoPendienteMayor30,
   type MovimientoTipo,
   type MovimientoMotivoCategoria,
   type Movimiento,
@@ -222,6 +223,7 @@ function MovimientosContent() {
     totalEnConfirmacion,
     fechaActualizacionTexto,
     ultimaEjecucionTexto,
+    ultimoAvisoTexto,
     senalesEnConfirmacion,
   } = useMemo(() => {
     const enGobierno = MOVIMIENTOS.filter((m) => m.fecha >= "2026-03-11");
@@ -274,6 +276,15 @@ function MovimientosContent() {
 
     const verificados = MOVIMIENTOS.filter((m) => m.estado === "verificado").length;
     const enConfirmacion = MOVIMIENTOS.filter((m) => m.estado !== "verificado").length;
+    const ultimaSenal = (MOVIMIENTOS_PIPELINE_METADATA.signals ?? [])
+      .map((signal) => signal.date)
+      .filter((date): date is string => Boolean(date))
+      .sort()
+      .at(-1);
+    const ultimoAviso = ultimaSenal ? new Date(`${ultimaSenal}T12:00:00Z`) : null;
+    const ultimoAvisoTexto = ultimoAviso && !Number.isNaN(ultimoAviso.getTime())
+      ? ultimoAviso.toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Santiago" })
+      : "sin registro";
 
     return {
       totalCambiosGobierno: totalGob,
@@ -289,6 +300,7 @@ function MovimientosContent() {
       ultimaEjecucionTexto: formatPipelineTimestamp(
         MOVIMIENTOS_PIPELINE_METADATA.last_success_at ?? MOVIMIENTOS_PIPELINE_METADATA.last_run,
       ),
+      ultimoAvisoTexto,
       senalesEnConfirmacion: Number(MOVIMIENTOS_PIPELINE_METADATA.stats.signals_en_confirmacion ?? 0),
     };
   }, [nowMs]);
@@ -339,7 +351,7 @@ function MovimientosContent() {
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.4rem" }}>
                 <span className="live-dot" aria-hidden="true" />
                 <span style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                  Pipeline diario · Última ejecución exitosa {ultimaEjecucionTexto} · Último evento {fechaActualizacionTexto}
+                  Pipeline diario · Última ejecución exitosa {ultimaEjecucionTexto} · Último aviso {ultimoAvisoTexto} · Último evento {fechaActualizacionTexto}
                 </span>
               </div>
               <h1 style={{ fontSize: "clamp(1.75rem, 3.2vw, 2.4rem)", fontWeight: 900, margin: "0 0 0.5rem 0", letterSpacing: "-0.02em" }}>
@@ -905,8 +917,16 @@ function MovimientosContent() {
                               )}
 
                               {mov.documento_pendiente && (
-                                <span className="badge badge-alert" style={{ fontSize: "0.7rem" }} title="Han transcurrido más de 30 días desde la detección sin publicación de decreto oficial en Ley Chile / Diario Oficial.">
-                                  ⚠️ Documento oficial pendiente (&gt;30d)
+                                <span
+                                  className="badge badge-alert"
+                                  style={{ fontSize: "0.7rem" }}
+                                  title={isMovimientoDocumentoPendienteMayor30(mov, nowMs)
+                                    ? "Han transcurrido más de 30 días desde la fecha del evento sin publicación de decreto oficial en Ley Chile / Diario Oficial."
+                                    : "El anuncio está pendiente de su decreto o resolución oficial en Ley Chile / Diario Oficial."}
+                                >
+                                  {isMovimientoDocumentoPendienteMayor30(mov, nowMs)
+                                    ? "⚠️ Documento oficial pendiente (&gt;30d)"
+                                    : "Documento oficial pendiente"}
                                 </span>
                               )}
                             </div>

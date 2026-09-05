@@ -146,6 +146,23 @@ export const MOVIMIENTOS_PIPELINE_METADATA = {
   signals: payload.signals ?? [],
 };
 
+export const MOVIMIENTO_DOCUMENTO_PENDIENTE_DIAS = 30;
+
+/**
+ * A provisional announcement can be pending an official act for any length
+ * of time. The >30d warning is only valid after thirty calendar days from
+ * the event date; recent announcements must not be presented as overdue.
+ */
+export function isMovimientoDocumentoPendienteMayor30(
+  movimiento: Pick<Movimiento, "documento_pendiente" | "fecha">,
+  nowMs = Date.now(),
+): boolean {
+  if (!movimiento.documento_pendiente) return false;
+  const eventMs = Date.parse(`${movimiento.fecha.slice(0, 10)}T12:00:00Z`);
+  return Number.isFinite(eventMs)
+    && nowMs - eventMs >= MOVIMIENTO_DOCUMENTO_PENDIENTE_DIAS * 86_400_000;
+}
+
 /**
  * Resumen editorial de la Home, calculado desde el mismo snapshot que usa
  * /movimientos. La fecha de inicio del gobierno es parte del corte
