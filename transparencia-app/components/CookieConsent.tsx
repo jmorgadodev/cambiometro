@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useSyncExternalStore } from "react";
+import React, { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 
 declare global {
@@ -54,19 +54,6 @@ function storeConsent(choice: ConsentChoice) {
   } catch {
     // Almacenamiento no disponible: el banner permanece visible.
   }
-}
-
-function subscribeConsent(onChange: () => void) {
-  const storageHandler = (event: StorageEvent) => {
-    if (event.key === CONSENT_KEY) onChange();
-  };
-  const changedHandler = () => onChange();
-  window.addEventListener("storage", storageHandler);
-  window.addEventListener(CONSENT_CHANGED_EVENT, changedHandler);
-  return () => {
-    window.removeEventListener("storage", storageHandler);
-    window.removeEventListener(CONSENT_CHANGED_EVENT, changedHandler);
-  };
 }
 
 /**
@@ -128,14 +115,32 @@ function trackPageView(pathname: string) {
 }
 
 export default function CookieConsent() {
-  const consent = useSyncExternalStore(subscribeConsent, readStoredConsent, () => "denied");
+  // El snapshot server-side de useSyncExternalStore podía dejar este componente
+  // con el valor "denied" después de hidratar un export estático. En ese estado
+  // el click guardaba el consentimiento, pero no llegaba a montar el tracker.
+  // Estado local explícito: primero se hidrata sin tracking y luego se lee
+  // localStorage en el cliente.
+  const [consent, setConsent] = useState<ConsentChoice | null>(null);
   const [reopened, setReopened] = useState(false);
   const pathname = usePathname();
 
   useEffect(() => {
+    // Defer the client-only storage read until after the first hydrated render;
+    // this avoids a hydration mismatch and a synchronous cascading render.
+    queueMicrotask(() => setConsent(readStoredConsent()));
+    const storageHandler = (event: StorageEvent) => {
+      if (event.key === CONSENT_KEY) setConsent(readStoredConsent());
+    };
+    const changedHandler = () => setConsent(readStoredConsent());
+    window.addEventListener("storage", storageHandler);
+    window.addEventListener(CONSENT_CHANGED_EVENT, changedHandler);
     const reopen = () => setReopened(true);
     window.addEventListener(CONSENT_OPEN_EVENT, reopen);
-    return () => window.removeEventListener(CONSENT_OPEN_EVENT, reopen);
+    return () => {
+      window.removeEventListener("storage", storageHandler);
+      window.removeEventListener(CONSENT_CHANGED_EVENT, changedHandler);
+      window.removeEventListener(CONSENT_OPEN_EVENT, reopen);
+    };
   }, []);
 
   useEffect(() => {
@@ -148,6 +153,7 @@ export default function CookieConsent() {
 
   const choose = (choice: ConsentChoice) => {
     storeConsent(choice);
+    setConsent(choice);
     updateGtagConsent(choice);
     // En el export estático no dependemos únicamente del siguiente render de
     // React para cargar la medición: el consentimiento explícito del usuario
