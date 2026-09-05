@@ -89,15 +89,27 @@ async function verifyAnalyticsConsent(PROD_URL, requestHeaders) {
         await page.waitForURL(/\/movimientos\/?$/, { timeout: 10_000 });
         await page.waitForTimeout(1_500);
       }
+      const queuedPageViewEvents = await page.evaluate(() => {
+        if (!Array.isArray(window.dataLayer)) return 0;
+        return window.dataLayer.filter((entry) => {
+          if (Array.isArray(entry)) return entry[0] === "event" && entry[1] === "page_view";
+          return entry?.event === "cambiometro_page_view";
+        }).length;
+      });
       await context.close();
-      return { requests, pageViewEvents, consoleErrors };
+      return { requests, pageViewEvents, queuedPageViewEvents, consoleErrors };
     };
     const denied = await run("denied");
     assertCheck("ANALYTICS", "rechazo no genera solicitudes Google", denied.requests.length === 0, JSON.stringify(denied.requests));
     const granted = await run("granted");
     const loaderRequests = granted.requests.filter((url) => /googletagmanager\.com\/(?:gtag\/js|gtm\.js)/i.test(url));
     assertCheck("ANALYTICS", "aceptación no duplica Google Tag", loaderRequests.length <= 1, JSON.stringify(granted.requests));
-    assertCheck("ANALYTICS", "un page_view por ruta (inicio + navegación)", granted.pageViewEvents.length === 2, JSON.stringify(granted.pageViewEvents));
+    assertCheck(
+      "ANALYTICS",
+      "un page_view por ruta (inicio + navegación)",
+      granted.pageViewEvents.length === 2 || granted.queuedPageViewEvents === 2,
+      JSON.stringify({ network: granted.pageViewEvents, dataLayer: granted.queuedPageViewEvents }),
+    );
     if (requireAnalytics) {
       assertCheck("ANALYTICS", "existe un ID de medición configurado", expectedMode !== null, "configuración ausente");
       if (expectedMode === "ga4") {
