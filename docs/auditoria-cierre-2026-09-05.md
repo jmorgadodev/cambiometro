@@ -3,19 +3,19 @@
 ## Estado
 
 La aplicación publicada responde correctamente. La base funcional de `main` es
-`f68973e`; el último refresco Pages fue generado por el release de Movimientos
-y los merges posteriores actualizaron documentación y el Worker. Esta auditoría
-reemplaza la fotografía anterior; no implica consultas masivas contra D1.
+`98ae643`; el último refresco Pages fue generado por el release de Movimientos.
+Esta auditoría reemplaza la fotografía anterior; no implica consultas masivas
+contra D1.
 
 ## Evidencia de producción
 
 - Dominio: <https://cambiometro.impulsacv.cl>.
-- Pages vigente: deployment `1048787c-778e-4ce4-b908-f8181bbdd2e2`.
-- Preview verificable: <https://1048787c.cambiometro.pages.dev>.
+- Pages vigente: deployment `182889d5-75ac-457d-9506-66969392ee2e`.
+- Preview verificable: <https://182889d5.cambiometro.pages.dev>.
 - ETL de Movimientos: run
-  `34007305715`, `success`.
-- Refresco Pages automático: run `34007340270`, `success`.
-- Guard de publicación ETL: run `34007340178`, `success`.
+  `34012795797`, `success`.
+- Refresco Pages automático: run `34012820313`, `success`.
+- Guard de publicación ETL: run `34012820285`, `success`.
 - Worker API promovido al 100%: versión
   `c5996d6b-a941-4c03-981c-37a81d9329ce`, workflow `34005110991`, bundle
   165,80 KiB (30,57 KiB gzip).
@@ -45,10 +45,10 @@ violaciones CSP. Las rutas principales y las fichas verificadas respondieron
 ## Movimientos
 
 - `data/movimientos.json`: 82 registros publicados.
-- Última publicación exitosa: `2026-09-06T02:46:13.765Z`.
+- Última publicación exitosa: `2026-09-06T04:58:19.805Z`.
 - Último evento: `2026-09-02`.
-- Checksum del payload ETL publicado: `4898ae7cad921d6880af2a53454104fa51769fc293a24ebc47a52726f07e397f`.
-- Checksum del asset estático de Movimientos: `f427d95dbfcf9d412d3051ebebf14ff4f5318c342eb073745ced2119e74a67b8`.
+- Checksum del payload ETL publicado: `cdaff6c2b47bbe808646d4b44e05258659b751c9a8ff98ef87dc55fb8bf40ff6`.
+- Checksum del asset estático de Movimientos: `d731baf593aa66fc3cae9d5a644d0cb37796651f42b4a37cb8dab55bb48cff80`.
 - Alonso Velásquez: evento efectivo `2026-09-02`, aviso de Radio Paulina
   `2026-09-03`, referencia oficial MINVU; estado `en_confirmacion`.
 - Patricio Löhr: evento efectivo `2026-09-01`, referencias Emol/ADN/BioBio;
@@ -66,9 +66,10 @@ InfoProbidad, Ley 19.862, Senado, SERVEL y SINIM. No aparecen los alias
 retirados `transparencia-activa` ni `personal-apoyo`.
 
 El ETL conserva una advertencia separada: `gob.cl` sigue respondiendo HTTP 403
-desde el runner de GitHub; el diagnóstico publicado ahora conserva
-explícitamente `status: 403`. El fallback por `curl` quedó incorporado, pero el
-bloqueo es de la red de origen y no se puede saltar sin autorización oficial.
+desde el runner de GitHub. Se probaron la página HTML, sus variantes y el feed
+RSS oficial; el diagnóstico publicado conserva explícitamente `status: 403`.
+El fallback por `curl` y el feed quedaron incorporados, pero el bloqueo es de
+la red de origen y no se puede saltar sin autorización oficial.
 El ETL no publica un snapshot vacío ni incompleto: conserva
 el último snapshot válido y publica sólo si existe al menos una fuente oficial
 usable. Ley Chile, Diario Oficial, Mindep y Prensa Presidencia sí respondieron
