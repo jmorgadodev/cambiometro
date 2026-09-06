@@ -388,6 +388,10 @@ try {
   const mobileMenuButton = page.getByRole("button", { name: /abrir menú de secciones/i });
   const openMobileDrawer = async () => {
     await page.waitForFunction(() => window.innerWidth < 1024);
+    // El HTML exportado contiene el botón antes de que React conecte el
+    // handler. Esperar la marca explícita evita hacer click sobre el shell
+    // estático en runners lentos y convertir una carrera en falso negativo.
+    await page.locator("header.site-header[data-hydrated=\"true\"]").waitFor({ state: "attached", timeout: 5000 });
     await mobileMenuButton.waitFor({ state: "visible", timeout: 5000 });
     await mobileMenuButton.click();
     await mobileMenuButton.getAttribute("aria-expanded").then((expanded) => {

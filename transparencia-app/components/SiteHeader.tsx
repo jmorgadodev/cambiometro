@@ -57,6 +57,7 @@ interface SiteHeaderProps {
 export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
   const [theme, setTheme] = useState<ThemeName>("paper");
   const previousPathname = useRef(pathname);
   const pathnameEffectReady = useRef(false);
@@ -72,6 +73,7 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
       document.documentElement.classList.toggle("dark", nextTheme === "dark");
       document.documentElement.setAttribute("data-theme", nextTheme);
       setTheme(nextTheme);
+      setHydrated(true);
     });
     return () => cancelAnimationFrame(id);
   }, []);
@@ -131,7 +133,7 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
 
   return (
     <>
-      <header className="site-header">
+      <header className="site-header" data-hydrated={hydrated ? "true" : undefined}>
         {/* ─── FILA 1: DESKTOP (≥1024px) / FILA ÚNICA MÓVIL (<1024px) ───────── */}
         <div className="container-main site-header__primary">
           <Link href="/" prefetch={false} className="site-brand" aria-label="El Cambiómetro, inicio">
