@@ -80,6 +80,10 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
   // setState diferido en el montaje competía con el primer click del botón
   // en el shell estático y podía devolver aria-expanded a false.
   useEffect(() => {
+    // Durante la hidratación de un export estático usePathname puede ser null
+    // antes de entregar la ruta real. No registres esa transición como una
+    // navegación: si ocurre después del primer click, cerraría el drawer.
+    if (!pathname) return;
     // En un export estático usePathname puede pasar de null al pathname
     // hidratado justo después del primer render. No cierres el drawer en esa
     // transición: puede ocurrir entre el click del botón y el commit del
