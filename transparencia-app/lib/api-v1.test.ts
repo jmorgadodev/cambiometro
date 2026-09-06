@@ -3,13 +3,13 @@ import { gzipSync } from "node:zlib";
 import api from "../workers/public-api/index";
 import { parseRelationQuery } from "./api-v1";
 
-function testEnv(transferRows = 59361) {
+function testEnv(transferRows = 59361, releaseRows = transferRows) {
   const statement = (sql: string, bindings: unknown[] = []) => ({
     bind(...values: unknown[]) {
       return statement(sql, values);
     },
     async first<T>() {
-      if (sql.includes("FROM transferencias_19862_release")) return { checksum_sha256: "release-checksum" } as T;
+      if (sql.includes("FROM transferencias_19862_release")) return { checksum_sha256: "release-checksum", total_rows: releaseRows } as T;
       if (sql.includes("FROM transferencias_19862")) return { total: transferRows } as T;
       if (sql.includes("FROM politicos")) return null;
       if (sql.includes("count(*)")) return { total: sql.includes("relations") ? 2 : sql.includes("records") ? 4 : 1 } as T;
@@ -526,16 +526,33 @@ describe("API canónica v1", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, transferRows: 59361, d1ReleaseChecksum: "release-checksum", transferSource: "d1" });
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 59361, transferRows: 59361, d1ReleaseChecksum: "release-checksum", transferSource: "d1" });
   });
 
-  it("mantiene health operativo y marca D1 inconsistente cuando R2 tiene el release canónico", async () => {
-    const env = { ...(testEnv(59360) as object), ...(transferR2Env() as object), HEALTH_CHECK_D1: "1" } as never;
+  it("mantiene health operativo y marca D1 inconsistente cuando el puntero R2 difiere", async () => {
+    const env = { ...(testEnv(59361, 59360) as object), ...(transferR2Env() as object), HEALTH_CHECK_D1: "1" } as never;
     const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
     const payload = await response.json();
 
     expect(response.status).toBe(200);
     expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 59360, transferRows: 59361, d1Consistent: false, transferSource: "r2" });
+  });
+
+  it("usa sólo el puntero de release en health y nunca cuenta la tabla D1", async () => {
+    const prepare = vi.fn((sql: string) => {
+      if (sql.includes("FROM transferencias_19862 ")) throw new Error("health no debe contar la tabla de transferencias");
+      return { async first<T>() { return { checksum_sha256: "release-checksum", total_rows: 59361 } as T; } };
+    });
+    const response = await api.fetch(new Request("https://example.test/api/v1/health"), {
+      ...(transferR2Env() as object),
+      DB: { prepare },
+      HEALTH_CHECK_D1: "1",
+    } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toMatchObject({ d1TransferRows: 59361, d1Consistent: true, transferSource: "r2" });
+    expect(prepare).toHaveBeenCalledTimes(1);
   });
 
   it("no consulta el COUNT de transferencias en health por defecto", async () => {
