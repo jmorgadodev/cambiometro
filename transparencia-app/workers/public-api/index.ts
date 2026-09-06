@@ -295,15 +295,16 @@ async function health(env: Env) {
   let d1ReleaseChecksum: string | null = null;
   if (transferD1 && checkD1) {
     try {
-      const result = await transferDb?.prepare("SELECT count(*) AS total FROM transferencias_19862").first<{ total: number }>();
-      d1TransferRows = Number(result?.total ?? 0);
-    } catch {
-      d1TransferRows = 0;
-    }
-    try {
-      const release = await transferDb?.prepare("SELECT checksum_sha256 FROM transferencias_19862_release WHERE singleton = 1").first<{ checksum_sha256: string }>();
+      // Never count the transfer table from a health probe. COUNT(*) scans the
+      // full D1 projection and can consume the free rows_read quota every time
+      // uptime smoke calls this endpoint. The release pointer is the cheap,
+      // canonical consistency check; a physical-table audit is a separate
+      // operator action, not a public health request.
+      const release = await transferDb?.prepare("SELECT checksum_sha256,total_rows FROM transferencias_19862_release WHERE singleton = 1").first<{ checksum_sha256: string; total_rows: number }>();
+      d1TransferRows = Number(release?.total_rows ?? 0);
       d1ReleaseChecksum = release?.checksum_sha256 ?? null;
     } catch {
+      d1TransferRows = 0;
       d1ReleaseChecksum = null;
     }
   }
