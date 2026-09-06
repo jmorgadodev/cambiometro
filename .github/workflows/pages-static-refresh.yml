@@ -298,7 +298,7 @@ jobs:
         run: npm run api:size
 
       - name: Guardar artefacto Pages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pages-static-${{ github.sha }}
           path: transparencia-app/out
@@ -358,7 +358,7 @@ jobs:
 
       - name: Guardar metadata del deployment Pages
         if: ${{ success() && ((github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') || (github.event_name == 'workflow_dispatch' && inputs.publish_pages == true && inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER')) }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pages-production-deployment-${{ github.sha }}
           path: transparencia-app/pages-deployments.json
@@ -406,7 +406,7 @@ jobs:
           '
 
       - name: Guardar metadata del deployment Pages existente
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pages-production-deployment-existing-${{ github.sha }}
           path: transparencia-app/pages-deployments.json

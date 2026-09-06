@@ -228,7 +228,7 @@ jobs:
           npm run verify:security
 
       - name: Guardar artefacto Pages
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pages-ui-${{ github.sha }}
           path: transparencia-app/out
@@ -280,7 +280,7 @@ jobs:
 
       - name: Guardar metadata del deployment Pages
         if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.publish_pages == true && inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER' }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: pages-ui-production-deployment-${{ github.sha }}
           path: transparencia-app/pages-deployments.json
