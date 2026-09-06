@@ -265,13 +265,13 @@ export function parseMovementSignals(body, source) {
 }
 
 /**
- * Prensa Presidencia occasionally serves a certificate chain that Node's
- * bundled CA cannot build on GitHub-hosted runners. Use the runner's curl
- * (which validates certificates against the operating-system trust store) as
- * a narrow fallback for this one official source. This does not disable TLS
- * verification and is intentionally not used for arbitrary URLs.
+ * Some official sources reject Node's request profile on GitHub-hosted
+ * runners. Use the runner's curl (which validates certificates against the
+ * operating-system trust store) as a narrow fallback for the allowlisted
+ * official sources below. This does not disable TLS verification and is
+ * intentionally not used for arbitrary URLs.
  */
-async function fetchPrensaWithSystemCurl(source, timeoutMs) {
+async function fetchOfficialWithSystemCurl(source, timeoutMs) {
   const { stdout } = await execFileAsync("curl", [
     "--silent",
     "--show-error",
@@ -341,12 +341,12 @@ export async function fetchSource(source, { fetchImpl = fetch, retries = 2, time
     }
     if (attempt < retries) await new Promise((resolve) => setTimeout(resolve, 500 * (attempt + 1)));
   }
-  // Keep the workaround narrow: only the known official endpoint with the
-  // broken chain gets the system-curl fallback, and only for real production
-  // fetches. Tests that inject fetchImpl remain deterministic.
-  if (source.id === "prensa-presidencia" && fetchImpl === globalThis.fetch) {
+  // Keep the workaround narrow: only the two known official hosts that
+  // reject Node's runner request get the system-curl fallback, and only for
+  // real production fetches. Tests that inject fetchImpl remain deterministic.
+  if (["gob-cl", "prensa-presidencia"].includes(source.id) && fetchImpl === globalThis.fetch) {
     try {
-      return await fetchPrensaWithSystemCurl(source, timeoutMs);
+      return await fetchOfficialWithSystemCurl(source, timeoutMs);
     } catch (error) {
       lastError = error;
     }
