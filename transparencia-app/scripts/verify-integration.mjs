@@ -540,6 +540,14 @@ try {
     // boundaries after the HTML shell; React reports this recoverable bailout
     // as #419 in the local production bundle.
     && !(verifyingLocal && message.includes("Minified React error #419"))
+    // Turnstile emits a non-actionable console formatting diagnostic from its
+    // challenge iframe in headless Chromium. It is not a page/CSP failure;
+    // keep all other challenge errors fatal.
+    && !(
+      locationUrl.includes("https://challenges.cloudflare.com/cdn-cgi/challenge-platform/")
+      && message.includes("font-size:0;color:transparent")
+      && message.includes("NaN")
+    )
   );
   assert.deepEqual(errors, [], `errores de consola: ${JSON.stringify(errors)}`);
 
