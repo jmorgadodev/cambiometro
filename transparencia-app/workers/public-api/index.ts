@@ -1594,9 +1594,10 @@ async function listSources(requestUrl: URL, env: Env) {
 }
 
 async function listSourcesFromR2(requestUrl: URL, env: Env) {
-  const [inventory, health] = await Promise.all([
+  const [inventory, health, transferRelease] = await Promise.all([
     r2Json<{ sources?: JsonRecord[] }>(env.PUBLIC_DATA, "projections/sources-v1/source-inventory.json"),
     r2Json<{ sources?: Record<string, JsonRecord> }>(env.PUBLIC_DATA, "projections/sources-v1/source-health.json"),
+    r2Json<TransferApiManifest>(env.PUBLIC_DATA, "projections/transferencias-v1/manifest.json"),
   ]);
   if (!inventory?.sources?.length && !health?.sources) return null;
   // El inventario histórico conserva dos identificadores que ya no deben
@@ -1630,10 +1631,18 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
     infolobby: "InfoLobby", infoprobidad: "InfoProbidad", "ley-19862": "Ley 19.862",
     senado: "Senado", servel: "SERVEL", sinim: "SINIM",
   };
+  // Ley 19.862 mantiene un catálogo histórico separado del release paginado
+  // que sirve /api/v1/transferencias. El catálogo de salud puede quedar
+  // atrasado después de una publicación incremental; el manifest completo es
+  // la autoridad para total, checksum y fecha pública, y además evita D1.
+  const currentTransferRelease = isCompleteTransferManifest(transferRelease) ? transferRelease : null;
   const data = ids.map((id) => {
     const source = inventoryById.get(id) ?? {};
     const state = healthById.get(id) ?? {};
-    const recordCount = Number(state.recordCount ?? source.recordCount ?? 0);
+    const isTransferSource = id === "ley-19862";
+    const recordCount = isTransferSource && currentTransferRelease
+      ? currentTransferRelease.totalRows
+      : Number(state.recordCount ?? source.recordCount ?? 0);
     const stateStatus = String(state.status ?? source.status ?? "unavailable");
     return {
       ...source,
@@ -1641,8 +1650,12 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
       label: source.label ?? labels[id] ?? id,
       recordCount,
       status: stateStatus === "archive_only" ? "partial" : recordCount > 0 ? "connected" : "unavailable",
-      checksumSha256: state.checksumSha256 ?? source.indexChecksumSha256 ?? null,
-      lastUpdated: state.lastSuccessAt ?? state.last_success_at ?? state.generatedAt ?? source.generatedAt ?? null,
+      checksumSha256: isTransferSource && currentTransferRelease
+        ? currentTransferRelease.checksumSha256
+        : state.checksumSha256 ?? source.indexChecksumSha256 ?? null,
+      lastUpdated: isTransferSource && currentTransferRelease
+        ? currentTransferRelease.generatedAt
+        : state.lastSuccessAt ?? state.last_success_at ?? state.generatedAt ?? source.generatedAt ?? null,
       statusDetail: stateStatus === "archive_only"
         ? "Histórico íntegro en R2; se consulta bajo demanda."
         : recordCount > 0 ? "Datos publicados en el lake." : "Sin datos publicados.",
