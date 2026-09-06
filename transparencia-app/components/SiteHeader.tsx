@@ -59,6 +59,7 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [theme, setTheme] = useState<ThemeName>("paper");
   const previousPathname = useRef(pathname);
+  const pathnameEffectReady = useRef(false);
 
   const displayTotal = totalRecords && totalRecords > 0 ? totalRecords : GLOBAL_KPIS.registros_canonicos;
   const displayCorte = updatedAt || GLOBAL_KPIS.corte;
@@ -79,6 +80,15 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
   // setState diferido en el montaje competía con el primer click del botón
   // en el shell estático y podía devolver aria-expanded a false.
   useEffect(() => {
+    // En un export estático usePathname puede pasar de null al pathname
+    // hidratado justo después del primer render. No cierres el drawer en esa
+    // transición: puede ocurrir entre el click del botón y el commit del
+    // estado y deja aria-expanded en false aunque el usuario sí lo abrió.
+    if (!pathnameEffectReady.current) {
+      pathnameEffectReady.current = true;
+      previousPathname.current = pathname;
+      return;
+    }
     if (previousPathname.current !== pathname) {
       previousPathname.current = pathname;
       setDrawerOpen(false);

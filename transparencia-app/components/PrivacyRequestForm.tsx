@@ -201,16 +201,16 @@ export default function PrivacyRequestForm({ siteKey = "" }: { siteKey?: string 
         <input id="website-field" name="website" type="text" tabIndex={-1} autoComplete="off" />
       </div>
 
-      {siteKey ? (
-        <div className="privacy-request-form__turnstile">
-          <p>Completa el desafío de verificación para enviar la solicitud.</p>
+      <div className="privacy-request-form__turnstile">
+        <p>Completa el desafío de verificación para enviar la solicitud.</p>
+        {siteKey ? (
           <div ref={turnstileRef} className="cf-turnstile-placeholder" aria-label="Verificación anti-bots" />
-        </div>
-      ) : (
-        <p className="privacy-request-form__unavailable" role="alert">
-          El formulario está temporalmente fuera de servicio porque la verificación anti-bots no está configurada.
-        </p>
-      )}
+        ) : (
+          <p className="privacy-request-form__unavailable" role="alert">
+            El formulario está temporalmente fuera de servicio porque la verificación anti-bots no está configurada.
+          </p>
+        )}
+      </div>
 
       {state === "error" && errorMessage && (
         <p role="alert" className="privacy-request-form__error">
