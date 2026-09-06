@@ -2,21 +2,22 @@
 
 ## Estado
 
-La aplicación publicada responde correctamente y el checkout `main` está
-limpio en `afe84c8`. Esta auditoría actualiza la fotografía histórica del
-4-sep; no implica que se hayan ejecutado consultas masivas contra D1.
+La aplicación publicada responde correctamente. El checkout `main` actual es
+`5d8abda`; el deployment Pages de datos fue construido desde `95bfbb8` y el
+merge posterior sólo actualizó documentación. Esta auditoría reemplaza la
+fotografía anterior; no implica consultas masivas contra D1.
 
 ## Evidencia de producción
 
 - Dominio: <https://cambiometro.impulsacv.cl>.
-- Pages vigente: deployment `e4c106f8-5fb4-450f-91bf-12090be2feb8`.
+- Pages vigente: deployment `271c27ce-a73e-4e81-9d56-d01575fd2ce5`.
+- Preview verificable: <https://271c27ce.cambiometro.pages.dev>.
 - ETL de Movimientos: run
-  `33996159042`, `success`.
-- Guardia de publicación: run `33996195497`, `success`.
-- Refresco Pages: run `33996214566`, `success`.
-- Verificación doble, navegador y crawl frío: run
+  `34003987310`, `success`.
+- Refresco Pages automático: run `34004020098`, `success`.
+- Verificación doble, navegador y crawl frío anterior: run
   `34001841994`, `success`.
-- Artefacto de evidencia: <https://github.com/jmorgadodev/cambiometro/actions/runs/34001841994/artifacts/9979998361>.
+- Artefacto de evidencia anterior: <https://github.com/jmorgadodev/cambiometro/actions/runs/34001841994/artifacts/9979998361>.
 
 La verificación final no reportó 404 inesperados, 5xx, 1102 ni violaciones
 CSP. El crawl y la doble pasada fueron exitosos. El falso fallo anterior se
@@ -27,9 +28,10 @@ del Worker y de CSP.
 ## Movimientos
 
 - `data/movimientos.json`: 82 registros publicados.
-- Última publicación exitosa: `2026-09-05T22:32:09.279Z`.
+- Última publicación exitosa: `2026-09-06T01:29:08.244Z`.
 - Último evento: `2026-09-02`.
-- Checksum publicado: `4c9fa0a1cc6eded40d12f6adf4ea1f19491dfcfa940d453f75c08057fd9ab4fb`.
+- Checksum del payload ETL publicado: `4274c964746883dda509eda168595a07fbbd52e210985aa37c783b49f3d9dc02`.
+- Checksum del asset estático de Movimientos: `9b6933d0ceeed7cd168a7d5e7512c9a9c1681e27969586c28d094a4e58067692`.
 - Alonso Velásquez: evento efectivo `2026-09-02`, aviso de Radio Paulina
   `2026-09-03`, referencia oficial MINVU; estado `en_confirmacion`.
 - Patricio Löhr: evento efectivo `2026-09-01`, referencias Emol/ADN/BioBio;
@@ -46,8 +48,10 @@ Cámara, ChileCompra, Contraloría, CPLT, DIPRES, INE, InfoLobby,
 InfoProbidad, Ley 19.862, Senado, SERVEL y SINIM. No aparecen los alias
 retirados `transparencia-activa` ni `personal-apoyo`.
 
-El ETL conserva una advertencia separada: `gob.cl` responde HTTP 403 desde el
-runner de GitHub. El ETL no publica un snapshot vacío ni incompleto: conserva
+El ETL conserva una advertencia separada: `gob.cl` sigue respondiendo HTTP 403
+desde el runner de GitHub; el fallback por `curl` quedó incorporado, pero el
+bloqueo es de la red de origen y no se puede saltar sin autorización oficial.
+El ETL no publica un snapshot vacío ni incompleto: conserva
 el último snapshot válido y publica sólo si existe al menos una fuente oficial
 usable. Ley Chile, Diario Oficial, Mindep y Prensa Presidencia sí respondieron
 en la última ejecución.
@@ -64,14 +68,15 @@ accidentales masivas.
 
 1. Resolver o autorizar una vía oficial para que el runner pueda consultar
    `gob.cl` sin 403, o mantener explícitamente esa fuente como advertencia no
-   bloqueante.
+   bloqueante. Esto no impide el ETL porque hay cuatro fuentes oficiales
+   disponibles en la última ejecución.
 2. Si se incorpora un acto administrativo para Alonso o Löhr, ejecutar el ETL
    diario y verificar el cambio de `en_confirmacion` a `verificado`.
 
 ## Rollback
 
 ```bash
-npm run pages:rollback -- e4c106f8-5fb4-450f-91bf-12090be2feb8
+npm run pages:rollback -- 271c27ce-a73e-4e81-9d56-d01575fd2ce5
 
 npx wrangler rollback <worker-version-id> \
   --name cambiometro-public-api
