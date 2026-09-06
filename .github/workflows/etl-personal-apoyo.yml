@@ -95,7 +95,7 @@ jobs:
 
       - name: Publicar resumen y diagnóstico
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: personal-apoyo-run-${{ github.run_id }}
           path: |
@@ -106,7 +106,7 @@ jobs:
 
       - name: Conservar diagnóstico de preflight D1
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: d1-preflight-personal-apoyo-${{ github.run_id }}
           path: transparencia-app/d1-preflight.json

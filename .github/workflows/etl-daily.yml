@@ -151,7 +151,7 @@ jobs:
 
       - name: Conservar diagnóstico de preflight D1
         if: always() && inputs.skip_d1 != true
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: d1-preflight-${{ github.run_id }}
           path: transparencia-app/d1-preflight.json
