@@ -44,6 +44,9 @@ const GOB_CL_URL_VARIANTS = Object.freeze([
   "https://www.gob.cl/",
   "https://www.gob.cl/noticias/?p=1",
   "https://www.gob.cl/noticias/?page=1",
+  // The official RSS endpoint is served by a different edge path and can
+  // remain available when the HTML news route rejects GitHub Actions.
+  "https://www.gob.cl/noticias/feed/",
 ]);
 
 const MOVEMENT_KEYWORDS = /\b(renuncia|renunció|renuncio|nombramiento|nombra|designa|designación|asume|asumió|remueve|remoción|decreto|subrogante|cambio de gabinete|salida de)\b/i;
