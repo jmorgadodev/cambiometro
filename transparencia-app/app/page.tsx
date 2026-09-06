@@ -5,13 +5,13 @@ import StatCounter from "@/components/StatCounter";
 import Reveal from "@/components/Reveal";
 import Icono from "@/components/ui/Icono";
 import { GLOBAL_KPIS, KPI_SCOPES } from "@/lib/global-kpis";
-import { ETL_SOURCES_DATA } from "@/lib/etl-sources-data";
+import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
 import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
 import { getVotingFreshness, VOTACIONES_DESTACADAS } from "@/lib/votaciones-destacadas";
 import { tituloVotacionLegible } from "@/lib/votaciones-format";
 import { MOVIMIENTOS_HOME_SUMMARY } from "@/lib/movimientos";
 import { formatFechaCorta } from "@/lib/format";
-import { getLandingSummary, sourceKeyForHomeSource } from "@/lib/landing-summary-runtime";
+import { getLandingSummary } from "@/lib/landing-summary-runtime";
 
 export const dynamic = "force-static";
 
@@ -95,21 +95,21 @@ const HOME_KPIS = [
 
 export default async function HomePage() {
   const landingSummary = getLandingSummary();
-  const sourceSnapshots = new Map(landingSummary.sources.map((source) => [source.id, source]));
-  const homeSources = ETL_SOURCES_DATA.map((source) => {
-    const sourceKey = sourceKeyForHomeSource(source.id);
-    const snapshot = sourceKey ? sourceSnapshots.get(sourceKey) : undefined;
-    if (!snapshot || snapshot.recordCount <= 0) return source;
-    return {
-      ...source,
-      recordCount: snapshot.recordCount,
-      lastUpdated: snapshot.generatedAt ?? source.lastUpdated,
-      lastUpdatedRelative: snapshot.generatedAt ? `Corte ${new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(snapshot.generatedAt))}` : source.lastUpdatedRelative,
-      status: snapshot.status === "complete" ? "operational" : source.status,
-      statusText: snapshot.status === "complete" ? "Universo verificado" : source.statusText,
-    };
-  }).filter((source) => source.recordCount > 0);
-  const HOME_SOURCES_LIST = homeSources;
+  const { sources: qualitySources } = await getDataQualityDashboardData();
+  const HOME_SOURCES_LIST = qualitySources
+    .filter((source) => source.canonicalCount > 0)
+    .map((source) => ({
+      id: source.id,
+      name: source.name,
+      organization: source.organization,
+      recordCount: source.canonicalCount,
+      frequency: source.frequency,
+      status: source.status,
+      statusText: source.statusLabel,
+      viewLink: source.modulePath,
+      lastUpdated: source.lastSync,
+      lastUpdatedRelative: source.lastSyncFormatted,
+    }));
   const operationalSources = HOME_SOURCES_LIST;
   const entityCount = getStaticEntityCatalog().total;
   const resolvedHomeKpis = HOME_KPIS.map((item) => item.key === "entidades"
@@ -362,7 +362,7 @@ export default async function HomePage() {
             ))}
           </div>
           <p className="home-coverage-note">
-            <strong>Cómo leer este catálogo.</strong> Son 12 fuentes oficiales con registros publicados y consultables. Cada tarjeta indica el corte disponible, su fecha y la ruta para explorar sus datos; el alcance temporal o temático declarado por cada organismo se explica en la ficha de la fuente. <Link prefetch={false} href="/fuentes">Ver metodología y fuentes →</Link>
+            <strong>Cómo leer este catálogo.</strong> Son 12 fuentes oficiales y 1 derivada, con registros publicados y consultables según la evidencia disponible; cada tarjeta distingue el release publicado del alcance que puede recorrerse mediante paginación. Cuando una métrica no tiene evidencia suficiente se muestra “No calculable”; el alcance temporal y temático se explica en la ficha de la fuente. <Link prefetch={false} href="/fuentes">Ver metodología y fuentes →</Link>
           </p>
         </section>
       </Reveal>

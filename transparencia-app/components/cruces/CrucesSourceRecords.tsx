@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 
-type SourceId = "chilecompra" | "infolobby" | "contraloria" | "infoprobidad";
+type SourceId = "chilecompra" | "infolobby" | "contraloria" | "infoprobidad" | "gastos_camara" | "gastos_senado";
 
 interface SourceRecord {
   id: string;
@@ -27,6 +27,8 @@ const SOURCES: Array<{ id: SourceId; label: string; description: string }> = [
   { id: "infolobby", label: "InfoLobby", description: "Audiencias, sujetos pasivos y organismos." },
   { id: "contraloria", label: "Contraloría", description: "Informes y documentos de fiscalización." },
   { id: "infoprobidad", label: "InfoProbidad", description: "Declaraciones y registros de probidad." },
+  { id: "gastos_camara", label: "Gastos Cámara", description: "Rendiciones operacionales completas de diputadas y diputados." },
+  { id: "gastos_senado", label: "Gastos Senado", description: "Rendiciones e informes disponibles del Senado." },
 ];
 
 const PAGE_SIZE = 25;
@@ -64,11 +66,19 @@ function recordFacts(record: SourceRecord, source: SourceId) {
       { label: "Región", value: text(data.region) },
       { label: "Unidad CGR", value: text(data.cgr_unit) },
     );
-  } else {
+  } else if (source === "infoprobidad") {
     facts.push(
       { label: "Persona declarante", value: text(data.nombre) },
       { label: "Organismo", value: text(data.organizations) },
       { label: "Método de conciliación", value: text(data.reconciliation_method) },
+    );
+  } else {
+    facts.push(
+      { label: "Fuente", value: text(data.fuente) },
+      { label: "Período", value: text(data.periodo) },
+      { label: "Monto CLP", value: text(data.monto_clp) },
+      { label: "Persona / parlamentario", value: text(data.nombre) },
+      { label: "Ítem", value: text(data.item) },
     );
   }
   return facts.filter((fact) => fact.value);
@@ -93,6 +103,13 @@ export default function CrucesSourceRecords({ counts }: { counts?: Partial<Recor
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [retry, setRetry] = useState(0);
+
+  useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("fuente") as SourceId | null;
+    if (!requested || !SOURCES.some((item) => item.id === requested)) return;
+    const timer = window.setTimeout(() => setSource(requested), 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
   useEffect(() => {
     const controller = new AbortController();

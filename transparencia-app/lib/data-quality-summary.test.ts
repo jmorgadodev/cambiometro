@@ -1,0 +1,34 @@
+import { describe, expect, it } from "vitest";
+import { buildFallbackDataQualitySummary, coverageMetric, getDataQualityConfig } from "@/lib/data-quality-summary";
+
+describe("manifiesto unificado de calidad de datos", () => {
+  it("mantiene las 13 fuentes y separa el KPI global de la suma por fuente", () => {
+    const summary = buildFallbackDataQualitySummary();
+    expect(getDataQualityConfig()).toHaveLength(13);
+    expect(summary.sourceCount).toBe(13);
+    expect(summary.totalCanonicalRecords).toBeGreaterThan(1_400_000);
+    expect(summary.globalKpiRecords ?? null).toBeNull();
+  });
+
+  it("no inventa porcentajes cuando no existe denominador o release consultable", () => {
+    expect(coverageMetric(null, 100)).toEqual({ count: null, denominator: 100, percent: null, label: "No calculable" });
+    expect(coverageMetric(10, 0).label).toBe("No calculable");
+  });
+
+  it("mantiene métricas dentro de rango para cada fuente", () => {
+    const summary = buildFallbackDataQualitySummary();
+    for (const source of summary.sources) {
+      for (const metric of Object.values(source.metrics)) {
+        if (metric.percent !== null) expect(metric.percent).toBeGreaterThanOrEqual(0);
+        if (metric.percent !== null) expect(metric.percent).toBeLessThanOrEqual(100);
+      }
+    }
+  });
+
+  it("etiqueta la auditoría de funcionarios cuando pertenece a un snapshot anterior", () => {
+    const source = buildFallbackDataQualitySummary().sources.find((item) => item.id === "transparencia-activa");
+    expect(source?.qualityAudit?.status).toBe("snapshot-not-current-release");
+    expect(source?.qualityAudit?.snapshotRecords).toBe(1_220_960);
+    expect(source?.qualityAudit?.observations.length).toBeGreaterThan(0);
+  });
+});

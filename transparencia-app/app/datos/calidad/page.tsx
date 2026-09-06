@@ -132,7 +132,8 @@ export default async function DataQualityPage() {
                   <th style={{ padding: "0.9rem 1rem", fontWeight: 700, color: "var(--text-primary)", textAlign: "right" }}>Canónicos</th>
                   <th style={{ padding: "0.9rem 1rem", fontWeight: 700, color: "var(--text-primary)", textAlign: "right" }}>Históricos</th>
                   <th style={{ padding: "0.9rem 1rem", fontWeight: 700, color: "var(--text-primary)" }}>Período</th>
-                  <th style={{ padding: "0.9rem 1rem", fontWeight: 700, color: "var(--text-primary)" }}>Última Sinc.</th>
+                  <th style={{ padding: "0.9rem 1rem", fontWeight: 700, color: "var(--text-primary)" }}>Publicado / consultable / relacionado</th>
+                  <th style={{ padding: "0.9rem 1rem", fontWeight: 700, color: "var(--text-primary)" }}>Observaciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -191,13 +192,43 @@ export default async function DataQualityPage() {
                     <td style={{ padding: "0.9rem 1rem", whiteSpace: "nowrap", color: "var(--text-primary)", fontWeight: 500 }}>
                       {source.periodoReciente}
                     </td>
-                    <td style={{ padding: "0.9rem 1rem", whiteSpace: "nowrap", fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                      {source.lastSyncFormatted}
+                    <td style={{ padding: "0.9rem 1rem", minWidth: 220, fontSize: "0.76rem", color: "var(--text-muted)" }}>
+                      <div>Publicado: <strong style={{ color: "var(--text-primary)" }}>{source.metrics.published.label}</strong></div>
+                      <div>Consultable: <strong style={{ color: "var(--text-primary)" }}>{source.metrics.queryable.label}</strong></div>
+                      <div>Relacionado: <strong style={{ color: "var(--text-primary)" }}>{source.metrics.related.label}</strong></div>
+                      <div style={{ marginTop: "0.25rem", fontSize: "0.68rem" }}>Última sinc.: {source.lastSyncFormatted}</div>
+                    </td>
+                    <td style={{ padding: "0.9rem 1rem", minWidth: 150, fontSize: "0.76rem", color: "var(--text-muted)" }}>
+                      {source.quality.observedCount > 0 || source.quality.correctedCount > 0
+                        ? `${source.quality.observedCount.toLocaleString("es-CL")} observados · ${source.quality.correctedCount.toLocaleString("es-CL")} con corrección de formato`
+                        : source.qualityAudit
+                          ? `Sin observaciones ligadas al release actual. Auditoría ${source.qualityAudit.snapshotDate}: ${source.qualityAudit.snapshotRecords.toLocaleString("es-CL")} registros.`
+                          : "Sin observaciones publicadas en este corte"}
+                      {source.qualityAudit && (
+                        <details style={{ marginTop: "0.35rem" }}>
+                          <summary style={{ cursor: "pointer", color: "var(--accent)" }}>Ver reglas auditadas</summary>
+                          <ul style={{ margin: "0.35rem 0 0", paddingLeft: "1rem", lineHeight: 1.45 }}>
+                            {source.qualityAudit.observations.map((observation) => (
+                              <li key={observation.label}>
+                                {observation.label}: {observation.count.toLocaleString("es-CL")} ({observation.percent.toLocaleString("es-CL")}%) · {observation.action}
+                              </li>
+                            ))}
+                          </ul>
+                          <p style={{ margin: "0.35rem 0 0", fontSize: "0.68rem" }}>{source.qualityAudit.note}</p>
+                        </details>
+                      )}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
+          </div>
+
+          <div className="card" style={{ marginTop: "1rem", padding: "1rem 1.25rem" }}>
+            <strong style={{ color: "var(--text-primary)" }}>Lectura de las métricas</strong>
+            <p style={{ margin: "0.35rem 0 0", color: "var(--text-muted)", fontSize: "0.8rem", lineHeight: 1.55 }}>
+              “Publicado” compara el release canónico con el histórico; “Consultable” sólo cuenta módulos o índices con paginación comprobada; “Relacionado” exige un vínculo documental indexado. Cuando no hay evidencia suficiente se muestra “No calculable”, no un porcentaje estimado.
+            </p>
           </div>
 
           <div style={{ marginTop: "0.75rem", padding: "0.75rem 1rem", background: "var(--bg-surface-2)", borderRadius: 8, border: "1px solid var(--border-subtle)" }}>
