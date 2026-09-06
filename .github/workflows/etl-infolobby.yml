@@ -108,3 +108,7 @@ jobs:
       - name: Registrar D1 pospuesto por cuota
         if: steps.d1-quota.outputs.proceed != 'true'
         run: echo "::warning::D1 de InfoLobby pospuesto por cuota alta o métrica ilegible; R2/Pages conserva el release canónico."
+
+      - name: Registrar D1 pospuesto por asset no disponible
+        if: steps.d1-quota.outputs.proceed == 'true'
+        run: echo "InfoLobby usa materialización opcional: si falta un asset de D1, el release R2/Pages se conserva y el diagnóstico queda en el resumen."

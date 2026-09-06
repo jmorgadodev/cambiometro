@@ -201,6 +201,9 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       expect(content, name).toContain('threshold-percent: "60"');
       expect(content, name).toContain("steps.d1-quota.outputs.proceed == 'true'");
     }
+    const infolobby = fs.readFileSync(path.join(workflowsDir, "etl-infolobby.yml"), "utf8");
+    expect(infolobby).toContain("data:materialize:optional");
+    expect(infolobby).toContain("D1 pospuesto por asset no disponible");
   });
 
   it("12. Los ETL de personal y CPLT preservan R2 cuando D1 se pospone", () => {
