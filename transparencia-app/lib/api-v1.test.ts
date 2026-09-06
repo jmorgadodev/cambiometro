@@ -726,6 +726,21 @@ describe("API canónica v1", () => {
             }) as T,
           };
         }
+        if (key === "projections/transferencias-v1/manifest.json") {
+          return {
+            json: async <T>() => ({
+              schemaVersion: 1,
+              dataset: "ley-19862",
+              generatedAt: "2026-09-06T04:58:19.805Z",
+              totalRows: 60351,
+              pageSize: 50,
+              totalPages: 1208,
+              pages: Array.from({ length: 1208 }, (_, index) => ({ page: index + 1, count: index === 1207 ? 1 : 50, key: `p-${index + 1}.json` })),
+              searchIndex: { key: "search.json", count: 60351 },
+              checksumSha256: "current-transfer-checksum",
+            }) as T,
+          };
+        }
         return null;
       },
     };
@@ -738,7 +753,7 @@ describe("API canónica v1", () => {
 
     expect(response.status).toBe(200);
     expect(payload.data).toHaveLength(1);
-    expect(payload.data[0]).toMatchObject({ id: "ley-19862", recordCount: 59912, status: "connected" });
+    expect(payload.data[0]).toMatchObject({ id: "ley-19862", recordCount: 60351, checksumSha256: "current-transfer-checksum", status: "connected" });
     expect(prepare).not.toHaveBeenCalled();
   });
 
