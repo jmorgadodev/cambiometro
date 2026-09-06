@@ -33,9 +33,12 @@ describe("promesas editoriales del inicio", () => {
   });
 
   it("envía la búsqueda del inicio al directorio parlamentario", () => {
-    expect(home).toContain('<form className="home-query" action="/politico" role="search">');
-    expect(home).toContain('placeholder="Nombre, partido, distrito o región"');
-    expect(home).toContain("diputados y senadores");
+    const search = readFileSync(resolve(import.meta.dirname, "../components/HomeInlineSearch.tsx"), "utf8");
+    expect(home).toContain("<HomeInlineSearch />");
+    expect(search).toContain('fetch(`/api/v1/search?q=${encodeURIComponent(normalizedQuery)}`');
+    expect(search).toContain('placeholder="Nombre, partido, distrito o región"');
+    expect(search).toContain("Coincidencias");
+    expect(search).toContain('action="/politico"');
   });
 
   it("mantiene cinco preguntas de análisis y separa el seguimiento de movimientos", () => {
