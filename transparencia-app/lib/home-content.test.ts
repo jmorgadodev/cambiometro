@@ -19,8 +19,11 @@ describe("promesas editoriales del inicio", () => {
     expect(home).toContain("GLOBAL_KPIS.relaciones");
   });
 
-  it("distingue una fuente conectada de una cobertura parcial", () => {
-    expect(ETL_SOURCES_DATA.some((source) => source.statusText === "Datos publicados · cobertura parcial declarada")).toBe(true);
+  it("distingue disponibilidad del corte y validación del universo", () => {
+    expect(ETL_SOURCES_DATA.some((source) => source.statusText === "Disponible para consulta")).toBe(true);
+    expect(ETL_SOURCES_DATA.some((source) => source.statusText === "Universo verificado")).toBe(true);
+    expect(home).toContain("registros publicados y consultables");
+    expect(home).not.toContain("cobertura parcial declarada");
   });
 
   it("agrupa datasets parlamentarios bajo su institucion", () => {
