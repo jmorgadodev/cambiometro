@@ -1,4 +1,9 @@
-# Auditoría de cierre — 2026-09-04
+# Auditoría de cierre — 2026-09-04 (histórica)
+
+> Este documento conserva la fotografía de la auditoría del 4 de septiembre.
+> Fue supersedido por [`estado-produccion-2026-09-05.md`](./estado-produccion-2026-09-05.md),
+> que contiene la evidencia posterior de producción, los merges y la
+> verificación doble final.
 
 ## Alcance
 
