@@ -94,6 +94,18 @@ function recordsScopeRequired(requestUrl: URL) {
   );
 }
 
+function relationsScopeRequired() {
+  return failure(
+    "RELATION_SCOPE_REQUIRED",
+    "Indique una entidad para consultar relaciones y cruces paginados.",
+    400,
+    {
+      requiredAnyOf: ["entity_id", "from_id"],
+      reason: "unbounded-relation-scan-disabled",
+    },
+  );
+}
+
 function hasRecordScope(requestUrl: URL) {
   return ["source", "kind", "q", "query", "entity_id", "from", "to"]
     .some((key) => Boolean(requestUrl.searchParams.get(key)?.trim()));
@@ -1266,12 +1278,17 @@ async function listRelations(requestUrl: URL, env: Env, crosses = false) {
   // los índices JSONL de R2; leerlas primero evita COUNT(*) + SELECT sobre
   // toda la tabla de D1 en cada visita. D1 queda como respaldo para consultas
   // globales o releases antiguos.
+  // Un listado global no tiene una respuesta útil para la interfaz pública y
+  // fuerza COUNT(*) + ORDER BY sobre la tabla completa. Rechazarlo antes de
+  // tocar D1 evita que crawlers o clientes mal configurados consuman el cupo
+  // diario; las fichas siguen usando entity_id/from_id y el índice R2.
+  const anchor = requestUrl.searchParams.get("entity_id") ?? requestUrl.searchParams.get("from_id");
+  if (!anchor?.trim()) return relationsScopeRequired();
   const published = await listRelationsFromR2(requestUrl, env, crosses);
   if (published) return published;
   if (!env.DB) return dbUnavailable();
   const limit = limitFrom(requestUrl);
   const offset = offsetFrom(requestUrl);
-  const anchor = requestUrl.searchParams.get("entity_id") ?? requestUrl.searchParams.get("from_id");
   const predicate = requestUrl.searchParams.get("predicate");
   const clauses: string[] = [];
   const bindings: string[] = [];
