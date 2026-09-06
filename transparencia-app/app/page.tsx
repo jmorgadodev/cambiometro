@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import HomeInlineSearch from "@/components/HomeInlineSearch";
 import StatCounter from "@/components/StatCounter";
 import Reveal from "@/components/Reveal";
 import Icono from "@/components/ui/Icono";
@@ -171,14 +172,7 @@ export default async function HomePage() {
                 <div><dt>Fuentes conectadas</dt><dd>{operationalSources.length}</dd></div>
               </dl>
               <div className="home-evidence-card__rule" aria-hidden="true" />
-              <form className="home-query" action="/politico" role="search">
-                <label htmlFor="home-search">Buscar en los registros</label>
-                <div className="home-query__control">
-                  <input id="home-search" name="q" type="search" minLength={2} maxLength={80} placeholder="Nombre, partido, distrito o región" autoComplete="off" />
-                  <button type="submit">Buscar</button>
-                </div>
-                <small>Busca diputados y senadores por nombre, partido, distrito o región.</small>
-              </form>
+              <HomeInlineSearch />
             </div>
           </div>
         </div>
