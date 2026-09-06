@@ -144,7 +144,12 @@ async function verifyProdFull() {
   const expectedTransferAmountOverride = process.env.EXPECTED_TRANSFER_AMOUNT ? Number(process.env.EXPECTED_TRANSFER_AMOUNT) : null;
   const expectedTransferPagesOverride = process.env.EXPECTED_TRANSFER_PAGES ? Number(process.env.EXPECTED_TRANSFER_PAGES) : null;
 
-  const votingSnapshotPath = resolve("data/politicos-votaciones.json");
+  // CI hydrates the R2 release before running this verifier.  Keeping an
+  // explicit override also makes local audits reproducible without replacing
+  // a developer's tracked snapshot just to inspect production.
+  const votingSnapshotPath = process.env.VERIFY_VOTING_SNAPSHOT_PATH
+    ? resolve(process.env.VERIFY_VOTING_SNAPSHOT_PATH)
+    : resolve("data/politicos-votaciones.json");
   const votingSnapshot = existsSync(votingSnapshotPath)
     ? JSON.parse(readFileSync(votingSnapshotPath, "utf8"))
     : null;
