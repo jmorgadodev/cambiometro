@@ -15,7 +15,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
 
     const staticPublishers = new Set([
       "etl-chilecompra.yml", "etl-contraloria.yml", "etl-cplt.yml", "etl-daily.yml",
-      "etl-dipres.yml", "etl-expenses.yml", "etl-infolobby.yml", "etl-infoprobidad.yml",
+      "etl-dipres.yml", "etl-expenses.yml", "etl-infolobby-scheduled.yml", "etl-infoprobidad.yml",
       "etl-ley-19862.yml", "etl-movimientos.yml", "etl-personal-apoyo.yml", "etl-servel.yml",
       "etl-sinim.yml",
     ]);
@@ -72,7 +72,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     const cronMap: Record<string, string | null> = {
       "etl-daily.yml": "0 7 * * *",
       "etl-chilecompra.yml": "0 8 * * 1",
-      "etl-infolobby.yml": "30 8 * * 1",
+      "etl-infolobby-scheduled.yml": "30 8 * * 1",
       "etl-contraloria.yml": "0 9 2 * *",
       "etl-cplt.yml": "0 9 5 * *",
       "etl-ley-19862.yml": "0 9 8 * *",
@@ -186,7 +186,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       "etl-contraloria.yml",
       "etl-dipres.yml",
       "etl-expenses.yml",
-      "etl-infolobby.yml",
+      "etl-infolobby-scheduled.yml",
       "etl-infoprobidad.yml",
       "etl-ley-19862.yml",
       "etl-servel.yml",
@@ -201,7 +201,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       expect(content, name).toContain('threshold-percent: "60"');
       expect(content, name).toContain("steps.d1-quota.outputs.proceed == 'true'");
     }
-    const infolobby = fs.readFileSync(path.join(workflowsDir, "etl-infolobby.yml"), "utf8");
+    const infolobby = fs.readFileSync(path.join(workflowsDir, "etl-infolobby-scheduled.yml"), "utf8");
     expect(infolobby).toContain("data:materialize:optional");
     expect(infolobby).toContain("D1 pospuesto por asset no disponible");
   });
