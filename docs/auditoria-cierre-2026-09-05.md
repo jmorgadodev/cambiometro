@@ -2,10 +2,10 @@
 
 ## Estado
 
-La aplicación publicada responde correctamente. El checkout `main` actual es
-`5d8abda`; el deployment Pages de datos fue construido desde `95bfbb8` y el
-merge posterior sólo actualizó documentación. Esta auditoría reemplaza la
-fotografía anterior; no implica consultas masivas contra D1.
+La aplicación publicada responde correctamente. La base funcional de `main` es
+`b33af50`; el deployment Pages de datos fue construido desde `95bfbb8` y los
+merges posteriores actualizaron documentación y el Worker. Esta auditoría
+reemplaza la fotografía anterior; no implica consultas masivas contra D1.
 
 ## Evidencia de producción
 
@@ -15,12 +15,18 @@ fotografía anterior; no implica consultas masivas contra D1.
 - ETL de Movimientos: run
   `34003987310`, `success`.
 - Refresco Pages automático: run `34004020098`, `success`.
-- Verificación doble, navegador y crawl frío anterior: run
-  `34001841994`, `success`.
-- Artefacto de evidencia anterior: <https://github.com/jmorgadodev/cambiometro/actions/runs/34001841994/artifacts/9979998361>.
+- Worker API promovido al 100%: versión
+  `c5996d6b-a941-4c03-981c-37a81d9329ce`, workflow `34005110991`, bundle
+  165,80 KiB (30,57 KiB gzip).
+- Verificación final doble, navegador y crawl frío: run
+  `34005184919`, `success`.
+- Artefacto de evidencia final: <https://github.com/jmorgadodev/cambiometro/actions/runs/34005184919/artifacts/9981017237>.
 
-La verificación final no reportó 404 inesperados, 5xx, 1102 ni violaciones
-CSP. El crawl y la doble pasada fueron exitosos. El falso fallo anterior se
+La verificación final ejecutó 138/138 comprobaciones en cada pasada, con cero
+fallos. El crawl recorrió 5.015 rutas: 5.015 respuestas 200, cero 404
+inesperados, 5xx, 1102 o respuestas no válidas. Home respondió en 71 ms y los
+listados principales quedaron bajo 700 ms; dos fichas aisladas fueron las
+únicas rutas sobre ese umbral (890–925 ms). No hubo violaciones CSP. El falso fallo anterior se
 debía al diagnóstico interno del iframe de Turnstile; el guard ahora ignora
 únicamente ese mensaje conocido y mantiene fatales los errores de la página,
 del Worker y de CSP.
@@ -60,13 +66,15 @@ en la última ejecución.
 
 Las rutas de transferencias y relaciones ancladas usan R2-first. La última
 prueba D1 posterior al reinicio fue verde y no se ejecutó una materialización
-manual ni un `COUNT(*)` global. El endpoint de registros sin alcance rechaza la
-petición antes de consultar D1 (`RECORD_SCOPE_REQUIRED`), evitando lecturas
-accidentales masivas.
+manual ni un `COUNT(*)` global. El health check del Worker fue corregido para
+leer sólo el puntero singleton de release, nunca la tabla completa. El endpoint
+de registros sin alcance rechaza la petición antes de consultar D1
+(`RECORD_SCOPE_REQUIRED`), evitando lecturas accidentales masivas.
 
-## Pendiente real
+## Advertencias no bloqueantes
 
-1. Resolver o autorizar una vía oficial para que el runner pueda consultar
+1. Resolver o autorizar, si se requiere cobertura adicional, una vía oficial
+   para que el runner pueda consultar
    `gob.cl` sin 403, o mantener explícitamente esa fuente como advertencia no
    bloqueante. Esto no impide el ETL porque hay cuatro fuentes oficiales
    disponibles en la última ejecución.
@@ -78,6 +86,6 @@ accidentales masivas.
 ```bash
 npm run pages:rollback -- 271c27ce-a73e-4e81-9d56-d01575fd2ce5
 
-npx wrangler rollback <worker-version-id> \
+npx wrangler rollback c5996d6b-a941-4c03-981c-37a81d9329ce \
   --name cambiometro-public-api
 ```
