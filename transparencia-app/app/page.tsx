@@ -105,7 +105,7 @@ export default async function HomePage() {
       lastUpdated: snapshot.generatedAt ?? source.lastUpdated,
       lastUpdatedRelative: snapshot.generatedAt ? `Corte ${new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(snapshot.generatedAt))}` : source.lastUpdatedRelative,
       status: snapshot.status === "complete" ? "operational" : source.status,
-      statusText: snapshot.status === "complete" ? "Cobertura completa" : source.statusText,
+      statusText: snapshot.status === "complete" ? "Universo verificado" : source.statusText,
     };
   }).filter((source) => source.recordCount > 0);
   const HOME_SOURCES_LIST = homeSources;
@@ -368,7 +368,7 @@ export default async function HomePage() {
             ))}
           </div>
           <p className="home-coverage-note">
-            <strong>Cómo leer este catálogo.</strong> Son 12 fuentes oficiales con registros disponibles; sus cortes pueden tener cobertura parcial declarada por el organismo. Los pipelines operan de forma automatizada y cada ficha conserva la trazabilidad al portal de origen. <Link prefetch={false} href="/fuentes">Ver metodología y fuentes →</Link>
+            <strong>Cómo leer este catálogo.</strong> Son 12 fuentes oficiales con registros publicados y consultables. Cada tarjeta indica el corte disponible, su fecha y la ruta para explorar sus datos; el alcance temporal o temático declarado por cada organismo se explica en la ficha de la fuente. <Link prefetch={false} href="/fuentes">Ver metodología y fuentes →</Link>
           </p>
         </section>
       </Reveal>
