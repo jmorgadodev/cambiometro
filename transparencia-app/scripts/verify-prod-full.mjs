@@ -1,5 +1,8 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { findLandingTransferSource } from "./source-contract.mjs";
+
+export { findLandingTransferSource } from "./source-contract.mjs";
 
 let passed = 0;
 let failed = 0;
@@ -338,7 +341,7 @@ async function verifyProdFull() {
   assertCheck("TRANSFERENCIAS", "API /api/v1/transferencias responde 200", transfApiRes.status === 200);
   const landingSummaryRes = await fetch(`${PROD_URL}/data/landing-summary.json`, { headers });
   const landingSummary = landingSummaryRes.ok ? await landingSummaryRes.json().catch(() => null) : null;
-  const landingTransfer = landingSummary?.sources?.find((source) => source?.id === "ley19862");
+  const landingTransfer = findLandingTransferSource(landingSummary?.sources);
   assertCheck(
     "TRANSFERENCIAS",
     `Landing summary comparte total ${formatInteger(expectedTransferRows)}`,

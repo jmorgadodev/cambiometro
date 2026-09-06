@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { buildLandingSummary, sourceKeyForHomeSource } from "../lib/landing-summary.ts";
+import { findLandingTransferSource } from "./source-contract.mjs";
 
 describe("landing summary", () => {
   it("persiste conteos y fechas del snapshot sin consultar servicios externos", () => {
@@ -58,5 +59,16 @@ describe("landing summary", () => {
     expect(summary.sources).toEqual([
       expect.objectContaining({ id: "ley-19862", recordCount: 60351 }),
     ]);
+  });
+
+  it("verifica el id canónico de transferencias en landing y conserva compatibilidad", () => {
+    expect(findLandingTransferSource([{ id: "ley-19862", recordCount: 60351 }])).toMatchObject({
+      id: "ley-19862",
+      recordCount: 60351,
+    });
+    expect(findLandingTransferSource([{ id: "ley19862", recordCount: 60351 }])).toMatchObject({
+      id: "ley19862",
+      recordCount: 60351,
+    });
   });
 });
