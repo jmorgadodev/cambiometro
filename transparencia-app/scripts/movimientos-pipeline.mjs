@@ -272,40 +272,49 @@ export function parseMovementSignals(body, source) {
  * intentionally not used for arbitrary URLs.
  */
 async function fetchOfficialWithSystemCurl(source, timeoutMs) {
-  const { stdout } = await execFileAsync("curl", [
-    "--silent",
-    "--show-error",
-    "--location",
-    "--max-time",
-    String(Math.max(1, Math.ceil(timeoutMs / 1000))),
-    "--user-agent",
-    "El-Cambiometro-MovimientosETL/1.0 (+https://cambiometro.impulsacv.cl/fuentes)",
-    "--write-out",
-    "\n__CAMBIOMETRO_STATUS__:%{http_code}\n__CAMBIOMETRO_TYPE__:%{content_type}\n",
-    source.url,
-  ], { maxBuffer: 4 * 1024 * 1024, windowsHide: true });
-  const statusMarker = "\n__CAMBIOMETRO_STATUS__:";
-  const typeMarker = "\n__CAMBIOMETRO_TYPE__:";
-  const statusIndex = stdout.lastIndexOf(statusMarker);
-  const typeIndex = stdout.lastIndexOf(typeMarker);
-  if (statusIndex < 0 || typeIndex < 0 || typeIndex < statusIndex) throw new Error("CURL_RESPONSE_METADATA_MISSING");
-  const body = stdout.slice(0, statusIndex);
-  const status = Number.parseInt(stdout.slice(statusIndex + statusMarker.length, typeIndex).trim(), 10);
-  const contentType = stdout.slice(typeIndex + typeMarker.length).trim();
-  if (!Number.isInteger(status)) throw new Error("CURL_STATUS_INVALID");
-  if (status < 200 || status >= 300) throw new Error(`HTTP_${status}`);
-  if (body.length < 128) throw new Error("SOURCE_BODY_TOO_SHORT");
-  if (/cf-chl-|challenge-platform|just a moment\.\.\.|enable javascript and cookies/i.test(body)) {
-    throw new Error("SOURCE_CHALLENGE_PAGE");
+  let lastError;
+  for (const url of sourceUrls(source)) {
+    try {
+      const { stdout } = await execFileAsync("curl", [
+        "--silent",
+        "--show-error",
+        "--location",
+        "--max-time",
+        String(Math.max(1, Math.ceil(timeoutMs / 1000))),
+        "--user-agent",
+        "El-Cambiometro-MovimientosETL/1.0 (+https://cambiometro.impulsacv.cl/fuentes)",
+        "--write-out",
+        "\n__CAMBIOMETRO_STATUS__:%{http_code}\n__CAMBIOMETRO_TYPE__:%{content_type}\n",
+        url,
+      ], { maxBuffer: 4 * 1024 * 1024, windowsHide: true });
+      const statusMarker = "\n__CAMBIOMETRO_STATUS__:";
+      const typeMarker = "\n__CAMBIOMETRO_TYPE__:";
+      const statusIndex = stdout.lastIndexOf(statusMarker);
+      const typeIndex = stdout.lastIndexOf(typeMarker);
+      if (statusIndex < 0 || typeIndex < 0 || typeIndex < statusIndex) throw new Error("CURL_RESPONSE_METADATA_MISSING");
+      const body = stdout.slice(0, statusIndex);
+      const status = Number.parseInt(stdout.slice(statusIndex + statusMarker.length, typeIndex).trim(), 10);
+      const contentType = stdout.slice(typeIndex + typeMarker.length).trim();
+      if (!Number.isInteger(status)) throw new Error("CURL_STATUS_INVALID");
+      if (status < 200 || status >= 300) throw new Error(`HTTP_${status}`);
+      if (body.length < 128) throw new Error("SOURCE_BODY_TOO_SHORT");
+      if (/cf-chl-|challenge-platform|just a moment\.\.\.|enable javascript and cookies/i.test(body)) {
+        throw new Error("SOURCE_CHALLENGE_PAGE");
+      }
+      return {
+        ...source,
+        ok: true,
+        status,
+        bytes: Buffer.byteLength(body),
+        fetchedAt: new Date().toISOString(),
+        resolved_url: url === source.url ? undefined : url,
+        signals: parseMovementSignals(body, { ...source, url, contentType }),
+      };
+    } catch (error) {
+      lastError = error;
+    }
   }
-  return {
-    ...source,
-    ok: true,
-    status,
-    bytes: Buffer.byteLength(body),
-    fetchedAt: new Date().toISOString(),
-    signals: parseMovementSignals(body, { ...source, contentType }),
-  };
+  throw lastError ?? new Error("CURL_SOURCE_UNAVAILABLE");
 }
 
 function statusFromError(error) {
