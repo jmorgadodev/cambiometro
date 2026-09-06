@@ -6,7 +6,13 @@
  * CI without turning an otherwise valid publication into a false failure.
  */
 const DEFERRED_FAILURES = Object.freeze([
-  { reason: "daily_rows_read_limit", pattern: /(?:code:\s*7500|rows_read|daily\s+limit)/i },
+  {
+    reason: "daily_rows_read_limit",
+    // Cloudflare has emitted several equivalent messages over time. Keep all
+    // of them deferrable so an optional D1 projection never blocks the
+    // canonical R2/static publication.
+    pattern: /(?:code\s*:\s*7500|rows[_\s-]*read|free\s+tier.*row\s+read|daily.*row\s+read|daily\s+limit)/i,
+  },
   { reason: "asset_unavailable", pattern: /D1_ASSET_UNAVAILABLE|asset unavailable/i },
   { reason: "database_size_limit", pattern: /Exceeded maximum DB size|maximum database size/i },
 ]);
