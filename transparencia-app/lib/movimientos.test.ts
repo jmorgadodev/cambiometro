@@ -3,6 +3,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   isMovimientoDocumentoPendienteMayor30,
+  latestMovementPublicationDate,
   MOVIMIENTOS,
   MOVIMIENTOS_HOME_SUMMARY,
 } from "./movimientos";
@@ -92,6 +93,15 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
   it("4b. Explica la diferencia entre fecha efectiva y fecha de publicación de la fuente", () => {
     expect(movimientosPageSource).toContain("Fecha del evento");
     expect(movimientosPageSource).toContain("fecha de publicación");
+    expect(movimientosPageSource).toContain("Última publicación detectada");
+    expect(movimientosPageSource).toContain("Último evento efectivo");
+  });
+
+  it("4c. calcula la última publicación sin reemplazar la fecha efectiva", () => {
+    expect(latestMovementPublicationDate([
+      { fuentes: [{ nivel: "prensa", medio: "Fuente", url: "https://example.test/a", fecha: "2026-09-02", titulo: "" }] },
+      { fuentes: [{ nivel: "oficial", medio: "Fuente oficial", url: "https://example.test/b", fecha: "2026-09-03", titulo: "" }] },
+    ], [{ date: "2026-09-01" }])).toBe("2026-09-03");
   });
 
   it("5. Días en el cargo calculado para autoridades salientes con origen", () => {

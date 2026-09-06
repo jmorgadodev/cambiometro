@@ -8,6 +8,7 @@ import {
   MOVIMIENTOS_TIPO_COLOR,
   MOVIMIENTOS_TIPO_EMOJI,
   MOVIMIENTOS_PIPELINE_METADATA,
+  latestMovementPublicationDate,
   MOTIVOS_CATEGORIAS,
   isMovimientoDocumentoPendienteMayor30,
   type MovimientoTipo,
@@ -223,7 +224,7 @@ function MovimientosContent() {
     totalEnConfirmacion,
     fechaActualizacionTexto,
     ultimaEjecucionTexto,
-    ultimoAvisoTexto,
+    ultimaPublicacionTexto,
     senalesEnConfirmacion,
   } = useMemo(() => {
     const enGobierno = MOVIMIENTOS.filter((m) => m.fecha >= "2026-03-11");
@@ -276,14 +277,10 @@ function MovimientosContent() {
 
     const verificados = MOVIMIENTOS.filter((m) => m.estado === "verificado").length;
     const enConfirmacion = MOVIMIENTOS.filter((m) => m.estado !== "verificado").length;
-    const ultimaSenal = (MOVIMIENTOS_PIPELINE_METADATA.signals ?? [])
-      .map((signal) => signal.date)
-      .filter((date): date is string => Boolean(date))
-      .sort()
-      .at(-1);
-    const ultimoAviso = ultimaSenal ? new Date(`${ultimaSenal}T12:00:00Z`) : null;
-    const ultimoAvisoTexto = ultimoAviso && !Number.isNaN(ultimoAviso.getTime())
-      ? ultimoAviso.toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Santiago" })
+    const ultimaPublicacion = latestMovementPublicationDate(MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA.signals);
+    const ultimaPublicacionDate = ultimaPublicacion ? new Date(`${ultimaPublicacion}T12:00:00Z`) : null;
+    const ultimaPublicacionTexto = ultimaPublicacionDate && !Number.isNaN(ultimaPublicacionDate.getTime())
+      ? ultimaPublicacionDate.toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Santiago" })
       : "sin registro";
 
     return {
@@ -300,7 +297,7 @@ function MovimientosContent() {
       ultimaEjecucionTexto: formatPipelineTimestamp(
         MOVIMIENTOS_PIPELINE_METADATA.last_success_at ?? MOVIMIENTOS_PIPELINE_METADATA.last_run,
       ),
-      ultimoAvisoTexto,
+      ultimaPublicacionTexto,
       senalesEnConfirmacion: Number(MOVIMIENTOS_PIPELINE_METADATA.stats.signals_en_confirmacion ?? 0),
     };
   }, [nowMs]);
@@ -351,7 +348,7 @@ function MovimientosContent() {
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.4rem" }}>
                 <span className="live-dot" aria-hidden="true" />
                 <span style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                  Pipeline diario · Última ejecución exitosa {ultimaEjecucionTexto} · Último aviso {ultimoAvisoTexto} · Último evento {fechaActualizacionTexto}
+                  Pipeline diario · Última ejecución exitosa {ultimaEjecucionTexto} · Última publicación detectada {ultimaPublicacionTexto} · Último evento efectivo {fechaActualizacionTexto}
                 </span>
               </div>
               <h1 style={{ fontSize: "clamp(1.75rem, 3.2vw, 2.4rem)", fontWeight: 900, margin: "0 0 0.5rem 0", letterSpacing: "-0.02em" }}>
@@ -464,7 +461,7 @@ function MovimientosContent() {
               {señalesPendientes.slice(0, 5).map((signal) => (
                 <li key={signal.signal_id}>
                   {signal.url ? <a href={signal.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)" }}>{signal.title}</a> : signal.title}
-                  <span style={{ color: "var(--text-muted)", marginLeft: "0.35rem" }}>({signal.source_label} · Anunciado · en confirmación)</span>
+                  <span style={{ color: "var(--text-muted)", marginLeft: "0.35rem" }}>({signal.source_label} · Publicado {signal.date ? formatFechaCorta(signal.date) : "sin fecha"} · Anunciado · en confirmación)</span>
                 </li>
               ))}
             </ul>

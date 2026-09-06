@@ -104,6 +104,24 @@ export interface MovimientosPayload {
   [key: string]: unknown;
 }
 
+/**
+ * Returns the most recent publication date carried by an evidence source or
+ * announcement signal. This is intentionally separate from `last_event_date`:
+ * a source can publish the confirmation after the effective date of the
+ * movement. Keeping both dates avoids presenting a fresh source as a stale
+ * event, or an announcement as an official appointment.
+ */
+export function latestMovementPublicationDate(
+  movimientos: Array<Pick<Movimiento, "fuentes">>,
+  signals: Array<Pick<MovimientoSignal, "date">> = [],
+): string | null {
+  const dates = [
+    ...movimientos.flatMap((movement) => movement.fuentes.map((source) => source.fecha)),
+    ...signals.map((signal) => signal.date),
+  ].filter((date): date is string => /^\d{4}-\d{2}-\d{2}$/.test(String(date ?? "")));
+  return dates.sort().at(-1) ?? null;
+}
+
 export const MOTIVOS_CATEGORIAS: MovimientoMotivoCategoria[] = [
   "No informado", "Renuncia pedida por el Gobierno", "Remoción", "Contraloría/irregularidad",
   "Conflictos internos", "Conductas indebidas", "Cambio dentro del gobierno",
