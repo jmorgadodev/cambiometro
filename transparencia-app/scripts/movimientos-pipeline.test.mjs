@@ -165,6 +165,7 @@ describe("pipeline automático de movimientos", () => {
     });
     expect(result.allOfficialBlocked).toBe(true);
     expect(result.hasOfficialSource).toBe(false);
+    expect(result.results.map((source) => source.status)).toEqual([403, 403]);
   });
 
   it("usa sólo variantes oficiales de gob.cl cuando la ruta de noticias está bloqueada", async () => {

@@ -308,6 +308,11 @@ async function fetchOfficialWithSystemCurl(source, timeoutMs) {
   };
 }
 
+function statusFromError(error) {
+  const match = String(error?.message ?? error ?? "").match(/^HTTP_(\d{3})$/);
+  return match ? Number.parseInt(match[1], 10) : null;
+}
+
 export async function fetchSource(source, { fetchImpl = fetch, retries = 2, timeoutMs = 20_000 } = {}) {
   let lastError;
   for (let attempt = 0; attempt <= retries; attempt += 1) {
@@ -354,7 +359,7 @@ export async function fetchSource(source, { fetchImpl = fetch, retries = 2, time
   return {
     ...source,
     ok: false,
-    status: null,
+    status: statusFromError(lastError),
     bytes: 0,
     fetchedAt: new Date().toISOString(),
     signals: [],
