@@ -4,6 +4,7 @@ import EtlHealthDashboardClient from "@/components/datos/EtlHealthDashboardClien
 import Icono from "@/components/ui/Icono";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
 import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
+import { getTransferReleaseMetadata } from "@/lib/transfer-release-metadata";
 
 export const metadata: Metadata = {
   title: "Estado de Conexión y Salud de Fuentes ETL — El Cambiómetro",
@@ -76,6 +77,7 @@ const ANALYSIS_LINES = [
 
 export default async function DataObservatoryPage() {
   const entityCount = getStaticEntityCatalog().total || GLOBAL_KPIS.entidades;
+  const transferRelease = getTransferReleaseMetadata();
 
   return (
     <div>
@@ -123,7 +125,7 @@ export default async function DataObservatoryPage() {
             </div>
           </div>
 
-          <EtlHealthDashboardClient />
+          <EtlHealthDashboardClient transferRelease={transferRelease} />
         </section>
 
         {/* ─── LÍNEAS DE ANÁLISIS Y LÍMITES EDITORIALES ────────────────── */}

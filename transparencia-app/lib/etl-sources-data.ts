@@ -77,13 +77,16 @@ export const ETL_SOURCES_DATA: EtlSourceInfo[] = descriptors.map(({ health, ...d
   const canonicalCount = CANONICAL_COUNTS[health] ?? state?.recordCount ?? 0;
   const historicalCount = HISTORICAL_COUNTS[health] ?? state?.recordCount ?? canonicalCount;
   const generatedAt = state?.generatedAt ?? "2026-08-21T10:02:59.458Z";
+  const financialAmountClp = state && "financialAmountClp" in state && typeof state.financialAmountClp === "number"
+    ? state.financialAmountClp
+    : undefined;
 
   return {
     ...descriptor,
     recordCount: canonicalCount,
     canonicalCount,
     historicalCount,
-    ...(state && "financialAmountClp" in state && typeof state.financialAmountClp === "number" ? { financialAmountClp: state.financialAmountClp } : {}),
+    ...(financialAmountClp !== undefined ? { financialAmountClp } : {}),
     lastUpdated: generatedAt,
     lastUpdatedRelative: dateLabel(generatedAt),
     status: state?.status === "complete" ? "operational" : "official_lag",

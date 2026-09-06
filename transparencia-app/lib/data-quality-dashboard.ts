@@ -1,6 +1,7 @@
 import { listPublishedSourceManifests } from "@/lib/published-sources";
 import { getMunicipalidadesStats } from "@/lib/municipalidades-list";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
+import { getTransferReleaseMetadata } from "@/lib/transfer-release-metadata";
 import healthRaw from "@/data/etl/source-health.json";
 
 export interface DataQualitySourceRow {
@@ -190,6 +191,7 @@ export async function getDataQualityDashboardData(): Promise<{
 }> {
   const manifests = await listPublishedSourceManifests();
   const muniStats = getMunicipalidadesStats();
+  const transferRelease = getTransferReleaseMetadata();
   const healthSources = healthRaw.sources as Record<string, { generatedAt?: string | null; status?: string }>;
   const ultimaValidacionIso = healthRaw.generatedAt || "2026-08-21T10:10:54.809Z";
 
@@ -208,7 +210,11 @@ export async function getDataQualityDashboardData(): Promise<{
     // Health timestamp fallback
     const healthKey = manifest.id.replace(/-/g, "") as keyof typeof healthSources;
     const healthEntry = healthSources[manifest.id] || healthSources[healthKey];
-    const rawSync = healthEntry?.generatedAt || manifest.lastUpdated || ultimaValidacionIso;
+    const isTransferRelease = manifest.id === "ley-19862";
+    const rawSync = (isTransferRelease ? transferRelease.generatedAt : null)
+      || healthEntry?.generatedAt
+      || manifest.lastUpdated
+      || ultimaValidacionIso;
 
     const count = manifest.canonicalCount ?? manifest.recordCount;
     const isSinDatos = count === 0 && (!healthEntry || healthEntry.status === "unavailable");
@@ -267,11 +273,13 @@ export async function getDataQualityDashboardData(): Promise<{
       status,
       statusLabel,
       statusBadgeClass,
-      canonicalCount: manifest.canonicalCount ?? manifest.recordCount,
-      historicalCount: manifest.historicalCount ?? manifest.recordCount,
+      canonicalCount: isTransferRelease ? transferRelease.totalRows : manifest.canonicalCount ?? manifest.recordCount,
+      historicalCount: isTransferRelease ? transferRelease.totalRows : manifest.historicalCount ?? manifest.recordCount,
       periodoReciente: meta.periodoReciente,
       desfase: meta.desfase,
-      coberturaDetalle: meta.coberturaDetalle,
+      coberturaDetalle: isTransferRelease
+        ? `${transferRelease.totalRows.toLocaleString("es-CL")} transferencias (${transferRelease.totalRecipients.toLocaleString("es-CL")} receptores / ${transferRelease.totalEmitters.toLocaleString("es-CL")} emisores)`
+        : meta.coberturaDetalle,
       lastSync: rawSync,
       lastSyncFormatted,
       coverageNote: meta.coverageNote,
