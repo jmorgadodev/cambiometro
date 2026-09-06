@@ -830,17 +830,16 @@ describe("API canónica v1", () => {
     expect(response.status).toBe(404);
   });
 
-  it("expone relaciones y cruces con la misma cadena de evidencia", async () => {
+  it("rechaza relaciones y cruces globales sin escanear D1", async () => {
     const relationsResponse = await fetchApi("https://example.test/api/v1/relations?predicate=cast_vote&limit=1");
     const relationPayload = await relationsResponse.json();
     const crossesResponse = await fetchApi("https://example.test/api/v1/crosses?predicate=cast_vote&limit=1");
     const crossesPayload = await crossesResponse.json();
 
-    expect(relationPayload.data).toHaveLength(1);
-    expect(crossesPayload.data).toHaveLength(1);
-    expect(crossesPayload.data[0].relation.id).toBe(relationPayload.data[0].id);
-    expect(crossesPayload.data[0].evidence[0].id).toBe(relationPayload.data[0].evidenceRecordIds[0]);
-    expect(crossesPayload.data[0].relation.disclaimer).toContain("no implica irregularidad");
+    expect(relationsResponse.status).toBe(400);
+    expect(crossesResponse.status).toBe(400);
+    expect(relationPayload).toMatchObject({ error: { code: "RELATION_SCOPE_REQUIRED" } });
+    expect(crossesPayload).toMatchObject({ error: { code: "RELATION_SCOPE_REQUIRED" } });
   });
 
   it("usa el índice de relaciones R2 para fichas sin consultar D1", async () => {
