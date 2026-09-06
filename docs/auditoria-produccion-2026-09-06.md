@@ -5,10 +5,10 @@
 La publicación vigente de Pages se mantiene estable y fue revalidada contra el dominio productivo después de integrar las guardias operativas. La última guardia de CI no cambia datos ni el deployment activo.
 
 - Commit de `main`: `a606deb` (`fix(api): block unbounded relation scans`).
-- Pages deployment conocido-bueno vigente: `45bee418-29bb-4ae1-a320-6a274225a92e`.
-- URL del deployment: `https://45bee418.cambiometro.pages.dev`.
+- Pages deployment productivo vigente: `4e45a686-d052-4d56-875a-d738a4b6cc38`.
+- URL del deployment: `https://4e45a686.cambiometro.pages.dev`.
 - Dominio verificado: `https://cambiometro.impulsacv.cl`.
-- Rollback Pages: `npm run pages:rollback -- 45bee418-29bb-4ae1-a320-6a274225a92e`.
+- Rollback Pages: `npm run pages:rollback -- 4e45a686-d052-4d56-875a-d738a4b6cc38`.
 - Worker productivo vigente: `362fd90a-ab0a-4303-9d75-c617ad47d271`.
 - Rollback Worker: `npx wrangler rollback 362fd90a-ab0a-4303-9d75-c617ad47d271 --name cambiometro-public-api`.
 
@@ -16,11 +16,11 @@ La publicación vigente de Pages se mantiene estable y fue revalidada contra el 
 
 La verificación productiva `npm run verify:prod:movimientos` pasó todos sus checks:
 
-- 82 registros históricos conservados.
-- Última ejecución exitosa: `2026-09-06T04:58:19.805Z`.
+- 82 registros históricos conservados y release R2 `d854bf4717b54374dc2c08262c85db18f1a56ea7e3171905fa46a697ef15161e` hidratado en Pages.
+- Última ejecución exitosa: `2026-09-06T11:28:11.475Z`.
 - Último evento efectivo: `2026-09-02`.
 - Última publicación de una fuente: `2026-09-03`.
-- Checksum publicado: `cdaff6c2b47bbe808646d4b44e05258659b751c9a8ff98ef87dc55fb8bf40ff6`.
+- Checksum publicado: `abbd517e8ef918843f779779c9a7035e66a2a70cbd2441bb154d49dccfe5008a`.
 - Estados `verificado` y `en_confirmacion` visibles y separados.
 - La página hidratada no deja spinner ni registra errores de navegador.
 

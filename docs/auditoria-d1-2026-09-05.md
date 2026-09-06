@@ -83,3 +83,18 @@ normalización queda después del próximo reinicio UTC, observando una consulta
 global rechazada y una consulta anclada atendida por R2 sin crecimiento masivo
 de `rows_read`.
 
+## Resultado del probe posterior al reinicio — 6 de septiembre
+
+El workflow `d1-post-reset-probe` (`34011982954`) terminó `success` después del
+reinicio UTC:
+
+- Rows read: `1.211.650 / 5.000.000` (`24,23%`).
+- Rows written: `18 / 100.000` (`0,02%`).
+- Consulta de Cámara: una sola fila, `limit=1`, total `13.441`, sin degradación.
+- No se ejecutó SQL desde el monitor; sólo se consultó Analytics D1 y luego una
+  página acotada de la API.
+
+La protección contra scans globales quedó validada operativamente. El último
+ETL de Movimientos publicó R2 y Pages consumió automáticamente el release
+`d854bf4717b54374dc2c08262c85db18f1a56ea7e3171905fa46a697ef15161e`.
+
