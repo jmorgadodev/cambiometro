@@ -1,6 +1,11 @@
 name: ETL Semanal - InfoLobby
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - .github/workflows/etl-infolobby.yml
   schedule:
     - cron: "30 8 * * 1" # Lunes 04:30 CLT
   workflow_dispatch:
@@ -19,6 +24,7 @@ concurrency:
 jobs:
   ingest-publish-materialize:
     name: Audiencias y Gestiones de Lobby (Ley 20.730)
+    if: github.event_name != 'push'
     runs-on: ubuntu-latest
     timeout-minutes: 45
     permissions:
