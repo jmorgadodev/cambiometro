@@ -113,9 +113,9 @@ jobs:
           if [ "$status" -eq 0 ]; then
             exit 0
           fi
-          if grep -Fq "code: 7500" "$log_file"; then
-            echo "::warning::D1 alcanzó el límite diario gratuito de rows_read; R2 y Pages seguirán siendo la fuente canónica de gastos."
-            echo "D1 materialization deferred because the free rows_read quota was exhausted; R2/static publication continues." >> "$GITHUB_STEP_SUMMARY"
+          if grep -Eq "code: 7500|D1_ASSET_UNAVAILABLE|Exceeded maximum DB size" "$log_file"; then
+            echo "::warning::D1 no pudo materializar gastos por una condición diferible; R2 y Pages seguirán siendo la fuente canónica."
+            echo "D1 materialization deferred; R2/static publication continues." >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
           exit "$status"

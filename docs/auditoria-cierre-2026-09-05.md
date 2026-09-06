@@ -73,6 +73,29 @@ leer sólo el puntero singleton de release, nunca la tabla completa. El endpoint
 de registros sin alcance rechaza la petición antes de consultar D1
 (`RECORD_SCOPE_REQUIRED`), evitando lecturas accidentales masivas.
 
+Los workflows de ETL ahora tratan la materialización D1 como una proyección
+opcional: si Cloudflare devuelve el límite diario `7500`, un asset ausente o el
+límite de tamaño de la base, el workflow deja una advertencia y conserva R2 /
+Pages como fuente pública. Credenciales inválidas, permisos insuficientes y
+errores desconocidos siguen siendo fallos fatales. Esto evita que un ETL verde
+en R2 aparezca como fallido sólo por D1 y evita reintentos que consuman más
+`rows_read`.
+
+La última matriz observada del catálogo productivo fue:
+
+| Fuente | Estado de conexión | Último corte publicado | Lectura |
+|---|---:|---:|---|
+| Cámara, Contraloría, INE, InfoLobby, InfoProbidad, Senado, SERVEL | conectadas | 02-09-2026 | disponibles en lake |
+| CPLT | conectada | 02-09-2026 | actualización mensual ejecutada el 05-09 |
+| ChileCompra | conectada | 21-08-2026 | última ejecución semanal exitosa 31-08 |
+| DIPRES | conectada | 21-08-2026 | cadencia trimestral; no vencida |
+| SINIM | conectada | 21-08-2026 | cadencia semestral; snapshot preservado |
+| Ley 19.862 | conectada | 25-08-2026 | próxima ventana mensual el día 8 |
+
+“Conectada” describe acceso y publicación en el catálogo; no significa que
+cada fuente tenga actualización diaria. La landing usa “cobertura parcial
+declarada” para distinguir esa limitación de una caída de conexión.
+
 ## Advertencias no bloqueantes
 
 1. Resolver o autorizar, si se requiere cobertura adicional, una vía oficial
