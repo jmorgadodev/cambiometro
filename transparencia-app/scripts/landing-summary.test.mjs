@@ -41,6 +41,22 @@ describe("landing summary", () => {
   it("mantiene el vínculo explícito entre las tarjetas y el snapshot de salud", () => {
     expect(sourceKeyForHomeSource("etl_chilecompra_ocds")).toBe("chilecompra");
     expect(sourceKeyForHomeSource("etl_ine_censo_2024")).toBe("ine");
+    expect(sourceKeyForHomeSource("etl_ley_19862_transferencias")).toBe("ley-19862");
     expect(sourceKeyForHomeSource("unknown")).toBeNull();
+  });
+
+  it("normaliza el identificador de transferencias al contrato de la API", () => {
+    const summary = buildLandingSummary({
+      sourceHealth: {
+        sources: { ley19862: { recordCount: 59544, status: "partial", generatedAt: "2026-09-04T10:00:00Z" } },
+      },
+      movements: { movimientos: [] },
+      globalKpis: {},
+      transferRelease: { totalRows: 60351, generatedAt: "2026-09-05T10:00:00Z" },
+    });
+
+    expect(summary.sources).toEqual([
+      expect.objectContaining({ id: "ley-19862", recordCount: 60351 }),
+    ]);
   });
 });
