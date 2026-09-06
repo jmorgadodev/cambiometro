@@ -4,13 +4,13 @@
 
 La publicación vigente de Pages se mantiene estable y fue revalidada contra el dominio productivo después de integrar las guardias operativas. La última guardia de CI no cambia datos ni el deployment activo.
 
-- Commit de `main`: `c513e18` (`Fix: preserve mobile drawer during static hydration`).
-- Pages deployment: `b9f75d80-3e88-47c5-b879-f75f5c931096`.
-- URL del deployment: `https://b9f75d80.cambiometro.pages.dev`.
+- Commit de `main`: `a606deb` (`fix(api): block unbounded relation scans`).
+- Pages deployment conocido-bueno vigente: `45bee418-29bb-4ae1-a320-6a274225a92e`.
+- URL del deployment: `https://45bee418.cambiometro.pages.dev`.
 - Dominio verificado: `https://cambiometro.impulsacv.cl`.
-- Rollback Pages: `npm run pages:rollback -- b9f75d80-3e88-47c5-b879-f75f5c931096`.
-- Worker productivo vigente: `9fa69a8e-3998-47af-97e2-bea61059df3b`.
-- Rollback Worker: `npx wrangler rollback 9fa69a8e-3998-47af-97e2-bea61059df3b --name cambiometro-public-api`.
+- Rollback Pages: `npm run pages:rollback -- 45bee418-29bb-4ae1-a320-6a274225a92e`.
+- Worker productivo vigente: `362fd90a-ab0a-4303-9d75-c617ad47d271`.
+- Rollback Worker: `npx wrangler rollback 362fd90a-ab0a-4303-9d75-c617ad47d271 --name cambiometro-public-api`.
 
 ## Movimientos
 
@@ -34,7 +34,7 @@ Las fechas no son contradictorias: el evento efectivo de Alonso Velásquez fue c
 
 ## Verificación integral
 
-`node scripts/verify-prod-full.mjs` pasó `132` verificaciones y `0` fallos. Se confirmaron, entre otros, las fichas Kaiser/Bianchi, Maipú, cruces, fuentes, transferencias `60.351`, Worker health, funcionarios, cero spinner y cero errores críticos. La guardia nueva confirma además `12/12` fuentes canónicas con estado `connected`.
+`node scripts/verify-prod-full.mjs` pasó `132` verificaciones y `0` fallos en la pasada 1 y nuevamente `132` verificaciones y `0` fallos diez minutos después (pasada 2). Se confirmaron, entre otros, las fichas Kaiser/Bianchi, Maipú, cruces, fuentes, transferencias `60.351`, Worker health, funcionarios, cero spinner y cero errores críticos. La guardia confirma además `12/12` fuentes canónicas con estado `connected`.
 
 El crawl frío de sitemap y rutas de nivel 1/2 pasó `5.015/5.015` respuestas HTTP 200, con `0` fallos, `0` respuestas 5xx/1102, máximo `679 ms` y promedio `312 ms`. La home respondió en `84 ms` en esa corrida y `/movimientos/` en `81 ms`.
 
@@ -44,7 +44,7 @@ La comprobación se realizó contra Pages y el dominio productivo después del d
 
 La API productiva devolvió las 12 fuentes del catálogo con estado `connected`. Los conteos publicados coinciden con los releases visibles en la web: CPLT 1.226.913, ChileCompra 888.693, InfoLobby 60.523, Ley 19.862 60.351, Cámara 29.890, Senado 8.139, SERVEL 23.894, INE 346 y CGR 291, entre otros.
 
-El workflow diario de Movimientos (`34012795797`) terminó `success` el 6 de septiembre a las 04:57 UTC y el snapshot publicado contiene los 82 registros. Los workflow fallidos observados no corresponden a pérdida del release público: CGR y Gastos fallaron en la proyección opcional D1 al alcanzar el límite de lectura; InfoLobby falló por un asset D1 ausente; Personal de apoyo falló porque Cámara bloqueó la URL de personal. R2/Pages conservó los últimos snapshots válidos. El PR #427 corrige la clasificación del mensaje actual de cuota D1 para que esos casos diferibles no interrumpan la publicación estática.
+El workflow diario de Movimientos (`34012795797`) terminó `success` el 6 de septiembre a las 04:57 UTC y el snapshot publicado contiene los 82 registros. Los workflow fallidos observados no corresponden a pérdida del release público: CGR y Gastos fallaron en la proyección opcional D1 al alcanzar el límite de lectura; InfoLobby falló por un asset D1 ausente; Personal de apoyo falló porque Cámara bloqueó la URL de personal. R2/Pages conservó los últimos snapshots válidos. El PR #427 corrige la clasificación del mensaje actual de cuota D1 para que esos casos diferibles no interrumpan la publicación estática. La protección adicional de relaciones/cruces sin alcance se integró en `a606deb` y está activa en el Worker indicado arriba.
 
 Se mantienen como advertencia operativa, no como dato inventado: `Gob.cl Noticias` devolvió `403` al runner, pero las otras fuentes oficiales de Movimientos respondieron 200. El pipeline no promueve una señal provisional a oficial sin respaldo.
 

@@ -25,14 +25,13 @@ D1.
 - El bundle del Worker después del cambio mide `165,29 KiB` (`30,31 KiB` gzip),
   por debajo del límite de `1 MiB`.
 
-## Pendiente antes de promover el Worker
+## Pendiente antes de cerrar el consumo D1
 
-1. Ejecutar CI de la rama y verificar en un preview que el catálogo R2 contiene
-   los índices de entidades publicados.
-2. Promover el Worker únicamente después de comprobar `/api/v1/relations` y
-   `/api/v1/crosses` con `X-Cambiometro-Cache` y `sourceBackend=r2-entity-index`.
-3. Comparar el uso D1 después del próximo reset UTC. No ejecutar
+1. Comparar el uso D1 después del próximo reset UTC. No ejecutar
    `materialize-d1` manualmente mientras el preflight esté sobre el umbral.
+2. Confirmar que las rutas globales `/api/v1/relations` y `/api/v1/crosses`
+   rechazan consultas sin alcance con HTTP 400, y que las consultas ancladas
+   continúan respondiendo desde el índice R2.
 
 ## Criterio de costo
 
@@ -54,7 +53,7 @@ npx wrangler rollback ec5d1cce-d02b-4ff4-8f69-3c6a6f66a8b0 \
 
 La nueva ruta usa `source_state.record_count` y una sola página de `records`
 para `source=...`, sin cambiar la respuesta pública. El bundle medido es de
-165,87 KiB (30,58 KiB gzip), frente al límite de 1 MiB.
+166,21 KiB (30,69 KiB gzip), frente al límite de 1 MiB.
 
 La medición posterior (`usage-watch`, run `33993326516`) quedó en 5.877.827
 rows_read (117,56%) y 488 rows_written (0,49%). El exceso pertenece al ciclo
@@ -67,4 +66,20 @@ La auditoría productiva adicional confirmó 12 fuentes en estado `connected`
 desde el inventario R2. El endpoint de `records` para Cámara devolvió 200,
 pero mientras dura el agotamiento D1 declara `temporarily-unavailable`; no es
 un 5xx ni una pérdida del release. ChileCompra continuó respondiendo desde R2.
+
+## Actualización 6 de septiembre — protección contra scans globales
+
+El monitor de cuota observó `53.544.561` filas leídas frente a `5.000.000`
+(`1070,89%`) en el ciclo ya consumido. El origen operativo identificado fueron
+consultas globales de relaciones/cruces que podían ejecutar `COUNT(*)` y
+ordenamiento sobre el universo completo. El Worker productivo
+`362fd90a-ab0a-4303-9d75-c617ad47d271` ahora devuelve `400
+RELATION_SCOPE_REQUIRED` antes de tocar D1 cuando falta `entity_id` o `from_id`.
+Las consultas ancladas siguen respondiendo desde R2; el bundle queda en
+`166,21 KiB`.
+
+El exceso del ciclo anterior no puede revertirse. La prueba definitiva de
+normalización queda después del próximo reinicio UTC, observando una consulta
+global rechazada y una consulta anclada atendida por R2 sin crecimiento masivo
+de `rows_read`.
 
