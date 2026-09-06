@@ -379,6 +379,12 @@ async function verifyProdFull() {
 
   // ─── MÓDULO 5: /FUENTES Y /DATOS/CALIDAD ───────────────────────────────────
   console.log("\n5. MÓDULO FUENTES Y CALIDAD DE DATOS (/fuentes, /datos/calidad)");
+  const sourcesApiRes = await fetch(`${API_URL}/api/v1/sources`, { headers });
+  const sourcesApi = sourcesApiRes.ok ? await sourcesApiRes.json().catch(() => null) : null;
+  const sourceRows = Array.isArray(sourcesApi?.data) ? sourcesApi.data : [];
+  const expectedSourceIds = ["camara", "chilecompra", "contraloria", "cplt", "dipres", "ine", "infolobby", "infoprobidad", "ley-19862", "senado", "servel", "sinim"];
+  assertCheck("FUENTES", "API de fuentes responde con el universo canónico", sourcesApiRes.status === 200 && sourceRows.length === expectedSourceIds.length && expectedSourceIds.every((id) => sourceRows.some((source) => source?.id === id)), `actual: ${sourceRows.length}/${expectedSourceIds.length}`);
+  assertCheck("FUENTES", "Todas las fuentes canónicas están conectadas", sourceRows.length === expectedSourceIds.length && sourceRows.every((source) => source?.status === "connected"), sourceRows.filter((source) => source?.status !== "connected").map((source) => `${source?.id ?? "?"}:${source?.status ?? "?"}`).join(", ") || "12/12 connected");
   const fuentesRes = await fetch(`${PROD_URL}/fuentes`, { headers });
   assertCheck("FUENTES", "HTTP Status 200", fuentesRes.status === 200);
   const fuentesHtml = (await fuentesRes.text()).replace(/<!--.*?-->/g, "");
