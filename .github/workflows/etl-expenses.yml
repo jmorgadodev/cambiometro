@@ -102,23 +102,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
           ETL_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-expenses
-        shell: bash
-        run: |
-          set +e
-          log_file="$(mktemp)"
-          trap 'rm -f "$log_file"' EXIT
-          npm run data:materialize -- --database transparencia-db --remote --skip-unchanged --sources gastos_senado >"$log_file" 2>&1
-          status=$?
-          cat "$log_file"
-          if [ "$status" -eq 0 ]; then
-            exit 0
-          fi
-          if grep -Eq "code: 7500|D1_ASSET_UNAVAILABLE|Exceeded maximum DB size" "$log_file"; then
-            echo "::warning::D1 no pudo materializar gastos por una condición diferible; R2 y Pages seguirán siendo la fuente canónica."
-            echo "D1 materialization deferred; R2/static publication continues." >> "$GITHUB_STEP_SUMMARY"
-            exit 0
-          fi
-          exit "$status"
+        run: npm run data:materialize:optional -- --database transparencia-db --remote --skip-unchanged --sources gastos_senado
 
       - name: Registrar D1 pospuesto por cuota
         if: steps.d1-quota.outputs.proceed != 'true'
