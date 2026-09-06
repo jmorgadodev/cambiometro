@@ -1,7 +1,7 @@
 name: ETL Semanal - InfoLobby
 
 on:
-  push:
+  push: {}
   schedule:
     - cron: "30 8 * * 1" # Lunes 04:30 CLT
   workflow_dispatch:
@@ -19,7 +19,6 @@ concurrency:
 
 jobs:
   push-noop:
-    if: github.event_name == 'push'
     name: Validación de workflow sin ingestión
     runs-on: ubuntu-latest
     steps:
@@ -27,6 +26,7 @@ jobs:
         run: echo "InfoLobby sólo se ejecuta por schedule o workflow_dispatch."
 
   ingest-publish-materialize:
+    if: github.event_name != 'push'
     name: Audiencias y Gestiones de Lobby (Ley 20.730)
     runs-on: ubuntu-latest
     timeout-minutes: 45
