@@ -6,7 +6,7 @@
     { "workflow": "etl-personal-apoyo.yml", "name": "Personal de apoyo parlamentario", "cronUtc": "0 7 * * 1", "local": "Lunes 04:00 invierno / 03:00 verano" },
     { "workflow": "etl-movimientos.yml", "name": "Movimientos de autoridades", "cronUtc": "0 7 * * *", "local": "Diario 04:00 invierno / 03:00 verano" },
     { "workflow": "etl-chilecompra.yml", "name": "ChileCompra", "cronUtc": "0 8 * * 1", "local": "Lunes 05:00 invierno / 04:00 verano" },
-    { "workflow": "etl-infolobby.yml", "name": "InfoLobby", "cronUtc": "30 8 * * 1", "local": "Lunes 05:30 invierno / 04:30 verano" },
+    { "workflow": "etl-infolobby-scheduled.yml", "name": "InfoLobby", "cronUtc": "30 8 * * 1", "local": "Lunes 05:30 invierno / 04:30 verano" },
     { "workflow": "etl-contraloria.yml", "name": "Contraloría", "cronUtc": "0 9 2 * *", "local": "Día 2, 06:00 invierno / 05:00 verano" },
     { "workflow": "etl-cplt.yml", "name": "CPLT", "cronUtc": "0 9 5 * *", "local": "Día 5, 06:00 invierno / 05:00 verano" },
     { "workflow": "etl-ley-19862.yml", "name": "Ley 19.862", "cronUtc": "0 9 8 * *", "local": "Día 8, 06:00 invierno / 05:00 verano" },
