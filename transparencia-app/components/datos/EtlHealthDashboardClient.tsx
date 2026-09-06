@@ -55,6 +55,7 @@ export default function EtlHealthDashboardClient({
     () => sources.reduce((acc, s) => acc + s.recordCount, 0),
     [sources]
   );
+  const publishedSources = sources.filter((source) => source.recordCount > 0).length;
   const completeSources = sources.filter((source) => source.status === "operational").length;
 
   const formatCLP = (amount: number) =>
@@ -77,9 +78,9 @@ export default function EtlHealthDashboardClient({
         aria-label="Indicadores generales de salud de datos"
       >
         <div className="stat-tile stat-tile--ok">
-          <div className="stat-tile__value">{completeSources} / {sources.length}</div>
-          <div className="stat-tile__label">Cobertura completa</div>
-          <div className="stat-tile__hint">El resto declara cobertura parcial</div>
+          <div className="stat-tile__value">{publishedSources} / {sources.length}</div>
+          <div className="stat-tile__label">Fuentes con datos publicados</div>
+          <div className="stat-tile__hint">{completeSources} declaran cobertura completa; el resto declara cobertura parcial</div>
         </div>
         <div className="stat-tile stat-tile--accent">
           <div className="stat-tile__value">+{totalRegistros.toLocaleString("es-CL")}</div>

@@ -20,7 +20,7 @@ describe("promesas editoriales del inicio", () => {
   });
 
   it("distingue una fuente conectada de una cobertura parcial", () => {
-    expect(ETL_SOURCES_DATA.some((source) => source.statusText === "Conectada · cobertura parcial declarada")).toBe(true);
+    expect(ETL_SOURCES_DATA.some((source) => source.statusText === "Datos publicados · cobertura parcial declarada")).toBe(true);
   });
 
   it("agrupa datasets parlamentarios bajo su institucion", () => {
