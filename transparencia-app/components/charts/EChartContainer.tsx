@@ -13,6 +13,7 @@ interface EChartContainerProps {
     legendselectchanged?: (params: { name: string; selected: Record<string, boolean> }) => void;
   };
   theme?: "dark" | "light" | "paper" | "night";
+  maps?: Array<{ name: string; geoJson: unknown }>;
 }
 
 export default function EChartContainer({
@@ -22,6 +23,7 @@ export default function EChartContainer({
   style = {},
   onEvents,
   theme = "paper",
+  maps = [],
 }: EChartContainerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const chartInstanceRef = useRef<ECharts | null>(null);
@@ -42,6 +44,10 @@ export default function EChartContainer({
           renderer: "svg", // SVG para gráficos nítidos y ligeros
         });
         chartInstanceRef.current = chart;
+      }
+
+      for (const map of maps) {
+        echarts.registerMap(map.name, map.geoJson as Parameters<typeof echarts.registerMap>[1]);
       }
 
       // Configurar tema base oscuro alineado con la paleta de Cambiómetro
@@ -85,7 +91,7 @@ export default function EChartContainer({
         resizeObserver.disconnect();
       }
     };
-  }, [options, onEvents, theme]);
+  }, [maps, options, onEvents, theme]);
 
   // Limpieza al desmontar
   useEffect(() => {

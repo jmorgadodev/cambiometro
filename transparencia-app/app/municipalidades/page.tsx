@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { getMunicipalidadesList, getMunicipalidadesStats } from "@/lib/municipalidades-list";
+import { getAllMunicipalidadesData } from "@/lib/municipalidades-data";
 import MunicipalidadesExplorerClient from "@/components/municipalidades/MunicipalidadesExplorerClient";
 
 export const metadata: Metadata = {
@@ -23,6 +24,13 @@ export const metadata: Metadata = {
 export default function MunicipalidadesPage() {
   const allData = getMunicipalidadesList();
   const stats = getMunicipalidadesStats();
+  const fullData = getAllMunicipalidadesData();
+  const purchasesById = Object.fromEntries(
+    fullData.map((municipality) => [
+      municipality.id,
+      { procesos: municipality.compras_publicas?.procesos_count ?? null },
+    ]),
+  );
 
   return (
     <Suspense
@@ -43,7 +51,7 @@ export default function MunicipalidadesPage() {
         </div>
       }
     >
-      <MunicipalidadesExplorerClient initialData={allData} stats={stats} />
+      <MunicipalidadesExplorerClient initialData={allData} stats={stats} purchasesById={purchasesById} />
     </Suspense>
   );
 }
