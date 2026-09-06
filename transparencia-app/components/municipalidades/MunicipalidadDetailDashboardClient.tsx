@@ -18,6 +18,7 @@ import {
 } from "@/lib/municipalidades-data";
 import { getPartidoConfig } from "@/lib/partidos.config";
 import OrganismoFuncionariosList from "@/components/OrganismoFuncionariosList";
+import OverviewSignalPanel from "@/components/dashboard/OverviewSignalPanel";
 
 interface Props {
   muniData: MunicipalidadEnriquecida;
@@ -199,6 +200,10 @@ export default function MunicipalidadDetailDashboardClient({
       ? Math.round(presVigente / muniData.poblacion_censo_2024)
       : 0);
   const fcmPct = muniData.fcm_dependencia_pct ?? 0;
+  const comprasMuni = muniData.compras_publicas;
+  const escenarioAnualPersonal = currentResumenPersonal?.masa_mensual_clp
+    ? currentResumenPersonal.masa_mensual_clp * 12
+    : null;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
@@ -452,6 +457,31 @@ export default function MunicipalidadDetailDashboardClient({
           </div>
         </div>
       </section>
+
+      <OverviewSignalPanel
+        title={`Lectura rápida de ${nombreComuna}`}
+        description="Una vista de contexto para entender la escala financiera, territorial y de control antes de entrar al detalle. Las cifras se calculan con el último corte municipal disponible y conservan sus períodos y ausencias."
+        metrics={[
+          { label: "Población Censo 2024", value: muniData.poblacion_censo_2024 ? formatNum(muniData.poblacion_censo_2024) : "No publicado", detail: muniData.superficie_km2 ? `${muniData.superficie_km2.toLocaleString("es-CL")} km²` : "INE", tone: "accent" },
+          { label: "Presupuesto vigente", value: presVigente > 0 ? formatCompactCLP(presVigente) : "No publicado", detail: perCapita > 0 ? `${formatCLP(perCapita)} por habitante` : `SINIM ${pres?.ano ?? "s/f"}`, tone: "ok" },
+          { label: "Personal del período", value: currentResumenPersonal ? formatNum(currentResumenPersonal.total_funcionarios) : "No publicado", detail: selectedPeriodInfo?.etiqueta ?? "CPLT", tone: "info" },
+          { label: "Compras y control", value: comprasMuni ? formatNum(comprasMuni.procesos_count ?? 0) : "No publicado", detail: `${auditorias.length} auditorías CGR`, tone: "warn" },
+        ]}
+        bars={[
+          { label: "Dependencia del Fondo Común Municipal", value: fcmPct > 0 ? fcmPct : null, displayValue: fcmPct > 0 ? `${fcmPct.toLocaleString("es-CL")} %` : "No publicado", detail: "Indicador SINIM", tone: fcmPct > 60 ? "warn" : "info" },
+          ...(currentResumenPersonal && currentResumenPersonal.total_funcionarios > 0
+            ? [
+                { label: "Planta", value: (currentResumenPersonal.planta / currentResumenPersonal.total_funcionarios) * 100, displayValue: `${((currentResumenPersonal.planta / currentResumenPersonal.total_funcionarios) * 100).toFixed(1)} %`, detail: `${formatNum(currentResumenPersonal.planta)} funcionarios`, tone: "ok" as const },
+                { label: "Contrata", value: (currentResumenPersonal.contrata / currentResumenPersonal.total_funcionarios) * 100, displayValue: `${((currentResumenPersonal.contrata / currentResumenPersonal.total_funcionarios) * 100).toFixed(1)} %`, detail: `${formatNum(currentResumenPersonal.contrata)} funcionarios`, tone: "accent" as const },
+              ]
+            : []),
+        ]}
+        insight={
+          escenarioAnualPersonal
+            ? <>Escenario orientativo: la masa mensual del período equivaldría a <strong style={{ color: "var(--ok)" }}>{formatCompactCLP(escenarioAnualPersonal)}</strong> en 12 meses si se mantuviera constante. No reemplaza una ejecución anual oficial.</>
+            : <>La ficha no tiene una masa salarial mensual publicada para construir una extrapolación responsable.</>
+        }
+      />
 
       {/* ═══ SELECTOR DE PESTAÑAS (TABS) ═══════════════════════════════════════ */}
       <div

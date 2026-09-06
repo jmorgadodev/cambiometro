@@ -6,6 +6,7 @@ import AccessibleTooltip from "@/components/ui/AccessibleTooltip";
 import type { ServicioPublicoEnriquecido, OrdenCompraChileCompra } from "@/lib/servicios-publicos-data";
 import OrganismoFuncionariosList from "@/components/OrganismoFuncionariosList";
 import { evaluateBudgetSourceAnomaly } from "@/lib/budget-integrity";
+import OverviewSignalPanel from "@/components/dashboard/OverviewSignalPanel";
 
 interface Props {
   servicio: ServicioPublicoEnriquecido;
@@ -53,6 +54,30 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
     const start = (currentComprasPage - 1) * comprasItemsPerPage;
     return ordenes.slice(start, start + comprasItemsPerPage);
   }, [ordenes, currentComprasPage, comprasItemsPerPage]);
+
+  const comprasSerie = compras?.serie_mensual_2026 ?? [];
+  const comprasSerieVisible = comprasSerie.slice(-6);
+  const comprasMaxMensual = Math.max(...comprasSerieVisible.map((item) => item.monto_clp ?? 0), 0);
+  const ultimaCompra = comprasSerie.at(-1);
+  const escenarioAnualCompras = ultimaCompra?.monto_clp ? ultimaCompra.monto_clp * 12 : null;
+  const overviewBars = [
+    ...(pres
+      ? [{
+          label: `Ejecución presupuestaria · ${pres.ultimo_periodo ?? pres.period}`,
+          value: pres.porcentaje_ejecucion,
+          displayValue: `${pres.porcentaje_ejecucion.toLocaleString("es-CL")} %`,
+          detail: `${formatCompactCLP(pres.ejecutado_clp)} ejecutados de ${formatCompactCLP(pres.vigente_clp)}`,
+          tone: "ok" as const,
+        }]
+      : []),
+    ...comprasSerieVisible.map((item) => ({
+      label: item.period,
+      value: comprasMaxMensual > 0 ? ((item.monto_clp ?? 0) / comprasMaxMensual) * 100 : 0,
+      displayValue: formatCompactCLP(item.monto_clp ?? 0),
+      detail: `${item.procesos_count.toLocaleString("es-CL")} procesos publicados`,
+      tone: "warn" as const,
+    })),
+  ];
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
@@ -199,6 +224,23 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
           </div>
         </div>
       </section>
+
+      <OverviewSignalPanel
+        title={`Qué muestran los datos de ${servicio.nombre}`}
+        description="Este resumen reúne las señales verificables antes de abrir cada módulo. Las cifras provienen de DIPRES, CPLT, ChileCompra, InfoLobby y Contraloría cuando existe un enlace comprobable."
+        metrics={[
+          { label: "Presupuesto vigente", value: pres?.vigente_clp ? formatCompactCLP(pres.vigente_clp) : "No publicado", detail: pres ? `${pres.porcentaje_ejecucion.toLocaleString("es-CL")} % ejecutado` : "La fuente no publica una partida individual", tone: "accent" },
+          { label: "Dotación publicada", value: personal?.dotacion_total !== null && personal?.dotacion_total !== undefined ? `${personal.dotacion_total.toLocaleString("es-CL")} personas` : "No publicado", detail: "Transparencia Activa CPLT", tone: "ok" },
+          { label: "Compras públicas", value: compras ? compras.procesos_count.toLocaleString("es-CL") : "No publicado", detail: compras ? formatCompactCLP(compras.monto_total_clp ?? 0) : "Sin enlace OCDS verificable", tone: "warn" },
+          { label: "Control y lobby", value: `${lobby.length + cgr.length}`, detail: `${lobby.length} audiencias · ${cgr.length} auditorías`, tone: "info" },
+        ]}
+        bars={overviewBars}
+        insight={
+          escenarioAnualCompras
+            ? <>Escenario orientativo: si el monto del último mes publicado se repitiera durante 12 meses, equivaldría a <strong style={{ color: "var(--warn)" }}>{formatCompactCLP(escenarioAnualCompras)}</strong>. No es una previsión oficial; es una extrapolación mecánica del último corte.</>
+            : <>No hay una serie mensual suficiente para extrapolar compras. El detalle conserva el universo publicado y su estado de cobertura.</>
+        }
+      />
 
       {/* ═══ SELECTOR DE PESTAÑAS (TABS) ═══════════════════════════════════════ */}
       <div
