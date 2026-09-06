@@ -1,6 +1,6 @@
 import type { FuncionarioPublico } from "./funcionarios";
 import { classifyFuncionarioRecord } from "./funcionarios-quality";
-import { normalizeFuncionarioRecord } from "./funcionarios-normalization";
+import { matchesFuncionarioQuality, normalizeFuncionarioRecord, type FuncionarioQualityFilter } from "./funcionarios-normalization";
 
 export interface StaticFuncionariosQuery {
   query?: string;
@@ -11,6 +11,7 @@ export interface StaticFuncionariosQuery {
   page?: number;
   limit?: number;
   generatedAt?: string | null;
+  calidad?: FuncionarioQualityFilter;
 }
 
 function normalized(value: unknown) {
@@ -46,6 +47,8 @@ export function queryStaticFuncionarios(rows: FuncionarioPublico[], query: Stati
   const estamento = normalized(query.estamento ?? "Todos");
 
   let filtered = allRecords.filter((row) => salary(row) > 0);
+  const quality = query.calidad ?? "Todos";
+  if (quality !== "Todos") filtered = filtered.filter((row) => matchesFuncionarioQuality(row, quality));
   if (needle) filtered = filtered.filter((row) => normalized(`${row.nombre_completo} ${row.cargo} ${row.formacion ?? ""}`).includes(needle));
   if (contract && contract !== "todos") filtered = filtered.filter((row) => normalized(row.tipo_contrato).includes(contract));
   if (estamento && estamento !== "todos") filtered = filtered.filter((row) => normalized(row.estamento).includes(estamento));

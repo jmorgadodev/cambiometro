@@ -19,6 +19,22 @@ export interface FuncionarioDataQuality {
   detalle: string;
 }
 
+export type FuncionarioQualityFilter = "Todos" | "corregidos" | "observados";
+
+const FORMAT_ISSUES = new Set<FuncionarioDataIssue>([
+  "nombre_prefijo_invalido",
+  "nombre_prefijo_numerico",
+  "nombre_incompleto",
+  "nombre_vacio",
+]);
+
+export function matchesFuncionarioQuality(record: { calidad_datos?: FuncionarioDataQuality }, filter: FuncionarioQualityFilter) {
+  if (filter === "Todos") return true;
+  const issues = record.calidad_datos?.incidencias ?? [];
+  if (filter === "corregidos") return issues.some((issue) => FORMAT_ISSUES.has(issue));
+  return issues.some((issue) => !FORMAT_ISSUES.has(issue));
+}
+
 type PublicRecord = Record<string, unknown>;
 
 function cleanWhitespace(value: unknown) {

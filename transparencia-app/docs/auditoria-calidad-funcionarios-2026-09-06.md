@@ -62,3 +62,17 @@ conteo de registros con incidencias y el porcentaje por incidencia. Si aumenta
 bruscamente una anomalía —por ejemplo, montos decimales o líquidos mayores que
 brutos— el pipeline debe advertir y conservar el último release válido hasta
 revisión.
+
+## Filtro público
+
+La interfaz expone la clasificación en **Calidad de la fuente**:
+
+- `Todos`: universo normal de consulta;
+- `Correcciones de formato`: filas en las que sólo se corrigió una marca o
+  prefijo inequívoco para lectura;
+- `Datos observados por auditoría`: filas con montos o campos que requieren
+  revisión, sin reemplazar el valor recibido.
+
+El término “datos observados” evita llamar “corrupto” a un registro cuando no
+existe evidencia suficiente para determinar si el problema está en la fuente,
+en una unidad de medida o en el contexto de pago.

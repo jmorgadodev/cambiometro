@@ -22,4 +22,14 @@ describe("consulta de nómina estática", () => {
     expect(result.meta.microMontoCount).toBe(1);
     expect(result.meta.sueldoCompletoCount).toBe(1);
   });
+
+  it("permite filtrar correcciones de formato y datos observados por auditoría", () => {
+    const auditedRows = [
+      { id: "format", nombre_completo: ". Diego Pérez", organo_nombre: "Municipalidad", organo_tipo: "municipalidad", cargo: "Profesional", estamento: "Profesional", tipo_contrato: "Planta", remuneracion_bruta_mensual: 2_000_000, remuneracion_liquida_mensual: 1_500_000, fecha_ingreso: "2020-01-01", horas_extras_mes_anterior: 0, monto_horas_extras_clp: 0 },
+      { id: "observed", nombre_completo: "Eva Soto", organo_nombre: "Municipalidad", organo_tipo: "municipalidad", cargo: "Profesional", estamento: "Profesional", tipo_contrato: "Planta", remuneracion_bruta_mensual: 2_000_000, remuneracion_liquida_mensual: 0, fecha_ingreso: "2020-01-01", horas_extras_mes_anterior: 0, monto_horas_extras_clp: 0 },
+    ] as never[];
+
+    expect(queryStaticFuncionarios(auditedRows, { calidad: "corregidos", page: 1, limit: 10 }).data.map((row) => row.id)).toEqual(["format"]);
+    expect(queryStaticFuncionarios(auditedRows, { calidad: "observados", page: 1, limit: 10 }).data.map((row) => row.id)).toEqual(["observed"]);
+  });
 });

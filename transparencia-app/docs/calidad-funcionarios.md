@@ -29,6 +29,17 @@ explica que la depuración es de formato. La API publica el resumen
 `meta.calidadDatos` para que consumidores externos puedan distinguir el
 alcance de la revisión.
 
+La nómina ofrece el filtro **Calidad de la fuente** con tres opciones:
+
+- **Todos los registros**: no aplica una clasificación;
+- **Correcciones de formato**: nombres con prefijos o problemas de formato
+  inequívocos que fueron corregidos sólo para lectura;
+- **Datos observados por auditoría**: inconsistencias de montos o campos que
+  requieren revisión, sin reemplazar el valor oficial.
+
+“Datos observados” es deliberado: describe una revisión de calidad y no acusa
+que la fuente sea falsa o que el organismo haya cometido una infracción.
+
 ## Alcance
 
 Las mismas reglas se ejecutan en el Worker, en el fallback estático del

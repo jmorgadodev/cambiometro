@@ -3,7 +3,7 @@ import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
 import { POLITICOS_SEED } from "../../lib/politicos-source";
 import { readR2EvidenceRecords } from "../../lib/r2-records";
 import { readR2EntityIndex } from "../../lib/r2-entities";
-import { normalizeFuncionarioRecord } from "../../lib/funcionarios-normalization";
+import { matchesFuncionarioQuality, normalizeFuncionarioRecord, type FuncionarioQualityFilter } from "../../lib/funcionarios-normalization";
 
 interface EmailSender {
   send(message: {
@@ -493,11 +493,14 @@ function officialsResponse(rows: JsonRecord[], requestUrl: URL, generatedAt: str
   const period = requestUrl.searchParams.get("periodo") ?? requestUrl.searchParams.get("fuente_periodo") ?? "Todos";
   const type = normalized(requestUrl.searchParams.get("tipo") ?? "Todos");
   const position = normalized(requestUrl.searchParams.get("cargo") ?? "Todos");
+  const requestedQuality = requestUrl.searchParams.get("calidad") ?? "Todos";
+  const qualityFilter: FuncionarioQualityFilter = requestedQuality === "corregidos" || requestedQuality === "observados" ? requestedQuality : "Todos";
   const allRecords = period !== "Todos" ? normalizedRows.filter((row) => String(row.fuente_periodo ?? row.periodo ?? "") === period) : normalizedRows;
   const withoutPayment = allRecords.filter((row) => officialSalary(row) <= 0);
   const microAmount = allRecords.filter((row) => officialSalary(row) > 0 && officialSalary(row) < 50_000);
   const completeSalary = allRecords.filter((row) => officialSalary(row) >= 50_000);
   let filtered = includeZero ? [...allRecords] : onlyAnomalies ? [...microAmount] : allRecords.filter((row) => officialSalary(row) > 0);
+  if (qualityFilter !== "Todos") filtered = allRecords.filter((row) => matchesFuncionarioQuality(row, qualityFilter));
   if (query) filtered = filtered.filter((row) => normalized(`${row.nombre_completo ?? ""} ${row.cargo ?? ""} ${row.organo_nombre ?? ""} ${row.formacion ?? ""}`).includes(query));
   if (type && type !== "todos") filtered = filtered.filter((row) => canonicalOrgType(row.organo_tipo).includes(canonicalOrgType(type)));
   if (position && position !== "todos") {
@@ -547,6 +550,7 @@ function officialsResponse(rows: JsonRecord[], requestUrl: URL, generatedAt: str
       updatedAt: generatedAt,
       communeId: coverage,
       sourceStatus,
+      calidad: qualityFilter,
       calidadDatos: {
         alcance: "nomina_consultada",
         registrosConIncidencias: qualityRows,

@@ -9,7 +9,7 @@ import {
 } from "@/lib/estamentos-format";
 import { classifyFuncionarioRecord, type AnomaliaInfo } from "@/lib/funcionarios-quality";
 import { queryStaticFuncionarios } from "@/lib/funcionarios-static";
-import { normalizeFuncionarioRecord } from "@/lib/funcionarios-normalization";
+import { normalizeFuncionarioRecord, type FuncionarioQualityFilter } from "@/lib/funcionarios-normalization";
 
 function formatCLP(n: number) {
   return new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(n);
@@ -59,6 +59,7 @@ export default function OrganismoFuncionariosList({
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("Todos");
   const [contratoFilter, setContratoFilter] = useState("Todos");
+  const [qualityFilter, setQualityFilter] = useState<FuncionarioQualityFilter>("Todos");
   const [sortBy, setSortBy] = useState("sueldo_desc");
   const [page, setPage] = useState(1);
   const itemsPerPage = 24;
@@ -121,6 +122,7 @@ export default function OrganismoFuncionariosList({
           query: debouncedSearch,
           muni: organismoId,
           contrato: contratoFilter,
+          calidad: qualityFilter,
           estamento: deptFilter !== "Todos" ? deptFilter : "Todos",
           sortBy,
           page: page.toString(),
@@ -145,6 +147,7 @@ export default function OrganismoFuncionariosList({
           return queryStaticFuncionarios(staticResponse, {
             query: debouncedSearch,
             contrato: contratoFilter,
+            calidad: qualityFilter,
             estamento: deptFilter,
             sortBy,
             periodo: periodo ?? undefined,
@@ -210,7 +213,7 @@ export default function OrganismoFuncionariosList({
       active = false;
       controller.abort();
     };
-  }, [debouncedSearch, organismoId, contratoFilter, deptFilter, sortBy, page, periodo, retryNonce]);
+  }, [debouncedSearch, organismoId, contratoFilter, qualityFilter, deptFilter, sortBy, page, periodo, retryNonce]);
 
   // Construcción del texto de causas para la Caja Ciudadana (§2.3)
   const visibleQualityCount = data.filter((item) => (item.calidad_datos?.incidencias.length ?? 0) > 0).length;
@@ -395,6 +398,25 @@ export default function OrganismoFuncionariosList({
               <option value="Administrativo">Administrativo</option>
               <option value="Auxiliar">Auxiliar</option>
               <option value="Salud">Salud y Médicos</option>
+            </select>
+          </div>
+
+          <div>
+            <label
+              style={{ fontSize: "0.75rem", color: "var(--text-subtle)", fontWeight: 700, display: "block", marginBottom: "0.3rem" }}
+              title="Clasificación de auditoría: no elimina ni reemplaza el valor informado por la fuente."
+            >
+              Calidad de la fuente
+            </label>
+            <select
+              className="input"
+              value={qualityFilter}
+              onChange={(e) => { setQualityFilter(e.target.value as FuncionarioQualityFilter); setPage(1); }}
+              style={{ width: "100%", fontSize: "0.85rem", padding: "0.45rem 0.75rem" }}
+            >
+              <option value="Todos">Todos los registros</option>
+              <option value="corregidos">Correcciones de formato</option>
+              <option value="observados">Datos observados por auditoría</option>
             </select>
           </div>
 
