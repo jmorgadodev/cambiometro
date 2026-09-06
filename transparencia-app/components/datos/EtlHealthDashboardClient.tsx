@@ -17,12 +17,30 @@ const CATEGORIES: { id: string; label: string; icon: IconoNombre }[] = [
   { id: "municipios", label: "Municipalidades", icon: "territorio" },
 ];
 
-export default function EtlHealthDashboardClient() {
+export default function EtlHealthDashboardClient({
+  transferRelease,
+}: {
+  transferRelease?: {
+    totalRows: number;
+    totalAmountClp: number;
+    generatedAt: string | null;
+  };
+}) {
   const [categoria, setCategoria] = useState<string>("all");
   const [filtroTexto, setFiltroTexto] = useState<string>("");
+  const sources = useMemo(() => ETL_SOURCES_DATA.map((source) => source.id === "etl_ley_19862_transferencias" && transferRelease
+    ? {
+        ...source,
+        recordCount: transferRelease.totalRows,
+        canonicalCount: transferRelease.totalRows,
+        historicalCount: transferRelease.totalRows,
+        ...(transferRelease.totalAmountClp > 0 ? { financialAmountClp: transferRelease.totalAmountClp } : {}),
+        ...(transferRelease.generatedAt ? { lastUpdated: transferRelease.generatedAt } : {}),
+      }
+    : source), [transferRelease]);
 
   const fuentesFiltradas = useMemo(() => {
-    return ETL_SOURCES_DATA.filter((s) => {
+    return sources.filter((s) => {
       const coincideCat = categoria === "all" || s.category === categoria;
       const coincideTexto =
         !filtroTexto.trim() ||
@@ -31,13 +49,13 @@ export default function EtlHealthDashboardClient() {
         s.description.toLowerCase().includes(filtroTexto.toLowerCase());
       return coincideCat && coincideTexto;
     });
-  }, [categoria, filtroTexto]);
+  }, [categoria, filtroTexto, sources]);
 
   const totalRegistros = useMemo(
-    () => ETL_SOURCES_DATA.reduce((acc, s) => acc + s.recordCount, 0),
-    []
+    () => sources.reduce((acc, s) => acc + s.recordCount, 0),
+    [sources]
   );
-  const completeSources = ETL_SOURCES_DATA.filter((source) => source.status === "operational").length;
+  const completeSources = sources.filter((source) => source.status === "operational").length;
 
   const formatCLP = (amount: number) =>
     new Intl.NumberFormat("es-CL", {
@@ -59,7 +77,7 @@ export default function EtlHealthDashboardClient() {
         aria-label="Indicadores generales de salud de datos"
       >
         <div className="stat-tile stat-tile--ok">
-          <div className="stat-tile__value">{completeSources} / {ETL_SOURCES_DATA.length}</div>
+          <div className="stat-tile__value">{completeSources} / {sources.length}</div>
           <div className="stat-tile__label">Cobertura completa</div>
           <div className="stat-tile__hint">El resto declara cobertura parcial</div>
         </div>
@@ -118,7 +136,7 @@ export default function EtlHealthDashboardClient() {
               }}
             >
               <Icono nombre={cat.icon} size={14} />
-              <span>{cat.label}</span>
+              <span>{cat.id === "all" ? `Todas las Fuentes (${sources.length})` : cat.label}</span>
             </button>
           ))}
         </div>

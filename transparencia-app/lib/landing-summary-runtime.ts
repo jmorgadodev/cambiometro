@@ -4,6 +4,7 @@ import sourceHealthRaw from "@/data/etl/source-health.json";
 import movementsRaw from "@/data/movimientos.json";
 import globalKpisRaw from "@/lib/global-kpis.json";
 import { buildLandingSummary, type LandingSummary, sourceKeyForHomeSource } from "@/lib/landing-summary";
+import { getTransferReleaseMetadata } from "@/lib/transfer-release-metadata";
 
 export { sourceKeyForHomeSource };
 
@@ -22,5 +23,6 @@ export function getLandingSummary(): LandingSummary {
     sourceHealth: sourceHealthRaw,
     movements: movementsRaw,
     globalKpis: globalKpisRaw,
+    transferRelease: getTransferReleaseMetadata(),
   });
 }

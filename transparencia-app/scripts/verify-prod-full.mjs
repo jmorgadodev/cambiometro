@@ -336,6 +336,15 @@ async function verifyProdFull() {
 
   const transfApiRes = await fetch(`${API_URL}/api/v1/transferencias?page=1&limit=10`, { headers });
   assertCheck("TRANSFERENCIAS", "API /api/v1/transferencias responde 200", transfApiRes.status === 200);
+  const landingSummaryRes = await fetch(`${PROD_URL}/data/landing-summary.json`, { headers });
+  const landingSummary = landingSummaryRes.ok ? await landingSummaryRes.json().catch(() => null) : null;
+  const landingTransfer = landingSummary?.sources?.find((source) => source?.id === "ley19862");
+  assertCheck(
+    "TRANSFERENCIAS",
+    `Landing summary comparte total ${formatInteger(expectedTransferRows)}`,
+    landingSummaryRes.status === 200 && Number(landingTransfer?.recordCount) === expectedTransferRows,
+    `landing: ${landingTransfer?.recordCount ?? "n/a"}`,
+  );
   if (transfApiRes.ok) {
     const apiJson = await transfApiRes.json();
     assertCheck("TRANSFERENCIAS", `API retorna total ${formatInteger(expectedTransferRows)}`, apiJson.total === expectedTransferRows);
@@ -375,7 +384,8 @@ async function verifyProdFull() {
   const fuentesHtml = (await fuentesRes.text()).replace(/<!--.*?-->/g, "");
 
   assertCheck("FUENTES", "Muestra 13 fuentes oficiales y derivadas", fuentesHtml.includes("13 fuentes") || fuentesHtml.includes("13"));
-  assertCheck("FUENTES", "Titular canónico con consolidado 1.753.013", fuentesHtml.includes("1.487.224") && fuentesHtml.includes("1.753.013"));
+  const expectedPublishedSourceTotal = 1487224 - 59361 + expectedTransferRows;
+  assertCheck("FUENTES", `Titular canónico con consolidado ${formatInteger(expectedPublishedSourceTotal)}`, fuentesHtml.includes(formatInteger(expectedPublishedSourceTotal)) && fuentesHtml.includes("1.753.013"));
   assertCheck("FUENTES", "Enlace a calidad de datos", fuentesHtml.includes("/datos/calidad"));
   assertCheck("FUENTES", "Estados reales: 'Operativa mensual'", fuentesHtml.includes("Operativa"));
   assertCheck("FUENTES", "Estados reales: 'Publicación anual' (SINIM)", fuentesHtml.includes("Publicación anual") || fuentesHtml.includes("anual"));

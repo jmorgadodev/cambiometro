@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import { join } from "node:path";
 import { buildLandingSummary } from "../lib/landing-summary.ts";
+import { getTransferReleaseMetadata } from "../lib/transfer-release-metadata.ts";
 
 const root = join(import.meta.dirname, "..");
 const readJson = (relativePath) => readFile(join(root, relativePath), "utf8").then(JSON.parse);
@@ -11,7 +12,7 @@ const [sourceHealth, movements, globalKpis] = await Promise.all([
   readJson("data/movimientos.json"),
   readJson("lib/global-kpis.json"),
 ]);
-const summary = buildLandingSummary({ sourceHealth, movements, globalKpis });
+const summary = buildLandingSummary({ sourceHealth, movements, globalKpis, transferRelease: getTransferReleaseMetadata() });
 const content = `${JSON.stringify(summary, null, 2)}\n`;
 
 await mkdir(join(root, "data", "generated"), { recursive: true });
