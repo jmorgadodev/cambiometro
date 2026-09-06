@@ -1,5 +1,6 @@
 import type { FuncionarioPublico } from "./funcionarios";
 import { classifyFuncionarioRecord } from "./funcionarios-quality";
+import { normalizeFuncionarioRecord } from "./funcionarios-normalization";
 
 export interface StaticFuncionariosQuery {
   query?: string;
@@ -32,10 +33,11 @@ function sortRows(rows: FuncionarioPublico[], sortBy: string) {
 }
 
 export function queryStaticFuncionarios(rows: FuncionarioPublico[], query: StaticFuncionariosQuery = {}) {
+  const normalizedRows = rows.map((row) => normalizeFuncionarioRecord(row));
   const period = query.periodo && query.periodo !== "Todos" ? query.periodo : "Todos";
   const allRecords = period === "Todos"
-    ? rows
-    : rows.filter((row) => String(row.fuente_periodo ?? row.periodo ?? "") === period);
+    ? normalizedRows
+    : normalizedRows.filter((row) => String(row.fuente_periodo ?? row.periodo ?? "") === period);
   const sinPago = allRecords.filter((row) => salary(row) <= 0);
   const microMonto = allRecords.filter((row) => salary(row) > 0 && salary(row) < 50_000);
   const sueldoCompleto = allRecords.filter((row) => salary(row) >= 50_000);
@@ -77,6 +79,10 @@ export function queryStaticFuncionarios(rows: FuncionarioPublico[], query: Stati
     if (cause && cause in causes) causes[cause as keyof typeof causes] += 1;
   }
   const validSalaryTotal = sueldoCompleto.reduce((sum, row) => sum + salary(row), 0);
+  const qualityCounts = allRecords.reduce<Record<string, number>>((counts, row) => {
+    for (const issue of row.calidad_datos.incidencias) counts[issue] = (counts[issue] ?? 0) + 1;
+    return counts;
+  }, {});
   const sinPagoSample = sinPago.slice(0, 50).map((row) => ({
     id: row.id,
     nombre_completo: row.nombre_completo,
@@ -101,6 +107,12 @@ export function queryStaticFuncionarios(rows: FuncionarioPublico[], query: Stati
       limit,
       updatedAt: query.generatedAt ?? null,
       sourceStatus: "static-fallback",
+      calidadDatos: {
+        alcance: "nomina_consultada",
+        registrosConIncidencias: allRecords.filter((row) => row.calidad_datos.incidencias.length > 0).length,
+        porIncidencia: qualityCounts,
+        metodologia: "Se corrigen sólo espacios y prefijos aislados inequívocos para lectura. Se conserva el valor original y no se infieren nombres ni remuneraciones.",
+      },
       causasBreakdown: { ...causes, nominal_sin_pago: sinPago.length },
       anomaliasSample,
       sinPagoSample,
