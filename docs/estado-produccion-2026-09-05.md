@@ -1,4 +1,6 @@
-# Estado de producción — 5 de septiembre de 2026
+# Estado de producción — 5 de septiembre de 2026 (histórico)
+
+> Este corte fue reemplazado por la auditoría posterior [auditoria-cierre-2026-09-05.md](auditoria-cierre-2026-09-05.md), que contiene los IDs, checksums y verificaciones vigentes. No usar los IDs de este documento para rollback.
 
 ## Resultado
 
