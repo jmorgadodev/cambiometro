@@ -42,6 +42,7 @@ async function throttleProd() {
 }
 
 const isRateLimited = (response) => [429, 503].includes(response?.status());
+const isRetryableResponse = (response) => isRateLimited(response) || (response?.status() >= 500 && response?.status() <= 599);
 const uptimeToken = process.env.UPTIME_TOKEN?.trim() ?? "";
 
 const browser = await chromium.launch({ headless: true });
@@ -92,7 +93,7 @@ async function getWithNetworkRetry(url, attempts = 6) {
   for (let attempt = 1; attempt <= attempts; attempt += 1) {
     try {
       const response = await page.request.get(url, { timeout: 30_000 });
-      if (isRateLimited(response)) {
+      if (isRetryableResponse(response)) {
         if (attempt < attempts) {
           await waitForRateLimit(response, attempt);
           continue;
@@ -413,11 +414,11 @@ try {
     ["/api/og/site", 200], ["/api/og/dip-061", 200],
   ];
   for (const [path, status] of legacyChecks) {
-    const response = await page.request.get(`${apiBaseUrl}${path}`);
+    const response = await getWithNetworkRetry(`${apiBaseUrl}${path}`);
     assert.equal(response.status(), status, `${path} HTTP ${response.status()}`);
   }
 
-  const sources = await page.request.get(`${apiBaseUrl}/api/v1/sources`);
+  const sources = await getWithNetworkRetry(`${apiBaseUrl}/api/v1/sources`);
   const sourcePayload = await sources.json();
   // DIPRES is published as the canonical 476-row program projection. The
   // larger historical figure (15,689) belongs to a different release and
@@ -444,12 +445,12 @@ try {
     "/api/v1/relations?from_id=person-camara-1009&limit=10",
     "/api/v1/crosses?entity_id=person-camara-1009&limit=10",
   ]) {
-    const response = await page.request.get(`${apiBaseUrl}${path}`);
+    const response = await getWithNetworkRetry(`${apiBaseUrl}${path}`);
     assert(response.ok(), `${path} HTTP ${response.status()}`);
     const payload = await response.json();
     assert("data" in payload && "meta" in payload && "links" in payload, `${path}: contrato uniforme`);
   }
-  assert.equal((await page.request.get(`${baseUrl}/rankings`)).status(), 200);
+  assert.equal((await getWithNetworkRetry(`${baseUrl}/rankings`)).status(), 200);
 
   const commercial = await page.request.get(`${apiBaseUrl}/api/v1/commercial/keys`);
   assert.equal(commercial.status(), 503);
@@ -462,7 +463,7 @@ try {
     assert.equal(await page.getByRole("heading", { name: "Fuente temporalmente no disponible" }).count(), 0);
   }
 
-  const health = await page.request.get(`${apiBaseUrl}/api/v1/health/data`);
+  const health = await getWithNetworkRetry(`${apiBaseUrl}/api/v1/health/data`);
   const healthText = await health.text();
   assert(!healthText.includes("publishedVersion") && !healthText.includes('"id":"run-'), "health no debe filtrar ids o versiones internas");
 
