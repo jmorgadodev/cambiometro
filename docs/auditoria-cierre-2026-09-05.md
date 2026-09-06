@@ -1,9 +1,9 @@
-# Auditoría de cierre operativo — 2026-09-05
+# Auditoría de cierre operativo — actualización 2026-09-06
 
 ## Estado
 
 La aplicación publicada responde correctamente. La base funcional de `main` es
-`e00c71a`; el último refresco Pages fue generado por el release de Movimientos
+`f68973e`; el último refresco Pages fue generado por el release de Movimientos
 y los merges posteriores actualizaron documentación y el Worker. Esta auditoría
 reemplaza la fotografía anterior; no implica consultas masivas contra D1.
 
@@ -31,6 +31,16 @@ listados principales quedaron bajo 700 ms; dos fichas aisladas fueron las
 debía al diagnóstico interno del iframe de Turnstile; el guard ahora ignora
 únicamente ese mensaje conocido y mantiene fatales los errores de la página,
 del Worker y de CSP.
+
+### Auditoría interactiva más reciente
+
+La ejecución local de `node scripts/verify-prod-full.mjs` con
+`VERIFY_BROWSER=1` y `VERIFY_THEME_BROWSER=1` terminó con **136/136
+comprobaciones pasadas y cero fallos**. Confirmó los tres temas (Papel,
+Oscuro y Noche), consentimiento de Analytics sin solicitudes al rechazar,
+una sola carga de Google Tag al aceptar, un `page_view` por ruta y cero
+violaciones CSP. Las rutas principales y las fichas verificadas respondieron
+200.
 
 ## Movimientos
 
