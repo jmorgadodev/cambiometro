@@ -35,6 +35,10 @@ type SourceHealth = {
   }>;
 };
 
+function canonicalSourceId(sourceId: string): string {
+  return sourceId === "ley19862" ? "ley-19862" : sourceId;
+}
+
 type MovementsPayload = {
   movimientos?: unknown[];
   last_success_at?: string | null;
@@ -87,7 +91,7 @@ export function buildLandingSummary({
         ? source.recordCount ?? 0
         : 0;
       return {
-        id,
+        id: canonicalSourceId(id),
         recordCount,
         status: source.status ?? "unknown",
         generatedAt: isTransferRelease ? effectiveTransferRelease.generatedAt : validDate(source.generatedAt),
@@ -124,7 +128,7 @@ export function sourceKeyForHomeSource(sourceId: string): string | null {
   const keys: Record<string, string> = {
     etl_cplt_transparencia_activa: "cplt",
     etl_dipres_presupuestos: "dipres",
-    etl_ley_19862_transferencias: "ley19862",
+    etl_ley_19862_transferencias: "ley-19862",
     etl_chilecompra_ocds: "chilecompra",
     etl_infolobby_plataforma: "infolobby",
     etl_infoprobidad_declaraciones: "infoprobidad",
