@@ -8,7 +8,6 @@ import { getPartidoConfig } from "@/lib/partidos.config";
 import ShareButton from "@/components/ShareButton";
 import type { CoverageMetric, DataQualityStatus } from "@/lib/data-quality-summary";
 import ReleaseMetaCard from "@/components/data/ReleaseMetaCard";
-import MunicipalidadesRegionalPanel from "@/components/municipalidades/MunicipalidadesRegionalPanel";
 import { getMuniCanonicalSlug } from "@/lib/slug-utils";
 
 interface MunicipalidadesExplorerClientProps {
@@ -113,11 +112,6 @@ export default function MunicipalidadesExplorerClient({
   const [pageSize, setPageSize] = useState(20);
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [showCharts, setShowCharts] = useState(true);
-
-  function handleRegionalPanelSelect(region: string) {
-    setRegionFilter(region);
-    setPage(1);
-  }
 
   // Regiones y Partidos únicos
   const regiones = useMemo(() => {
@@ -326,19 +320,6 @@ export default function MunicipalidadesExplorerClient({
     setSortBy("presupuesto");
     setSortOrder("desc");
     setPage(1);
-  };
-
-  const handleFrescuraSummarySelect = (
-    value: "Todos" | "al_dia" | "desfasado" | "sin_datos",
-  ) => {
-    setFrescuraFilter(value);
-    setPage(1);
-    window.setTimeout(() => {
-      document.getElementById("municipalidades-registros")?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    }, 0);
   };
 
   return (
@@ -687,48 +668,20 @@ export default function MunicipalidadesExplorerClient({
         </div>
       </section>
 
-      <section className="container-main municipal-compliance-panel" aria-labelledby="municipal-compliance-title">
-        <div className="card municipal-compliance-card">
-          <div className="municipal-compliance-heading">
-            <div>
-              <div className="municipal-panel-kicker">Transparencia activa · CPLT</div>
-              <h2 id="municipal-compliance-title">¿Cuándo se actualiza el personal municipal?</h2>
-              <p>
-                Las nóminas se publican una vez al mes. Este resumen indica en qué comunas hay una nómina disponible en el corte actual y en cuáles todavía no podemos consultar ese registro.
-              </p>
-            </div>
-            <span className="badge badge-info">Frecuencia: mensual</span>
-          </div>
-
-          <div className="municipal-compliance-states">
-            <button type="button" onClick={() => handleFrescuraSummarySelect("al_dia")}>
-              <span>Con nómina reciente</span>
-              <strong>{stats.alDiaCount ?? 0} / 346</strong>
-              <small>Hay datos publicados de los últimos 90 días.</small>
-            </button>
-            <button type="button" onClick={() => handleFrescuraSummarySelect("desfasado")}>
-              <span>Con nómina atrasada</span>
-              <strong>{stats.desfasadoCount ?? 0}</strong>
-              <small>Hay datos, pero tienen más de 90 días.</small>
-            </button>
-            <button type="button" onClick={() => handleFrescuraSummarySelect("sin_datos")}>
-              <span>Sin nómina publicada</span>
-              <strong>{stats.sinDatosCount ?? 0}</strong>
-              <small>El corte actual no trae ese registro.</small>
-            </button>
-          </div>
-
-          <p className="municipal-compliance-note">
-            <strong>Importante:</strong> “Sin nómina publicada” no significa que la comuna tenga cero funcionarios ni demuestra por sí solo un incumplimiento. Sólo indica que ese registro no está disponible en el corte que tenemos. Puedes abrir cada comuna para revisar su período y fuente.
-          </p>
-        </div>
-      </section>
-
       <div className="container-main" style={{ marginTop: "1rem" }}>
-        <MunicipalidadesRegionalPanel
-          municipalities={initialData}
-          selectedRegion={regionFilter}
-          onRegionSelect={handleRegionalPanelSelect}
+        <ReleaseMetaCard
+          title="Release territorial consultable"
+          source={release.source}
+          period={release.period}
+          lastSuccessAt={release.lastSuccessAt}
+          status={release.status}
+          published={release.published}
+          queryable={release.queryable}
+          related={release.related}
+          checksumSha256={release.checksumSha256}
+          href="/municipalidades?view=table"
+          officialUrl={release.officialUrl}
+          note="La tabla, las tarjetas y las fichas utilizan el mismo catálogo validado de 346 comunas. Un indicador sin publicación conserva el estado “Sin dato publicado”; no se convierte en cero."
         />
       </div>
 
