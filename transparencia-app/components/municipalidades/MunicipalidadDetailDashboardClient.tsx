@@ -19,6 +19,7 @@ import {
 import { getPartidoConfig } from "@/lib/partidos.config";
 import OrganismoFuncionariosList from "@/components/OrganismoFuncionariosList";
 import OverviewSignalPanel from "@/components/dashboard/OverviewSignalPanel";
+import FuncionarioDetailDialog, { type FuncionarioDetailRecord } from "@/components/municipalidades/FuncionarioDetailDialog";
 
 interface Props {
   muniData: MunicipalidadEnriquecida;
@@ -95,6 +96,7 @@ export default function MunicipalidadDetailDashboardClient({
   const [activeTab, setActiveTab] = useState<
     "presupuesto" | "personal" | "compras" | "concejo" | "control"
   >("presupuesto");
+  const [selectedTopFuncionario, setSelectedTopFuncionario] = useState<TopFuncionarioRemuneracion | null>(null);
 
   // Estados interactivos para Compras Públicas
   const [comprasSearch, setComprasSearch] = useState("");
@@ -183,6 +185,34 @@ export default function MunicipalidadDetailDashboardClient({
     }
     return muniData.top_remuneraciones ?? [];
   }, [muniData, selectedPeriod]);
+
+  const selectedTopFuncionarioDetail: FuncionarioDetailRecord | null = selectedTopFuncionario
+    ? (() => {
+        const base = selectedTopFuncionario.sueldo_base ?? null;
+        const amountProvided = selectedTopFuncionario.horas_extras_monto !== undefined && selectedTopFuncionario.horas_extras_monto !== null;
+        const calculatedOvertime = !amountProvided && base !== null
+          ? Math.max(0, selectedTopFuncionario.remuneracion_bruta - base)
+          : null;
+        return {
+          id: selectedTopFuncionario.id,
+          nombre: selectedTopFuncionario.nombre,
+          cargo: selectedTopFuncionario.cargo,
+          tipoContrato: selectedTopFuncionario.tipo_contrato,
+          periodo: selectedTopFuncionario.periodo,
+          sueldoBase: base,
+          remuneracionBruta: selectedTopFuncionario.remuneracion_bruta,
+          remuneracionLiquida: selectedTopFuncionario.remuneracion_liquida,
+          horasExtras: selectedTopFuncionario.horas_extras_hrs,
+          montoHorasExtras: amountProvided ? selectedTopFuncionario.horas_extras_monto : calculatedOvertime,
+          montoHorasExtrasCalculado: !amountProvided && calculatedOvertime !== null,
+          grado: selectedTopFuncionario.grado_eus,
+          totalContratos: selectedTopFuncionario.total_contratos_count,
+          cargosConsolidados: selectedTopFuncionario.cargos_consolidados,
+          fuente: "Transparencia Activa / CPLT",
+          fuentePeriodo: selectedTopFuncionario.periodo,
+        };
+      })()
+    : null;
 
   const desfaseMeses = muniData.desfase_meses ?? null;
   const esDesfasado = desfaseMeses !== null && desfaseMeses > 3;
@@ -1425,6 +1455,17 @@ export default function MunicipalidadDetailDashboardClient({
                 {topRemuneraciones.map((r, i) => (
                   <div
                     key={r.id || i}
+                    className="municipal-staff-card"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Abrir expediente de ${r.nombre}`}
+                    onClick={() => setSelectedTopFuncionario(r)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        setSelectedTopFuncionario(r);
+                      }
+                    }}
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
@@ -1470,6 +1511,14 @@ export default function MunicipalidadDetailDashboardClient({
               </div>
             )}
           </div>
+
+          {selectedTopFuncionarioDetail && (
+            <FuncionarioDetailDialog
+              record={selectedTopFuncionarioDetail}
+              nombreOrganismo={`Municipalidad de ${nombreComuna}`}
+              onClose={() => setSelectedTopFuncionario(null)}
+            />
+          )}
 
           {/* Nómina Interactiva Completa */}
           <div className="card" style={{ padding: "1.75rem" }}>

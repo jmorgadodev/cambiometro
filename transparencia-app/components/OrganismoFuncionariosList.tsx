@@ -10,6 +10,7 @@ import {
 import { classifyFuncionarioRecord, type AnomaliaInfo } from "@/lib/funcionarios-quality";
 import { queryStaticFuncionarios } from "@/lib/funcionarios-static";
 import { normalizeFuncionarioRecord, type FuncionarioQualityFilter } from "@/lib/funcionarios-normalization";
+import FuncionarioDetailDialog, { type FuncionarioDetailRecord } from "@/components/municipalidades/FuncionarioDetailDialog";
 
 function formatCLP(n: number) {
   return new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(n);
@@ -72,6 +73,7 @@ export default function OrganismoFuncionariosList({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sourceStatus, setSourceStatus] = useState<"api" | "static" | "static-fallback" | "unavailable">("api");
   const [retryNonce, setRetryNonce] = useState(0);
+  const [selectedFuncionario, setSelectedFuncionario] = useState<FuncionarioPublico | null>(null);
 
   // Calidad de datos forense (Sección 1 y 2)
   const [observadosCount, setObservadosCount] = useState(0);
@@ -224,6 +226,56 @@ export default function OrganismoFuncionariosList({
     causasBreakdown.error_unidad_fuente ? `${causasBreakdown.error_unidad_fuente} por valores nominales residuales de origen` : null,
     causasBreakdown.anomalia_fuente ? `${causasBreakdown.anomalia_fuente} sin causa determinable en observaciones ('anomalía de la fuente')` : null,
   ].filter(Boolean).join(", ") || "clasificación forense en curso";
+
+  const selectedFuncionarioDetail: FuncionarioDetailRecord | null = selectedFuncionario
+    ? (() => {
+        const overtimeAmount = selectedFuncionario.monto_horas_extras_clp > 0
+          ? selectedFuncionario.monto_horas_extras_clp
+          : null;
+        const overtimeHours = selectedFuncionario.horas_extras_mes_anterior > 0
+          ? selectedFuncionario.horas_extras_mes_anterior
+          : [
+              selectedFuncionario.horas_extras_diurnas_hrs,
+              selectedFuncionario.horas_extras_nocturnas_hrs,
+              selectedFuncionario.horas_extras_festivas_hrs,
+            ].reduce<number>((sum, value) => sum + (value ?? 0), 0);
+        const gross = selectedFuncionario.remuneracion_bruta_mensual || null;
+        const base = gross !== null && overtimeAmount !== null && gross >= overtimeAmount
+          ? gross - overtimeAmount
+          : null;
+        return {
+          id: selectedFuncionario.id,
+          nombre: selectedFuncionario.nombre_completo,
+          cargo: selectedFuncionario.cargo,
+          estamento: selectedFuncionario.estamento,
+          tipoContrato: selectedFuncionario.tipo_contrato,
+          periodo: selectedFuncionario.periodo,
+          sueldoBase: base,
+          remuneracionBruta: gross,
+          remuneracionLiquida: selectedFuncionario.remuneracion_liquida_mensual,
+          horasExtras: overtimeHours,
+          montoHorasExtras: overtimeAmount,
+          horasExtrasDiurnas: selectedFuncionario.horas_extras_diurnas_hrs,
+          horasExtrasNocturnas: selectedFuncionario.horas_extras_nocturnas_hrs,
+          horasExtrasFestivas: selectedFuncionario.horas_extras_festivas_hrs,
+          grado: selectedFuncionario.grado_eus,
+          formacion: selectedFuncionario.formacion,
+          region: selectedFuncionario.region,
+          fechaIngreso: selectedFuncionario.fecha_ingreso,
+          fechaTermino: selectedFuncionario.fecha_termino,
+          asignacionesEspeciales: selectedFuncionario.asignaciones_especiales_clp,
+          remuneracionesAdicionales: selectedFuncionario.rem_adicionales_clp,
+          bonosIncentivos: selectedFuncionario.bonos_incentivos_clp,
+          viaticos: selectedFuncionario.viaticos_clp,
+          derechoHorasExtras: selectedFuncionario.derecho_horas_extras,
+          observaciones: selectedFuncionario.observaciones,
+          fuente: selectedFuncionario.fuente,
+          fuentePeriodo: selectedFuncionario.fuente_periodo,
+          calidad: selectedFuncionario.calidad_datos?.estado,
+          calidadDetalle: selectedFuncionario.calidad_datos?.detalle,
+        };
+      })()
+    : null;
 
   return (
     <div>
@@ -514,6 +566,17 @@ export default function OrganismoFuncionariosList({
             return (
               <div
                 key={func.id}
+                className="municipal-staff-card"
+                role="button"
+                tabIndex={0}
+                aria-label={`Abrir expediente de ${func.nombre_completo}`}
+                onClick={() => setSelectedFuncionario(func)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setSelectedFuncionario(func);
+                  }
+                }}
                 style={{
                   background: "var(--bg-surface)",
                   borderRadius: 12,
@@ -634,6 +697,7 @@ export default function OrganismoFuncionariosList({
                             href={qualityInfo.urlRegistroOriginal}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={(event) => event.stopPropagation()}
                             style={{ fontSize: "0.65rem", color: "var(--accent)", textDecoration: "none", fontWeight: 700 }}
                             title="Ver fila original en portal oficial de Transparencia"
                           >
@@ -664,6 +728,10 @@ export default function OrganismoFuncionariosList({
                       +{func.horas_extras_mes_anterior} hrs extras
                     </span>
                   )}
+                </div>
+
+                <div style={{ color: "var(--accent)", fontSize: "0.72rem", fontWeight: 700 }}>
+                  Ver expediente completo →
                 </div>
               </div>
             );
@@ -759,6 +827,14 @@ export default function OrganismoFuncionariosList({
             </div>
           )}
         </div>
+      )}
+
+      {selectedFuncionarioDetail && (
+        <FuncionarioDetailDialog
+          record={selectedFuncionarioDetail}
+          nombreOrganismo={nombreOrganismo}
+          onClose={() => setSelectedFuncionario(null)}
+        />
       )}
     </div>
   );
