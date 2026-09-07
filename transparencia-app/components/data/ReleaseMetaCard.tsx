@@ -71,7 +71,9 @@ export default function ReleaseMetaCard({
         {[
           ["Publicado", published.count],
           ["Consultable", queryable.count],
-          ["Relacionado", related?.count ?? null],
+          ...(related?.count !== null && related?.count !== undefined
+            ? [["Relacionado", related.count] as [string, number]]
+            : []),
         ].map(([label, count]) => (
           <div key={String(label)} style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: "0.65rem" }}>
             <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{label}</div>

@@ -293,6 +293,26 @@ export default function MunicipalidadesExplorerClient({
 
   const maxTopPres = top10Presupuestos[0]?.presupuesto?.vigente_clp || 1;
 
+  const highestPerCapita = useMemo(() => {
+    return [...initialData]
+      .filter((m) => (m.presupuesto_per_capita_clp ?? 0) > 0)
+      .sort(
+        (a, b) =>
+          (b.presupuesto_per_capita_clp ?? 0) -
+          (a.presupuesto_per_capita_clp ?? 0)
+      )[0] ?? null;
+  }, [initialData]);
+
+  const highestStaff = useMemo(() => {
+    return [...initialData]
+      .filter((m) => (m.resumen_personal?.total_funcionarios ?? 0) > 0)
+      .sort(
+        (a, b) =>
+          (b.resumen_personal?.total_funcionarios ?? 0) -
+          (a.resumen_personal?.total_funcionarios ?? 0)
+      )[0] ?? null;
+  }, [initialData]);
+
   // Manejo de reset de filtros
   const handleResetFilters = () => {
     setSearch("");
@@ -369,6 +389,24 @@ export default function MunicipalidadesExplorerClient({
               text="Explora los presupuestos SINIM, dotaciones de personal y dependencia FCM de las 346 comunas de Chile."
               captureTargetId="directorio-munis-capture"
               variant="primary"
+            />
+          </div>
+
+          <div className="municipal-release-intro">
+            <ReleaseMetaCard
+              eyebrow="Estado y trazabilidad"
+              title="Datos municipales disponibles"
+              source={release.source}
+              period={release.period}
+              lastSuccessAt={release.lastSuccessAt}
+              status={release.status}
+              published={release.published}
+              queryable={release.queryable}
+              related={release.related}
+              checksumSha256={release.checksumSha256}
+              href="/municipalidades?view=table"
+              officialUrl={release.officialUrl}
+              note="El catálogo validado reúne las 346 comunas. Un indicador sin publicación conserva el estado “Sin dato publicado”; no se convierte en cero."
             />
           </div>
 
@@ -634,23 +672,6 @@ export default function MunicipalidadesExplorerClient({
       </section>
 
       <div className="container-main" style={{ marginTop: "1rem" }}>
-        <ReleaseMetaCard
-          title="Release territorial consultable"
-          source={release.source}
-          period={release.period}
-          lastSuccessAt={release.lastSuccessAt}
-          status={release.status}
-          published={release.published}
-          queryable={release.queryable}
-          related={release.related}
-          checksumSha256={release.checksumSha256}
-          href="/municipalidades?view=table"
-          officialUrl={release.officialUrl}
-          note="La tabla, las tarjetas y las fichas utilizan el mismo catálogo validado de 346 comunas. Un indicador sin publicación conserva el estado “Sin dato publicado”; no se convierte en cero."
-        />
-      </div>
-
-      <div className="container-main" style={{ marginTop: "1rem" }}>
         <MunicipalidadesRegionalPanel
           municipalities={initialData}
           selectedRegion={regionFilter}
@@ -863,7 +884,7 @@ export default function MunicipalidadesExplorerClient({
                         margin: 0,
                       }}
                     >
-                      ⚖️ Dispersión: Per Cápita vs Dependencia FCM
+                      Lectura comparada: per cápita y dependencia FCM
                     </h3>
                     <span
                       style={{
@@ -898,6 +919,7 @@ export default function MunicipalidadesExplorerClient({
                     }}
                   >
                     <div
+                      className="municipal-dispersion-tile"
                       style={{
                         padding: "0.75rem",
                         borderRadius: 8,
@@ -941,6 +963,7 @@ export default function MunicipalidadesExplorerClient({
                     </div>
 
                     <div
+                      className="municipal-dispersion-tile"
                       style={{
                         padding: "0.75rem",
                         borderRadius: 8,
@@ -982,6 +1005,92 @@ export default function MunicipalidadesExplorerClient({
                         Ej: La Pintana, comunas rurales
                       </div>
                     </div>
+
+                    <div
+                      className="municipal-dispersion-tile"
+                      style={{
+                        padding: "0.75rem",
+                        borderRadius: 8,
+                        background: "var(--surface-2)",
+                        border: "1px solid var(--border)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "0.7rem",
+                          fontWeight: 700,
+                          color: "var(--accent)",
+                          marginBottom: "0.2rem",
+                        }}
+                      >
+                        Mayor presupuesto per cápita
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "0.85rem",
+                          fontWeight: 700,
+                          color: "var(--text-primary)",
+                        }}
+                      >
+                        {highestPerCapita
+                          ? formatCLP(highestPerCapita.presupuesto_per_capita_clp)
+                          : "Sin dato publicado"}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "0.68rem",
+                          color: "var(--text-subtle)",
+                          marginTop: "0.2rem",
+                        }}
+                      >
+                        {highestPerCapita
+                          ? `${highestPerCapita.nombre_comuna} · ${highestPerCapita.region}`
+                          : "No calculable con este release"}
+                      </div>
+                    </div>
+
+                    <div
+                      className="municipal-dispersion-tile"
+                      style={{
+                        padding: "0.75rem",
+                        borderRadius: 8,
+                        background: "var(--surface-2)",
+                        border: "1px solid var(--border)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "0.7rem",
+                          fontWeight: 700,
+                          color: "var(--highlight)",
+                          marginBottom: "0.2rem",
+                        }}
+                      >
+                        Mayor dotación municipal
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "0.85rem",
+                          fontWeight: 700,
+                          color: "var(--text-primary)",
+                        }}
+                      >
+                        {highestStaff
+                          ? `${formatNum(highestStaff.resumen_personal?.total_funcionarios)} funcionarios`
+                          : "Sin dato publicado"}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "0.68rem",
+                          color: "var(--text-subtle)",
+                          marginTop: "0.2rem",
+                        }}
+                      >
+                        {highestStaff
+                          ? `${highestStaff.nombre_comuna} · ${highestStaff.region}`
+                          : "No calculable con este release"}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -995,8 +1104,8 @@ export default function MunicipalidadesExplorerClient({
                     color: "var(--text-muted)",
                   }}
                 >
-                  💡 Haz clic en cualquier comuna para ver su presupuesto,
-                  nómina y concejo comunal.
+                  Selecciona cualquier comuna para ver su presupuesto, nómina y
+                  concejo comunal.
                 </div>
               </div>
             </div>

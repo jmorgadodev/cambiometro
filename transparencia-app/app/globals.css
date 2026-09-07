@@ -3896,6 +3896,22 @@ html.dark .page-masthead {
    PANEL REGIONAL MUNICIPAL
    Lectura de territorio antes del detalle de cada ficha.
 ═══════════════════════════════════════════════════════════ */
+.municipal-release-intro {
+  margin-top: 1.25rem;
+}
+
+.municipal-release-intro > .card {
+  background: var(--surface-2);
+}
+
+.municipal-dispersion-tile {
+  min-height: 7rem;
+}
+
+.municipal-dispersion-tile:hover {
+  border-color: var(--accent) !important;
+}
+
 .municipal-regional-panel {
   overflow: hidden;
   border: 1px solid var(--border);
