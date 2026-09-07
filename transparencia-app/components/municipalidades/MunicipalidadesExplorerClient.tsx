@@ -120,6 +120,10 @@ export default function MunicipalidadesExplorerClient({
     setPage(1);
   }
 
+  function handleMapCommuneSelect(municipalityId: string) {
+    router.push(`/municipalidades/${municipalityId}`);
+  }
+
   // Regiones y Partidos únicos
   const regiones = useMemo(() => {
     return [
@@ -658,6 +662,7 @@ export default function MunicipalidadesExplorerClient({
             municipalities={initialData}
             selectedRegion={regionFilter}
             onRegionSelect={handleMapRegionSelect}
+            onCommuneSelect={handleMapCommuneSelect}
           />
         </div>
       )}

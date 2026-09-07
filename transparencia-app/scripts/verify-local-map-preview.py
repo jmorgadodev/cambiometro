@@ -22,24 +22,27 @@ with sync_playwright() as playwright:
         cookie_banner.get_by_role("button", name="Rechazar").click()
     assert page.get_by_label("Indicador del mapa municipal").count() == 1
     help_text = page.locator(".municipal-map-help").inner_text()
-    assert "Rueda acercar" in help_text
-    assert "Chile completo" in page.locator(".municipal-map-inspector").inner_text()
+    assert "Rueda para acercar" in help_text
+    assert "Chile completo" in page.locator(".municipal-map-panel").inner_text()
 
     map_paths = page.locator(".municipal-map-canvas svg path")
     assert map_paths.count() >= 16, f"Se esperaban 16 regiones, se encontraron {map_paths.count()} paths"
     map_canvas = page.locator(".municipal-map-canvas")
     map_canvas.scroll_into_view_if_needed()
-    zoom_target = map_paths.nth(8)
-    zoom_before = zoom_target.get_attribute("transform")
+    zoom_before = map_paths.evaluate_all("elements => elements.map(element => element.getAttribute('transform'))")
     canvas_bounds = map_canvas.bounding_box()
     assert canvas_bounds is not None, "No se pudo calcular el área del mapa"
     page.mouse.move(canvas_bounds["x"] + canvas_bounds["width"] / 2, canvas_bounds["y"] + canvas_bounds["height"] / 2)
     page.mouse.wheel(0, -500)
     page.wait_for_timeout(400)
-    zoom_after = zoom_target.get_attribute("transform")
-    assert zoom_before != zoom_after, "La rueda del ratón no modificó el zoom del mapa"
+    zoom_after = map_paths.evaluate_all("elements => elements.map(element => element.getAttribute('transform'))")
+    assert any(before != after for before, after in zip(zoom_before, zoom_after)), "La rueda del ratón no modificó el zoom del mapa"
     page.screenshot(path=str(SCREENSHOT), full_page=True)
 
+    page.goto(f"{BASE_URL}/municipalidades", wait_until="domcontentloaded", timeout=120_000)
+    page.get_by_role("heading", name="Del país a la comuna").wait_for(timeout=30_000)
+    page.wait_for_timeout(1200)
+    map_paths = page.locator(".municipal-map-canvas svg path")
     clickable_path = map_paths.nth(8)
     assert clickable_path is not None, "No hay una región visible para seleccionar"
     clickable_path.scroll_into_view_if_needed()
@@ -59,7 +62,7 @@ with sync_playwright() as playwright:
     )
     assert click_point is not None, "No se encontró un punto interactivo dentro de la región"
     page.mouse.click(click_point["x"], click_point["y"])
-    page.get_by_text("Región seleccionada").wait_for(timeout=10_000)
+    page.locator(".municipal-map-communes-heading").wait_for(timeout=10_000)
     assert page.get_by_text("Comunas de la región").count() == 1
     assert page.locator("a[href^='/municipalidades/']").count() > 0
     page.screenshot(path=str(REGION_SCREENSHOT), full_page=True)
