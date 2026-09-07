@@ -403,6 +403,7 @@ export default function MunicipalidadesExplorerClient({
               published={release.published}
               queryable={release.queryable}
               related={release.related}
+              compactMetrics
               checksumSha256={release.checksumSha256}
               href="/municipalidades?view=table"
               officialUrl={release.officialUrl}
@@ -412,6 +413,7 @@ export default function MunicipalidadesExplorerClient({
 
           {/* 4 KPIs Clave */}
           <div
+            className="municipal-kpi-grid"
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
@@ -420,7 +422,7 @@ export default function MunicipalidadesExplorerClient({
             }}
           >
             <div
-              className="card"
+              className="card municipal-kpi-card"
               style={{
                 background: "var(--surface-2)",
                 borderColor: "var(--border)",
@@ -460,7 +462,7 @@ export default function MunicipalidadesExplorerClient({
             </div>
 
             <div
-              className="card"
+              className="card municipal-kpi-card"
               style={{
                 background: "var(--surface-2)",
                 borderColor: "var(--border)",
@@ -512,7 +514,7 @@ export default function MunicipalidadesExplorerClient({
             </div>
 
             <div
-              className="card"
+              className="card municipal-kpi-card"
               style={{
                 background: "var(--surface-2)",
                 borderColor: "var(--border)",
@@ -564,7 +566,7 @@ export default function MunicipalidadesExplorerClient({
             </div>
 
             <div
-              className="card"
+              className="card municipal-kpi-card"
               style={{
                 background: "var(--surface-2)",
                 borderColor: "var(--border)",
@@ -617,7 +619,7 @@ export default function MunicipalidadesExplorerClient({
 
             {/* KPI 5: Cumplimiento Transparencia Activa Ley 20.285 */}
             <div
-              className="card"
+              className="card municipal-kpi-card"
               style={{
                 background: "var(--surface-2)",
                 borderColor: "var(--border)",

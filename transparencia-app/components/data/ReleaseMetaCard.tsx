@@ -21,6 +21,7 @@ interface Props {
   href: string;
   officialUrl?: string;
   note?: string;
+  compactMetrics?: boolean;
 }
 
 function formatCount(value: number | null | undefined): string {
@@ -48,8 +49,16 @@ export default function ReleaseMetaCard({
   href,
   officialUrl,
   note,
+  compactMetrics = false,
 }: Props) {
   const tone = RELEASE_STATUS_TONES[status];
+  const metrics = [
+    ["Publicado", published.count],
+    ["Consultable", queryable.count],
+    ...(related?.count !== null && related?.count !== undefined
+      ? [["Relacionado", related.count] as [string, number]]
+      : []),
+  ] as Array<[string, number | null | undefined]>;
 
   return (
     <section className="card" aria-labelledby={`${title}-release-title`} style={{ padding: "1.1rem 1.25rem" }}>
@@ -67,20 +76,25 @@ export default function ReleaseMetaCard({
         </span>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "0.65rem", marginTop: "0.9rem" }}>
-        {[
-          ["Publicado", published.count],
-          ["Consultable", queryable.count],
-          ...(related?.count !== null && related?.count !== undefined
-            ? [["Relacionado", related.count] as [string, number]]
-            : []),
-        ].map(([label, count]) => (
-          <div key={String(label)} style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: "0.65rem" }}>
-            <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{label}</div>
-            <strong style={{ display: "block", marginTop: "0.18rem", color: "var(--text-1)", fontFamily: "monospace" }}>{formatCount(count as number | null)}</strong>
-          </div>
-        ))}
-      </div>
+      {compactMetrics ? (
+        <dl className="release-coverage-line" aria-label="Cobertura del release">
+          {metrics.map(([label, count]) => (
+            <div key={label}>
+              <dt>{label}</dt>
+              <dd>{formatCount(count)}</dd>
+            </div>
+          ))}
+        </dl>
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "0.65rem", marginTop: "0.9rem" }}>
+          {metrics.map(([label, count]) => (
+            <div key={String(label)} style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: "0.65rem" }}>
+              <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{label}</div>
+              <strong style={{ display: "block", marginTop: "0.18rem", color: "var(--text-1)", fontFamily: "monospace" }}>{formatCount(count)}</strong>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem 1.25rem", marginTop: "0.8rem", color: "var(--text-muted)", fontSize: "0.72rem" }}>
         <span>Última publicación: <strong style={{ color: "var(--text-1)" }}>{formatReleaseTimestamp(lastSuccessAt)}</strong></span>

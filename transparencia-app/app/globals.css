@@ -3904,6 +3904,71 @@ html.dark .page-masthead {
   background: var(--surface-2);
 }
 
+.release-coverage-line {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .45rem 1.5rem;
+  margin: .9rem 0 0;
+  padding: .7rem 0;
+  border-block: 1px solid var(--border);
+}
+
+.release-coverage-line > div {
+  display: flex;
+  align-items: baseline;
+  gap: .45rem;
+}
+
+.release-coverage-line dt {
+  color: var(--text-muted);
+  font-size: .67rem;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.release-coverage-line dd {
+  margin: 0;
+  color: var(--text-1);
+  font-family: var(--font-mono, monospace);
+  font-size: .86rem;
+  font-weight: 800;
+}
+
+.municipal-kpi-grid {
+  align-items: stretch;
+}
+
+.municipal-kpi-card {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.municipal-kpi-card > div:nth-child(2) {
+  display: flex;
+  min-height: 2.55rem;
+  align-items: center;
+  white-space: nowrap;
+  font-size: clamp(1rem, 1.45vw, 1.32rem) !important;
+  letter-spacing: -.03em;
+}
+
+.municipal-kpi-card > div:last-child {
+  display: flex;
+  min-height: 2.35rem;
+  align-items: flex-start;
+}
+
+@media (max-width: 700px) {
+  .municipal-kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  }
+
+  .municipal-kpi-card > div:nth-child(2) {
+    font-size: clamp(1rem, 4.6vw, 1.25rem) !important;
+  }
+}
+
 .municipal-dispersion-tile {
   min-height: 7rem;
 }
