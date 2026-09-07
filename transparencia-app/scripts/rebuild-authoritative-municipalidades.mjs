@@ -143,7 +143,11 @@ for (const muni of MUNICIPALIDADES_SEED) {
       const isForbidden = cargo.includes("secretari") || cargo.includes("auxiliar") || cargo.includes("chofer") || cargo.includes("escuela") || cargo.includes("docente");
       if (isForbidden) return false;
       const isAlcaldeRole = est === "alcalde" || cargo === "alcalde" || cargo === "alcaldesa" || cargo.startsWith("alcalde ") || cargo.startsWith("alcaldesa ");
-      return isAlcaldeRole && bruto >= 4000000;
+      // El sueldo de una alcaldía no tiene un umbral nacional único. Un corte
+      // oficial puede informar menos de $4 millones según comuna, jornada,
+      // descuentos o la forma en que la municipalidad publica la nómina.
+      // Filtrar por monto hacía desaparecer alcaldes válidos del release.
+      return isAlcaldeRole && bruto > 0;
     });
 
     if (alcaldeRecord) {
@@ -344,6 +348,11 @@ for (const muni of MUNICIPALIDADES_SEED) {
           tipo_contrato: f.tipo_contrato || null,
           grado_eus: f.grado_eus || null,
           periodo: f.periodo || f.fuente_periodo || null,
+          fecha_ingreso: f.fecha_ingreso || null,
+          fecha_termino: f.fecha_termino || null,
+          formacion: f.formacion || null,
+          fuente: f.url || f.fuente || null,
+          fuente_periodo: f.fuente_periodo || f.periodo || null,
         });
 
         if (topList.length >= 5) break;

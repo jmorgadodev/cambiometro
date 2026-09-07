@@ -64,6 +64,27 @@ function formatDate(value?: string | null) {
   return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString("es-CL");
 }
 
+function formatServiceYears(fechaIngreso?: string | null, periodo?: string | null) {
+  if (!fechaIngreso) return "No informado";
+  const start = new Date(fechaIngreso);
+  if (Number.isNaN(start.getTime())) return "No informado";
+  const reference = /^\d{4}-\d{2}$/.test(periodo || "")
+    ? (() => {
+        const [year, month] = (periodo as string).split("-").map(Number);
+        return new Date(year, month, 0);
+      })()
+    : new Date();
+  if (reference < start) return "Aún no iniciado en el corte";
+  let years = reference.getFullYear() - start.getFullYear();
+  let months = reference.getMonth() - start.getMonth();
+  if (reference.getDate() < start.getDate()) months -= 1;
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  }
+  return `${years} ${years === 1 ? "año" : "años"}${months > 0 ? ` y ${months} ${months === 1 ? "mes" : "meses"}` : ""}`;
+}
+
 function valueOrFallback(value?: string | null) {
   return value?.trim() || "No informado";
 }
@@ -150,6 +171,7 @@ export default function FuncionarioDetailDialog({ record, nombreOrganismo, onClo
             <Metric label="Sueldo bruto" value={formatCLP(record.remuneracionBruta)} tone="ok" />
             <Metric label="Sueldo líquido" value={formatCLP(record.remuneracionLiquida)} />
             <Metric label="Sueldo base" value={formatCLP(record.sueldoBase)} />
+            <Metric label="Años de servicio" value={formatServiceYears(record.fechaIngreso, record.periodo)} />
             <Metric label="Horas extra" value={hasOvertime ? `${formatNumber(record.horasExtras)} hrs` : "0 hrs"} tone={hasOvertime ? "warn" : undefined} />
             <Metric label="Monto horas extra" value={formatCLP(record.montoHorasExtras)} tone={hasOvertime ? "warn" : undefined} />
             {record.montoHorasExtrasCalculado && (

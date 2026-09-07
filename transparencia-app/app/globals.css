@@ -5176,6 +5176,25 @@ html.dark .page-masthead {
 .municipal-staff-card:hover,
 .municipal-staff-card:focus-visible { border-color: var(--accent) !important; box-shadow: 0 8px 24px color-mix(in srgb, var(--accent) 14%, transparent); }
 
+.municipal-missing-data-callout {
+  display: flex;
+  flex-direction: column;
+  gap: .35rem;
+  margin-top: 1rem;
+  padding: .85rem 1rem;
+  border-left: 3px solid var(--warn);
+  border-radius: 8px;
+  background: var(--warn-bg);
+  color: var(--text-muted);
+  font-size: .76rem;
+  line-height: 1.5;
+}
+
+.municipal-missing-data-callout strong { color: var(--text-primary); }
+.municipal-missing-data-callout a { color: var(--accent); font-weight: 700; text-decoration: none; }
+.municipal-missing-data-callout a:hover { text-decoration: underline; }
+.municipal-missing-data-callout .btn { margin-top: .25rem; font-size: .72rem; padding: .35rem .6rem; }
+
 @media (max-width: 640px) {
   .municipal-staff-dialog-backdrop { padding: .5rem; }
   .municipal-staff-dialog-header,

@@ -20,6 +20,7 @@ import { getPartidoConfig } from "@/lib/partidos.config";
 import OrganismoFuncionariosList from "@/components/OrganismoFuncionariosList";
 import OverviewSignalPanel from "@/components/dashboard/OverviewSignalPanel";
 import FuncionarioDetailDialog, { type FuncionarioDetailRecord } from "@/components/municipalidades/FuncionarioDetailDialog";
+import { getVerifiedMuniRRSS } from "@/lib/municipalidades-rrss";
 
 interface Props {
   muniData: MunicipalidadEnriquecida;
@@ -69,6 +70,27 @@ function getTopOvertimeAmount(record: TopFuncionarioRemuneracion) {
     return Math.max(0, record.remuneracion_bruta - record.sueldo_base);
   }
   return 0;
+}
+
+function formatServiceYears(fechaIngreso?: string | null, periodo?: string | null) {
+  if (!fechaIngreso) return "No informado";
+  const start = new Date(fechaIngreso);
+  if (Number.isNaN(start.getTime())) return "No informado";
+  const reference = /^\d{4}-\d{2}$/.test(periodo || "")
+    ? (() => {
+        const [year, month] = (periodo as string).split("-").map(Number);
+        return new Date(year, month, 0);
+      })()
+    : new Date();
+  if (reference < start) return "Aún no iniciado en el corte";
+  let years = reference.getFullYear() - start.getFullYear();
+  let months = reference.getMonth() - start.getMonth();
+  if (reference.getDate() < start.getDate()) months -= 1;
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  }
+  return `${years} ${years === 1 ? "año" : "años"}${months > 0 ? ` y ${months} ${months === 1 ? "mes" : "meses"}` : ""}`;
 }
 
 function getModalityBadge(ocid?: string | null, titulo?: string) {
@@ -124,7 +146,20 @@ export default function MunicipalidadDetailDashboardClient({
     });
   };
 
-  const alcalde = muniData.alcalde;
+  const verifiedAlcalde = getVerifiedMuniRRSS(muniData.id)?.alcalde_oficial ?? null;
+  const alcalde: AlcaldeData | null = muniData.alcalde ?? (verifiedAlcalde ? {
+    nombre: verifiedAlcalde.nombre,
+    cargo: "Alcalde",
+    estamento: "Alcalde",
+    remuneracion_bruta: null,
+    remuneracion_liquida: null,
+    grado_eus: null,
+    formacion: null,
+    fecha_ingreso: null,
+    fuente: verifiedAlcalde.fuente,
+    periodo: null,
+    partido_alcalde: verifiedAlcalde.partido,
+  } : null);
   const pres = muniData.presupuesto;
   const personal = muniData.resumen_personal;
   const compras = muniData.compras_publicas;
@@ -216,10 +251,13 @@ export default function MunicipalidadDetailDashboardClient({
           montoHorasExtras: amountProvided ? selectedTopFuncionario.horas_extras_monto : calculatedOvertime,
           montoHorasExtrasCalculado: !amountProvided && calculatedOvertime !== null,
           grado: selectedTopFuncionario.grado_eus,
+          formacion: selectedTopFuncionario.formacion,
+          fechaIngreso: selectedTopFuncionario.fecha_ingreso,
+          fechaTermino: selectedTopFuncionario.fecha_termino,
+          fuente: selectedTopFuncionario.fuente || "Transparencia Activa / CPLT",
+          fuentePeriodo: selectedTopFuncionario.fuente_periodo || selectedTopFuncionario.periodo,
           totalContratos: selectedTopFuncionario.total_contratos_count,
           cargosConsolidados: selectedTopFuncionario.cargos_consolidados,
-          fuente: "Transparencia Activa / CPLT",
-          fuentePeriodo: selectedTopFuncionario.periodo,
         };
       })()
     : null;
@@ -1238,7 +1276,30 @@ export default function MunicipalidadDetailDashboardClient({
                     <strong>Profesión / Formación:</strong> {alcalde.formacion}
                   </div>
                 )}
+                <div>
+                  <strong>Años de servicio:</strong> {formatServiceYears(alcalde?.fecha_ingreso, alcalde?.periodo)}
+                  {alcalde?.fecha_ingreso && alcalde?.periodo ? " al corte informado" : ""}
+                </div>
               </div>
+
+              {!alcalde?.remuneracion_bruta && (
+                <div className="municipal-missing-data-callout" role="note">
+                  <strong>El sueldo no está publicado en este corte</strong>
+                  <span>
+                    La ficha sí puede identificar a la autoridad, pero el release CPLT disponible no contiene una remuneración positiva asociada a un registro de alcaldía. No mostramos $0 ni estimamos el monto.
+                  </span>
+                  <div>
+                    <button type="button" className="btn btn-secondary" onClick={() => setActiveTab("personal")}>
+                      Revisar nómina completa
+                    </button>{" "}
+                    {muniData.sitio_transparencia_activa && (
+                      <a href={muniData.sitio_transparencia_activa} target="_blank" rel="noopener noreferrer">
+                        Abrir Transparencia Activa ↗
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Dotación & Composición (M4) */}
