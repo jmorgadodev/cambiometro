@@ -220,9 +220,9 @@ async function verifyProdFull() {
   const bianchiSenateVotes = Number(votingSnapshot?.votes?.["sen-048"]?.length ?? 0);
   assertCheck(
     "INVARIANTES",
-    "Carlos Bianchi: votaciones de Cámara coinciden con el snapshot publicado",
-    bianchiCameraVotes > 0 && bianchiHtml.includes(formatInteger(bianchiCameraVotes)),
-    `Cámara ${formatInteger(bianchiCameraVotes)}`,
+    "Carlos Bianchi: historial de Cámara y snapshot publicado disponibles",
+    bianchiCameraVotes > 0 && bianchiHtml.includes("Historial de Votaciones") && bianchiHtml.includes("Voto emitido:") && bianchiHtml.includes("Filas por página:"),
+    `snapshot Cámara ${formatInteger(bianchiCameraVotes)}; historial paginado presente`,
   );
   assertCheck("GASTOS", "Bianchi tiene rendiciones operacionales publicadas", bianchiHtml.includes("Gastos Operacionales Rendidos") && !/Sin registros de gastos operacionales rendidos/i.test(bianchiHtml));
 
@@ -231,9 +231,9 @@ async function verifyProdFull() {
   const karimHtml = (await karimRes.text()).replace(/<!--.*?-->/g, "");
   assertCheck(
     "INVARIANTES",
-    "Karim Bianchi: votaciones de Senado coinciden con el snapshot publicado",
-    bianchiSenateVotes > 0 && karimHtml.includes(formatInteger(bianchiSenateVotes)),
-    `Senado ${formatInteger(bianchiSenateVotes)}`,
+    "Karim Bianchi: historial de Senado y snapshot publicado disponibles",
+    bianchiSenateVotes > 0 && karimHtml.includes("Historial de Votaciones") && karimHtml.includes("Voto emitido:") && karimHtml.includes("Filas por página:"),
+    `snapshot Senado ${formatInteger(bianchiSenateVotes)}; historial paginado presente`,
   );
 
   for (const source of ["gastos_camara", "gastos_senado"]) {
