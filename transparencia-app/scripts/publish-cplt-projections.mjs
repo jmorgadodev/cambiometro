@@ -62,6 +62,7 @@ for (const fileName of files) {
       e: row.estamento ?? "",
       b: Number(row.remuneracion_bruta_mensual ?? 0),
       l: row.remuneracion_liquida_mensual == null ? undefined : Number(row.remuneracion_liquida_mensual),
+      lo: row.remuneracion_liquida_mensual_original == null ? undefined : Number(row.remuneracion_liquida_mensual_original),
       h: Number(row.horas_extras_mes_anterior ?? 0),
       x: Number(row.monto_horas_extras_clp ?? 0),
       g: row.grado_eus ?? undefined,

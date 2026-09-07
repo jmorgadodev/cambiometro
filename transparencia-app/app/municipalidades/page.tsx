@@ -1,6 +1,8 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { getMunicipalidadesList, getMunicipalidadesStats } from "@/lib/municipalidades-list";
+import { getAllMunicipalidadesData } from "@/lib/municipalidades-data";
+import { coverageMetric, readGeneratedDataQualitySummary } from "@/lib/data-quality-summary";
 import MunicipalidadesExplorerClient from "@/components/municipalidades/MunicipalidadesExplorerClient";
 
 export const metadata: Metadata = {
@@ -23,6 +25,26 @@ export const metadata: Metadata = {
 export default function MunicipalidadesPage() {
   const allData = getMunicipalidadesList();
   const stats = getMunicipalidadesStats();
+  const fullData = getAllMunicipalidadesData();
+  const dataSummary = readGeneratedDataQualitySummary();
+  const municipalSources = dataSummary.sources.filter((source) => ["sinim", "ine-censo-2024", "transparencia-activa", "chilecompra"].includes(source.id));
+  const municipalRelease = {
+    source: "SINIM, Censo 2024, CPLT y ChileCompra",
+    period: municipalSources.map((source) => source.period).filter(Boolean).join(" · ") || "Corte publicado",
+    lastSuccessAt: dataSummary.generatedAt,
+    status: municipalSources.some((source) => source.status === "no_disponible") ? "parcial" as const : "completo" as const,
+    published: coverageMetric(allData.length, 346),
+    queryable: coverageMetric(allData.length, 346),
+    related: coverageMetric(null, null),
+    checksumSha256: dataSummary.manifestChecksumSha256 ?? null,
+    officialUrl: municipalSources.find((source) => source.id === "sinim")?.officialUrl,
+  };
+  const purchasesById = Object.fromEntries(
+    fullData.map((municipality) => [
+      municipality.id,
+      { procesos: municipality.compras_publicas?.procesos_count ?? null },
+    ]),
+  );
 
   return (
     <Suspense
@@ -43,7 +65,7 @@ export default function MunicipalidadesPage() {
         </div>
       }
     >
-      <MunicipalidadesExplorerClient initialData={allData} stats={stats} />
+      <MunicipalidadesExplorerClient initialData={allData} stats={stats} purchasesById={purchasesById} release={municipalRelease} />
     </Suspense>
   );
 }

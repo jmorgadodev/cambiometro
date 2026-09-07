@@ -412,6 +412,9 @@ if (fs.existsSync(statsPath)) {
       gastos: {
         total: val.gastos?.total || 0,
         porMes: val.gastos?.porMes || [],
+        // Mantener el desglose de categorías: las fichas de partidos lo usan
+        // para mostrar "Principales ítems de gasto" sin cargar el dataset crudo.
+        porItem: val.gastos?.porItem || [],
         porPolitico: val.gastos?.porPolitico || [],
       },
       disciplina: val.disciplina ? {

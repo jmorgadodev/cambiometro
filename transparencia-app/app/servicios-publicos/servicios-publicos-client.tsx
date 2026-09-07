@@ -6,6 +6,9 @@ import Link from "next/link";
 import type { ServicioPublicoEnriquecido } from "@/lib/servicios-publicos-data";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import ShareButton from "@/components/ShareButton";
+import ReleaseMetaCard from "@/components/data/ReleaseMetaCard";
+import type { CoverageMetric, DataQualityStatus } from "@/lib/data-quality-summary";
+import OverviewSignalPanel from "@/components/dashboard/OverviewSignalPanel";
 
 type ServicioConPolitico = ServicioPublicoEnriquecido & {
   politico_id?: string | null;
@@ -20,6 +23,17 @@ interface Props {
   /** Pre-computed server-side for Cloudflare Workers runtime */
   presupuestoTotalLey?: number;
   gastoDevengado?: number;
+  release: {
+    source: string;
+    period: string;
+    lastSuccessAt: string;
+    status: DataQualityStatus;
+    published: CoverageMetric;
+    queryable: CoverageMetric;
+    related: CoverageMetric;
+    checksumSha256: string | null;
+    officialUrl?: string;
+  };
 }
 
 function formatCLP(n: number) {
@@ -55,6 +69,7 @@ export default function ServiciosPublicosClient({
   totalConPartida,
   presupuestoTotalLey: presupuestoTotalLeyProp,
   gastoDevengado: gastoDevengadoProp,
+  release,
 }: Props) {
   const totalConPresupuestoEfectivo = totalConPartida ?? totalConPresupuesto ?? 0;
   const searchParams = useSearchParams();
@@ -303,6 +318,40 @@ export default function ServiciosPublicosClient({
           </div>
         </div>
       </section>
+
+      <div className="container-main" style={{ marginTop: "1rem" }}>
+        <ReleaseMetaCard
+          title="Release del directorio de servicios públicos"
+          source={release.source}
+          period={release.period}
+          lastSuccessAt={release.lastSuccessAt}
+          status={release.status}
+          published={release.published}
+          queryable={release.queryable}
+          related={release.related}
+          checksumSha256={release.checksumSha256}
+          href="/servicios-publicos?view=table"
+          officialUrl={release.officialUrl}
+          note="La lectura rápida resume presupuesto, dotación, compras, lobby y control. El detalle conserva filtros, paginación y enlaces de evidencia por institución."
+        />
+      </div>
+
+      <div className="container-main" style={{ marginTop: "1rem" }}>
+        <OverviewSignalPanel
+          title="Lectura rápida del Estado"
+          description="Una vista comparativa de las instituciones del release actual antes de abrir cada ficha. Las cifras se calculan sobre los registros publicados y conservan la cobertura propia de cada fuente."
+          metrics={[
+            { label: "Instituciones monitoreadas", value: totalServicios.toLocaleString("es-CL"), detail: "Directorio consolidado", tone: "accent" },
+            { label: "Con partida DIPRES", value: totalConPresupuestoEfectivo.toLocaleString("es-CL"), detail: `${totalServicios > 0 ? ((totalConPresupuestoEfectivo / totalServicios) * 100).toFixed(1) : "0.0"}% del directorio`, tone: "ok" },
+            { label: "Presupuesto inicial", value: presupuestoTotal.inicialLey > 0 ? formatCLP(presupuestoTotal.inicialLey) : "No publicado", detail: "Ley de Presupuestos 2026", tone: "warn" },
+            { label: "Gasto ejecutado", value: presupuestoTotal.ejecutado > 0 ? formatCLP(presupuestoTotal.ejecutado) : "No publicado", detail: presupuestoTotal.inicialLey > 0 && presupuestoTotal.ejecutado > 0 ? `${pctEjecutado(presupuestoTotal.inicialLey, presupuestoTotal.ejecutado)} del inicial` : "Sin corte ejecutado", tone: "info" },
+          ]}
+          bars={[
+            { label: "Ejecución presupuestaria agregada", value: presupuestoTotal.inicialLey > 0 && presupuestoTotal.ejecutado > 0 ? (presupuestoTotal.ejecutado / presupuestoTotal.inicialLey) * 100 : null, displayValue: presupuestoTotal.inicialLey > 0 && presupuestoTotal.ejecutado > 0 ? pctEjecutado(presupuestoTotal.inicialLey, presupuestoTotal.ejecutado) : "No publicado", detail: "Indicador descriptivo del release, no una proyección", tone: "info" },
+          ]}
+          insight="Explora una institución para revisar presupuesto, personal, compras, lobby y auditorías con sus fuentes y períodos respectivos."
+        />
+      </div>
 
       {/* ═══ CONTENIDO Y FILTROS ═══════════════════════════════════════════════ */}
       <div className="container-main" style={{ marginTop: "2rem" }}>

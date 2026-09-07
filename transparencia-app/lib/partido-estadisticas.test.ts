@@ -74,6 +74,13 @@ describe("partido-estadisticas", () => {
     expect(asistencia[0].total).toBeDefined();
   });
 
+  it("conserva los ítems de gasto publicados también para Independientes", async () => {
+    const ind = await getPartidoEstadisticas("ind");
+    expect(ind?.gastos.total).toBeGreaterThan(0);
+    expect(ind?.gastos.porItem.length).toBeGreaterThan(0);
+    expect(ind?.gastos.porItem[0].total).toBeGreaterThan(0);
+  });
+
   it("distingue ausencia de senadores de una falla de datos y conserva los votos de Lilian en Cámara", async () => {
     const pdg = await getPartidoEstadisticas("pdg");
 

@@ -24,9 +24,8 @@ export default async function FuentesPage() {
               Fuentes y versiones
             </h1>
             <p style={{ color: "var(--text-muted)", fontSize: "0.95rem", lineHeight: 1.6, maxWidth: 720, margin: 0 }}>
-              Cada registro publicado por El Cambiómetro proviene de un portal oficial del Estado de Chile y mantiene
-              trazabilidad a su fuente. Esta página lista las fuentes integradas, su cadencia de actualización,
-              cobertura declarada y trazabilidad a la consolidación vigente.
+              Cada registro publicado por El Cambiómetro mantiene trazabilidad a su fuente y a la versión del release.
+              Esta página separa lo publicado, lo que puede recorrerse mediante paginación y lo que participa en relaciones documentales.
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap", marginTop: "0.75rem" }}>
               <span className="badge badge-ok" style={{ fontSize: "0.68rem" }}>Versión {GLOBAL_KPIS.corte}</span>
@@ -65,6 +64,20 @@ export default async function FuentesPage() {
                 (ver nota en calidad de datos)
               </Link>
             </p>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "0.75rem", marginBottom: "1.25rem" }} aria-label="Métricas de cobertura">
+            {([
+              ["Publicado", summary.metrics.published],
+              ["Consultable", summary.metrics.queryable],
+              ["Relacionado", summary.metrics.related],
+            ] as const).map(([label, metric]) => (
+              <div key={label} className="stat-tile stat-tile--info">
+                <div className="stat-tile__value">{metric.label}</div>
+                <div className="stat-tile__label">{label}</div>
+                <div className="stat-tile__hint">{metric.count === null ? "La evidencia aún no permite calcularlo" : `${metric.count.toLocaleString("es-CL")} registros sobre ${metric.denominator?.toLocaleString("es-CL")}`}</div>
+              </div>
+            ))}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 320px), 1fr))", gap: "1rem" }}>
@@ -111,12 +124,26 @@ export default async function FuentesPage() {
                       <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Última validación ETL: </dt>
                       <dd style={{ display: "inline", color: "var(--text-muted)" }}>{source.lastSyncFormatted}</dd>
                     </div>
+                    <div style={{ paddingTop: "0.35rem", borderTop: "1px solid var(--border-subtle)" }}>
+                      <dt style={{ fontWeight: 700, color: "var(--text-primary)" }}>Cobertura con evidencia</dt>
+                      <dd style={{ margin: "0.25rem 0 0", color: "var(--text-muted)" }}>
+                        Publicado {source.metrics.published.label} · Consultable {source.metrics.queryable.label} · Relacionado {source.metrics.related.label}
+                      </dd>
+                    </div>
                   </dl>
                   {source.coverageNote && (
                     <p style={{ fontSize: "0.72rem", color: "var(--text-subtle)", lineHeight: 1.5, margin: "0.25rem 0 0 0" }}>
                       {source.coverageNote}
                     </p>
                   )}
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", marginTop: "auto", paddingTop: "0.5rem" }}>
+                    <span style={{ fontSize: "0.68rem", color: "var(--text-subtle)" }}>
+                      {source.checksumSha256 ? `sha256:${source.checksumSha256.slice(0, 12)}…` : "Checksum no publicado"}
+                    </span>
+                    <Link prefetch={false} href={source.modulePath} className="data-link" style={{ fontSize: "0.75rem", fontWeight: 700 }}>
+                      Explorar registros →
+                    </Link>
+                  </div>
                 </article>
               );
             })}

@@ -11,6 +11,7 @@ import {
   getInitials,
 } from "@/lib/estamentos-format";
 import { SkeletonCard, SkeletonTable } from "@/components/ui/Skeleton";
+import type { FuncionarioQualityFilter } from "@/lib/funcionarios-normalization";
 
 function formatCLP(n?: number | null) {
   if (n === null || n === undefined || isNaN(n)) return "—";
@@ -67,6 +68,7 @@ export default function GlobalFuncionariosClient() {
   const [muniFilter, setMuniFilter] = useState(() => searchParams.get("muni") || "Todos");
   const [muniSearchQuery, setMuniSearchQuery] = useState("");
   const [contratoFilter, setContratoFilter] = useState(() => searchParams.get("contrato") || "Todos");
+  const [qualityFilter, setQualityFilter] = useState<FuncionarioQualityFilter>(() => (searchParams.get("calidad") as FuncionarioQualityFilter) || "Todos");
   const [estamentoFilter, setEstamentoFilter] = useState(() => searchParams.get("estamento") || "Todos");
   const [rangoSueldo, setRangoSueldo] = useState(() => searchParams.get("rango") || "todos");
   const [soloHorasExtras, setSoloHorasExtras] = useState(() => searchParams.get("extras") === "true");
@@ -79,6 +81,7 @@ export default function GlobalFuncionariosClient() {
     (opts: {
       muni?: string;
       contrato?: string;
+      calidad?: FuncionarioQualityFilter;
       estamento?: string;
       rango?: string;
       extras?: boolean;
@@ -89,6 +92,7 @@ export default function GlobalFuncionariosClient() {
     }) => {
       const pMuni = opts.muni ?? muniFilter;
       const pContrato = opts.contrato ?? contratoFilter;
+      const pQuality = opts.calidad ?? qualityFilter;
       const pEstamento = opts.estamento ?? estamentoFilter;
       const pRango = opts.rango ?? rangoSueldo;
       const pExtras = opts.extras !== undefined ? opts.extras : soloHorasExtras;
@@ -100,6 +104,7 @@ export default function GlobalFuncionariosClient() {
       const params = new URLSearchParams();
       if (pMuni && pMuni !== "Todos") params.set("muni", pMuni);
       if (pContrato !== "Todos") params.set("contrato", pContrato);
+      if (pQuality !== "Todos") params.set("calidad", pQuality);
       if (pEstamento !== "Todos") params.set("estamento", pEstamento);
       if (pRango !== "todos") params.set("rango", pRango);
       if (pExtras) params.set("extras", "true");
@@ -111,7 +116,7 @@ export default function GlobalFuncionariosClient() {
       const qs = params.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     },
-    [muniFilter, contratoFilter, estamentoFilter, rangoSueldo, soloHorasExtras, sortBy, viewMode, page, debouncedSearch, pathname, router]
+    [muniFilter, contratoFilter, qualityFilter, estamentoFilter, rangoSueldo, soloHorasExtras, sortBy, viewMode, page, debouncedSearch, pathname, router]
   );
 
   // Datos
@@ -179,6 +184,7 @@ export default function GlobalFuncionariosClient() {
         const params = new URLSearchParams({
           muni: muniFilter,
           contrato: contratoFilter,
+          calidad: qualityFilter,
           estamento: estamentoFilter,
           sortBy,
           page: page.toString(),
@@ -231,6 +237,7 @@ export default function GlobalFuncionariosClient() {
     debouncedSearch,
     muniFilter,
     contratoFilter,
+    qualityFilter,
     estamentoFilter,
     selectedRango,
     soloHorasExtras,
@@ -243,6 +250,7 @@ export default function GlobalFuncionariosClient() {
     setSearch("");
     setDebouncedSearch("");
     setContratoFilter("Todos");
+    setQualityFilter("Todos");
     setEstamentoFilter("Todos");
     setRangoSueldo("todos");
     setSoloHorasExtras(false);
@@ -253,6 +261,7 @@ export default function GlobalFuncionariosClient() {
   const hasActiveFilters =
     search.trim() !== "" ||
     contratoFilter !== "Todos" ||
+    qualityFilter !== "Todos" ||
     estamentoFilter !== "Todos" ||
     rangoSueldo !== "todos" ||
     soloHorasExtras ||
@@ -450,6 +459,29 @@ export default function GlobalFuncionariosClient() {
                   {opt.label}
                 </option>
               ))}
+            </select>
+          </div>
+
+          {/* Calidad de la fuente */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+            <label
+              style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 600 }}
+              title="Clasificación de auditoría: no elimina ni reemplaza el valor informado por la fuente."
+            >
+              Calidad de la fuente
+            </label>
+            <select
+              className="input"
+              value={qualityFilter}
+              onChange={(e) => {
+                setQualityFilter(e.target.value as FuncionarioQualityFilter);
+                setPage(1);
+              }}
+              style={{ fontSize: "0.85rem", padding: "0.45rem 0.65rem", borderRadius: 6 }}
+            >
+              <option value="Todos">Todos los registros</option>
+              <option value="corregidos">Correcciones de formato</option>
+              <option value="observados">Datos observados por auditoría</option>
             </select>
           </div>
 
@@ -907,6 +939,16 @@ export default function GlobalFuncionariosClient() {
                   >
                     {contratoStyle.label}
                   </span>
+
+                  {(f.calidad_datos?.incidencias.length ?? 0) > 0 && (
+                    <span
+                      className="badge badge-warn"
+                      style={{ fontSize: "0.68rem", padding: "0.2rem 0.5rem" }}
+                      title={f.calidad_datos?.detalle}
+                    >
+                      Dato observado
+                    </span>
+                  )}
 
                   {f.grado_eus && f.grado_eus !== "0" && (
                     <span

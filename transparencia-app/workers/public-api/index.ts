@@ -3,6 +3,7 @@ import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
 import { POLITICOS_SEED } from "../../lib/politicos-source";
 import { readR2EvidenceRecords } from "../../lib/r2-records";
 import { readR2EntityIndex } from "../../lib/r2-entities";
+import { matchesFuncionarioQuality, normalizeFuncionarioRecord, type FuncionarioQualityFilter } from "../../lib/funcionarios-normalization";
 
 interface EmailSender {
   send(message: {
@@ -262,6 +263,7 @@ interface CompactOfficialRow {
   e?: string;
   b?: number;
   l?: number;
+  lo?: number;
   h?: number;
   x?: number;
   g?: string;
@@ -478,6 +480,7 @@ function officialSalary(row: JsonRecord) {
 }
 
 function officialsResponse(rows: JsonRecord[], requestUrl: URL, generatedAt: string, sourceStatus: string, coverage: string) {
+  const normalizedRows = rows.map((row) => normalizeFuncionarioRecord(row));
   const query = normalized(requestUrl.searchParams.get("query"));
   const contract = requestUrl.searchParams.get("contrato") ?? "Todos";
   const estamento = normalized(requestUrl.searchParams.get("estamento") ?? "Todos");
@@ -490,11 +493,14 @@ function officialsResponse(rows: JsonRecord[], requestUrl: URL, generatedAt: str
   const period = requestUrl.searchParams.get("periodo") ?? requestUrl.searchParams.get("fuente_periodo") ?? "Todos";
   const type = normalized(requestUrl.searchParams.get("tipo") ?? "Todos");
   const position = normalized(requestUrl.searchParams.get("cargo") ?? "Todos");
-  const allRecords = period !== "Todos" ? rows.filter((row) => String(row.fuente_periodo ?? row.periodo ?? "") === period) : rows;
+  const requestedQuality = requestUrl.searchParams.get("calidad") ?? "Todos";
+  const qualityFilter: FuncionarioQualityFilter = requestedQuality === "corregidos" || requestedQuality === "observados" ? requestedQuality : "Todos";
+  const allRecords = period !== "Todos" ? normalizedRows.filter((row) => String(row.fuente_periodo ?? row.periodo ?? "") === period) : normalizedRows;
   const withoutPayment = allRecords.filter((row) => officialSalary(row) <= 0);
   const microAmount = allRecords.filter((row) => officialSalary(row) > 0 && officialSalary(row) < 50_000);
   const completeSalary = allRecords.filter((row) => officialSalary(row) >= 50_000);
   let filtered = includeZero ? [...allRecords] : onlyAnomalies ? [...microAmount] : allRecords.filter((row) => officialSalary(row) > 0);
+  if (qualityFilter !== "Todos") filtered = allRecords.filter((row) => matchesFuncionarioQuality(row, qualityFilter));
   if (query) filtered = filtered.filter((row) => normalized(`${row.nombre_completo ?? ""} ${row.cargo ?? ""} ${row.organo_nombre ?? ""} ${row.formacion ?? ""}`).includes(query));
   if (type && type !== "todos") filtered = filtered.filter((row) => canonicalOrgType(row.organo_tipo).includes(canonicalOrgType(type)));
   if (position && position !== "todos") {
@@ -524,6 +530,11 @@ function officialsResponse(rows: JsonRecord[], requestUrl: URL, generatedAt: str
   const validSalary = completeSalary.reduce((sum, row) => sum + officialSalary(row), 0);
   const total = filtered.length;
   const data = filtered.slice((page - 1) * limit, page * limit);
+  const qualityCounts = allRecords.reduce<Record<string, number>>((counts, row) => {
+    for (const issue of row.calidad_datos.incidencias) counts[issue] = (counts[issue] ?? 0) + 1;
+    return counts;
+  }, {});
+  const qualityRows = allRecords.filter((row) => row.calidad_datos.incidencias.length > 0).length;
   return json({
     data,
     meta: {
@@ -539,6 +550,13 @@ function officialsResponse(rows: JsonRecord[], requestUrl: URL, generatedAt: str
       updatedAt: generatedAt,
       communeId: coverage,
       sourceStatus,
+      calidad: qualityFilter,
+      calidadDatos: {
+        alcance: "nomina_consultada",
+        registrosConIncidencias: qualityRows,
+        porIncidencia: qualityCounts,
+        metodologia: "Se corrigen sólo espacios y prefijos aislados inequívocos para lectura. Se conserva el valor original y no se infieren nombres ni remuneraciones.",
+      },
       stats: {
         totalMuni: allRecords.length,
         totalValidos: completeSalary.length,
@@ -565,6 +583,7 @@ function compactOfficialRow(row: CompactOfficialRow): JsonRecord {
     estamento: row.e ?? "",
     remuneracion_bruta_mensual: Number(row.b ?? 0),
     remuneracion_liquida_mensual: row.l == null ? null : Number(row.l),
+    remuneracion_liquida_mensual_original: row.lo == null ? undefined : Number(row.lo),
     horas_extras_mes_anterior: Number(row.h ?? 0),
     monto_horas_extras_clp: Number(row.x ?? 0),
     grado_eus: row.g ?? null,
@@ -666,7 +685,7 @@ async function listFuncionariosFromD1(requestUrl: URL, env: Env): Promise<Respon
     // release completo vive en R2. En ese caso dejamos que continúe el
     // fallback de R2 en lugar de presentar un directorio falsamente vacío.
     if (total === 0) return null;
-    const data = (rows.results ?? []).map((row) => ({
+    const data = (rows.results ?? []).map((row) => normalizeFuncionarioRecord({
       ...row,
       organo_nombre: row.organo_id,
       remuneracion_liquida_mensual: null,

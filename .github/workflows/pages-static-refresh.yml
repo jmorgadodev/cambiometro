@@ -25,6 +25,19 @@ on:
     types: [completed]
   workflow_dispatch:
     inputs:
+      deployment_mode:
+        description: "Modo de despliegue: data-refresh sólo con confirmación explícita"
+        type: choice
+        required: false
+        default: data-refresh
+        options:
+          - data-refresh
+          - ui-only
+      confirm_data_refresh:
+        description: "Escribir CAMBIOMETRO_DATA_REFRESH para un refresco manual de datos"
+        type: string
+        required: false
+        default: ""
       publish_pages:
         description: "Publicar el artefacto verificado en Pages producción"
         type: boolean
@@ -69,6 +82,25 @@ jobs:
         uses: actions/checkout@v5
         with:
           ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+
+      - name: Validar modo data-refresh
+        env:
+          DEPLOYMENT_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_mode || 'data-refresh' }}
+          CONFIRM_DATA_REFRESH: ${{ inputs.confirm_data_refresh }}
+        run: |
+          if [ "$DEPLOYMENT_MODE" = "ui-only" ]; then
+            echo "ERROR: el modo ui-only debe ejecutarse en pages-ui-refresh; no se procesa aquí." >&2
+            exit 1
+          fi
+          if [ "$DEPLOYMENT_MODE" = "data-refresh" ] && [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "$CONFIRM_DATA_REFRESH" != "CAMBIOMETRO_DATA_REFRESH" ]; then
+            echo "ERROR: un data-refresh manual requiere confirm_data_refresh=CAMBIOMETRO_DATA_REFRESH." >&2
+            exit 1
+          fi
+          if [ "${{ github.event_name }}" = "workflow_run" ] && [ "${{ github.event.workflow_run.conclusion }}" != "success" ]; then
+            echo "ERROR: un refresh por workflow_run sólo acepta un ETL exitoso." >&2
+            exit 1
+          fi
+          echo "Deployment mode: data-refresh"
 
       - uses: actions/setup-node@v5
         with:

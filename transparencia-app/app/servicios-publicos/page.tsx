@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { getAllServiciosPublicosEnriquecidos } from "@/lib/servicios-publicos-data";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
 import { getPresupuestoNacionalTotales } from "@/lib/presupuesto";
+import { coverageMetric, readGeneratedDataQualitySummary } from "@/lib/data-quality-summary";
 import ServiciosPublicosClient from "./servicios-publicos-client";
 
 export const metadata: Metadata = {
@@ -44,6 +45,19 @@ export default function ServiciosPublicosPage() {
   const totalServicios = serviciosConPolitico.length;
   const conPartidaCount = serviciosConPolitico.filter((s) => s.presupuesto !== null).length;
   const totalConPartida = conPartidaCount;
+  const dataSummary = readGeneratedDataQualitySummary();
+  const dipresSource = dataSummary.sources.find((source) => source.id === "dipres");
+  const serviceRelease = {
+    source: "DIPRES, CPLT, ChileCompra, InfoLobby y Contraloría",
+    period: dipresSource?.period || "Corte publicado",
+    lastSuccessAt: dataSummary.generatedAt,
+    status: dipresSource?.status ?? "parcial" as const,
+    published: coverageMetric(totalServicios, totalServicios),
+    queryable: coverageMetric(totalServicios, totalServicios),
+    related: coverageMetric(null, null),
+    checksumSha256: dataSummary.manifestChecksumSha256 ?? null,
+    officialUrl: dipresSource?.officialUrl,
+  };
 
   // Totales agregados de la Ley de Presupuestos 2026 en DIPRES
   const dipresTotales = getPresupuestoNacionalTotales();
@@ -86,6 +100,7 @@ export default function ServiciosPublicosPage() {
         totalConPartida={totalConPartida}
         presupuestoTotalLey={presupuestoTotalLey}
         gastoDevengado={gastoDevengado}
+        release={serviceRelease}
       />
     </Suspense>
   );

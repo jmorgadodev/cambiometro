@@ -9,6 +9,7 @@ import {
 } from "@/lib/estamentos-format";
 import { classifyFuncionarioRecord, type AnomaliaInfo } from "@/lib/funcionarios-quality";
 import { queryStaticFuncionarios } from "@/lib/funcionarios-static";
+import { normalizeFuncionarioRecord, type FuncionarioQualityFilter } from "@/lib/funcionarios-normalization";
 
 function formatCLP(n: number) {
   return new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(n);
@@ -58,6 +59,7 @@ export default function OrganismoFuncionariosList({
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("Todos");
   const [contratoFilter, setContratoFilter] = useState("Todos");
+  const [qualityFilter, setQualityFilter] = useState<FuncionarioQualityFilter>("Todos");
   const [sortBy, setSortBy] = useState("sueldo_desc");
   const [page, setPage] = useState(1);
   const itemsPerPage = 24;
@@ -120,6 +122,7 @@ export default function OrganismoFuncionariosList({
           query: debouncedSearch,
           muni: organismoId,
           contrato: contratoFilter,
+          calidad: qualityFilter,
           estamento: deptFilter !== "Todos" ? deptFilter : "Todos",
           sortBy,
           page: page.toString(),
@@ -144,6 +147,7 @@ export default function OrganismoFuncionariosList({
           return queryStaticFuncionarios(staticResponse, {
             query: debouncedSearch,
             contrato: contratoFilter,
+            calidad: qualityFilter,
             estamento: deptFilter,
             sortBy,
             periodo: periodo ?? undefined,
@@ -170,7 +174,7 @@ export default function OrganismoFuncionariosList({
           }
         }
         if (!active) return;
-        setData(result.data ?? []);
+        setData((result.data ?? []).map((item: FuncionarioPublico) => normalizeFuncionarioRecord(item)));
         setTotal(result.meta?.total ?? 0);
         setTotalHeadcount(result.meta?.totalHeadcount || result.meta?.stats?.totalMuni || result.meta?.total || 0);
         setTotalPages(result.meta?.totalPages ?? 1);
@@ -209,9 +213,10 @@ export default function OrganismoFuncionariosList({
       active = false;
       controller.abort();
     };
-  }, [debouncedSearch, organismoId, contratoFilter, deptFilter, sortBy, page, periodo, retryNonce]);
+  }, [debouncedSearch, organismoId, contratoFilter, qualityFilter, deptFilter, sortBy, page, periodo, retryNonce]);
 
   // Construcción del texto de causas para la Caja Ciudadana (§2.3)
+  const visibleQualityCount = data.filter((item) => (item.calidad_datos?.incidencias.length ?? 0) > 0).length;
   const causasTexto = [
     causasBreakdown.ajuste_periodo_anterior ? `${causasBreakdown.ajuste_periodo_anterior} por ajustes/rectificaciones de meses previos` : null,
     causasBreakdown.asignacion_reembolso_menor ? `${causasBreakdown.asignacion_reembolso_menor} por viáticos o movilización puntual` : null,
@@ -397,6 +402,25 @@ export default function OrganismoFuncionariosList({
           </div>
 
           <div>
+            <label
+              style={{ fontSize: "0.75rem", color: "var(--text-subtle)", fontWeight: 700, display: "block", marginBottom: "0.3rem" }}
+              title="Clasificación de auditoría: no elimina ni reemplaza el valor informado por la fuente."
+            >
+              Calidad de la fuente
+            </label>
+            <select
+              className="input"
+              value={qualityFilter}
+              onChange={(e) => { setQualityFilter(e.target.value as FuncionarioQualityFilter); setPage(1); }}
+              style={{ width: "100%", fontSize: "0.85rem", padding: "0.45rem 0.75rem" }}
+            >
+              <option value="Todos">Todos los registros</option>
+              <option value="corregidos">Correcciones de formato</option>
+              <option value="observados">Datos observados por auditoría</option>
+            </select>
+          </div>
+
+          <div>
             <label style={{ fontSize: "0.75rem", color: "var(--text-subtle)", fontWeight: 700, display: "block", marginBottom: "0.3rem" }}>
               Ordenar por
             </label>
@@ -448,6 +472,16 @@ export default function OrganismoFuncionariosList({
       {sourceStatus === "static" && (
         <div role="status" style={{ marginBottom: "1rem", fontSize: "0.74rem", color: "var(--text-subtle)" }}>
           Fuente: proyección oficial estática generada en el último build.
+        </div>
+      )}
+      {visibleQualityCount > 0 && (
+        <div
+          role="note"
+          className="card-flat"
+          style={{ marginBottom: "1rem", padding: "0.8rem 1rem", fontSize: "0.78rem", lineHeight: 1.5, color: "var(--text-muted)" }}
+        >
+          <strong style={{ color: "var(--text-primary)" }}>Depuración visible de la fuente:</strong>{" "}
+          {visibleQualityCount.toLocaleString("es-CL")} registros de esta página tienen una incidencia de formato reportada por el organismo. Se corrigen sólo prefijos o espacios inequívocos para facilitar la lectura; conservamos el valor original y el enlace a la fuente. No inferimos nombres ni remuneraciones.
         </div>
       )}
 
@@ -518,6 +552,15 @@ export default function OrganismoFuncionariosList({
                     <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "0.15rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                       {func.cargo || "Sin cargo"}
                     </div>
+                    {(func.calidad_datos?.incidencias.length ?? 0) > 0 && (
+                      <span
+                        className="badge badge-warn"
+                        style={{ display: "inline-flex", marginTop: "0.35rem", fontSize: "0.62rem", padding: "0.12rem 0.4rem" }}
+                        title={func.calidad_datos?.detalle}
+                      >
+                        Fuente normalizada
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -597,6 +640,21 @@ export default function OrganismoFuncionariosList({
                             Ver fuente ↗
                           </a>
                         )}
+                      </div>
+                    )}
+                    {func.remuneracion_liquida_mensual == null && bruto > 0 && (
+                      <div
+                        style={{ marginTop: "0.35rem", fontSize: "0.7rem", color: "var(--text-subtle)" }}
+                        title={func.remuneracion_liquida_mensual_original == null
+                          ? "La fuente no publicó un sueldo líquido para este registro."
+                          : `La fuente informó ${formatCLP(func.remuneracion_liquida_mensual_original)}; se muestra como no informado para no presentarlo como pago real.`}
+                      >
+                        Sueldo líquido: <strong>No informado por la fuente</strong>
+                      </div>
+                    )}
+                    {func.remuneracion_liquida_mensual != null && (
+                      <div style={{ marginTop: "0.35rem", fontSize: "0.7rem", color: "var(--text-subtle)" }}>
+                        Sueldo líquido: <strong>{formatCLP(func.remuneracion_liquida_mensual)}</strong>
                       </div>
                     )}
                   </div>

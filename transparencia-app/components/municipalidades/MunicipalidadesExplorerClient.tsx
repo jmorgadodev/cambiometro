@@ -6,6 +6,15 @@ import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import { MunicipalidadListItem } from "@/lib/municipalidades-list";
 import { getPartidoConfig } from "@/lib/partidos.config";
 import ShareButton from "@/components/ShareButton";
+import dynamic from "next/dynamic";
+import type { MunicipalMapPurchaseMetric } from "@/lib/municipalidades-map";
+import type { CoverageMetric, DataQualityStatus } from "@/lib/data-quality-summary";
+import ReleaseMetaCard from "@/components/data/ReleaseMetaCard";
+
+const MunicipalidadesRegionMap = dynamic(() => import("@/components/municipalidades/MunicipalidadesRegionMap"), {
+  ssr: false,
+  loading: () => <div className="card" style={{ minHeight: 280, display: "grid", placeItems: "center", color: "var(--text-muted)" }}>Preparando mapa territorial…</div>,
+});
 
 interface MunicipalidadesExplorerClientProps {
   initialData: MunicipalidadListItem[];
@@ -19,6 +28,18 @@ interface MunicipalidadesExplorerClientProps {
     alDiaCount?: number;
     desfasadoCount?: number;
     sinDatosCount?: number;
+  };
+  purchasesById: Readonly<Record<string, MunicipalMapPurchaseMetric | null>>;
+  release: {
+    source: string;
+    period: string;
+    lastSuccessAt: string;
+    status: DataQualityStatus;
+    published: CoverageMetric;
+    queryable: CoverageMetric;
+    related: CoverageMetric;
+    checksumSha256: string | null;
+    officialUrl?: string;
   };
 }
 
@@ -52,6 +73,8 @@ function formatNum(n: number | null | undefined): string {
 export default function MunicipalidadesExplorerClient({
   initialData,
   stats,
+  purchasesById,
+  release,
 }: MunicipalidadesExplorerClientProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -612,6 +635,35 @@ export default function MunicipalidadesExplorerClient({
           </div>
         </div>
       </section>
+
+      <div className="container-main" style={{ marginTop: "1rem" }}>
+        <ReleaseMetaCard
+          title="Release territorial consultable"
+          source={release.source}
+          period={release.period}
+          lastSuccessAt={release.lastSuccessAt}
+          status={release.status}
+          published={release.published}
+          queryable={release.queryable}
+          related={release.related}
+          checksumSha256={release.checksumSha256}
+          href="/municipalidades?view=table"
+          officialUrl={release.officialUrl}
+          note="El mapa, la tabla y las fichas utilizan el mismo catálogo validado de 346 comunas. Un indicador sin publicación conserva el estado “Sin dato publicado”; no se convierte en cero."
+        />
+      </div>
+
+      <div className="container-main" style={{ marginTop: "2rem" }}>
+        <MunicipalidadesRegionMap
+          municipalities={initialData}
+          purchasesById={purchasesById}
+          selectedRegion={regionFilter}
+          onRegionSelect={(region) => {
+            setRegionFilter(region === "Todas" ? "Todas" : region);
+            setPage(1);
+          }}
+        />
+      </div>
 
       {/* ═══ 2. GRÁFICAS COMPARATIVAS (COLAPSABLES) ═══════════════════════════ */}
       <div className="container-main" style={{ marginTop: "2rem" }}>

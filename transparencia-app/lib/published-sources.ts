@@ -4,6 +4,7 @@ import type { SourceManifest } from "@/lib/data-contracts";
 import { listSourceManifests } from "@/lib/data-platform-d1";
 import { mergeR2Catalog, type R2PublicCatalog } from "@/lib/r2-catalog";
 import { getTransferReleaseMetadata } from "@/lib/transfer-release-metadata";
+import { getDataQualityConfig } from "@/lib/data-quality-summary";
 
 export interface CpltPublicManifest {
   sourceId: "transparencia-activa";
@@ -43,37 +44,15 @@ function localCpltManifest(): CpltPublicManifest | null {
   }
 }
 
-export const SOURCE_CANONICAL_COUNTS: Record<string, number> = {
-  "chilecompra": 74142,
-  "transparencia-activa": 1203287,
-  "ley-19862": 59361,
-  "dipres": 15689,
-  "sinim": 3105,
-  "infolobby": 60523,
-  "infoprobidad": 15331,
-  "contraloria": 291,
-  "camara": 19025,
-  "senado": 8138,
-  "servel": 23894,
-  "personal-apoyo": 4092,
-  "ine-censo-2024": 346,
-};
+// Compatibility exports: all UI counts now originate in one checked-in source
+// manifest so the build can compare them with the generated public summary.
+export const SOURCE_CANONICAL_COUNTS: Record<string, number> = Object.fromEntries(
+  getDataQualityConfig().map((source) => [source.id, source.canonicalCount]),
+);
 
-export const SOURCE_HISTORICAL_COUNTS: Record<string, number> = {
-  "chilecompra": 888693,
-  "transparencia-activa": 1218136,
-  "ley-19862": 59361,
-  "dipres": 15689,
-  "sinim": 3105,
-  "infolobby": 60523,
-  "infoprobidad": 15331,
-  "contraloria": 291,
-  "camara": 19025,
-  "senado": 8138,
-  "servel": 23894,
-  "personal-apoyo": 4092,
-  "ine-censo-2024": 346,
-};
+export const SOURCE_HISTORICAL_COUNTS: Record<string, number> = Object.fromEntries(
+  getDataQualityConfig().map((source) => [source.id, source.historicalCount]),
+);
 
 export async function listPublishedSourceManifests(): Promise<SourceManifest[]> {
   const base = await listSourceManifests();

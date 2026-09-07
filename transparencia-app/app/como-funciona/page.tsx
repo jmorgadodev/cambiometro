@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listPublishedSourceManifests } from "@/lib/published-sources";
+import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
 import Icono, { type IconoNombre } from "@/components/ui/Icono";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
 
@@ -14,29 +14,33 @@ export const metadata: Metadata = {
 const PILARES: { icon: IconoNombre; title: string; text: string }[] = [
   {
     icon: "organismo",
-    title: "Fuentes Primarias Oficiales",
-    text: "Compilamos información exclusivamente desde portales públicos del Estado (Cámara de Diputadas y Diputados, Senado, ChileCompra, DIPRES, Contraloría General y CPLT). No usamos notas de prensa ni datos no verificados.",
+    title: "1. Recolectamos",
+    text: "Consultamos portales oficiales y fuentes documentales autorizadas. En Movimientos, una fuente periodística puede generar una señal provisional, separada de la confirmación oficial.",
   },
   {
     icon: "etl",
-    title: "Consolidación Inteligente",
-    text: "Cruzamos nóminas, votaciones de sala, asistencias, gastos operacionales y personal de apoyo en dashboards visuales, interactivos y listos para entender sin tecnicismos.",
+    title: "2. Versionamos",
+    text: "Conservamos corte, período, identificador, procedencia y checksum para que cada publicación pueda compararse con su release anterior.",
   },
   {
     icon: "datos",
-    title: "Actualización Permanente",
-    text: "Monitoreamos las publicaciones periódicas oficiales de cada organismo para mantener los datos de parlamentarios, partidos y municipios siempre al día.",
+    title: "3. Normalizamos",
+    text: "Limpiamos formatos de nombres, fechas y montos sin borrar el valor original ni convertir una observación de la fuente en un dato inventado.",
   },
   {
     icon: "principios",
-    title: "Rigor y Neutralidad",
-    text: "Presentamos los hechos y registros tal como son publicados por las entidades públicas, sin juicios de valor arbitrarios ni inferencias no sustentadas.",
+    title: "4. Validamos",
+    text: "Revisamos duplicados, fechas, montos, identificadores, cobertura, frescura y observaciones de calidad antes de publicar.",
+  },
+  {
+    icon: "datos",
+    title: "5. Publicamos",
+    text: "Entregamos chunks estáticos, R2 y consultas paginadas del Worker. El navegador nunca descarga un universo completo para mostrar una tabla.",
   },
 ];
 
 export default async function HowItWorksPage() {
-  const sources = await listPublishedSourceManifests();
-  const operationalSources = sources.filter((s) => s.recordCount > 0);
+  const { sources, summary } = await getDataQualityDashboardData();
 
   return (
     <div className="page-shell" style={{ minHeight: "100vh" }}>
@@ -117,7 +121,7 @@ export default async function HowItWorksPage() {
               Fuentes Oficiales del Estado de Chile
             </h2>
             <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", margin: 0 }}>
-              Todos los datos presentados provienen de portales de transparencia y datos abiertos de organismos autónomos y gubernamentales.
+              La matriz distingue registros originales, releases normalizados, relaciones documentales y resúmenes agregados. Una señal periodística no se presenta como confirmación oficial hasta contar con respaldo suficiente.
             </p>
           </div>
 
@@ -144,16 +148,38 @@ export default async function HowItWorksPage() {
               >
                 <div>
                   <strong style={{ fontSize: "0.85rem", color: "var(--text-primary)", display: "block" }}>
-                    {s.label}
+                    {s.name}
                   </strong>
                   <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)" }}>{s.organization}</span>
                 </div>
-                <span className="badge badge-ok" style={{ fontSize: "0.68rem" }}>
-                  Oficial
+                <span className={s.statusBadgeClass} style={{ fontSize: "0.68rem" }}>
+                  {s.confidenceLevel === "derived" ? "Derivada" : s.confidenceLevel === "official" ? "Oficial" : s.confidenceLevel}
                 </span>
               </div>
             ))}
           </div>
+
+          <div style={{ overflowX: "auto", marginTop: "1.25rem" }}>
+            <table className="data-table" style={{ width: "100%" }}>
+              <thead><tr><th>Fuente</th><th>Frecuencia / corte</th><th>Registros</th><th>Publicado</th><th>Consultable</th><th>Relacionado</th><th>Módulo</th></tr></thead>
+              <tbody>
+                {sources.map((source) => (
+                  <tr key={source.id}>
+                    <td><strong>{source.name}</strong><br /><span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>{source.organization}</span></td>
+                    <td>{source.frequency}<br /><span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>{source.periodoReciente}</span></td>
+                    <td>{source.canonicalCount.toLocaleString("es-CL")}</td>
+                    <td>{source.metrics.published.label}</td>
+                    <td>{source.metrics.queryable.label}</td>
+                    <td>{source.metrics.related.label}</td>
+                    <td><Link prefetch={false} className="data-link" href={source.modulePath}>Explorar →</Link></td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+          <p style={{ margin: "1rem 0 0", color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: 1.5 }}>
+            La plataforma tiene {summary.totalFuentes} fuentes en el catálogo. “No calculable” significa que el release actual no publica evidencia suficiente para afirmar una cobertura, no que la fuente esté vacía.
+          </p>
         </section>
 
         {/* CTA de exploración */}

@@ -41,6 +41,35 @@ function toTitleCase(str) {
     return str.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 }
 
+function normalizeFuncionarioName(rawValue) {
+    const original = String(rawValue ?? '').replace(/\s+/g, ' ').trim();
+    const tokens = original ? original.split(' ') : [];
+    const incidencias = [];
+    let removedPunctuation = false;
+    let removedNumeric = false;
+    while (tokens.length > 0 && (/^[.,;:/|_\-]+$/u.test(tokens[0]) || /^\d+$/u.test(tokens[0]))) {
+        if (/^[.,;:/|_\-]+$/u.test(tokens[0])) removedPunctuation = true;
+        if (/^\d+$/u.test(tokens[0])) removedNumeric = true;
+        tokens.shift();
+    }
+    if (removedPunctuation) incidencias.push('nombre_prefijo_invalido');
+    if (removedNumeric) incidencias.push('nombre_prefijo_numerico');
+    const nombre = tokens.join(' ');
+    const alphaTokens = nombre.split(' ').map((token) => token.replace(/[^\p{L}]/gu, '')).filter(Boolean);
+    if (!nombre) incidencias.push('nombre_vacio');
+    else if (alphaTokens.length < 2) incidencias.push('nombre_incompleto');
+    return {
+        nombre,
+        original,
+        incidencias,
+        calidad_datos: {
+            estado: incidencias.length ? 'normalizado' : 'original',
+            incidencias,
+            detalle: incidencias.length ? 'Se corrigió sólo formato inequívoco de la fuente; no se infirieron nombres.' : ''
+        }
+    };
+}
+
 async function processMunicipalCSV(filePath, muniId, tipoCode) {
     const fileStream = fs.createReadStream(filePath).pipe(iconv.decodeStream('win1252'));
     const rl = readline.createInterface({ input: fileStream, crlfDelay: Infinity });
@@ -60,7 +89,8 @@ async function processMunicipalCSV(filePath, muniId, tipoCode) {
         if (isNaN(year) || year < 2024) continue;
 
         const cargo = toTitleCase(cols[14]);
-        const nombre_completo = toTitleCase(`${cols[9]} ${cols[10]} ${cols[11]}`.trim().replace(/\s+/g, ' '));
+        const nombreNormalizado = normalizeFuncionarioName(toTitleCase(`${cols[9]} ${cols[10]} ${cols[11]}`.trim().replace(/\s+/g, ' ')));
+        const nombre_completo = nombreNormalizado.nombre;
         const month = parseInt(cols[7]?.trim(), 10) || 0;
 
         const he_diurnas = parseFloatCl(cols[30]);
@@ -69,6 +99,15 @@ async function processMunicipalCSV(filePath, muniId, tipoCode) {
         const p_diurnas = parseFloatCl(cols[29]);
         const p_nocturnas = parseFloatCl(cols[32]);
         const p_festivas = parseFloatCl(cols[35]);
+        const remuneracionBruta = parseFloatCl(cols[18]);
+        const remuneracionLiquidaOriginal = parseFloatCl(cols[20]);
+        const liquidNoInformada = remuneracionBruta > 0 && remuneracionLiquidaOriginal <= 0;
+        if (liquidNoInformada) nombreNormalizado.incidencias.push('remuneracion_liquida_no_informada');
+        nombreNormalizado.calidad_datos.estado = nombreNormalizado.incidencias.length ? 'normalizado' : 'original';
+        nombreNormalizado.calidad_datos.incidencias = nombreNormalizado.incidencias;
+        nombreNormalizado.calidad_datos.detalle = nombreNormalizado.incidencias.length
+            ? 'Se corrigió sólo formato inequívoco de la fuente; el valor líquido cero se conserva como original y se muestra como no informado.'
+            : '';
 
         const funcId = `func-${muniId}-muni-${tipoCode}-${linesProcessed}`;
 
@@ -81,13 +120,16 @@ async function processMunicipalCSV(filePath, muniId, tipoCode) {
         const funcionario = {
             id: funcId,
             nombre_completo,
+            ...(nombreNormalizado.nombre !== nombreNormalizado.original ? { nombre_completo_original: nombreNormalizado.original } : {}),
+            calidad_datos: nombreNormalizado.calidad_datos,
             organo_nombre: cols[3]?.trim() || muniId,
             organo_tipo: "municipalidad",
             cargo,
             estamento: toTitleCase(cols[8]),
             tipo_contrato: tipoStr,
-            remuneracion_bruta_mensual: parseFloatCl(cols[18]),
-            remuneracion_liquida_mensual: parseFloatCl(cols[20]),
+            remuneracion_bruta_mensual: remuneracionBruta,
+            remuneracion_liquida_mensual: liquidNoInformada ? null : remuneracionLiquidaOriginal,
+            ...(liquidNoInformada ? { remuneracion_liquida_mensual_original: remuneracionLiquidaOriginal } : {}),
             fecha_ingreso: parseDateCl(cols[37]),
             fecha_termino: parseDateCl(cols[38]),
             horas_extras_diurnas_hrs: he_diurnas,
