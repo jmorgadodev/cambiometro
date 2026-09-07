@@ -3892,6 +3892,164 @@ html.dark .page-masthead {
   }
 }
 
+/* ═══════════════════════════════════════════════════════════
+   PANEL REGIONAL MUNICIPAL
+   Lectura de territorio antes del detalle de cada ficha.
+═══════════════════════════════════════════════════════════ */
+.municipal-regional-panel {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.municipal-regional-header {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 1.5rem 1.6rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.municipal-panel-kicker,
+.municipal-panel-section-heading > div > span {
+  color: var(--accent);
+  font-size: .62rem;
+  font-weight: 800;
+  letter-spacing: .14em;
+  text-transform: uppercase;
+}
+
+.municipal-regional-header h2 {
+  margin: .3rem 0 .25rem;
+  color: var(--text-1);
+  font-size: clamp(1.3rem, 2vw, 1.8rem);
+  letter-spacing: -.03em;
+}
+
+.municipal-regional-header p {
+  max-width: 42rem;
+  margin: 0;
+  color: var(--text-2);
+  font-size: .82rem;
+}
+
+.municipal-panel-detail-link,
+.municipal-expanded-all {
+  color: var(--link);
+  font-size: .74rem;
+  font-weight: 750;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.municipal-panel-detail-link:hover,
+.municipal-expanded-all:hover { text-decoration: underline; }
+
+.municipal-regional-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(19rem, .8fr);
+  gap: 1.25rem;
+  padding: 1.25rem;
+}
+
+.municipal-regions-column,
+.municipal-rankings-column { min-width: 0; }
+
+.municipal-panel-section-heading {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: .8rem;
+  margin-bottom: .75rem;
+}
+
+.municipal-panel-section-heading > div { display: flex; align-items: baseline; gap: .55rem; }
+.municipal-panel-section-heading h3 { margin: 0; color: var(--text-1); font-size: .95rem; }
+.municipal-panel-section-heading > small { color: var(--text-3); font-size: .68rem; text-align: right; }
+
+.municipal-region-cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: .6rem; }
+
+.municipal-region-card {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 9px;
+  background: var(--surface);
+  transition: border-color .18s ease, background-color .18s ease;
+}
+
+.municipal-region-card:hover,
+.municipal-region-card.is-selected { border-color: var(--accent); background: var(--surface-2); }
+
+.municipal-region-card-trigger {
+  display: grid;
+  width: 100%;
+  gap: .7rem;
+  padding: .85rem;
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.municipal-region-card-heading,
+.municipal-region-card-values,
+.municipal-region-card-action { display: flex; align-items: center; justify-content: space-between; gap: .6rem; }
+.municipal-region-card-heading strong { color: var(--text-1); font-size: .82rem; }
+.municipal-region-card-heading b { color: var(--accent); font-size: .64rem; font-weight: 750; white-space: nowrap; }
+.municipal-region-card-values { align-items: start; justify-content: start; gap: .8rem; }
+.municipal-region-card-values span { display: grid; gap: .12rem; min-width: 0; }
+.municipal-region-card-values small { color: var(--text-3); font-size: .58rem; }
+.municipal-region-card-values strong { overflow: hidden; color: var(--text-1); font-size: .7rem; text-overflow: ellipsis; white-space: nowrap; }
+.municipal-region-card-action { justify-content: flex-start; color: var(--link); font-size: .66rem; font-weight: 750; }
+.municipal-region-card-action b { margin-left: auto; color: var(--accent); font-size: 1rem; font-weight: 500; }
+
+.municipal-region-expanded { display: grid; gap: .65rem; padding: .85rem; border-top: 1px solid var(--border); background: color-mix(in srgb, var(--accent) 5%, var(--surface)); }
+.municipal-expanded-heading { display: flex; align-items: baseline; justify-content: space-between; gap: .5rem; }
+.municipal-expanded-heading span { color: var(--text-1); font-size: .72rem; font-weight: 800; }
+.municipal-expanded-heading small { color: var(--text-3); font-size: .6rem; }
+.municipal-expanded-list { display: grid; gap: .25rem; }
+.municipal-expanded-list a { display: flex; justify-content: space-between; gap: .6rem; padding: .35rem .45rem; border-radius: 5px; color: var(--text-2); font-size: .68rem; text-decoration: none; }
+.municipal-expanded-list a:hover { background: var(--surface-2); color: var(--link); }
+.municipal-expanded-list b { color: var(--accent); font-size: .62rem; white-space: nowrap; }
+
+.municipal-rankings-column { padding: .95rem; border: 1px solid var(--border); border-radius: 10px; background: var(--surface-2); }
+.municipal-rankings-heading { align-items: center; }
+.municipal-rankings-heading select { min-width: 9.5rem; padding: .4rem .5rem; border: 1px solid var(--border); border-radius: 6px; background: var(--surface); color: var(--text-1); font: inherit; font-size: .68rem; }
+.municipal-rankings-intro { min-height: 2.5rem; margin: 0 0 .8rem; color: var(--text-2); font-size: .7rem; line-height: 1.45; }
+.municipal-ranking-list { display: grid; gap: .15rem; }
+.municipal-ranking-row { display: grid; grid-template-columns: 1.6rem minmax(0, 1fr) auto; align-items: center; gap: .55rem; padding: .6rem .35rem; border-bottom: 1px solid var(--border); color: inherit; text-decoration: none; }
+.municipal-ranking-row:last-child { border-bottom: 0; }
+.municipal-ranking-row:hover { background: var(--surface); }
+.municipal-ranking-index { color: var(--accent); font-size: .68rem; font-weight: 850; }
+.municipal-ranking-content { display: grid; min-width: 0; gap: .1rem; }
+.municipal-ranking-content b { overflow: hidden; color: var(--text-1); font-size: .72rem; text-overflow: ellipsis; white-space: nowrap; }
+.municipal-ranking-content small { color: var(--text-3); font-size: .6rem; }
+.municipal-ranking-content i { display: block; height: .24rem; margin-top: .2rem; overflow: hidden; border-radius: 99px; background: var(--border); }
+.municipal-ranking-content em { display: block; height: 100%; border-radius: inherit; background: var(--accent); }
+.municipal-ranking-row > strong { color: var(--text-1); font-size: .68rem; text-align: right; white-space: nowrap; }
+.municipal-ranking-note { display: grid; gap: .18rem; margin-top: .8rem; padding: .65rem .7rem; border: 1px solid var(--border); border-radius: 7px; background: var(--surface); color: var(--text-2); font-size: .65rem; line-height: 1.4; }
+.municipal-ranking-note b { color: var(--accent); font-size: .68rem; }
+
+@media (max-width: 1050px) {
+  .municipal-regional-layout { grid-template-columns: 1fr; }
+  .municipal-rankings-column { order: -1; }
+}
+
+@media (max-width: 650px) {
+  .municipal-regional-header { align-items: flex-start; flex-direction: column; padding: 1.1rem; }
+  .municipal-regional-layout { padding: .8rem; }
+  .municipal-region-cards { grid-template-columns: 1fr; }
+  .municipal-panel-section-heading { align-items: flex-start; flex-direction: column; }
+  .municipal-panel-section-heading > small { text-align: left; }
+  .municipal-rankings-heading { align-items: stretch; flex-direction: row; }
+  .municipal-rankings-heading select { min-width: 0; max-width: 10rem; }
+}
+
 /* Preview local del mapa territorial: se activa sólo con next dev. */
 .municipal-region-map {
   overflow: hidden;

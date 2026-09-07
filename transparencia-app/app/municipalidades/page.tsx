@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { getMunicipalidadesList, getMunicipalidadesStats } from "@/lib/municipalidades-list";
-import { getMunicipalidadesWithCentroids } from "@/lib/municipalidades-centroids";
 import { coverageMetric, readGeneratedDataQualitySummary } from "@/lib/data-quality-summary";
 import MunicipalidadesExplorerClient from "@/components/municipalidades/MunicipalidadesExplorerClient";
 
@@ -23,7 +22,7 @@ export const metadata: Metadata = {
 };
 
 export default function MunicipalidadesPage() {
-  const allData = getMunicipalidadesWithCentroids(getMunicipalidadesList());
+  const allData = getMunicipalidadesList();
   const stats = getMunicipalidadesStats();
   const dataSummary = readGeneratedDataQualitySummary();
   const municipalSources = dataSummary.sources.filter((source) => ["sinim", "ine-censo-2024", "transparencia-activa", "chilecompra"].includes(source.id));

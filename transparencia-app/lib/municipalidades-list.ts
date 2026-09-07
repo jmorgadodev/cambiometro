@@ -7,8 +7,6 @@ export interface MunicipalidadListItem {
   region: string;
   tiene_municipalidad_propia: boolean;
   poblacion_censo_2024: number | null;
-  latitud?: number | null;
-  longitud?: number | null;
   presupuesto_per_capita_clp?: number | null;
   fcm_dependencia_pct?: number | null;
   partido_alcalde: string | null;

@@ -8,7 +8,7 @@ import { getPartidoConfig } from "@/lib/partidos.config";
 import ShareButton from "@/components/ShareButton";
 import type { CoverageMetric, DataQualityStatus } from "@/lib/data-quality-summary";
 import ReleaseMetaCard from "@/components/data/ReleaseMetaCard";
-import MunicipalidadesRegionMap from "@/components/municipalidades/MunicipalidadesRegionMap";
+import MunicipalidadesRegionalPanel from "@/components/municipalidades/MunicipalidadesRegionalPanel";
 
 interface MunicipalidadesExplorerClientProps {
   initialData: MunicipalidadListItem[];
@@ -113,15 +113,9 @@ export default function MunicipalidadesExplorerClient({
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [showCharts, setShowCharts] = useState(true);
 
-  const isLocalMapPreview = process.env.NODE_ENV === "development";
-
-  function handleMapRegionSelect(region: string) {
+  function handleRegionalPanelSelect(region: string) {
     setRegionFilter(region);
     setPage(1);
-  }
-
-  function handleMapCommuneSelect(municipalityId: string) {
-    router.push(`/municipalidades/${municipalityId}`);
   }
 
   // Regiones y Partidos únicos
@@ -656,16 +650,13 @@ export default function MunicipalidadesExplorerClient({
         />
       </div>
 
-      {isLocalMapPreview && (
-        <div className="container-main" style={{ marginTop: "1rem" }}>
-          <MunicipalidadesRegionMap
-            municipalities={initialData}
-            selectedRegion={regionFilter}
-            onRegionSelect={handleMapRegionSelect}
-            onCommuneSelect={handleMapCommuneSelect}
-          />
-        </div>
-      )}
+      <div className="container-main" style={{ marginTop: "1rem" }}>
+        <MunicipalidadesRegionalPanel
+          municipalities={initialData}
+          selectedRegion={regionFilter}
+          onRegionSelect={handleRegionalPanelSelect}
+        />
+      </div>
 
       {/* ═══ 2. GRÁFICAS COMPARATIVAS (COLAPSABLES) ═══════════════════════════ */}
       <div className="container-main" style={{ marginTop: "2rem" }}>
