@@ -30,12 +30,20 @@ export default function MunicipalidadesPage() {
     source: "SINIM, Censo 2024, CPLT y ChileCompra",
     period: municipalSources.map((source) => source.period).filter(Boolean).join(" · ") || "Corte publicado",
     lastSuccessAt: dataSummary.generatedAt,
-    status: municipalSources.some((source) => source.status === "no_disponible") ? "parcial" as const : "completo" as const,
+    status: municipalSources.some((source) => source.status === "no_disponible") || (stats.nominaSinDatosCount ?? 0) > 0
+      ? "parcial" as const
+      : "completo" as const,
     published: coverageMetric(allData.length, 346),
     queryable: coverageMetric(allData.length, 346),
     related: coverageMetric(null, null),
     checksumSha256: dataSummary.manifestChecksumSha256 ?? null,
     officialUrl: municipalSources.find((source) => source.id === "sinim")?.officialUrl,
+    payrollCoverage: {
+      published: stats.nominaPublicadaCount ?? 0,
+      unavailable: stats.nominaSinDatosCount ?? 0,
+      notApplicable: stats.territorioNoAplicableCount ?? 0,
+      totalTerritories: allData.length,
+    },
   };
 
   return (

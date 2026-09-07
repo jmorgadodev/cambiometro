@@ -1367,6 +1367,38 @@ async function search(requestUrl: URL, env: Env) {
   return success({ autoridades: data.filter((item) => item.type === "persona").slice(0, 25), municipalidades: data.filter((item) => item.type === "municipalidad").slice(0, 25), funcionarios: [], entidades: data.slice(0, 25) }, { query: raw });
 }
 
+/**
+ * Home search adapter for the national officials release.
+ *
+ * The officials dataset is too large to load into the Worker or browser. The
+ * paginated R2 index resolves the query to positions and reads only the
+ * physical pages containing those positions. This keeps the home search
+ * useful while preserving the R2-first, zero-D1-scan contract.
+ */
+async function searchFuncionariosFromR2(raw: string, env: Env) {
+  const requestUrl = new URL("https://internal.example/api/v1/funcionarios");
+  requestUrl.searchParams.set("q", raw);
+  requestUrl.searchParams.set("limit", "8");
+  requestUrl.searchParams.set("include_zero", "true");
+  try {
+    const response = await listFuncionariosFromR2(requestUrl, env);
+    if (!response || response.status >= 400) return [];
+    const payload = await response.json() as JsonRecord;
+    const rows = Array.isArray(payload.data) ? payload.data : [];
+    return rows.slice(0, 8).map((row) => ({
+      id: String(row.id ?? ""),
+      type: "funcionario" as const,
+      nombre: String(row.nombre_completo ?? ""),
+      url: `/personas?search=${encodeURIComponent(String(row.nombre_completo ?? raw))}`,
+      cargo: row.cargo,
+      organo: row.organo_nombre ?? row.organo_id,
+      region: row.region,
+    })).filter((row) => row.id && row.nombre);
+  } catch {
+    return [];
+  }
+}
+
 async function searchFromR2(requestUrl: URL, env: Env) {
   const raw = requestUrl.searchParams.get("q")?.trim() ?? "";
   if (raw.length < 2 || raw.length > 80) return failure("INVALID_QUERY", "La búsqueda debe tener entre 2 y 80 caracteres.", 400);
@@ -1388,7 +1420,10 @@ async function searchFromR2(requestUrl: URL, env: Env) {
       partido: politico.partido_electoral ?? politico.partido_id,
       region: politico.distrito_region,
     }));
-  const rows = await canonicalEntitiesFromR2(env);
+  const [rows, funcionarios] = await Promise.all([
+    canonicalEntitiesFromR2(env),
+    searchFuncionariosFromR2(raw, env),
+  ]);
   const entities = (rows ?? [])
     .filter((row) => normalize(row.name).includes(needle))
     .slice(0, 75)
@@ -1408,8 +1443,8 @@ async function searchFromR2(requestUrl: URL, env: Env) {
     if (!current || current.url.startsWith("/entidades/")) merged.set(key, item);
   }
   const data = [...merged.values()].slice(0, 75);
-  if (data.length === 0 && !rows) return dbUnavailable();
-  return success({ autoridades: data.filter((item) => item.type === "persona").slice(0, 25), municipalidades: data.filter((item) => item.type === "municipalidad").slice(0, 25), funcionarios: [], entidades: data.slice(0, 25) }, { query: raw, sourceStatus: "r2-catalog" });
+  if (data.length === 0 && funcionarios.length === 0 && !rows) return dbUnavailable();
+  return success({ autoridades: data.filter((item) => item.type === "persona").slice(0, 25), municipalidades: data.filter((item) => item.type === "municipalidad").slice(0, 25), funcionarios, entidades: data.slice(0, 25) }, { query: raw, sourceStatus: "r2-catalog" });
 }
 
 async function listTransferencias(requestUrl: URL, env: Env) {

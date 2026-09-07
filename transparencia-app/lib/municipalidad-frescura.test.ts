@@ -92,6 +92,9 @@ describe("Tarea C v2 & v3: Frescura, Selector Compacto y Reactividad Total por P
     expect(typeof stats.alDiaCount).toBe("number");
     expect(typeof stats.desfasadoCount).toBe("number");
     expect(typeof stats.sinDatosCount).toBe("number");
+    expect(stats.nominaPublicadaCount).toBe(320);
+    expect(stats.nominaSinDatosCount).toBe(25);
+    expect(stats.territorioNoAplicableCount).toBe(1);
   });
 
   it("Invariante de integridad: Vanessa Kaiser mantiene evaluación ALTA y fórmula de exceso +33,7%", () => {

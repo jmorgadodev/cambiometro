@@ -53,6 +53,12 @@ export function getMunicipalidadesStats() {
   const alDiaCount = all.filter((m) => m.estado_frescura === "al_dia").length;
   const desfasadoCount = all.filter((m) => m.estado_frescura === "desfasado").length;
   const sinDatosCount = all.filter((m) => m.estado_frescura === "sin_datos" || !m.estado_frescura).length;
+  // El catálogo territorial y la cobertura de nóminas son métricas distintas:
+  // Antártica pertenece al territorio nacional, pero no tiene municipalidad
+  // propia; no debe presentarse como una fuente CPLT ausente.
+  const territorioNoAplicableCount = all.filter((m) => !m.tiene_municipalidad_propia).length;
+  const nominaSinDatosCount = all.filter((m) => m.tiene_municipalidad_propia && (m.estado_frescura === "sin_datos" || !m.resumen_personal)).length;
+  const nominaPublicadaCount = all.filter((m) => m.tiene_municipalidad_propia && Boolean(m.resumen_personal) && m.estado_frescura !== "sin_datos").length;
 
   return {
     totalComunas: all.length,
@@ -64,6 +70,9 @@ export function getMunicipalidadesStats() {
     alDiaCount,
     desfasadoCount,
     sinDatosCount,
+    nominaPublicadaCount,
+    nominaSinDatosCount,
+    territorioNoAplicableCount,
   };
 }
 
