@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useId } from "react";
+import type { FuncionarioSalaryHistoryPoint } from "@/lib/funcionarios-history";
+
+export type { FuncionarioSalaryHistoryPoint } from "@/lib/funcionarios-history";
 
 export interface FuncionarioDetailRecord {
   id: string;
@@ -36,6 +39,7 @@ export interface FuncionarioDetailRecord {
   totalContratos?: number | null;
   cargosConsolidados?: string[];
   sourceUrl?: string | null;
+  historial?: FuncionarioSalaryHistoryPoint[];
 }
 
 interface Props {
@@ -111,6 +115,83 @@ function DetailRow({ label, value }: { label: string; value: string }) {
       <dt>{label}</dt>
       <dd>{value}</dd>
     </div>
+  );
+}
+
+function SalaryHistory({ history }: { history: FuncionarioSalaryHistoryPoint[] }) {
+  if (history.length === 0) {
+    return (
+      <section className="municipal-staff-dialog-history" aria-label="Historial salarial">
+        <div className="municipal-staff-dialog-history-heading">
+          <div>
+            <span className="eyebrow">EVOLUCIÓN SALARIAL</span>
+            <h3>Historial de nóminas</h3>
+          </div>
+        </div>
+        <p className="municipal-staff-dialog-history-empty">
+          No hay más cortes de nómina cargados para esta persona en el release consultado. No se infiere una evolución con datos que la fuente no publicó.
+        </p>
+      </section>
+    );
+  }
+
+  const max = Math.max(...history.map((point) => point.bruto), 1);
+  const chartWidth = 620;
+  const chartHeight = 190;
+  const padding = { left: 14, right: 14, top: 18, bottom: 24 };
+  const innerWidth = chartWidth - padding.left - padding.right;
+  const innerHeight = chartHeight - padding.top - padding.bottom;
+  const pointCoordinates = history.map((point, index) => ({
+    x: history.length === 1 ? chartWidth / 2 : padding.left + (index / (history.length - 1)) * innerWidth,
+    y: padding.top + innerHeight - (point.bruto / max) * innerHeight,
+  }));
+  const polyline = pointCoordinates.map((point) => `${point.x},${point.y}`).join(" ");
+
+  return (
+    <section className="municipal-staff-dialog-history" aria-labelledby="municipal-history-title">
+      <div className="municipal-staff-dialog-history-heading">
+        <div>
+          <span className="eyebrow">EVOLUCIÓN SALARIAL</span>
+          <h3 id="municipal-history-title">Historial de nóminas</h3>
+          <p>Remuneración bruta informada por corte. Si hubo más de una fila en un mes, se muestra el total de esas filas.</p>
+        </div>
+        <strong>{history.length} {history.length === 1 ? "corte" : "cortes"}</strong>
+      </div>
+
+      <div className="municipal-staff-dialog-history-chart">
+        <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} role="img" aria-label="Evolución de la remuneración bruta por período">
+          {[0, 0.5, 1].map((ratio) => {
+            const y = padding.top + innerHeight - ratio * innerHeight;
+            return <line key={ratio} x1={padding.left} x2={chartWidth - padding.right} y1={y} y2={y} className="municipal-staff-dialog-history-grid" />;
+          })}
+          {history.length > 1 && <polyline points={polyline} className="municipal-staff-dialog-history-line" />}
+          {pointCoordinates.map((point, index) => (
+            <circle key={history[index].periodo} cx={point.x} cy={point.y} r="4" className="municipal-staff-dialog-history-point">
+              <title>{`${history[index].etiqueta}: ${formatCLP(history[index].bruto)}`}</title>
+            </circle>
+          ))}
+        </svg>
+      </div>
+
+      <div className="municipal-staff-dialog-history-table-wrap">
+        <table className="municipal-staff-dialog-history-table">
+          <caption className="sr-only">Detalle del sueldo por nómina</caption>
+          <thead>
+            <tr><th scope="col">Corte</th><th scope="col">Bruto</th><th scope="col">Líquido</th><th scope="col">Horas extra</th></tr>
+          </thead>
+          <tbody>
+            {history.map((point) => (
+              <tr key={point.periodo}>
+                <th scope="row">{point.etiqueta}</th>
+                <td>{formatCLP(point.bruto)}</td>
+                <td>{formatCLP(point.liquido)}</td>
+                <td>{point.horasExtras > 0 ? `${formatNumber(point.horasExtras)} hrs` : "0 hrs"}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
   );
 }
 
@@ -197,6 +278,8 @@ export default function FuncionarioDetailDialog({ record, nombreOrganismo, onClo
               </span>
             </div>
           )}
+
+          <SalaryHistory history={record.historial ?? []} />
 
           <dl className="municipal-staff-dialog-details">
             <DetailRow label="Período informado" value={valueOrFallback(record.fuentePeriodo || record.periodo)} />

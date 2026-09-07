@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { FuncionarioPublico } from "@/lib/funcionarios";
 import {
   formatEstamentoCorto,
@@ -11,6 +11,7 @@ import { classifyFuncionarioRecord, type AnomaliaInfo } from "@/lib/funcionarios
 import { queryStaticFuncionarios } from "@/lib/funcionarios-static";
 import { normalizeFuncionarioRecord, type FuncionarioQualityFilter } from "@/lib/funcionarios-normalization";
 import FuncionarioDetailDialog, { type FuncionarioDetailRecord } from "@/components/municipalidades/FuncionarioDetailDialog";
+import { buildFuncionarioSalaryHistory } from "@/lib/funcionarios-history";
 
 function formatCLP(n: number) {
   return new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(n);
@@ -74,6 +75,9 @@ export default function OrganismoFuncionariosList({
   const [sourceStatus, setSourceStatus] = useState<"api" | "static" | "static-fallback" | "unavailable">("api");
   const [retryNonce, setRetryNonce] = useState(0);
   const [selectedFuncionario, setSelectedFuncionario] = useState<FuncionarioPublico | null>(null);
+  const [payrollCoverage, setPayrollCoverage] = useState<{ expected: number; available: number } | null>(null);
+  const staticRecordsRef = useRef<FuncionarioPublico[]>([]);
+  const staticRecordsCacheRef = useRef<{ organismoId: string; records: FuncionarioPublico[] } | null>(null);
 
   // Calidad de datos forense (Sección 1 y 2)
   const [observadosCount, setObservadosCount] = useState(0);
@@ -119,6 +123,8 @@ export default function OrganismoFuncionariosList({
       setIsLoading(true);
       setErrorMessage(null);
       setSourceStatus("api");
+      staticRecordsRef.current = [];
+      if (staticRecordsCacheRef.current?.organismoId !== organismoId) staticRecordsCacheRef.current = null;
       try {
         const params = new URLSearchParams({
           query: debouncedSearch,
@@ -134,9 +140,28 @@ export default function OrganismoFuncionariosList({
           params.set("periodo", periodo);
         }
         const staticManifest = await fetchJson("/data/funcionarios/manifest.json", 3_000).catch(() => null);
+        if (active && staticManifest) {
+          const expected = Number(staticManifest.expectedMunicipalities ?? 0);
+          const available = Number(staticManifest.availableMunicipalities ?? 0);
+          if (expected > 0) setPayrollCoverage({ expected, available });
+        }
         const staticEntry = staticManifest?.files?.find?.((entry: { id?: string; rows?: number; chunks?: Array<{ path?: string }> }) => entry.id === organismoId && Number(entry.rows) > 0);
         const unavailableEntry = staticManifest?.unavailableMunicipalities?.find?.((entry: { id?: string; status?: string; recordCount?: number }) => entry.id === organismoId);
         const readStatic = async () => {
+          const cached = staticRecordsCacheRef.current;
+          if (cached?.organismoId === organismoId) {
+            staticRecordsRef.current = cached.records;
+            return queryStaticFuncionarios(cached.records, {
+              query: debouncedSearch,
+              contrato: contratoFilter,
+              calidad: qualityFilter,
+              estamento: deptFilter,
+              sortBy,
+              periodo: periodo ?? undefined,
+              page,
+              limit: itemsPerPage,
+            });
+          }
           const chunkPaths = Array.isArray(staticEntry?.chunks)
             ? staticEntry.chunks.map((chunk: { path?: string }) => chunk.path).filter((path: unknown): path is string => typeof path === "string" && path.length > 0)
             : [];
@@ -146,7 +171,10 @@ export default function OrganismoFuncionariosList({
           const payloads = await Promise.all(paths.map((path: string) => fetchJson(path, 8_000)));
           const staticResponse = payloads.flat();
           if (!payloads.every(Array.isArray)) throw new Error("STATIC_PAYROLL_INVALID");
-          return queryStaticFuncionarios(staticResponse, {
+          const normalizedStaticRecords = staticResponse.map((item: FuncionarioPublico) => normalizeFuncionarioRecord(item));
+          staticRecordsCacheRef.current = { organismoId, records: normalizedStaticRecords };
+          staticRecordsRef.current = normalizedStaticRecords;
+          return queryStaticFuncionarios(normalizedStaticRecords, {
             query: debouncedSearch,
             contrato: contratoFilter,
             calidad: qualityFilter,
@@ -273,6 +301,7 @@ export default function OrganismoFuncionariosList({
           fuentePeriodo: selectedFuncionario.fuente_periodo,
           calidad: selectedFuncionario.calidad_datos?.estado,
           calidadDetalle: selectedFuncionario.calidad_datos?.detalle,
+          historial: buildFuncionarioSalaryHistory(staticRecordsRef.current, selectedFuncionario.nombre_completo),
         };
       })()
     : null;
@@ -524,6 +553,12 @@ export default function OrganismoFuncionariosList({
       {sourceStatus === "static" && (
         <div role="status" style={{ marginBottom: "1rem", fontSize: "0.74rem", color: "var(--text-subtle)" }}>
           Fuente: proyección oficial estática generada en el último build.
+        </div>
+      )}
+      {payrollCoverage && payrollCoverage.available < payrollCoverage.expected && (
+        <div className="card-flat" role="note" style={{ marginBottom: "1rem", padding: "0.8rem 1rem", fontSize: "0.78rem", lineHeight: 1.5, color: "var(--text-muted)" }}>
+          <strong style={{ color: "var(--text-primary)" }}>Cobertura real de nóminas:</strong>{" "}
+          el release actual publica registros para {payrollCoverage.available.toLocaleString("es-CL")} de {payrollCoverage.expected.toLocaleString("es-CL")} comunas. Las comunas sin nómina publicada se mantienen como “sin datos publicados”; no se muestran como $0 ni se completan con estimaciones.
         </div>
       )}
       {visibleQualityCount > 0 && (

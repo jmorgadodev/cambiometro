@@ -314,7 +314,47 @@ for (const muni of MUNICIPALIDADES_SEED) {
       estado_frescura = "sin_datos";
     }
 
-    function buildTopRemuneraciones(staffList) {
+    function buildSalaryHistory(name, historySource) {
+      const target = normalizeStr(name);
+      const grouped = new Map();
+      for (const record of historySource) {
+        if (normalizeStr(record.nombre_completo) !== target) continue;
+        const periodo = String(record.fuente_periodo || record.periodo || "").trim();
+        if (!/^\d{4}-(?:0[1-9]|1[0-2])$/.test(periodo)) continue;
+        const current = grouped.get(periodo) || {
+          bruto: 0,
+          liquido: 0,
+          hasLiquido: false,
+          horasExtras: 0,
+          montoHorasExtras: 0,
+          hasMontoHorasExtras: false,
+          registros: 0,
+        };
+        current.bruto += Number(record.remuneracion_bruta_mensual || 0);
+        if (record.remuneracion_liquida_mensual !== null && record.remuneracion_liquida_mensual !== undefined) {
+          current.liquido += Number(record.remuneracion_liquida_mensual || 0);
+          current.hasLiquido = true;
+        }
+        current.horasExtras += Number(record.horas_extras_mes_anterior || 0);
+        if (record.monto_horas_extras_clp !== null && record.monto_horas_extras_clp !== undefined) {
+          current.montoHorasExtras += Number(record.monto_horas_extras_clp || 0);
+          current.hasMontoHorasExtras = true;
+        }
+        current.registros += 1;
+        grouped.set(periodo, current);
+      }
+      return [...grouped.entries()].sort(([left], [right]) => left.localeCompare(right)).map(([periodo, value]) => ({
+        periodo,
+        etiqueta: formatPeriodoEtiqueta(periodo),
+        bruto: Math.round(value.bruto),
+        liquido: value.hasLiquido ? Math.round(value.liquido) : null,
+        horasExtras: Number(value.horasExtras.toFixed(2)),
+        montoHorasExtras: value.hasMontoHorasExtras ? Math.round(value.montoHorasExtras) : null,
+        registros: value.registros,
+      }));
+    }
+
+    function buildTopRemuneraciones(staffList, historySource = regularStaff) {
       const sortedByBruto = staffList
         .filter((f) => Number(f.remuneracion_bruta_mensual || 0) >= 50000)
         .sort((a, b) => Number(b.remuneracion_bruta_mensual || 0) - Number(a.remuneracion_bruta_mensual || 0));
@@ -353,6 +393,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
           formacion: f.formacion || null,
           fuente: f.url || f.fuente || null,
           fuente_periodo: f.fuente_periodo || f.periodo || null,
+          historial_salarial: buildSalaryHistory(name, historySource),
         });
 
         if (topList.length >= 5) break;
@@ -361,11 +402,11 @@ for (const muni of MUNICIPALIDADES_SEED) {
     }
 
     for (const p of validPeriods) {
-      top_remuneraciones_por_periodo[p] = buildTopRemuneraciones(periodGroups.get(p) || []);
+      top_remuneraciones_por_periodo[p] = buildTopRemuneraciones(periodGroups.get(p) || [], regularStaff);
     }
 
     const activeStaff = periodo_cplt_reciente ? periodGroups.get(periodo_cplt_reciente) || regularStaff : regularStaff;
-    top_remuneraciones = buildTopRemuneraciones(activeStaff);
+    top_remuneraciones = buildTopRemuneraciones(activeStaff, regularStaff);
 
     // Dotación completa (M4): 100% de la nómina disponible en la fuente oficial.
     let totalPlanta = 0;

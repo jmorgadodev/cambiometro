@@ -5122,6 +5122,122 @@ html.dark .page-masthead {
 
 .municipal-staff-dialog-callout span { color: var(--text-muted); }
 
+.municipal-staff-dialog-history {
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-surface-2);
+}
+
+.municipal-staff-dialog-history-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.municipal-staff-dialog-history-heading h3 {
+  margin: .25rem 0 .2rem;
+  color: var(--text-primary);
+  font-size: .95rem;
+}
+
+.municipal-staff-dialog-history-heading p {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: .72rem;
+  line-height: 1.45;
+}
+
+.municipal-staff-dialog-history-heading > strong {
+  flex: 0 0 auto;
+  color: var(--accent);
+  font-family: var(--font-mono, ui-monospace, monospace);
+  font-size: .72rem;
+}
+
+.municipal-staff-dialog-history-chart {
+  margin-top: .8rem;
+  padding: .4rem .2rem 0;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.municipal-staff-dialog-history-chart svg {
+  display: block;
+  width: 100%;
+  height: auto;
+  min-height: 10rem;
+}
+
+.municipal-staff-dialog-history-grid {
+  stroke: var(--border);
+  stroke-dasharray: 3 4;
+  stroke-width: 1;
+}
+
+.municipal-staff-dialog-history-line {
+  fill: none;
+  stroke: var(--accent);
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  stroke-width: 3;
+}
+
+.municipal-staff-dialog-history-point {
+  fill: var(--bg-surface);
+  stroke: var(--accent);
+  stroke-width: 3;
+}
+
+.municipal-staff-dialog-history-table-wrap {
+  max-height: 12rem;
+  overflow: auto;
+  margin-top: .45rem;
+}
+
+.municipal-staff-dialog-history-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: .7rem;
+}
+
+.municipal-staff-dialog-history-table th,
+.municipal-staff-dialog-history-table td {
+  padding: .45rem .5rem;
+  border-bottom: 1px solid var(--border-subtle);
+  text-align: right;
+  white-space: nowrap;
+}
+
+.municipal-staff-dialog-history-table th:first-child,
+.municipal-staff-dialog-history-table td:first-child {
+  text-align: left;
+}
+
+.municipal-staff-dialog-history-table thead th {
+  color: var(--text-subtle);
+  font-size: .64rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.municipal-staff-dialog-history-table tbody th {
+  color: var(--text-primary);
+  font-weight: 700;
+}
+
+.municipal-staff-dialog-history-table tbody td { color: var(--text-muted); }
+
+.municipal-staff-dialog-history-empty {
+  margin: .75rem 0 0;
+  padding: .7rem .8rem;
+  border-left: 3px solid var(--border);
+  color: var(--text-muted);
+  font-size: .74rem;
+  line-height: 1.5;
+}
+
 .municipal-staff-dialog-details {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

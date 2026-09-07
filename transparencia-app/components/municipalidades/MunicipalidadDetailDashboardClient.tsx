@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 import Link from "next/link";
 import AccessibleTooltip from "@/components/ui/AccessibleTooltip";
@@ -21,6 +21,8 @@ import OrganismoFuncionariosList from "@/components/OrganismoFuncionariosList";
 import OverviewSignalPanel from "@/components/dashboard/OverviewSignalPanel";
 import FuncionarioDetailDialog, { type FuncionarioDetailRecord } from "@/components/municipalidades/FuncionarioDetailDialog";
 import { getVerifiedMuniRRSS } from "@/lib/municipalidades-rrss";
+import { buildFuncionarioSalaryHistory } from "@/lib/funcionarios-history";
+import type { FuncionarioPublico } from "@/lib/funcionarios";
 
 interface Props {
   muniData: MunicipalidadEnriquecida;
@@ -132,6 +134,7 @@ export default function MunicipalidadDetailDashboardClient({
     "presupuesto" | "personal" | "compras" | "concejo" | "control"
   >("presupuesto");
   const [selectedTopFuncionario, setSelectedTopFuncionario] = useState<TopFuncionarioRemuneracion | null>(null);
+  const [topHistory, setTopHistory] = useState<{ id: string; history: ReturnType<typeof buildFuncionarioSalaryHistory> } | null>(null);
 
   // Estados interactivos para Compras Públicas
   const [comprasSearch, setComprasSearch] = useState("");
@@ -234,6 +237,39 @@ export default function MunicipalidadDetailDashboardClient({
     return muniData.top_remuneraciones ?? [];
   }, [muniData, selectedPeriod]);
 
+  useEffect(() => {
+    let active = true;
+    const selected = selectedTopFuncionario;
+    if (!selected) {
+      setTopHistory(null);
+      return () => { active = false; };
+    }
+    const selectedPerson = selected;
+
+    setTopHistory({ id: selectedPerson.id, history: selectedPerson.historial_salarial ?? [] });
+    async function loadHistory() {
+      try {
+        const manifestResponse = await fetch("/data/funcionarios/manifest.json", { cache: "no-store" });
+        if (!manifestResponse.ok) return;
+        const manifest = await manifestResponse.json() as { files?: Array<{ id?: string; path?: string; chunks?: Array<{ path?: string }> }> };
+        const entry = manifest.files?.find((item) => item.id === muniData.id);
+        const paths = entry?.chunks?.map((chunk) => chunk.path).filter((path): path is string => Boolean(path))
+          ?? (entry?.path ? [entry.path] : []);
+        if (paths.length === 0) return;
+        const responses = await Promise.all(paths.map((path) => fetch(path, { cache: "no-store" })));
+        if (!responses.every((response) => response.ok)) return;
+        const payloads = await Promise.all(responses.map((response) => response.json()));
+        const rows = payloads.flat().filter((row): row is FuncionarioPublico => Boolean(row && typeof row === "object"));
+        const history = buildFuncionarioSalaryHistory(rows, selectedPerson.nombre);
+        if (active && history.length > 0) setTopHistory({ id: selectedPerson.id, history });
+      } catch {
+        // El expediente conserva el historial embebido en el release si la carga bajo demanda falla.
+      }
+    }
+    void loadHistory();
+    return () => { active = false; };
+  }, [muniData.id, selectedTopFuncionario]);
+
   const selectedTopFuncionarioDetail: FuncionarioDetailRecord | null = selectedTopFuncionario
     ? (() => {
         const base = selectedTopFuncionario.sueldo_base ?? null;
@@ -261,6 +297,9 @@ export default function MunicipalidadDetailDashboardClient({
           fuentePeriodo: selectedTopFuncionario.fuente_periodo || selectedTopFuncionario.periodo,
           totalContratos: selectedTopFuncionario.total_contratos_count,
           cargosConsolidados: selectedTopFuncionario.cargos_consolidados,
+          historial: topHistory?.id === selectedTopFuncionario.id
+            ? topHistory.history
+            : selectedTopFuncionario.historial_salarial,
         };
       })()
     : null;
