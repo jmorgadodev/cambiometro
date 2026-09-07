@@ -141,6 +141,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(content).toContain("if: github.event_name == 'workflow_dispatch'");
     expect(content).toContain("runs-on: ubuntu-latest");
     expect(content).toContain("node scripts/check-d1-usage.mjs");
+    expect(content).toContain("D1_USAGE_FAIL_ON_CRITICAL");
     expect(content).not.toMatch(/d1\s+execute|data:materialize|npm\s+run\s+etl/);
     expect(content).toContain("api.github.com/users/$OWNER/settings/billing/actions");
   });

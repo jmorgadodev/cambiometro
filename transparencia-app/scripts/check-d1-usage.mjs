@@ -81,7 +81,10 @@ async function main() {
   if (process.env.GITHUB_STEP_SUMMARY) await appendFile(process.env.GITHUB_STEP_SUMMARY, `${summary}\n`, "utf8");
   console.log(summary);
   if (report.level === "warning") console.log("::warning title=Uso D1 elevado::El consumo alcanzó al menos 60% del límite gratuito diario.");
-  if (report.level === "critical") throw new Error("D1_FREE_TIER_CRITICAL");
+  if (report.level === "critical") {
+    console.log("::error title=Uso D1 crítico::El consumo alcanzó al menos 80% del límite gratuito diario; revisar el resumen y diferir materializaciones.");
+    if (process.env.D1_USAGE_FAIL_ON_CRITICAL !== "false") throw new Error("D1_FREE_TIER_CRITICAL");
+  }
 }
 
 const isCli = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
