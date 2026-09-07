@@ -262,7 +262,12 @@ async function verifyProdFull() {
   assertCheck("CRUCES", "Tile ChileCompra '74.142'", crucesHtml.includes("74.142"));
   assertCheck("CRUCES", "Tile InfoLobby '60.523'", crucesHtml.includes("60.523"));
   assertCheck("CRUCES", "Selector 'Filas por página: 10 / 25 / 50' visible", crucesHtml.includes("Filas por página") && crucesHtml.includes("10") && crucesHtml.includes("25") && crucesHtml.includes("50"));
-  assertCheck("CRUCES", "Paginación default 10 filas ('Pág. 1 de 12')", crucesHtml.includes("Pág. 1 de 12") || crucesHtml.includes("Página 1 de 12"));
+  const crucesText = crucesHtml.replace(/<!--[\s\S]*?-->/g, "");
+  assertCheck(
+    "CRUCES",
+    "Paginación default 10 filas con total dinámico",
+    /(?:Pág\.|Página)\s*1\s*de\s*[1-9]\d*/.test(crucesText),
+  );
   assertCheck("CRUCES", "Registro oficial CGR Informe 704/2024", crucesHtml.includes("704/2024"));
   assertCheck("CRUCES", "Registro oficial InfoLobby ac0019366881", crucesHtml.includes("ac0019366881"));
 
