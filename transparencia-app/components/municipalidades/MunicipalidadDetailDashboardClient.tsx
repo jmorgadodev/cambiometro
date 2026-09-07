@@ -74,7 +74,10 @@ function getTopOvertimeAmount(record: TopFuncionarioRemuneracion) {
 
 function formatServiceYears(fechaIngreso?: string | null, periodo?: string | null) {
   if (!fechaIngreso) return "No informado";
-  const start = new Date(fechaIngreso);
+  const calendarDate = /^(\d{4})-(\d{2})-(\d{2})$/.exec(fechaIngreso);
+  const start = calendarDate
+    ? new Date(Number(calendarDate[1]), Number(calendarDate[2]) - 1, Number(calendarDate[3]))
+    : new Date(fechaIngreso);
   if (Number.isNaN(start.getTime())) return "No informado";
   const reference = /^\d{4}-\d{2}$/.test(periodo || "")
     ? (() => {

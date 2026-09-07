@@ -58,15 +58,22 @@ function formatNumber(value?: number | null) {
   return value.toLocaleString("es-CL");
 }
 
+function parseCalendarDate(value: string) {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  return match
+    ? new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]))
+    : new Date(value);
+}
+
 function formatDate(value?: string | null) {
   if (!value) return "No informado";
-  const date = new Date(value);
+  const date = parseCalendarDate(value);
   return Number.isNaN(date.getTime()) ? value : date.toLocaleDateString("es-CL");
 }
 
 function formatServiceYears(fechaIngreso?: string | null, periodo?: string | null) {
   if (!fechaIngreso) return "No informado";
-  const start = new Date(fechaIngreso);
+  const start = parseCalendarDate(fechaIngreso);
   if (Number.isNaN(start.getTime())) return "No informado";
   const reference = /^\d{4}-\d{2}$/.test(periodo || "")
     ? (() => {
