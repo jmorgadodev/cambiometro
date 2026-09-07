@@ -18,7 +18,7 @@ function formatCompact(value: number | null, unit: string): string {
   if (value === null || !Number.isFinite(value)) return "Sin dato";
   if (unit === "percent") return `${value.toLocaleString("es-CL", { maximumFractionDigits: 1 })}%`;
   if (unit === "currency") {
-    if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toLocaleString("es-CL", { maximumFractionDigits: 1 })} mil MM`;
+    if (value >= 1_000_000_000) return `$${(value / 1_000_000_000).toLocaleString("es-CL", { maximumFractionDigits: 1 })} mil millones`;
     if (value >= 1_000_000) return `$${Math.round(value / 1_000_000).toLocaleString("es-CL")} MM`;
     return `$${Math.round(value).toLocaleString("es-CL")}`;
   }
