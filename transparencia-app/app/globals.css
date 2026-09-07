@@ -3997,7 +3997,7 @@ html.dark .page-masthead {
 .municipal-kpi-card > div:first-child {
   display: flex;
   min-height: 2.2rem;
-  align-items: flex-start;
+  align-items: center;
   justify-content: center;
   gap: .35rem;
   text-align: center;
@@ -4091,7 +4091,7 @@ html.dark .page-masthead {
   display: flex;
   min-height: 7rem;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: .3rem;
   padding: .85rem 1rem;
   border: 1px solid var(--border);
@@ -4099,7 +4099,7 @@ html.dark .page-masthead {
   background: var(--surface-2);
   color: var(--text-1);
   cursor: pointer;
-  text-align: left;
+  text-align: center;
   transition: border-color .18s ease, transform .18s ease;
 }
 

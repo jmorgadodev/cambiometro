@@ -393,10 +393,10 @@ export default function MunicipalidadDetailDashboardClient({
                 fontFamily: "monospace",
                 fontSize: "1.45rem",
                 fontWeight: 900,
-                color: "var(--ok)",
+                color: alcalde?.remuneracion_bruta ? "var(--ok)" : "var(--text-muted)",
               }}
             >
-              {formatCLP(alcalde?.remuneracion_bruta)}
+              {alcalde?.remuneracion_bruta ? formatCLP(alcalde.remuneracion_bruta) : "No publicado"}
             </div>
             <div
               style={{
@@ -405,7 +405,7 @@ export default function MunicipalidadDetailDashboardClient({
                 marginTop: "0.25rem",
               }}
             >
-              Alcaldía de {nombreComuna}
+              {alcalde?.periodo ? `Corte CPLT ${alcalde.periodo}` : "No hay registro de remuneración en el corte CPLT"}
             </div>
           </div>
 
@@ -683,7 +683,7 @@ export default function MunicipalidadDetailDashboardClient({
                   <strong
                     style={{
                       fontFamily: "monospace",
-                      color: "var(--ok)",
+                color: alcalde?.remuneracion_bruta ? "var(--ok)" : "var(--text-muted)",
                       fontSize: "0.95rem",
                     }}
                   >
@@ -1093,32 +1093,36 @@ export default function MunicipalidadDetailDashboardClient({
                       margin: "0.35rem 0 0",
                     }}
                   >
-                    {alcalde?.nombre || "Alcaldía en ejercicio"}
+                    {alcalde?.nombre || "Dato de alcaldía no publicado"}
                   </h3>
                 </div>
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "0.35rem",
-                    padding: "0.2rem 0.55rem",
-                    borderRadius: 6,
-                    fontSize: "0.72rem",
-                    fontWeight: 800,
-                    color: "var(--surface)",
-                    backgroundColor: brandingAlcalde.color_oficial,
-                  }}
-                >
-                  {brandingAlcalde.logo_url && (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={brandingAlcalde.logo_url}
-                      alt={brandingAlcalde.sigla}
-                      style={{ width: 14, height: 14, borderRadius: 2, objectFit: "contain" }}
-                    />
-                  )}
-                  {brandingAlcalde.sigla || brandingAlcalde.nombre}
-                </span>
+                {alcalde ? (
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.35rem",
+                      padding: "0.2rem 0.55rem",
+                      borderRadius: 6,
+                      fontSize: "0.72rem",
+                      fontWeight: 800,
+                      color: "var(--surface)",
+                      backgroundColor: brandingAlcalde.color_oficial,
+                    }}
+                  >
+                    {brandingAlcalde.logo_url && (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={brandingAlcalde.logo_url}
+                        alt={brandingAlcalde.sigla}
+                        style={{ width: 14, height: 14, borderRadius: 2, objectFit: "contain" }}
+                      />
+                    )}
+                    {brandingAlcalde.sigla || brandingAlcalde.nombre}
+                  </span>
+                ) : (
+                  <span className="badge">Sin registro</span>
+                )}
               </div>
 
               <div
@@ -1148,7 +1152,7 @@ export default function MunicipalidadDetailDashboardClient({
                       marginTop: "0.15rem",
                     }}
                   >
-                    {formatCLP(alcalde?.remuneracion_bruta)}
+                    {alcalde?.remuneracion_bruta ? formatCLP(alcalde.remuneracion_bruta) : "No publicado"}
                   </div>
                 </div>
 
@@ -1171,7 +1175,7 @@ export default function MunicipalidadDetailDashboardClient({
                       marginTop: "0.15rem",
                     }}
                   >
-                    {formatCLP(alcalde?.remuneracion_liquida)}
+                    {alcalde?.remuneracion_liquida ? formatCLP(alcalde.remuneracion_liquida) : "No publicado"}
                   </div>
                 </div>
               </div>
@@ -1187,7 +1191,7 @@ export default function MunicipalidadDetailDashboardClient({
                 }}
               >
                 <div>
-                  <strong>Grado EUS:</strong> Grado {alcalde?.grado_eus || "1"}
+                  <strong>Grado EUS:</strong> {alcalde?.grado_eus ? `Grado ${alcalde.grado_eus}` : "No publicado"}
                 </div>
                 {alcalde?.formacion && (
                   <div>

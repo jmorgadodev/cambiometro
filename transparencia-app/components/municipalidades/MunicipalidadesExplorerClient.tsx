@@ -692,9 +692,9 @@ export default function MunicipalidadesExplorerClient({
           <div className="municipal-compliance-heading">
             <div>
               <div className="municipal-panel-kicker">Transparencia activa · CPLT</div>
-              <h2 id="municipal-compliance-title">Actualización mensual de nóminas</h2>
+              <h2 id="municipal-compliance-title">¿Cuándo se actualiza el personal municipal?</h2>
               <p>
-                El corte consultado se actualiza mensualmente. Aquí distinguimos una nómina publicada dentro del criterio de frescura, una nómina atrasada y la ausencia de un registro consultable.
+                Las nóminas se publican una vez al mes. Este resumen indica en qué comunas hay una nómina disponible en el corte actual y en cuáles todavía no podemos consultar ese registro.
               </p>
             </div>
             <span className="badge badge-info">Frecuencia: mensual</span>
@@ -702,24 +702,24 @@ export default function MunicipalidadesExplorerClient({
 
           <div className="municipal-compliance-states">
             <button type="button" onClick={() => handleFrescuraSummarySelect("al_dia")}>
-              <span>Al día</span>
+              <span>Con nómina reciente</span>
               <strong>{stats.alDiaCount ?? 0} / 346</strong>
-              <small>Nómina publicada en los últimos 90 días.</small>
+              <small>Hay datos publicados de los últimos 90 días.</small>
             </button>
             <button type="button" onClick={() => handleFrescuraSummarySelect("desfasado")}>
-              <span>Con desfase</span>
+              <span>Con nómina atrasada</span>
               <strong>{stats.desfasadoCount ?? 0}</strong>
-              <small>Existe nómina, pero el corte supera 90 días.</small>
+              <small>Hay datos, pero tienen más de 90 días.</small>
             </button>
             <button type="button" onClick={() => handleFrescuraSummarySelect("sin_datos")}>
-              <span>Sin nómina consultable</span>
+              <span>Sin nómina publicada</span>
               <strong>{stats.sinDatosCount ?? 0}</strong>
-              <small>No hay nómina en el release; no significa cero funcionarios.</small>
+              <small>El corte actual no trae ese registro.</small>
             </button>
           </div>
 
           <p className="municipal-compliance-note">
-            <strong>Cómo leerlo:</strong> “Sin nómina consultable” describe el alcance del release publicado, no prueba por sí solo que una municipalidad haya incumplido la Ley 20.285. El detalle de cada comuna conserva su estado, período y motivo disponible.
+            <strong>Importante:</strong> “Sin nómina publicada” no significa que la comuna tenga cero funcionarios ni demuestra por sí solo un incumplimiento. Sólo indica que ese registro no está disponible en el corte que tenemos. Puedes abrir cada comuna para revisar su período y fuente.
           </p>
         </div>
       </section>
