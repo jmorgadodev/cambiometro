@@ -61,6 +61,16 @@ function formatNum(n?: number | null) {
   return n.toLocaleString("es-CL");
 }
 
+function getTopOvertimeAmount(record: TopFuncionarioRemuneracion) {
+  if (record.horas_extras_monto !== undefined && record.horas_extras_monto !== null) {
+    return record.horas_extras_monto;
+  }
+  if (record.sueldo_base !== undefined && record.sueldo_base !== null) {
+    return Math.max(0, record.remuneracion_bruta - record.sueldo_base);
+  }
+  return 0;
+}
+
 function getModalityBadge(ocid?: string | null, titulo?: string) {
   const oc = (ocid || "").toUpperCase();
   const tit = (titulo || "").toUpperCase();
@@ -1492,7 +1502,7 @@ export default function MunicipalidadDetailDashboardClient({
                         )}
                       </div>
                       <div style={{ fontSize: "0.73rem", color: "var(--text-subtle)", fontFamily: "monospace", marginTop: "0.25rem" }}>
-                        Base {formatCLP(r.sueldo_base ?? r.remuneracion_bruta)} · HH.EE. {formatCLP(r.horas_extras_monto ?? 0)} ({r.horas_extras_hrs ?? 0} hrs) · Total {formatCLP(r.remuneracion_bruta)}
+                        Base {formatCLP(r.sueldo_base ?? r.remuneracion_bruta)} · HH.EE. {formatCLP(getTopOvertimeAmount(r))} ({r.horas_extras_hrs ?? 0} hrs) · Total {formatCLP(r.remuneracion_bruta)}
                       </div>
                     </div>
                     <div style={{ textAlign: "right" }}>
