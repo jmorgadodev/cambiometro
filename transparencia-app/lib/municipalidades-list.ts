@@ -1,4 +1,5 @@
-import municipalidadesListJson from "@/data/municipalidades-list.json";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 export interface MunicipalidadListItem {
   id: string;
@@ -27,7 +28,16 @@ export interface MunicipalidadListItem {
   auditorias_cgr_count?: number;
 }
 
-export const MUNICIPALIDADES_LIST = municipalidadesListJson as unknown as MunicipalidadListItem[];
+let municipalidadesListJson: unknown = [];
+try {
+  municipalidadesListJson = JSON.parse(
+    readFileSync(join(process.cwd(), "data", "municipalidades-list.json"), "utf8"),
+  );
+} catch {
+  // El build estático provee el catálogo; los consumidores de slices no lo cargan en el navegador.
+}
+
+export const MUNICIPALIDADES_LIST = municipalidadesListJson as MunicipalidadListItem[];
 
 export function getMunicipalidadesList(): MunicipalidadListItem[] {
   return MUNICIPALIDADES_LIST;

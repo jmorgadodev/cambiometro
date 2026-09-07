@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 
 import Link from "next/link";
 import AccessibleTooltip from "@/components/ui/AccessibleTooltip";
@@ -19,6 +19,10 @@ import {
 import { getPartidoConfig } from "@/lib/partidos.config";
 import OrganismoFuncionariosList from "@/components/OrganismoFuncionariosList";
 import OverviewSignalPanel from "@/components/dashboard/OverviewSignalPanel";
+import FuncionarioDetailDialog, { type FuncionarioDetailRecord } from "@/components/municipalidades/FuncionarioDetailDialog";
+import { getVerifiedMuniRRSS } from "@/lib/municipalidades-rrss";
+import { buildFuncionarioSalaryHistory } from "@/lib/funcionarios-history";
+import type { FuncionarioPublico } from "@/lib/funcionarios";
 
 interface Props {
   muniData: MunicipalidadEnriquecida;
@@ -60,6 +64,40 @@ function formatNum(n?: number | null) {
   return n.toLocaleString("es-CL");
 }
 
+function getTopOvertimeAmount(record: TopFuncionarioRemuneracion) {
+  if (record.horas_extras_monto !== undefined && record.horas_extras_monto !== null) {
+    return record.horas_extras_monto;
+  }
+  if (record.sueldo_base !== undefined && record.sueldo_base !== null) {
+    return Math.max(0, record.remuneracion_bruta - record.sueldo_base);
+  }
+  return 0;
+}
+
+function formatServiceYears(fechaIngreso?: string | null, periodo?: string | null) {
+  if (!fechaIngreso) return "No informado";
+  const calendarDate = /^(\d{4})-(\d{2})-(\d{2})$/.exec(fechaIngreso);
+  const start = calendarDate
+    ? new Date(Number(calendarDate[1]), Number(calendarDate[2]) - 1, Number(calendarDate[3]))
+    : new Date(fechaIngreso);
+  if (Number.isNaN(start.getTime())) return "No informado";
+  const reference = /^\d{4}-\d{2}$/.test(periodo || "")
+    ? (() => {
+        const [year, month] = (periodo as string).split("-").map(Number);
+        return new Date(year, month, 0);
+      })()
+    : new Date();
+  if (reference < start) return "Aún no iniciado en el corte";
+  let years = reference.getFullYear() - start.getFullYear();
+  let months = reference.getMonth() - start.getMonth();
+  if (reference.getDate() < start.getDate()) months -= 1;
+  if (months < 0) {
+    years -= 1;
+    months += 12;
+  }
+  return `${years} ${years === 1 ? "año" : "años"}${months > 0 ? ` y ${months} ${months === 1 ? "mes" : "meses"}` : ""}`;
+}
+
 function getModalityBadge(ocid?: string | null, titulo?: string) {
   const oc = (ocid || "").toUpperCase();
   const tit = (titulo || "").toUpperCase();
@@ -95,6 +133,8 @@ export default function MunicipalidadDetailDashboardClient({
   const [activeTab, setActiveTab] = useState<
     "presupuesto" | "personal" | "compras" | "concejo" | "control"
   >("presupuesto");
+  const [selectedTopFuncionario, setSelectedTopFuncionario] = useState<TopFuncionarioRemuneracion | null>(null);
+  const [topHistory, setTopHistory] = useState<{ id: string; history: ReturnType<typeof buildFuncionarioSalaryHistory> } | null>(null);
 
   // Estados interactivos para Compras Públicas
   const [comprasSearch, setComprasSearch] = useState("");
@@ -112,7 +152,20 @@ export default function MunicipalidadDetailDashboardClient({
     });
   };
 
-  const alcalde = muniData.alcalde;
+  const verifiedAlcalde = getVerifiedMuniRRSS(muniData.id)?.alcalde_oficial ?? null;
+  const alcalde: AlcaldeData | null = muniData.alcalde ?? (verifiedAlcalde ? {
+    nombre: verifiedAlcalde.nombre,
+    cargo: "Alcalde",
+    estamento: "Alcalde",
+    remuneracion_bruta: null,
+    remuneracion_liquida: null,
+    grado_eus: null,
+    formacion: null,
+    fecha_ingreso: null,
+    fuente: verifiedAlcalde.fuente,
+    periodo: null,
+    partido_alcalde: verifiedAlcalde.partido,
+  } : null);
   const pres = muniData.presupuesto;
   const personal = muniData.resumen_personal;
   const compras = muniData.compras_publicas;
@@ -183,6 +236,71 @@ export default function MunicipalidadDetailDashboardClient({
     }
     return muniData.top_remuneraciones ?? [];
   }, [muniData, selectedPeriod]);
+
+  useEffect(() => {
+    let active = true;
+    const selected = selectedTopFuncionario;
+    if (!selected) {
+      return () => { active = false; };
+    }
+    const selectedPerson = selected;
+
+    async function loadHistory() {
+      try {
+        const manifestResponse = await fetch("/data/funcionarios/manifest.json", { cache: "no-store" });
+        if (!manifestResponse.ok) return;
+        const manifest = await manifestResponse.json() as { files?: Array<{ id?: string; path?: string; chunks?: Array<{ path?: string }> }> };
+        const entry = manifest.files?.find((item) => item.id === muniData.id);
+        const paths = entry?.chunks?.map((chunk) => chunk.path).filter((path): path is string => Boolean(path))
+          ?? (entry?.path ? [entry.path] : []);
+        if (paths.length === 0) return;
+        const responses = await Promise.all(paths.map((path) => fetch(path, { cache: "no-store" })));
+        if (!responses.every((response) => response.ok)) return;
+        const payloads = await Promise.all(responses.map((response) => response.json()));
+        const rows = payloads.flat().filter((row): row is FuncionarioPublico => Boolean(row && typeof row === "object"));
+        const history = buildFuncionarioSalaryHistory(rows, selectedPerson.nombre);
+        if (active && history.length > 0) setTopHistory({ id: selectedPerson.id, history });
+      } catch {
+        // El expediente conserva el historial embebido en el release si la carga bajo demanda falla.
+      }
+    }
+    void loadHistory();
+    return () => { active = false; };
+  }, [muniData.id, selectedTopFuncionario]);
+
+  const selectedTopFuncionarioDetail: FuncionarioDetailRecord | null = selectedTopFuncionario
+    ? (() => {
+        const base = selectedTopFuncionario.sueldo_base ?? null;
+        const amountProvided = selectedTopFuncionario.horas_extras_monto !== undefined && selectedTopFuncionario.horas_extras_monto !== null;
+        const calculatedOvertime = !amountProvided && base !== null
+          ? Math.max(0, selectedTopFuncionario.remuneracion_bruta - base)
+          : null;
+        return {
+          id: selectedTopFuncionario.id,
+          nombre: selectedTopFuncionario.nombre,
+          cargo: selectedTopFuncionario.cargo,
+          tipoContrato: selectedTopFuncionario.tipo_contrato,
+          periodo: selectedTopFuncionario.periodo,
+          sueldoBase: base,
+          remuneracionBruta: selectedTopFuncionario.remuneracion_bruta,
+          remuneracionLiquida: selectedTopFuncionario.remuneracion_liquida,
+          horasExtras: selectedTopFuncionario.horas_extras_hrs,
+          montoHorasExtras: amountProvided ? selectedTopFuncionario.horas_extras_monto : calculatedOvertime,
+          montoHorasExtrasCalculado: !amountProvided && calculatedOvertime !== null,
+          grado: selectedTopFuncionario.grado_eus,
+          formacion: selectedTopFuncionario.formacion,
+          fechaIngreso: selectedTopFuncionario.fecha_ingreso,
+          fechaTermino: selectedTopFuncionario.fecha_termino,
+          fuente: selectedTopFuncionario.fuente || "Transparencia Activa / CPLT",
+          fuentePeriodo: selectedTopFuncionario.fuente_periodo || selectedTopFuncionario.periodo,
+          totalContratos: selectedTopFuncionario.total_contratos_count,
+          cargosConsolidados: selectedTopFuncionario.cargos_consolidados,
+          historial: topHistory?.id === selectedTopFuncionario.id
+            ? topHistory.history
+            : selectedTopFuncionario.historial_salarial,
+        };
+      })()
+    : null;
 
   const desfaseMeses = muniData.desfase_meses ?? null;
   const esDesfasado = desfaseMeses !== null && desfaseMeses > 3;
@@ -393,10 +511,10 @@ export default function MunicipalidadDetailDashboardClient({
                 fontFamily: "monospace",
                 fontSize: "1.45rem",
                 fontWeight: 900,
-                color: "var(--ok)",
+                color: alcalde?.remuneracion_bruta ? "var(--ok)" : "var(--text-muted)",
               }}
             >
-              {formatCLP(alcalde?.remuneracion_bruta)}
+              {alcalde?.remuneracion_bruta ? formatCLP(alcalde.remuneracion_bruta) : "No publicado"}
             </div>
             <div
               style={{
@@ -405,7 +523,7 @@ export default function MunicipalidadDetailDashboardClient({
                 marginTop: "0.25rem",
               }}
             >
-              Alcaldía de {nombreComuna}
+              {alcalde?.periodo ? `Corte CPLT ${alcalde.periodo}` : "No hay registro de remuneración en el corte CPLT"}
             </div>
           </div>
 
@@ -683,7 +801,7 @@ export default function MunicipalidadDetailDashboardClient({
                   <strong
                     style={{
                       fontFamily: "monospace",
-                      color: "var(--ok)",
+                color: alcalde?.remuneracion_bruta ? "var(--ok)" : "var(--text-muted)",
                       fontSize: "0.95rem",
                     }}
                   >
@@ -1093,32 +1211,36 @@ export default function MunicipalidadDetailDashboardClient({
                       margin: "0.35rem 0 0",
                     }}
                   >
-                    {alcalde?.nombre || "Alcaldía en ejercicio"}
+                    {alcalde?.nombre || "Dato de alcaldía no publicado"}
                   </h3>
                 </div>
-                <span
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "0.35rem",
-                    padding: "0.2rem 0.55rem",
-                    borderRadius: 6,
-                    fontSize: "0.72rem",
-                    fontWeight: 800,
-                    color: "var(--surface)",
-                    backgroundColor: brandingAlcalde.color_oficial,
-                  }}
-                >
-                  {brandingAlcalde.logo_url && (
-                    /* eslint-disable-next-line @next/next/no-img-element */
-                    <img
-                      src={brandingAlcalde.logo_url}
-                      alt={brandingAlcalde.sigla}
-                      style={{ width: 14, height: 14, borderRadius: 2, objectFit: "contain" }}
-                    />
-                  )}
-                  {brandingAlcalde.sigla || brandingAlcalde.nombre}
-                </span>
+                {alcalde ? (
+                  <span
+                    style={{
+                      display: "inline-flex",
+                      alignItems: "center",
+                      gap: "0.35rem",
+                      padding: "0.2rem 0.55rem",
+                      borderRadius: 6,
+                      fontSize: "0.72rem",
+                      fontWeight: 800,
+                      color: "var(--surface)",
+                      backgroundColor: brandingAlcalde.color_oficial,
+                    }}
+                  >
+                    {brandingAlcalde.logo_url && (
+                      /* eslint-disable-next-line @next/next/no-img-element */
+                      <img
+                        src={brandingAlcalde.logo_url}
+                        alt={brandingAlcalde.sigla}
+                        style={{ width: 14, height: 14, borderRadius: 2, objectFit: "contain" }}
+                      />
+                    )}
+                    {brandingAlcalde.sigla || brandingAlcalde.nombre}
+                  </span>
+                ) : (
+                  <span className="badge">Sin registro</span>
+                )}
               </div>
 
               <div
@@ -1148,7 +1270,7 @@ export default function MunicipalidadDetailDashboardClient({
                       marginTop: "0.15rem",
                     }}
                   >
-                    {formatCLP(alcalde?.remuneracion_bruta)}
+                    {alcalde?.remuneracion_bruta ? formatCLP(alcalde.remuneracion_bruta) : "No publicado"}
                   </div>
                 </div>
 
@@ -1171,7 +1293,7 @@ export default function MunicipalidadDetailDashboardClient({
                       marginTop: "0.15rem",
                     }}
                   >
-                    {formatCLP(alcalde?.remuneracion_liquida)}
+                    {alcalde?.remuneracion_liquida ? formatCLP(alcalde.remuneracion_liquida) : "No publicado"}
                   </div>
                 </div>
               </div>
@@ -1187,18 +1309,41 @@ export default function MunicipalidadDetailDashboardClient({
                 }}
               >
                 <div>
-                  <strong>Grado EUS:</strong> Grado {alcalde?.grado_eus || "1"}
+                  <strong>Grado EUS:</strong> {alcalde?.grado_eus ? `Grado ${alcalde.grado_eus}` : "No publicado"}
                 </div>
                 {alcalde?.formacion && (
                   <div>
                     <strong>Profesión / Formación:</strong> {alcalde.formacion}
                   </div>
                 )}
+                <div>
+                  <strong>Años de servicio:</strong> {formatServiceYears(alcalde?.fecha_ingreso, alcalde?.periodo)}
+                  {alcalde?.fecha_ingreso && alcalde?.periodo ? " al corte informado" : ""}
+                </div>
               </div>
+
+              {!alcalde?.remuneracion_bruta && (
+                <div className="municipal-missing-data-callout" role="note">
+                  <strong>El sueldo no está publicado en este corte</strong>
+                  <span>
+                    La ficha sí puede identificar a la autoridad, pero el release CPLT disponible no contiene una remuneración positiva asociada a un registro de alcaldía. No mostramos $0 ni estimamos el monto.
+                  </span>
+                  <div>
+                    <button type="button" className="btn btn-secondary" onClick={() => setActiveTab("personal")}>
+                      Revisar nómina completa
+                    </button>{" "}
+                    {muniData.sitio_transparencia_activa && (
+                      <a href={muniData.sitio_transparencia_activa} target="_blank" rel="noopener noreferrer">
+                        Abrir Transparencia Activa ↗
+                      </a>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
 
             {/* Dotación & Composición (M4) */}
-            {currentResumenPersonal && (
+            {currentResumenPersonal ? (
               <div className="card" style={{ padding: "1.5rem" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.2rem" }}>
                   <div
@@ -1342,6 +1487,26 @@ export default function MunicipalidadDetailDashboardClient({
                   </div>
                 )}
               </div>
+            ) : (
+              <div className="card municipal-personnel-empty" style={{ padding: "1.5rem" }}>
+                <div className="section-title" style={{ marginBottom: "0.45rem" }}>
+                  Personal municipal
+                </div>
+                <h3 style={{ margin: 0, color: "var(--text-1)", fontSize: "1.05rem" }}>
+                  No hay una nómina CPLT consultable para este corte
+                </h3>
+                <p style={{ margin: "0.65rem 0 0", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.5 }}>
+                  La fuente se actualiza mensualmente. Este resultado significa que el release disponible no contiene una nómina para {nombreComuna}; no significa que la municipalidad tenga cero funcionarios.
+                </p>
+                <p style={{ margin: "0.65rem 0 0", color: "var(--text-subtle)", fontSize: "0.72rem", lineHeight: 1.5 }}>
+                  Estado del corte: <strong>{muniData.estado_frescura === "sin_datos" ? "sin nómina consultable" : "sin período informado"}</strong>.
+                </p>
+                {muniData.sitio_transparencia_activa && (
+                  <a href={muniData.sitio_transparencia_activa} target="_blank" rel="noreferrer" className="btn btn-ghost" style={{ alignSelf: "flex-start", marginTop: "0.85rem", fontSize: "0.75rem" }}>
+                    Revisar Transparencia Activa ↗
+                  </a>
+                )}
+              </div>
             )}
           </div>
 
@@ -1401,6 +1566,17 @@ export default function MunicipalidadDetailDashboardClient({
                 {topRemuneraciones.map((r, i) => (
                   <div
                     key={r.id || i}
+                    className="municipal-staff-card"
+                    role="button"
+                    tabIndex={0}
+                    aria-label={`Abrir expediente de ${r.nombre}`}
+                    onClick={() => setSelectedTopFuncionario(r)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") {
+                        event.preventDefault();
+                        setSelectedTopFuncionario(r);
+                      }
+                    }}
                     style={{
                       display: "flex",
                       justifyContent: "space-between",
@@ -1427,7 +1603,7 @@ export default function MunicipalidadDetailDashboardClient({
                         )}
                       </div>
                       <div style={{ fontSize: "0.73rem", color: "var(--text-subtle)", fontFamily: "monospace", marginTop: "0.25rem" }}>
-                        Base {formatCLP(r.sueldo_base ?? r.remuneracion_bruta)} · HH.EE. {formatCLP(r.horas_extras_monto ?? 0)} ({r.horas_extras_hrs ?? 0} hrs) · Total {formatCLP(r.remuneracion_bruta)}
+                        Base {formatCLP(r.sueldo_base ?? r.remuneracion_bruta)} · HH.EE. {formatCLP(getTopOvertimeAmount(r))} ({r.horas_extras_hrs ?? 0} hrs) · Total {formatCLP(r.remuneracion_bruta)}
                       </div>
                     </div>
                     <div style={{ textAlign: "right" }}>
@@ -1446,6 +1622,14 @@ export default function MunicipalidadDetailDashboardClient({
               </div>
             )}
           </div>
+
+          {selectedTopFuncionarioDetail && (
+            <FuncionarioDetailDialog
+              record={selectedTopFuncionarioDetail}
+              nombreOrganismo={`Municipalidad de ${nombreComuna}`}
+              onClose={() => setSelectedTopFuncionario(null)}
+            />
+          )}
 
           {/* Nómina Interactiva Completa */}
           <div className="card" style={{ padding: "1.75rem" }}>

@@ -21,6 +21,7 @@ interface Props {
   href: string;
   officialUrl?: string;
   note?: string;
+  compactMetrics?: boolean;
 }
 
 function formatCount(value: number | null | undefined): string {
@@ -48,12 +49,20 @@ export default function ReleaseMetaCard({
   href,
   officialUrl,
   note,
+  compactMetrics = false,
 }: Props) {
   const tone = RELEASE_STATUS_TONES[status];
+  const metrics = [
+    ["Publicado", published.count],
+    ["Consultable", queryable.count],
+    ...(related?.count !== null && related?.count !== undefined
+      ? [["Relacionado", related.count] as [string, number]]
+      : []),
+  ] as Array<[string, number | null | undefined]>;
 
   return (
-    <section className="card" aria-labelledby={`${title}-release-title`} style={{ padding: "1.1rem 1.25rem" }}>
-      <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
+    <section className={`card release-meta-card${compactMetrics ? " release-meta-card--compact" : ""}`} aria-labelledby={`${title}-release-title`} style={{ padding: "1.1rem 1.25rem" }}>
+      <div className="release-meta-heading" style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
         <div>
           <div className="eyebrow" style={{ color: "var(--accent)", marginBottom: "0.25rem" }}>{eyebrow}</div>
           <h2 id={`${title}-release-title`} style={{ margin: 0, fontSize: "1.05rem", color: "var(--text-1)" }}>{title}</h2>
@@ -67,25 +76,35 @@ export default function ReleaseMetaCard({
         </span>
       </div>
 
-      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "0.65rem", marginTop: "0.9rem" }}>
-        {[
-          ["Publicado", published.count],
-          ["Consultable", queryable.count],
-          ["Relacionado", related?.count ?? null],
-        ].map(([label, count]) => (
-          <div key={String(label)} style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: "0.65rem" }}>
-            <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{label}</div>
-            <strong style={{ display: "block", marginTop: "0.18rem", color: "var(--text-1)", fontFamily: "monospace" }}>{formatCount(count as number | null)}</strong>
-          </div>
-        ))}
-      </div>
+      {compactMetrics ? (
+        <div className="release-coverage-summary">
+          <div className="release-coverage-summary-title">Cobertura del catálogo</div>
+          <dl className="release-coverage-line" aria-label="Cobertura del release">
+            {metrics.map(([label, count]) => (
+              <div key={label}>
+                <dt>{label}</dt>
+                <dd>{formatCount(count)}</dd>
+              </div>
+            ))}
+          </dl>
+        </div>
+      ) : (
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: "0.65rem", marginTop: "0.9rem" }}>
+          {metrics.map(([label, count]) => (
+            <div key={String(label)} style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: "0.65rem" }}>
+              <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", textTransform: "uppercase", letterSpacing: "0.04em" }}>{label}</div>
+              <strong style={{ display: "block", marginTop: "0.18rem", color: "var(--text-1)", fontFamily: "monospace" }}>{formatCount(count)}</strong>
+            </div>
+          ))}
+        </div>
+      )}
 
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem 1.25rem", marginTop: "0.8rem", color: "var(--text-muted)", fontSize: "0.72rem" }}>
+      <div className="release-meta-meta" style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem 1.25rem", marginTop: "0.8rem", color: "var(--text-muted)", fontSize: "0.72rem" }}>
         <span>Última publicación: <strong style={{ color: "var(--text-1)" }}>{formatReleaseTimestamp(lastSuccessAt)}</strong></span>
         <span>Checksum: <code style={{ color: toneColor(tone) }}>{shortReleaseChecksum(checksumSha256)}</code></span>
       </div>
-      {note ? <p style={{ margin: "0.7rem 0 0", color: "var(--text-muted)", fontSize: "0.76rem", lineHeight: 1.5 }}>{note}</p> : null}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.7rem", marginTop: "0.85rem" }}>
+      {note ? <p className="release-meta-note" style={{ margin: "0.7rem 0 0", color: "var(--text-muted)", fontSize: "0.76rem", lineHeight: 1.5 }}>{note}</p> : null}
+      <div className="release-meta-actions" style={{ display: "flex", flexWrap: "wrap", gap: "0.7rem", marginTop: "0.85rem" }}>
         <Link prefetch={false} href={href} className="btn btn-secondary" style={{ fontSize: "0.76rem" }}>Explorar registros</Link>
         {officialUrl ? <a href={officialUrl} target="_blank" rel="noreferrer" className="btn btn-ghost" style={{ fontSize: "0.76rem" }}>Fuente oficial ↗</a> : null}
       </div>
