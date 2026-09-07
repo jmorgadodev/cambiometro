@@ -8,6 +8,8 @@ import { getPartidoConfig } from "@/lib/partidos.config";
 import ShareButton from "@/components/ShareButton";
 import dynamic from "next/dynamic";
 import type { MunicipalMapPurchaseMetric } from "@/lib/municipalidades-map";
+import type { CoverageMetric, DataQualityStatus } from "@/lib/data-quality-summary";
+import ReleaseMetaCard from "@/components/data/ReleaseMetaCard";
 
 const MunicipalidadesRegionMap = dynamic(() => import("@/components/municipalidades/MunicipalidadesRegionMap"), {
   ssr: false,
@@ -28,6 +30,17 @@ interface MunicipalidadesExplorerClientProps {
     sinDatosCount?: number;
   };
   purchasesById: Readonly<Record<string, MunicipalMapPurchaseMetric | null>>;
+  release: {
+    source: string;
+    period: string;
+    lastSuccessAt: string;
+    status: DataQualityStatus;
+    published: CoverageMetric;
+    queryable: CoverageMetric;
+    related: CoverageMetric;
+    checksumSha256: string | null;
+    officialUrl?: string;
+  };
 }
 
 function formatCompactCLP(n: number | null | undefined): string {
@@ -61,6 +74,7 @@ export default function MunicipalidadesExplorerClient({
   initialData,
   stats,
   purchasesById,
+  release,
 }: MunicipalidadesExplorerClientProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -621,6 +635,23 @@ export default function MunicipalidadesExplorerClient({
           </div>
         </div>
       </section>
+
+      <div className="container-main" style={{ marginTop: "1rem" }}>
+        <ReleaseMetaCard
+          title="Release territorial consultable"
+          source={release.source}
+          period={release.period}
+          lastSuccessAt={release.lastSuccessAt}
+          status={release.status}
+          published={release.published}
+          queryable={release.queryable}
+          related={release.related}
+          checksumSha256={release.checksumSha256}
+          href="/municipalidades?view=table"
+          officialUrl={release.officialUrl}
+          note="El mapa, la tabla y las fichas utilizan el mismo catálogo validado de 346 comunas. Un indicador sin publicación conserva el estado “Sin dato publicado”; no se convierte en cero."
+        />
+      </div>
 
       <div className="container-main" style={{ marginTop: "2rem" }}>
         <MunicipalidadesRegionMap

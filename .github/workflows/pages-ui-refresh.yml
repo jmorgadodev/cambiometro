@@ -14,6 +14,14 @@ on:
       - "transparencia-app/tsconfig.json"
   workflow_dispatch:
     inputs:
+      deployment_mode:
+        description: "Modo de despliegue: esta tubería sólo acepta ui-only"
+        type: choice
+        required: false
+        default: ui-only
+        options:
+          - ui-only
+          - data-refresh
       publish_pages:
         description: "Publicar el artefacto de interfaz verificado en Pages producción"
         type: boolean
@@ -42,6 +50,17 @@ jobs:
     timeout-minutes: 25
     steps:
       - uses: actions/checkout@v5
+
+      - name: Validar modo ui-only
+        env:
+          DEPLOYMENT_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_mode || 'ui-only' }}
+        run: |
+          if [ "$DEPLOYMENT_MODE" != "ui-only" ]; then
+            echo "ERROR: pages-ui-refresh sólo puede construir releases ui-only." >&2
+            echo "Para datos use pages-static-refresh después de un ETL exitoso." >&2
+            exit 1
+          fi
+          echo "Deployment mode: ui-only (sin ETL y sin escritura en D1 productiva)"
 
       - uses: actions/setup-node@v5
         with:

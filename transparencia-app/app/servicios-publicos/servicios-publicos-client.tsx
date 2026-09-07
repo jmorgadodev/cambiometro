@@ -6,6 +6,8 @@ import Link from "next/link";
 import type { ServicioPublicoEnriquecido } from "@/lib/servicios-publicos-data";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import ShareButton from "@/components/ShareButton";
+import ReleaseMetaCard from "@/components/data/ReleaseMetaCard";
+import type { CoverageMetric, DataQualityStatus } from "@/lib/data-quality-summary";
 
 type ServicioConPolitico = ServicioPublicoEnriquecido & {
   politico_id?: string | null;
@@ -20,6 +22,17 @@ interface Props {
   /** Pre-computed server-side for Cloudflare Workers runtime */
   presupuestoTotalLey?: number;
   gastoDevengado?: number;
+  release: {
+    source: string;
+    period: string;
+    lastSuccessAt: string;
+    status: DataQualityStatus;
+    published: CoverageMetric;
+    queryable: CoverageMetric;
+    related: CoverageMetric;
+    checksumSha256: string | null;
+    officialUrl?: string;
+  };
 }
 
 function formatCLP(n: number) {
@@ -55,6 +68,7 @@ export default function ServiciosPublicosClient({
   totalConPartida,
   presupuestoTotalLey: presupuestoTotalLeyProp,
   gastoDevengado: gastoDevengadoProp,
+  release,
 }: Props) {
   const totalConPresupuestoEfectivo = totalConPartida ?? totalConPresupuesto ?? 0;
   const searchParams = useSearchParams();
@@ -303,6 +317,23 @@ export default function ServiciosPublicosClient({
           </div>
         </div>
       </section>
+
+      <div className="container-main" style={{ marginTop: "1rem" }}>
+        <ReleaseMetaCard
+          title="Release del directorio de servicios públicos"
+          source={release.source}
+          period={release.period}
+          lastSuccessAt={release.lastSuccessAt}
+          status={release.status}
+          published={release.published}
+          queryable={release.queryable}
+          related={release.related}
+          checksumSha256={release.checksumSha256}
+          href="/servicios-publicos?view=table"
+          officialUrl={release.officialUrl}
+          note="La lectura rápida resume presupuesto, dotación, compras, lobby y control. El detalle conserva filtros, paginación y enlaces de evidencia por institución."
+        />
+      </div>
 
       {/* ═══ CONTENIDO Y FILTROS ═══════════════════════════════════════════════ */}
       <div className="container-main" style={{ marginTop: "2rem" }}>

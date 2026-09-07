@@ -11,6 +11,8 @@ import PartidosRankingTable from "@/components/partidos/PartidosRankingTable";
 import TopGastosBancadas, { type TopEquipoDiputado } from "@/components/partidos/TopGastosBancadas";
 import ShareButton from "@/components/ShareButton";
 import { readPublishedCohesion } from "@/lib/cohesion-bancadas";
+import { readGeneratedDataQualitySummary } from "@/lib/data-quality-summary";
+import ReleaseMetaCard from "@/components/data/ReleaseMetaCard";
 
 export const metadata: Metadata = {
   title: "Partidos Políticos y Bancadas 2026-2030 — El Cambiómetro",
@@ -33,6 +35,20 @@ export const metadata: Metadata = {
 export default async function PartidosListPage() {
   const partidos = await getAllPartidosSummary();
   const cohesion = readPublishedCohesion();
+  const dataSummary = readGeneratedDataQualitySummary();
+  const camaraRelease = dataSummary.sources.find((source) => source.id === "camara");
+  const senadoRelease = dataSummary.sources.find((source) => source.id === "senado");
+  const partyRelease = {
+    source: "Cámara de Diputadas y Diputados + Senado",
+    period: [camaraRelease?.period, senadoRelease?.period].filter(Boolean).join(" · ") || "Corte publicado",
+    lastSuccessAt: dataSummary.generatedAt,
+    status: camaraRelease?.status === "completo" && senadoRelease?.status === "completo" ? "completo" as const : "parcial" as const,
+    published: camaraRelease?.metrics.published ?? dataSummary.metrics.published,
+    queryable: camaraRelease?.metrics.queryable ?? dataSummary.metrics.queryable,
+    related: camaraRelease?.metrics.related,
+    checksumSha256: dataSummary.manifestChecksumSha256 ?? null,
+    officialUrl: camaraRelease?.officialUrl ?? senadoRelease?.officialUrl,
+  };
 
   // Partidos no independientes para KPIs
   const partidosInstitucionales = partidos.filter((p) => !p.esIndependiente);
@@ -234,6 +250,23 @@ export default async function PartidosListPage() {
           </div>
         </div>
       </section>
+
+      <div className="container-main" style={{ marginTop: "1rem" }}>
+        <ReleaseMetaCard
+          title="Release parlamentario y de gastos"
+          source={partyRelease.source}
+          period={partyRelease.period}
+          lastSuccessAt={partyRelease.lastSuccessAt}
+          status={partyRelease.status}
+          published={partyRelease.published}
+          queryable={partyRelease.queryable}
+          related={partyRelease.related}
+          checksumSha256={partyRelease.checksumSha256}
+          href="/partidos"
+          officialUrl={partyRelease.officialUrl}
+          note="Un partido sin rendiciones publicadas se muestra como “Sin registros publicados”; no equivale a gasto cero. Las votaciones, bancadas y gastos mantienen la fecha y cobertura de su release."
+        />
+      </div>
 
       {/* ─── MAIN CONTENT ────────────────────────────────────────── */}
       <div className="container-main" style={{ padding: "2.5rem 1.5rem", display: "flex", flexDirection: "column", gap: "2.5rem" }}>
