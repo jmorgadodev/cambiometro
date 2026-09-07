@@ -3891,3 +3891,281 @@ html.dark .page-masthead {
     grid-template-columns: 1fr;
   }
 }
+
+/* Preview local del mapa territorial: se activa sólo con next dev. */
+.municipal-region-map {
+  overflow: hidden;
+  padding: 1.25rem;
+  border-color: var(--border);
+  background: var(--surface);
+}
+
+.municipal-map-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.municipal-map-heading h2 {
+  margin: .2rem 0 .35rem;
+  color: var(--text-primary);
+  font-size: clamp(1.15rem, 2vw, 1.45rem);
+  letter-spacing: -.02em;
+}
+
+.municipal-map-heading p {
+  max-width: 52rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: .84rem;
+  line-height: 1.55;
+}
+
+.municipal-map-heading label {
+  display: grid;
+  min-width: 13rem;
+  gap: .35rem;
+  color: var(--text-muted);
+  font-size: .72rem;
+  font-weight: 800;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+}
+
+.municipal-map-heading select {
+  min-height: 2.5rem;
+  color: var(--text-primary);
+  font-weight: 600;
+  text-transform: none;
+}
+
+.municipal-map-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(20rem, .75fr);
+  gap: 1rem;
+  align-items: stretch;
+  padding-top: 1rem;
+}
+
+.municipal-map-visual {
+  min-width: 0;
+}
+
+.municipal-map-canvas {
+  min-height: 31.25rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.municipal-map-help {
+  display: flex;
+  flex-wrap: wrap;
+  gap: .75rem 1.1rem;
+  padding-top: .65rem;
+  color: var(--text-muted);
+  font-size: .72rem;
+}
+
+.municipal-map-help strong {
+  color: var(--accent);
+}
+
+.municipal-map-inspector {
+  min-width: 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  background: var(--surface-2);
+}
+
+.municipal-map-inspector-kicker {
+  color: var(--accent);
+  font-family: var(--font-mono, monospace);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.municipal-map-inspector h3 {
+  margin: .3rem 0 .45rem;
+  color: var(--text-primary);
+  font-size: 1.18rem;
+}
+
+.municipal-map-inspector-lead {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: .8rem;
+  line-height: 1.55;
+}
+
+.municipal-map-kpis {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .55rem;
+  margin-top: 1rem;
+}
+
+.municipal-map-kpis > div {
+  display: grid;
+  min-width: 0;
+  gap: .15rem;
+  padding: .65rem;
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.municipal-map-kpis strong {
+  overflow: hidden;
+  color: var(--text-primary);
+  font-family: var(--font-mono, monospace);
+  font-size: .86rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.municipal-map-kpis span,
+.municipal-map-communes small,
+.municipal-map-selected-metric small {
+  color: var(--text-muted);
+  font-size: .68rem;
+  line-height: 1.35;
+}
+
+.municipal-map-inspector-note {
+  margin-top: 1rem;
+  padding: .7rem;
+  border-left: 3px solid var(--highlight);
+  background: var(--surface);
+  color: var(--text-muted);
+  font-size: .72rem;
+  line-height: 1.5;
+}
+
+.municipal-map-inspector-title-row,
+.municipal-map-communes-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+}
+
+.municipal-map-inspector-title-row .btn {
+  flex: 0 0 auto;
+  padding: .3rem .55rem;
+  font-size: .7rem;
+}
+
+.municipal-map-selected-metric {
+  display: grid;
+  gap: .15rem;
+  margin: .4rem 0 .85rem;
+  padding-bottom: .85rem;
+  border-bottom: 1px solid var(--border);
+}
+
+.municipal-map-selected-metric strong {
+  color: var(--accent);
+  font-family: var(--font-mono, monospace);
+  font-size: 1.35rem;
+}
+
+.municipal-map-selected-metric span {
+  color: var(--text-primary);
+  font-size: .78rem;
+  font-weight: 700;
+}
+
+.municipal-map-communes-heading {
+  margin: 1rem 0 .5rem;
+  color: var(--text-primary);
+  font-size: .78rem;
+  font-weight: 800;
+}
+
+.municipal-map-communes-heading small {
+  color: var(--text-muted);
+  font-weight: 500;
+}
+
+.municipal-map-communes {
+  max-height: 15.5rem;
+  overflow-y: auto;
+  border-top: 1px solid var(--border);
+}
+
+.municipal-map-communes a {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: .75rem;
+  padding: .55rem 0;
+  border-bottom: 1px solid var(--border);
+  color: var(--text-primary);
+  text-decoration: none;
+}
+
+.municipal-map-communes a:hover,
+.municipal-map-communes a:focus-visible {
+  color: var(--accent);
+}
+
+.municipal-map-communes a > span:first-child {
+  display: grid;
+  min-width: 0;
+  gap: .1rem;
+}
+
+.municipal-map-communes a strong {
+  overflow: hidden;
+  font-size: .76rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.municipal-map-commune-value {
+  flex: 0 0 auto;
+  color: var(--accent);
+  font-family: var(--font-mono, monospace);
+  font-size: .68rem;
+  text-align: right;
+}
+
+.municipal-map-commune-value b {
+  color: var(--highlight);
+}
+
+@media (max-width: 900px) {
+  .municipal-map-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .municipal-map-inspector {
+    min-height: 0;
+  }
+}
+
+@media (max-width: 640px) {
+  .municipal-region-map {
+    padding: .9rem;
+  }
+
+  .municipal-map-heading {
+    display: grid;
+  }
+
+  .municipal-map-heading label {
+    min-width: 0;
+  }
+
+  .municipal-map-canvas {
+    min-height: 22rem;
+  }
+
+  .municipal-map-kpis {
+    grid-template-columns: 1fr 1fr;
+  }
+}

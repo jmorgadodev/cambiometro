@@ -8,6 +8,7 @@ import { getPartidoConfig } from "@/lib/partidos.config";
 import ShareButton from "@/components/ShareButton";
 import type { CoverageMetric, DataQualityStatus } from "@/lib/data-quality-summary";
 import ReleaseMetaCard from "@/components/data/ReleaseMetaCard";
+import MunicipalidadesRegionMap from "@/components/municipalidades/MunicipalidadesRegionMap";
 
 interface MunicipalidadesExplorerClientProps {
   initialData: MunicipalidadListItem[];
@@ -111,6 +112,13 @@ export default function MunicipalidadesExplorerClient({
   const [pageSize, setPageSize] = useState(20);
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [showCharts, setShowCharts] = useState(true);
+
+  const isLocalMapPreview = process.env.NODE_ENV === "development";
+
+  function handleMapRegionSelect(region: string) {
+    setRegionFilter(region);
+    setPage(1);
+  }
 
   // Regiones y Partidos únicos
   const regiones = useMemo(() => {
@@ -643,6 +651,16 @@ export default function MunicipalidadesExplorerClient({
           note="La tabla, las tarjetas y las fichas utilizan el mismo catálogo validado de 346 comunas. Un indicador sin publicación conserva el estado “Sin dato publicado”; no se convierte en cero."
         />
       </div>
+
+      {isLocalMapPreview && (
+        <div className="container-main" style={{ marginTop: "1rem" }}>
+          <MunicipalidadesRegionMap
+            municipalities={initialData}
+            selectedRegion={regionFilter}
+            onRegionSelect={handleMapRegionSelect}
+          />
+        </div>
+      )}
 
       {/* ═══ 2. GRÁFICAS COMPARATIVAS (COLAPSABLES) ═══════════════════════════ */}
       <div className="container-main" style={{ marginTop: "2rem" }}>
