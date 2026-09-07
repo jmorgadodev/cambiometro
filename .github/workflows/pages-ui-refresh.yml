@@ -137,6 +137,22 @@ jobs:
         working-directory: transparencia-app
         run: npm run check:static-input-quality
 
+      - name: Regenerar agregados municipales desde el release CPLT
+        working-directory: transparencia-app
+        run: |
+          node scripts/rebuild-authoritative-municipalidades.mjs
+          node -e '
+            const fs = require("node:fs");
+            const data = JSON.parse(fs.readFileSync("data/municipalidades-data.json", "utf8"));
+            const vitacura = data["muni-vitacura"];
+            const paine = data["muni-paine"];
+            const covered = Object.values(data).filter((item) => Number(item?.resumen_personal?.total_funcionarios || 0) > 0).length;
+            if (covered < 300) throw new Error(`MUNICIPAL_DATA_COVERAGE_REGRESSION:${covered}`);
+            if (vitacura?.alcalde?.nombre !== "Camila Merino Catalan") throw new Error("MUNICIPAL_DATA_VITACURA_MISSING");
+            if (paine?.alcalde?.nombre !== "Rodrigo Contreras Gutierrez") throw new Error("MUNICIPAL_DATA_PAINE_MISSING");
+            console.log(JSON.stringify({ covered, vitacura: vitacura.alcalde.nombre, paine: paine.alcalde.nombre }));
+          '
+
       - name: Guardar snapshot recuperado para próximos cambios de interfaz
         if: steps.data-cache.outputs.cache-hit != 'true'
         uses: actions/cache/save@v4
