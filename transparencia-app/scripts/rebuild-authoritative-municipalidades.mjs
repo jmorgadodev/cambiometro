@@ -11,6 +11,7 @@ import { MUNICIPALIDADES_SEED } from '../lib/municipalidades.ts';
 import { CENSO_2024_OFICIAL } from './census-data.mjs';
 import { findBuyerByVerifiedRut, projectOfficialBuyer } from './etl/r10-chilecompra.mjs';
 import { partitionV7Records } from './etl/v7-quarantine.mjs';
+import { selectBestCpltDirectory } from './etl/municipal-cplt-source.mjs';
 
 const root = process.cwd();
 
@@ -97,13 +98,9 @@ function findChileCompraForMuni(rutJuridico) {
 
 
 // 4. Cargar CPLT Staff Files
-const cpltDirCandidates = [
-  path.join(root, "data", "lake", "projections", "funcionarios-v1"),
-  path.join(root, "data", "lake-cplt", "projections", "funcionarios-v1"),
-  path.join(root, "data", "lake-cplt", "projections", "funcionarios-v1", "current"),
-];
-const cpltDir = cpltDirCandidates.find((candidate) => fs.existsSync(candidate)) ?? cpltDirCandidates[0];
-const cpltFiles = fs.existsSync(cpltDir) ? fs.readdirSync(cpltDir).filter(f => f.startsWith("muni-") && f.endsWith(".json")) : [];
+const cpltSelection = selectBestCpltDirectory(root);
+const cpltDir = cpltSelection?.directory ?? path.join(root, "data", "lake-cplt", "projections", "funcionarios-v1");
+const cpltFiles = cpltSelection?.files ?? [];
 
 const cpltStaffMap = new Map();
 for (const file of cpltFiles) {
@@ -114,7 +111,12 @@ for (const file of cpltFiles) {
   } catch {}
 }
 
-console.log(`Cargados ${cpltStaffMap.size} archivos de personal municipal CPLT.`);
+if (cpltSelection) {
+  console.log(`Seleccionado release CPLT municipal: ${cpltDir}`);
+  console.log(`Cargados ${cpltStaffMap.size} archivos no vacíos de personal municipal CPLT (${cpltSelection.recordCount} registros).`);
+} else {
+  console.log("No se encontró un release CPLT municipal con nóminas no vacías.");
+}
 
 // 5. Las autoridades sólo se incorporan desde filas oficiales CPLT verificables.
 // 6. Ensamblaje Principal de las 346 Municipalidades
@@ -142,7 +144,10 @@ for (const muni of MUNICIPALIDADES_SEED) {
       const bruto = Number(f.remuneracion_bruta_mensual ?? 0);
       const isForbidden = cargo.includes("secretari") || cargo.includes("auxiliar") || cargo.includes("chofer") || cargo.includes("escuela") || cargo.includes("docente");
       if (isForbidden) return false;
-      const isAlcaldeRole = est === "alcalde" || cargo === "alcalde" || cargo === "alcaldesa" || cargo.startsWith("alcalde ") || cargo.startsWith("alcaldesa ");
+      const isAlcaldeRole = est === "alcalde" ||
+        /^(?:alcaldia|alcaldía)\s+alcalde(?:sa)?$/.test(cargo) ||
+        /^(?:alcalde|alcaldesa)$/.test(cargo) ||
+        /^(?:alcalde|alcaldesa)\s+/.test(cargo);
       // El sueldo de una alcaldía no tiene un umbral nacional único. Un corte
       // oficial puede informar menos de $4 millones según comuna, jornada,
       // descuentos o la forma en que la municipalidad publica la nómina.

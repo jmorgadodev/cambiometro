@@ -75,8 +75,8 @@ export default function OrganismoFuncionariosList({
   const [sourceStatus, setSourceStatus] = useState<"api" | "static" | "static-fallback" | "unavailable">("api");
   const [retryNonce, setRetryNonce] = useState(0);
   const [selectedFuncionario, setSelectedFuncionario] = useState<FuncionarioPublico | null>(null);
+  const [staticRecords, setStaticRecords] = useState<FuncionarioPublico[]>([]);
   const [payrollCoverage, setPayrollCoverage] = useState<{ expected: number; available: number } | null>(null);
-  const staticRecordsRef = useRef<FuncionarioPublico[]>([]);
   const staticRecordsCacheRef = useRef<{ organismoId: string; records: FuncionarioPublico[] } | null>(null);
 
   // Calidad de datos forense (Sección 1 y 2)
@@ -123,7 +123,7 @@ export default function OrganismoFuncionariosList({
       setIsLoading(true);
       setErrorMessage(null);
       setSourceStatus("api");
-      staticRecordsRef.current = [];
+      setStaticRecords([]);
       if (staticRecordsCacheRef.current?.organismoId !== organismoId) staticRecordsCacheRef.current = null;
       try {
         const params = new URLSearchParams({
@@ -150,7 +150,7 @@ export default function OrganismoFuncionariosList({
         const readStatic = async () => {
           const cached = staticRecordsCacheRef.current;
           if (cached?.organismoId === organismoId) {
-            staticRecordsRef.current = cached.records;
+            setStaticRecords(cached.records);
             return queryStaticFuncionarios(cached.records, {
               query: debouncedSearch,
               contrato: contratoFilter,
@@ -173,7 +173,7 @@ export default function OrganismoFuncionariosList({
           if (!payloads.every(Array.isArray)) throw new Error("STATIC_PAYROLL_INVALID");
           const normalizedStaticRecords = staticResponse.map((item: FuncionarioPublico) => normalizeFuncionarioRecord(item));
           staticRecordsCacheRef.current = { organismoId, records: normalizedStaticRecords };
-          staticRecordsRef.current = normalizedStaticRecords;
+          setStaticRecords(normalizedStaticRecords);
           return queryStaticFuncionarios(normalizedStaticRecords, {
             query: debouncedSearch,
             contrato: contratoFilter,
@@ -301,7 +301,7 @@ export default function OrganismoFuncionariosList({
           fuentePeriodo: selectedFuncionario.fuente_periodo,
           calidad: selectedFuncionario.calidad_datos?.estado,
           calidadDetalle: selectedFuncionario.calidad_datos?.detalle,
-          historial: buildFuncionarioSalaryHistory(staticRecordsRef.current, selectedFuncionario.nombre_completo),
+          historial: buildFuncionarioSalaryHistory(staticRecords, selectedFuncionario.nombre_completo),
         };
       })()
     : null;

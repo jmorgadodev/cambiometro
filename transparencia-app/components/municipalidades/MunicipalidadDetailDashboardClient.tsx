@@ -241,12 +241,10 @@ export default function MunicipalidadDetailDashboardClient({
     let active = true;
     const selected = selectedTopFuncionario;
     if (!selected) {
-      setTopHistory(null);
       return () => { active = false; };
     }
     const selectedPerson = selected;
 
-    setTopHistory({ id: selectedPerson.id, history: selectedPerson.historial_salarial ?? [] });
     async function loadHistory() {
       try {
         const manifestResponse = await fetch("/data/funcionarios/manifest.json", { cache: "no-store" });

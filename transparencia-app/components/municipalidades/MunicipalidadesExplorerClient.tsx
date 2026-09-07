@@ -3,7 +3,7 @@
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { MunicipalidadListItem } from "@/lib/municipalidades-list";
+import type { MunicipalidadListItem } from "@/lib/municipalidades-list";
 import { getPartidoConfig } from "@/lib/partidos.config";
 import ShareButton from "@/components/ShareButton";
 import type { CoverageMetric, DataQualityStatus } from "@/lib/data-quality-summary";
