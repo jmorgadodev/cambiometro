@@ -1198,7 +1198,7 @@ export default function MunicipalidadDetailDashboardClient({
             </div>
 
             {/* Dotación & Composición (M4) */}
-            {currentResumenPersonal && (
+            {currentResumenPersonal ? (
               <div className="card" style={{ padding: "1.5rem" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.2rem" }}>
                   <div
@@ -1340,6 +1340,26 @@ export default function MunicipalidadDetailDashboardClient({
                       <strong>Declaración parcial:</strong> Este período registra {formatNum(currentResumenPersonal.total_funcionarios)} funcionarios (publicación preliminar o segmentada en la fuente CPLT).
                     </span>
                   </div>
+                )}
+              </div>
+            ) : (
+              <div className="card municipal-personnel-empty" style={{ padding: "1.5rem" }}>
+                <div className="section-title" style={{ marginBottom: "0.45rem" }}>
+                  Personal municipal
+                </div>
+                <h3 style={{ margin: 0, color: "var(--text-1)", fontSize: "1.05rem" }}>
+                  No hay una nómina CPLT consultable para este corte
+                </h3>
+                <p style={{ margin: "0.65rem 0 0", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.5 }}>
+                  La fuente se actualiza mensualmente. Este resultado significa que el release disponible no contiene una nómina para {nombreComuna}; no significa que la municipalidad tenga cero funcionarios.
+                </p>
+                <p style={{ margin: "0.65rem 0 0", color: "var(--text-subtle)", fontSize: "0.72rem", lineHeight: 1.5 }}>
+                  Estado del corte: <strong>{muniData.estado_frescura === "sin_datos" ? "sin nómina consultable" : "sin período informado"}</strong>.
+                </p>
+                {muniData.sitio_transparencia_activa && (
+                  <a href={muniData.sitio_transparencia_activa} target="_blank" rel="noreferrer" className="btn btn-ghost" style={{ alignSelf: "flex-start", marginTop: "0.85rem", fontSize: "0.75rem" }}>
+                    Revisar Transparencia Activa ↗
+                  </a>
                 )}
               </div>
             )}

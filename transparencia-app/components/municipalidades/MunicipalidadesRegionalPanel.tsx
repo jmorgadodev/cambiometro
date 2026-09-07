@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import Link from "next/link";
 import type { MunicipalidadListItem } from "@/lib/municipalidades-list";
 import { getMunicipalMapMetric, MUNICIPAL_MAP_METRICS, type MunicipalMapMetric } from "@/lib/municipalidades-map";
+import { getMuniCanonicalSlug } from "@/lib/slug-utils";
 
 interface MunicipalidadesRegionalPanelProps {
   municipalities: readonly MunicipalidadListItem[];
@@ -87,7 +88,7 @@ export default function MunicipalidadesRegionalPanel({ municipalities, selectedR
                       <div className="municipal-expanded-heading"><span>Comunas de {region.name}</span><small>{region.rows.length} fichas disponibles</small></div>
                       <div className="municipal-expanded-list">
                         {[...selected.rows].sort((a, b) => a.nombre_comuna.localeCompare(b.nombre_comuna, "es")).slice(0, 6).map((municipality) => (
-                          <Link key={municipality.id} href={`/municipalidades/${municipality.id}`} prefetch={false}><span>{municipality.nombre_comuna}</span><b>{formatCompact(getMunicipalMapMetric(municipality, "budget"), "currency")} ↗</b></Link>
+                          <Link key={municipality.id} href={`/municipalidades/${getMuniCanonicalSlug(municipality.id) ?? municipality.id}`} prefetch={false}><span>{municipality.nombre_comuna}</span><b>{formatCompact(getMunicipalMapMetric(municipality, "budget"), "currency")} ↗</b></Link>
                         ))}
                       </div>
                       <Link className="municipal-expanded-all" href={`/municipalidades?region=${encodeURIComponent(region.name)}`} prefetch={false}>Ver las {region.rows.length} comunas de esta región →</Link>
@@ -108,7 +109,7 @@ export default function MunicipalidadesRegionalPanel({ municipalities, selectedR
           <div className="municipal-ranking-list">
             {ranking.map(({ municipality, value }, index) => {
               const width = Math.max(10, Math.round((value / rankingMax) * 100));
-              return <Link className="municipal-ranking-row" key={municipality.id} href={`/municipalidades/${municipality.id}`} prefetch={false}><span className="municipal-ranking-index">{String(index + 1).padStart(2, "0")}</span><span className="municipal-ranking-content"><b>{municipality.nombre_comuna}</b><small>{municipality.region}</small><i><em style={{ width: `${width}%` }} /></i></span><strong>{formatCompact(value, rankingOption.unit)}</strong></Link>;
+              return <Link className="municipal-ranking-row" key={municipality.id} href={`/municipalidades/${getMuniCanonicalSlug(municipality.id) ?? municipality.id}`} prefetch={false}><span className="municipal-ranking-index">{String(index + 1).padStart(2, "0")}</span><span className="municipal-ranking-content"><b>{municipality.nombre_comuna}</b><small>{municipality.region}</small><i><em style={{ width: `${width}%` }} /></i></span><strong>{formatCompact(value, rankingOption.unit)}</strong></Link>;
             })}
           </div>
           <div className="municipal-ranking-note"><b>Comparación rápida</b><span>Usa el selector para alternar entre presupuesto, población, autonomía financiera, dependencia FCM y dotación municipal.</span></div>

@@ -9,6 +9,7 @@ import ShareButton from "@/components/ShareButton";
 import type { CoverageMetric, DataQualityStatus } from "@/lib/data-quality-summary";
 import ReleaseMetaCard from "@/components/data/ReleaseMetaCard";
 import MunicipalidadesRegionalPanel from "@/components/municipalidades/MunicipalidadesRegionalPanel";
+import { getMuniCanonicalSlug } from "@/lib/slug-utils";
 
 interface MunicipalidadesExplorerClientProps {
   initialData: MunicipalidadListItem[];
@@ -325,6 +326,19 @@ export default function MunicipalidadesExplorerClient({
     setSortBy("presupuesto");
     setSortOrder("desc");
     setPage(1);
+  };
+
+  const handleFrescuraSummarySelect = (
+    value: "Todos" | "al_dia" | "desfasado" | "sin_datos",
+  ) => {
+    setFrescuraFilter(value);
+    setPage(1);
+    window.setTimeout(() => {
+      document.getElementById("municipalidades-registros")?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+    }, 0);
   };
 
   return (
@@ -666,10 +680,47 @@ export default function MunicipalidadesExplorerClient({
                   marginTop: "0.25rem",
                 }}
               >
-                Comunas con nómina al día (≤ 90 días)
+                Actualización mensual · criterio ≤ 90 días
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="container-main municipal-compliance-panel" aria-labelledby="municipal-compliance-title">
+        <div className="card municipal-compliance-card">
+          <div className="municipal-compliance-heading">
+            <div>
+              <div className="municipal-panel-kicker">Transparencia activa · CPLT</div>
+              <h2 id="municipal-compliance-title">Actualización mensual de nóminas</h2>
+              <p>
+                El corte consultado se actualiza mensualmente. Aquí distinguimos una nómina publicada dentro del criterio de frescura, una nómina atrasada y la ausencia de un registro consultable.
+              </p>
+            </div>
+            <span className="badge badge-info">Frecuencia: mensual</span>
+          </div>
+
+          <div className="municipal-compliance-states">
+            <button type="button" onClick={() => handleFrescuraSummarySelect("al_dia")}>
+              <span>Al día</span>
+              <strong>{stats.alDiaCount ?? 0} / 346</strong>
+              <small>Nómina publicada en los últimos 90 días.</small>
+            </button>
+            <button type="button" onClick={() => handleFrescuraSummarySelect("desfasado")}>
+              <span>Con desfase</span>
+              <strong>{stats.desfasadoCount ?? 0}</strong>
+              <small>Existe nómina, pero el corte supera 90 días.</small>
+            </button>
+            <button type="button" onClick={() => handleFrescuraSummarySelect("sin_datos")}>
+              <span>Sin nómina consultable</span>
+              <strong>{stats.sinDatosCount ?? 0}</strong>
+              <small>No hay nómina en el release; no significa cero funcionarios.</small>
+            </button>
+          </div>
+
+          <p className="municipal-compliance-note">
+            <strong>Cómo leerlo:</strong> “Sin nómina consultable” describe el alcance del release publicado, no prueba por sí solo que una municipalidad haya incumplido la Ley 20.285. El detalle de cada comuna conserva su estado, período y motivo disponible.
+          </p>
         </div>
       </section>
 
@@ -790,7 +841,7 @@ export default function MunicipalidadesExplorerClient({
                     return (
                       <Link
                         key={m.id}
-                        href={`/municipalidades/${m.id}`}
+                        href={`/municipalidades/${getMuniCanonicalSlug(m.id) ?? m.id}`}
                         prefetch={false}
                         style={{
                           textDecoration: "none",
@@ -1579,6 +1630,7 @@ export default function MunicipalidadesExplorerClient({
       <div className="container-main" style={{ marginTop: "1.5rem" }}>
         {paginatedData.length === 0 ? (
           <div
+            id="municipalidades-registros"
             className="card"
             style={{ padding: "3rem 1.5rem", textAlign: "center" }}
           >
@@ -1626,8 +1678,9 @@ export default function MunicipalidadesExplorerClient({
               const pres = m.presupuesto?.vigente_clp ?? 0;
               const perCapita = m.presupuesto_per_capita_clp ?? 0;
               const fcm = m.fcm_dependencia_pct ?? 0;
-              const staff = m.resumen_personal?.total_funcionarios ?? 0;
-              const masa = m.resumen_personal?.masa_mensual_clp ?? 0;
+              const hasNomina = Boolean(m.resumen_personal) && m.estado_frescura !== "sin_datos";
+              const staff = m.resumen_personal?.total_funcionarios ?? null;
+              const masa = m.resumen_personal?.masa_mensual_clp ?? null;
               const partido =
                 m.partido_alcalde ||
                 m.alcalde?.partido_alcalde ||
@@ -1637,7 +1690,7 @@ export default function MunicipalidadesExplorerClient({
               return (
                 <Link
                   key={m.id}
-                  href={`/municipalidades/${m.id}`}
+                  href={`/municipalidades/${getMuniCanonicalSlug(m.id) ?? m.id}`}
                   prefetch={false}
                   className="card hover-card"
                   style={{
@@ -1862,7 +1915,7 @@ export default function MunicipalidadesExplorerClient({
                             marginTop: "0.15rem",
                           }}
                         >
-                          {formatNum(staff)} pers.
+                          {hasNomina ? `${formatNum(staff)} pers.` : "No publicado"}
                         </div>
                         <div
                           style={{
@@ -1871,7 +1924,7 @@ export default function MunicipalidadesExplorerClient({
                             marginTop: "0.1rem",
                           }}
                         >
-                          Masa: {formatCompactCLP(masa)}/m
+                          {hasNomina && masa && masa > 0 ? `Masa: ${formatCompactCLP(masa)}/m` : "Sin nómina en el corte"}
                         </div>
                       </div>
                     </div>
@@ -2032,7 +2085,7 @@ export default function MunicipalidadesExplorerClient({
                         <td style={{ padding: "0.8rem 1rem" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                             <Link
-                              href={`/municipalidades/${m.id}`}
+                              href={`/municipalidades/${getMuniCanonicalSlug(m.id) ?? m.id}`}
                               prefetch={false}
                               style={{
                                 fontWeight: 700,
@@ -2186,7 +2239,7 @@ export default function MunicipalidadesExplorerClient({
                           }}
                         >
                           <Link
-                            href={`/municipalidades/${m.id}`}
+                            href={`/municipalidades/${getMuniCanonicalSlug(m.id) ?? m.id}`}
                             prefetch={false}
                             className="btn btn-ghost"
                             style={{

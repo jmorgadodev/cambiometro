@@ -4051,6 +4051,108 @@ html.dark .page-masthead {
   border-color: var(--accent) !important;
 }
 
+.municipal-compliance-panel {
+  margin-top: 1rem;
+}
+
+.municipal-compliance-card {
+  padding: 1.25rem 1.5rem;
+}
+
+.municipal-compliance-heading {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.municipal-compliance-heading h2 {
+  margin: .3rem 0 .35rem;
+  color: var(--text-1);
+  font-size: clamp(1.05rem, 1.8vw, 1.35rem);
+}
+
+.municipal-compliance-heading p {
+  max-width: 48rem;
+  margin: 0;
+  color: var(--text-2);
+  font-size: .78rem;
+  line-height: 1.5;
+}
+
+.municipal-compliance-states {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: .75rem;
+  margin-top: 1rem;
+}
+
+.municipal-compliance-states button {
+  display: flex;
+  min-height: 7rem;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: .3rem;
+  padding: .85rem 1rem;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface-2);
+  color: var(--text-1);
+  cursor: pointer;
+  text-align: left;
+  transition: border-color .18s ease, transform .18s ease;
+}
+
+.municipal-compliance-states button:hover,
+.municipal-compliance-states button:focus-visible {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+.municipal-compliance-states button span {
+  color: var(--accent);
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .06em;
+  text-transform: uppercase;
+}
+
+.municipal-compliance-states button strong {
+  color: var(--text-1);
+  font-family: var(--font-mono, monospace);
+  font-size: 1.35rem;
+  line-height: 1.1;
+}
+
+.municipal-compliance-states button small {
+  color: var(--text-muted);
+  font-size: .7rem;
+  line-height: 1.35;
+}
+
+.municipal-compliance-note {
+  margin: 1rem 0 0;
+  padding-top: .8rem;
+  border-top: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: .72rem;
+  line-height: 1.5;
+}
+
+.municipal-personnel-empty {
+  min-height: 100%;
+}
+
+@media (max-width: 700px) {
+  .municipal-compliance-heading {
+    flex-direction: column;
+  }
+
+  .municipal-compliance-states {
+    grid-template-columns: 1fr;
+  }
+}
+
 .municipal-regional-panel {
   overflow: hidden;
   border: 1px solid var(--border);
