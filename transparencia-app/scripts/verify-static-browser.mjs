@@ -209,30 +209,16 @@ async function main() {
   const legacyResponse = await fetch(`${baseUrl}/municipalidades/muni-maipu`, { redirect: "manual" });
   const legacyRedirect = { status: legacyResponse.status, location: legacyResponse.headers.get("location") };
 
-  const mapContext = await createContext(browser);
-  const mapPage = await mapContext.newPage();
-  const mapRequests = [];
-  mapPage.on("request", (request) => mapRequests.push(request.url()));
-  await mapPage.goto(`${baseUrl}/municipalidades`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-  await mapPage.waitForTimeout(waitMs);
-  const mapSelector = mapPage.getByRole("combobox", { name: "Indicador del mapa municipal" });
-  const tableLink = mapPage.getByRole("link", { name: "Explorar registros" });
-  const mapVisual = mapPage.locator(".echart-container svg, .echart-container canvas").first();
-  const initialMapMetric = await mapSelector.inputValue().catch(() => null);
-  await mapSelector.selectOption("perCapita");
-  const selectedMapMetric = await mapSelector.inputValue().catch(() => null);
-  const mapVerification = {
-    selector: await mapSelector.count(),
-    initialMetric: initialMapMetric,
-    selectedMetric: selectedMapMetric,
-    hasSixteenRegionsCopy: (await mapPage.locator("body").innerText()).includes("16 regiones"),
-    hasVisual: await mapVisual.count(),
-    tableFallback: await tableLink.count(),
-    externalRequests: mapRequests.filter((url) => {
-      try { return new URL(url).origin !== monitoredOrigin && !url.startsWith("data:"); } catch { return false; }
-    }),
+  const municipalidadesContext = await createContext(browser);
+  const municipalidadesPage = await municipalidadesContext.newPage();
+  await municipalidadesPage.goto(`${baseUrl}/municipalidades`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+  await municipalidadesPage.waitForTimeout(waitMs);
+  const municipalidadesBody = await municipalidadesPage.locator("body").innerText();
+  const municipalidadesMap = {
+    selectorCount: await municipalidadesPage.getByRole("combobox", { name: "Indicador del mapa municipal" }).count(),
+    hasTableFallback: municipalidadesBody.includes("Explorar registros") || municipalidadesBody.includes("Ver tabla completa"),
   };
-  await mapContext.close();
+  await municipalidadesContext.close();
 
   await browser.close();
   if (server.listening) await new Promise((resolve) => server.close(resolve));
@@ -256,16 +242,11 @@ async function main() {
   failures.push(check(municipalityPayroll.errors.length === 0, "Ficha Maipú: errores de navegador", { municipalityPayroll }));
   failures.push(check(municipalityPayroll.badResponses.length === 0, "Ficha Maipú: recursos 4xx/5xx", { municipalityPayroll }));
   failures.push(check(legacyRedirect.status === 301 && legacyRedirect.location === "/municipalidades/maipu", "Redirect legacy Maipú", { legacyRedirect }));
-  failures.push(check(mapVerification.selector === 1, "Municipalidades: no aparece el selector del mapa", mapVerification));
-  failures.push(check(mapVerification.initialMetric === "population", "Municipalidades: indicador inicial inesperado", mapVerification));
-  failures.push(check(mapVerification.selectedMetric === "perCapita", "Municipalidades: el selector no cambia de indicador", mapVerification));
-  failures.push(check(mapVerification.hasSixteenRegionsCopy, "Municipalidades: falta la referencia a las 16 regiones", mapVerification));
-  failures.push(check(mapVerification.hasVisual > 0, "Municipalidades: no se renderizó la capa visual del mapa", mapVerification));
-  failures.push(check(mapVerification.tableFallback > 0, "Municipalidades: falta la alternativa de tabla", mapVerification));
-  failures.push(check(mapVerification.externalRequests.length === 0, "Municipalidades: el mapa hizo requests externos", mapVerification));
+  failures.push(check(municipalidadesMap.selectorCount === 0, "Municipalidades: el mapa territorial no debe aparecer en producción", municipalidadesMap));
+  failures.push(check(municipalidadesMap.hasTableFallback, "Municipalidades: falta la alternativa de registros", municipalidadesMap));
 
   const failed = failures.filter(Boolean);
-  console.log(JSON.stringify({ baseUrl, waitMs, routes, navigation: { politicianNavigation, municipalityNavigation, navigationErrors, navigationBadResponses }, municipalityPayroll, legacyRedirect, mapVerification, passed: failures.length - failed.length, failed }, null, 2));
+  console.log(JSON.stringify({ baseUrl, waitMs, routes, navigation: { politicianNavigation, municipalityNavigation, navigationErrors, navigationBadResponses }, municipalityPayroll, legacyRedirect, municipalidadesMap, passed: failures.length - failed.length, failed }, null, 2));
   if (failed.length > 0) process.exitCode = 1;
 }
 
