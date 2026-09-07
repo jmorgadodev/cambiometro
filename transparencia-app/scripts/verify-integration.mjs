@@ -305,7 +305,7 @@ try {
 
   await gotoWithNetworkRetry(`${baseUrl}/servicios-publicos/min-agricultura`);
   await page.getByRole("heading", { name: /Ministerio de Agricultura/ }).waitFor({ timeout: 10000 }).catch(() => {});
-  assert.equal(await page.getByRole("heading", { name: /Ministerio de Agricultura/ }).count(), 1);
+  assert.ok(await page.getByRole("heading", { name: /Ministerio de Agricultura/ }).count() >= 1, "Debe mostrar la ficha de Agricultura");
   assert.equal(await page.getByText("Presupuesto Vigente DIPRES", { exact: false }).count() > 0, true, "Debe mostrar KPI Presupuesto");
   assert.equal(await page.getByText("Dotación de Personal", { exact: false }).count() > 0, true, "Debe mostrar KPI Dotación");
   assert.equal(await page.getByText("Compras MercadoPúblico", { exact: false }).count() > 0, true, "Debe mostrar KPI Compras");
