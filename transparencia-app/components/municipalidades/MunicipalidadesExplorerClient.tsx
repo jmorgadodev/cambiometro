@@ -33,6 +33,12 @@ interface MunicipalidadesExplorerClientProps {
     related: CoverageMetric;
     checksumSha256: string | null;
     officialUrl?: string;
+    payrollCoverage: {
+      published: number;
+      unavailable: number;
+      notApplicable: number;
+      totalTerritories: number;
+    };
   };
 }
 
@@ -398,13 +404,28 @@ export default function MunicipalidadesExplorerClient({
               published={release.published}
               queryable={release.queryable}
               related={release.related}
-              compactMetrics
               checksumSha256={release.checksumSha256}
               href="/municipalidades?view=table"
               officialUrl={release.officialUrl}
-              note="El catálogo validado reúne las 346 comunas. Un indicador sin publicación conserva el estado “Sin dato publicado”; no se convierte en cero."
+              note="El catálogo territorial reúne las 346 comunas. La cobertura de nóminas CPLT se informa por separado: una comuna sin nómina publicada no equivale a una remuneración de $0."
             />
           </div>
+
+          <section className="municipal-payroll-coverage card" aria-labelledby="municipal-payroll-coverage-title">
+            <div>
+              <div className="eyebrow" style={{ color: "var(--accent)", marginBottom: "0.25rem" }}>COBERTURA DE NÓMINAS</div>
+              <h2 id="municipal-payroll-coverage-title" style={{ margin: 0, fontSize: "1.05rem", color: "var(--text-1)" }}>¿Qué comunas tienen nómina publicada?</h2>
+              <p style={{ margin: "0.35rem 0 0", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.5 }}>
+                El catálogo municipal está completo. La nómina CPLT depende de que cada municipio publique su corte; cuando no existe un archivo disponible, lo mostramos explícitamente y no imputamos sueldos ni personal.
+              </p>
+            </div>
+            <div className="municipal-payroll-coverage-grid">
+              <div><strong>{formatNum(release.payrollCoverage.published)}</strong><span>con nómina publicada</span></div>
+              <div><strong>{formatNum(release.payrollCoverage.unavailable)}</strong><span>sin nómina en el corte</span></div>
+              <div><strong>{formatNum(release.payrollCoverage.notApplicable)}</strong><span>territorio no aplicable</span></div>
+              <div><strong>{formatNum(release.payrollCoverage.totalTerritories)}</strong><span>comunas/territorios catalogados</span></div>
+            </div>
+          </section>
 
           {/* 4 KPIs Clave */}
           <div
@@ -452,7 +473,7 @@ export default function MunicipalidadesExplorerClient({
                   marginTop: "0.25rem",
                 }}
               >
-                ✓ 100% Cobertura Nacional
+                Catálogo territorial completo
               </div>
             </div>
 
@@ -661,29 +682,12 @@ export default function MunicipalidadesExplorerClient({
                   marginTop: "0.25rem",
                 }}
               >
-                Actualización mensual · criterio ≤ 90 días
+                {stats.alDiaCount ?? 0} al día · {stats.desfasadoCount ?? 0} con desfase · {stats.sinDatosCount ?? 0} sin nómina
               </div>
             </div>
           </div>
         </div>
       </section>
-
-      <div className="container-main" style={{ marginTop: "1rem" }}>
-        <ReleaseMetaCard
-          title="Release territorial consultable"
-          source={release.source}
-          period={release.period}
-          lastSuccessAt={release.lastSuccessAt}
-          status={release.status}
-          published={release.published}
-          queryable={release.queryable}
-          related={release.related}
-          checksumSha256={release.checksumSha256}
-          href="/municipalidades?view=table"
-          officialUrl={release.officialUrl}
-          note="La tabla, las tarjetas y las fichas utilizan el mismo catálogo validado de 346 comunas. Un indicador sin publicación conserva el estado “Sin dato publicado”; no se convierte en cero."
-        />
-      </div>
 
       {/* ═══ 2. GRÁFICAS COMPARATIVAS (COLAPSABLES) ═══════════════════════════ */}
       <div className="container-main" style={{ marginTop: "2rem" }}>

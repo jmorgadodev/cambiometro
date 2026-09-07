@@ -227,12 +227,12 @@ export default async function PartidoPage({ params }: Props) {
               },
               {
                 label: "Gastos bancada (publicados)",
-                value: gastos.total > 0 ? formatCLP(gastos.total) : "$0 · Pendiente",
+                value: gastos.total > 0 ? formatCLP(gastos.total) : "Sin registros publicados",
                 color: gastos.total > 0 ? "var(--warn)" : "var(--text-3)",
               },
               {
                 label: `Promedio / miembro (${polsConGasto}/${escaños.total})`,
-                value: promedioGasto > 0 ? formatCLP(promedioGasto) : "—",
+                value: promedioGasto > 0 ? formatCLP(promedioGasto) : "No calculable",
                 color: "var(--text-1)",
               },
               {

@@ -240,6 +240,75 @@ describe("API canónica v1", () => {
     expect(payload.meta.sourceStatus).toBe("r2-catalog");
   });
 
+  it("incluye funcionarios del índice paginado R2 sin consultar D1", async () => {
+    const files: Record<string, unknown> = {
+      "projections/entities-v1/entities-routes.json": [],
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1203287,
+        pageSize: 2,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 1 }],
+        shards: { ma: "projections/funcionarios-v1/versions/2026-08-25/search_index/ma.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/ma.json": [["maipu", [0]]],
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [
+        { id: "func-maipu-1", n: "María Pérez", c: "Profesional", o: "Municipalidad de Maipú", t: "Contrata", e: "Profesional", b: 1200000 },
+      ],
+    };
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse para funcionarios del home"); } },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/search?q=Maipú"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.funcionarios[0]).toMatchObject({
+      id: "func-maipu-1",
+      nombre: "María Pérez",
+      type: "funcionario",
+    });
+  });
+
+  it("conserva la búsqueda de funcionarios si el catálogo de entidades no está disponible", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1,
+        pageSize: 1,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 1 }],
+        shards: { ma: "projections/funcionarios-v1/versions/2026-08-25/search_index/ma.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/ma.json": [["maipu", [0]]],
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [
+        { id: "func-maipu-2", n: "Jorge Funcionario", c: "Analista", o: "Municipalidad de Maipú", t: "Planta", e: "Profesional", b: 900000 },
+      ],
+    };
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse"); } },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/search?q=Maipú"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.funcionarios[0].id).toBe("func-maipu-2");
+  });
+
   it("mantiene diputados y senadores buscables aunque D1 y el catálogo R2 no respondan", async () => {
     const env = {
       DB: { prepare: () => { throw new Error("D1_ERROR: daily rows_read quota exceeded"); } },

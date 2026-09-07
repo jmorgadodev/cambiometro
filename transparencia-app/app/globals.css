@@ -3904,6 +3904,47 @@ html.dark .page-masthead {
   background: var(--surface-2);
 }
 
+.municipal-payroll-coverage {
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr);
+  gap: 1.25rem;
+  align-items: center;
+  margin-top: 1rem;
+  padding: 1.1rem 1.25rem;
+  background: var(--surface-2);
+}
+
+.municipal-payroll-coverage-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .6rem;
+}
+
+.municipal-payroll-coverage-grid > div {
+  display: flex;
+  min-height: 4.4rem;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: .25rem;
+  padding: .7rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  text-align: center;
+  background: var(--surface);
+}
+
+.municipal-payroll-coverage-grid strong {
+  color: var(--accent);
+  font-family: var(--font-mono, monospace);
+  font-size: 1.2rem;
+}
+
+.municipal-payroll-coverage-grid span {
+  color: var(--text-muted);
+  font-size: .68rem;
+}
+
 .release-meta-card--compact {
   display: grid;
   grid-template-columns: minmax(0, 1.35fr) minmax(280px, .65fr);
@@ -4022,6 +4063,14 @@ html.dark .page-masthead {
 }
 
 @media (max-width: 700px) {
+  .municipal-payroll-coverage {
+    display: block;
+  }
+
+  .municipal-payroll-coverage-grid {
+    margin-top: 1rem;
+  }
+
   .release-meta-card--compact {
     display: block;
   }
