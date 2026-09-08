@@ -622,6 +622,19 @@ body {
   background: rgba(30, 41, 59, 0.5);
 }
 
+.data-table tr.remuneracion-row {
+  cursor: pointer;
+}
+
+.data-table tr.remuneracion-row:hover td {
+  background: var(--surface-2);
+}
+
+.data-table tr.remuneracion-row:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -2px;
+}
+
 /* ═══════════════════════════════════════════════════════════
    PROGRESS BAR
 ═══════════════════════════════════════════════════════════ */
