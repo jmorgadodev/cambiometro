@@ -216,8 +216,11 @@ export default function Remuneraciones38BisClient({
   const [history, setHistory] = useState<HistoryPoint[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
-  const currentPeriod = currentPeriodFromManifest(manifest);
-  const activePeriod = periodo === manifest.mes || loadedPeriod?.mes !== periodo ? currentPeriod : loadedPeriod;
+  const currentPeriod = useMemo(() => currentPeriodFromManifest(manifest), [manifest]);
+  const activePeriod = useMemo(
+    () => periodo === manifest.mes || loadedPeriod?.mes !== periodo ? currentPeriod : loadedPeriod,
+    [currentPeriod, loadedPeriod, manifest.mes, periodo],
+  );
   const activePeriodReady = activePeriod.mes === periodo;
 
   const loadHistory = useCallback((person: Remuneracion38BisRecord) => {

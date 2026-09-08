@@ -206,6 +206,34 @@ async function main() {
   };
   await detailContext.close();
 
+  const remuneracionesContext = await createContext(browser);
+  const remuneracionesPage = await remuneracionesContext.newPage();
+  const remuneracionesErrors = [];
+  const remuneracionesBadResponses = [];
+  remuneracionesPage.on("pageerror", (error) => remuneracionesErrors.push(error.message));
+  remuneracionesPage.on("console", (message) => {
+    if (message.type() === "error") remuneracionesErrors.push(message.text());
+  });
+  remuneracionesPage.on("response", (response) => {
+    if (response.url().startsWith(monitoredOrigin) && response.status() >= 400) {
+      remuneracionesBadResponses.push({ path: new URL(response.url()).pathname, status: response.status() });
+    }
+  });
+  await remuneracionesPage.goto(`${baseUrl}/remuneraciones-publicas`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+  const remuneracionesSearch = remuneracionesPage.getByRole("searchbox", { name: "Buscar remuneraciones públicas" });
+  await remuneracionesSearch.fill("soto");
+  const remuneracionesRows = remuneracionesPage.locator("table.data-table tbody tr");
+  await remuneracionesRows.first().waitFor({ state: "visible", timeout: 10_000 });
+  await remuneracionesPage.waitForTimeout(500);
+  const loadingIndicator = remuneracionesPage.getByText("Cargando registros…", { exact: true });
+  const remuneraciones = {
+    rows: await remuneracionesRows.count(),
+    loadingVisible: await loadingIndicator.count() > 0 && await loadingIndicator.first().isVisible().catch(() => false),
+    errors: remuneracionesErrors,
+    badResponses: remuneracionesBadResponses,
+  };
+  await remuneracionesContext.close();
+
   const legacyResponse = await fetch(`${baseUrl}/municipalidades/muni-maipu`, { redirect: "manual" });
   const legacyRedirect = { status: legacyResponse.status, location: legacyResponse.headers.get("location") };
 
@@ -241,12 +269,16 @@ async function main() {
   failures.push(check(!municipalityPayroll.spinner && !municipalityPayroll.error, "Ficha Maipú: sin spinner ni error de nómina", { municipalityPayroll }));
   failures.push(check(municipalityPayroll.errors.length === 0, "Ficha Maipú: errores de navegador", { municipalityPayroll }));
   failures.push(check(municipalityPayroll.badResponses.length === 0, "Ficha Maipú: recursos 4xx/5xx", { municipalityPayroll }));
+  failures.push(check(remuneraciones.rows > 0, "Remuneraciones: el filtro no devuelve filas", { remuneraciones }));
+  failures.push(check(!remuneraciones.loadingVisible, "Remuneraciones: indicador de carga permanente después del filtro", { remuneraciones }));
+  failures.push(check(remuneraciones.errors.length === 0, "Remuneraciones: errores de navegador", { remuneraciones }));
+  failures.push(check(remuneraciones.badResponses.length === 0, "Remuneraciones: recursos 4xx/5xx", { remuneraciones }));
   failures.push(check(legacyRedirect.status === 301 && legacyRedirect.location === "/municipalidades/maipu", "Redirect legacy Maipú", { legacyRedirect }));
   failures.push(check(municipalidadesMap.selectorCount === 0, "Municipalidades: el mapa territorial no debe aparecer en producción", municipalidadesMap));
   failures.push(check(municipalidadesMap.hasTableFallback, "Municipalidades: falta la alternativa de registros", municipalidadesMap));
 
   const failed = failures.filter(Boolean);
-  console.log(JSON.stringify({ baseUrl, waitMs, routes, navigation: { politicianNavigation, municipalityNavigation, navigationErrors, navigationBadResponses }, municipalityPayroll, legacyRedirect, municipalidadesMap, passed: failures.length - failed.length, failed }, null, 2));
+  console.log(JSON.stringify({ baseUrl, waitMs, routes, navigation: { politicianNavigation, municipalityNavigation, navigationErrors, navigationBadResponses }, municipalityPayroll, remuneraciones, legacyRedirect, municipalidadesMap, passed: failures.length - failed.length, failed }, null, 2));
   if (failed.length > 0) process.exitCode = 1;
 }
 
