@@ -18,12 +18,9 @@ if (relativeFiles.some((file) => file.includes("server-functions") || file.inclu
 if (!relativeFiles.includes("_headers") || !relativeFiles.includes("_redirects")) throw new Error("Faltan _headers o _redirects en out/");
 const html = relativeFiles.filter((file) => file.endsWith(".html"));
 if (html.length === 0) throw new Error("out/ no contiene HTML");
-// Each canonical route can legitimately produce its HTML, metadata text and
-// route data/index artifacts. Keep a proportional ceiling so a growing but
-// valid catalog does not fail at an obsolete absolute limit, while still
-// catching accidental dumps of build/runtime files.
-const maxFiles = Math.max(20_000, html.length * 5 + 1_000);
-if (files.length > maxFiles) throw new Error(`Pages supera el límite proporcional (${maxFiles} archivos): ${files.length}`);
+// Cloudflare Pages enforces a hard 20,000-file limit for this account. Keep
+// the same guard locally so the workflow fails before attempting deployment.
+if (files.length > 20_000) throw new Error(`Pages supera 20.000 archivos: ${files.length}`);
 const oversized = files.filter((file) => statSync(file).size > 25 * 1024 * 1024);
 if (oversized.length) throw new Error(`Assets sobre 25 MiB: ${oversized.map((file) => relative(out, file)).join(", ")}`);
 const routes = ["index.html", "politico/index.html", "municipalidades/index.html", "servicios-publicos/index.html", "entidades/index.html", "transferencias/index.html", "gastos-operacionales/index.html"];
@@ -36,4 +33,4 @@ if (staticManifest.datasets?.entities?.count !== entityCatalog.total) {
   throw new Error(`Universo de entidades incoherente: manifest=${staticManifest.datasets?.entities?.count} catalog=${entityCatalog.total}`);
 }
 const bytes = files.reduce((sum, file) => sum + statSync(file).size, 0);
-console.log(JSON.stringify({ files: files.length, html: html.length, maxFiles, bytes, routes }));
+console.log(JSON.stringify({ files: files.length, html: html.length, bytes, routes }));
