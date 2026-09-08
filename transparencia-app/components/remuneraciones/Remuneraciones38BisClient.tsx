@@ -173,6 +173,16 @@ function compareNames(left: { nombre: string }, right: { nombre: string }) {
   return nameSortKey(left.nombre).localeCompare(nameSortKey(right.nombre), "es");
 }
 
+function monthNumber(periodo: string) {
+  const [year, month] = periodo.split("-").map(Number);
+  return year * 12 + month;
+}
+
+function monthsCovered(points: HistoryPoint[]) {
+  if (points.length < 2) return points.length;
+  return monthNumber(points[points.length - 1].mes) - monthNumber(points[0].mes) + 1;
+}
+
 function rowText(row: Remuneracion38BisRecord) {
   return normalize(`${row.nombre} ${row.organismo} ${row.cargo} ${row.partida}`);
 }
@@ -433,8 +443,8 @@ export default function Remuneraciones38BisClient({
                   {comparisonRows.length === 0 ? <p role="status" style={{ color: "var(--text-muted)", fontSize: "0.8rem", margin: "1rem 0 0" }}>No hay registros en esta categoría para el corte seleccionado.</p> : (
                     <>
                       <div className="table-shell" style={{ marginTop: "0.9rem", overflowX: "auto" }}>
-                        <table className="data-table"><caption className="sr-only">{comparisonTitle[comparisonKind]} del corte {activePeriod.mes}</caption><thead><tr><th>Persona</th><th>Organismo y cargo</th><th>Mes anterior</th><th>Mes seleccionado</th><th>Diferencia</th></tr></thead><tbody>
-                          {visibleComparisonRows.map((row) => <tr key={`${row.tipo}-${row.nombre}-${row.organismo}-${row.cargo}`}><td><strong>{row.nombre}</strong><small>{row.partida}</small></td><td>{row.organismo}<small>{row.cargo}</small></td><td>{row.bruto_anterior === null ? "No reportado" : money.format(row.bruto_anterior)}</td><td>{row.bruto_actual === null ? "No reportado" : money.format(row.bruto_actual)}</td><td style={{ fontFamily: "var(--font-mono)", fontWeight: 700, color: row.diferencia === null ? "var(--text-muted)" : row.diferencia >= 0 ? "var(--ok)" : "var(--warn)" }}>{row.diferencia === null ? "—" : `${row.diferencia >= 0 ? "+" : ""}${money.format(row.diferencia)}`}</td></tr>)}
+                        <table className="data-table"><caption className="sr-only">{comparisonTitle[comparisonKind]} del corte {activePeriod.mes}</caption><thead><tr><th>Persona</th><th>Organismo y cargo</th><th>Mes anterior</th><th>Mes seleccionado</th><th>Diferencia</th><th aria-label="Acciones" /></tr></thead><tbody>
+                          {visibleComparisonRows.map((row) => <tr key={`${row.tipo}-${row.nombre}-${row.organismo}-${row.cargo}`}><td><strong>{row.nombre}</strong><small>{row.partida}</small></td><td>{row.organismo}<small>{row.cargo}</small></td><td>{row.bruto_anterior === null ? "No reportado" : money.format(row.bruto_anterior)}</td><td>{row.bruto_actual === null ? "No reportado" : money.format(row.bruto_actual)}</td><td style={{ fontFamily: "var(--font-mono)", fontWeight: 700, color: row.diferencia === null ? "var(--text-muted)" : row.diferencia >= 0 ? "var(--ok)" : "var(--warn)" }}>{row.diferencia === null ? "—" : `${row.diferencia >= 0 ? "+" : ""}${money.format(row.diferencia)}`}</td><td><button type="button" className="btn btn-ghost" style={{ padding: "0.35rem 0.55rem", fontSize: "0.72rem" }} onClick={() => setSelected(row)}>Ver ficha</button></td></tr>)}
                         </tbody></table>
                       </div>
                       <nav aria-label="Paginación del detalle mensual" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", marginTop: "0.8rem" }}><button type="button" className="btn btn-ghost" disabled={comparisonPage <= 1} onClick={() => setComparisonPage((value) => Math.max(1, value - 1))}>← Anterior</button><span style={{ color: "var(--text-subtle)", fontSize: "0.74rem" }}>Página {comparisonPage} / {comparisonPageCount} · {number.format(comparisonRows.length)} registros</span><button type="button" className="btn btn-ghost" disabled={comparisonPage >= comparisonPageCount} onClick={() => setComparisonPage((value) => Math.min(comparisonPageCount, value + 1))}>Siguiente →</button></nav>
@@ -537,6 +547,10 @@ export default function Remuneraciones38BisClient({
           <p style={{ margin: "0.8rem 0 0", color: "var(--text-muted)", fontSize: "0.84rem", lineHeight: 1.7 }}>
             El primer corte completo funciona como línea base. Desde el mes siguiente se pueden contar entradas observadas, salidas observadas y cambios de monto, además de comparar la masa bruta publicada de cada mes. Los registros “NO REPORTADO” permanecen visibles y no se suman como cero. Una entrada o salida orienta una revisión, pero no prueba por sí sola un nombramiento o término jurídico. Una misma persona puede aparecer más de una vez si la fuente reporta cargos u organismos distintos.
           </p>
+          <p style={{ margin: "0.8rem 0 0", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.65 }}>
+            La Comisión informa que este registro contiene únicamente lo reportado por cada institución: nombre, función, organismo y remuneración asignada. Como referencia complementaria, las instrucciones públicas de DIPRES distinguen contratos por meses y días y explican que la remuneración bruta mensualizada puede variar según la situación particular. Por eso informamos el prorrateo por días como una hipótesis posible, nunca como una conclusión mientras la fuente no publique fechas, jornada o contrato.
+            <span> </span><a href="https://comision38bis.gob.cl/registro-publico" target="_blank" rel="noopener noreferrer" className="data-link">Fuente 38 bis ↗</a><span> </span><a href="https://www.dipres.gob.cl/598/articles-63868_doc_pdf.pdf" target="_blank" rel="noopener noreferrer" className="data-link">Instrucciones DIPRES ↗</a>
+          </p>
         </section>
       </main>
 
@@ -560,15 +574,19 @@ export default function Remuneraciones38BisClient({
               {historyLoading && <p role="status" style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>Cargando historial…</p>}
               {historyError && <p role="alert" className="badge badge-danger" style={{ marginTop: "0.7rem", textTransform: "none", letterSpacing: 0 }}>{historyError}</p>}
               {!historyLoading && !historyError && history.length > 0 && (
-                <div className="table-shell" style={{ marginTop: "0.75rem", maxHeight: "15rem", overflow: "auto" }}>
-                  <table className="data-table"><caption className="sr-only">Historial mensual de remuneraciones de {selected.nombre}</caption><thead><tr><th>Mes</th><th>Bruto publicado</th><th>Variación</th></tr></thead><tbody>
-                    {history.map((point, index) => {
-                      const previous = history[index - 1];
-                      const difference = previous && point.bruto_mensual !== null && previous.bruto_mensual !== null ? point.bruto_mensual - previous.bruto_mensual : null;
-                      return <tr key={point.mes}><td>{point.mes}</td><td style={{ fontFamily: "var(--font-mono)", fontWeight: 700 }}>{point.bruto_mensual === null ? "No reportado" : money.format(point.bruto_mensual)}</td><td style={{ fontFamily: "var(--font-mono)", color: difference === null ? "var(--text-muted)" : difference >= 0 ? "var(--ok)" : "var(--warn)" }}>{difference === null ? "—" : `${difference >= 0 ? "+" : ""}${money.format(difference)}`}</td></tr>;
-                    })}
-                  </tbody></table>
-                </div>
+                <>
+                  <div style={{ display: "flex", flexWrap: "wrap", gap: "0.45rem", marginTop: "0.75rem" }}><span className="badge badge-info">{history.length} meses observados</span><span className="badge badge-neutral">Primera aparición: {history[0].mes}</span><span className="badge badge-neutral">Último corte: {history[history.length - 1].mes}</span>{monthsCovered(history) !== history.length && <span className="badge badge-warn">Hay meses sin registro</span>}</div>
+                  <div className="table-shell" style={{ marginTop: "0.75rem", maxHeight: "15rem", overflow: "auto" }}>
+                    <table className="data-table"><caption className="sr-only">Historial mensual de remuneraciones de {selected.nombre}</caption><thead><tr><th>Mes</th><th>Bruto publicado</th><th>Variación</th></tr></thead><tbody>
+                      {history.map((point, index) => {
+                        const previous = history[index - 1];
+                        const difference = previous && point.bruto_mensual !== null && previous.bruto_mensual !== null ? point.bruto_mensual - previous.bruto_mensual : null;
+                        return <tr key={point.mes}><td>{point.mes}</td><td style={{ fontFamily: "var(--font-mono)", fontWeight: 700 }}>{point.bruto_mensual === null ? "No reportado" : money.format(point.bruto_mensual)}</td><td style={{ fontFamily: "var(--font-mono)", color: difference === null ? "var(--text-muted)" : difference >= 0 ? "var(--ok)" : "var(--warn)" }}>{difference === null ? "—" : `${difference >= 0 ? "+" : ""}${money.format(difference)}`}</td></tr>;
+                      })}
+                    </tbody></table>
+                  </div>
+                  <p style={{ margin: "0.7rem 0 0", color: "var(--text-muted)", fontSize: "0.72rem", lineHeight: 1.55 }}>Una variación puede ser compatible con un ingreso o término durante el mes, una jornada parcial, un cambio de cargo o una asignación. Esta fuente no publica las fechas ni la jornada, por lo que no permite confirmar cuál explicación aplica.</p>
+                </>
               )}
               {!historyLoading && !historyError && history.length === 0 && <p role="status" style={{ margin: "0.75rem 0 0", color: "var(--text-muted)", fontSize: "0.78rem" }}>No hay otros meses disponibles para este organismo y cargo.</p>}
             </section>

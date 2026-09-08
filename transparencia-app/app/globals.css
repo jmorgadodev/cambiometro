@@ -228,6 +228,7 @@ body {
 .badge-danger  { background: var(--bad-bg);    color: var(--bad);    border: 1px solid var(--bad); }
 .badge-bad     { background: var(--bad-bg);    color: var(--bad);    border: 1px solid var(--bad); }
 .badge-info    { background: var(--info-bg);   color: var(--info);   border: 1px solid var(--info); }
+.badge-neutral { background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border-subtle); }
 .badge-subtle  { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
 
 
