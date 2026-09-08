@@ -220,10 +220,9 @@ export default function Remuneraciones38BisClient({
   const activePeriod = periodo === manifest.mes || loadedPeriod?.mes !== periodo ? currentPeriod : loadedPeriod;
   const activePeriodReady = activePeriod.mes === periodo;
 
-  useEffect(() => {
-    if (!selected) return;
+  const loadHistory = useCallback((person: Remuneracion38BisRecord) => {
     let active = true;
-    const key = stableHash(rowKey(selected));
+    const key = stableHash(rowKey(person));
     setHistoryLoading(true);
     setHistoryError(null);
     fetch(`/data/remuneraciones-38bis/${manifest.history_base_path}${key}.json`)
@@ -235,15 +234,21 @@ export default function Remuneraciones38BisClient({
       .catch((reason: Error) => { if (active) { setHistory([]); setHistoryError(reason.message); } })
       .finally(() => { if (active) setHistoryLoading(false); });
     return () => { active = false; };
-  }, [manifest.history_base_path, selected]);
+  }, [manifest.history_base_path]);
 
   useEffect(() => {
-    if (!comparisonKind || !activePeriodReady) return;
+    if (!selected) return;
+    // The loader starts the external request and synchronizes its loading state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    return loadHistory(selected);
+  }, [loadHistory, selected]);
+
+  const loadComparison = useCallback((period: PeriodManifest) => {
     let active = true;
     setComparisonLoading(true);
     setComparisonError(null);
     setComparisonPage(1);
-    fetch(`/data/remuneraciones-38bis/${activePeriod.base_path}${activePeriod.comparison_key}`)
+    fetch(`/data/remuneraciones-38bis/${period.base_path}${period.comparison_key}`)
       .then((response) => {
         if (!response.ok) throw new Error("No se pudo cargar el detalle de la comparación mensual.");
         return response.json() as Promise<ComparisonDetails>;
@@ -252,7 +257,14 @@ export default function Remuneraciones38BisClient({
       .catch((reason: Error) => { if (active) { setComparisonDetails(null); setComparisonError(reason.message); } })
       .finally(() => { if (active) setComparisonLoading(false); });
     return () => { active = false; };
-  }, [activePeriod.base_path, activePeriod.comparison_key, activePeriod.mes, activePeriodReady, comparisonKind]);
+  }, []);
+
+  useEffect(() => {
+    if (!comparisonKind || !activePeriodReady) return;
+    // The loader starts the external request and synchronizes its loading state.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    return loadComparison(activePeriod);
+  }, [activePeriod, activePeriodReady, comparisonKind, loadComparison]);
 
   useEffect(() => {
     if (periodo === manifest.mes) return;
