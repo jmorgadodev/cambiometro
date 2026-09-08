@@ -2,23 +2,24 @@
   "schema_version": 1,
   "source_id": "remuneraciones-38bis",
   "mes": "2026-06",
-  "extraido_en": "2026-09-08T11:36:31.017Z",
-  "checksum_sha256": "3165437712216d109364555b1cd68ce89a43e2aa4a120c32ed46d755093cf6c6",
-  "filas": 1064,
+  "extraido_en": "2026-09-08T13:14:12.207Z",
+  "checksum_sha256": "b0405543977cd6da043f48695b6f20cce87c2f8de4868cfc9ab802a7c8f06893",
+  "filas": 1632,
   "filas_congreso": 205,
-  "filas_fuera_congreso": 859,
+  "filas_fuera_congreso": 1427,
   "delta": {
-    "estado": "linea_base",
-    "periodoAnterior": null,
-    "entradas": 0,
-    "salidasObservadas": 0,
-    "cambios": 0
+    "estado": "comparado",
+    "periodoAnterior": "2026-05",
+    "entradas": 51,
+    "salidasObservadas": 46,
+    "cambios": 439
   },
   "d1_rows_read": 0,
   "d1_rows_written": 0,
   "storage": "r2",
   "notas": [
     "Entrada y salida describen presencia o ausencia entre snapshots; no prueban por sí solas un nombramiento o término jurídico.",
-    "La fuente publica el período de remuneración y la institución es responsable de la información reportada."
+    "La fuente publica el período de remuneración y la institución es responsable de la información reportada.",
+    "Los montos no incluyen jornada, fecha de contratación, descuentos ni motivo de diferencias; se conserva el valor informado sin imputarlo."
   ]
 }

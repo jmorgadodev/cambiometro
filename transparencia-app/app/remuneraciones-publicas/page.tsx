@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import releaseManifest from "@/data/remuneraciones-38bis-publico-manifest.json";
-import Remuneraciones38BisClient from "@/components/remuneraciones/Remuneraciones38BisClient";
+import Remuneraciones38BisClient, { type ReleaseManifest } from "@/components/remuneraciones/Remuneraciones38BisClient";
 
 export const metadata: Metadata = {
   title: "Remuneraciones públicas — El Cambiómetro",
@@ -10,5 +10,5 @@ export const metadata: Metadata = {
 
 export default function RemuneracionesPublicasPage() {
   const { initial_rows: initialRows, ...manifest } = releaseManifest;
-  return <Remuneraciones38BisClient manifest={manifest} initialRows={initialRows} />;
+  return <Remuneraciones38BisClient manifest={manifest as unknown as ReleaseManifest} initialRows={initialRows} />;
 }

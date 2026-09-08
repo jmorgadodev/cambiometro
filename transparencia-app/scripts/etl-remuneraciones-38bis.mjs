@@ -7,6 +7,7 @@ const ROOT = process.cwd();
 const SOURCE_URL = "https://comision38bis.gob.cl/registro-publico";
 const outputPath = argument("--output", "data/remuneraciones-38bis-publico.json");
 const auditPath = argument("--audit-output", "data/remuneraciones-38bis-publico-audit.json");
+const historyPath = argument("--history-output", "data/remuneraciones-38bis-publico-historico.json");
 const previousPath = argument("--previous", "");
 const allowLargeDrop = process.argv.includes("--allow-large-drop");
 
@@ -41,6 +42,57 @@ function assignmentKey(row) {
   return [row.nombre, row.organismo, row.cargo].map(normalizeKey).join("|");
 }
 
+function sourceUrl(periodo) {
+  return periodo
+    ? `${SOURCE_URL}?reportes_publicos%5Bcalidad%5D=&reportes_publicos%5Bperiodo%5D=${encodeURIComponent(periodo)}&reportes_publicos%5Binstitucion%5D=`
+    : SOURCE_URL;
+}
+
+function availablePeriods(html) {
+  return [...html.matchAll(/<option\s+value="(\d{4}-\d{2})"/g)].map((match) => match[1]);
+}
+
+function parseRows(html) {
+  const rows = [];
+  const rowPattern = /<tr[^>]*>([\s\S]*?)<\/tr>/gi;
+  let match;
+  while ((match = rowPattern.exec(html)) !== null) {
+    const cells = [...match[1].matchAll(/<td[^>]*>([\s\S]*?)<\/td>/gi)].map((cell) => externalText(cell[1]));
+    if (cells.length < 4 || cells.length > 5) continue;
+    const [partida, organismo, cargo] = cells;
+    const nombre = cells.length === 5 ? cells[3] : "No reportado";
+    const rawSalary = cells.length === 5 ? cells[4] : cells[3];
+    const salaryMatch = /\$\s*([\d.]+)/.exec(rawSalary);
+    rows.push({
+      partida,
+      organismo,
+      cargo,
+      nombre,
+      bruto_mensual: salaryMatch ? Number.parseInt(salaryMatch[1].replace(/\./g, ""), 10) : null,
+    });
+  }
+  return rows;
+}
+
+async function fetchSource(periodo, html = null) {
+  if (html) return html;
+  const res = await fetch(sourceUrl(periodo), {
+    headers: { "user-agent": "cambiometro-public (ETL remuneraciones art. 38 bis)" },
+  });
+  const body = await res.text();
+  // The historical selector responds with HTTP 422 while still returning
+  // the complete rendered table. Keep the body only when the expected form
+  // is present; hard failures must still stop the ETL.
+  if (!res.ok && !body.includes('id="reportes_publicos_periodo"')) {
+    throw new Error(`REMUNERACIONES_38BIS_HTTP_${res.status}:${periodo}`);
+  }
+  return body;
+}
+
+function checksumRows(rows) {
+  return sha256(JSON.stringify(rows));
+}
+
 function compare(previous, currentRows) {
   // The legacy parliamentary snapshot is intentionally not a comparable
   // baseline for the complete public register. Start a clean baseline rather
@@ -64,26 +116,20 @@ function compare(previous, currentRows) {
   return { estado: "comparado", periodoAnterior: previous.mes ?? null, entradas, salidasObservadas, cambios };
 }
 
-const res = await fetch(SOURCE_URL, {
-  headers: { "user-agent": "cambiometro-public (ETL remuneraciones art. 38 bis)" },
-});
-if (!res.ok) throw new Error(`REMUNERACIONES_38BIS_HTTP_${res.status}`);
-const html = await res.text();
-
-const rows = [];
-const re = /<tr>\s*<td>(.*?)<\/td>\s*<td>(.*?)<\/td>\s*<td>(.*?)<\/td>\s*<td>(.*?)<\/td>\s*<td[^>]*>\s*<span class="lead">\s*\$&nbsp;([\d.]+)\s*<\/span>\s*<\/td>\s*<\/tr>/g;
-let match;
-while ((match = re.exec(html)) !== null) {
-  rows.push({
-    partida: externalText(match[1]),
-    organismo: externalText(match[2]),
-    cargo: externalText(match[3]),
-    nombre: externalText(match[4]),
-    bruto_mensual: Number.parseInt(match[5].replace(/\./g, ""), 10),
-  });
-}
+const html = await fetchSource(null);
+const periods = availablePeriods(html);
+const mes = periods[0] ?? new Date().toISOString().slice(0, 7);
+const rows = parseRows(html);
 
 if (rows.length < 500) throw new Error(`REMUNERACIONES_38BIS_TOO_FEW_ROWS:${rows.length}`);
+
+const snapshots = [{ mes, rows }];
+for (const periodo of periods.slice(1)) {
+  await new Promise((resolve) => setTimeout(resolve, 250));
+  const periodRows = parseRows(await fetchSource(periodo));
+  if (periodRows.length === 0) throw new Error(`REMUNERACIONES_38BIS_EMPTY_PERIOD:${periodo}`);
+  snapshots.push({ mes: periodo, rows: periodRows });
+}
 
 const previous = readJson(previousPath);
 const previousRows = rowsFromRelease(previous);
@@ -91,8 +137,6 @@ if (previous && !allowLargeDrop && previousRows.length > 0 && rows.length < prev
   throw new Error(`REMUNERACIONES_38BIS_LARGE_DROP:${previousRows.length}->${rows.length}`);
 }
 
-const mes = /<select[^>]*id="reportes_publicos_periodo"[\s\S]*?<option\s+value="(\d{4}-\d{2})"/.exec(html)?.[1]
-  ?? new Date().toISOString().slice(0, 7);
 const extractedAt = new Date().toISOString();
 const canonicalRows = JSON.stringify(rows);
 const checksumSha256 = sha256(canonicalRows);
@@ -109,7 +153,10 @@ const release = {
   // Compatibilidad con las fichas parlamentarias existentes.
   congreso,
 };
-const delta = compare(previous, rows);
+const previousSnapshot = snapshots[1];
+const delta = previousSnapshot
+  ? compare({ mes: previousSnapshot.mes, registros: previousSnapshot.rows }, rows)
+  : compare(previous, rows);
 const audit = {
   schema_version: 1,
   source_id: "remuneraciones-38bis",
@@ -126,13 +173,29 @@ const audit = {
   notas: [
     "Entrada y salida describen presencia o ausencia entre snapshots; no prueban por sí solas un nombramiento o término jurídico.",
     "La fuente publica el período de remuneración y la institución es responsable de la información reportada.",
+    "Los montos no incluyen jornada, fecha de contratación, descuentos ni motivo de diferencias; se conserva el valor informado sin imputarlo.",
   ],
+};
+
+const historical = {
+  schema_version: 1,
+  source_id: "remuneraciones-38bis",
+  source_url: SOURCE_URL,
+  extraido_en: extractedAt,
+  periodos: snapshots.slice(1).map((snapshot) => ({
+    mes: snapshot.mes,
+    filas: snapshot.rows.length,
+    checksum_sha256: checksumRows(snapshot.rows),
+    registros: snapshot.rows,
+  })),
 };
 
 fs.mkdirSync(path.dirname(resolveFromRoot(outputPath)), { recursive: true });
 fs.mkdirSync(path.dirname(resolveFromRoot(auditPath)), { recursive: true });
+fs.mkdirSync(path.dirname(resolveFromRoot(historyPath)), { recursive: true });
 fs.writeFileSync(resolveFromRoot(outputPath), `${JSON.stringify(release, null, 2)}\n`, "utf8");
 fs.writeFileSync(resolveFromRoot(auditPath), `${JSON.stringify(audit, null, 2)}\n`, "utf8");
+fs.writeFileSync(resolveFromRoot(historyPath), `${JSON.stringify(historical, null, 2)}\n`, "utf8");
 
 console.log(JSON.stringify({
   status: "ok",
@@ -143,6 +206,7 @@ console.log(JSON.stringify({
   fueraDeCongreso: rows.length - congreso.length,
   checksumSha256,
   delta,
+  periodos: snapshots.map((snapshot) => ({ mes: snapshot.mes, filas: snapshot.rows.length })),
   d1RowsRead: 0,
   d1RowsWritten: 0,
 }, null, 2));

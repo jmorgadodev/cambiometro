@@ -9,20 +9,64 @@ interface PageEntry {
   count: number;
 }
 
-type SortMode = "relevancia" | "sueldo_desc" | "sueldo_asc";
-
-interface ReleaseManifest {
-  source_url: string;
+export interface PeriodSummary {
   mes: string;
-  extraido_en: string;
   total: number;
+  registros_con_monto: number;
+  total_bruto: number;
+  manifest_key: string;
+  comparison: {
+    estado: string;
+    periodo_anterior: string | null;
+    entradas: number;
+    salidas_observadas: number;
+    cambios: number;
+  };
+}
+
+export interface PeriodManifest {
+  mes: string;
+  base_path: string;
+  total: number;
+  registros_con_monto: number;
+  total_bruto: number;
   page_size: number;
   page_count: number;
   pages: PageEntry[];
   sort_pages: Record<"sueldo_desc" | "sueldo_asc", PageEntry[]>;
+  search_index: string;
+  organismos: string[];
+  organismo_pages: Record<string, number[]>;
   cargos: string[];
   cargo_pages: Record<string, number[]>;
-  ambito_pages: Record<"todos" | "gobierno" | "congreso", number[]>;
+  comparison: {
+    estado: string;
+    periodo_anterior: string | null;
+    entradas: number;
+    salidas_observadas: number;
+    cambios: number;
+  };
+}
+
+type SortMode = "relevancia" | "sueldo_desc" | "sueldo_asc";
+
+export interface ReleaseManifest {
+  source_url: string;
+  mes: string;
+  extraido_en: string;
+  total: number;
+  registros_con_monto: number;
+  total_bruto: number;
+  page_size: number;
+  page_count: number;
+  pages: PageEntry[];
+  sort_pages: Record<"sueldo_desc" | "sueldo_asc", PageEntry[]>;
+  periodos: PeriodSummary[];
+  search_index: string;
+  organismos: string[];
+  organismo_pages: Record<string, number[]>;
+  cargos: string[];
+  cargo_pages: Record<string, number[]>;
   comparison: {
     estado: string;
     periodo_anterior: string | null;
@@ -33,6 +77,26 @@ interface ReleaseManifest {
 }
 
 type SearchIndex = Record<string, number[]>;
+
+function currentPeriodFromManifest(manifest: ReleaseManifest): PeriodManifest {
+  return {
+    mes: manifest.mes,
+    base_path: "",
+    total: manifest.total,
+    registros_con_monto: manifest.registros_con_monto,
+    total_bruto: manifest.total_bruto,
+    page_size: manifest.page_size,
+    page_count: manifest.page_count,
+    pages: manifest.pages,
+    sort_pages: manifest.sort_pages,
+    search_index: manifest.search_index,
+    organismos: manifest.organismos,
+    organismo_pages: manifest.organismo_pages,
+    cargos: manifest.cargos,
+    cargo_pages: manifest.cargo_pages,
+    comparison: manifest.comparison,
+  };
+}
 
 const money = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 });
 const number = new Intl.NumberFormat("es-CL");
@@ -58,74 +122,95 @@ export default function Remuneraciones38BisClient({
 }) {
   const [rows, setRows] = useState(initialRows);
   const [query, setQuery] = useState("");
-  const [scope, setScope] = useState<"todos" | "congreso" | "gobierno">("todos");
+  const [organismo, setOrganismo] = useState("todos");
   const [cargo, setCargo] = useState("todos");
   const [sortMode, setSortMode] = useState<SortMode>("relevancia");
+  const [periodo, setPeriodo] = useState(manifest.mes);
+  const [loadedPeriod, setLoadedPeriod] = useState<PeriodManifest | null>(null);
   const [page, setPage] = useState(1);
   const [resultCount, setResultCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selected, setSelected] = useState<Remuneracion38BisRecord | null>(null);
   const [searchIndex, setSearchIndex] = useState<SearchIndex | null>(null);
+  const [searchIndexPeriod, setSearchIndexPeriod] = useState<string | null>(null);
+  const currentPeriod = currentPeriodFromManifest(manifest);
+  const activePeriod = periodo === manifest.mes || loadedPeriod?.mes !== periodo ? currentPeriod : loadedPeriod;
+  const activePeriodReady = activePeriod.mes === periodo;
+
+  useEffect(() => {
+    if (periodo === manifest.mes) return;
+    const summary = manifest.periodos.find((period) => period.mes === periodo);
+    if (!summary) return;
+    let active = true;
+    fetch(`/data/remuneraciones-38bis/${summary.manifest_key}`)
+      .then((response) => {
+        if (!response.ok) throw new Error("No se pudo cargar el corte mensual seleccionado.");
+        return response.json() as Promise<PeriodManifest>;
+      })
+      .then((value) => { if (active) setLoadedPeriod(value); })
+      .catch((reason: Error) => { if (active) setError(reason.message); });
+    return () => { active = false; };
+  }, [manifest.mes, manifest.periodos, periodo]);
 
   useEffect(() => {
     let active = true;
-    fetch("/data/remuneraciones-38bis/search-index.json")
+    fetch(`/data/remuneraciones-38bis/${activePeriod.search_index}`)
       .then((response) => response.json() as Promise<SearchIndex>)
-      .then((value) => { if (active) setSearchIndex(value); })
-      .catch(() => { if (active) setSearchIndex({}); });
+      .then((value) => { if (active) { setSearchIndex(value); setSearchIndexPeriod(activePeriod.mes); } })
+      .catch(() => { if (active) { setSearchIndex({}); setSearchIndexPeriod(activePeriod.mes); } });
     return () => { active = false; };
-  }, []);
+  }, [activePeriod.mes, activePeriod.search_index]);
 
-  const fetchPage = useCallback(async (pageNumber: number, order: SortMode = "relevancia") => {
-    const entries = order === "relevancia" ? manifest.pages : manifest.sort_pages[order];
+  const fetchPage = useCallback(async (pageNumber: number, order: SortMode = "relevancia", period = activePeriod) => {
+    const entries = order === "relevancia" ? period.pages : period.sort_pages[order];
     const entry = entries.find((item) => item.page === pageNumber);
     if (!entry) return [];
     const directory = order === "relevancia" ? "" : order === "sueldo_desc" ? "sueldo-desc/" : "sueldo-asc/";
-    const response = await fetch(`/data/remuneraciones-38bis/${directory}${entry.key}`);
+    const response = await fetch(`/data/remuneraciones-38bis/${period.base_path}${directory}${entry.key}`);
     if (!response.ok) throw new Error("No se pudo cargar esta página del registro.");
     return response.json() as Promise<Remuneracion38BisRecord[]>;
-  }, [manifest.pages, manifest.sort_pages]);
+  }, [activePeriod]);
 
   useEffect(() => {
-    const filterActive = Boolean(query.trim() || cargo !== "todos" || scope !== "todos");
-    if (filterActive || (page === 1 && sortMode === "relevancia")) return;
+    const filterActive = Boolean(query.trim() || cargo !== "todos" || organismo !== "todos");
+    if (!activePeriodReady || filterActive || (page === 1 && sortMode === "relevancia" && periodo === manifest.mes)) return;
     let active = true;
     const timer = window.setTimeout(() => {
       if (!active) return;
       setLoading(true);
       setError(null);
-      fetchPage(page, sortMode)
+      fetchPage(page, sortMode, activePeriod)
         .then((value) => { if (active) setRows(value); })
         .catch((reason: Error) => { if (active) setError(reason.message); })
         .finally(() => { if (active) setLoading(false); });
     }, 0);
     return () => { active = false; window.clearTimeout(timer); };
-  }, [cargo, fetchPage, page, query, scope, sortMode]);
+  }, [activePeriod, activePeriodReady, cargo, fetchPage, manifest.mes, organismo, page, periodo, query, sortMode]);
 
   useEffect(() => {
-    const filterActive = Boolean(query.trim() || cargo !== "todos" || scope !== "todos");
-    if (!filterActive || (query.trim() && !searchIndex)) return;
+    const filterActive = Boolean(query.trim() || cargo !== "todos" || organismo !== "todos");
+    if (!activePeriodReady || !filterActive || (query.trim() && (!searchIndex || searchIndexPeriod !== activePeriod.mes))) return;
     let active = true;
     const terms = normalize(query).split(/\s+/).filter((term) => term.length >= 2);
     const candidatePages = new Set<number>();
     if (terms.length > 0 && searchIndex) {
       for (const term of terms) for (const pageNumber of searchIndex[term] ?? []) candidatePages.add(pageNumber);
     }
-    if (cargo !== "todos") for (const pageNumber of manifest.cargo_pages[cargo] ?? []) candidatePages.add(pageNumber);
-    if (scope !== "todos") for (const pageNumber of manifest.ambito_pages[scope] ?? []) candidatePages.add(pageNumber);
+    if (cargo !== "todos") for (const pageNumber of activePeriod.cargo_pages[cargo] ?? []) candidatePages.add(pageNumber);
+    if (organismo !== "todos") for (const pageNumber of activePeriod.organismo_pages[organismo] ?? []) candidatePages.add(pageNumber);
     const normalizedQuery = normalize(query);
     const timer = window.setTimeout(() => {
       if (!active) return;
       setLoading(true);
       setError(null);
-      Promise.all([...candidatePages].sort((a, b) => a - b).map((pageNumber) => fetchPage(pageNumber)))
+      Promise.all([...candidatePages].sort((a, b) => a - b).map((pageNumber) => fetchPage(pageNumber, "relevancia", activePeriod)))
         .then((groups) => {
           if (!active) return;
           const matches = groups.flat()
             .filter((row) => !normalizedQuery || rowText(row).includes(normalizedQuery))
             .filter((row) => cargo === "todos" || row.cargo === cargo)
-            .filter((row) => scope === "todos" || (scope === "congreso" ? row.partida === "Congreso Nacional" : row.partida !== "Congreso Nacional"))
+            .filter((row) => organismo === "todos" || row.organismo === organismo)
             .sort((left, right) => {
               if (sortMode === "relevancia") return 0;
               const leftValue = left.bruto_mensual ?? -1;
@@ -140,20 +225,17 @@ export default function Remuneraciones38BisClient({
         .finally(() => { if (active) setLoading(false); });
     }, 0);
     return () => { active = false; window.clearTimeout(timer); };
-  }, [cargo, fetchPage, manifest.ambito_pages, manifest.cargo_pages, query, scope, searchIndex, sortMode]);
+  }, [activePeriod, activePeriodReady, cargo, fetchPage, organismo, query, searchIndex, searchIndexPeriod, sortMode]);
 
-  const filterActive = Boolean(query.trim() || cargo !== "todos" || scope !== "todos");
-  const sourceRows = !filterActive && page === 1 && sortMode === "relevancia" ? initialRows : rows;
-  const filteredRows = useMemo(() => sourceRows.filter((row) => {
-    if (scope === "todos") return true;
-    return scope === "congreso" ? row.partida === "Congreso Nacional" : row.partida !== "Congreso Nacional";
-  }).filter((row) => cargo === "todos" || row.cargo === cargo), [cargo, scope, sourceRows]);
-  const pageCount = filterActive ? Math.max(1, Math.ceil((resultCount ?? filteredRows.length) / manifest.page_size)) : manifest.page_count;
-  const visibleRows = filterActive ? filteredRows.slice((page - 1) * manifest.page_size, page * manifest.page_size) : filteredRows;
+  const filterActive = Boolean(query.trim() || cargo !== "todos" || organismo !== "todos");
+  const sourceRows = !filterActive && page === 1 && sortMode === "relevancia" && periodo === manifest.mes ? initialRows : rows;
+  const filteredRows = useMemo(() => sourceRows.filter((row) => organismo === "todos" || row.organismo === organismo).filter((row) => cargo === "todos" || row.cargo === cargo), [cargo, organismo, sourceRows]);
+  const pageCount = filterActive ? Math.max(1, Math.ceil((resultCount ?? filteredRows.length) / activePeriod.page_size)) : activePeriod.page_count;
+  const visibleRows = filterActive ? filteredRows.slice((page - 1) * activePeriod.page_size, page * activePeriod.page_size) : filteredRows;
 
   const showingLabel = filterActive
     ? `${number.format(resultCount ?? filteredRows.length)} coincidencias`
-    : `Página ${page} de ${manifest.page_count}`;
+    : `Página ${page} de ${activePeriod.page_count}`;
 
   return (
     <div className="page-shell" style={{ minHeight: "100vh" }}>
@@ -190,15 +272,16 @@ export default function Remuneraciones38BisClient({
           </div>
 
           <div className="stat-grid" style={{ marginTop: "1.25rem" }}>
-            <div className="stat-tile stat-tile--accent"><div className="stat-tile__value">{number.format(manifest.total)}</div><div className="stat-tile__label">Registros del corte</div><div className="stat-tile__hint">{manifest.mes}</div></div>
-            <div className="stat-tile stat-tile--ok"><div className="stat-tile__value">{manifest.comparison.estado === "comparado" ? number.format(manifest.comparison.entradas) : "—"}</div><div className="stat-tile__label">Nuevos registros</div><div className="stat-tile__hint">{manifest.comparison.estado === "comparado" ? "Frente al corte anterior" : "Se verá desde el próximo corte"}</div></div>
-            <div className="stat-tile stat-tile--warn"><div className="stat-tile__value">{manifest.comparison.estado === "comparado" ? number.format(manifest.comparison.salidas_observadas) : "—"}</div><div className="stat-tile__label">Registros que ya no aparecen</div><div className="stat-tile__hint">No prueba término jurídico</div></div>
-            <div className="stat-tile stat-tile--info"><div className="stat-tile__value">{manifest.comparison.estado === "comparado" ? number.format(manifest.comparison.cambios) : "—"}</div><div className="stat-tile__label">Cambios de monto</div><div className="stat-tile__hint">Se compara mes a mes</div></div>
+            <div className="stat-tile stat-tile--accent"><div className="stat-tile__value">{number.format(activePeriod.total)}</div><div className="stat-tile__label">Registros del corte</div><div className="stat-tile__hint">{activePeriod.mes}</div></div>
+            <div className="stat-tile stat-tile--ok"><div className="stat-tile__value">{activePeriod.comparison.estado === "comparado" ? number.format(activePeriod.comparison.entradas) : "—"}</div><div className="stat-tile__label">Nuevos registros</div><div className="stat-tile__hint">{activePeriod.comparison.estado === "comparado" ? "Frente al mes anterior" : "Primera línea base"}</div></div>
+            <div className="stat-tile stat-tile--warn"><div className="stat-tile__value">{activePeriod.comparison.estado === "comparado" ? number.format(activePeriod.comparison.salidas_observadas) : "—"}</div><div className="stat-tile__label">Registros que ya no aparecen</div><div className="stat-tile__hint">No prueba término jurídico</div></div>
+            <div className="stat-tile stat-tile--info"><div className="stat-tile__value">{activePeriod.comparison.estado === "comparado" ? number.format(activePeriod.comparison.cambios) : "—"}</div><div className="stat-tile__label">Cambios de monto</div><div className="stat-tile__hint">Comparación mensual</div></div>
+            <div className="stat-tile stat-tile--accent"><div className="stat-tile__value">{money.format(activePeriod.total_bruto)}</div><div className="stat-tile__label">Masa bruta publicada</div><div className="stat-tile__hint">{number.format(activePeriod.registros_con_monto)} registros con monto</div></div>
           </div>
 
           <div style={{ marginTop: "1rem", paddingTop: "0.85rem", borderTop: "1px solid var(--border-subtle)", display: "flex", gap: "1rem", flexWrap: "wrap", color: "var(--text-subtle)", fontSize: "0.74rem" }}>
             <span>Actualización: mensual</span>
-            <span>Período publicado: <strong>{manifest.mes}</strong></span>
+            <span>Período publicado: <strong>{activePeriod.mes}</strong></span>
             <a href={manifest.source_url} target="_blank" rel="noopener noreferrer" className="data-link">Ver fuente oficial ↗</a>
           </div>
         </section>
@@ -219,11 +302,16 @@ export default function Remuneraciones38BisClient({
               <input className="form-input" type="search" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); setResultCount(null); }} placeholder="Ej. Ministerio del Interior" aria-label="Buscar remuneraciones públicas" />
             </label>
             <label style={{ display: "flex", flexDirection: "column", gap: "0.3rem", fontSize: "0.74rem", fontWeight: 700 }}>
-              Ámbito
-              <select className="form-input" value={scope} onChange={(event) => { setScope(event.target.value as typeof scope); setPage(1); setResultCount(null); }} aria-label="Filtrar por ámbito">
-                <option value="todos">Todos los registros</option>
-                <option value="gobierno">Gobierno y otros organismos</option>
-                <option value="congreso">Congreso Nacional</option>
+              Mes publicado
+              <select className="form-input" value={periodo} onChange={(event) => { setPeriodo(event.target.value); setPage(1); setResultCount(null); setRows([]); }} aria-label="Filtrar por mes publicado">
+                {manifest.periodos.map((period) => <option key={period.mes} value={period.mes}>{period.mes}</option>)}
+              </select>
+            </label>
+            <label style={{ display: "flex", flexDirection: "column", gap: "0.3rem", fontSize: "0.74rem", fontWeight: 700 }}>
+              Organismo
+              <select className="form-input" value={organismo} onChange={(event) => { setOrganismo(event.target.value); setPage(1); setResultCount(null); }} aria-label="Filtrar por organismo">
+                <option value="todos">Todos los organismos</option>
+                {activePeriod.organismos.map((option) => <option key={option} value={option}>{option}</option>)}
               </select>
             </label>
             <label style={{ display: "flex", flexDirection: "column", gap: "0.3rem", fontSize: "0.74rem", fontWeight: 700 }}>
@@ -248,7 +336,7 @@ export default function Remuneraciones38BisClient({
 
           <div className="table-shell" style={{ marginTop: "1rem", overflowX: "auto" }}>
             <table className="data-table" style={{ width: "100%" }}>
-              <caption className="sr-only">Registros de remuneraciones públicas del corte {manifest.mes}</caption>
+              <caption className="sr-only">Registros de remuneraciones públicas del corte {activePeriod.mes}</caption>
               <thead><tr><th>Persona</th><th>Organismo</th><th>Cargo</th><th>Bruto del mes</th><th aria-label="Acciones" /></tr></thead>
               <tbody>
                 {visibleRows.map((row) => (
@@ -276,7 +364,10 @@ export default function Remuneraciones38BisClient({
           <span className="eyebrow">Cómo leer estos cambios</span>
           <h2 id="method-title" style={{ margin: "0.25rem 0 0.4rem", fontSize: "1.15rem" }}>Auditoría mensual, no una acusación automática</h2>
           <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.84rem", lineHeight: 1.7 }}>
-            La fuente publica un corte mensual, pero no entrega en este registro la fecha de contratación, término o acto administrativo de cada persona. Por eso no presentamos “contrataciones” como hechos: desde el segundo corte podremos detectar registros que aparecen, dejan de aparecer o cambian de monto. Esas señales orientan la revisión y conservan el período, la fuente y el valor original.
+            La fuente publica un corte mensual, pero no entrega en este registro la fecha de contratación, término, jornada, descuentos ni acto administrativo de cada persona. Por eso no presentamos “contrataciones” como hechos: al comparar meses detectamos registros que aparecen, dejan de aparecer o cambian de monto. Un valor bajo, como $216.323, es el monto que la institución reportó para ese corte; sin jornada ni explicación publicada no corresponde convertirlo en un error ni recalcularlo.
+          </p>
+          <p style={{ margin: "0.8rem 0 0", color: "var(--text-muted)", fontSize: "0.84rem", lineHeight: 1.7 }}>
+            El primer corte completo funciona como línea base. Desde el mes siguiente se pueden contar entradas observadas, salidas observadas y cambios de monto, además de comparar la masa bruta publicada de cada mes. Los registros “NO REPORTADO” permanecen visibles y no se suman como cero. Una entrada o salida orienta una revisión, pero no prueba por sí sola un nombramiento o término jurídico. Una misma persona puede aparecer más de una vez si la fuente reporta cargos u organismos distintos.
           </p>
         </section>
       </main>
@@ -292,9 +383,9 @@ export default function Remuneraciones38BisClient({
               <div><dt style={{ color: "var(--text-subtle)" }}>Organismo</dt><dd style={{ margin: 0, fontWeight: 700 }}>{selected.organismo}</dd></div>
               <div><dt style={{ color: "var(--text-subtle)" }}>Partida</dt><dd style={{ margin: 0, fontWeight: 700 }}>{selected.partida}</dd></div>
               <div><dt style={{ color: "var(--text-subtle)" }}>Cargo o perfil</dt><dd style={{ margin: 0, fontWeight: 700 }}>{selected.cargo}</dd></div>
-              <div><dt style={{ color: "var(--text-subtle)" }}>Remuneración bruta</dt><dd style={{ margin: 0, fontWeight: 700, fontFamily: "var(--font-mono)" }}>{selected.bruto_mensual === null ? "No reportado" : money.format(selected.bruto_mensual)}</dd></div>
+              <div><dt style={{ color: "var(--text-subtle)" }}>Remuneración bruta reportada</dt><dd style={{ margin: 0, fontWeight: 700, fontFamily: "var(--font-mono)" }}>{selected.bruto_mensual === null ? "No reportado" : money.format(selected.bruto_mensual)}</dd></div>
             </dl>
-            <p style={{ margin: "1.25rem 0 0", color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: 1.6 }}>Este registro corresponde al corte {manifest.mes}. La ficha no interpreta por sí sola la legalidad o pertinencia del nombramiento.</p>
+            <p style={{ margin: "1.25rem 0 0", color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: 1.6 }}>Este registro corresponde al corte {activePeriod.mes}. La fuente no publica aquí jornada, fecha de contratación, descuentos ni motivo del monto. La ficha conserva el dato informado y no interpreta por sí sola la legalidad o pertinencia del nombramiento.</p>
           </div>
         </div>
       )}

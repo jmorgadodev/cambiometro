@@ -19,18 +19,18 @@ export const NAV_CLUSTERS = [
   {
     clusterName: "Poder & Decisión",
     items: [
-      { href: "/politico", label: "Análisis Parlamentario" },
+      { href: "/politico", label: "Análisis Parlamentario", shortLabel: "Parlamentario" },
       { href: "/partidos", label: "Partidos" },
-      { href: "/votaciones-destacadas/", label: "Votaciones destacadas" },
-      { href: "/personas", label: "Directorio de Personas" },
-      { href: "/remuneraciones-publicas", label: "Remuneraciones públicas" },
+      { href: "/votaciones-destacadas/", label: "Votaciones destacadas", shortLabel: "Votaciones" },
+      { href: "/personas", label: "Directorio de Personas", shortLabel: "Personas" },
+      { href: "/remuneraciones-publicas", label: "Remuneraciones públicas", shortLabel: "Remuneraciones" },
     ],
   },
   {
     clusterName: "Ejecución & Territorio",
     items: [
-      { href: "/servicios-publicos", label: "Servicios públicos" },
-      { href: "/municipalidades", label: "Municipalidades" },
+      { href: "/servicios-publicos", label: "Servicios públicos", shortLabel: "Servicios" },
+      { href: "/municipalidades", label: "Municipalidades", shortLabel: "Municipios" },
       { href: "/transferencias", label: "Transferencias" },
     ],
   },
@@ -214,7 +214,8 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
                       className="site-nav__link"
                       aria-current={isActive ? "page" : undefined}
                     >
-                      {item.label}
+                      <span aria-hidden="true">{item.shortLabel ?? item.label}</span>
+                      <span className="sr-only">{item.label}</span>
                     </Link>
                   );
                 })}

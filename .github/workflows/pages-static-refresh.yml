@@ -221,6 +221,9 @@ jobs:
         shell: bash
         run: |
           if npx wrangler r2 object get transparencia-public-data/projections/remuneraciones-38bis-v1/current.json --file data/remuneraciones-38bis-publico.json --remote; then
+            if ! npx wrangler r2 object get transparencia-public-data/projections/remuneraciones-38bis-v1/current-history.json --file data/remuneraciones-38bis-publico-historico.json --remote; then
+              echo "::warning::No existe historial mensual remoto; se conserva el fallback versionado."
+            fi
             npx wrangler r2 object get transparencia-public-data/projections/remuneraciones-38bis-v1/current-audit.json --file data/remuneraciones-38bis-publico-audit.json --remote
           else
             echo "::warning::No existe release R2 de remuneraciones 38 bis; se conserva el baseline versionado."
@@ -305,6 +308,7 @@ jobs:
             transparencia-app/data/municipalidades-data.json
             transparencia-app/data/municipalidades-list.json
             transparencia-app/data/remuneraciones-38bis-publico.json
+            transparencia-app/data/remuneraciones-38bis-publico-historico.json
             transparencia-app/data/remuneraciones-38bis-publico-audit.json
             transparencia-app/data/remuneraciones-38bis-publico-manifest.json
             transparencia-app/public/data/transferencias
