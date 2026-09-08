@@ -9,6 +9,8 @@ interface PageEntry {
   count: number;
 }
 
+type SortMode = "relevancia" | "sueldo_desc" | "sueldo_asc";
+
 interface ReleaseManifest {
   source_url: string;
   mes: string;
@@ -16,16 +18,17 @@ interface ReleaseManifest {
   total: number;
   page_size: number;
   page_count: number;
-  checksum_sha256: string;
   pages: PageEntry[];
-  audit: {
+  sort_pages: Record<"sueldo_desc" | "sueldo_asc", PageEntry[]>;
+  cargos: string[];
+  cargo_pages: Record<string, number[]>;
+  ambito_pages: Record<"todos" | "gobierno" | "congreso", number[]>;
+  comparison: {
     estado: string;
     periodo_anterior: string | null;
     entradas: number;
     salidas_observadas: number;
     cambios: number;
-    d1_rows_read: number;
-    d1_rows_written: number;
   };
 }
 
@@ -56,6 +59,8 @@ export default function Remuneraciones38BisClient({
   const [rows, setRows] = useState(initialRows);
   const [query, setQuery] = useState("");
   const [scope, setScope] = useState<"todos" | "congreso" | "gobierno">("todos");
+  const [cargo, setCargo] = useState("todos");
+  const [sortMode, setSortMode] = useState<SortMode>("relevancia");
   const [page, setPage] = useState(1);
   const [resultCount, setResultCount] = useState<number | null>(null);
   const [loading, setLoading] = useState(false);
@@ -72,43 +77,61 @@ export default function Remuneraciones38BisClient({
     return () => { active = false; };
   }, []);
 
-  const fetchPage = useCallback(async (pageNumber: number) => {
-    const entry = manifest.pages.find((item) => item.page === pageNumber);
+  const fetchPage = useCallback(async (pageNumber: number, order: SortMode = "relevancia") => {
+    const entries = order === "relevancia" ? manifest.pages : manifest.sort_pages[order];
+    const entry = entries.find((item) => item.page === pageNumber);
     if (!entry) return [];
-    const response = await fetch(`/data/remuneraciones-38bis/${entry.key}`);
+    const directory = order === "relevancia" ? "" : order === "sueldo_desc" ? "sueldo-desc/" : "sueldo-asc/";
+    const response = await fetch(`/data/remuneraciones-38bis/${directory}${entry.key}`);
     if (!response.ok) throw new Error("No se pudo cargar esta página del registro.");
     return response.json() as Promise<Remuneracion38BisRecord[]>;
-  }, [manifest.pages]);
+  }, [manifest.pages, manifest.sort_pages]);
 
   useEffect(() => {
-    if (page === 1 || query.trim()) return;
+    const filterActive = Boolean(query.trim() || cargo !== "todos" || scope !== "todos");
+    if (filterActive || (page === 1 && sortMode === "relevancia")) return;
     let active = true;
     const timer = window.setTimeout(() => {
       if (!active) return;
       setLoading(true);
       setError(null);
-      fetchPage(page)
+      fetchPage(page, sortMode)
         .then((value) => { if (active) setRows(value); })
         .catch((reason: Error) => { if (active) setError(reason.message); })
         .finally(() => { if (active) setLoading(false); });
     }, 0);
     return () => { active = false; window.clearTimeout(timer); };
-  }, [fetchPage, page, query]);
+  }, [cargo, fetchPage, page, query, scope, sortMode]);
 
   useEffect(() => {
-    if (!query.trim() || !searchIndex) return;
+    const filterActive = Boolean(query.trim() || cargo !== "todos" || scope !== "todos");
+    if (!filterActive || (query.trim() && !searchIndex)) return;
     let active = true;
     const terms = normalize(query).split(/\s+/).filter((term) => term.length >= 2);
     const candidatePages = new Set<number>();
-    for (const term of terms) for (const pageNumber of searchIndex[term] ?? []) candidatePages.add(pageNumber);
+    if (terms.length > 0 && searchIndex) {
+      for (const term of terms) for (const pageNumber of searchIndex[term] ?? []) candidatePages.add(pageNumber);
+    }
+    if (cargo !== "todos") for (const pageNumber of manifest.cargo_pages[cargo] ?? []) candidatePages.add(pageNumber);
+    if (scope !== "todos") for (const pageNumber of manifest.ambito_pages[scope] ?? []) candidatePages.add(pageNumber);
+    const normalizedQuery = normalize(query);
     const timer = window.setTimeout(() => {
       if (!active) return;
       setLoading(true);
       setError(null);
-      Promise.all([...candidatePages].sort((a, b) => a - b).map(fetchPage))
+      Promise.all([...candidatePages].sort((a, b) => a - b).map((pageNumber) => fetchPage(pageNumber)))
         .then((groups) => {
           if (!active) return;
-          const matches = groups.flat().filter((row) => rowText(row).includes(normalize(query)));
+          const matches = groups.flat()
+            .filter((row) => !normalizedQuery || rowText(row).includes(normalizedQuery))
+            .filter((row) => cargo === "todos" || row.cargo === cargo)
+            .filter((row) => scope === "todos" || (scope === "congreso" ? row.partida === "Congreso Nacional" : row.partida !== "Congreso Nacional"))
+            .sort((left, right) => {
+              if (sortMode === "relevancia") return 0;
+              const leftValue = left.bruto_mensual ?? -1;
+              const rightValue = right.bruto_mensual ?? -1;
+              return sortMode === "sueldo_desc" ? rightValue - leftValue : leftValue - rightValue;
+            });
           setRows(matches);
           setResultCount(matches.length);
           setPage(1);
@@ -117,15 +140,18 @@ export default function Remuneraciones38BisClient({
         .finally(() => { if (active) setLoading(false); });
     }, 0);
     return () => { active = false; window.clearTimeout(timer); };
-  }, [fetchPage, query, searchIndex]);
+  }, [cargo, fetchPage, manifest.ambito_pages, manifest.cargo_pages, query, scope, searchIndex, sortMode]);
 
-  const sourceRows = !query.trim() && page === 1 ? initialRows : rows;
+  const filterActive = Boolean(query.trim() || cargo !== "todos" || scope !== "todos");
+  const sourceRows = !filterActive && page === 1 && sortMode === "relevancia" ? initialRows : rows;
   const filteredRows = useMemo(() => sourceRows.filter((row) => {
     if (scope === "todos") return true;
     return scope === "congreso" ? row.partida === "Congreso Nacional" : row.partida !== "Congreso Nacional";
-  }), [sourceRows, scope]);
+  }).filter((row) => cargo === "todos" || row.cargo === cargo), [cargo, scope, sourceRows]);
+  const pageCount = filterActive ? Math.max(1, Math.ceil((resultCount ?? filteredRows.length) / manifest.page_size)) : manifest.page_count;
+  const visibleRows = filterActive ? filteredRows.slice((page - 1) * manifest.page_size, page * manifest.page_size) : filteredRows;
 
-  const showingLabel = query.trim()
+  const showingLabel = filterActive
     ? `${number.format(resultCount ?? filteredRows.length)} coincidencias`
     : `Página ${page} de ${manifest.page_count}`;
 
@@ -160,20 +186,20 @@ export default function Remuneraciones38BisClient({
                 La información es reportada por las instituciones responsables.
               </p>
             </div>
-            <span className="badge badge-ok">R2 · D1 no utilizado</span>
+            <span className="badge badge-ok">Registro mensual</span>
           </div>
 
           <div className="stat-grid" style={{ marginTop: "1.25rem" }}>
             <div className="stat-tile stat-tile--accent"><div className="stat-tile__value">{number.format(manifest.total)}</div><div className="stat-tile__label">Registros del corte</div><div className="stat-tile__hint">{manifest.mes}</div></div>
-            <div className="stat-tile stat-tile--ok"><div className="stat-tile__value">{number.format(manifest.audit.entradas)}</div><div className="stat-tile__label">Entradas observadas</div><div className="stat-tile__hint">{manifest.audit.estado === "linea_base" ? "Línea base inicial" : "Frente al corte anterior"}</div></div>
-            <div className="stat-tile stat-tile--warn"><div className="stat-tile__value">{number.format(manifest.audit.salidas_observadas)}</div><div className="stat-tile__label">Salidas observadas</div><div className="stat-tile__hint">No prueba término jurídico</div></div>
-            <div className="stat-tile stat-tile--info"><div className="stat-tile__value">{number.format(manifest.audit.cambios)}</div><div className="stat-tile__label">Cambios de monto</div><div className="stat-tile__hint">Comparación mensual</div></div>
+            <div className="stat-tile stat-tile--ok"><div className="stat-tile__value">{manifest.comparison.estado === "comparado" ? number.format(manifest.comparison.entradas) : "—"}</div><div className="stat-tile__label">Nuevos registros</div><div className="stat-tile__hint">{manifest.comparison.estado === "comparado" ? "Frente al corte anterior" : "Se verá desde el próximo corte"}</div></div>
+            <div className="stat-tile stat-tile--warn"><div className="stat-tile__value">{manifest.comparison.estado === "comparado" ? number.format(manifest.comparison.salidas_observadas) : "—"}</div><div className="stat-tile__label">Registros que ya no aparecen</div><div className="stat-tile__hint">No prueba término jurídico</div></div>
+            <div className="stat-tile stat-tile--info"><div className="stat-tile__value">{manifest.comparison.estado === "comparado" ? number.format(manifest.comparison.cambios) : "—"}</div><div className="stat-tile__label">Cambios de monto</div><div className="stat-tile__hint">Se compara mes a mes</div></div>
           </div>
 
           <div style={{ marginTop: "1rem", paddingTop: "0.85rem", borderTop: "1px solid var(--border-subtle)", display: "flex", gap: "1rem", flexWrap: "wrap", color: "var(--text-subtle)", fontSize: "0.74rem" }}>
-            <span>Checksum: <code>{manifest.checksum_sha256.slice(0, 16)}…</code></span>
-            <span>Filas leídas desde D1: <strong style={{ color: "var(--ok)" }}>{manifest.audit.d1_rows_read}</strong></span>
-            <a href={manifest.source_url} target="_blank" rel="noopener noreferrer" className="data-link">Fuente oficial ↗</a>
+            <span>Actualización: mensual</span>
+            <span>Período publicado: <strong>{manifest.mes}</strong></span>
+            <a href={manifest.source_url} target="_blank" rel="noopener noreferrer" className="data-link">Ver fuente oficial ↗</a>
           </div>
         </section>
 
@@ -187,17 +213,32 @@ export default function Remuneraciones38BisClient({
             <span style={{ color: "var(--text-subtle)", fontSize: "0.78rem" }}>{showingLabel}</span>
           </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "minmax(220px, 1fr) 220px", gap: "0.75rem", marginTop: "1rem" }}>
+          <div className="remuneraciones-filters" style={{ marginTop: "1rem" }}>
             <label style={{ display: "flex", flexDirection: "column", gap: "0.3rem", fontSize: "0.74rem", fontWeight: 700 }}>
               Buscar
-              <input className="form-input" type="search" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); }} placeholder="Ej. Ministerio del Interior" aria-label="Buscar remuneraciones públicas" />
+              <input className="form-input" type="search" value={query} onChange={(event) => { setQuery(event.target.value); setPage(1); setResultCount(null); }} placeholder="Ej. Ministerio del Interior" aria-label="Buscar remuneraciones públicas" />
             </label>
             <label style={{ display: "flex", flexDirection: "column", gap: "0.3rem", fontSize: "0.74rem", fontWeight: 700 }}>
               Ámbito
-              <select className="form-input" value={scope} onChange={(event) => setScope(event.target.value as typeof scope)} aria-label="Filtrar por ámbito">
+              <select className="form-input" value={scope} onChange={(event) => { setScope(event.target.value as typeof scope); setPage(1); setResultCount(null); }} aria-label="Filtrar por ámbito">
                 <option value="todos">Todos los registros</option>
                 <option value="gobierno">Gobierno y otros organismos</option>
                 <option value="congreso">Congreso Nacional</option>
+              </select>
+            </label>
+            <label style={{ display: "flex", flexDirection: "column", gap: "0.3rem", fontSize: "0.74rem", fontWeight: 700 }}>
+              Cargo
+              <select className="form-input" value={cargo} onChange={(event) => { setCargo(event.target.value); setPage(1); setResultCount(null); }} aria-label="Filtrar por cargo">
+                <option value="todos">Todos los cargos</option>
+                {manifest.cargos.map((option) => <option key={option} value={option}>{option}</option>)}
+              </select>
+            </label>
+            <label style={{ display: "flex", flexDirection: "column", gap: "0.3rem", fontSize: "0.74rem", fontWeight: 700 }}>
+              Ordenar sueldo
+              <select className="form-input" value={sortMode} onChange={(event) => { setSortMode(event.target.value as SortMode); setPage(1); setResultCount(null); }} aria-label="Ordenar por sueldo">
+                <option value="relevancia">Orden original de la fuente</option>
+                <option value="sueldo_desc">Mayor a menor</option>
+                <option value="sueldo_asc">Menor a mayor</option>
               </select>
             </label>
           </div>
@@ -210,7 +251,7 @@ export default function Remuneraciones38BisClient({
               <caption className="sr-only">Registros de remuneraciones públicas del corte {manifest.mes}</caption>
               <thead><tr><th>Persona</th><th>Organismo</th><th>Cargo</th><th>Bruto del mes</th><th aria-label="Acciones" /></tr></thead>
               <tbody>
-                {filteredRows.map((row) => (
+                {visibleRows.map((row) => (
                   <tr key={`${row.nombre}-${row.organismo}-${row.cargo}`}>
                     <td><strong>{row.nombre}</strong><small>{row.partida}</small></td>
                     <td>{row.organismo}</td>
@@ -219,23 +260,23 @@ export default function Remuneraciones38BisClient({
                     <td><button type="button" className="btn btn-ghost" style={{ padding: "0.35rem 0.55rem", fontSize: "0.74rem" }} onClick={() => setSelected(row)}>Ver ficha</button></td>
                   </tr>
                 ))}
-                {!loading && filteredRows.length === 0 && <tr><td colSpan={5}><div role="status" style={{ padding: "2rem 0", textAlign: "center", color: "var(--text-muted)" }}>No encontramos registros con esos filtros.</div></td></tr>}
+                {!loading && visibleRows.length === 0 && <tr><td colSpan={5}><div role="status" style={{ padding: "2rem 0", textAlign: "center", color: "var(--text-muted)" }}>No encontramos registros con esos filtros.</div></td></tr>}
               </tbody>
             </table>
           </div>
 
-          {!query.trim() && <nav aria-label="Paginación de remuneraciones" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", marginTop: "1rem" }}>
+          <nav aria-label="Paginación de remuneraciones" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", marginTop: "1rem" }}>
             <button type="button" className="btn btn-ghost" disabled={page <= 1 || loading} onClick={() => setPage((value) => Math.max(1, value - 1))}>← Anterior</button>
-            <span style={{ color: "var(--text-subtle)", fontSize: "0.75rem" }}>Página {page} / {manifest.page_count}</span>
-            <button type="button" className="btn btn-ghost" disabled={page >= manifest.page_count || loading} onClick={() => setPage((value) => Math.min(manifest.page_count, value + 1))}>Siguiente →</button>
-          </nav>}
+            <span style={{ color: "var(--text-subtle)", fontSize: "0.75rem" }}>Página {page} / {pageCount}</span>
+            <button type="button" className="btn btn-ghost" disabled={page >= pageCount || loading} onClick={() => setPage((value) => Math.min(pageCount, value + 1))}>Siguiente →</button>
+          </nav>
         </section>
 
         <section className="card" aria-labelledby="method-title">
           <span className="eyebrow">Cómo leer estos cambios</span>
           <h2 id="method-title" style={{ margin: "0.25rem 0 0.4rem", fontSize: "1.15rem" }}>Auditoría mensual, no una acusación automática</h2>
           <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.84rem", lineHeight: 1.7 }}>
-            Una entrada significa que el registro aparece en el nuevo corte; una salida observada significa que dejó de aparecer; un cambio significa que varió el monto publicado. Estos indicadores orientan la revisión y siempre conservan el período, la fuente y el valor original.
+            La fuente publica un corte mensual, pero no entrega en este registro la fecha de contratación, término o acto administrativo de cada persona. Por eso no presentamos “contrataciones” como hechos: desde el segundo corte podremos detectar registros que aparecen, dejan de aparecer o cambian de monto. Esas señales orientan la revisión y conservan el período, la fuente y el valor original.
           </p>
         </section>
       </main>

@@ -7,7 +7,6 @@
   "total": 1064,
   "page_size": 40,
   "page_count": 27,
-  "checksum_sha256": "3165437712216d109364555b1cd68ce89a43e2aa4a120c32ed46d755093cf6c6",
   "pages": [
     {
       "page": 1,
@@ -145,6 +144,545 @@
       "count": 24
     }
   ],
+  "sort_pages": {
+    "sueldo_desc": [
+      {
+        "page": 1,
+        "key": "page-0001.json",
+        "count": 40
+      },
+      {
+        "page": 2,
+        "key": "page-0002.json",
+        "count": 40
+      },
+      {
+        "page": 3,
+        "key": "page-0003.json",
+        "count": 40
+      },
+      {
+        "page": 4,
+        "key": "page-0004.json",
+        "count": 40
+      },
+      {
+        "page": 5,
+        "key": "page-0005.json",
+        "count": 40
+      },
+      {
+        "page": 6,
+        "key": "page-0006.json",
+        "count": 40
+      },
+      {
+        "page": 7,
+        "key": "page-0007.json",
+        "count": 40
+      },
+      {
+        "page": 8,
+        "key": "page-0008.json",
+        "count": 40
+      },
+      {
+        "page": 9,
+        "key": "page-0009.json",
+        "count": 40
+      },
+      {
+        "page": 10,
+        "key": "page-0010.json",
+        "count": 40
+      },
+      {
+        "page": 11,
+        "key": "page-0011.json",
+        "count": 40
+      },
+      {
+        "page": 12,
+        "key": "page-0012.json",
+        "count": 40
+      },
+      {
+        "page": 13,
+        "key": "page-0013.json",
+        "count": 40
+      },
+      {
+        "page": 14,
+        "key": "page-0014.json",
+        "count": 40
+      },
+      {
+        "page": 15,
+        "key": "page-0015.json",
+        "count": 40
+      },
+      {
+        "page": 16,
+        "key": "page-0016.json",
+        "count": 40
+      },
+      {
+        "page": 17,
+        "key": "page-0017.json",
+        "count": 40
+      },
+      {
+        "page": 18,
+        "key": "page-0018.json",
+        "count": 40
+      },
+      {
+        "page": 19,
+        "key": "page-0019.json",
+        "count": 40
+      },
+      {
+        "page": 20,
+        "key": "page-0020.json",
+        "count": 40
+      },
+      {
+        "page": 21,
+        "key": "page-0021.json",
+        "count": 40
+      },
+      {
+        "page": 22,
+        "key": "page-0022.json",
+        "count": 40
+      },
+      {
+        "page": 23,
+        "key": "page-0023.json",
+        "count": 40
+      },
+      {
+        "page": 24,
+        "key": "page-0024.json",
+        "count": 40
+      },
+      {
+        "page": 25,
+        "key": "page-0025.json",
+        "count": 40
+      },
+      {
+        "page": 26,
+        "key": "page-0026.json",
+        "count": 40
+      },
+      {
+        "page": 27,
+        "key": "page-0027.json",
+        "count": 24
+      }
+    ],
+    "sueldo_asc": [
+      {
+        "page": 1,
+        "key": "page-0001.json",
+        "count": 40
+      },
+      {
+        "page": 2,
+        "key": "page-0002.json",
+        "count": 40
+      },
+      {
+        "page": 3,
+        "key": "page-0003.json",
+        "count": 40
+      },
+      {
+        "page": 4,
+        "key": "page-0004.json",
+        "count": 40
+      },
+      {
+        "page": 5,
+        "key": "page-0005.json",
+        "count": 40
+      },
+      {
+        "page": 6,
+        "key": "page-0006.json",
+        "count": 40
+      },
+      {
+        "page": 7,
+        "key": "page-0007.json",
+        "count": 40
+      },
+      {
+        "page": 8,
+        "key": "page-0008.json",
+        "count": 40
+      },
+      {
+        "page": 9,
+        "key": "page-0009.json",
+        "count": 40
+      },
+      {
+        "page": 10,
+        "key": "page-0010.json",
+        "count": 40
+      },
+      {
+        "page": 11,
+        "key": "page-0011.json",
+        "count": 40
+      },
+      {
+        "page": 12,
+        "key": "page-0012.json",
+        "count": 40
+      },
+      {
+        "page": 13,
+        "key": "page-0013.json",
+        "count": 40
+      },
+      {
+        "page": 14,
+        "key": "page-0014.json",
+        "count": 40
+      },
+      {
+        "page": 15,
+        "key": "page-0015.json",
+        "count": 40
+      },
+      {
+        "page": 16,
+        "key": "page-0016.json",
+        "count": 40
+      },
+      {
+        "page": 17,
+        "key": "page-0017.json",
+        "count": 40
+      },
+      {
+        "page": 18,
+        "key": "page-0018.json",
+        "count": 40
+      },
+      {
+        "page": 19,
+        "key": "page-0019.json",
+        "count": 40
+      },
+      {
+        "page": 20,
+        "key": "page-0020.json",
+        "count": 40
+      },
+      {
+        "page": 21,
+        "key": "page-0021.json",
+        "count": 40
+      },
+      {
+        "page": 22,
+        "key": "page-0022.json",
+        "count": 40
+      },
+      {
+        "page": 23,
+        "key": "page-0023.json",
+        "count": 40
+      },
+      {
+        "page": 24,
+        "key": "page-0024.json",
+        "count": 40
+      },
+      {
+        "page": 25,
+        "key": "page-0025.json",
+        "count": 40
+      },
+      {
+        "page": 26,
+        "key": "page-0026.json",
+        "count": 40
+      },
+      {
+        "page": 27,
+        "key": "page-0027.json",
+        "count": 24
+      }
+    ]
+  },
+  "cargos": [
+    "ASESOR DE COMUNICACIONES",
+    "ASESOR ESTRATÉGICO O PRINCIPAL",
+    "ASESOR JUNIOR",
+    "ASESOR SENIOR",
+    "CONSEJERO",
+    "COORDINADOR DE ASESORES",
+    "DELEGADO PRESIDENCIAL PROVINCIAL",
+    "DELEGADO PRESIDENCIAL REGIONAL",
+    "DIPUTADO",
+    "DIRECTOR",
+    "DIRECTOR ADMINISTRATIVO",
+    "DIRECTOR GENERAL",
+    "FISCAL",
+    "GERENTE GENERAL EJECUTIVO",
+    "GOBERNADOR",
+    "MINISTRO",
+    "PRESIDENTE",
+    "PRESIDENTE DE LA CÁMARA DE DIPUTADOS Y DIPUTADAS",
+    "PRESIDENTE DE LA REPÚBLICA",
+    "PRESIDENTE DEL DIRECTORIO",
+    "PRESIDENTE DEL SENADO",
+    "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
+    "SENADOR",
+    "SUBSECRETARIO",
+    "SUPERINTENDENTE",
+    "VICEPRESIDENTE",
+    "VICEPRESIDENTE DE LA CÁMARA DE DIPUTADOS Y DIPUTADAS",
+    "VICEPRESIDENTE DEL CONSEJO DIRECTIVO",
+    "VICEPRESIDENTE DEL SENADO"
+  ],
+  "cargo_pages": {
+    "PRESIDENTE DE LA REPÚBLICA": [
+      1
+    ],
+    "DIRECTOR ADMINISTRATIVO": [
+      1
+    ],
+    "COORDINADOR DE ASESORES": [
+      1,
+      8,
+      9,
+      10
+    ],
+    "PRESIDENTE DEL SENADO": [
+      1
+    ],
+    "VICEPRESIDENTE DEL SENADO": [
+      1
+    ],
+    "SENADOR": [
+      1,
+      2
+    ],
+    "PRESIDENTE DE LA CÁMARA DE DIPUTADOS Y DIPUTADAS": [
+      2
+    ],
+    "VICEPRESIDENTE DE LA CÁMARA DE DIPUTADOS Y DIPUTADAS": [
+      2
+    ],
+    "DIPUTADO": [
+      2,
+      3,
+      4,
+      5,
+      6
+    ],
+    "MINISTRO": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "SUBSECRETARIO": [
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "DELEGADO PRESIDENCIAL REGIONAL": [
+      6
+    ],
+    "DELEGADO PRESIDENCIAL PROVINCIAL": [
+      6,
+      7
+    ],
+    "DIRECTOR GENERAL": [
+      7
+    ],
+    "DIRECTOR": [
+      7,
+      8,
+      10,
+      11,
+      12,
+      13,
+      14,
+      16
+    ],
+    "SECRETARIO REGIONAL MINISTERIAL (SEREMI)": [
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18
+    ],
+    "PRESIDENTE": [
+      9
+    ],
+    "VICEPRESIDENTE DEL CONSEJO DIRECTIVO": [
+      9
+    ],
+    "FISCAL": [
+      9
+    ],
+    "GERENTE GENERAL EJECUTIVO": [
+      9
+    ],
+    "PRESIDENTE DEL DIRECTORIO": [
+      9
+    ],
+    "VICEPRESIDENTE": [
+      10
+    ],
+    "SUPERINTENDENTE": [
+      12,
+      13
+    ],
+    "CONSEJERO": [
+      14,
+      16
+    ],
+    "GOBERNADOR": [
+      18
+    ],
+    "ASESOR ESTRATÉGICO O PRINCIPAL": [
+      18,
+      21,
+      25
+    ],
+    "ASESOR SENIOR": [
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27
+    ],
+    "ASESOR DE COMUNICACIONES": [
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27
+    ],
+    "ASESOR JUNIOR": [
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27
+    ]
+  },
+  "ambito_pages": {
+    "todos": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27
+    ],
+    "gobierno": [
+      1,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27
+    ],
+    "congreso": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6
+    ]
+  },
   "initial_rows": [
     {
       "partida": "Presidencia",
@@ -427,13 +965,11 @@
       "bruto_mensual": 8239091
     }
   ],
-  "audit": {
+  "comparison": {
     "estado": "linea_base",
     "periodo_anterior": null,
     "entradas": 0,
     "salidas_observadas": 0,
-    "cambios": 0,
-    "d1_rows_read": 0,
-    "d1_rows_written": 0
+    "cambios": 0
   }
 }
