@@ -361,7 +361,18 @@ export default function Remuneraciones38BisClient({
 
   const filterActive = Boolean(query.trim() || cargo !== "todos" || organismo !== "todos");
   const sourceRows = !filterActive && page === 1 && sortMode === "relevancia" && periodo === manifest.mes ? initialRows : rows;
-  const filteredRows = useMemo(() => sourceRows.filter((row) => organismo === "todos" || row.organismo === organismo).filter((row) => cargo === "todos" || row.cargo === cargo).sort(compareNames), [cargo, organismo, sourceRows]);
+  const filteredRows = useMemo(() => {
+    const filtered = sourceRows
+      .filter((row) => organismo === "todos" || row.organismo === organismo)
+      .filter((row) => cargo === "todos" || row.cargo === cargo);
+    if (sortMode === "relevancia") return filtered.sort(compareNames);
+    return filtered.sort((left, right) => {
+      const leftValue = left.bruto_mensual ?? -1;
+      const rightValue = right.bruto_mensual ?? -1;
+      const salaryOrder = sortMode === "sueldo_desc" ? rightValue - leftValue : leftValue - rightValue;
+      return salaryOrder || compareNames(left, right);
+    });
+  }, [cargo, organismo, sortMode, sourceRows]);
   const pageCount = filterActive ? Math.max(1, Math.ceil((resultCount ?? filteredRows.length) / activePeriod.page_size)) : activePeriod.page_count;
   const visibleRows = filterActive ? filteredRows.slice((page - 1) * activePeriod.page_size, page * activePeriod.page_size) : filteredRows;
 

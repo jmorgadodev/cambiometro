@@ -232,6 +232,25 @@ async function main() {
     errors: remuneracionesErrors,
     badResponses: remuneracionesBadResponses,
   };
+
+  const cargoFilter = remuneracionesPage.getByRole("combobox", { name: "Filtrar por cargo" });
+  const salaryOrder = remuneracionesPage.getByRole("combobox", { name: "Ordenar por sueldo" });
+  await remuneracionesSearch.fill("");
+  await cargoFilter.selectOption({ label: "ASESOR JUNIOR" });
+  await salaryOrder.selectOption("sueldo_desc");
+  await remuneracionesPage.locator("table.data-table tbody tr").first().waitFor({ state: "visible", timeout: 10_000 });
+  await remuneracionesPage.waitForTimeout(500);
+  const juniorSalaryValues = await remuneracionesPage.locator("table.data-table tbody tr td:nth-child(4)").evaluateAll((cells) => cells.map((cell) => {
+    const value = cell.textContent?.replace(/[^\d]/g, "") ?? "";
+    return value ? Number(value) : null;
+  }).filter((value) => value !== null));
+  const remuneracionesCombinedFilter = {
+    rows: juniorSalaryValues.length,
+    sortedDescending: juniorSalaryValues.every((value, index) => index === 0 || juniorSalaryValues[index - 1] >= value),
+    first: juniorSalaryValues[0] ?? null,
+    last: juniorSalaryValues[juniorSalaryValues.length - 1] ?? null,
+    loadingVisible: await loadingIndicator.count() > 0 && await loadingIndicator.first().isVisible().catch(() => false),
+  };
   await remuneracionesContext.close();
 
   const legacyResponse = await fetch(`${baseUrl}/municipalidades/muni-maipu`, { redirect: "manual" });
@@ -273,12 +292,14 @@ async function main() {
   failures.push(check(!remuneraciones.loadingVisible, "Remuneraciones: indicador de carga permanente después del filtro", { remuneraciones }));
   failures.push(check(remuneraciones.errors.length === 0, "Remuneraciones: errores de navegador", { remuneraciones }));
   failures.push(check(remuneraciones.badResponses.length === 0, "Remuneraciones: recursos 4xx/5xx", { remuneraciones }));
+  failures.push(check(remuneracionesCombinedFilter.rows > 0 && remuneracionesCombinedFilter.sortedDescending, "Remuneraciones: Asesor Junior no queda ordenado por sueldo descendente", { remuneracionesCombinedFilter }));
+  failures.push(check(!remuneracionesCombinedFilter.loadingVisible, "Remuneraciones: carga permanente al combinar cargo y orden", { remuneracionesCombinedFilter }));
   failures.push(check(legacyRedirect.status === 301 && legacyRedirect.location === "/municipalidades/maipu", "Redirect legacy Maipú", { legacyRedirect }));
   failures.push(check(municipalidadesMap.selectorCount === 0, "Municipalidades: el mapa territorial no debe aparecer en producción", municipalidadesMap));
   failures.push(check(municipalidadesMap.hasTableFallback, "Municipalidades: falta la alternativa de registros", municipalidadesMap));
 
   const failed = failures.filter(Boolean);
-  console.log(JSON.stringify({ baseUrl, waitMs, routes, navigation: { politicianNavigation, municipalityNavigation, navigationErrors, navigationBadResponses }, municipalityPayroll, remuneraciones, legacyRedirect, municipalidadesMap, passed: failures.length - failed.length, failed }, null, 2));
+  console.log(JSON.stringify({ baseUrl, waitMs, routes, navigation: { politicianNavigation, municipalityNavigation, navigationErrors, navigationBadResponses }, municipalityPayroll, remuneraciones, remuneracionesCombinedFilter, legacyRedirect, municipalidadesMap, passed: failures.length - failed.length, failed }, null, 2));
   if (failed.length > 0) process.exitCode = 1;
 }
 
