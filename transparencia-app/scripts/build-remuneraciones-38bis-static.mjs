@@ -5,6 +5,7 @@ const root = process.cwd();
 const inputPath = path.join(root, "data", "remuneraciones-38bis-publico.json");
 const historyPath = path.join(root, "data", "remuneraciones-38bis-publico-historico.json");
 const outputDir = path.join(root, "public", "data", "remuneraciones-38bis");
+const historyOutputDir = path.join(outputDir, "history");
 const pageSize = 40;
 const release = JSON.parse(fs.readFileSync(inputPath, "utf8"));
 const rows = Array.isArray(release.registros) ? release.registros : (release.congreso ?? []);
@@ -12,6 +13,7 @@ const historical = fs.existsSync(historyPath) ? JSON.parse(fs.readFileSync(histo
 
 fs.rmSync(outputDir, { recursive: true, force: true });
 fs.mkdirSync(outputDir, { recursive: true });
+fs.mkdirSync(historyOutputDir, { recursive: true });
 
 function writePages(rowsToWrite, directoryName) {
   const directory = path.join(outputDir, directoryName);
@@ -43,8 +45,30 @@ function normalize(value) {
     .trim();
 }
 
+function stableHash(value) {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(16).padStart(8, "0");
+}
+
 function rowKey(row) {
   return [row.nombre, row.organismo, row.cargo].map(normalize).join("|");
+}
+
+function nameSortKey(value) {
+  const normalized = normalize(value).replace(/\s+a contar del\s+\d{2}\s+\d{2}\s+\d{4}$/, "");
+  if (!normalized || /^(no reportado|no existe|sin nombre|0+|0+ 0+)$/.test(normalized)) return "zzzzzzzzzz";
+  const parts = normalized.split(" ").filter(Boolean);
+  const firstSurname = parts.length > 1 ? parts.at(-2) : parts[0];
+  const secondSurname = parts.at(-1) ?? "";
+  return `${firstSurname} ${secondSurname} ${normalized}`;
+}
+
+function compareNames(left, right) {
+  return nameSortKey(left.nombre).localeCompare(nameSortKey(right.nombre), "es");
 }
 
 function buildIndexes(rowsToIndex) {
@@ -91,7 +115,13 @@ function compareDetails(previousRows, currentRows, previousPeriod = null) {
   for (const row of previousRows) {
     if (!currentByKey.has(rowKey(row))) salidasObservadas.push({ tipo: "salida_observada", ...row, bruto_anterior: row.bruto_mensual, bruto_actual: null, diferencia: null });
   }
-  return { estado: "comparado", periodo_anterior: previousPeriod, entradas, salidas_observadas: salidasObservadas, cambios };
+  return {
+    estado: "comparado",
+    periodo_anterior: previousPeriod,
+    entradas: entradas.sort(compareNames),
+    salidas_observadas: salidasObservadas.sort(compareNames),
+    cambios: cambios.sort(compareNames),
+  };
 }
 
 function comparisonSummary(details) {
@@ -110,10 +140,11 @@ function totalBruto(rowsToSum) {
 
 function publicPeriod(rowsForPeriod, mes, previousRows = null, previousPeriod = null) {
   const basePath = `months/${mes}`;
-  const pages = writePages(rowsForPeriod, basePath);
+  const orderedRows = [...rowsForPeriod].sort(compareNames);
+  const pages = writePages(orderedRows, basePath);
   const sortedDesc = writePages([...rowsForPeriod].sort((left, right) => compareSalary(left, right, "desc")), `${basePath}/sueldo-desc`);
   const sortedAsc = writePages([...rowsForPeriod].sort((left, right) => compareSalary(left, right, "asc")), `${basePath}/sueldo-asc`);
-  const indexes = buildIndexes(rowsForPeriod);
+  const indexes = buildIndexes(orderedRows);
   const searchIndexKey = `${basePath}/search-index.json`;
   fs.writeFileSync(path.join(outputDir, searchIndexKey), `${JSON.stringify(indexes.searchIndex)}\n`, "utf8");
   const comparisonDetails = compareDetails(previousRows, rowsForPeriod, previousPeriod);
@@ -139,16 +170,36 @@ function publicPeriod(rowsForPeriod, mes, previousRows = null, previousPeriod = 
   };
 }
 
-const currentPages = writePages(rows, "");
-const currentIndexes = buildIndexes(rows);
+const orderedRows = [...rows].sort(compareNames);
+const currentPages = writePages(orderedRows, "");
+const currentIndexes = buildIndexes(orderedRows);
 const currentSortPages = {
   sueldo_desc: writePages([...rows].sort((left, right) => compareSalary(left, right, "desc")), "sueldo-desc"),
   sueldo_asc: writePages([...rows].sort((left, right) => compareSalary(left, right, "asc")), "sueldo-asc"),
 };
+fs.mkdirSync(historyOutputDir, { recursive: true });
 const auditPath = path.join(root, "data", "remuneraciones-38bis-publico-audit.json");
 const audit = JSON.parse(fs.readFileSync(auditPath, "utf8"));
 const historyPeriods = Array.isArray(historical.periodos) ? historical.periodos : [];
 const periodRows = [{ mes: release.mes, rows }, ...historyPeriods.map((period) => ({ mes: period.mes, rows: period.registros }))];
+const historyByHash = new Map();
+for (const period of periodRows) {
+  for (const row of period.rows) {
+    const key = rowKey(row);
+    const hash = stableHash(key);
+    const knownKey = historyByHash.get(hash)?.key;
+    if (knownKey && knownKey !== key) throw new Error(`Colisión al generar historial de remuneraciones: ${hash}`);
+    const entry = historyByHash.get(hash) ?? { key, rows: [] };
+    if (!entry.rows.some((item) => item.mes === period.mes)) {
+      entry.rows.push({ mes: period.mes, ...row });
+    }
+    historyByHash.set(hash, entry);
+  }
+}
+for (const [hash, entry] of historyByHash.entries()) {
+  entry.rows.sort((left, right) => left.mes.localeCompare(right.mes));
+  fs.writeFileSync(path.join(historyOutputDir, `${hash}.json`), `${JSON.stringify(entry.rows)}\n`, "utf8");
+}
 const periodManifests = periodRows.map((period, index) => publicPeriod(
   period.rows,
   period.mes,
@@ -187,8 +238,9 @@ const manifest = {
   organismo_pages: currentIndexes.organismoPages,
   cargos: currentIndexes.cargos,
   cargo_pages: currentIndexes.cargoPages,
+  history_base_path: "history/",
   comparison_key: `${currentPeriod.base_path}${currentPeriod.comparison_key}`,
-  initial_rows: rows.slice(0, pageSize),
+  initial_rows: orderedRows.slice(0, pageSize),
   periodos: periodSummaries,
   comparison: {
     estado: audit.delta.estado,

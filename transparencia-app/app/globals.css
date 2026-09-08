@@ -2909,6 +2909,29 @@ html.dark .page-masthead {
   border-radius: 12px;
   background: var(--surface-2);
 }
+.segmented-control {
+  display: inline-flex;
+  gap: .2rem;
+  padding: .2rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+.segmented-control button {
+  padding: .35rem .7rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.segmented-control button.is-active {
+  background: var(--accent);
+  color: var(--on-accent);
+}
 
 .stat-tile--accent { --tile-tone: var(--accent); }
 .stat-tile--ok     { --tile-tone: var(--ok); }

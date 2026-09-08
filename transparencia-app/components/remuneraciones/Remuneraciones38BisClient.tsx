@@ -41,6 +41,7 @@ export interface PeriodManifest {
   organismo_pages: Record<string, number[]>;
   cargos: string[];
   cargo_pages: Record<string, number[]>;
+  history_base_path: string;
   comparison: {
     estado: string;
     periodo_anterior: string | null;
@@ -71,6 +72,10 @@ interface ComparisonDetails {
   cambios: ComparisonDetail[];
 }
 
+interface HistoryPoint extends Remuneracion38BisRecord {
+  mes: string;
+}
+
 type ComparisonKind = "entradas" | "salidas_observadas" | "cambios";
 
 type SortMode = "relevancia" | "sueldo_desc" | "sueldo_asc";
@@ -92,6 +97,7 @@ export interface ReleaseManifest {
   organismo_pages: Record<string, number[]>;
   cargos: string[];
   cargo_pages: Record<string, number[]>;
+  history_base_path: string;
   comparison_key: string;
   comparison: {
     estado: string;
@@ -120,6 +126,7 @@ function currentPeriodFromManifest(manifest: ReleaseManifest): PeriodManifest {
     organismo_pages: manifest.organismo_pages,
     cargos: manifest.cargos,
     cargo_pages: manifest.cargo_pages,
+    history_base_path: manifest.history_base_path,
     comparison_key: manifest.comparison_key,
     comparison: manifest.comparison,
   };
@@ -134,6 +141,36 @@ function formatDate(value: string) {
 
 function normalize(value: string) {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase();
+}
+
+function normalizeKey(value: string) {
+  return normalize(value).replace(/[^a-z0-9]+/g, " ").trim();
+}
+
+function rowKey(row: Remuneracion38BisRecord) {
+  return [row.nombre, row.organismo, row.cargo].map(normalizeKey).join("|");
+}
+
+function stableHash(value: string) {
+  let hash = 2166136261;
+  for (let index = 0; index < value.length; index += 1) {
+    hash ^= value.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(16).padStart(8, "0");
+}
+
+function nameSortKey(value: string) {
+  const normalized = normalizeKey(value).replace(/\s+a contar del\s+\d{2}\s+\d{2}\s+\d{4}$/, "");
+  if (!normalized || /^(no reportado|no existe|sin nombre|0+|0+ 0+)$/.test(normalized)) return "zzzzzzzzzz";
+  const parts = normalized.split(" ").filter(Boolean);
+  const firstSurname = parts.length > 1 ? parts[parts.length - 2] : parts[0];
+  const secondSurname = parts[parts.length - 1] ?? "";
+  return `${firstSurname} ${secondSurname} ${normalized}`;
+}
+
+function compareNames(left: { nombre: string }, right: { nombre: string }) {
+  return nameSortKey(left.nombre).localeCompare(nameSortKey(right.nombre), "es");
 }
 
 function rowText(row: Remuneracion38BisRecord) {
@@ -166,9 +203,29 @@ export default function Remuneraciones38BisClient({
   const [comparisonLoading, setComparisonLoading] = useState(false);
   const [comparisonError, setComparisonError] = useState<string | null>(null);
   const [comparisonPage, setComparisonPage] = useState(1);
+  const [history, setHistory] = useState<HistoryPoint[]>([]);
+  const [historyLoading, setHistoryLoading] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
   const currentPeriod = currentPeriodFromManifest(manifest);
   const activePeriod = periodo === manifest.mes || loadedPeriod?.mes !== periodo ? currentPeriod : loadedPeriod;
   const activePeriodReady = activePeriod.mes === periodo;
+
+  useEffect(() => {
+    if (!selected) return;
+    let active = true;
+    const key = stableHash(rowKey(selected));
+    setHistoryLoading(true);
+    setHistoryError(null);
+    fetch(`/data/remuneraciones-38bis/${manifest.history_base_path}${key}.json`)
+      .then((response) => {
+        if (!response.ok) throw new Error("No se pudo cargar el historial mensual de esta persona.");
+        return response.json() as Promise<HistoryPoint[]>;
+      })
+      .then((value) => { if (active) setHistory(value.sort((left, right) => left.mes.localeCompare(right.mes))); })
+      .catch((reason: Error) => { if (active) { setHistory([]); setHistoryError(reason.message); } })
+      .finally(() => { if (active) setHistoryLoading(false); });
+    return () => { active = false; };
+  }, [manifest.history_base_path, selected]);
 
   useEffect(() => {
     if (!comparisonKind || !activePeriodReady) return;
@@ -261,10 +318,11 @@ export default function Remuneraciones38BisClient({
             .filter((row) => cargo === "todos" || row.cargo === cargo)
             .filter((row) => organismo === "todos" || row.organismo === organismo)
             .sort((left, right) => {
-              if (sortMode === "relevancia") return 0;
+              if (sortMode === "relevancia") return compareNames(left, right);
               const leftValue = left.bruto_mensual ?? -1;
               const rightValue = right.bruto_mensual ?? -1;
-              return sortMode === "sueldo_desc" ? rightValue - leftValue : leftValue - rightValue;
+              const salaryOrder = sortMode === "sueldo_desc" ? rightValue - leftValue : leftValue - rightValue;
+              return salaryOrder || compareNames(left, right);
             });
           setRows(matches);
           setResultCount(matches.length);
@@ -278,7 +336,7 @@ export default function Remuneraciones38BisClient({
 
   const filterActive = Boolean(query.trim() || cargo !== "todos" || organismo !== "todos");
   const sourceRows = !filterActive && page === 1 && sortMode === "relevancia" && periodo === manifest.mes ? initialRows : rows;
-  const filteredRows = useMemo(() => sourceRows.filter((row) => organismo === "todos" || row.organismo === organismo).filter((row) => cargo === "todos" || row.cargo === cargo), [cargo, organismo, sourceRows]);
+  const filteredRows = useMemo(() => sourceRows.filter((row) => organismo === "todos" || row.organismo === organismo).filter((row) => cargo === "todos" || row.cargo === cargo).sort(compareNames), [cargo, organismo, sourceRows]);
   const pageCount = filterActive ? Math.max(1, Math.ceil((resultCount ?? filteredRows.length) / activePeriod.page_size)) : activePeriod.page_count;
   const visibleRows = filterActive ? filteredRows.slice((page - 1) * activePeriod.page_size, page * activePeriod.page_size) : filteredRows;
 
@@ -287,7 +345,7 @@ export default function Remuneraciones38BisClient({
     : `Página ${page} de ${activePeriod.page_count}`;
 
   const periodPoints = manifest.periodos as RemuneracionPeriodPoint[];
-  const comparisonRows = comparisonDetails && comparisonKind ? comparisonDetails[comparisonKind] : [];
+  const comparisonRows = useMemo(() => comparisonDetails && comparisonKind ? [...comparisonDetails[comparisonKind]].sort(compareNames) : [], [comparisonDetails, comparisonKind]);
   const comparisonPageSize = 20;
   const comparisonPageCount = Math.max(1, Math.ceil(comparisonRows.length / comparisonPageSize));
   const visibleComparisonRows = comparisonRows.slice((comparisonPage - 1) * comparisonPageSize, comparisonPage * comparisonPageSize);
@@ -495,6 +553,25 @@ export default function Remuneraciones38BisClient({
               <div><dt style={{ color: "var(--text-subtle)" }}>Cargo o perfil</dt><dd style={{ margin: 0, fontWeight: 700 }}>{selected.cargo}</dd></div>
               <div><dt style={{ color: "var(--text-subtle)" }}>Remuneración bruta reportada</dt><dd style={{ margin: 0, fontWeight: 700, fontFamily: "var(--font-mono)" }}>{selected.bruto_mensual === null ? "No reportado" : money.format(selected.bruto_mensual)}</dd></div>
             </dl>
+            <section aria-labelledby="remuneracion-historial-title" style={{ marginTop: "1.35rem", paddingTop: "1rem", borderTop: "1px solid var(--border-subtle)" }}>
+              <span className="eyebrow">Historial disponible</span>
+              <h3 id="remuneracion-historial-title" style={{ margin: "0.25rem 0 0.3rem", fontSize: "1rem" }}>Evolución mensual de esta remuneración</h3>
+              <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.74rem", lineHeight: 1.5 }}>Se muestran sólo los meses en que la fuente publicó este mismo organismo y cargo.</p>
+              {historyLoading && <p role="status" style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>Cargando historial…</p>}
+              {historyError && <p role="alert" className="badge badge-danger" style={{ marginTop: "0.7rem", textTransform: "none", letterSpacing: 0 }}>{historyError}</p>}
+              {!historyLoading && !historyError && history.length > 0 && (
+                <div className="table-shell" style={{ marginTop: "0.75rem", maxHeight: "15rem", overflow: "auto" }}>
+                  <table className="data-table"><caption className="sr-only">Historial mensual de remuneraciones de {selected.nombre}</caption><thead><tr><th>Mes</th><th>Bruto publicado</th><th>Variación</th></tr></thead><tbody>
+                    {history.map((point, index) => {
+                      const previous = history[index - 1];
+                      const difference = previous && point.bruto_mensual !== null && previous.bruto_mensual !== null ? point.bruto_mensual - previous.bruto_mensual : null;
+                      return <tr key={point.mes}><td>{point.mes}</td><td style={{ fontFamily: "var(--font-mono)", fontWeight: 700 }}>{point.bruto_mensual === null ? "No reportado" : money.format(point.bruto_mensual)}</td><td style={{ fontFamily: "var(--font-mono)", color: difference === null ? "var(--text-muted)" : difference >= 0 ? "var(--ok)" : "var(--warn)" }}>{difference === null ? "—" : `${difference >= 0 ? "+" : ""}${money.format(difference)}`}</td></tr>;
+                    })}
+                  </tbody></table>
+                </div>
+              )}
+              {!historyLoading && !historyError && history.length === 0 && <p role="status" style={{ margin: "0.75rem 0 0", color: "var(--text-muted)", fontSize: "0.78rem" }}>No hay otros meses disponibles para este organismo y cargo.</p>}
+            </section>
             <p style={{ margin: "1.25rem 0 0", color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: 1.6 }}>Este registro corresponde al corte {activePeriod.mes}. La fuente no publica aquí jornada, fecha de contratación, descuentos ni motivo del monto. La ficha conserva el dato informado y no interpreta por sí sola la legalidad o pertinencia del nombramiento.</p>
           </div>
         </div>
