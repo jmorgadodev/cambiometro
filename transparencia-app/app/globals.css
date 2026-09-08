@@ -2886,6 +2886,29 @@ html.dark .page-masthead {
   transform: translateY(-2px);
   border-color: var(--tile-tone);
 }
+.stat-tile--interactive {
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.stat-tile--interactive:disabled {
+  cursor: default;
+  opacity: .72;
+}
+.stat-tile--interactive:disabled:hover {
+  transform: none;
+  border-color: var(--border-subtle);
+}
+.remuneraciones-comparison-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
 
 .stat-tile--accent { --tile-tone: var(--accent); }
 .stat-tile--ok     { --tile-tone: var(--ok); }

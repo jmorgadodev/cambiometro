@@ -2231,6 +2231,7 @@
       41
     ]
   },
+  "comparison_key": "months/2026-06/comparison.json",
   "initial_rows": [
     {
       "partida": "Presidencia",
@@ -2521,11 +2522,13 @@
       "total_bruto": 5727648259,
       "comparison": {
         "estado": "comparado",
+        "periodo_anterior": "2026-05",
         "entradas": 51,
         "salidas_observadas": 46,
         "cambios": 439
       },
-      "manifest_key": "months/2026-06/manifest.json"
+      "manifest_key": "months/2026-06/manifest.json",
+      "comparison_key": "months/2026-06/comparison.json"
     },
     {
       "mes": "2026-05",
@@ -2534,11 +2537,13 @@
       "total_bruto": 5677535351,
       "comparison": {
         "estado": "comparado",
+        "periodo_anterior": "2026-04",
         "entradas": 88,
         "salidas_observadas": 41,
         "cambios": 227
       },
-      "manifest_key": "months/2026-05/manifest.json"
+      "manifest_key": "months/2026-05/manifest.json",
+      "comparison_key": "months/2026-05/comparison.json"
     },
     {
       "mes": "2026-04",
@@ -2547,11 +2552,13 @@
       "total_bruto": 5503043194,
       "comparison": {
         "estado": "comparado",
+        "periodo_anterior": "2026-03",
         "entradas": 377,
         "salidas_observadas": 1473,
         "cambios": 606
       },
-      "manifest_key": "months/2026-04/manifest.json"
+      "manifest_key": "months/2026-04/manifest.json",
+      "comparison_key": "months/2026-04/comparison.json"
     },
     {
       "mes": "2026-03",
@@ -2560,11 +2567,13 @@
       "total_bruto": 5216197689,
       "comparison": {
         "estado": "comparado",
+        "periodo_anterior": "2026-02",
         "entradas": 1505,
         "salidas_observadas": 394,
         "cambios": 778
       },
-      "manifest_key": "months/2026-03/manifest.json"
+      "manifest_key": "months/2026-03/manifest.json",
+      "comparison_key": "months/2026-03/comparison.json"
     },
     {
       "mes": "2026-02",
@@ -2573,11 +2582,13 @@
       "total_bruto": 5431306077,
       "comparison": {
         "estado": "comparado",
+        "periodo_anterior": "2026-01",
         "entradas": 32,
         "salidas_observadas": 51,
         "cambios": 249
       },
-      "manifest_key": "months/2026-02/manifest.json"
+      "manifest_key": "months/2026-02/manifest.json",
+      "comparison_key": "months/2026-02/comparison.json"
     },
     {
       "mes": "2026-01",
@@ -2586,11 +2597,13 @@
       "total_bruto": 5415522267,
       "comparison": {
         "estado": "comparado",
+        "periodo_anterior": "2025-12",
         "entradas": 96,
         "salidas_observadas": 123,
         "cambios": 693
       },
-      "manifest_key": "months/2026-01/manifest.json"
+      "manifest_key": "months/2026-01/manifest.json",
+      "comparison_key": "months/2026-01/comparison.json"
     },
     {
       "mes": "2025-12",
@@ -2599,11 +2612,13 @@
       "total_bruto": 6599122882,
       "comparison": {
         "estado": "comparado",
+        "periodo_anterior": "2025-11",
         "entradas": 55,
         "salidas_observadas": 60,
         "cambios": 489
       },
-      "manifest_key": "months/2025-12/manifest.json"
+      "manifest_key": "months/2025-12/manifest.json",
+      "comparison_key": "months/2025-12/comparison.json"
     },
     {
       "mes": "2025-11",
@@ -2612,11 +2627,13 @@
       "total_bruto": 5525909746,
       "comparison": {
         "estado": "comparado",
+        "periodo_anterior": "2025-10",
         "entradas": 78,
         "salidas_observadas": 88,
         "cambios": 80
       },
-      "manifest_key": "months/2025-11/manifest.json"
+      "manifest_key": "months/2025-11/manifest.json",
+      "comparison_key": "months/2025-11/comparison.json"
     },
     {
       "mes": "2025-10",
@@ -2625,11 +2642,13 @@
       "total_bruto": 5510885472,
       "comparison": {
         "estado": "comparado",
+        "periodo_anterior": "2025-09",
         "entradas": 120,
         "salidas_observadas": 138,
         "cambios": 484
       },
-      "manifest_key": "months/2025-10/manifest.json"
+      "manifest_key": "months/2025-10/manifest.json",
+      "comparison_key": "months/2025-10/comparison.json"
     },
     {
       "mes": "2025-09",
@@ -2638,11 +2657,13 @@
       "total_bruto": 6602955027,
       "comparison": {
         "estado": "comparado",
+        "periodo_anterior": "2025-08",
         "entradas": 63,
         "salidas_observadas": 54,
         "cambios": 517
       },
-      "manifest_key": "months/2025-09/manifest.json"
+      "manifest_key": "months/2025-09/manifest.json",
+      "comparison_key": "months/2025-09/comparison.json"
     },
     {
       "mes": "2025-08",
@@ -2651,11 +2672,13 @@
       "total_bruto": 5532280985,
       "comparison": {
         "estado": "comparado",
+        "periodo_anterior": "2025-07",
         "entradas": 81,
         "salidas_observadas": 69,
         "cambios": 105
       },
-      "manifest_key": "months/2025-08/manifest.json"
+      "manifest_key": "months/2025-08/manifest.json",
+      "comparison_key": "months/2025-08/comparison.json"
     },
     {
       "mes": "2025-07",
@@ -2664,11 +2687,13 @@
       "total_bruto": 5538408227,
       "comparison": {
         "estado": "comparado",
+        "periodo_anterior": "2025-06",
         "entradas": 60,
         "salidas_observadas": 63,
         "cambios": 499
       },
-      "manifest_key": "months/2025-07/manifest.json"
+      "manifest_key": "months/2025-07/manifest.json",
+      "comparison_key": "months/2025-07/comparison.json"
     },
     {
       "mes": "2025-06",
@@ -2677,11 +2702,13 @@
       "total_bruto": 6658237306,
       "comparison": {
         "estado": "comparado",
+        "periodo_anterior": "2025-05",
         "entradas": 81,
         "salidas_observadas": 71,
         "cambios": 491
       },
-      "manifest_key": "months/2025-06/manifest.json"
+      "manifest_key": "months/2025-06/manifest.json",
+      "comparison_key": "months/2025-06/comparison.json"
     },
     {
       "mes": "2025-05",
@@ -2690,11 +2717,13 @@
       "total_bruto": 5541142363,
       "comparison": {
         "estado": "comparado",
+        "periodo_anterior": "2025-04",
         "entradas": 106,
         "salidas_observadas": 111,
         "cambios": 115
       },
-      "manifest_key": "months/2025-05/manifest.json"
+      "manifest_key": "months/2025-05/manifest.json",
+      "comparison_key": "months/2025-05/comparison.json"
     },
     {
       "mes": "2025-04",
@@ -2703,11 +2732,13 @@
       "total_bruto": 5601560925,
       "comparison": {
         "estado": "comparado",
+        "periodo_anterior": "2025-03",
         "entradas": 101,
         "salidas_observadas": 88,
         "cambios": 486
       },
-      "manifest_key": "months/2025-04/manifest.json"
+      "manifest_key": "months/2025-04/manifest.json",
+      "comparison_key": "months/2025-04/comparison.json"
     },
     {
       "mes": "2025-03",
@@ -2716,11 +2747,13 @@
       "total_bruto": 6627541976,
       "comparison": {
         "estado": "comparado",
+        "periodo_anterior": "2025-02",
         "entradas": 52,
         "salidas_observadas": 39,
         "cambios": 489
       },
-      "manifest_key": "months/2025-03/manifest.json"
+      "manifest_key": "months/2025-03/manifest.json",
+      "comparison_key": "months/2025-03/comparison.json"
     },
     {
       "mes": "2025-02",
@@ -2729,11 +2762,13 @@
       "total_bruto": 5541282957,
       "comparison": {
         "estado": "comparado",
+        "periodo_anterior": "2025-01",
         "entradas": 36,
         "salidas_observadas": 42,
         "cambios": 229
       },
-      "manifest_key": "months/2025-02/manifest.json"
+      "manifest_key": "months/2025-02/manifest.json",
+      "comparison_key": "months/2025-02/comparison.json"
     },
     {
       "mes": "2025-01",
@@ -2747,7 +2782,8 @@
         "salidas_observadas": 0,
         "cambios": 0
       },
-      "manifest_key": "months/2025-01/manifest.json"
+      "manifest_key": "months/2025-01/manifest.json",
+      "comparison_key": "months/2025-01/comparison.json"
     }
   ],
   "comparison": {

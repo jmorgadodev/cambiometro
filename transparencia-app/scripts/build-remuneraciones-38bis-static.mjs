@@ -73,27 +73,42 @@ function buildIndexes(rowsToIndex) {
   };
 }
 
-function compareRows(previousRows, currentRows) {
-  if (!previousRows) return { estado: "linea_base", periodo_anterior: null, entradas: 0, salidas_observadas: 0, cambios: 0 };
+function compareDetails(previousRows, currentRows, previousPeriod = null) {
+  if (!previousRows) return { estado: "linea_base", periodo_anterior: null, entradas: [], salidas_observadas: [], cambios: [] };
   const previousByKey = new Map(previousRows.map((row) => [rowKey(row), row]));
   const currentByKey = new Map(currentRows.map((row) => [rowKey(row), row]));
-  let entradas = 0;
-  let cambios = 0;
+  const entradas = [];
+  const cambios = [];
   for (const row of currentRows) {
     const previous = previousByKey.get(rowKey(row));
-    if (!previous) entradas += 1;
-    else if (previous.bruto_mensual !== row.bruto_mensual) cambios += 1;
+    if (!previous) {
+      entradas.push({ tipo: "entrada", ...row, bruto_anterior: null, bruto_actual: row.bruto_mensual, diferencia: null });
+    } else if (previous.bruto_mensual !== row.bruto_mensual) {
+      cambios.push({ tipo: "cambio", ...row, bruto_anterior: previous.bruto_mensual, bruto_actual: row.bruto_mensual, diferencia: (row.bruto_mensual ?? 0) - (previous.bruto_mensual ?? 0) });
+    }
   }
-  let salidasObservadas = 0;
-  for (const row of previousRows) if (!currentByKey.has(rowKey(row))) salidasObservadas += 1;
-  return { estado: "comparado", entradas, salidas_observadas: salidasObservadas, cambios };
+  const salidasObservadas = [];
+  for (const row of previousRows) {
+    if (!currentByKey.has(rowKey(row))) salidasObservadas.push({ tipo: "salida_observada", ...row, bruto_anterior: row.bruto_mensual, bruto_actual: null, diferencia: null });
+  }
+  return { estado: "comparado", periodo_anterior: previousPeriod, entradas, salidas_observadas: salidasObservadas, cambios };
+}
+
+function comparisonSummary(details) {
+  return {
+    estado: details.estado,
+    periodo_anterior: details.periodo_anterior,
+    entradas: details.entradas.length,
+    salidas_observadas: details.salidas_observadas.length,
+    cambios: details.cambios.length,
+  };
 }
 
 function totalBruto(rowsToSum) {
   return rowsToSum.reduce((total, row) => total + (Number.isFinite(row.bruto_mensual) ? row.bruto_mensual : 0), 0);
 }
 
-function publicPeriod(rowsForPeriod, mes, previousRows = null) {
+function publicPeriod(rowsForPeriod, mes, previousRows = null, previousPeriod = null) {
   const basePath = `months/${mes}`;
   const pages = writePages(rowsForPeriod, basePath);
   const sortedDesc = writePages([...rowsForPeriod].sort((left, right) => compareSalary(left, right, "desc")), `${basePath}/sueldo-desc`);
@@ -101,6 +116,9 @@ function publicPeriod(rowsForPeriod, mes, previousRows = null) {
   const indexes = buildIndexes(rowsForPeriod);
   const searchIndexKey = `${basePath}/search-index.json`;
   fs.writeFileSync(path.join(outputDir, searchIndexKey), `${JSON.stringify(indexes.searchIndex)}\n`, "utf8");
+  const comparisonDetails = compareDetails(previousRows, rowsForPeriod, previousPeriod);
+  const comparisonKey = "comparison.json";
+  fs.writeFileSync(path.join(outputDir, basePath, comparisonKey), `${JSON.stringify(comparisonDetails)}\n`, "utf8");
   return {
     mes,
     base_path: `${basePath}/`,
@@ -116,7 +134,8 @@ function publicPeriod(rowsForPeriod, mes, previousRows = null) {
     organismo_pages: indexes.organismoPages,
     cargos: indexes.cargos,
     cargo_pages: indexes.cargoPages,
-    comparison: compareRows(previousRows, rowsForPeriod),
+    comparison: comparisonSummary(comparisonDetails),
+    comparison_key: comparisonKey,
   };
 }
 
@@ -130,7 +149,12 @@ const auditPath = path.join(root, "data", "remuneraciones-38bis-publico-audit.js
 const audit = JSON.parse(fs.readFileSync(auditPath, "utf8"));
 const historyPeriods = Array.isArray(historical.periodos) ? historical.periodos : [];
 const periodRows = [{ mes: release.mes, rows }, ...historyPeriods.map((period) => ({ mes: period.mes, rows: period.registros }))];
-const periodManifests = periodRows.map((period, index) => publicPeriod(period.rows, period.mes, index === periodRows.length - 1 ? null : periodRows[index + 1].rows));
+const periodManifests = periodRows.map((period, index) => publicPeriod(
+  period.rows,
+  period.mes,
+  index === periodRows.length - 1 ? null : periodRows[index + 1].rows,
+  index === periodRows.length - 1 ? null : periodRows[index + 1].mes,
+));
 const currentPeriod = periodManifests[0];
 const periodSummaries = periodManifests.map((period) => {
   const manifestKey = `${period.base_path}manifest.json`;
@@ -142,6 +166,7 @@ const periodSummaries = periodManifests.map((period) => {
     total_bruto: period.total_bruto,
     comparison: period.comparison,
     manifest_key: manifestKey,
+    comparison_key: `${period.base_path}${period.comparison_key}`,
   };
 });
 const manifest = {
@@ -162,6 +187,7 @@ const manifest = {
   organismo_pages: currentIndexes.organismoPages,
   cargos: currentIndexes.cargos,
   cargo_pages: currentIndexes.cargoPages,
+  comparison_key: `${currentPeriod.base_path}${currentPeriod.comparison_key}`,
   initial_rows: rows.slice(0, pageSize),
   periodos: periodSummaries,
   comparison: {

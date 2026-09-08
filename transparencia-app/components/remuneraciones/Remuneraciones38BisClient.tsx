@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Remuneracion38BisRecord } from "@/lib/remuneraciones-38bis";
+import RemuneracionesHistoryChart, { type RemuneracionPeriodPoint } from "@/components/remuneraciones/RemuneracionesHistoryChart";
 
 interface PageEntry {
   page: number;
@@ -22,6 +23,7 @@ export interface PeriodSummary {
     salidas_observadas: number;
     cambios: number;
   };
+  comparison_key: string;
 }
 
 export interface PeriodManifest {
@@ -46,7 +48,30 @@ export interface PeriodManifest {
     salidas_observadas: number;
     cambios: number;
   };
+  comparison_key: string;
 }
+
+interface ComparisonDetail {
+  tipo: "entrada" | "salida_observada" | "cambio";
+  partida: string;
+  organismo: string;
+  cargo: string;
+  nombre: string;
+  bruto_mensual: number | null;
+  bruto_anterior: number | null;
+  bruto_actual: number | null;
+  diferencia: number | null;
+}
+
+interface ComparisonDetails {
+  estado: string;
+  periodo_anterior: string | null;
+  entradas: ComparisonDetail[];
+  salidas_observadas: ComparisonDetail[];
+  cambios: ComparisonDetail[];
+}
+
+type ComparisonKind = "entradas" | "salidas_observadas" | "cambios";
 
 type SortMode = "relevancia" | "sueldo_desc" | "sueldo_asc";
 
@@ -67,6 +92,7 @@ export interface ReleaseManifest {
   organismo_pages: Record<string, number[]>;
   cargos: string[];
   cargo_pages: Record<string, number[]>;
+  comparison_key: string;
   comparison: {
     estado: string;
     periodo_anterior: string | null;
@@ -94,6 +120,7 @@ function currentPeriodFromManifest(manifest: ReleaseManifest): PeriodManifest {
     organismo_pages: manifest.organismo_pages,
     cargos: manifest.cargos,
     cargo_pages: manifest.cargo_pages,
+    comparison_key: manifest.comparison_key,
     comparison: manifest.comparison,
   };
 }
@@ -134,9 +161,31 @@ export default function Remuneraciones38BisClient({
   const [selected, setSelected] = useState<Remuneracion38BisRecord | null>(null);
   const [searchIndex, setSearchIndex] = useState<SearchIndex | null>(null);
   const [searchIndexPeriod, setSearchIndexPeriod] = useState<string | null>(null);
+  const [comparisonKind, setComparisonKind] = useState<ComparisonKind | null>(null);
+  const [comparisonDetails, setComparisonDetails] = useState<ComparisonDetails | null>(null);
+  const [comparisonLoading, setComparisonLoading] = useState(false);
+  const [comparisonError, setComparisonError] = useState<string | null>(null);
+  const [comparisonPage, setComparisonPage] = useState(1);
   const currentPeriod = currentPeriodFromManifest(manifest);
   const activePeriod = periodo === manifest.mes || loadedPeriod?.mes !== periodo ? currentPeriod : loadedPeriod;
   const activePeriodReady = activePeriod.mes === periodo;
+
+  useEffect(() => {
+    if (!comparisonKind || !activePeriodReady) return;
+    let active = true;
+    setComparisonLoading(true);
+    setComparisonError(null);
+    setComparisonPage(1);
+    fetch(`/data/remuneraciones-38bis/${activePeriod.base_path}${activePeriod.comparison_key}`)
+      .then((response) => {
+        if (!response.ok) throw new Error("No se pudo cargar el detalle de la comparación mensual.");
+        return response.json() as Promise<ComparisonDetails>;
+      })
+      .then((value) => { if (active) setComparisonDetails(value); })
+      .catch((reason: Error) => { if (active) { setComparisonDetails(null); setComparisonError(reason.message); } })
+      .finally(() => { if (active) setComparisonLoading(false); });
+    return () => { active = false; };
+  }, [activePeriod.base_path, activePeriod.comparison_key, activePeriod.mes, activePeriodReady, comparisonKind]);
 
   useEffect(() => {
     if (periodo === manifest.mes) return;
@@ -237,6 +286,36 @@ export default function Remuneraciones38BisClient({
     ? `${number.format(resultCount ?? filteredRows.length)} coincidencias`
     : `Página ${page} de ${activePeriod.page_count}`;
 
+  const periodPoints = manifest.periodos as RemuneracionPeriodPoint[];
+  const comparisonRows = comparisonDetails && comparisonKind ? comparisonDetails[comparisonKind] : [];
+  const comparisonPageSize = 20;
+  const comparisonPageCount = Math.max(1, Math.ceil(comparisonRows.length / comparisonPageSize));
+  const visibleComparisonRows = comparisonRows.slice((comparisonPage - 1) * comparisonPageSize, comparisonPage * comparisonPageSize);
+  const comparisonTitle: Record<ComparisonKind, string> = {
+    entradas: "Nuevos registros detectados",
+    salidas_observadas: "Registros que ya no aparecen",
+    cambios: "Cambios de remuneración detectados",
+  };
+  const comparisonDescription: Record<ComparisonKind, string> = {
+    entradas: "Registros presentes en el mes seleccionado que no estaban en el corte anterior.",
+    salidas_observadas: "Registros del mes anterior que no aparecen en el corte seleccionado. No prueba por sí solo un término de contrato.",
+    cambios: "Personas cuyo monto bruto publicado cambió entre ambos cortes.",
+  };
+
+  const selectPeriod = (nextPeriod: string) => {
+    setPeriodo(nextPeriod);
+    setPage(1);
+    setResultCount(null);
+    setRows([]);
+    setComparisonKind(null);
+    setComparisonDetails(null);
+  };
+
+  const openComparison = (kind: ComparisonKind) => {
+    setComparisonKind(kind);
+    setComparisonPage(1);
+  };
+
   return (
     <div className="page-shell" style={{ minHeight: "100vh" }}>
       <header className="page-masthead">
@@ -273,11 +352,40 @@ export default function Remuneraciones38BisClient({
 
           <div className="stat-grid" style={{ marginTop: "1.25rem" }}>
             <div className="stat-tile stat-tile--accent"><div className="stat-tile__value">{number.format(activePeriod.total)}</div><div className="stat-tile__label">Registros del corte</div><div className="stat-tile__hint">{activePeriod.mes}</div></div>
-            <div className="stat-tile stat-tile--ok"><div className="stat-tile__value">{activePeriod.comparison.estado === "comparado" ? number.format(activePeriod.comparison.entradas) : "—"}</div><div className="stat-tile__label">Nuevos registros</div><div className="stat-tile__hint">{activePeriod.comparison.estado === "comparado" ? "Frente al mes anterior" : "Primera línea base"}</div></div>
-            <div className="stat-tile stat-tile--warn"><div className="stat-tile__value">{activePeriod.comparison.estado === "comparado" ? number.format(activePeriod.comparison.salidas_observadas) : "—"}</div><div className="stat-tile__label">Registros que ya no aparecen</div><div className="stat-tile__hint">No prueba término jurídico</div></div>
-            <div className="stat-tile stat-tile--info"><div className="stat-tile__value">{activePeriod.comparison.estado === "comparado" ? number.format(activePeriod.comparison.cambios) : "—"}</div><div className="stat-tile__label">Cambios de monto</div><div className="stat-tile__hint">Comparación mensual</div></div>
+            <button type="button" className="stat-tile stat-tile--ok stat-tile--interactive" aria-pressed={comparisonKind === "entradas"} onClick={() => openComparison("entradas")} disabled={activePeriod.comparison.estado !== "comparado"}><div className="stat-tile__value">{activePeriod.comparison.estado === "comparado" ? number.format(activePeriod.comparison.entradas) : "—"}</div><div className="stat-tile__label">Nuevos registros</div><div className="stat-tile__hint">{activePeriod.comparison.estado === "comparado" ? "Ver detalle frente al mes anterior ↗" : "Primera línea base"}</div></button>
+            <button type="button" className="stat-tile stat-tile--warn stat-tile--interactive" aria-pressed={comparisonKind === "salidas_observadas"} onClick={() => openComparison("salidas_observadas")} disabled={activePeriod.comparison.estado !== "comparado"}><div className="stat-tile__value">{activePeriod.comparison.estado === "comparado" ? number.format(activePeriod.comparison.salidas_observadas) : "—"}</div><div className="stat-tile__label">Registros que ya no aparecen</div><div className="stat-tile__hint">Ver detalle · no prueba término jurídico ↗</div></button>
+            <button type="button" className="stat-tile stat-tile--info stat-tile--interactive" aria-pressed={comparisonKind === "cambios"} onClick={() => openComparison("cambios")} disabled={activePeriod.comparison.estado !== "comparado"}><div className="stat-tile__value">{activePeriod.comparison.estado === "comparado" ? number.format(activePeriod.comparison.cambios) : "—"}</div><div className="stat-tile__label">Cambios de monto</div><div className="stat-tile__hint">Ver montos anterior y actual ↗</div></button>
             <div className="stat-tile stat-tile--accent"><div className="stat-tile__value">{money.format(activePeriod.total_bruto)}</div><div className="stat-tile__label">Masa bruta publicada</div><div className="stat-tile__hint">{number.format(activePeriod.registros_con_monto)} registros con monto</div></div>
           </div>
+
+          {comparisonKind && (
+            <section className="remuneraciones-comparison-panel" aria-labelledby="comparison-detail-title">
+              <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "flex-start", flexWrap: "wrap" }}>
+                <div>
+                  <span className="eyebrow">Detalle de la comparación</span>
+                  <h3 id="comparison-detail-title" style={{ margin: "0.25rem 0 0.3rem", fontSize: "1.05rem" }}>{comparisonTitle[comparisonKind]}</h3>
+                  <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.5 }}>{comparisonDescription[comparisonKind]} Corte {activePeriod.mes} frente a {activePeriod.comparison.periodo_anterior ?? "—"}.</p>
+                </div>
+                <button type="button" className="btn btn-ghost" onClick={() => { setComparisonKind(null); setComparisonDetails(null); }}>Cerrar detalle</button>
+              </div>
+              {comparisonLoading && <p role="status" style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>Cargando registros comparados…</p>}
+              {comparisonError && <p role="alert" className="badge badge-danger" style={{ marginTop: "0.8rem", textTransform: "none", letterSpacing: 0 }}>{comparisonError}</p>}
+              {!comparisonLoading && !comparisonError && comparisonDetails && (
+                <>
+                  {comparisonRows.length === 0 ? <p role="status" style={{ color: "var(--text-muted)", fontSize: "0.8rem", margin: "1rem 0 0" }}>No hay registros en esta categoría para el corte seleccionado.</p> : (
+                    <>
+                      <div className="table-shell" style={{ marginTop: "0.9rem", overflowX: "auto" }}>
+                        <table className="data-table"><caption className="sr-only">{comparisonTitle[comparisonKind]} del corte {activePeriod.mes}</caption><thead><tr><th>Persona</th><th>Organismo y cargo</th><th>Mes anterior</th><th>Mes seleccionado</th><th>Diferencia</th></tr></thead><tbody>
+                          {visibleComparisonRows.map((row) => <tr key={`${row.tipo}-${row.nombre}-${row.organismo}-${row.cargo}`}><td><strong>{row.nombre}</strong><small>{row.partida}</small></td><td>{row.organismo}<small>{row.cargo}</small></td><td>{row.bruto_anterior === null ? "No reportado" : money.format(row.bruto_anterior)}</td><td>{row.bruto_actual === null ? "No reportado" : money.format(row.bruto_actual)}</td><td style={{ fontFamily: "var(--font-mono)", fontWeight: 700, color: row.diferencia === null ? "var(--text-muted)" : row.diferencia >= 0 ? "var(--ok)" : "var(--warn)" }}>{row.diferencia === null ? "—" : `${row.diferencia >= 0 ? "+" : ""}${money.format(row.diferencia)}`}</td></tr>)}
+                        </tbody></table>
+                      </div>
+                      <nav aria-label="Paginación del detalle mensual" style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", marginTop: "0.8rem" }}><button type="button" className="btn btn-ghost" disabled={comparisonPage <= 1} onClick={() => setComparisonPage((value) => Math.max(1, value - 1))}>← Anterior</button><span style={{ color: "var(--text-subtle)", fontSize: "0.74rem" }}>Página {comparisonPage} / {comparisonPageCount} · {number.format(comparisonRows.length)} registros</span><button type="button" className="btn btn-ghost" disabled={comparisonPage >= comparisonPageCount} onClick={() => setComparisonPage((value) => Math.min(comparisonPageCount, value + 1))}>Siguiente →</button></nav>
+                    </>
+                  )}
+                </>
+              )}
+            </section>
+          )}
 
           <div style={{ marginTop: "1rem", paddingTop: "0.85rem", borderTop: "1px solid var(--border-subtle)", display: "flex", gap: "1rem", flexWrap: "wrap", color: "var(--text-subtle)", fontSize: "0.74rem" }}>
             <span>Actualización: mensual</span>
@@ -303,7 +411,7 @@ export default function Remuneraciones38BisClient({
             </label>
             <label style={{ display: "flex", flexDirection: "column", gap: "0.3rem", fontSize: "0.74rem", fontWeight: 700 }}>
               Mes publicado
-              <select className="form-input" value={periodo} onChange={(event) => { setPeriodo(event.target.value); setPage(1); setResultCount(null); setRows([]); }} aria-label="Filtrar por mes publicado">
+              <select className="form-input" value={periodo} onChange={(event) => selectPeriod(event.target.value)} aria-label="Filtrar por mes publicado">
                 {manifest.periodos.map((period) => <option key={period.mes} value={period.mes}>{period.mes}</option>)}
               </select>
             </label>
@@ -359,6 +467,8 @@ export default function Remuneraciones38BisClient({
             <button type="button" className="btn btn-ghost" disabled={page >= pageCount || loading} onClick={() => setPage((value) => Math.min(pageCount, value + 1))}>Siguiente →</button>
           </nav>
         </section>
+
+        <RemuneracionesHistoryChart periods={periodPoints} selectedPeriod={periodo} onPeriodClick={selectPeriod} />
 
         <section className="card" aria-labelledby="method-title">
           <span className="eyebrow">Cómo leer estos cambios</span>
