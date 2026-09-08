@@ -1,0 +1,439 @@
+{
+  "schema_version": 1,
+  "source_id": "remuneraciones-38bis",
+  "source_url": "https://comision38bis.gob.cl/registro-publico",
+  "mes": "2026-06",
+  "extraido_en": "2026-09-08T11:36:31.017Z",
+  "total": 1064,
+  "page_size": 40,
+  "page_count": 27,
+  "checksum_sha256": "3165437712216d109364555b1cd68ce89a43e2aa4a120c32ed46d755093cf6c6",
+  "pages": [
+    {
+      "page": 1,
+      "key": "page-0001.json",
+      "count": 40
+    },
+    {
+      "page": 2,
+      "key": "page-0002.json",
+      "count": 40
+    },
+    {
+      "page": 3,
+      "key": "page-0003.json",
+      "count": 40
+    },
+    {
+      "page": 4,
+      "key": "page-0004.json",
+      "count": 40
+    },
+    {
+      "page": 5,
+      "key": "page-0005.json",
+      "count": 40
+    },
+    {
+      "page": 6,
+      "key": "page-0006.json",
+      "count": 40
+    },
+    {
+      "page": 7,
+      "key": "page-0007.json",
+      "count": 40
+    },
+    {
+      "page": 8,
+      "key": "page-0008.json",
+      "count": 40
+    },
+    {
+      "page": 9,
+      "key": "page-0009.json",
+      "count": 40
+    },
+    {
+      "page": 10,
+      "key": "page-0010.json",
+      "count": 40
+    },
+    {
+      "page": 11,
+      "key": "page-0011.json",
+      "count": 40
+    },
+    {
+      "page": 12,
+      "key": "page-0012.json",
+      "count": 40
+    },
+    {
+      "page": 13,
+      "key": "page-0013.json",
+      "count": 40
+    },
+    {
+      "page": 14,
+      "key": "page-0014.json",
+      "count": 40
+    },
+    {
+      "page": 15,
+      "key": "page-0015.json",
+      "count": 40
+    },
+    {
+      "page": 16,
+      "key": "page-0016.json",
+      "count": 40
+    },
+    {
+      "page": 17,
+      "key": "page-0017.json",
+      "count": 40
+    },
+    {
+      "page": 18,
+      "key": "page-0018.json",
+      "count": 40
+    },
+    {
+      "page": 19,
+      "key": "page-0019.json",
+      "count": 40
+    },
+    {
+      "page": 20,
+      "key": "page-0020.json",
+      "count": 40
+    },
+    {
+      "page": 21,
+      "key": "page-0021.json",
+      "count": 40
+    },
+    {
+      "page": 22,
+      "key": "page-0022.json",
+      "count": 40
+    },
+    {
+      "page": 23,
+      "key": "page-0023.json",
+      "count": 40
+    },
+    {
+      "page": 24,
+      "key": "page-0024.json",
+      "count": 40
+    },
+    {
+      "page": 25,
+      "key": "page-0025.json",
+      "count": 40
+    },
+    {
+      "page": 26,
+      "key": "page-0026.json",
+      "count": 40
+    },
+    {
+      "page": 27,
+      "key": "page-0027.json",
+      "count": 24
+    }
+  ],
+  "initial_rows": [
+    {
+      "partida": "Presidencia",
+      "organismo": "PRESIDENCIA",
+      "cargo": "PRESIDENTE DE LA REPÚBLICA",
+      "nombre": "JOSE ANTONIO KAST RIST",
+      "bruto_mensual": 11308034
+    },
+    {
+      "partida": "Presidencia",
+      "organismo": "PRESIDENCIA",
+      "cargo": "DIRECTOR ADMINISTRATIVO",
+      "nombre": "JULIO ANDRES FERES REBOLLEDO",
+      "bruto_mensual": 7870221
+    },
+    {
+      "partida": "Presidencia",
+      "organismo": "PRESIDENCIA",
+      "cargo": "COORDINADOR DE ASESORES",
+      "nombre": "ALEJANDRO JOSÉ IRARRAZAVAL ALFONSO",
+      "bruto_mensual": 9500000
+    },
+    {
+      "partida": "Presidencia",
+      "organismo": "PRESIDENCIA",
+      "cargo": "COORDINADOR DE ASESORES",
+      "nombre": "ALVARO BELLOLIO AVARIA",
+      "bruto_mensual": 6900000
+    },
+    {
+      "partida": "Presidencia",
+      "organismo": "PRESIDENCIA",
+      "cargo": "COORDINADOR DE ASESORES",
+      "nombre": "BENJAMÍN ANTONIO JADUE ROSSELOT",
+      "bruto_mensual": 5900000
+    },
+    {
+      "partida": "Presidencia",
+      "organismo": "PRESIDENCIA",
+      "cargo": "COORDINADOR DE ASESORES",
+      "nombre": "CATALINA UGARTE MILLÁN",
+      "bruto_mensual": 7900000
+    },
+    {
+      "partida": "Presidencia",
+      "organismo": "PRESIDENCIA",
+      "cargo": "COORDINADOR DE ASESORES",
+      "nombre": "CLAUDIO DANIEL PONTILLO RAMIREZ",
+      "bruto_mensual": 5900000
+    },
+    {
+      "partida": "Presidencia",
+      "organismo": "PRESIDENCIA",
+      "cargo": "COORDINADOR DE ASESORES",
+      "nombre": "CRISTIAN RICARDO VALENZUELA BUSTOS",
+      "bruto_mensual": 8900000
+    },
+    {
+      "partida": "Presidencia",
+      "organismo": "PRESIDENCIA",
+      "cargo": "COORDINADOR DE ASESORES",
+      "nombre": "MARÍA PAZ FADEL ARCUCH",
+      "bruto_mensual": 6500000
+    },
+    {
+      "partida": "Presidencia",
+      "organismo": "PRESIDENCIA",
+      "cargo": "COORDINADOR DE ASESORES",
+      "nombre": "MIGUEL ESTEBAN ROJAS SOTO",
+      "bruto_mensual": 4200000
+    },
+    {
+      "partida": "Presidencia",
+      "organismo": "PRESIDENCIA",
+      "cargo": "COORDINADOR DE ASESORES",
+      "nombre": "RÍO SEBASTIÁN TORREALBA DEL",
+      "bruto_mensual": 9200000
+    },
+    {
+      "partida": "Presidencia",
+      "organismo": "PRESIDENCIA",
+      "cargo": "COORDINADOR DE ASESORES",
+      "nombre": "ROMER ANGEL RUBIO FLORES",
+      "bruto_mensual": 2850000
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "PRESIDENTE DEL SENADO",
+      "nombre": "PAULINA NUÑEZ URRUTIA",
+      "bruto_mensual": 9110534
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "VICEPRESIDENTE DEL SENADO",
+      "nombre": "IVAN MOREIRA BARROS",
+      "bruto_mensual": 9110534
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "ALEJANDRA SEPULVEDA ORBENES",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "ALEJANDRO KUSANOVIC GLUSEVIC",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "ALFONSO DE URRESTI LONGTON",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "ANDREA PAZ BALLADARES LETELIER",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "ANDRES LONGTON HERRERA",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "BEATRIZ DE JESUS SANCHEZ MUÑOZ",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "CAMILA ALEJANDRA FLORES OPORTO",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "CARLOS IGNACIO KUSCHEL SILVA",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "CLAUDIA PASCUAL GRAU",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "CRISTIAN ANDRES VIAL MACERATTA",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "DANIEL NUÑEZ ARANCIBIA",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "DANIELLA VALENTINA CICARDINI MILLA",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "DANISA ALEJANDRA ASTUDILLO PEIRETTI",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "DIEGO EDUARDO IBAÑEZ COTRONEO",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "ENRIQUE VAN RYSSELBERGHE HERRERA",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "ENRIQUE SEGUNDO LEE FLORES",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "ESTEBAN VELASQUEZ NUÑEZ",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "FABIOLA CAMPILLAI ROJAS",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "FIDEL ESPINOZA SANDOVAL",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "FRANCISCO HUENCHUMILLA JARAMILLO",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "GASTON SAAVEDRA CHANDIA",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "GUSTAVO SANHUEZA DUEÑAS",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "IGNACIO URRUTIA BONILLA",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "IVAN FLORES GARCIA",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "JAVIER MACAYA DANUS",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "JOSE MANUEL ROJO EDWARDS SILVA",
+      "bruto_mensual": 8239091
+    }
+  ],
+  "audit": {
+    "estado": "linea_base",
+    "periodo_anterior": null,
+    "entradas": 0,
+    "salidas_observadas": 0,
+    "cambios": 0,
+    "d1_rows_read": 0,
+    "d1_rows_written": 0
+  }
+}

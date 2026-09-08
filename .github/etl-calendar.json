@@ -14,6 +14,7 @@
     { "workflow": "etl-dipres.yml", "name": "DIPRES", "cronUtc": "0 9 1 1,4,7,10 *", "local": "Día 1 de enero, abril, julio y octubre; 06:00 invierno / 05:00 verano" },
     { "workflow": "etl-sinim.yml", "name": "SINIM", "cronUtc": "0 9 1 3,9 *", "local": "Día 1 de marzo y septiembre; 06:00 invierno / 05:00 verano" },
     { "workflow": "etl-expenses.yml", "name": "Gastos operacionales rendidos", "cronUtc": "30 8 2 * *", "local": "Día 2, 05:30 invierno / 04:30 verano" },
+    { "workflow": "etl-remuneraciones-38bis.yml", "name": "Remuneraciones públicas art. 38 bis", "cronUtc": "15 10 5 * *", "local": "Día 5, revisión mensual; 06:15 invierno / 07:15 verano" },
     { "workflow": "etl-servel.yml", "name": "SERVEL", "cronUtc": null, "local": "Sólo workflow_dispatch" }
   ]
 }

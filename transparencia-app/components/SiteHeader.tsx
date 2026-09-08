@@ -23,6 +23,7 @@ export const NAV_CLUSTERS = [
       { href: "/partidos", label: "Partidos" },
       { href: "/votaciones-destacadas/", label: "Votaciones destacadas" },
       { href: "/personas", label: "Directorio de Personas" },
+      { href: "/remuneraciones-publicas", label: "Remuneraciones públicas" },
     ],
   },
   {

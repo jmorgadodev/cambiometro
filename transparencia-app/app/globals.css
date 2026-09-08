@@ -3904,6 +3904,37 @@ html.dark .page-masthead {
   background: var(--surface-2);
 }
 
+.form-input {
+  width: 100%;
+  min-height: 2.7rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-1);
+  font: inherit;
+}
+
+.form-input:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.overlay-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--overlay);
+}
+
+@media (max-width: 680px) {
+  .form-input { min-height: 2.9rem; }
+}
+
 .municipal-payroll-coverage {
   display: grid;
   grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr);

@@ -79,6 +79,7 @@ const FOOTER_GROUPS = [
       ["Gastos Operacionales Rendidos", "/gastos-operacionales"],
       ["Rankings", "/rankings"],
       ["Comparador", "/comparar"],
+      ["Remuneraciones públicas", "/remuneraciones-publicas"],
       ["Movimientos", "/movimientos"],
       ["Cambios de autoridades", "/cambios"],
     ],

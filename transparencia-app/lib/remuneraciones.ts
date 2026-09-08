@@ -1,4 +1,5 @@
 import { normalizeSearchText } from "./data-source";
+import { getRemuneraciones38BisRows, type Remuneracion38BisRecord } from "./remuneraciones-38bis";
 
 export interface RemuneracionCruda {
   partida: string;
@@ -15,7 +16,8 @@ export interface RemuneracionParlamentario {
 
 interface Registro {
   mes: string;
-  congreso: RemuneracionCruda[];
+  registros?: Remuneracion38BisRecord[];
+  congreso?: RemuneracionCruda[];
 }
 
 import { getKvCache } from "@/lib/db";
@@ -27,6 +29,11 @@ async function leerRegistro(): Promise<Registro | null> {
   if (registro) return registro;
   registro = dataRemuneraciones as Registro;
   return registro;
+}
+
+function filasCongreso(reg: Registro): RemuneracionCruda[] {
+  return getRemuneraciones38BisRows(reg as never)
+    .filter((fila) => fila.partida === "Congreso Nacional") as RemuneracionCruda[];
 }
 
 /** Repara nombres del registro dañados por doble codificación (ej. "CLÃˆMENT" -> "CLÈMENT"). */
@@ -81,7 +88,7 @@ async function indice(): Promise<Map<string, RemuneracionParlamentario>> {
   if (porNombre.size > 0) return porNombre;
   const reg = await leerRegistro();
   if (reg) {
-    for (const fila of reg.congreso) {
+    for (const fila of filasCongreso(reg)) {
       const clave = normalizeSearchText(fila.nombre);
       if (clave.length >= 8 && !porNombre.has(clave)) {
         porNombre.set(clave, { cargo: fila.cargo, bruto_mensual: fila.bruto_mensual });
@@ -105,10 +112,11 @@ export async function remuneracionParaPolitico(nombreCompleto: string): Promise<
     const registro = await leerRegistro();
     if (registro) {
       let mejor: RemuneracionParlamentario | null = null;
-      for (const fila of registro.congreso) {
+      const filas = filasCongreso(registro);
+      for (const fila of filas) {
         const tokensRegistro = tokenizar(fila.nombre);
         if (matcheaTokens(tokensPolitico, tokensRegistro)) {
-          if (!mejor && !duplicadoAmbiguo(tokensPolitico, registro.congreso)) {
+          if (!mejor && !duplicadoAmbiguo(tokensPolitico, filas)) {
             mejor = { cargo: fila.cargo, bruto_mensual: fila.bruto_mensual };
           }
         }

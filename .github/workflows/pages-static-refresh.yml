@@ -22,6 +22,7 @@ on:
       - "ETL Bajo Demanda - SERVEL Resultados Electorales"
       - "ETL Semestral - SINIM Finanzas Municipales"
       - "ETL Mensual - Gastos Operacionales Congreso"
+      - "ETL Mensual - Remuneraciones 38 bis"
     types: [completed]
   workflow_dispatch:
     inputs:
@@ -180,6 +181,9 @@ jobs:
             transparencia-app/data/movimientos.json
             transparencia-app/data/municipalidades-data.json
             transparencia-app/data/municipalidades-list.json
+            transparencia-app/data/remuneraciones-38bis-publico.json
+            transparencia-app/data/remuneraciones-38bis-publico-audit.json
+            transparencia-app/data/remuneraciones-38bis-publico-manifest.json
             transparencia-app/public/data/transferencias
 
       - name: Hidratar respaldo estático CPLT desde R2
@@ -208,6 +212,19 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: npm run data:hydrate:static -- --required --required-files data/movimientos.json --only-files data/movimientos.json --force
+
+      - name: Rehidratar remuneraciones 38 bis desde el release vigente de R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        shell: bash
+        run: |
+          if npx wrangler r2 object get transparencia-public-data/projections/remuneraciones-38bis-v1/current.json --file data/remuneraciones-38bis-publico.json --remote; then
+            npx wrangler r2 object get transparencia-public-data/projections/remuneraciones-38bis-v1/current-audit.json --file data/remuneraciones-38bis-publico-audit.json --remote
+          else
+            echo "::warning::No existe release R2 de remuneraciones 38 bis; se conserva el baseline versionado."
+          fi
 
       - name: Verificar calidad semántica de entradas estáticas
         working-directory: transparencia-app
@@ -287,6 +304,9 @@ jobs:
             transparencia-app/data/movimientos.json
             transparencia-app/data/municipalidades-data.json
             transparencia-app/data/municipalidades-list.json
+            transparencia-app/data/remuneraciones-38bis-publico.json
+            transparencia-app/data/remuneraciones-38bis-publico-audit.json
+            transparencia-app/data/remuneraciones-38bis-publico-manifest.json
             transparencia-app/public/data/transferencias
 
       - name: Construir Pages estático
