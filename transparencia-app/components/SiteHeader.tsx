@@ -10,7 +10,7 @@ import { THEME_ORDER, type ThemeName } from "@/lib/theme-tokens";
 
 /**
  * Orden narrativo canónico por clústeres estructurados:
- * 1. Poder & Decisión: Análisis Parlamentario · Partidos · Directorio de Personas
+ * 1. Poder & Decisión: Análisis Parlamentario · Partidos · Directorio · Remuneraciones
  * 2. Ejecución & Territorio: Servicios públicos · Municipalidades · Transferencias
  * 3. Vínculos & Dinámicas: Cruces · Movimientos
  * 4. Meta & Transparencia: Datos · Metodología
@@ -23,6 +23,7 @@ export const NAV_CLUSTERS = [
       { href: "/partidos", label: "Partidos" },
       { href: "/votaciones-destacadas/", label: "Votaciones destacadas" },
       { href: "/personas", label: "Directorio de Personas" },
+      { href: "/remuneraciones-publicas", label: "Remuneraciones públicas" },
     ],
   },
   {

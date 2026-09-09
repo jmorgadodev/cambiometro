@@ -228,6 +228,7 @@ body {
 .badge-danger  { background: var(--bad-bg);    color: var(--bad);    border: 1px solid var(--bad); }
 .badge-bad     { background: var(--bad-bg);    color: var(--bad);    border: 1px solid var(--bad); }
 .badge-info    { background: var(--info-bg);   color: var(--info);   border: 1px solid var(--info); }
+.badge-neutral { background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border-subtle); }
 .badge-subtle  { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
 
 
@@ -620,6 +621,10 @@ body {
 .data-table tr:hover td {
   background: rgba(30, 41, 59, 0.5);
 }
+
+.data-table tr.remuneracion-row { cursor: pointer; }
+.data-table tr.remuneracion-row:hover td { background: var(--surface-2); }
+.data-table tr.remuneracion-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
 /* ═══════════════════════════════════════════════════════════
    PROGRESS BAR
@@ -2880,6 +2885,44 @@ html.dark .page-masthead {
   border-color: var(--tile-tone);
 }
 
+.stat-tile--interactive {
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.stat-tile--interactive:disabled { cursor: default; opacity: .72; }
+.stat-tile--interactive:disabled:hover { transform: none; border-color: var(--border-subtle); }
+.remuneraciones-comparison-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.segmented-control {
+  display: inline-flex;
+  gap: .2rem;
+  padding: .2rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+.segmented-control button {
+  padding: .35rem .7rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.segmented-control button.is-active { background: var(--accent); color: var(--on-accent); }
+
 .stat-tile--accent { --tile-tone: var(--accent); }
 .stat-tile--ok     { --tile-tone: var(--ok); }
 .stat-tile--warn   { --tile-tone: var(--warn); }
@@ -3890,6 +3933,43 @@ html.dark .page-masthead {
   .voting-freshness {
     grid-template-columns: 1fr;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PANEL REMUNERACIONES PÚBLICAS
+═══════════════════════════════════════════════════════════ */
+.remuneraciones-filters {
+  display: grid;
+  grid-template-columns: minmax(15rem, 1.6fr) repeat(4, minmax(9rem, 1fr));
+  gap: 0.75rem;
+}
+.form-input {
+  width: 100%;
+  min-height: 2.7rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-1);
+  font: inherit;
+}
+.form-input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.overlay-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--overlay);
+}
+@media (max-width: 900px) {
+  .remuneraciones-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 680px) {
+  .remuneraciones-filters { grid-template-columns: 1fr; }
+  .form-input { min-height: 2.9rem; }
 }
 
 /* ═══════════════════════════════════════════════════════════
