@@ -7,19 +7,11 @@ const outputDir = path.join(root, "public", "data", "remuneraciones-unified");
 const source38Path = path.join(root, "data", "remuneraciones-38bis-publico.json");
 const supportPath = path.join(root, "data", "personal-apoyo.json");
 const qualitySourcesPath = path.join(root, "data", "data-quality-sources.json");
-const serviceCivilPath = path.join(root, "data", "remuneraciones-servicio-civil.json");
-// Las páginas más grandes reducen el número de archivos de Pages sin cargar
-// el universo en el navegador: sólo se abre la página asociada a los tokens
-// de una búsqueda concreta.
-const pageSize = 250;
+const pageSize = 50;
 
 const source38 = JSON.parse(fs.readFileSync(source38Path, "utf8"));
 const support = JSON.parse(fs.readFileSync(supportPath, "utf8"));
 const qualitySources = JSON.parse(fs.readFileSync(qualitySourcesPath, "utf8"));
-const serviceCivil = fs.existsSync(serviceCivilPath)
-  ? JSON.parse(fs.readFileSync(serviceCivilPath, "utf8"))
-  : { records: [], datasets: [], sourcePageUrl: "https://reporte.serviciocivil.cl/datos/" };
-
 fs.rmSync(outputDir, { recursive: true, force: true });
 fs.mkdirSync(outputDir, { recursive: true });
 
@@ -125,19 +117,6 @@ for (const [senatorName, senatorRows] of Object.entries(support.senadores ?? {})
   }
 }
 
-for (const record of serviceCivil.records ?? []) {
-  const name = record.nombreOriginal ?? "";
-  rows.push({
-    ...record,
-    personKey: personKeyForRemuneration(name, record.recordId),
-    nombreNormalizado: normalize(name),
-    organismoNormalizado: normalize(record.organismoOriginal),
-    cargoNormalizado: normalize(record.cargoOriginal),
-    montoBruto: Number.isFinite(record.montoBruto) ? record.montoBruto : null,
-    qualityObservations: record.qualityObservations ?? [],
-  });
-}
-
 function nameSort(left, right) {
   return left.nombreNormalizado.localeCompare(right.nombreNormalizado, "es-CL")
     || left.sourceId.localeCompare(right.sourceId)
@@ -235,32 +214,6 @@ const releaseSources = [
     period: support.generado_en?.slice(0, 7) ?? null,
     checksum: support.asignacion_senado_2026?.checksum_sha256 ?? null,
     note: "Consolidado derivado de personal de apoyo del Senado.",
-    modulePath: "/remuneraciones-publicas",
-  }),
-  sourceMeta("servicio-civil-nombramientos", {
-    label: "Servicio Civil · nombramientos ADP",
-    status: "partial",
-    sourceType: "appointment",
-    officialUrl: serviceCivil.sourcePageUrl,
-    publishedCount: bySource.get("servicio-civil-nombramientos")?.count ?? 0,
-    queryableCount: bySource.get("servicio-civil-nombramientos")?.count ?? 0,
-    relatedCount: bySource.get("servicio-civil-nombramientos")?.related.size ?? 0,
-    period: serviceCivil.datasets.find((item) => item.id === "servicio-civil-nombramientos")?.updatedAt?.slice(0, 7) ?? null,
-    checksum: serviceCivil.datasets.find((item) => item.id === "servicio-civil-nombramientos")?.checksumSha256 ?? null,
-    note: "Nombramientos oficiales de Alta Dirección Pública. La publicación no contiene el monto individual pagado.",
-    modulePath: "/remuneraciones-publicas",
-  }),
-  sourceMeta("servicio-civil-convocatorias", {
-    label: "Servicio Civil · convocatorias",
-    status: "partial",
-    sourceType: "official_call",
-    officialUrl: serviceCivil.sourcePageUrl,
-    publishedCount: bySource.get("servicio-civil-convocatorias")?.count ?? 0,
-    queryableCount: bySource.get("servicio-civil-convocatorias")?.count ?? 0,
-    relatedCount: bySource.get("servicio-civil-convocatorias")?.related.size ?? 0,
-    period: serviceCivil.datasets.find((item) => item.id === "servicio-civil-convocatorias")?.updatedAt?.slice(0, 7) ?? null,
-    checksum: serviceCivil.datasets.find((item) => item.id === "servicio-civil-convocatorias")?.checksumSha256 ?? null,
-    note: "Convocatorias oficiales con renta bruta referencial del cargo; no es el sueldo efectivamente pagado a una persona.",
     modulePath: "/remuneraciones-publicas",
   }),
   sourceMeta("dipres", {

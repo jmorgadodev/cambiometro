@@ -101,7 +101,6 @@
     "ingest:votaciones-full": "node scripts/ingest-votaciones-full.mjs",
     "ingest:infolobby": "node scripts/ingest-infolobby.mjs",
     "ingest:infoprobidad": "node scripts/ingest-infoprobidad.mjs",
-    "etl:servicio-civil": "node scripts/etl/servicio-civil.mjs",
     "etl:personal-apoyo": "node scripts/etl-personal-apoyo.mjs",
     "etl:movimientos": "node scripts/etl_movimientos_autoridades.mjs",
     "poll:personal-apoyo": "node scripts/poll-camara-personal-apoyo.mjs",

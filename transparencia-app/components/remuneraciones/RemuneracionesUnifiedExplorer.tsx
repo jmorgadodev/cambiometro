@@ -76,8 +76,6 @@ function displayAmount(value: number | null) {
 }
 
 function recordDescription(row: UnifiedRow) {
-  if (row.sourceType === "appointment") return "Nombramiento oficial · sueldo individual no publicado";
-  if (row.sourceType === "official_call") return "Convocatoria oficial · renta referencial del cargo";
   if (row.sourceType === "support_staff") return "Personal de apoyo consolidado";
   return "Registro original";
 }
@@ -205,7 +203,7 @@ export default function RemuneracionesUnifiedExplorer() {
       <div className="eyebrow" style={{ color: "var(--accent)", marginBottom: "0.35rem" }}>REMUNERACIONES Y CARGOS PÚBLICOS</div>
       <h2 id="unified-remuneraciones-title" style={{ margin: 0, fontSize: "clamp(1.35rem, 3vw, 2rem)" }}>Busca una persona, organismo o cargo</h2>
       <p style={{ color: "var(--text-muted)", maxWidth: "850px", margin: "0.5rem 0 1rem", lineHeight: 1.6 }}>
-        Reunimos publicaciones oficiales en un mismo lugar. Cada resultado conserva su fuente y te indica si muestra un sueldo, un nombramiento o una renta referencial del cargo.
+        Reunimos publicaciones oficiales en un mismo lugar. Cada resultado conserva su fuente, organismo, cargo, período y monto cuando la fuente lo publica.
       </p>
 
       {!manifest && !error && <div className="stat-tile" role="status" aria-busy="true">Cargando fuentes públicas…</div>}
@@ -215,8 +213,8 @@ export default function RemuneracionesUnifiedExplorer() {
         <>
           <div className="remuneration-reading-key" aria-label="Cómo interpretar los resultados">
             <div><strong>Sueldo publicado</strong><span>La fuente informa un monto asociado al registro.</span></div>
-            <div><strong>Nombramiento</strong><span>Se informa quién fue designado, pero no su sueldo individual.</span></div>
-            <div><strong>Renta referencial</strong><span>Es el monto anunciado para un cargo, no un pago personal.</span></div>
+            <div><strong>Personal de apoyo</strong><span>Registros publicados por la Cámara o el Senado.</span></div>
+            <div><strong>Sin monto publicado</strong><span>La ausencia de un monto se conserva y no se convierte en cero.</span></div>
           </div>
           <div className="remuneration-source-grid" aria-label="Fuentes públicas disponibles">
             {manifest.sources.map((item) => (
@@ -255,7 +253,7 @@ export default function RemuneracionesUnifiedExplorer() {
                 const sourceIds = new Set(group.map((row) => row.sourceId));
                 return <article key={group[0].personKey} className="stat-tile" style={{ padding: "0.95rem" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: "0.7rem", flexWrap: "wrap" }}><div><h4 style={{ margin: 0, fontSize: "1rem" }}>{group[0].nombreOriginal}</h4><small style={{ color: "var(--text-muted)" }}>{sourceIds.size > 1 ? "Coincidencia nominal entre fuentes · requiere revisión contextual" : "Registro encontrado en una fuente"}</small></div><span className={`badge ${sourceIds.size > 1 ? "badge-warn" : "badge-info"}`}>{sourceIds.size} fuente{sourceIds.size === 1 ? "" : "s"}</span></div>
-                  <div style={{ overflowX: "auto", marginTop: "0.7rem" }}><table className="data-table" style={{ width: "100%" }}><thead><tr><th>Fuente</th><th>Organismo</th><th>Cargo</th><th>Período</th><th>Monto</th></tr></thead><tbody>{group.map((row) => <tr key={row.recordId}><td><strong>{row.sourceLabel}</strong><small style={{ display: "block", color: "var(--text-muted)" }}>{recordDescription(row)}</small></td><td>{row.organismoOriginal}</td><td>{row.cargoOriginal}</td><td>{row.periodo ?? "No informado"}</td><td>{row.sourceType === "official_call" && row.montoBruto !== null ? <><strong>{money.format(row.montoBruto)}</strong><small style={{ display: "block", color: "var(--text-muted)" }}>Renta referencial</small></> : displayAmount(row.montoBruto)}</td></tr>)}</tbody></table></div>
+                  <div style={{ overflowX: "auto", marginTop: "0.7rem" }}><table className="data-table" style={{ width: "100%" }}><thead><tr><th>Fuente</th><th>Organismo</th><th>Cargo</th><th>Período</th><th>Monto</th></tr></thead><tbody>{group.map((row) => <tr key={row.recordId}><td><strong>{row.sourceLabel}</strong><small style={{ display: "block", color: "var(--text-muted)" }}>{recordDescription(row)}</small></td><td>{row.organismoOriginal}</td><td>{row.cargoOriginal}</td><td>{row.periodo ?? "No informado"}</td><td>{displayAmount(row.montoBruto)}</td></tr>)}</tbody></table></div>
                 </article>;
               })}
             </div>
