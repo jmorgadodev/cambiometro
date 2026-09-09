@@ -1,5 +1,5 @@
 import { getMunicipalidadesStats } from "@/lib/municipalidades-list";
-import { readGeneratedDataQualitySummary, type CoverageMetric, type DataQualityStatus, type QualityAuditSnapshot } from "@/lib/data-quality-summary";
+import { readGeneratedDataQualitySummary, type CoverageMetric, type DataQualitySourceSummary, type DataQualityStatus, type QualityAuditSnapshot } from "@/lib/data-quality-summary";
 
 export interface DataQualitySourceRow {
   id: string;
@@ -79,6 +79,29 @@ function statusLabel(status: DataQualitySourceRow["status"]): string {
   return { operativa: "Operativa", anual: "Publicación anual", electoral: "Por elección", censal: "Censal oficial", derivada: "Consolidación derivada", desfasado: "Desfasado", sin_datos: "Sin datos" }[status];
 }
 
+function explainReleaseStatus(source: DataQualitySourceSummary): string {
+  const detail = source.statusDetail.trim();
+  const notes: string[] = [];
+
+  if (source.status === "parcial") {
+    notes.push(
+      source.metrics.queryable.count === null
+        ? "Este corte no declara un índice detallado paginado para este catálogo; se muestran los agregados disponibles y el módulo especializado cuando existe."
+        : "Este corte sí tiene un índice paginado; “parcial” describe el alcance declarado de la fuente, no que el release esté vacío."
+    );
+  } else if (source.status === "desfasado") {
+    notes.push("La última evidencia disponible es anterior a la cadencia esperada; se conserva como histórica y no se presenta como vigente.");
+  } else if (source.status === "no_disponible") {
+    notes.push("No hay un release publicado para este corte; no se reemplaza por ceros ni estimaciones.");
+  }
+
+  if (source.metrics.related.count === null) {
+    notes.push("No se calcula “Relacionado” porque el release no publica un índice documental verificable para esta fuente.");
+  }
+
+  return [detail, ...notes].filter(Boolean).join(" ");
+}
+
 export async function getDataQualityDashboardData(): Promise<{ sources: DataQualitySourceRow[]; summary: DataQualitySummary }> {
   const manifest = readGeneratedDataQualitySummary();
   const muniStats = getMunicipalidadesStats();
@@ -105,7 +128,7 @@ export async function getDataQualityDashboardData(): Promise<{ sources: DataQual
       lastSync: source.lastSuccessAt ?? ultimaValidacionIso,
       lastSyncFormatted: formatDate(source.lastSuccessAt, ultimaValidacionIso),
       coverageNote: source.coverageNote,
-      statusDetail: source.statusDetail,
+      statusDetail: explainReleaseStatus(source),
       isDerived: source.derived,
       modulePath: source.modulePath,
       checksumSha256: source.checksumSha256,

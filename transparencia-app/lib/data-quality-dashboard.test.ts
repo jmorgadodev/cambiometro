@@ -51,6 +51,10 @@ describe("Tarea D: Dashboard Público de Calidad de Datos (/datos/calidad)", () 
       expect(source?.statusDetail.length).toBeGreaterThan(0);
     }
 
+    expect(sources.find((source) => source.id === "chilecompra")?.statusDetail).toContain("índice paginado");
+    expect(sources.find((source) => source.id === "dipres")?.statusDetail).toContain("índice detallado paginado");
+    expect(sources.find((source) => source.id === "chilecompra")?.statusDetail).toContain("Relacionado");
+
     // Verificar fuente derivada
     const derived = sources.find((s) => s.id === "personal-apoyo");
     expect(derived?.isDerived).toBe(true);
