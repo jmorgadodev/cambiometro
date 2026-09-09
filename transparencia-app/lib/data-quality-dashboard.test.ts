@@ -48,6 +48,7 @@ describe("Tarea D: Dashboard Público de Calidad de Datos (/datos/calidad)", () 
       expect(source?.historicalCount).toBeGreaterThanOrEqual(source?.canonicalCount ?? 0);
       expect(source?.periodoReciente.length).toBeGreaterThan(0);
       expect(source?.lastSyncFormatted.length).toBeGreaterThan(0);
+      expect(source?.statusDetail.length).toBeGreaterThan(0);
     }
 
     // Verificar fuente derivada

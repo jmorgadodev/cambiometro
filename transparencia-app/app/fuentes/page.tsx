@@ -136,6 +136,12 @@ export default async function FuentesPage() {
                       {source.coverageNote}
                     </p>
                   )}
+                  <div style={{ marginTop: "0.25rem", padding: "0.6rem 0.7rem", borderRadius: 8, background: "var(--bg-surface-2)", border: "1px solid var(--border-subtle)" }}>
+                    <strong style={{ display: "block", fontSize: "0.7rem", color: "var(--text-primary)" }}>Por qué aparece así</strong>
+                    <span style={{ display: "block", marginTop: "0.2rem", fontSize: "0.72rem", color: "var(--text-muted)", lineHeight: 1.5 }}>
+                      {source.statusDetail}
+                    </span>
+                  </div>
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", marginTop: "auto", paddingTop: "0.5rem" }}>
                     <span style={{ fontSize: "0.68rem", color: "var(--text-subtle)" }}>
                       {source.checksumSha256 ? `sha256:${source.checksumSha256.slice(0, 12)}…` : "Checksum no publicado"}

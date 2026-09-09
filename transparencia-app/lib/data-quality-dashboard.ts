@@ -21,6 +21,7 @@ export interface DataQualitySourceRow {
   lastSync: string;
   lastSyncFormatted: string;
   coverageNote: string;
+  statusDetail: string;
   isDerived: boolean;
   modulePath: string;
   checksumSha256: string | null;
@@ -104,6 +105,7 @@ export async function getDataQualityDashboardData(): Promise<{ sources: DataQual
       lastSync: source.lastSuccessAt ?? ultimaValidacionIso,
       lastSyncFormatted: formatDate(source.lastSuccessAt, ultimaValidacionIso),
       coverageNote: source.coverageNote,
+      statusDetail: source.statusDetail,
       isDerived: source.derived,
       modulePath: source.modulePath,
       checksumSha256: source.checksumSha256,

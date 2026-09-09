@@ -171,6 +171,9 @@ export default async function DataQualityPage() {
                         <p style={{ margin: "0.3rem 0 0 0", fontSize: "0.72rem", color: "var(--text-subtle)", lineHeight: 1.4 }}>
                           {source.coverageNote}
                         </p>
+                        <p style={{ margin: "0.3rem 0 0 0", fontSize: "0.72rem", color: "var(--text-muted)", lineHeight: 1.4 }}>
+                          <strong style={{ color: "var(--text-primary)" }}>Por qué:</strong> {source.statusDetail}
+                        </p>
                       </div>
                     </td>
                     <td style={{ padding: "0.9rem 1rem", whiteSpace: "nowrap" }}>
