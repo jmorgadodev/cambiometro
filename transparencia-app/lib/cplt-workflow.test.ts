@@ -69,6 +69,13 @@ describe("automatizacion CPLT nacional", () => {
     expect(pagesWorkflow).toContain("npm run data:hydrate:cplt-static -- --required");
   });
 
+  it("transporta organismos descubiertos desde cada artefacto hasta la consolidación", () => {
+    const stage = readFileSync(resolve(process.cwd(), "scripts/stage-cplt-category.mjs"), "utf8");
+    const merge = readFileSync(resolve(process.cwd(), "scripts/merge-cplt-category-artifacts.mjs"), "utf8");
+    expect(stage).toContain("organismos_adicionales.json");
+    expect(merge).toContain("organismosAdicionales");
+  });
+
   it("reconstruye y publica el catálogo canónico de organismos después del ETL nacional", () => {
     const workflow = readFileSync(resolve(process.cwd(), "../.github/workflows/etl-cplt.yml"), "utf8");
     const staticInputs = readFileSync(resolve(process.cwd(), "scripts/static-site-inputs.mjs"), "utf8");

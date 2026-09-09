@@ -11,6 +11,7 @@ mkdirSync(join(output, "validation"), { recursive: true });
 mkdirSync(join(output, "coverage"), { recursive: true });
 
 const recordsByFile = new Map();
+const organismosAdicionales = new Map();
 for (const category of categories) {
   const source = join(artifactRoot, `cplt-${category}`);
   if (!existsSync(source)) throw new Error(`CPLT_ARTIFACT_MISSING: ${category}`);
@@ -26,10 +27,22 @@ for (const category of categories) {
     for (const record of records) merged.set(record.id, record);
     recordsByFile.set(fileName, merged);
   }
+
+  const additionalPath = join(source, "organismos_adicionales.json");
+  if (existsSync(additionalPath)) {
+    const additional = JSON.parse(readFileSync(additionalPath, "utf8"));
+    if (!Array.isArray(additional)) throw new Error(`CPLT_ARTIFACT_INVALID: ${category}/organismos_adicionales.json`);
+    for (const organismo of additional) {
+      if (organismo?.id) organismosAdicionales.set(organismo.id, organismo);
+    }
+  }
 }
 
 for (const [fileName, records] of recordsByFile) {
   writeFileSync(join(projections, fileName), JSON.stringify([...records.values()]));
 }
 if (recordsByFile.size < 1) throw new Error("CPLT_MERGED_PROJECTIONS_MISSING");
-console.log(JSON.stringify({ categories: categories.length, projectionFiles: recordsByFile.size }));
+if (organismosAdicionales.size > 0) {
+  writeFileSync(join(output, "organismos_adicionales.json"), `${JSON.stringify([...organismosAdicionales.values()], null, 2)}\n`);
+}
+console.log(JSON.stringify({ categories: categories.length, projectionFiles: recordsByFile.size, organismosAdicionales: organismosAdicionales.size }));

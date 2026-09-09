@@ -12,6 +12,7 @@ const target = resolve("data/cplt-category", category);
 const validation = join(raw, "validation", `${normalized}.json`);
 const coverage = join(raw, "coverage", `${normalized}.json`);
 const projections = join(raw, "projections", "funcionarios-v1");
+const additionalOrganismos = join(raw, "organismos_adicionales.json");
 if (!existsSync(validation) || !existsSync(coverage) || !existsSync(projections)) throw new Error("CPLT_CATEGORY_INCOMPLETE");
 
 rmSync(target, { recursive: true, force: true });
@@ -19,4 +20,7 @@ mkdirSync(target, { recursive: true });
 cpSync(projections, join(target, "projections"), { recursive: true });
 writeFileSync(join(target, "validation.json"), readFileSync(validation));
 writeFileSync(join(target, "coverage.json"), readFileSync(coverage));
+if (existsSync(additionalOrganismos)) {
+  cpSync(additionalOrganismos, join(target, "organismos_adicionales.json"));
+}
 console.log(JSON.stringify({ category, target }));
