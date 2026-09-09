@@ -14,7 +14,7 @@ import {
 import { classifyFuncionarioRecord } from "@/lib/funcionarios-quality";
 import { SkeletonCard, SkeletonTable } from "@/components/ui/Skeleton";
 
-export type PersonaTab = "parlamentarios" | "alcaldes" | "autoridades" | "funcionarios";
+export type PersonaTab = "todos" | "parlamentarios" | "alcaldes" | "autoridades" | "funcionarios";
 
 export interface ParlamentarioItem {
   id: string;
@@ -137,10 +137,12 @@ export default function PersonasUniversalClient({
 
   // Tab State derived from URL
   const rawTab = searchParams.get("tab") as PersonaTab | null;
-  const activeTab: PersonaTab = (rawTab && ["parlamentarios", "alcaldes", "autoridades", "funcionarios"].includes(rawTab))
+  const hasExplicitTab = Boolean(rawTab);
+  const hasGlobalSearch = Boolean(searchParams.get("search")?.trim());
+  const activeTab: PersonaTab = (rawTab && ["todos", "parlamentarios", "alcaldes", "autoridades", "funcionarios"].includes(rawTab))
     ? rawTab
-    : "parlamentarios";
-  const isCpltDirectoryTab = activeTab === "funcionarios" || activeTab === "alcaldes";
+    : hasGlobalSearch ? "todos" : "parlamentarios";
+  const isCpltDirectoryTab = activeTab === "funcionarios" || activeTab === "alcaldes" || activeTab === "todos";
 
   // Search & Filters
   const [search, setSearch] = useState(() => searchParams.get("search") || "");
@@ -264,7 +266,7 @@ export default function PersonasUniversalClient({
       if (activeTab === "alcaldes") {
         params.set("cargo", "alcalde");
         params.set("tipo", "Municipalidad");
-      } else {
+      } else if (activeTab === "funcionarios") {
         if (organismoFilter !== "Todos") params.set("muni", organismoFilter);
         if (tipoFilter !== "Todos") params.set("tipo", tipoFilter);
       }
@@ -276,7 +278,7 @@ export default function PersonasUniversalClient({
       // El directorio debe mostrar también las filas nominales sin pago
       // informado; son registros oficiales y no deben desaparecer del total.
       params.set("include_zero", "true");
-      params.set("sortBy", activeTab === "alcaldes" || organismoFilter === "Todos" ? "nombre_asc" : sortFuncionarios);
+      params.set("sortBy", activeTab === "alcaldes" || activeTab === "todos" || organismoFilter === "Todos" ? "nombre_asc" : sortFuncionarios);
       params.set("page", String(page));
       params.set("limit", String(ITEMS_PER_PAGE));
 
@@ -414,7 +416,9 @@ export default function PersonasUniversalClient({
 
   // Conteos
   const totalCount =
-    activeTab === "parlamentarios"
+    activeTab === "todos"
+      ? filteredParlamentarios.length + filteredAlcaldes.length + filteredAutoridades.length + funcionariosTotal
+      : activeTab === "parlamentarios"
       ? filteredParlamentarios.length
       : activeTab === "alcaldes"
       ? funcionariosTotal
@@ -423,6 +427,13 @@ export default function PersonasUniversalClient({
       : funcionariosTotal;
 
   const totalPages = Math.max(1, Math.ceil(totalCount / ITEMS_PER_PAGE));
+
+  const globalResultGroups = [
+    { id: "parlamentarios", label: "Parlamentarios", count: filteredParlamentarios.length },
+    { id: "alcaldes", label: "Alcaldes", count: filteredAlcaldes.length },
+    { id: "autoridades", label: "Altas autoridades", count: filteredAutoridades.length },
+    { id: "funcionarios", label: "Funcionarios y remuneraciones", count: funcionariosTotal },
+  ];
 
   return (
     <div style={{ minHeight: "100vh", background: "var(--bg)", color: "var(--text-1)", paddingBottom: "5rem" }}>
@@ -483,6 +494,7 @@ export default function PersonasUniversalClient({
             {/* Navigation Tabs */}
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", borderBottom: "1px solid var(--border)", paddingBottom: "0.5rem" }}>
               {[
+                { id: "todos" as PersonaTab, label: "🔎 Todas las coincidencias", count: hasGlobalSearch ? "" : "Buscar" },
                 { id: "parlamentarios" as PersonaTab, label: "🏛️ Parlamentarios", count: String(parlamentarios.length) },
                 { id: "alcaldes" as PersonaTab, label: "🏙️ Alcaldes", count: activeTab === "alcaldes" && funcionariosTotal > 0 ? funcionariosTotal.toLocaleString("es-CL") : "CPLT" },
                 { id: "autoridades" as PersonaTab, label: "⚖️ Altas autoridades DIP", count: String(autoridades.length) },
@@ -550,7 +562,15 @@ export default function PersonasUniversalClient({
               <input
                 type="text"
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setSearch(value);
+                  // Una búsqueda escrita desde el directorio parte como global,
+                  // salvo que el usuario haya elegido explícitamente una pestaña.
+                  if (!hasExplicitTab && value.trim()) {
+                    syncUrl({ tab: "todos", search: value, page: 1 });
+                  }
+                }}
                 placeholder={
                   activeTab === "parlamentarios"
                     ? "Buscar por nombre, partido o región..."
@@ -884,7 +904,9 @@ export default function PersonasUniversalClient({
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem", padding: "0 0.25rem" }}>
           <div style={{ fontSize: "0.85rem", color: "var(--text-3)" }}>
             Mostrando <strong style={{ color: "var(--text-1)" }}>{totalCount.toLocaleString("es-CL")}</strong>{" "}
-            {activeTab === "parlamentarios"
+            {activeTab === "todos"
+              ? "coincidencias en todo el directorio"
+              : activeTab === "parlamentarios"
               ? "parlamentarios encontrados"
               : activeTab === "alcaldes"
               ? "alcaldes de Chile"
@@ -903,6 +925,73 @@ export default function PersonasUniversalClient({
             </a>
           )}
         </div>
+
+        {/* ========================================================================= */}
+        {/* BÚSQUEDA GLOBAL */}
+        {/* ========================================================================= */}
+        {activeTab === "todos" && (
+          <section aria-labelledby="resultados-globales-personas" style={{ display: "flex", flexDirection: "column", gap: "1rem", marginBottom: "1.5rem" }}>
+            <div className="card" style={{ padding: "1rem 1.2rem" }}>
+              <h2 id="resultados-globales-personas" style={{ margin: 0, fontSize: "1.05rem" }}>
+                Resultados para “{debouncedSearch || "todo el directorio"}”
+              </h2>
+              <p style={{ margin: "0.35rem 0 0", color: "var(--text-3)", fontSize: "0.78rem" }}>
+                La búsqueda revisa parlamentarios, alcaldes, autoridades, funcionarios y remuneraciones. Selecciona una categoría para continuar con sus filtros.
+              </p>
+              <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginTop: "0.75rem" }}>
+                {globalResultGroups.map((group) => (
+                  <button
+                    key={group.id}
+                    type="button"
+                    className="capsule"
+                    onClick={() => handleTabChange(group.id as PersonaTab)}
+                    style={{ cursor: "pointer", border: "1px solid var(--border)", background: "var(--surface-2)", color: "var(--text-1)", padding: "0.35rem 0.65rem", borderRadius: 999, fontSize: "0.74rem" }}
+                  >
+                    {group.label}: <strong>{group.count.toLocaleString("es-CL")}</strong>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {(filteredParlamentarios.length + filteredAlcaldes.length + filteredAutoridades.length + funcionariosData.length) === 0 && !funcionariosLoading ? (
+              <div className="card" style={{ padding: "2rem", textAlign: "center", color: "var(--text-3)" }}>
+                No hay coincidencias en las fuentes publicadas para esta búsqueda.
+              </div>
+            ) : (
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: "0.8rem" }}>
+                {filteredParlamentarios.slice(0, 6).map((p) => (
+                  <Link key={`global-parl-${p.id}`} prefetch={false} href={`/politico/${getPoliticoSlug(p.id)}`} className="card-flat" style={{ padding: "0.9rem", textDecoration: "none", color: "inherit", borderTop: "3px solid var(--accent)" }}>
+                    <strong style={{ display: "block", color: "var(--text-1)" }}>{p.nombre_completo}</strong>
+                    <span style={{ display: "block", marginTop: "0.25rem", color: "var(--text-3)", fontSize: "0.76rem" }}>{p.cargo_actual} · {p.partido_actual}</span>
+                    <span style={{ display: "block", marginTop: "0.55rem", color: "var(--accent)", fontSize: "0.74rem", fontWeight: 700 }}>Ver ficha parlamentaria →</span>
+                  </Link>
+                ))}
+                {filteredAlcaldes.slice(0, 6).map((a) => (
+                  <Link key={`global-alcalde-${a.muni_id}`} prefetch={false} href={`/municipalidades/${a.muni_id}`} className="card-flat" style={{ padding: "0.9rem", textDecoration: "none", color: "inherit", borderTop: "3px solid var(--ok)" }}>
+                    <strong style={{ display: "block", color: "var(--text-1)" }}>{a.alcalde_nombre}</strong>
+                    <span style={{ display: "block", marginTop: "0.25rem", color: "var(--text-3)", fontSize: "0.76rem" }}>Alcalde/sa de {a.nombre_comuna} · {a.region}</span>
+                    <span style={{ display: "block", marginTop: "0.55rem", color: "var(--ok)", fontSize: "0.74rem", fontWeight: 700 }}>Ver ficha comunal →</span>
+                  </Link>
+                ))}
+                {filteredAutoridades.slice(0, 6).map((aut) => (
+                  <Link key={`global-aut-${aut.id}`} prefetch={false} href={`/servicios-publicos/${aut.id}`} className="card-flat" style={{ padding: "0.9rem", textDecoration: "none", color: "inherit", borderTop: "3px solid var(--warn)" }}>
+                    <strong style={{ display: "block", color: "var(--text-1)" }}>{aut.director_jefe_actual || "Jefatura Superior"}</strong>
+                    <span style={{ display: "block", marginTop: "0.25rem", color: "var(--text-3)", fontSize: "0.76rem" }}>{aut.nombre_canonico}</span>
+                    <span style={{ display: "block", marginTop: "0.55rem", color: "var(--warn)", fontSize: "0.74rem", fontWeight: 700 }}>Ver ficha del organismo →</span>
+                  </Link>
+                ))}
+                {funcionariosData.slice(0, 8).map((f) => (
+                  <button key={`global-func-${f.id}`} type="button" onClick={() => setModalItem({ tipo: "funcionario", data: f })} className="card-flat" style={{ padding: "0.9rem", textAlign: "left", cursor: "pointer", borderTop: "3px solid var(--money)" }}>
+                    <strong style={{ display: "block", color: "var(--text-1)" }}>{f.nombre_completo}</strong>
+                    <span style={{ display: "block", marginTop: "0.25rem", color: "var(--text-3)", fontSize: "0.76rem" }}>{f.cargo || "Cargo no informado"} · {f.organo_nombre}</span>
+                    <span style={{ display: "block", marginTop: "0.45rem", color: "var(--money)", fontFamily: "monospace", fontSize: "0.78rem", fontWeight: 700 }}>{formatCLP(f.remuneracion_bruta_mensual)}</span>
+                    <span style={{ display: "block", marginTop: "0.35rem", color: "var(--money)", fontSize: "0.74rem", fontWeight: 700 }}>Abrir expediente laboral →</span>
+                  </button>
+                ))}
+              </div>
+            )}
+          </section>
+        )}
 
         {/* ========================================================================= */}
         {/* TAB 1: PARLAMENTARIOS */}
@@ -1371,7 +1460,7 @@ export default function PersonasUniversalClient({
         {/* ========================================================================= */}
         {/* TAB 4: FUNCIONARIOS */}
         {/* ========================================================================= */}
-        {isCpltDirectoryTab && !(activeTab === "alcaldes" && funcionariosError !== null) && (
+        {(activeTab === "funcionarios" || activeTab === "alcaldes") && !(activeTab === "alcaldes" && funcionariosError !== null) && (
           <>
             {funcionariosLoading ? (
               viewMode === "cards" ? (
