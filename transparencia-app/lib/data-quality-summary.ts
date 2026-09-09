@@ -41,6 +41,7 @@ export interface DataQualitySourceSummary {
   lag: string;
   coverageDetail: string;
   coverageNote: string;
+  coverageReason?: string;
   canonicalCount: number;
   historicalCount: number;
   lastSuccessAt: string | null;
@@ -116,6 +117,7 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
     lag: source.lag,
     coverageDetail: source.coverageDetail,
     coverageNote: source.coverageNote,
+    coverageReason: source.coverageReason,
     canonicalCount,
     historicalCount,
     lastSuccessAt: null,

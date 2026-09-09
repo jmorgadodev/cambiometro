@@ -15,6 +15,7 @@ const ids = new Set();
 for (const source of summary.sources) {
   if (ids.has(source.id)) fail(`fuente duplicada: ${source.id}`);
   ids.add(source.id);
+  if (typeof source.coverageReason !== "string" || source.coverageReason.trim().length < 20) fail(`${source.id}: falta explicación pública de alcance`);
   if (!Number.isSafeInteger(source.canonicalCount) || source.canonicalCount < 0) fail(`${source.id}: canonicalCount inválido`);
   if (!Number.isSafeInteger(source.historicalCount) || source.historicalCount < source.canonicalCount) fail(`${source.id}: histórico menor que canónico`);
   for (const [name, metric] of Object.entries(source.metrics)) {

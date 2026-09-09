@@ -8,6 +8,7 @@ describe("manifiesto unificado de calidad de datos", () => {
     expect(summary.sourceCount).toBe(13);
     expect(summary.totalCanonicalRecords).toBeGreaterThan(1_400_000);
     expect(summary.globalKpiRecords ?? null).toBeNull();
+    expect(summary.sources.every((source) => source.coverageReason && source.coverageReason.length > 20)).toBe(true);
   });
 
   it("no inventa porcentajes cuando no existe denominador o release consultable", () => {

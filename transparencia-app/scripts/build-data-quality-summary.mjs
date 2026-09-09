@@ -76,13 +76,16 @@ const sources = config.map((source) => {
     lastSuccessAt,
     checksumSha256,
     status,
-    statusDetail: status === "completo"
-      ? "Release validado y disponible para consulta."
-      : status === "desfasado"
-        ? "Existe un release, pero su fecha de publicación requiere actualización."
-        : status === "no_disponible"
-          ? "No existe un release consultable en este corte."
-          : "Release disponible; la completitud se mantiene separada de la disponibilidad.",
+    statusDetail: [
+      source.coverageReason,
+      status === "completo"
+        ? "Release validado y disponible para consulta."
+        : status === "desfasado"
+          ? "Existe un release, pero su fecha de publicación requiere actualización."
+          : status === "no_disponible"
+            ? "No existe un release consultable en este corte."
+            : "Release disponible; la completitud se mantiene separada de la disponibilidad.",
+    ].filter(Boolean).join(" "),
     metrics: {
       published: metric(canonicalCount, historicalCount),
       queryable: metric(source.id === "ley-19862" && Number.isSafeInteger(transferRows) ? transferRows : source.queryableCount, canonicalCount),
