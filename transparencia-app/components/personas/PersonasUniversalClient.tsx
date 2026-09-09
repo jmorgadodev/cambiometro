@@ -713,12 +713,33 @@ export default function PersonasUniversalClient({
                   }}
                 >
                   <option value="Todos">Todos los organismos ({organismos.length})</option>
+                  {organismoFilter !== "Todos" && !filteredOrganismosOptions.some((o) => o.id === organismoFilter) && organismos.filter((o) => o.id === organismoFilter).map((o) => (
+                    <option key={o.id} value={o.id}>
+                      {o.sigla ? `[${o.sigla}] ` : ""}{o.nombre_canonico}
+                    </option>
+                  ))}
                   {filteredOrganismosOptions.map((o) => (
                     <option key={o.id} value={o.id}>
                       {o.sigla ? `[${o.sigla}] ` : ""}{o.nombre_canonico}
                     </option>
                   ))}
                 </select>
+                <input
+                  type="search"
+                  value={orgSearchQuery}
+                  onChange={(e) => setOrgSearchQuery(e.target.value)}
+                  placeholder="Buscar organismo…"
+                  aria-label="Buscar organismo para filtrar el directorio"
+                  style={{
+                    minWidth: 180,
+                    padding: "0.6rem 0.8rem",
+                    background: "var(--surface-2)",
+                    border: "1px solid var(--border)",
+                    borderRadius: 8,
+                    fontSize: "0.85rem",
+                    color: "var(--text-1)",
+                  }}
+                />
               </>
             )}
 

@@ -32,4 +32,23 @@ describe("consulta de nómina estática", () => {
     expect(queryStaticFuncionarios(auditedRows, { calidad: "corregidos", page: 1, limit: 10 }).data.map((row) => row.id)).toEqual(["format"]);
     expect(queryStaticFuncionarios(auditedRows, { calidad: "observados", page: 1, limit: 10 }).data.map((row) => row.id)).toEqual(["observed"]);
   });
+
+  it("encuentra un registro histórico por nombre sin convertirlo en parte del corte actual", () => {
+    const historicalRows = [
+      { id: "historical", nombre_completo: "Maria Victoria Raimann Pumpin", organo_nombre: "Municipalidad de Independencia", organo_tipo: "municipalidad", cargo: "Medico Cirujano", estamento: "Profesional", tipo_contrato: "Contrata", remuneracion_bruta_mensual: 1_876_569, fecha_ingreso: "2024-04-01", horas_extras_mes_anterior: 0, monto_horas_extras_clp: 0, fuente_periodo: "2024-04" },
+    ] as never[];
+    const current = queryStaticFuncionarios(historicalRows, { query: "Maria Victoria Raimann Pumpin", periodo: "2026-07", page: 1, limit: 10 });
+    const allPeriods = queryStaticFuncionarios(historicalRows, { query: "Maria Victoria Raimann Pumpin", periodo: "Todos", page: 1, limit: 10 });
+
+    expect(current.meta.total).toBe(0);
+    expect(allPeriods.meta.total).toBe(1);
+    expect(allPeriods.data[0].fuente_periodo).toBe("2024-04");
+  });
+
+  it("acepta el contrato de Código del Trabajo como etiqueta de interfaz", () => {
+    const result = queryStaticFuncionarios([
+      { id: "codigo", nombre_completo: "Carlos Código", organo_nombre: "Municipalidad", organo_tipo: "municipalidad", cargo: "Operario", estamento: "Auxiliar", tipo_contrato: "Código del Trabajo", remuneracion_bruta_mensual: 800_000, fecha_ingreso: "2024-01-01", horas_extras_mes_anterior: 0, monto_horas_extras_clp: 0 },
+    ] as never[], { contrato: "CodigoTrabajo", page: 1, limit: 10 });
+    expect(result.meta.total).toBe(1);
+  });
 });

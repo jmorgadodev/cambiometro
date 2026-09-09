@@ -73,6 +73,7 @@ export default function OrganismoFuncionariosList({
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [sourceStatus, setSourceStatus] = useState<"api" | "static" | "static-fallback" | "unavailable">("api");
+  const [historicalSearchPeriod, setHistoricalSearchPeriod] = useState<string | null>(null);
   const [retryNonce, setRetryNonce] = useState(0);
   const [selectedFuncionario, setSelectedFuncionario] = useState<FuncionarioPublico | null>(null);
   const [staticRecords, setStaticRecords] = useState<FuncionarioPublico[]>([]);
@@ -123,6 +124,7 @@ export default function OrganismoFuncionariosList({
       setIsLoading(true);
       setErrorMessage(null);
       setSourceStatus("api");
+      setHistoricalSearchPeriod(null);
       setStaticRecords([]);
       if (staticRecordsCacheRef.current?.organismoId !== organismoId) staticRecordsCacheRef.current = null;
       try {
@@ -186,20 +188,79 @@ export default function OrganismoFuncionariosList({
           });
         };
         let result;
+        let matchedHistoricalPeriod: string | null = null;
         if (staticEntry) {
           try {
             result = await readStatic();
+            // La vista normal respeta el corte seleccionado. Si una búsqueda
+            // nominal no aparece allí, revisamos el catálogo histórico ya
+            // publicado para no confundir "no está en este mes" con
+            // "nunca fue publicado".
+            if (debouncedSearch.trim() && periodo && periodo !== "Todos" && result.meta?.total === 0) {
+              const historicalResult = await queryStaticFuncionarios(staticRecordsCacheRef.current?.records ?? [], {
+                query: debouncedSearch,
+                contrato: contratoFilter,
+                calidad: qualityFilter,
+                estamento: deptFilter,
+                sortBy,
+                periodo: "Todos",
+                page,
+                limit: itemsPerPage,
+              });
+              if (historicalResult.meta.total > 0) {
+                result = historicalResult;
+                const periods = [...new Set(historicalResult.data.map((item) => item.fuente_periodo || item.periodo).filter(Boolean))];
+                matchedHistoricalPeriod = periods.join(", ") || "un período anterior";
+              }
+            }
             if (active) setSourceStatus("static");
           } catch {
             result = await fetchJson(`/api/funcionarios?${params.toString()}`, 3_000);
+            if (debouncedSearch.trim() && periodo && periodo !== "Todos" && result.meta?.total === 0) {
+              const historicalParams = new URLSearchParams(params);
+              historicalParams.delete("periodo");
+              const historicalResult = await fetchJson(`/api/funcionarios?${historicalParams.toString()}`, 3_000);
+              if (historicalResult.meta?.total > 0) {
+                result = historicalResult;
+                const periods = [...new Set((historicalResult.data ?? []).map((item: FuncionarioPublico) => item.fuente_periodo || item.periodo).filter(Boolean))];
+                matchedHistoricalPeriod = periods.join(", ") || "un período anterior";
+              }
+            }
             if (active) setSourceStatus("api");
           }
         } else {
           try {
             result = await fetchJson(`/api/funcionarios?${params.toString()}`, 3_000);
+            if (debouncedSearch.trim() && periodo && periodo !== "Todos" && result.meta?.total === 0) {
+              const historicalParams = new URLSearchParams(params);
+              historicalParams.delete("periodo");
+              const historicalResult = await fetchJson(`/api/funcionarios?${historicalParams.toString()}`, 3_000);
+              if (historicalResult.meta?.total > 0) {
+                result = historicalResult;
+                const periods = [...new Set((historicalResult.data ?? []).map((item: FuncionarioPublico) => item.fuente_periodo || item.periodo).filter(Boolean))];
+                matchedHistoricalPeriod = periods.join(", ") || "un período anterior";
+              }
+            }
           } catch {
             if (unavailableEntry) throw new Error("STATIC_PAYROLL_NOT_PUBLISHED");
             result = await readStatic();
+            if (debouncedSearch.trim() && periodo && periodo !== "Todos" && result.meta?.total === 0) {
+              const historicalResult = await queryStaticFuncionarios(staticRecordsCacheRef.current?.records ?? [], {
+                query: debouncedSearch,
+                contrato: contratoFilter,
+                calidad: qualityFilter,
+                estamento: deptFilter,
+                sortBy,
+                periodo: "Todos",
+                page,
+                limit: itemsPerPage,
+              });
+              if (historicalResult.meta.total > 0) {
+                result = historicalResult;
+                const periods = [...new Set(historicalResult.data.map((item) => item.fuente_periodo || item.periodo).filter(Boolean))];
+                matchedHistoricalPeriod = periods.join(", ") || "un período anterior";
+              }
+            }
             if (active) setSourceStatus("static-fallback");
           }
         }
@@ -215,6 +276,7 @@ export default function OrganismoFuncionariosList({
         setCausasBreakdown(result.meta?.causasBreakdown || {});
         setAnomaliasList(result.meta?.anomaliasSample || []);
         setSinPagoList(result.meta?.sinPagoSample || []);
+        setHistoricalSearchPeriod(matchedHistoricalPeriod);
       } catch (error) {
         if (!active || controller.signal.aborted) return;
         setData([]);
@@ -458,7 +520,7 @@ export default function OrganismoFuncionariosList({
               <option value="Planta">Planta</option>
               <option value="Contrata">Contrata</option>
               <option value="Honorarios">Honorarios</option>
-              <option value="Codigo del Trabajo">Código del Trabajo</option>
+              <option value="CodigoTrabajo">Código del Trabajo</option>
             </select>
           </div>
 
@@ -553,6 +615,11 @@ export default function OrganismoFuncionariosList({
       {sourceStatus === "static" && (
         <div role="status" style={{ marginBottom: "1rem", fontSize: "0.74rem", color: "var(--text-subtle)" }}>
           Fuente: proyección oficial estática generada en el último build.
+        </div>
+      )}
+      {historicalSearchPeriod && (
+        <div role="note" className="card-flat" style={{ marginBottom: "1rem", padding: "0.8rem 1rem", fontSize: "0.78rem", lineHeight: 1.5, color: "var(--text-muted)" }}>
+          No apareció en el corte seleccionado ({periodoEtiqueta || periodo}), pero sí existe en la nómina histórica publicada. Coincidencia encontrada en: <strong style={{ color: "var(--text-primary)" }}>{historicalSearchPeriod}</strong>. Puedes cambiar el período para revisar el contexto completo.
         </div>
       )}
       {payrollCoverage && payrollCoverage.available < payrollCoverage.expected && (

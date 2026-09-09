@@ -28,6 +28,7 @@ describe("experiencia y usabilidad de nóminas de funcionarios municipales (/fun
     expect(client).toContain("RANGOS_SUELDO");
     expect(client).toContain("soloHorasExtras");
     expect(client).toContain("handleResetFilters");
+    expect(personasClient).toContain("Buscar organismo");
   });
 
   it("destaca el sueldo bruto y formatea horas extras", () => {

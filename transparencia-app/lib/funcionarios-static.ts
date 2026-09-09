@@ -18,6 +18,10 @@ function normalized(value: unknown) {
   return String(value ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL").trim();
 }
 
+function canonicalContract(value: unknown) {
+  return normalized(value).replace(/[^a-z0-9]/g, "").replace("codigodeltrabajo", "codigotrabajo");
+}
+
 function salary(row: FuncionarioPublico) {
   const value = Number(row.remuneracion_bruta_mensual ?? 0);
   return Number.isFinite(value) ? value : 0;
@@ -43,14 +47,14 @@ export function queryStaticFuncionarios(rows: FuncionarioPublico[], query: Stati
   const microMonto = allRecords.filter((row) => salary(row) > 0 && salary(row) < 50_000);
   const sueldoCompleto = allRecords.filter((row) => salary(row) >= 50_000);
   const needle = normalized(query.query);
-  const contract = normalized(query.contrato ?? "Todos");
+  const contract = canonicalContract(query.contrato ?? "Todos");
   const estamento = normalized(query.estamento ?? "Todos");
 
   let filtered = allRecords.filter((row) => salary(row) > 0);
   const quality = query.calidad ?? "Todos";
   if (quality !== "Todos") filtered = filtered.filter((row) => matchesFuncionarioQuality(row, quality));
   if (needle) filtered = filtered.filter((row) => normalized(`${row.nombre_completo} ${row.cargo} ${row.formacion ?? ""}`).includes(needle));
-  if (contract && contract !== "todos") filtered = filtered.filter((row) => normalized(row.tipo_contrato).includes(contract));
+  if (contract && contract !== "todos") filtered = filtered.filter((row) => canonicalContract(row.tipo_contrato).includes(contract));
   if (estamento && estamento !== "todos") filtered = filtered.filter((row) => normalized(row.estamento).includes(estamento));
   sortRows(filtered, query.sortBy ?? "sueldo_desc");
 
