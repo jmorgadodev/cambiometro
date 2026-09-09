@@ -61,6 +61,26 @@ function run() {
     }
   }
 
+  // El manifiesto histórico sólo describe cobertura por comuna. El alcance
+  // nacional también produce una proyección por organismo; úsala para que la
+  // dotación de servicios públicos llegue al catálogo canónico y a sus fichas.
+  // Se cuentan las filas vigentes ya deduplicadas por el ETL, no el histórico
+  // completo ni filas sintéticas.
+  const cpltProjectionDir = path.join(rootDir, "data/raw/transparencia_activa/projections/funcionarios-v1");
+  const cpltOrganismoCoverageMap = new Map<string, number>();
+  if (fs.existsSync(cpltProjectionDir)) {
+    for (const fileName of fs.readdirSync(cpltProjectionDir)) {
+      if (!fileName.endsWith(".json")) continue;
+      try {
+        const rows = JSON.parse(fs.readFileSync(path.join(cpltProjectionDir, fileName), "utf8"));
+        if (Array.isArray(rows)) cpltOrganismoCoverageMap.set(fileName.replace(/\.json$/, ""), rows.length);
+      } catch (error) {
+        console.warn(`[CPLT] No se pudo leer la proyección ${fileName}:`, error);
+      }
+    }
+    console.log(`[CPLT] Cobertura nacional cargada: ${cpltOrganismoCoverageMap.size} organismos con proyección.`);
+  }
+
   // Preservar dotaciones existentes de organismos.json previo si no hay manifest local
   const existingOrganismosPath = path.join(rootDir, "data/lake/projections/v1/organismos.json");
   if (fs.existsSync(existingOrganismosPath)) {
@@ -170,7 +190,7 @@ function run() {
 
     const rutOficial = getRutOficialServicio(serv.id) || (serv as { rut_juridico?: string | null }).rut_juridico;
     const cc = matchChileCompra(rutOficial);
-    const dotacion = cpltCoverageMap.get(serv.id) ?? null;
+    const dotacion = cpltOrganismoCoverageMap.get(serv.id) ?? cpltCoverageMap.get(serv.id) ?? null;
 
     catalog.push({
       id: serv.id,
@@ -224,7 +244,7 @@ function run() {
         }
 
         const cc = matchChileCompra(rutOficial);
-        const dotacion = cpltCoverageMap.get(id) ?? null;
+        const dotacion = cpltOrganismoCoverageMap.get(id) ?? cpltCoverageMap.get(id) ?? null;
 
         catalog.push({
           id,

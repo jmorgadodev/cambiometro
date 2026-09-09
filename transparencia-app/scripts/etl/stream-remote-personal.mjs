@@ -70,7 +70,18 @@ function resolveOrganismoId(organismoNombre) {
   const exactName = String(organismoNombre ?? "").trim();
   const cached = ORGANISMO_RESOLUTION_CACHE.get(exactName);
   if (cached) return cached;
-  const municipalityId = MUNICIPALITY_REGISTRY.resolve(organismoNombre);
+  let municipalityId = null;
+  try {
+    municipalityId = MUNICIPALITY_REGISTRY.resolve(organismoNombre);
+  } catch (error) {
+    // El registro CPLT también contiene corporaciones, fundaciones y unidades
+    // dependientes de una municipalidad. En el alcance nacional no deben
+    // abortar la corrida por no ser una de las 346 administraciones oficiales:
+    // se conservan como organismos descubiertos y se publican con su propio
+    // identificador. El alcance municipal mantiene el guard estricto.
+    if (PERSONAL_SCOPE === "municipalities") throw error;
+    if (!(error instanceof Error) || !error.message.startsWith("CPLT_UNKNOWN_MUNICIPALITY:")) throw error;
+  }
   if (municipalityId) {
     ORGANISMO_RESOLUTION_CACHE.set(exactName, municipalityId);
     return municipalityId;

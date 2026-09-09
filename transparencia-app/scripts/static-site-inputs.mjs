@@ -57,6 +57,9 @@ export const STATIC_SITE_FILE_GROUPS = Object.freeze({
     "data/municipalidades-data.json",
     "data/municipalidades-list.json",
   ],
+  organismos: [
+    "data/lake/projections/v1/organismos.json",
+  ],
 });
 
 export const STATIC_SITE_FILE_PATHS = Object.freeze(
@@ -90,6 +93,9 @@ export function assertStaticInputContentQuality(relativePath, content) {
     if (sessions.length < 1 || Number(value?.totalSessions) !== sessions.length) {
       throw new Error(`STATIC_INPUT_PARTIAL_VOTACIONES: ${relativePath} sessions=${sessions.length}`);
     }
+  }
+  if (relativePath === "data/lake/projections/v1/organismos.json" && (!Array.isArray(value) || value.length < 884)) {
+    throw new Error(`STATIC_INPUT_PARTIAL_ORGANISMOS: ${relativePath} rows=${Array.isArray(value) ? value.length : 0}`);
   }
   return value;
 }

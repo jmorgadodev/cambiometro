@@ -69,6 +69,14 @@ describe("automatizacion CPLT nacional", () => {
     expect(pagesWorkflow).toContain("npm run data:hydrate:cplt-static -- --required");
   });
 
+  it("reconstruye y publica el catálogo canónico de organismos después del ETL nacional", () => {
+    const workflow = readFileSync(resolve(process.cwd(), "../.github/workflows/etl-cplt.yml"), "utf8");
+    const staticInputs = readFileSync(resolve(process.cwd(), "scripts/static-site-inputs.mjs"), "utf8");
+    expect(workflow).toContain("scripts/etl/generate-organismos-projection.ts");
+    expect(workflow).toContain("npm run data:publish:static -- --groups organismos");
+    expect(staticInputs).toContain('"data/lake/projections/v1/organismos.json"');
+  });
+
   it("no genera un indice nacional que exceda el limite de objeto R2", () => {
     const etl = readFileSync(resolve(process.cwd(), "scripts/etl/stream-remote-personal.mjs"), "utf8");
     const projectionPublisher = readFileSync(resolve(process.cwd(), "scripts/publish-cplt-projections.mjs"), "utf8");

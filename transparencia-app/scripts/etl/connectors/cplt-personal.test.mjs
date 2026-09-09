@@ -23,5 +23,6 @@ describe("prefiltro de nóminas CPLT", () => {
     expect(fullParse).toBe(-1);
     expect(source).toContain('process.env.CPLT_PERSONAL_SCOPE ?? "municipalities"');
     expect(source).toContain('PERSONAL_SCOPE === "municipalities"');
+    expect(source).toContain("se conservan como organismos descubiertos");
   });
 });

@@ -143,6 +143,14 @@ jobs:
         working-directory: transparencia-app
         run: npm run data:finalize:cplt:r2
 
+      - name: Reconstruir catálogo canónico con organismos CPLT nacionales
+        working-directory: transparencia-app
+        run: node --experimental-strip-types scripts/etl/generate-organismos-projection.ts
+
+      - name: Publicar catálogo de organismos para Pages
+        working-directory: transparencia-app
+        run: npm run data:publish:static -- --groups organismos
+
       - name: Registrar estado CPLT en D1
         if: steps.d1-quota.outputs.proceed == 'true'
         working-directory: transparencia-app
