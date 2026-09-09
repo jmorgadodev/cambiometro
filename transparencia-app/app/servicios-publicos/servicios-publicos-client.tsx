@@ -3,7 +3,7 @@
 import { useState, useMemo, useCallback } from "react";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
 import Link from "next/link";
-import type { ServicioPublicoEnriquecido } from "@/lib/servicios-publicos-data";
+import type { ServicioPublicoEnriquecido, ServicioReleaseInventory } from "@/lib/servicios-publicos-data";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import ShareButton from "@/components/ShareButton";
 import ReleaseMetaCard from "@/components/data/ReleaseMetaCard";
@@ -35,6 +35,7 @@ interface Props {
     checksumSha256: string | null;
     officialUrl?: string;
   };
+  releaseInventory: ServicioReleaseInventory;
 }
 
 function formatCLP(n: number) {
@@ -71,6 +72,7 @@ export default function ServiciosPublicosClient({
   presupuestoTotalLey: presupuestoTotalLeyProp,
   gastoDevengado: gastoDevengadoProp,
   release,
+  releaseInventory,
 }: Props) {
   const totalConPresupuestoEfectivo = totalConPartida ?? totalConPresupuesto ?? 0;
   const coverageSummary = useMemo(() => summarizeServiceCoverage(servicios), [servicios]);
@@ -353,6 +355,33 @@ export default function ServiciosPublicosClient({
           ]}
           insight="Explora una institución para revisar presupuesto, personal, compras, lobby y auditorías con sus fuentes y períodos respectivos."
         />
+      </div>
+
+      <div className="container-main" style={{ marginTop: "1rem" }}>
+        <section className="card" aria-labelledby="inventario-releases-servicios" style={{ padding: "1.25rem 1.4rem" }}>
+          <p className="eyebrow" style={{ marginBottom: "0.3rem" }}>Inventario de datos disponibles</p>
+          <h2 id="inventario-releases-servicios" style={{ margin: 0, fontSize: "1.15rem" }}>La fuente tiene más registros que los que podemos atribuir automáticamente</h2>
+          <p style={{ margin: "0.55rem 0 0", color: "var(--text-muted)", fontSize: "0.8rem", lineHeight: 1.5 }}>
+            Estos totales corresponden a los releases descargados. La cifra “enlazado” sólo cuenta relaciones con identificador oficial verificable; lo demás se conserva sin inventar una atribución.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "0.65rem", marginTop: "0.8rem" }}>
+            <div style={{ border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "0.75rem", background: "var(--bg-surface-2)" }}>
+              <strong style={{ display: "block", fontSize: "0.78rem" }}>ChileCompra</strong>
+              <span style={{ display: "block", marginTop: "0.25rem", fontFamily: "var(--font-mono, monospace)", fontWeight: 800, color: "var(--accent)" }}>{releaseInventory.chilecompraCompradores.toLocaleString("es-CL")} compradores</span>
+              <span style={{ display: "block", marginTop: "0.2rem", color: "var(--text-muted)", fontSize: "0.72rem" }}>{releaseInventory.chilecompraProveedores.toLocaleString("es-CL")} proveedores · {coverageSummary.compras.publicado} enlazados</span>
+            </div>
+            <div style={{ border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "0.75rem", background: "var(--bg-surface-2)" }}>
+              <strong style={{ display: "block", fontSize: "0.78rem" }}>Contraloría</strong>
+              <span style={{ display: "block", marginTop: "0.25rem", fontFamily: "var(--font-mono, monospace)", fontWeight: 800, color: "var(--accent)" }}>{releaseInventory.contraloriaRegistros.toLocaleString("es-CL")} registros</span>
+              <span style={{ display: "block", marginTop: "0.2rem", color: "var(--text-muted)", fontSize: "0.72rem" }}>{releaseInventory.contraloriaEntidades.toLocaleString("es-CL")} entidades en el release · {coverageSummary.contraloria.publicado} enlazadas</span>
+            </div>
+            <div style={{ border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "0.75rem", background: "var(--bg-surface-2)" }}>
+              <strong style={{ display: "block", fontSize: "0.78rem" }}>InfoLobby</strong>
+              <span style={{ display: "block", marginTop: "0.25rem", fontFamily: "var(--font-mono, monospace)", fontWeight: 800, color: releaseInventory.infolobbyRegistros > 0 ? "var(--accent)" : "var(--warn)" }}>{releaseInventory.infolobbyRegistros.toLocaleString("es-CL")} registros proyectados</span>
+              <span style={{ display: "block", marginTop: "0.2rem", color: "var(--text-muted)", fontSize: "0.72rem" }}>{releaseInventory.infolobbyRegistros > 0 ? "Se enlazan sólo con evidencia suficiente." : "El release local no contiene registros; no se presenta como ausencia de la fuente original."}</span>
+            </div>
+          </div>
+        </section>
       </div>
 
       <div className="container-main" style={{ marginTop: "1rem" }}>

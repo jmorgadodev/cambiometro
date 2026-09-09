@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { getAllServiciosPublicosEnriquecidos } from "@/lib/servicios-publicos-data";
+import { getAllServiciosPublicosEnriquecidos, getServicioReleaseInventory } from "@/lib/servicios-publicos-data";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
 import { getPresupuestoNacionalTotales } from "@/lib/presupuesto";
 import { coverageMetric, readGeneratedDataQualitySummary } from "@/lib/data-quality-summary";
@@ -45,6 +45,7 @@ export default function ServiciosPublicosPage() {
   const totalServicios = serviciosConPolitico.length;
   const conPartidaCount = serviciosConPolitico.filter((s) => s.presupuesto !== null).length;
   const totalConPartida = conPartidaCount;
+  const releaseInventory = getServicioReleaseInventory();
   const dataSummary = readGeneratedDataQualitySummary();
   const dipresSource = dataSummary.sources.find((source) => source.id === "dipres");
   const serviceRelease = {
@@ -101,6 +102,7 @@ export default function ServiciosPublicosPage() {
         presupuestoTotalLey={presupuestoTotalLey}
         gastoDevengado={gastoDevengado}
         release={serviceRelease}
+        releaseInventory={releaseInventory}
       />
     </Suspense>
   );

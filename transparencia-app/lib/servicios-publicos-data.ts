@@ -108,6 +108,14 @@ export interface ServicioPublicoEnriquecido extends ServicioPublico {
   cobertura: ServiceDataCoverage;
 }
 
+export interface ServicioReleaseInventory {
+  chilecompraCompradores: number;
+  chilecompraProveedores: number;
+  contraloriaRegistros: number;
+  contraloriaEntidades: number;
+  infolobbyRegistros: number;
+}
+
 // Carga en memoria cacheada de las proyecciones del Lake
 let cachedInfoLobby: {
   records?: Array<{
@@ -389,6 +397,34 @@ export function getServicioPublicoEnriquecido(id: string): ServicioPublicoEnriqu
       lobby: audiencias_lobby.length > 0 || audiencias_ministerio_tutelar.length > 0,
       contraloria: auditorias_cgr.length > 0,
     }),
+  };
+}
+
+/**
+ * Totales de los releases que alimentan el directorio. Son inventario del
+ * dataset, no relaciones atribuidas automáticamente a cada organismo.
+ * Mantener ambas cifras visibles evita confundir "hay datos en la fuente" con
+ * "pudimos vincularlos con evidencia suficiente".
+ */
+export function getServicioReleaseInventory(): ServicioReleaseInventory {
+  loadProjections();
+  const chilecompra = leerChileCompraV1();
+  const contraloria = cachedContraloria?.records ?? [];
+  const infolobby = cachedInfoLobby?.records ?? [];
+  let contraloriaEntidades = 0;
+  try {
+    const filePath = path.join(process.cwd(), "data", "lake", "projections", "v1", "contraloria.json");
+    const payload = JSON.parse(fs.readFileSync(filePath, "utf8"));
+    contraloriaEntidades = Array.isArray(payload?.entities) ? payload.entities.length : 0;
+  } catch {
+    contraloriaEntidades = 0;
+  }
+  return {
+    chilecompraCompradores: chilecompra?.buyers?.length ?? 0,
+    chilecompraProveedores: chilecompra?.suppliers?.length ?? 0,
+    contraloriaRegistros: contraloria.length,
+    contraloriaEntidades,
+    infolobbyRegistros: infolobby.length,
   };
 }
 
