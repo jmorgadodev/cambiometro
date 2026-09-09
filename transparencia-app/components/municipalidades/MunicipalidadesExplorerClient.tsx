@@ -119,6 +119,19 @@ export default function MunicipalidadesExplorerClient({
   const [viewMode, setViewMode] = useState<"cards" | "table">("cards");
   const [showCharts, setShowCharts] = useState(true);
 
+  const payrollGaps = useMemo(
+    () => initialData.filter((municipality) => municipality.tiene_municipalidad_propia && (municipality.estado_frescura === "sin_datos" || !municipality.resumen_personal)),
+    [initialData],
+  );
+  const stalePayroll = useMemo(
+    () => initialData.filter((municipality) => municipality.tiene_municipalidad_propia && municipality.estado_frescura === "desfasado"),
+    [initialData],
+  );
+  const notApplicableTerritories = useMemo(
+    () => initialData.filter((municipality) => !municipality.tiene_municipalidad_propia),
+    [initialData],
+  );
+
   // Regiones y Partidos únicos
   const regiones = useMemo(() => {
     return [
@@ -424,6 +437,52 @@ export default function MunicipalidadesExplorerClient({
               <div><strong>{formatNum(release.payrollCoverage.unavailable)}</strong><span>sin nómina en el corte</span></div>
               <div><strong>{formatNum(release.payrollCoverage.notApplicable)}</strong><span>territorio no aplicable</span></div>
               <div><strong>{formatNum(release.payrollCoverage.totalTerritories)}</strong><span>comunas/territorios catalogados</span></div>
+            </div>
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(min(100%, 280px), 1fr))", gap: "0.75rem", marginTop: "1rem" }}>
+              <details style={{ border: "1px solid var(--border-subtle)", borderRadius: 10, padding: "0.7rem 0.85rem" }}>
+                <summary style={{ cursor: "pointer", fontWeight: 700, color: "var(--text-1)", fontSize: "0.78rem" }}>
+                  Ver las {payrollGaps.length} comunas sin nómina publicada
+                </summary>
+                <p style={{ margin: "0.55rem 0", color: "var(--text-muted)", fontSize: "0.72rem", lineHeight: 1.45 }}>
+                  Motivo del corte: no encontramos una nómina CPLT consultable para ese municipio. No significa sueldo o dotación igual a cero.
+                </p>
+                <ul style={{ margin: 0, paddingLeft: "1.1rem", columns: "2 220px", columnGap: "1.5rem", fontSize: "0.72rem", lineHeight: 1.65 }}>
+                  {payrollGaps.map((municipality) => (
+                    <li key={municipality.id}>
+                      <Link href={`/municipalidades/${getMuniCanonicalSlug(municipality.id)}`} style={{ color: "var(--accent)" }}>
+                        {municipality.nombre_comuna}
+                      </Link>
+                      <span style={{ color: "var(--text-subtle)" }}> · {municipality.region}</span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+              <details style={{ border: "1px solid var(--border-subtle)", borderRadius: 10, padding: "0.7rem 0.85rem" }}>
+                <summary style={{ cursor: "pointer", fontWeight: 700, color: "var(--text-1)", fontSize: "0.78rem" }}>
+                  Ver las {stalePayroll.length} comunas con corte atrasado
+                </summary>
+                <p style={{ margin: "0.55rem 0", color: "var(--text-muted)", fontSize: "0.72rem", lineHeight: 1.45 }}>
+                  Tienen registros, pero su período publicado es anterior al umbral de frescura. Se muestran como históricos, no como datos actuales.
+                </p>
+                <ul style={{ margin: 0, paddingLeft: "1.1rem", columns: "2 220px", columnGap: "1.5rem", fontSize: "0.72rem", lineHeight: 1.65 }}>
+                  {stalePayroll.map((municipality) => (
+                    <li key={municipality.id}>
+                      <Link href={`/municipalidades/${getMuniCanonicalSlug(municipality.id)}`} style={{ color: "var(--accent)" }}>
+                        {municipality.nombre_comuna}
+                      </Link>
+                      <span style={{ color: "var(--text-subtle)" }}> · {municipality.periodo_nomina ?? "período no informado"}</span>
+                    </li>
+                  ))}
+                </ul>
+              </details>
+              <details style={{ border: "1px solid var(--border-subtle)", borderRadius: 10, padding: "0.7rem 0.85rem" }}>
+                <summary style={{ cursor: "pointer", fontWeight: 700, color: "var(--text-1)", fontSize: "0.78rem" }}>
+                  Ver territorios no aplicables ({notApplicableTerritories.length})
+                </summary>
+                <p style={{ margin: "0.55rem 0 0", color: "var(--text-muted)", fontSize: "0.72rem", lineHeight: 1.45 }}>
+                  {notApplicableTerritories.map((municipality) => municipality.nombre_comuna).join(", ")} no tiene municipalidad propia; la nómina se atribuye a su administración municipal correspondiente.
+                </p>
+              </details>
             </div>
           </section>
 

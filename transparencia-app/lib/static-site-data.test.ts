@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { buildChunkManifest, chunkRows, writeChunkedJson } from "../scripts/static-site-data.mjs";
 import { chunkJsonRows, listUnavailableMunicipalities } from "../scripts/static-payroll.mjs";
+import { getMunicipalidadesList } from "./municipalidades-list";
 
 describe("static site data", () => {
   it("divide nóminas grandes por bytes sin perder filas", () => {
@@ -22,6 +23,14 @@ describe("static site data", () => {
     ], [{ id: "muni-a" }])).toEqual([
       { id: "muni-b", status: "unavailable", recordCount: 0, cut: "2026-07" },
     ]);
+  });
+
+  it("mantiene identificables los municipios sin nómina, atrasados y no aplicables", () => {
+    const municipalities = getMunicipalidadesList();
+    expect(municipalities).toHaveLength(346);
+    expect(municipalities.filter((item) => item.tiene_municipalidad_propia && (item.estado_frescura === "sin_datos" || !item.resumen_personal))).toHaveLength(25);
+    expect(municipalities.filter((item) => item.tiene_municipalidad_propia && item.estado_frescura === "desfasado")).toHaveLength(10);
+    expect(municipalities.filter((item) => !item.tiene_municipalidad_propia).map((item) => item.nombre_comuna)).toEqual(["Antártica"]);
   });
 
   it("divide filas en páginas numeradas de tamaño estable", () => {
