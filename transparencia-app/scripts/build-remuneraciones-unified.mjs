@@ -8,7 +8,7 @@ const source38Path = path.join(root, "data", "remuneraciones-38bis-publico.json"
 const source38HistoryPath = path.join(root, "data", "remuneraciones-38bis-publico-historico.json");
 const supportPath = path.join(root, "data", "personal-apoyo.json");
 const qualitySourcesPath = path.join(root, "data", "data-quality-sources.json");
-const pageSize = 50;
+const pageSize = 100;
 
 const source38 = JSON.parse(fs.readFileSync(source38Path, "utf8"));
 const source38History = JSON.parse(fs.readFileSync(source38HistoryPath, "utf8"));

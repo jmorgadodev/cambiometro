@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 type SourceStatus = "complete" | "partial" | "aggregate_only" | "unavailable";
 
@@ -76,8 +76,9 @@ function displayAmount(value: number | null) {
 }
 
 function recordDescription(row: UnifiedRow) {
-  if (row.sourceType === "support_staff") return "Personal de apoyo consolidado";
-  return "Registro original";
+  if (row.sourceType === "support_staff") return "Personal de apoyo con monto publicado";
+  if (row.sourceId === "remuneraciones-38bis") return "Remuneración individual publicada";
+  return "Registro original de la fuente";
 }
 
 function sourceDescription(item: SourceInfo) {
@@ -128,10 +129,23 @@ export default function RemuneracionesUnifiedExplorer() {
   const [results, setResults] = useState<SearchResult | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const initialQueryHandled = useRef(false);
 
   useEffect(() => {
     loadJson<UnifiedManifest>("manifest.json").then(setManifest).catch((reason: Error) => setError(reason.message));
   }, []);
+
+  useEffect(() => {
+    if (!manifest || initialQueryHandled.current || typeof window === "undefined") return;
+    const initialQuery = new URLSearchParams(window.location.search).get("q")?.trim() ?? "";
+    initialQueryHandled.current = true;
+    if (initialQuery.length < 2) return;
+    const timer = window.setTimeout(() => {
+      setQuery(initialQuery);
+      window.setTimeout(() => (document.getElementById("remuneration-search") as HTMLFormElement | null)?.requestSubmit(), 0);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, [manifest]);
 
   const groups = useMemo(() => {
     const allRows = [...(results?.rows ?? []), ...(results?.remoteRows ?? [])];
@@ -143,6 +157,9 @@ export default function RemuneracionesUnifiedExplorer() {
     }
     return [...grouped.values()].sort((left, right) => left[0].nombreOriginal.localeCompare(right[0].nombreOriginal, "es-CL"));
   }, [results]);
+
+  const paidSources = useMemo(() => manifest?.sources.filter((item) => item.sourceType !== "aggregate") ?? [], [manifest]);
+  const aggregateSources = useMemo(() => manifest?.sources.filter((item) => item.sourceType === "aggregate") ?? [], [manifest]);
 
   async function runSearch(event: FormEvent) {
     event.preventDefault();
@@ -200,10 +217,10 @@ export default function RemuneracionesUnifiedExplorer() {
 
   return (
     <section className="page-shell remuneration-unified" aria-labelledby="unified-remuneraciones-title" style={{ paddingTop: "1rem", paddingBottom: "0" }}>
-      <div className="eyebrow" style={{ color: "var(--accent)", marginBottom: "0.35rem" }}>REMUNERACIONES Y CARGOS PÚBLICOS</div>
+      <div className="eyebrow" style={{ color: "var(--accent)", marginBottom: "0.35rem" }}>REMUNERACIONES PUBLICADAS</div>
       <h2 id="unified-remuneraciones-title" style={{ margin: 0, fontSize: "clamp(1.35rem, 3vw, 2rem)" }}>Busca una persona, organismo o cargo</h2>
       <p style={{ color: "var(--text-muted)", maxWidth: "850px", margin: "0.5rem 0 1rem", lineHeight: 1.6 }}>
-        Reunimos publicaciones oficiales en un mismo lugar. Cada resultado conserva su fuente, organismo, cargo, período y monto cuando la fuente lo publica.
+        Consulta pagos y remuneraciones publicados por organismos oficiales. Cada resultado conserva su fuente, organismo, cargo, período y monto; los datos que no están publicados no se completan ni se estiman.
       </p>
 
       {!manifest && !error && <div className="stat-tile" role="status" aria-busy="true">Cargando fuentes públicas…</div>}
@@ -211,39 +228,26 @@ export default function RemuneracionesUnifiedExplorer() {
 
       {manifest && (
         <>
-          <div className="remuneration-reading-key" aria-label="Cómo interpretar los resultados">
-            <div><strong>Sueldo publicado</strong><span>La fuente informa un monto asociado al registro.</span></div>
-            <div><strong>Personal de apoyo</strong><span>Registros publicados por la Cámara o el Senado.</span></div>
-            <div><strong>Sin monto publicado</strong><span>La ausencia de un monto se conserva y no se convierte en cero.</span></div>
-          </div>
-          <div className="remuneration-source-grid" aria-label="Fuentes públicas disponibles">
-            {manifest.sources.map((item) => (
-              <article key={item.id} className="stat-tile remuneration-source-card" style={{ minHeight: "0", padding: "0.85rem" }}>
-                <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem", alignItems: "flex-start" }}>
-                  <strong style={{ fontSize: "0.78rem", lineHeight: 1.25 }}>{item.label}</strong>
-                  <span className={`badge ${statusClass(item.status)}`} style={{ fontSize: "0.62rem", whiteSpace: "nowrap" }}>{statusLabel(item.status)}</span>
-                </div>
-                <dl className="remuneration-source-card__facts">
-                  <div><dt>Registros</dt><dd>{displayCount(item.publishedCount)}</dd></div>
-                  <div><dt>Último corte</dt><dd>{item.period ?? "Sin fecha publicada"}</dd></div>
-                </dl>
-                <small className="remuneration-source-card__description">{sourceDescription(item)}</small>
-                {item.officialUrl && <a className="data-link" href={item.officialUrl} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", marginTop: "0.45rem", fontSize: "0.72rem" }}>Fuente oficial ↗</a>}
-              </article>
-            ))}
-          </div>
+          <nav className="remuneration-module-nav" aria-label="Secciones de remuneraciones">
+            <a href="#buscar-remuneraciones">Buscar remuneraciones</a>
+            <a href="#fuentes-remuneraciones">Fuentes integradas</a>
+            <a href="#detalle-38bis">Historial 38 bis</a>
+          </nav>
 
-          <form className="remuneration-search-form" onSubmit={runSearch}>
-            <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700 }}>Nombre, organismo o cargo<input className="form-input" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Ej.: Lucy Depablos o director" /></label>
-            <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700 }}>Fuente<select className="form-input" value={source} onChange={(event) => setSource(event.target.value)}><option value="all">Todas las fuentes</option>{manifest.sources.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
-            <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700 }}>Organismo (opcional)<input className="form-input" value={organism} onChange={(event) => setOrganism(event.target.value)} placeholder="Ej.: Servicio Civil" /></label>
-            <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700 }}>Cargo (opcional)<input className="form-input" value={role} onChange={(event) => setRole(event.target.value)} placeholder="Ej.: director" /></label>
-            <button className="btn btn-primary" type="submit" disabled={loading}>{loading ? "Buscando…" : "Buscar"}</button>
-          </form>
+          <section id="buscar-remuneraciones" className="remuneration-module" aria-labelledby="buscar-remuneraciones-title">
+            <div className="remuneration-module__heading"><span className="eyebrow">01 · BÚSQUEDA</span><h3 id="buscar-remuneraciones-title">Encuentra un registro publicado</h3><p>Busca por nombre, organismo o cargo. Después podrás comparar los períodos disponibles para esa persona.</p></div>
+            <form id="remuneration-search" className="remuneration-search-form" onSubmit={runSearch}>
+              <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700 }}>Nombre, organismo o cargo<input className="form-input" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Ej.: Sofía Pumpin o asesor" /></label>
+              <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700 }}>Fuente<select className="form-input" value={source} onChange={(event) => setSource(event.target.value)}><option value="all">Todas las fuentes</option>{paidSources.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
+              <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700 }}>Organismo (opcional)<input className="form-input" value={organism} onChange={(event) => setOrganism(event.target.value)} placeholder="Ej.: Subsecretaría del Interior" /></label>
+              <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700 }}>Cargo (opcional)<input className="form-input" value={role} onChange={(event) => setRole(event.target.value)} placeholder="Ej.: asesor junior" /></label>
+              <button className="btn btn-primary" type="submit" disabled={loading}>{loading ? "Buscando…" : "Buscar"}</button>
+            </form>
+          </section>
 
-          {results && <div style={{ marginTop: "1rem" }} aria-live="polite">
+          {results && <section id="resultados-remuneraciones" className="remuneration-module remuneration-module--results" aria-labelledby="resultados-remuneraciones-title" aria-live="polite">
             <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", alignItems: "baseline" }}>
-              <h3 style={{ margin: 0 }}>Coincidencias para “{query.trim()}”</h3>
+              <h3 id="resultados-remuneraciones-title" style={{ margin: 0 }}>Resultados para “{query.trim()}”</h3>
               <span style={{ color: "var(--text-muted)", fontSize: "0.8rem" }}>{number.format(groups.length)} personas agrupadas · {number.format(results.rows.length + results.remoteRows.length)} filas visibles</span>
             </div>
             {results.remoteRows.length === 0 && (source === "all" || source === "transparencia-activa") && <p style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>La fuente Transparencia Activa no respondió en esta consulta o no tiene coincidencias en el release actual. Los resultados estáticos sí permanecen disponibles.</p>}
@@ -257,7 +261,27 @@ export default function RemuneracionesUnifiedExplorer() {
                 </article>;
               })}
             </div>
-          </div>}
+          </section>}
+
+          <section id="fuentes-remuneraciones" className="remuneration-module remuneration-module--sources" aria-labelledby="fuentes-remuneraciones-title">
+            <div className="remuneration-module__heading"><span className="eyebrow">02 · FUENTES</span><h3 id="fuentes-remuneraciones-title">Qué información está integrada</h3><p>Las fuentes se mantienen separadas. Sólo se agrupan registros cuando la publicación permite compararlos.</p></div>
+            <div className="remuneration-reading-key" aria-label="Cómo interpretar los resultados">
+              <div><strong>Remuneración publicada</strong><span>La fuente informa un monto asociado a una persona y un período.</span></div>
+              <div><strong>Personal de apoyo</strong><span>Pagos publicados por la Cámara o el Senado.</span></div>
+              <div><strong>Sin monto publicado</strong><span>La ausencia se conserva y no se convierte en cero.</span></div>
+            </div>
+            <div className="remuneration-source-grid" aria-label="Fuentes de pagos y remuneraciones">
+              {paidSources.map((item) => (
+                <article key={item.id} className="stat-tile remuneration-source-card" style={{ minHeight: "0", padding: "0.85rem" }}>
+                  <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem", alignItems: "flex-start" }}><strong style={{ fontSize: "0.78rem", lineHeight: 1.25 }}>{item.label}</strong><span className={`badge ${statusClass(item.status)}`} style={{ fontSize: "0.62rem", whiteSpace: "nowrap" }}>{statusLabel(item.status)}</span></div>
+                  <dl className="remuneration-source-card__facts"><div><dt>Registros</dt><dd>{displayCount(item.publishedCount)}</dd></div><div><dt>Último corte</dt><dd>{item.period ?? "Sin fecha publicada"}</dd></div></dl>
+                  <small className="remuneration-source-card__description">{sourceDescription(item)}</small>
+                  {item.officialUrl && <a className="data-link" href={item.officialUrl} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", marginTop: "0.45rem", fontSize: "0.72rem" }}>Fuente oficial ↗</a>}
+                </article>
+              ))}
+            </div>
+            {aggregateSources.map((item) => <div key={item.id} className="remuneration-context-note"><strong>{item.label}</strong><span>{sourceDescription(item)} No forma parte de la búsqueda individual.</span></div>)}
+          </section>
         </>
       )}
     </section>

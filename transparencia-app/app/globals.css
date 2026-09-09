@@ -5514,7 +5514,7 @@ html.dark .page-masthead {
 
 .remuneration-reading-key {
   display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
   gap: 0.7rem;
   margin: 0.9rem 0;
 }
@@ -5592,6 +5592,92 @@ html.dark .page-masthead {
   border-radius: 0.8rem;
   background: var(--bg-surface-2);
 }
+
+.remuneration-module-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+  margin: 0.9rem 0;
+}
+
+.remuneration-module-nav a {
+  padding: 0.45rem 0.7rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.remuneration-module-nav a:hover,
+.remuneration-module-nav a:focus-visible {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.remuneration-module {
+  margin: 0.9rem 0;
+  padding: 1rem;
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  background: var(--surface-raised);
+}
+
+.remuneration-module__heading {
+  display: grid;
+  gap: 0.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.remuneration-module__heading h3 {
+  margin: 0;
+  font-size: 1.1rem;
+}
+
+.remuneration-module__heading p {
+  max-width: 52rem;
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  line-height: 1.5;
+}
+
+.remuneration-context-note {
+  display: grid;
+  gap: 0.2rem;
+  margin-top: 0.75rem;
+  padding: 0.75rem 0.85rem;
+  border-left: 3px solid var(--accent);
+  background: var(--bg-surface-2);
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  line-height: 1.45;
+}
+
+.remuneration-context-note strong { color: var(--text-primary); }
+
+.remuneration-panel {
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  background: var(--surface-raised);
+}
+
+.remuneration-panel > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.remuneration-panel > summary::-webkit-details-marker { display: none; }
+.remuneration-panel > summary strong { display: block; margin-top: 0.2rem; }
+.remuneration-panel > summary small { color: var(--text-muted); }
+.remuneration-panel[open] > summary { border-bottom: 1px solid var(--border); }
+.remuneration-panel > :not(summary) { padding: 0 1rem 1rem; }
 
 @media (max-width: 900px) {
   .remuneration-reading-key {
