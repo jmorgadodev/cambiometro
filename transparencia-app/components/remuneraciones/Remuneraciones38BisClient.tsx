@@ -76,6 +76,8 @@ interface HistoryPoint extends Remuneracion38BisRecord {
   mes: string;
 }
 
+type HistoryIndex = Record<string, HistoryPoint[]>;
+
 type ComparisonKind = "entradas" | "salidas_observadas" | "cambios";
 
 type SortMode = "relevancia" | "sueldo_desc" | "sueldo_asc";
@@ -228,12 +230,14 @@ export default function Remuneraciones38BisClient({
     const key = stableHash(rowKey(person));
     setHistoryLoading(true);
     setHistoryError(null);
-    fetch(`/data/remuneraciones-38bis/${manifest.history_base_path}${key}.json`)
+    fetch(`/data/remuneraciones-38bis/${manifest.history_base_path}index.json`)
       .then((response) => {
         if (!response.ok) throw new Error("No se pudo cargar el historial mensual de esta persona.");
-        return response.json() as Promise<HistoryPoint[]>;
+        return response.json() as Promise<HistoryIndex>;
       })
-      .then((value) => { if (active) setHistory(value.sort((left, right) => left.mes.localeCompare(right.mes))); })
+      .then((value) => {
+        if (active) setHistory((value[key] ?? []).sort((left, right) => left.mes.localeCompare(right.mes)));
+      })
       .catch((reason: Error) => { if (active) { setHistory([]); setHistoryError(reason.message); } })
       .finally(() => { if (active) setHistoryLoading(false); });
     return () => { active = false; };

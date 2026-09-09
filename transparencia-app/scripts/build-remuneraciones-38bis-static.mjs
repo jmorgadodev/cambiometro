@@ -196,10 +196,14 @@ for (const period of periodRows) {
     historyByHash.set(hash, entry);
   }
 }
+const historyIndex = {};
 for (const [hash, entry] of historyByHash.entries()) {
   entry.rows.sort((left, right) => left.mes.localeCompare(right.mes));
-  fs.writeFileSync(path.join(historyOutputDir, `${hash}.json`), `${JSON.stringify(entry.rows)}\n`, "utf8");
+  historyIndex[hash] = entry.rows;
 }
+// Un solo índice evita crear miles de archivos pequeños en Pages. El cliente
+// sigue solicitando sólo el historial de la persona seleccionada.
+fs.writeFileSync(path.join(historyOutputDir, "index.json"), `${JSON.stringify(historyIndex)}\n`, "utf8");
 const periodManifests = periodRows.map((period, index) => publicPeriod(
   period.rows,
   period.mes,
