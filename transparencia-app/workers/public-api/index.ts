@@ -1741,7 +1741,7 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
       id,
       label: source.label ?? labels[id] ?? id,
       recordCount,
-      status: stateStatus === "archive_only" ? "partial" : recordCount > 0 ? "connected" : "unavailable",
+      status: stateStatus === "archive_only" || stateStatus === "partial" ? "partial" : recordCount > 0 ? "connected" : "unavailable",
       checksumSha256: isTransferSource && currentTransferRelease
         ? currentTransferRelease.checksumSha256
         : state.checksumSha256 ?? source.indexChecksumSha256 ?? null,
