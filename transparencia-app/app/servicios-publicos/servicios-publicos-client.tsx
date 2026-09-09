@@ -384,6 +384,28 @@ export default function ServiciosPublicosClient({
               );
             })}
           </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "repeat(auto-fit, minmax(250px, 1fr))",
+              gap: "0.65rem",
+              marginTop: "0.85rem",
+            }}
+            aria-label="Por qué algunos módulos no aparecen en todas las fichas"
+          >
+            {([
+              ["Presupuesto", "Sin partida individual", "La institución puede estar incluida en una partida agregada del organismo tutelar; no se convierte en $0."],
+              ["Personal", "Sin nómina vigente", "El release CPLT actual no publica una nómina vigente de servicios; los cortes históricos se mantienen separados."],
+              ["Compras públicas", "Sin enlace verificable", "ChileCompra sí tiene registros, pero se muestran sólo cuando el RUT jurídico permite conciliarlos con exactitud."],
+              ["Lobby y Contraloría", "Sin relación directa", "La fuente puede existir, pero no se atribuye a una institución sin un identificador o evidencia documental suficiente."],
+            ] as const).map(([label, status, reason]) => (
+              <div key={label} style={{ borderLeft: "3px solid var(--accent)", padding: "0.65rem 0.75rem", background: "var(--bg-surface-2)", borderRadius: "0 8px 8px 0" }}>
+                <strong style={{ display: "block", fontSize: "0.76rem" }}>{label}</strong>
+                <span style={{ display: "block", marginTop: "0.2rem", fontWeight: 700, fontSize: "0.74rem" }}>{status}</span>
+                <span style={{ display: "block", marginTop: "0.25rem", color: "var(--text-muted)", fontSize: "0.72rem", lineHeight: 1.45 }}>{reason}</span>
+              </div>
+            ))}
+          </div>
           <p style={{ margin: "0.85rem 0 0", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.5 }}>
             El directorio contiene {totalServicios.toLocaleString("es-CL")} organismos. Un “no publicado” significa que el release consultado no trae ese módulo para ese organismo; un “histórico” se conserva como evidencia, pero no se presenta como dato vigente.
           </p>

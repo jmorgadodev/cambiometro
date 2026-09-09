@@ -43,6 +43,13 @@ describe("Dashboard Integral de Servicios Públicos y Eliminación de Bloques Ci
     expect(sence?.personal).toBeNull();
   });
 
+  it("S3b. El directorio explica la diferencia entre ausencia, histórico y falta de conciliación", () => {
+    expect(directoryClientSource).toContain("Sin nómina vigente");
+    expect(directoryClientSource).toContain("Sin enlace verificable");
+    expect(directoryClientSource).toContain("no se convierte en $0");
+    expect(directoryClientSource).toContain("Sin relación directa");
+  });
+
   it("S4. Ministerios no son 'subordinados' y cuentan con desglose de subtítulos 21/22/29", () => {
     const minagri = presupuestoParaServicio("min-agricultura");
     expect(minagri).not.toBeNull();
