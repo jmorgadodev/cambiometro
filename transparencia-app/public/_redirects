@@ -5,6 +5,8 @@
 /funcionarios/ /personas?tab=funcionarios 301
 /partidos/independientes /partidos/ind 301
 /partidos/independientes/ /partidos/ind 301
+/remuneraciones /remuneraciones-publicas 301
+/remuneraciones/ /remuneraciones-publicas 301
 /municipalidades/muni-iquique /municipalidades/iquique 301
 /municipalidades/muni-iquique/ /municipalidades/iquique 301
 /municipalidades/muni-altohospicio /municipalidades/alto-hospicio 301

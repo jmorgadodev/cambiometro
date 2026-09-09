@@ -28,6 +28,7 @@ const simpleRedirects = [
   ["/autoridades", "/personas?tab=parlamentarios"],
   ["/funcionarios", "/personas?tab=funcionarios"],
   ["/partidos/independientes", "/partidos/ind"],
+  ["/remuneraciones", "/remuneraciones-publicas"],
 ];
 const canonicalRedirects = ["/votaciones-destacadas /votaciones-destacadas/ 301"];
 const redirects = [
