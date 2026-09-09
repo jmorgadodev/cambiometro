@@ -7,12 +7,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "01101",
     "region": "Tarapacá",
-    "dotacion_total": 2245,
+    "dotacion_total": 2272,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Mauricio Alejandro Soria Macchiavello",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -39,12 +41,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "01401",
     "region": "Tarapacá",
-    "dotacion_total": 1569,
+    "dotacion_total": 1593,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Richard Alfonso Godoy Aguirre",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -61,6 +65,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Evelyn Maria Mamani Viza",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -77,6 +83,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Teofilo Pedro Mamani Garcia",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -93,6 +101,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jose Andres Bartolo Vinaya",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -109,6 +119,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Ivan Infante Chacon",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -141,6 +153,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Marcelino Carvajal Ferreira",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -157,6 +171,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Adriana Nataly Rivera Vega",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -167,12 +183,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "02104",
     "region": "Antofagasta",
-    "dotacion_total": 1859,
+    "dotacion_total": 1870,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Mario Acuña Villalobos",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -205,6 +223,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jhean Ramirez Dominguez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -237,6 +257,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Ljubica Elena Kurtovic Cortes",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -253,6 +275,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Viviana Del Rosario Cuello Rivera",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -279,12 +303,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "03102",
     "region": "Atacama",
-    "dotacion_total": 5046,
+    "dotacion_total": 5058,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Brunilda Clementina Gonzalez Anjel",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -295,12 +321,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "03103",
     "region": "Atacama",
-    "dotacion_total": 3542,
+    "dotacion_total": 3567,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Cristobal Andres Zuñiga Arancibia",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -317,6 +345,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Alex Alberto Ahumada Monroy",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -327,12 +357,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "03202",
     "region": "Atacama",
-    "dotacion_total": 1127,
+    "dotacion_total": 1133,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Mario Edwar Araya Rojas",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -343,12 +375,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "03301",
     "region": "Atacama",
-    "dotacion_total": 2958,
+    "dotacion_total": 3008,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Victor Manuel Isla Lutz",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -365,6 +399,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Cristian Didy Olivares Iriarte",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -381,6 +417,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Fernando Alberto Ruhl Perez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -397,6 +435,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Rigoberto Briceño Tapia",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -413,6 +453,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Daniela Norambuena Borgheresi",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -423,12 +465,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "04102",
     "region": "Coquimbo",
-    "dotacion_total": 23383,
+    "dotacion_total": 23384,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Ali Manuel Manouchehri Moghadam Kashan Lobos",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -445,6 +489,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Juan Carlos Alfaro Aravena",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -461,6 +507,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Uberlinda Ester Aquea Barraza",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -477,6 +525,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Hernan Andres Ahumada Ahumada",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -493,6 +543,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Mario Alfonso Aros Carvajal",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -509,6 +561,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Denis Miguel Angel Cortes Aguilera",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -525,6 +579,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Waldo Enrique Contreras Cortes",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -541,6 +597,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Christian Frank Gross Hidalgo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -551,12 +609,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "04204",
     "region": "Coquimbo",
-    "dotacion_total": 3199,
+    "dotacion_total": 3266,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Carlos Andres Lillo Alamos",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -567,12 +627,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "04301",
     "region": "Coquimbo",
-    "dotacion_total": 24263,
+    "dotacion_total": 24429,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Hector Alberto Vega Campusano",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -583,12 +645,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "04302",
     "region": "Coquimbo",
-    "dotacion_total": 2373,
+    "dotacion_total": 2416,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Marta Angélica Carvajal Cortés",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -599,12 +663,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "04303",
     "region": "Coquimbo",
-    "dotacion_total": 9733,
+    "dotacion_total": 9799,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Cristian Daniel Herrera Peña",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -615,12 +681,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "04304",
     "region": "Coquimbo",
-    "dotacion_total": 1867,
+    "dotacion_total": 2008,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Pedro Humberto Araya Zepeda",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -637,6 +705,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Carmen Juana Olivares De La Rivera",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -653,6 +723,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Camila Tatiana Nieto Hernández",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -669,6 +741,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Rodrigo Martinez Roca",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -701,6 +775,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Pablo Andres Manriquez Angulo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -717,6 +793,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Marcos Antonio Morales Ureta",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -733,6 +811,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Rolando Hernan Silva Fuentes",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -749,6 +829,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Macarena Carolina Ripamonti Serrano",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -759,12 +841,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "05201",
     "region": "Valparaíso",
-    "dotacion_total": 4586,
+    "dotacion_total": 4650,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Elizabeth Joana Arevalo Pakarati",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -781,6 +865,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Manuel Eduardo Rivera Martinez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -791,12 +877,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "05302",
     "region": "Valparaíso",
-    "dotacion_total": 4507,
+    "dotacion_total": 4510,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Dina Patricia Gonzalez Alfaro",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -813,6 +901,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Juan Galdames Carmona",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -829,6 +919,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Christian Mauricio Ortega Villagras",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -845,6 +937,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Patricio Daniel Pallares Valenzuela",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -861,6 +955,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Alberto Patricio Aliaga Diaz",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -877,6 +973,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Claudia Adasme Donoso",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -893,6 +991,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Gustavo Abel Henriquez Toledo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -909,6 +1009,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Gustavo Alessandri Bascuñan",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -919,12 +1021,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "05501",
     "region": "Valparaíso",
-    "dotacion_total": 14511,
+    "dotacion_total": 14536,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Luis Alberto Mella Gajardo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -935,12 +1039,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "05502",
     "region": "Valparaíso",
-    "dotacion_total": 2776,
+    "dotacion_total": 2794,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Johnny Alexis Piraino Meneses",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -957,6 +1063,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Veronica Paz Maria Rossat Arriagada",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -973,6 +1081,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Filomena Aida Navia Hevia",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -983,12 +1093,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "05506",
     "region": "Valparaíso",
-    "dotacion_total": 2382,
+    "dotacion_total": 2394,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Leslie Pacheco Ramírez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -999,12 +1111,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "05601",
     "region": "Valparaíso",
-    "dotacion_total": 10214,
+    "dotacion_total": 10277,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Luis Omar Vera Castro",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1021,6 +1135,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Marco Antonio Gonzalez Candia",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1037,6 +1153,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Lily Lidia Isabel Silva Garcia",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1053,6 +1171,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "José Jofré Bustos",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1063,12 +1183,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "05605",
     "region": "Valparaíso",
-    "dotacion_total": 4118,
+    "dotacion_total": 4119,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Alfonso Muñoz Aravena",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1085,6 +1207,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Fernando Jose Rodriguez Larrain",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1101,6 +1225,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Carmen Gisele Castillo Taucher",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1117,6 +1243,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Rodrigo Eduardo Diaz Brito",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1133,6 +1261,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Edgardo Raul Gonzalez Arancibia",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1143,12 +1273,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "05704",
     "region": "Valparaíso",
-    "dotacion_total": 3136,
+    "dotacion_total": 3461,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Gonzalo Enrique Vergara Lizana",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1165,6 +1297,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Mauricio Antonio Quiroz Chamorro",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1181,6 +1315,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Claudio Patricio Zurita Ibarra",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1197,6 +1333,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Maria Corti Badia",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1213,6 +1351,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Fernando Luciano Valenzuela Romero",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1229,6 +1369,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jorge Elias Jil Herrera",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1239,12 +1381,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "05804",
     "region": "Valparaíso",
-    "dotacion_total": 3557,
+    "dotacion_total": 3784,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Nelson Fernando Estay Molina",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1255,12 +1399,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "06101",
     "region": "Libertador General Bernardo O'Higgins",
-    "dotacion_total": 3030,
+    "dotacion_total": 3061,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Raimundo Agliati Marchant",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1277,6 +1423,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jose Alexander Flores Osorio",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1293,6 +1441,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Juan Exequiel Abarca Padilla",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1309,6 +1459,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Felix Andres Sanchez Vergara",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1325,6 +1477,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Ricardo Boris Acuña Gonzalez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1341,6 +1495,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Juan Marcelo Minanir Matus",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1357,6 +1513,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Juan Pablo Flores Astorga",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1367,12 +1525,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "06108",
     "region": "Libertador General Bernardo O'Higgins",
-    "dotacion_total": 2561,
+    "dotacion_total": 2577,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Juan Carlos Abud Parra",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1383,12 +1543,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "06109",
     "region": "Libertador General Bernardo O'Higgins",
-    "dotacion_total": 1325,
+    "dotacion_total": 1328,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Luis Manuel Barra Villanueva",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1421,6 +1583,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "María Estrella Montero Carrasco",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1437,6 +1601,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Fermin Alejandro Carreño Carreño",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1447,12 +1613,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "06113",
     "region": "Libertador General Bernardo O'Higgins",
-    "dotacion_total": 2580,
+    "dotacion_total": 2614,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Ruben Adolfo Ceron Gonzalez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1485,6 +1653,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Enrique Alfonso Del Barrio Hernandez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1501,6 +1671,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Waldo Antonio Valdivia Montecinos",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1511,12 +1683,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "06117",
     "region": "Libertador General Bernardo O'Higgins",
-    "dotacion_total": 3229,
+    "dotacion_total": 3243,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Guido Hernan Carreño Reyes",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1533,6 +1707,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Roberto Del Carmen Cordova Carreno",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1549,6 +1725,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Valentin Geronimo Vidal Rubio",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1565,6 +1743,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Rodrigo Alejandro Palominos Vidal",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1581,6 +1761,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Sebastian Hernan Flores Labarca",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1597,6 +1779,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Yanko Antonio Blumen Antivilo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1613,6 +1797,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Moises Antonio Carvacho Vargas",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1629,6 +1815,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Pablo Francisco Silva Perez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1645,6 +1833,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Fabian Andres Soto Gonzalez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1655,12 +1845,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "06303",
     "region": "Libertador General Bernardo O'Higgins",
-    "dotacion_total": 1332,
+    "dotacion_total": 1333,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Marco Antonio Contreras Jorquera",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1671,12 +1863,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "06304",
     "region": "Libertador General Bernardo O'Higgins",
-    "dotacion_total": 544,
+    "dotacion_total": 550,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jose Alfredo Roman Chavez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1687,12 +1881,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "06305",
     "region": "Libertador General Bernardo O'Higgins",
-    "dotacion_total": 1090,
+    "dotacion_total": 1089,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Gabriel Antonio Ahumada Diaz",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1703,12 +1899,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "06306",
     "region": "Libertador General Bernardo O'Higgins",
-    "dotacion_total": 1326,
+    "dotacion_total": 1331,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Carlos Carrero Perez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1725,6 +1923,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Claudio Abraham Cumsille Chomali",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1741,6 +1941,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Marcelo Andres González Farías",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1757,6 +1959,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Victor Gonzalo Baraona Bezanilla",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1767,12 +1971,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "06310",
     "region": "Libertador General Bernardo O'Higgins",
-    "dotacion_total": 2863,
+    "dotacion_total": 2864,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Yamil Andres Ethit Romero",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1789,6 +1995,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Juan Carlos Diaz Avendano",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1799,12 +2007,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "07102",
     "region": "Maule",
-    "dotacion_total": 6241,
+    "dotacion_total": 6245,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Carlos Moises Valenzuela Gajardo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1837,6 +2047,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Carlos Alberto Correa Miños",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1853,6 +2065,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Pablo Cesar Luna Amigo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1869,6 +2083,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Cristian Boris Cabrera Lazo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1885,6 +2101,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jose Miguel Tobar Aravena",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1895,12 +2113,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "07108",
     "region": "Maule",
-    "dotacion_total": 7286,
+    "dotacion_total": 7404,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Americo Gustavo Guajardo Oyarce",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1917,6 +2137,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Juan Raul Rojas Vergara",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1949,6 +2171,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jorge Eduardo Muñoz Saavedra",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1965,6 +2189,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Marcelo Osvaldo Waddington Guajardo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1981,6 +2207,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Maria Luz Reyes Orellana",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -1997,6 +2225,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "George Raphael Bordachar Sotomayor",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2029,6 +2259,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Claudio Alejandro Reyes Fuenzalida",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2045,6 +2277,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Felipe Eduardo Mendez Guzman",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2061,6 +2295,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Claudia Andrea Medina Hernandez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2077,6 +2313,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jose Antonio Arellano Lynch",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2093,6 +2331,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Osvaldo Del Transito Jorquera Padilla",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2103,12 +2343,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "07308",
     "region": "Maule",
-    "dotacion_total": 2843,
+    "dotacion_total": 2852,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Wildo Richard Farías González",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2119,12 +2361,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "07309",
     "region": "Maule",
-    "dotacion_total": 979,
+    "dotacion_total": 980,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Patricio Andres Rivera Bravo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2141,6 +2385,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Mario Alejandro Meza Vasquez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2157,6 +2403,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Pedro Pablo Muñoz Oses",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2167,12 +2415,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "07403",
     "region": "Maule",
-    "dotacion_total": 860,
+    "dotacion_total": 878,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jaime Antonio Briones Jorquera",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2189,6 +2439,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Patricio Alejandro Ojeda Alarcon",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2205,6 +2457,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Rafael Antonio Ramirez Parra",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2221,6 +2475,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Luis Reveliño Alarcón Núñez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2237,6 +2493,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Arturo Del Carmen Palma Vilches",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2253,6 +2511,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jonathan Eduardo Norambuena Barros",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2263,12 +2523,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "08101",
     "region": "Biobío",
-    "dotacion_total": 15214,
+    "dotacion_total": 15216,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Héctor Juan Muñoz Uribe",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2285,6 +2547,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Boris Felipe Chamorro Rebolledo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2301,6 +2565,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jorge Carlos Lozano Zapata",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2311,12 +2577,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "08104",
     "region": "Biobío",
-    "dotacion_total": 671,
+    "dotacion_total": 679,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Rodrigo Alexis Montero Cuevas",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2333,6 +2601,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Ricardo Wladimir Fuentes Palma",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2381,6 +2651,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Juan Pablo Spoerer Brito",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2397,6 +2669,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Angel Custodio Castro Medina",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2413,6 +2687,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Eduardo Antonio Saavedra Bustos",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2429,6 +2705,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Italo Ismael Caceres Lizana",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2445,6 +2723,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Miguel Angel Rivera Morales",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2455,12 +2735,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "08201",
     "region": "Biobío",
-    "dotacion_total": 5275,
+    "dotacion_total": 5304,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Marcela Alejandra Tiznado Fernández",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2471,12 +2753,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "08202",
     "region": "Biobío",
-    "dotacion_total": 12681,
+    "dotacion_total": 12682,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Juan Mauricio Alarcon Guzman",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2493,6 +2777,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jorge James Radonich Barra",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2525,6 +2811,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Luis Gengnagel Gutiererz",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2541,6 +2829,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Pablo Cesar Vegas Verdugo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2557,6 +2847,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jose Rolando Linco Garrido",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2573,6 +2865,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jose Perez Arriagada",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2583,12 +2877,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "08302",
     "region": "Biobío",
-    "dotacion_total": 767,
+    "dotacion_total": 770,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Sandra Liliana Bobadilla Cisterna",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2615,12 +2911,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "08304",
     "region": "Biobío",
-    "dotacion_total": 2657,
+    "dotacion_total": 2690,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Vladimir Hilich Fica Toledo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2631,12 +2929,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "08305",
     "region": "Biobío",
-    "dotacion_total": 2680,
+    "dotacion_total": 2722,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jose Miguel Muñoz Saez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2647,12 +2947,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "08306",
     "region": "Biobío",
-    "dotacion_total": 3565,
+    "dotacion_total": 3607,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Carlos Roberto Toloza Soto",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2685,6 +2987,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Pablo Antonio Urrutia Maldonado",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2701,6 +3005,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Claudio Edelberto Solar Jara",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2743,12 +3049,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "08312",
     "region": "Biobío",
-    "dotacion_total": 2439,
+    "dotacion_total": 2440,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jaime Sergio Veloso Jara",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2765,6 +3073,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jose Aurelio Saez Vinet",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2781,6 +3091,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Felix Segundo Vita Manquepi",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2829,6 +3141,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Cristian Leonardo Moraga Lagos",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2845,6 +3159,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Daniel Antonio Parra Calabrano",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2861,6 +3177,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jose Antonio Colihuil Binimelis",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2877,6 +3195,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Hans Osvaldo Gonzalez Espinoza",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2893,6 +3213,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jorge Andrés Romero Martínez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2909,6 +3231,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Ricardo Armando Jaramillo Galindo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2919,12 +3243,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "09109",
     "region": "La Araucanía",
-    "dotacion_total": 4452,
+    "dotacion_total": 4453,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Alexis Arturo Pineda Ruiz",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2941,6 +3267,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Isaac Alejandro Cuminao Barros",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2973,6 +3301,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Mario Hernán González Rebolledo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2989,6 +3319,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Luis Alejandro Sepulveda Tapia",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -2999,12 +3331,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "09114",
     "region": "La Araucanía",
-    "dotacion_total": 6008,
+    "dotacion_total": 6024,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jacqueline Del Carmen Romero Inzunza",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3021,6 +3355,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Sebastian Diego Alvarez Ramirez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3037,6 +3373,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Roberto Ricardo Tripainao Calfulaf",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3053,6 +3391,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Baldomero Abel Santos Vidal",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3069,6 +3409,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Guillermo Antonio Martinez Soto",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3085,6 +3427,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Katherinne Tatiana Migueles Muñoz",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3101,6 +3445,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Pablo Santiago Astete Mermoud",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3117,6 +3463,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Alvaro Josue Labraña Opazo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3133,6 +3481,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jose Enrique Neira Neira",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3149,6 +3499,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Manuel Jesus Macaya Ramirez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3159,12 +3511,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "09203",
     "region": "La Araucanía",
-    "dotacion_total": 3130,
+    "dotacion_total": 3132,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Hugo Edmundo Vidal Merino",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3181,6 +3535,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Luis Alberto Orellana Rocha",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3197,6 +3553,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Eduardo Andrés Yáñez Rivas",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3207,12 +3565,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "09206",
     "region": "La Araucanía",
-    "dotacion_total": 2341,
+    "dotacion_total": 2352,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Victor Hugo Gonzalez Rodriguez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3229,6 +3589,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Richard Alexi Leonelli Contreras",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3255,12 +3617,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "09209",
     "region": "La Araucanía",
-    "dotacion_total": 1718,
+    "dotacion_total": 1721,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Claudio Musre Contreras",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3271,12 +3635,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "09210",
     "region": "La Araucanía",
-    "dotacion_total": 2127,
+    "dotacion_total": 2140,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Luis Armando Alvarez Valenzuela",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3287,12 +3653,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "09211",
     "region": "La Araucanía",
-    "dotacion_total": 11264,
+    "dotacion_total": 11230,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Javier Alejandro Jaramillo Soto",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3309,6 +3677,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Rodrigo Javier Wainraihgt Galilea",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3325,6 +3695,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Marco Andres Silva Maldonado",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3341,6 +3713,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Francisco Javier Donoso Oyarzun",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3357,6 +3731,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "José Miguel Cárdenas Barría",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3373,6 +3749,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Javier Ignacio Arismendi Valenzuela",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3383,12 +3761,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "10106",
     "region": "Los Lagos",
-    "dotacion_total": 4872,
+    "dotacion_total": 4877,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Emilio Rafael Gonzalez Burgos",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3405,6 +3785,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Victor Ruben Angulo Muñoz",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3421,6 +3803,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Nabih Soza Cardenas",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3437,6 +3821,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Tomas Andres Garate Silva",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3453,6 +3839,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Juan Baltazar Elgueta Cheuquepil",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3501,6 +3889,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Javiera Paz Yañez Rebolledo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3517,6 +3907,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Maria Alejandra Villegas Huichaman",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3527,12 +3919,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "10206",
     "region": "Los Lagos",
-    "dotacion_total": 300,
+    "dotacion_total": 309,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Alejandro Ariel Cardenas Quezada",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3549,6 +3943,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Marcos Patricio Vargas Oyarzún",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3565,6 +3961,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Claudio Jorge Barudy Labrín",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3581,6 +3979,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Javier Hernan Ugarte Mansilla",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3597,6 +3997,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Rene Alfonso Garces Alvarez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3613,6 +4015,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jaime Alberto Bertin Valenzuela",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3629,6 +4033,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Maria Elena Ojeda Betancourt",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3645,6 +4051,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Alicia Villar Vargas",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3661,6 +4069,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Maria Jimena Nuñez Morales",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3677,6 +4087,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Sebastian Alejandro Cruzat Carcamo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3693,6 +4105,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "José Luis Muñoz Uribe",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3709,6 +4123,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Marco Antonio Carrillo Bravo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3719,12 +4135,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "10401",
     "region": "Los Lagos",
-    "dotacion_total": 1110,
+    "dotacion_total": 1116,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Maria Clara Lazcano Fernandez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3741,6 +4159,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Fernando Erwin Grandon Domke",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3757,6 +4177,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "María Cristina Espinoza Ojeda",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3773,6 +4195,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Julio César Hernán Delgado Retamal",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3789,6 +4213,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Carlos Patricio Gatica Villegas",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3799,12 +4225,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "11102",
     "region": "Aysén del General Carlos Ibáñez del Campo",
-    "dotacion_total": 431,
+    "dotacion_total": 437,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Claudia Andrea Valdés Vasquéz",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3821,6 +4249,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Luis Alberto Martinez Gallardo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3837,6 +4267,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Francisco Javier Roncagliolo Lepio",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3853,6 +4285,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Bans Ramiro Puinao Carimoney",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3869,6 +4303,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Patricio Ulloa Georgía",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3879,12 +4315,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "11302",
     "region": "Aysén del General Carlos Ibáñez del Campo",
-    "dotacion_total": 372,
+    "dotacion_total": 375,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "José Claudio Fica Gomez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3901,6 +4339,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Marisela Jimenez Cruces",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3917,6 +4357,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Ariel Keim Hermosilla",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3933,6 +4375,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Marcelo Daniel Jelvez Cardenas",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3949,6 +4393,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Claudio Andres Radonich Jimenez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3965,6 +4411,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Fernando Ivan Ojeda Gonzalez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3981,6 +4429,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Silvia Tatiana Vasquez Barrientos",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -3997,6 +4447,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jeannette Isabel Andrade Ruiz",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4013,6 +4465,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jaime Patricio Fernandez Alarcon",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4045,6 +4499,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jose Gabriel Parada Aguilar",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4061,6 +4517,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Karina Paola Fernandez Marin",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4071,12 +4529,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "12303",
     "region": "Magallanes y de la Antártica Chilena",
-    "dotacion_total": 142,
+    "dotacion_total": 145,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Luis Segundo Barria Andrade",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4093,6 +4553,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Ana Ester Mayorga Bahamonde",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4109,6 +4571,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Anahí Marcela Cárdenas Rodríguez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4143,6 +4607,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Johnny Hernan Yañez Diaz",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4159,6 +4625,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Mauro Elias Tamayo Rozas",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4175,6 +4643,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Rene Arturo De La Vega Fuentes",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4185,12 +4655,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "13105",
     "region": "Metropolitana de Santiago",
-    "dotacion_total": 10528,
+    "dotacion_total": 10530,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Manuel Francisco Zuñiga Aguilar",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4201,12 +4673,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "13106",
     "region": "Metropolitana de Santiago",
-    "dotacion_total": 9537,
+    "dotacion_total": 9637,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Felipe Eduardo Muñoz Vallejos",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4223,6 +4697,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Maximiliano Luksic Lederer",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4233,12 +4709,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "13108",
     "region": "Metropolitana de Santiago",
-    "dotacion_total": 7677,
+    "dotacion_total": 7716,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Agustin Ignacio Iglesias Muñoz",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4255,6 +4733,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Joel Andrés Olmos Espinoza",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4271,6 +4751,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Daniel Adolfo Reyes Morales",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4287,6 +4769,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Claudio Eugenio Arriagada Macaya",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4303,6 +4787,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Claudia Gerlene Pizarro Peña",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4319,6 +4805,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jose Manuel Augusto Palacios Parra",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4351,6 +4839,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Felipe Alessandri Vergara",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4367,6 +4857,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Javiera Paz Reyes Jara",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4377,12 +4869,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "13117",
     "region": "Metropolitana de Santiago",
-    "dotacion_total": 3090,
+    "dotacion_total": 3105,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Maximiliano Rios Galleguillos",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4427,12 +4921,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "13120",
     "region": "Metropolitana de Santiago",
-    "dotacion_total": 1689,
+    "dotacion_total": 1721,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Sebastian Sichel Ramirez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4449,6 +4945,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Luis Alberto Astudillo Peiretti",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4465,6 +4963,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Miguel Andres Concha Manso",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4497,6 +4997,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Italo Bravo Lizana",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4513,6 +5015,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Paulina Rebeca Bobadilla Navarrete",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4523,12 +5027,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "13126",
     "region": "Metropolitana de Santiago",
-    "dotacion_total": 6137,
+    "dotacion_total": 6174,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Karina Andrea Delfino Mussa",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4561,6 +5067,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Claudio Nicolas Castro Salas",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4577,6 +5085,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Cristobal Amaro Labra Bassa",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4593,6 +5103,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Carol Cecilia Bown Sepulveda",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4603,12 +5115,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "13131",
     "region": "Metropolitana de Santiago",
-    "dotacion_total": 6332,
+    "dotacion_total": 6340,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Gustavo Eduardo Toro Quintana",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4625,6 +5139,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Camila Merino Catalan",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4641,6 +5157,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Matias Jair Toledo Herrera",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4651,12 +5169,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "13202",
     "region": "Metropolitana de Santiago",
-    "dotacion_total": 1392,
+    "dotacion_total": 1393,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jaime Escudero Ramos",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4673,6 +5193,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Roberto Ulises Pérez Catalán",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4689,6 +5211,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Isabel Margarita Valenzuela Ahumada",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4705,6 +5229,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jonathan Enrique Opazo Carrasco",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4721,6 +5247,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Cesar Mena Retamal",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4731,12 +5259,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "13401",
     "region": "Metropolitana de Santiago",
-    "dotacion_total": 4059,
+    "dotacion_total": 4068,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Christopher Antonio White Bahamondes",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4753,6 +5283,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Miguel Leonardo Araya Lobos",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4769,6 +5301,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Hortensia Maricel Mora Catalan",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4779,12 +5313,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "13404",
     "region": "Metropolitana de Santiago",
-    "dotacion_total": 2002,
+    "dotacion_total": 2314,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Rodrigo Contreras Gutierrez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4801,6 +5337,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Paula Andrea Gárate Rojas",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4817,6 +5355,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Marcela Chamorro Macias",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4849,6 +5389,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jessica Paola Del Carmen Mualim Fajuri",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4859,12 +5401,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "13505",
     "region": "Metropolitana de Santiago",
-    "dotacion_total": 1966,
+    "dotacion_total": 1974,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Manuel Jesús Devia Vilches",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4881,6 +5425,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Sebastian Enrique Rosas Guerrero",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4891,12 +5437,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "13602",
     "region": "Metropolitana de Santiago",
-    "dotacion_total": 4719,
+    "dotacion_total": 4873,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Zandra Sofia Maulen Jofre",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4913,6 +5461,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Juan Pablo Olave Cambara",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4929,6 +5479,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Felipe Luis Muñoz Heredia",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4939,12 +5491,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "13605",
     "region": "Metropolitana de Santiago",
-    "dotacion_total": 9977,
+    "dotacion_total": 10183,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Rodrigo Alejandro Cornejo Inostroza",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4977,6 +5531,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Claudio Oriel Gonzalez Navarro",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -4993,6 +5549,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Juan Javier Rocha Aguilera",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5009,6 +5567,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Victor David Fritz Aguayo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5025,6 +5585,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Gonzalo Andres Lara Martinez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5041,6 +5603,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Guillermo Rolando Mitre Gatica",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5057,6 +5621,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Cristian Alejandro Navarrete Quezada",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5073,6 +5639,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Rodrigo Valdivia Orias",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5089,6 +5657,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Saturnino Casimiro Quezada Solís",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5099,12 +5669,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "14202",
     "region": "Los Ríos",
-    "dotacion_total": 2895,
+    "dotacion_total": 2898,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Fernando Javier Flández Montecinos",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5121,6 +5693,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Miguel Angel Meza Shwenke",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5131,12 +5705,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "14204",
     "region": "Los Ríos",
-    "dotacion_total": 2899,
+    "dotacion_total": 2917,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Luis Roberto Reyes Álvarez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5153,6 +5729,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Orlando Severo Vargas Pizarro",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5163,12 +5741,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "15102",
     "region": "Arica y Parinacota",
-    "dotacion_total": 318,
+    "dotacion_total": 329,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Cristian Javier Zavala Soto",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5185,6 +5765,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Javier Tito Huaylla",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5201,6 +5783,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Alex Fernando Castillo Blas",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5211,12 +5795,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "16101",
     "region": "Ñuble",
-    "dotacion_total": 16937,
+    "dotacion_total": 16956,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Camilo Francisco Benavente Jimenez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5233,6 +5819,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Gonzalo Andres Bustamante Troncoso",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5243,12 +5831,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "16103",
     "region": "Ñuble",
-    "dotacion_total": 4138,
+    "dotacion_total": 4139,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jorge Del Pozo Pastene",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5265,6 +5855,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Renan Eduardo Cabezas Arroyo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5281,6 +5873,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Johnnson Neftali Guiñez Nuñez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5297,6 +5891,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jairo Alexis Del Pino Lema",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5307,12 +5903,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "16107",
     "region": "Ñuble",
-    "dotacion_total": 1397,
+    "dotacion_total": 1398,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Felipe Ignacio Catalan Venegas",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5329,6 +5927,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Patricio Eduardo Suazo Romero",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5345,6 +5945,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Rafael Arcangel Cifuentes Rodriguez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5361,6 +5963,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Eduardo Enrique Redlich Mardones",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5377,6 +5981,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jorge Eduardo Romero Villalobos",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5393,6 +5999,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Alejandro Rodrigo Pedreros Urrutia",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5409,6 +6017,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Luis Alberto Molina Melo",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5425,6 +6035,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Juan Carlos Ramirez Sepulveda",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5435,12 +6047,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "16206",
     "region": "Ñuble",
-    "dotacion_total": 1775,
+    "dotacion_total": 1776,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Nicolas Alfonso Torres Ovalle",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5451,12 +6065,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "16207",
     "region": "Ñuble",
-    "dotacion_total": 1169,
+    "dotacion_total": 1171,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Jorge Ivan Morales Sanhueza",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5473,6 +6089,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Ruben Esteban Mendez Venegas",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5489,6 +6107,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Wilson Enrique Palma Jelves",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5505,6 +6125,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Mauricio Andres Catoni Contreras",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5515,12 +6137,14 @@
     "partida_capitulo_dipres": null,
     "cut_si_municipio": "16304",
     "region": "Ñuble",
-    "dotacion_total": 2699,
+    "dotacion_total": 2702,
     "gasto_mensual_estimado_clp": null,
     "compras_ocds_monto_clp": null,
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Cristofer Antonio Valdes Gonzalez",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5537,6 +6161,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
+    "director_jefe_actual": "Victor Ramon Toro Leiva",
+    "fuente_director": "CPLT / SERVEL Elecciones Municipales",
     "ministerio_dependiente": "Municipalidades de Chile (SUBDERE)"
   },
   {
@@ -5555,6 +6181,7 @@
     "compras_ocds_rut_comprador": "60.501.000-8",
     "compras_ocds_metodo_enlace": "RUT_EXACTO",
     "director_jefe_actual": "Claudio Alvarado Andrade",
+    "fuente_director": "interior.gob.cl / BCN — Ministro del Interior y Seguridad Pública (D.S. N° 1 de 11-03-2026)",
     "sitio_web_oficial": "https://www.interior.gob.cl",
     "ministerio_dependiente": "Interior"
   },
@@ -5607,10 +6234,10 @@
     "region": null,
     "dotacion_total": null,
     "gasto_mensual_estimado_clp": null,
-    "compras_ocds_monto_clp": null,
-    "compras_ocds_procesos": null,
-    "compras_ocds_rut_comprador": null,
-    "compras_ocds_metodo_enlace": null,
+    "compras_ocds_monto_clp": 4073113344,
+    "compras_ocds_procesos": 505,
+    "compras_ocds_rut_comprador": "60.201.000-7",
+    "compras_ocds_metodo_enlace": "RUT_EXACTO",
     "director_jefe_actual": "Fernando Barros Tocornal",
     "sitio_web_oficial": "https://www.defensa.cl",
     "ministerio_dependiente": "Defensa Nacional"
@@ -5669,6 +6296,7 @@
     "compras_ocds_rut_comprador": "60.101.000-3",
     "compras_ocds_metodo_enlace": "RUT_EXACTO",
     "director_jefe_actual": "Claudio Alvarado Andrade",
+    "fuente_director": "segegob.cl / BCN — Ministro Secretario General de Gobierno (biministro Interior · SEGEGOB, D.S. N° 189 de 19-05-2026)",
     "sitio_web_oficial": "https://www.segegob.cl",
     "ministerio_dependiente": "SEGEGOB"
   },
@@ -5740,10 +6368,10 @@
     "region": null,
     "dotacion_total": null,
     "gasto_mensual_estimado_clp": null,
-    "compras_ocds_monto_clp": null,
-    "compras_ocds_procesos": null,
-    "compras_ocds_rut_comprador": null,
-    "compras_ocds_metodo_enlace": null,
+    "compras_ocds_monto_clp": 2176994083,
+    "compras_ocds_procesos": 52,
+    "compras_ocds_rut_comprador": "60.601.000-1",
+    "compras_ocds_metodo_enlace": "RUT_EXACTO",
     "director_jefe_actual": "Fernando Rabat Celis",
     "sitio_web_oficial": "https://www.minjusticia.gob.cl",
     "ministerio_dependiente": "Justicia"
@@ -5759,10 +6387,10 @@
     "region": null,
     "dotacion_total": null,
     "gasto_mensual_estimado_clp": null,
-    "compras_ocds_monto_clp": null,
-    "compras_ocds_procesos": null,
-    "compras_ocds_rut_comprador": null,
-    "compras_ocds_metodo_enlace": null,
+    "compras_ocds_monto_clp": 677040237,
+    "compras_ocds_procesos": 109,
+    "compras_ocds_rut_comprador": "60.701.000-5",
+    "compras_ocds_metodo_enlace": "RUT_EXACTO",
     "director_jefe_actual": "Tomás Rau Binder",
     "sitio_web_oficial": "https://www.mintrab.gob.cl",
     "ministerio_dependiente": "Trabajo"
@@ -5783,6 +6411,7 @@
     "compras_ocds_rut_comprador": "61.202.000-0",
     "compras_ocds_metodo_enlace": "RUT_EXACTO",
     "director_jefe_actual": "Louis de Grange Concha",
+    "fuente_director": "mop.cl / BCN — Ministro de Obras Públicas (D.S. N° 189 de 19-05-2026)",
     "sitio_web_oficial": "https://www.mop.cl",
     "ministerio_dependiente": "Obras Públicas"
   },
@@ -5802,6 +6431,7 @@
     "compras_ocds_rut_comprador": "61.601.000-K",
     "compras_ocds_metodo_enlace": "RUT_EXACTO",
     "director_jefe_actual": "May Chomali Garib",
+    "fuente_director": "minsal.cl / BCN — Ministra de Salud (D.S. N° 1 de 11-03-2026)",
     "sitio_web_oficial": "https://www.minsal.cl",
     "ministerio_dependiente": "Salud"
   },
@@ -5835,10 +6465,10 @@
     "region": null,
     "dotacion_total": null,
     "gasto_mensual_estimado_clp": null,
-    "compras_ocds_monto_clp": null,
-    "compras_ocds_procesos": null,
-    "compras_ocds_rut_comprador": null,
-    "compras_ocds_metodo_enlace": null,
+    "compras_ocds_monto_clp": 682062138,
+    "compras_ocds_procesos": 175,
+    "compras_ocds_rut_comprador": "61.301.000-9",
+    "compras_ocds_metodo_enlace": "RUT_EXACTO",
     "director_jefe_actual": "Jaime Campos Quiroga",
     "sitio_web_oficial": "https://www.minagri.gob.cl",
     "ministerio_dependiente": "Agricultura"
@@ -5878,6 +6508,7 @@
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
     "director_jefe_actual": "Louis de Grange Concha",
+    "fuente_director": "mtt.gob.cl / BCN — Ministro de Transportes y Telecomunicaciones (biministro)",
     "sitio_web_oficial": "https://www.mtt.gob.cl",
     "ministerio_dependiente": "Transportes"
   },
@@ -5953,7 +6584,8 @@
     "compras_ocds_procesos": 338,
     "compras_ocds_rut_comprador": "61.980.670-0",
     "compras_ocds_metodo_enlace": "RUT_EXACTO",
-    "director_jefe_actual": "Natalia Duco Soler",
+    "director_jefe_actual": "Francisco Riveros Cantuarias",
+    "fuente_director": "mindep.cl / Presidencia — Ministro del Deporte (14-08-2026)",
     "sitio_web_oficial": "https://www.mindep.cl",
     "ministerio_dependiente": "Deporte"
   },
@@ -5972,7 +6604,8 @@
     "compras_ocds_procesos": 106,
     "compras_ocds_rut_comprador": "61.980.680-8",
     "compras_ocds_metodo_enlace": "RUT_EXACTO",
-    "director_jefe_actual": "Judith Marín Morales",
+    "director_jefe_actual": "Marcia Raphael Mora",
+    "fuente_director": "minmujeryeg.gob.cl / Presidencia — Ministra de la Mujer (16-06-2026)",
     "sitio_web_oficial": "https://minmujeryeg.gob.cl",
     "ministerio_dependiente": "Mujer y Equidad de Género"
   },
@@ -6010,7 +6643,8 @@
     "compras_ocds_procesos": null,
     "compras_ocds_rut_comprador": null,
     "compras_ocds_metodo_enlace": null,
-    "director_jefe_actual": "Ximena Lincolao Pilquián",
+    "director_jefe_actual": "Carolina Rossi",
+    "fuente_director": "minciencia.gob.cl / Presidencia — Ministra de Ciencia (ratificada 16-06-2026)",
     "sitio_web_oficial": "https://www.minciencia.gob.cl",
     "ministerio_dependiente": "Ciencia"
   },
@@ -6030,6 +6664,7 @@
     "compras_ocds_rut_comprador": "60.803.000-K",
     "compras_ocds_metodo_enlace": "RUT_EXACTO",
     "director_jefe_actual": "Jorge Trujillo",
+    "fuente_director": "sii.cl / BCN — Director Nacional del Servicio de Impuestos Internos",
     "sitio_web_oficial": "https://www.sii.cl",
     "ministerio_dependiente": "Hacienda"
   },
@@ -6106,6 +6741,7 @@
     "compras_ocds_rut_comprador": "61.603.000-0",
     "compras_ocds_metodo_enlace": "RUT_EXACTO",
     "director_jefe_actual": "César Oyarzo",
+    "fuente_director": "fonasa.cl / BCN — Director Nacional del Fondo Nacional de Salud",
     "sitio_web_oficial": "https://www.fonasa.cl",
     "ministerio_dependiente": "Salud"
   },
@@ -6296,10 +6932,10 @@
     "region": null,
     "dotacion_total": 720,
     "gasto_mensual_estimado_clp": null,
-    "compras_ocds_monto_clp": null,
-    "compras_ocds_procesos": null,
-    "compras_ocds_rut_comprador": null,
-    "compras_ocds_metodo_enlace": null,
+    "compras_ocds_monto_clp": 7255020,
+    "compras_ocds_procesos": 12,
+    "compras_ocds_rut_comprador": "60.705.000-7",
+    "compras_ocds_metodo_enlace": "RUT_EXACTO",
     "director_jefe_actual": "José Ignacio Mujica",
     "fuente_director": "La Tercera 26-mar-2026 + corfo.cl (asumió 30-mar-2026)",
     "sitio_web_oficial": "https://www.corfo.cl",
@@ -6374,10 +7010,10 @@
     "region": null,
     "dotacion_total": null,
     "gasto_mensual_estimado_clp": null,
-    "compras_ocds_monto_clp": null,
-    "compras_ocds_procesos": null,
-    "compras_ocds_rut_comprador": null,
-    "compras_ocds_metodo_enlace": null,
+    "compras_ocds_monto_clp": 227297208,
+    "compras_ocds_procesos": 75,
+    "compras_ocds_rut_comprador": "61.504.000-2",
+    "compras_ocds_metodo_enlace": "RUT_EXACTO",
     "director_jefe_actual": "Joaquín Cortez",
     "sitio_web_oficial": "https://www.spensiones.cl",
     "ministerio_dependiente": "Trabajo"
@@ -12193,10 +12829,10 @@
     "region": null,
     "dotacion_total": null,
     "gasto_mensual_estimado_clp": null,
-    "compras_ocds_monto_clp": null,
-    "compras_ocds_procesos": null,
-    "compras_ocds_rut_comprador": null,
-    "compras_ocds_metodo_enlace": null,
+    "compras_ocds_monto_clp": 15172344033,
+    "compras_ocds_procesos": 3437,
+    "compras_ocds_rut_comprador": "61.608.107-1",
+    "compras_ocds_metodo_enlace": "RUT_EXACTO",
     "sitio_web_oficial": "",
     "ministerio_dependiente": "Descubierto Automáticamente"
   },

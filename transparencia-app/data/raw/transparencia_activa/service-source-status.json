@@ -1,0 +1,13 @@
+{
+  "org-hospital-el-pino": {
+    "organismoId": "AO103",
+    "fuenteOficial": "https://transparencia.redsalud.gob.cl/transparencia/public/personal_historico1_n.php?id=AO103",
+    "fuentesRelacionadas": [
+      "https://transparencia.redsalud.gob.cl/transparencia/public/personal_historicos3_n.php?id=AO103",
+      "https://www.portaltransparencia.cl/PortalPdT/directorio-de-organismos-regulados/?org=AO103"
+    ],
+    "ultimaActualizacion": "2018-01-13",
+    "estado": "historico",
+    "motivo": "El portal oficial consultado sólo expone un directorio histórico con última actualización visible en enero de 2018. No se incorpora como dotación vigente hasta validar un corte posterior."
+  }
+}

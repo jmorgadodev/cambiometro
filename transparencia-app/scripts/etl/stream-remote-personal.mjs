@@ -57,6 +57,14 @@ const ORGANISMOS_MAP = loadOrganismosMap();
 const COMMUNES = JSON.parse(fs.readFileSync(path.join(process.cwd(), "data", "catalog", "communes.json"), "utf8")).communes;
 const MUNICIPALITY_REGISTRY = createMunicipalityRegistry(COMMUNES);
 const ORGANISMO_RESOLUTION_CACHE = new Map();
+const PERSONAL_SCOPE = String(process.env.CPLT_PERSONAL_SCOPE ?? "municipalities").toLowerCase();
+if (!new Set(["municipalities", "all"]).has(PERSONAL_SCOPE)) {
+  throw new Error(`CPLT_PERSONAL_SCOPE_INVALID: ${PERSONAL_SCOPE}`);
+}
+
+function isMunicipalityName(value) {
+  return /^(?:(?:i|ilustre) )?municipalidad\b|^municipio\b/.test(normalized(value));
+}
 
 function resolveOrganismoId(organismoNombre) {
   const exactName = String(organismoNombre ?? "").trim();
@@ -129,18 +137,18 @@ async function processStream(tipo, urls, outputDir) {
       if (line.length === 0) continue;
       if (linesProcessed % 500_000 === 0) {
         const memory = memoryUsageMb();
-        console.log(`    [INFO] ${tipo}: ${linesProcessed} lineas; ${latestByOfficial.size} registros municipales vigentes unicos; memoria heap=${memory.heap}MB rss=${memory.rss}MB externa=${memory.external}MB`);
+        console.log(`    [INFO] ${tipo}: ${linesProcessed} lineas; ${latestByOfficial.size} registros vigentes unicos (${PERSONAL_SCOPE}); memoria heap=${memory.heap}MB rss=${memory.rss}MB externa=${memory.external}MB`);
       }
 
       const year = Number(scanCpltCell(line, header, "anyo", "año"));
       if (!Number.isInteger(year) || year < 2024) continue;
       const organismoNombre = scanCpltCell(line, header, "organismo_nombre", "organismo nombre");
-      if (!/^(?:(?:i|ilustre) )?municipalidad\b|^municipio\b/.test(normalized(organismoNombre))) continue;
+      if (PERSONAL_SCOPE === "municipalities" && !isMunicipalityName(organismoNombre)) continue;
       let organismoId;
       try {
         organismoId = resolveOrganismoId(organismoNombre);
       } catch (error) {
-        if (error instanceof Error && error.message.startsWith("CPLT_UNKNOWN_MUNICIPALITY:")) {
+        if (PERSONAL_SCOPE === "municipalities" && error instanceof Error && error.message.startsWith("CPLT_UNKNOWN_MUNICIPALITY:")) {
           unknownMunicipalities.add(organismoNombre);
           continue;
         }
@@ -208,25 +216,28 @@ async function processStream(tipo, urls, outputDir) {
 
   latestByOfficial.close();
 
-  const coverageDir = path.join(outputDir, "coverage");
-  fs.mkdirSync(coverageDir, { recursive: true });
-  const coverage = COMMUNES.map((commune) => {
-    const administrationId = commune.administracion_municipal_id;
-    const count = groupedCounts.get(administrationId) ?? 0;
-    return {
-      communeId: commune.id,
-      cut: commune.cut,
-      administrationId,
-      status: commune.tiene_municipalidad_propia ? (count > 0 ? "available" : "unavailable") : "not_applicable",
-      recordCount: commune.tiene_municipalidad_propia ? count : 0,
-    };
-  });
-  fs.writeFileSync(path.join(coverageDir, `${normalized(tipo)}.json`), JSON.stringify({
-    sourceId: `cplt-personal-${normalized(tipo)}`,
-    sourceUrl,
-    generatedAt: new Date().toISOString(),
-    coverage,
-  }, null, 2));
+  if (PERSONAL_SCOPE === "municipalities" || PERSONAL_SCOPE === "all") {
+    const coverageDir = path.join(outputDir, "coverage");
+    fs.mkdirSync(coverageDir, { recursive: true });
+    const coverage = COMMUNES.map((commune) => {
+      const administrationId = commune.administracion_municipal_id;
+      const count = groupedCounts.get(administrationId) ?? 0;
+      return {
+        communeId: commune.id,
+        cut: commune.cut,
+        administrationId,
+        status: commune.tiene_municipalidad_propia ? (count > 0 ? "available" : "unavailable") : "not_applicable",
+        recordCount: commune.tiene_municipalidad_propia ? count : 0,
+      };
+    });
+    fs.writeFileSync(path.join(coverageDir, `${normalized(tipo)}.json`), JSON.stringify({
+      sourceId: `cplt-personal-${normalized(tipo)}`,
+      sourceUrl,
+      generatedAt: new Date().toISOString(),
+      coverage,
+      scope: PERSONAL_SCOPE,
+    }, null, 2));
+  }
 
   const validationDir = path.join(outputDir, "validation");
   fs.mkdirSync(validationDir, { recursive: true });
@@ -238,7 +249,7 @@ async function processStream(tipo, urls, outputDir) {
     generatedAt: new Date().toISOString(),
   }, null, 2));
 
-  console.log(`[OK] ${tipo}: ${report.recordCount} registros validos; sha256 ${report.checksumSha256}`);
+  console.log(`[OK] ${tipo}: ${report.recordCount} registros validos en alcance ${PERSONAL_SCOPE}; sha256 ${report.checksumSha256}`);
 }
 
 async function run() {

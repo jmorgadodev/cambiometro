@@ -9,6 +9,7 @@ import ShareButton from "@/components/ShareButton";
 import ReleaseMetaCard from "@/components/data/ReleaseMetaCard";
 import type { CoverageMetric, DataQualityStatus } from "@/lib/data-quality-summary";
 import OverviewSignalPanel from "@/components/dashboard/OverviewSignalPanel";
+import { summarizeServiceCoverage } from "@/lib/servicios-publicos-cobertura";
 
 type ServicioConPolitico = ServicioPublicoEnriquecido & {
   politico_id?: string | null;
@@ -72,6 +73,7 @@ export default function ServiciosPublicosClient({
   release,
 }: Props) {
   const totalConPresupuestoEfectivo = totalConPartida ?? totalConPresupuesto ?? 0;
+  const coverageSummary = useMemo(() => summarizeServiceCoverage(servicios), [servicios]);
   const searchParams = useSearchParams();
   const router = useRouter();
   const pathname = usePathname();
@@ -353,6 +355,41 @@ export default function ServiciosPublicosClient({
         />
       </div>
 
+      <div className="container-main" style={{ marginTop: "1rem" }}>
+        <section className="card" aria-labelledby="cobertura-servicios" style={{ padding: "1.25rem 1.4rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "baseline", flexWrap: "wrap", marginBottom: "0.9rem" }}>
+            <div>
+              <p className="eyebrow" style={{ marginBottom: "0.3rem" }}>Cobertura por fuente</p>
+              <h2 id="cobertura-servicios" style={{ margin: 0, fontSize: "1.15rem" }}>No todos los módulos cubren a todos los organismos</h2>
+            </div>
+            <span style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>El detalle explica el motivo en cada ficha.</span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "0.65rem" }}>
+            {([
+              ["presupuesto", "Presupuesto"],
+              ["personal", "Personal"],
+              ["compras", "Compras públicas"],
+              ["lobby", "Lobby"],
+              ["contraloria", "Contraloría"],
+            ] as const).map(([key, label]) => {
+              const item = coverageSummary[key];
+              return (
+                <div key={key} style={{ border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "0.75rem", background: "var(--bg-surface-2)" }}>
+                  <strong style={{ display: "block", fontSize: "0.78rem" }}>{label}</strong>
+                  <div style={{ marginTop: "0.35rem", fontFamily: "var(--font-mono, monospace)", fontWeight: 800, color: "var(--accent)" }}>{item.publicado.toLocaleString("es-CL")} publicados</div>
+                  <div style={{ marginTop: "0.3rem", color: "var(--text-muted)", fontSize: "0.72rem", lineHeight: 1.45 }}>
+                    {item.historico > 0 && `${item.historico} históricos · `}{item.noPublicado} no publicados{item.noEnlazado > 0 && ` · ${item.noEnlazado} sin enlace`}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+          <p style={{ margin: "0.85rem 0 0", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.5 }}>
+            El directorio contiene {totalServicios.toLocaleString("es-CL")} organismos. Un “no publicado” significa que el release consultado no trae ese módulo para ese organismo; un “histórico” se conserva como evidencia, pero no se presenta como dato vigente.
+          </p>
+        </section>
+      </div>
+
       {/* ═══ CONTENIDO Y FILTROS ═══════════════════════════════════════════════ */}
       <div className="container-main" style={{ marginTop: "2rem" }}>
         
@@ -589,13 +626,13 @@ export default function ServiciosPublicosClient({
                       <div style={{ padding: "0.5rem 0.6rem", background: "var(--bg-surface-2)", borderRadius: 6 }}>
                         <span style={{ fontSize: "0.66rem", color: "var(--text-subtle)", textTransform: "uppercase", fontWeight: 700, display: "block" }}>Dotación</span>
                         <strong style={{ fontSize: "0.86rem", color: "var(--ok)", fontFamily: "monospace" }}>
-                          {personal?.dotacion_total !== null && personal?.dotacion_total !== undefined ? `${personal.dotacion_total.toLocaleString("es-CL")} pers.` : "—"}
+                          {personal?.dotacion_total !== null && personal?.dotacion_total !== undefined ? `${personal.dotacion_total.toLocaleString("es-CL")} pers.` : serv.cobertura.personal.etiqueta}
                         </strong>
                       </div>
                       <div style={{ padding: "0.5rem 0.6rem", background: "var(--bg-surface-2)", borderRadius: 6 }}>
                         <span style={{ fontSize: "0.66rem", color: "var(--text-subtle)", textTransform: "uppercase", fontWeight: 700, display: "block" }}>Compras OCDS</span>
                         <strong style={{ fontSize: "0.86rem", color: "var(--warn)", fontFamily: "monospace" }}>
-                          {compras?.monto_total_clp !== null && compras?.monto_total_clp !== undefined ? formatCLP(compras.monto_total_clp) : "—"}
+                          {compras?.monto_total_clp !== null && compras?.monto_total_clp !== undefined ? formatCLP(compras.monto_total_clp) : serv.cobertura.compras.etiqueta}
                         </strong>
                       </div>
                     </div>
@@ -714,10 +751,10 @@ export default function ServiciosPublicosClient({
                           {p && p.vigente_clp > 0 ? formatCLP(p.vigente_clp) : "Subordinado"}
                         </td>
                         <td style={{ padding: "0.85rem 1rem", textAlign: "right", fontFamily: "var(--font-mono, monospace)", color: "var(--ok)", fontWeight: 700 }}>
-                          {personal?.dotacion_total !== null && personal?.dotacion_total !== undefined ? `${personal.dotacion_total.toLocaleString("es-CL")} pers.` : "—"}
+                          {personal?.dotacion_total !== null && personal?.dotacion_total !== undefined ? `${personal.dotacion_total.toLocaleString("es-CL")} pers.` : serv.cobertura.personal.etiqueta}
                         </td>
                         <td style={{ padding: "0.85rem 1rem", textAlign: "right", fontFamily: "var(--font-mono, monospace)", color: "var(--warn)", fontWeight: 700 }}>
-                          {compras?.monto_total_clp !== null && compras?.monto_total_clp !== undefined ? formatCLP(compras.monto_total_clp) : "—"}
+                          {compras?.monto_total_clp !== null && compras?.monto_total_clp !== undefined ? formatCLP(compras.monto_total_clp) : serv.cobertura.compras.etiqueta}
                         </td>
                         <td style={{ padding: "0.85rem 1rem", textAlign: "center" }}>
                           <Link prefetch={false} href={`/servicios-publicos/${serv.id}`} className="btn btn-ghost" style={{ fontSize: "0.75rem", padding: "0.25rem 0.5rem" }}>

@@ -34,6 +34,21 @@ function formatCompactCLP(n: number) {
   return `$${(n / 1_000_000).toLocaleString("es-CL", { maximumFractionDigits: 0 })} MM`;
 }
 
+function formatCoverageDate(value?: string) {
+  if (!value) return null;
+  const date = new Date(`${value}T12:00:00`);
+  if (Number.isNaN(date.getTime())) return value;
+  return new Intl.DateTimeFormat("es-CL", { dateStyle: "medium" }).format(date);
+}
+
+const COVERAGE_MODULES = [
+  { key: "presupuesto", label: "Presupuesto" },
+  { key: "personal", label: "Personal y remuneraciones" },
+  { key: "compras", label: "Compras públicas" },
+  { key: "lobby", label: "Lobby" },
+  { key: "contraloria", label: "Contraloría" },
+] as const;
+
 export default function ServicioPublicoDashboardClient({ servicio, politicoId }: Props) {
   const [activeTab, setActiveTab] = useState<"presupuesto" | "personal" | "compras" | "lobby">("presupuesto");
   const [comprasPage, setComprasPage] = useState<number>(1);
@@ -45,6 +60,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
   const resumenLobby = servicio.resumen_lobby;
   const lobby = servicio.audiencias_lobby ?? [];
   const cgr = servicio.auditorias_cgr ?? [];
+  const cobertura = servicio.cobertura;
 
   // Paginación para órdenes de compra
   const ordenes = compras?.ordenes_recientes ?? [];
@@ -171,7 +187,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
               {personal?.dotacion_total !== null && personal?.dotacion_total !== undefined ? `${personal.dotacion_total.toLocaleString("es-CL")} pers.` : "—"}
             </div>
             <div style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
-              {personal?.dotacion_total !== null && personal?.dotacion_total !== undefined ? "Transparencia Activa CPLT" : "Sin publicaciones en la fuente"}
+              {personal?.dotacion_total !== null && personal?.dotacion_total !== undefined ? "Transparencia Activa CPLT" : cobertura.personal.etiqueta}
             </div>
           </div>
 
@@ -194,7 +210,7 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
               {compras?.monto_total_clp !== null && compras?.monto_total_clp !== undefined ? formatCompactCLP(compras.monto_total_clp) : "—"}
             </div>
             <div style={{ fontSize: "0.74rem", color: "var(--text-muted)", marginTop: "0.25rem" }}>
-              {compras ? `${compras.procesos_count.toLocaleString("es-CL")} procesos · ChileCompra OCDS` : "Sin publicaciones en la fuente"}
+              {compras ? `${compras.procesos_count.toLocaleString("es-CL")} procesos · ChileCompra OCDS` : cobertura.compras.etiqueta}
             </div>
           </div>
 
@@ -225,13 +241,41 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
         </div>
       </section>
 
+      <section className="card" aria-labelledby="estado-fuentes-servicio" style={{ padding: "1.25rem 1.4rem" }}>
+        <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "baseline", flexWrap: "wrap", marginBottom: "0.9rem" }}>
+          <div>
+            <p className="eyebrow" style={{ marginBottom: "0.3rem" }}>Trazabilidad de la información</p>
+            <h2 id="estado-fuentes-servicio" style={{ margin: 0, fontSize: "1.15rem" }}>Qué está publicado para este organismo</h2>
+          </div>
+          <span style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>Las ausencias no se interpretan como $0 ni como cero personas.</span>
+        </div>
+        <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "0.65rem" }}>
+          {COVERAGE_MODULES.map(({ key, label }) => {
+            const evidence = cobertura[key];
+            const positive = evidence.estado === "publicado";
+            const historical = evidence.estado === "historico";
+            return (
+              <div key={key} style={{ border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "0.75rem", background: "var(--bg-surface-2)" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: "0.4rem", alignItems: "center" }}>
+                  <strong style={{ fontSize: "0.78rem" }}>{label}</strong>
+                  <span className={`badge ${positive ? "badge-ok" : historical ? "badge-warn" : "badge-info"}`} style={{ fontSize: "0.62rem" }}>{evidence.etiqueta}</span>
+                </div>
+                <p style={{ margin: "0.5rem 0 0", color: "var(--text-muted)", fontSize: "0.76rem", lineHeight: 1.45 }}>{evidence.motivo}</p>
+                {evidence.ultimaActualizacion && <div style={{ marginTop: "0.45rem", fontSize: "0.7rem", color: "var(--text-subtle)" }}>Último corte: <strong>{formatCoverageDate(evidence.ultimaActualizacion)}</strong></div>}
+                {evidence.fuenteOficial && <a href={evidence.fuenteOficial} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", marginTop: "0.45rem", fontSize: "0.72rem", color: "var(--accent)" }}>Ver fuente oficial ↗</a>}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
       <OverviewSignalPanel
         title={`Qué muestran los datos de ${servicio.nombre}`}
         description="Este resumen reúne las señales verificables antes de abrir cada módulo. Las cifras provienen de DIPRES, CPLT, ChileCompra, InfoLobby y Contraloría cuando existe un enlace comprobable."
         metrics={[
           { label: "Presupuesto vigente", value: pres?.vigente_clp ? formatCompactCLP(pres.vigente_clp) : "No publicado", detail: pres ? `${pres.porcentaje_ejecucion.toLocaleString("es-CL")} % ejecutado` : "La fuente no publica una partida individual", tone: "accent" },
-          { label: "Dotación publicada", value: personal?.dotacion_total !== null && personal?.dotacion_total !== undefined ? `${personal.dotacion_total.toLocaleString("es-CL")} personas` : "No publicado", detail: "Transparencia Activa CPLT", tone: "ok" },
-          { label: "Compras públicas", value: compras ? compras.procesos_count.toLocaleString("es-CL") : "No publicado", detail: compras ? formatCompactCLP(compras.monto_total_clp ?? 0) : "Sin enlace OCDS verificable", tone: "warn" },
+          { label: "Dotación publicada", value: personal?.dotacion_total !== null && personal?.dotacion_total !== undefined ? `${personal.dotacion_total.toLocaleString("es-CL")} personas` : cobertura.personal.etiqueta, detail: cobertura.personal.motivo, tone: "ok" },
+          { label: "Compras públicas", value: compras ? compras.procesos_count.toLocaleString("es-CL") : cobertura.compras.etiqueta, detail: compras ? formatCompactCLP(compras.monto_total_clp ?? 0) : cobertura.compras.motivo, tone: "warn" },
           { label: "Control y lobby", value: `${lobby.length + cgr.length}`, detail: `${lobby.length} audiencias · ${cgr.length} auditorías`, tone: "info" },
         ]}
         bars={overviewBars}

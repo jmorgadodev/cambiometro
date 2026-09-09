@@ -71,7 +71,10 @@ export default function PoliticosListClient({
       .some((value) => normalizeSearchText(value).includes(searchQuery));
   });
   const totalPaginas = Math.ceil(filteredItems.length / pageSize) || 1;
-  useEffect(() => setPagina(1), [searchQuery, requestedCargo]);
+  useEffect(() => {
+    const timer = window.setTimeout(() => setPagina(1), 0);
+    return () => window.clearTimeout(timer);
+  }, [searchQuery, requestedCargo]);
   const sectionId = useId();
 
   const indiceInicio = (pagina - 1) * pageSize;

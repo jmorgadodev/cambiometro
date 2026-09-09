@@ -4,6 +4,7 @@ import { getServicioPublicoById, getAllServiciosPublicos, type ServicioPublico }
 import { presupuestoParaServicio, type ResumenPresupuesto } from "./presupuesto";
 import { getOrganismoById } from "./organismos";
 import { leerChileCompraV1 } from "./chilecompra";
+import { buildServiceDataCoverage, type ServiceDataCoverage } from "./servicios-publicos-cobertura";
 
 export interface ProveedorChileCompra {
   id: string;
@@ -104,6 +105,7 @@ export interface ServicioPublicoEnriquecido extends ServicioPublico {
   resumen_lobby: ResumenLobbyServicio;
   auditorias_cgr: AuditoriaCgrServicio[];
   personal: ResumenPersonalServicio | null;
+  cobertura: ServiceDataCoverage;
 }
 
 // Carga en memoria cacheada de las proyecciones del Lake
@@ -379,6 +381,14 @@ export function getServicioPublicoEnriquecido(id: string): ServicioPublicoEnriqu
     resumen_lobby,
     auditorias_cgr,
     personal,
+    cobertura: buildServiceDataCoverage({
+      id: servicio.id,
+      presupuesto: presupuesto !== null,
+      personal: personal !== null,
+      compras: compras !== null,
+      lobby: audiencias_lobby.length > 0 || audiencias_ministerio_tutelar.length > 0,
+      contraloria: auditorias_cgr.length > 0,
+    }),
   };
 }
 

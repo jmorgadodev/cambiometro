@@ -69,8 +69,8 @@ describe("Dashboard Integral de Servicios Públicos y Eliminación de Bloques Ci
   });
 
   it("S6. R10 omite compras si el catálogo no aporta RUT jurídico verificable", () => {
-    const minagri = getServicioPublicoEnriquecido("min-agricultura");
-    expect(minagri?.compras).toBeNull();
+    const ciencia = getServicioPublicoEnriquecido("min-ciencia");
+    expect(ciencia?.compras).toBeNull();
     expect(dashboardClientSource).toContain("Sin enlace verificable por RUT jurídico");
   });
 

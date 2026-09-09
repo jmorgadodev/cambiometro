@@ -69,18 +69,11 @@ describe("Tarea F — Cobertura Real de Dotación y Compras en Servicios Públic
   });
 
   it("F4. Invariante Vanessa Kaiser preservada ($4.582.550 + ALTA +33,7%)", () => {
-    const evalKaiser = evaluateSenateSupport({
-      total_clp: 15_250_000,
-      period: "2026-07",
-      base_mensual_clp: 11_406_149,
-      verified_transfers: [],
-    });
-
+    const evalKaiser = evaluateSenateSupport({ total_clp: 15_250_000, period: "2026-07", base_mensual_clp: 11_406_149, verified_transfers: [] });
     expect(evalKaiser.status).toBe("ALTA");
     expect(evalKaiser.excess_clp).toBe(3843851);
-    const pct = ((15250000 - 11406149) / 11406149) * 100;
-    const formattedPct = `+${pct.toFixed(1).replace(".", ",")}%`;
-    expect(formattedPct).toBe("+33,7%");
+    const pct = ((15_250_000 - 11_406_149) / 11_406_149) * 100;
+    expect(`+${pct.toFixed(1).replace(".", ",")}%`).toBe("+33,7%");
   });
 
   it("F5. Invariante Maipú preservada (Período representativo + Censo 2024)", () => {
@@ -91,9 +84,26 @@ describe("Tarea F — Cobertura Real de Dotación y Compras en Servicios Públic
   });
 
   it("F6. Dashboard de Calidad (/datos/calidad) operativo con 13 fuentes oficiales", () => {
-    const sourcesCount = Object.keys(SOURCE_CANONICAL_COUNTS).length;
-    expect(sourcesCount).toBe(13);
+    expect(Object.keys(SOURCE_CANONICAL_COUNTS)).toHaveLength(13);
     expect(SOURCE_CANONICAL_COUNTS["transparencia-activa"]).toBeGreaterThan(1_000_000);
     expect(SOURCE_CANONICAL_COUNTS["chilecompra"]).toBeGreaterThan(70_000);
+  });
+
+  it("F7. Hospital El Pino no se presenta como dotación cero si sólo hay un corte histórico", () => {
+    const hospital = getServicioPublicoEnriquecido("org-hospital-el-pino");
+    expect(hospital).not.toBeNull();
+    expect(hospital?.personal).toBeNull();
+    expect(hospital?.cobertura.personal.estado).toBe("historico");
+    expect(hospital?.cobertura.personal.ultimaActualizacion).toBe("2018-01-13");
+    expect(hospital?.cobertura.personal.motivo).toContain("2018");
+    expect(hospital?.cobertura.personal.fuenteOficial).toContain("AO103");
+  });
+
+  it("F8. Diferencia dato no publicado de módulo enlazado por RUT", () => {
+    const hospital = getServicioPublicoEnriquecido("org-hospital-el-pino");
+    expect(hospital?.cobertura.presupuesto.estado).toBe("no_publicado");
+    expect(hospital?.cobertura.compras.estado).toBe("publicado");
+    expect(hospital?.compras?.procesos_count).toBeGreaterThan(0);
+    expect(hospital?.cobertura.personal.estado).not.toBe("publicado");
   });
 });

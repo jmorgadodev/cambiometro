@@ -1,7 +1,8 @@
 /**
  * servicios-publicos.ts — Rama de Servicios Públicos y Ministerios (gabinete 2026 verificado).
- * Los presupuestos anuales y dotaciones de personal no tienen fuente oficial publicada en el
- * dataset → se retiran del modelo expuesto. Los directores de servicio se verificaron contra
+ * El catálogo combina el directorio de organismos con los releases que tienen evidencia
+ * verificable. La ausencia de un módulo no se convierte en cero: la interfaz la explica como
+ * no publicado, histórico o no enlazado. Los directores de servicio se verificaron contra
  * fuentes oficiales (sitio institucional, Alta Dirección Pública, Diario Oficial) en agosto 2026;
  * cada uno lleva su `fuente_director`. Sin fuente verificada el campo se omite.
  */

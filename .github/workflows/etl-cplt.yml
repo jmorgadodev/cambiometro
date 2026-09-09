@@ -72,6 +72,10 @@ jobs:
 
       - name: Procesar categoría oficial CPLT
         working-directory: transparencia-app
+        env:
+          # El release mantiene el alcance municipal y agrega los organismos
+          # públicos presentes en los CSV oficiales. No consulta D1.
+          CPLT_PERSONAL_SCOPE: all
         run: npm run ingest:cplt-personal -- "${{ matrix.category }}"
 
       - name: Preparar artefacto validado de categoría

@@ -2,7 +2,7 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import { parseCpltHeader, scanCpltCell } from "../cplt-personal.mjs";
 
-describe("prefiltro acotado de nóminas CPLT", () => {
+describe("prefiltro de nóminas CPLT", () => {
   it("lee una columna puntual sin materializar todas las columnas", () => {
     const header = parseCpltHeader("nombres;anyo;organismo_nombre;descripcion_funcion");
     const line = "Ana;2026;Municipalidad de Maipú;Profesional";
@@ -21,5 +21,7 @@ describe("prefiltro acotado de nóminas CPLT", () => {
     expect(yearPrefilter).toBeGreaterThan(-1);
     expect(municipalityPrefilter).toBeGreaterThan(yearPrefilter);
     expect(fullParse).toBe(-1);
+    expect(source).toContain('process.env.CPLT_PERSONAL_SCOPE ?? "municipalities"');
+    expect(source).toContain('PERSONAL_SCOPE === "municipalities"');
   });
 });
