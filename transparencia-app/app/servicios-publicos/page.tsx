@@ -49,7 +49,7 @@ export default function ServiciosPublicosPage() {
   const dataSummary = readGeneratedDataQualitySummary();
   const dipresSource = dataSummary.sources.find((source) => source.id === "dipres");
   const serviceRelease = {
-    source: "DIPRES, CPLT, ChileCompra, InfoLobby y Contraloría",
+    source: "DIPRES, CPLT, ChileCompra, InfoLobby, InfoProbidad, Ley 19.862 y Contraloría",
     period: dipresSource?.period || "Corte publicado",
     lastSuccessAt: dataSummary.generatedAt,
     status: dipresSource?.status ?? "parcial" as const,

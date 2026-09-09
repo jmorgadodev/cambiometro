@@ -360,9 +360,9 @@ export default function ServiciosPublicosClient({
       <div className="container-main" style={{ marginTop: "1rem" }}>
         <section className="card" aria-labelledby="inventario-releases-servicios" style={{ padding: "1.25rem 1.4rem" }}>
           <p className="eyebrow" style={{ marginBottom: "0.3rem" }}>Inventario de datos disponibles</p>
-          <h2 id="inventario-releases-servicios" style={{ margin: 0, fontSize: "1.15rem" }}>La fuente tiene más registros que los que podemos atribuir automáticamente</h2>
+          <h2 id="inventario-releases-servicios" style={{ margin: 0, fontSize: "1.15rem" }}>Todo lo disponible, con su alcance real</h2>
           <p style={{ margin: "0.55rem 0 0", color: "var(--text-muted)", fontSize: "0.8rem", lineHeight: 1.5 }}>
-            Estos totales corresponden a los releases descargados. La cifra “enlazado” sólo cuenta relaciones con identificador oficial verificable; lo demás se conserva sin inventar una atribución.
+            Estos totales corresponden a los releases descargados. “Enlazado” sólo cuenta relaciones con identificador oficial verificable; una muestra o un resumen no se presenta como el universo completo.
           </p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "0.65rem", marginTop: "0.8rem" }}>
             <div style={{ border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "0.75rem", background: "var(--bg-surface-2)" }}>
@@ -378,7 +378,17 @@ export default function ServiciosPublicosClient({
             <div style={{ border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "0.75rem", background: "var(--bg-surface-2)" }}>
               <strong style={{ display: "block", fontSize: "0.78rem" }}>InfoLobby</strong>
               <span style={{ display: "block", marginTop: "0.25rem", fontFamily: "var(--font-mono, monospace)", fontWeight: 800, color: releaseInventory.infolobbyRegistros > 0 ? "var(--accent)" : "var(--warn)" }}>{releaseInventory.infolobbyRegistros.toLocaleString("es-CL")} registros proyectados</span>
-              <span style={{ display: "block", marginTop: "0.2rem", color: "var(--text-muted)", fontSize: "0.72rem" }}>{releaseInventory.infolobbyRegistros > 0 ? "Se enlazan sólo con evidencia suficiente." : "El release local no contiene registros; no se presenta como ausencia de la fuente original."}</span>
+              <span style={{ display: "block", marginTop: "0.2rem", color: "var(--text-muted)", fontSize: "0.72rem" }}>{releaseInventory.infolobbyEsMuestra ? "Muestra local disponible; no equivale al universo completo." : "Release proyectado; se enlaza sólo con evidencia suficiente."}</span>
+            </div>
+            <div style={{ border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "0.75rem", background: "var(--bg-surface-2)" }}>
+              <strong style={{ display: "block", fontSize: "0.78rem" }}>InfoProbidad</strong>
+              <span style={{ display: "block", marginTop: "0.25rem", fontFamily: "var(--font-mono, monospace)", fontWeight: 800, color: "var(--accent)" }}>{releaseInventory.infoprobidadRegistros.toLocaleString("es-CL")} declaraciones</span>
+              <span style={{ display: "block", marginTop: "0.2rem", color: "var(--text-muted)", fontSize: "0.72rem" }}>Corte muestral disponible; no se atribuye a cada servicio sin identificador oficial.</span>
+            </div>
+            <div style={{ border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "0.75rem", background: "var(--bg-surface-2)" }}>
+              <strong style={{ display: "block", fontSize: "0.78rem" }}>Transferencias Ley 19.862</strong>
+              <span style={{ display: "block", marginTop: "0.25rem", fontFamily: "var(--font-mono, monospace)", fontWeight: 800, color: "var(--accent)" }}>{releaseInventory.ley19862Transferencias.toLocaleString("es-CL")} transferencias</span>
+              <span style={{ display: "block", marginTop: "0.2rem", color: "var(--text-muted)", fontSize: "0.72rem" }}>{releaseInventory.ley19862Receptores.toLocaleString("es-CL")} receptores · {releaseInventory.ley19862Emisores.toLocaleString("es-CL")} emisores · muestra visible {releaseInventory.ley19862MuestraTransferencias.toLocaleString("es-CL")}</span>
             </div>
           </div>
         </section>

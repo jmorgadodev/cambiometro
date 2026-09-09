@@ -5,6 +5,9 @@ import { presupuestoParaServicio, type ResumenPresupuesto } from "./presupuesto"
 import { getOrganismoById } from "./organismos";
 import { leerChileCompraV1 } from "./chilecompra";
 import { buildServiceDataCoverage, type ServiceDataCoverage } from "./servicios-publicos-cobertura";
+import infolobbyStaticJson from "@/data/lake-subsets/infolobby.subset.json";
+import infoprobidadStaticJson from "@/data/lake-subsets/infoprobidad.subset.json";
+import ley19862StaticJson from "@/data/lake-subsets/ley19862.subset.json";
 
 export interface ProveedorChileCompra {
   id: string;
@@ -114,6 +117,13 @@ export interface ServicioReleaseInventory {
   contraloriaRegistros: number;
   contraloriaEntidades: number;
   infolobbyRegistros: number;
+  infolobbyEsMuestra: boolean;
+  infoprobidadRegistros: number;
+  infoprobidadEsMuestra: boolean;
+  ley19862Transferencias: number;
+  ley19862MuestraTransferencias: number;
+  ley19862Receptores: number;
+  ley19862Emisores: number;
 }
 
 // Carga en memoria cacheada de las proyecciones del Lake
@@ -410,7 +420,14 @@ export function getServicioReleaseInventory(): ServicioReleaseInventory {
   loadProjections();
   const chilecompra = leerChileCompraV1();
   const contraloria = cachedContraloria?.records ?? [];
-  const infolobby = cachedInfoLobby?.records ?? [];
+  const infolobbyProjection = cachedInfoLobby?.records ?? [];
+  const infolobbySubset = (infolobbyStaticJson as { records?: unknown[] }).records ?? [];
+  const infolobby = infolobbyProjection.length > 0 ? infolobbyProjection : infolobbySubset;
+  const infoprobidad = infoprobidadStaticJson as { count?: number; records?: unknown[] };
+  const ley19862 = ley19862StaticJson as {
+    kpis?: { total_transfers?: number; total_receptores?: number; total_emisores?: number };
+    transfers_sample?: unknown[];
+  };
   let contraloriaEntidades = 0;
   try {
     const filePath = path.join(process.cwd(), "data", "lake", "projections", "v1", "contraloria.json");
@@ -425,6 +442,13 @@ export function getServicioReleaseInventory(): ServicioReleaseInventory {
     contraloriaRegistros: contraloria.length,
     contraloriaEntidades,
     infolobbyRegistros: infolobby.length,
+    infolobbyEsMuestra: infolobbyProjection.length === 0,
+    infoprobidadRegistros: infoprobidad.records?.length ?? infoprobidad.count ?? 0,
+    infoprobidadEsMuestra: true,
+    ley19862Transferencias: ley19862.kpis?.total_transfers ?? 0,
+    ley19862MuestraTransferencias: ley19862.transfers_sample?.length ?? 0,
+    ley19862Receptores: ley19862.kpis?.total_receptores ?? 0,
+    ley19862Emisores: ley19862.kpis?.total_emisores ?? 0,
   };
 }
 

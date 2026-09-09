@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { getServicioPublicoEnriquecido, getAllServiciosPublicosEnriquecidos } from "./servicios-publicos-data";
+import { getServicioPublicoEnriquecido, getAllServiciosPublicosEnriquecidos, getServicioReleaseInventory } from "./servicios-publicos-data";
 import { presupuestoParaServicio, getPresupuestoNacionalTotales } from "./presupuesto";
 import { queryFallbackFuncionarios, getFallbackFuncionarios } from "./funcionarios-fallback";
 
@@ -48,6 +48,16 @@ describe("Dashboard Integral de Servicios Públicos y Eliminación de Bloques Ci
     expect(directoryClientSource).toContain("Sin enlace verificable");
     expect(directoryClientSource).toContain("no se convierte en $0");
     expect(directoryClientSource).toContain("Sin relación directa");
+  });
+
+  it("S3c. El inventario muestra también releases que no tienen enlace directo por servicio", () => {
+    const inventory = getServicioReleaseInventory();
+    expect(inventory.infolobbyRegistros).toBeGreaterThan(0);
+    expect(inventory.infoprobidadRegistros).toBeGreaterThan(0);
+    expect(inventory.ley19862Transferencias).toBeGreaterThan(0);
+    expect(directoryClientSource).toContain("InfoProbidad");
+    expect(directoryClientSource).toContain("Transferencias Ley 19.862");
+    expect(directoryClientSource).toContain("no equivale al universo completo");
   });
 
   it("S4. Ministerios no son 'subordinados' y cuentan con desglose de subtítulos 21/22/29", () => {
