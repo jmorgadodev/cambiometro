@@ -5505,3 +5505,117 @@ html.dark .page-masthead {
     left: 1.4rem;
   }
 }
+.remuneration-source-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 0.75rem;
+  margin-bottom: 1rem;
+}
+
+.remuneration-reading-key {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.7rem;
+  margin: 0.9rem 0;
+}
+
+.remuneration-reading-key > div {
+  display: grid;
+  gap: 0.2rem;
+  padding: 0.75rem 0.85rem;
+  border: 1px solid var(--border);
+  border-radius: 0.75rem;
+  background: var(--surface-raised);
+}
+
+.remuneration-reading-key strong {
+  color: var(--text-primary);
+  font-size: 0.78rem;
+}
+
+.remuneration-reading-key span {
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.remuneration-source-card {
+  display: flex;
+  min-height: 10rem;
+  flex-direction: column;
+}
+
+.remuneration-source-card__facts {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin: 0.7rem 0 0;
+}
+
+.remuneration-source-card__facts div {
+  min-width: 0;
+  padding-top: 0.45rem;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.remuneration-source-card__facts dt {
+  color: var(--text-muted);
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.remuneration-source-card__facts dd {
+  margin: 0.2rem 0 0;
+  color: var(--accent);
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
+.remuneration-source-card__description {
+  display: block;
+  flex: 1;
+  margin-top: 0.55rem;
+  color: var(--text-muted);
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.remuneration-search-form {
+  display: grid;
+  grid-template-columns: minmax(220px, 1.4fr) repeat(3, minmax(140px, 1fr)) auto;
+  gap: 0.55rem;
+  align-items: end;
+  padding: 0.85rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 0.8rem;
+  background: var(--bg-surface-2);
+}
+
+@media (max-width: 900px) {
+  .remuneration-reading-key {
+    grid-template-columns: 1fr;
+  }
+
+  .remuneration-search-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .remuneration-search-form label:first-child,
+  .remuneration-search-form button {
+    grid-column: 1 / -1;
+  }
+}
+
+@media (max-width: 560px) {
+  .remuneration-source-grid,
+  .remuneration-search-form {
+    grid-template-columns: 1fr;
+  }
+
+  .remuneration-search-form label:first-child,
+  .remuneration-search-form button {
+    grid-column: auto;
+  }
+}

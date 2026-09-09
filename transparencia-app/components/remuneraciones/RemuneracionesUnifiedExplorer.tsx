@@ -64,7 +64,7 @@ function tokens(value: string) {
 }
 
 function statusLabel(status: SourceStatus) {
-  return status === "complete" ? "Completo" : status === "partial" ? "Parcial" : status === "aggregate_only" ? "Agregado" : "No disponible";
+  return status === "complete" ? "Disponible" : status === "partial" ? "Parcial" : status === "aggregate_only" ? "Contexto" : "En revisión";
 }
 
 function statusClass(status: SourceStatus) {
@@ -73,6 +73,26 @@ function statusClass(status: SourceStatus) {
 
 function displayAmount(value: number | null) {
   return value === null ? "Monto no publicado" : money.format(value);
+}
+
+function recordDescription(row: UnifiedRow) {
+  if (row.sourceType === "appointment") return "Nombramiento oficial · sueldo individual no publicado";
+  if (row.sourceType === "official_call") return "Convocatoria oficial · renta referencial del cargo";
+  if (row.sourceType === "support_staff") return "Personal de apoyo consolidado";
+  return "Registro original";
+}
+
+function sourceDescription(item: SourceInfo) {
+  if (item.sourceType === "appointment") return "Nombramientos oficiales; sin sueldo individual publicado.";
+  if (item.sourceType === "official_call") return "Cargos convocados y renta bruta referencial.";
+  if (item.sourceType === "aggregate") return "Cifras generales, no fichas personales.";
+  if (item.sourceType === "support_staff") return "Personal de apoyo publicado por el Congreso.";
+  if (item.id === "transparencia-activa") return "Nóminas de transparencia activa disponibles para buscar por persona, organismo o cargo.";
+  return "Remuneraciones individuales publicadas por la fuente.";
+}
+
+function displayCount(value: number | null) {
+  return value === null ? "Sin registros descargables" : number.format(value);
 }
 
 async function loadJson<T>(key: string) {
@@ -181,41 +201,45 @@ export default function RemuneracionesUnifiedExplorer() {
   }
 
   return (
-    <section className="page-shell" aria-labelledby="unified-remuneraciones-title" style={{ paddingTop: "1rem", paddingBottom: "0" }}>
-      <div className="eyebrow" style={{ color: "var(--accent)", marginBottom: "0.35rem" }}>ÍNDICE UNIFICADO · FUENTES SEPARADAS</div>
-      <h2 id="unified-remuneraciones-title" style={{ margin: 0, fontSize: "clamp(1.35rem, 3vw, 2rem)" }}>Busca una persona en todas las remuneraciones disponibles</h2>
+    <section className="page-shell remuneration-unified" aria-labelledby="unified-remuneraciones-title" style={{ paddingTop: "1rem", paddingBottom: "0" }}>
+      <div className="eyebrow" style={{ color: "var(--accent)", marginBottom: "0.35rem" }}>REMUNERACIONES Y CARGOS PÚBLICOS</div>
+      <h2 id="unified-remuneraciones-title" style={{ margin: 0, fontSize: "clamp(1.35rem, 3vw, 2rem)" }}>Busca una persona, organismo o cargo</h2>
       <p style={{ color: "var(--text-muted)", maxWidth: "850px", margin: "0.5rem 0 1rem", lineHeight: 1.6 }}>
-        Los registros se agrupan para facilitar la lectura, pero cada fuente, organismo, cargo, período y monto permanece separado. Una coincidencia nominal no prueba por sí sola que dos filas pertenezcan a la misma persona.
+        Reunimos publicaciones oficiales en un mismo lugar. Cada resultado conserva su fuente y te indica si muestra un sueldo, un nombramiento o una renta referencial del cargo.
       </p>
 
-      {!manifest && !error && <div className="stat-tile" role="status" aria-busy="true">Cargando catálogo de fuentes…</div>}
+      {!manifest && !error && <div className="stat-tile" role="status" aria-busy="true">Cargando fuentes públicas…</div>}
       {error && <div className="badge badge-danger" role="alert" style={{ textTransform: "none", letterSpacing: 0 }}>{error}</div>}
 
       {manifest && (
         <>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "0.65rem", marginBottom: "1rem" }}>
+          <div className="remuneration-reading-key" aria-label="Cómo interpretar los resultados">
+            <div><strong>Sueldo publicado</strong><span>La fuente informa un monto asociado al registro.</span></div>
+            <div><strong>Nombramiento</strong><span>Se informa quién fue designado, pero no su sueldo individual.</span></div>
+            <div><strong>Renta referencial</strong><span>Es el monto anunciado para un cargo, no un pago personal.</span></div>
+          </div>
+          <div className="remuneration-source-grid" aria-label="Fuentes públicas disponibles">
             {manifest.sources.map((item) => (
-              <article key={item.id} className="stat-tile" style={{ minHeight: "0", padding: "0.85rem" }}>
+              <article key={item.id} className="stat-tile remuneration-source-card" style={{ minHeight: "0", padding: "0.85rem" }}>
                 <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem", alignItems: "flex-start" }}>
                   <strong style={{ fontSize: "0.78rem", lineHeight: 1.25 }}>{item.label}</strong>
                   <span className={`badge ${statusClass(item.status)}`} style={{ fontSize: "0.62rem", whiteSpace: "nowrap" }}>{statusLabel(item.status)}</span>
                 </div>
-                <dl style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "0.2rem 0.5rem", margin: "0.6rem 0 0", fontSize: "0.7rem" }}>
-                  <dt>Publicado</dt><dd style={{ margin: 0, color: "var(--accent)", fontFamily: "var(--font-mono)", fontWeight: 800 }}>{item.publishedCount === null ? "No calculable" : number.format(item.publishedCount)}</dd>
-                  <dt>Consultable</dt><dd style={{ margin: 0, fontWeight: 700 }}>{item.queryableCount === null ? "No calculable" : number.format(item.queryableCount)}</dd>
-                  <dt>Relacionado</dt><dd style={{ margin: 0, fontWeight: 700 }}>{item.relatedCount === null ? "No calculable" : number.format(item.relatedCount)}</dd>
+                <dl className="remuneration-source-card__facts">
+                  <div><dt>Registros</dt><dd>{displayCount(item.publishedCount)}</dd></div>
+                  <div><dt>Último corte</dt><dd>{item.period ?? "Sin fecha publicada"}</dd></div>
                 </dl>
-                <small style={{ display: "block", color: "var(--text-muted)", marginTop: "0.25rem", lineHeight: 1.4 }}>{item.note ?? `Último período: ${item.period ?? "no informado"}`}</small>
+                <small className="remuneration-source-card__description">{sourceDescription(item)}</small>
                 {item.officialUrl && <a className="data-link" href={item.officialUrl} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", marginTop: "0.45rem", fontSize: "0.72rem" }}>Fuente oficial ↗</a>}
               </article>
             ))}
           </div>
 
-          <form onSubmit={runSearch} style={{ display: "grid", gridTemplateColumns: "minmax(220px, 1.4fr) repeat(3, minmax(140px, 1fr)) auto", gap: "0.55rem", alignItems: "end", padding: "0.85rem", border: "1px solid var(--border-subtle)", borderRadius: "0.8rem", background: "var(--bg-surface-2)" }}>
-            <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700 }}>Persona, organismo o cargo<input className="form-input" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Ej.: Lucy Depablos, asesor" /></label>
+          <form className="remuneration-search-form" onSubmit={runSearch}>
+            <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700 }}>Nombre, organismo o cargo<input className="form-input" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Ej.: Lucy Depablos o director" /></label>
             <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700 }}>Fuente<select className="form-input" value={source} onChange={(event) => setSource(event.target.value)}><option value="all">Todas las fuentes</option>{manifest.sources.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
-            <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700 }}>Organismo<input className="form-input" value={organism} onChange={(event) => setOrganism(event.target.value)} placeholder="Ej.: Servicio Civil" /></label>
-            <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700 }}>Cargo<input className="form-input" value={role} onChange={(event) => setRole(event.target.value)} placeholder="Ej.: asesor" /></label>
+            <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700 }}>Organismo (opcional)<input className="form-input" value={organism} onChange={(event) => setOrganism(event.target.value)} placeholder="Ej.: Servicio Civil" /></label>
+            <label style={{ display: "grid", gap: "0.3rem", fontSize: "0.72rem", fontWeight: 700 }}>Cargo (opcional)<input className="form-input" value={role} onChange={(event) => setRole(event.target.value)} placeholder="Ej.: director" /></label>
             <button className="btn btn-primary" type="submit" disabled={loading}>{loading ? "Buscando…" : "Buscar"}</button>
           </form>
 
@@ -231,12 +255,11 @@ export default function RemuneracionesUnifiedExplorer() {
                 const sourceIds = new Set(group.map((row) => row.sourceId));
                 return <article key={group[0].personKey} className="stat-tile" style={{ padding: "0.95rem" }}>
                   <div style={{ display: "flex", justifyContent: "space-between", gap: "0.7rem", flexWrap: "wrap" }}><div><h4 style={{ margin: 0, fontSize: "1rem" }}>{group[0].nombreOriginal}</h4><small style={{ color: "var(--text-muted)" }}>{sourceIds.size > 1 ? "Coincidencia nominal entre fuentes · requiere revisión contextual" : "Registro encontrado en una fuente"}</small></div><span className={`badge ${sourceIds.size > 1 ? "badge-warn" : "badge-info"}`}>{sourceIds.size} fuente{sourceIds.size === 1 ? "" : "s"}</span></div>
-                  <div style={{ overflowX: "auto", marginTop: "0.7rem" }}><table className="data-table" style={{ width: "100%" }}><thead><tr><th>Fuente</th><th>Organismo</th><th>Cargo</th><th>Período</th><th>Monto</th></tr></thead><tbody>{group.map((row) => <tr key={row.recordId}><td><strong>{row.sourceLabel}</strong><small style={{ display: "block", color: "var(--text-muted)" }}>{row.sourceType === "support_staff" ? "Consolidado de apoyo" : "Registro original"}</small></td><td>{row.organismoOriginal}</td><td>{row.cargoOriginal}</td><td>{row.periodo ?? "No informado"}</td><td>{displayAmount(row.montoBruto)}</td></tr>)}</tbody></table></div>
+                  <div style={{ overflowX: "auto", marginTop: "0.7rem" }}><table className="data-table" style={{ width: "100%" }}><thead><tr><th>Fuente</th><th>Organismo</th><th>Cargo</th><th>Período</th><th>Monto</th></tr></thead><tbody>{group.map((row) => <tr key={row.recordId}><td><strong>{row.sourceLabel}</strong><small style={{ display: "block", color: "var(--text-muted)" }}>{recordDescription(row)}</small></td><td>{row.organismoOriginal}</td><td>{row.cargoOriginal}</td><td>{row.periodo ?? "No informado"}</td><td>{row.sourceType === "official_call" && row.montoBruto !== null ? <><strong>{money.format(row.montoBruto)}</strong><small style={{ display: "block", color: "var(--text-muted)" }}>Renta referencial</small></> : displayAmount(row.montoBruto)}</td></tr>)}</tbody></table></div>
                 </article>;
               })}
             </div>
           </div>}
-          <p style={{ color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: 1.5, marginTop: "0.85rem" }}>Índice estático: {number.format(manifest.totalRows)} filas de 38 bis, Cámara y Senado. No se descarga el universo completo al navegador. Las filas CPLT se solicitan de forma paginada al Worker sólo cuando realizas una búsqueda.</p>
         </>
       )}
     </section>
