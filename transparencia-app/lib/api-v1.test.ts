@@ -872,6 +872,44 @@ describe("API canónica v1", () => {
     expect(prepare).not.toHaveBeenCalled();
   });
 
+  it("prefiere cualquier snapshot R2 publicado antes de consultar D1", async () => {
+    const prepare = vi.fn(() => { throw new Error("D1 no debe consultarse si existe snapshot R2"); });
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/static-site-v1/manifest.json") {
+          return {
+            json: async <T>() => ({
+              files: [{ path: "data/lake-subsets/camara.subset.json", key: "subsets/camara.json" }],
+            }) as T,
+          };
+        }
+        if (key === "subsets/camara.json") {
+          return {
+            json: async <T>() => ([{
+              id: "camara-1",
+              kind: "vote",
+              title: "Votación de prueba",
+              occurredAt: "2026-08-01",
+              data: { source: "release-r2" },
+            }]) as T,
+          };
+        }
+        return null;
+      },
+    };
+
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/records?source=camara&limit=1"),
+      { DB: { prepare }, PUBLIC_DATA } as never,
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.sourceBackend).toBe("r2");
+    expect(payload.data[0]).toMatchObject({ id: "camara-1", sourceId: "camara" });
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
   it("rechaza filtros inválidos con el error uniforme", async () => {
     const response = await fetchApi("https://example.test/api/v1/records?kind=delito");
     const payload = await response.json();
