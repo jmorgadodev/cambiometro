@@ -105,7 +105,22 @@ describe("Tarea F — Cobertura Real de Dotación y Compras en Servicios Públic
     expect(hospital?.cobertura.personal.estado).not.toBe("publicado");
   });
 
-  it("F9. Lee auditorías CGR desde data.service además de attributes.organization", () => {
+  it("F9. Cada módulo explica fuente, corte y frecuencia aunque no tenga dato enlazado", () => {
+    const hospital = getServicioPublicoEnriquecido("org-hospital-el-pino");
+    expect(hospital).not.toBeNull();
+    for (const evidencia of Object.values(hospital!.cobertura)) {
+      expect(evidencia.fuente).toBeTruthy();
+      expect(evidencia.periodoFuente).toBeTruthy();
+      expect(evidencia.frecuenciaFuente).toBeTruthy();
+      expect(evidencia.motivo.length).toBeGreaterThan(20);
+      expect(evidencia.fuenteOficial).toMatch(/^https?:\/\//);
+    }
+    expect(hospital?.cobertura.personal.fuente).toBe("Transparencia Activa");
+    expect(hospital?.cobertura.personal.periodoFuente).toContain("2026");
+    expect(hospital?.cobertura.personal.ultimaActualizacion).toBe("2018-01-13");
+  });
+
+  it("F10. Lee auditorías CGR desde data.service además de attributes.organization", () => {
     const hospital = getServicioPublicoEnriquecido("org-hospital-de-victoria");
     expect(hospital?.auditorias_cgr.length).toBeGreaterThan(0);
     expect(hospital?.auditorias_cgr[0]?.titulo.toLowerCase()).toContain("hospital de victoria");

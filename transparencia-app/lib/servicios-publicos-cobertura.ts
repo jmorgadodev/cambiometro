@@ -1,4 +1,5 @@
 import sourceStatusRaw from "@/data/raw/transparencia_activa/service-source-status.json";
+import sourceCatalogRaw from "@/data/data-quality-sources.json";
 
 export type ServiceDataState = "publicado" | "historico" | "no_publicado" | "no_enlazado";
 
@@ -9,6 +10,12 @@ export interface ServiceDataEvidence {
   fuenteOficial?: string;
   ultimaActualizacion?: string;
   organismoId?: string;
+  fuente?: string;
+  periodoFuente?: string;
+  frecuenciaFuente?: string;
+  desfaseFuente?: string;
+  registrosFuente?: number;
+  registrosConsultables?: number | null;
 }
 
 export interface ServiceDataCoverage {
@@ -29,6 +36,50 @@ interface ServiceSourceStatus {
 }
 
 const sourceStatus = sourceStatusRaw as Record<string, ServiceSourceStatus>;
+
+interface SourceCatalogEntry {
+  id?: string;
+  label?: string;
+  officialUrl?: string;
+  frequency?: string;
+  period?: string;
+  lag?: string;
+  canonicalCount?: number;
+  queryableCount?: number | null;
+}
+
+const sourceCatalog = sourceCatalogRaw as SourceCatalogEntry[];
+
+const MODULE_SOURCE_IDS = {
+  presupuesto: "dipres",
+  personal: "transparencia-activa",
+  compras: "chilecompra",
+  lobby: "infolobby",
+  contraloria: "contraloria",
+} as const;
+
+type CoverageModule = keyof typeof MODULE_SOURCE_IDS;
+
+function getSourceCatalogEntry(module: CoverageModule): SourceCatalogEntry | null {
+  const sourceId = MODULE_SOURCE_IDS[module];
+  return sourceCatalog.find((source) => source.id === sourceId) ?? null;
+}
+
+function attachSourceMetadata(evidence: ServiceDataEvidence, module: CoverageModule): ServiceDataEvidence {
+  const source = getSourceCatalogEntry(module);
+  if (!source) return evidence;
+
+  return {
+    ...evidence,
+    fuente: evidence.fuente ?? source.label,
+    fuenteOficial: evidence.fuenteOficial ?? source.officialUrl,
+    periodoFuente: source.period,
+    frecuenciaFuente: source.frequency,
+    desfaseFuente: source.lag,
+    registrosFuente: source.canonicalCount,
+    registrosConsultables: source.queryableCount,
+  };
+}
 
 const NO_PUBLICADO: ServiceDataEvidence = {
   estado: "no_publicado",
@@ -71,7 +122,7 @@ export function buildServiceDataCoverage(input: {
     : null;
 
   return {
-    presupuesto: input.presupuesto
+    presupuesto: attachSourceMetadata(input.presupuesto
       ? {
           estado: "publicado",
           etiqueta: "Publicado",
@@ -81,35 +132,36 @@ export function buildServiceDataCoverage(input: {
           estado: "no_publicado",
           etiqueta: "Sin partida individual",
           motivo: "No existe una partida DIPRES individual enlazada; el gasto puede estar agregado en la partida del organismo tutelar.",
-        },
-    personal: input.personal
+        }, "presupuesto"),
+    personal: attachSourceMetadata(input.personal
       ? {
           estado: "publicado",
           etiqueta: "Publicado",
           motivo: "La proyección canónica contiene una dotación de personal con origen en el release disponible.",
         }
       : historicalPersonal ?? cloneEvidence(NO_PUBLICADO),
-    compras: input.compras
+      "personal"),
+    compras: attachSourceMetadata(input.compras
       ? {
           estado: "publicado",
           etiqueta: "Publicado",
           motivo: "Existe una conciliación RUT exacta con el release OCDS de ChileCompra.",
         }
-      : cloneEvidence(NO_ENLAZADO),
-    lobby: input.lobby
+      : cloneEvidence(NO_ENLAZADO), "compras"),
+    lobby: attachSourceMetadata(input.lobby
       ? {
           estado: "publicado",
           etiqueta: "Publicado",
           motivo: "Existen audiencias o menciones documentales enlazadas a este organismo.",
         }
-      : cloneEvidence(NO_PUBLICADO),
-    contraloria: input.contraloria
+      : cloneEvidence(NO_PUBLICADO), "lobby"),
+    contraloria: attachSourceMetadata(input.contraloria
       ? {
           estado: "publicado",
           etiqueta: "Publicado",
           motivo: "Existen auditorías de Contraloría enlazadas al organismo.",
         }
-      : cloneEvidence(NO_PUBLICADO),
+      : cloneEvidence(NO_PUBLICADO), "contraloria"),
   };
 }
 

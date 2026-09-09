@@ -103,7 +103,7 @@ export default function HomeInlineSearch() {
 
   const normalizedQuery = query.trim();
   const showResults = isOpen && normalizedQuery.length >= 2;
-  const fullSearchHref = `/politico?q=${encodeURIComponent(normalizedQuery)}`;
+  const fullSearchHref = `/personas?search=${encodeURIComponent(normalizedQuery)}`;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     if (normalizedQuery.length < 2) event.preventDefault();
@@ -111,12 +111,12 @@ export default function HomeInlineSearch() {
 
   return (
     <div ref={wrapperRef} className="home-query-wrap">
-      <form className="home-query" action="/politico" method="get" role="search" onSubmit={handleSubmit}>
+      <form className="home-query" action="/personas" method="get" role="search" onSubmit={handleSubmit}>
         <label htmlFor="home-search">Buscar en los registros</label>
         <div className="home-query__control">
           <input
             id="home-search"
-            name="q"
+            name="search"
             type="search"
             minLength={2}
             maxLength={80}

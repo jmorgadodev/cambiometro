@@ -193,9 +193,18 @@ export default function PoliticosListClient({
       </div>
 
       {filteredItems.length === 0 && (
-        <p className="relation-disclaimer" role="status">
-          Sin coincidencias parlamentarias para “{searchParams.get("q") ?? ""}”. Prueba con un nombre, partido, distrito o región.
-        </p>
+        <div className="relation-disclaimer" role="status">
+          <p style={{ margin: 0 }}>
+            Sin coincidencias parlamentarias activas para “{searchParams.get("q") ?? ""}”. Puede tratarse de una persona, funcionario u organismo registrado en otro módulo.
+          </p>
+          <Link
+            prefetch={false}
+            href={`/personas?search=${encodeURIComponent(searchParams.get("q") ?? "")}`}
+            style={{ display: "inline-block", marginTop: "0.65rem", fontWeight: 700 }}
+          >
+            Buscar en todo el directorio →
+          </Link>
+        </div>
       )}
 
       {/* Paginación */}

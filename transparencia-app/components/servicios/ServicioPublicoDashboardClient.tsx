@@ -261,7 +261,13 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                   <span className={`badge ${positive ? "badge-ok" : historical ? "badge-warn" : "badge-info"}`} style={{ fontSize: "0.62rem" }}>{evidence.etiqueta}</span>
                 </div>
                 <p style={{ margin: "0.5rem 0 0", color: "var(--text-muted)", fontSize: "0.76rem", lineHeight: 1.45 }}>{evidence.motivo}</p>
-                {evidence.ultimaActualizacion && <div style={{ marginTop: "0.45rem", fontSize: "0.7rem", color: "var(--text-subtle)" }}>Último corte: <strong>{formatCoverageDate(evidence.ultimaActualizacion)}</strong></div>}
+                <div style={{ marginTop: "0.55rem", display: "grid", gap: "0.18rem", fontSize: "0.7rem", color: "var(--text-subtle)" }}>
+                  {evidence.fuente && <div>Fuente: <strong>{evidence.fuente}</strong></div>}
+                  {evidence.periodoFuente && <div>Corte de referencia: <strong>{evidence.periodoFuente}</strong></div>}
+                  {evidence.frecuenciaFuente && <div>Actualización: <strong>{evidence.frecuenciaFuente}</strong>{evidence.desfaseFuente ? ` · desfase esperado: ${evidence.desfaseFuente}` : ""}</div>}
+                  {evidence.ultimaActualizacion && <div>{historical ? "Última evidencia encontrada" : "Último corte informado"}: <strong>{formatCoverageDate(evidence.ultimaActualizacion)}</strong></div>}
+                  {evidence.registrosFuente !== undefined && <div>Universo de la fuente: <strong>{evidence.registrosFuente.toLocaleString("es-CL")}</strong> registros</div>}
+                </div>
                 {evidence.fuenteOficial && <a href={evidence.fuenteOficial} target="_blank" rel="noopener noreferrer" style={{ display: "inline-block", marginTop: "0.45rem", fontSize: "0.72rem", color: "var(--accent)" }}>Ver fuente oficial ↗</a>}
               </div>
             );

@@ -147,8 +147,8 @@ export default function HeaderSearch() {
           ) : !isLoading && results.length === 0 ? (
             <div role="status" className="header-search__message">
               <p>Sin coincidencias verificadas con ese texto.</p>
-              <Link prefetch={false} href={`/politico?q=${encodeURIComponent(query.trim())}`} onClick={() => setIsOpen(false)}>
-                Ver listado de diputados y senadores con “{query.trim()}” →
+              <Link prefetch={false} href={`/personas?search=${encodeURIComponent(query.trim())}`} onClick={() => setIsOpen(false)}>
+                Buscar en todo el directorio “{query.trim()}” →
               </Link>
             </div>
           ) : (

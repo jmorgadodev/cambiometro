@@ -32,16 +32,19 @@ describe("promesas editoriales del inicio", () => {
     expect(canonicalSourceId("contraloria")).toBe("contraloria");
   });
 
-  it("envía la búsqueda del inicio al directorio parlamentario", () => {
+  it("envía la búsqueda del inicio al directorio universal", () => {
     const search = readFileSync(resolve(import.meta.dirname, "../components/HomeInlineSearch.tsx"), "utf8");
     const headerSearch = readFileSync(resolve(import.meta.dirname, "../components/HeaderSearch.tsx"), "utf8");
     expect(home).toContain("<HomeInlineSearch />");
     expect(search).toContain('fetch(`/api/v1/search?q=${encodeURIComponent(normalizedQuery)}`');
     expect(search).toContain('placeholder="Nombre, partido, distrito o región"');
     expect(search).toContain("Coincidencias");
-    expect(search).toContain('action="/politico"');
+    expect(search).toContain('action="/personas"');
+    expect(search).toContain('name="search"');
+    expect(search).toContain("/personas?search=");
     expect(search).toContain('funcionario: "Remuneración pública"');
     expect(headerSearch).toContain('funcionario: "Remuneración pública"');
+    expect(headerSearch).toContain("/personas?search=");
   });
 
   it("mantiene cinco preguntas de análisis y separa el seguimiento de movimientos", () => {

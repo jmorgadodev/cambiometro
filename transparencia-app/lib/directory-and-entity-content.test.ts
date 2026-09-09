@@ -52,6 +52,8 @@ describe("experiencia visual de personas", () => {
     expect(directory).toContain("searchParams.get(\"q\")");
     expect(directory).toContain("filteredItems");
     expect(directory).toContain("searchParams.get(\"cargo\")");
+    expect(directory).toContain("Buscar en todo el directorio");
+    expect(directory).toContain("/personas?search=");
   });
 
   it("la página /autoridades redirige permanentemente a /personas?tab=parlamentarios", () => {
