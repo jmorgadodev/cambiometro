@@ -5,11 +5,13 @@ import { normalizeRemunerationText, personKeyForRemuneration, remunerationAmount
 const root = process.cwd();
 const outputDir = path.join(root, "public", "data", "remuneraciones-unified");
 const source38Path = path.join(root, "data", "remuneraciones-38bis-publico.json");
+const source38HistoryPath = path.join(root, "data", "remuneraciones-38bis-publico-historico.json");
 const supportPath = path.join(root, "data", "personal-apoyo.json");
 const qualitySourcesPath = path.join(root, "data", "data-quality-sources.json");
 const pageSize = 50;
 
 const source38 = JSON.parse(fs.readFileSync(source38Path, "utf8"));
+const source38History = JSON.parse(fs.readFileSync(source38HistoryPath, "utf8"));
 const support = JSON.parse(fs.readFileSync(supportPath, "utf8"));
 const qualitySources = JSON.parse(fs.readFileSync(qualitySourcesPath, "utf8"));
 fs.rmSync(outputDir, { recursive: true, force: true });
@@ -69,18 +71,28 @@ function makeRow({ sourceId, sourceLabel, sourceType, recordId, name, organism, 
 }
 
 const rows = [];
-for (const [index, row] of (source38.registros ?? source38.congreso ?? []).entries()) {
-  rows.push(makeRow({
-    sourceId: "remuneraciones-38bis",
-    sourceLabel: "Registro 38 bis",
-    sourceType: "individual",
-    recordId: `38bis-${hash(`${index}|${row.nombre}|${row.organismo}|${row.cargo}`)}`,
-    name: row.nombre,
-    organism: row.organismo,
-    role: row.cargo,
-    period: source38.mes,
-    amount: row.bruto_mensual,
-  }));
+const source38Periods = [
+  { period: source38.mes, checksum: source38.checksum_sha256 ?? null, records: source38.registros ?? source38.congreso ?? [] },
+  ...(source38History.periodos ?? []).map((release) => ({
+    period: release.mes,
+    checksum: release.checksum_sha256 ?? null,
+    records: release.registros ?? [],
+  })),
+];
+for (const release of source38Periods) {
+  for (const [index, row] of release.records.entries()) {
+    rows.push(makeRow({
+      sourceId: "remuneraciones-38bis",
+      sourceLabel: "Registro 38 bis",
+      sourceType: "individual",
+      recordId: `38bis-${hash(`${release.period}|${index}|${row.nombre}|${row.organismo}|${row.cargo}`)}`,
+      name: row.nombre,
+      organism: row.organismo,
+      role: row.cargo,
+      period: release.period,
+      amount: row.bruto_mensual,
+    }));
+  }
 }
 
 for (const [deputyId, deputy] of Object.entries(support.diputados ?? {})) {
@@ -187,9 +199,9 @@ const releaseSources = [
     publishedCount: rows.filter((row) => row.sourceId === "remuneraciones-38bis").length,
     queryableCount: rows.filter((row) => row.sourceId === "remuneraciones-38bis").length,
     relatedCount: [...entitySources.values()].filter((sources) => sources.has("remuneraciones-38bis") && sources.size > 1).length,
-    period: source38.mes,
-    checksum: source38.checksum_sha256 ?? null,
-    note: "Registro específico de cargos sujetos al artículo 38 bis.",
+    period: `${source38Periods.at(-1)?.period ?? ""} / ${source38Periods[0]?.period ?? source38.mes}`,
+    checksum: source38Periods.map((release) => release.checksum).filter(Boolean).join(",") || null,
+    note: "Registro específico de cargos sujetos al artículo 38 bis, con cortes mensuales históricos disponibles.",
     modulePath: "/remuneraciones-publicas",
   }),
   sourceMeta("camara", {

@@ -66,6 +66,7 @@
     "data:hydrate:transfer-api": "node scripts/hydrate-transfer-api-release.mjs",
     "data:publish:static": "node scripts/publish-static-site-inputs.mjs",
     "data:build:remuneraciones-38bis": "node scripts/build-remuneraciones-38bis-static.mjs",
+    "check:remuneraciones-unified": "node scripts/verify-remuneraciones-unified.mjs",
     "data:build:landing-summary": "node --experimental-strip-types scripts/build-landing-summary.mjs",
     "data:hydrate:static": "node scripts/hydrate-static-site-inputs.mjs",
     "check:static-input-quality": "node scripts/verify-static-input-quality.mjs",
