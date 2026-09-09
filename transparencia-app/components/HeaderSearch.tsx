@@ -121,7 +121,7 @@ export default function HeaderSearch() {
           onKeyDown={(event) => {
             if (event.key === "Escape") setIsOpen(false);
           }}
-          placeholder="Buscar autoridad, comuna, entidad o RUT…"
+          placeholder="Buscar autoridad, servicio, comuna, entidad o RUT…"
         />
         {isLoading && <span className="header-search__loading" role="status">Consultando</span>}
         {query && !isLoading && (

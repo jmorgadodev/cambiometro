@@ -142,7 +142,7 @@ export default function HomeInlineSearch() {
           />
           <button type="submit">Buscar</button>
         </div>
-        <small>Busca diputados, senadores, autoridades, comunas y entidades.</small>
+        <small>Busca diputados, senadores, funcionarios, servicios públicos, comunas y entidades.</small>
       </form>
 
       {showResults && (

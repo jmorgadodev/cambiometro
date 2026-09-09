@@ -240,6 +240,23 @@ describe("API canónica v1", () => {
     expect(payload.meta.sourceStatus).toBe("r2-catalog");
   });
 
+  it("encuentra servicios públicos desde el catálogo versionado aunque D1 no esté disponible", async () => {
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse para servicios públicos"); } },
+      PUBLIC_DATA: { get: async () => null },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/search?q=Hospital%20El%20Pino"), env);
+    const payload = await response.json();
+    const result = payload.data.entidades.find((item: { nombre: string }) => item.nombre === "Hospital El Pino");
+
+    expect(response.status).toBe(200);
+    expect(result).toMatchObject({
+      type: "organismo",
+      url: "/servicios-publicos/hospital-el-pino",
+    });
+  });
+
   it("dirige las municipalidades del buscador a su ficha municipal completa", async () => {
     const env = {
       DB: { prepare: () => { throw new Error("D1 no debe consultarse para la búsqueda del catálogo"); } },

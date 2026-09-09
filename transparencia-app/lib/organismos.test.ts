@@ -59,12 +59,12 @@ describe("organismos canónicos y clasificación estatal", () => {
     const noMunisConDotacion = todos.filter((organismo) => organismo.tipo !== "Municipalidad" && organismo.dotacion_total !== null);
 
     expect(munisConDotacion).toHaveLength(320);
-    expect(noMunisConDotacion.length).toBeGreaterThanOrEqual(16);
-    expect(conDotacion.length).toBeGreaterThanOrEqual(336);
+    expect(noMunisConDotacion).toHaveLength(0);
+    expect(conDotacion).toHaveLength(320);
     expect(new Set(conDotacion.map((organismo) => organismo.dotacion_total)).size).toBeGreaterThan(1);
 
     const sence = getOrganismoById("serv-sence");
-    expect(sence?.dotacion_total).toBe(1154);
+    expect(sence?.dotacion_total).toBeNull();
 
     const minagri = getOrganismoById("min-agricultura");
     expect(minagri?.dotacion_total).toBeNull();

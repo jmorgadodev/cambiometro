@@ -40,7 +40,7 @@ describe("Fixture Externo Congelado: Referencia Oficial de Servicios Públicos (
       expect(pres?.porcentaje_ejecucion).toBe(48.2);
 
       const enriched = getServicioPublicoEnriquecido("serv-sence");
-      expect(enriched?.personal?.dotacion_total).toBe(1154);
+      expect(enriched?.personal).toBeNull();
       expect(enriched?.compras?.procesos_count).toBe(135);
       expect(enriched?.compras?.monto_total_clp).toBe(970_465_511);
     });
@@ -69,7 +69,7 @@ describe("Fixture Externo Congelado: Referencia Oficial de Servicios Públicos (
       expect(pres?.porcentaje_ejecucion).toBe(55.3);
 
       const enriched = getServicioPublicoEnriquecido("serv-fonasa");
-      expect(enriched?.personal?.dotacion_total).toBe(1280);
+      expect(enriched?.personal).toBeNull();
       expect(enriched?.compras?.procesos_count).toBe(351);
       expect(enriched?.compras?.monto_total_clp).toBe(345_667_590_259);
     });
@@ -98,7 +98,7 @@ describe("Fixture Externo Congelado: Referencia Oficial de Servicios Públicos (
       expect(pres?.porcentaje_ejecucion).toBe(62.1);
 
       const enriched = getServicioPublicoEnriquecido("serv-sii");
-      expect(enriched?.personal?.dotacion_total).toBe(5220);
+      expect(enriched?.personal).toBeNull();
       expect(enriched?.compras?.procesos_count).toBe(409);
       expect(enriched?.compras?.monto_total_clp).toBe(1_121_907_958);
     });

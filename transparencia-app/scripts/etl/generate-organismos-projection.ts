@@ -74,31 +74,10 @@ function run() {
     } catch {}
   }
 
-  // Dotaciones oficiales reportadas por Transparencia Activa CPLT / Ley de Presupuestos para servicios nacionales
-  const CPLT_SERVICIOS_DOTACION: Record<string, number> = {
-    "serv-sence": 1154,
-    "serv-sii": 5220,
-    "serv-tgr": 2050,
-    "serv-aduanas": 2120,
-    "serv-dt": 4310,
-    "serv-fonasa": 1280,
-    "serv-ips": 3180,
-    "serv-sag": 4890,
-    "serv-indap": 1760,
-    "serv-sernac": 360,
-    "serv-registro-civil": 3340,
-    "serv-corfo": 720,
-    "serv-servel": 540,
-    "super-cmf": 680,
-    "super-salud": 410,
-    "super-educacion": 790,
-  };
-
-  for (const [id, count] of Object.entries(CPLT_SERVICIOS_DOTACION)) {
-    if (!cpltCoverageMap.has(id)) {
-      cpltCoverageMap.set(id, count);
-    }
-  }
+  // No completar dotaciones con cifras fijas. Si el ETL CPLT no publicó un
+  // organismo en el release vigente, queda como null y la interfaz explica
+  // la ausencia. Así el catálogo no convierte una referencia antigua o
+  // externa en una falsa dotación actual.
 
   // 2. Cargar ChileCompra
   const ccPath = path.join(rootDir, "data/lake/projections/v1/chilecompra.json");

@@ -7,14 +7,14 @@ import { getMunicipalidadById } from "./municipalidades";
 import { SOURCE_CANONICAL_COUNTS } from "./published-sources";
 
 describe("Tarea F — Cobertura Real de Dotación y Compras en Servicios Públicos", () => {
-  it("F1. SENCE posee RUT oficial válido, dotación CPLT > 0 y compras OCDS > 0", () => {
+  it("F1. SENCE posee RUT oficial válido y compras OCDS enlazadas por RUT exacto", () => {
     const rutSence = getRutOficialServicio("serv-sence");
     expect(rutSence).toBe("61.531.000-K");
     expect(validateModulo11(rutSence!)).toBe(true);
 
     const orgSence = getOrganismoById("serv-sence");
     expect(orgSence).toBeDefined();
-    expect(orgSence?.dotacion_total).toBe(1154);
+    expect(orgSence?.dotacion_total).toBeNull();
     expect(orgSence?.compras_ocds_rut_comprador).toBe("61.531.000-K");
     expect(orgSence?.compras_ocds_metodo_enlace).toBe("RUT_EXACTO");
     expect(orgSence?.compras_ocds_monto_clp).toBe(970465511);
@@ -22,25 +22,25 @@ describe("Tarea F — Cobertura Real de Dotación y Compras en Servicios Públic
 
     const senceEnriquecido = getServicioPublicoEnriquecido("serv-sence");
     expect(senceEnriquecido).not.toBeNull();
-    expect(senceEnriquecido?.personal?.dotacion_total).toBe(1154);
+    expect(senceEnriquecido?.personal).toBeNull();
     expect(senceEnriquecido?.compras?.monto_total_clp).toBe(970465511);
     expect(senceEnriquecido?.compras?.procesos_count).toBe(135);
     expect(senceEnriquecido?.compras?.top_proveedores.length).toBeGreaterThan(0);
     expect(senceEnriquecido?.compras?.serie_mensual_2026.length).toBeGreaterThan(0);
   });
 
-  it("F2. Muestra de 10 servicios nacionales con compras y dotaciones verificadas", () => {
+  it("F2. Muestra de servicios nacionales con compras verificadas", () => {
     const muestra = [
-      { id: "serv-sii", rut: "60.803.000-K", minMonto: 1_000_000_000, dotacion: 5220 },
-      { id: "serv-tgr", rut: "60.805.000-0", minMonto: 2_000_000_000, dotacion: 2050 },
-      { id: "serv-aduanas", rut: "60.804.000-5", minMonto: 2_000_000_000, dotacion: 2120 },
-      { id: "serv-dt", rut: "61.502.000-1", minMonto: 1_000_000_000, dotacion: 4310 },
-      { id: "serv-fonasa", rut: "61.603.000-0", minMonto: 100_000_000_000, dotacion: 1280 },
-      { id: "serv-ips", rut: "61.979.440-0", minMonto: 3_000_000_000, dotacion: 3180 },
-      { id: "serv-sag", rut: "61.308.000-7", minMonto: 5_000_000_000, dotacion: 4890 },
-      { id: "serv-indap", rut: "61.307.000-1", minMonto: 2_000_000_000, dotacion: 1760 },
-      { id: "min-mop", rut: "61.202.000-0", minMonto: 100_000_000_000, dotacion: null },
-      { id: "min-salud", rut: "61.601.000-K", minMonto: 10_000_000_000, dotacion: null },
+      { id: "serv-sii", rut: "60.803.000-K", minMonto: 1_000_000_000 },
+      { id: "serv-tgr", rut: "60.805.000-0", minMonto: 2_000_000_000 },
+      { id: "serv-aduanas", rut: "60.804.000-5", minMonto: 2_000_000_000 },
+      { id: "serv-dt", rut: "61.502.000-1", minMonto: 1_000_000_000 },
+      { id: "serv-fonasa", rut: "61.603.000-0", minMonto: 100_000_000_000 },
+      { id: "serv-ips", rut: "61.979.440-0", minMonto: 3_000_000_000 },
+      { id: "serv-sag", rut: "61.308.000-7", minMonto: 5_000_000_000 },
+      { id: "serv-indap", rut: "61.307.000-1", minMonto: 2_000_000_000 },
+      { id: "min-mop", rut: "61.202.000-0", minMonto: 100_000_000_000 },
+      { id: "min-salud", rut: "61.601.000-K", minMonto: 10_000_000_000 },
     ];
 
     for (const item of muestra) {
@@ -53,9 +53,7 @@ describe("Tarea F — Cobertura Real de Dotación y Compras en Servicios Públic
       expect(serv?.compras?.monto_total_clp).toBeGreaterThanOrEqual(item.minMonto);
       expect(serv?.compras?.procesos_count).toBeGreaterThan(0);
 
-      if (item.dotacion !== null) {
-        expect(serv?.personal?.dotacion_total).toBe(item.dotacion);
-      }
+      expect(serv?.cobertura.compras.estado).toBe("publicado");
     }
   });
 

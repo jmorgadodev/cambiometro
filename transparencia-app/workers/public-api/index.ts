@@ -1,6 +1,8 @@
 import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
 
 import { POLITICOS_SEED } from "../../lib/politicos-source";
+import { getAllServiciosPublicos } from "../../lib/servicios-publicos";
+import { getServicioCanonicalSlug } from "../../lib/slug-utils";
 import { readR2EvidenceRecords } from "../../lib/r2-records";
 import { readR2EntityIndex } from "../../lib/r2-entities";
 import { matchesFuncionarioQuality, normalizeFuncionarioRecord, type FuncionarioQualityFilter } from "../../lib/funcionarios-normalization";
@@ -1435,6 +1437,20 @@ async function searchFromR2(requestUrl: URL, env: Env) {
       partido: politico.partido_electoral ?? politico.partido_id,
       region: politico.distrito_region,
     }));
+  // El catálogo institucional forma parte del release de interfaz y no debe
+  // depender de D1. Esto permite encontrar hospitales y servicios públicos
+  // incluso cuando la cuota gratuita de D1 está agotada.
+  const services = getAllServiciosPublicos()
+    .filter((servicio) => normalize(`${servicio.nombre} ${servicio.sigla ?? ""} ${servicio.tipo_organo} ${servicio.ministerio_dependiente}`).includes(needle))
+    .slice(0, 75)
+    .map((servicio) => ({
+      id: servicio.id,
+      type: "organismo" as const,
+      nombre: servicio.nombre,
+      url: `/servicios-publicos/${getServicioCanonicalSlug(servicio.id) ?? servicio.id}`,
+      organo: servicio.tipo_organo,
+      region: servicio.ministerio_dependiente,
+    }));
   const [rows, funcionarios] = await Promise.all([
     canonicalEntitiesFromR2(env),
     searchFuncionariosFromR2(raw, env),
@@ -1453,6 +1469,11 @@ async function searchFromR2(requestUrl: URL, env: Env) {
   // richer /politico route; keep only one visible result in that case.
   const merged = new Map<string, (typeof entities)[number]>();
   for (const item of entities) merged.set(normalize(item.nombre), item);
+  for (const item of services) {
+    const key = normalize(item.nombre);
+    const current = merged.get(key);
+    if (!current || current.url.startsWith("/entidades/")) merged.set(key, item);
+  }
   for (const item of politicians) {
     const key = normalize(item.nombre);
     const current = merged.get(key);
