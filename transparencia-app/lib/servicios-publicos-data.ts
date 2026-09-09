@@ -8,6 +8,7 @@ import { buildServiceDataCoverage, type ServiceDataCoverage } from "./servicios-
 import infolobbyStaticJson from "@/data/lake-subsets/infolobby.subset.json";
 import infoprobidadStaticJson from "@/data/lake-subsets/infoprobidad.subset.json";
 import ley19862StaticJson from "@/data/lake-subsets/ley19862.subset.json";
+import dataQualitySourcesJson from "@/data/data-quality-sources.json";
 
 export interface ProveedorChileCompra {
   id: string;
@@ -118,6 +119,8 @@ export interface ServicioReleaseInventory {
   contraloriaRegistros: number;
   contraloriaEntidades: number;
   infolobbyRegistros: number;
+  /** Registros realmente cargados para conciliación local de fichas. */
+  infolobbyRegistrosConsultables: number;
   infolobbyEsMuestra: boolean;
   infoprobidadRegistros: number;
   infoprobidadEsMuestra: boolean;
@@ -477,6 +480,10 @@ export function getServicioReleaseInventory(): ServicioReleaseInventory {
   const infolobbyProjection = cachedInfoLobby?.records ?? [];
   const infolobbySubset = (infolobbyStaticJson as { records?: unknown[] }).records ?? [];
   const infolobby = infolobbyProjection.length > 0 ? infolobbyProjection : infolobbySubset;
+  const infolobbyCanonicalCount = Number(
+    (dataQualitySourcesJson as Array<{ id?: string; canonicalCount?: number }>)
+      .find((source) => source.id === "infolobby")?.canonicalCount ?? 0,
+  );
   let infoprobidadRecords = 0;
   let infoprobidadEsMuestra = true;
   try {
@@ -513,7 +520,10 @@ export function getServicioReleaseInventory(): ServicioReleaseInventory {
     chilecompraProveedores: chilecompra?.suppliers?.length ?? 0,
     contraloriaRegistros: contraloria.length,
     contraloriaEntidades,
-    infolobbyRegistros: infolobby.length,
+    // El inventario público debe reflejar el release completo aunque el build
+    // sólo hidrate una muestra acotada para enlazar fichas sin cargar 60k filas.
+    infolobbyRegistros: Math.max(infolobby.length, infolobbyCanonicalCount),
+    infolobbyRegistrosConsultables: infolobby.length,
     infolobbyEsMuestra: Boolean(cachedInfoLobby?.isSample),
     infoprobidadRegistros: infoprobidadRecords,
     infoprobidadEsMuestra,

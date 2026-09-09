@@ -377,8 +377,8 @@ export default function ServiciosPublicosClient({
             </div>
             <div style={{ border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "0.75rem", background: "var(--bg-surface-2)" }}>
               <strong style={{ display: "block", fontSize: "0.78rem" }}>InfoLobby</strong>
-              <span style={{ display: "block", marginTop: "0.25rem", fontFamily: "var(--font-mono, monospace)", fontWeight: 800, color: releaseInventory.infolobbyRegistros > 0 ? "var(--accent)" : "var(--warn)" }}>{releaseInventory.infolobbyRegistros.toLocaleString("es-CL")} registros proyectados</span>
-              <span style={{ display: "block", marginTop: "0.2rem", color: "var(--text-muted)", fontSize: "0.72rem" }}>{releaseInventory.infolobbyEsMuestra ? "Muestra local disponible; no equivale al universo completo." : "Release proyectado; se enlaza sólo con evidencia suficiente."}</span>
+              <span style={{ display: "block", marginTop: "0.25rem", fontFamily: "var(--font-mono, monospace)", fontWeight: 800, color: releaseInventory.infolobbyRegistros > 0 ? "var(--accent)" : "var(--warn)" }}>{releaseInventory.infolobbyRegistros.toLocaleString("es-CL")} registros en el release</span>
+              <span style={{ display: "block", marginTop: "0.2rem", color: "var(--text-muted)", fontSize: "0.72rem" }}>{releaseInventory.infolobbyEsMuestra ? `Muestra cargada para enlazar fichas: ${releaseInventory.infolobbyRegistrosConsultables.toLocaleString("es-CL")}. No equivale al universo completo.` : "Release proyectado; se enlaza sólo con evidencia suficiente."}</span>
             </div>
             <div style={{ border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "0.75rem", background: "var(--bg-surface-2)" }}>
               <strong style={{ display: "block", fontSize: "0.78rem" }}>InfoProbidad</strong>

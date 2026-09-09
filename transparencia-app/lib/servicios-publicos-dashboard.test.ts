@@ -52,7 +52,9 @@ describe("Dashboard Integral de Servicios Públicos y Eliminación de Bloques Ci
 
   it("S3c. El inventario muestra también releases que no tienen enlace directo por servicio", () => {
     const inventory = getServicioReleaseInventory();
-    expect(inventory.infolobbyRegistros).toBeGreaterThan(0);
+    expect(inventory.infolobbyRegistros).toBe(60523);
+    expect(inventory.infolobbyRegistrosConsultables).toBeGreaterThan(0);
+    expect(inventory.infolobbyRegistros).toBeGreaterThan(inventory.infolobbyRegistrosConsultables);
     expect(inventory.infoprobidadRegistros).toBeGreaterThan(0);
     expect(inventory.infoprobidadRegistros).toBeGreaterThan(1000);
     expect(inventory.infoprobidadEsMuestra).toBe(false);
