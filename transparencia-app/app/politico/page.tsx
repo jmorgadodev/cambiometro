@@ -193,12 +193,13 @@ export default async function PoliticoDirectory() {
               gastos operacionales (Senado) y vínculos documentados. Cada ficha cita su fuente.
             </p>
           </div>
-          <form className="cross-search" role="search" action="/politico">
-            <label htmlFor="politico-query">Nombre, partido, distrito o región</label>
+          <form className="cross-search" role="search" action="/personas" method="get">
+            <label htmlFor="politico-query">Buscar en todo el directorio</label>
             <div>
-              <input id="politico-query" name="q" type="search" defaultValue={rawQuery} placeholder="Ej.: Kaiser, Araucanía o RN" />
-              <button className="btn btn-primary">Buscar</button>
+              <input id="politico-query" name="search" type="search" defaultValue={rawQuery} placeholder="Ej.: Kaiser, Raimann, Independencia o RN" />
+              <button className="btn btn-primary">Buscar todo</button>
             </div>
+            <small>Busca parlamentarios, funcionarios, alcaldes, servicios públicos y organismos.</small>
           </form>
         </div>
       </section>
