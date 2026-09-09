@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import type { ReactElement } from "react";
@@ -222,23 +223,25 @@ export default async function PoliticoDirectory() {
           </p>
         )}
 
-        {senadores.length > 0 && (
-          <PoliticosListClient
-            items={senadores}
-            title="Senadores"
-            eyebrow="Cámara Alta"
-            pageSize={20}
-          />
-        )}
+        <Suspense fallback={<div className="relation-disclaimer" role="status">Cargando resultados parlamentarios…</div>}>
+          {senadores.length > 0 && (
+            <PoliticosListClient
+              items={senadores}
+              title="Senadores"
+              eyebrow="Cámara Alta"
+              pageSize={20}
+            />
+          )}
 
-        {diputados.length > 0 && (
-          <PoliticosListClient
-            items={diputados}
-            title="Diputados"
-            eyebrow="Cámara Baja"
-            pageSize={20}
-          />
-        )}
+          {diputados.length > 0 && (
+            <PoliticosListClient
+              items={diputados}
+              title="Diputados"
+              eyebrow="Cámara Baja"
+              pageSize={20}
+            />
+          )}
+        </Suspense>
 
 
         {!rawQuery && (rankingDiputados.length > 0 || rankingSenadores.length > 0) && (

@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 
 interface SearchResult {
-  type: "politico" | "persona" | "municipalidad" | "funcionario" | "entidad";
+  type: "politico" | "persona" | "municipalidad" | "funcionario" | "entidad" | "proveedor" | "organismo";
   id: string;
   nombre: string;
   url: string;
@@ -28,8 +28,10 @@ const TYPE_LABELS: Record<SearchResult["type"], string> = {
   politico: "Autoridad",
   persona: "Autoridad",
   municipalidad: "Municipalidad",
-  funcionario: "Funcionario/a",
+  funcionario: "Remuneración pública",
   entidad: "Entidad jurídica",
+  proveedor: "Proveedor",
+  organismo: "Organismo",
 };
 
 export default function HeaderSearch() {

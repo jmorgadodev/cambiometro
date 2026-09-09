@@ -47,6 +47,13 @@ describe("experiencia visual de personas", () => {
     expect(entityPage).not.toContain("redirect(");
   });
 
+  it("filtra el directorio parlamentario cuando la búsqueda llega desde el home", () => {
+    expect(directory).toContain("useSearchParams");
+    expect(directory).toContain("searchParams.get(\"q\")");
+    expect(directory).toContain("filteredItems");
+    expect(directory).toContain("searchParams.get(\"cargo\")");
+  });
+
   it("la página /autoridades redirige permanentemente a /personas?tab=parlamentarios", () => {
     expect(autoridadesPage).not.toContain("redirect(");
     expect(readFileSync(resolve("public/_redirects"), "utf8")).toContain("/autoridades /personas?tab=parlamentarios 301");

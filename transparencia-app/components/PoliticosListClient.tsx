@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useId } from "react";
+import { useEffect, useId, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { useSearchParams } from "next/navigation";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import type { Politico } from "@/lib/seed-politicos";
 
@@ -37,6 +38,14 @@ function evidencesLabel(fuentes: number) {
     : "Nómina oficial verificada";
 }
 
+function normalizeSearchText(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("es-CL")
+    .trim();
+}
+
 export default function PoliticosListClient({
   items,
   title,
@@ -44,12 +53,30 @@ export default function PoliticosListClient({
   pageSize = 20,
 }: Props) {
   const [pagina, setPagina] = useState(1);
-  const totalPaginas = Math.ceil(items.length / pageSize) || 1;
+  const searchParams = useSearchParams();
+  const searchQuery = normalizeSearchText(searchParams.get("q") ?? "");
+  const requestedCargo = searchParams.get("cargo") ?? "Todos";
+  const filteredItems = items.filter(({ politico, partido }) => {
+    if (requestedCargo !== "Todos" && politico.cargo !== requestedCargo) return false;
+    if (!searchQuery) return true;
+    return [
+      politico.nombre_completo,
+      politico.cargo,
+      politico.distrito_region,
+      politico.numero_distrito ? `distrito ${politico.numero_distrito}` : "",
+      partido?.nombre ?? "",
+      partido?.sigla ?? "",
+    ]
+      .filter(Boolean)
+      .some((value) => normalizeSearchText(value).includes(searchQuery));
+  });
+  const totalPaginas = Math.ceil(filteredItems.length / pageSize) || 1;
+  useEffect(() => setPagina(1), [searchQuery, requestedCargo]);
   const sectionId = useId();
 
   const indiceInicio = (pagina - 1) * pageSize;
   const indiceFin = indiceInicio + pageSize;
-  const itemsVisibles = items.slice(indiceInicio, indiceFin);
+  const itemsVisibles = filteredItems.slice(indiceInicio, indiceFin);
 
   const cambiarPagina = (nuevaPagina: number) => {
     setPagina(nuevaPagina);
@@ -67,7 +94,7 @@ export default function PoliticosListClient({
         <div>
           {eyebrow && <p className="eyebrow">{eyebrow}</p>}
           <h2 id={sectionId}>
-            {title} ({items.length})
+            {title} ({filteredItems.length})
           </h2>
         </div>
         {totalPaginas > 1 && (
@@ -161,6 +188,12 @@ export default function PoliticosListClient({
           );
         })}
       </div>
+
+      {filteredItems.length === 0 && (
+        <p className="relation-disclaimer" role="status">
+          Sin coincidencias parlamentarias para “{searchParams.get("q") ?? ""}”. Prueba con un nombre, partido, distrito o región.
+        </p>
+      )}
 
       {/* Paginación */}
       {totalPaginas > 1 && (

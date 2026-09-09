@@ -30,7 +30,7 @@ const TYPE_LABELS: Record<SearchResultType, string> = {
   politico: "Autoridad",
   persona: "Autoridad",
   municipalidad: "Municipalidad",
-  funcionario: "Funcionario/a",
+  funcionario: "Remuneración pública",
   entidad: "Entidad",
   proveedor: "Proveedor",
   organismo: "Organismo",

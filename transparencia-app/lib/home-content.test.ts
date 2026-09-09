@@ -34,11 +34,14 @@ describe("promesas editoriales del inicio", () => {
 
   it("envía la búsqueda del inicio al directorio parlamentario", () => {
     const search = readFileSync(resolve(import.meta.dirname, "../components/HomeInlineSearch.tsx"), "utf8");
+    const headerSearch = readFileSync(resolve(import.meta.dirname, "../components/HeaderSearch.tsx"), "utf8");
     expect(home).toContain("<HomeInlineSearch />");
     expect(search).toContain('fetch(`/api/v1/search?q=${encodeURIComponent(normalizedQuery)}`');
     expect(search).toContain('placeholder="Nombre, partido, distrito o región"');
     expect(search).toContain("Coincidencias");
     expect(search).toContain('action="/politico"');
+    expect(search).toContain('funcionario: "Remuneración pública"');
+    expect(headerSearch).toContain('funcionario: "Remuneración pública"');
   });
 
   it("mantiene cinco preguntas de análisis y separa el seguimiento de movimientos", () => {
