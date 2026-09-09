@@ -60,6 +60,17 @@ describe("Header y navegación global", () => {
     expect(headerContent).toContain("Metodología");
   });
 
+  it("desktop usa etiquetas compactas para mantener todas las secciones visibles", () => {
+    expect(headerContent).toContain('navLabel: "Análisis"');
+    expect(headerContent).toContain('navLabel: "Votaciones"');
+    expect(headerContent).toContain('navLabel: "Personas"');
+    expect(headerContent).toContain('navLabel: "Remuneraciones"');
+    expect(headerContent).toContain('navLabel: "Servicios"');
+    expect(headerContent).toContain('navLabel: "Municipios"');
+    expect(headerContent).toContain("item.navLabel || item.label");
+    expect(headerContent).toContain('title={item.label}');
+  });
+
   it("mobile (<1024px) contiene drawer con las 10 secciones, chip de corte, X y donación", () => {
     expect(headerContent).toContain("mobile-drawer");
     expect(headerContent).toContain("drawer-overlay");

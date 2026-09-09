@@ -19,33 +19,33 @@ export const NAV_CLUSTERS = [
   {
     clusterName: "Poder & Decisión",
     items: [
-      { href: "/politico", label: "Análisis Parlamentario" },
-      { href: "/partidos", label: "Partidos" },
-      { href: "/votaciones-destacadas/", label: "Votaciones destacadas" },
-      { href: "/personas", label: "Directorio de Personas" },
-      { href: "/remuneraciones-publicas", label: "Remuneraciones públicas" },
+       { href: "/politico", label: "Análisis Parlamentario", navLabel: "Análisis" },
+       { href: "/partidos", label: "Partidos", navLabel: "Partidos" },
+       { href: "/votaciones-destacadas/", label: "Votaciones destacadas", navLabel: "Votaciones" },
+       { href: "/personas", label: "Directorio de Personas", navLabel: "Personas" },
+       { href: "/remuneraciones-publicas", label: "Remuneraciones públicas", navLabel: "Remuneraciones" },
     ],
   },
   {
     clusterName: "Ejecución & Territorio",
     items: [
-      { href: "/servicios-publicos", label: "Servicios públicos" },
-      { href: "/municipalidades", label: "Municipalidades" },
-      { href: "/transferencias", label: "Transferencias" },
+       { href: "/servicios-publicos", label: "Servicios públicos", navLabel: "Servicios" },
+       { href: "/municipalidades", label: "Municipalidades", navLabel: "Municipios" },
+       { href: "/transferencias", label: "Transferencias", navLabel: "Transferencias" },
     ],
   },
   {
     clusterName: "Vínculos & Dinámicas",
     items: [
-      { href: "/cruces", label: "Cruces" },
-      { href: "/movimientos", label: "Movimientos" },
+       { href: "/cruces", label: "Cruces", navLabel: "Cruces" },
+       { href: "/movimientos", label: "Movimientos", navLabel: "Movimientos" },
     ],
   },
   {
     clusterName: "Meta & Transparencia",
     items: [
-      { href: "/datos", label: "Datos" },
-      { href: "/como-funciona", label: "Metodología" },
+       { href: "/datos", label: "Datos", navLabel: "Datos" },
+       { href: "/como-funciona", label: "Metodología", navLabel: "Metodología" },
     ],
   },
 ];
@@ -213,8 +213,10 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
                       prefetch={false}
                       className="site-nav__link"
                       aria-current={isActive ? "page" : undefined}
+                      aria-label={item.label}
+                      title={item.label}
                     >
-                      {item.label}
+                      {item.navLabel || item.label}
                     </Link>
                   );
                 })}
