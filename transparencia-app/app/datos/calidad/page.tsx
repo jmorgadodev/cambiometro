@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
 import Icono from "@/components/ui/Icono";
+import remunerationSourcesCatalog from "@/data/data-quality-sources.json";
 
 export const metadata: Metadata = {
   title: "Dashboard Público de Calidad de Datos — El Cambiómetro",
@@ -12,6 +13,9 @@ export const metadata: Metadata = {
 
 export default async function DataQualityPage() {
   const { sources, summary } = await getDataQualityDashboardData();
+  const remunerationAuditSources = remunerationSourcesCatalog.filter((source) =>
+    ["transparencia-activa", "camara", "senado", "personal-apoyo", "dipres"].includes(source.id),
+  );
 
   return (
     <div className="page-shell" style={{ minHeight: "100vh" }}>
@@ -235,6 +239,39 @@ export default async function DataQualityPage() {
             <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", margin: 0, lineHeight: 1.4 }}>
               ℹ️ <strong>Nota de cobertura histórica:</strong> El total incluye registros históricos de actividad parlamentaria no atribuidos a fuente individual en el catálogo.
             </p>
+          </div>
+        </section>
+
+        <section aria-labelledby="remuneraciones-audit-title">
+          <div className="section-heading" style={{ marginBottom: "1.25rem" }}>
+            <div>
+              <p className="eyebrow">Auditoría de remuneraciones</p>
+              <h2 id="remuneraciones-audit-title" style={{ fontSize: "1.35rem", margin: "0.25rem 0 0" }}>
+                Qué contiene cada fuente y qué puede mostrar el sitio
+              </h2>
+            </div>
+            <a className="data-link" href="/remuneraciones-publicas">Abrir búsqueda unificada →</a>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: "0.8rem" }}>
+            {remunerationAuditSources.map((source) => (
+              <article key={source.id} className="card" style={{ padding: "1rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem", alignItems: "flex-start" }}>
+                  <strong>{source.label}</strong>
+                  <span className={`badge ${source.confidenceLevel === "derived" ? "badge-info" : "badge-ok"}`} style={{ fontSize: "0.64rem" }}>
+                    {source.confidenceLevel === "derived" ? "Derivada" : "Oficial"}
+                  </span>
+                </div>
+                <p style={{ margin: "0.45rem 0 0", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.45 }}>{source.coverageNote}</p>
+                <dl style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "0.25rem 0.75rem", margin: "0.75rem 0 0", fontSize: "0.74rem" }}>
+                  <dt>Publicado</dt><dd style={{ margin: 0, fontWeight: 700 }}>{source.canonicalCount?.toLocaleString("es-CL") ?? "No calculable"}</dd>
+                  <dt>Consultable</dt><dd style={{ margin: 0, fontWeight: 700 }}>{source.queryableCount?.toLocaleString("es-CL") ?? "No calculable"}</dd>
+                  <dt>Período</dt><dd style={{ margin: 0, fontWeight: 700 }}>{source.period}</dd>
+                </dl>
+                <p style={{ margin: "0.7rem 0 0", color: "var(--text-subtle)", fontSize: "0.7rem", lineHeight: 1.4 }}>
+                  El índice unificado no convierte una fuente agregada en fichas personales y no reemplaza montos ausentes.
+                </p>
+              </article>
+            ))}
           </div>
         </section>
 

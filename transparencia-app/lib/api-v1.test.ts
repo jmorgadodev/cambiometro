@@ -766,7 +766,7 @@ describe("API canónica v1", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.data[0]).toMatchObject({ id: "camara", recordCount: 19025, status: "connected" });
+    expect(payload.data[0]).toMatchObject({ id: "camara", recordCount: 19025, status: "partial" });
   });
 
   it("normaliza alias históricos y no publica catálogos legados como fuentes sin datos", async () => {
@@ -822,7 +822,7 @@ describe("API canónica v1", () => {
 
     expect(response.status).toBe(200);
     expect(payload.data).toHaveLength(1);
-    expect(payload.data[0]).toMatchObject({ id: "ley-19862", recordCount: 60351, checksumSha256: "current-transfer-checksum", status: "connected" });
+    expect(payload.data[0]).toMatchObject({ id: "ley-19862", recordCount: 60351, checksumSha256: "current-transfer-checksum", status: "partial" });
     expect(prepare).not.toHaveBeenCalled();
   });
 
