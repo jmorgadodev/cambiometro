@@ -242,27 +242,40 @@ export async function fetchCamaraAttendance({ year, fetchImpl = fetch, timeoutMs
   if (sessions.some((session) => !session.date.startsWith(`${year}-`))) throw new Error("CAMARA_SESSION_OUTSIDE_YEAR");
   const publishedSessions = sessions.filter((session) => session.state.code === 1);
   let completed = 0;
+  let sessionsWithoutAttendance = 0;
   const details = await mapConcurrent(publishedSessions, concurrency, async (session) => {
     const sourceUrl = buildCamaraAttendanceUrl(session.id);
-    const xml = await fetchXml(sourceUrl, fetchImpl, timeoutMs, MAX_ATTENDANCE_XML_BYTES);
-    const detail = parseCamaraAttendanceXml(xml);
-    if (detail.id !== session.id || detail.date !== session.date) throw new Error(`CAMARA_SESSION_DETAIL_MISMATCH: ${session.id}`);
-    const result = {
-      session,
-      xml,
-      checksumSha256: createHash("sha256").update(xml).digest("hex"),
-      records: detail.attendance.map((attendance) => normalizeCamaraAttendance(detail, attendance, { sourceUrl })),
-    };
-    completed += 1;
-    onProgress?.({ phase: "sessions", completed, total: publishedSessions.length, sessionId: session.id });
-    return result;
+    try {
+      const xml = await fetchXml(sourceUrl, fetchImpl, timeoutMs, MAX_ATTENDANCE_XML_BYTES);
+      const detail = parseCamaraAttendanceXml(xml);
+      if (detail.id !== session.id || detail.date !== session.date) throw new Error(`CAMARA_SESSION_DETAIL_MISMATCH: ${session.id}`);
+      const result = {
+        session,
+        xml,
+        checksumSha256: createHash("sha256").update(xml).digest("hex"),
+        records: detail.attendance.map((attendance) => normalizeCamaraAttendance(detail, attendance, { sourceUrl })),
+      };
+      completed += 1;
+      onProgress?.({ phase: "sessions", completed, total: publishedSessions.length, sessionId: session.id });
+      return result;
+    } catch (error) {
+      if (error instanceof Error && error.message === "CAMARA_EMPTY_ATTENDANCE") {
+        sessionsWithoutAttendance += 1;
+        completed += 1;
+        onProgress?.({ phase: "sessions", completed, total: publishedSessions.length, sessionId: session.id });
+        return null;
+      }
+      throw error;
+    }
   });
-  const records = details.flatMap((detail) => detail.records).sort((a, b) => a.id.localeCompare(b.id));
+  const validDetails = details.filter(Boolean);
+  const records = validDetails.flatMap((detail) => detail.records).sort((a, b) => a.id.localeCompare(b.id));
+  if (!records.length) throw new Error("CAMARA_EMPTY_ATTENDANCE_YEAR");
   const ids = new Set(records.map((record) => record.id));
   if (ids.size !== records.length) throw new Error("CAMARA_DUPLICATE_RECORD");
   const listChecksumSha256 = createHash("sha256").update(sessionsXml).digest("hex");
   const byMonth = new Map();
-  for (const detail of details) {
+  for (const detail of validDetails) {
     const month = Number(detail.session.date.slice(5, 7));
     const group = byMonth.get(month) ?? [];
     group.push(detail);
@@ -288,6 +301,7 @@ export async function fetchCamaraAttendance({ year, fetchImpl = fetch, timeoutMs
     sessionsFound: sessions.length,
     sessionsPublished: publishedSessions.length,
     sessionsUnavailable: sessions.length - publishedSessions.length,
+    sessionsWithoutAttendance,
     periods: [...byMonth.keys()].sort((a, b) => a - b).map((month) => `${year}-${String(month).padStart(2, "0")}`),
     annualSessionsChecksumSha256: listChecksumSha256,
   };
