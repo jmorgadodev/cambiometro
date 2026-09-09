@@ -54,10 +54,19 @@ describe("Dashboard Integral de Servicios Públicos y Eliminación de Bloques Ci
     const inventory = getServicioReleaseInventory();
     expect(inventory.infolobbyRegistros).toBeGreaterThan(0);
     expect(inventory.infoprobidadRegistros).toBeGreaterThan(0);
+    expect(inventory.infoprobidadRegistros).toBeGreaterThan(1000);
+    expect(inventory.infoprobidadEsMuestra).toBe(false);
     expect(inventory.ley19862Transferencias).toBeGreaterThan(0);
     expect(directoryClientSource).toContain("InfoProbidad");
     expect(directoryClientSource).toContain("Transferencias Ley 19.862");
     expect(directoryClientSource).toContain("no equivale al universo completo");
+  });
+
+  it("S3d. Expone la procedencia cuando InfoLobby sólo está disponible como muestra", () => {
+    const servicio = getServicioPublicoEnriquecido("serv-dt");
+    expect(servicio?.lobbyEsMuestra).toBe(true);
+    expect(servicio?.resumen_lobby.total_audiencias).toBeGreaterThan(0);
+    expect(dashboardClientSource).toContain("muestra local");
   });
 
   it("S4. Ministerios no son 'subordinados' y cuentan con desglose de subtítulos 21/22/29", () => {

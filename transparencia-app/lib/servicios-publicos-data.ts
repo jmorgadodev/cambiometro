@@ -108,6 +108,7 @@ export interface ServicioPublicoEnriquecido extends ServicioPublico {
   resumen_lobby: ResumenLobbyServicio;
   auditorias_cgr: AuditoriaCgrServicio[];
   personal: ResumenPersonalServicio | null;
+  lobbyEsMuestra: boolean;
   cobertura: ServiceDataCoverage;
 }
 
@@ -128,6 +129,7 @@ export interface ServicioReleaseInventory {
 
 // Carga en memoria cacheada de las proyecciones del Lake
 let cachedInfoLobby: {
+  isSample?: boolean;
   records?: Array<{
     id?: string;
     fecha?: string;
@@ -156,8 +158,46 @@ let cachedContraloria: {
       auditType?: string;
       area?: string;
     };
+    data?: {
+      service?: string;
+      organization?: string;
+    };
+    evidence?: {
+      sourceUrl?: string;
+    };
   }>;
 } | null = null;
+
+function normalizeEvidenceText(value: unknown): string {
+  return String(value ?? "")
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function normalizeLobbyRecord(raw: Record<string, unknown>) {
+  return {
+    id: typeof raw.id === "string" ? raw.id : undefined,
+    fecha: typeof raw.fecha === "string" ? raw.fecha : undefined,
+    organismo: typeof raw.organismo === "string" ? raw.organismo : undefined,
+    sujeto_pasivo: typeof raw.sujeto_pasivo === "string" ? raw.sujeto_pasivo : typeof raw.nombre === "string" ? raw.nombre : undefined,
+    cargo_sujeto: typeof raw.cargo_sujeto === "string" ? raw.cargo_sujeto : typeof raw.cargo === "string" ? raw.cargo : undefined,
+    solicitante: typeof raw.solicitante === "string" ? raw.solicitante : typeof raw.sujetos_activos === "string" ? raw.sujetos_activos : undefined,
+    gestor_interes: typeof raw.gestor_interes === "string" ? raw.gestor_interes : undefined,
+    materia: typeof raw.materia === "string" && raw.materia.trim().length > 0
+      ? raw.materia
+      : typeof raw.objeto === "string" && raw.objeto.trim().length > 0
+        ? raw.objeto
+        : "Materia no especificada en el registro",
+    objeto: typeof raw.objeto === "string" ? raw.objeto : undefined,
+    asistentes: typeof raw.asistentes === "string" ? raw.asistentes : undefined,
+    forma: typeof raw.forma === "string" ? raw.forma : undefined,
+    lugar: typeof raw.lugar === "string" ? raw.lugar : undefined,
+    url: typeof raw.url === "string" ? raw.url : undefined,
+  };
+}
 
 function loadProjections() {
   const lakeDir = path.join(process.cwd(), "data", "lake", "projections", "v1");
@@ -165,7 +205,14 @@ function loadProjections() {
     if (!cachedInfoLobby) {
       const p = path.join(lakeDir, "infolobby.json");
       if (fs.existsSync(p) && fs.statSync(p).size < 20 * 1024 * 1024) {
-        cachedInfoLobby = JSON.parse(fs.readFileSync(p, "utf8"));
+        const projection = JSON.parse(fs.readFileSync(p, "utf8")) as { records?: Array<Record<string, unknown>> };
+        const records = Array.isArray(projection.records) ? projection.records.map(normalizeLobbyRecord) : [];
+        if (records.length > 0) {
+          cachedInfoLobby = { records, isSample: false };
+        } else {
+          const subset = (infolobbyStaticJson as { records?: Array<Record<string, unknown>> }).records ?? [];
+          cachedInfoLobby = { records: subset.map(normalizeLobbyRecord), isSample: true };
+        }
       }
     }
   } catch {}
@@ -264,12 +311,12 @@ export function getServicioPublicoEnriquecido(id: string): ServicioPublicoEnriqu
   let total_menciones_sector = 0;
 
   if (cachedInfoLobby && Array.isArray(cachedInfoLobby.records)) {
-    const sName = servicio.nombre.toLowerCase();
-    const sSigla = (servicio.sigla || "").toLowerCase();
+    const sName = normalizeEvidenceText(servicio.nombre);
+    const sSigla = normalizeEvidenceText(servicio.sigla || "");
     for (const rec of cachedInfoLobby.records) {
-      const org = String(rec.organismo || "").toLowerCase();
-      const mat = String(rec.materia || "").toLowerCase();
-      const obj = String(rec.objeto || "").toLowerCase();
+      const org = normalizeEvidenceText(rec.organismo);
+      const mat = normalizeEvidenceText(rec.materia);
+      const obj = normalizeEvidenceText(rec.objeto);
 
       if (org.includes(sName) || (sSigla.length > 2 && org.includes(sSigla))) {
         const solicitante = rec.solicitante || rec.gestor_interes;
@@ -291,7 +338,7 @@ export function getServicioPublicoEnriquecido(id: string): ServicioPublicoEnriqu
         });
       } else if (
         (sName.length > 5 && (mat.includes(sName) || obj.includes(sName))) ||
-        (sSigla.length >= 3 && (mat.includes(` ${sSigla} `) || obj.includes(` ${sSigla} `)))
+        (sSigla.length >= 3 && (mat.includes(sSigla) || obj.includes(sSigla)))
       ) {
         total_menciones_sector++;
         if (menciones_sectoriales.length < 3) {
@@ -368,21 +415,27 @@ export function getServicioPublicoEnriquecido(id: string): ServicioPublicoEnriqu
 
   // 4. Auditorías CGR (Contraloría)
   const auditorias_cgr: AuditoriaCgrServicio[] = [];
-  if (cachedContraloria && Array.isArray(cachedContraloria.records) && !servicio.id.startsWith("org-")) {
-    const sName = servicio.nombre.toLowerCase();
-    const sSigla = (servicio.sigla || "").toLowerCase();
+  if (cachedContraloria && Array.isArray(cachedContraloria.records)) {
+    const sName = normalizeEvidenceText(servicio.nombre);
+    const sSigla = normalizeEvidenceText(servicio.sigla || "");
     for (const rec of cachedContraloria.records) {
-      const title = String(rec.title || "").toLowerCase();
+      const title = normalizeEvidenceText(rec.title);
       const attrs = rec.attributes || {};
-      const org = String(attrs.organization || "").toLowerCase();
-      if (title.includes(sName) || org.includes(sName) || (sSigla.length > 2 && (title.includes(sSigla) || org.includes(sSigla)))) {
+      const org = normalizeEvidenceText(attrs.organization);
+      const dataService = normalizeEvidenceText(rec.data?.service);
+      const dataOrganization = normalizeEvidenceText(rec.data?.organization);
+      if (
+        title.includes(sName) || org.includes(sName) || dataService.includes(sName) || dataOrganization.includes(sName) ||
+        (sSigla.length > 2 && (title.includes(sSigla) || org.includes(sSigla) || dataService.includes(sSigla) || dataOrganization.includes(sSigla)))
+      ) {
         const fecha = rec.occurredAt || rec.publishedAt;
-        if (!rec.id || !rec.title || !fecha || !rec.url) continue;
+        const sourceUrl = rec.url || rec.evidence?.sourceUrl;
+        if (!rec.id || !rec.title || !fecha || !sourceUrl) continue;
         auditorias_cgr.push({
           id: rec.id,
           titulo: rec.title,
           fecha,
-          url: rec.url,
+          url: sourceUrl,
           tipo: attrs.auditType,
           area: attrs.area,
         });
@@ -399,6 +452,7 @@ export function getServicioPublicoEnriquecido(id: string): ServicioPublicoEnriqu
     resumen_lobby,
     auditorias_cgr,
     personal,
+    lobbyEsMuestra: Boolean(cachedInfoLobby?.isSample),
     cobertura: buildServiceDataCoverage({
       id: servicio.id,
       presupuesto: presupuesto !== null,
@@ -423,7 +477,25 @@ export function getServicioReleaseInventory(): ServicioReleaseInventory {
   const infolobbyProjection = cachedInfoLobby?.records ?? [];
   const infolobbySubset = (infolobbyStaticJson as { records?: unknown[] }).records ?? [];
   const infolobby = infolobbyProjection.length > 0 ? infolobbyProjection : infolobbySubset;
-  const infoprobidad = infoprobidadStaticJson as { count?: number; records?: unknown[] };
+  let infoprobidadRecords = 0;
+  let infoprobidadEsMuestra = true;
+  try {
+    const p = path.join(process.cwd(), "data", "lake", "projections", "v1", "infoprobidad.json");
+    const projection = JSON.parse(fs.readFileSync(p, "utf8")) as { count?: number; records?: unknown[] };
+    if (Array.isArray(projection.records) && projection.records.length > 0) {
+      infoprobidadRecords = projection.records.length;
+      infoprobidadEsMuestra = false;
+    } else if (typeof projection.count === "number" && projection.count > 0) {
+      infoprobidadRecords = projection.count;
+      infoprobidadEsMuestra = false;
+    }
+  } catch {
+    // Si el release completo no está disponible, se mantiene el subconjunto explícito.
+  }
+  if (infoprobidadRecords === 0) {
+    const infoprobidad = infoprobidadStaticJson as { count?: number; records?: unknown[] };
+    infoprobidadRecords = infoprobidad.records?.length ?? infoprobidad.count ?? 0;
+  }
   const ley19862 = ley19862StaticJson as {
     kpis?: { total_transfers?: number; total_receptores?: number; total_emisores?: number };
     transfers_sample?: unknown[];
@@ -442,9 +514,9 @@ export function getServicioReleaseInventory(): ServicioReleaseInventory {
     contraloriaRegistros: contraloria.length,
     contraloriaEntidades,
     infolobbyRegistros: infolobby.length,
-    infolobbyEsMuestra: infolobbyProjection.length === 0,
-    infoprobidadRegistros: infoprobidad.records?.length ?? infoprobidad.count ?? 0,
-    infoprobidadEsMuestra: true,
+    infolobbyEsMuestra: Boolean(cachedInfoLobby?.isSample),
+    infoprobidadRegistros: infoprobidadRecords,
+    infoprobidadEsMuestra,
     ley19862Transferencias: ley19862.kpis?.total_transfers ?? 0,
     ley19862MuestraTransferencias: ley19862.transfers_sample?.length ?? 0,
     ley19862Receptores: ley19862.kpis?.total_receptores ?? 0,

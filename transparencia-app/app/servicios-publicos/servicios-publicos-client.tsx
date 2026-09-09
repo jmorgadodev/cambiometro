@@ -383,7 +383,7 @@ export default function ServiciosPublicosClient({
             <div style={{ border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "0.75rem", background: "var(--bg-surface-2)" }}>
               <strong style={{ display: "block", fontSize: "0.78rem" }}>InfoProbidad</strong>
               <span style={{ display: "block", marginTop: "0.25rem", fontFamily: "var(--font-mono, monospace)", fontWeight: 800, color: "var(--accent)" }}>{releaseInventory.infoprobidadRegistros.toLocaleString("es-CL")} declaraciones</span>
-              <span style={{ display: "block", marginTop: "0.2rem", color: "var(--text-muted)", fontSize: "0.72rem" }}>Corte muestral disponible; no se atribuye a cada servicio sin identificador oficial.</span>
+              <span style={{ display: "block", marginTop: "0.2rem", color: "var(--text-muted)", fontSize: "0.72rem" }}>{releaseInventory.infoprobidadEsMuestra ? "Muestra local disponible; no equivale al universo completo." : "Release completo disponible; no se atribuye a cada servicio sin identificador oficial."}</span>
             </div>
             <div style={{ border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "0.75rem", background: "var(--bg-surface-2)" }}>
               <strong style={{ display: "block", fontSize: "0.78rem" }}>Transferencias Ley 19.862</strong>

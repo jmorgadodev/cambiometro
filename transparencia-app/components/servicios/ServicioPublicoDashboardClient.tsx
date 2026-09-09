@@ -1011,6 +1011,11 @@ export default function ServicioPublicoDashboardClient({ servicio, politicoId }:
                 {lobby.length > 0 ? `${lobby.length} reuniones directas` : "0 audiencias directas"}
               </span>
             </div>
+            {servicio.lobbyEsMuestra && (
+              <p style={{ margin: "-0.5rem 0 1rem", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.45 }}>
+                La proyección completa de InfoLobby no está disponible en este release; las reuniones que aparecen provienen de una muestra local y se etiquetan como tal.
+              </p>
+            )}
 
             {/* Tarjetas de Agregados InfoLobby */}
             {resumenLobby && (

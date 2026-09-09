@@ -104,4 +104,10 @@ describe("Tarea F — Cobertura Real de Dotación y Compras en Servicios Públic
     expect(hospital?.compras?.procesos_count).toBeGreaterThan(0);
     expect(hospital?.cobertura.personal.estado).not.toBe("publicado");
   });
+
+  it("F9. Lee auditorías CGR desde data.service además de attributes.organization", () => {
+    const hospital = getServicioPublicoEnriquecido("org-hospital-de-victoria");
+    expect(hospital?.auditorias_cgr.length).toBeGreaterThan(0);
+    expect(hospital?.auditorias_cgr[0]?.titulo.toLowerCase()).toContain("hospital de victoria");
+  });
 });
