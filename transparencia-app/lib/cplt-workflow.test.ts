@@ -74,6 +74,9 @@ describe("automatizacion CPLT nacional", () => {
     const merge = readFileSync(resolve(process.cwd(), "scripts/merge-cplt-category-artifacts.mjs"), "utf8");
     expect(stage).toContain("organismos_adicionales.json");
     expect(merge).toContain("organismosAdicionales");
+    expect(merge).toContain('mergeMode: "per-organism"');
+    expect(merge).not.toContain("const recordsByFile = new Map()");
+    expect(merge).toContain("for (const fileName of [...projectionFiles].sort())");
   });
 
   it("reconstruye y publica el catálogo canónico de organismos después del ETL nacional", () => {

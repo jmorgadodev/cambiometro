@@ -10,8 +10,8 @@ mkdirSync(projections, { recursive: true });
 mkdirSync(join(output, "validation"), { recursive: true });
 mkdirSync(join(output, "coverage"), { recursive: true });
 
-const recordsByFile = new Map();
 const organismosAdicionales = new Map();
+const projectionFiles = new Set();
 for (const category of categories) {
   const source = join(artifactRoot, `cplt-${category}`);
   if (!existsSync(source)) throw new Error(`CPLT_ARTIFACT_MISSING: ${category}`);
@@ -21,11 +21,7 @@ for (const category of categories) {
 
   for (const fileName of readdirSync(join(source, "projections"))) {
     if (!fileName.endsWith(".json")) continue;
-    const records = JSON.parse(readFileSync(join(source, "projections", fileName), "utf8"));
-    if (!Array.isArray(records)) throw new Error(`CPLT_ARTIFACT_INVALID: ${category}/${fileName}`);
-    const merged = recordsByFile.get(fileName) ?? new Map();
-    for (const record of records) merged.set(record.id, record);
-    recordsByFile.set(fileName, merged);
+    projectionFiles.add(fileName);
   }
 
   const additionalPath = join(source, "organismos_adicionales.json");
@@ -38,11 +34,28 @@ for (const category of categories) {
   }
 }
 
-for (const [fileName, records] of recordsByFile) {
-  writeFileSync(join(projections, fileName), JSON.stringify([...records.values()]));
+// Cada organismo se consolida de forma independiente. El ETL nacional puede
+// superar el millón de filas; mantener un Map global por archivo retenía todo
+// el país en memoria y hacía fallar el runner con heap out of memory. Aquí sólo
+// vive en memoria el organismo que se está escribiendo y su deduplicación por
+// id. El orden de categorías es estable, por lo que el resultado sigue siendo
+// determinista.
+for (const fileName of [...projectionFiles].sort()) {
+  const recordsById = new Map();
+  for (const category of categories) {
+    const filePath = join(artifactRoot, `cplt-${category}`, "projections", fileName);
+    if (!existsSync(filePath)) continue;
+    const records = JSON.parse(readFileSync(filePath, "utf8"));
+    if (!Array.isArray(records)) throw new Error(`CPLT_ARTIFACT_INVALID: ${category}/${fileName}`);
+    for (const record of records) {
+      if (!record?.id) throw new Error(`CPLT_ARTIFACT_RECORD_ID_MISSING: ${category}/${fileName}`);
+      recordsById.set(record.id, record);
+    }
+  }
+  writeFileSync(join(projections, fileName), JSON.stringify([...recordsById.values()]));
 }
-if (recordsByFile.size < 1) throw new Error("CPLT_MERGED_PROJECTIONS_MISSING");
+if (projectionFiles.size < 1) throw new Error("CPLT_MERGED_PROJECTIONS_MISSING");
 if (organismosAdicionales.size > 0) {
   writeFileSync(join(output, "organismos_adicionales.json"), `${JSON.stringify([...organismosAdicionales.values()], null, 2)}\n`);
 }
-console.log(JSON.stringify({ categories: categories.length, projectionFiles: recordsByFile.size, organismosAdicionales: organismosAdicionales.size }));
+console.log(JSON.stringify({ categories: categories.length, projectionFiles: projectionFiles.size, organismosAdicionales: organismosAdicionales.size, mergeMode: "per-organism" }));
