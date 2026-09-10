@@ -9,6 +9,10 @@ inputs:
     description: JSON report path relative to the repository root
     required: false
     default: "d1-preflight.json"
+  allow-remote-materialization:
+    description: Explicit opt-in for a remote D1 materialization. Scheduled ETLs keep this disabled.
+    required: false
+    default: "false"
 outputs:
   proceed:
     description: Whether the workflow may materialize D1
@@ -29,6 +33,7 @@ runs:
         CLOUDFLARE_API_TOKEN: ${{ env.CLOUDFLARE_API_TOKEN }}
         D1_USAGE_OUTPUT: ${{ inputs.output }}
         D1_THRESHOLD_PERCENT: ${{ inputs.threshold-percent }}
+        D1_ALLOW_REMOTE_MATERIALIZATION: ${{ inputs.allow-remote-materialization }}
       run: |
         set +e
         node transparencia-app/scripts/check-d1-usage.mjs "$(date -u +%F)"
@@ -36,8 +41,10 @@ runs:
 
         proceed=false
         peak_percent=100
-        reason="usage-unavailable"
-        if [[ -s "$D1_USAGE_OUTPUT" ]]; then
+        reason="policy-disabled"
+        if [[ "$D1_ALLOW_REMOTE_MATERIALIZATION" != "true" ]]; then
+          echo "D1 remote materialization is disabled by policy; R2/static publication remains canonical."
+        elif [[ -s "$D1_USAGE_OUTPUT" ]]; then
           peak_percent="$(node -e 'const fs=require("fs"); const report=JSON.parse(fs.readFileSync(process.argv[1], "utf8")); process.stdout.write(String(Math.max(Number(report.readPercent ?? 100), Number(report.writePercent ?? 100))))' "$D1_USAGE_OUTPUT" 2>/dev/null)"
           if [[ "$usage_status" -eq 0 && "$peak_percent" =~ ^[0-9]+([.][0-9]+)?$ ]] && node -e 'process.exit(Number(process.argv[1]) < Number(process.argv[2]) ? 0 : 1)' "$peak_percent" "$D1_THRESHOLD_PERCENT"; then
             proceed=true
