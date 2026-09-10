@@ -1168,8 +1168,9 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
           page: Math.floor(offset / limit) + 1,
           totalPages: Math.max(1, Math.ceil(lake.total / limit)),
           sourceBackend: "r2-lake",
-          sourceStatus: "complete",
-          publishedRows: lake.total,
+          sourceStatus: lake.complete ? "complete" : "partial",
+          publishedRows: lake.loadedRows,
+          expectedRows: lake.expectedTotal,
           nextCursor: lake.nextCursor,
         }, pageLinks(requestUrl, offset, limit, lake.total));
       }

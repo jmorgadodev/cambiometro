@@ -219,6 +219,9 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
     nextCursor: offset + selected.length < resultTotal
       ? `v1_${(offset + selected.length).toString(36)}`
       : null,
+    expectedTotal: manifest.totalRows,
+    loadedRows: manifest.totalRows,
+    complete: true,
   };
 }
 
@@ -244,12 +247,17 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
     && (!params.to || partition.period <= params.to.slice(0, 7)));
   if (partitions.length === 0) return null;
   const records: EvidenceRecord[] = [];
+  let loadedRows = 0;
+  let missingPartitions = 0;
   for (const partition of partitions) {
     const [year, month] = partition.period.split("-");
     const releaseTag = partition.releaseTag ?? `data-${partition.sourceId}-${year}`;
     const manifestAssetName = partition.manifestAssetName ?? `${partition.sourceId}-${year}-${month}-manifest.json`;
     const manifestObject = await readHotOrArchivedObject(bucket, partition.manifestKey, releaseTag, manifestAssetName);
-    if (!manifestObject) continue;
+    if (!manifestObject) {
+      missingPartitions += 1;
+      continue;
+    }
     const manifest = await manifestObject.json<PartitionManifest>();
     const artifacts = manifest.artifacts
       .filter((artifact) => /records(?:-[^/]+)?\.jsonl\.gz(?:\.part-\d+)?$/.test(artifact.key))
@@ -262,7 +270,10 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
       if (await checksumSha256(data) !== artifact.checksumSha256) throw new Error(`ARCHIVE_CHECKSUM_MISMATCH: ${artifact.key}`);
       chunks.push(new Uint8Array(data));
     }
-    if (chunks.length === 0) continue;
+    if (chunks.length === 0) {
+      missingPartitions += 1;
+      continue;
+    }
     const total = chunks.reduce((size, chunk) => size + chunk.byteLength, 0);
     const compressed = new Uint8Array(total);
     let position = 0;
@@ -270,6 +281,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
     const text = await decompressGzip(compressed);
     for (const line of text.split("\n")) {
       if (!line) continue;
+      loadedRows += 1;
       const record = projectLakeEvidence(JSON.parse(line) as LakeRecord, manifest.projectionChecksumSha256, catalog.generatedAt);
       const date = record.occurredAt?.slice(0, 10) ?? "";
       if (params.entityId && !record.subjectEntityIds.includes(params.entityId) && !record.objectEntityIds.includes(params.entityId)) continue;
@@ -288,5 +300,17 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   const offset = cursorOffset(params.cursor);
   const data = records.slice(offset, offset + params.limit);
   const next = offset + data.length;
-  return { data, total: records.length, limit: params.limit, nextCursor: next < records.length ? `v1_${next.toString(36)}` : null };
+  const expectedTotal = partitions.every((partition) => Number.isFinite(Number(partition.recordCount)))
+    ? partitions.reduce((total, partition) => total + Number(partition.recordCount), 0)
+    : null;
+  const complete = missingPartitions === 0 && (expectedTotal === null || expectedTotal === loadedRows);
+  return {
+    data,
+    total: records.length,
+    limit: params.limit,
+    nextCursor: next < records.length ? `v1_${next.toString(36)}` : null,
+    expectedTotal,
+    loadedRows,
+    complete,
+  };
 }
