@@ -4,7 +4,7 @@ export interface R2PublicCatalog {
   schemaVersion: string;
   generatedAt: string | null;
   sources: Array<{ id: string; status: SourceManifest["status"]; foundPeriods: string[]; recordCount: number }>;
-  partitions: Array<{ id: string; sourceId: string; period: string; manifestKey: string; checksumSha256: string; releaseTag?: string; status: SourceManifest["status"] }>;
+  partitions: Array<{ id: string; sourceId: string; variant?: string | null; period: string; manifestKey: string; manifestAssetName?: string; checksumSha256: string; releaseTag?: string; status: SourceManifest["status"] }>;
 }
 
 export function mergeR2Catalog(manifests: SourceManifest[], catalog: R2PublicCatalog | null): SourceManifest[] {

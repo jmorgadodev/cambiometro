@@ -247,7 +247,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   for (const partition of partitions) {
     const [year, month] = partition.period.split("-");
     const releaseTag = partition.releaseTag ?? `data-${partition.sourceId}-${year}`;
-    const manifestAssetName = `${partition.sourceId}-${year}-${month}-manifest.json`;
+    const manifestAssetName = partition.manifestAssetName ?? `${partition.sourceId}-${year}-${month}-manifest.json`;
     const manifestObject = await readHotOrArchivedObject(bucket, partition.manifestKey, releaseTag, manifestAssetName);
     if (!manifestObject) continue;
     const manifest = await manifestObject.json<PartitionManifest>();

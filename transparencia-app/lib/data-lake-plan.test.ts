@@ -32,7 +32,7 @@ describe("plan de publicación del lago estático", () => {
 
     expect(plan.catalog.schemaVersion).toBe("1.0.0");
     expect(plan.catalog.partitions.map((partition: { id: string }) => partition.id)).toEqual([
-      "camara/2026/08",
+      "camara/congreso_opendata/2026/08",
       "infolobby/2026/07",
       "infolobby/2026/08",
     ]);
@@ -138,6 +138,29 @@ describe("plan de publicación del lago estático", () => {
     expect(plan.catalog.sources.find((item: { id: string }) => item.id === "dipres")!.recordCount).toBe(15689);
     expect(plan.catalog.partitions.find((item: { id: string }) => item.id === "chilecompra/2026/06")!.manifestKey).toBe("partitions/chilecompra/2026/06/manifest.json");
     expect(plan.assets.some((item: { key: string }) => item.key === "sources/dipres/manifest.json")).toBe(false);
+  });
+
+  it("no reemplaza asistencia de Cámara al publicar votaciones del mismo mes", () => {
+    const plan = buildLakePlan({ actualizado_en: "2026-08-31T00:00:00Z", fuentes: {
+      votaciones_camara: [
+        { id: "vote-1", fecha: "2026-08-01", url: "https://camara.cl/vote-1", descripcion: "Votación" },
+      ],
+    } }, {
+      existingCatalog: {
+        partitions: [{
+          id: "camara/2026/08", sourceId: "camara", period: "2026-08", recordCount: 2117,
+          checksumSha256: "attendance-checksum", releaseTag: "data-camara-2026-attendance",
+          manifestKey: "partitions/camara/2026/08/manifest.json", status: "partial",
+        }],
+      },
+    });
+
+    expect(plan.catalog.partitions.map((partition: { id: string }) => partition.id)).toEqual([
+      "camara/2026/08",
+      "camara/votaciones_camara/2026/08",
+    ]);
+    expect(plan.catalog.sources.find((source: { id: string }) => source.id === "camara")?.recordCount).toBe(2118);
+    expect(plan.assets.some((asset: { key: string }) => asset.key === "partitions/camara/votaciones_camara/2026/08/manifest.json")).toBe(true);
   });
 
   it("reemplaza las particiones de una fuente cuando inicia un backfill limpio", () => {
@@ -257,7 +280,7 @@ describe("plan de publicación del lago estático", () => {
     const entityText = gunzipSync(entities.data).toString("utf8");
     expect(entityText).toContain('"scheme":"camara-dipid"');
     expect(entityText).toContain('"id":"public-body-camara"');
-    const records = recordAsset(plan, "partitions/camara/2026/08")!;
+    const records = recordAsset(plan, "partitions/camara/asistencia_camara/2026/08")!;
     expect(gunzipSync(records.data).toString("utf8")).toContain('"kind":"attendance"');
     const index = entityIndexAsset(plan, "camara")!;
     expect(gunzipSync(index.data).toString("utf8")).toContain('"toId":"public-body-camara"');

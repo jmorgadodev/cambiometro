@@ -14,6 +14,20 @@ const SOURCE_MAP = {
   infoprobidad: "infoprobidad",
 };
 
+const CAMARA_PARTITION_VARIANTS = new Set([
+  "congreso_opendata",
+  "votaciones_camara",
+  "asistencia_camara",
+]);
+
+function partitionVariant(sourceKey, sourceId) {
+  return sourceId === "camara" && CAMARA_PARTITION_VARIANTS.has(sourceKey) ? sourceKey : null;
+}
+
+function partitionNamespace(sourceId, variant) {
+  return `${sourceId}/${variant ?? "default"}`;
+}
+
 const KIND_MAP = {
   congreso_opendata: "authority",
   votaciones_camara: "vote",
@@ -286,14 +300,15 @@ export function buildLakePlan(snapshot, options = {}) {
 
   for (const [sourceKey, rawRecords] of Object.entries(snapshot.fuentes ?? {})) {
     const sourceId = SOURCE_MAP[sourceKey] ?? sourceKey;
+    const variant = partitionVariant(sourceKey, sourceId);
     for (const raw of rawRecords) {
       if (raw.source_period != null && !/^\d{4}-\d{2}$/.test(String(raw.source_period))) throw new Error(`INVALID_SOURCE_PERIOD: ${sourceId}`);
       const date = new Date(raw.source_period ? `${raw.source_period}-01T00:00:00.000Z` : (raw.fecha ?? fallbackDate));
       const year = String(date.getUTCFullYear()).padStart(4, "0");
       const month = String(date.getUTCMonth() + 1).padStart(2, "0");
-      const id = `${sourceId}/${year}/${month}`;
+      const id = variant ? `${sourceId}/${variant}/${year}/${month}` : `${sourceId}/${year}/${month}`;
       const sourcePeriod = raw.source_period ? String(raw.source_period) : null;
-      const group = groups.get(id) ?? { id, sourceId, year, month, sourcePeriod, records: [] };
+      const group = groups.get(id) ?? { id, sourceId, variant, year, month, sourcePeriod, records: [] };
       if (group.sourcePeriod !== sourcePeriod) throw new Error(`MIXED_SOURCE_PERIOD: ${id}`);
       const normalized = normalizeRecord(sourceKey, sourceId, raw);
       if (recordIds.has(normalized.id)) throw new Error(`DUPLICATE_SOURCE_RECORD_ID: ${sourceId}:${raw.id}`);
@@ -339,7 +354,8 @@ export function buildLakePlan(snapshot, options = {}) {
   const assets = [];
   const partitions = [];
   for (const group of [...groups.values()].sort((a, b) => a.id.localeCompare(b.id))) {
-    const prefix = `partitions/${group.sourceId}/${group.year}/${group.month}`;
+    const prefix = `partitions/${group.id}`;
+    const assetPrefix = group.variant ? `${group.sourceId}-${group.variant}-` : `${group.sourceId}-`;
     const projection = buildDeterministicPartition(group.records);
     const parts = splitDeterministically(projection.compressed, maxPartBytes);
     const projectionAssets = parts.map((part, index) => {
@@ -347,16 +363,17 @@ export function buildLakePlan(snapshot, options = {}) {
       const keySuffix = parts.length === 1
         ? `records-${projection.checksumSha256}.jsonl.gz`
         : `records-${projection.checksumSha256}.jsonl.gz.part-${String(index + 1).padStart(4, "0")}`;
-      return asset(`${prefix}/${keySuffix}`, part, "", `${group.sourceId}-${group.year}-${group.month}-${releaseSuffix}`);
+      return asset(`${prefix}/${keySuffix}`, part, "", `${assetPrefix}${group.year}-${group.month}-${releaseSuffix}`);
     });
     assets.push(...projectionAssets);
 
     const originals = originalAssets.filter((item) => item.sourceId === group.sourceId
       && Number(item.year) === Number(group.year) && Number(item.month) === Number(group.month));
     const originalReleaseAssets = [];
+    const originalPrefix = group.variant ? `${group.sourceId}/${group.variant}` : group.sourceId;
     const archivedOriginals = originals.filter((item) => item.redistributable && item.data).map((item) => {
-      const key = `originals/${group.sourceId}/${group.year}/${group.month}/${item.name}`;
-      const originalAsset = asset(key, item.data, "", `${group.sourceId}-${group.year}-${group.month}-original-${item.name}`);
+      const key = `originals/${originalPrefix}/${group.year}/${group.month}/${item.name}`;
+      const originalAsset = asset(key, item.data, "", `${assetPrefix}${group.year}-${group.month}-original-${item.name}`);
       originalReleaseAssets.push(originalAsset);
       assets.push(originalAsset);
       return { name: item.name, sourceUrl: item.url, license: item.license, archived: true, key, checksumSha256: originalAsset.checksumSha256, size: originalAsset.size };
@@ -370,6 +387,7 @@ export function buildLakePlan(snapshot, options = {}) {
       schemaVersion: "1.0.0",
       id: group.id,
       sourceId: group.sourceId,
+      variant: group.variant ?? null,
       year: Number(group.year),
       month: Number(group.month),
       sourcePeriod: group.sourcePeriod,
@@ -386,16 +404,19 @@ export function buildLakePlan(snapshot, options = {}) {
     const manifestText = `${stableStringify(manifest)}\n`;
     const releaseTag = `data-${group.sourceId}-${group.year}-${sha256(manifestText).slice(0, 16)}`;
     for (const releaseAsset of [...projectionAssets, ...originalReleaseAssets]) releaseAsset.releaseTag = releaseTag;
-    const manifestAsset = asset(`${prefix}/manifest.json`, manifestText, releaseTag, `${group.sourceId}-${group.year}-${group.month}-manifest.json`);
+    const manifestAssetName = `${assetPrefix}${group.year}-${group.month}-manifest.json`;
+    const manifestAsset = asset(`${prefix}/manifest.json`, manifestText, releaseTag, manifestAssetName);
     const checksumText = `${[...projectionAssets, manifestAsset].map((item) => `${item.checksumSha256}  ${item.key.split("/").at(-1)}`).join("\n")}\n`;
-    assets.push(manifestAsset, asset(`${prefix}/sha256.txt`, checksumText, releaseTag, `${group.sourceId}-${group.year}-${group.month}-sha256.txt`));
+    assets.push(manifestAsset, asset(`${prefix}/sha256.txt`, checksumText, releaseTag, `${assetPrefix}${group.year}-${group.month}-sha256.txt`));
     partitions.push({
       id: group.id,
       sourceId: group.sourceId,
+      variant: group.variant,
       period: `${group.year}-${group.month}`,
       sourcePeriod: group.sourcePeriod,
       releaseTag,
       manifestKey: manifestAsset.key,
+      manifestAssetName,
       recordCount: group.records.length,
       checksumSha256: projection.checksumSha256,
       status: "partial",
@@ -424,14 +445,15 @@ export function buildLakePlan(snapshot, options = {}) {
   const producedPartitionIds = new Set(partitions.map((partition) => partition.id));
   const explicitPeriodsBySource = new Map();
   for (const partition of partitions) if (partition.sourcePeriod) {
-    const periods = explicitPeriodsBySource.get(partition.sourceId) ?? new Set();
+    const namespace = partitionNamespace(partition.sourceId, partition.variant);
+    const periods = explicitPeriodsBySource.get(namespace) ?? new Set();
     periods.add(partition.sourcePeriod);
-    explicitPeriodsBySource.set(partition.sourceId, periods);
+    explicitPeriodsBySource.set(namespace, periods);
   }
   const retainedPartitions = (existingCatalog?.partitions ?? []).filter((partition) => {
     if (replaceSourceIds.has(partition.sourceId)) return false;
     if (producedPartitionIds.has(partition.id)) return false;
-    const explicitPeriods = explicitPeriodsBySource.get(partition.sourceId);
+    const explicitPeriods = explicitPeriodsBySource.get(partitionNamespace(partition.sourceId, partition.variant));
     if (!explicitPeriods) return true;
     if (!partition.sourcePeriod) return false;
     return !explicitPeriods.has(partition.sourcePeriod);
