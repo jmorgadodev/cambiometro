@@ -46,6 +46,10 @@ function searchTokens(value: string) {
   return normalizeSearchText(value).split(/[^a-z0-9]+/).filter((token) => token.length >= 2);
 }
 
+function remunerationIdentityKey(value: string) {
+  return searchTokens(value).sort().join(" ");
+}
+
 async function searchStaticRemunerations(query: string): Promise<SearchResult[]> {
   try {
     const manifestResponse = await fetch("/data/remuneraciones-unified/manifest.json", { cache: "force-cache" });
@@ -59,7 +63,7 @@ async function searchStaticRemunerations(query: string): Promise<SearchResult[]>
       const pages = index[token] ?? [];
       return current === null ? pages : current.filter((page) => pages.includes(page));
     }, null) ?? [];
-    const rows = (await Promise.all(candidatePages.slice(0, 8).map(async (page) => {
+    const rows = (await Promise.all(candidatePages.slice(0, 24).map(async (page) => {
       const entry = manifest.pages.find((item) => item.page === page);
       if (!entry) return [];
       const response = await fetch(`/data/remuneraciones-unified/${entry.key}`, { cache: "force-cache" });
@@ -70,7 +74,15 @@ async function searchStaticRemunerations(query: string): Promise<SearchResult[]>
       const haystack = normalizeSearchText(`${row.nombreOriginal ?? ""} ${row.organismoOriginal ?? ""} ${row.cargoOriginal ?? ""}`);
       return requestedTokens.every((token) => haystack.includes(token));
     });
-    return rows.slice(0, 4).map((row) => ({
+    // La nómina histórica contiene varias filas por persona. La home debe
+    // mostrar personas distintas para no llenar el cupo con meses repetidos.
+    // La ficha completa seguirá mostrando todas las filas originales.
+    const uniquePeople = new Map<string, Record<string, unknown>>();
+    for (const row of rows) {
+      const key = remunerationIdentityKey(String(row.nombreOriginal ?? ""));
+      if (key && !uniquePeople.has(key)) uniquePeople.set(key, row);
+    }
+    return [...uniquePeople.values()].slice(0, 4).map((row) => ({
       type: "remuneracion" as const,
       id: String(row.recordId ?? row.personKey ?? ""),
       nombre: String(row.nombreOriginal ?? ""),
@@ -129,7 +141,16 @@ export default function HomeInlineSearch() {
           searchStaticRemunerations(normalizedQuery),
         ]);
         const workerResults = workerPayload ? flattenResults(workerPayload) : [];
-        setResults([...workerResults, ...remunerationResults].slice(0, 8));
+        // Reservar espacio para las fuentes que no devuelve el endpoint de
+        // personas evita que un bloque de funcionarios o autoridades oculte
+        // todas las remuneraciones coincidentes.
+        const mixedResults: SearchResult[] = [];
+        const slots = Math.max(workerResults.length, remunerationResults.length);
+        for (let index = 0; index < slots && mixedResults.length < 8; index += 1) {
+          if (workerResults[index]) mixedResults.push(workerResults[index]);
+          if (remunerationResults[index] && mixedResults.length < 8) mixedResults.push(remunerationResults[index]);
+        }
+        setResults(mixedResults);
         if (workerResults.length === 0 && remunerationResults.length === 0 && !workerPayload) {
           setError("No fue posible consultar el índice público. Puedes abrir la búsqueda completa.");
         }
@@ -159,7 +180,14 @@ export default function HomeInlineSearch() {
 
   const normalizedQuery = query.trim();
   const showResults = isOpen && normalizedQuery.length >= 2;
-  const fullSearchHref = `/personas/?search=${encodeURIComponent(normalizedQuery)}`;
+  // /personas/ abre por defecto Parlamentarios y por eso ocultaba las
+  // coincidencias de remuneraciones. Cuando la home encontró pagos, el
+  // listado completo debe conservar ese mismo universo; para otras consultas
+  // se mantiene el directorio general como fallback.
+  const hasRemunerationResults = results.some((result) => result.type === "remuneracion");
+  const fullSearchHref = hasRemunerationResults
+    ? `/remuneraciones-publicas/?q=${encodeURIComponent(normalizedQuery)}`
+    : `/personas/?search=${encodeURIComponent(normalizedQuery)}`;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     // The home search is an inline index, so pressing Enter must not silently
@@ -172,7 +200,7 @@ export default function HomeInlineSearch() {
 
   return (
     <div ref={wrapperRef} className="home-query-wrap">
-      <form className="home-query" action="/personas/" method="get" role="search" onSubmit={handleSubmit}>
+      <form className="home-query" action="/remuneraciones-publicas/" method="get" role="search" onSubmit={handleSubmit}>
         <label htmlFor="home-search">Buscar en los registros</label>
         <div className="home-query__control">
           <input

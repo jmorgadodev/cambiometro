@@ -65,6 +65,10 @@ function tokens(value: string) {
   return normalize(value).split(/[^a-z0-9]+/).filter((token) => token.length >= 2);
 }
 
+function personIdentityKey(value: string) {
+  return tokens(value).sort().join(" ");
+}
+
 function displayAmount(value: number | null) {
   return value === null ? "Monto no publicado" : money.format(value);
 }
@@ -103,7 +107,7 @@ function RemoteOfficialRow(row: Record<string, unknown>, query: string): Unified
     sourceLabel: "Transparencia Activa CPLT",
     sourceType: "individual",
     recordId: String(row.id ?? `cplt-${normalize(name)}-${query}`),
-    personKey: normalize(name),
+    personKey: personIdentityKey(name),
     nombreOriginal: name,
     organismoOriginal: String(row.organo_nombre ?? row.organo_id ?? "Organismo no informado"),
     cargoOriginal: String(row.cargo ?? "Cargo no informado"),
@@ -146,9 +150,13 @@ export default function RemuneracionesUnifiedExplorer() {
     const allRows = [...(results?.rows ?? []), ...(results?.remoteRows ?? [])];
     const grouped = new Map<string, UnifiedRow[]>();
     for (const row of allRows) {
-      const list = grouped.get(row.personKey) ?? [];
+      // Algunas nóminas intercambian el orden de los apellidos entre meses.
+      // Agrupamos por el conjunto normalizado de palabras, pero conservamos
+      // debajo cada nombre y fila tal como fueron publicados.
+      const groupKey = personIdentityKey(row.nombreOriginal) || row.personKey;
+      const list = grouped.get(groupKey) ?? [];
       list.push(row);
-      grouped.set(row.personKey, list);
+      grouped.set(groupKey, list);
     }
     return [...grouped.values()].sort((left, right) => left[0].nombreOriginal.localeCompare(right[0].nombreOriginal, "es-CL"));
   }, [results]);
@@ -270,6 +278,7 @@ export default function RemuneracionesUnifiedExplorer() {
                {visibleGroups.map((group) => {
                  const sourceIds = new Set(group.map((row) => row.sourceId));
                  const primaryRow = group[0];
+                 const publishedNames = [...new Set(group.map((row) => row.nombreOriginal).filter(Boolean))];
                  return <details key={group[0].personKey} className="remuneration-person-result">
                    <summary className="remuneration-person-result__summary">
                      <span className="remuneration-person-result__identity">
@@ -285,7 +294,10 @@ export default function RemuneracionesUnifiedExplorer() {
                      </span>
                    </summary>
                    <div className="remuneration-person-result__body">
-                     <p className="remuneration-person-result__note">{sourceIds.size > 1 ? "Hay registros con este mismo nombre en más de una fuente; revisa el organismo y el período antes de relacionarlos." : "Registro publicado por una fuente oficial."}</p>
+                     <p className="remuneration-person-result__note">
+                       {sourceIds.size > 1 ? "Hay registros con este mismo nombre en más de una fuente; revisa el organismo y el período antes de relacionarlos." : "Registro publicado por una fuente oficial."}
+                       {publishedNames.length > 1 && <> La fuente publicó variantes del nombre: {publishedNames.join(" / ")}.</>}
+                     </p>
                      <div className="remuneration-person-result__table"><table className="data-table"><thead><tr><th>Fuente</th><th>Organismo</th><th>Cargo</th><th>Mes</th><th>Monto</th></tr></thead><tbody>{group.map((row) => <tr key={row.recordId}><td><strong>{row.sourceLabel}</strong><small>{recordDescription(row)}</small></td><td>{row.organismoOriginal}</td><td>{row.cargoOriginal}</td><td>{row.periodo ?? "No informado"}</td><td>{displayAmount(row.montoBruto)}</td></tr>)}</tbody></table></div>
                    </div>
                  </details>;
