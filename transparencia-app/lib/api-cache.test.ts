@@ -62,7 +62,7 @@ describe("public directory cache", () => {
       };
       return statement;
     });
-    const env = { DB: { prepare } } as never;
+    const env = { DB: { prepare }, ALLOW_PUBLIC_D1_READS: "1" } as never;
     const request = new Request("https://example.test/api/directorio?limit=1");
     const first = await api.fetch(request, env);
     const second = await api.fetch(request, env);

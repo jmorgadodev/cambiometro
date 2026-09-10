@@ -23,7 +23,7 @@ function testEnv(transferRows = 59361, releaseRows = transferRows) {
       return { results: [] } as T;
     },
   });
-  return { DB: { prepare: (sql: string) => statement(sql) } } as never;
+  return { DB: { prepare: (sql: string) => statement(sql) }, ALLOW_PUBLIC_D1_READS: "1" } as never;
 }
 
 const fetchApi = (url: string) => api.fetch(new Request(url), testEnv());
@@ -382,7 +382,7 @@ describe("API canónica v1", () => {
 
     const response = await api.fetch(
       new Request("https://example.test/api/v1/records?source=camara&limit=1"),
-      { DB: db } as never,
+      { DB: db, ALLOW_PUBLIC_D1_READS: "1" } as never,
     );
     const payload = await response.json();
 
@@ -408,7 +408,7 @@ describe("API canónica v1", () => {
 
     const response = await api.fetch(
       new Request("https://example.test/api/v1/records?entity_id=person-1&limit=10"),
-      { DB: db } as never,
+      { DB: db, ALLOW_PUBLIC_D1_READS: "1" } as never,
     );
 
     expect(response.status).toBe(200);
@@ -714,7 +714,7 @@ describe("API canónica v1", () => {
     };
     const response = await api.fetch(
       new Request("https://example.test/api/v1/sources"),
-      { DB: db } as never,
+      { DB: db, ALLOW_PUBLIC_D1_READS: "1" } as never,
     );
 
     expect(response.status).toBe(200);
@@ -1141,6 +1141,7 @@ describe("API canónica v1", () => {
     const response = await api.fetch(new Request("https://example.test/api/v1/transferencias?page=1&limit=1"), {
       ...(transferR2Env() as object),
       PREFER_TRANSFER_D1: "1",
+      ALLOW_PUBLIC_D1_READS: "1",
       DB: {
         prepare: (sql: string) => ({
           bind() { return this; },
