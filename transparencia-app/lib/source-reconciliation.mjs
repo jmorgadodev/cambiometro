@@ -15,8 +15,6 @@ const CATEGORY_BY_SOURCE = Object.freeze({
   senado: ["remuneraciones", "asesorias", "gastos", "votaciones"],
 });
 
-const PARENT_SOURCE_IDS = new Set(["camara", "senado"]);
-
 export function sourceCategories(sourceId) {
   return [...(CATEGORY_BY_SOURCE[String(sourceId)] ?? [])];
 }
