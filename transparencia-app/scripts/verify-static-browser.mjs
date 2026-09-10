@@ -242,7 +242,7 @@ async function main() {
     movedToPageTwo: /Pág\. 2 de/.test(crucesAfterPage),
     requestedStaticPage: crucesRequests.some((requestPath) => /\/p-\d{4}\.json$/.test(requestPath)),
     requestedPageChunkCount: crucesRequests.filter((requestPath) => /\/p-\d{4}\.json$/.test(requestPath)).length,
-    requestedSearchIndex: crucesRequests.some((requestPath) => requestPath.endsWith("/search-index.json")),
+    requestedSearchIndex: crucesRequests.some((requestPath) => /\/search-[^/]+\.json$/.test(requestPath)),
     searchUsesFullIndex: crucesAfterSearch.includes("Índice completo"),
   };
   await crucesContext.close();

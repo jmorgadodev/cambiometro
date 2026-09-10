@@ -26,13 +26,10 @@ interface CrucesStaticManifest {
   totalPages: number;
   pages: string[];
   categoryRows?: Record<string, number[]>;
-  searchIndex?: string;
+  searchIndex?: { buckets: Record<string, string> };
 }
 
-interface CrucesSearchRow {
-  i: number;
-  t: string;
-}
+type CrucesSearchBucket = Record<string, number[]>;
 
 function normalizeCrucesSearch(value: string) {
   return value
@@ -159,7 +156,7 @@ export default function CrucesExplorerClient({
   const [staticManifest, setStaticManifest] = useState<CrucesStaticManifest | null>(null);
   const [staticRows, setStaticRows] = useState<CrossEdge[]>(initialRows);
   const [staticLoading, setStaticLoading] = useState(false);
-  const [searchRows, setSearchRows] = useState<CrucesSearchRow[] | null>(null);
+  const [searchRows, setSearchRows] = useState<CrucesSearchBucket | null>(null);
   const [searchIndexQuery, setSearchIndexQuery] = useState("");
   const [pageSize, setPageSize] = useState<number>(() => {
     if (typeof window !== "undefined") {
@@ -195,13 +192,26 @@ export default function CrucesExplorerClient({
 
   useEffect(() => {
     const normalizedQuery = normalizeCrucesSearch(query);
-    if (!staticManifest || !normalizedQuery || !staticManifest.searchIndex) return;
+    if (!staticManifest || !normalizedQuery || !staticManifest.searchIndex?.buckets) return;
     let cancelled = false;
-    fetch(`/data/cruces/${staticManifest.searchIndex}`, { cache: "no-store" })
-      .then((response) => (response.ok ? response.json() : null))
-      .then((rows: CrucesSearchRow[] | null) => {
-        if (!cancelled && Array.isArray(rows)) {
-          setSearchRows(rows);
+    const terms = normalizedQuery.split(/\s+/).filter(Boolean);
+    const buckets = [...new Set(terms.map((term) => term[0] || "_"))];
+    Promise.all(
+      buckets.map(async (bucket) => {
+        const filename = staticManifest.searchIndex!.buckets[bucket];
+        if (!filename) return {};
+        const response = await fetch(`/data/cruces/${filename}`, { cache: "no-store" });
+        if (!response.ok) throw new Error("CRUCES_SEARCH_BUCKET_UNAVAILABLE");
+        return (await response.json()) as CrucesSearchBucket;
+      }),
+    )
+      .then((parts) => {
+        if (!cancelled) {
+          const merged: CrucesSearchBucket = {};
+          for (const part of parts) {
+            for (const [token, ids] of Object.entries(part)) merged[token] = ids;
+          }
+          setSearchRows(merged);
           setSearchIndexQuery(normalizedQuery);
         }
       })
@@ -218,9 +228,18 @@ export default function CrucesExplorerClient({
     if (!normalizedQuery) return chipIds;
     if (!searchRows || searchIndexQuery !== normalizedQuery) return null;
     const terms = normalizedQuery.split(/\s+/).filter(Boolean);
-    const matchedIds = searchRows
-      .filter((row) => terms.every((term) => row.t.includes(term)))
-      .map((row) => row.i);
+    const matchingLists = terms.map((term) => {
+      const exact = searchRows[term];
+      if (exact) return exact;
+      const prefixMatches = new Set<number>();
+      for (const [token, ids] of Object.entries(searchRows)) {
+        if (token.startsWith(term)) for (const id of ids) prefixMatches.add(id);
+      }
+      return [...prefixMatches];
+    });
+    if (matchingLists.some((ids) => ids.length === 0)) return [];
+    const matchingSets = matchingLists.map((ids) => new Set(ids));
+    const matchedIds = matchingLists[0].filter((id) => matchingSets.every((ids) => ids.has(id)));
     if (!chipIds) return matchedIds;
     const chipSet = new Set(chipIds);
     return matchedIds.filter((id) => chipSet.has(id));

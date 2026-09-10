@@ -85,9 +85,16 @@ async function main() {
     Transferencias: [],
     Votaciones: [],
   };
-  const searchIndex = rows.map((row, index) => {
+  const searchBuckets = new Map<string, Record<string, number[]>>();
+  rows.forEach((row, index) => {
     for (const category of categoryIds(row)) categoryRows[category].push(index);
-    return { i: index, t: searchText(row) };
+    const tokens = new Set(searchText(row).split(/\s+/).filter((token) => token.length >= 2));
+    for (const token of tokens) {
+      const bucket = token[0] || "_";
+      if (!searchBuckets.has(bucket)) searchBuckets.set(bucket, {});
+      const bucketIndex = searchBuckets.get(bucket)!;
+      (bucketIndex[token] ??= []).push(index);
+    }
   });
 
   await rm(outputDir, { recursive: true, force: true });
@@ -102,7 +109,12 @@ async function main() {
     pages.push(filename);
   }
 
-  await writeFile(join(outputDir, "search-index.json"), `${JSON.stringify(searchIndex)}\n`, "utf8");
+  const searchIndexBuckets: Record<string, string> = {};
+  for (const [bucket, bucketIndex] of searchBuckets.entries()) {
+    const filename = `search-${bucket}.json`;
+    await writeFile(join(outputDir, filename), `${JSON.stringify(bucketIndex)}\n`, "utf8");
+    searchIndexBuckets[bucket] = filename;
+  }
 
   const manifest = {
     schemaVersion: 1,
@@ -113,7 +125,7 @@ async function main() {
     totalPages,
     pages,
     categoryRows,
-    searchIndex: "search-index.json",
+    searchIndex: { buckets: searchIndexBuckets },
     checksumSha256: sha256(canonical),
     note: "Páginas estáticas del universo de relaciones documentales; no requiere D1 para la consulta pública.",
   };

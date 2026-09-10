@@ -52,12 +52,16 @@ for (const page of crossesManifest.pages) {
 if (crossesRows !== crossesManifest.totalRows) {
   throw new Error(`Universo de cruces incoherente: manifest=${crossesManifest.totalRows} páginas=${crossesRows}`);
 }
-if (crossesManifest.searchIndex) {
-  const searchIndexPath = join(out, "data", "cruces", crossesManifest.searchIndex);
-  if (!existsSync(searchIndexPath)) throw new Error("Falta índice de búsqueda de cruces");
-  const searchRows = JSON.parse(readFileSync(searchIndexPath, "utf8"));
-  if (!Array.isArray(searchRows) || searchRows.length !== crossesManifest.totalRows) {
-    throw new Error(`Índice de búsqueda de cruces incoherente: manifest=${crossesManifest.totalRows} índice=${searchRows?.length ?? "inválido"}`);
+if (crossesManifest.searchIndex?.buckets) {
+  const bucketEntries = Object.entries(crossesManifest.searchIndex.buckets);
+  if (bucketEntries.length === 0) throw new Error("Índice de búsqueda de cruces vacío");
+  for (const [bucket, filename] of bucketEntries) {
+    const searchIndexPath = join(out, "data", "cruces", filename);
+    if (!existsSync(searchIndexPath)) throw new Error(`Falta bloque de búsqueda de cruces: ${bucket}`);
+    const searchRows = JSON.parse(readFileSync(searchIndexPath, "utf8"));
+    if (!searchRows || Array.isArray(searchRows) || typeof searchRows !== "object") {
+      throw new Error(`Bloque de búsqueda de cruces inválido: ${bucket}`);
+    }
   }
 }
 const bytes = files.reduce((sum, file) => sum + statSync(file).size, 0);
