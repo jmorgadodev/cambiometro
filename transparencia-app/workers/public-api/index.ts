@@ -112,12 +112,15 @@ function municipalitySlug(name: string) {
   return commune || null;
 }
 
-function publicEntityPath(item: { id: string; kind: string; name: string }) {
-  if (item.kind === "municipality") {
-    const slug = municipalitySlug(item.name);
+function publicEntityPath(item: { id: unknown; kind: unknown; name: unknown }) {
+  const id = String(item.id ?? "");
+  const kind = String(item.kind ?? "");
+  const name = String(item.name ?? "");
+  if (kind === "municipality") {
+    const slug = municipalitySlug(name);
     if (slug) return `/municipalidades/${slug}`;
   }
-  return `/entidades/${item.id}`;
+  return `/entidades/${id}`;
 }
 
 function recordsScopeRequired(requestUrl: URL) {
