@@ -29,7 +29,8 @@ describe("experiencia visual de personas", () => {
 
   it("permite encontrar tambien personas historicas de la plataforma canonica", () => {
     expect(searchRoute).toContain("FROM entities WHERE name LIKE");
-    expect(searchRoute).toContain("/entidades/${item.id}");
+    expect(searchRoute).toContain("publicEntityPath(item)");
+    expect(searchRoute).toContain("return `/entidades/${id}`;");
   });
 
   it("mapea IDs de entidades parlamentarias directamente a /politico/[id]", () => {
