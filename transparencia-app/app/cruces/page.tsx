@@ -28,10 +28,13 @@ export const metadata: Metadata = {
 
 export default async function CrossesPage() {
   const rawQuery = "";
-  // The relation universe is the compact, validated index (1.897 rows in this
-  // release), not a source dataset. Keep it complete so client-side filters
-  // and pagination do not silently hide relations after the first 120 rows.
-  const crosses = await getAllCrosses();
+  // Build the complete relation universe on the server, but only serialize a
+  // small representative page into the static HTML. Embedding the full
+  // relation graph here made /cruces exceed the Pages asset limit and caused
+  // browsers to download the entire universe before the user interacted.
+  const allCrosses = await getAllCrosses();
+  const crosses = allCrosses.slice(0, 25);
+  const crossesTotal = allCrosses.length;
 
   const contraloria = leerContraloriaV1();
   const chilecompra = leerChileCompraV1();
@@ -108,9 +111,9 @@ export default async function CrossesPage() {
           <div className="stat-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
             {/* KPI 1 */}
             <div className="stat-tile stat-tile--accent">
-              <div className="stat-tile__value">{crosses.length.toLocaleString("es-CL")}</div>
+              <div className="stat-tile__value">{crossesTotal.toLocaleString("es-CL")}</div>
               <div className="stat-tile__label">Relaciones en Grafo</div>
-              <div className="stat-tile__hint">{crosses.length.toLocaleString("es-CL")} relaciones agregadas</div>
+              <div className="stat-tile__hint">{crossesTotal.toLocaleString("es-CL")} relaciones agregadas</div>
             </div>
 
             {/* KPI 2 */}
@@ -139,7 +142,7 @@ export default async function CrossesPage() {
 
         {/* ─── 3. RELACIONES Y REGISTROS ORIGINALES ─────────────────────────── */}
         <CrucesTabs
-          relations={<CrucesExplorerClient initialRows={crosses} initialQuery={rawQuery} />}
+          relations={<CrucesExplorerClient initialRows={crosses} initialTotal={crossesTotal} initialQuery={rawQuery} />}
           records={<CrucesSourceRecords counts={{
             chilecompra: chilecompraCanonicalCount,
             infolobby: infolobbyCanonicalCount,
@@ -148,7 +151,7 @@ export default async function CrossesPage() {
           }} />}
         />
         <p className="data-note" style={{ marginTop: "1rem" }}>
-           {crosses.length.toLocaleString("es-CL")} relaciones canónicas en el índice publicado; la tabla permite filtrarlas y paginarlas sin cargar los registros originales de las fuentes. <Link prefetch={false} href="/como-funciona">Conoce la metodología</Link>.
+           {crossesTotal.toLocaleString("es-CL")} relaciones canónicas en el índice publicado; la tabla permite filtrarlas y paginarlas dentro de la muestra inicial de {crosses.length.toLocaleString("es-CL")} relaciones, sin descargar el universo completo al navegador. <Link prefetch={false} href="/como-funciona">Conoce la metodología</Link>.
          </p>
 
         <section className="card" aria-label="Observaciones de calidad de la fuente" style={{ padding: "1.25rem" }}>

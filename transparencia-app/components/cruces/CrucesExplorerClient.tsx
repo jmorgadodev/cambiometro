@@ -15,6 +15,7 @@ import {
 
 interface Props {
   initialRows: CrossEdge[];
+  initialTotal?: number;
   initialQuery?: string;
   initialRowsPerPage?: number;
 }
@@ -120,6 +121,7 @@ export function getTipoCruceBadge(row: CrossEdge): {
 
 export default function CrucesExplorerClient({
   initialRows,
+  initialTotal = initialRows.length,
   initialQuery = "",
   initialRowsPerPage = DEFAULT_PAGE_SIZE,
 }: Props) {
@@ -445,7 +447,7 @@ export default function CrucesExplorerClient({
             }}
           >
             <div>
-              📌 <strong>Muestra indexada:</strong> {filteredRows.length.toLocaleString("es-CL")} relaciones (orden por monto/fecha) · los totales por fuente corresponden al universo oficial en{" "}
+              📌 <strong>Muestra inicial:</strong> {filteredRows.length.toLocaleString("es-CL")} de {initialTotal.toLocaleString("es-CL")} relaciones (orden por monto/fecha) · los totales por fuente corresponden al universo oficial en{" "}
               <Link prefetch={false} href="/datos/calidad" style={{ color: "var(--accent)", fontWeight: 600, textDecoration: "underline" }}>
                 /datos/calidad
               </Link>
