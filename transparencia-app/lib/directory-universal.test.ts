@@ -18,4 +18,11 @@ describe("directorio universal", () => {
     expect(client).toContain("Reintentar consulta");
     expect(client).toContain("No se encontraron funcionarios");
   });
+
+  it("separa el directorio laboral del historial de pagos", () => {
+    expect(client).toContain("DIRECTORIO LABORAL");
+    expect(client).toContain("Quién trabaja, dónde y bajo qué modalidad");
+    expect(client).toContain("Ver pagos publicados");
+    expect(client).toContain("Ver historial de pagos");
+  });
 });

@@ -42,6 +42,7 @@ describe("promesas editoriales del inicio", () => {
     expect(search).toContain("event.preventDefault();");
     expect(search).toContain("/remuneraciones-publicas/?q=");
     expect(search).toContain("hasRemunerationResults");
+    expect(search).toContain("Ver todas las remuneraciones");
   });
 
   it("mantiene cinco preguntas de análisis y separa el seguimiento de movimientos", () => {

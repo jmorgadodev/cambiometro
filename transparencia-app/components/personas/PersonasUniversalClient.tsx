@@ -83,6 +83,11 @@ function formatCLP(n?: number | null) {
   }).format(n);
 }
 
+function getRemuneracionesHref(nombre?: string | null) {
+  const value = (nombre ?? "").trim();
+  return value ? `/remuneraciones-publicas/?q=${encodeURIComponent(value)}` : "/remuneraciones-publicas/";
+}
+
 const TIPOS_ORGANISMO_OPTIONS = [
   { id: "Todos", label: "Todos los tipos" },
   { id: "Municipalidad", label: "Municipalidades" },
@@ -444,7 +449,7 @@ export default function PersonasUniversalClient({
                   Directorio de Personas del Estado
                 </h1>
                 <p style={{ fontSize: "0.9rem", color: "var(--text-2)", margin: 0, lineHeight: 1.6 }}>
-                  Consolidación de parlamentarios, alcaldes, ministros, directores de servicio y nóminas oficiales de personal según la cobertura publicada por cada organismo.
+                  Consulta quién ocupa un cargo, en qué organismo y bajo qué modalidad. Las remuneraciones publicadas se revisan con historial, períodos y fuentes separadas en Remuneraciones públicas.
                 </p>
               </div>
 
@@ -486,7 +491,7 @@ export default function PersonasUniversalClient({
                 { id: "parlamentarios" as PersonaTab, label: "🏛️ Parlamentarios", count: String(parlamentarios.length) },
                 { id: "alcaldes" as PersonaTab, label: "🏙️ Alcaldes", count: activeTab === "alcaldes" && funcionariosTotal > 0 ? funcionariosTotal.toLocaleString("es-CL") : "CPLT" },
                 { id: "autoridades" as PersonaTab, label: "⚖️ Altas autoridades DIP", count: String(autoridades.length) },
-                { id: "funcionarios" as PersonaTab, label: "📋 Funcionarios", count: "CPLT" },
+                { id: "funcionarios" as PersonaTab, label: "📋 Funcionarios y nóminas", count: "CPLT" },
               ].map((t) => {
                 const activo = activeTab === t.id;
                 return (
@@ -534,6 +539,49 @@ export default function PersonasUniversalClient({
 
       {/* Main Content Area */}
       <main className="container-main" style={{ paddingTop: "1.5rem" }}>
+        {activeTab === "funcionarios" && (
+          <section
+            aria-labelledby="directorio-laboral-title"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "1rem",
+              flexWrap: "wrap",
+              background: "var(--surface-2)",
+              border: "1px solid var(--border)",
+              borderRadius: 12,
+              padding: "1rem 1.15rem",
+              marginBottom: "1rem",
+            }}
+          >
+            <div style={{ minWidth: 0, maxWidth: 760 }}>
+              <span className="eyebrow">DIRECTORIO LABORAL</span>
+              <h2 id="directorio-laboral-title" style={{ fontSize: "1rem", color: "var(--text-1)", margin: "0.25rem 0 0.2rem", fontWeight: 800 }}>
+                Quién trabaja, dónde y bajo qué modalidad
+              </h2>
+              <p style={{ fontSize: "0.78rem", color: "var(--text-2)", margin: 0, lineHeight: 1.5 }}>
+                Aquí puedes filtrar organismo, cargo, contrato, estamento y horas extras. Para comparar pagos y ver la evolución mensual, abre la búsqueda de remuneraciones.
+              </p>
+              {(funcionariosStats.totalMuni > 0 || funcionariosStats.promedioSueldo > 0 || funcionariosStats.conHorasExtras > 0) && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "0.7rem", color: "var(--text-3)", fontSize: "0.7rem" }}>
+                  <span><strong style={{ color: "var(--text-1)" }}>{funcionariosStats.totalMuni.toLocaleString("es-CL")}</strong> registros en el resultado</span>
+                  {funcionariosStats.promedioSueldo > 0 && <span>promedio publicado <strong style={{ color: "var(--money)", fontFamily: "monospace" }}>{formatCLP(funcionariosStats.promedioSueldo)}</strong></span>}
+                  {funcionariosStats.conHorasExtras > 0 && <span><strong style={{ color: "var(--warn)" }}>{funcionariosStats.conHorasExtras.toLocaleString("es-CL")}</strong> con horas extras</span>}
+                </div>
+              )}
+            </div>
+            <Link
+              prefetch={false}
+              href={getRemuneracionesHref(debouncedSearch)}
+              className="btn btn-secondary btn-sm"
+              style={{ whiteSpace: "nowrap", fontSize: "0.75rem" }}
+            >
+              {debouncedSearch ? "Ver pagos publicados →" : "Explorar pagos publicados →"}
+            </Link>
+          </section>
+        )}
+
         {/* Controls and Search Bar */}
         <div
           style={{
@@ -1477,22 +1525,32 @@ export default function PersonasUniversalClient({
                       </div>
 
                       <div style={{ marginTop: "0.75rem", paddingTop: "0.65rem", borderTop: "1px solid var(--border)" }}>
-                        <button
-                          onClick={() => setModalItem({ tipo: "funcionario", data: f })}
-                          style={{
-                            width: "100%",
-                            padding: "0.4rem 0.75rem",
-                            borderRadius: "0.5rem",
-                            background: "var(--surface-2)",
-                            border: "1px solid var(--border)",
-                            color: "var(--text-1)",
-                            fontSize: "0.72rem",
-                            fontWeight: 700,
-                            cursor: "pointer",
-                          }}
-                        >
-                          Ver detalle de remuneración →
-                        </button>
+                        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                          <button
+                            onClick={() => setModalItem({ tipo: "funcionario", data: f })}
+                            style={{
+                              flex: "1 1 145px",
+                              padding: "0.4rem 0.6rem",
+                              borderRadius: "0.5rem",
+                              background: "var(--surface-2)",
+                              border: "1px solid var(--border)",
+                              color: "var(--text-1)",
+                              fontSize: "0.72rem",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                            }}
+                          >
+                            Ver ficha laboral
+                          </button>
+                          <Link
+                            prefetch={false}
+                            href={getRemuneracionesHref(f.nombre_completo)}
+                            className="btn btn-primary btn-sm"
+                            style={{ flex: "1 1 145px", textAlign: "center", fontSize: "0.72rem", padding: "0.4rem 0.6rem" }}
+                          >
+                            Ver pagos publicados →
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   );
@@ -1551,12 +1609,21 @@ export default function PersonasUniversalClient({
                             )}
                           </td>
                           <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
-                            <button
-                              onClick={() => setModalItem({ tipo: "funcionario", data: f })}
-                              style={{ background: "none", border: "none", color: "var(--accent)", fontWeight: 700, fontSize: "0.75rem", cursor: "pointer" }}
-                            >
-                              Ver →
-                            </button>
+                            <div style={{ display: "inline-flex", alignItems: "center", gap: "0.65rem" }}>
+                              <button
+                                onClick={() => setModalItem({ tipo: "funcionario", data: f })}
+                                style={{ background: "none", border: "none", color: "var(--accent)", fontWeight: 700, fontSize: "0.75rem", cursor: "pointer" }}
+                              >
+                                Ficha
+                              </button>
+                              <Link
+                                prefetch={false}
+                                href={getRemuneracionesHref(f.nombre_completo)}
+                                style={{ color: "var(--accent)", fontWeight: 700, fontSize: "0.75rem", textDecoration: "none" }}
+                              >
+                                Pagos →
+                              </Link>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -1673,6 +1740,7 @@ export default function PersonasUniversalClient({
                 <p style={{ fontSize: "0.85rem", color: "var(--text-2)", margin: 0 }}>{modalItem.data.cargo}</p>
               </div>
               <button
+                aria-label="Cerrar ficha laboral"
                 onClick={() => setModalItem(null)}
                 style={{ background: "none", border: "none", fontSize: "1.2rem", color: "var(--text-3)", cursor: "pointer", padding: "0.25rem" }}
               >
@@ -1762,6 +1830,14 @@ export default function PersonasUniversalClient({
             </div>
 
             <div style={{ padding: "0.85rem 1.25rem", background: "var(--surface-2)", borderTop: "1px solid var(--border)", display: "flex", justifyContent: "flex-end" }}>
+              <Link
+                prefetch={false}
+                href={getRemuneracionesHref(modalItem.data.nombre_completo)}
+                className="btn btn-secondary"
+                style={{ fontSize: "0.75rem", padding: "0.4rem 0.75rem", marginRight: "0.5rem" }}
+              >
+                Ver historial de pagos
+              </Link>
               <button
                 onClick={() => setModalItem(null)}
                 className="btn btn-primary"

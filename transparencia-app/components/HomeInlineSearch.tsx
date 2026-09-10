@@ -188,6 +188,7 @@ export default function HomeInlineSearch() {
   const fullSearchHref = hasRemunerationResults
     ? `/remuneraciones-publicas/?q=${encodeURIComponent(normalizedQuery)}`
     : `/personas/?search=${encodeURIComponent(normalizedQuery)}`;
+  const fullSearchLabel = hasRemunerationResults ? "Ver todas las remuneraciones →" : "Ver todos los registros →";
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     // The home search is an inline index, so pressing Enter must not silently
@@ -246,11 +247,11 @@ export default function HomeInlineSearch() {
           ) : results.length === 0 ? (
             <div className="home-query__message" role="status">
               <p>Sin coincidencias verificadas con ese texto.</p>
-              <Link prefetch={false} href={fullSearchHref} onClick={() => setIsOpen(false)}>Ver resultados completos →</Link>
+              <Link prefetch={false} href={fullSearchHref} onClick={() => setIsOpen(false)}>{fullSearchLabel}</Link>
             </div>
           ) : (
             <>
-              <div className="home-query__results-heading"><span>Coincidencias</span><Link prefetch={false} href={fullSearchHref} onClick={() => setIsOpen(false)}>Ver todos →</Link></div>
+              <div className="home-query__results-heading"><span>Coincidencias</span><Link prefetch={false} href={fullSearchHref} onClick={() => setIsOpen(false)}>{fullSearchLabel}</Link></div>
               {results.map((result) => (
                 <Link
                   prefetch={false}
