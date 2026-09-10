@@ -209,6 +209,7 @@ jobs:
 
       - name: Construir Pages sin hidratar ETL
         env:
+          CAMBIOMETRO_PUBLISHED_RELEASE_ONLY: "1"
           NEXT_PUBLIC_GA4_ID: ${{ vars.NEXT_PUBLIC_GA4_ID }}
           NEXT_PUBLIC_GTM_ID: ${{ vars.NEXT_PUBLIC_GTM_ID }}
           NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ vars.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }}

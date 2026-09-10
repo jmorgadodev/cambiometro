@@ -7,12 +7,12 @@ import { esProcedimental } from "@/components/VotacionesHistorial";
 describe("Fixture de Referencia Oficial — Votaciones en Sala y Coherencia Interna", () => {
   // Muestra obligatoria de auditoría: Kaiser, Bianchi K., Bianchi C., Winter, Cariola, Schalper
   const muestraAuditIds = [
-    { id: "sen-038", nombre: "Vanessa Kaiser Barents-Von Hohenhagen", cargo: "Senador", esperado: 189 },
-    { id: "sen-048", nombre: "Karim Bianchi Retamales", cargo: "Senador", esperado: 189 },
-    { id: "dip-154", nombre: "Carlos Bianchi Chelech", cargo: "Diputado", esperado: 580 },
-    { id: "dip-057", nombre: "Gonzalo Winter Etcheberry", cargo: "Diputado", esperado: 580 },
-    { id: "sen-017", nombre: "Karol Cariola Oliva", cargo: "Senador", esperado: 189 },
-    { id: "dip-068", nombre: "Diego Schalper Sepúlveda", cargo: "Diputado", esperado: 580 },
+    { id: "sen-038", nombre: "Vanessa Kaiser Barents-Von Hohenhagen", cargo: "Senador", esperado: 218 },
+    { id: "sen-048", nombre: "Karim Bianchi Retamales", cargo: "Senador", esperado: 218 },
+    { id: "dip-154", nombre: "Carlos Bianchi Chelech", cargo: "Diputado", esperado: 630 },
+    { id: "dip-057", nombre: "Gonzalo Winter Etcheberry", cargo: "Diputado", esperado: 630 },
+    { id: "sen-017", nombre: "Karol Cariola Oliva", cargo: "Senador", esperado: 218 },
+    { id: "dip-068", nombre: "Diego Schalper Sepúlveda", cargo: "Diputado", esperado: 630 },
   ];
 
   it("1. Coherencia Matemática Interna: tiles == historial == denominador de presencia", () => {

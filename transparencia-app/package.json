@@ -31,6 +31,7 @@
     "test": "npm run typecheck && npm run api:typecheck && npm run check:static-architecture && npm run check:tokens && npm run check:links && npm run check:innerhtml && vitest run",
     "guard:integrity": "node ../scripts/audit/pipeline-guard.mjs",
     "preflight": "npm run lint && npm run test && npm run pages:build && npm run api:size",
+    "pages:build:published": "node scripts/build-published-pages.mjs",
     "verify:browser": "node scripts/verify-integration.mjs",
     "verify:themes": "node scripts/verify-themes.mjs",
     "verify:static:browser": "node scripts/verify-static-browser.mjs",
