@@ -14,8 +14,8 @@ export default function RemuneracionesPublicasPage() {
   return (
     <>
       <RemuneracionesUnifiedExplorer />
-      <section id="detalle-38bis" className="page-shell remuneration-detail-module" aria-labelledby="remuneraciones-38bis-detail-title" style={{ paddingTop: "1rem" }}>
-        <details className="remuneration-panel">
+      <section id="detalle-38bis" className="container-main remuneration-detail-module" aria-labelledby="remuneraciones-38bis-detail-title" style={{ paddingTop: "1rem" }}>
+        <details open className="remuneration-panel">
           <summary><span><span className="eyebrow">03 · DETALLE</span><strong id="remuneraciones-38bis-detail-title">Registro 38 bis: historial, cambios y filas originales</strong></span><small>Ver detalle mensual</small></summary>
           <Remuneraciones38BisClient manifest={manifest as unknown as ReleaseManifest} initialRows={initialRows} />
         </details>

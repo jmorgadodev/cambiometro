@@ -55,6 +55,7 @@ interface SearchResult {
 const number = new Intl.NumberFormat("es-CL");
 const money = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 });
 const PAID_SOURCE_IDS = ["transparencia-activa", "remuneraciones-38bis", "camara", "senado"];
+const RESULTS_PAGE_SIZE = 15;
 
 function normalize(value: string) {
   return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es-CL");
@@ -120,6 +121,7 @@ export default function RemuneracionesUnifiedExplorer() {
   const [organism, setOrganism] = useState("");
   const [role, setRole] = useState("");
   const [results, setResults] = useState<SearchResult | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const initialQueryHandled = useRef(false);
@@ -152,7 +154,20 @@ export default function RemuneracionesUnifiedExplorer() {
   }, [results]);
 
   const paidSources = useMemo(() => manifest?.sources.filter((item) => PAID_SOURCE_IDS.includes(item.id)) ?? [], [manifest]);
-  const aggregateSources = useMemo(() => manifest?.sources.filter((item) => item.sourceType === "aggregate") ?? [], [manifest]);
+  const totalPages = Math.max(1, Math.ceil(groups.length / RESULTS_PAGE_SIZE));
+  const pageStart = groups.length === 0 ? 0 : (currentPage - 1) * RESULTS_PAGE_SIZE + 1;
+  const pageEnd = Math.min(currentPage * RESULTS_PAGE_SIZE, groups.length);
+  const visibleGroups = groups.slice((currentPage - 1) * RESULTS_PAGE_SIZE, currentPage * RESULTS_PAGE_SIZE);
+
+  function goToResultsPage(nextPage: number) {
+    setCurrentPage(nextPage);
+    window.setTimeout(() => {
+      const target = document.getElementById("resultados-remuneraciones");
+      if (!target) return;
+      const top = Math.max(0, target.getBoundingClientRect().top + window.scrollY - 112);
+      window.scrollTo({ top, behavior: "smooth" });
+    }, 0);
+  }
 
   async function runSearch(event: FormEvent) {
     event.preventDefault();
@@ -163,6 +178,7 @@ export default function RemuneracionesUnifiedExplorer() {
       return;
     }
     if (!manifest) return;
+    setCurrentPage(1);
     setLoading(true);
     setError(null);
     try {
@@ -209,7 +225,7 @@ export default function RemuneracionesUnifiedExplorer() {
   }
 
   return (
-    <section className="page-shell remuneration-unified" aria-labelledby="unified-remuneraciones-title">
+    <section className="container-main remuneration-unified" aria-labelledby="unified-remuneraciones-title">
       <header className="remuneration-hero">
         <div>
           <div className="eyebrow">REMUNERACIONES PÚBLICAS</div>
@@ -250,25 +266,44 @@ export default function RemuneracionesUnifiedExplorer() {
             <div className="remuneration-results__heading"><div><span className="eyebrow">RESULTADOS</span><h3 id="resultados-remuneraciones-title">Coincidencias para “{query.trim()}”</h3></div><span>{number.format(groups.length)} personas · {number.format(results.rows.length + results.remoteRows.length)} registros</span></div>
             {results.remoteRows.length === 0 && (source === "all" || source === "transparencia-activa") && <p className="remuneration-results__note">La búsqueda muestra los pagos publicados en los archivos disponibles. La nómina de Transparencia Activa se consulta por separado cuando el servicio responde.</p>}
             {groups.length === 0 && <div className="stat-tile" role="status">No encontramos coincidencias. Prueba con el apellido, organismo o cargo sin tildes.</div>}
-            <div className="remuneration-results__list">
-              {groups.map((group) => {
-                const sourceIds = new Set(group.map((row) => row.sourceId));
-                return <article key={group[0].personKey} className="stat-tile remuneration-person-result">
-                  <div className="remuneration-person-result__heading"><div><h4>{group[0].nombreOriginal}</h4><small>{sourceIds.size > 1 ? "Registros con el mismo nombre en más de una fuente; revisa el organismo y el período." : "Registro publicado por una fuente oficial."}</small></div><span className={`badge ${sourceIds.size > 1 ? "badge-warn" : "badge-info"}`}>{sourceIds.size} fuente{sourceIds.size === 1 ? "" : "s"}</span></div>
-                  <div className="remuneration-person-result__table"><table className="data-table"><thead><tr><th>Fuente</th><th>Organismo</th><th>Cargo</th><th>Mes</th><th>Monto</th></tr></thead><tbody>{group.map((row) => <tr key={row.recordId}><td><strong>{row.sourceLabel}</strong><small>{recordDescription(row)}</small></td><td>{row.organismoOriginal}</td><td>{row.cargoOriginal}</td><td>{row.periodo ?? "No informado"}</td><td>{displayAmount(row.montoBruto)}</td></tr>)}</tbody></table></div>
-                </article>;
-              })}
+             <div className="remuneration-results__list">
+               {visibleGroups.map((group) => {
+                 const sourceIds = new Set(group.map((row) => row.sourceId));
+                 const primaryRow = group[0];
+                 return <details key={group[0].personKey} className="remuneration-person-result">
+                   <summary className="remuneration-person-result__summary">
+                     <span className="remuneration-person-result__identity">
+                       <span className="remuneration-person-result__marker" aria-hidden="true">{primaryRow.nombreOriginal.slice(0, 1).toUpperCase()}</span>
+                       <span className="remuneration-person-result__copy">
+                         <strong>{primaryRow.nombreOriginal}</strong>
+                         <small>{primaryRow.organismoOriginal} · {primaryRow.cargoOriginal}</small>
+                       </span>
+                     </span>
+                     <span className="remuneration-person-result__summary-meta">
+                       <span className={`badge ${sourceIds.size > 1 ? "badge-warn" : "badge-info"}`}>{sourceIds.size} fuente{sourceIds.size === 1 ? "" : "s"}</span>
+                       <span className="remuneration-person-result__action">Ver ficha y registros</span>
+                     </span>
+                   </summary>
+                   <div className="remuneration-person-result__body">
+                     <p className="remuneration-person-result__note">{sourceIds.size > 1 ? "Hay registros con este mismo nombre en más de una fuente; revisa el organismo y el período antes de relacionarlos." : "Registro publicado por una fuente oficial."}</p>
+                     <div className="remuneration-person-result__table"><table className="data-table"><thead><tr><th>Fuente</th><th>Organismo</th><th>Cargo</th><th>Mes</th><th>Monto</th></tr></thead><tbody>{group.map((row) => <tr key={row.recordId}><td><strong>{row.sourceLabel}</strong><small>{recordDescription(row)}</small></td><td>{row.organismoOriginal}</td><td>{row.cargoOriginal}</td><td>{row.periodo ?? "No informado"}</td><td>{displayAmount(row.montoBruto)}</td></tr>)}</tbody></table></div>
+                   </div>
+                 </details>;
+               })}
             </div>
+            {groups.length > RESULTS_PAGE_SIZE && <nav className="remuneration-results__pagination" aria-label="Paginación de resultados">
+              <button type="button" onClick={() => goToResultsPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>← Anterior</button>
+              <span>Mostrando {number.format(pageStart)}–{number.format(pageEnd)} de {number.format(groups.length)} personas</span>
+              <button type="button" onClick={() => goToResultsPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>Siguiente →</button>
+            </nav>}
           </section>}
 
           <section id="fuentes-remuneraciones" className="remuneration-module remuneration-module--sources" aria-labelledby="fuentes-remuneraciones-title">
-            <div className="remuneration-module__heading"><span className="eyebrow">FUENTES</span><h3 id="fuentes-remuneraciones-title">De dónde salen los pagos</h3><p>Elige una fuente para filtrar la búsqueda. Los registros no se mezclan entre organismos.</p></div>
+            <div className="remuneration-module__heading"><span className="eyebrow">FUENTES</span><h3 id="fuentes-remuneraciones-title">De dónde salen los pagos</h3><p>Estas son las fuentes de remuneraciones individuales que puedes consultar. Cada registro conserva su organismo, período y procedencia.</p></div>
             <div className="remuneration-source-list" aria-label="Fuentes de pagos publicados">
-              <button type="button" className={`remuneration-source-row ${source === "all" ? "is-selected" : ""}`} onClick={() => setSource("all")}><span><strong>Todas las fuentes</strong><small>Comparar los registros disponibles</small></span><b>{paidSources.length} fuentes</b></button>
-              {paidSources.map((item) => <div key={item.id} className={`remuneration-source-row-wrap ${source === item.id ? "is-selected" : ""}`}><button type="button" className="remuneration-source-row" onClick={() => setSource(item.id)}><span><strong>{item.label}</strong><small>{sourceDescription(item)}</small></span><b>{displayCount(item.publishedCount)} registros</b></button>{item.officialUrl && <a href={item.officialUrl} target="_blank" rel="noopener noreferrer">Ver fuente oficial ↗</a>}</div>)}
+              {paidSources.map((item) => <article key={item.id} className="remuneration-source-card"><div className="remuneration-source-card__header"><span><strong>{item.label}</strong><small>{sourceDescription(item)}</small></span><b>{displayCount(item.publishedCount)} registros</b></div>{item.officialUrl && <a href={item.officialUrl} target="_blank" rel="noopener noreferrer">Ver fuente oficial ↗</a>}</article>)}
             </div>
             <p className="remuneration-reading-note"><strong>Cómo leer los resultados:</strong> un monto aparece sólo cuando la fuente lo publicó. Si falta, se indica “Monto no publicado”; nunca se completa con una estimación.</p>
-            {aggregateSources.length > 0 && <details className="remuneration-context"><summary>Datos generales, no pagos individuales</summary>{aggregateSources.map((item) => <p key={item.id}><strong>{item.label}:</strong> {sourceDescription(item)}</p>)}</details>}
           </section>
         </>
       )}

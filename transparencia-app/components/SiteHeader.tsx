@@ -51,11 +51,10 @@ export const NAV_CLUSTERS = [
 ];
 
 interface SiteHeaderProps {
-  updatedAt?: string | null;
   totalRecords?: number;
 }
 
-export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps) {
+export default function SiteHeader({ totalRecords }: SiteHeaderProps) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
@@ -64,7 +63,8 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
   const pathnameEffectReady = useRef(false);
 
   const displayTotal = totalRecords && totalRecords > 0 ? totalRecords : GLOBAL_KPIS.registros_canonicos;
-  const displayCorte = updatedAt || GLOBAL_KPIS.corte;
+  const catalogStatusLabel = "En línea · actualización por fuente";
+  const catalogStatusDescription = "Catálogo público disponible. Cada fuente conserva su propia fecha de actualización.";
 
   // Papel es el valor predeterminado; nunca se usa el tema del sistema.
   useEffect(() => {
@@ -153,17 +153,18 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
           </Link>
 
           <div className="site-header__actions">
-            {/* Chip de corte (Solo visible en Desktop ≥1024px) */}
+            {/* Estado del catálogo (cada fuente conserva su propia fecha) */}
             <Link
-              href="/como-funciona#fuentes"
+              href="/fuentes"
               prefetch={false}
               className="snapshot-stamp"
-              aria-label={`Corte oficial: ${displayTotal.toLocaleString("es-CL")} registros`}
+              aria-label={`${catalogStatusDescription} ${displayTotal.toLocaleString("es-CL")} registros.`}
+              title={catalogStatusDescription}
             >
               <span className="snapshot-stamp__status" aria-hidden="true" />
               <span>
                 <strong>{displayTotal.toLocaleString("es-CL")} registros</strong>
-                <small>{displayCorte ? `Corte ${displayCorte}` : "Corte oficial"}</small>
+                <small>{catalogStatusLabel}</small>
               </span>
             </Link>
 
@@ -293,18 +294,19 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
         </nav>
 
         <div className="mobile-drawer__footer">
-          {/* Chip de corte en el drawer */}
+          {/* Estado del catálogo en el drawer */}
           <Link
-            href="/como-funciona#fuentes"
+            href="/fuentes"
             prefetch={false}
             className="drawer-snapshot-stamp"
             onClick={() => setDrawerOpen(false)}
-            aria-label={`Corte de datos: ${displayTotal.toLocaleString("es-CL")} registros`}
+            aria-label={`${catalogStatusDescription} ${displayTotal.toLocaleString("es-CL")} registros.`}
+            title={catalogStatusDescription}
           >
             <span className="snapshot-stamp__status" aria-hidden="true" />
             <span>
               <strong>{displayTotal.toLocaleString("es-CL")} registros</strong>
-              <small>{displayCorte ? `Corte ${displayCorte}` : "Corte oficial"}</small>
+              <small>{catalogStatusLabel}</small>
             </span>
           </Link>
 

@@ -81,6 +81,13 @@ describe("Header y navegación global", () => {
     expect(headerContent).toContain('href="/donar"');
   });
 
+  it("no presenta un corte global cuando cada fuente tiene su propia actualización", () => {
+    expect(headerContent).toContain("actualización por fuente");
+    expect(headerContent).toContain("Catálogo público disponible");
+    expect(headerContent).not.toContain("Corte ${displayCorte}");
+    expect(headerContent).not.toContain("Corte oficial: ${displayTotal.toLocaleString(\"es-CL\")} registros");
+  });
+
   it("reglas de CSS: touch targets ≥ 44px, sticky header, drawer transition < 200ms", () => {
     expect(cssContent).toContain("position: sticky");
     expect(cssContent).toContain("overflow-x: clip");

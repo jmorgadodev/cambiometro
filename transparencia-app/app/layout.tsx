@@ -144,9 +144,6 @@ import { GLOBAL_KPIS } from "@/lib/global-kpis";
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const platform = await getDataPlatformSummary();
   const totalRecords = Math.max(platform.totalRecords || 0, GLOBAL_KPIS.registros_canonicos);
-  const updatedAt = platform.updatedAt
-    ? new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeStyle: "short", timeZone: "America/Santiago" }).format(new Date(platform.updatedAt))
-    : GLOBAL_KPIS.corte;
 
   return (
     <html lang="es" data-theme="paper" className={`${inter.variable} ${ibmPlexMono.variable}`}>
@@ -161,18 +158,18 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <a className="skip-link" href="#contenido-principal">Saltar al contenido</a>
         <RouteTransitionOrb />
         <NavigationProgressBar />
-        <SiteHeader updatedAt={updatedAt} totalRecords={totalRecords} />
+        <SiteHeader totalRecords={totalRecords} />
         <PageEntrance>
           <main id="contenido-principal">{children}</main>
         </PageEntrance>
-        <Footer updatedAt={updatedAt} totalRecords={totalRecords} />
+        <Footer totalRecords={totalRecords} />
         <CookieConsent />
       </body>
     </html>
   );
 }
 
-function Footer({ updatedAt, totalRecords }: { updatedAt: string | null; totalRecords: number }) {
+function Footer({ totalRecords }: { totalRecords: number }) {
   return (
     <footer className="site-footer">
       <div className="container-main site-footer__grid">
@@ -197,10 +194,10 @@ function Footer({ updatedAt, totalRecords }: { updatedAt: string | null; totalRe
           <div className="provenance-stamp">
             <div className="provenance-stamp__header">
               <span className="snapshot-stamp__status" aria-hidden="true" />
-              <span>Última consolidación</span>
+              <span>Estado del catálogo</span>
             </div>
-            <strong>{updatedAt ? `Corte ${updatedAt}` : "Corte oficial"}</strong>
-            <small>{totalRecords.toLocaleString("es-CL")} registros oficiales compilados</small>
+            <strong>Catálogo en línea</strong>
+            <small>{totalRecords.toLocaleString("es-CL")} registros compilados · actualización por fuente</small>
           </div>
         </div>
 

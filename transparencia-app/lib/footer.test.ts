@@ -27,8 +27,9 @@ describe("Footer compacto y pulido móvil", () => {
   it("móvil: marca con misión y corte como caja compacta --surface-2 no inline", () => {
     expect(layoutContent).toContain("site-footer__mission");
     expect(layoutContent).toContain("provenance-stamp");
-    expect(layoutContent).toContain("Última consolidación");
-    expect(layoutContent).toContain("registros oficiales compilados");
+    expect(layoutContent).toContain("Estado del catálogo");
+    expect(layoutContent).toContain("Catálogo en línea");
+    expect(layoutContent).toContain("registros compilados · actualización por fuente");
 
     expect(cssContent).toContain(".site-footer__mission");
     expect(cssContent).toContain("font-size: 13.5px");
