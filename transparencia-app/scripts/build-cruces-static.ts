@@ -9,6 +9,40 @@ const root = fileURLToPath(new URL("../", import.meta.url));
 const outputDir = join(root, "public", "data", "cruces");
 const pageSize = 50;
 
+function normalizeSearch(value: string) {
+  return value
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+
+function categoryIds(row: CrossEdge) {
+  const sourceIds = (row.fromEntity.sourceIds || [])
+    .concat(row.toEntity.sourceIds || [])
+    .concat(row.evidence.map((evidence) => evidence.sourceId));
+  const sources = sourceIds.join(" ").toLowerCase();
+  const predicate = row.relation.predicate.toLowerCase();
+  const categories: string[] = [];
+  if (sources.includes("contraloria") || predicate.includes("audit")) categories.push("Auditorías");
+  if (sources.includes("infoprobidad") || predicate.includes("declaration")) categories.push("Declaraciones");
+  if (sources.includes("chilecompra") || predicate.includes("contract") || predicate.includes("purchase") || predicate.includes("awarded")) categories.push("Compras");
+  if (sources.includes("infolobby") || predicate.includes("lobby")) categories.push("Lobby");
+  if (sources.includes("ley-19862") || sources.includes("transfer") || predicate.includes("transfer")) categories.push("Transferencias");
+  if (sources.includes("camara") || sources.includes("senado") || predicate.includes("vote") || predicate.includes("mandate") || predicate.includes("office") || predicate.includes("cast")) categories.push("Votaciones");
+  return categories;
+}
+
+function searchText(row: CrossEdge) {
+  return normalizeSearch([
+    row.fromEntity.name,
+    row.toEntity.name,
+    row.relation.predicate,
+    ...row.evidence.flatMap((evidence) => [evidence.sourceId, evidence.title, evidence.description || ""]),
+  ].join(" "));
+}
+
 function sha256(value: string) {
   return crypto.createHash("sha256").update(value, "utf8").digest("hex");
 }
@@ -43,6 +77,18 @@ async function main() {
   const rows = (await getAllCrosses()).map(compactCross);
   const canonical = JSON.stringify(rows);
   const totalPages = Math.ceil(rows.length / pageSize);
+  const categoryRows: Record<string, number[]> = {
+    Auditorías: [],
+    Declaraciones: [],
+    Compras: [],
+    Lobby: [],
+    Transferencias: [],
+    Votaciones: [],
+  };
+  const searchIndex = rows.map((row, index) => {
+    for (const category of categoryIds(row)) categoryRows[category].push(index);
+    return { i: index, t: searchText(row) };
+  });
 
   await rm(outputDir, { recursive: true, force: true });
   await mkdir(outputDir, { recursive: true });
@@ -56,6 +102,8 @@ async function main() {
     pages.push(filename);
   }
 
+  await writeFile(join(outputDir, "search-index.json"), `${JSON.stringify(searchIndex)}\n`, "utf8");
+
   const manifest = {
     schemaVersion: 1,
     dataset: "cruces-documentales",
@@ -64,6 +112,8 @@ async function main() {
     pageSize,
     totalPages,
     pages,
+    categoryRows,
+    searchIndex: "search-index.json",
     checksumSha256: sha256(canonical),
     note: "Páginas estáticas del universo de relaciones documentales; no requiere D1 para la consulta pública.",
   };

@@ -172,6 +172,8 @@ describe("Rediseño Integral de /cruces — Cruces Reales en Todos los Chips", (
     expect(packageSource).toContain("build-cruces-static");
     expect(explorerSource).toContain("/data/cruces/manifest.json");
     expect(explorerSource).toContain("staticPageSize");
+    expect(explorerSource).toContain("searchIndex");
+    expect(explorerSource).toContain("categoryRows");
     expect(pageSource).toContain("sin descargar el universo completo al navegador");
   });
 });

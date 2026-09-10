@@ -52,5 +52,13 @@ for (const page of crossesManifest.pages) {
 if (crossesRows !== crossesManifest.totalRows) {
   throw new Error(`Universo de cruces incoherente: manifest=${crossesManifest.totalRows} páginas=${crossesRows}`);
 }
+if (crossesManifest.searchIndex) {
+  const searchIndexPath = join(out, "data", "cruces", crossesManifest.searchIndex);
+  if (!existsSync(searchIndexPath)) throw new Error("Falta índice de búsqueda de cruces");
+  const searchRows = JSON.parse(readFileSync(searchIndexPath, "utf8"));
+  if (!Array.isArray(searchRows) || searchRows.length !== crossesManifest.totalRows) {
+    throw new Error(`Índice de búsqueda de cruces incoherente: manifest=${crossesManifest.totalRows} índice=${searchRows?.length ?? "inválido"}`);
+  }
+}
 const bytes = files.reduce((sum, file) => sum + statSync(file).size, 0);
 console.log(JSON.stringify({ files: files.length, html: html.length, bytes, routes, crosses: { totalRows: crossesRows, totalPages: crossesManifest.totalPages } }));
