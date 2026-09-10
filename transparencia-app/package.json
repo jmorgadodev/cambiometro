@@ -88,6 +88,7 @@
     "data:archive:cplt": "node scripts/publish-data-lake.mjs --output data/lake-cplt --releases --release-manifests-only",
     "data:record:cplt": "node scripts/record-cplt-source-state.mjs",
     "data:inventory": "node scripts/inventory-sources.mjs",
+    "audit:sources": "node scripts/audit-source-reconciliation.mjs",
     "data:health": "node scripts/build-source-health.mjs",
     "data:communes:update": "node scripts/update-commune-catalog.mjs",
     "data:communes:check": "node scripts/update-commune-catalog.mjs --check",

@@ -624,7 +624,7 @@ describe("API canónica v1", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 59361, transferRows: 59361, d1ReleaseChecksum: "release-checksum", transferSource: "d1" });
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, publicDataBackend: "r2", publicD1Reads: true, d1TransferRows: 59361, transferRows: 59361, d1ReleaseChecksum: "release-checksum", transferSource: "d1" });
   });
 
   it("mantiene health operativo y marca D1 inconsistente cuando el puntero R2 difiere", async () => {
@@ -633,7 +633,7 @@ describe("API canónica v1", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 59360, transferRows: 59361, d1Consistent: false, transferSource: "r2" });
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, publicDataBackend: "r2", publicD1Reads: true, d1TransferRows: 59360, transferRows: 59361, d1Consistent: false, transferSource: "r2" });
   });
 
   it("usa sólo el puntero de release en health y nunca cuenta la tabla D1", async () => {
@@ -664,7 +664,7 @@ describe("API canónica v1", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 0, d1Consistent: false, transferSource: "r2" });
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, publicDataBackend: "r2", publicD1Reads: false, d1TransferRows: 0, d1Consistent: false, transferSource: "r2" });
     expect(prepare).not.toHaveBeenCalled();
   });
 
