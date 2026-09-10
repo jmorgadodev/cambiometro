@@ -119,14 +119,13 @@
     "html2canvas": "^1.4.1",
     "iconv-lite": "^0.7.3",
     "minisearch": "^7.2.0",
-    "next": "16.3.0",
+    "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "recharts": "^3.10.1",
     "satori": "^0.29.0",
     "saxes": "6.0.0",
-    "server-only": "^0.0.1",
-    "wrangler": "^4.119.0"
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
@@ -136,13 +135,14 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.0",
+    "eslint-config-next": "16.3.4",
     "playwright": "^1.62.1",
     "puppeteer-core": "^25.7.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "wrangler": "^4.127.1"
   }
 }
