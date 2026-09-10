@@ -15,7 +15,11 @@ import type { Metadata } from "next";
 
 export function generateStaticParams() {
   try {
-    return JSON.parse(readFileSync(join(process.cwd(), "data", "generated", "entity-routes.json"), "utf8")) as Array<{ id: string }>;
+    const routes = JSON.parse(readFileSync(join(process.cwd(), "data", "generated", "entity-routes.json"), "utf8")) as Array<{ id: string }>;
+    // Las municipalidades tienen fichas territoriales canónicas. No generes
+    // una segunda ficha genérica vacía bajo /entidades/; sus aliases legacy
+    // quedan atendidos por public/_redirects.
+    return routes.filter(({ id }) => !id.startsWith("municipality-cl-"));
   } catch {
     return [];
   }
