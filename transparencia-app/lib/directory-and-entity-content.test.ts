@@ -21,6 +21,7 @@ describe("experiencia visual de personas", () => {
   it("usa una ficha continua para entidades persona", () => {
     expect(entityPage).toContain("<PersonEntityProfile");
     expect(entityPage).not.toContain("redirect(");
+    expect(entityPage).toContain('!id.startsWith("municipality-cl-")');
     expect(entityPage).toContain("counterpartNames");
     expect(profile).toContain('href={`#${section.id}`}');
     expect(profile).toContain('id="relaciones"');
