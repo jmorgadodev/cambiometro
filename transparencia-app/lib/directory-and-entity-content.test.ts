@@ -10,6 +10,7 @@ describe("experiencia visual de personas", () => {
   const searchRoute = readFileSync(resolve("workers/public-api/index.ts"), "utf8");
   const autoridadesPage = readFileSync(resolve("app/autoridades/page.tsx"), "utf8");
   const autoridadesExplorer = readFileSync(resolve("components/AutoridadesExplorer.tsx"), "utf8");
+  const staticRedirects = readFileSync(resolve("scripts/generate-static-redirects.mjs"), "utf8");
 
   it("muestra el directorio como tarjetas con fotografías legibles", () => {
     expect(directory).toContain('className="politician-card-grid"');
@@ -56,6 +57,8 @@ describe("experiencia visual de personas", () => {
     expect(readFileSync(resolve("public/_redirects"), "utf8")).toContain("/entidades/municipality-cl-06301/ /municipalidades/san-fernando 301");
     expect(readFileSync(resolve("public/_redirects"), "utf8")).toContain("/politico/dip-031/ /politico/sofia-gonzalez-cortes 301");
     expect(readFileSync(resolve("public/_redirects"), "utf8")).toContain("/partidos/independientes/ /partidos/ind 301");
+    expect(staticRedirects).toContain("/entidades/municipality-cl-${municipalidad.cut}");
+    expect(staticRedirects).toContain("const to = `/municipalidades/${slugify(municipalidad.nombre_comuna)}`");
     expect(readFileSync(resolve("public/_redirects"), "utf8")).toContain("/servicios-publicos/min-interior/ /servicios-publicos/ministerio-del-interior-y-seguridad-publica 301");
     expect(autoridadesExplorer).toContain("getPoliticoSlug(pol)");
     expect(autoridadesExplorer).not.toContain("/entidades/person-");

@@ -39,6 +39,13 @@ const redirects = [
     const to = `/municipalidades/${slugify(municipalidad.nombre_comuna)}`;
     return [`${from} ${to} 301`, `${from}/ ${to} 301`];
   }),
+  ...MUNICIPALIDADES_SEED.flatMap((municipalidad) => {
+    // Los IDs históricos municipality-cl-* siguen siendo enlaces públicos.
+    // Deben llegar a la ficha territorial canónica, no a la ficha genérica de entidad.
+    const from = `/entidades/municipality-cl-${municipalidad.cut}`;
+    const to = `/municipalidades/${slugify(municipalidad.nombre_comuna)}`;
+    return [`${from} ${to} 301`, `${from}/ ${to} 301`];
+  }),
   ...serviceRedirects.flatMap(({ from, to }) => redirectVariants(from, to)),
   ...politicoRedirects.flatMap(({ from, to }) => redirectVariants(`/politico/${from}`, `/politico/${to}`)),
 ].join("\n") + "\n";
