@@ -8,7 +8,11 @@ const source38Path = path.join(root, "data", "remuneraciones-38bis-publico.json"
 const source38HistoryPath = path.join(root, "data", "remuneraciones-38bis-publico-historico.json");
 const supportPath = path.join(root, "data", "personal-apoyo.json");
 const qualitySourcesPath = path.join(root, "data", "data-quality-sources.json");
-const pageSize = 100;
+// La interfaz pagina grupos de personas de 15. Estas páginas son sólo el
+// almacenamiento estático del índice y pueden contener más filas para
+// respetar el límite de 20.000 archivos de Cloudflare Pages sin cambiar la
+// experiencia ni descargar el universo completo al navegador.
+const pageSize = 200;
 
 const source38 = JSON.parse(fs.readFileSync(source38Path, "utf8"));
 const source38History = JSON.parse(fs.readFileSync(source38HistoryPath, "utf8"));
