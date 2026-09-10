@@ -26,6 +26,12 @@ export interface Env {
    * free-tier rows_read quota.
    */
   PREFER_TRANSFER_D1?: string;
+  /**
+   * Explicit emergency switch for legacy public D1 reads. It is intentionally
+   * disabled in production: R2 releases are the canonical public source and
+   * a D1 fallback can consume the shared account rows_read quota.
+   */
+  ALLOW_PUBLIC_D1_READS?: string;
   EMAIL?: EmailSender;
   TURNSTILE_SECRET_KEY?: string;
   READ_ONLY_PREVIEW?: string;
@@ -81,6 +87,10 @@ async function rateLimit(request: Request, env: Env, scope: string) {
 
 function dbUnavailable() {
   return failure("DATABASE_UNAVAILABLE", "D1 no esta disponible.", 503, undefined);
+}
+
+function publicD1ReadsEnabled(env: Env) {
+  return env.ALLOW_PUBLIC_D1_READS === "1";
 }
 
 function recordsScopeRequired(requestUrl: URL) {
@@ -653,7 +663,7 @@ async function officialsAtPositions(index: OfficialsSearchIndex, positions: numb
 }
 
 async function listFuncionariosFromD1(requestUrl: URL, env: Env): Promise<Response | null> {
-  if (!env.DB) return null;
+  if (!env.DB || !publicD1ReadsEnabled(env)) return null;
   const limit = limitFrom(requestUrl);
   const pageRaw = Number(requestUrl.searchParams.get("page") ?? 1);
   const page = Number.isInteger(pageRaw) ? Math.max(1, Math.min(pageRaw, 100_000)) : 1;
@@ -1205,7 +1215,7 @@ async function listEntities(requestUrl: URL, env: Env) {
   // COUNT(*) y ORDER BY sobre todo el universo en cada acceso frío.
   const published = await listEntitiesFromR2(requestUrl, env);
   if (published) return published;
-  if (!env.DB) return failure("DATASET_UNAVAILABLE", "El directorio no está disponible temporalmente.", 503);
+  if (!env.DB || !publicD1ReadsEnabled(env)) return failure("DATASET_UNAVAILABLE", "El directorio no está disponible temporalmente.", 503);
   const limit = limitFrom(requestUrl);
   const offset = offsetFrom(requestUrl);
   const kind = requestUrl.searchParams.get("kind");
@@ -1234,6 +1244,13 @@ async function listRecords(requestUrl: URL, env: Env) {
   // source) and can exhaust D1 rows_read when crawlers request it repeatedly.
   // Keep scoped queries and all R2-backed releases available, but fail before
   // touching D1 when no bounded scope was supplied.
+  if (env.DB && !hasRecordScope(requestUrl)) return recordsScopeRequired(requestUrl);
+  if (!publicD1ReadsEnabled(env)) {
+    return await listRecordsFromR2(requestUrl, env)
+      ?? (requestUrl.searchParams.has("source") || requestUrl.searchParams.has("entity_id")
+        ? recordsUnavailable(requestUrl, "r2-unavailable")
+        : dbUnavailable());
+  }
   if (env.DB && !hasRecordScope(requestUrl)) return recordsScopeRequired(requestUrl);
   if (!env.DB) return await listRecordsFromR2(requestUrl, env) ?? (requestUrl.searchParams.has("source") || requestUrl.searchParams.has("entity_id") ? recordsUnavailable(requestUrl, "d1-unavailable") : dbUnavailable());
   const limit = limitFrom(requestUrl);
@@ -1305,7 +1322,7 @@ async function listRelations(requestUrl: URL, env: Env, crosses = false) {
   if (!anchor?.trim()) return relationsScopeRequired();
   const published = await listRelationsFromR2(requestUrl, env, crosses);
   if (published) return published;
-  if (!env.DB) return dbUnavailable();
+  if (!env.DB || !publicD1ReadsEnabled(env)) return dbUnavailable();
   const limit = limitFrom(requestUrl);
   const offset = offsetFrom(requestUrl);
   const predicate = requestUrl.searchParams.get("predicate");
@@ -1356,7 +1373,7 @@ async function listRelationsFromR2(requestUrl: URL, env: Env, crosses: boolean):
 async function search(requestUrl: URL, env: Env) {
   const raw = requestUrl.searchParams.get("q")?.trim() ?? "";
   if (raw.length < 2 || raw.length > 80) return failure("INVALID_QUERY", "La búsqueda debe tener entre 2 y 80 caracteres.", 400);
-  if (!env.DB) return dbUnavailable();
+  if (!env.DB || !publicD1ReadsEnabled(env)) return dbUnavailable();
   const pattern = `%${raw.replace(/[%_]/g, "")}%`;
   const rows = await env.DB.prepare("SELECT id, kind, name, attributes_json FROM entities WHERE name LIKE ? COLLATE NOCASE ORDER BY name, id LIMIT 75").bind(pattern).all<JsonRecord>();
   const data = (rows.results ?? []).map((row) => {
@@ -1462,7 +1479,7 @@ async function listTransferencias(requestUrl: URL, env: Env) {
   // COUNT for every uncached query, which could exhaust the free-tier
   // rows_read quota even when the complete release was already in R2. D1 is
   // retained for an explicit operational validation/contingency only.
-  if (env.PREFER_TRANSFER_D1 !== "1") return listTransferenciasFromR2(requestUrl, env);
+  if (env.PREFER_TRANSFER_D1 !== "1" || !publicD1ReadsEnabled(env)) return listTransferenciasFromR2(requestUrl, env);
 
   const sort = requestUrl.searchParams.get("sort") === "fecha" ? "fecha" : "monto_clp";
   const order = requestUrl.searchParams.get("order") === "asc" ? "ASC" : "DESC";
@@ -1558,7 +1575,7 @@ async function exportData(requestUrl: URL, env: Env) {
   const format = requestUrl.searchParams.get("format");
   if (format !== "csv" && format !== "json") return failure("MISSING_PARAMETERS", "Filtros obligatorios: format=csv o format=json.", 400);
   if (requestUrl.searchParams.get("dataset") === "funcionarios") return exportFuncionarios(requestUrl, env, format);
-  if (!env.DB) return await exportEntitiesFromR2(requestUrl, env, format) ?? dbUnavailable();
+  if (!env.DB || !publicD1ReadsEnabled(env)) return await exportEntitiesFromR2(requestUrl, env, format) ?? dbUnavailable();
   const requestedLimit = Number(requestUrl.searchParams.get("limit") ?? 205);
   const limit = Number.isInteger(requestedLimit) ? Math.min(Math.max(requestedLimit, 1), 205) : 205;
   const cargo = (requestUrl.searchParams.get("cargo") ?? "").trim().toLowerCase();
@@ -1611,7 +1628,7 @@ async function listSources(requestUrl: URL, env: Env) {
   // de rows_read.
   const published = await listSourcesFromR2(requestUrl, env);
   if (published) return published;
-  if (!env.DB) return dbUnavailable();
+  if (!env.DB || !publicD1ReadsEnabled(env)) return dbUnavailable();
   try {
     const rows = await env.DB.prepare(`
       SELECT
@@ -1910,8 +1927,8 @@ export default {
       if (limited) return limited;
       // El universo nacional vive en el índice paginado de R2. Consultar D1
       // primero obliga a contar/leer hasta 1,2M filas y puede agotar el cupo
-      // gratuito de rows_read antes de llegar al fallback canónico. R2 es la
-      // fuente primaria; D1 sólo rescata un release R2 ausente o incompleto.
+      // gratuito de rows_read antes de llegar al release canónico. R2 es la
+      // fuente pública; D1 sólo se habilita mediante ALLOW_PUBLIC_D1_READS=1.
       const r2 = await listFuncionariosFromR2(url, env);
       if (r2.status < 500) return r2;
       const d1 = await listFuncionariosFromD1(url, env);
@@ -1919,16 +1936,17 @@ export default {
     }
     if (path.startsWith("/api/v1/politico/")) {
       return cachedPublicGet(request, async () => {
-        if (!env.DB) return dbUnavailable();
         const id = decodeURIComponent(path.split("/").at(-1) ?? "");
         let row: JsonRecord | null = null;
-        try {
-          row = await env.DB.prepare("SELECT * FROM politicos WHERE id = ? LIMIT 1").bind(id).first<JsonRecord>();
-        } catch {
-          // A partially migrated or briefly locked legacy table must not turn
-          // the public roster endpoint into a 500 when the compact seed can
-          // still serve the canonical politician identity.
-          row = null;
+        if (env.DB && publicD1ReadsEnabled(env)) {
+          try {
+            row = await env.DB.prepare("SELECT * FROM politicos WHERE id = ? LIMIT 1").bind(id).first<JsonRecord>();
+          } catch {
+            // A partially migrated or briefly locked legacy table must not turn
+            // the public roster endpoint into a 500 when the compact seed can
+            // still serve the canonical politician identity.
+            row = null;
+          }
         }
         // The current ETL publishes canonical people in `entities`; the legacy
         // `politicos` table may be empty while migrations are being rolled out.
@@ -1954,10 +1972,18 @@ export default {
     }
     if (path.startsWith("/api/v1/entities/")) {
       return cachedPublicGet(request, async () => {
-        if (!env.DB) return dbUnavailable();
         const id = decodeURIComponent(path.split("/").at(-1) ?? "");
-        const row = await env.DB.prepare("SELECT * FROM entities WHERE id = ? LIMIT 1").bind(id).first<JsonRecord>();
-        return row ? success(entity(row), { id }, { self: url.toString() }) : failure("NOT_FOUND", "Entidad no encontrada.", 404, { id });
+        let row: JsonRecord | null = null;
+        const d1Enabled = Boolean(env.DB && publicD1ReadsEnabled(env));
+        if (d1Enabled) {
+          row = await env.DB!.prepare("SELECT * FROM entities WHERE id = ? LIMIT 1").bind(id).first<JsonRecord>();
+        } else {
+          const rows = await canonicalEntitiesFromR2(env);
+          row = rows?.find((candidate) => String(candidate.id ?? "") === id) ?? null;
+        }
+        return row
+          ? success(entity(row), { id }, { self: url.toString() })
+          : failure(d1Enabled || env.PUBLIC_DATA ? "NOT_FOUND" : "DATABASE_UNAVAILABLE", d1Enabled || env.PUBLIC_DATA ? "Entidad no encontrada." : "La entidad no está disponible temporalmente.", d1Enabled || env.PUBLIC_DATA ? 404 : 503, { id });
       });
     }
     return failure("NOT_FOUND", "Ruta no encontrada.", 404);
