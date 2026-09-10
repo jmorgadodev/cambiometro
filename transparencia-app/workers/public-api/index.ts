@@ -93,6 +93,33 @@ function publicD1ReadsEnabled(env: Env) {
   return env.ALLOW_PUBLIC_D1_READS === "1";
 }
 
+/**
+ * The municipal catalogue uses entity ids for reconciliation, while the
+ * public municipal module uses semantic commune slugs. Keep search results
+ * on the user-facing module instead of opening the generic entity shell,
+ * which has no municipal indicators attached to it.
+ */
+function municipalitySlug(name: string) {
+  const commune = name
+    .replace(/^\s*(?:i\.?\s+|ilustre\s+)?municipalidad\s+de\s+/i, "")
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLocaleLowerCase("es-CL")
+    .replace(/[^a-z0-9\s-]/g, " ")
+    .trim()
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+  return commune || null;
+}
+
+function publicEntityPath(item: { id: string; kind: string; name: string }) {
+  if (item.kind === "municipality") {
+    const slug = municipalitySlug(item.name);
+    if (slug) return `/municipalidades/${slug}`;
+  }
+  return `/entidades/${item.id}`;
+}
+
 function recordsScopeRequired(requestUrl: URL) {
   return failure(
     "RECORD_SCOPE_REQUIRED",
@@ -1379,7 +1406,7 @@ async function search(requestUrl: URL, env: Env) {
   const data = (rows.results ?? []).map((row) => {
     const item = entity(row);
     const type = item.kind === "person" ? "persona" : item.kind === "municipality" ? "municipalidad" : item.kind === "supplier" ? "proveedor" : "organismo";
-    return { id: item.id, type, nombre: item.name, url: `/entidades/${item.id}`, ...(item.attributes as JsonRecord) };
+    return { id: item.id, type, nombre: item.name, url: publicEntityPath(item), ...(item.attributes as JsonRecord) };
   });
   return success({ autoridades: data.filter((item) => item.type === "persona").slice(0, 25), municipalidades: data.filter((item) => item.type === "municipalidad").slice(0, 25), funcionarios: [], entidades: data.slice(0, 25) }, { query: raw });
 }
@@ -1447,7 +1474,7 @@ async function searchFromR2(requestUrl: URL, env: Env) {
     .map((row) => {
       const item = entity(row);
       const type = item.kind === "person" ? "persona" : item.kind === "municipality" ? "municipalidad" : item.kind === "supplier" ? "proveedor" : "organismo";
-      return { id: item.id, type, nombre: item.name, url: `/entidades/${item.id}`, ...(item.attributes as JsonRecord) };
+      return { id: item.id, type, nombre: item.name, url: publicEntityPath(item), ...(item.attributes as JsonRecord) };
     });
   // Merge the two catalogs by normalized name. The canonical catalog may have
   // the same person under an entity id while the parliamentary catalog has the

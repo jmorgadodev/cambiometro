@@ -240,6 +240,35 @@ describe("API canónica v1", () => {
     expect(payload.meta.sourceStatus).toBe("r2-catalog");
   });
 
+  it("lleva las municipalidades del buscador a su ficha territorial canónica", async () => {
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse para la búsqueda del catálogo"); } },
+      PUBLIC_DATA: {
+        get: async (key: string) => key === "projections/entities-v1/entities-routes.json"
+          ? {
+            json: async <T>() => [{
+              id: "municipality-cl-06301",
+              kind: "municipality",
+              name: "Municipalidad de San fernando",
+              attributes: { comuna: "06301" },
+              identifiers: [],
+              sourceIds: ["sinim"],
+            }] as T,
+          }
+          : null,
+      },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/search?q=San%20Fernando"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.municipalidades[0]).toMatchObject({
+      nombre: "Municipalidad de San fernando",
+      url: "/municipalidades/san-fernando",
+    });
+  });
+
   it("incluye funcionarios del índice paginado R2 sin consultar D1", async () => {
     const files: Record<string, unknown> = {
       "projections/entities-v1/entities-routes.json": [],
