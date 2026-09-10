@@ -32,13 +32,15 @@ describe("promesas editoriales del inicio", () => {
     expect(canonicalSourceId("contraloria")).toBe("contraloria");
   });
 
-  it("envía la búsqueda del inicio al directorio parlamentario", () => {
+  it("muestra coincidencias cruzadas y no envía la búsqueda al módulo parlamentario", () => {
     const search = readFileSync(resolve(import.meta.dirname, "../components/HomeInlineSearch.tsx"), "utf8");
     expect(home).toContain("<HomeInlineSearch />");
     expect(search).toContain('fetch(`/api/v1/search?q=${encodeURIComponent(normalizedQuery)}`');
     expect(search).toContain('placeholder="Nombre, partido, distrito o región"');
     expect(search).toContain("Coincidencias");
-    expect(search).toContain('action="/politico"');
+    expect(search).toContain('action="/personas/"');
+    expect(search).toContain("event.preventDefault();");
+    expect(search).toContain("/personas/?search=");
   });
 
   it("mantiene cinco preguntas de análisis y separa el seguimiento de movimientos", () => {

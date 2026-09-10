@@ -766,7 +766,7 @@ describe("API canónica v1", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.data[0]).toMatchObject({ id: "camara", recordCount: 19025, status: "connected" });
+    expect(payload.data[0]).toMatchObject({ id: "camara", recordCount: 19025, status: "partial" });
   });
 
   it("normaliza alias históricos y no publica catálogos legados como fuentes sin datos", async () => {
@@ -822,7 +822,7 @@ describe("API canónica v1", () => {
 
     expect(response.status).toBe(200);
     expect(payload.data).toHaveLength(1);
-    expect(payload.data[0]).toMatchObject({ id: "ley-19862", recordCount: 60351, checksumSha256: "current-transfer-checksum", status: "connected" });
+    expect(payload.data[0]).toMatchObject({ id: "ley-19862", recordCount: 60351, checksumSha256: "current-transfer-checksum", status: "partial" });
     expect(prepare).not.toHaveBeenCalled();
   });
 
@@ -869,6 +869,107 @@ describe("API canónica v1", () => {
     expect(response.status).toBe(200);
     expect(payload.meta.sourceBackend).toBe("r2-lake");
     expect(payload.data[0].id).toBe("lobby-1");
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it("prefiere cualquier snapshot R2 publicado antes de consultar D1", async () => {
+    const prepare = vi.fn(() => { throw new Error("D1 no debe consultarse si existe snapshot R2"); });
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/static-site-v1/manifest.json") {
+          return {
+            json: async <T>() => ({
+              files: [{ path: "data/lake-subsets/camara.subset.json", key: "subsets/camara.json" }],
+            }) as T,
+          };
+        }
+        if (key === "subsets/camara.json") {
+          return {
+            json: async <T>() => ([{
+              id: "camara-1",
+              kind: "vote",
+              title: "Votación de prueba",
+              occurredAt: "2026-08-01",
+              data: { source: "release-r2" },
+            }]) as T,
+          };
+        }
+        return null;
+      },
+    };
+
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/records?source=camara&limit=1"),
+      { DB: { prepare }, PUBLIC_DATA } as never,
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.sourceBackend).toBe("r2");
+    expect(payload.data[0]).toMatchObject({ id: "camara-1", sourceId: "camara" });
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it("lee una partición del lake R2 de Cámara sin consultar D1", async () => {
+    const compressed = gzipSync(`${JSON.stringify({
+      id: "camara-lake-1",
+      sourceId: "camara",
+      kind: "vote",
+      occurredAt: "2026-08-01",
+      evidence: { sourceUrl: "https://opendata.congreso.cl/votacion/1" },
+      data: { title: "Votación Cámara", subject_entity_ids: [], object_entity_ids: [] },
+    })}\n`);
+    const checksum = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", compressed)))
+      .map((byte) => byte.toString(16).padStart(2, "0")).join("");
+    const manifest = {
+      projectionChecksumSha256: checksum,
+      artifacts: [{
+        key: `partitions/camara/2026/08/records-${checksum}.jsonl.gz`,
+        checksumSha256: checksum,
+        releaseAssetName: "camara-2026-08-records.jsonl.gz",
+      }],
+    };
+    const catalog = {
+      schemaVersion: "1.0.0",
+      generatedAt: "2026-08-08T00:00:00Z",
+      sources: [],
+      partitions: [{
+        id: "camara/2026/08",
+        sourceId: "camara",
+        period: "2026-08",
+        manifestKey: "partitions/camara/2026/08/manifest.json",
+        checksumSha256: checksum,
+        status: "partial",
+      }],
+    };
+    const objects = new Map<string, ArrayBuffer>([
+      ["catalog/v1/manifest.json", new TextEncoder().encode(JSON.stringify(catalog)).buffer],
+      ["partitions/camara/2026/08/manifest.json", new TextEncoder().encode(JSON.stringify(manifest)).buffer],
+      [manifest.artifacts[0].key, compressed.buffer.slice(compressed.byteOffset, compressed.byteOffset + compressed.byteLength)],
+    ]);
+    const PUBLIC_DATA = {
+      async get(key: string, options?: { range?: { offset: number; length: number } }) {
+        if (key === "projections/static-site-v1/manifest.json") {
+          return { json: async <T>() => ({ files: [{ path: "placeholder", key: "placeholder" }] }) as T };
+        }
+        const value = objects.get(key);
+        if (!value) return null;
+        const bytes = new Uint8Array(value);
+        const sliced = options?.range ? bytes.slice(options.range.offset, options.range.offset + options.range.length).buffer : value;
+        return { json: async <T>() => JSON.parse(new TextDecoder().decode(sliced)) as T, arrayBuffer: async () => sliced };
+      },
+    };
+    const prepare = vi.fn(() => { throw new Error("D1 no debe consultarse para el lake de Cámara"); });
+
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/records?source=camara&limit=1"),
+      { DB: { prepare }, PUBLIC_DATA } as never,
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.sourceBackend).toBe("r2-lake");
+    expect(payload.data[0]).toMatchObject({ id: "camara-lake-1", sourceId: "camara" });
     expect(prepare).not.toHaveBeenCalled();
   });
 

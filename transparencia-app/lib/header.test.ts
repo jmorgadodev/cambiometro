@@ -60,6 +60,17 @@ describe("Header y navegación global", () => {
     expect(headerContent).toContain("Metodología");
   });
 
+  it("desktop usa etiquetas compactas para mantener todas las secciones visibles", () => {
+    expect(headerContent).toContain('navLabel: "Análisis"');
+    expect(headerContent).toContain('navLabel: "Votaciones"');
+    expect(headerContent).toContain('navLabel: "Personas"');
+    expect(headerContent).toContain('navLabel: "Remuneraciones"');
+    expect(headerContent).toContain('navLabel: "Servicios"');
+    expect(headerContent).toContain('navLabel: "Municipios"');
+    expect(headerContent).toContain("item.navLabel || item.label");
+    expect(headerContent).toContain('title={item.label}');
+  });
+
   it("mobile (<1024px) contiene drawer con las 10 secciones, chip de corte, X y donación", () => {
     expect(headerContent).toContain("mobile-drawer");
     expect(headerContent).toContain("drawer-overlay");
@@ -68,6 +79,13 @@ describe("Header y navegación global", () => {
     expect(headerContent).toContain("https://x.com/cambiometro");
     expect(headerContent).toContain("Donar y apoyar");
     expect(headerContent).toContain('href="/donar"');
+  });
+
+  it("no presenta un corte global cuando cada fuente tiene su propia actualización", () => {
+    expect(headerContent).toContain("actualización por fuente");
+    expect(headerContent).toContain("Catálogo público disponible");
+    expect(headerContent).not.toContain("Corte ${displayCorte}");
+    expect(headerContent).not.toContain("Corte oficial: ${displayTotal.toLocaleString(\"es-CL\")} registros");
   });
 
   it("reglas de CSS: touch targets ≥ 44px, sticky header, drawer transition < 200ms", () => {

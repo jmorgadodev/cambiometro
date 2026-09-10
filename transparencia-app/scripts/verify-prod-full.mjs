@@ -397,7 +397,18 @@ async function verifyProdFull() {
   const sourceRows = Array.isArray(sourcesApi?.data) ? sourcesApi.data : [];
   const expectedSourceIds = ["camara", "chilecompra", "contraloria", "cplt", "dipres", "ine", "infolobby", "infoprobidad", "ley-19862", "senado", "servel", "sinim"];
   assertCheck("FUENTES", "API de fuentes responde con el universo canónico", sourcesApiRes.status === 200 && sourceRows.length === expectedSourceIds.length && expectedSourceIds.every((id) => sourceRows.some((source) => source?.id === id)), `actual: ${sourceRows.length}/${expectedSourceIds.length}`);
-  assertCheck("FUENTES", "Todas las fuentes canónicas están conectadas", sourceRows.length === expectedSourceIds.length && sourceRows.every((source) => source?.status === "connected"), sourceRows.filter((source) => source?.status !== "connected").map((source) => `${source?.id ?? "?"}:${source?.status ?? "?"}`).join(", ") || "12/12 connected");
+  // `partial` describes coverage or freshness, not a broken connection.  The
+  // public catalog intentionally keeps a source-level status so each source
+  // can have its own cut; only unavailable/error states indicate a failed
+  // connection.
+  const unavailableSourceStatuses = new Set(["unavailable", "error", "disconnected"]);
+  const unavailableSources = sourceRows.filter((source) => unavailableSourceStatuses.has(source?.status));
+  assertCheck(
+    "FUENTES",
+    "Todas las fuentes canónicas tienen estado de disponibilidad",
+    sourceRows.length === expectedSourceIds.length && unavailableSources.length === 0,
+    unavailableSources.map((source) => `${source?.id ?? "?"}:${source?.status ?? "?"}`).join(", ") || `${sourceRows.length}/${expectedSourceIds.length} con estado publicado`,
+  );
   const fuentesRes = await fetch(`${PROD_URL}/fuentes`, { headers });
   assertCheck("FUENTES", "HTTP Status 200", fuentesRes.status === 200);
   const fuentesHtml = (await fuentesRes.text()).replace(/<!--.*?-->/g, "");

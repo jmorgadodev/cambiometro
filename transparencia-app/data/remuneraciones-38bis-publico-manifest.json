@@ -1,0 +1,3278 @@
+{
+  "schema_version": 2,
+  "source_id": "remuneraciones-38bis",
+  "source_url": "https://comision38bis.gob.cl/registro-publico",
+  "mes": "2026-06",
+  "extraido_en": "2026-09-08T13:14:12.207Z",
+  "total": 1632,
+  "registros_con_monto": 1064,
+  "total_bruto": 5727648259,
+  "page_size": 40,
+  "page_count": 41,
+  "pages": [
+    {
+      "page": 1,
+      "key": "page-0001.json",
+      "count": 40
+    },
+    {
+      "page": 2,
+      "key": "page-0002.json",
+      "count": 40
+    },
+    {
+      "page": 3,
+      "key": "page-0003.json",
+      "count": 40
+    },
+    {
+      "page": 4,
+      "key": "page-0004.json",
+      "count": 40
+    },
+    {
+      "page": 5,
+      "key": "page-0005.json",
+      "count": 40
+    },
+    {
+      "page": 6,
+      "key": "page-0006.json",
+      "count": 40
+    },
+    {
+      "page": 7,
+      "key": "page-0007.json",
+      "count": 40
+    },
+    {
+      "page": 8,
+      "key": "page-0008.json",
+      "count": 40
+    },
+    {
+      "page": 9,
+      "key": "page-0009.json",
+      "count": 40
+    },
+    {
+      "page": 10,
+      "key": "page-0010.json",
+      "count": 40
+    },
+    {
+      "page": 11,
+      "key": "page-0011.json",
+      "count": 40
+    },
+    {
+      "page": 12,
+      "key": "page-0012.json",
+      "count": 40
+    },
+    {
+      "page": 13,
+      "key": "page-0013.json",
+      "count": 40
+    },
+    {
+      "page": 14,
+      "key": "page-0014.json",
+      "count": 40
+    },
+    {
+      "page": 15,
+      "key": "page-0015.json",
+      "count": 40
+    },
+    {
+      "page": 16,
+      "key": "page-0016.json",
+      "count": 40
+    },
+    {
+      "page": 17,
+      "key": "page-0017.json",
+      "count": 40
+    },
+    {
+      "page": 18,
+      "key": "page-0018.json",
+      "count": 40
+    },
+    {
+      "page": 19,
+      "key": "page-0019.json",
+      "count": 40
+    },
+    {
+      "page": 20,
+      "key": "page-0020.json",
+      "count": 40
+    },
+    {
+      "page": 21,
+      "key": "page-0021.json",
+      "count": 40
+    },
+    {
+      "page": 22,
+      "key": "page-0022.json",
+      "count": 40
+    },
+    {
+      "page": 23,
+      "key": "page-0023.json",
+      "count": 40
+    },
+    {
+      "page": 24,
+      "key": "page-0024.json",
+      "count": 40
+    },
+    {
+      "page": 25,
+      "key": "page-0025.json",
+      "count": 40
+    },
+    {
+      "page": 26,
+      "key": "page-0026.json",
+      "count": 40
+    },
+    {
+      "page": 27,
+      "key": "page-0027.json",
+      "count": 40
+    },
+    {
+      "page": 28,
+      "key": "page-0028.json",
+      "count": 40
+    },
+    {
+      "page": 29,
+      "key": "page-0029.json",
+      "count": 40
+    },
+    {
+      "page": 30,
+      "key": "page-0030.json",
+      "count": 40
+    },
+    {
+      "page": 31,
+      "key": "page-0031.json",
+      "count": 40
+    },
+    {
+      "page": 32,
+      "key": "page-0032.json",
+      "count": 40
+    },
+    {
+      "page": 33,
+      "key": "page-0033.json",
+      "count": 40
+    },
+    {
+      "page": 34,
+      "key": "page-0034.json",
+      "count": 40
+    },
+    {
+      "page": 35,
+      "key": "page-0035.json",
+      "count": 40
+    },
+    {
+      "page": 36,
+      "key": "page-0036.json",
+      "count": 40
+    },
+    {
+      "page": 37,
+      "key": "page-0037.json",
+      "count": 40
+    },
+    {
+      "page": 38,
+      "key": "page-0038.json",
+      "count": 40
+    },
+    {
+      "page": 39,
+      "key": "page-0039.json",
+      "count": 40
+    },
+    {
+      "page": 40,
+      "key": "page-0040.json",
+      "count": 40
+    },
+    {
+      "page": 41,
+      "key": "page-0041.json",
+      "count": 32
+    }
+  ],
+  "sort_pages": {
+    "sueldo_desc": [
+      {
+        "page": 1,
+        "key": "page-0001.json",
+        "count": 40
+      },
+      {
+        "page": 2,
+        "key": "page-0002.json",
+        "count": 40
+      },
+      {
+        "page": 3,
+        "key": "page-0003.json",
+        "count": 40
+      },
+      {
+        "page": 4,
+        "key": "page-0004.json",
+        "count": 40
+      },
+      {
+        "page": 5,
+        "key": "page-0005.json",
+        "count": 40
+      },
+      {
+        "page": 6,
+        "key": "page-0006.json",
+        "count": 40
+      },
+      {
+        "page": 7,
+        "key": "page-0007.json",
+        "count": 40
+      },
+      {
+        "page": 8,
+        "key": "page-0008.json",
+        "count": 40
+      },
+      {
+        "page": 9,
+        "key": "page-0009.json",
+        "count": 40
+      },
+      {
+        "page": 10,
+        "key": "page-0010.json",
+        "count": 40
+      },
+      {
+        "page": 11,
+        "key": "page-0011.json",
+        "count": 40
+      },
+      {
+        "page": 12,
+        "key": "page-0012.json",
+        "count": 40
+      },
+      {
+        "page": 13,
+        "key": "page-0013.json",
+        "count": 40
+      },
+      {
+        "page": 14,
+        "key": "page-0014.json",
+        "count": 40
+      },
+      {
+        "page": 15,
+        "key": "page-0015.json",
+        "count": 40
+      },
+      {
+        "page": 16,
+        "key": "page-0016.json",
+        "count": 40
+      },
+      {
+        "page": 17,
+        "key": "page-0017.json",
+        "count": 40
+      },
+      {
+        "page": 18,
+        "key": "page-0018.json",
+        "count": 40
+      },
+      {
+        "page": 19,
+        "key": "page-0019.json",
+        "count": 40
+      },
+      {
+        "page": 20,
+        "key": "page-0020.json",
+        "count": 40
+      },
+      {
+        "page": 21,
+        "key": "page-0021.json",
+        "count": 40
+      },
+      {
+        "page": 22,
+        "key": "page-0022.json",
+        "count": 40
+      },
+      {
+        "page": 23,
+        "key": "page-0023.json",
+        "count": 40
+      },
+      {
+        "page": 24,
+        "key": "page-0024.json",
+        "count": 40
+      },
+      {
+        "page": 25,
+        "key": "page-0025.json",
+        "count": 40
+      },
+      {
+        "page": 26,
+        "key": "page-0026.json",
+        "count": 40
+      },
+      {
+        "page": 27,
+        "key": "page-0027.json",
+        "count": 40
+      },
+      {
+        "page": 28,
+        "key": "page-0028.json",
+        "count": 40
+      },
+      {
+        "page": 29,
+        "key": "page-0029.json",
+        "count": 40
+      },
+      {
+        "page": 30,
+        "key": "page-0030.json",
+        "count": 40
+      },
+      {
+        "page": 31,
+        "key": "page-0031.json",
+        "count": 40
+      },
+      {
+        "page": 32,
+        "key": "page-0032.json",
+        "count": 40
+      },
+      {
+        "page": 33,
+        "key": "page-0033.json",
+        "count": 40
+      },
+      {
+        "page": 34,
+        "key": "page-0034.json",
+        "count": 40
+      },
+      {
+        "page": 35,
+        "key": "page-0035.json",
+        "count": 40
+      },
+      {
+        "page": 36,
+        "key": "page-0036.json",
+        "count": 40
+      },
+      {
+        "page": 37,
+        "key": "page-0037.json",
+        "count": 40
+      },
+      {
+        "page": 38,
+        "key": "page-0038.json",
+        "count": 40
+      },
+      {
+        "page": 39,
+        "key": "page-0039.json",
+        "count": 40
+      },
+      {
+        "page": 40,
+        "key": "page-0040.json",
+        "count": 40
+      },
+      {
+        "page": 41,
+        "key": "page-0041.json",
+        "count": 32
+      }
+    ],
+    "sueldo_asc": [
+      {
+        "page": 1,
+        "key": "page-0001.json",
+        "count": 40
+      },
+      {
+        "page": 2,
+        "key": "page-0002.json",
+        "count": 40
+      },
+      {
+        "page": 3,
+        "key": "page-0003.json",
+        "count": 40
+      },
+      {
+        "page": 4,
+        "key": "page-0004.json",
+        "count": 40
+      },
+      {
+        "page": 5,
+        "key": "page-0005.json",
+        "count": 40
+      },
+      {
+        "page": 6,
+        "key": "page-0006.json",
+        "count": 40
+      },
+      {
+        "page": 7,
+        "key": "page-0007.json",
+        "count": 40
+      },
+      {
+        "page": 8,
+        "key": "page-0008.json",
+        "count": 40
+      },
+      {
+        "page": 9,
+        "key": "page-0009.json",
+        "count": 40
+      },
+      {
+        "page": 10,
+        "key": "page-0010.json",
+        "count": 40
+      },
+      {
+        "page": 11,
+        "key": "page-0011.json",
+        "count": 40
+      },
+      {
+        "page": 12,
+        "key": "page-0012.json",
+        "count": 40
+      },
+      {
+        "page": 13,
+        "key": "page-0013.json",
+        "count": 40
+      },
+      {
+        "page": 14,
+        "key": "page-0014.json",
+        "count": 40
+      },
+      {
+        "page": 15,
+        "key": "page-0015.json",
+        "count": 40
+      },
+      {
+        "page": 16,
+        "key": "page-0016.json",
+        "count": 40
+      },
+      {
+        "page": 17,
+        "key": "page-0017.json",
+        "count": 40
+      },
+      {
+        "page": 18,
+        "key": "page-0018.json",
+        "count": 40
+      },
+      {
+        "page": 19,
+        "key": "page-0019.json",
+        "count": 40
+      },
+      {
+        "page": 20,
+        "key": "page-0020.json",
+        "count": 40
+      },
+      {
+        "page": 21,
+        "key": "page-0021.json",
+        "count": 40
+      },
+      {
+        "page": 22,
+        "key": "page-0022.json",
+        "count": 40
+      },
+      {
+        "page": 23,
+        "key": "page-0023.json",
+        "count": 40
+      },
+      {
+        "page": 24,
+        "key": "page-0024.json",
+        "count": 40
+      },
+      {
+        "page": 25,
+        "key": "page-0025.json",
+        "count": 40
+      },
+      {
+        "page": 26,
+        "key": "page-0026.json",
+        "count": 40
+      },
+      {
+        "page": 27,
+        "key": "page-0027.json",
+        "count": 40
+      },
+      {
+        "page": 28,
+        "key": "page-0028.json",
+        "count": 40
+      },
+      {
+        "page": 29,
+        "key": "page-0029.json",
+        "count": 40
+      },
+      {
+        "page": 30,
+        "key": "page-0030.json",
+        "count": 40
+      },
+      {
+        "page": 31,
+        "key": "page-0031.json",
+        "count": 40
+      },
+      {
+        "page": 32,
+        "key": "page-0032.json",
+        "count": 40
+      },
+      {
+        "page": 33,
+        "key": "page-0033.json",
+        "count": 40
+      },
+      {
+        "page": 34,
+        "key": "page-0034.json",
+        "count": 40
+      },
+      {
+        "page": 35,
+        "key": "page-0035.json",
+        "count": 40
+      },
+      {
+        "page": 36,
+        "key": "page-0036.json",
+        "count": 40
+      },
+      {
+        "page": 37,
+        "key": "page-0037.json",
+        "count": 40
+      },
+      {
+        "page": 38,
+        "key": "page-0038.json",
+        "count": 40
+      },
+      {
+        "page": 39,
+        "key": "page-0039.json",
+        "count": 40
+      },
+      {
+        "page": 40,
+        "key": "page-0040.json",
+        "count": 40
+      },
+      {
+        "page": 41,
+        "key": "page-0041.json",
+        "count": 32
+      }
+    ]
+  },
+  "search_index": "search-index.json",
+  "organismos": [
+    "AGENCIA DE PROMOCIÓN DE LA INVERSIÓN EXTRANJERA",
+    "AGENCIA NACIONAL DE INTELIGENCIA",
+    "BANCO DEL ESTADO",
+    "CÁMARA DE DIPUTADOS Y DIPUTADAS",
+    "COMISIÓN CHILENA DE ENERGÍA NUCLEAR",
+    "COMISIÓN CHILENA DEL COBRE",
+    "COMISIÓN NACIONAL DE RIEGO",
+    "CORPORACIÓN DE FOMENTO DE LA PRODUCCIÓN",
+    "CORPORACIÓN NACIONAL DE DESARROLLO INDÍGENA",
+    "CORPORACIÓN NACIONAL FORESTAL",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE ANTÁRTICA CHILENA",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE ARAUCO",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE AYSÉN",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE BIOBÍO",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CAPITÁN PRAT",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CARDENAL CARO",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CAUQUENES",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CHACABUCO",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CHAÑARAL",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CHILOÉ",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CHOAPA",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE COLCHAGUA",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CORDILLERA",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CURICÓ",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE EL LOA",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE EL RANCO",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE EL TAMARUGAL",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE GENERAL CARRERA",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE HUASCO",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE ISLA DE PASCUA",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE ITATA",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE LIMARÍ",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE LINARES",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE LOS ANDES",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE MAIPO",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE MALLECO",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE MARGA MARGA",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE MELIPILLA",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE OSORNO",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE PALENA",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE PARINACOTA",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE PETORCA",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE PUNILLA",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE QUILLOTA",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE SAN ANTONIO",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE SAN FELIPE DE ACONCAGUA",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE TALAGANTE",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE TIERRA DEL FUEGO",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE TOCOPILLA",
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE ÚLTIMA ESPERANZA",
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE ANTOFAGASTA",
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE ARICA Y PARINACOTA",
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE ATACAMA",
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE AYSÉN",
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE COQUIMBO",
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE LA ARAUCANÍA",
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE LA REGIÓN METROPOLITANA",
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE LOS LAGOS",
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE LOS RÍOS",
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE MAGALLANES Y LA ANTÁRTICA CHILENA",
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE ÑUBLE",
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE O'HIGGINS",
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE TARAPACÁ",
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE VALPARAÍSO",
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DEL BIOBÍO",
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DEL MAULE",
+    "DIRECCIÓN DE PLANEAMIENTO",
+    "DIRECCIÓN DE PRESUPUESTOS",
+    "DIRECCIÓN DEL TRABAJO",
+    "DIRECCIÓN GENERAL DE OBRAS PÚBLICAS",
+    "EMPRESA NACIONAL DE MINERÍA",
+    "FONDO DE SOLIDARIDAD E INVERSIÓN SOCIAL",
+    "FONDO NACIONAL DE SALUD",
+    "GENDARMERÍA DE CHILE",
+    "GOBIERNO REGIONAL DE ANTOFAGASTA",
+    "GOBIERNO REGIONAL DE ARICA Y PARINACOTA",
+    "GOBIERNO REGIONAL DE ATACAMA",
+    "GOBIERNO REGIONAL DE AYSÉN",
+    "GOBIERNO REGIONAL DE COQUIMBO",
+    "GOBIERNO REGIONAL DE LA ARAUCANÍA",
+    "GOBIERNO REGIONAL DE LOS LAGOS",
+    "GOBIERNO REGIONAL DE LOS RÍOS",
+    "GOBIERNO REGIONAL DE MAGALLANES Y LA ANTÁRTICA CHILENA",
+    "GOBIERNO REGIONAL DE ÑUBLE",
+    "GOBIERNO REGIONAL DE O'HIGGINS",
+    "GOBIERNO REGIONAL DE TARAPACÁ",
+    "GOBIERNO REGIONAL DE VALPARAÍSO",
+    "GOBIERNO REGIONAL DEL BIOBÍO",
+    "GOBIERNO REGIONAL DEL MAULE",
+    "GOBIERNO REGIONAL METROPOLITANO DE SANTIAGO",
+    "INSTITUTO DE DESARROLLO AGROPECUARIO",
+    "JUNTA NACIONAL DE AUXILIO ESCOLAR Y BECAS",
+    "MINISTERIO DE AGRICULTURA",
+    "MINISTERIO DE BIENES NACIONALES",
+    "MINISTERIO DE CIENCIA, TECNOLOGÍA, CONOCIMIENTO E INNOVACIÓN",
+    "MINISTERIO DE DEFENSA NACIONAL",
+    "MINISTERIO DE DESARROLLO SOCIAL Y FAMILIA",
+    "MINISTERIO DE ECONOMÍA, FOMENTO Y TURISMO",
+    "MINISTERIO DE EDUCACIÓN",
+    "MINISTERIO DE ENERGÍA",
+    "MINISTERIO DE HACIENDA",
+    "MINISTERIO DE JUSTICIA Y DERECHOS HUMANOS",
+    "MINISTERIO DE LA MUJER Y LA EQUIDAD DE GÉNERO",
+    "MINISTERIO DE LAS CULTURAS, LAS ARTES Y EL PATRIMONIO",
+    "MINISTERIO DE MINERÍA",
+    "MINISTERIO DE OBRAS PÚBLICAS",
+    "MINISTERIO DE RELACIONES EXTERIORES",
+    "MINISTERIO DE SALUD",
+    "MINISTERIO DE SEGURIDAD PÚBLICA",
+    "MINISTERIO DE TRANSPORTES Y TELECOMUNICACIONES",
+    "MINISTERIO DE VIVIENDA Y URBANISMO",
+    "MINISTERIO DEL DEPORTE",
+    "MINISTERIO DEL INTERIOR",
+    "MINISTERIO DEL MEDIO AMBIENTE",
+    "MINISTERIO DEL TRABAJO Y PREVISIÓN SOCIAL",
+    "MINISTERIO SECRETARÍA GENERAL DE GOBIERNO",
+    "MINISTERIO SECRETARÍA GENERAL DE LA PRESIDENCIA",
+    "POLICÍA DE INVESTIGACIONES DE CHILE",
+    "PRESIDENCIA",
+    "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
+    "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
+    "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
+    "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
+    "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
+    "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
+    "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
+    "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
+    "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
+    "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES Y LA ANTÁRTICA CHILENA",
+    "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE",
+    "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE Y BIOBÍO",
+    "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
+    "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS Y EL MAULE",
+    "SECRETARÍA REGIONAL MINISTERIAL DE SANTIAGO",
+    "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
+    "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO",
+    "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
+    "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
+    "SENADO",
+    "SERVICIO AGRÍCOLA Y GANADERO",
+    "SERVICIO CIVIL",
+    "SERVICIO DE BIODIVERSIDAD Y ÁREAS PROTEGIDAS",
+    "SERVICIO DE EVALUACIÓN AMBIENTAL",
+    "SERVICIO DE IMPUESTOS INTERNOS",
+    "SERVICIO NACIONAL DE MIGRACIONES",
+    "SUBSECRETARÍA DE AGRICULTURA",
+    "SUBSECRETARÍA DE BIENES NACIONALES",
+    "SUBSECRETARÍA DE CIENCIA, TECNOLOGÍA, CONOCIMIENTO E INNOVACIÓN",
+    "SUBSECRETARÍA DE DEFENSA",
+    "SUBSECRETARÍA DE DERECHOS HUMANOS",
+    "SUBSECRETARÍA DE DESARROLLO REGIONAL Y ADMINISTRATIVO",
+    "SUBSECRETARÍA DE ECONOMÍA Y EMPRESAS DE MENOR TAMAÑO",
+    "SUBSECRETARÍA DE EDUCACIÓN",
+    "SUBSECRETARÍA DE EDUCACIÓN PARVULARIA",
+    "SUBSECRETARÍA DE EDUCACIÓN SUPERIOR",
+    "SUBSECRETARÍA DE ENERGÍA",
+    "SUBSECRETARÍA DE EVALUACIÓN SOCIAL",
+    "SUBSECRETARÍA DE HACIENDA",
+    "SUBSECRETARÍA DE JUSTICIA",
+    "SUBSECRETARÍA DE LA MUJER Y LA EQUIDAD DE GÉNERO",
+    "SUBSECRETARÍA DE LA NIÑEZ",
+    "SUBSECRETARÍA DE LAS CULTURAS Y LAS ARTES",
+    "SUBSECRETARÍA DE MINERÍA",
+    "SUBSECRETARÍA DE OBRAS PÚBLICAS",
+    "SUBSECRETARÍA DE PESCA Y ACUICULTURA",
+    "SUBSECRETARÍA DE PREVENCIÓN DEL DELITO",
+    "SUBSECRETARÍA DE PREVISIÓN SOCIAL",
+    "SUBSECRETARÍA DE REDES ASISTENCIALES",
+    "SUBSECRETARÍA DE RELACIONES ECONÓMICAS INTERNACIONALES",
+    "SUBSECRETARÍA DE RELACIONES EXTERIORES",
+    "SUBSECRETARÍA DE SALUD PÚBLICA",
+    "SUBSECRETARÍA DE SEGURIDAD PÚBLICA",
+    "SUBSECRETARÍA DE SERVICIOS SOCIALES",
+    "SUBSECRETARÍA DE TELECOMUNICACIONES",
+    "SUBSECRETARÍA DE TRANSPORTES",
+    "SUBSECRETARÍA DE TURISMO",
+    "SUBSECRETARÍA DE VIVIENDA Y URBANISMO",
+    "SUBSECRETARÍA DEL DEPORTE",
+    "SUBSECRETARÍA DEL INTERIOR",
+    "SUBSECRETARÍA DEL MEDIO AMBIENTE",
+    "SUBSECRETARÍA DEL PATRIMONIO CULTURAL",
+    "SUBSECRETARÍA DEL TRABAJO",
+    "SUBSECRETARÍA GENERAL DE GOBIERNO",
+    "SUBSECRETARÍA GENERAL DE LA PRESIDENCIA",
+    "SUBSECRETARÍA PARA LAS FUERZAS ARMADAS",
+    "SUPERINTENDENCIA DE PENSIONES",
+    "SUPERINTENDENCIA DE SALUD",
+    "TELEVISIÓN NACIONAL DE CHILE"
+  ],
+  "organismo_pages": {
+    "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS": [
+      1,
+      2,
+      9,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      18,
+      19,
+      21,
+      25,
+      27,
+      28,
+      29,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE GENERAL CARRERA": [
+      1
+    ],
+    "CÁMARA DE DIPUTADOS Y DIPUTADAS": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27
+    ],
+    "MINISTERIO SECRETARÍA GENERAL DE LA PRESIDENCIA": [
+      1,
+      4,
+      10,
+      17,
+      20,
+      21,
+      25,
+      27,
+      30
+    ],
+    "MINISTERIO DE RELACIONES EXTERIORES": [
+      1,
+      7,
+      9,
+      12,
+      18,
+      29
+    ],
+    "SUBSECRETARÍA DEL INTERIOR": [
+      1,
+      2,
+      4,
+      8,
+      18,
+      19,
+      20,
+      22
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CURICÓ": [
+      1
+    ],
+    "SUBSECRETARÍA DE VIVIENDA Y URBANISMO": [
+      1,
+      4,
+      5,
+      9,
+      12,
+      14,
+      26
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN": [
+      1,
+      3,
+      4,
+      5,
+      9,
+      17,
+      18,
+      19,
+      20,
+      21,
+      24,
+      27,
+      28,
+      29,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ],
+    "GOBIERNO REGIONAL DE LA ARAUCANÍA": [
+      1,
+      11,
+      12,
+      13,
+      14,
+      17,
+      20,
+      22,
+      24,
+      41
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE": [
+      1,
+      3,
+      4,
+      5,
+      7,
+      11,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      28,
+      29,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA": [
+      1,
+      2,
+      3,
+      6,
+      9,
+      10,
+      11,
+      15,
+      16,
+      17,
+      18,
+      19,
+      21,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ],
+    "SUBSECRETARÍA DE REDES ASISTENCIALES": [
+      1,
+      11,
+      16,
+      26,
+      35
+    ],
+    "GOBIERNO REGIONAL DE ANTOFAGASTA": [
+      1,
+      6,
+      7,
+      40,
+      41
+    ],
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE LA REGIÓN METROPOLITANA": [
+      1,
+      4,
+      6,
+      10,
+      12,
+      26
+    ],
+    "PRESIDENCIA": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      15,
+      18,
+      19,
+      20,
+      21,
+      22,
+      24,
+      25,
+      26,
+      27
+    ],
+    "SUBSECRETARÍA DE AGRICULTURA": [
+      1,
+      7,
+      20,
+      26,
+      35
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES": [
+      1,
+      2,
+      3,
+      5,
+      6,
+      8,
+      9,
+      11,
+      14,
+      15,
+      19,
+      21,
+      22,
+      25,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DE SANTIAGO": [
+      1,
+      2,
+      4,
+      7,
+      8,
+      11,
+      13,
+      15,
+      17,
+      19,
+      20,
+      22,
+      23,
+      24,
+      26,
+      27,
+      28,
+      29,
+      31,
+      32,
+      33,
+      35,
+      36,
+      37,
+      38,
+      39
+    ],
+    "MINISTERIO DEL INTERIOR": [
+      1,
+      5,
+      10,
+      12,
+      14,
+      17,
+      18,
+      19,
+      21,
+      22,
+      24,
+      26,
+      27,
+      28
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      9,
+      10,
+      15,
+      16,
+      17,
+      21,
+      23,
+      24,
+      28,
+      29,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ],
+    "SUBSECRETARÍA DE DEFENSA": [
+      1,
+      5,
+      30
+    ],
+    "MINISTERIO DE DESARROLLO SOCIAL Y FAMILIA": [
+      1,
+      13,
+      20,
+      21,
+      22,
+      23,
+      27,
+      31,
+      32
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA": [
+      1,
+      6,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      17,
+      19,
+      21,
+      24,
+      25,
+      26,
+      27,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO": [
+      1,
+      4,
+      5,
+      6,
+      7,
+      8,
+      13,
+      15,
+      18,
+      19,
+      21,
+      22,
+      23,
+      24,
+      26,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39
+    ],
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DEL BIOBÍO": [
+      1,
+      8,
+      11,
+      17,
+      29
+    ],
+    "SENADO": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27
+    ],
+    "MINISTERIO DE OBRAS PÚBLICAS": [
+      1,
+      2,
+      3,
+      7,
+      8,
+      10,
+      11,
+      12,
+      15,
+      25,
+      28,
+      34
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO": [
+      1,
+      2,
+      3,
+      5,
+      7,
+      8,
+      12,
+      18,
+      20,
+      21,
+      22,
+      23,
+      27,
+      28,
+      29,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CARDENAL CARO": [
+      2
+    ],
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE LA ARAUCANÍA": [
+      2,
+      10,
+      13,
+      16,
+      20,
+      29
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA": [
+      2,
+      3,
+      4,
+      5,
+      7,
+      8,
+      9,
+      10,
+      11,
+      15,
+      16,
+      17,
+      19,
+      21,
+      28,
+      29,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ],
+    "MINISTERIO DE EDUCACIÓN": [
+      2,
+      10,
+      11,
+      16,
+      18,
+      23,
+      24,
+      26,
+      32
+    ],
+    "SUBSECRETARÍA DE PREVENCIÓN DEL DELITO": [
+      2,
+      4,
+      11,
+      16,
+      17,
+      20,
+      29
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE": [
+      2,
+      5,
+      6,
+      7,
+      8,
+      11,
+      12,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      27,
+      28,
+      29,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO": [
+      2,
+      4,
+      5,
+      6,
+      8,
+      9,
+      10,
+      12,
+      13,
+      14,
+      15,
+      18,
+      19,
+      20,
+      22,
+      23,
+      24,
+      25,
+      26,
+      28,
+      29,
+      31,
+      32,
+      33,
+      35,
+      36,
+      38,
+      39,
+      40
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE MARGA MARGA": [
+      2
+    ],
+    "SUBSECRETARÍA DE BIENES NACIONALES": [
+      2,
+      9,
+      19,
+      21,
+      37
+    ],
+    "CORPORACIÓN NACIONAL FORESTAL": [
+      2,
+      6,
+      8,
+      36
+    ],
+    "SUBSECRETARÍA DE OBRAS PÚBLICAS": [
+      2,
+      10,
+      34
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ": [
+      2,
+      3,
+      4,
+      6,
+      8,
+      9,
+      10,
+      11,
+      14,
+      15,
+      16,
+      17,
+      18,
+      22,
+      26,
+      27,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ],
+    "MINISTERIO DE DEFENSA NACIONAL": [
+      2,
+      27,
+      30
+    ],
+    "SUBSECRETARÍA DE LA MUJER Y LA EQUIDAD DE GÉNERO": [
+      3,
+      5,
+      8,
+      39
+    ],
+    "MINISTERIO DE ECONOMÍA, FOMENTO Y TURISMO": [
+      3,
+      7,
+      15,
+      18,
+      24,
+      31
+    ],
+    "COMISIÓN CHILENA DE ENERGÍA NUCLEAR": [
+      3,
+      4,
+      9,
+      14,
+      22,
+      25
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS": [
+      3,
+      4,
+      5,
+      7,
+      13,
+      14,
+      16,
+      17,
+      20,
+      23,
+      24,
+      25,
+      27,
+      28,
+      29,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ],
+    "SUBSECRETARÍA DE PESCA Y ACUICULTURA": [
+      3,
+      11,
+      13,
+      23,
+      24,
+      25
+    ],
+    "SUBSECRETARÍA DE EDUCACIÓN SUPERIOR": [
+      3,
+      25,
+      26,
+      32
+    ],
+    "SUBSECRETARÍA DE TURISMO": [
+      3,
+      13,
+      31
+    ],
+    "DIRECCIÓN GENERAL DE OBRAS PÚBLICAS": [
+      3,
+      7,
+      26,
+      34
+    ],
+    "SUBSECRETARÍA GENERAL DE GOBIERNO": [
+      3,
+      13,
+      30
+    ],
+    "SUBSECRETARÍA PARA LAS FUERZAS ARMADAS": [
+      3,
+      30
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CHILOÉ": [
+      3
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA": [
+      3,
+      4,
+      5,
+      8,
+      9,
+      13,
+      14,
+      15,
+      16,
+      19,
+      20,
+      22,
+      27,
+      28,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ],
+    "GOBIERNO REGIONAL DE ARICA Y PARINACOTA": [
+      3,
+      4,
+      6,
+      7,
+      13,
+      14,
+      17,
+      18,
+      19,
+      21,
+      23,
+      25,
+      26
+    ],
+    "DIRECCIÓN DEL TRABAJO": [
+      4,
+      9,
+      10,
+      17,
+      34
+    ],
+    "SUBSECRETARÍA DE ENERGÍA": [
+      4,
+      37
+    ],
+    "POLICÍA DE INVESTIGACIONES DE CHILE": [
+      4,
+      6,
+      26,
+      29
+    ],
+    "SUBSECRETARÍA DE PREVISIÓN SOCIAL": [
+      4,
+      19,
+      34
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE SAN FELIPE DE ACONCAGUA": [
+      4
+    ],
+    "MINISTERIO DE HACIENDA": [
+      4,
+      8,
+      11,
+      12,
+      20,
+      30
+    ],
+    "MINISTERIO DE AGRICULTURA": [
+      4,
+      5,
+      13,
+      28,
+      35
+    ],
+    "MINISTERIO DE VIVIENDA Y URBANISMO": [
+      4,
+      5,
+      10,
+      14,
+      15,
+      19,
+      28,
+      35
+    ],
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE ÑUBLE": [
+      4,
+      12,
+      13,
+      16,
+      23,
+      29
+    ],
+    "MINISTERIO DE TRANSPORTES Y TELECOMUNICACIONES": [
+      4,
+      8,
+      10,
+      19,
+      20,
+      21,
+      28,
+      37
+    ],
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE MAGALLANES Y LA ANTÁRTICA CHILENA": [
+      5,
+      8,
+      10
+    ],
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE LOS RÍOS": [
+      5,
+      11,
+      23,
+      29
+    ],
+    "MINISTERIO DE LA MUJER Y LA EQUIDAD DE GÉNERO": [
+      5,
+      8,
+      14,
+      16,
+      28,
+      39
+    ],
+    "GOBIERNO REGIONAL DE TARAPACÁ": [
+      5,
+      40
+    ],
+    "GOBIERNO REGIONAL DE VALPARAÍSO": [
+      5,
+      8,
+      9,
+      16,
+      41
+    ],
+    "COMISIÓN CHILENA DEL COBRE": [
+      5,
+      18
+    ],
+    "SUBSECRETARÍA GENERAL DE LA PRESIDENCIA": [
+      5,
+      30
+    ],
+    "MINISTERIO DE SALUD": [
+      5,
+      13,
+      15,
+      23,
+      25,
+      28,
+      34
+    ],
+    "MINISTERIO SECRETARÍA GENERAL DE GOBIERNO": [
+      5,
+      8,
+      27,
+      30
+    ],
+    "SUBSECRETARÍA DEL TRABAJO": [
+      5,
+      9,
+      17,
+      21,
+      34
+    ],
+    "SUBSECRETARÍA DEL PATRIMONIO CULTURAL": [
+      6,
+      40
+    ],
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE ATACAMA": [
+      6,
+      11,
+      21,
+      24
+    ],
+    "CORPORACIÓN DE FOMENTO DE LA PRODUCCIÓN": [
+      6,
+      16,
+      31
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE PALENA": [
+      6
+    ],
+    "SUBSECRETARÍA DE LAS CULTURAS Y LAS ARTES": [
+      6,
+      13,
+      40
+    ],
+    "BANCO DEL ESTADO": [
+      6,
+      7,
+      8,
+      11,
+      13,
+      14,
+      27
+    ],
+    "GOBIERNO REGIONAL DE COQUIMBO": [
+      6,
+      12,
+      41
+    ],
+    "SUPERINTENDENCIA DE PENSIONES": [
+      7,
+      34
+    ],
+    "GOBIERNO REGIONAL DE ÑUBLE": [
+      7,
+      41
+    ],
+    "MINISTERIO DE BIENES NACIONALES": [
+      7,
+      12,
+      13,
+      15,
+      18,
+      20,
+      24,
+      25,
+      28
+    ],
+    "EMPRESA NACIONAL DE MINERÍA": [
+      7,
+      12,
+      13
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE QUILLOTA": [
+      7
+    ],
+    "SUBSECRETARÍA DE JUSTICIA": [
+      7,
+      16,
+      23,
+      33
+    ],
+    "GOBIERNO REGIONAL DE LOS RÍOS": [
+      7,
+      12,
+      15,
+      41
+    ],
+    "SUPERINTENDENCIA DE SALUD": [
+      7,
+      35
+    ],
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE TARAPACÁ": [
+      7,
+      9,
+      19,
+      23,
+      24,
+      28
+    ],
+    "SUBSECRETARÍA DE EDUCACIÓN PARVULARIA": [
+      8,
+      13,
+      16,
+      23,
+      25,
+      26,
+      32
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE HUASCO": [
+      8
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE COLCHAGUA": [
+      8
+    ],
+    "SUBSECRETARÍA DE TELECOMUNICACIONES": [
+      8,
+      10,
+      17,
+      37
+    ],
+    "MINISTERIO DEL DEPORTE": [
+      8,
+      10,
+      28,
+      39
+    ],
+    "TELEVISIÓN NACIONAL DE CHILE": [
+      8
+    ],
+    "SUBSECRETARÍA DE RELACIONES ECONÓMICAS INTERNACIONALES": [
+      8,
+      19,
+      30
+    ],
+    "SERVICIO DE EVALUACIÓN AMBIENTAL": [
+      8,
+      38,
+      39
+    ],
+    "SUBSECRETARÍA DE SERVICIOS SOCIALES": [
+      9,
+      32
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE LOS ANDES": [
+      9
+    ],
+    "SUBSECRETARÍA DE DESARROLLO REGIONAL Y ADMINISTRATIVO": [
+      9,
+      21,
+      28
+    ],
+    "GOBIERNO REGIONAL DE MAGALLANES Y LA ANTÁRTICA CHILENA": [
+      9,
+      41
+    ],
+    "MINISTERIO DEL TRABAJO Y PREVISIÓN SOCIAL": [
+      9,
+      15,
+      20,
+      26,
+      28,
+      34
+    ],
+    "SUBSECRETARÍA DE MINERÍA": [
+      9,
+      10,
+      21,
+      36
+    ],
+    "MINISTERIO DE SEGURIDAD PÚBLICA": [
+      10,
+      22,
+      27,
+      29
+    ],
+    "SUBSECRETARÍA DE DERECHOS HUMANOS": [
+      10,
+      11,
+      15,
+      33
+    ],
+    "GOBIERNO REGIONAL DEL BIOBÍO": [
+      10,
+      14,
+      41
+    ],
+    "SUBSECRETARÍA DE SEGURIDAD PÚBLICA": [
+      10,
+      12,
+      21,
+      27,
+      29
+    ],
+    "DIRECCIÓN DE PRESUPUESTOS": [
+      10,
+      30
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE LINARES": [
+      10
+    ],
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE O'HIGGINS": [
+      10,
+      18,
+      19,
+      26,
+      28
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE LIMARÍ": [
+      11
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE EL TAMARUGAL": [
+      11
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE PARINACOTA": [
+      11
+    ],
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE AYSÉN": [
+      12,
+      14,
+      26
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE PUNILLA": [
+      12
+    ],
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE ANTOFAGASTA": [
+      12,
+      14,
+      24,
+      28
+    ],
+    "SUBSECRETARÍA DE ECONOMÍA Y EMPRESAS DE MENOR TAMAÑO": [
+      12,
+      13,
+      23,
+      26,
+      31
+    ],
+    "DIRECCIÓN DE PLANEAMIENTO": [
+      12,
+      34
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE ITATA": [
+      13
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE ÚLTIMA ESPERANZA": [
+      13
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE MELIPILLA": [
+      13
+    ],
+    "MINISTERIO DE CIENCIA, TECNOLOGÍA, CONOCIMIENTO E INNOVACIÓN": [
+      13,
+      26,
+      28,
+      40
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE SAN ANTONIO": [
+      14
+    ],
+    "SUBSECRETARÍA DE TRANSPORTES": [
+      14,
+      24,
+      26,
+      37
+    ],
+    "SUBSECRETARÍA DE EDUCACIÓN": [
+      14,
+      21,
+      32
+    ],
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE LOS LAGOS": [
+      14,
+      18,
+      26,
+      27,
+      29
+    ],
+    "CORPORACIÓN NACIONAL DE DESARROLLO INDÍGENA": [
+      14,
+      27,
+      32
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE MALLECO": [
+      14
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE ARAUCO": [
+      14
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS Y EL MAULE": [
+      14,
+      40
+    ],
+    "MINISTERIO DE MINERÍA": [
+      15,
+      28,
+      36
+    ],
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DEL MAULE": [
+      15,
+      19,
+      23,
+      29
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE BIOBÍO": [
+      15
+    ],
+    "SUBSECRETARÍA DE SALUD PÚBLICA": [
+      15,
+      18,
+      19,
+      35
+    ],
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE VALPARAÍSO": [
+      15,
+      21,
+      22,
+      24
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE ANTÁRTICA CHILENA": [
+      15
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE AYSÉN": [
+      15
+    ],
+    "MINISTERIO DE ENERGÍA": [
+      16,
+      20,
+      22,
+      28,
+      37
+    ],
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE COQUIMBO": [
+      16,
+      19,
+      21,
+      23,
+      28
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE TALAGANTE": [
+      16
+    ],
+    "DELEGACIÓN PRESIDENCIAL REGIONAL DE ARICA Y PARINACOTA": [
+      16,
+      18,
+      19,
+      23
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE TIERRA DEL FUEGO": [
+      17
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES Y LA ANTÁRTICA CHILENA": [
+      17,
+      40
+    ],
+    "GOBIERNO REGIONAL METROPOLITANO DE SANTIAGO": [
+      17,
+      23,
+      41
+    ],
+    "SUBSECRETARÍA DEL DEPORTE": [
+      18,
+      39
+    ],
+    "FONDO NACIONAL DE SALUD": [
+      18,
+      22,
+      35
+    ],
+    "JUNTA NACIONAL DE AUXILIO ESCOLAR Y BECAS": [
+      18,
+      33
+    ],
+    "GENDARMERÍA DE CHILE": [
+      19,
+      34
+    ],
+    "SERVICIO CIVIL": [
+      19,
+      30
+    ],
+    "MINISTERIO DE JUSTICIA Y DERECHOS HUMANOS": [
+      20,
+      22,
+      28,
+      33
+    ],
+    "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE Y BIOBÍO": [
+      20,
+      40
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE EL LOA": [
+      20
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CAPITÁN PRAT": [
+      20
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CAUQUENES": [
+      20
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE OSORNO": [
+      20
+    ],
+    "SERVICIO NACIONAL DE MIGRACIONES": [
+      20,
+      23,
+      29
+    ],
+    "MINISTERIO DE LAS CULTURAS, LAS ARTES Y EL PATRIMONIO": [
+      20,
+      25,
+      28,
+      40
+    ],
+    "SUBSECRETARÍA DE HACIENDA": [
+      21,
+      30
+    ],
+    "SERVICIO AGRÍCOLA Y GANADERO": [
+      21,
+      36
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CHOAPA": [
+      21
+    ],
+    "SUBSECRETARÍA DE CIENCIA, TECNOLOGÍA, CONOCIMIENTO E INNOVACIÓN": [
+      22,
+      40
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE MAIPO": [
+      22
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CHACABUCO": [
+      22
+    ],
+    "GOBIERNO REGIONAL DEL MAULE": [
+      22,
+      41
+    ],
+    "SUBSECRETARÍA DE LA NIÑEZ": [
+      22,
+      32
+    ],
+    "GOBIERNO REGIONAL DE LOS LAGOS": [
+      23,
+      41
+    ],
+    "GOBIERNO REGIONAL DE AYSÉN": [
+      23,
+      41
+    ],
+    "SERVICIO DE BIODIVERSIDAD Y ÁREAS PROTEGIDAS": [
+      23,
+      39
+    ],
+    "GOBIERNO REGIONAL DE O'HIGGINS": [
+      23,
+      41
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE PETORCA": [
+      24
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE ISLA DE PASCUA": [
+      24
+    ],
+    "SUBSECRETARÍA DE EVALUACIÓN SOCIAL": [
+      24,
+      25,
+      32
+    ],
+    "MINISTERIO DEL MEDIO AMBIENTE": [
+      24,
+      28,
+      38
+    ],
+    "SUBSECRETARÍA DE RELACIONES EXTERIORES": [
+      24,
+      29
+    ],
+    "SERVICIO DE IMPUESTOS INTERNOS": [
+      25,
+      30
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CHAÑARAL": [
+      25
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE EL RANCO": [
+      25
+    ],
+    "GOBIERNO REGIONAL DE ATACAMA": [
+      26,
+      41
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE TOCOPILLA": [
+      26
+    ],
+    "SUBSECRETARÍA DEL MEDIO AMBIENTE": [
+      26,
+      38
+    ],
+    "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CORDILLERA": [
+      26
+    ],
+    "AGENCIA NACIONAL DE INTELIGENCIA": [
+      27,
+      29
+    ],
+    "AGENCIA DE PROMOCIÓN DE LA INVERSIÓN EXTRANJERA": [
+      27,
+      31
+    ],
+    "FONDO DE SOLIDARIDAD E INVERSIÓN SOCIAL": [
+      27,
+      32
+    ],
+    "COMISIÓN NACIONAL DE RIEGO": [
+      28,
+      36
+    ],
+    "INSTITUTO DE DESARROLLO AGROPECUARIO": [
+      28,
+      36
+    ]
+  },
+  "cargos": [
+    "ASESOR DE COMUNICACIONES",
+    "ASESOR ESTRATÉGICO O PRINCIPAL",
+    "ASESOR JUNIOR",
+    "ASESOR SENIOR",
+    "CONSEJERO",
+    "COORDINADOR DE ASESORES",
+    "DELEGADO PRESIDENCIAL PROVINCIAL",
+    "DELEGADO PRESIDENCIAL REGIONAL",
+    "DIPUTADO",
+    "DIRECTOR",
+    "DIRECTOR ADMINISTRATIVO",
+    "DIRECTOR GENERAL",
+    "FISCAL",
+    "GERENTE GENERAL EJECUTIVO",
+    "GOBERNADOR",
+    "MINISTRO",
+    "PRESIDENTE",
+    "PRESIDENTE DE LA CÁMARA DE DIPUTADOS Y DIPUTADAS",
+    "PRESIDENTE DE LA REPÚBLICA",
+    "PRESIDENTE DEL DIRECTORIO",
+    "PRESIDENTE DEL SENADO",
+    "SECRETARIO EJECUTIVO",
+    "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
+    "SENADOR",
+    "SUBSECRETARIO",
+    "SUPERINTENDENTE",
+    "VICEPRESIDENTE",
+    "VICEPRESIDENTE DE LA CÁMARA DE DIPUTADOS Y DIPUTADAS",
+    "VICEPRESIDENTE DEL CONSEJO DIRECTIVO",
+    "VICEPRESIDENTE DEL SENADO"
+  ],
+  "cargo_pages": {
+    "SECRETARIO REGIONAL MINISTERIAL (SEREMI)": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28
+    ],
+    "DELEGADO PRESIDENCIAL PROVINCIAL": [
+      1,
+      2,
+      3,
+      4,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      20,
+      21,
+      22,
+      24,
+      25,
+      26
+    ],
+    "DIPUTADO": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27
+    ],
+    "ASESOR JUNIOR": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41
+    ],
+    "ASESOR SENIOR": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41
+    ],
+    "SUBSECRETARIO": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26
+    ],
+    "ASESOR DE COMUNICACIONES": [
+      1,
+      4,
+      5,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      23,
+      24,
+      25,
+      26,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40,
+      41
+    ],
+    "PRESIDENTE DE LA CÁMARA DE DIPUTADOS Y DIPUTADAS": [
+      1
+    ],
+    "MINISTRO": [
+      1,
+      2,
+      4,
+      8,
+      10,
+      13,
+      14,
+      15,
+      18,
+      19,
+      20,
+      24,
+      25,
+      27
+    ],
+    "DELEGADO PRESIDENCIAL REGIONAL": [
+      1,
+      5,
+      6,
+      8,
+      13,
+      14,
+      15,
+      18,
+      19,
+      23,
+      24,
+      26
+    ],
+    "SENADOR": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      17,
+      18,
+      19,
+      22,
+      23,
+      24,
+      25,
+      26,
+      27
+    ],
+    "DIRECTOR": [
+      2,
+      6,
+      7,
+      8,
+      10,
+      11,
+      12,
+      13,
+      14,
+      17,
+      18,
+      19,
+      21,
+      23,
+      25,
+      27,
+      28
+    ],
+    "COORDINADOR DE ASESORES": [
+      3,
+      8,
+      11,
+      12,
+      19,
+      21,
+      22,
+      23,
+      24,
+      25,
+      27,
+      28
+    ],
+    "CONSEJERO": [
+      3,
+      4,
+      5,
+      9,
+      14,
+      18,
+      22,
+      25,
+      27
+    ],
+    "VICEPRESIDENTE DE LA CÁMARA DE DIPUTADOS Y DIPUTADAS": [
+      4,
+      18
+    ],
+    "ASESOR ESTRATÉGICO O PRINCIPAL": [
+      4,
+      9,
+      15,
+      19,
+      28,
+      29,
+      30,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      37,
+      38,
+      39,
+      40
+    ],
+    "GOBERNADOR": [
+      5,
+      7,
+      9,
+      10,
+      12,
+      16,
+      17,
+      18,
+      22,
+      23,
+      26
+    ],
+    "DIRECTOR GENERAL": [
+      6,
+      27
+    ],
+    "SUPERINTENDENTE": [
+      7
+    ],
+    "GERENTE GENERAL EJECUTIVO": [
+      7
+    ],
+    "PRESIDENTE DEL DIRECTORIO": [
+      8
+    ],
+    "PRESIDENTE": [
+      8
+    ],
+    "DIRECTOR ADMINISTRATIVO": [
+      8
+    ],
+    "PRESIDENTE DE LA REPÚBLICA": [
+      12
+    ],
+    "FISCAL": [
+      13
+    ],
+    "VICEPRESIDENTE DEL SENADO": [
+      16
+    ],
+    "VICEPRESIDENTE": [
+      16
+    ],
+    "PRESIDENTE DEL SENADO": [
+      17
+    ],
+    "VICEPRESIDENTE DEL CONSEJO DIRECTIVO": [
+      27
+    ],
+    "SECRETARIO EJECUTIVO": [
+      28
+    ]
+  },
+  "history_base_path": "history/",
+  "comparison_key": "months/2026-06/comparison.json",
+  "initial_rows": [
+    {
+      "partida": "Ministerio de Educación",
+      "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
+      "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
+      "nombre": "JORGE ANTONIO ABARZUA CUBILLOS",
+      "bruto_mensual": 4554112
+    },
+    {
+      "partida": "Ministerio del Interior",
+      "organismo": "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE GENERAL CARRERA",
+      "cargo": "DELEGADO PRESIDENCIAL PROVINCIAL",
+      "nombre": "JORGE PATRICIO ABELLO MOLL",
+      "bruto_mensual": 6725190
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
+      "cargo": "DIPUTADO",
+      "nombre": "IGNACIO JAIME ACHURRA DIAZ",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Ministerio Secretaría General de la Presidencia",
+      "organismo": "MINISTERIO SECRETARÍA GENERAL DE LA PRESIDENCIA",
+      "cargo": "ASESOR JUNIOR",
+      "nombre": "JERSON BERNABET ACOSTA GAJARDO",
+      "bruto_mensual": 2359882
+    },
+    {
+      "partida": "Ministerio de Relaciones Exteriores",
+      "organismo": "MINISTERIO DE RELACIONES EXTERIORES",
+      "cargo": "ASESOR SENIOR",
+      "nombre": "CATALINA IGNACIA ADONIS BOYD",
+      "bruto_mensual": 4500000
+    },
+    {
+      "partida": "Ministerio del Interior",
+      "organismo": "SUBSECRETARÍA DEL INTERIOR",
+      "cargo": "ASESOR JUNIOR",
+      "nombre": "GABRIELA DE JESUS DE LOS ANDES ADONIS PEDEMONTE",
+      "bruto_mensual": 2477876
+    },
+    {
+      "partida": "Ministerio del Interior",
+      "organismo": "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE CURICÓ",
+      "cargo": "DELEGADO PRESIDENCIAL PROVINCIAL",
+      "nombre": "OSCAR ARTURO AGUILA GALDAMES",
+      "bruto_mensual": 4669956
+    },
+    {
+      "partida": "Ministerio de Vivienda y Urbanismo",
+      "organismo": "SUBSECRETARÍA DE VIVIENDA Y URBANISMO",
+      "cargo": "SUBSECRETARIO",
+      "nombre": "NATALIA ANDREA AGUILAR BRAVO",
+      "bruto_mensual": 7913525
+    },
+    {
+      "partida": "Ministerio de Economía, Fomento y Turismo",
+      "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
+      "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
+      "nombre": "RODRIGO HERNÁN AGUILERA SILVA",
+      "bruto_mensual": 6235473
+    },
+    {
+      "partida": "Gobiernos Regionales",
+      "organismo": "GOBIERNO REGIONAL DE LA ARAUCANÍA",
+      "cargo": "ASESOR DE COMUNICACIONES",
+      "nombre": "JAIME ANDRÉS AGUILERA YÉVENES",
+      "bruto_mensual": 1900000
+    },
+    {
+      "partida": "Ministerio de la Mujer y la Equidad de Género",
+      "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
+      "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
+      "nombre": "FERNANDA CATALINA AGUIRRE TORRES",
+      "bruto_mensual": 4554112
+    },
+    {
+      "partida": "Ministerio de Vivienda y Urbanismo",
+      "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
+      "cargo": "ASESOR JUNIOR",
+      "nombre": "YOVANA ALEJANDRA AHUMADA PALMA",
+      "bruto_mensual": 1707333
+    },
+    {
+      "partida": "Ministerio de Salud",
+      "organismo": "SUBSECRETARÍA DE REDES ASISTENCIALES",
+      "cargo": "ASESOR SENIOR",
+      "nombre": "BENJAMIN EMILIO AHUMADA ROJAS",
+      "bruto_mensual": 4129794
+    },
+    {
+      "partida": "Gobiernos Regionales",
+      "organismo": "GOBIERNO REGIONAL DE ANTOFAGASTA",
+      "cargo": "ASESOR JUNIOR",
+      "nombre": "PABLO GABRIEL ALBORNOZ CAMPUSANO",
+      "bruto_mensual": 2339182
+    },
+    {
+      "partida": "Ministerio del Interior",
+      "organismo": "DELEGACIÓN PRESIDENCIAL REGIONAL DE LA REGIÓN METROPOLITANA",
+      "cargo": "ASESOR JUNIOR",
+      "nombre": "JAIME PATRICIO ALCAIDE CATRILEO",
+      "bruto_mensual": 1798276
+    },
+    {
+      "partida": "Presidencia",
+      "organismo": "PRESIDENCIA",
+      "cargo": "ASESOR SENIOR",
+      "nombre": "JOSÉ MIGUEL ALDUNATE HUIDOBRO",
+      "bruto_mensual": 5200000
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
+      "cargo": "PRESIDENTE DE LA CÁMARA DE DIPUTADOS Y DIPUTADAS",
+      "nombre": "JORGE ALESSANDRI VERGARA",
+      "bruto_mensual": 9110534
+    },
+    {
+      "partida": "Ministerio de Agricultura",
+      "organismo": "SUBSECRETARÍA DE AGRICULTURA",
+      "cargo": "ASESOR DE COMUNICACIONES",
+      "nombre": "CYNTHIA LORENA ALFARO FERNÁNDEZ",
+      "bruto_mensual": 3800000
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
+      "cargo": "DIPUTADO",
+      "nombre": "RENE ALINCO BUSTOS",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Ministerio de Transportes y Telecomunicaciones",
+      "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
+      "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
+      "nombre": "STOWHAS ALVARADO ALLAN MANUEL",
+      "bruto_mensual": 5860650
+    },
+    {
+      "partida": "Ministerio de Bienes Nacionales",
+      "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE SANTIAGO",
+      "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
+      "nombre": "HEINZ ALEJANDRO ALMENDARES MULLER",
+      "bruto_mensual": 4554112
+    },
+    {
+      "partida": "Ministerio del Interior",
+      "organismo": "MINISTERIO DEL INTERIOR",
+      "cargo": "MINISTRO",
+      "nombre": "CLAUDIO ALVARADO ANDRADE",
+      "bruto_mensual": 9371632
+    },
+    {
+      "partida": "Ministerio de Educación",
+      "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
+      "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
+      "nombre": "JOSE RAUL ALVARADO DIAZ",
+      "bruto_mensual": 5834774
+    },
+    {
+      "partida": "Ministerio de Transportes y Telecomunicaciones",
+      "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
+      "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
+      "nombre": "JUAN PABLO ALVARADO LECAROS",
+      "bruto_mensual": 4733809
+    },
+    {
+      "partida": "Ministerio de Defensa Nacional",
+      "organismo": "SUBSECRETARÍA DE DEFENSA",
+      "cargo": "SUBSECRETARIO",
+      "nombre": "RODRIGO JAVIER ÁLVAREZ AGUIRRE",
+      "bruto_mensual": 8325480
+    },
+    {
+      "partida": "Ministerio de Desarrollo Social y Familia",
+      "organismo": "MINISTERIO DE DESARROLLO SOCIAL Y FAMILIA",
+      "cargo": "ASESOR SENIOR",
+      "nombre": "MAGDALENA ÁLVAREZ MARDONES",
+      "bruto_mensual": 4771764
+    },
+    {
+      "partida": "Ministerio de Seguridad Pública",
+      "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
+      "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
+      "nombre": "PEDRO ENRIQUE ALVAREZ ORTEGA",
+      "bruto_mensual": 5351050
+    },
+    {
+      "partida": "Ministerio del Trabajo y Previsión Social",
+      "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
+      "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
+      "nombre": "CAMILA FRANCISCA ALVAREZ SANHUEZA",
+      "bruto_mensual": 4784409
+    },
+    {
+      "partida": "Ministerio de las Culturas, las Artes y el Patrimonio",
+      "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
+      "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
+      "nombre": "PABLO ANDRES AMARO VALENZUELA",
+      "bruto_mensual": 4554112
+    },
+    {
+      "partida": "Ministerio de Energía",
+      "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
+      "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
+      "nombre": "JUAN LUIS AMENABAR GRANELLA",
+      "bruto_mensual": 6285191
+    },
+    {
+      "partida": "Ministerio del Interior",
+      "organismo": "DELEGACIÓN PRESIDENCIAL REGIONAL DEL BIOBÍO",
+      "cargo": "DELEGADO PRESIDENCIAL REGIONAL",
+      "nombre": "JULIO ALONSO ANATIVIA ZAMORA",
+      "bruto_mensual": 7963209
+    },
+    {
+      "partida": "Ministerio de Justicia y Derechos Humanos",
+      "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
+      "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
+      "nombre": "HERMAN MATIAS ANDRADE GÁLVEZ",
+      "bruto_mensual": 5351050
+    },
+    {
+      "partida": "Ministerio del Medio Ambiente",
+      "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
+      "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
+      "nombre": "VERONICA CECILIA ARANEDA GOMEZ",
+      "bruto_mensual": 5231251
+    },
+    {
+      "partida": "Ministerio de Salud",
+      "organismo": "SUBSECRETARÍA DE REDES ASISTENCIALES",
+      "cargo": "ASESOR JUNIOR",
+      "nombre": "NICOLAS VALENTIN ARAYA CASTRO",
+      "bruto_mensual": 2000000
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
+      "cargo": "DIPUTADO",
+      "nombre": "JAIME ARAYA GUERRERO",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Congreso Nacional",
+      "organismo": "SENADO",
+      "cargo": "SENADOR",
+      "nombre": "PEDRO ARAYA GUERRERO",
+      "bruto_mensual": 8239091
+    },
+    {
+      "partida": "Ministerio de Obras Públicas",
+      "organismo": "MINISTERIO DE OBRAS PÚBLICAS",
+      "cargo": "ASESOR JUNIOR",
+      "nombre": "DIEGO JOSÉ PÉREZ DE ARCE BOLADOS",
+      "bruto_mensual": 2548975
+    },
+    {
+      "partida": "Ministerio del Trabajo y Previsión Social",
+      "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
+      "cargo": "ASESOR JUNIOR",
+      "nombre": "JOAQUIN IGNACIO ARCOS ALVEAR",
+      "bruto_mensual": 171540
+    },
+    {
+      "partida": "Ministerio del Trabajo y Previsión Social",
+      "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
+      "cargo": "ASESOR JUNIOR",
+      "nombre": "JUAN ESTEBAN ARENAS MARDONES",
+      "bruto_mensual": 1578345
+    },
+    {
+      "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
+      "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
+      "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
+      "nombre": "MAITE DANIELA ARENAS ROJAS",
+      "bruto_mensual": 4673910
+    }
+  ],
+  "periodos": [
+    {
+      "mes": "2026-06",
+      "total": 1632,
+      "registros_con_monto": 1064,
+      "total_bruto": 5727648259,
+      "comparison": {
+        "estado": "comparado",
+        "periodo_anterior": "2026-05",
+        "entradas": 51,
+        "salidas_observadas": 46,
+        "cambios": 439
+      },
+      "manifest_key": "months/2026-06/manifest.json",
+      "comparison_key": "months/2026-06/comparison.json"
+    },
+    {
+      "mes": "2026-05",
+      "total": 1630,
+      "registros_con_monto": 1052,
+      "total_bruto": 5677535351,
+      "comparison": {
+        "estado": "comparado",
+        "periodo_anterior": "2026-04",
+        "entradas": 88,
+        "salidas_observadas": 41,
+        "cambios": 227
+      },
+      "manifest_key": "months/2026-05/manifest.json",
+      "comparison_key": "months/2026-05/comparison.json"
+    },
+    {
+      "mes": "2026-04",
+      "total": 1600,
+      "registros_con_monto": 1009,
+      "total_bruto": 5503043194,
+      "comparison": {
+        "estado": "comparado",
+        "periodo_anterior": "2026-03",
+        "entradas": 377,
+        "salidas_observadas": 1473,
+        "cambios": 606
+      },
+      "manifest_key": "months/2026-04/manifest.json",
+      "comparison_key": "months/2026-04/comparison.json"
+    },
+    {
+      "mes": "2026-03",
+      "total": 2698,
+      "registros_con_monto": 1694,
+      "total_bruto": 5216197689,
+      "comparison": {
+        "estado": "comparado",
+        "periodo_anterior": "2026-02",
+        "entradas": 1505,
+        "salidas_observadas": 394,
+        "cambios": 778
+      },
+      "manifest_key": "months/2026-03/manifest.json",
+      "comparison_key": "months/2026-03/comparison.json"
+    },
+    {
+      "mes": "2026-02",
+      "total": 1539,
+      "registros_con_monto": 1236,
+      "total_bruto": 5431306077,
+      "comparison": {
+        "estado": "comparado",
+        "periodo_anterior": "2026-01",
+        "entradas": 32,
+        "salidas_observadas": 51,
+        "cambios": 249
+      },
+      "manifest_key": "months/2026-02/manifest.json",
+      "comparison_key": "months/2026-02/comparison.json"
+    },
+    {
+      "mes": "2026-01",
+      "total": 1556,
+      "registros_con_monto": 1257,
+      "total_bruto": 5415522267,
+      "comparison": {
+        "estado": "comparado",
+        "periodo_anterior": "2025-12",
+        "entradas": 96,
+        "salidas_observadas": 123,
+        "cambios": 693
+      },
+      "manifest_key": "months/2026-01/manifest.json",
+      "comparison_key": "months/2026-01/comparison.json"
+    },
+    {
+      "mes": "2025-12",
+      "total": 1583,
+      "registros_con_monto": 1286,
+      "total_bruto": 6599122882,
+      "comparison": {
+        "estado": "comparado",
+        "periodo_anterior": "2025-11",
+        "entradas": 55,
+        "salidas_observadas": 60,
+        "cambios": 489
+      },
+      "manifest_key": "months/2025-12/manifest.json",
+      "comparison_key": "months/2025-12/comparison.json"
+    },
+    {
+      "mes": "2025-11",
+      "total": 1586,
+      "registros_con_monto": 1290,
+      "total_bruto": 5525909746,
+      "comparison": {
+        "estado": "comparado",
+        "periodo_anterior": "2025-10",
+        "entradas": 78,
+        "salidas_observadas": 88,
+        "cambios": 80
+      },
+      "manifest_key": "months/2025-11/manifest.json",
+      "comparison_key": "months/2025-11/comparison.json"
+    },
+    {
+      "mes": "2025-10",
+      "total": 1595,
+      "registros_con_monto": 1293,
+      "total_bruto": 5510885472,
+      "comparison": {
+        "estado": "comparado",
+        "periodo_anterior": "2025-09",
+        "entradas": 120,
+        "salidas_observadas": 138,
+        "cambios": 484
+      },
+      "manifest_key": "months/2025-10/manifest.json",
+      "comparison_key": "months/2025-10/comparison.json"
+    },
+    {
+      "mes": "2025-09",
+      "total": 1612,
+      "registros_con_monto": 1319,
+      "total_bruto": 6602955027,
+      "comparison": {
+        "estado": "comparado",
+        "periodo_anterior": "2025-08",
+        "entradas": 63,
+        "salidas_observadas": 54,
+        "cambios": 517
+      },
+      "manifest_key": "months/2025-09/manifest.json",
+      "comparison_key": "months/2025-09/comparison.json"
+    },
+    {
+      "mes": "2025-08",
+      "total": 1604,
+      "registros_con_monto": 1314,
+      "total_bruto": 5532280985,
+      "comparison": {
+        "estado": "comparado",
+        "periodo_anterior": "2025-07",
+        "entradas": 81,
+        "salidas_observadas": 69,
+        "cambios": 105
+      },
+      "manifest_key": "months/2025-08/manifest.json",
+      "comparison_key": "months/2025-08/comparison.json"
+    },
+    {
+      "mes": "2025-07",
+      "total": 1593,
+      "registros_con_monto": 1304,
+      "total_bruto": 5538408227,
+      "comparison": {
+        "estado": "comparado",
+        "periodo_anterior": "2025-06",
+        "entradas": 60,
+        "salidas_observadas": 63,
+        "cambios": 499
+      },
+      "manifest_key": "months/2025-07/manifest.json",
+      "comparison_key": "months/2025-07/comparison.json"
+    },
+    {
+      "mes": "2025-06",
+      "total": 1597,
+      "registros_con_monto": 1308,
+      "total_bruto": 6658237306,
+      "comparison": {
+        "estado": "comparado",
+        "periodo_anterior": "2025-05",
+        "entradas": 81,
+        "salidas_observadas": 71,
+        "cambios": 491
+      },
+      "manifest_key": "months/2025-06/manifest.json",
+      "comparison_key": "months/2025-06/comparison.json"
+    },
+    {
+      "mes": "2025-05",
+      "total": 1590,
+      "registros_con_monto": 1288,
+      "total_bruto": 5541142363,
+      "comparison": {
+        "estado": "comparado",
+        "periodo_anterior": "2025-04",
+        "entradas": 106,
+        "salidas_observadas": 111,
+        "cambios": 115
+      },
+      "manifest_key": "months/2025-05/manifest.json",
+      "comparison_key": "months/2025-05/comparison.json"
+    },
+    {
+      "mes": "2025-04",
+      "total": 1593,
+      "registros_con_monto": 1296,
+      "total_bruto": 5601560925,
+      "comparison": {
+        "estado": "comparado",
+        "periodo_anterior": "2025-03",
+        "entradas": 101,
+        "salidas_observadas": 88,
+        "cambios": 486
+      },
+      "manifest_key": "months/2025-04/manifest.json",
+      "comparison_key": "months/2025-04/comparison.json"
+    },
+    {
+      "mes": "2025-03",
+      "total": 1569,
+      "registros_con_monto": 1291,
+      "total_bruto": 6627541976,
+      "comparison": {
+        "estado": "comparado",
+        "periodo_anterior": "2025-02",
+        "entradas": 52,
+        "salidas_observadas": 39,
+        "cambios": 489
+      },
+      "manifest_key": "months/2025-03/manifest.json",
+      "comparison_key": "months/2025-03/comparison.json"
+    },
+    {
+      "mes": "2025-02",
+      "total": 1559,
+      "registros_con_monto": 1272,
+      "total_bruto": 5541282957,
+      "comparison": {
+        "estado": "comparado",
+        "periodo_anterior": "2025-01",
+        "entradas": 36,
+        "salidas_observadas": 42,
+        "cambios": 229
+      },
+      "manifest_key": "months/2025-02/manifest.json",
+      "comparison_key": "months/2025-02/comparison.json"
+    },
+    {
+      "mes": "2025-01",
+      "total": 1565,
+      "registros_con_monto": 1273,
+      "total_bruto": 5462462850,
+      "comparison": {
+        "estado": "linea_base",
+        "periodo_anterior": null,
+        "entradas": 0,
+        "salidas_observadas": 0,
+        "cambios": 0
+      },
+      "manifest_key": "months/2025-01/manifest.json",
+      "comparison_key": "months/2025-01/comparison.json"
+    }
+  ],
+  "comparison": {
+    "estado": "comparado",
+    "periodo_anterior": "2026-05",
+    "entradas": 51,
+    "salidas_observadas": 46,
+    "cambios": 439
+  }
+}

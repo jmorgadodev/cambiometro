@@ -36,7 +36,7 @@
     "verify:static:browser": "node scripts/verify-static-browser.mjs",
     "verify:details": "node scripts/diagnose-detail-load.mjs",
     "verify:security": "node scripts/verify-security.mjs",
-  "pages:build": "node scripts/build-politico-slices.mjs && node --experimental-strip-types scripts/build-cohesion-bancadas.mjs && node scripts/verify-votaciones-destacadas.mjs && node scripts/build-static-site-data.mjs && node scripts/build-data-quality-summary.mjs && node scripts/verify-data-quality-summary.mjs && node --experimental-strip-types scripts/build-landing-summary.mjs && next build --webpack && node scripts/repair-pages-encoded-chunks.mjs && node scripts/extract-static-inline-styles.mjs && node scripts/extract-static-inline-scripts.mjs && node scripts/prune-next-static-artifacts.mjs && node scripts/generate-static-redirects.mjs && node scripts/generate-static-metadata.mjs && node scripts/generate-static-headers.mjs && node scripts/verify-seo-static.mjs && node scripts/verify-pages-encoded-chunks.mjs && node scripts/verify-static-export.mjs && node scripts/verify-transfer-release.mjs",
+    "pages:build": "node scripts/build-politico-slices.mjs && node --experimental-strip-types scripts/build-cohesion-bancadas.mjs && node scripts/verify-votaciones-destacadas.mjs && node scripts/build-static-site-data.mjs && node scripts/build-remuneraciones-38bis-static.mjs && node scripts/build-remuneraciones-unified.mjs && node scripts/build-data-quality-summary.mjs && node scripts/verify-data-quality-summary.mjs && node --experimental-strip-types scripts/build-landing-summary.mjs && next build --webpack && node scripts/repair-pages-encoded-chunks.mjs && node scripts/extract-static-inline-styles.mjs && node scripts/extract-static-inline-scripts.mjs && node scripts/prune-next-static-artifacts.mjs && node scripts/generate-static-redirects.mjs && node scripts/generate-static-metadata.mjs && node scripts/generate-static-headers.mjs && node scripts/verify-seo-static.mjs && node scripts/verify-pages-encoded-chunks.mjs && node scripts/verify-static-export.mjs && node scripts/verify-transfer-release.mjs",
     "pages:verify": "node scripts/verify-static-export.mjs && node scripts/verify-transfer-release.mjs && node scripts/verify-detail-universe.mjs && node scripts/verify-expense-release.mjs --verify-slices",
     "verify:detail-universe": "node scripts/verify-detail-universe.mjs",
     "check:transfer-release": "node scripts/verify-transfer-release.mjs",
@@ -65,6 +65,8 @@
     "data:hydrate:ley19862": "node scripts/hydrate-ley19862-from-r2.mjs",
     "data:hydrate:transfer-api": "node scripts/hydrate-transfer-api-release.mjs",
     "data:publish:static": "node scripts/publish-static-site-inputs.mjs",
+    "data:build:remuneraciones-38bis": "node scripts/build-remuneraciones-38bis-static.mjs",
+    "check:remuneraciones-unified": "node scripts/verify-remuneraciones-unified.mjs",
     "data:build:landing-summary": "node --experimental-strip-types scripts/build-landing-summary.mjs",
     "data:hydrate:static": "node scripts/hydrate-static-site-inputs.mjs",
     "check:static-input-quality": "node scripts/verify-static-input-quality.mjs",
@@ -117,14 +119,13 @@
     "html2canvas": "^1.4.1",
     "iconv-lite": "^0.7.3",
     "minisearch": "^7.2.0",
-    "next": "16.3.0",
+    "next": "16.3.4",
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "recharts": "^3.10.1",
     "satori": "^0.29.0",
     "saxes": "6.0.0",
-    "server-only": "^0.0.1",
-    "wrangler": "^4.119.0"
+    "server-only": "^0.0.1"
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
@@ -134,13 +135,14 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
-    "eslint-config-next": "16.3.0",
+    "eslint-config-next": "16.3.4",
     "playwright": "^1.62.1",
     "puppeteer-core": "^25.7.0",
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
     "tailwindcss": "^4",
     "typescript": "^5",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "wrangler": "^4.127.1"
   }
 }

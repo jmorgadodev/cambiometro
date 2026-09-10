@@ -242,6 +242,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   const partitions = catalog.partitions.filter((partition) => sourceIds.includes(partition.sourceId)
     && (!params.from || partition.period >= params.from.slice(0, 7))
     && (!params.to || partition.period <= params.to.slice(0, 7)));
+  if (partitions.length === 0) return null;
   const records: EvidenceRecord[] = [];
   for (const partition of partitions) {
     const [year, month] = partition.period.split("-");

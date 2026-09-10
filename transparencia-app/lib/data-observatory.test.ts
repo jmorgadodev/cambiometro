@@ -29,7 +29,8 @@ describe("observatorio de datos", () => {
     const header = readFileSync(join(projectRoot, "components", "SiteHeader.tsx"), "utf8");
     const sitemap = readFileSync(join(projectRoot, "scripts", "generate-static-metadata.mjs"), "utf8");
 
-    expect(header).toContain('{ href: "/datos", label: "Datos" }');
+    expect(header).toContain('href: "/datos"');
+    expect(header).toContain('label: "Datos"');
     expect(sitemap).toContain("sitemap.xml");
     expect(sitemap).toContain('entry.name === "index.html"');
   });

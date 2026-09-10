@@ -10,7 +10,7 @@ import { THEME_ORDER, type ThemeName } from "@/lib/theme-tokens";
 
 /**
  * Orden narrativo canónico por clústeres estructurados:
- * 1. Poder & Decisión: Análisis Parlamentario · Partidos · Directorio de Personas
+ * 1. Poder & Decisión: Análisis Parlamentario · Partidos · Directorio · Remuneraciones
  * 2. Ejecución & Territorio: Servicios públicos · Municipalidades · Transferencias
  * 3. Vínculos & Dinámicas: Cruces · Movimientos
  * 4. Meta & Transparencia: Datos · Metodología
@@ -19,42 +19,42 @@ export const NAV_CLUSTERS = [
   {
     clusterName: "Poder & Decisión",
     items: [
-      { href: "/politico", label: "Análisis Parlamentario" },
-      { href: "/partidos", label: "Partidos" },
-      { href: "/votaciones-destacadas/", label: "Votaciones destacadas" },
-      { href: "/personas", label: "Directorio de Personas" },
+       { href: "/politico", label: "Análisis Parlamentario", navLabel: "Análisis" },
+       { href: "/partidos", label: "Partidos", navLabel: "Partidos" },
+       { href: "/votaciones-destacadas/", label: "Votaciones destacadas", navLabel: "Votaciones" },
+       { href: "/personas", label: "Directorio de Personas", navLabel: "Personas" },
+       { href: "/remuneraciones-publicas", label: "Remuneraciones públicas", navLabel: "Remuneraciones" },
     ],
   },
   {
     clusterName: "Ejecución & Territorio",
     items: [
-      { href: "/servicios-publicos", label: "Servicios públicos" },
-      { href: "/municipalidades", label: "Municipalidades" },
-      { href: "/transferencias", label: "Transferencias" },
+       { href: "/servicios-publicos", label: "Servicios públicos", navLabel: "Servicios" },
+       { href: "/municipalidades", label: "Municipalidades", navLabel: "Municipios" },
+       { href: "/transferencias", label: "Transferencias", navLabel: "Transferencias" },
     ],
   },
   {
     clusterName: "Vínculos & Dinámicas",
     items: [
-      { href: "/cruces", label: "Cruces" },
-      { href: "/movimientos", label: "Movimientos" },
+       { href: "/cruces", label: "Cruces", navLabel: "Cruces" },
+       { href: "/movimientos", label: "Movimientos", navLabel: "Movimientos" },
     ],
   },
   {
     clusterName: "Meta & Transparencia",
     items: [
-      { href: "/datos", label: "Datos" },
-      { href: "/como-funciona", label: "Metodología" },
+       { href: "/datos", label: "Datos", navLabel: "Datos" },
+       { href: "/como-funciona", label: "Metodología", navLabel: "Metodología" },
     ],
   },
 ];
 
 interface SiteHeaderProps {
-  updatedAt?: string | null;
   totalRecords?: number;
 }
 
-export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps) {
+export default function SiteHeader({ totalRecords }: SiteHeaderProps) {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
@@ -63,7 +63,8 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
   const pathnameEffectReady = useRef(false);
 
   const displayTotal = totalRecords && totalRecords > 0 ? totalRecords : GLOBAL_KPIS.registros_canonicos;
-  const displayCorte = updatedAt || GLOBAL_KPIS.corte;
+  const catalogStatusLabel = "En línea · actualización por fuente";
+  const catalogStatusDescription = "Catálogo público disponible. Cada fuente conserva su propia fecha de actualización.";
 
   // Papel es el valor predeterminado; nunca se usa el tema del sistema.
   useEffect(() => {
@@ -152,17 +153,18 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
           </Link>
 
           <div className="site-header__actions">
-            {/* Chip de corte (Solo visible en Desktop ≥1024px) */}
+            {/* Estado del catálogo (cada fuente conserva su propia fecha) */}
             <Link
-              href="/como-funciona#fuentes"
+              href="/fuentes"
               prefetch={false}
               className="snapshot-stamp"
-              aria-label={`Corte oficial: ${displayTotal.toLocaleString("es-CL")} registros`}
+              aria-label={`${catalogStatusDescription} ${displayTotal.toLocaleString("es-CL")} registros.`}
+              title={catalogStatusDescription}
             >
               <span className="snapshot-stamp__status" aria-hidden="true" />
               <span>
                 <strong>{displayTotal.toLocaleString("es-CL")} registros</strong>
-                <small>{displayCorte ? `Corte ${displayCorte}` : "Corte oficial"}</small>
+                <small>{catalogStatusLabel}</small>
               </span>
             </Link>
 
@@ -212,8 +214,10 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
                       prefetch={false}
                       className="site-nav__link"
                       aria-current={isActive ? "page" : undefined}
+                      aria-label={item.label}
+                      title={item.label}
                     >
-                      {item.label}
+                      {item.navLabel || item.label}
                     </Link>
                   );
                 })}
@@ -290,18 +294,19 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
         </nav>
 
         <div className="mobile-drawer__footer">
-          {/* Chip de corte en el drawer */}
+          {/* Estado del catálogo en el drawer */}
           <Link
-            href="/como-funciona#fuentes"
+            href="/fuentes"
             prefetch={false}
             className="drawer-snapshot-stamp"
             onClick={() => setDrawerOpen(false)}
-            aria-label={`Corte de datos: ${displayTotal.toLocaleString("es-CL")} registros`}
+            aria-label={`${catalogStatusDescription} ${displayTotal.toLocaleString("es-CL")} registros.`}
+            title={catalogStatusDescription}
           >
             <span className="snapshot-stamp__status" aria-hidden="true" />
             <span>
               <strong>{displayTotal.toLocaleString("es-CL")} registros</strong>
-              <small>{displayCorte ? `Corte ${displayCorte}` : "Corte oficial"}</small>
+              <small>{catalogStatusLabel}</small>
             </span>
           </Link>
 

@@ -228,6 +228,7 @@ body {
 .badge-danger  { background: var(--bad-bg);    color: var(--bad);    border: 1px solid var(--bad); }
 .badge-bad     { background: var(--bad-bg);    color: var(--bad);    border: 1px solid var(--bad); }
 .badge-info    { background: var(--info-bg);   color: var(--info);   border: 1px solid var(--info); }
+.badge-neutral { background: var(--surface-2); color: var(--text-muted); border: 1px solid var(--border-subtle); }
 .badge-subtle  { background: var(--surface-2); color: var(--text-2); border: 1px solid var(--border); }
 
 
@@ -620,6 +621,10 @@ body {
 .data-table tr:hover td {
   background: rgba(30, 41, 59, 0.5);
 }
+
+.data-table tr.remuneracion-row { cursor: pointer; }
+.data-table tr.remuneracion-row:hover td { background: var(--surface-2); }
+.data-table tr.remuneracion-row:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
 
 /* ═══════════════════════════════════════════════════════════
    PROGRESS BAR
@@ -2880,6 +2885,44 @@ html.dark .page-masthead {
   border-color: var(--tile-tone);
 }
 
+.stat-tile--interactive {
+  width: 100%;
+  min-width: 0;
+  text-align: left;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+.stat-tile--interactive:disabled { cursor: default; opacity: .72; }
+.stat-tile--interactive:disabled:hover { transform: none; border-color: var(--border-subtle); }
+.remuneraciones-comparison-panel {
+  margin-top: 1rem;
+  padding: 1rem;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: var(--surface-2);
+}
+.segmented-control {
+  display: inline-flex;
+  gap: .2rem;
+  padding: .2rem;
+  border: 1px solid var(--border-subtle);
+  border-radius: 999px;
+  background: var(--surface-2);
+}
+.segmented-control button {
+  padding: .35rem .7rem;
+  border: 0;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-muted);
+  font: inherit;
+  font-size: .72rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+.segmented-control button.is-active { background: var(--accent); color: var(--on-accent); }
+
 .stat-tile--accent { --tile-tone: var(--accent); }
 .stat-tile--ok     { --tile-tone: var(--ok); }
 .stat-tile--warn   { --tile-tone: var(--warn); }
@@ -3890,6 +3933,43 @@ html.dark .page-masthead {
   .voting-freshness {
     grid-template-columns: 1fr;
   }
+}
+
+/* ═══════════════════════════════════════════════════════════
+   PANEL REMUNERACIONES PÚBLICAS
+═══════════════════════════════════════════════════════════ */
+.remuneraciones-filters {
+  display: grid;
+  grid-template-columns: minmax(15rem, 1.6fr) repeat(4, minmax(9rem, 1fr));
+  gap: 0.75rem;
+}
+.form-input {
+  width: 100%;
+  min-height: 2.7rem;
+  padding: 0.65rem 0.8rem;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface-2);
+  color: var(--text-1);
+  font: inherit;
+}
+.form-input:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; }
+.overlay-panel {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+  background: var(--overlay);
+}
+@media (max-width: 900px) {
+  .remuneraciones-filters { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 680px) {
+  .remuneraciones-filters { grid-template-columns: 1fr; }
+  .form-input { min-height: 2.9rem; }
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -5424,4 +5504,123 @@ html.dark .page-masthead {
   .municipal-map-legend {
     left: 1.4rem;
   }
+}
+.remuneration-unified { padding-top: 1.5rem; padding-bottom: 0; }
+
+.remuneration-hero {
+  display: flex;
+  align-items: end;
+  justify-content: space-between;
+  gap: 1.5rem;
+  padding: 0.2rem 0 1.2rem;
+}
+
+.remuneration-hero h2 { max-width: 28ch; margin: 0.25rem 0 0; font-size: clamp(1.7rem, 3.4vw, 2.65rem); letter-spacing: -0.035em; line-height: 1.05; }
+.remuneration-hero p { max-width: 58ch; margin: 0.7rem 0 0; color: var(--text-muted); font-size: 0.9rem; line-height: 1.55; }
+.remuneration-hero__summary { display: grid; min-width: 9rem; gap: 0.1rem; padding: 0.85rem 1rem; border-left: 2px solid var(--accent); background: var(--bg-surface-2); }
+.remuneration-hero__summary strong { color: var(--accent); font-family: var(--font-mono); font-size: 1.55rem; line-height: 1; }
+.remuneration-hero__summary span { color: var(--text-muted); font-size: 0.7rem; line-height: 1.3; }
+
+.remuneration-module-nav { display: flex; flex-wrap: wrap; gap: 1rem; margin: 0 0 0.9rem; padding: 0.65rem 0; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); }
+.remuneration-module-nav a { color: var(--text-muted); font-size: 0.74rem; font-weight: 750; text-decoration: none; }
+.remuneration-module-nav a:hover, .remuneration-module-nav a:focus-visible { color: var(--accent); }
+
+.remuneration-module { margin: 0 0 0.9rem; padding: 1rem; border: 1px solid var(--border); border-radius: 0.85rem; background: var(--surface-raised); }
+.remuneration-module--search { border-color: color-mix(in srgb, var(--accent) 35%, var(--border)); }
+.remuneration-module__heading { display: grid; gap: 0.25rem; margin-bottom: 0.8rem; }
+.remuneration-module__heading h3 { margin: 0; font-size: 1.15rem; letter-spacing: -0.02em; }
+.remuneration-module__heading p { max-width: 62ch; margin: 0; color: var(--text-muted); font-size: 0.82rem; line-height: 1.5; }
+
+.remuneration-search-form { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 0.65rem; align-items: end; padding: 0.75rem; border: 1px solid var(--border-subtle); border-radius: 0.75rem; background: var(--bg-surface-2); }
+.remuneration-search__main, .remuneration-filters label { display: grid; gap: 0.35rem; color: var(--text-muted); font-size: 0.72rem; font-weight: 750; }
+.remuneration-search__main input { min-height: 2.65rem; font-size: 0.86rem; }
+.remuneration-search__button { min-height: 2.65rem; min-width: 6.5rem; }
+.remuneration-filters { margin-top: 0.7rem; }
+.remuneration-filters summary { width: fit-content; color: var(--accent); cursor: pointer; font-size: 0.74rem; font-weight: 750; }
+.remuneration-filters__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.65rem; margin-top: 0.7rem; padding-top: 0.7rem; border-top: 1px solid var(--border-subtle); }
+
+.remuneration-results__heading { display: flex; align-items: end; justify-content: space-between; gap: 1rem; flex-wrap: wrap; }
+.remuneration-module--results { scroll-margin-top: 7rem; }
+.remuneration-results__heading h3 { margin: 0.2rem 0 0; font-size: 1.05rem; }
+.remuneration-results__heading > span { color: var(--text-muted); font-size: 0.75rem; }
+.remuneration-results__note, .remuneration-reading-note { margin: 0.75rem 0 0; color: var(--text-muted); font-size: 0.75rem; line-height: 1.5; }
+.remuneration-results__list { display: grid; gap: 0.7rem; margin-top: 0.75rem; }
+.remuneration-results__pagination { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 0.8rem; padding-top: 0.8rem; border-top: 1px solid var(--border-subtle); }
+.remuneration-results__pagination button { min-height: 2.3rem; padding: 0.45rem 0.7rem; border: 1px solid var(--border); border-radius: 0.5rem; background: var(--surface); color: var(--text-primary); cursor: pointer; font: inherit; font-size: 0.72rem; font-weight: 750; }
+.remuneration-results__pagination button:hover:not(:disabled), .remuneration-results__pagination button:focus-visible { border-color: var(--accent); outline: none; }
+.remuneration-results__pagination button:disabled { cursor: not-allowed; opacity: 0.45; }
+.remuneration-results__pagination span { color: var(--text-muted); font-size: 0.72rem; text-align: center; }
+.remuneration-person-result { overflow: hidden; border: 1px solid var(--border); border-radius: 0.75rem; background: var(--surface-raised); }
+.remuneration-person-result > summary { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.8rem 0.9rem; cursor: pointer; list-style: none; }
+.remuneration-person-result > summary::-webkit-details-marker { display: none; }
+.remuneration-person-result > summary:hover, .remuneration-person-result > summary:focus-visible { background: color-mix(in srgb, var(--accent) 6%, var(--surface)); outline: none; }
+.remuneration-person-result[open] > summary { border-bottom: 1px solid var(--border); }
+.remuneration-person-result__identity { display: flex; min-width: 0; align-items: center; gap: 0.7rem; }
+.remuneration-person-result__marker { display: grid; width: 2rem; height: 2rem; flex: 0 0 auto; place-items: center; border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--border)); border-radius: 50%; color: var(--accent); font-family: var(--font-mono); font-size: 0.75rem; font-weight: 700; }
+.remuneration-person-result__copy { display: grid; min-width: 0; gap: 0.12rem; }
+.remuneration-person-result__copy strong { overflow: hidden; font-size: 0.88rem; text-overflow: ellipsis; white-space: nowrap; }
+.remuneration-person-result__copy small, .remuneration-person-result__note, .remuneration-person-result__table small { display: block; color: var(--text-muted); font-size: 0.7rem; line-height: 1.4; }
+.remuneration-person-result__copy small { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.remuneration-person-result__summary-meta { display: flex; flex: 0 0 auto; align-items: center; gap: 0.75rem; }
+.remuneration-person-result__action { color: var(--accent); font-size: 0.72rem; font-weight: 750; white-space: nowrap; }
+.remuneration-person-result__action::after { display: inline-block; margin-left: 0.35rem; content: "↓"; }
+.remuneration-person-result[open] .remuneration-person-result__action::after { content: "↑"; }
+.remuneration-person-result__body { padding: 0.75rem 0.9rem 0.9rem; }
+.remuneration-person-result__note { margin: 0 0 0.7rem; }
+.remuneration-person-result__table { overflow-x: auto; margin-top: 0.7rem; }
+.remuneration-person-result__table table { width: 100%; min-width: 44rem; }
+
+.remuneration-source-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.65rem; }
+.remuneration-source-card { display: grid; min-height: 7rem; gap: 0.55rem; padding: 0.85rem; border: 1px solid var(--border-subtle); border-radius: 0.7rem; background: var(--surface-raised); }
+.remuneration-source-card__header { display: flex; align-items: flex-start; justify-content: space-between; gap: 0.8rem; }
+.remuneration-source-card__header > span { display: grid; min-width: 0; gap: 0.25rem; }
+.remuneration-source-card strong { font-size: 0.8rem; }
+.remuneration-source-card small { color: var(--text-muted); font-size: 0.7rem; line-height: 1.4; }
+.remuneration-source-card b { flex: 0 0 auto; color: var(--accent); font-family: var(--font-mono); font-size: 0.72rem; text-align: right; white-space: nowrap; }
+.remuneration-source-card a { width: fit-content; color: var(--accent); font-size: 0.68rem; text-decoration: none; }
+.remuneration-source-card a:hover, .remuneration-source-card a:focus-visible { color: var(--text-primary); }
+.remuneration-reading-note { padding-top: 0.7rem; border-top: 1px solid var(--border-subtle); }
+.remuneration-reading-note strong { color: var(--text-primary); }
+.remuneration-context { margin-top: 0.7rem; border-top: 1px solid var(--border-subtle); }
+.remuneration-context summary { padding-top: 0.7rem; color: var(--text-muted); cursor: pointer; font-size: 0.72rem; font-weight: 750; }
+.remuneration-context p { margin: 0.6rem 0 0; color: var(--text-muted); font-size: 0.72rem; line-height: 1.45; }
+.remuneration-context strong { color: var(--text-primary); }
+
+.remuneration-panel {
+  border: 1px solid var(--border);
+  border-radius: 0.85rem;
+  background: var(--surface-raised);
+}
+
+.remuneration-panel > summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem;
+  cursor: pointer;
+  list-style: none;
+}
+
+.remuneration-panel > summary::-webkit-details-marker { display: none; }
+.remuneration-panel > summary strong { display: block; margin-top: 0.2rem; }
+.remuneration-panel > summary small { color: var(--text-muted); }
+.remuneration-panel[open] > summary { border-bottom: 1px solid var(--border); }
+.remuneration-panel > :not(summary) { padding: 0 1rem 1rem; }
+
+@media (max-width: 900px) {
+  .remuneration-hero { align-items: start; flex-direction: column; gap: 0.9rem; }
+  .remuneration-hero__summary { width: 100%; grid-template-columns: auto 1fr; align-items: center; gap: 0.65rem; }
+  .remuneration-filters__grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 560px) {
+  .remuneration-search-form {
+    grid-template-columns: 1fr;
+  }
+  .remuneration-source-list { grid-template-columns: 1fr; }
+  .remuneration-results__pagination { align-items: stretch; flex-direction: column; }
+  .remuneration-person-result > summary { align-items: start; }
+  .remuneration-person-result__summary-meta { align-items: end; flex-direction: column; gap: 0.35rem; }
+  .remuneration-person-result__action { font-size: 0.68rem; }
 }

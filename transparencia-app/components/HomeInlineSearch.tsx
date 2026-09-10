@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useId, useRef, useState } from "react";
 
-type SearchResultType = "politico" | "persona" | "municipalidad" | "funcionario" | "entidad" | "proveedor" | "organismo";
+type SearchResultType = "politico" | "persona" | "municipalidad" | "funcionario" | "entidad" | "proveedor" | "organismo" | "remuneracion";
 
 interface SearchResult {
   type: SearchResultType;
@@ -15,6 +15,7 @@ interface SearchResult {
   partido?: string;
   alcalde?: string;
   organo?: string;
+  periodo?: string | null;
 }
 
 interface SearchPayload {
@@ -34,7 +35,54 @@ const TYPE_LABELS: Record<SearchResultType, string> = {
   entidad: "Entidad",
   proveedor: "Proveedor",
   organismo: "Organismo",
+  remuneracion: "Remuneración",
 };
+
+function normalizeSearchText(value: string) {
+  return value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es-CL");
+}
+
+function searchTokens(value: string) {
+  return normalizeSearchText(value).split(/[^a-z0-9]+/).filter((token) => token.length >= 2);
+}
+
+async function searchStaticRemunerations(query: string): Promise<SearchResult[]> {
+  try {
+    const manifestResponse = await fetch("/data/remuneraciones-unified/manifest.json", { cache: "force-cache" });
+    if (!manifestResponse.ok) return [];
+    const manifest = await manifestResponse.json() as { searchIndexKey: string; pages: Array<{ page: number; key: string }> };
+    const indexResponse = await fetch(`/data/remuneraciones-unified/${manifest.searchIndexKey}`, { cache: "force-cache" });
+    if (!indexResponse.ok) return [];
+    const index = await indexResponse.json() as Record<string, number[]>;
+    const requestedTokens = searchTokens(query);
+    const candidatePages = requestedTokens.reduce<number[] | null>((current, token) => {
+      const pages = index[token] ?? [];
+      return current === null ? pages : current.filter((page) => pages.includes(page));
+    }, null) ?? [];
+    const rows = (await Promise.all(candidatePages.slice(0, 8).map(async (page) => {
+      const entry = manifest.pages.find((item) => item.page === page);
+      if (!entry) return [];
+      const response = await fetch(`/data/remuneraciones-unified/${entry.key}`, { cache: "force-cache" });
+      return response.ok ? await response.json() as Array<Record<string, unknown>> : [];
+    }))).flat().filter((row) => {
+      const sourceId = String(row.sourceId ?? "");
+      if (!["remuneraciones-38bis", "camara", "senado"].includes(sourceId)) return false;
+      const haystack = normalizeSearchText(`${row.nombreOriginal ?? ""} ${row.organismoOriginal ?? ""} ${row.cargoOriginal ?? ""}`);
+      return requestedTokens.every((token) => haystack.includes(token));
+    });
+    return rows.slice(0, 4).map((row) => ({
+      type: "remuneracion" as const,
+      id: String(row.recordId ?? row.personKey ?? ""),
+      nombre: String(row.nombreOriginal ?? ""),
+      url: `/remuneraciones-publicas?q=${encodeURIComponent(String(row.nombreOriginal ?? query))}`,
+      cargo: String(row.cargoOriginal ?? ""),
+      organo: String(row.organismoOriginal ?? ""),
+      periodo: row.periodo ? String(row.periodo) : null,
+    })).filter((row) => row.id && row.nombre);
+  } catch {
+    return [];
+  }
+}
 
 function flattenResults(payload: SearchPayload) {
   const groups = [
@@ -71,12 +119,20 @@ export default function HomeInlineSearch() {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/v1/search?q=${encodeURIComponent(normalizedQuery)}`, {
-          signal: controller.signal,
-        });
-        if (!response.ok) throw new Error(`Búsqueda HTTP ${response.status}`);
-        const payload = (await response.json()) as SearchPayload;
-        setResults(flattenResults(payload));
+        const [workerPayload, remunerationResults] = await Promise.all([
+          fetch(`/api/v1/search?q=${encodeURIComponent(normalizedQuery)}`, { signal: controller.signal })
+            .then(async (response) => response.ok ? await response.json() as SearchPayload : null)
+            .catch((requestError) => {
+              if ((requestError as Error).name === "AbortError") throw requestError;
+              return null;
+            }),
+          searchStaticRemunerations(normalizedQuery),
+        ]);
+        const workerResults = workerPayload ? flattenResults(workerPayload) : [];
+        setResults([...workerResults, ...remunerationResults].slice(0, 8));
+        if (workerResults.length === 0 && remunerationResults.length === 0 && !workerPayload) {
+          setError("No fue posible consultar el índice público. Puedes abrir la búsqueda completa.");
+        }
       } catch (requestError) {
         if ((requestError as Error).name !== "AbortError") {
           setResults([]);
@@ -103,15 +159,20 @@ export default function HomeInlineSearch() {
 
   const normalizedQuery = query.trim();
   const showResults = isOpen && normalizedQuery.length >= 2;
-  const fullSearchHref = `/politico?q=${encodeURIComponent(normalizedQuery)}`;
+  const fullSearchHref = `/personas/?search=${encodeURIComponent(normalizedQuery)}`;
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    if (normalizedQuery.length < 2) event.preventDefault();
+    // The home search is an inline index, so pressing Enter must not silently
+    // route every query to the parliamentarian section. Keep a useful static
+    // fallback for users without JavaScript below, but never replace visible
+    // cross-source results when the client is hydrated.
+    event.preventDefault();
+    setIsOpen(true);
   };
 
   return (
     <div ref={wrapperRef} className="home-query-wrap">
-      <form className="home-query" action="/politico" method="get" role="search" onSubmit={handleSubmit}>
+      <form className="home-query" action="/personas/" method="get" role="search" onSubmit={handleSubmit}>
         <label htmlFor="home-search">Buscar en los registros</label>
         <div className="home-query__control">
           <input
@@ -142,7 +203,7 @@ export default function HomeInlineSearch() {
           />
           <button type="submit">Buscar</button>
         </div>
-        <small>Busca diputados, senadores, autoridades, comunas y entidades.</small>
+        <small>Busca diputados, senadores, autoridades, remuneraciones, comunas y entidades.</small>
       </form>
 
       {showResults && (

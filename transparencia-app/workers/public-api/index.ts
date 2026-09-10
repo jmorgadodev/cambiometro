@@ -1102,7 +1102,7 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
   // helper applies filters and pagination before returning the response, so
   // the dataset is never embedded in the Worker bundle or sent to the client
   // in one response.
-  if ((source === "chilecompra" || source === "contraloria" || source === "infolobby") && env.PUBLIC_DATA) {
+  if (env.PUBLIC_DATA) {
     try {
       const offset = offsetFrom(requestUrl);
       const limit = limitFrom(requestUrl);
@@ -1665,10 +1665,11 @@ async function listSources(requestUrl: URL, env: Env) {
 }
 
 async function listSourcesFromR2(requestUrl: URL, env: Env) {
-  const [inventory, health, transferRelease] = await Promise.all([
+  const [inventory, health, transferRelease, lakeCatalog] = await Promise.all([
     r2Json<{ sources?: JsonRecord[] }>(env.PUBLIC_DATA, "projections/sources-v1/source-inventory.json"),
     r2Json<{ sources?: Record<string, JsonRecord> }>(env.PUBLIC_DATA, "projections/sources-v1/source-health.json"),
     r2Json<TransferApiManifest>(env.PUBLIC_DATA, "projections/transferencias-v1/manifest.json"),
+    r2Json<{ sources?: JsonRecord[]; partitions?: JsonRecord[] }>(env.PUBLIC_DATA, "catalog/v1/manifest.json"),
   ]);
   if (!inventory?.sources?.length && !health?.sources) return null;
   // El inventario histórico conserva dos identificadores que ya no deben
@@ -1695,6 +1696,19 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
     const id = canonicalSourceId(rawId);
     healthById.set(id, { ...(healthById.get(id) ?? {}), ...state });
   }
+  const lakePartitionsBySource = new Map<string, JsonRecord[]>();
+  for (const partition of lakeCatalog?.partitions ?? []) {
+    const sourceId = String(partition.sourceId ?? "");
+    if (!sourceId) continue;
+    const partitions = lakePartitionsBySource.get(sourceId) ?? [];
+    partitions.push(partition);
+    lakePartitionsBySource.set(sourceId, partitions);
+  }
+  const lakeSourcesById = new Map<string, JsonRecord>();
+  for (const source of lakeCatalog?.sources ?? []) {
+    const sourceId = String(source.id ?? "");
+    if (sourceId) lakeSourcesById.set(sourceId, source);
+  }
   const ids = [...new Set([...inventoryById.keys(), ...healthById.keys()])].sort();
   const labels: Record<string, string> = {
     camara: "Cámara", chilecompra: "ChileCompra OCDS", cplt: "Transparencia Activa CPLT",
@@ -1711,16 +1725,23 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
     const source = inventoryById.get(id) ?? {};
     const state = healthById.get(id) ?? {};
     const isTransferSource = id === "ley-19862";
+    const lakePartitions = lakePartitionsBySource.get(id) ?? [];
+    const lakeSource = lakeSourcesById.get(id) ?? {};
+    const hasPublishedLake = lakePartitions.length > 0;
     const recordCount = isTransferSource && currentTransferRelease
       ? currentTransferRelease.totalRows
+      : hasPublishedLake
+        ? lakePartitions.reduce((total, partition) => total + Number(partition.recordCount ?? 0), 0)
       : Number(state.recordCount ?? source.recordCount ?? 0);
-    const stateStatus = String(state.status ?? source.status ?? "unavailable");
+    const stateStatus = hasPublishedLake
+      ? String(lakeSource.status ?? "partial")
+      : String(state.status ?? source.status ?? "unavailable");
     return {
       ...source,
       id,
       label: source.label ?? labels[id] ?? id,
       recordCount,
-      status: stateStatus === "archive_only" ? "partial" : recordCount > 0 ? "connected" : "unavailable",
+      status: stateStatus === "archive_only" || stateStatus === "partial" ? "partial" : recordCount > 0 ? "connected" : "unavailable",
       checksumSha256: isTransferSource && currentTransferRelease
         ? currentTransferRelease.checksumSha256
         : state.checksumSha256 ?? source.indexChecksumSha256 ?? null,
@@ -1729,7 +1750,9 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
         : state.lastSuccessAt ?? state.last_success_at ?? state.generatedAt ?? source.generatedAt ?? null,
       statusDetail: stateStatus === "archive_only"
         ? "Histórico íntegro en R2; se consulta bajo demanda."
-        : recordCount > 0 ? "Datos publicados en el lake." : "Sin datos publicados.",
+        : hasPublishedLake && stateStatus === "partial"
+          ? `Release parcial en R2: ${recordCount} registros publicados.`
+          : recordCount > 0 ? "Datos publicados en el lake." : "Sin datos publicados.",
     };
   });
   return success(data, { total: data.length }, { self: requestUrl.toString() });
@@ -1846,11 +1869,12 @@ export default {
           const r2 = await listExpensesFromR2(url, env);
           if (r2) return r2;
         }
-        // These releases have complete, checksummed R2 indexes. Use them as
-        // the public path so a normal browse/search does not spend D1
-        // rows_read on a COUNT(*) plus a second paginated SELECT.
-        const r2FirstSources = new Set(["chilecompra", "infolobby", "contraloria"]);
-        if (r2FirstSources.has(url.searchParams.get("source")?.trim() ?? "")) {
+        // Any source with a published R2 snapshot must be served from that
+        // versioned release before considering D1. This keeps normal browse
+        // and search traffic off the free D1 rows_read budget while retaining
+        // D1 as a compatibility fallback for sources without a usable R2
+        // projection.
+        if (url.searchParams.get("source")?.trim()) {
           const r2 = await listRecordsFromR2(url, env);
           if (r2 && r2.status < 500) return r2;
         }

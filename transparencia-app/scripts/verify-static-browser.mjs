@@ -142,7 +142,7 @@ async function main() {
     { route: "/cruces", markers: ["Cruces"] },
     { route: "/movimientos", markers: ["Movimientos y Relevos de Autoridades", "79"] },
     { route: "/transferencias", markers: ["Transferencias"] },
-    { route: "/funcionarios", markers: ["Directorio de Personas"] },
+    { route: "/personas", markers: ["Directorio de Personas"] },
     { route: "/entidades", markers: ["Entidades"] },
     { route: "/politico/vanessa-kaiser-barents-von-hohenhagen", markers: ["Vanessa Kaiser", "8.291.039", "Votaciones", "Personal de Apoyo"] },
     { route: "/politico/carlos-bianchi-chelech", markers: ["Carlos Bianchi", "25.009", "24,89%", "580", "189"] },
