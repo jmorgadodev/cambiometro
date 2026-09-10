@@ -166,4 +166,12 @@ describe("Rediseño Integral de /cruces — Cruces Reales en Todos los Chips", (
     expect(explorerSource).toContain("chipCounts[chip.id]");
     expect(explorerSource).toContain("chip.icon");
   });
+
+  it("X6. La paginación pública usa páginas estáticas y no serializa el universo completo", () => {
+    const packageSource = readFileSync(resolve("package.json"), "utf8");
+    expect(packageSource).toContain("build-cruces-static");
+    expect(explorerSource).toContain("/data/cruces/manifest.json");
+    expect(explorerSource).toContain("staticPageSize");
+    expect(pageSource).toContain("sin descargar el universo completo al navegador");
+  });
 });

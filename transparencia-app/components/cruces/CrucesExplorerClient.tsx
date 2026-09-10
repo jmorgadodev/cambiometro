@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useTransition } from "react";
+import { useState, useMemo, useTransition, useEffect } from "react";
 import Link from "next/link";
 import { formatCLP, formatMontoConsolidado } from "@/lib/format";
 import type { CrossEdge, EvidenceRecord } from "@/lib/data-contracts";
@@ -18,6 +18,13 @@ interface Props {
   initialTotal?: number;
   initialQuery?: string;
   initialRowsPerPage?: number;
+}
+
+interface CrucesStaticManifest {
+  pageSize: number;
+  totalRows: number;
+  totalPages: number;
+  pages: string[];
 }
 
 export const DEFAULT_PAGE_SIZE = 10;
@@ -133,6 +140,9 @@ export default function CrucesExplorerClient({
   const [loadingRowId, setLoadingRowId] = useState<string | null>(null);
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const [page, setPage] = useState(1);
+  const [staticManifest, setStaticManifest] = useState<CrucesStaticManifest | null>(null);
+  const [staticRows, setStaticRows] = useState<CrossEdge[]>(initialRows);
+  const [staticLoading, setStaticLoading] = useState(false);
   const [pageSize, setPageSize] = useState<number>(() => {
     if (typeof window !== "undefined") {
       const urlParams = new URLSearchParams(window.location.search);
@@ -143,10 +153,68 @@ export default function CrucesExplorerClient({
   });
   const [isPending, startTransition] = useTransition();
 
+  const staticBrowsing = Boolean(staticManifest) && query.trim() === "" && selectedChip === "todos";
+  const staticPageSize = staticManifest?.pageSize ?? 50;
+
+  // The first HTML response remains useful if the asset is unavailable, but
+  // normal browsing is hydrated from small static pages instead of the full
+  // relation universe. This path never falls back to D1.
+  useEffect(() => {
+    let cancelled = false;
+    fetch("/data/cruces/manifest.json", { cache: "no-store" })
+      .then((response) => (response.ok ? response.json() : null))
+      .then((manifest: CrucesStaticManifest | null) => {
+        if (!cancelled && manifest?.pages?.length && manifest.totalRows >= 0) {
+          setStaticManifest(manifest);
+        }
+      })
+      .catch(() => undefined);
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!staticManifest || !staticBrowsing) return;
+    let cancelled = false;
+    const firstIndex = (Math.max(1, page) - 1) * pageSize;
+    const lastIndex = firstIndex + pageSize - 1;
+    const firstAssetPage = Math.floor(firstIndex / staticPageSize);
+    const lastAssetPage = Math.floor(lastIndex / staticPageSize);
+    const assetPages = Array.from(
+      { length: lastAssetPage - firstAssetPage + 1 },
+      (_, offset) => firstAssetPage + offset,
+    );
+
+    Promise.all(
+      assetPages.map((assetPage) =>
+        fetch(`/data/cruces/${staticManifest.pages[assetPage]}`, { cache: "no-store" }).then(async (response) => {
+          if (!response.ok) throw new Error("CRUCES_STATIC_PAGE_UNAVAILABLE");
+          return (await response.json()) as CrossEdge[];
+        }),
+      ),
+    )
+      .then((chunks) => {
+        if (cancelled) return;
+        const windowRows = chunks.flat().slice(firstIndex - firstAssetPage * staticPageSize);
+        setStaticRows(windowRows.slice(0, pageSize));
+      })
+      .catch(() => {
+        if (!cancelled) setStaticRows([]);
+      })
+      .finally(() => {
+        if (!cancelled) setStaticLoading(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [page, pageSize, staticBrowsing, staticManifest, staticPageSize]);
+
   // Conteo reactivo por Chip sobre el universo total
   const chipCounts = useMemo(() => {
     const counts: Record<string, number> = {
-      todos: initialRows.length,
+      todos: staticManifest?.totalRows ?? initialRows.length,
       Auditorías: 0,
       Declaraciones: 0,
       Compras: 0,
@@ -197,11 +265,11 @@ export default function CrucesExplorerClient({
       }
     }
     return counts;
-  }, [initialRows]);
+  }, [initialRows, staticManifest]);
 
   // Filtrado y ordenamiento reactivo en cliente con búsqueda y chips
   const filteredRows = useMemo(() => {
-    let rows = initialRows;
+    let rows = staticBrowsing ? staticRows : initialRows;
 
     // Filtro por Chip
     if (selectedChip !== "todos") {
@@ -282,7 +350,11 @@ export default function CrucesExplorerClient({
       const dateB = b.evidence[0]?.occurredAt || b.relation.period?.from || "";
       return dateB.localeCompare(dateA);
     });
-  }, [initialRows, selectedChip, query]);
+  }, [initialRows, selectedChip, query, staticBrowsing, staticRows]);
+
+  const totalRowsForPagination = staticBrowsing
+    ? (staticManifest?.totalRows ?? initialTotal)
+    : filteredRows.length;
 
   // Aplicar Preset con scroll suave a la tabla
   const handleApplyPreset = (preset: typeof PRESET_CRUCES[0]) => {
@@ -303,9 +375,11 @@ export default function CrucesExplorerClient({
     }
   };
 
-  const totalPages = Math.max(1, Math.ceil(filteredRows.length / pageSize));
+  const totalPages = Math.max(1, Math.ceil(totalRowsForPagination / pageSize));
   const currentPage = Math.min(Math.max(1, page), totalPages);
-  const paginatedRows = filteredRows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
+  const paginatedRows = staticBrowsing
+    ? filteredRows
+    : filteredRows.slice((currentPage - 1) * pageSize, currentPage * pageSize);
 
   const handlePageSizeChange = (newSize: number) => {
     setPageSize(newSize);
@@ -447,7 +521,7 @@ export default function CrucesExplorerClient({
             }}
           >
             <div>
-              📌 <strong>Muestra inicial:</strong> {filteredRows.length.toLocaleString("es-CL")} de {initialTotal.toLocaleString("es-CL")} relaciones (orden por monto/fecha) · los totales por fuente corresponden al universo oficial en{" "}
+              📌 {staticBrowsing ? <><strong>Universo paginado:</strong> {totalRowsForPagination.toLocaleString("es-CL")} relaciones · sólo se carga la página solicitada</> : <><strong>Muestra inicial:</strong> {filteredRows.length.toLocaleString("es-CL")} de {initialTotal.toLocaleString("es-CL")} relaciones</>} (orden por monto/fecha) · los totales por fuente corresponden al universo oficial en{" "}
               <Link prefetch={false} href="/datos/calidad" style={{ color: "var(--accent)", fontWeight: 600, textDecoration: "underline" }}>
                 /datos/calidad
               </Link>
@@ -472,7 +546,7 @@ export default function CrucesExplorerClient({
 
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap" }}>
               <span style={{ fontSize: "0.8rem", color: "var(--text-muted)", fontWeight: 600 }}>
-                {filteredRows.length.toLocaleString("es-CL")} relaciones · Pág. {currentPage} de {totalPages}
+                {totalRowsForPagination.toLocaleString("es-CL")} relaciones · Pág. {currentPage} de {totalPages}{staticLoading ? " · cargando" : ""}
               </span>
 
               {/* Selector de Vista Secundaria Tabla | Grafo */}
@@ -568,7 +642,7 @@ export default function CrucesExplorerClient({
                     </tr>
                   </thead>
                   <tbody>
-                    {filteredRows.length === 0 ? (
+                    {paginatedRows.length === 0 ? (
                       <tr>
                         <td colSpan={6} style={{ padding: "3rem 1rem", textAlign: "center", color: "var(--text-muted)" }}>
                           No se encontraron cruces documentales para los filtros seleccionados.
@@ -732,7 +806,7 @@ export default function CrucesExplorerClient({
                 {/* Izquierda: Info de rango + Selector de Filas (10 / 25 / 50) */}
                 <div style={{ display: "flex", alignItems: "center", gap: "1rem", flexWrap: "wrap" }}>
                   <span style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                    Mostrando {(currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, filteredRows.length)} de {filteredRows.length.toLocaleString("es-CL")} relaciones
+                    Mostrando {totalRowsForPagination === 0 ? 0 : (currentPage - 1) * pageSize + 1}–{Math.min(currentPage * pageSize, totalRowsForPagination)} de {totalRowsForPagination.toLocaleString("es-CL")} relaciones
                   </span>
 
                   <div style={{ display: "flex", alignItems: "center", gap: "0.35rem", fontSize: "0.75rem", color: "var(--text-muted)" }}>
