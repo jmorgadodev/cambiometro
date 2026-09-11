@@ -29,6 +29,17 @@ const transferRows = Number.isSafeInteger(transferRelease?.totalRows)
       ? transferRelease.kpis.total_transfers
       : null;
 const catalogById = new Map((catalog.sources ?? []).map((source) => [source.id, source]));
+const catalogSourceAliases = {
+  "transparencia-activa": "cplt",
+  "ley-19862": "ley19862",
+};
+const publishedPartitionCounts = new Map();
+for (const partition of Array.isArray(catalog.partitions) ? catalog.partitions : []) {
+  const sourceId = String(partition?.sourceId ?? "");
+  const recordCount = Number(partition?.recordCount);
+  if (!sourceId || !Number.isSafeInteger(recordCount) || recordCount < 0) continue;
+  publishedPartitionCounts.set(sourceId, (publishedPartitionCounts.get(sourceId) ?? 0) + recordCount);
+}
 const healthAliases = {
   "transparencia-activa": "cplt",
   "ley-19862": "ley19862",
@@ -55,6 +66,14 @@ const sources = config.map((source) => {
   const healthKey = healthAliases[source.id] ?? source.id;
   const healthEntry = health.sources?.[healthKey] ?? null;
   const catalogEntry = catalogById.get(source.id) ?? null;
+  const catalogSourceId = catalogSourceAliases[source.id] ?? source.id;
+  const partitionCount = publishedPartitionCounts.get(catalogSourceId);
+  // A source can declare a larger historical universe than the one currently
+  // published in R2. Keep both figures: the public page must never imply that
+  // a declared historical count is already queryable.
+  const publicHistoricalCount = Number.isSafeInteger(partitionCount) && partitionCount > 0
+    ? Math.max(canonicalCount, partitionCount)
+    : canonicalCount;
   const lastSuccessAt = healthEntry?.generatedAt ?? catalogEntry?.generatedAt ?? null;
   const sourceStatus = healthEntry?.status ?? catalogEntry?.status ?? null;
   const status = canonicalCount <= 0
@@ -72,6 +91,7 @@ const sources = config.map((source) => {
     ...source,
     canonicalCount,
     historicalCount,
+    publicHistoricalCount,
     period,
     lastSuccessAt,
     checksumSha256,

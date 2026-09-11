@@ -43,6 +43,8 @@ export interface DataQualitySourceSummary {
   coverageNote: string;
   canonicalCount: number;
   historicalCount: number;
+  /** Rows present in the published R2 catalog across its available partitions. */
+  publicHistoricalCount: number;
   lastSuccessAt: string | null;
   checksumSha256: string | null;
   status: DataQualityStatus;
@@ -118,6 +120,7 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
     coverageNote: source.coverageNote,
     canonicalCount,
     historicalCount,
+    publicHistoricalCount: canonicalCount,
     lastSuccessAt: null,
     checksumSha256: null,
     status: source.canonicalCount > 0 ? "parcial" : "no_disponible" as DataQualityStatus,

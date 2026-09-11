@@ -102,11 +102,13 @@ export default async function FuentesPage() {
                     <div>
                       <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Registros: </dt>
                       <dd style={{ display: "inline", color: "var(--text-muted)" }}>
-                        Canónicos: {source.canonicalCount.toLocaleString("es-CL")} · Histórico: {source.historicalCount.toLocaleString("es-CL")}
+                        Canónicos: {source.canonicalCount.toLocaleString("es-CL")} · Consultables en R2: {source.publicHistoricalCount.toLocaleString("es-CL")}
                       </dd>
                     </div>
-                    <div style={{ fontSize: "0.7rem", color: "var(--text-subtle)", marginTop: "-0.15rem" }}>
-                      Diferencia por deduplicación y cobertura declarada
+                    <div style={{ fontSize: "0.7rem", color: source.publicHistoricalCount < source.historicalCount ? "var(--warn, #b45309)" : "var(--text-subtle)", marginTop: "-0.15rem" }}>
+                      {source.publicHistoricalCount < source.historicalCount
+                        ? `Histórico declarado: ${source.historicalCount.toLocaleString("es-CL")}; aún no está todo publicado en R2.`
+                        : "El histórico declarado coincide con el catálogo publicado."}
                     </div>
                     <div>
                       <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Período reciente: </dt>
