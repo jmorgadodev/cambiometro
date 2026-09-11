@@ -7,12 +7,13 @@ describe("interfaz de votaciones destacadas", () => {
   const client = readFileSync(resolve(import.meta.dirname, "../components/VotacionesDestacadasClient.tsx"), "utf8");
   const annualExplorer = readFileSync(resolve(import.meta.dirname, "../components/VotacionesAnualesExplorer.tsx"), "utf8");
 
-  it("ofrece un filtro explícito por cámara con Senado como selección inicial", () => {
-    expect(client).toContain('useState<"Cámara" | "Senado">("Senado")');
-    expect(client).toContain('aria-label="Filtrar por cámara"');
-    expect(client).toContain("Cámara");
-    expect(client).toContain("Senado");
-    expect(client).not.toContain("Senado se muestra primero para facilitar la lectura del detalle.");
+  it("deja la ruta como registro completo y mantiene los filtros en el explorador anual", () => {
+    const page = readFileSync(resolve(import.meta.dirname, "../app/votaciones-destacadas/page.tsx"), "utf8");
+    expect(page).toContain('title: "Votaciones parlamentarias — El Cambiómetro"');
+    expect(client).toContain("Votaciones parlamentarias");
+    expect(client).toContain("VotacionesAnualesExplorer");
+    expect(client).not.toContain('aria-label="Filtros de votaciones destacadas"');
+    expect(client).not.toContain("Decisiones que merecen contexto");
   });
 
   it("muestra las 769 votaciones del año con búsqueda y paginación", () => {
@@ -30,7 +31,6 @@ describe("interfaz de votaciones destacadas", () => {
   });
 
   it("describe el boletín sin repetir una etiqueta genérica como título", () => {
-    expect(client).toContain("tituloVotacionLegible(entry, detail?.tipo)");
     const source = readFileSync(resolve(import.meta.dirname, "./votaciones-format.ts"), "utf8");
     expect(source).toContain('"Votación de proyecto"');
     expect(source).toContain("Boletín N°");

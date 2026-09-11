@@ -75,7 +75,7 @@ export default function VotacionesAnualesExplorer({
         </p>
       </div>
       <p className="annual-votes__intro">
-        Consulta el registro anual completo. Las votaciones destacadas incluyen análisis interno; las demás conservan acceso directo al registro oficial.
+        Consulta todas las votaciones publicadas por cada corporación. Algunas fichas incluyen una lectura editorial adicional; las demás conservan acceso directo al registro oficial.
       </p>
       <div className="annual-votes__filters">
         <div className="featured-vote-camera-filter">

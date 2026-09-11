@@ -7,7 +7,7 @@ import Icono from "@/components/ui/Icono";
 import { GLOBAL_KPIS, KPI_SCOPES } from "@/lib/global-kpis";
 import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
 import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
-import { getVotingFreshness, VOTACIONES_DESTACADAS } from "@/lib/votaciones-destacadas";
+import { getHomeFeaturedVotes, getVotingFreshness } from "@/lib/votaciones-destacadas";
 import { tituloVotacionLegible } from "@/lib/votaciones-format";
 import { MOVIMIENTOS_HOME_SUMMARY } from "@/lib/movimientos";
 import { formatFechaCorta } from "@/lib/format";
@@ -115,11 +115,7 @@ export default async function HomePage() {
   const resolvedHomeKpis = HOME_KPIS.map((item) => item.key === "entidades"
     ? { ...item, value: entityCount || item.value }
     : item);
-  const votesById = new Map(VOTACIONES_DESTACADAS.map((vote) => [vote.votacion_id, vote]));
-  const highlightedVotes = HOME_FEATURED_VOTE_IDS.flatMap((id) => {
-    const vote = votesById.get(id);
-    return vote ? [vote] : [];
-  });
+  const highlightedVotes = getHomeFeaturedVotes(HOME_FEATURED_VOTE_IDS);
 
   return (
     <div className="home-desk">
@@ -320,7 +316,7 @@ export default async function HomePage() {
         <section className="container-main home-sources home-featured-votes" aria-labelledby="highlighted-votes-title">
           <div className="home-section-heading">
             <div><p className="eyebrow">Seguimiento legislativo</p><h2 id="highlighted-votes-title">Votaciones destacadas</h2></div>
-            <Link prefetch={false} href="/votaciones-destacadas/">Ver selección completa →</Link>
+            <Link prefetch={false} href="/votaciones-destacadas/">Ver todas las votaciones →</Link>
           </div>
           <p className="home-featured-votes__intro">Una selección de proyectos con impacto público, quórum relevante o materias que conviene entender en contexto.</p>
           <div className="voting-freshness" role="status" aria-label="Frescura de las votaciones parlamentarias">
