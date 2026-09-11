@@ -78,7 +78,7 @@ jobs:
         working-directory: transparencia-app
         run: npm run data:publish:cplt-category -- "${{ matrix.category }}"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: cplt-${{ matrix.category }}
           path: transparencia-app/data/cplt-category/${{ matrix.category }}
@@ -150,7 +150,7 @@ jobs:
 
       - name: Conservar diagnóstico de preflight D1
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: d1-preflight-cplt-${{ github.run_id }}
           path: transparencia-app/d1-preflight.json

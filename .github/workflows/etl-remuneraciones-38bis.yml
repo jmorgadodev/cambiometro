@@ -95,7 +95,7 @@ jobs:
 
       - name: Guardar evidencia del corte
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: remuneraciones-38bis-${{ github.run_id }}
           path: |
