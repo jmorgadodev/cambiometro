@@ -99,7 +99,7 @@ jobs:
             for (const file of files) hash.update(fs.readFileSync(file));
             const key = hash.digest("hex");
             const catalogSha256 = crypto.createHash("sha256").update(fs.readFileSync("data/lake/catalog/v1/manifest.json")).digest("hex");
-            fs.appendFileSync(process.env.GITHUB_OUTPUT, `key=${key}\\ncatalog_sha256=${catalogSha256}\\n`);
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `key=${key}\ncatalog_sha256=${catalogSha256}\n`);
           '
 
       - name: Restaurar snapshot validado por checksum

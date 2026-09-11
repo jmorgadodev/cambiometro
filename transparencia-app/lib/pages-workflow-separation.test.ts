@@ -21,6 +21,8 @@ describe("separación de workflows Pages", () => {
       expect(workflow).toContain("EXPECTED_CATALOG_SHA256");
       expect(workflow).toContain("catalog/v1/manifest.json");
       expect(workflow).toContain("sha256sum data/lake/catalog/v1/manifest.json");
+      expect(workflow).toContain("catalog_sha256=${catalogSha256}\\n");
+      expect(workflow).not.toContain("catalog_sha256=${catalogSha256}\\\\n");
     }
   });
 
