@@ -38,4 +38,11 @@ describe("manifiesto unificado de calidad de datos", () => {
     expect(source?.publicHistoricalCount).toBe(74_142);
     expect(source?.publicHistoricalCount).toBeLessThan(source?.historicalCount ?? 0);
   });
+
+  it("separa el catálogo InfoLobby del índice público reconciliado", () => {
+    const source = buildFallbackDataQualitySummary().sources.find((item) => item.id === "infolobby");
+    expect(source?.catalogDeclaredCount).toBe(60_615);
+    expect(source?.publicHistoricalCount).toBe(60_523);
+    expect((source?.catalogDeclaredCount ?? 0) - (source?.publicHistoricalCount ?? 0)).toBe(92);
+  });
 });

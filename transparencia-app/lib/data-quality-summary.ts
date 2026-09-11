@@ -43,6 +43,8 @@ export interface DataQualitySourceSummary {
   coverageNote: string;
   canonicalCount: number;
   historicalCount: number;
+  /** Rows declared by the latest public catalog before index reconciliation, when available. */
+  catalogDeclaredCount?: number;
   /** Rows present in the published R2 catalog across its available partitions. */
   publicHistoricalCount: number;
   lastSuccessAt: string | null;
@@ -120,6 +122,7 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
     coverageNote: source.coverageNote,
     canonicalCount,
     historicalCount,
+    catalogDeclaredCount: source.catalogDeclaredCount,
     publicHistoricalCount: canonicalCount,
     lastSuccessAt: null,
     checksumSha256: null,

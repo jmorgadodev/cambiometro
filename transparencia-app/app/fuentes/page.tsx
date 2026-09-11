@@ -103,6 +103,9 @@ export default async function FuentesPage() {
                       <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Registros: </dt>
                       <dd style={{ display: "inline", color: "var(--text-muted)" }}>
                         Canónicos: {source.canonicalCount.toLocaleString("es-CL")} · Consultables en R2: {source.publicHistoricalCount.toLocaleString("es-CL")}
+                        {source.catalogDeclaredCount && source.catalogDeclaredCount !== source.publicHistoricalCount
+                          ? ` · Catálogo declarado: ${source.catalogDeclaredCount.toLocaleString("es-CL")}`
+                          : ""}
                       </dd>
                     </div>
               <div style={{ fontSize: "0.7rem", color: source.publicHistoricalCount < source.historicalCount ? "var(--warn)" : "var(--text-subtle)", marginTop: "-0.15rem" }}>
