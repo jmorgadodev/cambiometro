@@ -82,8 +82,10 @@ describe("archivo histórico en GitHub Releases", () => {
       },
       async put(key, value) { cached.set(key, value); },
     };
+    const requestedUrls: string[] = [];
     vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
       const url = String(input);
+      requestedUrls.push(url);
       if (url.endsWith("contraloria-2026-01-manifest.json")) return Response.json(manifest);
       if (url.endsWith("contraloria-2026-01-records.jsonl.gz")) return new Response(compressed);
       return new Response(null, { status: 404 });
@@ -95,6 +97,7 @@ describe("archivo histórico en GitHub Releases", () => {
     expect(result?.data[0]).toMatchObject({ kind: "audit", title: "Informe oficial 1" });
     expect(cached.has("partitions/contraloria/2026/01/manifest.json")).toBe(true);
     expect(cached.has(`partitions/contraloria/2026/01/records-${checksum}.jsonl.gz`)).toBe(true);
+    expect(requestedUrls.every((url) => url.startsWith("https://github.com/jmorgadodev/cambiometro/releases/download/"))).toBe(true);
   });
 
   it("rechaza un artefacto cuyo checksum no coincide", async () => {
