@@ -26,12 +26,19 @@ interface Props {
   release: {
     source: string;
     period: string;
-    lastSuccessAt: string;
+    lastSuccessAt: string | null;
     status: DataQualityStatus;
     published: CoverageMetric;
     queryable: CoverageMetric;
     related: CoverageMetric;
     checksumSha256: string | null;
+    officialUrl?: string;
+  };
+  dipresCoverage: {
+    catalogDeclaredCount: number | null;
+    publicCount: number;
+    projectionPrograms: number;
+    projectionPeriod: string;
     officialUrl?: string;
   };
 }
@@ -70,6 +77,7 @@ export default function ServiciosPublicosClient({
   presupuestoTotalLey: presupuestoTotalLeyProp,
   gastoDevengado: gastoDevengadoProp,
   release,
+  dipresCoverage,
 }: Props) {
   const totalConPresupuestoEfectivo = totalConPartida ?? totalConPresupuesto ?? 0;
   const searchParams = useSearchParams();
@@ -321,7 +329,7 @@ export default function ServiciosPublicosClient({
 
       <div className="container-main" style={{ marginTop: "1rem" }}>
         <ReleaseMetaCard
-          title="Release del directorio de servicios públicos"
+          title="Release del directorio institucional"
           source={release.source}
           period={release.period}
           lastSuccessAt={release.lastSuccessAt}
@@ -332,9 +340,49 @@ export default function ServiciosPublicosClient({
           checksumSha256={release.checksumSha256}
           href="/servicios-publicos?view=table"
           officialUrl={release.officialUrl}
-          note="La lectura rápida resume presupuesto, dotación, compras, lobby y control. El detalle conserva filtros, paginación y enlaces de evidencia por institución."
+          note="Estas métricas describen el directorio institucional. El alcance de DIPRES se informa por separado porque sus datos son agregados de presupuesto y ejecución, no fichas de remuneraciones individuales."
         />
       </div>
+
+      <section className="container-main" style={{ marginTop: "1rem" }} aria-labelledby="dipres-coverage-title">
+        <div className="card" style={{ padding: "1.25rem", borderColor: "var(--border)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
+            <div>
+              <div className="eyebrow" style={{ color: "var(--accent)", marginBottom: "0.25rem" }}>DIPRES · datos agregados</div>
+              <h2 id="dipres-coverage-title" style={{ margin: 0, fontSize: "1.05rem", color: "var(--text-1)" }}>Presupuesto y ejecución pública</h2>
+              <p style={{ margin: "0.4rem 0 0", maxWidth: "760px", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.5 }}>
+                Esta fuente permite comparar partidas, capítulos, programas y ejecución mensual. No corresponde a un buscador de sueldos ni a fichas de pagos personales.
+              </p>
+            </div>
+            {dipresCoverage.officialUrl ? <a href={dipresCoverage.officialUrl} target="_blank" rel="noreferrer" className="btn btn-ghost" style={{ fontSize: "0.76rem" }}>Fuente oficial ↗</a> : null}
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "0.65rem", marginTop: "1rem" }}>
+            <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: "0.7rem" }}>
+              <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", textTransform: "uppercase" }}>Programas en la proyección</div>
+              <strong style={{ display: "block", marginTop: "0.18rem", color: "var(--text-1)", fontFamily: "monospace" }}>{dipresCoverage.projectionPrograms.toLocaleString("es-CL")}</strong>
+            </div>
+            <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: "0.7rem" }}>
+              <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", textTransform: "uppercase" }}>Registros consultables</div>
+              <strong style={{ display: "block", marginTop: "0.18rem", color: "var(--text-1)", fontFamily: "monospace" }}>{dipresCoverage.publicCount.toLocaleString("es-CL")}</strong>
+            </div>
+            <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: "0.7rem" }}>
+              <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", textTransform: "uppercase" }}>Catálogo de la fuente</div>
+              <strong style={{ display: "block", marginTop: "0.18rem", color: "var(--text-1)", fontFamily: "monospace" }}>{dipresCoverage.catalogDeclaredCount === null ? "No publicado" : dipresCoverage.catalogDeclaredCount.toLocaleString("es-CL")}</strong>
+            </div>
+            <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: "0.7rem" }}>
+              <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", textTransform: "uppercase" }}>Ejecución visible</div>
+              <strong style={{ display: "block", marginTop: "0.18rem", color: "var(--text-1)", fontFamily: "monospace" }}>{dipresCoverage.projectionPeriod}</strong>
+            </div>
+          </div>
+
+          {dipresCoverage.catalogDeclaredCount !== null && dipresCoverage.catalogDeclaredCount > dipresCoverage.publicCount ? (
+            <p style={{ margin: "0.85rem 0 0", padding: "0.7rem 0.8rem", borderLeft: "3px solid var(--warn)", background: "var(--surface-2)", color: "var(--text-muted)", fontSize: "0.76rem", lineHeight: 1.5 }}>
+              El catálogo declara {dipresCoverage.catalogDeclaredCount.toLocaleString("es-CL")} registros, pero el release público consultable contiene {dipresCoverage.publicCount.toLocaleString("es-CL")}. La diferencia queda informada como cobertura pendiente; no se presenta como dato disponible ni se completa con estimaciones.
+            </p>
+          ) : null}
+        </div>
+      </section>
 
       <div className="container-main" style={{ marginTop: "1rem" }}>
         <OverviewSignalPanel
