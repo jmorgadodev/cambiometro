@@ -45,6 +45,16 @@ mkdirSync(searchIndexRoot, { recursive: true });
 const compactRows = [];
 const byShard = new Map();
 const normalizeSearch = (value) => String(value ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL");
+const formatQualityIssues = new Set(["nombre_prefijo_invalido", "nombre_prefijo_numerico", "nombre_incompleto", "nombre_vacio"]);
+function qualityIssues(row) {
+  const issues = Array.isArray(row.calidad_datos?.incidencias) ? [...row.calidad_datos.incidencias] : [];
+  if (Number(row.remuneracion_bruta_mensual ?? 0) > 0
+    && (!Number.isFinite(Number(row.remuneracion_liquida_mensual)) || Number(row.remuneracion_liquida_mensual) <= 0)
+    && !issues.includes("remuneracion_liquida_no_informada")) {
+    issues.push("remuneracion_liquida_no_informada");
+  }
+  return [...new Set(issues)].sort();
+}
 for (const fileName of files) {
   const source = join(projectionRoot, fileName);
   let rows;
@@ -69,6 +79,7 @@ for (const fileName of files) {
       fi: row.fecha_ingreso ?? undefined,
       p: row.fuente_periodo ?? row.periodo ?? undefined,
       u: row.url ?? row.url_fuente ?? undefined,
+      q: qualityIssues(row),
       oid: organismId,
     };
     compactRows.push(compact);
@@ -144,6 +155,16 @@ for (const [shard, tokenMap] of byShard) {
 const compactSearch = (value) => normalizeSearch(value).replace(/[^a-z0-9]/g, "");
 const compactContract = (value) => compactSearch(value).replace("codigodeltrabajo", "codigotrabajo");
 const compactOrgType = (value) => compactSearch(value).replace("gobiernoregional", "gore");
+const qualitySummary = compactRows.reduce((summary, row) => {
+  const issues = row.q ?? [];
+  if (issues.length > 0) {
+    summary.recordsWithIssues += 1;
+    for (const issue of issues) summary.byIssue[issue] = (summary.byIssue[issue] ?? 0) + 1;
+    if (issues.some((issue) => !formatQualityIssues.has(issue))) summary.observedRows += 1;
+    if (issues.some((issue) => formatQualityIssues.has(issue))) summary.correctedRows += 1;
+  }
+  return summary;
+}, { recordsWithIssues: 0, correctedRows: 0, observedRows: 0, byIssue: {} });
 const filterDefinitions = [
   ...[...new Set(compactRows.map((row) => String(row.p ?? "").trim()).filter((value) => /^\d{4}-\d{2}$/.test(value)))].sort()
     .map((period) => ({ key: `periodo:${period}`, matches: (row) => row.p === period })),
@@ -173,6 +194,8 @@ const filterDefinitions = [
   ].map(([key, needle]) => ({ key: `tipo:${key}`, matches: (row) => compactOrgType(row.ot).includes(compactOrgType(needle)) })),
   { key: "cargo:alcalde", matches: (row) => /^(alcalde|alcaldesa)(\s|$)/.test(normalizeSearch(row.c).trim()) },
   { key: "horas_extras:true", matches: (row) => Number(row.h ?? 0) > 0 },
+  { key: "calidad:corregidos", matches: (row) => (row.q ?? []).some((issue) => formatQualityIssues.has(issue)) },
+  { key: "calidad:observados", matches: (row) => (row.q ?? []).some((issue) => !formatQualityIssues.has(issue)) },
 ];
 const filters = {};
 for (const definition of filterDefinitions) {
@@ -197,6 +220,7 @@ const searchIndex = {
   pages,
   shards,
   filters,
+  quality: qualitySummary,
 };
 writeFileSync(searchIndexPath, `${JSON.stringify(searchIndex, null, 2)}\n`);
 const searchIndexKey = `projections/funcionarios-v1/versions/${version}/search_index.json`;

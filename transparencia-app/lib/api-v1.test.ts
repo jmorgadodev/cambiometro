@@ -204,10 +204,13 @@ describe("API canónica v1", () => {
         shards: { an: "projections/funcionarios-v1/versions/2026-08-25/search_index/an.json" },
         filters: {
           "periodo:2026-07": { key: "projections/funcionarios-v1/versions/2026-08-25/search_index/filter-periodo-2026-07.json", count: 1 },
+          "calidad:observados": { key: "projections/funcionarios-v1/versions/2026-08-25/search_index/filter-quality-observed.json", count: 1 },
         },
+        quality: { recordsWithIssues: 1, correctedRows: 0, observedRows: 1, byIssue: { remuneracion_liquida_no_informada: 1 } },
       },
       "projections/funcionarios-v1/versions/2026-08-25/search_index/an.json": [["ana", [0]]],
       "projections/funcionarios-v1/versions/2026-08-25/search_index/filter-periodo-2026-07.json": [0],
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/filter-quality-observed.json": [0],
       "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [
         { id: "func-1", n: "Ana Pérez", c: "Profesional", o: "Municipalidad de Maipú", t: "Contrata", e: "Profesional", b: 1200000, p: "2026-07" },
         { id: "func-2", n: "Ana Pérez", c: "Profesional", o: "Municipalidad de Maipú", t: "Contrata", e: "Profesional", b: 1100000, p: "2026-06" },
@@ -218,7 +221,7 @@ describe("API canónica v1", () => {
       PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
     } as never;
 
-    const response = await api.fetch(new Request("https://example.test/api/funcionarios?query=Ana&periodo=2026-07&limit=20&include_zero=true"), env);
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?query=Ana&periodo=2026-07&calidad=observados&limit=20&include_zero=true"), env);
     const payload = await response.json();
 
     expect(response.status).toBe(200);
@@ -226,6 +229,7 @@ describe("API canónica v1", () => {
     expect(payload.data[0]).toMatchObject({ id: "func-1", fuente_periodo: "2026-07" });
     expect(payload.meta.total).toBe(1);
     expect(payload.meta.sourceStatus).toBe("r2-search");
+    expect(payload.meta.calidadDatos).toMatchObject({ alcance: "universo_publicado", registrosConIncidencias: 1, porIncidencia: { remuneracion_liquida_no_informada: 1 } });
   });
 
   it("mantiene el directorio consultable desde el catálogo R2 si D1 falla", async () => {
