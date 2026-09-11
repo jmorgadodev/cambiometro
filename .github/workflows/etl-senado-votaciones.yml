@@ -75,6 +75,13 @@ jobs:
         working-directory: transparencia-app
         run: npm run etl:prepare
 
+      - name: Hidratar snapshot combinado vigente antes de actualizar Senado
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:hydrate:static -- --required --required-files data/politicos-votaciones.json --only-files data/politicos-votaciones.json --force
+
       - name: Ingerir sólo votaciones del Senado
         working-directory: transparencia-app
         run: npm run etl -- --from "${{ steps.range.outputs.from }}" --to "${{ steps.range.outputs.to }}" --source votaciones_senado
