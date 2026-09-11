@@ -221,9 +221,9 @@ try {
   await verifyWidgetInColdContext();
   await checkInternalLinks(internalLinks);
 
-  // Verificación del registro completo y del análisis interactivo. La ruta
-  // conserva todas las votaciones; el análisis editorial sólo aparece en
-  // aquellas filas que cuentan con una ficha detallada.
+  // Verificación del registro completo. La ruta conserva todas las
+  // votaciones; el análisis editorial se mantiene en la portada y se abre
+  // desde allí para no confundirlo con el registro exhaustivo.
   await gotoWithNetworkRetry(`${baseUrl}/votaciones-destacadas/`);
   await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
   await page.getByRole("heading", { name: "Todas las votaciones de 2026", exact: true }).waitFor({ state: "visible", timeout: 15_000 });
@@ -233,17 +233,20 @@ try {
     "true",
     "El registro de votaciones debe iniciar filtrado por Senado",
   );
-  let analysisButton = page.getByRole("button", { name: "Abrir análisis" }).first();
-  // The complete register opens on Senado. Editorial analysis is attached to
-  // selected records, so the initial chamber may legitimately have no such
-  // row while the other chamber does.
-  if (await page.getByRole("button", { name: "Abrir análisis" }).count() === 0) {
-    await cameraFilter.getByRole("button", { name: /Cámara/ }).click();
-    await page.waitForTimeout(250);
-    analysisButton = page.getByRole("button", { name: "Abrir análisis" }).first();
-  }
-  await analysisButton.waitFor({ state: "visible", timeout: 15_000 });
-  await analysisButton.click();
+  assert((await page.locator('a[target="_blank"]').count()) > 0, "El registro completo debe conservar enlaces oficiales");
+
+  await gotoWithNetworkRetry(baseUrl);
+  await page.getByRole("heading", { name: /La información pública no debería perderse|Transparencia, votaciones y gastos p.blicos|Sigue las decisiones p.blicas/ }).first().waitFor({ state: "visible", timeout: 15_000 });
+  await page.getByRole("link", { name: /Explorar parlamentarios/ }).first().waitFor({ state: "visible", timeout: 15_000 });
+  assert.equal(await page.getByRole("heading", { name: /La información pública no debería perderse|Transparencia, votaciones y gastos p.blicos|Sigue las decisiones p.blicas/ }).count(), 1);
+  assert.equal(await page.getByRole("link", { name: /Explorar parlamentarios/ }).count(), 1);
+  const highlightedVotes = page.getByRole("region", { name: "Votaciones destacadas" });
+  await highlightedVotes.getByRole("heading", { name: "Votaciones destacadas" }).waitFor({ state: "visible", timeout: 15_000 });
+  await highlightedVotes.getByRole("link", { name: /Ver todas las votaciones/ }).waitFor({ state: "visible", timeout: 15_000 });
+  const analysisLink = highlightedVotes.getByRole("link", { name: /Abrir análisis/ }).first();
+  await analysisLink.waitFor({ state: "visible", timeout: 15_000 });
+  await analysisLink.click();
+  await page.waitForURL(/\/votaciones-destacadas\/\?votacion=/, { timeout: 15_000 });
   const featuredDialog = page.locator(".featured-vote-dialog:visible");
   await featuredDialog.waitFor({ state: "visible", timeout: 5_000 });
   assert.equal(await featuredDialog.locator("[role=tab]").count(), 3, "Detalle destacado debe ofrecer tres capas");
@@ -262,12 +265,6 @@ try {
   await nominalSearch.fill("Pedro Araya");
   assert.equal(await featuredDialog.getByText("Pedro Araya Guerrero", { exact: true }).count(), 1, "El padrón nominal debe encontrar a Pedro Araya Guerrero");
   await featuredDialog.getByRole("button", { name: "Cerrar análisis" }).click();
-
-  await gotoWithNetworkRetry(baseUrl);
-  await page.getByRole("heading", { name: /La información pública no debería perderse|Transparencia, votaciones y gastos p.blicos|Sigue las decisiones p.blicas/ }).first().waitFor({ state: "visible", timeout: 15_000 });
-  await page.getByRole("link", { name: /Explorar parlamentarios/ }).first().waitFor({ state: "visible", timeout: 15_000 });
-  assert.equal(await page.getByRole("heading", { name: /La información pública no debería perderse|Transparencia, votaciones y gastos p.blicos|Sigue las decisiones p.blicas/ }).count(), 1);
-  assert.equal(await page.getByRole("link", { name: /Explorar parlamentarios/ }).count(), 1);
   await page.waitForTimeout(500);
   await page.screenshot({ path: join(tmpdir(), "transparencia-home-desktop.png"), fullPage: true });
 
