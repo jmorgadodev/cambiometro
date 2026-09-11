@@ -221,19 +221,17 @@ try {
   await verifyWidgetInColdContext();
   await checkInternalLinks(internalLinks);
 
-  // Verificación del análisis interactivo de una votación destacada. Esta
-  // guardia protege el valor principal de la página: no basta con que el
-  // listado cargue; el usuario debe poder abrir las tres capas del detalle,
-  // comparar bancadas y encontrar una persona en el padrón nominal.
+  // Verificación del registro completo y del análisis interactivo. La ruta
+  // conserva todas las votaciones; el análisis editorial sólo aparece en
+  // aquellas filas que cuentan con una ficha detallada.
   await gotoWithNetworkRetry(`${baseUrl}/votaciones-destacadas/`);
-  // La página es HTML estático, pero el botón de análisis requiere que React
-  // termine de hidratar antes de evaluar el click en runners lentos.
   await page.waitForLoadState("networkidle", { timeout: 10_000 }).catch(() => {});
+  await page.getByRole("heading", { name: "Todas las votaciones de 2026", exact: true }).waitFor({ state: "visible", timeout: 15_000 });
   const cameraFilter = page.locator(".featured-vote-camera-filter");
   assert.equal(
-    await cameraFilter.getByRole("button", { name: "Senado", exact: true }).getAttribute("aria-pressed"),
+    await cameraFilter.getByRole("button", { name: /Senado/ }).getAttribute("aria-pressed"),
     "true",
-    "Votaciones destacadas debe iniciar filtrada por Senado",
+    "El registro de votaciones debe iniciar filtrado por Senado",
   );
   const analysisButton = page.getByRole("button", { name: "Abrir análisis" }).first();
   await analysisButton.waitFor({ state: "visible", timeout: 15_000 });

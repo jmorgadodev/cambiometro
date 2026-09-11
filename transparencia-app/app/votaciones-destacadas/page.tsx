@@ -3,8 +3,8 @@ import VotacionesDestacadasClient from "@/components/VotacionesDestacadasClient"
 import { getVotingFreshness, getVotacionDestacadaDetalle, getVotacionesAnuales, VOTACIONES_DESTACADAS } from "@/lib/votaciones-destacadas";
 
 export const metadata: Metadata = {
-  title: "Votaciones destacadas — El Cambiómetro",
-  description: "Selección editorial de votaciones nominales verificables del Congreso Nacional.",
+  title: "Votaciones parlamentarias — El Cambiómetro",
+  description: "Registro completo de votaciones nominales verificables de la Cámara y el Senado.",
   alternates: { canonical: "/votaciones-destacadas" },
 };
 

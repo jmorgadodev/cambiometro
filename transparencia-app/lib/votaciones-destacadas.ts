@@ -212,6 +212,32 @@ export function getVotacionesAnuales(year = "2026"): VotacionAnual[] {
     .sort((left, right) => right.fecha.localeCompare(left.fecha) || right.votacion_id.localeCompare(left.votacion_id));
 }
 
+/**
+ * Keeps the Home editorial selection, while refreshing its factual fields from
+ * the current annual voting source when the ID is present in that release.
+ * The editorial title and summary remain curated; no new featured item is
+ * invented when a release is unavailable or an ID is not found.
+ */
+export function getHomeFeaturedVotes(ids: readonly string[]): VotacionDestacada[] {
+  const editorial = new Map(VOTACIONES_DESTACADAS.map((entry) => [entry.votacion_id, entry]));
+  const current = new Map(getVotacionesAnuales().map((entry) => [entry.votacion_id, entry]));
+
+  return ids.flatMap((id) => {
+    const original = editorial.get(id);
+    if (!original) return [];
+    const latest = current.get(id);
+    if (!latest) return [original];
+    return [{
+      ...original,
+      boletin: latest.boletin ?? original.boletin,
+      camara: latest.camara,
+      fecha: latest.fecha,
+      resultado: latest.resultado,
+      fuente_url: latest.fuente_url,
+    }];
+  });
+}
+
 function normalizeOption(value: string | undefined): OpcionVotacion {
   const normalized = (value || "No Vota").trim().toLowerCase();
   if (normalized === "afirmativo" || normalized === "sí" || normalized === "si" || normalized === "a favor") return "Afirmativo";

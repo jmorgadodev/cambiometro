@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getVotingFreshness, getVotacionDestacadaDetalle, getVotacionesAnuales } from "./votaciones-destacadas";
+import { getHomeFeaturedVotes, getVotingFreshness, getVotacionDestacadaDetalle, getVotacionesAnuales } from "./votaciones-destacadas";
 import { bancadaDisensoPct, bancadaParticipacion, getVotacionBancadaShares, sortVotacionBancadas } from "./votaciones-bancada";
 
 describe("votaciones destacadas", () => {
@@ -25,6 +25,20 @@ describe("votaciones destacadas", () => {
     expect(freshness.latestVoteDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(freshness.reviewedAt!.slice(0, 10) >= freshness.latestVoteDate!).toBe(true);
     expect(freshness.totalSessions).toBeGreaterThan(0);
+  });
+
+  it("mantiene las destacadas de la Home y refresca sus campos desde el registro anual", () => {
+    const featured = getHomeFeaturedVotes([
+      "senado-vot-11264",
+      "camara-vot-89844",
+      "senado-vot-11274",
+      "camara-vot-89749",
+      "camara-vot-89750",
+    ]);
+
+    expect(featured).toHaveLength(5);
+    expect(featured.every((entry) => entry.votacion_id)).toBe(true);
+    expect(featured.every((entry) => entry.fuente_url.startsWith("http"))).toBe(true);
   });
 
   it("expone el padrón nominal, el resultado recalculado y el agrupamiento por bancada", () => {
