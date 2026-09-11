@@ -17,6 +17,7 @@ for (const source of summary.sources) {
   ids.add(source.id);
   if (!Number.isSafeInteger(source.canonicalCount) || source.canonicalCount < 0) fail(`${source.id}: canonicalCount inválido`);
   if (!Number.isSafeInteger(source.historicalCount) || source.historicalCount < source.canonicalCount) fail(`${source.id}: histórico menor que canónico`);
+  if (source.catalogDeclaredCount !== null && source.catalogDeclaredCount !== undefined && (!Number.isSafeInteger(source.catalogDeclaredCount) || source.catalogDeclaredCount < source.publicHistoricalCount)) fail(`${source.id}: catalogDeclaredCount inválido`);
   if (!Number.isSafeInteger(source.publicHistoricalCount) || source.publicHistoricalCount < source.canonicalCount) fail(`${source.id}: publicHistoricalCount inválido`);
   for (const [name, metric] of Object.entries(source.metrics)) {
     if (metric.count === null) {

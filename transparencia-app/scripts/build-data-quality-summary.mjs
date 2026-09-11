@@ -91,6 +91,7 @@ const sources = config.map((source) => {
     ...source,
     canonicalCount,
     historicalCount,
+    catalogDeclaredCount: Number.isSafeInteger(source.catalogDeclaredCount) ? source.catalogDeclaredCount : null,
     publicHistoricalCount,
     period,
     lastSuccessAt,

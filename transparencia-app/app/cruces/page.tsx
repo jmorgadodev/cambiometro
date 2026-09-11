@@ -46,6 +46,7 @@ export default async function CrossesPage() {
   const chilecompraCanonicalCount = SOURCE_CANONICAL_COUNTS.chilecompra;
   const chilecompraSummary = getChileCompraResumen(5);
   const chilecompraQuality = qualitySources.find((source) => source.id === "chilecompra");
+  const infolobbyQuality = qualitySources.find((source) => source.id === "infolobby");
   const infolobbyCanonicalCount = SOURCE_CANONICAL_COUNTS.infolobby;
 
   const clp = (amount: number | null) => {
@@ -138,7 +139,12 @@ export default async function CrossesPage() {
             <div className="stat-tile stat-tile--alert">
               <div className="stat-tile__value">{infolobbyCanonicalCount.toLocaleString("es-CL")}</div>
               <div className="stat-tile__label">Registros InfoLobby</div>
-              <div className="stat-tile__hint">Universo canónico · {infolobbyIndexedCount.toLocaleString("es-CL")} registros indexados en esta vista</div>
+              <div className="stat-tile__hint">
+                {infolobbyCanonicalCount.toLocaleString("es-CL")} consultables mediante paginación · representación inicial de {infolobbyIndexedCount.toLocaleString("es-CL")} cruces
+                {infolobbyQuality?.catalogDeclaredCount && infolobbyQuality.catalogDeclaredCount !== infolobbyCanonicalCount
+                  ? ` · catálogo declara ${infolobbyQuality.catalogDeclaredCount.toLocaleString("es-CL")} (${(infolobbyQuality.catalogDeclaredCount - infolobbyCanonicalCount).toLocaleString("es-CL")} sin índice reconciliado)`
+                  : ""}
+              </div>
             </div>
           </div>
         </section>
@@ -272,13 +278,13 @@ export default async function CrossesPage() {
             <div className="card" style={{ padding: "1.25rem", background: "var(--surface)", borderColor: "var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>🤝</span>
-                 <span className="badge badge-info">{infolobbyCanonicalCount.toLocaleString("es-CL")} registros</span>
+                <span className="badge badge-info">{infolobbyCanonicalCount.toLocaleString("es-CL")} consultables</span>
               </div>
               <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>
                 InfoLobby (Ley 20.730)
               </strong>
               <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", margin: "0.3rem 0 0.85rem", lineHeight: 1.4 }}>
-                Registro de audiencias sostenidas con autoridades, viajes financiados y donativos.
+                Registro paginado de audiencias sostenidas con autoridades, viajes financiados y donativos. La vista inicial no representa todo el universo.
               </p>
               <Link prefetch={false} href="/cruces?fuente=infolobby" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem", width: "100%", textAlign: "center" }}>
                 Ver registros InfoLobby →

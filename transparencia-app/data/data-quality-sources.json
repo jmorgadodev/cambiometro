@@ -149,6 +149,7 @@
     "canonicalCount": 60523,
     "historicalCount": 60523,
     "queryableCount": 60523,
+    "catalogDeclaredCount": 60615,
     "relatedCount": null,
     "modulePath": "/cruces?fuente=infolobby",
     "derived": false,

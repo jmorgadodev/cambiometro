@@ -15,6 +15,7 @@ export interface DataQualitySourceRow {
   statusBadgeClass: string;
   canonicalCount: number;
   historicalCount: number;
+  catalogDeclaredCount: number | null;
   publicHistoricalCount: number;
   periodoReciente: string;
   desfase: string;
@@ -99,6 +100,7 @@ export async function getDataQualityDashboardData(): Promise<{ sources: DataQual
       statusBadgeClass: status === "desfasado" ? "badge badge-warn" : status === "sin_datos" ? "badge" : "badge badge-ok",
       canonicalCount: source.canonicalCount,
       historicalCount: source.historicalCount,
+      catalogDeclaredCount: source.catalogDeclaredCount ?? null,
       publicHistoricalCount: source.publicHistoricalCount,
       periodoReciente: source.period,
       desfase: source.lag,

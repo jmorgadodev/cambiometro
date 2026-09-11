@@ -197,7 +197,7 @@ export default function EtlHealthDashboardClient({
 
               <div style={{ textAlign: "right" }}>
                 <strong style={{ display: "block", fontFamily: "monospace", fontSize: "0.95rem", color: "var(--text-primary)" }}>
-                  Canónicos: {(fuente.canonicalCount ?? fuente.recordCount).toLocaleString("es-CL")} · Consultables: {(fuente.canonicalCount ?? fuente.recordCount).toLocaleString("es-CL")} · Histórico: declarado {(fuente.historicalCount ?? fuente.recordCount).toLocaleString("es-CL")} · Diferencia por deduplicación y cobertura declarada
+                  Canónicos: {(fuente.canonicalCount ?? fuente.recordCount).toLocaleString("es-CL")} · Consultables: {(fuente.publicHistoricalCount ?? fuente.canonicalCount ?? fuente.recordCount).toLocaleString("es-CL")} · Histórico: declarado {(fuente.historicalCount ?? fuente.recordCount).toLocaleString("es-CL")}{fuente.catalogDeclaredCount && fuente.catalogDeclaredCount !== fuente.publicHistoricalCount ? ` · Catálogo declarado ${fuente.catalogDeclaredCount.toLocaleString("es-CL")}` : ""} · Diferencia por deduplicación y cobertura declarada
                 </strong>
                 <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", display: "block" }}>
                   El histórico declarado sólo se considera disponible cuando sus particiones están publicadas y paginadas
