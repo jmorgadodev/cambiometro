@@ -13,6 +13,9 @@ const dryRun = process.argv.includes("--dry-run");
 const excludeSourceIndex = process.argv.indexOf("--exclude-source");
 const excludedSources = new Set((excludeSourceIndex >= 0 ? process.argv[excludeSourceIndex + 1] : "")
   .split(",").map((value) => value.trim()).filter(Boolean));
+const replaceSourceIndex = process.argv.indexOf("--replace-source");
+const replaceSourceIds = new Set((replaceSourceIndex >= 0 ? process.argv[replaceSourceIndex + 1] : "")
+  .split(",").map((value) => value.trim()).filter(Boolean));
 
 if (!existsSync(snapshotPath)) throw new Error(`Snapshot inexistente: ${snapshotPath}`);
 if (outputRoot === appRoot || dirname(outputRoot) === outputRoot) throw new Error("INVALID_OUTPUT_PATH");
@@ -44,7 +47,7 @@ const existingEntityBundles = Object.fromEntries((existingCatalog?.sources ?? []
     entities: readExistingProjection(source.entityKey),
     indexes: readExistingProjection(source.entityIndexKey),
   }]));
-const plan = buildLakePlan(snapshot, { sourceInventory, existingCatalog, existingEntityBundles });
+const plan = buildLakePlan(snapshot, { sourceInventory, existingCatalog, existingEntityBundles, replaceSourceIds });
 const publishPlan = {
   schemaVersion: "1.0.0",
   generatedAt: snapshot.actualizado_en ?? null,

@@ -317,7 +317,7 @@ export function buildLakePlan(snapshot, options = {}) {
       groups.set(id, group);
       let bundle = entityBundles.get(sourceId);
       if (!bundle) {
-        const seed = existingEntityBundles[sourceId] ?? {};
+        const seed = replaceSourceIds.has(sourceId) ? {} : (existingEntityBundles[sourceId] ?? {});
         const entities = new Map();
         for (const entity of seed.entities ?? []) upsertDeterministicEntity(entities, entity);
         const indexes = new Map((seed.indexes ?? []).map((entry) => [entry.id, {

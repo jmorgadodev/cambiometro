@@ -23,7 +23,7 @@ import { fetchVotacionesSenado } from "./etl/connectors/senado-votaciones.mjs";
 import { assertSuccessfulRun } from "./etl/validation.mjs";
 import { readJsonIfPresent, writeFileAtomic } from "./etl/safe-file.mjs";
 import { mergeRecordsById } from "./etl/history.mjs";
-import { resolveIncrementalFrom } from "./etl/incremental-window.mjs";
+import { resolveCamaraVoteWindow, CAMARA_CURRENT_PERIOD_START } from "./etl/camara-history.mjs";
 import { expenseMonthWindow } from "./etl/expense-window.mjs";
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
@@ -37,7 +37,7 @@ const BULK_REQUEST_TIMEOUT_MS = 180_000;
 const DRY_RUN = process.argv.includes("--dry-run");
 const FULL_HISTORY = process.argv.includes("--full-history");
 const SOURCE_KEYS = new Set(["infoprobidad", "infolobby", "camara", "votaciones_camara", "votaciones_senado", "gastos_senado", "gastos_camara"]);
-const PERIODO_ACTUAL_DESDE = "2026-03-11";
+const PERIODO_ACTUAL_DESDE = CAMARA_CURRENT_PERIOD_START;
 
 function readArgument(name) {
   const index = process.argv.indexOf(name);
@@ -288,9 +288,9 @@ async function main() {
   const now = new Date();
   const options = parseOptions();
   const previous = readJsonIfPresent(latestPath, null);
-  const voteFrom = resolveIncrementalFrom({
+  const voteWindow = resolveCamaraVoteWindow({
     requestedFrom: options.from,
-    minimumFrom: PERIODO_ACTUAL_DESDE,
+    fullHistory: FULL_HISTORY,
     previousRecords: [
       ...(previous?.fuentes?.votaciones_camara ?? []),
       ...(previous?.fuentes?.votaciones_senado ?? []),
@@ -335,7 +335,7 @@ async function main() {
   await runSource({
     key: "votaciones_camara", label: "Votaciones Cámara", selected: options.sources, previous, snapshot, summary,
     summaryKey: "votaciones_ingresadas", minimum: 0, preserveHistory: true,
-    load: () => fetchVotacionesCamara({ ...options, from: voteFrom }),
+    load: () => fetchVotacionesCamara({ ...options, from: voteWindow.from, minimumFrom: voteWindow.minimumFrom }),
   });
   await runSource({
     key: "votaciones_senado", label: "Votaciones Senado", selected: options.sources, previous, snapshot, summary,
