@@ -8,6 +8,7 @@ on:
       - "ETL Diario - Votaciones Cámara"
       - "ETL Diario - Votaciones Senado"
       - "ETL Diario - Movimientos de Autoridades"
+      - "ETL Mensual - Remuneraciones 38 bis"
       - "ETL Semanal - Personal de apoyo Cámara"
       - "ETL Semanal - Personal de apoyo Senado"
       - "ETL Mensual - CPLT Nóminas Transparencia Activa"
