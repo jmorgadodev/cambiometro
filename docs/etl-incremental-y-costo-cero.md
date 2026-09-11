@@ -2,9 +2,11 @@
 
 ## Qué se ejecuta diariamente
 
-El workflow `etl-daily.yml` mantiene el rango de ingestión con solapamiento y
-fusiona los registros por identificador estable. El regenerador de
-votaciones (`ingest:votaciones-full`) funciona en modo incremental por defecto:
+El workflow `etl-daily.yml` mantiene el rango de ingestión con solapamiento para
+Cámara y sus votaciones. El workflow `etl-senado-votaciones.yml` ejecuta el
+mismo patrón para Senado en una ventana separada. Ambos fusionan los registros
+por identificador estable. El regenerador de votaciones
+(`ingest:votaciones-full`) funciona en modo incremental por defecto:
 
 - consulta el listado oficial para detectar altas y cambios;
 - vuelve a pedir detalles sólo desde siete días antes de la fecha de ejecución;

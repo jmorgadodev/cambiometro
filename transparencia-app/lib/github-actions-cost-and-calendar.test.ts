@@ -14,9 +14,9 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(workflowFiles.length).toBeGreaterThanOrEqual(10);
 
     const staticPublishers = new Set([
-      "etl-chilecompra.yml", "etl-contraloria.yml", "etl-cplt.yml", "etl-daily.yml",
+      "etl-chilecompra.yml", "etl-contraloria.yml", "etl-cplt.yml", "etl-daily.yml", "etl-senado-votaciones.yml",
       "etl-dipres.yml", "etl-expenses.yml", "etl-infolobby-scheduled.yml", "etl-infoprobidad.yml",
-      "etl-ley-19862.yml", "etl-movimientos.yml", "etl-personal-apoyo.yml", "etl-servel.yml",
+      "etl-ley-19862.yml", "etl-movimientos.yml", "etl-personal-apoyo.yml", "etl-personal-apoyo-senado.yml", "etl-servel.yml",
       "etl-sinim.yml",
     ]);
     const serializedMutations = new Set(["repair-transfer-d1.yml"]);
@@ -164,7 +164,13 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
 
     expect(workflow).toContain("full_votaciones:");
     expect(workflow).toContain("FULL_VOTACIONES");
-    expect(workflow).toContain("npm run ingest:votaciones-full -- --full");
+    expect(workflow).toContain("npm run ingest:votaciones-full -- --source camara --full");
+    const senateWorkflow = fs.readFileSync(path.join(workflowsDir, "etl-senado-votaciones.yml"), "utf8");
+    expect(senateWorkflow).toContain("name: ETL Diario - Votaciones Senado");
+    expect(senateWorkflow).toContain("npm run etl -- --from");
+    expect(senateWorkflow).toContain("--source votaciones_senado");
+    expect(senateWorkflow).toContain("npm run ingest:votaciones-full -- --source senado --full");
+    expect(workflow).not.toContain("--source camara,votaciones_camara,votaciones_senado");
     expect(ingest).toContain("const REFRESH_FROM");
     expect(ingest).toContain("function cachedSession");
     expect(ingest).toContain("if (cached && !shouldRefresh(vote.fecha)) return cached");
@@ -192,7 +198,6 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       "etl-ley-19862.yml",
       "etl-servel.yml",
       "etl-sinim.yml",
-      "etl-personal-apoyo.yml",
       "etl-cplt.yml",
     ];
 
@@ -207,11 +212,17 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(infolobby).toContain("D1 pospuesto por asset no disponible");
   });
 
-  it("12. Los ETL de personal y CPLT preservan R2 cuando D1 se pospone", () => {
+  it("12. Los ETL de personal separados publican R2 sin usar D1; CPLT conserva su fallback", () => {
     const personal = fs.readFileSync(path.join(workflowsDir, "etl-personal-apoyo.yml"), "utf8");
+    const personalSenado = fs.readFileSync(path.join(workflowsDir, "etl-personal-apoyo-senado.yml"), "utf8");
     const cplt = fs.readFileSync(path.join(workflowsDir, "etl-cplt.yml"), "utf8");
+    expect(personal).toContain("--source camara");
+    expect(personalSenado).toContain("--source senado");
     expect(personal).toContain("--skip-d1");
-    expect(personal).toContain("Publicar personal de apoyo sólo en R2 por cuota");
+    expect(personalSenado).toContain("--skip-d1");
+    expect(personal).not.toMatch(/d1-preflight|data:materialize/);
+    expect(personalSenado).not.toMatch(/d1-preflight|data:materialize/);
+    expect(personal).toContain("Publicar personal de apoyo sólo en R2");
     expect(cplt).toContain("data:finalize:cplt:r2");
     expect(cplt).toContain("Registrar D1 CPLT pospuesto por cuota");
   });
