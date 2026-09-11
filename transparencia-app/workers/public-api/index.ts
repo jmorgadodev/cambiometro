@@ -320,6 +320,14 @@ interface OfficialsSearchIndex {
   pages: Array<{ page: number; key: string; count: number }>;
   shards: Record<string, string | string[]>;
   filters?: Record<string, { key: string; count: number }>;
+  quality?: OfficialsQualitySummary;
+}
+
+interface OfficialsQualitySummary {
+  recordsWithIssues: number;
+  correctedRows: number;
+  observedRows: number;
+  byIssue: Record<string, number>;
 }
 
 interface CompactOfficialRow {
@@ -340,6 +348,7 @@ interface CompactOfficialRow {
   p?: string;
   u?: string;
   oid?: string;
+  q?: string[];
 }
 
 type CompactOfficialTokenEntry = [token: string, positions: number[]];
@@ -665,6 +674,11 @@ function compactOfficialRow(row: CompactOfficialRow): JsonRecord {
     fuente_periodo: row.p ?? null,
     periodo: row.p ?? null,
     url: row.u ?? null,
+    calidad_datos: {
+      estado: row.q?.length ? "normalizado" : "original",
+      incidencias: row.q ?? [],
+      detalle: "La clasificación conserva las incidencias de calidad registradas por la fuente y el ETL.",
+    },
   };
 }
 
@@ -681,6 +695,7 @@ function officialFilterKeys(requestUrl: URL) {
     ["tipo", requestUrl.searchParams.get("tipo") ?? "Todos"],
     ["cargo", requestUrl.searchParams.get("cargo") ?? "Todos"],
     ["periodo", requestUrl.searchParams.get("periodo") ?? requestUrl.searchParams.get("fuente_periodo") ?? "Todos"],
+    ["calidad", requestUrl.searchParams.get("calidad") ?? "Todos"],
   ];
   for (const [name, value] of values) {
     const normalizedValue = normalized(value);
@@ -882,6 +897,14 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env) {
       meta.page = page;
       meta.totalPages = totalPages;
       meta.limit = limit;
+      if (index.quality) {
+        meta.calidadDatos = {
+          ...(meta.calidadDatos as JsonRecord ?? {}),
+          alcance: "universo_publicado",
+          registrosConIncidencias: index.quality.recordsWithIssues,
+          porIncidencia: index.quality.byIssue,
+        };
+      }
       payload.meta = meta;
       return json(payload, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
     }
@@ -892,6 +915,14 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env) {
     meta.page = page;
     meta.totalPages = totalPages;
     meta.limit = limit;
+    if (index.quality) {
+      meta.calidadDatos = {
+        ...(meta.calidadDatos as JsonRecord ?? {}),
+        alcance: "universo_publicado",
+        registrosConIncidencias: index.quality.recordsWithIssues,
+        porIncidencia: index.quality.byIssue,
+      };
+    }
     payload.meta = meta;
     return json(payload, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
   }
