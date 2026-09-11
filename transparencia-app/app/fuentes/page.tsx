@@ -105,7 +105,7 @@ export default async function FuentesPage() {
                         Canónicos: {source.canonicalCount.toLocaleString("es-CL")} · Consultables en R2: {source.publicHistoricalCount.toLocaleString("es-CL")}
                       </dd>
                     </div>
-                    <div style={{ fontSize: "0.7rem", color: source.publicHistoricalCount < source.historicalCount ? "var(--warn, #b45309)" : "var(--text-subtle)", marginTop: "-0.15rem" }}>
+              <div style={{ fontSize: "0.7rem", color: source.publicHistoricalCount < source.historicalCount ? "var(--warn)" : "var(--text-subtle)", marginTop: "-0.15rem" }}>
                       {source.publicHistoricalCount < source.historicalCount
                         ? `Histórico declarado: ${source.historicalCount.toLocaleString("es-CL")}; aún no está todo publicado en R2.`
                         : "El histórico declarado coincide con el catálogo publicado."}
