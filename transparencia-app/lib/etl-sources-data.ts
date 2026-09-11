@@ -11,6 +11,8 @@ export interface EtlSourceInfo {
   recordCount: number;
   canonicalCount: number;
   historicalCount: number;
+  publicHistoricalCount: number;
+  catalogDeclaredCount?: number;
   financialAmountClp?: number;
   status: "operational" | "updated" | "official_lag";
   statusText: string;
@@ -53,6 +55,10 @@ const HISTORICAL_COUNTS: Record<string, number> = {
   ine: 346,
 };
 
+const CATALOG_DECLARED_COUNTS: Record<string, number> = {
+  infolobby: 60615,
+};
+
 type HealthKey = keyof typeof healthRaw.sources | "personal_apoyo" | "ine";
 type Descriptor = Omit<EtlSourceInfo, "recordCount" | "canonicalCount" | "historicalCount" | "financialAmountClp" | "lastUpdated" | "lastUpdatedRelative" | "status" | "statusText"> & { health: HealthKey };
 const dateLabel = (value: string) => `Corte ${new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(value))}`;
@@ -86,6 +92,8 @@ export const ETL_SOURCES_DATA: EtlSourceInfo[] = descriptors.map(({ health, ...d
     recordCount: canonicalCount,
     canonicalCount,
     historicalCount,
+    publicHistoricalCount: canonicalCount,
+    ...(CATALOG_DECLARED_COUNTS[health] !== undefined ? { catalogDeclaredCount: CATALOG_DECLARED_COUNTS[health] } : {}),
     ...(financialAmountClp !== undefined ? { financialAmountClp } : {}),
     lastUpdated: generatedAt,
     lastUpdatedRelative: dateLabel(generatedAt),
