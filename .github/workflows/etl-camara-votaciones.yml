@@ -22,7 +22,9 @@ concurrency:
   cancel-in-progress: false
 
 permissions:
-  contents: read
+  # El publicador consulta y actualiza el release de datos para dejar
+  # trazabilidad del corte; no materializa D1.
+  contents: write
 
 jobs:
   ingest-publish:
