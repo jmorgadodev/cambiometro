@@ -109,4 +109,3 @@ jobs:
         run: |
           npm run data:build:subsets
           npm run data:publish:static -- --groups parlamento
-
