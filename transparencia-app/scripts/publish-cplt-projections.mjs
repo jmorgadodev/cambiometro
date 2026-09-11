@@ -145,6 +145,8 @@ const compactSearch = (value) => normalizeSearch(value).replace(/[^a-z0-9]/g, ""
 const compactContract = (value) => compactSearch(value).replace("codigodeltrabajo", "codigotrabajo");
 const compactOrgType = (value) => compactSearch(value).replace("gobiernoregional", "gore");
 const filterDefinitions = [
+  ...[...new Set(compactRows.map((row) => String(row.p ?? "").trim()).filter((value) => /^\d{4}-\d{2}$/.test(value)))].sort()
+    .map((period) => ({ key: `periodo:${period}`, matches: (row) => row.p === period })),
   ...[
     ["planta", "planta"],
     ["contrata", "contrata"],
