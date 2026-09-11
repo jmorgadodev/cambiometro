@@ -152,6 +152,61 @@ async function main() {
   const routes = [];
   for (const item of cases) routes.push(await checkRoute(browser, baseUrl, item.route, item.markers));
 
+  const mobileResponsive = [];
+  for (const viewport of [
+    { name: "phone", width: 390, height: 844 },
+    { name: "phone-wide", width: 430, height: 932 },
+  ]) {
+    const mobileContext = await browser.newContext({ viewport, isMobile: true, hasTouch: true });
+    const mobilePage = await mobileContext.newPage();
+    const mobileErrors = [];
+    mobilePage.on("pageerror", (error) => mobileErrors.push(error.message));
+    mobilePage.on("console", (message) => {
+      if (message.type() === "error" && !message.text().includes("Failed to load resource")) {
+        mobileErrors.push(message.text());
+      }
+    });
+    await mobilePage.goto(`${baseUrl}/remuneraciones-publicas`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+    await mobilePage.waitForTimeout(waitMs);
+    const bodyLayout = await mobilePage.evaluate(() => ({
+      viewport: document.documentElement.clientWidth,
+      bodyWidth: document.body.scrollWidth,
+      documentWidth: document.documentElement.scrollWidth,
+    }));
+    const desktopNavigationHidden = await mobilePage.locator(".site-header__nav-row").evaluate((element) => getComputedStyle(element).display === "none");
+    const menuButtonVisible = await mobilePage.getByRole("button", { name: "Abrir menú de secciones" }).isVisible();
+    const menuButton = mobilePage.getByRole("button", { name: "Abrir menú de secciones" });
+    await menuButton.click();
+    await mobilePage.waitForTimeout(150);
+    const drawerOpen = await mobilePage.locator("#mobile-drawer").getAttribute("aria-hidden") === "false";
+    const remunerationTitleVisible = await mobilePage.getByRole("heading", { name: "Encuentra un pago publicado" }).isVisible();
+    const releaseTableMobile = await mobilePage.evaluate(() => {
+      const table = document.querySelector(".remuneraciones-release-table");
+      const shell = table?.closest(".table-shell");
+      const action = table?.querySelector("tbody tr td:last-child button");
+      const viewport = document.documentElement.clientWidth;
+      const tableRect = table?.getBoundingClientRect();
+      const actionRect = action?.getBoundingClientRect();
+      return {
+        tableCards: Boolean(table && table.querySelector("tbody tr")),
+        shellOverflowX: shell ? getComputedStyle(shell).overflowX : null,
+        tableFits: Boolean(tableRect && tableRect.width <= viewport + 1),
+        actionFits: Boolean(actionRect && actionRect.right <= viewport + 1),
+      };
+    });
+    mobileResponsive.push({
+      ...viewport,
+      bodyLayout,
+      desktopNavigationHidden,
+      menuButtonVisible,
+      drawerOpen,
+      remunerationTitleVisible,
+      releaseTableMobile,
+      errors: mobileErrors,
+    });
+    await mobileContext.close();
+  }
+
   const navigationContext = await createContext(browser);
   const navigationPage = await navigationContext.newPage();
   const navigationErrors = [];
@@ -274,9 +329,17 @@ async function main() {
   failures.push(check(crucesPagination.nextEnabled && crucesPagination.movedToPageTwo, "Cruces: paginación no avanza a la página 2", { crucesPagination }));
   failures.push(check(crucesPagination.requestedStaticPage && crucesPagination.requestedPageChunkCount <= 10, "Cruces: la paginación solicitó demasiados chunks estáticos", { crucesPagination }));
   failures.push(check(crucesPagination.requestedSearchIndex && crucesPagination.searchUsesFullIndex, "Cruces: búsqueda no usa el índice completo", { crucesPagination }));
+  for (const mobile of mobileResponsive) {
+    failures.push(check(mobile.desktopNavigationHidden, `${mobile.name}: navegación de escritorio visible en móvil`, { mobile }));
+    failures.push(check(mobile.menuButtonVisible && mobile.drawerOpen, `${mobile.name}: drawer móvil no disponible`, { mobile }));
+    failures.push(check(mobile.remunerationTitleVisible, `${mobile.name}: remuneraciones no carga`, { mobile }));
+    failures.push(check(mobile.releaseTableMobile.tableCards && mobile.releaseTableMobile.tableFits && mobile.releaseTableMobile.actionFits, `${mobile.name}: ficha de remuneraciones queda fuera de pantalla`, { mobile }));
+    failures.push(check(mobile.bodyLayout.bodyWidth <= mobile.bodyLayout.viewport + 1 && mobile.bodyLayout.documentWidth <= mobile.bodyLayout.viewport + 1, `${mobile.name}: overflow horizontal`, { mobile }));
+    failures.push(check(mobile.errors.length === 0, `${mobile.name}: errores de navegador`, { mobile }));
+  }
 
   const failed = failures.filter(Boolean);
-  console.log(JSON.stringify({ baseUrl, waitMs, routes, navigation: { politicianNavigation, municipalityNavigation, navigationErrors, navigationBadResponses }, municipalityPayroll, legacyRedirect, municipalidadesMap, crucesPagination, passed: failures.length - failed.length, failed }, null, 2));
+  console.log(JSON.stringify({ baseUrl, waitMs, routes, navigation: { politicianNavigation, municipalityNavigation, navigationErrors, navigationBadResponses }, municipalityPayroll, legacyRedirect, municipalidadesMap, crucesPagination, mobileResponsive, passed: failures.length - failed.length, failed }, null, 2));
   if (failed.length > 0) process.exitCode = 1;
 }
 
