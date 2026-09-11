@@ -25,7 +25,11 @@ interface R2BucketLike {
   put?(key: string, value: ArrayBuffer): Promise<unknown>;
 }
 
-const RELEASE_BASE_URL = "https://github.com/jmorgadodev/transparencia.impulsacv.cl/releases/download";
+// The lake partitions are archived as release assets in the Cambiómetro
+// repository. Keep the cold fallback pointed at the same repository that
+// publishes the catalog; otherwise a valid cold partition is reported as
+// missing when it is not present in the hot R2 cache.
+const RELEASE_BASE_URL = "https://github.com/jmorgadodev/cambiometro/releases/download";
 
 function bufferedObject(data: ArrayBuffer): R2ObjectBodyLike {
   return {
