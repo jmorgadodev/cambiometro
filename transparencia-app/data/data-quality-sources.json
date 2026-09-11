@@ -88,6 +88,7 @@
     "coverageNote": "Ley de Presupuestos y ejecución mensual por partida, capítulo y programa.",
     "canonicalCount": 15689,
     "historicalCount": 15689,
+    "catalogDeclaredCount": 247287,
     "queryableCount": null,
     "relatedCount": null,
     "modulePath": "/datos",

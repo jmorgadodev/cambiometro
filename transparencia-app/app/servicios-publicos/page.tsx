@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getAllServiciosPublicosEnriquecidos } from "@/lib/servicios-publicos-data";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
-import { getPresupuestoNacionalTotales } from "@/lib/presupuesto";
+import { getPresupuestoNacionalTotales, leerPresupuestoV1 } from "@/lib/presupuesto";
 import { coverageMetric, readGeneratedDataQualitySummary } from "@/lib/data-quality-summary";
 import ServiciosPublicosClient from "./servicios-publicos-client";
 
@@ -47,15 +47,29 @@ export default function ServiciosPublicosPage() {
   const totalConPartida = conPartidaCount;
   const dataSummary = readGeneratedDataQualitySummary();
   const dipresSource = dataSummary.sources.find((source) => source.id === "dipres");
+  const dipresProjection = leerPresupuestoV1();
+  const dipresProjectionPeriods = dipresProjection?.programs
+    .flatMap((program) => program.meses.map((month) => month.period))
+    .filter((period, index, periods) => periods.indexOf(period) === index)
+    .sort() ?? [];
   const serviceRelease = {
-    source: "DIPRES, CPLT, ChileCompra, InfoLobby y Contraloría",
-    period: dipresSource?.period || "Corte publicado",
-    lastSuccessAt: dataSummary.generatedAt,
+    source: "Directorio institucional",
+    period: dipresProjection?.period || dipresSource?.period || "Corte publicado",
+    lastSuccessAt: dipresSource?.lastSuccessAt ?? null,
     status: dipresSource?.status ?? "parcial" as const,
     published: coverageMetric(totalServicios, totalServicios),
     queryable: coverageMetric(totalServicios, totalServicios),
     related: coverageMetric(null, null),
-    checksumSha256: dataSummary.manifestChecksumSha256 ?? null,
+    checksumSha256: dipresSource?.checksumSha256 ?? dataSummary.manifestChecksumSha256 ?? null,
+    officialUrl: dipresSource?.officialUrl,
+  };
+  const dipresCoverage = {
+    catalogDeclaredCount: dipresSource?.catalogDeclaredCount ?? null,
+    publicCount: dipresSource?.publicHistoricalCount ?? dipresSource?.canonicalCount ?? 0,
+    projectionPrograms: dipresProjection?.count ?? dipresProjection?.programs.length ?? 0,
+    projectionPeriod: dipresProjectionPeriods.length > 0
+      ? `${dipresProjectionPeriods[0]} a ${dipresProjectionPeriods.at(-1)}`
+      : "Período no publicado",
     officialUrl: dipresSource?.officialUrl,
   };
 
@@ -101,6 +115,7 @@ export default function ServiciosPublicosPage() {
         presupuestoTotalLey={presupuestoTotalLey}
         gastoDevengado={gastoDevengado}
         release={serviceRelease}
+        dipresCoverage={dipresCoverage}
       />
     </Suspense>
   );
