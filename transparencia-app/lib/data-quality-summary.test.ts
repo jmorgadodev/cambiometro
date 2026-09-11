@@ -50,6 +50,7 @@ describe("manifiesto unificado de calidad de datos", () => {
     const source = buildFallbackDataQualitySummary().sources.find((item) => item.id === "dipres");
     expect(source?.catalogDeclaredCount).toBe(247_287);
     expect(source?.publicHistoricalCount).toBe(15_689);
+    expect(source?.publicHistoricalCount).toBeLessThan(source?.catalogDeclaredCount ?? 0);
     expect((source?.catalogDeclaredCount ?? 0) - (source?.publicHistoricalCount ?? 0)).toBe(231_598);
   });
 });
