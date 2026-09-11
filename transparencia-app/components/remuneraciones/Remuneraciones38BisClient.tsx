@@ -473,7 +473,7 @@ export default function Remuneraciones38BisClient({
                   {comparisonRows.length === 0 ? <p role="status" style={{ color: "var(--text-muted)", fontSize: "0.8rem", margin: "1rem 0 0" }}>No hay registros en esta categoría para el corte seleccionado.</p> : (
                     <>
                       <div className="table-shell" style={{ marginTop: "0.9rem", overflowX: "auto" }}>
-                        <table className="data-table"><caption className="sr-only">{comparisonTitle[comparisonKind]} del corte {activePeriod.mes}</caption><thead><tr><th>Persona</th><th>Organismo y cargo</th><th>Mes anterior</th><th>Mes seleccionado</th><th>Diferencia</th><th aria-label="Acciones" /></tr></thead><tbody>
+                        <table className="data-table remuneraciones-comparison-table"><caption className="sr-only">{comparisonTitle[comparisonKind]} del corte {activePeriod.mes}</caption><thead><tr><th>Persona</th><th>Organismo y cargo</th><th>Mes anterior</th><th>Mes seleccionado</th><th>Diferencia</th><th aria-label="Acciones" /></tr></thead><tbody>
                           {visibleComparisonRows.map((row) => <tr key={`${row.tipo}-${row.nombre}-${row.organismo}-${row.cargo}`} className="remuneracion-row" role="button" tabIndex={0} aria-label={`Abrir ficha de ${row.nombre}`} onClick={(event) => { if ((event.target as HTMLElement).closest("button, a")) return; setSelected(row); }} onKeyDown={(event) => { if (event.key === "Enter" || event.key === " ") { event.preventDefault(); setSelected(row); } }}><td><strong>{row.nombre}</strong><small>{row.partida}</small></td><td>{row.organismo}<small>{row.cargo}</small></td><td>{row.bruto_anterior === null ? "No reportado" : money.format(row.bruto_anterior)}</td><td>{row.bruto_actual === null ? "No reportado" : money.format(row.bruto_actual)}</td><td style={{ fontFamily: "var(--font-mono)", fontWeight: 700, color: row.diferencia === null ? "var(--text-muted)" : row.diferencia >= 0 ? "var(--ok)" : "var(--warn)" }}>{row.diferencia === null ? "—" : `${row.diferencia >= 0 ? "+" : ""}${money.format(row.diferencia)}`}</td><td><button type="button" className="btn btn-ghost" style={{ padding: "0.35rem 0.55rem", fontSize: "0.72rem" }} onClick={() => setSelected(row)}>Ver ficha</button></td></tr>)}
                         </tbody></table>
                       </div>
@@ -541,7 +541,7 @@ export default function Remuneraciones38BisClient({
           {loading && <p role="status" style={{ color: "var(--text-muted)", fontSize: "0.8rem", margin: "1rem 0 0" }}>Cargando registros…</p>}
 
           <div className="table-shell" style={{ marginTop: "1rem", overflowX: "auto" }}>
-            <table className="data-table" style={{ width: "100%" }}>
+            <table className="data-table remuneraciones-release-table" style={{ width: "100%" }}>
               <caption className="sr-only">Registros de remuneraciones públicas del corte {activePeriod.mes}</caption>
               <thead><tr><th>Persona</th><th>Organismo</th><th>Cargo</th><th>Bruto del mes</th><th aria-label="Acciones" /></tr></thead>
               <tbody>
