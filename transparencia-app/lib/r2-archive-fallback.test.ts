@@ -114,6 +114,60 @@ describe("archivo histórico en GitHub Releases", () => {
     await expect(readR2EvidenceRecords(bucket, { source: "x", limit: 10 })).rejects.toThrow("ARCHIVE_CHECKSUM_MISMATCH");
   });
 
+  it("no publica una partición parcialmente cargada cuando falta uno de sus fragmentos", async () => {
+    const first = gzipSync(`${JSON.stringify({
+      id: "camara-partial-1",
+      sourceId: "camara",
+      kind: "vote",
+      occurredAt: "2026-08-01",
+      evidence: { sourceUrl: "https://opendata.camara.cl/votacion/1" },
+      data: { title: "Primera parte" },
+    })}\n`);
+    const firstChecksum = createHash("sha256").update(first).digest("hex");
+    const secondChecksum = "b".repeat(64);
+    const prefix = "partitions/camara/2026/08";
+    const firstKey = `${prefix}/records-${firstChecksum}.jsonl.gz.part-0001`;
+    const secondKey = `${prefix}/records-${secondChecksum}.jsonl.gz.part-0002`;
+    const manifest = {
+      projectionChecksumSha256: "c".repeat(64),
+      artifacts: [
+        { key: firstKey, checksumSha256: firstChecksum, releaseAssetName: "camara-2026-08-records.jsonl.gz.part-0001" },
+        { key: secondKey, checksumSha256: secondChecksum, releaseAssetName: "camara-2026-08-records.jsonl.gz.part-0002" },
+      ],
+    };
+    const catalog = {
+      schemaVersion: "1.0.0",
+      generatedAt: "2026-09-11T00:00:00Z",
+      sources: [],
+      partitions: [{
+        id: "camara/2026/08",
+        sourceId: "camara",
+        period: "2026-08",
+        manifestKey: `${prefix}/manifest.json`,
+        releaseTag: "data-camara-2026",
+        recordCount: 2,
+        checksumSha256: manifest.projectionChecksumSha256,
+        status: "partial",
+      }],
+    };
+    const objects = new Map<string, ArrayBuffer>([
+      ["catalog/v1/manifest.json", new TextEncoder().encode(JSON.stringify(catalog)).buffer],
+      [`${prefix}/manifest.json`, new TextEncoder().encode(JSON.stringify(manifest)).buffer],
+      [firstKey, first.buffer.slice(first.byteOffset, first.byteOffset + first.byteLength)],
+    ]);
+    const bucket: Parameters<typeof readR2EvidenceRecords>[0] = {
+      async get(key) {
+        const value = objects.get(key);
+        if (!value) return null;
+        return { json: async <T>() => JSON.parse(new TextDecoder().decode(value)) as T, arrayBuffer: async () => value };
+      },
+    };
+
+    const result = await readR2EvidenceRecords(bucket, { source: "camara", limit: 10 });
+
+    expect(result).toMatchObject({ data: [], total: 0, loadedRows: 0, expectedTotal: 2, complete: false, missingPartitions: 1, missingArtifacts: 1 });
+  });
+
   it("combina evidencia de varias fuentes para una entidad canónica", async () => {
     const files = new Map<string, Uint8Array>();
     const partitions = ["infoprobidad", "chilecompra"].map((sourceId, index) => {

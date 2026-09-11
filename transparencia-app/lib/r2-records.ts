@@ -222,6 +222,8 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
     expectedTotal: manifest.totalRows,
     loadedRows: manifest.totalRows,
     complete: true,
+    missingPartitions: 0,
+    missingArtifacts: 0,
   };
 }
 
@@ -249,6 +251,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   const records: EvidenceRecord[] = [];
   let loadedRows = 0;
   let missingPartitions = 0;
+  let missingArtifacts = 0;
   for (const partition of partitions) {
     const [year, month] = partition.period.split("-");
     const releaseTag = partition.releaseTag ?? `data-${partition.sourceId}-${year}`;
@@ -262,15 +265,22 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
     const artifacts = manifest.artifacts
       .filter((artifact) => /records(?:-[^/]+)?\.jsonl\.gz(?:\.part-\d+)?$/.test(artifact.key))
       .sort((a, b) => a.key.localeCompare(b.key));
+    if (artifacts.length === 0) {
+      missingPartitions += 1;
+      continue;
+    }
     const chunks = [];
     for (const artifact of artifacts) {
       const object = await readHotOrArchivedObject(bucket, artifact.key, releaseTag, artifact.releaseAssetName);
-      if (!object) continue;
+      if (!object) {
+        missingArtifacts += 1;
+        continue;
+      }
       const data = await object.arrayBuffer();
       if (await checksumSha256(data) !== artifact.checksumSha256) throw new Error(`ARCHIVE_CHECKSUM_MISMATCH: ${artifact.key}`);
       chunks.push(new Uint8Array(data));
     }
-    if (chunks.length === 0) {
+    if (chunks.length !== artifacts.length) {
       missingPartitions += 1;
       continue;
     }
@@ -312,5 +322,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
     expectedTotal,
     loadedRows,
     complete,
+    missingPartitions,
+    missingArtifacts,
   };
 }

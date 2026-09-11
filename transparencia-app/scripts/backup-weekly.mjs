@@ -3,6 +3,7 @@ import { gzipSync } from "node:zlib";
 import { readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
+import { parseR2ListPage } from "../lib/r2-list.mjs";
 
 // Backup semanal del sistema: exporta la base D1 y copia el data lake R2
 // completo a cambiometro-backups, con retención de 8 semanas.
@@ -52,9 +53,9 @@ async function listObjectsRest(bucket) {
     const response = await fetch(url, { headers: { Authorization: `Bearer ${token}` } });
     if (!response.ok) throw new Error(`R2_LIST_FAILED ${bucket}: HTTP ${response.status}`);
     const page = await response.json();
-    const list = page.result?.objects ?? page.objects ?? [];
-    objects.push(...list);
-    cursor = page.result?.cursor ?? page.cursor ?? null;
+    const pageData = parseR2ListPage(page);
+    objects.push(...pageData.objects);
+    cursor = pageData.cursor;
   } while (cursor);
   return objects;
 }
@@ -100,6 +101,9 @@ if (usingRestApi) {
 }
 
 console.log(`[INFO] ${sourceObjects.length} objects listados del bucket fuente`);
+if (sourceObjects.length === 0) {
+  throw new Error("R2_SOURCE_INVENTORY_EMPTY: se cancela el backup para no registrar una copia vacía");
+}
 
 let copied = 0;
 for (const object of sourceObjects) {

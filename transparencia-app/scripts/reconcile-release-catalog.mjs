@@ -24,7 +24,7 @@ const work = mkdtempSync(join(tmpdir(), "cambiometro-release-recovery-"));
 try {
   for (const partition of catalog.partitions ?? []) {
     const [year, month] = String(partition.period).split("-");
-    const assetName = `${partition.sourceId}-${year}-${month}-manifest.json`;
+    const assetName = partition.manifestAssetName ?? `${partition.sourceId}-${year}-${month}-manifest.json`;
     const releaseDir = join(work, partition.releaseTag);
     mkdirSync(releaseDir, { recursive: true });
     const result = spawnSync("gh", ["release", "download", partition.releaseTag, "--pattern", assetName, "--dir", releaseDir, "--clobber"], {
