@@ -1,9 +1,12 @@
 "use client";
 
-import { useState, type ReactNode } from "react";
+import { useEffect, useState, type ReactNode } from "react";
 
 export default function CrucesTabs({ relations, records }: { relations: ReactNode; records: ReactNode }) {
   const [active, setActive] = useState<"relations" | "records">("relations");
+  useEffect(() => {
+    if (new URLSearchParams(window.location.search).get("vista") === "registros") setActive("records");
+  }, []);
   return (
     <section aria-label="Exploradores de cruces y registros">
       <div role="tablist" aria-label="Vista de cruces" style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap", marginBottom: "0.75rem" }}>
