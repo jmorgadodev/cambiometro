@@ -1,8 +1,16 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { catalogComponentCount, catalogSourceCount, transferReleaseCount } from "../lib/source-health.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const read = (path) => JSON.parse(readFileSync(join(root, path), "utf8"));
+const readOptional = (path) => {
+  try {
+    return JSON.parse(readFileSync(join(root, path), "utf8"));
+  } catch {
+    return null;
+  }
+};
 const catalog = read("data/lake/catalog/v1/manifest.json");
 const cplt = read("data/lake-cplt/projections/funcionarios-v1/manifest.json");
 const presupuesto = read("data/lake/projections/v1/presupuesto.json");
@@ -10,15 +18,12 @@ const ley19862 = read("data/lake/projections/v1/ley19862-summary.json");
 const chilecompra = read("data/lake/projections/v1/chilecompra.json");
 const sinim = read("data/lake/projections/v1/sinim.json");
 const municipalities = read("data/municipalidades-list.json");
+const transferRelease = readOptional(".ci-data-version/transfer-api-manifest.json");
 const source = new Map(catalog.sources.map((item) => [item.id, item]));
 const count = (...ids) => ids.reduce((sum, id) => sum + (source.get(id)?.recordCount ?? 0), 0);
-const partitionCount = (sourceId, variant) => (catalog.partitions ?? [])
-  .filter((partition) => partition.sourceId === sourceId && (!variant || partition.variant === variant))
-  .reduce((sum, partition) => sum + (partition.recordCount ?? 0), 0);
-const componentCount = (sourceId, variant) => Math.max(
-  source.get(sourceId)?.recordCount ?? 0,
-  partitionCount(sourceId, variant),
-);
+const canonicalCount = (sourceId, fallback) => catalogSourceCount(source, sourceId, fallback);
+const componentCount = (sourceId, variant) => catalogComponentCount(catalog, source, sourceId, variant);
+const publicTransferRows = transferReleaseCount(transferRelease, ley19862.kpis.total_transfers);
 const generatedAt = new Date(Math.max(...[catalog.generatedAt, cplt.generatedAt, presupuesto.generatedAt, ley19862.generatedAt, chilecompra.generatedAt].map((value) => new Date(value).getTime()).filter(Number.isFinite))).toISOString();
 const latestExpense = presupuesto.programs.filter((program) => program.budgetSide === "expense").map((program) => program.meses?.at(-1)?.vigente).filter((value) => Number.isSafeInteger(value));
 
@@ -26,15 +31,15 @@ const health = {
   generatedAt,
   sources: {
     cplt: { recordCount: cplt.recordCount, status: "partial", generatedAt: cplt.generatedAt },
-    dipres: { recordCount: presupuesto.count, financialAmountClp: latestExpense.length ? latestExpense.reduce((sum, value) => sum + value, 0) : null, status: source.get("dipres")?.status ?? "partial", generatedAt: presupuesto.generatedAt },
+    dipres: { recordCount: canonicalCount("dipres", presupuesto.count), financialAmountClp: latestExpense.length ? latestExpense.reduce((sum, value) => sum + value, 0) : null, status: source.get("dipres")?.status ?? "partial", generatedAt: presupuesto.generatedAt },
     ley19862: {
-      recordCount: ley19862.kpis.total_transfers,
+      recordCount: publicTransferRows,
       catalogRecordCount: source.get("ley-19862")?.recordCount ?? null,
       financialAmountClp: ley19862.kpis.total_monto_clp,
       status: source.get("ley-19862")?.status ?? "partial",
-      generatedAt: ley19862.generatedAt,
+      generatedAt: transferRelease?.generatedAt ?? ley19862.generatedAt,
     },
-    chilecompra: { recordCount: chilecompra.buyers.reduce((sum, buyer) => sum + (buyer.procesos ?? 0), 0), financialAmountClp: chilecompra.total_adjudicado_clp ?? null, status: source.get("chilecompra")?.status ?? "partial", generatedAt: chilecompra.generatedAt },
+    chilecompra: { recordCount: canonicalCount("chilecompra", chilecompra.buyers.reduce((sum, buyer) => sum + (buyer.procesos ?? 0), 0)), financialAmountClp: chilecompra.total_adjudicado_clp ?? null, status: source.get("chilecompra")?.status ?? "partial", generatedAt: chilecompra.generatedAt },
     infolobby: { recordCount: count("infolobby"), status: source.get("infolobby")?.status ?? "partial", generatedAt: catalog.generatedAt },
     infoprobidad: { recordCount: count("infoprobidad"), status: source.get("infoprobidad")?.status ?? "partial", generatedAt: catalog.generatedAt },
     sinim: { recordCount: count("sinim"), coverageCount: sinim.total, coverageUniverse: municipalities.length, status: source.get("sinim")?.status ?? "partial", generatedAt: sinim.generatedAt },
