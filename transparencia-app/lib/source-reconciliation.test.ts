@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { reconcileSourceSnapshots, sourceCategories } from "./source-reconciliation.mjs";
+import { mergeLocalHealth, reconcileSourceSnapshots, sourceCategories } from "./source-reconciliation.mjs";
 
 describe("auditoría de reconciliación producción/R2/local", () => {
   it("clasifica como frescura una producción más nueva sin llamarlo pérdida", () => {
@@ -39,5 +39,27 @@ describe("auditoría de reconciliación producción/R2/local", () => {
     expect(sourceCategories("gastos_senado")).toEqual(["gastos"]);
     expect(sourceCategories("votaciones_senado")).toEqual(["votaciones"]);
     expect(sourceCategories("senado")).toEqual(["remuneraciones", "asesorias", "gastos", "votaciones"]);
+  });
+
+  it("mantiene el conteo del catálogo y deja source-health como señal de snapshot", () => {
+    const local = mergeLocalHealth(
+      {
+        generatedAt: "2026-09-11T00:00:00Z",
+        sources: [{ id: "camara", recordCount: 58_819, foundPeriods: [], status: "partial" }],
+      },
+      { sources: { camara: { recordCount: 19_025, generatedAt: "2026-08-21T00:00:00Z", status: "partial" } } },
+    );
+    const report = reconcileSourceSnapshots({
+      production: [{ id: "camara", recordCount: 58_819, lastUpdated: "2026-09-02T00:00:00Z", status: "partial" }] as never,
+      local: local as never,
+    });
+
+    expect(report.rows[0]).toMatchObject({
+      classification: "match",
+      localCount: 58_819,
+      localHealthCount: 19_025,
+      healthMismatch: true,
+    });
+    expect(report.summary.healthMismatch).toBe(1);
   });
 });

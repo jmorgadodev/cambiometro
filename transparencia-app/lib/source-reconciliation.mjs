@@ -57,11 +57,8 @@ function categoriesForSources(sources) {
 
 function classification({ production, local, children }) {
   const hasCategorySplit = children.length > 0;
-  const hasCatalogScopeDifference = local?.catalogRecordCount !== null
-    && local?.catalogRecordCount !== undefined
-    && Number(local.catalogRecordCount) !== Number(local.recordCount);
   if (production && local && Number(production.recordCount) === Number(local.recordCount) && !hasCategorySplit) return "match";
-  if (hasCategorySplit || hasCatalogScopeDifference || (local && sourceCategories(local.id).length > 0 && !production)) return "scope";
+  if (hasCategorySplit || (local && sourceCategories(local.id).length > 0 && !production)) return "scope";
   if (production && local && hasNewerProduction(production, local)) return "freshness";
   return "unexplained";
 }
@@ -83,6 +80,11 @@ function rowFor(production, local, localSources) {
     localGeneratedAt: local?.generatedAt ?? local?.lastUpdated ?? null,
     productionPeriods: production?.foundPeriods ?? [],
     localPeriods: local?.foundPeriods ?? [],
+    localHealthCount: local?.healthRecordCount ?? null,
+    localHealthUpdatedAt: local?.healthGeneratedAt ?? null,
+    healthMismatch: local?.healthRecordCount !== null
+      && local?.healthRecordCount !== undefined
+      && Number(local.healthRecordCount) !== Number(local.recordCount),
     localCategories: categories,
     localComponents: localParts.filter((source) => canonicalId(source.id) !== id).map((source) => ({
       id: canonicalId(source.id),
@@ -110,6 +112,7 @@ export function reconcileSourceSnapshots({ production = [], local = [] }) {
       freshness: rows.filter((row) => row.classification === "freshness").length,
       scope: rows.filter((row) => row.classification === "scope").length,
       unexplained: rows.filter((row) => row.classification === "unexplained").length,
+      healthMismatch: rows.filter((row) => row.healthMismatch).length,
     },
   };
 }
@@ -145,11 +148,21 @@ export function mergeLocalHealth(manifest, health) {
   for (const [rawId, rawSource] of Object.entries(health?.sources ?? {})) {
     const id = canonicalId(rawId);
     const existing = byId.get(id);
-    const recordCount = Number(rawSource?.recordCount ?? 0);
+    const healthRecordCount = Number(rawSource?.recordCount ?? 0);
+    // Si existe un conteo en el catálogo, éste es el conteo canónico del
+    // release. source-health queda visible como una vista derivada para
+    // detectar snapshots antiguos, pero no puede reemplazar al catálogo.
+    // El placeholder legado de Transparencia Activa tiene 0 en el catálogo;
+    // en ese caso conservamos el conteo de salud para poder auditarlo.
+    const recordCount = existing && Number(existing.recordCount ?? 0) > 0
+      ? Number(existing.recordCount)
+      : healthRecordCount;
     byId.set(id, {
       ...(existing ?? { id, foundPeriods: [] }),
       recordCount,
       catalogRecordCount: existing?.recordCount ?? null,
+      healthRecordCount,
+      healthGeneratedAt: rawSource?.generatedAt ?? null,
       status: rawSource?.status ?? existing?.status ?? null,
       generatedAt: rawSource?.generatedAt ?? existing?.generatedAt ?? manifest?.generatedAt ?? null,
     });
