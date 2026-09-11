@@ -680,6 +680,7 @@ function officialFilterKeys(requestUrl: URL) {
     ["estamento", requestUrl.searchParams.get("estamento") ?? "Todos"],
     ["tipo", requestUrl.searchParams.get("tipo") ?? "Todos"],
     ["cargo", requestUrl.searchParams.get("cargo") ?? "Todos"],
+    ["periodo", requestUrl.searchParams.get("periodo") ?? requestUrl.searchParams.get("fuente_periodo") ?? "Todos"],
   ];
   for (const [name, value] of values) {
     const normalizedValue = normalized(value);
