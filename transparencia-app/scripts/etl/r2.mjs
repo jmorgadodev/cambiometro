@@ -3,12 +3,21 @@ const DEFAULT_LIMIT_BYTES = 8 * 1024 * 1024 * 1024;
 function latestPrefixes(assets) {
   const latest = new Map();
   for (const asset of assets) {
-    const match = asset.key.match(/^partitions\/([^/]+)\/(\d{4})\/(\d{2})\//);
-    if (!match) continue;
-    const [, sourceId, year, month] = match;
+    const parts = asset.key.split("/");
+    if (parts[0] !== "partitions" || parts.length < 5) continue;
+    const sourceId = parts[1];
+    const hasVariant = !/^\d{4}$/.test(parts[2]);
+    const variant = hasVariant ? parts[2] : null;
+    const year = hasVariant ? parts[3] : parts[2];
+    const month = hasVariant ? parts[4] : parts[3];
+    if (!/^\d{4}$/.test(year) || !/^\d{2}$/.test(month)) continue;
     const period = `${year}-${month}`;
-    if (!latest.has(sourceId) || period > latest.get(sourceId).period) {
-      latest.set(sourceId, { period, prefix: `partitions/${sourceId}/${year}/${month}/` });
+    const namespace = `${sourceId}/${variant ?? "default"}`;
+    if (!latest.has(namespace) || period > latest.get(namespace).period) {
+      const prefix = variant
+        ? `partitions/${sourceId}/${variant}/${year}/${month}/`
+        : `partitions/${sourceId}/${year}/${month}/`;
+      latest.set(namespace, { period, prefix });
     }
   }
   return new Set([...latest.values()].map((value) => value.prefix));
@@ -88,7 +97,7 @@ export function planR2Publication(assets, previousInventory = { objects: [] }, l
   if (ratio >= 0.8) {
     const latest = catalogLatestPrefixes(assets);
     for (const key of previous.keys()) {
-      const partition = key.match(/^(partitions\/[^/]+\/\d{4}\/\d{2}\/)/)?.[1];
+      const partition = key.match(/^(partitions\/[^/]+\/(?:[^/]+\/)?\d{4}\/\d{2}\/)/)?.[1];
       if (partition && !latest.has(partition)) desired.delete(key);
     }
     projectedBytes = [...desired.values()].reduce((total, object) => total + object.size, 0);

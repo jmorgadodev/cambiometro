@@ -7,8 +7,11 @@ verano. Por eso el mismo cron `0 7 * * *` se muestra como 04:00 en invierno y
 
 | ETL | Cron UTC | Hora local aproximada |
 | --- | --- | --- |
-| Parlamento y Diario Oficial | `0 7 * * *` | 04:00 invierno / 03:00 verano |
-| Personal de apoyo parlamentario | `0 7 * * 1` | Lunes 04:00 invierno / 03:00 verano |
+| Cámara | `0 7 * * *` | 04:00 invierno / 03:00 verano |
+| Votaciones Cámara | `15 7 * * *` | 04:15 invierno / 03:15 verano |
+| Votaciones Senado | `30 7 * * *` | 04:30 invierno / 03:30 verano |
+| Personal de apoyo Cámara | `0 7 * * 1` | Lunes 04:00 invierno / 03:00 verano |
+| Personal de apoyo Senado | `30 7 * * 1` | Lunes 04:30 invierno / 03:30 verano |
 | Movimientos de autoridades | `0 7 * * *` | 04:00 invierno / 03:00 verano |
 | ChileCompra | `0 8 * * 1` | Lunes 05:00 invierno / 04:00 verano |
 | InfoLobby | `30 8 * * 1` | Lunes 05:30 invierno / 04:30 verano |
@@ -18,7 +21,7 @@ verano. Por eso el mismo cron `0 7 * * *` se muestra como 04:00 en invierno y
 | InfoProbidad | `0 9 10 * *` | Día 10, 06:00 invierno / 05:00 verano |
 | DIPRES | `0 9 1 1,4,7,10 *` | Día 1 del trimestre, 06:00 invierno / 05:00 verano |
 | SINIM | `0 9 1 3,9 *` | Día 1 de marzo y septiembre, 06:00 invierno / 05:00 verano |
-| Gastos operacionales rendidos | `30 8 2 * *` | Día 2, 05:30 invierno / 04:30 verano |
+| Gastos operacionales Senado | `30 8 2 * *` | Día 2, 05:30 invierno / 04:30 verano |
 | SERVEL | Sin schedule | Sólo `workflow_dispatch` |
 
 ## Regla de publicación
@@ -29,12 +32,13 @@ resumen de fuentes, conteos, checksum y fecha de publicación. Si una fuente
 obligatoria está bloqueada, el job falla y se conserva el último snapshot
 válido; no se publica un dataset parcial con apariencia de éxito.
 
-Movimientos y personal de apoyo tienen workflows propios para que un bloqueo
-de la página de personal de Cámara no impida actualizar el catálogo de
-autoridades ni la actividad parlamentaria. Si Cámara bloquea personal, ese
-workflow falla visiblemente y conserva su último snapshot válido; no se
-publican datos parciales. La fecha de la última ejecución y la fecha del
-último movimiento son metadatos distintos.
+Movimientos y cada fuente de personal de apoyo tienen workflows propios para
+que un bloqueo de Cámara no impida actualizar Senado ni el resto del portal.
+Las votaciones de Cámara y Senado tienen workflows y horarios propios,
+separados de sus respectivos ETL de nómina. Cada ejecución conserva en R2 la
+parte de la otra cámara desde el snapshot válido anterior; no publica un
+archivo incompleto como si fuera una actualización total. La fecha de la
+última ejecución y la fecha del último movimiento son metadatos distintos.
 
 Las fuentes provisionales RSS autorizadas se configuran en la variable de
 entorno `MOVIMIENTOS_PROVISIONAL_SOURCES` como una lista separada por comas.

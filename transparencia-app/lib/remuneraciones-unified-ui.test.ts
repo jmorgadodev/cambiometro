@@ -19,6 +19,7 @@ describe("interfaz unificada de remuneraciones", () => {
     expect(explorer).toContain("<details key={group[0].personKey}");
     expect(explorer).toContain("Ver ficha y registros");
     expect(explorer).toContain("<summary className=\"remuneration-person-result__summary\">");
+    expect(explorer).toContain("La fuente publicó variantes del nombre");
   });
 
   it("pagina los resultados y deja las fuentes como información, no como controles vacíos", () => {

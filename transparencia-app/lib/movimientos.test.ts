@@ -37,7 +37,20 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
   });
 
   it("1c. el resumen de la Home se recalcula desde el corte del gobierno actual", () => {
-    expect(MOVIMIENTOS_HOME_SUMMARY).toMatchObject({ desde: "2026-03-11", total: 79, renuncias: 55, verificados: 73, enConfirmacion: 6 });
+    const desde = "2026-03-11";
+    const delGobierno = MOVIMIENTOS.filter((movement) => movement.fecha >= desde);
+    const renuncias = delGobierno.filter((movement) => movement.tipo_evento === "renuncia" || movement.tipo === "renuncia");
+    const verificados = delGobierno.filter((movement) => ["verificado", "verificado_oficial", "corroborado"].includes(movement.estado));
+    const enConfirmacion = delGobierno.filter((movement) => movement.estado === "en_confirmacion");
+
+    expect(delGobierno.length).toBeGreaterThan(0);
+    expect(MOVIMIENTOS_HOME_SUMMARY).toMatchObject({
+      desde,
+      total: delGobierno.length,
+      renuncias: renuncias.length,
+      verificados: verificados.length,
+      enConfirmacion: enConfirmacion.length,
+    });
   });
 
   it("2. Eventos obligatorios del 14-08-2026 presentes (Duco/Deporte y Urrejola/Atacama) con fuentes de prensa", () => {

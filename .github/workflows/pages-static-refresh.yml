@@ -10,9 +10,12 @@ on:
   workflow_run:
     workflows:
       - "ETL Mensual - Ley 19.862 Transferencias del Estado"
-      - "ETL Diario - Parlamento y Diario Oficial"
+      - "ETL Diario - Cámara"
+      - "ETL Diario - Votaciones Cámara"
+      - "ETL Diario - Votaciones Senado"
       - "ETL Diario - Movimientos de Autoridades"
-      - "ETL Diario - Personal de apoyo parlamentario"
+      - "ETL Semanal - Personal de apoyo Cámara"
+      - "ETL Semanal - Personal de apoyo Senado"
       - "ETL Mensual - CPLT Nóminas Transparencia Activa"
       - "ETL Semanal - ChileCompra OCDS"
       - "ETL Mensual - Contraloría General (CGR)"
@@ -21,7 +24,7 @@ on:
       - "ETL Trimestral - DIPRES Presupuestos"
       - "ETL Bajo Demanda - SERVEL Resultados Electorales"
       - "ETL Semestral - SINIM Finanzas Municipales"
-      - "ETL Mensual - Gastos Operacionales Congreso"
+      - "ETL Mensual - Gastos Operacionales Senado"
     types: [completed]
   workflow_dispatch:
     inputs:

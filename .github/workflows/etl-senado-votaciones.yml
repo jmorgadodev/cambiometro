@@ -1,0 +1,113 @@
+name: ETL Diario - Votaciones Senado
+
+on:
+  schedule:
+    - cron: "30 7 * * *" # 30 minutos después de Cámara, 03:30 CLT en invierno
+  workflow_dispatch:
+    inputs:
+      from:
+        description: Fecha inicial YYYY-MM-DD (por defecto 3 días atrás)
+        required: false
+      to:
+        description: Fecha final YYYY-MM-DD
+        required: false
+      full_votaciones:
+        description: Reconstruir todo el histórico del Senado (sólo backfill)
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: cambiometro-static-publication
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  ingest-publish:
+    name: Votaciones oficiales del Senado
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+        working-directory: transparencia-app
+
+      - name: Exigir credenciales de datos
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_DATA_API_TOKEN"
+
+      - name: Recuperar catálogo vigente
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          mkdir -p data/lake/catalog/v1
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+
+      - name: Resolver rango con solapamiento
+        id: range
+        shell: bash
+        env:
+          INPUT_FROM: ${{ inputs.from }}
+          INPUT_TO: ${{ inputs.to }}
+        run: |
+          echo "from=${INPUT_FROM:-$(date -u -d '3 days ago' +%F)}" >> "$GITHUB_OUTPUT"
+          echo "to=${INPUT_TO:-$(date -u +%F)}" >> "$GITHUB_OUTPUT"
+
+      - name: Preparar workspace ETL sin datasets versionados
+        working-directory: transparencia-app
+        run: npm run etl:prepare
+
+      - name: Ingerir sólo votaciones del Senado
+        working-directory: transparencia-app
+        run: npm run etl -- --from "${{ steps.range.outputs.from }}" --to "${{ steps.range.outputs.to }}" --source votaciones_senado
+
+      - name: Construir y publicar lake de Senado
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          npm run data:lake -- --exclude-source infolobby,infoprobidad
+          npm run data:publish
+
+      - name: Actualizar cache estático incremental del Senado
+        working-directory: transparencia-app
+        env:
+          FULL_VOTACIONES: ${{ inputs.full_votaciones }}
+        shell: bash
+        run: |
+          if [[ "$FULL_VOTACIONES" == "true" ]]; then
+            npm run ingest:votaciones-full -- --source senado --full
+          else
+            npm run ingest:votaciones-full -- --source senado
+          fi
+
+      - name: Construir subsets estáticos
+        working-directory: transparencia-app
+        run: npm run data:build:subsets
+
+      - name: Publicar entradas estáticas de Parlamento
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:publish:static -- --groups parlamento

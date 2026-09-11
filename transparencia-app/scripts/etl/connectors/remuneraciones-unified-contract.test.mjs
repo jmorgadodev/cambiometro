@@ -10,6 +10,22 @@ describe("contrato de remuneraciones unificadas", () => {
     expect(personKeyForRemuneration("", "row-17")).toBe("unknown-row-17");
   });
 
+  it("reconoce el mismo nombre cuando la fuente intercambia el orden de los apellidos", () => {
+    expect(
+      personKeyForRemuneration("RÍO SEBASTIÁN TORREALBA DEL", "row-april"),
+    ).toBe(
+      personKeyForRemuneration("SEBASTIÁN TORREALBA DEL RÍO", "row-march"),
+    );
+  });
+
+  it("no confunde nombres con palabras distintas sólo por compartir un apellido", () => {
+    expect(
+      personKeyForRemuneration("RÍO SEBASTIÁN TORREALBA DEL", "row-a"),
+    ).not.toBe(
+      personKeyForRemuneration("ALEJANDRO RAMÓN RÍOS TORREALBA", "row-b"),
+    );
+  });
+
   it("no declara una relación confirmada sólo porque hay dos fuentes", () => {
     expect(relationStatus(["camara", "senado"])).toBe("possible");
     expect(relationStatus(["camara", "camara"])).toBe("single_source");

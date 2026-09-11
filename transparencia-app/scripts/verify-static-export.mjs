@@ -35,5 +35,34 @@ const entityCatalog = JSON.parse(readFileSync(join(root, "data", "generated", "e
 if (staticManifest.datasets?.entities?.count !== entityCatalog.total) {
   throw new Error(`Universo de entidades incoherente: manifest=${staticManifest.datasets?.entities?.count} catalog=${entityCatalog.total}`);
 }
+const crossesManifestPath = join(out, "data", "cruces", "manifest.json");
+if (!existsSync(crossesManifestPath)) throw new Error("Falta manifiesto estático de cruces");
+const crossesManifest = JSON.parse(readFileSync(crossesManifestPath, "utf8"));
+if (!Array.isArray(crossesManifest.pages) || crossesManifest.pages.length !== crossesManifest.totalPages) {
+  throw new Error("Manifiesto de cruces incoherente: páginas declaradas");
+}
+let crossesRows = 0;
+for (const page of crossesManifest.pages) {
+  const pagePath = join(out, "data", "cruces", page);
+  if (!existsSync(pagePath)) throw new Error(`Falta página estática de cruces: ${page}`);
+  const rows = JSON.parse(readFileSync(pagePath, "utf8"));
+  if (!Array.isArray(rows)) throw new Error(`Página estática de cruces inválida: ${page}`);
+  crossesRows += rows.length;
+}
+if (crossesRows !== crossesManifest.totalRows) {
+  throw new Error(`Universo de cruces incoherente: manifest=${crossesManifest.totalRows} páginas=${crossesRows}`);
+}
+if (crossesManifest.searchIndex?.buckets) {
+  const bucketEntries = Object.entries(crossesManifest.searchIndex.buckets);
+  if (bucketEntries.length === 0) throw new Error("Índice de búsqueda de cruces vacío");
+  for (const [bucket, filename] of bucketEntries) {
+    const searchIndexPath = join(out, "data", "cruces", filename);
+    if (!existsSync(searchIndexPath)) throw new Error(`Falta bloque de búsqueda de cruces: ${bucket}`);
+    const searchRows = JSON.parse(readFileSync(searchIndexPath, "utf8"));
+    if (!searchRows || Array.isArray(searchRows) || typeof searchRows !== "object") {
+      throw new Error(`Bloque de búsqueda de cruces inválido: ${bucket}`);
+    }
+  }
+}
 const bytes = files.reduce((sum, file) => sum + statSync(file).size, 0);
-console.log(JSON.stringify({ files: files.length, html: html.length, bytes, routes }));
+console.log(JSON.stringify({ files: files.length, html: html.length, bytes, routes, crosses: { totalRows: crossesRows, totalPages: crossesManifest.totalPages } }));

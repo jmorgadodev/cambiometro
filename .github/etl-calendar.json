@@ -2,8 +2,11 @@
   "timezone": "America/Santiago",
   "cronTimezone": "UTC",
   "entries": [
-    { "workflow": "etl-daily.yml", "name": "Parlamento y Diario Oficial", "cronUtc": "0 7 * * *", "local": "Diario 04:00 invierno / 03:00 verano" },
-    { "workflow": "etl-personal-apoyo.yml", "name": "Personal de apoyo parlamentario", "cronUtc": "0 7 * * 1", "local": "Lunes 04:00 invierno / 03:00 verano" },
+    { "workflow": "etl-daily.yml", "name": "Cámara", "cronUtc": "0 7 * * *", "local": "Diario 04:00 invierno / 03:00 verano" },
+    { "workflow": "etl-camara-votaciones.yml", "name": "Votaciones Cámara", "cronUtc": "15 7 * * *", "local": "Diario 04:15 invierno / 03:15 verano" },
+    { "workflow": "etl-senado-votaciones.yml", "name": "Votaciones Senado", "cronUtc": "30 7 * * *", "local": "Diario 04:30 invierno / 03:30 verano" },
+    { "workflow": "etl-personal-apoyo.yml", "name": "Personal de apoyo Cámara", "cronUtc": "0 7 * * 1", "local": "Lunes 04:00 invierno / 03:00 verano" },
+    { "workflow": "etl-personal-apoyo-senado.yml", "name": "Personal de apoyo Senado", "cronUtc": "30 7 * * 1", "local": "Lunes 04:30 invierno / 03:30 verano" },
     { "workflow": "etl-movimientos.yml", "name": "Movimientos de autoridades", "cronUtc": "0 7 * * *", "local": "Diario 04:00 invierno / 03:00 verano" },
     { "workflow": "etl-chilecompra.yml", "name": "ChileCompra", "cronUtc": "0 8 * * 1", "local": "Lunes 05:00 invierno / 04:00 verano" },
     { "workflow": "etl-infolobby-scheduled.yml", "name": "InfoLobby", "cronUtc": "30 8 * * 1", "local": "Lunes 05:30 invierno / 04:30 verano" },
@@ -13,7 +16,7 @@
     { "workflow": "etl-infoprobidad.yml", "name": "InfoProbidad", "cronUtc": "0 9 10 * *", "local": "Día 10, 06:00 invierno / 05:00 verano" },
     { "workflow": "etl-dipres.yml", "name": "DIPRES", "cronUtc": "0 9 1 1,4,7,10 *", "local": "Día 1 de enero, abril, julio y octubre; 06:00 invierno / 05:00 verano" },
     { "workflow": "etl-sinim.yml", "name": "SINIM", "cronUtc": "0 9 1 3,9 *", "local": "Día 1 de marzo y septiembre; 06:00 invierno / 05:00 verano" },
-    { "workflow": "etl-expenses.yml", "name": "Gastos operacionales rendidos", "cronUtc": "30 8 2 * *", "local": "Día 2, 05:30 invierno / 04:30 verano" },
+    { "workflow": "etl-expenses.yml", "name": "Gastos operacionales Senado", "cronUtc": "30 8 2 * *", "local": "Día 2, 05:30 invierno / 04:30 verano" },
     { "workflow": "etl-remuneraciones-38bis.yml", "name": "Remuneraciones públicas art. 38 bis", "cronUtc": "15 10 5 * *", "local": "Día 5, revisión mensual; 06:15 invierno / 07:15 verano" },
     { "workflow": "etl-servel.yml", "name": "SERVEL", "cronUtc": null, "local": "Sólo workflow_dispatch" }
   ]

@@ -624,7 +624,7 @@ describe("API canónica v1", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 59361, transferRows: 59361, d1ReleaseChecksum: "release-checksum", transferSource: "d1" });
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, publicDataBackend: "r2", publicD1Reads: true, d1TransferRows: 59361, transferRows: 59361, d1ReleaseChecksum: "release-checksum", transferSource: "d1" });
   });
 
   it("mantiene health operativo y marca D1 inconsistente cuando el puntero R2 difiere", async () => {
@@ -633,7 +633,7 @@ describe("API canónica v1", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 59360, transferRows: 59361, d1Consistent: false, transferSource: "r2" });
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, publicDataBackend: "r2", publicD1Reads: true, d1TransferRows: 59360, transferRows: 59361, d1Consistent: false, transferSource: "r2" });
   });
 
   it("usa sólo el puntero de release en health y nunca cuenta la tabla D1", async () => {
@@ -664,7 +664,7 @@ describe("API canónica v1", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 0, d1Consistent: false, transferSource: "r2" });
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, publicDataBackend: "r2", publicD1Reads: false, d1TransferRows: 0, d1Consistent: false, transferSource: "r2" });
     expect(prepare).not.toHaveBeenCalled();
   });
 
@@ -1000,6 +1000,58 @@ describe("API canónica v1", () => {
     expect(payload.meta.sourceBackend).toBe("r2-lake");
     expect(payload.data[0]).toMatchObject({ id: "camara-lake-1", sourceId: "camara" });
     expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it("no declara completo un release R2 si faltan particiones publicadas", async () => {
+    const compressed = gzipSync(`${JSON.stringify({
+      id: "camara-lake-available",
+      sourceId: "camara",
+      kind: "vote",
+      occurredAt: "2026-08-01",
+      evidence: { sourceUrl: "https://opendata.congreso.cl/votacion/available" },
+      data: { title: "Votación disponible", subject_entity_ids: [], object_entity_ids: [] },
+    })}\n`);
+    const checksum = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", compressed)))
+      .map((byte) => byte.toString(16).padStart(2, "0")).join("");
+    const artifact = {
+      key: `partitions/camara/2026/08/records-${checksum}.jsonl.gz`,
+      checksumSha256: checksum,
+      releaseAssetName: "camara-2026-08-records.jsonl.gz",
+    };
+    const manifest = { projectionChecksumSha256: checksum, artifacts: [artifact] };
+    const catalog = {
+      schemaVersion: "1.0.0",
+      generatedAt: "2026-08-08T00:00:00Z",
+      sources: [],
+      partitions: [
+        { id: "camara/2026/08", sourceId: "camara", period: "2026-08", manifestKey: "partitions/camara/2026/08/manifest.json", checksumSha256: checksum, status: "partial", recordCount: 1 },
+        { id: "camara/2026/07", sourceId: "camara", period: "2026-07", manifestKey: "partitions/camara/2026/07/manifest.json", checksumSha256: "missing", status: "partial", recordCount: 1 },
+      ],
+    };
+    const objects = new Map<string, ArrayBuffer>([
+      ["catalog/v1/manifest.json", new TextEncoder().encode(JSON.stringify(catalog)).buffer],
+      ["partitions/camara/2026/08/manifest.json", new TextEncoder().encode(JSON.stringify(manifest)).buffer],
+      [artifact.key, compressed.buffer.slice(compressed.byteOffset, compressed.byteOffset + compressed.byteLength)],
+    ]);
+    const PUBLIC_DATA = {
+      async get(key: string, options?: { range?: { offset: number; length: number } }) {
+        if (key === "projections/static-site-v1/manifest.json") return { json: async <T>() => ({ files: [{ path: "placeholder", key: "placeholder" }] }) as T };
+        const value = objects.get(key);
+        if (!value) return null;
+        const bytes = new Uint8Array(value);
+        const sliced = options?.range ? bytes.slice(options.range.offset, options.range.offset + options.range.length).buffer : value;
+        return { json: async <T>() => JSON.parse(new TextDecoder().decode(sliced)) as T, arrayBuffer: async () => sliced };
+      },
+    };
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/records?source=camara&limit=1"),
+      { DB: { prepare: () => { throw new Error("D1 no debe consultarse"); } }, PUBLIC_DATA } as never,
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta).toMatchObject({ sourceBackend: "r2-lake", sourceStatus: "partial", publishedRows: 1, expectedRows: 2 });
+    expect(payload.data[0].id).toBe("camara-lake-available");
   });
 
   it("rechaza filtros inválidos con el error uniforme", async () => {

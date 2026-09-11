@@ -41,7 +41,11 @@ const pausa = (ms) => new Promise((r) => setTimeout(r, ms));
 
 const OUT = "data/personal-apoyo.json";
 
-/** "camara": solo Cámara, preservando senadores guardados; sin argumento: Cámara + Senado completos. */
+/**
+ * Cada fuente puede actualizarse por separado. La fuente no seleccionada se
+ * conserva desde el snapshot de entrada para que una ejecución parcial nunca
+ * borre la historia publicada de la otra cámara.
+ */
 const cliArgs = process.argv.slice(2);
 function argumentValue(name, fallback) {
   const inline = cliArgs.find((argument) => argument.startsWith(`${name}=`));
@@ -52,13 +56,21 @@ function argumentValue(name, fallback) {
 const legacyLimit = cliArgs[0] === "camara" && /^\d+$/.test(cliArgs[1] ?? "")
   ? parseInt(cliArgs[1], 10)
   : null;
+const requestedSource = argumentValue("--source", cliArgs.includes("camara") ? "camara" : "all");
+if (!["all", "camara", "senado"].includes(requestedSource)) {
+  throw new Error(`PERSONAL_APOYO_SOURCE_INVALID: ${requestedSource}`);
+}
 const extraIdsArgument = cliArgs.find((argument) => argument.startsWith("--extra-ids="))?.split("=").slice(1).join("=")
   ?? (cliArgs.includes("--extra-ids") ? cliArgs[cliArgs.indexOf("--extra-ids") + 1] : "");
 const EXTRA_IDS = [...new Set(String(extraIdsArgument ?? "").split(",").map((id) => id.trim()).filter((id) => /^\d+$/.test(id)))];
 const ONLY_EXTRA = cliArgs.includes("--only-extra");
 if (ONLY_EXTRA && EXTRA_IDS.length === 0) throw new Error("PERSONAL_APOYO_EXTRA_IDS_REQUIRED");
+if (requestedSource === "senado" && (ONLY_EXTRA || EXTRA_IDS.length > 0 || legacyLimit !== null)) {
+  throw new Error("PERSONAL_APOYO_SOURCE_CONFLICT: --source senado no acepta límites ni ids de Cámara");
+}
 const LIMIT = legacyLimit;
-const SOLO_CAMARA = cliArgs.includes("camara") || LIMIT !== null || EXTRA_IDS.length > 0 || ONLY_EXTRA;
+const INCLUDE_CAMARA = requestedSource !== "senado";
+const INCLUDE_SENADO = requestedSource !== "camara";
 const ENTRADA = argumentValue("--input", OUT);
 const ESCRITURA = argumentValue("--output", LIMIT ? "data/personal-apoyo.test.json" : OUT);
 
@@ -132,26 +144,23 @@ function mejorMesConDatos(htmlGet, meses, st, url, jar) {
 }
 
 async function main() {
-  const senatePolicyUrl = "https://www.senado.cl/transparencia/personal-de-apoyo-senadores";
-  const senatePolicyHtml = curlHtml(senatePolicyUrl);
-  const senatePolicy = parseSenadoAssignmentPolicy(senatePolicyHtml);
-  const senateAssignment = {
-    ...senatePolicy,
-    source_url: senatePolicyUrl,
-    retrieved_at: new Date().toISOString(),
-    checksum_sha256: createHash("sha256").update(senatePolicyHtml).digest("hex"),
-    // La regla general no prueba un traspaso individual. Este arreglo sólo puede
-    // poblarse desde un documento oficial individualizado incorporado por ETL.
-    transferencias_acreditadas: [],
-  };
-
-  const jar = `cookies-${Date.now()}.txt`;
-  const primera = curlHtml("https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=1009", { jar });
-  const ids = [...primera.matchAll(/<option value="(\d+)">([^<]+)<\/option>/g)].map((m) => ({ id: m[1], apellido: html(m[2]) }));
-  console.log("diputados en select:", ids.length);
-  try { fs.unlinkSync(jar); } catch {}
-
   const previo = fs.existsSync(ENTRADA) ? JSON.parse(fs.readFileSync(ENTRADA, "utf8")) : null;
+  const senatePolicyUrl = "https://www.senado.cl/transparencia/personal-de-apoyo-senadores";
+  let senateAssignment = previo?.asignacion_senado_2026 ?? null;
+  if (INCLUDE_SENADO) {
+    const senatePolicyHtml = curlHtml(senatePolicyUrl);
+    const senatePolicy = parseSenadoAssignmentPolicy(senatePolicyHtml);
+    senateAssignment = {
+      ...senatePolicy,
+      source_url: senatePolicyUrl,
+      retrieved_at: new Date().toISOString(),
+      checksum_sha256: createHash("sha256").update(senatePolicyHtml).digest("hex"),
+      // La regla general no prueba un traspaso individual. Este arreglo sólo puede
+      // poblarse desde un documento oficial individualizado incorporado por ETL.
+      transferencias_acreditadas: [],
+    };
+  }
+
   const diputadosActualizados = {};
   let fallos = 0;
 
@@ -161,14 +170,22 @@ async function main() {
     if (Array.isArray(opendata)) vigentes = new Set(opendata.map((d) => String(d.id)));
   } catch {}
 
-  const enSelect = new Set(ids.map((x) => x.id));
-  const faltantes = vigentes ? [...vigentes].filter((id) => !enSelect.has(id)) : [];
-  if (faltantes.length) console.log("ids opendata ausentes del selector (se completan):", faltantes.join(", "));
-  const candidatos = [...ids, ...faltantes.map((id) => ({ id })), ...EXTRA_IDS.map((id) => ({ id }))];
-  const listaCompleta = [...new Map(candidatos.map((candidate) => [candidate.id, candidate])).values()];
-  const lista = ONLY_EXTRA
-    ? EXTRA_IDS.map((id) => ({ id }))
-    : LIMIT ? listaCompleta.slice(0, LIMIT) : listaCompleta;
+  let lista = [];
+  if (INCLUDE_CAMARA) {
+    const jar = `cookies-${Date.now()}.txt`;
+    const primera = curlHtml("https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=1009", { jar });
+    const ids = [...primera.matchAll(/<option value="(\d+)">([^<]+)<\/option>/g)].map((m) => ({ id: m[1], apellido: html(m[2]) }));
+    console.log("diputados en select:", ids.length);
+    try { fs.unlinkSync(jar); } catch {}
+    const enSelect = new Set(ids.map((x) => x.id));
+    const faltantes = vigentes ? [...vigentes].filter((id) => !enSelect.has(id)) : [];
+    if (faltantes.length) console.log("ids opendata ausentes del selector (se completan):", faltantes.join(", "));
+    const candidatos = [...ids, ...faltantes.map((id) => ({ id })), ...EXTRA_IDS.map((id) => ({ id }))];
+    const listaCompleta = [...new Map(candidatos.map((candidate) => [candidate.id, candidate])).values()];
+    lista = ONLY_EXTRA
+      ? EXTRA_IDS.map((id) => ({ id }))
+      : LIMIT ? listaCompleta.slice(0, LIMIT) : listaCompleta;
+  }
   for (const [i, { id }] of lista.entries()) {
     const jarId = `cookies-${id}.txt`;
     try {
@@ -230,9 +247,11 @@ async function main() {
       try { fs.unlinkSync(jarId); } catch {}
     }
   }
-  console.log("Cámara listo. fallos:", fallos);
+  if (INCLUDE_CAMARA) console.log("Cámara listo. fallos:", fallos);
 
-  const diputados = mergePersonalApoyoDeputies(previo?.diputados ?? {}, diputadosActualizados);
+  const diputados = INCLUDE_CAMARA
+    ? mergePersonalApoyoDeputies(previo?.diputados ?? {}, diputadosActualizados)
+    : (previo?.diputados ?? {});
   if (vigentes) {
     const historicos = Object.keys(diputados).filter((id) => !vigentes.has(id));
     if (historicos.length) {
@@ -242,9 +261,9 @@ async function main() {
     console.log("sin data/etl/latest.json: se conserva la historia publicada");
   }
 
-  let senadores = SOLO_CAMARA ? (previo?.senadores ?? {}) : {};
-  let mesesSenado = new Set(SOLO_CAMARA ? (previo?.meses_senado_disponibles ?? []) : []);
-  if (!SOLO_CAMARA) {
+  let senadores = INCLUDE_SENADO ? {} : (previo?.senadores ?? {});
+  let mesesSenado = new Set(INCLUDE_SENADO ? [] : (previo?.meses_senado_disponibles ?? []));
+  if (INCLUDE_SENADO) {
     let page = 1;
     const pageSize = 500;
     while (true) {

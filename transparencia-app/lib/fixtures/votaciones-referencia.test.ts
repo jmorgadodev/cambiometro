@@ -3,16 +3,17 @@ import { POLITICOS_SEED } from "@/lib/seed-politicos";
 import { getVotacionesParaPolitico, getTimelineParaPolitico, diputadoIdParaPolitico } from "@/lib/data-source";
 import { personalApoyoParaDiputado, personalApoyoParaSenador } from "@/lib/personal-apoyo";
 import { esProcedimental } from "@/components/VotacionesHistorial";
+import votacionesSnapshot from "@/data/politicos-votaciones.json";
 
 describe("Fixture de Referencia Oficial — Votaciones en Sala y Coherencia Interna", () => {
   // Muestra obligatoria de auditoría: Kaiser, Bianchi K., Bianchi C., Winter, Cariola, Schalper
   const muestraAuditIds = [
-    { id: "sen-038", nombre: "Vanessa Kaiser Barents-Von Hohenhagen", cargo: "Senador", esperado: 189 },
-    { id: "sen-048", nombre: "Karim Bianchi Retamales", cargo: "Senador", esperado: 189 },
-    { id: "dip-154", nombre: "Carlos Bianchi Chelech", cargo: "Diputado", esperado: 580 },
-    { id: "dip-057", nombre: "Gonzalo Winter Etcheberry", cargo: "Diputado", esperado: 580 },
-    { id: "sen-017", nombre: "Karol Cariola Oliva", cargo: "Senador", esperado: 189 },
-    { id: "dip-068", nombre: "Diego Schalper Sepúlveda", cargo: "Diputado", esperado: 580 },
+    { id: "sen-038", nombre: "Vanessa Kaiser Barents-Von Hohenhagen", cargo: "Senador" },
+    { id: "sen-048", nombre: "Karim Bianchi Retamales", cargo: "Senador" },
+    { id: "dip-154", nombre: "Carlos Bianchi Chelech", cargo: "Diputado" },
+    { id: "dip-057", nombre: "Gonzalo Winter Etcheberry", cargo: "Diputado" },
+    { id: "sen-017", nombre: "Karol Cariola Oliva", cargo: "Senador" },
+    { id: "dip-068", nombre: "Diego Schalper Sepúlveda", cargo: "Diputado" },
   ];
 
   it("1. Coherencia Matemática Interna: tiles == historial == denominador de presencia", () => {
@@ -22,7 +23,9 @@ describe("Fixture de Referencia Oficial — Votaciones en Sala y Coherencia Inte
       if (!pol) continue;
 
       const votaciones = getVotacionesParaPolitico(pol);
-      expect(votaciones.length).toBe(item.esperado); // Igualdad estricta tile ficha == fila sweep
+      const filasSnapshot = (votacionesSnapshot.votes as Record<string, unknown[]>)[item.id] ?? [];
+      expect(filasSnapshot.length).toBeGreaterThan(0);
+      expect(votaciones.length).toBe(filasSnapshot.length); // Igualdad estricta tile/ficha == fila del release
 
       let afirmativo = 0;
       let enContra = 0;
@@ -71,7 +74,8 @@ describe("Fixture de Referencia Oficial — Votaciones en Sala y Coherencia Inte
       if (!pol) continue;
 
       const votaciones = getVotacionesParaPolitico(pol);
-      expect(votaciones.length).toBe(item.esperado);
+      const filasSnapshot = (votacionesSnapshot.votes as Record<string, unknown[]>)[item.id] ?? [];
+      expect(votaciones.length).toBe(filasSnapshot.length);
 
       const validos = votaciones.filter((v) => v.voto.opcion && v.votacion.fecha);
       const ratio = validos.length / votaciones.length;

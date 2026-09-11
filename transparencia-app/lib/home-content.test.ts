@@ -38,9 +38,11 @@ describe("promesas editoriales del inicio", () => {
     expect(search).toContain('fetch(`/api/v1/search?q=${encodeURIComponent(normalizedQuery)}`');
     expect(search).toContain('placeholder="Nombre, partido, distrito o región"');
     expect(search).toContain("Coincidencias");
-    expect(search).toContain('action="/personas/"');
+    expect(search).toContain('action="/remuneraciones-publicas/"');
     expect(search).toContain("event.preventDefault();");
-    expect(search).toContain("/personas/?search=");
+    expect(search).toContain("/remuneraciones-publicas/?q=");
+    expect(search).toContain("hasRemunerationResults");
+    expect(search).toContain("Ver todas las remuneraciones");
   });
 
   it("mantiene cinco preguntas de análisis y separa el seguimiento de movimientos", () => {

@@ -7,8 +7,17 @@ export function normalizeRemunerationText(value) {
     .trim();
 }
 
+// Algunas fuentes publican nombres chilenos con los apellidos en posiciones
+// distintas (por ejemplo, "RÍO SEBASTIÁN TORREALBA DEL" frente a
+// "SEBASTIÁN TORREALBA DEL RÍO"). La llave de identidad sólo se usa para
+// agrupar y buscar; el nombre original permanece intacto en cada fila.
+export function normalizeRemunerationNameKey(value) {
+  const normalized = normalizeRemunerationText(value);
+  return normalized ? normalized.split(" ").sort().join(" ") : "";
+}
+
 export function personKeyForRemuneration(name, recordId = "unknown") {
-  return normalizeRemunerationText(name) || `unknown-${recordId}`;
+  return normalizeRemunerationNameKey(name) || `unknown-${recordId}`;
 }
 
 export function relationStatus(sourceIds) {

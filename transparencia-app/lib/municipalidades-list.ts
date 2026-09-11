@@ -52,7 +52,9 @@ export function getMunicipalidadesStats() {
   const totalMasaMensual = all.reduce((sum, m) => sum + (m.resumen_personal?.masa_mensual_clp ?? 0), 0);
   const alDiaCount = all.filter((m) => m.estado_frescura === "al_dia").length;
   const desfasadoCount = all.filter((m) => m.estado_frescura === "desfasado").length;
-  const sinDatosCount = all.filter((m) => m.estado_frescura === "sin_datos" || !m.estado_frescura).length;
+  // Territory without its own municipality is reported separately below;
+  // never count it as a missing municipal payroll.
+  const sinDatosCount = all.filter((m) => m.tiene_municipalidad_propia && (m.estado_frescura === "sin_datos" || !m.estado_frescura)).length;
   // El catálogo territorial y la cobertura de nóminas son métricas distintas:
   // Antártica pertenece al territorio nacional, pero no tiene municipalidad
   // propia; no debe presentarse como una fuente CPLT ausente.

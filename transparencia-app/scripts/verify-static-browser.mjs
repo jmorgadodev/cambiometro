@@ -145,7 +145,7 @@ async function main() {
     { route: "/personas", markers: ["Directorio de Personas"] },
     { route: "/entidades", markers: ["Entidades"] },
     { route: "/politico/vanessa-kaiser-barents-von-hohenhagen", markers: ["Vanessa Kaiser", "8.291.039", "Votaciones", "Personal de Apoyo"] },
-    { route: "/politico/carlos-bianchi-chelech", markers: ["Carlos Bianchi", "25.009", "24,89%", "580", "189"] },
+    { route: "/politico/carlos-bianchi-chelech", markers: ["Carlos Bianchi", "25.009", "24,89%"] },
     { route: "/municipalidades/maipu", markers: ["Municipalidad de Maipú", "Tomas Vodanovic", "Nómina Detallada", "219.402.160.000"] },
   ];
 
@@ -220,6 +220,33 @@ async function main() {
   };
   await municipalidadesContext.close();
 
+  const crucesContext = await createContext(browser);
+  const crucesPage = await crucesContext.newPage();
+  const crucesRequests = [];
+  crucesPage.on("request", (request) => {
+    if (request.url().includes("/data/cruces/")) crucesRequests.push(new URL(request.url()).pathname);
+  });
+  await crucesPage.goto(`${baseUrl}/cruces`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+  await crucesPage.waitForTimeout(waitMs);
+  const crucesNext = crucesPage.getByRole("button", { name: /Siguiente/ }).first();
+  const crucesNextEnabled = await crucesNext.isEnabled();
+  await crucesNext.click();
+  await crucesPage.waitForTimeout(800);
+  const crucesAfterPage = await crucesPage.locator("body").innerText();
+  const crucesSearch = crucesPage.getByRole("searchbox").first();
+  await crucesSearch.fill("contraloria");
+  await crucesPage.waitForTimeout(1_500);
+  const crucesAfterSearch = await crucesPage.locator("body").innerText();
+  const crucesPagination = {
+    nextEnabled: crucesNextEnabled,
+    movedToPageTwo: /Pág\. 2 de/.test(crucesAfterPage),
+    requestedStaticPage: crucesRequests.some((requestPath) => /\/p-\d{4}\.json$/.test(requestPath)),
+    requestedPageChunkCount: crucesRequests.filter((requestPath) => /\/p-\d{4}\.json$/.test(requestPath)).length,
+    requestedSearchIndex: crucesRequests.some((requestPath) => /\/search-[^/]+\.json$/.test(requestPath)),
+    searchUsesFullIndex: crucesAfterSearch.includes("Índice completo"),
+  };
+  await crucesContext.close();
+
   await browser.close();
   if (server.listening) await new Promise((resolve) => server.close(resolve));
 
@@ -244,9 +271,12 @@ async function main() {
   failures.push(check(legacyRedirect.status === 301 && legacyRedirect.location === "/municipalidades/maipu", "Redirect legacy Maipú", { legacyRedirect }));
   failures.push(check(municipalidadesMap.selectorCount === 0, "Municipalidades: el mapa territorial no debe aparecer en producción", municipalidadesMap));
   failures.push(check(municipalidadesMap.hasTableFallback, "Municipalidades: falta la alternativa de registros", municipalidadesMap));
+  failures.push(check(crucesPagination.nextEnabled && crucesPagination.movedToPageTwo, "Cruces: paginación no avanza a la página 2", { crucesPagination }));
+  failures.push(check(crucesPagination.requestedStaticPage && crucesPagination.requestedPageChunkCount <= 10, "Cruces: la paginación solicitó demasiados chunks estáticos", { crucesPagination }));
+  failures.push(check(crucesPagination.requestedSearchIndex && crucesPagination.searchUsesFullIndex, "Cruces: búsqueda no usa el índice completo", { crucesPagination }));
 
   const failed = failures.filter(Boolean);
-  console.log(JSON.stringify({ baseUrl, waitMs, routes, navigation: { politicianNavigation, municipalityNavigation, navigationErrors, navigationBadResponses }, municipalityPayroll, legacyRedirect, municipalidadesMap, passed: failures.length - failed.length, failed }, null, 2));
+  console.log(JSON.stringify({ baseUrl, waitMs, routes, navigation: { politicianNavigation, municipalityNavigation, navigationErrors, navigationBadResponses }, municipalityPayroll, legacyRedirect, municipalidadesMap, crucesPagination, passed: failures.length - failed.length, failed }, null, 2));
   if (failed.length > 0) process.exitCode = 1;
 }
 

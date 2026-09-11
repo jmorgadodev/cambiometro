@@ -9,10 +9,12 @@ export interface LakeAsset {
 export interface LakeCatalogPartition {
   id: string;
   sourceId: string;
+  variant?: string | null;
   period: string;
   sourcePeriod?: string | null;
   releaseTag: string;
   manifestKey: string;
+  manifestAssetName?: string;
   recordCount: number;
   checksumSha256: string;
   status: string;

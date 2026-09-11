@@ -377,6 +377,11 @@ async function health(env: Env) {
     d1Consistent,
     transferD1,
     d1ReleaseChecksum,
+    // Public datasets are served from versioned R2 assets. D1 remains an
+    // optional operator projection and is never implied by the presence of
+    // the binding in production.
+    publicDataBackend: "r2",
+    publicD1Reads: publicD1ReadsEnabled(env),
     transferSource: d1Consistent && env.PREFER_TRANSFER_D1 === "1" ? "d1" : "r2",
     transferRows: manifest?.totalRows ?? 0,
     generatedAt: manifest?.generatedAt ?? null,
@@ -1163,8 +1168,9 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
           page: Math.floor(offset / limit) + 1,
           totalPages: Math.max(1, Math.ceil(lake.total / limit)),
           sourceBackend: "r2-lake",
-          sourceStatus: "complete",
-          publishedRows: lake.total,
+          sourceStatus: lake.complete ? "complete" : "partial",
+          publishedRows: lake.loadedRows,
+          expectedRows: lake.expectedTotal,
           nextCursor: lake.nextCursor,
         }, pageLinks(requestUrl, offset, limit, lake.total));
       }

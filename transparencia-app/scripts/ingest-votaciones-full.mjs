@@ -21,6 +21,12 @@ function isoDateDaysAgo(days) {
 // runs; --full deliberately bypasses it for a controlled backfill.
 const REFRESH_FROM = readArgument("--from") || isoDateDaysAgo(7);
 const REFRESH_TO = readArgument("--to") || new Date().toISOString().slice(0, 10);
+const SOURCE_MODE = readArgument("--source") || "all";
+if (!["all", "camara", "senado"].includes(SOURCE_MODE)) {
+  throw new Error(`--source debe ser all, camara o senado; recibido: ${SOURCE_MODE}`);
+}
+const INCLUDE_CAMARA = SOURCE_MODE === "all" || SOURCE_MODE === "camara";
+const INCLUDE_SENADO = SOURCE_MODE === "all" || SOURCE_MODE === "senado";
 
 function normalizeText(value) {
   if (typeof value !== "string") return "";
@@ -374,10 +380,20 @@ async function fetchSenadoVotaciones() {
 // CONSOLIDACIÓN FINAL
 // ─────────────────────────────────────────────────────────────────────────────
 async function main() {
-  console.log(`[ingest-votaciones] Modo ${FULL_REBUILD ? "reconstrucción completa" : `incremental (detalles desde ${REFRESH_FROM})`}.`);
+  console.log(`[ingest-votaciones] Modo ${FULL_REBUILD ? "reconstrucción completa" : `incremental (detalles desde ${REFRESH_FROM})`} · fuente ${SOURCE_MODE}.`);
   const [camaraSessions, senadoSessions] = await Promise.all([
-    fetchCamaraVotaciones(),
-    fetchSenadoVotaciones(),
+    INCLUDE_CAMARA
+      ? fetchCamaraVotaciones()
+      : Promise.resolve([...previousSessions.entries()]
+        .filter(([, metadata]) => metadata.fuente === "camara")
+        .map(([sessionId]) => cachedSession(sessionId))
+        .filter(Boolean)),
+    INCLUDE_SENADO
+      ? fetchSenadoVotaciones()
+      : Promise.resolve([...previousSessions.entries()]
+        .filter(([, metadata]) => metadata.fuente === "senado")
+        .map(([sessionId]) => cachedSession(sessionId))
+        .filter(Boolean)),
   ]);
 
   console.log(`[ingest-votaciones] Consolidando: ${camaraSessions.length} Cámara + ${senadoSessions.length} Senado...`);

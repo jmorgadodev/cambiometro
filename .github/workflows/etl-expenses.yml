@@ -1,4 +1,4 @@
-name: ETL Mensual - Gastos Operacionales Congreso
+name: ETL Mensual - Gastos Operacionales Senado
 
 on:
   schedule:
@@ -20,7 +20,7 @@ permissions:
 
 jobs:
   ingest-publish-materialize:
-    name: Senado — conserva el release de Cámara publicado localmente
+    name: Gastos operacionales del Senado; Cámara se ejecuta localmente
     runs-on: ubuntu-latest
     timeout-minutes: 240
     environment: production
