@@ -233,7 +233,15 @@ try {
     "true",
     "El registro de votaciones debe iniciar filtrado por Senado",
   );
-  const analysisButton = page.getByRole("button", { name: "Abrir análisis" }).first();
+  let analysisButton = page.getByRole("button", { name: "Abrir análisis" }).first();
+  // The complete register opens on Senado. Editorial analysis is attached to
+  // selected records, so the initial chamber may legitimately have no such
+  // row while the other chamber does.
+  if (await page.getByRole("button", { name: "Abrir análisis" }).count() === 0) {
+    await cameraFilter.getByRole("button", { name: /Cámara/ }).click();
+    await page.waitForTimeout(250);
+    analysisButton = page.getByRole("button", { name: "Abrir análisis" }).first();
+  }
   await analysisButton.waitFor({ state: "visible", timeout: 15_000 });
   await analysisButton.click();
   const featuredDialog = page.locator(".featured-vote-dialog:visible");
