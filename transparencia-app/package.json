@@ -112,9 +112,9 @@
   },
   "dependencies": {
     "@cloudflare/workers-types": "^5.20260804.1",
-    "@types/cytoscape": "^3.21.9",
+    "@types/cytoscape": "^3.31.0",
     "csv-parser": "^3.2.1",
-    "cytoscape": "^3.34.0",
+    "cytoscape": "^3.34.2",
     "echarts": "^6.1.0",
     "fflate": "0.8.3",
     "html-to-image": "^1.11.13",
@@ -125,7 +125,7 @@
     "react": "19.2.8",
     "react-dom": "19.2.8",
     "recharts": "^3.10.1",
-    "satori": "^0.29.0",
+    "satori": "^0.33.4",
     "saxes": "6.0.0",
     "server-only": "^0.0.1"
   },
