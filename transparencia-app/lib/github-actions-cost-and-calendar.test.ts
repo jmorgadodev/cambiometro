@@ -14,7 +14,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(workflowFiles.length).toBeGreaterThanOrEqual(10);
 
     const staticPublishers = new Set([
-      "etl-chilecompra.yml", "etl-contraloria.yml", "etl-cplt.yml", "etl-daily.yml", "etl-senado-votaciones.yml",
+      "etl-chilecompra.yml", "etl-contraloria.yml", "etl-cplt.yml", "etl-daily.yml", "etl-camara-votaciones.yml", "etl-senado-votaciones.yml",
       "etl-dipres.yml", "etl-expenses.yml", "etl-infolobby-scheduled.yml", "etl-infoprobidad.yml",
       "etl-ley-19862.yml", "etl-movimientos.yml", "etl-personal-apoyo.yml", "etl-personal-apoyo-senado.yml", "etl-servel.yml",
       "etl-sinim.yml",
@@ -68,9 +68,13 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     }
   });
 
-  it("4. Calendario ETL: los 11 procesos automáticos y SERVEL tienen su contrato exacto", () => {
+  it("4. Calendario ETL: los procesos automáticos tienen su contrato exacto", () => {
     const cronMap: Record<string, string | null> = {
       "etl-daily.yml": "0 7 * * *",
+      "etl-camara-votaciones.yml": "15 7 * * *",
+      "etl-senado-votaciones.yml": "30 7 * * *",
+      "etl-personal-apoyo.yml": "0 7 * * 1",
+      "etl-personal-apoyo-senado.yml": "30 7 * * 1",
       "etl-chilecompra.yml": "0 8 * * 1",
       "etl-infolobby-scheduled.yml": "30 8 * * 1",
       "etl-contraloria.yml": "0 9 2 * *",
@@ -162,15 +166,19 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     const workflow = fs.readFileSync(path.join(workflowsDir, "etl-daily.yml"), "utf8");
     const ingest = fs.readFileSync(path.resolve(root, "scripts", "ingest-votaciones-full.mjs"), "utf8");
 
-    expect(workflow).toContain("full_votaciones:");
-    expect(workflow).toContain("FULL_VOTACIONES");
-    expect(workflow).toContain("npm run ingest:votaciones-full -- --source camara --full");
+    expect(workflow).toContain("name: ETL Diario - Cámara");
+    expect(workflow).toContain("--source camara");
+    expect(workflow).not.toContain("full_votaciones:");
+    const camaraVotesWorkflow = fs.readFileSync(path.join(workflowsDir, "etl-camara-votaciones.yml"), "utf8");
+    expect(camaraVotesWorkflow).toContain("name: ETL Diario - Votaciones Cámara");
+    expect(camaraVotesWorkflow).toContain("--source votaciones_camara");
+    expect(camaraVotesWorkflow).toContain("npm run ingest:votaciones-full -- --source camara --full");
     const senateWorkflow = fs.readFileSync(path.join(workflowsDir, "etl-senado-votaciones.yml"), "utf8");
     expect(senateWorkflow).toContain("name: ETL Diario - Votaciones Senado");
     expect(senateWorkflow).toContain("npm run etl -- --from");
     expect(senateWorkflow).toContain("--source votaciones_senado");
     expect(senateWorkflow).toContain("npm run ingest:votaciones-full -- --source senado --full");
-    expect(workflow).not.toContain("--source camara,votaciones_camara,votaciones_senado");
+    expect(workflow).not.toContain("--source camara,votaciones_camara");
     expect(ingest).toContain("const REFRESH_FROM");
     expect(ingest).toContain("function cachedSession");
     expect(ingest).toContain("if (cached && !shouldRefresh(vote.fecha)) return cached");

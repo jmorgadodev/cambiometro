@@ -7,7 +7,8 @@ verano. Por eso el mismo cron `0 7 * * *` se muestra como 04:00 en invierno y
 
 | ETL | Cron UTC | Hora local aproximada |
 | --- | --- | --- |
-| Cámara y votaciones Cámara | `0 7 * * *` | 04:00 invierno / 03:00 verano |
+| Cámara | `0 7 * * *` | 04:00 invierno / 03:00 verano |
+| Votaciones Cámara | `15 7 * * *` | 04:15 invierno / 03:15 verano |
 | Votaciones Senado | `30 7 * * *` | 04:30 invierno / 03:30 verano |
 | Personal de apoyo Cámara | `0 7 * * 1` | Lunes 04:00 invierno / 03:00 verano |
 | Personal de apoyo Senado | `30 7 * * 1` | Lunes 04:30 invierno / 03:30 verano |
@@ -33,11 +34,11 @@ válido; no se publica un dataset parcial con apariencia de éxito.
 
 Movimientos y cada fuente de personal de apoyo tienen workflows propios para
 que un bloqueo de Cámara no impida actualizar Senado ni el resto del portal.
-Las votaciones de Senado también tienen su propio workflow y horario, separado
-del ETL de Cámara. Cada ejecución conserva en R2 la parte de la otra cámara
-desde el snapshot válido anterior; no publica un archivo incompleto como si
-fuera una actualización total. La fecha de la última ejecución y la fecha del
-último movimiento son metadatos distintos.
+Las votaciones de Cámara y Senado tienen workflows y horarios propios,
+separados de sus respectivos ETL de nómina. Cada ejecución conserva en R2 la
+parte de la otra cámara desde el snapshot válido anterior; no publica un
+archivo incompleto como si fuera una actualización total. La fecha de la
+última ejecución y la fecha del último movimiento son metadatos distintos.
 
 Las fuentes provisionales RSS autorizadas se configuran en la variable de
 entorno `MOVIMIENTOS_PROVISIONAL_SOURCES` como una lista separada por comas.

@@ -2,7 +2,8 @@
   "timezone": "America/Santiago",
   "cronTimezone": "UTC",
   "entries": [
-    { "workflow": "etl-daily.yml", "name": "Cámara y votaciones Cámara", "cronUtc": "0 7 * * *", "local": "Diario 04:00 invierno / 03:00 verano" },
+    { "workflow": "etl-daily.yml", "name": "Cámara", "cronUtc": "0 7 * * *", "local": "Diario 04:00 invierno / 03:00 verano" },
+    { "workflow": "etl-camara-votaciones.yml", "name": "Votaciones Cámara", "cronUtc": "15 7 * * *", "local": "Diario 04:15 invierno / 03:15 verano" },
     { "workflow": "etl-senado-votaciones.yml", "name": "Votaciones Senado", "cronUtc": "30 7 * * *", "local": "Diario 04:30 invierno / 03:30 verano" },
     { "workflow": "etl-personal-apoyo.yml", "name": "Personal de apoyo Cámara", "cronUtc": "0 7 * * 1", "local": "Lunes 04:00 invierno / 03:00 verano" },
     { "workflow": "etl-personal-apoyo-senado.yml", "name": "Personal de apoyo Senado", "cronUtc": "30 7 * * 1", "local": "Lunes 04:30 invierno / 03:30 verano" },

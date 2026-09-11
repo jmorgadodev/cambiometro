@@ -10,7 +10,8 @@ on:
   workflow_run:
     workflows:
       - "ETL Mensual - Ley 19.862 Transferencias del Estado"
-      - "ETL Diario - Cámara y votaciones Cámara"
+      - "ETL Diario - Cámara"
+      - "ETL Diario - Votaciones Cámara"
       - "ETL Diario - Votaciones Senado"
       - "ETL Diario - Movimientos de Autoridades"
       - "ETL Semanal - Personal de apoyo Cámara"
