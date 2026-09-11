@@ -2,11 +2,12 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllCrosses } from "@/lib/data-platform-v1";
 import { leerContraloriaV1 } from "@/lib/contraloria-lake";
-import { leerChileCompraV1 } from "@/lib/chilecompra";
+import { getChileCompraResumen, leerChileCompraV1 } from "@/lib/chilecompra";
 import { leerInfoLobbyV1 } from "@/lib/infolobby";
 import CrucesExplorerClient from "@/components/cruces/CrucesExplorerClient";
 import CrucesSourceRecords from "@/components/cruces/CrucesSourceRecords";
 import CrucesTabs from "@/components/cruces/CrucesTabs";
+import ChileCompraSummaryPanel from "@/components/cruces/ChileCompraSummaryPanel";
 import { getLey19862Summary } from "@/lib/transferencias-data";
 import { SOURCE_CANONICAL_COUNTS } from "@/lib/published-sources";
 import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
@@ -43,6 +44,8 @@ export default async function CrossesPage() {
   const { sources: qualitySources } = await getDataQualityDashboardData();
   const cgrCanonicalCount = SOURCE_CANONICAL_COUNTS.contraloria;
   const chilecompraCanonicalCount = SOURCE_CANONICAL_COUNTS.chilecompra;
+  const chilecompraSummary = getChileCompraResumen(5);
+  const chilecompraQuality = qualitySources.find((source) => source.id === "chilecompra");
   const infolobbyCanonicalCount = SOURCE_CANONICAL_COUNTS.infolobby;
 
   const clp = (amount: number | null) => {
@@ -149,6 +152,12 @@ export default async function CrossesPage() {
             contraloria: cgrCanonicalCount,
             infoprobidad: SOURCE_CANONICAL_COUNTS.infoprobidad,
           }} />}
+        />
+        <ChileCompraSummaryPanel
+          summary={chilecompraSummary}
+          currentCount={chilecompraCanonicalCount}
+          publicHistoricalCount={chilecompraQuality?.publicHistoricalCount ?? chilecompraCanonicalCount}
+          declaredHistoricalCount={chilecompraQuality?.historicalCount ?? chilecompraCanonicalCount}
         />
         <p className="data-note" style={{ marginTop: "1rem" }}>
            {crossesTotal.toLocaleString("es-CL")} relaciones canónicas en el índice publicado; la tabla permite filtrarlas y paginarlas dentro de la muestra inicial de {crosses.length.toLocaleString("es-CL")} relaciones, sin descargar el universo completo al navegador. <Link prefetch={false} href="/como-funciona">Conoce la metodología</Link>.

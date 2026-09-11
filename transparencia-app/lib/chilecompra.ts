@@ -74,6 +74,13 @@ export interface ChileCompraProyeccion {
   total_adjudicado_clp: number | null;
 }
 
+export interface ChileCompraResumen {
+  months: ChileCompraMes[];
+  topBuyers: ChileCompraComprador[];
+  topSuppliers: ChileCompraProveedor[];
+  anomalies: number;
+}
+
 let cached: ChileCompraProyeccion | null = null;
 
 /**
@@ -111,4 +118,32 @@ export function chilecompraParaCompradorPorRut(rutJuridico: string): ChileCompra
 
 export function chilecompraParaProveedor(proveedorId: string): ChileCompraProveedor | null {
   return leerChileCompraV1()?.suppliers.find((supplier) => supplier.id === proveedorId) ?? null;
+}
+
+/**
+ * Resume únicamente los agregados ya publicados por la proyección v1. No
+ * recorre D1 ni carga los registros OCDS individuales en el navegador.
+ */
+export function getChileCompraResumen(limit = 5): ChileCompraResumen {
+  const projection = leerChileCompraV1();
+  if (!projection) return { months: [], topBuyers: [], topSuppliers: [], anomalies: 0 };
+
+  const months = new Map<string, ChileCompraMes>();
+  for (const buyer of projection.buyers) {
+    for (const month of buyer.months ?? []) {
+      const current = months.get(month.period) ?? { period: month.period, monto_total_clp: null, procesos: 0 };
+      current.procesos += Number.isFinite(month.procesos) ? month.procesos : 0;
+      if (typeof month.monto_total_clp === "number") {
+        current.monto_total_clp = (current.monto_total_clp ?? 0) + month.monto_total_clp;
+      }
+      months.set(month.period, current);
+    }
+  }
+
+  return {
+    months: [...months.values()].sort((left, right) => left.period.localeCompare(right.period)),
+    topBuyers: projection.buyers.slice(0, Math.max(1, limit)),
+    topSuppliers: projection.suppliers.slice(0, Math.max(1, limit)),
+    anomalies: projection.anomalies.length,
+  };
 }
