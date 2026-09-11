@@ -105,6 +105,13 @@ function cursorOffset(cursor?: string) {
   return Number.parseInt(cursor.slice(3), 36);
 }
 
+function outsideDateRange(date: string, from?: string, to?: string) {
+  const period = date.slice(0, 7);
+  if (from && (from.length === 7 ? period < from : date < from)) return true;
+  if (to && (to.length === 7 ? period > to : date > to)) return true;
+  return false;
+}
+
 interface IndexedRecordsManifest {
   schemaVersion: number;
   sourceId: string;
@@ -132,8 +139,7 @@ function indexedRecordMatches(record: EvidenceRecord, params: {
   if (params.entityId && !record.subjectEntityIds.includes(params.entityId) && !record.objectEntityIds.includes(params.entityId)) return false;
   if (params.recordIds && !params.recordIds.includes(record.id)) return false;
   if (params.kind && record.kind !== params.kind) return false;
-  if (params.from && date < params.from) return false;
-  if (params.to && date > params.to) return false;
+  if (outsideDateRange(date, params.from, params.to)) return false;
   if (params.query) {
     const haystack = JSON.stringify({ id: record.id, title: record.title, description: record.description, data: record.data }).toLocaleLowerCase("es-CL");
     if (!haystack.includes(params.query.toLocaleLowerCase("es-CL"))) return false;
@@ -301,8 +307,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
         const haystack = JSON.stringify({ id: record.id, title: record.title, description: record.description, data: record.data }).toLocaleLowerCase("es-CL");
         if (!haystack.includes(params.query.toLocaleLowerCase("es-CL"))) continue;
       }
-      if (params.from && date < params.from) continue;
-      if (params.to && date > params.to) continue;
+      if (outsideDateRange(date, params.from, params.to)) continue;
       records.push(record);
     }
   }

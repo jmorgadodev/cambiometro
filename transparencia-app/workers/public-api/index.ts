@@ -89,6 +89,35 @@ function dbUnavailable() {
   return failure("DATABASE_UNAVAILABLE", "D1 no esta disponible.", 503, undefined);
 }
 
+const sourceComponentDefinitions: Record<string, Record<string, { sourceId: string; label: string; includedInRecordCount: boolean }>> = {
+  camara: {
+    asistencia: { sourceId: "camara", label: "Asistencia", includedInRecordCount: true },
+    votaciones: { sourceId: "camara", label: "Votaciones", includedInRecordCount: true },
+    gastos: { sourceId: "gastos_camara", label: "Gastos operacionales", includedInRecordCount: false },
+  },
+  senado: {
+    votaciones: { sourceId: "votaciones_senado", label: "Votaciones", includedInRecordCount: false },
+    gastos: { sourceId: "gastos_senado", label: "Gastos operacionales", includedInRecordCount: false },
+  },
+};
+
+function publicSourceComponents(sourceId: string, state: JsonRecord) {
+  const definitions = sourceComponentDefinitions[sourceId];
+  const rawComponents = state.components;
+  if (!definitions || !rawComponents || typeof rawComponents !== "object" || Array.isArray(rawComponents)) return undefined;
+  const components = rawComponents as JsonRecord;
+  return Object.entries(definitions).map(([id, definition]) => {
+    const count = Number(components[id] ?? 0);
+    return {
+      id,
+      sourceId: definition.sourceId,
+      label: definition.label,
+      recordCount: Number.isFinite(count) && count >= 0 ? count : 0,
+      includedInRecordCount: definition.includedInRecordCount,
+    };
+  });
+}
+
 function publicD1ReadsEnabled(env: Env) {
   return env.ALLOW_PUBLIC_D1_READS === "1";
 }
@@ -1791,6 +1820,7 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
     const stateStatus = hasPublishedLake
       ? String(lakeSource.status ?? "partial")
       : String(state.status ?? source.status ?? "unavailable");
+    const components = publicSourceComponents(id, state);
     return {
       ...source,
       id,
@@ -1808,6 +1838,7 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
         : hasPublishedLake && stateStatus === "partial"
           ? `El catálogo declara ${recordCount} registros, pero el release es parcial. La consulta sólo entrega particiones verificadas.`
           : recordCount > 0 ? "Datos publicados en el lake." : "Sin datos publicados.",
+      ...(components ? { components } : {}),
     };
   });
   return success(data, { total: data.length }, { self: requestUrl.toString() });

@@ -784,7 +784,7 @@ describe("API canónica v1", () => {
             return { json: async <T>() => ({ sources: [{ id: "camara", label: "Cámara", status: "partial" }] }) as T };
           }
           if (key === "projections/sources-v1/source-health.json") {
-            return { json: async <T>() => ({ sources: { camara: { recordCount: 19025, status: "partial", generatedAt: "2026-08-21T00:00:00.000Z" } } }) as T };
+            return { json: async <T>() => ({ sources: { camara: { recordCount: 19025, status: "partial", generatedAt: "2026-08-21T00:00:00.000Z", components: { asistencia: 120, votaciones: 30, gastos: 40 } } } }) as T };
           }
           return null;
         },
@@ -796,6 +796,35 @@ describe("API canónica v1", () => {
 
     expect(response.status).toBe(200);
     expect(payload.data[0]).toMatchObject({ id: "camara", recordCount: 19025, status: "partial" });
+    expect(payload.data[0].components).toEqual([
+      { id: "asistencia", sourceId: "camara", label: "Asistencia", recordCount: 120, includedInRecordCount: true },
+      { id: "votaciones", sourceId: "camara", label: "Votaciones", recordCount: 30, includedInRecordCount: true },
+      { id: "gastos", sourceId: "gastos_camara", label: "Gastos operacionales", recordCount: 40, includedInRecordCount: false },
+    ]);
+  });
+
+  it("expone por separado los componentes publicados del Senado", async () => {
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/sources-v1/source-inventory.json") {
+          return { json: async <T>() => ({ sources: [{ id: "senado", label: "Senado" }] }) as T };
+        }
+        if (key === "projections/sources-v1/source-health.json") {
+          return { json: async <T>() => ({ sources: { senado: { recordCount: 1428, status: "partial", components: { votaciones: 205, gastos: 6517 } } } }) as T };
+        }
+        return null;
+      },
+    };
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/sources"), { PUBLIC_DATA } as never);
+    const payload = await response.json();
+    const senado = payload.data.find((source: { id: string }) => source.id === "senado");
+
+    expect(response.status).toBe(200);
+    expect(senado.components).toEqual([
+      { id: "votaciones", sourceId: "votaciones_senado", label: "Votaciones", recordCount: 205, includedInRecordCount: false },
+      { id: "gastos", sourceId: "gastos_senado", label: "Gastos operacionales", recordCount: 6517, includedInRecordCount: false },
+    ]);
   });
 
   it("normaliza alias históricos y no publica catálogos legados como fuentes sin datos", async () => {
@@ -991,7 +1020,7 @@ describe("API canónica v1", () => {
     const prepare = vi.fn(() => { throw new Error("D1 no debe consultarse para el lake de Cámara"); });
 
     const response = await api.fetch(
-      new Request("https://example.test/api/v1/records?source=camara&limit=1"),
+      new Request("https://example.test/api/v1/records?source=camara&from=2026-08&to=2026-08&kind=vote&limit=1"),
       { DB: { prepare }, PUBLIC_DATA } as never,
     );
     const payload = await response.json();
