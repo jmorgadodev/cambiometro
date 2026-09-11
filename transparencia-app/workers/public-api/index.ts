@@ -1171,6 +1171,8 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
           sourceStatus: lake.complete ? "complete" : "partial",
           publishedRows: lake.loadedRows,
           expectedRows: lake.expectedTotal,
+          missingPartitions: lake.missingPartitions,
+          missingArtifacts: lake.missingArtifacts,
           nextCursor: lake.nextCursor,
         }, pageLinks(requestUrl, offset, limit, lake.total));
       }
@@ -1804,7 +1806,7 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
       statusDetail: stateStatus === "archive_only"
         ? "Histórico íntegro en R2; se consulta bajo demanda."
         : hasPublishedLake && stateStatus === "partial"
-          ? `Release parcial en R2: ${recordCount} registros publicados.`
+          ? `El catálogo declara ${recordCount} registros, pero el release es parcial. La consulta sólo entrega particiones verificadas.`
           : recordCount > 0 ? "Datos publicados en el lake." : "Sin datos publicados.",
     };
   });
