@@ -164,7 +164,7 @@ jobs:
             let key = hash.digest("hex");
             const catalogSha256 = crypto.createHash("sha256").update(fs.readFileSync("data/lake/catalog/v1/manifest.json")).digest("hex");
             if ("${{ inputs.repair_transfer_api_pointer }}" === "true") key += "-${{ github.run_id }}";
-            fs.appendFileSync(process.env.GITHUB_OUTPUT, `key=${key}\\ncatalog_sha256=${catalogSha256}\\n`);
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `key=${key}\ncatalog_sha256=${catalogSha256}\n`);
           '
 
       - name: Restaurar snapshot de datos validado
