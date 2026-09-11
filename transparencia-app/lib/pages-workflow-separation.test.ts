@@ -16,6 +16,12 @@ describe("separación de workflows Pages", () => {
     expect(staticRefresh).toContain("run: npm run data:health");
     expect(uiRefresh).toContain("name: Regenerar salud de fuentes desde el snapshot publicado");
     expect(uiRefresh).toContain("run: npm run data:health");
+    for (const workflow of [staticRefresh, uiRefresh]) {
+      expect(workflow).toContain("name: Reaplicar catálogo R2 canónico después de la caché");
+      expect(workflow).toContain("EXPECTED_CATALOG_SHA256");
+      expect(workflow).toContain("catalog/v1/manifest.json");
+      expect(workflow).toContain("sha256sum data/lake/catalog/v1/manifest.json");
+    }
   });
 
   it("fija cada build de interfaz al release canónico vigente de transferencias", () => {

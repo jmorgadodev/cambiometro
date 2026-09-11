@@ -162,8 +162,9 @@ jobs:
             const hash = crypto.createHash("sha256");
             for (const file of files) hash.update(fs.readFileSync(file));
             let key = hash.digest("hex");
+            const catalogSha256 = crypto.createHash("sha256").update(fs.readFileSync("data/lake/catalog/v1/manifest.json")).digest("hex");
             if ("${{ inputs.repair_transfer_api_pointer }}" === "true") key += "-${{ github.run_id }}";
-            fs.appendFileSync(process.env.GITHUB_OUTPUT, `key=${key}\\n`);
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `key=${key}\\ncatalog_sha256=${catalogSha256}\\n`);
           '
 
       - name: Restaurar snapshot de datos validado
@@ -185,6 +186,22 @@ jobs:
             transparencia-app/data/municipalidades-data.json
             transparencia-app/data/municipalidades-list.json
             transparencia-app/public/data/transferencias
+
+      - name: Reaplicar catálogo R2 canónico después de la caché
+        # La caché puede devolver un snapshot anterior mediante restore-keys.
+        # El catálogo es la referencia vigente de producción y debe volver a
+        # descargarse después de restaurarla, antes de regenerar source-health.
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          EXPECTED_CATALOG_SHA256: ${{ steps.data-version.outputs.catalog_sha256 }}
+        run: |
+          mkdir -p data/lake/catalog/v1
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+          actual_catalog_sha256="$(sha256sum data/lake/catalog/v1/manifest.json | cut -d ' ' -f 1)"
+          test "$actual_catalog_sha256" = "$EXPECTED_CATALOG_SHA256"
+          echo "Catálogo R2 canónico verificado: $actual_catalog_sha256"
 
       - name: Hidratar respaldo estático CPLT desde R2
         if: steps.data-cache.outputs.cache-hit != 'true'
