@@ -123,7 +123,7 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
     canonicalCount,
     historicalCount,
     catalogDeclaredCount: source.catalogDeclaredCount,
-    publicHistoricalCount: canonicalCount,
+    publicHistoricalCount: source.publicHistoricalCount ?? canonicalCount,
     lastSuccessAt: null,
     checksumSha256: null,
     status: source.canonicalCount > 0 ? "parcial" : "no_disponible" as DataQualityStatus,

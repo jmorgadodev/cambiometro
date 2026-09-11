@@ -71,9 +71,14 @@ const sources = config.map((source) => {
   // A source can declare a larger historical universe than the one currently
   // published in R2. Keep both figures: the public page must never imply that
   // a declared historical count is already queryable.
-  const publicHistoricalCount = Number.isSafeInteger(partitionCount) && partitionCount > 0
-    ? Math.max(canonicalCount, partitionCount)
-    : canonicalCount;
+  const configuredPublicHistoricalCount = Number.isSafeInteger(source.publicHistoricalCount)
+    ? source.publicHistoricalCount
+    : null;
+  const publicHistoricalCount = configuredPublicHistoricalCount !== null
+    ? configuredPublicHistoricalCount
+    : Number.isSafeInteger(partitionCount) && partitionCount > 0
+      ? Math.max(canonicalCount, partitionCount)
+      : canonicalCount;
   const lastSuccessAt = healthEntry?.generatedAt ?? catalogEntry?.generatedAt ?? null;
   const sourceStatus = healthEntry?.status ?? catalogEntry?.status ?? null;
   const status = canonicalCount <= 0
