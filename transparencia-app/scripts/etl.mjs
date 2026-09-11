@@ -340,7 +340,7 @@ async function main() {
   await runSource({
     key: "votaciones_senado", label: "Votaciones Senado", selected: options.sources, previous, snapshot, summary,
     summaryKey: "votaciones_senado_ingresadas", minimum: 0, preserveHistory: true,
-    load: () => fetchVotacionesSenado({ legislatura: 374, desde: voteFrom, to: options.to }),
+    load: () => fetchVotacionesSenado({ legislatura: 374, desde: options.from, to: options.to }),
   });
   await runSource({
     key: "gastos_senado", label: "Gastos Operacionales Senado", selected: options.sources, previous, snapshot, summary,
