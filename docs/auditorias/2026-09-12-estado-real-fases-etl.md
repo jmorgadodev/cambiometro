@@ -1627,3 +1627,9 @@ Esto separa dos hechos que antes estaban mezclados:
 No se descargó el universo ni se ejecutó el ETL. El siguiente trabajo seguro es
 crear una prueba local acotada del paginado y comparar sus campos con el
 contrato de personal Cámara/Senado antes de publicar cualquier actualización.
+
+La prueba acotada de paginado ya se realizó sobre las páginas 1, 2 y 3.407:
+las tres respondieron `status=ok`, una fila por página y el mismo total de
+3.407. También se observaron montos y fechas de contrato válidos en los tres
+casos. Esto confirma que el siguiente ETL puede diseñarse incrementalmente,
+sin descargar más datos de los necesarios para la prueba.
