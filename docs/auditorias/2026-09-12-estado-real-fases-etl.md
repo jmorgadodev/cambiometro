@@ -565,6 +565,14 @@ endpoint; debe resolverse comparando el contrato y los registros antes de
 publicar. No se debe convertir esa diferencia en una cifra de cobertura ni
 mezclarla con votaciones, dietas o gastos de otra categoría.
 
+La búsqueda posterior en los releases del repositorio no encontró artefactos
+inmutables de `gastos_senado` para 2025-08 ni 2026-02, y el workflow de gastos
+del Senado no conserva artifacts descargables para esas ejecuciones. Sólo
+existen releases recientes de 2026. Esto cierra la alternativa de una
+restauración por rollback: esas dos particiones deben regenerarse desde la
+fuente oficial con un contrato de alcance explícito, o permanecer ausentes y
+marcadas como no consultables. No se hará una reconstrucción por inferencia.
+
 ## D1 — cuota crítica confirmada después del reinicio
 
 La sonda programada `34673322107` y el workflow diario de Cámara
