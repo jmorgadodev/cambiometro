@@ -424,6 +424,29 @@ reconstruirá el histórico ni se reemplazará el snapshot productivo. Si el
 artefacto específico no está disponible, se conserva el snapshot canónico y
 se informa la ausencia como temporal. No se usará D1 como fallback.
 
+## Corrección controlada de Cámara — PR #495
+
+El PR `#495` quedó fusionado en `main` como
+`bff778b8c1d0b1b35adc963527cb0e9bb3014f23`. La corrección fue acotada al
+contrato de consulta: `source=votaciones_camara` se resuelve contra la fuente
+canónica de Cámara, con variante y filtro `kind=vote`, sin mezclar asistencia
+ni recurrir a D1. No se modificaron datos, menú, rutas de Pages ni otros ETL.
+
+El candidato Worker `d2f82268-b1af-4481-a67b-d1f8953f0fc6` pasó typecheck,
+tamaño y checks remotos, y fue promovido al 100% por el workflow
+`34707108200`. La comprobación productiva posterior confirmó:
+
+- `source=votaciones_camara&kind=vote`: HTTP 200 desde `r2-lake`;
+- `sourceStatus=complete`, `publishedRows=49`, `expectedRows=49` y cero
+  particiones faltantes en el corte consultado;
+- la primera fila mantiene `sourceId=camara` y `kind=vote`;
+- `/api/v1/health`: `publicDataBackend=r2` y `publicD1Reads=false`;
+- Home, Municipalidades, Remuneraciones, Personas y Movimientos: HTTP 200.
+
+El workflow de Pages/refresco `34706970066` y el guard de publicación ETL
+`34706970075` también terminaron verdes. El bloque queda cerrado sin ejecutar
+SQL, materialización ni ETL de Cámara.
+
 ## Plan operativo aplicable hoy
 
 1. **Fuentes**: conservar el resultado de estas pruebas como preflight; no
@@ -438,6 +461,6 @@ se informa la ausencia como temporal. No se usará D1 como fallback.
    incremental.
 5. **D1**: no ejecutar SQL, materialización ni backup. Mañana sólo se medirá
    cuota post-reset y se verificará que los procesos públicos sigan en R2.
-6. **Cierre del día**: ejecutar pruebas locales del contrato y de publicación;
-   ningún cambio de menú, rutas, municipalidades, remuneraciones o
-   `cambiometro-editorial`.
+6. **Cierre del día**: conservar el rollback exacto del Worker anterior y
+   dejar D1 para el reinicio; ningún cambio de menú, rutas, municipalidades,
+   remuneraciones o `cambiometro-editorial`.

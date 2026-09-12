@@ -19,7 +19,7 @@
 - [x] Reconciliar catálogo R2 contra filas consultables por fuente sin usar D1.
 - [x] Separar en la UI catálogo declarado, publicados y consultables; comenzar por ChileCompra; corregir metadata R2 de InfoLobby.
 - [x] Preflight de fuentes sin escritura: Cámara, Senado y los cinco orígenes de Movimientos respondieron correctamente el 2026-09-12.
-- [ ] Reparar/publicar sólo la variante R2 `votaciones_camara`; la fuente responde y el snapshot local llega al 2026-09-09, pero la variante explícita está temporalmente indisponible en producción.
+- [x] Reparar/publicar sólo la variante R2 `votaciones_camara`; PR #495 fusionado y Worker `d2f82268-b1af-4481-a67b-d1f8953f0fc6` promovido. Alias validado en producción desde R2, sin D1.
 
 ## Mañana, después del reinicio
 
@@ -32,7 +32,7 @@
 
 - [x] Validar conectividad y fechas máximas de Cámara/Senado sin ejecutar ETL.
 - [x] Validar conectividad de las fuentes de Movimientos sin reemplazar el snapshot.
-- [ ] Revisar manifiesto R2 y preview de `votaciones_camara` sin usar D1.
+- [x] Revisar manifiesto R2 y preview de `votaciones_camara` sin usar D1.
 
 ## Fuera de alcance
 
