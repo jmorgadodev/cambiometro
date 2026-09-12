@@ -2042,3 +2042,10 @@ La acción segura para hoy es generar el diff de esas anomalías contra el relea
 vigente y clasificar cada una como fuente ausente, período inválido o dato real.
 No se cambiarán montos, nombres ni períodos en el catálogo hasta contar con la
 fila original y su checksum.
+
+Como comprobación adicional, se consultaron en producción las cinco fichas
+correspondientes a esos CUT (`08311`, `11302`, `12102`, `12103` y `12303`). Las
+cinco rutas respondieron HTTP 200 y ninguna incluyó `2026-10` ni `2026-12` en
+su HTML público. Por tanto, la evidencia disponible clasifica esos períodos como
+anomalía del snapshot local o de su normalización, no como una actualización
+productiva confirmada.
