@@ -6,6 +6,7 @@ import {
   latestMovementPublicationDate,
   MOVIMIENTOS,
   MOVIMIENTOS_HOME_SUMMARY,
+  summarizeMovementFreshness,
 } from "./movimientos";
 
 describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV y Anatomía de Card", () => {
@@ -115,6 +116,27 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
       { fuentes: [{ nivel: "prensa", medio: "Fuente", url: "https://example.test/a", fecha: "2026-09-02", titulo: "" }] },
       { fuentes: [{ nivel: "oficial", medio: "Fuente oficial", url: "https://example.test/b", fecha: "2026-09-03", titulo: "" }] },
     ], [{ date: "2026-09-01" }])).toBe("2026-09-03");
+  });
+
+  it("4d. separa la ejecución del proceso, el último evento y la salud de cada fuente", () => {
+    const summary = summarizeMovementFreshness({
+      last_attempt_at: "2026-09-11T17:17:35.908Z",
+      last_success_at: "2026-09-11T17:17:35.908Z",
+      last_event_date: "2026-09-02",
+      source_health: [
+        { id: "ley-chile", label: "Ley Chile / BCN", tier: "official", ok: true, status: 200, fetchedAt: "2026-09-11T17:17:36.100Z" },
+        { id: "gob-cl", label: "Gob.cl Noticias", tier: "official", ok: false, status: 403, fetchedAt: "2026-09-11T17:17:39.709Z", error: "HTTP_403" },
+      ],
+    }, Date.parse("2026-09-12T12:00:00Z"));
+
+    expect(summary).toMatchObject({
+      state: "advertencia",
+      lastEventDate: "2026-09-02",
+      successDaysAgo: 0,
+      eventDaysAgo: 10,
+    });
+    expect(summary.unavailableOfficial).toHaveLength(1);
+    expect(summary.unavailableOfficial[0]).toMatchObject({ id: "gob-cl", status: 403, error: "HTTP_403" });
   });
 
   it("5. Días en el cargo calculado para autoridades salientes con origen", () => {

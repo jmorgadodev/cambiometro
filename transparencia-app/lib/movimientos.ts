@@ -104,6 +104,93 @@ export interface MovimientosPayload {
   [key: string]: unknown;
 }
 
+export type MovimientoFreshnessState = "operativo" | "advertencia" | "sin_fuentes";
+
+export interface MovimientoConnectorFreshness {
+  id: string;
+  label: string;
+  tier: string;
+  ok: boolean;
+  status: number | null;
+  checkedAt: string | null;
+  error: string | null;
+  checkedDaysAgo: number | null;
+}
+
+export interface MovimientoFreshnessSummary {
+  state: MovimientoFreshnessState;
+  lastAttemptAt: string | null;
+  lastSuccessAt: string | null;
+  lastEventDate: string | null;
+  attemptDaysAgo: number | null;
+  successDaysAgo: number | null;
+  eventDaysAgo: number | null;
+  connectors: MovimientoConnectorFreshness[];
+  unavailableOfficial: MovimientoConnectorFreshness[];
+}
+
+function parseTimestamp(value: unknown): number | null {
+  const timestamp = Date.parse(String(value ?? ""));
+  return Number.isFinite(timestamp) ? timestamp : null;
+}
+
+function daysSinceTimestamp(value: unknown, nowMs: number): number | null {
+  const timestamp = parseTimestamp(value);
+  if (timestamp === null) return null;
+  return Math.max(0, Math.floor((nowMs - timestamp) / 86_400_000));
+}
+
+function daysSinceDate(value: unknown, nowMs: number): number | null {
+  const date = String(value ?? "");
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  return daysSinceTimestamp(`${date}T12:00:00Z`, nowMs);
+}
+
+/**
+ * Resume la frescura operacional sin mezclarla con la fecha efectiva del
+ * movimiento. `fetchedAt` es la última consulta al conector; `lastEventDate`
+ * es el último evento publicado por el dataset y puede ser anterior aunque el
+ * proceso se haya ejecutado correctamente.
+ */
+export function summarizeMovementFreshness(
+  input: Pick<MovimientosPayload, "last_attempt_at" | "last_success_at" | "last_event_date" | "source_health">,
+  nowMs = Date.now(),
+): MovimientoFreshnessSummary {
+  const connectors = (input.source_health ?? []).map((source) => {
+    const checkedAt = typeof source.fetchedAt === "string" ? source.fetchedAt : null;
+    const statusValue = Number(source.status);
+    return {
+      id: String(source.id ?? "fuente"),
+      label: String(source.label ?? source.id ?? "Fuente"),
+      tier: String(source.tier ?? "unknown"),
+      ok: source.ok === true,
+      status: Number.isInteger(statusValue) ? statusValue : null,
+      checkedAt,
+      error: source.ok === true ? null : String(source.error ?? "No respondió"),
+      checkedDaysAgo: daysSinceTimestamp(checkedAt, nowMs),
+    } satisfies MovimientoConnectorFreshness;
+  });
+  const official = connectors.filter((source) => source.tier === "official");
+  const unavailableOfficial = official.filter((source) => !source.ok);
+  const state: MovimientoFreshnessState = official.length === 0
+    ? "sin_fuentes"
+    : unavailableOfficial.length === 0
+      ? "operativo"
+      : "advertencia";
+
+  return {
+    state,
+    lastAttemptAt: input.last_attempt_at ?? null,
+    lastSuccessAt: input.last_success_at ?? null,
+    lastEventDate: input.last_event_date ?? null,
+    attemptDaysAgo: daysSinceTimestamp(input.last_attempt_at, nowMs),
+    successDaysAgo: daysSinceTimestamp(input.last_success_at, nowMs),
+    eventDaysAgo: daysSinceDate(input.last_event_date, nowMs),
+    connectors,
+    unavailableOfficial,
+  };
+}
+
 /**
  * Returns the most recent publication date carried by an evidence source or
  * announcement signal. This is intentionally separate from `last_event_date`:
