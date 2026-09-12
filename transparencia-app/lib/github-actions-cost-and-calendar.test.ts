@@ -236,4 +236,12 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(cplt).toContain("data:finalize:cplt:r2");
     expect(cplt).toContain("Registrar D1 CPLT pospuesto por cuota");
   });
+
+  it("13. El preflight siempre deja un diagnóstico aunque Analytics D1 no responda", () => {
+    const action = fs.readFileSync(path.join(root, "..", ".github", "actions", "d1-preflight", "action.yml"), "utf8");
+
+    expect(action).toContain('if [[ ! -s "$D1_USAGE_OUTPUT" ]]');
+    expect(action).toContain("D1_ANALYTICS_UNAUTHORIZED_OR_UNAVAILABLE");
+    expect(action).toContain("D1_USAGE_OUTPUT");
+  });
 });
