@@ -1846,3 +1846,53 @@ Sus checks remotos también terminaron en verde, incluido el build estático,
 fixture local de D1 y verificación de rutas, APIs y UI responsive. El PR #501
 contiene únicamente `transparencia-app/data/personal-apoyo.json`; sigue abierto
 y no se ha fusionado ni publicado.
+
+### Integración verificada y trabajo ejecutable sin esperar D1
+
+El estado anterior quedó actualizado el 12 de septiembre de 2026:
+
+- El PR #500 fue fusionado en la rama operativa
+  `codex/movimientos-r2-fix-20260912`.
+- El PR #501 fue fusionado en su rama de metadatos después de pasar los checks
+  remotos.
+- El PR #502 integró ambos cambios en la rama operativa con el commit
+  `09018153483476f1c8d2e02494d28ac0a79a0e61`.
+- El PR #502 terminó con build estático, presupuesto del Worker, fixture D1
+  local, rutas, APIs, responsive y widget en verde.
+- No hubo escrituras en D1 productiva, R2, Pages ni `main`.
+
+La rama operativa contiene ahora el snapshot oficial de personal de apoyo del
+Senado hasta agosto de 2026 y el manifiesto que calcula el período desde las
+filas publicadas. El cambio esperado es acotado: 3.407 filas de Senado y
+34.192 filas del módulo unificado, frente a 33.774 anteriores; Cámara mantiene
+julio de 2026 y Senado pasa de enero–julio a enero–agosto.
+
+Mientras la cuota diaria de D1 no se reinicia, el trabajo seguro para continuar
+es el siguiente, en este orden:
+
+1. **Cerrar evidencias de ETL sin escritura remota.** Probar cada fuente con
+   snapshots o archivos temporales, registrar HTTP, conteo, período, checksum y
+   resultado, y detener automáticamente la fuente que falle. No hacer una
+   ejecución global.
+2. **Cámara.** Mantener el snapshot de julio porque el endpoint de personal
+   sigue respondiendo 403 desde el runner. Preparar sólo la prueba de
+   disponibilidad y el diff; no reemplazar filas por una respuesta incompleta.
+3. **Senado.** Validar el snapshot ya integrado contra el endpoint oficial en
+   una corrida aislada cuando corresponda, comparando por clave estable y no por
+   orden de archivo. Publicar sólo como bloque independiente.
+4. **Movimientos.** Reconciliar fechas y estados usando los artefactos R2
+   existentes, sin materializar D1. La tarea puede terminarse en auditoría
+   local y luego someterse a preview.
+5. **Transparencia Activa.** Generar índices y controles de calidad desde el
+   release vigente sin descargar el universo completo al navegador ni leer D1.
+6. **Validación de compatibilidad.** Ejecutar el build/verificador, pruebas de
+   rutas y búsqueda, y revisar que las rutas actuales y los nombres del menú no
+   cambien.
+7. **Publicación posterior.** Sólo después del reinicio y del preflight de D1,
+   y con aprobación explícita, promover el release validado; mantener el
+   manifiesto anterior como rollback.
+
+Este orden permite avanzar hoy en auditoría, pruebas aisladas y preparación de
+ETL sin consumir la cuota agotada. Lo que queda bloqueado hasta el reinicio es
+únicamente cualquier operación remota que materialice o escriba datos en D1;
+no bloquea la validación de fuentes ni la preparación de releases R2.
