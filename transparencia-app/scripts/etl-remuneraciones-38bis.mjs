@@ -2,7 +2,7 @@ import fs from "node:fs";
 import { externalText } from "./etl/safe-text.mjs";
 
 const res = await fetch("https://comision38bis.gob.cl/registro-publico", {
-  headers: { "user-agent": "transparencia-impulsacv (ETL sueldos 38 bis)" },
+  headers: { "user-agent": "cambiometro (ETL sueldos 38 bis)" },
 });
 if (!res.ok) throw new Error(`HTTP ${res.status}`);
 const html = new TextDecoder("utf-8").decode(new Uint8Array(await res.arrayBuffer()));
