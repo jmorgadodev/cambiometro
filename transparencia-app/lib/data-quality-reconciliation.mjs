@@ -32,7 +32,9 @@ export function reconcileSourceCounts({ source, healthEntry, catalogEntry, trans
         : "aligned";
   const queryableCount = source.queryableCount === null || source.queryableCount === undefined
     ? null
-    : observedCount ?? source.queryableCount;
+    : isTransferRelease
+      ? publishedTransferRows
+      : observedCount ?? source.queryableCount;
   const components = healthEntry?.components && typeof healthEntry.components === "object"
     ? healthEntry.components
     : null;

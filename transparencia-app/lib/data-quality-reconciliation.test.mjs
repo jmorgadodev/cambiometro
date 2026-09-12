@@ -39,7 +39,7 @@ describe("reconciliación de conteos de fuentes", () => {
 
   it("acepta el release explícito de transferencias como denominador vigente", () => {
     const result = reconcileSourceCounts({
-      source: source({ id: "ley-19862", canonicalCount: 59_361, historicalCount: 59_361 }),
+      source: source({ id: "ley-19862", canonicalCount: 59_361, historicalCount: 59_361, queryableCount: 59_361 }),
       healthEntry: { recordCount: 62_443 },
       catalogEntry: { recordCount: 62_443 },
       transferRows: 62_172,
@@ -48,6 +48,7 @@ describe("reconciliación de conteos de fuentes", () => {
     expect(result).toMatchObject({
       canonicalCount: 62_172,
       historicalCount: 62_172,
+      queryableCount: 62_172,
       reconciliation: { state: "release_override", comparisonEligible: true },
     });
   });
