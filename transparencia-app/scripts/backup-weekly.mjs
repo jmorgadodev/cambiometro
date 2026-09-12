@@ -5,8 +5,10 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { parseR2ListPage } from "../lib/r2-list.mjs";
 
-// Backup semanal del sistema: exporta la base D1 y copia el data lake R2
-// completo a cambiometro-backups, con retención de 8 semanas.
+// Backup semanal del sistema: copia el data lake R2 completo a
+// cambiometro-backups, con retención de 8 semanas. El dump D1 queda
+// desactivado por defecto porque un export completo consume rows_read de la
+// cuota compartida; sólo se habilita manualmente con una confirmación exacta.
 // En CI usa CLOUDFLARE_API_TOKEN (CLOUDFLARE_DATA_API_TOKEN); en local
 // muestra mensaje y sale (el backup real se ejecuta en GitHub Actions).
 // Uso: node scripts/backup-weekly.mjs
@@ -16,6 +18,8 @@ const BACKUP_BUCKET = "cambiometro-backups";
 const RETENTION_WEEKS = 8;
 const SOURCE_DATABASE = "transparencia-db";
 const INVENTORY_KEY = "backup-inventory.json";
+const BACKUP_D1 = process.env.BACKUP_D1 === "1"
+  && process.env.D1_BACKUP_CONFIRM === "CAMBIOMETRO_D1_BACKUP";
 
 const accountId = process.env.CLOUDFLARE_ACCOUNT_ID?.trim();
 const token = process.env.CLOUDFLARE_API_TOKEN?.trim();
@@ -23,7 +27,7 @@ const usingRestApi = Boolean(accountId && token);
 const R2_API = usingRestApi ? `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets` : null;
 
 if (!usingRestApi) {
-  console.log("INFO: Sin CLOUDFLARE_API_TOKEN. Backup semanal requiere token REST para subir el dump D1 (>300 MiB) y copiar el lake.");
+  console.log("INFO: Sin CLOUDFLARE_API_TOKEN. Backup semanal requiere token REST para copiar el lake R2.");
   console.log("INFO: Ejecútalo en GitHub Actions con secrets.CLOUDFLARE_DATA_API_TOKEN.");
   console.log("INFO: Para probar localmente el flujo de get/put sin subir al bucket real,");
   console.log("INFO: establece CLOUDFLARE_ACCOUNT_ID y usa wrangler OAuth (--remote omitido).");
@@ -90,7 +94,11 @@ const cutoff = Date.now() - RETENTION_WEEKS * 7 * 24 * 60 * 60 * 1000;
 
 console.log(`stamp: ${stamp}`);
 
-await d1Export(stamp);
+if (BACKUP_D1) {
+  await d1Export(stamp);
+} else {
+  console.log("[OK] export D1 omitido: el backup semanal R2 no lee D1. Para habilitarlo manualmente se requieren BACKUP_D1=1 y D1_BACKUP_CONFIRM=CAMBIOMETRO_D1_BACKUP.");
+}
 
 let sourceObjects;
 if (usingRestApi) {
@@ -136,9 +144,10 @@ const inventory = {
   schemaVersion: "1.0.0",
   generatedAt: new Date().toISOString(),
   stamp,
-  d1: `d1/${stamp}/transparencia-db.sql.gz`,
+  d1: BACKUP_D1 ? `d1/${stamp}/transparencia-db.sql.gz` : null,
+  d1Skipped: !BACKUP_D1,
   objects: sourceObjects.map(({ key }) => key),
 };
 await r2Request("PUT", BACKUP_BUCKET, INVENTORY_KEY, Buffer.from(`${JSON.stringify(inventory, null, 2)}\n`, "utf8"), "application/json");
 
-console.log(JSON.stringify({ action: "backup", stamp, d1: `d1/${stamp}/transparencia-db.sql.gz`, lakeObjects: sourceObjects.length, copied, deletedOld: deleted, retentionWeeks: RETENTION_WEEKS, status: "OK" }, null, 2));
+console.log(JSON.stringify({ action: "backup", stamp, d1: BACKUP_D1 ? `d1/${stamp}/transparencia-db.sql.gz` : null, d1Skipped: !BACKUP_D1, lakeObjects: sourceObjects.length, copied, deletedOld: deleted, retentionWeeks: RETENTION_WEEKS, status: "OK" }, null, 2));
