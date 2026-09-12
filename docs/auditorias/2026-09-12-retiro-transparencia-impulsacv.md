@@ -52,3 +52,28 @@ y los assets editoriales deben permanecer en `cambiometro-editorial`.
 La existencia de D1 o R2 históricos no autoriza a reactivar el Worker antiguo:
 son recursos compartidos que deben permanecer bajo control del proyecto
 canónico y sin consultas masivas desde superficies públicas.
+
+## Comprobación de la estructura local
+
+La revisión del 12 de septiembre confirmó que dentro de
+`C:\Users\jorge\Proyectos` sólo permanecen estas tres raíces relacionadas con
+el proyecto:
+
+- `cambiometro-public` — maestro y producción;
+- `cambiometro-audit` — auditoría y evidencia;
+- `cambiometro-editorial` — publicaciones e imágenes.
+
+El antiguo directorio `transparencia.impulsacv.cl_` no existe, el dominio
+`transparencia.impulsacv.cl` no resuelve por DNS y la producción vigente
+continúa declarando `publicDataBackend: r2` y `publicD1Reads: false`.
+
+Las menciones restantes al nombre antiguo están en documentación histórica y
+en una configuración ETL congelada dentro del repositorio de auditoría; no son
+una dependencia del maestro ni se ejecutan automáticamente. No se eliminaron
+porque forman parte de la evidencia de retiro y del rollback histórico.
+
+La verificación definitiva de que no existe ningún Worker Cloudflare antiguo
+con binding a `transparencia-db` sigue requiriendo el permiso **Workers
+Scripts → Read** en el token de auditoría. El token actual devuelve `403` para
+ese inventario, por lo que no se debe declarar esa parte como comprobada sólo
+por la ausencia de carpetas locales.
