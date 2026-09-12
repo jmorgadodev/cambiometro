@@ -55,3 +55,21 @@ consumo proviene de otro proyecto o de un Worker antiguo que aún conserva el
 binding a `transparencia-db`, se necesita revisar los bindings de Workers con
 un token que incluya **Workers Scripts → Read**. No se ejecutó SQL ni se
 modificó ninguna base.
+
+## Verificación del candidato R2-only
+
+La rama `codex/release-candidate-r2-only-d1-safe`, commit
+`67de3c558837d4a1d337547f7ae83c064c097a3e`, quedó publicada como candidato
+remoto para revisión. Sus verificaciones terminaron correctamente el
+2026-09-12:
+
+| Verificación | Run | Resultado |
+|---|---:|---|
+| Quality (lint, tipos y tests) | `34683786274` | success |
+| Security - CodeQL | `34683786209` | success |
+| Verify ETL calendar | `34683786269` | success |
+| ETL Semanal - InfoLobby (validación) | `34683786341` | success |
+
+Esto valida el candidato en CI, pero no constituye un despliegue. Producción
+permanece sin cambios y la atribución del consumo histórico de
+`transparencia-db` sigue pendiente de permiso **Workers Scripts → Read**.
