@@ -9,10 +9,11 @@
 - [x] **Checkpoint 1 remoto:** preview del Worker y API de Movimientos validados desde R2, sin lecturas públicas D1.
 - [x] Promoción controlada del Worker candidato y smoke productivo completados.
 - [x] D1. Auditar ChileCompra, InfoLobby, DIPRES y Transparencia Activa en el candidato, sólo por R2.
-- [ ] Reconciliar las 92 filas de InfoLobby y separar corte vigente/histórico de ChileCompra.
+- [x] Reconciliar las 92 filas de InfoLobby mediante índice R2 acumulado versionado, sin D1.
+- [ ] Separar corte vigente/histórico de ChileCompra; mantener el snapshot válido mientras el origen responda HTTP 403.
 - [x] E. Ejecutar auditoría de consistencia y calidad en producción/R2/candidato.
 - [x] **Checkpoint 2:** checksums, paginación y ausencia de lecturas públicas D1 validados.
-- [ ] F. Preparar promoción controlada.
+- [x] F. Promoción controlada del Worker y verificación productiva completadas.
 
 ## Mañana, después del reinicio
 

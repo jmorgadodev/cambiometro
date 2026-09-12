@@ -279,3 +279,44 @@ Verificación posterior:
 
 La producción ya no presenta el vacío anterior de Movimientos. No se ejecutó
 ETL ni consulta SQL durante la promoción.
+
+## Reconciliación InfoLobby R2 sin D1 — 12 de septiembre
+
+La ejecución `34699618261` del workflow `ETL Semanal - InfoLobby` terminó
+correctamente con `skip_d1=true`. La preflight y la materialización D1 quedaron
+omitidas; el workflow registró explícitamente que R2/Pages conserva el release
+canónico.
+
+El diagnóstico de la cadena de publicación encontró que la ingesta había
+publicado 10.945 filas del corte de agosto, pero el índice paginado público
+seguía apuntando a las 60.523 filas anteriores. Se construyó una consolidación
+versionada sin reemplazar el archivo anterior:
+
+- histórico anterior: 60.523 filas;
+- nuevo corte: 10.945 filas;
+- duplicados reemplazados por su fila más reciente: 1;
+- total único activado: 71.467 filas;
+- índice: 1.430 páginas, con búsqueda y conteos por término;
+- ruta nueva: `indexes/v1/infolobby/releases/20260912-144219/`;
+- manifiesto anterior conservado para rollback.
+
+La activación fue sólo en R2; no cambió código, Pages ni D1. La verificación
+productiva con parámetro de caché confirmó:
+
+- `/api/v1/records?source=infolobby&limit=1`: 71.467 filas;
+- `sourceBackend=r2-lake`, `sourceStatus=complete`;
+- `publishedRows=71.467`, `expectedRows=71.467`, sin particiones faltantes;
+- búsqueda `q=municipalidad`: 16.881 coincidencias paginables;
+- health: `publicDataBackend=r2`, `publicD1Reads=false`.
+
+La respuesta sin parámetro de verificación puede tardar hasta cinco minutos en
+reflejar el cambio por el caché HTTP de la API. No se ejecutó ninguna consulta
+SQL ni materialización D1 durante esta corrección.
+
+## Estado operativo después del trabajo inmediato
+
+Movimientos quedó corregido y promovido, Cámara/Senado quedó reconciliado por
+componente y período, InfoLobby quedó indexado contra el catálogo vigente y la
+API productiva continúa R2-first. El siguiente bloque que requiere datos nuevos
+es separar en la interfaz y manifiestos el corte vigente de ChileCompra frente
+al histórico, sin reintentar su ETL mientras el origen mantenga HTTP 403.
