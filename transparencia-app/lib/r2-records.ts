@@ -164,8 +164,11 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
     }
   }
   if (!hasFilters) {
-    const pageIndex = Math.floor(offset / manifest.pageSize);
-    candidatePages = pageIndex < manifest.pages.length ? [pageIndex] : [];
+    const firstPageIndex = Math.floor(offset / manifest.pageSize);
+    const lastPageIndex = Math.floor(Math.max(offset, offset + limit - 1) / manifest.pageSize);
+    candidatePages = manifest.pages
+      .map((_, index) => index)
+      .filter((index) => index >= firstPageIndex && index <= lastPageIndex);
   }
 
   // A non-filtered request reads one physical page at a time. Its offset is
@@ -344,10 +347,11 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
       matched += 1;
     }
   }
-  const total = hasFilters || missingPartitions > 0 || missingArtifacts > 0
-    ? matched
-    : expectedTotal ?? matched;
-  const complete = missingPartitions === 0 && (hasFilters ? scannedAll : scannedAll && (expectedTotal === null || matched === expectedTotal));
+  const partial = missingPartitions > 0
+    || missingArtifacts > 0
+    || (!hasFilters && expectedTotal !== null && loadedRows < expectedTotal);
+  const total = hasFilters || partial ? matched : expectedTotal ?? matched;
+  const complete = !partial && (hasFilters ? scannedAll : scannedAll && (expectedTotal === null || matched === expectedTotal));
   return {
     data,
     total,

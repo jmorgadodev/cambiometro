@@ -154,7 +154,7 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
     const observedCount = safeCount(healthRecord.recordCount);
     const configuredCanonicalCount = safeCount(source.canonicalCount);
     const isTransferRelease = source.id === "ley-19862";
-    const canonicalCount = isTransferRelease ? transfer.totalRows : observedCount ?? source.canonicalCount;
+    const canonicalCount = isTransferRelease ? transfer.totalRows : source.canonicalCount;
     const historicalCount = isTransferRelease ? transfer.totalRows : source.historicalCount;
     const scopeMismatch = !isTransferRelease
       && observedCount !== null
