@@ -1034,3 +1034,33 @@ el bloqueo del preflight. Sólo si la cuota está limpia se evaluará una prueba
 incremental controlada; no se reactivará la materialización histórica. Todo lo
 que se pueda resolver con R2, manifiestos, índices y validadores se cerrará
 antes de esa puerta.
+
+## Revisión de compuertas D1 y workflows — corte 12 de septiembre
+
+La inspección estática de los workflows confirma que las ETL programadas usan
+la acción `.github/actions/d1-preflight` con el valor predeterminado
+`allow-remote-materialization=false`. En ese estado, el workflow puede
+ingerir y publicar en R2/Pages, pero no materializa D1. La salida de la acción
+es fail-safe: si Analytics no entrega la métrica, también pospone D1.
+
+Se identificaron dos excepciones que permanecen manuales y no deben ejecutarse
+durante la cuota crítica:
+
+- `etl-daily.yml`: sólo admite materialización si se dispara manualmente con
+  `allow_d1_materialization=true`, sin `skip_d1`, y el preflight está bajo el
+  umbral.
+- `repair-transfer-d1.yml`: requiere la confirmación literal
+  `REPAIR_TRANSFER_D1` y un preflight válido; aunque usa una D1 dedicada,
+  consume la cuota de la cuenta y por eso queda igualmente congelado.
+
+El workflow `etl-ley-19862.yml` publica el release de transferencias en R2 y
+Pages sin depender de D1; su proyección D1 también está condicionada a un
+`workflow_dispatch` y al preflight seguro. Las ejecuciones locales de D1 en
+`build-e2e.yml` y `pages-ui-refresh.yml` usan una fixture local y no consumen
+la cuota remota.
+
+Conclusión: hoy se puede continuar con auditoría de releases, checksums,
+particiones, calidad y espacio local sin abrir D1. La única prohibición
+operativa es no marcar manualmente ninguna opción de materialización ni
+ejecutar el workflow de reparación. Esta revisión no modificó workflows ni
+producción.
