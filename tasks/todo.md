@@ -10,8 +10,8 @@
 - [ ] Promoción controlada del Worker candidato, pendiente de autorización explícita.
 - [x] D1. Auditar ChileCompra, InfoLobby, DIPRES y Transparencia Activa en el candidato, sólo por R2.
 - [ ] Reconciliar las 92 filas de InfoLobby y separar corte vigente/histórico de ChileCompra.
-- [ ] E. Ejecutar auditoría de consistencia y calidad.
-- [ ] **Checkpoint 2:** validar checksums, paginación y ausencia de lecturas D1.
+- [x] E. Ejecutar auditoría de consistencia y calidad en producción/R2/candidato.
+- [x] **Checkpoint 2:** checksums, paginación y ausencia de lecturas públicas D1 validados.
 - [ ] F. Preparar promoción controlada.
 
 ## Mañana, después del reinicio
