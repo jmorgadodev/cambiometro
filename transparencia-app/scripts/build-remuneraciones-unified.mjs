@@ -185,6 +185,13 @@ for (const row of rows) {
   bySource.set(row.sourceId, current);
 }
 
+function sourcePeriod(sourceId) {
+  const periods = [...(bySource.get(sourceId)?.periods ?? [])].filter(Boolean).sort((left, right) => String(left).localeCompare(String(right), "es-CL"));
+  if (periods.length === 0) return null;
+  if (periods.length === 1) return periods[0];
+  return `${periods[0]} / ${periods.at(-1)}`;
+}
+
 const releaseSources = [
   sourceMeta("transparencia-activa", {
     label: "Transparencia Activa CPLT",
@@ -215,7 +222,7 @@ const releaseSources = [
     publishedCount: bySource.get("camara")?.count ?? 0,
     queryableCount: bySource.get("camara")?.count ?? 0,
     relatedCount: bySource.get("camara")?.related.size ?? 0,
-    period: support.generado_en?.slice(0, 7) ?? null,
+    period: sourcePeriod("camara"),
     checksum: support.fuentes?.camara?.checksum_sha256 ?? null,
     note: "Consolidado derivado de personal de apoyo; no representa la nómina completa de la Cámara.",
     modulePath: "/remuneraciones-publicas",
@@ -227,7 +234,7 @@ const releaseSources = [
     publishedCount: bySource.get("senado")?.count ?? 0,
     queryableCount: bySource.get("senado")?.count ?? 0,
     relatedCount: bySource.get("senado")?.related.size ?? 0,
-    period: support.generado_en?.slice(0, 7) ?? null,
+    period: sourcePeriod("senado"),
     checksum: support.asignacion_senado_2026?.checksum_sha256 ?? null,
     note: "Consolidado derivado de personal de apoyo del Senado.",
     modulePath: "/remuneraciones-publicas",

@@ -23,15 +23,33 @@ const expectedCount = expected38Bis.reduce((total, release) => total + release.r
 const missingPeriods = expected38Bis.map((release) => release.period).filter((period) => !actualPeriods.has(period));
 const sofiaPeriods = actual38Bis.filter((row) => /sofia pumpin/i.test(row.nombreOriginal)).map((row) => row.periodo).sort();
 
+function expectedSourcePeriod(sourceId) {
+  const periods = [...new Set(rows.filter((row) => row.sourceId === sourceId).map((row) => row.periodo).filter(Boolean))]
+    .sort((left, right) => String(left).localeCompare(String(right), "es-CL"));
+  if (periods.length === 0) return null;
+  if (periods.length === 1) return periods[0];
+  return `${periods[0]} / ${periods.at(-1)}`;
+}
+
 if (manifest.totalRows !== rows.length) throw new Error(`MANIFEST_ROW_COUNT_MISMATCH: ${manifest.totalRows} != ${rows.length}`);
 if (actual38Bis.length !== expectedCount) throw new Error(`38BIS_HISTORY_COUNT_MISMATCH: ${actual38Bis.length} != ${expectedCount}`);
 if (missingPeriods.length) throw new Error(`38BIS_MISSING_PERIODS: ${missingPeriods.join(",")}`);
 if (sofiaPeriods.length < 2) throw new Error("38BIS_HISTORY_SEARCH_MISSING: Sofía Pumpin debe tener al menos dos períodos");
+
+for (const sourceId of ["camara", "senado"]) {
+  const source = manifest.sources.find((item) => item.id === sourceId);
+  const expectedPeriod = expectedSourcePeriod(sourceId);
+  if (!source) throw new Error(`SOURCE_MANIFEST_MISSING: ${sourceId}`);
+  if (source.period !== expectedPeriod) {
+    throw new Error(`SOURCE_PERIOD_MISMATCH: ${sourceId}: ${source.period} != ${expectedPeriod}`);
+  }
+}
 
 console.log(JSON.stringify({
   status: "ok",
   totalRows: rows.length,
   source38BisRows: actual38Bis.length,
   source38BisPeriods: [...actualPeriods].sort(),
+  supportPeriods: Object.fromEntries(["camara", "senado"].map((sourceId) => [sourceId, expectedSourcePeriod(sourceId)])),
   sofiaPumpinPeriods: sofiaPeriods,
 }, null, 2));
