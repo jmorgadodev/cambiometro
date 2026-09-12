@@ -139,6 +139,13 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
     expect(summary.unavailableOfficial[0]).toMatchObject({ id: "gob-cl", status: 403, error: "HTTP_403" });
   });
 
+  it("4e. la nota de cobertura usa el snapshot y no conteos históricos escritos a mano", () => {
+    expect(movimientosPageSource).not.toContain("79 movimientos en total");
+    expect(movimientosPageSource).not.toContain("78 corresponden");
+    expect(movimientosPageSource).toContain("MOVIMIENTOS.length");
+    expect(movimientosPageSource).toContain("MOVIMIENTOS_GOBIERNO_DESDE");
+  });
+
   it("5. Días en el cargo calculado para autoridades salientes con origen", () => {
     const withDays = MOVIMIENTOS.filter((m) => m.dias_en_cargo !== undefined && m.dias_en_cargo !== null);
     expect(withDays.length).toBeGreaterThanOrEqual(10);

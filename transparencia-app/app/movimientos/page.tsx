@@ -8,6 +8,7 @@ import {
   MOVIMIENTOS_TIPO_COLOR,
   MOVIMIENTOS_TIPO_EMOJI,
   MOVIMIENTOS_PIPELINE_METADATA,
+  MOVIMIENTOS_GOBIERNO_DESDE,
   latestMovementPublicationDate,
   MOTIVOS_CATEGORIAS,
   isMovimientoDocumentoPendienteMayor30,
@@ -1252,7 +1253,7 @@ function MovimientosContent() {
             * <strong>Modelo Multifuente y Confirmación Oficial:</strong> El catálogo de movimientos indexa relevos y designaciones a partir de señales de prensa y monitoreo cívico (como <code>renunciaskast.cl</code> y agencias de noticias). Los eventos entran como <em>“En confirmación”</em> y solo son promovidos a <em>“Verificado oficial”</em> cuando cuentan con un Decreto Supremo indexado en Ley Chile (BCN) o el Diario Oficial. Si transcurren más de 30 días sin documento oficial, el registro conserva la advertencia <em>“Documento oficial pendiente”</em> y no se autopromueve.
           </p>
           <p style={{ margin: "0 0 0.5rem 0" }}>
-            * <strong>Cobertura Temporal y Registros de Transición:</strong> El dataset histórico consolida 79 movimientos en total, de los cuales 78 corresponden a la gestión de gobierno iniciada el 11 de marzo de 2026 y 1 al período de transición previo debidamente documentado.
+            * <strong>Cobertura Temporal y Registros de Transición:</strong> El dataset histórico consolida {MOVIMIENTOS.length.toLocaleString("es-CL")} movimientos en total, de los cuales {MOVIMIENTOS.filter((movement) => movement.fecha >= MOVIMIENTOS_GOBIERNO_DESDE).length.toLocaleString("es-CL")} corresponden a la gestión de gobierno iniciada el 11 de marzo de 2026 y {MOVIMIENTOS.filter((movement) => movement.fecha < MOVIMIENTOS_GOBIERNO_DESDE).length.toLocaleString("es-CL")} al período de transición previo.
           </p>
         </footer>
       </div>
