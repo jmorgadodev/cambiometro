@@ -39,7 +39,7 @@ describe("Blindaje Anti-Regresión — Coherencia Global del Sitio", () => {
       expect(SOURCE_CANONICAL_COUNTS["ley-19862"]).toBe(59361);
       expect(SOURCE_CANONICAL_COUNTS["dipres"]).toBe(15689);
       expect(SOURCE_CANONICAL_COUNTS["sinim"]).toBe(3105);
-      expect(SOURCE_CANONICAL_COUNTS["infolobby"]).toBe(60523);
+      expect(SOURCE_CANONICAL_COUNTS["infolobby"]).toBe(71467);
       expect(SOURCE_CANONICAL_COUNTS["infoprobidad"]).toBe(15331);
       expect(SOURCE_CANONICAL_COUNTS["contraloria"]).toBe(291);
       expect(SOURCE_CANONICAL_COUNTS["camara"]).toBe(19025);

@@ -1285,7 +1285,7 @@ function recordsUnavailable(requestUrl: URL, reason: string) {
   const limit = limitFrom(requestUrl);
   const offset = offsetFrom(requestUrl);
   const source = requestUrl.searchParams.get("source")?.trim() ?? null;
-  const expectedTotals: Record<string, number> = { chilecompra: 74142, infolobby: 60523, contraloria: 291, infoprobidad: 15331 };
+  const expectedTotals: Record<string, number> = { chilecompra: 74142, infolobby: 71467, contraloria: 291, infoprobidad: 15331 };
   return success([], {
     total: 0,
     limit,
