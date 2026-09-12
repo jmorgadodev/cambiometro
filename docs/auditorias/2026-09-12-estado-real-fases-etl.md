@@ -1994,3 +1994,20 @@ expectativa antigua de `/fuentes`: el test todavía calcula un titular intermedi
 `1.753.013`. No se modificó producción ni se ajustó el test para ocultar el
 desfase; queda como tarea de reconciliación del cálculo del titular, separada de
 la validación funcional de Movimientos.
+
+La corrección quedó implementada de forma acotada en el PR #503 y fue integrada
+en la rama operativa con el commit `aa2a13db50c69d4d5812d35fd7c820293eeab8fe`.
+El verificador ahora extrae del HTML los conteos canónico y consolidado visibles
+y exige que ambos sean enteros positivos. La evidencia posterior a la corrección
+fue:
+
+- prueba puntual del parser: 2/2;
+- typecheck y lint: correctos;
+- `verify-prod-full` contra producción: 132/132, 0 fallos;
+- build Pages/API y E2E remoto: correctos;
+- D1 productiva, R2, Pages y `main`: sin escrituras.
+
+La falla era del verificador, no del dato publicado. El siguiente bloque puede
+comenzar hoy con la calidad de Transparencia Activa y las pruebas aisladas de
+38 bis y ChileCompra; el reinicio de D1 sólo será necesario para el preflight de
+cuota, no para esas auditorías.
