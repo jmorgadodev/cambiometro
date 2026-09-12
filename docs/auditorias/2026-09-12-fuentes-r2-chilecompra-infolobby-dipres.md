@@ -312,6 +312,16 @@ registros, 205.151 términos de búsqueda, 227.555.913 bytes de archivo y
 coincidencia exacta entre la suma de longitudes de páginas y el archivo de
 registros. El primer y último ID fueron leídos correctamente.
 
+El candidato reconstruyó además referencias de entidades completas, sin
+reutilizar las claves ausentes del catálogo anterior:
+
+- entidades: `entities/v1/infolobby-d7119713a3b6ee839c925ac1794362c48dc41eed8697851399741ddd74d52c33.jsonl.gz`;
+- índice de entidades:
+  `indexes/v1/infolobby/entities-d8518c866ea7234ea83d0cb50b06a8a7a7e1bade7656b1cd959aee0808120b38.jsonl.gz`.
+
+La actualización futura debe publicar ambas claves junto con el catálogo, los
+ocho manifiestos mensuales y el índice paginado; no debe publicar sólo agosto.
+
 ## Control DIPRES — 07:16 UTC-3
 
 Las páginas oficiales de ejecución presupuestaria y de presupuestos
