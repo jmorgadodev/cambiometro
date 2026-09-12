@@ -1572,3 +1572,23 @@ maestro. El resultado fue:
 
 La ausencia de `tsc` y `playwright` detectada en el checkout maestro es, por
 tanto, una carencia de instalación local, no un fallo reproducido por el código.
+
+## Verificación de la barrera D1 en los workflows actuales
+
+La acción `.github/actions/d1-preflight/action.yml` mantiene
+`allow-remote-materialization=false` por defecto. Además, los pasos de
+materialización de Contraloría, DIPRES, InfoProbidad y Ley 19.862 sólo tienen
+condición de ejecución cuando se cumplen simultáneamente:
+
+- el evento es `workflow_dispatch`;
+- el preflight permite explícitamente continuar.
+
+Los workflows programados no pasan el opt-in de materialización remota. El
+workflow de pruebas usa únicamente D1 local (`--local`) y no afecta la cuenta.
+La ejecución antigua de Contraloría que consumió la cuota ocurrió antes de esta
+política; no representa el comportamiento actual de los workflows.
+
+Esto deja una protección verificable: los ETL pueden publicar R2/Pages sin
+necesitar D1 y una futura materialización remota requiere una autorización
+explícita. Mientras la cuota account-wide siga crítica, no se debe enviar ese
+opt-in.
