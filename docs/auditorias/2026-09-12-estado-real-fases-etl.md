@@ -554,3 +554,13 @@ artefactos inmutables asociados a `data-senado-2025` y `data-senado-2026`, o
 consultar la fuente oficial para regenerarlos con el mismo contrato. Mientras
 eso no ocurra, Senado debe permanecer rotulado como parcial y no como cobertura
 total.
+
+La fuente oficial actual fue consultada sólo en modo lectura y mostró otro
+dato que impide una restauración automática: el endpoint de gastos
+operacionales responde 1.199 filas para 2025-08 y 1.200 para 2026-02, mientras
+el catálogo histórico declara 121 y 7, respectivamente. El período 2026-05 sí
+coincide con el catálogo (1.250 filas). La diferencia puede corresponder a un
+cambio de alcance, a una publicación histórica incompleta o a un cambio del
+endpoint; debe resolverse comparando el contrato y los registros antes de
+publicar. No se debe convertir esa diferencia en una cifra de cobertura ni
+mezclarla con votaciones, dietas o gastos de otra categoría.
