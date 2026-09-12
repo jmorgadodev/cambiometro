@@ -244,3 +244,27 @@ También se revisaron las ejecuciones programadas recientes de Cámara
 correctamente y sus logs no muestran materialización remota ni exportación D1.
 El código de `origin/main` conserva los pasos D1 detrás de la acción de
 preflight y de una autorización explícita que ningún workflow actual activa.
+
+### Seguimiento del 12 de septiembre
+
+El `usage-watch` más reciente (`34689187017`, generado a las 07:43 CLST)
+terminó correctamente y reportó, para la ventana diaria de Cloudflare:
+
+- `transparencia-db`: 14.030.061 filas leídas, 0 escritas, 648 consultas.
+- Otras D1 de la cuenta: 667 filas leídas y 18 escritas.
+- Total reportado por el artefacto: 14.030.728 filas leídas y 18 escritas.
+- Frente al límite diario de 5.000.000 filas leídas, el artefacto marca 280,61%
+  y nivel `critical`.
+
+El panel de D1 consultado posteriormente muestra 15,43 millones de filas
+leídas y 0 escritas en las últimas 24 horas. La diferencia entre ambos valores
+se explica por la hora de captura: el workflow es anterior al refresco posterior
+del panel. Ambos datos confirman que la ventana aún contiene consumo histórico
+por encima del nivel gratuito; no prueban por sí solos que el consumo siga
+creciendo.
+
+Las comprobaciones R2 del API no incrementaron las métricas observadas. La
+medida de cierre sigue siendo completar una ventana móvil completa posterior a
+la promoción R2-only y confirmar que no reaparecen las consultas masivas. Hasta
+entonces, D1 permanece en observación crítica, sin cambios de código ni
+materialización remota.
