@@ -226,3 +226,23 @@ trimestre de 2026 (julio–septiembre); los endpoints CSV de `audiencias`,
 autoriza todavía una publicación: primero debe ejecutarse el ETL aislado de
 InfoLobby, comparar sus IDs con los 60.523 consultables, verificar si las 92
 filas reaparecen y conservar los checksums de cada dataset original.
+
+## Prueba incremental sin escritura — 07:04 UTC-3
+
+Se ejecutó únicamente:
+
+```text
+node scripts/etl.mjs --source infolobby --from 2026-08-01 --to 2026-08-31 --dry-run
+```
+
+Resultado: **10.944 registros de lobby, 0 errores, 0 archivos escritos**.
+Tampoco se consultó D1 ni se publicó R2. Por tanto, las 92 filas del catálogo
+no son el universo de agosto; corresponden a un release o partición incompleta
+que quedó catalogada. La fuente oficial entrega un volumen sustancialmente
+mayor y puede recuperarse.
+
+La corrección requiere una ejecución de publicación aislada de InfoLobby que
+genere el manifiesto, partición e índice desde esta fuente, compare IDs contra
+el release anterior y conserve los objetos válidos de enero–julio. Hasta
+completar esa validación, producción debe seguir declarando el alcance actual
+como parcial y no mezclar 10.944 filas nuevas con el índice público existente.
