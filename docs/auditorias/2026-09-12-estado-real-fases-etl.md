@@ -1336,6 +1336,28 @@ La corrección sigue aislada: no se hizo merge, no se publicó un release y no s
 ejecutó D1. Queda lista para revisión dentro del ciclo de publicación por
 fuente.
 
+## Inventario preciso del proyecto maestro — sin eliminar
+
+Se midieron las rutas reales bajo `cambiometro-public/transparencia-app`.
+La clasificación es informativa; no se borró ni movió ningún archivo.
+
+| Ruta | Tamaño | Clasificación | Tratamiento |
+|---|---:|---|---|
+| `.next` | 1,34 GiB | Build regenerable | Candidato de limpieza reversible |
+| `out` | 2,13 GiB | Export estático regenerable | Conservar hasta cerrar el último preview |
+| `public/data` | 1,55 GiB | Artefactos publicados/locales | No borrar: contiene datos servidos por Pages |
+| `data/lake-cplt` | 3,99 GiB | Histórico/proyección CPLT | Conservar hasta verificar rollback y R2 |
+| `data/cplt-artifacts` | 1,28 GiB | Artefactos intermedios por categoría | Candidato sólo después de comprobar R2 y manifest |
+| `data/raw` | 0,12 GiB | Fuentes crudas de auditoría | Conservar hasta cerrar trazabilidad |
+| `data/static-site-release` | 0,06 GiB | Release local | Conservar como rollback inmediato |
+
+Los candidatos potenciales de ahorro son `.next`, `out` y parte de
+`data/cplt-artifacts`, pero no se autoriza una limpieza destructiva hasta
+comprobar que el release correspondiente existe en R2 y que el repositorio
+puede reconstruirlo. `public/data` no se clasifica como caché prescindible:
+contiene el material que el sitio está sirviendo localmente y sirve como
+respaldo de verificación.
+
 ## Movimientos: verificación productiva R2 — 12 de septiembre
 
 Se consultó una página única de hasta 100 filas desde R2. El resultado fue:
