@@ -445,7 +445,12 @@ tamaño y checks remotos, y fue promovido al 100% por el workflow
 
 El workflow de Pages/refresco `34706970066` y el guard de publicación ETL
 `34706970075` también terminaron verdes. El bloque queda cerrado sin ejecutar
-SQL, materialización ni ETL de Cámara.
+SQL, materialización ni ETL de Cámara. La consulta histórica amplia de 2026
+queda documentada como `partial` en la fuente canónica y en el alias, con 7
+particiones faltantes (`publishedRows=13.685`, `expectedRows=14.510` en la
+consulta canónica). Por eso se cierra el incidente del alias, pero no se
+declara cerrada la cobertura histórica hasta reconstruir esas particiones desde
+la fuente oficial y validarlas en R2.
 
 ## Plan operativo aplicable hoy
 

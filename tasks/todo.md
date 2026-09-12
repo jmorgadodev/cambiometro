@@ -20,6 +20,7 @@
 - [x] Separar en la UI catálogo declarado, publicados y consultables; comenzar por ChileCompra; corregir metadata R2 de InfoLobby.
 - [x] Preflight de fuentes sin escritura: Cámara, Senado y los cinco orígenes de Movimientos respondieron correctamente el 2026-09-12.
 - [x] Reparar/publicar sólo la variante R2 `votaciones_camara`; PR #495 fusionado y Worker `d2f82268-b1af-4481-a67b-d1f8953f0fc6` promovido. Alias validado en producción desde R2, sin D1.
+- [ ] Reconstruir las 7 particiones históricas faltantes de Cámara en R2; el corte 2026-09-09 está completo, pero la consulta amplia 2026 sigue parcial y no debe presentarse como cobertura total.
 
 ## Mañana, después del reinicio
 
