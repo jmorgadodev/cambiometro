@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCpltTransparencySummary } from "../scripts/cplt-transparency-summary.mjs";
+import { buildCpltAggregateSummary, buildCpltTransparencySummary } from "../scripts/cplt-transparency-summary.mjs";
 
 describe("resumen agregado de Transparencia Activa", () => {
   it("calcula cortes, altas, bajas, cambios y estados de monto sin exponer filas", () => {
@@ -33,5 +33,35 @@ describe("resumen agregado de Transparencia Activa", () => {
     ], [], "2026-02-01T00:00:00.000Z");
 
     expect(summary.periods.at(-1)).toEqual(expect.objectContaining({ amountChanges: 1, organismChanges: 1, roleChanges: 1 }));
+  });
+
+  it("mantiene el fallback de Pages agregado sin inventar comparaciones individuales", () => {
+    const stats = {
+      recordCount: 2,
+      periods: new Map([
+        ["2026-01", { rows: 1, organisms: new Set(["municipalidad a"]), withAmount: 1, withoutAmount: 0, grossTotal: 100, contracts: { Planta: 1 } }],
+        ["2026-02", { rows: 1, organisms: new Set(["municipalidad a"]), withAmount: 0, withoutAmount: 1, grossTotal: 0, contracts: { Planta: 1 } }],
+      ]),
+      contractCounts: { Planta: 2 },
+      issueCounts: {},
+      recordsWithIssues: 0,
+      invalidPeriodCount: 0,
+      positiveAmountCount: 1,
+      zeroAmountCount: 0,
+      missingAmountCount: 1,
+    };
+
+    const summary = buildCpltAggregateSummary(stats, [], "2026-02-01T00:00:00.000Z");
+
+    expect(summary.comparisonsAvailable).toBe(false);
+    expect(summary.periods.at(-1)).toEqual(expect.objectContaining({
+      rows: 1,
+      people: null,
+      grossTotal: 0,
+      newRecords: null,
+      removedRecords: null,
+      amountChanges: null,
+    }));
+    expect(summary.quality.amountStates).toEqual({ positive: 1, zero: 0, notPublished: 1 });
   });
 });
