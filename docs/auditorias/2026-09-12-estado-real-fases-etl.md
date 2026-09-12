@@ -1671,12 +1671,15 @@ evita confundir a dos personas distintas que trabajan para el mismo senador.
 | Cargo o monto faltante | 0 | 0 | correcto |
 
 Las tres filas retiradas corresponden a funcionarios asociados a Kusanovic
-Glusevic, Flores Oporto y Longton Herrera, todos en julio de 2026. La prueba
-no permite afirmar por sí sola si son bajas reales o una corrección posterior
-de la fuente; deben conservarse como diferencia de fuente hasta que el release
-oficial de publicación confirme el estado. No se debe interpretar el aumento
-de 418 filas como 418 nuevas personas: es principalmente la carga del nuevo
-mes, con los mismos 70 senadores agrupados.
+Glusevic, Flores Oporto y Longton Herrera, todos en julio de 2026. En el nuevo
+extracto reaparecen las mismas combinaciones de senador, funcionario, cargo y
+monto, pero con `calidad_juridica=INDEFINIDO` en lugar de valores `FQTO...`.
+Por tanto, la evidencia disponible apunta a una corrección de clasificación de
+la fuente, no a tres bajas y tres contrataciones nuevas. Debe conservarse el
+valor original en el snapshot anterior y dejar la variación como observación
+de calidad. No se debe interpretar el aumento de 418 filas como 418 nuevas
+personas: es principalmente la carga del nuevo mes, con los mismos 70
+senadores agrupados.
 
 Conclusión operativa: el conector y el paginado responden, el extracto es
 consistente y la diferencia con la línea base se explica por la incorporación
