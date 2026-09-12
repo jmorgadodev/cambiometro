@@ -237,6 +237,63 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
   };
 }
 
+const MAX_UNINDEXED_FILTER_PARTITIONS = 12;
+
+async function readPartitionRecords(
+  bucket: R2BucketLike,
+  partition: { sourceId: string; period: string; manifestKey: string; releaseTag?: string; manifestAssetName?: string },
+  catalogGeneratedAt: string | null,
+) {
+  const [year, month] = partition.period.split("-");
+  const releaseTag = partition.releaseTag ?? `data-${partition.sourceId}-${year}`;
+  const manifestAssetName = partition.manifestAssetName ?? `${partition.sourceId}-${year}-${month}-manifest.json`;
+  const manifestObject = await readHotOrArchivedObject(bucket, partition.manifestKey, releaseTag, manifestAssetName);
+  if (!manifestObject) return null;
+  const manifest = await manifestObject.json<PartitionManifest>();
+  const artifacts = manifest.artifacts
+    .filter((artifact) => /records(?:-[^/]+)?\.jsonl\.gz(?:\.part-\d+)?$/.test(artifact.key))
+    .sort((left, right) => left.key.localeCompare(right.key));
+  if (artifacts.length === 0) return { records: [] as EvidenceRecord[], loadedRows: 0, missingArtifacts: 0, incomplete: true };
+
+  const chunks: Uint8Array[] = [];
+  let missingArtifacts = 0;
+  for (const artifact of artifacts) {
+    const object = await readHotOrArchivedObject(bucket, artifact.key, releaseTag, artifact.releaseAssetName);
+    if (!object) {
+      missingArtifacts += 1;
+      continue;
+    }
+    const data = await object.arrayBuffer();
+    if (await checksumSha256(data) !== artifact.checksumSha256) throw new Error(`ARCHIVE_CHECKSUM_MISMATCH: ${artifact.key}`);
+    chunks.push(new Uint8Array(data));
+  }
+  if (chunks.length !== artifacts.length) return { records: [] as EvidenceRecord[], loadedRows: 0, missingArtifacts, incomplete: true };
+
+  const total = chunks.reduce((size, chunk) => size + chunk.byteLength, 0);
+  const compressed = new Uint8Array(total);
+  let position = 0;
+  for (const chunk of chunks) { compressed.set(chunk, position); position += chunk.byteLength; }
+  const text = await decompressGzip(compressed);
+  const records = text.split("\n")
+    .filter(Boolean)
+    .map((line) => projectLakeEvidence(JSON.parse(line) as LakeRecord, manifest.projectionChecksumSha256, catalogGeneratedAt))
+    .sort((left, right) => (right.occurredAt ?? "").localeCompare(left.occurredAt ?? "") || left.id.localeCompare(right.id));
+  return { records, loadedRows: records.length, missingArtifacts, incomplete: false };
+}
+
+function matchesIndexedParams(record: EvidenceRecord, params: Parameters<typeof readR2EvidenceRecords>[1]) {
+  const date = record.occurredAt?.slice(0, 10) ?? "";
+  if (params.entityId && !record.subjectEntityIds.includes(params.entityId) && !record.objectEntityIds.includes(params.entityId)) return false;
+  if (params.recordIds && !params.recordIds.includes(record.id)) return false;
+  if (params.kind && record.kind !== params.kind) return false;
+  if (outsideDateRange(date, params.from, params.to)) return false;
+  if (params.query) {
+    const haystack = JSON.stringify({ id: record.id, title: record.title, description: record.description, data: record.data }).toLocaleLowerCase("es-CL");
+    if (!haystack.includes(params.query.toLocaleLowerCase("es-CL"))) return false;
+  }
+  return true;
+}
+
 export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   source: string | string[];
   query?: string;
@@ -258,80 +315,67 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
     && (!params.from || partition.period >= params.from.slice(0, 7))
     && (!params.to || partition.period <= params.to.slice(0, 7)));
   if (partitions.length === 0) return null;
-  const records: EvidenceRecord[] = [];
+  const orderedPartitions = [...partitions].sort((left, right) => right.period.localeCompare(left.period) || right.manifestKey.localeCompare(left.manifestKey));
+  const expectedTotal = orderedPartitions.every((partition) => Number.isFinite(Number(partition.recordCount)))
+    ? orderedPartitions.reduce((total, partition) => total + Number(partition.recordCount), 0)
+    : null;
+  const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || params.from || params.to);
+  const limit = Math.min(Math.max(params.limit, 1), 100);
+  const offset = cursorOffset(params.cursor);
+
+  // An unindexed query would require decompressing the complete history in a
+  // single Worker invocation. Refuse it before it can become a Cloudflare
+  // 1102; callers can narrow the period or use a published search index.
+  if (hasFilters && orderedPartitions.length > MAX_UNINDEXED_FILTER_PARTITIONS && !params.from && !params.to) {
+    return {
+      data: [] as EvidenceRecord[], total: 0, limit, nextCursor: null,
+      expectedTotal, loadedRows: 0, complete: false, missingPartitions: 0, missingArtifacts: 0,
+      scanLimited: true,
+    };
+  }
+
+  const data: EvidenceRecord[] = [];
+  let matched = 0;
   let loadedRows = 0;
   let missingPartitions = 0;
   let missingArtifacts = 0;
-  for (const partition of partitions) {
-    const [year, month] = partition.period.split("-");
-    const releaseTag = partition.releaseTag ?? `data-${partition.sourceId}-${year}`;
-    const manifestAssetName = partition.manifestAssetName ?? `${partition.sourceId}-${year}-${month}-manifest.json`;
-    const manifestObject = await readHotOrArchivedObject(bucket, partition.manifestKey, releaseTag, manifestAssetName);
-    if (!manifestObject) {
+  let scannedAll = true;
+  for (const partition of orderedPartitions) {
+    if (!hasFilters && matched >= offset + limit) {
+      scannedAll = false;
+      break;
+    }
+    const result = await readPartitionRecords(bucket, partition, catalog.generatedAt);
+    if (!result) {
       missingPartitions += 1;
       continue;
     }
-    const manifest = await manifestObject.json<PartitionManifest>();
-    const artifacts = manifest.artifacts
-      .filter((artifact) => /records(?:-[^/]+)?\.jsonl\.gz(?:\.part-\d+)?$/.test(artifact.key))
-      .sort((a, b) => a.key.localeCompare(b.key));
-    if (artifacts.length === 0) {
+    loadedRows += result.loadedRows;
+    missingArtifacts += result.missingArtifacts;
+    if (result.incomplete) {
       missingPartitions += 1;
       continue;
     }
-    const chunks = [];
-    for (const artifact of artifacts) {
-      const object = await readHotOrArchivedObject(bucket, artifact.key, releaseTag, artifact.releaseAssetName);
-      if (!object) {
-        missingArtifacts += 1;
-        continue;
-      }
-      const data = await object.arrayBuffer();
-      if (await checksumSha256(data) !== artifact.checksumSha256) throw new Error(`ARCHIVE_CHECKSUM_MISMATCH: ${artifact.key}`);
-      chunks.push(new Uint8Array(data));
-    }
-    if (chunks.length !== artifacts.length) {
-      missingPartitions += 1;
-      continue;
-    }
-    const total = chunks.reduce((size, chunk) => size + chunk.byteLength, 0);
-    const compressed = new Uint8Array(total);
-    let position = 0;
-    for (const chunk of chunks) { compressed.set(chunk, position); position += chunk.byteLength; }
-    const text = await decompressGzip(compressed);
-    for (const line of text.split("\n")) {
-      if (!line) continue;
-      loadedRows += 1;
-      const record = projectLakeEvidence(JSON.parse(line) as LakeRecord, manifest.projectionChecksumSha256, catalog.generatedAt);
-      const date = record.occurredAt?.slice(0, 10) ?? "";
-      if (params.entityId && !record.subjectEntityIds.includes(params.entityId) && !record.objectEntityIds.includes(params.entityId)) continue;
-      if (params.recordIds && !params.recordIds.includes(record.id)) continue;
-      if (params.kind && record.kind !== params.kind) continue;
-      if (params.query) {
-        const haystack = JSON.stringify({ id: record.id, title: record.title, description: record.description, data: record.data }).toLocaleLowerCase("es-CL");
-        if (!haystack.includes(params.query.toLocaleLowerCase("es-CL"))) continue;
-      }
-      if (outsideDateRange(date, params.from, params.to)) continue;
-      records.push(record);
+    for (const record of result.records) {
+      if (!matchesIndexedParams(record, params)) continue;
+      if (matched >= offset && data.length < limit) data.push(record);
+      matched += 1;
     }
   }
-  records.sort((a, b) => (b.occurredAt ?? "").localeCompare(a.occurredAt ?? "") || a.id.localeCompare(b.id));
-  const offset = cursorOffset(params.cursor);
-  const data = records.slice(offset, offset + params.limit);
-  const next = offset + data.length;
-  const expectedTotal = partitions.every((partition) => Number.isFinite(Number(partition.recordCount)))
-    ? partitions.reduce((total, partition) => total + Number(partition.recordCount), 0)
-    : null;
-  const complete = missingPartitions === 0 && (expectedTotal === null || expectedTotal === loadedRows);
+  const total = hasFilters || missingPartitions > 0 || missingArtifacts > 0
+    ? matched
+    : expectedTotal ?? matched;
+  const complete = missingPartitions === 0 && (hasFilters ? scannedAll : scannedAll && (expectedTotal === null || matched === expectedTotal));
   return {
     data,
-    total: records.length,
-    limit: params.limit,
-    nextCursor: next < records.length ? `v1_${next.toString(36)}` : null,
+    total,
+    limit,
+    nextCursor: offset + data.length < total ? `v1_${(offset + data.length).toString(36)}` : null,
     expectedTotal,
     loadedRows,
     complete,
     missingPartitions,
     missingArtifacts,
+    scanLimited: false,
   };
 }
