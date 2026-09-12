@@ -144,6 +144,11 @@ export default async function FuentesPage() {
                       Explorar registros →
                     </Link>
                   </div>
+                  {!source.reconciliation.comparisonEligible && (
+                    <p style={{ margin: "0.25rem 0 0", color: "var(--accent)", fontSize: "0.72rem", lineHeight: 1.45 }}>
+                      {source.reconciliation.note}
+                    </p>
+                  )}
                 </article>
               );
             })}

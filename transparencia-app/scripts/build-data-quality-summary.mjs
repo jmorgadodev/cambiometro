@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
+import { reconcileSourceCounts } from "../lib/data-quality-reconciliation.mjs";
 
 const root = process.cwd();
 const readJson = (relative, fallback) => {
@@ -32,6 +33,7 @@ const catalogById = new Map((catalog.sources ?? []).map((source) => [source.id, 
 const healthAliases = {
   "transparencia-activa": "cplt",
   "ley-19862": "ley19862",
+  "ine-censo-2024": "ine",
 };
 
 const metric = (count, denominator) => {
@@ -46,15 +48,11 @@ const metric = (count, denominator) => {
 };
 
 const sources = config.map((source) => {
-  const canonicalCount = source.id === "ley-19862" && Number.isSafeInteger(transferRows)
-    ? transferRows
-    : source.canonicalCount;
-  const historicalCount = source.id === "ley-19862" && Number.isSafeInteger(transferRows)
-    ? transferRows
-    : source.historicalCount;
   const healthKey = healthAliases[source.id] ?? source.id;
   const healthEntry = health.sources?.[healthKey] ?? null;
   const catalogEntry = catalogById.get(source.id) ?? null;
+  const resolvedCounts = reconcileSourceCounts({ source, healthEntry, catalogEntry, transferRows });
+  const { canonicalCount, historicalCount, queryableCount, reconciliation } = resolvedCounts;
   const lastSuccessAt = healthEntry?.generatedAt ?? catalogEntry?.generatedAt ?? null;
   const sourceStatus = healthEntry?.status ?? catalogEntry?.status ?? null;
   const status = canonicalCount <= 0
@@ -85,17 +83,25 @@ const sources = config.map((source) => {
           : "Release disponible; la completitud se mantiene separada de la disponibilidad.",
     metrics: {
       published: metric(canonicalCount, historicalCount),
-      queryable: metric(source.id === "ley-19862" && Number.isSafeInteger(transferRows) ? transferRows : source.queryableCount, canonicalCount),
+      queryable: metric(queryableCount, canonicalCount),
       related: metric(source.relatedCount, canonicalCount),
     },
     quality: source.qualityObservations,
+    reconciliation,
   };
 });
 
+for (const source of sources) {
+  if (!source.reconciliation.comparisonEligible) {
+    source.metrics.published = metric(null, null);
+    source.statusDetail = source.reconciliation.note;
+  }
+}
+
 const totalCanonicalRecords = sources.reduce((sum, source) => sum + source.canonicalCount, 0);
 const totalHistoricalRecords = sources.reduce((sum, source) => sum + source.historicalCount, 0);
-const queryableSources = sources.filter((source) => source.queryableCount !== null);
-const queryableCount = queryableSources.length ? queryableSources.reduce((sum, source) => sum + source.queryableCount, 0) : null;
+const queryableSources = sources.filter((source) => source.reconciliation.comparisonEligible && source.metrics.queryable.count !== null);
+const queryableCount = queryableSources.length ? queryableSources.reduce((sum, source) => sum + source.metrics.queryable.count, 0) : null;
 const queryableDenominator = queryableSources.length ? queryableSources.reduce((sum, source) => sum + source.canonicalCount, 0) : null;
 const totalRelatedRecords = Number.isSafeInteger(globalKpis.relaciones) ? globalKpis.relaciones : null;
 const generatedAt = health.generatedAt ?? catalog.generatedAt ?? globalKpis.generatedAt ?? new Date().toISOString();
@@ -109,7 +115,9 @@ const payload = {
   globalKpiRecords: Number.isSafeInteger(globalKpis.registros_canonicos) ? globalKpis.registros_canonicos : null,
   note: "Los totales por fuente no son aditivos cuando un registro participa en más de un módulo; el KPI global conserva el corte canónico de la plataforma.",
   metrics: {
-    published: metric(totalCanonicalRecords, totalHistoricalRecords),
+    published: sources.every((source) => source.reconciliation.comparisonEligible)
+      ? metric(totalCanonicalRecords, totalHistoricalRecords)
+      : metric(null, null),
     queryable: metric(queryableCount, queryableDenominator),
     related: metric(totalRelatedRecords, totalCanonicalRecords),
   },
