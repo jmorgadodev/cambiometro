@@ -901,6 +901,54 @@ describe("API canónica v1", () => {
     expect(prepare).not.toHaveBeenCalled();
   });
 
+  it("devuelve el último bloque de un índice R2 sin repetir el cursor", async () => {
+    const rows = [
+      { id: "lobby-1", sourceId: "infolobby", kind: "lobby", occurredAt: "2026-08-01", data: { title: "Uno" } },
+      { id: "lobby-2", sourceId: "infolobby", kind: "lobby", occurredAt: "2026-08-02", data: { title: "Dos" } },
+      { id: "lobby-3", sourceId: "infolobby", kind: "lobby", occurredAt: "2026-08-03", data: { title: "Tres" } },
+    ];
+    const archive = `${rows.map((row) => JSON.stringify(row)).join("\n")}\n`;
+    const firstPageLength = new TextEncoder().encode(`${JSON.stringify(rows[0])}\n${JSON.stringify(rows[1])}\n`).byteLength;
+    const archiveBytes = new TextEncoder().encode(archive);
+    const manifest = {
+      schemaVersion: 1,
+      sourceId: "infolobby",
+      totalRows: rows.length,
+      pageSize: 2,
+      recordArchiveKey: "indexes/v1/infolobby/records.jsonl",
+      pages: [
+        { offset: 0, length: firstPageLength },
+        { offset: firstPageLength, length: archiveBytes.byteLength - firstPageLength },
+      ],
+    };
+    const prepare = vi.fn(() => { throw new Error("D1 no debe consultarse para InfoLobby indexado"); });
+    const PUBLIC_DATA = {
+      get: async (key: string, options?: { range?: { offset: number; length: number } }) => {
+        if (key === "projections/static-site-v1/manifest.json") return { json: async <T>() => ({ files: [{ path: "placeholder", key: "placeholder" }] }) as T };
+        if (key === "indexes/v1/infolobby/manifest.json") return { json: async <T>() => manifest as T };
+        if (key === manifest.recordArchiveKey) {
+          const range = options?.range;
+          const value = range ? archiveBytes.slice(range.offset, range.offset + range.length) : archiveBytes;
+          return { arrayBuffer: async () => value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength) };
+        }
+        return null;
+      },
+    };
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/records?source=infolobby&offset=2&limit=1"), { DB: { prepare }, PUBLIC_DATA } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.map((row: { id: string }) => row.id)).toEqual(["lobby-3"]);
+    expect(payload.meta.total).toBe(3);
+    expect(payload.links.next).toBeUndefined();
+
+    const boundaryResponse = await api.fetch(new Request("https://example.test/api/v1/records?source=infolobby&offset=1&limit=2"), { DB: { prepare }, PUBLIC_DATA } as never);
+    const boundaryPayload = await boundaryResponse.json();
+    expect(boundaryPayload.data.map((row: { id: string }) => row.id)).toEqual(["lobby-2", "lobby-3"]);
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
   it("prefiere cualquier snapshot R2 publicado antes de consultar D1", async () => {
     const prepare = vi.fn(() => { throw new Error("D1 no debe consultarse si existe snapshot R2"); });
     const PUBLIC_DATA = {

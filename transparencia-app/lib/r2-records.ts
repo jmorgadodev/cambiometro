@@ -173,9 +173,19 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
       candidatePages = [...pageSets[0]].filter((page) => pageSets.every((pages) => pages.has(page))).sort((a, b) => a - b);
     }
   }
+  let unfilteredSelectionOffset = offset;
   if (!hasFilters) {
-    const pageIndex = Math.floor(offset / manifest.pageSize);
-    candidatePages = pageIndex < manifest.pages.length ? [pageIndex] : [];
+    // `offset` is relative to the complete archive, while `total` below is
+    // counted only across the physical pages selected for this request. A
+    // single physical page is not enough when a public page straddles the
+    // boundary between two R2 blocks (and using the global offset directly
+    // makes the final block return no rows forever).
+    const firstPageIndex = Math.floor(offset / manifest.pageSize);
+    const lastPageIndex = Math.floor(Math.max(offset, offset + limit - 1) / manifest.pageSize);
+    candidatePages = manifest.pages
+      .map((_, index) => index)
+      .filter((index) => index >= firstPageIndex && index <= lastPageIndex);
+    unfilteredSelectionOffset = offset - firstPageIndex * manifest.pageSize;
   }
 
   const selected: EvidenceRecord[] = [];
@@ -202,7 +212,8 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
       const lakeRecord = JSON.parse(line) as LakeRecord;
       const record = projectLakeEvidence(lakeRecord, null, null);
       if (!indexedRecordMatches(record, params)) continue;
-      if (total >= offset && selected.length < limit) selected.push(record);
+      const selectionOffset = hasFilters ? offset : unfilteredSelectionOffset;
+      if (total >= selectionOffset && selected.length < limit) selected.push(record);
       total += 1;
       if (indexedQueryTotal !== null && selected.length >= limit && total >= offset + limit) {
         exhausted = true;
