@@ -1245,3 +1245,27 @@ Si la cuota sigue crítica, el plan continúa por R2 sin reintentos automáticos
 La regla de trabajo queda fijada: avanzar por fuente y por evidencia mientras
 D1 espera, sin tocar el camino público ni mezclar snapshots locales con la
 referencia productiva.
+
+## Foto operativa de workflows — 12 de septiembre, 18:00 UTC-3
+
+Consulta de sólo lectura a GitHub Actions; no se disparó ningún workflow.
+
+| Fuente o proceso | Último run | Estado | Decisión inmediata |
+|---|---:|---|---|
+| Cámara | `34691031897` | `success` | Auditar alcance y checksum; no republicar |
+| Movimientos | `34690963760` | `success` | Auditar frescura y mantener snapshot anterior ante fallo |
+| Votaciones Cámara | `34691437098` | `success` | Separar período y componente de Cámara |
+| Votaciones Senado | `34691714118` | `success` | Confirmar corte de 2026-09 |
+| InfoLobby | `34719886264` | `success` | Mantener universo R2 de 71.467 filas |
+| DIPRES | `32851856261` | `success` | Mantener como agregado; revisar frescura |
+| ChileCompra | `34130670889` | `failure` | Conservar snapshot de 74.142; no publicar vacío |
+| CPLT | `34342239360` | `failure` | No regenerar hasta resolver guard de tamaño |
+| Personal Cámara | `34127058669` | `failure` | Conservar snapshot por bloqueo de fuente |
+| Personal Senado | — | sin ejecución reciente | Auditar workflow antes de forzar cualquier corrida |
+| Remuneraciones 38 bis | `34630955321` | `failure` histórica | Corrección aislada en PR #499; no tocar producción |
+
+La presencia de un workflow verde no autoriza por sí sola una publicación: aún
+debe coincidir el período, el número de filas, el checksum y el estado de
+completitud del release. Del mismo modo, un fallo aislado no autoriza a borrar
+el snapshot productivo. Esta matriz es la base para probar cada ETL por
+separado sin arriesgar el resto del sitio.
