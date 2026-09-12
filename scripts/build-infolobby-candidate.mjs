@@ -36,7 +36,7 @@ const all = [...mergedById.values()];
 const ids = all.map((row) => String(row.id ?? ""));
 
 const existingCatalog = JSON.parse(readFileSync(catalogPath, "utf8"));
-const plan = buildLakePlan({ actualizado_en: "2026-09-12T10:00:00.000Z", fuentes: { infolobby: all } }, { existingCatalog: { ...existingCatalog, partitions: previous, sources: existingCatalog.sources.filter((source) => source.id === "infolobby") } });
+const plan = buildLakePlan({ actualizado_en: "2026-09-12T10:00:00.000Z", fuentes: { infolobby: all } }, { existingCatalog });
 mkdirSync(outputRoot, { recursive: true });
 for (const item of plan.assets) {
   const target = join(outputRoot, item.key);
@@ -50,6 +50,8 @@ console.log(JSON.stringify({
   augustRows: august.length,
   candidateRows: all.length,
   candidateUniqueIds: new Set(ids).size,
+  preservedSourceCount: plan.catalog.sources.length,
+  preservedNonInfoLobbyPartitions: plan.catalog.partitions.filter((item) => item.sourceId !== "infolobby").length,
   candidatePartitions: plan.catalog.partitions.filter((item) => item.sourceId === "infolobby").map((item) => ({ period: item.period, rows: item.recordCount, checksumSha256: item.checksumSha256 })),
   entityCount: source?.entityCount ?? null,
   assets: plan.assets.length,

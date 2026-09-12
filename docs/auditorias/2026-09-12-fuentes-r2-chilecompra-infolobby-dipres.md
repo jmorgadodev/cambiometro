@@ -322,6 +322,12 @@ reutilizar las claves ausentes del catálogo anterior:
 La actualización futura debe publicar ambas claves junto con el catálogo, los
 ocho manifiestos mensuales y el índice paginado; no debe publicar sólo agosto.
 
+Se corrigió el generador del candidato para conservar el catálogo R2 completo.
+La verificación final confirma **14 fuentes**, **147 particiones** en total y
+**139 particiones no-InfoLobby** preservadas sin cambios de valores. El release
+propuesto modifica únicamente InfoLobby y sus artefactos derivados; no puede
+reemplazarse el catálogo completo por uno reducido a una sola fuente.
+
 ## Control DIPRES — 07:16 UTC-3
 
 Las páginas oficiales de ejecución presupuestaria y de presupuestos
