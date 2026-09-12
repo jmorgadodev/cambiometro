@@ -870,3 +870,19 @@ inventario histórico o a contenido temporal que ya no existe en la ubicación
 actual. El siguiente paso de limpieza debe ser interno y selectivo: localizar
 `node_modules`, caches, `.next`, artefactos de crawls y releases descargados,
 conservar rollback y datos únicos, y sólo después proponer eliminaciones.
+
+El desglose de mayor tamaño no autoriza todavía ninguna eliminación:
+
+- En `cambiometro-public`, `data/lake-cplt` ocupa 3,99 GiB y
+  `data/cplt-artifacts` 1,28 GiB; son artefactos de datos que deben conservarse
+  hasta comprobar su correspondencia con R2 y los manifiestos.
+- En `cambiometro-audit`, `data/lake` ocupa 4,05 GiB, `data/raw` 1,25 GiB y
+  `data/lake-cplt` 1,25 GiB; se consideran material de auditoría/histórico,
+  no caché prescindible.
+- El proyecto público contiene copias generadas en `out/data` (1,55 GiB),
+  `public/data` (1,55 GiB) y `.next` (1,34 GiB). Son los primeros candidatos a
+  una limpieza reversible, pero sólo después de comprobar que no sean la única
+  copia local del release que se está probando.
+- En editorial, `social/Publicaciones` ocupa 0,34 GiB y queda fuera de la
+  limpieza; contiene los assets editoriales que el usuario definió como
+  esenciales.
