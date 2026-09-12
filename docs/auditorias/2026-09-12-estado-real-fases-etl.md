@@ -1781,3 +1781,21 @@ Antes de publicar el snapshot probado de Senado se debe:
 
 La discrepancia queda clasificada como `metadata_drift`, no como pérdida de
 datos. Es un control prioritario para el próximo bloque R2-only.
+
+### Corrección preparada en aislamiento
+
+Se preparó la rama aislada `codex/remuneration-period-metadata-20260912`
+(commit `de7507b`). El constructor del manifiesto ahora deriva el período a
+partir de las filas de cada fuente y el verificador falla si el metadato no
+coincide con esas filas. El build acotado produjo y verificó:
+
+- 33.774 filas y 169 páginas;
+- Cámara: `julio 2026`;
+- Senado: `2026-01 / 2026-07`;
+- 38 bis: 18 períodos históricos;
+- historial de Sofía Pumpin: cuatro períodos.
+
+El `npm test` integral no pudo ejecutarse en ese worktree porque no tiene las
+dependencias instaladas (`tsc` no disponible); el build y
+`verify-remuneraciones-unified.mjs` sí terminaron correctamente. La rama no se
+fusionó ni se desplegó.
