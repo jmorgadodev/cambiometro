@@ -886,3 +886,29 @@ El desglose de mayor tamaño no autoriza todavía ninguna eliminación:
 - En editorial, `social/Publicaciones` ocupa 0,34 GiB y queda fuera de la
   limpieza; contiene los assets editoriales que el usuario definió como
   esenciales.
+
+## Resultado del verificador productivo largo — run 34716686372
+
+El run terminó con fallo después de ejecutar dos pasadas y un crawl frío. La
+clasificación basada en sus artefactos es:
+
+- El crawl frío fue completamente exitoso: 4.671 de 4.671 rutas respondieron
+  HTTP 200, con cero fallos, cero recuperaciones y cero cuerpos con 1102.
+- La primera pasada de integración falló porque el endpoint de cruces devolvió
+  HTTP 503 en una consulta puntual; una consulta directa posterior al mismo
+  endpoint respondió HTTP 200 con datos.
+- La segunda pasada volvió a encontrar una respuesta transitoria en gastos de
+  Cámara, y el endpoint de funcionarios por municipalidad devolvió HTTP 503;
+  ambos respondieron HTTP 200 en una comprobación directa posterior.
+- En ambas pasadas el verificador esperaba el tile InfoLobby `60.523`, pero el
+  release productivo vigente declara y muestra `71.467` filas.
+- En ambas pasadas el verificador esperaba el consolidado histórico `1.490.035`,
+  mientras `/fuentes` muestra el consolidado vigente `1.753.013` y el detalle
+  de fuentes actualizado.
+
+No se debe promover un parche de datos por este resultado. El siguiente cambio
+correctivo corresponde al propio verificador: eliminar expectativas numéricas
+históricas rígidas, leer los conteos declarados por la API o el HTML actual y
+aplicar reintentos explícitos a las comprobaciones de endpoints que ya tienen
+backoff en el resto del sistema. La producción queda operativa, pero la puerta
+de verificación no puede declararse verde hasta repetirla con esa corrección.
