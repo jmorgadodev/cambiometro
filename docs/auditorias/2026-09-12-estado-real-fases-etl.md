@@ -1750,3 +1750,34 @@ la escritura remota que dependa de cuota o una promoción que cambie el release
 público. La siguiente ejecución habilitada para Senado debe conservar el
 snapshot anterior, publicar únicamente por R2 y pasar verificación de
 remuneraciones antes de considerar cualquier promoción.
+
+## Reconciliación del manifiesto público de remuneraciones
+
+Se consultó directamente el manifiesto estático público en producción el 12
+de septiembre. El manifiesto declara 33.774 filas y separa correctamente las
+fuentes, pero presenta una discrepancia de fecha que debe corregirse antes de
+la próxima promoción:
+
+| Fuente | Filas públicas | Período declarado por manifiesto | Período observado en registros |
+|---|---:|---|---|
+| Cámara · personal de apoyo | 1.084 | 2026-08 | 2026-07 en el snapshot auditado |
+| Senado · personal de apoyo | 2.989 | 2026-08 | 2026-01 a 2026-07 |
+| Registro 38 bis | 29.701 | 2025-01 / 2026-06 | consistente con release público anterior |
+
+La evidencia de producción para Senado fue verificable sin descargar el
+universo: el índice de búsqueda y sus páginas contienen a `ANA KAREN` hasta
+2026-07, pero no aparece un registro 2026-08. Por tanto, el texto `period:
+2026-08` del manifiesto no prueba que agosto esté publicado; es metadato
+adelantado o incorrectamente heredado.
+
+Esto no altera las filas públicas ni autoriza una edición directa en Pages.
+Antes de publicar el snapshot probado de Senado se debe:
+
+- derivar el período mostrado desde los registros realmente publicados;
+- actualizar el conteo y checksum de la fuente en el mismo release;
+- verificar que Cámara no conserve una etiqueta de agosto si sólo contiene julio;
+- repetir la búsqueda y la ficha histórica en producción;
+- conservar el manifiesto anterior como rollback.
+
+La discrepancia queda clasificada como `metadata_drift`, no como pérdida de
+datos. Es un control prioritario para el próximo bloque R2-only.
