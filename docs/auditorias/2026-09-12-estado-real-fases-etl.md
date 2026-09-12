@@ -1683,3 +1683,43 @@ consistente y la diferencia con la línea base se explica por la incorporación
 de agosto más tres bajas/correcciones de julio. La promoción debe seguir siendo
 un paso independiente, con checksum, snapshot anterior y `--skip-d1`; esta
 prueba no autoriza publicación automática.
+
+## Cámara y Senado: separación de alcance y estado de publicación
+
+La auditoría de producción confirma que los conteos generales de Cámara y
+Senado no son conteos de remuneraciones individuales. Son catálogos compuestos
+por categorías distintas y, por eso, no deben compararse directamente con las
+nóminas de personal de apoyo.
+
+| Ámbito | Producción/catalogado | Release local revisado | Lectura correcta |
+|---|---:|---:|---|
+| Cámara, catálogo general | 58.751 | — | asistencia 54.538 + votaciones 4.058; gastos 16.275 están fuera del total |
+| Cámara, personal de apoyo | no aparece como componente del catálogo general | 1.084 | nómina derivada, todos los registros del corte local son julio de 2026 |
+| Senado, catálogo general | 1.428 | — | catálogo parcial; votaciones 194 y gastos 6.517 están excluidos del total |
+| Senado, personal de apoyo | no aparece como componente del catálogo general | 2.989 | nómina derivada, enero–julio de 2026; la prueba nueva llega a agosto |
+
+En el archivo local de Cámara hay 160 diputados catalogados: 155 tienen
+personal de apoyo y 5 no tienen filas en el corte. Las 1.084 filas existentes
+están etiquetadas como julio de 2026. Esto no demuestra que los cinco casos no
+tengan personal; sólo demuestra que la fuente o el corte local no publicó filas
+para ellos.
+
+La fuente de personal de Cámara continúa bloqueada para el runner con HTTP 403,
+por lo que no corresponde reemplazar las 1.084 filas ni inventar un corte más
+reciente. En Senado, en cambio, el endpoint oficial respondió y la prueba
+local confirmó 3.407 filas para 2026-01 a 2026-08. Por seguridad, la diferencia
+de Senado queda preparada para una publicación separada y no se mezcla con el
+ETL de Cámara.
+
+### Decisión de trabajo inmediata
+
+1. Mantener producción intacta y no consumir D1 mientras la cuota está en
+   estado crítico.
+2. Tratar Cámara como `fuente no disponible para actualización`, conservando
+   su snapshot anterior.
+3. Tratar Senado como `conector probado / publicación pendiente`, con snapshot
+   anterior y publicación R2-only cuando se autorice.
+4. No sumar los conteos de catálogo general con personal de apoyo, gastos o
+   votaciones. Cada categoría debe conservar su propio manifiesto y checksum.
+5. Verificar después de cada publicación que remuneraciones, votaciones y
+   gastos sigan resolviendo desde sus rutas actuales.
