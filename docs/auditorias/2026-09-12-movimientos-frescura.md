@@ -29,15 +29,20 @@ Movimientos desde R2. Recupera el snapshot anterior antes de ejecutar, valida
 el payload, exige checksum y conserva los movimientos anteriores si una fuente
 no responde.
 
-## Pendiente de cierre
+## Presentación implementada en la rama de trabajo
 
-La interfaz debe mostrar por separado:
+La interfaz de Movimientos quedó preparada para mostrar por separado:
 
 1. fecha del evento;
 2. última publicación de la fuente;
 3. última detección/ejecución del ETL;
-4. última publicación en Pages;
-5. fuentes que no actualizaron.
+4. estado de cada fuente revisada;
+5. fuentes que no respondieron en la última revisión.
+
+La publicación efectiva en Pages no se inventa: mientras el snapshot no lleve
+un sello de despliegue verificable, la interfaz no la presenta como si fuera la
+fecha de ejecución del ETL. Ese sello queda como mejora posterior del flujo de
+publicación.
 
 No se cambiará el contenido del snapshot hasta completar esa presentación y
 una prueba incremental que confirme que un fallo de una fuente no elimina los
