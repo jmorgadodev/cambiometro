@@ -35,6 +35,9 @@ La mejora de ChileCompra requiere publicar el histórico en particiones R2
 versionadas o retirar esa cifra de la experiencia pública hasta que exista un
 manifiesto verificable.
 
+La API productiva confirmó `sourceBackend=r2-lake`, `sourceStatus=complete`,
+`publishedRows=74.142` y `expectedRows=74.142`.
+
 ## InfoLobby
 
 El índice público vigente es:
@@ -63,6 +66,12 @@ release/alcance, no evidencia suficiente para eliminar registros.
 La cobertura temporal sí es recorrible por particiones mensuales; el siguiente
 trabajo debe hacer que índice, paginación y resumen usen el mismo manifiesto.
 
+La API productiva confirma `sourceBackend=r2-lake`, `sourceStatus=complete` y
+`total=60.523`. El offset final expuso un error adicional de paginación: el
+último bloque devolvía cero filas aunque el total lo incluía. Ese defecto quedó
+corregido localmente en `cambiometro-public` y está documentado por separado;
+requiere preview antes de llegar a producción.
+
 ## DIPRES
 
 Se observaron dos alcances distintos:
@@ -78,6 +87,14 @@ El conteo 247.287 no debe presentarse como si fuera el conteo de la partición
 presupuestaria de 15.689. Hasta definir el contrato, DIPRES debe permanecer
 como datos agregados de presupuesto/ejecución, no como un buscador de pagos
 individuales.
+
+La API productiva informa `total=247.287`, `publishedRows=15.689`,
+`expectedRows=247.287` y `sourceStatus=partial`. El catálogo R2 contiene 18
+particiones históricas (2021 y 2026) que suman 247.287, pero sólo la partición
+2026-06 está disponible en el bucket caliente; las demás dependen del fallback
+archivado. Una consulta acotada a 2021-01 devolvió `missingPartitions=1` y cero
+filas, por lo que no debe presentarse el histórico como completamente
+consultable hasta recuperar/publicar esas particiones.
 
 ## Decisiones
 
