@@ -719,3 +719,25 @@ Resultado: el hardening queda validado para promoción, pero aún no se promueve
 a producción. La promoción debe hacerse como operación independiente y luego
 repetir el mismo cuadro contra producción, junto con el smoke de salud y la
 verificación de que D1 no sea consultada por las rutas públicas.
+
+## Estado de los ETL separados — diagnóstico actual
+
+La separación de workflows está activa, pero “workflow separado” no significa
+que la fuente esté disponible en cada ejecución. Los últimos resultados
+revisados quedan clasificados así:
+
+| ETL | Último resultado | Causa o alcance | Acción segura ahora |
+|---|---|---|---|
+| Cámara, Senado, Movimientos y Votaciones Senado | Exitoso | La fuente respondió y el release quedó publicado/validado | Mantener preflight y smoke |
+| Gastos Senado, Ley 19.862 e InfoProbidad | Exitoso | Publicación separada; sin habilitar D1 pública | Auditar checksum y fecha de corte |
+| ChileCompra | Fallido, run `34130670889` | La fuente devolvió HTTP 403; el guard bloqueó un subset vacío | Conservar el snapshot productivo de 74.142 filas |
+| Contraloría | Fallido, run `33633187407` | El release R2 se generó, pero la materialización D1 fue rechazada por la cuota diaria | No reintentar D1; R2 queda como publicación canónica |
+| CPLT | Fallido, run `34342239360` | Guard de crecimiento R2 bloqueó la publicación al superar el 90% previsto | No publicar hasta revisar tamaño del release |
+| Personal de apoyo Cámara | Fallido, run `34127058669` | Página oficial bloqueada (`PERSONAL_APOYO_SOURCE_BLOCKED`) | Conservar snapshot anterior |
+| Remuneraciones 38 bis | Fallido, run `34630955321` | El endpoint oficial falló tras cuatro intentos | Conservar el último release verificable |
+
+La compuerta D1 actual es fail-safe: la acción `.github/actions/d1-preflight`
+mantiene `allow-remote-materialization=false` por defecto y sólo permite
+materializar cuando un workflow manual lo habilita explícitamente y la métrica
+está bajo el umbral. El fallo histórico de Contraloría ocurrió antes de esta
+política reforzada; no se debe repetir como criterio para reintentarla ahora.
