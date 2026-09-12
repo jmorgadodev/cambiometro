@@ -604,3 +604,43 @@ snapshot con procedencia y estados de confirmación, no porque falten filas en
 el artefacto publicado. El siguiente trabajo debe ser incremental: incorporar
 novedades, mantener los 82 registros anteriores ante un fallo de una fuente y
 separar siempre fecha del evento, fecha de detección y última publicación.
+
+## Probe manual posterior al reinicio — 12 de septiembre, 18:22 UTC
+
+Se ejecutó manualmente el workflow de diagnóstico
+`d1-post-reset-probe.yml` (run `34711006882`) para no esperar al siguiente
+horario programado. La ejecución terminó correctamente, pero la cuota todavía
+estaba crítica:
+
+- 14.031.028 filas leídas de 5.000.000 (280,62%).
+- 18 filas escritas de 100.000 (0,02%).
+- Resultado: `D1_FREE_TIER_CRITICAL` / `D1 level=critical`.
+- La compuerta dejó `probe=false` y no ejecutó SQL ni peticiones a la API.
+
+Esto confirma que el reinicio no había liberado aún la métrica observada por
+Analytics, o que otro consumidor de la cuenta siguió leyendo `transparencia-db`.
+No permite atribuir el consumo a `cambiometro-public`: la salud productiva
+continúa con `publicDataBackend=r2` y `publicD1Reads=false`, y el workflow
+protegido no realizó lecturas. La identificación del consumidor restante
+requiere auditoría de cuenta completa (otros proyectos, workflows o scripts),
+sin reactivar materializaciones.
+
+## Trabajo seguro aplicable inmediatamente, sin esperar D1
+
+Mientras D1 permanece crítica se puede avanzar en tareas que no dependen de
+ella:
+
+1. Mantener el smoke de rutas productivas y las comprobaciones de fuentes en
+   modo lectura, usando producción/R2 como referencia.
+2. Cerrar la reconciliación de Cámara ya restaurada y mantener el rollback
+   documentado.
+3. Auditar Senado sin publicar las dos particiones discrepantes hasta resolver
+   su alcance (el endpoint oficial actual devuelve 1.199 y 1.200 filas frente
+   a los 121 y 7 del catálogo histórico).
+4. Preparar la especificación de ETL incremental por fuente y sus guardas de
+   conteo, checksum y publicación atómica, sin ejecutarla.
+5. Revisar Movimientos, InfoLobby, ChileCompra y Transparencia Activa sólo
+   contra releases productivos; no regenerar ni materializar datos.
+
+No se debe hacer hoy: SQL de prueba, materialización, backup de D1, ETL
+completo, despliegue de interfaz ni cambios de navegación.
