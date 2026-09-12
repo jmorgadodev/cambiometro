@@ -14,6 +14,8 @@
 - [x] E. Ejecutar auditoría de consistencia y calidad en producción/R2/candidato.
 - [x] **Checkpoint 2:** checksums, paginación y ausencia de lecturas públicas D1 validados.
 - [x] F. Promoción controlada del Worker y verificación productiva completadas.
+- [x] Integrar PR #493 sobre `main`; candidato Worker validado con R2-first y sin D1 público.
+- [ ] Promover explícitamente el candidato `8fffd277-d5b5-4330-bdd8-7abc04c18f3a` para corregir el 1102 productivo de ChileCompra.
 
 ## Mañana, después del reinicio
 

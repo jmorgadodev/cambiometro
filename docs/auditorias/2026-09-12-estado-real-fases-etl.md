@@ -320,3 +320,27 @@ componente y período, InfoLobby quedó indexado contra el catálogo vigente y l
 API productiva continúa R2-first. El siguiente bloque que requiere datos nuevos
 es separar en la interfaz y manifiestos el corte vigente de ChileCompra frente
 al histórico, sin reintentar su ETL mientras el origen mantenga HTTP 403.
+
+## Integración segura posterior — PR #493
+
+El commit `a6f3255e08391a5d4cc97d09d836094215dcd1df` quedó fusionado en
+`main` después de ejecutar los checks completos. La integración fue acotada a
+seis archivos: contrato de rutas estáticas R2, lectura de índices, detección
+de índices parciales, prueba correspondiente y guard de D1 para InfoLobby. No
+incluyó cambios de interfaz, datos locales sucios ni `cambiometro-editorial`.
+
+Validación del candidato Worker `8fffd277-d5b5-4330-bdd8-7abc04c18f3a`:
+
+- preview de ChileCompra, InfoLobby y Movimientos: HTTP 200 desde R2;
+- health: `publicDataBackend=r2` y `publicD1Reads=false`;
+- checks de GitHub: lint, tipos, unitarios, seguridad, build estático y E2E
+  verdes.
+
+El Worker productivo no fue promovido automáticamente: la compuerta exige
+una ejecución explícita con el `worker_version_id`. En el smoke del tráfico
+productivo vigente, Home, Municipalidades, Remuneraciones, Personas,
+Movimientos e InfoLobby respondieron correctamente, pero ChileCompra respondió
+HTTP 503/1102. El mismo endpoint respondió HTTP 200 en el candidato nuevo.
+Esto confirma que el 1102 corresponde a la versión productiva anterior y que
+la promoción controlada del candidato es el siguiente movimiento, separado de
+la medición de cuota D1. No se ejecutó SQL ni materialización D1.
