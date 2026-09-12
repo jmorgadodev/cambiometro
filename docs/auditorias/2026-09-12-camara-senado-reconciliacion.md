@@ -1,116 +1,90 @@
-# Reconciliación Cámara y Senado — 12 de septiembre de 2026
+# Reconciliación de Cámara y Senado
 
-## Alcance
+**Fecha:** 2026-09-12  
+**Objetivo:** separar remuneraciones, dietas, asistencias, votaciones, gastos y
+autoridades antes de calcular cobertura o comparar producción con local.
 
-Auditoría de sólo lectura entre:
+## Evidencia utilizada
 
-- producción: `https://cambiometro.impulsacv.cl/api/v1/sources`;
-- catálogo local R2: `data/lake/catalog/v1/manifest.json`;
-- estado local: `data/etl/source-health.json`.
+Se comparó el catálogo local con el catálogo vigente descargado desde R2,
+sin consultar D1:
 
-No se consultó D1 ni se ejecutó ETL.
+| Catálogo | Generado | Particiones | Fuentes |
+|---|---|---:|---:|
+| Local `transparencia-app/data/lake/catalog/v1/manifest.json` | 2026-08-24T13:52:22Z | 90 | 14 |
+| R2 `catalog/v1/manifest.json` | 2026-09-12T00:13:38Z | 147 | 14 |
 
-Producción fue consultada a las `2026-09-12T05:47:42Z`; su catálogo de
-fuentes declara publicaciones actualizadas a las `2026-09-12T00:13:38.399Z`.
-El catálogo local disponible fue generado el `2026-08-24T13:52:22.514Z` y el
-estado local el `2026-08-21T10:10:54.809Z`.
+La versión R2 es la referencia vigente. La versión local es histórica y no se
+debe usar para reemplazar ni corregir producción.
 
-## Resultado
-
-| Fuente | Producción | Local estado | Local catálogo principal | Componentes locales separados | Clasificación |
-|---|---:|---:|---:|---:|---|
-| Cámara | 58.751 | 19.025 | 13.286 | gastos: 16.275 | Alcance/categorías mezcladas |
-| Senado | 1.428 | 8.138 | 1.428 | gastos: 6.543; votaciones: 189 | Alcance/categorías mezcladas |
+## Conteos vigentes por alcance
 
 ### Cámara
 
-Producción informa `58.751` registros y expone como componentes `54.538` de
-asistencia y `4.058` de votaciones. La suma de esos componentes es `58.596`,
-por lo que queda una diferencia interna de `155` registros que debe explicarse
-en el manifiesto antes de calcular cobertura.
+El registro de fuente `camara` en R2 contiene **58.751 filas**, pero no es una
+fuente de remuneraciones. La suma se explica completamente así:
 
-El catálogo local principal tiene `13.286` filas en siete períodos:
-`2026-01`, `2026-03`, `2026-04`, `2026-05`, `2026-06`, `2026-07` y
-`2026-08`. No hay una partición local `votaciones_camara`; las votaciones
-aparecen declaradas como componente de Cámara en producción. Los gastos de
-Cámara están separados en `gastos_camara` con `16.275` filas y períodos
-`2026-03` a `2026-07`.
+| Componente | Filas | Períodos | Interpretación |
+|---|---:|---|---|
+| `asistencia_camara` | 54.538 | 2024-01 a 2026-09, con meses no publicados | Asistencia parlamentaria |
+| `votaciones_camara` | 4.058 | 2024-01 a 2026-09, con meses no publicados | Votaciones |
+| `congreso_opendata` | 155 | 2026-09 | Autoridades/diputados vigentes |
+| **Total `camara`** | **58.751** | — | **No sumar como remuneraciones** |
 
-Por tanto, `19.025` no puede compararse directamente con `58.751`: representa
-un agregado local de alcance distinto, no la cobertura de una sola categoría.
+Los gastos de Cámara están separados en `gastos_camara`: **16.275 filas**, de
+marzo a julio de 2026. Las remuneraciones o asesorías de personal de apoyo no
+están representadas por el total `camara` y deben conservar su fuente propia.
 
 ### Senado
 
-Producción informa `1.428` registros del núcleo Senado. Sus componentes
-separados declaran `205` votaciones y `6.517` gastos, pero ambos están marcados
-como fuera del conteo principal.
+| Componente | Filas | Períodos | Interpretación |
+|---|---:|---|---|
+| `senado` | 1.428 | 2025-08, 2026-02, 2026-05, 2026-07 | Registros de dietas/remuneraciones publicados por Senado |
+| `votaciones_senado` | 205 | 2026-03 a 2026-09 | Votaciones |
+| `gastos_senado` | 6.517 | 2026-01 a 2026-05 | Gastos operacionales |
 
-El catálogo local principal también tiene `1.428` filas, en `2025-08`,
-`2026-02`, `2026-05` y `2026-07`. Además, mantiene `votaciones_senado` con
-`189` filas de marzo a agosto de 2026 y `gastos_senado` con `6.543` filas de
-enero a mayo de 2026.
+El manifiesto de `senado/2026/07` identifica el original como
+`senado-2026-07-diet-api.jsonl`, con fuente oficial de dietas. Por lo tanto,
+la interfaz debe decir **dietas/remuneraciones del Senado**, no “personal de
+apoyo” ni “nómina completa del Senado”.
 
-El estado local agregado de `8.138` mezcla esos componentes con el núcleo y no
-debe presentarse como remuneraciones, asesorías, gastos o votaciones por sí
-solo.
+## Diferencias local/R2 detectadas
 
-## Decisión de implementación
-
-Esta fase queda en estado **auditada, separación pendiente**. No se modificarán
-conteos ni se mostrarán porcentajes de cobertura hasta cumplir lo siguiente:
-
-1. Cada registro de Cámara y Senado tendrá una categoría única:
-   remuneración, asesoría, gasto, votación, asistencia u otra categoría
-   explícita.
-2. Los componentes se contarán aparte del núcleo y se indicará si están
-   incluidos o excluidos del total.
-3. Se explicará la diferencia interna de `155` registros de Cámara.
-4. Se reconciliarán `205` votaciones de Senado en producción frente a `189`
-   filas del catálogo local.
-5. Se publicarán los períodos efectivos por categoría.
-6. La interfaz nunca sumará núcleo y componentes como si fueran la misma
-   nómina.
-
-La diferencia local/producción queda clasificada como **alcance/categoría** y,
-en segundo término, como **frescura**. No es evidencia de pérdida de datos en
-producción.
-
-## Control de la API pública posterior
-
-En una consulta adicional del `2026-09-12T07:43:04Z`, la API productiva
-respondió `200` y mostró la diferencia entre el universo declarado y las filas
-realmente publicadas en el release consultable:
-
-| Consulta | Total API | Filas publicadas | Declarado por source-health | Estado |
+| Alcance | Local | R2 | Diferencia | Causa comprobada |
 |---|---:|---:|---:|---|
-| `source=camara` | 58.751 | 49 | 58.751 | parcial |
-| `source=senado` | 1.428 | 50 | 1.428 | parcial |
-| `source=votaciones_senado` | 205 | 16 | 205 | parcial |
-| `source=gastos_camara` | 16.275 | 16.275 | 16.275 | release R2 |
-| `source=gastos_senado` | 2.500 | 2.500 | 6.517 | parcial / alcance menor |
+| Cámara compuesto | 13.286 | 58.751 | +45.465 | Local sólo tenía una parte del histórico; R2 incluye asistencia, votaciones y autoridades |
+| Senado | 1.428 | 1.428 | 0 | Mismo conteo de este alcance |
+| Gastos Cámara | 16.275 | 16.275 | 0 | Mismo release |
+| Gastos Senado | 6.543 | 6.517 | -26 | Releases distintos; requiere conservar el corte R2 vigente |
+| Votaciones Senado | 189 | 205 | +16 | R2 incorpora el período más reciente |
 
-En Cámara y Senado, `total` representa el conteo declarado por el catálogo,
-no la cantidad descargable en esa respuesta. Por ello la interfaz no debe
-presentar esos resultados como consulta completa hasta que el release publicado
-contenga todas las particiones. Los gastos siguen siendo una categoría
-separada. En `gastos_senado`, el release API actual cubre 2.500 filas mientras
-`source-health` declara 6.517; no debe presentarse como histórico completo.
+El snapshot local de salud del 21 de agosto declara Cámara `19.025` y Senado
+`8.138`; esos números no tienen el mismo alcance que el catálogo R2 actual y
+no se deben presentar como conteos de remuneraciones.
 
-Esta comprobación no consultó D1 ni ejecutó ETL. Queda como requisito para la
-siguiente implementación: mostrar siempre `filas publicadas`, `total esperado`
-y el estado de release por componente.
+## Decisiones de presentación
 
-## Salvaguarda incorporada en el código maestro
+1. No mostrar “cobertura de remuneraciones de Cámara” usando las 58.751 filas.
+2. Mostrar módulos separados para asistencias, votaciones, autoridades,
+   dietas/remuneraciones y gastos.
+3. No sumar fuentes con alcances distintos.
+4. Mostrar período y fecha de corte por módulo.
+5. Mantener “personal de apoyo” como categoría derivada sólo cuando exista un
+   release específico de esa categoría.
+6. Si el catálogo no permite separar una categoría, mostrar “alcance no
+   determinado” y no calcular porcentaje.
 
-El proyecto maestro dejó una prueba de regresión en el commit
-`6aaf6a7` (`test: separar filas publicadas y esperadas en api de registros`).
-La prueba exige que, cuando falta una partición, la API use las filas
-realmente consultables para `total` y `totalPages`, y exponga el universo
-declarado aparte como `expectedRows`. De esta forma una respuesta parcial no
-puede generar una paginación o un mensaje de cobertura basado únicamente en
-el catálogo esperado.
+## Estado de implementación
 
-La rama remota quedó dos commits por delante y contiene una integración que
-reintroduce el fallback al repositorio retirado en `r2-records.ts`. No se
-incorporará automáticamente: el maestro local conserva R2 como único plano
-público y se debe revisar esa divergencia antes de sincronizar o publicar.
+El PR #490 ya incorpora la separación de componentes en `source-health` y la
+protección para no calcular cobertura cuando el alcance no está conciliado.
+La validación local y CI están verdes, pero el cambio aún no está promovido a
+producción. No se modificaron datos ni se ejecutó materialización D1 durante
+esta auditoría.
+
+## Próximo paso seguro
+
+Antes de fusionar o promover, verificar en preview que las tarjetas de Cámara
+y Senado muestren estas categorías separadas y que ninguna etiqueta diga
+“remuneraciones” para el total compuesto de Cámara. Después se puede continuar
+con Movimientos usando el mismo criterio de corte por fuente.
