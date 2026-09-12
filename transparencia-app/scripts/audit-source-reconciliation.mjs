@@ -43,6 +43,7 @@ async function main() {
       freshness: "Producción tiene una publicación más nueva que el snapshot local; no se marca como pérdida.",
       scope: "Producción y local tienen alcances o categorías distintas; revisar el desglose antes de calcular cobertura.",
       unexplained: "La evidencia disponible no permite explicar la diferencia.",
+      healthMismatch: "El conteo derivado de source-health no coincide con el conteo canónico del catálogo; indica snapshot desfasado o una categoría distinta, no pérdida automática de datos.",
     },
     ...report,
   };

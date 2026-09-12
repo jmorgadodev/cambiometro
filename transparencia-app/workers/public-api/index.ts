@@ -89,6 +89,35 @@ function dbUnavailable() {
   return failure("DATABASE_UNAVAILABLE", "D1 no esta disponible.", 503, undefined);
 }
 
+const sourceComponentDefinitions: Record<string, Record<string, { sourceId: string; label: string; includedInRecordCount: boolean }>> = {
+  camara: {
+    asistencia: { sourceId: "camara", label: "Asistencia", includedInRecordCount: true },
+    votaciones: { sourceId: "camara", label: "Votaciones", includedInRecordCount: true },
+    gastos: { sourceId: "gastos_camara", label: "Gastos operacionales", includedInRecordCount: false },
+  },
+  senado: {
+    votaciones: { sourceId: "votaciones_senado", label: "Votaciones", includedInRecordCount: false },
+    gastos: { sourceId: "gastos_senado", label: "Gastos operacionales", includedInRecordCount: false },
+  },
+};
+
+function publicSourceComponents(sourceId: string, state: JsonRecord) {
+  const definitions = sourceComponentDefinitions[sourceId];
+  const rawComponents = state.components;
+  if (!definitions || !rawComponents || typeof rawComponents !== "object" || Array.isArray(rawComponents)) return undefined;
+  const components = rawComponents as JsonRecord;
+  return Object.entries(definitions).map(([id, definition]) => {
+    const count = Number(components[id] ?? 0);
+    return {
+      id,
+      sourceId: definition.sourceId,
+      label: definition.label,
+      recordCount: Number.isFinite(count) && count >= 0 ? count : 0,
+      includedInRecordCount: definition.includedInRecordCount,
+    };
+  });
+}
+
 function publicD1ReadsEnabled(env: Env) {
   return env.ALLOW_PUBLIC_D1_READS === "1";
 }
@@ -291,6 +320,14 @@ interface OfficialsSearchIndex {
   pages: Array<{ page: number; key: string; count: number }>;
   shards: Record<string, string | string[]>;
   filters?: Record<string, { key: string; count: number }>;
+  quality?: OfficialsQualitySummary;
+}
+
+interface OfficialsQualitySummary {
+  recordsWithIssues: number;
+  correctedRows: number;
+  observedRows: number;
+  byIssue: Record<string, number>;
 }
 
 interface CompactOfficialRow {
@@ -311,6 +348,7 @@ interface CompactOfficialRow {
   p?: string;
   u?: string;
   oid?: string;
+  q?: string[];
 }
 
 type CompactOfficialTokenEntry = [token: string, positions: number[]];
@@ -636,6 +674,11 @@ function compactOfficialRow(row: CompactOfficialRow): JsonRecord {
     fuente_periodo: row.p ?? null,
     periodo: row.p ?? null,
     url: row.u ?? null,
+    calidad_datos: {
+      estado: row.q?.length ? "normalizado" : "original",
+      incidencias: row.q ?? [],
+      detalle: "La clasificación conserva las incidencias de calidad registradas por la fuente y el ETL.",
+    },
   };
 }
 
@@ -651,6 +694,8 @@ function officialFilterKeys(requestUrl: URL) {
     ["estamento", requestUrl.searchParams.get("estamento") ?? "Todos"],
     ["tipo", requestUrl.searchParams.get("tipo") ?? "Todos"],
     ["cargo", requestUrl.searchParams.get("cargo") ?? "Todos"],
+    ["periodo", requestUrl.searchParams.get("periodo") ?? requestUrl.searchParams.get("fuente_periodo") ?? "Todos"],
+    ["calidad", requestUrl.searchParams.get("calidad") ?? "Todos"],
   ];
   for (const [name, value] of values) {
     const normalizedValue = normalized(value);
@@ -852,6 +897,14 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env) {
       meta.page = page;
       meta.totalPages = totalPages;
       meta.limit = limit;
+      if (index.quality) {
+        meta.calidadDatos = {
+          ...(meta.calidadDatos as JsonRecord ?? {}),
+          alcance: "universo_publicado",
+          registrosConIncidencias: index.quality.recordsWithIssues,
+          porIncidencia: index.quality.byIssue,
+        };
+      }
       payload.meta = meta;
       return json(payload, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
     }
@@ -862,6 +915,14 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env) {
     meta.page = page;
     meta.totalPages = totalPages;
     meta.limit = limit;
+    if (index.quality) {
+      meta.calidadDatos = {
+        ...(meta.calidadDatos as JsonRecord ?? {}),
+        alcance: "universo_publicado",
+        registrosConIncidencias: index.quality.recordsWithIssues,
+        porIncidencia: index.quality.byIssue,
+      };
+    }
     payload.meta = meta;
     return json(payload, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
   }
@@ -1162,6 +1223,14 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
         cursor: offset > 0 ? `v1_${offset.toString(36)}` : undefined,
       });
       if (lake) {
+        if ("scanLimited" in lake && lake.scanLimited) {
+          return failure(
+            "QUERY_SCOPE_REQUIRED",
+            "Esta fuente requiere acotar el período o consultar un índice específico para evitar un escaneo histórico masivo.",
+            422,
+            { source, expectedTotal: lake.expectedTotal, sourceBackend: "r2-lake" },
+          );
+        }
         return success(lake.data, {
           total: lake.total,
           limit,
@@ -1791,6 +1860,7 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
     const stateStatus = hasPublishedLake
       ? String(lakeSource.status ?? "partial")
       : String(state.status ?? source.status ?? "unavailable");
+    const components = publicSourceComponents(id, state);
     return {
       ...source,
       id,
@@ -1808,6 +1878,7 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
         : hasPublishedLake && stateStatus === "partial"
           ? `El catálogo declara ${recordCount} registros, pero el release es parcial. La consulta sólo entrega particiones verificadas.`
           : recordCount > 0 ? "Datos publicados en el lake." : "Sin datos publicados.",
+      ...(components ? { components } : {}),
     };
   });
   return success(data, { total: data.length }, { self: requestUrl.toString() });

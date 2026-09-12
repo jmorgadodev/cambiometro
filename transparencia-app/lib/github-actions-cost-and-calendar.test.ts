@@ -177,6 +177,8 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(senateWorkflow).toContain("name: ETL Diario - Votaciones Senado");
     expect(senateWorkflow).toContain("npm run etl -- --from");
     expect(senateWorkflow).toContain("--source votaciones_senado");
+    const etlPipeline = fs.readFileSync(path.resolve(root, "scripts", "etl.mjs"), "utf8");
+    expect(etlPipeline).toContain("fetchVotacionesSenado({ legislatura: 374, desde: options.from, to: options.to })");
     expect(senateWorkflow).toContain("npm run ingest:votaciones-full -- --source senado --full");
     expect(workflow).not.toContain("--source camara,votaciones_camara");
     expect(ingest).toContain("const REFRESH_FROM");
@@ -234,5 +236,13 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(personal).toContain("Publicar personal de apoyo sólo en R2");
     expect(cplt).toContain("data:finalize:cplt:r2");
     expect(cplt).toContain("Registrar D1 CPLT pospuesto por cuota");
+  });
+
+  it("13. El preflight siempre deja un diagnóstico aunque Analytics D1 no responda", () => {
+    const action = fs.readFileSync(path.join(root, "..", ".github", "actions", "d1-preflight", "action.yml"), "utf8");
+
+    expect(action).toContain('if [[ ! -s "$D1_USAGE_OUTPUT" ]]');
+    expect(action).toContain("D1_ANALYTICS_UNAUTHORIZED_OR_UNAVAILABLE");
+    expect(action).toContain("D1_USAGE_OUTPUT");
   });
 });

@@ -188,6 +188,50 @@ describe("API canónica v1", () => {
     expect(payload.meta.sourceStatus).toBe("r2-search");
   });
 
+  it("aplica el período mensual desde un índice R2 sin consultar D1", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 2,
+        pageSize: 2,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 2 }],
+        shards: { an: "projections/funcionarios-v1/versions/2026-08-25/search_index/an.json" },
+        filters: {
+          "periodo:2026-07": { key: "projections/funcionarios-v1/versions/2026-08-25/search_index/filter-periodo-2026-07.json", count: 1 },
+          "calidad:observados": { key: "projections/funcionarios-v1/versions/2026-08-25/search_index/filter-quality-observed.json", count: 1 },
+        },
+        quality: { recordsWithIssues: 1, correctedRows: 0, observedRows: 1, byIssue: { remuneracion_liquida_no_informada: 1 } },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/an.json": [["ana", [0]]],
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/filter-periodo-2026-07.json": [0],
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/filter-quality-observed.json": [0],
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [
+        { id: "func-1", n: "Ana Pérez", c: "Profesional", o: "Municipalidad de Maipú", t: "Contrata", e: "Profesional", b: 1200000, p: "2026-07" },
+        { id: "func-2", n: "Ana Pérez", c: "Profesional", o: "Municipalidad de Maipú", t: "Contrata", e: "Profesional", b: 1100000, p: "2026-06" },
+      ],
+    };
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse para filtrar por período"); } },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?query=Ana&periodo=2026-07&calidad=observados&limit=20&include_zero=true"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toHaveLength(1);
+    expect(payload.data[0]).toMatchObject({ id: "func-1", fuente_periodo: "2026-07" });
+    expect(payload.meta.total).toBe(1);
+    expect(payload.meta.sourceStatus).toBe("r2-search");
+    expect(payload.meta.calidadDatos).toMatchObject({ alcance: "universo_publicado", registrosConIncidencias: 1, porIncidencia: { remuneracion_liquida_no_informada: 1 } });
+  });
+
   it("mantiene el directorio consultable desde el catálogo R2 si D1 falla", async () => {
     const files: Record<string, unknown> = {
       "projections/static-site-v1/manifest.json": {
@@ -784,7 +828,7 @@ describe("API canónica v1", () => {
             return { json: async <T>() => ({ sources: [{ id: "camara", label: "Cámara", status: "partial" }] }) as T };
           }
           if (key === "projections/sources-v1/source-health.json") {
-            return { json: async <T>() => ({ sources: { camara: { recordCount: 19025, status: "partial", generatedAt: "2026-08-21T00:00:00.000Z" } } }) as T };
+            return { json: async <T>() => ({ sources: { camara: { recordCount: 19025, status: "partial", generatedAt: "2026-08-21T00:00:00.000Z", components: { asistencia: 120, votaciones: 30, gastos: 40 } } } }) as T };
           }
           return null;
         },
@@ -796,6 +840,35 @@ describe("API canónica v1", () => {
 
     expect(response.status).toBe(200);
     expect(payload.data[0]).toMatchObject({ id: "camara", recordCount: 19025, status: "partial" });
+    expect(payload.data[0].components).toEqual([
+      { id: "asistencia", sourceId: "camara", label: "Asistencia", recordCount: 120, includedInRecordCount: true },
+      { id: "votaciones", sourceId: "camara", label: "Votaciones", recordCount: 30, includedInRecordCount: true },
+      { id: "gastos", sourceId: "gastos_camara", label: "Gastos operacionales", recordCount: 40, includedInRecordCount: false },
+    ]);
+  });
+
+  it("expone por separado los componentes publicados del Senado", async () => {
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/sources-v1/source-inventory.json") {
+          return { json: async <T>() => ({ sources: [{ id: "senado", label: "Senado" }] }) as T };
+        }
+        if (key === "projections/sources-v1/source-health.json") {
+          return { json: async <T>() => ({ sources: { senado: { recordCount: 1428, status: "partial", components: { votaciones: 205, gastos: 6517 } } } }) as T };
+        }
+        return null;
+      },
+    };
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/sources"), { PUBLIC_DATA } as never);
+    const payload = await response.json();
+    const senado = payload.data.find((source: { id: string }) => source.id === "senado");
+
+    expect(response.status).toBe(200);
+    expect(senado.components).toEqual([
+      { id: "votaciones", sourceId: "votaciones_senado", label: "Votaciones", recordCount: 205, includedInRecordCount: false },
+      { id: "gastos", sourceId: "gastos_senado", label: "Gastos operacionales", recordCount: 6517, includedInRecordCount: false },
+    ]);
   });
 
   it("normaliza alias históricos y no publica catálogos legados como fuentes sin datos", async () => {
@@ -1039,7 +1112,7 @@ describe("API canónica v1", () => {
     const prepare = vi.fn(() => { throw new Error("D1 no debe consultarse para el lake de Cámara"); });
 
     const response = await api.fetch(
-      new Request("https://example.test/api/v1/records?source=camara&limit=1"),
+      new Request("https://example.test/api/v1/records?source=camara&from=2026-08&to=2026-08&kind=vote&limit=1"),
       { DB: { prepare }, PUBLIC_DATA } as never,
     );
     const payload = await response.json();

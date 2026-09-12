@@ -156,7 +156,7 @@ export default function CrucesSourceRecords({ counts }: { counts?: Partial<Recor
   const active = SOURCES.find((item) => item.id === source) ?? SOURCES[0];
 
   return (
-    <section aria-label="Registros completos por fuente" className="card" style={{ padding: "1.25rem", marginTop: "1.5rem" }}>
+    <section id="registros-por-fuente" aria-label="Registros completos por fuente" className="card" style={{ padding: "1.25rem", marginTop: "1.5rem" }}>
       <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", alignItems: "flex-start" }}>
         <div>
           <span className="badge badge-info">Datos originales consultables</span>

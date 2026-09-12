@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { buildCpltTransparencySummary } from "./cplt-transparency-summary.mjs";
 
 const inputRoot = resolve("data/raw/transparencia_activa");
 const projectionRoot = join(inputRoot, "projections", "funcionarios-v1");
@@ -9,6 +10,16 @@ const validationRoot = join(inputRoot, "validation");
 const coverageRoot = join(inputRoot, "coverage");
 const outputRoot = resolve("data/lake-cplt");
 const required = ["planta", "contrata", "honorarios", "codigotrabajo"];
+const communeCatalogPath = resolve("data/catalog/communes.json");
+const communeCatalog = existsSync(communeCatalogPath)
+  ? JSON.parse(readFileSync(communeCatalogPath, "utf8")).communes ?? []
+  : [];
+const communeByIdentifier = new Map();
+for (const commune of communeCatalog) {
+  for (const identifier of [commune.id, commune.administracion_municipal_id, commune.cut]) {
+    if (identifier) communeByIdentifier.set(String(identifier), commune);
+  }
+}
 
 async function checksum(filePath) {
   const hash = createHash("sha256");
@@ -33,7 +44,7 @@ const version = latest.replace(/[:.]/g, "-");
 // Un release por versión evita superar el límite de 1.000 assets de GitHub Releases:
 // cada lote nacional publica más de 300 archivos versionados.
 const releaseTag = `data-cplt-personal-${version}`;
-const files = readdirSync(projectionRoot).filter((name) => name.endsWith(".json") && name !== "search_index.json").sort();
+const files = readdirSync(projectionRoot).filter((name) => name.endsWith(".json") && !["search_index.json", "transparency-summary.json"].includes(name)).sort();
 if (files.length < 1) throw new Error("CPLT_MISSING_PROJECTIONS");
 
 // La UI no puede buscar 1,2 millones de filas cargando el universo completo en
@@ -43,8 +54,19 @@ if (files.length < 1) throw new Error("CPLT_MISSING_PROJECTIONS");
 const searchIndexRoot = join(projectionRoot, "search_index");
 mkdirSync(searchIndexRoot, { recursive: true });
 const compactRows = [];
+const summaryRows = [];
 const byShard = new Map();
 const normalizeSearch = (value) => String(value ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL");
+const formatQualityIssues = new Set(["nombre_prefijo_invalido", "nombre_prefijo_numerico", "nombre_incompleto", "nombre_vacio"]);
+function qualityIssues(row) {
+  const issues = Array.isArray(row.calidad_datos?.incidencias) ? [...row.calidad_datos.incidencias] : [];
+  if (Number(row.remuneracion_bruta_mensual ?? 0) > 0
+    && (!Number.isFinite(Number(row.remuneracion_liquida_mensual)) || Number(row.remuneracion_liquida_mensual) <= 0)
+    && !issues.includes("remuneracion_liquida_no_informada")) {
+    issues.push("remuneracion_liquida_no_informada");
+  }
+  return [...new Set(issues)].sort();
+}
 for (const fileName of files) {
   const source = join(projectionRoot, fileName);
   let rows;
@@ -52,6 +74,15 @@ for (const fileName of files) {
   if (!Array.isArray(rows)) continue;
   const organismId = fileName.replace(/\.json$/, "");
   rows.forEach((row, index) => {
+    summaryRows.push({
+      nombre_completo: row.nombre_completo,
+      organo_nombre: row.organo_nombre,
+      tipo_contrato: row.tipo_contrato,
+      cargo: row.cargo,
+      remuneracion_bruta_mensual: row.remuneracion_bruta_mensual,
+      fuente_periodo: row.fuente_periodo ?? row.periodo,
+      calidad_datos: { incidencias: qualityIssues(row) },
+    });
     const compact = {
       id: String(row.id ?? `${organismId}-${index + 1}`),
       n: row.nombre_completo ?? "",
@@ -69,6 +100,7 @@ for (const fileName of files) {
       fi: row.fecha_ingreso ?? undefined,
       p: row.fuente_periodo ?? row.periodo ?? undefined,
       u: row.url ?? row.url_fuente ?? undefined,
+      q: qualityIssues(row),
       oid: organismId,
     };
     compactRows.push(compact);
@@ -144,7 +176,19 @@ for (const [shard, tokenMap] of byShard) {
 const compactSearch = (value) => normalizeSearch(value).replace(/[^a-z0-9]/g, "");
 const compactContract = (value) => compactSearch(value).replace("codigodeltrabajo", "codigotrabajo");
 const compactOrgType = (value) => compactSearch(value).replace("gobiernoregional", "gore");
+const qualitySummary = compactRows.reduce((summary, row) => {
+  const issues = row.q ?? [];
+  if (issues.length > 0) {
+    summary.recordsWithIssues += 1;
+    for (const issue of issues) summary.byIssue[issue] = (summary.byIssue[issue] ?? 0) + 1;
+    if (issues.some((issue) => !formatQualityIssues.has(issue))) summary.observedRows += 1;
+    if (issues.some((issue) => formatQualityIssues.has(issue))) summary.correctedRows += 1;
+  }
+  return summary;
+}, { recordsWithIssues: 0, correctedRows: 0, observedRows: 0, byIssue: {} });
 const filterDefinitions = [
+  ...[...new Set(compactRows.map((row) => String(row.p ?? "").trim()).filter((value) => /^\d{4}-\d{2}$/.test(value)))].sort()
+    .map((period) => ({ key: `periodo:${period}`, matches: (row) => row.p === period })),
   ...[
     ["planta", "planta"],
     ["contrata", "contrata"],
@@ -171,6 +215,8 @@ const filterDefinitions = [
   ].map(([key, needle]) => ({ key: `tipo:${key}`, matches: (row) => compactOrgType(row.ot).includes(compactOrgType(needle)) })),
   { key: "cargo:alcalde", matches: (row) => /^(alcalde|alcaldesa)(\s|$)/.test(normalizeSearch(row.c).trim()) },
   { key: "horas_extras:true", matches: (row) => Number(row.h ?? 0) > 0 },
+  { key: "calidad:corregidos", matches: (row) => (row.q ?? []).some((issue) => formatQualityIssues.has(issue)) },
+  { key: "calidad:observados", matches: (row) => (row.q ?? []).some((issue) => !formatQualityIssues.has(issue)) },
 ];
 const filters = {};
 for (const definition of filterDefinitions) {
@@ -195,6 +241,7 @@ const searchIndex = {
   pages,
   shards,
   filters,
+  quality: qualitySummary,
 };
 writeFileSync(searchIndexPath, `${JSON.stringify(searchIndex, null, 2)}\n`);
 const searchIndexKey = `projections/funcionarios-v1/versions/${version}/search_index.json`;
@@ -204,8 +251,42 @@ for (const asset of searchAssets) {
   // writeGeneratedAsset ya calculó el checksum de cada página/shard.
 }
 
+function buildCoverage() {
+  const byCommune = new Map();
+  for (const source of required) {
+    const filePath = join(coverageRoot, `${source}.json`);
+    if (!existsSync(filePath)) throw new Error(`CPLT_MISSING_COVERAGE: ${source}`);
+    const report = JSON.parse(readFileSync(filePath, "utf8"));
+    for (const item of report.coverage ?? []) {
+      const current = byCommune.get(item.communeId) ?? {
+        communeId: item.communeId,
+        name: communeByIdentifier.get(String(item.communeId))?.nombre_comuna ?? item.communeId,
+        cut: item.cut,
+        administrationId: item.administrationId,
+        status: item.status === "not_applicable" ? "not_applicable" : "unavailable",
+        recordCount: 0,
+        categories: {},
+      };
+      current.categories[source] = { status: item.status, recordCount: item.recordCount };
+      current.recordCount += item.recordCount;
+      if (item.status === "available") current.status = "available";
+      byCommune.set(item.communeId, current);
+    }
+  }
+  const coverage = [...byCommune.values()].sort((left, right) => left.cut.localeCompare(right.cut));
+  if (coverage.length !== 346) throw new Error(`CPLT_COVERAGE_COUNT_INVALID: ${coverage.length}`);
+  return coverage;
+}
+
+const coverage = buildCoverage();
+const transparencySummary = buildCpltTransparencySummary(summaryRows, coverage, latest);
+const transparencySummaryPath = join(projectionRoot, "transparency-summary.json");
+writeFileSync(transparencySummaryPath, `${JSON.stringify(transparencySummary, null, 2)}\n`);
+const transparencySummaryKey = `projections/funcionarios-v1/versions/${version}/transparency-summary.json`;
+const transparencySummaryMetadata = await writeGeneratedAsset(transparencySummaryPath, transparencySummaryKey);
+
 const assets = [];
-const manifestAssets = [searchIndexMetadata, ...searchAssets.filter((asset) => asset.key !== searchIndexKey)];
+const manifestAssets = [transparencySummaryMetadata, searchIndexMetadata, ...searchAssets.filter((asset) => asset.key !== searchIndexKey)];
 for (const asset of manifestAssets) {
   const target = join(outputRoot, asset.key);
   mkdirSync(dirname(target), { recursive: true });
@@ -237,35 +318,18 @@ const manifest = {
   schemaVersion: "1.0.0",
   sourceId: "transparencia-activa",
   generatedAt: latest,
+  releaseMonth: month,
   version,
   recordCount: validations.reduce((total, report) => total + report.recordCount, 0),
   sources: validations.map(({ sourceId, sourceUrl, sourceValidator, recordCount, checksumSha256 }) => ({ sourceId, sourceUrl, sourceValidator, recordCount, checksumSha256 })),
   searchIndex: { key: searchIndexKey, totalRows: compactRows.length, pageSize: searchPageSize },
-  coverage: (() => {
-    const byCommune = new Map();
-    for (const source of required) {
-      const filePath = join(coverageRoot, `${source}.json`);
-      if (!existsSync(filePath)) throw new Error(`CPLT_MISSING_COVERAGE: ${source}`);
-      const report = JSON.parse(readFileSync(filePath, "utf8"));
-      for (const item of report.coverage ?? []) {
-        const current = byCommune.get(item.communeId) ?? {
-          communeId: item.communeId,
-          cut: item.cut,
-          administrationId: item.administrationId,
-          status: item.status === "not_applicable" ? "not_applicable" : "unavailable",
-          recordCount: 0,
-          categories: {},
-        };
-        current.categories[source] = { status: item.status, recordCount: item.recordCount };
-        current.recordCount += item.recordCount;
-        if (item.status === "available") current.status = "available";
-        byCommune.set(item.communeId, current);
-      }
-    }
-    const coverage = [...byCommune.values()].sort((left, right) => left.cut.localeCompare(right.cut));
-    if (coverage.length !== 346) throw new Error(`CPLT_COVERAGE_COUNT_INVALID: ${coverage.length}`);
-    return coverage;
-  })(),
+  coverage,
+  transparencySummary: {
+    key: transparencySummaryKey,
+    recordCount: transparencySummary.recordCount,
+    periods: transparencySummary.periods.length,
+    checksumSha256: transparencySummaryMetadata.checksumSha256,
+  },
   assets: manifestAssets,
 };
 const manifestKey = "projections/funcionarios-v1/manifest.json";

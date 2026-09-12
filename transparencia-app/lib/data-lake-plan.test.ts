@@ -177,6 +177,27 @@ describe("plan de publicación del lago estático", () => {
     expect(plan.catalog.partitions.map((partition: { id: string }) => partition.id)).toEqual(["ley-19862/2026/01"]);
   });
 
+  it("reconstruye los índices de entidades al reemplazar una fuente", () => {
+    const previous = buildLakePlan({ actualizado_en: "2025-12-31T00:00:00Z", fuentes: { dipres: [{
+      id: "budget-old", fecha: "2025-12-01", url: "https://dipres.gob.cl/old.csv",
+      entities: [{ id: "dipres-old", kind: "public_body", name: "Entidad antigua", identifiers: [] }],
+    }] } });
+    const entities = gunzipSync(entityAsset(previous, "dipres")!.data).toString("utf8").trim().split("\n").map((line) => JSON.parse(line));
+    const indexText = gunzipSync(entityIndexAsset(previous, "dipres")!.data).toString("utf8").trim();
+    const indexes = indexText ? indexText.split("\n").map((line) => JSON.parse(line)) : [];
+    const rebuilt = buildLakePlan({ actualizado_en: "2026-01-31T00:00:00Z", fuentes: { dipres: [{
+      id: "budget-new", fecha: "2026-01-01", url: "https://dipres.gob.cl/new.csv",
+      entities: [{ id: "dipres-new", kind: "public_body", name: "Entidad nueva", identifiers: [] }],
+    }] } }, {
+      existingCatalog: JSON.parse(JSON.stringify(previous.catalog)),
+      existingEntityBundles: { dipres: { entities, indexes } },
+      replaceSourceIds: ["dipres"],
+    });
+    const rebuiltEntities = gunzipSync(entityAsset(rebuilt, "dipres")!.data).toString("utf8");
+    expect(rebuiltEntities).toContain('"id":"dipres-new"');
+    expect(rebuiltEntities).not.toContain('"id":"dipres-old"');
+  });
+
   it("publica fichas e índices cruzables usando sólo identificadores oficiales", () => {
     const plan = buildLakePlan({ actualizado_en: "2025-01-31T00:00:00Z", fuentes: { "ley-19862": [{ id: "transfer-1", fecha: "2025-01-02", kind: "transfer", url: "https://registros19862.gob.cl/transferencia/1", emitter: { entity_id: "legal-cl-a", name: "Emisor", class: "Ministerio o servicio público", rut_juridico: "60.000.000-1" }, receiver: { entity_id: "legal-cl-b", name: "Receptor", class: "Institución privada", rut_juridico: "70.000.000-2" }, subject_entity_ids: ["legal-cl-a"], object_entity_ids: ["legal-cl-b"] }] } });
     expect(entityAsset(plan, "ley-19862")).toBeDefined();

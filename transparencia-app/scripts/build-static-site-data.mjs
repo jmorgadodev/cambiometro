@@ -8,6 +8,7 @@ import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
 import { chunkJsonRows, listUnavailableMunicipalities } from "./static-payroll.mjs";
 import { readExpenseSubset } from "./expense-release.mjs";
 import { normalizeMovementPayload, validateMovementPayload } from "./movimientos-pipeline.mjs";
+import { buildCpltAggregateSummary, isPlausiblePeriod } from "./cplt-transparency-summary.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const readJson = (file) => readFile(join(root, file), "utf8").then(JSON.parse);
@@ -198,16 +199,67 @@ const cpltRoot = cpltRoots.find((candidate) => existsSync(candidate));
 if (!cpltRoot) throw new Error("STATIC_CPLT_PROJECTION_SOURCE_MISSING: hydrate funcionarios-v1 before building Pages");
 const cpltManifestPath = join(root, "data", "lake-cplt", "projections", "funcionarios-v1", "manifest.json");
 let cpltCoverage = [];
+let cpltGeneratedAt = new Date().toISOString();
 if (existsSync(cpltManifestPath)) {
   try {
     const cpltManifest = JSON.parse(await readFile(cpltManifestPath, "utf8"));
     cpltCoverage = Array.isArray(cpltManifest.coverage) ? cpltManifest.coverage : [];
+    cpltGeneratedAt = cpltManifest.generatedAt ?? cpltGeneratedAt;
   } catch {
     cpltCoverage = [];
   }
 }
+try {
+  const communeCatalog = await readJson("data/catalog/communes.json");
+  const names = new Map((communeCatalog.communes ?? []).flatMap((commune) => [
+    [String(commune.id), commune.nombre_comuna],
+    [String(commune.administracion_municipal_id), commune.nombre_comuna],
+    [String(commune.cut), commune.nombre_comuna],
+  ]));
+  cpltCoverage = cpltCoverage.map((item) => ({
+    ...item,
+    name: item.name ?? names.get(String(item.communeId)) ?? item.communeId,
+  }));
+} catch {
+  // El manifiesto de cobertura sigue siendo válido aunque el catálogo no esté disponible.
+}
 await rm(publicFuncionariosDir, { recursive: true, force: true });
 await mkdir(publicFuncionariosDir, { recursive: true });
+let cpltTransparencySummary = null;
+const cpltSummaryStats = {
+  recordCount: 0,
+  periods: new Map(),
+  contractCounts: {},
+  issueCounts: {},
+  recordsWithIssues: 0,
+  invalidPeriodCount: 0,
+  positiveAmountCount: 0,
+  zeroAmountCount: 0,
+  missingAmountCount: 0,
+};
+const cpltTransparencySummarySource = join(cpltRoot, "transparency-summary.json");
+if (existsSync(cpltTransparencySummarySource)) {
+  const summaryContent = await readFile(cpltTransparencySummarySource);
+  try {
+    const summary = JSON.parse(summaryContent.toString("utf8"));
+    if (summary?.dataset === "transparencia-activa-funcionarios-summary"
+      && Number.isSafeInteger(summary.recordCount)
+      && Array.isArray(summary.periods)
+      && summary.coverage?.total === 346) {
+      const summaryOutput = join(publicFuncionariosDir, "transparency-summary.json");
+      await writeFile(summaryOutput, summaryContent);
+      cpltTransparencySummary = {
+        path: "/data/funcionarios/transparency-summary.json",
+        bytes: summaryContent.byteLength,
+        checksumSha256: crypto.createHash("sha256").update(summaryContent).digest("hex"),
+        recordCount: summary.recordCount,
+        latestPeriod: summary.latestPeriod ?? null,
+      };
+    }
+  } catch {
+    cpltTransparencySummary = null;
+  }
+}
 const funcionariosFiles = [];
 for (const entry of await readdir(cpltRoot, { withFileTypes: true })) {
   if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
@@ -220,6 +272,42 @@ for (const entry of await readdir(cpltRoot, { withFileTypes: true })) {
     continue;
   }
   if (!Array.isArray(parsed) || parsed.length === 0) continue;
+  for (const row of parsed) {
+    cpltSummaryStats.recordCount += 1;
+    const period = String(row.fuente_periodo ?? row.periodo ?? "").trim().slice(0, 7);
+    const validPeriod = isPlausiblePeriod(period, cpltGeneratedAt);
+    if (!validPeriod) cpltSummaryStats.invalidPeriodCount += 1;
+    const rawAmount = row.remuneracion_bruta_mensual;
+    const amount = rawAmount === null || rawAmount === undefined || String(rawAmount).trim() === "" ? null : Number(rawAmount);
+    if (amount === null || !Number.isFinite(amount)) cpltSummaryStats.missingAmountCount += 1;
+    else if (amount === 0) cpltSummaryStats.zeroAmountCount += 1;
+    else cpltSummaryStats.positiveAmountCount += 1;
+    const contract = String(row.tipo_contrato ?? "").trim() || "No informado";
+    cpltSummaryStats.contractCounts[contract] = (cpltSummaryStats.contractCounts[contract] ?? 0) + 1;
+    const issues = Array.isArray(row.calidad_datos?.incidencias) ? row.calidad_datos.incidencias : [];
+    if (issues.length > 0) cpltSummaryStats.recordsWithIssues += 1;
+    for (const issue of issues) cpltSummaryStats.issueCounts[issue] = (cpltSummaryStats.issueCounts[issue] ?? 0) + 1;
+    if (validPeriod) {
+      const current = cpltSummaryStats.periods.get(period) ?? {
+        rows: 0,
+        withAmount: 0,
+        withoutAmount: 0,
+        grossTotal: 0,
+        organisms: new Set(),
+        contracts: {},
+      };
+      current.rows += 1;
+      if (amount === null || !Number.isFinite(amount)) current.withoutAmount += 1;
+      else {
+        current.withAmount += 1;
+        current.grossTotal += amount;
+      }
+      const organism = String(row.organo_nombre ?? row.organo_id ?? "").trim().toLocaleLowerCase("es-CL");
+      if (organism) current.organisms.add(organism);
+      current.contracts[contract] = (current.contracts[contract] ?? 0) + 1;
+      cpltSummaryStats.periods.set(period, current);
+    }
+  }
   const id = entry.name.replace(/\.json$/, "");
   const chunks = chunkJsonRows(parsed);
   if (chunks.length === 1) {
@@ -256,6 +344,19 @@ for (const entry of await readdir(cpltRoot, { withFileTypes: true })) {
     });
   }
 }
+if (!cpltTransparencySummary && cpltSummaryStats.recordCount > 0) {
+  const summary = buildCpltAggregateSummary(cpltSummaryStats, cpltCoverage, cpltGeneratedAt);
+  const summaryContent = `${JSON.stringify(summary, null, 2)}\n`;
+  const summaryOutput = join(publicFuncionariosDir, "transparency-summary.json");
+  await writeFile(summaryOutput, summaryContent);
+  cpltTransparencySummary = {
+    path: "/data/funcionarios/transparency-summary.json",
+    bytes: Buffer.byteLength(summaryContent),
+    checksumSha256: crypto.createHash("sha256").update(summaryContent).digest("hex"),
+    recordCount: summary.recordCount,
+    latestPeriod: summary.latestPeriod ?? null,
+  };
+}
 funcionariosFiles.sort((left, right) => left.id.localeCompare(right.id));
 const funcionariosManifest = {
   schemaVersion: 1,
@@ -269,6 +370,7 @@ const funcionariosManifest = {
   // fuente oficial no publicó.
   coverage: cpltCoverage,
   unavailableMunicipalities: listUnavailableMunicipalities(cpltCoverage, funcionariosFiles),
+  transparencySummary: cpltTransparencySummary,
   files: funcionariosFiles,
   checksumSha256: checksum(funcionariosFiles),
 };

@@ -217,7 +217,7 @@ export default function SiteHeader({ totalRecords }: SiteHeaderProps) {
                       aria-label={item.label}
                       title={item.label}
                     >
-                      {item.navLabel || item.label}
+                      {item.navLabel}
                     </Link>
                   );
                 })}

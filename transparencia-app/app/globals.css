@@ -1329,6 +1329,22 @@ select:focus-visible {
   }
 }
 
+/* Algunos teléfonos con "sitio de escritorio" reportan un ancho CSS grande
+   aunque sigan siendo una pantalla táctil. En ese caso el menú horizontal no
+   debe reemplazar al drawer móvil. */
+@media (pointer: coarse) and (hover: none) {
+  .site-header__nav-row { display: none !important; }
+  .site-menu-button { display: inline-flex; }
+  .site-header__primary { min-height: 56px; height: 56px; gap: 0.5rem; }
+  .site-brand { min-width: 0; flex-shrink: 1; gap: 0.5rem; }
+  .site-brand__dial { width: 28px; height: 28px; }
+  .site-brand strong { font-size: 0.84rem; }
+  .site-brand__tagline { display: none !important; }
+  .snapshot-stamp { display: none !important; }
+  .site-header__actions { gap: 0.4rem; flex-shrink: 0; }
+  .site-menu-button { padding: 0 0.65rem; font-size: 0.78rem; gap: 0.35rem; }
+}
+
 /* ── Site Footer (Compact & Mobile-first) ─────────────────────────── */
 .site-footer {
   margin-top: 3rem;
@@ -5581,6 +5597,23 @@ html.dark .page-masthead {
 .remuneration-source-card a:hover, .remuneration-source-card a:focus-visible { color: var(--text-primary); }
 .remuneration-reading-note { padding-top: 0.7rem; border-top: 1px solid var(--border-subtle); }
 .remuneration-reading-note strong { color: var(--text-primary); }
+.remuneration-transparency-summary { scroll-margin-top: 7rem; }
+.remuneration-transparency-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 0.65rem; }
+.remuneration-transparency-kpis article { display: grid; gap: 0.25rem; min-height: 4.8rem; padding: 0.75rem; border: 1px solid var(--border-subtle); border-radius: 0.65rem; background: var(--surface-raised); }
+.remuneration-transparency-kpis strong { color: var(--accent); font-family: var(--font-mono); font-size: 1.05rem; }
+.remuneration-transparency-kpis span { color: var(--text-muted); font-size: 0.7rem; line-height: 1.35; }
+.remuneration-transparency-latest { display: flex; flex-wrap: wrap; gap: 0.4rem 0.8rem; margin: 0.8rem 0; padding: 0.7rem 0.8rem; border-left: 2px solid var(--accent); background: var(--bg-surface-2); color: var(--text-muted); font-size: 0.74rem; }
+.remuneration-transparency-latest strong { color: var(--text-primary); }
+.remuneration-transparency-table-wrap { overflow-x: auto; }
+.remuneration-transparency-table { min-width: 48rem; }
+.remuneration-transparency-table caption { margin-bottom: 0.45rem; color: var(--text-muted); font-size: 0.72rem; text-align: left; }
+.remuneration-transparency-coverage { margin-top: 0.85rem; border-top: 1px solid var(--border-subtle); }
+.remuneration-transparency-coverage summary { width: fit-content; padding-top: 0.75rem; color: var(--accent); cursor: pointer; font-size: 0.74rem; font-weight: 750; }
+.remuneration-transparency-coverage > p { max-width: 70ch; color: var(--text-muted); font-size: 0.74rem; line-height: 1.5; }
+.remuneration-transparency-coverage-list { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 0.45rem; max-height: 22rem; overflow: auto; margin-top: 0.65rem; }
+.remuneration-transparency-coverage-list > div { display: grid; gap: 0.16rem; padding: 0.6rem 0.65rem; border: 1px solid var(--border-subtle); border-radius: 0.55rem; background: var(--surface-raised); }
+.remuneration-transparency-coverage-list strong { font-size: 0.75rem; }
+.remuneration-transparency-coverage-list span, .remuneration-transparency-coverage-list small { color: var(--text-muted); font-size: 0.68rem; line-height: 1.35; }
 .remuneration-context { margin-top: 0.7rem; border-top: 1px solid var(--border-subtle); }
 .remuneration-context summary { padding-top: 0.7rem; color: var(--text-muted); cursor: pointer; font-size: 0.72rem; font-weight: 750; }
 .remuneration-context p { margin: 0.6rem 0 0; color: var(--text-muted); font-size: 0.72rem; line-height: 1.45; }
@@ -5619,8 +5652,226 @@ html.dark .page-masthead {
     grid-template-columns: 1fr;
   }
   .remuneration-source-list { grid-template-columns: 1fr; }
+  .remuneration-transparency-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .remuneration-transparency-coverage-list { grid-template-columns: 1fr; max-height: 28rem; }
+  .remuneration-transparency-table-wrap { overflow: visible; }
+  .remuneration-transparency-table { display: block; min-width: 0; white-space: normal; }
+  .remuneration-transparency-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .remuneration-transparency-table tbody { display: grid; gap: 0.6rem; }
+  .remuneration-transparency-table tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.55rem 0.7rem;
+    padding: 0.7rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.6rem;
+    background: var(--surface);
+  }
+  .remuneration-transparency-table td {
+    display: grid;
+    min-width: 0;
+    gap: 0.15rem;
+    padding: 0;
+    border: 0;
+    overflow-wrap: anywhere;
+  }
+  .remuneration-transparency-table td::before {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.6rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .remuneration-transparency-table td:nth-child(1)::before { content: "Corte"; }
+  .remuneration-transparency-table td:nth-child(2)::before { content: "Registros"; }
+  .remuneration-transparency-table td:nth-child(3)::before { content: "Personas"; }
+  .remuneration-transparency-table td:nth-child(4)::before { content: "Nuevos"; }
+  .remuneration-transparency-table td:nth-child(5)::before { content: "Ya no aparecen"; }
+  .remuneration-transparency-table td:nth-child(6)::before { content: "Cambios de monto"; }
+  .remuneration-transparency-table td:nth-child(7)::before { content: "Monto bruto total"; }
+  .remuneration-transparency-table td:nth-child(1),
+  .remuneration-transparency-table td:nth-child(7) { grid-column: 1 / -1; }
   .remuneration-results__pagination { align-items: stretch; flex-direction: column; }
   .remuneration-person-result > summary { align-items: start; }
   .remuneration-person-result__summary-meta { align-items: end; flex-direction: column; gap: 0.35rem; }
   .remuneration-person-result__action { font-size: 0.68rem; }
+}
+
+@media (max-width: 768px), (pointer: coarse) and (hover: none) {
+  .remuneration-unified { padding-top: 1rem; }
+  .remuneration-module { padding: 0.85rem; }
+  .remuneration-module-nav { gap: 0.65rem 0.9rem; }
+  .remuneration-module-nav a { min-height: 2.25rem; display: inline-flex; align-items: center; }
+  .remuneration-results__heading { align-items: start; flex-direction: column; gap: 0.35rem; }
+  .remuneration-person-result > summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    align-items: start;
+    gap: 0.7rem;
+  }
+  .remuneration-person-result__identity { align-items: start; width: 100%; }
+  .remuneration-person-result__copy strong,
+  .remuneration-person-result__copy small {
+    overflow: visible;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    text-overflow: clip;
+  }
+  .remuneration-person-result__copy strong { line-height: 1.25; }
+  .remuneration-person-result__summary-meta {
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.45rem 0.7rem;
+  }
+  .remuneration-person-result__action { white-space: normal; }
+  .remuneration-person-result__body { padding: 0.7rem; }
+  .remuneration-person-result__table { overflow: visible; }
+  .remuneration-person-result__table .data-table {
+    display: block;
+    min-width: 0;
+    white-space: normal;
+    overflow: visible;
+  }
+  .remuneration-person-result__table .data-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .remuneration-person-result__table .data-table tbody {
+    display: grid;
+    gap: 0.65rem;
+  }
+  .remuneration-person-result__table .data-table tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.65rem;
+    background: var(--surface);
+  }
+  .remuneration-person-result__table .data-table td {
+    display: grid;
+    min-width: 0;
+    gap: 0.2rem;
+    padding: 0;
+    border: 0;
+    overflow-wrap: anywhere;
+  }
+  .remuneration-person-result__table .data-table td::before {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .remuneration-person-result__table .data-table td:nth-child(1)::before { content: "Fuente"; }
+  .remuneration-person-result__table .data-table td:nth-child(2)::before { content: "Organismo"; }
+  .remuneration-person-result__table .data-table td:nth-child(3)::before { content: "Cargo"; }
+  .remuneration-person-result__table .data-table td:nth-child(4)::before { content: "Mes"; }
+  .remuneration-person-result__table .data-table td:nth-child(5)::before { content: "Monto"; }
+  .remuneration-person-result__table .data-table td:nth-child(1),
+  .remuneration-person-result__table .data-table td:nth-child(3) { grid-column: 1 / -1; }
+  .remuneration-person-result__table .data-table td strong { font-size: 0.78rem; }
+  .remuneration-source-card__header { display: grid; grid-template-columns: minmax(0, 1fr); gap: 0.45rem; }
+  .remuneration-source-card b { text-align: left; }
+  .remuneration-panel > summary { align-items: start; flex-direction: column; gap: 0.45rem; }
+
+  /* Registro 38 bis: cada fila pasa a una ficha vertical, sin perder los
+     campos de escritorio ni obligar a desplazar una tabla de 900px. */
+  .table-shell:has(.remuneraciones-release-table),
+  .table-shell:has(.remuneraciones-comparison-table) {
+    overflow: visible !important;
+    overflow-x: visible !important;
+  }
+  .remuneraciones-release-table,
+  .remuneraciones-comparison-table {
+    display: block;
+    min-width: 0 !important;
+    white-space: normal;
+    overflow: visible;
+  }
+  .remuneraciones-release-table thead,
+  .remuneraciones-comparison-table thead {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+  .remuneraciones-release-table tbody,
+  .remuneraciones-comparison-table tbody { display: grid; gap: 0.65rem; }
+  .remuneraciones-release-table tr,
+  .remuneraciones-comparison-table tr {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.65rem;
+    padding: 0.75rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: 0.65rem;
+    background: var(--surface);
+  }
+  .remuneraciones-release-table td,
+  .remuneraciones-comparison-table td {
+    display: grid;
+    min-width: 0;
+    gap: 0.2rem;
+    padding: 0;
+    border: 0;
+    overflow-wrap: anywhere;
+  }
+  .remuneraciones-release-table td::before,
+  .remuneraciones-comparison-table td::before {
+    color: var(--text-muted);
+    font-family: var(--font-mono);
+    font-size: 0.62rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+  .remuneraciones-release-table td:nth-child(1)::before { content: "Persona"; }
+  .remuneraciones-release-table td:nth-child(2)::before { content: "Organismo"; }
+  .remuneraciones-release-table td:nth-child(3)::before { content: "Cargo"; }
+  .remuneraciones-release-table td:nth-child(4)::before { content: "Bruto del mes"; }
+  .remuneraciones-release-table td:nth-child(5)::before { content: "Acción"; }
+  .remuneraciones-release-table td:nth-child(1),
+  .remuneraciones-release-table td:nth-child(3),
+  .remuneraciones-release-table td:nth-child(5) { grid-column: 1 / -1; }
+  .remuneraciones-release-table td strong { font-size: 0.82rem; line-height: 1.3; }
+  .remuneraciones-release-table td:nth-child(4) { font-family: var(--font-mono); font-weight: 700; }
+  .remuneraciones-release-table td:nth-child(5) .btn { width: 100%; min-height: 2.5rem; }
+  .remuneraciones-comparison-table td:nth-child(1)::before { content: "Persona"; }
+  .remuneraciones-comparison-table td:nth-child(2)::before { content: "Organismo y cargo"; }
+  .remuneraciones-comparison-table td:nth-child(3)::before { content: "Mes anterior"; }
+  .remuneraciones-comparison-table td:nth-child(4)::before { content: "Mes seleccionado"; }
+  .remuneraciones-comparison-table td:nth-child(5)::before { content: "Diferencia"; }
+  .remuneraciones-comparison-table td:nth-child(6)::before { content: "Acción"; }
+  .remuneraciones-comparison-table td:nth-child(1),
+  .remuneraciones-comparison-table td:nth-child(2),
+  .remuneraciones-comparison-table td:nth-child(6) { grid-column: 1 / -1; }
+  .remuneraciones-comparison-table td:nth-child(6) .btn { width: 100%; min-height: 2.5rem; }
 }

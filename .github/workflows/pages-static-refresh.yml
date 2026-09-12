@@ -12,8 +12,10 @@ on:
       - "ETL Mensual - Ley 19.862 Transferencias del Estado"
       - "ETL Diario - Cámara"
       - "ETL Diario - Votaciones Cámara"
+      - "ETL Histórico - Reconciliación Cámara"
       - "ETL Diario - Votaciones Senado"
       - "ETL Diario - Movimientos de Autoridades"
+      - "ETL Mensual - Remuneraciones 38 bis"
       - "ETL Semanal - Personal de apoyo Cámara"
       - "ETL Semanal - Personal de apoyo Senado"
       - "ETL Mensual - CPLT Nóminas Transparencia Activa"
@@ -161,8 +163,9 @@ jobs:
             const hash = crypto.createHash("sha256");
             for (const file of files) hash.update(fs.readFileSync(file));
             let key = hash.digest("hex");
+            const catalogSha256 = crypto.createHash("sha256").update(fs.readFileSync("data/lake/catalog/v1/manifest.json")).digest("hex");
             if ("${{ inputs.repair_transfer_api_pointer }}" === "true") key += "-${{ github.run_id }}";
-            fs.appendFileSync(process.env.GITHUB_OUTPUT, `key=${key}\\n`);
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `key=${key}\ncatalog_sha256=${catalogSha256}\n`);
           '
 
       - name: Restaurar snapshot de datos validado
@@ -184,6 +187,22 @@ jobs:
             transparencia-app/data/municipalidades-data.json
             transparencia-app/data/municipalidades-list.json
             transparencia-app/public/data/transferencias
+
+      - name: Reaplicar catálogo R2 canónico después de la caché
+        # La caché puede devolver un snapshot anterior mediante restore-keys.
+        # El catálogo es la referencia vigente de producción y debe volver a
+        # descargarse después de restaurarla, antes de regenerar source-health.
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          EXPECTED_CATALOG_SHA256: ${{ steps.data-version.outputs.catalog_sha256 }}
+        run: |
+          mkdir -p data/lake/catalog/v1
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+          actual_catalog_sha256="$(sha256sum data/lake/catalog/v1/manifest.json | cut -d ' ' -f 1)"
+          test "$actual_catalog_sha256" = "$EXPECTED_CATALOG_SHA256"
+          echo "Catálogo R2 canónico verificado: $actual_catalog_sha256"
 
       - name: Hidratar respaldo estático CPLT desde R2
         if: steps.data-cache.outputs.cache-hit != 'true'
@@ -211,6 +230,24 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: npm run data:hydrate:static -- --required --required-files data/movimientos.json --only-files data/movimientos.json --force
+
+      - name: Rehidratar remuneraciones 38 bis desde el release vigente de R2
+        # Este ETL publica una proyección propia, fuera del snapshot estático
+        # general. Sólo se hidrata cuando ese ETL terminó correctamente; si el
+        # origen falla, este paso y el deployment de Pages no se ejecutan.
+        if: github.event_name == 'workflow_run' && github.event.workflow_run.name == 'ETL Mensual - Remuneraciones 38 bis'
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+        run: |
+          npx wrangler r2 object get transparencia-public-data/projections/remuneraciones-38bis-v1/current.json \
+            --file data/remuneraciones-38bis-publico.json --remote
+          npx wrangler r2 object get transparencia-public-data/projections/remuneraciones-38bis-v1/current-history.json \
+            --file data/remuneraciones-38bis-publico-historico.json --remote
+          npx wrangler r2 object get transparencia-public-data/projections/remuneraciones-38bis-v1/current-audit.json \
+            --file data/remuneraciones-38bis-publico-audit.json --remote
+          node -e 'const fs=require("fs"); const r=JSON.parse(fs.readFileSync("data/remuneraciones-38bis-publico.json")); const a=JSON.parse(fs.readFileSync("data/remuneraciones-38bis-publico-audit.json")); if(!Array.isArray(r.registros)||r.registros.length!==r.filas) throw new Error("38BIS_RELEASE_INVALID"); if(a.d1_rows_read!==0||a.d1_rows_written!==0) throw new Error("38BIS_D1_NOT_ZERO"); console.log(JSON.stringify({rows:r.filas,mes:r.mes,checksum:r.checksum_sha256,d1:[a.d1_rows_read,a.d1_rows_written]}));'
 
       - name: Verificar calidad semántica de entradas estáticas
         working-directory: transparencia-app
