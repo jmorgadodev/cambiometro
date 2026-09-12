@@ -1829,7 +1829,8 @@ adicional oficial de agosto (`CLAUDIA ORMENO URRA`, asesoría en medios
 digitales, $680.000); los registros existentes no cambiaron.
 
 Este resultado no se corrige cambiando silenciosamente el test ni ocultando la
-fila. Antes de promover agosto se debe actualizar la expectativa de la ficha o
-convertirla en una comprobación explícita por período, dejando visible el
-cambio mensual. La corrección de metadatos sí pasa la suite completa con la
-línea base anterior: 184 archivos y 986 pruebas.
+fila. Se agregó en la rama aislada una expectativa explícita por período: julio
+mantiene $15.250.000 y agosto valida $15.930.000. Con esa comprobación, el
+candidato vuelve a pasar la suite completa: 184 archivos y 986 pruebas. La
+corrección de metadatos también pasa con la línea base anterior: 184 archivos
+y 986 pruebas.
