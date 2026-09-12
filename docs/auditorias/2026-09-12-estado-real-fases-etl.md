@@ -1799,3 +1799,22 @@ El `npm test` integral no pudo ejecutarse en ese worktree porque no tiene las
 dependencias instaladas (`tsc` no disponible); el build y
 `verify-remuneraciones-unified.mjs` sí terminaron correctamente. La rama no se
 fusionó ni se desplegó.
+
+### Simulación del candidato de Senado
+
+Se sustituyó sólo en el worktree aislado el archivo de personal por el
+snapshot temporal probado de Senado y se reconstruyó el módulo. El resultado
+fue:
+
+- 34.192 filas totales, frente a 33.774 en producción: diferencia exacta de
+  418 filas;
+- 171 páginas, frente a 169;
+- Cámara: `julio 2026` sin cambios;
+- Senado: `2026-01 / 2026-08`;
+- verificador de remuneraciones: correcto;
+- D1, R2 y Pages: sin escrituras.
+
+La simulación confirma que la actualización de Senado puede ser un cambio
+acotado de 418 filas y dos páginas, no una reconstrucción de todo el universo.
+El archivo modificado permanece sin commit en el worktree temporal y no altera
+el checkout público.
