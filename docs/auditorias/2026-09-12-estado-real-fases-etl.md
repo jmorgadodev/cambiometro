@@ -696,7 +696,26 @@ exceder el tiempo/CPU de la función al descomprimir, transformar y serializar.
 
 La acción correcta queda separada del incidente D1: medir tamaño de fila,
 tiempo y bytes por fuente; establecer un límite seguro por fuente; y verificar
-cursor, caché y respuesta parcial antes de cambiar el Worker. No se hará un
-parche de producción durante la cuota crítica. ChileCompra queda verificado en
-`limit=1/10`; InfoLobby en `limit=1/10/25`; DIPRES en `limit=1/50`, y el
-comportamiento de páginas grandes queda pendiente de hardening.
+cursor, caché y respuesta parcial antes de cambiar el Worker.
+
+## Preview del hardening R2 — 12 de septiembre
+
+El PR `#497` (`490e7b9`) pasó los checks de GitHub y se desplegó en preview
+sin ruta productiva mediante el workflow `34713250459`. La prueba remota
+confirmó el comportamiento esperado:
+
+| Fuente | `limit=1` | `limit=10` | `limit=25` | `limit=50` | página 2 |
+|---|---:|---:|---:|---:|---:|
+| InfoLobby | 200 | 200 | 200 | 200 | 200 |
+| ChileCompra | 200 | 200 | 200 | 200 | 200 |
+| DIPRES | 200 | 200 | 200 | 200 | 200 |
+
+Las respuestas usaron `sourceBackend=r2-lake`; la consulta de InfoLobby
+reportó 71.467 filas, 1.430 páginas y cero particiones o artefactos faltantes.
+El preview conservó `ALLOW_PUBLIC_D1_READS=0`, por lo que esta validación no
+reabrió el camino público hacia D1.
+
+Resultado: el hardening queda validado para promoción, pero aún no se promueve
+a producción. La promoción debe hacerse como operación independiente y luego
+repetir el mismo cuadro contra producción, junto con el smoke de salud y la
+verificación de que D1 no sea consultada por las rutas públicas.
