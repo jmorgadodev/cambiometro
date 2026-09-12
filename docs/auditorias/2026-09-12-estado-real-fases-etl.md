@@ -1818,3 +1818,18 @@ La simulación confirma que la actualización de Senado puede ser un cambio
 acotado de 418 filas y dos páginas, no una reconstrucción de todo el universo.
 El archivo modificado permanece sin commit en el worktree temporal y no altera
 el checkout público.
+
+### Control de compatibilidad del candidato
+
+Al ejecutar la suite completa sobre el candidato de agosto, 183 archivos y 985
+pruebas pasaron. Falló una sola expectativa histórica de la ficha de Vanessa
+Kaiser: el fixture antiguo esperaba $15.250.000 para el último mes disponible
+y el nuevo agosto suma $15.930.000. La diferencia se explica por una fila
+adicional oficial de agosto (`CLAUDIA ORMENO URRA`, asesoría en medios
+digitales, $680.000); los registros existentes no cambiaron.
+
+Este resultado no se corrige cambiando silenciosamente el test ni ocultando la
+fila. Antes de promover agosto se debe actualizar la expectativa de la ficha o
+convertirla en una comprobación explícita por período, dejando visible el
+cambio mensual. La corrección de metadatos sí pasa la suite completa con la
+línea base anterior: 184 archivos y 986 pruebas.
