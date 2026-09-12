@@ -292,6 +292,7 @@ function matchesIndexedParams(record: EvidenceRecord, params: Parameters<typeof 
 
 export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   source: string | string[];
+  variant?: string | string[];
   query?: string;
   entityId?: string;
   recordIds?: string[];
@@ -307,7 +308,11 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   if (!catalogObject) return null;
   const catalog = await catalogObject.json<R2PublicCatalog>();
   const sourceIds = Array.isArray(params.source) ? params.source : [params.source];
+  const variants = params.variant === undefined
+    ? null
+    : Array.isArray(params.variant) ? params.variant : [params.variant];
   const partitions = catalog.partitions.filter((partition) => sourceIds.includes(partition.sourceId)
+    && (!variants || variants.includes(partition.variant ?? partition.sourceId))
     && (!params.from || partition.period >= params.from.slice(0, 7))
     && (!params.to || partition.period <= params.to.slice(0, 7)));
   if (partitions.length === 0) return null;
