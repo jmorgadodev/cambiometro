@@ -246,3 +246,15 @@ genere el manifiesto, partición e índice desde esta fuente, compare IDs contra
 el release anterior y conserve los objetos válidos de enero–julio. Hasta
 completar esa validación, producción debe seguir declarando el alcance actual
 como parcial y no mezclar 10.944 filas nuevas con el índice público existente.
+
+La comprobación en memoria confirmó además:
+
+- 10.944 registros proyectados;
+- 10.944 IDs únicos;
+- rango de fechas 2026-08-01 a 2026-08-31;
+- checksum del paquete trimestral descargado:
+  `a6a974a53869816782fcd3b3abac4a2085e0cc4c25d922f50a291ea1aff5a2c4`;
+- la descarga de los nueve datasets auxiliares terminó sin errores.
+
+Esto permite preparar un release aislado reproducible, pero todavía no lo
+publica ni reemplaza el índice vigente.
