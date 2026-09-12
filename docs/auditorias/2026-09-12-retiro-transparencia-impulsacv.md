@@ -77,3 +77,9 @@ con binding a `transparencia-db` sigue requiriendo el permiso **Workers
 Scripts → Read** en el token de auditoría. El token actual devuelve `403` para
 ese inventario, por lo que no se debe declarar esa parte como comprobada sólo
 por la ausencia de carpetas locales.
+
+La comprobación del repositorio remoto sí quedó confirmada mediante GitHub:
+`jmorgadodev/transparencia.impulsacv.cl` está archivado, privado, con último
+push el 18 de agosto de 2026 y sin ejecuciones posteriores a esa fecha. Sus
+últimas verificaciones fueron históricas; el repositorio no es una fuente
+activa del proyecto maestro.
