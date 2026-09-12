@@ -670,11 +670,12 @@ La rama quedó verificada con:
 - lint sin errores (sólo advertencias preexistentes);
 - verificación de tamaño del Worker: 178.586 bytes, bajo el límite de 1 MB.
 
-No se publicó el cambio. El preview remoto de Wrangler no pudo abrir sesión
-porque el token local no tiene permisos para esa operación; no se modificó el
-token ni se intentó desplegar a producción. El siguiente paso es ejecutar el
-workflow de preview con las credenciales de GitHub, probar `limit=1,10,25,50`
-para ChileCompra, InfoLobby y DIPRES, y sólo entonces evaluar promoción.
+En el momento de este registro aún no se había publicado el cambio: el preview
+remoto local de Wrangler no pudo abrir sesión porque el token local no tenía
+permisos para esa operación. No se modificó el token. El workflow de GitHub se
+usó después para probar `limit=1,10,25,50` en ChileCompra, InfoLobby y DIPRES;
+el resultado y la promoción posterior quedan registrados en las secciones
+cronológicamente siguientes.
 
 ## Auditoría adicional de registros públicos — 12 de septiembre
 
@@ -715,10 +716,9 @@ reportó 71.467 filas, 1.430 páginas y cero particiones o artefactos faltantes.
 El preview conservó `ALLOW_PUBLIC_D1_READS=0`, por lo que esta validación no
 reabrió el camino público hacia D1.
 
-Resultado: el hardening queda validado para promoción, pero aún no se promueve
-a producción. La promoción debe hacerse como operación independiente y luego
-repetir el mismo cuadro contra producción, junto con el smoke de salud y la
-verificación de que D1 no sea consultada por las rutas públicas.
+Resultado de esa etapa: el hardening quedó validado para promoción. La
+promoción posterior y el smoke productivo se registran en la sección siguiente;
+la comprobación confirmó que D1 no volvió al camino público.
 
 ## Promoción controlada y smoke productivo — 12 de septiembre
 
