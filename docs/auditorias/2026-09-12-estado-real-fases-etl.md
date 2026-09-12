@@ -1896,3 +1896,28 @@ Este orden permite avanzar hoy en auditoría, pruebas aisladas y preparación de
 ETL sin consumir la cuota agotada. Lo que queda bloqueado hasta el reinicio es
 únicamente cualquier operación remota que materialice o escriba datos en D1;
 no bloquea la validación de fuentes ni la preparación de releases R2.
+
+### Matriz de separación comprobada en los workflows
+
+La revisión estática de `.github/workflows/` y de las últimas ejecuciones
+registradas permite separar lo que está operativo de lo que sólo está preparado:
+
+| Flujo | Separación / última evidencia | Decisión para hoy |
+|---|---|---|
+| Personal Senado | Workflow R2-only; prueba aislada oficial hasta agosto; sin corrida productiva registrada en `main` | Mantener integrado en rama operativa y validar antes de promover |
+| Personal Cámara | Workflow R2-only; últimas corridas de `main` fallaron el 7 de septiembre | Conservar snapshot; no reemplazar por respuesta incompleta |
+| Votaciones Cámara | Corrida `34691437098`, exitosa el 12 de septiembre | Mantener como bloque independiente |
+| Votaciones Senado | Corrida `34691714118`, exitosa el 12 de septiembre | Mantener como bloque independiente |
+| Movimientos | Corrida `34690963760`, exitosa el 12 de septiembre | Reconciliar fechas y estados sin D1 |
+| Remuneraciones 38 bis | Varias corridas fallidas el 11 de septiembre; conector CSV probado en aislamiento | Dejar snapshot vigente y reparar la causa antes de publicar |
+| ChileCompra | Última corrida fallida el 7 de septiembre; había corridas previas exitosas | Auditar causa y mantener release anterior |
+| InfoLobby | Validaciones recientes verdes sólo en ramas de trabajo | No confundir validación de rama con producción |
+| DIPRES | Última corrida registrada exitosa el 25 de agosto | Revisar frescura antes de una nueva ejecución |
+| Transferencias Ley 19.862 | Corrida del 8 de septiembre exitosa | Mantener R2 canónico y D1 opcional bloqueado |
+
+Esta matriz confirma que no es necesario esperar al reinicio para continuar: se
+pueden auditar los fallos, probar conectores con snapshots, validar diffs,
+reconciliar Movimientos y completar los checks de compatibilidad. El reinicio
+sólo es requisito para medir nuevamente la cuota y decidir si alguna proyección
+pequeña de D1 puede ejecutarse; no es requisito para publicar un release R2 que
+ya haya pasado sus controles.
