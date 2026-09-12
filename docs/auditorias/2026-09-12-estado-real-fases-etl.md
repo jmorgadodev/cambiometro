@@ -933,6 +933,9 @@ Evidencia local y productiva de la rama:
 - `verify-prod-full` corregido contra producción: 132 verificaciones pasadas,
   0 fallidas; InfoLobby aparece como 71.467 audiencias.
 - No se ejecutó ningún ETL ni consulta D1 y el PR no se ha promovido.
+- Los checks del PR quedaron en verde: build estático/API, lint, tipos, tests,
+  seguridad, CodeQL y validación de workflows. El PR sigue sin merge ni
+  despliegue, como corresponde a una corrección exclusiva de verificadores.
 
 ## Plan operativo para continuar hoy — sin esperar el reinicio de D1
 
