@@ -1359,3 +1359,23 @@ Los casos relevantes quedan separados: Alonso Velásquez tiene evidencia
 oficial y permanece `en_confirmacion`; Patricio Löhr permanece pendiente de
 evidencia oficial. No se promoverá ningún registro provisional a verificado ni
 se eliminará el snapshot anterior por falta de novedades.
+
+## Transparencia Activa: disponibilidad del índice público
+
+Se hicieron tres consultas acotadas en producción, sin descargar el universo:
+
+- `source=transparencia-activa&limit=1`;
+- `source=transparencia-activa&q=torrealba&limit=1`;
+- el alias histórico `source=cplt&q=torrealba&limit=1`.
+
+Las tres respondieron HTTP 200 con `sourceBackend=none`,
+`sourceStatus=temporarily-unavailable` y cero filas. El catálogo, en cambio,
+declara 1.226.913 registros publicados. Por tanto, el resultado no debe
+presentarse al usuario como “sin coincidencias”: significa que el índice o
+release público de CPLT no está disponible para consulta en este momento.
+
+La acción correcta queda acotada y separada del incidente D1: revisar la
+existencia y el nombre exacto del objeto R2 de CPLT, validar su manifest y
+repetir una consulta paginada pequeña. Mientras eso no pase, la interfaz debe
+conservar el estado de indisponibilidad y no reemplazarlo por cero ni por una
+respuesta vacía normal.
