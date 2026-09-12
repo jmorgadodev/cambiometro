@@ -326,7 +326,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   // could advertise the expected total while silently omitting a missing
   // historical partition that has not been read yet.
   const knownMissingPartitionIds = new Set(orderedPartitions
-    .filter((partition) => !partition.manifestKey || !partition.checksumSha256 || partition.checksumSha256 === "missing")
+    .filter((partition) => !partition.manifestKey || partition.checksumSha256 === "missing")
     .map((partition) => partition.id));
   let missingPartitions = knownMissingPartitionIds.size;
   let missingArtifacts = 0;
