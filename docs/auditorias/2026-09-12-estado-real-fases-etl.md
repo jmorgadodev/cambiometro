@@ -1726,3 +1726,27 @@ ETL de Cámara.
    votaciones. Cada categoría debe conservar su propio manifiesto y checksum.
 5. Verificar después de cada publicación que remuneraciones, votaciones y
    gastos sigan resolviendo desde sus rutas actuales.
+
+## Evidencia de ejecuciones al 12 de septiembre
+
+La revisión de GitHub Actions confirma que hay tareas que pueden seguir
+avanzando sin esperar el reinicio de D1, siempre que se mantengan en R2/static
+y no se promuevan automáticamente:
+
+| ETL | Última evidencia | Estado operativo |
+|---|---|---|
+| Movimientos | run `34690963760` | éxito en `main`; no requiere reabrir la fase ahora |
+| Votaciones Cámara | run `34691437098` | éxito en `main`; último corte productivo verificado |
+| Votaciones Senado | run `34691714118` | éxito en `main`; último corte productivo verificado |
+| Personal Senado | sin run registrado | prueba local exitosa; publicación separada pendiente |
+| Personal Cámara | run `34127058669` | fallo de fuente; conserva snapshot anterior |
+| Remuneraciones 38 bis | run `34630955321` | fallo de fuente; PR #499 tiene conector CSV probado |
+| CPLT | run `34342239360` | bloqueado por crecimiento R2; no reemplazar release |
+| Contraloría | run `33633187407` | fallo de materialización anterior; no reintentar D1 |
+
+Por lo tanto, el trabajo de hoy no queda detenido: se puede cerrar auditoría,
+pruebas de fuente, diffs, manifiestos y snapshots; lo que debe esperar es sólo
+la escritura remota que dependa de cuota o una promoción que cambie el release
+público. La siguiente ejecución habilitada para Senado debe conservar el
+snapshot anterior, publicar únicamente por R2 y pasar verificación de
+remuneraciones antes de considerar cualquier promoción.
