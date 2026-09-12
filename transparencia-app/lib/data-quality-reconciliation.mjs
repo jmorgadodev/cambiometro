@@ -35,9 +35,11 @@ export function reconcileSourceCounts({ source, healthEntry, catalogEntry, trans
     : source.queryableCount === null || source.queryableCount === undefined
       ? null
       : observedCount ?? source.queryableCount;
-  const components = healthEntry?.components && typeof healthEntry.components === "object"
-    ? healthEntry.components
-    : null;
+  const rawComponents = healthEntry?.components && typeof healthEntry.components === "object"
+    ? Object.entries(healthEntry.components)
+      .map(([key, value]) => [key, safeCount(value)]).filter(([, value]) => value !== null)
+    : [];
+  const components = rawComponents.length > 0 ? Object.fromEntries(rawComponents) : null;
   const note = state === "scope_mismatch"
     ? `El release observado informa ${observedCount.toLocaleString("es-CL")} registros; la referencia histórica declarada es ${configuredCanonicalCount.toLocaleString("es-CL")}. No se calcula cobertura hasta reconciliar el alcance.`
     : state === "configured_only"

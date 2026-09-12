@@ -168,6 +168,11 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
     candidatePages = pageIndex < manifest.pages.length ? [pageIndex] : [];
   }
 
+  // A non-filtered request reads one physical page at a time. Its offset is
+  // global, but the page body starts at that page's own offset.
+  const selectionOffset = hasFilters
+    ? offset
+    : offset - Math.floor(offset / manifest.pageSize) * manifest.pageSize;
   const selected: EvidenceRecord[] = [];
   let total = 0;
   let exhausted = false;
@@ -192,9 +197,9 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
       const lakeRecord = JSON.parse(line) as LakeRecord;
       const record = projectLakeEvidence(lakeRecord, null, null);
       if (!indexedRecordMatches(record, params)) continue;
-      if (total >= offset && selected.length < limit) selected.push(record);
+      if (total >= selectionOffset && selected.length < limit) selected.push(record);
       total += 1;
-      if (indexedQueryTotal !== null && selected.length >= limit && total >= offset + limit) {
+      if (indexedQueryTotal !== null && selected.length >= limit && total >= selectionOffset + limit) {
         exhausted = true;
         break;
       }
