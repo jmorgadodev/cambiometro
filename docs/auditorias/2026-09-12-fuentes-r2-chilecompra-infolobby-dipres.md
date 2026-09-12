@@ -96,6 +96,12 @@ archivado. Una consulta acotada a 2021-01 devolvió `missingPartitions=1` y cero
 filas, por lo que no debe presentarse el histórico como completamente
 consultable hasta recuperar/publicar esas particiones.
 
+Una consulta nacional con `offset=15689` confirmó que el API devuelve cero
+filas y marca `missingPartitions=17`; el usuario no debe recibir un paginador
+que prometa 247.287 filas cuando sólo hay 15.689 disponibles en el release
+caliente. La UI debe presentar “15.689 publicados; 231.598 pendientes de
+publicación” o limitar la paginación al alcance publicado.
+
 ## Decisiones
 
 1. Producción sólo puede declarar como consultable aquello que tenga un
