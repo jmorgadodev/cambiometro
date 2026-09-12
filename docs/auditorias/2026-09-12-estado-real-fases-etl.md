@@ -1592,3 +1592,20 @@ Esto deja una protección verificable: los ETL pueden publicar R2/Pages sin
 necesitar D1 y una futura materialización remota requiere una autorización
 explícita. Mientras la cuota account-wide siga crítica, no se debe enviar ese
 opt-in.
+
+## Prueba local del conector 38 bis corregido
+
+En la copia aislada de la rama `codex/38bis-csv-connector-20260912` se ejecutó
+el conector contra el CSV oficial de la Comisión 38 bis. El resultado fue:
+
+- período: 2026-06;
+- filas: 1.634;
+- filas congreso: 205;
+- filas fuera de congreso: 1.429;
+- checksum: `42dd9a7d2d544bc059c40b8a7d320de4ee40729bd8ed13866ffecb9366521348`;
+- D1: 0 filas leídas y 0 filas escritas.
+
+El release productivo anterior tenía 1.632 filas; la diferencia observada es
+de dos registros nuevos, no una sustitución destructiva. El artefacto generado
+no se publicó ni se incorporó al maestro: queda en la rama aislada del PR #499
+hasta revisar el diff y decidir su promoción.
