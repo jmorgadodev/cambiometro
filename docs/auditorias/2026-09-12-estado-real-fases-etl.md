@@ -1288,3 +1288,37 @@ El resultado permite continuar con la auditoría de alcance sin esperar D1. La
 prioridad inmediata es explicar los estados parciales de Cámara, Senado y
 DIPRES; no aumentar el catálogo ni convertir el total declarado en cobertura
 consultable.
+
+## Reconciliación local/producción ejecutada ahora
+
+Se ejecutó `audit-source-reconciliation.mjs` con el catálogo local explícito
+(`transparencia-app/data/lake/catalog/v1/manifest.json`) y su estado ETL, sin
+escribir salida ni consultar D1. Resultado: 15 filas lógicas, 3 coincidencias
+directas, 12 diferencias de alcance y 0 diferencias sin explicación técnica
+inmediata.
+
+Hallazgos que guían el trabajo siguiente:
+
+- Cámara y Senado locales mezclan categorías y componentes adicionales
+  (gastos, votaciones, asesorías) con la fuente base. No se debe comparar su
+  total local contra la remuneración base de producción.
+- ChileCompra local conserva el histórico de 888.693, mientras producción
+  expone el corte vigente de 74.142. La diferencia es de alcance, no una
+  pérdida de registros.
+- InfoLobby local conserva 60.523 frente a 71.467 productivos; debe
+  verificarse el release productivo y su índice antes de ampliar el snapshot
+  local.
+- Ley 19.862 local registra 59.361 frente a 62.172 en producción; la fecha
+  productiva es 2026-09-08 y la local 2026-08-21. Es una diferencia de
+  frescura que debe reconciliarse por release, no mediante D1.
+- Transparencia Activa local registra 1.218.136 frente a 1.226.913 en
+  producción; el productivo es 2026-09-02 y el local 2026-08-21. Queda como
+  diferencia de frescura/alcance pendiente de separar por período.
+- INE Censo 2024, SERVEL y SINIM coinciden directamente; son referencias
+  útiles para validar que el procedimiento no confunda una diferencia real
+  con una fecha de corte distinta.
+
+Conclusión: no existe evidencia para reemplazar local por producción ni para
+recargar datos ahora. La próxima tarea segura es generar una matriz por
+componente y período para Cámara, Senado, CPLT, InfoLobby, ChileCompra y Ley
+19.862; sólo después se decidirá qué snapshot histórico conviene conservar.
