@@ -850,3 +850,23 @@ El verificador de calendario ETL se ejecutó manualmente en GitHub como run
 `34717871931` y terminó exitosamente. La comprobación confirma que los
 workflows separados y sus frecuencias declaradas siguen cubiertos por el
 calendario; esto no ejecutó ningún ETL ni consumió D1.
+
+## Inventario local de proyectos — 12 de septiembre
+
+Se midieron recursivamente los archivos de las carpetas maestras bajo
+`C:\Users\jorge\Proyectos`, sin eliminar ni mover nada:
+
+| Carpeta | Archivos | Tamaño aproximado |
+|---|---:|---:|
+| `cambiometro-public` | 77.169 | 11,03 GiB |
+| `cambiometro-audit` | 147.377 | 8,28 GiB |
+| `cambiometro-editorial` | 19.477 | 1,15 GiB |
+| **Total** | **244.023** | **20,46 GiB** |
+
+La comprobación encontró únicamente esas tres carpetas `cambiometro-*`; los
+worktrees temporales de fases anteriores ya no están presentes en ese nivel.
+La diferencia con una medición anterior cercana a 43 GiB corresponde a un
+inventario histórico o a contenido temporal que ya no existe en la ubicación
+actual. El siguiente paso de limpieza debe ser interno y selectivo: localizar
+`node_modules`, caches, `.next`, artefactos de crawls y releases descargados,
+conservar rollback y datos únicos, y sólo después proponer eliminaciones.
