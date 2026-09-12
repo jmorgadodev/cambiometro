@@ -1,49 +1,42 @@
-# Movimientos — control de frescura y procedencia
+# Auditoría de frescura de Movimientos — 12 de septiembre de 2026
 
-## Evidencia consultada
+## Método
 
-- Workflow maestro: `.github/workflows/etl-movimientos.yml`.
-- Snapshot local: `transparencia-app/data/movimientos.json`.
-- Snapshot productivo: `https://cambiometro.impulsacv.cl/data/movimientos.json`.
-- Consulta realizada el 12 de septiembre de 2026.
+Se comparó el artefacto público `https://cambiometro.impulsacv.cl/data/movimientos.json`
+con el snapshot local del proyecto maestro. No se consultó D1, no se ejecutó ETL
+y no se reemplazó ningún archivo local.
 
-## Estado actual
+## Resultado
 
-| Campo | Producción | Local | Evaluación |
-|---|---|---|---|
-| Última ejecución exitosa | `2026-09-11T17:17:35.908Z` | `2026-09-10T11:59:19.695Z` | Producción más fresca |
-| Último evento | `2026-09-02` | `2026-09-02` | Coincide |
-| Registros | 82 | 82 | Coincide |
-| Checksum | `93cbc4c…54762a8` | snapshot local anterior | Comparar en el siguiente pull |
-| Fuentes oficiales disponibles | 4 | 4 | Hay respaldo oficial |
+| Métrica | Producción | Local | Lectura |
+|---|---:|---:|---|
+| Versión | 5.0.0 | 4.0.0 | Producción está adelantada |
+| Última ejecución | 2026-09-11 17:17:35Z | 2026-08-17 03:00 CLT | Diferencia de frescura |
+| Frecuencia declarada | Diario 03:00 CLT | Diario 03:00 CLT | El calendario coincide |
+| Movimientos | 82 | 79 | +3 en producción |
+| Verificados | 74 | 75 | No comparar como pérdida: cambiaron los estados |
+| En confirmación | 8 | 4 | Producción conserva más casos pendientes |
+| Últimos 7 días | 0 | 7 | La ventana se recalculó en otra fecha |
+| Con CGR vinculado | 2 | 2 | Coincide |
 
 ## Conclusión
 
-El desfase local/producción actual es de frescura, no una pérdida de registros.
-Producción ya no está detenida en agosto: el último éxito es del 11 de
-septiembre de 2026. El último evento publicado sigue siendo del 2 de
-septiembre, que es distinto de la fecha de ejecución del ETL.
+La diferencia local/producción es de frescura y de estado, no evidencia de que
+producción haya perdido movimientos. Producción es la referencia operativa para
+la fecha y el conteo vigente. El snapshot local no debe presentarse como si
+fuera la versión actual ni usarse para reemplazar el artefacto público.
 
-El workflow está separado de Cámara y publica sólo el grupo estático de
-Movimientos desde R2. Recupera el snapshot anterior antes de ejecutar, valida
-el payload, exige checksum y conserva los movimientos anteriores si una fuente
-no responde.
+El proceso productivo sí está actualizado al 11 de septiembre y declara una
+frecuencia diaria. Queda pendiente auditar el conector y la hora efectiva de la
+siguiente ejecución, además de conservar por separado fecha del evento, fecha
+de detección y última publicación. La interfaz debe seguir mostrando el estado
+`verificado` o `en confirmación`, sin promover señales de prensa a hecho oficial.
 
-## Presentación implementada en la rama de trabajo
+## Siguiente control
 
-La interfaz de Movimientos quedó preparada para mostrar por separado:
+Antes de modificar el ETL se debe comprobar en una nueva ejecución que:
 
-1. fecha del evento;
-2. última publicación de la fuente;
-3. última detección/ejecución del ETL;
-4. estado de cada fuente revisada;
-5. fuentes que no respondieron en la última revisión.
-
-La publicación efectiva en Pages no se inventa: mientras el snapshot no lleve
-un sello de despliegue verificable, la interfaz no la presenta como si fuera la
-fecha de ejecución del ETL. Ese sello queda como mejora posterior del flujo de
-publicación.
-
-No se cambiará el contenido del snapshot hasta completar esa presentación y
-una prueba incremental que confirme que un fallo de una fuente no elimina los
-registros anteriores.
+1. el archivo cambia sólo cuando existe un evento nuevo o cambio de estado;
+2. los movimientos anteriores se conservan si una fuente falla;
+3. el número de filas, los estados y el `last_run` quedan registrados;
+4. la publicación en Pages ocurre después de validar el artefacto.
