@@ -1335,3 +1335,27 @@ obligatorios en verde:
 La corrección sigue aislada: no se hizo merge, no se publicó un release y no se
 ejecutó D1. Queda lista para revisión dentro del ciclo de publicación por
 fuente.
+
+## Movimientos: verificación productiva R2 — 12 de septiembre
+
+Se consultó una página única de hasta 100 filas desde R2. El resultado fue:
+
+| Métrica | Resultado |
+|---|---:|
+| Filas consultables | 82 |
+| Evento más antiguo | 2026-02-15 |
+| Evento más reciente | 2026-09-02 |
+| Última detección observada | 2026-09-12 11:24:46 UTC |
+| `verificado` | 74 |
+| `en_confirmacion` | 8 |
+| Registros sin fuente oficial en el arreglo de evidencia | 6 |
+
+La publicación productiva está disponible desde R2 (`sourceStatus=partial`),
+pero el último evento no coincide con la última detección: el proceso detectó
+datos hasta el 12 de septiembre mientras el evento más reciente es del 2 de
+septiembre. Esto es un desfase de actividad de la fuente, no una caída de R2.
+
+Los casos relevantes quedan separados: Alonso Velásquez tiene evidencia
+oficial y permanece `en_confirmacion`; Patricio Löhr permanece pendiente de
+evidencia oficial. No se promoverá ningún registro provisional a verificado ni
+se eliminará el snapshot anterior por falta de novedades.
