@@ -29,12 +29,10 @@ el Worker siga desplegado hoy. El archivo remoto es evidencia histórica; no se
 ejecuta desde GitHub porque el repositorio está archivado y sus workflows están
 deshabilitados.
 
-La eliminación o permanencia del Worker histórico no puede afirmarse desde el
-token de auditoría actual porque no incluye `Workers Scripts -> Read`. Por eso
-queda como verificación pendiente de infraestructura, no como una acción
-confirmada. Para desconexión definitiva se debe listar el Worker en Cloudflare
-y, si existe, retirar su trigger o eliminarlo con autorización explícita; esa
-acción no se ejecutó con un token de sólo lectura.
+La verificación directa en el panel de Cloudflare confirmó que los Workers
+`transparencia-impulsacv` y `transparencia-etl-legacy` no existen actualmente.
+Por tanto, el proyecto histórico no conserva un Worker desplegado que pueda
+ejecutar el cron diario declarado en su configuración antigua.
 - Se mantuvieron como únicas raíces operativas locales:
   - `C:\Users\jorge\Proyectos\cambiometro-public`
   - `C:\Users\jorge\Proyectos\cambiometro-audit`
@@ -89,12 +87,10 @@ en una configuración ETL congelada dentro del repositorio de auditoría; no son
 una dependencia del maestro ni se ejecutan automáticamente. No se eliminaron
 porque forman parte de la evidencia de retiro y del rollback histórico.
 
-La verificación definitiva de que no existe ningún Worker Cloudflare antiguo
-con binding a `transparencia-db` sigue requiriendo el permiso **Workers
-Scripts → Read** en el token de auditoría. El token actual devuelve `403` para
-ese inventario, por lo que esa parte queda explícitamente pendiente de
-infraestructura y no se declara eliminada sólo por la ausencia de carpetas
-locales.
+La verificación directa del panel descartó los dos nombres históricos
+conocidos. La CLI conserva una limitación de permisos para enumerar todos los
+Workers de la cuenta, pero esa limitación no cambia el resultado específico
+del proyecto retirado.
 
 La comprobación del repositorio remoto sí quedó confirmada mediante GitHub:
 `jmorgadodev/transparencia.impulsacv.cl` está archivado, privado, con último
@@ -126,10 +122,10 @@ Se repitió la comprobación sin escribir en Cloudflare, GitHub ni D1:
   `publicD1Reads: false`.
 
 El token de auditoría utilizado no tiene `Workers Scripts -> Read`, por lo que
-la API de Cloudflare responde `10000 Authentication error` al intentar listar
-las versiones del Worker `transparencia-impulsacv` y del Worker canónico. Esto
-impide una confirmación independiente del inventario de Workers desde CLI,
-pero no muestra una conexión operativa desde el repositorio antiguo.
+la API de Cloudflare sigue respondiendo `10000 Authentication error` al
+enumerar Workers desde CLI. El panel autenticado sí confirmó que los dos
+Workers históricos conocidos no existen. La limitación de la CLI no muestra
+una conexión operativa desde el repositorio antiguo.
 
 Como control adicional, se revisó `origin/main` del repositorio canónico: los
 ETL programados conservan R2/Pages como salida pública y sus pasos de
@@ -137,6 +133,22 @@ materialización remota D1 están condicionados a `workflow_dispatch`, preflight
 de cuota y autorización explícita. El backup D1 semanal también requiere una
 confirmación manual. Por tanto, los workflows activos no implican por sí solos
 lecturas o escrituras remotas D1 en cada ejecución programada.
+
+### Métricas D1 posteriores
+
+La misma revisión mostró que `transparencia-db` sí tuvo actividad reciente,
+pero no atribuible al repositorio histórico retirado:
+
+- aproximadamente 2 mil consultas en las últimas 24 horas;
+- aproximadamente 14–15 millones de filas leídas;
+- cero filas escritas;
+- 46 tablas.
+
+Las consultas de mayor impacto fueron lecturas amplias sobre `records`,
+incluyendo conteos por entidad y por fuente. Esto mantiene abierta la auditoría
+del consumo D1: el repositorio antiguo quedó descartado como origen, pero aún
+se debe identificar qué Worker o proyecto vigente genera esas lecturas antes
+de declarar cerrado el límite gratuito.
 
 ### Decisión operativa
 

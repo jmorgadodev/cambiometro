@@ -31,11 +31,12 @@ deshabilitados. La base `transparencia-db` y el bucket R2 no fueron eliminados.
 
 El repositorio histórico contiene una configuración congelada de un Worker
 `transparencia-etl-legacy` que declaraba un cron diario y binding a D1. Eso es
-evidencia histórica, no confirmación de un despliegue vigente. La eliminación
-del Worker no se afirma sin el permiso `Workers Scripts -> Read`; mientras esa
-comprobación de infraestructura no se realice, se considera fuera del flujo
-por repositorio archivado, workflows deshabilitados y dominio sin DNS, pero la
-desconexión definitiva de Cloudflare queda pendiente de verificación.
+evidencia histórica. El panel autenticado de Cloudflare confirmó que
+`transparencia-impulsacv` y `transparencia-etl-legacy` no existen actualmente,
+por lo que no hay un cron desplegado de ese proyecto. La CLI aún no puede
+enumerar todos los Workers por falta de `Workers Scripts -> Read`; cualquier
+consumo actual de D1 debe auditarse contra los servicios vigentes, no contra
+este repositorio retirado.
 
 El repositorio remoto permanece archivado y sin ejecución ETL como respaldo
 histórico fuera del flujo operativo. El código maestro no lo consulta: si falta
