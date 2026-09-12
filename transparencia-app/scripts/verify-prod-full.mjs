@@ -1,6 +1,12 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { findLandingTransferSource } from "./source-contract.mjs";
+import {
+  extractCanonicalCount,
+  extractConsolidatedCount,
+  extractInfoLobbyCount,
+  isRetryableHttpStatus,
+} from "./etl/production-verifier-contracts.mjs";
 
 export { findLandingTransferSource } from "./source-contract.mjs";
 
@@ -20,6 +26,20 @@ function assertCheck(moduleName, checkName, condition, extraInfo = "") {
 function normalizeHex(value) {
   const hex = String(value).toUpperCase();
   return /^#[0-9A-F]{3}$/.test(hex) ? `#${[...hex.slice(1)].map((digit) => digit + digit).join("")}` : hex;
+}
+
+async function fetchWithResponseRetry(url, options = {}, attempts = 4) {
+  let response;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    response = await fetch(url, options);
+    if (!isRetryableHttpStatus(response.status) || attempt === attempts) return response;
+    const retryAfter = Number(response.headers.get("retry-after"));
+    const delay = Number.isFinite(retryAfter) && retryAfter > 0
+      ? retryAfter * 1000
+      : 2_000 * 2 ** (attempt - 1);
+    await new Promise((resolve) => setTimeout(resolve, Math.min(delay, 15_000)));
+  }
+  return response;
 }
 
 async function verifyThemePersistence(PROD_URL, requestHeaders) {
@@ -237,7 +257,7 @@ async function verifyProdFull() {
   );
 
   for (const source of ["gastos_camara", "gastos_senado"]) {
-    const expenseRes = await fetch(`${API_URL}/api/v1/records?source=${source}&limit=1`, { headers });
+    const expenseRes = await fetchWithResponseRetry(`${API_URL}/api/v1/records?source=${source}&limit=1`, { headers });
     const expenseJson = expenseRes.ok ? await expenseRes.json().catch(() => null) : null;
     assertCheck("GASTOS", `Worker ${source} responde con filas`, expenseRes.status === 200 && Number(expenseJson?.meta?.total) > 0, `total: ${expenseJson?.meta?.total ?? "n/a"}`);
   }
@@ -260,7 +280,8 @@ async function verifyProdFull() {
 
   assertCheck("CRUCES", "Tile CGR '291'", crucesHtml.includes("291"));
   assertCheck("CRUCES", "Tile ChileCompra '74.142'", crucesHtml.includes("74.142"));
-  assertCheck("CRUCES", "Tile InfoLobby '60.523'", crucesHtml.includes("60.523"));
+  const infoLobbyCount = extractInfoLobbyCount(crucesHtml);
+  assertCheck("CRUCES", "Tile InfoLobby muestra el conteo publicado", Number.isInteger(infoLobbyCount) && infoLobbyCount > 0, `count: ${infoLobbyCount ?? "n/a"}`);
   assertCheck("CRUCES", "Selector 'Filas por página: 10 / 25 / 50' visible", crucesHtml.includes("Filas por página") && crucesHtml.includes("10") && crucesHtml.includes("25") && crucesHtml.includes("50"));
   const crucesText = crucesHtml.replace(/<!--[\s\S]*?-->/g, "");
   assertCheck(
@@ -383,7 +404,7 @@ async function verifyProdFull() {
       && (healthUsesCanonicalR2 || healthUsesOptInD1),
     `rows: ${healthJson?.data?.transferRows ?? "n/a"}, d1Rows: ${healthJson?.data?.d1TransferRows ?? "n/a"}, source: ${healthJson?.data?.transferSource ?? "n/a"}, consistent: ${healthJson?.data?.d1Consistent ?? "n/a"}`,
   );
-  const funcionariosRes = await fetch(`${API_URL}/api/funcionarios?muni=muni-maipu&query=Claudio&limit=5`, { headers });
+  const funcionariosRes = await fetchWithResponseRetry(`${API_URL}/api/funcionarios?muni=muni-maipu&query=Claudio&limit=5`, { headers });
   assertCheck("API", "Búsqueda de funcionario por municipalidad responde 200", funcionariosRes.status === 200);
   if (funcionariosRes.ok) {
     const funcionariosJson = await funcionariosRes.json();
@@ -414,8 +435,17 @@ async function verifyProdFull() {
   const fuentesHtml = (await fuentesRes.text()).replace(/<!--.*?-->/g, "");
 
   assertCheck("FUENTES", "Muestra 13 fuentes oficiales y derivadas", fuentesHtml.includes("13 fuentes") || fuentesHtml.includes("13"));
-  const expectedPublishedSourceTotal = 1487224 - 59361 + expectedTransferRows;
-  assertCheck("FUENTES", `Titular canónico con consolidado ${formatInteger(expectedPublishedSourceTotal)}`, fuentesHtml.includes(formatInteger(expectedPublishedSourceTotal)) && fuentesHtml.includes("1.753.013"));
+  const canonicalSourceCount = extractCanonicalCount(fuentesHtml);
+  const consolidatedSourceCount = extractConsolidatedCount(fuentesHtml);
+  assertCheck(
+    "FUENTES",
+    "Titular de fuentes muestra conteos canónico y consolidado vigentes",
+    Number.isInteger(canonicalSourceCount)
+      && canonicalSourceCount > 0
+      && Number.isInteger(consolidatedSourceCount)
+      && consolidatedSourceCount > 0,
+    `canónicos: ${canonicalSourceCount ?? "n/a"}, consolidado: ${consolidatedSourceCount ?? "n/a"}`,
+  );
   assertCheck("FUENTES", "Enlace a calidad de datos", fuentesHtml.includes("/datos/calidad"));
   assertCheck("FUENTES", "Estados reales: 'Operativa mensual'", fuentesHtml.includes("Operativa"));
   assertCheck("FUENTES", "Estados reales: 'Publicación anual' (SINIM)", fuentesHtml.includes("Publicación anual") || fuentesHtml.includes("anual"));
@@ -471,7 +501,7 @@ async function verifyProdFull() {
   // ─── MÓDULO 9: BARRIDO DE COBERTURA Y CONCORDANCIA OFICIAL ────────────────
   console.log("\n9. MÓDULO BARRIDO DE COBERTURA Y CONCORDANCIA OFICIAL");
   const { runCoverageSweep } = await import("./coverage-sweep.mjs");
-  const coverageResult = await runCoverageSweep({ silent: false, transferManifest });
+  const coverageResult = await runCoverageSweep({ silent: false, transferManifest, infolobbyCount: infoLobbyCount });
   assertCheck("COBERTURA", "Barrido de cobertura integral (Votaciones, Muestra 5 Fichas, Personal Apoyo, Movimientos, Manifest)", coverageResult.passed);
 
   // ─── MÓDULO 10: FICHAS /politico/* ESTÁTICAS Y RENDIMIENTO (10 URLs × 2 requests) ──

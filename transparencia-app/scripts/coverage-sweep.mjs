@@ -22,7 +22,7 @@ function chamberCountsFromSnapshot(polVotData) {
   return { camaraOfficial, senadoOfficial };
 }
 
-export async function runCoverageSweep({ silent = false, transferManifest = null } = {}) {
+export async function runCoverageSweep({ silent = false, transferManifest = null, infolobbyCount = null } = {}) {
   const rows = [];
   let allPassed = true;
 
@@ -162,10 +162,12 @@ export async function runCoverageSweep({ silent = false, transferManifest = null
   const transferCoverage = transferManifest || transferPath?.endsWith("manifest.json")
     ? buildTransferCoverageRow({ totalRows: transferData.totalRows, totalMontoClp: transferData.expected?.totalMontoClp })
     : buildTransferCoverageRow({ totalRows: transferData.kpis?.total_transfers, totalMontoClp: transferData.kpis?.total_monto_clp });
+  const normalizedInfoLobbyCount = Number.isInteger(infolobbyCount) && infolobbyCount > 0 ? infolobbyCount : null;
+  const formattedInfoLobbyCount = normalizedInfoLobbyCount?.toLocaleString("es-CL") ?? "No verificado";
   const universos = [
     transferCoverage,
     { modulo: "ChileCompra Compradores / Órdenes", indexado: "74.142 compradores ($1,9 billones)", universo: "74.142 manifest", nota: "Mercado Público", pass: true },
-    { modulo: "InfoLobby Audiencias", indexado: "60.523 audiencias", universo: "60.523 manifest", nota: "InfoLobby CPLT", pass: true },
+    { modulo: "InfoLobby Audiencias", indexado: `${formattedInfoLobbyCount} audiencias`, universo: `${formattedInfoLobbyCount} release productivo`, nota: "InfoLobby CPLT", pass: normalizedInfoLobbyCount !== null },
     { modulo: "Contraloría General (CGR) Auditorías", indexado: "291 informes", universo: "291 manifest", nota: "CGR Portal", pass: true },
   ];
 
