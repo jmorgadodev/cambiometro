@@ -223,6 +223,10 @@ previa a la protección R2-only.
   actual.
 - **API público:** protegido contra lecturas públicas D1 en la versión vigente.
 - **ETL programados:** publican R2; la materialización D1 requiere ejecución
-  manual, preflight y autorización explícita.
+  manual, preflight y autorización explícita. En `origin/main`, la acción
+  `d1-preflight` mantiene `allow-remote-materialization=false` por defecto y
+  ningún workflow actual lo habilita; por tanto, los pasos de materialización
+  quedan actualmente bloqueados incluso cuando un workflow se dispara de forma
+  manual.
 - **D1:** no se borra ni se toca su contenido; queda en observación hasta contar
   con una ventana posterior completa sin scans masivos.
