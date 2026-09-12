@@ -163,3 +163,26 @@ quedar auditada.
 
 **Estado:** auditoría completada; implementación de índices y vistas derivadas
 pendiente.
+
+## Revalidación productiva — 09:45 UTC-3
+
+Se repitieron las consultas contra producción y los manifiestos R2 sin leer ni
+escribir D1:
+
+| Fuente | Resumen `/api/v1/sources` | Consulta paginada | Resultado |
+|---|---:|---:|---|
+| ChileCompra | 74.142 | 74.142 | R2, completo |
+| InfoLobby | 60.615 | 60.523 | R2, discrepancia de índice de 92 |
+| DIPRES | 247.287 | 247.287 | R2, parcial por alcance de particiones verificadas |
+
+El catálogo R2 vigente suma correctamente 60.615 filas de InfoLobby en ocho
+particiones mensuales, pero `indexes/v1/infolobby/manifest.json` y la consulta
+pública siguen declarando 60.523. La interfaz no debe presentar ambas cifras
+como si fueran la misma métrica; la corrección debe reconciliar el índice con
+el catálogo antes de declarar completitud.
+
+El catálogo R2 vigente suma 247.287 filas DIPRES en 18 particiones, mientras
+que el release caliente sólo expone la partición de junio de 2026 como
+consulta verificable. Por tanto, el estado `partial` es correcto y el número
+247.287 sólo puede mostrarse como universo catalogado, no como filas
+inmediatamente descargables.
