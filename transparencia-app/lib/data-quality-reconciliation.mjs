@@ -30,9 +30,11 @@ export function reconcileSourceCounts({ source, healthEntry, catalogEntry, trans
       : scopeMismatch
         ? "scope_mismatch"
         : "aligned";
-  const queryableCount = source.queryableCount === null || source.queryableCount === undefined
-    ? null
-    : observedCount ?? source.queryableCount;
+  const queryableCount = isTransferRelease
+    ? publishedTransferRows
+    : source.queryableCount === null || source.queryableCount === undefined
+      ? null
+      : observedCount ?? source.queryableCount;
   const components = healthEntry?.components && typeof healthEntry.components === "object"
     ? healthEntry.components
     : null;

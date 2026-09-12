@@ -48,6 +48,7 @@ describe("reconciliación de conteos de fuentes", () => {
     expect(result).toMatchObject({
       canonicalCount: 62_172,
       historicalCount: 62_172,
+      queryableCount: 62_172,
       reconciliation: { state: "release_override", comparisonEligible: true },
     });
   });
