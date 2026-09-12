@@ -154,3 +154,75 @@ Se preparó una corrección local, sin despliegue ni escritura externa:
 La corrección está pendiente de revisión y publicación controlada. No modifica
 los datos públicos, no ejecuta ETL y no toca `cambiometro-editorial` ni otros
 repositorios.
+
+## Revisión de atribución posterior — 12 de septiembre, 12:00 UTC
+
+Se amplió la revisión desde el panel autenticado de Cloudflare y desde el
+código que corresponde a la versión productiva del API.
+
+### Inventario operativo de Workers
+
+El panel muestra 22 aplicaciones de Workers/Pages en la cuenta. Dentro del
+espacio Cambiómetro se revisaron explícitamente:
+
+| Servicio | Binding a `transparencia-db` | Actividad reciente | Estado operativo |
+|---|---|---:|---|
+| `cambiometro-public-api` | Sí | 451 invocaciones / 7 errores en 24 h | Productivo, ruta `/api/*` |
+| `cambiometro-public-api-preview` | Sí | 0 invocaciones | Sólo preview |
+| `cambiometro-public-api-staging` | Sí | 0 invocaciones | Sin rutas personalizadas |
+| `cambiometro` | Sí | 0 invocaciones | Sin rutas; `workers.dev` deshabilitado |
+| `transparencia-impulsacv` | No existe | — | Retirado |
+| `transparencia-etl-legacy` | No existe | — | Retirado |
+
+El Worker independiente `cambiometro` conserva un binding histórico, pero no
+tiene una ruta ni invocaciones en la ventana observada. No se eliminó ni se
+desvinculó porque es un recurso distinto del repositorio histórico y esa sería
+una operación destructiva separada que requiere autorización expresa sobre ese
+servicio concreto.
+
+### Comparación con la versión productiva
+
+La promoción productiva activa `64fa71d2-d0a1-4660-a478-aaa759f686a1` usa el
+commit `31f84cd61b65baae38932203d661178e008c554e`. Se verificó que ese código:
+
+- no contiene la consulta `subject_entity_ids_json LIKE` que encabeza el
+  consumo de D1 observado;
+- no contiene el `GROUP BY source_id` que aparece entre las consultas costosas;
+- no consulta `kv_cache`;
+- declara `ALLOW_PUBLIC_D1_READS=0` y `PREFER_TRANSFER_D1=0`;
+- intenta primero los índices y releases publicados en R2;
+- devuelve `publicDataBackend: r2` y `publicD1Reads: false` en producción.
+
+Se probó además, sin alterar datos, `/api/v1/health`, `/api/v1/sources`, una
+consulta paginada de Cámara, una consulta de funcionarios y una relación
+acotada. Todas respondieron HTTP 200 y conservaron el camino R2. Esto descarta
+que esas cinco comprobaciones estén ejecutando los scans de D1 que explican el
+pico.
+
+### Interpretación actual
+
+Las 2 mil consultas y 14–15 millones de filas leídas todavía visibles en la
+ventana de 24 horas mezclan actividad anterior a la promoción actual. El texto
+de las consultas de mayor impacto no existe en el Worker productivo vigente,
+ni en los Workers históricos `transparencia-*` porque éstos no existen. Con la
+evidencia disponible, el origen más probable es una versión anterior del API o
+un proceso externo/legado que operó antes de la promoción; Cloudflare no expone
+en esta vista el nombre del Worker que emitió cada consulta.
+
+La conclusión operativa no es declarar el incidente cerrado todavía: hay que
+observar la siguiente ventana completa posterior a la promoción. Si el mismo
+patrón vuelve a crecer después de que expire la ventana de 24 horas, habrá que
+revisar el Worker independiente `cambiometro` y los consumidores externos con
+un inventario de bindings autorizado. Si el contador cae y no reaparecen las
+consultas `LIKE`/`GROUP BY`, la causa habrá quedado confirmada como actividad
+previa a la protección R2-only.
+
+### Estado de cierre de esta fase
+
+- **Histórico `transparencia-impulsacv`:** retirado y descartado como consumidor
+  actual.
+- **API público:** protegido contra lecturas públicas D1 en la versión vigente.
+- **ETL programados:** publican R2; la materialización D1 requiere ejecución
+  manual, preflight y autorización explícita.
+- **D1:** no se borra ni se toca su contenido; queda en observación hasta contar
+  con una ventana posterior completa sin scans masivos.
