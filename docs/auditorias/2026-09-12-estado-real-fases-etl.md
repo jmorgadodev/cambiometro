@@ -1943,3 +1943,35 @@ probar cada fuente en forma independiente, guardar el resultado y el diff,
 reintentar sólo el conector que corresponda y bloquear la publicación si el
 resultado está vacío o incompleto. No se debe lanzar un ETL global para intentar
 resolver tres bloqueos de fuente distintos.
+
+### Reconciliación ejecutada contra producción
+
+El verificador `npm run audit:sources` se ejecutó el 12 de septiembre a las
+22:59 UTC-3 contra `https://cambiometro.impulsacv.cl/api/v1/sources`, usando el
+catálogo y `source-health.json` locales, sin escribir un reporte ni modificar
+archivos. El resultado fue:
+
+- 15 fuentes comparadas;
+- 3 coincidencias directas;
+- 12 diferencias clasificadas como `scope`;
+- 0 diferencias `unexplained`;
+- ninguna diferencia fue tratada como pérdida automáticamente.
+
+Hallazgos que deben guiar la siguiente fase:
+
+- Transparencia Activa: producción `1.226.913` frente a local `1.218.136`,
+  diferencia de `8.777` registros; requiere reconciliación del release y no una
+  sustitución local.
+- ChileCompra: producción `74.142` es el corte público; local conserva
+  `888.693` históricos. Son alcances distintos y deben mostrarse separados.
+- Cámara y Senado: los conteos de catálogo mezclan componentes de votaciones,
+  gastos y otros registros; no sirven como conteo de remuneraciones.
+- InfoLobby: producción `71.467` frente a local `60.523`; queda como diferencia
+  de release/alcance pendiente, no como ausencia de datos.
+- Ley 19.862: producción `62.172` frente a catálogo local `59.544`; el
+  snapshot local de filas consultado fue `59.361`. Deben reconciliarse release,
+  catálogo y filas antes de presentar cobertura.
+
+El mismo control confirmó coincidencia para INE Censo, SERVEL y SINIM. Esto
+permite seguir con cambios acotados sin confundir una diferencia de corte con un
+fallo de ingestión.
