@@ -1652,3 +1652,34 @@ produjo:
 La prueba terminó correctamente y no ejecutó D1. Esto deja el ETL de Senado
 listo para una revisión de diff y una eventual publicación separada; todavía no
 se escribió en R2, Pages ni en el archivo maestro.
+
+### Diff contra la línea base local
+
+La comparación se rehízo usando como clave el senador, período, nombre del
+funcionario, cargo y calidad jurídica; el monto se comparó por separado. Esto
+evita confundir a dos personas distintas que trabajan para el mismo senador.
+
+| Control | Línea base | Extracto probado | Resultado |
+|---|---:|---:|---|
+| Filas | 2.989 | 3.407 | +418 del período 2026-08 |
+| Senadores agrupados | 70 | 70 | sin variación |
+| Períodos | 2026-01 a 2026-07 | 2026-01 a 2026-08 | se agrega agosto |
+| Filas agregadas | — | 421 | 418 de agosto y 3 reemplazos de julio |
+| Filas retiradas | — | 3 | todas de 2026-07 |
+| Cambios de monto en filas comparables | — | 0 | sin cambios detectados |
+| Filas duplicadas por clave completa | 0 | 0 | correcto |
+| Cargo o monto faltante | 0 | 0 | correcto |
+
+Las tres filas retiradas corresponden a funcionarios asociados a Kusanovic
+Glusevic, Flores Oporto y Longton Herrera, todos en julio de 2026. La prueba
+no permite afirmar por sí sola si son bajas reales o una corrección posterior
+de la fuente; deben conservarse como diferencia de fuente hasta que el release
+oficial de publicación confirme el estado. No se debe interpretar el aumento
+de 418 filas como 418 nuevas personas: es principalmente la carga del nuevo
+mes, con los mismos 70 senadores agrupados.
+
+Conclusión operativa: el conector y el paginado responden, el extracto es
+consistente y la diferencia con la línea base se explica por la incorporación
+de agosto más tres bajas/correcciones de julio. La promoción debe seguir siendo
+un paso independiente, con checksum, snapshot anterior y `--skip-d1`; esta
+prueba no autoriza publicación automática.
