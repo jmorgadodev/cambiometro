@@ -344,3 +344,15 @@ HTTP 503/1102. El mismo endpoint respondió HTTP 200 en el candidato nuevo.
 Esto confirma que el 1102 corresponde a la versión productiva anterior y que
 la promoción controlada del candidato es el siguiente movimiento, separado de
 la medición de cuota D1. No se ejecutó SQL ni materialización D1.
+
+La promoción posterior se ejecutó mediante el workflow `34702718700` y terminó
+verde. El Worker `8fffd277-d5b5-4330-bdd8-7abc04c18f3a` quedó al 100% en la
+ruta productiva. El smoke posterior confirmó:
+
+- health: HTTP 200, `publicDataBackend=r2`, `publicD1Reads=false`;
+- ChileCompra: HTTP 200, 74.142 filas, índice completo;
+- InfoLobby: HTTP 200, 71.467 filas, índice completo;
+- Movimientos: HTTP 200, 82 filas, origen R2;
+- Home, Movimientos, Municipalidades, Remuneraciones y Personas: HTTP 200.
+
+El 1102 de ChileCompra quedó resuelto sin consultar ni materializar D1.
