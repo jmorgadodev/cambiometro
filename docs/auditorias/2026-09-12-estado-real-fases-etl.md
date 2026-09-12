@@ -1111,3 +1111,24 @@ enlaces de descarga con una petición acotada, registrar URL, código HTTP,
 content-type, tamaño y checksum, y sólo entonces evaluar un ETL aislado. No se
 debe relanzar el workflow completo por el solo hecho de que la portada
 responda.
+
+La inspección de índices avanzó un paso sin descargar los universos:
+
+- ChileCompra expone un `manifest.json` HTTP 200 de 434 bytes, pero la ruta de
+  descargas entrega una aplicación web; el conector debe resolver los recursos
+  desde ese índice/app y no asumir que la portada es un CSV.
+- El Registro 38 bis expone `registro-publico?csv-todo` HTTP 200 con
+  `text/csv`; la cabecera confirma campos de período, organismo, cargo,
+  nombres, remuneración bruta y asignaciones. El endpoint oficial responde y
+  merece una prueba de conector acotada antes de declarar la fuente caída.
+- OpenData Cámara responde el endpoint XML de diputados vigentes HTTP 200; la
+  prueba anterior que lo clasificó como HTML fue una inspección de cabeceras,
+  no una falla del recurso.
+- Portal de Transparencia responde la página de búsqueda HTTP 200, pero su
+  interfaz es dinámica; se debe auditar el recurso de datos que consume la
+  página, no la portada.
+
+Esto cambia la prioridad: no se ejecuta todavía ningún ETL, pero el próximo
+trabajo puede ser una prueba aislada de extracción de encabezado/metadatos por
+fuente. Si pasa, se prepara un release de prueba sin publicar; si falla, se
+conserva el snapshot actual y se registra el motivo exacto.
