@@ -167,12 +167,14 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
         : scopeMismatch
           ? "scope_mismatch"
           : "aligned";
-    const rawComponents = healthRecord.components && typeof healthRecord.components === "object"
-      ? Object.entries(healthRecord.components as JsonObject)
-        .map(([key, value]) => [key, safeCount(value)] as const)
-        .filter(([, value]) => value !== null)
-      : [];
-    const components = rawComponents.length > 0 ? Object.fromEntries(rawComponents) : null;
+    const componentEntries: Array<[string, number]> = [];
+    if (healthRecord.components && typeof healthRecord.components === "object") {
+      for (const [key, value] of Object.entries(healthRecord.components as JsonObject)) {
+        const count = safeCount(value);
+        if (count !== null) componentEntries.push([key, count]);
+      }
+    }
+    const components = componentEntries.length > 0 ? Object.fromEntries(componentEntries) : null;
     const reconciliationNote = reconciliationState === "scope_mismatch"
       ? `El snapshot observado informa ${observedCount!.toLocaleString("es-CL")} registros; la referencia configurada es ${configuredCanonicalCount!.toLocaleString("es-CL")}. No se calcula cobertura hasta reconciliar el alcance.`
       : reconciliationState === "release_override"
