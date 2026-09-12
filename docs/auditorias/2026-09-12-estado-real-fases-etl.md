@@ -644,3 +644,28 @@ ella:
 
 No se debe hacer hoy: SQL de prueba, materialización, backup de D1, ETL
 completo, despliegue de interfaz ni cambios de navegación.
+
+## Auditoría adicional de registros públicos — 12 de septiembre
+
+Se probó en producción el camino R2 de registros con páginas pequeñas, sin
+consultar D1. La salud continúa declarando `publicDataBackend=r2` y
+`publicD1Reads=false`. Los resultados no son uniformes por tamaño de página:
+
+| Fuente | `limit=1` | `limit=10` | `limit=25` | `limit=50` |
+|---|---:|---:|---:|---:|
+| InfoLobby | 200 | 200 | 200 | 1102 observado |
+| ChileCompra | 200 | 200 | 1102 observado | 1102 observado |
+| DIPRES | 200 | 1102 observado | 1102 observado | 200 observado |
+
+Los 1102 fueron respuestas intermitentes del Worker; al repetir una consulta
+pequeña volvió a responder 200. No se debe interpretar este hallazgo como una
+caída de R2 ni como una nueva lectura de D1. Sí demuestra que la paginación
+actual no tiene un margen uniforme para filas grandes: una página de 50 puede
+exceder el tiempo/CPU de la función al descomprimir, transformar y serializar.
+
+La acción correcta queda separada del incidente D1: medir tamaño de fila,
+tiempo y bytes por fuente; establecer un límite seguro por fuente; y verificar
+cursor, caché y respuesta parcial antes de cambiar el Worker. No se hará un
+parche de producción durante la cuota crítica. ChileCompra queda verificado en
+`limit=1/10`; InfoLobby en `limit=1/10/25`; DIPRES en `limit=1/50`, y el
+comportamiento de páginas grandes queda pendiente de hardening.
