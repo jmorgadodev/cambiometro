@@ -322,10 +322,17 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   const data: EvidenceRecord[] = [];
   let matched = 0;
   let loadedRows = 0;
-  let missingPartitions = 0;
+  // Preserve catalog-level gaps during early pagination. Otherwise page 1
+  // could advertise the expected total while silently omitting a missing
+  // historical partition that has not been read yet.
+  const knownMissingPartitionIds = new Set(orderedPartitions
+    .filter((partition) => !partition.manifestKey || !partition.checksumSha256 || partition.checksumSha256 === "missing")
+    .map((partition) => partition.id));
+  let missingPartitions = knownMissingPartitionIds.size;
   let missingArtifacts = 0;
   let scannedAll = true;
   for (const partition of orderedPartitions) {
+    if (knownMissingPartitionIds.has(partition.id)) continue;
     if (!hasFilters && matched >= offset + limit) {
       scannedAll = false;
       break;
