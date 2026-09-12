@@ -159,3 +159,18 @@ porcentajes cuando el denominador mezcla categorías.
 
 Esta actualización fue sólo de lectura contra R2; no consultó D1, no ejecutó
 ETL y no modificó producción.
+
+## Validación de workflows del 12 de septiembre
+
+La ejecución más reciente de cada ETL terminó correctamente:
+
+| Fuente | Run | Resultado ETL | Release R2 | Checksum del manifiesto estático |
+|---|---:|---|---|---|
+| Cámara | `34691437098` | 630 votaciones, 0 errores | `c4cd3e1a7a1fbb4c682fff8d4b42ed43b5d652c318a2ea94aed3c1fd995d4b35` | `b45228691f3ac3534f5dee0b9b56dd5b1fb9827d0012c6b189204994787ef594` |
+| Senado | `34691714118` | 5 votaciones, 0 errores | `b5a421f2b5bc1b6303dd49306e62e34d205693115ff189d257a2785bb1862ad2` | `8f7eaaf9872589c49679eb1af59cfe104367b90016e08587f94553411e41c147` |
+
+Esto confirma que ambos ETL respondieron y publicaron R2 en la última ventana.
+No cierra por sí solo la cobertura histórica ni la separación semántica de
+categorías: esas siguen siendo tareas de reconciliación de release y de
+presentación. El respaldo local se mantiene como replay controlado, no como
+segundo origen permanente ni como materialización D1.
