@@ -1557,3 +1557,18 @@ Este cuadro cambia el orden de trabajo: no corresponde relanzar ETL fallidos
 contra fuentes que siguen bloqueando ni forzar D1. Se deben conservar los
 releases anteriores, probar cada fuente de forma aislada y publicar sólo cuando
 el artefacto nuevo supere su guard de filas, checksum y disponibilidad.
+
+## Suite completa en copia aislada
+
+Para separar un problema de dependencias del estado del código, se ejecutó
+`npm test` en `cambiometro-verifier-fix-20260912`, sin modificar el checkout
+maestro. El resultado fue:
+
+- TypeScript de aplicación: correcto.
+- TypeScript del Worker API: correcto.
+- Guards de arquitectura, tokens, enlaces y `innerHTML`: correctos.
+- 184 archivos de prueba: correctos.
+- 986 pruebas: correctas.
+
+La ausencia de `tsc` y `playwright` detectada en el checkout maestro es, por
+tanto, una carencia de instalación local, no un fallo reproducido por el código.
