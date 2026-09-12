@@ -23,7 +23,7 @@
 - [x] Reconstruir las 7 particiones históricas faltantes de Cámara en R2; manifiestos y registros verificados por checksum, alias y fuente canónica completos en producción.
 - [ ] Reconstruir las 2 particiones faltantes de Senado en R2 (2025-08: 121; 2026-02: 7) después de localizar releases o validar la fuente oficial; no declarar cobertura total antes.
 
-## Mañana, después del reinicio
+## Cuando Analytics confirme el siguiente reset de D1
 
 - [ ] Medir cuota D1 post-reset (la sonda del 2026-09-12 ya reportó 13.758.232 lecturas; sigue crítica).
 - [ ] Identificar el consumidor de `transparencia-db` fuera del Worker público; la métrica actual sólo separa por base, no por proyecto.
@@ -36,6 +36,14 @@
 - [x] Validar conectividad y fechas máximas de Cámara/Senado sin ejecutar ETL.
 - [x] Validar conectividad de las fuentes de Movimientos sin reemplazar el snapshot.
 - [x] Revisar manifiesto R2 y preview de `votaciones_camara` sin usar D1.
+- [x] Auditar paginación R2 con tamaños pequeños y registrar respuestas 1102
+  intermitentes sin desplegar un parche.
+- [ ] Preparar hardening de paginación por fuente, con límite seguro por
+  tamaño de fila y prueba de cursor, sin publicar mientras D1 siga crítica.
+- [ ] Reconciliar el alcance de Senado 2025-08 y 2026-02 contra la fuente
+  oficial antes de reconstruir sus artefactos.
+- [ ] Revisar el corte vigente/histórico de ChileCompra y el release de
+  InfoLobby sólo desde producción/R2; no rehidratar D1.
 
 ## Fuera de alcance
 
