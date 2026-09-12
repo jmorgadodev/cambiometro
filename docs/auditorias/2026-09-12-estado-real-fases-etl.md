@@ -645,6 +645,29 @@ ella:
 No se debe hacer hoy: SQL de prueba, materialización, backup de D1, ETL
 completo, despliegue de interfaz ni cambios de navegación.
 
+## Hardening R2 preparado, sin promoción — 12 de septiembre
+
+Se preparó en la rama aislada `codex/r2-pagination-hardening-20260912`
+(commit `490e7b9`) un cambio acotado para la incidencia 1102. La API ahora
+intenta primero el índice paginado R2 y sólo carga la proyección estática
+antigua si el índice no puede responder. Así una consulta de 1–50 filas no
+transfiere ni analiza primero un subconjunto completo innecesario.
+
+La reproducción automatizada falló con el orden anterior y pasó con el cambio.
+La rama quedó verificada con:
+
+- 983 tests pasados;
+- typecheck general y del Worker;
+- guardas de arquitectura, tokens, enlaces y `innerHTML`;
+- lint sin errores (sólo advertencias preexistentes);
+- verificación de tamaño del Worker: 178.586 bytes, bajo el límite de 1 MB.
+
+No se publicó el cambio. El preview remoto de Wrangler no pudo abrir sesión
+porque el token local no tiene permisos para esa operación; no se modificó el
+token ni se intentó desplegar a producción. El siguiente paso es ejecutar el
+workflow de preview con las credenciales de GitHub, probar `limit=1,10,25,50`
+para ChileCompra, InfoLobby y DIPRES, y sólo entonces evaluar promoción.
+
 ## Auditoría adicional de registros públicos — 12 de septiembre
 
 Se probó en producción el camino R2 de registros con páginas pequeñas, sin
