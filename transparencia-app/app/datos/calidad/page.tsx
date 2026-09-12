@@ -11,6 +11,13 @@ export const metadata: Metadata = {
   alternates: { canonical: "/datos/calidad" },
 };
 
+const COMPONENT_LABELS: Record<string, string> = {
+  asistencia: "Asistencia",
+  votaciones: "Votaciones",
+  datosAbiertos: "Datos abiertos",
+  gastos: "Gastos operacionales",
+};
+
 export default async function DataQualityPage() {
   const { sources, summary } = await getDataQualityDashboardData();
   const remunerationAuditSources = remunerationSourcesCatalog.filter((source) =>
@@ -234,6 +241,21 @@ export default async function DataQualityPage() {
                         <p style={{ margin: "0.45rem 0 0", color: "var(--accent)", lineHeight: 1.45 }}>
                           <strong>Conteo pendiente:</strong> {source.reconciliation.note}
                         </p>
+                      )}
+                      {source.reconciliation.components && Object.keys(source.reconciliation.components).length > 0 && (
+                        <details style={{ marginTop: "0.45rem" }}>
+                          <summary style={{ cursor: "pointer", color: "var(--accent)" }}>Ver desglose del release</summary>
+                          <ul style={{ margin: "0.35rem 0 0", paddingLeft: "1rem", lineHeight: 1.45 }}>
+                            {Object.entries(source.reconciliation.components).map(([key, count]) => (
+                              <li key={key}>
+                                {COMPONENT_LABELS[key] ?? key}: {count.toLocaleString("es-CL")}
+                              </li>
+                            ))}
+                          </ul>
+                          <p style={{ margin: "0.35rem 0 0", fontSize: "0.68rem" }}>
+                            Los componentes tienen alcance propio y no se suman automáticamente al total de la fuente.
+                          </p>
+                        </details>
                       )}
                     </td>
                   </tr>
