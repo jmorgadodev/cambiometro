@@ -268,3 +268,24 @@ medida de cierre sigue siendo completar una ventana móvil completa posterior a
 la promoción R2-only y confirmar que no reaparecen las consultas masivas. Hasta
 entonces, D1 permanece en observación crítica, sin cambios de código ni
 materialización remota.
+
+### Medición manual posterior — 10:08 CLST
+
+La ejecución `usage-watch` manual `34695572856` consultó nuevamente Analytics
+sin ejecutar SQL. El workflow terminó con estado `failure` de forma deliberada
+porque `D1_USAGE_FAIL_ON_CRITICAL=true` convierte el nivel crítico en un fallo
+visible; no fue un error de credenciales ni de consulta.
+
+El artefacto generado a las `2026-09-12T13:08:12Z` reportó:
+
+- `transparencia-db`: **14.030.061** filas leídas, **0** escritas, sin aumento
+  respecto de la medición anterior.
+- La D1 separada `impulsacv-db`: 787 filas leídas y 18 escritas; el aumento de
+  120 filas desde el control previo ocurrió allí, no en `transparencia-db`.
+- Total de la cuenta: 14.030.848 filas leídas y 18 escritas; 280,62% del
+  límite gratuito de lecturas.
+
+Esta comprobación fortalece la conclusión: el consumo masivo observado en
+`transparencia-db` es histórico dentro de la ventana móvil y no está creciendo
+por las consultas R2 del sitio. Se mantiene la espera de la renovación completa
+de la ventana para confirmar el descenso del agregado.
