@@ -1269,3 +1269,22 @@ debe coincidir el período, el número de filas, el checksum y el estado de
 completitud del release. Del mismo modo, un fallo aislado no autoriza a borrar
 el snapshot productivo. Esta matriz es la base para probar cada ETL por
 separado sin arriesgar el resto del sitio.
+
+## Smoke de fuentes R2 — lectura acotada, 12 de septiembre
+
+Se consultó una sola fila por fuente (`limit=1`) contra producción. No se
+consultó D1 ni se descargó ningún universo completo:
+
+| Fuente | HTTP | Backend | Estado | Total declarado | Publicado | Página siguiente |
+|---|---:|---|---|---:|---:|---|
+| Cámara | 200 | `r2-lake` | parcial | 58.751 | 49 | sí |
+| Senado | 200 | `r2-lake` | parcial | 1.428 | 50 | sí |
+| Movimientos | 200 | `r2` | parcial | 82 | 82 | sí |
+| ChileCompra | 200 | `r2-lake` | completo | 74.142 | 74.142 | sí |
+| InfoLobby | 200 | `r2-lake` | completo | 71.467 | 71.467 | sí |
+| DIPRES | 200 | `r2-lake` | parcial | 247.287 | 15.689 | sí |
+
+El resultado permite continuar con la auditoría de alcance sin esperar D1. La
+prioridad inmediata es explicar los estados parciales de Cámara, Senado y
+DIPRES; no aumentar el catálogo ni convertir el total declarado en cobertura
+consultable.
