@@ -845,3 +845,8 @@ catálogos y el estado visible aún mezclan “declarado”, “publicado” y
 “consultable”. El siguiente cambio de datos debe corregir esa distinción antes
 de mostrar cobertura o corte global; no se debe resolver aumentando D1 ni
 descargando el universo al navegador.
+
+El verificador de calendario ETL se ejecutó manualmente en GitHub como run
+`34717871931` y terminó exitosamente. La comprobación confirma que los
+workflows separados y sus frecuencias declaradas siguen cubiertos por el
+calendario; esto no ejecutó ningún ETL ni consumió D1.

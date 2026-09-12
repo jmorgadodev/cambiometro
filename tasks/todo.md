@@ -42,6 +42,7 @@
   con pruebas `limit=1/10/25/50` y cursor en InfoLobby, ChileCompra y DIPRES;
 - [x] Promover PR #497 al 100% y verificar health, páginas 1–2 y límites 1/10/25/50
   en producción; queda pendiente sólo el verificador productivo largo iniciado.
+- [x] Ejecutar el verificador de calendario ETL (`34717871931`) sin tocar D1.
 - [ ] Reconciliar el alcance de Senado 2025-08 y 2026-02 contra la fuente
   oficial antes de reconstruir sus artefactos.
 - [ ] Revisar el corte vigente/histórico de ChileCompra y el release de
