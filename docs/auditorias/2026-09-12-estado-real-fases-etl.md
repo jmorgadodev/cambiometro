@@ -1921,3 +1921,25 @@ reconciliar Movimientos y completar los checks de compatibilidad. El reinicio
 sólo es requisito para medir nuevamente la cuota y decidir si alguna proyección
 pequeña de D1 puede ejecutarse; no es requisito para publicar un release R2 que
 ya haya pasado sus controles.
+
+### Causas comprobadas de los fallos recientes
+
+La lectura de los logs de GitHub Actions evita tratarlos como un único problema:
+
+- **Personal Cámara:** la corrida `34127058669` falla con
+  `PERSONAL_APOYO_SOURCE_BLOCKED` al consultar la ficha oficial de Cámara. No
+  es una falla de D1 ni autoriza a publicar una nómina vacía.
+- **38 bis:** la corrida `34630955321` falla después de cuatro intentos con
+  `fetch failed` contra `comision38bis.gob.cl/registro-publico`. El conector
+  CSV probado localmente es una ruta de recuperación, no una razón para borrar
+  el snapshot vigente.
+- **ChileCompra:** la corrida `34130670889` recibe `CHILECOMPRA_BULK_HTTP_403`,
+  genera cero compradores y es detenida por el guard
+  `STATIC_INPUT_PARTIAL_CHILECOMPRA_SUBSET`. El guard está funcionando: evita
+  publicar una actualización vacía y conserva el release anterior.
+
+El siguiente trabajo ejecutable hoy es, por tanto, diagnóstico y aislamiento:
+probar cada fuente en forma independiente, guardar el resultado y el diff,
+reintentar sólo el conector que corresponda y bloquear la publicación si el
+resultado está vacío o incompleto. No se debe lanzar un ETL global para intentar
+resolver tres bloqueos de fuente distintos.
