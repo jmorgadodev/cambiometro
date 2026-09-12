@@ -99,3 +99,18 @@ separada. En `gastos_senado`, el release API actual cubre 2.500 filas mientras
 Esta comprobación no consultó D1 ni ejecutó ETL. Queda como requisito para la
 siguiente implementación: mostrar siempre `filas publicadas`, `total esperado`
 y el estado de release por componente.
+
+## Salvaguarda incorporada en el código maestro
+
+El proyecto maestro dejó una prueba de regresión en el commit
+`6aaf6a7` (`test: separar filas publicadas y esperadas en api de registros`).
+La prueba exige que, cuando falta una partición, la API use las filas
+realmente consultables para `total` y `totalPages`, y exponga el universo
+declarado aparte como `expectedRows`. De esta forma una respuesta parcial no
+puede generar una paginación o un mensaje de cobertura basado únicamente en
+el catálogo esperado.
+
+La rama remota quedó dos commits por delante y contiene una integración que
+reintroduce el fallback al repositorio retirado en `r2-records.ts`. No se
+incorporará automáticamente: el maestro local conserva R2 como único plano
+público y se debe revisar esa divergencia antes de sincronizar o publicar.
