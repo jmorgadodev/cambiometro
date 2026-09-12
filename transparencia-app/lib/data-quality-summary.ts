@@ -184,7 +184,10 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
     totalHistoricalRecords,
     totalRelatedRecords,
     metrics: {
-      published: coverageMetric(totalCanonicalRecords, totalHistoricalRecords),
+      // Sin un snapshot de salud no existe un denominador reconciliado para
+      // afirmar cobertura; mostrar un porcentaje aquí convertiría la
+      // configuración histórica en una falsa cobertura vigente.
+      published: coverageMetric(null, null),
       queryable: coverageMetric(queryableCount, queryableDenominator),
       related: coverageMetric(totalRelatedRecords, totalCanonicalRecords),
     },
