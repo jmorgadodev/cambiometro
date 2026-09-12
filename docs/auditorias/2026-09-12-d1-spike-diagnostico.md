@@ -128,3 +128,29 @@ Este segundo fallo es consecuencia del primero: como el build de Pages en
 nuevo que el guard pudiera confirmar. La espera prolongada no representa una
 lectura masiva de D1 ni un nuevo ETL; es una verificación de frescura sin
 publicación exitosa.
+
+## Hallazgo adicional: exportación semanal completa de D1
+
+La revisión del repositorio público encontró una causa operativa directa y
+recurrente del consumo de lecturas: `.github/workflows/backup-weekly.yml` se
+ejecutaba cada domingo y llamaba a `transparencia-app/scripts/backup-weekly.mjs`.
+Ese script ejecutaba `wrangler d1 export transparencia-db` de forma
+incondicional antes de copiar el data lake a R2. Un export completo de la base
+es incompatible con el objetivo de mantener D1 dentro de la cuota compartida
+y es consistente con el pico histórico observado de 14.030.061 filas leídas.
+
+Se preparó una corrección local, sin despliegue ni escritura externa:
+
+- el backup programado queda en modo R2-only;
+- el export D1 sólo puede activarse manualmente con `BACKUP_D1=1` y la
+  confirmación exacta `CAMBIOMETRO_D1_BACKUP`;
+- el inventario marca explícitamente `d1: null` y `d1Skipped: true` cuando no
+  existe dump;
+- el restore drill valida un objeto del backup R2 mediante `HEAD` y termina en
+  modo `R2_ONLY`, sin descargar ni restaurar D1;
+- se agregó una prueba estática de la política para impedir que el flujo
+  programado vuelva a exportar D1 accidentalmente.
+
+La corrección está pendiente de revisión y publicación controlada. No modifica
+los datos públicos, no ejecuta ETL y no toca `cambiometro-editorial` ni otros
+repositorios.
