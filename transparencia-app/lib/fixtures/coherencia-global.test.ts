@@ -6,7 +6,6 @@ import { SOURCE_CANONICAL_COUNTS, SOURCE_HISTORICAL_COUNTS } from "@/lib/publish
 import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
 import { evaluateSenateSupport } from "@/scripts/etl/senado-assignment.mjs";
 import { getMuniCanonicalSlug, isMuniLegacyId, getAllMuniSlugs } from "@/lib/slug-utils";
-import { getTransferReleaseMetadata } from "@/lib/transfer-release-metadata";
 
 describe("Blindaje Anti-Regresión — Coherencia Global del Sitio", () => {
   const projectRoot = resolve(process.cwd());
@@ -26,12 +25,11 @@ describe("Blindaje Anti-Regresión — Coherencia Global del Sitio", () => {
     });
 
     it("La suma de conteos canónicos por fuente coincide exactamente con el resumen del dashboard de calidad", async () => {
-      const transferRelease = getTransferReleaseMetadata();
-      const canonicalSum = Object.entries(SOURCE_CANONICAL_COUNTS)
-        .reduce((sum, [id, count]) => sum + (id === "ley-19862" ? transferRelease.totalRows : count), 0);
-      const { summary } = await getDataQualityDashboardData();
+      const { summary, sources } = await getDataQualityDashboardData();
+      const canonicalSum = sources.reduce((sum, source) => sum + source.canonicalCount, 0);
       expect(summary.totalRegistrosCanonicos).toBe(canonicalSum);
-      expect(summary.totalRegistrosCanonicos).toBe(1487224 - 59361 + transferRelease.totalRows);
+      expect(summary.metrics.published.label).toBe("No calculable");
+      expect(sources.some((source) => source.reconciliation.state === "scope_mismatch")).toBe(true);
       expect(GLOBAL_KPIS.registros_canonicos).toBe(1753013);
     });
 

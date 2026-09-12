@@ -114,9 +114,18 @@ export default async function DataQualityPage() {
               </h2>
             </div>
             <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-              Cifras calculadas dinámicamente desde el catálogo authoritative y Lake de datos.
+              Cifras calculadas desde el release validado y su catálogo de componentes.
             </div>
           </div>
+
+          {sources.some((source) => !source.reconciliation.comparisonEligible) && (
+            <div className="card" style={{ marginBottom: "1rem", padding: "0.9rem 1.1rem", borderColor: "var(--accent)" }} role="status">
+              <strong style={{ color: "var(--text-primary)" }}>Hay conteos pendientes de reconciliación</strong>
+              <p style={{ margin: "0.3rem 0 0", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.5 }}>
+                Algunas fuentes cambiaron de alcance entre el release productivo y la referencia histórica local. Sus porcentajes de publicación quedan como “No calculable” hasta separar núcleo, votaciones, gastos y demás componentes.
+              </p>
+            </div>
+          )}
 
           <div
             className="table-container"
@@ -220,6 +229,11 @@ export default async function DataQualityPage() {
                           </ul>
                           <p style={{ margin: "0.35rem 0 0", fontSize: "0.68rem" }}>{source.qualityAudit.note}</p>
                         </details>
+                      )}
+                      {!source.reconciliation.comparisonEligible && (
+                        <p style={{ margin: "0.45rem 0 0", color: "var(--accent)", lineHeight: 1.45 }}>
+                          <strong>Conteo pendiente:</strong> {source.reconciliation.note}
+                        </p>
                       )}
                     </td>
                   </tr>
