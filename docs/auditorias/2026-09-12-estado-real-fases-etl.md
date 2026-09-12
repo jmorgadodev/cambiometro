@@ -1322,3 +1322,16 @@ Conclusión: no existe evidencia para reemplazar local por producción ni para
 recargar datos ahora. La próxima tarea segura es generar una matriz por
 componente y período para Cámara, Senado, CPLT, InfoLobby, ChileCompra y Ley
 19.862; sólo después se decidirá qué snapshot histórico conviene conservar.
+
+## Validación CI de la corrección 38 bis
+
+El PR #499 quedó verificado sobre el commit `ead788d4` con los tres checks
+obligatorios en verde:
+
+- Lint, tipos y pruebas unitarias.
+- Security Scan.
+- Build de Pages, Worker y verificación E2E.
+
+La corrección sigue aislada: no se hizo merge, no se publicó un release y no se
+ejecutó D1. Queda lista para revisión dentro del ciclo de publicación por
+fuente.
