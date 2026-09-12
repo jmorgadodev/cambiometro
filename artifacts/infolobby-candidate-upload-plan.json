@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-09-12T10:27:17.834Z",
+  "source": "infolobby",
+  "candidateRows": 71466,
+  "deltaObjectCount": 13,
+  "deltaBytes": 261720688,
+  "preservedJanJunObjectCount": 18,
+  "objects": [
+    {
+      "key": "catalog/v1/manifest.json",
+      "size": 64036,
+      "sha256": "08996e0be3af37e906e553d69eac9c578c1f5179e0ec393f9a4d0b53f7e5799a",
+      "action": "replace"
+    },
+    {
+      "key": "entities/v1/infolobby-d7119713a3b6ee839c925ac1794362c48dc41eed8697851399741ddd74d52c33.jsonl.gz",
+      "size": 3413515,
+      "sha256": "d7119713a3b6ee839c925ac1794362c48dc41eed8697851399741ddd74d52c33",
+      "action": "replace"
+    },
+    {
+      "key": "indexes/v1/infolobby/entities-d8518c866ea7234ea83d0cb50b06a8a7a7e1bade7656b1cd959aee0808120b38.jsonl.gz",
+      "size": 10350969,
+      "sha256": "d8518c866ea7234ea83d0cb50b06a8a7a7e1bade7656b1cd959aee0808120b38",
+      "action": "replace"
+    },
+    {
+      "key": "indexes/v1/infolobby/manifest.json",
+      "size": 89375,
+      "sha256": "3e89b88867cfbd2a5fa8619e1a8fd96a211c12242dd411fca639de27a2ab94fc",
+      "action": "replace"
+    },
+    {
+      "key": "indexes/v1/infolobby/records.jsonl",
+      "size": 227555913,
+      "sha256": "3d4276e67180674c90d8bfcf8bb14bf49f3bfce1d8ae197b099f317818668291",
+      "action": "replace"
+    },
+    {
+      "key": "indexes/v1/infolobby/search-counts.json",
+      "size": 4005480,
+      "sha256": "4885d3ab9be0631fda34f4d15832ed074c665e895916cf4153331fa82f94d2fc",
+      "action": "replace"
+    },
+    {
+      "key": "indexes/v1/infolobby/search.json",
+      "size": 8742723,
+      "sha256": "88b2db689690481418985c330b1f96c36e6a8695ec90e5dbb948cfb0d876facc",
+      "action": "replace"
+    },
+    {
+      "key": "partitions/infolobby/2026/07/manifest.json",
+      "size": 779,
+      "sha256": "f38d5134b87417783673d9cbe573e2472efe19c08590ca27e066040388d81ebe",
+      "action": "add_or_replace"
+    },
+    {
+      "key": "partitions/infolobby/2026/07/records-86a6a52a96ae1aa34c8124b23fb7147c7286593199aa9711e633daaea78b4d78.jsonl.gz",
+      "size": 4784553,
+      "sha256": "86a6a52a96ae1aa34c8124b23fb7147c7286593199aa9711e633daaea78b4d78",
+      "action": "add_or_replace"
+    },
+    {
+      "key": "partitions/infolobby/2026/07/sha256.txt",
+      "size": 228,
+      "sha256": "d1742b2e573f8302b1b671e3aebc75ac5da19b77253b8ded839f1660ea56c3ec",
+      "action": "add_or_replace"
+    },
+    {
+      "key": "partitions/infolobby/2026/08/manifest.json",
+      "size": 779,
+      "sha256": "85c7c7f68a22d9b1b15534215a09d1a1c0bd65a2edd5df50221ea6c0d231d45f",
+      "action": "add_or_replace"
+    },
+    {
+      "key": "partitions/infolobby/2026/08/records-6827bcb6083c9771b6b1f3532fcdc018d15f22338d09beddf23e2965523bddd8.jsonl.gz",
+      "size": 2712110,
+      "sha256": "6827bcb6083c9771b6b1f3532fcdc018d15f22338d09beddf23e2965523bddd8",
+      "action": "add_or_replace"
+    },
+    {
+      "key": "partitions/infolobby/2026/08/sha256.txt",
+      "size": 228,
+      "sha256": "3d6c4f290f930122c516f41202bea94aa095d7dccdce1c75cc47749475890907",
+      "action": "add_or_replace"
+    }
+  ]
+}

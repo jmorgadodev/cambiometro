@@ -333,6 +333,10 @@ catálogo, entidades, índice de entidades, índice paginado, julio corregido y
 agosto nuevo. Los **18 objetos de enero–junio** no necesitan volver a
 subirse. Esto reduce el riesgo y evita una recarga innecesaria de R2.
 
+El detalle de claves, tamaños, acción y SHA-256 quedó en
+`artifacts/infolobby-candidate-upload-plan.json` para usarlo como preflight de
+la publicación con escritura.
+
 ## Control DIPRES — 07:16 UTC-3
 
 Las páginas oficiales de ejecución presupuestaria y de presupuestos
