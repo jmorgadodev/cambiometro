@@ -816,3 +816,32 @@ Cuando Analytics confirme una cuota limpia, se hará sólo una sonda acotada y s
 verificará que el preflight bloquee materializaciones por defecto. No se
 reactivará ningún ETL masivo de D1 como parte de esta revisión. El camino
 público seguirá siendo R2.
+
+## Verificación directa adicional de producción — 12 de septiembre
+
+Se consultaron en modo sólo lectura los endpoints productivos, sin ejecutar SQL
+ni recorrer D1:
+
+- `/api/v1/health` respondió HTTP 200, con `publicDataBackend=r2`,
+  `publicD1Reads=false`, `transferSource=r2` y `transferRows=62172`.
+- El mismo health declara `generatedAt=2026-09-08T13:21:08.102Z`; este campo no
+  representa por sí solo la fecha de todos los ETL y debe dejar de presentarse
+  como un corte global.
+- `camara` declara 58.751 registros, pero la consulta verificable devuelve
+  `sourceStatus=partial` y `publishedRows=49` en la respuesta de una página.
+- `senado` declara 1.428 registros y devuelve `sourceStatus=partial`, con
+  `publishedRows=50` en la respuesta de una página.
+- `chilecompra` devuelve 74.142 filas, `sourceStatus=complete` y cero
+  particiones o artefactos faltantes.
+- `infolobby` devuelve 71.467 filas, `sourceStatus=complete` y cero
+  particiones o artefactos faltantes.
+- `cplt` no entregó filas en la consulta pública: respondió
+  `sourceStatus=temporarily-unavailable`, `sourceBackend=none` y razón
+  `r2-unavailable`, aunque el catálogo declara 1.226.913 registros.
+- `movimientos` devuelve 82 filas desde R2, sin abrir D1.
+
+La conclusión operativa es precisa: el camino público R2 está activo, pero los
+catálogos y el estado visible aún mezclan “declarado”, “publicado” y
+“consultable”. El siguiente cambio de datos debe corregir esa distinción antes
+de mostrar cobertura o corte global; no se debe resolver aumentando D1 ni
+descargando el universo al navegador.
