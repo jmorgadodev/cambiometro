@@ -242,7 +242,7 @@ jobs:
 
       - name: Registrar diagnóstico de materialización D1
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: transfer-d1-materialization-${{ github.run_id }}
           path: transparencia-app/transfer-d1-materialization.log

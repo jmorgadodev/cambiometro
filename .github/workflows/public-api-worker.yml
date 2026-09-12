@@ -125,7 +125,7 @@ jobs:
             --name cambiometro-public-api \
             --json > worker-versions.json
       - name: Publicar evidencia de versión
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: worker-version-${{ github.sha }}
           path: |
