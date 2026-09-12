@@ -5,21 +5,22 @@ import { useEffect, useState } from "react";
 type MonthlySummary = {
   period: string;
   rows: number;
-  people: number;
+  people: number | null;
   organisms: number;
   withAmount: number;
   withoutAmount: number;
   grossTotal: number;
   averageGross: number | null;
-  newRecords: number;
-  removedRecords: number;
-  amountChanges: number;
-  amountDelta: number;
-  organismChanges: number;
-  roleChanges: number;
+  newRecords: number | null;
+  removedRecords: number | null;
+  amountChanges: number | null;
+  amountDelta: number | null;
+  organismChanges: number | null;
+  roleChanges: number | null;
 };
 
 type TransparencySummary = {
+  comparisonsAvailable?: boolean;
   recordCount: number;
   generatedAt: string;
   latestPeriod: string | null;
@@ -50,6 +51,10 @@ function formatPeriod(period: string) {
 
 function formatMoney(value: number | null) {
   return value === null ? "—" : money.format(value);
+}
+
+function formatCount(value: number | null) {
+  return value === null ? "—" : number.format(value);
 }
 
 function humanizeMunicipality(id: string) {
@@ -90,9 +95,11 @@ export default function TransparencyActivaSummary() {
       {latest && (
         <div className="remuneration-transparency-latest" role="status">
           <strong>En el corte {formatPeriod(latest.period)}:</strong>
-          <span>{number.format(latest.newRecords)} nuevos registros</span>
-          <span>{number.format(latest.removedRecords)} que ya no aparecen</span>
-          <span>{number.format(latest.amountChanges)} cambios de monto</span>
+          {summary.comparisonsAvailable !== false ? <>
+            <span>{formatCount(latest.newRecords)} nuevos registros</span>
+            <span>{formatCount(latest.removedRecords)} que ya no aparecen</span>
+            <span>{formatCount(latest.amountChanges)} cambios de monto</span>
+          </> : <span>el release conserva los cortes; la comparación de altas, bajas y cambios se incorporará con el próximo resumen ETL</span>}
         </div>
       )}
 
@@ -104,10 +111,10 @@ export default function TransparencyActivaSummary() {
             <tr key={period.period}>
               <td><strong>{formatPeriod(period.period)}</strong></td>
               <td>{number.format(period.rows)}</td>
-              <td>{number.format(period.people)}</td>
-              <td>{number.format(period.newRecords)}</td>
-              <td>{number.format(period.removedRecords)}</td>
-              <td>{number.format(period.amountChanges)}</td>
+              <td>{formatCount(period.people)}</td>
+              <td>{formatCount(period.newRecords)}</td>
+              <td>{formatCount(period.removedRecords)}</td>
+              <td>{formatCount(period.amountChanges)}</td>
               <td>{formatMoney(period.grossTotal)}</td>
             </tr>
           ))}</tbody>

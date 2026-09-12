@@ -45,6 +45,27 @@ function sortedPeriods(values) {
   return [...values].sort((left, right) => left.localeCompare(right));
 }
 
+function coverageSummaryOf(coverage) {
+  const coverageRows = Array.isArray(coverage) ? coverage : [];
+  return {
+    total: coverageRows.length,
+    available: coverageRows.filter((item) => item.status === "available").length,
+    unavailable: coverageRows.filter((item) => item.status === "unavailable").length,
+    notApplicable: coverageRows.filter((item) => item.status === "not_applicable").length,
+    unavailableItems: coverageRows
+      .filter((item) => item.status !== "available")
+      .map((item) => ({
+        communeId: item.communeId,
+        name: item.name ?? item.communeId,
+        cut: item.cut ?? null,
+        status: item.status,
+        reason: item.status === "not_applicable"
+          ? "Territorio no aplicable como nómina municipal independiente."
+          : "La fuente no publicó una nómina disponible para este corte.",
+      })),
+  };
+}
+
 /**
  * Builds a small, aggregate-only view of the CPLT payroll release.
  * It deliberately contains no names, RUTs or individual rows: those remain
@@ -172,30 +193,14 @@ export function buildCpltTransparencySummary(rows, coverage, generatedAt) {
     };
   });
 
-  const coverageRows = Array.isArray(coverage) ? coverage : [];
-  const coverageSummary = {
-    total: coverageRows.length,
-    available: coverageRows.filter((item) => item.status === "available").length,
-    unavailable: coverageRows.filter((item) => item.status === "unavailable").length,
-    notApplicable: coverageRows.filter((item) => item.status === "not_applicable").length,
-    unavailableItems: coverageRows
-      .filter((item) => item.status !== "available")
-      .map((item) => ({
-        communeId: item.communeId,
-        name: item.name ?? item.communeId,
-        cut: item.cut ?? null,
-        status: item.status,
-        reason: item.status === "not_applicable"
-          ? "Territorio no aplicable como nómina municipal independiente."
-          : "La fuente no publicó una nómina disponible para este corte.",
-      })),
-  };
+  const coverageSummary = coverageSummaryOf(coverage);
 
   const multiOrganismPeople = [...organismsByName.values()].filter((organisms) => organisms.size > 1).length;
 
   return {
     schemaVersion: 1,
     dataset: "transparencia-activa-funcionarios-summary",
+    comparisonsAvailable: true,
     generatedAt,
     recordCount: rows?.length ?? 0,
     periods: monthly,
@@ -216,6 +221,63 @@ export function buildCpltTransparencySummary(rows, coverage, generatedAt) {
     notes: [
       "Las altas y bajas son cambios de presencia entre cortes publicados; no equivalen por sí solos a contrataciones o despidos.",
       "Los cambios de monto comparan remuneraciones brutas publicadas para una misma combinación normalizada de nombre y tipo de contrato; los cambios de organismo se cuentan por separado.",
+      "Los registros originales y sus valores publicados permanecen separados en la fuente consultable.",
+    ],
+  };
+}
+
+/**
+ * Fallback used only when an older R2 release predates the precomputed
+ * summary. It is intentionally aggregate-only and does not retain person
+ * keys, so Pages stays fast and memory-bounded. Historical deltas are marked
+ * unavailable until the next CPLT publication generates the full summary.
+ */
+export function buildCpltAggregateSummary(stats, coverage, generatedAt) {
+  const periodList = sortedPeriods(stats.periods?.keys?.() ?? []);
+  const periods = periodList.map((period) => {
+    const current = stats.periods.get(period);
+    return {
+      period,
+      rows: current.rows,
+      people: null,
+      organisms: current.organisms.size,
+      withAmount: current.withAmount,
+      withoutAmount: current.withoutAmount,
+      grossTotal: current.grossTotal,
+      averageGross: current.withAmount ? Math.round((current.grossTotal / current.withAmount) * 100) / 100 : null,
+      newRecords: null,
+      removedRecords: null,
+      amountChanges: null,
+      amountDelta: null,
+      organismChanges: null,
+      roleChanges: null,
+      contracts: current.contracts,
+    };
+  });
+  return {
+    schemaVersion: 1,
+    dataset: "transparencia-activa-funcionarios-summary",
+    comparisonsAvailable: false,
+    generatedAt,
+    recordCount: stats.recordCount,
+    periods,
+    coverage: coverageSummaryOf(coverage),
+    quality: {
+      recordsWithIssues: stats.recordsWithIssues,
+      byIssue: stats.issueCounts,
+      invalidPeriodCount: stats.invalidPeriodCount,
+      amountStates: {
+        positive: stats.positiveAmountCount,
+        zero: stats.zeroAmountCount,
+        notPublished: stats.missingAmountCount,
+      },
+    },
+    contractCounts: stats.contractCounts,
+    latestPeriod: periodList.at(-1) ?? null,
+    multiOrganismPeople: null,
+    notes: [
+      "Este resumen se calculó durante el build desde un release R2 anterior que no tenía agregados precomputados.",
+      "Las altas, bajas y cambios de monto aparecerán cuando el próximo release CPLT publique el resumen histórico completo.",
       "Los registros originales y sus valores publicados permanecen separados en la fuente consultable.",
     ],
   };

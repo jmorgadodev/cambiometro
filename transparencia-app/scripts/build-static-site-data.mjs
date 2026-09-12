@@ -8,7 +8,7 @@ import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
 import { chunkJsonRows, listUnavailableMunicipalities } from "./static-payroll.mjs";
 import { readExpenseSubset } from "./expense-release.mjs";
 import { normalizeMovementPayload, validateMovementPayload } from "./movimientos-pipeline.mjs";
-import { buildCpltTransparencySummary } from "./cplt-transparency-summary.mjs";
+import { buildCpltAggregateSummary } from "./cplt-transparency-summary.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const readJson = (file) => readFile(join(root, file), "utf8").then(JSON.parse);
@@ -226,7 +226,17 @@ try {
 await rm(publicFuncionariosDir, { recursive: true, force: true });
 await mkdir(publicFuncionariosDir, { recursive: true });
 let cpltTransparencySummary = null;
-const fallbackSummaryRows = [];
+const cpltSummaryStats = {
+  recordCount: 0,
+  periods: new Map(),
+  contractCounts: {},
+  issueCounts: {},
+  recordsWithIssues: 0,
+  invalidPeriodCount: 0,
+  positiveAmountCount: 0,
+  zeroAmountCount: 0,
+  missingAmountCount: 0,
+};
 const cpltTransparencySummarySource = join(cpltRoot, "transparency-summary.json");
 if (existsSync(cpltTransparencySummarySource)) {
   const summaryContent = await readFile(cpltTransparencySummarySource);
@@ -263,15 +273,40 @@ for (const entry of await readdir(cpltRoot, { withFileTypes: true })) {
   }
   if (!Array.isArray(parsed) || parsed.length === 0) continue;
   for (const row of parsed) {
-    fallbackSummaryRows.push({
-      nombre_completo: row.nombre_completo,
-      organo_nombre: row.organo_nombre,
-      tipo_contrato: row.tipo_contrato,
-      cargo: row.cargo,
-      remuneracion_bruta_mensual: row.remuneracion_bruta_mensual,
-      fuente_periodo: row.fuente_periodo ?? row.periodo,
-      calidad_datos: row.calidad_datos,
-    });
+    cpltSummaryStats.recordCount += 1;
+    const period = String(row.fuente_periodo ?? row.periodo ?? "").trim().slice(0, 7);
+    const validPeriod = /^\d{4}-(0[1-9]|1[0-2])$/.test(period);
+    if (!validPeriod) cpltSummaryStats.invalidPeriodCount += 1;
+    const rawAmount = row.remuneracion_bruta_mensual;
+    const amount = rawAmount === null || rawAmount === undefined || String(rawAmount).trim() === "" ? null : Number(rawAmount);
+    if (amount === null || !Number.isFinite(amount)) cpltSummaryStats.missingAmountCount += 1;
+    else if (amount === 0) cpltSummaryStats.zeroAmountCount += 1;
+    else cpltSummaryStats.positiveAmountCount += 1;
+    const contract = String(row.tipo_contrato ?? "").trim() || "No informado";
+    cpltSummaryStats.contractCounts[contract] = (cpltSummaryStats.contractCounts[contract] ?? 0) + 1;
+    const issues = Array.isArray(row.calidad_datos?.incidencias) ? row.calidad_datos.incidencias : [];
+    if (issues.length > 0) cpltSummaryStats.recordsWithIssues += 1;
+    for (const issue of issues) cpltSummaryStats.issueCounts[issue] = (cpltSummaryStats.issueCounts[issue] ?? 0) + 1;
+    if (validPeriod) {
+      const current = cpltSummaryStats.periods.get(period) ?? {
+        rows: 0,
+        withAmount: 0,
+        withoutAmount: 0,
+        grossTotal: 0,
+        organisms: new Set(),
+        contracts: {},
+      };
+      current.rows += 1;
+      if (amount === null || !Number.isFinite(amount)) current.withoutAmount += 1;
+      else {
+        current.withAmount += 1;
+        current.grossTotal += amount;
+      }
+      const organism = String(row.organo_nombre ?? row.organo_id ?? "").trim().toLocaleLowerCase("es-CL");
+      if (organism) current.organisms.add(organism);
+      current.contracts[contract] = (current.contracts[contract] ?? 0) + 1;
+      cpltSummaryStats.periods.set(period, current);
+    }
   }
   const id = entry.name.replace(/\.json$/, "");
   const chunks = chunkJsonRows(parsed);
@@ -309,8 +344,8 @@ for (const entry of await readdir(cpltRoot, { withFileTypes: true })) {
     });
   }
 }
-if (!cpltTransparencySummary && fallbackSummaryRows.length > 0) {
-  const summary = buildCpltTransparencySummary(fallbackSummaryRows, cpltCoverage, cpltGeneratedAt);
+if (!cpltTransparencySummary && cpltSummaryStats.recordCount > 0) {
+  const summary = buildCpltAggregateSummary(cpltSummaryStats, cpltCoverage, cpltGeneratedAt);
   const summaryContent = `${JSON.stringify(summary, null, 2)}\n`;
   const summaryOutput = join(publicFuncionariosDir, "transparency-summary.json");
   await writeFile(summaryOutput, summaryContent);
@@ -322,7 +357,6 @@ if (!cpltTransparencySummary && fallbackSummaryRows.length > 0) {
     latestPeriod: summary.latestPeriod ?? null,
   };
 }
-fallbackSummaryRows.length = 0;
 funcionariosFiles.sort((left, right) => left.id.localeCompare(right.id));
 const funcionariosManifest = {
   schemaVersion: 1,
