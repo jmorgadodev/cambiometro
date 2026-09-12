@@ -452,6 +452,14 @@ consulta canónica). Por eso se cierra el incidente del alias, pero no se
 declara cerrada la cobertura histórica hasta reconstruir esas particiones desde
 la fuente oficial y validarlas en R2.
 
+La auditoría mensual posterior detectó la causa concreta de la limitación del
+primer arreglo: el alias filtraba una variante R2 que sólo tenía septiembre.
+Enero y marzo-agosto muestran particiones publicadas pero incompletas; febrero
+no expone una partición consultable. El corte 2026-09 responde completo con 49
+votaciones. El PR #496 elimina ese filtro de variante: el alias usa el
+histórico canónico de Cámara y fuerza `kind=vote`, dejando la cobertura parcial
+histórica visible hasta que se reconstruyan los artefactos faltantes.
+
 ## Plan operativo aplicable hoy
 
 1. **Fuentes**: conservar el resultado de estas pruebas como preflight; no
