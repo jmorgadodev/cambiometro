@@ -186,3 +186,35 @@ que el release caliente sólo expone la partición de junio de 2026 como
 consulta verificable. Por tanto, el estado `partial` es correcto y el número
 247.287 sólo puede mostrarse como universo catalogado, no como filas
 inmediatamente descargables.
+
+## Reconciliación InfoLobby — 09:58 UTC-3
+
+La diferencia de 92 filas quedó aislada sin modificar R2, D1 ni el código
+productivo:
+
+- El catálogo `catalog/v1/manifest.json` registra la partición
+  `infolobby/2026/08` con 92 filas, release
+  `data-infolobby-2026-680f61c72bfcf3c8` y checksum
+  `aa735e90ce646472c0c8e2ebdfb5eb46afd76d7ac1b78ec86d12373b2cbc1278`.
+- El índice público `indexes/v1/infolobby/manifest.json` sólo suma las
+  particiones enero–julio y declara 60.523 filas.
+- La descarga remota de
+  `partitions/infolobby/2026/08/manifest.json` respondió `The specified key
+  does not exist`; el archivo local de comprobación quedó vacío (0 bytes).
+- El releaseTag no existe como GitHub Release ni como tag remoto recuperable
+  en el repositorio auditado, y no hay una partición local operativa que
+  contenga esas 92 filas.
+
+Conclusión: las 92 filas están catalogadas como una expectativa histórica,
+pero no existe evidencia del artefacto publicado que permita reconstruirlas.
+No se deben inventar, completar desde D1 ni marcar como consultables. Hasta
+que el ETL obtenga nuevamente el período agosto y publique sus objetos con
+checksum verificable, el alcance honesto de InfoLobby es **60.523 filas
+consultables, más 92 filas catalogadas pendientes de recuperación**. El
+estado debe continuar `partial`.
+
+Acción segura pendiente: recuperar agosto mediante una ejecución controlada
+del ETL de InfoLobby, validar conteo/checksum y sólo después regenerar el
+índice y publicar el release. Si la fuente no entrega esas 92 filas, debe
+corregirse el catálogo para dejar de prometerlas, mediante un cambio de
+release auditado; ninguna de esas acciones se ejecutó en esta revisión.
