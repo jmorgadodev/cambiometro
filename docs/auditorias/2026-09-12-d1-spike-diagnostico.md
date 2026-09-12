@@ -289,3 +289,17 @@ Esta comprobación fortalece la conclusión: el consumo masivo observado en
 `transparencia-db` es histórico dentro de la ventana móvil y no está creciendo
 por las consultas R2 del sitio. Se mantiene la espera de la renovación completa
 de la ventana para confirmar el descenso del agregado.
+
+### Revisión de barreras ETL
+
+Se revisaron los workflows activos del proyecto maestro. Los pasos que llaman a
+`data:materialize` quedan condicionados a `workflow_dispatch` y a un preflight
+que debe producir `proceed=true`; los workflows programados publican R2 y
+posponen D1. El flujo diario además exige el parámetro manual
+`allow_d1_materialization=true`, cuyo valor predeterminado es `false`. No se
+encontró un workflow programado que materialice remotamente
+`transparencia-db`.
+
+La revisión del repositorio histórico confirma que sus workflows ETL están
+`disabled_manually` y que sólo Dependabot permanece activo. No hay una ruta
+operativa desde ese repositorio hacia D1.
