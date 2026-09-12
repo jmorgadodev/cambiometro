@@ -306,3 +306,11 @@ El candidato está en la carpeta temporal de auditoría y no se publicó. Antes
 de usarlo como release se debe validar que el bundle de entidades completo sea
 el que se quiere conservar y que el manifiesto/índice público se actualicen en
 una sola operación versionada.
+
+## Control DIPRES — 07:16 UTC-3
+
+Las páginas oficiales de ejecución presupuestaria y de presupuestos
+respondieron HTTP 200. Esto confirma disponibilidad de la fuente, pero no
+cambia su naturaleza: los 247.287 registros catalogados corresponden a datos
+agregados presupuestarios y el alcance consultable publicado continúa siendo
+parcial. DIPRES no debe exponerse como buscador de remuneraciones individuales.
