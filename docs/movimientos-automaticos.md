@@ -58,3 +58,15 @@ clasificación oficial incorrecta.
 data/movimientos.json incluye last_attempt_at, last_success_at,
 last_event_date, source_health, checksum_sha256, stats y signals. La fecha del
 último evento no debe confundirse con la fecha de la última publicación exitosa.
+
+La página pública muestra por separado:
+
+- la última ejecución exitosa del proceso;
+- el último evento efectivo incorporado al catálogo;
+- la fecha de publicación de la evidencia que respalda un evento;
+- la última consulta y el estado de cada conector oficial.
+
+Una fuente bloqueada no elimina el snapshot anterior. El proceso conserva los
+movimientos con identificadores estables y reconcilia señales nuevas con filas
+provisionales existentes en cada ejecución; una señal no se convierte en
+movimiento verificado sin decreto o resolución oficial.
