@@ -29,6 +29,19 @@ export interface QualityAuditSnapshot {
   observations: QualityAuditObservation[];
 }
 
+export type SourceReconciliationState = "aligned" | "scope_mismatch" | "configured_only" | "release_override";
+
+export interface SourceCountReconciliation {
+  state: SourceReconciliationState;
+  comparisonEligible: boolean;
+  configuredCanonicalCount: number | null;
+  configuredHistoricalCount: number | null;
+  observedCount: number | null;
+  catalogCount: number | null;
+  components: Record<string, number> | null;
+  note: string;
+}
+
 export interface DataQualitySourceSummary {
   id: string;
   label: string;
@@ -62,6 +75,7 @@ export interface DataQualitySourceSummary {
     observedCount: number;
     correctedCount: number;
   };
+  reconciliation: SourceCountReconciliation;
   qualityAudit?: QualityAuditSnapshot;
 }
 
@@ -108,6 +122,7 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
   const sources = getDataQualityConfig().map((source) => {
     const canonicalCount = source.id === "ley-19862" ? transfer.totalRows : source.canonicalCount;
     const historicalCount = source.id === "ley-19862" ? transfer.totalRows : source.historicalCount;
+    const configuredScopeMismatch = canonicalCount !== historicalCount;
     return ({
     id: source.id,
     label: source.label,
@@ -131,11 +146,23 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
     modulePath: source.modulePath,
     derived: source.derived,
     metrics: {
-      published: coverageMetric(canonicalCount, historicalCount),
+      published: coverageMetric(null, null),
       queryable: coverageMetric(source.id === "ley-19862" ? transfer.totalRows : source.queryableCount, canonicalCount),
       related: coverageMetric(source.relatedCount, canonicalCount),
     },
     quality: source.qualityObservations,
+    reconciliation: {
+      state: configuredScopeMismatch ? "scope_mismatch" as const : "configured_only" as const,
+      comparisonEligible: false,
+      configuredCanonicalCount: source.canonicalCount,
+      configuredHistoricalCount: source.historicalCount,
+      observedCount: null,
+      catalogCount: null,
+      components: null,
+      note: configuredScopeMismatch
+        ? "Las referencias configuradas tienen distinto alcance; no se calcula cobertura hasta reconciliar el release observado."
+        : "No hay un snapshot de salud asociado a este build; se conserva la referencia configurada y no se infiere cobertura vigente.",
+    },
     qualityAudit: source.qualityAudit as QualityAuditSnapshot | undefined,
     });
   });
@@ -160,7 +187,10 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
     totalHistoricalRecords,
     totalRelatedRecords,
     metrics: {
-      published: coverageMetric(totalCanonicalRecords, totalHistoricalRecords),
+      // Without a generated release manifest there is no reconciled
+      // denominator. Never infer global coverage from configured historical
+      // counts with a different scope.
+      published: coverageMetric(null, null),
       queryable: coverageMetric(queryableCount, queryableDenominator),
       related: coverageMetric(totalRelatedRecords, totalCanonicalRecords),
     },

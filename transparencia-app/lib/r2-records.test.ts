@@ -82,7 +82,15 @@ describe("registros calientes de R2", () => {
 
     const result = await readR2EvidenceRecords(bucket, { source: "camara", limit: 1 });
 
-    expect(result).toMatchObject({ total: 2, expectedTotal: 2, loadedRows: 1, complete: false, missingPartitions: 0 });
+    expect(result).toMatchObject({
+      // Only the first page was read; the catalog expectation remains
+      // visible separately and must not inflate public pagination.
+      total: 1,
+      expectedTotal: 2,
+      loadedRows: 1,
+      complete: false,
+      missingPartitions: 0,
+    });
     expect(result?.data).toHaveLength(1);
     expect(result?.data[0]?.id).toBe("camara-1");
   });

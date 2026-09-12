@@ -24,7 +24,7 @@ async function fetchWithRetry(url, attempts = 4) {
     try {
       const response = await fetch(url, {
         signal: controller.signal,
-        headers: { "user-agent": "transparencia-impulsacv (ETL sueldos 38 bis)" },
+        headers: { "user-agent": "cambiometro (ETL sueldos 38 bis)" },
       });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       return response;

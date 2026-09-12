@@ -25,30 +25,11 @@ interface R2BucketLike {
   put?(key: string, value: ArrayBuffer): Promise<unknown>;
 }
 
-// The lake partitions are archived as release assets in the Cambiómetro
-// repository. Keep the cold fallback pointed at the same repository that
-// publishes the catalog; otherwise a valid cold partition is reported as
-// missing when it is not present in the hot R2 cache.
-const RELEASE_BASE_URL = "https://github.com/jmorgadodev/cambiometro/releases/download";
-
-function bufferedObject(data: ArrayBuffer): R2ObjectBodyLike {
-  return {
-    async json<T>() { return JSON.parse(new TextDecoder().decode(data)) as T; },
-    async arrayBuffer() { return data; },
-  };
-}
-
-async function readHotOrArchivedObject(bucket: R2BucketLike, key: string, releaseTag: string, releaseAssetName: string) {
-  const hot = await bucket.get(key);
-  if (hot) return hot;
-  const url = `${RELEASE_BASE_URL}/${encodeURIComponent(releaseTag)}/${encodeURIComponent(releaseAssetName)}`;
-  const response = await fetch(url, { headers: { Accept: "application/octet-stream" } });
-  if (!response.ok) return null;
-  const data = await response.arrayBuffer();
-  if (bucket.put) {
-    try { await bucket.put(key, data.slice(0)); } catch { /* A cold read remains valid when cache writes are unavailable. */ }
-  }
-  return bufferedObject(data);
+async function readR2Object(bucket: R2BucketLike, key: string) {
+  // R2 is the canonical public data plane. A missing object remains an
+  // incomplete partition; public reads never reach a retired repository and
+  // never create an implicit R2 write.
+  return bucket.get(key);
 }
 
 async function checksumSha256(data: ArrayBuffer) {
@@ -183,9 +164,19 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
       candidatePages = [...pageSets[0]].filter((page) => pageSets.every((pages) => pages.has(page))).sort((a, b) => a - b);
     }
   }
+  let unfilteredSelectionOffset = offset;
   if (!hasFilters) {
-    const pageIndex = Math.floor(offset / manifest.pageSize);
-    candidatePages = pageIndex < manifest.pages.length ? [pageIndex] : [];
+    // `offset` is relative to the complete archive, while `total` below is
+    // counted only across the physical pages selected for this request. A
+    // single physical page is not enough when a public page straddles the
+    // boundary between two R2 blocks (and using the global offset directly
+    // makes the final block return no rows forever).
+    const firstPageIndex = Math.floor(offset / manifest.pageSize);
+    const lastPageIndex = Math.floor(Math.max(offset, offset + limit - 1) / manifest.pageSize);
+    candidatePages = manifest.pages
+      .map((_, index) => index)
+      .filter((index) => index >= firstPageIndex && index <= lastPageIndex);
+    unfilteredSelectionOffset = offset - firstPageIndex * manifest.pageSize;
   }
 
   const selected: EvidenceRecord[] = [];
@@ -212,7 +203,8 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
       const lakeRecord = JSON.parse(line) as LakeRecord;
       const record = projectLakeEvidence(lakeRecord, null, null);
       if (!indexedRecordMatches(record, params)) continue;
-      if (total >= offset && selected.length < limit) selected.push(record);
+      const selectionOffset = hasFilters ? offset : unfilteredSelectionOffset;
+      if (total >= selectionOffset && selected.length < limit) selected.push(record);
       total += 1;
       if (indexedQueryTotal !== null && selected.length >= limit && total >= offset + limit) {
         exhausted = true;
@@ -247,7 +239,7 @@ async function readPartitionRecords(
   const [year, month] = partition.period.split("-");
   const releaseTag = partition.releaseTag ?? `data-${partition.sourceId}-${year}`;
   const manifestAssetName = partition.manifestAssetName ?? `${partition.sourceId}-${year}-${month}-manifest.json`;
-  const manifestObject = await readHotOrArchivedObject(bucket, partition.manifestKey, releaseTag, manifestAssetName);
+  const manifestObject = await readR2Object(bucket, partition.manifestKey);
   if (!manifestObject) return null;
   const manifest = await manifestObject.json<PartitionManifest>();
   const artifacts = manifest.artifacts
@@ -258,7 +250,7 @@ async function readPartitionRecords(
   const chunks: Uint8Array[] = [];
   let missingArtifacts = 0;
   for (const artifact of artifacts) {
-    const object = await readHotOrArchivedObject(bucket, artifact.key, releaseTag, artifact.releaseAssetName);
+    const object = await readR2Object(bucket, artifact.key);
     if (!object) {
       missingArtifacts += 1;
       continue;
@@ -362,7 +354,9 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
       matched += 1;
     }
   }
-  const total = hasFilters || missingPartitions > 0 || missingArtifacts > 0
+  // If pagination stops before visiting every partition, the expected catalog
+  // total is not yet a consultable total. Keep it separate in expectedTotal.
+  const total = hasFilters || !scannedAll || missingPartitions > 0 || missingArtifacts > 0
     ? matched
     : expectedTotal ?? matched;
   const complete = missingPartitions === 0 && (hasFilters ? scannedAll : scannedAll && (expectedTotal === null || matched === expectedTotal));

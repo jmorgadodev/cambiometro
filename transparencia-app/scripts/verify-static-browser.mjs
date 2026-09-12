@@ -4,6 +4,8 @@ import { extname, join } from "node:path";
 import { chromium } from "playwright";
 
 const root = join(process.cwd(), "out");
+const movementsPayload = JSON.parse(await readFile(join(process.cwd(), "data", "movimientos.json"), "utf8"));
+const currentGovernmentMovements = movementsPayload.movimientos.filter((movement) => movement.fecha >= "2026-03-11").length;
 const port = Number(process.env.STATIC_VERIFY_PORT || 0);
 const remoteBaseUrl = process.env.STATIC_VERIFY_BASE_URL?.replace(/\/+$/, "");
 const staticApiBaseUrl = process.env.STATIC_VERIFY_API_URL?.replace(/\/+$/, "");
@@ -140,7 +142,7 @@ async function main() {
     { route: "/politico", markers: ["Diputados y Senadores"] },
     { route: "/municipalidades", markers: ["Directorio de las 346 Municipalidades"] },
     { route: "/cruces", markers: ["Cruces"] },
-    { route: "/movimientos", markers: ["Movimientos y Relevos de Autoridades", "79"] },
+    { route: "/movimientos", markers: ["Movimientos y Relevos de Autoridades", String(currentGovernmentMovements)] },
     { route: "/transferencias", markers: ["Transferencias"] },
     { route: "/personas", markers: ["Directorio de Personas"] },
     { route: "/entidades", markers: ["Entidades"] },

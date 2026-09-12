@@ -1,5 +1,5 @@
 import { getMunicipalidadesStats } from "@/lib/municipalidades-list";
-import { readGeneratedDataQualitySummary, type CoverageMetric, type DataQualityStatus, type QualityAuditSnapshot } from "@/lib/data-quality-summary";
+import { readGeneratedDataQualitySummary, type CoverageMetric, type DataQualityStatus, type QualityAuditSnapshot, type SourceCountReconciliation } from "@/lib/data-quality-summary";
 
 export interface DataQualitySourceRow {
   id: string;
@@ -28,6 +28,7 @@ export interface DataQualitySourceRow {
   checksumSha256: string | null;
   metrics: { published: CoverageMetric; queryable: CoverageMetric; related: CoverageMetric };
   quality: { observedCount: number; correctedCount: number };
+  reconciliation: SourceCountReconciliation;
   qualityAudit?: QualityAuditSnapshot;
 }
 
@@ -113,6 +114,7 @@ export async function getDataQualityDashboardData(): Promise<{ sources: DataQual
       checksumSha256: source.checksumSha256,
       metrics: source.metrics,
       quality: source.quality,
+      reconciliation: source.reconciliation,
       qualityAudit: source.qualityAudit,
     } satisfies DataQualitySourceRow;
   });

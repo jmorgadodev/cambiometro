@@ -8,6 +8,7 @@ import {
   MOVIMIENTOS_TIPO_COLOR,
   MOVIMIENTOS_TIPO_EMOJI,
   MOVIMIENTOS_PIPELINE_METADATA,
+  MOVIMIENTOS_GOBIERNO_DESDE,
   latestMovementPublicationDate,
   MOTIVOS_CATEGORIAS,
   isMovimientoDocumentoPendienteMayor30,
@@ -231,6 +232,9 @@ function MovimientosContent() {
     ultimaEjecucionTexto,
     ultimaPublicacionTexto,
     senalesEnConfirmacion,
+    fuentesRevisadas,
+    fuentesSinRespuesta,
+    ultimaRevisionFuentesTexto,
   } = useMemo(() => {
     const enGobierno = MOVIMIENTOS.filter((m) => m.fecha >= "2026-03-11");
     const totalGob = enGobierno.length;
@@ -246,16 +250,21 @@ function MovimientosContent() {
     ).length;
     const fallidos = enGobierno.filter((m) => m.tipo === "fallido" || m.tipo === "nombramiento-fallido").length;
 
-    // Última fecha en el dataset
+    // Última fecha en el dataset. Cuando el ETL la declara explícitamente,
+    // esa fecha es la referencia del evento y no la fecha de ejecución.
     const maxFecha = MOVIMIENTOS.reduce(
       (max, m) => (m.fecha && m.fecha > max ? m.fecha : max),
       MOVIMIENTOS[0]?.fecha ?? ""
     );
+    const fechaEventoDeclarada = MOVIMIENTOS_PIPELINE_METADATA.last_event_date;
+    const fechaEvento = /^\d{4}-\d{2}-\d{2}$/.test(String(fechaEventoDeclarada ?? ""))
+      ? fechaEventoDeclarada as string
+      : maxFecha;
 
     let fechaTxt = "—";
     let haceTxt = "—";
-    if (maxFecha) {
-      const parts = maxFecha.slice(0, 10).split("-");
+    if (fechaEvento) {
+      const parts = fechaEvento.slice(0, 10).split("-");
       if (parts.length === 3) {
         const dia = parseInt(parts[2], 10);
         const mesIndex = parseInt(parts[1], 10) - 1;
@@ -265,7 +274,7 @@ function MovimientosContent() {
 
       // Cálculo de "hace X días" contra fecha actual (nunca hardcodeado)
       if (nowMs !== null) {
-        const diffMs = nowMs - new Date(maxFecha + "T12:00:00Z").getTime();
+        const diffMs = nowMs - new Date(fechaEvento + "T12:00:00Z").getTime();
         const diffDays = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
         haceTxt = diffDays === 0 ? "hoy" : diffDays === 1 ? "hace 1 día" : `hace ${diffDays} días`;
       }
@@ -273,9 +282,9 @@ function MovimientosContent() {
 
     // Rotación: promedio de días transcurridos desde el 2026-03-11 dividido por total de cambios en el gobierno
     let promedioRotacion = "—";
-    if (maxFecha && totalGob > 0) {
+    if (fechaEvento && totalGob > 0) {
       const inicio = new Date("2026-03-11T00:00:00Z").getTime();
-      const fin = new Date(maxFecha + "T00:00:00Z").getTime();
+      const fin = new Date(fechaEvento + "T00:00:00Z").getTime();
       const diasTranscurridos = Math.max(1, Math.round((fin - inicio) / (1000 * 60 * 60 * 24)));
       promedioRotacion = (diasTranscurridos / totalGob).toFixed(1).replace(".", ",");
     }
@@ -287,6 +296,13 @@ function MovimientosContent() {
     const ultimaPublicacionTexto = ultimaPublicacionDate && !Number.isNaN(ultimaPublicacionDate.getTime())
       ? ultimaPublicacionDate.toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Santiago" })
       : "sin registro";
+    const fuentes = MOVIMIENTOS_PIPELINE_METADATA.source_health;
+    const fuentesSinRespuesta = fuentes.filter((source) => source.ok === false);
+    const ultimaRevisionFuentes = fuentes
+      .map((source) => String(source.fetchedAt ?? ""))
+      .filter((value) => Number.isFinite(Date.parse(value)))
+      .sort()
+      .at(-1);
 
     return {
       totalCambiosGobierno: totalGob,
@@ -304,6 +320,9 @@ function MovimientosContent() {
       ),
       ultimaPublicacionTexto,
       senalesEnConfirmacion: Number(MOVIMIENTOS_PIPELINE_METADATA.stats.signals_en_confirmacion ?? 0),
+      fuentesRevisadas: fuentes,
+      fuentesSinRespuesta,
+      ultimaRevisionFuentesTexto: formatPipelineTimestamp(ultimaRevisionFuentes),
     };
   }, [nowMs]);
 
@@ -450,6 +469,50 @@ function MovimientosContent() {
               </div>
             </div>
           </div>
+        </div>
+      </section>
+
+      <section className="container-main" aria-labelledby="sources-health-heading" style={{ paddingTop: "1.25rem" }}>
+        <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 10, padding: "1rem 1.2rem" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "1rem", flexWrap: "wrap" }}>
+            <div>
+              <h2 id="sources-health-heading" style={{ fontSize: "0.95rem", margin: 0, color: "var(--text-1)" }}>
+                Estado de las fuentes
+              </h2>
+              <p style={{ margin: "0.3rem 0 0", color: "var(--text-2)", fontSize: "0.78rem", lineHeight: 1.45 }}>
+                La fecha del evento, la revisión de las fuentes y la publicación del snapshot son hitos distintos.
+              </p>
+            </div>
+            <span style={{ color: "var(--text-muted)", fontSize: "0.72rem" }}>
+              Última revisión de fuentes: {ultimaRevisionFuentesTexto}
+            </span>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "0.55rem", marginTop: "0.8rem" }}>
+            {fuentesRevisadas.map((source) => {
+              const label = String(source.label ?? source.id ?? "Fuente sin nombre");
+              const ok = source.ok === true;
+              const status = source.status ? `HTTP ${String(source.status)}` : "sin respuesta";
+              const error = source.error ? ` · ${String(source.error)}` : "";
+              return (
+                <div key={String(source.id ?? label)} style={{ border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "0.65rem 0.75rem", background: "var(--surface)" }}>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
+                    <strong style={{ fontSize: "0.75rem", color: "var(--text-1)" }}>{label}</strong>
+                    <span style={{ color: ok ? "var(--ok)" : "var(--warn)", fontSize: "0.68rem", fontWeight: 700 }}>
+                      {ok ? "Respondió" : "No respondió"}
+                    </span>
+                  </div>
+                  <span style={{ display: "block", marginTop: "0.2rem", color: "var(--text-muted)", fontSize: "0.68rem" }}>
+                    {status}{error}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+          {fuentesSinRespuesta.length > 0 && (
+            <p role="status" style={{ margin: "0.7rem 0 0", color: "var(--warn)", fontSize: "0.75rem", lineHeight: 1.45 }}>
+              {fuentesSinRespuesta.length} fuente{fuentesSinRespuesta.length === 1 ? "" : "s"} no respondió en la última revisión. El snapshot anterior se conserva y esas señales no se promueven automáticamente a movimiento oficial.
+            </p>
+          )}
         </div>
       </section>
 
@@ -1190,7 +1253,7 @@ function MovimientosContent() {
             * <strong>Modelo Multifuente y Confirmación Oficial:</strong> El catálogo de movimientos indexa relevos y designaciones a partir de señales de prensa y monitoreo cívico (como <code>renunciaskast.cl</code> y agencias de noticias). Los eventos entran como <em>“En confirmación”</em> y solo son promovidos a <em>“Verificado oficial”</em> cuando cuentan con un Decreto Supremo indexado en Ley Chile (BCN) o el Diario Oficial. Si transcurren más de 30 días sin documento oficial, el registro conserva la advertencia <em>“Documento oficial pendiente”</em> y no se autopromueve.
           </p>
           <p style={{ margin: "0 0 0.5rem 0" }}>
-            * <strong>Cobertura Temporal y Registros de Transición:</strong> El dataset histórico consolida 79 movimientos en total, de los cuales 78 corresponden a la gestión de gobierno iniciada el 11 de marzo de 2026 y 1 al período de transición previo debidamente documentado.
+            * <strong>Cobertura Temporal y Registros de Transición:</strong> El dataset histórico consolida {MOVIMIENTOS.length.toLocaleString("es-CL")} movimientos en total, de los cuales {MOVIMIENTOS.filter((movement) => movement.fecha >= MOVIMIENTOS_GOBIERNO_DESDE).length.toLocaleString("es-CL")} corresponden a la gestión de gobierno iniciada el 11 de marzo de 2026 y {MOVIMIENTOS.filter((movement) => movement.fecha < MOVIMIENTOS_GOBIERNO_DESDE).length.toLocaleString("es-CL")} al período de transición previo.
           </p>
         </footer>
       </div>
