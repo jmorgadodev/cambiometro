@@ -276,3 +276,33 @@ regenerarlos desde un histórico verificable.
 **Decisión:** corregir primero el inventario/artefactos R2 y luego publicar la
 partición de agosto; no se hará una actualización parcial que pueda perder
 relaciones históricas.
+
+## Candidato reproducible InfoLobby — 07:12 UTC-3
+
+Se generó fuera de los repositorios operativos públicos un candidato local con
+los registros normalizados de enero–julio recuperados desde R2 y la descarga
+oficial de agosto. La combinación usa reemplazo por ID: un registro aparece en
+julio con fecha `2026-07-28` y vuelve en agosto con fecha `2026-08-03`; se
+conserva la versión más reciente, no dos filas.
+
+| Métrica | Resultado |
+|---|---:|
+| Histórico recuperado | 60.523 |
+| Agosto oficial | 10.944 |
+| IDs duplicados resueltos por reemplazo | 1 |
+| Filas finales | 71.466 |
+| IDs únicos | 71.466 |
+| Particiones | 8 |
+| Entidades derivadas | 79.494 |
+| Artefactos generados | 27 |
+| Tamaño comprimido aproximado | 30,3 MB |
+
+La integridad física pasó: 10 archivos gzip fueron descomprimidos sin error.
+Los checksums de enero–junio permanecieron iguales; julio cambió de 10.649 a
+10.648 por el reemplazo del ID actualizado y agosto quedó en 10.944 filas con
+checksum `6827bcb6083c9771b6b1f3532fcdc018d15f22338d09beddf23e2965523bddd8`.
+
+El candidato está en la carpeta temporal de auditoría y no se publicó. Antes
+de usarlo como release se debe validar que el bundle de entidades completo sea
+el que se quiere conservar y que el manifiesto/índice público se actualicen en
+una sola operación versionada.
