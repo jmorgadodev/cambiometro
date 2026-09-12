@@ -1609,3 +1609,21 @@ El release productivo anterior tenía 1.632 filas; la diferencia observada es
 de dos registros nuevos, no una sustitución destructiva. El artefacto generado
 no se publicó ni se incorporó al maestro: queda en la rama aislada del PR #499
 hasta revisar el diff y decidir su promoción.
+
+## Personal de apoyo del Senado: fuente disponible, ETL pendiente
+
+Aunque no existe una ejecución reciente del workflow de Personal Senado, la
+fuente oficial consultada directamente respondió HTTP 200. El endpoint de 2026
+declaró 3.407 registros y 3.407 páginas de tamaño 1; el primer registro
+incluye, entre otros campos, mes, monto, cargo, `fecha_ingreso` y
+`fecha_contrato`.
+
+Esto separa dos hechos que antes estaban mezclados:
+
+- la fuente del Senado está disponible y entrega datos de remuneración/apoyo;
+- el proyecto todavía no tiene un ETL reciente que publique ese universo en el
+  release vigente.
+
+No se descargó el universo ni se ejecutó el ETL. El siguiente trabajo seguro es
+crear una prueba local acotada del paginado y comparar sus campos con el
+contrato de personal Cámara/Senado antes de publicar cualquier actualización.
