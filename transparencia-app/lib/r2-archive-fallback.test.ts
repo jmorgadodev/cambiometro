@@ -35,6 +35,30 @@ describe("archivo histórico en R2", () => {
     expect(result?.data[0]).toMatchObject({ id: "infolobby-1", sourceId: "infolobby" });
   });
 
+  it("marca el índice como parcial cuando el catálogo declara filas ausentes", async () => {
+    const record = { id: "infolobby-1", sourceId: "infolobby", kind: "lobby", occurredAt: "2026-07-01", evidence: {}, data: {} };
+    const archive = new TextEncoder().encode(`${JSON.stringify(record)}\n`).buffer;
+    const objects = new Map<string, ArrayBuffer>([
+      ["indexes/v1/infolobby/manifest.json", new TextEncoder().encode(JSON.stringify({ schemaVersion: 1, sourceId: "infolobby", totalRows: 1, pageSize: 1, recordArchiveKey: "indexes/v1/infolobby/records.jsonl", pages: [{ offset: 0, length: archive.byteLength }] })).buffer],
+      ["indexes/v1/infolobby/records.jsonl", archive],
+      ["catalog/v1/manifest.json", new TextEncoder().encode(JSON.stringify({ sources: [{ id: "infolobby", recordCount: 2 }], partitions: [] })).buffer],
+    ]);
+    const bucket: Parameters<typeof readR2EvidenceRecords>[0] = {
+      async get(key, options) {
+        const value = objects.get(key);
+        if (!value) return null;
+        const bytes = new Uint8Array(value);
+        const range = options?.range;
+        const sliced = range ? bytes.slice(range.offset, range.offset + range.length).buffer : value;
+        return { json: async <T>() => JSON.parse(new TextDecoder().decode(sliced)) as T, arrayBuffer: async () => sliced };
+      },
+    };
+
+    const result = await readR2EvidenceRecords(bucket, { source: "infolobby", limit: 10 });
+
+    expect(result).toMatchObject({ total: 1, expectedTotal: 2, loadedRows: 1, complete: false, missingPartitions: 1 });
+  });
+
   it("no consulta el repositorio retirado cuando falta una partición en R2", async () => {
     const lakeRecord = {
       id: "contraloria-audit-1",

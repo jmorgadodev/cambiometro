@@ -139,6 +139,17 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
   if (!manifestObject) return null;
   const manifest = await manifestObject.json<IndexedRecordsManifest>();
   if (manifest.schemaVersion !== 1 || manifest.sourceId !== sourceId || !Array.isArray(manifest.pages)) return null;
+  let catalogExpectedTotal: number | null = null;
+  const catalogObject = await bucket.get("catalog/v1/manifest.json");
+  if (catalogObject) {
+    const catalog = await catalogObject.json<R2PublicCatalog>();
+    const catalogSource = catalog.sources?.find((source) => source.id === sourceId);
+    if (catalogSource && Number.isFinite(Number(catalogSource.recordCount))) {
+      catalogExpectedTotal = Number(catalogSource.recordCount);
+    }
+  }
+  const expectedTotal = catalogExpectedTotal ?? manifest.totalRows;
+  const missingIndexedRows = Math.max(0, expectedTotal - manifest.totalRows);
   const offset = cursorOffset(params.cursor);
   const limit = Math.min(Math.max(params.limit, 1), 100);
   const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || params.from || params.to);
@@ -217,10 +228,10 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
     nextCursor: offset + selected.length < resultTotal
       ? `v1_${(offset + selected.length).toString(36)}`
       : null,
-    expectedTotal: manifest.totalRows,
+    expectedTotal,
     loadedRows: manifest.totalRows,
-    complete: true,
-    missingPartitions: 0,
+    complete: missingIndexedRows === 0,
+    missingPartitions: missingIndexedRows > 0 ? 1 : 0,
     missingArtifacts: 0,
   };
 }
