@@ -117,3 +117,14 @@ conteo canónico, histórico, consultable y estado de reconciliación; su build 
 E2E (`34685576445`) terminaron correctamente. Esto confirma que no debe
 promoverse `main` directamente ni corregirse el conteo a mano en producción:
 primero debe pasar la rama candidata completa.
+
+El guard asociado, run `34685584786`, terminó posteriormente con fallo tras
+agotar 30 minutos de espera:
+
+`STATIC_RELEASE_NOT_REFRESHED_AFTER_ETL:ETL Semanal - InfoLobby`
+
+Este segundo fallo es consecuencia del primero: como el build de Pages en
+`main` se detuvo por el resumen CPLT inválido, nunca existió un release estático
+nuevo que el guard pudiera confirmar. La espera prolongada no representa una
+lectura masiva de D1 ni un nuevo ETL; es una verificación de frescura sin
+publicación exitosa.
