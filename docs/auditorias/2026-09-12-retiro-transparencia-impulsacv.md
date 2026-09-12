@@ -86,3 +86,37 @@ activa del proyecto maestro.
 
 El inventario de workflows remoto muestra únicamente `Dependabot Updates`
 activo; no hay workflows ETL ni de despliegue activos en ese repositorio.
+
+## Revisión de cierre operativo — 09:38 UTC-3
+
+Se repitió la comprobación sin escribir en Cloudflare, GitHub ni D1:
+
+- `C:\Users\jorge\Proyectos` contiene sólo `cambiometro-public`,
+  `cambiometro-audit` y `cambiometro-editorial` entre las carpetas del proyecto.
+- `jmorgadodev/transparencia.impulsacv.cl` continúa archivado y privado; su
+  inventario remoto conserva únicamente Dependabot y no tiene ETL ni despliegue
+  activo.
+- `transparencia.impulsacv.cl` no resuelve por DNS.
+- El repositorio canónico es `jmorgadodev/cambiometro`, con producción
+  configurada para `cambiometro-public-api`, Pages `cambiometro` y el dominio
+  `cambiometro.impulsacv.cl`.
+- La búsqueda de referencias ejecutables en el maestro no encontró URLs del
+  repositorio o dominio retirados. Las menciones restantes están en auditoría,
+  documentación histórica o el directorio ETL congelado; no hay workflow actual
+  que invoque ese `wrangler.toml`.
+- El health público observado vuelve a declarar `publicDataBackend: r2` y
+  `publicD1Reads: false`.
+
+El token de auditoría utilizado no tiene `Workers Scripts -> Read`, por lo que
+la API de Cloudflare responde `10000 Authentication error` al intentar listar
+las versiones del Worker `transparencia-impulsacv` y del Worker canónico. Esto
+impide una confirmación independiente del inventario de Workers desde CLI,
+pero no muestra una conexión operativa desde el repositorio antiguo.
+
+### Decisión operativa
+
+Desde esta fecha sólo se trabaja en las tres raíces definidas en
+`docs/OPERACION-WORKSPACE.md`. El repositorio antiguo queda fuera del flujo y no
+se debe ejecutar, desplegar ni usar como fallback. No se elimina D1/R2 porque
+son recursos compartidos del proyecto canónico y su eliminación sería una
+acción distinta y destructiva.
