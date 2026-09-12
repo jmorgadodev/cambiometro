@@ -533,3 +533,24 @@ rollback; febrero no tiene partición publicada en el catálogo.
    acotada de compuertas, sin materializar datos masivos.
 5. No tocar navegación, municipalidades, remuneraciones, editorial ni cambios
    de interfaz mientras se valida la estabilidad de las fuentes.
+
+## Hallazgo adicional de Senado — diagnóstico sin escritura
+
+La consulta amplia de Senado con período explícito (`2025-01-01` a
+`2026-12-31`) devuelve 1.300 de 1.428 registros esperados desde `r2-lake`.
+El catálogo identifica cuatro particiones:
+
+- 2025-08: 121 registros; manifiesto ausente en R2.
+- 2026-02: 7 registros; manifiesto ausente en R2.
+- 2026-05: 1.250 registros; manifiesto y registros presentes y con checksum
+  coincidente.
+- 2026-07: 50 registros; manifiesto y registros presentes.
+
+Por tanto, la diferencia real es de 128 registros en dos particiones. No es
+una diferencia de paginación: el corte sin rango puede cargar sólo la primera
+partición para responder rápido, pero la consulta acotada confirma la ausencia.
+No se reconstruirá todavía. El siguiente paso seguro es localizar los
+artefactos inmutables asociados a `data-senado-2025` y `data-senado-2026`, o
+consultar la fuente oficial para regenerarlos con el mismo contrato. Mientras
+eso no ocurra, Senado debe permanecer rotulado como parcial y no como cobertura
+total.

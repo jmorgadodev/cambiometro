@@ -21,6 +21,7 @@
 - [x] Preflight de fuentes sin escritura: Cámara, Senado y los cinco orígenes de Movimientos respondieron correctamente el 2026-09-12.
 - [x] Reparar/publicar sólo la variante R2 `votaciones_camara`; PR #495 fusionado y Worker `d2f82268-b1af-4481-a67b-d1f8953f0fc6` promovido. Alias validado en producción desde R2, sin D1.
 - [x] Reconstruir las 7 particiones históricas faltantes de Cámara en R2; manifiestos y registros verificados por checksum, alias y fuente canónica completos en producción.
+- [ ] Reconstruir las 2 particiones faltantes de Senado en R2 (2025-08: 121; 2026-02: 7) después de localizar releases o validar la fuente oficial; no declarar cobertura total antes.
 
 ## Mañana, después del reinicio
 
