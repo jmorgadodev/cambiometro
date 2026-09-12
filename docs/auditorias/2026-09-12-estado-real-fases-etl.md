@@ -258,3 +258,24 @@ conteo del catálogo R2. La prueba remota del candidato quedó así:
 El endpoint ya no afirma que InfoLobby está completo cuando falta su partición
 de agosto. El dato faltante queda identificado como un problema de release R2,
 no como una razón para consultar D1 ni para borrar el último snapshot válido.
+
+## Promoción productiva y verificación posterior — run 34699354239
+
+La versión `8e02ce9d-e947-44de-8ad2-6467c1ad9c9a`, construida desde el commit
+`c24f106`, fue promovida al 100% mediante la compuerta explícita
+`CAMBIOMETRO_CONFIRM_CUTOVER`. El workflow reaplicó la ruta
+`cambiometro.impulsacv.cl/api/*` y confirmó health productivo.
+
+Verificación posterior:
+
+- `/api/v1/records?source=movimientos&limit=3`: HTTP 200, 82 registros,
+  `sourceBackend=r2` y paginación activa;
+- `/api/v1/health`: `publicDataBackend=r2` y `publicD1Reads=false`;
+- `/`, `/movimientos/`, `/municipalidades/`, `/remuneraciones-publicas/`,
+  `/personas/` y `/api/v1/sources`: HTTP 200;
+- `npm run verify:prod:movimientos`: todas las comprobaciones aprobadas,
+  incluyendo fechas, fuentes oficiales y estados de Alonso Velásquez y
+  Patricio Löhr.
+
+La producción ya no presenta el vacío anterior de Movimientos. No se ejecutó
+ETL ni consulta SQL durante la promoción.

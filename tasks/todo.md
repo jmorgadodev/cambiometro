@@ -7,7 +7,7 @@
 - [x] C. Reconciliar Cámara y Senado por componente y período; diferencia local/R2 documentada.
 - [x] **Checkpoint 1 local:** 957 tests, typecheck, lint, build Pages y browser smoke verdes.
 - [x] **Checkpoint 1 remoto:** preview del Worker y API de Movimientos validados desde R2, sin lecturas públicas D1.
-- [ ] Promoción controlada del Worker candidato, pendiente de autorización explícita.
+- [x] Promoción controlada del Worker candidato y smoke productivo completados.
 - [x] D1. Auditar ChileCompra, InfoLobby, DIPRES y Transparencia Activa en el candidato, sólo por R2.
 - [ ] Reconciliar las 92 filas de InfoLobby y separar corte vigente/histórico de ChileCompra.
 - [x] E. Ejecutar auditoría de consistencia y calidad en producción/R2/candidato.
