@@ -1834,3 +1834,9 @@ mantiene $15.250.000 y agosto valida $15.930.000. Con esa comprobación, el
 candidato vuelve a pasar la suite completa: 184 archivos y 986 pruebas. La
 corrección de metadatos también pasa con la línea base anterior: 184 archivos
 y 986 pruebas.
+
+El cambio quedó en el PR #500, con base corregida sobre
+`codex/movimientos-r2-fix-20260912`. El PR contiene únicamente los tres
+archivos de código/prueba relacionados con este control. Los checks remotos de
+Lint/Types/Unit Tests, CodeQL y validación de workflows terminaron en verde.
+No se hizo merge, publicación R2 ni despliegue Pages.
