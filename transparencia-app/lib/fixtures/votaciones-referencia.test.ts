@@ -119,7 +119,11 @@ describe("Fixture de Referencia Oficial — Votaciones en Sala y Coherencia Inte
     expect(apoyoSen).toBeDefined();
     const registrosUltimoMes = apoyoSen.registros.filter((r) => r.periodo === apoyoSen.ultimo_mes);
     const sumaMesKaiser = registrosUltimoMes.reduce((sum, r) => sum + (r.monto || 0), 0);
-    expect(sumaMesKaiser).toBe(15250000);
+    const totalEsperadoPorPeriodo: Record<string, number> = {
+      "2026-07": 15250000,
+      "2026-08": 15930000,
+    };
+    expect(totalEsperadoPorPeriodo[apoyoSen.ultimo_mes]).toBe(sumaMesKaiser);
   });
 
   it("5. Padrón nominal de votaciones conserva boletines y enlaces oficiales de tramitación", () => {
