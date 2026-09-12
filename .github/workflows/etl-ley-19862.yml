@@ -192,7 +192,7 @@ jobs:
 
       - name: Resolver D1 dedicada de transferencias
         id: transfer-d1-config
-        if: steps.d1-quota.outputs.proceed == 'true'
+        if: github.event_name == 'workflow_dispatch' && steps.d1-quota.outputs.proceed == 'true'
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -207,7 +207,7 @@ jobs:
 
       - name: Materializar proyección D1 cuando haya capacidad
         id: materialize-transfer-d1
-        if: steps.d1-quota.outputs.proceed == 'true'
+        if: github.event_name == 'workflow_dispatch' && steps.d1-quota.outputs.proceed == 'true'
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

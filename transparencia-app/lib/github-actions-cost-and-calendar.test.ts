@@ -213,6 +213,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       const content = fs.readFileSync(path.join(workflowsDir, name), "utf8");
       expect(content, name).toContain("uses: ./.github/actions/d1-preflight");
       expect(content, name).toContain('threshold-percent: "60"');
+      expect(content, name).toContain("github.event_name == 'workflow_dispatch' && steps.d1-quota.outputs.proceed == 'true'");
       expect(content, name).toContain("steps.d1-quota.outputs.proceed == 'true'");
     }
     const infolobby = fs.readFileSync(path.join(workflowsDir, "etl-infolobby-scheduled.yml"), "utf8");
