@@ -720,6 +720,24 @@ a producción. La promoción debe hacerse como operación independiente y luego
 repetir el mismo cuadro contra producción, junto con el smoke de salud y la
 verificación de que D1 no sea consultada por las rutas públicas.
 
+## Promoción controlada y smoke productivo — 12 de septiembre
+
+El PR `#497` fue integrado en `main` con commit `05c119ab`. La versión Worker
+`eb51837f-5774-465e-9306-fefc694b5698` se promovió al 100% mediante el workflow
+`34716564468`, que también confirmó la ruta productiva con health exitoso.
+
+La comprobación directa posterior respondió correctamente:
+
+- `/api/v1/health`: 200, `publicDataBackend=r2` y `publicD1Reads=false`.
+- InfoLobby, ChileCompra y DIPRES: HTTP 200 en `limit=1,10,25,50`.
+- Página 2 con `limit=50`: HTTP 200 para las tres fuentes.
+- InfoLobby y ChileCompra: estado `complete`; DIPRES conserva correctamente
+  estado `partial` por su alcance declarado.
+
+El verificador productivo completo quedó iniciado en modo sólo lectura como run
+`34716686372`, con crawl frío de concurrencia 1 y doble pasada separada; su
+resultado final se registrará cuando termine.
+
 ## Estado de los ETL separados — diagnóstico actual
 
 La separación de workflows está activa, pero “workflow separado” no significa
