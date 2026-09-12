@@ -1,5 +1,13 @@
 const PERIOD_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
 
+export function isPlausiblePeriod(period, generatedAt) {
+  if (!PERIOD_PATTERN.test(period)) return false;
+  const year = Number(String(period).slice(0, 4));
+  if (year < 2000 || year > 2100) return false;
+  const releasePeriod = String(generatedAt ?? "").slice(0, 7);
+  return !PERIOD_PATTERN.test(releasePeriod) || period <= releasePeriod;
+}
+
 function normalizeText(value) {
   return String(value ?? "")
     .normalize("NFD")
@@ -88,9 +96,10 @@ export function buildCpltTransparencySummary(rows, coverage, generatedAt) {
 
   for (const row of rows ?? []) {
     const period = periodOf(row);
-    if (!period || !PERIOD_PATTERN.test(period)) invalidPeriodCount += 1;
+    const validPeriod = isPlausiblePeriod(period, generatedAt);
+    if (!validPeriod) invalidPeriodCount += 1;
     const amount = amountOf(row);
-    const periodStats = period && PERIOD_PATTERN.test(period)
+    const periodStats = validPeriod
       ? periods.get(period) ?? {
         period,
         rows: 0,
@@ -131,7 +140,7 @@ export function buildCpltTransparencySummary(rows, coverage, generatedAt) {
       periods.set(period, periodStats);
     }
 
-    if (personKey && basePersonKey && period && PERIOD_PATTERN.test(period)) {
+    if (personKey && basePersonKey && validPeriod) {
       const periodPeople = peopleByPeriod.get(period) ?? new Set();
       periodPeople.add(personKey);
       peopleByPeriod.set(period, periodPeople);
