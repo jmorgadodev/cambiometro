@@ -29,6 +29,19 @@ export interface QualityAuditSnapshot {
   observations: QualityAuditObservation[];
 }
 
+export type SourceReconciliationState = "aligned" | "scope_mismatch" | "configured_only" | "release_override";
+
+export interface SourceCountReconciliation {
+  state: SourceReconciliationState;
+  comparisonEligible: boolean;
+  configuredCanonicalCount: number | null;
+  configuredHistoricalCount: number | null;
+  observedCount: number | null;
+  catalogCount: number | null;
+  components: Record<string, number> | null;
+  note: string;
+}
+
 export interface DataQualitySourceSummary {
   id: string;
   label: string;
@@ -62,6 +75,7 @@ export interface DataQualitySourceSummary {
     observedCount: number;
     correctedCount: number;
   };
+  reconciliation: SourceCountReconciliation;
   qualityAudit?: QualityAuditSnapshot;
 }
 
@@ -131,11 +145,21 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
     modulePath: source.modulePath,
     derived: source.derived,
     metrics: {
-      published: coverageMetric(canonicalCount, historicalCount),
+      published: coverageMetric(null, null),
       queryable: coverageMetric(source.id === "ley-19862" ? transfer.totalRows : source.queryableCount, canonicalCount),
       related: coverageMetric(source.relatedCount, canonicalCount),
     },
     quality: source.qualityObservations,
+    reconciliation: {
+      state: "configured_only" as const,
+      comparisonEligible: false,
+      configuredCanonicalCount: source.canonicalCount,
+      configuredHistoricalCount: source.historicalCount,
+      observedCount: null,
+      catalogCount: null,
+      components: null,
+      note: "No hay un snapshot de salud asociado a este build; se conserva la referencia configurada y no se infiere cobertura vigente.",
+    },
     qualityAudit: source.qualityAudit as QualityAuditSnapshot | undefined,
     });
   });
