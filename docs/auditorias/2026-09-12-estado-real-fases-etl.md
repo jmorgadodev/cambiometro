@@ -460,13 +460,23 @@ votaciones. El PR #496 elimina ese filtro de variante: el alias usa el
 histórico canónico de Cámara y fuerza `kind=vote`, dejando la cobertura parcial
 histórica visible hasta que se reconstruyan los artefactos faltantes.
 
+El PR #496 (`2dc41e86056df5dba6a15e60464a9ac0cf091dcb`) quedó fusionado y su
+Worker `6735ebae-9bed-4293-9b36-4c7b587a4788` fue promovido al 100% por el
+workflow `34708311553`. La comparación productiva posterior mostró que el
+alias `votaciones_camara` y `camara&kind=vote` entregan el mismo estado R2
+histórico: `publishedRows=13.685`, `expectedRows=14.510`,
+`missingPartitions=7` y `sourceStatus=partial`. Esto confirma que el alias ya
+no pierde los meses anteriores; lo pendiente es exclusivamente reconstruir los
+siete artefactos faltantes, no corregir el enrutamiento.
+
 ## Plan operativo aplicable hoy
 
 1. **Fuentes**: conservar el resultado de estas pruebas como preflight; no
    lanzar un ETL completo ni una reconstrucción histórica.
-2. **Cámara**: reparar o regenerar únicamente la variante R2 de
-   `votaciones_camara`, con conteo y fecha máxima como guardas; validar primero
-   en preview.
+2. **Cámara**: el alias ya está reparado y validado en producción. El siguiente
+   bloque será reconstruir sólo las siete particiones históricas faltantes,
+   con conteo, fecha máxima y checksum como guardas; validar primero en
+   preview y sin reemplazar el release sano.
 3. **Senado**: dejarlo en espera de cambio sólo si el snapshot productivo no
    coincide con el corte del 2026-09-09; la fuente está respondiendo.
 4. **Movimientos**: no reemplazar su snapshot de 82 filas por una consulta
