@@ -912,3 +912,24 @@ históricas rígidas, leer los conteos declarados por la API o el HTML actual y
 aplicar reintentos explícitos a las comprobaciones de endpoints que ya tienen
 backoff en el resto del sistema. La producción queda operativa, pero la puerta
 de verificación no puede declararse verde hasta repetirla con esa corrección.
+
+## Corrección aislada del verificador — PR #498
+
+Se preparó la rama `codex/verification-drift-20260912` y el PR
+`https://github.com/jmorgadodev/cambiometro/pull/498`. El cambio no toca datos,
+ETL, D1, R2, Pages, rutas ni menú; sólo modifica la instrumentación de
+verificación:
+
+- InfoLobby se valida con el conteo productivo observado, actualmente 71.467.
+- El barrido de cobertura deja de imprimir el valor histórico 60.523.
+- `/fuentes` se valida por presencia de los conteos canónico y consolidado
+  vigentes, sin una fórmula histórica rígida.
+- Gastos Cámara y funcionarios reintentan respuestas 429/5xx transitorias.
+- Se agregan cuatro pruebas unitarias del contrato del verificador.
+
+Evidencia local y productiva de la rama:
+
+- `npm test`: 184 archivos y 986 pruebas pasadas.
+- `verify-prod-full` corregido contra producción: 132 verificaciones pasadas,
+  0 fallidas; InfoLobby aparece como 71.467 audiencias.
+- No se ejecutó ningún ETL ni consulta D1 y el PR no se ha promovido.
