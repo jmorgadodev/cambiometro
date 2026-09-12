@@ -1,6 +1,5 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-<<<<<<< HEAD
 import { catalogSourceCount, transferReleaseCount } from "../lib/source-health.mjs";
 import { buildParliamentSourceHealth } from "./source-health-counts.mjs";
 

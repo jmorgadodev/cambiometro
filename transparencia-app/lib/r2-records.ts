@@ -25,30 +25,11 @@ interface R2BucketLike {
   put?(key: string, value: ArrayBuffer): Promise<unknown>;
 }
 
-// The lake partitions are archived as release assets in the Cambiómetro
-// repository. Keep the cold fallback pointed at the same repository that
-// publishes the catalog; otherwise a valid cold partition is reported as
-// missing when it is not present in the hot R2 cache.
-const RELEASE_BASE_URL = "https://github.com/jmorgadodev/cambiometro/releases/download";
-
-function bufferedObject(data: ArrayBuffer): R2ObjectBodyLike {
-  return {
-    async json<T>() { return JSON.parse(new TextDecoder().decode(data)) as T; },
-    async arrayBuffer() { return data; },
-  };
-}
-
-async function readHotOrArchivedObject(bucket: R2BucketLike, key: string, releaseTag: string, releaseAssetName: string) {
-  const hot = await bucket.get(key);
-  if (hot) return hot;
-  const url = `${RELEASE_BASE_URL}/${encodeURIComponent(releaseTag)}/${encodeURIComponent(releaseAssetName)}`;
-  const response = await fetch(url, { headers: { Accept: "application/octet-stream" } });
-  if (!response.ok) return null;
-  const data = await response.arrayBuffer();
-  if (bucket.put) {
-    try { await bucket.put(key, data.slice(0)); } catch { /* A cold read remains valid when cache writes are unavailable. */ }
-  }
-  return bufferedObject(data);
+async function readR2Object(bucket: R2BucketLike, key: string) {
+  // R2 is the canonical public data plane. A missing object remains an
+  // incomplete partition; public reads never reach a retired repository and
+  // never create an implicit R2 write.
+  return bucket.get(key);
 }
 
 async function checksumSha256(data: ArrayBuffer) {
@@ -258,7 +239,7 @@ async function readPartitionRecords(
   const [year, month] = partition.period.split("-");
   const releaseTag = partition.releaseTag ?? `data-${partition.sourceId}-${year}`;
   const manifestAssetName = partition.manifestAssetName ?? `${partition.sourceId}-${year}-${month}-manifest.json`;
-  const manifestObject = await readHotOrArchivedObject(bucket, partition.manifestKey, releaseTag, manifestAssetName);
+  const manifestObject = await readR2Object(bucket, partition.manifestKey);
   if (!manifestObject) return null;
   const manifest = await manifestObject.json<PartitionManifest>();
   const artifacts = manifest.artifacts
@@ -269,7 +250,7 @@ async function readPartitionRecords(
   const chunks: Uint8Array[] = [];
   let missingArtifacts = 0;
   for (const artifact of artifacts) {
-    const object = await readHotOrArchivedObject(bucket, artifact.key, releaseTag, artifact.releaseAssetName);
+    const object = await readR2Object(bucket, artifact.key);
     if (!object) {
       missingArtifacts += 1;
       continue;
