@@ -94,6 +94,29 @@ export interface DataQualitySummary {
 
 type SourceConfig = (typeof sourceConfig)[number];
 
+type JsonObject = Record<string, unknown>;
+
+const safeCount = (value: unknown): number | null =>
+  Number.isSafeInteger(value) && Number(value) >= 0 ? Number(value) : null;
+
+const readOptionalJson = (relativePath: string): JsonObject => {
+  try {
+    const parsed = JSON.parse(readFileSync(join(process.cwd(), relativePath), "utf8"));
+    return parsed && typeof parsed === "object" ? parsed as JsonObject : {};
+  } catch {
+    return {};
+  }
+};
+
+const LOCAL_HEALTH_ALIASES: Record<string, string> = {
+  "transparencia-activa": "cplt",
+  "ley-19862": "ley19862",
+  "ine-censo-2024": "ine",
+};
+
+const localHealth = readOptionalJson("data/etl/source-health.json");
+const localCatalog = readOptionalJson("data/lake/catalog/v1/manifest.json");
+
 const percent = (count: number | null, denominator: number | null): number | null => {
   if (count === null || denominator === null || denominator <= 0) return null;
   return Math.round((count / denominator) * 1000) / 10;
@@ -115,9 +138,44 @@ export function getDataQualityConfig(): SourceConfig[] {
 
 export function buildFallbackDataQualitySummary(): DataQualitySummary {
   const transfer = getTransferReleaseMetadata();
+  const healthSources = localHealth.sources && typeof localHealth.sources === "object"
+    ? localHealth.sources as JsonObject
+    : {};
+  const catalogSources = Array.isArray(localCatalog.sources) ? localCatalog.sources : [];
   const sources = getDataQualityConfig().map((source) => {
-    const canonicalCount = source.id === "ley-19862" ? transfer.totalRows : source.canonicalCount;
-    const historicalCount = source.id === "ley-19862" ? transfer.totalRows : source.historicalCount;
+    const healthEntry = healthSources[LOCAL_HEALTH_ALIASES[source.id] ?? source.id];
+    const healthRecord = healthEntry && typeof healthEntry === "object" ? healthEntry as JsonObject : {};
+    const catalogEntry = catalogSources.find((entry) => entry && typeof entry === "object" && (entry as JsonObject).id === source.id);
+    const catalogRecord = catalogEntry && typeof catalogEntry === "object" ? catalogEntry as JsonObject : {};
+    const observedCount = safeCount(healthRecord.recordCount);
+    const configuredCanonicalCount = safeCount(source.canonicalCount);
+    const isTransferRelease = source.id === "ley-19862";
+    const canonicalCount = isTransferRelease ? transfer.totalRows : observedCount ?? source.canonicalCount;
+    const historicalCount = isTransferRelease ? transfer.totalRows : source.historicalCount;
+    const scopeMismatch = !isTransferRelease
+      && observedCount !== null
+      && configuredCanonicalCount !== null
+      && observedCount !== configuredCanonicalCount;
+    const reconciliationState: SourceReconciliationState = isTransferRelease
+      ? "release_override"
+      : observedCount === null
+        ? "configured_only"
+        : scopeMismatch
+          ? "scope_mismatch"
+          : "aligned";
+    const rawComponents = healthRecord.components && typeof healthRecord.components === "object"
+      ? Object.entries(healthRecord.components as JsonObject)
+        .map(([key, value]) => [key, safeCount(value)] as const)
+        .filter(([, value]) => value !== null)
+      : [];
+    const components = rawComponents.length > 0 ? Object.fromEntries(rawComponents) : null;
+    const reconciliationNote = reconciliationState === "scope_mismatch"
+      ? `El snapshot observado informa ${observedCount!.toLocaleString("es-CL")} registros; la referencia configurada es ${configuredCanonicalCount!.toLocaleString("es-CL")}. No se calcula cobertura hasta reconciliar el alcance.`
+      : reconciliationState === "release_override"
+        ? "El conteo proviene del release vigente validado para esta fuente."
+        : reconciliationState === "configured_only"
+          ? "No hay un snapshot de salud asociado a este build; se conserva la referencia configurada y no se infiere cobertura vigente."
+          : "El conteo observado coincide con la referencia configurada para este alcance.";
     return ({
     id: source.id,
     label: source.label,
@@ -145,14 +203,14 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
     },
     quality: source.qualityObservations,
     reconciliation: {
-      state: "configured_only" as const,
-      comparisonEligible: false,
-      configuredCanonicalCount: source.canonicalCount,
+      state: reconciliationState,
+      comparisonEligible: isTransferRelease || (observedCount !== null && !scopeMismatch),
+      configuredCanonicalCount,
       configuredHistoricalCount: source.historicalCount,
-      observedCount: null,
-      catalogCount: null,
-      components: null,
-      note: "No hay un snapshot de salud asociado a este build; se conserva la referencia configurada y no se infiere cobertura vigente.",
+      observedCount,
+      catalogCount: safeCount(catalogRecord.recordCount),
+      components,
+      note: reconciliationNote,
     },
     qualityAudit: source.qualityAudit as QualityAuditSnapshot | undefined,
     });
