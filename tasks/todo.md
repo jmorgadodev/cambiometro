@@ -25,7 +25,8 @@
 
 ## Mañana, después del reinicio
 
-- [ ] Medir cuota D1 post-reset.
+- [ ] Medir cuota D1 post-reset (la sonda del 2026-09-12 ya reportó 13.758.232 lecturas; sigue crítica).
+- [ ] Identificar el consumidor de `transparencia-db` fuera del Worker público; la métrica actual sólo separa por base, no por proyecto.
 - [ ] Confirmar que no existen lecturas masivas nuevas.
 - [ ] Verificar compuertas de materialización programada.
 - [ ] Ejecutar sólo un preflight acotado si la cuota está limpia.

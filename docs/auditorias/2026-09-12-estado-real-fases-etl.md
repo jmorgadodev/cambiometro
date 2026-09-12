@@ -564,3 +564,26 @@ cambio de alcance, a una publicación histórica incompleta o a un cambio del
 endpoint; debe resolverse comparando el contrato y los registros antes de
 publicar. No se debe convertir esa diferencia en una cifra de cobertura ni
 mezclarla con votaciones, dietas o gastos de otra categoría.
+
+## D1 — cuota crítica confirmada después del reinicio
+
+La sonda programada `34673322107` y el workflow diario de Cámara
+`34691031897` consultaron Analytics para el 2026-09-12 y reportaron:
+
+- 13.758.232 filas leídas sobre 5.000.000 (275,16%).
+- 18 filas escritas sobre 100.000 (0,02%).
+- 13.757.655 lecturas en `transparencia-db` y 577 en
+  `impulsacv-db`.
+- La sonda detectó el estado `critical` y no ejecutó SQL ni consultas de API.
+
+El workflow de gastos del Senado `34660874426` también omitió materialización
+porque la métrica no estaba autorizada. Los workflows actuales de Cámara,
+ChileCompra, InfoLobby y las demás fuentes usan la compuerta opcional y no
+materializan cuando la cuota está crítica. La salud pública productiva sigue
+indicando `publicDataBackend=r2` y `publicD1Reads=false`.
+
+Conclusión: el consumo actual no corresponde a una escritura de ETL ni puede
+atribuirse sólo al Worker público. La métrica disponible agrupa por base D1,
+no por proyecto, workflow o endpoint. Debe auditarse la cuenta completa —incluidos
+los otros proyectos— antes de reactivar cualquier materialización. Hasta
+entonces, D1 queda en modo sólo diagnóstico y R2 es el único camino público.
