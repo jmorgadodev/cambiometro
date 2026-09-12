@@ -218,3 +218,11 @@ del ETL de InfoLobby, validar conteo/checksum y sólo después regenerar el
 índice y publicar el release. Si la fuente no entrega esas 92 filas, debe
 corregirse el catálogo para dejar de prometerlas, mediante un cambio de
 release auditado; ninguna de esas acciones se ejecutó en esta revisión.
+
+La fuente oficial sí está disponible para una recuperación controlada: el
+catálogo `VirtuosoLobby/trimestres` respondió HTTP 200 y declara el tercer
+trimestre de 2026 (julio–septiembre); los endpoints CSV de `audiencias`,
+`viajes` y `donativos` para 2026/Q3 también respondieron HTTP 200. Esto no
+autoriza todavía una publicación: primero debe ejecutarse el ETL aislado de
+InfoLobby, comparar sus IDs con los 60.523 consultables, verificar si las 92
+filas reaparecen y conservar los checksums de cada dataset original.
