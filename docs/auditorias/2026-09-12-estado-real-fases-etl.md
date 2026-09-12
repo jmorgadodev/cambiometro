@@ -56,6 +56,34 @@ ETL de forma local sólo como replay controlado y publicar un snapshot
 verificado, conservando el release anterior. No corresponde sustituir una
 fuente fallida con datos vacíos ni usar D1 como rescate masivo.
 
+### Reconciliación por componente
+
+La comparación del catálogo R2 vigente (`generatedAt` 2026-09-12) contra el
+catálogo local (`generatedAt` 2026-08-24) confirma que local no es una copia
+equivalente del corte productivo:
+
+| Fuente/componente | Producción/R2 | Local | Lectura correcta |
+|---|---:|---:|---|
+| Cámara, fuente base | 58.751 | 13.286 | Local sólo tenía el subconjunto 2026; R2 incluye períodos 2024-01 a 2026-09 |
+| Cámara, asistencia | 54.538 | incluido en el subconjunto local | Componente de Cámara, no remuneraciones |
+| Cámara, votaciones | 4.058 | incluido en el subconjunto local | Componente de votaciones; actualizado hasta 2026-09 en R2 |
+| Cámara, datos abiertos | 155 | no separado localmente | Componente adicional del release de Cámara |
+| Cámara, gastos | 16.275 | 16.275 | Fuente separada `gastos_camara`, períodos 2026-03 a 2026-07 |
+| Senado, fuente base | 1.428 | 1.428 | Registro propio del Senado; no incluye votaciones ni gastos |
+| Senado, votaciones | 194 | 189 | R2 tiene cinco registros nuevos y período 2026-09 |
+| Senado, gastos | 6.517 | 6.543 | Diferencia de release; local está 26 filas por sobre el corte vigente |
+
+La cifra de Cámara (58.751) no debe sumarse nuevamente con gastos; los gastos
+se publican como `gastos_camara`. Del mismo modo, 1.428 de Senado no es el
+universo parlamentario completo: votaciones y gastos tienen identificadores y
+manifiestos separados. Esta separación explica las inconsistencias observadas
+sin modificar ni reemplazar datos locales.
+
+Conclusión: Cámara y Senado quedan reconciliados por alcance y período. La
+fuente vigente para el sitio es R2; local se conserva como copia de trabajo y
+no debe usarse para afirmar cobertura productiva hasta hidratarla desde el
+release R2 correspondiente.
+
 ## Hallazgo crítico: Movimientos
 
 El run `34690963760` terminó correctamente y publicó:

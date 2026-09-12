@@ -4,7 +4,7 @@
 
 - [x] A. Congelar línea base y rollback por fuente.
 - [x] B. Corregir el contrato R2 de Movimientos en la rama local.
-- [ ] C. Reconciliar Cámara y Senado por componente.
+- [x] C. Reconciliar Cámara y Senado por componente y período; diferencia local/R2 documentada.
 - [x] **Checkpoint 1 local:** 957 tests, typecheck, lint, build Pages y browser smoke verdes.
 - [x] **Checkpoint 1 remoto:** preview del Worker y API de Movimientos validados desde R2, sin lecturas públicas D1.
 - [ ] Promoción controlada del Worker candidato, pendiente de autorización explícita.
