@@ -230,3 +230,11 @@ previa a la protección R2-only.
   manual.
 - **D1:** no se borra ni se toca su contenido; queda en observación hasta contar
   con una ventana posterior completa sin scans masivos.
+
+### Comprobación inmediata posterior
+
+Después de consultar los endpoints R2 del API y actualizar nuevamente el panel
+de D1, los indicadores permanecieron en aproximadamente 2 mil consultas y
+15,43 millones de filas leídas, con cero escrituras. No aumentaron durante las
+comprobaciones acotadas. Es una señal favorable, pero no reemplaza la ventana
+completa de 24 horas porque el panel conserva el agregado móvil.
