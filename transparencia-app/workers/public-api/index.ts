@@ -3,6 +3,7 @@ import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
 import { POLITICOS_SEED } from "../../lib/politicos-source";
 import { readR2EvidenceRecords } from "../../lib/r2-records";
 import { readR2EntityIndex } from "../../lib/r2-entities";
+import { staticRecordCandidatePaths, staticRecordRows } from "../../lib/r2-public-record-paths";
 import { matchesFuncionarioQuality, normalizeFuncionarioRecord, type FuncionarioQualityFilter } from "../../lib/funcionarios-normalization";
 
 interface EmailSender {
@@ -1186,16 +1187,13 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
   if (!source) return null;
   const manifest = await r2Json<StaticSiteManifest>(env.PUBLIC_DATA, "projections/static-site-v1/manifest.json");
   if (!manifest?.files?.length) return null;
-  const candidatePaths = [
-    `data/lake/projections/v1/${source}.json`,
-    `data/lake-subsets/${source}.subset.json`,
-  ];
+  const candidatePaths = staticRecordCandidatePaths(source);
   let rawRows: unknown[] = [];
   for (const path of candidatePaths) {
     const entry = manifest.files.find((file) => file.path === path);
     if (!entry) continue;
     const payload = await r2Json<JsonRecord>(env.PUBLIC_DATA, entry.key);
-    const candidateRows = Array.isArray(payload) ? payload : Array.isArray(payload?.records) ? payload.records : [];
+    const candidateRows = staticRecordRows(payload);
     if (candidateRows.length > 0) {
       rawRows = candidateRows;
       break;
