@@ -487,3 +487,49 @@ siete artefactos faltantes, no corregir el enrutamiento.
 6. **Cierre del día**: conservar el rollback exacto del Worker anterior y
    dejar D1 para el reinicio; ningún cambio de menú, rutas, municipalidades,
    remuneraciones o `cambiometro-editorial`.
+
+## Restauración de Cámara ejecutada sin D1 — 12 de septiembre
+
+La reconstrucción pendiente se resolvió sin ejecutar ETL, sin leer ni escribir
+D1 y sin cambiar código. Se localizaron los siete releases inmutables de
+GitHub que el catálogo R2 ya declaraba para enero y marzo-agosto de 2026. Cada
+manifiesto y cada archivo `records.jsonl.gz` se verificó contra el checksum del
+catálogo antes de publicarlo.
+
+Se restauraron únicamente los 14 objetos canónicos:
+
+- `camara/votaciones_camara/2026/01`
+- `camara/votaciones_camara/2026/03`
+- `camara/votaciones_camara/2026/04`
+- `camara/votaciones_camara/2026/05`
+- `camara/votaciones_camara/2026/06`
+- `camara/votaciones_camara/2026/07`
+- `camara/votaciones_camara/2026/08`
+
+La primera carga dejó seis duplicados en rutas auxiliares para marzo-mayo.
+Fueron eliminados después de confirmar la existencia y el checksum de las
+rutas canónicas. Los releases originales permanecen disponibles como
+rollback; febrero no tiene partición publicada en el catálogo.
+
+### Verificación productiva posterior
+
+- `source=votaciones_camara`: 874 votaciones, 14.510 filas publicadas,
+  14.510 esperadas, cero particiones faltantes y cero artefactos faltantes.
+- `source=camara&kind=vote`: exactamente el mismo resultado.
+- Todos los períodos disponibles de 2026 responden `sourceStatus=complete`.
+- `/api/v1/health`: `ok=true`, `publicDataBackend=r2`,
+  `publicD1Reads=false`.
+- No se desplegó Pages ni se ejecutó ETL como parte de esta reparación.
+
+### Ruta de trabajo para continuar hoy
+
+1. Mantener D1 fuera de operación hasta el reinicio; no ejecutar SQL ni
+   materialización.
+2. Cerrar el incidente histórico de Cámara y conservar esta evidencia como
+   rollback y referencia de checksums.
+3. Ejecutar sólo auditorías de lectura sobre Movimientos, Senado y las fuentes
+   pendientes, sin sustituir snapshots ni activar ETL.
+4. Preparar para después del reinicio una medición de cuota D1 y una prueba
+   acotada de compuertas, sin materializar datos masivos.
+5. No tocar navegación, municipalidades, remuneraciones, editorial ni cambios
+   de interfaz mientras se valida la estabilidad de las fuentes.
