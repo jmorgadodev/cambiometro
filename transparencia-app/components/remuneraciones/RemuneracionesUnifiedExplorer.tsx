@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import TransparencyActivaSummary from "./TransparencyActivaSummary";
 
 type SourceStatus = "complete" | "partial" | "aggregate_only" | "unavailable";
 
@@ -251,7 +252,7 @@ export default function RemuneracionesUnifiedExplorer() {
           <nav className="remuneration-module-nav" aria-label="Secciones de remuneraciones">
             <a href="#buscar-remuneraciones">Buscar</a>
             <a href="#fuentes-remuneraciones">Fuentes</a>
-            <a href="#detalle-38bis">Historial mensual</a>
+            <a href="#historial-transparencia">Historial mensual</a>
           </nav>
 
           <section id="buscar-remuneraciones" className="remuneration-module remuneration-module--search" aria-labelledby="buscar-remuneraciones-title">
@@ -317,6 +318,8 @@ export default function RemuneracionesUnifiedExplorer() {
             </div>
             <p className="remuneration-reading-note"><strong>Cómo leer los resultados:</strong> un monto aparece sólo cuando la fuente lo publicó. Si falta, se indica “Monto no publicado”; nunca se completa con una estimación.</p>
           </section>
+
+          <TransparencyActivaSummary />
         </>
       )}
     </section>

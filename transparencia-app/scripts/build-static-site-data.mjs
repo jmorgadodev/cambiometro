@@ -208,6 +208,30 @@ if (existsSync(cpltManifestPath)) {
 }
 await rm(publicFuncionariosDir, { recursive: true, force: true });
 await mkdir(publicFuncionariosDir, { recursive: true });
+let cpltTransparencySummary = null;
+const cpltTransparencySummarySource = join(cpltRoot, "transparency-summary.json");
+if (existsSync(cpltTransparencySummarySource)) {
+  const summaryContent = await readFile(cpltTransparencySummarySource);
+  try {
+    const summary = JSON.parse(summaryContent.toString("utf8"));
+    if (summary?.dataset === "transparencia-activa-funcionarios-summary"
+      && Number.isSafeInteger(summary.recordCount)
+      && Array.isArray(summary.periods)
+      && summary.coverage?.total === 346) {
+      const summaryOutput = join(publicFuncionariosDir, "transparency-summary.json");
+      await writeFile(summaryOutput, summaryContent);
+      cpltTransparencySummary = {
+        path: "/data/funcionarios/transparency-summary.json",
+        bytes: summaryContent.byteLength,
+        checksumSha256: crypto.createHash("sha256").update(summaryContent).digest("hex"),
+        recordCount: summary.recordCount,
+        latestPeriod: summary.latestPeriod ?? null,
+      };
+    }
+  } catch {
+    cpltTransparencySummary = null;
+  }
+}
 const funcionariosFiles = [];
 for (const entry of await readdir(cpltRoot, { withFileTypes: true })) {
   if (!entry.isFile() || !entry.name.endsWith(".json")) continue;
@@ -269,6 +293,7 @@ const funcionariosManifest = {
   // fuente oficial no publicó.
   coverage: cpltCoverage,
   unavailableMunicipalities: listUnavailableMunicipalities(cpltCoverage, funcionariosFiles),
+  transparencySummary: cpltTransparencySummary,
   files: funcionariosFiles,
   checksumSha256: checksum(funcionariosFiles),
 };
