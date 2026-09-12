@@ -347,9 +347,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
       matched += 1;
     }
   }
-  const partial = missingPartitions > 0
-    || missingArtifacts > 0
-    || (!hasFilters && expectedTotal !== null && loadedRows < expectedTotal);
+  const partial = missingPartitions > 0 || missingArtifacts > 0;
   const total = hasFilters || partial ? matched : expectedTotal ?? matched;
   const complete = !partial && (hasFilters ? scannedAll : scannedAll && (expectedTotal === null || matched === expectedTotal));
   return {
