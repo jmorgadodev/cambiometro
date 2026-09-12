@@ -102,6 +102,50 @@ que prometa 247.287 filas cuando sólo hay 15.689 disponibles en el release
 caliente. La UI debe presentar “15.689 publicados; 231.598 pendientes de
 publicación” o limitar la paginación al alcance publicado.
 
+## Transparencia Activa CPLT
+
+La fuente tiene un camino distinto al de `api/v1/records`: su proyección de
+funcionarios se publica en:
+
+`projections/funcionarios-v1/manifest.json`
+
+La revisión de producción y R2 del 12 de septiembre observó:
+
+| Capa | Filas | Corte/versión | Estado |
+|---|---:|---|---|
+| Resumen productivo `/api/v1/sources` | 1.226.913 | 2026-09-02 03:28:30 UTC | metadato, parcial |
+| Manifiesto R2 productivo | 1.226.913 | `2026-09-02T03-28-30-598Z` | publicado |
+| Proyección local `data/lake-cplt` | 1.220.960 | 2026-08-30 08:05:27 UTC | anterior |
+| `data-quality-sources.json` local | 1.203.287 | conteo canónico antiguo | anterior |
+| Auditoría local del snapshot | 1.220.960 | 2026-09-06 | observación, no release |
+
+La diferencia entre el manifiesto R2 y la proyección local es de **5.953
+filas** (0,49 %). La diferencia entre R2 y el conteo canónico local es de
+**23.626 filas** (1,92 %). No es correcto utilizar cualquiera de los dos
+conteos locales para describir la cobertura vigente.
+
+La consulta productiva específica de funcionarios sí funciona desde R2:
+
+`/api/v1/funcionarios?q=torrealba&limit=3` respondió `sourceStatus=r2-search`,
+`totalHeadcount=1.226.913` y resultados paginados. En cambio,
+`/api/v1/records?source=cplt` devuelve `temporarily-unavailable` porque esa
+ruta consulta el lake de registros genéricos, no la proyección de nóminas CPLT;
+no debe usarse como prueba de que la nómina de funcionarios esté caída.
+
+La proyección local ocupa aproximadamente **4.085 MiB** y contiene 1.774
+archivos. Esto confirma que no conviene tratarla como copia operativa
+permanente: producción/R2 debe ser la referencia y local debe hidratar sólo el
+release necesario para probar. Antes de eliminar ese material local se debe
+verificar que el build pueda hidratar el mismo manifiesto R2 y conservar un
+respaldo fuera de `Proyectos`.
+
+Observaciones de calidad del último snapshot local (no deben presentarse como
+conteo del release R2): 156.507 filas con bruto positivo y líquido cero,
+9.649 con líquido mayor que bruto, 314.945 sin fecha de término, 656 cargos
+con signo inicial y 30 nombres con prefijos aislados. Los valores originales
+deben conservarse; la normalización sólo puede aplicarse para lectura y debe
+quedar auditada.
+
 ## Decisiones
 
 1. Producción sólo puede declarar como consultable aquello que tenga un
@@ -113,6 +157,9 @@ publicación” o limitar la paginación al alcance publicado.
 4. DIPRES debe separar partición fuente, índice derivado y contexto agregado.
 5. Ninguna de estas discrepancias se resolverá usando D1 ni mezclando datos
    locales con producción.
+6. CPLT debe consumirse mediante su manifiesto/proyección R2, no mediante
+   `api/v1/records` ni D1. El conteo vigente es 1.226.913 hasta que otro
+   manifiesto productivo lo reemplace.
 
 **Estado:** auditoría completada; implementación de índices y vistas derivadas
 pendiente.
