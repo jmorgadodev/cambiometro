@@ -84,6 +84,32 @@ fuente vigente para el sitio es R2; local se conserva como copia de trabajo y
 no debe usarse para afirmar cobertura productiva hasta hidratarla desde el
 release R2 correspondiente.
 
+## Auditoría de alcance sin D1
+
+Se probó el candidato remoto con límite 1 y paginación. Las respuestas fueron
+servidas por R2; el Worker mantiene `ALLOW_PUBLIC_D1_READS=0`.
+
+| Fuente | Entrega verificable | Resultado | Observación |
+|---|---:|---|---|
+| ChileCompra | 74.142 / 74.142 | Completo para el release vigente | No equivale todavía al histórico de 888.693 mencionado en el plan |
+| InfoLobby | 60.523 / 60.523 | Completo para el release R2 | El inventario general declara 60.615; hay una diferencia pendiente de 92 filas |
+| DIPRES | 15.689 / 247.287 | Parcial | Debe presentarse como contexto agregado; no como buscador individual |
+| Transparencia Activa | 1.226.913 en el índice nacional | Buscador R2 operativo | La ruta específica es `/api/v1/funcionarios`; `/api/v1/records?source=cplt` no representa esta nómina |
+
+Esta prueba evita una falsa conclusión de ausencia: que `/records` no devuelva
+filas para `cplt` no significa que Transparencia Activa esté caída. Su índice
+especializado respondió con `sourceStatus=r2-search`, `totalHeadcount=1226913`
+y paginación real.
+
+Pendientes de datos, no de D1:
+
+1. Reconciliar las 92 filas entre el inventario de InfoLobby y su release R2.
+2. Definir si el histórico de ChileCompra será incorporado como release aparte,
+   sin mezclarlo con el corte vigente.
+3. Revalidar el universo DIPRES y sus períodos antes de ampliar su módulo.
+4. Mantener la ruta especializada de CPLT como contrato público y agregar una
+   prueba que impida medirla por el endpoint genérico de registros.
+
 ## Hallazgo crítico: Movimientos
 
 El run `34690963760` terminó correctamente y publicó:

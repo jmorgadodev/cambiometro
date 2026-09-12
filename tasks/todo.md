@@ -8,7 +8,8 @@
 - [x] **Checkpoint 1 local:** 957 tests, typecheck, lint, build Pages y browser smoke verdes.
 - [x] **Checkpoint 1 remoto:** preview del Worker y API de Movimientos validados desde R2, sin lecturas públicas D1.
 - [ ] Promoción controlada del Worker candidato, pendiente de autorización explícita.
-- [ ] D1. Revisar ChileCompra, InfoLobby, DIPRES y Transparencia Activa uno por uno.
+- [x] D1. Auditar ChileCompra, InfoLobby, DIPRES y Transparencia Activa en el candidato, sólo por R2.
+- [ ] Reconciliar las 92 filas de InfoLobby y separar corte vigente/histórico de ChileCompra.
 - [ ] E. Ejecutar auditoría de consistencia y calidad.
 - [ ] **Checkpoint 2:** validar checksums, paginación y ausencia de lecturas D1.
 - [ ] F. Preparar promoción controlada.
