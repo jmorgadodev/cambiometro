@@ -62,3 +62,22 @@ D1. El preview fue retirado al terminar.
   respuestas inválidas, con rutas de municipalidades, remuneraciones,
   movimientos, cruces y transferencias funcionando.
 - Los artefactos temporales y sus dependencias fueron eliminados.
+
+## Revalidación de aislamiento
+
+El 12 de septiembre se comprobó que no existe una carpeta local
+`transparencia.impulsacv.cl_` ni `transparencia-impulsacv` dentro de
+`C:\Users\jorge\Proyectos`. El repositorio remoto
+`jmorgadodev/transparencia.impulsacv.cl` permanece archivado y sus workflows de
+ETL están deshabilitados; sólo permanece activo Dependabot.
+
+La consulta de deployments del Worker histórico no pudo repetirse con el token
+de auditoría actual porque no incluye `Workers Scripts -> Read`; por eso no se
+presenta esa comprobación como evidencia nueva. El aislamiento local y de
+GitHub sí quedó verificado. Para una confirmación independiente del estado del
+Worker en Cloudflare se requiere ese permiso de lectura, sin permiso de
+escritura ni despliegue.
+
+Además, se eliminó del maestro la última ruta de auditoría que apuntaba al
+`data/lake` del repositorio retirado; las auditorías ahora resuelven por defecto
+el lake de `cambiometro-public`.
