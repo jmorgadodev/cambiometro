@@ -307,6 +307,11 @@ de usarlo como release se debe validar que el bundle de entidades completo sea
 el que se quiere conservar y que el manifiesto/índice público se actualicen en
 una sola operación versionada.
 
+El índice candidato también quedó validado: 71.466 filas, 1.430 páginas de 50
+registros, 205.151 términos de búsqueda, 227.555.913 bytes de archivo y
+coincidencia exacta entre la suma de longitudes de páginas y el archivo de
+registros. El primer y último ID fueron leídos correctamente.
+
 ## Control DIPRES — 07:16 UTC-3
 
 Las páginas oficiales de ejecución presupuestaria y de presupuestos
