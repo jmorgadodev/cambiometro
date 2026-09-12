@@ -1067,3 +1067,26 @@ particiones, calidad y espacio local sin abrir D1. La única prohibición
 operativa es no marcar manualmente ninguna opción de materialización ni
 ejecutar el workflow de reparación. Esta revisión no modificó workflows ni
 producción.
+
+## Reconciliación acotada de votaciones — consulta R2 del 12 de septiembre
+
+La consulta sin período fue correctamente rechazada para Cámara con
+`QUERY_SCOPE_REQUIRED`; esto confirma que la protección contra escaneos
+históricos está activa. Al acotar por año, los resultados fueron:
+
+| Fuente y período | Filas del rango | Filas publicadas en el release | Estado |
+|---|---:|---:|---|
+| Cámara, 2025 | 0 consultables | 19.062 | parcial; 11 particiones faltantes |
+| Cámara, 2026 | 874 consultables | 14.510 | completo; sin particiones faltantes |
+| Cámara, agosto 2026 | 102 consultables | 2.117 | completo |
+| Cámara, septiembre 2026 | 49 consultables | 979 | completo |
+| Senado, 2026 | 196 consultables | 196 | completo |
+| Senado, 2025 | 0 | no disponible | temporalmente indisponible |
+| Senado, agosto 2025 | 0 | no disponible | temporalmente indisponible |
+| Senado, febrero 2026 | 0 | no disponible | temporalmente indisponible |
+
+La cifra `publishedRows` representa el release cargado, no necesariamente el
+resultado del filtro temporal; por eso no se sumará directamente con `total`.
+El hallazgo confirma que Cámara está actualizada para 2026, mientras que
+Senado conserva una brecha real de períodos que debe resolverse desde su fuente
+o release oficial, no mediante una copia local ni D1.
