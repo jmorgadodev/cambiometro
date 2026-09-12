@@ -38,8 +38,9 @@
 - [x] Revisar manifiesto R2 y preview de `votaciones_camara` sin usar D1.
 - [x] Auditar paginación R2 con tamaños pequeños y registrar respuestas 1102
   intermitentes sin desplegar un parche.
-- [ ] Preparar hardening de paginación por fuente, con límite seguro por
-  tamaño de fila y prueba de cursor, sin publicar mientras D1 siga crítica.
+- [x] Preparar y validar en preview el hardening de paginación R2 (PR #497),
+  con pruebas `limit=1/10/25/50` y cursor en InfoLobby, ChileCompra y DIPRES;
+  la promoción productiva queda pendiente de autorización.
 - [ ] Reconciliar el alcance de Senado 2025-08 y 2026-02 contra la fuente
   oficial antes de reconstruir sus artefactos.
 - [ ] Revisar el corte vigente/histórico de ChileCompra y el release de
