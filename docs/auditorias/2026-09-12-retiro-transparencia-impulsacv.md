@@ -83,3 +83,6 @@ La comprobación del repositorio remoto sí quedó confirmada mediante GitHub:
 push el 18 de agosto de 2026 y sin ejecuciones posteriores a esa fecha. Sus
 últimas verificaciones fueron históricas; el repositorio no es una fuente
 activa del proyecto maestro.
+
+El inventario de workflows remoto muestra únicamente `Dependabot Updates`
+activo; no hay workflows ETL ni de despliegue activos en ese repositorio.
