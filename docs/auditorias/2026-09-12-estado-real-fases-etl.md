@@ -1975,3 +1975,22 @@ Hallazgos que deben guiar la siguiente fase:
 El mismo control confirmó coincidencia para INE Censo, SERVEL y SINIM. Esto
 permite seguir con cambios acotados sin confundir una diferencia de corte con un
 fallo de ingestión.
+
+### Verificación de Movimientos y regresión general
+
+`npm run verify:prod:movimientos` terminó correctamente contra producción:
+
+- HTTP 200 y encabezado hidratado;
+- 82 movimientos preservados;
+- checksum y última ejecución presentes;
+- estados `verificado` y `en_confirmacion` conservados;
+- todos los registros con ID y fuente;
+- fechas y procedencia de Alonso Velásquez y Patricio Löhr correctas;
+- ninguna promoción indebida de prensa a acto oficial.
+
+El doble verificador general pasó 131 controles y dejó un único fallo en una
+expectativa antigua de `/fuentes`: el test todavía calcula un titular intermedio
+`1.490.035`, mientras producción muestra el total canónico vigente
+`1.753.013`. No se modificó producción ni se ajustó el test para ocultar el
+desfase; queda como tarea de reconciliación del cálculo del titular, separada de
+la validación funcional de Movimientos.
