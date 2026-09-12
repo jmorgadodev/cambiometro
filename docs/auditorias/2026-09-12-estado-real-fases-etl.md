@@ -587,3 +587,20 @@ atribuirse sólo al Worker público. La métrica disponible agrupa por base D1,
 no por proyecto, workflow o endpoint. Debe auditarse la cuenta completa —incluidos
 los otros proyectos— antes de reactivar cualquier materialización. Hasta
 entonces, D1 queda en modo sólo diagnóstico y R2 es el único camino público.
+
+## Movimientos — corte productivo actual sin reemplazo
+
+La consulta productiva `source=movimientos&limit=100` respondió desde R2 con
+las 82 filas del snapshot vigente:
+
+- 74 registros `verificado` y 8 `en_confirmacion`.
+- Último evento: 2026-09-02.
+- Última detección registrada: 2026-09-12T11:24:46.934Z.
+- Período de eventos observado: 2026-02-15 a 2026-09-02.
+- No hay paginación pendiente: 82 filas, una página completa.
+
+La respuesta conserva `sourceStatus=partial` porque Movimientos mantiene un
+snapshot con procedencia y estados de confirmación, no porque falten filas en
+el artefacto publicado. El siguiente trabajo debe ser incremental: incorporar
+novedades, mantener los 82 registros anteriores ante un fallo de una fuente y
+separar siempre fecha del evento, fecha de detección y última publicación.
