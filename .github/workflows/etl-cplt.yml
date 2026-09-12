@@ -140,7 +140,7 @@ jobs:
         run: npm run data:finalize:cplt:r2
 
       - name: Registrar estado CPLT en D1
-        if: steps.d1-quota.outputs.proceed == 'true'
+        if: github.event_name == 'workflow_dispatch' && steps.d1-quota.outputs.proceed == 'true'
         working-directory: transparencia-app
         run: npm run data:record:cplt-state -- --remote
 
