@@ -73,3 +73,26 @@ remoto para revisión. Sus verificaciones terminaron correctamente el
 Esto valida el candidato en CI, pero no constituye un despliegue. Producción
 permanece sin cambios y la atribución del consumo histórico de
 `transparencia-db` sigue pendiente de permiso **Workers Scripts → Read**.
+
+## Reconciliación de release y validación del candidato
+
+El PR #490 (`codex/release-candidate-r2-only-d1-safe`) quedó actualizado al
+commit `71336105b721f7ac3602ed8444d8d3f53afc10f6`. Se corrigió la métrica
+`queryable` de Ley 19.862 para que use el mismo release explícito que fija el
+denominador canónico; el snapshot de salud anterior ya no puede producir una
+fracción mayor al 100%.
+
+La validación local, hidratando los artefactos desde R2 y sin consultar D1,
+pasó:
+
+- `npm test`: 980 tests aprobados;
+- `npm run pages:build`: 4.674 rutas estáticas, con municipalidades,
+  remuneraciones y transferencias incluidas;
+- `npm run pages:verify`: 346 municipalidades, 205 perfiles políticos,
+  59.912 transferencias y 18.775 gastos verificados;
+- `npm run api:size`: Worker de 173,61 KiB, con `ALLOW_PUBLIC_D1_READS=0`.
+
+El build local se hizo con los snapshots vigentes de R2 y los cambios
+generados sólo para la prueba no se incorporaron al commit. El build/E2E de
+GitHub quedó ejecutándose sobre el mismo commit; no se autoriza promoción a
+producción hasta que finalice correctamente.
