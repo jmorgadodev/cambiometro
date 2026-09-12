@@ -150,6 +150,13 @@ del consumo D1: el repositorio antiguo quedó descartado como origen, pero aún
 se debe identificar qué Worker o proyecto vigente genera esas lecturas antes
 de declarar cerrado el límite gratuito.
 
+También se observó un Worker independiente llamado `cambiometro`, distinto de
+`transparencia-impulsacv`: conserva un binding a `transparencia-db`, pero
+Cloudflare lo muestra sin rutas, con `workers.dev` deshabilitado y con cero
+invocaciones en las últimas 24 horas. Es un recurso legado dormido, no una
+prueba de que haya generado las lecturas observadas. Su eliminación o retiro
+del binding queda como acción separada y no se ejecuta en esta auditoría.
+
 ### Decisión operativa
 
 Desde esta fecha sólo se trabaja en las tres raíces definidas en
