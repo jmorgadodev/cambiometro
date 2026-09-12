@@ -24,11 +24,15 @@ confirmar que no duplican el proyecto maestro.
 
 ## Proyecto retirado
 
-El repositorio local `transparencia.impulsacv.cl_` y el Worker Cloudflare
-`transparencia-impulsacv` fueron retirados el 12 de septiembre de 2026. Se
-quitó el dominio `transparencia.impulsacv.cl`, se eliminó el Worker y se
-deshabilitaron sus workflows ETL. La base `transparencia-db` y el bucket R2
-no fueron eliminados.
+El repositorio local `transparencia.impulsacv.cl_` y el flujo operativo del
+proyecto histórico quedaron retirados el 12 de septiembre de 2026. El dominio
+`transparencia.impulsacv.cl` no resuelve y sus workflows ETL están
+deshabilitados. La base `transparencia-db` y el bucket R2 no fueron eliminados.
+
+La eliminación del Worker histórico no se afirma sin el permiso de lectura de
+Workers correspondiente; mientras esa comprobación de infraestructura no se
+realice, el Worker se considera fuera de operación por repositorio archivado,
+workflows deshabilitados y dominio sin DNS.
 
 El repositorio remoto permanece archivado y sin ejecución ETL como respaldo
 histórico fuera del flujo operativo. El código maestro no lo consulta: si falta

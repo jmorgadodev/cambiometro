@@ -10,14 +10,23 @@ Se auditó el repositorio histórico `transparencia.impulsacv.cl`, su Worker
 relación con D1/R2. Ese proyecto no es el maestro actual del Cambiómetro y no
 debe participar en nuevos despliegues ni en procesos de datos.
 
-## Acciones realizadas
+## Estado comprobado
 
-- Se retiró el dominio histórico del Worker antiguo.
-- Se eliminó el Worker antiguo de Cloudflare.
+- El repositorio histórico está archivado y privado.
+- Todos sus workflows ETL y de despliegue están deshabilitados; sólo queda
+  Dependabot activo.
+- No existe un checkout local del repositorio histórico dentro de
+  `C:\Users\jorge\Proyectos`.
+- El dominio histórico no resuelve por DNS.
 - Se conservaron D1 y R2 históricos; no se borraron datos compartidos.
-- Se deshabilitaron los workflows del repositorio histórico.
 - Se conservaron respaldos locales recuperables del repositorio y de los
   worktrees retirados fuera de `Proyectos`.
+
+La eliminación o permanencia del Worker histórico no puede afirmarse desde el
+token de auditoría actual porque no incluye `Workers Scripts -> Read`. Por eso
+queda como verificación pendiente de infraestructura, no como una acción
+confirmada. En cualquier caso, el repositorio archivado no tiene un camino
+activo para ejecutar ETL ni desplegar ese Worker.
 - Se mantuvieron como únicas raíces operativas locales:
   - `C:\Users\jorge\Proyectos\cambiometro-public`
   - `C:\Users\jorge\Proyectos\cambiometro-audit`
@@ -75,8 +84,9 @@ porque forman parte de la evidencia de retiro y del rollback histórico.
 La verificación definitiva de que no existe ningún Worker Cloudflare antiguo
 con binding a `transparencia-db` sigue requiriendo el permiso **Workers
 Scripts → Read** en el token de auditoría. El token actual devuelve `403` para
-ese inventario, por lo que no se debe declarar esa parte como comprobada sólo
-por la ausencia de carpetas locales.
+ese inventario, por lo que esa parte queda explícitamente pendiente de
+infraestructura y no se declara eliminada sólo por la ausencia de carpetas
+locales.
 
 La comprobación del repositorio remoto sí quedó confirmada mediante GitHub:
 `jmorgadodev/transparencia.impulsacv.cl` está archivado, privado, con último
