@@ -105,3 +105,23 @@ manifest de votaciones separado, que todavía declara 189 votos de Senado hasta
 agosto. Deben mantenerse ambas capas diferenciadas hasta que el ETL de
 votaciones publique un manifiesto equivalente; no se debe corregir sumando
 sesiones a los conteos de remuneraciones o personal.
+
+## Diagnóstico del workflow
+
+Los workflows separados están correctamente diferenciados:
+
+- Cámara ejecuta `--source votaciones_camara` y usa una ventana por defecto de
+  siete días.
+- Senado ejecuta `--source votaciones_senado` y usa una ventana por defecto de
+  tres días.
+- Ambos recuperan primero el catálogo R2, publican el lake y luego actualizan
+  el cache estático parlamentario.
+- El último workflow de Senado revisado, `34691714118`, terminó exitosamente
+  el 12 de septiembre y no requiere una nueva ejecución para explicar la
+  diferencia local.
+
+La diferencia observada se produce porque el catálogo local auditado fue
+generado el 24 de agosto, mientras producción recibió ejecuciones posteriores.
+La solución no es copiar producción completa al PC ni ejecutar un backfill:
+para futuras pruebas locales se debe descargar sólo el manifest R2 vigente y
+los artefactos paginados del período que se quiera revisar.
