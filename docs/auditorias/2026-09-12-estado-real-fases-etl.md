@@ -759,3 +759,60 @@ mantiene `allow-remote-materialization=false` por defecto y sólo permite
 materializar cuando un workflow manual lo habilita explícitamente y la métrica
 está bajo el umbral. El fallo histórico de Contraloría ocurrió antes de esta
 política reforzada; no se debe repetir como criterio para reintentarla ahora.
+
+## Trabajo ejecutable sin esperar el reinicio de D1 — corte 12 de septiembre
+
+El reinicio de cuota no es un requisito para continuar con las tareas de
+auditoría, reconciliación R2 ni pruebas de conectividad. Sólo quedan fuera de
+este bloque las materializaciones y cualquier consulta masiva sobre D1.
+
+### Estado de workflows separado
+
+La consulta de los últimos runs confirmó el siguiente estado operativo:
+
+| Workflow | Último run revisado | Resultado | Tratamiento inmediato |
+|---|---:|---|---|
+| ETL Diario Cámara | `34691031897` | Exitoso | Auditar release, período y checksum |
+| ETL Diario Movimientos | `34690963760` | Exitoso | Auditar fecha del último evento y detección |
+| ETL Diario Votaciones Cámara | `34691437098` | Exitoso | Verificar cobertura por período |
+| ETL Diario Votaciones Senado | `34691714118` | Exitoso | Verificar cobertura por período |
+| ETL Mensual Gastos Senado | `34660874426` | Exitoso | Auditar checksum y corte |
+| ETL Mensual InfoProbidad | `34481652765` | Exitoso | Auditar checksum y corte |
+| ETL Mensual Ley 19.862 | `34231278337` | Exitoso | Auditar checksum y filas |
+| ETL Trimestral DIPRES | `32851856261` | Exitoso | Mantener como dato agregado |
+| ETL Semanal InfoLobby | `34713923767` | Exitoso | Mantener universo R2 de 71.467 filas |
+| ETL ChileCompra | `34130670889` | Fallido protegido | Fuente HTTP 403; conservar snapshot vigente |
+| ETL Contraloría | `33633187407` | Fallido protegido | Falló materialización D1 histórica; no reintentar |
+| ETL CPLT | `34342239360` | Fallido protegido | Bloqueo de crecimiento R2; revisar tamaño antes de publicar |
+| ETL Personal Cámara | `34127058669` | Fallido protegido | Fuente oficial bloqueada; conservar snapshot |
+| ETL Remuneraciones 38 bis | `34630955321` | Fallido protegido | Endpoint oficial no respondió tras cuatro intentos |
+| ETL Personal Senado | — | Sin ejecución reciente | Auditar workflow y no forzar ejecución sin fuente |
+
+El resultado confirma que los fallos están aislados por fuente y no justifican
+relanzar todo el proceso. Ninguno de los cinco fallos protegidos debe reemplazar
+un snapshot válido ni abrir D1.
+
+### Secuencia que queda habilitada ahora
+
+1. Comparar producción contra el release R2 vigente por fuente: filas,
+   período, checksum y estado de completitud.
+2. Auditar los ETL exitosos sin publicarlos de nuevo: Cámara, Senado,
+   Movimientos, votaciones, Gastos Senado, InfoProbidad, Ley 19.862, DIPRES e
+   InfoLobby.
+3. Revisar de manera aislada los artefactos y guardas de ChileCompra, CPLT,
+   Personal Cámara y 38 bis; mantener el último release válido cuando la fuente
+   no responda.
+4. Confirmar que cada workflow fallido termine antes de cualquier publicación y
+   que el guard registre la causa, evitando falsos “cortes vacíos”.
+5. Auditar calidad del catálogo público: duplicados, períodos faltantes,
+   montos no publicados, nombres normalizados y diferencia entre producción y
+   local por fecha de corte.
+6. Revisar el espacio local mediante inventario y clasificación; no borrar
+   carpetas ni archivos hasta separar rollback, datos únicos y temporales.
+
+### Bloque reservado para después del reinicio
+
+Cuando Analytics confirme una cuota limpia, se hará sólo una sonda acotada y se
+verificará que el preflight bloquee materializaciones por defecto. No se
+reactivará ningún ETL masivo de D1 como parte de esta revisión. El camino
+público seguirá siendo R2.
