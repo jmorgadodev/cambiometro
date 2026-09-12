@@ -105,7 +105,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
 
       - name: Materializar D1 y registrar ejecución
-        if: steps.d1-quota.outputs.proceed == 'true'
+        if: github.event_name == 'workflow_dispatch' && steps.d1-quota.outputs.proceed == 'true'
         working-directory: transparencia-app
         env:
           GH_TOKEN: ${{ github.token }}
