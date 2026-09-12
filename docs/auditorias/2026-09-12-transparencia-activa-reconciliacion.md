@@ -25,6 +25,30 @@ es anterior al manifiesto local del 30 de agosto. El resumen de calidad debe
 regenerarse sólo después de seleccionar y validar un release explícito, para
 no volver a mezclar cifras históricas con el corte público.
 
+## Estado de las fuentes de origen
+
+Se realizó una comprobación `HEAD` contra los cuatro archivos oficiales el
+12 de septiembre. Todos respondieron `HTTP 200` y entregaron `ETag` y fecha de
+modificación:
+
+| Fuente | Última modificación observada | Tamaño anunciado | ¿Coincide con el release R2? |
+|---|---|---:|---|
+| Planta | 6 sep 2026 10:35 GMT | 8.605.185.397 bytes | No |
+| Contrata | 6 sep 2026 08:53 GMT | 14.295.821.962 bytes | No |
+| Honorarios | 6 sep 2026 09:36 GMT | 8.314.320.073 bytes | No |
+| Código del Trabajo | 5 sep 2026 11:03 GMT | 6.223.537.661 bytes | No |
+
+Los cuatro `ETag` actuales son distintos de los `sourceValidator` almacenados
+en el manifiesto R2 de versión `2026-09-02T03-28-30-598Z`. Esto significa que
+el release público es íntegro y consultable, pero ya no es el último estado
+publicado por CPLT. El siguiente ETL de Transparencia Activa debe ejecutarse
+por categoría, validar cada resultado y publicar un nuevo release sólo cuando
+las cuatro categorías terminen correctamente.
+
+No se ejecutó ese ETL durante esta auditoría: descargar y procesar los cuatro
+CSV implica más de 35 GB anunciados por los servidores de origen y no debe
+mezclarse con un despliegue de interfaz.
+
 ## Cobertura municipal
 
 | Estado | Local | Producción |
