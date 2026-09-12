@@ -933,3 +933,104 @@ Evidencia local y productiva de la rama:
 - `verify-prod-full` corregido contra producción: 132 verificaciones pasadas,
   0 fallidas; InfoLobby aparece como 71.467 audiencias.
 - No se ejecutó ningún ETL ni consulta D1 y el PR no se ha promovido.
+
+## Plan operativo para continuar hoy — sin esperar el reinicio de D1
+
+El reinicio de D1 no debe detener el diagnóstico ni la preparación de los
+ETL. Se trabajará en modo sólo lectura sobre producción y R2, sin publicar
+nuevos datos ni modificar la estructura del sitio.
+
+### Bloque A — Línea base por fuente
+
+Se tomará una fotografía reproducible de cada endpoint público con `limit=1`
+y de su manifiesto productivo. La matriz conservará cuatro conceptos
+separados:
+
+1. filas declaradas por el catálogo;
+2. filas publicadas en el release;
+3. filas consultables en el endpoint;
+4. filas que faltan o están temporalmente indisponibles.
+
+El corte directo observado el 12 de septiembre fue:
+
+| Fuente | Catálogo declarado | Endpoint consultable | Estado operativo | Acción hoy |
+|---|---:|---:|---|---|
+| CPLT | 1.226.913 | 0 | temporalmente indisponible | No reintentar masivo; conservar snapshot y revisar disponibilidad R2 |
+| Cámara | 58.751 | 49 en la página verificada | parcial | Conciliar componentes y períodos sin publicar |
+| Senado | 1.428 | 50 en la página verificada | parcial | Documentar períodos faltantes, sin reconstruir |
+| ChileCompra | 74.142 | 74.142 | completo | Mantener snapshot protegido por 403 de la fuente |
+| InfoLobby | 71.467 | 71.467 | completo | Usar como corte productivo vigente |
+| DIPRES | 247.287 | 15.689 en el release visible | parcial | Separar agregado de histórico y documentar alcance |
+| Movimientos | 82 | 82 | parcial | Validar frescura y fechas por conector |
+| Gastos Cámara | 16.275 | 16.275 | R2 | Mantener separado de remuneraciones/votaciones |
+| Gastos Senado | 2.500 | 2.500 | R2 | Mantener separado de remuneraciones/votaciones |
+
+La cifra de una página no se interpretará como total del dataset: se usará
+únicamente para comprobar que el endpoint responde y que su metadato declara
+el alcance correcto.
+
+### Bloque B — Reconciliación Cámara y Senado
+
+Hoy se revisarán los manifiestos y particiones de Cámara y Senado, sin correr
+ETL ni materialización. El resultado esperado es una tabla de períodos que
+indique `disponible`, `faltante`, `no publicado` o `no verificable`. La fuente
+no será considerada completa sólo porque el catálogo tenga un número total.
+
+Para Cámara se conserva como referencia el release R2 con sus particiones
+verificadas de 2026 y se separan asistencia, votaciones y gastos. Para Senado
+se mantienen explícitamente las ausencias ya detectadas de 2025-08 y 2026-02;
+no se inventarán filas ni se copiarán desde otra fuente.
+
+### Bloque C — Movimientos y frescura
+
+Se auditarán hoy cinco fechas independientes: fecha del evento, fecha de
+publicación de la fuente, fecha de detección, última ejecución exitosa y
+última publicación en Pages. El sitio no recibirá cambios de interfaz en este
+bloque; primero se validará que el corte declarado no mezcle esas fechas.
+
+### Bloque D — Calidad y consistencia
+
+Se preparará un reporte de anomalías sobre los releases ya disponibles:
+
+- duplicados aparentes;
+- períodos ausentes;
+- nombres no reportados o normalizados;
+- montos no publicados frente a monto cero;
+- categorías mezcladas entre remuneración, asesoría, gasto y votación;
+- diferencias de producción frente a local explicadas por fecha o alcance.
+
+Este reporte no corregirá ni reemplazará los archivos originales. Las
+correcciones futuras serán índices o vistas derivadas en R2, manteniendo la
+fila de origen y su checksum.
+
+### Bloque E — Preparación de ETL aislados
+
+Se validará la configuración de cada workflow sin ejecutarlo:
+
+- qué fuente consulta;
+- qué artefacto produce;
+- qué guardas impiden publicar vacío;
+- qué snapshot conserva si la fuente falla;
+- si intenta leer o escribir D1;
+- qué checksum entrega;
+- qué condición habilita la publicación.
+
+Los workflows con fuente bloqueada (ChileCompra, CPLT, Personal Cámara y 38
+bis) permanecerán en modo protegido. No se relanzarán en cadena ni se hará
+una publicación por el solo hecho de que el reinicio de cuota ocurra.
+
+### Bloque F — Espacio local, sin borrado impulsivo
+
+Hoy sólo se clasificarán candidatos de limpieza por tipo: caché regenerable,
+build reproducible, snapshot único, rollback y material editorial. No se
+eliminará nada en esta etapa. Las carpetas esenciales quedan limitadas a
+`cambiometro-public`, `cambiometro-audit` y `cambiometro-editorial`; cualquier
+worktree temporal debe verificarse antes de proponer su retiro.
+
+### Puerta de decisión posterior
+
+Cuando D1 reinicie, se hará una sola sonda pequeña para confirmar la métrica y
+el bloqueo del preflight. Sólo si la cuota está limpia se evaluará una prueba
+incremental controlada; no se reactivará la materialización histórica. Todo lo
+que se pueda resolver con R2, manifiestos, índices y validadores se cerrará
+antes de esa puerta.
