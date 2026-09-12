@@ -1379,3 +1379,21 @@ existencia y el nombre exacto del objeto R2 de CPLT, validar su manifest y
 repetir una consulta paginada pequeña. Mientras eso no pase, la interfaz debe
 conservar el estado de indisponibilidad y no reemplazarlo por cero ni por una
 respuesta vacía normal.
+
+### Comprobación directa del release R2 CPLT
+
+La revisión directa del bucket confirmó que el objeto sí existe y es válido:
+
+- `projections/funcionarios-v1/manifest.json` responde y declara versión
+  `2026-09-02T03:28:30.598Z`.
+- El manifest declara 1.226.913 filas y 1.514 assets.
+- El índice nacional responde con 127.900 bytes.
+- La primera página física responde con 10.000 filas y checksum registrado.
+- `/api/v1/funcionarios?q=torrealba&limit=5` responde desde `r2-search` con
+  558 coincidencias.
+
+La conclusión cambia el diagnóstico: R2 no está caído. La ruta genérica
+`/api/v1/records?source=cplt` no corresponde al contrato de la proyección
+CPLT y cae en `temporarily-unavailable`, mientras la ruta canónica
+`/api/v1/funcionarios` sí funciona. Esto debe corregirse en la auditoría de
+contratos antes de declarar que Transparencia Activa está ausente o sin datos.
