@@ -258,3 +258,21 @@ La comprobación en memoria confirmó además:
 
 Esto permite preparar un release aislado reproducible, pero todavía no lo
 publica ni reemplaza el índice vigente.
+
+## Dependencia adicional de integridad R2
+
+El catálogo también referencia estos artefactos de entidades de InfoLobby:
+
+- `entities/v1/infolobby-a25fd9e0f763e451a5bce08e11cf636895c2f478d5dec8cdd0ffd5da1913ba13.jsonl.gz`;
+- `indexes/v1/infolobby/entities-5e03c5837b20115fa2db29b0daf5584bf0d451af0e00c79d7c593cc02373878.jsonl.gz`.
+
+Ambos respondieron `The specified key does not exist` al consultarlos
+directamente en R2. Esto no afecta la consulta paginada de registros, pero sí
+impide regenerar de forma segura las relaciones históricas de InfoLobby sin
+reconstruir primero el bundle completo de entidades. El candidato aislado no
+debe cambiar `entityKey` ni `entityIndexKey` hasta recuperar esos artefactos o
+regenerarlos desde un histórico verificable.
+
+**Decisión:** corregir primero el inventario/artefactos R2 y luego publicar la
+partición de agosto; no se hará una actualización parcial que pueda perder
+relaciones históricas.
