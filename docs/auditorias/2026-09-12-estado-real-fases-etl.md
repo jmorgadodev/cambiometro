@@ -156,3 +156,35 @@ El preview remoto del Worker no pudo iniciar porque el token actual no tiene
 el permiso necesario para crear la sesión remota. No se cambiaron permisos, no
 se consultó D1 y no se desplegó producción. La corrección queda lista para
 preview/promoción cuando exista una credencial autorizada para esa operación.
+
+## Checkpoint remoto posterior — 12 de septiembre
+
+El workflow `34698602598`, ejecutado desde la rama
+`codex/movimientos-r2-fix-20260912`, terminó correctamente en sus tres
+controles: typecheck/tamaño, preview sin ruta productiva y versión candidata.
+
+La primera prueba remota mostró un segundo defecto de contrato: el archivo
+publicado conserva las filas bajo `movimientos`, no bajo `records`. Se corrigió
+la extracción sin cambiar el formato original y se repitió el workflow en el
+run `34698602598`, cuyo commit es `2507ac3`.
+
+Resultado del candidato remoto:
+
+- alias de preview: `https://candidate-34698602598-cambiometro-public-api.koooke.workers.dev`;
+- `/api/v1/records?source=movimientos&limit=3`: HTTP 200;
+- `sourceBackend`: `r2`;
+- total: 82 movimientos;
+- paginación: activa (`totalPages=28` con límite 3);
+- `/api/v1/health`: `publicD1Reads=false` y `publicDataBackend=r2`;
+- versión Worker: `8e02ce9d-e947-44de-8ad2-6467c1ad9c9a`;
+- tamaño: 172,09 KiB / gzip 32,62 KiB.
+
+La consistencia del artefacto quedó comprobada: el snapshot público de
+producción y el objeto R2 del release
+`01d90402c2ecffd8b6e15f4d377e7cb025983c38c7ab390c1c1e54d72c89f8ba` tienen
+82 filas, 205.865 bytes y checksum de contenido
+`1027af7fc35ac6f68df2e7f798cdfc605bce7ef63d98e453fc8ce6207065dc2d`.
+
+Conclusión del bloque: la corrección de Movimientos está validada en preview y
+R2. Producción todavía no se promovió; el endpoint productivo continúa con el
+comportamiento anterior hasta una promoción controlada y explícita.

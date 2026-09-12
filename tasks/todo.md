@@ -6,7 +6,8 @@
 - [x] B. Corregir el contrato R2 de Movimientos en la rama local.
 - [ ] C. Reconciliar Cámara y Senado por componente.
 - [x] **Checkpoint 1 local:** 957 tests, typecheck, lint, build Pages y browser smoke verdes.
-- [ ] **Checkpoint 1 remoto:** preview del Worker; bloqueado por permiso del token para sesión remota.
+- [x] **Checkpoint 1 remoto:** preview del Worker y API de Movimientos validados desde R2, sin lecturas públicas D1.
+- [ ] Promoción controlada del Worker candidato, pendiente de autorización explícita.
 - [ ] D1. Revisar ChileCompra, InfoLobby, DIPRES y Transparencia Activa uno por uno.
 - [ ] E. Ejecutar auditoría de consistencia y calidad.
 - [ ] **Checkpoint 2:** validar checksums, paginación y ausencia de lecturas D1.
