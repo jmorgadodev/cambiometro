@@ -74,3 +74,28 @@ conteos ni se mostrarán porcentajes de cobertura hasta cumplir lo siguiente:
 La diferencia local/producción queda clasificada como **alcance/categoría** y,
 en segundo término, como **frescura**. No es evidencia de pérdida de datos en
 producción.
+
+## Control de la API pública posterior
+
+En una consulta adicional del `2026-09-12T07:43:04Z`, la API productiva
+respondió `200` y mostró la diferencia entre el universo declarado y las filas
+realmente publicadas en el release consultable:
+
+| Consulta | Total API | Filas publicadas | Declarado por source-health | Estado |
+|---|---:|---:|---:|---|
+| `source=camara` | 58.751 | 49 | 58.751 | parcial |
+| `source=senado` | 1.428 | 50 | 1.428 | parcial |
+| `source=votaciones_senado` | 205 | 16 | 205 | parcial |
+| `source=gastos_camara` | 16.275 | 16.275 | 16.275 | release R2 |
+| `source=gastos_senado` | 2.500 | 2.500 | 6.517 | parcial / alcance menor |
+
+En Cámara y Senado, `total` representa el conteo declarado por el catálogo,
+no la cantidad descargable en esa respuesta. Por ello la interfaz no debe
+presentar esos resultados como consulta completa hasta que el release publicado
+contenga todas las particiones. Los gastos siguen siendo una categoría
+separada. En `gastos_senado`, el release API actual cubre 2.500 filas mientras
+`source-health` declara 6.517; no debe presentarse como histórico completo.
+
+Esta comprobación no consultó D1 ni ejecutó ETL. Queda como requisito para la
+siguiente implementación: mostrar siempre `filas publicadas`, `total esperado`
+y el estado de release por componente.
