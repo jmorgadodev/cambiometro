@@ -19,6 +19,12 @@ El resumen de registros apunta a
 `/data/funcionarios/transparency-summary.json`, con checksum
 `2d9d8d630de282353f37473a6f4fcc9198e5f53657feb18073d9be52b58b9d60`.
 
+El archivo local `data/generated/data-quality-summary.json` fue generado el
+`2026-08-21T10:10:54.809Z`; no debe utilizarse como conteo vigente. Incluso
+es anterior al manifiesto local del 30 de agosto. El resumen de calidad debe
+regenerarse sólo después de seleccionar y validar un release explícito, para
+no volver a mezclar cifras históricas con el corte público.
+
 ## Cobertura municipal
 
 | Estado | Local | Producción |
@@ -66,6 +72,13 @@ el productivo tengan alcances municipales distintos.
    mantenerse alineado: la ruta recomendada es hidratar sólo los manifiestos,
    índices y particiones necesarias desde R2, conservando el snapshot local
    como fixture o respaldo de pruebas.
+
+La implementación ya dispone de `npm run data:hydrate:cplt-static --
+--pages-only`, que descarga desde el bucket productivo únicamente los assets
+necesarios para Pages y valida tamaño y SHA-256 antes de reemplazar el
+manifiesto local. No se ejecutó durante esta auditoría porque agregaría una
+nueva copia local de aproximadamente 1,29 GiB; debe ejecutarse en una ventana
+de mantenimiento con espacio y respaldo confirmados.
 
 ## Decisión para la siguiente fase
 
