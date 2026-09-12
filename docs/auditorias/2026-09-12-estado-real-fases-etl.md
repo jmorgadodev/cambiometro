@@ -356,3 +356,29 @@ ruta productiva. El smoke posterior confirmó:
 - Home, Movimientos, Municipalidades, Remuneraciones y Personas: HTTP 200.
 
 El 1102 de ChileCompra quedó resuelto sin consultar ni materializar D1.
+
+## Consistencia de metadata R2 y publicación Pages — PR #494
+
+La integración `96a3a830101c7f8069a0bbade429835e20f78355` corrigió la
+referencia local de InfoLobby para que el panel use el índice R2 reconciliado
+vigente, no el snapshot anterior de 60.523 filas:
+
+- InfoLobby: 71.467 filas canónicas, históricas y consultables;
+- se eliminó la declaración obsoleta de 60.615 filas del catálogo visual;
+- el fallback de indisponibilidad de la API conserva el mismo total esperado;
+- no se alteraron registros, rutas, menú ni configuración D1.
+
+Validación local y remota:
+
+- `npm test`: 183 archivos y 980 pruebas aprobadas;
+- `npm run pages:build`: 4.674 páginas estáticas generadas;
+- `npm run pages:verify`, SEO, tipos y tamaño del Worker: aprobados;
+- Pages refrescado en `34704571318`: terminado correctamente;
+- `/datos/`: muestra InfoLobby 71.467 y ya no muestra 60.523;
+- producción: ChileCompra 74.142 y InfoLobby 71.467 desde `r2-lake`, ambos
+  completos; Movimientos 82 desde R2, parcial por su naturaleza histórica;
+- `/api/v1/health`: `publicDataBackend=r2` y `publicD1Reads=false`.
+
+El workflow de InfoLobby activado por el merge ejecutó únicamente su guard de
+push (`Validación de workflow sin ingestión`) y omitió el ETL. El Worker quedó
+validado como candidato, sin promoción adicional ni materialización D1.

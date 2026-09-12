@@ -17,7 +17,7 @@
 - [x] Integrar PR #493 sobre `main`; candidato Worker validado con R2-first y sin D1 público.
 - [x] Promover explícitamente el candidato `8fffd277-d5b5-4330-bdd8-7abc04c18f3a` para corregir el 1102 productivo de ChileCompra.
 - [x] Reconciliar catálogo R2 contra filas consultables por fuente sin usar D1.
-- [ ] Separar en la UI catálogo declarado, publicados y consultables; comenzar por ChileCompra.
+- [x] Separar en la UI catálogo declarado, publicados y consultables; comenzar por ChileCompra; corregir metadata R2 de InfoLobby.
 
 ## Mañana, después del reinicio
 
