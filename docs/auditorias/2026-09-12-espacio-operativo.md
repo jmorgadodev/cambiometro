@@ -16,6 +16,12 @@ El cálculo no confirma 43 GB dentro de esas tres carpetas. El resto del espacio
 observado en `C:\Users\jorge\Proyectos` pertenece a otros proyectos o a
 carpetas auxiliares y no debe eliminarse como parte de esta operación.
 
+En una medición del directorio padre, los mayores consumidores externos fueron
+`impulsacv-web-qa` (8,40 GB), `impulsacv-contexto` (3,68 GB), la carpeta `.git`
+del directorio padre (2,14 GB), `Youtube` (2,02 GB), `_Standby` (1,49 GB) e
+`impulsacv-web` (1,46 GB). No se tocaron porque no forman parte de las tres
+carpetas operativas de El Cambiómetro.
+
 ## Hallazgos relevantes
 
 En `cambiometro-public` los mayores consumidores son:
