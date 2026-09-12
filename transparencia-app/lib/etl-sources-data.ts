@@ -28,7 +28,7 @@ const CANONICAL_COUNTS: Record<string, number> = {
   dipres: 15689,
   ley19862: 59361,
   chilecompra: 74142,
-  infolobby: 60523,
+  infolobby: 71467,
   infoprobidad: 15331,
   sinim: 3105,
   contraloria: 291,
@@ -44,7 +44,7 @@ const HISTORICAL_COUNTS: Record<string, number> = {
   dipres: 15689,
   ley19862: 59361,
   chilecompra: 888693,
-  infolobby: 60523,
+  infolobby: 71467,
   infoprobidad: 15331,
   sinim: 3105,
   contraloria: 291,
@@ -56,7 +56,6 @@ const HISTORICAL_COUNTS: Record<string, number> = {
 };
 
 const CATALOG_DECLARED_COUNTS: Record<string, number> = {
-  infolobby: 60615,
 };
 
 type HealthKey = keyof typeof healthRaw.sources | "personal_apoyo" | "ine";

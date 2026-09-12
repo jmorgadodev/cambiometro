@@ -235,7 +235,7 @@ describe("Fixture Externo Congelado: Referencia Oficial de Partidos, Transferenc
 
       const lakeLobby = leerInfoLobbyV1();
       expect(lakeLobby).not.toBeNull();
-      expect(SOURCE_CANONICAL_COUNTS["infolobby"]).toBe(60523);
+      expect(SOURCE_CANONICAL_COUNTS["infolobby"]).toBe(71467);
     });
 
     it("Fuente 4: Ley 19.862 — 5 transferencias con respaldo documental y código oficial", () => {
