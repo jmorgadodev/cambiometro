@@ -8,7 +8,7 @@ import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
 import { chunkJsonRows, listUnavailableMunicipalities } from "./static-payroll.mjs";
 import { readExpenseSubset } from "./expense-release.mjs";
 import { normalizeMovementPayload, validateMovementPayload } from "./movimientos-pipeline.mjs";
-import { buildCpltAggregateSummary } from "./cplt-transparency-summary.mjs";
+import { buildCpltAggregateSummary, isPlausiblePeriod } from "./cplt-transparency-summary.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const readJson = (file) => readFile(join(root, file), "utf8").then(JSON.parse);
@@ -275,7 +275,7 @@ for (const entry of await readdir(cpltRoot, { withFileTypes: true })) {
   for (const row of parsed) {
     cpltSummaryStats.recordCount += 1;
     const period = String(row.fuente_periodo ?? row.periodo ?? "").trim().slice(0, 7);
-    const validPeriod = /^\d{4}-(0[1-9]|1[0-2])$/.test(period);
+    const validPeriod = isPlausiblePeriod(period, cpltGeneratedAt);
     if (!validPeriod) cpltSummaryStats.invalidPeriodCount += 1;
     const rawAmount = row.remuneracion_bruta_mensual;
     const amount = rawAmount === null || rawAmount === undefined || String(rawAmount).trim() === "" ? null : Number(rawAmount);

@@ -35,6 +35,18 @@ describe("resumen agregado de Transparencia Activa", () => {
     expect(summary.periods.at(-1)).toEqual(expect.objectContaining({ amountChanges: 1, organismChanges: 1, roleChanges: 1 }));
   });
 
+  it("descarta períodos imposibles o posteriores al release", () => {
+    const summary = buildCpltTransparencySummary([
+      { nombre_completo: "Ana Pérez", organo_nombre: "Municipalidad A", tipo_contrato: "Planta", cargo: "Analista", remuneracion_bruta_mensual: 100, fuente_periodo: "2026-02" },
+      { nombre_completo: "Ana Pérez", organo_nombre: "Municipalidad A", tipo_contrato: "Planta", cargo: "Analista", remuneracion_bruta_mensual: 125, fuente_periodo: "8768-03" },
+      { nombre_completo: "Ana Pérez", organo_nombre: "Municipalidad A", tipo_contrato: "Planta", cargo: "Analista", remuneracion_bruta_mensual: 150, fuente_periodo: "2027-01" },
+    ], [], "2026-03-01T00:00:00.000Z");
+
+    expect(summary.latestPeriod).toBe("2026-02");
+    expect(summary.quality.invalidPeriodCount).toBe(2);
+    expect(summary.periods).toHaveLength(1);
+  });
+
   it("mantiene el fallback de Pages agregado sin inventar comparaciones individuales", () => {
     const stats = {
       recordCount: 2,
