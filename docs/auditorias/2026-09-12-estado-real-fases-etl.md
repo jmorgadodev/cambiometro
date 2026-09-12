@@ -1527,3 +1527,33 @@ fallo anterior queda clasificado como una observación histórica de verificaci�
 por drift/transitorio. La siguiente actividad segura es la auditoría por ETL y
 la preparación de dependencias en una copia aislada; D1 sigue fuera del camino
 público.
+
+## Auditoría de ejecuciones ETL y fuentes no disponibles
+
+La revisión de los últimos workflows confirma que no todos los “éxitos” de una
+rama de trabajo equivalen a una nueva publicación en `main`. En particular, el
+último ETL exitoso de InfoLobby (`34720821463`) se ejecutó en la rama aislada
+`codex/38bis-csv-connector-20260912`, no en `main`; por eso se conserva como
+prueba de funcionamiento del conector, no como un nuevo corte productivo.
+
+| ETL | Última ejecución observada | Resultado | Clasificación |
+|---|---:|---|---|
+| Votaciones Cámara | 34691437098 | éxito en `main` | operativo |
+| Votaciones Senado | 34691714118 | éxito en `main` | operativo |
+| Movimientos | 34690963760 | éxito en `main` | operativo |
+| InfoLobby | 34720821463 | éxito en rama aislada | conector probado; no equivale a publicación |
+| Ley 19.862 | 34231278337 | éxito en `main` | operativo |
+| Gastos operacionales | 34660874426 | éxito | operativo |
+| DIPRES | 32851856261 | éxito antiguo en `main` | requiere ventana trimestral |
+| InfoProbidad | 34481652765 | éxito en `main` | operativo |
+| ChileCompra | 34130670889 | fallo protegido | la fuente devolvió HTTP 403; el guard conservó el release anterior |
+| CPLT | 34342239360 | fallo protegido | publicación bloqueada por `R2_GROWTH_BLOCKED_AT_90_PERCENT`; no se reemplazó el release |
+| Personal Cámara | 34127058669 | fallo protegido | fuente Camara respondió `PERSONAL_APOYO_SOURCE_BLOCKED` |
+| Remuneraciones 38 bis | 34630955321 | fallo de fuente | `comision38bis.gob.cl` no respondió tras cuatro intentos; el PR #499 contiene el conector corregido |
+| Contraloría | 33633187407 | fallo de materialización | la publicación R2 se generó, pero el paso D1 falló por el límite account-wide |
+| Personal Senado | sin ejecución reciente | sin evidencia | pendiente de separar/verificar localmente |
+
+Este cuadro cambia el orden de trabajo: no corresponde relanzar ETL fallidos
+contra fuentes que siguen bloqueando ni forzar D1. Se deben conservar los
+releases anteriores, probar cada fuente de forma aislada y publicar sólo cuando
+el artefacto nuevo supere su guard de filas, checksum y disponibilidad.
