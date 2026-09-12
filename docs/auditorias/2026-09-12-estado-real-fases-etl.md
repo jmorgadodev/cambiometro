@@ -1419,3 +1419,78 @@ La conclusión cambia el diagnóstico: R2 no está caído. La ruta genérica
 CPLT y cae en `temporarily-unavailable`, mientras la ruta canónica
 `/api/v1/funcionarios` sí funciona. Esto debe corregirse en la auditoría de
 contratos antes de declarar que Transparencia Activa está ausente o sin datos.
+
+## Revisión operativa sin D1 — 12 de septiembre, 18:xx CLT
+
+Se repitió una verificación de solo lectura contra producción y contra el
+estado de los workflows. No se ejecutó SQL, materialización ni consulta directa
+a D1.
+
+### Estado público observado
+
+`/api/v1/health` respondió HTTP 200 y mantiene `publicDataBackend=r2`,
+`publicD1Reads=false` y `transferSource=r2`. El endpoint todavía publica
+`d1Consistent=false`, que es coherente con mantener D1 fuera del camino público;
+no debe interpretarse como una falla de R2. La respuesta declara 62.172 filas
+de transferencias desde R2 y un `generatedAt` de 2026-09-08.
+
+Los cortes vigentes observados en `/api/v1/sources` fueron:
+
+| Fuente | Filas publicadas | Estado declarado | Última marca disponible |
+|---|---:|---|---|
+| Cámara | 58.751 | parcial | sin fecha en catálogo |
+| Senado | 1.428 | parcial | sin fecha en catálogo |
+| CPLT | 1.226.913 | parcial/lake publicado | 2026-09-02 |
+| InfoLobby | 71.467 | parcial | sin fecha en catálogo |
+| ChileCompra | 74.142 | parcial | 2026-08-21 |
+| DIPRES | 247.287 | parcial | 2026-08-21 |
+| Ley 19.862 | 62.172 | parcial | 2026-09-08 |
+| Movimientos | 82 | parcial/R2 | publicación disponible |
+
+Las consultas acotadas de votaciones siguen funcionando sin escaneo global:
+
+- Cámara, septiembre de 2026: 49 sesiones, 979 filas publicadas, primer
+  registro del 9 de septiembre, `sourceBackend=r2-lake`.
+- Senado, septiembre de 2026: 5 sesiones, 5 filas publicadas, primer registro
+  del 9 de septiembre, `sourceBackend=r2-lake`.
+- Movimientos: 82 registros, evento más reciente del 2 de septiembre y
+  detección observada hasta el 12 de septiembre.
+
+### Hallazgos que sí requieren trabajo, pero no D1
+
+1. La verificación de producción falló en `/api/v1/crosses?entity_id=...`
+   con HTTP 503. El código permite usar R2 para relaciones, pero el release
+   productivo no está exponiendo una proyección R2 disponible para esa ruta y
+   termina en indisponibilidad cuando D1 está desactivado. Es un bloqueo de
+   `Cruces`, no de las búsquedas públicas de registros y no se resolverá
+   reactivando D1.
+2. La verificación visual de `Cruces` espera 60.523 registros de InfoLobby,
+   mientras producción declara 71.467. El dato productivo debe ser la
+   referencia; el test y los artefactos antiguos están desfasados. No se debe
+   corregir producción hacia 60.523 ni ocultar la diferencia.
+3. La rama local de `cambiometro-public` contiene cambios de datos no
+   relacionados y no debe utilizarse para reemplazar el release productivo.
+4. Los tests locales no arrancan porque la instalación presente no contiene
+   `node_modules/.bin/tsc` ni `node_modules/.bin/playwright`, aunque existe el
+   `package-lock.json`. Esto es un problema de entorno reproducible, no una
+   evidencia de que haya que modificar el código o D1.
+
+### ETL con evidencia disponible
+
+En la consulta de ejecuciones, Pages y el guard de publicación terminaron
+exitosamente el 12 de septiembre. También terminaron exitosamente los ETL de
+InfoLobby, votaciones de Cámara y Senado, Movimientos y los checks de calidad
+de la rama aislada de 38 bis. El workflow integral de verificación falló por
+el 503 de `crosses` y por la expectativa antigua de InfoLobby, no por una ruta
+general caída: en el mismo run las rutas principales respondieron HTTP 200 y
+el crawl frío terminó correctamente.
+
+### Decisión operativa
+
+Se puede continuar hoy con tres tareas seguras: (a) separar el contrato de
+`crosses` y verificar su proyección R2, (b) actualizar la auditoría y los
+verificadores para usar el conteo productivo de InfoLobby con su release, y
+(c) preparar la instalación de dependencias en una copia aislada para ejecutar
+tests. Ninguna requiere D1 ni despliegue. La comprobación de cuota queda como
+una única puerta posterior al reinicio; si el consumo account-wide sigue sobre
+el límite, se detiene sin emitir SQL.
