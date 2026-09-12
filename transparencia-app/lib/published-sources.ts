@@ -44,8 +44,9 @@ function localCpltManifest(): CpltPublicManifest | null {
   }
 }
 
-// Compatibility exports: all UI counts now originate in one checked-in source
-// manifest so the build can compare them with the generated public summary.
+// Compatibility exports: these remain the configured historical references.
+// Current canonical counts are taken from the release catalog below whenever
+// it contains a validated count, so a stale config cannot hide a newer R2 cut.
 export const SOURCE_CANONICAL_COUNTS: Record<string, number> = Object.fromEntries(
   getDataQualityConfig().map((source) => [source.id, source.canonicalCount]),
 );
@@ -62,9 +63,13 @@ export async function listPublishedSourceManifests(): Promise<SourceManifest[]> 
   const transferRelease = getTransferReleaseMetadata();
   return merged.map((source) => ({
     ...source,
+    // R2/D1 manifests are the release evidence. The checked-in configuration
+    // is only a fallback for sources without a published count in this build.
     canonicalCount: source.id === "ley-19862"
       ? transferRelease.totalRows
-      : SOURCE_CANONICAL_COUNTS[source.id] ?? source.recordCount,
+      : Number.isSafeInteger(source.recordCount) && source.recordCount > 0
+        ? source.recordCount
+        : SOURCE_CANONICAL_COUNTS[source.id] ?? source.recordCount,
     historicalCount: source.id === "ley-19862"
       ? transferRelease.totalRows
       : SOURCE_HISTORICAL_COUNTS[source.id] ?? source.recordCount,

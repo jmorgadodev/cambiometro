@@ -22,33 +22,13 @@ interface R2ObjectBodyLike {
 
 interface R2BucketLike {
   get(key: string, options?: { range?: { offset: number; length: number } }): Promise<R2ObjectBodyLike | null>;
-  put?(key: string, value: ArrayBuffer): Promise<unknown>;
 }
 
-// The lake partitions are archived as release assets in the Cambiómetro
-// repository. Keep the cold fallback pointed at the same repository that
-// publishes the catalog; otherwise a valid cold partition is reported as
-// missing when it is not present in the hot R2 cache.
-const RELEASE_BASE_URL = "https://github.com/jmorgadodev/cambiometro/releases/download";
-
-function bufferedObject(data: ArrayBuffer): R2ObjectBodyLike {
-  return {
-    async json<T>() { return JSON.parse(new TextDecoder().decode(data)) as T; },
-    async arrayBuffer() { return data; },
-  };
-}
-
-async function readHotOrArchivedObject(bucket: R2BucketLike, key: string, releaseTag: string, releaseAssetName: string) {
-  const hot = await bucket.get(key);
-  if (hot) return hot;
-  const url = `${RELEASE_BASE_URL}/${encodeURIComponent(releaseTag)}/${encodeURIComponent(releaseAssetName)}`;
-  const response = await fetch(url, { headers: { Accept: "application/octet-stream" } });
-  if (!response.ok) return null;
-  const data = await response.arrayBuffer();
-  if (bucket.put) {
-    try { await bucket.put(key, data.slice(0)); } catch { /* A cold read remains valid when cache writes are unavailable. */ }
-  }
-  return bufferedObject(data);
+async function readR2Object(bucket: R2BucketLike, key: string) {
+  // R2 is the canonical public data plane. A missing object remains an
+  // incomplete partition; a public read never consults a retired repository
+  // and never writes back into storage.
+  return bucket.get(key);
 }
 
 async function checksumSha256(data: ArrayBuffer) {
@@ -184,10 +164,18 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
     }
   }
   if (!hasFilters) {
-    const pageIndex = Math.floor(offset / manifest.pageSize);
-    candidatePages = pageIndex < manifest.pages.length ? [pageIndex] : [];
+    const firstPageIndex = Math.floor(offset / manifest.pageSize);
+    const lastPageIndex = Math.floor(Math.max(offset, offset + limit - 1) / manifest.pageSize);
+    candidatePages = manifest.pages
+      .map((_, index) => index)
+      .filter((index) => index >= firstPageIndex && index <= lastPageIndex);
   }
 
+  // A non-filtered request reads one physical page at a time. Its offset is
+  // global, but the page body starts at that page's own offset.
+  const selectionOffset = hasFilters
+    ? offset
+    : offset - Math.floor(offset / manifest.pageSize) * manifest.pageSize;
   const selected: EvidenceRecord[] = [];
   let total = 0;
   let exhausted = false;
@@ -212,9 +200,9 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
       const lakeRecord = JSON.parse(line) as LakeRecord;
       const record = projectLakeEvidence(lakeRecord, null, null);
       if (!indexedRecordMatches(record, params)) continue;
-      if (total >= offset && selected.length < limit) selected.push(record);
+      if (total >= selectionOffset && selected.length < limit) selected.push(record);
       total += 1;
-      if (indexedQueryTotal !== null && selected.length >= limit && total >= offset + limit) {
+      if (indexedQueryTotal !== null && selected.length >= limit && total >= selectionOffset + limit) {
         exhausted = true;
         break;
       }
@@ -241,13 +229,10 @@ const MAX_UNINDEXED_FILTER_PARTITIONS = 12;
 
 async function readPartitionRecords(
   bucket: R2BucketLike,
-  partition: { sourceId: string; period: string; manifestKey: string; releaseTag?: string; manifestAssetName?: string },
+  partition: { sourceId: string; period: string; manifestKey: string },
   catalogGeneratedAt: string | null,
 ) {
-  const [year, month] = partition.period.split("-");
-  const releaseTag = partition.releaseTag ?? `data-${partition.sourceId}-${year}`;
-  const manifestAssetName = partition.manifestAssetName ?? `${partition.sourceId}-${year}-${month}-manifest.json`;
-  const manifestObject = await readHotOrArchivedObject(bucket, partition.manifestKey, releaseTag, manifestAssetName);
+  const manifestObject = await readR2Object(bucket, partition.manifestKey);
   if (!manifestObject) return null;
   const manifest = await manifestObject.json<PartitionManifest>();
   const artifacts = manifest.artifacts
@@ -258,7 +243,7 @@ async function readPartitionRecords(
   const chunks: Uint8Array[] = [];
   let missingArtifacts = 0;
   for (const artifact of artifacts) {
-    const object = await readHotOrArchivedObject(bucket, artifact.key, releaseTag, artifact.releaseAssetName);
+    const object = await readR2Object(bucket, artifact.key);
     if (!object) {
       missingArtifacts += 1;
       continue;
@@ -337,10 +322,17 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   const data: EvidenceRecord[] = [];
   let matched = 0;
   let loadedRows = 0;
-  let missingPartitions = 0;
+  // Preserve catalog-level gaps during early pagination. Otherwise page 1
+  // could advertise the expected total while silently omitting a missing
+  // historical partition that has not been read yet.
+  const knownMissingPartitionIds = new Set(orderedPartitions
+    .filter((partition) => !partition.manifestKey || partition.checksumSha256 === "missing")
+    .map((partition) => partition.id));
+  let missingPartitions = knownMissingPartitionIds.size;
   let missingArtifacts = 0;
   let scannedAll = true;
   for (const partition of orderedPartitions) {
+    if (knownMissingPartitionIds.has(partition.id)) continue;
     if (!hasFilters && matched >= offset + limit) {
       scannedAll = false;
       break;
@@ -362,10 +354,9 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
       matched += 1;
     }
   }
-  const total = hasFilters || missingPartitions > 0 || missingArtifacts > 0
-    ? matched
-    : expectedTotal ?? matched;
-  const complete = missingPartitions === 0 && (hasFilters ? scannedAll : scannedAll && (expectedTotal === null || matched === expectedTotal));
+  const partial = missingPartitions > 0 || missingArtifacts > 0;
+  const total = hasFilters || partial ? matched : expectedTotal ?? matched;
+  const complete = !partial && (hasFilters ? scannedAll : scannedAll && (expectedTotal === null || matched === expectedTotal));
   return {
     data,
     total,

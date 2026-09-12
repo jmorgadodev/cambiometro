@@ -10,6 +10,13 @@ export const metadata: Metadata = {
   alternates: { canonical: "/fuentes" },
 };
 
+const COMPONENT_LABELS: Record<string, string> = {
+  asistencia: "Asistencia",
+  votaciones: "Votaciones",
+  datosAbiertos: "Datos abiertos",
+  gastos: "Gastos operacionales",
+};
+
 export default async function FuentesPage() {
   const { sources, summary } = await getDataQualityDashboardData();
   const sorted = [...sources].sort((a, b) => a.organization.localeCompare(b.organization, "es"));
@@ -149,6 +156,26 @@ export default async function FuentesPage() {
                       Explorar registros →
                     </Link>
                   </div>
+                  {!source.reconciliation.comparisonEligible && (
+                    <p style={{ margin: "0.25rem 0 0", color: "var(--accent)", fontSize: "0.72rem", lineHeight: 1.45 }}>
+                      {source.reconciliation.note}
+                    </p>
+                  )}
+                  {source.reconciliation.components && Object.keys(source.reconciliation.components).length > 0 && (
+                    <details style={{ margin: "0.25rem 0 0", fontSize: "0.72rem" }}>
+                      <summary style={{ cursor: "pointer", color: "var(--accent)" }}>Ver desglose del release</summary>
+                      <ul style={{ margin: "0.35rem 0 0", paddingLeft: "1rem", lineHeight: 1.45, color: "var(--text-muted)" }}>
+                        {Object.entries(source.reconciliation.components).map(([key, count]) => (
+                          <li key={key}>
+                            {COMPONENT_LABELS[key] ?? key}: {count.toLocaleString("es-CL")}
+                          </li>
+                        ))}
+                      </ul>
+                      <p style={{ margin: "0.35rem 0 0", color: "var(--text-subtle)" }}>
+                        Cada componente conserva su propio alcance.
+                      </p>
+                    </details>
+                  )}
                 </article>
               );
             })}

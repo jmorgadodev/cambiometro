@@ -268,7 +268,7 @@ async function main() {
     const pageSize = 500;
     while (true) {
       const u = `https://web-back.senado.cl/api/transparency/senator-assignments/support-staff?filters%5Bano%5D%5B%24eq%5D=2026&pagination%5BpageSize%5D=${pageSize}&pagination%5Bpage%5D=${page}`;
-      const r = await fetch(u, { headers: { "user-agent": "transparencia-impulsacv ETL" } });
+      const r = await fetch(u, { headers: { "user-agent": "cambiometro ETL" } });
       const j = await r.json();
       const meta = j.data.meta.pagination;
       for (const f of j.data.data) {
