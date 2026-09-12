@@ -22,11 +22,19 @@ debe participar en nuevos despliegues ni en procesos de datos.
 - Se conservaron respaldos locales recuperables del repositorio y de los
   worktrees retirados fuera de `Proyectos`.
 
+La revisión del código histórico encontró una configuración `transparencia-etl-legacy`
+con cron diario (`1 4 * * *`) y binding a `transparencia-db`. Esto prueba que el
+repositorio antiguo tenía una vía potencial de consumo de D1, pero no prueba que
+el Worker siga desplegado hoy. El archivo remoto es evidencia histórica; no se
+ejecuta desde GitHub porque el repositorio está archivado y sus workflows están
+deshabilitados.
+
 La eliminación o permanencia del Worker histórico no puede afirmarse desde el
 token de auditoría actual porque no incluye `Workers Scripts -> Read`. Por eso
 queda como verificación pendiente de infraestructura, no como una acción
-confirmada. En cualquier caso, el repositorio archivado no tiene un camino
-activo para ejecutar ETL ni desplegar ese Worker.
+confirmada. Para desconexión definitiva se debe listar el Worker en Cloudflare
+y, si existe, retirar su trigger o eliminarlo con autorización explícita; esa
+acción no se ejecutó con un token de sólo lectura.
 - Se mantuvieron como únicas raíces operativas locales:
   - `C:\Users\jorge\Proyectos\cambiometro-public`
   - `C:\Users\jorge\Proyectos\cambiometro-audit`

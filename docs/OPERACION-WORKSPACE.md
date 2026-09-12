@@ -29,10 +29,13 @@ proyecto histórico quedaron retirados el 12 de septiembre de 2026. El dominio
 `transparencia.impulsacv.cl` no resuelve y sus workflows ETL están
 deshabilitados. La base `transparencia-db` y el bucket R2 no fueron eliminados.
 
-La eliminación del Worker histórico no se afirma sin el permiso de lectura de
-Workers correspondiente; mientras esa comprobación de infraestructura no se
-realice, el Worker se considera fuera de operación por repositorio archivado,
-workflows deshabilitados y dominio sin DNS.
+El repositorio histórico contiene una configuración congelada de un Worker
+`transparencia-etl-legacy` que declaraba un cron diario y binding a D1. Eso es
+evidencia histórica, no confirmación de un despliegue vigente. La eliminación
+del Worker no se afirma sin el permiso `Workers Scripts -> Read`; mientras esa
+comprobación de infraestructura no se realice, se considera fuera del flujo
+por repositorio archivado, workflows deshabilitados y dominio sin DNS, pero la
+desconexión definitiva de Cloudflare queda pendiente de verificación.
 
 El repositorio remoto permanece archivado y sin ejecución ETL como respaldo
 histórico fuera del flujo operativo. El código maestro no lo consulta: si falta
