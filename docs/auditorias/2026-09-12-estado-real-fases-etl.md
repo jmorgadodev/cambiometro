@@ -1149,3 +1149,31 @@ La prueba aislada del primer chunk real respondió HTTP 200, `text/csv`, y
 produjo 71 filas válidas sin descargar el universo completo. `node --check` y
 `git diff --check` están verdes. El PR queda sin merge y sin despliegue hasta
 que CI termine y se revise una ejecución de release aislada.
+
+## Comparación real CSV 38 bis versus producción
+
+Se hizo una comparación de lectura contra la fuente oficial, sin escribir el
+resultado en el repositorio ni publicarlo. El CSV actual contiene 29.703 filas
+en 18 períodos, desde 2025-01 hasta 2026-06. Para el período vigente
+2026-06 entrega 1.634 filas, de las cuales 1.066 tienen monto.
+
+La versión productiva/local auditada tenía 1.632 filas del mismo período. La
+primera comparación sin normalización parecía mostrar 567 entradas y 565
+salidas, pero el 100% de esa diferencia correspondía a variantes de mayúsculas
+en `No reportado`/`NO REPORTADO`. Tras normalizar espacios, mayúsculas y
+tildes, el resultado real fue:
+
+| Comparación | Resultado |
+|---|---:|
+| Entradas nuevas reales | 2 |
+| Salidas observadas reales | 0 |
+| Cambios de monto | 0 |
+
+Las dos filas nuevas son `MARIA JOSE CRUZ VERGARA` (Asesor Senior,
+$2.400.000) y `PILAR FRANCISCA LIZANA TORESANO` (Asesor Senior, $2.560.000),
+ambas del Ministerio de Seguridad Pública. Esto confirma que el problema no
+era una pérdida masiva de remuneraciones, sino una diferencia de formato más
+dos registros nuevos.
+
+El PR #499 fue actualizado con la normalización de claves y una prueba que
+impide volver a generar falsos deltas por mayúsculas o tildes.
