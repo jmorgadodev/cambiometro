@@ -69,4 +69,9 @@ La prueba completa quedó verde: 175 archivos y 951 pruebas. El build estático 
 
 ## Estado
 
-**Diagnóstico completado; corrección de código pendiente.**
+**Estado actualizado:** diagnóstico y corrección de reconciliación completados
+en la rama `codex/r2-public-datasets-d1-closure`. La corrección separa los
+componentes de Cámara y Senado antes de calcular conteos de salud y mantiene
+bloqueados los porcentajes cuyo alcance aún no es comparable. La validación
+local de esa rama pasó typecheck, lint y las pruebas específicas de
+reconciliación; este cambio aún no se ha desplegado desde esta auditoría.
