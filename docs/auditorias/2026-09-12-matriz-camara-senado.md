@@ -83,3 +83,25 @@ componente:
 La matriz queda lista para ser usada por los ETL separados. La siguiente
 acción segura es revisar los manifiestos de votaciones de Cámara y Senado y
 confirmar sus cortes, sin modificar la fuente base ni ejecutar D1.
+
+## Verificación productiva de votaciones
+
+La API productiva fue probada con páginas de una sola fila y período acotado:
+
+| Fuente | Consulta | HTTP | Coincidencias del período | Evidencia más reciente |
+|---|---|---:|---:|---|
+| Cámara | `kind=vote&from=2026-09-01&to=2026-09-30` | 200 | 49 | `camara-vot-90020`, 2026-09-09 |
+| Senado | `source=votaciones_senado&from=2026-09-01&to=2026-09-30` | 200 | 5 | `votaciones_senado-sen-vot-11321`, 2026-09-09 |
+
+La consulta histórica sin período para Cámara respondió HTTP 422 con
+`QUERY_SCOPE_REQUIRED`. Es una compuerta correcta contra escaneos masivos; no
+debe interpretarse como falta de votaciones. La respuesta acotada declaró
+`sourceStatus=complete` para septiembre y `sourceBackend=r2-lake`.
+
+El archivo local `politicos-votaciones.json`, generado el 2026-09-10,
+conserva 848 sesiones: 630 de Cámara y 218 de Senado, con fechas entre
+2026-03-17 y 2026-09-09. Esto demuestra que el snapshot está más fresco que el
+manifest de votaciones separado, que todavía declara 189 votos de Senado hasta
+agosto. Deben mantenerse ambas capas diferenciadas hasta que el ETL de
+votaciones publique un manifiesto equivalente; no se debe corregir sumando
+sesiones a los conteos de remuneraciones o personal.
