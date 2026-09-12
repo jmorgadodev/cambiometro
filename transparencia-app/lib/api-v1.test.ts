@@ -1171,7 +1171,17 @@ describe("API canónica v1", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.meta).toMatchObject({ sourceBackend: "r2-lake", sourceStatus: "partial", publishedRows: 1, expectedRows: 2 });
+    expect(payload.meta).toMatchObject({
+      sourceBackend: "r2-lake",
+      sourceStatus: "partial",
+      publishedRows: 1,
+      expectedRows: 2,
+      // `total` is the number of rows actually consultable in the published
+      // lake, not the catalog expectation. The latter is exposed separately
+      // so a partial release cannot look complete to pagination or coverage.
+      total: 1,
+      totalPages: 1,
+    });
     expect(payload.data[0].id).toBe("camara-lake-available");
   });
 
