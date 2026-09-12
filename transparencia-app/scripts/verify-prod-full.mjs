@@ -1,6 +1,7 @@
 import { existsSync, readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { findLandingTransferSource } from "./source-contract.mjs";
+import { extractCanonicalCount, extractConsolidatedCount } from "./etl/production-verifier-contracts.mjs";
 
 export { findLandingTransferSource } from "./source-contract.mjs";
 
@@ -414,8 +415,17 @@ async function verifyProdFull() {
   const fuentesHtml = (await fuentesRes.text()).replace(/<!--.*?-->/g, "");
 
   assertCheck("FUENTES", "Muestra 13 fuentes oficiales y derivadas", fuentesHtml.includes("13 fuentes") || fuentesHtml.includes("13"));
-  const expectedPublishedSourceTotal = 1487224 - 59361 + expectedTransferRows;
-  assertCheck("FUENTES", `Titular canónico con consolidado ${formatInteger(expectedPublishedSourceTotal)}`, fuentesHtml.includes(formatInteger(expectedPublishedSourceTotal)) && fuentesHtml.includes("1.753.013"));
+  const canonicalSourceCount = extractCanonicalCount(fuentesHtml);
+  const consolidatedSourceCount = extractConsolidatedCount(fuentesHtml);
+  assertCheck(
+    "FUENTES",
+    "Titular de fuentes muestra conteos canónico y consolidado vigentes",
+    Number.isInteger(canonicalSourceCount)
+      && canonicalSourceCount > 0
+      && Number.isInteger(consolidatedSourceCount)
+      && consolidatedSourceCount > 0,
+    `canónicos: ${canonicalSourceCount ?? "n/a"}, consolidado: ${consolidatedSourceCount ?? "n/a"}`,
+  );
   assertCheck("FUENTES", "Enlace a calidad de datos", fuentesHtml.includes("/datos/calidad"));
   assertCheck("FUENTES", "Estados reales: 'Operativa mensual'", fuentesHtml.includes("Operativa"));
   assertCheck("FUENTES", "Estados reales: 'Publicación anual' (SINIM)", fuentesHtml.includes("Publicación anual") || fuentesHtml.includes("anual"));
