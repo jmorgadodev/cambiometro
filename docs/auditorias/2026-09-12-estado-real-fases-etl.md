@@ -1177,3 +1177,71 @@ dos registros nuevos.
 
 El PR #499 fue actualizado con la normalización de claves y una prueba que
 impide volver a generar falsos deltas por mayúsculas o tildes.
+
+## Plan operativo inmediato — sin esperar el reinicio de D1
+
+Este plan se ejecuta en paralelo a la espera de una cuota D1 limpia. No
+requiere SQL, materialización, ETL completo, cambios de interfaz ni despliegue.
+
+### Bloque A — cerrar 38 bis aislado
+
+1. Esperar únicamente los checks del PR #499 sobre el commit
+   `ead788d4f62714a8f11dc8b2eb43234a2a6f523f`.
+2. Si los checks quedan verdes, dejarlo listo para revisión; no hacer merge ni
+   promoción automática.
+3. Mantener como evidencia la comparación contra el CSV oficial:
+   29.703 filas históricas, 18 períodos, 1.634 filas en 2026-06, dos altas
+   reales y cero bajas o cambios de monto frente al release actual.
+
+### Bloque B — reconciliar ETL sin publicar datos
+
+Auditar en modo lectura, en este orden:
+
+1. Cámara: separar padrón, votaciones, asistencia, apoyo y gastos; registrar
+   filas, período, checksum y estado del release.
+2. Senado: repetir la misma matriz y mantener rotuladas como parciales las
+   particiones cuya cobertura no coincida con el catálogo.
+3. Movimientos: verificar evento más reciente, última detección y último
+   release publicado; conservar el snapshot si una fuente falla.
+4. ChileCompra, InfoLobby, CPLT y DIPRES: comparar catálogo, índice R2 y
+   respuesta paginada pequeña, sin reconstruir universos.
+
+La salida de este bloque es una matriz de diferencias, no una carga de datos.
+Una discrepancia por fecha o alcance se documenta; no se corrige reemplazando
+producción con un snapshot local.
+
+### Bloque C — calidad y consistencia
+
+Sobre los releases ya disponibles se medirán duplicados, períodos faltantes,
+montos ausentes versus cero, nombres no reportados, cambios de organismo y
+conteos declarados versus consultables. Se conservará el valor original y se
+separará siempre `catalogado`, `publicado` y `consultable`.
+
+### Bloque D — espacio local sin riesgo
+
+Se mantiene el inventario de las tres carpetas maestras y se clasifica cada
+subcarpeta como rollback, dato único, build regenerable, caché o temporal. No
+se elimina nada hasta comprobar que el archivo no sea la única copia local de
+un release o evidencia de auditoría.
+
+### Bloque E — D1 después, sólo como comprobación
+
+Cuando la cuota se reinicie, se ejecutará una sola sonda acotada para confirmar
+la métrica y el bloqueo por defecto. No se reactivará materialización masiva.
+Si la cuota sigue crítica, el plan continúa por R2 sin reintentos automáticos.
+
+### Estado de ejecución
+
+- Bloque A: en ejecución; PR #499 sincronizado y con lint/types/security
+  verdes, build/E2E pendiente.
+- Bloque B: habilitado; salud productiva consultada en modo lectura y confirma
+  `publicDataBackend=r2` y `publicD1Reads=false`.
+- Bloque C: habilitado; la reconciliación real de 38 bis ya está cerrada y se
+  extenderá por fuente.
+- Bloque D: inventario inicial cerrado; falta sólo clasificar candidatos, sin
+  borrar.
+- Bloque E: reservado para el reinicio; no bloquea A-D.
+
+La regla de trabajo queda fijada: avanzar por fuente y por evidencia mientras
+D1 espera, sin tocar el camino público ni mezclar snapshots locales con la
+referencia productiva.
