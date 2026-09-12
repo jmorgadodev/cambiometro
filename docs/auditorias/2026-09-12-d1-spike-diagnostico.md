@@ -98,3 +98,22 @@ GitHub terminó correctamente en el run `34685576445`; también terminaron en
 verde calidad, seguridad, CodeQL y las verificaciones ETL. El PR queda listo
 para revisión y promoción explícita, pero este bloque no realizó despliegue a
 producción.
+
+## Revalidación del refresco de `main` — 09:20 UTC
+
+El refresco automático de Pages sobre `main`, run `34685584773`, falló antes de
+publicar cualquier artefacto. El error fue:
+
+`DATA_QUALITY_SUMMARY_INVALID: transparencia-activa: histórico menor que canónico`
+
+La causa es que `main` todavía genera el resumen con los conteos estáticos
+antiguos de `data/data-quality-sources.json`, mientras el catálogo/R2 vigente
+ya tiene un alcance distinto. El workflow recuperó y validó R2, pero no pasó el
+verificador de calidad; los pasos de Pages y el registro de deployment quedaron
+omitidos. No se produjo un despliegue parcial.
+
+La rama candidata del PR #490 ya contiene `reconcileSourceCounts`, que separa
+conteo canónico, histórico, consultable y estado de reconciliación; su build y
+E2E (`34685576445`) terminaron correctamente. Esto confirma que no debe
+promoverse `main` directamente ni corregirse el conteo a mano en producción:
+primero debe pasar la rama candidata completa.
