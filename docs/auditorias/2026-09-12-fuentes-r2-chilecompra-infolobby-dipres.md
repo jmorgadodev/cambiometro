@@ -328,6 +328,11 @@ La verificación final confirma **14 fuentes**, **147 particiones** en total y
 propuesto modifica únicamente InfoLobby y sus artefactos derivados; no puede
 reemplazarse el catálogo completo por uno reducido a una sola fuente.
 
+El delta de publicación quedó acotado a **13 objetos** (aprox. 261,7 MB):
+catálogo, entidades, índice de entidades, índice paginado, julio corregido y
+agosto nuevo. Los **18 objetos de enero–junio** no necesitan volver a
+subirse. Esto reduce el riesgo y evita una recarga innecesaria de R2.
+
 ## Control DIPRES — 07:16 UTC-3
 
 Las páginas oficiales de ejecución presupuestaria y de presupuestos
