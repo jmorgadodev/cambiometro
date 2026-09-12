@@ -2049,3 +2049,27 @@ cinco rutas respondieron HTTP 200 y ninguna incluyó `2026-10` ni `2026-12` en
 su HTML público. Por tanto, la evidencia disponible clasifica esos períodos como
 anomalía del snapshot local o de su normalización, no como una actualización
 productiva confirmada.
+
+### Prueba aislada del ETL 38 bis sin D1
+
+Para avanzar sin esperar el reinicio de la cuota se integró el conector 38 bis
+en una rama operativa separada (`codex/38bis-csv-operational-20260912`) y se
+abrió el PR #504. La prueba se ejecutó contra la fuente oficial y guardó sus
+artefactos fuera del repositorio, sin publicar en R2, Pages o producción.
+
+Resultado comprobado:
+
+- CSV oficial disponible; período más reciente detectado: `2026-06`.
+- `1.634` filas parseadas y `568` sin monto publicado, conservadas como
+  faltantes y no convertidas en cero.
+- `205` filas de Congreso y `1.429` fuera de Congreso.
+- checksum del artefacto aislado:
+  `42dd9a7d2d544bc059c40b8a7d320de4ee40729bd8ed13866ffecb9366521348`.
+- parser: 3/3 tests; typecheck y lint dirigidos: correctos.
+- `d1_rows_read=0` y `d1_rows_written=0`.
+
+El conector ahora intenta primero el CSV oficial, aplica un fallback HTML
+controlado sólo si el CSV falla, exige un mínimo de filas antes de producir
+artefactos y conserva historial, delta, checksum y auditoría. Esto permite
+validar este ETL hoy sin aumentar el consumo de D1. El PR #504 todavía no
+implica despliegue ni cambio en `main`.
