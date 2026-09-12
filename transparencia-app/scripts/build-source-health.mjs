@@ -1,6 +1,8 @@
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { catalogComponentCount, catalogSourceCount, transferReleaseCount } from "../lib/source-health.mjs";
+<<<<<<< HEAD
+import { catalogSourceCount, transferReleaseCount } from "../lib/source-health.mjs";
+import { buildParliamentSourceHealth } from "./source-health-counts.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const read = (path) => JSON.parse(readFileSync(join(root, path), "utf8"));
@@ -22,8 +24,8 @@ const transferRelease = readOptional(".ci-data-version/transfer-api-manifest.jso
 const source = new Map(catalog.sources.map((item) => [item.id, item]));
 const count = (...ids) => ids.reduce((sum, id) => sum + (source.get(id)?.recordCount ?? 0), 0);
 const canonicalCount = (sourceId, fallback) => catalogSourceCount(source, sourceId, fallback);
-const componentCount = (sourceId, variant) => catalogComponentCount(catalog, source, sourceId, variant);
 const publicTransferRows = transferReleaseCount(transferRelease, ley19862.kpis.total_transfers);
+const parliament = buildParliamentSourceHealth(catalog);
 const generatedAt = new Date(Math.max(...[catalog.generatedAt, cplt.generatedAt, presupuesto.generatedAt, ley19862.generatedAt, chilecompra.generatedAt].map((value) => new Date(value).getTime()).filter(Number.isFinite))).toISOString();
 const latestExpense = presupuesto.programs.filter((program) => program.budgetSide === "expense").map((program) => program.meses?.at(-1)?.vigente).filter((value) => Number.isSafeInteger(value));
 
@@ -53,23 +55,16 @@ const health = {
     // más registros de los que realmente correspondían a su categoría y
     // desalineaba source-health respecto del catálogo R2 que usa la API.
     camara: {
-      recordCount: source.get("camara")?.recordCount ?? 0,
+      recordCount: source.get("camara")?.recordCount ?? parliament.camara.recordCount,
       status: source.get("camara")?.status ?? "partial",
       generatedAt: catalog.generatedAt,
-      components: {
-        asistencia: componentCount("camara", "asistencia_camara"),
-        votaciones: componentCount("camara", "votaciones_camara"),
-        gastos: componentCount("gastos_camara"),
-      },
+      components: parliament.camara.components,
     },
     senado: {
-      recordCount: source.get("senado")?.recordCount ?? 0,
+      recordCount: source.get("senado")?.recordCount ?? parliament.senado.recordCount,
       status: source.get("senado")?.status ?? "partial",
       generatedAt: catalog.generatedAt,
-      components: {
-        votaciones: componentCount("votaciones_senado"),
-        gastos: componentCount("gastos_senado"),
-      },
+      components: parliament.senado.components,
     },
     servel: { recordCount: count("servel"), status: source.get("servel")?.status ?? "partial", generatedAt: catalog.generatedAt },
   },
