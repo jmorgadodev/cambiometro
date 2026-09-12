@@ -130,7 +130,9 @@ export function checksumRows(rows) {
 }
 
 function rowKey(row) {
-  return [row.partida, row.organismo, row.cargo, row.nombre].join("|");
+  return [row.partida, row.organismo, row.cargo, row.nombre]
+    .map((value) => externalText(value).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").toLocaleUpperCase("es-CL"))
+    .join("|");
 }
 
 export function compareRows(previousRows, currentRows, previousPeriod = null) {

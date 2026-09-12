@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { extractPeriod, latestCsvPeriod, parseCsvRows, parseRows } from "../scripts/etl/remuneraciones-38bis-parser.mjs";
+import { compareRows, extractPeriod, latestCsvPeriod, parseCsvRows, parseRows } from "../scripts/etl/remuneraciones-38bis-parser.mjs";
 
 describe("parser del registro público 38 bis", () => {
   it("conserva las filas sin nombre o monto reportado", () => {
@@ -27,5 +27,11 @@ describe("parser del registro público 38 bis", () => {
       { periodo: "2026-06", partida: "Presidencia", organismo: "PRESIDENCIA", cargo: "COORDINADOR DE ASESORES", nombre: "ANA ÁLVAREZ", bruto_mensual: 2900000 },
       { periodo: "2026-05", partida: "Congreso Nacional", organismo: "SENADO", cargo: "SENADOR", nombre: "PÉREZ GÓMEZ", bruto_mensual: null },
     ]);
+  });
+
+  it("no confunde cambios de mayúsculas o tildes con entradas y salidas", () => {
+    const previous = [{ partida: "Ministerio", organismo: "MINISTERIO", cargo: "ASESOR", nombre: "No reportado", bruto_mensual: null }];
+    const current = [{ partida: "Ministerio", organismo: "MINISTERIO", cargo: "ASESOR", nombre: "NO REPORTADO", bruto_mensual: null }];
+    expect(compareRows(previous, current)).toMatchObject({ entradas: 0, salidasObservadas: 0, cambios: 0 });
   });
 });
