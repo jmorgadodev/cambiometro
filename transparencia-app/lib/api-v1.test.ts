@@ -1123,6 +1123,51 @@ describe("API canónica v1", () => {
     expect(prepare).not.toHaveBeenCalled();
   });
 
+  it("resuelve votaciones_camara desde la variante R2 sin mezclar asistencia ni consultar D1", async () => {
+    const compressed = gzipSync(`${JSON.stringify({
+      id: "camara-vote-variant-1",
+      sourceId: "camara",
+      kind: "vote",
+      occurredAt: "2026-09-02",
+      evidence: { sourceUrl: "https://opendata.congreso.cl/votacion/variant-1" },
+      data: { title: "Votación Cámara", subject_entity_ids: [], object_entity_ids: [] },
+    })}\n`);
+    const checksum = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", compressed)))
+      .map((byte) => byte.toString(16).padStart(2, "0")).join("");
+    const artifact = { key: `partitions/camara/votaciones_camara/2026/09/records-${checksum}.jsonl.gz`, checksumSha256: checksum, releaseAssetName: "camara-votaciones-2026-09-records.jsonl.gz" };
+    const manifest = { projectionChecksumSha256: checksum, artifacts: [artifact] };
+    const catalog = {
+      schemaVersion: "1.0.0",
+      generatedAt: "2026-09-12T00:00:00Z",
+      sources: [],
+      partitions: [{ id: "camara/votaciones_camara/2026/09", sourceId: "camara", variant: "votaciones_camara", period: "2026-09", manifestKey: "partitions/camara/votaciones_camara/2026/09/manifest.json", checksumSha256: checksum, status: "complete", recordCount: 1 }],
+    };
+    const objects = new Map<string, ArrayBuffer>([
+      ["catalog/v1/manifest.json", new TextEncoder().encode(JSON.stringify(catalog)).buffer],
+      ["partitions/camara/votaciones_camara/2026/09/manifest.json", new TextEncoder().encode(JSON.stringify(manifest)).buffer],
+      [artifact.key, compressed.buffer.slice(compressed.byteOffset, compressed.byteOffset + compressed.byteLength)],
+    ]);
+    const PUBLIC_DATA = {
+      async get(key: string, options?: { range?: { offset: number; length: number } }) {
+        if (key === "projections/static-site-v1/manifest.json") return { json: async <T>() => ({ files: [{ path: "placeholder", key: "placeholder" }] }) as T };
+        const value = objects.get(key);
+        if (!value) return null;
+        const bytes = new Uint8Array(value);
+        const sliced = options?.range ? bytes.slice(options.range.offset, options.range.offset + options.range.length).buffer : value;
+        return { json: async <T>() => JSON.parse(new TextDecoder().decode(sliced)) as T, arrayBuffer: async () => sliced };
+      },
+    };
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/records?source=votaciones_camara&limit=1"),
+      { DB: { prepare: () => { throw new Error("D1 no debe consultarse para la variante R2 de Cámara"); } }, PUBLIC_DATA } as never,
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta).toMatchObject({ sourceBackend: "r2-lake", requestedSource: "votaciones_camara", sourceStatus: "complete", total: 1, expectedRows: 1, publishedRows: 1 });
+    expect(payload.data[0]).toMatchObject({ id: "camara-vote-variant-1", kind: "vote", sourceId: "camara" });
+  });
+
   it("no declara completo un release R2 si faltan particiones publicadas", async () => {
     const compressed = gzipSync(`${JSON.stringify({
       id: "camara-lake-available",

@@ -87,6 +87,25 @@ describe("registros calientes de R2", () => {
     expect(result?.data[0]?.id).toBe("camara-1");
   });
 
+  it("sirve una variante de Cámara sin mezclar asistencia ni consultar D1", async () => {
+    const vote = gzipText([{ id: "camara-vote-1", sourceId: "camara", kind: "vote", occurredAt: "2026-09-02", data: { title: "Votación" } }]);
+    const attendance = gzipText([{ id: "camara-attendance-1", sourceId: "camara", kind: "attendance", occurredAt: "2026-09-02", data: { title: "Asistencia" } }]);
+    const votePartition = { ...partition("camara", "2026-09", "partitions/camara/votaciones_camara/2026/09/records.jsonl.gz", vote, 1), variant: "votaciones_camara", manifestKey: "partitions/camara/votaciones_camara/2026/09/manifest.json" };
+    const attendancePartition = partition("camara", "2026-09", "partitions/camara/asistencia_camara/2026/09/records.jsonl.gz", attendance, 1);
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": { generatedAt: "2026-09-12T00:00:00Z", partitions: [votePartition, attendancePartition] },
+      [votePartition.manifestKey]: votePartition.manifest,
+      [attendancePartition.manifestKey]: attendancePartition.manifest,
+      [votePartition.key]: vote,
+      [attendancePartition.key]: attendance,
+    });
+
+    const result = await readR2EvidenceRecords(bucket, { source: "camara", variant: "votaciones_camara", kind: "vote", limit: 10 });
+
+    expect(result).toMatchObject({ total: 1, expectedTotal: 1, loadedRows: 1, complete: true, missingPartitions: 0 });
+    expect(result?.data.map((record) => record.id)).toEqual(["camara-vote-1"]);
+  });
+
   it("rechaza filtros amplios sin índice antes de iniciar un scan que pueda producir 1102", async () => {
     const partitions = Array.from({ length: 13 }, (_, index) => {
       const period = `202${Math.floor(index / 12) + 4}-${String((index % 12) + 1).padStart(2, "0")}`;

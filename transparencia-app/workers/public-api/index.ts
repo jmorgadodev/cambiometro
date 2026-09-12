@@ -1183,11 +1183,17 @@ function r2Record(row: JsonRecord, source: string): JsonRecord {
 }
 
 async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | null> {
-  const source = requestUrl.searchParams.get("source")?.trim();
-  if (!source) return null;
+  const requestedSource = requestUrl.searchParams.get("source")?.trim();
+  if (!requestedSource) return null;
+  const source = requestedSource === "votaciones_camara" ? "camara" : requestedSource;
+  const sourceVariant = requestedSource === "votaciones_camara" ? "votaciones_camara" : undefined;
+  const requestedKind = requestUrl.searchParams.get("kind")?.trim();
+  if (sourceVariant && requestedKind && requestedKind !== "vote") {
+    return failure("INVALID_QUERY", "La fuente de votaciones de Cámara sólo admite registros de tipo vote.", 400);
+  }
   const manifest = await r2Json<StaticSiteManifest>(env.PUBLIC_DATA, "projections/static-site-v1/manifest.json");
   if (!manifest?.files?.length) return null;
-  const candidatePaths = staticRecordCandidatePaths(source);
+  const candidatePaths = staticRecordCandidatePaths(requestedSource);
   let rawRows: unknown[] = [];
   for (const path of candidatePaths) {
     const entry = manifest.files.find((file) => file.path === path);
@@ -1212,9 +1218,10 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
       const limit = limitFrom(requestUrl);
       const lake = await readR2EvidenceRecords(env.PUBLIC_DATA, {
         source,
+        variant: sourceVariant,
         query: requestUrl.searchParams.get("q")?.trim() ?? requestUrl.searchParams.get("query")?.trim() ?? undefined,
         entityId: requestUrl.searchParams.get("entity_id")?.trim() || undefined,
-        kind: requestUrl.searchParams.get("kind")?.trim() as never || undefined,
+        kind: (requestedKind ?? (sourceVariant ? "vote" : undefined)) as never,
         from: requestUrl.searchParams.get("from")?.trim() || undefined,
         to: requestUrl.searchParams.get("to")?.trim() || undefined,
         limit,
@@ -1226,7 +1233,7 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
             "QUERY_SCOPE_REQUIRED",
             "Esta fuente requiere acotar el período o consultar un índice específico para evitar un escaneo histórico masivo.",
             422,
-            { source, expectedTotal: lake.expectedTotal, sourceBackend: "r2-lake" },
+            { source: requestedSource, expectedTotal: lake.expectedTotal, sourceBackend: "r2-lake" },
           );
         }
         return success(lake.data, {
@@ -1235,6 +1242,7 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
           page: Math.floor(offset / limit) + 1,
           totalPages: Math.max(1, Math.ceil(lake.total / limit)),
           sourceBackend: "r2-lake",
+          requestedSource,
           sourceStatus: lake.complete ? "complete" : "partial",
           publishedRows: lake.loadedRows,
           expectedRows: lake.expectedTotal,
@@ -1253,7 +1261,7 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
   const from = requestUrl.searchParams.get("from")?.trim() ?? "";
   const to = requestUrl.searchParams.get("to")?.trim() ?? "";
   const entityId = normalized(requestUrl.searchParams.get("entity_id"));
-  const kind = requestUrl.searchParams.get("kind")?.trim();
+  const kind = requestedKind ?? (sourceVariant ? "vote" : undefined);
   const validKinds = new Set(["authority", "purchase", "contract", "expense", "budget_execution", "transfer", "audit", "declaration", "lobby", "vote", "attendance", "remuneration"]);
   if (query.length > 80 || from.length > 32 || to.length > 32 || entityId.length > 160 || (kind && !validKinds.has(kind))) {
     return failure("INVALID_QUERY", "Parámetros de consulta inválidos.", 400);
