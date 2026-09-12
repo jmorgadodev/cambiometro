@@ -56,6 +56,8 @@ export interface DataQualitySourceSummary {
   coverageNote: string;
   canonicalCount: number;
   historicalCount: number;
+  catalogDeclaredCount?: number;
+  publicHistoricalCount: number;
   lastSuccessAt: string | null;
   checksumSha256: string | null;
   status: DataQualityStatus;
@@ -93,6 +95,10 @@ export interface DataQualitySummary {
 }
 
 type SourceConfig = (typeof sourceConfig)[number];
+type SourceConfigWithCoverage = SourceConfig & {
+  catalogDeclaredCount?: number;
+  publicHistoricalCount?: number;
+};
 
 type JsonObject = Record<string, unknown>;
 
@@ -143,6 +149,7 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
     : {};
   const catalogSources = Array.isArray(localCatalog.sources) ? localCatalog.sources : [];
   const sources = getDataQualityConfig().map((source) => {
+    const sourceWithCoverage = source as SourceConfigWithCoverage;
     const healthEntry = healthSources[LOCAL_HEALTH_ALIASES[source.id] ?? source.id];
     const healthRecord = healthEntry && typeof healthEntry === "object" ? healthEntry as JsonObject : {};
     const catalogEntry = catalogSources.find((entry) => entry && typeof entry === "object" && (entry as JsonObject).id === source.id);
@@ -150,7 +157,7 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
     const observedCount = safeCount(healthRecord.recordCount);
     const configuredCanonicalCount = safeCount(source.canonicalCount);
     const isTransferRelease = source.id === "ley-19862";
-    const canonicalCount = isTransferRelease ? transfer.totalRows : observedCount ?? source.canonicalCount;
+    const canonicalCount = isTransferRelease ? transfer.totalRows : source.canonicalCount;
     const historicalCount = isTransferRelease ? transfer.totalRows : source.historicalCount;
     const scopeMismatch = !isTransferRelease
       && observedCount !== null
@@ -214,6 +221,8 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
       components,
       note: reconciliationNote,
     },
+    catalogDeclaredCount: sourceWithCoverage.catalogDeclaredCount,
+    publicHistoricalCount: sourceWithCoverage.publicHistoricalCount ?? canonicalCount,
     qualityAudit: source.qualityAudit as QualityAuditSnapshot | undefined,
     });
   });
