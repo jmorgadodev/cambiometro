@@ -354,7 +354,9 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
       matched += 1;
     }
   }
-  const total = hasFilters || missingPartitions > 0 || missingArtifacts > 0
+  // If pagination stops before visiting every partition, the expected catalog
+  // total is not yet a consultable total. Keep it separate in expectedTotal.
+  const total = hasFilters || !scannedAll || missingPartitions > 0 || missingArtifacts > 0
     ? matched
     : expectedTotal ?? matched;
   const complete = missingPartitions === 0 && (hasFilters ? scannedAll : scannedAll && (expectedTotal === null || matched === expectedTotal));

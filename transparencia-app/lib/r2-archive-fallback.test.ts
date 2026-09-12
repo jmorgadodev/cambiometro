@@ -65,6 +65,7 @@ describe("archivo histórico en GitHub Releases", () => {
         manifestKey: "partitions/contraloria/2026/01/manifest.json",
         checksumSha256: checksum,
         releaseTag: "data-contraloria-2026",
+        recordCount: 1,
         status: "partial",
       }],
     };
@@ -91,13 +92,16 @@ describe("archivo histórico en GitHub Releases", () => {
       projectionChecksumSha256: "0".repeat(64),
       artifacts: [{ key: "partitions/x/2026/01/records.jsonl.gz", checksumSha256: "0".repeat(64), releaseAssetName: "x-2026-01-records.jsonl.gz" }],
     };
+    const manifestBytes = new TextEncoder().encode(JSON.stringify(manifest)).buffer;
+    const compressedBytes = compressed.buffer.slice(compressed.byteOffset, compressed.byteOffset + compressed.byteLength);
     const bucket: Parameters<typeof readR2EvidenceRecords>[0] = {
       async get(key) {
-        if (key === "catalog/v1/manifest.json") return { json: async <T>() => ({ generatedAt: null, sources: [], partitions: [{ sourceId: "x", period: "2026-01", manifestKey: "partitions/x/2026/01/manifest.json", releaseTag: "data-x-2026" }] }) as T, arrayBuffer: async () => new ArrayBuffer(0) };
+        if (key === "catalog/v1/manifest.json") return { json: async <T>() => ({ generatedAt: null, sources: [], partitions: [{ sourceId: "x", period: "2026-01", manifestKey: "partitions/x/2026/01/manifest.json", releaseTag: "data-x-2026", recordCount: 1 }] }) as T, arrayBuffer: async () => new ArrayBuffer(0) };
+        if (key === "partitions/x/2026/01/manifest.json") return { json: async <T>() => manifest as T, arrayBuffer: async () => manifestBytes };
+        if (key === "partitions/x/2026/01/records.jsonl.gz") return { json: async <T>() => ({} as T), arrayBuffer: async () => compressedBytes };
         return null;
       },
     };
-    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => String(input).endsWith("manifest.json") ? Response.json(manifest) : new Response(compressed)));
 
     await expect(readR2EvidenceRecords(bucket, { source: "x", limit: 10 })).rejects.toThrow("ARCHIVE_CHECKSUM_MISMATCH");
   });
