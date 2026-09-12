@@ -5,7 +5,7 @@ import { readR2EvidenceRecords } from "@/lib/r2-records";
 
 afterEach(() => vi.unstubAllGlobals());
 
-describe("archivo histórico en GitHub Releases", () => {
+describe("archivo histórico en R2", () => {
   it("pagina InfoLobby desde el índice de rangos sin inflar el archivo completo", async () => {
     const records = [
       { id: "infolobby-2", sourceId: "infolobby", kind: "lobby", occurredAt: "2026-07-02", evidence: { sourceUrl: "https://infolobby.test/2" }, data: { organismo: "Ministerio de Salud", sujeto_pasivo: "Ana Pérez" } },
@@ -35,7 +35,7 @@ describe("archivo histórico en GitHub Releases", () => {
     expect(result?.data[0]).toMatchObject({ id: "infolobby-1", sourceId: "infolobby" });
   });
 
-  it("valida y recachea una partición fría ausente de R2", async () => {
+  it("no consulta el repositorio retirado cuando falta una partición en R2", async () => {
     const lakeRecord = {
       id: "contraloria-audit-1",
       sourceId: "contraloria",
@@ -46,14 +46,6 @@ describe("archivo histórico en GitHub Releases", () => {
     };
     const compressed = gzipSync(`${JSON.stringify(lakeRecord)}\n`);
     const checksum = createHash("sha256").update(compressed).digest("hex");
-    const manifest = {
-      projectionChecksumSha256: checksum,
-      artifacts: [{
-        key: `partitions/contraloria/2026/01/records-${checksum}.jsonl.gz`,
-        checksumSha256: checksum,
-        releaseAssetName: "contraloria-2026-01-records.jsonl.gz",
-      }],
-    };
     const catalog = {
       schemaVersion: "1.0.0",
       generatedAt: "2026-08-08T00:00:00Z",
@@ -65,51 +57,47 @@ describe("archivo histórico en GitHub Releases", () => {
         manifestKey: "partitions/contraloria/2026/01/manifest.json",
         checksumSha256: checksum,
         releaseTag: "data-contraloria-2026",
+        recordCount: 1,
         status: "partial",
       }],
     };
-    const cached = new Map<string, ArrayBuffer>();
     const bucket: Parameters<typeof readR2EvidenceRecords>[0] = {
       async get(key) {
         if (key === "catalog/v1/manifest.json") {
           return { json: async <T>() => catalog as T, arrayBuffer: async () => new ArrayBuffer(0) };
         }
-        const data = cached.get(key);
-        return data ? {
-          json: async <T>() => JSON.parse(new TextDecoder().decode(data)) as T,
-          arrayBuffer: async () => data,
-        } : null;
+        return null;
       },
-      async put(key, value) { cached.set(key, value); },
     };
-    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
-      const url = String(input);
-      if (url.endsWith("contraloria-2026-01-manifest.json")) return Response.json(manifest);
-      if (url.endsWith("contraloria-2026-01-records.jsonl.gz")) return new Response(compressed);
-      return new Response(null, { status: 404 });
-    }));
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
 
     const result = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 10 });
 
-    expect(result?.data).toHaveLength(1);
-    expect(result?.data[0]).toMatchObject({ kind: "audit", title: "Informe oficial 1" });
-    expect(cached.has("partitions/contraloria/2026/01/manifest.json")).toBe(true);
-    expect(cached.has(`partitions/contraloria/2026/01/records-${checksum}.jsonl.gz`)).toBe(true);
+    expect(result).toMatchObject({ data: [], total: 0, loadedRows: 0, expectedTotal: 1, complete: false, missingPartitions: 1, missingArtifacts: 0 });
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it("rechaza un artefacto cuyo checksum no coincide", async () => {
     const compressed = gzipSync("{}\n");
+    const manifestKey = "partitions/x/2026/01/manifest.json";
+    const artifactKey = "partitions/x/2026/01/records.jsonl.gz";
     const manifest = {
       projectionChecksumSha256: "0".repeat(64),
-      artifacts: [{ key: "partitions/x/2026/01/records.jsonl.gz", checksumSha256: "0".repeat(64), releaseAssetName: "x-2026-01-records.jsonl.gz" }],
+      artifacts: [{ key: artifactKey, checksumSha256: "0".repeat(64), releaseAssetName: "x-2026-01-records.jsonl.gz" }],
     };
+    const objects = new Map<string, ArrayBuffer>([
+      ["catalog/v1/manifest.json", new TextEncoder().encode(JSON.stringify({ generatedAt: null, sources: [], partitions: [{ sourceId: "x", period: "2026-01", manifestKey, releaseTag: "data-x-2026", recordCount: 1 }] })).buffer],
+      [manifestKey, new TextEncoder().encode(JSON.stringify(manifest)).buffer],
+      [artifactKey, compressed.buffer.slice(compressed.byteOffset, compressed.byteOffset + compressed.byteLength)],
+    ]);
     const bucket: Parameters<typeof readR2EvidenceRecords>[0] = {
       async get(key) {
-        if (key === "catalog/v1/manifest.json") return { json: async <T>() => ({ generatedAt: null, sources: [], partitions: [{ sourceId: "x", period: "2026-01", manifestKey: "partitions/x/2026/01/manifest.json", releaseTag: "data-x-2026" }] }) as T, arrayBuffer: async () => new ArrayBuffer(0) };
-        return null;
+        const value = objects.get(key);
+        if (!value) return null;
+        return { json: async <T>() => JSON.parse(new TextDecoder().decode(value)) as T, arrayBuffer: async () => value };
       },
     };
-    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => String(input).endsWith("manifest.json") ? Response.json(manifest) : new Response(compressed)));
 
     await expect(readR2EvidenceRecords(bucket, { source: "x", limit: 10 })).rejects.toThrow("ARCHIVE_CHECKSUM_MISMATCH");
   });

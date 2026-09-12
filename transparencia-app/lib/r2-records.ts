@@ -22,29 +22,13 @@ interface R2ObjectBodyLike {
 
 interface R2BucketLike {
   get(key: string, options?: { range?: { offset: number; length: number } }): Promise<R2ObjectBodyLike | null>;
-  put?(key: string, value: ArrayBuffer): Promise<unknown>;
 }
 
-const RELEASE_BASE_URL = "https://github.com/jmorgadodev/transparencia.impulsacv.cl/releases/download";
-
-function bufferedObject(data: ArrayBuffer): R2ObjectBodyLike {
-  return {
-    async json<T>() { return JSON.parse(new TextDecoder().decode(data)) as T; },
-    async arrayBuffer() { return data; },
-  };
-}
-
-async function readHotOrArchivedObject(bucket: R2BucketLike, key: string, releaseTag: string, releaseAssetName: string) {
-  const hot = await bucket.get(key);
-  if (hot) return hot;
-  const url = `${RELEASE_BASE_URL}/${encodeURIComponent(releaseTag)}/${encodeURIComponent(releaseAssetName)}`;
-  const response = await fetch(url, { headers: { Accept: "application/octet-stream" } });
-  if (!response.ok) return null;
-  const data = await response.arrayBuffer();
-  if (bucket.put) {
-    try { await bucket.put(key, data.slice(0)); } catch { /* A cold read remains valid when cache writes are unavailable. */ }
-  }
-  return bufferedObject(data);
+async function readR2Object(bucket: R2BucketLike, key: string) {
+  // R2 is the canonical public data plane. A missing object must remain
+  // visible as an incomplete partition; it must not silently fall back to a
+  // retired repository or create an implicit write during a public read.
+  return bucket.get(key);
 }
 
 async function checksumSha256(data: ArrayBuffer) {
@@ -264,10 +248,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   let missingPartitions = 0;
   let missingArtifacts = 0;
   for (const partition of partitions) {
-    const [year, month] = partition.period.split("-");
-    const releaseTag = partition.releaseTag ?? `data-${partition.sourceId}-${year}`;
-    const manifestAssetName = partition.manifestAssetName ?? `${partition.sourceId}-${year}-${month}-manifest.json`;
-    const manifestObject = await readHotOrArchivedObject(bucket, partition.manifestKey, releaseTag, manifestAssetName);
+    const manifestObject = await readR2Object(bucket, partition.manifestKey);
     if (!manifestObject) {
       missingPartitions += 1;
       continue;
@@ -282,7 +263,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
     }
     const chunks = [];
     for (const artifact of artifacts) {
-      const object = await readHotOrArchivedObject(bucket, artifact.key, releaseTag, artifact.releaseAssetName);
+      const object = await readR2Object(bucket, artifact.key);
       if (!object) {
         missingArtifacts += 1;
         continue;
