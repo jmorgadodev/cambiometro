@@ -6,6 +6,7 @@ import { gzipDeterministicJsonl, stableStringify } from "./etl/core.mjs";
 import { buildLakePlan } from "./etl/lake.mjs";
 import { createCheckpointFetch } from "./etl/checkpoint-cache.mjs";
 import { loadOfficialBulkLicitaciones } from "./etl/chilecompra-bulk.mjs";
+import { assertNonEmptyChileCompraRelease } from "./etl/chilecompra-release-guard.mjs";
 
 function argument(name) {
   const index = process.argv.indexOf(name);
@@ -19,6 +20,7 @@ const concurrency = Number(argument("--concurrency") ?? 12);
 const requestsPerSecond = Number(argument("--rate") ?? 20);
 const cutoff = argument("--cutoff") ?? `${year}-${String(month).padStart(2, "0")}-31`;
 const selectedTypes = argument("--types")?.split(",").map((value) => value.trim()).filter(Boolean);
+const allowEmptyRelease = process.argv.includes("--allow-empty");
 if (!Number.isInteger(year) || year < 2009 || year > new Date().getUTCFullYear()) throw new Error("INVALID_YEAR");
 if (!Number.isInteger(month) || month < 1 || month > 12) throw new Error("INVALID_MONTH");
 const outputRoot = resolve(argument("--output") ?? join(root, "data", "lake"));
@@ -50,6 +52,7 @@ const result = await fetchChileCompraMonth({
   },
 });
 const projectedRecords = filterChileCompraRecordsByCutoff(result.records, cutoff);
+assertNonEmptyChileCompraRelease(projectedRecords, { allowEmpty: allowEmptyRelease });
 const originalProjection = await gzipDeterministicJsonl(
   result.documents.map((document) => ({ url: document.url, procurementType: document.procurementType, stage: document.stage, payload: document.payload })),
   (a, b) => a.url.localeCompare(b.url),
