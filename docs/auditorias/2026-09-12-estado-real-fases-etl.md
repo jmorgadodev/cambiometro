@@ -1494,3 +1494,36 @@ verificadores para usar el conteo productivo de InfoLobby con su release, y
 tests. Ninguna requiere D1 ni despliegue. La comprobación de cuota queda como
 una única puerta posterior al reinicio; si el consumo account-wide sigue sobre
 el límite, se detiene sin emitir SQL.
+
+## Revalidación posterior — `crosses`, InfoLobby y producción
+
+La ruta se volvió a consultar directamente después del fallo registrado por el
+workflow integral:
+
+- `/api/v1/relations?entity_id=person-camara-1009&limit=1`: HTTP 200,
+  `sourceBackend=r2-entity-index`, 630 relaciones.
+- `/api/v1/crosses?entity_id=person-camara-1009&limit=1`: HTTP 200,
+  `sourceBackend=r2-entity-index`, con relación y evidencia.
+- El índice R2 de Cámara existe físicamente y contiene el identificador
+  `person-camara-1009` con 630 relaciones; no fue necesario consultar D1.
+- `/cruces/` muestra 71.467 registros InfoLobby, coincidentes con el catálogo
+  productivo.
+
+También se ejecutó `verify-prod-full.mjs` desde la rama aislada de verificación
+con navegador desactivado para no agregar consumo innecesario. Resultado:
+
+- 132 verificaciones pasadas.
+- 0 verificaciones fallidas.
+- versión productiva observada: `v1.0-a3a23778`.
+- Cámara, Senado, Movimientos, Cruces, Transferencias, fuentes, calidad y
+  fichas respondieron conforme al contrato.
+
+El PR #498 ya contiene el ajuste del verificador que elimina el conteo fijo
+antiguo de 60.523 y toma el número publicado en el HTML productivo. Sus checks
+de CI están verdes. No se hizo merge ni despliegue desde esta revisión.
+
+Conclusión actualizada: `Cruces` no es un bloqueo operativo en producción. El
+fallo anterior queda clasificado como una observación histórica de verificación
+por drift/transitorio. La siguiente actividad segura es la auditoría por ETL y
+la preparación de dependencias en una copia aislada; D1 sigue fuera del camino
+público.
