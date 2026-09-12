@@ -1840,3 +1840,9 @@ El cambio quedó en el PR #500, con base corregida sobre
 archivos de código/prueba relacionados con este control. Los checks remotos de
 Lint/Types/Unit Tests, CodeQL y validación de workflows terminaron en verde.
 No se hizo merge, publicación R2 ni despliegue Pages.
+
+El snapshot de datos se dejó separado en el PR #501, dependiente del #500.
+Sus checks remotos también terminaron en verde, incluido el build estático,
+fixture local de D1 y verificación de rutas, APIs y UI responsive. El PR #501
+contiene únicamente `transparencia-app/data/personal-apoyo.json`; sigue abierto
+y no se ha fusionado ni publicado.
