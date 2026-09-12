@@ -94,5 +94,7 @@ pasó:
 
 El build local se hizo con los snapshots vigentes de R2 y los cambios
 generados sólo para la prueba no se incorporaron al commit. El build/E2E de
-GitHub quedó ejecutándose sobre el mismo commit; no se autoriza promoción a
-producción hasta que finalice correctamente.
+GitHub terminó correctamente en el run `34685576445`; también terminaron en
+verde calidad, seguridad, CodeQL y las verificaciones ETL. El PR queda listo
+para revisión y promoción explícita, pero este bloque no realizó despliegue a
+producción.
