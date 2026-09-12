@@ -1633,3 +1633,22 @@ las tres respondieron `status=ok`, una fila por página y el mismo total de
 3.407. También se observaron montos y fechas de contrato válidos en los tres
 casos. Esto confirma que el siguiente ETL puede diseñarse incrementalmente,
 sin descargar más datos de los necesarios para la prueba.
+
+## Prueba local completa del ETL de personal Senado
+
+Se ejecutó el ETL existente con `--source senado` hacia un archivo temporal
+fuera del repositorio. La ejecución recorrió las 7 páginas de 500 registros y
+produjo:
+
+- 3.407 filas;
+- 70 agrupaciones de senador;
+- 8 períodos mensuales, de 2026-01 a 2026-08;
+- 3.407 filas con monto;
+- 0 cargos faltantes;
+- 0 montos faltantes;
+- monto mínimo observado: $0;
+- monto máximo observado: $6.733.358.
+
+La prueba terminó correctamente y no ejecutó D1. Esto deja el ETL de Senado
+listo para una revisión de diff y una eventual publicación separada; todavía no
+se escribió en R2, Pages ni en el archivo maestro.
