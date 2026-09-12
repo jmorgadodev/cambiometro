@@ -2011,3 +2011,34 @@ La falla era del verificador, no del dato publicado. El siguiente bloque puede
 comenzar hoy con la calidad de Transparencia Activa y las pruebas aisladas de
 38 bis y ChileCompra; el reinicio de D1 sólo será necesario para el preflight de
 cuota, no para esas auditorías.
+
+### Auditoría de calidad de Transparencia Activa y municipalidades
+
+La lectura del `data-quality-summary` local y del catálogo de 346 comunas dejó
+estos valores verificables:
+
+- Snapshot de calidad generado el 21 de agosto de 2026; la auditoría detallada
+  CPLT del 6 de septiembre está marcada correctamente como
+  `snapshot-not-current-release`.
+- Transparencia Activa local: `1.218.136` registros canónicos, `1.203.287`
+  consultables declarados y sin conteo de relaciones calculable.
+- Observaciones del snapshot CPLT: 6 nombres con prefijo de puntuación, 24 con
+  prefijo numérico aislado, 656 cargos con signo inicial, 156.507 registros con
+  bruto positivo y líquido cero, 9.649 con líquido mayor que bruto y 314.945
+  sin fecha de término.
+- Municipalidades catalogadas: 346.
+- 26 comunas aparecen con personal total cero o ausente; esto debe mantenerse
+  como “sin dato publicado” hasta confirmar si la nómina no fue publicada.
+- 31 fichas no tienen alcalde ni sueldo directo; no se debe completar desde una
+  estimación o desde otra persona.
+- 310 comunas están `al_dia`, 10 `desfasado` y 26 `sin_datos` en el snapshot
+  local.
+- Se detectaron cinco períodos recientes futuros respecto del diagnóstico
+  (`Santa Bárbara` 2026-10 y `O'Higgins`, `Laguna Blanca`, `Río Verde` y
+  `Timaukel` 2026-12). Es una anomalía de período que debe confirmarse contra
+  el release CPLT antes de mostrarla como actualización válida.
+
+La acción segura para hoy es generar el diff de esas anomalías contra el release
+vigente y clasificar cada una como fuente ausente, período inválido o dato real.
+No se cambiarán montos, nombres ni períodos en el catálogo hasta contar con la
+fila original y su checksum.
