@@ -1223,6 +1223,14 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
         cursor: offset > 0 ? `v1_${offset.toString(36)}` : undefined,
       });
       if (lake) {
+        if ("scanLimited" in lake && lake.scanLimited) {
+          return failure(
+            "QUERY_SCOPE_REQUIRED",
+            "Esta fuente requiere acotar el período o consultar un índice específico para evitar un escaneo histórico masivo.",
+            422,
+            { source, expectedTotal: lake.expectedTotal, sourceBackend: "r2-lake" },
+          );
+        }
         return success(lake.data, {
           total: lake.total,
           limit,
