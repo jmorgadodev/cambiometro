@@ -131,6 +131,13 @@ las versiones del Worker `transparencia-impulsacv` y del Worker canónico. Esto
 impide una confirmación independiente del inventario de Workers desde CLI,
 pero no muestra una conexión operativa desde el repositorio antiguo.
 
+Como control adicional, se revisó `origin/main` del repositorio canónico: los
+ETL programados conservan R2/Pages como salida pública y sus pasos de
+materialización remota D1 están condicionados a `workflow_dispatch`, preflight
+de cuota y autorización explícita. El backup D1 semanal también requiere una
+confirmación manual. Por tanto, los workflows activos no implican por sí solos
+lecturas o escrituras remotas D1 en cada ejecución programada.
+
 ### Decisión operativa
 
 Desde esta fecha sólo se trabaja en las tres raíces definidas en
