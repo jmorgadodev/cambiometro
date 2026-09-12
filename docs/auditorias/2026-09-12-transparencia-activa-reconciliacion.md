@@ -49,6 +49,12 @@ No se ejecutó ese ETL durante esta auditoría: descargar y procesar los cuatro
 CSV implica más de 35 GB anunciados por los servidores de origen y no debe
 mezclarse con un despliegue de interfaz.
 
+El workflow canónico está programado para el día 5 de cada mes a las 05:00
+hora de Chile (`0 9 5 * *` UTC) y también admite ejecución manual por categoría
+o para las cuatro categorías. La ejecución correcta debe pasar primero por el
+preflight de cuota D1; si la cuota no permite registrar metadatos, el release
+R2 debe poder publicarse y D1 debe quedar pospuesto.
+
 ## Cobertura municipal
 
 | Estado | Local | Producción |
