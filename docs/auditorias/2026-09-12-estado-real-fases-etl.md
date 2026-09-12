@@ -1132,3 +1132,20 @@ Esto cambia la prioridad: no se ejecuta todavía ningún ETL, pero el próximo
 trabajo puede ser una prueba aislada de extracción de encabezado/metadatos por
 fuente. Si pasa, se prepara un release de prueba sin publicar; si falla, se
 conserva el snapshot actual y se registra el motivo exacto.
+
+### Corrección aislada preparada para 38 bis
+
+Con la evidencia anterior se preparó el PR
+`https://github.com/jmorgadodev/cambiometro/pull/499` desde la rama
+`codex/38bis-csv-connector-20260912`. El cambio:
+
+- consulta el CSV oficial `?csv-todo` como entrada primaria;
+- selecciona el período más reciente del archivo;
+- conserva el parser HTML como fallback;
+- mantiene historial, checksum y estados de monto no informado;
+- añade pruebas del formato delimitado, acentos, comillas y períodos.
+
+La prueba aislada del primer chunk real respondió HTTP 200, `text/csv`, y
+produjo 71 filas válidas sin descargar el universo completo. `node --check` y
+`git diff --check` están verdes. El PR queda sin merge y sin despliegue hasta
+que CI termine y se revise una ejecución de release aislada.
