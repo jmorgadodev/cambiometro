@@ -410,14 +410,19 @@ conserva Cámara y Senado hasta 2026-09-09. Producción devuelve votaciones de
 Cámara mediante `source=camara`, pero la variante explícita
 `source=votaciones_camara` responde `sourceBackend=none`,
 `sourceStatus=temporarily-unavailable` y `reason=r2-unavailable`. Por tanto,
-la fuente oficial no está caída y el dato no debe reemplazarse por cero: falta
-reconstruir o reactivar el artefacto R2 de la variante de Cámara.
+la fuente oficial no está caída y el dato no debe reemplazarse por cero. La
+consulta canónica acotada `source=camara&kind=vote&from=2026-09-09&to=2026-09-09`
+responde desde R2 con 7 votaciones y release completo; el catálogo declara
+4.058 registros de votaciones dentro del componente Cámara. El pendiente es
+de contrato/alias de la variante explícita, no una pérdida del universo
+canónico.
 
 La acción segura queda definida para hoy: comparar el manifiesto R2 y el
-workflow de Cámara, ejecutar una validación/preview de esa variante y publicar
-sólo si el conteo, fecha máxima y checksum coinciden con el snapshot validado.
-Si el artefacto no está disponible, se conserva el snapshot productivo
-anterior y se informa la ausencia como temporal. No se usará D1 como fallback.
+workflow de Cámara, y corregir sólo el contrato/alias de la variante explícita
+en preview si se confirma que el componente canónico es suficiente. No se
+reconstruirá el histórico ni se reemplazará el snapshot productivo. Si el
+artefacto específico no está disponible, se conserva el snapshot canónico y
+se informa la ausencia como temporal. No se usará D1 como fallback.
 
 ## Plan operativo aplicable hoy
 
