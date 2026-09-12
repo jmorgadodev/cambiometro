@@ -238,3 +238,9 @@ de D1, los indicadores permanecieron en aproximadamente 2 mil consultas y
 15,43 millones de filas leídas, con cero escrituras. No aumentaron durante las
 comprobaciones acotadas. Es una señal favorable, pero no reemplaza la ventana
 completa de 24 horas porque el panel conserva el agregado móvil.
+
+También se revisaron las ejecuciones programadas recientes de Cámara
+(`34691437098`), Senado (`34691714118`) e InfoLobby (`34691854513`). Terminaron
+correctamente y sus logs no muestran materialización remota ni exportación D1.
+El código de `origin/main` conserva los pasos D1 detrás de la acción de
+preflight y de una autorización explícita que ningún workflow actual activa.
