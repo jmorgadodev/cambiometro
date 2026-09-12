@@ -1186,11 +1186,12 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
   const requestedSource = requestUrl.searchParams.get("source")?.trim();
   if (!requestedSource) return null;
   const source = requestedSource === "votaciones_camara" ? "camara" : requestedSource;
-  const sourceVariant = requestedSource === "votaciones_camara" ? "votaciones_camara" : undefined;
   const requestedKind = requestUrl.searchParams.get("kind")?.trim();
-  if (sourceVariant && requestedKind && requestedKind !== "vote") {
+  const isCamaraVoteAlias = requestedSource === "votaciones_camara";
+  if (isCamaraVoteAlias && requestedKind && requestedKind !== "vote") {
     return failure("INVALID_QUERY", "La fuente de votaciones de Cámara sólo admite registros de tipo vote.", 400);
   }
+  const effectiveKind = requestedKind ?? (isCamaraVoteAlias ? "vote" : undefined);
   const manifest = await r2Json<StaticSiteManifest>(env.PUBLIC_DATA, "projections/static-site-v1/manifest.json");
   if (!manifest?.files?.length) return null;
   const candidatePaths = staticRecordCandidatePaths(requestedSource);
@@ -1218,10 +1219,9 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
       const limit = limitFrom(requestUrl);
       const lake = await readR2EvidenceRecords(env.PUBLIC_DATA, {
         source,
-        variant: sourceVariant,
         query: requestUrl.searchParams.get("q")?.trim() ?? requestUrl.searchParams.get("query")?.trim() ?? undefined,
         entityId: requestUrl.searchParams.get("entity_id")?.trim() || undefined,
-        kind: (requestedKind ?? (sourceVariant ? "vote" : undefined)) as never,
+        kind: effectiveKind as never,
         from: requestUrl.searchParams.get("from")?.trim() || undefined,
         to: requestUrl.searchParams.get("to")?.trim() || undefined,
         limit,
@@ -1261,7 +1261,7 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
   const from = requestUrl.searchParams.get("from")?.trim() ?? "";
   const to = requestUrl.searchParams.get("to")?.trim() ?? "";
   const entityId = normalized(requestUrl.searchParams.get("entity_id"));
-  const kind = requestedKind ?? (sourceVariant ? "vote" : undefined);
+  const kind = effectiveKind;
   const validKinds = new Set(["authority", "purchase", "contract", "expense", "budget_execution", "transfer", "audit", "declaration", "lobby", "vote", "attendance", "remuneration"]);
   if (query.length > 80 || from.length > 32 || to.length > 32 || entityId.length > 160 || (kind && !validKinds.has(kind))) {
     return failure("INVALID_QUERY", "Parámetros de consulta inválidos.", 400);
