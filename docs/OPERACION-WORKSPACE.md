@@ -30,10 +30,11 @@ quitó el dominio `transparencia.impulsacv.cl`, se eliminó el Worker y se
 deshabilitaron sus workflows ETL. La base `transparencia-db` y el bucket R2
 no fueron eliminados.
 
-El repositorio remoto permanece archivado y sin ejecución ETL como respaldo frío
-de releases históricos que el código maestro todavía puede consultar sólo si
-un artefacto R2 no está disponible. No es una fuente de producción ni un
-entorno de trabajo.
+El repositorio remoto permanece archivado y sin ejecución ETL como respaldo
+histórico fuera del flujo operativo. El código maestro no lo consulta: si falta
+un artefacto en R2, la respuesta conserva el estado de partición incompleta y
+no intenta recuperar datos desde el repositorio retirado. No es una fuente de
+producción ni un entorno de trabajo.
 
 ## Recuperación
 
