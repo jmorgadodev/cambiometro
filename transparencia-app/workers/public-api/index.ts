@@ -1182,7 +1182,7 @@ function r2Record(row: JsonRecord, source: string): JsonRecord {
   };
 }
 
-async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | null> {
+export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | null> {
   const requestedSource = requestUrl.searchParams.get("source")?.trim();
   if (!requestedSource) return null;
   const source = requestedSource === "votaciones_camara" ? "camara" : requestedSource;
@@ -1192,20 +1192,7 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
     return failure("INVALID_QUERY", "La fuente de votaciones de Cámara sólo admite registros de tipo vote.", 400);
   }
   const effectiveKind = requestedKind ?? (isCamaraVoteAlias ? "vote" : undefined);
-  const manifest = await r2Json<StaticSiteManifest>(env.PUBLIC_DATA, "projections/static-site-v1/manifest.json");
-  if (!manifest?.files?.length) return null;
-  const candidatePaths = staticRecordCandidatePaths(requestedSource);
   let rawRows: unknown[] = [];
-  for (const path of candidatePaths) {
-    const entry = manifest.files.find((file) => file.path === path);
-    if (!entry) continue;
-    const payload = await r2Json<JsonRecord>(env.PUBLIC_DATA, entry.key);
-    const candidateRows = staticRecordRows(payload);
-    if (candidateRows.length > 0) {
-      rawRows = candidateRows;
-      break;
-    }
-  }
 
   // The static-site projection is intentionally compact and is not the full
   // source record set. When D1 is unavailable, use the versioned lake
@@ -1255,6 +1242,26 @@ async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Response | 
       // Fall through to the compact projection/degraded response below.
     }
   }
+
+  // Only load the legacy static projection after the indexed lake path has
+  // declined the request. Loading a full static subset before the paginated
+  // R2 index needlessly transfers and parses a large object on every request;
+  // for 25-50 row pages this can exceed the Worker CPU limit and surface as
+  // Cloudflare 1102 even though the requested page is small.
+  const manifest = await r2Json<StaticSiteManifest>(env.PUBLIC_DATA, "projections/static-site-v1/manifest.json");
+  if (!manifest?.files?.length) return null;
+  const candidatePaths = staticRecordCandidatePaths(requestedSource);
+  for (const path of candidatePaths) {
+    const entry = manifest.files.find((file) => file.path === path);
+    if (!entry) continue;
+    const payload = await r2Json<JsonRecord>(env.PUBLIC_DATA, entry.key);
+    const candidateRows = staticRecordRows(payload);
+    if (candidateRows.length > 0) {
+      rawRows = candidateRows;
+      break;
+    }
+  }
+
   if (rawRows.length === 0) return null;
 
   const query = normalized(requestUrl.searchParams.get("q") ?? requestUrl.searchParams.get("query"));
