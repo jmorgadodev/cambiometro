@@ -382,3 +382,57 @@ Validación local y remota:
 El workflow de InfoLobby activado por el merge ejecutó únicamente su guard de
 push (`Validación de workflow sin ingestión`) y omitió el ETL. El Worker quedó
 validado como candidato, sin promoción adicional ni materialización D1.
+
+## Validación de fuentes sin escritura — 12 de septiembre
+
+Se ejecutó una comprobación acotada de lectura contra los conectores de Cámara,
+Senado y Movimientos. No se ejecutó el ETL, no se escribieron archivos, no se
+publicó un release y no se consultó D1.
+
+### Resultado de fuentes externas
+
+- Cámara: padrón vigente HTTP 200; listado de votaciones 2026 HTTP 200 con
+  942 entradas; la más reciente observada fue la votación `90026` del
+  2026-09-09 12:48:46; su detalle respondió HTTP 200 (43.183 bytes).
+- Cámara: sesiones 2026 HTTP 200 (23.436 bytes).
+- Senado: padrón HTTP 200; sesiones de la legislatura 374 HTTP 200 con 63
+  sesiones observadas y última sesión el 2026-09-09; períodos de dietas HTTP
+  200, con agosto de 2026 como último período disponible.
+- Movimientos: Ley Chile, Diario Oficial, Gob.cl, Prensa Presidencia y
+  Ministerio del Deporte respondieron HTTP 200. Gob.cl respondió sin desafío de
+  Cloudflare en esta comprobación; Ministerio del Deporte entregó 6 señales
+  compatibles con el detector.
+
+### Hallazgo operativo Cámara
+
+El snapshot local `data/politicos-votaciones.json` contiene 848 sesiones y
+conserva Cámara y Senado hasta 2026-09-09. Producción devuelve votaciones de
+Cámara mediante `source=camara`, pero la variante explícita
+`source=votaciones_camara` responde `sourceBackend=none`,
+`sourceStatus=temporarily-unavailable` y `reason=r2-unavailable`. Por tanto,
+la fuente oficial no está caída y el dato no debe reemplazarse por cero: falta
+reconstruir o reactivar el artefacto R2 de la variante de Cámara.
+
+La acción segura queda definida para hoy: comparar el manifiesto R2 y el
+workflow de Cámara, ejecutar una validación/preview de esa variante y publicar
+sólo si el conteo, fecha máxima y checksum coinciden con el snapshot validado.
+Si el artefacto no está disponible, se conserva el snapshot productivo
+anterior y se informa la ausencia como temporal. No se usará D1 como fallback.
+
+## Plan operativo aplicable hoy
+
+1. **Fuentes**: conservar el resultado de estas pruebas como preflight; no
+   lanzar un ETL completo ni una reconstrucción histórica.
+2. **Cámara**: reparar o regenerar únicamente la variante R2 de
+   `votaciones_camara`, con conteo y fecha máxima como guardas; validar primero
+   en preview.
+3. **Senado**: dejarlo en espera de cambio sólo si el snapshot productivo no
+   coincide con el corte del 2026-09-09; la fuente está respondiendo.
+4. **Movimientos**: no reemplazar su snapshot de 82 filas por una consulta
+   parcial; la comprobación de fuentes queda verde y el bloque sigue siendo
+   incremental.
+5. **D1**: no ejecutar SQL, materialización ni backup. Mañana sólo se medirá
+   cuota post-reset y se verificará que los procesos públicos sigan en R2.
+6. **Cierre del día**: ejecutar pruebas locales del contrato y de publicación;
+   ningún cambio de menú, rutas, municipalidades, remuneraciones o
+   `cambiometro-editorial`.

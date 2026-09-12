@@ -18,6 +18,8 @@
 - [x] Promover explícitamente el candidato `8fffd277-d5b5-4330-bdd8-7abc04c18f3a` para corregir el 1102 productivo de ChileCompra.
 - [x] Reconciliar catálogo R2 contra filas consultables por fuente sin usar D1.
 - [x] Separar en la UI catálogo declarado, publicados y consultables; comenzar por ChileCompra; corregir metadata R2 de InfoLobby.
+- [x] Preflight de fuentes sin escritura: Cámara, Senado y los cinco orígenes de Movimientos respondieron correctamente el 2026-09-12.
+- [ ] Reparar/publicar sólo la variante R2 `votaciones_camara`; la fuente responde y el snapshot local llega al 2026-09-09, pero la variante explícita está temporalmente indisponible en producción.
 
 ## Mañana, después del reinicio
 
@@ -25,6 +27,12 @@
 - [ ] Confirmar que no existen lecturas masivas nuevas.
 - [ ] Verificar compuertas de materialización programada.
 - [ ] Ejecutar sólo un preflight acotado si la cuota está limpia.
+
+## Trabajo habilitado antes del reinicio D1
+
+- [x] Validar conectividad y fechas máximas de Cámara/Senado sin ejecutar ETL.
+- [x] Validar conectividad de las fuentes de Movimientos sin reemplazar el snapshot.
+- [ ] Revisar manifiesto R2 y preview de `votaciones_camara` sin usar D1.
 
 ## Fuera de alcance
 
