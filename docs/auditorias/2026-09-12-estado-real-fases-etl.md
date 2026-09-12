@@ -1090,3 +1090,24 @@ resultado del filtro temporal; por eso no se sumará directamente con `total`.
 El hallazgo confirma que Cámara está actualizada para 2026, mientras que
 Senado conserva una brecha real de períodos que debe resolverse desde su fuente
 o release oficial, no mediante una copia local ni D1.
+
+## Movimientos y conectividad de fuentes — consulta R2 y origen oficial
+
+La consulta acotada de Movimientos devolvió 82 registros desde R2, con eventos
+entre 2026-02-15 y 2026-09-02. Los dos casos que estaban pendientes de revisión
+siguen marcados `en_confirmacion` y conservan `fecha_deteccion` del proceso;
+no se promovieron automáticamente a `verificado` porque aún falta el acto
+administrativo correspondiente.
+
+También se hizo una comprobación liviana de disponibilidad de los portales,
+sin descargar nóminas ni ejecutar los conectores completos. Respondieron HTTP
+200 ChileCompra, Portal de Transparencia, OpenData Congreso y el Registro 38
+bis. Esto no demuestra que los archivos internos estén disponibles: sí indica
+que los fallos anteriores deben clasificarse como fallo del recurso o del
+conector, no como caída total del dominio.
+
+La siguiente acción segura para esas fuentes es inspeccionar el índice y sus
+enlaces de descarga con una petición acotada, registrar URL, código HTTP,
+content-type, tamaño y checksum, y sólo entonces evaluar un ETL aislado. No se
+debe relanzar el workflow completo por el solo hecho de que la portada
+responda.
