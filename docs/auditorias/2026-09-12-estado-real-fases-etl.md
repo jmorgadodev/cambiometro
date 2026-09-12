@@ -242,3 +242,19 @@ producción y el objeto R2 del release
 Conclusión del bloque: la corrección de Movimientos está validada en preview y
 R2. Producción todavía no se promovió; el endpoint productivo continúa con el
 comportamiento anterior hasta una promoción controlada y explícita.
+
+## Checkpoint de calidad R2 — run 34699100822
+
+El commit `c24f106` agregó la comparación entre el índice paginado y el
+conteo del catálogo R2. La prueba remota del candidato quedó así:
+
+- InfoLobby: 60.523 filas servibles de 60.615 declaradas; `sourceStatus=partial`,
+  `missingPartitions=1`.
+- ChileCompra: 74.142 de 74.142; `sourceStatus=complete`.
+- Movimientos: 82 filas; `sourceBackend=r2`, `sourceStatus=partial` por la
+  naturaleza histórica del snapshot, no por una caída del servicio.
+- Health: `publicDataBackend=r2`, `publicD1Reads=false`.
+
+El endpoint ya no afirma que InfoLobby está completo cuando falta su partición
+de agosto. El dato faltante queda identificado como un problema de release R2,
+no como una razón para consultar D1 ni para borrar el último snapshot válido.
