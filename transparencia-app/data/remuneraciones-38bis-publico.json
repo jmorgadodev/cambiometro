@@ -3,9 +3,9 @@
   "fuente": "Comisión para la Fijación de Remuneraciones (art. 38 bis) · registro público",
   "url": "https://comision38bis.gob.cl/registro-publico",
   "mes": "2026-06",
-  "extraido_en": "2026-09-08T13:14:12.207Z",
-  "filas": 1632,
-  "checksum_sha256": "b0405543977cd6da043f48695b6f20cce87c2f8de4868cfc9ab802a7c8f06893",
+  "extraido_en": "2026-09-13T17:24:50.986Z",
+  "filas": 1634,
+  "checksum_sha256": "42dd9a7d2d544bc059c40b8a7d320de4ee40729bd8ed13866ffecb9366521348",
   "registros": [
     {
       "partida": "Presidencia",
@@ -1537,7 +1537,7 @@
       "partida": "Ministerio del Interior",
       "organismo": "MINISTERIO DEL INTERIOR",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -1964,14 +1964,14 @@
       "partida": "Ministerio del Interior",
       "organismo": "AGENCIA NACIONAL DE INTELIGENCIA",
       "cargo": "DIRECTOR GENERAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Interior",
       "organismo": "AGENCIA NACIONAL DE INTELIGENCIA",
       "cargo": "DIRECTOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -1985,7 +1985,7 @@
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "MINISTERIO DE SEGURIDAD PÚBLICA",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2167,7 +2167,7 @@
       "partida": "Ministerio de Defensa Nacional",
       "organismo": "MINISTERIO DE DEFENSA NACIONAL",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2321,7 +2321,7 @@
       "partida": "Ministerio Secretaría General de la Presidencia",
       "organismo": "MINISTERIO SECRETARÍA GENERAL DE LA PRESIDENCIA",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2335,14 +2335,14 @@
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "MINISTERIO SECRETARÍA GENERAL DE GOBIERNO",
       "cargo": "MINISTRO",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "MINISTERIO SECRETARÍA GENERAL DE GOBIERNO",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2622,7 +2622,7 @@
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "AGENCIA DE PROMOCIÓN DE LA INVERSIÓN EXTRANJERA",
       "cargo": "DIRECTOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2636,7 +2636,7 @@
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "MINISTERIO DE DESARROLLO SOCIAL Y FAMILIA",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2783,7 +2783,7 @@
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "FONDO DE SOLIDARIDAD E INVERSIÓN SOCIAL",
       "cargo": "DIRECTOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2797,7 +2797,7 @@
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "CORPORACIÓN NACIONAL DE DESARROLLO INDÍGENA",
       "cargo": "CONSEJERO",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2846,7 +2846,7 @@
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2860,7 +2860,7 @@
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2874,7 +2874,7 @@
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2888,7 +2888,7 @@
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2902,7 +2902,7 @@
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2916,7 +2916,7 @@
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2930,7 +2930,7 @@
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE SANTIAGO",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2944,7 +2944,7 @@
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2958,7 +2958,7 @@
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2972,7 +2972,7 @@
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -2986,7 +2986,7 @@
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -3000,7 +3000,7 @@
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -3014,7 +3014,7 @@
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -3028,7 +3028,7 @@
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -3042,7 +3042,7 @@
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -3056,7 +3056,7 @@
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -3077,7 +3077,7 @@
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "MINISTERIO DE JUSTICIA Y DERECHOS HUMANOS",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -3224,7 +3224,7 @@
       "partida": "Ministerio del Trabajo y Previsión Social",
       "organismo": "MINISTERIO DEL TRABAJO Y PREVISIÓN SOCIAL",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -3378,7 +3378,7 @@
       "partida": "Ministerio de Obras Públicas",
       "organismo": "MINISTERIO DE OBRAS PÚBLICAS",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -3525,7 +3525,7 @@
       "partida": "Ministerio de Salud",
       "organismo": "MINISTERIO DE SALUD",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -3679,7 +3679,7 @@
       "partida": "Ministerio de Vivienda y Urbanismo",
       "organismo": "MINISTERIO DE VIVIENDA Y URBANISMO",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -3812,7 +3812,7 @@
       "partida": "Ministerio de Agricultura",
       "organismo": "MINISTERIO DE AGRICULTURA",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -3945,14 +3945,14 @@
       "partida": "Ministerio de Agricultura",
       "organismo": "COMISIÓN NACIONAL DE RIEGO",
       "cargo": "SECRETARIO EJECUTIVO",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "INSTITUTO DE DESARROLLO AGROPECUARIO",
       "cargo": "DIRECTOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -3973,7 +3973,7 @@
       "partida": "Ministerio de Minería",
       "organismo": "MINISTERIO DE MINERÍA",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -4113,7 +4113,7 @@
       "partida": "Ministerio de Transportes y Telecomunicaciones",
       "organismo": "MINISTERIO DE TRANSPORTES Y TELECOMUNICACIONES",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -4253,7 +4253,7 @@
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "MINISTERIO DE BIENES NACIONALES",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -4281,7 +4281,7 @@
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -4386,7 +4386,7 @@
       "partida": "Ministerio de Energía",
       "organismo": "MINISTERIO DE ENERGÍA",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -4561,7 +4561,7 @@
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "MINISTERIO DEL MEDIO AMBIENTE",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -4708,7 +4708,7 @@
       "partida": "Ministerio del Deporte",
       "organismo": "MINISTERIO DEL DEPORTE",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -4834,7 +4834,7 @@
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "MINISTERIO DE LA MUJER Y LA EQUIDAD DE GÉNERO",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -4869,7 +4869,7 @@
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "SECRETARIO REGIONAL MINISTERIAL (SEREMI)",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -4967,7 +4967,7 @@
       "partida": "Ministerio de las Culturas, las Artes y el Patrimonio",
       "organismo": "MINISTERIO DE LAS CULTURAS, LAS ARTES Y EL PATRIMONIO",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -5107,7 +5107,7 @@
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "MINISTERIO DE CIENCIA, TECNOLOGÍA, CONOCIMIENTO E INNOVACIÓN",
       "cargo": "COORDINADOR DE ASESORES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -5513,7 +5513,7 @@
       "partida": "Ministerio del Interior",
       "organismo": "MINISTERIO DEL INTERIOR",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -5702,14 +5702,14 @@
       "partida": "Ministerio del Interior",
       "organismo": "SUBSECRETARÍA DE DESARROLLO REGIONAL Y ADMINISTRATIVO",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Interior",
       "organismo": "SUBSECRETARÍA DE DESARROLLO REGIONAL Y ADMINISTRATIVO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -5744,7 +5744,7 @@
       "partida": "Ministerio del Interior",
       "organismo": "DELEGACIÓN PRESIDENCIAL REGIONAL DE TARAPACÁ",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -5779,7 +5779,7 @@
       "partida": "Ministerio del Interior",
       "organismo": "DELEGACIÓN PRESIDENCIAL REGIONAL DE ANTOFAGASTA",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -5835,7 +5835,7 @@
       "partida": "Ministerio del Interior",
       "organismo": "DELEGACIÓN PRESIDENCIAL REGIONAL DE COQUIMBO",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -5926,7 +5926,7 @@
       "partida": "Ministerio del Interior",
       "organismo": "DELEGACIÓN PRESIDENCIAL REGIONAL DE O'HIGGINS",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -5954,7 +5954,7 @@
       "partida": "Ministerio del Interior",
       "organismo": "DELEGACIÓN PRESIDENCIAL REGIONAL DEL MAULE",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -5975,7 +5975,7 @@
       "partida": "Ministerio del Interior",
       "organismo": "DELEGACIÓN PRESIDENCIAL REGIONAL DE ÑUBLE",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -6010,7 +6010,7 @@
       "partida": "Ministerio del Interior",
       "organismo": "DELEGACIÓN PRESIDENCIAL REGIONAL DEL BIOBÍO",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -6066,21 +6066,21 @@
       "partida": "Ministerio del Interior",
       "organismo": "DELEGACIÓN PRESIDENCIAL REGIONAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Interior",
       "organismo": "DELEGACIÓN PRESIDENCIAL REGIONAL DE LOS RÍOS",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Interior",
       "organismo": "DELEGACIÓN PRESIDENCIAL REGIONAL DE LOS RÍOS",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -6122,7 +6122,7 @@
       "partida": "Ministerio del Interior",
       "organismo": "DELEGACIÓN PRESIDENCIAL REGIONAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -6171,7 +6171,7 @@
       "partida": "Ministerio del Interior",
       "organismo": "POLICÍA DE INVESTIGACIONES DE CHILE",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -6192,7 +6192,7 @@
       "partida": "Ministerio del Interior",
       "organismo": "POLICÍA DE INVESTIGACIONES DE CHILE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -6206,43 +6206,57 @@
       "partida": "Ministerio del Interior",
       "organismo": "SERVICIO NACIONAL DE MIGRACIONES",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Interior",
       "organismo": "SERVICIO NACIONAL DE MIGRACIONES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Interior",
       "organismo": "AGENCIA NACIONAL DE INTELIGENCIA",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Interior",
       "organismo": "AGENCIA NACIONAL DE INTELIGENCIA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Interior",
       "organismo": "AGENCIA NACIONAL DE INTELIGENCIA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "MINISTERIO DE SEGURIDAD PÚBLICA",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
+    },
+    {
+      "partida": "Ministerio de Seguridad Pública",
+      "organismo": "MINISTERIO DE SEGURIDAD PÚBLICA",
+      "cargo": "ASESOR SENIOR",
+      "nombre": "MARIA JOSE CRUZ VERGARA",
+      "bruto_mensual": 2400000
+    },
+    {
+      "partida": "Ministerio de Seguridad Pública",
+      "organismo": "MINISTERIO DE SEGURIDAD PÚBLICA",
+      "cargo": "ASESOR SENIOR",
+      "nombre": "PILAR FRANCISCA LIZANA TORESANO",
+      "bruto_mensual": 2560000
     },
     {
       "partida": "Ministerio de Seguridad Pública",
@@ -6262,14 +6276,14 @@
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "MINISTERIO DE SEGURIDAD PÚBLICA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "MINISTERIO DE SEGURIDAD PÚBLICA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -6297,14 +6311,14 @@
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SUBSECRETARÍA DE SEGURIDAD PÚBLICA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SUBSECRETARÍA DE SEGURIDAD PÚBLICA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -6332,7 +6346,7 @@
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SUBSECRETARÍA DE PREVENCIÓN DEL DELITO",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -6346,77 +6360,77 @@
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE SANTIAGO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -6430,28 +6444,28 @@
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Seguridad Pública",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -6479,49 +6493,49 @@
       "partida": "Ministerio de Relaciones Exteriores",
       "organismo": "MINISTERIO DE RELACIONES EXTERIORES",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Relaciones Exteriores",
       "organismo": "MINISTERIO DE RELACIONES EXTERIORES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Relaciones Exteriores",
       "organismo": "SUBSECRETARÍA DE RELACIONES EXTERIORES",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Relaciones Exteriores",
       "organismo": "SUBSECRETARÍA DE RELACIONES EXTERIORES",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Relaciones Exteriores",
       "organismo": "SUBSECRETARÍA DE RELACIONES EXTERIORES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Relaciones Exteriores",
       "organismo": "SUBSECRETARÍA DE RELACIONES ECONÓMICAS INTERNACIONALES",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Relaciones Exteriores",
       "organismo": "SUBSECRETARÍA DE RELACIONES ECONÓMICAS INTERNACIONALES",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -6535,42 +6549,42 @@
       "partida": "Ministerio de Defensa Nacional",
       "organismo": "MINISTERIO DE DEFENSA NACIONAL",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Defensa Nacional",
       "organismo": "MINISTERIO DE DEFENSA NACIONAL",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Defensa Nacional",
       "organismo": "MINISTERIO DE DEFENSA NACIONAL",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Defensa Nacional",
       "organismo": "MINISTERIO DE DEFENSA NACIONAL",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Defensa Nacional",
       "organismo": "SUBSECRETARÍA DE DEFENSA",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Defensa Nacional",
       "organismo": "SUBSECRETARÍA DE DEFENSA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -6584,21 +6598,21 @@
       "partida": "Ministerio de Defensa Nacional",
       "organismo": "SUBSECRETARÍA PARA LAS FUERZAS ARMADAS",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Defensa Nacional",
       "organismo": "SUBSECRETARÍA PARA LAS FUERZAS ARMADAS",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Defensa Nacional",
       "organismo": "SUBSECRETARÍA PARA LAS FUERZAS ARMADAS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -6626,63 +6640,63 @@
       "partida": "Ministerio de Hacienda",
       "organismo": "MINISTERIO DE HACIENDA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Hacienda",
       "organismo": "MINISTERIO DE HACIENDA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Hacienda",
       "organismo": "SUBSECRETARÍA DE HACIENDA",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Hacienda",
       "organismo": "SUBSECRETARÍA DE HACIENDA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Hacienda",
       "organismo": "SUBSECRETARÍA DE HACIENDA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Hacienda",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Hacienda",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Hacienda",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Hacienda",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -6696,63 +6710,63 @@
       "partida": "Ministerio de Hacienda",
       "organismo": "DIRECCIÓN DE PRESUPUESTOS",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Hacienda",
       "organismo": "DIRECCIÓN DE PRESUPUESTOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Hacienda",
       "organismo": "SERVICIO DE IMPUESTOS INTERNOS",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Hacienda",
       "organismo": "SERVICIO DE IMPUESTOS INTERNOS",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Hacienda",
       "organismo": "SERVICIO DE IMPUESTOS INTERNOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Hacienda",
       "organismo": "SERVICIO CIVIL",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Hacienda",
       "organismo": "SERVICIO CIVIL",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Hacienda",
       "organismo": "SERVICIO CIVIL",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de la Presidencia",
       "organismo": "MINISTERIO SECRETARÍA GENERAL DE LA PRESIDENCIA",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -6815,35 +6829,35 @@
       "partida": "Ministerio Secretaría General de la Presidencia",
       "organismo": "SUBSECRETARÍA GENERAL DE LA PRESIDENCIA",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de la Presidencia",
       "organismo": "SUBSECRETARÍA GENERAL DE LA PRESIDENCIA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de la Presidencia",
       "organismo": "SUBSECRETARÍA GENERAL DE LA PRESIDENCIA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "MINISTERIO SECRETARÍA GENERAL DE GOBIERNO",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "MINISTERIO SECRETARÍA GENERAL DE GOBIERNO",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -6871,126 +6885,126 @@
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "SUBSECRETARÍA GENERAL DE GOBIERNO",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "SUBSECRETARÍA GENERAL DE GOBIERNO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio Secretaría General de Gobierno",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "MINISTERIO DE ECONOMÍA, FOMENTO Y TURISMO",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -7025,14 +7039,14 @@
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "MINISTERIO DE ECONOMÍA, FOMENTO Y TURISMO",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "MINISTERIO DE ECONOMÍA, FOMENTO Y TURISMO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -7060,21 +7074,21 @@
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SUBSECRETARÍA DE ECONOMÍA Y EMPRESAS DE MENOR TAMAÑO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SUBSECRETARÍA DE TURISMO",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SUBSECRETARÍA DE TURISMO",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -7123,112 +7137,112 @@
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE SANTIAGO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -7242,42 +7256,42 @@
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "CORPORACIÓN DE FOMENTO DE LA PRODUCCIÓN",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "CORPORACIÓN DE FOMENTO DE LA PRODUCCIÓN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "AGENCIA DE PROMOCIÓN DE LA INVERSIÓN EXTRANJERA",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "AGENCIA DE PROMOCIÓN DE LA INVERSIÓN EXTRANJERA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Economía, Fomento y Turismo",
       "organismo": "AGENCIA DE PROMOCIÓN DE LA INVERSIÓN EXTRANJERA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "MINISTERIO DE DESARROLLO SOCIAL Y FAMILIA",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -7319,14 +7333,14 @@
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "MINISTERIO DE DESARROLLO SOCIAL Y FAMILIA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "MINISTERIO DE DESARROLLO SOCIAL Y FAMILIA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -7340,7 +7354,7 @@
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SUBSECRETARÍA DE EVALUACIÓN SOCIAL",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -7354,203 +7368,203 @@
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SUBSECRETARÍA DE SERVICIOS SOCIALES",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SUBSECRETARÍA DE SERVICIOS SOCIALES",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SUBSECRETARÍA DE SERVICIOS SOCIALES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SUBSECRETARÍA DE LA NIÑEZ",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SUBSECRETARÍA DE LA NIÑEZ",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SUBSECRETARÍA DE LA NIÑEZ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE SANTIAGO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "FONDO DE SOLIDARIDAD E INVERSIÓN SOCIAL",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "FONDO DE SOLIDARIDAD E INVERSIÓN SOCIAL",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "FONDO DE SOLIDARIDAD E INVERSIÓN SOCIAL",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "CORPORACIÓN NACIONAL DE DESARROLLO INDÍGENA",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "CORPORACIÓN NACIONAL DE DESARROLLO INDÍGENA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Desarrollo Social y Familia",
       "organismo": "CORPORACIÓN NACIONAL DE DESARROLLO INDÍGENA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "MINISTERIO DE EDUCACIÓN",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -7599,7 +7613,7 @@
       "partida": "Ministerio de Educación",
       "organismo": "MINISTERIO DE EDUCACIÓN",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -7620,14 +7634,14 @@
       "partida": "Ministerio de Educación",
       "organismo": "SUBSECRETARÍA DE EDUCACIÓN",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SUBSECRETARÍA DE EDUCACIÓN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -7669,14 +7683,14 @@
       "partida": "Ministerio de Educación",
       "organismo": "SUBSECRETARÍA DE EDUCACIÓN PARVULARIA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SUBSECRETARÍA DE EDUCACIÓN PARVULARIA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -7697,154 +7711,154 @@
       "partida": "Ministerio de Educación",
       "organismo": "SUBSECRETARÍA DE EDUCACIÓN SUPERIOR",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SUBSECRETARÍA DE EDUCACIÓN SUPERIOR",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE SANTIAGO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "JUNTA NACIONAL DE AUXILIO ESCOLAR Y BECAS",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "JUNTA NACIONAL DE AUXILIO ESCOLAR Y BECAS",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Educación",
       "organismo": "JUNTA NACIONAL DE AUXILIO ESCOLAR Y BECAS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "MINISTERIO DE JUSTICIA Y DERECHOS HUMANOS",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -7858,14 +7872,14 @@
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "MINISTERIO DE JUSTICIA Y DERECHOS HUMANOS",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "MINISTERIO DE JUSTICIA Y DERECHOS HUMANOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -7886,28 +7900,28 @@
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SUBSECRETARÍA DE JUSTICIA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SUBSECRETARÍA DE JUSTICIA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SUBSECRETARÍA DE DERECHOS HUMANOS",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SUBSECRETARÍA DE DERECHOS HUMANOS",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -7928,140 +7942,140 @@
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE SANTIAGO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "GENDARMERÍA DE CHILE",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "GENDARMERÍA DE CHILE",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Justicia y Derechos Humanos",
       "organismo": "GENDARMERÍA DE CHILE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Trabajo y Previsión Social",
       "organismo": "MINISTERIO DEL TRABAJO Y PREVISIÓN SOCIAL",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8096,7 +8110,7 @@
       "partida": "Ministerio del Trabajo y Previsión Social",
       "organismo": "SUBSECRETARÍA DEL TRABAJO",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8131,14 +8145,14 @@
       "partida": "Ministerio del Trabajo y Previsión Social",
       "organismo": "SUBSECRETARÍA DE PREVISIÓN SOCIAL",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Trabajo y Previsión Social",
       "organismo": "SUBSECRETARÍA DE PREVISIÓN SOCIAL",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8173,7 +8187,7 @@
       "partida": "Ministerio del Trabajo y Previsión Social",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8257,21 +8271,21 @@
       "partida": "Ministerio del Trabajo y Previsión Social",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Trabajo y Previsión Social",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Trabajo y Previsión Social",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8292,7 +8306,7 @@
       "partida": "Ministerio del Trabajo y Previsión Social",
       "organismo": "DIRECCIÓN DEL TRABAJO",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8313,28 +8327,28 @@
       "partida": "Ministerio del Trabajo y Previsión Social",
       "organismo": "SUPERINTENDENCIA DE PENSIONES",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Trabajo y Previsión Social",
       "organismo": "SUPERINTENDENCIA DE PENSIONES",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Trabajo y Previsión Social",
       "organismo": "SUPERINTENDENCIA DE PENSIONES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Obras Públicas",
       "organismo": "MINISTERIO DE OBRAS PÚBLICAS",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8383,7 +8397,7 @@
       "partida": "Ministerio de Obras Públicas",
       "organismo": "MINISTERIO DE OBRAS PÚBLICAS",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8411,7 +8425,7 @@
       "partida": "Ministerio de Obras Públicas",
       "organismo": "SUBSECRETARÍA DE OBRAS PÚBLICAS",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8432,35 +8446,35 @@
       "partida": "Ministerio de Obras Públicas",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Obras Públicas",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Obras Públicas",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Obras Públicas",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Obras Públicas",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8481,63 +8495,63 @@
       "partida": "Ministerio de Obras Públicas",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Obras Públicas",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Obras Públicas",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Obras Públicas",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Obras Públicas",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Obras Públicas",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Obras Públicas",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Obras Públicas",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Obras Públicas",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8558,42 +8572,42 @@
       "partida": "Ministerio de Obras Públicas",
       "organismo": "DIRECCIÓN GENERAL DE OBRAS PÚBLICAS",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Obras Públicas",
       "organismo": "DIRECCIÓN GENERAL DE OBRAS PÚBLICAS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Obras Públicas",
       "organismo": "DIRECCIÓN DE PLANEAMIENTO",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Obras Públicas",
       "organismo": "DIRECCIÓN DE PLANEAMIENTO",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Obras Públicas",
       "organismo": "DIRECCIÓN DE PLANEAMIENTO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "MINISTERIO DE SALUD",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8614,7 +8628,7 @@
       "partida": "Ministerio de Salud",
       "organismo": "MINISTERIO DE SALUD",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8656,7 +8670,7 @@
       "partida": "Ministerio de Salud",
       "organismo": "SUBSECRETARÍA DE SALUD PÚBLICA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8677,7 +8691,7 @@
       "partida": "Ministerio de Salud",
       "organismo": "SUBSECRETARÍA DE REDES ASISTENCIALES",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8705,21 +8719,21 @@
       "partida": "Ministerio de Salud",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8733,112 +8747,112 @@
       "partida": "Ministerio de Salud",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE SANTIAGO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "SUPERINTENDENCIA DE SALUD",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "SUPERINTENDENCIA DE SALUD",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "SUPERINTENDENCIA DE SALUD",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Salud",
       "organismo": "FONDO NACIONAL DE SALUD",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8852,14 +8866,14 @@
       "partida": "Ministerio de Salud",
       "organismo": "FONDO NACIONAL DE SALUD",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Vivienda y Urbanismo",
       "organismo": "MINISTERIO DE VIVIENDA Y URBANISMO",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8943,14 +8957,14 @@
       "partida": "Ministerio de Vivienda y Urbanismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Vivienda y Urbanismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -8964,49 +8978,49 @@
       "partida": "Ministerio de Vivienda y Urbanismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Vivienda y Urbanismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Vivienda y Urbanismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Vivienda y Urbanismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE SANTIAGO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Vivienda y Urbanismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Vivienda y Urbanismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Vivienda y Urbanismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9020,7 +9034,7 @@
       "partida": "Ministerio de Vivienda y Urbanismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9034,28 +9048,28 @@
       "partida": "Ministerio de Vivienda y Urbanismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Vivienda y Urbanismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Vivienda y Urbanismo",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "MINISTERIO DE AGRICULTURA",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9076,21 +9090,21 @@
       "partida": "Ministerio de Agricultura",
       "organismo": "MINISTERIO DE AGRICULTURA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "MINISTERIO DE AGRICULTURA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SUBSECRETARÍA DE AGRICULTURA",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9118,112 +9132,112 @@
       "partida": "Ministerio de Agricultura",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE SANTIAGO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9244,105 +9258,105 @@
       "partida": "Ministerio de Agricultura",
       "organismo": "CORPORACIÓN NACIONAL FORESTAL",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "CORPORACIÓN NACIONAL FORESTAL",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "COMISIÓN NACIONAL DE RIEGO",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "COMISIÓN NACIONAL DE RIEGO",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "COMISIÓN NACIONAL DE RIEGO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "INSTITUTO DE DESARROLLO AGROPECUARIO",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "INSTITUTO DE DESARROLLO AGROPECUARIO",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "INSTITUTO DE DESARROLLO AGROPECUARIO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SERVICIO AGRÍCOLA Y GANADERO",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SERVICIO AGRÍCOLA Y GANADERO",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Agricultura",
       "organismo": "SERVICIO AGRÍCOLA Y GANADERO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Minería",
       "organismo": "MINISTERIO DE MINERÍA",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Minería",
       "organismo": "MINISTERIO DE MINERÍA",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Minería",
       "organismo": "MINISTERIO DE MINERÍA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Minería",
       "organismo": "MINISTERIO DE MINERÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9356,7 +9370,7 @@
       "partida": "Ministerio de Minería",
       "organismo": "SUBSECRETARÍA DE MINERÍA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9370,14 +9384,14 @@
       "partida": "Ministerio de Minería",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Minería",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9391,77 +9405,77 @@
       "partida": "Ministerio de Minería",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Minería",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Minería",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Minería",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE SANTIAGO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Minería",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Minería",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Minería",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Minería",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Minería",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Transportes y Telecomunicaciones",
       "organismo": "MINISTERIO DE TRANSPORTES Y TELECOMUNICACIONES",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Transportes y Telecomunicaciones",
       "organismo": "MINISTERIO DE TRANSPORTES Y TELECOMUNICACIONES",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9510,7 +9524,7 @@
       "partida": "Ministerio de Transportes y Telecomunicaciones",
       "organismo": "SUBSECRETARÍA DE TRANSPORTES",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9538,14 +9552,14 @@
       "partida": "Ministerio de Transportes y Telecomunicaciones",
       "organismo": "SUBSECRETARÍA DE TELECOMUNICACIONES",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Transportes y Telecomunicaciones",
       "organismo": "SUBSECRETARÍA DE TELECOMUNICACIONES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9559,7 +9573,7 @@
       "partida": "Ministerio de Transportes y Telecomunicaciones",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9573,14 +9587,14 @@
       "partida": "Ministerio de Transportes y Telecomunicaciones",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Transportes y Telecomunicaciones",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9615,7 +9629,7 @@
       "partida": "Ministerio de Transportes y Telecomunicaciones",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9636,42 +9650,42 @@
       "partida": "Ministerio de Transportes y Telecomunicaciones",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Transportes y Telecomunicaciones",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Transportes y Telecomunicaciones",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Transportes y Telecomunicaciones",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Transportes y Telecomunicaciones",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Transportes y Telecomunicaciones",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9741,7 +9755,7 @@
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "SUBSECRETARÍA DE BIENES NACIONALES",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9762,42 +9776,42 @@
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE SANTIAGO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9811,70 +9825,70 @@
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Bienes Nacionales",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "MINISTERIO DE ENERGÍA",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -9895,357 +9909,357 @@
       "partida": "Ministerio de Energía",
       "organismo": "MINISTERIO DE ENERGÍA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "MINISTERIO DE ENERGÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SUBSECRETARÍA DE ENERGÍA",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SUBSECRETARÍA DE ENERGÍA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SUBSECRETARÍA DE ENERGÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE SANTIAGO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Energía",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "MINISTERIO DEL MEDIO AMBIENTE",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "MINISTERIO DEL MEDIO AMBIENTE",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "MINISTERIO DEL MEDIO AMBIENTE",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "MINISTERIO DEL MEDIO AMBIENTE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SUBSECRETARÍA DEL MEDIO AMBIENTE",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SUBSECRETARÍA DEL MEDIO AMBIENTE",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SUBSECRETARÍA DEL MEDIO AMBIENTE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE SANTIAGO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SERVICIO DE EVALUACIÓN AMBIENTAL",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SERVICIO DE EVALUACIÓN AMBIENTAL",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SERVICIO DE EVALUACIÓN AMBIENTAL",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SERVICIO DE BIODIVERSIDAD Y ÁREAS PROTEGIDAS",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SERVICIO DE BIODIVERSIDAD Y ÁREAS PROTEGIDAS",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Medio Ambiente",
       "organismo": "SERVICIO DE BIODIVERSIDAD Y ÁREAS PROTEGIDAS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "MINISTERIO DEL DEPORTE",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -10266,147 +10280,147 @@
       "partida": "Ministerio del Deporte",
       "organismo": "MINISTERIO DEL DEPORTE",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "MINISTERIO DEL DEPORTE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SUBSECRETARÍA DEL DEPORTE",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SUBSECRETARÍA DEL DEPORTE",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SUBSECRETARÍA DEL DEPORTE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio del Deporte",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "MINISTERIO DE LA MUJER Y LA EQUIDAD DE GÉNERO",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -10420,7 +10434,7 @@
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "MINISTERIO DE LA MUJER Y LA EQUIDAD DE GÉNERO",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -10441,7 +10455,7 @@
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SUBSECRETARÍA DE LA MUJER Y LA EQUIDAD DE GÉNERO",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -10462,119 +10476,119 @@
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE SANTIAGO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL MAULE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de la Mujer y la Equidad de Género",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de las Culturas, las Artes y el Patrimonio",
       "organismo": "MINISTERIO DE LAS CULTURAS, LAS ARTES Y EL PATRIMONIO",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -10588,14 +10602,14 @@
       "partida": "Ministerio de las Culturas, las Artes y el Patrimonio",
       "organismo": "MINISTERIO DE LAS CULTURAS, LAS ARTES Y EL PATRIMONIO",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de las Culturas, las Artes y el Patrimonio",
       "organismo": "MINISTERIO DE LAS CULTURAS, LAS ARTES Y EL PATRIMONIO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -10616,42 +10630,42 @@
       "partida": "Ministerio de las Culturas, las Artes y el Patrimonio",
       "organismo": "SUBSECRETARÍA DE LAS CULTURAS Y LAS ARTES",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de las Culturas, las Artes y el Patrimonio",
       "organismo": "SUBSECRETARÍA DE LAS CULTURAS Y LAS ARTES",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de las Culturas, las Artes y el Patrimonio",
       "organismo": "SUBSECRETARÍA DEL PATRIMONIO CULTURAL",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de las Culturas, las Artes y el Patrimonio",
       "organismo": "SUBSECRETARÍA DEL PATRIMONIO CULTURAL",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de las Culturas, las Artes y el Patrimonio",
       "organismo": "SUBSECRETARÍA DEL PATRIMONIO CULTURAL",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de las Culturas, las Artes y el Patrimonio",
       "organismo": "SUBSECRETARÍA DEL PATRIMONIO CULTURAL",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -10770,7 +10784,7 @@
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "MINISTERIO DE CIENCIA, TECNOLOGÍA, CONOCIMIENTO E INNOVACIÓN",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -10784,140 +10798,140 @@
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "MINISTERIO DE CIENCIA, TECNOLOGÍA, CONOCIMIENTO E INNOVACIÓN",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "MINISTERIO DE CIENCIA, TECNOLOGÍA, CONOCIMIENTO E INNOVACIÓN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SUBSECRETARÍA DE CIENCIA, TECNOLOGÍA, CONOCIMIENTO E INNOVACIÓN",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SUBSECRETARÍA DE CIENCIA, TECNOLOGÍA, CONOCIMIENTO E INNOVACIÓN",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SUBSECRETARÍA DE CIENCIA, TECNOLOGÍA, CONOCIMIENTO E INNOVACIÓN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ANTOFAGASTA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE O'HIGGINS Y EL MAULE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE ÑUBLE Y BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LA ARAUCANÍA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "organismo": "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES Y LA ANTÁRTICA CHILENA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -11036,42 +11050,42 @@
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE TARAPACÁ",
       "cargo": "ASESOR ESTRATÉGICO O PRINCIPAL",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE TARAPACÁ",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE TARAPACÁ",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE TARAPACÁ",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE ANTOFAGASTA",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE ANTOFAGASTA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -11099,21 +11113,21 @@
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE ATACAMA",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE ATACAMA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE ATACAMA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -11127,21 +11141,21 @@
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE COQUIMBO",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE COQUIMBO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL METROPOLITANO DE SANTIAGO",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -11155,14 +11169,14 @@
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL METROPOLITANO DE SANTIAGO",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE VALPARAÍSO",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -11197,63 +11211,63 @@
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE O'HIGGINS",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE O'HIGGINS",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE O'HIGGINS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DEL MAULE",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DEL MAULE",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DEL MAULE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE ÑUBLE",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE ÑUBLE",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE ÑUBLE",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -11267,21 +11281,21 @@
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DEL BIOBÍO",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DEL BIOBÍO",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE LA ARAUCANÍA",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
@@ -11358,1515 +11372,78 @@
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE LOS RÍOS",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE LOS RÍOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE LOS LAGOS",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE LOS LAGOS",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE LOS LAGOS",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE AYSÉN",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE AYSÉN",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE AYSÉN",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE MAGALLANES Y LA ANTÁRTICA CHILENA",
       "cargo": "ASESOR SENIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE MAGALLANES Y LA ANTÁRTICA CHILENA",
       "cargo": "ASESOR DE COMUNICACIONES",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
     },
     {
       "partida": "Gobiernos Regionales",
       "organismo": "GOBIERNO REGIONAL DE MAGALLANES Y LA ANTÁRTICA CHILENA",
       "cargo": "ASESOR JUNIOR",
-      "nombre": "No reportado",
+      "nombre": "NO REPORTADO",
       "bruto_mensual": null
-    }
-  ],
-  "congreso": [
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "PRESIDENTE DEL SENADO",
-      "nombre": "PAULINA NUÑEZ URRUTIA",
-      "bruto_mensual": 9110534
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "VICEPRESIDENTE DEL SENADO",
-      "nombre": "IVAN MOREIRA BARROS",
-      "bruto_mensual": 9110534
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "ALEJANDRA SEPULVEDA ORBENES",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "ALEJANDRO KUSANOVIC GLUSEVIC",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "ALFONSO DE URRESTI LONGTON",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "ANDREA PAZ BALLADARES LETELIER",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "ANDRES LONGTON HERRERA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "BEATRIZ DE JESUS SANCHEZ MUÑOZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "CAMILA ALEJANDRA FLORES OPORTO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "CARLOS IGNACIO KUSCHEL SILVA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "CLAUDIA PASCUAL GRAU",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "CRISTIAN ANDRES VIAL MACERATTA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "DANIEL NUÑEZ ARANCIBIA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "DANIELLA VALENTINA CICARDINI MILLA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "DANISA ALEJANDRA ASTUDILLO PEIRETTI",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "DIEGO EDUARDO IBAÑEZ COTRONEO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "ENRIQUE VAN RYSSELBERGHE HERRERA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "ENRIQUE SEGUNDO LEE FLORES",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "ESTEBAN VELASQUEZ NUÑEZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "FABIOLA CAMPILLAI ROJAS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "FIDEL ESPINOZA SANDOVAL",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "FRANCISCO HUENCHUMILLA JARAMILLO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "GASTON SAAVEDRA CHANDIA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "GUSTAVO SANHUEZA DUEÑAS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "IGNACIO URRUTIA BONILLA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "IVAN FLORES GARCIA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "JAVIER MACAYA DANUS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "JOSE MANUEL ROJO EDWARDS SILVA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "JUAN LUIS CASTRO GONZALEZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "KARIM ANTONIO BIANCHI RETAMALES",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "KAROL AIDA CARIOLA OLIVA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "LUCIANO CRUZ-COKE CARVALLO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "LUIS ARTURO SQUELLA OVALLE",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "MANUEL JOSE OSSANDON IRARRÁZABAL",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "MARIA JOSE GATICA BERTIN",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "MARIA LORETO CARVAJAL AMBIADO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "MATIAS WALKER PRIETO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "MIGUEL ANGEL BECKER ALVEAR",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "MIGUEL ANGEL CALISTO AGUILA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "PAULINA EUGENIA VODANOVIC ROJAS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "PEDRO ARAYA GUERRERO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "RENZO ALDO TRISOTTI MARTINEZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "RICARDO PATRICIO CELIS ARAYA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "RODOLFO RAFAEL CARTER FERNANDEZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "SEBASTIAN KEITEL BIANCHI",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "SERGIO GAHONA SALAZAR",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "VANESSA OLIMPIA KAISER BARENTS-VON HOHENHAG",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "VLADO MIROSEVIC VERDUGO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "XIMENA LORETO ORDENES NEIRA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "SENADO",
-      "cargo": "SENADOR",
-      "nombre": "YASNA PROVOSTE CAMPILLAY",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "PRESIDENTE DE LA CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "nombre": "JORGE ALESSANDRI VERGARA",
-      "bruto_mensual": 9110534
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "VICEPRESIDENTE DE LA CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "nombre": "FELIPE CAMANO CARDENAS",
-      "bruto_mensual": 9110534
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "VICEPRESIDENTE DE LA CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "nombre": "XIMENA OSSANDON IRARRAZABAL",
-      "bruto_mensual": 9110534
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "AGUSTIN ROMERO LEIVA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "ALEJANDRA YESENIA VALDEBENITO TORRES",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "ALEJANDRO BERNALES MALDONADO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "ALEJANDRO GABRIEL RIQUELME DUCCI",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "ALEX MANUEL NAHUELQUIN NAHUELQUIN",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "ALVARO CARTER FERNANDEZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "ALVARO ANDRES ORTIZ VERA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "ALVARO ARTURO JOFRE CACERES",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "ANA MARIA GAZMURI VIEIRA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "ANDREA PARRA SAUTEREL",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "ANDREA JACQUELINE MACIAS PALMA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "ANDRES CELIS MONTT",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "BENJAMIN MORENO BASCUR",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "BENJAMIN ISRAEL LORCA INZUNZA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "BERNARDO ANTONIO SALINAS MAYA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "BORIS BARRERA MORENO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CARLO ALEJANDRO ARQUEROS PIZARRO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CARLOS BIANCHI CHELECH",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CARLOS CESAR LUIS CUADRADO PRATS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CARLOS JOSE CARVAJAL GALLARDO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CARLOS LUIS CHANDIA ALARCON",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CAROLINA TELLO ROJAS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CAROLINA ELSA ICELA CUCUMIDES CALDERON",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CATALINA DEL REAL MIHOVILOVIC",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CESAR IGNACIO VALENZUELA MAASS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CHIARA BARCHIESI CHAVEZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CLAUDIA ELENA REYES LARENAS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CLAUDIA PATRICIA MORA VEGA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "COCA ERICKA NANCO VASQUEZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CONSTANZA GABRIELA SCHONHAUT SOTO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CONSTANZA VERONICA HUBE PORTUS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CONSUELO VELOSO AVILA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CRISTIAN ARAYA LERDO DE TEJADA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CRISTIAN TAPIA RAMOS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CRISTIAN ALEJANDRO CONTRERAS RADOVIC",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CRISTIAN ANDRES MELLA ANDAUR",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CRISTIAN ANDRES NEIRA MARTINEZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CRISTIAN ENRIQUE MENCHACA PINOCHET",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CRISTOBAL MARTINEZ RAMIREZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "CRISTOBAL URRUTICOECHEA RIOS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "DANIEL LILAYU VIVANCO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "DANIEL MANOUCHEHRI LOBOS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "DANIEL EDUARDO BUSTOS LEAL",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "DANIEL ELIAS VALENZUELA SALAZAR",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "DANIELA SERRANO SALAZAR",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "DIEGO SCHALPER SEPULVEDA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "DIEGO ALFONSO VERGARA RODRIGUEZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "EDUARDO DURAN SALINAS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "EDUARDO ANDRES CRETTON REBOLLEDO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "EILEEN PATRICIA URQUETA ROJAS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "EMILIA NUYADO ANCAPICHUN",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "EMILIA SCHNEIDER VIDELA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "ENRIQUE ALEJANDRO BASSALETTI RIESS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "ERICH CHRIST GROHS MARIN",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "FABIAN MAURICIO OSSANDON BRICENO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "FELIPE ROSS CORREA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "FELIX BUGUENO SOTELO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "FERNANDO UGARTE TEJEDA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "FERNANDO JORGE ZAMORANO PERALTA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "FLOR WEISSE NOVOA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "FLOR ROSSANY CONTRERAS VIVALLO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "FRANCESCA MUNOZ GONZALEZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "FRANCISCO JAVIER CRISOSTOMO LLANOS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "FRANCISCO JAVIER ORREGO GUTIERREZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "GAEL YEOMANS ARAYA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "GERMAN VERDUGO SOTO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "GLORIA NAVEILLAN ARRIAGADA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "GONZALO WINTER ETCHEBERRY",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "GUILLERMO RAMIREZ DIEZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "GUILLERMO VICTORIANO VALDES CARMONA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "GUSTAVO ADOLFO GATICA VILLARROEL",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "HANS ALBERTO MAROWSKI CUEVAS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "HECTOR BARRIA ANGULO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "HECTOR ULLOA AGUILERA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "HOTUITI TEAO DRAGO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "IGNACIO JAIME ACHURRA DIAZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "IGNACIO JOSE URCULLU CLÃˆMENT LUND",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "IRACI LUIZA HASSLER JACOB",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JAIME ARAYA GUERRERO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JAIME COLOMA ALAMOS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JAIME MULET MARTINEZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JAIME ANDRES BASSA MERCADO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JAVIER ANTONIO MUNOZ RIQUELME",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JAVIER IGNACIO OLIVARES AVENDANO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JAVIERA MORALES ALVARADO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JAVIERA VALENTINA RODRIGUEZ PASCUAL",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JOANNA PEREZ OLEA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JORGE BRITO HASBUN",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JORGE GUZMAN ZEPEDA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JORGE ELIAS GREGORIO DIAZ IBARRA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JOSE ANTONIO KAST ADRIASOLA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JOSE ANTONIO RIVAS VILLALOBOS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JOSE CARLOS MEZA PEREIRA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JOSE FRANCISCO MONTALVA FEUERHAKE",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JUAN IRARRAZAVAL ROSSEL",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JUAN SANTANA CASTILLO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JUAN CARLOS BELTRAN SILVA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "JUAN MARCELO VALENZUELA HENRIQUEZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "LEANDRO JORGE KUNSTMANN COLLADO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "LILIAN ALEJANDRA BETANCURT DELGADO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "LORENA FRIES MONLEON",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "LORENA PIZARRO SIERRA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "LUIS MALLA VALENZUELA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "LUIS PARDO SAINZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "LUIS SANCHEZ OSSA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "LUIS ALBERTO CUELLO PENA Y LILLO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "MACARENA EUGENIA SANTELICES CANAS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "MARCELA HERNANDO PEREZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "MARCO ANTONIO SULANTAY OLIVARES",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "MARCOS ILABACA CERDA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "MARCOS PATRICIO BARRAZA GOMEZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "MARIA FRANCISCA BELLO CAMPOS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "MARIO ANTONIO OLAVARRIA RODRIGUEZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "MARISELA SANTIBANEZ NOVOA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "MARLENE PEREZ CARTES",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "MATIAS JOSE FERNANDEZ HARTWIG",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "MAURO GONZALEZ VILLARROEL",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "NATALIA ROMERO TALGUIA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "NATHALIE CASTILLO ROJAS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "NELSON VENEGAS SALAZAR",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "OMAR RASHID SABAT GUZMAN",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "PAMELA JILES MORENO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "PATRICIO ALFONSO PINILLA VALENCIA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "PATRICIO ANTONIO BRIONES MOLLER",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "PAULA ANDREA OLMOS CONTRERAS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "PAULINA ANDREA MUNOZ MINTE",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "PAZ CHARPENTIER RAJCEVICH",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "PIER GIUSEPPE KARLEZI HAZLEBY",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "PRISCILLA ELENA CASTILLO GERLI",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "RAUL LEIVA CARVAJAL",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "RAUL SOTO MARDONES",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "RENE ALINCO BUSTOS",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "RENE MANUEL GARCIA GARCIA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "RICARDO ANDRES NEUMANN BERTIN",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "ROBERTO ARROYO MUNOZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "ROBERTO CELEDON FERNANDEZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "RODRIGO ALBERTO RAMIREZ PARRA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "SARA CONCHA SMITH",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "SEBASTIAN CRISTOFFANINI JARAQUEMADA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "SEBASTIAN NICOLAS ZAMORA SOTO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "SEBASTIAN PATRICIO VIDELA CASTILLO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "SERGIO BOBADILLA MUNOZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "SOFIA ALEJANDRA GONZALEZ CORTES",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "STEPHAN SCHUBERT RUBIO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "STEPHANIE JELDREZ ORTIZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "TAMARA ALEJANDRA RAMIREZ RAMIREZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "TATIANA KARINA URRUTIA HERRERA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "TOMAS WALTER RAFAEL KAST SOMMERHOFF",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "VALENTINA BELEN CACERES MONSALVEZ",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "VALENTINA JULIET BECERRA PENA",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "XIMENA ANDREA NARANJO PINTO",
-      "bruto_mensual": 8239091
-    },
-    {
-      "partida": "Congreso Nacional",
-      "organismo": "CÁMARA DE DIPUTADOS Y DIPUTADAS",
-      "cargo": "DIPUTADO",
-      "nombre": "ZANDRA ESTHER PARISI FERNANDEZ",
-      "bruto_mensual": 8239091
     }
   ]
 }
