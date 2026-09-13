@@ -43,7 +43,7 @@ export default function CambiosPage() {
           <dl className="page-fact-sheet">
             <div><dt>Actualización ETL</dt><dd>Semanal</dd></div>
             <div><dt>Último corte</dt><dd>{snapshot.generatedAtChile ?? "No disponible"}</dd></div>
-            <div><dt>Estado</dt><dd>Snapshot auditable</dd></div>
+            <div><dt>Estado</dt><dd>Versión auditable</dd></div>
           </dl>
         </div>
       </header>

@@ -59,12 +59,9 @@ export default async function DataQualityPage() {
               <dd>{summary.fuentesAlDia} / {summary.totalFuentes}</dd>
             </div>
             <div>
-              <dt>Release & Integridad</dt>
+              <dt>Publicación e integridad</dt>
               <dd style={{ fontSize: "1.1rem" }}>
-                {summary.releaseVersion}{" "}
-                <span style={{ fontSize: "0.72rem", color: "var(--text-muted)", fontFamily: "monospace" }}>
-                  ({summary.releaseChecksum})
-                </span>
+                Corte validado
               </dd>
             </div>
           </dl>
@@ -106,7 +103,7 @@ export default async function DataQualityPage() {
             <div className="stat-tile stat-tile--info">
               <div className="stat-tile__value">{summary.totalRegistrosHistoricos.toLocaleString("es-CL")}</div>
               <div className="stat-tile__label">Registros Históricos</div>
-              <div className="stat-tile__hint">Consolidación en Lake D1 / R2</div>
+              <div className="stat-tile__hint">Consolidación de datos públicos</div>
             </div>
           </div>
         </section>
@@ -121,7 +118,7 @@ export default async function DataQualityPage() {
               </h2>
             </div>
             <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-              Cifras calculadas desde el release validado y su catálogo de componentes.
+              Cifras calculadas desde el corte validado y sus componentes.
             </div>
           </div>
 
@@ -129,7 +126,7 @@ export default async function DataQualityPage() {
             <div className="card" style={{ marginBottom: "1rem", padding: "0.9rem 1.1rem", borderColor: "var(--accent)" }} role="status">
               <strong style={{ color: "var(--text-primary)" }}>Hay conteos pendientes de reconciliación</strong>
               <p style={{ margin: "0.3rem 0 0", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.5 }}>
-                Algunas fuentes cambiaron de alcance entre el release productivo y la referencia histórica local. Sus porcentajes de publicación quedan como “No calculable” hasta separar núcleo, votaciones, gastos y demás componentes.
+                Algunas fuentes cambiaron de alcance entre cortes. Sus porcentajes de publicación quedan como “No calculable” hasta separar núcleo, votaciones, gastos y demás componentes.
               </p>
             </div>
           )}
@@ -222,7 +219,7 @@ export default async function DataQualityPage() {
                       {source.quality.observedCount > 0 || source.quality.correctedCount > 0
                         ? `${source.quality.observedCount.toLocaleString("es-CL")} observados · ${source.quality.correctedCount.toLocaleString("es-CL")} con corrección de formato`
                         : source.qualityAudit
-                          ? `Sin observaciones ligadas al release actual. Auditoría ${source.qualityAudit.snapshotDate}: ${source.qualityAudit.snapshotRecords.toLocaleString("es-CL")} registros.`
+                          ? `Sin observaciones ligadas al corte actual. Auditoría ${source.qualityAudit.snapshotDate}: ${source.qualityAudit.snapshotRecords.toLocaleString("es-CL")} registros.`
                           : "Sin observaciones publicadas en este corte"}
                       {source.qualityAudit && (
                         <details style={{ marginTop: "0.35rem" }}>
@@ -244,7 +241,7 @@ export default async function DataQualityPage() {
                       )}
                       {source.reconciliation.components && Object.keys(source.reconciliation.components).length > 0 && (
                         <details style={{ marginTop: "0.45rem" }}>
-                          <summary style={{ cursor: "pointer", color: "var(--accent)" }}>Ver desglose del release</summary>
+                          <summary style={{ cursor: "pointer", color: "var(--accent)" }}>Ver desglose del corte</summary>
                           <ul style={{ margin: "0.35rem 0 0", paddingLeft: "1rem", lineHeight: 1.45 }}>
                             {Object.entries(source.reconciliation.components).map(([key, count]) => (
                               <li key={key}>
@@ -267,7 +264,7 @@ export default async function DataQualityPage() {
           <div className="card" style={{ marginTop: "1rem", padding: "1rem 1.25rem" }}>
             <strong style={{ color: "var(--text-primary)" }}>Lectura de las métricas</strong>
             <p style={{ margin: "0.35rem 0 0", color: "var(--text-muted)", fontSize: "0.8rem", lineHeight: 1.55 }}>
-              “Publicado” compara el release canónico con el histórico; “Consultable” sólo cuenta módulos o índices con paginación comprobada; “Relacionado” exige un vínculo documental indexado. Cuando no hay evidencia suficiente se muestra “No calculable”, no un porcentaje estimado.
+              “Publicado” compara el corte principal con el histórico; “Consultable” sólo cuenta módulos con paginación comprobada; “Relacionado” exige un vínculo documental indexado. Cuando no hay evidencia suficiente se muestra “No calculable”, no un porcentaje estimado.
             </p>
           </div>
 

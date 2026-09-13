@@ -1055,7 +1055,7 @@ export default function MunicipalidadesExplorerClient({
                       >
                         {highestPerCapita
                           ? `${highestPerCapita.nombre_comuna} · ${highestPerCapita.region}`
-                          : "No calculable con este release"}
+                          : "No calculable con este corte"}
                       </div>
                     </div>
 
@@ -1098,7 +1098,7 @@ export default function MunicipalidadesExplorerClient({
                       >
                         {highestStaff
                           ? `${highestStaff.nombre_comuna} · ${highestStaff.region}`
-                          : "No calculable con este release"}
+                          : "No calculable con este corte"}
                       </div>
                     </div>
                   </div>

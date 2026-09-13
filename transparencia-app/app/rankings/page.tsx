@@ -28,7 +28,7 @@ export default function RankingsPage() {
           <div>
             <p className="eyebrow">Elección general 16/11/2025 · SERVEL</p>
             <h1>Rankings electorales</h1>
-            <p>Candidatos más votados y pactos por contienda, desde la proyección oficial normalizada del lake.</p>
+            <p>Candidatos más votados y pactos por contienda, desde los registros oficiales normalizados.</p>
           </div>
           <dl className="page-fact-sheet">
             <div>
@@ -109,7 +109,7 @@ export default function RankingsPage() {
                     ) : (
                       <tr>
                         <td colSpan={7} style={{ textAlign: "center", padding: "1.5rem", color: "var(--text-muted)" }}>
-                          Rankings en actualización · 23.894 registros SERVEL 2025 cargados en lake
+                          Rankings en actualización · 23.894 registros SERVEL 2025 disponibles
                         </td>
                       </tr>
                     )}
@@ -143,14 +143,14 @@ export default function RankingsPage() {
                 ) : (
                   <tr>
                     <td colSpan={6} style={{ textAlign: "center", padding: "1.5rem", color: "var(--text-muted)" }}>
-                      Pactos en actualización · 23.894 registros SERVEL 2025 cargados en lake
+                          Pactos en actualización · 23.894 registros SERVEL 2025 disponibles
                     </td>
                   </tr>
                 )}
               </tbody>
             </table>
           </div>
-          <p className="relation-disclaimer">Resultados oficiales SERVEL 2025 normalizados en la proyección lake v1; votos a nivel de candidato sumados desde registros por circunscripción.</p>
+          <p className="relation-disclaimer">Resultados oficiales SERVEL 2025 normalizados; votos a nivel de candidato sumados desde registros por circunscripción.</p>
         </section>
       </div>
     </main>

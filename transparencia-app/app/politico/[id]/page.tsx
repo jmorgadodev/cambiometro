@@ -675,7 +675,7 @@ export default async function PoliticoPage({ params }: Props) {
                     );
                   })()}
                 <p style={{ fontSize: "0.68rem", color: "var(--text-subtle)", lineHeight: 1.6, margin: "0.6rem 0 0 0", fontStyle: "italic" }}>
-                  Resultados oficiales SERVEL 2025 (padrón resumido por circunscripción); persistido en la proyección lake v1.
+                  Resultados oficiales SERVEL 2025 (padrón resumido por circunscripción).
                 </p>
               </div>
             )}

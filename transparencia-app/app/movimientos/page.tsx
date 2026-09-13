@@ -479,7 +479,7 @@ function MovimientosContent() {
                 Estado de las fuentes
               </h2>
               <p style={{ margin: "0.3rem 0 0", color: "var(--text-2)", fontSize: "0.78rem", lineHeight: 1.45 }}>
-                La fecha del evento, la revisión de las fuentes y la publicación del snapshot son hitos distintos.
+                La fecha del evento, la revisión de las fuentes y la publicación de la versión son hitos distintos.
               </p>
             </div>
             <span style={{ color: "var(--text-muted)", fontSize: "0.72rem" }}>
@@ -509,7 +509,7 @@ function MovimientosContent() {
           </div>
           {fuentesSinRespuesta.length > 0 && (
             <p role="status" style={{ margin: "0.7rem 0 0", color: "var(--warn)", fontSize: "0.75rem", lineHeight: 1.45 }}>
-              {fuentesSinRespuesta.length} fuente{fuentesSinRespuesta.length === 1 ? "" : "s"} no respondió en la última revisión. El snapshot anterior se conserva y esas señales no se promueven automáticamente a movimiento oficial.
+              {fuentesSinRespuesta.length} fuente{fuentesSinRespuesta.length === 1 ? "" : "s"} no respondió en la última revisión. La versión anterior se conserva y esas señales no se promueven automáticamente a movimiento oficial.
             </p>
           )}
         </div>
@@ -599,7 +599,7 @@ function MovimientosContent() {
 
           {frescura.unavailableOfficial.length > 0 && (
             <p style={{ margin: "0.75rem 0 0", color: "var(--warn)", fontSize: "0.76rem", lineHeight: 1.45 }}>
-              Algunas fuentes oficiales no respondieron en la última ejecución ({frescura.unavailableOfficial.map((source) => source.label).join(", ")}). El snapshot anterior se conserva y no se borran movimientos por una falla temporal.
+              Algunas fuentes oficiales no respondieron en la última ejecución ({frescura.unavailableOfficial.map((source) => source.label).join(", ")}). La versión anterior se conserva y no se borran movimientos por una falla temporal.
             </p>
           )}
         </div>

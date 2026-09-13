@@ -253,7 +253,7 @@ export default async function PartidosListPage() {
 
       <div className="container-main" style={{ marginTop: "1rem" }}>
         <ReleaseMetaCard
-          title="Release parlamentario y de gastos"
+          title="Datos parlamentarios y de gastos"
           source={partyRelease.source}
           period={partyRelease.period}
           lastSuccessAt={partyRelease.lastSuccessAt}
@@ -264,7 +264,7 @@ export default async function PartidosListPage() {
           checksumSha256={partyRelease.checksumSha256}
           href="/partidos"
           officialUrl={partyRelease.officialUrl}
-          note="Un partido sin rendiciones publicadas se muestra como “Sin registros publicados”; no equivale a gasto cero. Las votaciones, bancadas y gastos mantienen la fecha y cobertura de su release."
+          note="Un partido sin rendiciones publicadas se muestra como “Sin registros publicados”; no equivale a gasto cero. Las votaciones, bancadas y gastos mantienen la fecha y cobertura de su corte."
         />
       </div>
 

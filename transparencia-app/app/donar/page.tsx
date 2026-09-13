@@ -142,7 +142,7 @@ export default function DonarPage() {
 
             <ul style={{ margin: 0, paddingLeft: "1.15rem", display: "flex", flexDirection: "column", gap: "0.85rem", fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.55 }}>
               <li>
-                <strong style={{ color: "var(--text-primary)" }}>Independencia de infraestructura:</strong> Servidores, bases de datos D1 y almacenamiento R2 financiados sin compromisos comerciales ni gubernamentales.
+                <strong style={{ color: "var(--text-primary)" }}>Independencia de infraestructura:</strong> La plataforma funciona con infraestructura financiada sin compromisos comerciales ni gubernamentales.
               </li>
               <li>
                 <strong style={{ color: "var(--text-primary)" }}>Nuevas fuentes oficiales:</strong> Ingesta, normalización y versionamiento continuo de nuevos organismos del Estado y compras públicas.

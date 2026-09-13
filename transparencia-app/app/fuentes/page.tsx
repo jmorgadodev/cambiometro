@@ -31,7 +31,7 @@ export default async function FuentesPage() {
               Fuentes y versiones
             </h1>
             <p style={{ color: "var(--text-muted)", fontSize: "0.95rem", lineHeight: 1.6, maxWidth: 720, margin: 0 }}>
-              Cada registro publicado por El Cambiómetro mantiene trazabilidad a su fuente y a la versión del release.
+              Cada registro publicado por El Cambiómetro mantiene trazabilidad a su fuente y a su corte de actualización.
               Esta página separa lo publicado, lo que puede recorrerse mediante paginación y lo que participa en relaciones documentales.
             </p>
             <div style={{ display: "flex", alignItems: "center", gap: "0.75rem", flexWrap: "wrap", marginTop: "0.75rem" }}>
@@ -109,7 +109,7 @@ export default async function FuentesPage() {
                     <div>
                       <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Registros: </dt>
                       <dd style={{ display: "inline", color: "var(--text-muted)" }}>
-                        Canónicos: {source.canonicalCount.toLocaleString("es-CL")} · Consultables en R2: {source.publicHistoricalCount.toLocaleString("es-CL")}
+                        Canónicos: {source.canonicalCount.toLocaleString("es-CL")} · Consultables en el sitio: {source.publicHistoricalCount.toLocaleString("es-CL")}
                         {source.catalogDeclaredCount && source.catalogDeclaredCount !== source.publicHistoricalCount
                           ? ` · Catálogo declarado: ${source.catalogDeclaredCount.toLocaleString("es-CL")}`
                           : ""}
@@ -117,7 +117,7 @@ export default async function FuentesPage() {
                     </div>
               <div style={{ fontSize: "0.7rem", color: source.publicHistoricalCount < source.historicalCount ? "var(--warn)" : "var(--text-subtle)", marginTop: "-0.15rem" }}>
                       {source.publicHistoricalCount < source.historicalCount
-                        ? `Histórico: declarado ${source.historicalCount.toLocaleString("es-CL")}; aún no está todo publicado en R2. Diferencia por deduplicación y cobertura declarada.`
+                        ? `Histórico: declarado ${source.historicalCount.toLocaleString("es-CL")}; aún no está todo disponible para consulta. Diferencia por deduplicación y cobertura declarada.`
                         : "Histórico: el valor declarado coincide con el catálogo publicado. Diferencia por deduplicación y cobertura declarada."}
                     </div>
                     <div>
@@ -150,7 +150,7 @@ export default async function FuentesPage() {
                   )}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", marginTop: "auto", paddingTop: "0.5rem" }}>
                     <span style={{ fontSize: "0.68rem", color: "var(--text-subtle)" }}>
-                      {source.checksumSha256 ? `sha256:${source.checksumSha256.slice(0, 12)}…` : "Checksum no publicado"}
+                      {source.reconciliation.comparisonEligible ? "Conteos comparados" : "Conteos pendientes de revisión"}
                     </span>
                     <Link prefetch={false} href={source.modulePath} className="data-link" style={{ fontSize: "0.75rem", fontWeight: 700 }}>
                       Explorar registros →
@@ -163,7 +163,7 @@ export default async function FuentesPage() {
                   )}
                   {source.reconciliation.components && Object.keys(source.reconciliation.components).length > 0 && (
                     <details style={{ margin: "0.25rem 0 0", fontSize: "0.72rem" }}>
-                      <summary style={{ cursor: "pointer", color: "var(--accent)" }}>Ver desglose del release</summary>
+                      <summary style={{ cursor: "pointer", color: "var(--accent)" }}>Ver desglose del corte</summary>
                       <ul style={{ margin: "0.35rem 0 0", paddingLeft: "1rem", lineHeight: 1.45, color: "var(--text-muted)" }}>
                         {Object.entries(source.reconciliation.components).map(([key, count]) => (
                           <li key={key}>
@@ -185,8 +185,7 @@ export default async function FuentesPage() {
         <section className="card" style={{ padding: "1.75rem" }}>
           <h2 style={{ fontSize: "1.15rem", margin: "0 0 0.5rem 0", color: "var(--text-primary)" }}>Cómo se versionan los datos</h2>
           <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.7, margin: 0 }}>
-            Cada extracción se valida contra el contrato de datos de la plataforma y se publica como una versión
-            con checksum. La fecha de corte de la consolidación vigente es{" "}
+            Cada extracción se valida antes de publicarse. La fecha de corte de la consolidación vigente es{" "}
             <strong style={{ color: "var(--text-primary)" }}>{GLOBAL_KPIS.corte}</strong>, y el detalle de las
             proyecciones está disponible en <Link prefetch={false} href="/datos" style={{ color: "var(--accent)" }}>Datos</Link>,{" "}
             <Link prefetch={false} href="/datos/calidad" style={{ color: "var(--accent)" }}>Dashboard de Calidad</Link> y{" "}

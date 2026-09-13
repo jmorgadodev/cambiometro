@@ -358,7 +358,7 @@ export default async function HomePage() {
             ))}
           </div>
           <p className="home-coverage-note">
-            <strong>Cómo leer este catálogo.</strong> Son 12 fuentes oficiales y 1 derivada, con registros publicados y consultables según la evidencia disponible; cada tarjeta distingue el release publicado del alcance que puede recorrerse mediante paginación. Cuando una métrica no tiene evidencia suficiente se muestra “No calculable”; el alcance temporal y temático se explica en la ficha de la fuente. <Link prefetch={false} href="/fuentes">Ver metodología y fuentes →</Link>
+            <strong>Cómo leer este catálogo.</strong> Son 12 fuentes oficiales y 1 derivada, con registros publicados y consultables según la evidencia disponible; cada tarjeta distingue el corte publicado del alcance que puede recorrerse mediante paginación. Cuando una métrica no tiene evidencia suficiente se muestra “No calculable”; el alcance temporal y temático se explica en la ficha de la fuente. <Link prefetch={false} href="/fuentes">Ver metodología y fuentes →</Link>
           </p>
         </section>
       </Reveal>

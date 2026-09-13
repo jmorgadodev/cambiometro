@@ -1326,7 +1326,7 @@ export default function MunicipalidadDetailDashboardClient({
                 <div className="municipal-missing-data-callout" role="note">
                   <strong>El sueldo no está publicado en este corte</strong>
                   <span>
-                    La ficha sí puede identificar a la autoridad, pero el release CPLT disponible no contiene una remuneración positiva asociada a un registro de alcaldía. No mostramos $0 ni estimamos el monto.
+                    La ficha sí puede identificar a la autoridad, pero el corte CPLT disponible no contiene una remuneración positiva asociada a un registro de alcaldía. No mostramos $0 ni estimamos el monto.
                   </span>
                   <div>
                     <button type="button" className="btn btn-secondary" onClick={() => setActiveTab("personal")}>
@@ -1496,7 +1496,7 @@ export default function MunicipalidadDetailDashboardClient({
                   No hay una nómina CPLT consultable para este corte
                 </h3>
                 <p style={{ margin: "0.65rem 0 0", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.5 }}>
-                  La fuente se actualiza mensualmente. Este resultado significa que el release disponible no contiene una nómina para {nombreComuna}; no significa que la municipalidad tenga cero funcionarios.
+                  La fuente se actualiza mensualmente. Este resultado significa que el corte disponible no contiene una nómina para {nombreComuna}; no significa que la municipalidad tenga cero funcionarios.
                 </p>
                 <p style={{ margin: "0.65rem 0 0", color: "var(--text-subtle)", fontSize: "0.72rem", lineHeight: 1.5 }}>
                   Estado del corte: <strong>{muniData.estado_frescura === "sin_datos" ? "sin nómina consultable" : "sin período informado"}</strong>.

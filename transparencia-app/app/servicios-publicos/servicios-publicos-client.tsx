@@ -329,7 +329,7 @@ export default function ServiciosPublicosClient({
 
       <div className="container-main" style={{ marginTop: "1rem" }}>
         <ReleaseMetaCard
-          title="Release del directorio institucional"
+          title="Directorio institucional publicado"
           source={release.source}
           period={release.period}
           lastSuccessAt={release.lastSuccessAt}
@@ -378,7 +378,7 @@ export default function ServiciosPublicosClient({
 
           {dipresCoverage.catalogDeclaredCount !== null && dipresCoverage.catalogDeclaredCount > dipresCoverage.publicCount ? (
             <p style={{ margin: "0.85rem 0 0", padding: "0.7rem 0.8rem", borderLeft: "3px solid var(--warn)", background: "var(--surface-2)", color: "var(--text-muted)", fontSize: "0.76rem", lineHeight: 1.5 }}>
-              El catálogo declara {dipresCoverage.catalogDeclaredCount.toLocaleString("es-CL")} registros, pero el release público consultable contiene {dipresCoverage.publicCount.toLocaleString("es-CL")}. La diferencia queda informada como cobertura pendiente; no se presenta como dato disponible ni se completa con estimaciones.
+              El catálogo declara {dipresCoverage.catalogDeclaredCount.toLocaleString("es-CL")} registros, pero el corte consultable contiene {dipresCoverage.publicCount.toLocaleString("es-CL")}. La diferencia queda informada como cobertura pendiente; no se presenta como dato disponible ni se completa con estimaciones.
             </p>
           ) : null}
         </div>
@@ -387,7 +387,7 @@ export default function ServiciosPublicosClient({
       <div className="container-main" style={{ marginTop: "1rem" }}>
         <OverviewSignalPanel
           title="Lectura rápida del Estado"
-          description="Una vista comparativa de las instituciones del release actual antes de abrir cada ficha. Las cifras se calculan sobre los registros publicados y conservan la cobertura propia de cada fuente."
+          description="Una vista comparativa de las instituciones del corte actual antes de abrir cada ficha. Las cifras se calculan sobre los registros publicados y conservan la cobertura propia de cada fuente."
           metrics={[
             { label: "Instituciones monitoreadas", value: totalServicios.toLocaleString("es-CL"), detail: "Directorio consolidado", tone: "accent" },
             { label: "Con partida DIPRES", value: totalConPresupuestoEfectivo.toLocaleString("es-CL"), detail: `${totalServicios > 0 ? ((totalConPresupuestoEfectivo / totalServicios) * 100).toFixed(1) : "0.0"}% del directorio`, tone: "ok" },
@@ -395,7 +395,7 @@ export default function ServiciosPublicosClient({
             { label: "Gasto ejecutado", value: presupuestoTotal.ejecutado > 0 ? formatCLP(presupuestoTotal.ejecutado) : "No publicado", detail: presupuestoTotal.inicialLey > 0 && presupuestoTotal.ejecutado > 0 ? `${pctEjecutado(presupuestoTotal.inicialLey, presupuestoTotal.ejecutado)} del inicial` : "Sin corte ejecutado", tone: "info" },
           ]}
           bars={[
-            { label: "Ejecución presupuestaria agregada", value: presupuestoTotal.inicialLey > 0 && presupuestoTotal.ejecutado > 0 ? (presupuestoTotal.ejecutado / presupuestoTotal.inicialLey) * 100 : null, displayValue: presupuestoTotal.inicialLey > 0 && presupuestoTotal.ejecutado > 0 ? pctEjecutado(presupuestoTotal.inicialLey, presupuestoTotal.ejecutado) : "No publicado", detail: "Indicador descriptivo del release, no una proyección", tone: "info" },
+            { label: "Ejecución presupuestaria agregada", value: presupuestoTotal.inicialLey > 0 && presupuestoTotal.ejecutado > 0 ? (presupuestoTotal.ejecutado / presupuestoTotal.inicialLey) * 100 : null, displayValue: presupuestoTotal.inicialLey > 0 && presupuestoTotal.ejecutado > 0 ? pctEjecutado(presupuestoTotal.inicialLey, presupuestoTotal.ejecutado) : "No publicado", detail: "Indicador descriptivo del corte, no una proyección", tone: "info" },
           ]}
           insight="Explora una institución para revisar presupuesto, personal, compras, lobby y auditorías con sus fuentes y períodos respectivos."
         />

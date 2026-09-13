@@ -84,7 +84,7 @@ export default function EtlHealthDashboardClient({
         <div className="stat-tile stat-tile--accent">
           <div className="stat-tile__value">+{totalRegistros.toLocaleString("es-CL")}</div>
           <div className="stat-tile__label">Registros Canónicos</div>
-          <div className="stat-tile__hint">Indexados y auditados en el Lake</div>
+          <div className="stat-tile__hint">Registros revisados y auditados</div>
         </div>
         <div className="stat-tile stat-tile--info">
           <div className="stat-tile__value">{ETL_MUNICIPAL_COVERAGE.covered} / {ETL_MUNICIPAL_COVERAGE.total}</div>
