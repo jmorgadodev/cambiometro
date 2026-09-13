@@ -110,7 +110,8 @@
     "poll:personal-apoyo": "node scripts/poll-camara-personal-apoyo.mjs",
     "data:publish:personal-apoyo": "node scripts/publish-personal-apoyo.mjs",
     "ingest:cplt-personal": "node --max-old-space-size=6144 scripts/etl/stream-remote-personal.mjs",
-    "ingest:cplt-central-honorarios": "node --max-old-space-size=6144 scripts/etl/central-honorarios-stream.mjs"
+    "ingest:cplt-central-honorarios": "node --max-old-space-size=6144 scripts/etl/central-honorarios-stream.mjs",
+    "audit:cplt-central-honorarios": "node scripts/etl/central-honorarios-audit.mjs"
   },
   "dependencies": {
     "@cloudflare/workers-types": "^5.20260804.1",
