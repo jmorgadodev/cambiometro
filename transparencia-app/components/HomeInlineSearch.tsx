@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useId, useRef, useState } from "react";
+import { resolveHomeSearchTarget, resolveSearchResultUrl } from "@/lib/home-search-routing";
 
 type SearchResultType = "politico" | "persona" | "municipalidad" | "funcionario" | "entidad" | "proveedor" | "organismo" | "remuneracion";
 
@@ -182,15 +183,7 @@ export default function HomeInlineSearch() {
 
   const normalizedQuery = query.trim();
   const showResults = isOpen && normalizedQuery.length >= 2;
-  // /personas/ abre por defecto Parlamentarios y por eso ocultaba las
-  // coincidencias de remuneraciones. Cuando la home encontró pagos, el
-  // listado completo debe conservar ese mismo universo; para otras consultas
-  // se mantiene el directorio general como fallback.
-  const hasRemunerationResults = results.some((result) => result.type === "remuneracion");
-  const fullSearchHref = hasRemunerationResults
-    ? `/remuneraciones-publicas/?q=${encodeURIComponent(normalizedQuery)}`
-    : `/personas/?search=${encodeURIComponent(normalizedQuery)}`;
-  const fullSearchLabel = hasRemunerationResults ? "Ver todas las remuneraciones →" : "Ver todos los registros →";
+  const fullSearchTarget = resolveHomeSearchTarget(results, normalizedQuery);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     // The home search is an inline index, so pressing Enter must not silently
@@ -244,21 +237,21 @@ export default function HomeInlineSearch() {
           ) : error ? (
             <div className="home-query__message" role="alert">
               <p>{error}</p>
-              <Link prefetch={false} href={fullSearchHref} onClick={() => setIsOpen(false)}>Abrir búsqueda completa →</Link>
+              <Link prefetch={false} href={fullSearchTarget.href} onClick={() => setIsOpen(false)}>Abrir búsqueda completa →</Link>
             </div>
           ) : results.length === 0 ? (
             <div className="home-query__message" role="status">
               <p>Sin coincidencias verificadas con ese texto.</p>
-              <Link prefetch={false} href={fullSearchHref} onClick={() => setIsOpen(false)}>{fullSearchLabel}</Link>
+              <Link prefetch={false} href={fullSearchTarget.href} onClick={() => setIsOpen(false)}>{fullSearchTarget.label}</Link>
             </div>
           ) : (
             <>
-              <div className="home-query__results-heading"><span>Coincidencias</span><Link prefetch={false} href={fullSearchHref} onClick={() => setIsOpen(false)}>{fullSearchLabel}</Link></div>
+              <div className="home-query__results-heading"><span>Coincidencias</span><Link prefetch={false} href={fullSearchTarget.href} onClick={() => setIsOpen(false)}>{fullSearchTarget.label}</Link></div>
               {results.map((result) => (
                 <Link
                   prefetch={false}
                   key={`${result.type}-${result.id}`}
-                  href={result.url}
+                  href={resolveSearchResultUrl(result)}
                   role="option"
                   aria-selected="false"
                   className="home-query__result"

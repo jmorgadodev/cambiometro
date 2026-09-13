@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import TransparencyMonthlyChart from "./TransparencyMonthlyChart";
 
 type MonthlySummary = {
   period: string;
@@ -74,6 +75,15 @@ export default function TransparencyActivaSummary() {
   if (!summary) return null;
   const recentPeriods = summary.periods.slice(-12).reverse();
   const latest = summary.periods.at(-1) ?? null;
+  const chartPeriods = summary.periods.map((period) => ({
+    period: period.period,
+    rows: period.rows,
+    grossTotal: period.grossTotal,
+    newRecords: period.newRecords,
+    removedRecords: period.removedRecords,
+    amountChanges: period.amountChanges,
+    amountDelta: period.amountDelta,
+  }));
 
   return (
     <section id="historial-transparencia" className="remuneration-module remuneration-transparency-summary" aria-labelledby="historial-transparencia-title">
@@ -103,23 +113,28 @@ export default function TransparencyActivaSummary() {
         </div>
       )}
 
-      <div className="remuneration-transparency-table-wrap">
-        <table className="data-table remuneration-transparency-table">
-          <caption>Comparación de los últimos cortes mensuales publicados</caption>
-          <thead><tr><th>Corte</th><th>Registros</th><th>Personas</th><th>Nuevos</th><th>Ya no aparecen</th><th>Cambios de monto</th><th>Monto bruto total</th></tr></thead>
-          <tbody>{recentPeriods.map((period) => (
-            <tr key={period.period}>
-              <td><strong>{formatPeriod(period.period)}</strong></td>
-              <td>{number.format(period.rows)}</td>
-              <td>{formatCount(period.people)}</td>
-              <td>{formatCount(period.newRecords)}</td>
-              <td>{formatCount(period.removedRecords)}</td>
-              <td>{formatCount(period.amountChanges)}</td>
-              <td>{formatMoney(period.grossTotal)}</td>
-            </tr>
-          ))}</tbody>
-        </table>
-      </div>
+      <TransparencyMonthlyChart periods={chartPeriods} />
+
+      <details className="remuneration-transparency-table-details">
+        <summary>Ver detalle mensual de los últimos 12 cortes</summary>
+        <div className="remuneration-transparency-table-wrap">
+          <table className="data-table remuneration-transparency-table">
+            <caption>Datos que alimentan la gráfica mensual</caption>
+            <thead><tr><th>Corte</th><th>Registros</th><th>Personas</th><th>Nuevos</th><th>Ya no aparecen</th><th>Cambios de monto</th><th>Monto bruto total</th></tr></thead>
+            <tbody>{recentPeriods.map((period) => (
+              <tr key={period.period}>
+                <td><strong>{formatPeriod(period.period)}</strong></td>
+                <td>{number.format(period.rows)}</td>
+                <td>{formatCount(period.people)}</td>
+                <td>{formatCount(period.newRecords)}</td>
+                <td>{formatCount(period.removedRecords)}</td>
+                <td>{formatCount(period.amountChanges)}</td>
+                <td>{formatMoney(period.grossTotal)}</td>
+              </tr>
+            ))}</tbody>
+          </table>
+        </div>
+      </details>
 
       <details className="remuneration-transparency-coverage">
         <summary>Ver las comunas sin nómina publicada y el motivo</summary>

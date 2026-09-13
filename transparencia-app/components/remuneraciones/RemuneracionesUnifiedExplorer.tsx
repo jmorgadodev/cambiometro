@@ -130,6 +130,8 @@ export default function RemuneracionesUnifiedExplorer() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const initialQueryHandled = useRef(false);
+  const initialQueryValue = useRef("");
+  const initialQuerySubmitted = useRef(false);
 
   useEffect(() => {
     loadJson<UnifiedManifest>("manifest.json").then(setManifest).catch((reason: Error) => setError(reason.message));
@@ -139,13 +141,19 @@ export default function RemuneracionesUnifiedExplorer() {
     if (!manifest || initialQueryHandled.current || typeof window === "undefined") return;
     const initialQuery = new URLSearchParams(window.location.search).get("q")?.trim() ?? "";
     initialQueryHandled.current = true;
+    initialQueryValue.current = initialQuery;
     if (initialQuery.length < 2) return;
-    const timer = window.setTimeout(() => {
-      setQuery(initialQuery);
-      window.setTimeout(() => (document.getElementById("remuneration-search") as HTMLFormElement | null)?.requestSubmit(), 0);
-    }, 0);
+    const timer = window.setTimeout(() => setQuery(initialQuery), 0);
     return () => window.clearTimeout(timer);
   }, [manifest]);
+
+  useEffect(() => {
+    if (!manifest || !initialQueryHandled.current || initialQuerySubmitted.current || typeof window === "undefined") return;
+    const initialQuery = initialQueryValue.current;
+    if (!initialQuery || initialQuery !== query.trim()) return;
+    initialQuerySubmitted.current = true;
+    void runSearch(undefined, initialQuery);
+  }, [manifest, query]);
 
   const groups = useMemo(() => {
     const allRows = [...(results?.rows ?? []), ...(results?.remoteRows ?? [])];
@@ -178,9 +186,9 @@ export default function RemuneracionesUnifiedExplorer() {
     }, 0);
   }
 
-  async function runSearch(event: FormEvent) {
-    event.preventDefault();
-    const cleanQuery = query.trim();
+  async function runSearch(event?: FormEvent, queryOverride?: string) {
+    event?.preventDefault();
+    const cleanQuery = (queryOverride ?? query).trim();
     if (cleanQuery.length < 2) {
       setError("Escribe al menos dos caracteres para buscar.");
       setResults(null);
