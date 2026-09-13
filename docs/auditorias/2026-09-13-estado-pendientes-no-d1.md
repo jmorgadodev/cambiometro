@@ -85,7 +85,8 @@ Esta comprobación cambia el orden de trabajo: primero se debe reconciliar catá
 2. ChileCompra: origen masivo identificado y validado por cabeceras para enero-julio 2026; probar un mes disponible en modo controlado, mantener vigente/histórico separados y no catalogar agosto/septiembre mientras respondan 403.
 3. 38 bis: resolver la diferencia entre acceso local y runner; mantener el último corte mientras la fuente no sea reproducible en CI.
 4. CPLT: reconciliar el release productivo de 1.226.913 con los snapshots locales y cerrar observaciones de calidad por período.
-   - Subtarea nueva: auditar e incorporar, como proyección separada, los honorarios de organismos centrales que hoy quedan fuera por el filtro municipal; comenzar con conteo y muestra verificable antes de publicar.
+   - Auditoría de honorarios centrales: **conteo y muestra verificados** (4.529.483 pagos positivos; 976 organismos; campos completos para el caso Romer Rubio).
+   - Pendiente restante: conciliar solapamiento municipal/central, filtrar periodos observados y decidir el tamaño de una proyección R2 separada antes de conectarla a la búsqueda pública.
 5. Contraloría: explicar 310 declarados frente a 291 verificables y corregir sólo metadata, no filas.
 6. Ley 19.862: reconciliar catálogo, release y filas sin presentar el baseline local como producción.
 7. InfoProbidad: resuelto en R2; mantener la corrida mensual y confirmar que el índice se conserva en las siguientes publicaciones.
