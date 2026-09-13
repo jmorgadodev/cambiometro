@@ -34,7 +34,7 @@ El catálogo R2 declara estas dos particiones:
 - `partitions/senado/2025/08/manifest.json`: 121 filas.
 - `partitions/senado/2026/02/manifest.json`: 7 filas.
 
-La consulta directa al bucket confirmó que ninguno de los dos prefijos contiene objetos. La API productiva entrega `publishedRows=1300`, `expectedRows=1428`; al filtrar cada período devuelve `missingPartitions=1` y cero filas. La revisión del conector y una consulta de sólo lectura a la API oficial del Senado identificaron el dataset exacto de cada faltante: `2025-08` corresponde a 121 pasajes nacionales y `2026-02` a 7 misiones al extranjero. Los resultados son reproducibles: `2025-08` pasajes checksum `69cd86a5fcb6f1911520757bc0e5496272cb6e985437f6b3ea535735af0dca97` y `2026-02` misiones checksum `339c7bd5e3c5fa06771ccb58f580ac08c546c3b9d97540a630bea9ed7695ef97`. La fuente oficial responde; falta ejecutar una publicación incremental que agregue sólo esas dos particiones y actualice catálogo/manifiestos sin reemplazar el resto del release. Hasta entonces se mantiene el snapshot publicado y el pendiente queda clasificado como **particiones históricas identificadas y recuperables, aún no republicadas**.
+La consulta directa al bucket confirmó inicialmente que ninguno de los dos prefijos contenía objetos. La revisión del conector y una consulta de sólo lectura a la API oficial del Senado identificaron el dataset exacto de cada faltante: `2025-08` corresponde a 121 pasajes nacionales y `2026-02` a 7 misiones al extranjero. Los resultados son reproducibles: `2025-08` pasajes checksum `69cd86a5fcb6f1911520757bc0e5496272cb6e985437f6b3ea535735af0dca97` y `2026-02` misiones checksum `339c7bd5e3c5fa06771ccb58f580ac08c546c3b9d97540a630bea9ed7695ef97`. Se ejecutó después una publicación incremental controlada, sin D1 ni eliminaciones: el catálogo R2 ahora declara 1.428 filas de Senado y los manifiestos recuperados entregan 121 y 7 filas respectivamente. El pendiente de reconstrucción queda **resuelto**; permanece sólo la verificación rutinaria de que una siguiente corrida no las vuelva a perder.
 
 ## Auditoría completa de claves R2
 
@@ -55,7 +55,7 @@ Esta comprobación cambia el orden de trabajo: primero se debe reconciliar catá
 
 ## Pendientes ordenados
 
-1. Senado: publicar incrementalmente las dos particiones ya identificadas (`2025-08` pasajes nacionales y `2026-02` misiones al extranjero), verificando checksum, catálogo y API antes de promover.
+1. Senado: resuelto. Las dos particiones fueron publicadas incrementalmente y verificadas en R2/API; mantenerlas en el control de regresión.
 2. ChileCompra: recuperar o validar el origen después del HTTP 403 y conservar separados vigente/histórico.
 3. 38 bis: resolver la diferencia entre acceso local y runner; mantener el último corte mientras la fuente no sea reproducible en CI.
 4. CPLT: reconciliar el release productivo de 1.226.913 con los snapshots locales y cerrar observaciones de calidad por período.
@@ -171,3 +171,10 @@ Se ejecutó una consulta de sólo lectura contra `web-back.senado.cl`, sin D1 y 
 | 2026-02 | Misiones al extranjero | 7 | `339c7bd5e3c5fa06771ccb58f580ac08c546c3b9d97540a630bea9ed7695ef97` | Reconstruir y publicar sólo `senado/2026/02` |
 
 También se verificó que el API actual ofrece períodos más recientes por dataset, por lo que no corresponde usar una única fecha global para Senado: dietas llega a 2026-08, misiones al extranjero a 2026-08, pasajes nacionales a 2026-03 y gastos operacionales a 2026-05. La interfaz y los manifiestos deben conservar esa granularidad.
+
+La publicación quedó comprobada el mismo día:
+
+- `partitions/senado/2025/08/manifest.json`: 121 filas, proyección `187f71fb8023172413e4bd50216205a528bc7bdbe7967580300ea7ed5b9661f5`.
+- `partitions/senado/2026/02/manifest.json`: 7 filas, proyección `3b006adbefbb1fab803c43d861f4f87aa964849a5128d74e517f773cbd4bc472`.
+- Catálogo R2: Senado `1.428` filas declaradas/publicadas.
+- Operación R2: 4 objetos por reparación, 0 eliminaciones, sin lecturas ni escrituras D1.
