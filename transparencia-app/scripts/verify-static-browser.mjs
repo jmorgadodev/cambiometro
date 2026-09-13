@@ -144,7 +144,7 @@ async function main() {
     { route: "/transferencias", markers: ["Transferencias"] },
     { route: "/personas", markers: ["Directorio de Personas"] },
     { route: "/entidades", markers: ["Entidades"] },
-    { route: "/politico/vanessa-kaiser-barents-von-hohenhagen", markers: ["Vanessa Kaiser", "8.291.039", "Votaciones", "Personal de Apoyo"] },
+    { route: "/politico/vanessa-kaiser-barents-von-hohenhagen", markers: ["Vanessa Kaiser", "dieta parlamentaria bruta", "Votaciones", "Personal de Apoyo"] },
     { route: "/politico/carlos-bianchi-chelech", markers: ["Carlos Bianchi", "25.009", "24,89%"] },
     { route: "/municipalidades/maipu", markers: ["Municipalidad de Maipú", "Tomas Vodanovic", "Nómina Detallada", "219.402.160.000"] },
   ];
