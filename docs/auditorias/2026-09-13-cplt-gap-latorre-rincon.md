@@ -44,6 +44,14 @@ La auditoría de los archivos originales sigue siendo necesaria para medir el
 volumen adicional y comprobar si existen más categorías y períodos afectados,
 pero ya no se considera una hipótesis que el problema sea sólo el índice.
 
+Un sondeo acotado por rangos HTTP, sin descargar los archivos completos,
+confirmó además la escala del cambio: `Planta` pesa aproximadamente 8,6 GB,
+`Contrata` 14,3 GB y `CodigoTrabajo` 6,3 GB. La distribución de los primeros
+rangos muestra que las tres categorías contienen grandes bloques de organismos
+centrales, no sólo unas pocas filas aisladas. Estas cifras son tamaño de fuente
+cruda, no cantidad de registros publicables después de deduplicar por persona,
+período y organismo.
+
 No se agregará manualmente la fila ni se reemplazará el snapshot vigente hasta
 identificar cuál de esas etapas falla.
 
@@ -63,6 +71,11 @@ Antes de implementar esa ampliación se debe estimar el volumen de las tres
 categorías centrales adicionales, su impacto en R2 y el tiempo de build. No se
 ejecutará una descarga nacional ni se publicará un cambio mientras esa
 estimación no esté validada.
+
+La arquitectura segura será una proyección central separada, con páginas e
+índices por fuente, período y organismo. No se debe mezclar con la cobertura
+municipal de 346 comunas, no se debe materializar en D1 y no se debe cargar el
+universo completo en el navegador.
 
 Este caso se convierte en una prueba de regresión de cobertura; no se usa como
 justificación para consumir D1 ni para descargar el universo completo al
