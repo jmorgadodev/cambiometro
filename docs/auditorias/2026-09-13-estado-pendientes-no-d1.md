@@ -247,3 +247,16 @@ Decisión operativa:
 - El reporte técnico queda en `transparencia-app/data/auditorias/cplt-central-honorarios-audit.json`.
 - La incorporación correcta será una proyección separada de honorarios pagados, particionada por mes, con deduplicación y exclusión explícita de periodos observados; no se mezclará con el release municipal ni con 38 bis.
 - Antes de publicar se debe conciliar el solapamiento de organismos, estimar el tamaño de la proyección y validar un corte histórico y uno vigente en preview.
+
+## Verificación integral posterior — 13 de septiembre de 2026
+
+Se ejecutó `node scripts/verify-prod-full.mjs` contra producción sin ETL ni
+materialización D1. El resultado fue **132 verificaciones pasadas y 0 fallidas**,
+versión productiva `v1.0-a3a9ec59`. Pasaron home y footer, fichas, gastos,
+cruces, movimientos, transferencias, fuentes, calidad, donaciones, layout,
+votaciones, personal de apoyo, InfoLobby, ChileCompra, Contraloría y las fichas
+parlamentarias estáticas. El health mantuvo `transferSource=r2` y `d1Rows=0`.
+
+La comprobación no cierra por sí sola los pendientes de frescura de fuentes ni
+autoriza publicar el universo central de honorarios; confirma que los cambios
+locales documentales y de ETL no regresaron sobre la producción vigente.
