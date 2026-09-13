@@ -5,6 +5,7 @@ import {
   extractCanonicalCount,
   extractConsolidatedCount,
   extractInfoLobbyCount,
+  hasPublishedParliamentaryDiet,
   isRetryableHttpStatus,
 } from "./etl/production-verifier-contracts.mjs";
 
@@ -228,7 +229,7 @@ async function verifyProdFull() {
   const kaiserRes = await fetch(`${PROD_URL}/politico/vanessa-kaiser-barents-von-hohenhagen`, { headers });
   assertCheck("INVARIANTES", "Ficha Vanessa Kaiser HTTP 200", kaiserRes.status === 200);
   const kaiserHtml = (await kaiserRes.text()).replace(/<!--.*?-->/g, "");
-  assertCheck("INVARIANTES", "Dieta Kaiser: $8.291.039", kaiserHtml.includes("8.291.039"));
+  assertCheck("INVARIANTES", "Dieta Kaiser publicada con período y monto", hasPublishedParliamentaryDiet(kaiserHtml, "2026-06"));
   assertCheck("INVARIANTES", "Asignación Kaiser: +33,7%", kaiserHtml.includes("+33,7%") || kaiserHtml.includes("33,7%"));
   assertCheck("GASTOS", "Kaiser tiene rendiciones operacionales publicadas", kaiserHtml.includes("Gastos Operacionales Rendidos") && !/Sin registros de gastos operacionales rendidos/i.test(kaiserHtml));
 

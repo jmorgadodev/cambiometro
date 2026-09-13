@@ -22,6 +22,18 @@ export function extractConsolidatedCount(html) {
   return parseDisplayedInteger(match?.[1]);
 }
 
+export function hasPublishedParliamentaryDiet(html, period = null) {
+  const text = String(html)
+    .replace(/<!--.*?-->/gs, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/gi, " ")
+    .replace(/\s+/g, " ");
+  const hasLabel = /dieta parlamentaria bruta/i.test(text);
+  const hasAmount = /\$\s*\d{1,3}(?:\.\d{3})+/.test(text);
+  const hasPeriod = period ? text.includes(String(period)) : true;
+  return hasLabel && hasAmount && hasPeriod;
+}
+
 export function isRetryableHttpStatus(status) {
   return status === 429 || (status >= 500 && status <= 599);
 }

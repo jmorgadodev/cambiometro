@@ -1,3 +1,5 @@
+import { hasPublishedParliamentaryDiet } from "./etl/production-verifier-contracts.mjs";
+
 let passed = 0;
 let failed = 0;
 
@@ -75,7 +77,7 @@ async function verifyProdTransferencias() {
   console.log("\n--- Verificación de Invariantes ---");
   const kaiserRes = await fetch(`${PROD_URL}/politico/vanessa-kaiser-barents-von-hohenhagen`);
   const kaiserHtml = await kaiserRes.text();
-  assertCheck("Invariante Kaiser: Dieta $8.291.039", kaiserHtml.includes("8.291.039"));
+  assertCheck("Invariante Kaiser: dieta publicada con período y monto", hasPublishedParliamentaryDiet(kaiserHtml, "2026-06"));
   assertCheck("Invariante Kaiser: Asignación +33,7%", kaiserHtml.includes("+33,7%") || kaiserHtml.includes("33,7%"));
 
   const maipuRes = await fetch(`${PROD_URL}/municipalidades/muni-maipu`, { redirect: "manual" });

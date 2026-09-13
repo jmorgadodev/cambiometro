@@ -3,6 +3,7 @@ import {
   extractCanonicalCount,
   extractConsolidatedCount,
   extractInfoLobbyCount,
+  hasPublishedParliamentaryDiet,
   isRetryableHttpStatus,
   parseDisplayedInteger,
 } from "../production-verifier-contracts.mjs";
@@ -28,5 +29,11 @@ describe("production verifier contracts", () => {
     expect(isRetryableHttpStatus(200)).toBe(false);
     expect(isRetryableHttpStatus(503)).toBe(true);
     expect(isRetryableHttpStatus(429)).toBe(true);
+  });
+
+  it("accepts the current published diet without freezing a historical amount", () => {
+    const html = '<div>$8.239.091</div><span>dieta parlamentaria bruta · 2026-06</span>';
+    expect(hasPublishedParliamentaryDiet(html, "2026-06")).toBe(true);
+    expect(hasPublishedParliamentaryDiet(html, "2026-05")).toBe(false);
   });
 });
