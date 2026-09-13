@@ -111,3 +111,19 @@ Se publicó en R2 el histórico completo del corte y se creó `indexes/v1/infopr
 - 1102 en página avanzada: resuelto.
 
 El uso R2 posterior a la publicación quedó en aproximadamente 4,6 GB de 8 GB (53,6%). El PR #508 integró la retención histórica de InfoProbidad y habilitó su índice paginado; sus checks de lint, tipos, tests, seguridad y E2E quedaron verdes.
+
+## Verificación operativa adicional — 13 de septiembre de 2026
+
+La lectura directa de producción se repitió después de integrar el PR #508 y sin consultar D1 para datos públicos:
+
+- `/api/v1/health`: HTTP 200.
+- `publicDataBackend`: `r2`.
+- `publicD1Reads`: `false`.
+- `transferSource`: `r2`.
+- `transferRows`: `62172`.
+- `d1TransferRows`: `0`.
+- Home, Municipalidades, Maipú, Movimientos y Remuneraciones: HTTP 200.
+
+El inventario público expone 12 fuentes canónicas. Los conteos vigentes observados fueron: Cámara 58.751, Senado 1.428 declarados, ChileCompra 74.142, Contraloría 310 declarados, CPLT 1.226.913, DIPRES 247.287, InfoLobby 71.467, InfoProbidad 16.077, Ley 19.862 62.443 en la API vigente, SERVEL 23.894 y SINIM 3.105. Estos números no deben sumarse ni convertirse en porcentajes de cobertura hasta resolver las diferencias de alcance indicadas en esta auditoría.
+
+En InfoProbidad, la ruta paginada ya entrega el universo publicado del corte enero-septiembre 2026: 16.077 registros, 100 en la primera página y 77 en `offset=16000`, con cero particiones faltantes. Su etiqueta `partial` en el inventario debe interpretarse como cobertura temporal del corte publicado, no como pérdida de filas. Queda pendiente mejorar ese texto para que el usuario no confunda “corte parcial” con “release incompleto”.
