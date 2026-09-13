@@ -34,7 +34,7 @@ El catálogo R2 declara estas dos particiones:
 - `partitions/senado/2025/08/manifest.json`: 121 filas.
 - `partitions/senado/2026/02/manifest.json`: 7 filas.
 
-La consulta directa al bucket confirmó que ninguno de los dos prefijos contiene objetos. La API productiva entrega `publishedRows=1300`, `expectedRows=1428`; al filtrar cada período devuelve `missingPartitions=1` y cero filas. La fuente oficial actual sí responde, pero el conector de dietas devuelve 50 filas para cada período y el endpoint de gastos devuelve 1.199/1.200; por tanto, no es seguro reconstruir 121/7 sin identificar el dataset y release original. Se mantiene el snapshot publicado y el pendiente queda correctamente clasificado como **partición histórica declarada pero no verificable**, no como ausencia de la fuente.
+La consulta directa al bucket confirmó que ninguno de los dos prefijos contiene objetos. La API productiva entrega `publishedRows=1300`, `expectedRows=1428`; al filtrar cada período devuelve `missingPartitions=1` y cero filas. La revisión del conector y una consulta de sólo lectura a la API oficial del Senado identificaron el dataset exacto de cada faltante: `2025-08` corresponde a 121 pasajes nacionales y `2026-02` a 7 misiones al extranjero. Los resultados son reproducibles: `2025-08` pasajes checksum `69cd86a5fcb6f1911520757bc0e5496272cb6e985437f6b3ea535735af0dca97` y `2026-02` misiones checksum `339c7bd5e3c5fa06771ccb58f580ac08c546c3b9d97540a630bea9ed7695ef97`. La fuente oficial responde; falta ejecutar una publicación incremental que agregue sólo esas dos particiones y actualice catálogo/manifiestos sin reemplazar el resto del release. Hasta entonces se mantiene el snapshot publicado y el pendiente queda clasificado como **particiones históricas identificadas y recuperables, aún no republicadas**.
 
 ## Auditoría completa de claves R2
 
@@ -55,7 +55,7 @@ Esta comprobación cambia el orden de trabajo: primero se debe reconciliar catá
 
 ## Pendientes ordenados
 
-1. Senado: identificar el dataset original de las dos particiones faltantes y reconstruir sólo con checksum/procedencia equivalente.
+1. Senado: publicar incrementalmente las dos particiones ya identificadas (`2025-08` pasajes nacionales y `2026-02` misiones al extranjero), verificando checksum, catálogo y API antes de promover.
 2. ChileCompra: recuperar o validar el origen después del HTTP 403 y conservar separados vigente/histórico.
 3. 38 bis: resolver la diferencia entre acceso local y runner; mantener el último corte mientras la fuente no sea reproducible en CI.
 4. CPLT: reconciliar el release productivo de 1.226.913 con los snapshots locales y cerrar observaciones de calidad por período.
@@ -149,3 +149,25 @@ No se usó D1 en estas comprobaciones. El workflow todavía conserva un paso opc
 El barrido HTTP acotado confirmó HTTP 200 para home, municipalidades, movimientos, remuneraciones, servicios públicos, cruces, personas, salud y fuentes. San Fernando también responde correctamente en la ruta canónica `/entidades/municipality-cl-06301/` (y en `/municipalidades/muni-sanfernando/`); la prueba contra `/municipalidades/municipality-cl-06301/` fue un falso negativo porque esa combinación de prefijo e identificador no es una ruta válida.
 
 La ruta canónica de votaciones es `/votaciones-destacadas/`; `/votaciones/` no existe y no debe usarse como prueba de disponibilidad. No se detectó una regresión en esos módulos por este barrido.
+
+## Cierre de bloque D1 y publicación 38 bis — 13 de septiembre de 2026
+
+- PR #505 quedó integrado en `main` con merge `908ee9983c3db7ba66b47405d18b863016abbc21`; la materialización remota D1 requiere ahora doble opt-in explícito.
+- PR #510 quedó integrado con merge `59dbf4c1830b28d9114d16650be741a29d90f8d7`; Remuneraciones públicas expone el corte 38 bis `2026-06` con 1.634 registros.
+- PR #509 quedó integrado con merge `2d79b357e45f47c2ecb090dc9fa9bbefd7be69db`; la auditoría de InfoProbidad queda versionada en el repositorio maestro.
+- Las verificaciones post-merge de Pages estático y del guard de publicación terminaron `success`.
+- El health productivo continúa con `publicDataBackend=r2`, `publicD1Reads=false`, `d1TransferRows=0` y `transferSource=r2`.
+- Los PR #490 y #492 fueron cerrados como supersedidos; no se borraron sus ramas ni su historial.
+
+El E2E antiguo iniciado por el primer merge quedó reemplazado por la corrida consolidada posterior; los resultados verdes de Pages, guard, seguridad, calidad y ETL son los que se consideran válidos para este cierre.
+
+## Reconciliación adicional Senado — 15:16 UTC-3
+
+Se ejecutó una consulta de sólo lectura contra `web-back.senado.cl`, sin D1 y sin publicar cambios. La respuesta confirma la procedencia de las dos particiones ausentes:
+
+| Período | Dataset oficial | Filas | Checksum del original consultado | Acción siguiente |
+|---|---|---:|---|---|
+| 2025-08 | Pasajes aéreos nacionales | 121 | `69cd86a5fcb6f1911520757bc0e5496272cb6e985437f6b3ea535735af0dca97` | Reconstruir y publicar sólo `senado/2025/08` |
+| 2026-02 | Misiones al extranjero | 7 | `339c7bd5e3c5fa06771ccb58f580ac08c546c3b9d97540a630bea9ed7695ef97` | Reconstruir y publicar sólo `senado/2026/02` |
+
+También se verificó que el API actual ofrece períodos más recientes por dataset, por lo que no corresponde usar una única fecha global para Senado: dietas llega a 2026-08, misiones al extranjero a 2026-08, pasajes nacionales a 2026-03 y gastos operacionales a 2026-05. La interfaz y los manifiestos deben conservar esa granularidad.
