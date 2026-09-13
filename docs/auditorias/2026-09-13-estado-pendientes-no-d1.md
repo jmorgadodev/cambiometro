@@ -224,7 +224,9 @@ el checkout local se conserva sólo para reproducir auditorías y pruebas.
    clasificando diferencia de fecha, alcance o release. El caso reproducible
    `LATORRE RINCON, VALENTINA ANDREA` demuestra que el conteo agregado no basta:
    la persona aparece en la fuente oficial de Planta, pero no en la búsqueda
-   pública actual. Ver `docs/auditorias/2026-09-13-cplt-gap-latorre-rincon.md`.
+   pública actual. La causa estructural identificada es que el ETL general
+   filtra sólo municipalidades y el flujo central separado cubre sólo
+   Honorarios. Ver `docs/auditorias/2026-09-13-cplt-gap-latorre-rincon.md`.
    Después cerrar la auditoría de historial mensual, altas, bajas, cambios de
    sueldo, cambios de organismo y montos proporcionales sin alterar filas
    originales.

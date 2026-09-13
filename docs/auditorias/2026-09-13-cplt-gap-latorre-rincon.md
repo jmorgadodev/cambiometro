@@ -27,14 +27,22 @@ corresponde a un problema de mayúsculas, tildes o inversión de apellidos.
 
 ## Diagnóstico
 
-La fila está ausente del release/index público actual. Las hipótesis que deben
-probarse contra el archivo original son, en este orden:
+La causa estructural ya está identificada en el código del ETL vigente:
 
-1. el lote de `Planta` no incorporó el período o el organismo;
-2. la fila fue filtrada durante la reducción por organismo/categoría;
-3. la fila llegó al artefacto de categoría pero no al índice R2;
-4. el manifiesto declara un universo agregado sin representar la cobertura
-   efectiva por mes.
+- `scripts/etl/stream-remote-personal.mjs` descarta toda fila cuyo organismo
+  no empiece por `municipalidad` o `municipio`.
+- `scripts/etl/central-honorarios-stream.mjs` procesa organismos centrales,
+  pero sólo la categoría `Honorarios`.
+- No existe un flujo equivalente para `Planta`, `Contrata` o `CodigoTrabajo`
+  de organismos centrales.
+
+Por eso la fila de Valentina Latorre Rincón puede estar publicada oficialmente
+en `Planta` y, al mismo tiempo, quedar fuera del release/index público. El
+conteo agregado de producción no permite detectar esta omisión de alcance.
+
+La auditoría de los archivos originales sigue siendo necesaria para medir el
+volumen adicional y comprobar si existen más categorías y períodos afectados,
+pero ya no se considera una hipótesis que el problema sea sólo el índice.
 
 No se agregará manualmente la fila ni se reemplazará el snapshot vigente hasta
 identificar cuál de esas etapas falla.
@@ -50,6 +58,11 @@ demuestre, para `Planta` y `Contrata`, por período y organismo:
 - que la búsqueda pública encuentre por nombre con y sin tildes;
 - que un fallo o archivo vacío conserve el release anterior y bloquee la
   publicación.
+
+Antes de implementar esa ampliación se debe estimar el volumen de las tres
+categorías centrales adicionales, su impacto en R2 y el tiempo de build. No se
+ejecutará una descarga nacional ni se publicará un cambio mientras esa
+estimación no esté validada.
 
 Este caso se convierte en una prueba de regresión de cobertura; no se usa como
 justificación para consumir D1 ni para descargar el universo completo al
