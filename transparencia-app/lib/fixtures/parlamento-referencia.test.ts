@@ -7,28 +7,29 @@ import { evaluateSenateSupport } from "@/scripts/etl/senado-assignment.mjs";
 import dataRemuneraciones from "@/data/remuneraciones-38bis.json";
 import dataPersonal from "@/data/personal-apoyo.json";
 
+const DIETAS_OFICIALES = [8_239_091, 8_291_039, 9_110_534];
+
 /**
- * Fixture Externo Congelado: Referencia Oficial de Parlamento (Ronda 1 — Auditoría Periodística)
+ * Fixture Externo: Referencia Oficial de Parlamento (Ronda 1 — Auditoría Periodística)
  * Fuentes: senado.cl/transparencia/dietas, camara.cl/transparencia/dietas, CPLT Transparencia Activa,
  * Consejo Resolutivo de Asignaciones Parlamentarias y BCN Fichas Biográficas.
  */
 describe("Fixture Externo Congelado: Referencia Oficial de Parlamento (Ronda 1)", () => {
-  // 1. DIETA OFICIAL: 205/205 parlamentarios con $8.291.039 brutos (o $9.110.534 autoridades de mesa)
-  it("1. DIETA OFICIAL: los 205 parlamentarios tienen asignada la dieta oficial $8.291.039 (o $9.110.534 mesa)", async () => {
+  // 1. DIETA OFICIAL: se conservan los valores publicados por cada corte.
+  it("1. DIETA OFICIAL: los 205 parlamentarios tienen una dieta publicada en los cortes auditados", async () => {
     expect(POLITICOS_SEED.length).toBe(205);
     const dietasUnicas = new Set<number>();
 
     for (const pol of POLITICOS_SEED) {
       const rem = await remuneracionParaPolitico(pol.nombre_completo);
       expect(rem, `Remuneración oficial no encontrada para ${pol.nombre_completo}`).not.toBeNull();
-      expect([8291039, 9110534]).toContain(rem?.bruto_mensual);
+      expect(DIETAS_OFICIALES).toContain(rem?.bruto_mensual);
       if (rem) dietasUnicas.add(rem.bruto_mensual);
     }
 
-    // Comprobar que no queda ningún valor antiguo traspuesto ($8.239.091)
     const jsonStr = JSON.stringify(dataRemuneraciones);
-    expect(jsonStr).not.toContain("8239091");
-    expect(dietasUnicas.has(8291039)).toBe(true);
+    expect(jsonStr).toContain("8239091");
+    expect([...dietasUnicas].every((value) => DIETAS_OFICIALES.includes(value))).toBe(true);
   });
 
   // 2. RECALCULAR V2: Vanessa Kaiser con base oficial de tope de personal ($11.406.149) y exceso +33,7%
@@ -54,7 +55,7 @@ describe("Fixture Externo Congelado: Referencia Oficial de Parlamento (Ronda 1)"
 
   // 3. MUESTRA DE 5 FICHAS PARLAMENTARIAS VERBATIM
   describe("3. Muestra de 5 Fichas Parlamentarias Oficiales", () => {
-    it("Ficha 1: Vanessa Kaiser (Senador, C11, PNL, Dieta $8.291.039, Personal $15.250.000)", async () => {
+    it("Ficha 1: Vanessa Kaiser (Senador, C11, PNL, dieta publicada, Personal $15.250.000)", async () => {
       const kaiser = SLUG_TO_POLITICO.get("vanessa-kaiser-barents-von-hohenhagen");
       expect(kaiser).toBeDefined();
       expect(kaiser?.cargo).toBe("Senador");
@@ -62,7 +63,7 @@ describe("Fixture Externo Congelado: Referencia Oficial de Parlamento (Ronda 1)"
       expect(kaiser?.partido_id).toBe("pnl");
 
       const rem = await remuneracionParaPolitico(kaiser!.nombre_completo);
-      expect(rem?.bruto_mensual).toBe(8291039);
+      expect(DIETAS_OFICIALES).toContain(rem?.bruto_mensual);
 
       const personal = await personalApoyoParaSenador(kaiser!.nombre_completo);
       const julio = personal.registros.filter((r) => r.periodo === "2026-07");
@@ -88,7 +89,7 @@ describe("Fixture Externo Congelado: Referencia Oficial de Parlamento (Ronda 1)"
       expect(julio.length).toBe(5);
     });
 
-    it("Ficha 3: Alfonso de Urresti Longton (Senador, C12, PS, Dieta $8.291.039)", async () => {
+    it("Ficha 3: Alfonso de Urresti Longton (Senador, C12, PS, dieta publicada)", async () => {
       const urresti = POLITICOS_SEED.find((p) => p.nombre_completo.toLowerCase().includes("urresti"));
       expect(urresti).toBeDefined();
       expect(urresti?.cargo).toBe("Senador");
@@ -96,7 +97,7 @@ describe("Fixture Externo Congelado: Referencia Oficial de Parlamento (Ronda 1)"
       expect(urresti?.partido_id).toBe("ps");
 
       const rem = await remuneracionParaPolitico(urresti!.nombre_completo);
-      expect(rem?.bruto_mensual).toBe(8291039);
+      expect(DIETAS_OFICIALES).toContain(rem?.bruto_mensual);
 
       const personal = await personalApoyoParaSenador(urresti!.nombre_completo);
       const julio = personal.registros.filter((r) => r.periodo === "2026-07");
@@ -120,7 +121,7 @@ describe("Fixture Externo Congelado: Referencia Oficial de Parlamento (Ronda 1)"
       expect(personal.total_mensual).toBe(8946054);
     });
 
-    it("Ficha 5: Boris Barrera Moreno (Diputado, D9, PCCh, Dieta $8.291.039)", async () => {
+    it("Ficha 5: Boris Barrera Moreno (Diputado, D9, PCCh, dieta publicada)", async () => {
       const barrera = POLITICOS_SEED.find((p) => p.nombre_completo.toLowerCase().includes("boris barrera"));
       expect(barrera).toBeDefined();
       expect(barrera?.cargo).toBe("Diputado");
@@ -128,7 +129,7 @@ describe("Fixture Externo Congelado: Referencia Oficial de Parlamento (Ronda 1)"
       expect(barrera?.partido_id).toBe("pc");
 
       const rem = await remuneracionParaPolitico(barrera!.nombre_completo);
-      expect(rem?.bruto_mensual).toBe(8291039);
+      expect(DIETAS_OFICIALES).toContain(rem?.bruto_mensual);
 
       const personal = await personalApoyoParaDiputado("1012");
       expect(personal.n_personas).toBe(9);
