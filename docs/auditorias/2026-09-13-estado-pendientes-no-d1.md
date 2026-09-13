@@ -127,3 +127,19 @@ La lectura directa de producción se repitió después de integrar el PR #508 y 
 El inventario público expone 12 fuentes canónicas. Los conteos vigentes observados fueron: Cámara 58.751, Senado 1.428 declarados, ChileCompra 74.142, Contraloría 310 declarados, CPLT 1.226.913, DIPRES 247.287, InfoLobby 71.467, InfoProbidad 16.077, Ley 19.862 62.443 en la API vigente, SERVEL 23.894 y SINIM 3.105. Estos números no deben sumarse ni convertirse en porcentajes de cobertura hasta resolver las diferencias de alcance indicadas en esta auditoría.
 
 En InfoProbidad, la ruta paginada ya entrega el universo publicado del corte enero-septiembre 2026: 16.077 registros, 100 en la primera página y 77 en `offset=16000`, con cero particiones faltantes. Su etiqueta `partial` en el inventario debe interpretarse como cobertura temporal del corte publicado, no como pérdida de filas. Queda pendiente mejorar ese texto para que el usuario no confunda “corte parcial” con “release incompleto”.
+
+## Verificación 38 bis y ChileCompra — 13 de septiembre de 2026
+
+### 38 bis
+
+La fuente oficial respondió localmente con HTTP 200 y el ETL produjo 1.634 filas del período `2026-06`, con checksum `42dd9a7d2d544bc059c40b8a7d320de4ee40729bd8ed13866ffecb9366521348`. El resultado separa 205 filas parlamentarias y 1.429 filas fuera de Congreso, conserva el histórico y registra `rowsRead=0` y `rowsWritten=0` para D1.
+
+El workflow de GitHub no logró consultar la fuente oficial en su entorno, por lo que no se publicó el nuevo corte automáticamente. El PR #510 contiene sólo la actualización validada y la adaptación de pruebas para aceptar los valores oficiales observados en cortes distintos; su build, E2E, seguridad, lint, tipos y tests terminaron en verde. El PR queda listo para revisión, pero el snapshot productivo anterior se mantiene hasta que el runner pueda reproducir la descarga oficial.
+
+### ChileCompra
+
+Se comprobó que `https://datos-abiertos.chilecompra.cl/descargas/procesos-ocds` responde HTTP 200, pero devuelve una aplicación web de 1.051 bytes, no el archivo de datos. El endpoint OCDS oficial sí responde para períodos concretos: por ejemplo, `2026-07` declara 8.004 procesos en su primera consulta; `2026-08` devuelve `404 No se encontraron resultados` en la misma consulta. Por ello, el HTTP 200 de la página de descargas no puede tratarse como una descarga exitosa del ETL.
+
+Producción expone actualmente 74.142 registros de ChileCompra y el catálogo histórico local declara 888.693. La diferencia queda clasificada como **corte vigente frente a histórico**, no como pérdida automática. El conector admite tres tipos —licitación, trato directo y convenio marco— y el flujo incluye archivos OCDS masivos por mes; falta obtener y validar el enlace real que la aplicación web entrega para cada período antes de ejecutar otra ingesta.
+
+No se usó D1 en estas comprobaciones. El workflow todavía conserva un paso opcional de materialización D1 condicionado por preflight; la publicación pública continúa en R2/Pages y la cuota alta debe impedir esa materialización. Esto debe confirmarse en el próximo run antes de considerar cerrado el aislamiento de D1.
