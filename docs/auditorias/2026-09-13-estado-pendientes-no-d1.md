@@ -13,7 +13,7 @@
 | Fuente | Producción/R2 | Última evidencia | Estado operativo | Pendiente no-D1 |
 |---|---:|---|---|---|
 | Cámara, fuente base | 58.751 | 2026-09-13 | Operativa, parcial por alcance | Mantener separado personal, asistencia, votaciones y gastos; personal de apoyo sigue bloqueado por HTTP 403.
-| Senado, fuente base | 1.428 declarados / 1.300 publicados | 2026-09-13 | Parcial | Resolver las particiones declaradas `2025-08` (121) y `2026-02` (7), cuyos objetos R2 no existen.
+| Senado, fuente base | 1.428 publicados | 2026-09-13 | Operativa | Mantener la verificación rutinaria de las dos particiones recuperadas.
 | Votaciones Cámara | 580 | 2026-09-13 | Operativa | Continuar actualización diaria y vigilar que el corte no retroceda.
 | Votaciones Senado | 189 | 2026-09-13 | Operativa | Continuar actualización diaria y conservar el histórico.
 | Movimientos | 82 | 2026-09-13 | Operativa | Seguir monitorizando frescura, estados y fuentes 403; no borrar el snapshot anterior si falla un conector.
@@ -24,8 +24,34 @@
 | Contraloría | 310 declarados / 291 verificados | 2026-09-13 | Parcial | Revisar la diferencia de catálogo frente a informes efectivamente publicados; el ETL histórico falló por un flujo antiguo, sin reemplazar snapshot.
 | InfoProbidad | 16.077 | 2026-09-13 | Operativa para el corte ene-sep 2026 | Histórico completo del corte publicado en R2; índice paginado activo. La fuente conserva su etiqueta de cobertura parcial si el catálogo no representa períodos fuera de este corte.
 | Ley 19.862 | 62.172 | 2026-09-08 | Operativa | Reconciliar la diferencia con los baselines locales 59.361/59.544 antes de mostrar cobertura porcentual.
-| 38 bis | 1.634 en prueba aislada | 2026-09-13 | Código corregido, runner bloqueado | El workflow manual volvió a fallar porque el runner no pudo consultar la fuente oficial; R2 conserva el último release válido. No publicar cero ni reemplazar el snapshot.
+| 38 bis | 1.634 publicados en R2; Pages pendiente de rehidratación | 2026-09-13 | ETL correcto, refresco Pages bloqueado por secreto | Integrar PR #518 y repetir el refresco controlado; no reemplazar el snapshot con cero.
 | SERVEL / SINIM / INE | 23.894 / 3.105 / 346 | 2026-09-13 | Operativos | Mantener actualización bajo demanda, semestral y censal respectivamente.
+
+## Hallazgo adicional: honorarios de organismos centrales en Transparencia Activa
+
+La fila mostrada para **ROMER ANGEL RUBIO FLORES** proviene de la nómina mensual oficial de personas naturales contratadas a honorarios de Transparencia Activa/CPLT, no de una convocatoria. La fuente publica, entre otros campos, período, nombre, función, calificación, región, moneda, bruto, líquido, modalidad de pago, fechas de inicio y término, observaciones y estado de publicación.
+
+La comprobación directa del archivo oficial `TA_PersonalContratohonorarios.csv` respondió HTTP 200, `Content-Type: text/csv`, tamaño aproximado de **8.314.320.073 bytes (8,31 GB)** y fecha de modificación **2026-09-06**. El encabezado confirma que la fuente contiene `organismo_nombre`, `anyo`, `Mes`, `Nombres`, `Paterno`, `Materno`, `descripcion_funcion`, `tipo_calificacionp`, `region`, remuneración bruta y líquida, `tipo_pago`, cuotas, fechas de ingreso y término, observaciones y enlace documental. El primer bloque observado ya corresponde a julio de 2026, por lo que la fuente es más reciente que el corte CPLT municipal actualmente publicado.
+
+La comprobación local dejó esta diferencia:
+
+| Campo | Disponible en el release actual |
+|---|---|
+| Nombre, organismo, cargo y período | Sí, mediante 38 bis |
+| Sueldo bruto mensual | Sí: marzo `$1.900.000`; abril-mayo-junio `$2.850.000` |
+| Sueldo líquido | No en 38 bis |
+| Función detallada, formación, región, fechas y modalidad de pago | No en 38 bis |
+| Fila original CPLT de honorarios centrales | No forma parte del release público CPLT actual |
+
+Una lectura acotada de los primeros 20 MiB del archivo confirmó las filas de **ROMER ANGEL RUBIO FLORES** en marzo, abril, mayo, junio y julio de 2026. La fila de junio coincide con la captura: bruto `$2.850.000`, líquido `$2.415.375`, pago mensual, ingreso `2026-03-11`, término `2026-12-31`, función de seguimiento de compromisos ministeriales y presidenciales, formación de abogado con magíster y región Metropolitana. La fuente también entrega un enlace al informe documental mensual.
+
+El parser de Transparencia Activa reconoce esos campos, pero el flujo público vigente filtra el archivo masivo para conservar registros municipales. Por eso el dato no debe marcarse como inexistente: está publicado por la fuente, pero aún no está incorporado en la proyección pública. La siguiente incorporación debe ser una proyección separada de **honorarios de organismos centrales**, sólo con pagos/remuneraciones publicadas y con paginación R2; no se deben incorporar convocatorias ni usar D1.
+
+Por el tamaño del archivo, la solución segura no es descargarlo completo al navegador ni guardarlo íntegro en el repositorio local: debe procesarse por rangos/stream, seleccionar sólo registros con remuneración y período válidos, particionar por organismo y mes, generar índices R2 y conservar el checksum del original. Antes de publicar se requiere una corrida de conteo y muestra; si la fuente no puede leerse íntegramente, se mantiene el release anterior.
+
+La preparación local quedó implementada y probada, sin ejecutarse sobre la fuente masiva: `ingest:cplt-central-honorarios` lee por rangos, usa SQLite temporal y genera particiones mensuales con conteo, tamaño y SHA-256. Los tests del parser, particionador y stream pasan 6/6. Esta capacidad no modifica el release municipal, no habilita D1 y todavía no conecta esos archivos a la búsqueda pública.
+
+Fuente de procedencia: [Portal de Transparencia](https://www.portaltransparencia.cl/) y [archivo masivo CPLT de honorarios](https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/TA_PersonalContratohonorarios.csv). El registro 38 bis utilizado para la comparación queda en `data/remuneraciones-38bis-publico-historico.json`.
 
 ## Hallazgo Senado: evidencia y decisión
 
@@ -56,9 +82,11 @@ Esta comprobación cambia el orden de trabajo: primero se debe reconciliar catá
 ## Pendientes ordenados
 
 1. Senado: resuelto. Las dos particiones fueron publicadas incrementalmente y verificadas en R2/API; mantenerlas en el control de regresión.
-2. ChileCompra: recuperar o validar el origen después del HTTP 403 y conservar separados vigente/histórico.
-3. 38 bis: resolver la diferencia entre acceso local y runner; mantener el último corte mientras la fuente no sea reproducible en CI.
+2. ChileCompra: origen masivo identificado y validado por cabeceras para enero-julio 2026; probar un mes disponible en modo controlado, mantener vigente/histórico separados y no catalogar agosto/septiembre mientras respondan 403.
+3. 38 bis: el ETL ya terminó correctamente en CI y publicó el release en R2; integrar PR #518 para que Pages use el secreto correcto y rehidratar producción.
 4. CPLT: reconciliar el release productivo de 1.226.913 con los snapshots locales y cerrar observaciones de calidad por período.
+   - Auditoría de honorarios centrales: **conteo y muestra verificados** (4.529.483 pagos positivos; 976 organismos; campos completos para el caso Romer Rubio).
+   - Pendiente restante: conciliar solapamiento municipal/central, filtrar periodos observados y decidir el tamaño de una proyección R2 separada antes de conectarla a la búsqueda pública.
 5. Contraloría: explicar 310 declarados frente a 291 verificables y corregir sólo metadata, no filas.
 6. Ley 19.862: reconciliar catálogo, release y filas sin presentar el baseline local como producción.
 7. InfoProbidad: resuelto en R2; mantener la corrida mensual y confirmar que el índice se conserva en las siguientes publicaciones.
@@ -178,3 +206,81 @@ La publicación quedó comprobada el mismo día:
 - `partitions/senado/2026/02/manifest.json`: 7 filas, proyección `3b006adbefbb1fab803c43d861f4f87aa964849a5128d74e517f773cbd4bc472`.
 - Catálogo R2: Senado `1.428` filas declaradas/publicadas.
 - Operación R2: 4 objetos por reparación, 0 eliminaciones, sin lecturas ni escrituras D1.
+
+## Verificación posterior de producción — 13 de septiembre de 2026
+
+Se repitió el smoke directamente contra producción, sin consulta ni medición de D1:
+
+- `/api/v1/health`: HTTP 200; `publicDataBackend=r2`, `publicD1Reads=false`, `d1TransferRows=0`, `transferSource=r2`, `transferRows=62172`.
+- `/api/v1/sources`: HTTP 200; inventario de 12 fuentes canónicas. Se confirmaron los conteos publicados de Cámara (58.751), CPLT (1.226.913), ChileCompra (74.142), InfoLobby (71.467), InfoProbidad (16.077), Ley 19.862 (62.172), Senado (1.428) y las demás fuentes del catálogo.
+- `/api/v1/search?q=Romer+Angel+Rubio+Flores`: HTTP 200; el resultado incluye la remuneración 38 bis de junio de 2026 por `$2.850.000`, Presidencia, Coordinador de asesores.
+- Rutas `/`, `/remuneraciones-publicas/`, `/municipalidades/`, `/movimientos/` y `/votaciones-destacadas/`: HTTP 200.
+
+La búsqueda confirma que la incorporación 38 bis permanece operativa. La ficha completa de honorarios CPLT centrales sigue siendo un pendiente separado y no se debe resolver mezclándola con el release municipal ni con 38 bis.
+
+## Auditoría de honorarios centrales CPLT — 13 de septiembre de 2026
+
+Se ejecutó una lectura completa, por rangos HTTP y sin almacenar el CSV original localmente, del archivo oficial `TA_PersonalContratohonorarios.csv`. La fuente respondió con `Content-Length=8.314.320.073` bytes, `Last-Modified=2026-09-06T09:36:22Z` y ETag `"1ef9274c9-65acd3c04b180"`.
+
+Resultado de la auditoría:
+
+| Métrica | Resultado |
+|---|---:|
+| Filas procesadas | 15.527.940 |
+| Filas con datos | 15.527.940 |
+| Registros con pago bruto o líquido positivo | 4.529.483 |
+| Filas excluidas por no tener pago positivo | 10.998.457 |
+| Organismos identificados | 976 |
+| Periodos 2024-01 a 2026-07 | 4.524.674 pagos |
+| Periodos posteriores a 2026-07 | 4.809 pagos |
+
+La fuente sí contiene organismos centrales y servicios públicos. Entre los organismos con más registros aparecen INE (150.230), Municipalidad de Maipú (88.681), Fundación Integra (87.684), IND (86.399), Municipalidad de Talca (71.742) y Hospital de Urgencia Asistencia Pública (48.317). Esto confirma que el archivo no es equivalente al release municipal actual: es un universo transversal de honorarios y no se puede añadir directamente sobre el catálogo CPLT vigente sin duplicar municipalidades.
+
+El caso de Romer Ángel Rubio Flores quedó comprobado en el archivo oficial con las columnas de organismo, cargo/función, formación, región, monto bruto, monto líquido, tipo de pago, fechas de ingreso y término, observaciones y enlace al respaldo. Por tanto, la ausencia de esos campos en la ficha pública actual se explica por alcance del release, no por falta de datos en la fuente oficial.
+
+También apareció una observación de calidad que impide publicar el universo sin una regla adicional: 4.809 pagos quedan después de `2026-07`, incluyendo periodos futuros hasta años extremos. Esos valores deben conservarse en una auditoría de fuente, pero quedar fuera de la vista pública hasta confirmar si corresponden a fechas mal formateadas o registros realmente futuros. No se debe inferir ni corregir el periodo automáticamente.
+
+Decisión operativa:
+
+- No se ejecutó la ingesta completa ni se modificó R2/Pages.
+- No se consultó ni se modificó D1.
+- El reporte técnico queda en `transparencia-app/data/auditorias/cplt-central-honorarios-audit.json`.
+- La incorporación correcta será una proyección separada de honorarios pagados, particionada por mes, con deduplicación y exclusión explícita de periodos observados; no se mezclará con el release municipal ni con 38 bis.
+- Antes de publicar se debe conciliar el solapamiento de organismos, estimar el tamaño de la proyección y validar un corte histórico y uno vigente en preview.
+
+## Verificación integral posterior — 13 de septiembre de 2026
+
+Se ejecutó `node scripts/verify-prod-full.mjs` contra producción sin ETL ni
+materialización D1. El resultado fue **132 verificaciones pasadas y 0 fallidas**,
+versión productiva `v1.0-a3a9ec59`. Pasaron home y footer, fichas, gastos,
+cruces, movimientos, transferencias, fuentes, calidad, donaciones, layout,
+votaciones, personal de apoyo, InfoLobby, ChileCompra, Contraloría y las fichas
+parlamentarias estáticas. El health mantuvo `transferSource=r2` y `d1Rows=0`.
+
+La comprobación no cierra por sí sola los pendientes de frescura de fuentes ni
+autoriza publicar el universo central de honorarios; confirma que los cambios
+locales documentales y de ETL no regresaron sobre la producción vigente.
+
+## Corrida 38 bis y diagnóstico del refresco de Pages — 20:34 UTC-3
+
+La corrida manual del workflow `ETL Mensual - Remuneraciones 38 bis` terminó
+correctamente en GitHub Actions:
+
+- Run `34781210062`: `success`.
+- Período publicado: `2026-07`.
+- Filas: `1.634`.
+- Períodos históricos conservados: `17`.
+- Checksum del release: `42dd9a7d2d544bc059c40b8a7d320de4ee40729bd8ed13866ffecb9366521348`.
+- Auditoría del ETL: `rowsRead=0`, `rowsWritten=0`.
+- R2 recibió `current.json`, `current-history.json`, `current-audit.json` y el
+  manifiesto del release.
+
+El workflow automático de Pages (`34781298373`) falló después de esa publicación,
+antes de compilar, porque el paso de rehidratación 38 bis referenciaba el secreto
+`CLOUDFLARE_API_TOKEN`, que no existe en ese entorno. El resto de los pasos de
+lectura R2 usa `CLOUDFLARE_DATA_API_TOKEN`. No fue una falla del archivo 38 bis,
+de la fuente ni de D1.
+
+Se corrigió únicamente esa referencia en el PR #518. Hasta integrar el PR y
+repetir el refresco de Pages, producción puede seguir mostrando el release
+anterior aunque el release nuevo ya esté sano y disponible en R2.
