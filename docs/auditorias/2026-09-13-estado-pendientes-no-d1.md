@@ -206,6 +206,12 @@ el checkout local se conserva sólo para reproducir auditorías y pruebas.
 - **Verificadores:** el chequeo de la dieta parlamentaria ya no fija un monto
   histórico; valida el concepto, período y monto publicado. El PR #514 quedó
   integrado.
+- **ETL separados:** los workflows de Cámara, ChileCompra, CPLT, Contraloría,
+  gastos, InfoLobby, InfoProbidad, Ley 19.862, DIPRES, SERVEL y SINIM tienen
+  calendario independiente. La acción `d1-preflight` conserva
+  `allow-remote-materialization=false` por defecto; el workflow diario también
+  exige un input manual para habilitarlo. Mientras ese input no se active, el
+  ETL puede publicar R2/Pages pero no materializa D1.
 - **Espacio local:** las carpetas temporales y artefactos generados retirables
   fueron limpiados. Permanecen sólo `cambiometro-public`, `cambiometro-audit`,
   `cambiometro-editorial` y worktrees de cambios aún sucios para no borrar
@@ -220,10 +226,11 @@ el checkout local se conserva sólo para reproducir auditorías y pruebas.
    organismo y montos proporcionales sin alterar filas originales.
 2. **Búsqueda transversal del home:** el índice estático de remuneraciones sí
    contiene `RÍO SEBASTIÁN TORREALBA DEL` y la búsqueda interna tolera tildes y
-   mayúsculas. El endpoint `/api/v1/search` todavía no devuelve por sí mismo
-   el universo de 38 bis porque el catálogo de entidades no lo contiene; debe
-   definirse si el home se apoya exclusivamente en el índice Pages o si se
-   publica un índice Worker/R2 específico. No usar D1 para resolverlo.
+   mayúsculas; la prueba directa del índice devolvió sus cuatro filas históricas.
+   El endpoint `/api/v1/search` todavía no devuelve por sí mismo el universo de
+   38 bis porque el catálogo de entidades no lo contiene. Debe definirse si el
+   API general también debe exponer ese índice, sin duplicar lecturas ni usar
+   D1; la interfaz de home ya tiene el camino estático de remuneraciones.
 3. **Cámara y Senado:** mantener la separación entre asistencia, votaciones,
    remuneraciones, personal de apoyo y gastos. Cámara conserva un alcance
    parcial y el personal de apoyo oficial sigue condicionado por HTTP 403.
