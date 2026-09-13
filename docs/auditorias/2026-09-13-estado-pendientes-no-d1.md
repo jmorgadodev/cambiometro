@@ -13,7 +13,7 @@
 | Fuente | Producción/R2 | Última evidencia | Estado operativo | Pendiente no-D1 |
 |---|---:|---|---|---|
 | Cámara, fuente base | 58.751 | 2026-09-13 | Operativa, parcial por alcance | Mantener separado personal, asistencia, votaciones y gastos; personal de apoyo sigue bloqueado por HTTP 403.
-| Senado, fuente base | 1.428 declarados / 1.300 publicados | 2026-09-13 | Parcial | Resolver las particiones declaradas `2025-08` (121) y `2026-02` (7), cuyos objetos R2 no existen.
+| Senado, fuente base | 1.428 publicados | 2026-09-13 | Operativa | Mantener la verificación rutinaria de las dos particiones recuperadas.
 | Votaciones Cámara | 580 | 2026-09-13 | Operativa | Continuar actualización diaria y vigilar que el corte no retroceda.
 | Votaciones Senado | 189 | 2026-09-13 | Operativa | Continuar actualización diaria y conservar el histórico.
 | Movimientos | 82 | 2026-09-13 | Operativa | Seguir monitorizando frescura, estados y fuentes 403; no borrar el snapshot anterior si falla un conector.
@@ -24,7 +24,7 @@
 | Contraloría | 310 declarados / 291 verificados | 2026-09-13 | Parcial | Revisar la diferencia de catálogo frente a informes efectivamente publicados; el ETL histórico falló por un flujo antiguo, sin reemplazar snapshot.
 | InfoProbidad | 16.077 | 2026-09-13 | Operativa para el corte ene-sep 2026 | Histórico completo del corte publicado en R2; índice paginado activo. La fuente conserva su etiqueta de cobertura parcial si el catálogo no representa períodos fuera de este corte.
 | Ley 19.862 | 62.172 | 2026-09-08 | Operativa | Reconciliar la diferencia con los baselines locales 59.361/59.544 antes de mostrar cobertura porcentual.
-| 38 bis | 1.634 en prueba aislada | 2026-09-13 | Código corregido, runner bloqueado | El workflow manual volvió a fallar porque el runner no pudo consultar la fuente oficial; R2 conserva el último release válido. No publicar cero ni reemplazar el snapshot.
+| 38 bis | 1.634 publicados en R2; Pages pendiente de rehidratación | 2026-09-13 | ETL correcto, refresco Pages bloqueado por secreto | Integrar PR #518 y repetir el refresco controlado; no reemplazar el snapshot con cero.
 | SERVEL / SINIM / INE | 23.894 / 3.105 / 346 | 2026-09-13 | Operativos | Mantener actualización bajo demanda, semestral y censal respectivamente.
 
 ## Hallazgo adicional: honorarios de organismos centrales en Transparencia Activa
@@ -83,7 +83,7 @@ Esta comprobación cambia el orden de trabajo: primero se debe reconciliar catá
 
 1. Senado: resuelto. Las dos particiones fueron publicadas incrementalmente y verificadas en R2/API; mantenerlas en el control de regresión.
 2. ChileCompra: origen masivo identificado y validado por cabeceras para enero-julio 2026; probar un mes disponible en modo controlado, mantener vigente/histórico separados y no catalogar agosto/septiembre mientras respondan 403.
-3. 38 bis: resolver la diferencia entre acceso local y runner; mantener el último corte mientras la fuente no sea reproducible en CI.
+3. 38 bis: el ETL ya terminó correctamente en CI y publicó el release en R2; integrar PR #518 para que Pages use el secreto correcto y rehidratar producción.
 4. CPLT: reconciliar el release productivo de 1.226.913 con los snapshots locales y cerrar observaciones de calidad por período.
    - Auditoría de honorarios centrales: **conteo y muestra verificados** (4.529.483 pagos positivos; 976 organismos; campos completos para el caso Romer Rubio).
    - Pendiente restante: conciliar solapamiento municipal/central, filtrar periodos observados y decidir el tamaño de una proyección R2 separada antes de conectarla a la búsqueda pública.
