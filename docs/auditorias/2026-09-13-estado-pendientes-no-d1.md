@@ -178,3 +178,90 @@ La publicación quedó comprobada el mismo día:
 - `partitions/senado/2026/02/manifest.json`: 7 filas, proyección `3b006adbefbb1fab803c43d861f4f87aa964849a5128d74e517f773cbd4bc472`.
 - Catálogo R2: Senado `1.428` filas declaradas/publicadas.
 - Operación R2: 4 objetos por reparación, 0 eliminaciones, sin lecturas ni escrituras D1.
+
+## Estado consolidado al 13 de septiembre de 2026 — revisión posterior
+
+Esta sección prevalece sobre las notas históricas anteriores cuando describen un
+estado que ya cambió. La producción y el release R2 son la referencia vigente;
+el checkout local se conserva sólo para reproducir auditorías y pruebas.
+
+### Cerrado o estable
+
+- **D1:** el health productivo mantiene `publicDataBackend=r2`,
+  `publicD1Reads=false`, `transferSource=r2`, `d1TransferRows=0` y
+  `transferRows=62172`. No se ejecutó ninguna consulta D1 en esta revisión.
+- **Senado:** las particiones `2025/08` y `2026/02` fueron publicadas de forma
+  incremental, sin eliminaciones. El catálogo productivo declara 1.428 filas.
+  El pendiente de reconstrucción quedó cerrado; sólo queda regresión rutinaria.
+- **ChileCompra:** el guard contra releases vacíos quedó integrado. Un HTTP 200
+  de la página de descargas no se considera una descarga de datos; el corte
+  vigente se mantiene hasta validar el enlace OCDS real.
+- **InfoProbidad:** el índice R2 paginado responde el universo de 16.077 filas,
+  incluida la página final, sin fallback D1.
+- **Movimientos y rutas principales:** smoke HTTP 200 confirmado para home,
+  municipalidades, San Fernando, movimientos, remuneraciones, servicios,
+  cruces, personas, votaciones, health y sources. Movimientos informa última
+  ejecución `2026-09-13T12:28:47.590Z`, último evento `2026-09-02` y checksum
+  `ea2dd566...`.
+- **Verificadores:** el chequeo de la dieta parlamentaria ya no fija un monto
+  histórico; valida el concepto, período y monto publicado. El PR #514 quedó
+  integrado.
+- **Espacio local:** las carpetas temporales y artefactos generados retirables
+  fueron limpiados. Permanecen sólo `cambiometro-public`, `cambiometro-audit`,
+  `cambiometro-editorial` y worktrees de cambios aún sucios para no borrar
+  trabajo del usuario.
+
+### Pendientes reales, en orden de prioridad
+
+1. **CPLT / Transparencia Activa:** reconciliar el conteo productivo de
+   `1.226.913` con el snapshot local/manifiesto que declara `1.203.287`,
+   clasificando diferencia de fecha, alcance o release. Después cerrar la
+   auditoría de historial mensual, altas, bajas, cambios de sueldo, cambios de
+   organismo y montos proporcionales sin alterar filas originales.
+2. **Búsqueda transversal del home:** el índice estático de remuneraciones sí
+   contiene `RÍO SEBASTIÁN TORREALBA DEL` y la búsqueda interna tolera tildes y
+   mayúsculas. El endpoint `/api/v1/search` todavía no devuelve por sí mismo
+   el universo de 38 bis porque el catálogo de entidades no lo contiene; debe
+   definirse si el home se apoya exclusivamente en el índice Pages o si se
+   publica un índice Worker/R2 específico. No usar D1 para resolverlo.
+3. **Cámara y Senado:** mantener la separación entre asistencia, votaciones,
+   remuneraciones, personal de apoyo y gastos. Cámara conserva un alcance
+   parcial y el personal de apoyo oficial sigue condicionado por HTTP 403.
+   Senado debe conservar sus períodos por dataset y no usar una fecha global.
+4. **ChileCompra:** validar el origen OCDS por período y documentar dos capas:
+   corte vigente `74.142` e histórico local `888.693`. No publicar un corte
+   vacío ni presentar el histórico como vigente.
+5. **38 bis:** el último release válido queda protegido mientras GitHub no
+   pueda reproducir la descarga oficial. Resolver la diferencia entre acceso
+   local y runner, sin publicar cero ni reemplazar el snapshot.
+6. **Contraloría:** explicar `310` declarados frente a `291` verificables y
+   ajustar sólo metadata/procedencia, nunca inventar filas.
+7. **Ley 19.862:** reconciliar catálogo, release R2 y baselines locales antes
+   de mostrar porcentajes. Producción/R2 vigente: `62.172` filas.
+8. **InfoLobby:** mantener el universo productivo `71.467` y mejorar el texto
+   de corte parcial para que no se interprete como muestra de 40 filas.
+9. **DIPRES:** mantenerla agregada; actualizar su corte según calendario y
+   separar presupuesto, ejecución y series históricas sin convertirla en ficha
+   salarial individual.
+10. **Votaciones:** Cámara y Senado tienen cortes distintos; comprobar que la
+    interfaz muestre el último período por cámara y conservar las votaciones
+    destacadas sólo en la home.
+11. **Validación final:** ejecutar el doble `verify-prod-full`, smoke de rutas,
+    crawl frío, revisión móvil de remuneraciones, CSP/GA4 y comprobación de
+    checksums después de cada bloque publicado.
+
+### Cola histórica que no debe mezclarse con el cierre
+
+Los PR abiertos antiguos (`#175`, `#83`, `#73`, `#33`, `#19`, `#12` y varios
+Dependabot) no forman parte automáticamente de este cierre. Sólo se revisarán
+si afectan una ruta actual, seguridad o dependencia reproducible; no se
+fusionarán por antigüedad ni para “limpiar” la lista de GitHub.
+
+### Resultado de la revisión
+
+El proyecto no está totalmente cerrado todavía. D1 y los bloques de Senado,
+InfoProbidad, movimientos, ChileCompra-guard y verificadores están estabilizados.
+El trabajo pendiente sustantivo es reconciliar fuentes y frescura —CPLT,
+ChileCompra, 38 bis, Cámara/Senado, Contraloría, Ley 19.862, InfoLobby, DIPRES
+y votaciones— y luego ejecutar la validación final. Ninguna de esas tareas
+requiere reactivar D1 para datos públicos.
