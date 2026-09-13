@@ -149,3 +149,14 @@ No se usó D1 en estas comprobaciones. El workflow todavía conserva un paso opc
 El barrido HTTP acotado confirmó HTTP 200 para home, municipalidades, movimientos, remuneraciones, servicios públicos, cruces, personas, salud y fuentes. San Fernando también responde correctamente en la ruta canónica `/entidades/municipality-cl-06301/` (y en `/municipalidades/muni-sanfernando/`); la prueba contra `/municipalidades/municipality-cl-06301/` fue un falso negativo porque esa combinación de prefijo e identificador no es una ruta válida.
 
 La ruta canónica de votaciones es `/votaciones-destacadas/`; `/votaciones/` no existe y no debe usarse como prueba de disponibilidad. No se detectó una regresión en esos módulos por este barrido.
+
+## Cierre de bloque D1 y publicación 38 bis — 13 de septiembre de 2026
+
+- PR #505 quedó integrado en `main` con merge `908ee9983c3db7ba66b47405d18b863016abbc21`; la materialización remota D1 requiere ahora doble opt-in explícito.
+- PR #510 quedó integrado con merge `59dbf4c1830b28d9114d16650be741a29d90f8d7`; Remuneraciones públicas expone el corte 38 bis `2026-06` con 1.634 registros.
+- PR #509 quedó integrado con merge `2d79b357e45f47c2ecb090dc9fa9bbefd7be69db`; la auditoría de InfoProbidad queda versionada en el repositorio maestro.
+- Las verificaciones post-merge de Pages estático y del guard de publicación terminaron `success`.
+- El health productivo continúa con `publicDataBackend=r2`, `publicD1Reads=false`, `d1TransferRows=0` y `transferSource=r2`.
+- Los PR #490 y #492 fueron cerrados como supersedidos; no se borraron sus ramas ni su historial.
+
+El E2E antiguo iniciado por el primer merge quedó reemplazado por la corrida consolidada posterior; los resultados verdes de Pages, guard, seguridad, calidad y ETL son los que se consideran válidos para este cierre.
