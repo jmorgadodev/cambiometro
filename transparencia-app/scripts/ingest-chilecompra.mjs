@@ -6,6 +6,7 @@ import { gzipDeterministicJsonl, stableStringify } from "./etl/core.mjs";
 import { buildLakePlan } from "./etl/lake.mjs";
 import { createCheckpointFetch } from "./etl/checkpoint-cache.mjs";
 import { loadOfficialBulkLicitaciones } from "./etl/chilecompra-bulk.mjs";
+import { assertChileCompraReleaseUsable } from "./etl/chilecompra-release-guard.mjs";
 
 function argument(name) {
   const index = process.argv.indexOf(name);
@@ -50,6 +51,7 @@ const result = await fetchChileCompraMonth({
   },
 });
 const projectedRecords = filterChileCompraRecordsByCutoff(result.records, cutoff);
+const releaseSummary = assertChileCompraReleaseUsable({ result, projectedRecords });
 const originalProjection = await gzipDeterministicJsonl(
   result.documents.map((document) => ({ url: document.url, procurementType: document.procurementType, stage: document.stage, payload: document.payload })),
   (a, b) => a.url.localeCompare(b.url),
@@ -112,4 +114,4 @@ const publishPlan = {
   })),
 };
 writeFileSync(join(outputRoot, "publish-plan.json"), `${JSON.stringify(publishPlan, null, 2)}\n`, "utf8");
-console.log(JSON.stringify({ source: "chilecompra", period: result.period, cutoff, listingCounts: result.listingCounts, bulkCoverage: result.bulkCoverage, documents: result.documents.length, rejectedDocuments: result.rejectedDocuments.length, records: projectedRecords.length, recordsBeforeCutoff: result.records.length, originalChecksumSha256, originalSize, originalArchived: false, assets: plan.assets.length, output: outputRoot }, null, 2));
+console.log(JSON.stringify({ source: "chilecompra", ...releaseSummary, cutoff, listingCounts: result.listingCounts, bulkCoverage: result.bulkCoverage, rejectedDocuments: result.rejectedDocuments.length, recordsBeforeCutoff: result.records.length, originalChecksumSha256, originalSize, originalArchived: false, assets: plan.assets.length, output: outputRoot }, null, 2));
