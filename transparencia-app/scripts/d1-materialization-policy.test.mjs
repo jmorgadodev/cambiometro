@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { classifyD1MaterializationFailure, summaryForD1Deferral } from "./d1-materialization-policy.mjs";
+import {
+  D1_MATERIALIZATION_CONFIRMATION,
+  canMaterializeD1,
+  classifyD1MaterializationFailure,
+  summaryForD1Deferral,
+} from "./d1-materialization-policy.mjs";
 
 describe("política de materialización D1 opcional", () => {
   it("degrada el límite diario de rows_read a advertencia", () => {
@@ -25,5 +30,24 @@ describe("política de materialización D1 opcional", () => {
   it("genera un resumen accionable para Actions", () => {
     expect(summaryForD1Deferral("asset_unavailable", "infolobby")).toContain("infolobby");
     expect(summaryForD1Deferral("asset_unavailable", "infolobby")).toContain("R2/Pages");
+  });
+
+  it("mantiene D1 cerrado sin opt-in explícito", () => {
+    expect(canMaterializeD1({})).toBe(false);
+    expect(canMaterializeD1({ D1_ALLOW_REMOTE_MATERIALIZATION: "true" })).toBe(false);
+  });
+
+  it("sólo abre D1 con la confirmación y la bandera correctas", () => {
+    expect(canMaterializeD1({
+      D1_ALLOW_REMOTE_MATERIALIZATION: "true",
+      D1_MATERIALIZATION_CONFIRMATION,
+    })).toBe(true);
+  });
+
+  it("rechaza confirmaciones alteradas", () => {
+    expect(canMaterializeD1({
+      D1_ALLOW_REMOTE_MATERIALIZATION: "true",
+      D1_MATERIALIZATION_CONFIRMATION: "CAMBIOMETRO_D1_BACKUP",
+    })).toBe(false);
   });
 });

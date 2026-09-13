@@ -12,6 +12,7 @@ import { tmpdir } from "node:os";
 import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
 import { assertCanonicalTransferRelease } from "./etl/transfer-release-guard.mjs";
 import { shouldSkipTransferMaterialization } from "./etl/transfer-materialization.mjs";
+import { canMaterializeD1 } from "./d1-materialization-policy.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const database = argument("--database", "transparencia-db");
@@ -23,6 +24,9 @@ const source = resolve(
 );
 const dryRun = process.argv.includes("--dry-run");
 const skipUnchanged = process.argv.includes("--skip-unchanged");
+if (!dryRun && !canMaterializeD1()) {
+  throw new Error("TRANSFER_D1_EXPLICIT_OPT_IN_REQUIRED");
+}
 // Keep each remote SQL statement comfortably below SQLite's statement-size
 // limit. The row count and checksum remain unchanged; only upload batching
 // changes.

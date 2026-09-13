@@ -17,6 +17,13 @@ const DEFERRED_FAILURES = Object.freeze([
   { reason: "database_size_limit", pattern: /Exceeded maximum DB size|maximum database size/i },
 ]);
 
+export const D1_MATERIALIZATION_CONFIRMATION = "CAMBIOMETRO_D1_RETAINED";
+
+export function canMaterializeD1(environment = process.env) {
+  return environment?.D1_ALLOW_REMOTE_MATERIALIZATION === "true"
+    && environment?.D1_MATERIALIZATION_CONFIRMATION === D1_MATERIALIZATION_CONFIRMATION;
+}
+
 export function classifyD1MaterializationFailure(output) {
   const text = String(output ?? "");
   return DEFERRED_FAILURES.find(({ pattern }) => pattern.test(text))?.reason ?? null;
