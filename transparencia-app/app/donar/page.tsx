@@ -202,14 +202,14 @@ export default function DonarPage() {
               >
                 LinkedIn de Jorge Morgado ↗
               </a>
-              <Link
+              <Link prefetch={false}
                 href="/datos/calidad"
                 className="btn btn-secondary"
                 style={{ padding: "0.6rem 1.15rem", fontSize: "0.82rem" }}
               >
                 Dashboard de Calidad →
               </Link>
-              <Link
+              <Link prefetch={false}
                 href="/como-funciona"
                 className="btn btn-secondary"
                 style={{ padding: "0.6rem 1.15rem", fontSize: "0.82rem" }}
@@ -271,7 +271,7 @@ export default function DonarPage() {
               >
                 Instagram @cambiometro ↗
               </a>
-              <Link
+              <Link prefetch={false}
                 href="/datos"
                 className="btn btn-secondary"
                 style={{ padding: "0.55rem 1rem", fontSize: "0.8rem" }}

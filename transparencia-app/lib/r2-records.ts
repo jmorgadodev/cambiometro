@@ -1,5 +1,5 @@
-import type { EvidenceRecord } from "@/lib/data-contracts";
-import type { R2PublicCatalog } from "@/lib/r2-catalog";
+import type { EvidenceRecord } from "./data-contracts";
+import type { R2PublicCatalog } from "./r2-catalog";
 
 interface LakeRecord {
   id: string;
@@ -21,30 +21,14 @@ interface R2ObjectBodyLike {
 }
 
 interface R2BucketLike {
-  get(key: string): Promise<R2ObjectBodyLike | null>;
-  put?(key: string, value: ArrayBuffer): Promise<unknown>;
+  get(key: string, options?: { range?: { offset: number; length: number } }): Promise<R2ObjectBodyLike | null>;
 }
 
-const RELEASE_BASE_URL = "https://github.com/jmorgadodev/transparencia.impulsacv.cl/releases/download";
-
-function bufferedObject(data: ArrayBuffer): R2ObjectBodyLike {
-  return {
-    async json<T>() { return JSON.parse(new TextDecoder().decode(data)) as T; },
-    async arrayBuffer() { return data; },
-  };
-}
-
-async function readHotOrArchivedObject(bucket: R2BucketLike, key: string, releaseTag: string, releaseAssetName: string) {
-  const hot = await bucket.get(key);
-  if (hot) return hot;
-  const url = `${RELEASE_BASE_URL}/${encodeURIComponent(releaseTag)}/${encodeURIComponent(releaseAssetName)}`;
-  const response = await fetch(url, { headers: { Accept: "application/octet-stream" } });
-  if (!response.ok) return null;
-  const data = await response.arrayBuffer();
-  if (bucket.put) {
-    try { await bucket.put(key, data.slice(0)); } catch { /* A cold read remains valid when cache writes are unavailable. */ }
-  }
-  return bufferedObject(data);
+async function readR2Object(bucket: R2BucketLike, key: string) {
+  // R2 is the canonical public data plane. A missing object remains an
+  // incomplete partition; a public read never consults a retired repository
+  // and never writes back into storage.
+  return bucket.get(key);
 }
 
 async function checksumSha256(data: ArrayBuffer) {
@@ -105,8 +89,211 @@ function cursorOffset(cursor?: string) {
   return Number.parseInt(cursor.slice(3), 36);
 }
 
+function outsideDateRange(date: string, from?: string, to?: string) {
+  const period = date.slice(0, 7);
+  if (from && (from.length === 7 ? period < from : date < from)) return true;
+  if (to && (to.length === 7 ? period > to : date > to)) return true;
+  return false;
+}
+
+interface IndexedRecordsManifest {
+  schemaVersion: number;
+  sourceId: string;
+  totalRows: number;
+  pageSize: number;
+  recordArchiveKey: string;
+  pages: Array<{ offset: number; length: number }>;
+  searchIndexKey?: string;
+  searchCountIndexKey?: string;
+}
+
+function searchTerms(query: string) {
+  return [...new Set(query.toLocaleLowerCase("es-CL").match(/[\p{L}\p{N}]{3,}/gu) ?? [])];
+}
+
+function indexedRecordMatches(record: EvidenceRecord, params: {
+  entityId?: string;
+  recordIds?: string[];
+  kind?: EvidenceRecord["kind"];
+  from?: string;
+  to?: string;
+  query?: string;
+}) {
+  const date = record.occurredAt?.slice(0, 10) ?? "";
+  if (params.entityId && !record.subjectEntityIds.includes(params.entityId) && !record.objectEntityIds.includes(params.entityId)) return false;
+  if (params.recordIds && !params.recordIds.includes(record.id)) return false;
+  if (params.kind && record.kind !== params.kind) return false;
+  if (outsideDateRange(date, params.from, params.to)) return false;
+  if (params.query) {
+    const haystack = JSON.stringify({ id: record.id, title: record.title, description: record.description, data: record.data }).toLocaleLowerCase("es-CL");
+    if (!haystack.includes(params.query.toLocaleLowerCase("es-CL"))) return false;
+  }
+  return true;
+}
+
+async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeof readR2EvidenceRecords>[1]) {
+  const sourceIds = Array.isArray(params.source) ? params.source : [params.source];
+  if (sourceIds.length !== 1 || !["chilecompra", "infolobby", "infoprobidad"].includes(sourceIds[0])) return null;
+  const sourceId = sourceIds[0];
+  const manifestObject = await bucket.get(`indexes/v1/${sourceId}/manifest.json`);
+  if (!manifestObject) return null;
+  const manifest = await manifestObject.json<IndexedRecordsManifest>();
+  if (manifest.schemaVersion !== 1 || manifest.sourceId !== sourceId || !Array.isArray(manifest.pages)) return null;
+  let catalogExpectedTotal: number | null = null;
+  const catalogObject = await bucket.get("catalog/v1/manifest.json");
+  if (catalogObject) {
+    const catalog = await catalogObject.json<R2PublicCatalog>();
+    const catalogSource = catalog.sources?.find((source) => source.id === sourceId);
+    if (catalogSource && Number.isFinite(Number(catalogSource.recordCount))) {
+      catalogExpectedTotal = Number(catalogSource.recordCount);
+    }
+  }
+  const expectedTotal = catalogExpectedTotal ?? manifest.totalRows;
+  const missingIndexedRows = Math.max(0, expectedTotal - manifest.totalRows);
+  const offset = cursorOffset(params.cursor);
+  const limit = Math.min(Math.max(params.limit, 1), 100);
+  const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || params.from || params.to);
+  let candidatePages = manifest.pages.map((_, index) => index);
+  const query = params.query?.trim();
+  let indexedQueryTotal: number | null = null;
+  if (query && manifest.searchIndexKey) {
+    const searchObject = await bucket.get(manifest.searchIndexKey);
+    if (!searchObject) return null;
+    const index = await searchObject.json<Record<string, number[]>>();
+    const terms = searchTerms(query);
+    if (terms.length > 0) {
+      if (terms.length === 1 && manifest.searchCountIndexKey && !params.entityId && !params.recordIds && !params.kind && !params.from && !params.to) {
+        const countObject = await bucket.get(manifest.searchCountIndexKey);
+        if (countObject) {
+          const counts = await countObject.json<Record<string, number>>();
+          indexedQueryTotal = counts[terms[0]] ?? 0;
+        }
+      }
+      const pageSets = terms.map((term) => new Set(index[term] ?? []));
+      if (pageSets.some((pages) => pages.size === 0)) return { data: [], total: 0, limit, nextCursor: null };
+      candidatePages = [...pageSets[0]].filter((page) => pageSets.every((pages) => pages.has(page))).sort((a, b) => a - b);
+    }
+  }
+  if (!hasFilters) {
+    const firstPageIndex = Math.floor(offset / manifest.pageSize);
+    const lastPageIndex = Math.floor(Math.max(offset, offset + limit - 1) / manifest.pageSize);
+    candidatePages = manifest.pages
+      .map((_, index) => index)
+      .filter((index) => index >= firstPageIndex && index <= lastPageIndex);
+  }
+
+  // A non-filtered request reads one physical page at a time. Its offset is
+  // global, but the page body starts at that page's own offset.
+  const selectionOffset = hasFilters
+    ? offset
+    : offset - Math.floor(offset / manifest.pageSize) * manifest.pageSize;
+  const selected: EvidenceRecord[] = [];
+  let total = 0;
+  let exhausted = false;
+  for (let index = 0; index < candidatePages.length && !exhausted;) {
+    const firstPageIndex = candidatePages[index];
+    let lastPageIndex = firstPageIndex;
+    while (index + 1 < candidatePages.length
+      && candidatePages[index + 1] === lastPageIndex + 1
+      && manifest.pages[candidatePages[index + 1]].offset + manifest.pages[candidatePages[index + 1]].length - manifest.pages[firstPageIndex].offset <= 1_000_000) {
+      index += 1;
+      lastPageIndex = candidatePages[index];
+    }
+    const firstPage = manifest.pages[firstPageIndex];
+    const lastPage = manifest.pages[lastPageIndex];
+    const object = await bucket.get(manifest.recordArchiveKey, {
+      range: { offset: firstPage.offset, length: lastPage.offset + lastPage.length - firstPage.offset },
+    });
+    if (!object) return null;
+    const pageText = new TextDecoder().decode(await object.arrayBuffer());
+    for (const line of pageText.split("\n")) {
+      if (!line) continue;
+      const lakeRecord = JSON.parse(line) as LakeRecord;
+      const record = projectLakeEvidence(lakeRecord, null, null);
+      if (!indexedRecordMatches(record, params)) continue;
+      if (total >= selectionOffset && selected.length < limit) selected.push(record);
+      total += 1;
+      if (indexedQueryTotal !== null && selected.length >= limit && total >= selectionOffset + limit) {
+        exhausted = true;
+        break;
+      }
+    }
+    index += 1;
+  }
+  const resultTotal = indexedQueryTotal ?? (hasFilters ? total : manifest.totalRows);
+  return {
+    data: selected,
+    total: resultTotal,
+    limit,
+    nextCursor: offset + selected.length < resultTotal
+      ? `v1_${(offset + selected.length).toString(36)}`
+      : null,
+    expectedTotal,
+    loadedRows: manifest.totalRows,
+    complete: missingIndexedRows === 0,
+    missingPartitions: missingIndexedRows > 0 ? 1 : 0,
+    missingArtifacts: 0,
+  };
+}
+
+const MAX_UNINDEXED_FILTER_PARTITIONS = 12;
+
+async function readPartitionRecords(
+  bucket: R2BucketLike,
+  partition: { sourceId: string; period: string; manifestKey: string },
+  catalogGeneratedAt: string | null,
+) {
+  const manifestObject = await readR2Object(bucket, partition.manifestKey);
+  if (!manifestObject) return null;
+  const manifest = await manifestObject.json<PartitionManifest>();
+  const artifacts = manifest.artifacts
+    .filter((artifact) => /records(?:-[^/]+)?\.jsonl\.gz(?:\.part-\d+)?$/.test(artifact.key))
+    .sort((left, right) => left.key.localeCompare(right.key));
+  if (artifacts.length === 0) return { records: [] as EvidenceRecord[], loadedRows: 0, missingArtifacts: 0, incomplete: true };
+
+  const chunks: Uint8Array[] = [];
+  let missingArtifacts = 0;
+  for (const artifact of artifacts) {
+    const object = await readR2Object(bucket, artifact.key);
+    if (!object) {
+      missingArtifacts += 1;
+      continue;
+    }
+    const data = await object.arrayBuffer();
+    if (await checksumSha256(data) !== artifact.checksumSha256) throw new Error(`ARCHIVE_CHECKSUM_MISMATCH: ${artifact.key}`);
+    chunks.push(new Uint8Array(data));
+  }
+  if (chunks.length !== artifacts.length) return { records: [] as EvidenceRecord[], loadedRows: 0, missingArtifacts, incomplete: true };
+
+  const total = chunks.reduce((size, chunk) => size + chunk.byteLength, 0);
+  const compressed = new Uint8Array(total);
+  let position = 0;
+  for (const chunk of chunks) { compressed.set(chunk, position); position += chunk.byteLength; }
+  const text = await decompressGzip(compressed);
+  const records = text.split("\n")
+    .filter(Boolean)
+    .map((line) => projectLakeEvidence(JSON.parse(line) as LakeRecord, manifest.projectionChecksumSha256, catalogGeneratedAt))
+    .sort((left, right) => (right.occurredAt ?? "").localeCompare(left.occurredAt ?? "") || left.id.localeCompare(right.id));
+  return { records, loadedRows: records.length, missingArtifacts, incomplete: false };
+}
+
+function matchesIndexedParams(record: EvidenceRecord, params: Parameters<typeof readR2EvidenceRecords>[1]) {
+  const date = record.occurredAt?.slice(0, 10) ?? "";
+  if (params.entityId && !record.subjectEntityIds.includes(params.entityId) && !record.objectEntityIds.includes(params.entityId)) return false;
+  if (params.recordIds && !params.recordIds.includes(record.id)) return false;
+  if (params.kind && record.kind !== params.kind) return false;
+  if (outsideDateRange(date, params.from, params.to)) return false;
+  if (params.query) {
+    const haystack = JSON.stringify({ id: record.id, title: record.title, description: record.description, data: record.data }).toLocaleLowerCase("es-CL");
+    if (!haystack.includes(params.query.toLocaleLowerCase("es-CL"))) return false;
+  }
+  return true;
+}
+
 export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   source: string | string[];
+  variant?: string | string[];
+  query?: string;
   entityId?: string;
   recordIds?: string[];
   kind?: EvidenceRecord["kind"];
@@ -115,51 +302,87 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   limit: number;
   cursor?: string;
 }) {
+  const indexed = await readIndexedRecords(bucket, params);
+  if (indexed) return indexed;
   const catalogObject = await bucket.get("catalog/v1/manifest.json");
   if (!catalogObject) return null;
   const catalog = await catalogObject.json<R2PublicCatalog>();
   const sourceIds = Array.isArray(params.source) ? params.source : [params.source];
+  const variants = params.variant === undefined
+    ? null
+    : Array.isArray(params.variant) ? params.variant : [params.variant];
   const partitions = catalog.partitions.filter((partition) => sourceIds.includes(partition.sourceId)
+    && (!variants || variants.includes(partition.variant ?? partition.sourceId))
     && (!params.from || partition.period >= params.from.slice(0, 7))
     && (!params.to || partition.period <= params.to.slice(0, 7)));
-  const records: EvidenceRecord[] = [];
-  for (const partition of partitions) {
-    const [year, month] = partition.period.split("-");
-    const releaseTag = partition.releaseTag ?? `data-${partition.sourceId}-${year}`;
-    const manifestAssetName = `${partition.sourceId}-${year}-${month}-manifest.json`;
-    const manifestObject = await readHotOrArchivedObject(bucket, partition.manifestKey, releaseTag, manifestAssetName);
-    if (!manifestObject) continue;
-    const manifest = await manifestObject.json<PartitionManifest>();
-    const artifacts = manifest.artifacts.filter((artifact) => /records\.jsonl\.gz(?:\.part-\d+)?$/.test(artifact.key)).sort((a, b) => a.key.localeCompare(b.key));
-    const chunks = [];
-    for (const artifact of artifacts) {
-      const object = await readHotOrArchivedObject(bucket, artifact.key, releaseTag, artifact.releaseAssetName);
-      if (!object) continue;
-      const data = await object.arrayBuffer();
-      if (await checksumSha256(data) !== artifact.checksumSha256) throw new Error(`ARCHIVE_CHECKSUM_MISMATCH: ${artifact.key}`);
-      chunks.push(new Uint8Array(data));
+  if (partitions.length === 0) return null;
+  const orderedPartitions = [...partitions].sort((left, right) => right.period.localeCompare(left.period) || right.manifestKey.localeCompare(left.manifestKey));
+  const expectedTotal = orderedPartitions.every((partition) => Number.isFinite(Number(partition.recordCount)))
+    ? orderedPartitions.reduce((total, partition) => total + Number(partition.recordCount), 0)
+    : null;
+  const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || params.from || params.to);
+  const limit = Math.min(Math.max(params.limit, 1), 100);
+  const offset = cursorOffset(params.cursor);
+
+  // An unindexed query would require decompressing the complete history in a
+  // single Worker invocation. Refuse it before it can become a Cloudflare
+  // 1102; callers can narrow the period or use a published search index.
+  if (hasFilters && orderedPartitions.length > MAX_UNINDEXED_FILTER_PARTITIONS && !params.from && !params.to) {
+    return {
+      data: [] as EvidenceRecord[], total: 0, limit, nextCursor: null,
+      expectedTotal, loadedRows: 0, complete: false, missingPartitions: 0, missingArtifacts: 0,
+      scanLimited: true,
+    };
+  }
+
+  const data: EvidenceRecord[] = [];
+  let matched = 0;
+  let loadedRows = 0;
+  // Preserve catalog-level gaps during early pagination. Otherwise page 1
+  // could advertise the expected total while silently omitting a missing
+  // historical partition that has not been read yet.
+  const knownMissingPartitionIds = new Set(orderedPartitions
+    .filter((partition) => !partition.manifestKey || partition.checksumSha256 === "missing")
+    .map((partition) => partition.id));
+  let missingPartitions = knownMissingPartitionIds.size;
+  let missingArtifacts = 0;
+  let scannedAll = true;
+  for (const partition of orderedPartitions) {
+    if (knownMissingPartitionIds.has(partition.id)) continue;
+    if (!hasFilters && matched >= offset + limit) {
+      scannedAll = false;
+      break;
     }
-    if (chunks.length === 0) continue;
-    const total = chunks.reduce((size, chunk) => size + chunk.byteLength, 0);
-    const compressed = new Uint8Array(total);
-    let position = 0;
-    for (const chunk of chunks) { compressed.set(chunk, position); position += chunk.byteLength; }
-    const text = await decompressGzip(compressed);
-    for (const line of text.split("\n")) {
-      if (!line) continue;
-      const record = projectLakeEvidence(JSON.parse(line) as LakeRecord, manifest.projectionChecksumSha256, catalog.generatedAt);
-      const date = record.occurredAt?.slice(0, 10) ?? "";
-      if (params.entityId && !record.subjectEntityIds.includes(params.entityId) && !record.objectEntityIds.includes(params.entityId)) continue;
-      if (params.recordIds && !params.recordIds.includes(record.id)) continue;
-      if (params.kind && record.kind !== params.kind) continue;
-      if (params.from && date < params.from) continue;
-      if (params.to && date > params.to) continue;
-      records.push(record);
+    const result = await readPartitionRecords(bucket, partition, catalog.generatedAt);
+    if (!result) {
+      missingPartitions += 1;
+      continue;
+    }
+    loadedRows += result.loadedRows;
+    missingArtifacts += result.missingArtifacts;
+    if (result.incomplete) {
+      missingPartitions += 1;
+      continue;
+    }
+    for (const record of result.records) {
+      if (!matchesIndexedParams(record, params)) continue;
+      if (matched >= offset && data.length < limit) data.push(record);
+      matched += 1;
     }
   }
-  records.sort((a, b) => (b.occurredAt ?? "").localeCompare(a.occurredAt ?? "") || a.id.localeCompare(b.id));
-  const offset = cursorOffset(params.cursor);
-  const data = records.slice(offset, offset + params.limit);
-  const next = offset + data.length;
-  return { data, total: records.length, limit: params.limit, nextCursor: next < records.length ? `v1_${next.toString(36)}` : null };
+  const partial = missingPartitions > 0 || missingArtifacts > 0;
+  const total = hasFilters || partial ? matched : expectedTotal ?? matched;
+  const complete = !partial && (hasFilters ? scannedAll : scannedAll && (expectedTotal === null || matched === expectedTotal));
+  return {
+    data,
+    total,
+    limit,
+    nextCursor: offset + data.length < total ? `v1_${(offset + data.length).toString(36)}` : null,
+    expectedTotal,
+    loadedRows,
+    complete,
+    missingPartitions,
+    missingArtifacts,
+    scanLimited: false,
+  };
 }

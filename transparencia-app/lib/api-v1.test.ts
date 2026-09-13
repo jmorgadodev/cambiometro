@@ -1,13 +1,17 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import { gzipSync } from "node:zlib";
 import api from "../workers/public-api/index";
 import { parseRelationQuery } from "./api-v1";
 
-function testEnv() {
+function testEnv(transferRows = 59361, releaseRows = transferRows) {
   const statement = (sql: string, bindings: unknown[] = []) => ({
     bind(...values: unknown[]) {
       return statement(sql, values);
     },
     async first<T>() {
+      if (sql.includes("FROM transferencias_19862_release")) return { checksum_sha256: "release-checksum", total_rows: releaseRows } as T;
+      if (sql.includes("FROM transferencias_19862")) return { total: transferRows } as T;
+      if (sql.includes("FROM politicos")) return null;
       if (sql.includes("count(*)")) return { total: sql.includes("relations") ? 2 : sql.includes("records") ? 4 : 1 } as T;
       if (sql.includes("WHERE id = ?")) return bindings[0] === "no-existe" ? null : { id: bindings[0], kind: "person", name: "Persona de prueba", identifiers_json: "[]", attributes_json: "{}", source_ids_json: "[]" } as T;
       return null;
@@ -19,12 +23,734 @@ function testEnv() {
       return { results: [] } as T;
     },
   });
-  return { DB: { prepare: (sql: string) => statement(sql) } } as never;
+  return { DB: { prepare: (sql: string) => statement(sql) }, ALLOW_PUBLIC_D1_READS: "1" } as never;
 }
 
 const fetchApi = (url: string) => api.fetch(new Request(url), testEnv());
 
+function transferR2Env() {
+  const files: Record<string, unknown> = {
+    "projections/transferencias-v1/manifest.json": {
+      schemaVersion: 1,
+      dataset: "ley-19862-transferencias",
+      generatedAt: "2026-08-25T00:00:00.000Z",
+      totalRows: 59361,
+      pageSize: 50,
+      totalPages: 1188,
+      checksumSha256: "release-checksum",
+      expected: { totalMontoClp: 5011094170302, totalReceptores: 14640, totalEmisores: 272 },
+      pages: [
+        { page: 1, count: 2, key: "projections/transferencias-v1/releases/release-checksum/p-0001.json" },
+        ...Array.from({ length: 1187 }, (_, index) => ({
+          page: index + 2,
+          count: 50,
+          key: `projections/transferencias-v1/releases/release-checksum/p-${String(index + 2).padStart(4, "0")}.json`,
+        })),
+      ],
+      searchIndex: { key: "projections/transferencias-v1/releases/release-checksum/search-index.json", count: 59361 },
+    },
+    "projections/transferencias-v1/releases/release-checksum/p-0001.json": [
+      { id: "tr-1", fecha: "2026-08-01", period: "2026", title: "Fondo educacional", emitter_name: "MINEDUC", receiver_name: "VIÑA BUS S.A.", monto_clp: 347920910, url: "https://registros19862.gob.cl/registro/tr-1" },
+      { id: "tr-2", fecha: "2026-08-02", period: "2026", title: "Programa cultural", emitter_name: "MINEDUC", receiver_name: "Fundación Chile", monto_clp: 1000, url: "https://registros19862.gob.cl/registro/tr-2" },
+    ],
+    "projections/transferencias-v1/releases/release-checksum/search-index.json": [
+      { i: 0, p: 1, y: "2026", d: "2026-08-01", e: "MINEDUC", r: "VIÑA BUS S.A.", t: "Fondo educacional", m: 347920910 },
+      { i: 1, p: 1, y: "2026", d: "2026-08-02", e: "MINEDUC", r: "Fundación Chile", t: "Programa cultural", m: 1000 },
+    ],
+  };
+  return {
+    PUBLIC_DATA: {
+      get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T },
+    },
+  } as never;
+}
+
+function officialsR2Env() {
+  const files: Record<string, unknown> = {
+    "projections/funcionarios-v1/manifest.json": {
+      generatedAt: "2026-08-25T00:00:00.000Z",
+      version: "2026-08-25",
+      assets: [{ key: "projections/funcionarios-v1/versions/2026-08-25/muni-maipu.json" }],
+    },
+    "projections/funcionarios-v1/versions/2026-08-25/muni-maipu.json": [
+      { id: "func-1", nombre_completo: "Claudio Adaros", cargo: "Analista", tipo_contrato: "Contrata", estamento: "Profesional", remuneracion_bruta_mensual: 5894314, url: "https://www.cplt.cl/" },
+      { id: "func-2", nombre_completo: "Otra Persona", cargo: "Auxiliar", tipo_contrato: "Planta", estamento: "Auxiliar", remuneracion_bruta_mensual: 900000, url: "https://www.cplt.cl/" },
+      { id: "func-3", nombre_completo: "Persona Laboral", cargo: "Administrativa", tipo_contrato: "Código del Trabajo", estamento: "Administrativo", remuneracion_bruta_mensual: 1200000, url: "https://www.cplt.cl/" },
+    ],
+  };
+  return {
+    PUBLIC_DATA: {
+      get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T },
+    },
+  } as never;
+}
+
 describe("API canónica v1", () => {
+  it("consulta el directorio nacional por páginas sin exigir muni", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1203287,
+        pageSize: 2,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 2 }],
+        shards: {},
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [
+        { id: "func-1", n: "Claudio Adaros", c: "Analista", o: "Municipalidad de Maipú", t: "Contrata", e: "Profesional", b: 5894314 },
+        { id: "func-2", n: "Otra Persona", c: "Auxiliar", o: "Municipalidad de Maipú", t: "Planta", e: "Auxiliar", b: 900000 },
+      ],
+    };
+    const env = {
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?limit=2&include_zero=true"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toHaveLength(2);
+    expect(payload.meta.totalHeadcount).toBe(1203287);
+    expect(payload.meta.total).toBe(1203287);
+  });
+
+  it("usa R2 si D1 está temporalmente sin cuota de lectura", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1203287,
+        pageSize: 2,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 2 }],
+        shards: {},
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [
+        { id: "func-1", n: "Claudio Adaros", c: "Analista", o: "Municipalidad de Maipú", t: "Contrata", e: "Profesional", b: 5894314 },
+      ],
+    };
+    const statement = {
+      bind() { return statement; },
+      async first() { throw new Error("D1_ERROR: daily rows_read quota exceeded"); },
+      async all() { throw new Error("D1_ERROR: daily rows_read quota exceeded"); },
+    };
+    const env = {
+      DB: { prepare: () => statement },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?limit=1&include_zero=true"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data[0].nombre_completo).toBe("Claudio Adaros");
+    expect(payload.meta.totalHeadcount).toBe(1203287);
+    expect(payload.meta.sourceStatus).toBe("r2-search");
+  });
+
+  it("prefiere el índice nacional de R2 antes de tocar D1", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1203287,
+        pageSize: 2,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 1 }],
+        shards: {},
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [
+        { id: "func-1", n: "Claudio Adaros", c: "Analista", o: "Municipalidad de Maipú", t: "Contrata", e: "Profesional", b: 5894314 },
+      ],
+    };
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse cuando R2 está disponible"); } },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?limit=1&include_zero=true"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data[0].nombre_completo).toBe("Claudio Adaros");
+    expect(payload.meta.sourceStatus).toBe("r2-search");
+  });
+
+  it("aplica el período mensual desde un índice R2 sin consultar D1", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 2,
+        pageSize: 2,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 2 }],
+        shards: { an: "projections/funcionarios-v1/versions/2026-08-25/search_index/an.json" },
+        filters: {
+          "periodo:2026-07": { key: "projections/funcionarios-v1/versions/2026-08-25/search_index/filter-periodo-2026-07.json", count: 1 },
+          "calidad:observados": { key: "projections/funcionarios-v1/versions/2026-08-25/search_index/filter-quality-observed.json", count: 1 },
+        },
+        quality: { recordsWithIssues: 1, correctedRows: 0, observedRows: 1, byIssue: { remuneracion_liquida_no_informada: 1 } },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/an.json": [["ana", [0]]],
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/filter-periodo-2026-07.json": [0],
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/filter-quality-observed.json": [0],
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [
+        { id: "func-1", n: "Ana Pérez", c: "Profesional", o: "Municipalidad de Maipú", t: "Contrata", e: "Profesional", b: 1200000, p: "2026-07" },
+        { id: "func-2", n: "Ana Pérez", c: "Profesional", o: "Municipalidad de Maipú", t: "Contrata", e: "Profesional", b: 1100000, p: "2026-06" },
+      ],
+    };
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse para filtrar por período"); } },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?query=Ana&periodo=2026-07&calidad=observados&limit=20&include_zero=true"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toHaveLength(1);
+    expect(payload.data[0]).toMatchObject({ id: "func-1", fuente_periodo: "2026-07" });
+    expect(payload.meta.total).toBe(1);
+    expect(payload.meta.sourceStatus).toBe("r2-search");
+    expect(payload.meta.calidadDatos).toMatchObject({ alcance: "universo_publicado", registrosConIncidencias: 1, porIncidencia: { remuneracion_liquida_no_informada: 1 } });
+  });
+
+  it("mantiene el directorio consultable desde el catálogo R2 si D1 falla", async () => {
+    const files: Record<string, unknown> = {
+      "projections/static-site-v1/manifest.json": {
+        schemaVersion: 1,
+        dataset: "cambiometro-static-site-inputs",
+        files: [{
+          path: "data/catalog/entities-routes.json",
+          key: "projections/static-site-v1/releases/catalog/data/catalog/entities-routes.json",
+        }],
+      },
+      "projections/static-site-v1/releases/catalog/data/catalog/entities-routes.json": [
+        { id: "person-1", kind: "person", name: "Ana Pérez", identifiers: [], attributes: { office: "Diputada" }, sourceIds: ["camara"] },
+        { id: "municipality-1", kind: "municipality", name: "Municipalidad de Maipú", identifiers: [], attributes: {}, sourceIds: ["sinim"] },
+      ],
+    };
+    const statement = {
+      bind() { return statement; },
+      async first() { throw new Error("D1_ERROR: daily rows_read quota exceeded"); },
+      async all() { throw new Error("D1_ERROR: daily rows_read quota exceeded"); },
+    };
+    const env = {
+      DB: { prepare: () => statement },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/directorio?q=maipu&limit=1"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toHaveLength(1);
+    expect(payload.data[0]).toMatchObject({ id: "municipality-1", name: "Municipalidad de Maipú" });
+    expect(payload.meta).toMatchObject({ total: 1, limit: 1 });
+  });
+
+  it("mantiene la búsqueda del home disponible desde el catálogo R2", async () => {
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse para la búsqueda del catálogo"); } },
+      PUBLIC_DATA: {
+        get: async (key: string) => key === "projections/entities-v1/entities-routes.json"
+          ? { json: async <T>() => [{ id: "person-1", kind: "person", name: "Vanessa Kaiser", attributes: { cargo: "Senadora" }, identifiers: [], sourceIds: [] }] as T }
+          : null,
+      },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/search?q=Kaiser"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.autoridades[0]).toMatchObject({ nombre: "Vanessa Kaiser", type: "persona" });
+    expect(payload.meta.sourceStatus).toBe("r2-catalog");
+  });
+
+  it("lleva las municipalidades del buscador a su ficha territorial canónica", async () => {
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse para la búsqueda del catálogo"); } },
+      PUBLIC_DATA: {
+        get: async (key: string) => key === "projections/entities-v1/entities-routes.json"
+          ? {
+            json: async <T>() => [{
+              id: "municipality-cl-06301",
+              kind: "municipality",
+              name: "Municipalidad de San fernando",
+              attributes: { comuna: "06301" },
+              identifiers: [],
+              sourceIds: ["sinim"],
+            }] as T,
+          }
+          : null,
+      },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/search?q=San%20Fernando"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.municipalidades[0]).toMatchObject({
+      nombre: "Municipalidad de San fernando",
+      url: "/municipalidades/san-fernando",
+    });
+  });
+
+  it("incluye funcionarios del índice paginado R2 sin consultar D1", async () => {
+    const files: Record<string, unknown> = {
+      "projections/entities-v1/entities-routes.json": [],
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1203287,
+        pageSize: 2,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 1 }],
+        shards: { ma: "projections/funcionarios-v1/versions/2026-08-25/search_index/ma.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/ma.json": [["maipu", [0]]],
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [
+        { id: "func-maipu-1", n: "María Pérez", c: "Profesional", o: "Municipalidad de Maipú", t: "Contrata", e: "Profesional", b: 1200000 },
+      ],
+    };
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse para funcionarios del home"); } },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/search?q=Maipú"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.funcionarios[0]).toMatchObject({
+      id: "func-maipu-1",
+      nombre: "María Pérez",
+      type: "funcionario",
+    });
+  });
+
+  it("conserva la búsqueda de funcionarios si el catálogo de entidades no está disponible", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1,
+        pageSize: 1,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 1 }],
+        shards: { ma: "projections/funcionarios-v1/versions/2026-08-25/search_index/ma.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/ma.json": [["maipu", [0]]],
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [
+        { id: "func-maipu-2", n: "Jorge Funcionario", c: "Analista", o: "Municipalidad de Maipú", t: "Planta", e: "Profesional", b: 900000 },
+      ],
+    };
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse"); } },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/search?q=Maipú"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.funcionarios[0].id).toBe("func-maipu-2");
+  });
+
+  it("mantiene diputados y senadores buscables aunque D1 y el catálogo R2 no respondan", async () => {
+    const env = {
+      DB: { prepare: () => { throw new Error("D1_ERROR: daily rows_read quota exceeded"); } },
+      PUBLIC_DATA: { get: async () => null },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/search?q=Vanessa%20Kaiser"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.autoridades[0]).toMatchObject({
+      id: "sen-038",
+      nombre: "Vanessa Kaiser Barents-Von Hohenhagen",
+      type: "persona",
+      url: "/politico/vanessa-kaiser-barents-von-hohenhagen",
+    });
+  });
+
+  it("no duplica una persona cuando existe en ambos catálogos", async () => {
+    const files: Record<string, unknown> = {
+      "projections/entities-v1/entities-routes.json": [
+        { id: "person-camara-1110", kind: "person", name: "Carlos Bianchi Chelech", attributes: {}, identifiers: [], sourceIds: [] },
+      ],
+    };
+    const env = {
+      DB: { prepare: () => { throw new Error("D1_ERROR: daily rows_read quota exceeded"); } },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/search?q=Bianchi"), env);
+    const payload = await response.json();
+    const matches = payload.data.autoridades.filter((item: { nombre: string }) => item.nombre === "Carlos Bianchi Chelech");
+
+    expect(response.status).toBe(200);
+    expect(matches).toHaveLength(1);
+    expect(matches[0].url).toBe("/politico/carlos-bianchi-chelech");
+  });
+
+  it("no ejecuta un escaneo global de registros sin alcance", async () => {
+    const prepare = vi.fn(() => {
+      throw new Error("D1 no debe consultarse para un escaneo global");
+    });
+    const env = {
+      DB: { prepare },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/records?limit=1"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(400);
+    expect(payload).toMatchObject({ error: { code: "RECORD_SCOPE_REQUIRED" } });
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it("usa el conteo publicado para records por fuente sin escanear records", async () => {
+    const prepared: string[] = [];
+    const db = {
+      prepare(sql: string) {
+        prepared.push(sql);
+        const statement = {
+          bind() { return statement; },
+          async first<T>() {
+            if (/FROM source_state/i.test(sql)) return { total: 29890 } as T;
+            return null;
+          },
+          async all<T>() { return { results: [] } as T; },
+        };
+        return statement;
+      },
+    };
+
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/records?source=camara&limit=1"),
+      { DB: db, ALLOW_PUBLIC_D1_READS: "1" } as never,
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.total).toBe(29890);
+    expect(prepared.some((sql) => /COUNT\(\*\).*FROM records/i.test(sql))).toBe(false);
+    expect(prepared.some((sql) => /FROM source_state/i.test(sql))).toBe(true);
+  });
+
+  it("filtra registros por las tablas normalizadas y no por LIKE sobre JSON", async () => {
+    const prepared: string[] = [];
+    const db = {
+      prepare(sql: string) {
+        prepared.push(sql);
+        const statement = {
+          bind() { return statement; },
+          async first<T>() { return { total: 0 } as T; },
+          async all<T>() { return { results: [] } as T; },
+        };
+        return statement;
+      },
+    };
+
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/records?entity_id=person-1&limit=10"),
+      { DB: db, ALLOW_PUBLIC_D1_READS: "1" } as never,
+    );
+
+    expect(response.status).toBe(200);
+    expect(prepared.join("\n")).toContain("records.id IN");
+    expect(prepared.join("\n")).toContain("FROM record_subjects");
+    expect(prepared.join("\n")).toContain("FROM record_objects");
+    expect(prepared.join("\n")).not.toContain("subject_entity_ids_json LIKE");
+    expect(prepared.join("\n")).not.toContain("object_entity_ids_json LIKE");
+  });
+
+  it("sirve gastos operacionales desde el release R2 cuando D1 está agotado", async () => {
+    const files: Record<string, unknown> = {
+      "projections/static-site-v1/manifest.json": {
+        files: [{ path: "data/lake-subsets/gastos-camara.subset.json", key: "releases/expenses/camara.json" }],
+      },
+      "releases/expenses/camara.json": {
+        schemaVersion: 1,
+        sourceId: "gastos_camara",
+        generatedAt: "2026-09-02T00:00:00.000Z",
+        recordCount: 1,
+        records: [{
+          id: "expense-1",
+          diputado_id: "1009",
+          nombre: "Diputado de prueba",
+          fecha: "2026-08-01",
+          periodo: "2026-08",
+          item: "Traslado",
+          monto_clp: 10000,
+          url: "https://www.camara.cl/registro/expense-1",
+          fuente: "Cámara de Diputados",
+        }],
+      },
+    };
+    const env = {
+      DB: { prepare: () => { throw new Error("D1_ERROR: daily rows_read quota exceeded"); } },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/records?source=gastos_camara&limit=1"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta).toMatchObject({ total: 1, sourceBackend: "r2" });
+    expect(payload.data[0]).toMatchObject({ id: "expense-1", kind: "expense", sourceId: "gastos_camara", title: "Traslado" });
+  });
+
+  it("pagina el universo nacional de forma continua aunque R2 use bloques físicos mayores", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 6,
+        pageSize: 3,
+        pages: [
+          { page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 3 },
+          { page: 2, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0002.json", count: 3 },
+        ],
+        shards: {},
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [
+        { id: "func-1", n: "Persona 1", b: 1 },
+        { id: "func-2", n: "Persona 2", b: 2 },
+        { id: "func-3", n: "Persona 3", b: 3 },
+      ],
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0002.json": [
+        { id: "func-4", n: "Persona 4", b: 4 },
+        { id: "func-5", n: "Persona 5", b: 5 },
+        { id: "func-6", n: "Persona 6", b: 6 },
+      ],
+    };
+    const env = {
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?page=2&limit=2&include_zero=true&sortBy=nombre_asc"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.map((row: { id: string }) => row.id)).toEqual(["func-3", "func-4"]);
+    expect(payload.meta).toMatchObject({ total: 6, page: 2, totalPages: 3, limit: 2 });
+  });
+
+  it("combina filtros nacionales usando índices de posiciones sin perder filas", async () => {
+    const base = "projections/funcionarios-v1/versions/2026-08-25/search_index";
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: `${base}.json` },
+      },
+      [`${base}.json`]: {
+        schemaVersion: 1,
+        totalRows: 6,
+        pageSize: 3,
+        pages: [
+          { page: 1, key: `${base}/p-0001.json`, count: 3 },
+          { page: 2, key: `${base}/p-0002.json`, count: 3 },
+        ],
+        shards: {},
+        filters: {
+          "contrato:planta": { key: `${base}/filter-planta.json`, count: 3 },
+          "estamento:profesional": { key: `${base}/filter-profesional.json`, count: 4 },
+          "cargo:alcalde": { key: `${base}/filter-alcalde.json`, count: 2 },
+        },
+      },
+      [`${base}/p-0001.json`]: [
+        { id: "func-1", n: "Persona 1", c: "Alcaldesa", t: "Planta", e: "Profesional", b: 1 },
+        { id: "func-2", n: "Persona 2", t: "Contrata", e: "Profesional", b: 2 },
+        { id: "func-3", n: "Persona 3", t: "Planta", e: "Auxiliar", b: 3 },
+      ],
+      [`${base}/p-0002.json`]: [
+        { id: "func-4", n: "Persona 4", c: "Alcalde", t: "Planta", e: "Profesional", b: 4 },
+        { id: "func-5", n: "Persona 5", t: "Contrata", e: "Profesional", b: 5 },
+        { id: "func-6", n: "Persona 6", t: "Honorarios", e: "Auxiliar", b: 6 },
+      ],
+      [`${base}/filter-planta.json`]: [0, 2, 3],
+      [`${base}/filter-profesional.json`]: [0, 1, 3, 4],
+      [`${base}/filter-alcalde.json`]: [0, 3],
+    };
+    const env = {
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?contrato=Planta&estamento=Profesional&cargo=alcalde&page=1&limit=20&include_zero=true&sortBy=nombre_asc"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.map((row: { id: string }) => row.id)).toEqual(["func-1", "func-4"]);
+    expect(payload.meta).toMatchObject({ total: 2, page: 1, totalPages: 1, limit: 20 });
+  });
+
+  it("consulta todos los fragmentos de un shard nacional dividido", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 2,
+        pageSize: 2,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 2 }],
+        shards: {
+          cl: [
+            "projections/funcionarios-v1/versions/2026-08-25/search_index/cl-001.json",
+            "projections/funcionarios-v1/versions/2026-08-25/search_index/cl-002.json",
+          ],
+        },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [
+        { id: "func-1", n: "Claudio Adaros", c: "Analista", o: "Municipalidad de Maipú", b: 5894314 },
+        { id: "func-2", n: "Claudia Araya", c: "Abogada", o: "Municipalidad de Maipú", b: 1900000 },
+      ],
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/cl-001.json": [
+        ["claudio", [0]],
+      ],
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/cl-002.json": [
+        ["claudia", [1]],
+      ],
+    };
+    const env = {
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?query=Cla&include_zero=true&page=2&limit=1"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.map((row: { id: string }) => row.id)).toEqual(["func-2"]);
+    expect(payload.meta).toMatchObject({ total: 2, page: 2, totalPages: 2, limit: 1 });
+  });
+
+  it("expone health 200 cuando el release R2 canónico está disponible", async () => {
+    const env = { ...(testEnv() as object), ...(transferR2Env() as object), PREFER_TRANSFER_D1: "1", HEALTH_CHECK_D1: "1" } as never;
+    const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Cache-Control")).toBe("no-store");
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, publicDataBackend: "r2", publicD1Reads: true, d1TransferRows: 59361, transferRows: 59361, d1ReleaseChecksum: "release-checksum", transferSource: "d1" });
+  });
+
+  it("mantiene health operativo y marca D1 inconsistente cuando el puntero R2 difiere", async () => {
+    const env = { ...(testEnv(59361, 59360) as object), ...(transferR2Env() as object), HEALTH_CHECK_D1: "1" } as never;
+    const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, publicDataBackend: "r2", publicD1Reads: true, d1TransferRows: 59360, transferRows: 59361, d1Consistent: false, transferSource: "r2" });
+  });
+
+  it("usa sólo el puntero de release en health y nunca cuenta la tabla D1", async () => {
+    const prepare = vi.fn((sql: string) => {
+      if (sql.includes("FROM transferencias_19862 ")) throw new Error("health no debe contar la tabla de transferencias");
+      return { async first<T>() { return { checksum_sha256: "release-checksum", total_rows: 59361 } as T; } };
+    });
+    const response = await api.fetch(new Request("https://example.test/api/v1/health"), {
+      ...(transferR2Env() as object),
+      DB: { prepare },
+      HEALTH_CHECK_D1: "1",
+    } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toMatchObject({ d1TransferRows: 59361, d1Consistent: true, transferSource: "r2" });
+    expect(prepare).toHaveBeenCalledTimes(1);
+  });
+
+  it("no consulta el COUNT de transferencias en health por defecto", async () => {
+    const prepare = vi.fn(() => {
+      throw new Error("health no debe leer la tabla de transferencias");
+    });
+    const response = await api.fetch(new Request("https://example.test/api/v1/health"), {
+      ...(transferR2Env() as object),
+      DB: { prepare },
+    } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, publicDataBackend: "r2", publicD1Reads: false, d1TransferRows: 0, d1Consistent: false, transferSource: "r2" });
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it("mantiene health operativo cuando la proyección D1 opcional aún no existe", async () => {
+    const env = {
+      ...(transferR2Env() as object),
+      DB: {
+        prepare: (sql: string) => {
+          if (sql.includes("FROM transferencias_19862")) throw new Error("no such table: transferencias_19862");
+          throw new Error(`Unexpected health query: ${sql}`);
+        },
+      },
+    } as never;
+    const response = await api.fetch(new Request("https://example.test/api/v1/health"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 0, d1Consistent: false, transferSource: "r2", transferRows: 59361 });
+  });
+
+  it("devuelve 503 estructurado cuando el manifest R2 está corrupto", async () => {
+    const response = await api.fetch(new Request("https://example.test/api/v1/health"), {
+      ...(testEnv() as object),
+      PUBLIC_DATA: { get: async () => ({ json: async () => { throw new Error("invalid json"); } }) },
+    } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(503);
+    expect(payload.data).toMatchObject({ ok: false, d1: true, r2: false, transferRows: 0 });
+  });
+
+  it("bloquea escrituras D1 en el perfil remoto de preview", async () => {
+    const response = await api.fetch(new Request("https://example.test/api/v1/requests", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ tipo: "informacion", email: "preview@example.test", descripcion: "Solicitud de prueba del preview." }),
+    }), { ...(testEnv() as object), READ_ONLY_PREVIEW: "1" } as never);
+
+    expect(response.status).toBe(503);
+    expect(await response.json()).toMatchObject({ error: { code: "READ_ONLY_PREVIEW" } });
+  });
+
   it("acepta entity_id como ancla bidireccional de relaciones", () => {
     expect(
       parseRelationQuery(
@@ -47,6 +773,161 @@ describe("API canónica v1", () => {
     expect(payload.data.some((source: { status: string }) => source.status === "connected")).toBe(false);
   });
 
+  it("usa los conteos publicados y no escanea el histórico al listar fuentes", async () => {
+    const prepared: string[] = [];
+    const db = {
+      prepare(sql: string) {
+        prepared.push(sql);
+        const statement = {
+          bind() { return statement; },
+          async all() { return { results: [] }; },
+        };
+        return statement;
+      },
+    };
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/sources"),
+      { DB: db, ALLOW_PUBLIC_D1_READS: "1" } as never,
+    );
+
+    expect(response.status).toBe(200);
+    expect(prepared.some((sql) => /COUNT\(\*\).*FROM records/i.test(sql))).toBe(false);
+    expect(prepared.some((sql) => /source_state\.record_count/i.test(sql))).toBe(true);
+  });
+
+  it("prefiere el inventario R2 y evita D1 cuando está publicado", async () => {
+    const prepare = vi.fn(() => {
+      throw new Error("D1 no debe consultarse para el inventario público");
+    });
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/sources-v1/source-inventory.json") {
+          return { json: async <T>() => ({ sources: [{ id: "chilecompra", label: "ChileCompra" }] }) as T };
+        }
+        if (key === "projections/sources-v1/source-health.json") {
+          return { json: async <T>() => ({ sources: { chilecompra: { recordCount: 74142, status: "connected" } } }) as T };
+        }
+        return null;
+      },
+    };
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/sources"), { DB: { prepare }, PUBLIC_DATA } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data[0]).toMatchObject({ id: "chilecompra", recordCount: 74142, status: "connected" });
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it("sirve el catálogo de fuentes desde R2 si D1 agotó su cuota", async () => {
+    const env = {
+      DB: { prepare: () => { throw new Error("D1_ERROR: daily rows_read quota exceeded"); } },
+      PUBLIC_DATA: {
+        get: async (key: string) => {
+          if (key === "projections/sources-v1/source-inventory.json") {
+            return { json: async <T>() => ({ sources: [{ id: "camara", label: "Cámara", status: "partial" }] }) as T };
+          }
+          if (key === "projections/sources-v1/source-health.json") {
+            return { json: async <T>() => ({ sources: { camara: { recordCount: 19025, status: "partial", generatedAt: "2026-08-21T00:00:00.000Z", components: { asistencia: 120, votaciones: 30, gastos: 40 } } } }) as T };
+          }
+          return null;
+        },
+      },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/sources"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data[0]).toMatchObject({ id: "camara", recordCount: 19025, status: "partial" });
+    expect(payload.data[0].components).toEqual([
+      { id: "asistencia", sourceId: "camara", label: "Asistencia", recordCount: 120, includedInRecordCount: true },
+      { id: "votaciones", sourceId: "camara", label: "Votaciones", recordCount: 30, includedInRecordCount: true },
+      { id: "gastos", sourceId: "gastos_camara", label: "Gastos operacionales", recordCount: 40, includedInRecordCount: false },
+    ]);
+  });
+
+  it("expone por separado los componentes publicados del Senado", async () => {
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/sources-v1/source-inventory.json") {
+          return { json: async <T>() => ({ sources: [{ id: "senado", label: "Senado" }] }) as T };
+        }
+        if (key === "projections/sources-v1/source-health.json") {
+          return { json: async <T>() => ({ sources: { senado: { recordCount: 1428, status: "partial", components: { votaciones: 205, gastos: 6517 } } } }) as T };
+        }
+        return null;
+      },
+    };
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/sources"), { PUBLIC_DATA } as never);
+    const payload = await response.json();
+    const senado = payload.data.find((source: { id: string }) => source.id === "senado");
+
+    expect(response.status).toBe(200);
+    expect(senado.components).toEqual([
+      { id: "votaciones", sourceId: "votaciones_senado", label: "Votaciones", recordCount: 205, includedInRecordCount: false },
+      { id: "gastos", sourceId: "gastos_senado", label: "Gastos operacionales", recordCount: 6517, includedInRecordCount: false },
+    ]);
+  });
+
+  it("normaliza alias históricos y no publica catálogos legados como fuentes sin datos", async () => {
+    const prepare = vi.fn(() => {
+      throw new Error("D1 no debe consultarse para normalizar el inventario R2");
+    });
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/sources-v1/source-inventory.json") {
+          return {
+            json: async <T>() => ({
+              sources: [
+                { id: "ley-19862", label: "Registro Ley 19.862" },
+                { id: "transparencia-activa", label: "Portal de Transparencia" },
+              ],
+            }) as T,
+          };
+        }
+        if (key === "projections/sources-v1/source-health.json") {
+          return {
+            json: async <T>() => ({
+              sources: {
+                ley19862: { recordCount: 59912, status: "partial", generatedAt: "2026-09-02T00:00:00.000Z" },
+                "transparencia-activa": { recordCount: 0, status: "partial" },
+              },
+            }) as T,
+          };
+        }
+        if (key === "projections/transferencias-v1/manifest.json") {
+          return {
+            json: async <T>() => ({
+              schemaVersion: 1,
+              dataset: "ley-19862",
+              generatedAt: "2026-09-06T04:58:19.805Z",
+              totalRows: 60351,
+              pageSize: 50,
+              totalPages: 1208,
+              pages: Array.from({ length: 1208 }, (_, index) => ({ page: index + 1, count: index === 1207 ? 1 : 50, key: `p-${index + 1}.json` })),
+              searchIndex: { key: "search.json", count: 60351 },
+              checksumSha256: "current-transfer-checksum",
+            }) as T,
+          };
+        }
+        return null;
+      },
+    };
+
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/sources"),
+      { DB: { prepare }, PUBLIC_DATA } as never,
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toHaveLength(1);
+    expect(payload.data[0]).toMatchObject({ id: "ley-19862", recordCount: 60351, checksumSha256: "current-transfer-checksum", status: "partial" });
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
   it("filtra y pagina registros con un enlace next reproducible", async () => {
     const response = await fetchApi("https://example.test/api/v1/records?source=camara&kind=vote&limit=2");
     const payload = await response.json();
@@ -56,6 +937,306 @@ describe("API canónica v1", () => {
     expect(payload.meta.limit).toBe(2);
     expect(payload.links.next).toContain("cursor=v1_");
   }, 20_000);
+
+  it("prefiere el índice R2 para fuentes completas y evita consultar D1", async () => {
+    const archive = JSON.stringify({
+      id: "lobby-1",
+      sourceId: "infolobby",
+      kind: "lobby",
+      occurredAt: "2026-08-01",
+      evidence: { sourceUrl: "https://www.infolobby.cl/1" },
+      data: { title: "Audiencia pública", subject_entity_ids: [], object_entity_ids: [] },
+    }) + "\n";
+    const manifest = {
+      schemaVersion: 1,
+      sourceId: "infolobby",
+      totalRows: 1,
+      pageSize: 1,
+      recordArchiveKey: "indexes/v1/infolobby/archive.jsonl.gz",
+      pages: [{ offset: 0, length: new TextEncoder().encode(archive).byteLength }],
+    };
+    const prepare = vi.fn(() => { throw new Error("D1 no debe consultarse para InfoLobby indexado"); });
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/static-site-v1/manifest.json") return { json: async <T>() => ({ files: [{ path: "placeholder", key: "placeholder" }] }) as T };
+        if (key === "indexes/v1/infolobby/manifest.json") return { json: async <T>() => manifest as T };
+        if (key === manifest.recordArchiveKey) return { arrayBuffer: async () => new TextEncoder().encode(archive).buffer };
+        return null;
+      },
+    };
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/records?source=infolobby&limit=1"), { DB: { prepare }, PUBLIC_DATA } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.sourceBackend).toBe("r2-lake");
+    expect(payload.data[0].id).toBe("lobby-1");
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it("devuelve el último bloque de un índice R2 sin repetir el cursor", async () => {
+    const rows = [
+      { id: "lobby-1", sourceId: "infolobby", kind: "lobby", occurredAt: "2026-08-01", data: { title: "Uno" } },
+      { id: "lobby-2", sourceId: "infolobby", kind: "lobby", occurredAt: "2026-08-02", data: { title: "Dos" } },
+      { id: "lobby-3", sourceId: "infolobby", kind: "lobby", occurredAt: "2026-08-03", data: { title: "Tres" } },
+    ];
+    const archive = `${rows.map((row) => JSON.stringify(row)).join("\n")}\n`;
+    const firstPageLength = new TextEncoder().encode(`${JSON.stringify(rows[0])}\n${JSON.stringify(rows[1])}\n`).byteLength;
+    const archiveBytes = new TextEncoder().encode(archive);
+    const manifest = {
+      schemaVersion: 1,
+      sourceId: "infolobby",
+      totalRows: rows.length,
+      pageSize: 2,
+      recordArchiveKey: "indexes/v1/infolobby/records.jsonl",
+      pages: [
+        { offset: 0, length: firstPageLength },
+        { offset: firstPageLength, length: archiveBytes.byteLength - firstPageLength },
+      ],
+    };
+    const prepare = vi.fn(() => { throw new Error("D1 no debe consultarse para InfoLobby indexado"); });
+    const PUBLIC_DATA = {
+      get: async (key: string, options?: { range?: { offset: number; length: number } }) => {
+        if (key === "projections/static-site-v1/manifest.json") return { json: async <T>() => ({ files: [{ path: "placeholder", key: "placeholder" }] }) as T };
+        if (key === "indexes/v1/infolobby/manifest.json") return { json: async <T>() => manifest as T };
+        if (key === manifest.recordArchiveKey) {
+          const range = options?.range;
+          const value = range ? archiveBytes.slice(range.offset, range.offset + range.length) : archiveBytes;
+          return { arrayBuffer: async () => value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength) };
+        }
+        return null;
+      },
+    };
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/records?source=infolobby&offset=2&limit=1"), { DB: { prepare }, PUBLIC_DATA } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.map((row: { id: string }) => row.id)).toEqual(["lobby-3"]);
+    expect(payload.meta.total).toBe(3);
+    expect(payload.links.next).toBeUndefined();
+
+    const boundaryResponse = await api.fetch(new Request("https://example.test/api/v1/records?source=infolobby&offset=1&limit=2"), { DB: { prepare }, PUBLIC_DATA } as never);
+    const boundaryPayload = await boundaryResponse.json();
+    expect(boundaryPayload.data.map((row: { id: string }) => row.id)).toEqual(["lobby-2", "lobby-3"]);
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it("prefiere cualquier snapshot R2 publicado antes de consultar D1", async () => {
+    const prepare = vi.fn(() => { throw new Error("D1 no debe consultarse si existe snapshot R2"); });
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/static-site-v1/manifest.json") {
+          return {
+            json: async <T>() => ({
+              files: [{ path: "data/lake-subsets/camara.subset.json", key: "subsets/camara.json" }],
+            }) as T,
+          };
+        }
+        if (key === "subsets/camara.json") {
+          return {
+            json: async <T>() => ([{
+              id: "camara-1",
+              kind: "vote",
+              title: "Votación de prueba",
+              occurredAt: "2026-08-01",
+              data: { source: "release-r2" },
+            }]) as T,
+          };
+        }
+        return null;
+      },
+    };
+
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/records?source=camara&limit=1"),
+      { DB: { prepare }, PUBLIC_DATA } as never,
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.sourceBackend).toBe("r2");
+    expect(payload.data[0]).toMatchObject({ id: "camara-1", sourceId: "camara" });
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it("lee una partición del lake R2 de Cámara sin consultar D1", async () => {
+    const compressed = gzipSync(`${JSON.stringify({
+      id: "camara-lake-1",
+      sourceId: "camara",
+      kind: "vote",
+      occurredAt: "2026-08-01",
+      evidence: { sourceUrl: "https://opendata.congreso.cl/votacion/1" },
+      data: { title: "Votación Cámara", subject_entity_ids: [], object_entity_ids: [] },
+    })}\n`);
+    const checksum = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", compressed)))
+      .map((byte) => byte.toString(16).padStart(2, "0")).join("");
+    const manifest = {
+      projectionChecksumSha256: checksum,
+      artifacts: [{
+        key: `partitions/camara/2026/08/records-${checksum}.jsonl.gz`,
+        checksumSha256: checksum,
+        releaseAssetName: "camara-2026-08-records.jsonl.gz",
+      }],
+    };
+    const catalog = {
+      schemaVersion: "1.0.0",
+      generatedAt: "2026-08-08T00:00:00Z",
+      sources: [],
+      partitions: [{
+        id: "camara/2026/08",
+        sourceId: "camara",
+        period: "2026-08",
+        manifestKey: "partitions/camara/2026/08/manifest.json",
+        checksumSha256: checksum,
+        status: "partial",
+      }],
+    };
+    const objects = new Map<string, ArrayBuffer>([
+      ["catalog/v1/manifest.json", new TextEncoder().encode(JSON.stringify(catalog)).buffer],
+      ["partitions/camara/2026/08/manifest.json", new TextEncoder().encode(JSON.stringify(manifest)).buffer],
+      [manifest.artifacts[0].key, compressed.buffer.slice(compressed.byteOffset, compressed.byteOffset + compressed.byteLength)],
+    ]);
+    const PUBLIC_DATA = {
+      async get(key: string, options?: { range?: { offset: number; length: number } }) {
+        if (key === "projections/static-site-v1/manifest.json") {
+          return { json: async <T>() => ({ files: [{ path: "placeholder", key: "placeholder" }] }) as T };
+        }
+        const value = objects.get(key);
+        if (!value) return null;
+        const bytes = new Uint8Array(value);
+        const sliced = options?.range ? bytes.slice(options.range.offset, options.range.offset + options.range.length).buffer : value;
+        return { json: async <T>() => JSON.parse(new TextDecoder().decode(sliced)) as T, arrayBuffer: async () => sliced };
+      },
+    };
+    const prepare = vi.fn(() => { throw new Error("D1 no debe consultarse para el lake de Cámara"); });
+
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/records?source=camara&from=2026-08&to=2026-08&kind=vote&limit=1"),
+      { DB: { prepare }, PUBLIC_DATA } as never,
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.sourceBackend).toBe("r2-lake");
+    expect(payload.data[0]).toMatchObject({ id: "camara-lake-1", sourceId: "camara" });
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it("resuelve votaciones_camara desde el histórico canónico sin mezclar asistencia ni consultar D1", async () => {
+    const attendance = JSON.stringify({
+      id: "camara-attendance-1",
+      sourceId: "camara",
+      kind: "attendance",
+      occurredAt: "2026-09-02",
+      evidence: { sourceUrl: "https://opendata.congreso.cl/asistencia/1" },
+      data: { title: "Asistencia Cámara", subject_entity_ids: [], object_entity_ids: [] },
+    });
+    const canonicalCompressed = gzipSync(`${attendance}\n${JSON.stringify({
+      id: "camara-vote-variant-1",
+      sourceId: "camara",
+      kind: "vote",
+      occurredAt: "2026-09-02",
+      evidence: { sourceUrl: "https://opendata.congreso.cl/votacion/variant-1" },
+      data: { title: "Votación Cámara", subject_entity_ids: [], object_entity_ids: [] },
+    })}\n`);
+    const canonicalChecksum = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", canonicalCompressed)))
+      .map((byte) => byte.toString(16).padStart(2, "0")).join("");
+    const artifact = { key: `partitions/camara/2026/09/records-${canonicalChecksum}.jsonl.gz`, checksumSha256: canonicalChecksum, releaseAssetName: "camara-2026-09-records.jsonl.gz" };
+    const manifest = { projectionChecksumSha256: canonicalChecksum, artifacts: [artifact] };
+    const catalog = {
+      schemaVersion: "1.0.0",
+      generatedAt: "2026-09-12T00:00:00Z",
+      sources: [],
+      partitions: [{ id: "camara/2026/09", sourceId: "camara", period: "2026-09", manifestKey: "partitions/camara/2026/09/manifest.json", checksumSha256: canonicalChecksum, status: "complete", recordCount: 2 }],
+    };
+    const objects = new Map<string, ArrayBuffer>([
+      ["catalog/v1/manifest.json", new TextEncoder().encode(JSON.stringify(catalog)).buffer],
+      ["partitions/camara/2026/09/manifest.json", new TextEncoder().encode(JSON.stringify(manifest)).buffer],
+      [artifact.key, canonicalCompressed.buffer.slice(canonicalCompressed.byteOffset, canonicalCompressed.byteOffset + canonicalCompressed.byteLength)],
+    ]);
+    const PUBLIC_DATA = {
+      async get(key: string, options?: { range?: { offset: number; length: number } }) {
+        if (key === "projections/static-site-v1/manifest.json") return { json: async <T>() => ({ files: [{ path: "placeholder", key: "placeholder" }] }) as T };
+        const value = objects.get(key);
+        if (!value) return null;
+        const bytes = new Uint8Array(value);
+        const sliced = options?.range ? bytes.slice(options.range.offset, options.range.offset + options.range.length).buffer : value;
+        return { json: async <T>() => JSON.parse(new TextDecoder().decode(sliced)) as T, arrayBuffer: async () => sliced };
+      },
+    };
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/records?source=votaciones_camara&limit=1"),
+      { DB: { prepare: () => { throw new Error("D1 no debe consultarse para la variante R2 de Cámara"); } }, PUBLIC_DATA } as never,
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta).toMatchObject({ sourceBackend: "r2-lake", requestedSource: "votaciones_camara", sourceStatus: "complete", total: 1, expectedRows: 2, publishedRows: 2 });
+    expect(payload.data[0]).toMatchObject({ id: "camara-vote-variant-1", kind: "vote", sourceId: "camara" });
+  });
+
+  it("no declara completo un release R2 si faltan particiones publicadas", async () => {
+    const compressed = gzipSync(`${JSON.stringify({
+      id: "camara-lake-available",
+      sourceId: "camara",
+      kind: "vote",
+      occurredAt: "2026-08-01",
+      evidence: { sourceUrl: "https://opendata.congreso.cl/votacion/available" },
+      data: { title: "Votación disponible", subject_entity_ids: [], object_entity_ids: [] },
+    })}\n`);
+    const checksum = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", compressed)))
+      .map((byte) => byte.toString(16).padStart(2, "0")).join("");
+    const artifact = {
+      key: `partitions/camara/2026/08/records-${checksum}.jsonl.gz`,
+      checksumSha256: checksum,
+      releaseAssetName: "camara-2026-08-records.jsonl.gz",
+    };
+    const manifest = { projectionChecksumSha256: checksum, artifacts: [artifact] };
+    const catalog = {
+      schemaVersion: "1.0.0",
+      generatedAt: "2026-08-08T00:00:00Z",
+      sources: [],
+      partitions: [
+        { id: "camara/2026/08", sourceId: "camara", period: "2026-08", manifestKey: "partitions/camara/2026/08/manifest.json", checksumSha256: checksum, status: "partial", recordCount: 1 },
+        { id: "camara/2026/07", sourceId: "camara", period: "2026-07", manifestKey: "partitions/camara/2026/07/manifest.json", checksumSha256: "missing", status: "partial", recordCount: 1 },
+      ],
+    };
+    const objects = new Map<string, ArrayBuffer>([
+      ["catalog/v1/manifest.json", new TextEncoder().encode(JSON.stringify(catalog)).buffer],
+      ["partitions/camara/2026/08/manifest.json", new TextEncoder().encode(JSON.stringify(manifest)).buffer],
+      [artifact.key, compressed.buffer.slice(compressed.byteOffset, compressed.byteOffset + compressed.byteLength)],
+    ]);
+    const PUBLIC_DATA = {
+      async get(key: string, options?: { range?: { offset: number; length: number } }) {
+        if (key === "projections/static-site-v1/manifest.json") return { json: async <T>() => ({ files: [{ path: "placeholder", key: "placeholder" }] }) as T };
+        const value = objects.get(key);
+        if (!value) return null;
+        const bytes = new Uint8Array(value);
+        const sliced = options?.range ? bytes.slice(options.range.offset, options.range.offset + options.range.length).buffer : value;
+        return { json: async <T>() => JSON.parse(new TextDecoder().decode(sliced)) as T, arrayBuffer: async () => sliced };
+      },
+    };
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/records?source=camara&limit=1"),
+      { DB: { prepare: () => { throw new Error("D1 no debe consultarse"); } }, PUBLIC_DATA } as never,
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta).toMatchObject({
+      sourceBackend: "r2-lake",
+      sourceStatus: "partial",
+      publishedRows: 1,
+      expectedRows: 2,
+      // `total` is the number of rows actually consultable in the published
+      // lake, not the catalog expectation. The latter is exposed separately
+      // so a partial release cannot look complete to pagination or coverage.
+      total: 1,
+      totalPages: 1,
+    });
+    expect(payload.data[0].id).toBe("camara-lake-available");
+  });
 
   it("rechaza filtros inválidos con el error uniforme", async () => {
     const response = await fetchApi("https://example.test/api/v1/records?kind=delito");
@@ -84,17 +1265,58 @@ describe("API canónica v1", () => {
     expect(response.status).toBe(404);
   });
 
-  it("expone relaciones y cruces con la misma cadena de evidencia", async () => {
+  it("rechaza relaciones y cruces globales sin escanear D1", async () => {
     const relationsResponse = await fetchApi("https://example.test/api/v1/relations?predicate=cast_vote&limit=1");
     const relationPayload = await relationsResponse.json();
     const crossesResponse = await fetchApi("https://example.test/api/v1/crosses?predicate=cast_vote&limit=1");
     const crossesPayload = await crossesResponse.json();
 
-    expect(relationPayload.data).toHaveLength(1);
-    expect(crossesPayload.data).toHaveLength(1);
-    expect(crossesPayload.data[0].relation.id).toBe(relationPayload.data[0].id);
-    expect(crossesPayload.data[0].evidence[0].id).toBe(relationPayload.data[0].evidenceRecordIds[0]);
-    expect(crossesPayload.data[0].relation.disclaimer).toContain("no implica irregularidad");
+    expect(relationsResponse.status).toBe(400);
+    expect(crossesResponse.status).toBe(400);
+    expect(relationPayload).toMatchObject({ error: { code: "RELATION_SCOPE_REQUIRED" } });
+    expect(crossesPayload).toMatchObject({ error: { code: "RELATION_SCOPE_REQUIRED" } });
+  });
+
+  it("usa el índice de relaciones R2 para fichas sin consultar D1", async () => {
+    const relation = {
+      id: "relation-r2-1",
+      fromId: "person-camara-1002",
+      predicate: "cast_vote",
+      toId: "record-1",
+      evidenceRecordIds: ["record-1"],
+      period: {},
+      reconciliation: { method: "official_id", confidence: 1 },
+      disclaimer: "Una relación documental no implica irregularidad ni responsabilidad.",
+    };
+    const catalog = {
+      schemaVersion: "1",
+      generatedAt: "2026-09-05T00:00:00.000Z",
+      sources: [{ id: "camara", foundPeriods: [], recordCount: 1, status: "connected", entityIndexKey: "indexes/v1/camara/entity-index.jsonl.gz" }],
+      partitions: [],
+    };
+    const compressed = gzipSync(`${JSON.stringify({
+      id: "person-camara-1002",
+      sourceId: "camara",
+      evidenceRecordIds: ["record-1"],
+      relations: [relation],
+    })}\n`);
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse cuando existe el índice R2"); } },
+      PUBLIC_DATA: {
+        get: async (key: string) => {
+          if (key === "catalog/v1/manifest.json") return { json: async <T>() => catalog as T };
+          if (key === "indexes/v1/camara/entity-index.jsonl.gz") return { arrayBuffer: async () => compressed.buffer.slice(compressed.byteOffset, compressed.byteOffset + compressed.byteLength) };
+          return null;
+        },
+      },
+    } as never;
+    const response = await api.fetch(new Request("https://example.test/api/v1/relations?entity_id=person-camara-1002&limit=1"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toHaveLength(1);
+    expect(payload.data[0]).toMatchObject({ id: "relation-r2-1", fromId: "person-camara-1002" });
+    expect(payload.meta).toMatchObject({ sourceBackend: "r2-entity-index", total: 1 });
   });
 
   it("permite embeber fichas mediante CORS solamente de lectura", async () => {
@@ -105,5 +1327,175 @@ describe("API canónica v1", () => {
     expect(response.status).toBe(200);
     expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
     expect(payload.links.self).toBe(request.url);
+  });
+
+  it("usa el roster compacto si la tabla legacy de políticos no está disponible", async () => {
+    const failingEnv = {
+      DB: {
+        prepare: () => ({
+          bind: () => ({
+            first: async () => { throw new Error("legacy table unavailable"); },
+          }),
+        }),
+      },
+    } as never;
+    const response = await api.fetch(new Request("https://example.test/api/v1/politico/dip-061"), failingEnv);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.id).toBe("dip-061");
+  });
+
+  it("acepta el preflight CORS del widget sin habilitar métodos de escritura", async () => {
+    const response = await api.fetch(new Request("https://example.test/api/v1/politico/dip-061", {
+      method: "OPTIONS",
+      headers: {
+        Origin: "null",
+        "Access-Control-Request-Method": "GET",
+        "Access-Control-Request-Headers": "x-cambiometro-uptime-token",
+      },
+    }), testEnv());
+
+    expect(response.status).toBe(204);
+    expect(response.headers.get("Access-Control-Allow-Origin")).toBe("*");
+    expect(response.headers.get("Access-Control-Allow-Methods")).toBe("GET, OPTIONS");
+    expect(response.headers.get("Access-Control-Allow-Headers")).toContain("X-Cambiometro-Uptime-Token");
+  });
+
+  it("sirve transferencias completas desde R2 cuando D1 está vacío", async () => {
+    const request = new Request("https://example.test/api/v1/transferencias?page=1&limit=1&q=VIÑA");
+    const response = await api.fetch(request, transferR2Env());
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.total).toBe(1);
+    expect(payload.data).toHaveLength(1);
+    expect(payload.data[0].receiver_name).toBe("VIÑA BUS S.A.");
+    expect(payload.kpis.total_transfers).toBe(59361);
+    expect(payload.sourceStatus).toBe("complete");
+  });
+
+  it("respeta limit y paginación lógica aunque R2 use chunks de 50 filas", async () => {
+    const response = await api.fetch(new Request("https://example.test/api/v1/transferencias?page=1&limit=1"), transferR2Env());
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toHaveLength(1);
+    expect(payload.data[0].id).toBe("tr-1");
+    expect(payload.limit).toBe(1);
+    expect(payload.totalPages).toBe(59361);
+  });
+
+  it("usa R2 como fuente pública por defecto sin consultar D1", async () => {
+    const prepare = vi.fn(() => {
+      throw new Error("D1 no debe consultarse en el camino público");
+    });
+    const response = await api.fetch(new Request("https://example.test/api/v1/transferencias?page=1&limit=1"), {
+      ...(transferR2Env() as object),
+      DB: { prepare },
+    } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.sourceStatus).toBe("complete");
+    expect(payload.total).toBe(59361);
+    expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it("mantiene D1 disponible sólo cuando se activa explícitamente", async () => {
+    const response = await api.fetch(new Request("https://example.test/api/v1/transferencias?page=1&limit=1"), {
+      ...(transferR2Env() as object),
+      PREFER_TRANSFER_D1: "1",
+      ALLOW_PUBLIC_D1_READS: "1",
+      DB: {
+        prepare: (sql: string) => ({
+          bind() { return this; },
+          async first<T>() {
+            if (sql.includes("transferencias_19862_release")) return { checksum_sha256: "release-checksum" } as T;
+            return { total: 59361 } as T;
+          },
+          async all<T>() { return { results: [{ id: "d1-1", fecha: "2026-08-01", periodo: "2026", emisor_nombre: "D1", receptor_nombre: "R", materia: "M", monto_clp: 1, url_registro: "https://registros19862.gob.cl/registro/d1-1" }] } as T; },
+        }),
+      },
+    } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.sourceStatus).toBe("d1");
+    expect(payload.data[0].id).toBe("d1-1");
+  });
+
+  it("ignora D1 desactualizada y conserva el universo R2 como fuente coherente", async () => {
+    const staleRow = {
+      id: "stale-1",
+      fecha: "2025-01-01",
+      periodo: "2025",
+      emisor_nombre: "D1 desactualizada",
+      receptor_nombre: "D1 desactualizada",
+      materia: "Dato antiguo",
+      monto_clp: 1,
+      clasificacion: "Antiguo",
+      comuna: "Santiago",
+    };
+    const statement = (sql: string) => ({
+      bind() { return this; },
+      async first<T>() { return (sql.includes("COUNT") ? { total: 1 } : null) as T; },
+      async all<T>() { return { results: [staleRow] } as T; },
+    });
+    const response = await api.fetch(new Request("https://example.test/api/v1/transferencias?page=1&limit=1"), {
+      ...(transferR2Env() as object),
+      DB: { prepare: (sql: string) => statement(sql) },
+    } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.sourceStatus).toBe("complete");
+    expect(payload.total).toBe(59361);
+    expect(payload.data[0].id).toBe("tr-1");
+  });
+
+  it("sirve y filtra funcionarios desde la proyección CPLT de R2", async () => {
+    const request = new Request("https://example.test/api/funcionarios?muni=muni-maipu&query=Claudio&limit=10");
+    const response = await api.fetch(request, officialsR2Env());
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.sourceStatus).toBe("r2");
+    expect(payload.meta.total).toBe(1);
+    expect(payload.data[0].nombre_completo).toBe("Claudio Adaros");
+  });
+
+  it("normaliza Código del Trabajo al aplicar el filtro contractual", async () => {
+    const request = new Request("https://example.test/api/funcionarios?muni=muni-maipu&contrato=CodigoTrabajo&include_zero=true&limit=10");
+    const response = await api.fetch(request, officialsR2Env());
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.total).toBe(1);
+    expect(payload.data[0].id).toBe("func-3");
+  });
+
+  it("ofrece la descarga segmentada del bloque consultado", async () => {
+    const request = new Request("https://example.test/api/v1/export?dataset=funcionarios&format=csv&muni=muni-maipu&page=1&limit=2");
+    const response = await api.fetch(request, officialsR2Env());
+    const body = await response.text();
+
+    expect(response.status).toBe(200);
+    expect(response.headers.get("Content-Type")).toContain("text/csv");
+    expect(body).toContain("nombre_completo");
+    expect(body).toContain("Claudio Adaros");
+  });
+
+  it("sirve la descarga segmentada desde R2 sin consultar D1 cuando el índice está disponible", async () => {
+    const prepare = vi.fn(() => { throw new Error("D1 no debe consultarse para exportar el directorio"); });
+    const response = await api.fetch(new Request("https://example.test/api/v1/export?dataset=funcionarios&format=json&muni=muni-maipu&page=1&limit=2"), {
+      ...(officialsR2Env() as object),
+      DB: { prepare },
+    } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.export).toBe("segmentada");
+    expect(prepare).not.toHaveBeenCalled();
   });
 });

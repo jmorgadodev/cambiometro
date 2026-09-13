@@ -1,6 +1,7 @@
 import { readFileSync, writeFileSync, mkdirSync, existsSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { POLITICOS_SEED } from "../lib/politicos-source.ts";
+import { readExpenseSubset } from "./expense-release.mjs";
 
 function slugifyNombre(nombre) {
   return nombre
@@ -27,18 +28,22 @@ function normalizeSearchText(text) {
     .trim();
 }
 
-function nameSequenceMatches(seedName, otherName) {
+// A fuzzy match is useful for the official Senate feed because it varies
+// punctuation and surname order. It must nevertheless produce one owner per
+// record: filtering every politician independently can assign a shared
+// surname (for example, two politicians named Bianchi) to multiple slices.
+function nameMatchScore(seedName, otherName) {
   const normA = normalizeSearchText(seedName);
   const normB = normalizeSearchText(otherName);
-  if (!normA || !normB) return false;
-  if (normA === normB || normA.includes(normB) || normB.includes(normA)) return true;
+  if (!normA || !normB) return 0;
+  if (normA === normB) return 10000;
+  if (normA.includes(normB) || normB.includes(normA)) return 8000 - Math.abs(normA.length - normB.length);
 
   const tokensA = normA.split(" ").filter((t) => t.length > 2);
   const tokensB = normB.split(" ").filter((t) => t.length > 2);
-  if (tokensA.length < 2 || tokensB.length < 2) return false;
-
+  if (tokensA.length < 2 || tokensB.length < 2) return 0;
   const matches = tokensA.filter((t) => tokensB.includes(t));
-  return matches.length >= 2;
+  return matches.length >= 2 ? matches.length * 100 - Math.abs(tokensA.length - tokensB.length) : 0;
 }
 
 function esProcedimental(vFila) {
@@ -68,6 +73,37 @@ export function buildAllPoliticoSlices() {
 
   const snapshotPath = resolve("data/snapshot.json");
   const snapshot = existsSync(snapshotPath) ? JSON.parse(readFileSync(snapshotPath, "utf8")) : {};
+  const staticExpenses = Object.fromEntries(["gastos_camara", "gastos_senado"].map((sourceId) => {
+    const subset = readExpenseSubset(process.cwd(), sourceId);
+    return [sourceId, subset?.records ?? null];
+  }));
+  const expenseSources = {
+    ...(snapshot.fuentes ?? {}),
+    ...(staticExpenses.gastos_camara ? { gastos_camara: staticExpenses.gastos_camara } : {}),
+    ...(staticExpenses.gastos_senado ? { gastos_senado: staticExpenses.gastos_senado } : {}),
+  };
+
+  const senateExpensesByPolitico = new Map();
+  const unassignedSenateExpenses = [];
+  for (const record of expenseSources.gastos_senado ?? []) {
+    const candidates = POLITICOS_SEED
+      .filter((politico) => politico.cargo === "Senador")
+      .map((politico) => ({ politico, score: nameMatchScore(politico.nombre_completo, record.nombre ?? "") }))
+      .filter(({ score }) => score > 0)
+      .sort((left, right) => right.score - left.score || left.politico.id.localeCompare(right.politico.id));
+    const best = candidates[0]?.politico;
+    if (best) {
+      const assigned = senateExpensesByPolitico.get(best.id) ?? [];
+      assigned.push(record);
+      senateExpensesByPolitico.set(best.id, assigned);
+    } else {
+      // The official release also contains valid historical senators who are
+      // not part of the current 2026-2030 directory. Keep these rows in a
+      // dedicated public slice instead of dropping them or misattributing
+      // them to a current politician.
+      unassignedSenateExpenses.push(record);
+    }
+  }
 
   const paPath = resolve("data/personal-apoyo.json");
   const personalApoyoData = existsSync(paPath) ? JSON.parse(readFileSync(paPath, "utf8")) : null;
@@ -262,12 +298,11 @@ export function buildAllPoliticoSlices() {
     // Calcular gastos
     let gastos = [];
     if (pol.cargo === "Diputado" && diputadoId) {
-      gastos = (snapshot.fuentes?.gastos_camara ?? [])
+      gastos = (expenseSources.gastos_camara ?? [])
         .filter((record) => String(record.diputado_id) === diputadoId)
         .sort((a, b) => (b.fecha ?? "").localeCompare(a.fecha ?? ""));
     } else if (pol.cargo === "Senador") {
-      gastos = (snapshot.fuentes?.gastos_senado ?? [])
-        .filter((record) => Boolean(record.nombre) && nameSequenceMatches(pol.nombre_completo, record.nombre ?? ""))
+      gastos = (senateExpensesByPolitico.get(pol.id) ?? [])
         .sort((a, b) => (b.fecha ?? "").localeCompare(a.fecha ?? ""));
     }
 
@@ -311,6 +346,17 @@ export function buildAllPoliticoSlices() {
     writeFileSync(join(slicesDir, `${slug}.json`), sliceJson, "utf8");
   }
 
+  writeFileSync(
+    join(slicesDir, "gastos-operacionales.json"),
+    JSON.stringify({
+      id: "gastos-operacionales",
+      nombre: "Gastos Operacionales Rendidos",
+      cargo: "Registros oficiales no atribuibles al directorio vigente",
+      gastos: unassignedSenateExpenses,
+    }),
+    "utf8",
+  );
+
   const outputPath = resolve("data/politicos-votaciones-index.json");
   writeFileSync(outputPath, JSON.stringify(index), "utf8");
   mkdirSync(resolve("data/generated"), { recursive: true });
@@ -324,6 +370,7 @@ export function buildAllPoliticoSlices() {
 
   console.log(`[build-politico-slices] Éxito: ${totalPoliticos} parlamentarios procesados (${totalVotosIndexados} votos totales).`);
   console.log(`[build-politico-slices] Slices individuales guardados en data/politico-slices/ (*.json < 200 KB).`);
+  console.log(`[build-politico-slices] ${unassignedSenateExpenses.length} rendiciones históricas conservadas en gastos-operacionales.json.`);
   console.log(`[build-politico-slices] Índice consolidado guardado en ${outputPath}`);
   return index;
 }

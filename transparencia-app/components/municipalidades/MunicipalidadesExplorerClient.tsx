@@ -3,9 +3,12 @@
 import { useState, useMemo, useEffect } from "react";
 import Link from "next/link";
 import { useSearchParams, useRouter, usePathname } from "next/navigation";
-import { MunicipalidadListItem } from "@/lib/municipalidades-list";
+import type { MunicipalidadListItem } from "@/lib/municipalidades-list";
 import { getPartidoConfig } from "@/lib/partidos.config";
 import ShareButton from "@/components/ShareButton";
+import type { CoverageMetric, DataQualityStatus } from "@/lib/data-quality-summary";
+import ReleaseMetaCard from "@/components/data/ReleaseMetaCard";
+import { getMuniCanonicalSlug } from "@/lib/slug-utils";
 
 interface MunicipalidadesExplorerClientProps {
   initialData: MunicipalidadListItem[];
@@ -19,6 +22,23 @@ interface MunicipalidadesExplorerClientProps {
     alDiaCount?: number;
     desfasadoCount?: number;
     sinDatosCount?: number;
+  };
+  release: {
+    source: string;
+    period: string;
+    lastSuccessAt: string;
+    status: DataQualityStatus;
+    published: CoverageMetric;
+    queryable: CoverageMetric;
+    related: CoverageMetric;
+    checksumSha256: string | null;
+    officialUrl?: string;
+    payrollCoverage: {
+      published: number;
+      unavailable: number;
+      notApplicable: number;
+      totalTerritories: number;
+    };
   };
 }
 
@@ -52,6 +72,7 @@ function formatNum(n: number | null | undefined): string {
 export default function MunicipalidadesExplorerClient({
   initialData,
   stats,
+  release,
 }: MunicipalidadesExplorerClientProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -273,6 +294,26 @@ export default function MunicipalidadesExplorerClient({
 
   const maxTopPres = top10Presupuestos[0]?.presupuesto?.vigente_clp || 1;
 
+  const highestPerCapita = useMemo(() => {
+    return [...initialData]
+      .filter((m) => (m.presupuesto_per_capita_clp ?? 0) > 0)
+      .sort(
+        (a, b) =>
+          (b.presupuesto_per_capita_clp ?? 0) -
+          (a.presupuesto_per_capita_clp ?? 0)
+      )[0] ?? null;
+  }, [initialData]);
+
+  const highestStaff = useMemo(() => {
+    return [...initialData]
+      .filter((m) => (m.resumen_personal?.total_funcionarios ?? 0) > 0)
+      .sort(
+        (a, b) =>
+          (b.resumen_personal?.total_funcionarios ?? 0) -
+          (a.resumen_personal?.total_funcionarios ?? 0)
+      )[0] ?? null;
+  }, [initialData]);
+
   // Manejo de reset de filtros
   const handleResetFilters = () => {
     setSearch("");
@@ -352,8 +393,43 @@ export default function MunicipalidadesExplorerClient({
             />
           </div>
 
+          <div className="municipal-release-intro">
+            <ReleaseMetaCard
+              eyebrow="Estado y trazabilidad"
+              title="Datos municipales disponibles"
+              source={release.source}
+              period={release.period}
+              lastSuccessAt={release.lastSuccessAt}
+              status={release.status}
+              published={release.published}
+              queryable={release.queryable}
+              related={release.related}
+              checksumSha256={release.checksumSha256}
+              href="/municipalidades?view=table"
+              officialUrl={release.officialUrl}
+              note="El catálogo territorial reúne las 346 comunas. La cobertura de nóminas CPLT se informa por separado: una comuna sin nómina publicada no equivale a una remuneración de $0."
+            />
+          </div>
+
+          <section className="municipal-payroll-coverage card" aria-labelledby="municipal-payroll-coverage-title">
+            <div>
+              <div className="eyebrow" style={{ color: "var(--accent)", marginBottom: "0.25rem" }}>COBERTURA DE NÓMINAS</div>
+              <h2 id="municipal-payroll-coverage-title" style={{ margin: 0, fontSize: "1.05rem", color: "var(--text-1)" }}>¿Qué comunas tienen nómina publicada?</h2>
+              <p style={{ margin: "0.35rem 0 0", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.5 }}>
+                El catálogo municipal está completo. La nómina CPLT depende de que cada municipio publique su corte; cuando no existe un archivo disponible, lo mostramos explícitamente y no imputamos sueldos ni personal.
+              </p>
+            </div>
+            <div className="municipal-payroll-coverage-grid">
+              <div><strong>{formatNum(release.payrollCoverage.published)}</strong><span>con nómina publicada</span></div>
+              <div><strong>{formatNum(release.payrollCoverage.unavailable)}</strong><span>sin nómina en el corte</span></div>
+              <div><strong>{formatNum(release.payrollCoverage.notApplicable)}</strong><span>territorio no aplicable</span></div>
+              <div><strong>{formatNum(release.payrollCoverage.totalTerritories)}</strong><span>comunas/territorios catalogados</span></div>
+            </div>
+          </section>
+
           {/* 4 KPIs Clave */}
           <div
+            className="municipal-kpi-grid"
             style={{
               display: "grid",
               gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
@@ -362,7 +438,7 @@ export default function MunicipalidadesExplorerClient({
             }}
           >
             <div
-              className="card"
+              className="card municipal-kpi-card"
               style={{
                 background: "var(--surface-2)",
                 borderColor: "var(--border)",
@@ -397,12 +473,12 @@ export default function MunicipalidadesExplorerClient({
                   marginTop: "0.25rem",
                 }}
               >
-                ✓ 100% Cobertura Nacional
+                Catálogo territorial completo
               </div>
             </div>
 
             <div
-              className="card"
+              className="card municipal-kpi-card"
               style={{
                 background: "var(--surface-2)",
                 borderColor: "var(--border)",
@@ -454,7 +530,7 @@ export default function MunicipalidadesExplorerClient({
             </div>
 
             <div
-              className="card"
+              className="card municipal-kpi-card"
               style={{
                 background: "var(--surface-2)",
                 borderColor: "var(--border)",
@@ -506,7 +582,7 @@ export default function MunicipalidadesExplorerClient({
             </div>
 
             <div
-              className="card"
+              className="card municipal-kpi-card"
               style={{
                 background: "var(--surface-2)",
                 borderColor: "var(--border)",
@@ -559,7 +635,7 @@ export default function MunicipalidadesExplorerClient({
 
             {/* KPI 5: Cumplimiento Transparencia Activa Ley 20.285 */}
             <div
-              className="card"
+              className="card municipal-kpi-card"
               style={{
                 background: "var(--surface-2)",
                 borderColor: "var(--border)",
@@ -606,7 +682,7 @@ export default function MunicipalidadesExplorerClient({
                   marginTop: "0.25rem",
                 }}
               >
-                Comunas con nómina al día (≤ 90 días)
+                {stats.alDiaCount ?? 0} al día · {stats.desfasadoCount ?? 0} con desfase · {stats.sinDatosCount ?? 0} sin nómina
               </div>
             </div>
           </div>
@@ -722,7 +798,8 @@ export default function MunicipalidadesExplorerClient({
                     return (
                       <Link
                         key={m.id}
-                        href={`/municipalidades/${m.id}`}
+                        href={`/municipalidades/${getMuniCanonicalSlug(m.id) ?? m.id}`}
+                        prefetch={false}
                         style={{
                           textDecoration: "none",
                           color: "inherit",
@@ -817,7 +894,7 @@ export default function MunicipalidadesExplorerClient({
                         margin: 0,
                       }}
                     >
-                      ⚖️ Dispersión: Per Cápita vs Dependencia FCM
+                      Lectura comparada: per cápita y dependencia FCM
                     </h3>
                     <span
                       style={{
@@ -852,6 +929,7 @@ export default function MunicipalidadesExplorerClient({
                     }}
                   >
                     <div
+                      className="municipal-dispersion-tile"
                       style={{
                         padding: "0.75rem",
                         borderRadius: 8,
@@ -895,6 +973,7 @@ export default function MunicipalidadesExplorerClient({
                     </div>
 
                     <div
+                      className="municipal-dispersion-tile"
                       style={{
                         padding: "0.75rem",
                         borderRadius: 8,
@@ -936,6 +1015,92 @@ export default function MunicipalidadesExplorerClient({
                         Ej: La Pintana, comunas rurales
                       </div>
                     </div>
+
+                    <div
+                      className="municipal-dispersion-tile"
+                      style={{
+                        padding: "0.75rem",
+                        borderRadius: 8,
+                        background: "var(--surface-2)",
+                        border: "1px solid var(--border)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "0.7rem",
+                          fontWeight: 700,
+                          color: "var(--accent)",
+                          marginBottom: "0.2rem",
+                        }}
+                      >
+                        Mayor presupuesto per cápita
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "0.85rem",
+                          fontWeight: 700,
+                          color: "var(--text-primary)",
+                        }}
+                      >
+                        {highestPerCapita
+                          ? formatCLP(highestPerCapita.presupuesto_per_capita_clp)
+                          : "Sin dato publicado"}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "0.68rem",
+                          color: "var(--text-subtle)",
+                          marginTop: "0.2rem",
+                        }}
+                      >
+                        {highestPerCapita
+                          ? `${highestPerCapita.nombre_comuna} · ${highestPerCapita.region}`
+                          : "No calculable con este release"}
+                      </div>
+                    </div>
+
+                    <div
+                      className="municipal-dispersion-tile"
+                      style={{
+                        padding: "0.75rem",
+                        borderRadius: 8,
+                        background: "var(--surface-2)",
+                        border: "1px solid var(--border)",
+                      }}
+                    >
+                      <div
+                        style={{
+                          fontSize: "0.7rem",
+                          fontWeight: 700,
+                          color: "var(--highlight)",
+                          marginBottom: "0.2rem",
+                        }}
+                      >
+                        Mayor dotación municipal
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "0.85rem",
+                          fontWeight: 700,
+                          color: "var(--text-primary)",
+                        }}
+                      >
+                        {highestStaff
+                          ? `${formatNum(highestStaff.resumen_personal?.total_funcionarios)} funcionarios`
+                          : "Sin dato publicado"}
+                      </div>
+                      <div
+                        style={{
+                          fontSize: "0.68rem",
+                          color: "var(--text-subtle)",
+                          marginTop: "0.2rem",
+                        }}
+                      >
+                        {highestStaff
+                          ? `${highestStaff.nombre_comuna} · ${highestStaff.region}`
+                          : "No calculable con este release"}
+                      </div>
+                    </div>
                   </div>
                 </div>
 
@@ -949,8 +1114,8 @@ export default function MunicipalidadesExplorerClient({
                     color: "var(--text-muted)",
                   }}
                 >
-                  💡 Haz clic en cualquier comuna para ver su presupuesto,
-                  nómina y concejo comunal.
+                  Selecciona cualquier comuna para ver su presupuesto, nómina y
+                  concejo comunal.
                 </div>
               </div>
             </div>
@@ -1422,6 +1587,7 @@ export default function MunicipalidadesExplorerClient({
       <div className="container-main" style={{ marginTop: "1.5rem" }}>
         {paginatedData.length === 0 ? (
           <div
+            id="municipalidades-registros"
             className="card"
             style={{ padding: "3rem 1.5rem", textAlign: "center" }}
           >
@@ -1457,7 +1623,7 @@ export default function MunicipalidadesExplorerClient({
             </button>
           </div>
         ) : viewMode === "cards" ? (
-          /* VISTA EN TARJETAS (100% CLICKABLE ENVOLVIENDO EN <Link>) */
+          /* VISTA EN TARJETAS (100% CLICKABLE ENVOLVIENDO EN <Link prefetch={false}>) */
           <div
             style={{
               display: "grid",
@@ -1469,8 +1635,9 @@ export default function MunicipalidadesExplorerClient({
               const pres = m.presupuesto?.vigente_clp ?? 0;
               const perCapita = m.presupuesto_per_capita_clp ?? 0;
               const fcm = m.fcm_dependencia_pct ?? 0;
-              const staff = m.resumen_personal?.total_funcionarios ?? 0;
-              const masa = m.resumen_personal?.masa_mensual_clp ?? 0;
+              const hasNomina = Boolean(m.resumen_personal) && m.estado_frescura !== "sin_datos";
+              const staff = m.resumen_personal?.total_funcionarios ?? null;
+              const masa = m.resumen_personal?.masa_mensual_clp ?? null;
               const partido =
                 m.partido_alcalde ||
                 m.alcalde?.partido_alcalde ||
@@ -1480,7 +1647,8 @@ export default function MunicipalidadesExplorerClient({
               return (
                 <Link
                   key={m.id}
-                  href={`/municipalidades/${m.id}`}
+                  href={`/municipalidades/${getMuniCanonicalSlug(m.id) ?? m.id}`}
+                  prefetch={false}
                   className="card hover-card"
                   style={{
                     textDecoration: "none",
@@ -1704,7 +1872,7 @@ export default function MunicipalidadesExplorerClient({
                             marginTop: "0.15rem",
                           }}
                         >
-                          {formatNum(staff)} pers.
+                          {hasNomina ? `${formatNum(staff)} pers.` : "No publicado"}
                         </div>
                         <div
                           style={{
@@ -1713,7 +1881,7 @@ export default function MunicipalidadesExplorerClient({
                             marginTop: "0.1rem",
                           }}
                         >
-                          Masa: {formatCompactCLP(masa)}/m
+                          {hasNomina && masa && masa > 0 ? `Masa: ${formatCompactCLP(masa)}/m` : "Sin nómina en el corte"}
                         </div>
                       </div>
                     </div>
@@ -1874,7 +2042,8 @@ export default function MunicipalidadesExplorerClient({
                         <td style={{ padding: "0.8rem 1rem" }}>
                           <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                             <Link
-                              href={`/municipalidades/${m.id}`}
+                              href={`/municipalidades/${getMuniCanonicalSlug(m.id) ?? m.id}`}
+                              prefetch={false}
                               style={{
                                 fontWeight: 700,
                                 color: "var(--text-primary)",
@@ -2027,7 +2196,8 @@ export default function MunicipalidadesExplorerClient({
                           }}
                         >
                           <Link
-                            href={`/municipalidades/${m.id}`}
+                            href={`/municipalidades/${getMuniCanonicalSlug(m.id) ?? m.id}`}
+                            prefetch={false}
                             className="btn btn-ghost"
                             style={{
                               fontSize: "0.72rem",

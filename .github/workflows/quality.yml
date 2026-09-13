@@ -3,13 +3,9 @@ name: Quality (Lint, Types & Unit Tests)
 on:
   push:
     paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
       - 'auditoria_integridad_datos/**'
   pull_request:
     paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
       - 'auditoria_integridad_datos/**'
   workflow_dispatch:
 
@@ -44,7 +40,7 @@ jobs:
         working-directory: transparencia-app
 
       - name: Static architecture and Worker type guards
-        run: node scripts/check-static-architecture.mjs && npm run api:typecheck
+        run: node scripts/check-static-architecture.mjs && npm run api:typecheck && npm run check:etl-calendar && npm run check:generated && npm run check:production-gates
         working-directory: transparencia-app
 
       - name: Enforce data integrity guards V1-V7

@@ -11,6 +11,8 @@ export interface EtlSourceInfo {
   recordCount: number;
   canonicalCount: number;
   historicalCount: number;
+  publicHistoricalCount: number;
+  catalogDeclaredCount?: number;
   financialAmountClp?: number;
   status: "operational" | "updated" | "official_lag";
   statusText: string;
@@ -26,7 +28,7 @@ const CANONICAL_COUNTS: Record<string, number> = {
   dipres: 15689,
   ley19862: 59361,
   chilecompra: 74142,
-  infolobby: 60523,
+  infolobby: 71467,
   infoprobidad: 15331,
   sinim: 3105,
   contraloria: 291,
@@ -42,7 +44,7 @@ const HISTORICAL_COUNTS: Record<string, number> = {
   dipres: 15689,
   ley19862: 59361,
   chilecompra: 888693,
-  infolobby: 60523,
+  infolobby: 71467,
   infoprobidad: 15331,
   sinim: 3105,
   contraloria: 291,
@@ -53,8 +55,11 @@ const HISTORICAL_COUNTS: Record<string, number> = {
   ine: 346,
 };
 
-type HealthKey = keyof typeof healthRaw.sources | "personal_apoyo";
-type Descriptor = Omit<EtlSourceInfo, "recordCount" | "canonicalCount" | "historicalCount" | "financialAmountClp" | "lastUpdated" | "lastUpdatedRelative" | "status" | "statusText"> & { health: HealthKey };
+const CATALOG_DECLARED_COUNTS: Record<string, number> = {
+};
+
+type HealthKey = keyof typeof healthRaw.sources | "personal_apoyo" | "ine";
+type Descriptor = Omit<EtlSourceInfo, "recordCount" | "canonicalCount" | "historicalCount" | "publicHistoricalCount" | "catalogDeclaredCount" | "financialAmountClp" | "lastUpdated" | "lastUpdatedRelative" | "status" | "statusText"> & { health: HealthKey };
 const dateLabel = (value: string) => `Corte ${new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(value))}`;
 
 const descriptors: Descriptor[] = [
@@ -77,17 +82,22 @@ export const ETL_SOURCES_DATA: EtlSourceInfo[] = descriptors.map(({ health, ...d
   const canonicalCount = CANONICAL_COUNTS[health] ?? state?.recordCount ?? 0;
   const historicalCount = HISTORICAL_COUNTS[health] ?? state?.recordCount ?? canonicalCount;
   const generatedAt = state?.generatedAt ?? "2026-08-21T10:02:59.458Z";
+  const financialAmountClp = state && "financialAmountClp" in state && typeof state.financialAmountClp === "number"
+    ? state.financialAmountClp
+    : undefined;
 
   return {
     ...descriptor,
     recordCount: canonicalCount,
     canonicalCount,
     historicalCount,
-    ...(state && "financialAmountClp" in state && typeof state.financialAmountClp === "number" ? { financialAmountClp: state.financialAmountClp } : {}),
+    publicHistoricalCount: canonicalCount,
+    ...(CATALOG_DECLARED_COUNTS[health] !== undefined ? { catalogDeclaredCount: CATALOG_DECLARED_COUNTS[health] } : {}),
+    ...(financialAmountClp !== undefined ? { financialAmountClp } : {}),
     lastUpdated: generatedAt,
     lastUpdatedRelative: dateLabel(generatedAt),
     status: state?.status === "complete" ? "operational" : "official_lag",
-    statusText: state?.status === "complete" ? "Cobertura completa" : "Cobertura parcial declarada",
+    statusText: state?.status === "complete" ? "Universo verificado" : "Disponible para consulta",
   };
 });
 

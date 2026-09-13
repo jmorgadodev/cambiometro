@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Calculadora Mi Impuesto — El Cambiómetro",
   description:
     "Calcula con precisión tributaria cuántos pesos de tu trabajo financian las dietas y gastos del Congreso Nacional y los servicios del Estado de Chile.",
+  alternates: { canonical: "/calculadora" },
 };
 
 export default function CalculadoraPage() {

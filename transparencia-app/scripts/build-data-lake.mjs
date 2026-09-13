@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { gunzipSync } from "node:zlib";
 import { buildLakePlan } from "./etl/lake.mjs";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
@@ -11,6 +12,9 @@ const outputRoot = resolve(outputArgIndex >= 0 ? process.argv[outputArgIndex + 1
 const dryRun = process.argv.includes("--dry-run");
 const excludeSourceIndex = process.argv.indexOf("--exclude-source");
 const excludedSources = new Set((excludeSourceIndex >= 0 ? process.argv[excludeSourceIndex + 1] : "")
+  .split(",").map((value) => value.trim()).filter(Boolean));
+const replaceSourceIndex = process.argv.indexOf("--replace-source");
+const replaceSourceIds = new Set((replaceSourceIndex >= 0 ? process.argv[replaceSourceIndex + 1] : "")
   .split(",").map((value) => value.trim()).filter(Boolean));
 
 if (!existsSync(snapshotPath)) throw new Error(`Snapshot inexistente: ${snapshotPath}`);
@@ -29,7 +33,21 @@ if (existsSync(existingCatalogPath)) {
     console.warn(`[WARN] Ignorando catálogo inválido o vacío: ${e.message}`);
   }
 }
-const plan = buildLakePlan(snapshot, { sourceInventory, existingCatalog });
+function readExistingProjection(key) {
+  if (!key) return [];
+  const path = resolve(outputRoot, key);
+  if (!path.startsWith(`${outputRoot}${sep}`) || !existsSync(path)) return [];
+  const text = gunzipSync(readFileSync(path)).toString("utf8").trim();
+  return text ? text.split("\n").map((line) => JSON.parse(line)) : [];
+}
+
+const existingEntityBundles = Object.fromEntries((existingCatalog?.sources ?? [])
+  .filter((source) => source.entityKey || source.entityIndexKey)
+  .map((source) => [source.id, {
+    entities: readExistingProjection(source.entityKey),
+    indexes: readExistingProjection(source.entityIndexKey),
+  }]));
+const plan = buildLakePlan(snapshot, { sourceInventory, existingCatalog, existingEntityBundles, replaceSourceIds });
 const publishPlan = {
   schemaVersion: "1.0.0",
   generatedAt: snapshot.actualizado_en ?? null,

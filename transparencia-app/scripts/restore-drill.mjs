@@ -61,6 +61,16 @@ async function r2Get(bucket, key) {
   return response;
 }
 
+async function r2Head(bucket, key) {
+  const url = `${R2_API}/${bucket}/objects/${encodeURIComponent(key)}`;
+  const response = await fetch(url, { method: "HEAD", headers: { Authorization: `Bearer ${token}` } });
+  if (!response.ok) {
+    const text = await response.text();
+    throw new Error(`R2_HEAD_FAILED ${bucket}/${key}: HTTP ${response.status} ${text.slice(0, 300)}`);
+  }
+  return response;
+}
+
 async function gunzipBuffer(gzBuffer) {
   return new Promise((res, rej) => {
     const gunzip = createGunzip();
@@ -164,14 +174,40 @@ if (stamps.length === 0) {
 stamps = [...new Set(stamps.filter(Boolean))].sort().reverse();
 
 const latestStamp = stamps[0];
-const d1Key = inventory.d1 || `d1/${latestStamp}/transparencia-db.sql.gz`;
+const d1Key = inventory.d1 ?? null;
 log(`Ultimo backup stamp: ${latestStamp}`);
-log(`D1 dump key: ${d1Key}`);
+log(`D1 dump key: ${d1Key ?? "no incluido (drill R2-only)"}`);
 
 const lakeObjects = Array.isArray(inventory.objects)
-  ? inventory.objects.filter((key) => key.startsWith(`backup/${latestStamp}/`))
+  ? inventory.objects
   : [];
 log(`Objetos lake en manifest para stamp ${latestStamp}: ${lakeObjects.length}`);
+
+// El backup semanal normal es R2-only. No se descarga ni se restaura D1 en
+// este modo: eso volvería a mover grandes volúmenes y contradice la política
+// de cuota. Se valida la existencia de una copia R2 aislada mediante HEAD y
+// se deja el drill completo disponible sólo cuando el inventario trae d1.
+if (!inventory.d1) {
+  if (lakeObjects.length === 0) throw new Error("R2_BACKUP_INVENTORY_EMPTY");
+  const sampleKey = `backup/${latestStamp}/${lakeObjects[0]}`;
+  const sample = await r2Head(BACKUP_BUCKET, sampleKey);
+  const report = {
+    mode: "R2_ONLY",
+    drillId,
+    backupId: sampleKey,
+    backupTimestamp: inventory.generatedAt ?? latestStamp,
+    lakeObjectsInManifest: lakeObjects.length,
+    sampleObjectBytes: Number(sample.headers.get("content-length") ?? 0),
+    d1Skipped: true,
+    status: "DRILL_R2_SUCCESS",
+  };
+  console.log("\n" + "=".repeat(72));
+  console.log("RESTORE DRILL REPORT (R2 ONLY)");
+  console.log("=".repeat(72));
+  console.log(JSON.stringify(report, null, 2));
+  console.log("=".repeat(72));
+  process.exit(0);
+}
 
 // Paso 3: descargar dump
 log(`Paso 3: Descargando dump D1 (${d1Key})...`);

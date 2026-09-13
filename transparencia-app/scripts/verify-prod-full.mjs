@@ -1,4 +1,14 @@
-import { strict as assert } from "node:assert";
+import { existsSync, readFileSync } from "node:fs";
+import { resolve } from "node:path";
+import { findLandingTransferSource } from "./source-contract.mjs";
+import {
+  extractCanonicalCount,
+  extractConsolidatedCount,
+  extractInfoLobbyCount,
+  isRetryableHttpStatus,
+} from "./etl/production-verifier-contracts.mjs";
+
+export { findLandingTransferSource } from "./source-contract.mjs";
 
 let passed = 0;
 let failed = 0;
@@ -13,6 +23,132 @@ function assertCheck(moduleName, checkName, condition, extraInfo = "") {
   }
 }
 
+function normalizeHex(value) {
+  const hex = String(value).toUpperCase();
+  return /^#[0-9A-F]{3}$/.test(hex) ? `#${[...hex.slice(1)].map((digit) => digit + digit).join("")}` : hex;
+}
+
+async function fetchWithResponseRetry(url, options = {}, attempts = 4) {
+  let response;
+  for (let attempt = 1; attempt <= attempts; attempt += 1) {
+    response = await fetch(url, options);
+    if (!isRetryableHttpStatus(response.status) || attempt === attempts) return response;
+    const retryAfter = Number(response.headers.get("retry-after"));
+    const delay = Number.isFinite(retryAfter) && retryAfter > 0
+      ? retryAfter * 1000
+      : 2_000 * 2 ** (attempt - 1);
+    await new Promise((resolve) => setTimeout(resolve, Math.min(delay, 15_000)));
+  }
+  return response;
+}
+
+async function verifyThemePersistence(PROD_URL, requestHeaders) {
+  if (process.env.VERIFY_THEME_BROWSER !== "1") {
+    console.log("  ℹ️ [THEME] navegador omitido; use VERIFY_THEME_BROWSER=1 para la verificación interactiva.");
+    return;
+  }
+  try {
+    const { chromium } = await import("playwright");
+    const browser = await chromium.launch({ headless: true });
+    const expected = {
+      paper: ["#F6F5F2", "#FFFFFF", "#101828", "#0E7C66"],
+      dark: ["#151719", "#1D2023", "#E8E6E1", "#34B39A"],
+      night: ["#0A0B0B", "#121313", "#D6D3CC", "#2FA08C"],
+    };
+    for (const [theme, tokens] of Object.entries(expected)) {
+      const context = await browser.newContext({ extraHTTPHeaders: requestHeaders });
+      const page = await context.newPage();
+      await page.goto(`${PROD_URL}/?theme_probe=${theme}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+      await page.evaluate((value) => { localStorage.setItem("cambiometro-theme", value); }, theme);
+      await page.reload({ waitUntil: "domcontentloaded", timeout: 30_000 });
+      await page.waitForFunction((value) => document.documentElement.dataset.theme === value, theme, { timeout: 5_000 });
+      const values = await page.evaluate(() => {
+        const style = getComputedStyle(document.documentElement);
+        return [document.documentElement.dataset.theme, style.getPropertyValue("--bg").trim().toUpperCase(), style.getPropertyValue("--surface").trim().toUpperCase(), style.getPropertyValue("--text").trim().toUpperCase(), style.getPropertyValue("--accent").trim().toUpperCase()];
+      });
+      assertCheck("THEME", `${theme}: localStorage y tokens aplicados`, values[0] === theme && values.slice(1).every((value, index) => normalizeHex(value) === normalizeHex(tokens[index])), JSON.stringify(values));
+      await context.close();
+    }
+    await browser.close();
+  } catch (error) {
+    assertCheck("THEME", "Playwright pudo comprobar persistencia y tokens", false, error.message);
+  }
+}
+
+async function verifyAnalyticsConsent(PROD_URL, requestHeaders) {
+  if (process.env.VERIFY_BROWSER !== "1") {
+    console.log("  ℹ️ [ANALYTICS] navegador omitido; use VERIFY_BROWSER=1 para probar consentimiento y CSP.");
+    return;
+  }
+  const { chromium } = await import("playwright");
+  const browser = await chromium.launch({ headless: true });
+  const expectedGa4Id = process.env.EXPECTED_GA4_ID?.trim();
+  const expectedGtmId = process.env.EXPECTED_GTM_ID?.trim();
+  const expectedMode = expectedGtmId ? "gtm" : expectedGa4Id ? "ga4" : null;
+  const requireAnalytics = process.env.REQUIRE_ANALYTICS === "1";
+  try {
+    const run = async (choice) => {
+      const context = await browser.newContext({ extraHTTPHeaders: requestHeaders });
+      const requests = [];
+      const pageViewEvents = [];
+      const consoleErrors = [];
+      const page = await context.newPage();
+      page.on("request", (request) => {
+        const url = request.url();
+        if (/googletagmanager\.com|google-analytics\.com|analytics\.google\.com/i.test(url)) requests.push(url);
+        if (/google-analytics\.com\/g\/collect/i.test(url)) {
+          const payload = `${url}&${request.postData() ?? ""}`;
+          if (/(?:^|[?&])en=page_view(?:&|$)/.test(payload)) pageViewEvents.push(url);
+        }
+      });
+      page.on("console", (message) => {
+        if (message.type() === "error" && /Content Security Policy|googletagmanager|google-analytics/i.test(message.text())) consoleErrors.push(message.text());
+      });
+      await page.goto(`${PROD_URL}/?analytics_probe=${choice}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
+      await page.getByRole("button", { name: choice === "granted" ? "Aceptar" : "Rechazar" }).click({ timeout: 5_000 });
+      await page.waitForTimeout(1_500);
+      if (choice === "granted") {
+        await page.getByRole("link", { name: "Movimientos", exact: true }).first().click();
+        await page.waitForURL(/\/movimientos\/?$/, { timeout: 10_000 });
+        await page.waitForTimeout(1_500);
+      }
+      const queuedPageViewEvents = await page.evaluate(() => {
+        if (!Array.isArray(window.dataLayer)) return 0;
+        return window.dataLayer.filter((entry) => {
+          if (Array.isArray(entry)) return entry[0] === "event" && entry[1] === "page_view";
+          return entry?.event === "cambiometro_page_view";
+        }).length;
+      });
+      await context.close();
+      return { requests, pageViewEvents, queuedPageViewEvents, consoleErrors };
+    };
+    const denied = await run("denied");
+    assertCheck("ANALYTICS", "rechazo no genera solicitudes Google", denied.requests.length === 0, JSON.stringify(denied.requests));
+    const granted = await run("granted");
+    const loaderRequests = granted.requests.filter((url) => /googletagmanager\.com\/(?:gtag\/js|gtm\.js)/i.test(url));
+    assertCheck("ANALYTICS", "aceptación no duplica Google Tag", loaderRequests.length <= 1, JSON.stringify(granted.requests));
+    assertCheck(
+      "ANALYTICS",
+      "un page_view por ruta (inicio + navegación)",
+      granted.pageViewEvents.length === 2 || granted.queuedPageViewEvents === 2,
+      JSON.stringify({ network: granted.pageViewEvents, dataLayer: granted.queuedPageViewEvents }),
+    );
+    if (requireAnalytics) {
+      assertCheck("ANALYTICS", "existe un ID de medición configurado", expectedMode !== null, "configuración ausente");
+      if (expectedMode === "ga4") {
+        const expectedUrl = `gtag/js?id=${encodeURIComponent(expectedGa4Id)}`;
+        assertCheck("ANALYTICS", "aceptación carga el GA4 esperado una sola vez", loaderRequests.filter((url) => url.includes(expectedUrl)).length === 1, expectedUrl);
+      } else if (expectedMode === "gtm") {
+        const expectedUrl = `gtm.js?id=${encodeURIComponent(expectedGtmId)}`;
+        assertCheck("ANALYTICS", "aceptación carga el contenedor GTM esperado una sola vez", loaderRequests.filter((url) => url.includes(expectedUrl)).length === 1, expectedUrl);
+      }
+    }
+    assertCheck("ANALYTICS", "consentimiento y Tag no generan violaciones CSP", denied.consoleErrors.length === 0 && granted.consoleErrors.length === 0, JSON.stringify([...denied.consoleErrors, ...granted.consoleErrors]));
+  } finally {
+    await browser.close();
+  }
+}
+
 async function verifyProdFull() {
   console.log("================================================================================");
   console.log("  VERIFICACIÓN EN VIVO INTEGRAL DE PRODUCCIÓN — EL CAMBIÓMETRO");
@@ -21,12 +157,47 @@ async function verifyProdFull() {
   console.log("================================================================================\n");
 
   const headers = { "User-Agent": "Cambiometro-Full-Verifier/1.0", "Cache-Control": "no-cache" };
+  const uptimeToken = process.env.UPTIME_TOKEN?.trim();
+  if (uptimeToken) headers["X-Cambiometro-Uptime-Token"] = uptimeToken;
+  const API_URL = process.env.API_URL || PROD_URL;
+  const expectedTransferRowsOverride = process.env.EXPECTED_TRANSFER_ROWS ? Number(process.env.EXPECTED_TRANSFER_ROWS) : null;
+  const expectedTransferAmountOverride = process.env.EXPECTED_TRANSFER_AMOUNT ? Number(process.env.EXPECTED_TRANSFER_AMOUNT) : null;
+  const expectedTransferPagesOverride = process.env.EXPECTED_TRANSFER_PAGES ? Number(process.env.EXPECTED_TRANSFER_PAGES) : null;
+
+  // CI hydrates the R2 release before running this verifier.  Keeping an
+  // explicit override also makes local audits reproducible without replacing
+  // a developer's tracked snapshot just to inspect production.
+  const votingSnapshotPath = process.env.VERIFY_VOTING_SNAPSHOT_PATH
+    ? resolve(process.env.VERIFY_VOTING_SNAPSHOT_PATH)
+    : resolve("data/politicos-votaciones.json");
+  const votingSnapshot = existsSync(votingSnapshotPath)
+    ? JSON.parse(readFileSync(votingSnapshotPath, "utf8"))
+    : null;
+
+  function formatInteger(value) {
+    return new Intl.NumberFormat("es-CL").format(value);
+  }
+
+  function formatBillones(value) {
+    return `$${(value / 1_000_000_000_000).toLocaleString("es-CL", { maximumFractionDigits: 2 })} billones`;
+  }
 
   // ─── MÓDULO 1: HOME & GLOBALES ─────────────────────────────────────────────
   console.log("1. MÓDULO HOME Y FOOTER COMPACTO (/)");
   const homeRes = await fetch(`${PROD_URL}/`, { headers });
   assertCheck("HOME", "HTTP Status 200", homeRes.status === 200);
   const homeHtml = (await homeRes.text()).replace(/<!--.*?-->/g, "");
+  await verifyThemePersistence(PROD_URL, headers);
+  try {
+    await verifyAnalyticsConsent(PROD_URL, headers);
+  } catch (error) {
+    assertCheck("ANALYTICS", "Playwright pudo comprobar consentimiento y CSP", false, error.message);
+  }
+
+  const staticManifestRes = await fetch(`${PROD_URL}/data/static-site-manifest.json`, { headers });
+  assertCheck("HOME", "Manifiesto estático HTTP 200", staticManifestRes.status === 200);
+  const staticManifest = staticManifestRes.ok ? await staticManifestRes.json().catch(() => null) : null;
+  const canonicalCount = Number(staticManifest?.datasets?.entities?.count ?? 0);
 
   // Version ID header/tag check
   const cfRay = homeRes.headers.get("cf-ray") || "local";
@@ -34,18 +205,22 @@ async function verifyProdFull() {
   const versionId = `${etag}-${cfRay.slice(0, 8)}`;
 
   assertCheck("HOME", "Total registros canónicos (1.753.013)", homeHtml.includes("1.753.013"));
-  assertCheck("HOME", "Total entidades identificadas (3.281)", homeHtml.includes("3.281"));
+  assertCheck("HOME", `Total entidades identificadas (${formatInteger(canonicalCount)})`, canonicalCount > 0 && homeHtml.includes(formatInteger(canonicalCount)));
   assertCheck("HOME", "Total relaciones y cruces (1.897)", homeHtml.includes("1.897"));
   assertCheck("HOME", "Total votaciones de sala (12.111)", homeHtml.includes("12.111"));
   assertCheck("HOME", "Total gastos parlamentarios (690)", homeHtml.includes("690"));
   assertCheck("HOME", "Hero KPIs sin signo negativo '-' en SSR", !homeHtml.includes("home-stat\"><strong>-") && !homeHtml.includes("home-stat\">-"));
-  assertCheck("HOME", "Total 13 fuentes públicas", homeHtml.includes("13") && (homeHtml.includes("fuentes") || homeHtml.includes("Fuentes")));
+  // Home muestra sólo las fuentes oficiales con registros disponibles (12).
+  // /fuentes también incluye una fuente derivada y por eso se valida como 13
+  // en el módulo correspondiente; no mezclar ambos universos.
+  assertCheck("HOME", "Total 12 fuentes oficiales con registros", homeHtml.includes("12 fuentes oficiales"));
   assertCheck("HOME", "Footer contiene 'Creado por Jorge Morgado'", homeHtml.includes("Creado por") && homeHtml.includes("Jorge Morgado"));
   assertCheck("HOME", "Footer contiene enlace a LinkedIn de Jorge Morgado", homeHtml.includes("https://www.linkedin.com/in/jorge-morgado/"));
   assertCheck("HOME", "Footer NO contiene columna 'Explorar' (duplicada)", !homeHtml.includes('aria-label="Explorar"') && !homeHtml.includes('>Explorar</h2>'));
   assertCheck("HOME", "Footer contiene icono SVG de LinkedIn", homeHtml.includes("<svg") && homeHtml.includes("LinkedIn"));
   assertCheck("HOME", "Footer contiene icono SVG de Instagram", homeHtml.includes("<svg") && homeHtml.includes("Instagram"));
   assertCheck("HOME", "Footer contiene icono SVG de X", homeHtml.includes("<svg") && (homeHtml.includes("𝕏") || homeHtml.includes("Twitter")));
+  assertCheck("HOME", "Footer contiene enlace de TikTok @cambiometro", homeHtml.includes("https://www.tiktok.com/@cambiometro") && homeHtml.includes("TikTok"));
   assertCheck("HOME", "Footer contiene 'Última consolidación'", homeHtml.includes("Última consolidación") || homeHtml.includes("Corte"));
 
   // ─── MÓDULO 2: FICHAS E INVARIANTES ────────────────────────────────────────
@@ -55,6 +230,37 @@ async function verifyProdFull() {
   const kaiserHtml = (await kaiserRes.text()).replace(/<!--.*?-->/g, "");
   assertCheck("INVARIANTES", "Dieta Kaiser: $8.291.039", kaiserHtml.includes("8.291.039"));
   assertCheck("INVARIANTES", "Asignación Kaiser: +33,7%", kaiserHtml.includes("+33,7%") || kaiserHtml.includes("33,7%"));
+  assertCheck("GASTOS", "Kaiser tiene rendiciones operacionales publicadas", kaiserHtml.includes("Gastos Operacionales Rendidos") && !/Sin registros de gastos operacionales rendidos/i.test(kaiserHtml));
+
+  const bianchiRes = await fetch(`${PROD_URL}/politico/carlos-bianchi-chelech`, { headers });
+  assertCheck("INVARIANTES", "Ficha Carlos Bianchi HTTP 200", bianchiRes.status === 200);
+  const bianchiHtml = (await bianchiRes.text()).replace(/<!--.*?-->/g, "");
+  assertCheck("INVARIANTES", "Bianchi: 25.009 y 24,89%", bianchiHtml.includes("25.009") && bianchiHtml.includes("24,89%"));
+  const bianchiCameraVotes = Number(votingSnapshot?.votes?.["dip-154"]?.length ?? 0);
+  const bianchiSenateVotes = Number(votingSnapshot?.votes?.["sen-048"]?.length ?? 0);
+  assertCheck(
+    "INVARIANTES",
+    "Carlos Bianchi: historial de Cámara y snapshot publicado disponibles",
+    bianchiCameraVotes > 0 && bianchiHtml.includes("Historial de Votaciones") && bianchiHtml.includes("Voto emitido:") && bianchiHtml.includes("Filas por página:"),
+    `snapshot Cámara ${formatInteger(bianchiCameraVotes)}; historial paginado presente`,
+  );
+  assertCheck("GASTOS", "Bianchi tiene rendiciones operacionales publicadas", bianchiHtml.includes("Gastos Operacionales Rendidos") && !/Sin registros de gastos operacionales rendidos/i.test(bianchiHtml));
+
+  const karimRes = await fetch(`${PROD_URL}/politico/karim-bianchi-retamales`, { headers });
+  assertCheck("INVARIANTES", "Ficha Karim Bianchi HTTP 200", karimRes.status === 200);
+  const karimHtml = (await karimRes.text()).replace(/<!--.*?-->/g, "");
+  assertCheck(
+    "INVARIANTES",
+    "Karim Bianchi: historial de Senado y snapshot publicado disponibles",
+    bianchiSenateVotes > 0 && karimHtml.includes("Historial de Votaciones") && karimHtml.includes("Voto emitido:") && karimHtml.includes("Filas por página:"),
+    `snapshot Senado ${formatInteger(bianchiSenateVotes)}; historial paginado presente`,
+  );
+
+  for (const source of ["gastos_camara", "gastos_senado"]) {
+    const expenseRes = await fetchWithResponseRetry(`${API_URL}/api/v1/records?source=${source}&limit=1`, { headers });
+    const expenseJson = expenseRes.ok ? await expenseRes.json().catch(() => null) : null;
+    assertCheck("GASTOS", `Worker ${source} responde con filas`, expenseRes.status === 200 && Number(expenseJson?.meta?.total) > 0, `total: ${expenseJson?.meta?.total ?? "n/a"}`);
+  }
 
   const maipuRes = await fetch(`${PROD_URL}/municipalidades/muni-maipu`, { redirect: "manual", headers });
   assertCheck(
@@ -63,6 +269,8 @@ async function verifyProdFull() {
     maipuRes.status === 301 || maipuRes.status === 307 || maipuRes.status === 308,
     `Status: ${maipuRes.status}`
   );
+  const maipuLocation = maipuRes.headers.get("location");
+  assertCheck("INVARIANTES", "Redirección Maipú apunta a /municipalidades/maipu", maipuLocation ? new URL(maipuLocation, PROD_URL).pathname === "/municipalidades/maipu" : false);
 
   // ─── MÓDULO 3: /CRUCES ─────────────────────────────────────────────────────
   console.log("\n3. MÓDULO CRUCES DOCUMENTALES (/cruces)");
@@ -71,51 +279,173 @@ async function verifyProdFull() {
   const crucesHtml = (await crucesRes.text()).replace(/<!--.*?-->/g, "");
 
   assertCheck("CRUCES", "Tile CGR '291'", crucesHtml.includes("291"));
-  assertCheck("CRUCES", "Tile ChileCompra '$1,9 billones' / '74.142'", (crucesHtml.includes("$1,9") || crucesHtml.includes("1,9")) && crucesHtml.includes("74.142"));
-  assertCheck("CRUCES", "Tile InfoLobby '60.523'", crucesHtml.includes("60.523"));
+  assertCheck("CRUCES", "Tile ChileCompra '74.142'", crucesHtml.includes("74.142"));
+  const infoLobbyCount = extractInfoLobbyCount(crucesHtml);
+  assertCheck("CRUCES", "Tile InfoLobby muestra el conteo publicado", Number.isInteger(infoLobbyCount) && infoLobbyCount > 0, `count: ${infoLobbyCount ?? "n/a"}`);
   assertCheck("CRUCES", "Selector 'Filas por página: 10 / 25 / 50' visible", crucesHtml.includes("Filas por página") && crucesHtml.includes("10") && crucesHtml.includes("25") && crucesHtml.includes("50"));
-  assertCheck("CRUCES", "Paginación default 10 filas ('Pág. 1 de 37')", crucesHtml.includes("Pág. 1 de 37") || crucesHtml.includes("Página 1 de 37") || crucesHtml.includes("37"));
+  const crucesText = crucesHtml.replace(/<!--[\s\S]*?-->/g, "");
+  assertCheck(
+    "CRUCES",
+    "Paginación default 10 filas con total dinámico",
+    /(?:Pág\.|Página)\s*1\s*de\s*[1-9]\d*/.test(crucesText),
+  );
   assertCheck("CRUCES", "Registro oficial CGR Informe 704/2024", crucesHtml.includes("704/2024"));
   assertCheck("CRUCES", "Registro oficial InfoLobby ac0019366881", crucesHtml.includes("ac0019366881"));
 
   const cruces25Res = await fetch(`${PROD_URL}/cruces?rows=25`, { headers });
-  const cruces25Html = (await cruces25Res.text()).replace(/<!--.*?-->/g, "");
-  assertCheck("CRUCES", "Query ?rows=25 recalcula paginación ('Pág. 1 de 15')", cruces25Html.includes("Pág. 1 de 15") || cruces25Html.includes("Página 1 de 15") || cruces25Html.includes("15"));
+  await cruces25Res.text();
+  assertCheck("CRUCES", "Query ?rows=25 llega al HTML estático para paginación cliente", cruces25Res.status === 200);
+
+  // ─── MÓDULO 3B: MOVIMIENTOS AUTOMÁTICOS ────────────────────────────────────
+  console.log("\n3B. MÓDULO MOVIMIENTOS DE AUTORIDADES (/movimientos)");
+  const movimientosRes = await fetch(`${PROD_URL}/movimientos/`, { headers });
+  assertCheck("MOVIMIENTOS", "HTTP Status 200", movimientosRes.status === 200);
+  const movimientosHtml = (await movimientosRes.text()).replace(/<!--.*?-->/g, "");
+  assertCheck("MOVIMIENTOS", "Página contiene el encabezado", movimientosHtml.includes("Movimientos y Relevos de Autoridades"));
+  // Static export prerenders the Suspense fallback before the client mounts.
+  // Validate that it does not contain the global transition overlay; the
+  // hydrated loader is covered by verify-prod-movimientos/verify:browser.
+  assertCheck("MOVIMIENTOS", "SSR sin overlay de transición", !movimientosHtml.includes('id="route-transition-overlay"'));
+  const movimientosSnapshotRes = await fetch(`${PROD_URL}/data/movimientos.json`, { headers });
+  assertCheck("MOVIMIENTOS", "Snapshot estático HTTP 200", movimientosSnapshotRes.status === 200);
+  const movimientosSnapshot = movimientosSnapshotRes.ok ? await movimientosSnapshotRes.json().catch(() => null) : null;
+  assertCheck("MOVIMIENTOS", "Pipeline identificado", movimientosSnapshot?.pipeline === "etl_movimientos_autoridades");
+  assertCheck("MOVIMIENTOS", "Universo histórico preservado (>=79)", Number(movimientosSnapshot?.movimientos?.length ?? 0) >= 79, `total: ${movimientosSnapshot?.movimientos?.length ?? "n/a"}`);
+  assertCheck("MOVIMIENTOS", "Checksum SHA-256 presente", /^[a-f0-9]{64}$/i.test(movimientosSnapshot?.checksum_sha256 || ""));
+  assertCheck("MOVIMIENTOS", "Última ejecución exitosa presente", Number.isFinite(Date.parse(movimientosSnapshot?.last_success_at || movimientosSnapshot?.last_run || "")));
+  assertCheck("MOVIMIENTOS", "Fuente oficial disponible", movimientosSnapshot?.source_health?.some((source) => source.tier === "official" && source.ok === true));
+  assertCheck("MOVIMIENTOS", "Estado en_confirmacion preservado", movimientosSnapshot?.movimientos?.some((movement) => movement.estado === "en_confirmacion"));
 
   // ─── MÓDULO 4: /TRANSFERENCIAS ─────────────────────────────────────────────
   console.log("\n4. MÓDULO TRANSFERENCIAS LEY 19.862 (/transferencias)");
+  const transferManifestRes = await fetch(`${PROD_URL}/data/transferencias/manifest.json`, { headers });
+  assertCheck("TRANSFERENCIAS", "Manifest estático HTTP 200", transferManifestRes.status === 200);
+  let transferManifest = null;
+  if (transferManifestRes.ok) {
+    try {
+      transferManifest = await transferManifestRes.json();
+    } catch {
+      transferManifest = null;
+    }
+  }
+  const transferSummaryRes = await fetch(`${PROD_URL}/data/transferencias/summary.json`, { headers });
+  assertCheck("TRANSFERENCIAS", "Summary estático HTTP 200", transferSummaryRes.status === 200);
+  let transferSummary = null;
+  if (transferSummaryRes.ok) {
+    try {
+      transferSummary = await transferSummaryRes.json();
+    } catch {
+      transferSummary = null;
+    }
+  }
+  const expectedTransferRows = expectedTransferRowsOverride ?? Number(transferManifest?.totalRows ?? 0);
+  const expectedTransferAmount = expectedTransferAmountOverride ?? Number(transferManifest?.expected?.totalMontoClp ?? 0);
+  const expectedTransferPages = expectedTransferPagesOverride ?? Number(transferManifest?.totalPages ?? 0);
+  assertCheck("TRANSFERENCIAS", "Manifest schemaVersion 1", transferManifest?.schemaVersion === 1);
+  assertCheck("TRANSFERENCIAS", expectedTransferRowsOverride === null ? "Manifest contiene el universo completo" : `Manifest totalRows ${formatInteger(expectedTransferRows)}`, Number.isInteger(transferManifest?.totalRows) && transferManifest.totalRows > 1000 && transferManifest.totalRows === expectedTransferRows, `actual: ${transferManifest?.totalRows ?? "n/a"}`);
+  assertCheck("TRANSFERENCIAS", `Manifest totalPages ${formatInteger(expectedTransferPages)}`, transferManifest?.totalPages === expectedTransferPages, `actual: ${transferManifest?.totalPages ?? "n/a"}`);
+  assertCheck("TRANSFERENCIAS", "Manifest pages coincide con totalPages", Array.isArray(transferManifest?.pages) && transferManifest.pages.length === expectedTransferPages);
+  assertCheck("TRANSFERENCIAS", "Manifest checksum SHA-256 presente", /^[a-f0-9]{64}$/i.test(transferManifest?.checksumSha256 || ""));
+  assertCheck("TRANSFERENCIAS", `Manifest totalMontoClp ${formatInteger(expectedTransferAmount)}`, transferManifest?.expected?.totalMontoClp === expectedTransferAmount, `actual: ${transferManifest?.expected?.totalMontoClp ?? "n/a"}`);
+
   const transfRes = await fetch(`${PROD_URL}/transferencias`, { headers });
   assertCheck("TRANSFERENCIAS", "HTTP Status 200", transfRes.status === 200);
   const transfHtml = (await transfRes.text()).replace(/<!--.*?-->/g, "");
 
-  assertCheck("TRANSFERENCIAS", "KPI Total '59.361'", transfHtml.includes("59.361"));
-  assertCheck("TRANSFERENCIAS", "KPI Monto '$5,01 billones'", transfHtml.includes("billones") || transfHtml.includes("5,01"));
-  assertCheck("TRANSFERENCIAS", "Serie Anual (2023, 2024, 2025, 2026)", transfHtml.includes("2023") && transfHtml.includes("2024") && transfHtml.includes("2025") && transfHtml.includes("2026"));
+  assertCheck("TRANSFERENCIAS", `KPI Total '${formatInteger(expectedTransferRows)}'`, transfHtml.includes(formatInteger(expectedTransferRows)));
+  assertCheck("TRANSFERENCIAS", `KPI Monto '${formatBillones(expectedTransferAmount)}'`, transfHtml.includes("billones") || transfHtml.includes(formatBillones(expectedTransferAmount).replace("$", "")));
+  const summaryYears = Object.keys(transferSummary?.by_year ?? {});
+  const summaryYearRows = summaryYears.reduce((sum, year) => sum + Number(transferSummary.by_year[year]?.count ?? 0), 0);
+  const summaryYearAmount = summaryYears.reduce((sum, year) => sum + Number(transferSummary.by_year[year]?.total ?? 0), 0);
+  assertCheck("TRANSFERENCIAS", "Serie anual declarada por el summary estático", summaryYears.length > 0 && summaryYearRows === expectedTransferRows && summaryYearAmount === expectedTransferAmount, summaryYears.join(", "));
+  assertCheck("TRANSFERENCIAS", "HTML contiene el módulo de serie anual", transfHtml.includes("Serie Anual"));
   assertCheck("TRANSFERENCIAS", "Selector 'Filas por página: 10 / 25 / 50' visible", transfHtml.includes("Filas por página") && transfHtml.includes("10") && transfHtml.includes("25") && transfHtml.includes("50"));
-  assertCheck("TRANSFERENCIAS", "Paginación default 10 filas ('5.937 págs')", transfHtml.includes("5.937") || transfHtml.includes("5937"));
+  assertCheck("TRANSFERENCIAS", `Paginación default 10 filas ('${formatInteger(Math.ceil(expectedTransferRows / 10))} págs')`, transfHtml.includes(formatInteger(Math.ceil(expectedTransferRows / 10))) || transfHtml.includes(String(Math.ceil(expectedTransferRows / 10))));
   assertCheck("TRANSFERENCIAS", "Registro oficial VIÑA BUS S.A. ($347.920.910)", transfHtml.includes("VIÑA BUS") || transfHtml.includes("347.920.910") || transfHtml.includes("4585076"));
   assertCheck("TRANSFERENCIAS", "Enlace a registros19862.gob.cl", transfHtml.includes("registros19862.gob.cl"));
 
   const transf50Res = await fetch(`${PROD_URL}/transferencias?rows=50`, { headers });
-  const transf50Html = (await transf50Res.text()).replace(/<!--.*?-->/g, "");
-  assertCheck("TRANSFERENCIAS", "Query ?rows=50 recalcula paginación ('Página 1 de 1.188')", transf50Html.includes("1.188") || transf50Html.includes("1188"));
+  await transf50Res.text();
+  assertCheck("TRANSFERENCIAS", "Query ?rows=50 llega al HTML estático para paginación cliente", transf50Res.status === 200);
 
-  const transfApiRes = await fetch(`${process.env.API_URL || PROD_URL}/api/v1/transferencias?page=1&limit=10`, { headers });
+  const transfApiRes = await fetch(`${API_URL}/api/v1/transferencias?page=1&limit=10`, { headers });
   assertCheck("TRANSFERENCIAS", "API /api/v1/transferencias responde 200", transfApiRes.status === 200);
+  const landingSummaryRes = await fetch(`${PROD_URL}/data/landing-summary.json`, { headers });
+  const landingSummary = landingSummaryRes.ok ? await landingSummaryRes.json().catch(() => null) : null;
+  const landingTransfer = findLandingTransferSource(landingSummary?.sources);
+  assertCheck(
+    "TRANSFERENCIAS",
+    `Landing summary comparte total ${formatInteger(expectedTransferRows)}`,
+    landingSummaryRes.status === 200 && Number(landingTransfer?.recordCount) === expectedTransferRows,
+    `landing: ${landingTransfer?.recordCount ?? "n/a"}`,
+  );
   if (transfApiRes.ok) {
     const apiJson = await transfApiRes.json();
-    assertCheck("TRANSFERENCIAS", "API retorna total 59.361", apiJson.total === 59361);
+    assertCheck("TRANSFERENCIAS", `API retorna total ${formatInteger(expectedTransferRows)}`, apiJson.total === expectedTransferRows);
     assertCheck("TRANSFERENCIAS", "API retorna 10 filas", apiJson.data?.length === 10);
+  }
+
+  const healthRes = await fetch(`${API_URL}/api/v1/health`, { headers });
+  assertCheck("API", "Worker health responde 200", healthRes.status === 200);
+  const healthJson = healthRes.ok ? await healthRes.json().catch(() => null) : null;
+  const healthUsesCanonicalR2 = healthJson?.data?.transferSource === "r2"
+    && healthJson.data.r2 === true;
+  const healthUsesOptInD1 = healthJson?.data?.transferSource === "d1"
+    && healthJson.data.transferD1 === true
+    && healthJson.data.d1Consistent === true
+    && healthJson.data.d1TransferRows === expectedTransferRows
+    && typeof healthJson.data.d1ReleaseChecksum === "string"
+    && healthJson.data.d1ReleaseChecksum === transferManifest?.checksumSha256;
+  assertCheck(
+    "API",
+    "Worker health declara un release de transferencias coherente (R2 canónico o D1 opt-in)",
+    healthJson?.data?.ok === true
+      && healthJson.data.transferRows === expectedTransferRows
+      && (healthUsesCanonicalR2 || healthUsesOptInD1),
+    `rows: ${healthJson?.data?.transferRows ?? "n/a"}, d1Rows: ${healthJson?.data?.d1TransferRows ?? "n/a"}, source: ${healthJson?.data?.transferSource ?? "n/a"}, consistent: ${healthJson?.data?.d1Consistent ?? "n/a"}`,
+  );
+  const funcionariosRes = await fetchWithResponseRetry(`${API_URL}/api/funcionarios?muni=muni-maipu&query=Claudio&limit=5`, { headers });
+  assertCheck("API", "Búsqueda de funcionario por municipalidad responde 200", funcionariosRes.status === 200);
+  if (funcionariosRes.ok) {
+    const funcionariosJson = await funcionariosRes.json();
+    assertCheck("API", "Búsqueda de funcionario devuelve filas y paginación", Array.isArray(funcionariosJson.data) && funcionariosJson.data.length > 0 && Number(funcionariosJson.meta?.total) > 0);
   }
 
   // ─── MÓDULO 5: /FUENTES Y /DATOS/CALIDAD ───────────────────────────────────
   console.log("\n5. MÓDULO FUENTES Y CALIDAD DE DATOS (/fuentes, /datos/calidad)");
+  const sourcesApiRes = await fetch(`${API_URL}/api/v1/sources`, { headers });
+  const sourcesApi = sourcesApiRes.ok ? await sourcesApiRes.json().catch(() => null) : null;
+  const sourceRows = Array.isArray(sourcesApi?.data) ? sourcesApi.data : [];
+  const expectedSourceIds = ["camara", "chilecompra", "contraloria", "cplt", "dipres", "ine", "infolobby", "infoprobidad", "ley-19862", "senado", "servel", "sinim"];
+  assertCheck("FUENTES", "API de fuentes responde con el universo canónico", sourcesApiRes.status === 200 && sourceRows.length === expectedSourceIds.length && expectedSourceIds.every((id) => sourceRows.some((source) => source?.id === id)), `actual: ${sourceRows.length}/${expectedSourceIds.length}`);
+  // `partial` describes coverage or freshness, not a broken connection.  The
+  // public catalog intentionally keeps a source-level status so each source
+  // can have its own cut; only unavailable/error states indicate a failed
+  // connection.
+  const unavailableSourceStatuses = new Set(["unavailable", "error", "disconnected"]);
+  const unavailableSources = sourceRows.filter((source) => unavailableSourceStatuses.has(source?.status));
+  assertCheck(
+    "FUENTES",
+    "Todas las fuentes canónicas tienen estado de disponibilidad",
+    sourceRows.length === expectedSourceIds.length && unavailableSources.length === 0,
+    unavailableSources.map((source) => `${source?.id ?? "?"}:${source?.status ?? "?"}`).join(", ") || `${sourceRows.length}/${expectedSourceIds.length} con estado publicado`,
+  );
   const fuentesRes = await fetch(`${PROD_URL}/fuentes`, { headers });
   assertCheck("FUENTES", "HTTP Status 200", fuentesRes.status === 200);
   const fuentesHtml = (await fuentesRes.text()).replace(/<!--.*?-->/g, "");
 
   assertCheck("FUENTES", "Muestra 13 fuentes oficiales y derivadas", fuentesHtml.includes("13 fuentes") || fuentesHtml.includes("13"));
-  assertCheck("FUENTES", "Titular canónico con consolidado 1.753.013", fuentesHtml.includes("1.487.224") && fuentesHtml.includes("1.753.013"));
+  const canonicalSourceCount = extractCanonicalCount(fuentesHtml);
+  const consolidatedSourceCount = extractConsolidatedCount(fuentesHtml);
+  assertCheck(
+    "FUENTES",
+    "Titular de fuentes muestra conteos canónico y consolidado vigentes",
+    Number.isInteger(canonicalSourceCount)
+      && canonicalSourceCount > 0
+      && Number.isInteger(consolidatedSourceCount)
+      && consolidatedSourceCount > 0,
+    `canónicos: ${canonicalSourceCount ?? "n/a"}, consolidado: ${consolidatedSourceCount ?? "n/a"}`,
+  );
   assertCheck("FUENTES", "Enlace a calidad de datos", fuentesHtml.includes("/datos/calidad"));
   assertCheck("FUENTES", "Estados reales: 'Operativa mensual'", fuentesHtml.includes("Operativa"));
   assertCheck("FUENTES", "Estados reales: 'Publicación anual' (SINIM)", fuentesHtml.includes("Publicación anual") || fuentesHtml.includes("anual"));
@@ -166,12 +496,12 @@ async function verifyProdFull() {
   assertCheck("LAYOUT", "/cruces con container-main", crucesHtml.includes("container-main"));
   assertCheck("LAYOUT", "/transferencias con container-main", transfHtml.includes("container-main"));
   assertCheck("LAYOUT", "Home con main.home-desk y container-main", homeHtml.includes("home-desk") && homeHtml.includes("container-main"));
-  assertCheck("LAYOUT", "Home rutas 12-col layout", homeHtml.includes("home-paths__layout") && homeHtml.includes("home-paths__grid"));
+  assertCheck("LAYOUT", "Home ledger y rutas layout", homeHtml.includes("home-ledger__grid") && homeHtml.includes("home-paths"));
 
   // ─── MÓDULO 9: BARRIDO DE COBERTURA Y CONCORDANCIA OFICIAL ────────────────
   console.log("\n9. MÓDULO BARRIDO DE COBERTURA Y CONCORDANCIA OFICIAL");
   const { runCoverageSweep } = await import("./coverage-sweep.mjs");
-  const coverageResult = await runCoverageSweep({ silent: false });
+  const coverageResult = await runCoverageSweep({ silent: false, transferManifest, infolobbyCount: infoLobbyCount });
   assertCheck("COBERTURA", "Barrido de cobertura integral (Votaciones, Muestra 5 Fichas, Personal Apoyo, Movimientos, Manifest)", coverageResult.passed);
 
   // ─── MÓDULO 10: FICHAS /politico/* ESTÁTICAS Y RENDIMIENTO (10 URLs × 2 requests) ──

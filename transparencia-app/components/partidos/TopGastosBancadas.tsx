@@ -103,7 +103,7 @@ export default function TopGastosBancadas({ topEquiposDiputados, partidos }: Pro
       {tab === "equipos" && (
         <div style={{ display: "flex", flexDirection: "column" }}>
           {topEquiposDiputados.map((r, index) => (
-            <Link
+            <Link prefetch={false}
               href={`/politico/${getPoliticoSlug(r.id)}`}
               key={r.id}
               style={{
@@ -169,7 +169,7 @@ export default function TopGastosBancadas({ topEquiposDiputados, partidos }: Pro
       {tab === "total_bancada" && (
         <div style={{ display: "flex", flexDirection: "column" }}>
           {partidosPorTotal.map((p, index) => (
-            <Link
+            <Link prefetch={false}
               href={`/partidos/${p.slug}`}
               key={p.id}
               style={{
@@ -250,7 +250,7 @@ export default function TopGastosBancadas({ topEquiposDiputados, partidos }: Pro
       {tab === "promedio_bancada" && (
         <div style={{ display: "flex", flexDirection: "column" }}>
           {partidosPorPromedio.map((p, index) => (
-            <Link
+            <Link prefetch={false}
               href={`/partidos/${p.slug}`}
               key={p.id}
               style={{

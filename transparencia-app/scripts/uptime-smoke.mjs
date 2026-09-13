@@ -1,4 +1,4 @@
-import { execSync } from "node:child_process";
+import { execFileSync } from "node:child_process";
 
 const PROD_BASE = process.env.PROD_URL || "https://cambiometro.impulsacv.cl";
 const API_BASE = process.env.API_URL || PROD_BASE;
@@ -12,9 +12,28 @@ const ROUTES = [
   "/politico/vanessa-kaiser-barents-von-hohenhagen",
   "/transferencias",
   "/cruces",
-  "/api/v1/health/data",
+  "/movimientos",
+  "/api/v1/health",
   "/api/v1/search?q=Kaiser",
+  "/api/v1/records?source=infolobby&limit=1",
 ];
+
+export function buildRequestHeaders(path, uptimeToken = "") {
+  const headers = { "User-Agent": "Cambiometro-UptimeSmoke/1.0" };
+  // The limited WAF exception also protects the Pages home request, not only /api/*.
+  if (uptimeToken) headers["X-Cambiometro-Uptime-Token"] = uptimeToken;
+  return headers;
+}
+
+export function validateSmokeConfiguration({ githubActions = false, uptimeToken = "" } = {}) {
+  if (githubActions && !uptimeToken) {
+    throw new Error("UPTIME_TOKEN_MISSING: configura el secreto CAMBIOMETRO_UPTIME_TOKEN antes de ejecutar el smoke en Actions.");
+  }
+}
+
+const UPTIME_TOKEN = process.env.UPTIME_TOKEN?.trim() ?? "";
+const isMainScript = process.argv[1]?.endsWith("uptime-smoke.mjs");
+if (isMainScript) validateSmokeConfiguration({ githubActions: Boolean(process.env.GITHUB_ACTIONS), uptimeToken: UPTIME_TOKEN });
 
 async function checkRoute(path) {
   const origin = path.startsWith("/api/") ? API_BASE : PROD_BASE;
@@ -25,7 +44,7 @@ async function checkRoute(path) {
 
   try {
     res = await fetch(url, {
-      headers: { "User-Agent": "Cambiometro-UptimeSmoke/1.0" },
+      headers: buildRequestHeaders(path, UPTIME_TOKEN),
       signal: AbortSignal.timeout(5000),
     });
   } catch (err) {
@@ -43,7 +62,28 @@ async function checkRoute(path) {
   }
 
   const has1102 = text.includes("Error 1102") || text.includes("error code: 1102") || text.includes("Worker threw exception");
-  const isOk = status === 200 && durationMs <= 5000 && !has1102;
+  let movementAssetStatus = null;
+  let movementOk = true;
+  if (path === "/movimientos") {
+    // The page is static and its records are hydrated by the browser. Validate
+    // the canonical JSON asset instead of relying on SSR text in the HTML.
+    try {
+      const movementAsset = await fetch(`${PROD_BASE}/data/movimientos.json`, {
+        headers: buildRequestHeaders("/data/movimientos.json", UPTIME_TOKEN),
+        signal: AbortSignal.timeout(5000),
+      });
+      movementAssetStatus = movementAsset.status;
+      const movementJson = await movementAsset.json();
+      movementOk = movementAsset.ok
+        && movementJson?.pipeline === "etl_movimientos_autoridades"
+        && Array.isArray(movementJson?.movimientos)
+        && movementJson.movimientos.length >= 79
+        && !text.includes("MOVIMIENTOS_ALL_OFFICIAL_SOURCES_BLOCKED");
+    } catch {
+      movementOk = false;
+    }
+  }
+  const isOk = status === 200 && durationMs <= 5000 && movementOk && !has1102;
 
   return {
     path,
@@ -53,6 +93,7 @@ async function checkRoute(path) {
     rayId,
     isOk,
     has1102,
+    movementAssetStatus,
     errorMsg,
   };
 }
@@ -82,7 +123,10 @@ export async function runUptimeSmoke() {
       if (process.env.GITHUB_ACTIONS && process.env.GITHUB_TOKEN) {
         try {
           console.log(`[uptime-smoke] Creando issue en GitHub: "${issueTitle}"...`);
-          execSync(`gh issue create --title "${issueTitle}" --body "${issueBody.replace(/"/g, '\\"')}"`, { stdio: "inherit" });
+          execFileSync("gh", ["issue", "create", "--title", issueTitle, "--body-file", "-"], {
+            input: issueBody,
+            stdio: ["pipe", "inherit", "inherit"],
+          });
         } catch (e) {
           console.error(`[uptime-smoke] Error al crear issue:`, e.message);
         }
@@ -94,6 +138,6 @@ export async function runUptimeSmoke() {
   console.log(`[uptime-smoke] Todas las rutas operativas (200 OK, <5s, 0 Error 1102).`);
 }
 
-if (process.argv[1]?.endsWith("uptime-smoke.mjs")) {
+if (isMainScript) {
   runUptimeSmoke();
 }

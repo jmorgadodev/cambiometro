@@ -4,14 +4,10 @@ on:
   push:
     branches: [master, "codex/**"]
     paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
       - 'auditoria_integridad_datos/**'
   pull_request:
     branches: [master]
     paths-ignore:
-      - '**/*.md'
-      - 'docs/**'
       - 'auditoria_integridad_datos/**'
   schedule:
     - cron: "23 6 * * 1"

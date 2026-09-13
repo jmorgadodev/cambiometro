@@ -27,8 +27,9 @@ describe("Footer compacto y pulido móvil", () => {
   it("móvil: marca con misión y corte como caja compacta --surface-2 no inline", () => {
     expect(layoutContent).toContain("site-footer__mission");
     expect(layoutContent).toContain("provenance-stamp");
-    expect(layoutContent).toContain("Última consolidación");
-    expect(layoutContent).toContain("registros oficiales compilados");
+    expect(layoutContent).toContain("Estado del catálogo");
+    expect(layoutContent).toContain("Catálogo en línea");
+    expect(layoutContent).toContain("registros compilados · actualización por fuente");
 
     expect(cssContent).toContain(".site-footer__mission");
     expect(cssContent).toContain("font-size: 13.5px");
@@ -43,7 +44,7 @@ describe("Footer compacto y pulido móvil", () => {
     expect(cssContent).toContain("padding-block: 4px");
   });
 
-  it("barra final legal contiene © 2026, Creado por Jorge Morgado, ImpulsaCV ↗, iconos SVG de Instagram, X y LinkedIn", () => {
+  it("barra final legal contiene © 2026, autoría, ImpulsaCV y enlaces de RRSS", () => {
     expect(layoutContent).toContain("© 2026 El Cambiómetro · Información pública verificada");
     expect(layoutContent).toContain("Creado por");
     expect(layoutContent).toContain("Jorge Morgado");
@@ -51,10 +52,12 @@ describe("Footer compacto y pulido móvil", () => {
     expect(layoutContent).toContain("LinkedInIcon");
     expect(layoutContent).toContain("InstagramIcon");
     expect(layoutContent).toContain("XIcon");
+    expect(layoutContent).toContain("TikTokIcon");
     expect(layoutContent).toContain("ImpulsaCV");
     expect(layoutContent).toContain("https://impulsacv.cl");
     expect(layoutContent).toContain("https://www.instagram.com/cambiometro/");
     expect(layoutContent).toContain("https://x.com/cambiometro");
+    expect(layoutContent).toContain("https://www.tiktok.com/@cambiometro");
   });
 
   it("desktop (>=1024px) cuenta con grid compacto de 3 columnas (brand + 2 nav)", () => {
@@ -67,8 +70,8 @@ describe("Footer compacto y pulido móvil", () => {
     expect(cssContent).toContain("grid-column: 1 / -1");
   });
 
-  it("botón de búsqueda en home tiene texto blanco legible con alto contraste", () => {
+  it("botón de búsqueda en home usa el token de contraste", () => {
     expect(cssContent).toContain(".home-query button");
-    expect(cssContent).toContain("color: #ffffff");
+    expect(cssContent).toContain("color: var(--on-accent)");
   });
 });

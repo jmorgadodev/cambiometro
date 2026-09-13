@@ -1,0 +1,34 @@
+name: Verify ETL calendar
+
+on:
+  push:
+    paths:
+      - ".github/etl-calendar.json"
+      - ".github/workflows/etl-*.yml"
+      - "transparencia-app/scripts/verify-etl-calendar.mjs"
+  pull_request:
+    paths:
+      - ".github/etl-calendar.json"
+      - ".github/workflows/etl-*.yml"
+      - "transparencia-app/scripts/verify-etl-calendar.mjs"
+  workflow_dispatch:
+
+concurrency:
+  group: verify-etl-calendar-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - name: Comprobar calendario UTC y cobertura de ETL
+        working-directory: transparencia-app
+        run: npm run check:etl-calendar

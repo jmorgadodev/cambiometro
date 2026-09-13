@@ -22,6 +22,7 @@
 # production
 /build
 /data/politico-slices/
+/data/lake-subsets/gastos-*.subset.json
 /data/politicos-votaciones-index.json
 /data/lake/*
 /data/lake-cplt/
@@ -71,9 +72,15 @@ data/lake/projections/v1/*.json
 /data/etl/status.json
 /data/entidades-canonica*.json
 /data/generated/
+/data/cohesion-bancadas.json
+/public/data/
 /public/data/transferencias/
 /public/data/search-index.json
 /public/data/static-site-manifest.json
+/public/data/cohesion-bancadas.json
+/public/data/funcionarios/
+/data/static-site-release/
+/.static-site-release-manifest*
 /workers/public-api/dist/
 /workers/public-api/dist-check/
 /workers/public-api/workers/

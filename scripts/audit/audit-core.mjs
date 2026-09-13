@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 export const AUDIT_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 export const APP_ROOT = resolve(AUDIT_ROOT, "transparencia-app");
 export const DOCS_ROOT = resolve(AUDIT_ROOT, "docs/auditoria");
-export const DEFAULT_LAKE = "C:\\Users\\jorge\\Proyectos\\transparencia.impulsacv.cl_\\transparencia-app\\data\\lake";
+export const DEFAULT_LAKE = resolve(AUDIT_ROOT, "transparencia-app/data/lake");
 export const DEFAULT_SITE = "https://cambiometro.impulsacv.cl";
 export const DEFAULT_CUTOFF = "2026-08-20";
 

@@ -1,8 +1,11 @@
 {
-  "generatedAt": "2026-08-21T02:44:54.415Z",
+  "generatedAt": "2026-08-24T13:52:22.514Z",
   "source": {
     "id": "ley-19862",
     "method": "official-monthly-csv",
+    "registeredThrough": "2026-08-20",
+    "sourceRows": 59544,
+    "excludedAfterCutoff": 183,
     "periods": [
       "2026-01",
       "2026-02",
@@ -21,18 +24,6 @@
     "total_emisores": 272
   },
   "by_year": {
-    "2023": {
-      "count": 78412,
-      "total": 4120890340150
-    },
-    "2024": {
-      "count": 84195,
-      "total": 4681240190800
-    },
-    "2025": {
-      "count": 89630,
-      "total": 4950410780200
-    },
     "2026": {
       "count": 59361,
       "total": 5011094170302

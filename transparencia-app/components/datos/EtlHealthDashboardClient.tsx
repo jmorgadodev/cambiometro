@@ -17,12 +17,30 @@ const CATEGORIES: { id: string; label: string; icon: IconoNombre }[] = [
   { id: "municipios", label: "Municipalidades", icon: "territorio" },
 ];
 
-export default function EtlHealthDashboardClient() {
+export default function EtlHealthDashboardClient({
+  transferRelease,
+}: {
+  transferRelease?: {
+    totalRows: number;
+    totalAmountClp: number;
+    generatedAt: string | null;
+  };
+}) {
   const [categoria, setCategoria] = useState<string>("all");
   const [filtroTexto, setFiltroTexto] = useState<string>("");
+  const sources = useMemo(() => ETL_SOURCES_DATA.map((source) => source.id === "etl_ley_19862_transferencias" && transferRelease
+    ? {
+        ...source,
+        recordCount: transferRelease.totalRows,
+        canonicalCount: transferRelease.totalRows,
+        historicalCount: transferRelease.totalRows,
+        ...(transferRelease.totalAmountClp > 0 ? { financialAmountClp: transferRelease.totalAmountClp } : {}),
+        ...(transferRelease.generatedAt ? { lastUpdated: transferRelease.generatedAt } : {}),
+      }
+    : source), [transferRelease]);
 
   const fuentesFiltradas = useMemo(() => {
-    return ETL_SOURCES_DATA.filter((s) => {
+    return sources.filter((s) => {
       const coincideCat = categoria === "all" || s.category === categoria;
       const coincideTexto =
         !filtroTexto.trim() ||
@@ -31,13 +49,13 @@ export default function EtlHealthDashboardClient() {
         s.description.toLowerCase().includes(filtroTexto.toLowerCase());
       return coincideCat && coincideTexto;
     });
-  }, [categoria, filtroTexto]);
+  }, [categoria, filtroTexto, sources]);
 
   const totalRegistros = useMemo(
-    () => ETL_SOURCES_DATA.reduce((acc, s) => acc + s.recordCount, 0),
-    []
+    () => sources.reduce((acc, s) => acc + s.recordCount, 0),
+    [sources]
   );
-  const completeSources = ETL_SOURCES_DATA.filter((source) => source.status === "operational").length;
+  const publishedSources = sources.filter((source) => source.recordCount > 0).length;
 
   const formatCLP = (amount: number) =>
     new Intl.NumberFormat("es-CL", {
@@ -59,9 +77,9 @@ export default function EtlHealthDashboardClient() {
         aria-label="Indicadores generales de salud de datos"
       >
         <div className="stat-tile stat-tile--ok">
-          <div className="stat-tile__value">{completeSources} / {ETL_SOURCES_DATA.length}</div>
-          <div className="stat-tile__label">Cobertura completa</div>
-          <div className="stat-tile__hint">El resto declara cobertura parcial</div>
+          <div className="stat-tile__value">{publishedSources} / {sources.length}</div>
+          <div className="stat-tile__label">Fuentes con datos publicados</div>
+          <div className="stat-tile__hint">Cada corte publicado se puede consultar y conserva su fecha, fuente y trazabilidad</div>
         </div>
         <div className="stat-tile stat-tile--accent">
           <div className="stat-tile__value">+{totalRegistros.toLocaleString("es-CL")}</div>
@@ -118,7 +136,7 @@ export default function EtlHealthDashboardClient() {
               }}
             >
               <Icono nombre={cat.icon} size={14} />
-              <span>{cat.label}</span>
+              <span>{cat.id === "all" ? `Todas las Fuentes (${sources.length})` : cat.label}</span>
             </button>
           ))}
         </div>
@@ -179,10 +197,10 @@ export default function EtlHealthDashboardClient() {
 
               <div style={{ textAlign: "right" }}>
                 <strong style={{ display: "block", fontFamily: "monospace", fontSize: "0.95rem", color: "var(--text-primary)" }}>
-                  Canónicos: {(fuente.canonicalCount ?? fuente.recordCount).toLocaleString("es-CL")} · Histórico: {(fuente.historicalCount ?? fuente.recordCount).toLocaleString("es-CL")}
+                  Canónicos: {(fuente.canonicalCount ?? fuente.recordCount).toLocaleString("es-CL")} · Consultables: {(fuente.publicHistoricalCount ?? fuente.canonicalCount ?? fuente.recordCount).toLocaleString("es-CL")} · Histórico: declarado {(fuente.historicalCount ?? fuente.recordCount).toLocaleString("es-CL")}{fuente.catalogDeclaredCount && fuente.catalogDeclaredCount !== fuente.publicHistoricalCount ? ` · Catálogo declarado ${fuente.catalogDeclaredCount.toLocaleString("es-CL")}` : ""} · Diferencia por deduplicación y cobertura declarada
                 </strong>
                 <span style={{ fontSize: "0.7rem", color: "var(--text-subtle)", display: "block" }}>
-                  Diferencia por deduplicación y cobertura declarada
+                  El histórico declarado sólo se considera disponible cuando sus particiones están publicadas y paginadas
                 </span>
               </div>
             </div>
@@ -239,7 +257,7 @@ export default function EtlHealthDashboardClient() {
                 Origen de Datos Abiertos del Estado ↗
               </a>
 
-              <Link
+              <Link prefetch={false}
                 href={fuente.viewLink}
                 style={{
                   fontSize: "0.78rem",

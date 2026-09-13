@@ -163,7 +163,7 @@ export default async function ServicioPublicoDetailPage({
                     Autoridad Titular / Directiva:{" "}
                     <strong style={{ color: "var(--text-1)" }}>{enriquecido.director_jefe_actual}</strong>
                     {politicoMatch && (
-                      <Link
+                      <Link prefetch={false}
                         href={`/politico/${politicoMatch.id}`}
                         style={{
                           marginLeft: "0.5rem",

@@ -11,6 +11,7 @@ import {
   getInitials,
 } from "@/lib/estamentos-format";
 import { SkeletonCard, SkeletonTable } from "@/components/ui/Skeleton";
+import type { FuncionarioQualityFilter } from "@/lib/funcionarios-normalization";
 
 function formatCLP(n?: number | null) {
   if (n === null || n === undefined || isNaN(n)) return "—";
@@ -67,6 +68,7 @@ export default function GlobalFuncionariosClient() {
   const [muniFilter, setMuniFilter] = useState(() => searchParams.get("muni") || "Todos");
   const [muniSearchQuery, setMuniSearchQuery] = useState("");
   const [contratoFilter, setContratoFilter] = useState(() => searchParams.get("contrato") || "Todos");
+  const [qualityFilter, setQualityFilter] = useState<FuncionarioQualityFilter>(() => (searchParams.get("calidad") as FuncionarioQualityFilter) || "Todos");
   const [estamentoFilter, setEstamentoFilter] = useState(() => searchParams.get("estamento") || "Todos");
   const [rangoSueldo, setRangoSueldo] = useState(() => searchParams.get("rango") || "todos");
   const [soloHorasExtras, setSoloHorasExtras] = useState(() => searchParams.get("extras") === "true");
@@ -79,6 +81,7 @@ export default function GlobalFuncionariosClient() {
     (opts: {
       muni?: string;
       contrato?: string;
+      calidad?: FuncionarioQualityFilter;
       estamento?: string;
       rango?: string;
       extras?: boolean;
@@ -89,6 +92,7 @@ export default function GlobalFuncionariosClient() {
     }) => {
       const pMuni = opts.muni ?? muniFilter;
       const pContrato = opts.contrato ?? contratoFilter;
+      const pQuality = opts.calidad ?? qualityFilter;
       const pEstamento = opts.estamento ?? estamentoFilter;
       const pRango = opts.rango ?? rangoSueldo;
       const pExtras = opts.extras !== undefined ? opts.extras : soloHorasExtras;
@@ -100,6 +104,7 @@ export default function GlobalFuncionariosClient() {
       const params = new URLSearchParams();
       if (pMuni && pMuni !== "Todos") params.set("muni", pMuni);
       if (pContrato !== "Todos") params.set("contrato", pContrato);
+      if (pQuality !== "Todos") params.set("calidad", pQuality);
       if (pEstamento !== "Todos") params.set("estamento", pEstamento);
       if (pRango !== "todos") params.set("rango", pRango);
       if (pExtras) params.set("extras", "true");
@@ -111,7 +116,7 @@ export default function GlobalFuncionariosClient() {
       const qs = params.toString();
       router.replace(qs ? `${pathname}?${qs}` : pathname, { scroll: false });
     },
-    [muniFilter, contratoFilter, estamentoFilter, rangoSueldo, soloHorasExtras, sortBy, viewMode, page, debouncedSearch, pathname, router]
+    [muniFilter, contratoFilter, qualityFilter, estamentoFilter, rangoSueldo, soloHorasExtras, sortBy, viewMode, page, debouncedSearch, pathname, router]
   );
 
   // Datos
@@ -163,12 +168,23 @@ export default function GlobalFuncionariosClient() {
   // Fetch data
   useEffect(() => {
     async function fetchData() {
+      if (muniFilter === "Todos") {
+        setData([]);
+        setTotal(0);
+        setTotalPages(1);
+        setStats(null);
+        setErrorMessage(null);
+        setIsLoading(false);
+        return;
+      }
+
       setIsLoading(true);
       setErrorMessage(null);
       try {
         const params = new URLSearchParams({
           muni: muniFilter,
           contrato: contratoFilter,
+          calidad: qualityFilter,
           estamento: estamentoFilter,
           sortBy,
           page: page.toString(),
@@ -221,6 +237,7 @@ export default function GlobalFuncionariosClient() {
     debouncedSearch,
     muniFilter,
     contratoFilter,
+    qualityFilter,
     estamentoFilter,
     selectedRango,
     soloHorasExtras,
@@ -233,6 +250,7 @@ export default function GlobalFuncionariosClient() {
     setSearch("");
     setDebouncedSearch("");
     setContratoFilter("Todos");
+    setQualityFilter("Todos");
     setEstamentoFilter("Todos");
     setRangoSueldo("todos");
     setSoloHorasExtras(false);
@@ -243,6 +261,7 @@ export default function GlobalFuncionariosClient() {
   const hasActiveFilters =
     search.trim() !== "" ||
     contratoFilter !== "Todos" ||
+    qualityFilter !== "Todos" ||
     estamentoFilter !== "Todos" ||
     rangoSueldo !== "todos" ||
     soloHorasExtras ||
@@ -443,6 +462,29 @@ export default function GlobalFuncionariosClient() {
             </select>
           </div>
 
+          {/* Calidad de la fuente */}
+          <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
+            <label
+              style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 600 }}
+              title="Clasificación de auditoría: no elimina ni reemplaza el valor informado por la fuente."
+            >
+              Calidad de la fuente
+            </label>
+            <select
+              className="input"
+              value={qualityFilter}
+              onChange={(e) => {
+                setQualityFilter(e.target.value as FuncionarioQualityFilter);
+                setPage(1);
+              }}
+              style={{ fontSize: "0.85rem", padding: "0.45rem 0.65rem", borderRadius: 6 }}
+            >
+              <option value="Todos">Todos los registros</option>
+              <option value="corregidos">Correcciones de formato</option>
+              <option value="observados">Datos observados por auditoría</option>
+            </select>
+          </div>
+
           {/* Ordenamiento */}
           <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem" }}>
             <label style={{ fontSize: "0.75rem", color: "var(--text-muted)", fontWeight: 600 }}>
@@ -605,13 +647,13 @@ export default function GlobalFuncionariosClient() {
             </span>
             <div>
               <span style={{ fontSize: "0.72rem", color: "var(--accent)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.05em" }}>
-                {activeMuni ? "Resumen de Nómina Oficial" : "Consolidado Nacional · Transparencia Activa"}
+                {activeMuni ? "Resumen de Nómina Oficial" : "Consulta por municipalidad"}
               </span>
               <h2 style={{ fontSize: "1.15rem", margin: "0.1rem 0 0.2rem 0", color: "var(--text-primary)" }}>
-                {activeMuni ? `Municipalidad de ${activeMuni.nombre_comuna}` : "Todas las Municipalidades de Chile"}
+                {activeMuni ? `Municipalidad de ${activeMuni.nombre_comuna}` : "Selecciona una municipalidad para consultar su nómina"}
               </h2>
               <span style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-                {activeMuni ? `${activeMuni.region ?? "Chile"} · CUT: ${activeMuni.cut ?? "—"}` : "346 Comunas del Territorio Nacional"}
+                {activeMuni ? `${activeMuni.region ?? "Chile"} · CUT: ${activeMuni.cut ?? "—"}` : "La consulta nacional requiere elegir una comuna"}
               </span>
             </div>
           </div>
@@ -629,7 +671,7 @@ export default function GlobalFuncionariosClient() {
                 Funcionarios en nómina
               </span>
               <strong style={{ fontSize: "1.1rem", color: "var(--text-primary)" }}>
-                {(stats.totalMuni ?? total).toLocaleString("es-CL")}
+                {activeMuni ? (stats.totalMuni ?? total).toLocaleString("es-CL") : "—"}
               </strong>
             </div>
 
@@ -656,7 +698,7 @@ export default function GlobalFuncionariosClient() {
             )}
 
             {activeMuni ? (
-              <Link
+              <Link prefetch={false}
                 href={`/municipalidades/${activeMuni.id}`}
                 className="btn btn-secondary"
                 style={{ fontSize: "0.8rem", padding: "0.45rem 0.9rem", alignSelf: "center" }}
@@ -664,7 +706,7 @@ export default function GlobalFuncionariosClient() {
                 Ficha Comunal ↗
               </Link>
             ) : (
-              <Link
+              <Link prefetch={false}
                 href="/municipalidades"
                 className="btn btn-secondary"
                 style={{ fontSize: "0.8rem", padding: "0.45rem 0.9rem", alignSelf: "center" }}
@@ -689,7 +731,7 @@ export default function GlobalFuncionariosClient() {
       >
         <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
           <span style={{ fontSize: "0.92rem", fontWeight: 700, color: "var(--text-primary)" }}>
-            {isLoading ? "Consultando nómina..." : `${total.toLocaleString("es-CL")} funcionarios encontrados`}
+            {isLoading ? "Consultando nómina..." : activeMuni ? `${total.toLocaleString("es-CL")} funcionarios encontrados` : "Selecciona una municipalidad para comenzar"}
           </span>
           {hasActiveFilters && (
             <span className="badge badge-info" style={{ fontSize: "0.7rem" }}>
@@ -898,6 +940,16 @@ export default function GlobalFuncionariosClient() {
                     {contratoStyle.label}
                   </span>
 
+                  {(f.calidad_datos?.incidencias.length ?? 0) > 0 && (
+                    <span
+                      className="badge badge-warn"
+                      style={{ fontSize: "0.68rem", padding: "0.2rem 0.5rem" }}
+                      title={f.calidad_datos?.detalle}
+                    >
+                      Dato observado
+                    </span>
+                  )}
+
                   {f.grado_eus && f.grado_eus !== "0" && (
                     <span
                       style={{
@@ -1094,9 +1146,9 @@ export default function GlobalFuncionariosClient() {
           }}
         >
           <div style={{ fontSize: "2rem", marginBottom: "0.5rem" }}>🔍</div>
-          <h3 style={{ fontSize: "1.1rem", margin: "0 0 0.5rem 0" }}>No se encontraron funcionarios</h3>
+          <h3 style={{ fontSize: "1.1rem", margin: "0 0 0.5rem 0" }}>{activeMuni ? "No se encontraron funcionarios" : "Selecciona una municipalidad"}</h3>
           <p style={{ fontSize: "0.85rem", color: "var(--text-muted)", maxWidth: 450, margin: "0 auto 1.25rem" }}>
-            No hay registros que coincidan con los filtros aplicados en esta municipalidad.
+            {activeMuni ? "No hay registros que coincidan con los filtros aplicados en esta municipalidad." : "Elige una comuna en el selector para consultar datos oficiales y usar la búsqueda de funcionarios."}
           </p>
           <button
             type="button"

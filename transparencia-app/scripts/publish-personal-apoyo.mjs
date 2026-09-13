@@ -20,6 +20,7 @@ const database = argument("--database", "transparencia-db");
 const bucket = argument("--bucket", "transparencia-public-data");
 const input = resolve(argument("--input", "data/personal-apoyo.json"));
 const remote = process.argv.includes("--remote");
+const skipD1 = process.argv.includes("--skip-d1");
 const localAuth = process.argv.includes("--local-auth") && !process.env.CI;
 if (database !== "transparencia-db") throw new Error(`PERSONAL_APOYO_D1_NOT_AUTHORIZED: ${database}`);
 if (bucket !== "transparencia-public-data") throw new Error(`PERSONAL_APOYO_R2_NOT_AUTHORIZED: ${bucket}`);
@@ -63,9 +64,13 @@ try {
     `INSERT OR REPLACE INTO etl_runs (id,cadence,status,started_at,finished_at,catalog_version,catalog_checksum,source_count,record_count,error) VALUES (${sql(runId)},'weekly','success',CURRENT_TIMESTAMP,CURRENT_TIMESTAMP,${sql(version)},${sql(checksum)},1,${summary.recordCount},NULL);`,
     `INSERT OR REPLACE INTO source_state (source_id,etl_run_id,status,record_count,checksum_sha256,generated_at,last_success_at,error,published_version,updated_at) VALUES ('personal-apoyo',${sql(runId)},'partial',${summary.recordCount},${sql(checksum)},${sql(dataset.generado_en)},CURRENT_TIMESTAMP,NULL,${sql(version)},CURRENT_TIMESTAMP);`,
   ];
-  const sqlPath = join(work, "personal-apoyo.sql");
-  writeFileSync(sqlPath, `${statements.join("\n")}\n`, "utf8");
-  wrangler(["d1", "execute", database, remote ? "--remote" : "--local", "--file", sqlPath]);
+  if (!skipD1) {
+    const sqlPath = join(work, "personal-apoyo.sql");
+    writeFileSync(sqlPath, `${statements.join("\n")}\n`, "utf8");
+    wrangler(["d1", "execute", database, remote ? "--remote" : "--local", "--file", sqlPath]);
+  } else {
+    console.warn("D1 personal-apoyo pospuesto: R2 queda como proyección canónica.");
+  }
   if (remote) {
     // El manifiesto corriente es el puntero de activacion y siempre se publica al final.
     try {
@@ -80,7 +85,7 @@ try {
       throw error;
     }
   }
-  console.log(JSON.stringify({ database, bucket: remote ? bucket : null, version, checksumSha256: checksum, chunks: chunks.length, ...summary }, null, 2));
+  console.log(JSON.stringify({ database: skipD1 ? null : database, bucket: remote ? bucket : null, d1: skipD1 ? "deferred" : "published", version, checksumSha256: checksum, chunks: chunks.length, ...summary }, null, 2));
 } finally {
   rmSync(work, { recursive: true, force: true });
 }

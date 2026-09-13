@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { Suspense } from "react";
 import { Inter, IBM_Plex_Mono } from "next/font/google";
 import SiteHeader from "@/components/SiteHeader";
 import PageEntrance from "@/components/PageEntrance";
@@ -28,7 +27,7 @@ export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_SITE_URL || "https://cambiometro.impulsacv.cl"),
   title: {
     default: "El Cambiómetro — Datos públicos con trazabilidad",
-    template: "%s | El Cambiómetro",
+    template: "%s",
   },
   description:
     "Explora autoridades, instituciones y nóminas públicas de Chile con fecha de corte, procedencia y enlaces a sus fuentes.",
@@ -66,6 +65,9 @@ export const metadata: Metadata = {
     images: ["/api/og/site"],
   },
   robots: { index: true, follow: true },
+  verification: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION
+    ? { google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }
+    : undefined,
 };
 
 const FOOTER_GROUPS = [
@@ -74,8 +76,10 @@ const FOOTER_GROUPS = [
     links: [
       ["Cruces de datos", "/cruces"],
       ["Transferencias Ley 19.862", "/transferencias"],
+      ["Gastos Operacionales Rendidos", "/gastos-operacionales"],
       ["Rankings", "/rankings"],
       ["Comparador", "/comparar"],
+      ["Remuneraciones públicas", "/remuneraciones-publicas"],
       ["Movimientos", "/movimientos"],
       ["Cambios de autoridades", "/cambios"],
     ],
@@ -119,17 +123,30 @@ function LinkedInIcon({ size = 15 }: { size?: number }) {
   );
 }
 
+function TikTokIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M16.7 3c.3 2.1 1.5 3.4 3.3 3.5v3.1c-1.7.2-3.1-.4-4.2-1.3v6.2c0 4.2-3.1 6.5-6.4 6.5A5.2 5.2 0 0 1 4 15.8c0-3.1 2.5-5.5 5.6-5.5.3 0 .7 0 1 .1v3.2a2.7 2.7 0 0 0-1-.2 2.4 2.4 0 1 0 2.5 2.4V3h4.6Z" />
+    </svg>
+  );
+}
+
+function FacebookIcon({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+      <path d="M13.5 21v-8h2.75l.4-3h-3.15V8.08c0-.87.24-1.46 1.5-1.46h1.76V3.94c-.3-.04-1.34-.14-2.55-.14-2.52 0-4.25 1.54-4.25 4.37V10H7.1v3h2.86v8h3.54Z" />
+    </svg>
+  );
+}
+
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
 
 export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   const platform = await getDataPlatformSummary();
   const totalRecords = Math.max(platform.totalRecords || 0, GLOBAL_KPIS.registros_canonicos);
-  const updatedAt = platform.updatedAt
-    ? new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeStyle: "short", timeZone: "America/Santiago" }).format(new Date(platform.updatedAt))
-    : GLOBAL_KPIS.corte;
 
   return (
-    <html lang="es" className={`${inter.variable} ${ibmPlexMono.variable}`}>
+    <html lang="es" data-theme="paper" className={`${inter.variable} ${ibmPlexMono.variable}`}>
       <body className="font-sans">
         <div id="initial-splash-orb" className="initial-splash-orb" role="status" aria-label="Cargando El Cambiómetro...">
           <div className="loading-orb" style={{ width: "56px", height: "56px" }}>
@@ -139,31 +156,25 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           </div>
         </div>
         <a className="skip-link" href="#contenido-principal">Saltar al contenido</a>
-        <Suspense fallback={null}>
-          <RouteTransitionOrb />
-          <NavigationProgressBar />
-        </Suspense>
-        <Suspense fallback={<div className="site-header site-header--fallback" aria-hidden="true" />}>
-          <SiteHeader updatedAt={updatedAt} totalRecords={totalRecords} />
-        </Suspense>
+        <RouteTransitionOrb />
+        <NavigationProgressBar />
+        <SiteHeader totalRecords={totalRecords} />
         <PageEntrance>
-          <Suspense fallback={<div className="container-main" aria-hidden="true" />}>
-            <main id="contenido-principal">{children}</main>
-          </Suspense>
+          <main id="contenido-principal">{children}</main>
         </PageEntrance>
-        <Footer updatedAt={updatedAt} totalRecords={totalRecords} />
+        <Footer totalRecords={totalRecords} />
         <CookieConsent />
       </body>
     </html>
   );
 }
 
-function Footer({ updatedAt, totalRecords }: { updatedAt: string | null; totalRecords: number }) {
+function Footer({ totalRecords }: { totalRecords: number }) {
   return (
     <footer className="site-footer">
       <div className="container-main site-footer__grid">
         <div className="site-footer__about">
-          <Link href="/" className="site-brand site-brand--footer" aria-label="El Cambiómetro, inicio">
+          <Link href="/" prefetch={false} className="site-brand site-brand--footer" aria-label="El Cambiómetro, inicio">
             <Image
               src="/brand/el-cambiometro-mark.svg"
               alt="Símbolo dial El Cambiómetro"
@@ -183,10 +194,10 @@ function Footer({ updatedAt, totalRecords }: { updatedAt: string | null; totalRe
           <div className="provenance-stamp">
             <div className="provenance-stamp__header">
               <span className="snapshot-stamp__status" aria-hidden="true" />
-              <span>Última consolidación</span>
+              <span>Estado del catálogo</span>
             </div>
-            <strong>{updatedAt ? `Corte ${updatedAt}` : "Corte oficial"}</strong>
-            <small>{totalRecords.toLocaleString("es-CL")} registros oficiales compilados</small>
+            <strong>Catálogo en línea</strong>
+            <small>{totalRecords.toLocaleString("es-CL")} registros compilados · actualización por fuente</small>
           </div>
         </div>
 
@@ -196,7 +207,7 @@ function Footer({ updatedAt, totalRecords }: { updatedAt: string | null; totalRe
             <ul className="site-footer__list">
               {group.links.map(([label, href]) => (
                 <li key={href}>
-                  <Link href={href} className="site-footer__link">
+                  <Link href={href} prefetch={false} className="site-footer__link">
                     {label}
                   </Link>
                 </li>
@@ -235,29 +246,21 @@ function Footer({ updatedAt, totalRecords }: { updatedAt: string | null; totalRe
             <span className="site-footer__dot" aria-hidden="true">
               ·
             </span>
-            <a
-              href="https://www.instagram.com/cambiometro/"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Instagram @cambiometro"
-              style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
-            >
-              <InstagramIcon size={14} />
-              Instagram
-            </a>
-            <span className="site-footer__dot" aria-hidden="true">
-              ·
+            <span aria-label="Redes sociales de El Cambiómetro" style={{ display: "inline-flex", alignItems: "center", gap: "0.55rem" }}>
+              <a href="https://www.instagram.com/cambiometro/" target="_blank" rel="noopener noreferrer" aria-label="Instagram @cambiometro" title="Instagram @cambiometro" style={{ display: "inline-flex", alignItems: "center" }}>
+                <InstagramIcon size={14} />
+              </a>
+              <a href="https://x.com/cambiometro" target="_blank" rel="noopener noreferrer" aria-label="X @cambiometro" title="X @cambiometro" style={{ display: "inline-flex", alignItems: "center" }}>
+                <XIcon size={13} />
+              </a>
+              <a href="https://www.tiktok.com/@cambiometro" target="_blank" rel="noopener noreferrer" aria-label="TikTok @cambiometro" title="TikTok @cambiometro" style={{ display: "inline-flex", alignItems: "center" }}>
+                <TikTokIcon size={13} />
+              </a>
+              <a href="https://www.facebook.com/profile.php?id=61593925561451" target="_blank" rel="noopener noreferrer" aria-label="Facebook Cambiometro" title="Facebook Cambiometro" style={{ display: "inline-flex", alignItems: "center" }}>
+                <FacebookIcon size={14} />
+              </a>
+              <span className="sr-only">@cambiometro</span>
             </span>
-            <a
-              href="https://x.com/cambiometro"
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="𝕏 Twitter / X @cambiometro"
-              style={{ display: "inline-flex", alignItems: "center", gap: "0.25rem" }}
-            >
-              <XIcon size={13} />
-              𝕏 @cambiometro
-            </a>
             <span className="site-footer__dot" aria-hidden="true">
               ·
             </span>

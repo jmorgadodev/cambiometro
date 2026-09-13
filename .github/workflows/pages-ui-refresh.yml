@@ -1,0 +1,342 @@
+name: Pages estático - cambios de interfaz sin refresco ETL
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "transparencia-app/app/**"
+      - "transparencia-app/components/**"
+      - "transparencia-app/lib/**"
+      - "transparencia-app/scripts/**"
+      - "transparencia-app/public/_headers"
+      - "transparencia-app/public/_redirects"
+      - "transparencia-app/next.config.ts"
+      - "transparencia-app/tsconfig.json"
+  workflow_dispatch:
+    inputs:
+      deployment_mode:
+        description: "Modo de despliegue: esta tubería sólo acepta ui-only"
+        type: choice
+        required: false
+        default: ui-only
+        options:
+          - ui-only
+          - data-refresh
+      publish_pages:
+        description: "Publicar el artefacto de interfaz verificado en Pages producción"
+        type: boolean
+        required: false
+        default: false
+      confirm_cutover:
+        description: "Escribir CAMBIOMETRO_CONFIRM_CUTOVER sólo para publicar producción"
+        type: string
+        required: false
+        default: ""
+      preview_branch:
+        description: "Rama Pages de preview; vacío para no publicar preview"
+        required: false
+        default: ""
+
+concurrency:
+  group: pages-ui-refresh
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build-verify-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Validar modo ui-only
+        env:
+          DEPLOYMENT_MODE: ${{ github.event_name == 'workflow_dispatch' && inputs.deployment_mode || 'ui-only' }}
+        run: |
+          if [ "$DEPLOYMENT_MODE" != "ui-only" ]; then
+            echo "ERROR: pages-ui-refresh sólo puede construir releases ui-only." >&2
+            echo "Para datos use pages-static-refresh después de un ETL exitoso." >&2
+            exit 1
+          fi
+          echo "Deployment mode: ui-only (sin ETL y sin escritura en D1 productiva)"
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+        working-directory: transparencia-app
+
+      - name: Recuperar manifiestos de datos publicados
+        id: data-version
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          mkdir -p data/lake/catalog/v1 .ci-data-version
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+          npx wrangler r2 object get transparencia-public-data/projections/static-site-v1/manifest.json --file .ci-data-version/static-site-manifest.json --remote
+          npx wrangler r2 object get transparencia-public-data/projections/funcionarios-v1/manifest.json --file .ci-data-version/funcionarios-manifest.json --remote
+          npx wrangler r2 object get transparencia-public-data/projections/transferencias-v1/manifest.json --file .ci-data-version/transfer-api-manifest.json --remote
+          node -e '
+            const fs = require("node:fs");
+            const crypto = require("node:crypto");
+            const files = [
+              "data/lake/catalog/v1/manifest.json",
+              ".ci-data-version/static-site-manifest.json",
+              ".ci-data-version/funcionarios-manifest.json",
+              ".ci-data-version/transfer-api-manifest.json",
+            ];
+            const hash = crypto.createHash("sha256");
+            for (const file of files) hash.update(fs.readFileSync(file));
+            const key = hash.digest("hex");
+            const catalogSha256 = crypto.createHash("sha256").update(fs.readFileSync("data/lake/catalog/v1/manifest.json")).digest("hex");
+            fs.appendFileSync(process.env.GITHUB_OUTPUT, `key=${key}\ncatalog_sha256=${catalogSha256}\n`);
+          '
+
+      - name: Restaurar snapshot validado por checksum
+        id: data-cache
+        uses: actions/cache/restore@v4
+        with:
+          key: pages-static-data-${{ steps.data-version.outputs.key }}
+          restore-keys: |
+            pages-static-data-
+          path: |
+            transparencia-app/data/lake/catalog
+            transparencia-app/data/lake/partitions/ley-19862
+            transparencia-app/data/lake/projections/v1
+            transparencia-app/data/lake-subsets
+            transparencia-app/data/lake-cplt
+            transparencia-app/data/politicos-votaciones.json
+            transparencia-app/data/personal-apoyo.json
+            transparencia-app/data/movimientos.json
+            transparencia-app/data/municipalidades-data.json
+            transparencia-app/data/municipalidades-list.json
+            transparencia-app/public/data/transferencias
+
+      - name: Reaplicar catálogo R2 canónico después de la caché
+        # La caché puede devolver un snapshot anterior mediante restore-keys.
+        # El catálogo es la referencia vigente de producción y debe volver a
+        # descargarse después de restaurarla, antes de regenerar source-health.
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          EXPECTED_CATALOG_SHA256: ${{ steps.data-version.outputs.catalog_sha256 }}
+        run: |
+          mkdir -p data/lake/catalog/v1
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+          actual_catalog_sha256="$(sha256sum data/lake/catalog/v1/manifest.json | cut -d ' ' -f 1)"
+          test "$actual_catalog_sha256" = "$EXPECTED_CATALOG_SHA256"
+          echo "Catálogo R2 canónico verificado: $actual_catalog_sha256"
+
+      - name: Recuperar snapshot publicado desde R2 sin ejecutar ETL
+        if: steps.data-cache.outputs.cache-hit != 'true'
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          npm run data:hydrate:cplt-static -- --required --pages-only
+          npm run data:hydrate:static -- --required --required-all
+          npm run check:static-input-fallback
+          npm run data:hydrate:ley19862
+          npm run data:lake:projection:ley19862
+
+      - name: Verificar calidad semántica de entradas estáticas
+        working-directory: transparencia-app
+        run: npm run check:static-input-quality
+
+      - name: Regenerar agregados municipales desde el release CPLT
+        working-directory: transparencia-app
+        run: |
+          node scripts/rebuild-authoritative-municipalidades.mjs
+          node -e '
+            const fs = require("node:fs");
+            const data = JSON.parse(fs.readFileSync("data/municipalidades-data.json", "utf8"));
+            const vitacura = data["muni-vitacura"];
+            const paine = data["muni-paine"];
+            const covered = Object.values(data).filter((item) => Number(item?.resumen_personal?.total_funcionarios || 0) > 0).length;
+            if (covered < 300) throw new Error(`MUNICIPAL_DATA_COVERAGE_REGRESSION:${covered}`);
+            if (vitacura?.alcalde?.nombre !== "Camila Merino Catalan") throw new Error("MUNICIPAL_DATA_VITACURA_MISSING");
+            if (paine?.alcalde?.nombre !== "Rodrigo Contreras Gutierrez") throw new Error("MUNICIPAL_DATA_PAINE_MISSING");
+            console.log(JSON.stringify({ covered, vitacura: vitacura.alcalde.nombre, paine: paine.alcalde.nombre }));
+          '
+
+      - name: Guardar snapshot recuperado para próximos cambios de interfaz
+        if: steps.data-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          key: pages-static-data-${{ steps.data-version.outputs.key }}
+          path: |
+            transparencia-app/data/lake/catalog
+            transparencia-app/data/lake/partitions/ley-19862
+            transparencia-app/data/lake/projections/v1
+            transparencia-app/data/lake-subsets
+            transparencia-app/data/lake-cplt
+            transparencia-app/data/politicos-votaciones.json
+            transparencia-app/data/personal-apoyo.json
+            transparencia-app/data/movimientos.json
+            transparencia-app/data/municipalidades-data.json
+            transparencia-app/data/municipalidades-list.json
+            transparencia-app/public/data/transferencias
+
+      - name: Regenerar salud de fuentes desde el snapshot publicado
+        working-directory: transparencia-app
+        run: npm run data:health
+
+      - name: Restaurar release canónico de transferencias por checksum
+        id: transfer-release-cache
+        uses: actions/cache/restore@v4
+        with:
+          key: pages-ui-transfer-release-v1-${{ hashFiles('transparencia-app/.ci-data-version/transfer-api-manifest.json') }}
+          restore-keys: |
+            pages-ui-transfer-release-v1-
+          path: transparencia-app/public/data/transferencias
+
+      - name: Hidratar release API canónico de transferencias para Pages
+        if: steps.transfer-release-cache.outputs.cache-hit != 'true'
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          node scripts/hydrate-transfer-api-release.mjs \
+            --manifest .ci-data-version/transfer-api-manifest.json \
+            --output public/data/transferencias
+
+      - name: Guardar release canónico de transferencias por checksum
+        if: steps.transfer-release-cache.outputs.cache-hit != 'true'
+        uses: actions/cache/save@v4
+        with:
+          key: pages-ui-transfer-release-v1-${{ hashFiles('transparencia-app/.ci-data-version/transfer-api-manifest.json') }}
+          path: transparencia-app/public/data/transferencias
+
+      - name: Fijar manifest canónico para el build
+        working-directory: transparencia-app
+        run: |
+          echo "TRANSFER_STATIC_CANONICAL_MANIFEST_FILE=$GITHUB_WORKSPACE/transparencia-app/public/data/transferencias/manifest.json" >> "$GITHUB_ENV"
+
+      - name: Construir Pages sin hidratar ETL
+        env:
+          CAMBIOMETRO_PUBLISHED_RELEASE_ONLY: "1"
+          NEXT_PUBLIC_GA4_ID: ${{ vars.NEXT_PUBLIC_GA4_ID }}
+          NEXT_PUBLIC_GTM_ID: ${{ vars.NEXT_PUBLIC_GTM_ID }}
+          NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION: ${{ vars.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION }}
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: ${{ vars.NEXT_PUBLIC_TURNSTILE_SITE_KEY }}
+        run: npm run pages:build
+        working-directory: transparencia-app
+
+      - name: Verificar coherencia con el release API de R2
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: node scripts/verify-transfer-r2-consistency.mjs
+
+      - name: Verificar export, datos y fichas
+        run: npm run pages:verify && npm run api:typecheck && npm run api:size
+        working-directory: transparencia-app
+
+      - name: Instalar navegador para E2E
+        run: npx playwright install --with-deps chromium
+        working-directory: transparencia-app
+
+      - name: Preparar D1 local de integración
+        working-directory: transparencia-app
+        run: |
+          for migration in migrations/*.sql; do
+            npx wrangler d1 execute transparencia-db --local --config workers/public-api/wrangler.jsonc --file "$migration"
+          done
+          npx wrangler d1 execute transparencia-db --local --config workers/public-api/wrangler.jsonc --file fixtures/d1-browser.sql
+
+      - name: Verificar navegador, temas y CSP
+        working-directory: transparencia-app
+        env:
+          VERIFY_BASE_URL: http://127.0.0.1:3003
+          VERIFY_API_URL: http://127.0.0.1:8788
+          TURNSTILE_SECRET_KEY: 1x0000000000000000000000000000000AA
+          NEXT_PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
+        run: |
+          npx wrangler dev --local --var ALLOW_PUBLIC_D1_READS:1 --config workers/public-api/wrangler.jsonc --port 8788 --inspector-port 9230 --log-level warn > /tmp/cambiometro-api.log 2>&1 &
+          api_pid=$!
+          npx wrangler pages dev out --port 3003 --proxy 8788 --inspector-port 9231 --compatibility-date=2026-08-08 --log-level warn > /tmp/cambiometro-pages.log 2>&1 &
+          pages_pid=$!
+          trap 'kill "$api_pid" "$pages_pid" 2>/dev/null || true' EXIT
+          ready=""
+          for attempt in {1..30}; do
+            if curl --fail --silent http://127.0.0.1:3003/ > /dev/null; then ready="yes"; break; fi
+            sleep 1
+          done
+          if [ -z "$ready" ]; then cat /tmp/cambiometro-api.log; cat /tmp/cambiometro-pages.log; exit 1; fi
+          npm run verify:browser
+          npm run verify:themes
+          npm run verify:security
+
+      - name: Guardar artefacto Pages
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-ui-${{ github.sha }}
+          path: transparencia-app/out
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Publicar preview Pages
+        if: inputs.preview_branch != ''
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+        run: npx wrangler pages deploy out --project-name cambiometro --branch "${{ inputs.preview_branch }}" --commit-hash "${GITHUB_SHA:0:40}" --commit-message "Pages UI preview ${GITHUB_SHA}"
+
+      - name: Publicar Pages producción sólo con confirmación
+        if: github.event_name == 'workflow_dispatch' && inputs.publish_pages == true && inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER'
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+        run: npx wrangler pages deploy out --project-name cambiometro --branch main --commit-hash "$GITHUB_SHA" --commit-message "Pages UI release ${GITHUB_SHA}"
+
+      - name: Registrar deployment Pages productivo y rollback
+        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.publish_pages == true && inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER' }}
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+          PAGES_COMMIT_SHA: ${{ github.sha }}
+        run: |
+          curl --fail --silent --show-error \
+            --header "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/cambiometro/deployments" \
+            > pages-deployments.json
+          node -e '
+            const fs = require("node:fs");
+            const payload = JSON.parse(fs.readFileSync("pages-deployments.json", "utf8"));
+            const deployments = Array.isArray(payload.result) ? payload.result : [];
+            const matching = deployments.filter((item) => item.deployment_trigger?.metadata?.commit_hash === process.env.PAGES_COMMIT_SHA);
+            const production = deployments.filter((item) => item.environment === "production" && item.is_skipped !== true);
+            const candidates = production.length > 0 ? production : deployments;
+            const deployment = matching[0] ?? [...candidates].sort((a, b) => Date.parse(b.created_on ?? 0) - Date.parse(a.created_on ?? 0))[0];
+            if (!deployment?.id) throw new Error(`No se encontró deployment Pages productivo para ${process.env.PAGES_COMMIT_SHA}`);
+            if (matching.length === 0) console.warn(`No hubo match por commit; se registra el deployment productivo más reciente (${deployment.id})`);
+            console.log(`Pages deployment ID: ${deployment.id}`);
+            console.log(`Pages deployment URL: ${deployment.url ?? "n/a"}`);
+            console.log(`Rollback exacto: npm run pages:rollback -- ${deployment.id}`);
+          '
+
+      - name: Guardar metadata del deployment Pages
+        if: ${{ success() && github.event_name == 'workflow_dispatch' && inputs.publish_pages == true && inputs.confirm_cutover == 'CAMBIOMETRO_CONFIRM_CUTOVER' }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: pages-ui-production-deployment-${{ github.sha }}
+          path: transparencia-app/pages-deployments.json
+          if-no-files-found: error
+          retention-days: 30

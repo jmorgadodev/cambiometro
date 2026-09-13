@@ -1,13 +1,15 @@
 import type { Metadata } from "next";
 import { getAllServiciosPublicosEnriquecidos } from "@/lib/servicios-publicos-data";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
-import { getPresupuestoNacionalTotales } from "@/lib/presupuesto";
+import { getPresupuestoNacionalTotales, leerPresupuestoV1 } from "@/lib/presupuesto";
+import { coverageMetric, readGeneratedDataQualitySummary } from "@/lib/data-quality-summary";
 import ServiciosPublicosClient from "./servicios-publicos-client";
 
 export const metadata: Metadata = {
   title: "Servicios Públicos, Ministerios y Gobiernos Regionales — El Cambiómetro",
   description:
     "Directorio oficial consolidado de las instituciones del Estado de Chile: 25 ministerios, 16 gobiernos regionales, superintendencias, empresas públicas y servicios nacionales. Presupuestos DIPRES 2026, dotación de personal y compras públicas en MercadoPúblico.",
+  alternates: { canonical: "/servicios-publicos" },
   openGraph: {
     title: "Servicios Públicos y Ministerios de Chile — El Cambiómetro",
     description: "Presupuestos Ley DIPRES 2026, dotación de personal, compras públicas y autoridades verificadas del Estado de Chile.",
@@ -43,6 +45,33 @@ export default function ServiciosPublicosPage() {
   const totalServicios = serviciosConPolitico.length;
   const conPartidaCount = serviciosConPolitico.filter((s) => s.presupuesto !== null).length;
   const totalConPartida = conPartidaCount;
+  const dataSummary = readGeneratedDataQualitySummary();
+  const dipresSource = dataSummary.sources.find((source) => source.id === "dipres");
+  const dipresProjection = leerPresupuestoV1();
+  const dipresProjectionPeriods = dipresProjection?.programs
+    .flatMap((program) => program.meses.map((month) => month.period))
+    .filter((period, index, periods) => periods.indexOf(period) === index)
+    .sort() ?? [];
+  const serviceRelease = {
+    source: "Directorio institucional",
+    period: dipresProjection?.period || dipresSource?.period || "Corte publicado",
+    lastSuccessAt: dipresSource?.lastSuccessAt ?? null,
+    status: dipresSource?.status ?? "parcial" as const,
+    published: coverageMetric(totalServicios, totalServicios),
+    queryable: coverageMetric(totalServicios, totalServicios),
+    related: coverageMetric(null, null),
+    checksumSha256: dipresSource?.checksumSha256 ?? dataSummary.manifestChecksumSha256 ?? null,
+    officialUrl: dipresSource?.officialUrl,
+  };
+  const dipresCoverage = {
+    catalogDeclaredCount: dipresSource?.catalogDeclaredCount ?? null,
+    publicCount: dipresSource?.publicHistoricalCount ?? dipresSource?.canonicalCount ?? 0,
+    projectionPrograms: dipresProjection?.count ?? dipresProjection?.programs.length ?? 0,
+    projectionPeriod: dipresProjectionPeriods.length > 0
+      ? `${dipresProjectionPeriods[0]} a ${dipresProjectionPeriods.at(-1)}`
+      : "Período no publicado",
+    officialUrl: dipresSource?.officialUrl,
+  };
 
   // Totales agregados de la Ley de Presupuestos 2026 en DIPRES
   const dipresTotales = getPresupuestoNacionalTotales();
@@ -85,6 +114,8 @@ export default function ServiciosPublicosPage() {
         totalConPartida={totalConPartida}
         presupuestoTotalLey={presupuestoTotalLey}
         gastoDevengado={gastoDevengado}
+        release={serviceRelease}
+        dipresCoverage={dipresCoverage}
       />
     </Suspense>
   );

@@ -55,7 +55,11 @@ export function getLey19862Summary(): Ley19862Summary {
   ]) {
     try {
       const parsed = JSON.parse(readFileSync(candidate, "utf8")) as Ley19862Summary;
-      if (parsed.transfers_sample.length >= 1000 || candidate.endsWith("ley19862-summary.json")) return parsed;
+      // The generated projection intentionally keeps only a compact sample;
+      // its KPIs still describe the complete static release. Prefer it over
+      // the older pinned snapshot whenever it has a valid full-row count.
+      if (candidate.includes(`${join("data", "generated")}${process.platform === "win32" ? "\\" : "/"}`) && parsed.kpis?.total_transfers > 0) return parsed;
+      if (candidate.endsWith("ley19862-summary.json")) return parsed;
     } catch {
       // The generated compact projection is the production path; the source
       // projection keeps local tests and development useful before prebuild.

@@ -1,0 +1,141 @@
+name: ETL Histórico - Reconciliación Cámara
+
+on:
+  workflow_dispatch:
+    inputs:
+      from:
+        description: Fecha inicial histórica YYYY-MM-DD
+        required: true
+        default: "2024-01-01"
+      to:
+        description: Fecha final histórica YYYY-MM-DD (vacío = hoy UTC)
+        required: false
+        default: ""
+      attendance_years:
+        description: Años de asistencia separados por coma
+        required: true
+        default: "2024,2025,2026"
+      confirm_reconciliation:
+        description: Escribe CAMBIOMETRO_CONFIRM_CAMARA_RECONCILIATION para habilitar el backfill
+        required: true
+        default: ""
+
+concurrency:
+  group: cambiometro-camara-reconciliation
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  reconcile:
+    name: Reconstruir histórico oficial de Cámara en R2
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Instalar dependencias
+        working-directory: transparencia-app
+        run: npm ci
+
+      - name: Validar confirmación y rango histórico
+        id: range
+        env:
+          FROM_DATE: ${{ inputs.from }}
+          TO_DATE: ${{ inputs.to }}
+          CONFIRMATION: ${{ inputs.confirm_reconciliation }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test "$CONFIRMATION" = "CAMBIOMETRO_CONFIRM_CAMARA_RECONCILIATION" || {
+            echo "Se requiere confirm_reconciliation=CAMBIOMETRO_CONFIRM_CAMARA_RECONCILIATION." >&2
+            exit 1
+          }
+          to_date="${TO_DATE:-$(date -u +%F)}"
+          [[ "$FROM_DATE" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]
+          [[ "$to_date" =~ ^[0-9]{4}-[0-9]{2}-[0-9]{2}$ ]]
+          test "$FROM_DATE" = "$(date -u -d "$FROM_DATE" +%F)"
+          test "$to_date" = "$(date -u -d "$to_date" +%F)"
+          test "$FROM_DATE" \< "$to_date"
+          echo "from=$FROM_DATE" >> "$GITHUB_OUTPUT"
+          echo "to=$to_date" >> "$GITHUB_OUTPUT"
+
+      - name: Exigir credenciales de publicación
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_DATA_API_TOKEN"
+
+      - name: Recuperar catálogo R2 vigente
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          mkdir -p data/lake/catalog/v1
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json \
+            --file data/lake/catalog/v1/manifest.json --remote
+
+      - name: Preparar workspace sin datasets versionados
+        working-directory: transparencia-app
+        run: npm run etl:prepare
+
+      - name: Reconstruir votaciones oficiales de todo el rango
+        working-directory: transparencia-app
+        run: npm run etl -- --from "${{ steps.range.outputs.from }}" --to "${{ steps.range.outputs.to }}" --source camara,votaciones_camara --full-history
+
+      - name: Reemplazar particiones Camara y publicar R2/Releases
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          npm run data:lake -- --replace-source camara
+          npm run data:publish
+
+      - name: Reconstruir asistencia oficial por año
+        working-directory: transparencia-app
+        env:
+          ATTENDANCE_YEARS: ${{ inputs.attendance_years }}
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          IFS=',' read -ra years <<< "$ATTENDANCE_YEARS"
+          for year in "${years[@]}"; do
+            year="$(echo "$year" | tr -d '[:space:]')"
+            [[ "$year" =~ ^[0-9]{4}$ ]] || { echo "Año inválido: $year" >&2; exit 1; }
+            npm run ingest:camara-attendance -- --year "$year" --concurrency 8
+            npm run data:publish
+          done
+
+      - name: Verificar que el catálogo no conserve huecos declarados de Cámara
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json \
+            --file /tmp/camara-catalog.json --remote
+          node -e '
+            const fs = require("node:fs");
+            const catalog = JSON.parse(fs.readFileSync("/tmp/camara-catalog.json", "utf8"));
+            const partitions = (catalog.partitions ?? []).filter((item) => item.sourceId === "camara");
+            const rows = partitions.reduce((sum, item) => sum + Number(item.recordCount || 0), 0);
+            if (partitions.length === 0 || rows === 0) throw new Error("CAMARA_RECONCILIATION_EMPTY");
+            console.log(JSON.stringify({ source: "camara", partitions: partitions.length, rows }, null, 2));
+          '

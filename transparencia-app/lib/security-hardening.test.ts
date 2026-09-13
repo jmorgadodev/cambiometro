@@ -67,7 +67,20 @@ describe("endurecimiento del runtime publico", () => {
 
   it("acota cada grupo de resultados del buscador publico", async () => {
     const response = await api.fetch(new Request("https://example.test/api/v1/search?q=an"), {});
-    expect(response.status).toBe(503);
+    const payload = await response.json() as {
+      data?: {
+        autoridades?: unknown[];
+        municipalidades?: unknown[];
+        funcionarios?: unknown[];
+        entidades?: unknown[];
+      };
+    };
+
+    expect(response.status).toBe(200);
+    expect(payload.data?.autoridades?.length ?? 0).toBeLessThanOrEqual(25);
+    expect(payload.data?.municipalidades?.length ?? 0).toBeLessThanOrEqual(25);
+    expect(payload.data?.funcionarios?.length ?? 0).toBeLessThanOrEqual(25);
+    expect(payload.data?.entidades?.length ?? 0).toBeLessThanOrEqual(25);
   }, 15000);
 
   it("responde 429 cuando Cloudflare agota el cupo de una API costosa", async () => {

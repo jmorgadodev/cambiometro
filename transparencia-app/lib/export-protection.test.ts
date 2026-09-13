@@ -15,6 +15,7 @@ function testEnv() {
   });
   return {
     DB: { prepare: (sql: string) => statement(sql) },
+    ALLOW_PUBLIC_D1_READS: "1",
     EXPENSIVE_API_RATE_LIMITER: { limit: async () => ({ success: ++calls <= 5 }) },
   } as never;
 }

@@ -258,7 +258,7 @@ export default function PersonalApoyoMensual({
                       Exceso &gt;40% califica como <strong>CRÍTICA</strong> (aislado en cuarentena).
                     </span>
                     <div style={{ marginTop: "0.4rem" }}>
-                      <Link href="/como-funciona#fuentes" className="data-link" style={{ fontSize: "0.72rem", fontWeight: 700 }}>
+                      <Link prefetch={false} href="/como-funciona#fuentes" className="data-link" style={{ fontSize: "0.72rem", fontWeight: 700 }}>
                         Ver metodología completa →
                       </Link>
                     </div>

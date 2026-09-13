@@ -1,6 +1,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
+import { gunzipSync } from "node:zlib";
 import { fetchTransferMonth } from "./etl/connectors/ley-19862.mjs";
 import { buildLakePlan } from "./etl/lake.mjs";
 
@@ -25,9 +26,25 @@ const inventoryPath = join(root, "data", "etl", "source-inventory.json");
 const sourceInventory = existsSync(inventoryPath) ? JSON.parse(readFileSync(inventoryPath, "utf8")) : null;
 const existingCatalogPath = join(outputRoot, "catalog", "v1", "manifest.json");
 const existingCatalog = existsSync(existingCatalogPath) ? JSON.parse(readFileSync(existingCatalogPath, "utf8")) : null;
+const existingLeySource = existingCatalog?.sources?.find((source) => source.id === "ley-19862") ?? null;
+function readExistingProjection(key) {
+  if (!key) return [];
+  const path = resolve(outputRoot, key);
+  if (!path.startsWith(`${outputRoot}${sep}`) || !existsSync(path)) return [];
+  const text = gunzipSync(readFileSync(path)).toString("utf8").trim();
+  return text ? text.split("\n").map((line) => JSON.parse(line)) : [];
+}
+const existingEntityBundles = existingLeySource ? {
+  "ley-19862": {
+    entities: readExistingProjection(existingLeySource.entityKey),
+    indexes: readExistingProjection(existingLeySource.entityIndexKey),
+  },
+} : {};
 const plan = buildLakePlan(snapshot, {
   sourceInventory,
   existingCatalog,
+  existingEntityBundles,
+  replaceSourceIds: process.env.LEY_19862_REPLACE_CATALOG === "true" ? ["ley-19862"] : [],
   originalAssets: [{ sourceId: "ley-19862", year, month, ...result.original }],
 });
 

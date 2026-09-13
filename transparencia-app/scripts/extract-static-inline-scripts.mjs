@@ -33,8 +33,13 @@ async function walk(dir) {
       for (const group of groups) {
         const body = `${rscRevealShim}\n${group.bodies.join("\n;\n")}`;
         const id = crypto.createHash("sha256").update(body).digest("hex").slice(0, 16);
+        const src = `/inline-scripts/${id}.js`;
         await writeFile(join(scriptDir, `${id}.js`), body);
-        html = html.replace(group.marker, `<script src="/inline-scripts/${id}.js"></script>`);
+        // RSC reveal scripts must be fetched before Next's async hydration
+        // chunks can run. Without a preload, the browser may hydrate an
+        // unresolved Suspense boundary first and React reports error #419.
+        html = html.replace(group.marker, `<script src="${src}"></script>`);
+        html = html.replace("</head>", `<link rel="preload" as="script" href="${src}" /></head>`);
       }
       await writeFile(file, html);
     }

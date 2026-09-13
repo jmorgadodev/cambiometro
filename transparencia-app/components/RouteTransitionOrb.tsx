@@ -1,20 +1,19 @@
 "use client";
 
 import React, { useEffect, useRef, useState } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 import LoadingOrb from "@/components/LoadingOrb";
 
 export default function RouteTransitionOrb() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [isVisible, setIsVisible] = useState(false);
 
   const transitionStartRef = useRef<number>(0);
   const hideTimeoutRef = useRef<number | null>(null);
+  const maxVisibleTimeoutRef = useRef<number | null>(null);
   const prevKeyRef = useRef<string>("");
 
-  const searchStr = searchParams?.toString() ?? "";
-  const currentKey = `${pathname}?${searchStr}`;
+  const currentKey = pathname;
 
   // Desvanecimiento del splash inicial SSR tras la hidratacion SIN remover el nodo del DOM
   useEffect(() => {
@@ -57,9 +56,14 @@ export default function RouteTransitionOrb() {
         if (isSamePath && isSameSearch) return;
 
         if (hideTimeoutRef.current) window.clearTimeout(hideTimeoutRef.current);
+        if (maxVisibleTimeoutRef.current) window.clearTimeout(maxVisibleTimeoutRef.current);
 
         transitionStartRef.current = Date.now();
         setIsVisible(true);
+        maxVisibleTimeoutRef.current = window.setTimeout(() => {
+          setIsVisible(false);
+          maxVisibleTimeoutRef.current = null;
+        }, 5000);
       } catch {
         // Ignorar URLs invalidas
       }
@@ -89,9 +93,20 @@ export default function RouteTransitionOrb() {
 
       hideTimeoutRef.current = window.setTimeout(() => {
         setIsVisible(false);
+        if (maxVisibleTimeoutRef.current) {
+          window.clearTimeout(maxVisibleTimeoutRef.current);
+          maxVisibleTimeoutRef.current = null;
+        }
       }, remainingMs);
     }
   }, [currentKey]);
+
+  useEffect(() => () => {
+    if (hideTimeoutRef.current) window.clearTimeout(hideTimeoutRef.current);
+    if (maxVisibleTimeoutRef.current) window.clearTimeout(maxVisibleTimeoutRef.current);
+  }, []);
+
+  if (!isVisible) return null;
 
   return (
     <div

@@ -1,5 +1,55 @@
+import { gzipSync } from "node:zlib";
+import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
-import { projectLakeEvidence } from "@/lib/r2-records";
+import { projectLakeEvidence, readR2EvidenceRecords } from "@/lib/r2-records";
+
+function fakeBucket(recordsByKey: Record<string, unknown>) {
+  const encoded = new Map<string, ArrayBuffer>();
+  for (const [key, value] of Object.entries(recordsByKey)) {
+    if (value instanceof ArrayBuffer) {
+      encoded.set(key, value);
+      continue;
+    }
+    const raw = typeof value === "string" ? value : JSON.stringify(value);
+    const data = Uint8Array.from(Buffer.from(raw));
+    encoded.set(key, data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength));
+  }
+  return {
+    async get(key: string) {
+      const data = encoded.get(key);
+      if (!data) return null;
+      return {
+        async json<T>() { return JSON.parse(new TextDecoder().decode(data)) as T; },
+        async arrayBuffer() { return data; },
+      };
+    },
+  };
+}
+
+function gzipText(lines: unknown[]) {
+  const data = gzipSync(`${lines.map((line) => JSON.stringify(line)).join("\n")}\n`);
+  return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+}
+
+function sha256(data: ArrayBuffer) {
+  return createHash("sha256").update(Buffer.from(data)).digest("hex");
+}
+
+function partition(sourceId: string, period: string, key: string, data: ArrayBuffer, recordCount: number) {
+  return {
+    sourceId,
+    period,
+    recordCount,
+    manifestKey: `partitions/${sourceId}/${period}/manifest.json`,
+    releaseTag: "data-test",
+    manifestAssetName: `${sourceId}-${period}-manifest.json`,
+    key,
+    manifest: {
+      projectionChecksumSha256: "projection",
+      artifacts: [{ key, checksumSha256: sha256(data), releaseAssetName: `${sourceId}-${period}-records.jsonl.gz` }],
+    },
+  };
+}
 
 describe("registros calientes de R2", () => {
   it("proyecta ejecución DIPRES con monto CLP, origen y checksum", () => {
@@ -15,5 +65,86 @@ describe("registros calientes de R2", () => {
   it("conserva entidades territoriales explícitas de SINIM", () => {
     const record = projectLakeEvidence({ id: "sinim-1", sourceId: "sinim", kind: "expense", occurredAt: "2025-12-31", evidence: { sourceUrl: "https://datos.sinim.gov.cl/real.xls" }, data: { title: "Gasto municipal", subject_entity_ids: ["municipality-cl-01101"], monto_clp: 10_000, monto_original: { amount: "10", currency: "CLP", unit: "miles de pesos" } } }, "abc", "2026-08-08T00:00:00Z");
     expect(record).toMatchObject({ subjectEntityIds: ["municipality-cl-01101"], amount: { amountClp: 10_000 } });
+  });
+
+  it("sirve una página de una fuente no indexada sin descomprimir todas sus particiones", async () => {
+    const first = gzipText([{ id: "camara-1", sourceId: "camara", kind: "attendance", occurredAt: "2026-09-02", data: { title: "Asistencia" } }]);
+    const second = gzipText([{ id: "camara-2", sourceId: "camara", kind: "attendance", occurredAt: "2026-08-02", data: { title: "Asistencia" } }]);
+    const firstPartition = partition("camara", "2026-09", "partitions/camara/2026/09/records.jsonl.gz", first, 1);
+    const secondPartition = partition("camara", "2026-08", "partitions/camara/2026/08/records.jsonl.gz", second, 1);
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": { generatedAt: "2026-09-12T00:00:00Z", partitions: [firstPartition, secondPartition] },
+      [firstPartition.manifestKey]: firstPartition.manifest,
+      [secondPartition.manifestKey]: secondPartition.manifest,
+      [firstPartition.key]: first,
+      [secondPartition.key]: second,
+    });
+
+    const result = await readR2EvidenceRecords(bucket, { source: "camara", limit: 1 });
+
+    expect(result).toMatchObject({ total: 2, expectedTotal: 2, loadedRows: 1, complete: false, missingPartitions: 0 });
+    expect(result?.data).toHaveLength(1);
+    expect(result?.data[0]?.id).toBe("camara-1");
+  });
+
+  it("sirve una variante de Cámara sin mezclar asistencia ni consultar D1", async () => {
+    const vote = gzipText([{ id: "camara-vote-1", sourceId: "camara", kind: "vote", occurredAt: "2026-09-02", data: { title: "Votación" } }]);
+    const attendance = gzipText([{ id: "camara-attendance-1", sourceId: "camara", kind: "attendance", occurredAt: "2026-09-02", data: { title: "Asistencia" } }]);
+    const votePartition = { ...partition("camara", "2026-09", "partitions/camara/votaciones_camara/2026/09/records.jsonl.gz", vote, 1), variant: "votaciones_camara", manifestKey: "partitions/camara/votaciones_camara/2026/09/manifest.json" };
+    const attendancePartition = partition("camara", "2026-09", "partitions/camara/asistencia_camara/2026/09/records.jsonl.gz", attendance, 1);
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": { generatedAt: "2026-09-12T00:00:00Z", partitions: [votePartition, attendancePartition] },
+      [votePartition.manifestKey]: votePartition.manifest,
+      [attendancePartition.manifestKey]: attendancePartition.manifest,
+      [votePartition.key]: vote,
+      [attendancePartition.key]: attendance,
+    });
+
+    const result = await readR2EvidenceRecords(bucket, { source: "camara", variant: "votaciones_camara", kind: "vote", limit: 10 });
+
+    expect(result).toMatchObject({ total: 1, expectedTotal: 1, loadedRows: 1, complete: true, missingPartitions: 0 });
+    expect(result?.data.map((record) => record.id)).toEqual(["camara-vote-1"]);
+  });
+
+  it("rechaza filtros amplios sin índice antes de iniciar un scan que pueda producir 1102", async () => {
+    const partitions = Array.from({ length: 13 }, (_, index) => {
+      const period = `202${Math.floor(index / 12) + 4}-${String((index % 12) + 1).padStart(2, "0")}`;
+      const key = `partitions/camara/${period}/records.jsonl.gz`;
+      const data = gzipText([{ id: `camara-${index}`, sourceId: "camara", kind: "attendance", occurredAt: `${period}-01`, data: {} }]);
+      return partition("camara", period, key, data, 1);
+    });
+    const result = await readR2EvidenceRecords(fakeBucket({ "catalog/v1/manifest.json": { partitions } }), { source: "camara", kind: "vote", limit: 25 });
+
+    expect(result).toMatchObject({ scanLimited: true, expectedTotal: 13, complete: false });
+    expect(result?.data).toEqual([]);
+  });
+
+  it("usa el índice paginado de InfoProbidad para no descomprimir todo el histórico", async () => {
+    const records = [
+      { id: "probidad-1", sourceId: "infoprobidad", kind: "declaration", occurredAt: "2026-09-01", title: "Declaración Uno", data: { nombre: "PERSONA UNO" } },
+      { id: "probidad-2", sourceId: "infoprobidad", kind: "declaration", occurredAt: "2026-08-01", title: "Declaración Dos", data: { nombre: "PERSONA DOS" } },
+    ];
+    const archive = new TextEncoder().encode(`${records.map((record) => JSON.stringify(record)).join("\n")}\n`).buffer;
+    const bucket = fakeBucket({
+      "indexes/v1/infoprobidad/manifest.json": {
+        schemaVersion: 1,
+        sourceId: "infoprobidad",
+        totalRows: 2,
+        pageSize: 1,
+        recordArchiveKey: "indexes/v1/infoprobidad/records.jsonl",
+        searchIndexKey: "indexes/v1/infoprobidad/search.json",
+        searchCountIndexKey: "indexes/v1/infoprobidad/search-counts.json",
+        pages: [{ offset: 0, length: Buffer.byteLength(`${JSON.stringify(records[0])}\n`) }, { offset: Buffer.byteLength(`${JSON.stringify(records[0])}\n`), length: Buffer.byteLength(`${JSON.stringify(records[1])}\n`) }],
+      },
+      "indexes/v1/infoprobidad/records.jsonl": archive,
+      "indexes/v1/infoprobidad/search.json": { "persona": [0, 1] },
+      "indexes/v1/infoprobidad/search-counts.json": { persona: 2 },
+    });
+
+    const result = await readR2EvidenceRecords(bucket, { source: "infoprobidad", query: "persona", limit: 1 });
+
+    expect(result).toMatchObject({ total: 2, expectedTotal: 2, complete: true, missingPartitions: 0 });
+    expect(result?.data).toHaveLength(1);
+    expect(result?.data[0]?.sourceId).toBe("infoprobidad");
   });
 });

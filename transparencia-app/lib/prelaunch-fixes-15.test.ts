@@ -31,9 +31,10 @@ describe("Tarea 15 - 5 Fixes Críticos Pre-Launch", () => {
     expect(datosContent).toContain("Diferencia por deduplicación y cobertura declarada");
   });
 
-  it("Fix 2: Home y /datos muestran fuentes oficiales + 1 derivada con coherencia numérica", () => {
+  it("Fix 2: Home y /datos muestran el catálogo de fuentes con coherencia numérica", () => {
     const homeContent = readFileSync(join(projectRoot, "app", "page.tsx"), "utf8");
-    expect(homeContent).toContain("12 fuentes oficiales + 1 derivada");
+    expect(homeContent).toContain("operationalSources.length");
+    expect(homeContent).toContain("12 fuentes oficiales");
     expect(homeContent).toContain('href="/fuentes"');
 
     const datosContent = readFileSync(join(projectRoot, "app", "datos", "page.tsx"), "utf8");

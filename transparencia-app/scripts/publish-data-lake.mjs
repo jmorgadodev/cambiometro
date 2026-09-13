@@ -53,6 +53,7 @@ const bucketIndex = process.argv.indexOf("--bucket");
 const bucket = bucketIndex >= 0 ? process.argv[bucketIndex + 1] : "transparencia-public-data";
 const publishReleases = process.argv.includes("--releases");
 const publishR2 = process.argv.includes("--r2");
+const releaseManifestsOnly = process.argv.includes("--release-manifests-only");
 const allowLocalAuth = process.argv.includes("--local-auth") && !process.env.CI;
 if (!publishReleases && !publishR2) throw new Error("Indica --releases, --r2 o ambos");
 
@@ -75,7 +76,10 @@ if (oversizedR2Asset) {
 if (publishReleases) {
   if (!process.env.GH_TOKEN?.trim()) throw new Error("PUBLICATION_MISSING_SECRET: GH_TOKEN");
   const releaseStaging = mkdtempSync(join(tmpdir(), "cambiometro-releases-"));
-  const grouped = Map.groupBy(assets, (asset) => asset.releaseTag);
+  const releaseVerifyRoot = mkdtempSync(join(tmpdir(), "cambiometro-release-verify-"));
+  const releaseCatalog = releaseManifestsOnly ? assets.filter((asset) => asset.key.endsWith("/manifest.json")) : assets;
+  if (releaseCatalog.length === 0) throw new Error("PUBLICATION_RELEASE_MANIFEST_MISSING");
+  const grouped = Map.groupBy(releaseCatalog, (asset) => asset.releaseTag);
   for (const [tag, releaseAssets] of grouped) {
     const releaseView = command("gh", ["release", "view", tag, "--json", "assets"], true);
     let existingAssets = new Map();
@@ -93,11 +97,63 @@ if (publishReleases) {
       }
       const stagedPath = join(releaseStaging, asset.releaseAssetName);
       copyFileSync(join(outputRoot, asset.key), stagedPath);
+      const verifyRemote = () => {
+        const verifyDir = mkdtempSync(join(releaseVerifyRoot, "asset-"));
+        const downloaded = command("gh", ["release", "download", tag, "--pattern", asset.releaseAssetName, "--dir", verifyDir], true);
+        const downloadedPath = join(verifyDir, asset.releaseAssetName);
+        if (downloaded.status !== 0 || !existsSync(downloadedPath)) return false;
+        const remoteChecksum = createHash("sha256").update(readFileSync(downloadedPath)).digest("hex");
+        if (remoteChecksum !== asset.checksumSha256) throw new Error(`IMMUTABLE_RELEASE_CONFLICT: ${tag}/${asset.releaseAssetName}`);
+        return true;
+      };
       let attempts = 0;
       while (attempts < 3) {
         attempts += 1;
         const result = command("gh", ["release", "upload", tag, stagedPath], true);
-        if (result.status === 0) break;
+        if (result.status === 0) {
+          // Mantener el índice en memoria evita que dos assets generados con
+          // el mismo nombre se vuelvan a subir dentro de esta ejecución.
+          // GitHub Releases es inmutable por nombre: el segundo encuentro
+          // debe tratarse como idempotente y conservar su checksum.
+          existingAssets.set(asset.releaseAssetName, {
+            name: asset.releaseAssetName,
+            digest: `sha256:${asset.checksumSha256}`,
+          });
+          break;
+        }
+        // La subida puede haber llegado al servidor aunque la CLI reciba un
+        // error de red. Antes de reintentar, consulta el release: si el asset
+        // ya existe y conserva exactamente su digest, la operación es
+        // idempotente y se puede continuar sin duplicar la carga.
+        const alreadyExists = /already exists/i.test(result.stderr ?? "");
+        if (alreadyExists) {
+          // GitHub puede confirmar el conflicto antes de hacer visible el
+          // asset en `release view`. Esperamos brevemente y consultamos varias
+          // veces para distinguir esa consistencia eventual de un conflicto
+          // real de contenido.
+          let verifiedExisting = false;
+          // El endpoint de upload puede reservar el nombre antes de que el
+          // asset aparezca en los endpoints de lectura. Esperamos hasta dos
+          // minutos antes de declarar la publicación fallida.
+          for (let check = 1; check <= 12; check += 1) {
+            const refreshed = command("gh", ["release", "view", tag, "--json", "assets"], true);
+            if (refreshed.status === 0) {
+              const remoteAssets = JSON.parse(refreshed.stdout).assets ?? [];
+              const remote = remoteAssets.find((item) => item.name === asset.releaseAssetName);
+              if (remote?.digest === `sha256:${asset.checksumSha256}`) {
+                verifiedExisting = true;
+                break;
+              }
+              if (remote) throw new Error(`IMMUTABLE_RELEASE_CONFLICT: ${tag}/${asset.releaseAssetName}`);
+            }
+            if (!verifiedExisting && verifyRemote()) {
+              verifiedExisting = true;
+              break;
+            }
+            if (check < 12) spawnSync(process.execPath, ["-e", "setTimeout(()=>null, 10000)"]);
+          }
+          if (verifiedExisting) break;
+        }
         if (attempts === 3) throw new Error(`gh release upload fallo tras 3 intentos: codigo ${result.status} ${result.stderr?.trim() ? `(${result.stderr.trim()})` : ""}`);
         spawnSync(process.execPath, ["-e", "setTimeout(()=>null, 5000)"]);
       }
@@ -117,10 +173,12 @@ if (publishR2) {
   const r2Plan = planR2Publication(assets, previous);
   const activationManifests = r2Plan.puts.filter((asset) => asset.key.endsWith("/manifest.json"));
 
+  // Sólo se eliminan particiones frías o versiones históricas no activas.
+  // Liberarlas antes de subir evita superar transitoriamente la cuota R2.
+  for (const key of r2Plan.deletes) wranglerWithRetry(["r2", "object", "delete", `${bucket}/${key}`]);
   for (const asset of r2Plan.puts.filter((item) => !activationManifests.includes(item))) {
     wranglerWithRetry(["r2", "object", "put", `${bucket}/${asset.key}`, "--file", join(outputRoot, asset.key)]);
   }
-  for (const key of r2Plan.deletes) wranglerWithRetry(["r2", "object", "delete", `${bucket}/${key}`]);
   for (const manifest of activationManifests) {
     wranglerWithRetry(["r2", "object", "put", `${bucket}/${manifest.key}`, "--file", join(outputRoot, manifest.key), "--content-type", "application/json"]);
   }

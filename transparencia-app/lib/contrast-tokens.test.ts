@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { LIGHT_TOKENS, DARK_TOKENS, ThemeTokens } from "./theme-tokens";
+import { LIGHT_TOKENS, DARK_TOKENS, NIGHT_TOKENS, ThemeTokens } from "./theme-tokens";
 
 function hexToRgb(hex: string): [number, number, number] {
   const cleanHex = hex.replace("#", "");
@@ -92,4 +92,5 @@ describe("Sistema de Color Transversal — Ratios de Contraste WCAG AA (>= 4.5:1
 
   checkTokenContrasts("Modo Día (Light)", LIGHT_TOKENS);
   checkTokenContrasts("Modo Oscuro (Dark)", DARK_TOKENS);
+  checkTokenContrasts("Modo Noche (Night)", NIGHT_TOKENS);
 });

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import type { FuncionarioPublico } from "@/lib/funcionarios";
 import {
   formatEstamentoCorto,
@@ -8,6 +8,10 @@ import {
   getInitials,
 } from "@/lib/estamentos-format";
 import { classifyFuncionarioRecord, type AnomaliaInfo } from "@/lib/funcionarios-quality";
+import { queryStaticFuncionarios } from "@/lib/funcionarios-static";
+import { normalizeFuncionarioRecord, type FuncionarioQualityFilter } from "@/lib/funcionarios-normalization";
+import FuncionarioDetailDialog, { type FuncionarioDetailRecord } from "@/components/municipalidades/FuncionarioDetailDialog";
+import { buildFuncionarioSalaryHistory } from "@/lib/funcionarios-history";
 
 function formatCLP(n: number) {
   return new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(n);
@@ -57,6 +61,7 @@ export default function OrganismoFuncionariosList({
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const [deptFilter, setDeptFilter] = useState("Todos");
   const [contratoFilter, setContratoFilter] = useState("Todos");
+  const [qualityFilter, setQualityFilter] = useState<FuncionarioQualityFilter>("Todos");
   const [sortBy, setSortBy] = useState("sueldo_desc");
   const [page, setPage] = useState(1);
   const itemsPerPage = 24;
@@ -67,6 +72,12 @@ export default function OrganismoFuncionariosList({
   const [totalPages, setTotalPages] = useState(1);
   const [isLoading, setIsLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [sourceStatus, setSourceStatus] = useState<"api" | "static" | "static-fallback" | "unavailable">("api");
+  const [retryNonce, setRetryNonce] = useState(0);
+  const [selectedFuncionario, setSelectedFuncionario] = useState<FuncionarioPublico | null>(null);
+  const [staticRecords, setStaticRecords] = useState<FuncionarioPublico[]>([]);
+  const [payrollCoverage, setPayrollCoverage] = useState<{ expected: number; available: number } | null>(null);
+  const staticRecordsCacheRef = useRef<{ organismoId: string; records: FuncionarioPublico[] } | null>(null);
 
   // Calidad de datos forense (Sección 1 y 2)
   const [observadosCount, setObservadosCount] = useState(0);
@@ -90,14 +101,36 @@ export default function OrganismoFuncionariosList({
 
   // Fetch data
   useEffect(() => {
+    const controller = new AbortController();
+    let active = true;
+
+    async function fetchJson(url: string, timeoutMs: number) {
+      const requestController = new AbortController();
+      const onLifetimeAbort = () => requestController.abort();
+      controller.signal.addEventListener("abort", onLifetimeAbort, { once: true });
+      const timer = window.setTimeout(() => requestController.abort(), timeoutMs);
+      try {
+        const response = await fetch(url, { signal: requestController.signal, cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return await response.json();
+      } finally {
+        window.clearTimeout(timer);
+        controller.signal.removeEventListener("abort", onLifetimeAbort);
+      }
+    }
+
     async function fetchData() {
       setIsLoading(true);
       setErrorMessage(null);
+      setSourceStatus("api");
+      setStaticRecords([]);
+      if (staticRecordsCacheRef.current?.organismoId !== organismoId) staticRecordsCacheRef.current = null;
       try {
         const params = new URLSearchParams({
           query: debouncedSearch,
           muni: organismoId,
           contrato: contratoFilter,
+          calidad: qualityFilter,
           estamento: deptFilter !== "Todos" ? deptFilter : "Todos",
           sortBy,
           page: page.toString(),
@@ -106,21 +139,84 @@ export default function OrganismoFuncionariosList({
         if (periodo && periodo !== "Todos") {
           params.set("periodo", periodo);
         }
-        const res = await fetch(`/api/funcionarios?${params.toString()}`);
-        if (!res.ok) throw new Error("API Error");
-        const result = await res.json();
-        setData(result.data);
-        setTotal(result.meta.total);
-        setTotalHeadcount(result.meta.totalHeadcount || result.meta.stats?.totalMuni || result.meta.total);
-        setTotalPages(result.meta.totalPages);
-        setObservadosCount(result.meta.observadosCount || result.meta.stats?.observadosCount || 0);
-        setSinPagoCount(result.meta.sinPagoCount || result.meta.stats?.sinPagoCount || 0);
-        setMicroMontoCount(result.meta.microMontoCount || result.meta.stats?.microMontoCount || 0);
-        setSueldoCompletoCount(result.meta.sueldoCompletoCount || result.meta.stats?.totalValidos || 0);
-        setCausasBreakdown(result.meta.causasBreakdown || {});
-        setAnomaliasList(result.meta.anomaliasSample || []);
-        setSinPagoList(result.meta.sinPagoSample || []);
-      } catch {
+        const staticManifest = await fetchJson("/data/funcionarios/manifest.json", 3_000).catch(() => null);
+        if (active && staticManifest) {
+          const expected = Number(staticManifest.expectedMunicipalities ?? 0);
+          const available = Number(staticManifest.availableMunicipalities ?? 0);
+          if (expected > 0) setPayrollCoverage({ expected, available });
+        }
+        const staticEntry = staticManifest?.files?.find?.((entry: { id?: string; rows?: number; chunks?: Array<{ path?: string }> }) => entry.id === organismoId && Number(entry.rows) > 0);
+        const unavailableEntry = staticManifest?.unavailableMunicipalities?.find?.((entry: { id?: string; status?: string; recordCount?: number }) => entry.id === organismoId);
+        const readStatic = async () => {
+          const cached = staticRecordsCacheRef.current;
+          if (cached?.organismoId === organismoId) {
+            setStaticRecords(cached.records);
+            return queryStaticFuncionarios(cached.records, {
+              query: debouncedSearch,
+              contrato: contratoFilter,
+              calidad: qualityFilter,
+              estamento: deptFilter,
+              sortBy,
+              periodo: periodo ?? undefined,
+              page,
+              limit: itemsPerPage,
+            });
+          }
+          const chunkPaths = Array.isArray(staticEntry?.chunks)
+            ? staticEntry.chunks.map((chunk: { path?: string }) => chunk.path).filter((path: unknown): path is string => typeof path === "string" && path.length > 0)
+            : [];
+          const paths = chunkPaths.length > 0
+            ? chunkPaths
+            : [`/data/funcionarios/${encodeURIComponent(organismoId)}.json`];
+          const payloads = await Promise.all(paths.map((path: string) => fetchJson(path, 8_000)));
+          const staticResponse = payloads.flat();
+          if (!payloads.every(Array.isArray)) throw new Error("STATIC_PAYROLL_INVALID");
+          const normalizedStaticRecords = staticResponse.map((item: FuncionarioPublico) => normalizeFuncionarioRecord(item));
+          staticRecordsCacheRef.current = { organismoId, records: normalizedStaticRecords };
+          setStaticRecords(normalizedStaticRecords);
+          return queryStaticFuncionarios(normalizedStaticRecords, {
+            query: debouncedSearch,
+            contrato: contratoFilter,
+            calidad: qualityFilter,
+            estamento: deptFilter,
+            sortBy,
+            periodo: periodo ?? undefined,
+            page,
+            limit: itemsPerPage,
+          });
+        };
+        let result;
+        if (staticEntry) {
+          try {
+            result = await readStatic();
+            if (active) setSourceStatus("static");
+          } catch {
+            result = await fetchJson(`/api/funcionarios?${params.toString()}`, 3_000);
+            if (active) setSourceStatus("api");
+          }
+        } else {
+          try {
+            result = await fetchJson(`/api/funcionarios?${params.toString()}`, 3_000);
+          } catch {
+            if (unavailableEntry) throw new Error("STATIC_PAYROLL_NOT_PUBLISHED");
+            result = await readStatic();
+            if (active) setSourceStatus("static-fallback");
+          }
+        }
+        if (!active) return;
+        setData((result.data ?? []).map((item: FuncionarioPublico) => normalizeFuncionarioRecord(item)));
+        setTotal(result.meta?.total ?? 0);
+        setTotalHeadcount(result.meta?.totalHeadcount || result.meta?.stats?.totalMuni || result.meta?.total || 0);
+        setTotalPages(result.meta?.totalPages ?? 1);
+        setObservadosCount(result.meta?.observadosCount || result.meta?.stats?.observadosCount || 0);
+        setSinPagoCount(result.meta?.sinPagoCount || result.meta?.stats?.sinPagoCount || 0);
+        setMicroMontoCount(result.meta?.microMontoCount || result.meta?.stats?.microMontoCount || 0);
+        setSueldoCompletoCount(result.meta?.sueldoCompletoCount || result.meta?.stats?.totalValidos || 0);
+        setCausasBreakdown(result.meta?.causasBreakdown || {});
+        setAnomaliasList(result.meta?.anomaliasSample || []);
+        setSinPagoList(result.meta?.sinPagoSample || []);
+      } catch (error) {
+        if (!active || controller.signal.aborted) return;
         setData([]);
         setTotal(0);
         setTotalHeadcount(0);
@@ -132,15 +228,25 @@ export default function OrganismoFuncionariosList({
         setCausasBreakdown({});
         setAnomaliasList([]);
         setSinPagoList([]);
-        setErrorMessage("La nómina oficial no está disponible temporalmente.");
+        setSourceStatus("unavailable");
+        setErrorMessage(error instanceof Error && error.message === "STATIC_PAYROLL_INVALID"
+          ? "La proyección local de esta municipalidad no tiene un formato oficial válido."
+          : error instanceof Error && error.message === "STATIC_PAYROLL_NOT_PUBLISHED"
+            ? "La fuente oficial reportó esta municipalidad, pero no publicó registros de nómina para el corte disponible."
+            : "La nómina oficial no está disponible temporalmente.");
       } finally {
-        setIsLoading(false);
+        if (active) setIsLoading(false);
       }
     }
     fetchData();
-  }, [debouncedSearch, organismoId, contratoFilter, deptFilter, sortBy, page, periodo]);
+    return () => {
+      active = false;
+      controller.abort();
+    };
+  }, [debouncedSearch, organismoId, contratoFilter, qualityFilter, deptFilter, sortBy, page, periodo, retryNonce]);
 
   // Construcción del texto de causas para la Caja Ciudadana (§2.3)
+  const visibleQualityCount = data.filter((item) => (item.calidad_datos?.incidencias.length ?? 0) > 0).length;
   const causasTexto = [
     causasBreakdown.ajuste_periodo_anterior ? `${causasBreakdown.ajuste_periodo_anterior} por ajustes/rectificaciones de meses previos` : null,
     causasBreakdown.asignacion_reembolso_menor ? `${causasBreakdown.asignacion_reembolso_menor} por viáticos o movilización puntual` : null,
@@ -148,6 +254,57 @@ export default function OrganismoFuncionariosList({
     causasBreakdown.error_unidad_fuente ? `${causasBreakdown.error_unidad_fuente} por valores nominales residuales de origen` : null,
     causasBreakdown.anomalia_fuente ? `${causasBreakdown.anomalia_fuente} sin causa determinable en observaciones ('anomalía de la fuente')` : null,
   ].filter(Boolean).join(", ") || "clasificación forense en curso";
+
+  const selectedFuncionarioDetail: FuncionarioDetailRecord | null = selectedFuncionario
+    ? (() => {
+        const overtimeAmount = selectedFuncionario.monto_horas_extras_clp > 0
+          ? selectedFuncionario.monto_horas_extras_clp
+          : null;
+        const overtimeHours = selectedFuncionario.horas_extras_mes_anterior > 0
+          ? selectedFuncionario.horas_extras_mes_anterior
+          : [
+              selectedFuncionario.horas_extras_diurnas_hrs,
+              selectedFuncionario.horas_extras_nocturnas_hrs,
+              selectedFuncionario.horas_extras_festivas_hrs,
+            ].reduce<number>((sum, value) => sum + (value ?? 0), 0);
+        const gross = selectedFuncionario.remuneracion_bruta_mensual || null;
+        const base = gross !== null && overtimeAmount !== null && gross >= overtimeAmount
+          ? gross - overtimeAmount
+          : null;
+        return {
+          id: selectedFuncionario.id,
+          nombre: selectedFuncionario.nombre_completo,
+          cargo: selectedFuncionario.cargo,
+          estamento: selectedFuncionario.estamento,
+          tipoContrato: selectedFuncionario.tipo_contrato,
+          periodo: selectedFuncionario.periodo,
+          sueldoBase: base,
+          remuneracionBruta: gross,
+          remuneracionLiquida: selectedFuncionario.remuneracion_liquida_mensual,
+          horasExtras: overtimeHours,
+          montoHorasExtras: overtimeAmount,
+          horasExtrasDiurnas: selectedFuncionario.horas_extras_diurnas_hrs,
+          horasExtrasNocturnas: selectedFuncionario.horas_extras_nocturnas_hrs,
+          horasExtrasFestivas: selectedFuncionario.horas_extras_festivas_hrs,
+          grado: selectedFuncionario.grado_eus,
+          formacion: selectedFuncionario.formacion,
+          region: selectedFuncionario.region,
+          fechaIngreso: selectedFuncionario.fecha_ingreso,
+          fechaTermino: selectedFuncionario.fecha_termino,
+          asignacionesEspeciales: selectedFuncionario.asignaciones_especiales_clp,
+          remuneracionesAdicionales: selectedFuncionario.rem_adicionales_clp,
+          bonosIncentivos: selectedFuncionario.bonos_incentivos_clp,
+          viaticos: selectedFuncionario.viaticos_clp,
+          derechoHorasExtras: selectedFuncionario.derecho_horas_extras,
+          observaciones: selectedFuncionario.observaciones,
+          fuente: selectedFuncionario.fuente,
+          fuentePeriodo: selectedFuncionario.fuente_periodo,
+          calidad: selectedFuncionario.calidad_datos?.estado,
+          calidadDetalle: selectedFuncionario.calidad_datos?.detalle,
+          historial: buildFuncionarioSalaryHistory(staticRecords, selectedFuncionario.nombre_completo),
+        };
+      })()
+    : null;
 
   return (
     <div>
@@ -326,6 +483,25 @@ export default function OrganismoFuncionariosList({
           </div>
 
           <div>
+            <label
+              style={{ fontSize: "0.75rem", color: "var(--text-subtle)", fontWeight: 700, display: "block", marginBottom: "0.3rem" }}
+              title="Clasificación de auditoría: no elimina ni reemplaza el valor informado por la fuente."
+            >
+              Calidad de la fuente
+            </label>
+            <select
+              className="input"
+              value={qualityFilter}
+              onChange={(e) => { setQualityFilter(e.target.value as FuncionarioQualityFilter); setPage(1); }}
+              style={{ width: "100%", fontSize: "0.85rem", padding: "0.45rem 0.75rem" }}
+            >
+              <option value="Todos">Todos los registros</option>
+              <option value="corregidos">Correcciones de formato</option>
+              <option value="observados">Datos observados por auditoría</option>
+            </select>
+          </div>
+
+          <div>
             <label style={{ fontSize: "0.75rem", color: "var(--text-subtle)", fontWeight: 700, display: "block", marginBottom: "0.3rem" }}>
               Ordenar por
             </label>
@@ -369,6 +545,32 @@ export default function OrganismoFuncionariosList({
 
         {totalPages > 1 && <span>Página {page} de {totalPages}</span>}
       </div>
+      {sourceStatus === "static-fallback" && (
+        <div className="card-flat" role="status" style={{ marginBottom: "1rem", padding: "0.75rem 1rem", fontSize: "0.78rem", color: "var(--text-muted)" }}>
+          El Worker API no respondió; se está mostrando la última proyección oficial estática disponible para esta municipalidad.
+        </div>
+      )}
+      {sourceStatus === "static" && (
+        <div role="status" style={{ marginBottom: "1rem", fontSize: "0.74rem", color: "var(--text-subtle)" }}>
+          Fuente: proyección oficial estática generada en el último build.
+        </div>
+      )}
+      {payrollCoverage && payrollCoverage.available < payrollCoverage.expected && (
+        <div className="card-flat" role="note" style={{ marginBottom: "1rem", padding: "0.8rem 1rem", fontSize: "0.78rem", lineHeight: 1.5, color: "var(--text-muted)" }}>
+          <strong style={{ color: "var(--text-primary)" }}>Cobertura real de nóminas:</strong>{" "}
+          el release actual publica registros para {payrollCoverage.available.toLocaleString("es-CL")} de {payrollCoverage.expected.toLocaleString("es-CL")} comunas. Las comunas sin nómina publicada se mantienen como “sin datos publicados”; no se muestran como $0 ni se completan con estimaciones.
+        </div>
+      )}
+      {visibleQualityCount > 0 && (
+        <div
+          role="note"
+          className="card-flat"
+          style={{ marginBottom: "1rem", padding: "0.8rem 1rem", fontSize: "0.78rem", lineHeight: 1.5, color: "var(--text-muted)" }}
+        >
+          <strong style={{ color: "var(--text-primary)" }}>Depuración visible de la fuente:</strong>{" "}
+          {visibleQualityCount.toLocaleString("es-CL")} registros de esta página tienen una incidencia de formato reportada por el organismo. Se corrigen sólo prefijos o espacios inequívocos para facilitar la lectura; conservamos el valor original y el enlace a la fuente. No inferimos nombres ni remuneraciones.
+        </div>
+      )}
 
       {/* Grilla Principal */}
       {isLoading ? (
@@ -379,6 +581,9 @@ export default function OrganismoFuncionariosList({
         <div className="card" role="status" style={{ textAlign: "center", padding: "2.5rem" }}>
           <h3 style={{ margin: 0, color: "var(--text-primary)" }}>Nómina no disponible</h3>
           <p style={{ color: "var(--text-muted)", fontSize: "0.85rem", marginTop: "0.5rem" }}>{errorMessage}</p>
+          <button type="button" className="btn btn-secondary" onClick={() => setRetryNonce((value) => value + 1)}>
+            Reintentar
+          </button>
         </div>
       ) : data.length === 0 ? (
         <div style={{ padding: "3rem", textAlign: "center", color: "var(--text-muted)" }}>
@@ -396,6 +601,17 @@ export default function OrganismoFuncionariosList({
             return (
               <div
                 key={func.id}
+                className="municipal-staff-card"
+                role="button"
+                tabIndex={0}
+                aria-label={`Abrir expediente de ${func.nombre_completo}`}
+                onClick={() => setSelectedFuncionario(func)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setSelectedFuncionario(func);
+                  }
+                }}
                 style={{
                   background: "var(--bg-surface)",
                   borderRadius: 12,
@@ -434,6 +650,15 @@ export default function OrganismoFuncionariosList({
                     <div style={{ fontSize: "0.78rem", color: "var(--text-muted)", marginTop: "0.15rem", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>
                       {func.cargo || "Sin cargo"}
                     </div>
+                    {(func.calidad_datos?.incidencias.length ?? 0) > 0 && (
+                      <span
+                        className="badge badge-warn"
+                        style={{ display: "inline-flex", marginTop: "0.35rem", fontSize: "0.62rem", padding: "0.12rem 0.4rem" }}
+                        title={func.calidad_datos?.detalle}
+                      >
+                        Fuente normalizada
+                      </span>
+                    )}
                   </div>
                 </div>
 
@@ -507,12 +732,28 @@ export default function OrganismoFuncionariosList({
                             href={qualityInfo.urlRegistroOriginal}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={(event) => event.stopPropagation()}
                             style={{ fontSize: "0.65rem", color: "var(--accent)", textDecoration: "none", fontWeight: 700 }}
                             title="Ver fila original en portal oficial de Transparencia"
                           >
                             Ver fuente ↗
                           </a>
                         )}
+                      </div>
+                    )}
+                    {func.remuneracion_liquida_mensual == null && bruto > 0 && (
+                      <div
+                        style={{ marginTop: "0.35rem", fontSize: "0.7rem", color: "var(--text-subtle)" }}
+                        title={func.remuneracion_liquida_mensual_original == null
+                          ? "La fuente no publicó un sueldo líquido para este registro."
+                          : `La fuente informó ${formatCLP(func.remuneracion_liquida_mensual_original)}; se muestra como no informado para no presentarlo como pago real.`}
+                      >
+                        Sueldo líquido: <strong>No informado por la fuente</strong>
+                      </div>
+                    )}
+                    {func.remuneracion_liquida_mensual != null && (
+                      <div style={{ marginTop: "0.35rem", fontSize: "0.7rem", color: "var(--text-subtle)" }}>
+                        Sueldo líquido: <strong>{formatCLP(func.remuneracion_liquida_mensual)}</strong>
                       </div>
                     )}
                   </div>
@@ -522,6 +763,10 @@ export default function OrganismoFuncionariosList({
                       +{func.horas_extras_mes_anterior} hrs extras
                     </span>
                   )}
+                </div>
+
+                <div style={{ color: "var(--accent)", fontSize: "0.72rem", fontWeight: 700 }}>
+                  Ver expediente completo →
                 </div>
               </div>
             );
@@ -617,6 +862,14 @@ export default function OrganismoFuncionariosList({
             </div>
           )}
         </div>
+      )}
+
+      {selectedFuncionarioDetail && (
+        <FuncionarioDetailDialog
+          record={selectedFuncionarioDetail}
+          nombreOrganismo={nombreOrganismo}
+          onClose={() => setSelectedFuncionario(null)}
+        />
       )}
     </div>
   );

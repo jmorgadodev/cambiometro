@@ -221,7 +221,7 @@ export async function listRecords(params: { entityId?: string; kind?: EvidenceKi
 
   if (entityScope) {
     const placeholders = entityScope.ids.map(() => "?").join(",");
-    query += ` AND (EXISTS (SELECT 1 FROM record_subjects WHERE record_subjects.record_id=records.id AND record_subjects.entity_id IN (${placeholders})) OR EXISTS (SELECT 1 FROM record_objects WHERE record_objects.record_id=records.id AND record_objects.entity_id IN (${placeholders})))`;
+    query += ` AND records.id IN (SELECT record_id FROM record_subjects WHERE entity_id IN (${placeholders}) UNION SELECT record_id FROM record_objects WHERE entity_id IN (${placeholders}))`;
     bindings.push(...entityScope.ids, ...entityScope.ids);
   }
   if (params.kind) {
@@ -357,9 +357,7 @@ export async function listSourceManifests(): Promise<SourceManifest[]> {
   }
 
   try {
-    const [recordStats, stateRows] = await Promise.all([
-      db.prepare("SELECT source_id, count(*) as cnt FROM records GROUP BY source_id").all<{source_id: string, cnt: number}>(),
-      db.prepare("SELECT source_id,status,record_count,checksum_sha256,generated_at,last_success_at,error FROM source_state").all<{
+    const stateRows = await db.prepare("SELECT source_id,status,record_count,checksum_sha256,generated_at,last_success_at,error FROM source_state").all<{
         source_id: string;
         status: string;
         record_count: number;
@@ -367,13 +365,14 @@ export async function listSourceManifests(): Promise<SourceManifest[]> {
         generated_at: string | null;
         last_success_at: string | null;
         error: string | null;
-      }>(),
-    ]);
+      }>();
 
     const statsBySource = new Map<string, { count: number }>();
-    for (const row of recordStats.results) {
+    // Counts are validated and published by the ETL. Reading the small state
+    // table avoids scanning every historical record on each catalog request.
+    for (const row of stateRows.results) {
       const sourceId = canonicalSourceId(row.source_id);
-      statsBySource.set(sourceId, { count: (statsBySource.get(sourceId)?.count ?? 0) + Number(row.cnt) });
+      statsBySource.set(sourceId, { count: (statsBySource.get(sourceId)?.count ?? 0) + Number(row.record_count) });
     }
     const stateBySource = new Map(stateRows.results.map((row) => [canonicalSourceId(row.source_id), row]));
 
@@ -382,10 +381,7 @@ export async function listSourceManifests(): Promise<SourceManifest[]> {
       const materializedCount = stats?.count || 0;
       const state = stateBySource.get(source.id);
       const archiveOnly = state?.status === "archive_only";
-      const projectionOnly = source.id === "personal-apoyo";
-      const count = archiveOnly || projectionOnly
-        ? Math.max(materializedCount, Number(state?.record_count ?? 0))
-        : materializedCount;
+      const count = materializedCount;
       const hasSnapshot = count > 0;
       const foundPeriods: string[] = []; // Omitted for simplicity
 
@@ -426,11 +422,9 @@ export async function resolveDataPlatformSummary(
 ): Promise<DataPlatformSummary> {
   if (!db) return fallback();
   try {
-    const [records, state] = await Promise.all([
-      db.prepare("SELECT count(*) AS total FROM records").first<{ total: number }>(),
-      db.prepare("SELECT max(coalesce(last_success_at, generated_at)) AS updated_at FROM source_state").first<{ updated_at: string | null }>(),
-    ]);
-    return { totalRecords: Number(records?.total ?? 0), updatedAt: state?.updated_at ?? null };
+    const state = await db.prepare("SELECT sum(record_count) AS total, max(coalesce(last_success_at, generated_at)) AS updated_at FROM source_state")
+      .first<{ total: number | null; updated_at: string | null }>();
+    return { totalRecords: Number(state?.total ?? 0), updatedAt: state?.updated_at ?? null };
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error);
     if (/no such table:\s*(records|source_state)\b/i.test(message) || /internal error/i.test(message)) {

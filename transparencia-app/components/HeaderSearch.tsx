@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 
 interface SearchResult {
-  type: "politico" | "municipalidad" | "funcionario" | "entidad";
+  type: "politico" | "persona" | "municipalidad" | "funcionario" | "entidad";
   id: string;
   nombre: string;
   url: string;
@@ -16,7 +16,7 @@ interface SearchResult {
 }
 
 interface SearchPayload {
-  results: {
+  data: {
     autoridades: SearchResult[];
     municipalidades: SearchResult[];
     funcionarios: SearchResult[];
@@ -26,6 +26,7 @@ interface SearchPayload {
 
 const TYPE_LABELS: Record<SearchResult["type"], string> = {
   politico: "Autoridad",
+  persona: "Autoridad",
   municipalidad: "Municipalidad",
   funcionario: "Funcionario/a",
   entidad: "Entidad jurídica",
@@ -58,10 +59,10 @@ export default function HeaderSearch() {
 
         const payload = (await response.json()) as SearchPayload;
         setResults([
-          ...payload.results.autoridades,
-          ...payload.results.municipalidades,
-          ...payload.results.funcionarios,
-          ...(payload.results.entidades ?? []),
+          ...payload.data.autoridades,
+          ...payload.data.municipalidades,
+          ...payload.data.funcionarios,
+          ...(payload.data.entidades ?? []),
         ].slice(0, 9));
       } catch (requestError) {
         if ((requestError as Error).name !== "AbortError") {
@@ -143,14 +144,14 @@ export default function HeaderSearch() {
             <p role="alert" className="header-search__message">{error}</p>
           ) : !isLoading && results.length === 0 ? (
             <div role="status" className="header-search__message">
-              <p>Sin coincidencias verificadas para “{query}”.</p>
-              <Link href={`/politico?q=${encodeURIComponent(query.trim())}`} onClick={() => setIsOpen(false)}>
+              <p>Sin coincidencias verificadas con ese texto.</p>
+              <Link prefetch={false} href={`/politico?q=${encodeURIComponent(query.trim())}`} onClick={() => setIsOpen(false)}>
                 Ver listado de diputados y senadores con “{query.trim()}” →
               </Link>
             </div>
           ) : (
             results.map((result) => (
-              <Link
+              <Link prefetch={false}
                 key={`${result.type}-${result.id}`}
                 href={result.url}
                 role="option"

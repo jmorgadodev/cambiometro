@@ -3,12 +3,21 @@ const DEFAULT_LIMIT_BYTES = 8 * 1024 * 1024 * 1024;
 function latestPrefixes(assets) {
   const latest = new Map();
   for (const asset of assets) {
-    const match = asset.key.match(/^partitions\/([^/]+)\/(\d{4})\/(\d{2})\//);
-    if (!match) continue;
-    const [, sourceId, year, month] = match;
+    const parts = asset.key.split("/");
+    if (parts[0] !== "partitions" || parts.length < 5) continue;
+    const sourceId = parts[1];
+    const hasVariant = !/^\d{4}$/.test(parts[2]);
+    const variant = hasVariant ? parts[2] : null;
+    const year = hasVariant ? parts[3] : parts[2];
+    const month = hasVariant ? parts[4] : parts[3];
+    if (!/^\d{4}$/.test(year) || !/^\d{2}$/.test(month)) continue;
     const period = `${year}-${month}`;
-    if (!latest.has(sourceId) || period > latest.get(sourceId).period) {
-      latest.set(sourceId, { period, prefix: `partitions/${sourceId}/${year}/${month}/` });
+    const namespace = `${sourceId}/${variant ?? "default"}`;
+    if (!latest.has(namespace) || period > latest.get(namespace).period) {
+      const prefix = variant
+        ? `partitions/${sourceId}/${variant}/${year}/${month}/`
+        : `partitions/${sourceId}/${year}/${month}/`;
+      latest.set(namespace, { period, prefix });
     }
   }
   return new Set([...latest.values()].map((value) => value.prefix));
@@ -32,6 +41,10 @@ export function selectHotAssets(assets) {
     || asset.key.startsWith("entities/")
     || asset.key.startsWith("indexes/")
     || asset.key.startsWith("projections/")
+    // InfoProbidad se consulta por historial de declaraciones. Mantener sólo
+    // el mes más reciente deja el catálogo apuntando a particiones ausentes y
+    // convierte una fuente histórica en una muestra reciente.
+    || asset.key.startsWith("partitions/infoprobidad/")
     || [...prefixes].some((prefix) => asset.key.startsWith(prefix)));
 }
 
@@ -41,19 +54,54 @@ function publicationRank(key) {
   return 0;
 }
 
+function projectionVersion(key) {
+  const match = key.match(/^projections\/([^/]+)\/versions\/([^/]+)\//);
+  return match ? { dataset: match[1], version: match[2] } : null;
+}
+
+function pruneObsoleteProjectionVersions(desired, previous, assets) {
+  const incomingByDataset = new Map();
+  for (const asset of assets) {
+    const parsed = projectionVersion(asset.key);
+    if (!parsed) continue;
+    if (!incomingByDataset.has(parsed.dataset)) incomingByDataset.set(parsed.dataset, new Set());
+    incomingByDataset.get(parsed.dataset).add(parsed.version);
+  }
+
+  for (const [dataset, incomingVersions] of incomingByDataset) {
+    const previousVersions = new Set();
+    for (const key of previous.keys()) {
+      const parsed = projectionVersion(key);
+      if (parsed?.dataset === dataset) previousVersions.add(parsed.version);
+    }
+    const rollbackVersion = [...previousVersions].sort().at(-1);
+    const retained = new Set(incomingVersions);
+    if (rollbackVersion) retained.add(rollbackVersion);
+
+    for (const key of previous.keys()) {
+      const parsed = projectionVersion(key);
+      if (parsed?.dataset === dataset && !retained.has(parsed.version)) desired.delete(key);
+    }
+  }
+}
+
 export function planR2Publication(assets, previousInventory = { objects: [] }, limitBytes = DEFAULT_LIMIT_BYTES) {
   if (!Number.isSafeInteger(limitBytes) || limitBytes < 1) throw new Error("INVALID_R2_LIMIT");
   const hot = selectHotAssets(assets);
   const previous = new Map((previousInventory.objects ?? []).map((object) => [object.key, object]));
   const desired = new Map(previous);
   for (const asset of hot) desired.set(asset.key, asset);
+  // Cada proyección versionada conserva la candidata entrante y la versión
+  // activa previa como rollback. Las copias más antiguas no son referenciadas
+  // por ningún manifiesto y duplican gigabytes sin aportar disponibilidad.
+  pruneObsoleteProjectionVersions(desired, previous, hot);
   const previousBytes = [...previous.values()].reduce((total, object) => total + object.size, 0);
   let projectedBytes = [...desired.values()].reduce((total, object) => total + object.size, 0);
   let ratio = projectedBytes / limitBytes;
   if (ratio >= 0.8) {
     const latest = catalogLatestPrefixes(assets);
     for (const key of previous.keys()) {
-      const partition = key.match(/^(partitions\/[^/]+\/\d{4}\/\d{2}\/)/)?.[1];
+      const partition = key.match(/^(partitions\/[^/]+\/(?:[^/]+\/)?\d{4}\/\d{2}\/)/)?.[1];
       if (partition && !latest.has(partition)) desired.delete(key);
     }
     projectedBytes = [...desired.values()].reduce((total, object) => total + object.size, 0);

@@ -22,7 +22,7 @@ import { POLITICOS_SEED } from "../lib/politicos-source.ts";
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const outputPath = join(scriptDirectory, "..", "data", "politicos-fotos.json");
 
-const USER_AGENT = "TransparenciaChile-Fotos/1.0 (+https://transparencia.impulsacv.cl)";
+const USER_AGENT = "Cambiometro-Fotos/1.0 (+https://cambiometro.impulsacv.cl)";
 const API = "https://es.wikipedia.org/w/api.php";
 const COMMONS_API = "https://commons.wikimedia.org/w/api.php";
 

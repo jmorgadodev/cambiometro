@@ -82,6 +82,25 @@ describe("conector oficial de asistencia de la Cámara", () => {
     expect(result.originals[0].checksumSha256).toMatch(/^[a-f0-9]{64}$/);
   });
 
+  it("omite una sesión celebrada sin asistentes y conserva las demás", async () => {
+    const emptyAttendance = attendanceXml(4808).replace(/<Asistencia>[\s\S]*?<\/Asistencia>/g, "");
+    const result = await fetchCamaraAttendance({
+      year: 2026,
+      concurrency: 2,
+      fetchImpl: async (input) => {
+        const url = String(input);
+        if (url.includes("retornarSesionesXAnno")) return new Response(sessionsXml, { headers: { "content-type": "text/xml; charset=utf-8" } });
+        const id = Number(new URL(url).searchParams.get("prmSesionId"));
+        const xml = id === 4808 ? emptyAttendance : attendanceXml(id);
+        return new Response(xml, { headers: { "content-type": "text/xml; charset=utf-8" } });
+      },
+    });
+
+    expect(result.records).toHaveLength(2);
+    expect(result.sessionsWithoutAttendance).toBe(1);
+    expect(result.periods).toEqual(["2026-08"]);
+  });
+
   it("rechaza duplicados, XML peligroso, cambios incompatibles y fuente caída", async () => {
     const duplicate = attendanceXml().replace("</ListadoAsistencia>", `<Asistencia><TipoAsistencia Valor="1">Asiste</TipoAsistencia><Diputado><Id>803</Id><Nombre>René</Nombre><ApellidoPaterno>Alinco</ApellidoPaterno><ApellidoMaterno>Bustos</ApellidoMaterno></Diputado></Asistencia></ListadoAsistencia>`);
     expect(() => parseCamaraAttendanceXml(duplicate)).toThrow("CAMARA_DUPLICATE_ATTENDANCE");

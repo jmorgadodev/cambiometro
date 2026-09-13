@@ -354,7 +354,7 @@ export default function PartidosRankingTable({ partidos }: Props) {
                 >
                   {/* Partido */}
                   <td style={{ padding: "0.75rem 1rem" }}>
-                    <Link
+                    <Link prefetch={false}
                       href={`/partidos/${p.slug}`}
                       style={{
                         display: "flex",

@@ -39,6 +39,28 @@ describe("parser de personal CPLT", () => {
     expect(record?.id).toMatch(/^func-org-presidencia-honorarios-[a-f0-9]{16}$/);
   });
 
+  it("marca errores de formato de la fuente sin inventar nombre ni sueldo líquido", () => {
+    const header = parseCpltHeader("organismo_nombre;anyo;Mes;Nombres;Paterno;Materno;descripcion_funcion;remuneracionbruta;remuliquida_mensual;enlace");
+    const record = parseCpltRecord({
+      line: "Municipalidad;2026;Junio;. EZZIO;BRAZZODURO;;SERVICIO;1000000;0;https://oficial.test/nomina",
+      header,
+      tipo: "Honorarios",
+      organismoId: "muni-gorbea",
+      sourceUrl: "https://www.cplt.cl/honorarios.csv",
+    });
+
+    expect(record).toMatchObject({
+      nombre_completo: "Ezzio Brazzoduro",
+      nombre_completo_original: ". Ezzio Brazzoduro",
+      remuneracion_liquida_mensual: null,
+      remuneracion_liquida_mensual_original: 0,
+    });
+    expect(record?.calidad_datos?.incidencias).toEqual([
+      "nombre_prefijo_invalido",
+      "remuneracion_liquida_no_informada",
+    ]);
+  });
+
   it("genera el mismo identificador estable al repetir el registro", () => {
     const header = parseCpltHeader("organismo_nombre;anyo;Mes;Nombres;Paterno;Materno;descripcion_funcion;remuneracionbruta;enlace");
     const input = {

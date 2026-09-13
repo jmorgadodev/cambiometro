@@ -32,7 +32,7 @@ export async function queryTransferencias(params: TransferenciaQueryParams = {})
   const sortOrder = params.sortOrder === "asc" ? "asc" : "desc";
 
   const summary = getLey19862Summary();
-  const canonicalTotal = SOURCE_CANONICAL_COUNTS["ley-19862"] ?? summary.kpis?.total_transfers ?? 59361;
+  const canonicalTotal = summary.kpis?.total_transfers ?? SOURCE_CANONICAL_COUNTS["ley-19862"] ?? 59361;
   const db = await getD1Database();
 
   if (db) {

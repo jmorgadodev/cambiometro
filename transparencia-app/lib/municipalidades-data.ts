@@ -85,8 +85,22 @@ export interface TopFuncionarioRemuneracion {
   grado_eus?: string | null;
   tipo_contrato?: string | null;
   periodo?: string | null;
+  fecha_ingreso?: string | null;
+  fecha_termino?: string | null;
+  formacion?: string | null;
+  fuente?: string | null;
+  fuente_periodo?: string | null;
   total_contratos_count?: number;
   cargos_consolidados?: string[];
+  historial_salarial?: Array<{
+    periodo: string;
+    etiqueta: string;
+    bruto: number;
+    liquido: number | null;
+    horasExtras: number;
+    montoHorasExtras: number | null;
+    registros: number;
+  }>;
 }
 
 export interface AnomaliaIntegridadMunicipal {

@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
 import Icono from "@/components/ui/Icono";
+import remunerationSourcesCatalog from "@/data/data-quality-sources.json";
 
 export const metadata: Metadata = {
   title: "Dashboard Público de Calidad de Datos — El Cambiómetro",
@@ -10,8 +11,18 @@ export const metadata: Metadata = {
   alternates: { canonical: "/datos/calidad" },
 };
 
+const COMPONENT_LABELS: Record<string, string> = {
+  asistencia: "Asistencia",
+  votaciones: "Votaciones",
+  datosAbiertos: "Datos abiertos",
+  gastos: "Gastos operacionales",
+};
+
 export default async function DataQualityPage() {
   const { sources, summary } = await getDataQualityDashboardData();
+  const remunerationAuditSources = remunerationSourcesCatalog.filter((source) =>
+    ["transparencia-activa", "camara", "senado", "personal-apoyo", "dipres"].includes(source.id),
+  );
 
   return (
     <div className="page-shell" style={{ minHeight: "100vh" }}>
@@ -110,9 +121,18 @@ export default async function DataQualityPage() {
               </h2>
             </div>
             <div style={{ fontSize: "0.8rem", color: "var(--text-muted)" }}>
-              Cifras calculadas dinámicamente desde el catálogo authoritative y Lake de datos.
+              Cifras calculadas desde el release validado y su catálogo de componentes.
             </div>
           </div>
+
+          {sources.some((source) => !source.reconciliation.comparisonEligible) && (
+            <div className="card" style={{ marginBottom: "1rem", padding: "0.9rem 1.1rem", borderColor: "var(--accent)" }} role="status">
+              <strong style={{ color: "var(--text-primary)" }}>Hay conteos pendientes de reconciliación</strong>
+              <p style={{ margin: "0.3rem 0 0", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.5 }}>
+                Algunas fuentes cambiaron de alcance entre el release productivo y la referencia histórica local. Sus porcentajes de publicación quedan como “No calculable” hasta separar núcleo, votaciones, gastos y demás componentes.
+              </p>
+            </div>
+          )}
 
           <div
             className="table-container"
@@ -132,7 +152,8 @@ export default async function DataQualityPage() {
                   <th style={{ padding: "0.9rem 1rem", fontWeight: 700, color: "var(--text-primary)", textAlign: "right" }}>Canónicos</th>
                   <th style={{ padding: "0.9rem 1rem", fontWeight: 700, color: "var(--text-primary)", textAlign: "right" }}>Históricos</th>
                   <th style={{ padding: "0.9rem 1rem", fontWeight: 700, color: "var(--text-primary)" }}>Período</th>
-                  <th style={{ padding: "0.9rem 1rem", fontWeight: 700, color: "var(--text-primary)" }}>Última Sinc.</th>
+                  <th style={{ padding: "0.9rem 1rem", fontWeight: 700, color: "var(--text-primary)" }}>Publicado / consultable / relacionado</th>
+                  <th style={{ padding: "0.9rem 1rem", fontWeight: 700, color: "var(--text-primary)" }}>Observaciones</th>
                 </tr>
               </thead>
               <tbody>
@@ -191,8 +212,51 @@ export default async function DataQualityPage() {
                     <td style={{ padding: "0.9rem 1rem", whiteSpace: "nowrap", color: "var(--text-primary)", fontWeight: 500 }}>
                       {source.periodoReciente}
                     </td>
-                    <td style={{ padding: "0.9rem 1rem", whiteSpace: "nowrap", fontSize: "0.78rem", color: "var(--text-muted)" }}>
-                      {source.lastSyncFormatted}
+                    <td style={{ padding: "0.9rem 1rem", minWidth: 220, fontSize: "0.76rem", color: "var(--text-muted)" }}>
+                      <div>Publicado: <strong style={{ color: "var(--text-primary)" }}>{source.metrics.published.label}</strong></div>
+                      <div>Consultable: <strong style={{ color: "var(--text-primary)" }}>{source.metrics.queryable.label}</strong></div>
+                      <div>Relacionado: <strong style={{ color: "var(--text-primary)" }}>{source.metrics.related.label}</strong></div>
+                      <div style={{ marginTop: "0.25rem", fontSize: "0.68rem" }}>Última sinc.: {source.lastSyncFormatted}</div>
+                    </td>
+                    <td style={{ padding: "0.9rem 1rem", minWidth: 150, fontSize: "0.76rem", color: "var(--text-muted)" }}>
+                      {source.quality.observedCount > 0 || source.quality.correctedCount > 0
+                        ? `${source.quality.observedCount.toLocaleString("es-CL")} observados · ${source.quality.correctedCount.toLocaleString("es-CL")} con corrección de formato`
+                        : source.qualityAudit
+                          ? `Sin observaciones ligadas al release actual. Auditoría ${source.qualityAudit.snapshotDate}: ${source.qualityAudit.snapshotRecords.toLocaleString("es-CL")} registros.`
+                          : "Sin observaciones publicadas en este corte"}
+                      {source.qualityAudit && (
+                        <details style={{ marginTop: "0.35rem" }}>
+                          <summary style={{ cursor: "pointer", color: "var(--accent)" }}>Ver reglas auditadas</summary>
+                          <ul style={{ margin: "0.35rem 0 0", paddingLeft: "1rem", lineHeight: 1.45 }}>
+                            {source.qualityAudit.observations.map((observation) => (
+                              <li key={observation.label}>
+                                {observation.label}: {observation.count.toLocaleString("es-CL")} ({observation.percent.toLocaleString("es-CL")}%) · {observation.action}
+                              </li>
+                            ))}
+                          </ul>
+                          <p style={{ margin: "0.35rem 0 0", fontSize: "0.68rem" }}>{source.qualityAudit.note}</p>
+                        </details>
+                      )}
+                      {!source.reconciliation.comparisonEligible && (
+                        <p style={{ margin: "0.45rem 0 0", color: "var(--accent)", lineHeight: 1.45 }}>
+                          <strong>Conteo pendiente:</strong> {source.reconciliation.note}
+                        </p>
+                      )}
+                      {source.reconciliation.components && Object.keys(source.reconciliation.components).length > 0 && (
+                        <details style={{ marginTop: "0.45rem" }}>
+                          <summary style={{ cursor: "pointer", color: "var(--accent)" }}>Ver desglose del release</summary>
+                          <ul style={{ margin: "0.35rem 0 0", paddingLeft: "1rem", lineHeight: 1.45 }}>
+                            {Object.entries(source.reconciliation.components).map(([key, count]) => (
+                              <li key={key}>
+                                {COMPONENT_LABELS[key] ?? key}: {count.toLocaleString("es-CL")}
+                              </li>
+                            ))}
+                          </ul>
+                          <p style={{ margin: "0.35rem 0 0", fontSize: "0.68rem" }}>
+                            Los componentes tienen alcance propio y no se suman automáticamente al total de la fuente.
+                          </p>
+                        </details>
+                      )}
                     </td>
                   </tr>
                 ))}
@@ -200,10 +264,50 @@ export default async function DataQualityPage() {
             </table>
           </div>
 
+          <div className="card" style={{ marginTop: "1rem", padding: "1rem 1.25rem" }}>
+            <strong style={{ color: "var(--text-primary)" }}>Lectura de las métricas</strong>
+            <p style={{ margin: "0.35rem 0 0", color: "var(--text-muted)", fontSize: "0.8rem", lineHeight: 1.55 }}>
+              “Publicado” compara el release canónico con el histórico; “Consultable” sólo cuenta módulos o índices con paginación comprobada; “Relacionado” exige un vínculo documental indexado. Cuando no hay evidencia suficiente se muestra “No calculable”, no un porcentaje estimado.
+            </p>
+          </div>
+
           <div style={{ marginTop: "0.75rem", padding: "0.75rem 1rem", background: "var(--bg-surface-2)", borderRadius: 8, border: "1px solid var(--border-subtle)" }}>
             <p style={{ fontSize: "0.75rem", color: "var(--text-muted)", margin: 0, lineHeight: 1.4 }}>
               ℹ️ <strong>Nota de cobertura histórica:</strong> El total incluye registros históricos de actividad parlamentaria no atribuidos a fuente individual en el catálogo.
             </p>
+          </div>
+        </section>
+
+        <section aria-labelledby="remuneraciones-audit-title">
+          <div className="section-heading" style={{ marginBottom: "1.25rem" }}>
+            <div>
+              <p className="eyebrow">Auditoría de remuneraciones</p>
+              <h2 id="remuneraciones-audit-title" style={{ fontSize: "1.35rem", margin: "0.25rem 0 0" }}>
+                Qué contiene cada fuente y qué puede mostrar el sitio
+              </h2>
+            </div>
+            <a className="data-link" href="/remuneraciones-publicas">Abrir búsqueda unificada →</a>
+          </div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(230px, 1fr))", gap: "0.8rem" }}>
+            {remunerationAuditSources.map((source) => (
+              <article key={source.id} className="card" style={{ padding: "1rem" }}>
+                <div style={{ display: "flex", justifyContent: "space-between", gap: "0.5rem", alignItems: "flex-start" }}>
+                  <strong>{source.label}</strong>
+                  <span className={`badge ${source.confidenceLevel === "derived" ? "badge-info" : "badge-ok"}`} style={{ fontSize: "0.64rem" }}>
+                    {source.confidenceLevel === "derived" ? "Derivada" : "Oficial"}
+                  </span>
+                </div>
+                <p style={{ margin: "0.45rem 0 0", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.45 }}>{source.coverageNote}</p>
+                <dl style={{ display: "grid", gridTemplateColumns: "1fr auto", gap: "0.25rem 0.75rem", margin: "0.75rem 0 0", fontSize: "0.74rem" }}>
+                  <dt>Publicado</dt><dd style={{ margin: 0, fontWeight: 700 }}>{source.canonicalCount?.toLocaleString("es-CL") ?? "No calculable"}</dd>
+                  <dt>Consultable</dt><dd style={{ margin: 0, fontWeight: 700 }}>{source.queryableCount?.toLocaleString("es-CL") ?? "No calculable"}</dd>
+                  <dt>Período</dt><dd style={{ margin: 0, fontWeight: 700 }}>{source.period}</dd>
+                </dl>
+                <p style={{ margin: "0.7rem 0 0", color: "var(--text-subtle)", fontSize: "0.7rem", lineHeight: 1.4 }}>
+                  El índice unificado no convierte una fuente agregada en fichas personales y no reemplaza montos ausentes.
+                </p>
+              </article>
+            ))}
           </div>
         </section>
 
@@ -275,10 +379,10 @@ export default async function DataQualityPage() {
             </p>
           </div>
           <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap" }}>
-            <Link className="btn btn-secondary" href="/fuentes" style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}>
+            <Link prefetch={false} className="btn btn-secondary" href="/fuentes" style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}>
               Ver catálogo de fuentes →
             </Link>
-            <Link className="btn btn-secondary" href="/datos" style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}>
+            <Link prefetch={false} className="btn btn-secondary" href="/datos" style={{ fontSize: "0.85rem", padding: "0.5rem 1rem" }}>
               Monitor de salud de ETLs →
             </Link>
           </div>

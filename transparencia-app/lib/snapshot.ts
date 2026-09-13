@@ -15,6 +15,15 @@ let cached: Snapshot | null = null;
  */
 export function leerSnapshot(): Snapshot {
   if (!cached) {
+    // A UI-only/Pages build must be reproducible from the published release.
+    // data/etl/latest.json is intentionally ignored by Git and may contain a
+    // newer or broader local ETL snapshot than the R2 release used by Pages.
+    // Keep that snapshot available for ETL/local diagnostics, but never let it
+    // silently change a published-data build.
+    if (process.env.CAMBIOMETRO_PUBLISHED_RELEASE_ONLY === "1") {
+      cached = { fuentes: {} };
+      return cached;
+    }
     const file = path.join(process.cwd(), "data", "etl", "latest.json");
     try {
       cached = fs.existsSync(file)

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
 import { resolve } from "node:path";
 import { canonicalizeLakeRecord, entityFromRosterMember, relationsFromLakeRecord, selectMaterializedPartitions, sourceStateChecksum } from "../scripts/etl/materialize.mjs";
@@ -43,6 +43,26 @@ describe("materializacion del lake a D1", () => {
     expect(script).not.toMatch(/`BEGIN;|\nBEGIN;|\nCOMMIT;/);
   });
 
+  it("usa la configuracion del Worker para operaciones D1 y R2 remotas", () => {
+    const script = readFileSync(resolve("scripts/materialize-d1.mjs"), "utf8");
+    expect(script).toContain('const wranglerConfig = resolve("workers/public-api/wrangler.jsonc")');
+    expect(script).toContain('[wranglerBin, "--config", config, ...args]');
+  });
+
+  it("usa una configuracion ubicada junto a migrations para aplicar D1", () => {
+    const script = readFileSync(resolve("scripts/materialize-d1.mjs"), "utf8");
+    const config = readFileSync(resolve("wrangler.d1.jsonc"), "utf8");
+    expect(script).toContain('const wranglerMigrationConfig = resolve("wrangler.d1.jsonc")');
+    expect(script).toContain('function wranglerMigrations(args, allowFailure = false)');
+    expect(script).toContain('wrangler(["d1", "migrations", ...args], allowFailure, wranglerMigrationConfig)');
+    expect(config).toContain('"database_name": "transparencia-db"');
+  });
+
+  it("mantiene la proyeccion de transferencias fuera de la D1 compartida", () => {
+    expect(existsSync(resolve("migrations/0014_transferencias_19862.sql"))).toBe(false);
+    expect(existsSync(resolve("migrations-transferencias/0001_transferencias_19862.sql"))).toBe(true);
+  });
+
   it("limpia staging si una importación falla antes de activar la fuente", () => {
     const script = readFileSync(resolve("scripts/materialize-d1.mjs"), "utf8");
     expect(script).toContain("DELETE FROM stage_entities WHERE run_id=${sql(runId)}");
@@ -57,6 +77,20 @@ describe("materializacion del lake a D1", () => {
     expect(script).toContain("source_id IS NULL LIMIT 10000");
     expect(script).toContain("DELETE FROM relations WHERE source_id=");
     expect(script).not.toContain("SELECT 'rel-' || stage_records.id");
+  });
+
+  it("evita escanear relaciones legacy en una materializacion acotada por fuente", () => {
+    const script = readFileSync(resolve("scripts/materialize-d1.mjs"), "utf8");
+    expect(script).toContain("if (requestedSourceIds.size === 0) clearLegacyRelations();");
+  });
+
+  it("evalua checksums antes de aplicar migrations en ejecuciones incrementales", () => {
+    const script = readFileSync(resolve("scripts/materialize-d1.mjs"), "utf8");
+    const checksumCheck = script.indexOf("const previousStates = new Map");
+    const migrationCall = script.indexOf("ensureMigrations();", checksumCheck);
+
+    expect(checksumCheck).toBeGreaterThan(-1);
+    expect(migrationCall).toBeGreaterThan(checksumCheck);
   });
 
   it("publica las entidades descubiertas dentro de los registros antes de activar la fuente", () => {

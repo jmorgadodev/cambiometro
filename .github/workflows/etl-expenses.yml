@@ -1,0 +1,133 @@
+name: ETL Mensual - Gastos Operacionales Senado
+
+on:
+  schedule:
+    - cron: "30 8 2 * *" # segundo día del mes, después de la publicación oficial
+  workflow_dispatch:
+    inputs:
+      full_history:
+        description: Reconstruir todos los meses publicados (sólo backfill o bootstrap)
+        required: false
+        type: boolean
+        default: false
+
+concurrency:
+  group: cambiometro-static-publication
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+
+jobs:
+  ingest-publish-materialize:
+    name: Gastos operacionales del Senado; Cámara se ejecuta localmente
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Instalar dependencias
+        run: npm ci
+        working-directory: transparencia-app
+
+      - name: Exigir credenciales de datos
+        shell: bash
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_DATA_API_TOKEN"
+
+      - name: Recuperar catálogo vigente
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          mkdir -p data/lake/catalog/v1
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+
+      - name: Recuperar los subconjuntos vigentes antes de actualizar Senado
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: node scripts/etl-expenses-local.mjs --hydrate-only --force
+
+      - name: Preparar workspace ETL
+        working-directory: transparencia-app
+        run: npm run etl:prepare
+
+      - name: Ingerir gastos oficiales de Senado de forma incremental
+        working-directory: transparencia-app
+        shell: bash
+        run: |
+          full_history=""
+          if [[ "${{ inputs.full_history }}" == "true" ]]; then full_history="--full-history"; fi
+          npm run etl -- --from "$(date -u -d '60 days ago' +%F)" --to "$(date -u +%F)" --source gastos_senado $full_history
+
+      - name: Construir y publicar lake
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          npm run data:lake -- --exclude-source infolobby,infoprobidad
+          npm run data:publish
+
+      - name: Preflight de cuota D1 antes de materializar
+        id: d1-quota
+        uses: ./.github/actions/d1-preflight
+        with:
+          threshold-percent: "60"
+          output: transparencia-app/d1-preflight.json
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+
+      - name: Materializar gastos en D1 productiva
+        if: github.event_name == 'workflow_dispatch' && steps.d1-quota.outputs.proceed == 'true'
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          ETL_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}-expenses
+        run: npm run data:materialize:optional -- --database transparencia-db --remote --skip-unchanged --sources gastos_senado
+
+      - name: Registrar D1 pospuesto por cuota
+        if: steps.d1-quota.outputs.proceed != 'true'
+        run: echo "::warning::D1 de gastos pospuesto por cuota alta o métrica ilegible; R2/Pages conserva el release canónico."
+
+      - name: Conservar diagnóstico de preflight D1
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d1-preflight-expenses-${{ github.run_id }}
+          path: transparencia-app/d1-preflight.json
+          if-no-files-found: warn
+          retention-days: 31
+
+      - name: Generar subsets estáticos completos
+        working-directory: transparencia-app
+        run: npm run data:build:subsets
+
+      - name: Verificar release de gastos antes de publicarlo
+        working-directory: transparencia-app
+        run: node scripts/verify-expense-release.mjs --required
+
+      - name: Publicar gastos como entradas autorizadas de Pages
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:publish:static -- --groups gastos

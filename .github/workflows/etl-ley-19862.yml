@@ -5,6 +5,11 @@ on:
     - cron: "0 9 8 * *" # Día 8 de cada mes, 05:00 CLT
   workflow_dispatch:
     inputs:
+      full_backfill:
+        description: Reprocesar todas las particiones 2026 desde el origen oficial
+        required: false
+        type: boolean
+        default: false
       year:
         description: Año a procesar (ej. 2026)
         required: false
@@ -13,8 +18,8 @@ on:
         required: false
 
 concurrency:
-  group: etl-ley-19862
-  cancel-in-progress: true
+  group: cambiometro-static-publication
+  cancel-in-progress: false
 
 jobs:
   ingest-publish-materialize:
@@ -51,36 +56,199 @@ jobs:
 
       - name: Preparar workspace ETL sin datasets versionados
         working-directory: transparencia-app
-        run: npm run etl:prepare
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run etl:prepare -- --download-projections --sources ley-19862
+
+      - name: Publicar bridge privado para el origen oficial
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+        run: |
+          set -euo pipefail
+          bridge_token="$(openssl rand -hex 32)"
+          printf '%s' "$bridge_token" | npx wrangler secret put SOURCE_BRIDGE_TOKEN \
+            --config workers/ley19862-source-bridge/wrangler.jsonc \
+            --name cambiometro-ley19862-source
+          bridge_output="$(npx wrangler deploy \
+            --config workers/ley19862-source-bridge/wrangler.jsonc \
+            --message "Official source bridge ${GITHUB_SHA}" 2>&1 | tee /tmp/ley19862-source-bridge.log)"
+          bridge_url="$(printf '%s\n' "$bridge_output" | grep -Eo 'https://[^[:space:]]+\.workers\.dev' | tail -n 1 | sed 's/[[:punct:]]*$//' || true)"
+          test -n "$bridge_url"
+          echo "::add-mask::$bridge_token"
+          echo "LEY_19862_SOURCE_BRIDGE_URL=$bridge_url" >> "$GITHUB_ENV"
+          echo "LEY_19862_SOURCE_BRIDGE_TOKEN=$bridge_token" >> "$GITHUB_ENV"
+          echo "Bridge URL: $bridge_url"
+          bridge_health="$(curl --fail --silent --show-error --location --max-time 10 "$bridge_url/health")"
+          echo "Bridge health: $bridge_health"
+          probe_file="$(mktemp)"
+          trap 'rm -f "$probe_file"' EXIT
+          if curl --fail --silent --show-error --location \
+            --connect-timeout 10 --max-time 45 \
+            --header "X-Source-Bridge-Token: $bridge_token" \
+            "$bridge_url/fetch?year=2026&month=1" --output "$probe_file"; then
+            probe_bytes="$(stat -c '%s' "$probe_file")"
+            if [ "$probe_bytes" -gt 1000 ]; then
+              echo "Official source bridge probe bytes: $probe_bytes"
+            else
+              echo "::warning::El bridge oficial devolvió un payload demasiado pequeño; se usará directamente registros19862.gob.cl."
+              unset LEY_19862_SOURCE_BRIDGE_URL
+              unset LEY_19862_SOURCE_BRIDGE_TOKEN
+              echo "LEY_19862_SOURCE_BRIDGE_URL=" >> "$GITHUB_ENV"
+              echo "LEY_19862_SOURCE_BRIDGE_TOKEN=" >> "$GITHUB_ENV"
+            fi
+          else
+            echo "::warning::El bridge oficial no pasó la prueba autenticada; se usará directamente registros19862.gob.cl y el ETL fallará si esa fuente también está bloqueada."
+            unset LEY_19862_SOURCE_BRIDGE_URL
+            unset LEY_19862_SOURCE_BRIDGE_TOKEN
+            echo "LEY_19862_SOURCE_BRIDGE_URL=" >> "$GITHUB_ENV"
+            echo "LEY_19862_SOURCE_BRIDGE_TOKEN=" >> "$GITHUB_ENV"
+          fi
+
+      - name: Hidratar particiones históricas de transferencias desde R2
+        if: ${{ inputs.full_backfill != true }}
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:hydrate:ley19862
 
       - name: Ingerir y proyectar Transferencias Ley 19.862
         working-directory: transparencia-app
         env:
           INPUT_YEAR: ${{ inputs.year }}
           INPUT_MONTH: ${{ inputs.month }}
+          FULL_BACKFILL: ${{ inputs.full_backfill }}
           GH_TOKEN: ${{ github.token }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          LEY_19862_TIMEOUT_MS: 120000
+          LEY_19862_MAX_ATTEMPTS: 8
+          LEY_19862_RETRY_DELAY_MS: 3000
         run: |
-          period=$(date -u -d '1 month ago' +%Y-%m)
-          target_year="${INPUT_YEAR:-${period%-*}}"
-          target_month="${INPUT_MONTH:-$((10#${period#*-}))}"
-          npm run ingest:ley-19862 -- --year "$target_year" --month "$target_month"
-          npm run data:publish
+          if [[ -n "${LEY_19862_SOURCE_BRIDGE_URL:-}" ]]; then
+            export LEY_19862_TIMEOUT_MS=30000
+            export LEY_19862_MAX_ATTEMPTS=2
+            export LEY_19862_RETRY_DELAY_MS=1000
+          fi
+          if [[ "$FULL_BACKFILL" == "true" ]]; then
+            target_year="${INPUT_YEAR:-$(date -u +%Y)}"
+            last_month=12
+            if [[ "$target_year" == "$(date -u +%Y)" ]]; then
+              last_month="$(date -u +%m)"
+            fi
+            for target_month in $(seq 1 "$last_month"); do
+              if [[ "$target_month" == "1" ]]; then
+                export LEY_19862_REPLACE_CATALOG=true
+              else
+                unset LEY_19862_REPLACE_CATALOG
+              fi
+              npm run ingest:ley-19862 -- --year "$target_year" --month "$target_month"
+              # Cada ingest publica sólo su partición para que el siguiente
+              # ciclo pueda continuar aunque el origen falle transitoriamente.
+              # La guardia del universo completo corre una sola vez al final.
+              npm run data:publish
+            done
+            npm run data:lake:projection:ley19862
+            npm run data:build:subsets
+            npm run data:lake
+            npm run data:publish
+          else
+            period=$(date -u -d '1 month ago' +%Y-%m)
+            target_year="${INPUT_YEAR:-${period%-*}}"
+            target_month="${INPUT_MONTH:-$((10#${period#*-}))}"
+            npm run ingest:ley-19862 -- --year "$target_year" --month "$target_month"
+            npm run data:lake:projection:ley19862
+            npm run data:build:subsets
+            npm run data:lake
+            npm run data:publish
+          fi
 
-      - name: Refrescar catálogo maestro antes de materializar
+      - name: Publicar entradas estáticas versionadas para Pages
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
-        run: |
-          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
+        run: npm run data:publish:static -- --groups ley19862
 
-      - name: Materializar D1 y registrar ejecución
+      - name: Publicar release completo para Pages y Worker
         working-directory: transparencia-app
         env:
-          GH_TOKEN: ${{ github.token }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
-          ETL_RUN_ID: ${{ github.run_id }}-${{ github.run_attempt }}
-        run: npm run data:materialize -- --database transparencia-db --remote --sources ley-19862
+        run: npm run data:publish:transfer-api
+
+      - name: Preflight de cuota D1 antes de materializar
+        id: d1-quota
+        uses: ./.github/actions/d1-preflight
+        with:
+          threshold-percent: "60"
+          output: transparencia-app/d1-preflight.json
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+
+      - name: Resolver D1 dedicada de transferencias
+        id: transfer-d1-config
+        if: github.event_name == 'workflow_dispatch' && steps.d1-quota.outputs.proceed == 'true'
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_DATA_API_TOKEN"
+          config="$RUNNER_TEMP/cambiometro-transfer-d1.jsonc"
+          node scripts/ensure-transfer-d1.mjs --create --output "$config"
+          echo "config=$config" >> "$GITHUB_OUTPUT"
+          echo "database=cambiometro-transferencias" >> "$GITHUB_OUTPUT"
+
+      - name: Materializar proyección D1 cuando haya capacidad
+        id: materialize-transfer-d1
+        if: github.event_name == 'workflow_dispatch' && steps.d1-quota.outputs.proceed == 'true'
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          TRANSFER_D1_CONFIG: ${{ steps.transfer-d1-config.outputs.config }}
+          TRANSFER_D1_DATABASE: ${{ steps.transfer-d1-config.outputs.database }}
+        shell: bash
+        run: |
+          set +e
+          log_file="$GITHUB_WORKSPACE/transparencia-app/transfer-d1-materialization.log"
+          npm run data:materialize:transfer -- --database "$TRANSFER_D1_DATABASE" --config "$TRANSFER_D1_CONFIG" --batch-size 50 --skip-unchanged >"$log_file" 2>&1
+          status=$?
+          cat "$log_file"
+          if [ "$status" -eq 0 ]; then
+            echo "D1 transfer projection materialized successfully." >> "$GITHUB_STEP_SUMMARY"
+            echo "status=materialized" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          if grep -Eq 'Exceeded maximum DB size|code: 7500' "$log_file"; then
+            echo "::warning::D1 no tiene capacidad para duplicar el release completo; R2 permanece como fuente canónica y la API usará su fallback validado."
+            {
+              echo "### Transferencias: D1 opcional"
+              echo "- Estado: skipped_r2_canonical"
+              echo "- Motivo: límite de tamaño D1 (Cloudflare code 7500)"
+              echo "- Fuente canónica: release completo validado en R2"
+            } >> "$GITHUB_STEP_SUMMARY"
+            echo "status=skipped_r2_canonical" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+          echo "Materialización D1 falló por un motivo no permitido; se aborta el ETL." >&2
+          exit "$status"
+
+      - name: Registrar diagnóstico de materialización D1
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: transfer-d1-materialization-${{ github.run_id }}
+          path: transparencia-app/transfer-d1-materialization.log
+          if-no-files-found: ignore
+          retention-days: 30
+
+      - name: Registrar D1 de transferencias pospuesto por cuota
+        if: steps.d1-quota.outputs.proceed != 'true'
+        run: echo "::warning::D1 de transferencias pospuesto por cuota alta o métrica ilegible; R2 permanece como fuente canónica."

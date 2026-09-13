@@ -4,11 +4,6 @@ import path from 'path';
 import { FuncionarioPublico } from './funcionarios';
 
 
-// URL base de GitHub Releases para los datos de CPLT
-// El tag se actualiza mensualmente por el workflow etl.yml
-const CPLT_RELEASES_BASE = 'https://github.com/jmorgadodev/transparencia.impulsacv.cl/releases/latest/download';
-const FUNCIONARIOS_REMOTE_URL = `${CPLT_RELEASES_BASE}/funcionarios_nacional.json`;
-
 // Caché en memoria para no repetir la descarga en cada request
 let globalFuncionariosCache: FuncionarioPublico[] | null = null;
 
@@ -17,7 +12,8 @@ import { getFallbackFuncionarios } from './funcionarios-fallback';
 /**
  * Carga todos los funcionarios.
  * - En desarrollo local: lee de data/raw/transparencia_activa/ si existe.
- * - En producción (Cloudflare/Vercel): usa getFallbackFuncionarios() o descarga desde GitHub Releases.
+ * - En producción (Cloudflare/Vercel): usa únicamente la proyección oficial
+ *   embebida/fallback del maestro; nunca consulta repositorios históricos.
  * Utiliza caché en memoria para ser instantáneo tras la primera carga.
  */
 export function getGlobalFuncionarios(): FuncionarioPublico[] {
@@ -67,61 +63,17 @@ export function getGlobalFuncionarios(): FuncionarioPublico[] {
   return globalFuncionariosCache;
 }
 
-// Categorías extraídas individualmente por el ETL
-const CATEGORIES = ['planta', 'contrata', 'honorarios', 'codigotrabajo'];
-
 /**
- * Versión async que descarga desde GitHub Releases si no hay datos locales.
- * Usar en API Routes de Next.js (app/api/*).
+ * Versión async para API Routes de Next.js (app/api/*).
+ * La superficie pública no hace descargas externas ni usa el repositorio
+ * histórico: los datos masivos deben llegar por las proyecciones publicadas.
  */
 export async function getGlobalFuncionariosAsync(): Promise<FuncionarioPublico[]> {
   if (globalFuncionariosCache && globalFuncionariosCache.length > 0) {
     return globalFuncionariosCache;
   }
 
-  // Intentar local primero
-  const local = getGlobalFuncionarios();
-  if (local.length > 0) return local;
-
-  // Descargar desde GitHub Releases en paralelo
-  try {
-    const fetchPromises = CATEGORIES.map(cat => {
-      const url = `${CPLT_RELEASES_BASE}/funcionarios_${cat}.json`;
-      console.log(`[API] Descargando ${url}...`);
-      return fetch(url, {
-        headers: { 'Accept': 'application/json' },
-        next: { revalidate: 3600 }
-      }).then(async r => {
-        if (!r.ok) {
-          console.warn(`[WARN] Categoría remota ${cat} no disponible (${r.status})`);
-          return [];
-        }
-        return r.json() as Promise<FuncionarioPublico[]>;
-      }).catch(e => {
-        console.warn(`[WARN] Falló descarga de ${cat}:`, e);
-        return [];
-      });
-    });
-
-    const results = await Promise.all(fetchPromises);
-    const mapDeduplicado = new Map<string, FuncionarioPublico>();
-    
-    for (const arr of results) {
-      for (const f of arr) {
-        const key = `${f.nombre_completo}|${f.organo_nombre}|${f.tipo_contrato}`;
-        mapDeduplicado.set(key, f);
-      }
-    }
-    
-    const all = Array.from(mapDeduplicado.values());
-    all.sort((a, b) => b.remuneracion_bruta_mensual - a.remuneracion_bruta_mensual);
-    globalFuncionariosCache = all;
-    console.log(`[API] Caché global construida (GitHub Releases paralelos): ${all.length} funcionarios.`);
-    return all;
-  } catch (error) {
-    console.error('[ERROR] No se pudo descargar desde GitHub Releases:', error);
-    return [];
-  }
+  return getGlobalFuncionarios();
 }
 
 export interface PaginatedResponse {

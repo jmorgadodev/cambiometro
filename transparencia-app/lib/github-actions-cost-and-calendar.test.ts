@@ -10,18 +10,34 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
 
   const workflowFiles = fs.readdirSync(workflowsDir).filter((f) => f.endsWith(".yml") || f.endsWith(".yaml"));
 
-  it("1. TODOS los workflows tienen concurrency con cancel-in-progress: true", () => {
+  it("1. TODOS los workflows tienen concurrency y serializan las publicaciones estáticas", () => {
     expect(workflowFiles.length).toBeGreaterThanOrEqual(10);
+
+    const staticPublishers = new Set([
+      "etl-chilecompra.yml", "etl-contraloria.yml", "etl-cplt.yml", "etl-daily.yml", "etl-camara-votaciones.yml", "etl-senado-votaciones.yml",
+      "etl-dipres.yml", "etl-expenses.yml", "etl-infolobby-scheduled.yml", "etl-infoprobidad.yml",
+      "etl-ley-19862.yml", "etl-movimientos.yml", "etl-personal-apoyo.yml", "etl-personal-apoyo-senado.yml", "etl-servel.yml",
+      "etl-sinim.yml",
+    ]);
+    const serializedMutations = new Set(["repair-transfer-d1.yml"]);
 
     for (const file of workflowFiles) {
       const content = fs.readFileSync(path.join(workflowsDir, file), "utf8");
       expect(content, `El workflow ${file} debe tener bloque concurrency`).toContain("concurrency:");
-      expect(content, `El workflow ${file} debe tener cancel-in-progress: true`).toMatch(/cancel-in-progress:\s*true/);
+      if (staticPublishers.has(file)) {
+        expect(content, `El workflow ${file} debe compartir la cola de publicación estática`).toMatch(/group:\s*cambiometro-static-publication/);
+        expect(content, `El workflow ${file} no debe cancelar otra publicación estática`).toMatch(/cancel-in-progress:\s*false/);
+      } else if (serializedMutations.has(file)) {
+        expect(content, `El workflow ${file} debe usar una cola propia`).toMatch(/group:\s*cambiometro-transfer-d1-repair/);
+        expect(content, `El workflow ${file} no debe cancelar una reparación D1 activa`).toMatch(/cancel-in-progress:\s*false/);
+      } else {
+        expect(content, `El workflow ${file} debe conservar cancel-in-progress: true`).toMatch(/cancel-in-progress:\s*true/);
+      }
     }
   });
 
-  it("2. Workflows disparados por push / pull_request tienen paths-ignore para *.md, docs y auditorias", () => {
-    const triggerWorkflows = ["quality.yml", "build-e2e.yml", "codeql.yml"];
+  it("2. Workflows disparados por push / pull_request validan también la documentación", () => {
+    const triggerWorkflows = ["quality.yml", "build-e2e.yml", "codeql.yml", "security.yml"];
 
     for (const file of triggerWorkflows) {
       const filePath = path.join(workflowsDir, file);
@@ -29,36 +45,45 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
 
       const content = fs.readFileSync(filePath, "utf8");
       expect(content, `${file} debe contener paths-ignore`).toContain("paths-ignore:");
-      expect(content, `${file} debe ignorar archivos .md`).toContain("**/*.md");
-      expect(content, `${file} debe ignorar docs/`).toContain("docs/**");
+      expect(content, `${file} no debe ignorar archivos .md`).not.toContain("**/*.md");
+      expect(content, `${file} no debe ignorar docs/`).not.toContain("docs/**");
       expect(content, `${file} debe ignorar auditoria_integridad_datos/`).toContain("auditoria_integridad_datos/**");
     }
   });
 
-  it("3. CERO pasos de deploy en workflows de cron / ETL (Deploy SIEMPRE es local)", () => {
+  it("3. Los ETL no despliegan Pages ni el Worker público; el bridge interno es la única excepción", () => {
     for (const file of workflowFiles) {
       const content = fs.readFileSync(path.join(workflowsDir, file), "utf8");
       const hasSchedule = content.includes("schedule:") || content.includes("cron:");
 
       if (hasSchedule) {
-        // Ningún workflow programado puede contener comandos de despliegue
-        expect(content, `El workflow programado ${file} NO debe contener comandos de deploy`).not.toMatch(/wrangler(?:\s+pages)?\s+deploy/i);
+        const isLeySourceBridge = file === "etl-ley-19862.yml"
+          && content.includes("workers/ley19862-source-bridge/wrangler.jsonc")
+          && content.includes("--name cambiometro-ley19862-source");
+        const deployCommands = content.match(/wrangler(?:\s+pages)?\s+deploy/gi) ?? [];
+        if (isLeySourceBridge) expect(deployCommands).toHaveLength(1);
+        else expect(content, `El workflow programado ${file} NO debe contener comandos de deploy`).not.toMatch(/wrangler(?:\s+pages)?\s+deploy/i);
         expect(content, `El workflow programado ${file} NO debe invocar npm run deploy`).not.toMatch(/npm\s+run\s+deploy/i);
       }
     }
   });
 
-  it("4. Calendario ETL: Los 10 procesos oficiales tienen sus crons exactos en YAML", () => {
+  it("4. Calendario ETL: los procesos automáticos tienen su contrato exacto", () => {
     const cronMap: Record<string, string | null> = {
       "etl-daily.yml": "0 7 * * *",
+      "etl-camara-votaciones.yml": "15 7 * * *",
+      "etl-senado-votaciones.yml": "30 7 * * *",
+      "etl-personal-apoyo.yml": "0 7 * * 1",
+      "etl-personal-apoyo-senado.yml": "30 7 * * 1",
       "etl-chilecompra.yml": "0 8 * * 1",
-      "etl-infolobby.yml": "30 8 * * 1",
+      "etl-infolobby-scheduled.yml": "30 8 * * 1",
       "etl-contraloria.yml": "0 9 2 * *",
       "etl-cplt.yml": "0 9 5 * *",
       "etl-ley-19862.yml": "0 9 8 * *",
       "etl-infoprobidad.yml": "0 9 10 * *",
       "etl-dipres.yml": "0 9 1 1,4,7,10 *",
       "etl-sinim.yml": "0 9 1 3,9 *",
+      "etl-expenses.yml": "30 8 2 * *",
       "etl-servel.yml": null, // workflow_dispatch (on-demand)
     };
 
@@ -110,13 +135,117 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(md).not.toContain("brief");
   });
 
-  it("7. usage-watch.yml existe y es estrictamente workflow_dispatch (cero minutos en crons)", () => {
+  it("7. vigilancia D1 horaria usa Analytics y runner estándar; billing sólo manual", () => {
     const watchPath = path.join(workflowsDir, "usage-watch.yml");
     expect(fs.existsSync(watchPath)).toBe(true);
     const content = fs.readFileSync(watchPath, "utf8");
 
     expect(content).toContain("workflow_dispatch:");
-    expect(content).not.toContain("schedule:");
+    expect(content).toContain('cron: "15 * * * *"');
+    expect(content).toContain("if: github.event_name == 'workflow_dispatch'");
+    expect(content).toContain("runs-on: ubuntu-latest");
+    expect(content).toContain("node scripts/check-d1-usage.mjs");
+    expect(content).toContain("D1_USAGE_FAIL_ON_CRITICAL");
+    expect(content).not.toMatch(/d1\s+execute|data:materialize|npm\s+run\s+etl/);
     expect(content).toContain("api.github.com/users/$OWNER/settings/billing/actions");
+  });
+
+  it("8. Ley 19.862 mantiene R2 canónico cuando D1 alcanza su límite", () => {
+    const content = fs.readFileSync(path.join(workflowsDir, "etl-ley-19862.yml"), "utf8");
+
+    expect(content).toContain("D1 opcional");
+    expect(content).toContain("Exceeded maximum DB size");
+    expect(content).toContain("code: 7500");
+    expect(content).toContain("R2 permanece como fuente canónica");
+    expect(content).toContain("se aborta el ETL");
+    expect(content).toContain("status=skipped_r2_canonical");
+    expect(content).toContain("transfer-d1-materialization-${{ github.run_id }}");
+  });
+
+  it("9. Las votaciones usan incremental diario y reservan el full para backfill", () => {
+    const workflow = fs.readFileSync(path.join(workflowsDir, "etl-daily.yml"), "utf8");
+    const ingest = fs.readFileSync(path.resolve(root, "scripts", "ingest-votaciones-full.mjs"), "utf8");
+
+    expect(workflow).toContain("name: ETL Diario - Cámara");
+    expect(workflow).toContain("--source camara");
+    expect(workflow).not.toContain("full_votaciones:");
+    const camaraVotesWorkflow = fs.readFileSync(path.join(workflowsDir, "etl-camara-votaciones.yml"), "utf8");
+    expect(camaraVotesWorkflow).toContain("name: ETL Diario - Votaciones Cámara");
+    expect(camaraVotesWorkflow).toContain("--source votaciones_camara");
+    expect(camaraVotesWorkflow).toContain("npm run ingest:votaciones-full -- --source camara --full");
+    const senateWorkflow = fs.readFileSync(path.join(workflowsDir, "etl-senado-votaciones.yml"), "utf8");
+    expect(senateWorkflow).toContain("name: ETL Diario - Votaciones Senado");
+    expect(senateWorkflow).toContain("npm run etl -- --from");
+    expect(senateWorkflow).toContain("--source votaciones_senado");
+    const etlPipeline = fs.readFileSync(path.resolve(root, "scripts", "etl.mjs"), "utf8");
+    expect(etlPipeline).toContain("fetchVotacionesSenado({ legislatura: 374, desde: options.from, to: options.to })");
+    expect(senateWorkflow).toContain("npm run ingest:votaciones-full -- --source senado --full");
+    expect(workflow).not.toContain("--source camara,votaciones_camara");
+    expect(ingest).toContain("const REFRESH_FROM");
+    expect(ingest).toContain("function cachedSession");
+    expect(ingest).toContain("if (cached && !shouldRefresh(vote.fecha)) return cached");
+  });
+
+  it("10. El ETL diario omite D1 cuando la cuota ya está elevada", () => {
+    const workflow = fs.readFileSync(path.join(workflowsDir, "etl-daily.yml"), "utf8");
+
+    expect(workflow).toContain("id: d1-quota");
+    expect(workflow).toContain("D1_USAGE_OUTPUT: d1-preflight.json");
+    expect(workflow).toContain("proceed=false");
+    expect(workflow).toContain("steps.d1-quota.outputs.proceed == 'true'");
+    expect(workflow).toContain("D1_THRESHOLD_PERCENT: 60");
+    expect(workflow).toContain("Math.max(report.readPercent ?? 100, report.writePercent ?? 100)");
+  });
+
+  it("11. Todo ETL que materializa D1 tiene el preflight fail-safe de cuota", () => {
+    const workflows = [
+      "etl-chilecompra.yml",
+      "etl-contraloria.yml",
+      "etl-dipres.yml",
+      "etl-expenses.yml",
+      "etl-infolobby-scheduled.yml",
+      "etl-infoprobidad.yml",
+      "etl-ley-19862.yml",
+      "etl-servel.yml",
+      "etl-sinim.yml",
+      "etl-cplt.yml",
+    ];
+
+    for (const name of workflows) {
+      const content = fs.readFileSync(path.join(workflowsDir, name), "utf8");
+      expect(content, name).toContain("uses: ./.github/actions/d1-preflight");
+      expect(content, name).toContain('threshold-percent: "60"');
+      const materializationGuard = name === "etl-infolobby-scheduled.yml"
+        ? "github.event_name == 'workflow_dispatch' && inputs.skip_d1 != true && steps.d1-quota.outputs.proceed == 'true'"
+        : "github.event_name == 'workflow_dispatch' && steps.d1-quota.outputs.proceed == 'true'";
+      expect(content, name).toContain(materializationGuard);
+      expect(content, name).toContain("steps.d1-quota.outputs.proceed == 'true'");
+    }
+    const infolobby = fs.readFileSync(path.join(workflowsDir, "etl-infolobby-scheduled.yml"), "utf8");
+    expect(infolobby).toContain("data:materialize:optional");
+    expect(infolobby).toContain("D1 pospuesto por asset no disponible");
+  });
+
+  it("12. Los ETL de personal separados publican R2 sin usar D1; CPLT conserva su fallback", () => {
+    const personal = fs.readFileSync(path.join(workflowsDir, "etl-personal-apoyo.yml"), "utf8");
+    const personalSenado = fs.readFileSync(path.join(workflowsDir, "etl-personal-apoyo-senado.yml"), "utf8");
+    const cplt = fs.readFileSync(path.join(workflowsDir, "etl-cplt.yml"), "utf8");
+    expect(personal).toContain("--source camara");
+    expect(personalSenado).toContain("--source senado");
+    expect(personal).toContain("--skip-d1");
+    expect(personalSenado).toContain("--skip-d1");
+    expect(personal).not.toMatch(/d1-preflight|data:materialize/);
+    expect(personalSenado).not.toMatch(/d1-preflight|data:materialize/);
+    expect(personal).toContain("Publicar personal de apoyo sólo en R2");
+    expect(cplt).toContain("data:finalize:cplt:r2");
+    expect(cplt).toContain("Registrar D1 CPLT pospuesto por cuota");
+  });
+
+  it("13. El preflight siempre deja un diagnóstico aunque Analytics D1 no responda", () => {
+    const action = fs.readFileSync(path.join(root, "..", ".github", "actions", "d1-preflight", "action.yml"), "utf8");
+
+    expect(action).toContain('if [[ ! -s "$D1_USAGE_OUTPUT" ]]');
+    expect(action).toContain("D1_ANALYTICS_UNAUTHORIZED_OR_UNAVAILABLE");
+    expect(action).toContain("D1_USAGE_OUTPUT");
   });
 });

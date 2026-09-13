@@ -1,18 +1,20 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { usePathname, useSearchParams } from "next/navigation";
+import { usePathname } from "next/navigation";
 
 import LoadingOrb from "@/components/LoadingOrb";
 
 export default function NavigationProgressBar() {
   const pathname = usePathname();
-  const searchParams = useSearchParams();
   const [active, setActive] = useState(false);
   const [progress, setProgress] = useState(0);
   const timeoutRef = useRef<number | null>(null);
   const prevRef = useRef<string>("");
 
-  const key = `${pathname}?${searchParams.toString()}`;
+  // Query-string changes are filter updates inside the current page, not a
+  // document navigation. Keeping this keyed to the pathname also avoids a
+  // static-export bailout through next/navigation's useSearchParams().
+  const key = pathname;
 
   useEffect(() => {
     if (prevRef.current && prevRef.current !== key) {

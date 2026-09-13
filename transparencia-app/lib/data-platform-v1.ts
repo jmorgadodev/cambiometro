@@ -386,6 +386,75 @@ try {
   if (infolobby && Array.isArray(infolobby.records)) {
     for (const raw of infolobby.records.slice(0, 250)) {
       const rawAny = raw as Record<string, unknown>;
+
+      // Current InfoLobby releases carry canonical entity ids. Prefer those
+      // ids over the legacy name-only fields so a valid public record is not
+      // silently dropped when the source schema evolves.
+      const sourceEntities = Array.isArray(rawAny.entities)
+        ? rawAny.entities as Array<Record<string, unknown>>
+        : [];
+      const subjectEntityIds = Array.isArray(rawAny.subject_entity_ids)
+        ? rawAny.subject_entity_ids.filter((value): value is string => typeof value === "string")
+        : [];
+      const objectEntityIds = Array.isArray(rawAny.object_entity_ids)
+        ? rawAny.object_entity_ids.filter((value): value is string => typeof value === "string")
+        : [];
+      if (raw.id && raw.fecha && typeof raw.url === "string" && subjectEntityIds.length > 0 && objectEntityIds.length > 0) {
+        for (const sourceEntity of sourceEntities) {
+          const entityId = typeof sourceEntity.id === "string" ? sourceEntity.id : null;
+          const entityName = typeof sourceEntity.name === "string" ? sourceEntity.name : null;
+          if (!entityId || !entityName || entities.has(entityId)) continue;
+          const sourceKind = sourceEntity.kind === "legal_entity" || sourceEntity.kind === "supplier"
+            ? sourceEntity.kind
+            : sourceEntity.kind === "public_body" || sourceEntity.kind === "municipality"
+              ? sourceEntity.kind
+              : "person";
+          const identifiers = Array.isArray(sourceEntity.identifiers)
+            ? sourceEntity.identifiers.filter((identifier): identifier is CanonicalEntity["identifiers"][number] => Boolean(identifier && typeof identifier === "object" && typeof (identifier as Record<string, unknown>).scheme === "string" && typeof (identifier as Record<string, unknown>).value === "string"))
+            : [];
+          entities.set(entityId, {
+            id: entityId,
+            kind: sourceKind,
+            name: entityName,
+            identifiers,
+            attributes: Object.fromEntries(Object.entries((sourceEntity.attributes ?? {}) as Record<string, unknown>).map(([key, value]) => [key, typeof value === "string" || typeof value === "number" || typeof value === "boolean" || value === null ? value : String(value)])),
+            sourceIds: ["infolobby"],
+            updatedAt,
+          });
+        }
+        const fromId = subjectEntityIds[0];
+        const toId = objectEntityIds[0];
+        if (!entities.has(fromId) || !entities.has(toId)) continue;
+        const recordId = `infolobby-aud-${compactId(raw.id)}`;
+        const description = typeof rawAny.descripcion === "string" ? rawAny.descripcion : null;
+        const title = `${rawAny.kind === "travel" ? "Viaje" : rawAny.kind === "gift" ? "Donativo" : "Audiencia"}: ${description || rawAny.materia || rawAny.objeto || "registro InfoLobby"}`;
+        records.push({
+          id: recordId,
+          kind: "lobby",
+          sourceId: "infolobby",
+          title,
+          description,
+          occurredAt: raw.fecha,
+          period: periodFromDate(raw.fecha),
+          subjectEntityIds: [fromId],
+          objectEntityIds: [toId],
+          amount: null,
+          evidence: { sourceUrl: raw.url, checksumSha256: null, retrievedAt: updatedAt, documentPage: null },
+          data: publicData(rawAny),
+        });
+        relations.push({
+          id: `relation-lobby-${compactId(raw.id)}`,
+          fromId,
+          predicate: "participated_in_lobby_meeting",
+          toId,
+          evidenceRecordIds: [recordId],
+          period: periodFromDate(raw.fecha),
+          reconciliation: { method: "official_id", confidence: 1 },
+          disclaimer: DISCLAIMER,
+        });
+        continue;
+      }
+
       const gestorName = rawAny.gestor_interes || rawAny.solicitante || rawAny.representante || rawAny.sujetos_activos;
       const sujetoName = rawAny.sujeto_pasivo || rawAny.autoridad || rawAny.nombre;
       const orgName = rawAny.organismo;

@@ -5,8 +5,61 @@ import { readR2EvidenceRecords } from "@/lib/r2-records";
 
 afterEach(() => vi.unstubAllGlobals());
 
-describe("archivo histórico en GitHub Releases", () => {
-  it("valida y recachea una partición fría ausente de R2", async () => {
+describe("archivo histórico en R2", () => {
+  it("pagina InfoLobby desde el índice de rangos sin inflar el archivo completo", async () => {
+    const records = [
+      { id: "infolobby-2", sourceId: "infolobby", kind: "lobby", occurredAt: "2026-07-02", evidence: { sourceUrl: "https://infolobby.test/2" }, data: { organismo: "Ministerio de Salud", sujeto_pasivo: "Ana Pérez" } },
+      { id: "infolobby-1", sourceId: "infolobby", kind: "lobby", occurredAt: "2026-07-01", evidence: { sourceUrl: "https://infolobby.test/1" }, data: { organismo: "Presidencia de la República", sujeto_pasivo: "Luis Soto" } },
+    ];
+    const archive = new TextEncoder().encode(records.map((record) => `${JSON.stringify(record)}\n`).join("")).buffer;
+    const firstLength = new TextEncoder().encode(`${JSON.stringify(records[0])}\n`).byteLength;
+    const objects = new Map<string, ArrayBuffer>([
+      ["indexes/v1/infolobby/manifest.json", new TextEncoder().encode(JSON.stringify({ schemaVersion: 1, sourceId: "infolobby", totalRows: 2, pageSize: 1, recordArchiveKey: "indexes/v1/infolobby/records.jsonl", searchIndexKey: "indexes/v1/infolobby/search.json", pages: [{ offset: 0, length: firstLength }, { offset: firstLength, length: archive.byteLength - firstLength }] })).buffer],
+      ["indexes/v1/infolobby/records.jsonl", archive],
+      ["indexes/v1/infolobby/search.json", new TextEncoder().encode(JSON.stringify({ presidencia: [1], ministerio: [0] })).buffer],
+    ]);
+    const bucket: Parameters<typeof readR2EvidenceRecords>[0] = {
+      async get(key, options) {
+        const value = objects.get(key);
+        if (!value) return null;
+        const bytes = new Uint8Array(value);
+        const range = options?.range;
+        const sliced = range ? bytes.slice(range.offset, range.offset + range.length).buffer : value;
+        return { json: async <T>() => JSON.parse(new TextDecoder().decode(sliced)) as T, arrayBuffer: async () => sliced };
+      },
+    };
+
+    const result = await readR2EvidenceRecords(bucket, { source: "infolobby", query: "presidencia", limit: 10 });
+
+    expect(result).toMatchObject({ total: 1, limit: 10 });
+    expect(result?.data[0]).toMatchObject({ id: "infolobby-1", sourceId: "infolobby" });
+  });
+
+  it("marca el índice como parcial cuando el catálogo declara filas ausentes", async () => {
+    const record = { id: "infolobby-1", sourceId: "infolobby", kind: "lobby", occurredAt: "2026-07-01", evidence: {}, data: {} };
+    const archive = new TextEncoder().encode(`${JSON.stringify(record)}\n`).buffer;
+    const objects = new Map<string, ArrayBuffer>([
+      ["indexes/v1/infolobby/manifest.json", new TextEncoder().encode(JSON.stringify({ schemaVersion: 1, sourceId: "infolobby", totalRows: 1, pageSize: 1, recordArchiveKey: "indexes/v1/infolobby/records.jsonl", pages: [{ offset: 0, length: archive.byteLength }] })).buffer],
+      ["indexes/v1/infolobby/records.jsonl", archive],
+      ["catalog/v1/manifest.json", new TextEncoder().encode(JSON.stringify({ sources: [{ id: "infolobby", recordCount: 2 }], partitions: [] })).buffer],
+    ]);
+    const bucket: Parameters<typeof readR2EvidenceRecords>[0] = {
+      async get(key, options) {
+        const value = objects.get(key);
+        if (!value) return null;
+        const bytes = new Uint8Array(value);
+        const range = options?.range;
+        const sliced = range ? bytes.slice(range.offset, range.offset + range.length).buffer : value;
+        return { json: async <T>() => JSON.parse(new TextDecoder().decode(sliced)) as T, arrayBuffer: async () => sliced };
+      },
+    };
+
+    const result = await readR2EvidenceRecords(bucket, { source: "infolobby", limit: 10 });
+
+    expect(result).toMatchObject({ total: 1, expectedTotal: 2, loadedRows: 1, complete: false, missingPartitions: 1 });
+  });
+
+  it("no consulta el repositorio retirado cuando falta una partición en R2", async () => {
     const lakeRecord = {
       id: "contraloria-audit-1",
       sourceId: "contraloria",
@@ -17,14 +70,6 @@ describe("archivo histórico en GitHub Releases", () => {
     };
     const compressed = gzipSync(`${JSON.stringify(lakeRecord)}\n`);
     const checksum = createHash("sha256").update(compressed).digest("hex");
-    const manifest = {
-      projectionChecksumSha256: checksum,
-      artifacts: [{
-        key: "partitions/contraloria/2026/01/records.jsonl.gz",
-        checksumSha256: checksum,
-        releaseAssetName: "contraloria-2026-01-records.jsonl.gz",
-      }],
-    };
     const catalog = {
       schemaVersion: "1.0.0",
       generatedAt: "2026-08-08T00:00:00Z",
@@ -36,53 +81,103 @@ describe("archivo histórico en GitHub Releases", () => {
         manifestKey: "partitions/contraloria/2026/01/manifest.json",
         checksumSha256: checksum,
         releaseTag: "data-contraloria-2026",
+        recordCount: 1,
         status: "partial",
       }],
     };
-    const cached = new Map<string, ArrayBuffer>();
     const bucket: Parameters<typeof readR2EvidenceRecords>[0] = {
       async get(key) {
         if (key === "catalog/v1/manifest.json") {
           return { json: async <T>() => catalog as T, arrayBuffer: async () => new ArrayBuffer(0) };
         }
-        const data = cached.get(key);
-        return data ? {
-          json: async <T>() => JSON.parse(new TextDecoder().decode(data)) as T,
-          arrayBuffer: async () => data,
-        } : null;
+        return null;
       },
-      async put(key, value) { cached.set(key, value); },
     };
-    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => {
-      const url = String(input);
-      if (url.endsWith("contraloria-2026-01-manifest.json")) return Response.json(manifest);
-      if (url.endsWith("contraloria-2026-01-records.jsonl.gz")) return new Response(compressed);
-      return new Response(null, { status: 404 });
-    }));
+    const fetchSpy = vi.fn();
+    vi.stubGlobal("fetch", fetchSpy);
 
     const result = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 10 });
 
-    expect(result?.data).toHaveLength(1);
-    expect(result?.data[0]).toMatchObject({ kind: "audit", title: "Informe oficial 1" });
-    expect(cached.has("partitions/contraloria/2026/01/manifest.json")).toBe(true);
-    expect(cached.has("partitions/contraloria/2026/01/records.jsonl.gz")).toBe(true);
+    expect(result).toMatchObject({ data: [], total: 0, loadedRows: 0, expectedTotal: 1, complete: false, missingPartitions: 1, missingArtifacts: 0 });
+    expect(fetchSpy).not.toHaveBeenCalled();
   });
 
   it("rechaza un artefacto cuyo checksum no coincide", async () => {
     const compressed = gzipSync("{}\n");
+    const manifestKey = "partitions/x/2026/01/manifest.json";
+    const artifactKey = "partitions/x/2026/01/records.jsonl.gz";
     const manifest = {
       projectionChecksumSha256: "0".repeat(64),
-      artifacts: [{ key: "partitions/x/2026/01/records.jsonl.gz", checksumSha256: "0".repeat(64), releaseAssetName: "x-2026-01-records.jsonl.gz" }],
+      artifacts: [{ key: artifactKey, checksumSha256: "0".repeat(64), releaseAssetName: "x-2026-01-records.jsonl.gz" }],
     };
+    const objects = new Map<string, ArrayBuffer>([
+      ["catalog/v1/manifest.json", new TextEncoder().encode(JSON.stringify({ generatedAt: null, sources: [], partitions: [{ sourceId: "x", period: "2026-01", manifestKey, releaseTag: "data-x-2026", recordCount: 1 }] })).buffer],
+      [manifestKey, new TextEncoder().encode(JSON.stringify(manifest)).buffer],
+      [artifactKey, compressed.buffer.slice(compressed.byteOffset, compressed.byteOffset + compressed.byteLength)],
+    ]);
     const bucket: Parameters<typeof readR2EvidenceRecords>[0] = {
       async get(key) {
-        if (key === "catalog/v1/manifest.json") return { json: async <T>() => ({ generatedAt: null, sources: [], partitions: [{ sourceId: "x", period: "2026-01", manifestKey: "partitions/x/2026/01/manifest.json", releaseTag: "data-x-2026" }] }) as T, arrayBuffer: async () => new ArrayBuffer(0) };
-        return null;
+        const value = objects.get(key);
+        if (!value) return null;
+        return { json: async <T>() => JSON.parse(new TextDecoder().decode(value)) as T, arrayBuffer: async () => value };
       },
     };
-    vi.stubGlobal("fetch", vi.fn(async (input: RequestInfo | URL) => String(input).endsWith("manifest.json") ? Response.json(manifest) : new Response(compressed)));
 
     await expect(readR2EvidenceRecords(bucket, { source: "x", limit: 10 })).rejects.toThrow("ARCHIVE_CHECKSUM_MISMATCH");
+  });
+
+  it("no publica una partición parcialmente cargada cuando falta uno de sus fragmentos", async () => {
+    const first = gzipSync(`${JSON.stringify({
+      id: "camara-partial-1",
+      sourceId: "camara",
+      kind: "vote",
+      occurredAt: "2026-08-01",
+      evidence: { sourceUrl: "https://opendata.camara.cl/votacion/1" },
+      data: { title: "Primera parte" },
+    })}\n`);
+    const firstChecksum = createHash("sha256").update(first).digest("hex");
+    const secondChecksum = "b".repeat(64);
+    const prefix = "partitions/camara/2026/08";
+    const firstKey = `${prefix}/records-${firstChecksum}.jsonl.gz.part-0001`;
+    const secondKey = `${prefix}/records-${secondChecksum}.jsonl.gz.part-0002`;
+    const manifest = {
+      projectionChecksumSha256: "c".repeat(64),
+      artifacts: [
+        { key: firstKey, checksumSha256: firstChecksum, releaseAssetName: "camara-2026-08-records.jsonl.gz.part-0001" },
+        { key: secondKey, checksumSha256: secondChecksum, releaseAssetName: "camara-2026-08-records.jsonl.gz.part-0002" },
+      ],
+    };
+    const catalog = {
+      schemaVersion: "1.0.0",
+      generatedAt: "2026-09-11T00:00:00Z",
+      sources: [],
+      partitions: [{
+        id: "camara/2026/08",
+        sourceId: "camara",
+        period: "2026-08",
+        manifestKey: `${prefix}/manifest.json`,
+        releaseTag: "data-camara-2026",
+        recordCount: 2,
+        checksumSha256: manifest.projectionChecksumSha256,
+        status: "partial",
+      }],
+    };
+    const objects = new Map<string, ArrayBuffer>([
+      ["catalog/v1/manifest.json", new TextEncoder().encode(JSON.stringify(catalog)).buffer],
+      [`${prefix}/manifest.json`, new TextEncoder().encode(JSON.stringify(manifest)).buffer],
+      [firstKey, first.buffer.slice(first.byteOffset, first.byteOffset + first.byteLength)],
+    ]);
+    const bucket: Parameters<typeof readR2EvidenceRecords>[0] = {
+      async get(key) {
+        const value = objects.get(key);
+        if (!value) return null;
+        return { json: async <T>() => JSON.parse(new TextDecoder().decode(value)) as T, arrayBuffer: async () => value };
+      },
+    };
+
+    const result = await readR2EvidenceRecords(bucket, { source: "camara", limit: 10 });
+
+    expect(result).toMatchObject({ data: [], total: 0, loadedRows: 0, expectedTotal: 2, complete: false, missingPartitions: 1, missingArtifacts: 1 });
   });
 
   it("combina evidencia de varias fuentes para una entidad canónica", async () => {

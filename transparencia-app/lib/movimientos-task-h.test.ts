@@ -47,7 +47,9 @@ describe("TAREA H v5: Cierre Correcto de Sucesiones + Regla Verbatim", () => {
     expect(depSub).toBeDefined();
     expect(depSub?.salio?.nombre).toContain("Andrés Otero");
     expect(depSub?.entro?.nombre).toContain("Sofía Rengifo Ottone");
-    expect(depSub?.id_norma).toBe("1215435");
+    expect(depSub?.id_norma).toBeUndefined();
+    expect(depSub?.estado).toBe("en_confirmacion");
+    expect(depSub?.tipo_evento).toBe("nombramiento-fallido");
   });
 
   it("3. Mujer (Marcia Raphael Mora) y Ciencia (Carolina Rossi ratificada) 16-junio", () => {

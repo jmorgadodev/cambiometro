@@ -45,7 +45,11 @@ describe("Tarea D: Dashboard Público de Calidad de Datos (/datos/calidad)", () 
       expect(source?.organization.length).toBeGreaterThan(0);
       expect(source?.officialUrl).toMatch(/^https?:\/\//);
       expect(source?.canonicalCount).toBeGreaterThan(0);
-      expect(source?.historicalCount).toBeGreaterThanOrEqual(source?.canonicalCount ?? 0);
+      if (source?.reconciliation?.comparisonEligible === false) {
+        expect(source.metrics.published.label).toBe("No calculable");
+      } else {
+        expect(source?.historicalCount).toBeGreaterThanOrEqual(source?.canonicalCount ?? 0);
+      }
       expect(source?.periodoReciente.length).toBeGreaterThan(0);
       expect(source?.lastSyncFormatted.length).toBeGreaterThan(0);
     }

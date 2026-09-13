@@ -5,6 +5,8 @@ import type { ReactElement } from "react";
 import { PARTIDOS_SEED, POLITICOS_SEED } from "@/lib/seed-politicos";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import { getEvidenceForPolitico, normalizeSearchText } from "@/lib/data-source";
+import { getGastosParaPolitico } from "@/lib/data-source";
+import { procesarGastosPolitico } from "@/lib/gastos-operacionales";
 import { FUENTE_REMUNERACIONES, mesRemuneraciones, remuneracionParaPolitico } from "@/lib/remuneraciones";
 import { getGastosAgregadosD1 } from "@/lib/db";
 import { comparePorApellido } from "@/lib/format";
@@ -20,9 +22,10 @@ const DIETA_OFICIAL_PARLAMENTARIA = {
 };
 
 export const metadata: Metadata = {
-  title: "Diputados y Senadores 2026-2030",
+  title: "Diputados y Senadores 2026-2030 | El Cambiómetro",
   description:
     "Listado completo de los 155 diputados y 50 senadores del período 2026-2030 con acceso a la ficha de transparencia de cada uno.",
+  alternates: { canonical: "/politico" },
 };
 
 export default async function PoliticoDirectory() {
@@ -98,7 +101,7 @@ export default async function PoliticoDirectory() {
               return (
                 <tr key={politico.id} style={{ position: "relative" }} className="hover-row">
                   <td>
-                    <Link href={`/politico/${slug}`} style={{ position: "absolute", inset: 0, zIndex: 1 }} aria-label={`Ficha de ${politico.nombre_completo}`} />
+                    <Link prefetch={false} href={`/politico/${slug}`} style={{ position: "absolute", inset: 0, zIndex: 1 }} aria-label={`Ficha de ${politico.nombre_completo}`} />
                     <span className="rank-number">{index + 1}</span>
                   </td>
                   <td>
@@ -144,6 +147,8 @@ export default async function PoliticoDirectory() {
     const partido = PARTIDOS_SEED.find((p) => p.id === politico.partido_id);
     const evidenciasList = await getEvidenceForPolitico(politico);
     const fuentes = evidenciasList.filter((e) => e.records.length > 0).length;
+    const gastos = getGastosParaPolitico(politico);
+    const gastosProcesados = procesarGastosPolitico(gastos);
     const sueldo = await remuneracionParaPolitico(politico.nombre_completo);
     const partidoConfig = getPartidoConfig(politico.partido_id || partido?.sigla || "IND");
     const dietaMonto = DIETA_OFICIAL_PARLAMENTARIA[politico.cargo as "Diputado" | "Senador"];
@@ -165,6 +170,10 @@ export default async function PoliticoDirectory() {
       dietaMonto,
       verifiedPhoto,
       initials,
+      gastosTotal: gastosProcesados.totalAcumulado,
+      gastosPeriodos: gastosProcesados.meses.length,
+      gastosRegistros: gastos.length,
+      gastosUltimoPeriodo: gastosProcesados.ultimoPeriodo || null,
     };
   }))).sort((a, b) => comparePorApellido(a.politico.nombre_completo, b.politico.nombre_completo));
 
@@ -195,13 +204,13 @@ export default async function PoliticoDirectory() {
 
       <div className="container-main page-layout">
         <div className="politico-filters" role="group" aria-label="Filtrar por cámara">
-          <Link className="btn btn-ghost" href="/politico" aria-current={!cargoFilter ? "page" : undefined}>
+          <Link prefetch={false} className="btn btn-ghost" href="/politico" aria-current={!cargoFilter ? "page" : undefined}>
             Todos ({POLITICOS_SEED.length})
           </Link>
-          <Link className="btn btn-ghost" href="/politico?cargo=Diputado" aria-current={cargoFilter === "Diputado" ? "page" : undefined}>
+          <Link prefetch={false} className="btn btn-ghost" href="/politico?cargo=Diputado" aria-current={cargoFilter === "Diputado" ? "page" : undefined}>
             Cámara ({POLITICOS_SEED.filter((p) => p.cargo === "Diputado").length})
           </Link>
-          <Link className="btn btn-ghost" href="/politico?cargo=Senador" aria-current={cargoFilter === "Senador" ? "page" : undefined}>
+          <Link prefetch={false} className="btn btn-ghost" href="/politico?cargo=Senador" aria-current={cargoFilter === "Senador" ? "page" : undefined}>
             Senado ({POLITICOS_SEED.filter((p) => p.cargo === "Senador").length})
           </Link>
         </div>
@@ -268,7 +277,7 @@ export default async function PoliticoDirectory() {
               Puede ser un parlamentario fuera del período 2026-2030, una persona de otra institución
               o un dato que aún no publicamos. Probá con apellido, partido o región.
             </p>
-            <Link className="btn btn-primary" href="/politico">Ver listado completo</Link>
+            <Link prefetch={false} className="btn btn-primary" href="/politico">Ver listado completo</Link>
           </div>
         )}
 

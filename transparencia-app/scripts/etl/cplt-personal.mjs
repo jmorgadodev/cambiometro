@@ -15,6 +15,26 @@ function titleCase(value) {
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
 }
 
+function normalizeFuncionarioName(rawValue) {
+  const original = String(rawValue ?? "").replace(/\s+/g, " ").trim();
+  const tokens = original ? original.split(" ") : [];
+  const incidencias = [];
+  let removedPunctuation = false;
+  let removedNumeric = false;
+  while (tokens.length > 0 && (/^[.,;:/|_\-]+$/u.test(tokens[0]) || /^\d+$/u.test(tokens[0]))) {
+    if (/^[.,;:/|_\-]+$/u.test(tokens[0])) removedPunctuation = true;
+    if (/^\d+$/u.test(tokens[0])) removedNumeric = true;
+    tokens.shift();
+  }
+  if (removedPunctuation) incidencias.push("nombre_prefijo_invalido");
+  if (removedNumeric) incidencias.push("nombre_prefijo_numerico");
+  const nombre = tokens.join(" ");
+  const alphaTokens = nombre.split(" ").map((token) => token.replace(/[^\p{L}]/gu, "")).filter(Boolean);
+  if (!nombre) incidencias.push("nombre_vacio");
+  else if (alphaTokens.length < 2) incidencias.push("nombre_incompleto");
+  return { nombre, original, incidencias };
+}
+
 function numberCl(value) {
   const text = String(value ?? "").trim();
   if (!text) return 0;
@@ -58,11 +78,31 @@ function cell(columns, header, ...names) {
 }
 
 export function getCpltCell(line, header, ...names) {
-  return cell(String(line).split(";"), header, ...names);
+  return scanCpltCell(line, header, ...names);
 }
 
-export function parseCpltColumns(line) {
-  return String(line).split(";");
+export function scanCpltCell(line, header, ...names) {
+  let targetIndex;
+  for (const name of names) {
+    const index = header.get(normalized(name));
+    if (index !== undefined) {
+      targetIndex = index;
+      break;
+    }
+  }
+  if (targetIndex === undefined) return "";
+
+  const text = typeof line === "string" ? line : String(line);
+  let columnIndex = 0;
+  let columnStart = 0;
+  for (let index = 0; index <= text.length; index += 1) {
+    if (index < text.length && text.charCodeAt(index) !== 59) continue;
+    if (columnIndex === targetIndex) return text.slice(columnStart, index).trim();
+    if (columnIndex > targetIndex) break;
+    columnIndex += 1;
+    columnStart = index + 1;
+  }
+  return "";
 }
 
 export function getCpltColumn(columns, header, ...names) {
@@ -70,12 +110,14 @@ export function getCpltColumn(columns, header, ...names) {
 }
 
 export function parseCpltIdentity({ line, columns: inputColumns = null, header, tipo, organismoId }) {
-  const columns = inputColumns ?? String(line).split(";");
-  const year = Number(cell(columns, header, "anyo", "año"));
-  const month = monthNumber(cell(columns, header, "mes"));
+  const readCell = (...names) => inputColumns
+    ? cell(inputColumns, header, ...names)
+    : scanCpltCell(line, header, ...names);
+  const year = Number(readCell("anyo", "año"));
+  const month = monthNumber(readCell("mes"));
   if (!Number.isInteger(year) || year < 2024 || month === 0) return null;
-  const rawName = [cell(columns, header, "nombres"), cell(columns, header, "paterno"), cell(columns, header, "materno")].filter(Boolean).join(" ");
-  const rawCargo = cell(columns, header, "tipo cargo", "descripcion_funcion", "descripcion funcion");
+  const rawName = [readCell("nombres"), readCell("paterno"), readCell("materno")].filter(Boolean).join(" ");
+  const rawCargo = readCell("tipo cargo", "descripcion_funcion", "descripcion funcion");
   if (!rawName || !rawCargo) return null;
   return {
     stableKey: [organismoId, normalized(tipo), normalized(rawName).replace(/\s+/g, " "), normalized(rawCargo).replace(/\s+/g, " ")].join("|"),
@@ -91,54 +133,70 @@ export function createCpltRecordId(stableKey) {
 
 export function parseCpltRecord({ line, columns: inputColumns = null, header, tipo, organismoId, sourceUrl, deferId = false }) {
   if (!(header instanceof Map) || !organismoId || !sourceUrl) throw new Error("CPLT_INVALID_PARSER_INPUT");
-  const columns = inputColumns ?? String(line).split(";");
-  const identity = parseCpltIdentity({ columns, header, tipo, organismoId });
+  const readCell = (...names) => inputColumns
+    ? cell(inputColumns, header, ...names)
+    : scanCpltCell(line, header, ...names);
+  const identity = parseCpltIdentity({ line, columns: inputColumns, header, tipo, organismoId });
   if (!identity) return null;
 
-  const nombre = titleCase([
-    cell(columns, header, "nombres"),
-    cell(columns, header, "paterno"),
-    cell(columns, header, "materno"),
-  ].filter(Boolean).join(" "));
-  const cargo = titleCase(cell(columns, header, "tipo cargo", "descripcion_funcion", "descripcion funcion"));
+  const nombreNormalizado = normalizeFuncionarioName(titleCase([
+    readCell("nombres"),
+    readCell("paterno"),
+    readCell("materno"),
+  ].filter(Boolean).join(" ")));
+  const nombre = nombreNormalizado.nombre;
+  const cargo = titleCase(readCell("tipo cargo", "descripcion_funcion", "descripcion funcion"));
   if (!nombre || !cargo) return null;
 
   const stableKey = identity.stableKey;
-  const officialLink = cell(columns, header, "enlace");
+  const officialLink = readCell("enlace");
   const recordUrl = /^https:\/\//i.test(officialLink) ? officialLink : sourceUrl;
-  const extraDay = numberCl(cell(columns, header, "horas extra diurnas"));
-  const extraNight = numberCl(cell(columns, header, "horas extra nocturnas"));
-  const extraHoliday = numberCl(cell(columns, header, "horas extra festivas"));
+  const extraDay = numberCl(readCell("horas extra diurnas"));
+  const extraNight = numberCl(readCell("horas extra nocturnas"));
+  const extraHoliday = numberCl(readCell("horas extra festivas"));
+  const remuneracionBruta = numberCl(readCell("remuneracionbruta_mensual", "remuneracionbruta"));
+  const remuneracionLiquidaOriginal = numberCl(readCell("remuliquida_mensual"));
+  const liquidNoInformada = remuneracionBruta > 0 && remuneracionLiquidaOriginal <= 0;
+  if (liquidNoInformada) nombreNormalizado.incidencias.push("remuneracion_liquida_no_informada");
 
   return {
     id: deferId ? "" : createCpltRecordId(stableKey),
     ...(deferId ? { _stableKey: stableKey } : {}),
     nombre_completo: nombre,
-    organo_nombre: cell(columns, header, "organismo_nombre", "organismo nombre"),
+    ...(nombre !== nombreNormalizado.original ? { nombre_completo_original: nombreNormalizado.original } : {}),
+    ...(nombreNormalizado.incidencias.length > 0 ? {
+      calidad_datos: {
+        estado: "normalizado",
+        incidencias: nombreNormalizado.incidencias,
+        detalle: "Se corrigió sólo formato inequívoco de la fuente; el valor líquido cero se conserva como original y se muestra como no informado.",
+      },
+    } : { calidad_datos: { estado: "original", incidencias: [], detalle: "" } }),
+    organo_nombre: readCell("organismo_nombre", "organismo nombre"),
     organo_tipo: organismoId.startsWith("muni-") ? "municipalidad" : "servicio_publico",
     cargo,
-    estamento: titleCase(cell(columns, header, "tipo estamento")) || tipo,
+    estamento: titleCase(readCell("tipo estamento")) || tipo,
     tipo_contrato: tipo,
-    remuneracion_bruta_mensual: numberCl(cell(columns, header, "remuneracionbruta_mensual", "remuneracionbruta")),
-    remuneracion_liquida_mensual: numberCl(cell(columns, header, "remuliquida_mensual")),
-    fecha_ingreso: dateCl(cell(columns, header, "fecha_ingreso")),
-    fecha_termino: dateCl(cell(columns, header, "fecha_termino")),
+    remuneracion_bruta_mensual: remuneracionBruta,
+    remuneracion_liquida_mensual: liquidNoInformada ? null : remuneracionLiquidaOriginal,
+    ...(liquidNoInformada ? { remuneracion_liquida_mensual_original: remuneracionLiquidaOriginal } : {}),
+    fecha_ingreso: dateCl(readCell("fecha_ingreso")),
+    fecha_termino: dateCl(readCell("fecha_termino")),
     horas_extras_diurnas_hrs: extraDay,
     horas_extras_nocturnas_hrs: extraNight,
     horas_extras_festivas_hrs: extraHoliday,
     horas_extras_mes_anterior: extraDay + extraNight + extraHoliday,
-    monto_horas_extras_clp: numberCl(cell(columns, header, "pago extra diurnas"))
-      + numberCl(cell(columns, header, "pago extra nocturnas"))
-      + numberCl(cell(columns, header, "pago extra festivas")),
-    grado_eus: cell(columns, header, "grado_eus"),
-    formacion: titleCase(cell(columns, header, "tipo_calificacionp")),
-    region: cell(columns, header, "region"),
+    monto_horas_extras_clp: numberCl(readCell("pago extra diurnas"))
+      + numberCl(readCell("pago extra nocturnas"))
+      + numberCl(readCell("pago extra festivas")),
+    grado_eus: readCell("grado_eus"),
+    formacion: titleCase(readCell("tipo_calificacionp")),
+    region: readCell("region"),
     asignaciones_especiales_clp: 0,
-    rem_adicionales_clp: numberCl(cell(columns, header, "remu_adicional")),
-    bonos_incentivos_clp: numberCl(cell(columns, header, "remu_bonoin")),
-    derecho_horas_extras: normalized(cell(columns, header, "horasextra")) === "si",
-    viaticos_clp: numberCl(cell(columns, header, "viaticos")),
-    observaciones: cell(columns, header, "observaciones"),
+    rem_adicionales_clp: numberCl(readCell("remu_adicional")),
+    bonos_incentivos_clp: numberCl(readCell("remu_bonoin")),
+    derecho_horas_extras: normalized(readCell("horasextra")) === "si",
+    viaticos_clp: numberCl(readCell("viaticos")),
+    observaciones: readCell("observaciones"),
     fuente: sourceUrl,
     url: recordUrl,
     fuente_periodo: identity.period,

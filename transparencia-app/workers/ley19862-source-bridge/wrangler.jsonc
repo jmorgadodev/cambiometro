@@ -1,0 +1,10 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "cambiometro-ley19862-source",
+  "main": "index.ts",
+  "compatibility_date": "2026-08-25",
+  "workers_dev": true,
+  "preview_urls": false,
+  "observability": { "enabled": true },
+  "secrets": { "required": ["SOURCE_BRIDGE_TOKEN"] }
+}

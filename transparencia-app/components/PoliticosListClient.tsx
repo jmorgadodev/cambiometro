@@ -15,6 +15,10 @@ export interface PoliticoCardData {
   dietaMonto: number;
   verifiedPhoto: string | null;
   initials: string;
+  gastosTotal: number;
+  gastosPeriodos: number;
+  gastosRegistros: number;
+  gastosUltimoPeriodo: string | null;
 }
 
 interface Props {
@@ -75,11 +79,11 @@ export default function PoliticosListClient({
 
       <div className="politician-card-grid">
         {itemsVisibles.map((entry) => {
-          const { politico, partidoConfig, fuentes, sueldo, dietaMonto, verifiedPhoto, initials } = entry;
+          const { politico, partidoConfig, fuentes, sueldo, dietaMonto, verifiedPhoto, initials, gastosTotal, gastosPeriodos, gastosRegistros, gastosUltimoPeriodo } = entry;
           const slug = getPoliticoSlug(politico);
 
           return (
-            <Link className="politician-card" href={`/politico/${slug}`} key={politico.id}>
+            <Link className="politician-card" href={`/politico/${slug}`} prefetch={false} key={politico.id}>
               <div className="politician-card__photo">
                 {verifiedPhoto ? (
                   <Image
@@ -137,6 +141,17 @@ export default function PoliticosListClient({
                       >
                         {formatCLP(sueldo ? sueldo.bruto_mensual : dietaMonto)}
                       </span>
+                    </dd>
+                  </div>
+                  <div>
+                    <dt title="Rendiciones oficiales de gastos operacionales">Gastos operacionales rendidos</dt>
+                    <dd>
+                      <span style={{ color: gastosRegistros > 0 ? "var(--money)" : "var(--text-muted)", fontWeight: 700 }}>
+                        {gastosRegistros > 0 ? formatCLP(gastosTotal) : "Sin registros publicados"}
+                      </span>
+                      {gastosRegistros > 0 && (
+                        <small>{gastosPeriodos} período{gastosPeriodos === 1 ? "" : "s"} · hasta {gastosUltimoPeriodo}</small>
+                      )}
                     </dd>
                   </div>
                 </dl>

@@ -17,6 +17,7 @@ export const metadata: Metadata = {
   title: "Directorio Universal de Personas y Autoridades del Estado — El Cambiómetro",
   description:
     "Directorio consolidado de parlamentarios, autoridades y nóminas oficiales de personal, con cobertura declarada por organismo.",
+  alternates: { canonical: "/personas" },
   openGraph: {
     title: "Directorio de Personas del Estado de Chile — El Cambiómetro",
     description:
@@ -142,6 +143,7 @@ export default function PersonasPage() {
         autoridades={autoridades}
         organismos={organismosOptions}
         totalFuncionariosEstimados={1203287}
+        totalMunicipalidades={MUNICIPALIDADES_SEED.length}
       />
     </Suspense>
   );

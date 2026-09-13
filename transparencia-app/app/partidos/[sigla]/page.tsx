@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { notFound } from "next/navigation";
 import { PARTIDOS_SEED, SCORES_SEED } from "@/lib/seed-politicos";
 import {
@@ -51,6 +52,9 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   return {
     title: `Bancada ${partido.sigla} (${nombre}) — El Cambiómetro`,
     description: `Ficha de fiscalización de la bancada ${partido.sigla}: escaños, votaciones en sala, asistencia, gastos operacionales y personal de apoyo compilados por El Cambiómetro.`,
+    alternates: {
+      canonical: `/partidos/${partido.sigla.toLowerCase()}`,
+    },
     openGraph: {
       title: `Bancada ${partido.sigla}: Votaciones y Gastos`,
       description: `Revisa la evidencia oficial de ${partido.sigla} en El Cambiómetro.`,
@@ -223,12 +227,12 @@ export default async function PartidoPage({ params }: Props) {
               },
               {
                 label: "Gastos bancada (publicados)",
-                value: gastos.total > 0 ? formatCLP(gastos.total) : "$0 · Pendiente",
+                value: gastos.total > 0 ? formatCLP(gastos.total) : "Sin registros publicados",
                 color: gastos.total > 0 ? "var(--warn)" : "var(--text-3)",
               },
               {
                 label: `Promedio / miembro (${polsConGasto}/${escaños.total})`,
-                value: promedioGasto > 0 ? formatCLP(promedioGasto) : "—",
+                value: promedioGasto > 0 ? formatCLP(promedioGasto) : "No calculable",
                 color: "var(--text-1)",
               },
               {
@@ -446,19 +450,21 @@ export default async function PartidoPage({ params }: Props) {
         )}
 
         {/* Dashboard Cliente Interactivo */}
-        <PartidoDashboardClient
-          partido={partido}
-          esIndependiente={esIndependiente}
-          votosCamara={votosCamara}
-          votosSenado={votosSenado}
-          votacionesTodas={votacionesTodas}
-          serieAsistencia={serieAsistencia}
-          disciplina={disciplina}
-          radiografia={radiografia}
-          gastos={gastos}
-          politicos={politicosPartido}
-          scores={scoresPartido}
-        />
+        <Suspense fallback={null}>
+          <PartidoDashboardClient
+            partido={partido}
+            esIndependiente={esIndependiente}
+            votosCamara={votosCamara}
+            votosSenado={votosSenado}
+            votacionesTodas={votacionesTodas}
+            serieAsistencia={serieAsistencia}
+            disciplina={disciplina}
+            radiografia={radiografia}
+            gastos={gastos}
+            politicos={politicosPartido}
+            scores={scoresPartido}
+          />
+        </Suspense>
 
         <p style={{ fontSize: "0.7rem", color: "var(--text-3)", marginTop: "2.5rem", lineHeight: 1.6 }}>
           Votos: registros oficiales de votación de sala (opendata.congreso.cl). Asistencia = votos emitidos (Sí + No +

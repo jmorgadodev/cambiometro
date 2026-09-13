@@ -11,10 +11,10 @@ export default function NotFound() {
         El registro, autoridad o servicio que buscas no está disponible o ha sido reubicado en la plataforma.
       </p>
       <div style={{ display: "flex", gap: "1rem", flexWrap: "wrap", justifyContent: "center" }}>
-        <Link href="/" className="btn btn-primary">
+        <Link prefetch={false} href="/" className="btn btn-primary">
           Ir al Inicio
         </Link>
-        <Link href="/politico" className="btn btn-secondary">
+        <Link prefetch={false} href="/politico" className="btn btn-secondary">
           Explorar Autoridades
         </Link>
       </div>

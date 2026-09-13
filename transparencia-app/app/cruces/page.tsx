@@ -2,10 +2,19 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { getAllCrosses } from "@/lib/data-platform-v1";
 import { leerContraloriaV1 } from "@/lib/contraloria-lake";
-import { leerChileCompraV1 } from "@/lib/chilecompra";
+import { getChileCompraResumen, leerChileCompraV1 } from "@/lib/chilecompra";
 import { leerInfoLobbyV1 } from "@/lib/infolobby";
 import CrucesExplorerClient from "@/components/cruces/CrucesExplorerClient";
+import CrucesSourceRecords from "@/components/cruces/CrucesSourceRecords";
+import CrucesTabs from "@/components/cruces/CrucesTabs";
+import ChileCompraSummaryPanel from "@/components/cruces/ChileCompraSummaryPanel";
 import { getLey19862Summary } from "@/lib/transferencias-data";
+import { SOURCE_CANONICAL_COUNTS } from "@/lib/published-sources";
+import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
+import {
+  CRUCES_CGR_MUESTRA,
+  CRUCES_INFOLOBBY_MUESTRA,
+} from "@/lib/partidos-transparencia";
 
 export const metadata: Metadata = {
   title: "Explorador de Cruces de Datos Públicos — El Cambiómetro",
@@ -20,14 +29,25 @@ export const metadata: Metadata = {
 
 export default async function CrossesPage() {
   const rawQuery = "";
-  // Keep the HTML shell small; the explorer can request further records from
-  // the indexed Worker API without serializing the complete lake into RSC.
-  const crosses = (await getAllCrosses()).slice(0, 120);
+  // Build the complete relation universe on the server, but only serialize a
+  // small representative page into the static HTML. Embedding the full
+  // relation graph here made /cruces exceed the Pages asset limit and caused
+  // browsers to download the entire universe before the user interacted.
+  const allCrosses = await getAllCrosses();
+  const crosses = allCrosses.slice(0, 25);
+  const crossesTotal = allCrosses.length;
 
   const contraloria = leerContraloriaV1();
   const chilecompra = leerChileCompraV1();
   const infolobby = leerInfoLobbyV1();
   const ley19862 = getLey19862Summary();
+  const { sources: qualitySources } = await getDataQualityDashboardData();
+  const cgrCanonicalCount = SOURCE_CANONICAL_COUNTS.contraloria;
+  const chilecompraCanonicalCount = SOURCE_CANONICAL_COUNTS.chilecompra;
+  const chilecompraSummary = getChileCompraResumen(5);
+  const chilecompraQuality = qualitySources.find((source) => source.id === "chilecompra");
+  const infolobbyQuality = qualitySources.find((source) => source.id === "infolobby");
+  const infolobbyCanonicalCount = SOURCE_CANONICAL_COUNTS.infolobby;
 
   const clp = (amount: number | null) => {
     if (amount === null || amount <= 0) return "—";
@@ -48,13 +68,10 @@ export default async function CrossesPage() {
       ? montosChilecompra.reduce((sum, amount) => sum + amount, 0)
       : null;
 
-  const procesosChilecompra = chilecompra?.buyers
-    ?.map((buyer) => buyer.procesos)
-    .filter((count): count is number => typeof count === "number") ?? [];
-  const totalChilecompraProcesos = procesosChilecompra.length > 0
-    ? procesosChilecompra.reduce((sum, count) => sum + count, 0)
-    : null;
-  const ley19862ReferenceTotal = 1900000000000;
+  const cgrIndexedCount = contraloria?.records.length ?? 0;
+  const infolobbyIndexedCount = infolobby?.count ?? 0;
+  const cgrReference = CRUCES_CGR_MUESTRA[0];
+  const infolobbyReference = CRUCES_INFOLOBBY_MUESTRA[0];
 
   return (
     <main>
@@ -98,39 +115,112 @@ export default async function CrossesPage() {
           <div className="stat-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))" }}>
             {/* KPI 1 */}
             <div className="stat-tile stat-tile--accent">
-              <div className="stat-tile__value">{crosses.length.toLocaleString("es-CL")}</div>
+              <div className="stat-tile__value">{crossesTotal.toLocaleString("es-CL")}</div>
               <div className="stat-tile__label">Relaciones en Grafo</div>
-              <div className="stat-tile__hint">{crosses.length.toLocaleString("es-CL")} relaciones agregadas</div>
+              <div className="stat-tile__hint">{crossesTotal.toLocaleString("es-CL")} relaciones agregadas</div>
             </div>
 
             {/* KPI 2 */}
             <div className="stat-tile stat-tile--ok">
-              <div className="stat-tile__value">{contraloria?.records.length ?? "—"}</div>
+              <div className="stat-tile__value">{cgrCanonicalCount.toLocaleString("es-CL")}</div>
               <div className="stat-tile__label">Auditorías CGR</div>
-              <div className="stat-tile__hint">Informes de fiscalización 2025-2026</div>
+              <div className="stat-tile__hint">Universo canónico · {cgrIndexedCount.toLocaleString("es-CL")} informes indexados en esta vista</div>
             </div>
 
-            {/* KPI 3 (Monto real, NUNCA $0) */}
+            {/* KPI 3: el conteo canónico es estable; el monto sólo se muestra si
+                la proyección publicada trae un agregado válido. */}
             <div className="stat-tile stat-tile--warn">
-              <div className="stat-tile__value">{clp(totalChilecompraMonto)}</div>
-              <div className="stat-tile__label">Compras ChileCompra</div>
-               <div className="stat-tile__hint">{totalChilecompraProcesos?.toLocaleString("es-CL") ?? "—"} procesos OCDS · referencia {ley19862ReferenceTotal.toLocaleString("es-CL")}</div>
+              <div className="stat-tile__value">{chilecompraCanonicalCount.toLocaleString("es-CL")}</div>
+              <div className="stat-tile__label">Registros ChileCompra</div>
+              <div className="stat-tile__hint">Universo OCDS publicado · {clp(totalChilecompraMonto)} monto consolidado disponible</div>
             </div>
 
             {/* KPI 4 */}
             <div className="stat-tile stat-tile--alert">
-              <div className="stat-tile__value">{infolobby?.count?.toLocaleString("es-CL") ?? "—"}</div>
+              <div className="stat-tile__value">{infolobbyCanonicalCount.toLocaleString("es-CL")}</div>
               <div className="stat-tile__label">Registros InfoLobby</div>
-              <div className="stat-tile__hint">Audiencias, viajes y donativos</div>
+              <div className="stat-tile__hint">
+                {infolobbyCanonicalCount.toLocaleString("es-CL")} consultables mediante paginación · representación inicial de {infolobbyIndexedCount.toLocaleString("es-CL")} cruces
+                {infolobbyQuality?.catalogDeclaredCount && infolobbyQuality.catalogDeclaredCount !== infolobbyCanonicalCount
+                  ? ` · catálogo declara ${infolobbyQuality.catalogDeclaredCount.toLocaleString("es-CL")} (${(infolobbyQuality.catalogDeclaredCount - infolobbyCanonicalCount).toLocaleString("es-CL")} sin índice reconciliado)`
+                  : ""}
+              </div>
             </div>
           </div>
         </section>
 
-        {/* ─── 3. EXPLORADOR ÚNICO (PRESETS + CHIPS + TABLA 20 + DRAWER) ───────── */}
-         <CrucesExplorerClient initialRows={crosses} initialQuery={rawQuery} />
-         <p className="data-note" style={{ marginTop: "1rem" }}>
-           1.897 relaciones canónicas en el modelo de datos; el grafo muestra los vínculos actualmente indexados. <Link href="/como-funciona">Conoce la metodología</Link>.
+        {/* ─── 3. RELACIONES Y REGISTROS ORIGINALES ─────────────────────────── */}
+        <CrucesTabs
+          relations={<CrucesExplorerClient initialRows={crosses} initialTotal={crossesTotal} initialQuery={rawQuery} />}
+          records={<CrucesSourceRecords counts={{
+            chilecompra: chilecompraCanonicalCount,
+            infolobby: infolobbyCanonicalCount,
+            contraloria: cgrCanonicalCount,
+            infoprobidad: SOURCE_CANONICAL_COUNTS.infoprobidad,
+          }} />}
+        />
+        <ChileCompraSummaryPanel
+          summary={chilecompraSummary}
+          currentCount={chilecompraCanonicalCount}
+          publicHistoricalCount={chilecompraQuality?.publicHistoricalCount ?? chilecompraCanonicalCount}
+          declaredHistoricalCount={chilecompraQuality?.historicalCount ?? chilecompraCanonicalCount}
+        />
+        <p className="data-note" style={{ marginTop: "1rem" }}>
+           {crossesTotal.toLocaleString("es-CL")} relaciones canónicas en el índice publicado; la tabla permite filtrarlas y paginarlas dentro de la muestra inicial de {crosses.length.toLocaleString("es-CL")} relaciones, sin descargar el universo completo al navegador. <Link prefetch={false} href="/como-funciona">Conoce la metodología</Link>.
          </p>
+
+        <section className="card" aria-label="Observaciones de calidad de la fuente" style={{ padding: "1.25rem" }}>
+          <span className="badge badge-info">Trazabilidad de calidad</span>
+          <h2 style={{ fontSize: "1.05rem", margin: "0.45rem 0 0.35rem", color: "var(--text-primary)" }}>Observaciones de calidad de la fuente</h2>
+          <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", margin: 0, lineHeight: 1.5 }}>
+            Las observaciones separan correcciones de formato de datos que requieren revisión. Conservamos el valor original, la regla aplicada y la procedencia; no eliminamos registros sólo por parecer atípicos.
+          </p>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))", gap: "0.65rem", marginTop: "0.85rem" }}>
+            {qualitySources.map((source) => (
+              <div key={source.id} style={{ padding: "0.75rem", border: "1px solid var(--border-subtle)", borderRadius: 8, background: "var(--bg-surface-2)" }}>
+                <strong style={{ display: "block", fontSize: "0.78rem", color: "var(--text-primary)" }}>{source.name}</strong>
+                <span style={{ display: "block", marginTop: "0.25rem", fontSize: "0.7rem", color: "var(--text-muted)" }}>
+                  {source.quality.observedCount.toLocaleString("es-CL")} observados · {source.quality.correctedCount.toLocaleString("es-CL")} correcciones de formato
+                </span>
+                {source.qualityAudit && (
+                  <details style={{ marginTop: "0.45rem", fontSize: "0.68rem", color: "var(--text-subtle)" }}>
+                    <summary style={{ cursor: "pointer", color: "var(--accent)" }}>Ver auditoría del snapshot</summary>
+                    <span style={{ display: "block", marginTop: "0.35rem", lineHeight: 1.45 }}>
+                      {source.qualityAudit.snapshotRecords.toLocaleString("es-CL")} registros · corte {source.qualityAudit.snapshotDate}. No reemplaza el release publicado actual.
+                    </span>
+                    <Link prefetch={false} href="/datos/calidad" className="data-link" style={{ display: "inline-block", marginTop: "0.25rem" }}>
+                      Ver observaciones y reglas →
+                    </Link>
+                  </details>
+                )}
+              </div>
+            ))}
+          </div>
+          <p style={{ margin: "0.75rem 0 0", fontSize: "0.72rem", color: "var(--text-subtle)" }}>
+            Para revisar el detalle por fuente, usa el <Link prefetch={false} href="/datos/calidad" className="data-link">Dashboard de Calidad</Link>.
+          </p>
+        </section>
+
+        <section className="card" aria-label="Referencias oficiales verificables" style={{ padding: "1.25rem" }}>
+          <h2 style={{ fontSize: "1.05rem", margin: "0 0 0.35rem", color: "var(--text-primary)" }}>
+            Referencias oficiales verificables
+          </h2>
+          <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", margin: "0 0 0.75rem", lineHeight: 1.5 }}>
+            Muestras congeladas del corte publicado para comprobar que los identificadores y enlaces oficiales sobreviven al export estático.
+          </p>
+          <ul style={{ margin: 0, paddingLeft: "1.2rem", display: "grid", gap: "0.4rem", fontSize: "0.8rem" }}>
+            <li>
+              <a href={cgrReference.url_oficial} target="_blank" rel="noreferrer" style={{ color: "var(--accent)", textDecoration: "underline", textUnderlineOffset: "0.15em" }}>
+                CGR Informe {cgrReference.numero_informe}
+              </a>{" "}· {cgrReference.entidad}
+            </li>
+            <li>
+              <a href={infolobbyReference.url_audiencia} target="_blank" rel="noreferrer" style={{ color: "var(--accent)", textDecoration: "underline", textUnderlineOffset: "0.15em" }}>
+                InfoLobby {infolobbyReference.id.split("-")[1]}
+              </a>{" "}· {infolobbyReference.sujeto_pasivo}
+            </li>
+          </ul>
+        </section>
 
         {/* ─── 4. FUENTES Y COBERTURA (Cards con enlaces a módulos existentes) ── */}
         <section aria-label="Fuentes oficiales y cobertura">
@@ -154,7 +244,7 @@ export default async function CrossesPage() {
             <div className="card" style={{ padding: "1.25rem", background: "var(--surface)", borderColor: "var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>⚖️</span>
-                <span className="badge badge-ok">{contraloria?.records.length ?? "—"} informes</span>
+                 <span className="badge badge-ok">{cgrCanonicalCount.toLocaleString("es-CL")} informes</span>
               </div>
               <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>
                 Contraloría General (CGR)
@@ -162,8 +252,8 @@ export default async function CrossesPage() {
               <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", margin: "0.3rem 0 0.85rem", lineHeight: 1.4 }}>
                 Informes finales de auditoría y dictámenes vinculados a servicios públicos y municipios.
               </p>
-              <Link href="/servicios-publicos" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem", width: "100%", textAlign: "center" }}>
-                Ver en Servicios Públicos →
+              <Link prefetch={false} href="/cruces?fuente=contraloria" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem", width: "100%", textAlign: "center" }}>
+                Ver registros CGR →
               </Link>
             </div>
 
@@ -171,7 +261,7 @@ export default async function CrossesPage() {
             <div className="card" style={{ padding: "1.25rem", background: "var(--surface)", borderColor: "var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>🛒</span>
-                <span className="badge badge-warn">{totalChilecompraProcesos?.toLocaleString("es-CL") ?? "—"} procesos</span>
+                <span className="badge badge-warn">{chilecompraCanonicalCount.toLocaleString("es-CL")} registros</span>
               </div>
               <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>
                 ChileCompra MercadoPúblico
@@ -179,8 +269,8 @@ export default async function CrossesPage() {
               <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", margin: "0.3rem 0 0.85rem", lineHeight: 1.4 }}>
                 Licitaciones públicas, tratos directos y convenios marco unificados por OCID oficial.
               </p>
-              <Link href="/servicios-publicos" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem", width: "100%", textAlign: "center" }}>
-                Ver Compras Públicas →
+              <Link prefetch={false} href="/cruces?fuente=chilecompra" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem", width: "100%", textAlign: "center" }}>
+                Ver registros ChileCompra →
               </Link>
             </div>
 
@@ -188,16 +278,16 @@ export default async function CrossesPage() {
             <div className="card" style={{ padding: "1.25rem", background: "var(--surface)", borderColor: "var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>🤝</span>
-                <span className="badge badge-info">{infolobby?.count?.toLocaleString("es-CL") ?? "—"} registros</span>
+                <span className="badge badge-info">{infolobbyCanonicalCount.toLocaleString("es-CL")} consultables</span>
               </div>
               <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>
                 InfoLobby (Ley 20.730)
               </strong>
               <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", margin: "0.3rem 0 0.85rem", lineHeight: 1.4 }}>
-                Registro de audiencias sostenidas con autoridades, viajes financiados y donativos.
+                Registro paginado de audiencias sostenidas con autoridades, viajes financiados y donativos. La vista inicial no representa todo el universo.
               </p>
-              <Link href="/politico" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem", width: "100%", textAlign: "center" }}>
-                Ver Autoridades y Lobby →
+              <Link prefetch={false} href="/cruces?fuente=infolobby" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem", width: "100%", textAlign: "center" }}>
+                Ver registros InfoLobby →
               </Link>
             </div>
 
@@ -213,7 +303,7 @@ export default async function CrossesPage() {
               <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", margin: "0.3rem 0 0.85rem", lineHeight: 1.4 }}>
                 Aportes y transferencias del Estado a personas jurídicas y entidades privadas receptoras.
               </p>
-              <Link href="/transferencias" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem", width: "100%", textAlign: "center" }}>
+              <Link prefetch={false} href="/transferencias" className="btn btn-secondary btn-sm" style={{ fontSize: "0.75rem", width: "100%", textAlign: "center" }}>
                 Ver Módulo Transferencias →
               </Link>
             </div>

@@ -1,11 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { listEntities } from "@/lib/data-platform-d1";
+import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
 
 export const metadata: Metadata = {
   title: "Entidades Canónicas — El Cambiómetro",
   description:
     "Catálogo de personas, organismos, proveedores y municipalidades indexados en la plataforma de evidencia pública. Busca y cruza entidades con documentos oficiales.",
+  alternates: { canonical: "/entidades" },
 };
 
 const KIND_LABEL: Record<string, { label: string; emoji: string; badge: string }> = {
@@ -22,11 +23,12 @@ export default async function EntidadesPage() {
   const kindFilter: string = "";
   const cursor = undefined;
 
-  const result = await listEntities({
-    kind: kindFilter as ("person" | "public_body" | "supplier" | "municipality") | undefined,
-    limit: PAGE_SIZE,
-    cursor,
-  });
+  const catalog = getStaticEntityCatalog();
+  const result = {
+    data: catalog.firstPage,
+    total: catalog.total,
+    nextCursor: null,
+  };
 
   // Filter by search query client-side (the listEntities API doesn't support text search)
   const filtered = query
@@ -35,7 +37,7 @@ export default async function EntidadesPage() {
       )
     : result.data;
 
-  const allKindCounts = await listEntities({ limit: 1 });
+  const allKindCounts = { total: catalog.total };
 
   return (
     <main>
@@ -91,6 +93,7 @@ export default async function EntidadesPage() {
               const active = kindFilter === kind;
               return (
                 <Link
+                  prefetch={false}
                   key={kind}
                   href={href}
                   className={`btn ${active ? "btn-primary" : "btn-ghost"}`}
@@ -126,7 +129,7 @@ export default async function EntidadesPage() {
             <div className="empty-state">
               <strong>Sin entidades que coincidan con los filtros</strong>
               <p>Prueba ampliar la búsqueda o cambiar el tipo de entidad.</p>
-              <Link href="/entidades" className="btn btn-ghost">Ver todas las entidades</Link>
+              <Link prefetch={false} href="/entidades" className="btn btn-ghost">Ver todas las entidades</Link>
             </div>
           ) : (
             <div className="table-shell">
@@ -190,7 +193,7 @@ export default async function EntidadesPage() {
                           ))}
                         </td>
                         <td>
-                          <Link className="data-link" href={`/entidades/${entity.id}`}>
+                          <Link prefetch={false} className="data-link" href={`/entidades/${entity.id}`}>
                             Ver ficha ↗
                           </Link>
                         </td>
@@ -207,6 +210,7 @@ export default async function EntidadesPage() {
             <div style={{ display: "flex", justifyContent: "space-between", marginTop: "1.5rem", gap: "1rem" }}>
               {cursor && (
                 <Link
+                  prefetch={false}
                   href={`/entidades?${kindFilter ? `kind=${kindFilter}&` : ""}${query ? `q=${encodeURIComponent(query)}&` : ""}`}
                   className="btn btn-ghost"
                 >
@@ -215,6 +219,7 @@ export default async function EntidadesPage() {
               )}
               {result.nextCursor && (
                 <Link
+                  prefetch={false}
                   href={`/entidades?${kindFilter ? `kind=${kindFilter}&` : ""}${query ? `q=${encodeURIComponent(query)}&` : ""}cursor=${result.nextCursor}`}
                   className="btn btn-ghost"
                   style={{ marginLeft: "auto" }}
@@ -243,7 +248,7 @@ export default async function EntidadesPage() {
               { href: "/cruces", label: "🔗 Explorar cruces →" },
               { href: "/rankings", label: "📊 Rankings SERVEL" },
             ].map(({ href, label }) => (
-              <Link key={href} href={href} className="btn btn-ghost" style={{ fontSize: "0.82rem" }}>
+              <Link prefetch={false} key={href} href={href} className="btn btn-ghost" style={{ fontSize: "0.82rem" }}>
                 {label}
               </Link>
             ))}

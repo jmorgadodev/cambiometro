@@ -8,6 +8,7 @@ import {
   votacionesDelPartido,
   asistenciaPorSesion,
 } from "./partido-estadisticas";
+import { etiquetaVotosPorCamara } from "./partido-votos-label";
 import { getPartidoConfig, PARTIDOS_CONFIG } from "./partidos.config";
 
 describe("partido-estadisticas", () => {
@@ -72,5 +73,28 @@ describe("partido-estadisticas", () => {
     expect(asistencia[0].presentes).toBeDefined();
     expect(asistencia[0].total).toBeDefined();
   });
-});
 
+  it("conserva los ítems de gasto publicados también para Independientes", async () => {
+    const ind = await getPartidoEstadisticas("ind");
+    expect(ind?.gastos.total).toBeGreaterThan(0);
+    expect(ind?.gastos.porItem.length).toBeGreaterThan(0);
+    expect(ind?.gastos.porItem[0].total).toBeGreaterThan(0);
+  });
+
+  it("distingue ausencia de senadores de una falla de datos y conserva los votos de Lilian en Cámara", async () => {
+    const pdg = await getPartidoEstadisticas("pdg");
+
+    expect(politicosDelPartido("pdg").find((p) => p.id === "dip-123")).toMatchObject({
+      nombre_completo: "Lilian Betancurt Delgado",
+      cargo: "Diputado",
+    });
+    expect(pdg?.votosCamara.emitidos).toBeGreaterThan(0);
+    expect(pdg?.votosSenado.apariciones).toBe(0);
+    expect(etiquetaVotosPorCamara("Senado", 0, pdg!.votosSenado)).toBe(
+      "Sin senadores en el padrón vigente",
+    );
+    expect(etiquetaVotosPorCamara("Cámara", 14, pdg!.votosCamara)).toContain(
+      "votos emitidos por sus diputados",
+    );
+  });
+});

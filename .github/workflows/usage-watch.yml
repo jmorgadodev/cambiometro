@@ -1,15 +1,21 @@
 name: Watch GitHub Actions Usage & Billing
 
 on:
+  schedule:
+    - cron: "15 * * * *" # Analytics only, including 00:15 UTC after the quota reset.
   workflow_dispatch:
 
 concurrency:
   group: usage-watch
   cancel-in-progress: true
 
+permissions:
+  contents: read
+
 jobs:
   check-usage:
     name: Check GitHub Actions Minutes & Limit
+    if: github.event_name == 'workflow_dispatch'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
@@ -29,3 +35,33 @@ jobs:
           echo "Recuerda: El Spending Limit en GitHub Settings debe ser $0 USD."
           echo "El despliegue se realiza mediante Pages y el Worker API separado, con promoción explícita."
           echo "======================================================="
+
+  check-d1:
+    name: Check D1 Free Tier Usage
+    if: github.event_name == 'workflow_dispatch' || github.event.repository.private == false
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+      - name: Consultar Analytics D1 sin ejecutar SQL
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+          D1_USAGE_OUTPUT: d1-usage.json
+          # La vigilancia programada debe completar para conservar la evidencia
+          # y dejar el estado critical visible sin convertir la alerta en un
+          # "fallo de tarea". Errores de credenciales/respuesta siguen fallando.
+          D1_USAGE_FAIL_ON_CRITICAL: ${{ github.event_name == 'workflow_dispatch' && 'true' || 'false' }}
+        run: node scripts/check-d1-usage.mjs
+      - name: Conservar evidencia de uso
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: d1-usage-${{ github.run_id }}
+          path: transparencia-app/d1-usage.json
+          if-no-files-found: warn
+          retention-days: 31

@@ -2,14 +2,15 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
-import React, { useEffect, useState, startTransition } from "react";
+import { usePathname } from "next/navigation";
+import React, { useEffect, useRef, useState } from "react";
 import Icono from "@/components/ui/Icono";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
+import { THEME_ORDER, type ThemeName } from "@/lib/theme-tokens";
 
 /**
  * Orden narrativo canónico por clústeres estructurados:
- * 1. Poder & Decisión: Análisis Parlamentario · Partidos · Directorio de Personas
+ * 1. Poder & Decisión: Análisis Parlamentario · Partidos · Directorio · Remuneraciones
  * 2. Ejecución & Territorio: Servicios públicos · Municipalidades · Transferencias
  * 3. Vínculos & Dinámicas: Cruces · Movimientos
  * 4. Meta & Transparencia: Datos · Metodología
@@ -18,71 +19,87 @@ export const NAV_CLUSTERS = [
   {
     clusterName: "Poder & Decisión",
     items: [
-      { href: "/politico", label: "Análisis Parlamentario" },
-      { href: "/partidos", label: "Partidos" },
-      { href: "/personas", label: "Directorio de Personas" },
+       { href: "/politico", label: "Análisis Parlamentario", navLabel: "Análisis" },
+       { href: "/partidos", label: "Partidos", navLabel: "Partidos" },
+       { href: "/votaciones-destacadas/", label: "Votaciones destacadas", navLabel: "Votaciones" },
+       { href: "/personas", label: "Directorio de Personas", navLabel: "Personas" },
+       { href: "/remuneraciones-publicas", label: "Remuneraciones públicas", navLabel: "Remuneraciones" },
     ],
   },
   {
     clusterName: "Ejecución & Territorio",
     items: [
-      { href: "/servicios-publicos", label: "Servicios públicos" },
-      { href: "/municipalidades", label: "Municipalidades" },
-      { href: "/transferencias", label: "Transferencias" },
+       { href: "/servicios-publicos", label: "Servicios públicos", navLabel: "Servicios" },
+       { href: "/municipalidades", label: "Municipalidades", navLabel: "Municipios" },
+       { href: "/transferencias", label: "Transferencias", navLabel: "Transferencias" },
     ],
   },
   {
     clusterName: "Vínculos & Dinámicas",
     items: [
-      { href: "/cruces", label: "Cruces" },
-      { href: "/movimientos", label: "Movimientos" },
+       { href: "/cruces", label: "Cruces", navLabel: "Cruces" },
+       { href: "/movimientos", label: "Movimientos", navLabel: "Movimientos" },
     ],
   },
   {
     clusterName: "Meta & Transparencia",
     items: [
-      { href: "/datos", label: "Datos" },
-      { href: "/como-funciona", label: "Metodología" },
+       { href: "/datos", label: "Datos", navLabel: "Datos" },
+       { href: "/como-funciona", label: "Metodología", navLabel: "Metodología" },
     ],
   },
 ];
 
 interface SiteHeaderProps {
-  updatedAt?: string | null;
   totalRecords?: number;
 }
 
-export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps) {
+export default function SiteHeader({ totalRecords }: SiteHeaderProps) {
   const pathname = usePathname();
-  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [isDark, setIsDark] = useState(false);
+  const [hydrated, setHydrated] = useState(false);
+  const [theme, setTheme] = useState<ThemeName>("paper");
+  const previousPathname = useRef(pathname);
+  const pathnameEffectReady = useRef(false);
 
   const displayTotal = totalRecords && totalRecords > 0 ? totalRecords : GLOBAL_KPIS.registros_canonicos;
-  const displayCorte = updatedAt || GLOBAL_KPIS.corte;
+  const catalogStatusLabel = "En línea · actualización por fuente";
+  const catalogStatusDescription = "Catálogo público disponible. Cada fuente conserva su propia fecha de actualización.";
 
-  // Sincronizar tema claro / oscuro desde localStorage o media query
+  // Papel es el valor predeterminado; nunca se usa el tema del sistema.
   useEffect(() => {
     const id = requestAnimationFrame(() => {
       const savedTheme = localStorage.getItem("cambiometro-theme");
-      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const shouldBeDark = savedTheme ? savedTheme === "dark" : prefersDark;
-      if (shouldBeDark) {
-        document.documentElement.classList.add("dark");
-        document.documentElement.setAttribute("data-theme", "dark");
-        setIsDark(true);
-      } else {
-        document.documentElement.classList.remove("dark");
-        document.documentElement.setAttribute("data-theme", "light");
-        setIsDark(false);
-      }
+      const nextTheme: ThemeName = savedTheme === "dark" || savedTheme === "night" || savedTheme === "paper" ? savedTheme : "paper";
+      document.documentElement.classList.toggle("dark", nextTheme === "dark");
+      document.documentElement.setAttribute("data-theme", nextTheme);
+      setTheme(nextTheme);
+      setHydrated(true);
     });
     return () => cancelAnimationFrame(id);
   }, []);
 
-  // Cerrar drawer al cambiar de ruta
+  // Cerrar el drawer sólo después de una navegación real. Ejecutar un
+  // setState diferido en el montaje competía con el primer click del botón
+  // en el shell estático y podía devolver aria-expanded a false.
   useEffect(() => {
-    startTransition(() => setDrawerOpen(false));
+    // Durante la hidratación de un export estático usePathname puede ser null
+    // antes de entregar la ruta real. No registres esa transición como una
+    // navegación: si ocurre después del primer click, cerraría el drawer.
+    if (!pathname) return;
+    // En un export estático usePathname puede pasar de null al pathname
+    // hidratado justo después del primer render. No cierres el drawer en esa
+    // transición: puede ocurrir entre el click del botón y el commit del
+    // estado y deja aria-expanded en false aunque el usuario sí lo abrió.
+    if (!pathnameEffectReady.current) {
+      pathnameEffectReady.current = true;
+      previousPathname.current = pathname;
+      return;
+    }
+    if (previousPathname.current !== pathname) {
+      previousPathname.current = pathname;
+      setDrawerOpen(false);
+    }
   }, [pathname]);
 
   // Manejo de tecla Escape y bloqueo de scroll al abrir drawer
@@ -105,25 +122,22 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
   }, [drawerOpen]);
 
   const toggleTheme = () => {
-    const nextDark = !isDark;
-    setIsDark(nextDark);
-    if (nextDark) {
-      document.documentElement.classList.add("dark");
-      document.documentElement.setAttribute("data-theme", "dark");
-      localStorage.setItem("cambiometro-theme", "dark");
-    } else {
-      document.documentElement.classList.remove("dark");
-      document.documentElement.setAttribute("data-theme", "light");
-      localStorage.setItem("cambiometro-theme", "light");
-    }
+    const nextTheme = THEME_ORDER[(THEME_ORDER.indexOf(theme) + 1) % THEME_ORDER.length];
+    setTheme(nextTheme);
+    document.documentElement.classList.toggle("dark", nextTheme === "dark");
+    document.documentElement.setAttribute("data-theme", nextTheme);
+    localStorage.setItem("cambiometro-theme", nextTheme);
   };
+
+  const themeLabels: Record<ThemeName, string> = { paper: "Papel", dark: "Oscuro", night: "Noche" };
+  const nextTheme = THEME_ORDER[(THEME_ORDER.indexOf(theme) + 1) % THEME_ORDER.length];
 
   return (
     <>
-      <header className="site-header">
+      <header className="site-header" data-hydrated={hydrated ? "true" : undefined}>
         {/* ─── FILA 1: DESKTOP (≥1024px) / FILA ÚNICA MÓVIL (<1024px) ───────── */}
         <div className="container-main site-header__primary">
-          <Link href="/" className="site-brand" aria-label="El Cambiómetro, inicio">
+          <Link href="/" prefetch={false} className="site-brand" aria-label="El Cambiómetro, inicio">
             <Image
               src="/brand/el-cambiometro-mark.svg"
               alt="Símbolo dial El Cambiómetro"
@@ -139,16 +153,18 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
           </Link>
 
           <div className="site-header__actions">
-            {/* Chip de corte (Solo visible en Desktop ≥1024px) */}
+            {/* Estado del catálogo (cada fuente conserva su propia fecha) */}
             <Link
-              href="/como-funciona#fuentes"
+              href="/fuentes"
+              prefetch={false}
               className="snapshot-stamp"
-              aria-label={`Corte oficial: ${displayTotal.toLocaleString("es-CL")} registros`}
+              aria-label={`${catalogStatusDescription} ${displayTotal.toLocaleString("es-CL")} registros.`}
+              title={catalogStatusDescription}
             >
               <span className="snapshot-stamp__status" aria-hidden="true" />
               <span>
                 <strong>{displayTotal.toLocaleString("es-CL")} registros</strong>
-                <small>{displayCorte ? `Corte ${displayCorte}` : "Corte oficial"}</small>
+                <small>{catalogStatusLabel}</small>
               </span>
             </Link>
 
@@ -157,10 +173,11 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
               type="button"
               className="theme-toggle-btn"
               onClick={toggleTheme}
-              aria-label={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
-              title={isDark ? "Cambiar a modo claro" : "Cambiar a modo oscuro"}
+              aria-label={`Tema actual: ${themeLabels[theme]}. Cambiar a ${themeLabels[nextTheme]}`}
+              title={`Tema: ${themeLabels[theme]} · siguiente: ${themeLabels[nextTheme]}`}
             >
-              <Icono nombre={isDark ? "sun" : "moon"} size={18} />
+              <Icono nombre={theme === "paper" ? "sun" : "moon"} size={18} />
+              <span className="sr-only">{themeLabels[theme]}</span>
             </button>
 
             {/* Botón de Secciones (Solo visible en móvil <1024px, touch target ≥ 44px) */}
@@ -194,15 +211,13 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
                     <Link
                       key={item.href}
                       href={item.href}
+                      prefetch={false}
                       className="site-nav__link"
                       aria-current={isActive ? "page" : undefined}
-                      onMouseEnter={() => {
-                        try {
-                          router.prefetch(item.href);
-                        } catch {}
-                      }}
+                      aria-label={item.label}
+                      title={item.label}
                     >
-                      {item.label}
+                      {item.navLabel}
                     </Link>
                   );
                 })}
@@ -262,14 +277,10 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
                     <li key={`m-${item.href}`}>
                       <Link
                         href={item.href}
+                        prefetch={false}
                         className={`mobile-drawer__link${isActive ? " is-active" : ""}`}
                         aria-current={isActive ? "page" : undefined}
                         onClick={() => setDrawerOpen(false)}
-                        onMouseEnter={() => {
-                          try {
-                            router.prefetch(item.href);
-                          } catch {}
-                        }}
                       >
                         <span>{item.label}</span>
                         {isActive && <Icono nombre="check" size={14} style={{ color: "var(--accent)" }} />}
@@ -283,17 +294,19 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
         </nav>
 
         <div className="mobile-drawer__footer">
-          {/* Chip de corte en el drawer */}
+          {/* Estado del catálogo en el drawer */}
           <Link
-            href="/como-funciona#fuentes"
+            href="/fuentes"
+            prefetch={false}
             className="drawer-snapshot-stamp"
             onClick={() => setDrawerOpen(false)}
-            aria-label={`Corte de datos: ${displayTotal.toLocaleString("es-CL")} registros`}
+            aria-label={`${catalogStatusDescription} ${displayTotal.toLocaleString("es-CL")} registros.`}
+            title={catalogStatusDescription}
           >
             <span className="snapshot-stamp__status" aria-hidden="true" />
             <span>
               <strong>{displayTotal.toLocaleString("es-CL")} registros</strong>
-              <small>{displayCorte ? `Corte ${displayCorte}` : "Corte oficial"}</small>
+              <small>{catalogStatusLabel}</small>
             </span>
           </Link>
 
@@ -319,6 +332,7 @@ export default function SiteHeader({ updatedAt, totalRecords }: SiteHeaderProps)
             </a>
             <Link
               href="/donar"
+              prefetch={false}
               className="btn btn-primary drawer-donate-btn"
               onClick={() => setDrawerOpen(false)}
             >

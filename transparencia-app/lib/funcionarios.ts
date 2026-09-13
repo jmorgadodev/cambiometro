@@ -28,6 +28,7 @@ export type TipoOrganoFuncionario =
 export interface FuncionarioPublico {
   id: string;
   nombre_completo: string;
+  organo_id?: string;
   organo_nombre: string;
   organo_tipo: TipoOrganoFuncionario;
   cargo: string;
@@ -42,7 +43,7 @@ export interface FuncionarioPublico {
   instagram_handle?: string;
   linkedin_url?: string;
   /** Campos adicionales provenientes de Transparencia Activa (portaltransparencia.cl) */
-  remuneracion_liquida_mensual?: number;
+  remuneracion_liquida_mensual?: number | null;
   grado_eus?: string;
   formacion?: string;
   region?: string;
@@ -59,6 +60,14 @@ export interface FuncionarioPublico {
   fuente?: string;
   fuente_periodo?: string;
   periodo?: string;
+  /** Preserva el valor que llegó desde la fuente cuando hubo depuración. */
+  nombre_completo_original?: string;
+  remuneracion_liquida_mensual_original?: number | null;
+  calidad_datos?: {
+    estado: "original" | "normalizado";
+    incidencias: string[];
+    detalle: string;
+  };
 }
 
 export const FUNCIONARIOS_PUBLICOS_SEED: FuncionarioPublico[] = [];

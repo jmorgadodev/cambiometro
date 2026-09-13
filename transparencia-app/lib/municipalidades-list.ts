@@ -1,4 +1,5 @@
-import municipalidadesListJson from "@/data/municipalidades-list.json";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 
 export interface MunicipalidadListItem {
   id: string;
@@ -27,7 +28,16 @@ export interface MunicipalidadListItem {
   auditorias_cgr_count?: number;
 }
 
-export const MUNICIPALIDADES_LIST = municipalidadesListJson as unknown as MunicipalidadListItem[];
+let municipalidadesListJson: unknown = [];
+try {
+  municipalidadesListJson = JSON.parse(
+    readFileSync(join(process.cwd(), "data", "municipalidades-list.json"), "utf8"),
+  );
+} catch {
+  // El build estático provee el catálogo; los consumidores de slices no lo cargan en el navegador.
+}
+
+export const MUNICIPALIDADES_LIST = municipalidadesListJson as MunicipalidadListItem[];
 
 export function getMunicipalidadesList(): MunicipalidadListItem[] {
   return MUNICIPALIDADES_LIST;
@@ -42,7 +52,15 @@ export function getMunicipalidadesStats() {
   const totalMasaMensual = all.reduce((sum, m) => sum + (m.resumen_personal?.masa_mensual_clp ?? 0), 0);
   const alDiaCount = all.filter((m) => m.estado_frescura === "al_dia").length;
   const desfasadoCount = all.filter((m) => m.estado_frescura === "desfasado").length;
-  const sinDatosCount = all.filter((m) => m.estado_frescura === "sin_datos" || !m.estado_frescura).length;
+  // Territory without its own municipality is reported separately below;
+  // never count it as a missing municipal payroll.
+  const sinDatosCount = all.filter((m) => m.tiene_municipalidad_propia && (m.estado_frescura === "sin_datos" || !m.estado_frescura)).length;
+  // El catálogo territorial y la cobertura de nóminas son métricas distintas:
+  // Antártica pertenece al territorio nacional, pero no tiene municipalidad
+  // propia; no debe presentarse como una fuente CPLT ausente.
+  const territorioNoAplicableCount = all.filter((m) => !m.tiene_municipalidad_propia).length;
+  const nominaSinDatosCount = all.filter((m) => m.tiene_municipalidad_propia && (m.estado_frescura === "sin_datos" || !m.resumen_personal)).length;
+  const nominaPublicadaCount = all.filter((m) => m.tiene_municipalidad_propia && Boolean(m.resumen_personal) && m.estado_frescura !== "sin_datos").length;
 
   return {
     totalComunas: all.length,
@@ -54,6 +72,9 @@ export function getMunicipalidadesStats() {
     alDiaCount,
     desfasadoCount,
     sinDatosCount,
+    nominaPublicadaCount,
+    nominaSinDatosCount,
+    territorioNoAplicableCount,
   };
 }
 

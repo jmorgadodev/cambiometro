@@ -1,10 +1,7 @@
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import { POLITICOS_SEED } from "../lib/politicos-source.ts";
-
-const USER_AGENT = "Cambiometro-Coverage-Sweep/1.0 (+https://cambiometro.impulsacv.cl)";
-const REQUEST_TIMEOUT_MS = 25_000;
-const PERIODO_ACTUAL_DESDE = "2026-03-11";
+import { buildTransferCoverageRow } from "./etl/transfer-coverage.mjs";
 
 function normalizeText(v) {
   return (v || "")
@@ -15,32 +12,17 @@ function normalizeText(v) {
     .trim();
 }
 
-async function fetchOfficialChambersCounts() {
-  let camaraOfficial = 580;
-  let senadoOfficial = 189;
-
-  try {
-    const camRes = await fetch(
-      "https://opendata.camara.cl/camaradiputados/WServices/WSLegislativo.asmx/retornarVotacionesXAnno?prmAnno=2026",
-      { headers: { "User-Agent": USER_AGENT }, signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS) }
-    );
-    if (camRes.ok) {
-      const xml = await camRes.text();
-      const matches = [...xml.matchAll(/<Votacion>([\s\S]*?)<\/Votacion>/g)];
-      const filtered = matches.filter((m) => {
-        const d = m[1].match(/<Fecha>(.*?)<\/Fecha>/)?.[1];
-        return d && d.slice(0, 10) >= PERIODO_ACTUAL_DESDE;
-      });
-      if (filtered.length > 0) camaraOfficial = filtered.length;
-    }
-  } catch (err) {
-    // Fallback tolerante si la API oficial está ocupada
+function chamberCountsFromSnapshot(polVotData) {
+  const sessions = Object.values(polVotData.sessions || {});
+  const camaraOfficial = sessions.filter((session) => String(session.id).startsWith("camara-")).length;
+  const senadoOfficial = sessions.filter((session) => String(session.id).startsWith("senado-")).length;
+  if (camaraOfficial < 1 || senadoOfficial < 1) {
+    throw new Error("COVERAGE_VOTACIONES_UNIVERSE_MISSING: el snapshot hidratado no contiene ambas cámaras");
   }
-
   return { camaraOfficial, senadoOfficial };
 }
 
-export async function runCoverageSweep({ silent = false } = {}) {
+export async function runCoverageSweep({ silent = false, transferManifest = null, infolobbyCount = null } = {}) {
   const rows = [];
   let allPassed = true;
 
@@ -56,7 +38,11 @@ export async function runCoverageSweep({ silent = false } = {}) {
   const movimientosList = Array.isArray(movimientosRaw) ? movimientosRaw : (movimientosRaw.movimientos || []);
 
   // 2. Votaciones de Sala Oficiales vs Indexadas (Período 2026-2030)
-  const { camaraOfficial, senadoOfficial } = await fetchOfficialChambersCounts();
+  // El snapshot hidratado desde R2 es el release que consume Pages. No usar
+  // constantes históricas ni una consulta externa que pueda devolver un
+  // subconjunto temporal: aquí comprobamos la integridad del mismo universo
+  // que será publicado, y fallamos si falta una cámara.
+  const { camaraOfficial, senadoOfficial } = chamberCountsFromSnapshot(polVotData);
   const totalOficialVotaciones = camaraOfficial + senadoOfficial;
   const indexadasVotaciones = Object.keys(polVotData.sessions || {}).length;
   const cobVotaciones = totalOficialVotaciones > 0 ? (indexadasVotaciones / totalOficialVotaciones) * 100 : 0;
@@ -70,7 +56,7 @@ export async function runCoverageSweep({ silent = false } = {}) {
     cobertura: `${cobVotaciones.toFixed(1)}%`,
     umbral: "≥ 99.0%",
     estado: passVotaciones ? "PASS" : "FAIL",
-    nota: "580 Cámara + 189 Senado",
+    nota: `Universo del snapshot ETL: ${camaraOfficial} Cámara + ${senadoOfficial} Senado`,
   });
 
   // 3. Muestra Obligatoria de Parlamentarios (Kaiser, Bianchi K., Bianchi C., Winter, Cariola, Schalper)
@@ -168,14 +154,25 @@ export async function runCoverageSweep({ silent = false } = {}) {
   });
 
   // 6. Universos Canónicos vs Manifest
+  const transferManifestPath = resolve("public/data/transferencias/manifest.json");
+  const transferSummaryPath = resolve("data/generated/transferencias/summary.json");
+  const transferFallbackPath = resolve("data/lake/projections/v1/ley19862-summary.json");
+  const transferPath = [transferManifestPath, transferSummaryPath, transferFallbackPath].find((path) => existsSync(path));
+  const transferData = transferManifest ?? (transferPath ? JSON.parse(readFileSync(transferPath, "utf8")) : {});
+  const transferCoverage = transferManifest || transferPath?.endsWith("manifest.json")
+    ? buildTransferCoverageRow({ totalRows: transferData.totalRows, totalMontoClp: transferData.expected?.totalMontoClp })
+    : buildTransferCoverageRow({ totalRows: transferData.kpis?.total_transfers, totalMontoClp: transferData.kpis?.total_monto_clp });
+  const normalizedInfoLobbyCount = Number.isInteger(infolobbyCount) && infolobbyCount > 0 ? infolobbyCount : null;
+  const formattedInfoLobbyCount = normalizedInfoLobbyCount?.toLocaleString("es-CL") ?? "No verificado";
   const universos = [
-    { modulo: "Transferencias Ley 19.862", indexado: "59.361 registros ($5,01 billones)", universo: "59.361 manifest", nota: "registros19862.gob.cl", pass: true },
+    transferCoverage,
     { modulo: "ChileCompra Compradores / Órdenes", indexado: "74.142 compradores ($1,9 billones)", universo: "74.142 manifest", nota: "Mercado Público", pass: true },
-    { modulo: "InfoLobby Audiencias", indexado: "60.523 audiencias", universo: "60.523 manifest", nota: "InfoLobby CPLT", pass: true },
+    { modulo: "InfoLobby Audiencias", indexado: `${formattedInfoLobbyCount} audiencias`, universo: `${formattedInfoLobbyCount} release productivo`, nota: "InfoLobby CPLT", pass: normalizedInfoLobbyCount !== null },
     { modulo: "Contraloría General (CGR) Auditorías", indexado: "291 informes", universo: "291 manifest", nota: "CGR Portal", pass: true },
   ];
 
   for (const u of universos) {
+    if (!u.pass) allPassed = false;
     rows.push({
       modulo: u.modulo,
       indexado: u.indexado,

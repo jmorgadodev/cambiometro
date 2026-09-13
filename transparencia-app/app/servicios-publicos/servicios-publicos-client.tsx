@@ -6,6 +6,9 @@ import Link from "next/link";
 import type { ServicioPublicoEnriquecido } from "@/lib/servicios-publicos-data";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import ShareButton from "@/components/ShareButton";
+import ReleaseMetaCard from "@/components/data/ReleaseMetaCard";
+import type { CoverageMetric, DataQualityStatus } from "@/lib/data-quality-summary";
+import OverviewSignalPanel from "@/components/dashboard/OverviewSignalPanel";
 
 type ServicioConPolitico = ServicioPublicoEnriquecido & {
   politico_id?: string | null;
@@ -20,6 +23,24 @@ interface Props {
   /** Pre-computed server-side for Cloudflare Workers runtime */
   presupuestoTotalLey?: number;
   gastoDevengado?: number;
+  release: {
+    source: string;
+    period: string;
+    lastSuccessAt: string | null;
+    status: DataQualityStatus;
+    published: CoverageMetric;
+    queryable: CoverageMetric;
+    related: CoverageMetric;
+    checksumSha256: string | null;
+    officialUrl?: string;
+  };
+  dipresCoverage: {
+    catalogDeclaredCount: number | null;
+    publicCount: number;
+    projectionPrograms: number;
+    projectionPeriod: string;
+    officialUrl?: string;
+  };
 }
 
 function formatCLP(n: number) {
@@ -55,6 +76,8 @@ export default function ServiciosPublicosClient({
   totalConPartida,
   presupuestoTotalLey: presupuestoTotalLeyProp,
   gastoDevengado: gastoDevengadoProp,
+  release,
+  dipresCoverage,
 }: Props) {
   const totalConPresupuestoEfectivo = totalConPartida ?? totalConPresupuesto ?? 0;
   const searchParams = useSearchParams();
@@ -304,6 +327,80 @@ export default function ServiciosPublicosClient({
         </div>
       </section>
 
+      <div className="container-main" style={{ marginTop: "1rem" }}>
+        <ReleaseMetaCard
+          title="Release del directorio institucional"
+          source={release.source}
+          period={release.period}
+          lastSuccessAt={release.lastSuccessAt}
+          status={release.status}
+          published={release.published}
+          queryable={release.queryable}
+          related={release.related}
+          checksumSha256={release.checksumSha256}
+          href="/servicios-publicos?view=table"
+          officialUrl={release.officialUrl}
+          note="Estas métricas describen el directorio institucional. El alcance de DIPRES se informa por separado porque sus datos son agregados de presupuesto y ejecución, no fichas de remuneraciones individuales."
+        />
+      </div>
+
+      <section className="container-main" style={{ marginTop: "1rem" }} aria-labelledby="dipres-coverage-title">
+        <div className="card" style={{ padding: "1.25rem", borderColor: "var(--border)" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", gap: "1rem", flexWrap: "wrap" }}>
+            <div>
+              <div className="eyebrow" style={{ color: "var(--accent)", marginBottom: "0.25rem" }}>DIPRES · datos agregados</div>
+              <h2 id="dipres-coverage-title" style={{ margin: 0, fontSize: "1.05rem", color: "var(--text-1)" }}>Presupuesto y ejecución pública</h2>
+              <p style={{ margin: "0.4rem 0 0", maxWidth: "760px", color: "var(--text-muted)", fontSize: "0.78rem", lineHeight: 1.5 }}>
+                Esta fuente permite comparar partidas, capítulos, programas y ejecución mensual. No corresponde a un buscador de sueldos ni a fichas de pagos personales.
+              </p>
+            </div>
+            {dipresCoverage.officialUrl ? <a href={dipresCoverage.officialUrl} target="_blank" rel="noreferrer" className="btn btn-ghost" style={{ fontSize: "0.76rem" }}>Fuente oficial ↗</a> : null}
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: "0.65rem", marginTop: "1rem" }}>
+            <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: "0.7rem" }}>
+              <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", textTransform: "uppercase" }}>Programas en la proyección</div>
+              <strong style={{ display: "block", marginTop: "0.18rem", color: "var(--text-1)", fontFamily: "monospace" }}>{dipresCoverage.projectionPrograms.toLocaleString("es-CL")}</strong>
+            </div>
+            <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: "0.7rem" }}>
+              <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", textTransform: "uppercase" }}>Registros consultables</div>
+              <strong style={{ display: "block", marginTop: "0.18rem", color: "var(--text-1)", fontFamily: "monospace" }}>{dipresCoverage.publicCount.toLocaleString("es-CL")}</strong>
+            </div>
+            <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: "0.7rem" }}>
+              <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", textTransform: "uppercase" }}>Catálogo de la fuente</div>
+              <strong style={{ display: "block", marginTop: "0.18rem", color: "var(--text-1)", fontFamily: "monospace" }}>{dipresCoverage.catalogDeclaredCount === null ? "No publicado" : dipresCoverage.catalogDeclaredCount.toLocaleString("es-CL")}</strong>
+            </div>
+            <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, padding: "0.7rem" }}>
+              <div style={{ fontSize: "0.68rem", color: "var(--text-muted)", textTransform: "uppercase" }}>Ejecución visible</div>
+              <strong style={{ display: "block", marginTop: "0.18rem", color: "var(--text-1)", fontFamily: "monospace" }}>{dipresCoverage.projectionPeriod}</strong>
+            </div>
+          </div>
+
+          {dipresCoverage.catalogDeclaredCount !== null && dipresCoverage.catalogDeclaredCount > dipresCoverage.publicCount ? (
+            <p style={{ margin: "0.85rem 0 0", padding: "0.7rem 0.8rem", borderLeft: "3px solid var(--warn)", background: "var(--surface-2)", color: "var(--text-muted)", fontSize: "0.76rem", lineHeight: 1.5 }}>
+              El catálogo declara {dipresCoverage.catalogDeclaredCount.toLocaleString("es-CL")} registros, pero el release público consultable contiene {dipresCoverage.publicCount.toLocaleString("es-CL")}. La diferencia queda informada como cobertura pendiente; no se presenta como dato disponible ni se completa con estimaciones.
+            </p>
+          ) : null}
+        </div>
+      </section>
+
+      <div className="container-main" style={{ marginTop: "1rem" }}>
+        <OverviewSignalPanel
+          title="Lectura rápida del Estado"
+          description="Una vista comparativa de las instituciones del release actual antes de abrir cada ficha. Las cifras se calculan sobre los registros publicados y conservan la cobertura propia de cada fuente."
+          metrics={[
+            { label: "Instituciones monitoreadas", value: totalServicios.toLocaleString("es-CL"), detail: "Directorio consolidado", tone: "accent" },
+            { label: "Con partida DIPRES", value: totalConPresupuestoEfectivo.toLocaleString("es-CL"), detail: `${totalServicios > 0 ? ((totalConPresupuestoEfectivo / totalServicios) * 100).toFixed(1) : "0.0"}% del directorio`, tone: "ok" },
+            { label: "Presupuesto inicial", value: presupuestoTotal.inicialLey > 0 ? formatCLP(presupuestoTotal.inicialLey) : "No publicado", detail: "Ley de Presupuestos 2026", tone: "warn" },
+            { label: "Gasto ejecutado", value: presupuestoTotal.ejecutado > 0 ? formatCLP(presupuestoTotal.ejecutado) : "No publicado", detail: presupuestoTotal.inicialLey > 0 && presupuestoTotal.ejecutado > 0 ? `${pctEjecutado(presupuestoTotal.inicialLey, presupuestoTotal.ejecutado)} del inicial` : "Sin corte ejecutado", tone: "info" },
+          ]}
+          bars={[
+            { label: "Ejecución presupuestaria agregada", value: presupuestoTotal.inicialLey > 0 && presupuestoTotal.ejecutado > 0 ? (presupuestoTotal.ejecutado / presupuestoTotal.inicialLey) * 100 : null, displayValue: presupuestoTotal.inicialLey > 0 && presupuestoTotal.ejecutado > 0 ? pctEjecutado(presupuestoTotal.inicialLey, presupuestoTotal.ejecutado) : "No publicado", detail: "Indicador descriptivo del release, no una proyección", tone: "info" },
+          ]}
+          insight="Explora una institución para revisar presupuesto, personal, compras, lobby y auditorías con sus fuentes y períodos respectivos."
+        />
+      </div>
+
       {/* ═══ CONTENIDO Y FILTROS ═══════════════════════════════════════════════ */}
       <div className="container-main" style={{ marginTop: "2rem" }}>
         
@@ -521,7 +618,7 @@ export default function ServiciosPublicosClient({
                       <div style={{ fontSize: "0.86rem", fontWeight: 700, color: "var(--text-primary)", marginTop: "0.1rem" }}>
                         {serv.director_jefe_actual ? (
                           serv.politico_id ? (
-                            <Link href={`/politico/${getPoliticoSlug(serv.politico_id)}`} style={{ color: "var(--accent)", textDecoration: "none" }}>
+                            <Link prefetch={false} href={`/politico/${getPoliticoSlug(serv.politico_id)}`} style={{ color: "var(--accent)", textDecoration: "none" }}>
                               👤 {serv.director_jefe_actual}
                             </Link>
                           ) : (
@@ -588,7 +685,7 @@ export default function ServiciosPublicosClient({
                     </div>
 
                     <div style={{ marginTop: "0.85rem", display: "flex", gap: "0.5rem" }}>
-                      <Link
+                      <Link prefetch={false}
                         href={`/servicios-publicos/${serv.id}`}
                         className="btn btn-secondary"
                         style={{ fontSize: "0.8rem", padding: "0.4rem 0.75rem", flex: 1, textAlign: "center", justifyContent: "center" }}
@@ -646,7 +743,7 @@ export default function ServiciosPublicosClient({
                         }}
                       >
                         <td style={{ padding: "0.85rem 1rem", fontWeight: 700 }}>
-                          <Link href={`/servicios-publicos/${serv.id}`} style={{ color: "var(--text-primary)", textDecoration: "none" }}>
+                          <Link prefetch={false} href={`/servicios-publicos/${serv.id}`} style={{ color: "var(--text-primary)", textDecoration: "none" }}>
                             {serv.nombre}
                           </Link>
                           {serv.sigla && (
@@ -671,7 +768,7 @@ export default function ServiciosPublicosClient({
                           {compras?.monto_total_clp !== null && compras?.monto_total_clp !== undefined ? formatCLP(compras.monto_total_clp) : "—"}
                         </td>
                         <td style={{ padding: "0.85rem 1rem", textAlign: "center" }}>
-                          <Link href={`/servicios-publicos/${serv.id}`} className="btn btn-ghost" style={{ fontSize: "0.75rem", padding: "0.25rem 0.5rem" }}>
+                          <Link prefetch={false} href={`/servicios-publicos/${serv.id}`} className="btn btn-ghost" style={{ fontSize: "0.75rem", padding: "0.25rem 0.5rem" }}>
                             Ver Ficha →
                           </Link>
                         </td>

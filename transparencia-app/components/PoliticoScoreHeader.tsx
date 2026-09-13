@@ -153,6 +153,7 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
             <div style={{ display: "flex", gap: "0.75rem", flexWrap: "wrap", alignItems: "center" }}>
               <Link
                 href={`/partidos/${data.partido?.sigla?.toLowerCase() ?? "ind"}`}
+                prefetch={false}
                 style={{
                   display: "inline-flex",
                   alignItems: "center",

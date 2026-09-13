@@ -1,18 +1,25 @@
 import fs from "node:fs";
 import path from "node:path";
-import readline from "node:readline";
-import { Readable } from "node:stream";
-import iconv from "iconv-lite";
-import { createCpltRecordId, getCpltColumn, parseCpltColumns, parseCpltHeader, parseCpltIdentity, parseCpltRecord } from "./cplt-personal.mjs";
+import { createCpltRecordId, parseCpltHeader, parseCpltRecord, scanCpltCell } from "./cplt-personal.mjs";
+import { LatestCpltRecordStore } from "./latest-cplt-record-store.mjs";
 import { createMunicipalityRegistry } from "./municipality-registry.mjs";
-import { validatePublication } from "./validation.mjs";
+import { readRangedTextLines } from "./ranged-csv-source.mjs";
+import { validatePublicationStream } from "./validation.mjs";
+
+const SOURCE_BASES = [
+  "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos",
+  "https://www.cplt.cl/transparencia_activa/datoabierto/archivos",
+];
 
 const URLS = [
-  { tipo: "Planta", url: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv" },
-  { tipo: "Contrata", url: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalContrata.csv" },
-  { tipo: "Honorarios", url: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalContratohonorarios.csv" },
-  { tipo: "CodigoTrabajo", url: "https://www.cplt.cl/transparencia_activa/datoabierto/archivos/TA_PersonalCodigotrabajo.csv" },
-];
+  { tipo: "Planta", fileName: "TA_PersonalPlanta.csv" },
+  { tipo: "Contrata", fileName: "TA_PersonalContrata.csv" },
+  { tipo: "Honorarios", fileName: "TA_PersonalContratohonorarios.csv" },
+  { tipo: "CodigoTrabajo", fileName: "TA_PersonalCodigotrabajo.csv" },
+].map(({ tipo, fileName }) => ({
+  tipo,
+  urls: SOURCE_BASES.map((base) => `${base}/${fileName}`),
+}));
 
 function normalized(value) {
   return String(value ?? "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").trim().toLowerCase();
@@ -21,6 +28,15 @@ function normalized(value) {
 function titleCase(value) {
   return String(value ?? "").trim().toLowerCase().split(/\s+/).filter(Boolean)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
+}
+
+function memoryUsageMb() {
+  const usage = process.memoryUsage();
+  return {
+    heap: Math.round(usage.heapUsed / 1024 / 1024),
+    rss: Math.round(usage.rss / 1024 / 1024),
+    external: Math.round(usage.external / 1024 / 1024),
+  };
 }
 
 function loadOrganismosMap() {
@@ -85,79 +101,91 @@ function mergeById(previous, current) {
   return [...records.values()];
 }
 
-async function processStream(tipo, url, outputDir) {
-  console.log(`\n[+] Iniciando descarga de ${tipo}: ${url}`);
-  const response = await fetch(url);
-  if (!response.ok || !response.body) {
-    throw new Error(`CPLT_DOWNLOAD_FAILED: ${tipo} respondio ${response.status} ${response.statusText}`);
-  }
-
-  const decodedStream = Readable.fromWeb(response.body).pipe(iconv.decodeStream("win1252"));
-  const lines = readline.createInterface({ input: decodedStream, crlfDelay: Infinity });
-  const latestByOfficial = new Map();
+async function processStream(tipo, urls, outputDir) {
+  console.log(`\n[+] Iniciando descarga de ${tipo}: ${urls.join(" | ")}`);
+  let sourceUrl = urls[0];
+  let sourceValidator = null;
+  const lines = readRangedTextLines({
+    urls,
+    onSource: (source) => {
+      sourceUrl = source.sourceUrl;
+      sourceValidator = source.validator;
+      console.log(`    [INFO] ${tipo}: ${source.totalBytes} bytes; descarga reanudable por rangos`);
+    },
+  });
+  const temporaryStorePath = path.join(outputDir, `.latest-${normalized(tipo)}-${process.pid}.sqlite`);
+  const latestByOfficial = new LatestCpltRecordStore(temporaryStorePath);
   const unknownMunicipalities = new Set();
   let header = null;
   let linesProcessed = 0;
 
-  for await (const line of lines) {
-    linesProcessed += 1;
-    if (linesProcessed === 1) {
-      header = parseCpltHeader(line);
-      continue;
-    }
-    if (!line.trim()) continue;
-    if (linesProcessed % 500_000 === 0) {
-      console.log(`    [INFO] ${tipo}: ${linesProcessed} lineas; ${latestByOfficial.size} registros municipales vigentes unicos`);
-    }
-
-    const columns = parseCpltColumns(line);
-    const year = Number(getCpltColumn(columns, header, "anyo", "año"));
-    if (!Number.isInteger(year) || year < 2024) continue;
-    const organismoNombre = getCpltColumn(columns, header, "organismo_nombre", "organismo nombre");
-    if (!/^(?:(?:i|ilustre) )?municipalidad\b|^municipio\b/.test(normalized(organismoNombre))) continue;
-    let organismoId;
-    try {
-      organismoId = resolveOrganismoId(organismoNombre);
-    } catch (error) {
-      if (error instanceof Error && error.message.startsWith("CPLT_UNKNOWN_MUNICIPALITY:")) {
-        unknownMunicipalities.add(organismoNombre);
+  try {
+    for await (const line of lines) {
+      linesProcessed += 1;
+      if (linesProcessed === 1) {
+        header = parseCpltHeader(line);
         continue;
       }
-      throw error;
-    }
-    const identity = parseCpltIdentity({ columns, header, tipo, organismoId });
-    if (!identity) continue;
+      if (line.length === 0) continue;
+      if (linesProcessed % 500_000 === 0) {
+        const memory = memoryUsageMb();
+        console.log(`    [INFO] ${tipo}: ${linesProcessed} lineas; ${latestByOfficial.size} registros municipales vigentes unicos; memoria heap=${memory.heap}MB rss=${memory.rss}MB externa=${memory.external}MB`);
+      }
 
-    const current = latestByOfficial.get(identity.stableKey);
-    if (!current || identity.period > current.period) {
-      latestByOfficial.set(identity.stableKey, { line, organismoId, period: identity.period });
+      const year = Number(scanCpltCell(line, header, "anyo", "año"));
+      if (!Number.isInteger(year) || year < 2024) continue;
+      const organismoNombre = scanCpltCell(line, header, "organismo_nombre", "organismo nombre");
+      if (!/^(?:(?:i|ilustre) )?municipalidad\b|^municipio\b/.test(normalized(organismoNombre))) continue;
+      let organismoId;
+      try {
+        organismoId = resolveOrganismoId(organismoNombre);
+      } catch (error) {
+        if (error instanceof Error && error.message.startsWith("CPLT_UNKNOWN_MUNICIPALITY:")) {
+          unknownMunicipalities.add(organismoNombre);
+          continue;
+        }
+        throw error;
+      }
+      const funcionario = parseCpltRecord({ line, header, tipo, organismoId, sourceUrl, deferId: true });
+      if (!funcionario) continue;
+      latestByOfficial.upsert({
+        stableKey: funcionario._stableKey,
+        period: funcionario.fuente_periodo,
+        record: funcionario,
+        organismoId,
+        recordId: createCpltRecordId(funcionario._stableKey),
+      });
     }
-
+  } catch (error) {
+    latestByOfficial.close();
+    throw error;
   }
 
+  latestByOfficial.flush();
+
   if (unknownMunicipalities.size > 0) {
+    latestByOfficial.close();
     throw new Error(`CPLT_UNKNOWN_MUNICIPALITIES: ${JSON.stringify([...unknownMunicipalities].sort())}`);
   }
 
-  const organismoByRecordId = new Map();
-  const records = [...latestByOfficial.values()].map((latest) => {
-    const { organismoId } = latest;
-    const funcionario = parseCpltRecord({ line: latest.line, header, tipo, organismoId, sourceUrl: url, deferId: true });
-    if (!funcionario) throw new Error(`CPLT_LATEST_RECORD_INVALID: ${organismoId}`);
-    funcionario.id = createCpltRecordId(funcionario._stableKey);
-    delete funcionario._stableKey;
-    organismoByRecordId.set(funcionario.id, organismoId);
-    return funcionario;
-  });
-  const report = validatePublication({
+  const report = validatePublicationStream({
     sourceId: `cplt-personal-${normalized(tipo)}`,
-    records,
+    records: (function* finalizedRecords() {
+      for (const latest of latestByOfficial.valuesSortedByRecordId()) {
+        const funcionario = latest.record;
+        if (!funcionario) throw new Error(`CPLT_LATEST_RECORD_INVALID: ${latest.organismoId}`);
+        funcionario.id = createCpltRecordId(funcionario._stableKey);
+        delete funcionario._stableKey;
+        yield funcionario;
+      }
+    })(),
     minimumCount: 1,
   });
 
   const projectionsDir = path.join(outputDir, "projections", "funcionarios-v1");
   fs.mkdirSync(projectionsDir, { recursive: true });
-  const grouped = new Map();
+  // Elimina la categoría anterior leyendo un archivo municipal por vez.
+  // Nunca se conserva el universo completo en memoria.
   for (const fileName of fs.readdirSync(projectionsDir)) {
     if (!fileName.endsWith(".json")) continue;
     const filePath = path.join(projectionsDir, fileName);
@@ -165,22 +193,26 @@ async function processStream(tipo, url, outputDir) {
     fs.writeFileSync(filePath, JSON.stringify(retained));
   }
 
-  for (const funcionario of records) {
-    const organismoId = organismoByRecordId.get(funcionario.id);
-    if (!grouped.has(organismoId)) grouped.set(organismoId, []);
-    grouped.get(organismoId).push(funcionario);
-  }
-
-  for (const [organismoId, current] of grouped) {
-    const filePath = path.join(projectionsDir, `${organismoId}.json`);
+  const groupedCounts = new Map();
+  for (const group of latestByOfficial.groupsByOrganismo()) {
+    const current = group.records.map(({ record }) => {
+      if (!record) throw new Error(`CPLT_LATEST_RECORD_INVALID: ${group.organismoId}`);
+      record.id = createCpltRecordId(record._stableKey);
+      delete record._stableKey;
+      return record;
+    });
+    groupedCounts.set(group.organismoId, current.length);
+    const filePath = path.join(projectionsDir, `${group.organismoId}.json`);
     fs.writeFileSync(filePath, JSON.stringify(mergeById(readJsonArray(filePath), current)));
   }
+
+  latestByOfficial.close();
 
   const coverageDir = path.join(outputDir, "coverage");
   fs.mkdirSync(coverageDir, { recursive: true });
   const coverage = COMMUNES.map((commune) => {
     const administrationId = commune.administracion_municipal_id;
-    const count = grouped.get(administrationId)?.length ?? 0;
+    const count = groupedCounts.get(administrationId) ?? 0;
     return {
       communeId: commune.id,
       cut: commune.cut,
@@ -191,7 +223,7 @@ async function processStream(tipo, url, outputDir) {
   });
   fs.writeFileSync(path.join(coverageDir, `${normalized(tipo)}.json`), JSON.stringify({
     sourceId: `cplt-personal-${normalized(tipo)}`,
-    sourceUrl: url,
+    sourceUrl,
     generatedAt: new Date().toISOString(),
     coverage,
   }, null, 2));
@@ -200,7 +232,8 @@ async function processStream(tipo, url, outputDir) {
   fs.mkdirSync(validationDir, { recursive: true });
   fs.writeFileSync(path.join(validationDir, `${normalized(tipo)}.json`), JSON.stringify({
     ...report,
-    sourceUrl: url,
+    sourceUrl,
+    sourceValidator,
     linesProcessed,
     generatedAt: new Date().toISOString(),
   }, null, 2));
@@ -218,7 +251,7 @@ async function run() {
     : URLS;
   if (selected.length === 0) throw new Error(`CPLT_UNKNOWN_TYPE: ${targetTipo}`);
 
-  for (const { tipo, url } of selected) await processStream(tipo, url, outputDir);
+  for (const { tipo, urls } of selected) await processStream(tipo, urls, outputDir);
 
   if (globalThis.DISCOVERED_ORGANISMOS) {
     const filePath = path.join(outputDir, "organismos_adicionales.json");

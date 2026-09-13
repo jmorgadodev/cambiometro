@@ -1,0 +1,72 @@
+import assert from "node:assert/strict";
+import { mkdirSync, mkdtempSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { describe, it } from "vitest";
+import {
+  assertStaticInputManifest,
+  assertStaticInputManifestComplete,
+  assertStaticInputContentQuality,
+  buildStaticInputEntries,
+  buildStaticInputManifest,
+  parseRequestedStaticFiles,
+  STATIC_SITE_FILE_GROUPS,
+} from "./static-site-inputs.mjs";
+
+describe("static site input release", () => {
+  it("keeps Movimientos isolated from the Parlamento release group", () => {
+    assert.ok(!STATIC_SITE_FILE_GROUPS.parlamento.includes("data/movimientos.json"));
+    assert.ok(STATIC_SITE_FILE_GROUPS.movimientos.includes("data/movimientos.json"));
+  });
+
+  it("builds and validates a checksum manifest from an allowed group", () => {
+    const root = mkdtempSync(join(tmpdir(), "cambiometro-static-inputs-"));
+    try {
+      const file = "data/lake-subsets/chilecompra.subset.json";
+      const target = join(root, "data", "lake-subsets", "chilecompra.subset.json");
+      mkdirSync(join(root, "data", "lake-subsets"), { recursive: true });
+      writeFileSync(target, "{\"generatedAt\":\"test\"}\n", "utf8");
+      const requested = parseRequestedStaticFiles({ groups: ["chilecompra"] });
+      assert.equal(requested.length, 2);
+      const entries = buildStaticInputEntries({ root, files: [file], releaseId: "a".repeat(64) });
+      const manifest = buildStaticInputManifest({ entries });
+      assertStaticInputManifest(manifest);
+      assert.equal(manifest.files[0].checksumSha256.length, 64);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects files outside the static input allowlist", () => {
+    assert.throws(
+      () => parseRequestedStaticFiles({ files: ["data/lake/partitions/secret.json"] }),
+      /STATIC_INPUT_FILE_NOT_ALLOWED/,
+    );
+  });
+
+  it("detects a partial release before Pages can hydrate stale checkout files", () => {
+    const root = mkdtempSync(join(tmpdir(), "cambiometro-static-inputs-partial-"));
+    try {
+      const file = "data/lake-subsets/chilecompra.subset.json";
+      const target = join(root, "data", "lake-subsets", "chilecompra.subset.json");
+      mkdirSync(join(root, "data", "lake-subsets"), { recursive: true });
+      writeFileSync(target, "{}\n", "utf8");
+      const entries = buildStaticInputEntries({ root, files: [file], releaseId: "b".repeat(64) });
+      const manifest = buildStaticInputManifest({ entries });
+      assert.throws(() => assertStaticInputManifestComplete(manifest), /STATIC_INPUT_MANIFEST_INCOMPLETE/);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
+  });
+
+  it("rejects syntactically valid but incomplete source catalogs", () => {
+    assert.throws(
+      () => assertStaticInputContentQuality("data/lake-subsets/chilecompra.subset.json", JSON.stringify({ buyers: [] })),
+      /STATIC_INPUT_PARTIAL_CHILECOMPRA/,
+    );
+    assert.throws(
+      () => assertStaticInputContentQuality("data/lake-subsets/infolobby.subset.json", JSON.stringify({ records: [] })),
+      /STATIC_INPUT_PARTIAL_INFOLOBBY/,
+    );
+  });
+});

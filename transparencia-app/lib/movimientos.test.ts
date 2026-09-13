@@ -1,7 +1,13 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
-import { MOVIMIENTOS } from "./movimientos";
+import {
+  isMovimientoDocumentoPendienteMayor30,
+  latestMovementPublicationDate,
+  MOVIMIENTOS,
+  MOVIMIENTOS_HOME_SUMMARY,
+  summarizeMovementFreshness,
+} from "./movimientos";
 
 describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV y Anatomía de Card", () => {
   const root = process.cwd();
@@ -24,6 +30,28 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
     expect(json.frecuencia).toBe("Diario 03:00 CLT");
     expect(json.last_run).toBeDefined();
     expect(json.movimientos.length).toBeGreaterThan(0);
+  });
+
+  it("1b. cada movimiento tiene un identificador único", () => {
+    const ids = MOVIMIENTOS.map((movement) => movement.id);
+    expect(new Set(ids).size).toBe(ids.length);
+  });
+
+  it("1c. el resumen de la Home se recalcula desde el corte del gobierno actual", () => {
+    const desde = "2026-03-11";
+    const delGobierno = MOVIMIENTOS.filter((movement) => movement.fecha >= desde);
+    const renuncias = delGobierno.filter((movement) => movement.tipo_evento === "renuncia" || movement.tipo === "renuncia");
+    const verificados = delGobierno.filter((movement) => ["verificado", "verificado_oficial", "corroborado"].includes(movement.estado));
+    const enConfirmacion = delGobierno.filter((movement) => movement.estado === "en_confirmacion");
+
+    expect(delGobierno.length).toBeGreaterThan(0);
+    expect(MOVIMIENTOS_HOME_SUMMARY).toMatchObject({
+      desde,
+      total: delGobierno.length,
+      renuncias: renuncias.length,
+      verificados: verificados.length,
+      enConfirmacion: enConfirmacion.length,
+    });
   });
 
   it("2. Eventos obligatorios del 14-08-2026 presentes (Duco/Deporte y Urrejola/Atacama) con fuentes de prensa", () => {
@@ -76,6 +104,41 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
     expect(movimientosPageSource).toContain("Copiar enlace");
   });
 
+  it("4b. Explica la diferencia entre fecha efectiva y fecha de publicación de la fuente", () => {
+    expect(movimientosPageSource).toContain("Fecha del evento");
+    expect(movimientosPageSource).toContain("fecha de publicación");
+    expect(movimientosPageSource).toContain("Última publicación detectada");
+    expect(movimientosPageSource).toContain("Último evento efectivo");
+  });
+
+  it("4c. calcula la última publicación sin reemplazar la fecha efectiva", () => {
+    expect(latestMovementPublicationDate([
+      { fuentes: [{ nivel: "prensa", medio: "Fuente", url: "https://example.test/a", fecha: "2026-09-02", titulo: "" }] },
+      { fuentes: [{ nivel: "oficial", medio: "Fuente oficial", url: "https://example.test/b", fecha: "2026-09-03", titulo: "" }] },
+    ], [{ date: "2026-09-01" }])).toBe("2026-09-03");
+  });
+
+  it("4d. separa la ejecución del proceso, el último evento y la salud de cada fuente", () => {
+    const summary = summarizeMovementFreshness({
+      last_attempt_at: "2026-09-11T17:17:35.908Z",
+      last_success_at: "2026-09-11T17:17:35.908Z",
+      last_event_date: "2026-09-02",
+      source_health: [
+        { id: "ley-chile", label: "Ley Chile / BCN", tier: "official", ok: true, status: 200, fetchedAt: "2026-09-11T17:17:36.100Z" },
+        { id: "gob-cl", label: "Gob.cl Noticias", tier: "official", ok: false, status: 403, fetchedAt: "2026-09-11T17:17:39.709Z", error: "HTTP_403" },
+      ],
+    }, Date.parse("2026-09-12T12:00:00Z"));
+
+    expect(summary).toMatchObject({
+      state: "advertencia",
+      lastEventDate: "2026-09-02",
+      successDaysAgo: 0,
+      eventDaysAgo: 10,
+    });
+    expect(summary.unavailableOfficial).toHaveLength(1);
+    expect(summary.unavailableOfficial[0]).toMatchObject({ id: "gob-cl", status: 403, error: "HTTP_403" });
+  });
+
   it("5. Días en el cargo calculado para autoridades salientes con origen", () => {
     const withDays = MOVIMIENTOS.filter((m) => m.dias_en_cargo !== undefined && m.dias_en_cargo !== null);
     expect(withDays.length).toBeGreaterThanOrEqual(10);
@@ -111,5 +174,12 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
         expect(hasOficial).toBe(true);
       }
     }
+  });
+
+  it("9. No marca anuncios recientes como documentos atrasados", () => {
+    const now = Date.parse("2026-09-05T12:00:00Z");
+    expect(isMovimientoDocumentoPendienteMayor30({ documento_pendiente: true, fecha: "2026-09-02" }, now)).toBe(false);
+    expect(isMovimientoDocumentoPendienteMayor30({ documento_pendiente: true, fecha: "2026-07-01" }, now)).toBe(true);
+    expect(isMovimientoDocumentoPendienteMayor30({ documento_pendiente: false, fecha: "2026-07-01" }, now)).toBe(false);
   });
 });

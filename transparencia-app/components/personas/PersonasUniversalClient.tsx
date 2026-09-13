@@ -71,6 +71,7 @@ interface PersonasUniversalClientProps {
   autoridades: AutoridadItem[];
   organismos: OrganismoOption[];
   totalFuncionariosEstimados?: number;
+  totalMunicipalidades?: number;
 }
 
 function formatCLP(n?: number | null) {
@@ -80,6 +81,11 @@ function formatCLP(n?: number | null) {
     currency: "CLP",
     maximumFractionDigits: 0,
   }).format(n);
+}
+
+function getRemuneracionesHref(nombre?: string | null) {
+  const value = (nombre ?? "").trim();
+  return value ? `/remuneraciones-publicas/?q=${encodeURIComponent(value)}` : "/remuneraciones-publicas/";
 }
 
 const TIPOS_ORGANISMO_OPTIONS = [
@@ -128,6 +134,7 @@ export default function PersonasUniversalClient({
   autoridades,
   organismos,
   totalFuncionariosEstimados = 1203287,
+  totalMunicipalidades = 346,
 }: PersonasUniversalClientProps) {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -138,6 +145,7 @@ export default function PersonasUniversalClient({
   const activeTab: PersonaTab = (rawTab && ["parlamentarios", "alcaldes", "autoridades", "funcionarios"].includes(rawTab))
     ? rawTab
     : "parlamentarios";
+  const isCpltDirectoryTab = activeTab === "funcionarios" || activeTab === "alcaldes";
 
   // Search & Filters
   const [search, setSearch] = useState(() => searchParams.get("search") || "");
@@ -150,7 +158,10 @@ export default function PersonasUniversalClient({
   const [soloHorasExtras, setSoloHorasExtras] = useState(() => searchParams.get("extras") === "true");
   const [partidoFilter, setPartidoFilter] = useState(() => searchParams.get("partido") || "Todos");
   const [regionFilter, setRegionFilter] = useState(() => searchParams.get("region") || "Todas");
-  const [sortFuncionarios, setSortFuncionarios] = useState(() => searchParams.get("sort") || "sueldo_desc");
+  // El índice nacional de R2 está ordenado alfabéticamente para permitir
+  // recorrer el universo completo sin cargarlo en memoria. Los órdenes por
+  // remuneración se aplican cuando se acota a un organismo.
+  const [sortFuncionarios, setSortFuncionarios] = useState(() => searchParams.get("sort") || "nombre_asc");
   const [viewMode, setViewMode] = useState<"cards" | "table">(() => (searchParams.get("view") as "cards" | "table") || "cards");
   const [page, setPage] = useState(() => Number(searchParams.get("page")) || 1);
 
@@ -166,6 +177,8 @@ export default function PersonasUniversalClient({
   const [funcionariosData, setFuncionariosData] = useState<FuncionarioPublico[]>([]);
   const [funcionariosTotal, setFuncionariosTotal] = useState(0);
   const [funcionariosLoading, setFuncionariosLoading] = useState(false);
+  const [funcionariosError, setFuncionariosError] = useState<string | null>(null);
+  const [funcionariosRetry, setFuncionariosRetry] = useState(0);
   const [funcionariosStats, setFuncionariosStats] = useState({
     totalMuni: 0,
     promedioSueldo: 0,
@@ -225,8 +238,9 @@ export default function PersonasUniversalClient({
       const nextRegion = opts.region !== undefined ? opts.region : regionFilter;
       if (nextRegion !== "Todas") params.set("region", nextRegion);
 
-      const nextSort = opts.sort !== undefined ? opts.sort : sortFuncionarios;
-      if (nextSort !== "sueldo_desc") params.set("sort", nextSort);
+      const requestedSort = opts.sort !== undefined ? opts.sort : sortFuncionarios;
+      const nextSort = nextOrg === "Todos" ? "nombre_asc" : requestedSort;
+      if (nextSort !== "nombre_asc") params.set("sort", nextSort);
 
       const nextView = opts.view !== undefined ? opts.view : viewMode;
       if (nextView !== "cards") params.set("view", nextView);
@@ -239,44 +253,64 @@ export default function PersonasUniversalClient({
     [activeTab, search, tipoFilter, organismoFilter, contratoFilter, estamentoFilter, soloHorasExtras, partidoFilter, regionFilter, sortFuncionarios, viewMode, page, router, pathname]
   );
 
-  // Fetch Funcionarios cuando la pestaña activa es "funcionarios"
+  // La nómina nacional de CPLT alimenta tanto el directorio completo como la
+  // vista de alcaldes. Así no se limita esta última a los dos nombres que
+  // también están enriquecidos en las fichas municipales estáticas.
   useEffect(() => {
-    if (activeTab !== "funcionarios") return;
-
+    if (!isCpltDirectoryTab) return;
     let isMounted = true;
+    const controller = new AbortController();
     const timer = setTimeout(() => {
       setFuncionariosLoading(true);
+      setFuncionariosError(null);
 
       const params = new URLSearchParams();
       if (debouncedSearch) params.set("query", debouncedSearch);
-      if (organismoFilter !== "Todos") params.set("muni", organismoFilter);
-      if (tipoFilter !== "Todos") params.set("tipo", tipoFilter);
-      if (contratoFilter !== "Todos") params.set("contrato", contratoFilter);
-      if (estamentoFilter !== "Todos") params.set("estamento", estamentoFilter);
-      if (soloHorasExtras) params.set("horas_extras", "true");
-      params.set("sortBy", sortFuncionarios);
+      if (activeTab === "alcaldes") {
+        params.set("cargo", "alcalde");
+        params.set("tipo", "Municipalidad");
+      } else {
+        if (organismoFilter !== "Todos") params.set("muni", organismoFilter);
+        if (tipoFilter !== "Todos") params.set("tipo", tipoFilter);
+      }
+      if (activeTab === "funcionarios") {
+        if (contratoFilter !== "Todos") params.set("contrato", contratoFilter);
+        if (estamentoFilter !== "Todos") params.set("estamento", estamentoFilter);
+        if (soloHorasExtras) params.set("horas_extras", "true");
+      }
+      // El directorio debe mostrar también las filas nominales sin pago
+      // informado; son registros oficiales y no deben desaparecer del total.
+      params.set("include_zero", "true");
+      params.set("sortBy", activeTab === "alcaldes" || organismoFilter === "Todos" ? "nombre_asc" : sortFuncionarios);
       params.set("page", String(page));
       params.set("limit", String(ITEMS_PER_PAGE));
 
-      fetch(`/api/funcionarios?${params.toString()}`)
-        .then((res) => res.json())
+      fetch(`/api/funcionarios?${params.toString()}`, { signal: controller.signal })
+        .then(async (res) => {
+          const json = await res.json();
+          if (!res.ok) throw new Error(json?.error?.message || "No se pudo consultar el directorio.");
+          return json;
+        })
         .then((json) => {
           if (!isMounted) return;
           if (json.data && Array.isArray(json.data)) {
             setFuncionariosData(json.data);
-            setFuncionariosTotal(json.pagination?.total || json.data.length);
-            if (json.pagination?.stats) {
-              setFuncionariosStats(json.pagination.stats);
+            const pagination = json.pagination ?? json.meta ?? {};
+            setFuncionariosTotal(pagination.total ?? json.data.length);
+            if (pagination.stats) {
+              setFuncionariosStats(pagination.stats);
             }
           } else {
             setFuncionariosData([]);
             setFuncionariosTotal(0);
           }
         })
-        .catch(() => {
+        .catch((error: unknown) => {
+          if (error instanceof DOMException && error.name === "AbortError") return;
           if (!isMounted) return;
           setFuncionariosData([]);
           setFuncionariosTotal(0);
+          setFuncionariosError(error instanceof Error ? error.message : "No se pudo consultar el directorio.");
         })
         .finally(() => {
           if (isMounted) setFuncionariosLoading(false);
@@ -286,8 +320,9 @@ export default function PersonasUniversalClient({
     return () => {
       isMounted = false;
       clearTimeout(timer);
+      controller.abort();
     };
-  }, [activeTab, debouncedSearch, organismoFilter, tipoFilter, contratoFilter, estamentoFilter, soloHorasExtras, sortFuncionarios, page]);
+  }, [activeTab, isCpltDirectoryTab, debouncedSearch, organismoFilter, tipoFilter, contratoFilter, estamentoFilter, soloHorasExtras, sortFuncionarios, page, funcionariosRetry]);
 
   // Handle Tab Switch
   const handleTabChange = (newTab: PersonaTab) => {
@@ -387,7 +422,7 @@ export default function PersonasUniversalClient({
     activeTab === "parlamentarios"
       ? filteredParlamentarios.length
       : activeTab === "alcaldes"
-      ? filteredAlcaldes.length
+      ? funcionariosTotal
       : activeTab === "autoridades"
       ? filteredAutoridades.length
       : funcionariosTotal;
@@ -414,7 +449,7 @@ export default function PersonasUniversalClient({
                   Directorio de Personas del Estado
                 </h1>
                 <p style={{ fontSize: "0.9rem", color: "var(--text-2)", margin: 0, lineHeight: 1.6 }}>
-                  Consolidación de parlamentarios, alcaldes, ministros, directores de servicio y nóminas oficiales de personal según la cobertura publicada por cada organismo.
+                  Consulta quién ocupa un cargo, en qué organismo y bajo qué modalidad. Las remuneraciones publicadas se revisan con historial, períodos y fuentes separadas en Remuneraciones públicas.
                 </p>
               </div>
 
@@ -436,8 +471,8 @@ export default function PersonasUniversalClient({
                   <div style={{ fontSize: "0.68rem", color: "var(--text-3)", fontWeight: 600 }}>Parlamentarios</div>
                 </div>
                 <div style={{ textAlign: "center", padding: "0 0.5rem", borderLeft: "1px solid var(--border)" }}>
-                  <div style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--text-1)" }}>{alcaldes.length}</div>
-                  <div style={{ fontSize: "0.68rem", color: "var(--text-3)", fontWeight: 600 }}>Alcaldes</div>
+                  <div style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--text-1)" }}>{totalMunicipalidades}</div>
+                  <div style={{ fontSize: "0.68rem", color: "var(--text-3)", fontWeight: 600 }}>Comunas cubiertas</div>
                 </div>
                 <div style={{ textAlign: "center", padding: "0 0.5rem", borderLeft: "1px solid var(--border)" }}>
                   <div style={{ fontSize: "1.25rem", fontWeight: 800, color: "var(--text-1)" }}>{autoridades.length}</div>
@@ -454,9 +489,9 @@ export default function PersonasUniversalClient({
             <div style={{ display: "flex", flexWrap: "wrap", gap: "0.5rem", borderBottom: "1px solid var(--border)", paddingBottom: "0.5rem" }}>
               {[
                 { id: "parlamentarios" as PersonaTab, label: "🏛️ Parlamentarios", count: String(parlamentarios.length) },
-                { id: "alcaldes" as PersonaTab, label: "🏙️ Alcaldes", count: String(alcaldes.length) },
+                { id: "alcaldes" as PersonaTab, label: "🏙️ Alcaldes", count: activeTab === "alcaldes" && funcionariosTotal > 0 ? funcionariosTotal.toLocaleString("es-CL") : "CPLT" },
                 { id: "autoridades" as PersonaTab, label: "⚖️ Altas autoridades DIP", count: String(autoridades.length) },
-                { id: "funcionarios" as PersonaTab, label: "📋 Funcionarios", count: "CPLT" },
+                { id: "funcionarios" as PersonaTab, label: "📋 Funcionarios y nóminas", count: "CPLT" },
               ].map((t) => {
                 const activo = activeTab === t.id;
                 return (
@@ -504,6 +539,49 @@ export default function PersonasUniversalClient({
 
       {/* Main Content Area */}
       <main className="container-main" style={{ paddingTop: "1.5rem" }}>
+        {activeTab === "funcionarios" && (
+          <section
+            aria-labelledby="directorio-laboral-title"
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+              gap: "1rem",
+              flexWrap: "wrap",
+              background: "var(--surface-2)",
+              border: "1px solid var(--border)",
+              borderRadius: 12,
+              padding: "1rem 1.15rem",
+              marginBottom: "1rem",
+            }}
+          >
+            <div style={{ minWidth: 0, maxWidth: 760 }}>
+              <span className="eyebrow">DIRECTORIO LABORAL</span>
+              <h2 id="directorio-laboral-title" style={{ fontSize: "1rem", color: "var(--text-1)", margin: "0.25rem 0 0.2rem", fontWeight: 800 }}>
+                Quién trabaja, dónde y bajo qué modalidad
+              </h2>
+              <p style={{ fontSize: "0.78rem", color: "var(--text-2)", margin: 0, lineHeight: 1.5 }}>
+                Aquí puedes filtrar organismo, cargo, contrato, estamento y horas extras. Para comparar pagos y ver la evolución mensual, abre la búsqueda de remuneraciones.
+              </p>
+              {(funcionariosStats.totalMuni > 0 || funcionariosStats.promedioSueldo > 0 || funcionariosStats.conHorasExtras > 0) && (
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem", marginTop: "0.7rem", color: "var(--text-3)", fontSize: "0.7rem" }}>
+                  <span><strong style={{ color: "var(--text-1)" }}>{funcionariosStats.totalMuni.toLocaleString("es-CL")}</strong> registros en el resultado</span>
+                  {funcionariosStats.promedioSueldo > 0 && <span>promedio publicado <strong style={{ color: "var(--money)", fontFamily: "monospace" }}>{formatCLP(funcionariosStats.promedioSueldo)}</strong></span>}
+                  {funcionariosStats.conHorasExtras > 0 && <span><strong style={{ color: "var(--warn)" }}>{funcionariosStats.conHorasExtras.toLocaleString("es-CL")}</strong> con horas extras</span>}
+                </div>
+              )}
+            </div>
+            <Link
+              prefetch={false}
+              href={getRemuneracionesHref(debouncedSearch)}
+              className="btn btn-secondary btn-sm"
+              style={{ whiteSpace: "nowrap", fontSize: "0.75rem" }}
+            >
+              {debouncedSearch ? "Ver pagos publicados →" : "Explorar pagos publicados →"}
+            </Link>
+          </section>
+        )}
+
         {/* Controls and Search Bar */}
         <div
           style={{
@@ -612,29 +690,7 @@ export default function PersonasUniversalClient({
             )}
 
             {activeTab === "alcaldes" && (
-              <select
-                value={regionFilter}
-                onChange={(e) => {
-                  setRegionFilter(e.target.value);
-                  setPage(1);
-                  syncUrl({ region: e.target.value, page: 1 });
-                }}
-                style={{
-                  padding: "0.6rem 0.8rem",
-                  background: "var(--surface-2)",
-                  border: "1px solid var(--border)",
-                  borderRadius: 8,
-                  fontSize: "0.85rem",
-                  color: "var(--text-1)",
-                }}
-              >
-                <option value="Todas">Todas las regiones de Chile</option>
-                {uniqueRegiones.map((r) => (
-                  <option key={r} value={r}>
-                    {r}
-                  </option>
-                ))}
-              </select>
+              <span className="badge badge-info">Nómina nacional CPLT · 346 comunas con cobertura declarada</span>
             )}
 
             {activeTab === "autoridades" && (
@@ -813,7 +869,7 @@ export default function PersonasUniversalClient({
               <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
                 <span style={{ color: "var(--text-3)", fontWeight: 600 }}>Ordenar:</span>
                 <select
-                  value={sortFuncionarios}
+                  value={organismoFilter === "Todos" ? "nombre_asc" : sortFuncionarios}
                   onChange={(e) => {
                     setSortFuncionarios(e.target.value);
                     setPage(1);
@@ -827,7 +883,7 @@ export default function PersonasUniversalClient({
                     color: "var(--text-1)",
                   }}
                 >
-                  {SORTS_FUNCIONARIOS.map((s) => (
+                  {SORTS_FUNCIONARIOS.filter((s) => organismoFilter !== "Todos" || s.id === "nombre_asc").map((s) => (
                     <option key={s.id} value={s.id}>
                       {s.label}
                     </option>
@@ -861,8 +917,18 @@ export default function PersonasUniversalClient({
               ? "alcaldes de Chile"
               : activeTab === "autoridades"
               ? "altas autoridades institucionales"
-              : "funcionarios públicos clasificados"}
+              : "registros laborales oficiales"}
           </div>
+          {isCpltDirectoryTab && (
+            <a
+              href={`/api/v1/export?dataset=funcionarios&format=csv&page=${page}&limit=${ITEMS_PER_PAGE}${activeTab === "alcaldes" ? "&cargo=alcalde&tipo=Municipalidad" : ""}${debouncedSearch ? `&query=${encodeURIComponent(debouncedSearch)}` : ""}${activeTab === "funcionarios" && organismoFilter !== "Todos" ? `&muni=${encodeURIComponent(organismoFilter)}` : ""}${activeTab === "funcionarios" && contratoFilter !== "Todos" ? `&contrato=${encodeURIComponent(contratoFilter)}` : ""}${activeTab === "funcionarios" && estamentoFilter !== "Todos" ? `&estamento=${encodeURIComponent(estamentoFilter)}` : ""}`}
+              className="btn btn-secondary btn-sm"
+              download
+              style={{ fontSize: "0.75rem" }}
+            >
+              Descargar este bloque (CSV)
+            </a>
+          )}
         </div>
 
         {/* ========================================================================= */}
@@ -877,7 +943,7 @@ export default function PersonasUniversalClient({
                   const asistPct = p.asistencia_sala_pct ?? null;
                   const asistColor = asistPct === null ? "var(--text-3)" : asistPct >= 85 ? "var(--ok)" : asistPct >= 70 ? "var(--warn)" : "var(--bad)";
                   return (
-                    <Link
+                    <Link prefetch={false}
                       key={p.id}
                       href={`/politico/${getPoliticoSlug(p.id)}`}
                       style={{
@@ -1065,7 +1131,7 @@ export default function PersonasUniversalClient({
                             {p.asistencia_sala_pct ? `${p.asistencia_sala_pct}%` : "—"}
                           </td>
                           <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
-                            <Link
+                            <Link prefetch={false}
                               href={`/politico/${getPoliticoSlug(p.id)}`}
                               style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textDecoration: "none" }}
                             >
@@ -1085,12 +1151,12 @@ export default function PersonasUniversalClient({
         {/* ========================================================================= */}
         {/* TAB 2: ALCALDES */}
         {/* ========================================================================= */}
-        {activeTab === "alcaldes" && (
+        {activeTab === "alcaldes" && funcionariosError !== null && (
           <>
             {viewMode === "cards" ? (
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(260px, 1fr))", gap: "1rem" }}>
                 {paginatedAlcaldes.map((a) => (
-                  <Link
+                  <Link prefetch={false}
                     key={a.muni_id}
                     href={`/municipalidades/${a.muni_id}`}
                     style={{
@@ -1192,7 +1258,7 @@ export default function PersonasUniversalClient({
                           {a.grado_eus ? `Grado ${a.grado_eus}` : "—"}
                         </td>
                         <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
-                          <Link
+                          <Link prefetch={false}
                             href={`/municipalidades/${a.muni_id}`}
                             style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textDecoration: "none" }}
                           >
@@ -1263,7 +1329,7 @@ export default function PersonasUniversalClient({
                     </div>
 
                     <div style={{ marginTop: "0.75rem", paddingTop: "0.65rem", borderTop: "1px solid var(--border)" }}>
-                      <Link
+                      <Link prefetch={false}
                         href={`/servicios-publicos/${aut.id}`}
                         style={{
                           display: "block",
@@ -1313,7 +1379,7 @@ export default function PersonasUniversalClient({
                           {aut.dotacion_total === null ? "—" : aut.dotacion_total.toLocaleString("es-CL")}
                         </td>
                         <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
-                          <Link
+                          <Link prefetch={false}
                             href={`/servicios-publicos/${aut.id}`}
                             style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textDecoration: "none" }}
                           >
@@ -1332,7 +1398,7 @@ export default function PersonasUniversalClient({
         {/* ========================================================================= */}
         {/* TAB 4: FUNCIONARIOS */}
         {/* ========================================================================= */}
-        {activeTab === "funcionarios" && (
+        {isCpltDirectoryTab && !(activeTab === "alcaldes" && funcionariosError !== null) && (
           <>
             {funcionariosLoading ? (
               viewMode === "cards" ? (
@@ -1347,12 +1413,22 @@ export default function PersonasUniversalClient({
             ) : funcionariosData.length === 0 ? (
               <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 16, padding: "3rem", textAlign: "center" }}>
                 <div style={{ fontSize: "2rem", marginBottom: "0.75rem" }}>🔍</div>
-                <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--text-1)", margin: "0 0 0.5rem" }}>No se encontraron funcionarios</h3>
+                <h3 style={{ fontSize: "1.1rem", fontWeight: 800, color: "var(--text-1)", margin: "0 0 0.5rem" }}>
+                  {funcionariosError ? "No se pudo consultar el directorio" : activeTab === "alcaldes" ? "No se encontraron alcaldes en la nómina publicada" : "No se encontraron funcionarios"}
+                </h3>
                 <p style={{ fontSize: "0.85rem", color: "var(--text-3)", maxWidth: 420, margin: "0 auto 1.5rem" }}>
-                  Prueba cambiando los filtros de organismo, tipo, contrato o término de búsqueda.
+                  {funcionariosError
+                    ? funcionariosError
+                    : activeTab === "alcaldes"
+                    ? "Prueba con otro nombre o comuna. Esta vista consulta cargos de alcalde y alcaldesa publicados por CPLT."
+                    : "Prueba cambiando los filtros de organismo, tipo, contrato o término de búsqueda."}
                 </p>
                 <button
                   onClick={() => {
+                    if (funcionariosError) {
+                      setFuncionariosRetry((value) => value + 1);
+                      return;
+                    }
                     setSearch("");
                     setTipoFilter("Todos");
                     setOrganismoFilter("Todos");
@@ -1364,7 +1440,7 @@ export default function PersonasUniversalClient({
                   className="btn btn-primary"
                   style={{ fontSize: "0.8rem", padding: "0.5rem 1rem" }}
                 >
-                  Restablecer todos los filtros
+                  {funcionariosError ? "Reintentar consulta" : "Restablecer todos los filtros"}
                 </button>
               </div>
             ) : viewMode === "cards" ? (
@@ -1449,22 +1525,32 @@ export default function PersonasUniversalClient({
                       </div>
 
                       <div style={{ marginTop: "0.75rem", paddingTop: "0.65rem", borderTop: "1px solid var(--border)" }}>
-                        <button
-                          onClick={() => setModalItem({ tipo: "funcionario", data: f })}
-                          style={{
-                            width: "100%",
-                            padding: "0.4rem 0.75rem",
-                            borderRadius: "0.5rem",
-                            background: "var(--surface-2)",
-                            border: "1px solid var(--border)",
-                            color: "var(--text-1)",
-                            fontSize: "0.72rem",
-                            fontWeight: 700,
-                            cursor: "pointer",
-                          }}
-                        >
-                          Ver detalle de remuneración →
-                        </button>
+                        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
+                          <button
+                            onClick={() => setModalItem({ tipo: "funcionario", data: f })}
+                            style={{
+                              flex: "1 1 145px",
+                              padding: "0.4rem 0.6rem",
+                              borderRadius: "0.5rem",
+                              background: "var(--surface-2)",
+                              border: "1px solid var(--border)",
+                              color: "var(--text-1)",
+                              fontSize: "0.72rem",
+                              fontWeight: 700,
+                              cursor: "pointer",
+                            }}
+                          >
+                            Ver ficha laboral
+                          </button>
+                          <Link
+                            prefetch={false}
+                            href={getRemuneracionesHref(f.nombre_completo)}
+                            className="btn btn-primary btn-sm"
+                            style={{ flex: "1 1 145px", textAlign: "center", fontSize: "0.72rem", padding: "0.4rem 0.6rem" }}
+                          >
+                            Ver pagos publicados →
+                          </Link>
+                        </div>
                       </div>
                     </div>
                   );
@@ -1523,12 +1609,21 @@ export default function PersonasUniversalClient({
                             )}
                           </td>
                           <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
-                            <button
-                              onClick={() => setModalItem({ tipo: "funcionario", data: f })}
-                              style={{ background: "none", border: "none", color: "var(--accent)", fontWeight: 700, fontSize: "0.75rem", cursor: "pointer" }}
-                            >
-                              Ver →
-                            </button>
+                            <div style={{ display: "inline-flex", alignItems: "center", gap: "0.65rem" }}>
+                              <button
+                                onClick={() => setModalItem({ tipo: "funcionario", data: f })}
+                                style={{ background: "none", border: "none", color: "var(--accent)", fontWeight: 700, fontSize: "0.75rem", cursor: "pointer" }}
+                              >
+                                Ficha
+                              </button>
+                              <Link
+                                prefetch={false}
+                                href={getRemuneracionesHref(f.nombre_completo)}
+                                style={{ color: "var(--accent)", fontWeight: 700, fontSize: "0.75rem", textDecoration: "none" }}
+                              >
+                                Pagos →
+                              </Link>
+                            </div>
                           </td>
                         </tr>
                       );
@@ -1645,6 +1740,7 @@ export default function PersonasUniversalClient({
                 <p style={{ fontSize: "0.85rem", color: "var(--text-2)", margin: 0 }}>{modalItem.data.cargo}</p>
               </div>
               <button
+                aria-label="Cerrar ficha laboral"
                 onClick={() => setModalItem(null)}
                 style={{ background: "none", border: "none", fontSize: "1.2rem", color: "var(--text-3)", cursor: "pointer", padding: "0.25rem" }}
               >
@@ -1734,6 +1830,14 @@ export default function PersonasUniversalClient({
             </div>
 
             <div style={{ padding: "0.85rem 1.25rem", background: "var(--surface-2)", borderTop: "1px solid var(--border)", display: "flex", justifyContent: "flex-end" }}>
+              <Link
+                prefetch={false}
+                href={getRemuneracionesHref(modalItem.data.nombre_completo)}
+                className="btn btn-secondary"
+                style={{ fontSize: "0.75rem", padding: "0.4rem 0.75rem", marginRight: "0.5rem" }}
+              >
+                Ver historial de pagos
+              </Link>
               <button
                 onClick={() => setModalItem(null)}
                 className="btn btn-primary"

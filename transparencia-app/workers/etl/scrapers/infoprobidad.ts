@@ -19,7 +19,7 @@ export async function fetchInfoProbidadRecientes(): Promise<DeclaracionProbidadR
   try {
     const res = await fetch("https://www.infoprobidad.cl/api/declaraciones/recientes", {
       headers: {
-        "User-Agent": "TransparenciaChile-Bot/1.0 (+https://transparencia.impulsacv.cl)",
+        "User-Agent": "Cambiometro-Bot/1.0 (+https://cambiometro.impulsacv.cl)",
         Accept: "application/json",
       },
     });

@@ -18,12 +18,51 @@ if (relativeFiles.some((file) => file.includes("server-functions") || file.inclu
 if (!relativeFiles.includes("_headers") || !relativeFiles.includes("_redirects")) throw new Error("Faltan _headers o _redirects en out/");
 const html = relativeFiles.filter((file) => file.endsWith(".html"));
 if (html.length === 0) throw new Error("out/ no contiene HTML");
-if (files.length > 20_000) throw new Error(`Pages supera 20.000 archivos: ${files.length}`);
+// El export reúne una página HTML y su script inline por ruta canónica,
+// además de índices paginados de los releases públicos. El explorador
+// unificado de remuneraciones agrega índices válidos, por lo que el límite
+// operativo debe dejar margen a ese crecimiento sin permitir una expansión
+// accidental del catálogo.
+if (files.length > 25_000) throw new Error(`Pages supera 25.000 archivos: ${files.length}`);
 const oversized = files.filter((file) => statSync(file).size > 25 * 1024 * 1024);
 if (oversized.length) throw new Error(`Assets sobre 25 MiB: ${oversized.map((file) => relative(out, file)).join(", ")}`);
-const routes = ["index.html", "politico/index.html", "municipalidades/index.html", "servicios-publicos/index.html", "entidades/index.html", "transferencias/index.html"];
+const routes = ["index.html", "politico/index.html", "municipalidades/index.html", "servicios-publicos/index.html", "entidades/index.html", "transferencias/index.html", "gastos-operacionales/index.html"];
 for (const route of routes) if (!relativeFiles.includes(route)) throw new Error(`Falta ruta estática: ${route}`);
 const staticHeaders = readFileSync(join(out, "_headers"), "utf8");
 if (/unsafe-inline|unsafe-eval/.test(staticHeaders)) throw new Error("CSP insegura en _headers");
+const staticManifest = JSON.parse(readFileSync(join(out, "data", "static-site-manifest.json"), "utf8"));
+const entityCatalog = JSON.parse(readFileSync(join(root, "data", "generated", "entity-catalog.json"), "utf8"));
+if (staticManifest.datasets?.entities?.count !== entityCatalog.total) {
+  throw new Error(`Universo de entidades incoherente: manifest=${staticManifest.datasets?.entities?.count} catalog=${entityCatalog.total}`);
+}
+const crossesManifestPath = join(out, "data", "cruces", "manifest.json");
+if (!existsSync(crossesManifestPath)) throw new Error("Falta manifiesto estático de cruces");
+const crossesManifest = JSON.parse(readFileSync(crossesManifestPath, "utf8"));
+if (!Array.isArray(crossesManifest.pages) || crossesManifest.pages.length !== crossesManifest.totalPages) {
+  throw new Error("Manifiesto de cruces incoherente: páginas declaradas");
+}
+let crossesRows = 0;
+for (const page of crossesManifest.pages) {
+  const pagePath = join(out, "data", "cruces", page);
+  if (!existsSync(pagePath)) throw new Error(`Falta página estática de cruces: ${page}`);
+  const rows = JSON.parse(readFileSync(pagePath, "utf8"));
+  if (!Array.isArray(rows)) throw new Error(`Página estática de cruces inválida: ${page}`);
+  crossesRows += rows.length;
+}
+if (crossesRows !== crossesManifest.totalRows) {
+  throw new Error(`Universo de cruces incoherente: manifest=${crossesManifest.totalRows} páginas=${crossesRows}`);
+}
+if (crossesManifest.searchIndex?.buckets) {
+  const bucketEntries = Object.entries(crossesManifest.searchIndex.buckets);
+  if (bucketEntries.length === 0) throw new Error("Índice de búsqueda de cruces vacío");
+  for (const [bucket, filename] of bucketEntries) {
+    const searchIndexPath = join(out, "data", "cruces", filename);
+    if (!existsSync(searchIndexPath)) throw new Error(`Falta bloque de búsqueda de cruces: ${bucket}`);
+    const searchRows = JSON.parse(readFileSync(searchIndexPath, "utf8"));
+    if (!searchRows || Array.isArray(searchRows) || typeof searchRows !== "object") {
+      throw new Error(`Bloque de búsqueda de cruces inválido: ${bucket}`);
+    }
+  }
+}
 const bytes = files.reduce((sum, file) => sum + statSync(file).size, 0);
-console.log(JSON.stringify({ files: files.length, html: html.length, bytes, routes }));
+console.log(JSON.stringify({ files: files.length, html: html.length, bytes, routes, crosses: { totalRows: crossesRows, totalPages: crossesManifest.totalPages } }));

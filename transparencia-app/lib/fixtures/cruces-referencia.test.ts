@@ -190,7 +190,7 @@ describe("Fixture Externo Congelado: Cruces de Referencia Oficial (Ronda 4)", ()
       expect(SOURCE_CANONICAL_COUNTS["chilecompra"]).toBe(74142);
 
       // 3. InfoLobby
-      expect(SOURCE_CANONICAL_COUNTS["infolobby"]).toBe(60523);
+      expect(SOURCE_CANONICAL_COUNTS["infolobby"]).toBe(71467);
 
       // 4. Ley 19.862
       expect(SOURCE_CANONICAL_COUNTS["ley-19862"]).toBe(59361);

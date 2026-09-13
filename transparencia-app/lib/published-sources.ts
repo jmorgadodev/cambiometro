@@ -3,6 +3,8 @@ import { join } from "node:path";
 import type { SourceManifest } from "@/lib/data-contracts";
 import { listSourceManifests } from "@/lib/data-platform-d1";
 import { mergeR2Catalog, type R2PublicCatalog } from "@/lib/r2-catalog";
+import { getTransferReleaseMetadata } from "@/lib/transfer-release-metadata";
+import { getDataQualityConfig } from "@/lib/data-quality-summary";
 
 export interface CpltPublicManifest {
   sourceId: "transparencia-activa";
@@ -42,46 +44,35 @@ function localCpltManifest(): CpltPublicManifest | null {
   }
 }
 
-export const SOURCE_CANONICAL_COUNTS: Record<string, number> = {
-  "chilecompra": 74142,
-  "transparencia-activa": 1203287,
-  "ley-19862": 59361,
-  "dipres": 15689,
-  "sinim": 3105,
-  "infolobby": 60523,
-  "infoprobidad": 15331,
-  "contraloria": 291,
-  "camara": 19025,
-  "senado": 8138,
-  "servel": 23894,
-  "personal-apoyo": 4092,
-  "ine-censo-2024": 346,
-};
+// Compatibility exports: these remain the configured historical references.
+// Current canonical counts are taken from the release catalog below whenever
+// it contains a validated count, so a stale config cannot hide a newer R2 cut.
+export const SOURCE_CANONICAL_COUNTS: Record<string, number> = Object.fromEntries(
+  getDataQualityConfig().map((source) => [source.id, source.canonicalCount]),
+);
 
-export const SOURCE_HISTORICAL_COUNTS: Record<string, number> = {
-  "chilecompra": 888693,
-  "transparencia-activa": 1218136,
-  "ley-19862": 59361,
-  "dipres": 15689,
-  "sinim": 3105,
-  "infolobby": 60523,
-  "infoprobidad": 15331,
-  "contraloria": 291,
-  "camara": 19025,
-  "senado": 8138,
-  "servel": 23894,
-  "personal-apoyo": 4092,
-  "ine-censo-2024": 346,
-};
+export const SOURCE_HISTORICAL_COUNTS: Record<string, number> = Object.fromEntries(
+  getDataQualityConfig().map((source) => [source.id, source.historicalCount]),
+);
 
 export async function listPublishedSourceManifests(): Promise<SourceManifest[]> {
   const base = await listSourceManifests();
   const catalog = localR2Catalog();
   const cplt = localCpltManifest();
   const merged = mergeCpltCatalog(mergeR2Catalog(base, catalog), cplt);
+  const transferRelease = getTransferReleaseMetadata();
   return merged.map((source) => ({
     ...source,
-    canonicalCount: SOURCE_CANONICAL_COUNTS[source.id] ?? source.recordCount,
-    historicalCount: SOURCE_HISTORICAL_COUNTS[source.id] ?? source.recordCount,
+    // R2/D1 manifests are the release evidence. The checked-in configuration
+    // is only a fallback for sources without a published count in this build.
+    canonicalCount: source.id === "ley-19862"
+      ? transferRelease.totalRows
+      : Number.isSafeInteger(source.recordCount) && source.recordCount > 0
+        ? source.recordCount
+        : SOURCE_CANONICAL_COUNTS[source.id] ?? source.recordCount,
+    historicalCount: source.id === "ley-19862"
+      ? transferRelease.totalRows
+      : SOURCE_HISTORICAL_COUNTS[source.id] ?? source.recordCount,
+    lastUpdated: source.id === "ley-19862" ? transferRelease.generatedAt ?? source.lastUpdated : source.lastUpdated,
   }));
 }
