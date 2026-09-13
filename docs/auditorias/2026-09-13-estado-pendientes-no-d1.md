@@ -73,3 +73,25 @@ Esta comprobación cambia el orden de trabajo: primero se debe reconciliar catá
 - No se descargan universos completos al navegador.
 - No se reemplazan datos productivos por snapshots locales antiguos.
 - No se convierten faltantes en cero ni se reconstruyen montos por inferencia.
+
+## Actualización de matriz productiva — 13:18 UTC-3
+
+Se volvió a consultar la API pública con `limit=1` por fuente, sin acceder a D1. El resultado confirma que el código HTTP 200 sólo demuestra que el endpoint está disponible; la cobertura se debe leer con `total`, `publishedRows`, `expectedRows`, `sourceStatus` y `missingPartitions`.
+
+| Fuente consultada | HTTP | Total declarado | Filas publicadas en la ruta consultada | Esperadas | Estado | Lectura operativa |
+|---|---:|---:|---:|---:|---|---|
+| Cámara | 200 | 58.751 | 49 en la primera página | 58.751 | parcial | El endpoint responde; el número de la página no es el universo publicado.
+| Senado | 200 | 1.428 | 50 en la primera página | 1.428 | parcial | Mantiene las dos particiones históricas no verificables descritas arriba.
+| Votaciones Senado | 200 | 194 | 5 en la primera página | 194 | parcial | La consulta debe usar la fuente canónica de votaciones, no `votaciones_camara` como fuente genérica.
+| Contraloría | 200 | 310 | 3 en la primera página | 310 | parcial | Responde, pero no prueba que las 310 filas estén disponibles.
+| DIPRES | 200 | 247.287 | 15.689 | 247.287 | parcial | El release público es acotado y agregado; no debe presentarse como histórico completo.
+| InfoLobby | 200 | 71.467 | 71.467 | 71.467 | completo | Es el único universo masivo auditado como completo en esta consulta.
+| InfoProbidad | 200 | 2 | 2 | 16.058 | parcial | Pendiente crítico: el índice/ruta pública sólo expone una fracción mínima.
+| Ley 19.862 | 200 | 62.443 | 1.645 en la primera página | 62.443 | parcial | El total vigente difiere del baseline anterior; requiere reconciliación antes de publicar porcentajes.
+| SERVEL | 200 | 23.894 | 23.894 | 23.894 | completo | Universo consultable completo.
+| SINIM | 200 | 3.105 | 3.105 | 3.105 | completo | Universo consultable completo.
+| 38 bis | 200 | 0 en la ruta genérica | — | — | temporalmente no disponible | Usa una ruta/proyección específica; el último release válido no se debe reemplazar.
+
+La prueba de `votaciones_camara` con ese identificador devolvió 422 por parámetro de fuente no válido; no se clasifica como caída de Cámara. La fuente canónica debe verificarse mediante la ruta de votaciones existente.
+
+La consulta directa local a `https://comision38bis.gob.cl/registro-publico` devolvió HTTP 200 y aproximadamente 1,3 MB, mientras que el runner de GitHub falló al consultar tanto CSV como HTML. Esto deja el problema clasificado como **alcance de red del runner**, no como error de parser ni como permiso D1.
