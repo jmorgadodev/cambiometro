@@ -53,3 +53,34 @@ Para cerrar la fase ChileCompra se requiere una de estas dos salidas verificable
 
 Mientras eso no ocurra, las rutas actuales se mantienen con el corte público de
 74.142 y no se habilita un buscador que prometa el universo histórico.
+
+## Reconciliación del origen masivo — 13 de septiembre de 2026
+
+La página de descargas (`/descargas/procesos-ocds`) es una aplicación React de
+1.051 bytes y no es el archivo descargable. Al revisar su JavaScript oficial se
+confirmó la ruta que usa el propio portal para los archivos masivos recientes:
+
+`https://ocds-lic-files.da.mercadopublico.cl/{año}/{año}{mes}.7z`
+
+Comprobación de sólo cabeceras, sin descargar archivos:
+
+| Periodo | HTTP | Tamaño declarado |
+|---|---:|---:|
+| 2026-01 | 200 | 25.248.817 bytes |
+| 2026-02 | 200 | 29.589.909 bytes |
+| 2026-03 | 200 | 30.160.689 bytes |
+| 2026-04 | 200 | 28.773.578 bytes |
+| 2026-05 | 200 | 16.637.457 bytes |
+| 2026-06 | 200 | 9.509.848 bytes |
+| 2026-07 | 200 | 168.032 bytes |
+| 2026-08 | 403 | no publicado o protegido |
+| 2026-09 | 403 | no publicado o protegido |
+
+El conector local ya usa esta ruta mediante `scripts/etl/chilecompra-bulk.mjs`
+y la ingesta intenta primero el archivo masivo antes de recurrir a las consultas
+por proceso. El pendiente de ChileCompra queda redefinido: no es recuperar un
+endpoint inexistente, sino ejecutar una prueba controlada con un mes disponible,
+validar el contenido del `.7z`, comparar su conteo contra el release vigente y
+mantener agosto/septiembre fuera del catálogo hasta que el proveedor los publique.
+No se modificó el release de producción ni se descargaron estos archivos durante
+esta comprobación.

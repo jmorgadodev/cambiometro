@@ -82,7 +82,7 @@ Esta comprobación cambia el orden de trabajo: primero se debe reconciliar catá
 ## Pendientes ordenados
 
 1. Senado: resuelto. Las dos particiones fueron publicadas incrementalmente y verificadas en R2/API; mantenerlas en el control de regresión.
-2. ChileCompra: recuperar o validar el origen después del HTTP 403 y conservar separados vigente/histórico.
+2. ChileCompra: origen masivo identificado y validado por cabeceras para enero-julio 2026; probar un mes disponible en modo controlado, mantener vigente/histórico separados y no catalogar agosto/septiembre mientras respondan 403.
 3. 38 bis: resolver la diferencia entre acceso local y runner; mantener el último corte mientras la fuente no sea reproducible en CI.
 4. CPLT: reconciliar el release productivo de 1.226.913 con los snapshots locales y cerrar observaciones de calidad por período.
    - Subtarea nueva: auditar e incorporar, como proyección separada, los honorarios de organismos centrales que hoy quedan fuera por el filtro municipal; comenzar con conteo y muestra verificable antes de publicar.
