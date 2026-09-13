@@ -172,6 +172,7 @@ export async function runCoverageSweep({ silent = false, transferManifest = null
   ];
 
   for (const u of universos) {
+    if (!u.pass) allPassed = false;
     rows.push({
       modulo: u.modulo,
       indexado: u.indexado,
