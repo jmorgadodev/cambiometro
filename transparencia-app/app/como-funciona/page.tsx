@@ -20,7 +20,7 @@ const PILARES: { icon: IconoNombre; title: string; text: string }[] = [
   {
     icon: "etl",
     title: "2. Versionamos",
-    text: "Conservamos corte, período, identificador, procedencia y checksum para que cada publicación pueda compararse con su release anterior.",
+    text: "Conservamos corte, período, identificador y procedencia para que cada publicación pueda compararse con la anterior.",
   },
   {
     icon: "datos",
@@ -35,7 +35,7 @@ const PILARES: { icon: IconoNombre; title: string; text: string }[] = [
   {
     icon: "datos",
     title: "5. Publicamos",
-    text: "Entregamos chunks estáticos, R2 y consultas paginadas del Worker. El navegador nunca descarga un universo completo para mostrar una tabla.",
+    text: "Mostramos los registros por páginas y entregamos sólo la información necesaria para cada consulta.",
   },
 ];
 
@@ -121,7 +121,7 @@ export default async function HowItWorksPage() {
               Fuentes Oficiales del Estado de Chile
             </h2>
             <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", margin: 0 }}>
-              La matriz distingue registros originales, releases normalizados, relaciones documentales y resúmenes agregados. Una señal periodística no se presenta como confirmación oficial hasta contar con respaldo suficiente.
+              La matriz distingue registros originales, cortes normalizados, relaciones documentales y resúmenes agregados. Una señal periodística no se presenta como confirmación oficial hasta contar con respaldo suficiente.
             </p>
           </div>
 
@@ -178,7 +178,7 @@ export default async function HowItWorksPage() {
             </table>
           </div>
           <p style={{ margin: "1rem 0 0", color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: 1.5 }}>
-            La plataforma tiene {summary.totalFuentes} fuentes en el catálogo. “No calculable” significa que el release actual no publica evidencia suficiente para afirmar una cobertura, no que la fuente esté vacía.
+            La plataforma tiene {summary.totalFuentes} fuentes en el catálogo. “No calculable” significa que el corte actual no publica evidencia suficiente para afirmar una cobertura, no que la fuente esté vacía.
           </p>
         </section>
 

@@ -65,7 +65,8 @@ describe("TAREA G: Cierre de Hallazgos Pre-Launch", () => {
 
   it("H-01: Nota inline en /cruces con link a metodología", () => {
     const crucesContent = readFileSync(join(projectRoot, "app", "cruces", "page.tsx"), "utf8");
-    expect(crucesContent).toContain("relaciones canónicas en el índice publicado; la tabla permite filtrarlas y paginarlas");
+    expect(crucesContent).toContain("relaciones documentales disponibles; la tabla permite filtrarlas y revisarlas por páginas");
+    expect(crucesContent).not.toContain("descargar el universo completo al navegador");
     expect(crucesContent).toContain('href="/como-funciona"');
   });
 

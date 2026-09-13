@@ -10,7 +10,7 @@
 - [x] Promoción controlada del Worker candidato y smoke productivo completados.
 - [x] D1. Auditar ChileCompra, InfoLobby, DIPRES y Transparencia Activa en el candidato, sólo por R2.
 - [x] Reconciliar las 92 filas de InfoLobby mediante índice R2 acumulado versionado, sin D1.
-- [ ] Separar corte vigente/histórico de ChileCompra; mantener el snapshot válido mientras el origen responda HTTP 403.
+- [x] Separar corte vigente/histórico de ChileCompra; mantener el snapshot válido mientras el origen responda HTTP 403.
 - [x] E. Ejecutar auditoría de consistencia y calidad en producción/R2/candidato.
 - [x] **Checkpoint 2:** checksums, paginación y ausencia de lecturas públicas D1 validados.
 - [x] F. Promoción controlada del Worker y verificación productiva completadas.
@@ -21,7 +21,7 @@
 - [x] Preflight de fuentes sin escritura: Cámara, Senado y los cinco orígenes de Movimientos respondieron correctamente el 2026-09-12.
 - [x] Reparar/publicar sólo la variante R2 `votaciones_camara`; PR #495 fusionado y Worker `d2f82268-b1af-4481-a67b-d1f8953f0fc6` promovido. Alias validado en producción desde R2, sin D1.
 - [x] Reconstruir las 7 particiones históricas faltantes de Cámara en R2; manifiestos y registros verificados por checksum, alias y fuente canónica completos en producción.
-- [ ] Reconstruir las 2 particiones faltantes de Senado en R2 (2025-08: 121; 2026-02: 7) después de localizar releases o validar la fuente oficial; no declarar cobertura total antes.
+- [x] Verificar las 2 particiones históricas de Senado en R2 (2025-08: 121; 2026-02: 7) contra sus manifiestos y registros publicados, sin reconstruir ni duplicar artefactos.
 
 ## Cuando Analytics confirme el siguiente reset de D1
 
@@ -45,10 +45,23 @@
 - [x] Ejecutar el verificador de calendario ETL (`34717871931`) sin tocar D1.
 - [x] Inventariar las carpetas maestras locales; sólo existen `public`, `audit`
   y `editorial` (20,46 GiB combinados), sin eliminar contenido.
-- [ ] Reconciliar el alcance de Senado 2025-08 y 2026-02 contra la fuente
-  oficial antes de reconstruir sus artefactos.
-- [ ] Revisar el corte vigente/histórico de ChileCompra y el release de
+- [x] Reconciliar el alcance de Senado 2025-08 y 2026-02 contra los
+  manifiestos y registros publicados en R2, sin rehidratar D1.
+- [x] Revisar el corte vigente/histórico de ChileCompra y la publicación de
   InfoLobby sólo desde producción/R2; no rehidratar D1.
+
+### Evidencia de cierre — 2026-09-13
+
+- Senado 2025-08: 121 registros; manifiesto y archivo de registros verificados
+  por checksum, sin cambios adicionales.
+- Senado 2026-02: 7 registros; manifiesto y archivo de registros verificados
+  por checksum, sin cambios adicionales.
+- ChileCompra: 74.142 registros corresponden al corte público actual; 888.693
+  es la referencia histórica declarada y permanece separada como cobertura no
+  disponible completa para recorrido. La guardia del proceso aborta antes de
+  escribir si el origen devuelve HTTP 403, vacío o un resultado inválido.
+- Interfaz: los detalles técnicos de infraestructura no se muestran en la
+  experiencia pública; quedan sólo en pruebas, auditoría y configuración.
 
 ## Fuera de alcance
 

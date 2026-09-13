@@ -129,7 +129,7 @@ function SalaryHistory({ history }: { history: FuncionarioSalaryHistoryPoint[] }
           </div>
         </div>
         <p className="municipal-staff-dialog-history-empty">
-          No hay más cortes de nómina cargados para esta persona en el release consultado. No se infiere una evolución con datos que la fuente no publicó.
+          No hay más cortes de nómina cargados para esta persona en la consulta. No se infiere una evolución con datos que la fuente no publicó.
         </p>
       </section>
     );
@@ -312,7 +312,7 @@ export default function FuncionarioDetailDialog({ record, nombreOrganismo, onClo
             {record.sourceUrl ? (
               <a href={record.sourceUrl} target="_blank" rel="noopener noreferrer">Ver registro original ↗</a>
             ) : (
-              <span>El registro se conserva según el release publicado.</span>
+              <span>El registro se conserva según el corte publicado.</span>
             )}
           </footer>
         </div>

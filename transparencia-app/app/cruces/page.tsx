@@ -166,7 +166,7 @@ export default async function CrossesPage() {
           declaredHistoricalCount={chilecompraQuality?.historicalCount ?? chilecompraCanonicalCount}
         />
         <p className="data-note" style={{ marginTop: "1rem" }}>
-           {crossesTotal.toLocaleString("es-CL")} relaciones canónicas en el índice publicado; la tabla permite filtrarlas y paginarlas dentro de la muestra inicial de {crosses.length.toLocaleString("es-CL")} relaciones, sin descargar el universo completo al navegador. <Link prefetch={false} href="/como-funciona">Conoce la metodología</Link>.
+           {crossesTotal.toLocaleString("es-CL")} relaciones documentales disponibles; la tabla permite filtrarlas y revisarlas por páginas desde la muestra inicial de {crosses.length.toLocaleString("es-CL")} relaciones. <Link prefetch={false} href="/como-funciona">Conoce la metodología</Link>.
          </p>
 
         <section className="card" aria-label="Observaciones de calidad de la fuente" style={{ padding: "1.25rem" }}>
@@ -184,9 +184,9 @@ export default async function CrossesPage() {
                 </span>
                 {source.qualityAudit && (
                   <details style={{ marginTop: "0.45rem", fontSize: "0.68rem", color: "var(--text-subtle)" }}>
-                    <summary style={{ cursor: "pointer", color: "var(--accent)" }}>Ver auditoría del snapshot</summary>
+                    <summary style={{ cursor: "pointer", color: "var(--accent)" }}>Ver auditoría de la versión</summary>
                     <span style={{ display: "block", marginTop: "0.35rem", lineHeight: 1.45 }}>
-                      {source.qualityAudit.snapshotRecords.toLocaleString("es-CL")} registros · corte {source.qualityAudit.snapshotDate}. No reemplaza el release publicado actual.
+                      {source.qualityAudit.snapshotRecords.toLocaleString("es-CL")} registros · corte {source.qualityAudit.snapshotDate}. No reemplaza el corte publicado actual.
                     </span>
                     <Link prefetch={false} href="/datos/calidad" className="data-link" style={{ display: "inline-block", marginTop: "0.25rem" }}>
                       Ver observaciones y reglas →

@@ -91,12 +91,12 @@ export default function TransparencyActivaSummary() {
         <span className="eyebrow">TRANSPARENCIA ACTIVA</span>
         <h3 id="historial-transparencia-title">Qué cambió entre un mes y otro</h3>
         <p>
-          Resumen del release publicado por el CPLT. Las altas y bajas indican que un registro apareció o dejó de aparecer entre dos cortes; no prueban por sí solas una contratación o un despido.
+          Resumen del corte publicado por el CPLT. Las altas y bajas indican que un registro apareció o dejó de aparecer entre dos cortes; no prueban por sí solas una contratación o un despido.
         </p>
       </div>
 
       <div className="remuneration-transparency-kpis">
-        <article><strong>{number.format(summary.recordCount)}</strong><span>registros en el release</span></article>
+        <article><strong>{number.format(summary.recordCount)}</strong><span>registros publicados</span></article>
         <article><strong>{number.format(summary.coverage.available)} / {number.format(summary.coverage.total)}</strong><span>comunas con nómina publicada</span></article>
         <article><strong>{number.format(summary.quality.amountStates.notPublished)}</strong><span>sin monto publicado</span></article>
         <article><strong>{summary.latestPeriod ? formatPeriod(summary.latestPeriod) : "—"}</strong><span>último corte incorporado</span></article>
@@ -109,7 +109,7 @@ export default function TransparencyActivaSummary() {
             <span>{formatCount(latest.newRecords)} nuevos registros</span>
             <span>{formatCount(latest.removedRecords)} que ya no aparecen</span>
             <span>{formatCount(latest.amountChanges)} cambios de monto</span>
-          </> : <span>el release conserva los cortes; la comparación de altas, bajas y cambios se incorporará con el próximo resumen ETL</span>}
+          </> : <span>la fuente conserva los cortes; la comparación de altas, bajas y cambios se incorporará con la próxima actualización</span>}
         </div>
       )}
 
@@ -138,7 +138,7 @@ export default function TransparencyActivaSummary() {
 
       <details className="remuneration-transparency-coverage">
         <summary>Ver las comunas sin nómina publicada y el motivo</summary>
-        <p>“Sin nómina publicada” significa que el release no trae registros para ninguna de las cuatro categorías consultadas en ese corte. No se transforma en cero.</p>
+        <p>“Sin nómina publicada” significa que la fuente no trae registros para ninguna de las cuatro categorías consultadas en ese corte. No se transforma en cero.</p>
         <div className="remuneration-transparency-coverage-list">
           {summary.coverage.unavailableItems.map((item) => (
             <div key={item.communeId}>
@@ -150,7 +150,7 @@ export default function TransparencyActivaSummary() {
         </div>
       </details>
 
-      <p className="remuneration-reading-note"><strong>Cómo leerlo:</strong> los montos comparados son brutos y sólo se cuentan cuando la fuente los publicó. El release conserva {number.format(summary.quality.amountStates.zero)} valores en cero y {number.format(summary.quality.recordsWithIssues)} registros con observaciones de calidad. {summary.notes?.[1] ?? "Los cambios se calculan sólo con datos publicados y comparables."}</p>
+      <p className="remuneration-reading-note"><strong>Cómo leerlo:</strong> los montos comparados son brutos y sólo se cuentan cuando la fuente los publicó. La fuente conserva {number.format(summary.quality.amountStates.zero)} valores en cero y {number.format(summary.quality.recordsWithIssues)} registros con observaciones de calidad. {summary.notes?.[1] ?? "Los cambios se calculan sólo con datos publicados y comparables."}</p>
     </section>
   );
 }

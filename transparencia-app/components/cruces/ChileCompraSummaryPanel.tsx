@@ -33,7 +33,7 @@ export default function ChileCompraSummaryPanel({
             Compras públicas que sí se pueden recorrer
           </h2>
           <p style={{ margin: 0, maxWidth: 760, fontSize: "0.8rem", lineHeight: 1.55, color: "var(--text-muted)" }}>
-            Este panel usa agregados precalculados del release OCDS y deja el detalle original en una consulta paginada. Los montos no publicados no se convierten en cero.
+            Este panel resume el corte publicado de ChileCompra y deja el detalle original disponible por páginas. Los montos no publicados no se convierten en cero.
           </p>
         </div>
         <Link prefetch={false} href="/cruces?vista=registros&fuente=chilecompra" className="btn btn-secondary btn-sm">
@@ -50,7 +50,7 @@ export default function ChileCompraSummaryPanel({
 
       {historicalPending && (
         <p role="status" style={{ margin: "1rem 0 0", padding: "0.75rem 0.85rem", border: "1px solid var(--warning)", borderRadius: 8, background: "color-mix(in srgb, var(--warning) 10%, transparent)", color: "var(--text-primary)", fontSize: "0.78rem", lineHeight: 1.5 }}>
-          <strong>Histórico pendiente de publicación:</strong> el catálogo R2 permite consultar {formatInteger(publicHistoricalCount)} registros. El valor de referencia de {formatInteger(declaredHistoricalCount)} filas todavía no tiene particiones públicas recorribles.
+          <strong>Histórico pendiente de publicación:</strong> el sitio permite consultar {formatInteger(publicHistoricalCount)} registros. El valor de referencia de {formatInteger(declaredHistoricalCount)} filas todavía no está disponible completo para recorrer.
         </p>
       )}
 

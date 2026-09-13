@@ -174,6 +174,7 @@ describe("Rediseño Integral de /cruces — Cruces Reales en Todos los Chips", (
     expect(explorerSource).toContain("staticPageSize");
     expect(explorerSource).toContain("searchIndex");
     expect(explorerSource).toContain("categoryRows");
-    expect(pageSource).toContain("sin descargar el universo completo al navegador");
+    expect(pageSource).toContain("revisarlas por páginas desde la muestra inicial");
+    expect(pageSource).not.toContain("descargar el universo completo al navegador");
   });
 });

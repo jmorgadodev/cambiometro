@@ -558,7 +558,7 @@ export default function OrganismoFuncionariosList({
       {payrollCoverage && payrollCoverage.available < payrollCoverage.expected && (
         <div className="card-flat" role="note" style={{ marginBottom: "1rem", padding: "0.8rem 1rem", fontSize: "0.78rem", lineHeight: 1.5, color: "var(--text-muted)" }}>
           <strong style={{ color: "var(--text-primary)" }}>Cobertura real de nóminas:</strong>{" "}
-          el release actual publica registros para {payrollCoverage.available.toLocaleString("es-CL")} de {payrollCoverage.expected.toLocaleString("es-CL")} comunas. Las comunas sin nómina publicada se mantienen como “sin datos publicados”; no se muestran como $0 ni se completan con estimaciones.
+          el corte actual publica registros para {payrollCoverage.available.toLocaleString("es-CL")} de {payrollCoverage.expected.toLocaleString("es-CL")} comunas. Las comunas sin nómina publicada se mantienen como “sin datos publicados”; no se muestran como $0 ni se completan con estimaciones.
         </div>
       )}
       {visibleQualityCount > 0 && (

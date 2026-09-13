@@ -438,7 +438,7 @@ export default function Remuneraciones38BisClient({
         <section className="card" aria-labelledby="release-title">
           <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", flexWrap: "wrap", alignItems: "flex-start" }}>
             <div>
-              <span className="eyebrow">Trazabilidad del release</span>
+              <span className="eyebrow">Estado de la fuente</span>
               <h2 id="release-title" style={{ margin: "0.25rem 0 0.35rem", fontSize: "1.35rem" }}>Un corte mensual, una versión verificable</h2>
               <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.86rem", lineHeight: 1.6 }}>
                 La Comisión mantiene este registro mensualmente; la fecha del corte puede tener desfase respecto de la fecha de publicación.

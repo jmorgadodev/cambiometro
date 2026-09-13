@@ -4,7 +4,6 @@ import {
   formatReleaseTimestamp,
   RELEASE_STATUS_LABELS,
   RELEASE_STATUS_TONES,
-  shortReleaseChecksum,
 } from "@/lib/release-meta";
 
 interface Props {
@@ -28,15 +27,8 @@ function formatCount(value: number | null | undefined): string {
   return value === null || value === undefined ? "No calculable" : value.toLocaleString("es-CL");
 }
 
-function toneColor(tone: "ok" | "warn" | "danger" | "muted"): string {
-  if (tone === "ok") return "var(--ok)";
-  if (tone === "warn") return "var(--warn)";
-  if (tone === "danger") return "var(--danger)";
-  return "var(--text-muted)";
-}
-
 export default function ReleaseMetaCard({
-  eyebrow = "Trazabilidad del release",
+  eyebrow = "Estado de la fuente",
   title,
   source,
   period,
@@ -45,7 +37,6 @@ export default function ReleaseMetaCard({
   published,
   queryable,
   related,
-  checksumSha256,
   href,
   officialUrl,
   note,
@@ -71,7 +62,7 @@ export default function ReleaseMetaCard({
             {period ? <> · período {period}</> : null}
           </p>
         </div>
-        <span className={`badge badge-${tone === "muted" ? "subtle" : tone}`} aria-label={`Estado del release: ${RELEASE_STATUS_LABELS[status]}`}>
+        <span className={`badge badge-${tone === "muted" ? "subtle" : tone}`} aria-label={`Estado de la fuente: ${RELEASE_STATUS_LABELS[status]}`}>
           {RELEASE_STATUS_LABELS[status]}
         </span>
       </div>
@@ -79,7 +70,7 @@ export default function ReleaseMetaCard({
       {compactMetrics ? (
         <div className="release-coverage-summary">
           <div className="release-coverage-summary-title">Cobertura del catálogo</div>
-          <dl className="release-coverage-line" aria-label="Cobertura del release">
+          <dl className="release-coverage-line" aria-label="Cobertura de la fuente">
             {metrics.map(([label, count]) => (
               <div key={label}>
                 <dt>{label}</dt>
@@ -100,8 +91,7 @@ export default function ReleaseMetaCard({
       )}
 
       <div className="release-meta-meta" style={{ display: "flex", flexWrap: "wrap", gap: "0.75rem 1.25rem", marginTop: "0.8rem", color: "var(--text-muted)", fontSize: "0.72rem" }}>
-        <span>Última publicación: <strong style={{ color: "var(--text-1)" }}>{formatReleaseTimestamp(lastSuccessAt)}</strong></span>
-        <span>Checksum: <code style={{ color: toneColor(tone) }}>{shortReleaseChecksum(checksumSha256)}</code></span>
+        <span>Última actualización: <strong style={{ color: "var(--text-1)" }}>{formatReleaseTimestamp(lastSuccessAt)}</strong></span>
       </div>
       {note ? <p className="release-meta-note" style={{ margin: "0.7rem 0 0", color: "var(--text-muted)", fontSize: "0.76rem", lineHeight: 1.5 }}>{note}</p> : null}
       <div className="release-meta-actions" style={{ display: "flex", flexWrap: "wrap", gap: "0.7rem", marginTop: "0.85rem" }}>
