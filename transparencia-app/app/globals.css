@@ -5604,6 +5604,37 @@ html.dark .page-masthead {
 .remuneration-transparency-kpis span { color: var(--text-muted); font-size: 0.7rem; line-height: 1.35; }
 .remuneration-transparency-latest { display: flex; flex-wrap: wrap; gap: 0.4rem 0.8rem; margin: 0.8rem 0; padding: 0.7rem 0.8rem; border-left: 2px solid var(--accent); background: var(--bg-surface-2); color: var(--text-muted); font-size: 0.74rem; }
 .remuneration-transparency-latest strong { color: var(--text-primary); }
+.remuneration-monthly-chart { display: grid; gap: 0.8rem; margin: 0.9rem 0; padding: 1rem; border: 1px solid var(--border-subtle); border-radius: 0.75rem; background: var(--surface-raised); }
+.remuneration-monthly-chart__header { display: flex; align-items: flex-end; justify-content: space-between; gap: 1rem; }
+.remuneration-monthly-chart__header h4 { margin: 0.25rem 0 0.3rem; color: var(--text-primary); font-size: 1rem; letter-spacing: -0.015em; }
+.remuneration-monthly-chart__header p { max-width: 68ch; margin: 0; color: var(--text-muted); font-size: 0.73rem; line-height: 1.5; }
+.remuneration-monthly-chart__signals { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 0.45rem; }
+.remuneration-monthly-chart__signals span { display: grid; gap: 0.18rem; min-width: 0; padding: 0.55rem 0.6rem; border: 1px solid var(--border-subtle); border-radius: 0.55rem; background: var(--surface); }
+.remuneration-monthly-chart__signals b { overflow: hidden; color: var(--accent); font-family: var(--font-mono); font-size: 0.8rem; text-overflow: ellipsis; white-space: nowrap; }
+.remuneration-monthly-chart__signals small { color: var(--text-muted); font-size: 0.64rem; line-height: 1.3; }
+.remuneration-monthly-chart__legend { display: flex; flex-wrap: wrap; gap: 0.7rem 1rem; color: var(--text-muted); font-size: 0.68rem; }
+.remuneration-monthly-chart__legend span { display: inline-flex; align-items: center; gap: 0.35rem; }
+.remuneration-monthly-chart__legend i { display: inline-block; width: 0.65rem; height: 0.65rem; border-radius: 2px; background: var(--accent); }
+.remuneration-monthly-chart__legend i.is-line { height: 0.2rem; border-radius: 999px; }
+.remuneration-monthly-chart__legend i.is-new { background: var(--ok); }
+.remuneration-monthly-chart__legend i.is-removed { background: var(--warn); }
+.remuneration-monthly-chart__legend .is-unavailable { color: var(--warn); font-weight: 700; }
+.remuneration-monthly-chart__canvas { min-height: 16rem; overflow: hidden; border-top: 1px solid var(--border-subtle); border-bottom: 1px solid var(--border-subtle); background: var(--surface); }
+.remuneration-monthly-chart__canvas svg { display: block; width: 100%; height: 20rem; overflow: visible; }
+.remuneration-monthly-chart__grid { stroke: var(--border-subtle); stroke-dasharray: 3 5; stroke-width: 1; }
+.remuneration-monthly-chart__baseline { stroke: var(--border); stroke-width: 1; }
+.remuneration-monthly-chart__axis, .remuneration-monthly-chart__label { fill: var(--text-muted); font-family: var(--font-mono); font-size: 10px; }
+.remuneration-monthly-chart__label { font-size: 9px; }
+.remuneration-monthly-chart__line { fill: none; stroke: var(--accent); stroke-linecap: round; stroke-linejoin: round; stroke-width: 3; }
+.remuneration-monthly-chart__point { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.remuneration-monthly-chart__month { cursor: pointer; outline: none; }
+.remuneration-monthly-chart__month:focus-visible .remuneration-monthly-chart__point, .remuneration-monthly-chart__month:hover .remuneration-monthly-chart__point { r: 6; stroke: var(--highlight); }
+.remuneration-monthly-chart__bar.is-new { fill: var(--ok); }
+.remuneration-monthly-chart__bar.is-removed { fill: var(--warn); }
+.remuneration-monthly-chart__note { margin: 0; color: var(--text-muted); font-size: 0.68rem; line-height: 1.45; }
+.remuneration-transparency-table-details { margin-top: 0.85rem; border-top: 1px solid var(--border-subtle); }
+.remuneration-transparency-table-details summary { padding: 0.75rem 0; color: var(--accent); cursor: pointer; font-size: 0.74rem; font-weight: 750; }
+.remuneration-transparency-table-details[open] summary { border-bottom: 1px solid var(--border-subtle); }
 .remuneration-transparency-table-wrap { overflow-x: auto; }
 .remuneration-transparency-table { min-width: 48rem; }
 .remuneration-transparency-table caption { margin-bottom: 0.45rem; color: var(--text-muted); font-size: 0.72rem; text-align: left; }
@@ -5653,6 +5684,13 @@ html.dark .page-masthead {
   }
   .remuneration-source-list { grid-template-columns: 1fr; }
   .remuneration-transparency-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .remuneration-monthly-chart { padding: 0.75rem; }
+  .remuneration-monthly-chart__header { align-items: stretch; flex-direction: column; }
+  .remuneration-monthly-chart__header .segmented-control { width: 100%; }
+  .remuneration-monthly-chart__header .segmented-control button { flex: 1 1 50%; }
+  .remuneration-monthly-chart__signals { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .remuneration-monthly-chart__signals span:first-child { grid-column: 1 / -1; }
+  .remuneration-monthly-chart__canvas svg { height: 17rem; }
   .remuneration-transparency-coverage-list { grid-template-columns: 1fr; max-height: 28rem; }
   .remuneration-transparency-table-wrap { overflow: visible; }
   .remuneration-transparency-table { display: block; min-width: 0; white-space: normal; }

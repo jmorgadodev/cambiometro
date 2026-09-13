@@ -40,9 +40,10 @@ describe("promesas editoriales del inicio", () => {
     expect(search).toContain("Coincidencias");
     expect(search).toContain('action="/remuneraciones-publicas/"');
     expect(search).toContain("event.preventDefault();");
-    expect(search).toContain("/remuneraciones-publicas/?q=");
-    expect(search).toContain("hasRemunerationResults");
-    expect(search).toContain("Ver todas las remuneraciones");
+    expect(search).toContain("resolveHomeSearchTarget");
+    expect(search).toContain("resolveSearchResultUrl");
+    expect(search).toContain("fullSearchTarget.href");
+    expect(search).not.toContain("hasRemunerationResults");
   });
 
   it("mantiene cinco preguntas de análisis y separa el seguimiento de movimientos", () => {

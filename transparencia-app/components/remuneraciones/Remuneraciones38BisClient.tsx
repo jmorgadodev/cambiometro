@@ -497,7 +497,6 @@ export default function Remuneraciones38BisClient({
             <div>
               <span className="eyebrow">Explorador paginado</span>
               <h2 id="explore-title" style={{ margin: "0.25rem 0 0.25rem", fontSize: "1.25rem" }}>Busca una persona, organismo o cargo</h2>
-              <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.82rem" }}>El navegador carga sólo la página solicitada; no descarga el universo completo.</p>
             </div>
             <span style={{ color: "var(--text-subtle)", fontSize: "0.78rem" }}>{showingLabel}</span>
           </div>

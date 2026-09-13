@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
+import { resolveHomeSearchTarget, resolveSearchResultUrl } from "@/lib/home-search-routing";
 
 interface SearchResult {
   type: "politico" | "persona" | "municipalidad" | "funcionario" | "entidad";
@@ -145,15 +146,15 @@ export default function HeaderSearch() {
           ) : !isLoading && results.length === 0 ? (
             <div role="status" className="header-search__message">
               <p>Sin coincidencias verificadas con ese texto.</p>
-              <Link prefetch={false} href={`/politico?q=${encodeURIComponent(query.trim())}`} onClick={() => setIsOpen(false)}>
-                Ver listado de diputados y senadores con “{query.trim()}” →
+              <Link prefetch={false} href={resolveHomeSearchTarget([], query.trim()).href} onClick={() => setIsOpen(false)}>
+                Buscar “{query.trim()}” en remuneraciones →
               </Link>
             </div>
           ) : (
             results.map((result) => (
               <Link prefetch={false}
                 key={`${result.type}-${result.id}`}
-                href={result.url}
+                href={resolveSearchResultUrl(result)}
                 role="option"
                 aria-selected="false"
                 className="header-search__result"
