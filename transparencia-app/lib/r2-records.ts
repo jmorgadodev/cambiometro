@@ -133,7 +133,7 @@ function indexedRecordMatches(record: EvidenceRecord, params: {
 
 async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeof readR2EvidenceRecords>[1]) {
   const sourceIds = Array.isArray(params.source) ? params.source : [params.source];
-  if (sourceIds.length !== 1 || !["chilecompra", "infolobby"].includes(sourceIds[0])) return null;
+  if (sourceIds.length !== 1 || !["chilecompra", "infolobby", "infoprobidad"].includes(sourceIds[0])) return null;
   const sourceId = sourceIds[0];
   const manifestObject = await bucket.get(`indexes/v1/${sourceId}/manifest.json`);
   if (!manifestObject) return null;

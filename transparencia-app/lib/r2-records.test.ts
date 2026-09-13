@@ -99,4 +99,33 @@ describe("registros calientes de R2", () => {
     expect(result).toMatchObject({ scanLimited: true, expectedTotal: 13, complete: false });
     expect(result?.data).toEqual([]);
   });
+
+  it("usa el índice paginado de InfoProbidad para no descomprimir todo el histórico", async () => {
+    const records = [
+      { id: "probidad-1", sourceId: "infoprobidad", kind: "declaration", occurredAt: "2026-09-01", title: "Declaración Uno", data: { nombre: "PERSONA UNO" } },
+      { id: "probidad-2", sourceId: "infoprobidad", kind: "declaration", occurredAt: "2026-08-01", title: "Declaración Dos", data: { nombre: "PERSONA DOS" } },
+    ];
+    const archive = new TextEncoder().encode(`${records.map((record) => JSON.stringify(record)).join("\n")}\n`).buffer;
+    const bucket = fakeBucket({
+      "indexes/v1/infoprobidad/manifest.json": {
+        schemaVersion: 1,
+        sourceId: "infoprobidad",
+        totalRows: 2,
+        pageSize: 1,
+        recordArchiveKey: "indexes/v1/infoprobidad/records.jsonl",
+        searchIndexKey: "indexes/v1/infoprobidad/search.json",
+        searchCountIndexKey: "indexes/v1/infoprobidad/search-counts.json",
+        pages: [{ offset: 0, length: Buffer.byteLength(`${JSON.stringify(records[0])}\n`) }, { offset: Buffer.byteLength(`${JSON.stringify(records[0])}\n`), length: Buffer.byteLength(`${JSON.stringify(records[1])}\n`) }],
+      },
+      "indexes/v1/infoprobidad/records.jsonl": archive,
+      "indexes/v1/infoprobidad/search.json": { "persona": [0, 1] },
+      "indexes/v1/infoprobidad/search-counts.json": { persona: 2 },
+    });
+
+    const result = await readR2EvidenceRecords(bucket, { source: "infoprobidad", query: "persona", limit: 1 });
+
+    expect(result).toMatchObject({ total: 2, expectedTotal: 2, complete: true, missingPartitions: 0 });
+    expect(result?.data).toHaveLength(1);
+    expect(result?.data[0]?.sourceId).toBe("infoprobidad");
+  });
 });
