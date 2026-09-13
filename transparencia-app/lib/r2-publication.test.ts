@@ -42,6 +42,22 @@ describe("publicación caliente en R2", () => {
     ]);
   });
 
+  it("conserva todas las particiones históricas de InfoProbidad", () => {
+    const hot = selectHotAssets([
+      asset("catalog/v1/manifest.json"),
+      asset("partitions/infoprobidad/2026/01/records.jsonl.gz"),
+      asset("partitions/infoprobidad/2026/08/records.jsonl.gz"),
+      asset("partitions/infoprobidad/2026/09/records.jsonl.gz"),
+    ]);
+
+    expect(hot.map((item: { key: string }) => item.key)).toEqual([
+      "catalog/v1/manifest.json",
+      "partitions/infoprobidad/2026/01/records.jsonl.gz",
+      "partitions/infoprobidad/2026/08/records.jsonl.gz",
+      "partitions/infoprobidad/2026/09/records.jsonl.gz",
+    ]);
+  });
+
   it("elimina objetos fríos administrados y bloquea crecimiento desde 90 %", () => {
     const plan = planR2Publication([asset("catalog/v1/manifest.json", 81)], {
       objects: [{ key: "partitions/old/2020/01/records.jsonl.gz", size: 80, checksumSha256: "old" }],

@@ -41,6 +41,10 @@ export function selectHotAssets(assets) {
     || asset.key.startsWith("entities/")
     || asset.key.startsWith("indexes/")
     || asset.key.startsWith("projections/")
+    // InfoProbidad se consulta por historial de declaraciones. Mantener sólo
+    // el mes más reciente deja el catálogo apuntando a particiones ausentes y
+    // convierte una fuente histórica en una muestra reciente.
+    || asset.key.startsWith("partitions/infoprobidad/")
     || [...prefixes].some((prefix) => asset.key.startsWith(prefix)));
 }
 
