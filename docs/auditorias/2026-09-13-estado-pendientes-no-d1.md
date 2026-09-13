@@ -143,3 +143,9 @@ Se comprobó que `https://datos-abiertos.chilecompra.cl/descargas/procesos-ocds`
 Producción expone actualmente 74.142 registros de ChileCompra y el catálogo histórico local declara 888.693. La diferencia queda clasificada como **corte vigente frente a histórico**, no como pérdida automática. La API respondió para `2026-06` con 9.302 licitaciones, 9.278 tratos directos y 17.565 convenios marco; para `2026-07`, con 8.004, 9.361 y 17.364 respectivamente. Para `2026-08` y `2026-09` respondió `404 No se encontraron resultados` en los tres tipos. El conector admite esos tres tipos y el flujo incluye archivos OCDS masivos por mes; falta obtener y validar el enlace real que la aplicación web entrega para cada período antes de ejecutar otra ingesta.
 
 No se usó D1 en estas comprobaciones. El workflow todavía conserva un paso opcional de materialización D1 condicionado por preflight; la publicación pública continúa en R2/Pages y la cuota alta debe impedir esa materialización. Esto debe confirmarse en el próximo run antes de considerar cerrado el aislamiento de D1.
+
+## Smoke de rutas — 13 de septiembre de 2026
+
+El barrido HTTP acotado confirmó HTTP 200 para home, municipalidades, movimientos, remuneraciones, servicios públicos, cruces, personas, salud y fuentes. San Fernando también responde correctamente en la ruta canónica `/entidades/municipality-cl-06301/` (y en `/municipalidades/muni-sanfernando/`); la prueba contra `/municipalidades/municipality-cl-06301/` fue un falso negativo porque esa combinación de prefijo e identificador no es una ruta válida.
+
+La ruta canónica de votaciones es `/votaciones-destacadas/`; `/votaciones/` no existe y no debe usarse como prueba de disponibilidad. No se detectó una regresión en esos módulos por este barrido.
