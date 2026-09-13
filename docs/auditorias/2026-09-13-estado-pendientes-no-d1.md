@@ -221,9 +221,13 @@ el checkout local se conserva sólo para reproducir auditorías y pruebas.
 
 1. **CPLT / Transparencia Activa:** reconciliar el conteo productivo de
    `1.226.913` con el snapshot local/manifiesto que declara `1.203.287`,
-   clasificando diferencia de fecha, alcance o release. Después cerrar la
-   auditoría de historial mensual, altas, bajas, cambios de sueldo, cambios de
-   organismo y montos proporcionales sin alterar filas originales.
+   clasificando diferencia de fecha, alcance o release. El caso reproducible
+   `LATORRE RINCON, VALENTINA ANDREA` demuestra que el conteo agregado no basta:
+   la persona aparece en la fuente oficial de Planta, pero no en la búsqueda
+   pública actual. Ver `docs/auditorias/2026-09-13-cplt-gap-latorre-rincon.md`.
+   Después cerrar la auditoría de historial mensual, altas, bajas, cambios de
+   sueldo, cambios de organismo y montos proporcionales sin alterar filas
+   originales.
 2. **Búsqueda transversal del home:** el índice estático de remuneraciones sí
    contiene `RÍO SEBASTIÁN TORREALBA DEL` y la búsqueda interna tolera tildes y
    mayúsculas; la prueba directa del índice devolvió sus cuatro filas históricas.
