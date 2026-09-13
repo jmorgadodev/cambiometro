@@ -23,6 +23,7 @@ interface SearchPayload {
     autoridades?: SearchResult[];
     municipalidades?: SearchResult[];
     funcionarios?: SearchResult[];
+    remuneraciones?: SearchResult[];
     entidades?: SearchResult[];
   };
 }
@@ -101,6 +102,7 @@ function flattenResults(payload: SearchPayload) {
     payload.data?.autoridades ?? [],
     payload.data?.municipalidades ?? [],
     payload.data?.funcionarios ?? [],
+    payload.data?.remuneraciones ?? [],
     payload.data?.entidades ?? [],
   ];
   const unique = new Map<string, SearchResult>();

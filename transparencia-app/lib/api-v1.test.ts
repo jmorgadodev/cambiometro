@@ -284,6 +284,40 @@ describe("API canónica v1", () => {
     expect(payload.meta.sourceStatus).toBe("r2-catalog");
   });
 
+  it("incluye pagos 38 bis en la búsqueda general sin consultar D1", async () => {
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse para remuneraciones del home"); } },
+      PUBLIC_DATA: {
+        get: async (key: string) => key === "projections/remuneraciones-38bis-v1/current.json"
+          ? {
+            json: async <T>() => ({
+              mes: "2026-06",
+              checksum_sha256: "release-38bis",
+              registros: [{
+                nombre: "RÍO SEBASTIÁN TORREALBA DEL",
+                organismo: "PRESIDENCIA",
+                cargo: "COORDINADOR DE ASESORES",
+                bruto_mensual: 9200000,
+              }],
+            }) as T,
+          }
+          : null,
+      },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/search?q=rio%20sebastian%20torrealba%20del"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.remuneraciones).toHaveLength(1);
+    expect(payload.data.remuneraciones[0]).toMatchObject({
+      nombre: "RÍO SEBASTIÁN TORREALBA DEL",
+      type: "remuneracion",
+      periodo: "2026-06",
+      monto: 9200000,
+    });
+  });
+
   it("lleva las municipalidades del buscador a su ficha territorial canónica", async () => {
     const env = {
       DB: { prepare: () => { throw new Error("D1 no debe consultarse para la búsqueda del catálogo"); } },

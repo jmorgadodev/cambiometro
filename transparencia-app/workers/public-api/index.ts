@@ -352,6 +352,17 @@ interface CompactOfficialRow {
   q?: string[];
 }
 
+interface Remuneration38BisRelease {
+  mes?: string | null;
+  checksum_sha256?: string | null;
+  registros?: Array<{
+    nombre?: string | null;
+    organismo?: string | null;
+    cargo?: string | null;
+    bruto_mensual?: number | null;
+  }>;
+}
+
 type CompactOfficialTokenEntry = [token: string, positions: number[]];
 
 async function r2Json<T>(bucket: R2Bucket | undefined, key: string): Promise<T | null> {
@@ -1536,6 +1547,52 @@ async function searchFuncionariosFromR2(raw: string, env: Env) {
   }
 }
 
+/**
+ * Search the current 38 bis payment release without D1. A payment row is
+ * evidence from a source, not automatically a canonical person entity, so it
+ * remains in its own result group. Historical rows stay in the Pages unified
+ * remuneration explorer.
+ */
+async function searchRemuneraciones38BisFromR2(raw: string, env: Env) {
+  const release = await r2Json<Remuneration38BisRelease>(
+    env.PUBLIC_DATA,
+    "projections/remuneraciones-38bis-v1/current.json",
+  );
+  if (!Array.isArray(release?.registros)) return [];
+  const queryTokens = normalized(raw)
+    .replace(/[^a-z0-9]+/g, " ")
+    .split(/\s+/)
+    .filter((token) => token.length >= 2);
+  if (queryTokens.length === 0) return [];
+
+  const seen = new Set<string>();
+  const matches: Array<JsonRecord> = [];
+  for (const row of release.registros) {
+    const nombre = String(row.nombre ?? "").trim();
+    if (!nombre) continue;
+    const organismo = String(row.organismo ?? "").trim();
+    const cargo = String(row.cargo ?? "").trim();
+    const haystack = normalized(`${nombre} ${organismo} ${cargo}`);
+    if (!queryTokens.every((token) => haystack.includes(token))) continue;
+    const identity = normalized(`${nombre}|${organismo}|${cargo}`);
+    if (seen.has(identity)) continue;
+    seen.add(identity);
+    matches.push({
+      id: `remuneracion-38bis-${identity.replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "")}`,
+      type: "remuneracion",
+      nombre,
+      url: `/remuneraciones-publicas/?q=${encodeURIComponent(nombre)}`,
+      cargo: cargo || undefined,
+      organo: organismo || undefined,
+      periodo: release.mes ?? null,
+      monto: Number.isFinite(Number(row.bruto_mensual)) ? Number(row.bruto_mensual) : null,
+      fuente: "Registro 38 bis",
+    });
+    if (matches.length >= 25) break;
+  }
+  return matches;
+}
+
 async function searchFromR2(requestUrl: URL, env: Env) {
   const raw = requestUrl.searchParams.get("q")?.trim() ?? "";
   if (raw.length < 2 || raw.length > 80) return failure("INVALID_QUERY", "La búsqueda debe tener entre 2 y 80 caracteres.", 400);
@@ -1557,9 +1614,10 @@ async function searchFromR2(requestUrl: URL, env: Env) {
       partido: politico.partido_electoral ?? politico.partido_id,
       region: politico.distrito_region,
     }));
-  const [rows, funcionarios] = await Promise.all([
+  const [rows, funcionarios, remuneraciones] = await Promise.all([
     canonicalEntitiesFromR2(env),
     searchFuncionariosFromR2(raw, env),
+    searchRemuneraciones38BisFromR2(raw, env),
   ]);
   const entities = (rows ?? [])
     .filter((row) => normalize(row.name).includes(needle))
@@ -1580,8 +1638,8 @@ async function searchFromR2(requestUrl: URL, env: Env) {
     if (!current || current.url.startsWith("/entidades/")) merged.set(key, item);
   }
   const data = [...merged.values()].slice(0, 75);
-  if (data.length === 0 && funcionarios.length === 0 && !rows) return dbUnavailable();
-  return success({ autoridades: data.filter((item) => item.type === "persona").slice(0, 25), municipalidades: data.filter((item) => item.type === "municipalidad").slice(0, 25), funcionarios, entidades: data.slice(0, 25) }, { query: raw, sourceStatus: "r2-catalog" });
+  if (data.length === 0 && funcionarios.length === 0 && remuneraciones.length === 0 && !rows) return dbUnavailable();
+  return success({ autoridades: data.filter((item) => item.type === "persona").slice(0, 25), municipalidades: data.filter((item) => item.type === "municipalidad").slice(0, 25), funcionarios, remuneraciones, entidades: data.slice(0, 25) }, { query: raw, sourceStatus: "r2-catalog" });
 }
 
 async function listTransferencias(requestUrl: URL, env: Env) {
