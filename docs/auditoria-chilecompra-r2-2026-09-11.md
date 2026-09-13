@@ -84,3 +84,11 @@ validar el contenido del `.7z`, comparar su conteo contra el release vigente y
 mantener agosto/septiembre fuera del catálogo hasta que el proveedor los publique.
 No se modificó el release de producción ni se descargaron estos archivos durante
 esta comprobación.
+
+La prueba controlada de `2026-07.7z` sí pudo abrirse con el loader existente y
+produjo 76 documentos OCDS, sin archivos vacíos ni error de esquema. El archivo
+descargado temporalmente midió 168.032 bytes y su SHA-256 fue
+`ad565b0c949a799d8ac6bb717dab457020e70ae7ab0cb2fee3f5afb2309cea8a`.
+Esto valida el camino técnico del ETL, pero no autoriza publicar julio como si
+fuera el histórico completo: ese mes debe reconciliarse con el conteo y el
+alcance de la proyección vigente antes de reemplazar el release.
