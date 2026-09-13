@@ -2,6 +2,7 @@ import crypto from "node:crypto";
 import { externalText } from "./safe-text.mjs";
 
 export const SOURCE_URL = "https://comision38bis.gob.cl/registro-publico";
+export const SOURCE_CSV_URL = `${SOURCE_URL}?csv-todo`;
 
 export function extractPeriod(html) {
   const titlePeriod = String(html).match(/Registro\s+de\s+remuneraciones\s+(\d{4}-\d{2})/i)?.[1];
@@ -39,12 +40,99 @@ export function parseRows(html) {
   return rows;
 }
 
+function normalizeHeader(value) {
+  return externalText(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase();
+}
+
+function parseDelimited(text, separator = ";") {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let quoted = false;
+  const input = String(text).replace(/^\uFEFF/, "");
+  for (let index = 0; index < input.length; index += 1) {
+    const character = input[index];
+    const next = input[index + 1];
+    if (character === '"') {
+      if (quoted && next === '"') {
+        cell += '"';
+        index += 1;
+      } else {
+        quoted = !quoted;
+      }
+    } else if (character === separator && !quoted) {
+      row.push(cell);
+      cell = "";
+    } else if ((character === "\n" || character === "\r") && !quoted) {
+      if (character === "\r" && next === "\n") index += 1;
+      row.push(cell);
+      if (row.some((value) => value.trim())) rows.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += character;
+    }
+  }
+  if (cell || row.length) {
+    row.push(cell);
+    if (row.some((value) => value.trim())) rows.push(row);
+  }
+  return rows;
+}
+
+function columnIndex(headers, ...names) {
+  for (const name of names) {
+    const index = headers.indexOf(normalizeHeader(name));
+    if (index >= 0) return index;
+  }
+  return -1;
+}
+
+export function parseCsvRows(csv) {
+  const table = parseDelimited(csv);
+  if (table.length < 2) return [];
+  const headers = table[0].map(normalizeHeader);
+  const periodIndex = columnIndex(headers, "PERÍODO", "PERIODO");
+  const partidaIndex = columnIndex(headers, "PARTIDA PRESUP");
+  const organizationIndex = columnIndex(headers, "ORGANISMO");
+  const roleIndex = columnIndex(headers, "CARGO O PERFIL", "CARGO");
+  const firstNameIndex = columnIndex(headers, "NOMBRES", "NOMBRE");
+  const surnameIndex = columnIndex(headers, "APELLIDOS", "APELLIDO");
+  const salaryIndex = columnIndex(headers, "REMUNERACIÓN BRUTA DEL MES", "REMUNERACION BRUTA DEL MES", "REMUNERACIÓN BRUTA", "REMUNERACION BRUTA");
+  const fallbackAmountIndex = columnIndex(headers, "MONTO BRUTO", "TOTAL");
+  if ([periodIndex, partidaIndex, organizationIndex, roleIndex, firstNameIndex].some((index) => index < 0)) return [];
+
+  return table.slice(1).map((values) => {
+    const firstName = externalText(values[firstNameIndex]);
+    const surname = surnameIndex >= 0 ? externalText(values[surnameIndex]) : "";
+    const name = [firstName, surname].filter(Boolean).join(" ") || "NO REPORTADO";
+    const amountValue = salaryIndex >= 0 ? values[salaryIndex] : fallbackAmountIndex >= 0 ? values[fallbackAmountIndex] : "";
+    return {
+      periodo: externalText(values[periodIndex]),
+      partida: externalText(values[partidaIndex]),
+      organismo: externalText(values[organizationIndex]),
+      cargo: externalText(values[roleIndex]),
+      nombre: name,
+      bruto_mensual: parseAmount(amountValue),
+    };
+  }).filter((row) => /^\d{4}-\d{2}$/.test(row.periodo) && (row.partida || row.organismo || row.cargo));
+}
+
+export function latestCsvPeriod(csvRows) {
+  return [...new Set(csvRows.map((row) => row.periodo).filter(Boolean))].sort().at(-1) ?? null;
+}
+
 export function checksumRows(rows) {
   return crypto.createHash("sha256").update(JSON.stringify(rows)).digest("hex");
 }
 
 function rowKey(row) {
-  return [row.partida, row.organismo, row.cargo, row.nombre].join("|");
+  return [row.partida, row.organismo, row.cargo, row.nombre]
+    .map((value) => externalText(value).normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/\s+/g, " ").toLocaleUpperCase("es-CL"))
+    .join("|");
 }
 
 export function compareRows(previousRows, currentRows, previousPeriod = null) {

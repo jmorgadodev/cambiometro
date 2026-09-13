@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { buildHistory, checksumRows, compareRows, extractPeriod, parseRows, SOURCE_URL } from "./etl/remuneraciones-38bis-parser.mjs";
+import { buildHistory, checksumRows, compareRows, extractPeriod, latestCsvPeriod, parseCsvRows, parseRows, SOURCE_CSV_URL, SOURCE_URL } from "./etl/remuneraciones-38bis-parser.mjs";
 
 const root = process.cwd();
 const args = new Map();
@@ -43,13 +43,28 @@ function readJson(filePath, fallback = null) {
   return JSON.parse(fs.readFileSync(filePath, "utf8"));
 }
 
-const response = await fetchWithRetry(SOURCE_URL);
-const html = new TextDecoder("utf-8").decode(new Uint8Array(await response.arrayBuffer()));
-const registros = parseRows(html);
+let response;
+let registros;
+let mes;
+try {
+  response = await fetchWithRetry(SOURCE_CSV_URL);
+  const csv = new TextDecoder("utf-8").decode(new Uint8Array(await response.arrayBuffer()));
+  const csvRows = parseCsvRows(csv);
+  const latestPeriod = latestCsvPeriod(csvRows);
+  if (!csvRows.length || !latestPeriod) throw new Error("CSV 38 bis sin filas válidas o período reconocible");
+  registros = csvRows.filter((row) => row.periodo === latestPeriod).map(({ periodo: _periodo, ...row }) => row);
+  mes = latestPeriod;
+} catch (error) {
+  console.warn(`CSV 38 bis no disponible; se intenta la página HTML: ${error.message}`);
+  response = await fetchWithRetry(SOURCE_URL);
+  const html = new TextDecoder("utf-8").decode(new Uint8Array(await response.arrayBuffer()));
+  registros = parseRows(html);
+  mes = extractPeriod(html);
+}
 if (registros.length < 500) throw new Error(`Se parsearon ${registros.length} filas; se requieren al menos 500 para publicar.`);
 
 const extraidoEn = new Date().toISOString();
-const mes = extractPeriod(html) ?? new Date(extraidoEn).toISOString().slice(0, 7);
+mes ??= new Date(extraidoEn).toISOString().slice(0, 7);
 const previous = readJson(previousPath);
 const previousHistory = readJson(previousHistoryPath, readJson(historyPath, { periodos: [] }));
 const checksum = checksumRows(registros);
