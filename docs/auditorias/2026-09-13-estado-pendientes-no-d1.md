@@ -216,3 +216,33 @@ Se repitió el smoke directamente contra producción, sin consulta ni medición 
 - Rutas `/`, `/remuneraciones-publicas/`, `/municipalidades/`, `/movimientos/` y `/votaciones-destacadas/`: HTTP 200.
 
 La búsqueda confirma que la incorporación 38 bis permanece operativa. La ficha completa de honorarios CPLT centrales sigue siendo un pendiente separado y no se debe resolver mezclándola con el release municipal ni con 38 bis.
+
+## Auditoría de honorarios centrales CPLT — 13 de septiembre de 2026
+
+Se ejecutó una lectura completa, por rangos HTTP y sin almacenar el CSV original localmente, del archivo oficial `TA_PersonalContratohonorarios.csv`. La fuente respondió con `Content-Length=8.314.320.073` bytes, `Last-Modified=2026-09-06T09:36:22Z` y ETag `"1ef9274c9-65acd3c04b180"`.
+
+Resultado de la auditoría:
+
+| Métrica | Resultado |
+|---|---:|
+| Filas procesadas | 15.527.940 |
+| Filas con datos | 15.527.940 |
+| Registros con pago bruto o líquido positivo | 4.529.483 |
+| Filas excluidas por no tener pago positivo | 10.998.457 |
+| Organismos identificados | 976 |
+| Periodos 2024-01 a 2026-07 | 4.524.674 pagos |
+| Periodos posteriores a 2026-07 | 4.809 pagos |
+
+La fuente sí contiene organismos centrales y servicios públicos. Entre los organismos con más registros aparecen INE (150.230), Municipalidad de Maipú (88.681), Fundación Integra (87.684), IND (86.399), Municipalidad de Talca (71.742) y Hospital de Urgencia Asistencia Pública (48.317). Esto confirma que el archivo no es equivalente al release municipal actual: es un universo transversal de honorarios y no se puede añadir directamente sobre el catálogo CPLT vigente sin duplicar municipalidades.
+
+El caso de Romer Ángel Rubio Flores quedó comprobado en el archivo oficial con las columnas de organismo, cargo/función, formación, región, monto bruto, monto líquido, tipo de pago, fechas de ingreso y término, observaciones y enlace al respaldo. Por tanto, la ausencia de esos campos en la ficha pública actual se explica por alcance del release, no por falta de datos en la fuente oficial.
+
+También apareció una observación de calidad que impide publicar el universo sin una regla adicional: 4.809 pagos quedan después de `2026-07`, incluyendo periodos futuros hasta años extremos. Esos valores deben conservarse en una auditoría de fuente, pero quedar fuera de la vista pública hasta confirmar si corresponden a fechas mal formateadas o registros realmente futuros. No se debe inferir ni corregir el periodo automáticamente.
+
+Decisión operativa:
+
+- No se ejecutó la ingesta completa ni se modificó R2/Pages.
+- No se consultó ni se modificó D1.
+- El reporte técnico queda en `transparencia-app/data/auditorias/cplt-central-honorarios-audit.json`.
+- La incorporación correcta será una proyección separada de honorarios pagados, particionada por mes, con deduplicación y exclusión explícita de periodos observados; no se mezclará con el release municipal ni con 38 bis.
+- Antes de publicar se debe conciliar el solapamiento de organismos, estimar el tamaño de la proyección y validar un corte histórico y uno vigente en preview.
