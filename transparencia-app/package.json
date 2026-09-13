@@ -99,6 +99,7 @@
     "ingest:ley-19862": "node scripts/ingest-ley-19862.mjs",
     "ingest:contraloria": "node scripts/ingest-contraloria.mjs",
     "ingest:senado": "node scripts/ingest-senado.mjs",
+    "repair:senado:partition": "node scripts/etl/repair-senate-partition.mjs",
     "ingest:servel": "node scripts/ingest-servel.mjs",
     "ingest:camara-attendance": "node scripts/ingest-camara-attendance.mjs",
     "ingest:votaciones-full": "node scripts/ingest-votaciones-full.mjs",
