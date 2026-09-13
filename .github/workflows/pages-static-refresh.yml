@@ -235,7 +235,7 @@ jobs:
         # Este ETL publica una proyección propia, fuera del snapshot estático
         # general. Sólo se hidrata cuando ese ETL terminó correctamente; si el
         # origen falla, este paso y el deployment de Pages no se ejecutan.
-        if: github.event_name == 'workflow_run' && github.event.workflow_run.name == 'ETL Mensual - Remuneraciones 38 bis'
+        if: (github.event_name == 'workflow_run' && github.event.workflow_run.name == 'ETL Mensual - Remuneraciones 38 bis') || (github.event_name == 'workflow_dispatch' && inputs.deployment_mode == 'data-refresh' && inputs.confirm_data_refresh == 'CAMBIOMETRO_DATA_REFRESH')
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
