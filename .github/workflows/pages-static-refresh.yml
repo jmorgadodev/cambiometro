@@ -239,7 +239,7 @@ jobs:
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: |
           npx wrangler r2 object get transparencia-public-data/projections/remuneraciones-38bis-v1/current.json \
             --file data/remuneraciones-38bis-publico.json --remote
