@@ -49,6 +49,8 @@ El parser de Transparencia Activa reconoce esos campos, pero el flujo público v
 
 Por el tamaño del archivo, la solución segura no es descargarlo completo al navegador ni guardarlo íntegro en el repositorio local: debe procesarse por rangos/stream, seleccionar sólo registros con remuneración y período válidos, particionar por organismo y mes, generar índices R2 y conservar el checksum del original. Antes de publicar se requiere una corrida de conteo y muestra; si la fuente no puede leerse íntegramente, se mantiene el release anterior.
 
+La preparación local quedó implementada y probada, sin ejecutarse sobre la fuente masiva: `ingest:cplt-central-honorarios` lee por rangos, usa SQLite temporal y genera particiones mensuales con conteo, tamaño y SHA-256. Los tests del parser, particionador y stream pasan 6/6. Esta capacidad no modifica el release municipal, no habilita D1 y todavía no conecta esos archivos a la búsqueda pública.
+
 Fuente de procedencia: [Portal de Transparencia](https://www.portaltransparencia.cl/) y [archivo masivo CPLT de honorarios](https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/TA_PersonalContratohonorarios.csv). El registro 38 bis utilizado para la comparación queda en `data/remuneraciones-38bis-publico-historico.json`.
 
 ## Hallazgo Senado: evidencia y decisión
