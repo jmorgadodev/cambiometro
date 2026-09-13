@@ -260,3 +260,27 @@ parlamentarias estáticas. El health mantuvo `transferSource=r2` y `d1Rows=0`.
 La comprobación no cierra por sí sola los pendientes de frescura de fuentes ni
 autoriza publicar el universo central de honorarios; confirma que los cambios
 locales documentales y de ETL no regresaron sobre la producción vigente.
+
+## Corrida 38 bis y diagnóstico del refresco de Pages — 20:34 UTC-3
+
+La corrida manual del workflow `ETL Mensual - Remuneraciones 38 bis` terminó
+correctamente en GitHub Actions:
+
+- Run `34781210062`: `success`.
+- Período publicado: `2026-07`.
+- Filas: `1.634`.
+- Períodos históricos conservados: `17`.
+- Checksum del release: `42dd9a7d2d544bc059c40b8a7d320de4ee40729bd8ed13866ffecb9366521348`.
+- Auditoría del ETL: `rowsRead=0`, `rowsWritten=0`.
+- R2 recibió `current.json`, `current-history.json`, `current-audit.json` y el
+  manifiesto del release.
+
+El workflow automático de Pages (`34781298373`) falló después de esa publicación,
+antes de compilar, porque el paso de rehidratación 38 bis referenciaba el secreto
+`CLOUDFLARE_API_TOKEN`, que no existe en ese entorno. El resto de los pasos de
+lectura R2 usa `CLOUDFLARE_DATA_API_TOKEN`. No fue una falla del archivo 38 bis,
+de la fuente ni de D1.
+
+Se corrigió únicamente esa referencia en el PR #518. Hasta integrar el PR y
+repetir el refresco de Pages, producción puede seguir mostrando el release
+anterior aunque el release nuevo ya esté sano y disponible en R2.
