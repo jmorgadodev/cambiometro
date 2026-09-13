@@ -27,6 +27,30 @@
 | 38 bis | 1.634 en prueba aislada | 2026-09-13 | Código corregido, runner bloqueado | El workflow manual volvió a fallar porque el runner no pudo consultar la fuente oficial; R2 conserva el último release válido. No publicar cero ni reemplazar el snapshot.
 | SERVEL / SINIM / INE | 23.894 / 3.105 / 346 | 2026-09-13 | Operativos | Mantener actualización bajo demanda, semestral y censal respectivamente.
 
+## Hallazgo adicional: honorarios de organismos centrales en Transparencia Activa
+
+La fila mostrada para **ROMER ANGEL RUBIO FLORES** proviene de la nómina mensual oficial de personas naturales contratadas a honorarios de Transparencia Activa/CPLT, no de una convocatoria. La fuente publica, entre otros campos, período, nombre, función, calificación, región, moneda, bruto, líquido, modalidad de pago, fechas de inicio y término, observaciones y estado de publicación.
+
+La comprobación directa del archivo oficial `TA_PersonalContratohonorarios.csv` respondió HTTP 200, `Content-Type: text/csv`, tamaño aproximado de **8.314.320.073 bytes (8,31 GB)** y fecha de modificación **2026-09-06**. El encabezado confirma que la fuente contiene `organismo_nombre`, `anyo`, `Mes`, `Nombres`, `Paterno`, `Materno`, `descripcion_funcion`, `tipo_calificacionp`, `region`, remuneración bruta y líquida, `tipo_pago`, cuotas, fechas de ingreso y término, observaciones y enlace documental. El primer bloque observado ya corresponde a julio de 2026, por lo que la fuente es más reciente que el corte CPLT municipal actualmente publicado.
+
+La comprobación local dejó esta diferencia:
+
+| Campo | Disponible en el release actual |
+|---|---|
+| Nombre, organismo, cargo y período | Sí, mediante 38 bis |
+| Sueldo bruto mensual | Sí: marzo `$1.900.000`; abril-mayo-junio `$2.850.000` |
+| Sueldo líquido | No en 38 bis |
+| Función detallada, formación, región, fechas y modalidad de pago | No en 38 bis |
+| Fila original CPLT de honorarios centrales | No forma parte del release público CPLT actual |
+
+Una lectura acotada de los primeros 20 MiB del archivo confirmó las filas de **ROMER ANGEL RUBIO FLORES** en marzo, abril, mayo, junio y julio de 2026. La fila de junio coincide con la captura: bruto `$2.850.000`, líquido `$2.415.375`, pago mensual, ingreso `2026-03-11`, término `2026-12-31`, función de seguimiento de compromisos ministeriales y presidenciales, formación de abogado con magíster y región Metropolitana. La fuente también entrega un enlace al informe documental mensual.
+
+El parser de Transparencia Activa reconoce esos campos, pero el flujo público vigente filtra el archivo masivo para conservar registros municipales. Por eso el dato no debe marcarse como inexistente: está publicado por la fuente, pero aún no está incorporado en la proyección pública. La siguiente incorporación debe ser una proyección separada de **honorarios de organismos centrales**, sólo con pagos/remuneraciones publicadas y con paginación R2; no se deben incorporar convocatorias ni usar D1.
+
+Por el tamaño del archivo, la solución segura no es descargarlo completo al navegador ni guardarlo íntegro en el repositorio local: debe procesarse por rangos/stream, seleccionar sólo registros con remuneración y período válidos, particionar por organismo y mes, generar índices R2 y conservar el checksum del original. Antes de publicar se requiere una corrida de conteo y muestra; si la fuente no puede leerse íntegramente, se mantiene el release anterior.
+
+Fuente de procedencia: [Portal de Transparencia](https://www.portaltransparencia.cl/) y [archivo masivo CPLT de honorarios](https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/TA_PersonalContratohonorarios.csv). El registro 38 bis utilizado para la comparación queda en `data/remuneraciones-38bis-publico-historico.json`.
+
 ## Hallazgo Senado: evidencia y decisión
 
 El catálogo R2 declara estas dos particiones:
@@ -59,6 +83,7 @@ Esta comprobación cambia el orden de trabajo: primero se debe reconciliar catá
 2. ChileCompra: recuperar o validar el origen después del HTTP 403 y conservar separados vigente/histórico.
 3. 38 bis: resolver la diferencia entre acceso local y runner; mantener el último corte mientras la fuente no sea reproducible en CI.
 4. CPLT: reconciliar el release productivo de 1.226.913 con los snapshots locales y cerrar observaciones de calidad por período.
+   - Subtarea nueva: auditar e incorporar, como proyección separada, los honorarios de organismos centrales que hoy quedan fuera por el filtro municipal; comenzar con conteo y muestra verificable antes de publicar.
 5. Contraloría: explicar 310 declarados frente a 291 verificables y corregir sólo metadata, no filas.
 6. Ley 19.862: reconciliar catálogo, release y filas sin presentar el baseline local como producción.
 7. InfoProbidad: resuelto en R2; mantener la corrida mensual y confirmar que el índice se conserva en las siguientes publicaciones.
@@ -178,3 +203,14 @@ La publicación quedó comprobada el mismo día:
 - `partitions/senado/2026/02/manifest.json`: 7 filas, proyección `3b006adbefbb1fab803c43d861f4f87aa964849a5128d74e517f773cbd4bc472`.
 - Catálogo R2: Senado `1.428` filas declaradas/publicadas.
 - Operación R2: 4 objetos por reparación, 0 eliminaciones, sin lecturas ni escrituras D1.
+
+## Verificación posterior de producción — 13 de septiembre de 2026
+
+Se repitió el smoke directamente contra producción, sin consulta ni medición de D1:
+
+- `/api/v1/health`: HTTP 200; `publicDataBackend=r2`, `publicD1Reads=false`, `d1TransferRows=0`, `transferSource=r2`, `transferRows=62172`.
+- `/api/v1/sources`: HTTP 200; inventario de 12 fuentes canónicas. Se confirmaron los conteos publicados de Cámara (58.751), CPLT (1.226.913), ChileCompra (74.142), InfoLobby (71.467), InfoProbidad (16.077), Ley 19.862 (62.172), Senado (1.428) y las demás fuentes del catálogo.
+- `/api/v1/search?q=Romer+Angel+Rubio+Flores`: HTTP 200; el resultado incluye la remuneración 38 bis de junio de 2026 por `$2.850.000`, Presidencia, Coordinador de asesores.
+- Rutas `/`, `/remuneraciones-publicas/`, `/municipalidades/`, `/movimientos/` y `/votaciones-destacadas/`: HTTP 200.
+
+La búsqueda confirma que la incorporación 38 bis permanece operativa. La ficha completa de honorarios CPLT centrales sigue siendo un pendiente separado y no se debe resolver mezclándola con el release municipal ni con 38 bis.
