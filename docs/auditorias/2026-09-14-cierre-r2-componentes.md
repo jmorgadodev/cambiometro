@@ -723,3 +723,8 @@ El auditor incorpora ahora `--references <archivo.json>` para pasarle un
 conjunto explícito de claves referenciadas. Cada grupo queda marcado como
 `referenced`, `unreferenced-by-supplied-set` o `unknown`; sólo el segundo puede
 pasar a una revisión manual de retención.
+
+La ejecución contra el inventario remoto y el catálogo vigente encontró 21
+claves referenciadas y mantuvo los tres grupos duplicados como
+`unreferenced-by-supplied-set`. Esto es evidencia suficiente para abrir una
+revisión de retención, pero no para eliminar objetos durante esta fase.
