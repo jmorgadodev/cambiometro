@@ -149,7 +149,9 @@ function normalizeKey(value: string) {
 }
 
 function rowKey(row: Remuneracion38BisRecord) {
-  return [row.nombre, row.organismo, row.cargo].map(normalizeKey).join("|");
+  // Debe coincidir con la clave usada al construir los historiales: la
+  // partida distingue filas repetidas con nombre, organismo y cargo iguales.
+  return [row.partida, row.nombre, row.organismo, row.cargo].map(normalizeKey).join("|");
 }
 
 function stableHash(value: string) {
@@ -384,7 +386,7 @@ export default function Remuneraciones38BisClient({
     : `Página ${page} de ${activePeriod.page_count}`;
 
   const comparisonRows = useMemo(() => comparisonDetails && comparisonKind ? [...comparisonDetails[comparisonKind]].sort(compareNames) : [], [comparisonDetails, comparisonKind]);
-  const comparisonPageSize = 20;
+  const comparisonPageSize = 15;
   const comparisonPageCount = Math.max(1, Math.ceil(comparisonRows.length / comparisonPageSize));
   const visibleComparisonRows = comparisonRows.slice((comparisonPage - 1) * comparisonPageSize, comparisonPage * comparisonPageSize);
   const comparisonTitle: Record<ComparisonKind, string> = {

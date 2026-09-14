@@ -48,5 +48,21 @@ describe("remuneraciones 38 bis", () => {
     expect(result.entradas).toHaveLength(0);
     expect(result.salidasObservadas).toHaveLength(0);
   });
+
+  it("conserva filas repetidas cuando la partida las distingue", () => {
+    const previous = release("2026-05", [
+      { partida: "Ministerio A", organismo: "SEREMI", cargo: "ASESOR", nombre: "No reportado", bruto_mensual: null },
+      { partida: "Ministerio B", organismo: "SEREMI", cargo: "ASESOR", nombre: "No reportado", bruto_mensual: null },
+    ]);
+    const current = release("2026-06", [
+      { partida: "Ministerio A", organismo: "SEREMI", cargo: "ASESOR", nombre: "No reportado", bruto_mensual: 1000000 },
+      { partida: "Ministerio B", organismo: "SEREMI", cargo: "ASESOR", nombre: "No reportado", bruto_mensual: 1200000 },
+    ]);
+
+    const result = compareRemuneraciones38Bis(previous, current);
+    expect(result.entradas).toHaveLength(0);
+    expect(result.salidasObservadas).toHaveLength(0);
+    expect(result.cambios).toHaveLength(2);
+  });
 });
 

@@ -55,7 +55,10 @@ function stableHash(value) {
 }
 
 function rowKey(row) {
-  return [row.nombre, row.organismo, row.cargo].map(normalize).join("|");
+  // La partida es parte de la identidad de una fila del release. Sin ella,
+  // las filas "No reportado" de distintos ministerios se pisan en los mapas
+  // y falsean entradas, salidas y cambios de monto.
+  return [row.partida, row.nombre, row.organismo, row.cargo].map(normalize).join("|");
 }
 
 function nameSortKey(value) {

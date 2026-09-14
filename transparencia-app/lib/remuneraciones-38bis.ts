@@ -44,7 +44,10 @@ export function getRemuneraciones38BisRows(release: Remuneracion38BisRelease): R
 }
 
 export function remuneracion38BisKey(record: Remuneracion38BisRecord): string {
-  return [record.nombre, record.organismo, record.cargo]
+  // La partida distingue filas que pueden compartir nombre, organismo y
+  // cargo (por ejemplo, nombres no reportados publicados por ministerios
+  // distintos). Omitirla hacía que Map sobrescribiera registros del release.
+  return [record.partida, record.nombre, record.organismo, record.cargo]
     .map((value) => normalizeSearchText(value ?? ""))
     .join("|");
 }

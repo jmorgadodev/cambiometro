@@ -25,8 +25,8 @@ describe("release público de remuneraciones 38 bis", () => {
     expect(manifest.comparison).toMatchObject({
       estado: "comparado",
       periodo_anterior: "2026-05",
-      entradas: 51,
-      salidas_observadas: 46,
+      entradas: 52,
+      salidas_observadas: 50,
       cambios: 439,
     });
     expect(manifest.periodos[0].comparison).toEqual(manifest.comparison);
