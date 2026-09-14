@@ -188,6 +188,40 @@ describe("API canónica v1", () => {
     expect(payload.meta.sourceStatus).toBe("r2-search");
   });
 
+  it("permite probar la variante central de Transparencia Activa sin cambiar el puntero por defecto", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-central-v1/manifest.json": {
+        generatedAt: "2026-09-14T03:51:42.634Z",
+        version: "2026-09-14T03-51-42-634Z",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-central-v1/versions/2026-09-14T03-51-42-634Z/search_index.json" },
+      },
+      "projections/funcionarios-central-v1/versions/2026-09-14T03-51-42-634Z/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1,
+        pageSize: 1,
+        pages: [{ page: 1, key: "projections/funcionarios-central-v1/versions/2026-09-14T03-51-42-634Z/search_index/p-0001.json", count: 1 }],
+        shards: { ri: "projections/funcionarios-central-v1/versions/2026-09-14T03-51-42-634Z/search_index/ri.json" },
+      },
+      "projections/funcionarios-central-v1/versions/2026-09-14T03-51-42-634Z/search_index/ri.json": [["rio", [0]]],
+      "projections/funcionarios-central-v1/versions/2026-09-14T03-51-42-634Z/search_index/p-0001.json": [
+        { id: "central-1", n: "RÍO SEBASTIÁN TORREALBA DEL", c: "Coordinador de asesores", o: "PRESIDENCIA", ot: "servicio_publico", t: "Contrata", b: 9200000, p: "2026-09" },
+      ],
+    };
+    const env = {
+      CPLT_PROJECTION_VARIANT: "funcionarios-central-v1",
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?query=rio&limit=1&include_zero=true"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data[0]).toMatchObject({ id: "central-1", nombre_completo: "RÍO SEBASTIÁN TORREALBA DEL", organo_nombre: "PRESIDENCIA" });
+    expect(payload.meta.totalHeadcount).toBe(1);
+    expect(payload.meta.updatedAt).toBe("2026-09-14T03:51:42.634Z");
+  });
+
   it("aplica el período mensual desde un índice R2 sin consultar D1", async () => {
     const files: Record<string, unknown> = {
       "projections/funcionarios-v1/manifest.json": {

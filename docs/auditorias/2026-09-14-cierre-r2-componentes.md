@@ -111,6 +111,13 @@ manifiestos. Los artefactos permanecen conservados para auditoría; la
 producción sigue usando el release anterior mientras se prepara una
 compatibilidad verificable.
 
+Se agregó al Worker un selector de lectura restringido,
+`CPLT_PROJECTION_VARIANT=funcionarios-central-v1`, para pruebas controladas.
+El valor por defecto sigue siendo `funcionarios-v1` y sólo se aceptan esas dos
+variantes; no se habilitó ninguna variable en producción ni se cambió el
+puntero de R2. La prueba automatizada confirmó que el release central puede
+leerse por páginas, con búsqueda indexada y sin tocar D1.
+
 ## Decisiones y siguiente orden seguro
 
 1. Mantener las rutas, los nombres del menú y los datos municipales y de

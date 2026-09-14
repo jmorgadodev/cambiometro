@@ -37,6 +37,12 @@ export interface Env {
   TURNSTILE_SECRET_KEY?: string;
   READ_ONLY_PREVIEW?: string;
   HEALTH_CHECK_D1?: string;
+  /**
+   * Optional read-only projection selector for preview/reconciliation. The
+   * default remains funcionarios-v1 until the central release passes the
+   * coverage and quality gates.
+   */
+  CPLT_PROJECTION_VARIANT?: string;
   EXPENSIVE_API_RATE_LIMITER?: { limit(input: { key: string }): Promise<{ success: boolean }> };
 }
 
@@ -289,6 +295,17 @@ interface CpltManifest {
   assets: Array<{ key: string }>;
   coverage?: Array<{ communeId: string; administrationId: string; status: string }>;
   searchIndex?: { key: string };
+}
+
+const DEFAULT_CPLT_PROJECTION_VARIANT = "funcionarios-v1";
+const ALLOWED_CPLT_PROJECTION_VARIANTS = new Set(["funcionarios-v1", "funcionarios-central-v1"]);
+
+function cpltProjectionRoot(env: Env) {
+  const requested = env.CPLT_PROJECTION_VARIANT?.trim();
+  const variant = requested && ALLOWED_CPLT_PROJECTION_VARIANTS.has(requested)
+    ? requested
+    : DEFAULT_CPLT_PROJECTION_VARIANT;
+  return `projections/${variant}`;
 }
 
 interface StaticSiteManifest {
@@ -796,11 +813,12 @@ async function listFuncionariosFromD1(requestUrl: URL, env: Env): Promise<Respon
 
 async function listFuncionariosFromR2(requestUrl: URL, env: Env) {
   const organism = requestUrl.searchParams.get("muni") ?? requestUrl.searchParams.get("organismo") ?? "Todos";
-  const manifest = await r2Json<CpltManifest>(env.PUBLIC_DATA, "projections/funcionarios-v1/manifest.json");
+  const projectionRoot = cpltProjectionRoot(env);
+  const manifest = await r2Json<CpltManifest>(env.PUBLIC_DATA, `${projectionRoot}/manifest.json`);
   if (!manifest?.version || !Array.isArray(manifest.assets)) return failure("DATASET_UNAVAILABLE", "La nómina oficial no está publicada.", 503);
 
   if (!organism || organism === "Todos") {
-    const indexKey = manifest.searchIndex?.key ?? `projections/funcionarios-v1/versions/${manifest.version}/search_index.json`;
+    const indexKey = manifest.searchIndex?.key ?? `${projectionRoot}/versions/${manifest.version}/search_index.json`;
     const index = await r2Json<OfficialsSearchIndex | CompactOfficialRow[]>(env.PUBLIC_DATA, indexKey);
     if (Array.isArray(index)) {
       return officialsResponse(compactOfficialRows(index), requestUrl, manifest.generatedAt, "r2-search-legacy", "Todos");
@@ -927,7 +945,7 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env) {
     payload.meta = meta;
     return json(payload, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
   }
-  const key = manifest.assets.find((asset) => asset.key === `projections/funcionarios-v1/versions/${manifest.version}/${organism}.json`)?.key;
+  const key = manifest.assets.find((asset) => asset.key === `${projectionRoot}/versions/${manifest.version}/${organism}.json`)?.key;
   if (!key) return failure("DATASET_UNAVAILABLE", "No existe una nómina publicada para este organismo.", 404, { organism });
   const rows = await r2Json<JsonRecord[]>(env.PUBLIC_DATA, key);
   if (!rows) return failure("DATASET_UNAVAILABLE", "La nómina oficial no está disponible temporalmente.", 503);
