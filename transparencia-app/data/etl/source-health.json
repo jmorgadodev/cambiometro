@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-21T10:10:54.809Z",
+  "generatedAt": "2026-08-24T13:52:22.514Z",
   "sources": {
     "cplt": {
       "recordCount": 1218136,
@@ -16,7 +16,7 @@
       "recordCount": 59361,
       "financialAmountClp": 5011094170302,
       "status": "partial",
-      "generatedAt": "2026-08-21T02:44:54.415Z"
+      "generatedAt": "2026-08-24T13:52:22.514Z"
     },
     "chilecompra": {
       "recordCount": 888693,
@@ -25,14 +25,14 @@
       "generatedAt": "2026-08-21T10:10:54.809Z"
     },
     "infolobby": {
-      "recordCount": 71467,
+      "recordCount": 60523,
       "status": "partial",
-      "generatedAt": "2026-08-21T10:02:59.458Z"
+      "generatedAt": "2026-08-21T17:07:19.288Z"
     },
     "infoprobidad": {
       "recordCount": 15331,
       "status": "partial",
-      "generatedAt": "2026-08-21T10:02:59.458Z"
+      "generatedAt": "2026-08-21T17:07:19.288Z"
     },
     "sinim": {
       "recordCount": 3105,
@@ -41,32 +41,42 @@
       "status": "partial",
       "generatedAt": "2026-08-21T03:50:05.194Z"
     },
-    "contraloria": {
-      "recordCount": 291,
-      "status": "partial",
-      "generatedAt": "2026-08-21T10:02:59.458Z"
-    },
-    "camara": {
-      "recordCount": 19025,
-      "status": "partial",
-      "generatedAt": "2026-08-21T10:02:59.458Z"
-    },
-    "senado": {
-      "recordCount": 8138,
-      "status": "partial",
-      "generatedAt": "2026-08-21T10:02:59.458Z"
-    },
-    "servel": {
-      "recordCount": 23894,
-      "status": "partial",
-      "generatedAt": "2026-08-21T10:02:59.458Z"
-    },
     "ine": {
       "recordCount": 346,
       "coverageCount": 346,
       "coverageUniverse": 346,
       "status": "complete",
-      "generatedAt": "2026-08-22T04:47:00.000Z"
+      "generatedAt": "2026-08-21T17:07:19.288Z"
+    },
+    "contraloria": {
+      "recordCount": 291,
+      "status": "partial",
+      "generatedAt": "2026-08-21T17:07:19.288Z"
+    },
+    "camara": {
+      "recordCount": 2750,
+      "components": {
+        "asistencia": 0,
+        "votaciones": 0,
+        "datosAbiertos": 0,
+        "gastos": 16275
+      },
+      "status": "partial",
+      "generatedAt": "2026-08-21T17:07:19.288Z"
+    },
+    "senado": {
+      "recordCount": 7002,
+      "components": {
+        "votaciones": 189,
+        "gastos": 6521
+      },
+      "status": "partial",
+      "generatedAt": "2026-08-21T17:07:19.288Z"
+    },
+    "servel": {
+      "recordCount": 23894,
+      "status": "partial",
+      "generatedAt": "2026-08-21T17:07:19.288Z"
     }
   }
 }

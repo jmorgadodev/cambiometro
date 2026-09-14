@@ -55,6 +55,37 @@ function categoriesForSources(sources) {
   return [...new Set(sources.flatMap((source) => sourceCategories(source.id)))];
 }
 
+function inferredComponentSourceId(parentId, id) {
+  const maps = {
+    camara: {
+      asistencia: "asistencia_camara",
+      votaciones: "votaciones_camara",
+      datosAbiertos: "congreso_opendata",
+      gastos: "gastos_camara",
+    },
+    senado: {
+      votaciones: "votaciones_senado",
+      gastos: "gastos_senado",
+    },
+  };
+  return maps[parentId]?.[id] ?? id;
+}
+
+function normalizeComponents(components, parentId = null) {
+  const rows = Array.isArray(components)
+    ? components
+    : components && typeof components === "object"
+      ? Object.entries(components).map(([id, recordCount]) => ({ id, recordCount }))
+      : [];
+  return rows.map((component) => ({
+    id: String(component?.id ?? ""),
+    sourceId: canonicalId(component?.sourceId ?? inferredComponentSourceId(parentId, String(component?.id ?? ""))),
+    label: component?.label ?? null,
+    recordCount: Number.isFinite(Number(component?.recordCount)) ? Number(component.recordCount) : null,
+    includedInRecordCount: component?.includedInRecordCount === true,
+  })).filter((component) => component.id || component.sourceId);
+}
+
 function classification({ production, local, children }) {
   const hasCategorySplit = children.length > 0;
   if (production && local && Number(production.recordCount) === Number(local.recordCount) && !hasCategorySplit) return "match";
@@ -91,6 +122,8 @@ function rowFor(production, local, localSources) {
       recordCount: Number(source.recordCount ?? 0),
       categories: sourceCategories(source.id),
     })),
+    productionComponents: normalizeComponents(production?.components, id),
+    localDeclaredComponents: normalizeComponents(local?.components, id),
   };
 }
 
@@ -126,6 +159,7 @@ export function productionSourcesPayload(payload) {
     status: source.status ?? null,
     lastUpdated: source.lastUpdated ?? source.generatedAt ?? null,
     foundPeriods: Array.isArray(source.foundPeriods) ? source.foundPeriods : [],
+    components: normalizeComponents(source.components, canonicalId(source.id)),
   }));
 }
 
@@ -137,6 +171,7 @@ export function localCatalogSources(manifest) {
     status: source.status ?? null,
     generatedAt: manifest.generatedAt ?? null,
     foundPeriods: Array.isArray(source.foundPeriods) ? source.foundPeriods : [],
+    components: normalizeComponents(source.components, canonicalId(source.id)),
   }));
 }
 
@@ -165,6 +200,7 @@ export function mergeLocalHealth(manifest, health) {
       healthGeneratedAt: rawSource?.generatedAt ?? null,
       status: rawSource?.status ?? existing?.status ?? null,
       generatedAt: rawSource?.generatedAt ?? existing?.generatedAt ?? manifest?.generatedAt ?? null,
+      components: normalizeComponents(rawSource?.components ?? existing?.components, id),
     });
   }
   return [...byId.values()];

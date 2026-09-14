@@ -62,4 +62,48 @@ describe("auditoría de reconciliación producción/R2/local", () => {
     });
     expect(report.summary.healthMismatch).toBe(1);
   });
+
+  it("conserva los componentes publicados y los diferencia del conteo base", () => {
+    const local = mergeLocalHealth(
+      {
+        generatedAt: "2026-09-11T00:00:00Z",
+        sources: [{ id: "camara", recordCount: 2_750, foundPeriods: [], status: "partial" }],
+      },
+      {
+        sources: {
+          camara: {
+            recordCount: 2_750,
+            generatedAt: "2026-09-11T00:00:00Z",
+            status: "partial",
+            components: { asistencia: 0, votaciones: 0, gastos: 16_275 },
+          },
+        },
+      },
+    );
+    const report = reconcileSourceSnapshots({
+      production: [{
+        id: "camara",
+        recordCount: 58_751,
+        lastUpdated: "2026-09-13T00:00:00Z",
+        status: "partial",
+        components: [
+          { id: "asistencia", sourceId: "camara", recordCount: 54_538, includedInRecordCount: true },
+          { id: "votaciones", sourceId: "camara", recordCount: 4_058, includedInRecordCount: true },
+          { id: "gastos", sourceId: "gastos_camara", recordCount: 16_275, includedInRecordCount: false },
+        ],
+      }] as never,
+      local: local as never,
+    });
+
+    expect(report.rows[0].productionComponents).toEqual([
+      expect.objectContaining({ id: "asistencia", recordCount: 54_538, includedInRecordCount: true }),
+      expect.objectContaining({ id: "votaciones", recordCount: 4_058, includedInRecordCount: true }),
+      expect.objectContaining({ id: "gastos", sourceId: "gastos_camara", recordCount: 16_275, includedInRecordCount: false }),
+    ]);
+    expect(report.rows[0].localDeclaredComponents).toEqual([
+      expect.objectContaining({ id: "asistencia", recordCount: 0 }),
+      expect.objectContaining({ id: "votaciones", recordCount: 0 }),
+      expect.objectContaining({ id: "gastos", recordCount: 16_275 }),
+    ]);
+  });
 });
