@@ -935,6 +935,49 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
   return officialsResponse(rows, requestUrl, manifest.generatedAt, datasetRoot === "funcionarios-v1" ? "r2" : "r2-central", organism);
 }
 
+async function listAllFuncionariosFromR2(requestUrl: URL, env: Env) {
+  const requestedLimit = Number(requestUrl.searchParams.get("limit") ?? 20);
+  const limit = Number.isInteger(requestedLimit) ? Math.max(1, Math.min(requestedLimit, 100)) : 20;
+  const combinedLimit = Math.min(100, Math.max(limit, limit * 2));
+  const scopedUrl = new URL(requestUrl);
+  scopedUrl.searchParams.set("limit", String(combinedLimit));
+  const [municipal, central] = await Promise.all([
+    listFuncionariosFromR2(scopedUrl, env, "funcionarios-v1"),
+    listFuncionariosFromR2(scopedUrl, env, "funcionarios-central-v1"),
+  ]);
+  const usable = [municipal, central].filter((response) => response.status < 500);
+  if (usable.length === 0) return municipal;
+  if (usable.length === 1) return usable[0];
+
+  const payloads = await Promise.all(usable.map(async (response) => await response.json() as JsonRecord));
+  const rows = payloads.flatMap((payload) => Array.isArray(payload.data) ? payload.data as JsonRecord[] : []);
+  const unique = new Map<string, JsonRecord>();
+  for (const row of rows) {
+    const id = String(row.id ?? "");
+    if (id && !unique.has(id)) unique.set(id, row);
+  }
+  const data = [...unique.values()].sort((left, right) => {
+    const byName = normalized(left.nombre_completo).localeCompare(normalized(right.nombre_completo), "es");
+    return byName || String(left.id ?? "").localeCompare(String(right.id ?? ""));
+  });
+  const totals = payloads.map((payload) => Number((payload.meta as JsonRecord | undefined)?.total ?? 0));
+  const total = totals.reduce((sum, value) => sum + (Number.isFinite(value) ? value : 0), 0);
+  const firstMeta = (payloads[0].meta as JsonRecord | undefined) ?? {};
+  return json({
+    data,
+    meta: {
+      ...firstMeta,
+      total,
+      totalHeadcount: total,
+      limit: combinedLimit,
+      totalPages: Math.max(1, Math.ceil(total / combinedLimit)),
+      sourceStatus: "r2-search-combined",
+      sources: ["municipal", "central"],
+    },
+    links: { self: requestUrl.toString() },
+  }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
+}
+
 function limitFrom(url: URL) {
   const raw = Number(url.searchParams.get("limit") ?? 25);
   return Number.isInteger(raw) ? Math.min(Math.max(raw, 1), 100) : 25;
@@ -1516,6 +1559,7 @@ async function search(requestUrl: URL, env: Env) {
 async function searchFuncionariosFromR2(raw: string, env: Env) {
   const requestUrl = new URL("https://internal.example/api/v1/funcionarios");
   requestUrl.searchParams.set("q", raw);
+  requestUrl.searchParams.set("scope", "all");
   requestUrl.searchParams.set("limit", "8");
   requestUrl.searchParams.set("include_zero", "true");
   try {
@@ -2053,6 +2097,11 @@ export default {
       // gratuito de rows_read antes de llegar al release canónico. R2 es la
       // fuente pública; D1 sólo se habilita mediante ALLOW_PUBLIC_D1_READS=1.
       const requestedScope = normalized(url.searchParams.get("scope") ?? "");
+      if (requestedScope === "all" && !url.searchParams.get("muni") && !url.searchParams.get("organismo")
+        && (url.searchParams.get("query") ?? url.searchParams.get("q"))?.trim()) {
+        const combined = await listAllFuncionariosFromR2(url, env);
+        if (combined.status < 500) return combined;
+      }
       const datasetRoot = requestedScope === "central" ? "funcionarios-central-v1" : "funcionarios-v1";
       const r2 = await listFuncionariosFromR2(url, env, datasetRoot);
       if (r2.status < 500) {

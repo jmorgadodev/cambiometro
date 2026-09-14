@@ -214,7 +214,7 @@ export default function RemuneracionesUnifiedExplorer() {
         && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
       if (!isLocalStaticPreview && (source === "all" || source === "transparencia-activa")) {
         try {
-          const response = await fetch(`/api/funcionarios?query=${encodeURIComponent(cleanQuery)}&include_zero=true&limit=20&sortBy=nombre_asc`, { cache: "no-store" });
+          const response = await fetch(`/api/funcionarios?scope=all&query=${encodeURIComponent(cleanQuery)}&include_zero=true&limit=20&sortBy=nombre_asc`, { cache: "no-store" });
           if (response.ok) {
             const payload = await response.json() as { data?: Record<string, unknown>[]; total?: number };
             remoteRows = (payload.data ?? []).map((row) => RemoteOfficialRow(row, cleanQuery)).filter((row): row is UnifiedRow => Boolean(row));

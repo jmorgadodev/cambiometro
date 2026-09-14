@@ -1511,6 +1511,55 @@ describe("API canónica v1", () => {
     expect(payload.data[0].organo_nombre).toBe("Presidencia");
   });
 
+  it("combina las coincidencias municipales y centrales en una búsqueda nominal", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1,
+        pageSize: 2,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 1 }],
+        shards: { to: "projections/funcionarios-v1/versions/2026-08-25/search_index/to.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/to.json": [["torrealba", [0]]],
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [
+        { id: "municipal-1", n: "Alejandro Rios Torrealba", c: "Profesional", o: "Municipalidad de Talca", ot: "municipalidad", t: "Planta", e: "Profesional", b: 1000000, p: "2026-07" },
+      ],
+      "projections/funcionarios-central-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-central-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-central-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1,
+        pageSize: 2,
+        pages: [{ page: 1, key: "projections/funcionarios-central-v1/versions/2026-08-25/search_index/p-0001.json", count: 1 }],
+        shards: { to: "projections/funcionarios-central-v1/versions/2026-08-25/search_index/to.json" },
+      },
+      "projections/funcionarios-central-v1/versions/2026-08-25/search_index/to.json": [["torrealba", [0]]],
+      "projections/funcionarios-central-v1/versions/2026-08-25/search_index/p-0001.json": [
+        { id: "central-1", n: "Río Sebastián Torrealba del Río", c: "Coordinador de Asesores", o: "Presidencia", ot: "servicio_publico", t: "Planta", e: "Directivo", b: 9200000, p: "2026-06" },
+      ],
+    };
+    const env = {
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?scope=all&query=Torrealba&limit=20"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.sourceStatus).toBe("r2-search-combined");
+    expect(payload.meta.total).toBe(2);
+    expect(payload.data.map((row: { id: string }) => row.id)).toEqual(["municipal-1", "central-1"]);
+  });
+
   it("normaliza Código del Trabajo al aplicar el filtro contractual", async () => {
     const request = new Request("https://example.test/api/funcionarios?muni=muni-maipu&contrato=CodigoTrabajo&include_zero=true&limit=10");
     const response = await api.fetch(request, officialsR2Env());
