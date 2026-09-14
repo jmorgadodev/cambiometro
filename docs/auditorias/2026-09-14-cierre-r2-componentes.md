@@ -775,3 +775,11 @@ La diferencia entre “manifiesto faltante” y “artefacto no verificable en e
 inventario” se conserva separada. No se interpreta como pérdida de filas ni
 se publica como cero; requiere reconstruir o volver a registrar el cierre
 físico de cada fuente antes de promover historiales.
+
+El filtro por fuente también fue corregido para resolver los nombres físicos
+anidados del catálogo. Por ejemplo, `votaciones_camara` se declara bajo
+`sourceId=camara`, pero su `manifestKey` contiene el segmento
+`votaciones_camara`. La auditoría específica ahora revisa 30 particiones de
+esa fuente y la mantiene bloqueada por 13 manifiestos faltantes y 16
+artefactos no verificables, en vez de reportarla erróneamente como completa
+por haber encontrado cero coincidencias de `sourceId`.

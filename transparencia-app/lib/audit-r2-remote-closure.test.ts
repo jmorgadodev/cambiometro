@@ -15,11 +15,16 @@ describe("auditoría de cierre del catálogo R2", () => {
       partitions: [
         { sourceId: "votaciones_senado", manifestKey: "partitions/votaciones_senado/2026/07/manifest.json" },
         { sourceId: "votaciones_camara", manifestKey: "partitions/votaciones_camara/2026/07/manifest.json" },
+        { sourceId: "camara", manifestKey: "partitions/camara/votaciones_camara/2026/08/manifest.json" },
       ],
     };
 
     expect(catalogPartitionKeys(catalog, "votaciones_senado")).toEqual([
       "partitions/votaciones_senado/2026/07/manifest.json",
+    ]);
+    expect(catalogPartitionKeys(catalog, "votaciones_camara")).toEqual([
+      "partitions/camara/votaciones_camara/2026/08/manifest.json",
+      "partitions/votaciones_camara/2026/07/manifest.json",
     ]);
   });
 
@@ -106,5 +111,17 @@ describe("auditoría de cierre del catálogo R2", () => {
         { sourceId: "unknown", count: 1 },
       ],
     });
+  });
+
+  it("no trata una fuente sin particiones catalogadas como completa", () => {
+    expect(classifyR2Closure({
+      checkedPartitions: 0,
+      complete: true,
+      missingManifests: [],
+      missingArtifacts: [],
+      missingManifestArtifacts: [],
+      missingArtifactInventory: [],
+      presentWithoutManifest: [],
+    })).toMatchObject({ status: "no_catalog_partitions", promotionAllowed: false });
   });
 });

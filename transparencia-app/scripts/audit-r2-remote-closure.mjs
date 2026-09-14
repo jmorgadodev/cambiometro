@@ -22,7 +22,12 @@ function getObject(objects, key) {
 /** @param {Record<string, unknown>} catalog @param {string | null} [sourceId] */
 export function catalogPartitionKeys(catalog, sourceId = null) {
   return [...new Set((Array.isArray(catalog?.partitions) ? catalog.partitions : [])
-    .filter((partition) => !sourceId || String(partition?.sourceId ?? "") === sourceId)
+    .filter((partition) => {
+      if (!sourceId) return true;
+      const declaredSource = String(partition?.sourceId ?? "");
+      const manifestParts = String(partition?.manifestKey ?? "").split("/");
+      return declaredSource === sourceId || manifestParts.includes(sourceId);
+    })
     .map((partition) => String(partition?.manifestKey ?? "").trim())
     .filter(Boolean))].sort((left, right) => left.localeCompare(right));
 }
@@ -71,6 +76,13 @@ export function auditCatalogClosure(catalog, objects, sourceId = null) {
  * states must not be collapsed into a generic "unavailable" or zero count.
  */
 export function classifyR2Closure(result) {
+  if (Number(result?.checkedPartitions) === 0) {
+    return {
+      status: "no_catalog_partitions",
+      promotionAllowed: false,
+      reason: "No hay particiones catalogadas para la fuente solicitada; no se puede demostrar que el release esté completo.",
+    };
+  }
   const missingManifests = Array.isArray(result?.missingManifests) ? result.missingManifests : [];
   const missingArtifacts = Array.isArray(result?.missingArtifacts) ? result.missingArtifacts : [];
   const missingManifestArtifacts = Array.isArray(result?.missingManifestArtifacts) ? result.missingManifestArtifacts : [];
