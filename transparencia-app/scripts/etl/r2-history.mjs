@@ -334,5 +334,11 @@ export async function buildR2HistoryFromManifests(manifests, readJson, options =
     if (Array.isArray(manifest?.artifacts)) return readR2ReleaseArtifacts(manifest, readArtifact);
     throw new Error(`Historial R2: manifiesto ${manifest?.id ?? manifest?.period ?? "desconocido"} sin pages[] ni artifacts[]`);
   }));
-  return buildR2History(releases, options);
+  const ordered = [...releases].sort((left, right) => left.period.localeCompare(right.period));
+  for (let index = 1; index < ordered.length; index += 1) {
+    if (ordered[index - 1].period === ordered[index].period) {
+      throw new Error(`Historial R2: período duplicado ${ordered[index].period}`);
+    }
+  }
+  return buildR2History(ordered, options);
 }

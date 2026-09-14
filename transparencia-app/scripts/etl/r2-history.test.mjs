@@ -84,6 +84,26 @@ describe("buildR2History", () => {
     expect(result.comparisons[0].amountChanges[0]).toMatchObject({ key: "a", amountBefore: 100, amountAfter: 125 });
   });
 
+  it("ordena los manifiestos cronológicamente antes de calcular cambios", async () => {
+    const objects = new Map([
+      ["r2/2026-01/page-1.json", [{ personKey: "a", monto: 100 }]],
+      ["r2/2026-02/page-1.json", [{ personKey: "a", monto: 125 }]],
+    ]);
+    const result = await buildR2HistoryFromManifests([
+      { period: "2026-02", version: "release-02", checksum_sha256: "checksum-02", total: 1, pages: [{ page: 1, key: "r2/2026-02/page-1.json", count: 1 }] },
+      { period: "2026-01", version: "release-01", checksum_sha256: "checksum-01", total: 1, pages: [{ page: 1, key: "r2/2026-01/page-1.json", count: 1 }] },
+    ], async (key) => objects.get(key), { keyFields: ["personKey"] });
+    expect(result.periods.map((period) => period.period)).toEqual(["2026-01", "2026-02"]);
+    expect(result.comparisons[0].amountChanges[0]).toMatchObject({ amountBefore: 100, amountAfter: 125 });
+  });
+
+  it("rechaza dos manifiestos del mismo período", async () => {
+    await expect(buildR2HistoryFromManifests([
+      { period: "2026-01", version: "release-a", checksum_sha256: "checksum-a", total: 0, pages: [{ page: 1, key: "a.json", count: 0 }] },
+      { period: "2026-01", version: "release-b", checksum_sha256: "checksum-b", total: 0, pages: [{ page: 1, key: "b.json", count: 0 }] },
+    ], async () => [], { keyFields: ["personKey"] })).rejects.toThrow("período duplicado");
+  });
+
   it("does not accept a manifest with an incomplete page", async () => {
     await expect(buildR2HistoryFromManifests([
       { period: "2026-01", version: "release-01", checksum_sha256: "checksum-01", total: 2, pages: [{ page: 1, key: "missing.json", count: 2 }] },
