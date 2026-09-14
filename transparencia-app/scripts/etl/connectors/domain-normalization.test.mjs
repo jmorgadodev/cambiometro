@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeMovementRecord, normalizeParliamentaryRecord } from "./domain-normalization.mjs";
+import { normalizeMovementRecord, normalizeParliamentaryRecord, normalizeDomainRecords, summarizeDomainRecords } from "./domain-normalization.mjs";
 
 describe("contrato normalizado por dominio", () => {
   it("separa categorías parlamentarias y conserva cero, nulo y original", () => {
@@ -52,5 +52,26 @@ describe("contrato normalizado por dominio", () => {
       "missing_stable_record_id",
       "missing_documentary_source",
     ]);
+  });
+
+  it("resume un lote sin duplicar ni reemplazar sus filas originales", () => {
+    const original = { id: "v-1", fecha: "2026-08-01", kind: "vote", monto_clp: null, url: "https://example.test/v-1" };
+    const normalized = normalizeDomainRecords({
+      domain: "parlamentario",
+      sourceId: "camara",
+      sourceKey: "votaciones_camara",
+      records: [original],
+    });
+    const summary = summarizeDomainRecords({
+      domain: "parlamentario",
+      sourceId: "camara",
+      sourceKey: "votaciones_camara",
+      records: [original],
+    });
+
+    expect(normalized.records[0].original).toBe(original);
+    expect(normalized.categories).toEqual({ votaciones: 1 });
+    expect(summary).not.toHaveProperty("records");
+    expect(summary.recordCount).toBe(1);
   });
 });

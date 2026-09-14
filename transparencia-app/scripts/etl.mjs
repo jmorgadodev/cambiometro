@@ -24,6 +24,7 @@ import { assertSuccessfulRun } from "./etl/validation.mjs";
 import { readJsonIfPresent, writeFileAtomic } from "./etl/safe-file.mjs";
 import { mergeRecordsById } from "./etl/history.mjs";
 import { validateSourceRelease } from "./etl/source-release-guard.mjs";
+import { summarizeDomainRecords } from "./etl/connectors/domain-normalization.mjs";
 import { resolveCamaraVoteWindow, CAMARA_CURRENT_PERIOD_START } from "./etl/camara-history.mjs";
 import { expenseMonthWindow } from "./etl/expense-window.mjs";
 
@@ -268,7 +269,7 @@ function validateRecords(name, records, minimumExpected = 1) {
   return traced;
 }
 
-async function runSource({ key, label, selected, previous, snapshot, summary, summaryKey, load, minimum = 1, preserveHistory = false }) {
+async function runSource({ key, label, selected, previous, snapshot, summary, summaryKey, load, minimum = 1, preserveHistory = false, domain = "parlamentario", sourceKey = key }) {
   if (!selected.has(key)) return;
   try {
     const records = validateRecords(label, await load(), minimum);
@@ -279,6 +280,12 @@ async function runSource({ key, label, selected, previous, snapshot, summary, su
       previousRecords: previous?.fuentes?.[snapshotKey] ?? [],
       minimumCount: minimum,
       preserveHistory,
+    });
+    summary.normalization[summaryKey] = summarizeDomainRecords({
+      domain,
+      sourceId: snapshotKey,
+      sourceKey,
+      records,
     });
     summary[summaryKey] = records.length;
     snapshot.fuentes[snapshotKey] = preserveHistory
@@ -318,6 +325,7 @@ async function main() {
     votaciones_senado_ingresadas: 0,
     gastos_senado_ingresados: 0,
     gastos_camara_ingresados: 0,
+    normalization: {},
     errores: [],
   };
   const snapshot = {
@@ -333,7 +341,7 @@ async function main() {
   });
   await runSource({
     key: "camara", label: "Congreso OpenData", selected: options.sources, previous, snapshot, summary,
-    summaryKey: "diputados_ingresados", minimum: 100, load: fetchDiputadosVigentes,
+    summaryKey: "diputados_ingresados", minimum: 100, load: fetchDiputadosVigentes, sourceKey: "congreso_opendata",
   });
   await runSource({
     key: "infolobby", label: "InfoLobby", selected: options.sources, previous, snapshot, summary,
@@ -342,22 +350,22 @@ async function main() {
   });
   await runSource({
     key: "votaciones_camara", label: "Votaciones Cámara", selected: options.sources, previous, snapshot, summary,
-    summaryKey: "votaciones_ingresadas", minimum: 0, preserveHistory: true,
+    summaryKey: "votaciones_ingresadas", minimum: 0, preserveHistory: true, sourceKey: "votaciones_camara",
     load: () => fetchVotacionesCamara({ ...options, from: voteWindow.from, minimumFrom: voteWindow.minimumFrom }),
   });
   await runSource({
     key: "votaciones_senado", label: "Votaciones Senado", selected: options.sources, previous, snapshot, summary,
-    summaryKey: "votaciones_senado_ingresadas", minimum: 0, preserveHistory: true,
+    summaryKey: "votaciones_senado_ingresadas", minimum: 0, preserveHistory: true, sourceKey: "votaciones_senado",
     load: () => fetchVotacionesSenado({ legislatura: 374, desde: options.from, to: options.to }),
   });
   await runSource({
     key: "gastos_senado", label: "Gastos Operacionales Senado", selected: options.sources, previous, snapshot, summary,
-    summaryKey: "gastos_senado_ingresados", minimum: 0, preserveHistory: true,
+    summaryKey: "gastos_senado_ingresados", minimum: 0, preserveHistory: true, sourceKey: "gastos_senado",
     load: () => fetchGastosSenado({ fullHistory: FULL_HISTORY }),
   });
   await runSource({
     key: "gastos_camara", label: "Gastos Operacionales Cámara", selected: options.sources, previous, snapshot, summary,
-    summaryKey: "gastos_camara_ingresados", minimum: 0, preserveHistory: true,
+    summaryKey: "gastos_camara_ingresados", minimum: 0, preserveHistory: true, sourceKey: "gastos_camara",
     load: async () => {
       const { fetchGastosCamara } = await import("./etl/connectors/camara-gastos.mjs");
       return fetchGastosCamara({

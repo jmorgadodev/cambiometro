@@ -15,7 +15,8 @@
       Evidencia: `scripts/audit-normalization-production.mjs` y la actualización
       de calidad del informe productivo.
 - [~] N2: contrato normalizado por dominio Cámara/Senado/Movimientos y guardia
-      de releases implementados; queda pendiente conectar cada publicador tras
+      de releases implementados; el resumen queda registrado en los reportes
+      del ETL sin duplicar el release crudo. Queda pendiente la promoción tras
       reconciliar sus particiones consultables.
 - [~] N3: historial acotado de remuneraciones construido desde índices R2 y
       protegido contra consultas amplias; falta validarlo con organismos y

@@ -133,3 +133,46 @@ export function normalizeDomainRecord({ domain, raw, sourceId, sourceKey }) {
   if (domain === "movimientos") return normalizeMovementRecord(raw);
   return normalizeParliamentaryRecord({ sourceId, sourceKey, raw });
 }
+
+/**
+ * Normaliza un lote sin reemplazarlo ni serializarlo. El resultado está
+ * pensado para auditoría del ETL: `records` conserva cada fila original por
+ * referencia y `summary` permite registrar categorías e incidencias sin
+ * duplicar el universo en el release público.
+ */
+export function normalizeDomainRecords({ domain = "parlamentario", sourceId, sourceKey, records }) {
+  if (!Array.isArray(records)) throw new Error("DOMAIN_NORMALIZATION_INVALID_RECORDS");
+  const normalized = records.map((raw) => normalizeDomainRecord({ domain, raw, sourceId, sourceKey }));
+  const categories = normalized.reduce((counts, row) => {
+    const category = row.category ?? "movimientos";
+    counts[category] = (counts[category] ?? 0) + 1;
+    return counts;
+  }, {});
+  const issues = normalized.reduce((counts, row) => {
+    for (const issue of row.qualityIssues ?? []) counts[issue] = (counts[issue] ?? 0) + 1;
+    return counts;
+  }, {});
+  return {
+    schemaVersion: 1,
+    domain,
+    sourceId: text(sourceId),
+    sourceKey: text(sourceKey),
+    recordCount: normalized.length,
+    categories,
+    qualityIssues: issues,
+    records: normalized,
+  };
+}
+
+export function summarizeDomainRecords(options) {
+  const normalized = normalizeDomainRecords(options);
+  return {
+    schemaVersion: normalized.schemaVersion,
+    domain: normalized.domain,
+    sourceId: normalized.sourceId,
+    sourceKey: normalized.sourceKey,
+    recordCount: normalized.recordCount,
+    categories: normalized.categories,
+    qualityIssues: normalized.qualityIssues,
+  };
+}

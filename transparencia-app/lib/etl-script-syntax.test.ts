@@ -13,6 +13,8 @@ describe("scripts ETL ejecutados por GitHub Actions", () => {
       "scripts/ingest-cplt-nacional.mjs",
       "scripts/stage-cplt-category.mjs",
       "scripts/merge-cplt-category-artifacts.mjs",
+      "scripts/etl.mjs",
+      "scripts/etl_movimientos_autoridades.mjs",
     ];
     for (const file of scripts) {
       expect(() => execFileSync(process.execPath, ["--check", resolve(process.cwd(), file)], { stdio: "pipe" })).not.toThrow();

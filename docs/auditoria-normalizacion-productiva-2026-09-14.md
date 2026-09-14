@@ -91,6 +91,9 @@ La rama incorpora un contrato local, aún sin conexión al publicador:
 - Movimientos conserva identificador, fecha del evento, fecha de detección,
   cargo, organismo, entrante, saliente, estado de verificación y fuentes
   documentales.
+- Los ETL parlamentarios y de Movimientos registran ahora un resumen de
+  categorías e incidencias en su reporte interno; las filas crudas siguen
+  siendo el release canónico y no se duplican en R2.
 - El registro original se conserva por referencia y nunca se reemplaza.
 - `0`, `null`, “no informado” y valor inválido quedan en estados distintos.
 - No se fusionan personas por nombre ni se corrigen releases fallidos.

@@ -15,6 +15,7 @@ import {
   MOVIMIENTOS_SOURCES,
   validateMovementPayload,
 } from "./movimientos-pipeline.mjs";
+import { summarizeDomainRecords } from "./etl/connectors/domain-normalization.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const inputPath = resolve(root, process.env.MOVIMIENTOS_INPUT ?? "data/movimientos.json");
@@ -77,6 +78,12 @@ async function main() {
     sourceResults: collected.results,
     signals: collected.signals,
   }));
+  report.normalization = summarizeDomainRecords({
+    domain: "movimientos",
+    sourceId: "movimientos",
+    sourceKey: "movimientos",
+    records: payload.movimientos,
+  });
   const temporaryPath = `${outputPath}.tmp`;
   await writeFile(temporaryPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
   await rename(temporaryPath, outputPath);
