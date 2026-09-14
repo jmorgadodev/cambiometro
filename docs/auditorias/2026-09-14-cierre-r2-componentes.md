@@ -145,6 +145,27 @@ pendiente y no se considera actualizado.
 Estos controles son deliberadamente pequeños: prueban disponibilidad y esquema
 sin convertir la auditoría en una descarga masiva ni consumir D1.
 
+## Inventario de almacenamiento R2
+
+El inventario remoto `catalog/v1/storage.json` fue leído sin modificar el
+bucket:
+
+| Métrica | Valor |
+| --- | ---: |
+| Límite declarado | 10.000.000.000 bytes |
+| Uso declarado y calculado | 9.016.336.751 bytes |
+| Uso | 90,16% |
+| Margen libre | 983.663.249 bytes |
+| Objetos | 8.362 |
+| Duplicados potenciales por checksum | 66.508 bytes |
+
+La distribución confirma que el problema no está en las particiones de datos:
+`projections` ocupa 8.743.327.270 bytes en 8.151 objetos; `indexes` ocupa
+258.501.254 bytes. Por lo tanto, el crecimiento queda bloqueado hasta revisar
+versiones históricas de proyecciones. El preflight `npm run audit:r2:storage`
+queda disponible para repetir esta comprobación y puede fallar explícitamente
+con `--fail-on-growth-block`.
+
 ## Seguridad de operación
 
 - No hubo escrituras en R2.
