@@ -272,6 +272,7 @@ export default function PersonasUniversalClient({
       } else {
         if (organismoFilter !== "Todos") params.set("muni", organismoFilter);
         if (tipoFilter !== "Todos") params.set("tipo", tipoFilter);
+        if (organismoFilter === "Todos") params.set("scope", "all");
       }
       if (activeTab === "funcionarios") {
         if (contratoFilter !== "Todos") params.set("contrato", contratoFilter);

@@ -59,11 +59,16 @@ const COMMUNES = JSON.parse(fs.readFileSync(path.join(process.cwd(), "data", "ca
 const MUNICIPALITY_REGISTRY = createMunicipalityRegistry(COMMUNES);
 const ORGANISMO_RESOLUTION_CACHE = new Map();
 
-function resolveOrganismoId(organismoNombre) {
+function resolveOrganismoId(organismoNombre, { allowUnknownMunicipality = false } = {}) {
   const exactName = String(organismoNombre ?? "").trim();
   const cached = ORGANISMO_RESOLUTION_CACHE.get(exactName);
   if (cached) return cached;
-  const municipalityId = MUNICIPALITY_REGISTRY.resolve(organismoNombre);
+  let municipalityId = null;
+  try {
+    municipalityId = MUNICIPALITY_REGISTRY.resolve(organismoNombre);
+  } catch (error) {
+    if (!allowUnknownMunicipality) throw error;
+  }
   if (municipalityId) {
     ORGANISMO_RESOLUTION_CACHE.set(exactName, municipalityId);
     return municipalityId;
@@ -139,7 +144,7 @@ async function processStream(tipo, urls, outputDir, scope) {
       if (!acceptsCpltScope(organismoNombre, scope)) continue;
       let organismoId;
       try {
-        organismoId = resolveOrganismoId(organismoNombre);
+        organismoId = resolveOrganismoId(organismoNombre, { allowUnknownMunicipality: scope === CPLT_SCOPES.CENTRAL });
       } catch (error) {
         if (scope === CPLT_SCOPES.MUNICIPAL && error instanceof Error && error.message.startsWith("CPLT_UNKNOWN_MUNICIPALITY:")) {
           unknownMunicipalities.add(organismoNombre);
