@@ -656,6 +656,26 @@ descargar las páginas de nómina. La ausencia de una comuna sigue siendo un
 estado de fuente, no un sueldo cero ni una inferencia de que la municipalidad
 no tenga personal.
 
+## Reconciliación R2 de ChileCompra y DIPRES — 2026-09-14
+
+La auditoría del catálogo R2 separa la diferencia de los dos conteos que el
+reconciliador productivo/local no podía explicar por sí solo:
+
+- **ChileCompra:** R2 declara 74.142 registros en un corte vigente con una
+  partición base para `2026-06`/`2026-07`; el catálogo local conserva 1.915.039
+  filas en nueve particiones de enero a julio. La diferencia corresponde a
+  alcance/corte del artefacto, no permite afirmar pérdida y no autoriza a
+  reemplazar el release público por el local.
+- **DIPRES:** R2 declara 247.287 registros en 18 particiones, incluyendo
+  `2021-01` a `2021-12` y `2026-01` a `2026-06`; el catálogo local contiene
+  92.286 filas en seis particiones de 2026. El contador `source-health` de 476
+  es un conteo de entidades, no un conteo de filas, por lo que no debe
+  compararse directamente con el release de registros.
+
+Ambos casos quedan clasificados por el catálogo R2 como `frescura_o_conteo`.
+La presentación pública debe mantener separado el corte vigente del histórico
+y mostrar DIPRES como información agregada, no como fichas individuales.
+
 ## Validación posterior — 2026-09-14
 
 La suite completa se ejecutó con un margen de timeout adecuado para las
