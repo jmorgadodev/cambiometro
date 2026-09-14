@@ -24,6 +24,22 @@ function readReferences(path) {
   return Array.isArray(payload) ? payload : payload?.keys ?? null;
 }
 
+function collectCatalogReferences(value, inventoryKeys, result = new Set()) {
+  if (typeof value === "string") {
+    const key = value.trim();
+    if (inventoryKeys.has(key)) result.add(key);
+    return result;
+  }
+  if (Array.isArray(value)) {
+    for (const item of value) collectCatalogReferences(item, inventoryKeys, result);
+    return result;
+  }
+  if (value && typeof value === "object") {
+    for (const item of Object.values(value)) collectCatalogReferences(item, inventoryKeys, result);
+  }
+  return result;
+}
+
 function downloadInventory(bucket, key, output) {
   const wrangler = resolve("node_modules/wrangler/bin/wrangler.js");
   const result = spawnSync(process.execPath, [wrangler, "r2", "object", "get", `${bucket}/${key}`, "--file", output, "--remote"], {
@@ -40,12 +56,25 @@ function main() {
     const path = suppliedPath ?? join(temp, "storage.json");
     if (!suppliedPath) downloadInventory(option("--bucket", "transparencia-public-data"), option("--key", "catalog/v1/storage.json"), path);
     const referencesPath = option("--references");
+    const catalogPath = option("--catalog");
+    const inventory = readInventory(path);
+    const inventoryKeys = new Set((inventory.objects ?? []).map((object) => String(object?.key ?? "").trim()).filter(Boolean));
+    const explicitReferences = readReferences(referencesPath);
+    const catalogReferences = catalogPath ? collectCatalogReferences(readInventory(catalogPath), inventoryKeys) : [];
+    const referencedKeys = new Set([...(explicitReferences ?? []), ...catalogReferences]);
     const summary = summarizeR2Storage(readInventory(path), {
       warningRatio: Number(option("--warning-ratio", "0.8")),
       growthBlockRatio: Number(option("--growth-block-ratio", "0.9")),
-      referencedKeys: readReferences(referencesPath),
+      referencedKeys: referencesPath || catalogPath ? referencedKeys : null,
     });
-    console.log(JSON.stringify({ schemaVersion: 1, inventoryPath: suppliedPath ? resolve(suppliedPath) : null, referencesPath: referencesPath ? resolve(referencesPath) : null, ...summary }, null, 2));
+    console.log(JSON.stringify({
+      schemaVersion: 1,
+      inventoryPath: suppliedPath ? resolve(suppliedPath) : null,
+      referencesPath: referencesPath ? resolve(referencesPath) : null,
+      catalogPath: catalogPath ? resolve(catalogPath) : null,
+      referencedKeyCount: referencesPath || catalogPath ? referencedKeys.size : null,
+      ...summary,
+    }, null, 2));
     if (hasFlag("--fail-on-growth-block") && !summary.growthAllowed) process.exitCode = 2;
   } finally {
     rmSync(temp, { recursive: true, force: true });
