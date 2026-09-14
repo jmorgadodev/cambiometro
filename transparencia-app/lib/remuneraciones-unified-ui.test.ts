@@ -35,6 +35,15 @@ describe("interfaz unificada de remuneraciones", () => {
     expect(page).toContain("<details open className=\"remuneration-panel\">");
   });
 
+  it("no renderiza el gráfico mensual que mezclaba cortes incompletos", () => {
+    const detail = readFileSync(join(projectRoot, "components", "remuneraciones", "Remuneraciones38BisClient.tsx"), "utf8");
+
+    expect(detail).not.toContain("RemuneracionesHistoryChart");
+    expect(detail).toContain("Nuevos registros");
+    expect(detail).toContain("Registros que ya no aparecen");
+    expect(detail).toContain("Cambios de remuneración detectados");
+  });
+
   it("ejecuta automáticamente una búsqueda recibida por la URL después de copiarla al estado", () => {
     const explorer = readFileSync(join(projectRoot, "components", "remuneraciones", "RemuneracionesUnifiedExplorer.tsx"), "utf8");
 

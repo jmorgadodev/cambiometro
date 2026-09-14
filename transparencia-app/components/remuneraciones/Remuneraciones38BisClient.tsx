@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Remuneracion38BisRecord } from "@/lib/remuneraciones-38bis";
-import RemuneracionesHistoryChart, { type RemuneracionPeriodPoint } from "@/components/remuneraciones/RemuneracionesHistoryChart";
 
 interface PageEntry {
   page: number;
@@ -384,7 +383,6 @@ export default function Remuneraciones38BisClient({
     ? `${number.format(resultCount ?? filteredRows.length)} coincidencias`
     : `Página ${page} de ${activePeriod.page_count}`;
 
-  const periodPoints = manifest.periodos as RemuneracionPeriodPoint[];
   const comparisonRows = useMemo(() => comparisonDetails && comparisonKind ? [...comparisonDetails[comparisonKind]].sort(compareNames) : [], [comparisonDetails, comparisonKind]);
   const comparisonPageSize = 20;
   const comparisonPageCount = Math.max(1, Math.ceil(comparisonRows.length / comparisonPageSize));
@@ -564,8 +562,6 @@ export default function Remuneraciones38BisClient({
             <button type="button" className="btn btn-ghost" disabled={page >= pageCount || loading} onClick={() => setPage((value) => Math.min(pageCount, value + 1))}>Siguiente →</button>
           </nav>
         </section>
-
-        <RemuneracionesHistoryChart periods={periodPoints} selectedPeriod={periodo} onPeriodClick={selectPeriod} />
 
         <section className="card" aria-labelledby="method-title">
           <span className="eyebrow">Cómo leer estos cambios</span>

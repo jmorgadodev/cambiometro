@@ -221,6 +221,9 @@ if (publishR2) {
   console.log(JSON.stringify({
     action: r2Plan.action,
     usedBytes: r2Plan.projectedBytes,
+    previousBytes: r2Plan.previousBytes,
+    growthBytes: r2Plan.growthBytes,
+    headroomBytes: r2Plan.headroomBytes,
     limitBytes: r2Plan.limitBytes,
     puts: r2Plan.puts.length,
     deletes: r2Plan.deletes.length,
