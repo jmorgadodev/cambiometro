@@ -4,6 +4,8 @@ import { useEffect, useState } from "react";
 
 type MonthlySummary = {
   period: string;
+  status?: "linea_base" | "comparable" | "parcial";
+  statusReason?: string | null;
   rows: number;
   people: number | null;
   organisms: number;
@@ -24,6 +26,8 @@ type TransparencySummary = {
   recordCount: number;
   generatedAt: string;
   latestPeriod: string | null;
+  latestPeriodStatus?: "linea_base" | "comparable" | "parcial" | null;
+  latestPeriodStatusReason?: string | null;
   periods: MonthlySummary[];
   coverage: {
     total: number;

@@ -254,6 +254,8 @@ if (existsSync(cpltTransparencySummarySource)) {
         checksumSha256: crypto.createHash("sha256").update(summaryContent).digest("hex"),
         recordCount: summary.recordCount,
         latestPeriod: summary.latestPeriod ?? null,
+        latestPeriodStatus: summary.latestPeriodStatus ?? null,
+        latestPeriodStatusReason: summary.latestPeriodStatusReason ?? null,
       };
     }
   } catch {
@@ -355,6 +357,8 @@ if (!cpltTransparencySummary && cpltSummaryStats.recordCount > 0) {
     checksumSha256: crypto.createHash("sha256").update(summaryContent).digest("hex"),
     recordCount: summary.recordCount,
     latestPeriod: summary.latestPeriod ?? null,
+    latestPeriodStatus: summary.latestPeriodStatus ?? null,
+    latestPeriodStatusReason: summary.latestPeriodStatusReason ?? null,
   };
 }
 funcionariosFiles.sort((left, right) => left.id.localeCompare(right.id));

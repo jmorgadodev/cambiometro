@@ -58,6 +58,21 @@ function sortedPeriods(values) {
   return [...values].sort((left, right) => left.localeCompare(right));
 }
 
+function classifyPeriod(current, previous) {
+  if (!previous) {
+    return { status: "linea_base", reason: "No existe un corte anterior comparable." };
+  }
+  const rowsDroppedAbruptly = previous.rows >= 1_000 && current.rows < previous.rows * 0.25;
+  const organismsDroppedAbruptly = previous.organisms.size >= 50 && current.organisms.size < previous.organisms.size * 0.25;
+  if (rowsDroppedAbruptly || organismsDroppedAbruptly) {
+    return {
+      status: "parcial",
+      reason: "La caída abrupta de filas u organismos indica una publicación posiblemente incompleta; requiere confirmación en la fuente oficial.",
+    };
+  }
+  return { status: "comparable", reason: "No se detectó una caída abrupta frente al corte anterior." };
+}
+
 function coverageSummaryOf(coverage) {
   const coverageRows = Array.isArray(coverage) ? coverage : [];
   return {
@@ -165,6 +180,7 @@ export function buildCpltTransparencySummary(rows, coverage, generatedAt) {
   const monthly = periodList.map((period, index) => {
     const current = periods.get(period);
     const previousPeriod = periodList[index - 1] ?? null;
+    const previous = previousPeriod ? periods.get(previousPeriod) : null;
     const currentPeople = peopleByPeriod.get(period) ?? new Set();
     const previousPeople = previousPeriod ? peopleByPeriod.get(previousPeriod) ?? new Set() : new Set();
     const newRecords = [...currentPeople].filter((key) => !previousPeople.has(key)).length;
@@ -192,8 +208,11 @@ export function buildCpltTransparencySummary(rows, coverage, generatedAt) {
       }
     }
     const rowsInPeriod = current?.rows ?? 0;
+    const periodClassification = classifyPeriod(current ?? { rows: 0, organisms: new Set() }, previous);
     return {
       period,
+      status: periodClassification.status,
+      statusReason: periodClassification.reason,
       rows: rowsInPeriod,
       people: current?.people.size ?? 0,
       organisms: current?.organisms.size ?? 0,
@@ -235,6 +254,8 @@ export function buildCpltTransparencySummary(rows, coverage, generatedAt) {
     },
     contractCounts,
     latestPeriod: periodList.at(-1) ?? null,
+    latestPeriodStatus: monthly.at(-1)?.status ?? null,
+    latestPeriodStatusReason: monthly.at(-1)?.statusReason ?? null,
     multiOrganismPeople,
     notes: [
       "Las altas y bajas son cambios de presencia entre cortes publicados; no equivalen por sí solos a contrataciones o despidos.",

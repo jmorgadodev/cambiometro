@@ -23,6 +23,7 @@ describe("resumen agregado de Transparencia Activa", () => {
     expect(summary.quality.amountStates).toEqual({ positive: 2, zero: 1, notPublished: 1 });
     expect(summary.quality.recordsWithIssues).toBe(1);
     expect(summary.periods.at(-1)).toEqual(expect.objectContaining({ organismChanges: 0, roleChanges: 0 }));
+    expect(summary.latestPeriodStatus).toBe("comparable");
     expect(summary).not.toHaveProperty("rows");
   });
 
@@ -87,5 +88,23 @@ describe("resumen agregado de Transparencia Activa", () => {
     expect(summary.periods.at(-1)).toEqual(expect.objectContaining({ newRecords: 1, removedRecords: 0, amountChanges: 1, amountDelta: 25 }));
     expect(summary.quality.amountStates).toEqual({ positive: 2, zero: 0, notPublished: 1 });
     expect(summary.quality.recordsWithIssues).toBe(1);
+  });
+
+  it("marca como parcial un corte con una caída abrupta de cobertura", () => {
+    const previous = Array.from({ length: 1_000 }, (_, index) => ({
+      nombre_completo: `Persona ${index}`,
+      organo_nombre: `Organismo ${index % 50}`,
+      tipo_contrato: "Planta",
+      cargo: "Analista",
+      remuneracion_bruta_mensual: 100,
+      fuente_periodo: "2026-07",
+    }));
+    const summary = buildCpltTransparencySummary([
+      ...previous,
+      { nombre_completo: "Persona nueva", organo_nombre: "Organismo 1", tipo_contrato: "Planta", cargo: "Analista", remuneracion_bruta_mensual: 100, fuente_periodo: "2026-08" },
+    ], [], "2026-08-21T00:00:00.000Z");
+
+    expect(summary.periods.at(-1)).toMatchObject({ period: "2026-08", status: "parcial" });
+    expect(summary.latestPeriodStatus).toBe("parcial");
   });
 });
