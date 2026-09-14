@@ -34,6 +34,8 @@ export function auditCpltProjection({ manifest, index, summary }) {
   const invalidPeriodFilters = indexedPeriods.filter((item) => !declared.has(item.period));
   const indexedPeriodRows = indexedPeriods.reduce((total, item) => total + item.count, 0);
   const invalidPeriodRows = invalidPeriodFilters.reduce((total, item) => total + item.count, 0);
+  const indexedQuality = index?.quality && typeof index.quality === "object" ? index.quality : null;
+  const qualityInvalidPeriodRows = integer(indexedQuality?.invalidPeriodRows) ?? 0;
   const structuralIssues = [];
 
   if (manifestRows === null) structuralIssues.push("manifest_record_count_missing");
@@ -44,12 +46,14 @@ export function auditCpltProjection({ manifest, index, summary }) {
   if (declared.size === 0) structuralIssues.push("declared_periods_missing");
   if (indexedPeriodRows !== null && indexRows !== null && indexedPeriodRows !== indexRows) structuralIssues.push("period_filter_sum_mismatch");
   if (invalidPeriodRows > 0) structuralIssues.push("period_filters_outside_declared_release");
+  if (qualityInvalidPeriodRows > 0) structuralIssues.push("rows_with_invalid_period");
 
-  const quality = index?.quality && typeof index.quality === "object"
+  const quality = indexedQuality
     ? {
       recordsWithIssues: integer(index.quality.recordsWithIssues) ?? 0,
       correctedRows: integer(index.quality.correctedRows) ?? 0,
       observedRows: integer(index.quality.observedRows) ?? 0,
+      invalidPeriodRows: qualityInvalidPeriodRows,
       byIssue: index.quality.byIssue && typeof index.quality.byIssue === "object" ? index.quality.byIssue : {},
     }
     : null;

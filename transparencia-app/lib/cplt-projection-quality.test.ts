@@ -35,6 +35,20 @@ describe("auditoría acotada de proyección CPLT", () => {
     expect(result.structuralIssues).toContain("period_filters_outside_declared_release");
   });
 
+  it("bloquea filas marcadas con período inválido por el generador", () => {
+    const result = auditCpltProjection(fixture({
+      index: {
+        totalRows: 3,
+        pages: [{ page: 1, count: 3 }],
+        filters: { "periodo:2026-08": { count: 2 }, "periodo:2026-09": { count: 1 } },
+        quality: { invalidPeriodRows: 1 },
+      },
+    }));
+    expect(result.status).toBe("blocked");
+    expect(result.quality).toMatchObject({ invalidPeriodRows: 1 });
+    expect(result.structuralIssues).toContain("rows_with_invalid_period");
+  });
+
   it("bloquea una discrepancia entre el total declarado y las páginas físicas", () => {
     const result = auditCpltProjection(fixture({ manifest: { recordCount: 4 } }));
     expect(result.status).toBe("blocked");
