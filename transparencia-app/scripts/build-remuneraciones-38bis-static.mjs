@@ -178,8 +178,6 @@ const currentSortPages = {
   sueldo_asc: writePages([...rows].sort((left, right) => compareSalary(left, right, "asc")), "sueldo-asc"),
 };
 fs.mkdirSync(historyOutputDir, { recursive: true });
-const auditPath = path.join(root, "data", "remuneraciones-38bis-publico-audit.json");
-const audit = JSON.parse(fs.readFileSync(auditPath, "utf8"));
 const historyPeriods = Array.isArray(historical.periodos) ? historical.periodos : [];
 const periodRows = [{ mes: release.mes, rows }, ...historyPeriods.map((period) => ({ mes: period.mes, rows: period.registros }))];
 const historyByHash = new Map();
@@ -246,13 +244,11 @@ const manifest = {
   comparison_key: `${currentPeriod.base_path}${currentPeriod.comparison_key}`,
   initial_rows: orderedRows.slice(0, pageSize),
   periodos: periodSummaries,
-  comparison: {
-    estado: audit.delta.estado,
-    periodo_anterior: audit.delta.periodoAnterior,
-    entradas: audit.delta.entradas,
-    salidas_observadas: audit.delta.salidasObservadas,
-    cambios: audit.delta.cambios,
-  },
+  // El resumen del período actual ya fue calculado contra el historial
+  // publicado. El delta del audit JSON puede ser línea base cuando el release
+  // actual se extrajo sin un corte anterior; no debe sobrescribir estos
+  // indicadores con ceros.
+  comparison: currentPeriod.comparison,
 };
 
 fs.writeFileSync(path.join(outputDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");

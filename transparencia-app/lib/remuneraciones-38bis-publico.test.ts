@@ -1,5 +1,6 @@
 import release from "@/data/remuneraciones-38bis-publico.json";
 import audit from "@/data/remuneraciones-38bis-publico-audit.json";
+import manifest from "@/data/remuneraciones-38bis-publico-manifest.json";
 import { describe, expect, it } from "vitest";
 
 describe("release público de remuneraciones 38 bis", () => {
@@ -18,5 +19,14 @@ describe("release público de remuneraciones 38 bis", () => {
       cargo: "ASESOR JUNIOR",
       bruto_mensual: 1_900_000,
     });
+  });
+
+  it("mantiene los indicadores del corte actual en el manifiesto raíz", () => {
+    const current = manifest.periodos.find((period) => period.mes === manifest.mes);
+    expect(current).toBeDefined();
+    expect(manifest.comparison).toEqual(current?.comparison);
+    expect(manifest.comparison.entradas).toBeGreaterThan(0);
+    expect(manifest.comparison.salidas_observadas).toBeGreaterThan(0);
+    expect(manifest.comparison.cambios).toBeGreaterThan(0);
   });
 });

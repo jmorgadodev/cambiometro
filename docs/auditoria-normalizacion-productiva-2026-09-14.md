@@ -107,6 +107,8 @@ seleccionado. El bloque de comparación del manifiesto raíz puede representar
 la línea base del release y no debe utilizarse para pintar los indicadores del
 corte vigente; leerlo provocaba que entradas, ausencias y cambios aparecieran
 como cero aunque el detalle histórico sí los contuviera.
+El generador del manifiesto también quedó alineado para usar ese resumen del
+período actual como bloque raíz.
 
 ### Revalidación acotada — 2026-09-14 11:55 UTC-3
 

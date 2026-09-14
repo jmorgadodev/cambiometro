@@ -3,10 +3,10 @@
   "source_id": "remuneraciones-38bis",
   "source_url": "https://comision38bis.gob.cl/registro-publico",
   "mes": "2026-06",
-  "extraido_en": "2026-09-08T13:14:12.207Z",
-  "total": 1632,
-  "registros_con_monto": 1064,
-  "total_bruto": 5727648259,
+  "extraido_en": "2026-09-13T17:24:50.986Z",
+  "total": 1634,
+  "registros_con_monto": 1066,
+  "total_bruto": 5732608259,
   "page_size": 40,
   "page_count": 41,
   "pages": [
@@ -213,7 +213,7 @@
     {
       "page": 41,
       "key": "page-0041.json",
-      "count": 32
+      "count": 34
     }
   ],
   "sort_pages": {
@@ -421,7 +421,7 @@
       {
         "page": 41,
         "key": "page-0041.json",
-        "count": 32
+        "count": 34
       }
     ],
     "sueldo_asc": [
@@ -628,7 +628,7 @@
       {
         "page": 41,
         "key": "page-0041.json",
-        "count": 32
+        "count": 34
       }
     ]
   },
@@ -891,6 +891,7 @@
       20,
       21,
       25,
+      26,
       27,
       30
     ],
@@ -1010,7 +1011,6 @@
       27,
       28,
       29,
-      30,
       31,
       32,
       33,
@@ -1033,7 +1033,6 @@
       1,
       6,
       7,
-      40,
       41
     ],
     "DELEGACIÓN PRESIDENCIAL REGIONAL DE LA REGIÓN METROPOLITANA": [
@@ -1041,6 +1040,7 @@
       4,
       6,
       10,
+      11,
       12,
       26
     ],
@@ -1053,7 +1053,6 @@
       8,
       9,
       10,
-      11,
       12,
       13,
       15,
@@ -1072,7 +1071,7 @@
       7,
       20,
       26,
-      35
+      36
     ],
     "SECRETARÍA REGIONAL MINISTERIAL DE MAGALLANES": [
       1,
@@ -1116,7 +1115,6 @@
       19,
       20,
       22,
-      23,
       24,
       26,
       27,
@@ -1185,10 +1183,8 @@
       13,
       20,
       21,
-      22,
       23,
       27,
-      31,
       32
     ],
     "SECRETARÍA REGIONAL MINISTERIAL DE ARICA Y PARINACOTA": [
@@ -1208,6 +1204,7 @@
       25,
       26,
       27,
+      28,
       29,
       30,
       31,
@@ -1248,7 +1245,8 @@
       36,
       37,
       38,
-      39
+      39,
+      40
     ],
     "DELEGACIÓN PRESIDENCIAL REGIONAL DEL BIOBÍO": [
       1,
@@ -1293,7 +1291,7 @@
       11,
       12,
       15,
-      25,
+      26,
       28,
       34
     ],
@@ -1309,7 +1307,7 @@
       20,
       21,
       22,
-      23,
+      24,
       27,
       28,
       29,
@@ -1346,8 +1344,8 @@
       10,
       11,
       15,
-      16,
       17,
+      18,
       19,
       21,
       28,
@@ -1410,7 +1408,8 @@
       36,
       37,
       38,
-      39
+      39,
+      40
     ],
     "SECRETARÍA REGIONAL MINISTERIAL DE VALPARAÍSO": [
       2,
@@ -1418,14 +1417,12 @@
       5,
       6,
       8,
-      9,
       10,
       12,
       13,
       14,
       15,
       18,
-      19,
       20,
       22,
       23,
@@ -1480,9 +1477,8 @@
       18,
       22,
       26,
-      27,
+      28,
       29,
-      30,
       31,
       32,
       33,
@@ -1509,7 +1505,7 @@
       3,
       7,
       15,
-      18,
+      19,
       24,
       31
     ],
@@ -1559,8 +1555,9 @@
     "SUBSECRETARÍA DE EDUCACIÓN SUPERIOR": [
       3,
       25,
-      26,
-      32
+      27,
+      32,
+      33
     ],
     "SUBSECRETARÍA DE TURISMO": [
       3,
@@ -1589,7 +1586,6 @@
       3,
       4,
       5,
-      8,
       9,
       13,
       14,
@@ -1619,6 +1615,7 @@
       7,
       13,
       14,
+      15,
       17,
       18,
       19,
@@ -1636,7 +1633,8 @@
     ],
     "SUBSECRETARÍA DE ENERGÍA": [
       4,
-      37
+      37,
+      38
     ],
     "POLICÍA DE INVESTIGACIONES DE CHILE": [
       4,
@@ -1665,7 +1663,8 @@
       5,
       13,
       28,
-      35
+      35,
+      36
     ],
     "MINISTERIO DE VIVIENDA Y URBANISMO": [
       4,
@@ -1691,7 +1690,7 @@
       10,
       19,
       20,
-      21,
+      22,
       28,
       37
     ],
@@ -1716,7 +1715,8 @@
     ],
     "GOBIERNO REGIONAL DE TARAPACÁ": [
       5,
-      40
+      40,
+      41
     ],
     "GOBIERNO REGIONAL DE VALPARAÍSO": [
       5,
@@ -1740,7 +1740,7 @@
       23,
       25,
       28,
-      34
+      35
     ],
     "MINISTERIO SECRETARÍA GENERAL DE GOBIERNO": [
       5,
@@ -1775,7 +1775,7 @@
     ],
     "SUBSECRETARÍA DE LAS CULTURAS Y LAS ARTES": [
       6,
-      13,
+      14,
       40
     ],
     "BANCO DEL ESTADO": [
@@ -1789,7 +1789,7 @@
     ],
     "GOBIERNO REGIONAL DE COQUIMBO": [
       6,
-      12,
+      13,
       41
     ],
     "SUPERINTENDENCIA DE PENSIONES": [
@@ -1810,6 +1810,14 @@
       24,
       25,
       28
+    ],
+    "MINISTERIO DE SEGURIDAD PÚBLICA": [
+      7,
+      10,
+      13,
+      22,
+      27,
+      29
     ],
     "EMPRESA NACIONAL DE MINERÍA": [
       7,
@@ -1849,7 +1857,7 @@
       16,
       23,
       25,
-      26,
+      27,
       32
     ],
     "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE HUASCO": [
@@ -1880,7 +1888,6 @@
     ],
     "SERVICIO DE EVALUACIÓN AMBIENTAL": [
       8,
-      38,
       39
     ],
     "SUBSECRETARÍA DE SERVICIOS SOCIALES": [
@@ -1913,12 +1920,6 @@
       21,
       36
     ],
-    "MINISTERIO DE SEGURIDAD PÚBLICA": [
-      10,
-      22,
-      27,
-      29
-    ],
     "SUBSECRETARÍA DE DERECHOS HUMANOS": [
       10,
       11,
@@ -1949,7 +1950,7 @@
       18,
       19,
       26,
-      28
+      29
     ],
     "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE LIMARÍ": [
       11
@@ -2066,7 +2067,7 @@
       15
     ],
     "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE AYSÉN": [
-      15
+      16
     ],
     "MINISTERIO DE ENERGÍA": [
       16,
@@ -2080,7 +2081,7 @@
       19,
       21,
       23,
-      28
+      29
     ],
     "DELEGACIÓN PRESIDENCIAL PROVINCIAL DE TALAGANTE": [
       16
@@ -2099,7 +2100,7 @@
       40
     ],
     "GOBIERNO REGIONAL METROPOLITANO DE SANTIAGO": [
-      17,
+      18,
       23,
       41
     ],
@@ -2147,12 +2148,12 @@
       20
     ],
     "SERVICIO NACIONAL DE MIGRACIONES": [
-      20,
+      21,
       23,
       29
     ],
     "MINISTERIO DE LAS CULTURAS, LAS ARTES Y EL PATRIMONIO": [
-      20,
+      21,
       25,
       28,
       40
@@ -2219,8 +2220,9 @@
       38
     ],
     "SUBSECRETARÍA DE RELACIONES EXTERIORES": [
-      24,
-      29
+      25,
+      29,
+      30
     ],
     "SERVICIO DE IMPUESTOS INTERNOS": [
       25,
@@ -2252,7 +2254,8 @@
     ],
     "AGENCIA DE PROMOCIÓN DE LA INVERSIÓN EXTRANJERA": [
       27,
-      31
+      31,
+      32
     ],
     "FONDO DE SOLIDARIDAD E INVERSIÓN SOCIAL": [
       27,
@@ -2491,7 +2494,6 @@
       21,
       22,
       23,
-      24,
       25,
       26
     ],
@@ -2512,11 +2514,9 @@
       18,
       19,
       20,
-      21,
       22,
       23,
       24,
-      25,
       26,
       28,
       29,
@@ -2613,13 +2613,11 @@
     "COORDINADOR DE ASESORES": [
       3,
       8,
-      11,
       12,
       19,
       21,
       22,
       23,
-      24,
       25,
       27,
       28
@@ -2663,9 +2661,8 @@
       7,
       9,
       10,
-      12,
+      13,
       16,
-      17,
       18,
       22,
       23,
@@ -2999,13 +2996,13 @@
   "periodos": [
     {
       "mes": "2026-06",
-      "total": 1632,
-      "registros_con_monto": 1064,
-      "total_bruto": 5727648259,
+      "total": 1634,
+      "registros_con_monto": 1066,
+      "total_bruto": 5732608259,
       "comparison": {
         "estado": "comparado",
         "periodo_anterior": "2026-05",
-        "entradas": 51,
+        "entradas": 53,
         "salidas_observadas": 46,
         "cambios": 439
       },
@@ -3271,7 +3268,7 @@
   "comparison": {
     "estado": "comparado",
     "periodo_anterior": "2026-05",
-    "entradas": 51,
+    "entradas": 53,
     "salidas_observadas": 46,
     "cambios": 439
   }
