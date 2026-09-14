@@ -39,6 +39,8 @@ describe("interfaz unificada de remuneraciones", () => {
     const detail = readFileSync(join(projectRoot, "components", "remuneraciones", "Remuneraciones38BisClient.tsx"), "utf8");
 
     expect(detail).not.toContain("RemuneracionesHistoryChart");
+    expect(detail).toContain("const currentSummary = manifest.periodos.find((period) => period.mes === manifest.mes)");
+    expect(detail).toContain("currentSummary?.comparison ?? manifest.comparison");
     expect(detail).toContain("Nuevos registros");
     expect(detail).toContain("Registros que ya no aparecen");
     expect(detail).toContain("Cambios de remuneración detectados");

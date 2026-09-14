@@ -112,6 +112,7 @@ export interface ReleaseManifest {
 type SearchIndex = Record<string, number[]>;
 
 function currentPeriodFromManifest(manifest: ReleaseManifest): PeriodManifest {
+  const currentSummary = manifest.periodos.find((period) => period.mes === manifest.mes);
   return {
     mes: manifest.mes,
     base_path: "",
@@ -129,7 +130,10 @@ function currentPeriodFromManifest(manifest: ReleaseManifest): PeriodManifest {
     cargo_pages: manifest.cargo_pages,
     history_base_path: manifest.history_base_path,
     comparison_key: manifest.comparison_key,
-    comparison: manifest.comparison,
+    // El bloque raíz puede corresponder a la línea base del release. Para el
+    // estado visible del corte actual se debe usar el resumen del mismo mes,
+    // que conserva la comparación frente al período anterior.
+    comparison: currentSummary?.comparison ?? manifest.comparison,
   };
 }
 
