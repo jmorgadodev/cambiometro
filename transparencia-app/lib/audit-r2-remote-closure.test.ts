@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { auditCatalogClosure, catalogPartitionKeys, catalogProjectionArtifactKey, classifyR2Closure } from "../scripts/audit-r2-remote-closure.mjs";
+import { auditCatalogClosure, catalogPartitionKeys, catalogProjectionArtifactKey, classifyR2Closure, summarizeR2ClosureGaps } from "../scripts/audit-r2-remote-closure.mjs";
 
 describe("auditoría de cierre del catálogo R2", () => {
   it("deriva sólo la clave de proyección de un checksum completo", () => {
@@ -83,5 +83,28 @@ describe("auditoría de cierre del catálogo R2", () => {
       presentWithoutManifest: [],
       missingArtifactInventory: [],
     })).toMatchObject({ status: "verifiable", promotionAllowed: true });
+  });
+
+  it("resume brechas por fuente sin ocultar las claves originales", () => {
+    expect(summarizeR2ClosureGaps({
+      missingManifests: [
+        "partitions/camara/2026/07/manifest.json",
+        "partitions/camara/2026/08/manifest.json",
+        "partitions/senado/2026/09/manifest.json",
+      ],
+      missingArtifactInventory: [
+        "partitions/camara/2026/07/records-a.jsonl.gz",
+        "indexes/v1/camara/entities-a.jsonl.gz",
+      ],
+    })).toMatchObject({
+      missingManifests: [
+        { sourceId: "camara", count: 2 },
+        { sourceId: "senado", count: 1 },
+      ],
+      missingArtifactInventory: [
+        { sourceId: "camara", count: 1 },
+        { sourceId: "unknown", count: 1 },
+      ],
+    });
   });
 });

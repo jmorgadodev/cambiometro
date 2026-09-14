@@ -756,3 +756,22 @@ vigente encontró 21 claves referenciadas en total y 2 referencias aportadas
 por los manifiestos de fuente; los tres grupos duplicados conservaron el
 estado `unreferenced-by-supplied-set`. Esto deja la revisión automatizada y
 no cambia la regla de retención: identificar no equivale a eliminar.
+
+## Revalidación remota agrupada — 2026-09-14
+
+La revisión completa del catálogo remoto comprobó 147 particiones. El estado
+continúa siendo `catalogued_without_manifest` y `promotionAllowed: false`.
+Las brechas principales quedaron agrupadas así:
+
+- manifiestos faltantes: Contraloría 18, DIPRES 18, Cámara 15,
+  InfoProbidad 9, Ley 19.862 8, gastos Cámara 5, gastos Senado 5, Senado 4,
+  InfoLobby 2, votaciones Senado 2, ChileCompra 1, Servel 1 y SINIM 1;
+- artefactos que el inventario de almacenamiento no permite verificar:
+  Cámara 43, InfoLobby 6, votaciones Senado 5 y Contraloría 1;
+- artefactos presentes sin manifiesto y artefactos faltantes comprobados por
+  descarga física: ninguno en esta ejecución.
+
+La diferencia entre “manifiesto faltante” y “artefacto no verificable en el
+inventario” se conserva separada. No se interpreta como pérdida de filas ni
+se publica como cero; requiere reconstruir o volver a registrar el cierre
+físico de cada fuente antes de promover historiales.

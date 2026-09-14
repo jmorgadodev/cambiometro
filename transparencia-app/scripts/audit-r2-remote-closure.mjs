@@ -114,6 +114,39 @@ export function classifyR2Closure(result) {
   };
 }
 
+function gapSource(value) {
+  const key = typeof value === "string" ? value : value?.manifestKey ?? value?.artifactKey ?? "";
+  const parts = String(key).split("/");
+  return parts[0] === "partitions" && parts[1] ? parts[1] : "unknown";
+}
+
+function groupGaps(values) {
+  const groups = new Map();
+  for (const value of values ?? []) {
+    const source = gapSource(value);
+    const current = groups.get(source) ?? { sourceId: source, count: 0, samples: [] };
+    current.count += 1;
+    if (current.samples.length < 3) current.samples.push(typeof value === "string" ? value : value?.manifestKey ?? value?.artifactKey ?? null);
+    groups.set(source, current);
+  }
+  return [...groups.values()].sort((left, right) => right.count - left.count || left.sourceId.localeCompare(right.sourceId));
+}
+
+/**
+ * Produces a compact, source-oriented view of closure gaps. The full arrays
+ * remain available for forensic review, while this summary is suitable for
+ * CI output and operator decisions.
+ */
+export function summarizeR2ClosureGaps(result) {
+  return {
+    missingManifests: groupGaps(result?.missingManifests),
+    missingArtifacts: groupGaps(result?.missingArtifacts),
+    missingManifestArtifacts: groupGaps(result?.missingManifestArtifacts),
+    missingArtifactInventory: groupGaps(result?.missingArtifactInventory),
+    presentWithoutManifest: groupGaps(result?.presentWithoutManifest),
+  };
+}
+
 function option(name, fallback = null) {
   const index = process.argv.indexOf(name);
   return index >= 0 ? process.argv[index + 1] : fallback;
@@ -245,6 +278,7 @@ function run() {
     };
     result.complete = result.missingManifests.length === 0 && (!verifyArtifacts || result.missingArtifacts.length === 0);
     Object.assign(result, classifyR2Closure(result));
+    result.gapSummary = summarizeR2ClosureGaps(result);
     console.log(JSON.stringify(result, null, 2));
     if (!result.complete) process.exitCode = 1;
   } finally {
