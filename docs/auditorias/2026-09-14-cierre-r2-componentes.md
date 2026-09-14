@@ -579,8 +579,8 @@ como oportunidad de auditoría; no autorizan eliminaciones automáticas.
 
 Estado de validación del checkout después de estos cambios:
 
-- `npm test`: 197 archivos y 1.053 pruebas aprobadas;
-- `npm run check:r2-history`: 6 pruebas aprobadas;
+- `npm test`: 197 archivos y 1.056 pruebas aprobadas;
+- `npm run check:r2-history`: 9 pruebas aprobadas;
 - `npm run check:movimientos-normalization`: aprobado;
 - `npm run check:legislative-normalization`: aprobado;
 - typecheck, API typecheck y arquitectura estática: aprobados.
