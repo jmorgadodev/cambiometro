@@ -54,4 +54,34 @@ describe("registros públicos R2", () => {
     expect(payload.meta.sourceBackend).toBe("r2-lake");
     expect(bucket.requested).not.toContain("projections/static-site-v1/manifest.json");
   });
+
+  it("usa el snapshot R2 canónico de Movimientos cuando no hay particiones del lake", async () => {
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": { partitions: [] },
+      "projections/static-site-v1/manifest.json": {
+        files: [{ path: "data/movimientos.json", key: "static/movimientos.json" }],
+      },
+      "static/movimientos.json": {
+        pipeline: "etl_movimientos_autoridades",
+        movimientos: [{
+          id: "mov-prueba-1",
+          fecha: "2026-09-10",
+          tipo: "nombramiento",
+          organismo: "PRESIDENCIA",
+          fuentes: [{ url: "https://fuente-oficial.test/movimiento/1" }],
+        }],
+      },
+    });
+
+    const response = await listRecordsFromR2(
+      new URL("https://example.test/api/v1/records?source=movimientos&limit=10"),
+      { PUBLIC_DATA: bucket as never },
+    );
+    const payload = await response!.json() as { data: Array<{ id: string }>; meta: Record<string, unknown> };
+
+    expect(response!.status).toBe(200);
+    expect(payload.data.map((row) => row.id)).toEqual(["mov-prueba-1"]);
+    expect(payload.meta.sourceBackend).toBe("r2");
+    expect(bucket.requested).toContain("static/movimientos.json");
+  });
 });
