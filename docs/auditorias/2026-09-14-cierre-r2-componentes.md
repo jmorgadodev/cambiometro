@@ -76,6 +76,41 @@ denominador comparable.
 - **Transparencia Activa, Servel y SINIM:** no presentaron diferencia de
   catálogo en esta comparación.
 
+## Proyección central de Transparencia Activa: no promover todavía
+
+Durante la revisión apareció en R2 una proyección adicional que no está
+conectada al API público actual: `funcionarios-central-v1`. Su manifiesto fue
+leído sólo en modo GET y declara:
+
+| Métrica | Valor |
+| --- | ---: |
+| Registros | 2.110.434 |
+| Períodos | 33 |
+| Corte declarado | 2026-09 |
+| Planta | 295.944 |
+| Contrata | 869.005 |
+| Honorarios | 615.255 |
+| Código del Trabajo | 330.230 |
+
+La producción continúa sirviendo `funcionarios-v1`, con 1.226.913 registros y
+corte generado el 2026-09-02. Por tanto, la existencia del release central no
+significa que ya esté disponible para el usuario ni autoriza a cambiar el
+puntero productivo.
+
+El resumen central también explica por qué no se debe mostrar una tabla
+mensual incompleta como si fuera una serie comparable: julio de 2026 contiene
+578.446 filas, frente a 75.998 en junio, 46.657 en agosto y sólo 123 en
+septiembre. El salto coincide con un cambio de alcance/cobertura del release,
+no con una conclusión sobre contrataciones. Además, el release declara
+563.221 registros con observaciones de calidad, principalmente remuneración
+líquida no informada, y 6.952 períodos inválidos.
+
+Decisión: la interfaz no mostrará la evolución mensual ni la tabla de los
+últimos 12 cortes de esta proyección hasta reconciliar alcance, períodos y
+manifiestos. Los artefactos permanecen conservados para auditoría; la
+producción sigue usando el release anterior mientras se prepara una
+compatibilidad verificable.
+
 ## Decisiones y siguiente orden seguro
 
 1. Mantener las rutas, los nombres del menú y los datos municipales y de

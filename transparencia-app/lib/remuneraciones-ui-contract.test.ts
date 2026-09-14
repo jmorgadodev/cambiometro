@@ -25,5 +25,6 @@ describe("interfaz de remuneraciones", () => {
     expect(client).toContain("Nuevos registros detectados");
     expect(client).toContain("Registros que ya no aparecen");
     expect(client).toContain("Cambios de remuneración detectados");
+    expect(client).toContain("${row.partida}-${row.nombre}-${row.organismo}-${row.cargo}");
   });
 });
