@@ -1,0 +1,576 @@
+{
+  "schemaVersion": 1,
+  "generatedAt": "2026-09-14T21:03:18.180Z",
+  "productionUrl": "https://cambiometro.impulsacv.cl/api/v1/sources",
+  "localCatalog": "C:\\Users\\jorge\\Proyectos\\cambiometro-audit\\transparencia-app\\data\\lake\\catalog\\v1\\manifest.json",
+  "localHealth": "C:\\Users\\jorge\\Proyectos\\cambiometro-audit\\transparencia-app\\data\\etl\\source-health.json",
+  "classificationLegend": {
+    "match": "Los conteos coinciden y no hay componentes locales separados.",
+    "freshness": "Producción tiene una publicación más nueva que el snapshot local; no se marca como pérdida.",
+    "scope": "Producción y local tienen alcances o categorías distintas; revisar el desglose antes de calcular cobertura.",
+    "unexplained": "La evidencia disponible no permite explicar la diferencia.",
+    "healthMismatch": "El conteo derivado de source-health no coincide con el conteo canónico del catálogo; indica snapshot desfasado o una categoría distinta, no pérdida automática de datos."
+  },
+  "sourceCount": 15,
+  "rows": [
+    {
+      "id": "camara",
+      "classification": "scope",
+      "productionCount": 58751,
+      "localCount": 2750,
+      "localCatalogCount": 2750,
+      "productionStatus": "partial",
+      "localStatus": "partial",
+      "productionUpdatedAt": "2026-09-13T18:23:46.817Z",
+      "localGeneratedAt": "2026-08-21T17:07:19.288Z",
+      "productionPeriods": [],
+      "localPeriods": [
+        "2026-01",
+        "2026-03",
+        "2026-04",
+        "2026-05",
+        "2026-06",
+        "2026-07",
+        "2026-08"
+      ],
+      "localHealthCount": 2750,
+      "localHealthUpdatedAt": "2026-08-21T17:07:19.288Z",
+      "healthMismatch": false,
+      "localCategories": [
+        "remuneraciones",
+        "asesorias",
+        "gastos",
+        "votaciones"
+      ],
+      "localComponents": [
+        {
+          "id": "gastos_camara",
+          "recordCount": 16275,
+          "categories": [
+            "gastos"
+          ]
+        }
+      ],
+      "productionComponents": [
+        {
+          "id": "asistencia",
+          "sourceId": "camara",
+          "label": "Asistencia",
+          "recordCount": 54538,
+          "includedInRecordCount": true
+        },
+        {
+          "id": "votaciones",
+          "sourceId": "camara",
+          "label": "Votaciones",
+          "recordCount": 4058,
+          "includedInRecordCount": true
+        },
+        {
+          "id": "gastos",
+          "sourceId": "gastos_camara",
+          "label": "Gastos operacionales",
+          "recordCount": 16275,
+          "includedInRecordCount": false
+        }
+      ],
+      "localDeclaredComponents": [
+        {
+          "id": "asistencia",
+          "sourceId": "asistencia_camara",
+          "label": null,
+          "recordCount": 0,
+          "includedInRecordCount": false
+        },
+        {
+          "id": "votaciones",
+          "sourceId": "votaciones_camara",
+          "label": null,
+          "recordCount": 0,
+          "includedInRecordCount": false
+        },
+        {
+          "id": "datosAbiertos",
+          "sourceId": "congreso_opendata",
+          "label": null,
+          "recordCount": 0,
+          "includedInRecordCount": false
+        },
+        {
+          "id": "gastos",
+          "sourceId": "gastos_camara",
+          "label": null,
+          "recordCount": 16275,
+          "includedInRecordCount": false
+        }
+      ]
+    },
+    {
+      "id": "chilecompra",
+      "classification": "unexplained",
+      "productionCount": 74142,
+      "localCount": 1915039,
+      "localCatalogCount": 1915039,
+      "productionStatus": "partial",
+      "localStatus": "partial",
+      "productionUpdatedAt": "2026-08-21T10:10:54.809Z",
+      "localGeneratedAt": "2026-08-21T10:10:54.809Z",
+      "productionPeriods": [],
+      "localPeriods": [
+        "2026-01",
+        "2026-02",
+        "2026-03",
+        "2026-04",
+        "2026-05",
+        "2026-06",
+        "2026-07"
+      ],
+      "localHealthCount": 888693,
+      "localHealthUpdatedAt": "2026-08-21T10:10:54.809Z",
+      "healthMismatch": true,
+      "localCategories": [],
+      "localComponents": [],
+      "productionComponents": [],
+      "localDeclaredComponents": []
+    },
+    {
+      "id": "contraloria",
+      "classification": "freshness",
+      "productionCount": 310,
+      "localCount": 291,
+      "localCatalogCount": 291,
+      "productionStatus": "partial",
+      "localStatus": "partial",
+      "productionUpdatedAt": "2026-09-13T18:23:46.817Z",
+      "localGeneratedAt": "2026-08-21T17:07:19.288Z",
+      "productionPeriods": [],
+      "localPeriods": [
+        "2025-01",
+        "2025-02",
+        "2025-03",
+        "2025-04",
+        "2025-05",
+        "2025-06",
+        "2025-07",
+        "2025-08",
+        "2025-09",
+        "2025-11",
+        "2025-12",
+        "2026-01",
+        "2026-02",
+        "2026-03",
+        "2026-04",
+        "2026-05",
+        "2026-06",
+        "2026-07",
+        "2026-08"
+      ],
+      "localHealthCount": 291,
+      "localHealthUpdatedAt": "2026-08-21T17:07:19.288Z",
+      "healthMismatch": false,
+      "localCategories": [],
+      "localComponents": [],
+      "productionComponents": [],
+      "localDeclaredComponents": []
+    },
+    {
+      "id": "dipres",
+      "classification": "unexplained",
+      "productionCount": 247287,
+      "localCount": 92286,
+      "localCatalogCount": 92286,
+      "productionStatus": "partial",
+      "localStatus": "partial",
+      "productionUpdatedAt": "2026-08-21T02:44:54.415Z",
+      "localGeneratedAt": "2026-08-21T02:44:54.415Z",
+      "productionPeriods": [],
+      "localPeriods": [
+        "2026-01",
+        "2026-02",
+        "2026-03",
+        "2026-04",
+        "2026-05",
+        "2026-06"
+      ],
+      "localHealthCount": 476,
+      "localHealthUpdatedAt": "2026-08-21T02:44:54.415Z",
+      "healthMismatch": true,
+      "localCategories": [],
+      "localComponents": [],
+      "productionComponents": [],
+      "localDeclaredComponents": []
+    },
+    {
+      "id": "gastos_camara",
+      "classification": "scope",
+      "productionCount": null,
+      "localCount": 16275,
+      "localCatalogCount": null,
+      "productionStatus": null,
+      "localStatus": "partial",
+      "productionUpdatedAt": null,
+      "localGeneratedAt": "2026-08-21T17:07:19.288Z",
+      "productionPeriods": [],
+      "localPeriods": [
+        "2026-03",
+        "2026-04",
+        "2026-05",
+        "2026-06",
+        "2026-07"
+      ],
+      "localHealthCount": null,
+      "localHealthUpdatedAt": null,
+      "healthMismatch": false,
+      "localCategories": [
+        "gastos"
+      ],
+      "localComponents": [],
+      "productionComponents": [],
+      "localDeclaredComponents": []
+    },
+    {
+      "id": "gastos_senado",
+      "classification": "scope",
+      "productionCount": null,
+      "localCount": 6521,
+      "localCatalogCount": null,
+      "productionStatus": null,
+      "localStatus": "partial",
+      "productionUpdatedAt": null,
+      "localGeneratedAt": "2026-08-21T17:07:19.288Z",
+      "productionPeriods": [],
+      "localPeriods": [
+        "2026-01",
+        "2026-02",
+        "2026-03",
+        "2026-04",
+        "2026-05"
+      ],
+      "localHealthCount": null,
+      "localHealthUpdatedAt": null,
+      "healthMismatch": false,
+      "localCategories": [
+        "gastos"
+      ],
+      "localComponents": [],
+      "productionComponents": [],
+      "localDeclaredComponents": []
+    },
+    {
+      "id": "ine-censo-2024",
+      "classification": "match",
+      "productionCount": 346,
+      "localCount": 346,
+      "localCatalogCount": null,
+      "productionStatus": "connected",
+      "localStatus": "complete",
+      "productionUpdatedAt": "2026-09-13T18:23:46.817Z",
+      "localGeneratedAt": "2026-08-21T17:07:19.288Z",
+      "productionPeriods": [],
+      "localPeriods": [],
+      "localHealthCount": 346,
+      "localHealthUpdatedAt": "2026-08-21T17:07:19.288Z",
+      "healthMismatch": false,
+      "localCategories": [],
+      "localComponents": [],
+      "productionComponents": [],
+      "localDeclaredComponents": []
+    },
+    {
+      "id": "infolobby",
+      "classification": "freshness",
+      "productionCount": 71467,
+      "localCount": 60523,
+      "localCatalogCount": 60523,
+      "productionStatus": "partial",
+      "localStatus": "partial",
+      "productionUpdatedAt": "2026-09-13T18:23:46.817Z",
+      "localGeneratedAt": "2026-08-21T17:07:19.288Z",
+      "productionPeriods": [],
+      "localPeriods": [
+        "2026-01",
+        "2026-02",
+        "2026-03",
+        "2026-04",
+        "2026-05",
+        "2026-06",
+        "2026-07"
+      ],
+      "localHealthCount": 60523,
+      "localHealthUpdatedAt": "2026-08-21T17:07:19.288Z",
+      "healthMismatch": false,
+      "localCategories": [],
+      "localComponents": [],
+      "productionComponents": [],
+      "localDeclaredComponents": []
+    },
+    {
+      "id": "infoprobidad",
+      "classification": "freshness",
+      "productionCount": 16077,
+      "localCount": 15331,
+      "localCatalogCount": 15331,
+      "productionStatus": "partial",
+      "localStatus": "partial",
+      "productionUpdatedAt": "2026-09-13T18:23:46.817Z",
+      "localGeneratedAt": "2026-08-21T17:07:19.288Z",
+      "productionPeriods": [],
+      "localPeriods": [
+        "2026-01",
+        "2026-02",
+        "2026-03",
+        "2026-04",
+        "2026-05",
+        "2026-06",
+        "2026-07",
+        "2026-08"
+      ],
+      "localHealthCount": 15331,
+      "localHealthUpdatedAt": "2026-08-21T17:07:19.288Z",
+      "healthMismatch": false,
+      "localCategories": [],
+      "localComponents": [],
+      "productionComponents": [],
+      "localDeclaredComponents": []
+    },
+    {
+      "id": "ley-19862",
+      "classification": "freshness",
+      "productionCount": 62172,
+      "localCount": 59361,
+      "localCatalogCount": 59361,
+      "productionStatus": "partial",
+      "localStatus": "partial",
+      "productionUpdatedAt": "2026-09-08T13:21:08.102Z",
+      "localGeneratedAt": "2026-08-24T13:52:22.514Z",
+      "productionPeriods": [],
+      "localPeriods": [
+        "2026-01",
+        "2026-02",
+        "2026-03",
+        "2026-04",
+        "2026-05",
+        "2026-06",
+        "2026-07",
+        "2026-08"
+      ],
+      "localHealthCount": 59361,
+      "localHealthUpdatedAt": "2026-08-24T13:52:22.514Z",
+      "healthMismatch": false,
+      "localCategories": [],
+      "localComponents": [],
+      "productionComponents": [],
+      "localDeclaredComponents": []
+    },
+    {
+      "id": "senado",
+      "classification": "scope",
+      "productionCount": 1428,
+      "localCount": 7002,
+      "localCatalogCount": 7002,
+      "productionStatus": "partial",
+      "localStatus": "partial",
+      "productionUpdatedAt": "2026-09-13T18:23:46.817Z",
+      "localGeneratedAt": "2026-08-21T17:07:19.288Z",
+      "productionPeriods": [],
+      "localPeriods": [
+        "2015",
+        "2018",
+        "2024",
+        "2025",
+        "2025-08",
+        "2026",
+        "2026-01",
+        "2026-02",
+        "2026-03",
+        "2026-04",
+        "2026-05",
+        "2026-06",
+        "2026-07"
+      ],
+      "localHealthCount": 7002,
+      "localHealthUpdatedAt": "2026-08-21T17:07:19.288Z",
+      "healthMismatch": false,
+      "localCategories": [
+        "remuneraciones",
+        "asesorias",
+        "gastos",
+        "votaciones"
+      ],
+      "localComponents": [
+        {
+          "id": "gastos_senado",
+          "recordCount": 6521,
+          "categories": [
+            "gastos"
+          ]
+        },
+        {
+          "id": "votaciones_senado",
+          "recordCount": 189,
+          "categories": [
+            "votaciones"
+          ]
+        }
+      ],
+      "productionComponents": [
+        {
+          "id": "votaciones",
+          "sourceId": "votaciones_senado",
+          "label": "Votaciones",
+          "recordCount": 194,
+          "includedInRecordCount": false
+        },
+        {
+          "id": "gastos",
+          "sourceId": "gastos_senado",
+          "label": "Gastos operacionales",
+          "recordCount": 6517,
+          "includedInRecordCount": false
+        }
+      ],
+      "localDeclaredComponents": [
+        {
+          "id": "votaciones",
+          "sourceId": "votaciones_senado",
+          "label": null,
+          "recordCount": 189,
+          "includedInRecordCount": false
+        },
+        {
+          "id": "gastos",
+          "sourceId": "gastos_senado",
+          "label": null,
+          "recordCount": 6521,
+          "includedInRecordCount": false
+        }
+      ]
+    },
+    {
+      "id": "servel",
+      "classification": "match",
+      "productionCount": 23894,
+      "localCount": 23894,
+      "localCatalogCount": 23894,
+      "productionStatus": "partial",
+      "localStatus": "partial",
+      "productionUpdatedAt": "2026-09-13T18:23:46.817Z",
+      "localGeneratedAt": "2026-08-21T17:07:19.288Z",
+      "productionPeriods": [],
+      "localPeriods": [
+        "2025",
+        "2025-11"
+      ],
+      "localHealthCount": 23894,
+      "localHealthUpdatedAt": "2026-08-21T17:07:19.288Z",
+      "healthMismatch": false,
+      "localCategories": [],
+      "localComponents": [],
+      "productionComponents": [],
+      "localDeclaredComponents": []
+    },
+    {
+      "id": "sinim",
+      "classification": "match",
+      "productionCount": 3105,
+      "localCount": 3105,
+      "localCatalogCount": 3105,
+      "productionStatus": "partial",
+      "localStatus": "partial",
+      "productionUpdatedAt": "2026-08-21T03:50:05.194Z",
+      "localGeneratedAt": "2026-08-21T03:50:05.194Z",
+      "productionPeriods": [],
+      "localPeriods": [
+        "2001",
+        "2002",
+        "2003",
+        "2004",
+        "2005",
+        "2006",
+        "2007",
+        "2008",
+        "2009",
+        "2010",
+        "2011",
+        "2012",
+        "2013",
+        "2014",
+        "2015",
+        "2016",
+        "2017",
+        "2018",
+        "2019",
+        "2020",
+        "2021",
+        "2022",
+        "2023",
+        "2024",
+        "2025",
+        "2025-12"
+      ],
+      "localHealthCount": 3105,
+      "localHealthUpdatedAt": "2026-08-21T03:50:05.194Z",
+      "healthMismatch": false,
+      "localCategories": [],
+      "localComponents": [],
+      "productionComponents": [],
+      "localDeclaredComponents": []
+    },
+    {
+      "id": "transparencia-activa",
+      "classification": "freshness",
+      "productionCount": 1226913,
+      "localCount": 1218136,
+      "localCatalogCount": 0,
+      "productionStatus": "partial",
+      "localStatus": "partial",
+      "productionUpdatedAt": "2026-09-02T03:28:30.598Z",
+      "localGeneratedAt": "2026-08-21T03:35:33.587Z",
+      "productionPeriods": [],
+      "localPeriods": [],
+      "localHealthCount": 1218136,
+      "localHealthUpdatedAt": "2026-08-21T03:35:33.587Z",
+      "healthMismatch": false,
+      "localCategories": [],
+      "localComponents": [],
+      "productionComponents": [],
+      "localDeclaredComponents": []
+    },
+    {
+      "id": "votaciones_senado",
+      "classification": "scope",
+      "productionCount": null,
+      "localCount": 189,
+      "localCatalogCount": null,
+      "productionStatus": null,
+      "localStatus": "partial",
+      "productionUpdatedAt": null,
+      "localGeneratedAt": "2026-08-21T17:07:19.288Z",
+      "productionPeriods": [],
+      "localPeriods": [
+        "2026-03",
+        "2026-04",
+        "2026-05",
+        "2026-06",
+        "2026-07",
+        "2026-08"
+      ],
+      "localHealthCount": null,
+      "localHealthUpdatedAt": null,
+      "healthMismatch": false,
+      "localCategories": [
+        "votaciones"
+      ],
+      "localComponents": [],
+      "productionComponents": [],
+      "localDeclaredComponents": []
+    }
+  ],
+  "summary": {
+    "match": 3,
+    "freshness": 5,
+    "scope": 5,
+    "unexplained": 2,
+    "healthMismatch": 2
+  }
+}

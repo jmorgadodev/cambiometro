@@ -391,6 +391,14 @@ La comparación quedó operable sin preparar un archivo remoto manual:
 npm run audit:r2:catalog -- --remote-r2
 ```
 
+La matriz completa de reconciliación producción/local quedó guardada en
+[`2026-09-14-reconciliacion-fuentes.json`](./2026-09-14-reconciliacion-fuentes.json)
+y se puede regenerar sin D1 con:
+
+```bash
+npm run audit:sources -- --output ../docs/auditorias/2026-09-14-reconciliacion-fuentes.json
+```
+
 El modo remoto descarga únicamente `catalog/v1/manifest.json` a un directorio
 temporal, lo compara con `data/lake/catalog/v1/manifest.json` y lo elimina al
 terminar. No consulta D1 ni descarga las particiones de datos.
