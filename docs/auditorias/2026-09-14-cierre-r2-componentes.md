@@ -724,6 +724,18 @@ conjunto explícito de claves referenciadas. Cada grupo queda marcado como
 `referenced`, `unreferenced-by-supplied-set` o `unknown`; sólo el segundo puede
 pasar a una revisión manual de retención.
 
+## Normalización parlamentaria — corrección de identificadores técnicos
+
+La verificación local de Cámara y Senado confirmó 27.793 registros separados
+por categoría: 155 autoridades, 769 votaciones, 22.796 gastos operacionales y
+4.073 filas de personal de apoyo. Las filas de apoyo que no publican un `id`
+oficial reciben un identificador técnico determinista y conservan
+`recordIdOrigin: technical` junto con la fila original. Se corrigió el
+verificador para no marcarlas falsamente como `id_ausente`; no se presenta el
+identificador técnico como si proviniera de la fuente. El control pasó 9/9
+pruebas unitarias y la ejecución real quedó sin observaciones de calidad de
+identidad.
+
 La ejecución contra el inventario remoto y el catálogo vigente encontró 21
 claves referenciadas y mantuvo los tres grupos duplicados como
 `unreferenced-by-supplied-set`. Esto es evidencia suficiente para abrir una

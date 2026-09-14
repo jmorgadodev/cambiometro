@@ -98,9 +98,9 @@ function officialUrls(row, defaultOfficialUrls = []) {
   return [...new Set(candidates.filter((value) => typeof value === "string" && /^https?:\/\//i.test(value)))];
 }
 
-function qualityObservations(sourceId, row, category, categoryEvidence, urls, period) {
+function qualityObservations(sourceId, row, category, categoryEvidence, urls, period, effectiveRecordId) {
   const observations = [];
-  if (!String(row?.id ?? "").trim()) observations.push("id_ausente");
+  if (!String(effectiveRecordId ?? row?.id ?? "").trim()) observations.push("id_ausente");
   if (categoryEvidence === "fallback") observations.push("categoria_inferida_por_fallback");
   if (categoryEvidence === "item") observations.push("categoria_inferida_por_item");
   if ((VOTE_SOURCES.has(sourceId) || EXPENSE_SOURCES.has(sourceId) || sourceId === "personal-apoyo") && !period) {
@@ -126,13 +126,14 @@ export function normalizeLegislativeRecord(sourceId, row, {
   const urls = officialUrls(row, defaultOfficialUrls);
   const person = personOriginal(row);
   const period = String(row?.periodo ?? row?.fecha ?? defaultPeriod ?? "").trim() || null;
-  const qualityObservations = qualityObservationsFor(sourceId, row, category, categoryEvidence, urls, period);
+  const effectiveRecordId = String(recordId ?? row?.id ?? "").trim() || null;
+  const qualityObservations = qualityObservationsFor(sourceId, row, category, categoryEvidence, urls, period, effectiveRecordId);
   return {
     sourceId,
     sourceLabel,
     sourceType: "legislative",
     chamber: legislativeChamber(sourceId),
-    recordId: String(recordId ?? row?.id ?? "").trim() || null,
+    recordId: effectiveRecordId,
     recordIdOrigin: row?.id ? "source" : (recordId ? "technical" : null),
     category,
     categoryEvidence,
@@ -158,8 +159,8 @@ export function normalizeLegislativeRecord(sourceId, row, {
 
 // Kept separate to make the validation rule independently testable and
 // prevent accidental recursion if the observation rules evolve.
-function qualityObservationsFor(sourceId, row, category, categoryEvidence, urls, period) {
-  return qualityObservations(sourceId, row, category, categoryEvidence, urls, period);
+function qualityObservationsFor(sourceId, row, category, categoryEvidence, urls, period, effectiveRecordId) {
+  return qualityObservations(sourceId, row, category, categoryEvidence, urls, period, effectiveRecordId);
 }
 
 export function normalizeLegislativeRelease({ sourceId, sourceLabel = sourceId, rows = [], releaseId = null, checksum = null, publishedAt = null, recordIdForRow = null, metadataForRow = null }) {
