@@ -256,8 +256,8 @@ como cerradas. Esta comprobación posterior es la referencia operativa actual:
 
 | Fuente | Particiones revisadas | Objetos de datos faltantes | Manifiestos faltantes | Estado físico |
 | --- | ---: | ---: | ---: | --- |
-| Votaciones Senado | 7 | 0 | 2026-08, 2026-09 | Incompleto/no promocionable |
-| InfoProbidad | 9 | 0 | 2026-01 a 2026-09 | Incompleto/no promocionable |
+| Votaciones Senado | 7 | 2 | 2026-08, 2026-09 | Incompleto/no promocionable |
+| InfoProbidad | 9 | 9 | 2026-01 a 2026-09 | Incompleto/no promocionable |
 
 La ausencia de los manifiestos no prueba que las filas hayan desaparecido,
 pero sí impide acreditar período, conteo y checksum de cada partición. Por
@@ -265,6 +265,25 @@ ello no se debe declarar ninguna de las dos fuentes como cerrada ni publicar
 un nuevo resumen basado sólo en los objetos que responden. La acción siguiente
 es reconstruir o recuperar los manifiestos desde el release autoritativo, sin
 eliminar los objetos actuales y sin consultar D1.
+
+La inspección del catálogo vigente agregó una comprobación física adicional:
+las claves de registros derivadas del checksum declarado tampoco están
+disponibles para las muestras probadas. En particular:
+
+| Fuente/período | Filas declaradas | Checksum declarado | Clave de registros probada | Resultado |
+| --- | ---: | --- | --- | --- |
+| Votaciones Senado 2026-09 | 5 | `50a8db01…` | `partitions/votaciones_senado/2026/09/records-50a8db01….jsonl.gz` | No existe |
+| InfoProbidad 2026-01 | 352 | `79f4448c…` | `partitions/infoprobidad/2026/01/records-79f4448c….jsonl.gz` | No existe |
+
+Esto refuerza la clasificación **referencia catalogada sin artefacto
+verificable**. No corresponde reconstruir un manifiesto sólo con el conteo y
+el checksum del catálogo, porque seguiría sin probar el contenido real.
+
+El auditor quedó ampliado para realizar esta prueba automáticamente cuando se
+usa `--verify-artifacts`: deriva la clave de proyección esperada desde el
+checksum del catálogo y reporta por separado `missingManifestArtifacts` y
+`presentWithoutManifest`. La derivación es sólo una pista de comprobación y no
+autoriza a tratar el objeto como release válido sin su manifiesto.
 
 ## Validación del contrato normalizado por dominio — 2026-09-14
 

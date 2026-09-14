@@ -1,7 +1,15 @@
 import { describe, expect, it } from "vitest";
-import { auditCatalogClosure, catalogPartitionKeys } from "../scripts/audit-r2-remote-closure.mjs";
+import { auditCatalogClosure, catalogPartitionKeys, catalogProjectionArtifactKey } from "../scripts/audit-r2-remote-closure.mjs";
 
 describe("auditoría de cierre del catálogo R2", () => {
+  it("deriva sólo la clave de proyección de un checksum completo", () => {
+    expect(catalogProjectionArtifactKey({
+      manifestKey: "partitions/infoprobidad/2026/01/manifest.json",
+      checksumSha256: "a".repeat(64),
+    })).toBe(`partitions/infoprobidad/2026/01/records-${"a".repeat(64)}.jsonl.gz`);
+    expect(catalogProjectionArtifactKey({ manifestKey: "partitions/x/manifest.json", checksumSha256: "short" })).toBeNull();
+  });
+
   it("selecciona sólo las particiones de la fuente solicitada", () => {
     const catalog = {
       partitions: [

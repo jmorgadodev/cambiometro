@@ -27,6 +27,18 @@ export function catalogPartitionKeys(catalog, sourceId = null) {
     .filter(Boolean))].sort((left, right) => left.localeCompare(right));
 }
 
+/**
+ * Derives the single-part projection key used by the lake when a partition
+ * manifest is missing but the catalog still carries its projection checksum.
+ * This is only a probe hint: it must never be treated as proof of a release.
+ */
+export function catalogProjectionArtifactKey(partition) {
+  const manifestKey = String(partition?.manifestKey ?? "").trim();
+  const checksum = String(partition?.checksumSha256 ?? "").trim();
+  if (!manifestKey.endsWith("/manifest.json") || !/^[a-f0-9]{64}$/i.test(checksum)) return null;
+  return `${manifestKey.slice(0, -"manifest.json".length)}records-${checksum}.jsonl.gz`;
+}
+
 /** @param {Record<string, unknown>} catalog @param {Map<string, unknown> | Set<string> | Record<string, unknown>} objects @param {string | null} [sourceId] */
 export function auditCatalogClosure(catalog, objects, sourceId = null) {
   const missingManifests = [];
@@ -149,6 +161,21 @@ function run() {
         if (!result.ok) missingArtifacts.push(key);
       }
     }
+    const missingManifestArtifacts = [];
+    const presentWithoutManifest = [];
+    if (verifyArtifacts) {
+      const partitions = Array.isArray(catalogResult.value?.partitions) ? catalogResult.value.partitions : [];
+      for (const [index, partition] of partitions.entries()) {
+        if (sourceId && String(partition?.sourceId ?? "") !== sourceId) continue;
+        const manifestKey = String(partition?.manifestKey ?? "").trim();
+        if (!manifestKey || objects.has(manifestKey)) continue;
+        const artifactKey = catalogProjectionArtifactKey(partition);
+        if (!artifactKey) continue;
+        const result = wranglerGet(bucket, artifactKey, join(temp, `missing-manifest-artifact-${index}.bin`));
+        if (result.ok) presentWithoutManifest.push({ manifestKey, artifactKey });
+        else missingManifestArtifacts.push({ manifestKey, artifactKey });
+      }
+    }
     const closure = auditCatalogClosure(catalogResult.value, objects, sourceId);
     const result = {
       schemaVersion: 1,
@@ -160,6 +187,8 @@ function run() {
       artifactCheck: verifyArtifacts ? "physical_get" : inventoryAvailable ? "storage_inventory" : "not_available",
       checkedManifests: closure.checkedManifests,
       missingArtifacts: verifyArtifacts ? missingArtifacts : [],
+      missingManifestArtifacts,
+      presentWithoutManifest,
       missingArtifactInventory,
       // A failed manifest download is authoritative even when a stale inventory
       // happens to contain its key.
