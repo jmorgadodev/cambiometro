@@ -25,6 +25,17 @@ describe("prefiltro acotado de nóminas CPLT", () => {
     expect(fullParse).toBe(-1);
   });
 
+  it("decide la promoción antes de reemplazar la proyección existente", () => {
+    const source = readFileSync(new URL("../stream-remote-personal.mjs", import.meta.url), "utf8");
+    const promotionImport = source.indexOf('from "./source-promotion-gate.mjs"');
+    const promotionCall = source.indexOf("evaluateSourcePromotion({");
+    const replacement = source.indexOf("record.tipo_contrato !== tipo");
+
+    expect(promotionImport).toBeGreaterThan(-1);
+    expect(promotionCall).toBeGreaterThan(-1);
+    expect(promotionCall).toBeLessThan(replacement);
+  });
+
   it("conserva una remuneración central de planta con sus campos oficiales", () => {
     const header = parseCpltHeader("nombres;paterno;materno;anyo;mes;organismo_nombre;tipo cargo;tipo estamento;remuneracionbruta_mensual;tipo_calificacionp");
     const line = "Valentina;Latorre;Rincon;2026;Julio;Presidencia;Director/a Regional;Directivo;5676763;Profesor/a de Educación General Básica";

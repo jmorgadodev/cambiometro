@@ -16,16 +16,18 @@
       de calidad del informe productivo.
 - [~] N2: contrato normalizado por dominio Cámara/Senado/Movimientos y guardia
       de releases implementados; el resumen queda registrado en los reportes
-      del ETL sin duplicar el release crudo. Queda pendiente la promoción tras
-      reconciliar sus particiones consultables.
-- [~] N3: historial acotado de remuneraciones construido desde índices R2 y
-      protegido contra consultas amplias; falta validarlo con organismos y
-      conectarlo a la presentación pública.
+      del ETL sin duplicar el release crudo. La compuerta también quedó
+      conectada a las cuatro categorías del stream CPLT antes de reemplazar
+      proyecciones; queda pendiente la promoción tras reconciliar particiones.
+- [~] N3: historial acotado de remuneraciones construido desde índices R2,
+      protegido contra consultas amplias y conectado a la ficha de persona
+      bajo demanda; falta validarlo con organismos y smoke productivo.
 - [~] N4: guardia de crecimiento R2 y conservación de la versión de rollback
       activos; queda pendiente registrar tamaño comprimido proyectado por cada
       nuevo release.
-- [~] N5: compuerta de promoción por fuente y rollback lógico implementados;
-      queda ejecutar los smoke productivos por bloque antes de publicar.
+- [~] N5: compuerta de promoción por fuente y rollback lógico implementados
+      para ETL general, Movimientos y stream CPLT; queda ejecutar los smoke
+      productivos por bloque antes de publicar.
 
 ### Decisión de almacenamiento
 

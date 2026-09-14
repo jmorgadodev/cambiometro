@@ -13,4 +13,16 @@ describe("resumen mensual de Transparencia Activa", () => {
     expect(summary).not.toContain("TransparencyMonthlyChart");
     expect(summary).not.toContain("Ver detalle mensual de los últimos 12 cortes");
   });
+
+  it("conecta el historial R2 sólo dentro de la ficha de una persona", () => {
+    const explorer = readFileSync(resolve(import.meta.dirname, "../components/remuneraciones/RemuneracionesUnifiedExplorer.tsx"), "utf8");
+    const historyPanel = readFileSync(resolve(import.meta.dirname, "../components/remuneraciones/R2RemunerationHistoryPanel.tsx"), "utf8");
+
+    expect(explorer).toContain("<R2RemunerationHistoryPanel");
+    expect(explorer).toContain('sourceIds.has("transparencia-activa")');
+    expect(historyPanel).toContain("/api/v1/remuneraciones/history?q=");
+    expect(historyPanel).toContain("entradas observadas");
+    expect(historyPanel).toContain("ausencias observadas");
+    expect(historyPanel).toContain("cambios de monto");
+  });
 });

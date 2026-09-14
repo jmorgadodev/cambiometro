@@ -119,6 +119,9 @@ La rama incorpora un contrato local, aún sin conexión al publicador:
   checksum, paginación y ausencia de lecturas masivas D1. Un release vacío,
   fallido o con caída anómala conserva el anterior; una fuente parcial queda
   en espera hasta una reconciliación explícita.
+- El stream CPLT aplica la misma compuerta antes de eliminar o reemplazar la
+  categoría anterior. Si la validación falla, la proyección existente no se
+  modifica.
 - El registro original se conserva por referencia y nunca se reemplaza.
 - `0`, `null`, “no informado” y valor inválido quedan en estados distintos.
 - No se fusionan personas por nombre ni se corrigen releases fallidos.
@@ -132,3 +135,6 @@ Antes de conectar estos normalizadores al ETL o promover cambios:
 3. validar una persona y un organismo desde índices R2;
 4. medir tamaño comprimido y margen de R2;
 5. ejecutar pruebas y preview por fuente.
+
+El historial de una persona se consulta bajo demanda desde el índice R2; la
+interfaz no lo solicita al cargar la página ni lo resuelve mediante D1.

@@ -1,6 +1,7 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
+import R2RemunerationHistoryPanel from "./R2RemunerationHistoryPanel";
 import TransparencyActivaSummary from "./TransparencyActivaSummary";
 
 type SourceStatus = "complete" | "partial" | "aggregate_only" | "unavailable";
@@ -308,6 +309,7 @@ export default function RemuneracionesUnifiedExplorer() {
                        {publishedNames.length > 1 && <> La fuente publicó variantes del nombre: {publishedNames.join(" / ")}.</>}
                      </p>
                      <div className="remuneration-person-result__table"><table className="data-table"><thead><tr><th>Fuente</th><th>Organismo</th><th>Cargo</th><th>Mes</th><th>Monto</th></tr></thead><tbody>{group.map((row) => <tr key={row.recordId}><td><strong>{row.sourceLabel}</strong><small>{recordDescription(row)}</small></td><td>{row.organismoOriginal}</td><td>{row.cargoOriginal}</td><td>{row.periodo ?? "No informado"}</td><td>{displayAmount(row.montoBruto)}</td></tr>)}</tbody></table></div>
+                     {sourceIds.has("transparencia-activa") && <R2RemunerationHistoryPanel name={primaryRow.nombreOriginal} />}
                    </div>
                  </details>;
                })}

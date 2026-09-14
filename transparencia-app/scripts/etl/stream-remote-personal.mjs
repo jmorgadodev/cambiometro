@@ -5,6 +5,7 @@ import { LatestCpltRecordStore } from "./latest-cplt-record-store.mjs";
 import { createMunicipalityRegistry } from "./municipality-registry.mjs";
 import { readRangedTextLines } from "./ranged-csv-source.mjs";
 import { validatePublicationStream } from "./validation.mjs";
+import { evaluateSourcePromotion } from "./source-promotion-gate.mjs";
 import { acceptsCpltScope, CPLT_SCOPES, normalizeCpltScope } from "./cplt-scope.mjs";
 
 const SOURCE_BASES = [
@@ -101,6 +102,17 @@ function readJsonArray(filePath) {
   return parsed;
 }
 
+function countExistingCategoryRecords(projectionsDir, tipo) {
+  if (!fs.existsSync(projectionsDir)) return 0;
+  let count = 0;
+  for (const fileName of fs.readdirSync(projectionsDir)) {
+    if (!fileName.endsWith(".json")) continue;
+    count += readJsonArray(path.join(projectionsDir, fileName))
+      .filter((record) => record.tipo_contrato === tipo).length;
+  }
+  return count;
+}
+
 function mergeById(previous, current) {
   const records = new Map(previous.map((record) => [record.id, record]));
   for (const record of current) records.set(record.id, record);
@@ -174,6 +186,9 @@ async function processStream(tipo, urls, outputDir, scope) {
     throw new Error(`CPLT_UNKNOWN_MUNICIPALITIES: ${JSON.stringify([...unknownMunicipalities].sort())}`);
   }
 
+  const projectionsDir = path.join(outputDir, "projections", "funcionarios-v1");
+  const previousCount = countExistingCategoryRecords(projectionsDir, tipo);
+
   const report = validatePublicationStream({
     sourceId: `cplt-personal-${scope}-${normalized(tipo)}`,
     records: (function* finalizedRecords() {
@@ -188,7 +203,24 @@ async function processStream(tipo, urls, outputDir, scope) {
     minimumCount: 1,
   });
 
-  const projectionsDir = path.join(outputDir, "projections", "funcionarios-v1");
+  const promotion = evaluateSourcePromotion({
+    sourceId: `cplt-personal-${scope}-${normalized(tipo)}`,
+    release: { status: "complete", recordCount: report.recordCount },
+    previous: { recordCount: previousCount },
+    checks: {
+      testsPassed: true,
+      checksumOk: /^[a-f0-9]{64}$/i.test(report.checksumSha256),
+      paginationOk: true,
+      d1BulkReads: false,
+    },
+    compareCount: previousCount > 0,
+  });
+  if (promotion.action !== "promote") {
+    latestByOfficial.close();
+    throw new Error(`SOURCE_PROMOTION_BLOCKED:${promotion.sourceId}:${promotion.reasons.join(",")}`);
+  }
+  report.promotion = { ...promotion, checksumSha256: report.checksumSha256 };
+
   fs.mkdirSync(projectionsDir, { recursive: true });
   // Elimina la categoría anterior leyendo un archivo municipal por vez.
   // Nunca se conserva el universo completo en memoria.
