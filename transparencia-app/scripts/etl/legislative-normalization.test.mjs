@@ -43,6 +43,22 @@ describe("normalización separada de Cámara y Senado", () => {
     expect(support.category).not.toBe(expense.category);
   });
 
+  it("recorre el formato del Senado y conserva su cámara", () => {
+    const normalized = normalizeLegislativeRecord("personal-apoyo-senado", {
+      nombre: "ANTONIA",
+      apellido_paterno: "AMUNATEGUI",
+      apellido_materno: "BLANCO",
+      cargo: "ASESORIA LEGISLATIVA Y PARLAMENTARIA",
+      monto: 2062000,
+      periodo: "2026-07",
+      url: "https://web-back.senado.cl/api/transparency/senator-assignments/support-staff",
+    }, { recordId: "support-senado-1" });
+    expect(normalized.chamber).toBe("senado");
+    expect(normalized.category).toBe("personal_apoyo");
+    expect(normalized.personOriginal).toBe("ANTONIA AMUNATEGUI BLANCO");
+    expect(normalized.montoClp).toBe(2062000);
+  });
+
   it("usa sueldo y metadatos del release cuando la fila no repite monto ni URL", () => {
     const normalized = normalizeLegislativeRecord("personal-apoyo", {
       nombre: "Ana Pérez",

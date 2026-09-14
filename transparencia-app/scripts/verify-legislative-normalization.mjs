@@ -42,12 +42,22 @@ for (const person of Object.values(support.diputados ?? {})) {
     });
   }
 }
-const supportIdForRow = (row, index) => {
+const supportIdForRow = (prefix) => (row, index) => {
   if (row?.id) return row.id;
-  const source = [row?.nombre, row?.cargo, row?.sueldo, row?.cese, index].map((value) => String(value ?? "").trim()).join("|");
-  return `personal-apoyo-${createHash("sha256").update(source).digest("hex").slice(0, 16)}`;
+  const source = [row?.nombre, row?.apellido_paterno, row?.apellido_materno, row?.cargo, row?.sueldo, row?.monto, row?.periodo, row?.cese, index].map((value) => String(value ?? "").trim()).join("|");
+  return `${prefix}-${createHash("sha256").update(source).digest("hex").slice(0, 16)}`;
 };
-add("personal-apoyo", "Cámara · personal de apoyo y asesorías externas", diputados, support.asignacion_senado_2026?.checksum_sha256 ?? null, supportIdForRow, (_row, index) => supportMetadata[index]);
+add("personal-apoyo", "Cámara · personal de apoyo y asesorías externas", diputados, support.asignacion_senado_2026?.checksum_sha256 ?? null, supportIdForRow("personal-apoyo"), (_row, index) => supportMetadata[index]);
+
+const senadores = Object.values(support.senadores ?? {}).flat();
+add(
+  "personal-apoyo-senado",
+  "Senado · personal de apoyo parlamentario",
+  senadores,
+  support.asignacion_senado_2026?.checksum_sha256 ?? null,
+  supportIdForRow("personal-apoyo-senado"),
+  () => ({ defaultOfficialUrls: [support.fuentes?.senado?.url].filter(Boolean) }),
+);
 
 console.log(JSON.stringify({
   ok: true,

@@ -71,7 +71,7 @@ function inferCategory(sourceId, row) {
   ].filter(Boolean).join(" "));
 
   if (VOTE_SOURCES.has(source)) return { category: "votaciones", evidence: "source_id" };
-  if (source === "personal-apoyo") return { category: "personal_apoyo", evidence: "source_id" };
+  if (source.startsWith("personal-apoyo")) return { category: "personal_apoyo", evidence: "source_id" };
   if (EXPENSE_SOURCES.has(source)) {
     if (/asesor|asesoria|consultor/.test(text)) return { category: "asesorias", evidence: "item" };
     return { category: "gastos_operacionales", evidence: "source_id" };
@@ -85,7 +85,8 @@ function inferCategory(sourceId, row) {
 }
 
 function personOriginal(row) {
-  if (typeof row?.nombre === "string") return row.nombre;
+  const composed = [row?.nombre, row?.apellido_paterno, row?.apellido_materno].filter((value) => typeof value === "string" && value.trim()).join(" ");
+  if (composed) return composed;
   if (typeof row?.person === "string") return row.person;
   if (typeof row?.name === "string") return row.name;
   if (typeof row?.diputado === "string") return row.diputado;

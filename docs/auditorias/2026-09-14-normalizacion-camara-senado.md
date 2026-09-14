@@ -20,8 +20,9 @@ siendo la referencia para frescura.
 | `gastos_camara` | Cámara | 16.275 | Gastos operacionales | 2026-03 a 2026-07 |
 | `gastos_senado` | Senado | 6.521 | Gastos operacionales | 2026-01 a 2026-05 |
 | `personal-apoyo` | Cámara | 1.084 | Personal de apoyo | 2026-07 |
+| `personal-apoyo-senado` | Senado | 2.989 | Personal de apoyo | 2026-01 a 2026-07 |
 
-Total auditado: **24.804 registros**.
+Total auditado: **27.793 registros**.
 
 No se detectaron filas explícitas de asesorías en el snapshot. La regla sólo
 clasifica como `asesorias` una fila que lo declara en su categoría, tipo o ítem;
@@ -29,7 +30,7 @@ no convierte gastos ni personal de apoyo en asesorías por inferencia.
 
 ## Observaciones de calidad
 
-- Las 1.084 filas de personal de apoyo no traen `id` propio. El auditor genera
+- Las 4.073 filas de personal de apoyo no traen `id` propio. El auditor genera
   un identificador técnico determinista sólo para validación; conserva la fila
   original sin agregarle ni cambiarle campos.
 - En esas filas, el período, sueldo y URL se obtienen del contexto oficial del
@@ -38,6 +39,17 @@ no convierte gastos ni personal de apoyo en asesorías por inferencia.
   gastos y URL oficial en todas las filas auditadas.
 - Cada fila recibe exactamente una categoría, por lo que votaciones, gastos,
   asesorías y personal de apoyo no se suman entre sí.
+
+## Producción frente a local
+
+La consulta acotada a producción para `source=personal-apoyo` respondió HTTP
+200, pero con `sourceStatus=temporarily-unavailable`, `sourceBackend=none` y
+`total=0`. Ese cero **no se considera un conteo de fuente**: el último snapshot
+local conserva 1.084 filas de Cámara y 2.989 de Senado, que deben mantenerse
+hasta que el release productivo vuelva a responder y pueda reconciliarse.
+
+La regla de promoción es conservar el último release válido ante una respuesta
+vacía o temporalmente indisponible.
 
 ## Verificación reproducible
 
