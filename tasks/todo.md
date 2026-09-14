@@ -93,6 +93,9 @@
   filas en 169 páginas, 102 comprobaciones de smoke estático verdes.
 - [ ] Ejecutar build y smoke de producción con el lago completo de Ley 19.862;
   el modo de muestra local no sustituye ese release.
+- [x] Ejecutar smoke integral de la base actualmente publicada: 132/132
+  comprobaciones verdes; Movimientos 82 registros y checksum válido. Esto no
+  sustituye el smoke del nuevo código de remuneraciones tras su promoción.
 
 ### Evidencia de cierre — 2026-09-13
 

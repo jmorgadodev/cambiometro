@@ -182,3 +182,16 @@ usó explícitamente 1.000 filas de muestra y el verificador global la rechaza
 como corresponde. El smoke del export estático sí pasó 102 comprobaciones,
 incluyendo rutas de municipalidades, menú, vista móvil y ausencia de errores
 de consola. No hubo cambios pendientes en Git después de la prueba.
+
+### Smoke productivo de invariantes — 2026-09-14 12:38 UTC-3
+
+La verificación integral de producción (`verify-prod-full`) pasó 132/132
+comprobaciones. Confirmó R2 como origen público, gastos de Cámara/Senado,
+municipalidades, votaciones, ChileCompra, InfoLobby, transferencias y las
+compuertas de rendimiento sin errores 1102. El smoke específico de Movimientos
+también pasó: 82 registros, checksum SHA-256 presente, cuatro fuentes oficiales
+disponibles y estados `en_confirmacion` preservados.
+
+Este resultado valida la base actualmente publicada, no la rama de cambios de
+remuneraciones: la nueva vista aún no se ha promovido y la ruta de historial
+R2 de remuneraciones sigue pendiente de smoke posterior al despliegue.
