@@ -91,6 +91,7 @@
     "data:inventory": "node scripts/inventory-sources.mjs",
     "audit:sources": "node scripts/audit-source-reconciliation.mjs",
     "data:health": "node scripts/build-source-health.mjs",
+    "audit:r2:catalog": "node scripts/audit-r2-catalog.mjs",
     "data:communes:update": "node scripts/update-commune-catalog.mjs",
     "data:communes:check": "node scripts/update-commune-catalog.mjs --check",
     "ingest:dipres": "node scripts/ingest-dipres.mjs",
