@@ -148,8 +148,8 @@ jobs:
           npm run data:hydrate:cplt-static -- --required --pages-only
           npm run data:hydrate:static -- --required --required-all
           npm run check:static-input-fallback
-          npm run data:hydrate:ley19862
-          npm run data:lake:projection:ley19862
+          # UI-only builds use the separately verified transfer API release
+          # below; they do not hydrate or rebuild the historical ETL lake.
 
       - name: Verificar calidad semántica de entradas estáticas
         working-directory: transparencia-app

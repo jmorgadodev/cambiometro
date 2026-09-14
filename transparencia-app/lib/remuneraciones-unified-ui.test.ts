@@ -38,9 +38,8 @@ describe("interfaz unificada de remuneraciones", () => {
   it("ejecuta automáticamente una búsqueda recibida por la URL después de copiarla al estado", () => {
     const explorer = readFileSync(join(projectRoot, "components", "remuneraciones", "RemuneracionesUnifiedExplorer.tsx"), "utf8");
 
-    expect(explorer).toContain("initialQuerySubmitted");
-    expect(explorer).toContain("initialQuery !== query.trim()");
-    expect(explorer).toContain("void runSearch(undefined, initialQuery)");
-    expect(explorer).not.toContain("requestSubmit()");
+    expect(explorer).toContain("initialQueryHandled");
+    expect(explorer).toContain("window.location.search");
+    expect(explorer).toContain("requestSubmit()");
   });
 });

@@ -129,8 +129,19 @@ const expenseManifest = {
 };
 await writeFile(join(expenseDir, "manifest.json"), `${JSON.stringify(expenseManifest, null, 2)}\n`);
 
+// A UI-only build receives the already verified, paginated transfer release
+// from R2. It must not require the historical lake partitions as a side
+// effect: those partitions are ETL inputs, while the canonical manifest is the
+// public release used by Pages. Data-refresh builds still require the complete
+// lake below when no canonical manifest was supplied.
+const canonicalManifestFile = process.env.TRANSFER_STATIC_CANONICAL_MANIFEST_FILE
+  ? resolve(process.env.TRANSFER_STATIC_CANONICAL_MANIFEST_FILE)
+  : null;
+const canonicalManifest = canonicalManifestFile && existsSync(canonicalManifestFile)
+  ? JSON.parse(readFileSync(canonicalManifestFile, "utf8"))
+  : null;
 const fullSource = join(root, "data", "lake", "partitions", "ley-19862");
-if (!existsSync(fullSource) && !allowSample) {
+if (!existsSync(fullSource) && !canonicalManifest && !allowSample) {
   throw new Error("STATIC_DATA_FULL_TRANSFER_SOURCE_MISSING: hydrate the complete Ley 19.862 lake before building Pages");
 }
 const pinnedSummary = await readJson("data/lake/projections/v1/ley19862-summary.json");
@@ -142,12 +153,6 @@ const registeredThrough = process.env.TRANSFER_RELEASE_REGISTERED_THROUGH
 // Pages publish fewer rows than the API release built from the same source.
 // When no explicit cutoff is supplied, both publishers derive metadata from
 // the complete hydrated lake without excluding newer official records.
-const canonicalManifestFile = process.env.TRANSFER_STATIC_CANONICAL_MANIFEST_FILE
-  ? resolve(process.env.TRANSFER_STATIC_CANONICAL_MANIFEST_FILE)
-  : null;
-const canonicalManifest = canonicalManifestFile && existsSync(canonicalManifestFile)
-  ? JSON.parse(readFileSync(canonicalManifestFile, "utf8"))
-  : null;
 const fullRelease = canonicalManifest
   ? { manifest: canonicalManifest, summary: JSON.parse(readFileSync(join(transferDir, "summary.json"), "utf8")) }
   : existsSync(fullSource)

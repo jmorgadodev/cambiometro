@@ -33,6 +33,9 @@ describe("separación de workflows Pages", () => {
     expect(uiRefresh).toContain('".ci-data-version/transfer-api-manifest.json"');
     expect(uiRefresh).toContain("name: Hidratar release API canónico de transferencias para Pages");
     expect(uiRefresh).toContain("scripts/hydrate-transfer-api-release.mjs");
+    expect(uiRefresh).toContain("UI-only builds use the separately verified transfer API release");
+    expect(uiRefresh).not.toContain("npm run data:hydrate:ley19862");
+    expect(uiRefresh).not.toContain("npm run data:lake:projection:ley19862");
     expect(uiRefresh).toContain("TRANSFER_STATIC_CANONICAL_MANIFEST_FILE=");
     expect(uiRefresh).toContain("id: transfer-release-cache");
     expect(uiRefresh).toContain("pages-ui-transfer-release-v1-");
