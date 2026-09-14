@@ -480,10 +480,11 @@ La promoción `ui-only` de Pages se ejecutó sobre un branch basado en `main`
 inicial de la home. Las pruebas locales pasaron, pero el workflow productivo se
 detuvo antes del build al hidratar las particiones de `ley-19862`.
 
-El catálogo remoto referencia los manifiestos de enero, febrero, marzo y abril
-de 2026, pero R2 responde `The specified key does not exist` para esas cuatro
-claves. Los cuatro manifiestos y sus artefactos todavía existen localmente y
-sus checksums coinciden con los nombres esperados; no se publicó ninguna
+El catálogo remoto referencia los manifiestos de enero a agosto de 2026, pero
+R2 responde `The specified key does not exist` para esas ocho claves y para los
+artefactos derivados que el catálogo permite comprobar. Los ocho manifiestos y
+sus artefactos todavía existen localmente y sus checksums coinciden con los
+nombres esperados; no se publicó ninguna
 reparación porque el token de auditoría es de sólo lectura. Producción conserva
 la versión anterior, sin cambio parcial.
 
