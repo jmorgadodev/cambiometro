@@ -58,6 +58,31 @@ describe("publicación caliente en R2", () => {
     ]);
   });
 
+  it("conserva todas las particiones que el catálogo todavía referencia", () => {
+    const catalog = asset("catalog/v1/manifest.json");
+    catalog.data = Buffer.from(JSON.stringify({
+      partitions: [
+        { manifestKey: "partitions/votaciones_senado/2026/07/manifest.json" },
+        { manifestKey: "partitions/votaciones_senado/2026/09/manifest.json" },
+      ],
+    }));
+    const hot = selectHotAssets([
+      catalog,
+      asset("partitions/votaciones_senado/2026/07/manifest.json"),
+      asset("partitions/votaciones_senado/2026/07/records.jsonl.gz"),
+      asset("partitions/votaciones_senado/2026/09/manifest.json"),
+      asset("partitions/votaciones_senado/2026/09/records.jsonl.gz"),
+    ]);
+
+    expect(hot.map((item: { key: string }) => item.key)).toEqual([
+      "catalog/v1/manifest.json",
+      "partitions/votaciones_senado/2026/07/manifest.json",
+      "partitions/votaciones_senado/2026/07/records.jsonl.gz",
+      "partitions/votaciones_senado/2026/09/manifest.json",
+      "partitions/votaciones_senado/2026/09/records.jsonl.gz",
+    ]);
+  });
+
   it("elimina objetos fríos administrados y bloquea crecimiento desde 90 %", () => {
     const plan = planR2Publication([asset("catalog/v1/manifest.json", 81)], {
       objects: [{ key: "partitions/old/2020/01/records.jsonl.gz", size: 80, checksumSha256: "old" }],

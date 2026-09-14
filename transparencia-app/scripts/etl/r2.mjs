@@ -28,7 +28,13 @@ function catalogLatestPrefixes(assets) {
   if (!catalogAsset?.data) return latestPrefixes(assets);
   try {
     const catalog = JSON.parse(Buffer.from(catalogAsset.data).toString("utf8"));
-    return latestPrefixes((catalog.partitions ?? []).map((partition) => ({ key: `${partition.manifestKey ?? `partitions/${partition.sourceId}/${partition.period.replace("-", "/")}/manifest.json`}` })));
+    const prefixes = new Set();
+    for (const partition of catalog.partitions ?? []) {
+      const key = String(partition.manifestKey ?? "");
+      const match = key.match(/^(partitions\/[^/]+\/(?:[^/]+\/)?\d{4}\/\d{2}\/)/);
+      if (match) prefixes.add(match[1]);
+    }
+    return prefixes.size > 0 ? prefixes : latestPrefixes(assets);
   } catch {
     return latestPrefixes(assets);
   }
@@ -77,7 +83,11 @@ export function assertR2CatalogClosure(assets, inventory) {
 }
 
 export function selectHotAssets(assets) {
-  const prefixes = latestPrefixes(assets);
+  // El catálogo es la fuente de verdad del histórico: si una partición sigue
+  // referenciada, sus objetos deben permanecer publicables aunque no sea la
+  // última del período. La última partición se conserva como fallback cuando
+  // se trabaja con un catálogo antiguo sin datos legibles.
+  const prefixes = new Set([...latestPrefixes(assets), ...catalogLatestPrefixes(assets)]);
   return assets.filter((asset) => asset.key.startsWith("catalog/")
     || asset.key.startsWith("sources/")
     || asset.key.startsWith("entities/")
