@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdtempSync, readFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
-import { spawnSync } from "node:child_process";
+import { spawn, spawnSync } from "node:child_process";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
 import { planR2Publication } from "./etl/r2.mjs";
 import { readJsonIfPresent, writeFileAtomic } from "./etl/safe-file.mjs";
@@ -32,6 +32,39 @@ function wranglerWithRetry(args, retries = 3) {
   }
 }
 
+function spawnCommand(binary, args) {
+  return new Promise((resolve, reject) => {
+    const child = spawn(binary, args, { stdio: "inherit" });
+    child.once("error", reject);
+    child.once("close", (status) => resolve({ status: status ?? 1 }));
+  });
+}
+
+async function wranglerWithRetryAsync(args, retries = 3) {
+  let attempt = 0;
+  while (attempt < retries) {
+    attempt += 1;
+    const result = await spawnCommand(process.execPath, [resolve("node_modules/wrangler/bin/wrangler.js"), ...args, "--remote"]);
+    if (result.status === 0) return;
+    if (attempt === retries) {
+      throw new Error(`wrangler ${args.join(" ")} fallo tras ${retries} intentos: codigo ${result.status}`);
+    }
+    await new Promise((resolveDelay) => setTimeout(resolveDelay, attempt * 3000));
+  }
+}
+
+async function runConcurrent(items, worker, concurrency) {
+  let cursor = 0;
+  const consume = async () => {
+    while (cursor < items.length) {
+      const index = cursor;
+      cursor += 1;
+      await worker(items[index], index);
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, consume));
+}
+
 function verifyAsset(outputRoot, metadata) {
   const filePath = join(outputRoot, metadata.key);
   if (!existsSync(filePath)) throw new Error(`PUBLICATION_MISSING_ASSET: ${metadata.key}`);
@@ -55,6 +88,7 @@ const publishReleases = process.argv.includes("--releases");
 const publishR2 = process.argv.includes("--r2");
 const releaseManifestsOnly = process.argv.includes("--release-manifests-only");
 const allowLocalAuth = process.argv.includes("--local-auth") && !process.env.CI;
+const r2PublishConcurrency = Math.min(12, Math.max(1, Number.parseInt(process.env.R2_PUBLISH_CONCURRENCY ?? "8", 10)));
 if (!publishReleases && !publishR2) throw new Error("Indica --releases, --r2 o ambos");
 
 const planPath = join(outputRoot, "publish-plan.json");
@@ -175,16 +209,15 @@ if (publishR2) {
 
   // Sólo se eliminan particiones frías o versiones históricas no activas.
   // Liberarlas antes de subir evita superar transitoriamente la cuota R2.
-  for (const key of r2Plan.deletes) wranglerWithRetry(["r2", "object", "delete", `${bucket}/${key}`]);
-  for (const asset of r2Plan.puts.filter((item) => !activationManifests.includes(item))) {
-    wranglerWithRetry(["r2", "object", "put", `${bucket}/${asset.key}`, "--file", join(outputRoot, asset.key)]);
-  }
+  await runConcurrent(r2Plan.deletes, (key) => wranglerWithRetryAsync(["r2", "object", "delete", `${bucket}/${key}`]), r2PublishConcurrency);
+  const dataPuts = r2Plan.puts.filter((item) => !activationManifests.includes(item));
+  await runConcurrent(dataPuts, (asset) => wranglerWithRetryAsync(["r2", "object", "put", `${bucket}/${asset.key}`, "--file", join(outputRoot, asset.key)]), r2PublishConcurrency);
   for (const manifest of activationManifests) {
-    wranglerWithRetry(["r2", "object", "put", `${bucket}/${manifest.key}`, "--file", join(outputRoot, manifest.key), "--content-type", "application/json"]);
+    await wranglerWithRetryAsync(["r2", "object", "put", `${bucket}/${manifest.key}`, "--file", join(outputRoot, manifest.key), "--content-type", "application/json"]);
   }
 
   writeFileAtomic(inventoryPath, `${JSON.stringify(r2Plan.inventory, null, 2)}\n`, "utf8");
-  wranglerWithRetry(["r2", "object", "put", `${bucket}/${inventoryKey}`, "--file", inventoryPath, "--content-type", "application/json"]);
+  await wranglerWithRetryAsync(["r2", "object", "put", `${bucket}/${inventoryKey}`, "--file", inventoryPath, "--content-type", "application/json"]);
   console.log(JSON.stringify({
     action: r2Plan.action,
     usedBytes: r2Plan.projectedBytes,

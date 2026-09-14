@@ -5,12 +5,14 @@ import { planR2Publication, selectHotAssets } from "../scripts/etl/r2.mjs";
 
 const asset = (key: string, size = 10, checksumSha256 = key) => ({ key, size, checksumSha256, data: Buffer.alloc(size), releaseTag: "x", releaseAssetName: key });
 
-it("no permite reemplazar assets de una Release inmutable", () => {
-  const publisher = readFileSync(resolve("scripts/publish-data-lake.mjs"), "utf8");
-  expect(publisher).not.toContain('"--clobber"');
-  expect(publisher).toContain("IMMUTABLE_RELEASE_CONFLICT");
-  expect(publisher.indexOf("for (const key of r2Plan.deletes)")).toBeLessThan(publisher.indexOf("for (const asset of r2Plan.puts"));
-});
+  it("no permite reemplazar assets de una Release inmutable", () => {
+    const publisher = readFileSync(resolve("scripts/publish-data-lake.mjs"), "utf8");
+    expect(publisher).not.toContain('"--clobber"');
+    expect(publisher).toContain("IMMUTABLE_RELEASE_CONFLICT");
+    expect(publisher.indexOf("await runConcurrent(r2Plan.deletes")).toBeLessThan(publisher.indexOf("const dataPuts"));
+    expect(publisher).toContain("runConcurrent");
+    expect(publisher).toContain("R2_PUBLISH_CONCURRENCY");
+  });
 
 describe("publicación caliente en R2", () => {
   it("conserva catálogo y sólo la partición más reciente de cada fuente", () => {
