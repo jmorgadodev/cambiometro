@@ -358,3 +358,23 @@ los datos auditados se observa:
 Julio no se elimina ni se transforma en cero: mantiene sus filas, altas,
 bajas y cambios de monto, pero queda advertido como un cambio de alcance o
 una publicación excepcional que debe confirmarse en la fuente oficial.
+
+## Reconciliación Cámara y Senado: remoto contra local — 2026-09-14
+
+Se comparó el catálogo remoto descargado en lectura con el catálogo local,
+sin sustituir ninguno. La diferencia debe interpretarse por componente y
+período:
+
+| Componente | Producción | Local | Clasificación | Lectura |
+| --- | ---: | ---: | --- | --- |
+| Cámara, total catalogado | 58.751 | 2.750 | alcance | Producción suma asistencia, votaciones y el componente parlamentario; local conserva sólo el subconjunto base. |
+| Gastos Cámara | 16.275 | 16.275 | coincide | Conteo y períodos coinciden. |
+| Gastos Senado | 6.517 | 6.521 | frescura/conteo | Misma cobertura temporal; diferencia acotada de 4 filas. |
+| Senado, total catalogado | 1.428 | 7.002 | frescura/conteo | El local conserva más meses históricos; producción expone un subconjunto distinto. |
+| Votaciones Senado | 194 | 189 | frescura/conteo | Producción agrega septiembre de 2026 con 5 registros. |
+
+Conclusión: no se debe copiar el catálogo local sobre producción. El bloque
+pendiente es separar explícitamente las variantes de Cámara y recuperar o
+reconstruir los manifiestos productivos ausentes de Senado sin borrar la
+historia local. Los conteos de gastos no requieren una corrección de alcance
+inmediata; Senado votaciones sí requiere un ciclo incremental por fuente.
