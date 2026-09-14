@@ -485,3 +485,17 @@ Para reanudar la promoción se necesita una reparación explícita y reversible 
 esas referencias R2 con un token de escritura autorizado, seguida de una nueva
 ejecución completa de `pages-ui-refresh`. No se debe omitir la hidratación ni
 usar snapshots locales para reemplazar datos productivos.
+
+Se agregó un planificador local no mutante para preparar esa reparación:
+
+```bash
+npm run audit:r2:repair-plan -- --source ley-19862
+```
+
+El resultado actual verifica las 8 particiones locales, 16 objetos entre
+manifiestos y artefactos, 5.104.859 bytes y cero faltantes o discrepancias de
+checksum. El plan declara `writesPerformed: false`; no llama a Wrangler ni
+modifica R2. Antes de ejecutar una restauración futura habrá que intersectar
+esas operaciones con las claves faltantes comprobadas por
+`audit:r2:closure -- --source ley-19862 --verify-artifacts` y usar una
+credencial de escritura autorizada.
