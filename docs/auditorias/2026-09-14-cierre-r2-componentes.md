@@ -321,3 +321,40 @@ anterior siguen bloqueando la promoción de esos releases.
   9.016.336.751 de 10.000.000.000 bytes (90,16%), por lo que no se deben
   generar ni publicar nuevos índices masivos hasta resolver retención o
   compresión.
+
+## Comprobación de las fuentes oficiales — 2026-09-14
+
+Se probaron los conectores en lectura, sin escribir archivos, R2 ni D1:
+
+- Senado: el endpoint oficial respondió HTTP 200, entregó 63 sesiones y los
+  endpoints de votaciones y asistencia respondieron para sesiones de prueba.
+  Las sesiones sin votaciones devuelven una respuesta válida sin votos; no se
+  deben convertir en un release vacío que reemplace el anterior.
+- InfoProbidad: el endpoint SPARQL respondió HTTP 200. La consulta del 1 al 14
+  de septiembre devolvió 241 declaraciones con identificadores únicos, en 5
+  páginas del conector.
+
+La autenticación de GitHub también fue comprobada y los tags de release
+referenciados por el catálogo (`data-infoprobidad-2026-1fe06400915edc62` y
+`data-votaciones_senado-2026-812204e3cee8f2a8`) no existen como releases
+publicados. La conclusión actual es que los conectores oficiales responden,
+pero las referencias de publicación están incompletas o quedaron huérfanas.
+No corresponde ejecutar ETL o publicar una reparación mientras R2 siga
+bloqueado por crecimiento; primero se debe recuperar o reconstruir el release
+completo y comprobar su cierre físico.
+
+## Corrección de cortes abruptos de Transparencia Activa — 2026-09-14
+
+El resumen precomputado conserva las métricas de comparación, pero ahora el
+build vuelve a aplicar la guarda de cobertura antes de copiarlo a Pages. Con
+los datos auditados se observa:
+
+| Corte | Filas | Nuevos | Estado |
+| --- | ---: | ---: | --- |
+| 2026-06 | 75.136 | 65.164 | comparable |
+| 2026-07 | 257.733 | 236.195 | parcial: aumento abrupto |
+| 2026-08 | 93 | 90 | parcial: caída abrupta |
+
+Julio no se elimina ni se transforma en cero: mantiene sus filas, altas,
+bajas y cambios de monto, pero queda advertido como un cambio de alcance o
+una publicación excepcional que debe confirmarse en la fuente oficial.
