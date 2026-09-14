@@ -70,7 +70,11 @@ export function assertR2CatalogClosure(assets, inventory) {
     if (!inventoryKeys.has(manifestKey)) throw new Error(`R2_CATALOG_REFERENCES_UNPUBLISHED_MANIFEST:${manifestKey}`);
     checkedManifests += 1;
     const manifestAsset = assetByKey.get(manifestKey);
-    if (!manifestAsset) continue;
+    // El inventario puede conservar una referencia antigua aunque el plan de
+    // publicación no traiga el manifiesto. No basta con que la clave exista
+    // en el inventario: el release que se activa debe incluir su contenido
+    // para poder validar también sus artefactos.
+    if (!manifestAsset) throw new Error(`R2_PUBLICATION_MISSING_MANIFEST_ASSET:${manifestKey}`);
     const manifest = parseAssetJson(manifestAsset, manifestKey);
     for (const artifact of Array.isArray(manifest?.artifacts) ? manifest.artifacts : []) {
       const artifactKey = String(artifact?.key ?? "");

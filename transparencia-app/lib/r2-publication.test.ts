@@ -124,6 +124,18 @@ describe("publicación caliente en R2", () => {
       .toThrow("R2_CATALOG_REFERENCES_UNPUBLISHED_MANIFEST");
   });
 
+  it("bloquea un catálogo cuando el inventario conserva el manifiesto pero el plan no lo trae", () => {
+    const catalog = asset("catalog/v1/manifest.json");
+    const manifest = asset("partitions/senado/2026/09/manifest.json");
+    catalog.data = Buffer.from(JSON.stringify({ partitions: [{ id: "senado/2026/09", manifestKey: manifest.key }] }));
+    const inventory = { objects: [
+      { key: catalog.key, size: catalog.data.length, checksumSha256: "catalog" },
+      { key: manifest.key, size: manifest.data.length, checksumSha256: "manifest" },
+    ] };
+    expect(() => assertR2CatalogClosure([catalog], inventory))
+      .toThrow("R2_PUBLICATION_MISSING_MANIFEST_ASSET");
+  });
+
   it("bloquea un manifiesto que apunta a un artefacto no conservado", () => {
     const catalog = asset("catalog/v1/manifest.json");
     const manifest = asset("partitions/senado/2026/09/manifest.json");
