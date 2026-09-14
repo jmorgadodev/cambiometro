@@ -103,7 +103,13 @@ mensual incompleta como si fuera una serie comparable: julio de 2026 contiene
 septiembre. El salto coincide con un cambio de alcance/cobertura del release,
 no con una conclusión sobre contrataciones. Además, el release declara
 563.221 registros con observaciones de calidad, principalmente remuneración
-líquida no informada, y 6.952 períodos inválidos.
+líquida no informada. La compuerta reproducible de calidad confirmó que las
+212 páginas suman exactamente 2.110.434 filas y que el total del manifiesto
+coincide con el índice, pero detectó 2.984 filtros de período en el índice
+frente a sólo 33 períodos declarados por el resumen. Hay 6.952 filas en
+2.951 filtros fuera del release declarado; la muestra incluye `2026-10`,
+`2026-11`, `2026-12` y períodos futuros que llegan hasta `3538`. Esto bloquea
+la promoción aunque los conteos generales cuadren.
 
 Decisión: la interfaz no mostrará la evolución mensual ni la tabla de los
 últimos 12 cortes de esta proyección hasta reconciliar alcance, períodos y
@@ -116,7 +122,9 @@ Se agregó al Worker un selector de lectura restringido,
 El valor por defecto sigue siendo `funcionarios-v1` y sólo se aceptan esas dos
 variantes; no se habilitó ninguna variable en producción ni se cambió el
 puntero de R2. La prueba automatizada confirmó que el release central puede
-leerse por páginas, con búsqueda indexada y sin tocar D1.
+leerse por páginas, con búsqueda indexada y sin tocar D1. La nueva compuerta
+`audit:cplt:projection` queda como requisito previo para cualquier promoción;
+en el estado actual devuelve `blocked` y no realiza escrituras.
 
 ## Decisiones y siguiente orden seguro
 

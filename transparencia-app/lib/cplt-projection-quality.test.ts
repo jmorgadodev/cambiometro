@@ -1,0 +1,45 @@
+import { describe, expect, it } from "vitest";
+import { auditCpltProjection } from "../scripts/etl/cplt-projection-quality.mjs";
+
+function fixture(overrides: Record<string, unknown> = {}) {
+  return {
+    manifest: { recordCount: 3 },
+    index: {
+      totalRows: 3,
+      pages: [{ page: 1, count: 2 }, { page: 2, count: 1 }],
+      filters: { "periodo:2026-08": { count: 2 }, "periodo:2026-09": { count: 1 } },
+      quality: { recordsWithIssues: 1, correctedRows: 0, observedRows: 1, byIssue: { remuneracion_liquida_no_informada: 1 } },
+    },
+    summary: { periods: [{ period: "2026-08" }, { period: "2026-09" }] },
+    ...overrides,
+  };
+}
+
+describe("auditoría acotada de proyección CPLT", () => {
+  it("permite promoción cuando manifiesto, páginas e índices de período coinciden", () => {
+    const result = auditCpltProjection(fixture());
+    expect(result).toMatchObject({ status: "ready", promotionAllowed: true, manifestRows: 3, pageRows: 3, invalidPeriodRows: 0 });
+  });
+
+  it("bloquea períodos indexados fuera del release declarado aunque el total cuadre", () => {
+    const result = auditCpltProjection(fixture({
+      index: {
+        totalRows: 3,
+        pages: [{ page: 1, count: 3 }],
+        filters: { "periodo:2026-08": { count: 2 }, "periodo:3538-04": { count: 1 } },
+      },
+    }));
+    expect(result.status).toBe("blocked");
+    expect(result.promotionAllowed).toBe(false);
+    expect(result.invalidPeriodRows).toBe(1);
+    expect(result.structuralIssues).toContain("period_filters_outside_declared_release");
+  });
+
+  it("bloquea una discrepancia entre el total declarado y las páginas físicas", () => {
+    const result = auditCpltProjection(fixture({ manifest: { recordCount: 4 } }));
+    expect(result.status).toBe("blocked");
+    expect(result.structuralIssues).toContain("manifest_index_count_mismatch");
+    expect(result.pageRows).toBe(3);
+    expect(result.structuralIssues).not.toContain("page_count_sum_mismatch");
+  });
+});
