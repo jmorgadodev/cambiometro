@@ -5,7 +5,10 @@
 - [x] N0: compartir la normalización de nombres, remuneraciones líquidas e
       incidencias entre los ingestores central y municipal.
 - [x] N0: agregar pruebas del contrato común sin descargar datos masivos.
-- [ ] N1: auditar por manifiesto y muestras acotadas la calidad de cada fuente.
+- [x] N1: agregar auditor reproducible de conteos, alcance y frescura por
+      fuente usando metadatos, sin D1.
+- [ ] N1: ejecutar la matriz contra manifiestos productivos R2 y muestras
+      acotadas antes de modificar cualquier proyección.
 - [ ] N2: normalizar por dominio Cámara/Senado/Movimientos manteniendo sus
       categorías y releases independientes.
 - [ ] N3: generar historiales, altas, bajas y cambios desde índices R2.

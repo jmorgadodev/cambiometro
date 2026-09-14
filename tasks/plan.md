@@ -34,6 +34,8 @@ universo ni moverlo a otra base gratuita.
 
 #### N1 — Auditoría de normalización por fuente (siguiente)
 
+- [x] Crear un auditor reproducible que compare manifiestos locales y estado
+      de salud sin leer filas masivas.
 - [ ] Generar una matriz sólo con manifiestos y muestras acotadas de R2.
 - [ ] Medir campos ausentes, formatos de fecha, montos, duplicados aparentes
       y períodos por fuente.
