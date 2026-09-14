@@ -89,6 +89,33 @@ denominador comparable.
 5. Sólo después de cerrar manifiestos, recalcular índices, historiales y
    estados visibles de frescura.
 
+## Prueba de reconstrucción: Votaciones Senado
+
+El conector oficial respondió en modo `--dry-run` para `2026-08-01` a
+`2026-09-14`:
+
+- 52 votaciones válidas;
+- 23 registros para 2026-08;
+- 29 registros para 2026-09;
+- primer evento: 2026-08-04;
+- último evento: 2026-09-09;
+- 0 errores;
+- 0 archivos escritos.
+
+El plan de lago generado en memoria produjo los siguientes checksums de
+proyección:
+
+| Partición | Registros | Checksum de proyección |
+| --- | ---: | --- |
+| `votaciones_senado/2026/08` | 23 | `169d5551c89edd28c6fa5b190fd3f9c2f6afc94e7e9dcac7b4cefabed2099b93` |
+| `votaciones_senado/2026/09` | 29 | `9cd9423b142a6f3b837c4fa107c516050b0d1fe362e12d5733d937e7ae03caf8` |
+
+El tamaño comprimido de ambas proyecciones, sus manifiestos y sus archivos de
+checksum sería **20.002 bytes**. La prueba demuestra que esta fuente está lista
+para una promoción aislada, pero no autoriza todavía la escritura en R2: antes
+de eso se debe comparar el candidato con el release y cerrar el catálogo de
+forma atómica.
+
 ## Seguridad de operación
 
 - No hubo escrituras en R2.
