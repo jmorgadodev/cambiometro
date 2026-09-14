@@ -76,4 +76,16 @@ describe("resumen agregado de Transparencia Activa", () => {
     }));
     expect(summary.quality.amountStates).toEqual({ positive: 1, zero: 0, notPublished: 1 });
   });
+
+  it("acepta filas compactas del índice sin perder altas, bajas ni cambios", () => {
+    const summary = buildCpltTransparencySummary([
+      { n: "Ana Pérez", o: "Municipalidad A", t: "Planta", c: "Analista", b: 100, p: "2026-01", q: [] },
+      { n: "Ana Pérez", o: "Municipalidad A", t: "Planta", c: "Analista", b: 125, p: "2026-02", q: [] },
+      { n: "Bruno Soto", o: "Municipalidad A", t: "Contrata", c: "Técnico", b: null, p: "2026-02", q: ["remuneracion_liquida_no_informada"] },
+    ], [], "2026-02-01T00:00:00.000Z");
+
+    expect(summary.periods.at(-1)).toEqual(expect.objectContaining({ newRecords: 1, removedRecords: 0, amountChanges: 1, amountDelta: 25 }));
+    expect(summary.quality.amountStates).toEqual({ positive: 2, zero: 0, notPublished: 1 });
+    expect(summary.quality.recordsWithIssues).toBe(1);
+  });
 });

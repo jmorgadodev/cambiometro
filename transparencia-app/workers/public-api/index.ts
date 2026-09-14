@@ -339,7 +339,7 @@ interface CompactOfficialRow {
   ot?: string;
   t?: string;
   e?: string;
-  b?: number;
+  b?: number | null;
   l?: number;
   lo?: number;
   h?: number;
@@ -665,7 +665,7 @@ function compactOfficialRow(row: CompactOfficialRow): JsonRecord {
     organo_tipo: row.ot ?? "",
     tipo_contrato: row.t ?? "",
     estamento: row.e ?? "",
-    remuneracion_bruta_mensual: Number(row.b ?? 0),
+    remuneracion_bruta_mensual: row.b == null ? null : Number(row.b),
     remuneracion_liquida_mensual: row.l == null ? null : Number(row.l),
     remuneracion_liquida_mensual_original: row.lo == null ? undefined : Number(row.lo),
     horas_extras_mes_anterior: Number(row.h ?? 0),

@@ -78,6 +78,11 @@ describe("automatizacion CPLT nacional", () => {
     expect(lakePublisher).toContain("R2_OBJECT_EXCEEDS_WRANGLER_LIMIT");
   });
 
+  it("no duplica el asset del resumen al construir el manifiesto local", () => {
+    const publisher = readFileSync(resolve(process.cwd(), "scripts/publish-cplt-projections.mjs"), "utf8");
+    expect(publisher).toContain("asset.key !== transparencySummaryKey");
+  });
+
   it("permite materializar el lake CPLT local sin publicar", () => {
     const packageJson = readFileSync(resolve(process.cwd(), "package.json"), "utf8");
     const publisher = readFileSync(resolve(process.cwd(), "scripts/publish-cplt-projections.mjs"), "utf8");

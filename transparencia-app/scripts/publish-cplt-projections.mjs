@@ -54,7 +54,6 @@ if (files.length < 1) throw new Error("CPLT_MISSING_PROJECTIONS");
 const searchIndexRoot = join(projectionRoot, "search_index");
 mkdirSync(searchIndexRoot, { recursive: true });
 const compactRows = [];
-const summaryRows = [];
 const byShard = new Map();
 const normalizeSearch = (value) => String(value ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL");
 const formatQualityIssues = new Set(["nombre_prefijo_invalido", "nombre_prefijo_numerico", "nombre_incompleto", "nombre_vacio"]);
@@ -74,15 +73,7 @@ for (const fileName of files) {
   if (!Array.isArray(rows)) continue;
   const organismId = fileName.replace(/\.json$/, "");
   rows.forEach((row, index) => {
-    summaryRows.push({
-      nombre_completo: row.nombre_completo,
-      organo_nombre: row.organo_nombre,
-      tipo_contrato: row.tipo_contrato,
-      cargo: row.cargo,
-      remuneracion_bruta_mensual: row.remuneracion_bruta_mensual,
-      fuente_periodo: row.fuente_periodo ?? row.periodo,
-      calidad_datos: { incidencias: qualityIssues(row) },
-    });
+    const rawGross = row.remuneracion_bruta_mensual;
     const compact = {
       id: String(row.id ?? `${organismId}-${index + 1}`),
       n: row.nombre_completo ?? "",
@@ -91,7 +82,7 @@ for (const fileName of files) {
       ot: row.organo_tipo ?? "",
       t: row.tipo_contrato ?? "",
       e: row.estamento ?? "",
-      b: Number(row.remuneracion_bruta_mensual ?? 0),
+      b: rawGross == null || String(rawGross).trim() === "" ? null : Number(rawGross),
       l: row.remuneracion_liquida_mensual == null ? undefined : Number(row.remuneracion_liquida_mensual),
       lo: row.remuneracion_liquida_mensual_original == null ? undefined : Number(row.remuneracion_liquida_mensual_original),
       h: Number(row.horas_extras_mes_anterior ?? 0),
@@ -279,14 +270,20 @@ function buildCoverage() {
 }
 
 const coverage = buildCoverage();
-const transparencySummary = buildCpltTransparencySummary(summaryRows, coverage, latest);
+// El índice compacto conserva los campos necesarios para el resumen y evita
+// mantener una segunda copia completa de todas las filas en memoria.
+const transparencySummary = buildCpltTransparencySummary(compactRows, coverage, latest);
 const transparencySummaryPath = join(projectionRoot, "transparency-summary.json");
 writeFileSync(transparencySummaryPath, `${JSON.stringify(transparencySummary, null, 2)}\n`);
 const transparencySummaryKey = `projections/funcionarios-v1/versions/${version}/transparency-summary.json`;
 const transparencySummaryMetadata = await writeGeneratedAsset(transparencySummaryPath, transparencySummaryKey);
 
 const assets = [];
-const manifestAssets = [transparencySummaryMetadata, searchIndexMetadata, ...searchAssets.filter((asset) => asset.key !== searchIndexKey)];
+const manifestAssets = [
+  transparencySummaryMetadata,
+  searchIndexMetadata,
+  ...searchAssets.filter((asset) => asset.key !== searchIndexKey && asset.key !== transparencySummaryKey),
+];
 for (const asset of manifestAssets) {
   const target = join(outputRoot, asset.key);
   mkdirSync(dirname(target), { recursive: true });

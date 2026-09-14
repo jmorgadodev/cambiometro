@@ -17,28 +17,33 @@ function normalizeText(value) {
     .trim();
 }
 
+function fieldOf(row, fullName, compactName) {
+  if (row && Object.prototype.hasOwnProperty.call(row, fullName)) return row[fullName];
+  return row?.[compactName];
+}
+
 function periodOf(row) {
-  const value = String(row.fuente_periodo ?? row.periodo ?? "").trim().slice(0, 7);
+  const value = String(fieldOf(row, "fuente_periodo", "p") ?? fieldOf(row, "periodo", "p") ?? "").trim().slice(0, 7);
   return value || null;
 }
 
 function amountOf(row) {
-  const raw = row.remuneracion_bruta_mensual;
+  const raw = fieldOf(row, "remuneracion_bruta_mensual", "b");
   if (raw === null || raw === undefined || String(raw).trim() === "") return null;
   const value = Number(raw);
   return Number.isFinite(value) ? value : null;
 }
 
 function personKeyOf(row) {
-  const name = normalizeText(row.nombre_completo);
-  const organism = normalizeText(row.organo_nombre ?? row.organo_id);
-  const contract = normalizeText(row.tipo_contrato);
+  const name = normalizeText(fieldOf(row, "nombre_completo", "n"));
+  const organism = normalizeText(fieldOf(row, "organo_nombre", "o") ?? row.organo_id ?? row.oid);
+  const contract = normalizeText(fieldOf(row, "tipo_contrato", "t"));
   return name ? `${name}|${organism}|${contract}` : null;
 }
 
 function basePersonKeyOf(row) {
-  const name = normalizeText(row.nombre_completo);
-  const contract = normalizeText(row.tipo_contrato);
+  const name = normalizeText(fieldOf(row, "nombre_completo", "n"));
+  const contract = normalizeText(fieldOf(row, "tipo_contrato", "t"));
   return name ? `${name}|${contract}` : null;
 }
 
@@ -117,15 +122,19 @@ export function buildCpltTransparencySummary(rows, coverage, generatedAt) {
     else if (amount === 0) zeroAmountCount += 1;
     else positiveAmountCount += 1;
 
-    const contract = String(row.tipo_contrato ?? "").trim() || "No informado";
+    const contract = String(fieldOf(row, "tipo_contrato", "t") ?? "").trim() || "No informado";
     contractCounts[contract] = (contractCounts[contract] ?? 0) + 1;
-    const issues = Array.isArray(row.calidad_datos?.incidencias) ? row.calidad_datos.incidencias : [];
+    const issues = Array.isArray(row.calidad_datos?.incidencias)
+      ? row.calidad_datos.incidencias
+      : Array.isArray(row.q) ? row.q : [];
     if (issues.length > 0) recordsWithIssues += 1;
     for (const issue of issues) issueCounts[issue] = (issueCounts[issue] ?? 0) + 1;
 
     const personKey = personKeyOf(row);
     const basePersonKey = basePersonKeyOf(row);
-    addToSet(organismsByName, normalizeText(row.nombre_completo), normalizeText(row.organo_nombre ?? row.organo_id));
+    const name = fieldOf(row, "nombre_completo", "n");
+    const organismName = fieldOf(row, "organo_nombre", "o") ?? row.organo_id ?? row.oid;
+    addToSet(organismsByName, normalizeText(name), normalizeText(organismName));
     if (periodStats) {
       periodStats.rows += 1;
       if (amount === null) periodStats.withoutAmount += 1;
@@ -134,7 +143,7 @@ export function buildCpltTransparencySummary(rows, coverage, generatedAt) {
         periodStats.grossTotal += amount;
       }
       if (personKey) periodStats.people.add(personKey);
-      const organism = normalizeText(row.organo_nombre ?? row.organo_id);
+      const organism = normalizeText(organismName);
       if (organism) periodStats.organisms.add(organism);
       periodStats.contracts[contract] = (periodStats.contracts[contract] ?? 0) + 1;
       periods.set(period, periodStats);
@@ -147,8 +156,8 @@ export function buildCpltTransparencySummary(rows, coverage, generatedAt) {
       const salaryPeriods = salaryByPerson.get(basePersonKey) ?? new Map();
       if (!salaryPeriods.has(period)) salaryPeriods.set(period, amount);
       salaryByPerson.set(basePersonKey, salaryPeriods);
-      addToSet(organismByPerson, `${basePersonKey}|${period}`, normalizeText(row.organo_nombre ?? row.organo_id));
-      addToSet(roleByPerson, `${basePersonKey}|${period}`, normalizeText(row.cargo));
+      addToSet(organismByPerson, `${basePersonKey}|${period}`, normalizeText(organismName));
+      addToSet(roleByPerson, `${basePersonKey}|${period}`, normalizeText(fieldOf(row, "cargo", "c")));
     }
   }
 

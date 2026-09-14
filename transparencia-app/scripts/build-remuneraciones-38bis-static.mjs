@@ -178,8 +178,6 @@ const currentSortPages = {
   sueldo_asc: writePages([...rows].sort((left, right) => compareSalary(left, right, "asc")), "sueldo-asc"),
 };
 fs.mkdirSync(historyOutputDir, { recursive: true });
-const auditPath = path.join(root, "data", "remuneraciones-38bis-publico-audit.json");
-const audit = JSON.parse(fs.readFileSync(auditPath, "utf8"));
 const historyPeriods = Array.isArray(historical.periodos) ? historical.periodos : [];
 const periodRows = [{ mes: release.mes, rows }, ...historyPeriods.map((period) => ({ mes: period.mes, rows: period.registros }))];
 const historyByHash = new Map();
@@ -247,11 +245,11 @@ const manifest = {
   initial_rows: orderedRows.slice(0, pageSize),
   periodos: periodSummaries,
   comparison: {
-    estado: audit.delta.estado,
-    periodo_anterior: audit.delta.periodoAnterior,
-    entradas: audit.delta.entradas,
-    salidas_observadas: audit.delta.salidasObservadas,
-    cambios: audit.delta.cambios,
+    estado: currentPeriod.comparison.estado,
+    periodo_anterior: currentPeriod.comparison.periodo_anterior,
+    entradas: currentPeriod.comparison.entradas,
+    salidas_observadas: currentPeriod.comparison.salidas_observadas,
+    cambios: currentPeriod.comparison.cambios,
   },
 };
 
