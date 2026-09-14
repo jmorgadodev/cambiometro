@@ -288,7 +288,11 @@ const transparencySummaryKey = `projections/${datasetRoot}/versions/${version}/t
 const transparencySummaryMetadata = await writeGeneratedAsset(transparencySummaryPath, transparencySummaryKey);
 
 const assets = [];
-const manifestAssets = [transparencySummaryMetadata, searchIndexMetadata, ...searchAssets.filter((asset) => asset.key !== searchIndexKey)];
+const manifestAssets = [
+  transparencySummaryMetadata,
+  searchIndexMetadata,
+  ...searchAssets.filter((asset) => asset.key !== searchIndexKey && asset.key !== transparencySummaryKey),
+];
 for (const asset of manifestAssets) {
   const target = join(outputRoot, asset.key);
   mkdirSync(dirname(target), { recursive: true });
