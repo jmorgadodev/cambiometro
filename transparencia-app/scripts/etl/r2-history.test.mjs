@@ -89,4 +89,40 @@ describe("buildR2History", () => {
       { period: "2026-01", version: "release-01", checksum_sha256: "checksum-01", total: 2, pages: [{ page: 1, key: "missing.json", count: 2 }] },
     ], async () => [{ personKey: "a" }], { keyFields: ["personKey"] })).rejects.toThrow("conteo incorrecto");
   });
+
+  it("supports physical R2 manifests with JSONL artifacts", async () => {
+    const result = await buildR2HistoryFromManifests([
+      {
+        id: "camara/asistencia_camara/2026/09",
+        sourcePeriod: null,
+        year: 2026,
+        month: 9,
+        projectionChecksumSha256: "artifact-checksum",
+        recordCount: 2,
+        artifacts: [{ key: "records.jsonl.gz", size: 10 }],
+      },
+    ], async () => {
+      return [
+        { personKey: "a", organismo: "Cámara", monto: 100 },
+        { personKey: "b", organismo: "Cámara", monto: 200 },
+      ];
+    }, { keyFields: ["personKey"] });
+    expect(result.periods[0]).toMatchObject({ period: "2026-09", releaseId: "camara/asistencia_camara/2026/09", count: 2 });
+    expect(result.historyByKey.a[0].original.monto).toBe(100);
+  });
+
+  it("accepts an explicit resolver for nested official identities", () => {
+    const result = buildR2History([
+      {
+        period: "2026-09",
+        releaseId: "camara-09",
+        checksum: "checksum-09",
+        records: [{ data: { deputy: { entity_id: "person-camara-1009" } }, monto: 1 }],
+      },
+    ], {
+      keyResolver: (row) => row.data?.deputy?.entity_id,
+    });
+    expect(result.historyByKey["person-camara-1009"]).toHaveLength(1);
+    expect(result.periods[0].fallbackKeys).toBe(0);
+  });
 });

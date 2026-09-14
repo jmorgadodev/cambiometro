@@ -587,3 +587,12 @@ Estado de validación del checkout después de estos cambios:
 
 Commits reversibles de este bloque: `6522887` y `0c20084`. No se publicó ningún
 release nuevo en R2 ni se modificó D1.
+
+La implementación también admite el formato físico actualmente observado en
+R2: manifiestos con `artifacts[]` y archivos JSONL comprimidos. La lectura de
+un artefacto remoto de Cámara (`camara/asistencia_camara/2026/09`) fue
+verificada en modo GET: 775 filas, checksum
+`0228f8037f8ee9e6b6b08a9b14618fbffc5466188f7a97b3a8fcffc75ea697fc` y
+identidad anidada de diputado resuelta mediante identificador explícito.
+Los manifiestos históricos faltantes siguen siendo un bloqueo de evidencia; no
+se rellenan con un snapshot local ni se publican como cero.

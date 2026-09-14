@@ -49,7 +49,9 @@ function numericValue(record, fields) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
-function recordKey(record, keyFields, periodIndex, recordIndex) {
+function recordKey(record, keyFields, periodIndex, recordIndex, keyResolver) {
+  const resolved = typeof keyResolver === "function" ? normalized(keyResolver(record)) : "";
+  if (resolved) return { key: resolved, quality: "explicit-resolver" };
   const parts = keyFields.map((field) => normalized(record?.[field]));
   if (parts.every(Boolean)) {
     return { key: parts.join("|"), quality: "explicit" };
@@ -67,7 +69,7 @@ function recordKey(record, keyFields, periodIndex, recordIndex) {
   };
 }
 
-function validatePeriod(period, index, keyFields) {
+function validatePeriod(period, index, keyFields, keyResolver) {
   if (!period || typeof period !== "object") throw new Error(`Historial R2: período ${index + 1} inválido`);
   if (!text(period.period)) throw new Error(`Historial R2: período ${index + 1} sin period`);
   if (!text(period.releaseId)) throw new Error(`Historial R2: ${period.period} sin releaseId`);
@@ -79,7 +81,7 @@ function validatePeriod(period, index, keyFields) {
     if (!original || typeof original !== "object" || Array.isArray(original)) {
       throw new Error(`Historial R2: ${period.period} contiene una fila inválida en ${recordIndex}`);
     }
-    const identity = recordKey(original, keyFields, index, recordIndex);
+    const identity = recordKey(original, keyFields, index, recordIndex, keyResolver);
     const previous = seen.get(identity.key);
     if (previous !== undefined) {
       throw new Error(`Historial R2: clave duplicada ${identity.key} en ${period.period} (filas ${previous} y ${recordIndex})`);
@@ -168,7 +170,8 @@ export function buildR2History(periods, options = {}) {
   const keyFields = Array.isArray(options.keyFields) && options.keyFields.length > 0
     ? options.keyFields
     : ["personKey"];
-  const normalizedPeriods = periods.map((period, index) => validatePeriod(period, index, keyFields));
+  const keyResolver = options.keyResolver;
+  const normalizedPeriods = periods.map((period, index) => validatePeriod(period, index, keyFields, keyResolver));
   const comparisons = [];
   for (let index = 1; index < normalizedPeriods.length; index += 1) {
     comparisons.push(comparePeriods(normalizedPeriods[index - 1], normalizedPeriods[index]));
@@ -196,7 +199,7 @@ export function buildR2History(periods, options = {}) {
       checksum: period.checksum,
       publishedAt: period.publishedAt,
       count: period.rows.length,
-      fallbackKeys: period.rows.filter((row) => row.keyQuality !== "explicit").length,
+      fallbackKeys: period.rows.filter((row) => !row.keyQuality.startsWith("explicit")).length,
     })),
     comparisons,
     historyByKey,
@@ -211,15 +214,40 @@ function manifestValue(manifest, ...fields) {
   return null;
 }
 
+function manifestPeriod(manifest) {
+  const direct = text(manifestValue(manifest, "period", "mes", "sourcePeriod"));
+  if (direct) return direct;
+  const year = Number(manifestValue(manifest, "year"));
+  const month = Number(manifestValue(manifest, "month"));
+  return Number.isInteger(year) && Number.isInteger(month) && month >= 1 && month <= 12
+    ? `${year}-${String(month).padStart(2, "0")}`
+    : "";
+}
+
+function manifestReleaseId(manifest) {
+  return text(manifestValue(manifest, "releaseId", "release_id", "version", "id"));
+}
+
+function manifestChecksum(manifest) {
+  return text(manifestValue(
+    manifest,
+    "checksum",
+    "checksum_sha256",
+    "checksumSha256",
+    "projectionChecksumSha256",
+    "projectionUncompressedChecksumSha256",
+  ));
+}
+
 /**
  * Reads only the pages declared by one R2 release manifest. This is intended
  * for a controlled build/audit process, never for a browser request.
  */
 export async function readR2ReleasePages(manifest, readJson) {
   if (typeof readJson !== "function") throw new Error("Historial R2: readJson debe ser una función");
-  const period = text(manifestValue(manifest, "period", "mes"));
-  const releaseId = text(manifestValue(manifest, "releaseId", "release_id", "version"));
-  const checksum = text(manifestValue(manifest, "checksum", "checksum_sha256", "checksumSha256"));
+  const period = manifestPeriod(manifest);
+  const releaseId = manifestReleaseId(manifest);
+  const checksum = manifestChecksum(manifest);
   const pages = Array.isArray(manifest?.pages) ? manifest.pages : [];
   if (!period) throw new Error("Historial R2: manifiesto sin period");
   if (!releaseId) throw new Error(`Historial R2: ${period} sin releaseId/version`);
@@ -253,9 +281,53 @@ export async function readR2ReleasePages(manifest, readJson) {
   };
 }
 
+/** Reads JSONL/JSON artifacts declared by a physical R2 partition manifest. */
+export async function readR2ReleaseArtifacts(manifest, readRecords) {
+  if (typeof readRecords !== "function") throw new Error("Historial R2: readRecords debe ser una función");
+  const period = manifestPeriod(manifest);
+  const releaseId = manifestReleaseId(manifest);
+  const checksum = manifestChecksum(manifest);
+  const artifacts = Array.isArray(manifest?.artifacts) ? manifest.artifacts : [];
+  if (!period) throw new Error("Historial R2: manifiesto sin period/sourcePeriod");
+  if (!releaseId) throw new Error(`Historial R2: ${period} sin releaseId/version/id`);
+  if (!checksum) throw new Error(`Historial R2: ${period} sin checksum`);
+  if (artifacts.length === 0) throw new Error(`Historial R2: ${period} sin artefactos declarados`);
+
+  const seenKeys = new Set();
+  const loaded = await Promise.all(artifacts.map(async (artifact, index) => {
+    const key = text(artifact?.key ?? artifact?.path);
+    if (!key) throw new Error(`Historial R2: artefacto ${index + 1} sin key`);
+    if (seenKeys.has(key)) throw new Error(`Historial R2: artefacto duplicado ${key}`);
+    seenKeys.add(key);
+    const rows = await readRecords(key, artifact);
+    if (!Array.isArray(rows)) throw new Error(`Historial R2: artefacto ilegible ${key}`);
+    if (artifact?.recordCount != null && Number(artifact.recordCount) !== rows.length) {
+      throw new Error(`Historial R2: conteo incorrecto en ${key}`);
+    }
+    return rows;
+  }));
+  const records = loaded.flat();
+  const expected = Number(manifest?.total ?? manifest?.recordCount ?? NaN);
+  if (Number.isFinite(expected) && expected !== records.length) {
+    throw new Error(`Historial R2: ${period} total de manifiesto no coincide`);
+  }
+  return {
+    period,
+    releaseId,
+    checksum,
+    publishedAt: text(manifestValue(manifest, "publishedAt", "published_at", "generatedAt", "extraido_en")) || null,
+    records,
+  };
+}
+
 /** Loads declared R2 pages for each release, then performs the pure comparison. */
 export async function buildR2HistoryFromManifests(manifests, readJson, options = {}) {
   if (!Array.isArray(manifests) || manifests.length === 0) throw new Error("Historial R2: se requieren manifiestos");
-  const releases = await Promise.all(manifests.map((manifest) => readR2ReleasePages(manifest, readJson)));
+  const readArtifact = typeof options.readArtifact === "function" ? options.readArtifact : readJson;
+  const releases = await Promise.all(manifests.map((manifest) => {
+    if (Array.isArray(manifest?.pages)) return readR2ReleasePages(manifest, readJson);
+    if (Array.isArray(manifest?.artifacts)) return readR2ReleaseArtifacts(manifest, readArtifact);
+    throw new Error(`Historial R2: manifiesto ${manifest?.id ?? manifest?.period ?? "desconocido"} sin pages[] ni artifacts[]`);
+  }));
   return buildR2History(releases, options);
 }
