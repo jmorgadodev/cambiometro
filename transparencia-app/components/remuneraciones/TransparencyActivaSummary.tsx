@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import TransparencyMonthlyChart from "./TransparencyMonthlyChart";
 
 type MonthlySummary = {
   period: string;
@@ -18,6 +17,8 @@ type MonthlySummary = {
   amountDelta: number | null;
   organismChanges: number | null;
   roleChanges: number | null;
+  comparisonStatus?: "baseline" | "comparable" | "review";
+  comparisonNote?: string | null;
 };
 
 type TransparencySummary = {
@@ -43,15 +44,10 @@ type TransparencySummary = {
 };
 
 const number = new Intl.NumberFormat("es-CL");
-const money = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 });
 
 function formatPeriod(period: string) {
   const [year, month] = period.split("-");
   return `${month}/${year}`;
-}
-
-function formatMoney(value: number | null) {
-  return value === null ? "—" : money.format(value);
 }
 
 function formatCount(value: number | null) {
@@ -73,25 +69,15 @@ export default function TransparencyActivaSummary() {
   }, []);
 
   if (!summary) return null;
-  const recentPeriods = summary.periods.slice(-12).reverse();
   const latest = summary.periods.at(-1) ?? null;
-  const chartPeriods = summary.periods.map((period) => ({
-    period: period.period,
-    rows: period.rows,
-    grossTotal: period.grossTotal,
-    newRecords: period.newRecords,
-    removedRecords: period.removedRecords,
-    amountChanges: period.amountChanges,
-    amountDelta: period.amountDelta,
-  }));
 
   return (
-    <section id="historial-transparencia" className="remuneration-module remuneration-transparency-summary" aria-labelledby="historial-transparencia-title">
+    <section id="estado-transparencia" className="remuneration-module remuneration-transparency-summary" aria-labelledby="estado-transparencia-title">
       <div className="remuneration-module__heading">
         <span className="eyebrow">TRANSPARENCIA ACTIVA</span>
-        <h3 id="historial-transparencia-title">Qué cambió entre un mes y otro</h3>
+        <h3 id="estado-transparencia-title">Estado del último corte</h3>
         <p>
-          Resumen del corte publicado por el CPLT. Las altas y bajas indican que un registro apareció o dejó de aparecer entre dos cortes; no prueban por sí solas una contratación o un despido.
+          La fuente conserva los registros publicados y sus montos originales. Los cambios sólo se muestran cuando existen dos cortes comparables.
         </p>
       </div>
 
@@ -105,36 +91,13 @@ export default function TransparencyActivaSummary() {
       {latest && (
         <div className="remuneration-transparency-latest" role="status">
           <strong>En el corte {formatPeriod(latest.period)}:</strong>
-          {summary.comparisonsAvailable !== false ? <>
+          {summary.comparisonsAvailable !== false && latest.comparisonStatus !== "review" ? <>
             <span>{formatCount(latest.newRecords)} nuevos registros</span>
             <span>{formatCount(latest.removedRecords)} que ya no aparecen</span>
             <span>{formatCount(latest.amountChanges)} cambios de monto</span>
-          </> : <span>la fuente conserva los cortes; la comparación de altas, bajas y cambios se incorporará con la próxima actualización</span>}
+          </> : <span>este corte requiere revisión antes de comparar nuevos registros, ausencias o cambios de monto</span>}
         </div>
       )}
-
-      <TransparencyMonthlyChart periods={chartPeriods} />
-
-      <details className="remuneration-transparency-table-details">
-        <summary>Ver detalle mensual de los últimos 12 cortes</summary>
-        <div className="remuneration-transparency-table-wrap">
-          <table className="data-table remuneration-transparency-table">
-            <caption>Datos que alimentan la gráfica mensual</caption>
-            <thead><tr><th>Corte</th><th>Registros</th><th>Personas</th><th>Nuevos</th><th>Ya no aparecen</th><th>Cambios de monto</th><th>Monto bruto total</th></tr></thead>
-            <tbody>{recentPeriods.map((period) => (
-              <tr key={period.period}>
-                <td><strong>{formatPeriod(period.period)}</strong></td>
-                <td>{number.format(period.rows)}</td>
-                <td>{formatCount(period.people)}</td>
-                <td>{formatCount(period.newRecords)}</td>
-                <td>{formatCount(period.removedRecords)}</td>
-                <td>{formatCount(period.amountChanges)}</td>
-                <td>{formatMoney(period.grossTotal)}</td>
-              </tr>
-            ))}</tbody>
-          </table>
-        </div>
-      </details>
 
       <details className="remuneration-transparency-coverage">
         <summary>Ver las comunas sin nómina publicada y el motivo</summary>
@@ -150,7 +113,7 @@ export default function TransparencyActivaSummary() {
         </div>
       </details>
 
-      <p className="remuneration-reading-note"><strong>Cómo leerlo:</strong> los montos comparados son brutos y sólo se cuentan cuando la fuente los publicó. La fuente conserva {number.format(summary.quality.amountStates.zero)} valores en cero y {number.format(summary.quality.recordsWithIssues)} registros con observaciones de calidad. {summary.notes?.[1] ?? "Los cambios se calculan sólo con datos publicados y comparables."}</p>
+      <p className="remuneration-reading-note"><strong>Cómo leerlo:</strong> los montos comparados son brutos y sólo se cuentan cuando la fuente los publicó. La fuente conserva {number.format(summary.quality.amountStates.zero)} valores en cero y {number.format(summary.quality.recordsWithIssues)} registros con observaciones de calidad.</p>
     </section>
   );
 }

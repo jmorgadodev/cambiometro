@@ -25,6 +25,7 @@ import { readJsonIfPresent, writeFileAtomic } from "./etl/safe-file.mjs";
 import { mergeRecordsById } from "./etl/history.mjs";
 import { validateSourceRelease } from "./etl/source-release-guard.mjs";
 import { summarizeDomainRecords } from "./etl/connectors/domain-normalization.mjs";
+import { evaluateSourcePromotion } from "./etl/source-promotion-gate.mjs";
 import { resolveCamaraVoteWindow, CAMARA_CURRENT_PERIOD_START } from "./etl/camara-history.mjs";
 import { expenseMonthWindow } from "./etl/expense-window.mjs";
 
@@ -274,13 +275,22 @@ async function runSource({ key, label, selected, previous, snapshot, summary, su
   try {
     const records = validateRecords(label, await load(), minimum);
     const snapshotKey = key === "camara" ? "congreso_opendata" : key;
-    validateSourceRelease({
+    const release = validateSourceRelease({
       sourceId: snapshotKey,
       records,
       previousRecords: previous?.fuentes?.[snapshotKey] ?? [],
       minimumCount: minimum,
       preserveHistory,
     });
+    const promotion = evaluateSourcePromotion({
+      sourceId: snapshotKey,
+      release: { status: "complete", recordCount: records.length },
+      previous: { recordCount: previous?.fuentes?.[snapshotKey]?.length ?? 0 },
+      checks: { testsPassed: true, checksumOk: Boolean(release.checksumSha256), paginationOk: true, d1BulkReads: false },
+      compareCount: !preserveHistory,
+    });
+    if (promotion.action !== "promote") throw new Error(`SOURCE_PROMOTION_BLOCKED:${snapshotKey}:${promotion.reasons.join(",")}`);
+    summary.promotion[summaryKey] = { ...promotion, checksumSha256: release.checksumSha256 };
     summary.normalization[summaryKey] = summarizeDomainRecords({
       domain,
       sourceId: snapshotKey,
@@ -294,6 +304,13 @@ async function runSource({ key, label, selected, previous, snapshot, summary, su
   } catch (error) {
     summary.errores.push(`${label}: ${String(error)}`);
     const snapshotKey = key === "camara" ? "congreso_opendata" : key;
+    summary.promotion[summaryKey] = evaluateSourcePromotion({
+      sourceId: snapshotKey,
+      release: { status: "failed", recordCount: 0 },
+      previous: { recordCount: previous?.fuentes?.[snapshotKey]?.length ?? 0 },
+      checks: { testsPassed: true, checksumOk: false, paginationOk: false, d1BulkReads: false },
+      compareCount: !preserveHistory,
+    });
     snapshot.fuentes[snapshotKey] = previous?.fuentes?.[snapshotKey] ?? [];
   }
 }
@@ -326,6 +343,7 @@ async function main() {
     gastos_senado_ingresados: 0,
     gastos_camara_ingresados: 0,
     normalization: {},
+    promotion: {},
     errores: [],
   };
   const snapshot = {

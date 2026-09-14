@@ -26,6 +26,25 @@ describe("resumen agregado de Transparencia Activa", () => {
     expect(summary).not.toHaveProperty("rows");
   });
 
+  it("marca como revisión los cortes con saltos anómalos de volumen", () => {
+    const summary = buildCpltTransparencySummary([
+      { nombre_completo: "Ana Pérez", organo_nombre: "Municipalidad A", tipo_contrato: "Planta", cargo: "Analista", remuneracion_bruta_mensual: 100, fuente_periodo: "2026-06" },
+      ...Array.from({ length: 4 }, (_, index) => ({
+        nombre_completo: `Persona ${index}`,
+        organo_nombre: "Municipalidad A",
+        tipo_contrato: "Planta",
+        cargo: "Analista",
+        remuneracion_bruta_mensual: 100,
+        fuente_periodo: "2026-07",
+      })),
+    ], [], "2026-07-01T00:00:00.000Z");
+
+    expect(summary.periods.at(-1)).toEqual(expect.objectContaining({
+      comparisonStatus: "review",
+      comparisonNote: expect.stringContaining("cuatro veces"),
+    }));
+  });
+
   it("detecta cambios de organismo y cargo aunque la fila cambie de organismo", () => {
     const summary = buildCpltTransparencySummary([
       { nombre_completo: "Ana Pérez", organo_nombre: "Municipalidad A", tipo_contrato: "Planta", cargo: "Analista", remuneracion_bruta_mensual: 100, fuente_periodo: "2026-01" },

@@ -53,6 +53,19 @@ function sortedPeriods(values) {
   return [...values].sort((left, right) => left.localeCompare(right));
 }
 
+function periodQuality(currentRows, previousRows) {
+  if (previousRows === null || previousRows === 0) return {
+    status: "baseline",
+    reason: "No existe un corte anterior comparable.",
+  };
+  const ratio = currentRows / previousRows;
+  if (ratio >= 4 || ratio <= 0.25) return {
+    status: "review",
+    reason: "La cantidad de registros cambia más de cuatro veces respecto del corte anterior.",
+  };
+  return { status: "comparable", reason: null };
+}
+
 function coverageSummaryOf(coverage) {
   const coverageRows = Array.isArray(coverage) ? coverage : [];
   return {
@@ -156,6 +169,8 @@ export function buildCpltTransparencySummary(rows, coverage, generatedAt) {
   const monthly = periodList.map((period, index) => {
     const current = periods.get(period);
     const previousPeriod = periodList[index - 1] ?? null;
+    const previousRows = previousPeriod === null ? null : periods.get(previousPeriod)?.rows ?? 0;
+    const quality = periodQuality(current?.rows ?? 0, previousRows);
     const currentPeople = peopleByPeriod.get(period) ?? new Set();
     const previousPeople = previousPeriod ? peopleByPeriod.get(previousPeriod) ?? new Set() : new Set();
     const newRecords = [...currentPeople].filter((key) => !previousPeople.has(key)).length;
@@ -198,6 +213,8 @@ export function buildCpltTransparencySummary(rows, coverage, generatedAt) {
       amountDelta,
       organismChanges,
       roleChanges,
+      comparisonStatus: quality.status,
+      comparisonNote: quality.reason,
       contracts: current?.contracts ?? {},
     };
   });
@@ -243,8 +260,10 @@ export function buildCpltTransparencySummary(rows, coverage, generatedAt) {
  */
 export function buildCpltAggregateSummary(stats, coverage, generatedAt) {
   const periodList = sortedPeriods(stats.periods?.keys?.() ?? []);
-  const periods = periodList.map((period) => {
+  const periods = periodList.map((period, index) => {
     const current = stats.periods.get(period);
+    const previousPeriod = periodList[index - 1] ?? null;
+    const quality = periodQuality(current.rows, previousPeriod === null ? null : stats.periods.get(previousPeriod)?.rows ?? 0);
     return {
       period,
       rows: current.rows,
@@ -260,6 +279,8 @@ export function buildCpltAggregateSummary(stats, coverage, generatedAt) {
       amountDelta: null,
       organismChanges: null,
       roleChanges: null,
+      comparisonStatus: quality.status,
+      comparisonNote: quality.reason,
       contracts: current.contracts,
     };
   });

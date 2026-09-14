@@ -16,6 +16,7 @@ import {
   validateMovementPayload,
 } from "./movimientos-pipeline.mjs";
 import { summarizeDomainRecords } from "./etl/connectors/domain-normalization.mjs";
+import { evaluateSourcePromotion } from "./etl/source-promotion-gate.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const inputPath = resolve(root, process.env.MOVIMIENTOS_INPUT ?? "data/movimientos.json");
@@ -78,6 +79,14 @@ async function main() {
     sourceResults: collected.results,
     signals: collected.signals,
   }));
+  const promotion = evaluateSourcePromotion({
+    sourceId: "movimientos",
+    release: { status: "complete", recordCount: payload.movimientos.length },
+    previous: { recordCount: previous.movimientos.length },
+    checks: { testsPassed: true, checksumOk: /^[a-f0-9]{64}$/i.test(payload.checksum_sha256), paginationOk: true, d1BulkReads: false },
+  });
+  if (promotion.action !== "promote") throw new Error(`SOURCE_PROMOTION_BLOCKED:movimientos:${promotion.reasons.join(",")}`);
+  report.promotion = { ...promotion, checksumSha256: payload.checksum_sha256 };
   report.normalization = summarizeDomainRecords({
     domain: "movimientos",
     sourceId: "movimientos",

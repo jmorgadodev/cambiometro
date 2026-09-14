@@ -81,6 +81,27 @@ parcialmente recorrible.
 6. **Movimientos:** tiene 82 filas públicas, pero no aparece en el catálogo
    general de fuentes; debe mantener su propio manifiesto y estado de frescura.
 
+### Revisión específica del resumen de remuneraciones
+
+El archivo de producción consultado (`transparency-summary.json`) declara
+`comparisonsAvailable: false`. Por eso los campos de nuevos registros,
+registros ausentes y cambios de monto aparecen sin cálculo; no representan
+un resultado igual a cero. El generador de releases sí contiene el cálculo
+completo cuando recibe los registros históricos, por lo que la próxima
+publicación debe incluir ese resumen verificable o conservar el anterior.
+
+En el snapshot local central se observaron 2.110.434 filas. La distribución
+incluye 75.998 filas en 2026-06, 578.446 en 2026-07, 46.657 en 2026-08 y
+123 en 2026-09. También hay 2.884 períodos posteriores al corte del
+diagnóstico. Julio queda marcado como salto anómalo y agosto/septiembre como
+cortes que requieren revisión; no se deben presentar como una evolución
+normal ni utilizar para afirmar altas, bajas o cambios de sueldo sin validar
+el release original.
+
+La interfaz de Remuneraciones deja de mostrar la gráfica mensual y la tabla de
+12 cortes. Mantiene sólo el estado del último corte y sus tres indicadores
+cuando el release trae una comparación válida.
+
 ## Decisión de normalización
 
 La rama incorpora un contrato local, aún sin conexión al publicador:
@@ -94,6 +115,10 @@ La rama incorpora un contrato local, aún sin conexión al publicador:
 - Los ETL parlamentarios y de Movimientos registran ahora un resumen de
   categorías e incidencias en su reporte interno; las filas crudas siguen
   siendo el release canónico y no se duplican en R2.
+- La promoción por fuente queda protegida por una compuerta que exige pruebas,
+  checksum, paginación y ausencia de lecturas masivas D1. Un release vacío,
+  fallido o con caída anómala conserva el anterior; una fuente parcial queda
+  en espera hasta una reconciliación explícita.
 - El registro original se conserva por referencia y nunca se reemplaza.
 - `0`, `null`, “no informado” y valor inválido quedan en estados distintos.
 - No se fusionan personas por nombre ni se corrigen releases fallidos.

@@ -1,3 +1,6 @@
+import { createHash } from "node:crypto";
+import { stableStringify } from "./core.mjs";
+
 /**
  * Guarda de publicación por fuente.
  *
@@ -37,11 +40,20 @@ export function validateSourceRelease({
     throw new Error(`SOURCE_RELEASE_UNEXPECTED_DROP:${sourceId}:${records.length}/${previousRecords.length}`);
   }
 
+  const checksum = createHash("sha256");
+  [...records]
+    .sort((left, right) => String(left.id).localeCompare(String(right.id)))
+    .forEach((record, index) => {
+      if (index > 0) checksum.update("\n");
+      checksum.update(stableStringify(record));
+    });
+
   return {
     sourceId,
     recordCount: records.length,
     previousCount: previousRecords.length,
     preservedHistory: preserveHistory,
+    checksumSha256: checksum.digest("hex"),
     status: "valid",
   };
 }

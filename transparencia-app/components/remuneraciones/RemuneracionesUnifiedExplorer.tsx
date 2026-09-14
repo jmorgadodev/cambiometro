@@ -260,7 +260,7 @@ export default function RemuneracionesUnifiedExplorer() {
           <nav className="remuneration-module-nav" aria-label="Secciones de remuneraciones">
             <a href="#buscar-remuneraciones">Buscar</a>
             <a href="#fuentes-remuneraciones">Fuentes</a>
-            <a href="#historial-transparencia">Historial mensual</a>
+            <a href="#estado-transparencia">Estado del corte</a>
           </nav>
 
           <section id="buscar-remuneraciones" className="remuneration-module remuneration-module--search" aria-labelledby="buscar-remuneraciones-title">

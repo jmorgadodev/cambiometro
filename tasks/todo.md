@@ -24,7 +24,8 @@
 - [~] N4: guardia de crecimiento R2 y conservación de la versión de rollback
       activos; queda pendiente registrar tamaño comprimido proyectado por cada
       nuevo release.
-- [ ] N5: validar y promover cada bloque con rollback.
+- [~] N5: compuerta de promoción por fuente y rollback lógico implementados;
+      queda ejecutar los smoke productivos por bloque antes de publicar.
 
 ### Decisión de almacenamiento
 
