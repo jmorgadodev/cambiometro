@@ -149,6 +149,6 @@ flowchart TD
 ## 4. Append-only y Versionado
 
 * **Inmutabilidad:** los datasets publicados son append-only; el histórico se publica en Releases de GitHub (`data-{fuente}-{año}`) y los períodos calientes en el bucket R2 `transparencia-public-data`.
-* **Límites del publicador:** el publicador aplica un límite interno de 8 GiB: archiva objetos fríos al 80 % y bloquea crecimiento al 90 %.
+* **Límites del publicador:** el publicador toma como techo los 10 GB del nivel gratuito de R2: archiva objetos fríos al 80 % y bloquea crecimiento al 95 %, conservando un margen operativo.
 * **Materialización:** las tablas relacionales en D1 (`transparencia-db`) se materializan desde las particiones inmutables, de modo que el estado vigente siempre es reconstruible desde el lake.
 * **Exclusión de Git:** las particiones y archivos de trabajo del lake se excluyen del repositorio; el código y los scripts de regeneración son la fuente de verdad versionada.

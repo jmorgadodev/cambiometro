@@ -1,4 +1,8 @@
-const DEFAULT_LIMIT_BYTES = 8 * 1024 * 1024 * 1024;
+// Cloudflare R2 Standard includes 10 GB-month of storage in the free tier.
+// Keep a 5% headroom before blocking growth so a valid release can publish
+// while the next release is still stopped before it can create billable usage.
+const DEFAULT_LIMIT_BYTES = 10_000_000_000;
+const GROWTH_BLOCK_RATIO = 0.95;
 
 function latestPrefixes(assets) {
   const latest = new Map();
@@ -107,7 +111,7 @@ export function planR2Publication(assets, previousInventory = { objects: [] }, l
     projectedBytes = [...desired.values()].reduce((total, object) => total + object.size, 0);
     ratio = projectedBytes / limitBytes;
   }
-  if (ratio >= 0.9 && projectedBytes > previousBytes) throw new Error("R2_GROWTH_BLOCKED_AT_90_PERCENT");
+  if (ratio >= GROWTH_BLOCK_RATIO && projectedBytes > previousBytes) throw new Error("R2_GROWTH_BLOCKED_AT_95_PERCENT");
 
   const puts = hot
     .filter((asset) => previous.get(asset.key)?.checksumSha256 !== asset.checksumSha256)
