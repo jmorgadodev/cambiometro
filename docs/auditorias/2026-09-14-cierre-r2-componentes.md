@@ -728,3 +728,12 @@ La ejecución contra el inventario remoto y el catálogo vigente encontró 21
 claves referenciadas y mantuvo los tres grupos duplicados como
 `unreferenced-by-supplied-set`. Esto es evidencia suficiente para abrir una
 revisión de retención, pero no para eliminar objetos durante esta fase.
+
+La comprobación adicional de los manifiestos de fuente vigentes de Cámara y
+Contraloría tampoco encontró referencias a las cuatro claves duplicadas. La
+revisión se hizo sobre los manifiestos descargados en modo lectura y también
+contra el catálogo vigente: cada clave obtuvo `references: 0`. El resultado
+refuerza la clasificación de candidato no referenciado, pero se mantiene la
+regla de no borrar durante esta auditoría; todavía falta comprobar la política
+de retención histórica y conservar un inventario reproducible antes de una
+limpieza explícita.
