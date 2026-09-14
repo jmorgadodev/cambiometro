@@ -1,5 +1,7 @@
-import { readFileSync } from "node:fs";
-import { resolve } from "node:path";
+import { mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 
 function readJson(path) {
@@ -110,13 +112,39 @@ function option(name) {
   return index >= 0 ? process.argv[index + 1] : null;
 }
 
+function hasFlag(name) {
+  return process.argv.includes(name);
+}
+
+function downloadRemoteCatalog(bucket, key, directory) {
+  const file = join(directory, "catalog.json");
+  const wrangler = resolve("node_modules/wrangler/bin/wrangler.js");
+  const result = spawnSync(process.execPath, [wrangler, "r2", "object", "get", `${bucket}/${key}`, "--file", file, "--remote"], {
+    encoding: "utf8",
+    stdio: ["ignore", "pipe", "pipe"],
+  });
+  if (result.status !== 0) {
+    throw new Error(`R2_CATALOG_READ_FAILED:${result.stderr?.trim() ?? result.error?.message ?? `codigo ${result.status}`}`);
+  }
+  return file;
+}
+
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
   const remotePath = option("--remote");
   const localPath = option("--local") ?? "data/lake/catalog/v1/manifest.json";
-  if (!remotePath) {
-    console.error("Uso: node scripts/audit-r2-catalog.mjs --remote <manifest-r2.json> [--local <manifest-local.json>]");
+  const remoteR2 = hasFlag("--remote-r2");
+  const bucket = option("--bucket") ?? "transparencia-public-data";
+  const key = option("--key") ?? "catalog/v1/manifest.json";
+  if (!remotePath && !remoteR2) {
+    console.error("Uso: node scripts/audit-r2-catalog.mjs --remote <manifest-r2.json> [--local <manifest-local.json>] | --remote-r2 [--bucket <bucket>] [--key <key>]");
     process.exitCode = 2;
   } else {
-    console.log(JSON.stringify(compareR2Catalogs(readJson(remotePath), readJson(localPath)), null, 2));
+    const temp = remoteR2 ? mkdtempSync(join(tmpdir(), "cambiometro-r2-catalog-")) : null;
+    try {
+      const downloadedPath = remoteR2 ? downloadRemoteCatalog(bucket, key, temp) : null;
+      console.log(JSON.stringify(compareR2Catalogs(readJson(downloadedPath ?? remotePath), readJson(localPath)), null, 2));
+    } finally {
+      if (temp) rmSync(temp, { recursive: true, force: true });
+    }
   }
 }

@@ -378,3 +378,13 @@ pendiente es separar explícitamente las variantes de Cámara y recuperar o
 reconstruir los manifiestos productivos ausentes de Senado sin borrar la
 historia local. Los conteos de gastos no requieren una corrección de alcance
 inmediata; Senado votaciones sí requiere un ciclo incremental por fuente.
+
+La comparación quedó operable sin preparar un archivo remoto manual:
+
+```bash
+npm run audit:r2:catalog -- --remote-r2
+```
+
+El modo remoto descarga únicamente `catalog/v1/manifest.json` a un directorio
+temporal, lo compara con `data/lake/catalog/v1/manifest.json` y lo elimina al
+terminar. No consulta D1 ni descarga las particiones de datos.

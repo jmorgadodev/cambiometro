@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { compareR2Catalogs } from "../scripts/audit-r2-catalog.mjs";
 
 describe("auditoría acotada del catálogo R2", () => {
+  it("ofrece un modo remoto explícito sin romper el modo por archivo", () => {
+    const script = readFileSync(resolve("scripts/audit-r2-catalog.mjs"), "utf8");
+    expect(script).toContain("--remote-r2");
+    expect(script).toContain("R2_CATALOG_READ_FAILED");
+    expect(script).toContain("--remote");
+  });
+
   it("distingue variantes remotas que faltan en el catálogo local", () => {
     const report = compareR2Catalogs(
       {
