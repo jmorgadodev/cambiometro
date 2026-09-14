@@ -61,6 +61,9 @@ jobs:
       GH_TOKEN: ${{ github.token }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+      # La proyección central supera los dos millones de filas. La etapa de
+      # índices necesita más heap que el límite predeterminado de Node.
+      NODE_OPTIONS: --max-old-space-size=8192
     steps:
       - uses: actions/checkout@v5
       - uses: actions/setup-node@v5
