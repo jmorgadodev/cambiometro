@@ -676,6 +676,21 @@ Ambos casos quedan clasificados por el catálogo R2 como `frescura_o_conteo`.
 La presentación pública debe mantener separado el corte vigente del histórico
 y mostrar DIPRES como información agregada, no como fichas individuales.
 
+## Cierre físico para historiales — 2026-09-14
+
+La compuerta de historial se ejecutó con lectura física de R2, sin recorrer el
+universo de registros:
+
+- **ChileCompra:** la partición `2026/06` está catalogada, pero su manifiesto y
+  artefacto no están disponibles físicamente.
+- **InfoLobby:** las particiones `2026/07` y `2026/08` están catalogadas, pero
+  sus manifiestos y artefactos no están disponibles físicamente.
+
+Ambas fuentes quedan en `catalogued_without_manifest` y
+`promotionAllowed: false`. El historial no se genera desde el snapshot local
+ni se publica con ceros; se conserva el último release válido hasta que la
+evidencia R2 esté completa.
+
 ## Validación posterior — 2026-09-14
 
 La suite completa se ejecutó con un margen de timeout adecuado para las
