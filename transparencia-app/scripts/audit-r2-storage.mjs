@@ -14,6 +14,14 @@ function hasFlag(name) {
   return process.argv.includes(name);
 }
 
+function options(name) {
+  const values = [];
+  for (let index = 0; index < process.argv.length; index += 1) {
+    if (process.argv[index] === name && process.argv[index + 1]) values.push(process.argv[index + 1]);
+  }
+  return values;
+}
+
 function readInventory(path) {
   return JSON.parse(readFileSync(resolve(path), "utf8"));
 }
@@ -57,11 +65,16 @@ function main() {
     if (!suppliedPath) downloadInventory(option("--bucket", "transparencia-public-data"), option("--key", "catalog/v1/storage.json"), path);
     const referencesPath = option("--references");
     const catalogPath = option("--catalog");
+    const sourceManifestPaths = options("--source-manifest").map((value) => resolve(value));
     const inventory = readInventory(path);
     const inventoryKeys = new Set((inventory.objects ?? []).map((object) => String(object?.key ?? "").trim()).filter(Boolean));
     const explicitReferences = readReferences(referencesPath);
     const catalogReferences = catalogPath ? collectCatalogReferences(readInventory(catalogPath), inventoryKeys) : [];
-    const referencedKeys = new Set([...(explicitReferences ?? []), ...catalogReferences]);
+    const sourceManifestReferences = new Set();
+    for (const manifestPath of sourceManifestPaths) {
+      collectCatalogReferences(readInventory(manifestPath), inventoryKeys, sourceManifestReferences);
+    }
+    const referencedKeys = new Set([...(explicitReferences ?? []), ...catalogReferences, ...sourceManifestReferences]);
     const summary = summarizeR2Storage(readInventory(path), {
       warningRatio: Number(option("--warning-ratio", "0.8")),
       growthBlockRatio: Number(option("--growth-block-ratio", "0.9")),
@@ -72,7 +85,9 @@ function main() {
       inventoryPath: suppliedPath ? resolve(suppliedPath) : null,
       referencesPath: referencesPath ? resolve(referencesPath) : null,
       catalogPath: catalogPath ? resolve(catalogPath) : null,
-      referencedKeyCount: referencesPath || catalogPath ? referencedKeys.size : null,
+      sourceManifestPaths,
+      referencedKeyCount: referencesPath || catalogPath || sourceManifestPaths.length ? referencedKeys.size : null,
+      sourceManifestReferenceCount: sourceManifestPaths.length ? sourceManifestReferences.size : null,
       ...summary,
     }, null, 2));
     if (hasFlag("--fail-on-growth-block") && !summary.growthAllowed) process.exitCode = 2;
