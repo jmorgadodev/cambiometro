@@ -6,6 +6,7 @@ const scopeArgument = process.argv.find((argument) => argument.startsWith("--sco
 const scope = String(scopeArgument?.slice("--scope=".length) || "municipal").toLowerCase();
 if (!new Set(["municipal", "central"]).has(scope)) throw new Error(`CPLT_UNKNOWN_SCOPE: ${scope}`);
 const artifactRoot = resolve("data", scope === "central" ? "cplt-central-artifacts" : "cplt-artifacts");
+const artifactPrefix = scope === "central" ? "cplt-central-" : "cplt-";
 const output = resolve("data/raw", scope === "central" ? "transparencia_activa_central" : "transparencia_activa");
 const projections = join(output, "projections", "funcionarios-v1");
 rmSync(output, { recursive: true, force: true });
@@ -15,7 +16,7 @@ mkdirSync(join(output, "coverage"), { recursive: true });
 
 const recordsByFile = new Map();
 for (const category of categories) {
-  const source = join(artifactRoot, `cplt-${category}`);
+  const source = join(artifactRoot, `${artifactPrefix}${category}`);
   if (!existsSync(source)) throw new Error(`CPLT_ARTIFACT_MISSING: ${category}`);
   const normalized = category.toLowerCase();
   writeFileSync(join(output, "validation", `${normalized}.json`), readFileSync(join(source, "validation.json")));
