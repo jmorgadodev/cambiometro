@@ -558,3 +558,32 @@ Por tanto, no se debe subir el snapshot local antiguo ni tratar la reparación
 como una simple restauración de objetos: se requiere un nuevo release oficial,
 con validación de conteos, checksum y margen de almacenamiento antes de
 publicarlo.
+
+## Historiales desde páginas R2 y protección de crecimiento — 2026-09-14
+
+Se agregó el módulo local `scripts/etl/r2-history.mjs` para construir
+historiales desde páginas declaradas por manifiestos R2. El lector:
+
+- solicita únicamente las claves listadas en `pages[]`;
+- verifica `releaseId`/`version`, checksum, conteo de cada página y total del
+  manifiesto;
+- rechaza páginas duplicadas o incompletas;
+- conserva cada fila original;
+- calcula altas, salidas observadas, cambios de monto y cambios de organismo;
+- no consulta D1 ni se ejecuta en el navegador.
+
+La protección de almacenamiento quedó cubierta por pruebas: una proyección que
+eleva el inventario sobre 90% del límite se rechaza con
+`R2_GROWTH_BLOCKED_AT_90_PERCENT`. Los duplicados de checksum sólo se reportan
+como oportunidad de auditoría; no autorizan eliminaciones automáticas.
+
+Estado de validación del checkout después de estos cambios:
+
+- `npm test`: 197 archivos y 1.053 pruebas aprobadas;
+- `npm run check:r2-history`: 6 pruebas aprobadas;
+- `npm run check:movimientos-normalization`: aprobado;
+- `npm run check:legislative-normalization`: aprobado;
+- typecheck, API typecheck y arquitectura estática: aprobados.
+
+Commits reversibles de este bloque: `6522887` y `0c20084`. No se publicó ningún
+release nuevo en R2 ni se modificó D1.
