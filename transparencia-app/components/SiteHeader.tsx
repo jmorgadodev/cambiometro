@@ -169,11 +169,9 @@ export default function SiteHeader({ totalRecords }: SiteHeaderProps) {
             </Link>
 
             <a
-              href="https://link.mercadopago.cl/impulsacv"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/donar"
               className="site-support-link"
-              title="Haz un aporte voluntario para mantener los servidores y la fiscalización independiente"
+              title="Conoce la misión del proyecto y cómo apoyar su independencia"
             >
               Apoyar Proyecto
             </a>
@@ -341,9 +339,7 @@ export default function SiteHeader({ totalRecords }: SiteHeaderProps) {
               <span>𝕏 @cambiometro</span>
             </a>
             <a
-              href="https://link.mercadopago.cl/impulsacv"
-              target="_blank"
-              rel="noopener noreferrer"
+              href="/donar"
               className="btn btn-primary drawer-donate-btn"
               onClick={() => setDrawerOpen(false)}
             >
