@@ -411,3 +411,32 @@ La política conserva la versión activa y una versión de rollback; por eso no
 se ejecutó ninguna eliminación. Antes de retirar una versión será necesario
 confirmar qué manifiesto la referencia y cuánto tiempo de rollback se desea
 mantener.
+
+## Remuneraciones: comparación e historial verificados — 2026-09-14
+
+La interfaz de Remuneraciones conserva la búsqueda paginada y la ficha
+individual, pero ya no renderiza el bloque global de “Evolución mensual” ni
+“Ver detalle mensual de los últimos 12 cortes”. El detalle útil queda en la
+comparación del corte seleccionado.
+
+Para el corte 2026-06 frente a 2026-05, los contadores y las tablas físicas
+coinciden:
+
+| Categoría | Contador publicado | Filas verificadas |
+| --- | ---: | ---: |
+| Nuevos registros | 52 | 52 |
+| Registros que ya no aparecen | 50 | 50 |
+| Cambios de monto | 438 | 438 |
+
+Las 438 filas de cambio contienen monto anterior y actual; no se convierten
+valores ausentes en cero. El índice de historial tiene 4.473 entradas y sus
+meses están ordenados. La auditoría se ejecuta con:
+
+```bash
+npm run check:remuneraciones-history
+```
+
+Esta guarda sólo revisa artefactos públicos ya construidos: no ejecuta ETL,
+no consulta D1 y no descarga el universo desde R2. Si un próximo build deja un
+contador sin su tabla, una fila de cambio sin ambos montos o un historial
+desordenado, la verificación falla antes de promoverlo.
