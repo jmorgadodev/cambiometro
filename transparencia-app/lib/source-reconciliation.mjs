@@ -33,6 +33,30 @@ function timestamp(value) {
   return Number.isFinite(parsed) ? parsed : null;
 }
 
+function normalizeComponents(value) {
+  if (Array.isArray(value)) {
+    return value
+      .filter((component) => component && typeof component === "object")
+      .map((component) => ({
+        id: String(component.id ?? component.sourceId ?? "").trim() || null,
+        sourceId: String(component.sourceId ?? "").trim() || null,
+        label: String(component.label ?? "").trim() || null,
+        recordCount: Number.isSafeInteger(component.recordCount) ? component.recordCount : null,
+        includedInRecordCount: component.includedInRecordCount === true,
+      }));
+  }
+  if (value && typeof value === "object") {
+    return Object.entries(value).map(([id, recordCount]) => ({
+      id,
+      sourceId: null,
+      label: null,
+      recordCount: Number.isSafeInteger(recordCount) ? recordCount : null,
+      includedInRecordCount: true,
+    }));
+  }
+  return [];
+}
+
 function hasNewerProduction(production, local) {
   const productionAt = timestamp(production?.lastUpdated ?? production?.generatedAt);
   const localAt = timestamp(local?.generatedAt ?? local?.lastUpdated);
@@ -85,6 +109,7 @@ function rowFor(production, local, localSources) {
     healthMismatch: local?.healthRecordCount !== null
       && local?.healthRecordCount !== undefined
       && Number(local.healthRecordCount) !== Number(local.recordCount),
+    productionComponents: normalizeComponents(production?.components),
     localCategories: categories,
     localComponents: localParts.filter((source) => canonicalId(source.id) !== id).map((source) => ({
       id: canonicalId(source.id),
@@ -126,6 +151,7 @@ export function productionSourcesPayload(payload) {
     status: source.status ?? null,
     lastUpdated: source.lastUpdated ?? source.generatedAt ?? null,
     foundPeriods: Array.isArray(source.foundPeriods) ? source.foundPeriods : [],
+    components: normalizeComponents(source.components),
   }));
 }
 

@@ -122,6 +122,9 @@ devuelve 49 frente a 58.751; ambos permanecen bloqueados para promoción como
 universos completos. La ruta de historial de remuneraciones todavía responde
 404 en producción porque esta rama no se ha desplegado; queda pendiente un
 smoke posterior a una promoción explícita.
+La matriz de auditoría conserva ahora los componentes declarados por
+producción, incluyendo si sus conteos están incluidos o excluidos del total,
+para no confundir asistencia, votaciones y gastos con remuneraciones.
 
 ## Decisión de normalización
 

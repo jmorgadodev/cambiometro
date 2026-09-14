@@ -41,6 +41,27 @@ describe("auditoría de reconciliación producción/R2/local", () => {
     expect(sourceCategories("senado")).toEqual(["remuneraciones", "asesorias", "gastos", "votaciones"]);
   });
 
+  it("conserva los componentes productivos para reconciliar su alcance", () => {
+    const report = reconcileSourceSnapshots({
+      production: [{
+        id: "camara",
+        recordCount: 58_751,
+        status: "partial",
+        components: [
+          { id: "asistencia", sourceId: "camara", label: "Asistencia", recordCount: 54_538, includedInRecordCount: true },
+          { id: "votaciones", sourceId: "camara", label: "Votaciones", recordCount: 4_058, includedInRecordCount: true },
+          { id: "gastos", sourceId: "gastos_camara", label: "Gastos operacionales", recordCount: 16_275, includedInRecordCount: false },
+        ],
+      }] as never,
+      local: [],
+    });
+
+    expect(report.rows[0].productionComponents).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "asistencia", recordCount: 54_538, includedInRecordCount: true }),
+      expect.objectContaining({ id: "gastos", recordCount: 16_275, includedInRecordCount: false }),
+    ]));
+  });
+
   it("mantiene el conteo del catálogo y deja source-health como señal de snapshot", () => {
     const local = mergeLocalHealth(
       {
