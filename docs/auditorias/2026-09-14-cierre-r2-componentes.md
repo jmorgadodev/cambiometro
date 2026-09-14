@@ -507,3 +507,18 @@ modifica R2. Antes de ejecutar una restauración futura habrá que intersectar
 esas operaciones con las claves faltantes comprobadas por
 `audit:r2:closure -- --source ley-19862 --verify-artifacts` y usar una
 credencial de escritura autorizada.
+
+## ChileCompra: separación de corte, histórico y archivo local — 2026-09-14
+
+La reconciliación detectó que el catálogo local de R2 contiene 1.915.039 filas
+de archivo y variantes de ChileCompra. Ese número no corresponde al corte
+canónico que debe mostrar la experiencia pública. Se ajustó
+`listPublishedSourceManifests` para conservar como referencias públicas:
+
+- corte canónico: 74.142 registros;
+- histórico declarado: 888.693 registros;
+- archivo local observado: 1.915.039 registros, sólo para auditoría.
+
+El archivo no se eliminó ni se reemplazó. La prueba de pre-lanzamiento y la
+batería completa quedan verdes después del ajuste: 193 archivos y 1.031
+pruebas aprobadas.
