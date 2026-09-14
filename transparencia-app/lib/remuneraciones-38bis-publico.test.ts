@@ -1,6 +1,8 @@
 import release from "@/data/remuneraciones-38bis-publico.json";
 import audit from "@/data/remuneraciones-38bis-publico-audit.json";
 import manifest from "@/data/remuneraciones-38bis-publico-manifest.json";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 
 describe("release público de remuneraciones 38 bis", () => {
@@ -27,8 +29,22 @@ describe("release público de remuneraciones 38 bis", () => {
       periodo_anterior: "2026-05",
       entradas: 52,
       salidas_observadas: 50,
-      cambios: 439,
+      cambios: 438,
     });
     expect(manifest.periodos[0].comparison).toEqual(manifest.comparison);
+  });
+
+  it("mantiene las tres listas comparativas completas y no confunde ausencia de monto con cero", () => {
+    const comparisonPath = join(process.cwd(), "public", "data", "remuneraciones-38bis", "months", manifest.mes, "comparison.json");
+    const comparison = JSON.parse(readFileSync(comparisonPath, "utf8")) as {
+      entradas: unknown[];
+      salidas_observadas: unknown[];
+      cambios: Array<{ bruto_anterior: number | null; bruto_actual: number | null }>;
+    };
+
+    expect(comparison.entradas).toHaveLength(manifest.comparison.entradas);
+    expect(comparison.salidas_observadas).toHaveLength(manifest.comparison.salidas_observadas);
+    expect(comparison.cambios).toHaveLength(manifest.comparison.cambios);
+    expect(comparison.cambios.every((row) => row.bruto_anterior !== null && row.bruto_actual !== null)).toBe(true);
   });
 });

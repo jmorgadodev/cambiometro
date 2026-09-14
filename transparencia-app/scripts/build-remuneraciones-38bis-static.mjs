@@ -110,8 +110,8 @@ function compareDetails(previousRows, currentRows, previousPeriod = null) {
     const previous = previousByKey.get(rowKey(row));
     if (!previous) {
       entradas.push({ tipo: "entrada", ...row, bruto_anterior: null, bruto_actual: row.bruto_mensual, diferencia: null });
-    } else if (previous.bruto_mensual !== row.bruto_mensual) {
-      cambios.push({ tipo: "cambio", ...row, bruto_anterior: previous.bruto_mensual, bruto_actual: row.bruto_mensual, diferencia: (row.bruto_mensual ?? 0) - (previous.bruto_mensual ?? 0) });
+    } else if (previous.bruto_mensual !== null && row.bruto_mensual !== null && previous.bruto_mensual !== row.bruto_mensual) {
+      cambios.push({ tipo: "cambio", ...row, bruto_anterior: previous.bruto_mensual, bruto_actual: row.bruto_mensual, diferencia: row.bruto_mensual - previous.bruto_mensual });
     }
   }
   const salidasObservadas = [];

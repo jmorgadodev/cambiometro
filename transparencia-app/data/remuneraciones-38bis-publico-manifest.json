@@ -3007,7 +3007,7 @@
         "periodo_anterior": "2026-05",
         "entradas": 52,
         "salidas_observadas": 50,
-        "cambios": 439
+        "cambios": 438
       },
       "manifest_key": "months/2026-06/manifest.json",
       "comparison_key": "months/2026-06/comparison.json"
@@ -3022,7 +3022,7 @@
         "periodo_anterior": "2026-04",
         "entradas": 95,
         "salidas_observadas": 65,
-        "cambios": 227
+        "cambios": 221
       },
       "manifest_key": "months/2026-05/manifest.json",
       "comparison_key": "months/2026-05/comparison.json"
@@ -3037,7 +3037,7 @@
         "periodo_anterior": "2026-03",
         "entradas": 393,
         "salidas_observadas": 1492,
-        "cambios": 606
+        "cambios": 589
       },
       "manifest_key": "months/2026-04/manifest.json",
       "comparison_key": "months/2026-04/comparison.json"
@@ -3052,7 +3052,7 @@
         "periodo_anterior": "2026-02",
         "entradas": 1579,
         "salidas_observadas": 420,
-        "cambios": 778
+        "cambios": 773
       },
       "manifest_key": "months/2026-03/manifest.json",
       "comparison_key": "months/2026-03/comparison.json"
@@ -3067,7 +3067,7 @@
         "periodo_anterior": "2026-01",
         "entradas": 35,
         "salidas_observadas": 52,
-        "cambios": 249
+        "cambios": 247
       },
       "manifest_key": "months/2026-02/manifest.json",
       "comparison_key": "months/2026-02/comparison.json"
@@ -3097,7 +3097,7 @@
         "periodo_anterior": "2025-11",
         "entradas": 57,
         "salidas_observadas": 60,
-        "cambios": 489
+        "cambios": 488
       },
       "manifest_key": "months/2025-12/manifest.json",
       "comparison_key": "months/2025-12/comparison.json"
@@ -3112,7 +3112,7 @@
         "periodo_anterior": "2025-10",
         "entradas": 79,
         "salidas_observadas": 88,
-        "cambios": 80
+        "cambios": 79
       },
       "manifest_key": "months/2025-11/manifest.json",
       "comparison_key": "months/2025-11/comparison.json"
@@ -3127,7 +3127,7 @@
         "periodo_anterior": "2025-09",
         "entradas": 123,
         "salidas_observadas": 139,
-        "cambios": 484
+        "cambios": 483
       },
       "manifest_key": "months/2025-10/manifest.json",
       "comparison_key": "months/2025-10/comparison.json"
@@ -3142,7 +3142,7 @@
         "periodo_anterior": "2025-08",
         "entradas": 64,
         "salidas_observadas": 56,
-        "cambios": 517
+        "cambios": 515
       },
       "manifest_key": "months/2025-09/manifest.json",
       "comparison_key": "months/2025-09/comparison.json"
@@ -3172,7 +3172,7 @@
         "periodo_anterior": "2025-06",
         "entradas": 60,
         "salidas_observadas": 64,
-        "cambios": 499
+        "cambios": 496
       },
       "manifest_key": "months/2025-07/manifest.json",
       "comparison_key": "months/2025-07/comparison.json"
@@ -3187,7 +3187,7 @@
         "periodo_anterior": "2025-05",
         "entradas": 83,
         "salidas_observadas": 75,
-        "cambios": 491
+        "cambios": 486
       },
       "manifest_key": "months/2025-06/manifest.json",
       "comparison_key": "months/2025-06/comparison.json"
@@ -3247,7 +3247,7 @@
         "periodo_anterior": "2025-01",
         "entradas": 37,
         "salidas_observadas": 43,
-        "cambios": 229
+        "cambios": 227
       },
       "manifest_key": "months/2025-02/manifest.json",
       "comparison_key": "months/2025-02/comparison.json"
@@ -3273,6 +3273,6 @@
     "periodo_anterior": "2026-05",
     "entradas": 52,
     "salidas_observadas": 50,
-    "cambios": 439
+    "cambios": 438
   }
 }

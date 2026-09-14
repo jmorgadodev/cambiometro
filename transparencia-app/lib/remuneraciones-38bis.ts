@@ -91,7 +91,7 @@ export function compareRemuneraciones38Bis(
     const old = previousByKey.get(key);
     if (!old) {
       entradas.push(deltaFrom(row, "entrada", null));
-    } else if (old.bruto_mensual !== row.bruto_mensual) {
+    } else if (old.bruto_mensual !== null && row.bruto_mensual !== null && old.bruto_mensual !== row.bruto_mensual) {
       cambios.push(deltaFrom(row, "cambio", old.bruto_mensual));
     }
   }

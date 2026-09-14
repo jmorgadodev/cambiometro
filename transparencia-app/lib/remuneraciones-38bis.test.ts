@@ -51,8 +51,8 @@ describe("remuneraciones 38 bis", () => {
 
   it("conserva filas repetidas cuando la partida las distingue", () => {
     const previous = release("2026-05", [
-      { partida: "Ministerio A", organismo: "SEREMI", cargo: "ASESOR", nombre: "No reportado", bruto_mensual: null },
-      { partida: "Ministerio B", organismo: "SEREMI", cargo: "ASESOR", nombre: "No reportado", bruto_mensual: null },
+      { partida: "Ministerio A", organismo: "SEREMI", cargo: "ASESOR", nombre: "No reportado", bruto_mensual: 900000 },
+      { partida: "Ministerio B", organismo: "SEREMI", cargo: "ASESOR", nombre: "No reportado", bruto_mensual: 800000 },
     ]);
     const current = release("2026-06", [
       { partida: "Ministerio A", organismo: "SEREMI", cargo: "ASESOR", nombre: "No reportado", bruto_mensual: 1000000 },
@@ -63,6 +63,21 @@ describe("remuneraciones 38 bis", () => {
     expect(result.entradas).toHaveLength(0);
     expect(result.salidasObservadas).toHaveLength(0);
     expect(result.cambios).toHaveLength(2);
+  });
+
+  it("no convierte un monto no publicado en cero al medir cambios", () => {
+    const previous = release("2026-05", [
+      { partida: "Ministerio", organismo: "ORGANISMO A", cargo: "ASESOR", nombre: "Ana Pérez", bruto_mensual: null },
+      { partida: "Ministerio", organismo: "ORGANISMO B", cargo: "ASESOR", nombre: "Bruno Soto", bruto_mensual: 1000000 },
+    ]);
+    const current = release("2026-06", [
+      { partida: "Ministerio", organismo: "ORGANISMO A", cargo: "ASESOR", nombre: "Ana Pérez", bruto_mensual: 1500000 },
+      { partida: "Ministerio", organismo: "ORGANISMO B", cargo: "ASESOR", nombre: "Bruno Soto", bruto_mensual: null },
+    ]);
+
+    const result = compareRemuneraciones38Bis(previous, current);
+
+    expect(result.cambios).toHaveLength(0);
   });
 });
 
