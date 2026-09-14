@@ -737,3 +737,10 @@ refuerza la clasificación de candidato no referenciado, pero se mantiene la
 regla de no borrar durante esta auditoría; todavía falta comprobar la política
 de retención histórica y conservar un inventario reproducible antes de una
 limpieza explícita.
+
+El auditor quedó preparado para repetir esta comprobación con múltiples
+`--source-manifest <archivo.json>`. La ejecución conjunta con el catálogo
+vigente encontró 21 claves referenciadas en total y 2 referencias aportadas
+por los manifiestos de fuente; los tres grupos duplicados conservaron el
+estado `unreferenced-by-supplied-set`. Esto deja la revisión automatizada y
+no cambia la regla de retención: identificar no equivale a eliminar.
