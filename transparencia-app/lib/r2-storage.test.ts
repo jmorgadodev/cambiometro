@@ -38,4 +38,20 @@ describe("auditoría de almacenamiento R2", () => {
     });
     expect(summary.accountingDeltaBytes).toBe(100);
   });
+
+  it("desglosa las versiones de proyección sin tratarlas como candidatas a borrar", () => {
+    const summary = summarizeR2Storage({
+      limitBytes: 10_000,
+      usedBytes: 300,
+      objects: [
+        { key: "projections/funcionarios-v1/versions/v1/a.json", size: 100, checksumSha256: "a" },
+        { key: "projections/funcionarios-v1/versions/v1/b.json", size: 50, checksumSha256: "b" },
+        { key: "projections/funcionarios-v1/versions/v2/a.json", size: 150, checksumSha256: "c" },
+      ],
+    });
+    expect(summary.projectionVersions).toEqual([
+      { dataset: "funcionarios-v1", version: "v1", objects: 2, bytes: 150 },
+      { dataset: "funcionarios-v1", version: "v2", objects: 1, bytes: 150 },
+    ]);
+  });
 });

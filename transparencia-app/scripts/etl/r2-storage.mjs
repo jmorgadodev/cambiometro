@@ -34,6 +34,7 @@ export function summarizeR2Storage(inventory, options = {}) {
   const usedBytes = declaredBytes;
   const checksumGroups = new Map();
   const prefixes = new Map();
+  const projectionVersions = new Map();
   for (const object of objects) {
     if (object.checksumSha256) {
       const group = checksumGroups.get(object.checksumSha256) ?? { count: 0, bytes: 0, size: object.size };
@@ -47,6 +48,15 @@ export function summarizeR2Storage(inventory, options = {}) {
     group.objects += 1;
     group.bytes += object.size;
     prefixes.set(prefix, group);
+
+    const version = object.key.match(/^projections\/([^/]+)\/versions\/([^/]+)\//);
+    if (version) {
+      const key = `${version[1]}@${version[2]}`;
+      const versionGroup = projectionVersions.get(key) ?? { dataset: version[1], version: version[2], objects: 0, bytes: 0 };
+      versionGroup.objects += 1;
+      versionGroup.bytes += object.size;
+      projectionVersions.set(key, versionGroup);
+    }
   }
 
   const duplicateGroups = [...checksumGroups.values()].filter((group) => group.count > 1);
@@ -68,6 +78,8 @@ export function summarizeR2Storage(inventory, options = {}) {
     byPrefix: [...prefixes.entries()]
       .map(([prefix, value]) => ({ prefix, ...value }))
       .sort((left, right) => right.bytes - left.bytes || left.prefix.localeCompare(right.prefix)),
+    projectionVersions: [...projectionVersions.values()]
+      .sort((left, right) => right.bytes - left.bytes || left.dataset.localeCompare(right.dataset) || left.version.localeCompare(right.version)),
     thresholds: { warningRatio, growthBlockRatio },
   };
 }

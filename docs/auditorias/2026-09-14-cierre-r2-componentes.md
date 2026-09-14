@@ -388,3 +388,20 @@ npm run audit:r2:catalog -- --remote-r2
 El modo remoto descarga únicamente `catalog/v1/manifest.json` a un directorio
 temporal, lo compara con `data/lake/catalog/v1/manifest.json` y lo elimina al
 terminar. No consulta D1 ni descarga las particiones de datos.
+
+## Desglose de almacenamiento por versión — 2026-09-14
+
+El preflight remoto se amplió para desglosar las versiones de proyección sin
+marcarlas automáticamente como eliminables. El resultado actual es:
+
+| Dataset | Versión | Objetos | Tamaño aproximado |
+| --- | --- | ---: | ---: |
+| `funcionarios-central-v1` | `2026-09-14T03-51-42-634Z` | 5.121 | 4,48 GB |
+| `funcionarios-v1` | `2026-09-02T03-28-30-598Z` | 1.514 | 2,13 GB |
+| `funcionarios-v1` | `2026-08-30T08-05-27-795Z` | 1.514 | 2,12 GB |
+
+Estas tres versiones explican prácticamente todo el prefijo `projections`.
+La política conserva la versión activa y una versión de rollback; por eso no
+se ejecutó ninguna eliminación. Antes de retirar una versión será necesario
+confirmar qué manifiesto la referencia y cuánto tiempo de rollback se desea
+mantener.
