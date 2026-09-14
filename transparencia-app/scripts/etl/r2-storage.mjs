@@ -37,10 +37,11 @@ export function summarizeR2Storage(inventory, options = {}) {
   const projectionVersions = new Map();
   for (const object of objects) {
     if (object.checksumSha256) {
-      const group = checksumGroups.get(object.checksumSha256) ?? { count: 0, bytes: 0, size: object.size };
+      const group = checksumGroups.get(object.checksumSha256) ?? { checksumSha256: object.checksumSha256, count: 0, bytes: 0, size: object.size, keys: [] };
       group.count += 1;
       group.bytes += object.size;
       group.size = Math.max(group.size, object.size);
+      group.keys.push(object.key);
       checksumGroups.set(object.checksumSha256, group);
     }
     const prefix = object.key.split("/")[0] ?? "";
@@ -75,6 +76,15 @@ export function summarizeR2Storage(inventory, options = {}) {
     objectCount: objects.length,
     duplicateChecksumGroups: duplicateGroups.length,
     duplicateBytes,
+    duplicateGroups: duplicateGroups
+      .map((group) => ({
+        checksumSha256: group.checksumSha256,
+        count: group.count,
+        bytes: group.bytes,
+        reclaimableBytes: group.bytes - group.size,
+        keys: [...group.keys].sort(),
+      }))
+      .sort((left, right) => right.reclaimableBytes - left.reclaimableBytes || String(left.checksumSha256).localeCompare(String(right.checksumSha256))),
     byPrefix: [...prefixes.entries()]
       .map(([prefix, value]) => ({ prefix, ...value }))
       .sort((left, right) => right.bytes - left.bytes || left.prefix.localeCompare(right.prefix)),

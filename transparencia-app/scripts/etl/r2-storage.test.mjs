@@ -32,7 +32,7 @@ describe("protecciones de almacenamiento R2", () => {
     });
     expect(summary.duplicateChecksumGroups).toBe(1);
     expect(summary.duplicateBytes).toBe(100);
+    expect(summary.duplicateGroups[0]).toMatchObject({ count: 2, reclaimableBytes: 100, keys: ["sources/a.json", "sources/b.json"] });
     expect(summary).not.toHaveProperty("deletes");
   });
 });
-
