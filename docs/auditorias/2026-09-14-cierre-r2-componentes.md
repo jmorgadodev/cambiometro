@@ -655,3 +655,10 @@ detectan entidades duplicadas. Esto permite auditar la cobertura municipal sin
 descargar las páginas de nómina. La ausencia de una comuna sigue siendo un
 estado de fuente, no un sueldo cero ni una inferencia de que la municipalidad
 no tenga personal.
+
+## Validación posterior — 2026-09-14
+
+La suite completa se ejecutó con un margen de timeout adecuado para las
+pruebas de lectura por bloques: 197 archivos y 1.057 pruebas aprobadas. Las
+pruebas específicas de la nueva cobertura CPLT quedaron en 5/5 y el comando
+reutilizable para repetir la auditoría remota es `npm run audit:cplt:remote`.
