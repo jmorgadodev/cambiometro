@@ -203,3 +203,59 @@ export function buildR2History(periods, options = {}) {
   };
 }
 
+function manifestValue(manifest, ...fields) {
+  for (const field of fields) {
+    const value = manifest?.[field];
+    if (value !== null && value !== undefined && text(value) !== "") return value;
+  }
+  return null;
+}
+
+/**
+ * Reads only the pages declared by one R2 release manifest. This is intended
+ * for a controlled build/audit process, never for a browser request.
+ */
+export async function readR2ReleasePages(manifest, readJson) {
+  if (typeof readJson !== "function") throw new Error("Historial R2: readJson debe ser una función");
+  const period = text(manifestValue(manifest, "period", "mes"));
+  const releaseId = text(manifestValue(manifest, "releaseId", "release_id", "version"));
+  const checksum = text(manifestValue(manifest, "checksum", "checksum_sha256", "checksumSha256"));
+  const pages = Array.isArray(manifest?.pages) ? manifest.pages : [];
+  if (!period) throw new Error("Historial R2: manifiesto sin period");
+  if (!releaseId) throw new Error(`Historial R2: ${period} sin releaseId/version`);
+  if (!checksum) throw new Error(`Historial R2: ${period} sin checksum`);
+  if (pages.length === 0) throw new Error(`Historial R2: ${period} sin páginas declaradas`);
+
+  const orderedPages = [...pages].sort((left, right) => Number(left?.page ?? 0) - Number(right?.page ?? 0));
+  const seenKeys = new Set();
+  const loaded = await Promise.all(orderedPages.map(async (page, index) => {
+    const key = text(page?.key ?? page?.path);
+    if (!key) throw new Error(`Historial R2: ${period} página ${index + 1} sin key`);
+    if (seenKeys.has(key)) throw new Error(`Historial R2: ${period} página duplicada ${key}`);
+    seenKeys.add(key);
+    const rows = await readJson(key);
+    if (!Array.isArray(rows)) throw new Error(`Historial R2: ${period} página ilegible ${key}`);
+    if (page?.count != null && Number(page.count) !== rows.length) {
+      throw new Error(`Historial R2: ${period} conteo incorrecto en ${key}`);
+    }
+    return rows;
+  }));
+  const records = loaded.flat();
+  if (manifest?.total != null && Number(manifest.total) !== records.length) {
+    throw new Error(`Historial R2: ${period} total de manifiesto no coincide`);
+  }
+  return {
+    period,
+    releaseId,
+    checksum,
+    publishedAt: text(manifestValue(manifest, "publishedAt", "published_at", "generatedAt", "extraido_en")) || null,
+    records,
+  };
+}
+
+/** Loads declared R2 pages for each release, then performs the pure comparison. */
+export async function buildR2HistoryFromManifests(manifests, readJson, options = {}) {
+  if (!Array.isArray(manifests) || manifests.length === 0) throw new Error("Historial R2: se requieren manifiestos");
+  const releases = await Promise.all(manifests.map((manifest) => readR2ReleasePages(manifest, readJson)));
+  return buildR2History(releases, options);
+}

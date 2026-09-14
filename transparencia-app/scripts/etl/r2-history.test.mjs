@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildR2History } from "./r2-history.mjs";
+import { buildR2History, buildR2HistoryFromManifests } from "./r2-history.mjs";
 
 const base = {
   releaseId: "release-",
@@ -65,5 +65,28 @@ describe("buildR2History", () => {
     expect(row.original).toEqual(input.records[0]);
     expect(input.records[0]).toEqual({ recordId: "row-1", nombre: "Ana Pérez", monto: "1.250.000" });
   });
-});
 
+  it("reads only declared R2 pages and validates page and release totals", async () => {
+    const requested = [];
+    const objects = new Map([
+      ["r2/2026-01/page-1.json", [{ personKey: "a", organismo: "A", monto: 100 }]],
+      ["r2/2026-02/page-1.json", [{ personKey: "a", organismo: "A", monto: 125 }]],
+    ]);
+    const readJson = async (key) => {
+      requested.push(key);
+      return objects.get(key) ?? null;
+    };
+    const result = await buildR2HistoryFromManifests([
+      { period: "2026-01", version: "release-01", checksum_sha256: "checksum-01", total: 1, pages: [{ page: 1, key: "r2/2026-01/page-1.json", count: 1 }] },
+      { period: "2026-02", version: "release-02", checksum_sha256: "checksum-02", total: 1, pages: [{ page: 1, key: "r2/2026-02/page-1.json", count: 1 }] },
+    ], readJson, { keyFields: ["personKey"] });
+    expect(requested).toEqual(["r2/2026-01/page-1.json", "r2/2026-02/page-1.json"]);
+    expect(result.comparisons[0].amountChanges[0]).toMatchObject({ key: "a", amountBefore: 100, amountAfter: 125 });
+  });
+
+  it("does not accept a manifest with an incomplete page", async () => {
+    await expect(buildR2HistoryFromManifests([
+      { period: "2026-01", version: "release-01", checksum_sha256: "checksum-01", total: 2, pages: [{ page: 1, key: "missing.json", count: 2 }] },
+    ], async () => [{ personKey: "a" }], { keyFields: ["personKey"] })).rejects.toThrow("conteo incorrecto");
+  });
+});
