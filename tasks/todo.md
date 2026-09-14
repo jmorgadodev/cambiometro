@@ -88,6 +88,11 @@
   manifiestos y registros publicados en R2, sin rehidratar D1.
 - [x] Revisar el corte vigente/histórico de ChileCompra y la publicación de
   InfoLobby sólo desde producción/R2; no rehidratar D1.
+- [x] Validar localmente el índice unificado de remuneraciones y la vista 38
+  bis después de retirar la gráfica mensual y la tabla de doce cortes; 33.776
+  filas en 169 páginas, 102 comprobaciones de smoke estático verdes.
+- [ ] Ejecutar build y smoke de producción con el lago completo de Ley 19.862;
+  el modo de muestra local no sustituye ese release.
 
 ### Evidencia de cierre — 2026-09-13
 

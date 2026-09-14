@@ -162,3 +162,23 @@ Antes de conectar estos normalizadores al ETL o promover cambios:
 
 El historial de una persona se consulta bajo demanda desde el índice R2; la
 interfaz no lo solicita al cargar la página ni lo resuelve mediante D1.
+
+### Validación local reproducible — 2026-09-14 12:30 UTC-3
+
+Se regeneraron únicamente los artefactos de remuneraciones y se ejecutó el
+build de Pages en modo de muestra local, sin publicar ni ejecutar ETL. El
+índice unificado quedó con 33.776 filas en 169 páginas; el subconjunto 38 bis
+contiene 29.703 filas y 18 períodos, desde 2025-01 hasta 2026-06. La prueba
+específica también encontró a Sofía Pumpin en 2026-03, 2026-04, 2026-05 y
+2026-06.
+
+El manifiesto 38 bis del corte vigente 2026-06 conserva la comparación del
+período actual: 53 nuevos registros, 46 salidas observadas y 439 cambios de
+monto. La gráfica mensual y la tabla de doce cortes ya no se renderizan.
+
+El build completo de producción no se declara cerrado en este checkout porque
+requiere el lago completo de transferencias Ley 19.862; la validación local
+usó explícitamente 1.000 filas de muestra y el verificador global la rechaza
+como corresponde. El smoke del export estático sí pasó 102 comprobaciones,
+incluyendo rutas de municipalidades, menú, vista móvil y ausencia de errores
+de consola. No hubo cambios pendientes en Git después de la prueba.
