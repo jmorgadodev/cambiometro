@@ -101,7 +101,13 @@ El resumen central también explica por qué no se debe mostrar una tabla
 mensual incompleta como si fuera una serie comparable: julio de 2026 contiene
 578.446 filas, frente a 75.998 en junio, 46.657 en agosto y sólo 123 en
 septiembre. El salto coincide con un cambio de alcance/cobertura del release,
-no con una conclusión sobre contrataciones. Además, el release declara
+no con una conclusión sobre contrataciones. La inspección de evidencia remota
+encontró filas con períodos futuros o imposibles dentro del mismo release; por
+ejemplo, una fila de Hospital de Osorno conserva `p: 3538-04` y filas de
+hospitales conservan `p: 2026-10` aunque el release fue generado en septiembre.
+La fuente declarada es el CSV oficial de Transparencia Activa, por lo que el
+problema debe resolverse en la interpretación del período de origen y no
+ocultarse en la interfaz. Además, el release declara
 563.221 registros con observaciones de calidad, principalmente remuneración
 líquida no informada. La compuerta reproducible de calidad confirmó que las
 212 páginas suman exactamente 2.110.434 filas y que el total del manifiesto
@@ -115,7 +121,10 @@ Decisión: la interfaz no mostrará la evolución mensual ni la tabla de los
 últimos 12 cortes de esta proyección hasta reconciliar alcance, períodos y
 manifiestos. Los artefactos permanecen conservados para auditoría; la
 producción sigue usando el release anterior mientras se prepara una
-compatibilidad verificable.
+compatibilidad verificable. El generador también marcará como **parcial** un
+corte que triplique filas u organismos respecto del anterior, tanto por caída
+como por aumento abrupto. Así, julio no se presentará como una tendencia
+normal mientras la fuente no confirme el cambio.
 
 Se agregó al Worker un selector de lectura restringido,
 `CPLT_PROJECTION_VARIANT=funcionarios-central-v1`, para pruebas controladas.

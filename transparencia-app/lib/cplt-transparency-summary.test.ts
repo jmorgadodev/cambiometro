@@ -107,4 +107,31 @@ describe("resumen agregado de Transparencia Activa", () => {
     expect(summary.periods.at(-1)).toMatchObject({ period: "2026-08", status: "parcial" });
     expect(summary.latestPeriodStatus).toBe("parcial");
   });
+
+  it("marca como parcial un corte con un aumento abrupto de cobertura", () => {
+    const previous = Array.from({ length: 1_000 }, (_, index) => ({
+      nombre_completo: `Persona ${index}`,
+      organo_nombre: `Organismo ${index % 50}`,
+      tipo_contrato: "Planta",
+      cargo: "Analista",
+      remuneracion_bruta_mensual: 100,
+      fuente_periodo: "2026-06",
+    }));
+    const current = Array.from({ length: 3_001 }, (_, index) => ({
+      nombre_completo: `Persona actual ${index}`,
+      organo_nombre: `Organismo actual ${index % 150}`,
+      tipo_contrato: "Planta",
+      cargo: "Analista",
+      remuneracion_bruta_mensual: 100,
+      fuente_periodo: "2026-07",
+    }));
+    const summary = buildCpltTransparencySummary([...previous, ...current], [], "2026-07-31T00:00:00.000Z");
+
+    expect(summary.periods.at(-1)).toMatchObject({
+      period: "2026-07",
+      status: "parcial",
+      statusReason: "El aumento abrupto de filas u organismos indica un cambio de alcance o una publicación excepcional; requiere confirmación en la fuente oficial.",
+    });
+    expect(summary.latestPeriodStatus).toBe("parcial");
+  });
 });

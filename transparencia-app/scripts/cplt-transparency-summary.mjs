@@ -64,10 +64,14 @@ function classifyPeriod(current, previous) {
   }
   const rowsDroppedAbruptly = previous.rows >= 1_000 && current.rows < previous.rows * 0.25;
   const organismsDroppedAbruptly = previous.organisms.size >= 50 && current.organisms.size < previous.organisms.size * 0.25;
-  if (rowsDroppedAbruptly || organismsDroppedAbruptly) {
+  const rowsIncreasedAbruptly = previous.rows >= 1_000 && current.rows > previous.rows * 3;
+  const organismsIncreasedAbruptly = previous.organisms.size >= 50 && current.organisms.size > previous.organisms.size * 3;
+  if (rowsDroppedAbruptly || organismsDroppedAbruptly || rowsIncreasedAbruptly || organismsIncreasedAbruptly) {
     return {
       status: "parcial",
-      reason: "La caída abrupta de filas u organismos indica una publicación posiblemente incompleta; requiere confirmación en la fuente oficial.",
+      reason: rowsDroppedAbruptly || organismsDroppedAbruptly
+        ? "La caída abrupta de filas u organismos indica una publicación posiblemente incompleta; requiere confirmación en la fuente oficial."
+        : "El aumento abrupto de filas u organismos indica un cambio de alcance o una publicación excepcional; requiere confirmación en la fuente oficial.",
     };
   }
   return { status: "comparable", reason: "No se detectó una caída abrupta frente al corte anterior." };
