@@ -4,6 +4,12 @@ name: ETL manual - CPLT nóminas centrales
 # manual hasta medir tamaño, duración y consumo de R2 con un release completo.
 on:
   workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publicar el release central validado en R2 después de revisar el resumen"
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: cambiometro-cplt-central-publication
@@ -69,6 +75,11 @@ jobs:
         with:
           pattern: cplt-central-*
           path: transparencia-app/data/cplt-central-artifacts
-      - name: Consolidar y publicar sólo la proyección central
+      - name: Consolidar la proyección central sin publicar
+        if: inputs.publish != true
+        working-directory: transparencia-app
+        run: npm run data:finalize:cplt-central:local
+      - name: Publicar sólo después de confirmación explícita
+        if: inputs.publish == true
         working-directory: transparencia-app
         run: npm run data:finalize:cplt-central:r2

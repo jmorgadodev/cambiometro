@@ -86,6 +86,7 @@
     "data:finalize:cplt": "npm run data:finalize:cplt:r2 && npm run data:record:cplt-state -- --remote",
     "data:finalize:cplt:r2": "node scripts/merge-cplt-category-artifacts.mjs && node scripts/publish-cplt-projections.mjs --r2",
     "data:publish:cplt-central-category": "node scripts/stage-cplt-category.mjs",
+    "data:finalize:cplt-central:local": "node scripts/merge-cplt-category-artifacts.mjs --scope=central && node scripts/publish-cplt-projections.mjs --central --local-only",
     "data:finalize:cplt-central:r2": "node scripts/merge-cplt-category-artifacts.mjs --scope=central && node scripts/publish-cplt-projections.mjs --central --r2",
     "data:record:cplt-state": "node scripts/record-cplt-source-state.mjs",
     "data:archive:cplt": "node scripts/publish-data-lake.mjs --output data/lake-cplt --releases --release-manifests-only",
