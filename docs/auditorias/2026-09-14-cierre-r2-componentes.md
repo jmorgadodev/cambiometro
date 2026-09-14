@@ -718,3 +718,8 @@ de entidades de Cámara y Contraloría son otras claves checksum (`0403f006…` 
 referenciado por ese catálogo vigente. Se mantienen como **candidatos no
 referenciados por el catálogo actual**, pendientes de comprobar retención y
 referencias históricas antes de cualquier eliminación.
+
+El auditor incorpora ahora `--references <archivo.json>` para pasarle un
+conjunto explícito de claves referenciadas. Cada grupo queda marcado como
+`referenced`, `unreferenced-by-supplied-set` o `unknown`; sólo el segundo puede
+pasar a una revisión manual de retención.
