@@ -102,6 +102,12 @@ La interfaz de Remuneraciones deja de mostrar la gráfica mensual y la tabla de
 12 cortes. Mantiene sólo el estado del último corte y sus tres indicadores
 cuando el release trae una comparación válida.
 
+La vista 38 bis además usa la comparación del resumen del período actualmente
+seleccionado. El bloque de comparación del manifiesto raíz puede representar
+la línea base del release y no debe utilizarse para pintar los indicadores del
+corte vigente; leerlo provocaba que entradas, ausencias y cambios aparecieran
+como cero aunque el detalle histórico sí los contuviera.
+
 ## Decisión de normalización
 
 La rama incorpora un contrato local, aún sin conexión al publicador:
