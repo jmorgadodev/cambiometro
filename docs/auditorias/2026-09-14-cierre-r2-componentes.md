@@ -440,3 +440,27 @@ Esta guarda sólo revisa artefactos públicos ya construidos: no ejecuta ETL,
 no consulta D1 y no descarga el universo desde R2. Si un próximo build deja un
 contador sin su tabla, una fila de cambio sin ambos montos o un historial
 desordenado, la verificación falla antes de promoverlo.
+
+## Gastos operacionales: cobertura estática corregida — 2026-09-14
+
+La auditoría del release estático detectó una pérdida local de filas en Senado:
+el snapshot ETL completo tenía 6.521 registros, pero
+`data/lake-subsets/gastos-senado.subset.json` sólo contenía 2.500. Cámara no
+tenía esa pérdida: sus 16.275 registros coincidían.
+
+Se reconstruyeron ambos subconjuntos exclusivamente desde
+`data/etl/latest.json`, sin consultar D1, escribir R2 ni ejecutar ETL. El
+resultado local queda en 16.275 filas de Cámara y 6.521 de Senado. El verificador
+ahora compara cada subconjunto contra el snapshot completo y bloquea el release
+si faltan o sobran identificadores.
+
+Comandos de control:
+
+```bash
+npm run data:rebuild:expenses:local
+node scripts/verify-expense-release.mjs --required
+```
+
+El catálogo R2 sigue reportando 6.517 filas para Senado; esa diferencia de
+cuatro filas respecto del snapshot local queda documentada como diferencia de
+release/frescura y no se corrige copiando datos locales sobre producción.

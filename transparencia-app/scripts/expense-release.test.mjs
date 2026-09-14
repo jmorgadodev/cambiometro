@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildExpenseSubset, compactExpenseRecord } from "./expense-release.mjs";
+import { auditExpenseSubsetAgainstSnapshot, buildExpenseSubset, compactExpenseRecord } from "./expense-release.mjs";
 
 const base = {
   id: "cam-1",
@@ -30,5 +30,27 @@ describe("release estático de gastos operacionales", () => {
     const subset = buildExpenseSubset({ sourceId: "gastos_senado", generatedAt: "2026-08-26T00:00:00.000Z", records: [{ ...base, id: "sen-1", diputado_id: undefined, person: { name: "Senador de Prueba" }, nombre: "Senador de Prueba" }] });
     expect(subset.records[0]).not.toHaveProperty("diputado_id");
     expect(subset.recordCount).toBe(1);
+  });
+
+  it("detecta cuando el subconjunto publicado perdió filas del snapshot completo", () => {
+    const complete = buildExpenseSubset({
+      sourceId: "gastos_senado",
+      generatedAt: "2026-08-26T00:00:00.000Z",
+      records: [
+        { ...base, id: "sen-1", diputado_id: undefined, nombre: "Senador Uno" },
+        { ...base, id: "sen-2", diputado_id: undefined, nombre: "Senador Dos" },
+      ],
+    });
+    const partial = buildExpenseSubset({
+      sourceId: "gastos_senado",
+      generatedAt: "2026-08-26T00:00:00.000Z",
+      records: [{ ...base, id: "sen-1", diputado_id: undefined, nombre: "Senador Uno" }],
+    });
+
+    expect(auditExpenseSubsetAgainstSnapshot({
+      sourceId: "gastos_senado",
+      subset: partial,
+      snapshot: { fuentes: { gastos_senado: complete.records } },
+    })).toMatchObject({ snapshotCount: 2, subsetCount: 1, missingCount: 1, complete: false });
   });
 });

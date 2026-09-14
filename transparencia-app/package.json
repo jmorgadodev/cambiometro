@@ -76,6 +76,7 @@
     "check:static-input-fallback": "node scripts/verify-static-input-fallback.mjs",
     "check:cplt-freshness": "node scripts/verify-cplt-source-freshness.mjs",
     "data:build:subsets": "node scripts/build-lake-subsets.mjs",
+    "data:rebuild:expenses:local": "node scripts/rebuild-expense-subsets-from-snapshot.mjs",
     "data:materialize": "node scripts/materialize-d1.mjs",
     "data:materialize:optional": "node scripts/d1-materialize-optional.mjs",
     "data:materialize:dry": "node scripts/materialize-d1.mjs --dry-run",

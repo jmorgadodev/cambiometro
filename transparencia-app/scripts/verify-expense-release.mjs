@@ -1,11 +1,12 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { buildExpenseSubset, EXPENSE_SOURCES, readExpenseSubset } from "./expense-release.mjs";
+import { auditExpenseSubsetAgainstSnapshot, buildExpenseSubset, EXPENSE_SOURCES, readExpenseSnapshot, readExpenseSubset } from "./expense-release.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const required = process.argv.includes("--required") || process.env.ALLOW_STATIC_SAMPLE !== "1";
 const verifySlices = process.argv.includes("--verify-slices");
 const slicesDir = join(root, "data", "politico-slices");
+const snapshot = readExpenseSnapshot(root);
 
 function fail(message) {
   throw new Error(`EXPENSE_RELEASE_INVALID: ${message}`);
@@ -21,6 +22,10 @@ const subsets = EXPENSE_SOURCES.map((sourceId) => {
   if (required && subset.recordCount === 0) fail(`${sourceId} está vacío; no se publica una ficha sin rendiciones`);
   const rebuilt = buildExpenseSubset({ sourceId, records: subset.records, generatedAt: subset.generatedAt });
   if (rebuilt.checksumSha256 !== subset.checksumSha256) fail(`${sourceId} checksum inválido`);
+  const coverage = auditExpenseSubsetAgainstSnapshot({ sourceId, subset, snapshot });
+  if (required && coverage.sourceAvailable && !coverage.complete) {
+    fail(`${sourceId} está incompleto frente al snapshot ETL: ${coverage.subsetCount}/${coverage.snapshotCount} filas; faltan ${coverage.missingCount}`);
+  }
   const ids = new Set();
   for (const record of subset.records) {
     if (ids.has(record.id)) fail(`${sourceId} tiene id duplicado ${record.id}`);
@@ -29,7 +34,7 @@ const subsets = EXPENSE_SOURCES.map((sourceId) => {
     if (!Number.isSafeInteger(record.monto_clp) || record.monto_clp < 0) fail(`${sourceId}/${record.id} monto inválido`);
     if (!/^https:\/\//i.test(record.url ?? "")) fail(`${sourceId}/${record.id} no tiene fuente HTTPS`);
   }
-  return subset;
+  return { ...subset, coverage };
 }).filter(Boolean);
 
 if (subsets.length === 0) {

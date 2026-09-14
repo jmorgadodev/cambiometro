@@ -85,4 +85,28 @@ export function readExpenseSnapshot(root) {
   return null;
 }
 
+/**
+ * Compara el subconjunto que alimenta Pages contra el snapshot ETL completo.
+ * Evita que una descarga o una regeneración parcial publique menos filas sin
+ * que el verificador lo detecte. No consulta D1 ni R2.
+ */
+export function auditExpenseSubsetAgainstSnapshot({ sourceId, subset, snapshot }) {
+  const snapshotRows = Array.isArray(snapshot?.fuentes?.[sourceId]) ? snapshot.fuentes[sourceId] : null;
+  if (!snapshotRows) return { sourceAvailable: false, complete: true, snapshotCount: null, subsetCount: subset?.recordCount ?? 0, missingCount: 0, extraCount: 0 };
+
+  const expected = buildExpenseSubset({ sourceId, records: snapshotRows, generatedAt: snapshot.actualizado_en ?? subset?.generatedAt });
+  const expectedIds = new Set(expected.records.map((record) => record.id));
+  const subsetIds = new Set(Array.isArray(subset?.records) ? subset.records.map((record) => record.id) : []);
+  const missingCount = [...expectedIds].filter((id) => !subsetIds.has(id)).length;
+  const extraCount = [...subsetIds].filter((id) => !expectedIds.has(id)).length;
+  return {
+    sourceAvailable: true,
+    complete: missingCount === 0 && extraCount === 0 && subset?.recordCount === expected.recordCount,
+    snapshotCount: expected.recordCount,
+    subsetCount: subset?.recordCount ?? 0,
+    missingCount,
+    extraCount,
+  };
+}
+
 export { EXPENSE_SOURCES };
