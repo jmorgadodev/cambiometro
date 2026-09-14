@@ -287,3 +287,18 @@ R2 cuando D1 no está disponible y que los alias históricos no creen fuentes
 duplicadas. Esto valida la estructura de normalización, pero no cierra la
 completitud física de una fuente: los manifiestos faltantes de la sección
 anterior siguen bloqueando la promoción de esos releases.
+
+## Guardas operativas comprobadas — 2026-09-14
+
+- El calendario independiente pasó: **18 workflows**, zona horaria
+  `America/Santiago`.
+- El typecheck del Worker público pasó sin errores.
+- El bundle del Worker quedó en **174,61 KiB** sin comprimir y **33,60 KiB**
+  comprimido, bajo el límite de 1 MiB.
+- El Worker mantiene `ALLOW_PUBLIC_D1_READS=0` y `PREFER_TRANSFER_D1=0` en
+  la configuración inspeccionada; las búsquedas públicas siguen encaminadas a
+  R2.
+- El preflight de almacenamiento R2 permanece en `growth-blocked`: uso
+  9.016.336.751 de 10.000.000.000 bytes (90,16%), por lo que no se deben
+  generar ni publicar nuevos índices masivos hasta resolver retención o
+  compresión.
