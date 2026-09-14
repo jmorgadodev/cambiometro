@@ -247,3 +247,43 @@ con `--fail-on-growth-block`.
 - No se eliminaron releases ni artefactos locales.
 - No se debe declarar una fuente completa mientras falte su manifiesto de
   partición o no pueda comprobarse su checksum.
+
+## Revalidación física posterior — 2026-09-14
+
+Se volvió a ejecutar `audit:r2:closure` en modo de sólo lectura, con
+`--verify-artifacts`, sobre dos fuentes que una nota anterior había descrito
+como cerradas. Esta comprobación posterior es la referencia operativa actual:
+
+| Fuente | Particiones revisadas | Objetos de datos faltantes | Manifiestos faltantes | Estado físico |
+| --- | ---: | ---: | ---: | --- |
+| Votaciones Senado | 7 | 0 | 2026-08, 2026-09 | Incompleto/no promocionable |
+| InfoProbidad | 9 | 0 | 2026-01 a 2026-09 | Incompleto/no promocionable |
+
+La ausencia de los manifiestos no prueba que las filas hayan desaparecido,
+pero sí impide acreditar período, conteo y checksum de cada partición. Por
+ello no se debe declarar ninguna de las dos fuentes como cerrada ni publicar
+un nuevo resumen basado sólo en los objetos que responden. La acción siguiente
+es reconstruir o recuperar los manifiestos desde el release autoritativo, sin
+eliminar los objetos actuales y sin consultar D1.
+
+## Validación del contrato normalizado por dominio — 2026-09-14
+
+Se ejecutaron las pruebas del plan de lago y del API que cubren Cámara, Senado
+y sus componentes separados. El resultado fue **86/86 pruebas aprobadas** en
+`data-lake-plan`, `data-coherence-lake` y `api-v1`.
+
+La evidencia confirma que el contrato mantiene separados, como mínimo:
+
+- votaciones (`kind=vote`);
+- asistencia (`kind=attendance`);
+- gastos de Cámara y Senado (`kind=expense`);
+- personal de apoyo y otros registros parlamentarios, sin sumarlos a gastos o
+  votaciones;
+- entidad/persona, organismo, fuente, período, procedencia y relaciones
+  documentales.
+
+Las pruebas también verifican que la API pueda servir esos componentes desde
+R2 cuando D1 no está disponible y que los alias históricos no creen fuentes
+duplicadas. Esto valida la estructura de normalización, pero no cierra la
+completitud física de una fuente: los manifiestos faltantes de la sección
+anterior siguen bloqueando la promoción de esos releases.
