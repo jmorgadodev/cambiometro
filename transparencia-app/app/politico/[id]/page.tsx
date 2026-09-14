@@ -48,6 +48,7 @@ import PoliticoScoreHeader, { type PoliticoHeaderData } from "@/components/Polit
 import PersonalApoyoMensual from "@/components/PersonalApoyoMensual";
 import nextDynamic from "next/dynamic";
 import { cohesionForPolitico } from "@/lib/cohesion-bancadas";
+import { SupportProjectBanner } from "@/components/SupportProjectLink";
 
 const VotacionesHistorial = nextDynamic(() => import("@/components/VotacionesHistorial"), {
   loading: () => <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-3)" }}>Cargando historial de votaciones...</div>,
@@ -798,6 +799,8 @@ export default async function PoliticoPage({ params }: Props) {
           </div>
           <VotacionesHistorial votaciones={votacionesFila} cargo={pol.cargo} />
         </div>
+
+        <SupportProjectBanner />
 
       </div>
     </div>

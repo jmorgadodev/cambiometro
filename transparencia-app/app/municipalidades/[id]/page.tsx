@@ -7,6 +7,7 @@ import { getPartidoConfig } from "@/lib/partidos.config";
 import ShareButton from "@/components/ShareButton";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import MunicipalidadDetailDashboardClient from "@/components/municipalidades/MunicipalidadDetailDashboardClient";
+import { SupportProjectBanner } from "@/components/SupportProjectLink";
 import {
   getMuniBySlugOrId,
   getMuniCanonicalSlug,
@@ -435,6 +436,7 @@ export default async function MunicipalidadDetailPage({
           region={muni.region}
           cut={muni.cut}
         />
+        <SupportProjectBanner />
       </main>
     </div>
   );
