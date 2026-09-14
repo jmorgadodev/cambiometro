@@ -776,6 +776,13 @@ inventario” se conserva separada. No se interpreta como pérdida de filas ni
 se publica como cero; requiere reconstruir o volver a registrar el cierre
 físico de cada fuente antes de promover historiales.
 
+El constructor de historiales R2 incorpora ahora una compuerta explícita de
+promoción. Cuando se solicita `requirePromotionAllowed`, exige que el cierre
+recibido tenga simultáneamente `complete=true` y `promotionAllowed=true`; un
+catálogo parcial puede seguir siendo auditado localmente, pero no puede
+presentarse como historial público completo. La prueba específica de historial
+quedó en 13/13.
+
 El filtro por fuente también fue corregido para resolver los nombres físicos
 anidados del catálogo. Por ejemplo, `votaciones_camara` se declara bajo
 `sourceId=camara`, pero su `manifestKey` contiene el segmento

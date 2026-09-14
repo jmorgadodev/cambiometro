@@ -206,6 +206,18 @@ export function buildR2History(periods, options = {}) {
   };
 }
 
+/**
+ * Prevents a history built from a partial catalog from being promoted as
+ * complete. The closure result is produced by audit-r2-remote-closure.mjs;
+ * this small contract keeps the history builder independent of R2/D1.
+ */
+export function assertR2HistoryPromotionAllowed(closure) {
+  if (closure?.complete !== true || closure?.promotionAllowed !== true) {
+    throw new Error(`Historial R2: cierre no verificable (${closure?.status ?? "sin-estado"})`);
+  }
+  return true;
+}
+
 function manifestValue(manifest, ...fields) {
   for (const field of fields) {
     const value = manifest?.[field];
@@ -328,6 +340,7 @@ export async function readR2ReleaseArtifacts(manifest, readRecords) {
 /** Loads declared R2 pages for each release, then performs the pure comparison. */
 export async function buildR2HistoryFromManifests(manifests, readJson, options = {}) {
   if (!Array.isArray(manifests) || manifests.length === 0) throw new Error("Historial R2: se requieren manifiestos");
+  if (options.requirePromotionAllowed === true) assertR2HistoryPromotionAllowed(options.closure);
   const readArtifact = typeof options.readArtifact === "function" ? options.readArtifact : readJson;
   const releases = await Promise.all(manifests.map((manifest) => {
     if (Array.isArray(manifest?.pages)) return readR2ReleasePages(manifest, readJson);

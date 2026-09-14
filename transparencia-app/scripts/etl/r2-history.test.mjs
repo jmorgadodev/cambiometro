@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildR2History, buildR2HistoryFromManifests } from "./r2-history.mjs";
+import { assertR2HistoryPromotionAllowed, buildR2History, buildR2HistoryFromManifests } from "./r2-history.mjs";
 
 const base = {
   releaseId: "release-",
@@ -8,6 +8,21 @@ const base = {
 };
 
 describe("buildR2History", () => {
+  it("sólo autoriza promoción con cierre R2 completo", () => {
+    expect(assertR2HistoryPromotionAllowed({ complete: true, promotionAllowed: true, status: "verifiable" })).toBe(true);
+    expect(() => assertR2HistoryPromotionAllowed({ complete: false, promotionAllowed: false, status: "catalogued_without_manifest" }))
+      .toThrow("cierre no verificable");
+  });
+
+  it("bloquea el historial cuando se exige una compuerta R2 no verificable", async () => {
+    await expect(buildR2HistoryFromManifests([
+      { period: "2026-01", version: "release-01", checksum_sha256: "checksum-01", total: 0, pages: [{ page: 1, key: "empty.json", count: 0 }] },
+    ], async () => [], {
+      requirePromotionAllowed: true,
+      closure: { complete: false, promotionAllowed: false, status: "catalogued_without_manifest" },
+    })).rejects.toThrow("cierre no verificable");
+  });
+
   it("requires release metadata before comparing records", () => {
     expect(() => buildR2History([{ period: "2026-01", records: [] }], { keyFields: ["personKey"] }))
       .toThrow("sin releaseId");
