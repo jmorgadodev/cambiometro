@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { MERCADO_PAGO_URL } from "@/components/SupportProjectLink";
 
 export const metadata: Metadata = {
   title: "Proyecto Cívico y Apoyo — El Cambiómetro",
@@ -151,6 +152,17 @@ export default function DonarPage() {
                 <strong style={{ color: "var(--text-primary)" }}>Tiempo de auditoría ciudadana:</strong> Mantención y desarrollo de algoritmos de detección de sobreprecios, nepotismo y cruces documentales.
               </li>
             </ul>
+
+            <a
+              href={MERCADO_PAGO_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn btn-primary"
+              style={{ marginTop: "auto", alignSelf: "flex-start", padding: "0.7rem 1.1rem", fontSize: "0.84rem" }}
+              title="Abrir Mercado Pago en una pestaña nueva"
+            >
+              Realizar un aporte en Mercado Pago ↗
+            </a>
           </div>
         </div>
 

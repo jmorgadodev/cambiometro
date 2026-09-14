@@ -1,15 +1,13 @@
 import type React from "react";
 
-const MERCADO_PAGO_URL = "https://link.mercadopago.cl/impulsacv";
+export const MERCADO_PAGO_URL = "https://link.mercadopago.cl/impulsacv";
 
 export function SupportProjectLink({ className = "", children = "Apoyar Proyecto" }: { className?: string; children?: React.ReactNode }) {
   return (
     <a
-      href={MERCADO_PAGO_URL}
-      target="_blank"
-      rel="noopener noreferrer"
+      href="/donar"
       className={className}
-      title="Haz un aporte voluntario para mantener los servidores y la fiscalización independiente"
+      title="Conoce la misión del proyecto y cómo apoyar su independencia"
     >
       {children}
     </a>
@@ -23,7 +21,7 @@ export function SupportProjectBanner() {
         <strong>¿Te fue útil esta auditoría pública?</strong>
         <p>Apoya el desarrollo de esta herramienta independiente.</p>
       </div>
-      <SupportProjectLink className="support-project-banner__link">Realizar un aporte ↗</SupportProjectLink>
+      <SupportProjectLink className="support-project-banner__link">Conoce cómo apoyar →</SupportProjectLink>
     </aside>
   );
 }
