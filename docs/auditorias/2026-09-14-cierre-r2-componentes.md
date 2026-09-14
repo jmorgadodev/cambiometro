@@ -535,3 +535,26 @@ La auditoría remota de R2 informa 9.016.336.751 bytes de 10.000.000.000
 `growth-blocked`: no se deben publicar nuevos releases ni reparar objetos
 faltantes hasta revisar el margen, el versionado y la retención. La reparación
 de `ley-19862` queda separada de cualquier crecimiento no esencial.
+
+## Reproceso de fuente Ley 19.862 en aislamiento — 2026-09-14
+
+Se probó el origen oficial por los ocho meses de 2026 en una carpeta temporal,
+sin R2, D1 ni cambios en el repositorio. Los ocho requests respondieron y
+generaron un candidato local de 70.891 registros y 89.972.735 bytes.
+
+| Mes | Candidato oficial | Catálogo productivo | Diferencia |
+| --- | ---: | ---: | ---: |
+| 2026-01 | 14.000 | 13.844 | +156 |
+| 2026-02 | 9.436 | 9.248 | +188 |
+| 2026-03 | 7.769 | 7.318 | +451 |
+| 2026-04 | 7.650 | 7.448 | +202 |
+| 2026-05 | 9.828 | 7.609 | +2.219 |
+| 2026-06 | 7.036 | 6.149 | +887 |
+| 2026-07 | 8.558 | 6.921 | +1.637 |
+| 2026-08 | 6.614 | 3.906 | +2.708 |
+
+Los ocho checksums del candidato son distintos de los del catálogo productivo.
+Por tanto, no se debe subir el snapshot local antiguo ni tratar la reparación
+como una simple restauración de objetos: se requiere un nuevo release oficial,
+con validación de conteos, checksum y margen de almacenamiento antes de
+publicarlo.
