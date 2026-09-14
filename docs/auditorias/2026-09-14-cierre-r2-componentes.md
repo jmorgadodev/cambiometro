@@ -173,6 +173,13 @@ para una promoción aislada, pero no autoriza todavía la escritura en R2: antes
 de eso se debe comparar el candidato con el release y cerrar el catálogo de
 forma atómica.
 
+La comprobación física posterior (`audit:r2:closure --source
+votaciones_senado --verify-artifacts`) revisó 7 particiones y no encontró
+artefactos faltantes en los manifiestos existentes, pero confirmó que siguen
+faltando los manifiestos catalogados de `2026-08` y `2026-09`. Por tanto, el
+estado correcto continúa siendo **incompleto/no promocionable**; no se debe
+interpretar el HTTP 200 de la API ni el dry-run como publicación cerrada.
+
 ## Control de Gastos Cámara
 
 El primer `--dry-run` de Gastos Cámara reveló un defecto del runner local:
