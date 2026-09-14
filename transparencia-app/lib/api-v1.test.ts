@@ -1124,15 +1124,7 @@ describe("API canónica v1", () => {
   });
 
   it("resuelve votaciones_camara desde el histórico canónico sin mezclar asistencia ni consultar D1", async () => {
-    const attendance = JSON.stringify({
-      id: "camara-attendance-1",
-      sourceId: "camara",
-      kind: "attendance",
-      occurredAt: "2026-09-02",
-      evidence: { sourceUrl: "https://opendata.congreso.cl/asistencia/1" },
-      data: { title: "Asistencia Cámara", subject_entity_ids: [], object_entity_ids: [] },
-    });
-    const canonicalCompressed = gzipSync(`${attendance}\n${JSON.stringify({
+    const canonicalCompressed = gzipSync(`${JSON.stringify({
       id: "camara-vote-variant-1",
       sourceId: "camara",
       kind: "vote",
@@ -1142,17 +1134,17 @@ describe("API canónica v1", () => {
     })}\n`);
     const canonicalChecksum = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", canonicalCompressed)))
       .map((byte) => byte.toString(16).padStart(2, "0")).join("");
-    const artifact = { key: `partitions/camara/2026/09/records-${canonicalChecksum}.jsonl.gz`, checksumSha256: canonicalChecksum, releaseAssetName: "camara-2026-09-records.jsonl.gz" };
+    const artifact = { key: `partitions/camara/votaciones_camara/2026/09/records-${canonicalChecksum}.jsonl.gz`, checksumSha256: canonicalChecksum, releaseAssetName: "camara-votaciones-2026-09-records.jsonl.gz" };
     const manifest = { projectionChecksumSha256: canonicalChecksum, artifacts: [artifact] };
     const catalog = {
       schemaVersion: "1.0.0",
       generatedAt: "2026-09-12T00:00:00Z",
       sources: [],
-      partitions: [{ id: "camara/2026/09", sourceId: "camara", period: "2026-09", manifestKey: "partitions/camara/2026/09/manifest.json", checksumSha256: canonicalChecksum, status: "complete", recordCount: 2 }],
+      partitions: [{ id: "camara/votaciones_camara/2026/09", sourceId: "camara", variant: "votaciones_camara", period: "2026-09", manifestKey: "partitions/camara/votaciones_camara/2026/09/manifest.json", checksumSha256: canonicalChecksum, status: "complete", recordCount: 1 }],
     };
     const objects = new Map<string, ArrayBuffer>([
       ["catalog/v1/manifest.json", new TextEncoder().encode(JSON.stringify(catalog)).buffer],
-      ["partitions/camara/2026/09/manifest.json", new TextEncoder().encode(JSON.stringify(manifest)).buffer],
+      ["partitions/camara/votaciones_camara/2026/09/manifest.json", new TextEncoder().encode(JSON.stringify(manifest)).buffer],
       [artifact.key, canonicalCompressed.buffer.slice(canonicalCompressed.byteOffset, canonicalCompressed.byteOffset + canonicalCompressed.byteLength)],
     ]);
     const PUBLIC_DATA = {
@@ -1172,7 +1164,7 @@ describe("API canónica v1", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.meta).toMatchObject({ sourceBackend: "r2-lake", requestedSource: "votaciones_camara", sourceStatus: "complete", total: 1, expectedRows: 2, publishedRows: 2 });
+    expect(payload.meta).toMatchObject({ sourceBackend: "r2-lake", requestedSource: "votaciones_camara", sourceStatus: "complete", total: 1, expectedRows: 1, publishedRows: 1 });
     expect(payload.data[0]).toMatchObject({ id: "camara-vote-variant-1", kind: "vote", sourceId: "camara" });
   });
 

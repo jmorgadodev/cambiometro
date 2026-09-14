@@ -1206,6 +1206,7 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
       const limit = limitFrom(requestUrl);
       const lake = await readR2EvidenceRecords(env.PUBLIC_DATA, {
         source,
+        variant: isCamaraVoteAlias ? "votaciones_camara" : undefined,
         query: requestUrl.searchParams.get("q")?.trim() ?? requestUrl.searchParams.get("query")?.trim() ?? undefined,
         entityId: requestUrl.searchParams.get("entity_id")?.trim() || undefined,
         kind: effectiveKind as never,
