@@ -130,6 +130,21 @@ secuenciales por diputado, por lo que debe correr en su ventana programada para
 evitar rate-limit de la Cámara. Hasta esa ejecución, Gastos Cámara permanece
 pendiente y no se considera actualizado.
 
+## Controles livianos de fuentes pendientes
+
+- **Gastos Senado:** el ETL en modo seco respondió con 2.500 registros, sin
+  errores y sin escribir archivos. El resultado corresponde a la ventana
+  mensual configurada; no reemplaza los 6.517 registros del release remoto ni
+  cierra por sí solo los manifiestos faltantes.
+- **InfoLobby:** el catálogo oficial respondió HTTP 200, con 48 trimestres
+  disponibles; 2026-T2 y 2026-T3 están publicados. El endpoint CSV de
+  audiencias de 2026-T3 respondió HTTP 200 y `text/csv`. La fuente está
+  disponible para una reconstrucción incremental, pero todavía no se descargó
+  el universo ni se escribió un candidato local.
+
+Estos controles son deliberadamente pequeños: prueban disponibilidad y esquema
+sin convertir la auditoría en una descarga masiva ni consumir D1.
+
 ## Seguridad de operación
 
 - No hubo escrituras en R2.
