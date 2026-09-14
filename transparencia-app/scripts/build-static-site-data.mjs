@@ -8,7 +8,7 @@ import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
 import { chunkJsonRows, listUnavailableMunicipalities } from "./static-payroll.mjs";
 import { readExpenseSubset } from "./expense-release.mjs";
 import { normalizeMovementPayload, validateMovementPayload } from "./movimientos-pipeline.mjs";
-import { buildCpltAggregateSummary, isPlausiblePeriod } from "./cplt-transparency-summary.mjs";
+import { buildCpltAggregateSummary, isPlausiblePeriod, reclassifyCpltSummary } from "./cplt-transparency-summary.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
 const readJson = (file) => readFile(join(root, file), "utf8").then(JSON.parse);
@@ -241,17 +241,18 @@ const cpltTransparencySummarySource = join(cpltRoot, "transparency-summary.json"
 if (existsSync(cpltTransparencySummarySource)) {
   const summaryContent = await readFile(cpltTransparencySummarySource);
   try {
-    const summary = JSON.parse(summaryContent.toString("utf8"));
+    const summary = reclassifyCpltSummary(JSON.parse(summaryContent.toString("utf8")));
     if (summary?.dataset === "transparencia-activa-funcionarios-summary"
       && Number.isSafeInteger(summary.recordCount)
       && Array.isArray(summary.periods)
       && summary.coverage?.total === 346) {
       const summaryOutput = join(publicFuncionariosDir, "transparency-summary.json");
-      await writeFile(summaryOutput, summaryContent);
+      const normalizedSummaryContent = Buffer.from(`${JSON.stringify(summary, null, 2)}\n`, "utf8");
+      await writeFile(summaryOutput, normalizedSummaryContent);
       cpltTransparencySummary = {
         path: "/data/funcionarios/transparency-summary.json",
-        bytes: summaryContent.byteLength,
-        checksumSha256: crypto.createHash("sha256").update(summaryContent).digest("hex"),
+        bytes: normalizedSummaryContent.byteLength,
+        checksumSha256: crypto.createHash("sha256").update(normalizedSummaryContent).digest("hex"),
         recordCount: summary.recordCount,
         latestPeriod: summary.latestPeriod ?? null,
         latestPeriodStatus: summary.latestPeriodStatus ?? null,

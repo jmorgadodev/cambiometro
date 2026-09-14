@@ -58,14 +58,18 @@ function sortedPeriods(values) {
   return [...values].sort((left, right) => left.localeCompare(right));
 }
 
-function classifyPeriod(current, previous) {
+export function classifyCpltPeriod(current, previous) {
   if (!previous) {
     return { status: "linea_base", reason: "No existe un corte anterior comparable." };
   }
-  const rowsDroppedAbruptly = previous.rows >= 1_000 && current.rows < previous.rows * 0.25;
-  const organismsDroppedAbruptly = previous.organisms.size >= 50 && current.organisms.size < previous.organisms.size * 0.25;
-  const rowsIncreasedAbruptly = previous.rows >= 1_000 && current.rows > previous.rows * 3;
-  const organismsIncreasedAbruptly = previous.organisms.size >= 50 && current.organisms.size > previous.organisms.size * 3;
+  const currentRows = Number(current?.rows ?? 0);
+  const previousRows = Number(previous?.rows ?? 0);
+  const currentOrganisms = typeof current?.organisms === "number" ? current.organisms : (current?.organisms?.size ?? 0);
+  const previousOrganisms = typeof previous?.organisms === "number" ? previous.organisms : (previous?.organisms?.size ?? 0);
+  const rowsDroppedAbruptly = previousRows >= 1_000 && currentRows < previousRows * 0.25;
+  const organismsDroppedAbruptly = previousOrganisms >= 50 && currentOrganisms < previousOrganisms * 0.25;
+  const rowsIncreasedAbruptly = previousRows >= 1_000 && currentRows > previousRows * 3;
+  const organismsIncreasedAbruptly = previousOrganisms >= 50 && currentOrganisms > previousOrganisms * 3;
   if (rowsDroppedAbruptly || organismsDroppedAbruptly || rowsIncreasedAbruptly || organismsIncreasedAbruptly) {
     return {
       status: "parcial",
@@ -212,7 +216,7 @@ export function buildCpltTransparencySummary(rows, coverage, generatedAt) {
       }
     }
     const rowsInPeriod = current?.rows ?? 0;
-    const periodClassification = classifyPeriod(current ?? { rows: 0, organisms: new Set() }, previous);
+    const periodClassification = classifyCpltPeriod(current ?? { rows: 0, organisms: new Set() }, previous);
     return {
       period,
       status: periodClassification.status,
@@ -266,6 +270,24 @@ export function buildCpltTransparencySummary(rows, coverage, generatedAt) {
       "Los cambios de monto comparan remuneraciones brutas publicadas para una misma combinación normalizada de nombre y tipo de contrato; los cambios de organismo se cuentan por separado.",
       "Los registros originales y sus valores publicados permanecen separados en la fuente consultable.",
     ],
+  };
+}
+
+/** Reapplies the coverage guard to an older precomputed summary. */
+export function reclassifyCpltSummary(summary) {
+  if (!summary || !Array.isArray(summary.periods)) return summary;
+  const periods = summary.periods.map((period, index) => {
+    const previous = index > 0 ? summary.periods[index - 1] : null;
+    const classification = classifyCpltPeriod(period, previous);
+    return { ...period, status: classification.status, statusReason: classification.reason };
+  });
+  const latest = periods.at(-1) ?? null;
+  return {
+    ...summary,
+    periods,
+    latestPeriod: latest?.period ?? summary.latestPeriod ?? null,
+    latestPeriodStatus: latest?.status ?? summary.latestPeriodStatus ?? null,
+    latestPeriodStatusReason: latest?.statusReason ?? summary.latestPeriodStatusReason ?? null,
   };
 }
 

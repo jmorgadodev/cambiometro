@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCpltAggregateSummary, buildCpltTransparencySummary } from "../scripts/cplt-transparency-summary.mjs";
+import { buildCpltAggregateSummary, buildCpltTransparencySummary, reclassifyCpltSummary } from "../scripts/cplt-transparency-summary.mjs";
 
 describe("resumen agregado de Transparencia Activa", () => {
   it("calcula cortes, altas, bajas, cambios y estados de monto sin exponer filas", () => {
@@ -131,6 +131,27 @@ describe("resumen agregado de Transparencia Activa", () => {
       period: "2026-07",
       status: "parcial",
       statusReason: "El aumento abrupto de filas u organismos indica un cambio de alcance o una publicación excepcional; requiere confirmación en la fuente oficial.",
+    });
+    expect(summary.latestPeriodStatus).toBe("parcial");
+  });
+
+  it("reclasifica resúmenes precalculados sin perder sus comparaciones", () => {
+    const summary = reclassifyCpltSummary({
+      dataset: "transparencia-activa-funcionarios-summary",
+      recordCount: 1_257_733,
+      periods: [
+        { period: "2026-06", rows: 75_136, organisms: 346, status: "comparable", newRecords: 65_164 },
+        { period: "2026-07", rows: 257_733, organisms: 346, status: "comparable", newRecords: 236_195 },
+      ],
+      latestPeriod: "2026-07",
+      latestPeriodStatus: "comparable",
+    });
+
+    expect(summary.periods[0]).toMatchObject({ status: "linea_base", newRecords: 65_164 });
+    expect(summary.periods[1]).toMatchObject({
+      status: "parcial",
+      statusReason: "El aumento abrupto de filas u organismos indica un cambio de alcance o una publicación excepcional; requiere confirmación en la fuente oficial.",
+      newRecords: 236_195,
     });
     expect(summary.latestPeriodStatus).toBe("parcial");
   });
