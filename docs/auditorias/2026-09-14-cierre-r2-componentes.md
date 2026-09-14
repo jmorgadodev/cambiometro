@@ -464,3 +464,24 @@ node scripts/verify-expense-release.mjs --required
 El catálogo R2 sigue reportando 6.517 filas para Senado; esa diferencia de
 cuatro filas respecto del snapshot local queda documentada como diferencia de
 release/frescura y no se corrige copiando datos locales sobre producción.
+
+## Bloqueo de promoción de interfaz por `ley-19862` — 2026-09-14
+
+La promoción `ui-only` de Pages se ejecutó sobre un branch basado en `main`
+(`a200fb2`) para aislar la retirada del gráfico mensual y corregir la búsqueda
+inicial de la home. Las pruebas locales pasaron, pero el workflow productivo se
+detuvo antes del build al hidratar las particiones de `ley-19862`.
+
+El catálogo remoto referencia los manifiestos de enero, febrero, marzo y abril
+de 2026, pero R2 responde `The specified key does not exist` para esas cuatro
+claves. Los cuatro manifiestos y sus artefactos todavía existen localmente y
+sus checksums coinciden con los nombres esperados; no se publicó ninguna
+reparación porque el token de auditoría es de sólo lectura. Producción conserva
+la versión anterior, sin cambio parcial.
+
+Run detenido: `34895600630`.
+
+Para reanudar la promoción se necesita una reparación explícita y reversible de
+esas referencias R2 con un token de escritura autorizado, seguida de una nueva
+ejecución completa de `pages-ui-refresh`. No se debe omitir la hidratación ni
+usar snapshots locales para reemplazar datos productivos.
