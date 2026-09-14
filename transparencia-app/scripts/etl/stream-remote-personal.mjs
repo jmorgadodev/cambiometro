@@ -5,6 +5,7 @@ import { LatestCpltRecordStore } from "./latest-cplt-record-store.mjs";
 import { createMunicipalityRegistry } from "./municipality-registry.mjs";
 import { readRangedTextLines } from "./ranged-csv-source.mjs";
 import { validatePublicationStream } from "./validation.mjs";
+import { acceptsCpltScope, CPLT_SCOPES, normalizeCpltScope } from "./cplt-scope.mjs";
 
 const SOURCE_BASES = [
   "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos",
@@ -101,8 +102,8 @@ function mergeById(previous, current) {
   return [...records.values()];
 }
 
-async function processStream(tipo, urls, outputDir) {
-  console.log(`\n[+] Iniciando descarga de ${tipo}: ${urls.join(" | ")}`);
+async function processStream(tipo, urls, outputDir, scope) {
+  console.log(`\n[+] Iniciando descarga de ${tipo} (${scope}): ${urls.join(" | ")}`);
   let sourceUrl = urls[0];
   let sourceValidator = null;
   const lines = readRangedTextLines({
@@ -135,12 +136,12 @@ async function processStream(tipo, urls, outputDir) {
       const year = Number(scanCpltCell(line, header, "anyo", "año"));
       if (!Number.isInteger(year) || year < 2024) continue;
       const organismoNombre = scanCpltCell(line, header, "organismo_nombre", "organismo nombre");
-      if (!/^(?:(?:i|ilustre) )?municipalidad\b|^municipio\b/.test(normalized(organismoNombre))) continue;
+      if (!acceptsCpltScope(organismoNombre, scope)) continue;
       let organismoId;
       try {
         organismoId = resolveOrganismoId(organismoNombre);
       } catch (error) {
-        if (error instanceof Error && error.message.startsWith("CPLT_UNKNOWN_MUNICIPALITY:")) {
+        if (scope === CPLT_SCOPES.MUNICIPAL && error instanceof Error && error.message.startsWith("CPLT_UNKNOWN_MUNICIPALITY:")) {
           unknownMunicipalities.add(organismoNombre);
           continue;
         }
@@ -163,13 +164,13 @@ async function processStream(tipo, urls, outputDir) {
 
   latestByOfficial.flush();
 
-  if (unknownMunicipalities.size > 0) {
+  if (scope === CPLT_SCOPES.MUNICIPAL && unknownMunicipalities.size > 0) {
     latestByOfficial.close();
     throw new Error(`CPLT_UNKNOWN_MUNICIPALITIES: ${JSON.stringify([...unknownMunicipalities].sort())}`);
   }
 
   const report = validatePublicationStream({
-    sourceId: `cplt-personal-${normalized(tipo)}`,
+    sourceId: `cplt-personal-${scope}-${normalized(tipo)}`,
     records: (function* finalizedRecords() {
       for (const latest of latestByOfficial.valuesSortedByRecordId()) {
         const funcionario = latest.record;
@@ -208,30 +209,42 @@ async function processStream(tipo, urls, outputDir) {
 
   latestByOfficial.close();
 
-  const coverageDir = path.join(outputDir, "coverage");
-  fs.mkdirSync(coverageDir, { recursive: true });
-  const coverage = COMMUNES.map((commune) => {
-    const administrationId = commune.administracion_municipal_id;
-    const count = groupedCounts.get(administrationId) ?? 0;
-    return {
-      communeId: commune.id,
-      cut: commune.cut,
-      administrationId,
-      status: commune.tiene_municipalidad_propia ? (count > 0 ? "available" : "unavailable") : "not_applicable",
-      recordCount: commune.tiene_municipalidad_propia ? count : 0,
-    };
-  });
-  fs.writeFileSync(path.join(coverageDir, `${normalized(tipo)}.json`), JSON.stringify({
-    sourceId: `cplt-personal-${normalized(tipo)}`,
-    sourceUrl,
-    generatedAt: new Date().toISOString(),
-    coverage,
-  }, null, 2));
+  if (scope === CPLT_SCOPES.MUNICIPAL) {
+    const coverageDir = path.join(outputDir, "coverage");
+    fs.mkdirSync(coverageDir, { recursive: true });
+    const coverage = COMMUNES.map((commune) => {
+      const administrationId = commune.administracion_municipal_id;
+      const count = groupedCounts.get(administrationId) ?? 0;
+      return {
+        communeId: commune.id,
+        cut: commune.cut,
+        administrationId,
+        status: commune.tiene_municipalidad_propia ? (count > 0 ? "available" : "unavailable") : "not_applicable",
+        recordCount: commune.tiene_municipalidad_propia ? count : 0,
+      };
+    });
+    fs.writeFileSync(path.join(coverageDir, `${normalized(tipo)}.json`), JSON.stringify({
+      sourceId: `cplt-personal-${scope}-${normalized(tipo)}`,
+      sourceUrl,
+      generatedAt: new Date().toISOString(),
+      coverage,
+    }, null, 2));
+  } else {
+    const organizationsDir = path.join(outputDir, "organizations");
+    fs.mkdirSync(organizationsDir, { recursive: true });
+    fs.writeFileSync(path.join(organizationsDir, `${normalized(tipo)}.json`), JSON.stringify({
+      sourceId: `cplt-personal-${scope}-${normalized(tipo)}`,
+      sourceUrl,
+      generatedAt: new Date().toISOString(),
+      organizations: [...groupedCounts.entries()].map(([organismoId, recordCount]) => ({ organismoId, recordCount })),
+    }, null, 2));
+  }
 
   const validationDir = path.join(outputDir, "validation");
   fs.mkdirSync(validationDir, { recursive: true });
   fs.writeFileSync(path.join(validationDir, `${normalized(tipo)}.json`), JSON.stringify({
     ...report,
+    sourceId: `cplt-personal-${scope}-${normalized(tipo)}`,
     sourceUrl,
     sourceValidator,
     linesProcessed,
@@ -243,7 +256,9 @@ async function processStream(tipo, urls, outputDir) {
 
 async function run() {
   const targetTipo = process.argv[2];
-  const outputDir = path.join(process.cwd(), "data", "raw", "transparencia_activa");
+  const scopeArgument = process.argv.find((argument) => argument.startsWith("--scope="));
+  const scope = normalizeCpltScope(scopeArgument?.slice("--scope=".length));
+  const outputDir = path.join(process.cwd(), "data", "raw", scope === CPLT_SCOPES.CENTRAL ? "transparencia_activa_central" : "transparencia_activa");
   fs.mkdirSync(outputDir, { recursive: true });
 
   const selected = targetTipo
@@ -251,7 +266,7 @@ async function run() {
     : URLS;
   if (selected.length === 0) throw new Error(`CPLT_UNKNOWN_TYPE: ${targetTipo}`);
 
-  for (const { tipo, urls } of selected) await processStream(tipo, urls, outputDir);
+  for (const { tipo, urls } of selected) await processStream(tipo, urls, outputDir, scope);
 
   if (globalThis.DISCOVERED_ORGANISMOS) {
     const filePath = path.join(outputDir, "organismos_adicionales.json");

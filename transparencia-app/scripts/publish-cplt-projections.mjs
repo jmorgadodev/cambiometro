@@ -4,11 +4,13 @@ import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { buildCpltTransparencySummary } from "./cplt-transparency-summary.mjs";
 
-const inputRoot = resolve("data/raw/transparencia_activa");
+const centralScope = process.argv.includes("--central");
+const datasetRoot = centralScope ? "funcionarios-central-v1" : "funcionarios-v1";
+const inputRoot = resolve("data/raw", centralScope ? "transparencia_activa_central" : "transparencia_activa");
 const projectionRoot = join(inputRoot, "projections", "funcionarios-v1");
 const validationRoot = join(inputRoot, "validation");
 const coverageRoot = join(inputRoot, "coverage");
-const outputRoot = resolve("data/lake-cplt");
+const outputRoot = resolve(centralScope ? "data/lake-cplt-central" : "data/lake-cplt");
 const required = ["planta", "contrata", "honorarios", "codigotrabajo"];
 const communeCatalogPath = resolve("data/catalog/communes.json");
 const communeCatalog = existsSync(communeCatalogPath)
@@ -138,7 +140,7 @@ for (let offset = 0; offset < compactRows.length; offset += searchPageSize) {
   const page = Math.floor(offset / searchPageSize) + 1;
   const filePath = join(searchIndexRoot, `p-${String(page).padStart(4, "0")}.json`);
   writeFileSync(filePath, `${JSON.stringify(compactRows.slice(offset, offset + searchPageSize))}\n`);
-  pages.push({ page, count: Math.min(searchPageSize, compactRows.length - offset), key: `projections/funcionarios-v1/versions/${version}/search_index/p-${String(page).padStart(4, "0")}.json` });
+  pages.push({ page, count: Math.min(searchPageSize, compactRows.length - offset), key: `projections/${datasetRoot}/versions/${version}/search_index/p-${String(page).padStart(4, "0")}.json` });
   await writeGeneratedAsset(filePath, pages.at(-1).key);
 }
 const shards = {};
@@ -152,7 +154,7 @@ for (const [shard, tokenMap] of byShard) {
     if (entries.length === 0) return;
     const fileName = `${shard}-${String(part).padStart(3, "0")}.json`;
     const filePath = join(searchIndexRoot, fileName);
-    const key = `projections/funcionarios-v1/versions/${version}/search_index/${fileName}`;
+    const key = `projections/${datasetRoot}/versions/${version}/search_index/${fileName}`;
     writeFileSync(filePath, `${JSON.stringify(entries)}\n`);
     shardKeys.push(key);
     await writeGeneratedAsset(filePath, key);
@@ -227,7 +229,7 @@ for (const definition of filterDefinitions) {
   const hash = createHash("sha256").update(definition.key).digest("hex").slice(0, 16);
   const fileName = `filter-${hash}.json`;
   const filePath = join(searchIndexRoot, fileName);
-  const key = `projections/funcionarios-v1/versions/${version}/search_index/${fileName}`;
+  const key = `projections/${datasetRoot}/versions/${version}/search_index/${fileName}`;
   writeFileSync(filePath, `${JSON.stringify(positions)}\n`);
   await writeGeneratedAsset(filePath, key);
   filters[definition.key] = { key, count: positions.length };
@@ -244,7 +246,7 @@ const searchIndex = {
   quality: qualitySummary,
 };
 writeFileSync(searchIndexPath, `${JSON.stringify(searchIndex, null, 2)}\n`);
-const searchIndexKey = `projections/funcionarios-v1/versions/${version}/search_index.json`;
+const searchIndexKey = `projections/${datasetRoot}/versions/${version}/search_index.json`;
 const searchIndexMetadata = await writeGeneratedAsset(searchIndexPath, searchIndexKey);
 for (const asset of searchAssets) {
   if (asset.key === searchIndexKey) continue;
@@ -278,11 +280,11 @@ function buildCoverage() {
   return coverage;
 }
 
-const coverage = buildCoverage();
+const coverage = centralScope ? [] : buildCoverage();
 const transparencySummary = buildCpltTransparencySummary(summaryRows, coverage, latest);
 const transparencySummaryPath = join(projectionRoot, "transparency-summary.json");
 writeFileSync(transparencySummaryPath, `${JSON.stringify(transparencySummary, null, 2)}\n`);
-const transparencySummaryKey = `projections/funcionarios-v1/versions/${version}/transparency-summary.json`;
+const transparencySummaryKey = `projections/${datasetRoot}/versions/${version}/transparency-summary.json`;
 const transparencySummaryMetadata = await writeGeneratedAsset(transparencySummaryPath, transparencySummaryKey);
 
 const assets = [];
@@ -305,7 +307,7 @@ for (const fileName of files) {
   const size = statSync(source).size;
   if (size < 2) throw new Error(`CPLT_EMPTY_PROJECTION: ${fileName}`);
   const checksumSha256 = await checksum(source);
-  const key = `projections/funcionarios-v1/versions/${version}/${fileName}`;
+  const key = `projections/${datasetRoot}/versions/${version}/${fileName}`;
   const target = join(outputRoot, key);
   mkdirSync(dirname(target), { recursive: true });
   copyFileSync(source, target);
@@ -316,14 +318,14 @@ for (const fileName of files) {
 
 const manifest = {
   schemaVersion: "1.0.0",
-  sourceId: "transparencia-activa",
+  sourceId: centralScope ? "transparencia-activa-central" : "transparencia-activa",
   generatedAt: latest,
   releaseMonth: month,
   version,
   recordCount: validations.reduce((total, report) => total + report.recordCount, 0),
   sources: validations.map(({ sourceId, sourceUrl, sourceValidator, recordCount, checksumSha256 }) => ({ sourceId, sourceUrl, sourceValidator, recordCount, checksumSha256 })),
   searchIndex: { key: searchIndexKey, totalRows: compactRows.length, pageSize: searchPageSize },
-  coverage,
+  ...(centralScope ? {} : { coverage }),
   transparencySummary: {
     key: transparencySummaryKey,
     recordCount: transparencySummary.recordCount,
@@ -332,7 +334,7 @@ const manifest = {
   },
   assets: manifestAssets,
 };
-const manifestKey = "projections/funcionarios-v1/manifest.json";
+const manifestKey = `projections/${datasetRoot}/manifest.json`;
 const manifestTarget = join(outputRoot, manifestKey);
 mkdirSync(dirname(manifestTarget), { recursive: true });
 const manifestData = Buffer.from(`${JSON.stringify(manifest, null, 2)}\n`);

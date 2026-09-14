@@ -1,0 +1,85 @@
+name: ETL manual - CPLT nóminas centrales
+
+# La nómina central se mantiene separada de la municipal. Este flujo queda
+# manual hasta medir tamaño, duración y consumo de R2 con un release completo.
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: "Publicar el release central validado en R2 después de revisar el resumen"
+        required: false
+        default: false
+        type: boolean
+
+concurrency:
+  group: cambiometro-cplt-central-publication
+  cancel-in-progress: true
+
+jobs:
+  cplt-central-categories:
+    name: Ingesta central CPLT (${{ matrix.category }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    strategy:
+      fail-fast: false
+      matrix:
+        category: [Planta, Contrata, Honorarios, CodigoTrabajo]
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+        working-directory: transparencia-app
+      - name: Procesar sólo organismos centrales
+        working-directory: transparencia-app
+        run: npm run ingest:cplt-personal -- "${{ matrix.category }}" --scope=central
+      - name: Preparar artefacto validado
+        working-directory: transparencia-app
+        run: npm run data:publish:cplt-central-category -- "${{ matrix.category }}" --scope=central
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cplt-central-${{ matrix.category }}
+          path: transparencia-app/data/cplt-central-category/${{ matrix.category }}
+          if-no-files-found: error
+          retention-days: 2
+          compression-level: 9
+
+  cplt-central-finalize:
+    name: Publicar proyección central en R2
+    needs: cplt-central-categories
+    if: needs.cplt-central-categories.result == 'success'
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    permissions:
+      contents: write
+    environment: production
+    env:
+      GH_TOKEN: ${{ github.token }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+      - name: Install dependencies
+        run: npm ci
+        working-directory: transparencia-app
+      - uses: actions/download-artifact@v4
+        with:
+          pattern: cplt-central-*
+          path: transparencia-app/data/cplt-central-artifacts
+      - name: Consolidar la proyección central sin publicar
+        if: inputs.publish != true
+        working-directory: transparencia-app
+        run: npm run data:finalize:cplt-central:local
+      - name: Publicar sólo después de confirmación explícita
+        if: inputs.publish == true
+        working-directory: transparencia-app
+        run: npm run data:finalize:cplt-central:r2

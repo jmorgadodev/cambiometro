@@ -19,6 +19,7 @@
     { "workflow": "etl-expenses.yml", "name": "Gastos operacionales Senado", "cronUtc": "30 8 2 * *", "local": "Día 2, 05:30 invierno / 04:30 verano" },
     { "workflow": "etl-remuneraciones-38bis.yml", "name": "Remuneraciones públicas art. 38 bis", "cronUtc": "15 10 5 * *", "local": "Día 5, revisión mensual; 06:15 invierno / 07:15 verano" },
     { "workflow": "etl-servel.yml", "name": "SERVEL", "cronUtc": null, "local": "Sólo workflow_dispatch" },
-    { "workflow": "etl-camara-reconciliation.yml", "name": "Reconciliación histórica de Cámara", "cronUtc": null, "local": "Sólo workflow_dispatch con confirmación explícita" }
+    { "workflow": "etl-camara-reconciliation.yml", "name": "Reconciliación histórica de Cámara", "cronUtc": null, "local": "Sólo workflow_dispatch con confirmación explícita" },
+    { "workflow": "etl-cplt-central.yml", "name": "Nóminas centrales CPLT", "cronUtc": null, "local": "Sólo workflow_dispatch hasta validar tamaño, checksums y costo R2" }
   ]
 }

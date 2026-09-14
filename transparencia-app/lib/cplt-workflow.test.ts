@@ -33,9 +33,16 @@ describe("automatizacion CPLT nacional", () => {
     expect(workflow).toContain("Archivo GitHub Releases no crítico");
   });
 
-  it("limita la proyeccion a administraciones municipales", () => {
+  it("mantiene separadas las proyecciones municipales y centrales", () => {
     const etl = readFileSync(resolve(process.cwd(), "scripts/etl/stream-remote-personal.mjs"), "utf8");
-    expect(etl).toContain("municipalidad\\b|^municipio");
+    expect(etl).toContain("--scope=");
+    expect(etl).toContain("transparencia_activa_central");
+    expect(readFileSync(resolve(process.cwd(), "scripts/etl/cplt-scope.mjs"), "utf8")).toContain("acceptsCpltScope");
+    const centralWorkflow = readFileSync(resolve(process.cwd(), "../.github/workflows/etl-cplt-central.yml"), "utf8");
+    expect(centralWorkflow).toContain("workflow_dispatch:");
+    expect(centralWorkflow).toContain("--scope=central");
+    expect(centralWorkflow).toContain("data:finalize:cplt-central:r2");
+    expect(centralWorkflow).not.toContain("D1");
   });
 
   it("usa el host oficial canónico y conserva fallback ante cambios del host legado", () => {
