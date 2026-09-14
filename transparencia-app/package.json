@@ -30,6 +30,7 @@
     "verify:prod:movimientos": "node scripts/verify-prod-movimientos.mjs",
     "check:movimientos-normalization": "node scripts/verify-movimientos-normalization.mjs",
     "check:legislative-normalization": "node scripts/verify-legislative-normalization.mjs",
+    "check:r2-history": "vitest run scripts/etl/r2-history.test.mjs",
     "test": "npm run typecheck && npm run api:typecheck && npm run check:static-architecture && npm run check:tokens && npm run check:links && npm run check:innerhtml && vitest run",
     "guard:integrity": "node ../scripts/audit/pipeline-guard.mjs",
     "preflight": "npm run lint && npm run test && npm run pages:build && npm run api:size",
