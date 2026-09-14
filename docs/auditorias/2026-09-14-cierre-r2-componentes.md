@@ -279,6 +279,12 @@ Esto refuerza la clasificación **referencia catalogada sin artefacto
 verificable**. No corresponde reconstruir un manifiesto sólo con el conteo y
 el checksum del catálogo, porque seguiría sin probar el contenido real.
 
+El auditor ahora expresa esta decisión en campos explícitos: para Senado el
+estado es `catalogued_without_manifest` y `promotionAllowed=false`. Si todos
+los manifiestos y artefactos responden, el estado pasa a `verifiable` y la
+promoción queda permitida; si sólo se dispone del manifiesto sin poder
+comprobar artefactos, queda `manifests_present_artifacts_unverified`.
+
 El auditor quedó ampliado para realizar esta prueba automáticamente cuando se
 usa `--verify-artifacts`: deriva la clave de proyección esperada desde el
 checksum del catálogo y reporta por separado `missingManifestArtifacts` y

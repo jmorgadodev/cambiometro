@@ -65,6 +65,55 @@ export function auditCatalogClosure(catalog, objects, sourceId = null) {
   };
 }
 
+/**
+ * Converts the raw closure evidence into a publication decision. A source can
+ * have a responding connector and still lack a verifiable R2 release; those
+ * states must not be collapsed into a generic "unavailable" or zero count.
+ */
+export function classifyR2Closure(result) {
+  const missingManifests = Array.isArray(result?.missingManifests) ? result.missingManifests : [];
+  const missingArtifacts = Array.isArray(result?.missingArtifacts) ? result.missingArtifacts : [];
+  const missingManifestArtifacts = Array.isArray(result?.missingManifestArtifacts) ? result.missingManifestArtifacts : [];
+  const presentWithoutManifest = Array.isArray(result?.presentWithoutManifest) ? result.presentWithoutManifest : [];
+  const missingArtifactInventory = Array.isArray(result?.missingArtifactInventory) ? result.missingArtifactInventory : [];
+
+  if (missingManifests.length > 0 || missingManifestArtifacts.length > 0) {
+    return {
+      status: "catalogued_without_manifest",
+      promotionAllowed: false,
+      reason: "El catálogo referencia particiones cuyo manifiesto no está disponible en R2.",
+    };
+  }
+  if (missingArtifacts.length > 0 || missingArtifactInventory.length > 0) {
+    return {
+      status: "manifest_without_artifact",
+      promotionAllowed: false,
+      reason: "Hay manifiestos que apuntan a artefactos no verificables en R2.",
+    };
+  }
+  if (presentWithoutManifest.length > 0) {
+    return {
+      status: "artifact_without_manifest",
+      promotionAllowed: false,
+      reason: "Hay artefactos presentes sin un manifiesto que acredite período, conteo y checksum.",
+    };
+  }
+  if (result?.artifactCheck === "not_available") {
+    return {
+      status: "manifests_present_artifacts_unverified",
+      promotionAllowed: false,
+      reason: "Los manifiestos están presentes, pero no se pudo comprobar la existencia de sus artefactos.",
+    };
+  }
+  return {
+    status: result?.complete === true ? "verifiable" : "incomplete",
+    promotionAllowed: result?.complete === true,
+    reason: result?.complete === true
+      ? "Manifiestos y artefactos comprobados en R2."
+      : "El cierre de R2 está incompleto.",
+  };
+}
+
 function option(name, fallback = null) {
   const index = process.argv.indexOf(name);
   return index >= 0 ? process.argv[index + 1] : fallback;
@@ -195,6 +244,7 @@ function run() {
       missingManifests: [...new Set([...missingManifests, ...closure.missingManifests])].sort(),
     };
     result.complete = result.missingManifests.length === 0 && (!verifyArtifacts || result.missingArtifacts.length === 0);
+    Object.assign(result, classifyR2Closure(result));
     console.log(JSON.stringify(result, null, 2));
     if (!result.complete) process.exitCode = 1;
   } finally {

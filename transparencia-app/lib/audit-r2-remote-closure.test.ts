@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { auditCatalogClosure, catalogPartitionKeys, catalogProjectionArtifactKey } from "../scripts/audit-r2-remote-closure.mjs";
+import { auditCatalogClosure, catalogPartitionKeys, catalogProjectionArtifactKey, classifyR2Closure } from "../scripts/audit-r2-remote-closure.mjs";
 
 describe("auditoría de cierre del catálogo R2", () => {
   it("deriva sólo la clave de proyección de un checksum completo", () => {
@@ -61,5 +61,27 @@ describe("auditoría de cierre del catálogo R2", () => {
       missingManifests: [],
       missingArtifacts: [],
     });
+  });
+
+  it("separa catálogo incompleto de fuente no disponible", () => {
+    expect(classifyR2Closure({
+      complete: false,
+      artifactCheck: "physical_get",
+      missingManifests: ["partitions/senado/2026/09/manifest.json"],
+      missingArtifacts: [],
+      missingManifestArtifacts: [{ manifestKey: "x", artifactKey: "y" }],
+      presentWithoutManifest: [],
+      missingArtifactInventory: [],
+    })).toMatchObject({ status: "catalogued_without_manifest", promotionAllowed: false });
+
+    expect(classifyR2Closure({
+      complete: true,
+      artifactCheck: "physical_get",
+      missingManifests: [],
+      missingArtifacts: [],
+      missingManifestArtifacts: [],
+      presentWithoutManifest: [],
+      missingArtifactInventory: [],
+    })).toMatchObject({ status: "verifiable", promotionAllowed: true });
   });
 });
