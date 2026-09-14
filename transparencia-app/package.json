@@ -28,6 +28,7 @@
     "verify:cold-crawl": "node scripts/cold-crawl.mjs",
     "verify:prod:double": "node scripts/verify-prod-double.mjs",
     "verify:prod:movimientos": "node scripts/verify-prod-movimientos.mjs",
+    "verify:prod:remuneraciones": "node scripts/verify-prod-remuneraciones.mjs",
     "test": "npm run typecheck && npm run api:typecheck && npm run check:static-architecture && npm run check:tokens && npm run check:links && npm run check:innerhtml && vitest run",
     "guard:integrity": "node ../scripts/audit/pipeline-guard.mjs",
     "preflight": "npm run lint && npm run test && npm run pages:build && npm run api:size",

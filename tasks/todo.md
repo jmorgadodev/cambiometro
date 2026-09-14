@@ -21,7 +21,7 @@
       proyecciones; queda pendiente la promoción tras reconciliar particiones.
 - [~] N3: historial acotado de remuneraciones construido desde índices R2,
       protegido contra consultas amplias y conectado a la ficha de persona
-      bajo demanda; falta validarlo con organismos y smoke productivo.
+      bajo demanda; falta promoverlo y completar el smoke productivo.
 - [x] N4: guardia de crecimiento R2 y conservación de la versión de rollback
       activos; cada plan registra bytes previos, proyectados, crecimiento y
       margen restante antes de publicar. Se mide el tamaño real de los objetos
@@ -93,6 +93,8 @@
   filas en 169 páginas, 102 comprobaciones de smoke estático verdes.
 - [ ] Ejecutar build y smoke de producción con el lago completo de Ley 19.862;
   el modo de muestra local no sustituye ese release.
+- [ ] Promover el manifiesto 38 bis comparado y el Worker de historial R2 como
+  un bloque; el smoke actual detecta `linea_base` 0/0/0 y un 404 productivo.
 - [x] Ejecutar smoke integral de la base actualmente publicada: 132/132
   comprobaciones verdes; Movimientos 82 registros y checksum válido. Esto no
   sustituye el smoke del nuevo código de remuneraciones tras su promoción.

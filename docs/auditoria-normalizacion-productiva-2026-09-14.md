@@ -195,3 +195,15 @@ disponibles y estados `en_confirmacion` preservados.
 Este resultado valida la base actualmente publicada, no la rama de cambios de
 remuneraciones: la nueva vista aún no se ha promovido y la ruta de historial
 R2 de remuneraciones sigue pendiente de smoke posterior al despliegue.
+
+### Smoke específico de remuneraciones en producción — 2026-09-14 12:45 UTC-3
+
+El verificador específico confirmó que producción ya no muestra la gráfica ni
+la tabla de doce cortes y que conserva los tres indicadores. Sin embargo,
+detuvo la validación antes de continuar porque el manifiesto productivo
+`2026-06` todavía declara `comparison.estado = linea_base` con `0/0/0`.
+La rama local contiene el mismo corte con `comparado` y `53/46/439`. El
+endpoint de historial bajo demanda sigue respondiendo 404 en producción.
+Por tanto, la promoción del manifiesto y del Worker de historial debe ser un
+bloque único y no se debe declarar cerrada la prioridad de comparaciones hasta
+que este smoke pase completo.
