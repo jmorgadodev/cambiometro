@@ -794,13 +794,14 @@ async function listFuncionariosFromD1(requestUrl: URL, env: Env): Promise<Respon
   }
 }
 
-async function listFuncionariosFromR2(requestUrl: URL, env: Env) {
+async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "funcionarios-v1") {
   const organism = requestUrl.searchParams.get("muni") ?? requestUrl.searchParams.get("organismo") ?? "Todos";
-  const manifest = await r2Json<CpltManifest>(env.PUBLIC_DATA, "projections/funcionarios-v1/manifest.json");
+  const projectionRoot = `projections/${datasetRoot}`;
+  const manifest = await r2Json<CpltManifest>(env.PUBLIC_DATA, `${projectionRoot}/manifest.json`);
   if (!manifest?.version || !Array.isArray(manifest.assets)) return failure("DATASET_UNAVAILABLE", "La nómina oficial no está publicada.", 503);
 
   if (!organism || organism === "Todos") {
-    const indexKey = manifest.searchIndex?.key ?? `projections/funcionarios-v1/versions/${manifest.version}/search_index.json`;
+    const indexKey = manifest.searchIndex?.key ?? `${projectionRoot}/versions/${manifest.version}/search_index.json`;
     const index = await r2Json<OfficialsSearchIndex | CompactOfficialRow[]>(env.PUBLIC_DATA, indexKey);
     if (Array.isArray(index)) {
       return officialsResponse(compactOfficialRows(index), requestUrl, manifest.generatedAt, "r2-search-legacy", "Todos");
@@ -889,7 +890,7 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env) {
     } else {
       responseUrl.searchParams.set("sortBy", "nombre_asc");
     }
-    const response = officialsResponse(rows, responseUrl, manifest.generatedAt, "r2-search", "Todos");
+    const response = officialsResponse(rows, responseUrl, manifest.generatedAt, datasetRoot === "funcionarios-v1" ? "r2-search" : "r2-search-central", "Todos");
     if (!query) {
       const payload = await response.json() as JsonRecord;
       const meta = (payload.meta as JsonRecord) ?? {};
@@ -927,11 +928,11 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env) {
     payload.meta = meta;
     return json(payload, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
   }
-  const key = manifest.assets.find((asset) => asset.key === `projections/funcionarios-v1/versions/${manifest.version}/${organism}.json`)?.key;
+  const key = manifest.assets.find((asset) => asset.key === `${projectionRoot}/versions/${manifest.version}/${organism}.json`)?.key;
   if (!key) return failure("DATASET_UNAVAILABLE", "No existe una nómina publicada para este organismo.", 404, { organism });
   const rows = await r2Json<JsonRecord[]>(env.PUBLIC_DATA, key);
   if (!rows) return failure("DATASET_UNAVAILABLE", "La nómina oficial no está disponible temporalmente.", 503);
-  return officialsResponse(rows, requestUrl, manifest.generatedAt, "r2", organism);
+  return officialsResponse(rows, requestUrl, manifest.generatedAt, datasetRoot === "funcionarios-v1" ? "r2" : "r2-central", organism);
 }
 
 function limitFrom(url: URL) {
@@ -2051,8 +2052,27 @@ export default {
       // primero obliga a contar/leer hasta 1,2M filas y puede agotar el cupo
       // gratuito de rows_read antes de llegar al release canónico. R2 es la
       // fuente pública; D1 sólo se habilita mediante ALLOW_PUBLIC_D1_READS=1.
-      const r2 = await listFuncionariosFromR2(url, env);
-      if (r2.status < 500) return r2;
+      const requestedScope = normalized(url.searchParams.get("scope") ?? "");
+      const datasetRoot = requestedScope === "central" ? "funcionarios-central-v1" : "funcionarios-v1";
+      const r2 = await listFuncionariosFromR2(url, env, datasetRoot);
+      if (r2.status < 500) {
+        // Mantiene la proyección municipal como contrato principal. Cuando
+        // una búsqueda nominal no encuentra nada allí, consulta la proyección
+        // central separada, sin mezclar ambos universos ni tocar D1.
+        if (datasetRoot === "funcionarios-v1" && !url.searchParams.get("muni") && !url.searchParams.get("organismo")
+          && (url.searchParams.get("query") ?? url.searchParams.get("q"))?.trim()) {
+          try {
+            const payload = await r2.clone().json() as { meta?: { total?: number } };
+            if (Number(payload.meta?.total ?? 0) === 0) {
+              const central = await listFuncionariosFromR2(url, env, "funcionarios-central-v1");
+              if (central.status < 500) return central;
+            }
+          } catch {
+            // Se conserva la respuesta municipal si el cuerpo no es JSON.
+          }
+        }
+        return r2;
+      }
       const d1 = await listFuncionariosFromD1(url, env);
       return d1 ?? r2;
     }

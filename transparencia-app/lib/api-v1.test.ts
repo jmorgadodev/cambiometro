@@ -1465,6 +1465,52 @@ describe("API canónica v1", () => {
     expect(payload.data[0].nombre_completo).toBe("Claudio Adaros");
   });
 
+  it("consulta la proyección central sólo cuando la búsqueda municipal no encuentra coincidencias", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 0,
+        pageSize: 2,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 0 }],
+        shards: {},
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [],
+      "projections/funcionarios-central-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-central-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-central-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1,
+        pageSize: 2,
+        pages: [{ page: 1, key: "projections/funcionarios-central-v1/versions/2026-08-25/search_index/p-0001.json", count: 1 }],
+        shards: { la: "projections/funcionarios-central-v1/versions/2026-08-25/search_index/la.json" },
+      },
+      "projections/funcionarios-central-v1/versions/2026-08-25/search_index/la.json": [["latorre", [0]]],
+      "projections/funcionarios-central-v1/versions/2026-08-25/search_index/p-0001.json": [
+        { id: "central-1", n: "Valentina Andrea Latorre Rincon", c: "Director/a Regional", o: "Presidencia", ot: "servicio_publico", t: "Planta", e: "Directivo", b: 5676763, p: "2026-07" },
+      ],
+    };
+    const env = {
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?query=Latorre&limit=10"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.sourceStatus).toBe("r2-search-central");
+    expect(payload.data[0].nombre_completo).toBe("Valentina Andrea Latorre Rincon");
+    expect(payload.data[0].organo_nombre).toBe("Presidencia");
+  });
+
   it("normaliza Código del Trabajo al aplicar el filtro contractual", async () => {
     const request = new Request("https://example.test/api/funcionarios?muni=muni-maipu&contrato=CodigoTrabajo&include_zero=true&limit=10");
     const response = await api.fetch(request, officialsR2Env());

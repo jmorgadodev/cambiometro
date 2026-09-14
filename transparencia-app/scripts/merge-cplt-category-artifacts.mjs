@@ -2,8 +2,11 @@ import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync, writeFileSync
 import { join, resolve } from "node:path";
 
 const categories = ["Planta", "Contrata", "Honorarios", "CodigoTrabajo"];
-const artifactRoot = resolve("data/cplt-artifacts");
-const output = resolve("data/raw/transparencia_activa");
+const scopeArgument = process.argv.find((argument) => argument.startsWith("--scope="));
+const scope = String(scopeArgument?.slice("--scope=".length) || "municipal").toLowerCase();
+if (!new Set(["municipal", "central"]).has(scope)) throw new Error(`CPLT_UNKNOWN_SCOPE: ${scope}`);
+const artifactRoot = resolve("data", scope === "central" ? "cplt-central-artifacts" : "cplt-artifacts");
+const output = resolve("data/raw", scope === "central" ? "transparencia_activa_central" : "transparencia_activa");
 const projections = join(output, "projections", "funcionarios-v1");
 rmSync(output, { recursive: true, force: true });
 mkdirSync(projections, { recursive: true });
@@ -16,7 +19,10 @@ for (const category of categories) {
   if (!existsSync(source)) throw new Error(`CPLT_ARTIFACT_MISSING: ${category}`);
   const normalized = category.toLowerCase();
   writeFileSync(join(output, "validation", `${normalized}.json`), readFileSync(join(source, "validation.json")));
-  writeFileSync(join(output, "coverage", `${normalized}.json`), readFileSync(join(source, "coverage.json")));
+  if (existsSync(join(source, "coverage.json"))) {
+    mkdirSync(join(output, "coverage"), { recursive: true });
+    writeFileSync(join(output, "coverage", `${normalized}.json`), readFileSync(join(source, "coverage.json")));
+  }
 
   for (const fileName of readdirSync(join(source, "projections"))) {
     if (!fileName.endsWith(".json")) continue;
@@ -32,4 +38,4 @@ for (const [fileName, records] of recordsByFile) {
   writeFileSync(join(projections, fileName), JSON.stringify([...records.values()]));
 }
 if (recordsByFile.size < 1) throw new Error("CPLT_MERGED_PROJECTIONS_MISSING");
-console.log(JSON.stringify({ categories: categories.length, projectionFiles: recordsByFile.size }));
+console.log(JSON.stringify({ categories: categories.length, scope, projectionFiles: recordsByFile.size }));
