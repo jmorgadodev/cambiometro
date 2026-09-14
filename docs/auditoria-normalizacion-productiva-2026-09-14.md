@@ -1,0 +1,89 @@
+# Auditoría productiva de normalización — 2026-09-14
+
+## Alcance
+
+Auditoría de sólo lectura contra los endpoints públicos de producción. Se
+consultaron los manifiestos resumidos de fuentes, el estado de salud y como
+máximo una fila por fuente. No se descargaron universos, no se ejecutó ETL,
+no se escribió en D1 y no se modificó ningún release R2.
+
+Referencia consultada: `https://cambiometro.impulsacv.cl`.
+
+## Línea base operativa
+
+- Backend público declarado: R2.
+- Lecturas públicas D1 declaradas: `false`.
+- Estado de salud: correcto (`ok=true`, R2 disponible).
+- Fuentes auditadas: 13, incluyendo Movimientos.
+- Muestra máxima: 1 fila por fuente.
+- Los valores de las filas no se guardaron en este informe; sólo sus nombres
+  de campos, estado y metadatos de paginación.
+
+## Matriz de producción frente a local
+
+| Fuente | Producción declarado | Local | Estado productivo | Publicado / esperado en muestra | Clasificación |
+| --- | ---: | ---: | --- | ---: | --- |
+| Cámara | 58.751 | 19.025 | parcial | 155 / 58.751 | alcance/frescura por reconciliar |
+| Senado | 1.428 | 8.138 | parcial | 0 / 1.428 | release sin filas consultables |
+| ChileCompra | 74.142 | 74.142 | parcial en catálogo; completo en registros | 74.142 / 74.142 | metadatos inconsistentes |
+| Contraloría | 310 | 291 | parcial | 0 / 310 | release parcial |
+| DIPRES | 247.287 | 15.689 | parcial | 0 / 247.287 | alcance distinto; agregado |
+| INE Censo 2024 | 346 | 346 | conectado | resumen, sin endpoint de filas | coincide en resumen |
+| InfoLobby | 71.467 | 71.467 | parcial en catálogo; completo en registros | 71.467 / 71.467 | coincide en resumen y consulta |
+| InfoProbidad | 16.077 | 15.331 | parcial | 16.077 / 16.077 | frescura |
+| Ley 19.862 | 62.172 | 59.361 | parcial | 0 / 62.443 | release parcial |
+| SERVEL | 23.894 | 23.894 | parcial | 0 / 23.894 | release parcial |
+| SINIM | 3.105 | 3.105 | parcial | 0 / 3.105 | release parcial |
+| Transparencia Activa | 1.226.913 | 1.203.287 | parcial | resumen solamente | frescura / consulta temporalmente no disponible |
+| Movimientos | — | 4.092 local | parcial | 82 publicados | fuente fuera del catálogo general |
+
+Los conteos no se interpretan como cobertura total automáticamente. “Declarado”
+es el conteo del catálogo; “publicado” es lo que el endpoint de registros
+reportó como publicado; “esperado” es el total que el propio endpoint declara
+para ese release. Una fuente puede tener un catálogo correcto y aun así estar
+parcialmente recorrible.
+
+## Hallazgos que bloquean promoción
+
+1. **Cámara:** el catálogo declara 58.751 registros, pero el endpoint expone
+   155 y marca una partición faltante. Se debe separar el conteo declarado del
+   subconjunto consultable antes de presentar cobertura.
+2. **Senado:** el catálogo declara 1.428, pero la consulta devuelve cero filas
+   con cuatro particiones faltantes. No se debe publicar ese cero como un
+   corte nuevo ni reemplazar el release anterior válido.
+3. **Transparencia Activa:** el resumen productivo conserva 1.226.913, pero
+   la consulta detallada está temporalmente no disponible. Esto explica por
+   qué un nombre puede aparecer en un resumen o en una versión anterior y no
+   en una búsqueda actual.
+4. **ChileCompra:** el catálogo de fuentes marca `partial`, mientras el
+   endpoint de registros marca `complete` para las 74.142 filas del corte.
+   Hay que reconciliar ese estado de metadata antes de usarlo en porcentajes.
+5. **DIPRES:** su conteo productivo declarado corresponde a un alcance distinto
+   al conteo local y sigue siendo un dataset agregado; no debe transformarse
+   en fichas personales.
+6. **Movimientos:** tiene 82 filas públicas, pero no aparece en el catálogo
+   general de fuentes; debe mantener su propio manifiesto y estado de frescura.
+
+## Decisión de normalización
+
+La rama incorpora un contrato local, aún sin conexión al publicador:
+
+- Cámara y Senado mantienen categorías separadas para votaciones, asistencia,
+  gastos, remuneraciones, asesorías/personal de apoyo y categorías no
+  determinadas.
+- Movimientos conserva identificador, fecha del evento, fecha de detección,
+  cargo, organismo, entrante, saliente, estado de verificación y fuentes
+  documentales.
+- El registro original se conserva por referencia y nunca se reemplaza.
+- `0`, `null`, “no informado” y valor inválido quedan en estados distintos.
+- No se fusionan personas por nombre ni se corrigen releases fallidos.
+
+## Siguiente checkpoint
+
+Antes de conectar estos normalizadores al ETL o promover cambios:
+
+1. reconciliar las particiones faltantes de Cámara y Senado;
+2. comprobar que el release anterior permanece disponible ante respuesta vacía;
+3. validar una persona y un organismo desde índices R2;
+4. medir tamaño comprimido y margen de R2;
+5. ejecutar pruebas y preview por fuente.

@@ -7,8 +7,12 @@
 - [x] N0: agregar pruebas del contrato común sin descargar datos masivos.
 - [x] N1: agregar auditor reproducible de conteos, alcance y frescura por
       fuente usando metadatos, sin D1.
-- [ ] N1: ejecutar la matriz contra manifiestos productivos R2 y muestras
-      acotadas antes de modificar cualquier proyección.
+- [x] N1: ejecutar la matriz contra manifiestos productivos R2 y muestras
+      acotadas antes de modificar cualquier proyección. Evidencia:
+      `docs/auditoria-normalizacion-productiva-2026-09-14.md`.
+- [ ] N1: completar la medición de campos ausentes, formatos, anomalías y
+      duplicados por fuente; la matriz actual sólo usa metadatos y nombres de
+      campos de una muestra.
 - [ ] N2: normalizar por dominio Cámara/Senado/Movimientos manteniendo sus
       categorías y releases independientes.
 - [ ] N3: generar historiales, altas, bajas y cambios desde índices R2.
