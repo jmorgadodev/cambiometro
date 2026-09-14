@@ -78,7 +78,9 @@ describe("Header y navegación global", () => {
     expect(headerContent).toContain("drawer-snapshot-stamp");
     expect(headerContent).toContain("https://x.com/cambiometro");
     expect(headerContent).toContain("Donar y apoyar");
-    expect(headerContent).toContain('href="/donar"');
+    expect(headerContent).toContain('href="https://link.mercadopago.cl/impulsacv"');
+    expect(headerContent).toContain('target="_blank"');
+    expect(headerContent).toContain('rel="noopener noreferrer"');
   });
 
   it("no presenta un corte global cuando cada fuente tiene su propia actualización", () => {

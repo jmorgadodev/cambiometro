@@ -175,7 +175,7 @@ export default function SiteHeader({ totalRecords }: SiteHeaderProps) {
               className="site-support-link"
               title="Haz un aporte voluntario para mantener los servidores y la fiscalización independiente"
             >
-              <span aria-hidden="true">☕</span> Apoyar Proyecto
+              Apoyar Proyecto
             </a>
 
             {/* Toggle de tema (Touch target ≥ 44px en ambos breakpoints) */}

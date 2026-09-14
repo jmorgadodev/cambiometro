@@ -2,7 +2,7 @@ import type React from "react";
 
 const MERCADO_PAGO_URL = "https://link.mercadopago.cl/impulsacv";
 
-export function SupportProjectLink({ className = "", children = "☕ Apoyar Proyecto" }: { className?: string; children?: React.ReactNode }) {
+export function SupportProjectLink({ className = "", children = "Apoyar Proyecto" }: { className?: string; children?: React.ReactNode }) {
   return (
     <a
       href={MERCADO_PAGO_URL}
