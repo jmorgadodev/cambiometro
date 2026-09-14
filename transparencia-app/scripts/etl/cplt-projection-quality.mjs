@@ -19,12 +19,38 @@ function periodFilters(index) {
     .map(([key, descriptor]) => ({ period: key.slice(PERIOD_FILTER_PREFIX.length), count: integer(descriptor.count) ?? 0 }));
 }
 
+function coverageSummary(manifest) {
+  const coverage = Array.isArray(manifest?.coverage) ? manifest.coverage : [];
+  const seen = new Set();
+  let duplicateIds = 0;
+  let recordRows = 0;
+  let available = 0;
+  let unavailable = 0;
+  for (const row of coverage) {
+    const id = String(row?.communeId ?? row?.administrationId ?? row?.cut ?? "").trim();
+    if (id && seen.has(id)) duplicateIds += 1;
+    if (id) seen.add(id);
+    const count = integer(row?.recordCount);
+    if (count !== null) recordRows += count;
+    if (row?.status === "available") available += 1;
+    if (row?.status === "unavailable") unavailable += 1;
+  }
+  return {
+    declared: coverage.length,
+    available,
+    unavailable,
+    recordRows,
+    duplicateIds,
+  };
+}
+
 /**
  * Audits only manifest/index/summary metadata. It never reads a data page and
  * therefore can be used before a large release is promoted or downloaded.
  */
 export function auditCpltProjection({ manifest, index, summary }) {
   const manifestRows = integer(manifest?.recordCount);
+  const coverage = coverageSummary(manifest);
   const indexRows = integer(index?.totalRows);
   const pageRows = Array.isArray(index?.pages)
     ? index.pages.reduce((total, page) => total + (integer(page?.count) ?? 0), 0)
@@ -47,6 +73,11 @@ export function auditCpltProjection({ manifest, index, summary }) {
   if (indexedPeriodRows !== null && indexRows !== null && indexedPeriodRows !== indexRows) structuralIssues.push("period_filter_sum_mismatch");
   if (invalidPeriodRows > 0) structuralIssues.push("period_filters_outside_declared_release");
   if (qualityInvalidPeriodRows > 0) structuralIssues.push("rows_with_invalid_period");
+  if (coverage.declared === 0) structuralIssues.push("coverage_missing");
+  if (coverage.duplicateIds > 0) structuralIssues.push("coverage_duplicate_entities");
+  if (manifestRows !== null && coverage.declared > 0 && coverage.recordRows !== manifestRows) {
+    structuralIssues.push("coverage_record_count_sum_mismatch");
+  }
 
   const quality = indexedQuality
     ? {
@@ -63,6 +94,7 @@ export function auditCpltProjection({ manifest, index, summary }) {
     status: structuralIssues.length === 0 ? "ready" : "blocked",
     promotionAllowed: structuralIssues.length === 0,
     manifestRows,
+    coverage,
     indexRows,
     pageCount: Array.isArray(index?.pages) ? index.pages.length : 0,
     pageRows,

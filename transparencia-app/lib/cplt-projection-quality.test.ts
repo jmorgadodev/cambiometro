@@ -3,7 +3,13 @@ import { auditCpltProjection } from "../scripts/etl/cplt-projection-quality.mjs"
 
 function fixture(overrides: Record<string, unknown> = {}) {
   return {
-    manifest: { recordCount: 3 },
+    manifest: {
+      recordCount: 3,
+      coverage: [
+        { communeId: "muni-a", status: "available", recordCount: 2 },
+        { communeId: "muni-b", status: "unavailable", recordCount: 1 },
+      ],
+    },
     index: {
       totalRows: 3,
       pages: [{ page: 1, count: 2 }, { page: 2, count: 1 }],
@@ -18,7 +24,25 @@ function fixture(overrides: Record<string, unknown> = {}) {
 describe("auditoría acotada de proyección CPLT", () => {
   it("permite promoción cuando manifiesto, páginas e índices de período coinciden", () => {
     const result = auditCpltProjection(fixture());
-    expect(result).toMatchObject({ status: "ready", promotionAllowed: true, manifestRows: 3, pageRows: 3, invalidPeriodRows: 0 });
+    expect(result).toMatchObject({
+      status: "ready",
+      promotionAllowed: true,
+      manifestRows: 3,
+      pageRows: 3,
+      invalidPeriodRows: 0,
+      coverage: { declared: 2, available: 1, unavailable: 1, recordRows: 3, duplicateIds: 0 },
+    });
+  });
+
+  it("bloquea una cobertura territorial que no coincide con el total del manifiesto", () => {
+    const result = auditCpltProjection(fixture({
+      manifest: {
+        recordCount: 3,
+        coverage: [{ communeId: "muni-a", status: "available", recordCount: 2 }],
+      },
+    }));
+    expect(result.status).toBe("blocked");
+    expect(result.structuralIssues).toContain("coverage_record_count_sum_mismatch");
   });
 
   it("bloquea períodos indexados fuera del release declarado aunque el total cuadre", () => {

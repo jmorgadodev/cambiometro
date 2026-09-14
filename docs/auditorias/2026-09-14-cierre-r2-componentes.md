@@ -647,3 +647,11 @@ La compuerta `auditCpltProjection` devuelve:
 La búsqueda nacional vigente puede continuar usando el índice R2, pero no se
 debe promover una serie histórica mensual ni afirmar cobertura temporal hasta
 publicar un resumen de períodos y calidad que coincida con el mismo release.
+
+La misma auditoría ahora valida la cobertura territorial declarada por el
+manifiesto: 346 comunas, 320 con registros disponibles y 25 sin publicación;
+la suma de sus conteos (`1.226.913`) coincide con el total del release y no se
+detectan entidades duplicadas. Esto permite auditar la cobertura municipal sin
+descargar las páginas de nómina. La ausencia de una comuna sigue siendo un
+estado de fuente, no un sueldo cero ni una inferencia de que la municipalidad
+no tenga personal.
