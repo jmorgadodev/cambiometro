@@ -711,3 +711,10 @@ Los 48 bytes restantes corresponden a filtros pequeños repetidos entre
 versiones. El reporte sólo identifica candidatos; no autoriza borrar objetos,
 porque una clave aparentemente duplicada puede seguir siendo una referencia
 canónica o histórica.
+
+La revisión del catálogo R2 vigente muestra que las claves actuales de índices
+de entidades de Cámara y Contraloría son otras claves checksum (`0403f006…` y
+`a32683c3…` respectivamente); ninguno de los cuatro objetos duplicados aparece
+referenciado por ese catálogo vigente. Se mantienen como **candidatos no
+referenciados por el catálogo actual**, pendientes de comprobar retención y
+referencias históricas antes de cualquier eliminación.
