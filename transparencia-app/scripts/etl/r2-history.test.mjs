@@ -111,6 +111,17 @@ describe("buildR2History", () => {
     expect(result.historyByKey.a[0].original.monto).toBe(100);
   });
 
+  it("rejects an artifact checksum returned by the R2 reader when it differs", async () => {
+    await expect(buildR2HistoryFromManifests([{
+      id: "source/2026/09",
+      year: 2026,
+      month: 9,
+      projectionChecksumSha256: "projection-checksum",
+      recordCount: 1,
+      artifacts: [{ key: "records.jsonl.gz", checksumSha256: "expected-artifact-checksum" }],
+    }], async () => ({ records: [{ personKey: "a" }], checksumSha256: "different-artifact-checksum" }), { keyFields: ["personKey"] })).rejects.toThrow("checksum incorrecto");
+  });
+
   it("accepts an explicit resolver for nested official identities", () => {
     const result = buildR2History([
       {

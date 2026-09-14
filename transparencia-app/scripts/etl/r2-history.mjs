@@ -299,8 +299,13 @@ export async function readR2ReleaseArtifacts(manifest, readRecords) {
     if (!key) throw new Error(`Historial R2: artefacto ${index + 1} sin key`);
     if (seenKeys.has(key)) throw new Error(`Historial R2: artefacto duplicado ${key}`);
     seenKeys.add(key);
-    const rows = await readRecords(key, artifact);
+    const payload = await readRecords(key, artifact);
+    const rows = Array.isArray(payload) ? payload : payload?.records;
     if (!Array.isArray(rows)) throw new Error(`Historial R2: artefacto ilegible ${key}`);
+    const actualChecksum = Array.isArray(payload) ? null : text(payload?.checksumSha256 ?? payload?.checksum);
+    if (artifact?.checksumSha256 && actualChecksum && artifact.checksumSha256 !== actualChecksum) {
+      throw new Error(`Historial R2: checksum incorrecto en ${key}`);
+    }
     if (artifact?.recordCount != null && Number(artifact.recordCount) !== rows.length) {
       throw new Error(`Historial R2: conteo incorrecto en ${key}`);
     }
