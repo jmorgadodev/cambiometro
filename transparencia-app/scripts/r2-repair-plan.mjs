@@ -21,6 +21,8 @@ function normalizedPartitions(catalog, sourceId = null) {
  * Builds a local-only, non-mutating repair plan for catalogued R2 objects.
  * It verifies local manifests and their declared artifacts before any future
  * operator is allowed to upload them. This function never calls Wrangler.
+ *
+ * @param {{ catalog: Record<string, unknown>, lakeRoot: string, sourceId?: string | null }} input
  */
 export function buildLocalR2RepairPlan({ catalog, lakeRoot, sourceId = null }) {
   const operations = [];
