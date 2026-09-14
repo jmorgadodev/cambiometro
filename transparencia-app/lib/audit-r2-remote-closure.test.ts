@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { auditCatalogClosure, catalogPartitionKeys, catalogProjectionArtifactKey, classifyR2Closure, summarizeR2ClosureGaps } from "../scripts/audit-r2-remote-closure.mjs";
+import { auditCatalogClosure, catalogPartitionKeys, catalogProjectionArtifactKey, classifyR2Closure, summarizeR2ClosureBySource, summarizeR2ClosureGaps } from "../scripts/audit-r2-remote-closure.mjs";
 
 describe("auditoría de cierre del catálogo R2", () => {
   it("deriva sólo la clave de proyección de un checksum completo", () => {
@@ -123,5 +123,41 @@ describe("auditoría de cierre del catálogo R2", () => {
       missingArtifactInventory: [],
       presentWithoutManifest: [],
     })).toMatchObject({ status: "no_catalog_partitions", promotionAllowed: false });
+  });
+
+  it("construye una matriz independiente por fuente", () => {
+    const catalog = {
+      partitions: [
+        { sourceId: "camara", manifestKey: "partitions/camara/votaciones_camara/2026/07/manifest.json" },
+        { sourceId: "senado", manifestKey: "partitions/senado/2026/07/manifest.json" },
+      ],
+    };
+    const manifests = new Map([
+      ["partitions/camara/votaciones_camara/2026/07/manifest.json", { artifacts: [{ key: "partitions/camara/votaciones_camara/2026/07/records.jsonl.gz" }] }],
+      ["partitions/senado/2026/07/manifest.json", { artifacts: [{ key: "partitions/senado/2026/07/records.jsonl.gz" }] }],
+    ]);
+    expect(summarizeR2ClosureBySource(catalog, manifests, {
+      missingManifests: ["partitions/senado/2026/07/manifest.json"],
+      missingArtifactInventory: ["partitions/camara/votaciones_camara/2026/07/records.jsonl.gz"],
+    })).toEqual([
+      {
+        sourceId: "camara",
+        partitions: 1,
+        manifestsPresent: 1,
+        missingManifests: 0,
+        missingArtifactInventory: 1,
+        status: "manifest_without_artifact",
+        promotionAllowed: false,
+      },
+      {
+        sourceId: "senado",
+        partitions: 1,
+        manifestsPresent: 0,
+        missingManifests: 1,
+        missingArtifactInventory: 0,
+        status: "catalogued_without_manifest",
+        promotionAllowed: false,
+      },
+    ]);
   });
 });

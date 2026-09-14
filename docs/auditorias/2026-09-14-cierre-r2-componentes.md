@@ -776,6 +776,14 @@ inventario” se conserva separada. No se interpreta como pérdida de filas ni
 se publica como cero; requiere reconstruir o volver a registrar el cierre
 físico de cada fuente antes de promover historiales.
 
+La matriz por `sourceId` quedó así en la misma ejecución: Cámara 61
+particiones (46 manifiestos presentes, 15 faltantes y 43 artefactos no
+verificables); Contraloría 19 (1, 18 y 1); DIPRES 18 (0, 18 y 0);
+InfoProbidad 9 (0, 9 y 0); InfoLobby 8 (6, 2 y 6); Ley 19.862 8 (0, 8 y 0);
+votaciones Senado 7 (5, 2 y 5); gastos Cámara 5 (0, 5 y 0); gastos Senado 5
+(0, 5 y 0); Senado 4 (0, 4 y 0); y ChileCompra, Servel y SINIM 1 cada uno,
+sin manifiesto presente. Ninguna fuente alcanzó `promotionAllowed=true`.
+
 El constructor de historiales R2 incorpora ahora una compuerta explícita de
 promoción. Cuando se solicita `requirePromotionAllowed`, exige que el cierre
 recibido tenga simultáneamente `complete=true` y `promotionAllowed=true`; un

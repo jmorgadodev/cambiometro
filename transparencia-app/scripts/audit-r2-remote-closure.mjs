@@ -159,6 +159,49 @@ export function summarizeR2ClosureGaps(result) {
   };
 }
 
+/**
+ * Builds a compact per-source matrix from the catalog and the closure result.
+ * Declared source IDs are kept intact; nested dataset names remain visible in
+ * the partition keys and are not silently merged into another source.
+ */
+export function summarizeR2ClosureBySource(catalog, manifests, result) {
+  const missingManifests = new Set(result?.missingManifests ?? []);
+  const missingArtifactInventory = new Set(result?.missingArtifactInventory ?? []);
+  const groups = new Map();
+  for (const partition of Array.isArray(catalog?.partitions) ? catalog.partitions : []) {
+    const sourceId = String(partition?.sourceId ?? "unknown");
+    const manifestKey = String(partition?.manifestKey ?? "").trim();
+    const current = groups.get(sourceId) ?? {
+      sourceId,
+      partitions: 0,
+      manifestsPresent: 0,
+      missingManifests: 0,
+      missingArtifactInventory: 0,
+    };
+    current.partitions += 1;
+    if (missingManifests.has(manifestKey)) current.missingManifests += 1;
+    else current.manifestsPresent += 1;
+    const manifest = manifests?.get?.(manifestKey);
+    for (const artifact of Array.isArray(manifest?.artifacts) ? manifest.artifacts : []) {
+      if (missingArtifactInventory.has(String(artifact?.key ?? "").trim())) current.missingArtifactInventory += 1;
+    }
+    groups.set(sourceId, current);
+  }
+  return [...groups.values()]
+    .map((entry) => ({
+      ...entry,
+      status: entry.partitions === 0
+        ? "no_catalog_partitions"
+        : entry.missingManifests > 0
+          ? "catalogued_without_manifest"
+          : entry.missingArtifactInventory > 0
+            ? "manifest_without_artifact"
+            : "verifiable",
+      promotionAllowed: entry.partitions > 0 && entry.missingManifests === 0 && entry.missingArtifactInventory === 0,
+    }))
+    .sort((left, right) => right.partitions - left.partitions || left.sourceId.localeCompare(right.sourceId));
+}
+
 function option(name, fallback = null) {
   const index = process.argv.indexOf(name);
   return index >= 0 ? process.argv[index + 1] : fallback;
@@ -291,6 +334,7 @@ function run() {
     result.complete = result.missingManifests.length === 0 && (!verifyArtifacts || result.missingArtifacts.length === 0);
     Object.assign(result, classifyR2Closure(result));
     result.gapSummary = summarizeR2ClosureGaps(result);
+    result.sourceMatrix = summarizeR2ClosureBySource(catalogResult.value, objects, result);
     console.log(JSON.stringify(result, null, 2));
     if (!result.complete) process.exitCode = 1;
   } finally {
