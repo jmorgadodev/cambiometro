@@ -596,3 +596,23 @@ verificada en modo GET: 775 filas, checksum
 identidad anidada de diputado resuelta mediante identificador explícito.
 Los manifiestos históricos faltantes siguen siendo un bloqueo de evidencia; no
 se rellenan con un snapshot local ni se publican como cero.
+
+## Cierre físico de Cámara — 2026-09-14
+
+La comprobación `audit-r2-remote-closure.mjs --source camara
+--verify-artifacts` revisó 61 particiones catalogadas. Encontró 15 manifiestos
+históricos ausentes y un artefacto ausente (`votaciones_camara/2024/10`). El
+resultado fue:
+
+- `status`: `catalogued_without_manifest`;
+- `promotionAllowed`: `false`;
+- `complete`: `false`;
+- `inventoryAvailable`: `false` en esta ejecución física.
+
+La fuente conserva su último release verificable; no se reemplaza el catálogo,
+no se carga el snapshot local y no se transforma el faltante en cero registros.
+
+La misma comprobación sobre Servel revisó una partición y encontró ausente su
+manifiesto `2025/11` y el artefacto derivado. También queda en
+`catalogued_without_manifest`; el conteo local coincidente no es suficiente
+para promoverlo mientras falte la evidencia física del release.
