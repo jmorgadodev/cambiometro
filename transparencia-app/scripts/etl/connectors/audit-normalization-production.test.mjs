@@ -38,7 +38,7 @@ describe("auditor productivo de normalización", () => {
     expect(report.rows.find((row) => row.id === "camara").productionChecksum).toBe("123456789012…");
   });
 
-  it("consulta sólo endpoints de metadatos y una fila por fuente", async () => {
+  it("consulta sólo endpoints de metadatos y una muestra pequeña por fuente", async () => {
     const calls = [];
     const fetchImpl = async (url) => {
       calls.push(String(url));
@@ -56,11 +56,34 @@ describe("auditor productivo de normalización", () => {
       generatedAt: "2026-09-14T12:00:00.000Z",
     });
 
-    expect(report.policy.maxRowsRequestedPerSource).toBe(1);
+    expect(report.policy.maxRowsRequestedPerSource).toBe(20);
     expect(calls).toEqual([
       "https://example.test/api/v1/sources?audit=normalization",
       "https://example.test/api/v1/health?audit=normalization",
-      "https://example.test/api/v1/records?source=camara&limit=1",
+      "https://example.test/api/v1/records?source=camara&limit=20",
     ]);
+  });
+
+  it("resume calidad de la muestra sin exponer valores originales", () => {
+    const report = buildProductionNormalizationAudit({
+      productionPayload: { data: [{ id: "camara", recordCount: 2 }] },
+      productionHealth: { ok: true, publicDataBackend: "r2", publicD1Reads: false, r2: true },
+      localQualitySources: [{ id: "camara", canonicalCount: 2 }],
+      localSourceHealth: {},
+      sampleResults: [{
+        sourceId: "camara",
+        httpStatus: 200,
+        responseBytes: 100,
+        backend: "r2",
+        sourceStatus: "complete",
+        sampleCount: 2,
+        sampleFieldNames: ["id", "monto_clp"],
+        sampleQuality: { amounts: { reported: 0, zero: 1, notReported: 1, invalid: 0, structured: 0, notAvailable: 0 }, duplicateIds: 1 },
+      }],
+    });
+
+    expect(report.rows[0].sample.sampleQuality.amounts.zero).toBe(1);
+    expect(report.rows[0].sample.sampleQuality.duplicateIds).toBe(1);
+    expect(JSON.stringify(report)).not.toContain("valor original");
   });
 });

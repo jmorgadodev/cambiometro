@@ -19,6 +19,23 @@ Referencia consultada: `https://cambiometro.impulsacv.cl`.
 - Los valores de las filas no se guardaron en este informe; sólo sus nombres
   de campos, estado y metadatos de paginación.
 
+### Actualización de calidad acotada — 2026-09-14 14:08 UTC
+
+El auditor ahora solicita como máximo 20 filas por fuente, manteniendo la
+misma política de sólo lectura, sin D1 y sin mutar releases. Además de los
+conteos, calcula únicamente métricas agregadas de la muestra: campos ausentes,
+forma de fechas, forma de períodos, estados de monto, identificadores faltantes
+y duplicados aparentes. No guarda los valores originales.
+
+En la ejecución acotada se obtuvieron 3 muestras con filas, 3 releases
+parciales, 1 fuente de resumen solamente y 0 solicitudes fallidas. Cámara,
+ChileCompra e InfoLobby respondieron con 20 filas; Senado, DIPRES y
+Transparencia Activa permanecieron sin detalle recorrible en este endpoint.
+Los campos `period` y `amount` aparecen en parte de la muestra como objetos
+estructurados; se registran como `structured`, no como montos inválidos ni se
+convierten en cero. Esta observación queda pendiente de mapear al contrato de
+cada dominio antes de promover una proyección.
+
 ## Matriz de producción frente a local
 
 | Fuente | Producción declarado | Local | Estado productivo | Publicado / esperado en muestra | Clasificación |

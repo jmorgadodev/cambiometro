@@ -6,7 +6,7 @@ import { mergeLocalHealth, productionSourcesPayload, reconcileSourceSnapshots } 
 const DEFAULT_BASE_URL = "https://cambiometro.impulsacv.cl";
 const DEFAULT_LOCAL_QUALITY = "data/data-quality-sources.json";
 const DEFAULT_LOCAL_HEALTH = "data/etl/source-health.json";
-const DEFAULT_SAMPLE_LIMIT = 1;
+const DEFAULT_SAMPLE_LIMIT = 20;
 const EXTRA_SAMPLE_SOURCES = ["movimientos"];
 
 function option(name, fallback) {
@@ -29,6 +29,60 @@ function shortChecksum(value) {
 function recordKeys(value) {
   if (!value || typeof value !== "object" || Array.isArray(value)) return [];
   return Object.keys(value).sort();
+}
+
+const DATE_FIELDS = ["fecha", "date", "occurred_at", "occurredAt", "fecha_publicacion", "publishedAt", "periodo", "period"];
+const AMOUNT_FIELDS = ["monto_clp", "monto", "amount", "remuneracion_bruta_mensual", "remuneracion_liquida_mensual"];
+const ID_FIELDS = ["id", "record_id", "recordId"];
+
+function sampleQuality(rows) {
+  const fields = [...new Set(rows.flatMap(recordKeys))].sort();
+  const missingFields = Object.fromEntries(fields.map((field) => [field, rows.filter((row) => row[field] === null || row[field] === undefined || row[field] === "").length]));
+  const dates = { observed: 0, invalid: 0 };
+  const amounts = { reported: 0, zero: 0, notReported: 0, invalid: 0, structured: 0, notAvailable: 0 };
+  const periods = {};
+  const identifiers = [];
+
+  for (const row of rows) {
+    const dateField = DATE_FIELDS.find((field) => Object.prototype.hasOwnProperty.call(row, field));
+    if (dateField) {
+      const value = String(row[dateField] ?? "").trim();
+      if (/^\d{4}(?:-\d{2})?(?:-\d{2})?(?:T.*)?$/.test(value)) dates.observed += 1;
+      else dates.invalid += 1;
+    }
+    const rawPeriod = row.periodo ?? row.period;
+    const period = rawPeriod && typeof rawPeriod === "object"
+      ? "structured"
+      : String(rawPeriod ?? "").trim();
+    if (period) periods[period] = (periods[period] ?? 0) + 1;
+    const amountField = AMOUNT_FIELDS.find((field) => Object.prototype.hasOwnProperty.call(row, field));
+    if (!amountField) amounts.notAvailable += 1;
+    else if (row[amountField] === null || row[amountField] === undefined || row[amountField] === "") amounts.notReported += 1;
+    else if (typeof row[amountField] === "object") amounts.structured += 1;
+    else {
+      const amount = Number(row[amountField]);
+      if (!Number.isFinite(amount) || amount < 0) amounts.invalid += 1;
+      else if (amount === 0) amounts.zero += 1;
+      else amounts.reported += 1;
+    }
+    const idField = ID_FIELDS.find((field) => row[field] !== null && row[field] !== undefined && String(row[field]).trim());
+    identifiers.push(idField ? String(row[idField]).trim() : null);
+  }
+
+  const idCounts = identifiers.filter(Boolean).reduce((counts, id) => {
+    counts[id] = (counts[id] ?? 0) + 1;
+    return counts;
+  }, {});
+  return {
+    sampleRows: rows.length,
+    fieldCount: fields.length,
+    missingFields,
+    dates,
+    amounts,
+    periods,
+    missingIds: identifiers.filter((id) => !id).length,
+    duplicateIds: Object.values(idCounts).filter((count) => count > 1).reduce((total, count) => total + count - 1, 0),
+  };
 }
 
 async function fetchJson(fetchImpl, url, timeoutMs = 30_000) {
@@ -82,7 +136,8 @@ function sampleResult(sourceId, response) {
     availability: metadata.availability ?? null,
     reason: metadata.reason ?? null,
     sampleCount: rows.length,
-    sampleFieldNames: recordKeys(rows[0]),
+    sampleFieldNames: [...new Set(rows.flatMap(recordKeys))].sort(),
+    sampleQuality: sampleQuality(rows),
   };
 }
 

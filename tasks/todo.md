@@ -10,14 +10,19 @@
 - [x] N1: ejecutar la matriz contra manifiestos productivos R2 y muestras
       acotadas antes de modificar cualquier proyección. Evidencia:
       `docs/auditoria-normalizacion-productiva-2026-09-14.md`.
-- [ ] N1: completar la medición de campos ausentes, formatos, anomalías y
-      duplicados por fuente; la matriz actual sólo usa metadatos y nombres de
-      campos de una muestra.
-- [ ] N2: normalizar por dominio Cámara/Senado/Movimientos manteniendo sus
-      categorías y releases independientes.
-- [ ] N3: generar historiales, altas, bajas y cambios desde índices R2.
-- [ ] N4: optimizar compresión, deduplicación y proyección de almacenamiento
-      antes de agregar nuevos universos.
+- [x] N1: medir en muestras acotadas campos ausentes, formatos, anomalías y
+      duplicados aparentes por fuente; los valores originales no se guardan.
+      Evidencia: `scripts/audit-normalization-production.mjs` y la actualización
+      de calidad del informe productivo.
+- [~] N2: contrato normalizado por dominio Cámara/Senado/Movimientos y guardia
+      de releases implementados; queda pendiente conectar cada publicador tras
+      reconciliar sus particiones consultables.
+- [~] N3: historial acotado de remuneraciones construido desde índices R2 y
+      protegido contra consultas amplias; falta validarlo con organismos y
+      conectarlo a la presentación pública.
+- [~] N4: guardia de crecimiento R2 y conservación de la versión de rollback
+      activos; queda pendiente registrar tamaño comprimido proyectado por cada
+      nuevo release.
 - [ ] N5: validar y promover cada bloque con rollback.
 
 ### Decisión de almacenamiento
