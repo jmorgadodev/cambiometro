@@ -20,9 +20,11 @@ describe("auditoría acotada del catálogo R2", () => {
     );
 
     expect(report.summary.alcance).toBe(1);
-    expect(report.rows[0]).toMatchObject({ id: "camara", classification: "alcance", deltaRecords: 56_001 });
-    expect(report.rows[0].remote.variants).toHaveProperty("asistencia_camara");
-    expect(report.rows[0].local.variants).toHaveProperty("base");
+    const row = report.rows[0];
+    expect(row).toBeDefined();
+    expect(row).toMatchObject({ id: "camara", classification: "alcance", deltaRecords: 56_001 });
+    expect(row.remote?.variants).toHaveProperty("asistencia_camara");
+    expect(row.local?.variants).toHaveProperty("base");
   });
 
   it("marca una fuente idéntica sin convertir el manifiesto en datos", () => {
@@ -33,6 +35,6 @@ describe("auditoría acotada del catálogo R2", () => {
     };
     const report = compareR2Catalogs(manifest, manifest);
     expect(report.summary.coincide).toBe(1);
-    expect(report.rows[0].remote).not.toHaveProperty("records");
+    expect(report.rows[0]?.remote).not.toHaveProperty("records");
   });
 });

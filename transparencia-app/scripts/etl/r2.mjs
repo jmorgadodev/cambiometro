@@ -34,6 +34,48 @@ function catalogLatestPrefixes(assets) {
   }
 }
 
+function parseAssetJson(asset, label) {
+  if (!asset?.data) return null;
+  try {
+    return JSON.parse(Buffer.from(asset.data).toString("utf8"));
+  } catch {
+    throw new Error(`R2_INVALID_MANIFEST_JSON:${label}`);
+  }
+}
+
+/**
+ * Verifica que el catálogo que se va a activar no apunte a manifiestos o
+ * artefactos que el inventario final de R2 no conservará. Esta comprobación
+ * ocurre antes de borrar objetos fríos o activar el catálogo nuevo.
+ */
+export function assertR2CatalogClosure(assets, inventory) {
+  const assetByKey = new Map((assets ?? []).map((asset) => [asset.key, asset]));
+  const inventoryKeys = new Set((inventory?.objects ?? []).map((object) => object.key));
+  const catalogAsset = assetByKey.get("catalog/v1/manifest.json");
+  if (!catalogAsset) throw new Error("R2_CATALOG_MISSING_FROM_PUBLICATION");
+  if (!inventoryKeys.has(catalogAsset.key)) throw new Error("R2_CATALOG_NOT_IN_FINAL_INVENTORY");
+  const catalog = parseAssetJson(catalogAsset, catalogAsset.key);
+  const partitions = Array.isArray(catalog?.partitions) ? catalog.partitions : [];
+  let checkedManifests = 0;
+  let checkedArtifacts = 0;
+  for (const partition of partitions) {
+    const manifestKey = String(partition?.manifestKey ?? "");
+    if (!manifestKey) throw new Error(`R2_CATALOG_PARTITION_MANIFEST_MISSING:${partition?.id ?? "unknown"}`);
+    if (!inventoryKeys.has(manifestKey)) throw new Error(`R2_CATALOG_REFERENCES_UNPUBLISHED_MANIFEST:${manifestKey}`);
+    checkedManifests += 1;
+    const manifestAsset = assetByKey.get(manifestKey);
+    if (!manifestAsset) continue;
+    const manifest = parseAssetJson(manifestAsset, manifestKey);
+    for (const artifact of Array.isArray(manifest?.artifacts) ? manifest.artifacts : []) {
+      const artifactKey = String(artifact?.key ?? "");
+      if (!artifactKey) continue;
+      if (!inventoryKeys.has(artifactKey)) throw new Error(`R2_MANIFEST_REFERENCES_UNPUBLISHED_ARTIFACT:${artifactKey}`);
+      checkedArtifacts += 1;
+    }
+  }
+  return { checkedManifests, checkedArtifacts };
+}
+
 export function selectHotAssets(assets) {
   const prefixes = latestPrefixes(assets);
   return assets.filter((asset) => asset.key.startsWith("catalog/")

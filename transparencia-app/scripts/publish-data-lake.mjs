@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
-import { planR2Publication } from "./etl/r2.mjs";
+import { assertR2CatalogClosure, planR2Publication } from "./etl/r2.mjs";
 import { readJsonIfPresent, writeFileAtomic } from "./etl/safe-file.mjs";
 
 function command(binary, args, allowFailure = false) {
@@ -171,6 +171,7 @@ if (publishR2) {
     ? readJsonIfPresent(inventoryPath, { objects: [] })
     : { objects: [] };
   const r2Plan = planR2Publication(assets, previous);
+  assertR2CatalogClosure(assets, r2Plan.inventory);
   const activationManifests = r2Plan.puts.filter((asset) => asset.key.endsWith("/manifest.json"));
 
   // Sólo se eliminan particiones frías o versiones históricas no activas.

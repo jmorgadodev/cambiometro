@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { planR2Publication, selectHotAssets } from "../scripts/etl/r2.mjs";
+import { assertR2CatalogClosure, planR2Publication, selectHotAssets } from "../scripts/etl/r2.mjs";
 
 const asset = (key: string, size = 10, checksumSha256 = key) => ({ key, size, checksumSha256, data: Buffer.alloc(size), releaseTag: "x", releaseAssetName: key });
 
@@ -88,6 +88,28 @@ describe("publicación caliente en R2", () => {
     ]);
 
     expect(plan.puts.at(-1)?.key).toBe("catalog/v1/manifest.json");
+  });
+
+  it("bloquea un catálogo que activa un manifiesto ausente del inventario final", () => {
+    const catalog = asset("catalog/v1/manifest.json");
+    catalog.data = Buffer.from(JSON.stringify({
+      partitions: [{ id: "senado/2026/09", manifestKey: "partitions/senado/2026/09/manifest.json" }],
+    }));
+    expect(() => assertR2CatalogClosure([catalog], { objects: [{ key: catalog.key, size: catalog.data.length, checksumSha256: "catalog" }] }))
+      .toThrow("R2_CATALOG_REFERENCES_UNPUBLISHED_MANIFEST");
+  });
+
+  it("bloquea un manifiesto que apunta a un artefacto no conservado", () => {
+    const catalog = asset("catalog/v1/manifest.json");
+    const manifest = asset("partitions/senado/2026/09/manifest.json");
+    catalog.data = Buffer.from(JSON.stringify({ partitions: [{ id: "senado/2026/09", manifestKey: manifest.key }] }));
+    manifest.data = Buffer.from(JSON.stringify({ artifacts: [{ key: "partitions/senado/2026/09/records-missing.jsonl.gz" }] }));
+    const inventory = { objects: [
+      { key: catalog.key, size: catalog.data.length, checksumSha256: "catalog" },
+      { key: manifest.key, size: manifest.data.length, checksumSha256: "manifest" },
+    ] };
+    expect(() => assertR2CatalogClosure([catalog, manifest], inventory))
+      .toThrow("R2_MANIFEST_REFERENCES_UNPUBLISHED_ARTIFACT");
   });
 
   it("conserva proyecciones CPLT y publica su manifiesto vigente al final", () => {
