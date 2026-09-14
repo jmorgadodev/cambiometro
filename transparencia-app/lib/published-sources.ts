@@ -44,9 +44,12 @@ function localCpltManifest(): CpltPublicManifest | null {
   }
 }
 
-// Compatibility exports: these remain the configured historical references.
-// Current canonical counts are taken from the release catalog below whenever
-// it contains a validated count, so a stale config cannot hide a newer R2 cut.
+// Compatibility exports: these are the declared public references for each
+// source. A catalog can contain a larger local archive or several release
+// variants; that observed storage count must not be presented as the current
+// public cut. The distinction is especially important for ChileCompra, where
+// the local archive (1.915.039 rows) is larger than the canonical cut (74.142)
+// and the published historical reference (888.693).
 export const SOURCE_CANONICAL_COUNTS: Record<string, number> = Object.fromEntries(
   getDataQualityConfig().map((source) => [source.id, source.canonicalCount]),
 );
@@ -63,13 +66,12 @@ export async function listPublishedSourceManifests(): Promise<SourceManifest[]> 
   const transferRelease = getTransferReleaseMetadata();
   return merged.map((source) => ({
     ...source,
-    // R2/D1 manifests are the release evidence. The checked-in configuration
-    // is only a fallback for sources without a published count in this build.
+    // The declared references are the public contract. R2/D1/catalog counts
+    // remain useful evidence for reconciliation, but are not interchangeable
+    // with the canonical cut when a catalog includes an archive or variants.
     canonicalCount: source.id === "ley-19862"
       ? transferRelease.totalRows
-      : Number.isSafeInteger(source.recordCount) && source.recordCount > 0
-        ? source.recordCount
-        : SOURCE_CANONICAL_COUNTS[source.id] ?? source.recordCount,
+      : SOURCE_CANONICAL_COUNTS[source.id] ?? source.recordCount,
     historicalCount: source.id === "ley-19862"
       ? transferRelease.totalRows
       : SOURCE_HISTORICAL_COUNTS[source.id] ?? source.recordCount,
