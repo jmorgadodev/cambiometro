@@ -631,3 +631,19 @@ sus 9 manifiestos de partición de enero a septiembre de 2026 y los artefactos
 derivados no están disponibles físicamente. El índice no se interpreta como
 prueba de un historial completo; la fuente queda en
 `catalogued_without_manifest` para fines de promoción histórica.
+
+## Proyección productiva de Transparencia Activa — 2026-09-14
+
+Se leyó el manifiesto y el índice remoto de `funcionarios-v1`, sin descargar
+ninguna página de datos. Los conteos estructurales coinciden: 1.226.913 filas,
+123 páginas y suma de páginas de 1.226.913. Sin embargo, el release no declara
+períodos ni métricas de calidad suficientes para auditar la evolución mensual.
+La compuerta `auditCpltProjection` devuelve:
+
+- `status`: `blocked`;
+- `promotionAllowed`: `false`;
+- incidencias: `declared_periods_missing` y `period_filter_sum_mismatch`.
+
+La búsqueda nacional vigente puede continuar usando el índice R2, pero no se
+debe promover una serie histórica mensual ni afirmar cobertura temporal hasta
+publicar un resumen de períodos y calidad que coincida con el mismo release.
