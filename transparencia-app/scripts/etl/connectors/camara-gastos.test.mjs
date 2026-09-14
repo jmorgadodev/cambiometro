@@ -13,4 +13,8 @@ describe("conector de gastos operacionales de Cámara", () => {
   it("no considera completado un diputado si sólo quedó la marca de progreso y no su checkpoint", () => {
     expect(resumableCamaraIds(["1", "2"], ["2"])).toEqual(new Set(["2"]));
   });
+
+  it("acepta el conjunto de progreso que usa el runner", () => {
+    expect(resumableCamaraIds(new Set(["1", "2"]), new Set(["2"]))).toEqual(new Set(["2"]));
+  });
 });

@@ -47,8 +47,9 @@ export function assertCamaraExpenseComplete(completed, expected) {
  * phase failed, causing a retry to return an empty extraction.
  */
 export function resumableCamaraIds(progressIds = [], checkpointIds = []) {
-  const checkpoints = new Set(checkpointIds.map((id) => String(id)));
-  return new Set(progressIds.map((id) => String(id)).filter((id) => checkpoints.has(id)));
+  const asArray = (value) => Array.isArray(value) ? value : [...(value ?? [])];
+  const checkpoints = new Set(asArray(checkpointIds).map((id) => String(id)));
+  return new Set(asArray(progressIds).map((id) => String(id)).filter((id) => checkpoints.has(id)));
 }
 
 function checkpointPath(checkpointDir, diputadoId) {

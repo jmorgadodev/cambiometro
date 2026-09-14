@@ -116,6 +116,20 @@ para una promoción aislada, pero no autoriza todavía la escritura en R2: antes
 de eso se debe comparar el candidato con el release y cerrar el catálogo de
 forma atómica.
 
+## Control de Gastos Cámara
+
+El primer `--dry-run` de Gastos Cámara reveló un defecto del runner local:
+`resumableCamaraIds` recibía un `Set` de marcas de progreso, pero sólo aceptaba
+arrays. Eso producía `progressIds.map is not a function` antes de consultar la
+fuente y podía confundirse con una fuente sin datos.
+
+Se corrigió el normalizador para aceptar ambos tipos de colección y se agregó
+una prueba específica. La prueba unitaria quedó en **4/4**. La extracción
+completa no se volvió a ejecutar: este conector usa navegador y consultas
+secuenciales por diputado, por lo que debe correr en su ventana programada para
+evitar rate-limit de la Cámara. Hasta esa ejecución, Gastos Cámara permanece
+pendiente y no se considera actualizado.
+
 ## Seguridad de operación
 
 - No hubo escrituras en R2.
