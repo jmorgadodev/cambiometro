@@ -697,3 +697,17 @@ La suite completa se ejecutó con un margen de timeout adecuado para las
 pruebas de lectura por bloques: 197 archivos y 1.057 pruebas aprobadas. Las
 pruebas específicas de la nueva cobertura CPLT quedaron en 5/5 y el comando
 reutilizable para repetir la auditoría remota es `npm run audit:cplt:remote`.
+
+## Inventario de duplicados R2 — 2026-09-14
+
+El inventario remoto identifica tres grupos de checksum repetido, con 66.508
+bytes potencialmente recuperables. Los dos grupos relevantes son:
+
+- índices de entidades de Cámara: 42.666 bytes potencialmente recuperables;
+- índices de entidades de Contraloría: 23.794 bytes potencialmente
+  recuperables.
+
+Los 48 bytes restantes corresponden a filtros pequeños repetidos entre
+versiones. El reporte sólo identifica candidatos; no autoriza borrar objetos,
+porque una clave aparentemente duplicada puede seguir siendo una referencia
+canónica o histórica.
