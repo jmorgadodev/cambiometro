@@ -523,3 +523,15 @@ canónico que debe mostrar la experiencia pública. Se ajustó
 El archivo no se eliminó ni se reemplazó. La prueba de pre-lanzamiento y la
 batería completa quedan verdes después del ajuste: 193 archivos y 1.031
 pruebas aprobadas.
+
+## Estado de consumo y almacenamiento — 2026-09-14
+
+La consulta de Analytics D1 se ejecutó desde el workflow de vigilancia, sin
+SQL ni escrituras adicionales. El reporte de hoy registra 3.844 filas leídas
+(0,08% de 5.000.000), 5 filas escritas (0,01% de 100.000) y nivel `ok`.
+
+La auditoría remota de R2 informa 9.016.336.751 bytes de 10.000.000.000
+(90,16%), 8.362 objetos y 66.508 bytes duplicados detectados. El estado es
+`growth-blocked`: no se deben publicar nuevos releases ni reparar objetos
+faltantes hasta revisar el margen, el versionado y la retención. La reparación
+de `ley-19862` queda separada de cualquier crecimiento no esencial.
