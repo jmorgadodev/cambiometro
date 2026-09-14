@@ -1594,6 +1594,47 @@ describe("API canónica v1", () => {
     expect(payload.data.map((row: { id: string }) => row.id)).toEqual(["municipal-1", "central-1"]);
   });
 
+  it("construye el historial de remuneraciones desde R2 sin consultar D1", async () => {
+    const base = "projections/funcionarios-v1/versions/2026-08-25/search_index";
+    const rows = [
+      { id: "history-1", n: "Romer Angel Rubio Flores", c: "Asesor", o: "Ministerio", ot: "servicio_publico", t: "Honorarios", b: 1900000, p: "2026-01" },
+      { id: "history-2", n: "Romer Angel Rubio Flores", c: "Asesor", o: "Ministerio", ot: "servicio_publico", t: "Honorarios", b: 2850000, p: "2026-02" },
+      { id: "history-3", n: "Romer Angel Rubio Flores", c: "Asesor", o: "Ministerio", ot: "servicio_publico", t: "Honorarios", b: 2850000, p: "2026-03" },
+    ];
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: `${base}.json` },
+      },
+      [`${base}.json`]: {
+        schemaVersion: 1,
+        totalRows: rows.length,
+        pageSize: 10,
+        pages: [{ page: 1, key: `${base}/p-0001.json`, count: rows.length }],
+        shards: Object.fromEntries(["ro", "an", "ru", "fl"].map((prefix) => [prefix, `${base}/${prefix}.json`])),
+      },
+      ...Object.fromEntries(["ro", "an", "ru", "fl"].map((prefix) => [
+        `${base}/${prefix}.json`,
+        [[prefix === "ro" ? "romer" : prefix === "an" ? "angel" : prefix === "ru" ? "rubio" : "flores", [0, 1, 2]]],
+      ])),
+      [`${base}/p-0001.json`]: rows,
+    };
+    const env = {
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse para construir historiales"); } },
+    } as never;
+    const response = await api.fetch(new Request("https://example.test/api/v1/remuneraciones/history?name=Romer%20Angel%20Rubio%20Flores"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.sourceBackend).toBe("r2-search-history");
+    expect(payload.meta.d1Used).toBe(false);
+    expect(payload.data.people[0].periods.map((item: { period: string }) => item.period)).toEqual(["2026-01", "2026-02", "2026-03"]);
+    expect(payload.data.people[0].comparisons[0].amountChanges[0].delta).toBe(950000);
+  });
+
   it("normaliza Código del Trabajo al aplicar el filtro contractual", async () => {
     const request = new Request("https://example.test/api/funcionarios?muni=muni-maipu&contrato=CodigoTrabajo&include_zero=true&limit=10");
     const response = await api.fetch(request, officialsR2Env());

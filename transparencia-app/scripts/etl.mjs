@@ -23,6 +23,7 @@ import { fetchVotacionesSenado } from "./etl/connectors/senado-votaciones.mjs";
 import { assertSuccessfulRun } from "./etl/validation.mjs";
 import { readJsonIfPresent, writeFileAtomic } from "./etl/safe-file.mjs";
 import { mergeRecordsById } from "./etl/history.mjs";
+import { validateSourceRelease } from "./etl/source-release-guard.mjs";
 import { resolveCamaraVoteWindow, CAMARA_CURRENT_PERIOD_START } from "./etl/camara-history.mjs";
 import { expenseMonthWindow } from "./etl/expense-window.mjs";
 
@@ -271,8 +272,15 @@ async function runSource({ key, label, selected, previous, snapshot, summary, su
   if (!selected.has(key)) return;
   try {
     const records = validateRecords(label, await load(), minimum);
-    summary[summaryKey] = records.length;
     const snapshotKey = key === "camara" ? "congreso_opendata" : key;
+    validateSourceRelease({
+      sourceId: snapshotKey,
+      records,
+      previousRecords: previous?.fuentes?.[snapshotKey] ?? [],
+      minimumCount: minimum,
+      preserveHistory,
+    });
+    summary[summaryKey] = records.length;
     snapshot.fuentes[snapshotKey] = preserveHistory
       ? mergeRecordsById(previous?.fuentes?.[snapshotKey] ?? [], records)
       : records;

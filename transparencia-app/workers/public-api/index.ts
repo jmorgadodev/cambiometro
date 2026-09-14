@@ -5,6 +5,7 @@ import { readR2EvidenceRecords } from "../../lib/r2-records";
 import { readR2EntityIndex } from "../../lib/r2-entities";
 import { staticRecordCandidatePaths, staticRecordRows } from "../../lib/r2-public-record-paths";
 import { matchesFuncionarioQuality, normalizeFuncionarioRecord, type FuncionarioQualityFilter } from "../../lib/funcionarios-normalization";
+import { buildR2RemunerationHistory, type R2RemunerationHistoryRow } from "../../lib/r2-remuneration-history";
 
 interface EmailSender {
   send(message: {
@@ -987,6 +988,45 @@ async function listAllFuncionariosFromR2(requestUrl: URL, env: Env) {
     },
     links: { self: requestUrl.toString() },
   }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
+}
+
+/**
+ * Builds a bounded history from the R2 search indexes. The query must be
+ * narrow enough to identify a person; broad surname searches are stopped
+ * before they can turn into a scan of the national release.
+ */
+async function remunerationHistoryFromR2(requestUrl: URL, env: Env) {
+  const query = (requestUrl.searchParams.get("name") ?? requestUrl.searchParams.get("q") ?? "").trim();
+  if (query.length < 3 || query.length > 80) return failure("INVALID_QUERY", "Indica un nombre de al menos tres caracteres.", 400);
+  const maxPages = 20;
+  const maxRows = 2_000;
+  const rows: R2RemunerationHistoryRow[] = [];
+  let total = 0;
+  let totalPages = 1;
+  for (let page = 1; page <= totalPages; page += 1) {
+    if (page > maxPages) return failure("QUERY_TOO_BROAD", "Acota la búsqueda a un nombre completo para revisar su historial.", 400, { maxPages });
+    const pageUrl = new URL(requestUrl);
+    pageUrl.searchParams.set("scope", "all");
+    pageUrl.searchParams.set("query", query);
+    pageUrl.searchParams.set("limit", "100");
+    pageUrl.searchParams.set("page", String(page));
+    const response = await listAllFuncionariosFromR2(pageUrl, env);
+    if (response.status >= 500) return response;
+    const payload = await response.json() as { data?: unknown; meta?: { total?: number; totalPages?: number } };
+    const pageRows = Array.isArray(payload.data) ? payload.data : [];
+    rows.push(...pageRows as R2RemunerationHistoryRow[]);
+    total = Number(payload.meta?.total ?? rows.length);
+    totalPages = Math.max(1, Number(payload.meta?.totalPages ?? Math.ceil(total / 100)));
+    if (rows.length > maxRows) return failure("QUERY_TOO_BROAD", "Acota la búsqueda a un nombre completo para revisar su historial.", 400, { maxRows });
+  }
+  const history = buildR2RemunerationHistory(rows, { targetName: query });
+  return success(history, {
+    total,
+    pagesRead: totalPages,
+    sourceBackend: "r2-search-history",
+    sourceStatus: "r2",
+    d1Used: false,
+  }, { self: requestUrl.toString() });
 }
 
 function limitFrom(url: URL) {
@@ -2182,6 +2222,10 @@ export default {
       }
       const d1 = await listFuncionariosFromD1(url, env);
       return d1 ?? r2;
+    }
+    if (path === "/api/v1/remuneraciones/history") {
+      const limited = await rateLimit(request, env, "remuneraciones-history");
+      return limited ?? cachedPublicGet(request, () => remunerationHistoryFromR2(url, env));
     }
     if (path.startsWith("/api/v1/politico/")) {
       return cachedPublicGet(request, async () => {
