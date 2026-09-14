@@ -616,3 +616,18 @@ La misma comprobación sobre Servel revisó una partición y encontró ausente s
 manifiesto `2025/11` y el artefacto derivado. También queda en
 `catalogued_without_manifest`; el conteo local coincidente no es suficiente
 para promoverlo mientras falte la evidencia física del release.
+
+## Cierre físico de InfoLobby — 2026-09-14
+
+InfoLobby tiene 8 períodos catalogados. Se verificaron físicamente 6
+manifiestos y sus artefactos; faltan los manifiestos y artefactos de julio y
+agosto de 2026. El resultado es `catalogued_without_manifest` y
+`promotionAllowed: false`. El release público no debe reducirse a la muestra
+local de 40 filas ni presentarse como completo hasta reconstruir esas dos
+particiones.
+
+InfoProbidad presenta un caso distinto: existe un índice R2 consultable, pero
+sus 9 manifiestos de partición de enero a septiembre de 2026 y los artefactos
+derivados no están disponibles físicamente. El índice no se interpreta como
+prueba de un historial completo; la fuente queda en
+`catalogued_without_manifest` para fines de promoción histórica.
