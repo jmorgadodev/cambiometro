@@ -168,6 +168,16 @@ export default function SiteHeader({ totalRecords }: SiteHeaderProps) {
               </span>
             </Link>
 
+            <a
+              href="https://link.mercadopago.cl/impulsacv"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="site-support-link"
+              title="Haz un aporte voluntario para mantener los servidores y la fiscalización independiente"
+            >
+              <span aria-hidden="true">☕</span> Apoyar Proyecto
+            </a>
+
             {/* Toggle de tema (Touch target ≥ 44px en ambos breakpoints) */}
             <button
               type="button"
@@ -330,14 +340,15 @@ export default function SiteHeader({ totalRecords }: SiteHeaderProps) {
             >
               <span>𝕏 @cambiometro</span>
             </a>
-            <Link
-              href="/donar"
-              prefetch={false}
+            <a
+              href="https://link.mercadopago.cl/impulsacv"
+              target="_blank"
+              rel="noopener noreferrer"
               className="btn btn-primary drawer-donate-btn"
               onClick={() => setDrawerOpen(false)}
             >
               Donar y apoyar
-            </Link>
+            </a>
           </div>
         </div>
       </aside>

@@ -7,6 +7,7 @@ import PageEntrance from "@/components/PageEntrance";
 import RouteTransitionOrb from "@/components/RouteTransitionOrb";
 import NavigationProgressBar from "@/components/NavigationProgressBar";
 import CookieConsent, { CookiePreferencesButton } from "@/components/CookieConsent";
+import { SupportProjectLink } from "@/components/SupportProjectLink";
 import { getDataPlatformSummary } from "@/lib/data-platform-d1";
 import "./globals.css";
 
@@ -199,6 +200,15 @@ function Footer({ totalRecords }: { totalRecords: number }) {
             <strong>Catálogo en línea</strong>
             <small>{totalRecords.toLocaleString("es-CL")} registros compilados · actualización por fuente</small>
           </div>
+          <aside className="site-footer__support">
+            <h2>Sostenibilidad Ciudadana</h2>
+            <p>
+              El Cambiómetro es una plataforma ciudadana 100% independiente que procesa y audita más de 1,7 millones de registros públicos de Chile sin financiamiento de partidos ni de empresas. Ayúdanos a costear los servidores y la infraestructura de datos con un aporte voluntario desde cualquier monto.
+            </p>
+            <SupportProjectLink className="btn btn-primary site-footer__support-link">
+              Realizar un aporte en Mercado Pago ↗
+            </SupportProjectLink>
+          </aside>
         </div>
 
         {FOOTER_GROUPS.map((group) => (
