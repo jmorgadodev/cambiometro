@@ -126,6 +126,13 @@ leerse por páginas, con búsqueda indexada y sin tocar D1. La nueva compuerta
 `audit:cplt:projection` queda como requisito previo para cualquier promoción;
 en el estado actual devuelve `blocked` y no realiza escrituras.
 
+Además, el generador local de proyecciones fue ajustado para aplicar la misma
+regla de período plausible al índice de filtros que ya usaba el resumen. Las
+filas con período inválido no se borran ni se corrigen silenciosamente: quedan
+en el release candidato, se contabilizan como observación y la compuerta impide
+promover mientras no exista una decisión de origen. Esto evita que una tabla o
+un filtro presente un universo distinto del archivo original.
+
 ## Decisiones y siguiente orden seguro
 
 1. Mantener las rutas, los nombres del menú y los datos municipales y de

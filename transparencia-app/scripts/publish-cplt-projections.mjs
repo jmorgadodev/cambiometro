@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
-import { buildCpltTransparencySummary } from "./cplt-transparency-summary.mjs";
+import { buildCpltTransparencySummary, isPlausiblePeriod } from "./cplt-transparency-summary.mjs";
 
 const inputRoot = resolve("data/raw/transparencia_activa");
 const projectionRoot = join(inputRoot, "projections", "funcionarios-v1");
@@ -167,6 +167,8 @@ for (const [shard, tokenMap] of byShard) {
 const compactSearch = (value) => normalizeSearch(value).replace(/[^a-z0-9]/g, "");
 const compactContract = (value) => compactSearch(value).replace("codigodeltrabajo", "codigotrabajo");
 const compactOrgType = (value) => compactSearch(value).replace("gobiernoregional", "gore");
+const compactPeriod = (row) => String(row.p ?? "").trim().slice(0, 7);
+const invalidPeriodRows = compactRows.filter((row) => !isPlausiblePeriod(compactPeriod(row), latest)).length;
 const qualitySummary = compactRows.reduce((summary, row) => {
   const issues = row.q ?? [];
   if (issues.length > 0) {
@@ -176,9 +178,9 @@ const qualitySummary = compactRows.reduce((summary, row) => {
     if (issues.some((issue) => formatQualityIssues.has(issue))) summary.correctedRows += 1;
   }
   return summary;
-}, { recordsWithIssues: 0, correctedRows: 0, observedRows: 0, byIssue: {} });
+}, { recordsWithIssues: 0, correctedRows: 0, observedRows: 0, byIssue: {}, invalidPeriodRows });
 const filterDefinitions = [
-  ...[...new Set(compactRows.map((row) => String(row.p ?? "").trim()).filter((value) => /^\d{4}-\d{2}$/.test(value)))].sort()
+  ...[...new Set(compactRows.map(compactPeriod).filter((value) => isPlausiblePeriod(value, latest)))].sort()
     .map((period) => ({ key: `periodo:${period}`, matches: (row) => row.p === period })),
   ...[
     ["planta", "planta"],
