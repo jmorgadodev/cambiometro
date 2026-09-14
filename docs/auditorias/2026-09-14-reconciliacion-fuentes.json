@@ -1,6 +1,6 @@
 {
   "schemaVersion": 1,
-  "generatedAt": "2026-09-14T21:03:18.180Z",
+  "generatedAt": "2026-09-14T21:14:36.479Z",
   "productionUrl": "https://cambiometro.impulsacv.cl/api/v1/sources",
   "localCatalog": "C:\\Users\\jorge\\Proyectos\\cambiometro-audit\\transparencia-app\\data\\lake\\catalog\\v1\\manifest.json",
   "localHealth": "C:\\Users\\jorge\\Proyectos\\cambiometro-audit\\transparencia-app\\data\\etl\\source-health.json",
