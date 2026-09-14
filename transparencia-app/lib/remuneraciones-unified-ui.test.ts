@@ -37,8 +37,11 @@ describe("interfaz unificada de remuneraciones", () => {
 
   it("no renderiza el gráfico mensual que mezclaba cortes incompletos", () => {
     const detail = readFileSync(join(projectRoot, "components", "remuneraciones", "Remuneraciones38BisClient.tsx"), "utf8");
+    const page = readFileSync(join(projectRoot, "app", "remuneraciones-publicas", "page.tsx"), "utf8");
 
     expect(detail).not.toContain("RemuneracionesHistoryChart");
+    expect(page).not.toContain("Evolución mensual de los últimos 12 cortes");
+    expect(page).not.toContain("Ver detalle mensual de los últimos 12 cortes");
     expect(detail).toContain("const currentSummary = manifest.periodos.find((period) => period.mes === manifest.mes)");
     expect(detail).toContain("currentSummary?.comparison ?? manifest.comparison");
     expect(detail).toContain("Nuevos registros");
