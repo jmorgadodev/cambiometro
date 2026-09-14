@@ -22,9 +22,10 @@
 - [~] N3: historial acotado de remuneraciones construido desde índices R2,
       protegido contra consultas amplias y conectado a la ficha de persona
       bajo demanda; falta validarlo con organismos y smoke productivo.
-- [~] N4: guardia de crecimiento R2 y conservación de la versión de rollback
-      activos; queda pendiente registrar tamaño comprimido proyectado por cada
-      nuevo release.
+- [x] N4: guardia de crecimiento R2 y conservación de la versión de rollback
+      activos; cada plan registra bytes previos, proyectados, crecimiento y
+      margen restante antes de publicar. Se mide el tamaño real de los objetos
+      R2; no se presenta una compresión hipotética como ahorro efectivo.
 - [~] N5: compuerta de promoción por fuente y rollback lógico implementados
       para ETL general, Movimientos y stream CPLT; queda ejecutar los smoke
       productivos por bloque antes de publicar.
@@ -35,7 +36,8 @@
 - [x] Mantener D1 fuera de búsquedas y lecturas masivas.
 - [x] No migrar remuneraciones a Firebase/Firestore ni Supabase Free: sus
       cuotas gratuitas no son adecuadas para este universo.
-- [ ] Medir tamaño comprimido y margen R2 antes de cada nuevo release.
+- [x] Medir tamaño de objetos y margen R2 antes de cada nuevo release; bloquear
+      crecimiento cuando el uso proyectado supera el 95% del límite configurado.
 
 ## Ahora, sin D1
 

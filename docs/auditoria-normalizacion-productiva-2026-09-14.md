@@ -108,6 +108,19 @@ la línea base del release y no debe utilizarse para pintar los indicadores del
 corte vigente; leerlo provocaba que entradas, ausencias y cambios aparecieran
 como cero aunque el detalle histórico sí los contuviera.
 
+### Revalidación acotada — 2026-09-14 11:55 UTC-3
+
+La segunda consulta de sólo lectura solicitó como máximo 20 filas por fuente.
+El estado productivo volvió a declarar `publicDataBackend: r2`,
+`publicD1Reads: false` y `r2: true`, sin solicitudes fallidas. El resumen
+obtuvo 4 fuentes con muestra, 2 fuentes sólo de resumen y 7 releases parciales.
+Transparencia Activa sigue sin detalle recorrible (`summary-only`), mientras
+Senado devuelve 0 filas consultables frente a 1.428 declaradas y Cámara
+devuelve 49 frente a 58.751; ambos permanecen bloqueados para promoción como
+universos completos. La ruta de historial de remuneraciones todavía responde
+404 en producción porque esta rama no se ha desplegado; queda pendiente un
+smoke posterior a una promoción explícita.
+
 ## Decisión de normalización
 
 La rama incorpora un contrato local, aún sin conexión al publicador:
@@ -139,7 +152,7 @@ Antes de conectar estos normalizadores al ETL o promover cambios:
 1. reconciliar las particiones faltantes de Cámara y Senado;
 2. comprobar que el release anterior permanece disponible ante respuesta vacía;
 3. validar una persona y un organismo desde índices R2;
-4. medir tamaño comprimido y margen de R2;
+4. medir tamaño de objetos y margen de R2;
 5. ejecutar pruebas y preview por fuente.
 
 El historial de una persona se consulta bajo demanda desde el índice R2; la
