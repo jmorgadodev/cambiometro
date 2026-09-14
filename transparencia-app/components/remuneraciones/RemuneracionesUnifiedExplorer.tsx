@@ -1,7 +1,6 @@
 "use client";
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
-import TransparencyActivaSummary from "./TransparencyActivaSummary";
 
 type SourceStatus = "complete" | "partial" | "aggregate_only" | "unavailable";
 
@@ -130,8 +129,6 @@ export default function RemuneracionesUnifiedExplorer() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const initialQueryHandled = useRef(false);
-  const initialQueryValue = useRef("");
-  const initialQuerySubmitted = useRef(false);
 
   useEffect(() => {
     loadJson<UnifiedManifest>("manifest.json").then(setManifest).catch((reason: Error) => setError(reason.message));
@@ -141,19 +138,13 @@ export default function RemuneracionesUnifiedExplorer() {
     if (!manifest || initialQueryHandled.current || typeof window === "undefined") return;
     const initialQuery = new URLSearchParams(window.location.search).get("q")?.trim() ?? "";
     initialQueryHandled.current = true;
-    initialQueryValue.current = initialQuery;
     if (initialQuery.length < 2) return;
-    const timer = window.setTimeout(() => setQuery(initialQuery), 0);
+    const timer = window.setTimeout(() => {
+      setQuery(initialQuery);
+      window.setTimeout(() => (document.getElementById("remuneration-search") as HTMLFormElement | null)?.requestSubmit(), 0);
+    }, 0);
     return () => window.clearTimeout(timer);
   }, [manifest]);
-
-  useEffect(() => {
-    if (!manifest || !initialQueryHandled.current || initialQuerySubmitted.current || typeof window === "undefined") return;
-    const initialQuery = initialQueryValue.current;
-    if (!initialQuery || initialQuery !== query.trim()) return;
-    initialQuerySubmitted.current = true;
-    void runSearch(undefined, initialQuery);
-  }, [manifest, query]);
 
   const groups = useMemo(() => {
     const allRows = [...(results?.rows ?? []), ...(results?.remoteRows ?? [])];
@@ -186,9 +177,9 @@ export default function RemuneracionesUnifiedExplorer() {
     }, 0);
   }
 
-  async function runSearch(event?: FormEvent, queryOverride?: string) {
-    event?.preventDefault();
-    const cleanQuery = (queryOverride ?? query).trim();
+  async function runSearch(event: FormEvent) {
+    event.preventDefault();
+    const cleanQuery = query.trim();
     if (cleanQuery.length < 2) {
       setError("Escribe al menos dos caracteres para buscar.");
       setResults(null);
@@ -222,7 +213,7 @@ export default function RemuneracionesUnifiedExplorer() {
         && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
       if (!isLocalStaticPreview && (source === "all" || source === "transparencia-activa")) {
         try {
-          const response = await fetch(`/api/funcionarios?scope=all&query=${encodeURIComponent(cleanQuery)}&include_zero=true&limit=20&sortBy=nombre_asc`, { cache: "no-store" });
+          const response = await fetch(`/api/funcionarios?query=${encodeURIComponent(cleanQuery)}&include_zero=true&limit=20&sortBy=nombre_asc`, { cache: "no-store" });
           if (response.ok) {
             const payload = await response.json() as { data?: Record<string, unknown>[]; total?: number };
             remoteRows = (payload.data ?? []).map((row) => RemoteOfficialRow(row, cleanQuery)).filter((row): row is UnifiedRow => Boolean(row));
@@ -260,7 +251,6 @@ export default function RemuneracionesUnifiedExplorer() {
           <nav className="remuneration-module-nav" aria-label="Secciones de remuneraciones">
             <a href="#buscar-remuneraciones">Buscar</a>
             <a href="#fuentes-remuneraciones">Fuentes</a>
-            <a href="#historial-transparencia">Historial mensual</a>
           </nav>
 
           <section id="buscar-remuneraciones" className="remuneration-module remuneration-module--search" aria-labelledby="buscar-remuneraciones-title">
@@ -327,7 +317,6 @@ export default function RemuneracionesUnifiedExplorer() {
             <p className="remuneration-reading-note"><strong>Cómo leer los resultados:</strong> un monto aparece sólo cuando la fuente lo publicó. Si falta, se indica “Monto no publicado”; nunca se completa con una estimación.</p>
           </section>
 
-          <TransparencyActivaSummary />
         </>
       )}
     </section>
