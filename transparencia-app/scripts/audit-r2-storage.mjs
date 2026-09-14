@@ -18,6 +18,12 @@ function readInventory(path) {
   return JSON.parse(readFileSync(resolve(path), "utf8"));
 }
 
+function readReferences(path) {
+  if (!path) return null;
+  const payload = readInventory(path);
+  return Array.isArray(payload) ? payload : payload?.keys ?? null;
+}
+
 function downloadInventory(bucket, key, output) {
   const wrangler = resolve("node_modules/wrangler/bin/wrangler.js");
   const result = spawnSync(process.execPath, [wrangler, "r2", "object", "get", `${bucket}/${key}`, "--file", output, "--remote"], {
@@ -33,11 +39,13 @@ function main() {
   try {
     const path = suppliedPath ?? join(temp, "storage.json");
     if (!suppliedPath) downloadInventory(option("--bucket", "transparencia-public-data"), option("--key", "catalog/v1/storage.json"), path);
+    const referencesPath = option("--references");
     const summary = summarizeR2Storage(readInventory(path), {
       warningRatio: Number(option("--warning-ratio", "0.8")),
       growthBlockRatio: Number(option("--growth-block-ratio", "0.9")),
+      referencedKeys: readReferences(referencesPath),
     });
-    console.log(JSON.stringify({ schemaVersion: 1, inventoryPath: suppliedPath ? resolve(suppliedPath) : null, ...summary }, null, 2));
+    console.log(JSON.stringify({ schemaVersion: 1, inventoryPath: suppliedPath ? resolve(suppliedPath) : null, referencesPath: referencesPath ? resolve(referencesPath) : null, ...summary }, null, 2));
     if (hasFlag("--fail-on-growth-block") && !summary.growthAllowed) process.exitCode = 2;
   } finally {
     rmSync(temp, { recursive: true, force: true });
@@ -45,4 +53,3 @@ function main() {
 }
 
 if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.url)) main();
-

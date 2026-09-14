@@ -32,7 +32,33 @@ describe("protecciones de almacenamiento R2", () => {
     });
     expect(summary.duplicateChecksumGroups).toBe(1);
     expect(summary.duplicateBytes).toBe(100);
-    expect(summary.duplicateGroups[0]).toMatchObject({ count: 2, reclaimableBytes: 100, keys: ["sources/a.json", "sources/b.json"] });
+    expect(summary.duplicateGroups[0]).toMatchObject({
+      count: 2,
+      reclaimableBytes: 100,
+      keys: ["sources/a.json", "sources/b.json"],
+      referenceStatus: "unknown",
+      referencedKeys: [],
+    });
     expect(summary).not.toHaveProperty("deletes");
+  });
+
+  it("clasifica duplicados sólo con el conjunto explícito de referencias", () => {
+    const summary = summarizeR2Storage({
+      limitBytes: 1_000,
+      objects: [
+        { key: "sources/a.json", size: 100, checksumSha256: "same" },
+        { key: "sources/b.json", size: 100, checksumSha256: "same" },
+      ],
+    }, { referencedKeys: ["sources/b.json"] });
+    expect(summary.duplicateGroups[0]).toMatchObject({ referenceStatus: "referenced", referencedKeys: ["sources/b.json"] });
+
+    const unreferenced = summarizeR2Storage({
+      limitBytes: 1_000,
+      objects: [
+        { key: "sources/a.json", size: 100, checksumSha256: "same" },
+        { key: "sources/b.json", size: 100, checksumSha256: "same" },
+      ],
+    }, { referencedKeys: ["sources/other.json"] });
+    expect(unreferenced.duplicateGroups[0].referenceStatus).toBe("unreferenced-by-supplied-set");
   });
 });

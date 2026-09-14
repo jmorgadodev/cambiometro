@@ -29,6 +29,9 @@ export function summarizeR2Storage(inventory, options = {}) {
   }
 
   const objects = objectRows(inventory);
+  const referencedKeys = options.referencedKeys == null
+    ? null
+    : new Set(Array.from(options.referencedKeys, (key) => String(key ?? "").trim()).filter(Boolean));
   const computedBytes = objects.reduce((total, object) => total + object.size, 0);
   const declaredBytes = inventory?.usedBytes == null ? computedBytes : asNonNegativeInteger(Number(inventory.usedBytes), "used_bytes");
   const usedBytes = declaredBytes;
@@ -83,6 +86,10 @@ export function summarizeR2Storage(inventory, options = {}) {
         bytes: group.bytes,
         reclaimableBytes: group.bytes - group.size,
         keys: [...group.keys].sort(),
+        referenceStatus: referencedKeys === null
+          ? "unknown"
+          : group.keys.some((key) => referencedKeys.has(key)) ? "referenced" : "unreferenced-by-supplied-set",
+        referencedKeys: referencedKeys === null ? [] : group.keys.filter((key) => referencedKeys.has(key)).sort(),
       }))
       .sort((left, right) => right.reclaimableBytes - left.reclaimableBytes || String(left.checksumSha256).localeCompare(String(right.checksumSha256))),
     byPrefix: [...prefixes.entries()]
