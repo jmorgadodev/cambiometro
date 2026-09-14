@@ -1,4 +1,9 @@
 import { createHash } from "node:crypto";
+import {
+  finalizeFuncionarioQuality,
+  normalizeFuncionarioCompensation,
+  normalizeFuncionarioName,
+} from "./funcionarios-normalization.mjs";
 
 const MONTHS = new Map([
   ["enero", 1], ["febrero", 2], ["marzo", 3], ["abril", 4], ["mayo", 5], ["junio", 6],
@@ -13,26 +18,6 @@ function normalized(value) {
 function titleCase(value) {
   return String(value ?? "").trim().toLowerCase().split(/\s+/).filter(Boolean)
     .map((word) => word.charAt(0).toUpperCase() + word.slice(1)).join(" ");
-}
-
-function normalizeFuncionarioName(rawValue) {
-  const original = String(rawValue ?? "").replace(/\s+/g, " ").trim();
-  const tokens = original ? original.split(" ") : [];
-  const incidencias = [];
-  let removedPunctuation = false;
-  let removedNumeric = false;
-  while (tokens.length > 0 && (/^[.,;:/|_\-]+$/u.test(tokens[0]) || /^\d+$/u.test(tokens[0]))) {
-    if (/^[.,;:/|_\-]+$/u.test(tokens[0])) removedPunctuation = true;
-    if (/^\d+$/u.test(tokens[0])) removedNumeric = true;
-    tokens.shift();
-  }
-  if (removedPunctuation) incidencias.push("nombre_prefijo_invalido");
-  if (removedNumeric) incidencias.push("nombre_prefijo_numerico");
-  const nombre = tokens.join(" ");
-  const alphaTokens = nombre.split(" ").map((token) => token.replace(/[^\p{L}]/gu, "")).filter(Boolean);
-  if (!nombre) incidencias.push("nombre_vacio");
-  else if (alphaTokens.length < 2) incidencias.push("nombre_incompleto");
-  return { nombre, original, incidencias };
 }
 
 function numberCl(value) {
@@ -156,29 +141,26 @@ export function parseCpltRecord({ line, columns: inputColumns = null, header, ti
   const extraHoliday = numberCl(readCell("horas extra festivas"));
   const remuneracionBruta = numberCl(readCell("remuneracionbruta_mensual", "remuneracionbruta"));
   const remuneracionLiquidaOriginal = numberCl(readCell("remuliquida_mensual"));
-  const liquidNoInformada = remuneracionBruta > 0 && remuneracionLiquidaOriginal <= 0;
-  if (liquidNoInformada) nombreNormalizado.incidencias.push("remuneracion_liquida_no_informada");
+  const compensation = normalizeFuncionarioCompensation({
+    bruto: remuneracionBruta,
+    liquido: remuneracionLiquidaOriginal,
+  });
+  const quality = finalizeFuncionarioQuality(nombreNormalizado, compensation);
 
   return {
     id: deferId ? "" : createCpltRecordId(stableKey),
     ...(deferId ? { _stableKey: stableKey } : {}),
     nombre_completo: nombre,
     ...(nombre !== nombreNormalizado.original ? { nombre_completo_original: nombreNormalizado.original } : {}),
-    ...(nombreNormalizado.incidencias.length > 0 ? {
-      calidad_datos: {
-        estado: "normalizado",
-        incidencias: nombreNormalizado.incidencias,
-        detalle: "Se corrigió sólo formato inequívoco de la fuente; el valor líquido cero se conserva como original y se muestra como no informado.",
-      },
-    } : { calidad_datos: { estado: "original", incidencias: [], detalle: "" } }),
+    calidad_datos: quality.calidad_datos,
     organo_nombre: readCell("organismo_nombre", "organismo nombre"),
     organo_tipo: organismoId.startsWith("muni-") ? "municipalidad" : "servicio_publico",
     cargo,
     estamento: titleCase(readCell("tipo estamento")) || tipo,
     tipo_contrato: tipo,
-    remuneracion_bruta_mensual: remuneracionBruta,
-    remuneracion_liquida_mensual: liquidNoInformada ? null : remuneracionLiquidaOriginal,
-    ...(liquidNoInformada ? { remuneracion_liquida_mensual_original: remuneracionLiquidaOriginal } : {}),
+    remuneracion_bruta_mensual: compensation.bruto,
+    remuneracion_liquida_mensual: compensation.liquido,
+    ...(compensation.liquidoOriginal !== undefined ? { remuneracion_liquida_mensual_original: compensation.liquidoOriginal } : {}),
     fecha_ingreso: dateCl(readCell("fecha_ingreso")),
     fecha_termino: dateCl(readCell("fecha_termino")),
     horas_extras_diurnas_hrs: extraDay,

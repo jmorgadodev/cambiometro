@@ -1,5 +1,77 @@
 # Plan de trabajo inmediato sin D1
 
+## Alineación posterior a la prioridad 1 — 2026-09-14
+
+La prioridad 1 de remuneraciones ya está publicada y verificada: el universo
+central y el municipal se consultan desde R2, con cortes y manifiestos
+independientes. Las fases siguientes no deben volver a reconstruir ese
+universo ni moverlo a otra base gratuita.
+
+### Alternativa de almacenamiento adoptada
+
+- **R2 continúa como almacén público principal**: objetos comprimidos,
+  índices precalculados y consultas paginadas por Worker.
+- **D1 continúa fuera del camino público**: sólo metadatos operativos y
+  preflight acotado cuando corresponda.
+- **Firebase/Firestore no se adopta** para estas nóminas: el nivel gratuito
+  tiene 1 GiB almacenado, 50.000 lecturas y 20.000 escrituras diarias, y su
+  modelo de lectura por documento no es adecuado para un universo de millones
+  de filas.
+- **Supabase Free tampoco es reemplazo**: 500 MB de base de datos y 1 GB de
+  almacenamiento no alcanzan para conservar el histórico completo.
+- Antes de incorporar más datos a R2 se debe comprimir, deduplicar índices y
+  verificar el espacio proyectado; el bucket observado quedó cerca del límite
+  gratuito. No se cambia de proveedor para ocultar ese problema.
+
+### Fases restantes, en orden de menor a mayor riesgo
+
+#### N0 — Contrato común de normalización (iniciada)
+
+- [x] Compartir reglas entre los ingestores central y municipal.
+- [x] Preservar el nombre y el líquido originales cuando se normaliza.
+- [x] Distinguir líquido válido de líquido no informado.
+- [x] Añadir pruebas unitarias sin descargar el universo.
+
+#### N1 — Auditoría de normalización por fuente (siguiente)
+
+- [ ] Generar una matriz sólo con manifiestos y muestras acotadas de R2.
+- [ ] Medir campos ausentes, formatos de fecha, montos, duplicados aparentes
+      y períodos por fuente.
+- [ ] No mezclar remuneraciones, asesorías, gastos, votaciones o agregados.
+- [ ] No corregir valores originales; las reglas deben quedar versionadas.
+
+#### N2 — Normalizadores específicos por dominio
+
+- [ ] Aplicar el contrato a Cámara, Senado y Movimientos sin cambiar sus
+      categorías ni rutas.
+- [ ] Mantener un estado explícito para fuente incompleta, desfasada o no
+      respondida.
+- [ ] Conservar el último release válido cuando una fuente falle.
+
+#### N3 — Historiales y cambios
+
+- [ ] Construir altas, bajas, cambios de monto y cambios de organismo desde
+      índices R2, no desde consultas masivas D1.
+- [ ] Validar primero con una persona y un organismo; después ampliar por
+      lotes.
+- [ ] Publicar sólo si los conteos y checksums coinciden.
+
+#### N4 — Eficiencia de almacenamiento y consulta
+
+- [ ] Medir tamaño comprimido antes de cada publicación.
+- [ ] Evitar duplicar fichas completas en índices secundarios.
+- [ ] Separar corte vigente e histórico sin eliminar los releases originales.
+- [ ] Bloquear la publicación si el tamaño proyectado deja un margen inseguro.
+
+#### N5 — Presentación y promoción por bloques
+
+- [ ] Revisar la interfaz sólo después de validar los datos.
+- [ ] Probar desktop, móvil, paginación y rutas existentes.
+- [ ] Promover una fuente por vez con rollback documentado.
+
+Cada fase se cierra con: pruebas, comparación de conteos, verificación de
+checksum, comprobación de consumo D1 y un commit independiente.
+
 ## Objetivo
 
 Avanzar hoy en todo lo que no requiere leer, escribir ni materializar

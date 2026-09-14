@@ -1,5 +1,26 @@
 # Lista de trabajo inmediata
 
+## Ruta vigente después de cerrar la prioridad 1
+
+- [x] N0: compartir la normalización de nombres, remuneraciones líquidas e
+      incidencias entre los ingestores central y municipal.
+- [x] N0: agregar pruebas del contrato común sin descargar datos masivos.
+- [ ] N1: auditar por manifiesto y muestras acotadas la calidad de cada fuente.
+- [ ] N2: normalizar por dominio Cámara/Senado/Movimientos manteniendo sus
+      categorías y releases independientes.
+- [ ] N3: generar historiales, altas, bajas y cambios desde índices R2.
+- [ ] N4: optimizar compresión, deduplicación y proyección de almacenamiento
+      antes de agregar nuevos universos.
+- [ ] N5: validar y promover cada bloque con rollback.
+
+### Decisión de almacenamiento
+
+- [x] Mantener R2 como almacenamiento público principal.
+- [x] Mantener D1 fuera de búsquedas y lecturas masivas.
+- [x] No migrar remuneraciones a Firebase/Firestore ni Supabase Free: sus
+      cuotas gratuitas no son adecuadas para este universo.
+- [ ] Medir tamaño comprimido y margen R2 antes de cada nuevo release.
+
 ## Ahora, sin D1
 
 - [x] A. Congelar línea base y rollback por fuente.
