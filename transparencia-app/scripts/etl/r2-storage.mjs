@@ -149,15 +149,17 @@ export function planR2Retention(inventory, options = {}) {
     group.keys.push(object.key);
     groups.set(key, group);
   }
+  const classifiedDatasets = new Set(Object.keys(activeVersions));
   const candidates = [...groups.values()]
-    .filter((group) => Object.prototype.hasOwnProperty.call(activeVersions, group.dataset))
     .map((group) => ({
       ...group,
       keys: [...group.keys].sort(),
-      retentionStatus: "historical",
+      retentionStatus: classifiedDatasets.has(group.dataset) ? "historical" : "unclassified",
       deletionAllowed: false,
       requiresExplicitApproval: true,
-      reason: "versión no activa; requiere verificación de rollback y aprobación explícita",
+      reason: classifiedDatasets.has(group.dataset)
+        ? "versión no activa; requiere verificación de rollback y aprobación explícita"
+        : "release sin manifiesto activo; requiere identificar procedencia, verificar rollback y aprobación explícita",
     }))
     .sort((left, right) => right.bytes - left.bytes || left.dataset.localeCompare(right.dataset) || left.version.localeCompare(right.version));
   const candidateBytes = candidates.reduce((total, candidate) => total + candidate.bytes, 0);

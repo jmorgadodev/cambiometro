@@ -93,4 +93,24 @@ describe("protecciones de almacenamiento R2", () => {
     expect(plan.projectedUsedBytesAfterAllCandidates).toBe(600);
     expect(plan.summary.growthAllowed).toBe(false);
   });
+
+  it("expone releases sin manifiesto como candidatos no clasificados", () => {
+    const plan = planR2Retention({
+      limitBytes: 10_000,
+      usedBytes: 9_000,
+      objects: [
+        { key: "projections/funcionarios-central-v1/versions/candidate/a.json", size: 4_000, checksumSha256: "a" },
+      ],
+    }, { activeVersions: { "funcionarios-v1": "active" } });
+
+    expect(plan.candidates[0]).toMatchObject({
+      dataset: "funcionarios-central-v1",
+      version: "candidate",
+      retentionStatus: "unclassified",
+      deletionAllowed: false,
+      requiresExplicitApproval: true,
+    });
+    expect(plan.candidates[0].reason).toContain("manifiesto");
+    expect(plan.projectedUsedBytesAfterAllCandidates).toBe(5_000);
+  });
 });

@@ -372,3 +372,21 @@ Estos artefactos locales no se subirán mientras R2 permanezca en
 incompleto queda clasificada como **release/manifestación R2 pendiente**, no
 como permiso para publicar sin espacio ni como evidencia de que la interfaz
 deba mostrar cero registros.
+
+## Candidato de retención identificado
+
+La retención en seco ahora incluye también versiones que no tienen manifiesto
+activo, en vez de ocultarlas del plan. El principal candidato es
+`funcionarios-central-v1@2026-09-14T03-51-42-634Z`:
+
+- `5.121` objetos y `4.481.975.318` bytes.
+- Estado: `unclassified`; no es el release público activo.
+- Índice, páginas y shards: rollback verificado con `0` claves faltantes.
+- Eliminación: `deletionAllowed=false`; requiere decisión explícita.
+- Si se retirara después de esa decisión, el uso proyectado bajaría a
+  `45,2%` aproximadamente y habilitaría espacio para reparar los releases
+  pendientes.
+
+La versión histórica municipal de agosto también pasa rollback (`0` claves
+faltantes), pero se conserva como respaldo y no se propone eliminarla sin una
+decisión separada.
