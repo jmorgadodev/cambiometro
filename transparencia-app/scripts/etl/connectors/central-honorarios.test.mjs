@@ -42,4 +42,14 @@ describe("parser de honorarios centrales CPLT", () => {
     const unpaid = paidRow.replace("2850000,0", "").replace("2415375,0", "");
     expect(parseCentralHonorarioRow({ line: unpaid, headerLine: header, sourceUrl: "https://source.test/honorarios.csv" })).toBeNull();
   });
+
+  it("rechaza pagos con un período posterior al corte auditado", () => {
+    const future = paidRow.replace("Junio", "Diciembre");
+    expect(parseCentralHonorarioRow({
+      line: future,
+      headerLine: header,
+      sourceUrl: "https://source.test/honorarios.csv",
+      maxPeriod: "2026-09",
+    })).toBeNull();
+  });
 });

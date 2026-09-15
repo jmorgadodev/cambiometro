@@ -48,6 +48,14 @@ function monthNumber(value) {
   return MONTHS.get(normalized(value)) ?? 0;
 }
 
+export function currentCpltPeriod(date = new Date()) {
+  return `${date.getUTCFullYear()}-${String(date.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
+function isPeriodAllowed(period, maxPeriod) {
+  return !maxPeriod || period <= String(maxPeriod);
+}
+
 export function parseCpltHeader(line) {
   const indexes = new Map();
   String(line).split(";").forEach((name, index) => indexes.set(normalized(name), index));
@@ -111,7 +119,7 @@ export function getCpltColumn(columns, header, ...names) {
   return cell(columns, header, ...names);
 }
 
-export function parseCpltIdentity({ line, columns: inputColumns = null, header, tipo, organismoId }) {
+export function parseCpltIdentity({ line, columns: inputColumns = null, header, tipo, organismoId, maxPeriod = null }) {
   const readCell = (...names) => inputColumns
     ? cell(inputColumns, header, ...names)
     : scanCpltCell(line, header, ...names);
@@ -121,9 +129,11 @@ export function parseCpltIdentity({ line, columns: inputColumns = null, header, 
   const rawName = [readCell("nombres"), readCell("paterno"), readCell("materno")].filter(Boolean).join(" ");
   const rawCargo = readCell("tipo cargo", "descripcion_funcion", "descripcion funcion");
   if (!rawName || !rawCargo) return null;
+  const period = `${year}-${String(month).padStart(2, "0")}`;
+  if (!isPeriodAllowed(period, maxPeriod)) return null;
   return {
     stableKey: [organismoId, normalized(tipo), normalized(rawName).replace(/\s+/g, " "), normalized(rawCargo).replace(/\s+/g, " ")].join("|"),
-    period: `${year}-${String(month).padStart(2, "0")}`,
+    period,
   };
 }
 
@@ -133,12 +143,12 @@ export function createCpltRecordId(stableKey) {
   return `func-${organismoId}-${tipo}-${suffix}`;
 }
 
-export function parseCpltRecord({ line, columns: inputColumns = null, header, tipo, organismoId, sourceUrl, deferId = false }) {
+export function parseCpltRecord({ line, columns: inputColumns = null, header, tipo, organismoId, sourceUrl, deferId = false, maxPeriod = null }) {
   if (!(header instanceof Map) || !organismoId || !sourceUrl) throw new Error("CPLT_INVALID_PARSER_INPUT");
   const readCell = (...names) => inputColumns
     ? cell(inputColumns, header, ...names)
     : scanCpltCell(line, header, ...names);
-  const identity = parseCpltIdentity({ line, columns: inputColumns, header, tipo, organismoId });
+  const identity = parseCpltIdentity({ line, columns: inputColumns, header, tipo, organismoId, maxPeriod });
   if (!identity) return null;
 
   const nombreNormalizado = normalizeFuncionarioName(titleCase([

@@ -31,7 +31,7 @@ function dateCl(value) {
   return match ? `${match[3]}-${match[2]}-${match[1]}` : null;
 }
 
-export function parseCentralHonorarioRow({ line, headerLine, sourceUrl }) {
+export function parseCentralHonorarioRow({ line, headerLine, sourceUrl, maxPeriod = null }) {
   if (!line || !headerLine || !sourceUrl) throw new Error("CENTRAL_HONORARIO_INPUT_INVALID");
   const header = headerLine instanceof Map ? headerLine : parseCpltHeader(headerLine);
   const read = (...names) => scanCpltCell(line, header, ...names);
@@ -46,6 +46,7 @@ export function parseCentralHonorarioRow({ line, headerLine, sourceUrl }) {
   if (!Number.isInteger(year) || year < 2024 || !month || !organism || !rawName || !rawRole) return null;
   if (gross <= 0 && liquidOriginal <= 0) return null;
   const period = `${year}-${String(month).padStart(2, "0")}`;
+  if (maxPeriod && period > String(maxPeriod)) return null;
   const name = titleCase(rawName);
   const role = titleCase(rawRole);
   const sourceKey = [read("idPagina"), organismCode, period, normalized(rawName), normalized(rawRole), gross, liquidOriginal].join("|");

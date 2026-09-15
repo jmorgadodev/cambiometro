@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { createCpltRecordId, getCpltColumn, parseCpltHeader, parseCpltLine, parseCpltRecord } from "./cplt-personal.mjs";
+import { createCpltRecordId, currentCpltPeriod, getCpltColumn, parseCpltHeader, parseCpltLine, parseCpltRecord } from "./cplt-personal.mjs";
 import { LatestCpltRecordStore } from "./latest-cplt-record-store.mjs";
 import { createMunicipalityRegistry } from "./municipality-registry.mjs";
 import { readRangedTextLines } from "./ranged-csv-source.mjs";
@@ -121,6 +121,7 @@ function mergeById(previous, current) {
 
 async function processStream(tipo, urls, outputDir, scope) {
   console.log(`\n[+] Iniciando descarga de ${tipo} (${scope}): ${urls.join(" | ")}`);
+  const maxPeriod = currentCpltPeriod();
   let sourceUrl = urls[0];
   let sourceValidator = null;
   const lines = readRangedTextLines({
@@ -165,7 +166,7 @@ async function processStream(tipo, urls, outputDir, scope) {
         }
         throw error;
       }
-      const funcionario = parseCpltRecord({ columns, header, tipo, organismoId, sourceUrl, deferId: true });
+      const funcionario = parseCpltRecord({ columns, header, tipo, organismoId, sourceUrl, deferId: true, maxPeriod });
       if (!funcionario) continue;
       latestByOfficial.upsert({
         stableKey: funcionario._stableKey,

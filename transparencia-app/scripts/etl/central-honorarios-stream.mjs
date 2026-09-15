@@ -1,6 +1,7 @@
 import { pathToFileURL } from "node:url";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
+import { currentCpltPeriod } from "./cplt-personal.mjs";
 import { parseCentralHonorarioRow } from "./central-honorarios.mjs";
 import { LatestCpltRecordStore } from "./latest-cplt-record-store.mjs";
 import { readRangedTextLines } from "./ranged-csv-source.mjs";
@@ -16,6 +17,7 @@ export async function processCentralHonorariosLines(lines, {
   sourceUrl = null,
   sourceValidator = null,
   storePath = null,
+  maxPeriod = currentCpltPeriod(),
 } = {}) {
   if (!lines || typeof lines[Symbol.asyncIterator] !== "function") throw new Error("CENTRAL_HONORARIOS_LINES_REQUIRED");
   if (!outputRoot) throw new Error("CENTRAL_HONORARIOS_OUTPUT_REQUIRED");
@@ -31,7 +33,7 @@ export async function processCentralHonorariosLines(lines, {
         headerLine = line;
         continue;
       }
-      const record = parseCentralHonorarioRow({ line, headerLine, sourceUrl: sourceUrl ?? "https://www.portaltransparencia.cl/" });
+      const record = parseCentralHonorarioRow({ line, headerLine, sourceUrl: sourceUrl ?? "https://www.portaltransparencia.cl/", maxPeriod });
       if (!record) continue;
       store.upsert({
         stableKey: record.id,

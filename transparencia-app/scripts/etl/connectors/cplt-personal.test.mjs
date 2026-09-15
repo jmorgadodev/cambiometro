@@ -60,4 +60,17 @@ describe("prefiltro acotado de nóminas CPLT", () => {
     expect(record?.remuneracion_bruta_mensual).toBe(5676763);
     expect(record?.fuente_periodo).toBe("2026-07");
   });
+
+  it("rechaza un período posterior al corte de ejecución", () => {
+    const header = parseCpltHeader("nombres;paterno;materno;anyo;mes;organismo_nombre;tipo cargo;remuneracionbruta_mensual");
+    const columns = parseCpltLine("Ana;Pérez;Soto;2026;Diciembre;Presidencia;Asesora;1000000");
+    expect(parseCpltRecord({
+      columns,
+      header,
+      tipo: "Contrata",
+      organismoId: "org-presidencia",
+      sourceUrl: "https://oficial.test/contrata",
+      maxPeriod: "2026-09",
+    })).toBeNull();
+  });
 });
