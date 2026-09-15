@@ -91,6 +91,32 @@ describe("buildR2History", () => {
     expect(comparison.organizationChanges[0]).toMatchObject({ key: "a", organizationBefore: "Interior", organizationAfter: "Presidencia" });
   });
 
+  it("interpreta montos chilenos formateados sin alterar la fila original", () => {
+    const result = buildR2History([
+      {
+        ...base,
+        period: "2026-01",
+        releaseId: "release-01",
+        checksum: "checksum-01",
+        records: [{ personKey: "a", monto: "$1.250.000" }],
+      },
+      {
+        ...base,
+        period: "2026-02",
+        releaseId: "release-02",
+        checksum: "checksum-02",
+        records: [{ personKey: "a", monto: "1.500.000" }],
+      },
+    ], { keyFields: ["personKey"] });
+
+    expect(result.comparisons[0].amountChanges[0]).toMatchObject({
+      amountBefore: 1250000,
+      amountAfter: 1500000,
+      difference: 250000,
+    });
+    expect(result.historyByKey.a[0].original.monto).toBe("$1.250.000");
+  });
+
   it("distingue una corrección del mismo período de un cambio entre períodos", () => {
     const result = buildR2History([
       {

@@ -52,7 +52,32 @@ function numericValue(record, fields) {
   const value = firstValue(record, fields);
   if (value === null || value === "") return null;
   if (typeof value === "number") return Number.isFinite(value) ? value : null;
-  const parsed = Number(String(value).replace(/[^0-9.-]/g, ""));
+  const rawValue = String(value).trim();
+  const negative = /^\(.*\)$/.test(rawValue) || rawValue.includes("-");
+  let numeric = rawValue.replace(/[^0-9.,]/g, "");
+  if (!numeric) return null;
+
+  const commaIndex = numeric.lastIndexOf(",");
+  const dotIndex = numeric.lastIndexOf(".");
+  if (commaIndex >= 0 && dotIndex >= 0) {
+    if (commaIndex > dotIndex) {
+      numeric = numeric.replace(/\./g, "").replace(",", ".");
+    } else {
+      numeric = numeric.replace(/,/g, "");
+    }
+  } else if (commaIndex >= 0) {
+    const commaParts = numeric.split(",");
+    numeric = commaParts.length === 2 && commaParts[1].length <= 2
+      ? `${commaParts[0].replace(/\./g, "")}.${commaParts[1]}`
+      : numeric.replace(/,/g, "");
+  } else if ((numeric.match(/\./g) ?? []).length > 1) {
+    numeric = numeric.replace(/\./g, "");
+  } else if (dotIndex >= 0 && numeric.split(".")[1].length === 3) {
+    numeric = numeric.replace(".", "");
+  }
+
+  const parsed = Number(numeric);
+  if (Number.isFinite(parsed) && negative) return -Math.abs(parsed);
   return Number.isFinite(parsed) ? parsed : null;
 }
 
