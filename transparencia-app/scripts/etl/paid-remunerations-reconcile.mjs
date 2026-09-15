@@ -1,7 +1,10 @@
 import { pathToFileURL } from "node:url";
 import { createHash } from "node:crypto";
+import { DatabaseSync } from "node:sqlite";
 import { mkdir, readdir, readFile, writeFile } from "node:fs/promises";
+import { rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { tmpdir } from "node:os";
 import { currentCpltPeriod } from "./cplt-personal.mjs";
 import { parseCentralHonorarioRow } from "./central-honorarios.mjs";
 import { CENTRAL_HONORARIOS_URLS } from "./central-honorarios-stream.mjs";
@@ -38,34 +41,67 @@ export function paidRemunerationShape(record) {
   ].join("|");
 }
 
+function fingerprintDigest(value) {
+  return createHash("sha256").update(value).digest("hex");
+}
+
 async function loadExistingProjection(root) {
-  const ids = new Set();
-  const fingerprints = new Set();
-  const shapes = new Map();
+  const filePath = join(tmpdir(), `cambiometro-paid-reconcile-${process.pid}.sqlite`);
+  for (const suffix of ["", "-journal", "-wal", "-shm"]) rmSync(`${filePath}${suffix}`, { force: true });
+  const database = new DatabaseSync(filePath);
+  database.exec(`
+    PRAGMA journal_mode = DELETE;
+    PRAGMA synchronous = OFF;
+    PRAGMA temp_store = FILE;
+    PRAGMA cache_size = -65536;
+    CREATE TABLE existing_ids (record_id TEXT PRIMARY KEY);
+    CREATE TABLE existing_fingerprints (fingerprint TEXT PRIMARY KEY, shape TEXT NOT NULL);
+    CREATE INDEX existing_shape ON existing_fingerprints(shape);
+    CREATE TABLE source_fingerprints (fingerprint TEXT PRIMARY KEY);
+  `);
+  const insertId = database.prepare("INSERT OR IGNORE INTO existing_ids (record_id) VALUES (?)");
+  const insertFingerprint = database.prepare("INSERT OR IGNORE INTO existing_fingerprints (fingerprint, shape) VALUES (?, ?)");
   let rows = 0;
   let invalidPeriodRows = 0;
   const byContract = new Map();
 
-  for (const fileName of (await readdir(root)).filter((name) => name.endsWith(".json")).sort()) {
-    const parsed = JSON.parse(await readFile(join(root, fileName), "utf8"));
-    if (!Array.isArray(parsed)) continue;
-    for (const record of parsed) {
-      rows += 1;
-      if (record.id) ids.add(String(record.id));
-      const period = text(record.fuente_periodo ?? record.periodo).slice(0, 7);
-      if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(period)) invalidPeriodRows += 1;
-      const fingerprint = paidRemunerationFingerprint(record);
-      fingerprints.add(fingerprint);
-      const shape = paidRemunerationShape(record);
-      const bucket = shapes.get(shape) ?? [];
-      bucket.push(fingerprint);
-      shapes.set(shape, bucket);
-      const contract = text(record.tipo_contrato) || "Sin informar";
-      byContract.set(contract, (byContract.get(contract) ?? 0) + 1);
+  try {
+    database.exec("BEGIN");
+    for (const fileName of (await readdir(root)).filter((name) => name.endsWith(".json")).sort()) {
+      const parsed = JSON.parse(await readFile(join(root, fileName), "utf8"));
+      if (!Array.isArray(parsed)) continue;
+      for (const record of parsed) {
+        rows += 1;
+        if (record.id) insertId.run(String(record.id));
+        const period = text(record.fuente_periodo ?? record.periodo).slice(0, 7);
+        if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(period)) invalidPeriodRows += 1;
+        insertFingerprint.run(
+          fingerprintDigest(paidRemunerationFingerprint(record)),
+          fingerprintDigest(paidRemunerationShape(record)),
+        );
+        const contract = text(record.tipo_contrato) || "Sin informar";
+        byContract.set(contract, (byContract.get(contract) ?? 0) + 1);
+      }
     }
+    database.exec("COMMIT");
+  } catch (error) {
+    database.close();
+    for (const suffix of ["", "-journal", "-wal", "-shm"]) rmSync(`${filePath}${suffix}`, { force: true });
+    throw error;
   }
 
-  return { rows, ids, fingerprints, shapes, invalidPeriodRows, byContract };
+  return {
+    database,
+    filePath,
+    rows,
+    invalidPeriodRows,
+    byContract,
+    existingId: database.prepare("SELECT 1 AS found FROM existing_ids WHERE record_id = ? LIMIT 1"),
+    existingFingerprint: database.prepare("SELECT 1 AS found FROM existing_fingerprints WHERE fingerprint = ? LIMIT 1"),
+    existingShape: database.prepare("SELECT 1 AS found FROM existing_fingerprints WHERE shape = ? LIMIT 1"),
+    sourceFingerprint: database.prepare("SELECT 1 AS found FROM source_fingerprints WHERE fingerprint = ? LIMIT 1"),
+    insertSourceFingerprint: database.prepare("INSERT OR IGNORE INTO source_fingerprints (fingerprint) VALUES (?)"),
+  };
 }
 
 function increment(map, key) {
@@ -86,8 +122,6 @@ export async function reconcilePaidRemunerations({
   maxPeriod = currentCpltPeriod(),
 } = {}) {
   const existing = await loadExistingProjection(projectionRoot);
-  const sourceFingerprints = new Set();
-  const sourceDuplicateFingerprints = new Set();
   const byPeriod = new Map();
   const byOrganism = new Map();
   const byClassification = new Map();
@@ -99,6 +133,7 @@ export async function reconcilePaidRemunerations({
   let alreadyPublished = 0;
   let missing = 0;
   let conflicts = 0;
+  let sourceDuplicateRows = 0;
   const sampleMissing = [];
   const sampleConflicts = [];
   let sourceUrl = urls[0];
@@ -132,19 +167,20 @@ export async function reconcilePaidRemunerations({
 
     paidRows += 1;
     const fingerprint = paidRemunerationFingerprint(record);
-    if (sourceFingerprints.has(fingerprint)) sourceDuplicateFingerprints.add(fingerprint);
-    sourceFingerprints.add(fingerprint);
+    const fingerprintKey = fingerprintDigest(fingerprint);
+    if (existing.sourceFingerprint.get(fingerprintKey)) sourceDuplicateRows += 1;
+    existing.insertSourceFingerprint.run(fingerprintKey);
     increment(byPeriod, record.fuente_periodo);
     increment(byOrganism, record.organo_nombre);
 
-    if (existing.ids.has(record.id) || existing.fingerprints.has(fingerprint)) {
+    if (existing.existingId.get(record.id) || existing.existingFingerprint.get(fingerprintKey)) {
       alreadyPublished += 1;
       increment(byClassification, "ya_publicado");
       continue;
     }
 
     const shape = paidRemunerationShape(record);
-    if (existing.shapes.has(shape)) {
+    if (existing.existingShape.get(fingerprintDigest(shape))) {
       conflicts += 1;
       increment(byClassification, "conflicto_o_revision");
       if (sampleConflicts.length < 25) sampleConflicts.push({ id: record.id, periodo: record.fuente_periodo });
@@ -178,7 +214,7 @@ export async function reconcilePaidRemunerations({
       outsidePeriodRows,
       periods: sortedCounts(byPeriod, 1000),
       topOrganisms: sortedCounts(byOrganism),
-      duplicateExactRows: sourceDuplicateFingerprints.size,
+      duplicateExactRows: sourceDuplicateRows,
     },
     reconciliation: {
       alreadyPublished,
@@ -195,10 +231,16 @@ export async function reconcilePaidRemunerations({
       crossSourceNameOnlyDeduplication: "forbidden",
       rawCsvPublication: "forbidden",
     },
+    index: {
+      algorithm: "sha256",
+      purpose: "huellas compactas para conciliación; no reemplazan los valores originales",
+    },
     sourceChecksum: createHash("sha256").update(JSON.stringify({ sourceUrl, sourceValidator, maxPeriod, paidRows })).digest("hex"),
   };
   await mkdir(dirname(output), { recursive: true });
   await writeFile(output, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+  existing.database.close();
+  for (const suffix of ["", "-journal", "-wal", "-shm"]) rmSync(`${existing.filePath}${suffix}`, { force: true });
   return report;
 }
 
