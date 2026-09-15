@@ -22,6 +22,7 @@ const quarterStart = `${now.getUTCFullYear()}-${String(quarterMonth).padStart(2,
 const from = validDate(argument("--from") ?? quarterStart, "INFOLOBBY_INVALID_FROM");
 const to = validDate(argument("--to") ?? today, "INFOLOBBY_INVALID_TO");
 if (from > to) throw new Error("INFOLOBBY_INVALID_RANGE");
+const dryRun = process.argv.includes("--dry-run");
 const outputRoot = resolve(argument("--output") ?? join(root, "data", "lake"));
 if (outputRoot === root || dirname(outputRoot) === outputRoot) throw new Error("INVALID_OUTPUT_PATH");
 
@@ -37,6 +38,22 @@ if (result.records.length === 0) {
 const serialized = JSON.stringify(result.records);
 if (/"(?:rut|run|rut_persona|rut_personal|domicilio|direccion_particular)"\s*:/i.test(serialized)) {
   throw new Error("INFOLOBBY_PERSONAL_IDENTIFIER_IN_PUBLIC_PROJECTION");
+}
+
+const summary = {
+  source: "infolobby",
+  from,
+  to,
+  dryRun,
+  records: result.records.length,
+  eventKinds: Object.fromEntries(["audience", "travel", "gift"].map((kind) => [kind, result.records.filter((record) => record.lobby_event_kind === kind).length])),
+  entities: new Set(result.records.flatMap((record) => record.entities ?? []).map((entity) => entity.id)).size,
+  legalRuts: new Set(result.records.flatMap((record) => record.entities ?? []).map((entity) => entity.rut_juridico).filter(Boolean)).size,
+  quarters: result.originals.map((quarter) => ({ year: quarter.year, quarter: quarter.quarter, checksumSha256: quarter.checksumSha256 })),
+};
+if (dryRun) {
+  console.log(JSON.stringify({ ...summary, writesPerformed: false }, null, 2));
+  process.exit(0);
 }
 
 const generatedAt = new Date().toISOString();
@@ -84,14 +101,7 @@ const publishPlan = {
 writeFileSync(join(outputRoot, "publish-plan.json"), `${JSON.stringify(publishPlan, null, 2)}\n`, "utf8");
 
 console.log(JSON.stringify({
-  source: "infolobby",
-  from,
-  to,
-  records: result.records.length,
-  eventKinds: Object.fromEntries(["audience", "travel", "gift"].map((kind) => [kind, result.records.filter((record) => record.lobby_event_kind === kind).length])),
-  entities: new Set(result.records.flatMap((record) => record.entities ?? []).map((entity) => entity.id)).size,
-  legalRuts: new Set(result.records.flatMap((record) => record.entities ?? []).map((entity) => entity.rut_juridico).filter(Boolean)).size,
-  quarters: result.originals.map((quarter) => ({ year: quarter.year, quarter: quarter.quarter, checksumSha256: quarter.checksumSha256 })),
+  ...summary,
   assets: plan.assets.length,
   output: outputRoot,
 }, null, 2));
