@@ -487,3 +487,10 @@ y los `15` fueron rechazados por `local_manifest_missing`. Esto confirma que
 no existe una reparación local segura para completar esos períodos y que el
 ETL de origen debe volver a producirlos; no se intentará inferirlos desde el
 catálogo.
+
+La misma comprobación en Senado fue más informativa: de `4` manifiestos
+faltantes, `2` son candidatos locales que coinciden en período, conteo y
+checksum (`2025-08` y `2026-07`), mientras `2026-02` y `2026-05` fueron
+rechazados por diferencias de conteo. Los dos candidatos representan sólo
+`9.596` bytes y permanecen sin publicar porque la compuerta R2 sigue cerrada;
+los dos rechazos requieren revisar el ETL de origen antes de cualquier acción.
