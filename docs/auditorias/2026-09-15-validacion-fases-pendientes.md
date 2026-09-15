@@ -102,6 +102,14 @@ Tras finalizar Contrata, el workflow continuó de forma serializada:
 
 El workflow conserva `publish=false`; por tanto, los artefactos se validan localmente y no alteran el release productivo.
 
+La validación técnica posterior corrigió tres incompatibilidades de tipado en pruebas de cierre R2 y en la firma del parser CPLT:
+
+- `npm run typecheck`: aprobado.
+- `npm run api:typecheck`: aprobado.
+- Pruebas específicas de cierre R2 y parser CPLT: 15/15 aprobadas.
+- ESLint y `git diff --check`: aprobados.
+- Commit: `b260193`.
+
 ## Siguiente puerta
 
 1. Esperar el resultado terminal del job Planta.
