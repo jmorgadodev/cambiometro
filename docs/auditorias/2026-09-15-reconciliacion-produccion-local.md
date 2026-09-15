@@ -80,3 +80,16 @@ La comprobación de validadores remotos detectó cambios en las cuatro nóminas 
 - Código del Trabajo: validador cambiado.
 
 Por tanto, la ejecución central en curso está justificada por cambios reales de fuente. El validador sólo demuestra que el archivo cambió; no sustituye la validación de períodos, conteos, cobertura y calidad antes de publicar.
+
+## Tamaño de las fuentes remotas
+
+La inspección `HEAD` del mismo ciclo confirmó que las fuentes se sirven con rangos HTTP:
+
+| Nómina | Tamaño remoto aproximado | Rangos |
+| --- | ---: | --- |
+| Planta | 8,66 GB | Sí |
+| Contrata | 14,40 GB | Sí |
+| Honorarios | 8,36 GB | Sí |
+| Código del Trabajo | 6,25 GB | Sí |
+
+El ETL no debe descargar estas fuentes completas a R2 ni mantenerlas completas en memoria. La ejecución actual procesa sólo una categoría a la vez y materializa únicamente el resultado validado. La duración de Planta es compatible con su tamaño; el criterio de fallo sigue siendo el timeout, el error del job o el límite de 300 minutos, no el paso de unos pocos minutos sin artefacto.
