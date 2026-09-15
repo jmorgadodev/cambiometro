@@ -76,6 +76,21 @@ La categoría Planta terminó correctamente antes de continuar con Contrata:
 
 El artefacto tiene estado `valid`, pero sigue siendo sólo un resultado de validación local porque el workflow fue ejecutado con `publish=false`.
 
+### Resultado Contrata
+
+El job `104221344580` terminó correctamente dentro del workflow `34918549350`, también con `publish=false`.
+
+- Registros: 874.404.
+- Proyecciones locales: 444.
+- Archivos del artefacto: 446.
+- Tamaño local del artefacto: 1.085.731.080 bytes.
+- Checksum: `634a217c20e711a0bc737ff2a008c9c32679f80094c43a1c20325f94feca4362`.
+- Estado: `valid`.
+- Fuente: archivo oficial de Personal Contrata.
+- La muestra revisada conserva remuneración bruta/líquida, contrato, período y organismo municipal.
+
+El resultado queda validado localmente, pero no se publica porque el almacenamiento R2 está en estado `growth-blocked` y aún faltan Honorarios y Código del Trabajo.
+
 ## Siguiente puerta
 
 1. Esperar el resultado terminal del job Planta.
