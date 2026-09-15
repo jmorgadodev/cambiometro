@@ -280,3 +280,15 @@ La auditoría local `npm run audit:cplt:scope` comparó sólo `organizations.jso
 - Código del Trabajo: `382` organismos centrales y `3` municipalidades, frente a `308` municipalidades públicas.
 
 La compuerta queda en `replacementEligible=false` por dos razones: alcance central presente y cobertura municipal incompleta. Las tres municipalidades coincidentes (`Macul`, `Negrete` y `Penco`) figuran sin registros publicados en las cuatro categorías del release vigente; el candidato las clasifica como `municipalitiesFillingUnavailable=3`, no como duplicados. Aun así, no se deben sumar los `2.122.881` registros al conteo público ni activar este candidato como sustituto: primero debe separarse el complemento central del reemplazo municipal.
+
+## Causa y bloqueo preventivo del alcance central
+
+La ejecución `34918549350` utilizó el commit `a27ba0ae609096ea14d17477cbd6edfd4bc555ed`, que ya contenía el filtro de alcance central. La fuga se produjo porque el reconocedor no contemplaba la forma `I. Municipalidad ...`; por eso `Macul`, `Negrete` y `Penco` podían llegar a la resolución de organismos como `muni-*` aunque el flujo fuera central.
+
+Se corrigió el reconocedor para aceptar `I.` y se agregó una compuerta de publicación que detiene cualquier release central que contenga IDs `muni-*`. La prueba contra los artefactos de esa ejecución detecta exactamente `muni-macul`, `muni-negrete` y `muni-penco` antes de generar cobertura o promover el release.
+
+- Commit central: `b54c93a` (`fix: block municipal leakage in central CPLT releases`).
+- Prueba específica: `4/4` aprobadas.
+- Lint y `git diff --check`: aprobados.
+- La suite general terminó con `1` timeout preexistente en `ranged-csv-source` y `1.055/1.056` pruebas aprobadas; no hubo fallo en el cambio de alcance.
+- No hubo escritura en D1, R2 ni producción.
