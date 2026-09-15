@@ -838,3 +838,21 @@ Esto no autoriza subirlos automáticamente: R2 permanece sobre el umbral de
 crecimiento y el cierre remoto no acredita todavía las referencias completas.
 La próxima promoción deberá usar estos paquetes como candidatos, validar el
 inventario final y conservar el rollback antes de cualquier escritura.
+
+## Variante CPLT activa frente a candidata — 2026-09-14
+
+La API pública confirma que producción usa `funcionarios-v1`, con 1.226.913
+registros y fecha `2026-09-02T03:28:30.598Z`. La variante más nueva
+`funcionarios-central-v1` contiene 2.110.434 registros y fecha
+`2026-09-14T03:51:42.634Z`, pero no se debe activar todavía:
+
+- `funcionarios-v1`: cobertura declarada para 346 comunas (320 disponibles,
+  25 sin publicación), sin duplicados; queda bloqueada sólo por falta de
+  metadatos de períodos para auditar historia.
+- `funcionarios-central-v1`: sin cobertura ni períodos declarados, 2.984
+  filtros de período fuera del release declarado y 563.221 filas con
+  observaciones de calidad, principalmente remuneración líquida no informada.
+
+Ambas auditorías devuelven `promotionAllowed=false`. Se conserva la variante
+antigua como referencia pública estable y la central como candidata de
+auditoría; no se cambia el selector ni se elimina la versión anterior.
