@@ -128,3 +128,26 @@ La ejecución secuencial terminó sus cuatro ingestas sin publicación (`publish
 Las cuatro nóminas centrales están validadas localmente (`100%` del bloque ETL central). El conteo candidato conjunto es `2.122.881` registros. Esta validación no autoriza promoción porque R2 mantiene `growth-blocked`; además, aún falta reconciliar el alcance de cada categoría con el release productivo antes de presentar coberturas.
 
 La consolidación final del candidato terminó correctamente en GitHub Actions (`2026-09-15T04:17:38Z`) con versión `2026-09-15T04-09-07-576Z`, `714` proyecciones y `2.177` assets. El resultado reportó `published: false`; por lo tanto, la diferencia local/producción sigue siendo intencional y no se alteró el release vigente.
+
+## Reconciliación por fuente — 2026-09-15 01:20 UTC-3
+
+La auditoría `npm run audit:sources` comparó producción contra el catálogo y el estado local, sin descargar universos ni usar D1. Se revisaron `15` fuentes:
+
+| Clasificación | Fuentes | Lectura operativa |
+|---|---:|---|
+| Coincidente | 3 | El conteo canónico coincide; no implica que tengan el mismo corte temporal. |
+| Frescura | 5 | Producción tiene un corte más reciente que el snapshot local; no se marca como pérdida. |
+| Alcance | 7 | Los conteos mezclan padre/componentes o histórico/corte vigente y deben compararse por categoría. |
+| Sin explicación | 0 | No quedó una diferencia sin clasificación. |
+| Desfase de `source-health` | 2 | El estado local deriva de otro alcance o snapshot; no se interpreta como pérdida automática. |
+
+Hallazgos que quedan fijados para la siguiente etapa:
+
+- Cámara: producción separa asistencia (`54.538`) y votaciones (`4.058`), mientras gastos (`16.275`) queda fuera del conteo padre; no se deben sumar esos componentes al registro principal.
+- Senado: producción separa votaciones (`194`) y gastos (`6.517`); el snapshot local conserva categorías históricas adicionales.
+- ChileCompra: producción muestra el corte vigente (`74.142`), mientras el snapshot local conserva histórico acumulado; no son conteos comparables.
+- DIPRES: ambos alcances son agregados y no representan fichas individuales comparables.
+- Transparencia Activa: producción tiene `1.226.913` frente a `1.218.136` del snapshot local; se clasifica como diferencia de frescura.
+- InfoLobby: producción tiene `71.467` frente a `60.523` locales; la diferencia se clasifica como frescura.
+
+La reconciliación queda documentada como diagnóstico; no modifica releases, rutas, índices públicos ni datos originales.
