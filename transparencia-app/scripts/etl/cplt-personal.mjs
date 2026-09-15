@@ -81,6 +81,39 @@ export function getCpltCell(line, header, ...names) {
   return scanCpltCell(line, header, ...names);
 }
 
+/**
+ * Parses one semicolon-delimited CPLT row, preserving semicolons inside quoted
+ * cells and decoding escaped quotes. The source publishes long descriptions
+ * that may contain delimiters, so a plain String.split(";") shifts all later
+ * columns and can manufacture impossible periods.
+ */
+export function parseCpltLine(line) {
+  const text = typeof line === "string" ? line : String(line ?? "");
+  const columns = [];
+  let value = "";
+  let quoted = false;
+  for (let index = 0; index < text.length; index += 1) {
+    const character = text[index];
+    if (character === '"') {
+      if (quoted && text[index + 1] === '"') {
+        value += '"';
+        index += 1;
+      } else {
+        quoted = !quoted;
+      }
+      continue;
+    }
+    if (character === ";" && !quoted) {
+      columns.push(value.trim());
+      value = "";
+      continue;
+    }
+    value += character;
+  }
+  columns.push(value.replace(/\r$/, "").trim());
+  return columns;
+}
+
 export function scanCpltCell(line, header, ...names) {
   let targetIndex;
   for (const name of names) {
@@ -91,18 +124,7 @@ export function scanCpltCell(line, header, ...names) {
     }
   }
   if (targetIndex === undefined) return "";
-
-  const text = typeof line === "string" ? line : String(line);
-  let columnIndex = 0;
-  let columnStart = 0;
-  for (let index = 0; index <= text.length; index += 1) {
-    if (index < text.length && text.charCodeAt(index) !== 59) continue;
-    if (columnIndex === targetIndex) return text.slice(columnStart, index).trim();
-    if (columnIndex > targetIndex) break;
-    columnIndex += 1;
-    columnStart = index + 1;
-  }
-  return "";
+  return parseCpltLine(line)[targetIndex] ?? "";
 }
 
 export function getCpltColumn(columns, header, ...names) {

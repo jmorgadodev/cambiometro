@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { createCpltRecordId, parseCpltHeader, parseCpltRecord } from "../scripts/etl/cplt-personal.mjs";
+import { createCpltRecordId, parseCpltHeader, parseCpltLine, parseCpltRecord } from "../scripts/etl/cplt-personal.mjs";
 
 describe("parser de personal CPLT", () => {
+  it("respeta delimitadores y comillas escapadas dentro de una celda", () => {
+    const columns = parseCpltLine('1;2;"Pagina Personal; Contrata";Servicio;AA001;2026/09/10;2026;Agosto;Profesional;ANA;PEREZ;SOTO;6;ABOGADO;ASESORA;RM;();Pesos;1000000;Pesos;800000;Pesos;;Pesos;;No;Pesos;0;0;Pesos;0;0;Pesos;0;0;01/01/2026;31/12/2026;"Sin observaciones; revisar";No;Pesos;0;Sí');
+    const header = parseCpltHeader("idPagina;idPaginaPadre;camino;organismo_nombre;organismo_codigo;fecha_publicacion;anyo;Mes;Tipo Estamento;Nombres;Paterno;Materno;grado_eus;tipo_calificacionp;Tipo cargo;region;asignaciones;Tipo Unidad monetaria;remuneracionbruta_mensual;Tipo Unidad monetaria remuneracion liquida;remuliquida_mensual;Tipo Unidad monetaria remuneracion adicional;remu_adicional;Tipo unidad monetaria remuneracion bonos incentivos;remu_bonoin;horasextra;Tipo de unidad monetaria horas diurnas;Pago extra diurnas;Horas extra diurnas;Tipo de unidad monetaria horas nocturnas;Pago extra nocturnas;Horas extra nocturnas;Tipo de unidad monetaria horas festivas;Pago extra festivas;Horas extra festivas;fecha_ingreso;fecha_termino;observaciones;enlace;Tipo unidad monetaria viaticos;viaticos;activado");
+    const record = parseCpltRecord({ columns, header, tipo: "Contrata", organismoId: "org-servicio", sourceUrl: "https://oficial.test/contrata" });
+
+    expect(record).toMatchObject({ fuente_periodo: "2026-08", organo_nombre: "Servicio", remuneracion_bruta_mensual: 1_000_000 });
+    expect(record?.observaciones).toBe("Sin observaciones; revisar");
+  });
+
   it("interpreta meses en texto y columnas de Planta", () => {
     const header = parseCpltHeader("organismo_nombre;anyo;Mes;Tipo Estamento;Nombres;Paterno;Materno;Tipo cargo;remuneracionbruta_mensual;remuliquida_mensual;observaciones;enlace");
     const record = parseCpltRecord({
