@@ -173,3 +173,5 @@ La prueba local de `planR2Publication` terminó con `2/2` casos aprobados. El pu
 - conserva la versión activa anterior para rollback;
 - elimina únicamente versiones frías no referenciadas;
 - no se ejecuta durante esta validación porque el workflow usa `publish=false`.
+
+Además, el workflow central quedó protegido para exigir dos decisiones separadas antes de una publicación: `publish=true` y `confirm_storage=true`. La segunda sólo debe activarse después de revisar el inventario y el margen R2 vigente. Commit del workflow: `049c855`.
