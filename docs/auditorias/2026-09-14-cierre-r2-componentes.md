@@ -810,3 +810,9 @@ La comprobación física focalizada, ejecutada sin inventario, confirmó además
 La matriz ahora queda limitada a la fuente solicitada y distingue entre
 `missingManifestArtifacts`, artefactos que fallan en descarga física y objetos
 que sólo faltan del inventario de almacenamiento.
+
+El plan local de reparación fue alineado con la misma regla de selección:
+puede resolver `votaciones_camara` aunque el catálogo declare `sourceId=camara`
+cuando el `manifestKey` contiene ese conjunto anidado. La prueba conjunta de
+auditoría y reparación quedó en 11/11; sigue siendo un plan de lectura local y
+no ejecuta escrituras.

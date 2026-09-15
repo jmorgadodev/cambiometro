@@ -10,9 +10,16 @@ function readJson(file) {
   return JSON.parse(readFileSync(file, "utf8"));
 }
 
+function matchesSource(partition, sourceId = null) {
+  if (!sourceId) return true;
+  const declaredSource = String(partition?.sourceId ?? "");
+  const manifestParts = String(partition?.manifestKey ?? "").split("/");
+  return declaredSource === sourceId || manifestParts.includes(sourceId);
+}
+
 function normalizedPartitions(catalog, sourceId = null) {
   return (Array.isArray(catalog?.partitions) ? catalog.partitions : [])
-    .filter((partition) => !sourceId || String(partition?.sourceId ?? "") === sourceId)
+    .filter((partition) => matchesSource(partition, sourceId))
     .filter((partition) => String(partition?.manifestKey ?? "").trim())
     .sort((left, right) => String(left.manifestKey).localeCompare(String(right.manifestKey)));
 }

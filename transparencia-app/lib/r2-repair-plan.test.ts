@@ -43,4 +43,22 @@ describe("plan local de reparación R2", () => {
     expect(plan.missing).toHaveLength(1);
     expect(plan.writesPerformed).toBe(false);
   });
+
+  it("resuelve fuentes anidadas por el segmento del manifestKey", () => {
+    const lakeRoot = mkdtempSync(join(tmpdir(), "cambiometro-r2-plan-"));
+    const manifestKey = "partitions/camara/votaciones_camara/2026/08/manifest.json";
+    const artifactKey = "partitions/camara/votaciones_camara/2026/08/records.jsonl.gz";
+    const directory = join(lakeRoot, "partitions/camara/votaciones_camara/2026/08");
+    mkdirSync(directory, { recursive: true });
+    writeFileSync(join(lakeRoot, artifactKey), "vote\n");
+    writeFileSync(join(lakeRoot, manifestKey), JSON.stringify({ artifacts: [{ key: artifactKey, checksumSha256: digest("vote\n") }] }));
+
+    const plan = buildLocalR2RepairPlan({
+      lakeRoot,
+      sourceId: "votaciones_camara",
+      catalog: { partitions: [{ sourceId: "camara", manifestKey }] },
+    });
+
+    expect(plan).toMatchObject({ ready: true, checkedPartitions: 1, writesPerformed: false });
+  });
 });
