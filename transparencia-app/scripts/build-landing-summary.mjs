@@ -7,11 +7,15 @@ import { getTransferReleaseMetadata } from "../lib/transfer-release-metadata.ts"
 const root = join(import.meta.dirname, "..");
 const readJson = (relativePath) => readFile(join(root, relativePath), "utf8").then(JSON.parse);
 
-const [sourceHealth, movements, globalKpis] = await Promise.all([
+const [sourceHealth, movementsSource, globalKpis, movementsScopePolicy] = await Promise.all([
   readJson("data/etl/source-health.json"),
   readJson("data/movimientos.json"),
   readJson("lib/global-kpis.json"),
+  readJson("data/movimientos-scope-policy.json"),
 ]);
+const movements = movementsScopePolicy.status === "validated"
+  ? movementsSource
+  : { ...movementsSource, movimientos: [], stats: { ...(movementsSource.stats ?? {}), total_movimientos: 0 } };
 const summary = buildLandingSummary({ sourceHealth, movements, globalKpis, transferRelease: getTransferReleaseMetadata() });
 const content = `${JSON.stringify(summary, null, 2)}\n`;
 

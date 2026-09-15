@@ -42,6 +42,12 @@ const snapshot = await fetch(productionUrl("/data/movimientos.json"), { headers,
 assert(snapshot.status === 200, "/data/movimientos.json responde 200");
 const payload = await snapshot.json();
 assert(payload.pipeline === "etl_movimientos_autoridades", "el snapshot identifica el pipeline correcto");
+if (payload.release_status === "blocked_pending_official_reconciliation") {
+  assert(Array.isArray(payload.movimientos) && payload.movimientos.length === 0, "el asset público no expone el snapshot en revisión");
+  assert(pageHtml.includes("Validación documental en curso"), "la ruta informa la validación documental");
+  console.log(JSON.stringify({ ok: true, status: payload.release_status, total: 0 }, null, 2));
+  process.exit(0);
+}
 assert(Array.isArray(payload.movimientos) && payload.movimientos.length >= 79, `universo preservado (${payload.movimientos?.length ?? 0})`);
 assert(/^[a-f0-9]{64}$/i.test(payload.checksum_sha256 || ""), "checksum SHA-256 presente");
 assert(Number.isFinite(Date.parse(payload.last_success_at || payload.last_run)), "última ejecución exitosa presente");

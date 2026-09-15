@@ -6,6 +6,7 @@
  * no contiene un catálogo duplicado ni datos generados manualmente.
  */
 import movimientosData from "../data/movimientos.json";
+import movimientosScopePolicy from "../data/movimientos-scope-policy.json";
 
 export type MovimientoTipo =
   | "renuncia" | "cese" | "remocion" | "cambio" | "cambio-puesto"
@@ -250,6 +251,7 @@ export const MOVIMIENTOS_PIPELINE_METADATA = {
   source_health: payload.source_health ?? [],
   signals: payload.signals ?? [],
 };
+export const MOVIMIENTOS_PUBLICATION_BLOCKED = movimientosScopePolicy.status !== "validated";
 
 export const MOVIMIENTO_DOCUMENTO_PENDIENTE_DIAS = 30;
 

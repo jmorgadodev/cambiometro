@@ -126,6 +126,10 @@ async function checkRoute(browser, baseUrl, route, markers) {
 }
 
 async function main() {
+  const movementPolicy = JSON.parse(await readFile(join(process.cwd(), "data", "movimientos-scope-policy.json"), "utf8"));
+  const movementMarkers = movementPolicy.status === "validated"
+    ? ["Movimientos y Relevos de Autoridades"]
+    : ["Movimientos y Relevos de Autoridades", "Validación documental en curso"];
   let baseUrl = remoteBaseUrl;
   if (!baseUrl) {
     await new Promise((resolve) => server.listen(port, "127.0.0.1", resolve));
@@ -140,7 +144,7 @@ async function main() {
     { route: "/politico", markers: ["Diputados y Senadores"] },
     { route: "/municipalidades", markers: ["Directorio de las 346 Municipalidades"] },
     { route: "/cruces", markers: ["Cruces"] },
-    { route: "/movimientos", markers: ["Movimientos y Relevos de Autoridades", "79"] },
+    { route: "/movimientos", markers: movementMarkers },
     { route: "/transferencias", markers: ["Transferencias"] },
     { route: "/personas", markers: ["Directorio de Personas"] },
     { route: "/entidades", markers: ["Entidades"] },

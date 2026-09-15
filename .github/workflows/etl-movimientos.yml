@@ -60,6 +60,9 @@ jobs:
       - name: Ejecutar ETL independiente de Cámara
         working-directory: transparencia-app
         env:
+          # Queda congelado hasta promover el release reconciliado Kast 2026.
+          # No borrar esta bandera: evita que el baseline inflado vuelva a publicarse.
+          MOVIMIENTOS_RELEASE_APPROVED: "0"
           MOVIMIENTOS_RUN_REPORT: data/generated/movimientos-run.json
           MOVIMIENTOS_INPUT: data/movimientos.previous.json
           MOVIMIENTOS_PROVISIONAL_SOURCES: ${{ vars.MOVIMIENTOS_PROVISIONAL_SOURCES }}
