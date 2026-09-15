@@ -103,6 +103,7 @@
     "audit:r2:history:sample": "node scripts/audit-r2-history-sample.mjs",
     "audit:r2:retention": "node scripts/audit-r2-retention.mjs",
     "audit:cplt:projection": "node scripts/audit-cplt-projection.mjs",
+    "audit:cplt:scope": "node scripts/audit-cplt-central-scope.mjs",
     "audit:cplt:remote": "node scripts/audit-cplt-projection.mjs --remote-r2",
     "data:communes:update": "node scripts/update-commune-catalog.mjs",
     "data:communes:check": "node scripts/update-commune-catalog.mjs --check",
