@@ -57,3 +57,15 @@ Esta capacidad impide promover una nueva proyección central hasta contar con un
 ## Próximo paso verificable
 
 Reconciliar primero Cámara y Senado mediante una matriz por categoría, período y release. Después se podrá validar el histórico de ChileCompra y los resúmenes agregados de DIPRES sin alterar las rutas públicas actuales.
+
+## Prueba de historial acotado desde R2
+
+Se ejecutó una lectura de prueba para **Alejandro Fernandez Troncoso** entre los releases `2026-08-30T08-05-27-795Z` y `2026-09-02T03-28-30-598Z` de `funcionarios-v1`.
+
+- Se encontraron 1 fila en cada release.
+- La identidad, organismo y período permanecieron iguales.
+- El monto bruto cambió de `$1.614.067` a `$60.000`.
+- La clasificación resultante fue `source-correction`.
+- Se leyeron 10 objetos R2 en total, sin escaneo masivo ni consulta D1.
+
+La muestra confirma el mecanismo de historial, pero no constituye todavía una validación global de todas las personas o períodos.
