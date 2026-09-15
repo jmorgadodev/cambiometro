@@ -121,6 +121,19 @@ El job `104221344396` terminó correctamente dentro del workflow `34918549350`, 
 
 Con las cuatro categorías centrales validadas, el conteo local del ciclo es de `2.122.881` registros. Este total es una evidencia del artefacto candidato, no un reemplazo del conteo productivo: producción mantiene su release vigente hasta que se resuelva la puerta de almacenamiento.
 
+### Control de calidad estructural del ciclo completo
+
+Se recorrieron las proyecciones JSON locales de las cuatro categorías, sin escribir ni transformar los artefactos. El control verificó nombre, organismo, cargo, período `YYYY-MM`, montos negativos e identificadores repetidos:
+
+| Categoría | Filas | Proyecciones | Nombre/organismo/cargo faltante | Período inválido | IDs duplicados | Bruto cero | Líquido cero |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| Planta | 297.468 | 447 | 0 | 0 | 0 | 5.038 | 86.927 |
+| Contrata | 874.404 | 444 | 0 | 0 | 0 | 22.612 | 243.550 |
+| Honorarios | 621.112 | 658 | 0 | 0 | 0 | 5.328 | 184.092 |
+| Código del Trabajo | 329.897 | 385 | 0 | 0 | 0 | 5.191 | 90.708 |
+
+No se detectaron montos brutos o líquidos negativos. Los ceros se conservan como observación de calidad del dato de origen; no se reinterpretan como “sin información” ni se reemplazan por estimaciones.
+
 ### Estado secuencial del workflow
 
 El workflow completó las cuatro ingestas de forma serializada:

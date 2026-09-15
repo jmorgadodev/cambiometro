@@ -122,6 +122,7 @@ La ejecución secuencial terminó sus cuatro ingestas sin publicación (`publish
 - Código del Trabajo: `329.897` registros, `387` archivos y `414.181.523` bytes.
 - Checksum de Código del Trabajo: `4f31ce55b33a6dd4cc63e8fe1359d2e162cf12069cfc18517f179d87d9176f81`.
 - El artefacto de Honorarios conserva los campos originales y separa los líquidos no informados de los valores cero.
+- El control estructural de las cuatro categorías no detectó nombres, organismos o cargos faltantes; tampoco períodos inválidos, montos negativos ni identificadores duplicados. Los ceros monetarios quedaron contabilizados como observaciones de origen y no fueron convertidos en ausencias.
 - No hubo escrituras, eliminaciones ni publicaciones en R2 o D1.
 
 Las cuatro nóminas centrales están validadas localmente (`100%` del bloque ETL central). El conteo candidato conjunto es `2.122.881` registros. Esta validación no autoriza promoción porque R2 mantiene `growth-blocked`; además, aún falta reconciliar el alcance de cada categoría con el release productivo antes de presentar coberturas.
