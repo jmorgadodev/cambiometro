@@ -4,6 +4,7 @@ import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
 import { activeProjectionVersions, summarizeR2Storage } from "./etl/r2-storage.mjs";
+import { defaultActiveProjectionManifests } from "./r2-active-manifests.mjs";
 
 function option(name, fallback = null) {
   const index = process.argv.indexOf(name);
@@ -76,7 +77,14 @@ function main() {
     const referencesPath = option("--references");
     const catalogPath = option("--catalog");
     const sourceManifestPaths = options("--source-manifest").map((value) => resolve(value));
-    const projectionManifestSpecs = options("--projection-manifest");
+    let projectionManifestSpecs = options("--projection-manifest");
+    if (projectionManifestSpecs.length === 0 && !suppliedPath) {
+      projectionManifestSpecs = defaultActiveProjectionManifests().map(({ dataset, key }) => {
+        const output = join(temp, `${dataset}-manifest.json`);
+        downloadInventory(option("--bucket", "transparencia-public-data"), key, output);
+        return `${dataset}=${output}`;
+      });
+    }
     const projectionManifestPaths = projectionManifestSpecs.map((value) => resolve(value.includes("=") ? value.slice(value.indexOf("=") + 1) : value));
     const inventory = readInventory(path);
     const inventoryKeys = new Set((inventory.objects ?? []).map((object) => String(object?.key ?? "").trim()).filter(Boolean));

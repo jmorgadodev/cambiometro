@@ -1,8 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { planR2Publication } from "./r2.mjs";
 import { planR2Retention, summarizeR2Storage } from "./r2-storage.mjs";
+import { defaultActiveProjectionManifests } from "../r2-active-manifests.mjs";
 
 describe("protecciones de almacenamiento R2", () => {
+  it("declara el manifiesto público funcionarios-v1 como activo por defecto", () => {
+    expect(defaultActiveProjectionManifests()).toEqual([
+      {
+        dataset: "funcionarios-v1",
+        key: "projections/funcionarios-v1/manifest.json",
+      },
+    ]);
+  });
+
   it("bloquea crecimiento cuando el inventario supera el 90%", () => {
     const summary = summarizeR2Storage({
       limitBytes: 1_000,

@@ -3,6 +3,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { activeProjectionVersions, planR2Retention } from "./etl/r2-storage.mjs";
+import { defaultActiveProjectionManifests } from "./r2-active-manifests.mjs";
 
 function option(name, fallback = null) {
   const index = process.argv.indexOf(name);
@@ -38,7 +39,14 @@ try {
   download(bucket, option("--key", "catalog/v1/storage.json"), inventoryPath);
   const inventory = readJson(inventoryPath);
   const inventoryKeys = new Set((inventory.objects ?? []).map((object) => String(object?.key ?? "").trim()).filter(Boolean));
-  const specs = options("--projection-manifest");
+  let specs = options("--projection-manifest");
+  if (specs.length === 0) {
+    specs = defaultActiveProjectionManifests().map(({ dataset, key }) => {
+      const output = join(temp, `${dataset}-manifest.json`);
+      download(bucket, key, output);
+      return `${dataset}=${output}`;
+    });
+  }
   const manifests = specs.map((spec) => {
     const separator = spec.indexOf("=");
     const dataset = separator > 0 ? spec.slice(0, separator).trim() : null;
