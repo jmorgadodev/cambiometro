@@ -3,6 +3,7 @@ import {
   assertPublicProjectionD1Disabled,
   classifyD1MaterializationFailure,
   summaryForD1Deferral,
+  shouldDeferRemoteD1Materialization,
 } from "./d1-materialization-policy.mjs";
 
 describe("política de materialización D1 opcional", () => {
@@ -34,5 +35,11 @@ describe("política de materialización D1 opcional", () => {
   it("exige desactivar D1 en las publicaciones públicas", () => {
     expect(assertPublicProjectionD1Disabled(true)).toBe(true);
     expect(() => assertPublicProjectionD1Disabled(false)).toThrow("PUBLIC_PROJECTION_D1_DISABLED");
+  });
+
+  it("pospone D1 remoto salvo habilitación explícita", () => {
+    expect(shouldDeferRemoteD1Materialization({ remote: true, allowRemote: false })).toBe(true);
+    expect(shouldDeferRemoteD1Materialization({ remote: true, allowRemote: true })).toBe(false);
+    expect(shouldDeferRemoteD1Materialization({ remote: false, allowRemote: false })).toBe(false);
   });
 });

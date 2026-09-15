@@ -37,3 +37,7 @@ export function assertPublicProjectionD1Disabled(skipD1) {
   }
   return true;
 }
+
+export function shouldDeferRemoteD1Materialization({ remote, allowRemote } = {}) {
+  return remote === true && allowRemote !== true;
+}

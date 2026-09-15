@@ -1,9 +1,23 @@
 import { appendFileSync } from "node:fs";
 import { spawnSync } from "node:child_process";
-import { classifyD1MaterializationFailure, summaryForD1Deferral } from "./d1-materialization-policy.mjs";
+import {
+  classifyD1MaterializationFailure,
+  shouldDeferRemoteD1Materialization,
+  summaryForD1Deferral,
+} from "./d1-materialization-policy.mjs";
 
 const args = process.argv.slice(2);
 const npm = process.platform === "win32" ? "npm.cmd" : "npm";
+const remote = args.includes("--remote");
+const allowRemote = process.env.D1_ALLOW_REMOTE_MATERIALIZATION === "true";
+if (shouldDeferRemoteD1Materialization({ remote, allowRemote })) {
+  const sourcesIndex = args.indexOf("--sources");
+  const sources = sourcesIndex >= 0 ? args[sourcesIndex + 1] || "unspecified" : "unspecified";
+  const summary = summaryForD1Deferral("remote_materialization_disabled", sources);
+  console.warn(`[d1-materialize-optional] ${summary.replaceAll("\n", " ")}`);
+  if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, `${summary}\n`);
+  process.exit(0);
+}
 const result = spawnSync(npm, ["run", "data:materialize", "--", ...args], {
   encoding: "utf8",
   stdio: ["inherit", "pipe", "pipe"],

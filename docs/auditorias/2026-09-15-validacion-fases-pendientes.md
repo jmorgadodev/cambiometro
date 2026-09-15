@@ -317,3 +317,9 @@ El inventario R2 se mantuvo sin cambios: `9.016.336.751` bytes (`90,1633%`),
 estado `growth-blocked`, sin publicación ni eliminación. El control agrupado de
 historiales, movimientos, categorías parlamentarias y remuneraciones tampoco
 realizó lecturas o escrituras D1.
+
+La ruta común `d1-materialize-optional.mjs` también quedó cerrada por defecto
+para D1 remoto: sin `D1_ALLOW_REMOTE_MATERIALIZATION=true` devuelve una
+postergación explícita y no ejecuta `data:materialize`. La prueba de política
+quedó en `8/8` y una ejecución real con `--remote --sources camara` confirmó la
+postergación sin invocar Wrangler.
