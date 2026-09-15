@@ -92,6 +92,29 @@ describe("auditoría acotada de proyección CPLT", () => {
     expect(result.structuralIssues).toContain("period_filters_with_invalid_format");
   });
 
+  it("bloquea períodos posteriores al corte aunque tengan formato válido", () => {
+    const result = auditCpltProjection(fixture({
+      manifest: {
+        recordCount: 3,
+        generatedAt: "2026-09-14T03:51:42.634Z",
+        coverage: [
+          { communeId: "muni-a", status: "available", recordCount: 2 },
+          { communeId: "muni-b", status: "unavailable", recordCount: 1 },
+        ],
+      },
+      index: {
+        totalRows: 3,
+        pages: [{ page: 1, count: 3 }],
+        filters: { "periodo:2026-08": { count: 2 }, "periodo:2026-12": { count: 1 } },
+      },
+      summary: { generatedAt: "2026-09-14T03:51:42.634Z", periods: [{ period: "2026-08" }, { period: "2026-12" }] },
+    }));
+    expect(result.status).toBe("blocked");
+    expect(result.malformedPeriodFilterCount).toBe(1);
+    expect(result.malformedPeriodRows).toBe(1);
+    expect(result.structuralIssues).toContain("period_filters_with_invalid_format");
+  });
+
   it("bloquea una discrepancia entre el total declarado y las páginas físicas", () => {
     const result = auditCpltProjection(fixture({ manifest: { recordCount: 4 } }));
     expect(result.status).toBe("blocked");
