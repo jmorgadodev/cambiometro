@@ -266,3 +266,17 @@ La ejecución `npm run audit:cplt:remote` volvió a leer únicamente el manifies
 - El release permanece bloqueado para promoción porque el manifiesto antiguo no declara períodos ni `transparency-summary.json`; no se interpreta como pérdida de filas.
 
 El auditor quedó preparado para leer automáticamente `transparencySummary.key` desde R2 en releases nuevos y validar sus períodos sin descargar la nómina completa ni requerir una ruta manual. En el release vigente la ruta no existe, por lo que se conserva la observación de metadatos incompletos.
+
+## Reconciliación de alcance del candidato central
+
+La auditoría local `npm run audit:cplt:scope` comparó sólo `organizations.json` y `validation.json` de las cuatro categorías centrales contra la cobertura del manifiesto público; no leyó filas completas ni D1.
+
+- Release público: `1.226.913` filas y `346` entidades declaradas.
+- Candidato central: `2.122.881` filas.
+- Rol correcto del candidato: `complementary_candidate`, no reemplazo del release público.
+- Planta: `444` organismos centrales y sólo `3` municipalidades, frente a `317` municipalidades con registros en el release público.
+- Contrata: `441` organismos centrales y `3` municipalidades, frente a `315` municipalidades públicas.
+- Honorarios: `655` organismos centrales y `3` municipalidades, frente a `318` municipalidades públicas.
+- Código del Trabajo: `382` organismos centrales y `3` municipalidades, frente a `308` municipalidades públicas.
+
+La compuerta queda en `replacementEligible=false` por tres razones: alcance central presente, cobertura municipal incompleta y entidades municipales coincidentes que requieren una regla explícita de deduplicación. No se deben sumar los `2.122.881` registros al conteo público ni activar este candidato como sustituto.
