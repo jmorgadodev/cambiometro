@@ -110,6 +110,12 @@ La validación técnica posterior corrigió tres incompatibilidades de tipado en
 - ESLint y `git diff --check`: aprobados.
 - Commit: `b260193`.
 
+La suite completa quedó estable con ejecución serializada para evitar timeouts por concurrencia de artefactos grandes y SQLite temporal:
+
+- 198 archivos de prueba aprobados.
+- 1.080 pruebas aprobadas.
+- Commit de estabilización: `d268f62`.
+
 ## Siguiente puerta
 
 1. Esperar el resultado terminal del job Planta.
