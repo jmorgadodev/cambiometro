@@ -879,3 +879,10 @@ D1. Antes de cualquier promoción habrá que corregir localmente la validación 
 período, reconstruir el candidato desde sus filas originales y comprobar que
 los filtros queden limitados a períodos `AAAA-MM` realmente presentes en el
 release.
+
+Como prevención para la siguiente reconstrucción, el parser CPLT ahora procesa
+las filas CSV respetando celdas entre comillas y delimitadores internos, y el
+streamer reutiliza esa fila ya parseada para leer año, organismo y registro.
+La prueba del parser quedó en 6/6 y la compuerta de proyección en 6/6. Esto
+queda sólo en la rama de auditoría: todavía no reconstruye ni publica el
+candidato remoto.
