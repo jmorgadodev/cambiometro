@@ -3,6 +3,7 @@ import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, re
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { buildCpltTransparencySummary, isPlausiblePeriod } from "./cplt-transparency-summary.mjs";
+import { assertCentralOrganizations } from "./etl/cplt-scope.mjs";
 
 const centralScope = process.argv.includes("--central");
 const datasetRoot = centralScope ? "funcionarios-central-v1" : "funcionarios-v1";
@@ -294,6 +295,7 @@ function buildCentralCoverage() {
     const filePath = join(organizationsRoot, `${source}.json`);
     if (!existsSync(filePath)) throw new Error(`CPLT_MISSING_ORGANIZATIONS: ${source}`);
     const report = JSON.parse(readFileSync(filePath, "utf8"));
+    assertCentralOrganizations(report.organizations ?? []);
     for (const item of report.organizations ?? []) {
       const organismId = String(item.organismoId ?? "").trim();
       if (!organismId) continue;
