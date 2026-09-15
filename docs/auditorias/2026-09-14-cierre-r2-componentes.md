@@ -825,3 +825,16 @@ publicados prefieren R2 y no consultan D1 cuando el índice está disponible o
 la cuota de D1 está agotada. La configuración pública mantiene
 `ALLOW_PUBLIC_D1_READS=0` y `PREFER_TRANSFER_D1=0`; D1 queda como operación
 explícita de emergencia o metadatos acotados, no como camino masivo.
+
+## Paquetes locales listos, promoción remota bloqueada — 2026-09-14
+
+El plan local de reparación encontró paquetes íntegros, con manifiestos y
+checksums correctos, para ChileCompra (9 particiones, 146.293.757 bytes),
+votaciones Senado (6, 66.506 bytes), Servel (1, 1.367.392 bytes), SINIM (1,
+122.886 bytes), gastos Cámara (5, 232.119 bytes) y gastos Senado (5, 119.399
+bytes). Todos quedaron `ready=true`, `writesPerformed=false`.
+
+Esto no autoriza subirlos automáticamente: R2 permanece sobre el umbral de
+crecimiento y el cierre remoto no acredita todavía las referencias completas.
+La próxima promoción deberá usar estos paquetes como candidatos, validar el
+inventario final y conservar el rollback antes de cualquier escritura.
