@@ -816,3 +816,12 @@ puede resolver `votaciones_camara` aunque el catálogo declare `sourceId=camara`
 cuando el `manifestKey` contiene ese conjunto anidado. La prueba conjunta de
 auditoría y reparación quedó en 11/11; sigue siendo un plan de lectura local y
 no ejecuta escrituras.
+
+## Validación del camino público sin D1 masivo — 2026-09-14
+
+La API pública pasó 63 pruebas específicas y `api:typecheck`. Las pruebas
+confirman que las búsquedas, índices R2, paginación, exportaciones y releases
+publicados prefieren R2 y no consultan D1 cuando el índice está disponible o
+la cuota de D1 está agotada. La configuración pública mantiene
+`ALLOW_PUBLIC_D1_READS=0` y `PREFER_TRANSFER_D1=0`; D1 queda como operación
+explícita de emergencia o metadatos acotados, no como camino masivo.
