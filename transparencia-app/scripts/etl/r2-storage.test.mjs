@@ -11,11 +11,15 @@ describe("protecciones de almacenamiento R2", () => {
     expect(assertR2RetentionDeletionConfirmed(["old/object.json"], true)).toBe(true);
   });
 
-  it("declara el manifiesto público funcionarios-v1 como activo por defecto", () => {
+  it("declara las variantes públicas municipal y central como activas por defecto", () => {
     expect(defaultActiveProjectionManifests()).toEqual([
       {
         dataset: "funcionarios-v1",
         key: "projections/funcionarios-v1/manifest.json",
+      },
+      {
+        dataset: "funcionarios-central-v1",
+        key: "projections/funcionarios-central-v1/manifest.json",
       },
     ]);
   });
