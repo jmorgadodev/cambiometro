@@ -91,6 +91,31 @@ describe("buildR2History", () => {
     expect(comparison.organizationChanges[0]).toMatchObject({ key: "a", organizationBefore: "Interior", organizationAfter: "Presidencia" });
   });
 
+  it("distingue una corrección del mismo período de un cambio entre períodos", () => {
+    const result = buildR2History([
+      {
+        ...base,
+        period: "2026-08-30",
+        releaseId: "release-01",
+        checksum: "checksum-01",
+        records: [{ personKey: "a", periodo: "2026-05", montoBruto: 1614067 }],
+      },
+      {
+        ...base,
+        period: "2026-09-02",
+        releaseId: "release-02",
+        checksum: "checksum-02",
+        records: [{ personKey: "a", periodo: "2026-05", montoBruto: 60000 }],
+      },
+    ], { keyFields: ["personKey"] });
+
+    expect(result.comparisons[0].amountChanges[0]).toMatchObject({
+      changeKind: "source-correction",
+      recordPeriodBefore: "2026-05",
+      recordPeriodAfter: "2026-05",
+    });
+  });
+
   it("rejects duplicate identities instead of overwriting source rows", () => {
     expect(() => buildR2History([{
       ...base,

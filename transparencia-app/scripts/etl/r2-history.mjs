@@ -21,6 +21,13 @@ const DEFAULT_ROLE_FIELDS = [
   "cargoOriginal",
 ];
 
+const DEFAULT_PERIOD_FIELDS = [
+  "periodo",
+  "period",
+  "mes",
+  "month",
+];
+
 function text(value) {
   return String(value ?? "").trim();
 }
@@ -94,6 +101,7 @@ function validatePeriod(period, index, keyFields, keyResolver) {
       amount: numericValue(original, DEFAULT_AMOUNT_FIELDS),
       organization: text(firstValue(original, DEFAULT_ORGANIZATION_FIELDS)),
       role: text(firstValue(original, DEFAULT_ROLE_FIELDS)),
+      recordPeriod: text(firstValue(original, DEFAULT_PERIOD_FIELDS)),
     };
   });
 
@@ -121,10 +129,20 @@ function comparePeriods(previous, current) {
       continue;
     }
     if (oldRow.amount !== null && row.amount !== null && oldRow.amount !== row.amount) {
+      const sameSourcePeriod = oldRow.recordPeriod && row.recordPeriod
+        ? normalized(oldRow.recordPeriod) === normalized(row.recordPeriod)
+        : null;
       amountChanges.push({
         key,
         period: current.period,
         previousPeriod: previous.period,
+        changeKind: sameSourcePeriod === true
+          ? "source-correction"
+          : sameSourcePeriod === false
+            ? "period-shift"
+            : "unclassified",
+        recordPeriodBefore: oldRow.recordPeriod || null,
+        recordPeriodAfter: row.recordPeriod || null,
         amountBefore: oldRow.amount,
         amountAfter: row.amount,
         difference: row.amount - oldRow.amount,
