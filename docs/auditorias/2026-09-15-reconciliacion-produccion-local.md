@@ -97,3 +97,15 @@ El ETL no debe descargar estas fuentes completas a R2 ni mantenerlas completas e
 ## Prueba acotada de respuesta y esquema
 
 Se leyó únicamente el primer bloque de 4 MiB de cada fuente, sin guardar el universo. Las cuatro respondieron `HTTP 206` con `Content-Range` válido y encabezados separados por `;` que el parser reconoce. Los primeros registros observados correspondieron a períodos recientes de 2026 (Agosto en Planta, Contrata y Código del Trabajo; Julio en Honorarios). Esta prueba confirma disponibilidad y esquema inicial, pero no reemplaza el recorrido completo requerido para detectar anomalías en cualquier posición del archivo.
+
+## Revalidación del ciclo de normalización — 15-09-2026 23:35
+
+- Las pruebas específicas de reconciliación, R2 y plan de datos quedaron en `4 archivos / 39 pruebas aprobadas`.
+- Las pruebas específicas de contrato, movimientos y verificación de producción quedaron en `3 archivos / 16 pruebas aprobadas`.
+- El artefacto local de Planta fue validado: `297.468` registros, `d9ddf00435b95755199711fcd48589b4dba5e0635843a1983f12e873485c3818`, sin períodos inválidos y sin montos negativos.
+- El job de Contrata continúa en estado `in_progress`, dentro de la etapa de procesamiento central; no se reinició.
+- Los jobs de Honorarios y Código del Trabajo aún no deben considerarse validados porque permanecen pendientes de ejecución.
+- La auditoría pública de `funcionarios-v1` mantiene `1.226.913` filas indexadas, `123` páginas, `0` identificadores duplicados y `25` organismos sin archivo disponible en el release. El estado sigue bloqueado sólo por ausencia de metadatos de períodos declarados.
+- La auditoría de almacenamiento mantiene `9.016.336.751` bytes usados (`90,16%`) y `growth-blocked`; no hubo escrituras, eliminaciones ni publicaciones R2 en esta revalidación.
+
+El avance del bloque ETL central queda en `25%` (Planta validada de 4 nóminas). El avance global del plan se mantiene en `84%` hasta validar Contrata, Honorarios y Código del Trabajo.
