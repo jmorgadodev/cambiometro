@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import type { SpawnSyncOptions } from "node:child_process";
 import { auditCatalogClosure, catalogPartitionKeys, catalogProjectionArtifactKey, classifyR2Closure, summarizeR2ClosureBySource, summarizeR2ClosureGaps, wranglerGet } from "../scripts/audit-r2-remote-closure.mjs";
 
 describe("auditoría de cierre del catálogo R2", () => {
@@ -169,7 +170,7 @@ describe("auditoría de cierre del catálogo R2", () => {
   });
 
   it("cierra la lectura remota cuando Wrangler excede el tiempo máximo", () => {
-    let receivedOptions;
+    let receivedOptions: SpawnSyncOptions | undefined;
     const result = wranglerGet("bucket", "catalog/v1/manifest.json", "manifest.json", {
       timeoutMs: 1234,
       spawn: (_command, _args, options) => {
@@ -178,7 +179,7 @@ describe("auditoría de cierre del catálogo R2", () => {
       },
     });
 
-    expect(receivedOptions.timeout).toBe(1234);
+    expect(receivedOptions?.timeout).toBe(1234);
     expect(result).toEqual({ ok: false, stderr: "R2_WRANGLER_TIMEOUT:1234ms" });
   });
 });

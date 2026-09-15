@@ -153,6 +153,9 @@ export function createCpltRecordId(stableKey) {
   return `func-${organismoId}-${tipo}-${suffix}`;
 }
 
+/**
+ * @param {{ line?: string, columns?: string[] | null, header: Map<string, number>, tipo: string, organismoId: string, sourceUrl: string, deferId?: boolean }} input
+ */
 export function parseCpltRecord({ line, columns: inputColumns = null, header, tipo, organismoId, sourceUrl, deferId = false }) {
   if (!(header instanceof Map) || !organismoId || !sourceUrl) throw new Error("CPLT_INVALID_PARSER_INPUT");
   const readCell = (...names) => inputColumns

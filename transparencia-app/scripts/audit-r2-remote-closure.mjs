@@ -235,6 +235,12 @@ function hasFlag(name) {
   return process.argv.includes(name);
 }
 
+/**
+ * @param {string} bucket
+ * @param {string} key
+ * @param {string} file
+ * @param {{ spawn?: (command: string, args: readonly string[], options: import("node:child_process").SpawnSyncOptions) => { status: number | null, signal: string | null, stderr?: string, error?: { message?: string } }, timeoutMs?: number }} [options]
+ */
 export function wranglerGet(bucket, key, file, { spawn = spawnSync, timeoutMs = 30_000 } = {}) {
   const wrangler = resolve("node_modules/wrangler/bin/wrangler.js");
   const result = spawn(process.execPath, [wrangler, "r2", "object", "get", `${bucket}/${key}`, "--file", file, "--remote"], {
