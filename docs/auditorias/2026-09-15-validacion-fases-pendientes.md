@@ -193,6 +193,17 @@ La batería consolidada posterior cubrió 11 archivos y 96 pruebas, incluyendo a
 
 La validación adicional de `lib/api-v1.test.ts` y `lib/api-cache.test.ts` terminó con 63/63 pruebas aprobadas: el camino público prioriza R2 y evita D1 para búsquedas masivas, índices, fuentes, Cámara, transferencias y registros cuando existe un release publicado.
 
+## Verificación posterior a la consolidación — 2026-09-15 01:19 UTC-3
+
+Después de cerrar el candidato central se repitieron las comprobaciones de los dominios dependientes, sin escrituras en R2/D1:
+
+- Historial R2: `16/16` pruebas aprobadas.
+- Movimientos: `80` registros; `74` verificados, `6` pendientes; release `movimientos-bbf092656ee6a637`; checksum `bbf092656ee6a637be1f3e9851f1dbd95d33f6f56aac5e891998934470f1e9bf`.
+- Historial de remuneraciones: `4.473` entradas, `0` cambios inválidos, `0` lecturas D1 y `0` escrituras D1.
+- Cámara y Senado: `27.793` registros categorizados sin mezcla; `769` votaciones, `22.796` gastos y `4.073` personas de apoyo. El release local verificado no contiene asesorías (`0`), por lo que no se presenta esa categoría como cubierta.
+
+Estas verificaciones dejan habilitada la siguiente etapa de reconciliación por fuente, pero no autorizan publicar el candidato central mientras la compuerta de almacenamiento R2 siga bloqueada.
+
 ## Revalidación local posterior — 2026-09-15 00:50 UTC-3
 
 Esta sección conserva la fotografía tomada a las 00:50 UTC-3, antes de que terminara Código del Trabajo. La ejecución posterior del mismo workflow quedó documentada arriba.
