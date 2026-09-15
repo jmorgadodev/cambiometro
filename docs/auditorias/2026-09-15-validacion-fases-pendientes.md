@@ -255,3 +255,14 @@ Con el manifiesto público `projections/funcionarios-v1/manifest.json` cargado e
 - Release histórico de `funcionarios-v1`: `2026-08-30T08-05-27-795Z`, `2.124.662.818` bytes; el índice y sus `123` páginas/`1.050` shards pasan rollback con `0` claves faltantes.
 - `funcionarios-central-v1@2026-09-14T03-51-42-634Z` sigue `unclassified`; no se clasifica como activo ni se elimina automáticamente.
 - El análisis fue `dry-run`; no se borró ningún objeto.
+
+## Auditoría remota posterior del release público
+
+La ejecución `npm run audit:cplt:remote` volvió a leer únicamente el manifiesto y el índice R2 del release público vigente:
+
+- `1.226.913` filas declaradas, indexadas y distribuidas en `123` páginas.
+- `0` identificadores duplicados.
+- Cobertura declarada: `346` entidades; `320` disponibles y `25` no disponibles.
+- El release permanece bloqueado para promoción porque el manifiesto antiguo no declara períodos ni `transparency-summary.json`; no se interpreta como pérdida de filas.
+
+El auditor quedó preparado para leer automáticamente `transparencySummary.key` desde R2 en releases nuevos y validar sus períodos sin descargar la nómina completa ni requerir una ruta manual. En el release vigente la ruta no existe, por lo que se conserva la observación de metadatos incompletos.
