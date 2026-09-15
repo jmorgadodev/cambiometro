@@ -84,3 +84,13 @@ El artefacto tiene estado `valid`, pero sigue siendo sólo un resultado de valid
 4. Promover sólo si todas las categorías pasan calidad y existe margen de almacenamiento aprobado.
 
 Hasta entonces, producción conserva su release vigente.
+
+## Revalidación del historial R2
+
+Se corrigió el parser de montos del historial para interpretar formatos monetarios publicados como `$1.250.000`, sin modificar el valor original de la fila. La comparación conserva la diferencia numérica y la procedencia de ambas versiones.
+
+- Commit de auditoría: `7123ba2`.
+- `npm run check:r2-history`: 16 pruebas aprobadas.
+- Validación combinada de historiales, movimientos y contratos: 30 pruebas aprobadas.
+- ESLint y `git diff --check`: aprobados.
+- Sin escrituras en R2/D1 y sin promoción a producción.
