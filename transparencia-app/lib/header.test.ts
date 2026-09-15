@@ -83,7 +83,7 @@ describe("Header y navegación global", () => {
 
   it("no presenta un corte global cuando cada fuente tiene su propia actualización", () => {
     expect(headerContent).toContain("actualización por fuente");
-    expect(headerContent).toContain("Catálogo público disponible");
+    expect(headerContent).toContain("Datos públicos disponibles");
     expect(headerContent).not.toContain("Corte ${displayCorte}");
     expect(headerContent).not.toContain("Corte oficial: ${displayTotal.toLocaleString(\"es-CL\")} registros");
   });

@@ -29,7 +29,7 @@ describe("Footer compacto y pulido móvil", () => {
     expect(layoutContent).toContain("provenance-stamp");
     expect(layoutContent).toContain("Estado del catálogo");
     expect(layoutContent).toContain("Catálogo en línea");
-    expect(layoutContent).toContain("registros compilados · actualización por fuente");
+    expect(layoutContent).toContain("Datos públicos disponibles · actualización por fuente");
 
     expect(cssContent).toContain(".site-footer__mission");
     expect(cssContent).toContain("font-size: 13.5px");

@@ -156,7 +156,7 @@ export default async function HomePage() {
                 <strong>Pregunta → fuente → evidencia</strong>
               </div>
               <dl className="home-evidence-card__facts">
-                <div><dt>Registros indexados</dt><dd>{GLOBAL_KPIS.registros_canonicos.toLocaleString("es-CL")}</dd></div>
+                <div><dt>Fuentes con registros</dt><dd>{operationalSources.length}</dd></div>
                 <div><dt>Entidades identificadas</dt><dd>{entityCount.toLocaleString("es-CL")}</dd></div>
                 <div><dt>Fuentes conectadas</dt><dd>{operationalSources.length}</dd></div>
               </dl>
