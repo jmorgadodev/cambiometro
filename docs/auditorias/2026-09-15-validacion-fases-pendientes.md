@@ -204,6 +204,17 @@ Después de cerrar el candidato central se repitieron las comprobaciones de los 
 
 Estas verificaciones dejan habilitada la siguiente etapa de reconciliación por fuente, pero no autorizan publicar el candidato central mientras la compuerta de almacenamiento R2 siga bloqueada.
 
+## Historial probado directamente desde R2
+
+La muestra remota de búsqueda `Torrealba` comparó los releases públicos `2026-08-30T08-05-27-795Z` y `2026-09-02T03-28-30-598Z` mediante sus índices y páginas R2, sin D1:
+
+- `13` filas seleccionadas en cada release.
+- `0` entradas nuevas, `0` salidas, `0` cambios de monto y `0` cambios de organismo en la muestra.
+- `12` objetos R2 leídos (índices, shard y páginas), no el universo completo.
+- Checksums de índice: `15bc35220cd4236a8f14c140494d86dc0915e6571e2f3444be0b4aa90050c12d` y `12d5c8d77484ca5ecc4b9ee97d04b47b2fd9ebfd46ef0b20829c31e63858d56b`.
+
+Esto confirma que los historiales pueden construirse desde R2 de forma paginada y trazable. La ausencia de cambios corresponde sólo a esta muestra nominal, no a una conclusión sobre todo el universo.
+
 ## Revalidación local posterior — 2026-09-15 00:50 UTC-3
 
 Esta sección conserva la fotografía tomada a las 00:50 UTC-3, antes de que terminara Código del Trabajo. La ejecución posterior del mismo workflow quedó documentada arriba.
