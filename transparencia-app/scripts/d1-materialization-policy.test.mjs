@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { classifyD1MaterializationFailure, summaryForD1Deferral } from "./d1-materialization-policy.mjs";
+import {
+  assertPublicProjectionD1Disabled,
+  classifyD1MaterializationFailure,
+  summaryForD1Deferral,
+} from "./d1-materialization-policy.mjs";
 
 describe("política de materialización D1 opcional", () => {
   it("degrada el límite diario de rows_read a advertencia", () => {
@@ -25,5 +29,10 @@ describe("política de materialización D1 opcional", () => {
   it("genera un resumen accionable para Actions", () => {
     expect(summaryForD1Deferral("asset_unavailable", "infolobby")).toContain("infolobby");
     expect(summaryForD1Deferral("asset_unavailable", "infolobby")).toContain("R2/Pages");
+  });
+
+  it("exige desactivar D1 en las publicaciones públicas", () => {
+    expect(assertPublicProjectionD1Disabled(true)).toBe(true);
+    expect(() => assertPublicProjectionD1Disabled(false)).toThrow("PUBLIC_PROJECTION_D1_DISABLED");
   });
 });

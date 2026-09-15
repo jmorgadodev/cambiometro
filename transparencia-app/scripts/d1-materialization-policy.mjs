@@ -30,3 +30,10 @@ export function summaryForD1Deferral(reason, sources = "unspecified") {
     "- R2/Pages remains the canonical public projection; D1 will be retried in a later safe quota window.",
   ].join("\n");
 }
+
+export function assertPublicProjectionD1Disabled(skipD1) {
+  if (skipD1 !== true) {
+    throw new Error("PUBLIC_PROJECTION_D1_DISABLED: use --skip-d1; R2 is the canonical public projection");
+  }
+  return true;
+}

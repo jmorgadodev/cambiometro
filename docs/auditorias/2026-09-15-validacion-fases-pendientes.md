@@ -292,3 +292,16 @@ Se corrigió el reconocedor para aceptar `I.` y se agregó una compuerta de publ
 - Lint y `git diff --check`: aprobados.
 - La suite general terminó con `1` timeout preexistente en `ranged-csv-source` y `1.055/1.056` pruebas aprobadas; no hubo fallo en el cambio de alcance.
 - No hubo escritura en D1, R2 ni producción.
+
+## Cierre preventivo del publicador de personal de apoyo
+
+El publicador `publish-personal-apoyo.mjs` permitía una ruta heredada de
+materialización D1 si se ejecutaba sin `--skip-d1`, aunque los workflows vigentes
+ya usaban ese parámetro. Se dejó fail-safe: ahora la publicación pública exige
+explícitamente `--skip-d1` y falla antes de leer el dataset o ejecutar Wrangler
+si se omite.
+
+- Prueba de política: `7/7` aprobadas.
+- Prueba de ejecución sin `--skip-d1`: bloqueada con
+  `PUBLIC_PROJECTION_D1_DISABLED` antes de cualquier escritura.
+- R2 continúa como proyección pública canónica; D1 queda fuera de esta ruta.

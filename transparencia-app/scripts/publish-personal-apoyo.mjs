@@ -5,6 +5,7 @@ import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
 import { splitPersonalApoyoJson, validatePersonalApoyoDataset } from "./etl/personal-apoyo-publication.mjs";
+import { assertPublicProjectionD1Disabled } from "./d1-materialization-policy.mjs";
 
 function argument(name, fallback) {
   const index = process.argv.indexOf(name);
@@ -22,6 +23,7 @@ const input = resolve(argument("--input", "data/personal-apoyo.json"));
 const remote = process.argv.includes("--remote");
 const skipD1 = process.argv.includes("--skip-d1");
 const localAuth = process.argv.includes("--local-auth") && !process.env.CI;
+assertPublicProjectionD1Disabled(skipD1);
 if (database !== "transparencia-db") throw new Error(`PERSONAL_APOYO_D1_NOT_AUTHORIZED: ${database}`);
 if (bucket !== "transparencia-public-data") throw new Error(`PERSONAL_APOYO_R2_NOT_AUTHORIZED: ${bucket}`);
 if (remote && !localAuth) requireCloudflareDataCredentials();
