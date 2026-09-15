@@ -279,4 +279,4 @@ La auditoría local `npm run audit:cplt:scope` comparó sólo `organizations.jso
 - Honorarios: `655` organismos centrales y `3` municipalidades, frente a `318` municipalidades públicas.
 - Código del Trabajo: `382` organismos centrales y `3` municipalidades, frente a `308` municipalidades públicas.
 
-La compuerta queda en `replacementEligible=false` por tres razones: alcance central presente, cobertura municipal incompleta y entidades municipales coincidentes que requieren una regla explícita de deduplicación. No se deben sumar los `2.122.881` registros al conteo público ni activar este candidato como sustituto.
+La compuerta queda en `replacementEligible=false` por dos razones: alcance central presente y cobertura municipal incompleta. Las tres municipalidades coincidentes (`Macul`, `Negrete` y `Penco`) figuran sin registros publicados en las cuatro categorías del release vigente; el candidato las clasifica como `municipalitiesFillingUnavailable=3`, no como duplicados. Aun así, no se deben sumar los `2.122.881` registros al conteo público ni activar este candidato como sustituto: primero debe separarse el complemento central del reemplazo municipal.
