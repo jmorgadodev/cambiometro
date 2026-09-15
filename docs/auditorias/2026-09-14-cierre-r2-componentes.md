@@ -886,3 +886,8 @@ streamer reutiliza esa fila ya parseada para leer año, organismo y registro.
 La prueba del parser quedó en 6/6 y la compuerta de proyección en 6/6. Esto
 queda sólo en la rama de auditoría: todavía no reconstruye ni publica el
 candidato remoto.
+
+Además, el publicador CPLT quedó protegido para que cualquier ejecución con
+`--r2` o `--releases` falle antes de activar un release si quedan filas con
+períodos inválidos. El modo `--local-only` sigue disponible para diagnosticar y
+reconstruir sin tocar R2.
