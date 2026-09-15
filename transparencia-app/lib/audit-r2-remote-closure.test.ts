@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { auditCatalogClosure, catalogPartitionKeys, catalogProjectionArtifactKey, classifyR2Closure, summarizeR2ClosureBySource, summarizeR2ClosureGaps } from "../scripts/audit-r2-remote-closure.mjs";
+import { auditCatalogClosure, catalogPartitionKeys, catalogProjectionArtifactKey, classifyR2Closure, summarizeR2ClosureBySource, summarizeR2ClosureGaps, wranglerGet } from "../scripts/audit-r2-remote-closure.mjs";
 
 describe("auditoría de cierre del catálogo R2", () => {
   it("deriva sólo la clave de proyección de un checksum completo", () => {
@@ -166,5 +166,19 @@ describe("auditoría de cierre del catálogo R2", () => {
         promotionAllowed: false,
       },
     ]);
+  });
+
+  it("cierra la lectura remota cuando Wrangler excede el tiempo máximo", () => {
+    let receivedOptions;
+    const result = wranglerGet("bucket", "catalog/v1/manifest.json", "manifest.json", {
+      timeoutMs: 1234,
+      spawn: (_command, _args, options) => {
+        receivedOptions = options;
+        return { status: null, signal: "SIGTERM", stderr: "" };
+      },
+    });
+
+    expect(receivedOptions.timeout).toBe(1234);
+    expect(result).toEqual({ ok: false, stderr: "R2_WRANGLER_TIMEOUT:1234ms" });
   });
 });

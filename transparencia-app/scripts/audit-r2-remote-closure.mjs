@@ -235,22 +235,29 @@ function hasFlag(name) {
   return process.argv.includes(name);
 }
 
-function wranglerGet(bucket, key, file) {
+export function wranglerGet(bucket, key, file, { spawn = spawnSync, timeoutMs = 30_000 } = {}) {
   const wrangler = resolve("node_modules/wrangler/bin/wrangler.js");
-  const result = spawnSync(process.execPath, [wrangler, "r2", "object", "get", `${bucket}/${key}`, "--file", file, "--remote"], {
+  const result = spawn(process.execPath, [wrangler, "r2", "object", "get", `${bucket}/${key}`, "--file", file, "--remote"], {
     encoding: "utf8",
     stdio: ["ignore", "pipe", "pipe"],
+    timeout: timeoutMs,
   });
-  return { ok: result.status === 0, stderr: result.stderr?.trim() ?? result.error?.message ?? "" };
+  const timedOut = result.signal === "SIGTERM" && result.status === null;
+  return {
+    ok: result.status === 0,
+    stderr: timedOut
+      ? `R2_WRANGLER_TIMEOUT:${timeoutMs}ms`
+      : result.stderr?.trim() ?? result.error?.message ?? "",
+  };
 }
 
 function readJson(path) {
   return JSON.parse(readFileSync(resolve(path), "utf8"));
 }
 
-function downloadJson(bucket, key, directory, name) {
+function downloadJson(bucket, key, directory, name, options = {}) {
   const file = join(directory, name);
-  const result = wranglerGet(bucket, key, file);
+  const result = wranglerGet(bucket, key, file, options);
   if (!result.ok) return { ok: false, error: result.stderr };
   try {
     return { ok: true, value: JSON.parse(readFileSync(file, "utf8")) };
@@ -282,13 +289,14 @@ function run() {
   const sourceId = option("--source", null);
   const catalogPath = option("--catalog", null);
   const limit = numericOption("--limit", DEFAULT_LIMIT);
+  const requestTimeoutMs = numericOption("--request-timeout-ms", 30_000);
   const verifyArtifacts = hasFlag("--verify-artifacts");
   const temp = mkdtempSync(join(tmpdir(), "cambiometro-r2-closure-"));
 
   try {
     const catalogResult = catalogPath
       ? { ok: true, value: readJson(catalogPath) }
-      : downloadJson(bucket, DEFAULT_CATALOG_KEY, temp, "catalog.json");
+      : downloadJson(bucket, DEFAULT_CATALOG_KEY, temp, "catalog.json", { timeoutMs: requestTimeoutMs });
     if (!catalogResult.ok) throw new Error(`R2_CATALOG_READ_FAILED:${catalogResult.error}`);
 
     const allKeys = catalogPartitionKeys(catalogResult.value, sourceId);
@@ -298,7 +306,7 @@ function run() {
     const missingManifests = [];
     for (const key of allKeys) {
       const fileName = `manifest-${objects.size}.json`;
-      const result = downloadJson(bucket, key, temp, fileName);
+      const result = downloadJson(bucket, key, temp, fileName, { timeoutMs: requestTimeoutMs });
       if (!result.ok) missingManifests.push(key);
       else objects.set(key, result.value);
     }
@@ -313,7 +321,7 @@ function run() {
     const missingArtifacts = [];
     if (verifyArtifacts) {
       for (const [index, key] of artifactKeys.entries()) {
-        const result = wranglerGet(bucket, key, join(temp, `artifact-${index}.bin`));
+        const result = wranglerGet(bucket, key, join(temp, `artifact-${index}.bin`), { timeoutMs: requestTimeoutMs });
         if (!result.ok) missingArtifacts.push(key);
       }
     }
@@ -327,7 +335,7 @@ function run() {
         if (!manifestKey || objects.has(manifestKey)) continue;
         const artifactKey = catalogProjectionArtifactKey(partition);
         if (!artifactKey) continue;
-        const result = wranglerGet(bucket, artifactKey, join(temp, `missing-manifest-artifact-${index}.bin`));
+        const result = wranglerGet(bucket, artifactKey, join(temp, `missing-manifest-artifact-${index}.bin`), { timeoutMs: requestTimeoutMs });
         if (result.ok) presentWithoutManifest.push({ manifestKey, artifactKey });
         else missingManifestArtifacts.push({ manifestKey, artifactKey });
       }
