@@ -69,3 +69,14 @@ Se ejecutó una lectura de prueba para **Alejandro Fernandez Troncoso** entre lo
 - Se leyeron 10 objetos R2 en total, sin escaneo masivo ni consulta D1.
 
 La muestra confirma el mecanismo de historial, pero no constituye todavía una validación global de todas las personas o períodos.
+
+## Frescura de las fuentes CPLT
+
+La comprobación de validadores remotos detectó cambios en las cuatro nóminas frente al snapshot anterior:
+
+- Planta: validador cambiado.
+- Contrata: validador cambiado.
+- Honorarios: validador cambiado.
+- Código del Trabajo: validador cambiado.
+
+Por tanto, la ejecución central en curso está justificada por cambios reales de fuente. El validador sólo demuestra que el archivo cambió; no sustituye la validación de períodos, conteos, cobertura y calidad antes de publicar.
