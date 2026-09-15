@@ -480,3 +480,10 @@ local y exige coincidencia de período, conteo, checksum de proyección, clave d
 artefacto y checksum físico local. Devuelve `writesPerformed=false` y rechaza
 cualquier candidato que no represente exactamente la declaración del catálogo;
 no crea archivos ni publica en R2.
+
+La prueba contra Cámara quedó cerrada sin candidatos promocionables: de los
+`15` manifiestos R2 faltantes, `0` pudieron reconstruirse desde el lake local
+y los `15` fueron rechazados por `local_manifest_missing`. Esto confirma que
+no existe una reparación local segura para completar esos períodos y que el
+ETL de origen debe volver a producirlos; no se intentará inferirlos desde el
+catálogo.
