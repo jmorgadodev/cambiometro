@@ -122,126 +122,129 @@ export async function reconcilePaidRemunerations({
   maxPeriod = currentCpltPeriod(),
 } = {}) {
   const existing = await loadExistingProjection(projectionRoot);
-  const byPeriod = new Map();
-  const byOrganism = new Map();
-  const byClassification = new Map();
-  let sourceLines = 0;
-  let sourceRows = 0;
-  let paidRows = 0;
-  let excludedRows = 0;
-  let outsidePeriodRows = 0;
-  let alreadyPublished = 0;
-  let missing = 0;
-  let conflicts = 0;
-  let sourceDuplicateRows = 0;
-  const sampleMissing = [];
-  const sampleConflicts = [];
-  let sourceUrl = urls[0];
-  let sourceValidator = null;
+  try {
+    const byPeriod = new Map();
+    const byOrganism = new Map();
+    const byClassification = new Map();
+    let sourceLines = 0;
+    let sourceRows = 0;
+    let paidRows = 0;
+    let excludedRows = 0;
+    let outsidePeriodRows = 0;
+    let alreadyPublished = 0;
+    let missing = 0;
+    let conflicts = 0;
+    let sourceDuplicateRows = 0;
+    const sampleMissing = [];
+    const sampleConflicts = [];
+    let sourceUrl = urls[0];
+    let sourceValidator = null;
 
-  const lines = readRangedTextLines({
-    urls,
-    onSource: (source) => {
-      sourceUrl = source.sourceUrl;
-      sourceValidator = source.validator ?? null;
-    },
-  });
+    const lines = readRangedTextLines({
+      urls,
+      onSource: (source) => {
+        sourceUrl = source.sourceUrl;
+        sourceValidator = source.validator ?? null;
+      },
+    });
 
-  let headerLine = null;
-  for await (const line of lines) {
-    sourceLines += 1;
-    if (sourceLines === 1) {
-      headerLine = line;
-      continue;
+    let headerLine = null;
+    for await (const line of lines) {
+      sourceLines += 1;
+      if (sourceLines === 1) {
+        headerLine = line;
+        continue;
+      }
+      sourceRows += 1;
+      const record = parseCentralHonorarioRow({ line, headerLine, sourceUrl });
+      if (!record) {
+        excludedRows += 1;
+        continue;
+      }
+      if (record.fuente_periodo > maxPeriod) {
+        outsidePeriodRows += 1;
+        continue;
+      }
+
+      paidRows += 1;
+      const fingerprint = paidRemunerationFingerprint(record);
+      const fingerprintKey = fingerprintDigest(fingerprint);
+      if (existing.sourceFingerprint.get(fingerprintKey)) sourceDuplicateRows += 1;
+      existing.insertSourceFingerprint.run(fingerprintKey);
+      increment(byPeriod, record.fuente_periodo);
+      increment(byOrganism, record.organo_nombre);
+
+      if (existing.existingId.get(record.id) || existing.existingFingerprint.get(fingerprintKey)) {
+        alreadyPublished += 1;
+        increment(byClassification, "ya_publicado");
+        continue;
+      }
+
+      const shape = paidRemunerationShape(record);
+      if (existing.existingShape.get(fingerprintDigest(shape))) {
+        conflicts += 1;
+        increment(byClassification, "conflicto_o_revision");
+        if (sampleConflicts.length < 25) sampleConflicts.push({ id: record.id, periodo: record.fuente_periodo });
+        continue;
+      }
+
+      missing += 1;
+      increment(byClassification, "faltante");
+      if (sampleMissing.length < 25) sampleMissing.push({ id: record.id, periodo: record.fuente_periodo });
     }
-    sourceRows += 1;
-    const record = parseCentralHonorarioRow({ line, headerLine, sourceUrl });
-    if (!record) {
-      excludedRows += 1;
-      continue;
-    }
-    if (record.fuente_periodo > maxPeriod) {
-      outsidePeriodRows += 1;
-      continue;
-    }
 
-    paidRows += 1;
-    const fingerprint = paidRemunerationFingerprint(record);
-    const fingerprintKey = fingerprintDigest(fingerprint);
-    if (existing.sourceFingerprint.get(fingerprintKey)) sourceDuplicateRows += 1;
-    existing.insertSourceFingerprint.run(fingerprintKey);
-    increment(byPeriod, record.fuente_periodo);
-    increment(byOrganism, record.organo_nombre);
-
-    if (existing.existingId.get(record.id) || existing.existingFingerprint.get(fingerprintKey)) {
-      alreadyPublished += 1;
-      increment(byClassification, "ya_publicado");
-      continue;
-    }
-
-    const shape = paidRemunerationShape(record);
-    if (existing.existingShape.get(fingerprintDigest(shape))) {
-      conflicts += 1;
-      increment(byClassification, "conflicto_o_revision");
-      if (sampleConflicts.length < 25) sampleConflicts.push({ id: record.id, periodo: record.fuente_periodo });
-      continue;
-    }
-
-    missing += 1;
-    increment(byClassification, "faltante");
-    if (sampleMissing.length < 25) sampleMissing.push({ id: record.id, periodo: record.fuente_periodo });
+    if (!headerLine) throw new Error("CENTRAL_HONORARIOS_HEADER_MISSING");
+    const report = {
+      schemaVersion: 1,
+      sourceId: "cplt-central-honorarios",
+      sourceUrl,
+      sourceValidator,
+      generatedAt: new Date().toISOString(),
+      maxPeriod,
+      existingProjection: {
+        path: projectionRoot,
+        rows: existing.rows,
+        invalidPeriodRows: existing.invalidPeriodRows,
+        byContract: Object.fromEntries(existing.byContract),
+      },
+      source: {
+        linesProcessed: sourceLines,
+        dataRows: sourceRows,
+        paidRowsWithinPeriod: paidRows,
+        excludedRows: excludedRows,
+        outsidePeriodRows,
+        periods: sortedCounts(byPeriod, 1000),
+        topOrganisms: sortedCounts(byOrganism),
+        duplicateExactRows: sourceDuplicateRows,
+      },
+      reconciliation: {
+        alreadyPublished,
+        missing,
+        conflicts,
+        classification: Object.fromEntries(byClassification),
+        sampleMissing,
+        sampleConflicts,
+      },
+      policy: {
+        convocatorias: "excluded",
+        zeroOrUnpaid: "excluded",
+        futurePeriods: "excluded",
+        crossSourceNameOnlyDeduplication: "forbidden",
+        rawCsvPublication: "forbidden",
+      },
+      index: {
+        algorithm: "sha256",
+        purpose: "huellas compactas para conciliación; no reemplazan los valores originales",
+      },
+      sourceChecksum: createHash("sha256").update(JSON.stringify({ sourceUrl, sourceValidator, maxPeriod, paidRows })).digest("hex"),
+    };
+    await mkdir(dirname(output), { recursive: true });
+    await writeFile(output, `${JSON.stringify(report, null, 2)}\n`, "utf8");
+    return report;
+  } finally {
+    existing.database.close();
+    for (const suffix of ["", "-journal", "-wal", "-shm"]) rmSync(`${existing.filePath}${suffix}`, { force: true });
   }
-
-  if (!headerLine) throw new Error("CENTRAL_HONORARIOS_HEADER_MISSING");
-  const report = {
-    schemaVersion: 1,
-    sourceId: "cplt-central-honorarios",
-    sourceUrl,
-    sourceValidator,
-    generatedAt: new Date().toISOString(),
-    maxPeriod,
-    existingProjection: {
-      path: projectionRoot,
-      rows: existing.rows,
-      invalidPeriodRows: existing.invalidPeriodRows,
-      byContract: Object.fromEntries(existing.byContract),
-    },
-    source: {
-      linesProcessed: sourceLines,
-      dataRows: sourceRows,
-      paidRowsWithinPeriod: paidRows,
-      excludedRows: excludedRows,
-      outsidePeriodRows,
-      periods: sortedCounts(byPeriod, 1000),
-      topOrganisms: sortedCounts(byOrganism),
-      duplicateExactRows: sourceDuplicateRows,
-    },
-    reconciliation: {
-      alreadyPublished,
-      missing,
-      conflicts,
-      classification: Object.fromEntries(byClassification),
-      sampleMissing,
-      sampleConflicts,
-    },
-    policy: {
-      convocatorias: "excluded",
-      zeroOrUnpaid: "excluded",
-      futurePeriods: "excluded",
-      crossSourceNameOnlyDeduplication: "forbidden",
-      rawCsvPublication: "forbidden",
-    },
-    index: {
-      algorithm: "sha256",
-      purpose: "huellas compactas para conciliación; no reemplazan los valores originales",
-    },
-    sourceChecksum: createHash("sha256").update(JSON.stringify({ sourceUrl, sourceValidator, maxPeriod, paidRows })).digest("hex"),
-  };
-  await mkdir(dirname(output), { recursive: true });
-  await writeFile(output, `${JSON.stringify(report, null, 2)}\n`, "utf8");
-  existing.database.close();
-  for (const suffix of ["", "-journal", "-wal", "-shm"]) rmSync(`${existing.filePath}${suffix}`, { force: true });
-  return report;
 }
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
