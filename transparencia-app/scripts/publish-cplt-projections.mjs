@@ -10,6 +10,8 @@ const validationRoot = join(inputRoot, "validation");
 const coverageRoot = join(inputRoot, "coverage");
 const outputRoot = resolve("data/lake-cplt");
 const required = ["planta", "contrata", "honorarios", "codigotrabajo"];
+const modes = ["--releases", "--r2"].filter((mode) => process.argv.includes(mode));
+const localOnly = process.argv.includes("--local-only");
 const communeCatalogPath = resolve("data/catalog/communes.json");
 const communeCatalog = existsSync(communeCatalogPath)
   ? JSON.parse(readFileSync(communeCatalogPath, "utf8")).communes ?? []
@@ -169,6 +171,9 @@ const compactContract = (value) => compactSearch(value).replace("codigodeltrabaj
 const compactOrgType = (value) => compactSearch(value).replace("gobiernoregional", "gore");
 const compactPeriod = (row) => String(row.p ?? "").trim().slice(0, 7);
 const invalidPeriodRows = compactRows.filter((row) => !isPlausiblePeriod(compactPeriod(row), latest)).length;
+if (modes.length > 0 && invalidPeriodRows > 0) {
+  throw new Error(`CPLT_INVALID_PERIODS_BLOCK_PUBLICATION:${invalidPeriodRows}`);
+}
 const qualitySummary = compactRows.reduce((summary, row) => {
   const issues = row.q ?? [];
   if (issues.length > 0) {
@@ -346,8 +351,6 @@ assets.push({
 
 mkdirSync(outputRoot, { recursive: true });
 writeFileSync(join(outputRoot, "publish-plan.json"), `${JSON.stringify({ schemaVersion: "1.0.0", generatedAt: latest, assets }, null, 2)}\n`);
-const modes = ["--releases", "--r2"].filter((mode) => process.argv.includes(mode));
-const localOnly = process.argv.includes("--local-only");
 if (modes.length === 0 && !localOnly) throw new Error("CPLT_PUBLICATION_MODE_REQUIRED");
 if (!localOnly) {
   const localAuth = process.argv.includes("--local-auth") ? ["--local-auth"] : [];
