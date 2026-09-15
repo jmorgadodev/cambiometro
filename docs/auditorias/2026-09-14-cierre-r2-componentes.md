@@ -23,6 +23,20 @@ La diferencia local/R2 no debe tratarse como un error único. Hay diferencias de
 fecha, particionamiento y alcance. No se reemplazó ningún dato local con el
 remoto ni se modificó R2 o D1.
 
+## Validación seca de InfoLobby — 2026-09-14
+
+Se agregó y ejecutó `node scripts/ingest-infolobby.mjs --from 2026-07-01
+--to 2026-09-14 --dry-run`. El conector oficial respondió para los nueve
+datasets del tercer trimestre y devolvió **25.559 registros**, distribuidos en
+16.495 audiencias, 8.295 viajes y 769 donativos. Se identificaron 45.355
+entidades y 6.212 identificadores jurídicos; el checksum del trimestre fue
+`07fbb3a92a5842168644146cba38a70063f3bf93597fb478824505b0a45287fb`.
+
+El modo seco no creó archivos, no escribió R2 ni D1 y queda como requisito
+previo para una reconstrucción incremental. El release no se promueve todavía:
+la auditoría física del catálogo y el límite de crecimiento de R2 siguen
+bloqueando nuevas publicaciones masivas.
+
 ## Estado físico de particiones revisadas
 
 La comprobación remota fue realizada contra los manifiestos declarados en el
