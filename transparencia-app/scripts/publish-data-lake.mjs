@@ -4,7 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
-import { assertR2CatalogClosure, planR2Publication } from "./etl/r2.mjs";
+import { assertR2CatalogClosure, assertR2RetentionDeletionConfirmed, planR2Publication } from "./etl/r2.mjs";
 import { readJsonIfPresent, writeFileAtomic } from "./etl/safe-file.mjs";
 
 function command(binary, args, allowFailure = false) {
@@ -54,6 +54,7 @@ const bucket = bucketIndex >= 0 ? process.argv[bucketIndex + 1] : "transparencia
 const publishReleases = process.argv.includes("--releases");
 const publishR2 = process.argv.includes("--r2");
 const releaseManifestsOnly = process.argv.includes("--release-manifests-only");
+const confirmRetention = process.argv.includes("--confirm-retention");
 const allowLocalAuth = process.argv.includes("--local-auth") && !process.env.CI;
 if (!publishReleases && !publishR2) throw new Error("Indica --releases, --r2 o ambos");
 
@@ -171,6 +172,7 @@ if (publishR2) {
     ? readJsonIfPresent(inventoryPath, { objects: [] })
     : { objects: [] };
   const r2Plan = planR2Publication(assets, previous);
+  assertR2RetentionDeletionConfirmed(r2Plan.deletes, confirmRetention);
   assertR2CatalogClosure(assets, r2Plan.inventory);
   const activationManifests = r2Plan.puts.filter((asset) => asset.key.endsWith("/manifest.json"));
 

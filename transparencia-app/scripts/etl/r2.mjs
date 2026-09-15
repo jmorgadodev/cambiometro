@@ -2,6 +2,13 @@
 // límite; mantener una sola unidad evita que publicación y auditoría discrepen.
 const DEFAULT_LIMIT_BYTES = 10_000_000_000;
 
+export function assertR2RetentionDeletionConfirmed(deletes, confirmed) {
+  if (Array.isArray(deletes) && deletes.length > 0 && confirmed !== true) {
+    throw new Error(`R2_RETENTION_CONFIRMATION_REQUIRED:${deletes.length}`);
+  }
+  return true;
+}
+
 function latestPrefixes(assets) {
   const latest = new Map();
   for (const asset of assets) {

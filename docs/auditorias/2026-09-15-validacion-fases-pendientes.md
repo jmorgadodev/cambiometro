@@ -395,3 +395,16 @@ También se alineó el límite predeterminado del publicador R2 con el inventari
 remoto: ambos usan ahora `10.000.000.000` bytes decimales. La prueba específica
 de publicación y retención quedó en `21/21`, evitando que un control use 8 GiB
 mientras el otro use 10 GB.
+
+## Bloqueo adicional para eliminaciones R2
+
+La publicación R2 ahora exige una confirmación separada para cualquier objeto
+que el plan marque para eliminación. Sin `--confirm-retention`, el proceso falla
+antes de ejecutar cualquier `put` o `delete` y devuelve
+`R2_RETENTION_CONFIRMATION_REQUIRED`. El flag no se incorpora a los workflows
+por defecto: sólo puede usarse después de revisar el plan de retención, el
+rollback y la decisión explícita de conservar o retirar cada release.
+
+La prueba de esta barrera y la validación completa quedaron en `200` archivos y
+`1.092` pruebas aprobadas. No se eliminó ni publicó ningún objeto R2 durante
+esta revisión.
