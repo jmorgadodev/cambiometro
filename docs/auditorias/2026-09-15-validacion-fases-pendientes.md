@@ -494,3 +494,13 @@ checksum (`2025-08` y `2026-07`), mientras `2026-02` y `2026-05` fueron
 rechazados por diferencias de conteo. Los dos candidatos representan sólo
 `9.596` bytes y permanecen sin publicar porque la compuerta R2 sigue cerrada;
 los dos rechazos requieren revisar el ETL de origen antes de cualquier acción.
+
+La comprobación adicional dejó estos resultados:
+
+- InfoLobby: `0/2` candidatos; julio fue rechazado por checksum de proyección
+  distinto y agosto por ausencia del manifiesto local.
+- ChileCompra: `0/1` candidatos; el corte remoto declara `74.142` registros y
+  el lake local `263.286`, por lo que se rechazó por diferencia de conteo.
+
+La reparación local, por tanto, no puede completar ninguna de estas fuentes
+sin volver a obtener el release original y validarlo contra el catálogo R2.
