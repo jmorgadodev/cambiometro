@@ -237,3 +237,10 @@ La auditoría remota de almacenamiento confirmó:
 - Duplicados por checksum: `3` grupos, `66.508` bytes potencialmente repetidos, con referencias desconocidas; no se elimina nada automáticamente.
 - La versión `funcionarios-central-v1` de `2026-09-14T03-51-42-634Z` aparece almacenada pero con `retentionStatus: unclassified`; no se considera release público activo.
 - La versión candidata generada el `2026-09-15` no aparece en el inventario R2, consistente con `published: false`.
+
+Con el manifiesto público `projections/funcionarios-v1/manifest.json` cargado explícitamente en el preflight, la retención quedó identificada sin ambigüedad:
+
+- Release público activo: `funcionarios-v1@2026-09-02T03-28-30-598Z`.
+- Release histórico de `funcionarios-v1`: `2026-08-30T08-05-27-795Z`, `2.124.662.818` bytes; el índice y sus `123` páginas/`1.050` shards pasan rollback con `0` claves faltantes.
+- `funcionarios-central-v1@2026-09-14T03-51-42-634Z` sigue `unclassified`; no se clasifica como activo ni se elimina automáticamente.
+- El análisis fue `dry-run`; no se borró ningún objeto.
