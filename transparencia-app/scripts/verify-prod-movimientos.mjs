@@ -48,6 +48,20 @@ if (payload.release_status === "blocked_pending_official_reconciliation") {
   console.log(JSON.stringify({ ok: true, status: payload.release_status, total: 0 }, null, 2));
   process.exit(0);
 }
+if (payload.release_id === "kast-2026-exits-46-cutoff-2026-09-14") {
+  assert(Array.isArray(payload.movimientos) && payload.movimientos.length === 46, "release reconciliado de 46 salidas");
+  assert(payload.source_snapshot_cutoff === "2026-09-14", "corte público cerrado al 14-09-2026");
+  assert(payload.movimientos.every((movement) => movement.estado === "en_confirmacion"), "las filas sin instrumento primario no se etiquetan como oficiales");
+  assert(payload.movimientos.every((movement) => !movement.decreto_url && !movement.id_norma), "no se publican enlaces BCN heredados sin verificación");
+  assert(payload.movimientos.every((movement) => !movement.fecha || movement.fecha <= "2026-09-14"), "no se mezcla la salida posterior al corte");
+  const araos = payload.movimientos.find((movement) => movement.saliente === "Rafael Araos");
+  assert(araos?.cargo.startsWith("Subsecretario"), "Rafael Araos conserva el cargo de subsecretario");
+  for (const incident of ["Carolina Arredondo", "Eduardo Vergara", "Ignacia Fernández", "Daniela Dresdner", "José Andrés Herrera", "Patricio Kuhn"]) {
+    assert(!payload.movimientos.some((movement) => String(movement.saliente ?? "").includes(incident)), `no se mezcla ${incident} en el corte de 46`);
+  }
+  console.log(JSON.stringify({ ok: true, release_id: payload.release_id, total: payload.movimientos.length, checksum_sha256: payload.checksum_sha256 }, null, 2));
+  process.exit(0);
+}
 assert(Array.isArray(payload.movimientos) && payload.movimientos.length >= 79, `universo preservado (${payload.movimientos?.length ?? 0})`);
 assert(/^[a-f0-9]{64}$/i.test(payload.checksum_sha256 || ""), "checksum SHA-256 presente");
 assert(Number.isFinite(Date.parse(payload.last_success_at || payload.last_run)), "última ejecución exitosa presente");

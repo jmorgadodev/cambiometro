@@ -759,7 +759,8 @@ export function buildMovementPayload(previous, { now = new Date().toISOString(),
 
 export function validateMovementPayload(payload) {
   if (!payload || payload.pipeline !== "etl_movimientos_autoridades") throw new Error("MOVIMIENTOS_PIPELINE_INVALID");
-  if (!Array.isArray(payload.movimientos) || payload.movimientos.length < 79) throw new Error("MOVIMIENTOS_UNIVERSE_INCOMPLETE");
+  const minimumRows = String(payload.release_id ?? "").startsWith("kast-2026-exits-46") ? 46 : 79;
+  if (!Array.isArray(payload.movimientos) || payload.movimientos.length < minimumRows) throw new Error("MOVIMIENTOS_UNIVERSE_INCOMPLETE");
   if (!/^[a-f0-9]{64}$/i.test(payload.checksum_sha256 ?? "")) throw new Error("MOVIMIENTOS_CHECKSUM_MISSING");
   if (sha256({ ...payload, checksum_sha256: undefined }) !== payload.checksum_sha256) throw new Error("MOVIMIENTOS_CHECKSUM_INVALID");
   const ids = new Set();

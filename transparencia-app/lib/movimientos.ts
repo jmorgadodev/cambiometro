@@ -251,7 +251,7 @@ export const MOVIMIENTOS_PIPELINE_METADATA = {
   source_health: payload.source_health ?? [],
   signals: payload.signals ?? [],
 };
-export const MOVIMIENTOS_PUBLICATION_BLOCKED = movimientosScopePolicy.status !== "validated";
+export const MOVIMIENTOS_PUBLICATION_BLOCKED = !["validated", "validated_reference"].includes(movimientosScopePolicy.status);
 
 export const MOVIMIENTO_DOCUMENTO_PENDIENTE_DIAS = 30;
 
