@@ -10,6 +10,24 @@ afterEach(async () => {
 });
 
 describe("readRangedTextLines", () => {
+  it("corta una solicitud que queda colgada y la reporta como timeout", async () => {
+    let aborted = false;
+    const fetchImpl = (_url, { signal }) => new Promise((_resolve, reject) => {
+      signal.addEventListener("abort", () => {
+        aborted = true;
+        reject(new Error("aborted"));
+      }, { once: true });
+    });
+
+    await expect(readRangedTextLines({
+      urls: ["https://example.test/personal.csv"],
+      retryDelaysMs: [0],
+      requestTimeoutMs: 10,
+      fetchImpl,
+    }).next()).rejects.toThrow("CPLT_RANGE_REQUEST_TIMEOUT: 10ms");
+    expect(aborted).toBe(true);
+  });
+
   it("reintenta un bloque interrumpido sin duplicar ni perder lineas", async () => {
     const payload = Buffer.from([
       "nombre;organismo\r\n",
