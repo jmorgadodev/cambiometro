@@ -94,3 +94,5 @@ Se corrigió el parser de montos del historial para interpretar formatos monetar
 - Validación combinada de historiales, movimientos y contratos: 30 pruebas aprobadas.
 - ESLint y `git diff --check`: aprobados.
 - Sin escrituras en R2/D1 y sin promoción a producción.
+
+La batería consolidada posterior cubrió 11 archivos y 96 pruebas, incluyendo auditoría R2, almacenamiento, historiales, movimientos, categorías legislativas y contratos de normalización; todas terminaron correctamente.
