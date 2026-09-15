@@ -305,3 +305,15 @@ si se omite.
 - Prueba de ejecución sin `--skip-d1`: bloqueada con
   `PUBLIC_PROJECTION_D1_DISABLED` antes de cualquier escritura.
 - R2 continúa como proyección pública canónica; D1 queda fuera de esta ruta.
+
+## Verificación consolidada posterior — 2026-09-15 02:04 UTC-3
+
+La suite completa de `transparencia-app` terminó con `200` archivos y `1.087`
+pruebas aprobadas. Incluye typecheck, API typecheck, arquitectura estática,
+política D1, enlaces, seguridad de HTML y los verificadores ETL registrados en
+la configuración de Vitest.
+
+El inventario R2 se mantuvo sin cambios: `9.016.336.751` bytes (`90,1633%`),
+estado `growth-blocked`, sin publicación ni eliminación. El control agrupado de
+historiales, movimientos, categorías parlamentarias y remuneraciones tampoco
+realizó lecturas o escrituras D1.
