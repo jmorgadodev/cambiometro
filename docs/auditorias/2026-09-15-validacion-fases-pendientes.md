@@ -338,3 +338,20 @@ trazabilidad, pero ya no pueden ejecutarse accidentalmente ni escribir D1.
 La suite completa posterior a este bloqueo terminó nuevamente en verde: `200`
 archivos y `1.089` pruebas aprobadas, con typecheck, arquitectura estática,
 políticas de D1, enlaces y verificadores ETL incluidos.
+
+## Cierre de comprobación física de brechas R2
+
+Se verificaron físicamente, en una sola pasada y sin escritura, las brechas
+catalogadas de InfoLobby. Los seis artefactos históricos que no aparecían en el
+inventario sí están ausentes de esa fotografía del inventario, pero no se
+detectaron artefactos extra sin manifiesto. Además, los artefactos derivados de
+julio y agosto no existen sin sus manifiestos: la falta es real de release,
+no sólo un inventario desactualizado.
+
+- InfoLobby: `6` manifiestos de `8` presentes; julio y agosto faltantes; `0`
+  artefactos físicos faltantes entre los manifiestos existentes; promoción
+  bloqueada.
+- ChileCompra: la única partición catalogada (`2026-06`) no tiene manifiesto
+  disponible; no hay evidencia suficiente para reconstruirla desde R2.
+- No se descargaron universos completos, no se generaron releases y no se
+  modificaron D1/R2.
