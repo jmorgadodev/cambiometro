@@ -219,9 +219,21 @@ Estas comprobaciones fueron locales y no alteraron releases, R2, D1 ni producci�
 
 La prueba local de `planR2Publication` terminó con `2/2` casos aprobados. El publicador central:
 
-- bloquea el crecimiento cuando el uso proyectado alcanza el `95%` del límite configurado;
+- bloquea el crecimiento cuando el uso proyectado alcanza el `90%` del límite configurado;
 - conserva la versión activa anterior para rollback;
 - elimina únicamente versiones frías no referenciadas;
 - no se ejecuta durante esta validación porque el workflow usa `publish=false`.
 
 Además, el workflow central quedó protegido para exigir dos decisiones separadas antes de una publicación: `publish=true` y `confirm_storage=true`. La segunda sólo debe activarse después de revisar el inventario y el margen R2 vigente. Commit del workflow: `049c855`.
+
+## Control R2 posterior — 2026-09-15 01:20 UTC-3
+
+La auditoría remota de almacenamiento confirmó:
+
+- Uso: `9.016.336.751` bytes de `10.000.000.000` (`90,1633%`).
+- Libre: `983.663.249` bytes.
+- Objetos: `8.362`.
+- Estado: `growth-blocked`; no se permite crecimiento.
+- Duplicados por checksum: `3` grupos, `66.508` bytes potencialmente repetidos, con referencias desconocidas; no se elimina nada automáticamente.
+- La versión `funcionarios-central-v1` de `2026-09-14T03-51-42-634Z` aparece almacenada pero con `retentionStatus: unclassified`; no se considera release público activo.
+- La versión candidata generada el `2026-09-15` no aparece en el inventario R2, consistente con `published: false`.

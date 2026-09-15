@@ -49,7 +49,7 @@ La auditoría remota del mismo ciclo informa:
 - Uso: `9.016.336.751` de `10.000.000.000` bytes (`90,16%`).
 - Estado: `growth-blocked`; no se permiten nuevas publicaciones grandes.
 - Objetos: `8.362`.
-- Proyección central candidata: aproximadamente `4,48 GB` y `5.121` objetos; permanece sin publicar.
+- Versión central almacenada de `2026-09-14T03-51-42-634Z`: aproximadamente `4,48 GB` y `5.121` objetos; figura como `unclassified` y no está activada como release público.
 - Duplicados detectados: aproximadamente `66 KB` recuperables potenciales; quedan sin borrar porque el inventario no prueba que sus claves sean prescindibles.
 
 Esta capacidad impide promover una nueva proyección central hasta contar con una decisión explícita de retención/archivo y una validación de que el release no contiene períodos futuros.
