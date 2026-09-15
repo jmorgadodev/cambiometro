@@ -8,6 +8,7 @@ import {
   MOVIMIENTOS_TIPO_COLOR,
   MOVIMIENTOS_TIPO_EMOJI,
   MOVIMIENTOS_PIPELINE_METADATA,
+  MOVIMIENTOS_PUBLICATION_BLOCKED,
   MOTIVOS_CATEGORIAS,
   getMovimientoEstadoPublico,
   summarizeMovementFreshness,
@@ -49,6 +50,20 @@ function formatPipelineTimestamp(value?: string): string {
 }
 
 export default function MovimientosPage() {
+  if (MOVIMIENTOS_PUBLICATION_BLOCKED) {
+    return (
+      <main className="container-main" style={{ minHeight: "60vh", padding: "5rem 1.25rem" }}>
+        <section style={{ maxWidth: "48rem", margin: "0 auto", border: "1px solid var(--border)", borderRadius: "1rem", padding: "2rem", background: "var(--surface-1)" }}>
+          <p className="eyebrow" style={{ margin: 0 }}>MOVIMIENTOS DE AUTORIDADES</p>
+          <h1 style={{ margin: "0.75rem 0", fontSize: "clamp(1.8rem, 4vw, 2.8rem)" }}>Movimientos y Relevos de Autoridades</h1>
+          <h2 style={{ margin: "0 0 0.75rem", fontSize: "1.15rem" }}>Validación documental en curso</h2>
+          <p style={{ margin: 0, color: "var(--text-2)", maxWidth: "40rem" }}>
+            Estamos revisando cada salida de autoridad contra su documento oficial antes de volver a publicar este listado. La información se mostrará nuevamente cuando el corte quede validado.
+          </p>
+        </section>
+      </main>
+    );
+  }
   return (
     <Suspense
       fallback={

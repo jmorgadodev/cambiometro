@@ -23,6 +23,7 @@ const inputPath = resolve(root, process.env.MOVIMIENTOS_INPUT ?? "data/movimient
 const outputPath = resolve(root, process.env.MOVIMIENTOS_OUTPUT ?? "data/movimientos.json");
 const reportPath = resolve(root, process.env.MOVIMIENTOS_RUN_REPORT ?? "data/generated/movimientos-run.json");
 const now = new Date().toISOString();
+const releaseApproval = process.env.MOVIMIENTOS_RELEASE_APPROVED === "1";
 
 function configuredSources() {
   const raw = process.env.MOVIMIENTOS_PROVISIONAL_SOURCES?.trim();
@@ -57,6 +58,21 @@ function writeReport(report) {
 }
 
 async function main() {
+  // Incidente de integridad: no permitimos que el proceso vuelva a conservar
+  // el baseline histórico ni a publicar señales hasta que exista un release
+  // explícitamente reconciliado y aprobado. El archivo de salida queda intacto.
+  if (!releaseApproval) {
+    const report = {
+      pipeline: "etl_movimientos_autoridades",
+      attemptedAt: now,
+      published: false,
+      status: "frozen",
+      reason: "MOVIMIENTOS_INTEGRITY_RELEASE_PENDING",
+      message: "ETL congelado: falta un release Kast 2026 validado contra documentos oficiales.",
+    };
+    await writeReport(report);
+    throw new Error("MOVIMIENTOS_ETL_FROZEN_INTEGRITY_REVIEW");
+  }
   if (!existsSync(inputPath)) throw new Error(`MOVIMIENTOS_INPUT_MISSING:${inputPath}`);
   const previous = JSON.parse(await readFile(inputPath, "utf8"));
   const collected = await collectMovementSources({ sources: configuredSources(), retries: Number(process.env.MOVIMIENTOS_SOURCE_RETRIES ?? 2) });

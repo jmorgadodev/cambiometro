@@ -77,7 +77,9 @@ async function checkRoute(path) {
       movementOk = movementAsset.ok
         && movementJson?.pipeline === "etl_movimientos_autoridades"
         && Array.isArray(movementJson?.movimientos)
-        && movementJson.movimientos.length >= 79
+        && (movementJson.release_status === "blocked_pending_official_reconciliation"
+          ? movementJson.movimientos.length === 0
+          : movementJson.movimientos.length >= 79)
         && !text.includes("MOVIMIENTOS_ALL_OFFICIAL_SOURCES_BLOCKED");
     } catch {
       movementOk = false;
