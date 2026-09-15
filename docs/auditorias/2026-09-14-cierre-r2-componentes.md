@@ -798,3 +798,15 @@ anidados del catálogo. Por ejemplo, `votaciones_camara` se declara bajo
 esa fuente y la mantiene bloqueada por 13 manifiestos faltantes y 16
 artefactos no verificables, en vez de reportarla erróneamente como completa
 por haber encontrado cero coincidencias de `sourceId`.
+
+La comprobación física focalizada, ejecutada sin inventario, confirmó además:
+
+- **ChileCompra:** el manifiesto `2026/06` y su artefacto derivado no están
+  disponibles; no es un simple desfase del inventario.
+- **Votaciones Senado:** los cinco artefactos de períodos anteriores
+  respondieron, pero `2026/08` y `2026/09` siguen sin manifiesto ni artefacto
+  derivado. La fuente continúa bloqueada por esos dos períodos.
+
+La matriz ahora queda limitada a la fuente solicitada y distingue entre
+`missingManifestArtifacts`, artefactos que fallan en descarga física y objetos
+que sólo faltan del inventario de almacenamiento.

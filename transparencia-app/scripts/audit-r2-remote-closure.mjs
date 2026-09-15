@@ -19,15 +19,17 @@ function getObject(objects, key) {
   return objects?.[key];
 }
 
+function matchesSource(partition, sourceId = null) {
+  if (!sourceId) return true;
+  const declaredSource = String(partition?.sourceId ?? "");
+  const manifestParts = String(partition?.manifestKey ?? "").split("/");
+  return declaredSource === sourceId || manifestParts.includes(sourceId);
+}
+
 /** @param {Record<string, unknown>} catalog @param {string | null} [sourceId] */
 export function catalogPartitionKeys(catalog, sourceId = null) {
   return [...new Set((Array.isArray(catalog?.partitions) ? catalog.partitions : [])
-    .filter((partition) => {
-      if (!sourceId) return true;
-      const declaredSource = String(partition?.sourceId ?? "");
-      const manifestParts = String(partition?.manifestKey ?? "").split("/");
-      return declaredSource === sourceId || manifestParts.includes(sourceId);
-    })
+    .filter((partition) => matchesSource(partition, sourceId))
     .map((partition) => String(partition?.manifestKey ?? "").trim())
     .filter(Boolean))].sort((left, right) => left.localeCompare(right));
 }
@@ -164,28 +166,38 @@ export function summarizeR2ClosureGaps(result) {
  * Declared source IDs are kept intact; nested dataset names remain visible in
  * the partition keys and are not silently merged into another source.
  */
-export function summarizeR2ClosureBySource(catalog, manifests, result) {
+export function summarizeR2ClosureBySource(catalog, manifests, result, sourceId = null) {
   const missingManifests = new Set(result?.missingManifests ?? []);
+  const missingArtifacts = new Set(result?.missingArtifacts ?? []);
   const missingArtifactInventory = new Set(result?.missingArtifactInventory ?? []);
+  const missingManifestArtifacts = new Set((result?.missingManifestArtifacts ?? []).map((item) => String(item?.artifactKey ?? "").trim()).filter(Boolean));
+  const missingManifestArtifactManifests = new Set((result?.missingManifestArtifacts ?? []).map((item) => String(item?.manifestKey ?? "").trim()).filter(Boolean));
   const groups = new Map();
   for (const partition of Array.isArray(catalog?.partitions) ? catalog.partitions : []) {
-    const sourceId = String(partition?.sourceId ?? "unknown");
+    if (!matchesSource(partition, sourceId)) continue;
+    const declaredSourceId = String(partition?.sourceId ?? "unknown");
     const manifestKey = String(partition?.manifestKey ?? "").trim();
-    const current = groups.get(sourceId) ?? {
-      sourceId,
+    const current = groups.get(declaredSourceId) ?? {
+      sourceId: declaredSourceId,
       partitions: 0,
       manifestsPresent: 0,
       missingManifests: 0,
+      missingArtifacts: 0,
       missingArtifactInventory: 0,
+      missingManifestArtifacts: 0,
     };
     current.partitions += 1;
     if (missingManifests.has(manifestKey)) current.missingManifests += 1;
     else current.manifestsPresent += 1;
+    if (missingManifestArtifactManifests.has(manifestKey)) current.missingManifestArtifacts += 1;
     const manifest = manifests?.get?.(manifestKey);
     for (const artifact of Array.isArray(manifest?.artifacts) ? manifest.artifacts : []) {
-      if (missingArtifactInventory.has(String(artifact?.key ?? "").trim())) current.missingArtifactInventory += 1;
+      const artifactKey = String(artifact?.key ?? "").trim();
+      if (missingArtifacts.has(artifactKey)) current.missingArtifacts += 1;
+      if (missingArtifactInventory.has(artifactKey)) current.missingArtifactInventory += 1;
+      if (missingManifestArtifacts.has(artifactKey)) current.missingManifestArtifacts += 1;
     }
-    groups.set(sourceId, current);
+    groups.set(declaredSourceId, current);
   }
   return [...groups.values()]
     .map((entry) => ({
@@ -194,10 +206,17 @@ export function summarizeR2ClosureBySource(catalog, manifests, result) {
         ? "no_catalog_partitions"
         : entry.missingManifests > 0
           ? "catalogued_without_manifest"
-          : entry.missingArtifactInventory > 0
+          : result?.artifactCheck === "not_available"
+            ? "manifests_present_artifacts_unverified"
+            : entry.missingArtifacts > 0 || entry.missingArtifactInventory > 0 || entry.missingManifestArtifacts > 0
             ? "manifest_without_artifact"
             : "verifiable",
-      promotionAllowed: entry.partitions > 0 && entry.missingManifests === 0 && entry.missingArtifactInventory === 0,
+      promotionAllowed: entry.partitions > 0
+        && entry.missingManifests === 0
+        && entry.missingArtifacts === 0
+        && entry.missingArtifactInventory === 0
+        && entry.missingManifestArtifacts === 0
+        && result?.artifactCheck !== "not_available",
     }))
     .sort((left, right) => right.partitions - left.partitions || left.sourceId.localeCompare(right.sourceId));
 }
@@ -334,7 +353,7 @@ function run() {
     result.complete = result.missingManifests.length === 0 && (!verifyArtifacts || result.missingArtifacts.length === 0);
     Object.assign(result, classifyR2Closure(result));
     result.gapSummary = summarizeR2ClosureGaps(result);
-    result.sourceMatrix = summarizeR2ClosureBySource(catalogResult.value, objects, result);
+    result.sourceMatrix = summarizeR2ClosureBySource(catalogResult.value, objects, result, sourceId);
     console.log(JSON.stringify(result, null, 2));
     if (!result.complete) process.exitCode = 1;
   } finally {

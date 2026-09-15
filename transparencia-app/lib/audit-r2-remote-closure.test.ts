@@ -134,10 +134,13 @@ describe("auditoría de cierre del catálogo R2", () => {
     };
     const manifests = new Map([
       ["partitions/camara/votaciones_camara/2026/07/manifest.json", { artifacts: [{ key: "partitions/camara/votaciones_camara/2026/07/records.jsonl.gz" }] }],
-      ["partitions/senado/2026/07/manifest.json", { artifacts: [{ key: "partitions/senado/2026/07/records.jsonl.gz" }] }],
     ]);
     expect(summarizeR2ClosureBySource(catalog, manifests, {
       missingManifests: ["partitions/senado/2026/07/manifest.json"],
+      missingManifestArtifacts: [{
+        manifestKey: "partitions/senado/2026/07/manifest.json",
+        artifactKey: "partitions/senado/2026/07/records.jsonl.gz",
+      }],
       missingArtifactInventory: ["partitions/camara/votaciones_camara/2026/07/records.jsonl.gz"],
     })).toEqual([
       {
@@ -145,7 +148,9 @@ describe("auditoría de cierre del catálogo R2", () => {
         partitions: 1,
         manifestsPresent: 1,
         missingManifests: 0,
+        missingArtifacts: 0,
         missingArtifactInventory: 1,
+        missingManifestArtifacts: 0,
         status: "manifest_without_artifact",
         promotionAllowed: false,
       },
@@ -154,7 +159,9 @@ describe("auditoría de cierre del catálogo R2", () => {
         partitions: 1,
         manifestsPresent: 0,
         missingManifests: 1,
+        missingArtifacts: 0,
         missingArtifactInventory: 0,
+        missingManifestArtifacts: 1,
         status: "catalogued_without_manifest",
         promotionAllowed: false,
       },
