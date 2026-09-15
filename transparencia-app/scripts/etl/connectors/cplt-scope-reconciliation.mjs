@@ -38,7 +38,10 @@ export function reconcileCpltScopes({ publicManifest, candidateCategories }) {
     const publicCategory = publicCategoryRows(publicManifest, category);
     const publicById = new Map(publicCategory.map((row) => [row.id, row]));
     const overlap = municipal.filter((row) => publicById.has(String(row.organismoId)));
-    const countMismatches = overlap.filter((row) => integer(row.recordCount) !== publicById.get(String(row.organismoId)).count);
+    const publishedOverlap = overlap.filter((row) => publicById.get(String(row.organismoId)).count > 0);
+    const unavailableOverlap = overlap.filter((row) => publicById.get(String(row.organismoId)).count === 0
+      && publicById.get(String(row.organismoId)).status !== "available");
+    const countMismatches = publishedOverlap.filter((row) => integer(row.recordCount) !== publicById.get(String(row.organismoId)).count);
     return {
       category,
       candidateRows: integer(candidate?.recordCount),
@@ -48,6 +51,8 @@ export function reconcileCpltScopes({ publicManifest, candidateCategories }) {
       publicMunicipalities: publicCategory.filter((row) => row.count > 0).length,
       publicMunicipalRows: publicCategory.reduce((total, row) => total + row.count, 0),
       overlappingMunicipalities: overlap.length,
+      municipalitiesAlreadyPublished: publishedOverlap.length,
+      municipalitiesFillingUnavailable: unavailableOverlap.length,
       municipalCountMismatches: countMismatches.length,
       overlapSample: countMismatches.slice(0, 10).map((row) => ({
         organismId: String(row.organismoId),
@@ -60,7 +65,7 @@ export function reconcileCpltScopes({ publicManifest, candidateCategories }) {
   const reasons = new Set();
   if (categories.some((row) => row.candidateCentralOrganizations > 0)) reasons.add("central_scope_present");
   if (categories.some((row) => row.candidateMunicipalities < row.publicMunicipalities)) reasons.add("municipal_coverage_incomplete");
-  if (categories.some((row) => row.overlappingMunicipalities > 0)) reasons.add("municipal_overlap_requires_deduplication");
+  if (categories.some((row) => row.municipalitiesAlreadyPublished > 0)) reasons.add("municipal_overlap_requires_deduplication");
 
   const replacementEligible = reasons.size === 0 && categories.length > 0;
   return {

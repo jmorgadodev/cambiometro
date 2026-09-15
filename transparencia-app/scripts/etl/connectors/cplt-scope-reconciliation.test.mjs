@@ -28,7 +28,24 @@ describe("reconcileCpltScopes", () => {
       publicMunicipalities: 2,
       candidateCentralOrganizations: 1,
       overlappingMunicipalities: 1,
+      municipalitiesAlreadyPublished: 1,
     });
+  });
+
+  it("distingue una municipalidad candidata que falta en producción", () => {
+    const result = reconcileCpltScopes({
+      publicManifest: {
+        coverage: [{ communeId: "muni-a", status: "unavailable", categories: { planta: { status: "unavailable", recordCount: 0 } } }],
+      },
+      candidateCategories: [{ category: "Planta", recordCount: 4, organizations: [{ organismoId: "muni-a", recordCount: 4 }] }],
+    });
+
+    expect(result.categories[0]).toMatchObject({
+      overlappingMunicipalities: 1,
+      municipalitiesAlreadyPublished: 0,
+      municipalitiesFillingUnavailable: 1,
+    });
+    expect(result.reasons).not.toContain("municipal_overlap_requires_deduplication");
   });
 
   it("no afirma cobertura municipal cuando el candidato no trae municipios", () => {
