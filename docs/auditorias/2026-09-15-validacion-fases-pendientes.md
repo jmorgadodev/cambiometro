@@ -408,3 +408,21 @@ rollback y la decisión explícita de conservar o retirar cada release.
 La prueba de esta barrera y la validación completa quedaron en `200` archivos y
 `1.092` pruebas aprobadas. No se eliminó ni publicó ningún objeto R2 durante
 esta revisión.
+
+## Revisión agrupada de fuentes parlamentarias
+
+La comprobación remota por fuente confirmó que el siguiente paso no es
+reemplazar datos locales ni ejecutar una publicación, sino reparar la
+trazabilidad de los releases:
+
+- Cámara: `61` particiones catalogadas; `46` manifiestos presentes, `15`
+  ausentes y `43` artefactos que no aparecen en el inventario de almacenamiento.
+- Senado: `4` particiones catalogadas y `4` manifiestos ausentes.
+
+Ambas fuentes quedan en `catalogued_without_manifest` y con
+`promotionAllowed=false`. La ausencia en el inventario no se presenta como
+eliminación física porque esta pasada sólo consultó catálogo, manifiestos e
+inventario; no descargó artefactos completos. La normalización local de
+`27.793` registros se mantiene válida como auditoría de categorías, pero no
+puede usarse para cerrar la cobertura R2 hasta que cada partición productiva
+tenga manifiesto, período, conteo y checksum verificables.

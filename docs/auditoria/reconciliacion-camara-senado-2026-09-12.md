@@ -89,3 +89,26 @@ masivas ni escrituras en D1.
 4. Ejecutar el workflow de reconciliación de Cámara sólo con confirmación
    explícita y después de validar las fuentes upstream.
 
+## Verificación R2 agrupada — 2026-09-15
+
+Se volvió a consultar el catálogo y el inventario de R2 por fuente, sin leer
+los artefactos de datos completos y sin usar D1:
+
+| Fuente | Particiones catalogadas | Manifiestos presentes | Manifiestos ausentes | Artefactos fuera del inventario | Estado |
+|---|---:|---:|---:|---:|---|
+| Cámara | 61 | 46 | 15 | 43 | `catalogued_without_manifest` |
+| Senado | 4 | 0 | 4 | 0 | `catalogued_without_manifest` |
+
+Estos resultados impiden declarar cerrada la reconciliación o promover un
+release nuevo. “Artefactos fuera del inventario” sólo significa que las claves
+esperadas no aparecen en `catalog/v1/storage.json`; no demuestra por sí solo
+que los objetos físicos hayan sido eliminados. No se ejecutó `--verify-artifacts`
+porque habría descargado artefactos potencialmente grandes y no es necesario
+para esta auditoría acotada.
+
+La diferencia de Cámara no debe interpretarse como pérdida de 15 períodos sin
+antes recuperar o reconstruir sus manifiestos. En Senado, las cuatro
+particiones catalogadas requieren manifiestos antes de poder comparar conteos,
+períodos y checksums. Producción conserva su release actual y estas brechas
+quedan como trabajo del ETL por fuente.
+
