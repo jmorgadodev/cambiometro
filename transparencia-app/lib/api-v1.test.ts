@@ -881,6 +881,36 @@ describe("API canónica v1", () => {
     ]);
   });
 
+  it("usa el manifiesto vigente de remuneraciones CPLT para el conteo público", async () => {
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/sources-v1/source-inventory.json") {
+          return { json: async <T>() => ({ sources: [{ id: "cplt", label: "Transparencia Activa CPLT" }] }) as T };
+        }
+        if (key === "projections/sources-v1/source-health.json") {
+          return { json: async <T>() => ({ sources: { cplt: { recordCount: 1226913, status: "partial", generatedAt: "2026-09-02T03:28:30.598Z" } } }) as T };
+        }
+        if (key === "projections/funcionarios-v1/manifest.json") {
+          return { json: async <T>() => ({ recordCount: 1243761, generatedAt: "2026-09-15T08:08:44.566Z", checksumSha256: "cplt-current" }) as T };
+        }
+        return null;
+      },
+    };
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/sources"), { PUBLIC_DATA } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toHaveLength(1);
+    expect(payload.data[0]).toMatchObject({
+      id: "cplt",
+      recordCount: 1243761,
+      checksumSha256: "cplt-current",
+      lastUpdated: "2026-09-15T08:08:44.566Z",
+      status: "partial",
+    });
+  });
+
   it("expone por separado los componentes publicados del Senado", async () => {
     const PUBLIC_DATA = {
       get: async (key: string) => {

@@ -1945,11 +1945,12 @@ async function listSources(requestUrl: URL, env: Env) {
 }
 
 async function listSourcesFromR2(requestUrl: URL, env: Env) {
-  const [inventory, health, transferRelease, lakeCatalog] = await Promise.all([
+  const [inventory, health, transferRelease, lakeCatalog, cpltRelease] = await Promise.all([
     r2Json<{ sources?: JsonRecord[] }>(env.PUBLIC_DATA, "projections/sources-v1/source-inventory.json"),
     r2Json<{ sources?: Record<string, JsonRecord> }>(env.PUBLIC_DATA, "projections/sources-v1/source-health.json"),
     r2Json<TransferApiManifest>(env.PUBLIC_DATA, "projections/transferencias-v1/manifest.json"),
     r2Json<{ sources?: JsonRecord[]; partitions?: JsonRecord[] }>(env.PUBLIC_DATA, "catalog/v1/manifest.json"),
+    r2Json<JsonRecord>(env.PUBLIC_DATA, "projections/funcionarios-v1/manifest.json"),
   ]);
   if (!inventory?.sources?.length && !health?.sources) return null;
   // El inventario histórico conserva dos identificadores que ya no deben
@@ -1989,7 +1990,13 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
     const sourceId = String(source.id ?? "");
     if (sourceId) lakeSourcesById.set(sourceId, source);
   }
-  const ids = [...new Set([...inventoryById.keys(), ...healthById.keys()])].sort();
+  const cpltRecordCount = Number(cpltRelease?.recordCount ?? 0);
+  const hasCpltRelease = Number.isSafeInteger(cpltRecordCount) && cpltRecordCount > 0;
+  const ids = [...new Set([
+    ...inventoryById.keys(),
+    ...healthById.keys(),
+    ...(hasCpltRelease ? ["cplt"] : []),
+  ])].sort();
   const labels: Record<string, string> = {
     camara: "Cámara", chilecompra: "ChileCompra OCDS", cplt: "Transparencia Activa CPLT",
     contraloria: "Contraloría General", dipres: "DIPRES", ine: "INE Censo 2024",
@@ -2005,10 +2012,13 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
     const source = inventoryById.get(id) ?? {};
     const state = healthById.get(id) ?? {};
     const isTransferSource = id === "ley-19862";
+    const isCpltSource = id === "cplt" || id === "transparencia-activa";
     const lakePartitions = lakePartitionsBySource.get(id) ?? [];
     const lakeSource = lakeSourcesById.get(id) ?? {};
     const hasPublishedLake = lakePartitions.length > 0;
-    const recordCount = isTransferSource && currentTransferRelease
+    const recordCount = isCpltSource && hasCpltRelease
+      ? cpltRecordCount
+      : isTransferSource && currentTransferRelease
       ? currentTransferRelease.totalRows
       : hasPublishedLake
         ? lakePartitions.reduce((total, partition) => total + Number(partition.recordCount ?? 0), 0)
@@ -2023,13 +2033,19 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
       label: source.label ?? labels[id] ?? id,
       recordCount,
       status: stateStatus === "archive_only" || stateStatus === "partial" ? "partial" : recordCount > 0 ? "connected" : "unavailable",
-      checksumSha256: isTransferSource && currentTransferRelease
+      checksumSha256: isCpltSource && hasCpltRelease
+        ? String(cpltRelease?.checksumSha256 ?? state.checksumSha256 ?? source.indexChecksumSha256 ?? "") || null
+        : isTransferSource && currentTransferRelease
         ? currentTransferRelease.checksumSha256
         : state.checksumSha256 ?? source.indexChecksumSha256 ?? null,
-      lastUpdated: isTransferSource && currentTransferRelease
+      lastUpdated: isCpltSource && hasCpltRelease
+        ? String(cpltRelease?.generatedAt ?? "") || null
+        : isTransferSource && currentTransferRelease
         ? currentTransferRelease.generatedAt
         : state.lastSuccessAt ?? state.last_success_at ?? state.generatedAt ?? source.generatedAt ?? null,
-      statusDetail: stateStatus === "archive_only"
+      statusDetail: isCpltSource && hasCpltRelease
+        ? "Nómina nacional validada y versionada en R2; el corte vigente se consulta mediante índices paginados."
+        : stateStatus === "archive_only"
         ? "Histórico íntegro en R2; se consulta bajo demanda."
         : hasPublishedLake && stateStatus === "partial"
           ? `El catálogo declara ${recordCount} registros, pero el release es parcial. La consulta sólo entrega particiones verificadas.`
