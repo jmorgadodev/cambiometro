@@ -17,6 +17,10 @@ function options(name) {
   return values;
 }
 
+function hasFlag(name) {
+  return process.argv.includes(name);
+}
+
 function readJson(path) {
   return JSON.parse(readFileSync(resolve(path), "utf8"));
 }
@@ -30,7 +34,10 @@ function download(bucket, key, output) {
 const temp = mkdtempSync(join(tmpdir(), "cambiometro-r2-retention-"));
 try {
   const inventoryPath = join(temp, "storage.json");
-  download(option("--bucket", "transparencia-public-data"), option("--key", "catalog/v1/storage.json"), inventoryPath);
+  const bucket = option("--bucket", "transparencia-public-data");
+  download(bucket, option("--key", "catalog/v1/storage.json"), inventoryPath);
+  const inventory = readJson(inventoryPath);
+  const inventoryKeys = new Set((inventory.objects ?? []).map((object) => String(object?.key ?? "").trim()).filter(Boolean));
   const specs = options("--projection-manifest");
   const manifests = specs.map((spec) => {
     const separator = spec.indexOf("=");
@@ -39,11 +46,44 @@ try {
     const manifest = readJson(path);
     return dataset ? { ...manifest, dataset } : manifest;
   });
-  const plan = planR2Retention(readJson(inventoryPath), { activeVersions: activeProjectionVersions(manifests) });
+  const plan = planR2Retention(inventory, { activeVersions: activeProjectionVersions(manifests) });
+  const rollbackVerification = hasFlag("--verify-rollback")
+    ? plan.candidates.map((candidate, index) => {
+      const indexKey = `projections/${candidate.dataset}/versions/${candidate.version}/search_index.json`;
+      const indexPresent = inventoryKeys.has(indexKey);
+      if (!indexPresent) {
+        return { dataset: candidate.dataset, version: candidate.version, indexKey, indexPresent, rollbackReady: false, reason: "índice no está en el inventario" };
+      }
+      const indexPath = join(temp, `rollback-${index}.json`);
+      try {
+        download(bucket, indexKey, indexPath);
+        const indexPayload = readJson(indexPath);
+        const pageKeys = (indexPayload.pages ?? []).map((page) => page.key ?? page.path).filter(Boolean);
+        const shardValues = Object.values(indexPayload.shards ?? {});
+        const shardKeys = shardValues.flatMap((value) => Array.isArray(value) ? value : [value]).filter(Boolean);
+        const requiredKeys = [...new Set([...pageKeys, ...shardKeys])];
+        const missingKeys = requiredKeys.filter((key) => !inventoryKeys.has(key));
+        return {
+          dataset: candidate.dataset,
+          version: candidate.version,
+          indexKey,
+          indexPresent,
+          declaredPages: pageKeys.length,
+          declaredShards: shardKeys.length,
+          missingKeys: missingKeys.length,
+          sampleMissingKeys: missingKeys.slice(0, 5),
+          rollbackReady: missingKeys.length === 0,
+        };
+      } catch (error) {
+        return { dataset: candidate.dataset, version: candidate.version, indexKey, indexPresent, rollbackReady: false, reason: error instanceof Error ? error.message : String(error) };
+      }
+    })
+    : null;
   console.log(JSON.stringify({
     mode: "dry-run",
     deletionPerformed: false,
     projectionManifestCount: manifests.length,
+    rollbackVerification,
     ...plan,
     candidates: plan.candidates.map(({ keys, ...candidate }) => ({
       ...candidate,
