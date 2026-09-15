@@ -3,6 +3,8 @@ import { readFileSync, existsSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   isMovimientoDocumentoPendienteMayor30,
+  isMovimientoDocumentoPendienteMayor90,
+  getMovimientoEstadoPublico,
   latestMovementPublicationDate,
   MOVIMIENTOS,
   MOVIMIENTOS_HOME_SUMMARY,
@@ -104,11 +106,14 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
     expect(movimientosPageSource).toContain("Copiar enlace");
   });
 
-  it("4b. Explica la diferencia entre fecha efectiva y fecha de publicación de la fuente", () => {
+  it("4b. Expone sólo fechas útiles para el usuario", () => {
     expect(movimientosPageSource).toContain("Fecha del evento");
     expect(movimientosPageSource).toContain("fecha de publicación");
-    expect(movimientosPageSource).toContain("Última publicación detectada");
-    expect(movimientosPageSource).toContain("Último evento efectivo");
+    expect(movimientosPageSource).toContain("Actualización de movimientos");
+    expect(movimientosPageSource).not.toContain("Estado de las fuentes");
+    expect(movimientosPageSource).not.toContain("No respondió");
+    expect(movimientosPageSource).not.toContain("HTTP ${String(source.status)}");
+    expect(movimientosPageSource).not.toContain("Algunas fuentes oficiales no respondieron");
   });
 
   it("4c. calcula la última publicación sin reemplazar la fecha efectiva", () => {
@@ -179,7 +184,15 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
   it("9. No marca anuncios recientes como documentos atrasados", () => {
     const now = Date.parse("2026-09-05T12:00:00Z");
     expect(isMovimientoDocumentoPendienteMayor30({ documento_pendiente: true, fecha: "2026-09-02" }, now)).toBe(false);
-    expect(isMovimientoDocumentoPendienteMayor30({ documento_pendiente: true, fecha: "2026-07-01" }, now)).toBe(true);
-    expect(isMovimientoDocumentoPendienteMayor30({ documento_pendiente: false, fecha: "2026-07-01" }, now)).toBe(false);
+    expect(isMovimientoDocumentoPendienteMayor90({ documento_pendiente: true, fecha: "2026-06-01" }, now)).toBe(true);
+    expect(isMovimientoDocumentoPendienteMayor90({ documento_pendiente: true, fecha: "2026-07-01" }, now)).toBe(false);
+    expect(isMovimientoDocumentoPendienteMayor30({ documento_pendiente: false, fecha: "2026-06-01" }, now)).toBe(false);
+  });
+
+  it("10. Mantiene los pendientes antiguos separados del total oficial", () => {
+    const now = Date.parse("2026-09-15T12:00:00Z");
+    expect(getMovimientoEstadoPublico({ estado: "verificado", documento_pendiente: false, fecha: "2026-09-01", fecha_deteccion: "2026-09-01" }, now)).toBe("oficial");
+    expect(getMovimientoEstadoPublico({ estado: "en_confirmacion", documento_pendiente: true, fecha: "2026-09-01", fecha_deteccion: "2026-09-01" }, now)).toBe("en_confirmacion");
+    expect(getMovimientoEstadoPublico({ estado: "en_confirmacion", documento_pendiente: true, fecha: "2026-06-01", fecha_deteccion: "2026-06-01" }, now)).toBe("aun_no_confirmado");
   });
 });

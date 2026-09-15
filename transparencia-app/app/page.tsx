@@ -11,7 +11,6 @@ import { getHomeFeaturedVotes, getVotingFreshness } from "@/lib/votaciones-desta
 import { tituloVotacionLegible } from "@/lib/votaciones-format";
 import { MOVIMIENTOS_HOME_SUMMARY } from "@/lib/movimientos";
 import { formatFechaCorta } from "@/lib/format";
-import { getLandingSummary } from "@/lib/landing-summary-runtime";
 
 export const dynamic = "force-static";
 
@@ -21,11 +20,6 @@ function formatVotingDate(value: string | null) {
   if (!value) return "Sin fecha publicada";
   const date = value.slice(0, 10);
   return new Intl.DateTimeFormat("es-CL", { dateStyle: "long", timeZone: "UTC" }).format(new Date(`${date}T12:00:00Z`));
-}
-
-function formatLandingDate(value: string | null) {
-  if (!value) return null;
-  return new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(value));
 }
 
 // Selección editorial para la Home: impacto público, quórum y diversidad de
@@ -94,7 +88,6 @@ const HOME_KPIS = [
 ];
 
 export default async function HomePage() {
-  const landingSummary = getLandingSummary();
   const { sources: qualitySources } = await getDataQualityDashboardData();
   const HOME_SOURCES_LIST = qualitySources
     .filter((source) => source.canonicalCount > 0)
@@ -135,7 +128,7 @@ export default async function HomePage() {
       <section className="home-hero" aria-labelledby="home-title">
         <div className="container-main home-lead">
           <div className="home-lead__copy">
-            <div className="home-kicker"><span aria-hidden="true" /> Plataforma de datos públicos <span className="home-kicker__cut">Corte {formatLandingDate(landingSummary.dataUpdatedAt) ?? GLOBAL_KPIS.corte}</span></div>
+            <div className="home-kicker"><span aria-hidden="true" /> Plataforma de datos públicos <span className="home-kicker__cut">Datos actualizados por fuente</span></div>
             <h1 id="home-title">La información pública <em>no debería perderse.</em></h1>
             <p className="home-lead__intro">
               El Cambiómetro convierte fuentes dispersas del Estado de Chile en evidencia que puedes
@@ -266,8 +259,8 @@ export default async function HomePage() {
             <div className="home-movement-feature__copy">
               <p className="eyebrow">Corte de movimientos</p>
               <h3>Cambios que vale la pena seguir</h3>
-              <p>Una lectura breve de renuncias, nombramientos y cambios anunciados. Los movimientos en confirmación se mantienen separados hasta contar con respaldo normativo.</p>
-              <span className="home-path__meta">{MOVIMIENTOS_HOME_SUMMARY.total} movimientos · {MOVIMIENTOS_HOME_SUMMARY.renuncias} renuncias · {MOVIMIENTOS_HOME_SUMMARY.verificados} verificados · {MOVIMIENTOS_HOME_SUMMARY.enConfirmacion} en confirmación</span>
+              <p>Una lectura breve de renuncias, nombramientos y cambios anunciados. Los registros sin respaldo oficial permanecen separados.</p>
+              <span className="home-path__meta">{MOVIMIENTOS_HOME_SUMMARY.verificados} oficiales · {MOVIMIENTOS_HOME_SUMMARY.enConfirmacion} en confirmación · {MOVIMIENTOS_HOME_SUMMARY.aunNoConfirmado} aún no confirmados</span>
               <Link prefetch={false} href="/movimientos" className="home-movement-feature__cta">Ver movimientos y fuentes <span aria-hidden="true">→</span></Link>
             </div>
             <div className="home-movement-timeline" aria-label="Línea de tiempo de movimientos desde el 11 de marzo de 2026">
@@ -300,7 +293,7 @@ export default async function HomePage() {
               <span className="home-discovery-card__icon"><Icono nombre="etl" size={20} /></span>
               <span className="home-discovery-card__label">Actualidad</span>
               <strong>{MOVIMIENTOS_HOME_SUMMARY.renuncias} renuncias desde el 11 de marzo</strong>
-              <span>{MOVIMIENTOS_HOME_SUMMARY.verificados} hechos verificados y {MOVIMIENTOS_HOME_SUMMARY.enConfirmacion} en confirmación.</span>
+              <span>{MOVIMIENTOS_HOME_SUMMARY.verificados} hechos oficiales y {MOVIMIENTOS_HOME_SUMMARY.enConfirmacion + MOVIMIENTOS_HOME_SUMMARY.aunNoConfirmado} pendientes de confirmación.</span>
             </Link>
             <Link prefetch={false} href="/municipalidades" className="home-discovery-card">
               <span className="home-discovery-card__icon"><Icono nombre="datos" size={20} /></span>
@@ -345,7 +338,7 @@ export default async function HomePage() {
             </div>
             <Link prefetch={false} href="/datos">Revisar todas las fuentes →</Link>
           </div>
-          <p className="home-sources__intro">Cada tarjeta indica qué fuente está conectada, cuántos registros tiene disponibles y dónde continuar la revisión. Corte generado automáticamente: {formatLandingDate(landingSummary.dataUpdatedAt) ?? "sin fecha publicada"}.</p>
+          <p className="home-sources__intro">Cada tarjeta indica cuántos registros están disponibles, la última actualización publicada por esa fuente y dónde continuar la revisión.</p>
           <div className="home-source-grid">
             {operationalSources.map((source, sourceIndex) => (
               <Link prefetch={false} className="home-source-card" href={source.viewLink} key={source.id}>
@@ -353,7 +346,7 @@ export default async function HomePage() {
                 <h3>{source.name}</h3>
                 <p>{source.organization}</p>
                 <div className="home-source-card__metric"><strong>{source.recordCount.toLocaleString("es-CL")}</strong><span>registros disponibles</span></div>
-                <div className="home-source-card__footer"><span>{source.frequency}</span><b>Explorar <span aria-hidden="true">↗</span></b></div>
+                <div className="home-source-card__footer"><span>{source.lastUpdatedRelative || source.frequency}</span><b>Explorar <span aria-hidden="true">↗</span></b></div>
               </Link>
             ))}
           </div>

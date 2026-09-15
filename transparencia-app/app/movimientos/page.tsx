@@ -8,9 +8,8 @@ import {
   MOVIMIENTOS_TIPO_COLOR,
   MOVIMIENTOS_TIPO_EMOJI,
   MOVIMIENTOS_PIPELINE_METADATA,
-  latestMovementPublicationDate,
   MOTIVOS_CATEGORIAS,
-  isMovimientoDocumentoPendienteMayor30,
+  getMovimientoEstadoPublico,
   summarizeMovementFreshness,
   type MovimientoTipo,
   type MovimientoMotivoCategoria,
@@ -88,9 +87,9 @@ function MovimientosContent() {
     if (t && (t === "todos" || t in MOVIMIENTOS_TIPO_LABEL)) return t as MovimientoTipo | "todos";
     return "todos";
   });
-  const [filtroEstado, setFiltroEstado] = useState<"todos" | "verificado" | "en_confirmacion">(() => {
+  const [filtroEstado, setFiltroEstado] = useState<"todos" | "verificado" | "en_confirmacion" | "aun_no_confirmado">(() => {
     const e = searchParams.get("estado");
-    if (e === "verificado" || e === "en_confirmacion") return e;
+    if (e === "verificado" || e === "en_confirmacion" || e === "aun_no_confirmado") return e;
     if (searchParams.get("verificado") === "true") return "verificado";
     return "todos";
   });
@@ -164,12 +163,14 @@ function MovimientosContent() {
     return Array.from(set).sort((a, b) => a.localeCompare(b, "es-CL"));
   }, []);
 
+  const [nowMs] = useState<number>(() => Date.now());
+
   // Filtrado reactivo
   const filtrados = useMemo(() => {
     return MOVIMIENTOS.filter((m) => {
       if (filtroTipo !== "todos" && m.tipo !== filtroTipo) return false;
-      if (filtroEstado === "verificado" && m.estado !== "verificado") return false;
-      if (filtroEstado === "en_confirmacion" && m.estado === "verificado") return false;
+      const estadoPublico = getMovimientoEstadoPublico(m, nowMs);
+      if (filtroEstado !== "todos" && estadoPublico !== filtroEstado) return false;
       if (filtroMinisterio !== "todos" && m.ministerio !== filtroMinisterio) return false;
       if (filtroRegion !== "todos" && m.region !== filtroRegion) return false;
       if (filtroMotivo !== "todos" && m.salio?.motivo_categoria !== filtroMotivo) return false;
@@ -198,7 +199,7 @@ function MovimientosContent() {
 
       return true;
     }).sort((a, b) => (a.fecha === b.fecha ? 0 : a.fecha < b.fecha ? 1 : -1));
-  }, [filtroTipo, filtroEstado, filtroMinisterio, filtroRegion, filtroMotivo, busqueda]);
+  }, [filtroTipo, filtroEstado, filtroMinisterio, filtroRegion, filtroMotivo, busqueda, nowMs]);
 
   // Agrupación cronológica mensual
   const agrupados = useMemo(() => {
@@ -210,7 +211,6 @@ function MovimientosContent() {
     return Object.entries(grupos).sort((a, b) => (a[0] === b[0] ? 0 : a[0] < b[0] ? 1 : -1));
   }, [filtrados]);
 
-  const [nowMs] = useState<number>(() => Date.now());
   const [shareFeedback, setShareFeedback] = useState(false);
   const frescura = useMemo(
     () => summarizeMovementFreshness(MOVIMIENTOS_PIPELINE_METADATA, nowMs),
@@ -227,13 +227,9 @@ function MovimientosContent() {
     diasEntreCambios,
     totalVerificados,
     totalEnConfirmacion,
+    totalAunNoConfirmado,
     fechaActualizacionTexto,
-    ultimaEjecucionTexto,
-    ultimaPublicacionTexto,
     senalesEnConfirmacion,
-    fuentesRevisadas,
-    fuentesSinRespuesta,
-    ultimaRevisionFuentesTexto,
   } = useMemo(() => {
     const enGobierno = MOVIMIENTOS.filter((m) => m.fecha >= "2026-03-11");
     const totalGob = enGobierno.length;
@@ -288,21 +284,10 @@ function MovimientosContent() {
       promedioRotacion = (diasTranscurridos / totalGob).toFixed(1).replace(".", ",");
     }
 
-    const verificados = MOVIMIENTOS.filter((m) => m.estado === "verificado").length;
-    const enConfirmacion = MOVIMIENTOS.filter((m) => m.estado !== "verificado").length;
-    const ultimaPublicacion = latestMovementPublicationDate(MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA.signals);
-    const ultimaPublicacionDate = ultimaPublicacion ? new Date(`${ultimaPublicacion}T12:00:00Z`) : null;
-    const ultimaPublicacionTexto = ultimaPublicacionDate && !Number.isNaN(ultimaPublicacionDate.getTime())
-      ? ultimaPublicacionDate.toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Santiago" })
-      : "sin registro";
-    const fuentes = MOVIMIENTOS_PIPELINE_METADATA.source_health;
-    const fuentesSinRespuesta = fuentes.filter((source) => source.ok === false);
-    const ultimaRevisionFuentes = fuentes
-      .map((source) => String(source.fetchedAt ?? ""))
-      .filter((value) => Number.isFinite(Date.parse(value)))
-      .sort()
-      .at(-1);
-
+    const estadosPublicos = MOVIMIENTOS.map((movement) => getMovimientoEstadoPublico(movement, nowMs));
+    const verificados = estadosPublicos.filter((estado) => estado === "oficial").length;
+    const enConfirmacion = estadosPublicos.filter((estado) => estado === "en_confirmacion").length;
+    const aunNoConfirmado = estadosPublicos.filter((estado) => estado === "aun_no_confirmado").length;
     return {
       totalCambiosGobierno: totalGob,
       totalSalidas: salidas,
@@ -313,15 +298,9 @@ function MovimientosContent() {
       diasEntreCambios: promedioRotacion,
       totalVerificados: verificados,
       totalEnConfirmacion: enConfirmacion,
+      totalAunNoConfirmado: aunNoConfirmado,
       fechaActualizacionTexto: fechaTxt,
-      ultimaEjecucionTexto: formatPipelineTimestamp(
-        MOVIMIENTOS_PIPELINE_METADATA.last_success_at ?? MOVIMIENTOS_PIPELINE_METADATA.last_run,
-      ),
-      ultimaPublicacionTexto,
       senalesEnConfirmacion: Number(MOVIMIENTOS_PIPELINE_METADATA.stats.signals_en_confirmacion ?? 0),
-      fuentesRevisadas: fuentes,
-      fuentesSinRespuesta,
-      ultimaRevisionFuentesTexto: formatPipelineTimestamp(ultimaRevisionFuentes),
     };
   }, [nowMs]);
 
@@ -371,7 +350,7 @@ function MovimientosContent() {
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", marginBottom: "0.4rem" }}>
                 <span className="live-dot" aria-hidden="true" />
                 <span style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textTransform: "uppercase", letterSpacing: "0.06em" }}>
-                  Pipeline diario · Última ejecución exitosa {ultimaEjecucionTexto} · Última publicación detectada {ultimaPublicacionTexto} · Último evento efectivo {fechaActualizacionTexto}
+                  Datos actualizados por fuente · Último evento publicado {fechaActualizacionTexto}
                 </span>
               </div>
               <h1 style={{ fontSize: "clamp(1.75rem, 3.2vw, 2.4rem)", fontWeight: 900, margin: "0 0 0.5rem 0", letterSpacing: "-0.02em" }}>
@@ -471,50 +450,6 @@ function MovimientosContent() {
         </div>
       </section>
 
-      <section className="container-main" aria-labelledby="sources-health-heading" style={{ paddingTop: "1.25rem" }}>
-        <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 10, padding: "1rem 1.2rem" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "1rem", flexWrap: "wrap" }}>
-            <div>
-              <h2 id="sources-health-heading" style={{ fontSize: "0.95rem", margin: 0, color: "var(--text-1)" }}>
-                Estado de las fuentes
-              </h2>
-              <p style={{ margin: "0.3rem 0 0", color: "var(--text-2)", fontSize: "0.78rem", lineHeight: 1.45 }}>
-                La fecha del evento, la revisión de las fuentes y la publicación de la versión son hitos distintos.
-              </p>
-            </div>
-            <span style={{ color: "var(--text-muted)", fontSize: "0.72rem" }}>
-              Última revisión de fuentes: {ultimaRevisionFuentesTexto}
-            </span>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "0.55rem", marginTop: "0.8rem" }}>
-            {fuentesRevisadas.map((source) => {
-              const label = String(source.label ?? source.id ?? "Fuente sin nombre");
-              const ok = source.ok === true;
-              const status = source.status ? `HTTP ${String(source.status)}` : "sin respuesta";
-              const error = source.error ? ` · ${String(source.error)}` : "";
-              return (
-                <div key={String(source.id ?? label)} style={{ border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "0.65rem 0.75rem", background: "var(--surface)" }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
-                    <strong style={{ fontSize: "0.75rem", color: "var(--text-1)" }}>{label}</strong>
-                    <span style={{ color: ok ? "var(--ok)" : "var(--warn)", fontSize: "0.68rem", fontWeight: 700 }}>
-                      {ok ? "Respondió" : "No respondió"}
-                    </span>
-                  </div>
-                  <span style={{ display: "block", marginTop: "0.2rem", color: "var(--text-muted)", fontSize: "0.68rem" }}>
-                    {status}{error}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-          {fuentesSinRespuesta.length > 0 && (
-            <p role="status" style={{ margin: "0.7rem 0 0", color: "var(--warn)", fontSize: "0.75rem", lineHeight: 1.45 }}>
-              {fuentesSinRespuesta.length} fuente{fuentesSinRespuesta.length === 1 ? "" : "s"} no respondió en la última revisión. La versión anterior se conserva y esas señales no se promueven automáticamente a movimiento oficial.
-            </p>
-          )}
-        </div>
-      </section>
-
       {señalesPendientes.length > 0 && (
         <section className="container-main" aria-labelledby="signals-heading" style={{ paddingTop: "1.25rem" }}>
           <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 10, padding: "1rem 1.2rem" }}>
@@ -536,72 +471,43 @@ function MovimientosContent() {
         </section>
       )}
 
-      <section className="container-main" aria-labelledby="freshness-heading" style={{ paddingTop: "1.25rem" }}>
+      <section className="container-main" aria-labelledby="movement-status-heading" style={{ paddingTop: "1.25rem" }}>
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "1rem 1.2rem" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "flex-start", flexWrap: "wrap" }}>
+          <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "baseline", flexWrap: "wrap" }}>
             <div>
-              <h2 id="freshness-heading" style={{ fontSize: "0.95rem", margin: "0 0 0.35rem", color: "var(--text-1)" }}>
-                Estado de actualización
+              <h2 id="movement-status-heading" style={{ fontSize: "0.95rem", margin: 0, color: "var(--text-1)" }}>
+                Actualización de movimientos
               </h2>
-              <p style={{ margin: 0, color: "var(--text-2)", fontSize: "0.82rem", lineHeight: 1.45 }}>
-                Las fechas se mantienen separadas: una fuente puede consultarse hoy aunque su último evento publicado sea anterior.
+              <p style={{ margin: "0.3rem 0 0", color: "var(--text-2)", fontSize: "0.78rem", lineHeight: 1.45 }}>
+                Los registros se muestran según el respaldo documental disponible.
               </p>
             </div>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.35rem",
-                padding: "0.3rem 0.65rem",
-                borderRadius: 999,
-                border: "1px solid var(--border)",
-                color: frescura.state === "operativo" ? "var(--ok)" : "var(--warn)",
-                fontSize: "0.72rem",
-                fontWeight: 800,
-                textTransform: "uppercase",
-              }}
-            >
-              <span className="live-dot" aria-hidden="true" />
-              {frescura.state === "operativo" ? "Fuentes operativas" : frescura.state === "advertencia" ? "Advertencia de fuente" : "Sin fuente oficial disponible"}
+            <span style={{ color: "var(--ok)", fontSize: "0.72rem", fontWeight: 800 }}>
+              Datos actualizados por fuente
             </span>
           </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "0.65rem", marginTop: "0.9rem" }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: "0.65rem", marginTop: "0.9rem" }}>
             <div style={{ padding: "0.65rem 0.75rem", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--border)" }}>
-              <div style={{ color: "var(--text-muted)", fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Última ejecución exitosa</div>
+              <span style={{ color: "var(--text-muted)", fontSize: "0.7rem" }}>Última actualización</span>
               <strong style={{ display: "block", marginTop: "0.2rem", fontSize: "0.82rem" }}>{formatPipelineTimestamp(frescura.lastSuccessAt ?? undefined)}</strong>
             </div>
             <div style={{ padding: "0.65rem 0.75rem", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--border)" }}>
-              <div style={{ color: "var(--text-muted)", fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Último evento efectivo</div>
+              <span style={{ color: "var(--text-muted)", fontSize: "0.7rem" }}>Último evento publicado</span>
               <strong style={{ display: "block", marginTop: "0.2rem", fontSize: "0.82rem" }}>{frescura.lastEventDate ? formatFechaCorta(frescura.lastEventDate) : "sin registro"}</strong>
-              <span style={{ color: "var(--text-muted)", fontSize: "0.72rem" }}>{frescura.eventDaysAgo === null ? "sin fecha" : `${frescura.eventDaysAgo} días desde el evento`}</span>
             </div>
             <div style={{ padding: "0.65rem 0.75rem", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--border)" }}>
-              <div style={{ color: "var(--text-muted)", fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Fuentes oficiales</div>
-              <strong style={{ display: "block", marginTop: "0.2rem", fontSize: "0.82rem" }}>{frescura.connectors.filter((source) => source.tier === "official" && source.ok).length} disponibles</strong>
-              <span style={{ color: "var(--text-muted)", fontSize: "0.72rem" }}>{frescura.connectors.filter((source) => source.tier === "official").length} monitoreadas</span>
+              <span style={{ color: "var(--text-muted)", fontSize: "0.7rem" }}>Movimientos oficiales</span>
+              <strong style={{ display: "block", marginTop: "0.2rem", fontSize: "0.82rem" }}>{totalVerificados}</strong>
+            </div>
+            <div style={{ padding: "0.65rem 0.75rem", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--border)" }}>
+              <span style={{ color: "var(--text-muted)", fontSize: "0.7rem" }}>En confirmación</span>
+              <strong style={{ display: "block", marginTop: "0.2rem", fontSize: "0.82rem" }}>{totalEnConfirmacion}</strong>
+            </div>
+            <div style={{ padding: "0.65rem 0.75rem", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--border)" }}>
+              <span style={{ color: "var(--text-muted)", fontSize: "0.7rem" }}>Aún no confirmados</span>
+              <strong style={{ display: "block", marginTop: "0.2rem", fontSize: "0.82rem" }}>{totalAunNoConfirmado}</strong>
             </div>
           </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "0.45rem", marginTop: "0.9rem" }}>
-            {frescura.connectors.map((source) => (
-              <div key={source.id} style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem", alignItems: "center", padding: "0.55rem 0.65rem", borderTop: "1px solid var(--border)" }}>
-                <div style={{ minWidth: 0 }}>
-                  <strong style={{ display: "block", fontSize: "0.76rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{source.label}</strong>
-                  <span style={{ color: "var(--text-muted)", fontSize: "0.7rem" }}>{source.checkedAt ? `Consultada ${formatPipelineTimestamp(source.checkedAt)}` : "Sin consulta registrada"}</span>
-                </div>
-                <span style={{ color: source.ok ? "var(--ok)" : "var(--warn)", fontSize: "0.7rem", fontWeight: 800, whiteSpace: "nowrap" }}>
-                  {source.ok ? "Disponible" : `No disponible${source.status ? ` · ${source.status}` : ""}`}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {frescura.unavailableOfficial.length > 0 && (
-            <p style={{ margin: "0.75rem 0 0", color: "var(--warn)", fontSize: "0.76rem", lineHeight: 1.45 }}>
-              Algunas fuentes oficiales no respondieron en la última ejecución ({frescura.unavailableOfficial.map((source) => source.label).join(", ")}). La versión anterior se conserva y no se borran movimientos por una falla temporal.
-            </p>
-          )}
         </div>
       </section>
 
@@ -661,7 +567,7 @@ function MovimientosContent() {
             {/* Filtro Estado */}
             <select
               value={filtroEstado}
-              onChange={(e) => setFiltroEstado(e.target.value as "todos" | "verificado" | "en_confirmacion")}
+              onChange={(e) => setFiltroEstado(e.target.value as "todos" | "verificado" | "en_confirmacion" | "aun_no_confirmado")}
               style={{
                 padding: "0.48rem 0.65rem",
                 borderRadius: 6,
@@ -674,6 +580,7 @@ function MovimientosContent() {
               <option value="todos">Estado: Todos ({MOVIMIENTOS.length})</option>
               <option value="verificado">Verificado oficial ({totalVerificados})</option>
               <option value="en_confirmacion">En confirmación ({totalEnConfirmacion})</option>
+              <option value="aun_no_confirmado">Aún no confirmado ({totalAunNoConfirmado})</option>
             </select>
 
             {/* Filtro Ministerio */}
@@ -836,7 +743,9 @@ function MovimientosContent() {
                 </tr>
               </thead>
               <tbody>
-                {filtrados.map((mov) => (
+                {filtrados.map((mov) => {
+                  const estadoPublico = getMovimientoEstadoPublico(mov, nowMs);
+                  return (
                   <tr key={mov.id} style={{ borderBottom: "1px solid var(--border)", verticalAlign: "middle" }}>
                     <td style={{ padding: "0.65rem 0.85rem", whiteSpace: "nowrap", fontWeight: 600, fontSize: "0.78rem" }}>
                       {formatFechaCorta(mov.fecha)}
@@ -878,8 +787,10 @@ function MovimientosContent() {
                       <span style={{ color: "var(--text-2)" }}>{mov.salio?.motivo_categoria || mov.motivo}</span>
                     </td>
                     <td style={{ padding: "0.65rem 0.85rem", whiteSpace: "nowrap" }}>
-                      {mov.estado === "verificado" ? (
+                      {estadoPublico === "oficial" ? (
                         <span className="badge badge-ok" style={{ fontSize: "0.7rem" }}>Verificado</span>
+                      ) : estadoPublico === "aun_no_confirmado" ? (
+                        <span className="badge badge-alert" style={{ fontSize: "0.7rem" }}>Aún no confirmado</span>
                       ) : (
                         <span className="badge badge-warn" style={{ fontSize: "0.7rem" }}>Anunciado · en confirmación</span>
                       )}
@@ -899,7 +810,8 @@ function MovimientosContent() {
                       )}
                     </td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>
@@ -974,6 +886,7 @@ function MovimientosContent() {
 
                     {lista.map((mov) => {
                       const isExpanded = expandedIds.has(mov.id);
+                      const estadoPublico = getMovimientoEstadoPublico(mov, nowMs);
                       const tipoColor = MOVIMIENTOS_TIPO_COLOR[mov.tipo] || "var(--text-1)";
                       const tipoLabel = MOVIMIENTOS_TIPO_LABEL[mov.tipo] || mov.tipo;
                       const tipoEmoji = MOVIMIENTOS_TIPO_EMOJI[mov.tipo] || "•";
@@ -984,7 +897,7 @@ function MovimientosContent() {
                           style={{
                             position: "relative",
                             background: "var(--surface)",
-                            border: `1px solid ${mov.estado === "verificado" ? "var(--border)" : "var(--warn)"}`,
+                            border: `1px solid ${estadoPublico === "oficial" ? "var(--border)" : estadoPublico === "aun_no_confirmado" ? "var(--alert)" : "var(--warn)"}`,
                             borderRadius: 10,
                             padding: "1.25rem 1.4rem",
                             boxShadow: "var(--card-shadow)",
@@ -1039,9 +952,13 @@ function MovimientosContent() {
                             </div>
 
                             <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                              {mov.estado === "verificado" ? (
+                              {estadoPublico === "oficial" ? (
                                 <span className="badge badge-ok" style={{ fontSize: "0.72rem" }}>
                                   ✓ Verificado oficial
+                                </span>
+                              ) : estadoPublico === "aun_no_confirmado" ? (
+                                <span className="badge badge-alert" style={{ fontSize: "0.72rem" }}>
+                                  Aún no confirmado
                                 </span>
                               ) : (
                                 <span className="badge badge-warn" style={{ fontSize: "0.72rem" }}>
@@ -1053,12 +970,12 @@ function MovimientosContent() {
                                 <span
                                   className="badge badge-alert"
                                   style={{ fontSize: "0.7rem" }}
-                                  title={isMovimientoDocumentoPendienteMayor30(mov, nowMs)
-                                    ? "Han transcurrido más de 30 días desde la fecha del evento sin publicación de decreto oficial en Ley Chile / Diario Oficial."
+                                  title={estadoPublico === "aun_no_confirmado"
+                                    ? "Han transcurrido 90 días o más sin publicación de decreto oficial en Ley Chile / Diario Oficial."
                                     : "El anuncio está pendiente de su decreto o resolución oficial en Ley Chile / Diario Oficial."}
                                 >
-                                  {isMovimientoDocumentoPendienteMayor30(mov, nowMs)
-                                    ? "⚠️ Documento oficial pendiente (&gt;30d)"
+                                  {estadoPublico === "aun_no_confirmado"
+                                    ? "⚠️ Documento oficial pendiente (90+ días)"
                                     : "Documento oficial pendiente"}
                                 </span>
                               )}
@@ -1249,7 +1166,7 @@ function MovimientosContent() {
           }}
         >
           <p style={{ margin: "0 0 0.5rem 0" }}>
-            * <strong>Modelo Multifuente y Confirmación Oficial:</strong> El catálogo de movimientos indexa relevos y designaciones a partir de señales de prensa y monitoreo cívico (como <code>renunciaskast.cl</code> y agencias de noticias). Los eventos entran como <em>“En confirmación”</em> y solo son promovidos a <em>“Verificado oficial”</em> cuando cuentan con un Decreto Supremo indexado en Ley Chile (BCN) o el Diario Oficial. Si transcurren más de 30 días sin documento oficial, el registro conserva la advertencia <em>“Documento oficial pendiente”</em> y no se autopromueve.
+            * <strong>Modelo Multifuente y Confirmación Oficial:</strong> El catálogo de movimientos indexa relevos y designaciones a partir de señales de prensa y monitoreo cívico. Los eventos entran como <em>“En confirmación”</em> y solo son promovidos a <em>“Verificado oficial”</em> cuando cuentan con un Decreto Supremo indexado en Ley Chile (BCN) o el Diario Oficial. Si transcurren 90 días o más sin documento oficial, el registro pasa a <em>“Aún no confirmado”</em>, permanece visible y no se suma al total oficial.
           </p>
           <p style={{ margin: "0 0 0.5rem 0" }}>
             * <strong>Cobertura Temporal y Registros de Transición:</strong> El dataset histórico consolida 79 movimientos en total, de los cuales 78 corresponden a la gestión de gobierno iniciada el 11 de marzo de 2026 y 1 al período de transición previo debidamente documentado.

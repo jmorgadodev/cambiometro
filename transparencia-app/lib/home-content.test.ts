@@ -55,6 +55,9 @@ describe("promesas editoriales del inicio", () => {
     expect(home).toContain("Último cambio");
     expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.renuncias");
     expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.enConfirmacion");
+    expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.aunNoConfirmado");
+    expect(home).toContain("Datos actualizados por fuente");
+    expect(home).not.toContain("Corte generado automáticamente");
     expect(home).toContain('href="/movimientos"');
     expect(home).not.toContain("home-path--movement");
   });

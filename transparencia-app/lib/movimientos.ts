@@ -251,21 +251,46 @@ export const MOVIMIENTOS_PIPELINE_METADATA = {
   signals: payload.signals ?? [],
 };
 
-export const MOVIMIENTO_DOCUMENTO_PENDIENTE_DIAS = 30;
+export const MOVIMIENTO_DOCUMENTO_PENDIENTE_DIAS = 90;
+
+export type MovimientoEstadoPublico = "oficial" | "en_confirmacion" | "aun_no_confirmado";
+
+function fechaParaAntiguedad(movimiento: Pick<Movimiento, "fecha" | "fecha_deteccion">): string | null {
+  if (/^\d{4}-\d{2}-\d{2}$/.test(String(movimiento.fecha ?? ""))) return movimiento.fecha;
+  return /^\d{4}-\d{2}-\d{2}/.test(String(movimiento.fecha_deteccion ?? ""))
+    ? movimiento.fecha_deteccion.slice(0, 10)
+    : null;
+}
 
 /**
  * A provisional announcement can be pending an official act for any length
  * of time. The >30d warning is only valid after thirty calendar days from
  * the event date; recent announcements must not be presented as overdue.
  */
-export function isMovimientoDocumentoPendienteMayor30(
+export function isMovimientoDocumentoPendienteMayor90(
   movimiento: Pick<Movimiento, "documento_pendiente" | "fecha">,
   nowMs = Date.now(),
 ): boolean {
   if (!movimiento.documento_pendiente) return false;
-  const eventMs = Date.parse(`${movimiento.fecha.slice(0, 10)}T12:00:00Z`);
+  const eventDate = fechaParaAntiguedad(movimiento as Pick<Movimiento, "fecha" | "fecha_deteccion">);
+  if (!eventDate) return false;
+  const eventMs = Date.parse(`${eventDate}T12:00:00Z`);
   return Number.isFinite(eventMs)
     && nowMs - eventMs >= MOVIMIENTO_DOCUMENTO_PENDIENTE_DIAS * 86_400_000;
+}
+
+/** @deprecated Se conserva el nombre por compatibilidad; el umbral vigente es 90 días. */
+export const isMovimientoDocumentoPendienteMayor30 = isMovimientoDocumentoPendienteMayor90;
+
+export function getMovimientoEstadoPublico(
+  movimiento: Pick<Movimiento, "estado" | "documento_pendiente" | "fecha" | "fecha_deteccion">,
+  nowMs = Date.now(),
+): MovimientoEstadoPublico {
+  if (["verificado", "verificado_oficial", "corroborado"].includes(movimiento.estado)) return "oficial";
+  if (movimiento.documento_pendiente && isMovimientoDocumentoPendienteMayor90(movimiento, nowMs)) {
+    return "aun_no_confirmado";
+  }
+  return "en_confirmacion";
 }
 
 /**
@@ -291,6 +316,7 @@ export const MOVIMIENTOS_HOME_SUMMARY = {
   renuncias: movimientosGobierno.filter(esRenuncia).length,
   verificados: movimientosGobierno.filter(esVerificado).length,
   enConfirmacion: movimientosGobierno.filter((movement) => movement.estado === "en_confirmacion").length,
+  aunNoConfirmado: movimientosGobierno.filter((movement) => getMovimientoEstadoPublico(movement) === "aun_no_confirmado").length,
   ultimoEvento,
   ultimoCorte,
   diasSinCambios,
