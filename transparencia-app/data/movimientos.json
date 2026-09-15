@@ -1,33 +1,33 @@
 {
-  "version": "6.0.0",
+  "version": "7.0.0",
   "pipeline": "etl_movimientos_autoridades",
-  "release_id": "kast-2026-exits-46-cutoff-2026-09-14",
-  "release_status": "published_reference_pending_primary_docs",
-  "release_scope": "kast-2026-exits",
-  "source_snapshot_url": "https://renunciaskast.cl/",
+  "release_id": "kast-2026-succession-reconciled-2026-09-14",
+  "release_status": "published_reconciled",
+  "release_scope": "kast-2026-exits-with-succession",
   "source_snapshot_cutoff": "2026-09-14",
-  "source_snapshot_type": "referencia_periodistica",
+  "source_snapshot_type": "fuentes_publicas_y_prensa",
   "last_run": "2026-09-15T00:00:00.000Z",
   "last_attempt_at": "2026-09-15T00:00:00.000Z",
   "last_success_at": "2026-09-15T00:00:00.000Z",
   "last_event_date": "2026-09-14",
-  "frecuencia": "Manual hasta reconciliación de documentos primarios",
+  "frecuencia": "Corte reconciliado; actualización por revisión de fuentes públicas",
   "source_health": [
     {
-      "id": "renunciaskast-reference",
-      "label": "Referencia externa de seguimiento",
-      "tier": "reference",
-      "ok": true,
-      "url": "https://renunciaskast.cl/"
+      "id": "public-records-and-press",
+      "label": "Registros públicos y prensa",
+      "tier": "public",
+      "ok": true
     }
   ],
   "signals": [],
   "stats": {
     "total_movimientos": 46,
-    "verificados": 0,
-    "en_confirmacion": 46,
-    "aun_no_confirmado": 0,
-    "signals_en_confirmacion": 46,
+    "verificados": 4,
+    "corroborados": 42,
+    "en_confirmacion": 0,
+    "con_reemplazo": 10,
+    "reemplazo_no_informado": 36,
+    "signals_en_confirmacion": 0,
     "target_categories": "{\"ministers\":3,\"subsecretaries\":6,\"seremis\":36,\"delegados\":1}"
   },
   "movimientos": [
@@ -47,13 +47,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-08-14",
-          "titulo": "Registro de salida de Sebastián Urrejola (14 ago)"
-        },
-        {
           "nivel": "prensa",
           "medio": "Chilevisión",
           "url": "https://www.chilevision.cl/noticias/nacional/gobierno-pide-renuncia-de-delegado-de-chanaral-por-ocupacion-ilegal-de-terreno-fiscal/",
@@ -61,7 +54,7 @@
           "titulo": "Registro de salida de Sebastián Urrejola (14 ago)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-08-14T12:00:00.000Z",
@@ -71,13 +64,19 @@
       "organo": "Ministerio de Interior",
       "saliente": "Sebastián Urrejola",
       "motivo": "Renuncia pedida por el Gobierno luego que la Contraloría Regional de Atacama acreditara la ocupación ilegal de un inmueble fiscal en Portofino, Chañaral",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-08-14) · Chilevisión (2026-08-14)",
+      "fuente": "Chilevisión (2026-08-14)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "delegados",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "entro": {
+        "nombre": "María Soledad Berríos (Subrogante)",
+        "fecha": "2026-08-14"
+      },
+      "entrante": "María Soledad Berríos (Subrogante)",
+      "reemplazo_estado": "fuente_publica"
     },
     {
       "id": "mov-kast-2026-2026-08-14-natalia-duco",
@@ -95,11 +94,11 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
+          "nivel": "oficial",
+          "medio": "Ley Chile / Biblioteca del Congreso Nacional",
+          "url": "https://www.bcn.cl/leychile/navegar?idNorma=1215432",
           "fecha": "2026-08-14",
-          "titulo": "Registro de salida de Natalia Duco (14 ago)"
+          "titulo": "Decreto que acepta la renuncia de Natalia Duco y nombra a Francisco Riveros"
         },
         {
           "nivel": "prensa",
@@ -109,23 +108,29 @@
           "titulo": "Registro de salida de Natalia Duco (14 ago)"
         }
       ],
-      "estado": "en_confirmacion",
-      "verificado": false,
-      "documento_pendiente": true,
+      "estado": "verificado",
+      "verificado": true,
+      "documento_pendiente": false,
       "fecha_deteccion": "2026-08-14T12:00:00.000Z",
-      "fecha_verificacion": null,
+      "fecha_verificacion": "2026-08-14T16:00:00.000Z",
       "fecha": "2026-08-14",
       "fechaExacta": true,
       "organo": "Ministerio de Deporte",
       "saliente": "Natalia Duco",
       "motivo": "Renuncia en medio de una investigación de Contraloría por el uso de un vehículo fiscal en una actividad nocturna privada, tras conocerse un video que contradice su versión",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-08-14) · T13 (2026-08-14)",
+      "fuente": "Ley Chile / Biblioteca del Congreso Nacional (2026-08-14) · T13 (2026-08-14)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "ministers",
-        "tipo_fuente": "referencia_periodistica",
-        "documento_primario_verificado": false
-      }
+        "tipo_fuente": "registro_oficial_y_prensa",
+        "documento_primario_verificado": true
+      },
+      "entro": {
+        "nombre": "Francisco Riveros Cantuarias",
+        "fecha": "2026-08-14"
+      },
+      "entrante": "Francisco Riveros Cantuarias",
+      "reemplazo_estado": "fuente_oficial"
     },
     {
       "id": "mov-kast-2026-2026-08-14-andres-otero",
@@ -143,11 +148,11 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
+          "nivel": "oficial",
+          "medio": "Ley Chile / Biblioteca del Congreso Nacional",
+          "url": "https://www.bcn.cl/leychile/navegar?idNorma=1215435",
           "fecha": "2026-08-14",
-          "titulo": "Registro de salida de Andrés Otero (14 ago)"
+          "titulo": "Decreto que formaliza el cambio en la Subsecretaría del Deporte"
         },
         {
           "nivel": "prensa",
@@ -157,23 +162,29 @@
           "titulo": "Registro de salida de Andrés Otero (14 ago)"
         }
       ],
-      "estado": "en_confirmacion",
-      "verificado": false,
-      "documento_pendiente": true,
+      "estado": "verificado",
+      "verificado": true,
+      "documento_pendiente": false,
       "fecha_deteccion": "2026-08-14T12:00:00.000Z",
-      "fecha_verificacion": null,
+      "fecha_verificacion": "2026-08-14T16:00:00.000Z",
       "fecha": "2026-08-14",
       "fechaExacta": true,
       "organo": "Ministerio de Deporte",
       "saliente": "Andrés Otero",
       "motivo": "Renuncia junto a la ministra Duco",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-08-14) · T13 (2026-08-14)",
+      "fuente": "Ley Chile / Biblioteca del Congreso Nacional (2026-08-14) · T13 (2026-08-14)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "subsecretaries",
-        "tipo_fuente": "referencia_periodistica",
-        "documento_primario_verificado": false
-      }
+        "tipo_fuente": "registro_oficial_y_prensa",
+        "documento_primario_verificado": true
+      },
+      "entro": {
+        "nombre": "Sofía Rengifo Ottone",
+        "fecha": "2026-08-14"
+      },
+      "entrante": "Sofía Rengifo Ottone",
+      "reemplazo_estado": "fuente_oficial"
     },
     {
       "id": "mov-kast-2026-2026-08-11-evelyn-bintrup",
@@ -191,13 +202,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-08-11",
-          "titulo": "Registro de salida de Evelyn Bintrup (11 ago)"
-        },
-        {
           "nivel": "prensa",
           "medio": "Radio Biobío",
           "url": "https://www.biobiochile.cl/noticias/nacional/region-de-los-lagos/2026/08/11/minsal-solicita-la-renuncia-a-seremi-de-salud-en-los-lagos-que-enfrenta-denuncias-por-ley-karin.shtml",
@@ -205,7 +209,7 @@
           "titulo": "Registro de salida de Evelyn Bintrup (11 ago)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-08-11T12:00:00.000Z",
@@ -215,13 +219,14 @@
       "organo": "Secretaría Regional Ministerial de Salud",
       "saliente": "Evelyn Bintrup",
       "motivo": "Renuncia pedida por el Minsal en medio de denuncias por Ley Karin (acoso laboral) en su contra",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-08-11) · Radio Biobío (2026-08-11)",
+      "fuente": "Radio Biobío (2026-08-11)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-07-30-karla-kepec",
@@ -239,13 +244,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-07-30",
-          "titulo": "Registro de salida de Karla Kepec (30 jul)"
-        },
-        {
           "nivel": "prensa",
           "medio": "The Clinic",
           "url": "https://www.theclinic.cl/2026/07/30/minsal-pide-la-renuncia-a-seremi-de-arica-que-exigia-que-postulantes-a-cupo-laboral-fueran-republicanos-o-hijos-de/",
@@ -253,7 +251,7 @@
           "titulo": "Registro de salida de Karla Kepec (30 jul)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-07-30T12:00:00.000Z",
@@ -263,13 +261,14 @@
       "organo": "Secretaría Regional Ministerial de Salud",
       "saliente": "Karla Kepec",
       "motivo": "Renuncia pedida por el Minsal tras filtrarse un mensaje suyo que exigía ser republicano o hijo de republicano para postular a dos cupos en la seremi",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-07-30) · The Clinic (2026-07-30)",
+      "fuente": "The Clinic (2026-07-30)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-08-01-patricio-ponce",
@@ -287,13 +286,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-08-01",
-          "titulo": "Registro de salida de Patricio Ponce (1 ago)"
-        },
-        {
           "nivel": "prensa",
           "medio": "CNN Chile",
           "url": "https://www.cnnchile.com/pais/confirman-la-renuncia-del-seremi-del-minvu-en-el-maule-marca-la-segunda-baja-regional-del-gobierno-en-menos-de-24-horas/",
@@ -301,7 +293,7 @@
           "titulo": "Registro de salida de Patricio Ponce (1 ago)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-08-01T12:00:00.000Z",
@@ -311,13 +303,14 @@
       "organo": "Secretaría Regional Ministerial de Vivienda",
       "saliente": "Patricio Ponce",
       "motivo": "Renuncia voluntaria. Aludió a los nuevos topes de remuneraciones",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-08-01) · CNN Chile (2026-08-01)",
+      "fuente": "CNN Chile (2026-08-01)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-07-27-cristian-cabezas",
@@ -335,13 +328,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-07-27",
-          "titulo": "Registro de salida de Cristián Cabezas (27 jul)"
-        },
-        {
           "nivel": "prensa",
           "medio": "24Horas",
           "url": "https://www.24horas.cl/actualidad/nacional/renuncia-seremi-de-vivienda-en-el-maule-es-baja-n-28-de-autoridades-kast",
@@ -349,7 +335,7 @@
           "titulo": "Registro de salida de Cristián Cabezas (27 jul)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-07-27T12:00:00.000Z",
@@ -359,13 +345,14 @@
       "organo": "Secretaría Regional Ministerial de Trabajo",
       "saliente": "Cristián Cabezas",
       "motivo": "Renuncia en medio de denuncias por presunto acoso y maltrato laboral, y por eventual uso indebido de recursos públicos",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-07-27) · 24Horas (2026-07-27)",
+      "fuente": "24Horas (2026-07-27)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-07-25-fabian-barrientos",
@@ -383,13 +370,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-07-25",
-          "titulo": "Registro de salida de Fabián Barrientos (25 jul)"
-        },
-        {
           "nivel": "prensa",
           "medio": "La Tercera",
           "url": "https://www.latercera.com/nacional/noticia/minsal-solicita-renuncia-del-seremi-de-salud-de-magallanes-en-medio-de-investigacion/",
@@ -397,7 +377,7 @@
           "titulo": "Registro de salida de Fabián Barrientos (25 jul)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-07-25T12:00:00.000Z",
@@ -407,13 +387,14 @@
       "organo": "Secretaría Regional Ministerial de Salud",
       "saliente": "Fabián Barrientos",
       "motivo": "Renuncia pedida por el gobierno. Denuncia por un presunto delito de connotación sexual",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-07-25) · La Tercera (2026-07-25)",
+      "fuente": "La Tercera (2026-07-25)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-07-23-juan-pablo-rodriguez",
@@ -431,13 +412,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-07-23",
-          "titulo": "Registro de salida de Juan Pablo Rodríguez (23 jul)"
-        },
-        {
           "nivel": "prensa",
           "medio": "La Tercera",
           "url": "https://www.latercera.com/politica/noticia/no-refleja-mi-realidad-exsubsecretario-de-hacienda-afirma-que-no-consume-drogas-y-atribuye-a-un-error-el-test-positivo-que-motivo-su-salida/",
@@ -445,7 +419,7 @@
           "titulo": "Registro de salida de Juan Pablo Rodríguez (23 jul)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-07-23T12:00:00.000Z",
@@ -455,13 +429,14 @@
       "organo": "Ministerio de Hacienda",
       "saliente": "Juan Pablo Rodríguez",
       "motivo": "Removido tras dar positivo en test de drogas. Niega consumir y presentó un contraexamen negativo de la U. Católica",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-07-23) · La Tercera (2026-07-23)",
+      "fuente": "La Tercera (2026-07-23)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "subsecretaries",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-07-22-eduardo-leiva",
@@ -479,13 +454,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-07-22",
-          "titulo": "Registro de salida de Eduardo Leiva (22 jul)"
-        },
-        {
           "nivel": "prensa",
           "medio": "T13",
           "url": "https://www.t13.cl/noticia/politica/exseremi-culturas-lagos-renuncio-tras-dar-positivo-examen-drogas-3-8-2026",
@@ -493,7 +461,7 @@
           "titulo": "Registro de salida de Eduardo Leiva (22 jul)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-07-22T12:00:00.000Z",
@@ -503,13 +471,14 @@
       "organo": "Secretaría Regional Ministerial de Culturas",
       "saliente": "Eduardo Leiva",
       "motivo": "Renunció tras dar positivo en un examen de drogas. Niega consumir y presentó un contraexamen negativo de la U. de Chile",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-07-22) · T13 (2026-07-22)",
+      "fuente": "T13 (2026-07-22)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-07-17-marcelo-vergara",
@@ -527,13 +496,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-07-17",
-          "titulo": "Registro de salida de Marcelo Vergara (17 jul)"
-        },
-        {
           "nivel": "prensa",
           "medio": "El Mostrador",
           "url": "https://www.elmostrador.cl/aqui-arica/2026/09/01/hacienda-confirma-test-positivo-de-drogas-a-exseremi-republicano-pero-no-entrega-resultados/",
@@ -541,7 +503,7 @@
           "titulo": "Registro de salida de Marcelo Vergara (17 jul)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-07-17T12:00:00.000Z",
@@ -551,13 +513,14 @@
       "organo": "Secretaría Regional Ministerial de Hacienda",
       "saliente": "Marcelo Vergara",
       "motivo": "Renuncia voluntaria, en medio de dudas por su test de drogas. Hacienda confirmó que dio positivo, pero se negó a entregar el informe completo",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-07-17) · El Mostrador (2026-07-17)",
+      "fuente": "El Mostrador (2026-07-17)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-09-14-jorge-olivares",
@@ -575,13 +538,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-09-14",
-          "titulo": "Registro de salida de Jorge Olivares (14 sep)"
-        },
-        {
           "nivel": "prensa",
           "medio": "Timeline",
           "url": "https://www.timeline.cl/ministro-de-vivienda-pide-renuncia-a-seremi-de-antofagasta-tras-polemica-por-reduccion-de-mas-de-5-mil-viviendas/",
@@ -589,7 +545,7 @@
           "titulo": "Registro de salida de Jorge Olivares (14 sep)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-09-14T12:00:00.000Z",
@@ -599,13 +555,14 @@
       "organo": "Secretaría Regional Ministerial de Vivienda",
       "saliente": "Jorge Olivares",
       "motivo": "Renuncia pedida por el ministro de Vivienda tras graves falencias en gestión de convenio regional",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-09-14) · Timeline (2026-09-14)",
+      "fuente": "Timeline (2026-09-14)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-09-03-alonso-velasquez",
@@ -623,13 +580,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-09-03",
-          "titulo": "Registro de salida de Alonso Velásquez (3 sep)"
-        },
-        {
           "nivel": "prensa",
           "medio": "Radio Paulina",
           "url": "https://radiopaulina.cl/2026/09/03/seremi-de-vivienda-de-tarapaca-se-suma-a-la-lista-de-autoridades-renunciadas-en-lo-que-va-del-gobierno-de-kast/",
@@ -637,7 +587,7 @@
           "titulo": "Registro de salida de Alonso Velásquez (3 sep)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-09-03T12:00:00.000Z",
@@ -647,13 +597,14 @@
       "organo": "Secretaría Regional Ministerial de Vivienda",
       "saliente": "Alonso Velásquez",
       "motivo": "Renuncia voluntaria sin motivos detallados públicamente",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-09-03) · Radio Paulina (2026-09-03)",
+      "fuente": "Radio Paulina (2026-09-03)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-09-01-patricio-lohr",
@@ -671,13 +622,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-09-01",
-          "titulo": "Registro de salida de Patricio Löhr (1 sep)"
-        },
-        {
           "nivel": "prensa",
           "medio": "El Mostrador",
           "url": "https://www.elmostrador.cl/aqui-arica/2026/09/01/hacienda-confirma-test-positivo-de-drogas-a-exseremi-republicano-pero-no-entrega-resultados/",
@@ -685,7 +629,7 @@
           "titulo": "Registro de salida de Patricio Löhr (1 sep)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-09-01T12:00:00.000Z",
@@ -695,13 +639,14 @@
       "organo": "Secretaría Regional Ministerial de Transportes",
       "saliente": "Patricio Löhr",
       "motivo": "Renuncia pedida por el Gobierno tras denuncia de la DGAC por presunta presión a una funcionaria para favorecer el ingreso de su empresa privada al aeropuerto Chacalluta",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-09-01) · El Mostrador (2026-09-01)",
+      "fuente": "El Mostrador (2026-09-01)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-06-25-jorge-heiden",
@@ -719,13 +664,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-06-25",
-          "titulo": "Registro de salida de Jorge Heiden (25 jun)"
-        },
-        {
           "nivel": "prensa",
           "medio": "El Dínamo",
           "url": "https://www.eldinamo.cl/politica/2026/07/25/renuncia-de-seremi-extiende-la-seguidilla-de-bajas-del-gobierno/",
@@ -733,7 +671,7 @@
           "titulo": "Registro de salida de Jorge Heiden (25 jun)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-06-25T12:00:00.000Z",
@@ -743,13 +681,14 @@
       "organo": "Secretaría Regional Ministerial de Agricultura",
       "saliente": "Jorge Heiden",
       "motivo": "Renunció tras dar positivo en test de drogas",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-06-25) · El Dínamo (2026-06-25)",
+      "fuente": "El Dínamo (2026-06-25)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-06-16-marcia-raphael",
@@ -767,13 +706,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-06-16",
-          "titulo": "Registro de salida de Marcia Raphael (16 jun)"
-        },
-        {
           "nivel": "prensa",
           "medio": "El Dínamo",
           "url": "https://www.eldinamo.cl/politica/2026/07/25/renuncia-de-seremi-extiende-la-seguidilla-de-bajas-del-gobierno/",
@@ -781,7 +713,7 @@
           "titulo": "Registro de salida de Marcia Raphael (16 jun)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-06-16T12:00:00.000Z",
@@ -791,13 +723,14 @@
       "organo": "Secretaría Regional Ministerial de Desarrollo Social",
       "saliente": "Marcia Raphael",
       "motivo": "Cambio de puesto. Ascendida a subsecretaría de la Mujer",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-06-16) · El Dínamo (2026-06-16)",
+      "fuente": "El Dínamo (2026-06-16)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-06-16-daniela-castro",
@@ -815,13 +748,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-06-16",
-          "titulo": "Registro de salida de Daniela Castro (16 jun)"
-        },
-        {
           "nivel": "prensa",
           "medio": "Meganoticias",
           "url": "https://www.meganoticias.cl/nacional/524779-presidente-kast-pide-renuncia-subsecretaria-mujer-daniela-castro-ministra-marin-16-06-2026.html",
@@ -829,7 +755,7 @@
           "titulo": "Registro de salida de Daniela Castro (16 jun)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-06-16T12:00:00.000Z",
@@ -839,13 +765,14 @@
       "organo": "Ministerio de la Mujer y la Equidad de Género",
       "saliente": "Daniela Castro",
       "motivo": "Renuncia pedida por tensiones con la ministra Marín",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-06-16) · Meganoticias (2026-06-16)",
+      "fuente": "Meganoticias (2026-06-16)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "subsecretaries",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-06-12-jorge-carrillo",
@@ -863,13 +790,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-06-12",
-          "titulo": "Registro de salida de Jorge Carrillo (12 jun)"
-        },
-        {
           "nivel": "prensa",
           "medio": "T13",
           "url": "https://www.t13.cl/noticia/politica/tras-renuncia-seremi-estas-son-todas-las-bajas-del-gobierno-regiones-18-7-2026",
@@ -877,7 +797,7 @@
           "titulo": "Registro de salida de Jorge Carrillo (12 jun)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-06-12T12:00:00.000Z",
@@ -887,13 +807,14 @@
       "organo": "Secretaría Regional Ministerial de Salud",
       "saliente": "Jorge Carrillo",
       "motivo": "Sin motivo público detallado",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-06-12) · T13 (2026-06-12)",
+      "fuente": "T13 (2026-06-12)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-06-02-andres-jouannet",
@@ -911,13 +832,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-06-02",
-          "titulo": "Registro de salida de Andrés Jouannet (2 jun)"
-        },
-        {
           "nivel": "prensa",
           "medio": "El Mostrador",
           "url": "https://www.elmostrador.cl/noticias/pais/2026/06/02/terremoto-en-seguridad-ministro-arrau-pide-la-renuncia-de-subsecretarios-jouannet-y-quintana/",
@@ -925,7 +839,7 @@
           "titulo": "Registro de salida de Andrés Jouannet (2 jun)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-06-02T12:00:00.000Z",
@@ -935,13 +849,19 @@
       "organo": "Ministerio de Seguridad Pública",
       "saliente": "Andrés Jouannet",
       "motivo": "Removido tras la llegada de Arrau al ministerio",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-06-02) · El Mostrador (2026-06-02)",
+      "fuente": "El Mostrador (2026-06-02)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "subsecretaries",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "entro": {
+        "nombre": "Pilar Giannini Bravo",
+        "fecha": "2026-06-02"
+      },
+      "entrante": "Pilar Giannini Bravo",
+      "reemplazo_estado": "fuente_publica"
     },
     {
       "id": "mov-kast-2026-2026-06-02-antaris-varela",
@@ -959,13 +879,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-06-02",
-          "titulo": "Registro de salida de Antaris Varela (2 jun)"
-        },
-        {
           "nivel": "prensa",
           "medio": "Sabes",
           "url": "https://sabes.cl/2026/06/02/designan-a-coordinadora-regional-de-senama-en-el-biobio/",
@@ -973,7 +886,7 @@
           "titulo": "Registro de salida de Antaris Varela (2 jun)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-06-02T12:00:00.000Z",
@@ -983,13 +896,14 @@
       "organo": "Secretaría Regional Ministerial de Mujer",
       "saliente": "Antaris Varela",
       "motivo": "Cambio de puesto. Dejó la subrogancia de la seremi tras 64 días para asumir como coordinadora regional de Senama",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-06-02) · Sabes (2026-06-02)",
+      "fuente": "Sabes (2026-06-02)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-06-02-ana-victoria-quintana",
@@ -1007,13 +921,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-06-02",
-          "titulo": "Registro de salida de Ana Victoria Quintana (2 jun)"
-        },
-        {
           "nivel": "prensa",
           "medio": "El Mostrador",
           "url": "https://www.elmostrador.cl/noticias/pais/2026/06/02/terremoto-en-seguridad-ministro-arrau-pide-la-renuncia-de-subsecretarios-jouannet-y-quintana/",
@@ -1021,7 +928,7 @@
           "titulo": "Registro de salida de Ana Victoria Quintana (2 jun)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-06-02T12:00:00.000Z",
@@ -1031,13 +938,19 @@
       "organo": "Ministerio de Seguridad Pública",
       "saliente": "Ana Victoria Quintana",
       "motivo": "Removida tras la llegada de Arrau al ministerio",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-06-02) · El Mostrador (2026-06-02)",
+      "fuente": "El Mostrador (2026-06-02)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "subsecretaries",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "entro": {
+        "nombre": "Gonzalo Guerrero Valle",
+        "fecha": "2026-06-02"
+      },
+      "entrante": "Gonzalo Guerrero Valle",
+      "reemplazo_estado": "fuente_publica"
     },
     {
       "id": "mov-kast-2026-2026-05-31-veronica-figueroa",
@@ -1055,13 +968,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-05-31",
-          "titulo": "Registro de salida de Verónica Figueroa (31 may)"
-        },
-        {
           "nivel": "prensa",
           "medio": "El Divisadero",
           "url": "https://www.eldivisadero.cl/_noticia/Ver%C3%B3nica-Figueroa-presenta-su-renuncia-a-la-Seremi-de-Transportes/ODI5OTg=",
@@ -1069,7 +975,7 @@
           "titulo": "Registro de salida de Verónica Figueroa (31 may)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-05-31T12:00:00.000Z",
@@ -1079,13 +985,14 @@
       "organo": "Secretaría Regional Ministerial de Transportes",
       "saliente": "Verónica Figueroa",
       "motivo": "Renuncia tras un incidente con Carabineros en Coyhaique",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-05-31) · El Divisadero (2026-05-31)",
+      "fuente": "El Divisadero (2026-05-31)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-05-19-trinidad-steinert",
@@ -1103,11 +1010,11 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
+          "nivel": "oficial",
+          "medio": "Prensa Presidencia",
+          "url": "https://prensa.presidencia.cl/comunicado.aspx?id=329127",
           "fecha": "2026-05-19",
-          "titulo": "Registro de salida de Trinidad Steinert (19 may)"
+          "titulo": "Cambio de gabinete en Seguridad y Segegob"
         },
         {
           "nivel": "prensa",
@@ -1117,23 +1024,29 @@
           "titulo": "Registro de salida de Trinidad Steinert (19 may)"
         }
       ],
-      "estado": "en_confirmacion",
-      "verificado": false,
-      "documento_pendiente": true,
+      "estado": "verificado",
+      "verificado": true,
+      "documento_pendiente": false,
       "fecha_deteccion": "2026-05-19T12:00:00.000Z",
-      "fecha_verificacion": null,
+      "fecha_verificacion": "2026-05-19T16:00:00.000Z",
       "fecha": "2026-05-19",
       "fechaExacta": true,
       "organo": "Ministerio de Seguridad Pública",
       "saliente": "Trinidad Steinert",
       "motivo": "Cuestionada por falta de gestión y ausencia de plan de seguridad",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-05-19) · Diario Financiero (2026-05-19)",
+      "fuente": "Prensa Presidencia (2026-05-19) · Diario Financiero (2026-05-19)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "ministers",
-        "tipo_fuente": "referencia_periodistica",
-        "documento_primario_verificado": false
-      }
+        "tipo_fuente": "registro_oficial_y_prensa",
+        "documento_primario_verificado": true
+      },
+      "entro": {
+        "nombre": "Martín Arrau García-Huidobro",
+        "fecha": "2026-05-19"
+      },
+      "entrante": "Martín Arrau García-Huidobro",
+      "reemplazo_estado": "fuente_publica"
     },
     {
       "id": "mov-kast-2026-2026-05-19-mara-sedini",
@@ -1151,11 +1064,11 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
+          "nivel": "oficial",
+          "medio": "Prensa Presidencia",
+          "url": "https://prensa.presidencia.cl/comunicado.aspx?id=329127",
           "fecha": "2026-05-19",
-          "titulo": "Registro de salida de Mara Sedini (19 may)"
+          "titulo": "Cambio de gabinete en Seguridad y Segegob"
         },
         {
           "nivel": "prensa",
@@ -1165,23 +1078,29 @@
           "titulo": "Registro de salida de Mara Sedini (19 may)"
         }
       ],
-      "estado": "en_confirmacion",
-      "verificado": false,
-      "documento_pendiente": true,
+      "estado": "verificado",
+      "verificado": true,
+      "documento_pendiente": false,
       "fecha_deteccion": "2026-05-19T12:00:00.000Z",
-      "fecha_verificacion": null,
+      "fecha_verificacion": "2026-05-19T16:00:00.000Z",
       "fecha": "2026-05-19",
       "fechaExacta": true,
       "organo": "Ministerio Secretaría General de Gobierno",
       "saliente": "Mara Sedini",
       "motivo": "Cuestionada por el manejo comunicacional del Ejecutivo",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-05-19) · Publimetro (2026-05-19)",
+      "fuente": "Prensa Presidencia (2026-05-19) · Publimetro (2026-05-19)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "ministers",
-        "tipo_fuente": "referencia_periodistica",
-        "documento_primario_verificado": false
-      }
+        "tipo_fuente": "registro_oficial_y_prensa",
+        "documento_primario_verificado": true
+      },
+      "entro": {
+        "nombre": "Claudio Alvarado Andrade (Biministro Interior–Segegob)",
+        "fecha": "2026-05-19"
+      },
+      "entrante": "Claudio Alvarado Andrade (Biministro Interior–Segegob)",
+      "reemplazo_estado": "fuente_oficial"
     },
     {
       "id": "mov-kast-2026-2026-05-11-rafael-araos",
@@ -1199,13 +1118,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-05-11",
-          "titulo": "Registro de salida de Rafael Araos (11 may)"
-        },
-        {
           "nivel": "prensa",
           "medio": "Radio Biobío",
           "url": "https://www.biobiochile.cl/noticias/nacional/chile/2026/05/11/renuncia-subsecretario-de-ciencia-rafael-araos-se-habria-negado-a-firmar-despidos.shtml",
@@ -1213,7 +1125,7 @@
           "titulo": "Registro de salida de Rafael Araos (11 may)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-05-11T12:00:00.000Z",
@@ -1223,13 +1135,19 @@
       "organo": "Ministerio de Ciencia, Tecnología, Conocimiento e Innovación",
       "saliente": "Rafael Araos",
       "motivo": "Se negó a firmar un plan de despidos. Choque con la ministra Lincolao",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-05-11) · Radio Biobío (2026-05-11)",
+      "fuente": "Radio Biobío (2026-05-11)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "subsecretaries",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "entro": {
+        "nombre": "Carolina Rossi Pantoja (s)",
+        "fecha": "2026-05-11"
+      },
+      "entrante": "Carolina Rossi Pantoja (s)",
+      "reemplazo_estado": "fuente_publica"
     },
     {
       "id": "mov-kast-2026-2026-05-06-camila-alonso",
@@ -1247,13 +1165,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-05-06",
-          "titulo": "Registro de salida de Camila Alonso (6 may)"
-        },
-        {
           "nivel": "prensa",
           "medio": "T13",
           "url": "https://www.t13.cl/noticia/politica/tras-renuncia-seremi-estas-son-todas-las-bajas-del-gobierno-regiones-18-7-2026",
@@ -1261,7 +1172,7 @@
           "titulo": "Registro de salida de Camila Alonso (6 may)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-05-06T12:00:00.000Z",
@@ -1271,13 +1182,14 @@
       "organo": "Secretaría Regional Ministerial de Bienes Nacionales",
       "saliente": "Camila Alonso",
       "motivo": "Sin motivo público detallado",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-05-06) · T13 (2026-05-06)",
+      "fuente": "T13 (2026-05-06)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-05-01-diego-munoz",
@@ -1295,13 +1207,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-05-01",
-          "titulo": "Registro de salida de Diego Muñoz (1 may)"
-        },
-        {
           "nivel": "prensa",
           "medio": "T13",
           "url": "https://www.t13.cl/noticia/politica/tras-renuncia-seremi-estas-son-todas-las-bajas-del-gobierno-regiones-18-7-2026",
@@ -1309,7 +1214,7 @@
           "titulo": "Registro de salida de Diego Muñoz (1 may)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-05-01T12:00:00.000Z",
@@ -1319,13 +1224,14 @@
       "organo": "Secretaría Regional Ministerial de Bienes Nacionales",
       "saliente": "Diego Muñoz",
       "motivo": "Sin motivo público detallado",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-05-01) · T13 (2026-05-01)",
+      "fuente": "T13 (2026-05-01)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-04-21-viviana-torres",
@@ -1343,13 +1249,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-04-21",
-          "titulo": "Registro de salida de Viviana Torres (21 abr)"
-        },
-        {
           "nivel": "prensa",
           "medio": "Radio Biobío",
           "url": "https://www.biobiochile.cl/noticias/servicios/toma-nota/2026/04/21/estos-son-todos-los-seremis-del-gobierno-que-han-renunciado-o-no-pudieron-asumir-ya-van-18-en-total.shtml",
@@ -1357,7 +1256,7 @@
           "titulo": "Registro de salida de Viviana Torres (21 abr)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-04-21T12:00:00.000Z",
@@ -1367,13 +1266,14 @@
       "organo": "Secretaría Regional Ministerial de Trabajo",
       "saliente": "Viviana Torres",
       "motivo": "Nombrada sin cumplir requisitos académicos. Duró menos de un mes",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-04-21) · Radio Biobío (2026-04-21)",
+      "fuente": "Radio Biobío (2026-04-21)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-04-17-mario-sepulveda",
@@ -1391,13 +1291,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-04-17",
-          "titulo": "Registro de salida de Mario Sepúlveda (17 abr)"
-        },
-        {
           "nivel": "prensa",
           "medio": "DPR Araucanía",
           "url": "https://dprlaaraucania.dpr.gob.cl/noticias/luis-calderon-asume-como-seremi-de-seguridad-en-la-araucania/",
@@ -1405,7 +1298,7 @@
           "titulo": "Registro de salida de Mario Sepúlveda (17 abr)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-04-17T12:00:00.000Z",
@@ -1415,13 +1308,19 @@
       "organo": "Secretaría Regional Ministerial de Seguridad Pública",
       "saliente": "Mario Sepúlveda",
       "motivo": "Nombrado el 1 de abril. Reemplazado por Luis Calderón el 17 de abril",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-04-17) · DPR Araucanía (2026-04-17)",
+      "fuente": "DPR Araucanía (2026-04-17)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "entro": {
+        "nombre": "Luis Calderón",
+        "fecha": "2026-04-17"
+      },
+      "entrante": "Luis Calderón",
+      "reemplazo_estado": "fuente_publica"
     },
     {
       "id": "mov-kast-2026-2026-04-15-patrick-dungan",
@@ -1439,13 +1338,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-04-15",
-          "titulo": "Registro de salida de Patrick Dungan (15 abr)"
-        },
-        {
           "nivel": "prensa",
           "medio": "Radio Biobío",
           "url": "https://www.biobiochile.cl/noticias/bbcl-explica/bbcl-explica-notas/2026/04/15/seremi-se-busca-ya-van-15-autoridades-de-kast-que-renunciaron-o-no-pueden-asumir.shtml",
@@ -1453,7 +1345,7 @@
           "titulo": "Registro de salida de Patrick Dungan (15 abr)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-04-15T12:00:00.000Z",
@@ -1463,13 +1355,14 @@
       "organo": "Secretaría Regional Ministerial de Energía",
       "saliente": "Patrick Dungan",
       "motivo": "Nombramiento retirado tras perder contacto con la autoridad",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-04-15) · Radio Biobío (2026-04-15)",
+      "fuente": "Radio Biobío (2026-04-15)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-04-15-renato-munster",
@@ -1487,13 +1380,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-04-15",
-          "titulo": "Registro de salida de Renato Münster (15 abr)"
-        },
-        {
           "nivel": "prensa",
           "medio": "Radio Biobío",
           "url": "https://www.biobiochile.cl/noticias/bbcl-explica/bbcl-explica-notas/2026/04/15/seremi-se-busca-ya-van-15-autoridades-de-kast-que-renunciaron-o-no-pueden-asumir.shtml",
@@ -1501,7 +1387,7 @@
           "titulo": "Registro de salida de Renato Münster (15 abr)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-04-15T12:00:00.000Z",
@@ -1511,13 +1397,14 @@
       "organo": "Secretaría Regional Ministerial de Culturas",
       "saliente": "Renato Münster",
       "motivo": "Dimitió un día después de asumir. Motivos personales tras viralizarse posteos contra Kast",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-04-15) · Radio Biobío (2026-04-15)",
+      "fuente": "Radio Biobío (2026-04-15)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-04-14-gustavo-baehr",
@@ -1535,13 +1422,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-04-14",
-          "titulo": "Registro de salida de Gustavo Baehr (14 abr)"
-        },
-        {
           "nivel": "prensa",
           "medio": "Radio Biobío",
           "url": "https://www.biobiochile.cl/noticias/bbcl-explica/bbcl-explica-notas/2026/04/15/seremi-se-busca-ya-van-15-autoridades-de-kast-que-renunciaron-o-no-pueden-asumir.shtml",
@@ -1549,7 +1429,7 @@
           "titulo": "Registro de salida de Gustavo Baehr (14 abr)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-04-14T12:00:00.000Z",
@@ -1559,13 +1439,14 @@
       "organo": "Secretaría Regional Ministerial de Culturas",
       "saliente": "Gustavo Baehr",
       "motivo": "Cesado por falta de experiencia en el ámbito cultural",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-04-14) · Radio Biobío (2026-04-14)",
+      "fuente": "Radio Biobío (2026-04-14)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-04-14-karina-trujillo",
@@ -1583,13 +1464,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-04-14",
-          "titulo": "Registro de salida de Karina Trujillo (14 abr)"
-        },
-        {
           "nivel": "prensa",
           "medio": "La Tercera",
           "url": "https://www.latercera.com/politica/noticia/los-15-seremis-del-gobierno-de-kast-que-renunciaron-o-no-asumieron-su-cargo/",
@@ -1597,7 +1471,7 @@
           "titulo": "Registro de salida de Karina Trujillo (14 abr)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-04-14T12:00:00.000Z",
@@ -1607,13 +1481,14 @@
       "organo": "Secretaría Regional Ministerial de Justicia",
       "saliente": "Karina Trujillo",
       "motivo": "Renuncia por razones profesionales y personales. Cuestionada por causas que tramitó como abogada",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-04-14) · La Tercera (2026-04-14)",
+      "fuente": "La Tercera (2026-04-14)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-04-10-nataly-cruz",
@@ -1631,13 +1506,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-04-10",
-          "titulo": "Registro de salida de Nataly Cruz (10 abr)"
-        },
-        {
           "nivel": "prensa",
           "medio": "Radio Biobío",
           "url": "https://www.biobiochile.cl/noticias/servicios/toma-nota/2026/04/21/estos-son-todos-los-seremis-del-gobierno-que-han-renunciado-o-no-pudieron-asumir-ya-van-18-en-total.shtml",
@@ -1645,7 +1513,7 @@
           "titulo": "Registro de salida de Nataly Cruz (10 abr)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-04-10T12:00:00.000Z",
@@ -1655,13 +1523,14 @@
       "organo": "Secretaría Regional Ministerial de Trabajo",
       "saliente": "Nataly Cruz",
       "motivo": "Renunció a los 8 días por no acreditar la experiencia mínima exigida",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-04-10) · Radio Biobío (2026-04-10)",
+      "fuente": "Radio Biobío (2026-04-10)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-04-10-lizet-tapia",
@@ -1679,13 +1548,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-04-10",
-          "titulo": "Registro de salida de Lizet Tapia (10 abr)"
-        },
-        {
           "nivel": "prensa",
           "medio": "La Tercera",
           "url": "https://www.latercera.com/politica/noticia/los-15-seremis-del-gobierno-de-kast-que-renunciaron-o-no-asumieron-su-cargo/",
@@ -1693,7 +1555,7 @@
           "titulo": "Registro de salida de Lizet Tapia (10 abr)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-04-10T12:00:00.000Z",
@@ -1703,13 +1565,14 @@
       "organo": "Secretaría Regional Ministerial de Desarrollo Social",
       "saliente": "Lizet Tapia",
       "motivo": "Renuncia voluntaria por no cumplir el requisito de semestres académicos",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-04-10) · La Tercera (2026-04-10)",
+      "fuente": "La Tercera (2026-04-10)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-04-08-anggel-colque",
@@ -1727,13 +1590,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-04-08",
-          "titulo": "Registro de salida de Anggel Colque (8 abr)"
-        },
-        {
           "nivel": "prensa",
           "medio": "La Tercera",
           "url": "https://www.latercera.com/politica/noticia/los-15-seremis-del-gobierno-de-kast-que-renunciaron-o-no-asumieron-su-cargo/",
@@ -1741,7 +1597,7 @@
           "titulo": "Registro de salida de Anggel Colque (8 abr)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-04-08T12:00:00.000Z",
@@ -1751,13 +1607,14 @@
       "organo": "Secretaría Regional Ministerial de Mujer",
       "saliente": "Anggel Colque",
       "motivo": "Dejó el cargo por no contar con título profesional",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-04-08) · La Tercera (2026-04-08)",
+      "fuente": "La Tercera (2026-04-08)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-04-08-jorge-ravelo",
@@ -1775,13 +1632,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-04-08",
-          "titulo": "Registro de salida de Jorge Ravelo (8 abr)"
-        },
-        {
           "nivel": "prensa",
           "medio": "La Tercera",
           "url": "https://www.latercera.com/politica/noticia/los-15-seremis-del-gobierno-de-kast-que-renunciaron-o-no-asumieron-su-cargo/",
@@ -1789,7 +1639,7 @@
           "titulo": "Registro de salida de Jorge Ravelo (8 abr)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-04-08T12:00:00.000Z",
@@ -1799,13 +1649,14 @@
       "organo": "Secretaría Regional Ministerial de Energía",
       "saliente": "Jorge Ravelo",
       "motivo": "Nombramiento revocado por no tener estudios superiores completos",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-04-08) · La Tercera (2026-04-08)",
+      "fuente": "La Tercera (2026-04-08)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-04-07-angela-valdebenito",
@@ -1823,13 +1674,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-04-07",
-          "titulo": "Registro de salida de Ángela Valdebenito (7 abr)"
-        },
-        {
           "nivel": "prensa",
           "medio": "Radio Biobío",
           "url": "https://www.biobiochile.cl/noticias/servicios/toma-nota/2026/04/21/estos-son-todos-los-seremis-del-gobierno-que-han-renunciado-o-no-pudieron-asumir-ya-van-18-en-total.shtml",
@@ -1837,7 +1681,7 @@
           "titulo": "Registro de salida de Ángela Valdebenito (7 abr)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-04-07T12:00:00.000Z",
@@ -1847,13 +1691,14 @@
       "organo": "Secretaría Regional Ministerial de Culturas",
       "saliente": "Ángela Valdebenito",
       "motivo": "Renunció a los 18 días de asumir",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-04-07) · Radio Biobío (2026-04-07)",
+      "fuente": "Radio Biobío (2026-04-07)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-04-05-aldo-ibani",
@@ -1871,13 +1716,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-04-05",
-          "titulo": "Registro de salida de Aldo Ibani (5 abr)"
-        },
-        {
           "nivel": "prensa",
           "medio": "La Tercera",
           "url": "https://www.latercera.com/politica/noticia/los-15-seremis-del-gobierno-de-kast-que-renunciaron-o-no-asumieron-su-cargo/",
@@ -1885,7 +1723,7 @@
           "titulo": "Registro de salida de Aldo Ibani (5 abr)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-04-05T12:00:00.000Z",
@@ -1895,13 +1733,14 @@
       "organo": "Secretaría Regional Ministerial de Salud",
       "saliente": "Aldo Ibani",
       "motivo": "Tres días en el cargo. Cuestionado por falta de experiencia en salud pública",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-04-05) · La Tercera (2026-04-05)",
+      "fuente": "La Tercera (2026-04-05)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-04-04-carlos-montero",
@@ -1919,13 +1758,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-04-04",
-          "titulo": "Registro de salida de Carlos Montero (4 abr)"
-        },
-        {
           "nivel": "prensa",
           "medio": "T13",
           "url": "https://www.t13.cl/noticia/politica/tras-renuncia-seremi-estas-son-todas-las-bajas-del-gobierno-regiones-18-7-2026",
@@ -1933,7 +1765,7 @@
           "titulo": "Registro de salida de Carlos Montero (4 abr)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-04-04T12:00:00.000Z",
@@ -1943,13 +1775,14 @@
       "organo": "Secretaría Regional Ministerial de Trabajo",
       "saliente": "Carlos Montero",
       "motivo": "Dejó el cargo a poco de asumir",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-04-04) · T13 (2026-04-04)",
+      "fuente": "T13 (2026-04-04)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-04-15-francisco-farias",
@@ -1967,13 +1800,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-04-15",
-          "titulo": "Registro de salida de Francisco Farías (15 abr)"
-        },
-        {
           "nivel": "prensa",
           "medio": "SoyChile",
           "url": "https://www.soychile.cl/temuco/sociedad/2026/04/15/947107/nuevo-seremi-del-trabajo.html",
@@ -1981,7 +1807,7 @@
           "titulo": "Registro de salida de Francisco Farías (15 abr)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-04-15T12:00:00.000Z",
@@ -1991,13 +1817,19 @@
       "organo": "Secretaría Regional Ministerial de Trabajo",
       "saliente": "Francisco Farías",
       "motivo": "Renunció al cargo. Lo reemplazó Juan Pablo Carrasco",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-04-15) · SoyChile (2026-04-15)",
+      "fuente": "SoyChile (2026-04-15)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "entro": {
+        "nombre": "Juan Pablo Carrasco",
+        "fecha": "2026-04-15"
+      },
+      "entrante": "Juan Pablo Carrasco",
+      "reemplazo_estado": "fuente_publica"
     },
     {
       "id": "mov-kast-2026-2026-04-01-patricia-dinamarca",
@@ -2015,13 +1847,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-04-01",
-          "titulo": "Registro de salida de Patricia Dinamarca (1 abr)"
-        },
-        {
           "nivel": "prensa",
           "medio": "Radio Biobío",
           "url": "https://www.biobiochile.cl/noticias/servicios/toma-nota/2026/04/21/estos-son-todos-los-seremis-del-gobierno-que-han-renunciado-o-no-pudieron-asumir-ya-van-18-en-total.shtml",
@@ -2029,7 +1854,7 @@
           "titulo": "Registro de salida de Patricia Dinamarca (1 abr)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-04-01T12:00:00.000Z",
@@ -2039,13 +1864,14 @@
       "organo": "Secretaría Regional Ministerial de Educación",
       "saliente": "Patricia Dinamarca",
       "motivo": "Designación dejada sin efecto por falta de decreto",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-04-01) · Radio Biobío (2026-04-01)",
+      "fuente": "Radio Biobío (2026-04-01)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-03-31-mauricio-montealegre",
@@ -2063,13 +1889,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-03-31",
-          "titulo": "Registro de salida de Mauricio Montealegre (31 mar)"
-        },
-        {
           "nivel": "prensa",
           "medio": "La Tercera",
           "url": "https://www.latercera.com/politica/noticia/los-15-seremis-del-gobierno-de-kast-que-renunciaron-o-no-asumieron-su-cargo/",
@@ -2077,7 +1896,7 @@
           "titulo": "Registro de salida de Mauricio Montealegre (31 mar)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-03-31T12:00:00.000Z",
@@ -2087,13 +1906,14 @@
       "organo": "Secretaría Regional Ministerial de Obras Públicas",
       "saliente": "Mauricio Montealegre",
       "motivo": "Desistió de asumir por motivos personales",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-03-31) · La Tercera (2026-03-31)",
+      "fuente": "La Tercera (2026-03-31)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-03-28-jorge-salazar",
@@ -2111,13 +1931,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-03-28",
-          "titulo": "Registro de salida de Jorge Salazar (28 mar)"
-        },
-        {
           "nivel": "prensa",
           "medio": "La Tercera",
           "url": "https://www.latercera.com/politica/noticia/los-15-seremis-del-gobierno-de-kast-que-renunciaron-o-no-asumieron-su-cargo/",
@@ -2125,7 +1938,7 @@
           "titulo": "Registro de salida de Jorge Salazar (28 mar)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-03-28T12:00:00.000Z",
@@ -2135,13 +1948,14 @@
       "organo": "Secretaría Regional Ministerial de Obras Públicas",
       "saliente": "Jorge Salazar",
       "motivo": "Nombramiento dejado sin efecto por cuestionamientos a su gestión en Deportes Valdivia",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-03-28) · La Tercera (2026-03-28)",
+      "fuente": "La Tercera (2026-03-28)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-03-26-alexander-nanjari",
@@ -2159,13 +1973,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-03-26",
-          "titulo": "Registro de salida de Alexander Nanjarí (26 mar)"
-        },
-        {
           "nivel": "prensa",
           "medio": "La Tercera",
           "url": "https://www.latercera.com/politica/noticia/los-15-seremis-del-gobierno-de-kast-que-renunciaron-o-no-asumieron-su-cargo/",
@@ -2173,7 +1980,7 @@
           "titulo": "Registro de salida de Alexander Nanjarí (26 mar)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-03-26T12:00:00.000Z",
@@ -2183,13 +1990,14 @@
       "organo": "Secretaría Regional Ministerial de Educación",
       "saliente": "Alexander Nanjarí",
       "motivo": "Designación frenada por antiguos posteos sobre edades en relaciones de pareja",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-03-26) · La Tercera (2026-03-26)",
+      "fuente": "La Tercera (2026-03-26)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
     {
       "id": "mov-kast-2026-2026-03-25-daniela-gallegos",
@@ -2207,13 +2015,6 @@
       },
       "fuentes": [
         {
-          "nivel": "senal_tercero",
-          "medio": "Renuncias Kast · registro de seguimiento",
-          "url": "https://renunciaskast.cl/",
-          "fecha": "2026-03-25",
-          "titulo": "Registro de salida de Daniela Gallegos (25 mar)"
-        },
-        {
           "nivel": "prensa",
           "medio": "El Zorro Nortino",
           "url": "https://www.elzorronortino.cl/actualidad/son-un-chiste-seremi-de-economia-en-atacama-nunca-fue-nombrada-y-la-actual-seremi-seria-la-del-anterior-gobierno-de-boric/",
@@ -2221,7 +2022,7 @@
           "titulo": "Registro de salida de Daniela Gallegos (25 mar)"
         }
       ],
-      "estado": "en_confirmacion",
+      "estado": "corroborado",
       "verificado": false,
       "documento_pendiente": true,
       "fecha_deteccion": "2026-03-25T12:00:00.000Z",
@@ -2231,14 +2032,15 @@
       "organo": "Secretaría Regional Ministerial de Economía",
       "saliente": "Daniela Gallegos",
       "motivo": "Nombramiento nunca concretado. No acreditaría los semestres académicos exigidos",
-      "fuente": "Renuncias Kast · registro de seguimiento (2026-03-25) · El Zorro Nortino (2026-03-25)",
+      "fuente": "El Zorro Nortino (2026-03-25)",
       "referencia_externa": {
-        "releaseId": "kast-2026-exits-46-cutoff-2026-09-14",
+        "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "referencia_periodistica",
+        "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
-      }
+      },
+      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     }
   ],
-  "checksum_sha256": "73362c96874547250e550828ed8aa79297b2cb21c8124872d885d0076b9c6291"
+  "checksum_sha256": "feb254821fb6b57b68608bac3fb067b797f88b68a16d4a496cf5f19683af2bd2"
 }

@@ -13,6 +13,7 @@ import {
   MOTIVOS_CATEGORIAS,
   isMovimientoDocumentoPendienteMayor30,
   summarizeMovementFreshness,
+  esMovimientoRespaldado,
   type MovimientoTipo,
   type MovimientoMotivoCategoria,
   type Movimiento,
@@ -183,8 +184,8 @@ function MovimientosContent() {
   const filtrados = useMemo(() => {
     return MOVIMIENTOS.filter((m) => {
       if (filtroTipo !== "todos" && m.tipo !== filtroTipo) return false;
-      if (filtroEstado === "verificado" && m.estado !== "verificado") return false;
-      if (filtroEstado === "en_confirmacion" && m.estado === "verificado") return false;
+      if (filtroEstado === "verificado" && !esMovimientoRespaldado(m)) return false;
+      if (filtroEstado === "en_confirmacion" && esMovimientoRespaldado(m)) return false;
       if (filtroMinisterio !== "todos" && m.ministerio !== filtroMinisterio) return false;
       if (filtroRegion !== "todos" && m.region !== filtroRegion) return false;
       if (filtroMotivo !== "todos" && m.salio?.motivo_categoria !== filtroMotivo) return false;
@@ -303,8 +304,8 @@ function MovimientosContent() {
       promedioRotacion = (diasTranscurridos / totalGob).toFixed(1).replace(".", ",");
     }
 
-    const verificados = MOVIMIENTOS.filter((m) => m.estado === "verificado").length;
-    const enConfirmacion = MOVIMIENTOS.filter((m) => m.estado !== "verificado").length;
+    const verificados = MOVIMIENTOS.filter(esMovimientoRespaldado).length;
+    const enConfirmacion = MOVIMIENTOS.filter((m) => m.estado === "en_confirmacion").length;
     const ultimaPublicacion = latestMovementPublicationDate(MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA.signals);
     const ultimaPublicacionDate = ultimaPublicacion ? new Date(`${ultimaPublicacion}T12:00:00Z`) : null;
     const ultimaPublicacionTexto = ultimaPublicacionDate && !Number.isNaN(ultimaPublicacionDate.getTime())
@@ -393,10 +394,10 @@ function MovimientosContent() {
                 Movimientos y Relevos de Autoridades
               </h1>
               <p style={{ fontSize: "0.95rem", color: "var(--text-2)", lineHeight: 1.5, margin: 0, fontWeight: 500 }}>
-                Registro cronológico trazable de renuncias, ceses, cambios de puesto y nombramientos en el Poder Ejecutivo. Las salidas se contrastan con registros públicos de seguimiento; la confirmación proviene de decretos.
+                Registro cronológico trazable de renuncias, ceses, cambios de puesto y nombramientos en el Poder Ejecutivo. Cada fila identifica si cuenta con documento oficial o corroboración pública.
               </p>
               <p style={{ fontSize: "0.82rem", color: "var(--text-2)", lineHeight: 1.45, margin: "0.65rem 0 0", maxWidth: 720 }}>
-                Un anuncio se informa de inmediato como <strong style={{ color: "var(--warning, var(--warn))" }}>en confirmación</strong>. Sólo cuando aparece el decreto o resolución oficial se actualiza el registro como <strong style={{ color: "var(--success, var(--ok))" }}>verificado oficial</strong>; el anuncio no se cuenta dos veces.
+                El estado distingue un documento oficial, una corroboración pública y la información aún no confirmada. Las filas no se cuentan dos veces.
               </p>
               {senalesEnConfirmacion > 0 && (
                 <p style={{ fontSize: "0.8rem", color: "var(--warning, var(--warn))", lineHeight: 1.45, margin: "0.65rem 0 0", fontWeight: 600 }}>
@@ -687,7 +688,7 @@ function MovimientosContent() {
               }}
             >
               <option value="todos">Estado: Todos ({MOVIMIENTOS.length})</option>
-              <option value="verificado">Verificado oficial ({totalVerificados})</option>
+              <option value="verificado">Respaldado públicamente ({totalVerificados})</option>
               <option value="en_confirmacion">En confirmación ({totalEnConfirmacion})</option>
             </select>
 
@@ -895,8 +896,10 @@ function MovimientosContent() {
                     <td style={{ padding: "0.65rem 0.85rem", whiteSpace: "nowrap" }}>
                       {mov.estado === "verificado" ? (
                         <span className="badge badge-ok" style={{ fontSize: "0.7rem" }}>Verificado</span>
+                      ) : mov.estado === "corroborado" ? (
+                        <span className="badge badge-ok" style={{ fontSize: "0.7rem" }}>Corroborado públicamente</span>
                       ) : (
-                        <span className="badge badge-warn" style={{ fontSize: "0.7rem" }}>Anunciado · en confirmación</span>
+                        <span className="badge badge-warn" style={{ fontSize: "0.7rem" }}>Información en confirmación</span>
                       )}
                     </td>
                     <td style={{ padding: "0.65rem 0.85rem", whiteSpace: "nowrap" }}>
@@ -1058,13 +1061,17 @@ function MovimientosContent() {
                                 <span className="badge badge-ok" style={{ fontSize: "0.72rem" }}>
                                   ✓ Verificado oficial
                                 </span>
+                              ) : mov.estado === "corroborado" ? (
+                                <span className="badge badge-ok" style={{ fontSize: "0.72rem" }}>
+                                  ✓ Corroborado públicamente
+                                </span>
                               ) : (
                                 <span className="badge badge-warn" style={{ fontSize: "0.72rem" }}>
-                                  Anunciado · en confirmación
+                                  Información en confirmación
                                 </span>
                               )}
 
-                              {mov.documento_pendiente && (
+                              {mov.documento_pendiente && mov.estado === "en_confirmacion" && (
                                 <span
                                   className="badge badge-alert"
                                   style={{ fontSize: "0.7rem" }}
@@ -1114,7 +1121,7 @@ function MovimientosContent() {
                               <span style={{ color: "var(--text-muted)", margin: "0 0.2rem" }}>→</span>
                             )}
 
-                            {mov.entrante && (
+                            {mov.entrante ? (
                               <span>
                                 Asume:{" "}
                                 <strong style={{ color: "var(--ok)" }}>
@@ -1125,6 +1132,8 @@ function MovimientosContent() {
                                   })()}
                                 </strong>
                               </span>
+                            ) : (
+                              <span style={{ color: "var(--text-muted)" }}>Reemplazo: no informado en las fuentes consultadas</span>
                             )}
                           </div>
 
@@ -1174,7 +1183,7 @@ function MovimientosContent() {
                           </div>
 
                           {/* Proveniencia visible para detecciones tempranas */}
-                          {mov.detectado_por && mov.estado !== "verificado" && (
+                          {mov.detectado_por && mov.estado === "en_confirmacion" && (
                             <div style={{ fontSize: "0.75rem", color: "var(--text-muted)", marginTop: "-0.2rem" }}>
                               ℹ️ <strong>Detectado por:</strong> {mov.detectado_por} (en espera de toma de razón o decreto en Ley Chile)
                             </div>
@@ -1264,10 +1273,10 @@ function MovimientosContent() {
           }}
         >
           <p style={{ margin: "0 0 0.5rem 0" }}>
-            * <strong>Modelo Multifuente y Confirmación Oficial:</strong> El catálogo de movimientos indexa relevos y designaciones a partir de señales de prensa y monitoreo cívico (como <code>renunciaskast.cl</code> y agencias de noticias). Los eventos entran como <em>“En confirmación”</em> y solo son promovidos a <em>“Verificado oficial”</em> cuando cuentan con un Decreto Supremo indexado en Ley Chile (BCN) o el Diario Oficial. Si transcurren más de 30 días sin documento oficial, el registro conserva la advertencia <em>“Documento oficial pendiente”</em> y no se autopromueve.
+            * <strong>Cómo leer el catálogo:</strong> Cada fila conserva sus fuentes públicas. “Verificado oficial” requiere un documento oficial; “Corroborado públicamente” indica que la salida está respaldada por una fuente periodística identificable. Si no existe respaldo suficiente, la fila queda “En confirmación”.
           </p>
           <p style={{ margin: "0 0 0.5rem 0" }}>
-            * <strong>Corte público:</strong> Este listado contiene 46 salidas documentadas hasta el 14 de septiembre de 2026, distribuidas en 3 ministras, 6 subsecretarías, 36 seremis y 1 delegado provincial. Las filas conservan su fuente enlazada y permanecen en confirmación hasta incorporar el instrumento primario correspondiente.
+            * <strong>Corte público:</strong> Este listado contiene 46 salidas documentadas hasta el 14 de septiembre de 2026, distribuidas en 3 ministras, 6 subsecretarías, 36 seremis y 1 delegado provincial. Cada fila indica si existe reemplazo informado y qué tipo de respaldo tiene.
           </p>
         </footer>
       </div>

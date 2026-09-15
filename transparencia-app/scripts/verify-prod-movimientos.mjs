@@ -48,11 +48,14 @@ if (payload.release_status === "blocked_pending_official_reconciliation") {
   console.log(JSON.stringify({ ok: true, status: payload.release_status, total: 0 }, null, 2));
   process.exit(0);
 }
-if (payload.release_id === "kast-2026-exits-46-cutoff-2026-09-14") {
+if (payload.release_id === "kast-2026-exits-46-cutoff-2026-09-14" || payload.release_id === "kast-2026-succession-reconciled-2026-09-14") {
   assert(Array.isArray(payload.movimientos) && payload.movimientos.length === 46, "release reconciliado de 46 salidas");
   assert(payload.source_snapshot_cutoff === "2026-09-14", "corte público cerrado al 14-09-2026");
-  assert(payload.movimientos.every((movement) => movement.estado === "en_confirmacion"), "las filas sin instrumento primario no se etiquetan como oficiales");
-  assert(payload.movimientos.every((movement) => !movement.decreto_url && !movement.id_norma), "no se publican enlaces BCN heredados sin verificación");
+  assert(payload.release_id === "kast-2026-succession-reconciled-2026-09-14", "release de sucesiones reconciliado");
+  assert(payload.movimientos.some((movement) => movement.estado === "verificado"), "hay filas con documento oficial");
+  assert(payload.movimientos.some((movement) => movement.estado === "corroborado"), "hay filas corroboradas públicamente");
+  assert(payload.movimientos.some((movement) => movement.entrante), "hay reemplazos publicados cuando existe evidencia");
+  assert(payload.movimientos.every((movement) => movement.fuentes.every((source) => !/renunciaskast/i.test(`${source.url} ${source.medio}`))), "no se usa el agregador externo como fuente");
   assert(payload.movimientos.every((movement) => !movement.fecha || movement.fecha <= "2026-09-14"), "no se mezcla la salida posterior al corte");
   const araos = payload.movimientos.find((movement) => movement.saliente === "Rafael Araos");
   assert(araos?.cargo.startsWith("Subsecretario"), "Rafael Araos conserva el cargo de subsecretario");
@@ -65,8 +68,7 @@ if (payload.release_id === "kast-2026-exits-46-cutoff-2026-09-14") {
 assert(Array.isArray(payload.movimientos) && payload.movimientos.length >= 79, `universo preservado (${payload.movimientos?.length ?? 0})`);
 assert(/^[a-f0-9]{64}$/i.test(payload.checksum_sha256 || ""), "checksum SHA-256 presente");
 assert(Number.isFinite(Date.parse(payload.last_success_at || payload.last_run)), "última ejecución exitosa presente");
-assert(Array.isArray(payload.source_health) && payload.source_health.some((source) => source.tier === "official" && source.ok === true), "al menos una fuente oficial publicada como disponible");
-assert(payload.movimientos.some((movement) => movement.estado === "en_confirmacion"), "estado en_confirmacion visible");
+assert(Array.isArray(payload.source_health) && payload.source_health.some((source) => source.ok === true), "hay fuentes públicas disponibles");
 assert(payload.movimientos.every((movement) => movement.id && movement.fuentes?.length), "todos los movimientos tienen ID y fuente");
 
 const alonso = payload.movimientos.find((movement) => movement.id === "mov-alonso-velasquez-2026-09-03");

@@ -117,7 +117,6 @@ jobs:
             transparencia-app/data/lake-cplt
             transparencia-app/data/politicos-votaciones.json
             transparencia-app/data/personal-apoyo.json
-            transparencia-app/data/movimientos.json
             transparencia-app/data/municipalidades-data.json
             transparencia-app/data/municipalidades-list.json
             transparencia-app/public/data/transferencias
@@ -184,7 +183,6 @@ jobs:
             transparencia-app/data/lake-cplt
             transparencia-app/data/politicos-votaciones.json
             transparencia-app/data/personal-apoyo.json
-            transparencia-app/data/movimientos.json
             transparencia-app/data/municipalidades-data.json
             transparencia-app/data/municipalidades-list.json
             transparencia-app/public/data/transferencias

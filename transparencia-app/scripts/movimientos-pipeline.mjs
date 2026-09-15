@@ -403,6 +403,7 @@ export async function collectMovementSources({ sources = MOVIMIENTOS_SOURCES, fe
 }
 
 export function calculateMovimientoEstado(movimiento) {
+  if (["verificado", "verificado_oficial", "corroborado"].includes(movimiento.estado)) return movimiento.estado;
   // Una nota oficial o un comunicado confirma el anuncio, pero no reemplaza
   // el acto administrativo que acredita el nombramiento en el catálogo.
   return movimiento.decreto_url ? "verificado" : "en_confirmacion";
@@ -674,7 +675,7 @@ export function materializeKnownSignals(movimientos, signals, now) {
     // Never downgrade a row that already has a decree or verified status.
     const existing = result[existingIndex];
     const mergedSources = mergeMovementSourceLists(existing.fuentes, rebuilt.fuentes);
-    if (existing.decreto_url || existing.estado === "verificado") {
+    if (existing.decreto_url || ["verificado", "verificado_oficial", "corroborado"].includes(existing.estado)) {
       result[existingIndex] = {
         ...existing,
         fuentes: mergedSources,
@@ -743,8 +744,9 @@ export function buildMovementPayload(previous, { now = new Date().toISOString(),
     stats: {
       ...(previous.stats ?? {}),
       total_movimientos: movimientos.length,
-      verificados: movimientos.filter((movement) => movement.estado === "verificado").length,
-      en_confirmacion: movimientos.filter((movement) => movement.estado !== "verificado").length,
+    verificados: movimientos.filter((movement) => ["verificado", "verificado_oficial"].includes(movement.estado)).length,
+      corroborados: movimientos.filter((movement) => movement.estado === "corroborado").length,
+      en_confirmacion: movimientos.filter((movement) => movement.estado === "en_confirmacion").length,
       ultimos_7_dias: movimientos.filter((movement) => {
         const eventMs = Date.parse(`${movement.fecha}T12:00:00Z`);
         return Number.isFinite(eventMs) && eventMs <= nowMs && nowMs - eventMs <= 7 * 86_400_000;
@@ -759,7 +761,8 @@ export function buildMovementPayload(previous, { now = new Date().toISOString(),
 
 export function validateMovementPayload(payload) {
   if (!payload || payload.pipeline !== "etl_movimientos_autoridades") throw new Error("MOVIMIENTOS_PIPELINE_INVALID");
-  const minimumRows = String(payload.release_id ?? "").startsWith("kast-2026-exits-46") ? 46 : 79;
+  const minimumRows = String(payload.release_id ?? "").startsWith("kast-2026-exits-46")
+    || String(payload.release_id ?? "").startsWith("kast-2026-succession-reconciled") ? 46 : 79;
   if (!Array.isArray(payload.movimientos) || payload.movimientos.length < minimumRows) throw new Error("MOVIMIENTOS_UNIVERSE_INCOMPLETE");
   if (!/^[a-f0-9]{64}$/i.test(payload.checksum_sha256 ?? "")) throw new Error("MOVIMIENTOS_CHECKSUM_MISSING");
   if (sha256({ ...payload, checksum_sha256: undefined }) !== payload.checksum_sha256) throw new Error("MOVIMIENTOS_CHECKSUM_INVALID");
@@ -767,7 +770,7 @@ export function validateMovementPayload(payload) {
   for (const movement of payload.movimientos) {
     if (!movement.id || ids.has(movement.id)) throw new Error(`MOVIMIENTOS_DUPLICATE_ID:${movement.id ?? "missing"}`);
     ids.add(movement.id);
-    if (!["verificado", "en_confirmacion"].includes(movement.estado)) throw new Error(`MOVIMIENTOS_STATE_INVALID:${movement.id}`);
+    if (!["verificado", "verificado_oficial", "corroborado", "en_confirmacion"].includes(movement.estado)) throw new Error(`MOVIMIENTOS_STATE_INVALID:${movement.id}`);
     if (!movement.fuentes?.length) throw new Error(`MOVIMIENTOS_SOURCE_MISSING:${movement.id}`);
   }
   return payload;

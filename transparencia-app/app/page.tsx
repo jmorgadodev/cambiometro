@@ -266,8 +266,8 @@ export default async function HomePage() {
             <div className="home-movement-feature__copy">
               <p className="eyebrow">Corte de movimientos</p>
               <h3>Cambios que vale la pena seguir</h3>
-              <p>Una lectura breve de renuncias, nombramientos y cambios anunciados. Los movimientos en confirmación se mantienen separados hasta contar con respaldo normativo.</p>
-              <span className="home-path__meta">{MOVIMIENTOS_HOME_SUMMARY.total} movimientos · {MOVIMIENTOS_HOME_SUMMARY.renuncias} renuncias · {MOVIMIENTOS_HOME_SUMMARY.verificados} verificados · {MOVIMIENTOS_HOME_SUMMARY.enConfirmacion} en confirmación</span>
+              <p>Una lectura breve de renuncias, nombramientos y cambios anunciados. Cada registro distingue respaldo oficial, corroboración pública e información pendiente.</p>
+              <span className="home-path__meta">{MOVIMIENTOS_HOME_SUMMARY.total} movimientos · {MOVIMIENTOS_HOME_SUMMARY.renuncias} renuncias · {MOVIMIENTOS_HOME_SUMMARY.verificados} respaldados públicamente · {MOVIMIENTOS_HOME_SUMMARY.enConfirmacion} en confirmación</span>
               <Link prefetch={false} href="/movimientos" className="home-movement-feature__cta">Ver movimientos y fuentes <span aria-hidden="true">→</span></Link>
             </div>
             <div className="home-movement-timeline" aria-label="Línea de tiempo de movimientos desde el 11 de marzo de 2026">
@@ -300,7 +300,7 @@ export default async function HomePage() {
               <span className="home-discovery-card__icon"><Icono nombre="etl" size={20} /></span>
               <span className="home-discovery-card__label">Actualidad</span>
               <strong>{MOVIMIENTOS_HOME_SUMMARY.renuncias} renuncias desde el 11 de marzo</strong>
-              <span>{MOVIMIENTOS_HOME_SUMMARY.verificados} hechos verificados y {MOVIMIENTOS_HOME_SUMMARY.enConfirmacion} en confirmación.</span>
+              <span>{MOVIMIENTOS_HOME_SUMMARY.verificados} hechos respaldados públicamente y {MOVIMIENTOS_HOME_SUMMARY.enConfirmacion} en confirmación.</span>
             </Link>
             <Link prefetch={false} href="/municipalidades" className="home-discovery-card">
               <span className="home-discovery-card__icon"><Icono nombre="datos" size={20} /></span>

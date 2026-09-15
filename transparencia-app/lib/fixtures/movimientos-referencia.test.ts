@@ -45,9 +45,18 @@ describe("Release de referencia de Movimientos 2026", () => {
     }
   });
 
-  it("no publica enlaces BCN heredados ni presenta las filas como oficiales", () => {
-    expect(MOVIMIENTOS.every((movement) => !movement.decreto_url && !movement.id_norma)).toBe(true);
-    expect(MOVIMIENTOS.every((movement) => movement.estado === "en_confirmacion")).toBe(true);
-    expect(MOVIMIENTOS.every((movement) => movement.fuentes.some((source) => source.url === "https://renunciaskast.cl/"))).toBe(true);
+  it("no publica el agregador externo y conserva fuentes públicas visibles", () => {
+    expect(MOVIMIENTOS.every((movement) => movement.fuentes.every((source) => !/renunciaskast/i.test(`${source.url} ${source.medio}`)))).toBe(true);
+    expect(MOVIMIENTOS.every((movement) => movement.fuentes.some((source) => source.nivel === "prensa" || source.nivel === "oficial"))).toBe(true);
+    expect(MOVIMIENTOS.some((movement) => movement.estado === "verificado")).toBe(true);
+    expect(MOVIMIENTOS.some((movement) => movement.estado === "corroborado")).toBe(true);
+  });
+
+  it("muestra los reemplazos auditados y distingue cuando no fueron informados", () => {
+    const replacements = new Map(MOVIMIENTOS.map((movement) => [movement.saliente, movement.entrante]));
+    expect(replacements.get("Natalia Duco")).toBe("Francisco Riveros Cantuarias");
+    expect(replacements.get("Andrés Otero")).toBe("Sofía Rengifo Ottone");
+    expect(replacements.get("Mara Sedini")).toContain("Claudio Alvarado");
+    expect(MOVIMIENTOS.some((movement) => movement.reemplazo_estado === "no_informado_en_fuentes_consultadas")).toBe(true);
   });
 });

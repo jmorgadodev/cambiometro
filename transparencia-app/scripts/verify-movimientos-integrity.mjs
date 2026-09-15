@@ -57,11 +57,11 @@ const report = {
     incidents,
   },
   decision: {
-    status: policy.status === "validated_reference" && inScopeRows.length === 46 && outOfScopeRows.length === 0 && duplicateIds.length === 0
-      ? "validated_reference"
+    status: ["validated_reference", "validated_reconciled"].includes(policy.status) && inScopeRows.length === 46 && outOfScopeRows.length === 0 && duplicateIds.length === 0
+      ? policy.status
       : "blocked",
-    reason: policy.status === "validated_reference"
-      ? "Release de 46 salidas documentadas hasta el 14-09-2026; cada fila conserva referencia pública y queda pendiente de instrumento primario para promoción oficial."
+    reason: ["validated_reference", "validated_reconciled"].includes(policy.status)
+      ? "Release de 46 salidas documentadas hasta el 14-09-2026; cada fila conserva fuente pública y un estado explícito de evidencia y sucesión."
       : "No existe todavía un release de 46 filas reconciliado con el alcance definido.",
     etlFrozen: true,
     productionMutation: false,

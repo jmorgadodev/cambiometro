@@ -61,7 +61,7 @@ const movimientosSourcePayload = JSON.parse(movimientosSourceContent);
 const movimientosPayload = normalizeMovementPayload(movimientosSourcePayload);
 const sourceMovimientosChecksum = movimientosPayload.checksum_sha256 ?? null;
 const movimientosScopePolicy = JSON.parse(await readFile(join(root, "data", "movimientos-scope-policy.json"), "utf8"));
-const movimientosPublicationBlocked = !["validated", "validated_reference"].includes(movimientosScopePolicy.status);
+const movimientosPublicationBlocked = !["validated", "validated_reference", "validated_reconciled"].includes(movimientosScopePolicy.status);
 if (!movimientosPublicationBlocked && (!Array.isArray(movimientosPayload.movimientos) || movimientosPayload.movimientos.length < 46)) {
   throw new Error("STATIC_MOVIMIENTOS_RELEASE_INCOMPLETE");
 }

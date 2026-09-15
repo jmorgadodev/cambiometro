@@ -1,6 +1,6 @@
 {
   "scopeId": "kast-2026-exits",
-  "status": "validated_reference",
+  "status": "validated_reconciled",
   "scopeStartDate": "2026-03-11",
   "cutoffDate": "2026-09-14",
   "targetCount": 46,
@@ -11,6 +11,6 @@
     "delegados": 1
   },
   "allowedEventTypes": ["renuncia", "remocion", "cambio-puesto", "nombramiento-fallido"],
-  "evidenceRequirement": "reference-source-visible-primary-document-pending",
-  "notes": "Corte público de 46 salidas hasta el 14-09-2026. Se conserva la referencia enlazada y cada fila queda en confirmación hasta incorporar el instrumento primario; no se reutilizan enlaces BCN heredados ni se etiqueta como decreto una fuente periodística."
+  "evidenceRequirement": "public-press-or-primary-record-with-explicit-status",
+  "notes": "Corte público de 46 salidas hasta el 14-09-2026. Las filas conservan fuentes públicas visibles; el estado distingue documento oficial, corroboración periodística y falta de información. No se usa un agregador de seguimiento como fuente."
 }

@@ -312,11 +312,11 @@ async function verifyProdFull() {
   const movimientosSnapshot = movimientosSnapshotRes.ok ? await movimientosSnapshotRes.json().catch(() => null) : null;
   assertCheck("MOVIMIENTOS", "Pipeline identificado", movimientosSnapshot?.pipeline === "etl_movimientos_autoridades");
   const movimientosBlocked = movimientosSnapshot?.release_status === "blocked_pending_official_reconciliation";
-  assertCheck("MOVIMIENTOS", movimientosBlocked ? "Asset público bloqueado durante revisión" : "Universo histórico preservado (>=79)", movimientosBlocked ? Number(movimientosSnapshot?.movimientos?.length ?? 0) === 0 : Number(movimientosSnapshot?.movimientos?.length ?? 0) >= 79, `total: ${movimientosSnapshot?.movimientos?.length ?? "n/a"}`);
+  assertCheck("MOVIMIENTOS", movimientosBlocked ? "Asset público bloqueado durante revisión" : "Corte reconciliado preservado (>=46)", movimientosBlocked ? Number(movimientosSnapshot?.movimientos?.length ?? 0) === 0 : Number(movimientosSnapshot?.movimientos?.length ?? 0) >= 46, `total: ${movimientosSnapshot?.movimientos?.length ?? "n/a"}`);
   assertCheck("MOVIMIENTOS", "Checksum SHA-256 presente", /^[a-f0-9]{64}$/i.test(movimientosSnapshot?.checksum_sha256 || ""));
   assertCheck("MOVIMIENTOS", "Última ejecución exitosa presente", movimientosBlocked || Number.isFinite(Date.parse(movimientosSnapshot?.last_success_at || movimientosSnapshot?.last_run || "")));
-  assertCheck("MOVIMIENTOS", "Fuente oficial disponible", movimientosBlocked || movimientosSnapshot?.source_health?.some((source) => source.tier === "official" && source.ok === true));
-  assertCheck("MOVIMIENTOS", "Estado en_confirmacion preservado", movimientosBlocked || movimientosSnapshot?.movimientos?.some((movement) => movement.estado === "en_confirmacion"));
+  assertCheck("MOVIMIENTOS", "Fuente pública disponible", movimientosBlocked || movimientosSnapshot?.source_health?.some((source) => source.ok === true));
+  assertCheck("MOVIMIENTOS", "Estados de respaldo preservados", movimientosBlocked || movimientosSnapshot?.movimientos?.some((movement) => ["verificado", "corroborado", "en_confirmacion"].includes(movement.estado)));
 
   // ─── MÓDULO 4: /TRANSFERENCIAS ─────────────────────────────────────────────
   console.log("\n4. MÓDULO TRANSFERENCIAS LEY 19.862 (/transferencias)");
