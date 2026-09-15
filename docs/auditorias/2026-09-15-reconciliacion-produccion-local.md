@@ -126,3 +126,5 @@ La ejecución secuencial terminó sus cuatro ingestas sin publicación (`publish
 - No hubo escrituras, eliminaciones ni publicaciones en R2 o D1.
 
 Las cuatro nóminas centrales están validadas localmente (`100%` del bloque ETL central). El conteo candidato conjunto es `2.122.881` registros. Esta validación no autoriza promoción porque R2 mantiene `growth-blocked`; además, aún falta reconciliar el alcance de cada categoría con el release productivo antes de presentar coberturas.
+
+La consolidación final del candidato terminó correctamente en GitHub Actions (`2026-09-15T04:17:38Z`) con versión `2026-09-15T04-09-07-576Z`, `714` proyecciones y `2.177` assets. El resultado reportó `published: false`; por lo tanto, la diferencia local/producción sigue siendo intencional y no se alteró el release vigente.

@@ -145,6 +145,18 @@ El workflow completó las cuatro ingestas de forma serializada:
 
 El workflow conserva `publish=false`; por tanto, los artefactos se validan localmente y no alteran el release productivo.
 
+### Consolidación central final
+
+El job de finalización terminó con `success` el `2026-09-15T04:17:38Z`. Su salida verificable fue:
+
+- Versión candidata: `2026-09-15T04-09-07-576Z`.
+- Registros consolidados: `2.122.881`.
+- Proyecciones generadas: `714`.
+- Assets generados: `2.177`.
+- Estado de publicación: `published: false`.
+
+La consolidación se ejecutó únicamente en el runner de GitHub con los cuatro artefactos ya descargados; no escribió en R2, no materializó D1 y no reemplazó el release productivo. El conteo y la versión son candidatos de auditoría hasta reconciliar alcance y capacidad de almacenamiento.
+
 La validación técnica posterior corrigió tres incompatibilidades de tipado en pruebas de cierre R2 y en la firma del parser CPLT:
 
 - `npm run typecheck`: aprobado.
@@ -161,7 +173,7 @@ La suite completa quedó estable con ejecución serializada para evitar timeouts
 
 ## Siguiente puerta
 
-1. Mantener los cuatro resultados como validación local mientras R2 siga en `growth-blocked`.
+1. Mantener el candidato consolidado fuera de producción mientras R2 siga en `growth-blocked`.
 2. Comparar la cobertura del ciclo contra el release productivo por categoría, período y organismo; no sumar categorías que pertenezcan a otros dominios.
 3. Promover sólo si todas las categorías pasan la reconciliación de alcance y existe margen de almacenamiento aprobado.
 
