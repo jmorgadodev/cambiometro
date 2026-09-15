@@ -355,3 +355,20 @@ no sólo un inventario desactualizado.
   disponible; no hay evidencia suficiente para reconstruirla desde R2.
 - No se descargaron universos completos, no se generaron releases y no se
   modificaron D1/R2.
+
+## Plan local de reparación, aún no promocionable
+
+El plan local no mutante `npm run audit:r2:repair-plan` encontró material
+verificable para reconstruir parte de esas brechas:
+
+- InfoLobby: `7` particiones listas, `13.793.329` bytes, sin faltantes ni
+  discrepancias de checksum.
+- ChileCompra: `9` particiones listas, `146.293.757` bytes, sin faltantes ni
+  discrepancias de checksum.
+- `writesPerformed=false` en ambos planes.
+
+Estos artefactos locales no se subirán mientras R2 permanezca en
+`growth-blocked`. La diferencia entre el plan local listo y el cierre remoto
+incompleto queda clasificada como **release/manifestación R2 pendiente**, no
+como permiso para publicar sin espacio ni como evidencia de que la interfaz
+deba mostrar cero registros.
