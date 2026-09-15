@@ -91,6 +91,17 @@ El job `104221344580` terminó correctamente dentro del workflow `34918549350`, 
 
 El resultado queda validado localmente, pero no se publica porque el almacenamiento R2 está en estado `growth-blocked` y aún faltan Honorarios y Código del Trabajo.
 
+### Estado secuencial del workflow
+
+Tras finalizar Contrata, el workflow continuó de forma serializada:
+
+- Planta: `success`.
+- Contrata: `success`.
+- Honorarios: `in_progress`, procesando organismos centrales.
+- Código del Trabajo: `queued`.
+
+El workflow conserva `publish=false`; por tanto, los artefactos se validan localmente y no alteran el release productivo.
+
 ## Siguiente puerta
 
 1. Esperar el resultado terminal del job Planta.
