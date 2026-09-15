@@ -96,3 +96,5 @@ Se corrigió el parser de montos del historial para interpretar formatos monetar
 - Sin escrituras en R2/D1 y sin promoción a producción.
 
 La batería consolidada posterior cubrió 11 archivos y 96 pruebas, incluyendo auditoría R2, almacenamiento, historiales, movimientos, categorías legislativas y contratos de normalización; todas terminaron correctamente.
+
+La validación adicional de `lib/api-v1.test.ts` y `lib/api-cache.test.ts` terminó con 63/63 pruebas aprobadas: el camino público prioriza R2 y evita D1 para búsquedas masivas, índices, fuentes, Cámara, transferencias y registros cuando existe un release publicado.
