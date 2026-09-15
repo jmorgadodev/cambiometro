@@ -44,6 +44,20 @@ describe("pipeline automático de movimientos", () => {
     });
   });
 
+  it("detecta una renuncia dentro del cuerpo de un comunicado oficial del MINVU", () => {
+    const signals = parseMovementSignals(
+      '<main><p>El Secretario Regional Ministerial (Seremi) de la Región de Antofagasta, Jorge Olivares, presentó este lunes 14 de septiembre de 2026 la renuncia voluntaria a su cargo en el Ministerio de Vivienda y Urbanismo. La subrogancia será ejercida por Marietta Méndez.</p></main>',
+      { id: "minvu", url: "https://www.minvu.gob.cl/noticia/declaracion-publica-14-septiembre-2026/", contentType: "text/html" },
+    );
+    expect(signals).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        title: expect.stringContaining("Jorge Olivares"),
+        date: "2026-09-14",
+        url: "https://www.minvu.gob.cl/noticia/declaracion-publica-14-septiembre-2026/",
+      }),
+    ]));
+  });
+
   it("mantiene el estado provisional cuando no hay fuente oficial", () => {
     expect(calculateMovimientoEstado({ fuentes: [{ nivel: "prensa" }] })).toBe("en_confirmacion");
     expect(calculateMovimientoEstado({ fuentes: [{ nivel: "oficial" }] })).toBe("en_confirmacion");
@@ -117,6 +131,28 @@ describe("pipeline automático de movimientos", () => {
       expect.objectContaining({ medio: "ADN Radio", fecha: "2026-09-01" }),
       expect.objectContaining({ medio: "BioBioChile", fecha: "2026-09-01" }),
       expect.objectContaining({ medio: "Emol", fecha: "2026-09-02" }),
+    ]));
+  });
+
+  it("materializa la renuncia oficial de Jorge Olivares como movimiento provisional", () => {
+    const result = materializeKnownSignals([], [{
+      title: "Jorge Olivares presentó su renuncia como seremi de Vivienda de Antofagasta",
+      summary: "La subrogancia será ejercida por Marietta Méndez.",
+      url: "https://www.minvu.gob.cl/noticia/declaracion-publica-14-septiembre-2026/",
+      date: "2026-09-14",
+      source_id: "minvu",
+      source_label: "MINVU",
+      source_tier: "official",
+    }], "2026-09-15T12:00:00.000Z");
+    expect(result).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        id: "mov-jorge-olivares-2026-09-14",
+        estado: "en_confirmacion",
+        verificado: false,
+        salio: { nombre: "Jorge Olivares", fecha: "2026-09-14" },
+        entrante: "Marietta Méndez (subrogante)",
+        documento_pendiente: true,
+      }),
     ]));
   });
 

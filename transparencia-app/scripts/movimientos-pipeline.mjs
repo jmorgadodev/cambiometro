@@ -35,6 +35,12 @@ export const MOVIMIENTOS_SOURCES = Object.freeze([
     tier: "official",
     url: "https://www.mindep.cl/noticias",
   },
+  {
+    id: "minvu",
+    label: "MINVU · Declaración pública 14-09-2026",
+    tier: "official",
+    url: "https://www.minvu.gob.cl/noticia/declaracion-publica-14-septiembre-2026/",
+  },
 ]);
 
 // gob.cl sometimes applies its edge policy differently to the news path and
@@ -252,6 +258,28 @@ export function parseMovementSignals(body, source) {
         summary: metaSummary,
       });
     }
+
+    // Algunos comunicados oficiales del MINVU publican el hecho en el
+    // cuerpo de la página, sin titular enlazado ni meta descripción útil.
+    // Mantener este extractor acotado al comunicado allowlisted evita
+    // convertir cualquier texto de contexto en un movimiento.
+    if (source.id === "minvu") {
+      const plainText = decodeHtml(text
+        .replace(/<script[\s\S]*?<\/script>/gi, " ")
+        .replace(/<style[\s\S]*?<\/style>/gi, " ")
+        .replace(/<[^>]+>/g, " "));
+      const lead = plainText.match(/El Secretario Regional Ministerial[\s\S]{0,500}?Jorge Olivares[\s\S]{0,500}?renunci[aó] voluntaria[\s\S]{0,300}?Ministerio de Vivienda y Urbanismo\./i);
+      if (lead) {
+        const dateMatch = plainText.match(/\b(\d{1,2}) de septiembre de 2026\b/i);
+        const date = dateMatch ? `2026-09-${String(Number(dateMatch[1])).padStart(2, "0")}` : readHtmlArticleDate(text);
+        items.push({
+          title: "Jorge Olivares presentó su renuncia como seremi de Vivienda de Antofagasta",
+          url: source.url,
+          date,
+          summary: lead[0],
+        });
+      }
+    }
   }
 
   const seen = new Set();
@@ -434,6 +462,7 @@ function connectorKeyForSource(sourceId) {
   if (sourceId === "gob-cl") return "t1_gob_cl";
   if (sourceId === "prensa-presidencia") return "t1_prensa_presidencia";
   if (sourceId === "mindep") return "t1_mindep";
+  if (sourceId === "minvu") return "t1_minvu";
   return null;
 }
 
@@ -515,6 +544,35 @@ const KNOWN_ANNOUNCED_MOVEMENTS = Object.freeze([
       verificado: false,
     }),
   },
+  {
+    id: "mov-jorge-olivares-2026-09-14",
+    matches: /jorge ol[ií]vares|seremi.{0,80}vivienda.{0,80}antofagasta.{0,80}renunci|renunci.{0,80}jorge ol[ií]vares/i,
+    prefer: /jorge ol[ií]vares/i,
+    build: (signal, now) => ({
+      id: "mov-jorge-olivares-2026-09-14",
+      tipo_evento: "renuncia",
+      cargo: "Secretario Regional Ministerial de Vivienda y Urbanismo de Antofagasta",
+      organismo: "SEREMI de Vivienda y Urbanismo de Antofagasta",
+      ministerio: "Ministerio de Vivienda y Urbanismo",
+      region: "Región de Antofagasta",
+      salio: { nombre: "Jorge Olivares", fecha: "2026-09-14" },
+      entro: { nombre: "Marietta Méndez (subrogante)", fecha: "2026-09-14" },
+      fuentes: mergeMovementSources(JORGE_OLIVARES_SOURCES, signal),
+      estado: "en_confirmacion",
+      fecha_deteccion: now,
+      fecha_verificacion: null,
+      fecha: "2026-09-14",
+      fechaExacta: true,
+      tipo: "renuncia",
+      organo: "SEREMI de Vivienda y Urbanismo de Antofagasta",
+      saliente: "Jorge Olivares",
+      entrante: "Marietta Méndez (subrogante)",
+      motivo: "Renuncia voluntaria comunicada oficialmente por el MINVU; la comunicación no detalla sus motivos ni aporta todavía el acto administrativo verificable.",
+      fuente: sourceLabelsForMovement(JORGE_OLIVARES_SOURCES),
+      documento_pendiente: true,
+      verificado: false,
+    }),
+  },
 ]);
 
 const ALONSO_VELASQUEZ_SOURCES = Object.freeze([
@@ -562,6 +620,16 @@ const PATRICIO_LOHR_SOURCES = Object.freeze([
     url: "https://www.emol.com/noticias/Nacional/2026/09/02/1210280/renuncia-seremi-transportes-de-arica.html",
     fecha: "2026-09-02",
     titulo: "Van 34: Renuncia seremi de Transportes de Arica tras acusaciones de conflicto de interés",
+  },
+]);
+
+const JORGE_OLIVARES_SOURCES = Object.freeze([
+  {
+    nivel: "oficial",
+    medio: "Ministerio de Vivienda y Urbanismo",
+    url: "https://www.minvu.gob.cl/noticia/declaracion-publica-14-septiembre-2026/",
+    fecha: "2026-09-14",
+    titulo: "Declaración pública - 14 de septiembre de 2026",
   },
 ]);
 
