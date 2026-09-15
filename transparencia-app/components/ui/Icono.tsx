@@ -33,8 +33,12 @@ interface IconoProps extends React.SVGProps<SVGSVGElement> {
 }
 
 /**
- * Sistema de Iconografía Canónica Propia Monoline — El Cambiómetro
- * Especificaciones: Grid 24x24 · Trazo 1.5px · Terminaciones redondeadas · currentColor · 1 detalle --accent
+ * Sistema de iconografía propia — El Cambiómetro
+ *
+ * Los glifos de dominio usan una lógica de "instrumento de evidencia":
+ * marcos abiertos, nodos de trazabilidad y una marca de lectura en acento.
+ * No dependen de una librería externa ni de emojis, para conservar una firma
+ * visual reconocible en escritorio y móvil.
  */
 export default function Icono({
   nombre,
@@ -59,42 +63,34 @@ export default function Icono({
   };
 
   switch (nombre) {
-    // 1. Organismo: Frontón institucional clásico + columnas + arco/puerta
+    // 1. Organismo: módulo institucional con registro y punto de origen
     case "organismo":
       return (
         <svg {...commonProps} aria-hidden="true">
-          <path d="M3 9.5L12 4.5L21 9.5" />
-          <path d="M5 9.5V19.5" />
-          <path d="M9 9.5V19.5" />
-          <path d="M15 9.5V19.5" />
-          <path d="M19 9.5V19.5" />
-          <path d="M2 19.5H22" />
-          {/* Detalle de acento: arco central superior */}
-          <path d="M10 6.5A2 2 0 0 1 14 6.5" stroke={accentColor} strokeWidth={1.8} />
+          <path d="M5 19V8.5L12 4L19 8.5V19" />
+          <path d="M8 12H16M8 16H16" />
+          <path d="M8 19V9.5M16 19V9.5" stroke={accentColor} />
+          <circle cx="12" cy="8" r="1.5" stroke={accentColor} strokeWidth={1.8} />
         </svg>
       );
 
-    // 2. Votaciones: Urna electoral con ranura + papeleta con check
+    // 2. Votaciones: papeleta dentro de un marco de decisión
     case "votaciones":
       return (
         <svg {...commonProps} aria-hidden="true">
-          <path d="M4 10V20C4 20.5523 4.44772 21 5 21H19C19.5523 21 20 20.5523 20 20V10" />
-          <path d="M2 10H22" />
-          <path d="M8 10V5C8 4.44772 8.44772 4 9 4H15C15.5523 4 16 4.44772 16 5V10" />
-          {/* Detalle de acento: marca de voto check */}
-          <path d="M10.5 6.5L11.5 7.5L13.5 5.5" stroke={accentColor} strokeWidth={1.8} />
+          <path d="M5 4H19V20H5Z" />
+          <path d="M8 8H13M8 12H13M8 16H13" />
+          <path d="M15 11L16.5 12.5L19.5 9.5" stroke={accentColor} strokeWidth={1.8} />
         </svg>
       );
 
-    // 3. Dinero: Moneda circular con símbolo $ y detalle de valor
+    // 3. Dinero: ficha de valor con lectura ascendente
     case "dinero":
       return (
         <svg {...commonProps} aria-hidden="true">
-          <circle cx="12" cy="12" r="9" />
-          <path d="M12 6.5V17.5" />
-          <path d="M14.5 9C14.5 7.6 13.4 7 12 7C10.6 7 9.5 7.6 9.5 9C9.5 10.4 10.6 11 12 11C13.4 11 14.5 11.6 14.5 13C14.5 14.4 13.4 15 12 15C10.6 15 9.5 14.4 9.5 13" />
-          {/* Detalle de acento: brillo sutil */}
-          <circle cx="16" cy="8" r="0.75" fill={accentColor} stroke="none" />
+          <path d="M12 3.5A8.5 8.5 0 1 1 5.2 17.1" />
+          <path d="M12 7V17M9 9.5H13.5A2 2 0 0 1 13.5 13.5H10.5A2 2 0 0 0 10.5 17H15" />
+          <path d="M5.2 17.1L3.5 14.5M5.2 17.1L8 16.5" stroke={accentColor} strokeWidth={1.8} />
         </svg>
       );
 
@@ -107,14 +103,15 @@ export default function Icono({
         </svg>
       );
 
-    // 5. Lobby: Dos burbujas de diálogo entrelazadas
+    // 5. Lobby: conversación como relación entre dos nodos
     case "lobby":
       return (
         <svg {...commonProps} aria-hidden="true">
-          <path d="M7 16H4C3.44772 16 3 15.5523 3 15V6C3 5.44772 3.44772 5 4 5H14C14.5523 5 15 5.44772 15 6V9" />
-          <path d="M17 19L20.5 21V11C20.5 10.4477 20.0523 10 19.5 10H10.5C9.94772 10 9.5 10.4477 9.5 11V18C9.5 18.5523 9.94772 19 10.5 19H17Z" />
-          {/* Detalle de acento: punto de comunicación */}
-          <circle cx="15" cy="14.5" r="0.75" fill={accentColor} stroke="none" />
+          <circle cx="7" cy="8" r="3.5" />
+          <circle cx="17" cy="16" r="3.5" stroke={accentColor} />
+          <path d="M9.8 10.1L14.2 13.9" />
+          <path d="M5.5 12.5L4 15.5L7 14" />
+          <path d="M19 19L20 21L16.8 19.8" stroke={accentColor} />
         </svg>
       );
 
@@ -158,69 +155,71 @@ export default function Icono({
         </svg>
       );
 
-    // 9. Personas: Dos cabezas / bustos superpuestos
+    // 9. Personas: constelación de identidades relacionadas
     case "personas":
       return (
         <svg {...commonProps} aria-hidden="true">
-          <path d="M16 21V19C16 17.3431 14.6569 16 13 16H6C4.34315 16 3 17.3431 3 19V21" />
-          <circle cx="9.5" cy="8.5" r="4.5" />
-          <path d="M21 21V19C21 17.7 20.2 16.6 19 16.2" />
-          <path d="M15.5 4.3C16.8 4.9 17.7 6.2 17.7 7.7C17.7 9.2 16.8 10.5 15.5 11.1" stroke={accentColor} />
+          <circle cx="8" cy="8" r="3.5" />
+          <circle cx="17" cy="7" r="2.5" stroke={accentColor} />
+          <circle cx="14" cy="17" r="3" />
+          <path d="M10.8 9.5L12.5 14M14.3 8.8L14.1 14M10.5 17H8.5C6.3 17 4.5 18.8 4.5 21" />
         </svg>
       );
 
-    // 10. Territorio: Pin de mapa / ubicación geográfica
+    // 10. Territorio: mapa abierto con coordenadas y frontera
     case "territorio":
       return (
         <svg {...commonProps} aria-hidden="true">
-          <path d="M12 21C16 16.5 19 13.5 19 9.5C19 5.63401 15.866 2.5 12 2.5C8.13401 2.5 5 5.63401 5 9.5C5 13.5 8 16.5 12 21Z" />
-          <circle cx="12" cy="9.5" r="2.5" stroke={accentColor} strokeWidth={1.8} />
+          <path d="M4 6.5L9 4L15 6L20 3.5V17.5L15 20L9 18L4 20.5Z" />
+          <path d="M9 4V18M15 6V20" />
+          <path d="M11 11.5C11 10.4 12 9.5 13 9.5C14 9.5 15 10.4 15 11.5C15 13 13 14.2 13 14.2C13 14.2 11 13 11 11.5Z" stroke={accentColor} strokeWidth={1.8} />
         </svg>
       );
 
-    // 11. Cruces: Dos nodos circulares conectados por una arista vectorial
+    // 11. Cruces: grafo documental con nodo de evidencia central
     case "cruces":
       return (
         <svg {...commonProps} aria-hidden="true">
-          <circle cx="6" cy="7" r="3" />
-          <circle cx="18" cy="17" r="3" />
-          <path d="M8.5 8.5L15.5 15.5" />
-          <circle cx="18" cy="7" r="1.5" stroke={accentColor} />
-          <path d="M8.5 7H16.5" stroke={accentColor} strokeDasharray="2 2" />
+          <circle cx="5.5" cy="6" r="2.5" />
+          <circle cx="18.5" cy="6" r="2.5" />
+          <circle cx="12" cy="18" r="3" stroke={accentColor} />
+          <path d="M7.7 7.3L10.4 15M16.3 7.3L13.6 15M8 6H16" />
+          <path d="M11 17L12 18L13 17" stroke={accentColor} strokeWidth={1.8} />
         </svg>
       );
 
-    // 12. Datos: 3 barras de gráfico con progresión analítica
+    // 12. Datos: registro de señales, no un gráfico genérico
     case "datos":
       return (
         <svg {...commonProps} aria-hidden="true">
-          <path d="M3 20H21" />
-          <path d="M6 20V14H9V20" />
-          <path d="M11 20V9H14V20" />
-          <path d="M16 20V4H19V20" />
-          {/* Detalle de acento: punto de pico analítico */}
-          <circle cx="17.5" cy="4" r="0.75" fill={accentColor} stroke="none" />
+          <path d="M4 5V19H20" />
+          <path d="M7 15L10 12L13 14L18 8" stroke={accentColor} strokeWidth={1.8} />
+          <circle cx="7" cy="15" r="1" />
+          <circle cx="10" cy="12" r="1" />
+          <circle cx="13" cy="14" r="1" />
+          <circle cx="18" cy="8" r="1.5" stroke={accentColor} strokeWidth={1.8} />
         </svg>
       );
 
-    // 13. Principios / Shield: Escudo de rigor institucional
+    // 13. Principios / Shield: escudo con dial de verificación
     case "principios":
     case "shield":
       return (
         <svg {...commonProps} aria-hidden="true">
-          <path d="M12 3L4 6V11C4 16.5 7.5 20.5 12 22C16.5 20.5 20 16.5 20 11V6L12 3Z" />
-          <path d="M12 7V17" stroke={accentColor} strokeWidth={1.8} />
-          <path d="M9 12H15" stroke={accentColor} strokeWidth={1.8} />
+          <path d="M12 3L4.5 6.2V11C4.5 16.2 7.6 20.1 12 21C16.4 20.1 19.5 16.2 19.5 11V6.2L12 3Z" />
+          <circle cx="12" cy="12" r="3.5" stroke={accentColor} strokeWidth={1.8} />
+          <path d="M12 12L14.6 9.6" stroke={accentColor} strokeWidth={1.8} />
+          <path d="M12 7V5.5M12 18.5V17" />
         </svg>
       );
 
-    // 14. Anomalía: Triángulo con signo de exclamación
+    // 14. Anomalía: alerta de dato fuera de patrón
     case "anomalia":
       return (
         <svg {...commonProps} aria-hidden="true">
-          <path d="M10.29 3.86L1.82 18C1.64 18.3 1.55 18.65 1.55 19C1.55 20.1 2.45 21 3.55 21H20.45C20.8 21 21.15 20.91 21.45 20.73C22.4 20.18 22.73 18.96 22.18 18.01L13.71 3.86C13.53 3.56 13.27 3.32 12.96 3.17C11.99 2.69 10.81 3.08 10.29 3.86Z" />
-          <path d="M12 9V13" />
-          <circle cx="12" cy="17" r="0.75" fill={accentColor} stroke="none" />
+          <path d="M12 3L21 12L12 21L3 12L12 3Z" />
+          <path d="M12 8V14" stroke={accentColor} strokeWidth={1.8} />
+          <circle cx="12" cy="17" r="1" fill={accentColor} stroke="none" />
         </svg>
       );
 
