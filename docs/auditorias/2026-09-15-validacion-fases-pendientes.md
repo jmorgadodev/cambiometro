@@ -426,3 +426,20 @@ inventario; no descargó artefactos completos. La normalización local de
 `27.793` registros se mantiene válida como auditoría de categorías, pero no
 puede usarse para cerrar la cobertura R2 hasta que cada partición productiva
 tenga manifiesto, período, conteo y checksum verificables.
+
+## Plan local de reparación parlamentaria
+
+El plan no mutante del lake local permite separar lo que está listo para una
+eventual revisión de lo que todavía no puede reconstruirse:
+
+| Fuente | Particiones locales verificables | Bytes locales | Faltantes locales | Lectura |
+|---|---:|---:|---:|---|
+| Cámara | 7 | 367.391 | 0 | Material local íntegro para esas particiones |
+| Senado | 8 | 262.324 | 0 | Material local íntegro para esas particiones |
+
+Esto no equivale a una reparación remota: el catálogo R2 contiene `61`
+particiones de Cámara y `4` de Senado, por lo que el lake local no representa
+el mismo universo ni debe completar silenciosamente los faltantes productivos.
+La eventual reparación debe comparar cada `manifestKey`, período y checksum
+con el ETL de origen; hasta entonces el plan queda informativo y no
+promocionable.
