@@ -504,3 +504,19 @@ La comprobación adicional dejó estos resultados:
 
 La reparación local, por tanto, no puede completar ninguna de estas fuentes
 sin volver a obtener el release original y validarlo contra el catálogo R2.
+
+## Frescura de fuentes CPLT
+
+La verificación de cabeceras upstream detectó cambios en los cuatro validadores
+de fuentes centrales frente al manifiesto publicado:
+
+- Planta: `20445bc33-65b5ad260afc0` frente a `200c138ef-65a41f9f1a040`.
+- Contrata: `35a139535-65b596ea83bc0` frente a `353b1504f-65a409b0d2280`.
+- Honorarios: `1f22bc5f5-65b5a02e4d780` frente a `1ef46bb6b-65a412dadc180`.
+- Código del Trabajo: `174a4a239-65b464a616880` frente a `172e6265a-65a2e6e5f51c0`.
+
+El estado correcto es **fuente modificada, release productivo anterior
+conservado**. No se interpreta como cero registros ni se ejecuta una nueva
+publicación mientras R2 permanezca en `growth-blocked`; el ETL deberá volver a
+validarse por categoría cuando exista margen y una compuerta de promoción
+aprobada.
