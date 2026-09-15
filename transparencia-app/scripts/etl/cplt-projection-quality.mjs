@@ -36,7 +36,7 @@ function coverageSummary(manifest) {
   let available = 0;
   let unavailable = 0;
   for (const row of coverage) {
-    const id = String(row?.communeId ?? row?.administrationId ?? row?.cut ?? "").trim();
+    const id = String(row?.communeId ?? row?.organismId ?? row?.administrationId ?? row?.cut ?? "").trim();
     if (id && seen.has(id)) duplicateIds += 1;
     if (id) seen.add(id);
     const count = integer(row?.recordCount);
