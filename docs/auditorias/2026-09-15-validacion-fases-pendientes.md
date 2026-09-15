@@ -58,6 +58,20 @@ La auditoría remota mantiene el bloqueo de crecimiento:
 
 La ejecución manual de validación `34918549350` procesa la categoría Planta con `publish=false`. Los jobs restantes están en cola por diseño (`max-parallel: 1`). No ha publicado R2 ni modificado producción.
 
+### Resultado Planta
+
+La categoría Planta terminó correctamente antes de continuar con Contrata:
+
+- 297.468 registros.
+- 447 organismos con proyección.
+- Checksum: `d9ddf00435b95755199711fcd48589b4dba5e0635843a1983f12e873485c3818`.
+- 0 nombres faltantes.
+- 0 montos negativos.
+- 82.082 líquidos no informados, conservados como ausencia y no como cero.
+- 25 filas del mes corriente `2026-09`; no se detectaron períodos con formato inválido.
+
+El artefacto tiene estado `valid`, pero sigue siendo sólo un resultado de validación local porque el workflow fue ejecutado con `publish=false`.
+
 ## Siguiente puerta
 
 1. Esperar el resultado terminal del job Planta.
