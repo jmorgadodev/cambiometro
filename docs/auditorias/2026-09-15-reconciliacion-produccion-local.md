@@ -151,3 +151,5 @@ Hallazgos que quedan fijados para la siguiente etapa:
 - InfoLobby: producción tiene `71.467` frente a `60.523` locales; la diferencia se clasifica como frescura.
 
 La reconciliación queda documentada como diagnóstico; no modifica releases, rutas, índices públicos ni datos originales.
+
+La comparación directa del manifiesto `catalog/v1/manifest.json` remoto contra el manifiesto local produjo una segunda lectura, más granular: `14` fuentes, `4` coincidentes, `9` con diferencia de frescura/conteo y `1` de alcance. El manifiesto remoto no declara `generatedAt`, por lo que no se usará como fecha de corte. La proyección separada `funcionarios-central-v1` tampoco debe inferirse desde ese catálogo: su estado se controla por el inventario de objetos y aparece como `unclassified` hasta que exista una activación explícita.
