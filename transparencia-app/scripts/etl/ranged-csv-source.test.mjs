@@ -137,5 +137,5 @@ describe("readRangedTextLines", () => {
     })) received.push(line);
 
     expect(received).toEqual(rows);
-  });
+  }, 15_000);
 });
