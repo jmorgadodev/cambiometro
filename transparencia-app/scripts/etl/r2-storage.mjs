@@ -14,6 +14,16 @@ function objectRows(inventory) {
   })).filter((object) => object.key);
 }
 
+export function activeProjectionVersions(manifests = []) {
+  const active = {};
+  for (const manifest of manifests) {
+    const dataset = String(manifest?.dataset ?? manifest?.sourceId ?? "").trim();
+    const version = String(manifest?.version ?? "").trim();
+    if (dataset && version) active[dataset] = version;
+  }
+  return active;
+}
+
 /**
  * Resume el inventario de R2 sin consultar ni modificar el bucket.
  * `duplicateBytes` es sólo una oportunidad potencial: no autoriza borrar
@@ -32,6 +42,9 @@ export function summarizeR2Storage(inventory, options = {}) {
   const referencedKeys = options.referencedKeys == null
     ? null
     : new Set(Array.from(options.referencedKeys, (key) => String(key ?? "").trim()).filter(Boolean));
+  const activeVersions = options.activeVersions && typeof options.activeVersions === "object"
+    ? options.activeVersions
+    : {};
   const computedBytes = objects.reduce((total, object) => total + object.size, 0);
   const declaredBytes = inventory?.usedBytes == null ? computedBytes : asNonNegativeInteger(Number(inventory.usedBytes), "used_bytes");
   const usedBytes = declaredBytes;
@@ -56,7 +69,15 @@ export function summarizeR2Storage(inventory, options = {}) {
     const version = object.key.match(/^projections\/([^/]+)\/versions\/([^/]+)\//);
     if (version) {
       const key = `${version[1]}@${version[2]}`;
-      const versionGroup = projectionVersions.get(key) ?? { dataset: version[1], version: version[2], objects: 0, bytes: 0 };
+      const versionGroup = projectionVersions.get(key) ?? {
+        dataset: version[1],
+        version: version[2],
+        objects: 0,
+        bytes: 0,
+        retentionStatus: Object.prototype.hasOwnProperty.call(activeVersions, version[1])
+          ? activeVersions[version[1]] === version[2] ? "active" : "historical"
+          : "unclassified",
+      };
       versionGroup.objects += 1;
       versionGroup.bytes += object.size;
       projectionVersions.set(key, versionGroup);
@@ -97,6 +118,10 @@ export function summarizeR2Storage(inventory, options = {}) {
       .sort((left, right) => right.bytes - left.bytes || left.prefix.localeCompare(right.prefix)),
     projectionVersions: [...projectionVersions.values()]
       .sort((left, right) => right.bytes - left.bytes || left.dataset.localeCompare(right.dataset) || left.version.localeCompare(right.version)),
+    activeProjectionVersions: activeVersions,
+    historicalProjectionBytes: [...projectionVersions.values()]
+      .filter((version) => version.retentionStatus === "historical")
+      .reduce((total, version) => total + version.bytes, 0),
     thresholds: { warningRatio, growthBlockRatio },
   };
 }
