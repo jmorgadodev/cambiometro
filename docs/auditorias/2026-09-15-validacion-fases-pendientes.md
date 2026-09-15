@@ -473,3 +473,10 @@ el mismo universo ni debe completar silenciosamente los faltantes productivos.
 La eventual reparación debe comparar cada `manifestKey`, período y checksum
 con el ETL de origen; hasta entonces el plan queda informativo y no
 promocionable.
+
+Para esa revisión quedó disponible `npm run audit:r2:repair-candidates`. El
+planador compara únicamente los manifiestos remotos faltantes contra el lake
+local y exige coincidencia de período, conteo, checksum de proyección, clave de
+artefacto y checksum físico local. Devuelve `writesPerformed=false` y rechaza
+cualquier candidato que no represente exactamente la declaración del catálogo;
+no crea archivos ni publica en R2.
