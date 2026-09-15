@@ -378,6 +378,17 @@ async function r2Json<T>(bucket: R2Bucket | undefined, key: string): Promise<T |
   }
   if (!object) return null;
   try {
+    if (key.endsWith(".gz") || object.httpMetadata?.contentEncoding === "gzip") {
+      if (!object.body) return null;
+      // Los tipos de R2 y de DecompressionStream usan variantes ligeramente
+      // distintas de ReadableStream entre workers-types y lib.dom. El cast
+      // mantiene la operación acotada al cuerpo binario del objeto, sin
+      // convertirlo en una lectura masiva de D1 ni del navegador.
+      const compressedBody = object.body as unknown as ReadableStream<Uint8Array>;
+      const decoder = new DecompressionStream("gzip") as unknown as TransformStream<Uint8Array, Uint8Array>;
+      const decompressed = compressedBody.pipeThrough(decoder);
+      return JSON.parse(await new Response(decompressed as unknown as BodyInit).text()) as T;
+    }
     return await object.json<T>();
   } catch {
     return null;

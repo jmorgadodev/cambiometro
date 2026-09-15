@@ -211,7 +211,11 @@ if (publishR2) {
   // Liberarlas antes de subir evita superar transitoriamente la cuota R2.
   await runConcurrent(r2Plan.deletes, (key) => wranglerWithRetryAsync(["r2", "object", "delete", `${bucket}/${key}`]), r2PublishConcurrency);
   const dataPuts = r2Plan.puts.filter((item) => !activationManifests.includes(item));
-  await runConcurrent(dataPuts, (asset) => wranglerWithRetryAsync(["r2", "object", "put", `${bucket}/${asset.key}`, "--file", join(outputRoot, asset.key)]), r2PublishConcurrency);
+  await runConcurrent(dataPuts, (asset) => {
+    const args = ["r2", "object", "put", `${bucket}/${asset.key}`, "--file", join(outputRoot, asset.key)];
+    if (asset.contentEncoding === "gzip" || asset.key.endsWith(".json.gz")) args.push("--content-type", "application/json", "--content-encoding", "gzip");
+    return wranglerWithRetryAsync(args);
+  }, r2PublishConcurrency);
   for (const manifest of activationManifests) {
     await wranglerWithRetryAsync(["r2", "object", "put", `${bucket}/${manifest.key}`, "--file", join(outputRoot, manifest.key), "--content-type", "application/json"]);
   }

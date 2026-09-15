@@ -1,7 +1,8 @@
 import { createHash } from "node:crypto";
-import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { gzipSync } from "node:zlib";
 import { buildCpltTransparencySummary, isPlausiblePeriod } from "./cplt-transparency-summary.mjs";
 import { assertCentralOrganizations } from "./etl/cplt-scope.mjs";
 
@@ -16,6 +17,9 @@ const outputRoot = resolve(centralScope ? "data/lake-cplt-central" : "data/lake-
 const required = ["planta", "contrata", "honorarios", "codigotrabajo"];
 const modes = ["--releases", "--r2"].filter((mode) => process.argv.includes(mode));
 const localOnly = process.argv.includes("--local-only");
+const gzipJson = process.argv.includes("--gzip-json");
+const gzipInPlace = process.argv.includes("--gzip-in-place");
+if (gzipInPlace && !gzipJson) throw new Error("CPLT_GZIP_IN_PLACE_REQUIRES_GZIP_JSON");
 const communeCatalogPath = resolve("data/catalog/communes.json");
 const communeCatalog = existsSync(communeCatalogPath)
   ? JSON.parse(readFileSync(communeCatalogPath, "utf8")).communes ?? []
@@ -25,12 +29,6 @@ for (const commune of communeCatalog) {
   for (const identifier of [commune.id, commune.administracion_municipal_id, commune.cut]) {
     if (identifier) communeByIdentifier.set(String(identifier), commune);
   }
-}
-
-async function checksum(filePath) {
-  const hash = createHash("sha256");
-  for await (const chunk of createReadStream(filePath)) hash.update(chunk);
-  return hash.digest("hex");
 }
 
 if (!existsSync(projectionRoot)) throw new Error("CPLT_MISSING_PROJECTIONS");
@@ -47,6 +45,8 @@ const validations = required.map((source) => {
 const latest = validations.map((report) => report.generatedAt).sort().at(-1) ?? new Date().toISOString();
 const month = latest.slice(0, 7);
 const version = latest.replace(/[:.]/g, "-");
+const storageVersion = gzipInPlace ? version : gzipJson ? `${version}-gzip` : version;
+const storageKey = (key) => gzipJson && !gzipInPlace && key.endsWith(".json") ? `${key}.gz` : key;
 // Un release por versión evita superar el límite de 1.000 assets de GitHub Releases:
 // cada lote nacional publica más de 300 archivos versionados.
 const releaseTag = `data-cplt-personal-${version}`;
@@ -132,10 +132,35 @@ compactRows.forEach((row, position) => {
 });
 const searchPageSize = 10_000;
 const searchAssets = [];
-const writeGeneratedAsset = async (filePath, key) => {
-  const data = readFileSync(filePath);
+function buildAssetMetadata(filePath, key) {
+  const source = readFileSync(filePath);
+  const data = gzipJson ? gzipSync(source, { level: 9 }) : source;
   const checksumSha256 = createHash("sha256").update(data).digest("hex");
-  const metadata = { key, checksumSha256, size: data.byteLength, sourcePath: filePath };
+  const sourceChecksumSha256 = createHash("sha256").update(source).digest("hex");
+  return {
+    key,
+    checksumSha256,
+    size: data.byteLength,
+    sourceChecksumSha256,
+    sourceSize: source.byteLength,
+    contentEncoding: gzipJson ? "gzip" : undefined,
+    sourcePath: filePath,
+  };
+}
+
+function stageAsset(asset) {
+  const source = readFileSync(asset.sourcePath);
+  const data = gzipJson ? gzipSync(source, { level: 9 }) : source;
+  if (data.byteLength !== asset.size || createHash("sha256").update(data).digest("hex") !== asset.checksumSha256) {
+    throw new Error(`CPLT_STAGED_ASSET_MISMATCH: ${asset.key}`);
+  }
+  const target = join(outputRoot, asset.key);
+  mkdirSync(dirname(target), { recursive: true });
+  writeFileSync(target, data);
+}
+
+const writeGeneratedAsset = async (filePath, key) => {
+  const metadata = buildAssetMetadata(filePath, key);
   searchAssets.push(metadata);
   return metadata;
 };
@@ -144,7 +169,7 @@ for (let offset = 0; offset < compactRows.length; offset += searchPageSize) {
   const page = Math.floor(offset / searchPageSize) + 1;
   const filePath = join(searchIndexRoot, `p-${String(page).padStart(4, "0")}.json`);
   writeFileSync(filePath, `${JSON.stringify(compactRows.slice(offset, offset + searchPageSize))}\n`);
-  pages.push({ page, count: Math.min(searchPageSize, compactRows.length - offset), key: `projections/${datasetRoot}/versions/${version}/search_index/p-${String(page).padStart(4, "0")}.json` });
+  pages.push({ page, count: Math.min(searchPageSize, compactRows.length - offset), key: storageKey(`projections/${datasetRoot}/versions/${storageVersion}/search_index/p-${String(page).padStart(4, "0")}.json`) });
   await writeGeneratedAsset(filePath, pages.at(-1).key);
 }
 const shards = {};
@@ -158,7 +183,7 @@ for (const [shard, tokenMap] of byShard) {
     if (entries.length === 0) return;
     const fileName = `${shard}-${String(part).padStart(3, "0")}.json`;
     const filePath = join(searchIndexRoot, fileName);
-    const key = `projections/${datasetRoot}/versions/${version}/search_index/${fileName}`;
+    const key = storageKey(`projections/${datasetRoot}/versions/${storageVersion}/search_index/${fileName}`);
     writeFileSync(filePath, `${JSON.stringify(entries)}\n`);
     shardKeys.push(key);
     await writeGeneratedAsset(filePath, key);
@@ -238,7 +263,7 @@ for (const definition of filterDefinitions) {
   const hash = createHash("sha256").update(definition.key).digest("hex").slice(0, 16);
   const fileName = `filter-${hash}.json`;
   const filePath = join(searchIndexRoot, fileName);
-  const key = `projections/${datasetRoot}/versions/${version}/search_index/${fileName}`;
+  const key = storageKey(`projections/${datasetRoot}/versions/${storageVersion}/search_index/${fileName}`);
   writeFileSync(filePath, `${JSON.stringify(positions)}\n`);
   await writeGeneratedAsset(filePath, key);
   filters[definition.key] = { key, count: positions.length };
@@ -255,7 +280,7 @@ const searchIndex = {
   quality: qualitySummary,
 };
 writeFileSync(searchIndexPath, `${JSON.stringify(searchIndex, null, 2)}\n`);
-const searchIndexKey = `projections/${datasetRoot}/versions/${version}/search_index.json`;
+const searchIndexKey = storageKey(`projections/${datasetRoot}/versions/${storageVersion}/search_index.json`);
 const searchIndexMetadata = await writeGeneratedAsset(searchIndexPath, searchIndexKey);
 for (const asset of searchAssets) {
   if (asset.key === searchIndexKey) continue;
@@ -322,7 +347,7 @@ const coverage = centralScope ? buildCentralCoverage() : buildCoverage();
 const transparencySummary = buildCpltTransparencySummary(summaryRows, coverage, latest);
 const transparencySummaryPath = join(projectionRoot, "transparency-summary.json");
 writeFileSync(transparencySummaryPath, `${JSON.stringify(transparencySummary, null, 2)}\n`);
-const transparencySummaryKey = `projections/${datasetRoot}/versions/${version}/transparency-summary.json`;
+const transparencySummaryKey = storageKey(`projections/${datasetRoot}/versions/${storageVersion}/transparency-summary.json`);
 const transparencySummaryMetadata = await writeGeneratedAsset(transparencySummaryPath, transparencySummaryKey);
 
 const assets = [];
@@ -332,15 +357,16 @@ const manifestAssets = [
   ...searchAssets.filter((asset) => asset.key !== searchIndexKey && asset.key !== transparencySummaryKey),
 ];
 for (const asset of manifestAssets) {
-  const target = join(outputRoot, asset.key);
-  mkdirSync(dirname(target), { recursive: true });
-  copyFileSync(asset.sourcePath, target);
+  stageAsset(asset);
   assets.push({
     key: asset.key,
     checksumSha256: asset.checksumSha256,
     size: asset.size,
+    sourceChecksumSha256: asset.sourceChecksumSha256,
+    sourceSize: asset.sourceSize,
+    contentEncoding: asset.contentEncoding,
     releaseTag,
-    releaseAssetName: `cplt-${version}-${asset.key.replaceAll("/", "-")}`,
+    releaseAssetName: `cplt-${storageVersion}-${asset.key.replaceAll("/", "-")}`,
   });
   delete asset.sourcePath;
 }
@@ -348,14 +374,28 @@ for (const fileName of files) {
   const source = join(projectionRoot, fileName);
   const size = statSync(source).size;
   if (size < 2) throw new Error(`CPLT_EMPTY_PROJECTION: ${fileName}`);
-  const checksumSha256 = await checksum(source);
-  const key = `projections/${datasetRoot}/versions/${version}/${fileName}`;
-  const target = join(outputRoot, key);
-  mkdirSync(dirname(target), { recursive: true });
-  copyFileSync(source, target);
-  const releaseAssetName = `cplt-${version}-${fileName}`;
-  assets.push({ key, checksumSha256, size, releaseTag, releaseAssetName });
-  manifestAssets.push({ key, checksumSha256, size });
+  const key = storageKey(`projections/${datasetRoot}/versions/${storageVersion}/${fileName}`);
+  const asset = buildAssetMetadata(source, key);
+  stageAsset(asset);
+  const releaseAssetName = `cplt-${storageVersion}-${fileName}${gzipJson ? ".gz" : ""}`;
+  assets.push({
+    key,
+    checksumSha256: asset.checksumSha256,
+    size: asset.size,
+    sourceChecksumSha256: asset.sourceChecksumSha256,
+    sourceSize: asset.sourceSize,
+    contentEncoding: asset.contentEncoding,
+    releaseTag,
+    releaseAssetName,
+  });
+  manifestAssets.push({
+    key,
+    checksumSha256: asset.checksumSha256,
+    size: asset.size,
+    sourceChecksumSha256: asset.sourceChecksumSha256,
+    sourceSize: asset.sourceSize,
+    contentEncoding: asset.contentEncoding,
+  });
 }
 
 const manifest = {
@@ -363,7 +403,7 @@ const manifest = {
   sourceId: centralScope ? "transparencia-activa-central" : "transparencia-activa",
   generatedAt: latest,
   releaseMonth: month,
-  version,
+  version: storageVersion,
   recordCount: validations.reduce((total, report) => total + report.recordCount, 0),
   sources: validations.map(({ sourceId, sourceUrl, sourceValidator, recordCount, checksumSha256 }) => ({ sourceId, sourceUrl, sourceValidator, recordCount, checksumSha256 })),
   searchIndex: { key: searchIndexKey, totalRows: compactRows.length, pageSize: searchPageSize },
@@ -386,7 +426,7 @@ assets.push({
   checksumSha256: createHash("sha256").update(manifestData).digest("hex"),
   size: manifestData.byteLength,
   releaseTag,
-  releaseAssetName: `cplt-${version}-manifest.json`,
+  releaseAssetName: `cplt-${storageVersion}-manifest.json`,
 });
 
 mkdirSync(outputRoot, { recursive: true });
@@ -397,4 +437,4 @@ if (!localOnly) {
   const result = spawnSync(process.execPath, [resolve("scripts/publish-data-lake.mjs"), "--output", outputRoot, ...modes, ...localAuth], { stdio: "inherit" });
   if (result.status !== 0) throw new Error(`CPLT_PUBLICATION_FAILED: ${result.status}`);
 }
-console.log(JSON.stringify({ version, records: manifest.recordCount, assets: manifestAssets.length, manifest: manifestKey, published: !localOnly }, null, 2));
+console.log(JSON.stringify({ version: storageVersion, records: manifest.recordCount, assets: manifestAssets.length, manifest: manifestKey, gzipJson, gzipInPlace, published: !localOnly }, null, 2));

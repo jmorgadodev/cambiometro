@@ -92,6 +92,23 @@ describe("automatizacion CPLT nacional", () => {
     expect(lakePublisher).toContain("R2_OBJECT_EXCEEDS_WRANGLER_LIMIT");
   });
 
+  it("permite publicar JSON comprimido sin cambiar las claves del manifiesto raíz", () => {
+    const publisher = readFileSync(resolve(process.cwd(), "scripts/publish-cplt-projections.mjs"), "utf8");
+    const lakePublisher = readFileSync(resolve(process.cwd(), "scripts/publish-data-lake.mjs"), "utf8");
+    expect(publisher).toContain('--gzip-json');
+    expect(publisher).toContain('contentEncoding: gzipJson ? "gzip" : undefined');
+    expect(lakePublisher).toContain('asset.key.endsWith(".json.gz")');
+    expect(lakePublisher).toContain('"--content-encoding", "gzip"');
+    const packageJson = readFileSync(resolve(process.cwd(), "package.json"), "utf8");
+    expect(packageJson).toContain('data:finalize:cplt-central:r2:gzip');
+    expect(packageJson).toContain('data:finalize:cplt-central:r2:gzip-in-place');
+    const centralWorkflow = readFileSync(resolve(process.cwd(), "../.github/workflows/etl-cplt-central.yml"), "utf8");
+    expect(centralWorkflow).toContain('gzip_json:');
+    expect(centralWorkflow).toContain('gzip_in_place:');
+    expect(centralWorkflow).toContain('inputs.gzip_json == true');
+    expect(centralWorkflow).toContain('inputs.gzip_in_place == true');
+  });
+
   it("permite materializar el lake CPLT local sin publicar", () => {
     const packageJson = readFileSync(resolve(process.cwd(), "package.json"), "utf8");
     const publisher = readFileSync(resolve(process.cwd(), "scripts/publish-cplt-projections.mjs"), "utf8");

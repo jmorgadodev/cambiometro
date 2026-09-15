@@ -15,6 +15,16 @@ on:
         required: false
         default: false
         type: boolean
+      gzip_json:
+        description: "Publicar JSON de la proyección central comprimido con gzip"
+        required: false
+        default: false
+        type: boolean
+      gzip_in_place:
+        description: "Reemplazar en sitio los objetos activos, conservando sus claves y evitando almacenamiento temporal duplicado"
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: cambiometro-cplt-central-publication
@@ -96,11 +106,24 @@ jobs:
         run: |
           echo "R2_STORAGE_CONFIRMATION_REQUIRED: activa publish y confirm_storage sólo después de revisar el margen R2."
           exit 1
+      - name: Bloquear compresión en sitio sin lector compatible
+        if: inputs.publish == true && inputs.gzip_in_place == true && inputs.gzip_json != true
+        run: |
+          echo "R2_GZIP_READER_CONFIRMATION_REQUIRED: gzip_in_place requiere gzip_json=true y el Worker compatible ya promovido."
+          exit 1
       - name: Consolidar la proyección central sin publicar
         if: inputs.publish != true
         working-directory: transparencia-app
         run: npm run data:finalize:cplt-central:local
       - name: Publicar sólo después de confirmación explícita
-        if: inputs.publish == true && inputs.confirm_storage == true
+        if: inputs.publish == true && inputs.confirm_storage == true && inputs.gzip_json != true && inputs.gzip_in_place != true
         working-directory: transparencia-app
         run: npm run data:finalize:cplt-central:r2
+      - name: Publicar proyección central comprimida
+        if: inputs.publish == true && inputs.confirm_storage == true && inputs.gzip_json == true && inputs.gzip_in_place != true
+        working-directory: transparencia-app
+        run: npm run data:finalize:cplt-central:r2:gzip
+      - name: Comprimir proyección central activa en sitio
+        if: inputs.publish == true && inputs.confirm_storage == true && inputs.gzip_json == true && inputs.gzip_in_place == true
+        working-directory: transparencia-app
+        run: npm run data:finalize:cplt-central:r2:gzip-in-place

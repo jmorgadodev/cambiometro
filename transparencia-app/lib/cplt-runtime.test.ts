@@ -16,6 +16,12 @@ describe("consulta runtime de funcionarios", () => {
     expect(route).toContain("LIMIT ?");
   });
 
+  it("puede leer JSON gzip desde R2 sin convertirlo en una descarga masiva", () => {
+    const route = readFileSync(resolve(process.cwd(), "workers/public-api/index.ts"), "utf8");
+    expect(route).toContain('key.endsWith(".gz")');
+    expect(route).toContain('new DecompressionStream("gzip")');
+  });
+
   it("mantiene el cliente de fichas municipales acotado por organismo", () => {
     const client = readFileSync(resolve(process.cwd(), "components/GlobalFuncionariosClient.tsx"), "utf8");
     expect(client).not.toContain('<option value="Todos">Todos los Organismos</option>');
