@@ -153,3 +153,14 @@ Se corrigió el parser de montos del historial para interpretar formatos monetar
 La batería consolidada posterior cubrió 11 archivos y 96 pruebas, incluyendo auditoría R2, almacenamiento, historiales, movimientos, categorías legislativas y contratos de normalización; todas terminaron correctamente.
 
 La validación adicional de `lib/api-v1.test.ts` y `lib/api-cache.test.ts` terminó con 63/63 pruebas aprobadas: el camino público prioriza R2 y evita D1 para búsquedas masivas, índices, fuentes, Cámara, transferencias y registros cuando existe un release publicado.
+
+## Revalidación local posterior — 2026-09-15 00:50 UTC-3
+
+Se repitieron las validaciones acotadas mientras el workflow remoto continúa procesando Código del Trabajo:
+
+- Cámara y Senado: `27.793` registros, con categorías separadas y sin mezcla entre autoridades, votaciones, gastos y personal de apoyo.
+- Movimientos: `80` registros; `74` verificados, `6` pendientes y `75` con fuente oficial.
+- Historial R2: `16/16` pruebas aprobadas.
+- Historial de remuneraciones: `4.473` entradas, `0` cambios inválidos, `0` lecturas D1 y `0` escrituras D1.
+
+Estas comprobaciones son locales y no alteran releases, R2, D1 ni producción. El bloque central permanece en `75%` hasta que Código del Trabajo termine y su artefacto pase la misma validación por fuente.
