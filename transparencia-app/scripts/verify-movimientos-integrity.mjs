@@ -18,7 +18,8 @@ function roleCategory(movement) {
 }
 
 function inScope(movement) {
-  return movement.fecha >= policy.cutoffDate
+  return movement.fecha >= policy.scopeStartDate
+    && movement.fecha <= policy.cutoffDate
     && policy.allowedEventTypes.includes(movement.tipo_evento)
     && roleCategory(movement) !== null;
 }
