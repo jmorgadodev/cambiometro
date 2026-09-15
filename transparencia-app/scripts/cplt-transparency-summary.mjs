@@ -76,8 +76,9 @@ function coverageSummaryOf(coverage) {
     unavailableItems: coverageRows
       .filter((item) => item.status !== "available")
       .map((item) => ({
-        communeId: item.communeId,
-        name: item.name ?? item.communeId,
+        communeId: item.communeId ?? null,
+        organismId: item.organismId ?? null,
+        name: item.name ?? item.communeId ?? item.organismId ?? "Sin identificar",
         cut: item.cut ?? null,
         status: item.status,
         reason: item.status === "not_applicable"

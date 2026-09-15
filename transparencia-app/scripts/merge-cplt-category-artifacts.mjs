@@ -13,6 +13,7 @@ rmSync(output, { recursive: true, force: true });
 mkdirSync(projections, { recursive: true });
 mkdirSync(join(output, "validation"), { recursive: true });
 mkdirSync(join(output, "coverage"), { recursive: true });
+mkdirSync(join(output, "organizations"), { recursive: true });
 
 const recordsByFile = new Map();
 for (const category of categories) {
@@ -23,6 +24,9 @@ for (const category of categories) {
   if (existsSync(join(source, "coverage.json"))) {
     mkdirSync(join(output, "coverage"), { recursive: true });
     writeFileSync(join(output, "coverage", `${normalized}.json`), readFileSync(join(source, "coverage.json")));
+  }
+  if (existsSync(join(source, "organizations.json"))) {
+    writeFileSync(join(output, "organizations", `${normalized}.json`), readFileSync(join(source, "organizations.json")));
   }
 
   for (const fileName of readdirSync(join(source, "projections"))) {

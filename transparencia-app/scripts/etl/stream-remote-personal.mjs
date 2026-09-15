@@ -135,6 +135,7 @@ async function processStream(tipo, urls, outputDir, scope) {
   const temporaryStorePath = path.join(outputDir, `.latest-${normalized(tipo)}-${process.pid}.sqlite`);
   const latestByOfficial = new LatestCpltRecordStore(temporaryStorePath);
   const unknownMunicipalities = new Set();
+  const organizationNames = new Map();
   let header = null;
   let linesProcessed = 0;
 
@@ -242,6 +243,7 @@ async function processStream(tipo, urls, outputDir, scope) {
       return record;
     });
     groupedCounts.set(group.organismoId, current.length);
+    organizationNames.set(group.organismoId, current[0]?.organo_nombre || group.organismoId);
     const filePath = path.join(projectionsDir, `${group.organismoId}.json`);
     fs.writeFileSync(filePath, JSON.stringify(mergeById(readJsonArray(filePath), current)));
   }
@@ -275,7 +277,11 @@ async function processStream(tipo, urls, outputDir, scope) {
       sourceId: `cplt-personal-${scope}-${normalized(tipo)}`,
       sourceUrl,
       generatedAt: new Date().toISOString(),
-      organizations: [...groupedCounts.entries()].map(([organismoId, recordCount]) => ({ organismoId, recordCount })),
+      organizations: [...groupedCounts.entries()].map(([organismoId, recordCount]) => ({
+        organismoId,
+        organismoNombre: organizationNames.get(organismoId) ?? organismoId,
+        recordCount,
+      })),
     }, null, 2));
   }
 

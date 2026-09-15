@@ -10,6 +10,7 @@ const inputRoot = resolve("data/raw", centralScope ? "transparencia_activa_centr
 const projectionRoot = join(inputRoot, "projections", "funcionarios-v1");
 const validationRoot = join(inputRoot, "validation");
 const coverageRoot = join(inputRoot, "coverage");
+const organizationsRoot = join(inputRoot, "organizations");
 const outputRoot = resolve(centralScope ? "data/lake-cplt-central" : "data/lake-cplt");
 const required = ["planta", "contrata", "honorarios", "codigotrabajo"];
 const modes = ["--releases", "--r2"].filter((mode) => process.argv.includes(mode));
@@ -287,7 +288,35 @@ function buildCoverage() {
   return coverage;
 }
 
-const coverage = centralScope ? [] : buildCoverage();
+function buildCentralCoverage() {
+  const byOrganization = new Map();
+  for (const source of required) {
+    const filePath = join(organizationsRoot, `${source}.json`);
+    if (!existsSync(filePath)) throw new Error(`CPLT_MISSING_ORGANIZATIONS: ${source}`);
+    const report = JSON.parse(readFileSync(filePath, "utf8"));
+    for (const item of report.organizations ?? []) {
+      const organismId = String(item.organismoId ?? "").trim();
+      if (!organismId) continue;
+      const current = byOrganization.get(organismId) ?? {
+        organismId,
+        name: item.organismoNombre ?? organismId,
+        status: "unavailable",
+        recordCount: 0,
+        categories: {},
+      };
+      current.name = current.name || item.organismoNombre || organismId;
+      current.categories[source] = { status: "available", recordCount: Number(item.recordCount ?? 0) };
+      current.recordCount += Number(item.recordCount ?? 0);
+      if (Number(item.recordCount ?? 0) > 0) current.status = "available";
+      byOrganization.set(organismId, current);
+    }
+  }
+  const coverage = [...byOrganization.values()].sort((left, right) => left.name.localeCompare(right.name, "es-CL"));
+  if (coverage.length < 1) throw new Error("CPLT_CENTRAL_COVERAGE_EMPTY");
+  return coverage;
+}
+
+const coverage = centralScope ? buildCentralCoverage() : buildCoverage();
 const transparencySummary = buildCpltTransparencySummary(summaryRows, coverage, latest);
 const transparencySummaryPath = join(projectionRoot, "transparency-summary.json");
 writeFileSync(transparencySummaryPath, `${JSON.stringify(transparencySummary, null, 2)}\n`);
@@ -336,7 +365,7 @@ const manifest = {
   recordCount: validations.reduce((total, report) => total + report.recordCount, 0),
   sources: validations.map(({ sourceId, sourceUrl, sourceValidator, recordCount, checksumSha256 }) => ({ sourceId, sourceUrl, sourceValidator, recordCount, checksumSha256 })),
   searchIndex: { key: searchIndexKey, totalRows: compactRows.length, pageSize: searchPageSize },
-  ...(centralScope ? {} : { coverage }),
+  coverage,
   transparencySummary: {
     key: transparencySummaryKey,
     recordCount: transparencySummary.recordCount,

@@ -14,13 +14,16 @@ const raw = resolve("data/raw", scope === "central" ? "transparencia_activa_cent
 const target = resolve("data", scope === "central" ? "cplt-central-category" : "cplt-category", category);
 const validation = join(raw, "validation", `${normalized}.json`);
 const coverage = join(raw, "coverage", `${normalized}.json`);
+const organizations = join(raw, "organizations", `${normalized}.json`);
 const projections = join(raw, "projections", "funcionarios-v1");
 if (!existsSync(validation) || !existsSync(projections)) throw new Error("CPLT_CATEGORY_INCOMPLETE");
 if (scope === "municipal" && !existsSync(coverage)) throw new Error("CPLT_CATEGORY_COVERAGE_INCOMPLETE");
+if (scope === "central" && !existsSync(organizations)) throw new Error("CPLT_CATEGORY_ORGANIZATIONS_INCOMPLETE");
 
 rmSync(target, { recursive: true, force: true });
 mkdirSync(target, { recursive: true });
 cpSync(projections, join(target, "projections"), { recursive: true });
 writeFileSync(join(target, "validation.json"), readFileSync(validation));
 if (existsSync(coverage)) writeFileSync(join(target, "coverage.json"), readFileSync(coverage));
+if (existsSync(organizations)) writeFileSync(join(target, "organizations.json"), readFileSync(organizations));
 console.log(JSON.stringify({ category, scope, target }));

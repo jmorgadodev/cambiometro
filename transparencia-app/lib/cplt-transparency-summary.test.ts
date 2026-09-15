@@ -95,4 +95,16 @@ describe("resumen agregado de Transparencia Activa", () => {
     }));
     expect(summary.quality.amountStates).toEqual({ positive: 1, zero: 0, notPublished: 1 });
   });
+
+  it("conserva la identidad de organismos en la cobertura central", () => {
+    const summary = buildCpltTransparencySummary([], [
+      { organismId: "org-presidencia", name: "Presidencia", status: "available", recordCount: 10 },
+      { organismId: "org-salud", name: "Ministerio de Salud", status: "unavailable", recordCount: 0 },
+    ], "2026-09-14T00:00:00.000Z");
+
+    expect(summary.coverage).toMatchObject({ total: 2, available: 1, unavailable: 1 });
+    expect(summary.coverage.unavailableItems).toEqual([
+      expect.objectContaining({ organismId: "org-salud", name: "Ministerio de Salud" }),
+    ]);
+  });
 });
