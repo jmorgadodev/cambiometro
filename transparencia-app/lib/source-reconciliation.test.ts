@@ -35,6 +35,30 @@ describe("auditoría de reconciliación producción/R2/local", () => {
     expect(report.rows[0].classification).toBe("unexplained");
   });
 
+  it("clasifica ChileCompra como diferencia de alcance y explica el corte vigente", () => {
+    const report = reconcileSourceSnapshots({
+      production: [{ id: "chilecompra", recordCount: 74_142, lastUpdated: "2026-09-02", status: "partial" }] as never,
+      local: [{ id: "chilecompra", recordCount: 888_693, generatedAt: "2026-08-21", status: "partial" }] as never,
+    });
+
+    expect(report.rows[0]).toMatchObject({
+      classification: "scope",
+      classificationReason: expect.stringContaining("corte público vigente"),
+    });
+  });
+
+  it("clasifica DIPRES como alcance agregado distinto, no como pérdida individual", () => {
+    const report = reconcileSourceSnapshots({
+      production: [{ id: "dipres", recordCount: 247_287, lastUpdated: "2026-08-21", status: "partial" }] as never,
+      local: [{ id: "dipres", recordCount: 92_286, generatedAt: "2026-08-21", status: "partial" }] as never,
+    });
+
+    expect(report.rows[0]).toMatchObject({
+      classification: "scope",
+      classificationReason: expect.stringContaining("alcances agregados distintos"),
+    });
+  });
+
   it("separa categorías parlamentarias sin sumar categorías distintas", () => {
     expect(sourceCategories("gastos_senado")).toEqual(["gastos"]);
     expect(sourceCategories("votaciones_senado")).toEqual(["votaciones"]);

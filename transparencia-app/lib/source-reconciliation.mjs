@@ -15,6 +15,11 @@ const CATEGORY_BY_SOURCE = Object.freeze({
   senado: ["remuneraciones", "asesorias", "gastos", "votaciones"],
 });
 
+const KNOWN_AGGREGATE_SCOPE = Object.freeze({
+  chilecompra: "Producción expone el corte público vigente; el snapshot local conserva histórico y cortes acumulados.",
+  dipres: "Producción y el snapshot local tienen alcances agregados distintos; no representan fichas individuales comparables.",
+});
+
 export function sourceCategories(sourceId) {
   return [...(CATEGORY_BY_SOURCE[String(sourceId)] ?? [])];
 }
@@ -86,12 +91,22 @@ function normalizeComponents(components, parentId = null) {
   })).filter((component) => component.id || component.sourceId);
 }
 
-function classification({ production, local, children }) {
+function classification({ id, production, local, children }) {
   const hasCategorySplit = children.length > 0;
   if (production && local && Number(production.recordCount) === Number(local.recordCount) && !hasCategorySplit) return "match";
   if (hasCategorySplit || (local && sourceCategories(local.id).length > 0 && !production)) return "scope";
+  if (KNOWN_AGGREGATE_SCOPE[id] && production && local && Number(production.recordCount) !== Number(local.recordCount)) return "scope";
   if (production && local && hasNewerProduction(production, local)) return "freshness";
   return "unexplained";
+}
+
+function classificationReason({ id, production, local, children }) {
+  if (KNOWN_AGGREGATE_SCOPE[id] && production && local && Number(production.recordCount) !== Number(local.recordCount)) {
+    return KNOWN_AGGREGATE_SCOPE[id];
+  }
+  if (children.length > 0) return "La fuente local conserva componentes separados que no deben sumarse al conteo padre.";
+  if (production && local && hasNewerProduction(production, local)) return "Producción tiene un corte más reciente que el snapshot local.";
+  return null;
 }
 
 function rowFor(production, local, localSources) {
@@ -101,7 +116,8 @@ function rowFor(production, local, localSources) {
   const categories = categoriesForSources(localParts.length ? localParts : production ? [production] : []);
   return {
     id,
-    classification: classification({ production, local, children }),
+    classification: classification({ id, production, local, children }),
+    classificationReason: classificationReason({ id, production, local, children }),
     productionCount: production?.recordCount ?? null,
     localCount: local?.recordCount ?? null,
     localCatalogCount: local?.catalogRecordCount ?? null,
