@@ -127,6 +127,6 @@ describe("publicación caliente en R2", () => {
     expect(plan.inventory.objects.map((item: { key: string }) => item.key)).toContain(`${prefix}/2026-08-26/search_index.json`);
     expect(plan.inventory.objects.map((item: { key: string }) => item.key)).toContain(`${prefix}/2026-08-30/search_index.json`);
     expect(plan.inventory.objects.map((item: { key: string }) => item.key)).toContain("projections/otro-v1/versions/2026-08-01/data.json");
-    expect(plan.ratio).toBeLessThan(0.9);
+    expect(plan.ratio).toBeLessThan(0.95);
   });
 });

@@ -87,7 +87,7 @@ export function protectPersonalIdentifiers(record, hmacSecret) {
 export function storagePolicy(usedGb, limitGb = 8) {
   if (!Number.isFinite(usedGb) || !Number.isFinite(limitGb) || usedGb < 0 || limitGb <= 0) throw new Error("INVALID_STORAGE_USAGE");
   const ratio = usedGb / limitGb;
-  if (ratio >= 0.9) return { action: "block_growth", ratio };
+  if (ratio >= 0.95) return { action: "block_growth", ratio };
   if (ratio >= 0.8) return { action: "archive_cold_partitions", ratio };
   return { action: "publish", ratio };
 }
