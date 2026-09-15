@@ -92,6 +92,12 @@ describe("automatizacion CPLT nacional", () => {
     expect(publisher).toContain('process.argv.includes("--local-only")');
   });
 
+  it("bloquea una publicación CPLT si quedan períodos inválidos", () => {
+    const publisher = readFileSync(resolve(process.cwd(), "scripts/publish-cplt-projections.mjs"), "utf8");
+    expect(publisher).toContain("CPLT_INVALID_PERIODS_BLOCK_PUBLICATION");
+    expect(publisher).toContain("modes.length > 0 && invalidPeriodRows > 0");
+  });
+
   it("solo permite registrar el estado CPLT en la D1 autorizada", () => {
     const recorder = readFileSync(resolve(process.cwd(), "scripts/record-cplt-source-state.mjs"), "utf8");
     expect(recorder).toContain('database !== "transparencia-db"');

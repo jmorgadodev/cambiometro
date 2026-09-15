@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
-import { buildCpltTransparencySummary } from "./cplt-transparency-summary.mjs";
+import { buildCpltTransparencySummary, isPlausiblePeriod } from "./cplt-transparency-summary.mjs";
 
 const centralScope = process.argv.includes("--central");
 const datasetRoot = centralScope ? "funcionarios-central-v1" : "funcionarios-v1";
@@ -12,6 +12,8 @@ const validationRoot = join(inputRoot, "validation");
 const coverageRoot = join(inputRoot, "coverage");
 const outputRoot = resolve(centralScope ? "data/lake-cplt-central" : "data/lake-cplt");
 const required = ["planta", "contrata", "honorarios", "codigotrabajo"];
+const modes = ["--releases", "--r2"].filter((mode) => process.argv.includes(mode));
+const localOnly = process.argv.includes("--local-only");
 const communeCatalogPath = resolve("data/catalog/communes.json");
 const communeCatalog = existsSync(communeCatalogPath)
   ? JSON.parse(readFileSync(communeCatalogPath, "utf8")).communes ?? []
@@ -178,6 +180,11 @@ for (const [shard, tokenMap] of byShard) {
 const compactSearch = (value) => normalizeSearch(value).replace(/[^a-z0-9]/g, "");
 const compactContract = (value) => compactSearch(value).replace("codigodeltrabajo", "codigotrabajo");
 const compactOrgType = (value) => compactSearch(value).replace("gobiernoregional", "gore");
+const compactPeriod = (row) => String(row.p ?? "").trim().slice(0, 7);
+const invalidPeriodRows = compactRows.filter((row) => !isPlausiblePeriod(compactPeriod(row), latest)).length;
+if (modes.length > 0 && invalidPeriodRows > 0) {
+  throw new Error(`CPLT_INVALID_PERIODS_BLOCK_PUBLICATION:${invalidPeriodRows}`);
+}
 const qualitySummary = compactRows.reduce((summary, row) => {
   const issues = row.q ?? [];
   if (issues.length > 0) {
@@ -187,9 +194,9 @@ const qualitySummary = compactRows.reduce((summary, row) => {
     if (issues.some((issue) => formatQualityIssues.has(issue))) summary.correctedRows += 1;
   }
   return summary;
-}, { recordsWithIssues: 0, correctedRows: 0, observedRows: 0, byIssue: {} });
+}, { recordsWithIssues: 0, correctedRows: 0, observedRows: 0, byIssue: {}, invalidPeriodRows });
 const filterDefinitions = [
-  ...[...new Set(compactRows.map((row) => String(row.p ?? "").trim()).filter((value) => /^\d{4}-\d{2}$/.test(value)))].sort()
+  ...[...new Set(compactRows.map(compactPeriod).filter((value) => isPlausiblePeriod(value, latest)))].sort()
     .map((period) => ({ key: `periodo:${period}`, matches: (row) => row.p === period })),
   ...[
     ["planta", "planta"],
@@ -353,8 +360,6 @@ assets.push({
 
 mkdirSync(outputRoot, { recursive: true });
 writeFileSync(join(outputRoot, "publish-plan.json"), `${JSON.stringify({ schemaVersion: "1.0.0", generatedAt: latest, assets }, null, 2)}\n`);
-const modes = ["--releases", "--r2"].filter((mode) => process.argv.includes(mode));
-const localOnly = process.argv.includes("--local-only");
 if (modes.length === 0 && !localOnly) throw new Error("CPLT_PUBLICATION_MODE_REQUIRED");
 if (!localOnly) {
   const localAuth = process.argv.includes("--local-auth") ? ["--local-auth"] : [];

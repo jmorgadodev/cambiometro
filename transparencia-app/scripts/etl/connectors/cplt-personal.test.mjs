@@ -1,6 +1,6 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
-import { parseCpltHeader, parseCpltRecord, scanCpltCell } from "../cplt-personal.mjs";
+import { parseCpltHeader, parseCpltLine, parseCpltRecord, scanCpltCell } from "../cplt-personal.mjs";
 
 describe("prefiltro acotado de nóminas CPLT", () => {
   it("lee una columna puntual sin materializar todas las columnas", () => {
@@ -14,15 +14,22 @@ describe("prefiltro acotado de nóminas CPLT", () => {
 
   it("prefiltra año y ámbito del organismo antes de dividir la fila completa", () => {
     const source = readFileSync(new URL("../stream-remote-personal.mjs", import.meta.url), "utf8");
-    const yearPrefilter = source.indexOf('scanCpltCell(line, header, "anyo", "año")');
-    const organizationPrefilter = source.indexOf('scanCpltCell(line, header, "organismo_nombre", "organismo nombre")');
+    const yearPrefilter = source.indexOf('getCpltColumn(columns, header, "anyo", "año")');
+    const organizationPrefilter = source.indexOf('getCpltColumn(columns, header, "organismo_nombre", "organismo nombre")');
     const scopedFilter = source.indexOf("acceptsCpltScope(organismoNombre, scope)");
-    const fullParse = source.indexOf("parseCpltColumns(line)");
+    const fullParse = source.indexOf("parseCpltLine(line)");
 
     expect(yearPrefilter).toBeGreaterThan(-1);
     expect(organizationPrefilter).toBeGreaterThan(yearPrefilter);
     expect(scopedFilter).toBeGreaterThan(organizationPrefilter);
-    expect(fullParse).toBe(-1);
+    expect(fullParse).toBeGreaterThan(-1);
+  });
+
+  it("conserva las columnas cuando una descripción contiene un punto y coma", () => {
+    const header = parseCpltHeader("id;camino;organismo_nombre;anyo;mes;nombres;paterno;materno;tipo cargo;remuneracionbruta");
+    const columns = parseCpltLine('1;"Personal; Contrata";Presidencia;2026;Agosto;ANA;PEREZ;SOTO;ASESORA;1000000');
+    const record = parseCpltRecord({ columns, header, tipo: "Contrata", organismoId: "org-presidencia", sourceUrl: "https://oficial.test/contrata" });
+    expect(record).toMatchObject({ fuente_periodo: "2026-08", organo_nombre: "Presidencia", remuneracion_bruta_mensual: 1_000_000 });
   });
 
   it("decide la promoción antes de reemplazar la proyección existente", () => {
