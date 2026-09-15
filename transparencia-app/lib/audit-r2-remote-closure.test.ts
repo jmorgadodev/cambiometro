@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { SpawnSyncOptions } from "node:child_process";
-import { auditCatalogClosure, catalogPartitionKeys, catalogProjectionArtifactKey, classifyR2Closure, summarizeR2ClosureBySource, summarizeR2ClosureGaps, wranglerGet } from "../scripts/audit-r2-remote-closure.mjs";
+import { auditCatalogClosure, catalogPartitionKeys, catalogProjectionArtifactKey, classifyR2Closure, compactR2ClosureReport, summarizeR2ClosureBySource, summarizeR2ClosureGaps, wranglerGet } from "../scripts/audit-r2-remote-closure.mjs";
 
 describe("auditoría de cierre del catálogo R2", () => {
   it("deriva sólo la clave de proyección de un checksum completo", () => {
@@ -167,6 +167,36 @@ describe("auditoría de cierre del catálogo R2", () => {
         promotionAllowed: false,
       },
     ]);
+  });
+
+  it("reduce la salida agrupada sin ocultar el estado de promoción ni las brechas", () => {
+    expect(compactR2ClosureReport({
+      bucket: "transparencia-public-data",
+      sourceId: "all",
+      checkedPartitions: 65,
+      checkedManifests: 46,
+      artifactCheck: "storage_inventory",
+      complete: false,
+      status: "catalogued_without_manifest",
+      promotionAllowed: false,
+      reason: "faltan manifiestos",
+      sourceMatrix: [{ sourceId: "camara", status: "catalogued_without_manifest", promotionAllowed: false }],
+      gapSummary: { missingManifests: [{ sourceId: "camara", count: 1 }], missingArtifacts: [], missingManifestArtifacts: [], missingArtifactInventory: [], presentWithoutManifest: [] },
+      missingManifests: ["secret-key"],
+    })).toEqual({
+      schemaVersion: 1,
+      bucket: "transparencia-public-data",
+      sourceId: "all",
+      checkedPartitions: 65,
+      checkedManifests: 46,
+      artifactCheck: "storage_inventory",
+      complete: false,
+      status: "catalogued_without_manifest",
+      promotionAllowed: false,
+      reason: "faltan manifiestos",
+      sourceMatrix: [{ sourceId: "camara", status: "catalogued_without_manifest", promotionAllowed: false }],
+      gapSummary: { missingManifests: [{ sourceId: "camara", count: 1 }], missingArtifacts: [], missingManifestArtifacts: [], missingArtifactInventory: [], presentWithoutManifest: [] },
+    });
   });
 
   it("cierra la lectura remota cuando Wrangler excede el tiempo máximo", () => {

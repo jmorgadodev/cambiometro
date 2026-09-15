@@ -98,6 +98,7 @@
     "data:health": "node scripts/build-source-health.mjs",
     "audit:r2:catalog": "node scripts/audit-r2-catalog.mjs",
     "audit:r2:closure": "node scripts/audit-r2-remote-closure.mjs",
+    "audit:r2:sources": "node scripts/audit-r2-remote-closure.mjs --compact --limit 200",
     "audit:r2:repair-plan": "node scripts/r2-repair-plan.mjs",
     "audit:r2:storage": "node scripts/audit-r2-storage.mjs",
     "audit:r2:history:sample": "node scripts/audit-r2-history-sample.mjs",

@@ -1,9 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { planR2Publication } from "./r2.mjs";
+import { assertR2RetentionDeletionConfirmed, planR2Publication } from "./r2.mjs";
 import { planR2Retention, summarizeR2Storage } from "./r2-storage.mjs";
 import { defaultActiveProjectionManifests } from "../r2-active-manifests.mjs";
 
 describe("protecciones de almacenamiento R2", () => {
+  it("exige confirmación separada antes de eliminar objetos de retención", () => {
+    expect(assertR2RetentionDeletionConfirmed([], false)).toBe(true);
+    expect(() => assertR2RetentionDeletionConfirmed(["old/object.json"], false))
+      .toThrow("R2_RETENTION_CONFIRMATION_REQUIRED");
+    expect(assertR2RetentionDeletionConfirmed(["old/object.json"], true)).toBe(true);
+  });
+
   it("declara el manifiesto público funcionarios-v1 como activo por defecto", () => {
     expect(defaultActiveProjectionManifests()).toEqual([
       {

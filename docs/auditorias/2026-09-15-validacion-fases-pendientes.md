@@ -406,8 +406,14 @@ por defecto: sólo puede usarse después de revisar el plan de retención, el
 rollback y la decisión explícita de conservar o retirar cada release.
 
 La prueba de esta barrera y la validación completa quedaron en `200` archivos y
-`1.092` pruebas aprobadas. No se eliminó ni publicó ningún objeto R2 durante
+`1.093` pruebas aprobadas. No se eliminó ni publicó ningún objeto R2 durante
 esta revisión.
+
+Se agregó `npm run audit:r2:sources`, que ejecuta una sola auditoría agrupada
+del catálogo, manifiestos e inventario y entrega una matriz resumida por
+fuente. La salida compacta conserva `status`, `promotionAllowed`, brechas y
+razón de bloqueo, sin imprimir cada clave de artefacto ni repetir consultas
+por fuente.
 
 ## Revisión agrupada de fuentes parlamentarias
 

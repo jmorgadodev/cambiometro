@@ -3,7 +3,6 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import {
   assertR2CatalogClosure,
-  assertR2RetentionDeletionConfirmed,
   planR2Publication,
   selectHotAssets,
 } from "../scripts/etl/r2.mjs";
@@ -21,13 +20,6 @@ it("no permite reemplazar assets de una Release inmutable", () => {
 });
 
 describe("publicación caliente en R2", () => {
-  it("exige confirmación separada para eliminar objetos de retención", () => {
-    expect(assertR2RetentionDeletionConfirmed([], false)).toBe(true);
-    expect(() => assertR2RetentionDeletionConfirmed(["old/object.json"], false))
-      .toThrow("R2_RETENTION_CONFIRMATION_REQUIRED");
-    expect(assertR2RetentionDeletionConfirmed(["old/object.json"], true)).toBe(true);
-  });
-
   it("usa el límite R2 decimales compartido por el inventario", () => {
     const plan = planR2Publication([asset("sources/current.json", 10)]);
     expect(plan.limitBytes).toBe(10_000_000_000);

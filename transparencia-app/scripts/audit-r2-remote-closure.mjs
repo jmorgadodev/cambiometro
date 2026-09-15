@@ -221,6 +221,34 @@ export function summarizeR2ClosureBySource(catalog, manifests, result, sourceId 
     .sort((left, right) => right.partitions - left.partitions || left.sourceId.localeCompare(right.sourceId));
 }
 
+/**
+ * Returns the operator-facing result of a grouped R2 audit without printing
+ * every manifest or artifact key. The full result remains available for
+ * forensic runs; this compact form is intended for the normal source matrix.
+ */
+export function compactR2ClosureReport(result) {
+  return {
+    schemaVersion: result?.schemaVersion ?? 1,
+    bucket: result?.bucket ?? null,
+    sourceId: result?.sourceId ?? "all",
+    checkedPartitions: result?.checkedPartitions ?? 0,
+    checkedManifests: result?.checkedManifests ?? 0,
+    artifactCheck: result?.artifactCheck ?? "not_available",
+    complete: result?.complete === true,
+    status: result?.status ?? "incomplete",
+    promotionAllowed: result?.promotionAllowed === true,
+    reason: result?.reason ?? null,
+    sourceMatrix: result?.sourceMatrix ?? [],
+    gapSummary: result?.gapSummary ?? {
+      missingManifests: [],
+      missingArtifacts: [],
+      missingManifestArtifacts: [],
+      missingArtifactInventory: [],
+      presentWithoutManifest: [],
+    },
+  };
+}
+
 function option(name, fallback = null) {
   const index = process.argv.indexOf(name);
   return index >= 0 ? process.argv[index + 1] : fallback;
@@ -297,6 +325,7 @@ function run() {
   const limit = numericOption("--limit", DEFAULT_LIMIT);
   const requestTimeoutMs = numericOption("--request-timeout-ms", 30_000);
   const verifyArtifacts = hasFlag("--verify-artifacts");
+  const compact = hasFlag("--compact");
   const temp = mkdtempSync(join(tmpdir(), "cambiometro-r2-closure-"));
 
   try {
@@ -368,7 +397,7 @@ function run() {
     Object.assign(result, classifyR2Closure(result));
     result.gapSummary = summarizeR2ClosureGaps(result);
     result.sourceMatrix = summarizeR2ClosureBySource(catalogResult.value, objects, result, sourceId);
-    console.log(JSON.stringify(result, null, 2));
+    console.log(JSON.stringify(compact ? compactR2ClosureReport(result) : result, null, 2));
     if (!result.complete) process.exitCode = 1;
   } finally {
     rmSync(temp, { recursive: true, force: true });
