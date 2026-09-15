@@ -152,10 +152,6 @@ const expenseManifest = {
 };
 await writeFile(join(expenseDir, "manifest.json"), `${JSON.stringify(expenseManifest, null, 2)}\n`);
 
-const fullSource = join(root, "data", "lake", "partitions", "ley-19862");
-if (!existsSync(fullSource) && !allowSample) {
-  throw new Error("STATIC_DATA_FULL_TRANSFER_SOURCE_MISSING: hydrate the complete Ley 19.862 lake before building Pages");
-}
 const pinnedSummary = await readJson("data/lake/projections/v1/ley19862-summary.json");
 const registeredThrough = process.env.TRANSFER_RELEASE_REGISTERED_THROUGH
   ?? process.env.LEY_19862_REGISTERED_THROUGH
@@ -171,6 +167,10 @@ const canonicalManifestFile = process.env.TRANSFER_STATIC_CANONICAL_MANIFEST_FIL
 const canonicalManifest = canonicalManifestFile && existsSync(canonicalManifestFile)
   ? JSON.parse(readFileSync(canonicalManifestFile, "utf8"))
   : null;
+const fullSource = join(root, "data", "lake", "partitions", "ley-19862");
+if (!existsSync(fullSource) && !canonicalManifest && !allowSample) {
+  throw new Error("STATIC_DATA_FULL_TRANSFER_SOURCE_MISSING: hydrate the complete Ley 19.862 lake or the canonical paginated release before building Pages");
+}
 const fullRelease = canonicalManifest
   ? { manifest: canonicalManifest, summary: JSON.parse(readFileSync(join(transferDir, "summary.json"), "utf8")) }
   : existsSync(fullSource)
