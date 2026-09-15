@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { existsSync, mkdirSync, readFileSync, readdirSync, rmSync } from "node:fs";
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, readdirSync, renameSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { spawn } from "node:child_process";
 
@@ -64,21 +64,30 @@ const partitions = all.filter((partition) => String(partition.id).split("/")[1] 
 if (!partitions.length) throw new Error("LEY_19862_R2_PARTITIONS_MISSING");
 
 const sourceRoot = join(lakeRoot, "partitions", "ley-19862");
-rmSync(sourceRoot, { recursive: true, force: true });
-const queue = [...partitions];
-const workers = Array.from({ length: Math.min(4, queue.length) }, async () => {
-  while (queue.length) {
-    const partition = queue.shift();
-    if (!partition) return;
-    const manifestPath = join(lakeRoot, partition.manifestKey);
-    await download(partition.manifestKey, manifestPath);
-    const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
-    const artifacts = (manifest.artifacts ?? []).filter((artifact) => artifact.key?.endsWith(".jsonl.gz"));
-    if (artifacts.length !== 1) throw new Error(`LEY_19862_R2_ARTIFACT_COUNT_INVALID: ${partition.id}`);
-    await download(artifacts[0].key, join(lakeRoot, artifacts[0].key), artifacts[0].checksumSha256);
-  }
-});
-await Promise.all(workers);
-const downloaded = readdirSync(sourceRoot, { recursive: true }).filter((name) => String(name).endsWith("manifest.json"));
-if (downloaded.length !== partitions.length) throw new Error(`LEY_19862_R2_PARTITION_COUNT_INVALID: ${downloaded.length}/${partitions.length}`);
+// Descargar en un directorio temporal y reemplazar el snapshot anterior sólo
+// después de validar todas las particiones. Un manifiesto R2 incompleto o una
+// caída de red nunca debe borrar el último snapshot local válido.
+const stagingRoot = mkdtempSync(join(lakeRoot, ".ley19862-staging-"));
+try {
+  const queue = [...partitions];
+  const workers = Array.from({ length: Math.min(4, queue.length) }, async () => {
+    while (queue.length) {
+      const partition = queue.shift();
+      if (!partition) return;
+      const manifestPath = join(stagingRoot, partition.manifestKey);
+      await download(partition.manifestKey, manifestPath);
+      const manifest = JSON.parse(readFileSync(manifestPath, "utf8"));
+      const artifacts = (manifest.artifacts ?? []).filter((artifact) => artifact.key?.endsWith(".jsonl.gz"));
+      if (artifacts.length !== 1) throw new Error(`LEY_19862_R2_ARTIFACT_COUNT_INVALID: ${partition.id}`);
+      await download(artifacts[0].key, join(stagingRoot, artifacts[0].key), artifacts[0].checksumSha256);
+    }
+  });
+  await Promise.all(workers);
+  const downloaded = readdirSync(stagingRoot, { recursive: true }).filter((name) => String(name).endsWith("manifest.json"));
+  if (downloaded.length !== partitions.length) throw new Error(`LEY_19862_R2_PARTITION_COUNT_INVALID: ${downloaded.length}/${partitions.length}`);
+  rmSync(sourceRoot, { recursive: true, force: true });
+  renameSync(stagingRoot, sourceRoot);
+} finally {
+  if (existsSync(stagingRoot)) rmSync(stagingRoot, { recursive: true, force: true });
+}
 console.log(JSON.stringify({ bucket, year: latestYear, partitions: partitions.length, recordCount: partitions.reduce((sum, partition) => sum + Number(partition.recordCount ?? 0), 0), generatedAt: catalog.generatedAt }, null, 2));

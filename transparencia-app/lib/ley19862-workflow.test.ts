@@ -22,4 +22,11 @@ describe("workflow de publicación Ley 19.862", () => {
     const workflow = fs.readFileSync(workflowPath, "utf8");
     expect(workflow).toContain("npm run data:hydrate:static -- --required --required-all");
   });
+
+  it("conserva el snapshot anterior si falla la hidratación desde R2", () => {
+    const script = fs.readFileSync(path.resolve(process.cwd(), "scripts", "hydrate-ley19862-from-r2.mjs"), "utf8");
+    expect(script).toContain("mkdtempSync");
+    expect(script).toContain("renameSync(stagingRoot, sourceRoot)");
+    expect(script).toContain("if (existsSync(stagingRoot)) rmSync");
+  });
 });
