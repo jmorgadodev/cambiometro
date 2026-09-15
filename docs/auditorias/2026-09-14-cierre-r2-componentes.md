@@ -856,3 +856,20 @@ registros y fecha `2026-09-02T03:28:30.598Z`. La variante más nueva
 Ambas auditorías devuelven `promotionAllowed=false`. Se conserva la variante
 antigua como referencia pública estable y la central como candidata de
 auditoría; no se cambia el selector ni se elimina la versión anterior.
+
+## Hallazgo adicional en el índice central candidato — 2026-09-14
+
+La inspección acotada del índice de `funcionarios-central-v1` confirmó que sus
+2.984 filtros `periodo:*` no representan sólo meses reales del release. El
+índice comienza en `periodo:2024-01`, pero termina en `periodo:3538-04` y
+contiene años futuros con períodos parciales. Esto explica por qué la auditoría
+detecta 2.984 períodos fuera del release declarado: el problema está en la
+construcción o normalización de períodos del candidato, no en una diferencia
+válida de frescura entre local y producción.
+
+El hallazgo mantiene bloqueada la variante central. No se modifica el índice
+remoto, no se cambia la variante pública y no se ejecutan escrituras en R2 o
+D1. Antes de cualquier promoción habrá que corregir localmente la validación de
+período, reconstruir el candidato desde sus filas originales y comprobar que
+los filtros queden limitados a períodos `AAAA-MM` realmente presentes en el
+release.
