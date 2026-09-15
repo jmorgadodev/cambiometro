@@ -323,3 +323,8 @@ para D1 remoto: sin `D1_ALLOW_REMOTE_MATERIALIZATION=true` devuelve una
 postergación explícita y no ejecuta `data:materialize`. La prueba de política
 quedó en `8/8` y una ejecución real con `--remote --sources camara` confirmó la
 postergación sin invocar Wrangler.
+
+La rama del ETL CPLT central también quedó validada de extremo a extremo: `203`
+archivos de prueba y `1.056` pruebas aprobadas. El ajuste fue únicamente el
+tiempo permitido al fixture local de descargas por rangos en Windows; no cambia
+la ingesta, el filtro de alcance ni la publicación.
