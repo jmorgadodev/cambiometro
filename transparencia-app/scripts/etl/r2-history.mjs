@@ -293,6 +293,72 @@ export async function readR2ReleasePages(manifest, readJson) {
   };
 }
 
+/**
+ * Reads only the physical R2 pages that contain the requested global row
+ * positions from a paginated search-index manifest. This is intentionally
+ * separate from readR2ReleasePages: a history sample must not pretend that a
+ * partial selection is a complete release.
+ *
+ * The returned rows retain their global position so a caller can compare the
+ * same selected identities across releases without downloading the universe.
+ */
+export async function readR2SearchIndexRowsAtPositions(manifest, positions, readJson) {
+  if (!manifest || typeof manifest !== "object") throw new Error("Historial R2: índice de búsqueda inválido");
+  if (typeof readJson !== "function") throw new Error("Historial R2: readJson debe ser una función");
+  if (!Array.isArray(positions) || positions.length === 0) return [];
+
+  const pages = Array.isArray(manifest.pages)
+    ? [...manifest.pages].sort((left, right) => Number(left?.page ?? 0) - Number(right?.page ?? 0))
+    : [];
+  if (pages.length === 0) throw new Error("Historial R2: índice de búsqueda sin páginas");
+
+  const requested = [...new Set(positions.map((position) => Number(position)))];
+  if (requested.some((position) => !Number.isInteger(position) || position < 0)) {
+    throw new Error("Historial R2: posición de búsqueda inválida");
+  }
+  if (manifest.totalRows != null && requested.some((position) => position >= Number(manifest.totalRows))) {
+    throw new Error("Historial R2: posición fuera del total del índice");
+  }
+
+  const locations = new Map();
+  let base = 0;
+  for (const page of pages) {
+    const declaredCount = Number(page?.count);
+    if (!Number.isInteger(declaredCount) || declaredCount < 0) {
+      throw new Error(`Historial R2: página ${page?.page ?? "?"} sin count válido`);
+    }
+    const end = base + declaredCount;
+    for (const position of requested) {
+      if (position >= base && position < end) {
+        locations.set(position, { page, pageBase: base, offset: position - base });
+      }
+    }
+    base = end;
+  }
+  if (locations.size !== requested.length) throw new Error("Historial R2: posiciones ausentes en el índice");
+
+  const pageEntries = [...new Map([...locations.values()].map((location) => [location.page.key ?? location.page.path, location])).values()];
+  const loaded = new Map();
+  await Promise.all(pageEntries.map(async (location) => {
+    const key = text(location.page?.key ?? location.page?.path);
+    if (!key) throw new Error("Historial R2: página de índice sin key");
+    const rows = await readJson(key);
+    if (!Array.isArray(rows)) throw new Error(`Historial R2: página ilegible ${key}`);
+    if (rows.length !== Number(location.page.count)) {
+      throw new Error(`Historial R2: conteo incorrecto en ${key}`);
+    }
+    loaded.set(key, rows);
+  }));
+
+  return requested
+    .sort((left, right) => left - right)
+    .map((position) => {
+      const location = locations.get(position);
+      const key = text(location.page?.key ?? location.page?.path);
+      return { position, record: loaded.get(key)[location.offset], page: key };
+    });
+}
+
 /** Reads JSONL/JSON artifacts declared by a physical R2 partition manifest. */
 export async function readR2ReleaseArtifacts(manifest, readRecords) {
   if (typeof readRecords !== "function") throw new Error("Historial R2: readRecords debe ser una función");

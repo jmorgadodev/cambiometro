@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { assertR2HistoryPromotionAllowed, buildR2History, buildR2HistoryFromManifests } from "./r2-history.mjs";
+import {
+  assertR2HistoryPromotionAllowed,
+  buildR2History,
+  buildR2HistoryFromManifests,
+  readR2SearchIndexRowsAtPositions,
+} from "./r2-history.mjs";
 
 const base = {
   releaseId: "release-",
@@ -8,6 +13,33 @@ const base = {
 };
 
 describe("buildR2History", () => {
+  it("lee sólo las páginas necesarias para una muestra del índice R2", async () => {
+    const requested = [];
+    const objects = new Map([
+      ["page-1.json", [{ id: "a" }, { id: "b" }]],
+      ["page-2.json", [{ id: "c" }, { id: "d" }]],
+      ["page-3.json", [{ id: "e" }]],
+    ]);
+    const rows = await readR2SearchIndexRowsAtPositions({
+      totalRows: 5,
+      pageSize: 2,
+      pages: [
+        { page: 1, count: 2, key: "page-1.json" },
+        { page: 2, count: 2, key: "page-2.json" },
+        { page: 3, count: 1, key: "page-3.json" },
+      ],
+    }, [3, 0], async (key) => {
+      requested.push(key);
+      return objects.get(key);
+    });
+
+    expect(requested.sort()).toEqual(["page-1.json", "page-2.json"]);
+    expect(rows).toEqual([
+      { position: 0, record: { id: "a" }, page: "page-1.json" },
+      { position: 3, record: { id: "d" }, page: "page-2.json" },
+    ]);
+  });
+
   it("sólo autoriza promoción con cierre R2 completo", () => {
     expect(assertR2HistoryPromotionAllowed({ complete: true, promotionAllowed: true, status: "verifiable" })).toBe(true);
     expect(() => assertR2HistoryPromotionAllowed({ complete: false, promotionAllowed: false, status: "catalogued_without_manifest" }))
