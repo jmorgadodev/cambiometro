@@ -21,6 +21,7 @@ describe("workflow de publicación Ley 19.862", () => {
     const workflowPath = path.resolve(process.cwd(), "..", ".github", "workflows", "pages-static-refresh.yml");
     const workflow = fs.readFileSync(workflowPath, "utf8");
     expect(workflow).toContain("npm run data:hydrate:static -- --required --required-all");
+    expect(workflow).toContain("audit-r2-remote-closure.mjs --source ley-19862 --verify-artifacts");
   });
 
   it("conserva el snapshot anterior si falla la hidratación desde R2", () => {
