@@ -1,4 +1,13 @@
 const PERIOD_FILTER_PREFIX = "periodo:";
+const PERIOD_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
+
+function isPlausiblePeriod(period, generatedAt) {
+  if (!PERIOD_PATTERN.test(period)) return false;
+  const year = Number(String(period).slice(0, 4));
+  if (year < 2000 || year > 2100) return false;
+  const releasePeriod = String(generatedAt ?? "").slice(0, 7);
+  return !PERIOD_PATTERN.test(releasePeriod) || period <= releasePeriod;
+}
 
 function integer(value) {
   const parsed = Number(value);
@@ -57,8 +66,11 @@ export function auditCpltProjection({ manifest, index, summary }) {
     : null;
   const declared = declaredPeriods(summary);
   const indexedPeriods = periodFilters(index);
+  const generatedAt = manifest?.generatedAt ?? summary?.generatedAt ?? null;
+  const malformedPeriodFilters = indexedPeriods.filter((item) => !isPlausiblePeriod(item.period, generatedAt));
   const invalidPeriodFilters = indexedPeriods.filter((item) => !declared.has(item.period));
   const indexedPeriodRows = indexedPeriods.reduce((total, item) => total + item.count, 0);
+  const malformedPeriodRows = malformedPeriodFilters.reduce((total, item) => total + item.count, 0);
   const invalidPeriodRows = invalidPeriodFilters.reduce((total, item) => total + item.count, 0);
   const indexedQuality = index?.quality && typeof index.quality === "object" ? index.quality : null;
   const qualityInvalidPeriodRows = integer(indexedQuality?.invalidPeriodRows) ?? 0;
@@ -72,6 +84,7 @@ export function auditCpltProjection({ manifest, index, summary }) {
   if (declared.size === 0) structuralIssues.push("declared_periods_missing");
   if (indexedPeriodRows !== null && indexRows !== null && indexedPeriodRows !== indexRows) structuralIssues.push("period_filter_sum_mismatch");
   if (invalidPeriodRows > 0) structuralIssues.push("period_filters_outside_declared_release");
+  if (malformedPeriodRows > 0) structuralIssues.push("period_filters_with_invalid_format");
   if (qualityInvalidPeriodRows > 0) structuralIssues.push("rows_with_invalid_period");
   if (coverage.declared === 0) structuralIssues.push("coverage_missing");
   if (coverage.duplicateIds > 0) structuralIssues.push("coverage_duplicate_entities");
@@ -101,6 +114,9 @@ export function auditCpltProjection({ manifest, index, summary }) {
     declaredPeriodCount: declared.size,
     indexedPeriodCount: indexedPeriods.length,
     indexedPeriodRows,
+    malformedPeriodFilterCount: malformedPeriodFilters.length,
+    malformedPeriodRows,
+    malformedPeriodSample: malformedPeriodFilters.slice(0, 12),
     invalidPeriodFilterCount: invalidPeriodFilters.length,
     invalidPeriodRows,
     invalidPeriodSample: invalidPeriodFilters.slice(0, 12),

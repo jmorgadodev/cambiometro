@@ -867,6 +867,12 @@ detecta 2.984 períodos fuera del release declarado: el problema está en la
 construcción o normalización de períodos del candidato, no en una diferencia
 válida de frescura entre local y producción.
 
+La compuerta ahora separa además el formato/rango inválido del simple desfase:
+la auditoría reproducible del manifiesto e índice local detectó 2.951 filtros
+inválidos que representan 6.952 filas, incluyendo períodos posteriores al corte
+`2026-09`. El índice queda bloqueado aunque esos valores aparezcan declarados
+por el propio candidato.
+
 El hallazgo mantiene bloqueada la variante central. No se modifica el índice
 remoto, no se cambia la variante pública y no se ejecutan escrituras en R2 o
 D1. Antes de cualquier promoción habrá que corregir localmente la validación de
