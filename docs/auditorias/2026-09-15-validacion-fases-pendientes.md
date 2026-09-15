@@ -164,3 +164,12 @@ Se repitieron las validaciones acotadas mientras el workflow remoto continúa pr
 - Historial de remuneraciones: `4.473` entradas, `0` cambios inválidos, `0` lecturas D1 y `0` escrituras D1.
 
 Estas comprobaciones son locales y no alteran releases, R2, D1 ni producción. El bloque central permanece en `75%` hasta que Código del Trabajo termine y su artefacto pase la misma validación por fuente.
+
+### Compuerta de publicación R2
+
+La prueba local de `planR2Publication` terminó con `2/2` casos aprobados. El publicador central:
+
+- bloquea el crecimiento cuando el uso proyectado alcanza el `95%` del límite configurado;
+- conserva la versión activa anterior para rollback;
+- elimina únicamente versiones frías no referenciadas;
+- no se ejecuta durante esta validación porque el workflow usa `publish=false`.
