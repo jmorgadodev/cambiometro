@@ -1,0 +1,68 @@
+# Validación de fases pendientes — 2026-09-15
+
+## Alcance
+
+Validación local, acotada y sin escrituras en R2 ni D1 de los bloques que siguen a la línea base: categorías parlamentarias, movimientos, historiales de remuneraciones y margen de almacenamiento.
+
+## Resultados verificables
+
+### Cámara y Senado
+
+`npm run check:legislative-normalization` terminó correctamente.
+
+- 27.793 registros auditados.
+- 769 votaciones: 580 Cámara y 189 Senado.
+- 22.796 gastos operacionales: 16.275 Cámara y 6.521 Senado.
+- 4.073 registros de personal de apoyo: 1.084 Cámara y 2.989 Senado.
+- 155 autoridades parlamentarias.
+- 0 registros clasificados simultáneamente en categorías distintas.
+
+La auditoría confirma que remuneraciones/personas, votaciones, gastos y personal de apoyo se mantienen separados. Los conteos son del artefacto local auditado; no se usan para sustituir el release productivo.
+
+### Movimientos
+
+`npm run check:movimientos-normalization` terminó correctamente.
+
+- 80 registros en el release local.
+- 74 verificados y 6 pendientes.
+- 75 con fuente oficial.
+- 6 con observaciones de calidad.
+- Release: `movimientos-bbf092656ee6a637`.
+- Checksum: `bbf092656ee6a637be1f3e9851f1dbd95d33f6f56aac5e891998934470f1e9bf`.
+
+Los pendientes no se convierten en registros confirmados y el release anterior se conserva cuando una fuente no responde.
+
+### Historiales desde R2
+
+`npm run check:r2-history` terminó con 15 pruebas aprobadas.
+
+`npm run check:remuneraciones-history` terminó correctamente:
+
+- 4.473 entradas de historial verificadas.
+- 0 cambios inválidos.
+- 0 lecturas D1.
+- 0 escrituras D1.
+- Comparación vigente del artefacto local: 52 entradas, 50 salidas observadas y 438 cambios de monto.
+
+### Almacenamiento
+
+La auditoría remota mantiene el bloqueo de crecimiento:
+
+- Uso: 9.016.336.751 bytes de 10.000.000.000.
+- Ocupación: 90,16%.
+- Margen libre: 983.663.249 bytes.
+- No se eliminó ningún objeto porque existen referencias aún no clasificadas.
+- La proyección central candidata de aproximadamente 4,48 GB no está autorizada para publicación.
+
+## Proceso central en curso
+
+La ejecución manual de validación `34918549350` procesa la categoría Planta con `publish=false`. Los jobs restantes están en cola por diseño (`max-parallel: 1`). No ha publicado R2 ni modificado producción.
+
+## Siguiente puerta
+
+1. Esperar el resultado terminal del job Planta.
+2. Revisar el artefacto y sus conteos/checksum.
+3. Ejecutar las otras tres categorías en el mismo ciclo secuencial.
+4. Promover sólo si todas las categorías pasan calidad y existe margen de almacenamiento aprobado.
+
+Hasta entonces, producción conserva su release vigente.
