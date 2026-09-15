@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   assertPublicProjectionD1Disabled,
+  assertLegacyD1IngestDisabled,
   classifyD1MaterializationFailure,
   summaryForD1Deferral,
   shouldDeferRemoteD1Materialization,
@@ -41,5 +42,9 @@ describe("política de materialización D1 opcional", () => {
     expect(shouldDeferRemoteD1Materialization({ remote: true, allowRemote: false })).toBe(true);
     expect(shouldDeferRemoteD1Materialization({ remote: true, allowRemote: true })).toBe(false);
     expect(shouldDeferRemoteD1Materialization({ remote: false, allowRemote: false })).toBe(false);
+  });
+
+  it("bloquea los ingesters D1 heredados", () => {
+    expect(() => assertLegacyD1IngestDisabled()).toThrow("LEGACY_D1_INGEST_DISABLED");
   });
 });

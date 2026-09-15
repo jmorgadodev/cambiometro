@@ -41,3 +41,7 @@ export function assertPublicProjectionD1Disabled(skipD1) {
 export function shouldDeferRemoteD1Materialization({ remote, allowRemote } = {}) {
   return remote === true && allowRemote !== true;
 }
+
+export function assertLegacyD1IngestDisabled() {
+  throw new Error("LEGACY_D1_INGEST_DISABLED: use the validated R2 pipeline");
+}

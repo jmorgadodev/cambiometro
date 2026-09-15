@@ -328,3 +328,9 @@ La rama del ETL CPLT central también quedó validada de extremo a extremo: `203
 archivos de prueba y `1.056` pruebas aprobadas. El ajuste fue únicamente el
 tiempo permitido al fixture local de descargas por rangos en Windows; no cambia
 la ingesta, el filtro de alcance ni la publicación.
+
+El inventario de código también detectó dos ingesters heredados sin workflow
+activo (`ingest-directorio-estado.mjs` e `ingest-asignaciones-congreso.mjs`) que
+contenían SQL simulado directo contra `transparencia-db`. Ambos quedaron
+bloqueados con `LEGACY_D1_INGEST_DISABLED`; se conservan en el repositorio para
+trazabilidad, pero ya no pueden ejecutarse accidentalmente ni escribir D1.

@@ -1,5 +1,8 @@
 import { execFileSync } from 'child_process';
 import fs from 'fs';
+import { assertLegacyD1IngestDisabled } from '../d1-materialization-policy.mjs';
+
+assertLegacyD1IngestDisabled();
 
 console.log("Iniciando ETL de Auto-Descubrimiento del Directorio del Estado...");
 
