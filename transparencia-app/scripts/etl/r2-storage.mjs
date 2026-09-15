@@ -125,3 +125,49 @@ export function summarizeR2Storage(inventory, options = {}) {
     thresholds: { warningRatio, growthBlockRatio },
   };
 }
+
+/**
+ * Builds a dry-run retention proposal. It never mutates the inventory and
+ * never authorizes deletion by itself: every candidate still requires an
+ * explicit retention/rollback decision.
+ */
+export function planR2Retention(inventory, options = {}) {
+  const activeVersions = options.activeVersions && typeof options.activeVersions === "object"
+    ? options.activeVersions
+    : {};
+  const summary = summarizeR2Storage(inventory, { ...options, activeVersions });
+  const groups = new Map();
+  for (const object of objectRows(inventory)) {
+    const match = object.key.match(/^projections\/([^/]+)\/versions\/([^/]+)\//);
+    if (!match) continue;
+    const [dataset, version] = [match[1], match[2]];
+    if (activeVersions[dataset] === version) continue;
+    const key = `${dataset}@${version}`;
+    const group = groups.get(key) ?? { dataset, version, objects: 0, bytes: 0, keys: [] };
+    group.objects += 1;
+    group.bytes += object.size;
+    group.keys.push(object.key);
+    groups.set(key, group);
+  }
+  const candidates = [...groups.values()]
+    .filter((group) => Object.prototype.hasOwnProperty.call(activeVersions, group.dataset))
+    .map((group) => ({
+      ...group,
+      keys: [...group.keys].sort(),
+      retentionStatus: "historical",
+      deletionAllowed: false,
+      requiresExplicitApproval: true,
+      reason: "versión no activa; requiere verificación de rollback y aprobación explícita",
+    }))
+    .sort((left, right) => right.bytes - left.bytes || left.dataset.localeCompare(right.dataset) || left.version.localeCompare(right.version));
+  const candidateBytes = candidates.reduce((total, candidate) => total + candidate.bytes, 0);
+  return {
+    dryRun: true,
+    activeProjectionVersions: activeVersions,
+    candidates,
+    candidateBytes,
+    projectedUsedBytesAfterAllCandidates: Math.max(0, summary.usedBytes - candidateBytes),
+    projectedRatioAfterAllCandidates: Math.max(0, summary.usedBytes - candidateBytes) / summary.limitBytes,
+    summary,
+  };
+}
