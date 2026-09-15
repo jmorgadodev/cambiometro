@@ -93,3 +93,7 @@ La inspección `HEAD` del mismo ciclo confirmó que las fuentes se sirven con ra
 | Código del Trabajo | 6,25 GB | Sí |
 
 El ETL no debe descargar estas fuentes completas a R2 ni mantenerlas completas en memoria. La ejecución actual procesa sólo una categoría a la vez y materializa únicamente el resultado validado. La duración de Planta es compatible con su tamaño; el criterio de fallo sigue siendo el timeout, el error del job o el límite de 300 minutos, no el paso de unos pocos minutos sin artefacto.
+
+## Prueba acotada de respuesta y esquema
+
+Se leyó únicamente el primer bloque de 4 MiB de cada fuente, sin guardar el universo. Las cuatro respondieron `HTTP 206` con `Content-Range` válido y encabezados separados por `;` que el parser reconoce. Los primeros registros observados correspondieron a períodos recientes de 2026 (Agosto en Planta, Contrata y Código del Trabajo; Julio en Honorarios). Esta prueba confirma disponibilidad y esquema inicial, pero no reemplaza el recorrido completo requerido para detectar anomalías en cualquier posición del archivo.
