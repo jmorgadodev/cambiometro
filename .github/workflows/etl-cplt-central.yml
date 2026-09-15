@@ -10,6 +10,11 @@ on:
         required: false
         default: false
         type: boolean
+      confirm_storage:
+        description: "Confirmar que la auditoría vigente de almacenamiento R2 permite publicar"
+        required: false
+        default: false
+        type: boolean
 
 concurrency:
   group: cambiometro-cplt-central-publication
@@ -86,11 +91,16 @@ jobs:
         with:
           pattern: cplt-central-*
           path: transparencia-app/data/cplt-central-artifacts
+      - name: Bloquear publicación sin confirmación de almacenamiento
+        if: inputs.publish == true && inputs.confirm_storage != true
+        run: |
+          echo "R2_STORAGE_CONFIRMATION_REQUIRED: activa publish y confirm_storage sólo después de revisar el margen R2."
+          exit 1
       - name: Consolidar la proyección central sin publicar
         if: inputs.publish != true
         working-directory: transparencia-app
         run: npm run data:finalize:cplt-central:local
       - name: Publicar sólo después de confirmación explícita
-        if: inputs.publish == true
+        if: inputs.publish == true && inputs.confirm_storage == true
         working-directory: transparencia-app
         run: npm run data:finalize:cplt-central:r2
