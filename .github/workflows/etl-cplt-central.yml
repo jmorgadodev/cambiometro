@@ -115,6 +115,21 @@ jobs:
         if: inputs.publish != true
         working-directory: transparencia-app
         run: npm run data:finalize:cplt-central:local
+      - name: Resolver versión activa R2 para compactación en sitio
+        id: active-central-release
+        if: inputs.publish == true && inputs.gzip_in_place == true
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          manifest="$RUNNER_TEMP/funcionarios-central-manifest.json"
+          npx wrangler r2 object get transparencia-public-data/projections/funcionarios-central-v1/manifest.json --file "$manifest" --remote
+          version=$(node -e 'const fs=require("node:fs"); const value=JSON.parse(fs.readFileSync(process.argv[1], "utf8")).version; if (!/^[a-zA-Z0-9._-]+$/.test(value ?? "")) process.exit(1); process.stdout.write(value);' "$manifest")
+          test -n "$version"
+          echo "version=$version" >> "$GITHUB_OUTPUT"
       - name: Publicar sólo después de confirmación explícita
         if: inputs.publish == true && inputs.confirm_storage == true && inputs.gzip_json != true && inputs.gzip_in_place != true
         working-directory: transparencia-app
@@ -126,4 +141,6 @@ jobs:
       - name: Comprimir proyección central activa en sitio
         if: inputs.publish == true && inputs.confirm_storage == true && inputs.gzip_json == true && inputs.gzip_in_place == true
         working-directory: transparencia-app
+        env:
+          CAMBIOMETRO_STORAGE_VERSION: ${{ steps.active-central-release.outputs.version }}
         run: npm run data:finalize:cplt-central:r2:gzip-in-place

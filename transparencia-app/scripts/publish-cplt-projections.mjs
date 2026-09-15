@@ -45,7 +45,13 @@ const validations = required.map((source) => {
 const latest = validations.map((report) => report.generatedAt).sort().at(-1) ?? new Date().toISOString();
 const month = latest.slice(0, 7);
 const version = latest.replace(/[:.]/g, "-");
-const storageVersion = gzipInPlace ? version : gzipJson ? `${version}-gzip` : version;
+const requestedStorageVersion = process.env.CAMBIOMETRO_STORAGE_VERSION?.trim() ?? "";
+if (requestedStorageVersion && !/^[a-zA-Z0-9._-]+$/.test(requestedStorageVersion)) {
+  throw new Error("CPLT_INVALID_STORAGE_VERSION");
+}
+const storageVersion = gzipInPlace
+  ? (requestedStorageVersion || version)
+  : gzipJson ? `${version}-gzip` : version;
 const storageKey = (key) => gzipJson && !gzipInPlace && key.endsWith(".json") ? `${key}.gz` : key;
 // Un release por versión evita superar el límite de 1.000 assets de GitHub Releases:
 // cada lote nacional publica más de 300 archivos versionados.

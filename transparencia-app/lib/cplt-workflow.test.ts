@@ -107,6 +107,8 @@ describe("automatizacion CPLT nacional", () => {
     expect(centralWorkflow).toContain('gzip_in_place:');
     expect(centralWorkflow).toContain('inputs.gzip_json == true');
     expect(centralWorkflow).toContain('inputs.gzip_in_place == true');
+    expect(publisher).toContain('CAMBIOMETRO_STORAGE_VERSION');
+    expect(centralWorkflow).toContain('projections/funcionarios-central-v1/manifest.json');
   });
 
   it("permite materializar el lake CPLT local sin publicar", () => {
