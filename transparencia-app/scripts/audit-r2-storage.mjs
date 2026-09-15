@@ -98,7 +98,7 @@ function main() {
     const referencedKeys = new Set([...(explicitReferences ?? []), ...catalogReferences, ...sourceManifestReferences]);
     const summary = summarizeR2Storage(readInventory(path), {
       warningRatio: Number(option("--warning-ratio", "0.8")),
-      growthBlockRatio: Number(option("--growth-block-ratio", "0.9")),
+      growthBlockRatio: Number(option("--growth-block-ratio", "0.95")),
       referencedKeys: referencesPath || catalogPath ? referencedKeys : null,
       activeVersions,
     });

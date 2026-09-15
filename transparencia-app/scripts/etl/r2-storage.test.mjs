@@ -20,23 +20,23 @@ describe("protecciones de almacenamiento R2", () => {
     ]);
   });
 
-  it("bloquea crecimiento cuando el inventario supera el 90%", () => {
+  it("bloquea crecimiento cuando el inventario supera el 95%", () => {
     const summary = summarizeR2Storage({
       limitBytes: 1_000,
-      usedBytes: 905,
-      objects: [{ key: "sources/current.json", size: 905, checksumSha256: "a" }],
+      usedBytes: 955,
+      objects: [{ key: "sources/current.json", size: 955, checksumSha256: "a" }],
     });
     expect(summary.status).toBe("growth-blocked");
     expect(summary.growthAllowed).toBe(false);
-    expect(summary.freeBytes).toBe(95);
+    expect(summary.freeBytes).toBe(45);
   });
 
   it("rechaza una publicación que aumentaría un inventario ya bloqueado", () => {
     expect(() => planR2Publication(
       [{ key: "sources/new.json", size: 50, checksumSha256: "new" }],
-      { objects: [{ key: "sources/current.json", size: 905, checksumSha256: "old" }] },
+      { objects: [{ key: "sources/current.json", size: 955, checksumSha256: "old" }] },
       1_000,
-    )).toThrow("R2_GROWTH_BLOCKED_AT_90_PERCENT");
+    )).toThrow("R2_GROWTH_BLOCKED_AT_95_PERCENT");
   });
 
   it("identifica duplicados como oportunidad, sin decidir eliminaciones", () => {
@@ -82,7 +82,7 @@ describe("protecciones de almacenamiento R2", () => {
   it("propone versiones históricas en seco sin autorizar eliminaciones", () => {
     const plan = planR2Retention({
       limitBytes: 1_000,
-      usedBytes: 900,
+      usedBytes: 950,
       objects: [
         { key: "projections/funcionarios-v1/versions/current/a.json", size: 600, checksumSha256: "a" },
         { key: "projections/funcionarios-v1/versions/old/a.json", size: 300, checksumSha256: "b" },
@@ -97,7 +97,7 @@ describe("protecciones de almacenamiento R2", () => {
       deletionAllowed: false,
       requiresExplicitApproval: true,
     });
-    expect(plan.projectedUsedBytesAfterAllCandidates).toBe(600);
+    expect(plan.projectedUsedBytesAfterAllCandidates).toBe(650);
     expect(plan.summary.growthAllowed).toBe(false);
   });
 

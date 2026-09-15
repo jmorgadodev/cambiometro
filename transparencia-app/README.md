@@ -26,7 +26,7 @@ npm run data:lake:dry
 
 El flujo es `descubrir → descargar → checksum → validar → normalizar → conciliar → publicar`. `data/etl/latest.json` conserva el snapshot actual y `data/etl/source-inventory.json` el inventario verificable de índices oficiales. Las particiones generadas en `data/lake/` son reproducibles y se excluyen de Git.
 
-GitHub Actions publica el histórico en Releases (`data-{fuente}-{año}`) y el catálogo/períodos calientes en el bucket R2 `transparencia-public-data`. El publicador aplica un límite interno de 8 GiB: archiva objetos fríos al 80 % y bloquea crecimiento al 90 %.
+GitHub Actions publica el histórico en Releases (`data-{fuente}-{año}`) y el catálogo/períodos calientes en el bucket R2 `transparencia-public-data`. El publicador archiva objetos fríos al 80 % y bloquea crecimiento al 95 % para conservar un margen operativo; es una protección del proyecto, no un límite impuesto por Cloudflare.
 
 El catálogo municipal se actualiza y verifica contra el CUT oficial de SUBDERE con `npm run data:communes:update` y `npm run data:communes:check`. El ETL CPLT mensual procesa Planta, Contrata, Honorarios y Código del Trabajo en paralelo; rechaza nombres municipales desconocidos, archivos vacíos y objetos que excedan el límite de R2.
 

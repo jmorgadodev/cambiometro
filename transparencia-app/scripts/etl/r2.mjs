@@ -1,5 +1,7 @@
 // R2 Free declara 10 GB decimales por mes. El inventario remoto usa el mismo
 // límite; mantener una sola unidad evita que publicación y auditoría discrepen.
+import { DEFAULT_GROWTH_BLOCK_RATIO } from "./r2-storage.mjs";
+
 const DEFAULT_LIMIT_BYTES = 10_000_000_000;
 
 export function assertR2RetentionDeletionConfirmed(deletes, confirmed) {
@@ -172,7 +174,9 @@ export function planR2Publication(assets, previousInventory = { objects: [] }, l
     projectedBytes = [...desired.values()].reduce((total, object) => total + object.size, 0);
     ratio = projectedBytes / limitBytes;
   }
-  if (ratio >= 0.9 && projectedBytes > previousBytes) throw new Error("R2_GROWTH_BLOCKED_AT_90_PERCENT");
+  if (ratio >= DEFAULT_GROWTH_BLOCK_RATIO && projectedBytes > previousBytes) {
+    throw new Error("R2_GROWTH_BLOCKED_AT_95_PERCENT");
+  }
 
   const puts = hot
     .filter((asset) => previous.get(asset.key)?.checksumSha256 !== asset.checksumSha256)

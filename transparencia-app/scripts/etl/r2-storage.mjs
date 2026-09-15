@@ -1,5 +1,7 @@
 const DEFAULT_WARNING_RATIO = 0.8;
-const DEFAULT_GROWTH_BLOCK_RATIO = 0.9;
+// Safety guard owned by the project, not a Cloudflare hard limit. Keep 5%
+// of the free allowance as an emergency margin for manifests and rollbacks.
+export const DEFAULT_GROWTH_BLOCK_RATIO = 0.95;
 
 function asNonNegativeInteger(value, name) {
   if (!Number.isSafeInteger(value) || value < 0) throw new Error(`INVALID_R2_STORAGE_${name.toUpperCase()}`);

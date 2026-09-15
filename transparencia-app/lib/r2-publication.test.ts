@@ -95,15 +95,15 @@ describe("publicación caliente en R2", () => {
     ]);
   });
 
-  it("elimina objetos fríos administrados y bloquea crecimiento desde 90 %", () => {
+  it("elimina objetos fríos administrados y bloquea crecimiento desde 95 %", () => {
     const plan = planR2Publication([asset("catalog/v1/manifest.json", 81)], {
       objects: [{ key: "partitions/old/2020/01/records.jsonl.gz", size: 80, checksumSha256: "old" }],
     }, 100);
     expect(plan.action).toBe("archive_cold_partitions");
     expect(plan.deletes).toEqual(["partitions/old/2020/01/records.jsonl.gz"]);
 
-    expect(() => planR2Publication([asset("catalog/v1/manifest.json", 91)], { objects: [] }, 100))
-      .toThrow("R2_GROWTH_BLOCKED_AT_90_PERCENT");
+    expect(() => planR2Publication([asset("catalog/v1/manifest.json", 96)], { objects: [] }, 100))
+      .toThrow("R2_GROWTH_BLOCKED_AT_95_PERCENT");
   });
 
   it("no elimina una partición vigente ausente de un plan incremental", () => {
@@ -193,6 +193,6 @@ describe("publicación caliente en R2", () => {
     expect(plan.inventory.objects.map((item: { key: string }) => item.key)).toContain(`${prefix}/2026-08-26/search_index.json`);
     expect(plan.inventory.objects.map((item: { key: string }) => item.key)).toContain(`${prefix}/2026-08-30/search_index.json`);
     expect(plan.inventory.objects.map((item: { key: string }) => item.key)).toContain("projections/otro-v1/versions/2026-08-01/data.json");
-    expect(plan.ratio).toBeLessThan(0.9);
+    expect(plan.ratio).toBeLessThan(0.95);
   });
 });

@@ -23,8 +23,8 @@ describe("auditoría de almacenamiento R2", () => {
   it("bloquea crecimiento desde el umbral crítico", () => {
     const summary = summarizeR2Storage({
       limitBytes: 1_000,
-      usedBytes: 900,
-      objects: [{ key: "a", size: 900, checksumSha256: "a" }],
+      usedBytes: 950,
+      objects: [{ key: "a", size: 950, checksumSha256: "a" }],
     });
     expect(summary.status).toBe("growth-blocked");
     expect(summary.growthAllowed).toBe(false);
