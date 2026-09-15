@@ -91,14 +91,29 @@ El job `104221344580` terminó correctamente dentro del workflow `34918549350`, 
 
 El resultado queda validado localmente, pero no se publica porque el almacenamiento R2 está en estado `growth-blocked` y aún faltan Honorarios y Código del Trabajo.
 
+### Resultado Honorarios
+
+El job `104221344600` terminó correctamente dentro del workflow `34918549350`, con `publish=false`.
+
+- Registros: 621.112.
+- Proyecciones/organismos: 658.
+- Archivos del artefacto: 660.
+- Tamaño local del artefacto: 978.310.741 bytes (aprox. 932,99 MiB).
+- Checksum: `2bd624225706837d47636a9ee53d0aea3e262dc4e6852a582075584efaa1bd8d`.
+- Estado: `valid`.
+- Fuente: archivo oficial de Personal a honorarios.
+- El artefacto mantiene el valor original de los campos monetarios y conserva los líquidos no informados como ausencia, no como cero.
+
+El resultado queda validado localmente y no modifica R2, D1 ni el release productivo.
+
 ### Estado secuencial del workflow
 
 Tras finalizar Contrata, el workflow continuó de forma serializada:
 
 - Planta: `success`.
 - Contrata: `success`.
-- Honorarios: `in_progress`, procesando organismos centrales.
-- Código del Trabajo: `queued`.
+- Honorarios: `success`.
+- Código del Trabajo: `in_progress`, procesando organismos centrales.
 
 El workflow conserva `publish=false`; por tanto, los artefactos se validan localmente y no alteran el release productivo.
 
@@ -118,9 +133,9 @@ La suite completa quedó estable con ejecución serializada para evitar timeouts
 
 ## Siguiente puerta
 
-1. Esperar el resultado terminal del job Planta.
-2. Revisar el artefacto y sus conteos/checksum.
-3. Ejecutar las otras tres categorías en el mismo ciclo secuencial.
+1. Esperar el resultado terminal del job Código del Trabajo.
+2. Revisar su artefacto, conteo, checksum y calidad antes de considerar completo el bloque central.
+3. Mantener los cuatro resultados como validación local mientras R2 siga en `growth-blocked`.
 4. Promover sólo si todas las categorías pasan calidad y existe margen de almacenamiento aprobado.
 
 Hasta entonces, producción conserva su release vigente.

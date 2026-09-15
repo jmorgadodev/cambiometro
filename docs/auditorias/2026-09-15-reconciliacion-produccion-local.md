@@ -109,3 +109,14 @@ Se leyó únicamente el primer bloque de 4 MiB de cada fuente, sin guardar el un
 - La auditoría de almacenamiento mantiene `9.016.336.751` bytes usados (`90,16%`) y `growth-blocked`; no hubo escrituras, eliminaciones ni publicaciones R2 en esta revalidación.
 
 El avance del bloque ETL central queda en `25%` (Planta validada de 4 nóminas). El avance global del plan se mantiene en `84%` hasta validar Contrata, Honorarios y Código del Trabajo.
+
+## Actualización del ciclo central — workflow 34918549350
+
+La ejecución secuencial continuó sin publicación (`publish=false`). Planta, Contrata y Honorarios terminaron con artefactos `valid`; Código del Trabajo permanece en procesamiento. Los resultados nuevos son:
+
+- Honorarios: `621.112` registros, `658` organismos/proyecciones, `660` archivos locales y `978.310.741` bytes.
+- Checksum de Honorarios: `2bd624225706837d47636a9ee53d0aea3e262dc4e6852a582075584efaa1bd8d`.
+- El artefacto de Honorarios conserva los campos originales y separa los líquidos no informados de los valores cero.
+- No hubo escrituras, eliminaciones ni publicaciones en R2 o D1.
+
+Con tres de cuatro nóminas validadas, el avance verificable del bloque ETL central es `75%`. El último 25% depende exclusivamente de terminar y auditar Código del Trabajo. Esta validación no autoriza promoción porque R2 mantiene `growth-blocked`.
