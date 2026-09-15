@@ -106,14 +106,29 @@ El job `104221344600` terminó correctamente dentro del workflow `34918549350`, 
 
 El resultado queda validado localmente y no modifica R2, D1 ni el release productivo.
 
+### Resultado Código del Trabajo
+
+El job `104221344396` terminó correctamente dentro del workflow `34918549350`, con `publish=false`.
+
+- Registros: 329.897.
+- Archivos del artefacto: 387.
+- Tamaño local del artefacto: 414.181.523 bytes.
+- Checksum: `4f31ce55b33a6dd4cc63e8fe1359d2e162cf12069cfc18517f179d87d9176f81`.
+- Estado: `valid`.
+- Fuente: archivo oficial de Personal Código del Trabajo.
+- Líneas procesadas: 16.306.263.
+- El artefacto incluye proyecciones por organismo y conserva la fuente original; su publicación permanece bloqueada por el margen de almacenamiento R2.
+
+Con las cuatro categorías centrales validadas, el conteo local del ciclo es de `2.122.881` registros. Este total es una evidencia del artefacto candidato, no un reemplazo del conteo productivo: producción mantiene su release vigente hasta que se resuelva la puerta de almacenamiento.
+
 ### Estado secuencial del workflow
 
-Tras finalizar Contrata, el workflow continuó de forma serializada:
+El workflow completó las cuatro ingestas de forma serializada:
 
 - Planta: `success`.
 - Contrata: `success`.
 - Honorarios: `success`.
-- Código del Trabajo: `in_progress`, procesando organismos centrales.
+- Código del Trabajo: `success`.
 
 El workflow conserva `publish=false`; por tanto, los artefactos se validan localmente y no alteran el release productivo.
 
@@ -133,10 +148,9 @@ La suite completa quedó estable con ejecución serializada para evitar timeouts
 
 ## Siguiente puerta
 
-1. Esperar el resultado terminal del job Código del Trabajo.
-2. Revisar su artefacto, conteo, checksum y calidad antes de considerar completo el bloque central.
-3. Mantener los cuatro resultados como validación local mientras R2 siga en `growth-blocked`.
-4. Promover sólo si todas las categorías pasan calidad y existe margen de almacenamiento aprobado.
+1. Mantener los cuatro resultados como validación local mientras R2 siga en `growth-blocked`.
+2. Comparar la cobertura del ciclo contra el release productivo por categoría, período y organismo; no sumar categorías que pertenezcan a otros dominios.
+3. Promover sólo si todas las categorías pasan la reconciliación de alcance y existe margen de almacenamiento aprobado.
 
 Hasta entonces, producción conserva su release vigente.
 
@@ -156,14 +170,14 @@ La validación adicional de `lib/api-v1.test.ts` y `lib/api-cache.test.ts` termi
 
 ## Revalidación local posterior — 2026-09-15 00:50 UTC-3
 
-Se repitieron las validaciones acotadas mientras el workflow remoto continúa procesando Código del Trabajo:
+Esta sección conserva la fotografía tomada a las 00:50 UTC-3, antes de que terminara Código del Trabajo. La ejecución posterior del mismo workflow quedó documentada arriba.
 
 - Cámara y Senado: `27.793` registros, con categorías separadas y sin mezcla entre autoridades, votaciones, gastos y personal de apoyo.
 - Movimientos: `80` registros; `74` verificados, `6` pendientes y `75` con fuente oficial.
 - Historial R2: `16/16` pruebas aprobadas.
 - Historial de remuneraciones: `4.473` entradas, `0` cambios inválidos, `0` lecturas D1 y `0` escrituras D1.
 
-Estas comprobaciones son locales y no alteran releases, R2, D1 ni producción. El bloque central permanece en `75%` hasta que Código del Trabajo termine y su artefacto pase la misma validación por fuente.
+Estas comprobaciones fueron locales y no alteraron releases, R2, D1 ni producción. En esa fotografía el bloque central estaba en `75%`; el resultado posterior verificó el `100%` de las cuatro categorías de ese bloque.
 
 ### Compuerta de publicación R2
 

@@ -112,11 +112,16 @@ El avance del bloque ETL central queda en `25%` (Planta validada de 4 nóminas).
 
 ## Actualización del ciclo central — workflow 34918549350
 
-La ejecución secuencial continuó sin publicación (`publish=false`). Planta, Contrata y Honorarios terminaron con artefactos `valid`; Código del Trabajo permanece en procesamiento. Los resultados nuevos son:
+La ejecución secuencial terminó sus cuatro ingestas sin publicación (`publish=false`). Todas las categorías terminaron con artefactos `valid`. Los resultados verificados del ciclo son:
+
+- Planta: `297.468` registros; checksum `d9ddf00435b95755199711fcd48589b4dba5e0635843a1983f12e873485c3818`.
+- Contrata: `874.404` registros; checksum `634a217c20e711a0bc737ff2a008c9c32679f80094c43a1c20325f94feca4362`.
 
 - Honorarios: `621.112` registros, `658` organismos/proyecciones, `660` archivos locales y `978.310.741` bytes.
 - Checksum de Honorarios: `2bd624225706837d47636a9ee53d0aea3e262dc4e6852a582075584efaa1bd8d`.
+- Código del Trabajo: `329.897` registros, `387` archivos y `414.181.523` bytes.
+- Checksum de Código del Trabajo: `4f31ce55b33a6dd4cc63e8fe1359d2e162cf12069cfc18517f179d87d9176f81`.
 - El artefacto de Honorarios conserva los campos originales y separa los líquidos no informados de los valores cero.
 - No hubo escrituras, eliminaciones ni publicaciones en R2 o D1.
 
-Con tres de cuatro nóminas validadas, el avance verificable del bloque ETL central es `75%`. El último 25% depende exclusivamente de terminar y auditar Código del Trabajo. Esta validación no autoriza promoción porque R2 mantiene `growth-blocked`.
+Las cuatro nóminas centrales están validadas localmente (`100%` del bloque ETL central). El conteo candidato conjunto es `2.122.881` registros. Esta validación no autoriza promoción porque R2 mantiene `growth-blocked`; además, aún falta reconciliar el alcance de cada categoría con el release productivo antes de presentar coberturas.
