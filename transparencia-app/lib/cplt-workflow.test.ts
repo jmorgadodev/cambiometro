@@ -45,6 +45,13 @@ describe("automatizacion CPLT nacional", () => {
     expect(centralWorkflow).not.toContain("D1");
   });
 
+  it("limita la ingesta central a una categoría por vez y verifica espacio", () => {
+    const centralWorkflow = readFileSync(resolve(process.cwd(), "../.github/workflows/etl-cplt-central.yml"), "utf8");
+    expect(centralWorkflow).toContain("max-parallel: 1");
+    expect(centralWorkflow).toContain("check-workspace-capacity.mjs --path ..");
+    expect(readFileSync(resolve(process.cwd(), "scripts/check-workspace-capacity.mjs"), "utf8")).toContain("CPLT_WORKSPACE_SPACE_BLOCKED");
+  });
+
   it("usa el host oficial canónico y conserva fallback ante cambios del host legado", () => {
     const etl = readFileSync(resolve(process.cwd(), "scripts/etl/stream-remote-personal.mjs"), "utf8");
     const rangedSource = readFileSync(resolve(process.cwd(), "scripts/etl/ranged-csv-source.mjs"), "utf8");
