@@ -60,6 +60,12 @@ describe("auditoría de reconciliación producción/R2/local", () => {
       expect.objectContaining({ id: "asistencia", recordCount: 54_538, includedInRecordCount: true }),
       expect.objectContaining({ id: "gastos", recordCount: 16_275, includedInRecordCount: false }),
     ]));
+    expect(report.rows[0]).toMatchObject({
+      productionCategories: ["asistencia", "gastos", "votaciones"],
+      productionIncludedComponentCount: 58_596,
+      productionUnclassifiedCount: 155,
+      productionExcludedComponentCount: 16_275,
+    });
   });
 
   it("mantiene el conteo del catálogo y deja source-health como señal de snapshot", () => {

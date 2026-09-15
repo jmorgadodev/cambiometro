@@ -15,6 +15,15 @@ const CATEGORY_BY_SOURCE = Object.freeze({
   senado: ["remuneraciones", "asesorias", "gastos", "votaciones"],
 });
 
+const CATEGORY_BY_COMPONENT = Object.freeze({
+  asistencia: "asistencia",
+  votaciones: "votaciones",
+  gastos: "gastos",
+  remuneraciones: "remuneraciones",
+  asesorias: "asesorias",
+  "personal-apoyo": "asesorias",
+});
+
 export function sourceCategories(sourceId) {
   return [...(CATEGORY_BY_SOURCE[String(sourceId)] ?? [])];
 }
@@ -79,6 +88,37 @@ function categoriesForSources(sources) {
   return [...new Set(sources.flatMap((source) => sourceCategories(source.id)))];
 }
 
+function categoriesForProduction(source) {
+  const components = normalizeComponents(source?.components);
+  if (components.length === 0) return sourceCategories(source?.id);
+  return [...new Set(components.flatMap((component) => {
+    const componentCategory = CATEGORY_BY_COMPONENT[component.id ?? ""];
+    if (componentCategory) return [componentCategory];
+    return sourceCategories(component.sourceId ?? component.id);
+  }))].sort();
+}
+
+function componentTotals(source) {
+  const components = normalizeComponents(source?.components);
+  if (components.length === 0) {
+    return { included: null, excluded: null, unclassified: null };
+  }
+  const included = components
+    .filter((component) => component.includedInRecordCount && Number.isSafeInteger(component.recordCount))
+    .reduce((total, component) => total + component.recordCount, 0);
+  const excluded = components
+    .filter((component) => !component.includedInRecordCount && Number.isSafeInteger(component.recordCount))
+    .reduce((total, component) => total + component.recordCount, 0);
+  const productionCount = Number.isSafeInteger(source?.recordCount) ? source.recordCount : null;
+  return {
+    included,
+    excluded,
+    unclassified: productionCount === null || included === 0
+      ? null
+      : Math.max(0, productionCount - included),
+  };
+}
+
 function classification({ production, local, children }) {
   const hasCategorySplit = children.length > 0;
   if (production && local && Number(production.recordCount) === Number(local.recordCount) && !hasCategorySplit) return "match";
@@ -92,6 +132,7 @@ function rowFor(production, local, localSources) {
   const children = production ? localChildren(localSources, id) : [];
   const localParts = local ? [local, ...children] : children;
   const categories = categoriesForSources(localParts.length ? localParts : production ? [production] : []);
+  const productionComponentTotals = componentTotals(production);
   return {
     id,
     classification: classification({ production, local, children }),
@@ -110,6 +151,10 @@ function rowFor(production, local, localSources) {
       && local?.healthRecordCount !== undefined
       && Number(local.healthRecordCount) !== Number(local.recordCount),
     productionComponents: normalizeComponents(production?.components),
+    productionCategories: categoriesForProduction(production),
+    productionIncludedComponentCount: productionComponentTotals.included,
+    productionExcludedComponentCount: productionComponentTotals.excluded,
+    productionUnclassifiedCount: productionComponentTotals.unclassified,
     localCategories: categories,
     localComponents: localParts.filter((source) => canonicalId(source.id) !== id).map((source) => ({
       id: canonicalId(source.id),
