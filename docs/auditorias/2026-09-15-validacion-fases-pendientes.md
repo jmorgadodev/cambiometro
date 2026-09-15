@@ -334,3 +334,7 @@ activo (`ingest-directorio-estado.mjs` e `ingest-asignaciones-congreso.mjs`) que
 contenían SQL simulado directo contra `transparencia-db`. Ambos quedaron
 bloqueados con `LEGACY_D1_INGEST_DISABLED`; se conservan en el repositorio para
 trazabilidad, pero ya no pueden ejecutarse accidentalmente ni escribir D1.
+
+La suite completa posterior a este bloqueo terminó nuevamente en verde: `200`
+archivos y `1.089` pruebas aprobadas, con typecheck, arquitectura estática,
+políticas de D1, enlaces y verificadores ETL incluidos.
