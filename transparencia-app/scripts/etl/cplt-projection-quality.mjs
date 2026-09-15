@@ -1,6 +1,13 @@
 const PERIOD_FILTER_PREFIX = "periodo:";
 const PERIOD_PATTERN = /^\d{4}-(0[1-9]|1[0-2])$/;
 
+export function projectionSummaryKey(manifest) {
+  const key = manifest?.transparencySummary?.key;
+  return typeof key === "string" && key.startsWith("projections/") && key.endsWith("/transparency-summary.json")
+    ? key
+    : null;
+}
+
 function isPlausiblePeriod(period, generatedAt) {
   if (!PERIOD_PATTERN.test(period)) return false;
   const year = Number(String(period).slice(0, 4));

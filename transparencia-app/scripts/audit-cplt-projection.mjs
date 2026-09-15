@@ -3,7 +3,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath } from "node:url";
-import { auditCpltProjection } from "./etl/cplt-projection-quality.mjs";
+import { auditCpltProjection, projectionSummaryKey } from "./etl/cplt-projection-quality.mjs";
 
 function option(name) {
   const index = process.argv.indexOf(name);
@@ -44,8 +44,16 @@ function runRemoteAudit() {
     const index = downloadRemoteJson(bucket, indexKey, indexPath);
     // Algunos releases antiguos no publican transparency-summary.json. En ese
     // caso se audita como metadata incompleta; nunca se inventan períodos.
-    const summaryPath = option("--summary");
-    const summary = summaryPath ? readJson(summaryPath) : {};
+    const explicitSummaryPath = option("--summary");
+    let summaryPath = explicitSummaryPath;
+    let summary = explicitSummaryPath ? readJson(explicitSummaryPath) : {};
+    if (!explicitSummaryPath) {
+      const summaryKey = projectionSummaryKey(manifest);
+      if (summaryKey) {
+        summaryPath = summaryKey;
+        summary = downloadRemoteJson(bucket, summaryKey, join(temporary, "transparency-summary.json"));
+      }
+    }
     return {
       manifestPath: manifestKey,
       indexPath: indexKey,
