@@ -119,7 +119,8 @@
     "data:publish:personal-apoyo": "node scripts/publish-personal-apoyo.mjs",
     "ingest:cplt-personal": "node --max-old-space-size=6144 scripts/etl/stream-remote-personal.mjs",
     "ingest:cplt-central-honorarios": "node --max-old-space-size=6144 scripts/etl/central-honorarios-stream.mjs",
-    "audit:cplt-central-honorarios": "node scripts/etl/central-honorarios-audit.mjs"
+    "audit:cplt-central-honorarios": "node scripts/etl/central-honorarios-audit.mjs",
+    "audit:paid-remunerations": "node --max-old-space-size=6144 scripts/etl/paid-remunerations-reconcile.mjs"
   },
   "dependencies": {
     "@cloudflare/workers-types": "^5.20260804.1",
