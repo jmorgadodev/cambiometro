@@ -12,13 +12,16 @@ describe("prefiltro acotado de nóminas CPLT", () => {
     expect(scanCpltCell(line, header, "campo_inexistente")).toBe("");
   });
 
-  it("prefiltra año y organismo antes de dividir la fila completa", () => {
+  it("divide cada fila una vez y filtra año y organismo sin parsear de nuevo", () => {
     const source = readFileSync(new URL("../stream-remote-personal.mjs", import.meta.url), "utf8");
-    const yearPrefilter = source.indexOf('scanCpltCell(line, header, "anyo", "año")');
-    const municipalityPrefilter = source.indexOf('scanCpltCell(line, header, "organismo_nombre", "organismo nombre")');
+    const splitOnce = source.indexOf("const columns = parseCpltLine(line)");
+    const yearPrefilter = source.indexOf('getCpltColumn(columns, header, "anyo", "año")');
+    const municipalityPrefilter = source.indexOf('getCpltColumn(columns, header, "organismo_nombre", "organismo nombre")');
     const fullParse = source.indexOf("parseCpltColumns(line)");
 
+    expect(splitOnce).toBeGreaterThan(-1);
     expect(yearPrefilter).toBeGreaterThan(-1);
+    expect(yearPrefilter).toBeGreaterThan(splitOnce);
     expect(municipalityPrefilter).toBeGreaterThan(yearPrefilter);
     expect(fullParse).toBe(-1);
   });

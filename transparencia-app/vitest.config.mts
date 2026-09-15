@@ -18,6 +18,10 @@ export default defineConfig({
     ],
   },
   test: {
+    // Estas pruebas leen artefactos grandes y usan SQLite temporal; ejecutarlas
+    // en paralelo provoca timeouts no deterministas sin aportar cobertura.
+    fileParallelism: false,
+    maxWorkers: 1,
     include: ["lib/**/*.test.ts", "workers/**/*.test.ts", "scripts/static-site-inputs.test.mjs", "scripts/expense-release.test.mjs", "scripts/movimientos-pipeline.test.mjs", "scripts/etl-expenses-local.test.mjs", "scripts/cplt-static-assets.test.mjs", "scripts/etl/transfer-release-cutoff.test.mjs", "scripts/etl/transfer-materialization.test.mjs", "scripts/etl/ranged-csv-source.test.mjs", "scripts/etl/latest-cplt-record-store.test.mjs", "scripts/etl/cplt-source-freshness.test.mjs", "scripts/etl/incremental-window.test.mjs", "scripts/etl/camara-history.test.mjs", "scripts/etl/materialize-incremental.test.mjs", "scripts/etl/expense-window.test.mjs", "scripts/d1-post-reset-preflight.test.mjs", "scripts/d1-materialization-policy.test.mjs", "scripts/landing-summary.test.mjs", "scripts/etl/movimientos-normalization.test.mjs", "scripts/etl/legislative-normalization.test.mjs", "scripts/etl/r2-history.test.mjs", "scripts/etl/r2-storage.test.mjs", "scripts/etl/connectors/**/*.test.mjs"],
   },
 });
