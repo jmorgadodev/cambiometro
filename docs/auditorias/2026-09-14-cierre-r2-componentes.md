@@ -891,3 +891,10 @@ Además, el publicador CPLT quedó protegido para que cualquier ejecución con
 `--r2` o `--releases` falle antes de activar un release si quedan filas con
 períodos inválidos. El modo `--local-only` sigue disponible para diagnosticar y
 reconstruir sin tocar R2.
+
+El origen del candidato central quedó localizado en el flujo manual
+`.github/workflows/etl-cplt-central.yml`, rama
+`codex/normalize-remuneraciones-contract`. Allí se aplicó la misma corrección
+del parser y la compuerta de publicación en el commit `8dd44e5`; las pruebas
+del flujo central quedaron en 17/17 y 12/12. El workflow continúa siendo manual
+y no se ejecutó ni se publicó ningún release central.
