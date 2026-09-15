@@ -13,6 +13,11 @@ it("no permite reemplazar assets de una Release inmutable", () => {
 });
 
 describe("publicación caliente en R2", () => {
+  it("usa el límite R2 decimales compartido por el inventario", () => {
+    const plan = planR2Publication([asset("sources/current.json", 10)]);
+    expect(plan.limitBytes).toBe(10_000_000_000);
+  });
+
   it("conserva catálogo y sólo la partición más reciente de cada fuente", () => {
     const hot = selectHotAssets([
       asset("catalog/v1/manifest.json"),

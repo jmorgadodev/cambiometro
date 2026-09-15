@@ -1,4 +1,6 @@
-const DEFAULT_LIMIT_BYTES = 8 * 1024 * 1024 * 1024;
+// R2 Free declara 10 GB decimales por mes. El inventario remoto usa el mismo
+// límite; mantener una sola unidad evita que publicación y auditoría discrepen.
+const DEFAULT_LIMIT_BYTES = 10_000_000_000;
 
 function latestPrefixes(assets) {
   const latest = new Map();

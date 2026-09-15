@@ -390,3 +390,8 @@ activo, en vez de ocultarlas del plan. El principal candidato es
 La versión histórica municipal de agosto también pasa rollback (`0` claves
 faltantes), pero se conserva como respaldo y no se propone eliminarla sin una
 decisión separada.
+
+También se alineó el límite predeterminado del publicador R2 con el inventario
+remoto: ambos usan ahora `10.000.000.000` bytes decimales. La prueba específica
+de publicación y retención quedó en `21/21`, evitando que un control use 8 GiB
+mientras el otro use 10 GB.
