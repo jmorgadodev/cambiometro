@@ -415,6 +415,30 @@ fuente. La salida compacta conserva `status`, `promotionAllowed`, brechas y
 razón de bloqueo, sin imprimir cada clave de artefacto ni repetir consultas
 por fuente.
 
+La primera ejecución agrupada revisó `147` particiones y `147` manifiestos
+catalogados. El estado resumido fue:
+
+| Fuente | Particiones | Manifiestos presentes | Manifiestos ausentes | Artefactos fuera del inventario |
+|---|---:|---:|---:|---:|
+| Cámara | 61 | 46 | 15 | 43 |
+| Contraloría | 19 | 1 | 18 | 1 |
+| DIPRES | 18 | 0 | 18 | 0 |
+| InfoProbidad | 9 | 0 | 9 | 0 |
+| InfoLobby | 8 | 6 | 2 | 6 |
+| Ley 19.862 | 8 | 0 | 8 | 0 |
+| Votaciones Senado | 7 | 5 | 2 | 5 |
+| Gastos Cámara | 5 | 0 | 5 | 0 |
+| Gastos Senado | 5 | 0 | 5 | 0 |
+| Senado | 4 | 0 | 4 | 0 |
+| ChileCompra | 1 | 0 | 1 | 0 |
+| Servel | 1 | 0 | 1 | 0 |
+| SINIM | 1 | 0 | 1 | 0 |
+
+Todas quedan con `promotionAllowed=false` mientras no exista el manifiesto
+correspondiente. El lake local, en cambio, tiene `90` particiones listas y
+`183.987.417` bytes, pero no representa el mismo universo de las `147`
+particiones catalogadas en R2; por eso no se usa como reemplazo automático.
+
 ## Revisión agrupada de fuentes parlamentarias
 
 La comprobación remota por fuente confirmó que el siguiente paso no es
