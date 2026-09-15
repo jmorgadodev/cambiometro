@@ -54,6 +54,10 @@ La auditoría remota mantiene el bloqueo de crecimiento:
 - No se eliminó ningún objeto porque existen referencias aún no clasificadas.
 - La proyección central candidata de aproximadamente 4,48 GB no está autorizada para publicación.
 
+### Acceso a métricas D1
+
+La auditoría comprobó que la sesión actual puede autenticarse y listar bases D1, pero la consulta de Analytics GraphQL y `wrangler d1 insights` responden `not authorized`. La causa operativa comprobada es que el proceso de Codex conserva una credencial anterior a la renovación del token; por ello no se debe interpretar la ausencia de métricas como consumo cero. La lectura quedará habilitada cuando la nueva credencial se cargue en una sesión nueva y vuelva a pasar el preflight.
+
 ## Proceso central en curso
 
 La ejecución manual de validación `34918549350` procesa la categoría Planta con `publish=false`. Los jobs restantes están en cola por diseño (`max-parallel: 1`). No ha publicado R2 ni modificado producción.
