@@ -42,6 +42,18 @@ Una diferencia de conteo no se interpreta como pérdida mientras no se haya reco
 - No se modificó R2, D1 ni ningún release productivo durante esta auditoría.
 - Las categorías de Cámara y Senado no se sumarán entre sí ni se mezclarán con remuneraciones.
 
+## Estado de almacenamiento R2
+
+La auditoría remota del mismo ciclo informa:
+
+- Uso: `9.016.336.751` de `10.000.000.000` bytes (`90,16%`).
+- Estado: `growth-blocked`; no se permiten nuevas publicaciones grandes.
+- Objetos: `8.362`.
+- Proyección central candidata: aproximadamente `4,48 GB` y `5.121` objetos; permanece sin publicar.
+- Duplicados detectados: aproximadamente `66 KB` recuperables potenciales; quedan sin borrar porque el inventario no prueba que sus claves sean prescindibles.
+
+Esta capacidad impide promover una nueva proyección central hasta contar con una decisión explícita de retención/archivo y una validación de que el release no contiene períodos futuros.
+
 ## Próximo paso verificable
 
 Reconciliar primero Cámara y Senado mediante una matriz por categoría, período y release. Después se podrá validar el histórico de ChileCompra y los resúmenes agregados de DIPRES sin alterar las rutas públicas actuales.
