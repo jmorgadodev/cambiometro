@@ -1882,3 +1882,25 @@ La presencia histórica del Worker en la cuenta Cloudflare aún no puede
 confirmarse desde este entorno porque la credencial disponible no tiene
 `Workers Scripts → Read`. Por tanto, el cierre de runtime requiere una
 verificación independiente en el panel o con una credencial de sólo lectura.
+
+### Verificación directa en Cloudflare — 16-09-2026
+
+La revisión de solo lectura en el panel de Cloudflare confirmó que no existe
+un proyecto/Worker listado con el nombre `transparencia-etl-legacy` en la
+cuenta revisada. La base `transparencia-db` muestra cero consultas, cero filas
+leídas y cero filas escritas en las últimas 24 horas, con 46 tablas. Esto es
+coherente con que las búsquedas públicas usen R2 y con el healthcheck productivo
+que declara `publicDataBackend: r2` y `publicD1Reads: false`.
+
+En el mismo período, `impulsacv-db` registra 98 consultas, aproximadamente
+6.000 filas leídas y 56 filas escritas. La actividad es acotada y no prueba por
+sí sola que exista una lectura masiva; debe atribuirse al servicio que todavía
+usa esa base antes de considerar cerrado el diagnóstico global de D1. A nivel
+de cuenta el panel informa 5,19k filas leídas, 57 escritas y $0,00 de uso
+facturable para el período actual.
+
+Esta verificación no ejecutó SQL, ETL, `PUT`, `DELETE` ni cambios de
+configuración. El resultado permite cerrar la hipótesis de que
+`transparencia-db` esté provocando el consumo actual, pero deja como pendiente
+la atribución de las 98 consultas de `impulsacv-db` y la medición histórica de
+la cuenta con el token de auditoría separado.
