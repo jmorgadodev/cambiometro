@@ -4,7 +4,7 @@ import { readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { parseR2ListPage } from "../lib/r2-list.mjs";
-import { getExpiredBackupObjects, projectedAccountBytes } from "../lib/backup-retention.mjs";
+import { getExpiredBackupObjects, projectedAccountBytes, retentionDeletionAuthorized } from "../lib/backup-retention.mjs";
 
 // Backup semanal del sistema: copia el data lake R2 completo a
 // cambiometro-backups, con retención de 8 semanas. El dump D1 queda
@@ -23,6 +23,7 @@ const R2_LIMIT_BYTES = Number(process.env.R2_LIMIT_BYTES ?? 10_000_000_000);
 const R2_BLOCK_RATIO = 0.95;
 const BACKUP_D1 = process.env.BACKUP_D1 === "1"
   && process.env.D1_BACKUP_CONFIRM === "CAMBIOMETRO_D1_BACKUP";
+const BACKUP_RETENTION_DELETE = retentionDeletionAuthorized();
 
 const accountId = process.env.CLOUDFLARE_ACCOUNT_ID?.trim();
 const token = process.env.CLOUDFLARE_API_TOKEN?.trim();
@@ -110,13 +111,18 @@ if (sourceObjects.length === 0) {
 }
 
 const backupObjects = await listObjectsRest(BACKUP_BUCKET);
-const expiredBackupObjects = getExpiredBackupObjects(backupObjects, stamp, RETENTION_WEEKS);
+const expiredCandidates = getExpiredBackupObjects(backupObjects, stamp, RETENTION_WEEKS);
+const expiredBackupObjects = BACKUP_RETENTION_DELETE ? expiredCandidates : [];
 const projectedBytes = projectedAccountBytes({ sourceObjects, backupObjects, expiredBackupObjects });
 if (!Number.isSafeInteger(R2_LIMIT_BYTES) || R2_LIMIT_BYTES < 1) throw new Error("INVALID_R2_LIMIT_BYTES");
 if (projectedBytes >= R2_LIMIT_BYTES * R2_BLOCK_RATIO) {
   throw new Error(`R2_BACKUP_BLOCKED_AT_95_PERCENT: projectedAccountBytes=${projectedBytes} limitBytes=${R2_LIMIT_BYTES}`);
 }
-console.log(`[INFO] preflight R2: ${backupObjects.length} objetos de backup, ${expiredBackupObjects.length} expirados, ${projectedBytes} bytes proyectados`);
+console.log(`[INFO] preflight R2: ${backupObjects.length} objetos de backup, candidatos expirados=${expiredCandidates.length}, eliminaciones autorizadas=${expiredBackupObjects.length}, ${projectedBytes} bytes proyectados`);
+
+if (expiredCandidates.length > 0 && !BACKUP_RETENTION_DELETE) {
+  console.log("[OK] limpieza por retención omitida: requiere BACKUP_RETENTION_CONFIRM=CAMBIOMETRO_R2_RETENTION_DELETE y rollback verificable");
+}
 
 let deleted = 0;
 for (const object of expiredBackupObjects) {
