@@ -1569,3 +1569,7 @@ objeto R2.
 En el equipo se eliminaron sólo los directorios regenerables `.next` y `out` del
 proyecto maestro. No se eliminaron repositorios, datos fuente, históricos ni
 `cambiometro-editorial`.
+La verificación local posterior al merge terminó con 202 archivos de prueba y
+1.066 tests aprobados. Los guards de arquitectura, tokens, enlaces e
+`innerHTML` también quedaron verdes. El smoke productivo mantuvo HTTP 200 en
+las rutas principales, Movimientos 46/46 y el origen público R2.
