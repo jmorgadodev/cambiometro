@@ -59,6 +59,11 @@ const compactRows = [];
 const summaryRows = [];
 const byShard = new Map();
 const normalizeSearch = (value) => String(value ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL");
+// Las palabras vacías de dos letras generan posiciones para casi todo el
+// universo (por ejemplo, "de" supera el millón de referencias). Indexarlas
+// hace que una búsqueda nominal nacional lea varios megabytes de ruido. No se
+// elimina ninguna fila: sólo se omiten estos tokens del índice.
+const SEARCH_STOPWORDS = new Set(["a", "al", "con", "de", "del", "el", "en", "la", "las", "los", "por", "sin", "y"]);
 const formatQualityIssues = new Set(["nombre_prefijo_invalido", "nombre_prefijo_numerico", "nombre_incompleto", "nombre_vacio"]);
 function qualityIssues(row) {
   const issues = Array.isArray(row.calidad_datos?.incidencias) ? [...row.calidad_datos.incidencias] : [];
@@ -114,10 +119,10 @@ compactRows.sort((left, right) => normalizeSearch(left.n).localeCompare(normaliz
 // varios GiB. Cada token se almacena una sola vez por shard y el Worker
 // intersecta sus posiciones antes de cargar sólo las fichas solicitadas.
 compactRows.forEach((row, position) => {
-  const tokens = new Set([row.n, row.c, row.o].flatMap((value) => normalizeSearch(value)
+    const tokens = new Set([row.n, row.c, row.o].flatMap((value) => normalizeSearch(value)
     .split(/\s+/)
     .map((token) => token.replace(/[^a-z0-9]/gi, ""))
-    .filter((token) => token.length >= 2)));
+    .filter((token) => token.length >= 2 && !SEARCH_STOPWORDS.has(token))));
   for (const token of tokens) {
     const shard = token.slice(0, 2);
     if (!byShard.has(shard)) byShard.set(shard, new Map());

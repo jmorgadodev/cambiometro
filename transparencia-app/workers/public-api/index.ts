@@ -553,6 +553,8 @@ function normalized(value: unknown) {
   return String(value ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL").trim();
 }
 
+const OFFICIAL_SEARCH_STOPWORDS = new Set(["a", "al", "con", "de", "del", "el", "en", "la", "las", "los", "por", "sin", "y"]);
+
 function politicoSlug(value: unknown) {
   return normalized(value).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
@@ -828,7 +830,10 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
     let page = Number.isInteger(requestedPage) ? Math.max(1, Math.min(requestedPage, totalPages)) : 1;
     let rows: JsonRecord[] = [];
     if (query) {
-      const queryTokens = [...new Set(query.split(/\s+/).map((value) => value.replace(/[^a-z0-9]/gi, "")).filter((value) => value.length >= 2))];
+      const queryTokens = [...new Set(query.split(/\s+/)
+        .map((value) => value.replace(/[^a-z0-9]/gi, ""))
+        .filter((value) => value.length >= 2 && !OFFICIAL_SEARCH_STOPWORDS.has(value)))];
+      if (queryTokens.length === 0) return failure("INVALID_QUERY", "Ingresa un nombre, cargo u organismo más específico.", 400);
       const tokenPositionLists = await Promise.all(queryTokens.map(async (token) => {
         const prefix = token.slice(0, 2);
         const shardValue = index.shards?.[prefix];

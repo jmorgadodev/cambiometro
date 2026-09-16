@@ -129,4 +129,52 @@ describe("registros públicos R2", () => {
     expect(payload.meta.total).toBe(1);
     expect(payload.data.map((row) => row.id)).toEqual(["expense-jan"]);
   });
+
+  it("omite palabras vacías nacionales y consulta ambas nóminas sin cargar su shard gigante", async () => {
+    const municipalVersion = "municipal-test";
+    const centralVersion = "central-test";
+    const municipalManifest = {
+      version: municipalVersion,
+      generatedAt: "2026-09-15T00:00:00Z",
+      assets: [],
+      searchIndex: { key: `projections/funcionarios-v1/versions/${municipalVersion}/search_index.json` },
+    };
+    const centralManifest = {
+      version: centralVersion,
+      generatedAt: "2026-09-15T00:00:00Z",
+      assets: [],
+      searchIndex: { key: `projections/funcionarios-central-v1/versions/${centralVersion}/search_index.json` },
+    };
+    const makeIndex = (root: string, version: string, rowKey: string) => ({
+      totalRows: 1,
+      pageSize: 10,
+      pages: [{ page: 1, key: `${root}/versions/${version}/search_index/p-0001.json`, count: 1 }],
+      shards: { lu: `${root}/versions/${version}/search_index/lu-001.json` },
+      filters: {},
+      rowKey,
+    });
+    const municipalIndex = makeIndex("projections/funcionarios-v1", municipalVersion, "municipal-row");
+    const centralIndex = makeIndex("projections/funcionarios-central-v1", centralVersion, "central-row");
+    const bucket = fakeBucket({
+      "projections/funcionarios-v1/manifest.json": municipalManifest,
+      "projections/funcionarios-central-v1/manifest.json": centralManifest,
+      [municipalManifest.searchIndex.key]: municipalIndex,
+      [centralManifest.searchIndex.key]: centralIndex,
+      "projections/funcionarios-v1/versions/municipal-test/search_index/lu-001.json": [["lucy", [0]]],
+      "projections/funcionarios-central-v1/versions/central-test/search_index/lu-001.json": [["lucy", [0]]],
+      "projections/funcionarios-v1/versions/municipal-test/search_index/p-0001.json": [{ id: "municipal-row", n: "Lucy Depablos Chacon", c: "Asesora", o: "Municipalidad" }],
+      "projections/funcionarios-central-v1/versions/central-test/search_index/p-0001.json": [{ id: "central-row", n: "Lucy Depablos Chacon", c: "Asesora", o: "Servicio público" }],
+    });
+
+    const response = await worker.fetch(
+      new Request("https://example.test/api/funcionarios?scope=all&query=Lucy%20de&include_zero=true&limit=20"),
+      { PUBLIC_DATA: bucket as never } as never,
+    );
+    const payload = await response.json() as { data: Array<{ id: string }>; meta: Record<string, unknown> };
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.total).toBe(2);
+    expect(payload.data.map((row) => row.id).sort()).toEqual(["central-row", "municipal-row"]);
+    expect(bucket.requested.some((key) => key.includes("/de-"))).toBe(false);
+  });
 });
