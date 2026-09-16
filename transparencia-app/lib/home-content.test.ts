@@ -35,7 +35,8 @@ describe("promesas editoriales del inicio", () => {
   it("muestra coincidencias cruzadas y no envía la búsqueda al módulo parlamentario", () => {
     const search = readFileSync(resolve(import.meta.dirname, "../components/HomeInlineSearch.tsx"), "utf8");
     expect(home).toContain("<HomeInlineSearch />");
-    expect(search).toContain('fetch(`/api/v1/search?q=${encodeURIComponent(normalizedQuery)}`');
+    expect(search).toContain('fetch(publicApiUrl(`/api/v1/search?q=${encodeURIComponent(normalizedQuery)}`)');
+    expect(search).toContain('from "@/lib/public-api-origin"');
     expect(search).toContain('placeholder="Nombre, partido, distrito o región"');
     expect(search).toContain("Coincidencias");
     expect(search).toContain('action="/remuneraciones-publicas/"');
