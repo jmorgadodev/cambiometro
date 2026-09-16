@@ -3,6 +3,7 @@ import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { discoverLatestSenatePeriod, fetchSenateDiet, fetchSenateDomesticTickets, fetchSenateForeignMissions, fetchSenateOperationalExpenses } from "./etl/connectors/senado.mjs";
 import { buildLakePlan } from "./etl/lake.mjs";
+import { buildSenateSources, senateSourceId } from "./etl/senado-source-map.mjs";
 
 function argument(name) {
   const index = process.argv.indexOf(name);
@@ -39,7 +40,9 @@ for (const dataset of datasets) {
 }
 const snapshot = JSON.parse(readFileSync(join(root, "data", "etl", "latest.json"), "utf8"));
 snapshot.actualizado_en = new Date().toISOString();
-snapshot.fuentes.senado = results.flatMap((result) => result.records);
+const nextSources = { ...snapshot.fuentes };
+for (const sourceId of new Set(results.map((result) => senateSourceId(result.dataset ?? "operational_expenses")))) delete nextSources[sourceId];
+snapshot.fuentes = { ...nextSources, ...buildSenateSources(results) };
 const inventoryPath = join(root, "data", "etl", "source-inventory.json");
 const sourceInventory = existsSync(inventoryPath) ? JSON.parse(readFileSync(inventoryPath, "utf8")) : null;
 const existingCatalogPath = join(outputRoot, "catalog", "v1", "manifest.json");
@@ -47,7 +50,7 @@ const existingCatalog = existsSync(existingCatalogPath) ? JSON.parse(readFileSyn
 const plan = buildLakePlan(snapshot, {
   sourceInventory,
   existingCatalog,
-  originalAssets: results.map((result) => ({ sourceId: "senado", year: result.year, month: result.month, ...result.original })),
+  originalAssets: results.map((result) => ({ sourceId: senateSourceId(result.dataset ?? "operational_expenses"), year: result.year, month: result.month, ...result.original })),
 });
 for (const item of plan.assets) {
   const target = resolve(outputRoot, item.key);

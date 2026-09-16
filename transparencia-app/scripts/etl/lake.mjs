@@ -38,6 +38,9 @@ const KIND_MAP = {
   votaciones_senado: "vote",
   gastos_senado: "expense",
   gastos_camara: "expense",
+  senado: "remuneration",
+  senado_pasajes: "expense",
+  senado_misiones: "expense",
 };
 
 function sha256(data) {
@@ -181,7 +184,7 @@ function collectEntities(sourceId, sourceKey, raw, sourceUrl, updatedAt) {
       attributes: { role: "Senador/a", country: "CL" }, sourceIds: [sourceId], updatedAt,
     });
   }
-  if (sourceKey === "gastos_senado") add({ id: "public-body-senado", kind: "public_body", name: "Senado de la República", identifiers: [], attributes: { country: "CL" }, sourceIds: [sourceId], updatedAt });
+  if (["senado", "gastos_senado", "senado_pasajes", "senado_misiones"].includes(sourceKey)) add({ id: "public-body-senado", kind: "public_body", name: "Senado de la República", identifiers: [], attributes: { country: "CL" }, sourceIds: [sourceId], updatedAt });
   if (sourceKey === "gastos_camara") add({ id: "public-body-camara", kind: "public_body", name: "Cámara de Diputadas y Diputados", identifiers: [], attributes: { country: "CL" }, sourceIds: [sourceId], updatedAt });
   if (raw.buyer?.id) add({
     id: canonicalPartyId(raw.buyer.id, raw.buyer.rut_juridico), kind: "public_body", name: raw.buyer.legal_name || raw.buyer.name,
@@ -231,7 +234,7 @@ function rawEntityIds(sourceId, sourceKey, raw) {
     if (subjects.length === 0) for (const vote of raw.votos ?? []) if (vote?.id) subjects.push(`person-senado-${vote.id}`);
     if (objects.length === 0) objects.push("public-body-senado");
   }
-  if (sourceKey === "gastos_senado" && objects.length === 0) objects.push("public-body-senado");
+  if (["senado", "gastos_senado", "senado_pasajes", "senado_misiones"].includes(sourceKey) && objects.length === 0) objects.push("public-body-senado");
   if (sourceKey === "gastos_camara" && objects.length === 0) objects.push("public-body-camara");
   if (subjects.length === 0 && raw.buyer?.id) subjects.push(canonicalPartyId(raw.buyer.id, raw.buyer.rut_juridico));
   if (objects.length === 0) for (const supplier of raw.suppliers ?? []) if (supplier?.id) objects.push(canonicalPartyId(supplier.id, supplier.rut_juridico));
