@@ -1495,3 +1495,9 @@ correctas fila por fila: sí descarta diferencias inexplicadas en los
 manifiestos, pero quedan revisiones de alcance/frescura y la calidad de
 remuneraciones debe seguir auditándose antes de ampliar cargas. R2 permanece
 en revisión preventiva al 91,798%; no se borraron objetos.
+
+La verificación integral `verify-prod-full` completó dos pasadas verdes, con
+134 verificaciones aprobadas y 0 fallas en cada pasada. Confirmó además las
+fichas políticas, Cámara, Senado, votaciones, gastos, cruces, transferencias,
+Movimientos y las rutas públicas principales. La versión de producción
+observada fue `v1.0-a3bfcc66`.
