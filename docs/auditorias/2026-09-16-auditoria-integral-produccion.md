@@ -1733,6 +1733,13 @@ La validación local pasó con 205 archivos y 1.074 tests. El cambio no realiza
 lecturas masivas de D1, no escribe R2 y no altera rutas ni datos productivos.
 Su integración queda condicionada al check final de Pages.
 
+La prueba remota contra el inventario vigente se ejecutó el 16-09-2026 y
+falló de manera controlada con `R2_BACKUP_INVENTORY_EMPTY`, código de salida
+1. No descargó el dump D1 ni ejecutó una restauración falsa. El cierre limpio
+del stream de red quedó en el PR #553; sus checks de seguridad y calidad están
+en ejecución. Hasta que el inventario se repare, el resultado correcto es
+`no restaurable` y no debe maquillarse como éxito.
+
 ### Auditoría del respaldo R2 — 16-09-2026
 
 La revisión se hizo mediante el inventario de objetos del API de R2, sin
