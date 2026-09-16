@@ -1228,6 +1228,11 @@ organismo. Mientras esa diferencia no se reconcilie, no se presentará un
 porcentaje de cobertura ni se actualizará el snapshot local con un conteo que
 no tenga artefactos correspondientes.
 
+El control de crecimiento quedó unificado en 95% tanto para el planificador
+R2 como para el núcleo ETL; entre 80% y menos de 95% se mantiene la política de
+archivo de particiones frías y sobre 95% se bloquea el crecimiento. Esto evita
+que una de las dos capas detenga o permita cargas con un criterio diferente.
+
 La reconciliación de componentes también detectó y corrigió un error del
 auditor: en Cámara, `asistencia`, `votaciones` y `autoridades` compartían
 `sourceId=camara` y podían quedar colapsados como si fueran un solo componente.
