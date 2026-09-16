@@ -1813,9 +1813,10 @@ describe("API canónica v1", () => {
         schemaVersion: 1,
         totalRows: 0,
         pageSize: 2,
-        pages: [],
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json", count: 0 }],
         shards: {},
       },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index/p-0001.json": [],
     };
     let centralReads = 0;
     const env = {
