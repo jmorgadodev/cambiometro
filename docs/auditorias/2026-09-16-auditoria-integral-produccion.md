@@ -1371,3 +1371,27 @@ No se modifican rutas, menú, municipalidades ni el contenido editorial como
 parte de esta auditoría. El siguiente informe deberá indicar por dominio qué
 está confirmado, qué está pendiente y qué no está publicado; nunca presentar
 la aprobación de Movimientos como cobertura total del sitio.
+
+### Corrección final de estado productivo de Movimientos — 16-09-2026
+
+La auditoría detectó que el endpoint devolvía las 46 filas correctas, pero
+marcaba el release reconciliado como `partial` por una regla genérica de la
+proyección estática. Se agregó una prueba de regresión y se cambió la regla
+para declarar `complete` sólo cuando el release de Movimientos conserva
+`release_id`, checksum, conteo declarado y número real de filas coincidentes.
+Los releases sin esa evidencia continúan como `partial`.
+
+La corrección quedó en la PR #543, merge commit
+`5d929a53c98e8a8867bff39b12b12f4d3447bd0b`, con candidato Worker
+`f88266e6-fe7e-480c-891c-0c60a701e92c` promovido al 100% mediante el flujo
+confirmado. La verificación productiva posterior confirmó respuesta 200,
+`sourceStatus=complete`, `total=46` y `publishedRows=46` en la URL canónica.
+El checksum del contenido permanece
+`9a884d9bef8627718afed406d530591acec6a95c50dd27956c744b56766f1995`.
+
+La validación local pasó 201 archivos y 1.060 pruebas, junto con typecheck del
+sitio y del Worker. No se modificaron filas, rutas, menú, municipalidades,
+Remuneraciones ni D1. La intermitencia observada en la búsqueda combinada de
+funcionarios (503/1102 sólo para algunas consultas `scope=all`) queda como el
+primer pendiente técnico separado; no se mezclará con el cierre de
+Movimientos.
