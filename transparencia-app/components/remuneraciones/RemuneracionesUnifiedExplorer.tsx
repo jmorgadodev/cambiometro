@@ -55,6 +55,11 @@ interface SearchResult {
   remotePartial: boolean;
 }
 
+interface LiveCpltCoverage {
+  municipal: number | null;
+  central: number | null;
+}
+
 const number = new Intl.NumberFormat("es-CL");
 const money = new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 });
 const PAID_SOURCE_IDS = ["transparencia-activa", "remuneraciones-38bis", "camara", "senado"];
@@ -95,6 +100,13 @@ function displayCount(value: number | null) {
   return value === null ? "Sin registros descargables" : number.format(value);
 }
 
+function publicApiUrl(path: string) {
+  if (typeof window === "undefined") return path;
+  const isLocalPreview = window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+  const configuredOrigin = isLocalPreview ? process.env.NEXT_PUBLIC_PUBLIC_API_ORIGIN?.trim() : "";
+  return configuredOrigin ? new URL(path, configuredOrigin).toString() : path;
+}
+
 async function loadJson<T>(key: string) {
   const response = await fetch(`/data/remuneraciones-unified/${key}`, { cache: "force-cache" });
   if (!response.ok) throw new Error("No se pudo cargar el índice unificado.");
@@ -126,6 +138,7 @@ function RemoteOfficialRow(row: Record<string, unknown>, query: string): Unified
 
 export default function RemuneracionesUnifiedExplorer() {
   const [manifest, setManifest] = useState<UnifiedManifest | null>(null);
+  const [liveCpltCoverage, setLiveCpltCoverage] = useState<LiveCpltCoverage | null>(null);
   const [query, setQuery] = useState("");
   const [source, setSource] = useState("all");
   const [organism, setOrganism] = useState("");
@@ -141,6 +154,21 @@ export default function RemuneracionesUnifiedExplorer() {
   useEffect(() => {
     loadJson<UnifiedManifest>("manifest.json").then(setManifest).catch((reason: Error) => setError(reason.message));
   }, []);
+
+  useEffect(() => {
+    if (!manifest) return;
+    const request = (scope: "municipal" | "central") => fetch(publicApiUrl(`/api/v1/funcionarios?scope=${scope}&limit=1&include_zero=true`), { cache: "no-store" })
+      .then(async (response) => {
+        if (!response.ok) return null;
+        const payload = await response.json() as { meta?: { total?: number } };
+        const total = Number(payload.meta?.total);
+        return Number.isFinite(total) ? total : null;
+      })
+      .catch(() => null);
+    void Promise.all([request("municipal"), request("central")]).then(([municipal, central]) => {
+      if (municipal !== null || central !== null) setLiveCpltCoverage({ municipal, central });
+    });
+  }, [manifest]);
 
   useEffect(() => {
     if (!manifest || initialQueryHandled.current || typeof window === "undefined") return;
@@ -334,7 +362,17 @@ export default function RemuneracionesUnifiedExplorer() {
           <section id="fuentes-remuneraciones" className="remuneration-module remuneration-module--sources" aria-labelledby="fuentes-remuneraciones-title">
             <div className="remuneration-module__heading"><span className="eyebrow">FUENTES</span><h3 id="fuentes-remuneraciones-title">De dónde salen los pagos</h3><p>Estas son las fuentes de remuneraciones individuales que puedes consultar. Cada registro conserva su organismo, período y procedencia.</p></div>
             <div className="remuneration-source-list" aria-label="Fuentes de pagos publicados">
-              {paidSources.map((item) => <article key={item.id} className="remuneration-source-card"><div className="remuneration-source-card__header"><span><strong>{item.label}</strong><small>{sourceDescription(item)}</small></span><b>{displayCount(item.publishedCount)} registros</b></div>{item.officialUrl && <a href={item.officialUrl} target="_blank" rel="noopener noreferrer">Ver fuente oficial ↗</a>}</article>)}
+              {paidSources.map((item) => {
+                const isCplt = item.id === "transparencia-activa";
+                const liveTotal = isCplt && liveCpltCoverage
+                  ? [liveCpltCoverage.municipal, liveCpltCoverage.central].filter((value): value is number => value !== null).reduce((sum, value) => sum + value, 0)
+                  : null;
+                const count = liveTotal !== null ? displayCount(liveTotal) : isCplt ? "Conteo en línea" : displayCount(item.publishedCount);
+                const scopeNote = isCplt && liveCpltCoverage
+                  ? `${liveCpltCoverage.municipal === null ? "Municipalidades: sin dato" : `${displayCount(liveCpltCoverage.municipal)} registros municipales`} · ${liveCpltCoverage.central === null ? "Organismos centrales: sin dato" : `${displayCount(liveCpltCoverage.central)} registros centrales`}`
+                  : null;
+                return <article key={item.id} className="remuneration-source-card"><div className="remuneration-source-card__header"><span><strong>{item.label}</strong><small>{scopeNote ?? sourceDescription(item)}</small></span><b>{count} registros</b></div>{item.officialUrl && <a href={item.officialUrl} target="_blank" rel="noopener noreferrer">Ver fuente oficial ↗</a>}</article>;
+              })}
             </div>
             <p className="remuneration-reading-note"><strong>Cómo leer los resultados:</strong> un monto aparece sólo cuando la fuente lo publicó. Si falta, se indica “Monto no publicado”; nunca se completa con una estimación.</p>
           </section>
