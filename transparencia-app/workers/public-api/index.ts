@@ -957,10 +957,13 @@ async function listAllFuncionariosFromR2(requestUrl: URL, env: Env) {
   const combinedLimit = Math.min(100, Math.max(limit, limit * 2));
   const scopedUrl = new URL(requestUrl);
   scopedUrl.searchParams.set("limit", String(combinedLimit));
-  const [municipal, central] = await Promise.all([
-    listFuncionariosFromR2(scopedUrl, env, "funcionarios-v1"),
-    listFuncionariosFromR2(scopedUrl, env, "funcionarios-central-v1"),
-  ]);
+  // Las dos nóminas tienen índices grandes. Consultarlas en paralelo duplica
+  // la descompresión y el número de lecturas R2 dentro del mismo Worker y
+  // puede terminar en 1102 aunque cada alcance aislado responda 200. La
+  // combinación debe ser secuencial y degradable: una fuente disponible no
+  // se oculta por el fallo temporal de la otra.
+  const municipal = await listFuncionariosFromR2(scopedUrl, env, "funcionarios-v1");
+  const central = await listFuncionariosFromR2(scopedUrl, env, "funcionarios-central-v1");
   const usable = [municipal, central].filter((response) => response.status < 500);
   if (usable.length === 0) return municipal;
   if (usable.length === 1) return usable[0];
