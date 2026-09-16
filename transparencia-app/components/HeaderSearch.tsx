@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useId, useRef, useState } from "react";
 import { resolveHomeSearchTarget, resolveSearchResultUrl } from "@/lib/home-search-routing";
+import { publicApiUrl } from "@/lib/public-api-origin";
 
 interface SearchResult {
   type: "politico" | "persona" | "municipalidad" | "funcionario" | "remuneracion" | "entidad";
@@ -55,7 +56,7 @@ export default function HeaderSearch() {
       setIsLoading(true);
       setError(null);
       try {
-        const response = await fetch(`/api/v1/search?q=${encodeURIComponent(normalizedQuery)}`, {
+        const response = await fetch(publicApiUrl(`/api/v1/search?q=${encodeURIComponent(normalizedQuery)}`), {
           signal: controller.signal,
         });
         if (!response.ok) throw new Error(`Búsqueda HTTP ${response.status}`);

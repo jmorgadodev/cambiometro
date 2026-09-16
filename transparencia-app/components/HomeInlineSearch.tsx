@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { FormEvent, useEffect, useId, useRef, useState } from "react";
 import { resolveHomeSearchTarget, resolveSearchResultUrl } from "@/lib/home-search-routing";
+import { publicApiUrl } from "@/lib/public-api-origin";
 
 type SearchResultType = "politico" | "persona" | "municipalidad" | "funcionario" | "entidad" | "proveedor" | "organismo" | "remuneracion";
 
@@ -135,7 +136,7 @@ export default function HomeInlineSearch() {
       setError(null);
       try {
         const [workerPayload, remunerationResults] = await Promise.all([
-          fetch(`/api/v1/search?q=${encodeURIComponent(normalizedQuery)}`, { signal: controller.signal })
+          fetch(publicApiUrl(`/api/v1/search?q=${encodeURIComponent(normalizedQuery)}`), { signal: controller.signal })
             .then(async (response) => response.ok ? await response.json() as SearchPayload : null)
             .catch((requestError) => {
               if ((requestError as Error).name === "AbortError") throw requestError;
