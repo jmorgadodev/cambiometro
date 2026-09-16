@@ -1467,3 +1467,31 @@ regenerables (`.next`, `out`, `node_modules`) fueron identificados para una
 limpieza separada; `cambiometro-public` (2,17 GB) no se toca porque contiene
 datos/release que todavía requieren comparación. No se borraron repositorios
 ni datos fuente durante esta revisión.
+
+### Cierre de Movimientos y publicación de interfaz — 16-09-2026
+
+La comprobación productiva posterior confirmó que `/api/v1/records?source=movimientos&limit=100`
+responde HTTP 200 desde R2 con `sourceStatus=complete`, `total=46`,
+`publishedRows=46` y sin alterar el release reconciliado
+`kast-2026-succession-reconciled-2026-09-14`. El health público declara
+`publicDataBackend=r2`, `publicD1Reads=false` y `d1TransferRows=0`; D1 no es el
+camino de consulta pública.
+
+El guard para evitar refrescos por pushes sin ingestión quedó integrado en
+`main` mediante PR #545. La limpieza de Remuneraciones quedó integrada mediante
+PR #546: se retiraron del explorador la evolución mensual y la tabla de 12
+cortes que mostraban comparaciones vacías. Se conservaron el buscador, las
+fichas expandibles, la paginación de 15 resultados, las fuentes y el detalle
+mensual propio del Registro 38 bis.
+
+La validación remota de PR #546 pasó build, typecheck, rutas, APIs, UI
+responsive, CSP y E2E. El flujo `ui-only` de Pages `35096231860` terminó en
+éxito sobre el commit `e7cf7f479647d93fd139b2647509c2c9b3446810`; no ejecutó
+ETL ni publicó cambios de datos. Las rutas `/`, `/remuneraciones-publicas/`,
+`/movimientos/`, `/municipalidades/` y `/personas/` respondieron HTTP 200.
+
+La auditoría integral sigue sin demostrar que todas las fuentes estén
+correctas fila por fila: sí descarta diferencias inexplicadas en los
+manifiestos, pero quedan revisiones de alcance/frescura y la calidad de
+remuneraciones debe seguir auditándose antes de ampliar cargas. R2 permanece
+en revisión preventiva al 91,798%; no se borraron objetos.
