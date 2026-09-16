@@ -22,7 +22,7 @@ público, que responde desde R2:
 | Consulta | Resultado | Procedencia observada |
 | --- | ---: | --- |
 | Sofía Pumpin | 1 | Organismos centrales |
-| Lucy Depablos | 3 | Registros CPLT publicados |
+| Lucy Depablos | 7 | Registros CPLT publicados |
 | Valentina Andrea Latorre Rincon | 3 | Organismos centrales |
 | Romer Angel Rubio Flores | 4 | Registros CPLT publicados |
 | Río Sebastián Torrealba del Río | 1 | Organismos centrales |
@@ -59,6 +59,9 @@ municipalidades con organismos centrales.
 - El release central tiene 2.110.434 filas distribuidas por organismo, pero su
   manifiesto no usa la misma estructura `coverage` municipal. Su auditoría debe
   usar los assets y sus checksums por organismo.
+- La respuesta productiva reporta 159.705 incidencias en la proyección
+  municipal y 563.221 en la central; casi todas corresponden a líquido no
+  informado, que no debe interpretarse como sueldo líquido cero.
 - La tarjeta estática y el catálogo productivo no tienen todavía una fuente
   única de conteo. Esto es un problema de presentación/metadatos, no evidencia
   de que los registros R2 estén ausentes.
