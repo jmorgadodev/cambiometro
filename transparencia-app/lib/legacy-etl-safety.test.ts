@@ -35,4 +35,11 @@ describe("bloqueos de ETL heredados", () => {
     expect(result.status).not.toBe(0);
     expect(`${result.stdout}\n${result.stderr}`).toContain("D1_REMOTE_MATERIALIZATION_REQUIRES_EXPLICIT_CONFIRMATION");
   });
+
+  it("prefiere el token de auditoría en los monitores de D1", () => {
+    for (const relativePath of [".github/workflows/usage-watch.yml", ".github/workflows/d1-post-reset-probe.yml"]) {
+      const source = readFileSync(resolve("..", relativePath), "utf8");
+      expect(source).toContain("secrets.CLOUDFLARE_AUDIT_API_TOKEN || secrets.WRANGLER_TOKEN");
+    }
+  });
 });
