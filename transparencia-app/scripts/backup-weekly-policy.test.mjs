@@ -24,4 +24,10 @@ describe("política de backup sin consumo accidental de D1", () => {
     expect(drill).toContain("r2Head(BACKUP_BUCKET, sampleKey)");
     expect(drill).toContain("if (!inventory.d1)");
   });
+
+  it("rechaza un inventario con cero objetos antes de considerar cualquier dump D1", () => {
+    expect(drill).toContain("const lakeObjects = getR2LakeObjects(inventory);");
+    expect(drill).toContain("R2_BACKUP_INVENTORY_EMPTY");
+    expect(drill.indexOf("getR2LakeObjects(inventory)")).toBeLessThan(drill.indexOf("Paso 3: descargar dump"));
+  });
 });
