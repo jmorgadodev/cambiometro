@@ -1227,3 +1227,18 @@ La auditoría queda como requisito previo para completar la cobertura por mes y
 organismo. Mientras esa diferencia no se reconcilie, no se presentará un
 porcentaje de cobertura ni se actualizará el snapshot local con un conteo que
 no tenga artefactos correspondientes.
+
+La reconciliación de componentes también detectó y corrigió un error del
+auditor: en Cámara, `asistencia`, `votaciones` y `autoridades` compartían
+`sourceId=camara` y podían quedar colapsados como si fueran un solo componente.
+La identificación ahora conserva el componente específico cuando el
+`sourceId` coincide con el padre. La lectura vigente queda así:
+
+- Cámara: asistencia 54.538, votaciones 4.058, autoridades 155 y gastos
+  16.275; el catálogo local sólo tiene el componente de gastos, por lo que la
+  diferencia se clasifica como alcance/artefactos locales faltantes.
+- Senado: gastos 6.520 frente a 6.517 locales (+3) y votaciones 218 frente a
+  194 locales (+24).
+
+No se corrigieron conteos a mano ni se promovió ningún artefacto; primero debe
+reconstruirse o localizarse el release local verificable de cada componente.
