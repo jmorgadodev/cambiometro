@@ -1573,3 +1573,16 @@ La verificación local posterior al merge terminó con 202 archivos de prueba y
 1.066 tests aprobados. Los guards de arquitectura, tokens, enlaces e
 `innerHTML` también quedaron verdes. El smoke productivo mantuvo HTTP 200 en
 las rutas principales, Movimientos 46/46 y el origen público R2.
+### Protección de retención de backups — 16-09-2026 14:30 UTC-3
+
+El PR #549 quedó fusionado en `main` como `1a7571d` después de seis checks
+verdes y un check omitido por no ingestión. Se corrigió la causa concreta del
+crecimiento de `cambiometro-backups`: la retención recorría `sourceObjects`, por
+lo que nunca encontraba claves `backup/YYYY-MM-DD/` para retirar.
+
+Ahora el backup lista ambos buckets, identifica snapshots expirados antes de
+copiar y calcula el tamaño combinado proyectado. Si la cuenta queda en 95% o
+más, el proceso se detiene antes de cualquier borrado, exportación D1 o copia.
+La prueba de regresión confirma que los objetos `d1/` no se confunden con
+snapshots. La suite posterior terminó con 203 archivos y 1.068 tests aprobados.
+No se ejecutó el backup real ni se modificó R2.
