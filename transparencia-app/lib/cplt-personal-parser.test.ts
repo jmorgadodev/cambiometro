@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createCpltRecordId, parseCpltHeader, parseCpltRecord } from "../scripts/etl/cplt-personal.mjs";
+import { createCpltRecordId, filterCpltRowsForPublication, parseCpltHeader, parseCpltRecord } from "../scripts/etl/cplt-personal.mjs";
 
 describe("parser de personal CPLT", () => {
   it("interpreta meses en texto y columnas de Planta", () => {
@@ -18,6 +18,40 @@ describe("parser de personal CPLT", () => {
       remuneracion_bruta_mensual: 3_088_479,
       cargo: "Jefatura",
     });
+  });
+
+  it("descarta períodos posteriores al corte solicitado y años imposibles", () => {
+    const header = parseCpltHeader("organismo_nombre;anyo;Mes;Nombres;Paterno;Materno;Tipo cargo;remuneracionbruta_mensual");
+    const futureMonth = parseCpltRecord({
+      line: "Hospital;2026;Octubre;ANA;PEREZ;SOTO;PROFESIONAL;1000000",
+      header,
+      tipo: "Planta",
+      organismoId: "org-hospital",
+      sourceUrl: "https://oficial.test/planta",
+      maxPeriod: "2026-09",
+    });
+    const impossibleYear = parseCpltRecord({
+      line: "Hospital;2121;Enero;ANA;PEREZ;SOTO;PROFESIONAL;1000000",
+      header,
+      tipo: "Planta",
+      organismoId: "org-hospital",
+      sourceUrl: "https://oficial.test/planta",
+      maxPeriod: "2026-09",
+    });
+
+    expect(futureMonth).toBeNull();
+    expect(impossibleYear).toBeNull();
+  });
+
+  it("filtra el release público sin modificar las filas originales", () => {
+    const rows = [
+      { id: "paid", fuente_periodo: "2026-09" },
+      { id: "future", fuente_periodo: "2026-10" },
+      { id: "impossible", fuente_periodo: "2121-01" },
+    ];
+
+    expect(filterCpltRowsForPublication(rows, "2026-09")).toEqual([rows[0]]);
+    expect(rows).toHaveLength(3);
   });
 
   it("interpreta el esquema reducido de Honorarios sin exigir 40 columnas", () => {
