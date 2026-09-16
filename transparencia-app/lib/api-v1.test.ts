@@ -384,6 +384,113 @@ describe("API canónica v1", () => {
     });
   });
 
+  it("incluye en la búsqueda de la Home coincidencias centrales y municipales", async () => {
+    const files: Record<string, unknown> = {
+      "projections/entities-v1/entities-routes.json": [],
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-09-15T00:00:00.000Z",
+        version: "municipal-test",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/municipal-test/search_index.json" },
+      },
+      "projections/funcionarios-central-v1/manifest.json": {
+        generatedAt: "2026-09-15T00:00:00.000Z",
+        version: "central-test",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-central-v1/versions/central-test/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/municipal-test/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1,
+        pageSize: 10,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/municipal-test/search_index/p-0001.json", count: 1 }],
+        shards: { to: "projections/funcionarios-v1/versions/municipal-test/search_index/to.json" },
+      },
+      "projections/funcionarios-central-v1/versions/central-test/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1,
+        pageSize: 10,
+        pages: [{ page: 1, key: "projections/funcionarios-central-v1/versions/central-test/search_index/p-0001.json", count: 1 }],
+        shards: { to: "projections/funcionarios-central-v1/versions/central-test/search_index/to.json" },
+      },
+      "projections/funcionarios-v1/versions/municipal-test/search_index/to.json": [["torrealba", [0]]],
+      "projections/funcionarios-central-v1/versions/central-test/search_index/to.json": [["torrealba", [0]]],
+      "projections/funcionarios-v1/versions/municipal-test/search_index/p-0001.json": [
+        { id: "municipal-torrealba", n: "Alejandro Ríos Torrealba", c: "Profesional", o: "Municipalidad de Talca", t: "Planta", e: "Profesional", b: 1000000 },
+      ],
+      "projections/funcionarios-central-v1/versions/central-test/search_index/p-0001.json": [
+        { id: "central-torrealba", n: "Río Sebastián Torrealba del Río", c: "Coordinador de Asesores", o: "Presidencia", t: "Planta", e: "Directivo", b: 9200000 },
+      ],
+    };
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse para la búsqueda nacional"); } },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/search?q=Torrealba"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.funcionarios.map((item: { id: string }) => item.id).sort()).toEqual(["central-torrealba", "municipal-torrealba"]);
+  });
+
+  it("scope=all sin texto devuelve ambas nóminas sin consultar D1", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-09-15T00:00:00.000Z",
+        version: "municipal-test",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/municipal-test/search_index.json" },
+      },
+      "projections/funcionarios-central-v1/manifest.json": {
+        generatedAt: "2026-09-15T00:00:00.000Z",
+        version: "central-test",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-central-v1/versions/central-test/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/municipal-test/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 2,
+        pageSize: 10,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/municipal-test/search_index/p-0001.json", count: 2 }],
+        quality: { recordsWithIssues: 2, byIssue: { remuneracion_liquida_no_informada: 2 } },
+      },
+      "projections/funcionarios-central-v1/versions/central-test/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1,
+        pageSize: 10,
+        pages: [{ page: 1, key: "projections/funcionarios-central-v1/versions/central-test/search_index/p-0001.json", count: 1 }],
+        quality: { recordsWithIssues: 3, byIssue: { remuneracion_liquida_no_informada: 2, nombre_incompleto: 1 } },
+      },
+      "projections/funcionarios-v1/versions/municipal-test/search_index/p-0001.json": [
+        { id: "municipal-1", n: "Persona Municipal 1", c: "Profesional", o: "Municipalidad A", t: "Planta", e: "Profesional", b: 1000000 },
+        { id: "municipal-2", n: "Persona Municipal 2", c: "Técnico", o: "Municipalidad B", t: "Contrata", e: "Técnico", b: 800000 },
+      ],
+      "projections/funcionarios-central-v1/versions/central-test/search_index/p-0001.json": [
+        { id: "central-1", n: "Persona Central 1", c: "Asesor", o: "Ministerio", t: "Contrata", e: "Profesional", b: 2000000 },
+      ],
+    };
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse para scope=all"); } },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/funcionarios?scope=all&limit=10"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta).toMatchObject({ total: 3, sourceStatus: "r2-search-combined", sources: ["municipal", "central"] });
+    expect(payload.meta.calidadDatos).toMatchObject({
+      alcance: "universo_publicado",
+      registrosConIncidencias: 5,
+      porIncidencia: { remuneracion_liquida_no_informada: 4, nombre_incompleto: 1 },
+    });
+    expect(payload.meta.stats).toMatchObject({ totalMuni: 3, totalValidos: 3, promedioSueldo: 1266667 });
+    expect(payload.data.map((item: { id: string }) => item.id).sort()).toEqual(["central-1", "municipal-1", "municipal-2"]);
+    expect(payload.data.find((item: { id: string }) => item.id === "municipal-1").sourceScope).toBe("municipal");
+    expect(payload.data.find((item: { id: string }) => item.id === "central-1").sourceScope).toBe("central");
+  });
+
   it("conserva la búsqueda de funcionarios si el catálogo de entidades no está disponible", async () => {
     const files: Record<string, unknown> = {
       "projections/funcionarios-v1/manifest.json": {
@@ -560,6 +667,53 @@ describe("API canónica v1", () => {
     expect(response.status).toBe(200);
     expect(payload.meta).toMatchObject({ total: 1, sourceBackend: "r2" });
     expect(payload.data[0]).toMatchObject({ id: "expense-1", kind: "expense", sourceId: "gastos_camara", title: "Traslado" });
+  });
+
+  it("prefiere el histórico lake de gastos al subconjunto estático", async () => {
+    const compressed = gzipSync([
+      { id: "gastos_senado-expense-1", sourceId: "gastos_senado", kind: "expense", occurredAt: "2026-05-01", evidence: { sourceUrl: "https://senado.cl/1" }, data: { periodo: "2026-05", item: "Traslado", monto_clp: 10000 } },
+      { id: "gastos_senado-expense-2", sourceId: "gastos_senado", kind: "expense", occurredAt: "2026-05-02", evidence: { sourceUrl: "https://senado.cl/2" }, data: { periodo: "2026-05", item: "Alojamiento", monto_clp: 20000 } },
+    ].map((row) => JSON.stringify(row)).join("\n") + "\n");
+    const checksum = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", compressed)))
+      .map((byte) => byte.toString(16).padStart(2, "0")).join("");
+    const files: Record<string, unknown> = {
+      "projections/static-site-v1/manifest.json": {
+        files: [{ path: "data/lake-subsets/gastos-senado.subset.json", key: "releases/expenses/senado-static.json" }],
+      },
+      "releases/expenses/senado-static.json": {
+        schemaVersion: 1,
+        sourceId: "gastos_senado",
+        recordCount: 1,
+        records: [{ id: "static-only", fecha: "2026-05-01", periodo: "2026-05", item: "Subconjunto", monto_clp: 1, url: "https://senado.cl/static", fuente: "Senado" }],
+      },
+      "catalog/v1/manifest.json": {
+        generatedAt: "2026-09-16T00:00:00.000Z",
+        sources: [{ id: "gastos_senado", recordCount: 2, status: "partial" }],
+        partitions: [{ sourceId: "gastos_senado", period: "2026-05", manifestKey: "partitions/gastos_senado/2026/05/manifest.json", recordCount: 2, checksumSha256: checksum, status: "partial" }],
+      },
+      "partitions/gastos_senado/2026/05/manifest.json": {
+        projectionChecksumSha256: checksum,
+        artifacts: [{ key: "partitions/gastos_senado/2026/05/records.jsonl.gz", checksumSha256: checksum }],
+      },
+      "partitions/gastos_senado/2026/05/records.jsonl.gz": compressed,
+    };
+    const env = {
+      PUBLIC_DATA: {
+        get: async (key: string) => {
+          const value = files[key];
+          if (value === undefined) return null;
+          if (value instanceof Uint8Array) return { arrayBuffer: async () => value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength) };
+          return { json: async <T>() => value as T };
+        },
+      },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/records?source=gastos_senado&limit=10"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta).toMatchObject({ total: 2, sourceBackend: "r2-lake", publishedRows: 2 });
+    expect(payload.data.map((row: { id: string }) => row.id)).toEqual(["gastos_senado-expense-2", "gastos_senado-expense-1"]);
   });
 
   it("pagina el universo nacional de forma continua aunque R2 use bloques físicos mayores", async () => {
@@ -877,6 +1031,7 @@ describe("API canónica v1", () => {
     expect(payload.data[0].components).toEqual([
       { id: "asistencia", sourceId: "camara", label: "Asistencia", recordCount: 120, includedInRecordCount: true },
       { id: "votaciones", sourceId: "camara", label: "Votaciones", recordCount: 30, includedInRecordCount: true },
+      { id: "autoridades", sourceId: "camara", label: "Autoridades vigentes", recordCount: 0, includedInRecordCount: true },
       { id: "gastos", sourceId: "gastos_camara", label: "Gastos operacionales", recordCount: 40, includedInRecordCount: false },
     ]);
   });
@@ -903,6 +1058,76 @@ describe("API canónica v1", () => {
       { id: "votaciones", sourceId: "votaciones_senado", label: "Votaciones", recordCount: 205, includedInRecordCount: false },
       { id: "gastos", sourceId: "gastos_senado", label: "Gastos operacionales", recordCount: 6517, includedInRecordCount: false },
     ]);
+  });
+
+  it("deriva los componentes de Cámara desde las particiones R2 vigentes", async () => {
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/sources-v1/source-inventory.json") {
+          return { json: async <T>() => ({ sources: [{ id: "camara", label: "Cámara" }] }) as T };
+        }
+        if (key === "projections/sources-v1/source-health.json") {
+          return { json: async <T>() => ({ sources: { camara: { recordCount: 9, status: "partial", components: { asistencia: 99, votaciones: 88, gastos: 77 } } } }) as T };
+        }
+        if (key === "catalog/v1/manifest.json") {
+          return { json: async <T>() => ({
+            sources: [{ id: "camara", recordCount: 9, status: "partial" }],
+            partitions: [
+              { sourceId: "camara", variant: "asistencia_camara", recordCount: 2 },
+              { sourceId: "camara", variant: "votaciones_camara", recordCount: 3 },
+              { sourceId: "camara", variant: "congreso_opendata", recordCount: 4 },
+              { sourceId: "gastos_camara", recordCount: 5 },
+            ],
+          }) as T };
+        }
+        return null;
+      },
+    };
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/sources"), { PUBLIC_DATA } as never);
+    const payload = await response.json();
+    const camara = payload.data.find((source: { id: string }) => source.id === "camara");
+
+    expect(response.status).toBe(200);
+    expect(camara.recordCount).toBe(9);
+    expect(camara.components).toEqual([
+      { id: "asistencia", sourceId: "camara", label: "Asistencia", recordCount: 2, includedInRecordCount: true },
+      { id: "votaciones", sourceId: "camara", label: "Votaciones", recordCount: 3, includedInRecordCount: true },
+      { id: "autoridades", sourceId: "camara", label: "Autoridades vigentes", recordCount: 4, includedInRecordCount: true },
+      { id: "gastos", sourceId: "gastos_camara", label: "Gastos operacionales", recordCount: 5, includedInRecordCount: false },
+    ]);
+  });
+
+  it("marca DIPRES como fuente agregada y no como buscador individual", async () => {
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/sources-v1/source-inventory.json") {
+          return { json: async <T>() => ({ sources: [{ id: "dipres", label: "DIPRES", recordCount: 247287 }] }) as T };
+        }
+        if (key === "projections/sources-v1/source-health.json") {
+          return { json: async <T>() => ({ sources: { dipres: { status: "partial" } } }) as T };
+        }
+        return null;
+      },
+    };
+
+    const sourcesResponse = await api.fetch(new Request("https://example.test/api/v1/sources"), { PUBLIC_DATA } as never);
+    const sourcesPayload = await sourcesResponse.json();
+    expect(sourcesResponse.status).toBe(200);
+    expect(sourcesPayload.data[0]).toMatchObject({
+      id: "dipres",
+      dataScope: "aggregate",
+      queryable: false,
+      queryableCount: 0,
+      statusDetail: "Datos agregados de presupuesto y ejecución; no corresponde a un buscador de personas.",
+    });
+
+    const recordsResponse = await api.fetch(
+      new Request("https://example.test/api/v1/records?source=dipres&limit=10"),
+      { PUBLIC_DATA } as never,
+    );
+    expect(recordsResponse.status).toBe(422);
+    expect(await recordsResponse.json()).toMatchObject({ error: { code: "AGGREGATE_SOURCE" } });
   });
 
   it("normaliza alias históricos y no publica catálogos legados como fuentes sin datos", async () => {
@@ -1206,7 +1431,7 @@ describe("API canónica v1", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.meta).toMatchObject({ sourceBackend: "r2-lake", requestedSource: "votaciones_camara", sourceStatus: "complete", total: 1, expectedRows: 2, publishedRows: 2 });
+    expect(payload.meta).toMatchObject({ sourceBackend: "r2-lake", requestedSource: "votaciones_camara", sourceStatus: "complete", total: 1, expectedRows: 1, publishedRows: 1 });
     expect(payload.data[0]).toMatchObject({ id: "camara-vote-variant-1", kind: "vote", sourceId: "camara" });
   });
 

@@ -15,6 +15,11 @@ const CATEGORY_BY_SOURCE = Object.freeze({
   senado: ["remuneraciones", "asesorias", "gastos", "votaciones"],
 });
 
+const EXPLICIT_SCOPE_HINTS = Object.freeze({
+  chilecompra: "El snapshot local conserva histórico; el release productivo es un corte vigente por períodos.",
+  dipres: "El conteo local corresponde a entidades/series resumidas; el release productivo cuenta filas presupuestarias por período.",
+});
+
 export function sourceCategories(sourceId) {
   return [...(CATEGORY_BY_SOURCE[String(sourceId)] ?? [])];
 }
@@ -55,22 +60,56 @@ function categoriesForSources(sources) {
   return [...new Set(sources.flatMap((source) => sourceCategories(source.id)))];
 }
 
-function classification({ production, local, children }) {
+function classification({ id, production, local, children }) {
   const hasCategorySplit = children.length > 0;
+  if (EXPLICIT_SCOPE_HINTS[id] && production && local) return "scope";
   if (production && local && Number(production.recordCount) === Number(local.recordCount) && !hasCategorySplit) return "match";
   if (hasCategorySplit || (local && sourceCategories(local.id).length > 0 && !production)) return "scope";
-  if (production && local && hasNewerProduction(production, local)) return "freshness";
+  if (EXPLICIT_SCOPE_HINTS[id] && production && local && Number(production.recordCount) !== Number(local.recordCount)) return "scope";
+  if (production && local && hasNewerProduction(production, local)) {
+    // Una versión más nueva con más filas puede ser frescura. Si trae menos,
+    // el dato puede estar recortado o pertenecer a otro alcance: no se debe
+    // presentar como actualización normal hasta reconciliar categorías.
+    return Number(production.recordCount) > Number(local.recordCount) ? "freshness" : "scope";
+  }
   return "unexplained";
+}
+
+function componentMismatches(productionComponents, localComponents) {
+  const productionById = new Map(productionComponents.map((component) => [canonicalId(component.id), component]));
+  const localById = new Map(localComponents.map((component) => [canonicalId(component.id), component]));
+  const ids = [...new Set([...productionById.keys(), ...localById.keys()])].sort();
+  return ids.flatMap((id) => {
+    const production = productionById.get(id);
+    const local = localById.get(id);
+    const productionCount = production?.recordCount ?? null;
+    const localCount = local?.recordCount ?? null;
+    if (productionCount === localCount) return [];
+    return [{
+      id,
+      productionCount,
+      localCount,
+      delta: productionCount !== null && localCount !== null ? productionCount - localCount : null,
+      status: production && local ? "count-mismatch" : production ? "local-component-missing" : "production-component-missing",
+    }];
+  });
 }
 
 function rowFor(production, local, localSources) {
   const id = canonicalId(production?.id ?? local?.id);
   const children = production ? localChildren(localSources, id) : [];
   const localParts = local ? [local, ...children] : children;
+  const productionComponents = production?.components ?? [];
+  const localComponents = localParts.filter((source) => canonicalId(source.id) !== id).map((source) => ({
+    id: canonicalId(source.id),
+    recordCount: Number(source.recordCount ?? 0),
+    categories: sourceCategories(source.id),
+  }));
   const categories = categoriesForSources(localParts.length ? localParts : production ? [production] : []);
   return {
     id,
-    classification: classification({ production, local, children }),
+    classification: classification({ id, production, local, children }),
+    scopeReason: EXPLICIT_SCOPE_HINTS[id] ?? null,
     productionCount: production?.recordCount ?? null,
     localCount: local?.recordCount ?? null,
     localCatalogCount: local?.catalogRecordCount ?? null,
@@ -86,11 +125,9 @@ function rowFor(production, local, localSources) {
       && local?.healthRecordCount !== undefined
       && Number(local.healthRecordCount) !== Number(local.recordCount),
     localCategories: categories,
-    localComponents: localParts.filter((source) => canonicalId(source.id) !== id).map((source) => ({
-      id: canonicalId(source.id),
-      recordCount: Number(source.recordCount ?? 0),
-      categories: sourceCategories(source.id),
-    })),
+    productionComponents,
+    localComponents,
+    componentMismatches: componentMismatches(productionComponents, localComponents),
   };
 }
 
@@ -126,6 +163,17 @@ export function productionSourcesPayload(payload) {
     status: source.status ?? null,
     lastUpdated: source.lastUpdated ?? source.generatedAt ?? null,
     foundPeriods: Array.isArray(source.foundPeriods) ? source.foundPeriods : [],
+    components: Array.isArray(source.components) ? source.components.map((component) => ({
+      id: canonicalId(
+        component.sourceId && canonicalId(component.sourceId) !== canonicalId(source.id)
+          ? component.sourceId
+          : component.id,
+      ),
+      sourceId: canonicalId(component.sourceId ?? component.id),
+      label: component.label ?? null,
+      recordCount: Number(component.recordCount ?? 0),
+      includedInRecordCount: component.includedInRecordCount !== false,
+    })) : [],
   }));
 }
 

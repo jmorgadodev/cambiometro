@@ -4,10 +4,10 @@ import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { writeChunkedJson } from "./static-site-data.mjs";
-import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
+import { buildTransferenciasStatic, hasFullTransferSource } from "./build-transferencias-static.mjs";
 import { chunkJsonRows, listUnavailableMunicipalities } from "./static-payroll.mjs";
 import { readExpenseSubset } from "./expense-release.mjs";
-import { normalizeMovementPayload, validateMovementPayload } from "./movimientos-pipeline.mjs";
+import { normalizeMovementPayload, sha256, validateMovementPayload } from "./movimientos-pipeline.mjs";
 import { buildCpltAggregateSummary, isPlausiblePeriod } from "./cplt-transparency-summary.mjs";
 
 const root = fileURLToPath(new URL("../", import.meta.url));
@@ -59,18 +59,41 @@ await mkdir(publicDataDir, { recursive: true });
 const movimientosSourceContent = await readFile(join(root, "data", "movimientos.json"), "utf8");
 const movimientosSourcePayload = JSON.parse(movimientosSourceContent);
 const movimientosPayload = normalizeMovementPayload(movimientosSourcePayload);
-if (!Array.isArray(movimientosPayload.movimientos) || movimientosPayload.movimientos.length < 79) {
+const sourceMovimientosChecksum = movimientosPayload.checksum_sha256 ?? null;
+const movimientosScopePolicy = JSON.parse(await readFile(join(root, "data", "movimientos-scope-policy.json"), "utf8"));
+const movimientosPublicationBlocked = !["validated", "validated_reference", "validated_reconciled"].includes(movimientosScopePolicy.status);
+if (!movimientosPublicationBlocked && (!Array.isArray(movimientosPayload.movimientos) || movimientosPayload.movimientos.length < 46)) {
   throw new Error("STATIC_MOVIMIENTOS_RELEASE_INCOMPLETE");
 }
-if (!allowSample) validateMovementPayload(movimientosPayload);
-const movimientosContent = `${JSON.stringify(movimientosPayload, null, 2)}\n`;
+if (!allowSample && !movimientosPublicationBlocked) validateMovementPayload(movimientosPayload);
+const publicMovimientosPayload = movimientosPublicationBlocked
+  ? {
+      ...movimientosPayload,
+      movimientos: [],
+      source_health: [],
+      signals: [],
+      conectores: {},
+      last_run: null,
+      last_attempt_at: null,
+      last_success_at: null,
+      last_event_date: null,
+      stats: { ...(movimientosPayload.stats ?? {}), total_movimientos: 0, verificados: 0, en_confirmacion: 0 },
+      release_status: "blocked_pending_official_reconciliation",
+      release_scope: movimientosScopePolicy.scopeId,
+    }
+  : movimientosPayload;
+if (movimientosPublicationBlocked) {
+  publicMovimientosPayload.checksum_sha256 = sha256({ ...publicMovimientosPayload, checksum_sha256: undefined });
+}
+const movimientosContent = `${JSON.stringify(publicMovimientosPayload, null, 2)}\n`;
 await writeFile(join(publicDataDir, "movimientos.json"), movimientosContent);
 const movimientosRelease = {
-  count: movimientosPayload.movimientos.length,
+  count: publicMovimientosPayload.movimientos.length,
   checksumSha256: crypto.createHash("sha256").update(movimientosContent).digest("hex"),
-  pipelineChecksumSha256: movimientosPayload.checksum_sha256 ?? null,
+  pipelineChecksumSha256: sourceMovimientosChecksum,
   lastSuccessAt: movimientosPayload.last_success_at ?? movimientosPayload.last_run ?? null,
   lastEventDate: movimientosPayload.last_event_date ?? null,
+  status: movimientosPublicationBlocked ? "blocked_pending_official_reconciliation" : "published",
 };
 
 // Publicar el universo completo de rendiciones operacionales en chunks. Las
@@ -129,10 +152,6 @@ const expenseManifest = {
 };
 await writeFile(join(expenseDir, "manifest.json"), `${JSON.stringify(expenseManifest, null, 2)}\n`);
 
-const fullSource = join(root, "data", "lake", "partitions", "ley-19862");
-if (!existsSync(fullSource) && !allowSample) {
-  throw new Error("STATIC_DATA_FULL_TRANSFER_SOURCE_MISSING: hydrate the complete Ley 19.862 lake before building Pages");
-}
 const pinnedSummary = await readJson("data/lake/projections/v1/ley19862-summary.json");
 const registeredThrough = process.env.TRANSFER_RELEASE_REGISTERED_THROUGH
   ?? process.env.LEY_19862_REGISTERED_THROUGH
@@ -148,9 +167,14 @@ const canonicalManifestFile = process.env.TRANSFER_STATIC_CANONICAL_MANIFEST_FIL
 const canonicalManifest = canonicalManifestFile && existsSync(canonicalManifestFile)
   ? JSON.parse(readFileSync(canonicalManifestFile, "utf8"))
   : null;
+const fullSource = join(root, "data", "lake", "partitions", "ley-19862");
+const fullSourceAvailable = hasFullTransferSource(fullSource);
+if (!fullSourceAvailable && !canonicalManifest && !allowSample) {
+  throw new Error("STATIC_DATA_FULL_TRANSFER_SOURCE_MISSING: hydrate the complete Ley 19.862 lake or the canonical paginated release before building Pages");
+}
 const fullRelease = canonicalManifest
   ? { manifest: canonicalManifest, summary: JSON.parse(readFileSync(join(transferDir, "summary.json"), "utf8")) }
-  : existsSync(fullSource)
+  : fullSourceAvailable
     ? await buildTransferenciasStatic({ source: fullSource, output: transferDir, registeredThrough })
     : null;
 if (!fullRelease && !allowSample) throw new Error("STATIC_DATA_FULL_TRANSFER_RELEASE_EMPTY");

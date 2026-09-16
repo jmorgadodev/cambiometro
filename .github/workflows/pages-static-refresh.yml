@@ -183,7 +183,6 @@ jobs:
             transparencia-app/data/lake-cplt
             transparencia-app/data/politicos-votaciones.json
             transparencia-app/data/personal-apoyo.json
-            transparencia-app/data/movimientos.json
             transparencia-app/data/municipalidades-data.json
             transparencia-app/data/municipalidades-list.json
             transparencia-app/public/data/transferencias
@@ -221,15 +220,21 @@ jobs:
         run: npm run data:hydrate:static -- --required --required-all
 
       - name: Rehidratar Movimientos desde el release vigente de R2
-        # La caché de Pages puede ser válida para los datasets pesados y, a la
-        # vez, contener un snapshot de Movimientos anterior. Este archivo es
-        # pequeño y debe seguir siempre el checksum que acaba de publicar el
-        # ETL, sin invalidar ni volver a descargar el resto del data lake.
+        # Movimientos tiene un release de referencia reconciliado que debe
+        # viajar con el commit cuando la política está en un release reconciliado.
+        # En ese caso no se permite que un artefacto histórico de R2 lo
+        # sobrescriba. Para los releases normales se conserva la hidratación
+        # desde R2.
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
-        run: npm run data:hydrate:static -- --required --required-files data/movimientos.json --only-files data/movimientos.json --force
+        run: |
+          if node -e 'const fs=require("fs"); const p=JSON.parse(fs.readFileSync("data/movimientos.json")); const policy=JSON.parse(fs.readFileSync("data/movimientos-scope-policy.json")); process.exit(["validated_reference","validated_reconciled"].includes(policy.status) && /^kast-2026-(exits-46|succession-reconciled)-/.test(p.release_id || "") ? 0 : 1);'; then
+            echo "Usando el release reconciliado de Movimientos del commit; se omite la hidratación histórica de R2."
+          else
+            npm run data:hydrate:static -- --required --required-files data/movimientos.json --only-files data/movimientos.json --force
+          fi
 
       - name: Rehidratar remuneraciones 38 bis desde el release vigente de R2
         # Este ETL publica una proyección propia, fuera del snapshot estático
@@ -268,8 +273,16 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: |
-          npm run data:hydrate:ley19862
-          npm run data:lake:projection:ley19862
+          # El release paginado canónico ya se descargó y validó antes de
+          # este paso. El lago histórico particionado puede estar archivado
+          # en R2; su ausencia no significa que falten transferencias
+          # públicas y no debe bloquear Pages.
+          if test -s .ci-data-version/transfer-api-manifest.json; then
+            echo "Usando el release canónico paginado de transferencias; se omite el lago histórico archivado."
+          else
+            npm run data:hydrate:ley19862
+            npm run data:lake:projection:ley19862
+          fi
 
       - name: Regenerar salud de fuentes desde el snapshot publicado
         working-directory: transparencia-app
@@ -324,7 +337,6 @@ jobs:
             transparencia-app/data/lake-cplt
             transparencia-app/data/politicos-votaciones.json
             transparencia-app/data/personal-apoyo.json
-            transparencia-app/data/movimientos.json
             transparencia-app/data/municipalidades-data.json
             transparencia-app/data/municipalidades-list.json
             transparencia-app/public/data/transferencias

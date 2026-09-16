@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { mergeLocalHealth, reconcileSourceSnapshots, sourceCategories } from "./source-reconciliation.mjs";
+import { mergeLocalHealth, productionSourcesPayload, reconcileSourceSnapshots, sourceCategories } from "./source-reconciliation.mjs";
 
 describe("auditoría de reconciliación producción/R2/local", () => {
   it("clasifica como frescura una producción más nueva sin llamarlo pérdida", () => {
@@ -33,6 +33,96 @@ describe("auditoría de reconciliación producción/R2/local", () => {
     });
 
     expect(report.rows[0].classification).toBe("unexplained");
+  });
+
+  it("no llama frescura a un release más nuevo que trae menos filas", () => {
+    const report = reconcileSourceSnapshots({
+      production: [{ id: "senado", recordCount: 1_428, lastUpdated: "2026-09-15T00:00:00Z", status: "partial" }] as never,
+      local: [{ id: "senado", recordCount: 8_138, generatedAt: "2026-08-21T00:00:00Z", status: "partial" }] as never,
+    });
+
+    expect(report.rows[0]).toMatchObject({ classification: "scope", productionCount: 1_428, localCount: 8_138 });
+  });
+
+  it("clasifica ChileCompra como alcance cuando local conserva histórico y producción un corte", () => {
+    const report = reconcileSourceSnapshots({
+      production: [{ id: "chilecompra", recordCount: 74_142, lastUpdated: "2026-08-21", status: "partial" }] as never,
+      local: [{ id: "chilecompra", recordCount: 888_693, generatedAt: "2026-08-21", status: "partial" }] as never,
+    });
+
+    expect(report.rows[0]).toMatchObject({ classification: "scope", scopeReason: expect.stringContaining("histórico") });
+  });
+
+  it("clasifica DIPRES como alcance cuando local cuenta entidades y producción filas presupuestarias", () => {
+    const report = reconcileSourceSnapshots({
+      production: [{ id: "dipres", recordCount: 247_287, lastUpdated: "2026-08-21", status: "partial" }] as never,
+      local: [{ id: "dipres", recordCount: 476, generatedAt: "2026-08-21", status: "partial" }] as never,
+    });
+
+    expect(report.rows[0]).toMatchObject({ classification: "scope", scopeReason: expect.stringContaining("entidades") });
+  });
+
+  it("no llama coincidencia a fuentes con alcance explícitamente distinto aunque el conteo coincida", () => {
+    const report = reconcileSourceSnapshots({
+      production: [{ id: "chilecompra", recordCount: 74_142, lastUpdated: "2026-08-21", status: "partial" }] as never,
+      local: [{ id: "chilecompra", recordCount: 74_142, generatedAt: "2026-08-21", status: "partial" }] as never,
+    });
+
+    expect(report.rows[0]).toMatchObject({ classification: "scope", scopeReason: expect.stringContaining("histórico") });
+  });
+
+  it("expone la diferencia entre componentes productivos y locales", () => {
+    const production = productionSourcesPayload({
+      data: [{
+        id: "senado",
+        recordCount: 1_428,
+        status: "partial",
+        components: [
+          { id: "gastos", sourceId: "gastos_senado", label: "Gastos operacionales", recordCount: 6_520, includedInRecordCount: false },
+          { id: "votaciones", sourceId: "votaciones_senado", label: "Votaciones", recordCount: 218, includedInRecordCount: false },
+        ],
+      }],
+    }) as never;
+    const report = reconcileSourceSnapshots({
+      production,
+      local: [
+        { id: "senado", recordCount: 1_428, generatedAt: "2026-09-15", status: "partial" },
+        { id: "gastos_senado", recordCount: 6_517, generatedAt: "2026-09-15", status: "partial" },
+        { id: "votaciones_senado", recordCount: 194, generatedAt: "2026-09-15", status: "partial" },
+      ] as never,
+    });
+
+    expect(report.rows.find((row) => row.id === "senado")).toMatchObject({
+      productionComponents: expect.arrayContaining([
+        expect.objectContaining({ id: "gastos_senado", recordCount: 6_520 }),
+      ]),
+      componentMismatches: expect.arrayContaining([
+        expect.objectContaining({ id: "gastos_senado", productionCount: 6_520, localCount: 6_517, delta: 3 }),
+      ]),
+    });
+  });
+
+  it("no colapsa componentes de Cámara cuyo sourceId coincide con el padre", () => {
+    const production = productionSourcesPayload({
+      data: [{
+        id: "camara",
+        recordCount: 58_751,
+        components: [
+          { id: "asistencia", sourceId: "camara", recordCount: 54_538 },
+          { id: "votaciones", sourceId: "camara", recordCount: 4_058 },
+          { id: "autoridades", sourceId: "camara", recordCount: 155 },
+          { id: "gastos", sourceId: "gastos_camara", recordCount: 16_275, includedInRecordCount: false },
+        ],
+      }],
+    });
+
+    const components = production[0].components as Array<{ id: string }>;
+    expect(components.map((component) => component.id)).toEqual([
+      "asistencia",
+      "votaciones",
+      "autoridades",
+      "gastos_camara",
+    ]);
   });
 
   it("separa categorías parlamentarias sin sumar categorías distintas", () => {

@@ -48,23 +48,38 @@ export interface Ley19862Summary {
   transfers_sample: TransferenciaDetalle[];
 }
 
+/**
+ * Chooses the richest local summary without allowing a compact sample to
+ * shadow an already available full lake summary. A newer full projection with
+ * more rows still wins, while ties prefer the summary with derived rankings.
+ */
+export function selectBestTransferSummary(candidates: Ley19862Summary[]): Ley19862Summary | null {
+  return candidates
+    .filter((candidate) => Number(candidate.kpis?.total_transfers ?? 0) > 0)
+    .sort((left, right) => {
+      const rows = Number(right.kpis.total_transfers) - Number(left.kpis.total_transfers);
+      if (rows !== 0) return rows;
+      const leftDetail = (left.top_receptores?.length ?? 0) + (left.top_emisores?.length ?? 0);
+      const rightDetail = (right.top_receptores?.length ?? 0) + (right.top_emisores?.length ?? 0);
+      return rightDetail - leftDetail;
+    })[0] ?? null;
+}
+
 export function getLey19862Summary(): Ley19862Summary {
+  const candidates: Ley19862Summary[] = [];
   for (const candidate of [
     join(process.cwd(), "data", "generated", "transferencias", "summary.json"),
     join(process.cwd(), "data", "lake", "projections", "v1", "ley19862-summary.json"),
   ]) {
     try {
-      const parsed = JSON.parse(readFileSync(candidate, "utf8")) as Ley19862Summary;
-      // The generated projection intentionally keeps only a compact sample;
-      // its KPIs still describe the complete static release. Prefer it over
-      // the older pinned snapshot whenever it has a valid full-row count.
-      if (candidate.includes(`${join("data", "generated")}${process.platform === "win32" ? "\\" : "/"}`) && parsed.kpis?.total_transfers > 0) return parsed;
-      if (candidate.endsWith("ley19862-summary.json")) return parsed;
+    const parsed = JSON.parse(readFileSync(candidate, "utf8")) as Ley19862Summary;
+      candidates.push(parsed);
     } catch {
-      // The generated compact projection is the production path; the source
-      // projection keeps local tests and development useful before prebuild.
+      // Another release candidate may still be available locally.
     }
   }
+  const selected = selectBestTransferSummary(candidates);
+  if (selected) return selected;
   {
     return {
       generatedAt: "",

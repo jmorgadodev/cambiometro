@@ -263,6 +263,25 @@ async function verifyProdFull() {
     assertCheck("GASTOS", `Worker ${source} responde con filas`, expenseRes.status === 200 && Number(expenseJson?.meta?.total) > 0, `total: ${expenseJson?.meta?.total ?? "n/a"}`);
   }
 
+  for (const [source, params, period] of [
+    ["gastos_senado", "kind=expense", "2026-01"],
+    ["votaciones_senado", "kind=vote", "2026-03"],
+  ]) {
+    const scopedRes = await fetchWithResponseRetry(`${API_URL}/api/v1/records?source=${source}&${params}&period=${period}&limit=3`, { headers });
+    const scopedJson = scopedRes.ok ? await scopedRes.json().catch(() => null) : null;
+    const rows = Array.isArray(scopedJson?.data) ? scopedJson.data : [];
+    const rowPeriods = rows.map((row) => String(row?.period?.periodo ?? row?.period?.label ?? row?.data?.periodo ?? row?.data?.period ?? row?.occurredAt ?? "").slice(0, 7));
+    assertCheck(
+      "GASTOS/VOTACIONES",
+      `${source} respeta el filtro period=${period}`,
+      scopedRes.status === 200 &&
+        Number.isFinite(Number(scopedJson?.meta?.total)) &&
+        Number(scopedJson?.meta?.total) >= 0 &&
+        (rows.length === 0 || rowPeriods.every((value) => value === period)),
+      JSON.stringify({ status: scopedRes.status, total: scopedJson?.meta?.total ?? null, rowPeriods }),
+    );
+  }
+
   const maipuRes = await fetch(`${PROD_URL}/municipalidades/muni-maipu`, { redirect: "manual", headers });
   assertCheck(
     "INVARIANTES",
@@ -311,11 +330,12 @@ async function verifyProdFull() {
   assertCheck("MOVIMIENTOS", "Snapshot estático HTTP 200", movimientosSnapshotRes.status === 200);
   const movimientosSnapshot = movimientosSnapshotRes.ok ? await movimientosSnapshotRes.json().catch(() => null) : null;
   assertCheck("MOVIMIENTOS", "Pipeline identificado", movimientosSnapshot?.pipeline === "etl_movimientos_autoridades");
-  assertCheck("MOVIMIENTOS", "Universo histórico preservado (>=79)", Number(movimientosSnapshot?.movimientos?.length ?? 0) >= 79, `total: ${movimientosSnapshot?.movimientos?.length ?? "n/a"}`);
+  const movimientosBlocked = movimientosSnapshot?.release_status === "blocked_pending_official_reconciliation";
+  assertCheck("MOVIMIENTOS", movimientosBlocked ? "Asset público bloqueado durante revisión" : "Corte reconciliado preservado (>=46)", movimientosBlocked ? Number(movimientosSnapshot?.movimientos?.length ?? 0) === 0 : Number(movimientosSnapshot?.movimientos?.length ?? 0) >= 46, `total: ${movimientosSnapshot?.movimientos?.length ?? "n/a"}`);
   assertCheck("MOVIMIENTOS", "Checksum SHA-256 presente", /^[a-f0-9]{64}$/i.test(movimientosSnapshot?.checksum_sha256 || ""));
-  assertCheck("MOVIMIENTOS", "Última ejecución exitosa presente", Number.isFinite(Date.parse(movimientosSnapshot?.last_success_at || movimientosSnapshot?.last_run || "")));
-  assertCheck("MOVIMIENTOS", "Fuente oficial disponible", movimientosSnapshot?.source_health?.some((source) => source.tier === "official" && source.ok === true));
-  assertCheck("MOVIMIENTOS", "Estado en_confirmacion preservado", movimientosSnapshot?.movimientos?.some((movement) => movement.estado === "en_confirmacion"));
+  assertCheck("MOVIMIENTOS", "Última ejecución exitosa presente", movimientosBlocked || Number.isFinite(Date.parse(movimientosSnapshot?.last_success_at || movimientosSnapshot?.last_run || "")));
+  assertCheck("MOVIMIENTOS", "Fuente pública disponible", movimientosBlocked || movimientosSnapshot?.source_health?.some((source) => source.ok === true));
+  assertCheck("MOVIMIENTOS", "Estados de respaldo preservados", movimientosBlocked || movimientosSnapshot?.movimientos?.some((movement) => ["verificado", "corroborado", "en_confirmacion"].includes(movement.estado)));
 
   // ─── MÓDULO 4: /TRANSFERENCIAS ─────────────────────────────────────────────
   console.log("\n4. MÓDULO TRANSFERENCIAS LEY 19.862 (/transferencias)");

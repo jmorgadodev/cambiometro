@@ -1,0 +1,16 @@
+{
+  "scopeId": "kast-2026-exits",
+  "status": "validated_reconciled",
+  "scopeStartDate": "2026-03-11",
+  "cutoffDate": "2026-09-14",
+  "targetCount": 46,
+  "targetCategories": {
+    "ministers": 3,
+    "subsecretaries": 6,
+    "seremis": 36,
+    "delegados": 1
+  },
+  "allowedEventTypes": ["renuncia", "remocion", "cambio-puesto", "nombramiento-fallido"],
+  "evidenceRequirement": "public-press-or-primary-record-with-explicit-status",
+  "notes": "Corte público de 46 salidas hasta el 14-09-2026. Las filas conservan fuentes públicas visibles; el estado distingue documento oficial, corroboración periodística y falta de información. No se usa un agregador de seguimiento como fuente."
+}

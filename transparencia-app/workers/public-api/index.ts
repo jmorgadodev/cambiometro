@@ -90,10 +90,11 @@ function dbUnavailable() {
   return failure("DATABASE_UNAVAILABLE", "D1 no esta disponible.", 503, undefined);
 }
 
-const sourceComponentDefinitions: Record<string, Record<string, { sourceId: string; label: string; includedInRecordCount: boolean }>> = {
+const sourceComponentDefinitions: Record<string, Record<string, { sourceId: string; label: string; includedInRecordCount: boolean; variant?: string }>> = {
   camara: {
-    asistencia: { sourceId: "camara", label: "Asistencia", includedInRecordCount: true },
-    votaciones: { sourceId: "camara", label: "Votaciones", includedInRecordCount: true },
+    asistencia: { sourceId: "camara", variant: "asistencia_camara", label: "Asistencia", includedInRecordCount: true },
+    votaciones: { sourceId: "camara", variant: "votaciones_camara", label: "Votaciones", includedInRecordCount: true },
+    autoridades: { sourceId: "camara", variant: "congreso_opendata", label: "Autoridades vigentes", includedInRecordCount: true },
     gastos: { sourceId: "gastos_camara", label: "Gastos operacionales", includedInRecordCount: false },
   },
   senado: {
@@ -102,13 +103,20 @@ const sourceComponentDefinitions: Record<string, Record<string, { sourceId: stri
   },
 };
 
-function publicSourceComponents(sourceId: string, state: JsonRecord) {
+function publicSourceComponents(sourceId: string, state: JsonRecord, lakePartitionsBySource: Map<string, JsonRecord[]>) {
   const definitions = sourceComponentDefinitions[sourceId];
   const rawComponents = state.components;
   if (!definitions || !rawComponents || typeof rawComponents !== "object" || Array.isArray(rawComponents)) return undefined;
   const components = rawComponents as JsonRecord;
   return Object.entries(definitions).map(([id, definition]) => {
-    const count = Number(components[id] ?? 0);
+    const publishedPartitions = lakePartitionsBySource.get(definition.sourceId) ?? [];
+    const matchingPartitions = definition.variant
+      ? publishedPartitions.filter((partition) => String(partition.variant ?? "") === definition.variant)
+      : publishedPartitions;
+    const publishedCount = matchingPartitions.length > 0
+      ? matchingPartitions.reduce((total, partition) => total + Number(partition.recordCount ?? 0), 0)
+      : null;
+    const count = publishedCount ?? Number(components[id] ?? 0);
     return {
       id,
       sourceId: definition.sourceId,
@@ -553,6 +561,8 @@ function normalized(value: unknown) {
   return String(value ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL").trim();
 }
 
+const OFFICIAL_SEARCH_STOPWORDS = new Set(["a", "al", "con", "de", "del", "el", "en", "la", "las", "los", "por", "sin", "y"]);
+
 function politicoSlug(value: unknown) {
   return normalized(value).replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
@@ -828,7 +838,10 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
     let page = Number.isInteger(requestedPage) ? Math.max(1, Math.min(requestedPage, totalPages)) : 1;
     let rows: JsonRecord[] = [];
     if (query) {
-      const queryTokens = [...new Set(query.split(/\s+/).map((value) => value.replace(/[^a-z0-9]/gi, "")).filter((value) => value.length >= 2))];
+      const queryTokens = [...new Set(query.split(/\s+/)
+        .map((value) => value.replace(/[^a-z0-9]/gi, ""))
+        .filter((value) => value.length >= 2 && !OFFICIAL_SEARCH_STOPWORDS.has(value)))];
+      if (queryTokens.length === 0) return failure("INVALID_QUERY", "Ingresa un nombre, cargo u organismo más específico.", 400);
       const tokenPositionLists = await Promise.all(queryTokens.map(async (token) => {
         const prefix = token.slice(0, 2);
         const shardValue = index.shards?.[prefix];
@@ -949,41 +962,114 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
 async function listAllFuncionariosFromR2(requestUrl: URL, env: Env) {
   const requestedLimit = Number(requestUrl.searchParams.get("limit") ?? 20);
   const limit = Number.isInteger(requestedLimit) ? Math.max(1, Math.min(requestedLimit, 100)) : 20;
-  const combinedLimit = Math.min(100, Math.max(limit, limit * 2));
-  const scopedUrl = new URL(requestUrl);
-  scopedUrl.searchParams.set("limit", String(combinedLimit));
-  const [municipal, central] = await Promise.all([
-    listFuncionariosFromR2(scopedUrl, env, "funcionarios-v1"),
-    listFuncionariosFromR2(scopedUrl, env, "funcionarios-central-v1"),
-  ]);
-  const usable = [municipal, central].filter((response) => response.status < 500);
-  if (usable.length === 0) return municipal;
-  if (usable.length === 1) return usable[0];
+  const requestedPageRaw = Number(requestUrl.searchParams.get("page") ?? 1);
+  const requestedPage = Number.isInteger(requestedPageRaw) ? Math.max(1, requestedPageRaw) : 1;
+  const headUrl = new URL(requestUrl);
+  headUrl.searchParams.set("page", "1");
+  headUrl.searchParams.set("limit", "1");
+  // Las dos nóminas tienen índices grandes. Consultarlas secuencialmente
+  // evita duplicar la descompresión y las lecturas R2 dentro del Worker. El
+  // encabezado de cada fuente permite paginar el universo combinado sin
+  // devolver varias veces el límite solicitado ni perder filas entre páginas.
+  const sourceResponses = [
+    { name: "municipal", root: "funcionarios-v1", response: await listFuncionariosFromR2(headUrl, env, "funcionarios-v1") },
+    { name: "central", root: "funcionarios-central-v1", response: await listFuncionariosFromR2(headUrl, env, "funcionarios-central-v1") },
+  ];
+  const usable = sourceResponses.filter(({ response }) => response.status < 500);
+  if (usable.length === 0) return sourceResponses[0].response;
 
-  const payloads = await Promise.all(usable.map(async (response) => await response.json() as JsonRecord));
-  const rows = payloads.flatMap((payload) => Array.isArray(payload.data) ? payload.data as JsonRecord[] : []);
+  const payloads = await Promise.all(usable.map(async ({ response }) => await response.clone().json() as JsonRecord));
+  const sourceTotals = new Map(usable.map(({ name }, index) => [name, Number((payloads[index].meta as JsonRecord | undefined)?.total ?? 0)]));
+  const total = [...sourceTotals.values()].reduce((sum, value) => sum + (Number.isFinite(value) ? value : 0), 0);
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const page = Math.min(requestedPage, totalPages);
+  const start = (page - 1) * limit;
+  const end = Math.min(start + limit, total);
+  const rows: JsonRecord[] = [];
+
+  async function appendSourceSegment(source: { name: string; root: string }, sourceStart: number, sourceEnd: number) {
+    if (sourceStart >= sourceEnd) return;
+    const sourceUrl = new URL(requestUrl);
+    sourceUrl.searchParams.set("page", String(Math.floor(sourceStart / limit) + 1));
+    sourceUrl.searchParams.set("limit", String(limit));
+    const response = await listFuncionariosFromR2(sourceUrl, env, source.root);
+    if (response.status >= 500) return;
+    const payload = await response.json() as JsonRecord;
+    const sourceRows = Array.isArray(payload.data) ? payload.data as JsonRecord[] : [];
+    const localOffset = sourceStart % limit;
+    rows.push(...sourceRows
+      .slice(localOffset, localOffset + (sourceEnd - sourceStart))
+      .map((row) => ({ ...row, sourceScope: source.name })));
+  }
+
+  // El contrato combinado es determinista: primero municipal y luego central.
+  // Así cada registro pertenece exactamente a una página y no se descarta la
+  // mitad de una fuente al mezclar dos páginas independientes.
+  const municipalTotal = sourceTotals.get("municipal") ?? 0;
+  const municipalSource = usable.find((source) => source.name === "municipal");
+  const centralSource = usable.find((source) => source.name === "central");
+  if (municipalSource) {
+    const municipalStart = Math.min(start, municipalTotal);
+    const municipalEnd = Math.min(end, municipalTotal);
+    await appendSourceSegment(municipalSource, municipalStart, municipalEnd);
+  }
+  if (centralSource) {
+    const centralStart = Math.max(0, start - municipalTotal);
+    const centralEnd = Math.max(0, end - municipalTotal);
+    await appendSourceSegment(centralSource, centralStart, centralEnd);
+  }
+
   const unique = new Map<string, JsonRecord>();
   for (const row of rows) {
     const id = String(row.id ?? "");
     if (id && !unique.has(id)) unique.set(id, row);
   }
-  const data = [...unique.values()].sort((left, right) => {
-    const byName = normalized(left.nombre_completo).localeCompare(normalized(right.nombre_completo), "es");
-    return byName || String(left.id ?? "").localeCompare(String(right.id ?? ""));
-  });
-  const totals = payloads.map((payload) => Number((payload.meta as JsonRecord | undefined)?.total ?? 0));
-  const total = totals.reduce((sum, value) => sum + (Number.isFinite(value) ? value : 0), 0);
+  const combinedRows = [...unique.values()];
+  const combinedQuality = payloads.reduce<JsonRecord>((quality, payload) => {
+    const sourceQuality = (payload.meta as JsonRecord | undefined)?.calidadDatos as JsonRecord | undefined;
+    if (!sourceQuality) return quality;
+    const sourceIssues = sourceQuality.porIncidencia as Record<string, unknown> | undefined;
+    const byIssue = (quality.porIncidencia as Record<string, number> | undefined) ?? {};
+    for (const [issue, value] of Object.entries(sourceIssues ?? {})) {
+      const count = Number(value);
+      if (Number.isFinite(count)) byIssue[issue] = (byIssue[issue] ?? 0) + count;
+    }
+    quality.porIncidencia = byIssue;
+    const recordsWithIssues = Number(sourceQuality.registrosConIncidencias ?? 0);
+    if (Number.isFinite(recordsWithIssues)) {
+      quality.registrosConIncidencias = Number(quality.registrosConIncidencias ?? 0) + recordsWithIssues;
+    }
+    if (!quality.metodologia && typeof sourceQuality.metodologia === "string") quality.metodologia = sourceQuality.metodologia;
+    return quality;
+  }, { porIncidencia: {} });
+  combinedQuality.alcance = usable.length === sourceResponses.length ? "universo_publicado" : "universo_publicado_parcial";
+  const withoutPayment = combinedRows.filter((row) => officialSalary(row) <= 0);
+  const microAmount = combinedRows.filter((row) => officialSalary(row) > 0 && officialSalary(row) < 50_000);
+  const completeSalary = combinedRows.filter((row) => officialSalary(row) >= 50_000);
+  const validSalary = completeSalary.reduce((sum, row) => sum + officialSalary(row), 0);
+  const combinedStats = {
+    totalMuni: combinedRows.length,
+    totalValidos: completeSalary.length,
+    promedioSueldo: completeSalary.length ? Math.round(validSalary / completeSalary.length) : 0,
+    conHorasExtras: completeSalary.filter((row) => Number(row.horas_extras_mes_anterior ?? 0) > 0).length,
+    observadosCount: withoutPayment.length + microAmount.length,
+    sinPagoCount: withoutPayment.length,
+    microMontoCount: microAmount.length,
+  };
   const firstMeta = (payloads[0].meta as JsonRecord | undefined) ?? {};
   return json({
-    data,
+    data: combinedRows,
     meta: {
       ...firstMeta,
+      calidadDatos: combinedQuality,
+      stats: combinedStats,
       total,
       totalHeadcount: total,
-      limit: combinedLimit,
-      totalPages: Math.max(1, Math.ceil(total / combinedLimit)),
-      sourceStatus: "r2-search-combined",
-      sources: ["municipal", "central"],
+      page,
+      limit,
+      totalPages,
+      sourceStatus: usable.length === sourceResponses.length ? "r2-search-combined" : "r2-search-partial",
+      sources: usable.map(({ name }) => name),
     },
     links: { self: requestUrl.toString() },
   }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
@@ -1141,16 +1227,18 @@ async function listExpensesFromR2(requestUrl: URL, env: Env): Promise<Response |
   if (subsets.some((subset) => !subset || !Array.isArray(subset.records))) return null;
 
   const query = normalized(requestUrl.searchParams.get("q") ?? requestUrl.searchParams.get("query"));
+  const period = requestUrl.searchParams.get("period")?.trim() ?? requestUrl.searchParams.get("periodo")?.trim() ?? "";
   const from = requestUrl.searchParams.get("from")?.trim() ?? "";
   const to = requestUrl.searchParams.get("to")?.trim() ?? "";
   const entityId = normalized(requestUrl.searchParams.get("entity_id"));
-  if (query.length > 80 || from.length > 32 || to.length > 32 || entityId.length > 160) {
+  if ((period && !/^\d{4}(?:-\d{2})?$/.test(period)) || query.length > 80 || from.length > 32 || to.length > 32 || entityId.length > 160) {
     return failure("INVALID_QUERY", "Parámetros de consulta inválidos.", 400);
   }
   const normalize = (value: unknown) => normalized(value);
   const rows = subsets.flatMap((subset) => subset!.records.map((row) => ({ row, sourceId: subset!.sourceId })));
   const filtered = rows
     .filter(({ row }) => !query || normalize(`${row.id} ${row.nombre} ${row.item} ${row.fuente}`).includes(query))
+    .filter(({ row }) => !period || row.periodo === period)
     .filter(({ row }) => !from || row.fecha >= from)
     .filter(({ row }) => !to || row.fecha <= to)
     .filter(({ row }) => !entityId || normalize(`${row.diputado_id ?? ""} ${row.nombre ?? ""}`).includes(entityId))
@@ -1241,13 +1329,34 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
   const requestedSource = requestUrl.searchParams.get("source")?.trim();
   if (!requestedSource) return null;
   const source = requestedSource === "votaciones_camara" ? "camara" : requestedSource;
+  // DIPRES publica presupuesto y ejecución agregados por partida, capítulo y
+  // programa. No es una nómina individual y no debe degradarse a una lista
+  // vacía cuando sus particiones históricas no están disponibles.
+  if (source === "dipres") {
+    return failure(
+      "AGGREGATE_SOURCE",
+      "DIPRES publica datos agregados de presupuesto y ejecución; no es un buscador de personas.",
+      422,
+      {
+        source: requestedSource,
+        sourceBackend: "r2-aggregate",
+        sourceStatus: "aggregate-only",
+        queryable: false,
+      },
+    );
+  }
   const requestedKind = requestUrl.searchParams.get("kind")?.trim();
   const isCamaraVoteAlias = requestedSource === "votaciones_camara";
   if (isCamaraVoteAlias && requestedKind && requestedKind !== "vote") {
     return failure("INVALID_QUERY", "La fuente de votaciones de Cámara sólo admite registros de tipo vote.", 400);
   }
   const effectiveKind = requestedKind ?? (isCamaraVoteAlias ? "vote" : undefined);
+  const requestedPeriod = requestUrl.searchParams.get("period")?.trim() ?? requestUrl.searchParams.get("periodo")?.trim() ?? "";
+  if (requestedPeriod && !/^\d{4}(?:-\d{2})?$/.test(requestedPeriod)) {
+    return failure("INVALID_QUERY", "El período debe tener formato AAAA o AAAA-MM.", 400);
+  }
   let rawRows: unknown[] = [];
+  const usesAuthoritativeMovementRelease = requestedSource === "movimientos";
 
   // The static-site projection is intentionally compact and is not the full
   // source record set. When D1 is unavailable, use the versioned lake
@@ -1255,15 +1364,17 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
   // helper applies filters and pagination before returning the response, so
   // the dataset is never embedded in the Worker bundle or sent to the client
   // in one response.
-  if (env.PUBLIC_DATA) {
+  if (env.PUBLIC_DATA && !usesAuthoritativeMovementRelease) {
     try {
       const offset = offsetFrom(requestUrl);
       const limit = limitFrom(requestUrl);
       const lake = await readR2EvidenceRecords(env.PUBLIC_DATA, {
         source,
+        variant: isCamaraVoteAlias ? "votaciones_camara" : undefined,
         query: requestUrl.searchParams.get("q")?.trim() ?? requestUrl.searchParams.get("query")?.trim() ?? undefined,
         entityId: requestUrl.searchParams.get("entity_id")?.trim() || undefined,
         kind: effectiveKind as never,
+        period: requestedPeriod || undefined,
         from: requestUrl.searchParams.get("from")?.trim() || undefined,
         to: requestUrl.searchParams.get("to")?.trim() || undefined,
         limit,
@@ -1333,6 +1444,7 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
   const filtered = rows
     .filter((row) => !kind || row.kind === kind)
     .filter((row) => !query || searchable(row).includes(query))
+    .filter((row) => !requestedPeriod || String(row.occurredAt ?? (row.data as JsonRecord)?.periodo ?? (row.data as JsonRecord)?.period ?? "").startsWith(requestedPeriod))
     .filter((row) => !from || String(row.occurredAt ?? "") >= from)
     .filter((row) => !to || String(row.occurredAt ?? "") <= to)
     .filter((row) => !entityId || normalized(JSON.stringify({ subjectEntityIds: row.subjectEntityIds, objectEntityIds: row.objectEntityIds, data: row.data })).includes(entityId))
@@ -1574,10 +1686,24 @@ async function searchFuncionariosFromR2(raw: string, env: Env) {
   requestUrl.searchParams.set("limit", "8");
   requestUrl.searchParams.set("include_zero", "true");
   try {
-    const response = await listFuncionariosFromR2(requestUrl, env);
-    if (!response || response.status >= 400) return [];
-    const payload = await response.json() as JsonRecord;
-    const rows = Array.isArray(payload.data) ? payload.data : [];
+    // La búsqueda de la Home debe consultar las dos nóminas publicadas. Para
+    // que una nómina municipal extensa no oculte una coincidencia central en
+    // la vista previa, se intercalan resultados de ambos índices y sólo se
+    // leen las primeras filas coincidentes de cada uno.
+    const municipal = await listFuncionariosFromR2(requestUrl, env, "funcionarios-v1");
+    const central = await listFuncionariosFromR2(requestUrl, env, "funcionarios-central-v1");
+    const payloads = [municipal, central]
+      .filter((response) => response.status < 400)
+      .map(async (response) => await response.json() as JsonRecord);
+    const sourceRows = await Promise.all(payloads);
+    const rows: JsonRecord[] = [];
+    const rowLists = sourceRows.map((payload) => Array.isArray(payload.data) ? payload.data as JsonRecord[] : []);
+    for (let index = 0; rows.length < 8 && index < 8; index += 1) {
+      for (const list of rowLists) {
+        if (list[index]) rows.push(list[index]);
+        if (rows.length >= 8) break;
+      }
+    }
     return rows.slice(0, 8).map((row) => ({
       id: String(row.id ?? ""),
       type: "funcionario" as const,
@@ -1968,6 +2094,7 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
     const lakePartitions = lakePartitionsBySource.get(id) ?? [];
     const lakeSource = lakeSourcesById.get(id) ?? {};
     const hasPublishedLake = lakePartitions.length > 0;
+    const aggregateOnly = id === "dipres";
     const recordCount = isTransferSource && currentTransferRelease
       ? currentTransferRelease.totalRows
       : hasPublishedLake
@@ -1976,7 +2103,7 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
     const stateStatus = hasPublishedLake
       ? String(lakeSource.status ?? "partial")
       : String(state.status ?? source.status ?? "unavailable");
-    const components = publicSourceComponents(id, state);
+    const components = publicSourceComponents(id, state, lakePartitionsBySource);
     return {
       ...source,
       id,
@@ -1989,7 +2116,12 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
       lastUpdated: isTransferSource && currentTransferRelease
         ? currentTransferRelease.generatedAt
         : state.lastSuccessAt ?? state.last_success_at ?? state.generatedAt ?? source.generatedAt ?? null,
-      statusDetail: stateStatus === "archive_only"
+      dataScope: aggregateOnly ? "aggregate" : "individual-or-event",
+      queryable: !aggregateOnly,
+      queryableCount: aggregateOnly ? 0 : recordCount,
+      statusDetail: aggregateOnly
+        ? "Datos agregados de presupuesto y ejecución; no corresponde a un buscador de personas."
+        : stateStatus === "archive_only"
         ? "Histórico íntegro en R2; se consulta bajo demanda."
         : hasPublishedLake && stateStatus === "partial"
           ? `El catálogo declara ${recordCount} registros, pero el release es parcial. La consulta sólo entrega particiones verificadas.`
@@ -2108,6 +2240,16 @@ export default {
         const expenseSource = url.searchParams.get("source")?.startsWith("gastos_");
         const expenseKind = url.searchParams.get("kind") === "expense";
         if (expenseSource || expenseKind) {
+          // El lake es la proyección canónica y puede contener más histórico
+          // que el subconjunto estático usado como respaldo de compatibilidad.
+          // Sólo usamos el subconjunto si el lake no tiene filas publicadas;
+          // de lo contrario, una consulta podía mostrar 2.500 gastos aunque
+          // el catálogo R2 declarara 6.517.
+          if (expenseSource) {
+            const lake = await listRecordsFromR2(url, env);
+            const lakePayload = lake ? await lake.clone().json().catch(() => null) as { meta?: JsonRecord } | null : null;
+            if (lake && lakePayload?.meta?.sourceBackend === "r2-lake" && Number(lakePayload.meta.publishedRows ?? 0) > 0) return lake;
+          }
           const r2 = await listExpensesFromR2(url, env);
           if (r2) return r2;
         }
@@ -2155,8 +2297,10 @@ export default {
       // gratuito de rows_read antes de llegar al release canónico. R2 es la
       // fuente pública; D1 sólo se habilita mediante ALLOW_PUBLIC_D1_READS=1.
       const requestedScope = normalized(url.searchParams.get("scope") ?? "");
-      if (requestedScope === "all" && !url.searchParams.get("muni") && !url.searchParams.get("organismo")
-        && (url.searchParams.get("query") ?? url.searchParams.get("q"))?.trim()) {
+      if (requestedScope === "all" && !url.searchParams.get("muni") && !url.searchParams.get("organismo")) {
+        // `scope=all` must include both published R2 projections even when the
+        // caller is listing without a text query. Returning the municipal
+        // projection alone makes the API silently lose the central universe.
         const combined = await listAllFuncionariosFromR2(url, env);
         if (combined.status < 500) return combined;
       }

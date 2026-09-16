@@ -115,6 +115,7 @@ function indexedRecordMatches(record: EvidenceRecord, params: {
   entityId?: string;
   recordIds?: string[];
   kind?: EvidenceRecord["kind"];
+  period?: string;
   from?: string;
   to?: string;
   query?: string;
@@ -123,6 +124,7 @@ function indexedRecordMatches(record: EvidenceRecord, params: {
   if (params.entityId && !record.subjectEntityIds.includes(params.entityId) && !record.objectEntityIds.includes(params.entityId)) return false;
   if (params.recordIds && !params.recordIds.includes(record.id)) return false;
   if (params.kind && record.kind !== params.kind) return false;
+  if (params.period && !date.startsWith(params.period)) return false;
   if (outsideDateRange(date, params.from, params.to)) return false;
   if (params.query) {
     const haystack = JSON.stringify({ id: record.id, title: record.title, description: record.description, data: record.data }).toLocaleLowerCase("es-CL");
@@ -152,7 +154,7 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
   const missingIndexedRows = Math.max(0, expectedTotal - manifest.totalRows);
   const offset = cursorOffset(params.cursor);
   const limit = Math.min(Math.max(params.limit, 1), 100);
-  const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || params.from || params.to);
+  const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || params.period || params.from || params.to);
   let candidatePages = manifest.pages.map((_, index) => index);
   const query = params.query?.trim();
   let indexedQueryTotal: number | null = null;
@@ -162,7 +164,7 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
     const index = await searchObject.json<Record<string, number[]>>();
     const terms = searchTerms(query);
     if (terms.length > 0) {
-      if (terms.length === 1 && manifest.searchCountIndexKey && !params.entityId && !params.recordIds && !params.kind && !params.from && !params.to) {
+      if (terms.length === 1 && manifest.searchCountIndexKey && !params.entityId && !params.recordIds && !params.kind && !params.period && !params.from && !params.to) {
         const countObject = await bucket.get(manifest.searchCountIndexKey);
         if (countObject) {
           const counts = await countObject.json<Record<string, number>>();
@@ -242,6 +244,7 @@ async function readPartitionRecords(
   bucket: R2BucketLike,
   partition: { sourceId: string; period: string; manifestKey: string },
   catalogGeneratedAt: string | null,
+  recordKind?: EvidenceRecord["kind"],
 ) {
   const manifestObject = await readR2Object(bucket, partition.manifestKey);
   if (!manifestObject) return null;
@@ -270,10 +273,11 @@ async function readPartitionRecords(
   let position = 0;
   for (const chunk of chunks) { compressed.set(chunk, position); position += chunk.byteLength; }
   const text = await decompressGzip(compressed);
-  const records = text.split("\n")
+  const allRecords = text.split("\n")
     .filter(Boolean)
     .map((line) => projectLakeEvidence(JSON.parse(line) as LakeRecord, manifest.projectionChecksumSha256, catalogGeneratedAt))
     .sort((left, right) => (right.occurredAt ?? "").localeCompare(left.occurredAt ?? "") || left.id.localeCompare(right.id));
+  const records = recordKind ? allRecords.filter((record) => record.kind === recordKind) : allRecords;
   return { records, loadedRows: records.length, missingArtifacts, incomplete: false };
 }
 
@@ -282,6 +286,7 @@ function matchesIndexedParams(record: EvidenceRecord, params: Parameters<typeof 
   if (params.entityId && !record.subjectEntityIds.includes(params.entityId) && !record.objectEntityIds.includes(params.entityId)) return false;
   if (params.recordIds && !params.recordIds.includes(record.id)) return false;
   if (params.kind && record.kind !== params.kind) return false;
+  if (params.period && !date.startsWith(params.period)) return false;
   if (outsideDateRange(date, params.from, params.to)) return false;
   if (params.query) {
     const haystack = JSON.stringify({ id: record.id, title: record.title, description: record.description, data: record.data }).toLocaleLowerCase("es-CL");
@@ -299,6 +304,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   kind?: EvidenceRecord["kind"];
   from?: string;
   to?: string;
+  period?: string;
   limit: number;
   cursor?: string;
 }) {
@@ -311,16 +317,35 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   const variants = params.variant === undefined
     ? null
     : Array.isArray(params.variant) ? params.variant : [params.variant];
-  const partitions = catalog.partitions.filter((partition) => sourceIds.includes(partition.sourceId)
-    && (!variants || variants.includes(partition.variant ?? partition.sourceId))
-    && (!params.from || partition.period >= params.from.slice(0, 7))
-    && (!params.to || partition.period <= params.to.slice(0, 7)));
+  const legacyCamaraVotePartitionIds = new Set<string>();
+  const partitions = catalog.partitions.filter((partition) => {
+    if (!sourceIds.includes(partition.sourceId)) return false;
+    if (!variants) {
+      return (!params.period || partition.period === params.period)
+        && (!params.from || partition.period >= params.from.slice(0, 7))
+        && (!params.to || partition.period <= params.to.slice(0, 7));
+    }
+    const declaredVariant = partition.variant ?? partition.sourceId;
+    // Releases anteriores al campo `variant` almacenaban votaciones y
+    // asistencia bajo `camara`. El alias público de votaciones puede leer
+    // esas particiones legadas sólo cuando el filtro de tipo ya restringe a
+    // `vote`; así se conserva compatibilidad sin mezclar asistencia.
+    const legacyCamaraVote = partition.variant == null
+      && partition.sourceId === "camara"
+      && params.kind === "vote"
+      && variants.includes("votaciones_camara");
+    if (legacyCamaraVote) legacyCamaraVotePartitionIds.add(partition.id);
+    return (variants.includes(declaredVariant) || legacyCamaraVote)
+      && (!params.period || partition.period === params.period)
+      && (!params.from || partition.period >= params.from.slice(0, 7))
+      && (!params.to || partition.period <= params.to.slice(0, 7));
+  });
   if (partitions.length === 0) return null;
   const orderedPartitions = [...partitions].sort((left, right) => right.period.localeCompare(left.period) || right.manifestKey.localeCompare(left.manifestKey));
-  const expectedTotal = orderedPartitions.every((partition) => Number.isFinite(Number(partition.recordCount)))
+  let expectedTotal = legacyCamaraVotePartitionIds.size > 0 ? null : orderedPartitions.every((partition) => Number.isFinite(Number(partition.recordCount)))
     ? orderedPartitions.reduce((total, partition) => total + Number(partition.recordCount), 0)
     : null;
-  const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || params.from || params.to);
+  const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || params.period || params.from || params.to);
   const limit = Math.min(Math.max(params.limit, 1), 100);
   const offset = cursorOffset(params.cursor);
 
@@ -353,7 +378,12 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
       scannedAll = false;
       break;
     }
-    const result = await readPartitionRecords(bucket, partition, catalog.generatedAt);
+    const result = await readPartitionRecords(
+      bucket,
+      partition,
+      catalog.generatedAt,
+      legacyCamaraVotePartitionIds.has(partition.id) ? "vote" : undefined,
+    );
     if (!result) {
       missingPartitions += 1;
       continue;
@@ -370,6 +400,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
       matched += 1;
     }
   }
+  if (expectedTotal === null) expectedTotal = loadedRows;
   const partial = missingPartitions > 0 || missingArtifacts > 0;
   const total = hasFilters || partial ? matched : expectedTotal ?? matched;
   const complete = !partial && (hasFilters ? scannedAll : scannedAll && (expectedTotal === null || matched === expectedTotal));

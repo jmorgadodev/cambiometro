@@ -106,6 +106,25 @@ describe("registros calientes de R2", () => {
     expect(result?.data.map((record) => record.id)).toEqual(["camara-vote-1"]);
   });
 
+  it("aplica el período solicitado antes de leer particiones de Senado", async () => {
+    const january = gzipText([{ id: "senado-expense-jan", sourceId: "gastos_senado", kind: "expense", occurredAt: "2026-01-15", data: { title: "Enero" } }]);
+    const february = gzipText([{ id: "senado-expense-feb", sourceId: "gastos_senado", kind: "expense", occurredAt: "2026-02-15", data: { title: "Febrero" } }]);
+    const januaryPartition = partition("gastos_senado", "2026-01", "partitions/gastos_senado/2026/01/records.jsonl.gz", january, 1);
+    const februaryPartition = partition("gastos_senado", "2026-02", "partitions/gastos_senado/2026/02/records.jsonl.gz", february, 1);
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": { generatedAt: "2026-09-12T00:00:00Z", partitions: [januaryPartition, februaryPartition] },
+      [januaryPartition.manifestKey]: januaryPartition.manifest,
+      [februaryPartition.manifestKey]: februaryPartition.manifest,
+      [januaryPartition.key]: january,
+      [februaryPartition.key]: february,
+    });
+
+    const result = await readR2EvidenceRecords(bucket, { source: "gastos_senado", period: "2026-01", limit: 10 } as never);
+
+    expect(result).toMatchObject({ total: 1, expectedTotal: 1, complete: true });
+    expect(result?.data.map((record) => record.id)).toEqual(["senado-expense-jan"]);
+  });
+
   it("rechaza filtros amplios sin índice antes de iniciar un scan que pueda producir 1102", async () => {
     const partitions = Array.from({ length: 13 }, (_, index) => {
       const period = `202${Math.floor(index / 12) + 4}-${String((index % 12) + 1).padStart(2, "0")}`;

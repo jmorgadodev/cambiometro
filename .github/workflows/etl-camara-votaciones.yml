@@ -16,6 +16,36 @@ on:
         required: false
         type: boolean
         default: false
+      repair_attendance:
+        description: Reparar sólo asistencia Cámara 2026-09 en R2, sin ETL general
+        required: false
+        type: boolean
+        default: false
+      confirm_attendance:
+        description: Escribe CAMBIOMETRO_CONFIRM_CAMARA_ATTENDANCE_REPAIR para reparar
+        required: false
+        type: string
+        default: ""
+      repair_authorities:
+        description: Reparar sólo autoridades Cámara 2026-09 en R2, sin ETL general
+        required: false
+        type: boolean
+        default: false
+      confirm_authorities:
+        description: Escribe CAMBIOMETRO_CONFIRM_CAMARA_AUTHORITIES_REPAIR para reparar
+        required: false
+        type: string
+        default: ""
+      repair_votes:
+        description: Reparar sólo votaciones Cámara 2026-09 en R2, sin ETL general
+        required: false
+        type: boolean
+        default: false
+      confirm_votes:
+        description: Escribe CAMBIOMETRO_CONFIRM_CAMARA_VOTES_REPAIR para reparar
+        required: false
+        type: string
+        default: ""
 
 concurrency:
   group: cambiometro-static-publication
@@ -29,6 +59,7 @@ permissions:
 jobs:
   ingest-publish:
     name: Votaciones oficiales de Cámara
+    if: inputs.repair_attendance != true && inputs.repair_authorities != true && inputs.repair_votes != true
     runs-on: ubuntu-latest
     timeout-minutes: 45
     environment: production
@@ -118,3 +149,31 @@ jobs:
         run: |
           npm run data:build:subsets
           npm run data:publish:static -- --groups parlamento
+
+  repair-attendance:
+    name: Reparación aislada de asistencia Cámara
+    if: inputs.repair_attendance == true
+    uses: ./.github/workflows/repair-camara-attendance-staged.yml
+    with:
+      confirm_repair: ${{ inputs.confirm_attendance }}
+    secrets: inherit
+
+  repair-authorities:
+    name: Reparación aislada de autoridades Cámara
+    if: inputs.repair_authorities == true
+    uses: ./.github/workflows/repair-camara-attendance-staged.yml
+    with:
+      confirm_repair: ${{ inputs.confirm_authorities }}
+      variant: congreso_opendata
+      expected_count: 155
+    secrets: inherit
+
+  repair-votes:
+    name: Reparación aislada de votaciones Cámara
+    if: inputs.repair_votes == true
+    uses: ./.github/workflows/repair-camara-attendance-staged.yml
+    with:
+      confirm_repair: ${{ inputs.confirm_votes }}
+      variant: votaciones_camara
+      expected_count: 49
+    secrets: inherit

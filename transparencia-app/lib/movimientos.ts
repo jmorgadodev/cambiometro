@@ -6,6 +6,7 @@
  * no contiene un catálogo duplicado ni datos generados manualmente.
  */
 import movimientosData from "../data/movimientos.json";
+import movimientosScopePolicy from "../data/movimientos-scope-policy.json";
 
 export type MovimientoTipo =
   | "renuncia" | "cese" | "remocion" | "cambio" | "cambio-puesto"
@@ -71,7 +72,11 @@ export interface Movimiento {
   motivo: string;
   fuente?: string;
   verificado: boolean;
+  reemplazo_estado?: "fuente_oficial" | "fuente_publica" | "no_informado_en_fuentes_consultadas";
 }
+
+export const esMovimientoRespaldado = (movement: Pick<Movimiento, "estado">) =>
+  ["verificado", "verificado_oficial", "corroborado"].includes(movement.estado);
 
 export interface MovimientoSignal {
   signal_id: string;
@@ -250,6 +255,7 @@ export const MOVIMIENTOS_PIPELINE_METADATA = {
   source_health: payload.source_health ?? [],
   signals: payload.signals ?? [],
 };
+export const MOVIMIENTOS_PUBLICATION_BLOCKED = !["validated", "validated_reference", "validated_reconciled"].includes(movimientosScopePolicy.status);
 
 export const MOVIMIENTO_DOCUMENTO_PENDIENTE_DIAS = 30;
 

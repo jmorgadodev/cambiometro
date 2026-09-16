@@ -31,6 +31,7 @@ tmp/
 docs/auditoria-local-*.md
 transparencia-app/artifacts/
 /transparencia-app/pages-deployments.json
+/transparencia-app/.ci-data-version/
 .ci-transfer-d1*.jsonc
 .ci-evidence-prod-*/
 .ci-evidence-worker-*/

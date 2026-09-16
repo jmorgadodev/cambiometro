@@ -54,7 +54,8 @@ describe("núcleo del lago de datos", () => {
   it("aplica los umbrales internos de almacenamiento R2", () => {
     expect(storagePolicy(6.3, 8).action).toBe("publish");
     expect(storagePolicy(6.4, 8).action).toBe("archive_cold_partitions");
-    expect(storagePolicy(7.2, 8).action).toBe("block_growth");
+    expect(storagePolicy(7.2, 8).action).toBe("archive_cold_partitions");
+    expect(storagePolicy(7.6, 8).action).toBe("block_growth");
   });
 
   it("conserva el último dato válido cuando el conector falla", () => {
