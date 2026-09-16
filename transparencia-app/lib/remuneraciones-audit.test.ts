@@ -21,7 +21,7 @@ describe("buildRemunerationAudit", () => {
         central: { meta: { total: 2110434, updatedAt: "2026-09-14T03:51:42.634Z", calidadDatos: { registrosConIncidencias: 563221 } } },
       },
       probes: [{ label: "Lucy Depablos", scope: "central", total: 4 }],
-    } as any);
+    });
 
     expect(report.staticRelease).toMatchObject({ totalRows: 33776, pageCount: 169 });
     expect(report.scopes).toEqual(expect.arrayContaining([
@@ -40,7 +40,7 @@ describe("buildRemunerationAudit", () => {
       productionSources: [],
       scopeResponses: {},
       probes: [{ label: "Caso ausente", scope: "municipal", total: 0 }],
-    } as any);
+    });
 
     expect(report.probes[0]).toMatchObject({ status: "fail", total: 0 });
     expect(report.findings).toEqual(expect.arrayContaining([

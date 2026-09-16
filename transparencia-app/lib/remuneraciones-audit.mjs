@@ -61,6 +61,15 @@ function compareStaticToProduction(staticSource, productionById) {
   };
 }
 
+/**
+ * @param {{
+ *   generatedAt?: string,
+ *   unifiedManifest?: Record<string, any>,
+ *   productionSources?: Array<Record<string, any>>,
+ *   scopeResponses?: Record<string, Record<string, any>>,
+ *   probes?: Array<Record<string, any>>,
+ * }} options
+ */
 export function buildRemunerationAudit({
   generatedAt = new Date().toISOString(),
   unifiedManifest = {},
