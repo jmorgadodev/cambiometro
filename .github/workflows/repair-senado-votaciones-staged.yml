@@ -15,6 +15,22 @@ on:
         description: Escribe CAMBIOMETRO_CONFIRM_SENADO_VOTACIONES_REPAIR para publicar
         required: true
         default: ""
+  workflow_call:
+    inputs:
+      from:
+        required: true
+        type: string
+      to:
+        required: true
+        type: string
+      confirm_repair:
+        required: true
+        type: string
+    secrets:
+      CLOUDFLARE_ACCOUNT_ID:
+        required: true
+      CLOUDFLARE_DATA_API_TOKEN:
+        required: true
 
 concurrency:
   group: cambiometro-senado-votaciones-staged
