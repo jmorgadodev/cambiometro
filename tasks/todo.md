@@ -76,7 +76,9 @@
    desde manifiestos R2, sin cargar el universo en D1. La auditoría de metadatos,
    montos y períodos quedó documentada en
    `docs/auditorias/2026-09-16-calidad-remuneraciones-r2.md`; falta el conteo
-   reproducible de duplicados exactos y la revisión por organismo.
+   reproducible de duplicados exactos y la revisión por organismo. El snapshot
+   central local ya fue revisado: 2.110.434 filas, 0 duplicados exactos; falta
+   repetirlo para municipal y aclarar 2 archivos centrales no tabulares.
 4. Construir historiales, altas, bajas y cambios de monto por lotes pequeños.
 
 ### Pendientes de normalización habilitados
@@ -84,8 +86,9 @@
 - [x] Retirar la gráfica general de evolución y el acceso “Ver detalle mensual”
   del recorrido público de Remuneraciones; se conservan las fichas y las
   comparaciones detalladas que sí tienen filas originales.
-- [ ] Generar un índice R2 liviano por organismo y período para explicar la
-  cobertura sin leer el universo ni usar D1.
+- [x] Preparar el índice R2 liviano por organismo y período para explicar la
+  cobertura sin leer el universo ni usar D1. Queda pendiente validarlo en CI y
+  publicarlo con el siguiente release de cada alcance.
 - [ ] Auditar el salto de julio y la caída de agosto/septiembre por categoría
   y organismo antes de ampliar la interfaz o incorporar pagos. La señal quedó
   confirmada en ambos releases productivos y documentada; falta el desglose

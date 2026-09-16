@@ -55,7 +55,20 @@ Los resúmenes productivos sí contienen `newRecords`, `removedRecords`, `amount
 
 ## Índices y alcance actual
 
-El manifiesto declara un índice de búsqueda completo por filas, pero no declara todavía un artefacto público separado que permita explicar de forma liviana el conteo por organismo, período y categoría. Por eso no corresponde publicar porcentajes de cobertura por organismo a partir de este release sin construir esa dimensión explícitamente.
+El publicador ahora genera un `coverage-index.json` liviano por organismo y período. Contiene conteos, montos positivos, ceros, montos no clasificables, incidencias y distribución contractual; no copia nombres ni filas completas. Su checksum queda dentro del manifiesto de cada release. Esto permite auditar la cobertura sin descargar el universo ni consultar D1.
+
+El índice no reemplaza las filas originales: sólo agrega una vista de control reproducible. Los períodos inválidos quedan fuera de las entradas y se contabilizan por separado.
+
+### Duplicados exactos revisados
+
+En el snapshot local de proyecciones centrales disponible para esta auditoría se revisaron 2.110.434 filas en 716 archivos, usando una huella semántica que excluye el identificador técnico y considera fuente, organismo, persona, cargo, período, montos, contrato y fechas. El resultado fue:
+
+- 2.110.434 huellas únicas.
+- 0 grupos de duplicados exactos.
+- 0 filas duplicadas exactas.
+- 2 artefactos de metadatos (`search_index.json` y `transparency-summary.json`) excluidos del conteo de filas.
+
+Este resultado sólo aplica al snapshot central local; no se extrapola al alcance municipal ni reemplaza la auditoría productiva.
 
 ## Decisiones de implementación
 
@@ -63,7 +76,7 @@ El manifiesto declara un índice de búsqueda completo por filas, pero no declar
 - Mantener separados los alcances municipal y central.
 - Conservar las filas originales y los montos publicados.
 - Mantener el historial individual que sí tiene registros, sin volver a mostrar la gráfica general retirada.
-- Construir como siguiente bloque un índice liviano por organismo, período y categoría, con conteos y checksum, sin duplicar filas completas.
+- Generar un índice liviano por organismo y período, con conteos y checksum, sin duplicar filas completas; el cambio quedó preparado en el publicador y aún requiere validación CI antes de promoción.
 - Revisar julio, agosto y septiembre por lotes pequeños antes de ampliar la interfaz o incorporar nuevos pagos.
 - Auditar duplicados exactos y relaciones de personas como una etapa separada; los manifiestos actuales no entregan por sí solos un conteo confiable de duplicados exactos.
 
@@ -74,4 +87,3 @@ El manifiesto declara un índice de búsqueda completo por filas, pero no declar
 - `projections/funcionarios-central-v1/manifest.json`
 - `projections/funcionarios-central-v1/.../transparency-summary.json`
 - Consultas públicas acotadas a `limit=1` y `limit=5`, todas respondidas con `sourceStatus` R2.
-
