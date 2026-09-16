@@ -29,7 +29,7 @@
 ## D1 después del reinicio — comprobado 2026-09-16
 
 - [x] Medir cuota D1 post-reset: nivel `ok`; 5.192 filas leídas y 57 escritas en la sonda `35136580370`.
-- [ ] Identificar el consumidor de `transparencia-db` fuera del Worker público; la métrica actual sólo separa por base, no por proyecto.
+- [x] Identificar los consumidores de `transparencia-db` fuera del Worker público: workflows ETL opcionales, registro de estado CPLT y export de backup sólo manual; evidencia en `docs/auditorias/2026-09-16-consumidores-d1.md`.
 - [x] Confirmar que no existen lecturas masivas nuevas en la sonda: sólo se ejecutó una página de Cámara y no hubo SQL masivo.
 - [x] Verificar compuertas de materialización programada; todas requieren `workflow_dispatch` y confirmación explícita.
 - [x] Ejecutar un preflight acotado con una página de Cámara; respondió desde R2.
@@ -78,7 +78,7 @@
    `docs/auditorias/2026-09-16-calidad-remuneraciones-r2.md`; falta el conteo
    reproducible de duplicados exactos y la revisión por organismo. El snapshot
    central local ya fue revisado: 2.110.434 filas, 0 duplicados exactos; falta
-   repetirlo para municipal y aclarar 2 archivos centrales no tabulares.
+   repetirlo para municipal.
 4. Construir historiales, altas, bajas y cambios de monto por lotes pequeños.
 
 ### Pendientes de normalización habilitados
