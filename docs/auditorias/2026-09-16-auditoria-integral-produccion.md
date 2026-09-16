@@ -1080,3 +1080,26 @@ El hallazgo no demuestra que falten filas de remuneraciones: demuestra que la
 respuesta combinada estaba reportando mal su auditoría. La cobertura de cada
 release sigue siendo una tarea separada y no se deben sumar los universos para
 presentarlos como personas únicas.
+
+### Línea base de calidad por nómina — 16-09-2026
+
+La lectura productiva acotada a `limit=1` confirmó los manifiestos y permitió
+medir calidad sin descargar filas masivas:
+
+| Nómina | Filas consultables | Registros con incidencias | Proporción | Líquido no informado |
+|---|---:|---:|---:|---:|
+| Municipal | 1.243.761 | 159.705 | 12,84% | 159.679 |
+| Central | 2.110.434 | 563.221 | 26,69% | 563.169 |
+| Combinada | 3.354.195 | 722.926 | 21,55% | 722.848 |
+
+Las proporciones no representan personas únicas ni cobertura histórica: son
+incidencias registradas sobre cada release consultable. Las incidencias por
+nombre son acotadas (municipal: 24 prefijos numéricos, 7 prefijos inválidos y
+5 nombres incompletos; central: 16, 65 y 17 respectivamente). La principal
+observación es que el líquido no está informado en la fuente para la mayoría de
+los registros observados; no se debe convertir en cero ni imputar un valor.
+
+El siguiente bloque de trabajo queda definido como auditoría por período y
+organismo de esas incidencias, empezando por una muestra reproducible y sin
+reescribir el release. Sólo después se evaluará si conviene una vista derivada
+de historial; el valor bruto y la URL de origen permanecerán intactos.
