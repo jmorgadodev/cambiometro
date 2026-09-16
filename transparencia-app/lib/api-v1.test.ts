@@ -905,6 +905,38 @@ describe("API canónica v1", () => {
     ]);
   });
 
+  it("marca DIPRES como fuente agregada y no como buscador individual", async () => {
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/sources-v1/source-inventory.json") {
+          return { json: async <T>() => ({ sources: [{ id: "dipres", label: "DIPRES", recordCount: 247287 }] }) as T };
+        }
+        if (key === "projections/sources-v1/source-health.json") {
+          return { json: async <T>() => ({ sources: { dipres: { status: "partial" } } }) as T };
+        }
+        return null;
+      },
+    };
+
+    const sourcesResponse = await api.fetch(new Request("https://example.test/api/v1/sources"), { PUBLIC_DATA } as never);
+    const sourcesPayload = await sourcesResponse.json();
+    expect(sourcesResponse.status).toBe(200);
+    expect(sourcesPayload.data[0]).toMatchObject({
+      id: "dipres",
+      dataScope: "aggregate",
+      queryable: false,
+      queryableCount: 0,
+      statusDetail: "Datos agregados de presupuesto y ejecución; no corresponde a un buscador de personas.",
+    });
+
+    const recordsResponse = await api.fetch(
+      new Request("https://example.test/api/v1/records?source=dipres&limit=10"),
+      { PUBLIC_DATA } as never,
+    );
+    expect(recordsResponse.status).toBe(422);
+    expect(await recordsResponse.json()).toMatchObject({ error: { code: "AGGREGATE_SOURCE" } });
+  });
+
   it("normaliza alias históricos y no publica catálogos legados como fuentes sin datos", async () => {
     const prepare = vi.fn(() => {
       throw new Error("D1 no debe consultarse para normalizar el inventario R2");

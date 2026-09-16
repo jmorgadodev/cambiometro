@@ -1248,6 +1248,22 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
   const requestedSource = requestUrl.searchParams.get("source")?.trim();
   if (!requestedSource) return null;
   const source = requestedSource === "votaciones_camara" ? "camara" : requestedSource;
+  // DIPRES publica presupuesto y ejecución agregados por partida, capítulo y
+  // programa. No es una nómina individual y no debe degradarse a una lista
+  // vacía cuando sus particiones históricas no están disponibles.
+  if (source === "dipres") {
+    return failure(
+      "AGGREGATE_SOURCE",
+      "DIPRES publica datos agregados de presupuesto y ejecución; no es un buscador de personas.",
+      422,
+      {
+        source: requestedSource,
+        sourceBackend: "r2-aggregate",
+        sourceStatus: "aggregate-only",
+        queryable: false,
+      },
+    );
+  }
   const requestedKind = requestUrl.searchParams.get("kind")?.trim();
   const isCamaraVoteAlias = requestedSource === "votaciones_camara";
   if (isCamaraVoteAlias && requestedKind && requestedKind !== "vote") {
@@ -1982,6 +1998,7 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
     const lakePartitions = lakePartitionsBySource.get(id) ?? [];
     const lakeSource = lakeSourcesById.get(id) ?? {};
     const hasPublishedLake = lakePartitions.length > 0;
+    const aggregateOnly = id === "dipres";
     const recordCount = isTransferSource && currentTransferRelease
       ? currentTransferRelease.totalRows
       : hasPublishedLake
@@ -2003,7 +2020,12 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
       lastUpdated: isTransferSource && currentTransferRelease
         ? currentTransferRelease.generatedAt
         : state.lastSuccessAt ?? state.last_success_at ?? state.generatedAt ?? source.generatedAt ?? null,
-      statusDetail: stateStatus === "archive_only"
+      dataScope: aggregateOnly ? "aggregate" : "individual-or-event",
+      queryable: !aggregateOnly,
+      queryableCount: aggregateOnly ? 0 : recordCount,
+      statusDetail: aggregateOnly
+        ? "Datos agregados de presupuesto y ejecución; no corresponde a un buscador de personas."
+        : stateStatus === "archive_only"
         ? "Histórico íntegro en R2; se consulta bajo demanda."
         : hasPublishedLake && stateStatus === "partial"
           ? `El catálogo declara ${recordCount} registros, pero el release es parcial. La consulta sólo entrega particiones verificadas.`
