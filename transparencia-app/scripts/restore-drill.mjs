@@ -4,6 +4,7 @@ import { existsSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
+import { getR2LakeObjects } from "../lib/restore-inventory.mjs";
 
 // =============================================================================
 // restore-drill.mjs — Drill de Restore pre-launch (ENTORNO AISLADO)
@@ -149,10 +150,8 @@ log(`Bucket: ${BACKUP_BUCKET} | Motor: node:sqlite (100% aislado, NUNCA D1 remot
 log(`Paso 1: Descargando ${INVENTORY_KEY}...`);
 const inventoryResponse = await r2Get(BACKUP_BUCKET, INVENTORY_KEY);
 const inventory = await inventoryResponse.json();
-if (!inventory.objects || !Array.isArray(inventory.objects)) {
-  throw new Error("INVENTORY_INVALID: objects array no encontrado");
-}
-log(`Inventario: schemaVersion=${inventory.schemaVersion} generatedAt=${inventory.generatedAt} objects=${inventory.objects.length}`);
+const lakeObjects = getR2LakeObjects(inventory);
+log(`Inventario: schemaVersion=${inventory.schemaVersion} generatedAt=${inventory.generatedAt} objects=${lakeObjects.length}`);
 
 // Paso 2: stamp
 let stamps = [];
@@ -178,9 +177,6 @@ const d1Key = inventory.d1 ?? null;
 log(`Ultimo backup stamp: ${latestStamp}`);
 log(`D1 dump key: ${d1Key ?? "no incluido (drill R2-only)"}`);
 
-const lakeObjects = Array.isArray(inventory.objects)
-  ? inventory.objects
-  : [];
 log(`Objetos lake en manifest para stamp ${latestStamp}: ${lakeObjects.length}`);
 
 // El backup semanal normal es R2-only. No se descarga ni se restaura D1 en
