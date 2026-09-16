@@ -68,12 +68,23 @@
 
 ### Pendientes actuales de datos
 
-1. Corregir la presentación del conteo CPLT para separar municipalidades y
+1. [x] Corregir la presentación del conteo CPLT para separar municipalidades y
    organismos centrales; no usar el valor estático 1.203.287.
-2. Auditar la cobertura CPLT por período y organismo antes de incorporar pagos.
+2. [x] Auditar los cortes CPLT productivos por período; evidencia en
+   `docs/auditorias/2026-09-16-cplt-cortes-r2.md`.
 3. Completar la matriz de calidad de nombres, montos, períodos y duplicados
    desde manifiestos R2, sin cargar el universo en D1.
 4. Construir historiales, altas, bajas y cambios de monto por lotes pequeños.
+
+### Pendientes de normalización habilitados
+
+- [x] Retirar la gráfica general de evolución y el acceso “Ver detalle mensual”
+  del recorrido público de Remuneraciones; se conservan las fichas y las
+  comparaciones detalladas que sí tienen filas originales.
+- [ ] Generar un índice R2 liviano por organismo y período para explicar la
+  cobertura sin leer el universo ni usar D1.
+- [ ] Auditar el salto de julio y la caída de agosto/septiembre por categoría
+  y organismo antes de ampliar la interfaz o incorporar pagos.
 
 ## Fuera de alcance
 
