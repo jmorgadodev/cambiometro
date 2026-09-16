@@ -1,5 +1,8 @@
 import { getExpiredBackupObjects } from "./backup-retention.mjs";
 
+/** @typedef {{ key?: string, size?: number }} R2Object */
+
+/** @param {R2Object[]} objects */
 function bytes(objects) {
   return objects.reduce((total, object) => total + (Number.isFinite(Number(object?.size)) ? Number(object.size) : 0), 0);
 }
@@ -13,6 +16,7 @@ function snapshotDate(key) {
  * Produces a read-only retention report. It intentionally does not decide or
  * perform deletions: a snapshot is only a candidate until a verified rollback
  * exists for every release it contains.
+ * @param {{ sourceObjects?: R2Object[], backupObjects?: R2Object[], asOf: string, retentionWeeks?: number }} options
  */
 export function buildR2RetentionReport({ sourceObjects = [], backupObjects = [], asOf, retentionWeeks = 8 } = {}) {
   const expired = getExpiredBackupObjects(backupObjects, asOf, retentionWeeks);
