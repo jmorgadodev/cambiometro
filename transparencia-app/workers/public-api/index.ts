@@ -987,7 +987,7 @@ async function listAllFuncionariosFromR2(requestUrl: URL, env: Env) {
   const end = Math.min(start + limit, total);
   const rows: JsonRecord[] = [];
 
-  async function appendSourceSegment(source: { root: string }, sourceStart: number, sourceEnd: number) {
+  async function appendSourceSegment(source: { name: string; root: string }, sourceStart: number, sourceEnd: number) {
     if (sourceStart >= sourceEnd) return;
     const sourceUrl = new URL(requestUrl);
     sourceUrl.searchParams.set("page", String(Math.floor(sourceStart / limit) + 1));
@@ -997,7 +997,9 @@ async function listAllFuncionariosFromR2(requestUrl: URL, env: Env) {
     const payload = await response.json() as JsonRecord;
     const sourceRows = Array.isArray(payload.data) ? payload.data as JsonRecord[] : [];
     const localOffset = sourceStart % limit;
-    rows.push(...sourceRows.slice(localOffset, localOffset + (sourceEnd - sourceStart)));
+    rows.push(...sourceRows
+      .slice(localOffset, localOffset + (sourceEnd - sourceStart))
+      .map((row) => ({ ...row, sourceScope: source.name })));
   }
 
   // El contrato combinado es determinista: primero municipal y luego central.

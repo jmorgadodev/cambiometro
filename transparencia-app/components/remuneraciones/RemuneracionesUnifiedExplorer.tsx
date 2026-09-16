@@ -46,6 +46,7 @@ interface UnifiedRow {
   montoBruto: number | null;
   tipoContrato: string | null;
   estadoRegistro: string;
+  sourceScope?: "municipal" | "central";
 }
 
 interface SearchResult {
@@ -105,9 +106,11 @@ function RemoteOfficialRow(row: Record<string, unknown>, query: string): Unified
   const name = String(row.nombre_completo ?? row.nombre ?? "").trim();
   if (!name) return null;
   const amount = Number(row.remuneracion_bruta_mensual ?? row.bruto_mensual);
+  const sourceScope = row.sourceScope === "central" ? "central" : "municipal";
+  const central = sourceScope === "central";
   return {
-    sourceId: "transparencia-activa",
-    sourceLabel: "Transparencia Activa CPLT",
+    sourceId: central ? "transparencia-activa-central" : "transparencia-activa",
+    sourceLabel: central ? "Transparencia Activa · Organismos centrales" : "Transparencia Activa · Municipalidades",
     sourceType: "individual",
     recordId: String(row.id ?? `cplt-${normalize(name)}-${query}`),
     personKey: personIdentityKey(name),
@@ -118,6 +121,7 @@ function RemoteOfficialRow(row: Record<string, unknown>, query: string): Unified
     montoBruto: Number.isFinite(amount) ? amount : null,
     tipoContrato: String(row.tipo_contrato ?? "").trim() || null,
     estadoRegistro: Number.isFinite(amount) ? "publicado" : "monto_no_publicado",
+    sourceScope,
   };
 }
 
@@ -212,8 +216,11 @@ export default function RemuneracionesUnifiedExplorer() {
         return entry ? loadJson<UnifiedRow[]>(entry.key) : [];
       }))).flat().filter((row) => {
         const haystack = normalize(`${row.nombreOriginal} ${row.organismoOriginal} ${row.cargoOriginal} ${row.periodo ?? ""}`);
+        const sourceMatches = source === "all"
+          || row.sourceId === source
+          || (source === "transparencia-activa" && row.sourceId === "transparencia-activa-central");
         return requestedTokens.every((token) => haystack.includes(token))
-          && (source === "all" || row.sourceId === source)
+          && sourceMatches
           && (!organism.trim() || normalize(row.organismoOriginal).includes(normalize(organism.trim())))
           && (!role.trim() || normalize(row.cargoOriginal).includes(normalize(role.trim())));
       });
@@ -223,9 +230,12 @@ export default function RemuneracionesUnifiedExplorer() {
       let remotePartial = false;
       const isLocalStaticPreview = typeof window !== "undefined"
         && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
-      if (!isLocalStaticPreview && (source === "all" || source === "transparencia-activa")) {
+      const transparencySourceSelected = source === "transparencia-activa" || source === "transparencia-activa-central";
+      if (!isLocalStaticPreview && (source === "all" || transparencySourceSelected)) {
         const remote = await searchTransparencyActiva({ query: cleanQuery, organism, role });
-        remoteRows = remote.rows.map((row) => RemoteOfficialRow(row, cleanQuery)).filter((row): row is UnifiedRow => Boolean(row));
+        remoteRows = remote.rows.map((row) => RemoteOfficialRow(row, cleanQuery))
+          .filter((row): row is UnifiedRow => Boolean(row))
+          .filter((row) => source === "all" || row.sourceId === source || (source === "transparencia-activa" && row.sourceId === "transparencia-activa-central"));
         totalRemote = remote.total;
         remotePartial = remote.partial;
       }
@@ -269,7 +279,7 @@ export default function RemuneracionesUnifiedExplorer() {
             <details className="remuneration-filters">
               <summary>Agregar filtros</summary>
               <div className="remuneration-filters__grid">
-                <label>Fuente<select className="form-input" value={source} onChange={(event) => setSource(event.target.value)}><option value="all">Todas las fuentes</option>{paidSources.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}</select></label>
+                <label>Fuente<select className="form-input" value={source} onChange={(event) => setSource(event.target.value)}><option value="all">Todas las fuentes</option>{paidSources.map((item) => <option key={item.id} value={item.id}>{item.label}</option>)}<option value="transparencia-activa-central">Transparencia Activa · Organismos centrales</option></select></label>
                 <label>Organismo<input className="form-input" value={organism} onChange={(event) => setOrganism(event.target.value)} placeholder="Ej.: Subsecretaría del Interior" /></label>
                 <label>Cargo<input className="form-input" value={role} onChange={(event) => setRole(event.target.value)} placeholder="Ej.: asesor junior" /></label>
               </div>
@@ -278,7 +288,7 @@ export default function RemuneracionesUnifiedExplorer() {
 
           {results && <section id="resultados-remuneraciones" className="remuneration-module remuneration-module--results" aria-labelledby="resultados-remuneraciones-title" aria-live="polite">
             <div className="remuneration-results__heading"><div><span className="eyebrow">RESULTADOS</span><h3 id="resultados-remuneraciones-title">Coincidencias para “{query.trim()}”</h3></div><span>{number.format(groups.length)} personas · {number.format(results.rows.length + results.remoteRows.length)} registros</span></div>
-            {results.remoteRows.length === 0 && (source === "all" || source === "transparencia-activa") && <p className="remuneration-results__note">La búsqueda muestra los pagos publicados en los archivos disponibles. La nómina de Transparencia Activa se consulta por separado cuando el servicio responde.</p>}
+            {results.remoteRows.length === 0 && (source === "all" || source === "transparencia-activa" || source === "transparencia-activa-central") && <p className="remuneration-results__note">La búsqueda muestra los pagos publicados en los archivos disponibles. La nómina de Transparencia Activa se consulta por separado cuando el servicio responde.</p>}
             {results.remotePartial && <p className="remuneration-results__note">Algunos registros están temporalmente fuera de esta búsqueda. Intenta nuevamente para consultar todas las nóminas disponibles.</p>}
             {groups.length === 0 && <div className="stat-tile" role="status">No encontramos coincidencias. Prueba con el apellido, organismo o cargo sin tildes.</div>}
              <div className="remuneration-results__list">

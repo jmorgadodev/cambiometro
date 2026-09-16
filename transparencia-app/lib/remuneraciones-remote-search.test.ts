@@ -20,6 +20,7 @@ describe("búsqueda remota de Transparencia Activa", () => {
     expect(calls[0]).toContain("scope=all");
     expect(result).toMatchObject({ total: 1, partial: false });
     expect(result.rows).toHaveLength(1);
+    expect(result.rows[0].sourceScope).toBeUndefined();
   });
 
   it("separa municipal y central cuando la ruta combinada falla", async () => {
@@ -38,6 +39,8 @@ describe("búsqueda remota de Transparencia Activa", () => {
     expect(calls).toHaveLength(3);
     expect(result).toMatchObject({ total: 2, partial: false });
     expect(result.rows.map((row) => row.id).sort()).toEqual(["central-1", "muni-1"]);
+    expect(result.rows.find((row) => row.id === "central-1")?.sourceScope).toBe("central");
+    expect(result.rows.find((row) => row.id === "muni-1")?.sourceScope).toBe("municipal");
   });
 
   it("marca la respuesta parcial sin ocultar la fuente que sí responde", async () => {
@@ -50,5 +53,6 @@ describe("búsqueda remota de Transparencia Activa", () => {
 
     expect(result).toMatchObject({ total: 1, partial: true });
     expect(result.rows[0].id).toBe("muni-1");
+    expect(result.rows[0].sourceScope).toBe("municipal");
   });
 });

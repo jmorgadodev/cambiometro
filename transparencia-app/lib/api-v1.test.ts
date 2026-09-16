@@ -487,6 +487,8 @@ describe("API canónica v1", () => {
     });
     expect(payload.meta.stats).toMatchObject({ totalMuni: 3, totalValidos: 3, promedioSueldo: 1266667 });
     expect(payload.data.map((item: { id: string }) => item.id).sort()).toEqual(["central-1", "municipal-1", "municipal-2"]);
+    expect(payload.data.find((item: { id: string }) => item.id === "municipal-1").sourceScope).toBe("municipal");
+    expect(payload.data.find((item: { id: string }) => item.id === "central-1").sourceScope).toBe("central");
   });
 
   it("conserva la búsqueda de funcionarios si el catálogo de entidades no está disponible", async () => {

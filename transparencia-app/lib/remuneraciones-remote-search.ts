@@ -57,10 +57,11 @@ export async function searchTransparencyActiva(options: SearchOptions): Promise<
     // Se intenta la ruta por fuente abajo.
   }
 
-  const results: Array<{ rows: RemoteOfficialRow[]; total: number | null } | null> = [];
+  const results: Array<{ scope: "municipal" | "central"; rows: RemoteOfficialRow[]; total: number | null } | null> = [];
   for (const scope of ["municipal", "central"] as const) {
     try {
-      results.push(await readResponse(await fetcher(requestUrl(scope, options))));
+      const result = await readResponse(await fetcher(requestUrl(scope, options)));
+      results.push(result ? { ...result, scope } : null);
     } catch {
       results.push(null);
     }
@@ -70,10 +71,10 @@ export async function searchTransparencyActiva(options: SearchOptions): Promise<
     for (const row of result?.rows ?? []) {
       const id = String(row.id ?? "");
       const key = id || JSON.stringify(row);
-      if (!rows.has(key)) rows.set(key, row);
+      if (!rows.has(key)) rows.set(key, { ...row, sourceScope: result?.scope });
     }
   }
-  const totals = results.filter((result): result is { rows: RemoteOfficialRow[]; total: number | null } => Boolean(result));
+  const totals = results.filter((result): result is { scope: "municipal" | "central"; rows: RemoteOfficialRow[]; total: number | null } => Boolean(result));
   const total = totals.length > 0
     ? totals.reduce((sum, result) => sum + (result.total ?? result.rows.length), 0)
     : null;
