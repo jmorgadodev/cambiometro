@@ -1,6 +1,8 @@
 // Cloudflare R2 Standard includes 10 GB-month of storage in the free tier.
 // Keep a 5% headroom before blocking growth so a valid release can publish
 // while the next release is still stopped before it can create billable usage.
+import { assertCatalogReferencesAvailable } from "../../lib/r2-catalog-audit.mjs";
+
 const DEFAULT_LIMIT_BYTES = 10_000_000_000;
 const GROWTH_BLOCK_RATIO = 0.95;
 
@@ -95,6 +97,16 @@ export function planR2Publication(assets, previousInventory = { objects: [] }, l
   const previous = new Map((previousInventory.objects ?? []).map((object) => [object.key, object]));
   const desired = new Map(previous);
   for (const asset of hot) desired.set(asset.key, asset);
+  const catalogAsset = assets.find((asset) => asset.key === "catalog/v1/manifest.json");
+  if (catalogAsset?.data) {
+    let catalog;
+    try {
+      catalog = JSON.parse(Buffer.from(catalogAsset.data).toString("utf8"));
+    } catch {
+      throw new Error("R2_CATALOG_INVALID_JSON");
+    }
+    assertCatalogReferencesAvailable(catalog, new Set([...desired.keys(), ...assets.map((asset) => asset.key)]));
+  }
   // Cada proyección versionada conserva la candidata entrante y la versión
   // activa previa como rollback. Las copias más antiguas no son referenciadas
   // por ningún manifiesto y duplican gigabytes sin aportar disponibilidad.

@@ -5,6 +5,7 @@ import { join, resolve } from "node:path";
 import { spawn, spawnSync } from "node:child_process";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
 import { planR2Publication } from "./etl/r2.mjs";
+import { listR2Objects } from "../lib/r2-live-list.mjs";
 import { readJsonIfPresent, writeFileAtomic } from "./etl/safe-file.mjs";
 
 function command(binary, args, allowFailure = false) {
@@ -201,9 +202,24 @@ if (publishR2) {
   const inventoryPath = join(r2Staging, "storage.json");
   const inventoryKey = "catalog/v1/storage.json";
   const downloaded = wrangler(["r2", "object", "get", `${bucket}/${inventoryKey}`, "--file", inventoryPath], true);
-  const previous = downloaded.status === 0
-    ? readJsonIfPresent(inventoryPath, { objects: [] })
-    : { objects: [] };
+  const cached = downloaded.status === 0 ? readJsonIfPresent(inventoryPath, { objects: [] }) : { objects: [] };
+  const liveObjects = await listR2Objects({
+    accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
+    token: process.env.CLOUDFLARE_API_TOKEN,
+    bucket,
+  });
+  const cachedByKey = new Map((cached.objects ?? []).map((object) => [object.key, object]));
+  const previous = {
+    schemaVersion: "1.0.0",
+    limitBytes: cached.limitBytes,
+    objects: liveObjects.map((object) => ({
+      key: object.key,
+      size: object.size,
+      // El listado REST no expone SHA-256; reutilizamos el checksum del
+      // inventario previo sólo cuando coincide el tamaño.
+      checksumSha256: cachedByKey.get(object.key)?.size === object.size ? cachedByKey.get(object.key)?.checksumSha256 ?? null : null,
+    })),
+  };
   const r2Plan = planR2Publication(assets, previous);
   const activationManifests = r2Plan.puts.filter((asset) => asset.key.endsWith("/manifest.json"));
 

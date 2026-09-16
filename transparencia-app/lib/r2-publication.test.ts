@@ -3,7 +3,10 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { planR2Publication, selectHotAssets } from "../scripts/etl/r2.mjs";
 
-const asset = (key: string, size = 10, checksumSha256 = key) => ({ key, size, checksumSha256, data: Buffer.alloc(size), releaseTag: "x", releaseAssetName: key });
+const asset = (key: string, size = 10, checksumSha256 = key) => {
+  const data = key === "catalog/v1/manifest.json" ? Buffer.from(JSON.stringify({ partitions: [] })) : Buffer.alloc(size);
+  return { key, size, checksumSha256, data, releaseTag: "x", releaseAssetName: key };
+};
 
   it("no permite reemplazar assets de una Release inmutable", () => {
     const publisher = readFileSync(resolve("scripts/publish-data-lake.mjs"), "utf8");
@@ -79,7 +82,10 @@ describe("publicación caliente en R2", () => {
     catalog.data = Buffer.from(JSON.stringify({ partitions: [{ id: "dipres/2026/06", sourceId: "dipres", period: "2026-06", manifestKey: "partitions/dipres/2026/06/manifest.json" }] }));
     catalog.size = catalog.data.length;
     const plan = planR2Publication([catalog, asset("partitions/sinim/2025/12/records.jsonl.gz", 10)], {
-      objects: [{ key: "partitions/dipres/2026/06/records.jsonl.gz", size: 80, checksumSha256: "dipres" }],
+      objects: [
+        { key: "partitions/dipres/2026/06/manifest.json", size: 5, checksumSha256: "dipres-manifest" },
+        { key: "partitions/dipres/2026/06/records.jsonl.gz", size: 80, checksumSha256: "dipres" },
+      ],
     }, 1000);
     expect(plan.deletes).toEqual([]);
     expect(plan.inventory.objects.some((item: { key: string }) => item.key === "partitions/dipres/2026/06/records.jsonl.gz")).toBe(true);
