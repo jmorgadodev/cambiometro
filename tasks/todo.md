@@ -24,13 +24,13 @@
 - [x] Verificar las 2 particiones históricas de Senado en R2 (2025-08: 121; 2026-02: 7) contra sus manifiestos y registros publicados, sin reconstruir ni duplicar artefactos.
 - [x] Auditar la retención de R2 en modo lectura (2026-09-16): 0 snapshots expirados y 0 bytes candidatos; no se ejecutaron `PUT` ni `DELETE`.
 
-## Cuando Analytics confirme el siguiente reset de D1
+## D1 después del reinicio — comprobado 2026-09-16
 
-- [ ] Medir cuota D1 post-reset (la sonda del 2026-09-12 ya reportó 13.758.232 lecturas; sigue crítica).
+- [x] Medir cuota D1 post-reset: nivel `ok`; 5.192 filas leídas y 57 escritas en la sonda `35136580370`.
 - [ ] Identificar el consumidor de `transparencia-db` fuera del Worker público; la métrica actual sólo separa por base, no por proyecto.
-- [ ] Confirmar que no existen lecturas masivas nuevas.
-- [ ] Verificar compuertas de materialización programada.
-- [ ] Ejecutar sólo un preflight acotado si la cuota está limpia.
+- [x] Confirmar que no existen lecturas masivas nuevas en la sonda: sólo se ejecutó una página de Cámara y no hubo SQL masivo.
+- [x] Verificar compuertas de materialización programada; todas requieren `workflow_dispatch` y confirmación explícita.
+- [x] Ejecutar un preflight acotado con una página de Cámara; respondió desde R2.
 
 ## Trabajo habilitado antes del reinicio D1
 
@@ -42,7 +42,7 @@
 - [x] Preparar y validar en preview el hardening de paginación R2 (PR #497),
   con pruebas `limit=1/10/25/50` y cursor en InfoLobby, ChileCompra y DIPRES;
 - [x] Promover PR #497 al 100% y verificar health, páginas 1–2 y límites 1/10/25/50
-  en producción; queda pendiente sólo el verificador productivo largo iniciado.
+  en producción; el verificador productivo largo quedó exitoso.
 - [x] Ejecutar el verificador de calendario ETL (`34717871931`) sin tocar D1.
 - [x] Inventariar las carpetas maestras locales; sólo existen `public`, `audit`
   y `editorial` (20,46 GiB combinados), sin eliminar contenido.
