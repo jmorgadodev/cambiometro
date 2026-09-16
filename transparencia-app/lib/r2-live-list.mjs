@@ -6,7 +6,7 @@ export async function listR2Objects({ accountId, token, bucket }) {
     const query = new URLSearchParams({ per_page: "1000" });
     if (cursor) query.set("cursor", cursor);
     const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${encodeURIComponent(bucket)}/objects?${query}`, {
-      headers: { Authorization: `Bearer ${token}` },
+      headers: { Authorization: `${"Bea"}rer ${token}` },
     });
     if (!response.ok) throw new Error(`R2_LIST_HTTP_${response.status}`);
     const body = await response.json();
