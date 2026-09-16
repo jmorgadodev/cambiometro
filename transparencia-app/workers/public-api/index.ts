@@ -2216,8 +2216,10 @@ export default {
       // gratuito de rows_read antes de llegar al release canónico. R2 es la
       // fuente pública; D1 sólo se habilita mediante ALLOW_PUBLIC_D1_READS=1.
       const requestedScope = normalized(url.searchParams.get("scope") ?? "");
-      if (requestedScope === "all" && !url.searchParams.get("muni") && !url.searchParams.get("organismo")
-        && (url.searchParams.get("query") ?? url.searchParams.get("q"))?.trim()) {
+      if (requestedScope === "all" && !url.searchParams.get("muni") && !url.searchParams.get("organismo")) {
+        // `scope=all` must include both published R2 projections even when the
+        // caller is listing without a text query. Returning the municipal
+        // projection alone makes the API silently lose the central universe.
         const combined = await listAllFuncionariosFromR2(url, env);
         if (combined.status < 500) return combined;
       }

@@ -434,6 +434,53 @@ describe("API canónica v1", () => {
     expect(payload.data.funcionarios.map((item: { id: string }) => item.id).sort()).toEqual(["central-torrealba", "municipal-torrealba"]);
   });
 
+  it("scope=all sin texto devuelve ambas nóminas sin consultar D1", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-09-15T00:00:00.000Z",
+        version: "municipal-test",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/municipal-test/search_index.json" },
+      },
+      "projections/funcionarios-central-v1/manifest.json": {
+        generatedAt: "2026-09-15T00:00:00.000Z",
+        version: "central-test",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-central-v1/versions/central-test/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/municipal-test/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 2,
+        pageSize: 10,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/municipal-test/search_index/p-0001.json", count: 2 }],
+      },
+      "projections/funcionarios-central-v1/versions/central-test/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1,
+        pageSize: 10,
+        pages: [{ page: 1, key: "projections/funcionarios-central-v1/versions/central-test/search_index/p-0001.json", count: 1 }],
+      },
+      "projections/funcionarios-v1/versions/municipal-test/search_index/p-0001.json": [
+        { id: "municipal-1", n: "Persona Municipal 1", c: "Profesional", o: "Municipalidad A", t: "Planta", e: "Profesional", b: 1000000 },
+        { id: "municipal-2", n: "Persona Municipal 2", c: "Técnico", o: "Municipalidad B", t: "Contrata", e: "Técnico", b: 800000 },
+      ],
+      "projections/funcionarios-central-v1/versions/central-test/search_index/p-0001.json": [
+        { id: "central-1", n: "Persona Central 1", c: "Asesor", o: "Ministerio", t: "Contrata", e: "Profesional", b: 2000000 },
+      ],
+    };
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse para scope=all"); } },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/funcionarios?scope=all&limit=10"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta).toMatchObject({ total: 3, sourceStatus: "r2-search-combined", sources: ["municipal", "central"] });
+    expect(payload.data.map((item: { id: string }) => item.id).sort()).toEqual(["central-1", "municipal-1", "municipal-2"]);
+  });
+
   it("conserva la búsqueda de funcionarios si el catálogo de entidades no está disponible", async () => {
     const files: Record<string, unknown> = {
       "projections/funcionarios-v1/manifest.json": {
