@@ -50,7 +50,9 @@ jobs:
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+          # Use the least-privilege read-only token for Analytics. Keep the
+          # legacy token only as a temporary fallback until the secret is set.
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_AUDIT_API_TOKEN || secrets.WRANGLER_TOKEN }}
           D1_USAGE_OUTPUT: d1-usage.json
           # La vigilancia programada debe completar para conservar la evidencia
           # y dejar el estado critical visible sin convertir la alerta en un

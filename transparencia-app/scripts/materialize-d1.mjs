@@ -6,6 +6,7 @@ import readline from "node:readline";
 import { spawnSync } from "node:child_process";
 import { createGunzip } from "node:zlib";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
+import { canMaterializeD1 } from "./d1-materialization-policy.mjs";
 import { canonicalizeLakeRecord, D1_ARCHIVE_ONLY_SOURCES, entityFromRosterMember, relationsFromLakeRecord, selectMaterializedPartitions, sourceStateChecksum } from "./etl/materialize.mjs";
 import { changedSources } from "./etl/materialize-incremental.mjs";
 import { fetchParliamentRosters } from "./etl/parliament-rosters.mjs";
@@ -19,7 +20,11 @@ function argument(name, fallback) {
 const database = argument("--database", "transparencia-db");
 const bucket = argument("--bucket", "transparencia-public-data");
 const lakeRoot = resolve(argument("--lake", "data/lake"));
+const showHelp = process.argv.includes("--help") || process.argv.includes("-h");
 const isRemote = process.argv.includes("--remote");
+if (isRemote && !showHelp && !canMaterializeD1()) {
+  throw new Error("D1_REMOTE_MATERIALIZATION_REQUIRES_EXPLICIT_CONFIRMATION");
+}
 const dryRun = process.argv.includes("--dry-run");
 const includeAllHistory = process.argv.includes("--all-history");
 const skipUnchanged = process.argv.includes("--skip-unchanged");
@@ -35,7 +40,6 @@ const wranglerBin = resolve("node_modules/wrangler/bin/wrangler.js");
 const wranglerConfig = resolve("workers/public-api/wrangler.jsonc");
 const wranglerMigrationConfig = resolve("wrangler.d1.jsonc");
 const work = mkdtempSync(join(tmpdir(), "cambiometro-d1-"));
-const showHelp = process.argv.includes("--help") || process.argv.includes("-h");
 
 function command(binary, args, allowFailure = false) {
   const result = spawnSync(binary, args, { encoding: "utf8", stdio: allowFailure ? "pipe" : "inherit" });
