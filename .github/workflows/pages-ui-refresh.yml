@@ -253,9 +253,7 @@ jobs:
       - name: Preparar D1 local de integración
         working-directory: transparencia-app
         run: |
-          for migration in migrations/*.sql; do
-            npx wrangler d1 execute transparencia-db --local --config workers/public-api/wrangler.jsonc --file "$migration"
-          done
+          npx wrangler d1 migrations apply transparencia-db --local --config workers/public-api/wrangler.jsonc
           npx wrangler d1 execute transparencia-db --local --config workers/public-api/wrangler.jsonc --file fixtures/d1-browser.sql
 
       - name: Verificar navegador, temas y CSP
