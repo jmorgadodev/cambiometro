@@ -17,4 +17,8 @@ describe("configuración del índice de búsqueda CPLT", () => {
   it("rechaza tamaños que volverían a crear objetos inseguros", () => {
     expect(() => getCpltSearchPageSize({ central: true, override: "10001" })).toThrow("CPLT_SEARCH_PAGE_SIZE_INVALID");
   });
+
+  it("no permite reactivar páginas grandes en la nómina central", () => {
+    expect(() => getCpltSearchPageSize({ central: true, override: "2501" })).toThrow("CPLT_SEARCH_PAGE_SIZE_INVALID");
+  });
 });
