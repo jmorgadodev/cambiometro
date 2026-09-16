@@ -42,4 +42,13 @@ describe("bloqueos de ETL heredados", () => {
       expect(source).toContain("secrets.CLOUDFLARE_AUDIT_API_TOKEN || secrets.WRANGLER_TOKEN");
     }
   });
+
+  it("mantiene congelado el Worker ETL histórico", () => {
+    const source = readFileSync(resolve("workers/etl/cron.ts"), "utf8");
+    const config = readFileSync(resolve("workers/etl/wrangler.toml"), "utf8");
+    expect(source).toContain("Worker congelado");
+    expect(source).not.toMatch(/prepare\(|\.put\(|fetchInfoProbidad|fetchGastos|fetchAudiencias/);
+    expect(config).not.toContain("[[d1_databases]]");
+    expect(config).not.toContain("crons =");
+  });
 });
