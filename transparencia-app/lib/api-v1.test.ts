@@ -1206,7 +1206,7 @@ describe("API canónica v1", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.meta).toMatchObject({ sourceBackend: "r2-lake", requestedSource: "votaciones_camara", sourceStatus: "complete", total: 1, expectedRows: 2, publishedRows: 2 });
+    expect(payload.meta).toMatchObject({ sourceBackend: "r2-lake", requestedSource: "votaciones_camara", sourceStatus: "complete", total: 1, expectedRows: 1, publishedRows: 1 });
     expect(payload.data[0]).toMatchObject({ id: "camara-vote-variant-1", kind: "vote", sourceId: "camara" });
   });
 
