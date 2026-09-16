@@ -59,7 +59,12 @@ function classification({ production, local, children }) {
   const hasCategorySplit = children.length > 0;
   if (production && local && Number(production.recordCount) === Number(local.recordCount) && !hasCategorySplit) return "match";
   if (hasCategorySplit || (local && sourceCategories(local.id).length > 0 && !production)) return "scope";
-  if (production && local && hasNewerProduction(production, local)) return "freshness";
+  if (production && local && hasNewerProduction(production, local)) {
+    // Una versión más nueva con más filas puede ser frescura. Si trae menos,
+    // el dato puede estar recortado o pertenecer a otro alcance: no se debe
+    // presentar como actualización normal hasta reconciliar categorías.
+    return Number(production.recordCount) > Number(local.recordCount) ? "freshness" : "scope";
+  }
   return "unexplained";
 }
 

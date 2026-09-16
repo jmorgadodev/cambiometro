@@ -35,6 +35,15 @@ describe("auditoría de reconciliación producción/R2/local", () => {
     expect(report.rows[0].classification).toBe("unexplained");
   });
 
+  it("no llama frescura a un release más nuevo que trae menos filas", () => {
+    const report = reconcileSourceSnapshots({
+      production: [{ id: "senado", recordCount: 1_428, lastUpdated: "2026-09-15T00:00:00Z", status: "partial" }] as never,
+      local: [{ id: "senado", recordCount: 8_138, generatedAt: "2026-08-21T00:00:00Z", status: "partial" }] as never,
+    });
+
+    expect(report.rows[0]).toMatchObject({ classification: "scope", productionCount: 1_428, localCount: 8_138 });
+  });
+
   it("separa categorías parlamentarias sin sumar categorías distintas", () => {
     expect(sourceCategories("gastos_senado")).toEqual(["gastos"]);
     expect(sourceCategories("votaciones_senado")).toEqual(["votaciones"]);

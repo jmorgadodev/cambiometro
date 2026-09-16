@@ -23,11 +23,19 @@ async function main() {
   const response = await fetch(productionUrl, { headers: { Accept: "application/json" } });
   if (!response.ok) throw new Error(`PRODUCTION_SOURCES_HTTP_${response.status}`);
 
-  const [productionPayload, localCatalog, localHealth] = await Promise.all([
-    response.json(),
-    readJson(localCatalogPath),
-    readJson(localHealthPath),
-  ]);
+  const productionPayload = await response.json();
+  const localHealth = await readJson(localHealthPath);
+  let localCatalog = { generatedAt: localHealth.generatedAt ?? null, sources: [] };
+  let localCatalogMode = "health-only";
+  try {
+    localCatalog = await readJson(localCatalogPath);
+    localCatalogMode = "catalog-and-health";
+  } catch (error) {
+    // Algunos checkouts de trabajo no conservan el catálogo lake completo.
+    // source-health sigue siendo una señal válida para clasificar frescura,
+    // pero nunca se presenta como un manifiesto R2 equivalente.
+    if (error?.code !== "ENOENT") throw error;
+  }
   const report = reconcileSourceSnapshots({
     production: productionSourcesPayload(productionPayload),
     local: mergeLocalHealth(localCatalog, localHealth),
@@ -37,6 +45,7 @@ async function main() {
     generatedAt: report.generatedAt,
     productionUrl,
     localCatalog: resolve(localCatalogPath),
+    localCatalogMode,
     localHealth: resolve(localHealthPath),
     classificationLegend: {
       match: "Los conteos coinciden y no hay componentes locales separados.",
