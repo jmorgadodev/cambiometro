@@ -105,6 +105,7 @@
     "ingest:contraloria": "node scripts/ingest-contraloria.mjs",
     "ingest:senado": "node scripts/ingest-senado.mjs",
     "repair:senado:partition": "node scripts/etl/repair-senate-partition.mjs",
+    "preflight:senado:votaciones": "node scripts/etl/merge-senado-votaciones-preflight.mjs",
     "ingest:servel": "node scripts/ingest-servel.mjs",
     "ingest:camara-attendance": "node scripts/ingest-camara-attendance.mjs",
     "ingest:votaciones-full": "node scripts/ingest-votaciones-full.mjs",
