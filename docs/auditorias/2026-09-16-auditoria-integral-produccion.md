@@ -1299,3 +1299,11 @@ filas y 0 filas materializadas en D1), `check:data-quality-summary` y
 `check:production-gates`. La verificación productiva de Remuneraciones pasó
 con 33.776 filas estáticas, 169 páginas y las búsquedas críticas de Lucy
 Depablos, Sofía Pumpin, María Victoria Raimann Pumpin e Independencia.
+
+El guard de zona de Cloudflare no pudo enumerar `impulsacv.cl` con el token de
+auditoría actual: la API respondió correctamente, pero sin zonas visibles.
+Esto es coherente con un token limitado a cuenta/R2/D1/Analytics y no afecta
+las consultas públicas ni permite concluir que la zona esté caída. Para
+auditar WAF/RUM en el futuro se necesitará un token separado, de sólo lectura,
+con acceso explícito a la zona y permisos de lectura de las reglas requeridas;
+no se reutilizará el token de datos ni se ampliarán permisos automáticamente.
