@@ -1657,3 +1657,43 @@ La estructura de rutas, navegación, municipalidades, remuneraciones y
 en D1 ni cargas nuevas en R2. La cuenta no debe recibir otro release hasta que
 el preflight de tamaño sea inferior al umbral operativo y exista rollback
 verificado.
+
+### Verificación específica y conciliación de fuentes — 16-09-2026 14:45 UTC-3
+
+La prueba `verify:prod:movimientos` terminó completamente verde. Confirmó
+HTTP 200 para la página y el snapshot, release de 46 salidas con corte
+2026-09-14, presencia de filas con evidencia oficial y corroboración pública,
+reemplazos cuando existe respaldo, ausencia del agregador externo y exclusión
+de Carolina Arredondo, Eduardo Vergara, Ignacia Fernández, Daniela Dresdner,
+José Andrés Herrera y Patricio Kuhn. También confirmó que Rafael Araos figura
+como subsecretario. `check:movimientos-integrity` informó 46 filas dentro de
+alcance, cero fuera de alcance, cero IDs duplicados y cero incidencias.
+
+La auditoría de remuneraciones no modifica releases y dejó estas pruebas
+válidas: Lucy Depablos (7 filas), Sofía Pumpin (1), María Victoria Raimann
+Pumpin (1), Río Sebastián Torrealba del Río (1) e Independencia municipal
+(8.161 filas totales, consulta paginada de 20). Esto demuestra que esas rutas
+de búsqueda responden, pero no demuestra por sí solo que el universo completo
+esté reconciliado.
+
+La diferencia de remuneraciones debe mantenerse separada por artefacto:
+
+- Release estático de la página: 1.203.287 filas.
+- Conteo productivo de la fuente `cplt`: 1.243.761 filas.
+- Diferencia entre ambos: 40.474 filas.
+- Snapshot local del catálogo comparativo: 1.218.136 filas.
+- Diferencia entre producción y ese snapshot local: 25.625 filas.
+
+Los tres números no se suman ni se usan para afirmar cobertura hasta comparar
+período, organismo, releaseId y checksum. La diferencia local/producción es
+compatible con frescura distinta; la diferencia entre el release estático y
+la fuente productiva requiere reconciliación específica antes de la próxima
+publicación de interfaz. El informe actual clasifica 6 fuentes como
+coincidentes, 1 como más fresca en producción y 8 con diferencia de alcance
+o categoría; no hay diferencias clasificadas como inexplicadas.
+
+El inventario físico confirma que no es seguro recuperar particiones todavía:
+el bucket público ocupa 11.078.005.075 bytes y el de backups 6.359.832.609
+bytes, para 17.437.837.684 bytes combinados frente al límite de 10 GB. Por
+eso se mantiene la regla: cero nuevas cargas o copias R2 hasta liberar espacio
+con una política explícita de rollback y una credencial de escritura.
