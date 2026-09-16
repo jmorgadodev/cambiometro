@@ -91,6 +91,20 @@ corresponde al calendario publicado por la fuente original. Las votaciones
 usan un conector distinto y permanecen como control separado; no se infiere su
 ausencia sólo a partir del calendario de sesiones.
 
+### Discrepancia confirmada en votaciones de marzo de 2026
+
+La fuente oficial `WSLegislativo` devolvió 107 votaciones para `2026-03`,
+mientras que la partición R2 vigente
+`camara/votaciones_camara/2026/03` contiene 39 filas. La diferencia es de 68
+registros y no debe presentarse como una diferencia local/producción menor.
+
+Se ejecutó el ETL de Cámara en modo `--dry-run --full-history` para ese único
+mes: obtuvo 107 votaciones, 0 errores y terminó en 3,181 ms. El modo dry-run
+confirmó explícitamente que no escribió archivos, R2 ni D1. El siguiente paso
+seguro es preparar un release aislado con esas 107 filas, verificar IDs,
+detalles y checksum, y promoverlo sólo después de esa revisión. No se hizo
+ninguna publicación automática con esta auditoría.
+
 ## Estado de D1 y R2
 
 - El health productivo declara `publicDataBackend=r2`, `publicD1Reads=false` y
@@ -108,9 +122,8 @@ ausencia sólo a partir del calendario de sesiones.
 1. Identificar el consumidor externo que explica la actividad histórica de
    `transparencia-db`; la sonda actual sólo permite atribuirla por base de
    datos, no por proyecto.
-2. Comprobar con las fuentes originales si los tres febreros sin partición de
-   Cámara fueron meses sin publicación o releases faltantes, sin interpretar un
-   HTTP 429 o un timeout como ausencia de datos.
+2. Preparar y validar el release aislado de votaciones Cámara `2026-03`:
+   107 filas oficiales frente a 39 publicadas actualmente.
 3. Auditar la cobertura de remuneraciones CPLT por período y organismo antes
    de incorporar nuevos pagos.
 4. Completar la matriz de calidad de nombres, montos, períodos y duplicados
