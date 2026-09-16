@@ -1200,3 +1200,30 @@ conteo, período y alcance documentados; el release anterior queda disponible
 para rollback; y una falla externa conserva el último release válido. Quedan
 prohibidos los reemplazos automáticos por cero filas, las fusiones por nombre
 solamente y las correcciones que oculten el valor original.
+
+### Auditoría acotada de Remuneraciones — 16-09-2026
+
+Se agregó `npm run audit:remuneraciones`, una auditoría de sólo lectura que
+consulta el manifiesto unificado, la metadata de fuentes productivas y cinco
+búsquedas limitadas. No escribe releases, no descarga los universos completos
+y no consulta D1 masivamente.
+
+Resultado productivo de esta ejecución:
+
+| Alcance | Filas consultables | Incidencias de calidad | Última actualización |
+|---|---:|---:|---|
+| Municipal | 1.243.761 | 159.705 | 15-09-2026 08:08 UTC |
+| Central | 2.110.434 | 563.221 | 14-09-2026 03:51 UTC |
+| Release unificado estático acotado | 33.776 | — | 16-09-2026 08:29 UTC |
+
+Las búsquedas de Lucy Depablos (7), Sofía Pumpin (1), María Victoria Raimann
+Pumpin (1), Río Sebastián Torrealba del Río (1) e Independencia municipal
+(8.161) devolvieron resultados. El snapshot estático de Transparencia Activa
+declara 1.203.287 filas frente a 1.243.761 en producción: diferencia de
+40.474 filas clasificada como revisión de release/alcance, no como pérdida.
+No se modificó ningún dato.
+
+La auditoría queda como requisito previo para completar la cobertura por mes y
+organismo. Mientras esa diferencia no se reconcilie, no se presentará un
+porcentaje de cobertura ni se actualizará el snapshot local con un conteo que
+no tenga artefactos correspondientes.
