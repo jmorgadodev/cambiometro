@@ -36,6 +36,8 @@ export async function runCoverageSweep({ silent = false, transferManifest = null
   const movimientosPath = resolve("data/movimientos.json");
   const movimientosRaw = existsSync(movimientosPath) ? JSON.parse(readFileSync(movimientosPath, "utf8")) : {};
   const movimientosList = Array.isArray(movimientosRaw) ? movimientosRaw : (movimientosRaw.movimientos || []);
+  const movementPolicyPath = resolve("data/movimientos-scope-policy.json");
+  const movementPolicy = existsSync(movementPolicyPath) ? JSON.parse(readFileSync(movementPolicyPath, "utf8")) : {};
 
   // 2. Votaciones de Sala Oficiales vs Indexadas (Período 2026-2030)
   // El snapshot hidratado desde R2 es el release que consume Pages. No usar
@@ -138,9 +140,16 @@ export async function runCoverageSweep({ silent = false, transferManifest = null
 
   // 5. Movimientos de Autoridades (Benchmark Oficial BCN / Diario Oficial)
   const totalMovimientos = movimientosList.length;
-  const benchmarkMovimientos = 79;
+  // El universo ya no es el benchmark histórico de 79 filas: el release
+  // vigente está explícitamente acotado al corte reconciliado de 46 salidas.
+  // Mantener el fallback histórico sólo permite auditar snapshots antiguos;
+  // no debe convertir el release validado en un falso déficit de cobertura.
+  const reconciledMovementRelease = movimientosRaw.release_status === "published_reconciled"
+    && movementPolicy.status === "validated_reconciled"
+    && Number(movementPolicy.targetCount) > 0;
+  const benchmarkMovimientos = reconciledMovementRelease ? Number(movementPolicy.targetCount) : 79;
   const cobMov = benchmarkMovimientos > 0 ? (totalMovimientos / benchmarkMovimientos) * 100 : 0;
-  const passMov = cobMov >= 95.0;
+  const passMov = reconciledMovementRelease ? totalMovimientos === benchmarkMovimientos : cobMov >= 95.0;
   if (!passMov) allPassed = false;
 
   rows.push({
@@ -150,7 +159,9 @@ export async function runCoverageSweep({ silent = false, transferManifest = null
     cobertura: `${cobMov.toFixed(1)}%`,
     umbral: "≥ 95.0%",
     estado: passMov ? "PASS" : "FAIL",
-    nota: "Gabinete, Subsecretarios, Delegados, Seremis",
+    nota: reconciledMovementRelease
+      ? `Release reconciliado: ${movementPolicy.cutoffDate ?? "corte vigente"}`
+      : "Gabinete, Subsecretarios, Delegados, Seremis",
   });
 
   // 6. Universos Canónicos vs Manifest
