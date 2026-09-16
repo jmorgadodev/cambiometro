@@ -1315,8 +1315,9 @@ validado, la preservación de alcances de Remuneraciones, los guards de D1/R2 y
 las auditorías reproducibles. La PR quedó inicialmente bloqueada mientras
 corren Build/E2E, Quality, Security y calendario. Esto corrige un desfase real:
 `main` todavía exigía 79 movimientos y por eso su refresco automático falló
-con el release reconciliado de 46. No se hizo merge ni promoción automática;
-la promoción queda condicionada a que todos los checks terminen verdes.
+con el release reconciliado de 46. La PR quedó integrada después de que los
+checks obligatorios terminaran verdes; la evidencia del cierre productivo se
+detalla en la sección siguiente.
 
 ### Cierre productivo de Movimientos — 16-09-2026
 
