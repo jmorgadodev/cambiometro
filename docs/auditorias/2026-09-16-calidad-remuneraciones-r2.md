@@ -53,6 +53,20 @@ Los resúmenes productivos sí contienen `newRecords`, `removedRecords`, `amount
 3. “Nuevos”, “ya no aparecen” y “cambios de monto” son diferencias entre cortes publicados. No equivalen por sí solos a contratación, despido o aumento efectivo.
 4. Septiembre contiene sólo 102 filas municipales y 123 centrales en el release revisado; se trata como corte parcial hasta que el manifiesto productivo indique cobertura completa.
 
+### Desglose central por organismo y contrato
+
+La revisión del snapshot central local (714 archivos, 2.110.434 filas) confirma que el salto de julio está concentrado en pocos organismos de educación, salud y corporaciones públicas, no distribuido uniformemente en toda la nómina:
+
+| Corte | Filas | Organismos | Principales concentraciones |
+| --- | ---: | ---: | --- |
+| 2026-07 | 578.446 | 645 | Fundación Integra 26.217; JUNJI 21.892; Corporación Municipal de Puente Alto 7.959 |
+| 2026-08 | 46.657 | 215 | Hospital de Puerto Montt 4.010; SLEP Iquique 3.185; SLEP del Pino 2.947 |
+| 2026-09 | 123 | 9 | Hospital San Juan de Dios 90; Hospital de Angol 23 |
+
+Por contrato, julio se compone principalmente de 312.432 filas de `Contrata`, 141.033 de `Planta`, 69.819 de `CodigoTrabajo` y 55.162 de `Honorarios`. En agosto, `CodigoTrabajo` concentra 37.748 de 46.657 filas; septiembre sólo contiene nueve organismos y 123 filas. Esto respalda tratar julio como un cambio de alcance/carga y agosto-septiembre como cortes parciales, no como variaciones de dotación.
+
+Este desglose cubre el snapshot central local y no sustituye la verificación municipal productiva.
+
 ## Índices y alcance actual
 
 El publicador ahora genera un `coverage-index.json` liviano por organismo y período. Contiene conteos, montos positivos, ceros, montos no clasificables, incidencias y distribución contractual; no copia nombres ni filas completas. Su checksum queda dentro del manifiesto de cada release. Esto permite auditar la cobertura sin descargar el universo ni consultar D1.
