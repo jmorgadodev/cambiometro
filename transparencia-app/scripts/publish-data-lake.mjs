@@ -5,6 +5,7 @@ import { join, resolve } from "node:path";
 import { spawn, spawnSync } from "node:child_process";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
 import { planR2Publication } from "./etl/r2.mjs";
+import { assertRemoteR2WriteBudget, configuredR2BudgetBuckets } from "./etl/r2-account-budget.mjs";
 import { listR2Objects } from "../lib/r2-live-list.mjs";
 import { readJsonIfPresent, writeFileAtomic } from "./etl/safe-file.mjs";
 
@@ -222,6 +223,17 @@ if (publishR2) {
   };
   const r2Plan = planR2Publication(assets, previous);
   const activationManifests = r2Plan.puts.filter((asset) => asset.key.endsWith("/manifest.json"));
+  const inventoryText = `${JSON.stringify(r2Plan.inventory, null, 2)}\n`;
+  const storageBudget = await assertRemoteR2WriteBudget({
+    accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
+    token: process.env.CLOUDFLARE_API_TOKEN,
+    buckets: configuredR2BudgetBuckets(bucket),
+    puts: [
+      ...r2Plan.puts.map((asset) => ({ bucket, key: asset.key, size: asset.size })),
+      { bucket, key: inventoryKey, size: Buffer.byteLength(inventoryText) },
+    ],
+    deletes: r2Plan.deletes.map((key) => ({ bucket, key, size: 0 })),
+  });
 
   // Sólo se eliminan particiones frías o versiones históricas no activas.
   // Liberarlas antes de subir evita superar transitoriamente la cuota R2.
@@ -232,7 +244,7 @@ if (publishR2) {
     await wranglerWithRetryAsync(["r2", "object", "put", `${bucket}/${manifest.key}`, "--file", join(outputRoot, manifest.key), "--content-type", "application/json"]);
   }
 
-  writeFileAtomic(inventoryPath, `${JSON.stringify(r2Plan.inventory, null, 2)}\n`, "utf8");
+  writeFileAtomic(inventoryPath, inventoryText, "utf8");
   await wranglerWithRetryAsync(["r2", "object", "put", `${bucket}/${inventoryKey}`, "--file", inventoryPath, "--content-type", "application/json"]);
   console.log(JSON.stringify({
     action: r2Plan.action,
@@ -240,5 +252,10 @@ if (publishR2) {
     limitBytes: r2Plan.limitBytes,
     puts: r2Plan.puts.length,
     deletes: r2Plan.deletes.length,
+    storageBudget: {
+      currentBytes: storageBudget.currentBytes,
+      projectedBytes: storageBudget.projectedBytes,
+      peakBytes: storageBudget.peakBytes,
+    },
   }, null, 2));
 }

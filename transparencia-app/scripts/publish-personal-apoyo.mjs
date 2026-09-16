@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
+import { assertRemoteR2WriteBudget, configuredR2BudgetBuckets } from "./etl/r2-account-budget.mjs";
 import { splitPersonalApoyoJson, validatePersonalApoyoDataset } from "./etl/personal-apoyo-publication.mjs";
 
 function argument(name, fallback) {
@@ -21,10 +22,9 @@ const bucket = argument("--bucket", "transparencia-public-data");
 const input = resolve(argument("--input", "data/personal-apoyo.json"));
 const remote = process.argv.includes("--remote");
 const skipD1 = process.argv.includes("--skip-d1");
-const localAuth = process.argv.includes("--local-auth") && !process.env.CI;
 if (database !== "transparencia-db") throw new Error(`PERSONAL_APOYO_D1_NOT_AUTHORIZED: ${database}`);
 if (bucket !== "transparencia-public-data") throw new Error(`PERSONAL_APOYO_R2_NOT_AUTHORIZED: ${bucket}`);
-if (remote && !localAuth) requireCloudflareDataCredentials();
+const credentials = remote ? requireCloudflareDataCredentials() : null;
 
 const buffer = readFileSync(input);
 const dataset = JSON.parse(buffer.toString("utf8"));
@@ -49,6 +49,17 @@ function wrangler(args) {
 try {
   const manifestPath = join(work, "manifest.json");
   writeFileSync(manifestPath, manifest);
+  const storageBudget = remote ? await assertRemoteR2WriteBudget({
+    accountId: credentials.accountId,
+    token: credentials.token,
+    buckets: configuredR2BudgetBuckets(bucket),
+    puts: [
+      { bucket, key: `projections/personal-apoyo-v1/versions/${version}/personal-apoyo.json`, size: buffer.byteLength },
+      { bucket, key: `projections/personal-apoyo-v1/versions/${version}/manifest.json`, size: manifest.byteLength },
+      { bucket, key: "projections/personal-apoyo-v1/personal-apoyo.json", size: buffer.byteLength },
+      { bucket, key: "projections/personal-apoyo-v1/manifest.json", size: manifest.byteLength },
+    ],
+  }) : null;
   if (remote) {
     wrangler(["r2", "object", "put", `${bucket}/projections/personal-apoyo-v1/versions/${version}/personal-apoyo.json`, "--file", input, "--remote"]);
     wrangler(["r2", "object", "put", `${bucket}/projections/personal-apoyo-v1/versions/${version}/manifest.json`, "--file", manifestPath, "--remote"]);
@@ -85,7 +96,7 @@ try {
       throw error;
     }
   }
-  console.log(JSON.stringify({ database: skipD1 ? null : database, bucket: remote ? bucket : null, d1: skipD1 ? "deferred" : "published", version, checksumSha256: checksum, chunks: chunks.length, ...summary }, null, 2));
+  console.log(JSON.stringify({ database: skipD1 ? null : database, bucket: remote ? bucket : null, d1: skipD1 ? "deferred" : "published", version, checksumSha256: checksum, chunks: chunks.length, storageBudget: storageBudget ? { currentBytes: storageBudget.currentBytes, projectedBytes: storageBudget.projectedBytes, peakBytes: storageBudget.peakBytes } : null, ...summary }, null, 2));
 } finally {
   rmSync(work, { recursive: true, force: true });
 }
