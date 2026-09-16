@@ -1591,3 +1591,69 @@ y 0 fallas en cada una de las dos pasadas. La versión observada fue
 `v1.0-a3c08e35`; Movimientos permaneció en 46/46, el health respondió HTTP 200
 con `publicDataBackend=r2` y `publicD1Reads=false`, y las rutas principales
 continuaron disponibles.
+
+### Cierre prioritario de Movimientos y ruta posterior — 16-09-2026
+
+La prioridad crítica de Movimientos queda validada en producción. La consulta
+`/api/v1/records?source=movimientos&limit=100` respondió HTTP 200 desde R2 con
+`sourceStatus=complete`, `total=46` y `publishedRows=46`. El release publicado
+es `kast-2026-succession-reconciled-2026-09-14`, con checksum
+`9a884d9bef8627718afed406d530591acec6a95c50dd27956c744b56766f1995`.
+
+El control de integridad del release mantiene 46/46 salidas del benchmark:
+3 ministras, 6 subsecretarios, 36 seremis y 1 delegado regional. No se
+detectan en el release productivo las autoridades históricas señaladas como
+falsos positivos ni los cargos incorrectos de Rafael Araos y Martín Arrau.
+El pipeline permanece congelado para inyección automática (`etlFrozen=true`,
+`productionMutation=false`). Los estados de verificación y sus evidencias se
+conservan; una fila corroborada por prensa no se presenta como decreto oficial
+hasta contar con el documento primario.
+
+#### Plan de trabajo posterior, sin parches ni cargas ciegas
+
+1. **Regresión protegida (cerrada):** conservar una prueba de producción para
+   46 registros, categorías, cargos corregidos, ausencia de autoridades
+   históricas y origen R2. Cualquier cambio que altere el total o reintroduzca
+   esos nombres queda bloqueado.
+2. **Salud de fuentes y releases:** auditar cada fuente contra el manifiesto
+   físico de R2, comparando producción, release activo y snapshot local sólo
+   por fecha, alcance, categoría y checksum. Una falla conservará el último
+   release válido y nunca publicará cero filas.
+3. **Cámara y Senado:** separar remuneraciones, asesorías, gastos y
+   votaciones; restaurar sólo particiones con manifiesto y checksum verificable.
+   Senado se procesará por categoría, porque el histórico anterior mezclaba
+   tickets, misiones, gastos y dietas bajo un mismo identificador.
+4. **Remuneraciones y Transparencia Activa:** auditar cobertura por organismo,
+   período y tipo de pago; conservar valores originales, separar faltante de
+   cero y cargar sólo pagos oficiales faltantes después de una muestra
+   reconciliada.
+5. **Movimientos incremental:** incorporar novedades sólo con identificador
+   estable, fecha del evento, evidencia y estado explícito. No se ampliará el
+   universo por noticias o nombramientos sin respaldo documental sin marcarlo
+   como pendiente.
+6. **R2 antes de cualquier publicación:** no copiar, recuperar ni generar un
+   nuevo release mientras el almacenamiento físico combinado siga sobre el
+   umbral. La medición actual es 11.078.005.075 bytes en el bucket público y
+   6.359.832.609 bytes en backups (17.437.837.684 bytes combinados). El guard
+   de 95% ya bloquea el backup antes de borrar o copiar. Se requiere definir
+   retención y usar una credencial de escritura antes de liberar espacio.
+7. **Promoción por bloque:** cada fuente tendrá auditoría R2, normalización
+   local, checksum/conteo, preview, smoke de API y navegación, revisión móvil,
+   promoción individual y rollback registrado. No se ejecutará ETL durante un
+   despliegue de interfaz.
+
+#### Orden recomendado
+
+Primero mantener Movimientos congelado y monitorizar su regresión; segundo
+resolver espacio y referencias huérfanas de R2; tercero reparar Senado por
+categorías; cuarto auditar remuneraciones/Transparencia Activa; y recién
+después ampliar históricos de ChileCompra, InfoLobby o DIPRES. Hasta cerrar el
+segundo punto no se agregan datos masivos ni se afirma cobertura total.
+
+#### Estado de seguridad
+
+La estructura de rutas, navegación, municipalidades, remuneraciones y
+`cambiometro-editorial` queda fuera de este cierre. No se hicieron escrituras
+en D1 ni cargas nuevas en R2. La cuenta no debe recibir otro release hasta que
+el preflight de tamaño sea inferior al umbral operativo y exista rollback
+verificado.
