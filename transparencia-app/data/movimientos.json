@@ -22,11 +22,11 @@
   "signals": [],
   "stats": {
     "total_movimientos": 46,
-    "verificados": 4,
-    "corroborados": 42,
+    "verificados": 11,
+    "corroborados": 35,
     "en_confirmacion": 0,
-    "con_reemplazo": 10,
-    "reemplazo_no_informado": 36,
+    "con_reemplazo": 26,
+    "reemplazo_no_informado": 20,
     "signals_en_confirmacion": 0,
     "target_categories": "{\"ministers\":3,\"subsecretaries\":6,\"seremis\":36,\"delegados\":1}"
   },
@@ -207,26 +207,38 @@
           "url": "https://www.biobiochile.cl/noticias/nacional/region-de-los-lagos/2026/08/11/minsal-solicita-la-renuncia-a-seremi-de-salud-en-los-lagos-que-enfrenta-denuncias-por-ley-karin.shtml",
           "fecha": "2026-08-11",
           "titulo": "Registro de salida de Evelyn Bintrup (11 ago)"
+        },
+        {
+          "nivel": "oficial",
+          "medio": "Ministerio de Salud de Chile",
+          "url": "https://www.minsal.cl/ministerio-de-salud-designa-nueva-seremi-de-la-region-de-los-lagos/",
+          "fecha": "2026-09-07",
+          "titulo": "Ministerio de Salud designa nueva seremi de la Región de Los Lagos"
         }
       ],
-      "estado": "corroborado",
-      "verificado": false,
-      "documento_pendiente": true,
+      "estado": "verificado",
+      "verificado": true,
+      "documento_pendiente": false,
       "fecha_deteccion": "2026-08-11T12:00:00.000Z",
-      "fecha_verificacion": null,
+      "fecha_verificacion": "2026-08-11T16:00:00.000Z",
       "fecha": "2026-08-11",
       "fechaExacta": true,
       "organo": "Secretaría Regional Ministerial de Salud",
       "saliente": "Evelyn Bintrup",
       "motivo": "Renuncia pedida por el Minsal en medio de denuncias por Ley Karin (acoso laboral) en su contra",
-      "fuente": "Radio Biobío (2026-08-11)",
+      "fuente": "Radio Biobío (2026-08-11) · Ministerio de Salud de Chile (2026-09-07)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "prensa_publicada",
-        "documento_primario_verificado": false
+        "tipo_fuente": "registro_oficial_y_prensa",
+        "documento_primario_verificado": true
       },
-      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
+      "reemplazo_estado": "fuente_oficial",
+      "entro": {
+        "nombre": "Fernanda Robles Inostroza",
+        "fecha": "2026-08-11"
+      },
+      "entrante": "Fernanda Robles Inostroza"
     },
     {
       "id": "mov-kast-2026-2026-07-30-karla-kepec",
@@ -291,6 +303,13 @@
           "url": "https://www.cnnchile.com/pais/confirman-la-renuncia-del-seremi-del-minvu-en-el-maule-marca-la-segunda-baja-regional-del-gobierno-en-menos-de-24-horas/",
           "fecha": "2026-08-01",
           "titulo": "Registro de salida de Patricio Ponce (1 ago)"
+        },
+        {
+          "nivel": "prensa",
+          "medio": "Emol",
+          "url": "https://www.emol.com/noticias/Nacional/2026/07/27/1206848/renuncia-seremi-vivienda-patricio-ponce.html",
+          "fecha": "2026-07-27",
+          "titulo": "La subrogancia de la Seremi de Vivienda del Maule la asumirá María José Díaz Hernández"
         }
       ],
       "estado": "corroborado",
@@ -303,14 +322,19 @@
       "organo": "Secretaría Regional Ministerial de Vivienda",
       "saliente": "Patricio Ponce",
       "motivo": "Renuncia voluntaria. Aludió a los nuevos topes de remuneraciones",
-      "fuente": "CNN Chile (2026-08-01)",
+      "fuente": "CNN Chile (2026-08-01) · Emol (2026-07-27)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
         "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
       },
-      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
+      "reemplazo_estado": "fuente_publica",
+      "entro": {
+        "nombre": "María José Díaz Hernández (Subrogante)",
+        "fecha": "2026-08-01"
+      },
+      "entrante": "María José Díaz Hernández (Subrogante)"
     },
     {
       "id": "mov-kast-2026-2026-07-27-cristian-cabezas",
@@ -329,10 +353,10 @@
       "fuentes": [
         {
           "nivel": "prensa",
-          "medio": "24Horas",
-          "url": "https://www.24horas.cl/actualidad/nacional/renuncia-seremi-de-vivienda-en-el-maule-es-baja-n-28-de-autoridades-kast",
+          "medio": "Emol",
+          "url": "https://www.emol.com/noticias/Nacional/2026/07/27/1206804/seremi-trabajo-tarapaca-denucnias-laboral.html",
           "fecha": "2026-07-27",
-          "titulo": "Registro de salida de Cristián Cabezas (27 jul)"
+          "titulo": "Renuncia de Cristián Cabezas como seremi del Trabajo de Tarapacá"
         }
       ],
       "estado": "corroborado",
@@ -345,7 +369,7 @@
       "organo": "Secretaría Regional Ministerial de Trabajo",
       "saliente": "Cristián Cabezas",
       "motivo": "Renuncia en medio de denuncias por presunto acoso y maltrato laboral, y por eventual uso indebido de recursos públicos",
-      "fuente": "24Horas (2026-07-27)",
+      "fuente": "Emol (2026-07-27)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
@@ -417,6 +441,13 @@
           "url": "https://www.latercera.com/politica/noticia/no-refleja-mi-realidad-exsubsecretario-de-hacienda-afirma-que-no-consume-drogas-y-atribuye-a-un-error-el-test-positivo-que-motivo-su-salida/",
           "fecha": "2026-07-23",
           "titulo": "Registro de salida de Juan Pablo Rodríguez (23 jul)"
+        },
+        {
+          "nivel": "prensa",
+          "medio": "El País",
+          "url": "https://elpais.com/chile/2026-08-10/kast-designa-a-un-nuevo-subsecretario-de-hacienda-tras-descartar-a-juan-pablo-rodriguez-destituido-tras-dar-positivo-en-un-test-de-drogas.html",
+          "fecha": "2026-08-10",
+          "titulo": "Sebastián Vallebona Espinosa es designado subsecretario de Hacienda"
         }
       ],
       "estado": "corroborado",
@@ -429,14 +460,19 @@
       "organo": "Ministerio de Hacienda",
       "saliente": "Juan Pablo Rodríguez",
       "motivo": "Removido tras dar positivo en test de drogas. Niega consumir y presentó un contraexamen negativo de la U. Católica",
-      "fuente": "La Tercera (2026-07-23)",
+      "fuente": "La Tercera (2026-07-23) · El País (2026-08-10)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "subsecretaries",
         "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
       },
-      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
+      "reemplazo_estado": "fuente_publica",
+      "entro": {
+        "nombre": "Sebastián Vallebona Espinosa",
+        "fecha": "2026-07-23"
+      },
+      "entrante": "Sebastián Vallebona Espinosa"
     },
     {
       "id": "mov-kast-2026-2026-07-22-eduardo-leiva",
@@ -459,6 +495,13 @@
           "url": "https://www.t13.cl/noticia/politica/exseremi-culturas-lagos-renuncio-tras-dar-positivo-examen-drogas-3-8-2026",
           "fecha": "2026-07-22",
           "titulo": "Registro de salida de Eduardo Leiva (22 jul)"
+        },
+        {
+          "nivel": "prensa",
+          "medio": "BioBioChile",
+          "url": "https://www.biobiochile.cl/noticias/nacional/region-de-los-lagos/2026/08/05/gobierno-anuncia-a-karen-lindh-como-nueva-seremi-de-las-culturas-de-la-region-de-los-lagos.shtml",
+          "fecha": "2026-08-05",
+          "titulo": "Karen Lindh Aguilar asume como seremi de las Culturas de Los Lagos"
         }
       ],
       "estado": "corroborado",
@@ -471,14 +514,19 @@
       "organo": "Secretaría Regional Ministerial de Culturas",
       "saliente": "Eduardo Leiva",
       "motivo": "Renunció tras dar positivo en un examen de drogas. Niega consumir y presentó un contraexamen negativo de la U. de Chile",
-      "fuente": "T13 (2026-07-22)",
+      "fuente": "T13 (2026-07-22) · BioBioChile (2026-08-05)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
         "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
       },
-      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
+      "reemplazo_estado": "fuente_publica",
+      "entro": {
+        "nombre": "Karen Lindh Aguilar",
+        "fecha": "2026-07-22"
+      },
+      "entrante": "Karen Lindh Aguilar"
     },
     {
       "id": "mov-kast-2026-2026-07-17-marcelo-vergara",
@@ -501,6 +549,13 @@
           "url": "https://www.elmostrador.cl/aqui-arica/2026/09/01/hacienda-confirma-test-positivo-de-drogas-a-exseremi-republicano-pero-no-entrega-resultados/",
           "fecha": "2026-07-17",
           "titulo": "Registro de salida de Marcelo Vergara (17 jul)"
+        },
+        {
+          "nivel": "prensa",
+          "medio": "Emol",
+          "url": "https://www.emol.com/noticias/Nacional/2026/07/18/1206023/seremi-hacienda-arica-presenta-renuncia.html",
+          "fecha": "2026-07-18",
+          "titulo": "Romina Cifuentes asumirá la subrogancia de Hacienda en Arica y Parinacota"
         }
       ],
       "estado": "corroborado",
@@ -513,14 +568,19 @@
       "organo": "Secretaría Regional Ministerial de Hacienda",
       "saliente": "Marcelo Vergara",
       "motivo": "Renuncia voluntaria, en medio de dudas por su test de drogas. Hacienda confirmó que dio positivo, pero se negó a entregar el informe completo",
-      "fuente": "El Mostrador (2026-07-17)",
+      "fuente": "El Mostrador (2026-07-17) · Emol (2026-07-18)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
         "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
       },
-      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
+      "reemplazo_estado": "fuente_publica",
+      "entro": {
+        "nombre": "Romina Cifuentes (Subrogante)",
+        "fecha": "2026-07-17"
+      },
+      "entrante": "Romina Cifuentes (Subrogante)"
     },
     {
       "id": "mov-kast-2026-2026-09-14-jorge-olivares",
@@ -585,6 +645,13 @@
           "url": "https://radiopaulina.cl/2026/09/03/seremi-de-vivienda-de-tarapaca-se-suma-a-la-lista-de-autoridades-renunciadas-en-lo-que-va-del-gobierno-de-kast/",
           "fecha": "2026-09-03",
           "titulo": "Registro de salida de Alonso Velásquez (3 sep)"
+        },
+        {
+          "nivel": "prensa",
+          "medio": "BioBioChile",
+          "url": "https://www.biobiochile.cl/noticias/nacional/region-de-tarapaca/2026/09/03/racha-de-salidas-suma-un-nuevo-capitulo-renuncia-seremi-de-vivienda-de-tarapaca-el-numero-35.shtml",
+          "fecha": "2026-09-03",
+          "titulo": "Godeliver Arriagada asume la subrogancia de Vivienda en Tarapacá"
         }
       ],
       "estado": "corroborado",
@@ -597,14 +664,19 @@
       "organo": "Secretaría Regional Ministerial de Vivienda",
       "saliente": "Alonso Velásquez",
       "motivo": "Renuncia voluntaria sin motivos detallados públicamente",
-      "fuente": "Radio Paulina (2026-09-03)",
+      "fuente": "Radio Paulina (2026-09-03) · BioBioChile (2026-09-03)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
         "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
       },
-      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
+      "reemplazo_estado": "fuente_publica",
+      "entro": {
+        "nombre": "Godeliver Arriagada González (Subrogante)",
+        "fecha": "2026-09-03"
+      },
+      "entrante": "Godeliver Arriagada González (Subrogante)"
     },
     {
       "id": "mov-kast-2026-2026-09-01-patricio-lohr",
@@ -623,10 +695,10 @@
       "fuentes": [
         {
           "nivel": "prensa",
-          "medio": "El Mostrador",
-          "url": "https://www.elmostrador.cl/aqui-arica/2026/09/01/hacienda-confirma-test-positivo-de-drogas-a-exseremi-republicano-pero-no-entrega-resultados/",
+          "medio": "ADN Radio",
+          "url": "https://www.adnradio.cl/2026/09/01/gobierno-pide-renuncia-a-seremi-de-transportes-de-arica-tras-denuncia-por-presuntas-presiones-a-funcionaria-de-la-dgac/?outputType=amp",
           "fecha": "2026-09-01",
-          "titulo": "Registro de salida de Patricio Löhr (1 sep)"
+          "titulo": "Gobierno pide la renuncia de Patricio Löhr como seremi de Transportes de Arica"
         }
       ],
       "estado": "corroborado",
@@ -639,7 +711,7 @@
       "organo": "Secretaría Regional Ministerial de Transportes",
       "saliente": "Patricio Löhr",
       "motivo": "Renuncia pedida por el Gobierno tras denuncia de la DGAC por presunta presión a una funcionaria para favorecer el ingreso de su empresa privada al aeropuerto Chacalluta",
-      "fuente": "El Mostrador (2026-09-01)",
+      "fuente": "ADN Radio (2026-09-01)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
@@ -669,26 +741,38 @@
           "url": "https://www.eldinamo.cl/politica/2026/07/25/renuncia-de-seremi-extiende-la-seguidilla-de-bajas-del-gobierno/",
           "fecha": "2026-06-25",
           "titulo": "Registro de salida de Jorge Heiden (25 jun)"
+        },
+        {
+          "nivel": "oficial",
+          "medio": "Ministerio de Agricultura de Chile",
+          "url": "https://minagri.gob.cl/region-de-arica-y-parinacota/",
+          "fecha": "2026-08-04",
+          "titulo": "Asume nueva seremi de Agricultura en la región de Arica y Parinacota"
         }
       ],
-      "estado": "corroborado",
-      "verificado": false,
-      "documento_pendiente": true,
+      "estado": "verificado",
+      "verificado": true,
+      "documento_pendiente": false,
       "fecha_deteccion": "2026-06-25T12:00:00.000Z",
-      "fecha_verificacion": null,
+      "fecha_verificacion": "2026-06-25T16:00:00.000Z",
       "fecha": "2026-06-25",
       "fechaExacta": true,
       "organo": "Secretaría Regional Ministerial de Agricultura",
       "saliente": "Jorge Heiden",
       "motivo": "Renunció tras dar positivo en test de drogas",
-      "fuente": "El Dínamo (2026-06-25)",
+      "fuente": "El Dínamo (2026-06-25) · Ministerio de Agricultura de Chile (2026-08-04)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "prensa_publicada",
-        "documento_primario_verificado": false
+        "tipo_fuente": "registro_oficial_y_prensa",
+        "documento_primario_verificado": true
       },
-      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
+      "reemplazo_estado": "fuente_oficial",
+      "entro": {
+        "nombre": "Christopher Pizarro Schmauck",
+        "fecha": "2026-06-25"
+      },
+      "entrante": "Christopher Pizarro Schmauck"
     },
     {
       "id": "mov-kast-2026-2026-06-16-marcia-raphael",
@@ -753,6 +837,13 @@
           "url": "https://www.meganoticias.cl/nacional/524779-presidente-kast-pide-renuncia-subsecretaria-mujer-daniela-castro-ministra-marin-16-06-2026.html",
           "fecha": "2026-06-16",
           "titulo": "Registro de salida de Daniela Castro (16 jun)"
+        },
+        {
+          "nivel": "prensa",
+          "medio": "BioBioChile",
+          "url": "https://www.biobiochile.cl/noticias/nacional/chile/2026/06/16/kast-nombra-como-nueva-subsecretaria-de-la-mujer-a-marcia-raphael-rn-tras-remocion-de-daniela-castro.shtml",
+          "fecha": "2026-06-16",
+          "titulo": "Marcia Raphael es nombrada subsecretaria de la Mujer en reemplazo de Daniela Castro"
         }
       ],
       "estado": "corroborado",
@@ -765,14 +856,19 @@
       "organo": "Ministerio de la Mujer y la Equidad de Género",
       "saliente": "Daniela Castro",
       "motivo": "Renuncia pedida por tensiones con la ministra Marín",
-      "fuente": "Meganoticias (2026-06-16)",
+      "fuente": "Meganoticias (2026-06-16) · BioBioChile (2026-06-16)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "subsecretaries",
         "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
       },
-      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
+      "reemplazo_estado": "fuente_publica",
+      "entro": {
+        "nombre": "Marcia Raphael Mora",
+        "fecha": "2026-06-16"
+      },
+      "entrante": "Marcia Raphael Mora"
     },
     {
       "id": "mov-kast-2026-2026-06-12-jorge-carrillo",
@@ -795,26 +891,38 @@
           "url": "https://www.t13.cl/noticia/politica/tras-renuncia-seremi-estas-son-todas-las-bajas-del-gobierno-regiones-18-7-2026",
           "fecha": "2026-06-12",
           "titulo": "Registro de salida de Jorge Carrillo (12 jun)"
+        },
+        {
+          "nivel": "oficial",
+          "medio": "Ministerio de Salud de Chile",
+          "url": "https://www.minsal.cl/ministra-s-de-salud-solicita-renuncia-al-seremi-de-nuble/",
+          "fecha": "2026-06-12",
+          "titulo": "Gustavo Rojas asume como seremi de Salud de Ñuble subrogante"
         }
       ],
-      "estado": "corroborado",
-      "verificado": false,
-      "documento_pendiente": true,
+      "estado": "verificado",
+      "verificado": true,
+      "documento_pendiente": false,
       "fecha_deteccion": "2026-06-12T12:00:00.000Z",
-      "fecha_verificacion": null,
+      "fecha_verificacion": "2026-06-12T16:00:00.000Z",
       "fecha": "2026-06-12",
       "fechaExacta": true,
       "organo": "Secretaría Regional Ministerial de Salud",
       "saliente": "Jorge Carrillo",
       "motivo": "Sin motivo público detallado",
-      "fuente": "T13 (2026-06-12)",
+      "fuente": "T13 (2026-06-12) · Ministerio de Salud de Chile (2026-06-12)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "prensa_publicada",
-        "documento_primario_verificado": false
+        "tipo_fuente": "registro_oficial_y_prensa",
+        "documento_primario_verificado": true
       },
-      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
+      "reemplazo_estado": "fuente_oficial",
+      "entro": {
+        "nombre": "Gustavo Rojas (Subrogante)",
+        "fecha": "2026-06-12"
+      },
+      "entrante": "Gustavo Rojas (Subrogante)"
     },
     {
       "id": "mov-kast-2026-2026-06-02-andres-jouannet",
@@ -865,8 +973,8 @@
     },
     {
       "id": "mov-kast-2026-2026-06-02-antaris-varela",
-      "tipo_evento": "cambio-puesto",
-      "tipo": "cambio-puesto",
+      "tipo_evento": "nombramiento-fallido",
+      "tipo": "nombramiento-fallido",
       "cargo": "Seremi de Mujer de Biobío",
       "organismo": "Secretaría Regional Ministerial de Mujer",
       "ministerio": "Ministerio de la Mujer y la Equidad de Género",
@@ -884,6 +992,13 @@
           "url": "https://sabes.cl/2026/06/02/designan-a-coordinadora-regional-de-senama-en-el-biobio/",
           "fecha": "2026-06-02",
           "titulo": "Registro de salida de Antaris Varela (2 jun)"
+        },
+        {
+          "nivel": "prensa",
+          "medio": "BioBioChile",
+          "url": "https://www.biobiochile.cl/noticias/nacional/region-del-bio-bio/2026/08/03/designan-a-michelle-vera-pcc-como-nueva-seremi-de-la-mujer-del-bio-bio.shtml",
+          "fecha": "2026-08-03",
+          "titulo": "Michelle Vera Machuca es designada seremi de la Mujer del Biobío"
         }
       ],
       "estado": "corroborado",
@@ -896,14 +1011,19 @@
       "organo": "Secretaría Regional Ministerial de Mujer",
       "saliente": "Antaris Varela",
       "motivo": "Cambio de puesto. Dejó la subrogancia de la seremi tras 64 días para asumir como coordinadora regional de Senama",
-      "fuente": "Sabes (2026-06-02)",
+      "fuente": "Sabes (2026-06-02) · BioBioChile (2026-08-03)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
         "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
       },
-      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
+      "reemplazo_estado": "fuente_publica",
+      "entro": {
+        "nombre": "Michelle Vera Machuca",
+        "fecha": "2026-06-02"
+      },
+      "entrante": "Michelle Vera Machuca"
     },
     {
       "id": "mov-kast-2026-2026-06-02-ana-victoria-quintana",
@@ -1170,26 +1290,38 @@
           "url": "https://www.t13.cl/noticia/politica/tras-renuncia-seremi-estas-son-todas-las-bajas-del-gobierno-regiones-18-7-2026",
           "fecha": "2026-05-06",
           "titulo": "Registro de salida de Camila Alonso (6 may)"
+        },
+        {
+          "nivel": "oficial",
+          "medio": "Biblioteca del Congreso Nacional / Ley Chile",
+          "url": "https://www.bcn.cl/leychile/navegar?idNorma=1227314",
+          "fecha": "2026-08-20",
+          "titulo": "Decreto 44: nombra a Patricio Martínez Quinzacara como seremi de Bienes Nacionales de Antofagasta"
         }
       ],
-      "estado": "corroborado",
-      "verificado": false,
-      "documento_pendiente": true,
+      "estado": "verificado",
+      "verificado": true,
+      "documento_pendiente": false,
       "fecha_deteccion": "2026-05-06T12:00:00.000Z",
-      "fecha_verificacion": null,
+      "fecha_verificacion": "2026-05-06T16:00:00.000Z",
       "fecha": "2026-05-06",
       "fechaExacta": true,
       "organo": "Secretaría Regional Ministerial de Bienes Nacionales",
       "saliente": "Camila Alonso",
       "motivo": "Sin motivo público detallado",
-      "fuente": "T13 (2026-05-06)",
+      "fuente": "T13 (2026-05-06) · Biblioteca del Congreso Nacional / Ley Chile (2026-08-20)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "prensa_publicada",
-        "documento_primario_verificado": false
+        "tipo_fuente": "registro_oficial_y_prensa",
+        "documento_primario_verificado": true
       },
-      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
+      "reemplazo_estado": "fuente_oficial",
+      "entro": {
+        "nombre": "Patricio Martínez Quinzacara",
+        "fecha": "2026-05-06"
+      },
+      "entrante": "Patricio Martínez Quinzacara"
     },
     {
       "id": "mov-kast-2026-2026-05-01-diego-munoz",
@@ -1427,6 +1559,13 @@
           "url": "https://www.biobiochile.cl/noticias/bbcl-explica/bbcl-explica-notas/2026/04/15/seremi-se-busca-ya-van-15-autoridades-de-kast-que-renunciaron-o-no-pueden-asumir.shtml",
           "fecha": "2026-04-14",
           "titulo": "Registro de salida de Gustavo Baehr (14 abr)"
+        },
+        {
+          "nivel": "prensa",
+          "medio": "BioBioChile",
+          "url": "https://www.biobiochile.cl/noticias/servicios/toma-nota/2026/04/21/estos-son-todos-los-seremis-del-gobierno-que-han-renunciado-o-no-pudieron-asumir-ya-van-18-en-total.shtml",
+          "fecha": "2026-04-21",
+          "titulo": "Renato Münster fue anunciado tras la salida de Gustavo Baehr"
         }
       ],
       "estado": "corroborado",
@@ -1439,14 +1578,19 @@
       "organo": "Secretaría Regional Ministerial de Culturas",
       "saliente": "Gustavo Baehr",
       "motivo": "Cesado por falta de experiencia en el ámbito cultural",
-      "fuente": "Radio Biobío (2026-04-14)",
+      "fuente": "Radio Biobío (2026-04-14) · BioBioChile (2026-04-21)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
         "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
       },
-      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
+      "reemplazo_estado": "fuente_publica",
+      "entro": {
+        "nombre": "Renato Münster",
+        "fecha": "2026-04-14"
+      },
+      "entrante": "Renato Münster"
     },
     {
       "id": "mov-kast-2026-2026-04-14-karina-trujillo",
@@ -1721,6 +1865,13 @@
           "url": "https://www.latercera.com/politica/noticia/los-15-seremis-del-gobierno-de-kast-que-renunciaron-o-no-asumieron-su-cargo/",
           "fecha": "2026-04-05",
           "titulo": "Registro de salida de Aldo Ibani (5 abr)"
+        },
+        {
+          "nivel": "prensa",
+          "medio": "T13",
+          "url": "https://www.t13.cl/amp/noticia/politica/seremi-valparaiso-renuncia-tras-cuestionamientos-por-su-idoneidad-cargo-5-4-2026",
+          "fecha": "2026-04-05",
+          "titulo": "Carlos Zamora asume como seremi de Salud de Valparaíso subrogante"
         }
       ],
       "estado": "corroborado",
@@ -1733,14 +1884,19 @@
       "organo": "Secretaría Regional Ministerial de Salud",
       "saliente": "Aldo Ibani",
       "motivo": "Tres días en el cargo. Cuestionado por falta de experiencia en salud pública",
-      "fuente": "La Tercera (2026-04-05)",
+      "fuente": "La Tercera (2026-04-05) · T13 (2026-04-05)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
         "tipo_fuente": "prensa_publicada",
         "documento_primario_verificado": false
       },
-      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
+      "reemplazo_estado": "fuente_publica",
+      "entro": {
+        "nombre": "Carlos Zamora (Subrogante)",
+        "fecha": "2026-04-05"
+      },
+      "entrante": "Carlos Zamora (Subrogante)"
     },
     {
       "id": "mov-kast-2026-2026-04-04-carlos-montero",
@@ -1852,31 +2008,43 @@
           "url": "https://www.biobiochile.cl/noticias/servicios/toma-nota/2026/04/21/estos-son-todos-los-seremis-del-gobierno-que-han-renunciado-o-no-pudieron-asumir-ya-van-18-en-total.shtml",
           "fecha": "2026-04-01",
           "titulo": "Registro de salida de Patricia Dinamarca (1 abr)"
+        },
+        {
+          "nivel": "oficial",
+          "medio": "Ministerio de Educación de Chile",
+          "url": "https://www.mineduc.cl/organigrama/mineduc/",
+          "fecha": "2026-04-06",
+          "titulo": "Dalmiro Yáñez Martínez figura como seremi de Educación de Los Lagos"
         }
       ],
-      "estado": "corroborado",
-      "verificado": false,
-      "documento_pendiente": true,
+      "estado": "verificado",
+      "verificado": true,
+      "documento_pendiente": false,
       "fecha_deteccion": "2026-04-01T12:00:00.000Z",
-      "fecha_verificacion": null,
+      "fecha_verificacion": "2026-04-01T16:00:00.000Z",
       "fecha": "2026-04-01",
       "fechaExacta": true,
       "organo": "Secretaría Regional Ministerial de Educación",
       "saliente": "Patricia Dinamarca",
       "motivo": "Designación dejada sin efecto por falta de decreto",
-      "fuente": "Radio Biobío (2026-04-01)",
+      "fuente": "Radio Biobío (2026-04-01) · Ministerio de Educación de Chile (2026-04-06)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "prensa_publicada",
-        "documento_primario_verificado": false
+        "tipo_fuente": "registro_oficial_y_prensa",
+        "documento_primario_verificado": true
       },
-      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
+      "reemplazo_estado": "fuente_oficial",
+      "entro": {
+        "nombre": "Dalmiro Yáñez Martínez",
+        "fecha": "2026-04-01"
+      },
+      "entrante": "Dalmiro Yáñez Martínez"
     },
     {
       "id": "mov-kast-2026-2026-03-31-mauricio-montealegre",
-      "tipo_evento": "renuncia",
-      "tipo": "renuncia",
+      "tipo_evento": "nombramiento-fallido",
+      "tipo": "nombramiento-fallido",
       "cargo": "Seremi de Obras Públicas de Tarapacá",
       "organismo": "Secretaría Regional Ministerial de Obras Públicas",
       "ministerio": "Ministerio de Obras Públicas",
@@ -1936,26 +2104,38 @@
           "url": "https://www.latercera.com/politica/noticia/los-15-seremis-del-gobierno-de-kast-que-renunciaron-o-no-asumieron-su-cargo/",
           "fecha": "2026-03-28",
           "titulo": "Registro de salida de Jorge Salazar (28 mar)"
+        },
+        {
+          "nivel": "oficial",
+          "medio": "Ministerio de Obras Públicas de Chile",
+          "url": "https://losrios.mop.gob.cl/ingeniero-valdiviano-ulises-rivera-asumio-como-nuevo-seremi-de-obras-publicas-en-los-rios/",
+          "fecha": "2026-07-10",
+          "titulo": "Ulises Rivera asume como nuevo seremi de Obras Públicas de Los Ríos"
         }
       ],
-      "estado": "corroborado",
-      "verificado": false,
-      "documento_pendiente": true,
+      "estado": "verificado",
+      "verificado": true,
+      "documento_pendiente": false,
       "fecha_deteccion": "2026-03-28T12:00:00.000Z",
-      "fecha_verificacion": null,
+      "fecha_verificacion": "2026-03-28T16:00:00.000Z",
       "fecha": "2026-03-28",
       "fechaExacta": true,
       "organo": "Secretaría Regional Ministerial de Obras Públicas",
       "saliente": "Jorge Salazar",
       "motivo": "Nombramiento dejado sin efecto por cuestionamientos a su gestión en Deportes Valdivia",
-      "fuente": "La Tercera (2026-03-28)",
+      "fuente": "La Tercera (2026-03-28) · Ministerio de Obras Públicas de Chile (2026-07-10)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "prensa_publicada",
-        "documento_primario_verificado": false
+        "tipo_fuente": "registro_oficial_y_prensa",
+        "documento_primario_verificado": true
       },
-      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
+      "reemplazo_estado": "fuente_oficial",
+      "entro": {
+        "nombre": "Ulises Rivera García",
+        "fecha": "2026-03-28"
+      },
+      "entrante": "Ulises Rivera García"
     },
     {
       "id": "mov-kast-2026-2026-03-26-alexander-nanjari",
@@ -1978,26 +2158,38 @@
           "url": "https://www.latercera.com/politica/noticia/los-15-seremis-del-gobierno-de-kast-que-renunciaron-o-no-asumieron-su-cargo/",
           "fecha": "2026-03-26",
           "titulo": "Registro de salida de Alexander Nanjarí (26 mar)"
+        },
+        {
+          "nivel": "oficial",
+          "medio": "Delegación Presidencial Regional del Biobío",
+          "url": "https://www.dprbiobio.dpr.gob.cl/2026/07/29/a-estudiantes-de-alto-biobio-delegado-presidencial-julio-anativia-y-seremi-de-educacion-teresa-carrasco-entregan-85-computadores-del-programa-becas-tic/",
+          "fecha": "2026-07-29",
+          "titulo": "Teresa Carrasco ejerce como seremi de Educación del Biobío"
         }
       ],
-      "estado": "corroborado",
-      "verificado": false,
-      "documento_pendiente": true,
+      "estado": "verificado",
+      "verificado": true,
+      "documento_pendiente": false,
       "fecha_deteccion": "2026-03-26T12:00:00.000Z",
-      "fecha_verificacion": null,
+      "fecha_verificacion": "2026-03-26T16:00:00.000Z",
       "fecha": "2026-03-26",
       "fechaExacta": true,
       "organo": "Secretaría Regional Ministerial de Educación",
       "saliente": "Alexander Nanjarí",
       "motivo": "Designación frenada por antiguos posteos sobre edades en relaciones de pareja",
-      "fuente": "La Tercera (2026-03-26)",
+      "fuente": "La Tercera (2026-03-26) · Delegación Presidencial Regional del Biobío (2026-07-29)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "prensa_publicada",
-        "documento_primario_verificado": false
+        "tipo_fuente": "registro_oficial_y_prensa",
+        "documento_primario_verificado": true
       },
-      "reemplazo_estado": "no_informado_en_fuentes_consultadas"
+      "reemplazo_estado": "fuente_oficial",
+      "entro": {
+        "nombre": "Teresa Carrasco Molina",
+        "fecha": "2026-03-26"
+      },
+      "entrante": "Teresa Carrasco Molina"
     },
     {
       "id": "mov-kast-2026-2026-03-25-daniela-gallegos",
@@ -2042,5 +2234,5 @@
       "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     }
   ],
-  "checksum_sha256": "feb254821fb6b57b68608bac3fb067b797f88b68a16d4a496cf5f19683af2bd2"
+  "checksum_sha256": "9a884d9bef8627718afed406d530591acec6a95c50dd27956c744b56766f1995"
 }

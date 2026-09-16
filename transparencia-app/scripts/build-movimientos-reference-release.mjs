@@ -29,13 +29,39 @@ const replacements = new Map([
   ["sebastian urrejola", { name: "María Soledad Berríos (Subrogante)", evidence: "public_record" }],
   ["natalia duco", { name: "Francisco Riveros Cantuarias", evidence: "official" }],
   ["andres otero", { name: "Sofía Rengifo Ottone", evidence: "official" }],
+  ["evelyn bintrup", { name: "Fernanda Robles Inostroza", evidence: "official", source: { nivel: "oficial", medio: "Ministerio de Salud de Chile", url: "https://www.minsal.cl/ministerio-de-salud-designa-nueva-seremi-de-la-region-de-los-lagos/", fecha: "2026-09-07", titulo: "Ministerio de Salud designa nueva seremi de la Región de Los Lagos" } }],
+  ["patricio ponce", { name: "María José Díaz Hernández (Subrogante)", evidence: "public_record", source: { nivel: "prensa", medio: "Emol", url: "https://www.emol.com/noticias/Nacional/2026/07/27/1206848/renuncia-seremi-vivienda-patricio-ponce.html", fecha: "2026-07-27", titulo: "La subrogancia de la Seremi de Vivienda del Maule la asumirá María José Díaz Hernández" } }],
+  ["juan pablo rodriguez", { name: "Sebastián Vallebona Espinosa", evidence: "public_record", source: { nivel: "prensa", medio: "El País", url: "https://elpais.com/chile/2026-08-10/kast-designa-a-un-nuevo-subsecretario-de-hacienda-tras-descartar-a-juan-pablo-rodriguez-destituido-tras-dar-positivo-en-un-test-de-drogas.html", fecha: "2026-08-10", titulo: "Sebastián Vallebona Espinosa es designado subsecretario de Hacienda" } }],
+  ["eduardo leiva", { name: "Karen Lindh Aguilar", evidence: "public_record", source: { nivel: "prensa", medio: "BioBioChile", url: "https://www.biobiochile.cl/noticias/nacional/region-de-los-lagos/2026/08/05/gobierno-anuncia-a-karen-lindh-como-nueva-seremi-de-las-culturas-de-la-region-de-los-lagos.shtml", fecha: "2026-08-05", titulo: "Karen Lindh Aguilar asume como seremi de las Culturas de Los Lagos" } }],
+  ["marcelo vergara", { name: "Romina Cifuentes (Subrogante)", evidence: "public_record", source: { nivel: "prensa", medio: "Emol", url: "https://www.emol.com/noticias/Nacional/2026/07/18/1206023/seremi-hacienda-arica-presenta-renuncia.html", fecha: "2026-07-18", titulo: "Romina Cifuentes asumirá la subrogancia de Hacienda en Arica y Parinacota" } }],
   ["andres jouannet", { name: "Pilar Giannini Bravo", evidence: "public_record" }],
+  ["antaris varela", { name: "Michelle Vera Machuca", evidence: "public_record", source: { nivel: "prensa", medio: "BioBioChile", url: "https://www.biobiochile.cl/noticias/nacional/region-del-bio-bio/2026/08/03/designan-a-michelle-vera-pcc-como-nueva-seremi-de-la-mujer-del-bio-bio.shtml", fecha: "2026-08-03", titulo: "Michelle Vera Machuca es designada seremi de la Mujer del Biobío" } }],
   ["ana victoria quintana", { name: "Gonzalo Guerrero Valle", evidence: "public_record" }],
   ["trinidad steinert", { name: "Martín Arrau García-Huidobro", evidence: "public_record" }],
   ["mara sedini", { name: "Claudio Alvarado Andrade (Biministro Interior–Segegob)", evidence: "official" }],
+  ["jorge heiden", { name: "Christopher Pizarro Schmauck", evidence: "official", source: { nivel: "oficial", medio: "Ministerio de Agricultura de Chile", url: "https://minagri.gob.cl/region-de-arica-y-parinacota/", fecha: "2026-08-04", titulo: "Asume nueva seremi de Agricultura en la región de Arica y Parinacota" } }],
+  ["daniela castro", { name: "Marcia Raphael Mora", evidence: "public_record", source: { nivel: "prensa", medio: "BioBioChile", url: "https://www.biobiochile.cl/noticias/nacional/chile/2026/06/16/kast-nombra-como-nueva-subsecretaria-de-la-mujer-a-marcia-raphael-rn-tras-remocion-de-daniela-castro.shtml", fecha: "2026-06-16", titulo: "Marcia Raphael es nombrada subsecretaria de la Mujer en reemplazo de Daniela Castro" } }],
+  ["jorge carrillo", { name: "Gustavo Rojas (Subrogante)", evidence: "official", source: { nivel: "oficial", medio: "Ministerio de Salud de Chile", url: "https://www.minsal.cl/ministra-s-de-salud-solicita-renuncia-al-seremi-de-nuble/", fecha: "2026-06-12", titulo: "Gustavo Rojas asume como seremi de Salud de Ñuble subrogante" } }],
   ["rafael araos", { name: "Carolina Rossi Pantoja (s)", evidence: "public_record" }],
+  ["camila alonso", { name: "Patricio Martínez Quinzacara", evidence: "official", source: { nivel: "oficial", medio: "Biblioteca del Congreso Nacional / Ley Chile", url: "https://www.bcn.cl/leychile/navegar?idNorma=1227314", fecha: "2026-08-20", titulo: "Decreto 44: nombra a Patricio Martínez Quinzacara como seremi de Bienes Nacionales de Antofagasta" } }],
+  ["aldo ibani", { name: "Carlos Zamora (Subrogante)", evidence: "public_record", source: { nivel: "prensa", medio: "T13", url: "https://www.t13.cl/amp/noticia/politica/seremi-valparaiso-renuncia-tras-cuestionamientos-por-su-idoneidad-cargo-5-4-2026", fecha: "2026-04-05", titulo: "Carlos Zamora asume como seremi de Salud de Valparaíso subrogante" } }],
+  ["jorge salazar", { name: "Ulises Rivera García", evidence: "official", source: { nivel: "oficial", medio: "Ministerio de Obras Públicas de Chile", url: "https://losrios.mop.gob.cl/ingeniero-valdiviano-ulises-rivera-asumio-como-nuevo-seremi-de-obras-publicas-en-los-rios/", fecha: "2026-07-10", titulo: "Ulises Rivera asume como nuevo seremi de Obras Públicas de Los Ríos" } }],
+  ["alexander nanjari", { name: "Teresa Carrasco Molina", evidence: "official", source: { nivel: "oficial", medio: "Delegación Presidencial Regional del Biobío", url: "https://www.dprbiobio.dpr.gob.cl/2026/07/29/a-estudiantes-de-alto-biobio-delegado-presidencial-julio-anativia-y-seremi-de-educacion-teresa-carrasco-entregan-85-computadores-del-programa-becas-tic/", fecha: "2026-07-29", titulo: "Teresa Carrasco ejerce como seremi de Educación del Biobío" } }],
+  ["patricia dinamarca", { name: "Dalmiro Yáñez Martínez", evidence: "official", source: { nivel: "oficial", medio: "Ministerio de Educación de Chile", url: "https://www.mineduc.cl/organigrama/mineduc/", fecha: "2026-04-06", titulo: "Dalmiro Yáñez Martínez figura como seremi de Educación de Los Lagos" } }],
+  ["alonso velasquez", { name: "Godeliver Arriagada González (Subrogante)", evidence: "public_record", source: { nivel: "prensa", medio: "BioBioChile", url: "https://www.biobiochile.cl/noticias/nacional/region-de-tarapaca/2026/09/03/racha-de-salidas-suma-un-nuevo-capitulo-renuncia-seremi-de-vivienda-de-tarapaca-el-numero-35.shtml", fecha: "2026-09-03", titulo: "Godeliver Arriagada asume la subrogancia de Vivienda en Tarapacá" } }],
   ["mario sepulveda", { name: "Luis Calderón", evidence: "press" }],
   ["francisco farias", { name: "Juan Pablo Carrasco", evidence: "press" }],
+  ["gustavo baehr", { name: "Renato Münster", evidence: "public_record", source: { nivel: "prensa", medio: "BioBioChile", url: "https://www.biobiochile.cl/noticias/servicios/toma-nota/2026/04/21/estos-son-todos-los-seremis-del-gobierno-que-han-renunciado-o-no-pudieron-asumir-ya-van-18-en-total.shtml", fecha: "2026-04-21", titulo: "Renato Münster fue anunciado tras la salida de Gustavo Baehr" } }],
+]);
+
+const eventTypeOverrides = new Map([
+  ["antaris varela", "nombramiento-fallido"],
+  ["mauricio montealegre", "nombramiento-fallido"],
+]);
+
+const sourceOverrides = new Map([
+  ["cristian cabezas", [{ nivel: "prensa", medio: "Emol", url: "https://www.emol.com/noticias/Nacional/2026/07/27/1206804/seremi-trabajo-tarapaca-denucnias-laboral.html", fecha: "2026-07-27", titulo: "Renuncia de Cristián Cabezas como seremi del Trabajo de Tarapacá" }]],
+  ["patricio lohr", [{ nivel: "prensa", medio: "ADN Radio", url: "https://www.adnradio.cl/2026/09/01/gobierno-pide-renuncia-a-seremi-de-transportes-de-arica-tras-denuncia-por-presuntas-presiones-a-funcionaria-de-la-dgac/?outputType=amp", fecha: "2026-09-01", titulo: "Gobierno pide la renuncia de Patricio Löhr como seremi de Transportes de Arica" }]],
 ]);
 
 const officialEvidence = new Map([
@@ -77,7 +103,7 @@ function publicSources(movement) {
 
 function reconcileMovement(movement) {
   const key = normalize(movement.saliente ?? movement.salio?.nombre);
-  const sources = publicSources(movement);
+  const sources = sourceOverrides.get(key) ?? publicSources(movement);
   const official = officialEvidence.get(key);
   if (official && !sources.some((source) => source.url === official.url)) {
     sources.unshift({
@@ -90,12 +116,16 @@ function reconcileMovement(movement) {
   }
 
   const replacement = replacements.get(key);
+  if (replacement?.source && !sources.some((source) => source.url === replacement.source.url)) {
+    sources.push(replacement.source);
+  }
   const entry = replacement ? { nombre: replacement.name, fecha: sourceDate(movement) } : undefined;
   const hasOfficial = sources.some((source) => source.nivel === "oficial");
   const hasPublicEvidence = sources.some((source) => source.nivel === "prensa" || source.nivel === "semioficial");
   const estado = hasOfficial ? "verificado" : hasPublicEvidence ? "corroborado" : "en_confirmacion";
   const next = {
     ...movement,
+    ...(eventTypeOverrides.has(key) ? { tipo_evento: eventTypeOverrides.get(key), tipo: eventTypeOverrides.get(key) } : {}),
     fuentes: sources,
     referencia_externa: {
       releaseId: RELEASE_ID,
@@ -118,7 +148,7 @@ function reconcileMovement(movement) {
 }
 
 const input = JSON.parse(await readFile(resolve(root, "data", "movimientos.json"), "utf8"));
-if (input.release_id !== OLD_RELEASE_ID || !Array.isArray(input.movimientos) || input.movimientos.length !== 46) {
+if (![OLD_RELEASE_ID, RELEASE_ID].includes(input.release_id) || !Array.isArray(input.movimientos) || input.movimientos.length !== 46) {
   throw new Error(`MOVIMIENTOS_RECONCILE_INPUT_INVALID:${input.release_id}:${input.movimientos?.length ?? 0}`);
 }
 
