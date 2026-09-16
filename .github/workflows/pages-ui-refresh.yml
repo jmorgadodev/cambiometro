@@ -147,8 +147,10 @@ jobs:
           npm run data:hydrate:cplt-static -- --required --pages-only
           npm run data:hydrate:static -- --required --required-all
           npm run check:static-input-fallback
-          npm run data:hydrate:ley19862
-          npm run data:lake:projection:ley19862
+          # The static-site manifest already contains the canonical, validated
+          # Ley 19.862 projection and subset. Do not rehydrate raw partitions
+          # or rebuild an ETL projection during a UI-only deployment: older raw
+          # partitions are intentionally not retained in the public bucket.
 
       - name: Verificar calidad semántica de entradas estáticas
         working-directory: transparencia-app
