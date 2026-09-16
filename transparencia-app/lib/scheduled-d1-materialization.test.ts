@@ -24,7 +24,7 @@ describe("guardia de materializacion D1", () => {
     expect(steps.length).toBeGreaterThan(0);
     for (const { name, step } of steps) {
       expect(step, `${name}: materializacion remota sin compuerta manual`).toMatch(
-        /if:\s*.*github\.event_name\s*==\s*['"]workflow_dispatch['"]/s,
+        /if:\s*[\s\S]*github\.event_name\s*==\s*['"]workflow_dispatch['"]/
       );
     }
   });
