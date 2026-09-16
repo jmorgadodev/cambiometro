@@ -1720,6 +1720,19 @@ la retención del rollback, se libere espacio de forma explícita y un nuevo
 preflight quede bajo 95%. No se debe saltar el guard mediante variables de
 entorno en producción.
 
+### Control de restauración fail-closed — PR #552
+
+El simulador de restauración fue ajustado para exigir que
+`backup-inventory.json` contenga objetos del lago R2 antes de considerar
+cualquier dump de D1. Un inventario con cero objetos ahora falla con
+`R2_BACKUP_INVENTORY_EMPTY`; por tanto, no puede presentar como restaurable
+un respaldo que sólo contiene una referencia D1 o un puntero incompleto.
+
+La corrección se implementó en la rama de seguridad y quedó en el PR #552.
+La validación local pasó con 205 archivos y 1.074 tests. El cambio no realiza
+lecturas masivas de D1, no escribe R2 y no altera rutas ni datos productivos.
+Su integración queda condicionada al check final de Pages.
+
 ### Auditoría del respaldo R2 — 16-09-2026
 
 La revisión se hizo mediante el inventario de objetos del API de R2, sin
