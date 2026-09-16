@@ -1822,6 +1822,28 @@ optimización debe tratar por separado las copias redundantes y los releases
 incompletamente respaldados, con checksum y rollback verificable antes de
 autorizar cualquier eliminación.
 
+### Revisión de rutas de materialización D1 — 16-09-2026
+
+La inspección de workflows y scripts confirmó que los ETL programados invocan
+la materialización como paso opcional y que el preflight mantiene el permiso
+desactivado por defecto. La materialización sólo puede avanzar en una
+ejecución manual con cuota bajo el umbral y confirmación explícita; si la
+métrica no está disponible, el paso se difiere. Las consultas públicas siguen
+siendo R2-first.
+
+Se detectaron además dos scripts heredados fuera de los workflows que sí
+contenían datos simulados y una escritura directa a `transparencia-db`:
+`ingest-directorio-estado.mjs` y `ingest-asignaciones-congreso.mjs`. Ambos
+quedaron desactivados en el PR #556, junto con una compuerta dentro de
+`materialize-d1.mjs` para impedir que `--remote` salte la política. No se
+ejecutó ninguno durante la auditoría.
+
+Los monitores de consumo fueron ajustados para preferir el secreto
+`CLOUDFLARE_AUDIT_API_TOKEN`, separado del token usado para publicar R2. El
+secreto aún debe registrarse en GitHub para que la próxima medición use la
+credencial de sólo lectura; mientras tanto el fallback conserva el
+comportamiento fail-safe y no habilita materialización.
+
 ### Verificación de credenciales para medir D1 — 16-09-2026
 
 El token disponible en el proceso de auditoría está activo, pero no autoriza
