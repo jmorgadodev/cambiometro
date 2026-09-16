@@ -31,6 +31,19 @@ export function validateSmokeConfiguration({ githubActions = false, uptimeToken 
   }
 }
 
+export function validateMovimientosAsset(movementJson, { statusOk = true, pageText = "" } = {}) {
+  const movementRows = Array.isArray(movementJson?.movimientos) ? movementJson.movimientos : [];
+  const declaredMovementCount = Number(movementJson?.stats?.total_movimientos ?? movementJson?.total_movimientos ?? -1);
+  const reconciledRelease = ["published_reconciled", "published", "complete"].includes(String(movementJson?.release_status ?? ""));
+
+  return statusOk
+    && movementJson?.pipeline === "etl_movimientos_autoridades"
+    && reconciledRelease
+    && movementRows.length > 0
+    && declaredMovementCount === movementRows.length
+    && !pageText.includes("MOVIMIENTOS_ALL_OFFICIAL_SOURCES_BLOCKED");
+}
+
 const UPTIME_TOKEN = process.env.UPTIME_TOKEN?.trim() ?? "";
 const isMainScript = process.argv[1]?.endsWith("uptime-smoke.mjs");
 if (isMainScript) validateSmokeConfiguration({ githubActions: Boolean(process.env.GITHUB_ACTIONS), uptimeToken: UPTIME_TOKEN });
@@ -74,13 +87,7 @@ async function checkRoute(path) {
       });
       movementAssetStatus = movementAsset.status;
       const movementJson = await movementAsset.json();
-      movementOk = movementAsset.ok
-        && movementJson?.pipeline === "etl_movimientos_autoridades"
-        && Array.isArray(movementJson?.movimientos)
-        && (movementJson.release_status === "blocked_pending_official_reconciliation"
-          ? movementJson.movimientos.length === 0
-          : movementJson.movimientos.length >= 79)
-        && !text.includes("MOVIMIENTOS_ALL_OFFICIAL_SOURCES_BLOCKED");
+      movementOk = validateMovimientosAsset(movementJson, { statusOk: movementAsset.ok, pageText: text });
     } catch {
       movementOk = false;
     }
