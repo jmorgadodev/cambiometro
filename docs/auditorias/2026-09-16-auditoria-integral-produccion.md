@@ -1821,3 +1821,24 @@ Esto confirma que la política vigente no libera espacio por sí sola. La
 optimización debe tratar por separado las copias redundantes y los releases
 incompletamente respaldados, con checksum y rollback verificable antes de
 autorizar cualquier eliminación.
+
+### Verificación de credenciales para medir D1 — 16-09-2026
+
+El token disponible en el proceso de auditoría está activo, pero no autoriza
+la cuenta para el dataset de Analytics de D1. La consulta GraphQL respondió
+`not authorized for that account` y `wrangler d1 insights transparencia-db`
+respondió con error de autenticación. El sufijo no coincide con el token
+creado para esta auditoría, por lo que no se puede certificar el consumo
+actual de D1 desde este entorno sin actualizar la variable de entorno.
+
+No se ejecutaron consultas SQL, escrituras ni procesos ETL. La medición queda
+pendiente de repetir con el token correcto, con permisos `Account Analytics →
+Read` y `D1 → Read`, limitado a la cuenta de Jorge.
+
+### Cierre de retención preventiva — 16-09-2026
+
+El PR #555 fue integrado en `main` con el commit
+`7a5b25ccdc5b647583d4174b4de08d92d8309964`. La limpieza por retención ahora
+requiere una confirmación manual explícita; sin ella no calcula ni ejecuta
+`DELETE`. Los checks de seguridad, calidad, tipos, build estático, APIs,
+responsive y temas terminaron correctamente antes de la integración.
