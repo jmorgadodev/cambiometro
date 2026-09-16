@@ -68,6 +68,15 @@ un rollback verificable por release antes de evaluar retención.
 5. Revisar la política de backups por edad y tipo de artefacto antes de borrar
    cualquier objeto. La eliminación requiere una lista explícita y verificable.
 
+## Comprobación de API asociada
+
+La versión candidata del Worker `fc559aed-db9f-4eed-8829-54dbcf5aa9e9` respondió
+correctamente una búsqueda explícita `scope=municipal` sin hacer fallback al
+dataset central. La misma consulta en producción todavía devuelve el fallback
+central para un nombre que sólo existe allí. El cambio está validado en CI y en
+la URL candidata, pero requiere una promoción productiva explícita con su
+version ID; esta auditoría no la ejecuta.
+
 ## Estado
 
 - Diagnóstico: completo.
@@ -75,4 +84,3 @@ un rollback verificable por release antes de evaluar retención.
 - Eliminaciones R2: 0.
 - Descarga de universos de datos: 0.
 - Publicación de nuevos datos: bloqueada hasta reconciliar retención y tamaño.
-
