@@ -1,10 +1,11 @@
 import { createHash } from "node:crypto";
-import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
+import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { buildCpltCoverageIndex } from "./cplt-coverage-index.mjs";
 import { buildCpltTransparencySummary } from "./cplt-transparency-summary.mjs";
 import { getCpltSearchPageSize } from "./cplt-search-config.mjs";
+import { filterCpltRowsForPublication } from "./etl/cplt-personal.mjs";
 
 const centralScope = process.argv.includes("--central");
 const datasetRoot = centralScope ? "funcionarios-central-v1" : "funcionarios-v1";
@@ -23,12 +24,6 @@ for (const commune of communeCatalog) {
   for (const identifier of [commune.id, commune.administracion_municipal_id, commune.cut]) {
     if (identifier) communeByIdentifier.set(String(identifier), commune);
   }
-}
-
-async function checksum(filePath) {
-  const hash = createHash("sha256");
-  for await (const chunk of createReadStream(filePath)) hash.update(chunk);
-  return hash.digest("hex");
 }
 
 if (!existsSync(projectionRoot)) throw new Error("CPLT_MISSING_PROJECTIONS");
@@ -61,6 +56,17 @@ const compactRows = [];
 const summaryRows = [];
 const byShard = new Map();
 const normalizeSearch = (value) => String(value ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL");
+const publishedRowsByFile = new Map();
+const publishedSourceCounts = new Map(required.map((source) => [source, 0]));
+const inputSourceCounts = new Map(required.map((source) => [source, 0]));
+const sourceKeyForContract = (value) => {
+  const contract = normalizeSearch(value);
+  if (contract.includes("codigo")) return "codigotrabajo";
+  if (contract.includes("honor")) return "honorarios";
+  if (contract.includes("contrat")) return "contrata";
+  if (contract.includes("plant")) return "planta";
+  return null;
+};
 // Las palabras vacías de dos letras generan posiciones para casi todo el
 // universo (por ejemplo, "de" supera el millón de referencias). Indexarlas
 // hace que una búsqueda nominal nacional lea varios megabytes de ruido. No se
@@ -82,7 +88,17 @@ for (const fileName of files) {
   try { rows = JSON.parse(readFileSync(source, "utf8")); } catch { continue; }
   if (!Array.isArray(rows)) continue;
   const organismId = fileName.replace(/\.json$/, "");
-  rows.forEach((row, index) => {
+  const publicRows = filterCpltRowsForPublication(rows, month);
+  publishedRowsByFile.set(fileName, publicRows);
+  for (const row of rows) {
+    const sourceKey = sourceKeyForContract(row?.tipo_contrato);
+    if (sourceKey) inputSourceCounts.set(sourceKey, inputSourceCounts.get(sourceKey) + 1);
+  }
+  for (const row of publicRows) {
+    const sourceKey = sourceKeyForContract(row?.tipo_contrato);
+    if (sourceKey) publishedSourceCounts.set(sourceKey, publishedSourceCounts.get(sourceKey) + 1);
+  }
+  publicRows.forEach((row, index) => {
     summaryRows.push({
       nombre_completo: row.nombre_completo,
       organo_nombre: row.organo_nombre,
@@ -255,6 +271,9 @@ const searchIndex = {
   shards,
   filters,
   quality: qualitySummary,
+  inputRows: [...inputSourceCounts.values()].reduce((total, count) => total + count, 0),
+  excludedInvalidPeriodRows: [...inputSourceCounts.entries()]
+    .reduce((total, [source, count]) => total + count - (publishedSourceCounts.get(source) ?? 0), 0),
 };
 writeFileSync(searchIndexPath, `${JSON.stringify(searchIndex, null, 2)}\n`);
 const searchIndexKey = `projections/${datasetRoot}/versions/${version}/search_index.json`;
@@ -324,14 +343,15 @@ for (const asset of manifestAssets) {
   delete asset.sourcePath;
 }
 for (const fileName of files) {
-  const source = join(projectionRoot, fileName);
-  const size = statSync(source).size;
+  const publishedRows = publishedRowsByFile.get(fileName) ?? [];
+  const data = Buffer.from(`${JSON.stringify(publishedRows)}\n`);
+  const size = data.byteLength;
   if (size < 2) throw new Error(`CPLT_EMPTY_PROJECTION: ${fileName}`);
-  const checksumSha256 = await checksum(source);
+  const checksumSha256 = createHash("sha256").update(data).digest("hex");
   const key = `projections/${datasetRoot}/versions/${version}/${fileName}`;
   const target = join(outputRoot, key);
   mkdirSync(dirname(target), { recursive: true });
-  copyFileSync(source, target);
+  writeFileSync(target, data);
   const releaseAssetName = `cplt-${version}-${fileName}`;
   assets.push({ key, checksumSha256, size, releaseTag, releaseAssetName });
   manifestAssets.push({ key, checksumSha256, size });
@@ -343,8 +363,23 @@ const manifest = {
   generatedAt: latest,
   releaseMonth: month,
   version,
-  recordCount: validations.reduce((total, report) => total + report.recordCount, 0),
-  sources: validations.map(({ sourceId, sourceUrl, sourceValidator, recordCount, checksumSha256 }) => ({ sourceId, sourceUrl, sourceValidator, recordCount, checksumSha256 })),
+  recordCount: compactRows.length,
+  inputRecordCount: validations.reduce((total, report) => total + report.recordCount, 0),
+  excludedInvalidPeriodRows: validations.reduce((total, report) => total + report.recordCount, 0) - compactRows.length,
+  sources: validations.map(({ sourceId, sourceUrl, sourceValidator, recordCount, checksumSha256 }) => {
+    const sourceKey = sourceKeyForContract(sourceId);
+    return {
+      sourceId,
+      sourceUrl,
+      sourceValidator,
+      recordCount: sourceKey ? publishedSourceCounts.get(sourceKey) ?? 0 : 0,
+      inputRecordCount: recordCount,
+      excludedInvalidPeriodRows: sourceKey
+        ? (inputSourceCounts.get(sourceKey) ?? 0) - (publishedSourceCounts.get(sourceKey) ?? 0)
+        : recordCount,
+      checksumSha256,
+    };
+  }),
   searchIndex: { key: searchIndexKey, totalRows: compactRows.length, pageSize: searchPageSize },
   coverageIndex: {
     key: coverageIndexKey,

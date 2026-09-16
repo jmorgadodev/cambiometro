@@ -63,6 +63,26 @@ function monthNumber(value) {
   return MONTHS.get(normalized(value)) ?? 0;
 }
 
+const CPLT_PERIOD_PATTERN = /^(\d{4})-(0[1-9]|1[0-2])$/;
+
+/** @param {string|null|undefined} period @param {string|null|undefined} maxPeriod */
+export function isPlausibleCpltPeriod(period, maxPeriod = null) {
+  const value = String(period ?? "").trim();
+  const match = value.match(CPLT_PERIOD_PATTERN);
+  if (!match) return false;
+  const year = Number(match[1]);
+  if (year < 2024 || year > 2100) return false;
+  if (maxPeriod == null || String(maxPeriod).trim() === "") return true;
+  const maximum = String(maxPeriod).trim();
+  return CPLT_PERIOD_PATTERN.test(maximum) && value <= maximum;
+}
+
+/** @param {unknown[]} rows @param {string|null|undefined} maxPeriod */
+export function filterCpltRowsForPublication(rows, maxPeriod) {
+  if (!Array.isArray(rows)) return [];
+  return rows.filter((row) => isPlausibleCpltPeriod(row?.fuente_periodo ?? row?.periodo, maxPeriod));
+}
+
 export function parseCpltHeader(line) {
   const indexes = new Map();
   String(line).split(";").forEach((name, index) => indexes.set(normalized(name), index));
@@ -109,19 +129,22 @@ export function getCpltColumn(columns, header, ...names) {
   return cell(columns, header, ...names);
 }
 
-export function parseCpltIdentity({ line, columns: inputColumns = null, header, tipo, organismoId }) {
+/** @param {{ line: string, columns?: string[]|null, header: Map<string, number>, tipo: string, organismoId: string, maxPeriod?: string|null }} input */
+export function parseCpltIdentity({ line, columns: inputColumns = null, header, tipo, organismoId, maxPeriod = null }) {
   const readCell = (...names) => inputColumns
     ? cell(inputColumns, header, ...names)
     : scanCpltCell(line, header, ...names);
   const year = Number(readCell("anyo", "año"));
   const month = monthNumber(readCell("mes"));
-  if (!Number.isInteger(year) || year < 2024 || month === 0) return null;
+  if (!Number.isInteger(year) || month === 0) return null;
+  const period = `${year}-${String(month).padStart(2, "0")}`;
+  if (!isPlausibleCpltPeriod(period, maxPeriod)) return null;
   const rawName = [readCell("nombres"), readCell("paterno"), readCell("materno")].filter(Boolean).join(" ");
   const rawCargo = readCell("tipo cargo", "descripcion_funcion", "descripcion funcion");
   if (!rawName || !rawCargo) return null;
   return {
     stableKey: [organismoId, normalized(tipo), normalized(rawName).replace(/\s+/g, " "), normalized(rawCargo).replace(/\s+/g, " ")].join("|"),
-    period: `${year}-${String(month).padStart(2, "0")}`,
+    period,
   };
 }
 
@@ -131,12 +154,13 @@ export function createCpltRecordId(stableKey) {
   return `func-${organismoId}-${tipo}-${suffix}`;
 }
 
-export function parseCpltRecord({ line, columns: inputColumns = null, header, tipo, organismoId, sourceUrl, deferId = false }) {
+/** @param {{ line: string, columns?: string[]|null, header: Map<string, number>, tipo: string, organismoId: string, sourceUrl: string, deferId?: boolean, maxPeriod?: string|null }} input */
+export function parseCpltRecord({ line, columns: inputColumns = null, header, tipo, organismoId, sourceUrl, deferId = false, maxPeriod = null }) {
   if (!(header instanceof Map) || !organismoId || !sourceUrl) throw new Error("CPLT_INVALID_PARSER_INPUT");
   const readCell = (...names) => inputColumns
     ? cell(inputColumns, header, ...names)
     : scanCpltCell(line, header, ...names);
-  const identity = parseCpltIdentity({ line, columns: inputColumns, header, tipo, organismoId });
+  const identity = parseCpltIdentity({ line, columns: inputColumns, header, tipo, organismoId, maxPeriod });
   if (!identity) return null;
 
   const nombreNormalizado = normalizeFuncionarioName(titleCase([

@@ -124,6 +124,7 @@ async function processStream(tipo, urls, outputDir, scope) {
   const unknownMunicipalities = new Set();
   let header = null;
   let linesProcessed = 0;
+  const maxPeriod = new Date().toISOString().slice(0, 7);
 
   try {
     for await (const line of lines) {
@@ -139,7 +140,7 @@ async function processStream(tipo, urls, outputDir, scope) {
       }
 
       const year = Number(scanCpltCell(line, header, "anyo", "año"));
-      if (!Number.isInteger(year) || year < 2024) continue;
+      if (!Number.isInteger(year) || year < 2024 || year > 2100) continue;
       const organismoNombre = scanCpltCell(line, header, "organismo_nombre", "organismo nombre");
       if (!acceptsCpltScope(organismoNombre, scope)) continue;
       let organismoId;
@@ -152,7 +153,7 @@ async function processStream(tipo, urls, outputDir, scope) {
         }
         throw error;
       }
-      const funcionario = parseCpltRecord({ line, header, tipo, organismoId, sourceUrl, deferId: true });
+      const funcionario = parseCpltRecord({ line, header, tipo, organismoId, sourceUrl, deferId: true, maxPeriod });
       if (!funcionario) continue;
       latestByOfficial.upsert({
         stableKey: funcionario._stableKey,
