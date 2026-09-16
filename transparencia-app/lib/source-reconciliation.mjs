@@ -15,6 +15,11 @@ const CATEGORY_BY_SOURCE = Object.freeze({
   senado: ["remuneraciones", "asesorias", "gastos", "votaciones"],
 });
 
+const EXPLICIT_SCOPE_HINTS = Object.freeze({
+  chilecompra: "El snapshot local conserva histórico; el release productivo es un corte vigente por períodos.",
+  dipres: "El conteo local corresponde a entidades/series resumidas; el release productivo cuenta filas presupuestarias por período.",
+});
+
 export function sourceCategories(sourceId) {
   return [...(CATEGORY_BY_SOURCE[String(sourceId)] ?? [])];
 }
@@ -55,10 +60,11 @@ function categoriesForSources(sources) {
   return [...new Set(sources.flatMap((source) => sourceCategories(source.id)))];
 }
 
-function classification({ production, local, children }) {
+function classification({ id, production, local, children }) {
   const hasCategorySplit = children.length > 0;
   if (production && local && Number(production.recordCount) === Number(local.recordCount) && !hasCategorySplit) return "match";
   if (hasCategorySplit || (local && sourceCategories(local.id).length > 0 && !production)) return "scope";
+  if (EXPLICIT_SCOPE_HINTS[id] && production && local && Number(production.recordCount) !== Number(local.recordCount)) return "scope";
   if (production && local && hasNewerProduction(production, local)) {
     // Una versión más nueva con más filas puede ser frescura. Si trae menos,
     // el dato puede estar recortado o pertenecer a otro alcance: no se debe
@@ -75,7 +81,8 @@ function rowFor(production, local, localSources) {
   const categories = categoriesForSources(localParts.length ? localParts : production ? [production] : []);
   return {
     id,
-    classification: classification({ production, local, children }),
+    classification: classification({ id, production, local, children }),
+    scopeReason: EXPLICIT_SCOPE_HINTS[id] ?? null,
     productionCount: production?.recordCount ?? null,
     localCount: local?.recordCount ?? null,
     localCatalogCount: local?.catalogRecordCount ?? null,

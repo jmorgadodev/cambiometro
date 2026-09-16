@@ -44,6 +44,24 @@ describe("auditoría de reconciliación producción/R2/local", () => {
     expect(report.rows[0]).toMatchObject({ classification: "scope", productionCount: 1_428, localCount: 8_138 });
   });
 
+  it("clasifica ChileCompra como alcance cuando local conserva histórico y producción un corte", () => {
+    const report = reconcileSourceSnapshots({
+      production: [{ id: "chilecompra", recordCount: 74_142, lastUpdated: "2026-08-21", status: "partial" }] as never,
+      local: [{ id: "chilecompra", recordCount: 888_693, generatedAt: "2026-08-21", status: "partial" }] as never,
+    });
+
+    expect(report.rows[0]).toMatchObject({ classification: "scope", scopeReason: expect.stringContaining("histórico") });
+  });
+
+  it("clasifica DIPRES como alcance cuando local cuenta entidades y producción filas presupuestarias", () => {
+    const report = reconcileSourceSnapshots({
+      production: [{ id: "dipres", recordCount: 247_287, lastUpdated: "2026-08-21", status: "partial" }] as never,
+      local: [{ id: "dipres", recordCount: 476, generatedAt: "2026-08-21", status: "partial" }] as never,
+    });
+
+    expect(report.rows[0]).toMatchObject({ classification: "scope", scopeReason: expect.stringContaining("entidades") });
+  });
+
   it("separa categorías parlamentarias sin sumar categorías distintas", () => {
     expect(sourceCategories("gastos_senado")).toEqual(["gastos"]);
     expect(sourceCategories("votaciones_senado")).toEqual(["votaciones"]);
