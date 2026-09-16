@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, readdirSync, statSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { buildCpltCoverageIndex } from "./cplt-coverage-index.mjs";
 import { buildCpltTransparencySummary } from "./cplt-transparency-summary.mjs";
 import { getCpltSearchPageSize } from "./cplt-search-config.mjs";
 
@@ -47,7 +48,7 @@ const version = latest.replace(/[:.]/g, "-");
 // Un release por versión evita superar el límite de 1.000 assets de GitHub Releases:
 // cada lote nacional publica más de 300 archivos versionados.
 const releaseTag = `data-cplt-personal-${version}`;
-const files = readdirSync(projectionRoot).filter((name) => name.endsWith(".json") && !["search_index.json", "transparency-summary.json"].includes(name)).sort();
+const files = readdirSync(projectionRoot).filter((name) => name.endsWith(".json") && !["search_index.json", "transparency-summary.json", "coverage-index.json"].includes(name)).sort();
 if (files.length < 1) throw new Error("CPLT_MISSING_PROJECTIONS");
 
 // La UI no puede buscar 1,2 millones de filas cargando el universo completo en
@@ -263,6 +264,12 @@ for (const asset of searchAssets) {
   // writeGeneratedAsset ya calculó el checksum de cada página/shard.
 }
 
+const coverageIndexPath = join(projectionRoot, "coverage-index.json");
+const coverageIndex = buildCpltCoverageIndex(compactRows);
+writeFileSync(coverageIndexPath, `${JSON.stringify(coverageIndex)}\n`);
+const coverageIndexKey = `projections/${datasetRoot}/versions/${version}/coverage-index.json`;
+const coverageIndexMetadata = await writeGeneratedAsset(coverageIndexPath, coverageIndexKey);
+
 function buildCoverage() {
   const byCommune = new Map();
   for (const source of required) {
@@ -339,6 +346,14 @@ const manifest = {
   recordCount: validations.reduce((total, report) => total + report.recordCount, 0),
   sources: validations.map(({ sourceId, sourceUrl, sourceValidator, recordCount, checksumSha256 }) => ({ sourceId, sourceUrl, sourceValidator, recordCount, checksumSha256 })),
   searchIndex: { key: searchIndexKey, totalRows: compactRows.length, pageSize: searchPageSize },
+  coverageIndex: {
+    key: coverageIndexKey,
+    entries: coverageIndex.entries.length,
+    totalRows: coverageIndex.totalRows,
+    indexedRows: coverageIndex.indexedRows,
+    invalidPeriodRows: coverageIndex.invalidPeriodRows,
+    checksumSha256: coverageIndexMetadata.checksumSha256,
+  },
   ...(centralScope ? {} : { coverage }),
   transparencySummary: {
     key: transparencySummaryKey,

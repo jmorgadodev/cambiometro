@@ -105,6 +105,28 @@ describe("automatizacion CPLT nacional", () => {
     expect(publisher).toContain('process.argv.includes("--local-only")');
   });
 
+  it("genera un índice liviano por organismo y período", () => {
+    const publisher = readFileSync(resolve(process.cwd(), "scripts/publish-cplt-projections.mjs"), "utf8");
+    const indexer = readFileSync(resolve(process.cwd(), "scripts/cplt-coverage-index.mjs"), "utf8");
+    expect(publisher).toContain("buildCpltCoverageIndex");
+    expect(publisher).toContain('"coverage-index.json"');
+    expect(publisher).toContain("coverageIndex:");
+    expect(indexer).toContain("organismId");
+    expect(indexer).toContain("invalidPeriodRows");
+    expect(indexer).not.toContain("nombre_completo");
+  });
+
+  it("deja la auditoría de duplicados separada de la publicación", () => {
+    const packageJson = readFileSync(resolve(process.cwd(), "package.json"), "utf8");
+    const audit = readFileSync(resolve(process.cwd(), "scripts/audit-cplt-duplicates.mjs"), "utf8");
+    expect(packageJson).toContain('"audit:cplt:duplicates"');
+    expect(audit).toContain("metadataFiles");
+    expect(audit).toContain("duplicateGroups");
+    expect(audit).not.toContain("wrangler");
+    expect(audit).not.toContain("D1");
+    expect(audit).not.toContain("r2 object");
+  });
+
   it("solo permite registrar el estado CPLT en la D1 autorizada", () => {
     const recorder = readFileSync(resolve(process.cwd(), "scripts/record-cplt-source-state.mjs"), "utf8");
     expect(recorder).toContain('database !== "transparencia-db"');
