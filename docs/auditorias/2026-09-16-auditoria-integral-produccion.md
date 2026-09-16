@@ -1535,3 +1535,11 @@ para usar el listado físico de R2; no se realizaron borrados ni publicaciones
 de datos en esta revisión. La publicación queda bloqueada hasta liberar
 espacio con una credencial de escritura y definir qué histórico se conserva,
 porque el token local vigente sólo tiene permisos de lectura.
+
+El bucket separado `cambiometro-backups` conserva una copia del snapshot del
+2026-08-20. Esa copia contiene 14 de las particiones actualmente huérfanas,
+entre ellas ChileCompra 2026-06 (74.142 filas), DIPRES 2026-06 (15.689),
+InfoLobby 2026-07 (10.649), Servel 2025-11 (23.894), SINIM 2025-12 (3.105),
+votaciones Senado 2026-08 (23) y las particiones base de Senado 2026-05 y
+2026-07. Es una vía de recuperación verificable, pero no se copiaron objetos:
+primero se debe liberar espacio y separar las categorías de Senado.
