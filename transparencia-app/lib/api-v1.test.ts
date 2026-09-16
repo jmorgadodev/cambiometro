@@ -562,6 +562,53 @@ describe("API canónica v1", () => {
     expect(payload.data[0]).toMatchObject({ id: "expense-1", kind: "expense", sourceId: "gastos_camara", title: "Traslado" });
   });
 
+  it("prefiere el histórico lake de gastos al subconjunto estático", async () => {
+    const compressed = gzipSync([
+      { id: "gastos_senado-expense-1", sourceId: "gastos_senado", kind: "expense", occurredAt: "2026-05-01", evidence: { sourceUrl: "https://senado.cl/1" }, data: { periodo: "2026-05", item: "Traslado", monto_clp: 10000 } },
+      { id: "gastos_senado-expense-2", sourceId: "gastos_senado", kind: "expense", occurredAt: "2026-05-02", evidence: { sourceUrl: "https://senado.cl/2" }, data: { periodo: "2026-05", item: "Alojamiento", monto_clp: 20000 } },
+    ].map((row) => JSON.stringify(row)).join("\n") + "\n");
+    const checksum = Array.from(new Uint8Array(await crypto.subtle.digest("SHA-256", compressed)))
+      .map((byte) => byte.toString(16).padStart(2, "0")).join("");
+    const files: Record<string, unknown> = {
+      "projections/static-site-v1/manifest.json": {
+        files: [{ path: "data/lake-subsets/gastos-senado.subset.json", key: "releases/expenses/senado-static.json" }],
+      },
+      "releases/expenses/senado-static.json": {
+        schemaVersion: 1,
+        sourceId: "gastos_senado",
+        recordCount: 1,
+        records: [{ id: "static-only", fecha: "2026-05-01", periodo: "2026-05", item: "Subconjunto", monto_clp: 1, url: "https://senado.cl/static", fuente: "Senado" }],
+      },
+      "catalog/v1/manifest.json": {
+        generatedAt: "2026-09-16T00:00:00.000Z",
+        sources: [{ id: "gastos_senado", recordCount: 2, status: "partial" }],
+        partitions: [{ sourceId: "gastos_senado", period: "2026-05", manifestKey: "partitions/gastos_senado/2026/05/manifest.json", recordCount: 2, checksumSha256: checksum, status: "partial" }],
+      },
+      "partitions/gastos_senado/2026/05/manifest.json": {
+        projectionChecksumSha256: checksum,
+        artifacts: [{ key: "partitions/gastos_senado/2026/05/records.jsonl.gz", checksumSha256: checksum }],
+      },
+      "partitions/gastos_senado/2026/05/records.jsonl.gz": compressed,
+    };
+    const env = {
+      PUBLIC_DATA: {
+        get: async (key: string) => {
+          const value = files[key];
+          if (value === undefined) return null;
+          if (value instanceof Uint8Array) return { arrayBuffer: async () => value.buffer.slice(value.byteOffset, value.byteOffset + value.byteLength) };
+          return { json: async <T>() => value as T };
+        },
+      },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/records?source=gastos_senado&limit=10"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta).toMatchObject({ total: 2, sourceBackend: "r2-lake", publishedRows: 2 });
+    expect(payload.data.map((row: { id: string }) => row.id)).toEqual(["gastos_senado-expense-2", "gastos_senado-expense-1"]);
+  });
+
   it("pagina el universo nacional de forma continua aunque R2 use bloques físicos mayores", async () => {
     const files: Record<string, unknown> = {
       "projections/funcionarios-v1/manifest.json": {

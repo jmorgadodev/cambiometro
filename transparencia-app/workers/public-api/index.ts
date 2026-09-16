@@ -2156,6 +2156,16 @@ export default {
         const expenseSource = url.searchParams.get("source")?.startsWith("gastos_");
         const expenseKind = url.searchParams.get("kind") === "expense";
         if (expenseSource || expenseKind) {
+          // El lake es la proyección canónica y puede contener más histórico
+          // que el subconjunto estático usado como respaldo de compatibilidad.
+          // Sólo usamos el subconjunto si el lake no tiene filas publicadas;
+          // de lo contrario, una consulta podía mostrar 2.500 gastos aunque
+          // el catálogo R2 declarara 6.517.
+          if (expenseSource) {
+            const lake = await listRecordsFromR2(url, env);
+            const lakePayload = lake ? await lake.clone().json().catch(() => null) as { meta?: JsonRecord } | null : null;
+            if (lake && lakePayload?.meta?.sourceBackend === "r2-lake" && Number(lakePayload.meta.publishedRows ?? 0) > 0) return lake;
+          }
           const r2 = await listExpensesFromR2(url, env);
           if (r2) return r2;
         }
