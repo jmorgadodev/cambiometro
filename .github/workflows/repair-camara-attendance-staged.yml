@@ -7,11 +7,27 @@ on:
         description: Escribe CAMBIOMETRO_CONFIRM_CAMARA_ATTENDANCE_REPAIR para publicar
         required: true
         default: ""
+      variant:
+        description: Variante Cámara a reparar
+        required: false
+        default: "asistencia_camara"
+      expected_count:
+        description: Conteo esperado de la variante
+        required: false
+        default: "775"
   workflow_call:
     inputs:
       confirm_repair:
         required: true
         type: string
+      variant:
+        required: false
+        type: string
+        default: "asistencia_camara"
+      expected_count:
+        required: false
+        type: number
+        default: 775
     secrets:
       CLOUDFLARE_ACCOUNT_ID:
         required: true
@@ -51,7 +67,11 @@ jobs:
           CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: |
           set -euo pipefail
-          test "$CONFIRMATION" = "CAMBIOMETRO_CONFIRM_CAMARA_ATTENDANCE_REPAIR"
+          if [ "${{ inputs.variant }}" = "congreso_opendata" ]; then
+            test "$CONFIRMATION" = "CAMBIOMETRO_CONFIRM_CAMARA_AUTHORITIES_REPAIR"
+          else
+            test "$CONFIRMATION" = "CAMBIOMETRO_CONFIRM_CAMARA_ATTENDANCE_REPAIR"
+          fi
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_DATA_API_TOKEN"
 
@@ -70,8 +90,13 @@ jobs:
         working-directory: transparencia-app
         run: |
           set -euo pipefail
-          node scripts/etl/prepare-camara-attendance-release.mjs \
-            --year 2026 --period 2026-09 --output .repair-staging/release
+          if [ "${{ inputs.variant }}" = "congreso_opendata" ]; then
+            node scripts/etl/prepare-camara-authorities-release.mjs \
+              --period 2026-09 --output .repair-staging/release
+          else
+            node scripts/etl/prepare-camara-attendance-release.mjs \
+              --year 2026 --period 2026-09 --output .repair-staging/release
+          fi
 
       - name: Fusionar catálogo y validar alcance
         working-directory: transparencia-app
@@ -80,7 +105,8 @@ jobs:
           node scripts/etl/merge-camara-attendance-preflight.mjs \
             --catalog .repair-staging/catalog-before.json \
             --staged .repair-staging/release/release-summary.json \
-            --output .repair-staging/merged-catalog.json
+            --output .repair-staging/merged-catalog.json \
+            --variant "${{ inputs.variant }}" --period 2026-09 --expected-count "${{ inputs.expected_count }}"
           node --input-type=module - <<'NODE'
           import { readFileSync } from "node:fs";
           const before = JSON.parse(readFileSync(".repair-staging/catalog-before.json", "utf8"));
@@ -88,7 +114,7 @@ jobs:
           const staged = JSON.parse(readFileSync(".repair-staging/release/release-summary.json", "utf8"));
           const source = after.sources.find((entry) => entry.id === "camara");
           const old = before.sources.find((entry) => entry.id === "camara");
-          if (staged.recordCount !== 775) throw new Error(`CAMARA_ATTENDANCE_COUNT:${staged.recordCount}`);
+          if (staged.recordCount !== Number("${{ inputs.expected_count }}")) throw new Error(`CAMARA_VARIANT_COUNT:${staged.recordCount}`);
           if (source?.recordCount !== old?.recordCount) throw new Error(`CAMARA_SOURCE_SCOPE_CHANGED:${old?.recordCount}:${source?.recordCount}`);
           if (new Set(staged.partitions.map((partition) => partition.id)).size !== 1) throw new Error("CAMARA_ATTENDANCE_PARTITION_SCOPE");
           console.log(JSON.stringify({ oldPartitions: before.partitions.length, newPartitions: after.partitions.length, records: staged.recordCount, checksum: staged.partitions[0].checksumSha256 }, null, 2));
@@ -115,10 +141,10 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: |
           set -euo pipefail
-          npx wrangler r2 object put "transparencia-public-data/catalog/v1/rollback/camara-attendance-${GITHUB_RUN_ID}-before.json" \
+          npx wrangler r2 object put "transparencia-public-data/catalog/v1/rollback/camara-${{ inputs.variant }}-${GITHUB_RUN_ID}-before.json" \
             --file .repair-staging/catalog-before.json --remote --content-type application/json
 
-      - name: Publicar sólo asistencia Cámara
+      - name: Publicar sólo variante Cámara validada
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -149,17 +175,18 @@ jobs:
           npx wrangler r2 object put transparencia-public-data/catalog/v1/manifest.json \
             --file .repair-staging/merged-catalog.json --remote --content-type application/json
 
-      - name: Verificar asistencia productiva y ausencia de D1
+      - name: Verificar variante productiva y ausencia de D1
         env:
           API_URL: https://cambiometro.impulsacv.cl/api/v1/records
         run: |
           set -euo pipefail
           node --input-type=module - <<'NODE'
-          const url = `${process.env.API_URL}?source=camara&kind=attendance&period=2026-09&limit=1&repair_probe=${process.env.GITHUB_RUN_ID}`;
+          const kind = "${{ inputs.variant }}" === "congreso_opendata" ? "authority" : "attendance";
+          const url = `${process.env.API_URL}?source=camara&kind=${kind}&period=2026-09&limit=1&repair_probe=${process.env.GITHUB_RUN_ID}`;
           const response = await fetch(url);
-          if (!response.ok) throw new Error(`CAMARA_ATTENDANCE_HTTP:${response.status}`);
+          if (!response.ok) throw new Error(`CAMARA_VARIANT_HTTP:${response.status}`);
           const payload = await response.json();
-          if (Number(payload.meta?.total ?? 0) !== 775) throw new Error(`CAMARA_ATTENDANCE_TOTAL:${payload.meta?.total}`);
-          if (payload.meta?.sourceBackend !== "r2-lake") throw new Error(`CAMARA_ATTENDANCE_BACKEND:${payload.meta?.sourceBackend}`);
+          if (Number(payload.meta?.total ?? 0) !== Number("${{ inputs.expected_count }}")) throw new Error(`CAMARA_VARIANT_TOTAL:${payload.meta?.total}`);
+          if (payload.meta?.sourceBackend !== "r2-lake") throw new Error(`CAMARA_VARIANT_BACKEND:${payload.meta?.sourceBackend}`);
           console.log(JSON.stringify({ total: payload.meta.total, backend: payload.meta.sourceBackend, status: payload.meta.sourceStatus }, null, 2));
           NODE

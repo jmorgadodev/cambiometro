@@ -9,11 +9,14 @@ const catalogPath = argument("--catalog");
 const stagedPath = argument("--staged");
 const outputPath = argument("--output");
 if (!catalogPath || !stagedPath || !outputPath) throw new Error("CAMARA_PREFLIGHT_ARGS_REQUIRED");
+const variant = argument("--variant") ?? "asistencia_camara";
+const period = argument("--period") ?? "2026-09";
+const expectedCount = Number(argument("--expected-count") ?? (variant === "asistencia_camara" ? 775 : 155));
 
 const catalog = JSON.parse(readFileSync(catalogPath, "utf8"));
 const staged = JSON.parse(readFileSync(stagedPath, "utf8"));
-if (staged.variant !== "asistencia_camara" || staged.period !== "2026-09") throw new Error("CAMARA_PREFLIGHT_SCOPE_INVALID");
-if (staged.recordCount !== 775 || staged.partitions?.length !== 1) throw new Error(`CAMARA_PREFLIGHT_COUNT_INVALID:${staged.recordCount}`);
+if (staged.variant !== variant || staged.period !== period) throw new Error(`CAMARA_PREFLIGHT_SCOPE_INVALID:${staged.variant}:${staged.period}`);
+if (staged.recordCount !== expectedCount || staged.partitions?.length !== 1) throw new Error(`CAMARA_PREFLIGHT_COUNT_INVALID:${staged.recordCount}:${expectedCount}`);
 
 const newPartitions = staged.partitions;
 const replacementIds = new Set(newPartitions.map((partition) => partition.id));
