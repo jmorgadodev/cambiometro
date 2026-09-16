@@ -253,8 +253,8 @@ jobs:
       - name: Preparar D1 local de integración
         working-directory: transparencia-app
         run: |
-          npx wrangler d1 migrations apply transparencia-db --local --config wrangler.d1.jsonc
-          npx wrangler d1 execute transparencia-db --local --config wrangler.d1.jsonc --file fixtures/d1-browser.sql
+          npx wrangler d1 migrations apply transparencia-db --local --persist-to .wrangler/state --config wrangler.d1.jsonc
+          npx wrangler d1 execute transparencia-db --local --persist-to .wrangler/state --config wrangler.d1.jsonc --file fixtures/d1-browser.sql
 
       - name: Verificar navegador, temas y CSP
         working-directory: transparencia-app
@@ -264,7 +264,7 @@ jobs:
           TURNSTILE_SECRET_KEY: 1x0000000000000000000000000000000AA
           NEXT_PUBLIC_TURNSTILE_SITE_KEY: 1x00000000000000000000AA
         run: |
-          npx wrangler dev --local --var ALLOW_PUBLIC_D1_READS:1 --config workers/public-api/wrangler.jsonc --port 8788 --inspector-port 9230 --log-level warn > /tmp/cambiometro-api.log 2>&1 &
+          npx wrangler dev --local --persist-to .wrangler/state --var ALLOW_PUBLIC_D1_READS:1 --config workers/public-api/wrangler.jsonc --port 8788 --inspector-port 9230 --log-level warn > /tmp/cambiometro-api.log 2>&1 &
           api_pid=$!
           npx wrangler pages dev out --port 3003 --proxy 8788 --inspector-port 9231 --compatibility-date=2026-08-08 --log-level warn > /tmp/cambiometro-pages.log 2>&1 &
           pages_pid=$!
