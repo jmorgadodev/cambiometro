@@ -1151,3 +1151,52 @@ Resultado de la lectura acotada más reciente:
 La prueba específica y `api-v1` pasaron 76/76; `typecheck` también pasó. Esta
 reconciliación es sólo de metadatos y no lee masivamente D1 ni descarga los
 universos de R2.
+
+### Cierre de integridad de Movimientos y hoja de ruta — 16-09-2026
+
+El módulo `/movimientos/` queda corregido y validado en producción. El release
+público vigente es `kast-2026-succession-reconciled-2026-09-14`, con corte al
+14-09-2026, 46 salidas y checksum
+`9a884d9bef8627718afed406d530591acec6a95c50dd27956c744b56766f1995`. La
+verificación productiva confirmó que no se mezclan Carolina Arredondo, Eduardo
+Vergara, Ignacia Fernández, Daniela Dresdner, José Andrés Herrera ni Patricio
+Kuhn; Rafael Araos conserva el cargo de subsecretario. No se debe volver a
+promover un snapshot de movimientos sin repetir esta verificación.
+
+La corrección de Movimientos no permite concluir que todas las fuentes tengan
+problemas. Fue una falla de alcance específica del pipeline de autoridades,
+por lo que el resto se auditará por separado y no se corregirá por analogía.
+
+#### Orden aprobado para continuar
+
+1. **Remuneraciones — integridad y cobertura real.** Comparar por fuente,
+   período y organismo los manifiestos productivos contra los índices locales;
+   distinguir filas publicadas, filas consultables, histórico, duplicados y
+   faltantes. Se empezará con muestras pequeñas de Transparencia Activa,
+   38 bis, Cámara y Senado. No se modificará ningún release hasta explicar una
+   diferencia.
+2. **Cámara y Senado — componentes separados.** Reconciliar por separado
+   remuneraciones, personal de apoyo, asesorías, gastos y votaciones. El estado
+   actual deja documentados los desfases de Senado: +3 gastos y +24 votaciones
+   en producción frente al catálogo local. Primero se verificará el origen y
+   período; después se decidirá si corresponde actualizar el artefacto local.
+3. **Transparencia Activa — calidad útil.** Auditar meses, organismos,
+   nombres, cargos, monto bruto, líquido no informado, monto cero y duplicados.
+   Se generará una muestra reproducible de altas, bajas y cambios de monto sin
+   descargar el universo ni reescribir valores originales.
+4. **Historiales desde R2.** Probar con una persona y un organismo; sólo si
+   los conteos y checksums coinciden se ampliará por lotes. D1 no participará en
+   búsquedas ni historiales masivos.
+5. **Fuentes restantes.** Revisar ChileCompra, InfoLobby y DIPRES por alcance:
+   corte vigente, histórico, agregados y filas consultables. No se tratarán
+   conteos agregados como personas ni se mostrarán muestras como universos.
+6. **Validación final.** Por cada bloque: pruebas, preview, navegación móvil y
+   escritorio, conteos, checksum, consumo D1, tamaño proyectado R2 y rollback.
+
+#### Regla de promoción
+
+Un bloque sólo pasa a producción cuando su release productivo tiene checksum,
+conteo, período y alcance documentados; el release anterior queda disponible
+para rollback; y una falla externa conserva el último release válido. Quedan
+prohibidos los reemplazos automáticos por cero filas, las fusiones por nombre
+solamente y las correcciones que oculten el valor original.
