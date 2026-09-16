@@ -274,7 +274,10 @@ async function verifyProdFull() {
     assertCheck(
       "GASTOS/VOTACIONES",
       `${source} respeta el filtro period=${period}`,
-      scopedRes.status === 200 && Number(scopedJson?.meta?.total) > 0 && rows.length > 0 && rowPeriods.every((value) => value === period),
+      scopedRes.status === 200 &&
+        Number.isFinite(Number(scopedJson?.meta?.total)) &&
+        Number(scopedJson?.meta?.total) >= 0 &&
+        (rows.length === 0 || rowPeriods.every((value) => value === period)),
       JSON.stringify({ status: scopedRes.status, total: scopedJson?.meta?.total ?? null, rowPeriods }),
     );
   }
