@@ -962,44 +962,78 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
 async function listAllFuncionariosFromR2(requestUrl: URL, env: Env) {
   const requestedLimit = Number(requestUrl.searchParams.get("limit") ?? 20);
   const limit = Number.isInteger(requestedLimit) ? Math.max(1, Math.min(requestedLimit, 100)) : 20;
-  const combinedLimit = Math.min(100, Math.max(limit, limit * 2));
-  const scopedUrl = new URL(requestUrl);
-  scopedUrl.searchParams.set("limit", String(combinedLimit));
-  // Las dos nóminas tienen índices grandes. Consultarlas en paralelo duplica
-  // la descompresión y el número de lecturas R2 dentro del mismo Worker y
-  // puede terminar en 1102 aunque cada alcance aislado responda 200. La
-  // combinación debe ser secuencial y degradable: una fuente disponible no
-  // se oculta por el fallo temporal de la otra.
-  const municipal = await listFuncionariosFromR2(scopedUrl, env, "funcionarios-v1");
-  const central = await listFuncionariosFromR2(scopedUrl, env, "funcionarios-central-v1");
-  const usable = [municipal, central].filter((response) => response.status < 500);
-  if (usable.length === 0) return municipal;
-  if (usable.length === 1) return usable[0];
+  const requestedPageRaw = Number(requestUrl.searchParams.get("page") ?? 1);
+  const requestedPage = Number.isInteger(requestedPageRaw) ? Math.max(1, requestedPageRaw) : 1;
+  const headUrl = new URL(requestUrl);
+  headUrl.searchParams.set("page", "1");
+  headUrl.searchParams.set("limit", "1");
+  // Las dos nóminas tienen índices grandes. Consultarlas secuencialmente
+  // evita duplicar la descompresión y las lecturas R2 dentro del Worker. El
+  // encabezado de cada fuente permite paginar el universo combinado sin
+  // devolver varias veces el límite solicitado ni perder filas entre páginas.
+  const sourceResponses = [
+    { name: "municipal", root: "funcionarios-v1", response: await listFuncionariosFromR2(headUrl, env, "funcionarios-v1") },
+    { name: "central", root: "funcionarios-central-v1", response: await listFuncionariosFromR2(headUrl, env, "funcionarios-central-v1") },
+  ];
+  const usable = sourceResponses.filter(({ response }) => response.status < 500);
+  if (usable.length === 0) return sourceResponses[0].response;
 
-  const payloads = await Promise.all(usable.map(async (response) => await response.json() as JsonRecord));
-  const rows = payloads.flatMap((payload) => Array.isArray(payload.data) ? payload.data as JsonRecord[] : []);
+  const payloads = await Promise.all(usable.map(async ({ response }) => await response.clone().json() as JsonRecord));
+  const sourceTotals = new Map(usable.map(({ name }, index) => [name, Number((payloads[index].meta as JsonRecord | undefined)?.total ?? 0)]));
+  const total = [...sourceTotals.values()].reduce((sum, value) => sum + (Number.isFinite(value) ? value : 0), 0);
+  const totalPages = Math.max(1, Math.ceil(total / limit));
+  const page = Math.min(requestedPage, totalPages);
+  const start = (page - 1) * limit;
+  const end = Math.min(start + limit, total);
+  const rows: JsonRecord[] = [];
+
+  async function appendSourceSegment(source: { root: string }, sourceStart: number, sourceEnd: number) {
+    if (sourceStart >= sourceEnd) return;
+    const sourceUrl = new URL(requestUrl);
+    sourceUrl.searchParams.set("page", String(Math.floor(sourceStart / limit) + 1));
+    sourceUrl.searchParams.set("limit", String(limit));
+    const response = await listFuncionariosFromR2(sourceUrl, env, source.root);
+    if (response.status >= 500) return;
+    const payload = await response.json() as JsonRecord;
+    const sourceRows = Array.isArray(payload.data) ? payload.data as JsonRecord[] : [];
+    const localOffset = sourceStart % limit;
+    rows.push(...sourceRows.slice(localOffset, localOffset + (sourceEnd - sourceStart)));
+  }
+
+  // El contrato combinado es determinista: primero municipal y luego central.
+  // Así cada registro pertenece exactamente a una página y no se descarta la
+  // mitad de una fuente al mezclar dos páginas independientes.
+  const municipalTotal = sourceTotals.get("municipal") ?? 0;
+  const municipalSource = usable.find((source) => source.name === "municipal");
+  const centralSource = usable.find((source) => source.name === "central");
+  if (municipalSource) {
+    const municipalStart = Math.min(start, municipalTotal);
+    const municipalEnd = Math.min(end, municipalTotal);
+    await appendSourceSegment(municipalSource, municipalStart, municipalEnd);
+  }
+  if (centralSource) {
+    const centralStart = Math.max(0, start - municipalTotal);
+    const centralEnd = Math.max(0, end - municipalTotal);
+    await appendSourceSegment(centralSource, centralStart, centralEnd);
+  }
+
   const unique = new Map<string, JsonRecord>();
   for (const row of rows) {
     const id = String(row.id ?? "");
     if (id && !unique.has(id)) unique.set(id, row);
   }
-  const data = [...unique.values()].sort((left, right) => {
-    const byName = normalized(left.nombre_completo).localeCompare(normalized(right.nombre_completo), "es");
-    return byName || String(left.id ?? "").localeCompare(String(right.id ?? ""));
-  });
-  const totals = payloads.map((payload) => Number((payload.meta as JsonRecord | undefined)?.total ?? 0));
-  const total = totals.reduce((sum, value) => sum + (Number.isFinite(value) ? value : 0), 0);
   const firstMeta = (payloads[0].meta as JsonRecord | undefined) ?? {};
   return json({
-    data,
+    data: [...unique.values()],
     meta: {
       ...firstMeta,
       total,
       totalHeadcount: total,
-      limit: combinedLimit,
-      totalPages: Math.max(1, Math.ceil(total / combinedLimit)),
-      sourceStatus: "r2-search-combined",
-      sources: ["municipal", "central"],
+      page,
+      limit,
+      totalPages,
+      sourceStatus: usable.length === sourceResponses.length ? "r2-search-combined" : "r2-search-partial",
+      sources: usable.map(({ name }) => name),
     },
     links: { self: requestUrl.toString() },
   }, { headers: { "Cache-Control": "public, max-age=30, s-maxage=3600, stale-while-revalidate=86400" } });
@@ -1616,13 +1650,24 @@ async function searchFuncionariosFromR2(raw: string, env: Env) {
   requestUrl.searchParams.set("limit", "8");
   requestUrl.searchParams.set("include_zero", "true");
   try {
-    // La búsqueda de la Home debe consultar las dos nóminas publicadas. El
-    // endpoint combinado ya pagina cada índice por separado y los une sin
-    // cargar el universo completo ni recurrir a D1.
-    const response = await listAllFuncionariosFromR2(requestUrl, env);
-    if (!response || response.status >= 400) return [];
-    const payload = await response.json() as JsonRecord;
-    const rows = Array.isArray(payload.data) ? payload.data : [];
+    // La búsqueda de la Home debe consultar las dos nóminas publicadas. Para
+    // que una nómina municipal extensa no oculte una coincidencia central en
+    // la vista previa, se intercalan resultados de ambos índices y sólo se
+    // leen las primeras filas coincidentes de cada uno.
+    const municipal = await listFuncionariosFromR2(requestUrl, env, "funcionarios-v1");
+    const central = await listFuncionariosFromR2(requestUrl, env, "funcionarios-central-v1");
+    const payloads = [municipal, central]
+      .filter((response) => response.status < 400)
+      .map(async (response) => await response.json() as JsonRecord);
+    const sourceRows = await Promise.all(payloads);
+    const rows: JsonRecord[] = [];
+    const rowLists = sourceRows.map((payload) => Array.isArray(payload.data) ? payload.data as JsonRecord[] : []);
+    for (let index = 0; rows.length < 8 && index < 8; index += 1) {
+      for (const list of rowLists) {
+        if (list[index]) rows.push(list[index]);
+        if (rows.length >= 8) break;
+      }
+    }
     return rows.slice(0, 8).map((row) => ({
       id: String(row.id ?? ""),
       type: "funcionario" as const,
