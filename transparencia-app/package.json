@@ -97,6 +97,7 @@
     "audit:sources": "node scripts/audit-source-reconciliation.mjs",
     "audit:remuneraciones": "node scripts/audit-remuneraciones-scope.mjs",
     "audit:r2:storage": "node scripts/audit-r2-storage.mjs",
+    "audit:r2:retention": "node scripts/audit-r2-retention.mjs",
     "audit:r2:catalog": "node scripts/audit-r2-catalog.mjs",
     "data:health": "node scripts/build-source-health.mjs",
     "data:communes:update": "node scripts/update-commune-catalog.mjs",
