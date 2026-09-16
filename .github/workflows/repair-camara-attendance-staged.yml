@@ -69,6 +69,8 @@ jobs:
           set -euo pipefail
           if [ "${{ inputs.variant }}" = "congreso_opendata" ]; then
             test "$CONFIRMATION" = "CAMBIOMETRO_CONFIRM_CAMARA_AUTHORITIES_REPAIR"
+          elif [ "${{ inputs.variant }}" = "votaciones_camara" ]; then
+            test "$CONFIRMATION" = "CAMBIOMETRO_CONFIRM_CAMARA_VOTES_REPAIR"
           else
             test "$CONFIRMATION" = "CAMBIOMETRO_CONFIRM_CAMARA_ATTENDANCE_REPAIR"
           fi
@@ -92,6 +94,9 @@ jobs:
           set -euo pipefail
           if [ "${{ inputs.variant }}" = "congreso_opendata" ]; then
             node scripts/etl/prepare-camara-authorities-release.mjs \
+              --period 2026-09 --output .repair-staging/release
+          elif [ "${{ inputs.variant }}" = "votaciones_camara" ]; then
+            node scripts/etl/prepare-camara-votes-release.mjs \
               --period 2026-09 --output .repair-staging/release
           else
             node scripts/etl/prepare-camara-attendance-release.mjs \

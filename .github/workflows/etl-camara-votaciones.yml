@@ -36,6 +36,16 @@ on:
         required: false
         type: string
         default: ""
+      repair_votes:
+        description: Reparar sólo votaciones Cámara 2026-09 en R2, sin ETL general
+        required: false
+        type: boolean
+        default: false
+      confirm_votes:
+        description: Escribe CAMBIOMETRO_CONFIRM_CAMARA_VOTES_REPAIR para reparar
+        required: false
+        type: string
+        default: ""
 
 concurrency:
   group: cambiometro-static-publication
@@ -49,7 +59,7 @@ permissions:
 jobs:
   ingest-publish:
     name: Votaciones oficiales de Cámara
-    if: inputs.repair_attendance != true && inputs.repair_authorities != true
+    if: inputs.repair_attendance != true && inputs.repair_authorities != true && inputs.repair_votes != true
     runs-on: ubuntu-latest
     timeout-minutes: 45
     environment: production
@@ -156,4 +166,14 @@ jobs:
       confirm_repair: ${{ inputs.confirm_authorities }}
       variant: congreso_opendata
       expected_count: 155
+    secrets: inherit
+
+  repair-votes:
+    name: Reparación aislada de votaciones Cámara
+    if: inputs.repair_votes == true
+    uses: ./.github/workflows/repair-camara-attendance-staged.yml
+    with:
+      confirm_repair: ${{ inputs.confirm_votes }}
+      variant: votaciones_camara
+      expected_count: 49
     secrets: inherit
