@@ -263,6 +263,22 @@ async function verifyProdFull() {
     assertCheck("GASTOS", `Worker ${source} responde con filas`, expenseRes.status === 200 && Number(expenseJson?.meta?.total) > 0, `total: ${expenseJson?.meta?.total ?? "n/a"}`);
   }
 
+  for (const [source, params, period] of [
+    ["gastos_senado", "kind=expense", "2026-01"],
+    ["votaciones_senado", "kind=vote", "2026-03"],
+  ]) {
+    const scopedRes = await fetchWithResponseRetry(`${API_URL}/api/v1/records?source=${source}&${params}&period=${period}&limit=3`, { headers });
+    const scopedJson = scopedRes.ok ? await scopedRes.json().catch(() => null) : null;
+    const rows = Array.isArray(scopedJson?.data) ? scopedJson.data : [];
+    const rowPeriods = rows.map((row) => String(row?.period?.periodo ?? row?.period?.label ?? row?.data?.periodo ?? row?.data?.period ?? row?.occurredAt ?? "").slice(0, 7));
+    assertCheck(
+      "GASTOS/VOTACIONES",
+      `${source} respeta el filtro period=${period}`,
+      scopedRes.status === 200 && Number(scopedJson?.meta?.total) > 0 && rows.length > 0 && rowPeriods.every((value) => value === period),
+      JSON.stringify({ status: scopedRes.status, total: scopedJson?.meta?.total ?? null, rowPeriods }),
+    );
+  }
+
   const maipuRes = await fetch(`${PROD_URL}/municipalidades/muni-maipu`, { redirect: "manual", headers });
   assertCheck(
     "INVARIANTES",
