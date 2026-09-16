@@ -186,7 +186,7 @@ jobs:
         run: |
           set -euo pipefail
           node --input-type=module - <<'NODE'
-          const kind = "${{ inputs.variant }}" === "congreso_opendata" ? "authority" : "attendance";
+          const kind = "${{ inputs.variant }}" === "congreso_opendata" ? "authority" : ("${{ inputs.variant }}" === "votaciones_camara" ? "vote" : "attendance");
           const url = `${process.env.API_URL}?source=camara&kind=${kind}&period=2026-09&limit=1&repair_probe=${process.env.GITHUB_RUN_ID}`;
           const response = await fetch(url);
           if (!response.ok) throw new Error(`CAMARA_VARIANT_HTTP:${response.status}`);
