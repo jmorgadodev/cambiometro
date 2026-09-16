@@ -2,7 +2,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import type { Remuneracion38BisRecord } from "@/lib/remuneraciones-38bis";
-import RemuneracionesHistoryChart, { type RemuneracionPeriodPoint } from "@/components/remuneraciones/RemuneracionesHistoryChart";
 
 interface PageEntry {
   page: number;
@@ -384,7 +383,6 @@ export default function Remuneraciones38BisClient({
     ? `${number.format(resultCount ?? filteredRows.length)} coincidencias`
     : `Página ${page} de ${activePeriod.page_count}`;
 
-  const periodPoints = manifest.periodos as RemuneracionPeriodPoint[];
   const comparisonRows = useMemo(() => comparisonDetails && comparisonKind ? [...comparisonDetails[comparisonKind]].sort(compareNames) : [], [comparisonDetails, comparisonKind]);
   const comparisonPageSize = 20;
   const comparisonPageCount = Math.max(1, Math.ceil(comparisonRows.length / comparisonPageSize));
@@ -565,8 +563,6 @@ export default function Remuneraciones38BisClient({
           </nav>
         </section>
 
-        <RemuneracionesHistoryChart periods={periodPoints} selectedPeriod={periodo} onPeriodClick={selectPeriod} />
-
         <section className="card" aria-labelledby="method-title">
           <span className="eyebrow">Cómo leer estos cambios</span>
           <h2 id="method-title" style={{ margin: "0.25rem 0 0.4rem", fontSize: "1.15rem" }}>Auditoría mensual, no una acusación automática</h2>
@@ -598,7 +594,7 @@ export default function Remuneraciones38BisClient({
             </dl>
             <section aria-labelledby="remuneracion-historial-title" style={{ marginTop: "1.35rem", paddingTop: "1rem", borderTop: "1px solid var(--border-subtle)" }}>
               <span className="eyebrow">Historial disponible</span>
-              <h3 id="remuneracion-historial-title" style={{ margin: "0.25rem 0 0.3rem", fontSize: "1rem" }}>Evolución mensual de esta remuneración</h3>
+              <h3 id="remuneracion-historial-title" style={{ margin: "0.25rem 0 0.3rem", fontSize: "1rem" }}>Historial publicado de esta persona</h3>
               <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.74rem", lineHeight: 1.5 }}>Se muestran sólo los meses en que la fuente publicó este mismo organismo y cargo.</p>
               {historyLoading && <p role="status" style={{ color: "var(--text-muted)", fontSize: "0.78rem" }}>Cargando historial…</p>}
               {historyError && <p role="alert" className="badge badge-danger" style={{ marginTop: "0.7rem", textTransform: "none", letterSpacing: 0 }}>{historyError}</p>}
