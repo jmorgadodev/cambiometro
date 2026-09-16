@@ -1697,3 +1697,62 @@ el bucket público ocupa 11.078.005.075 bytes y el de backups 6.359.832.609
 bytes, para 17.437.837.684 bytes combinados frente al límite de 10 GB. Por
 eso se mantiene la regla: cero nuevas cargas o copias R2 hasta liberar espacio
 con una política explícita de rollback y una credencial de escritura.
+
+### Protección account-wide de publicaciones R2 — PR #551
+
+Se detectó y corrigió un hueco de seguridad: los publicadores directos de
+personal de apoyo, estáticos y transferencias no ejecutaban el preflight de
+almacenamiento antes de escribir. Ahora los cuatro caminos de publicación
+(lake, estáticos, personal de apoyo y transferencias) consultan ambos buckets
+de la cuenta y calculan tamaño actual, pico conservador y resultado final.
+
+La prueba remota con el grupo mínimo de Movimientos se detuvo antes del primer
+`PUT` con `R2_WRITE_BLOCKED_AT_95_PERCENT`: pico de 17.437.939.965 bytes y
+límite de 10.000.000.000 bytes. No se escribió R2 ni D1.
+
+El PR #551 está en una rama separada de `main`. Sus pruebas locales quedaron en
+204 archivos y 1.072 tests aprobados; los checks remotos de lint/tipos/tests,
+seguridad y análisis estático ya pasaron, mientras la verificación de Pages/API
+termina. Este cambio no publica interfaz ni datos.
+
+La cuenta queda operativamente bloqueada para nuevas cargas hasta que se defina
+la retención del rollback, se libere espacio de forma explícita y un nuevo
+preflight quede bajo 95%. No se debe saltar el guard mediante variables de
+entorno en producción.
+
+### Auditoría del respaldo R2 — 16-09-2026
+
+La revisión se hizo mediante el inventario de objetos del API de R2, sin
+descargar los archivos ni escribir en ningún bucket.
+
+El puntero `backup-inventory.json` no es confiable como inventario vigente:
+declara una generación del 06-09-2026, referencia sólo un dump de D1 y
+reporta cero objetos del lago de datos. En cambio, el bucket contiene dos
+snapshots posteriores, por lo que el inventario publicado quedó atrasado o
+incompleto. El simulador de restauración no debe considerarse válido hasta
+que ese puntero enumere un snapshot verificable.
+
+El snapshot `backup/2026-09-13/` contiene 2.587 objetos y
+4.310.789.809 bytes. No es una copia completa del bucket público actual:
+926 objetos coinciden por clave, mientras 1.661 objetos por
+2.181.852.714 bytes sólo existen en ese snapshot. La mayor parte corresponde
+a una versión histórica de `funcionarios-v1` (1.514 objetos y
+2.124.662.818 bytes); también conserva particiones que hoy faltan en el
+catálogo público, entre ellas ChileCompra, InfoLobby, DIPRES, Servel, SINIM,
+Cámara, Senado e InfoProbidad. Por eso sí es necesario conservarlo como
+rollback y recuperación hasta validar qué particiones se restauran y cuál
+será la política definitiva de retención.
+
+El snapshot `backup/2026-08-20/` sigue siendo necesario por ahora: contiene
+613 objetos y 1.878.360.452 bytes, incluyendo copias de recuperación de
+particiones ausentes. No se puede eliminar sólo por ser más antiguo, porque
+el snapshot del 13-09 no reemplaza automáticamente todo su contenido.
+
+Conclusión operativa: no se eliminó ningún respaldo y no se subió ningún
+dato. La prioridad es reparar el inventario, verificar una restauración
+aislada de ambos snapshots y escoger explícitamente un rollback por cada
+proyección. Sólo después se podrá liberar espacio eliminando objetos
+redundantes identificados por clave y checksum. Mientras tanto R2 permanece
+bloqueado por el umbral account-wide: el bucket público ocupa
+11.078.005.075 bytes, backups 6.359.832.609 bytes y el total combinado
+17.437.837.684 bytes frente al límite operativo de 10 GB.
