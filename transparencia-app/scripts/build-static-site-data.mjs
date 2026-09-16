@@ -4,7 +4,7 @@ import { mkdir, readFile, readdir, rm, writeFile } from "node:fs/promises";
 import { join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import { writeChunkedJson } from "./static-site-data.mjs";
-import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
+import { buildTransferenciasStatic, hasFullTransferSource } from "./build-transferencias-static.mjs";
 import { chunkJsonRows, listUnavailableMunicipalities } from "./static-payroll.mjs";
 import { readExpenseSubset } from "./expense-release.mjs";
 import { normalizeMovementPayload, sha256, validateMovementPayload } from "./movimientos-pipeline.mjs";
@@ -168,12 +168,13 @@ const canonicalManifest = canonicalManifestFile && existsSync(canonicalManifestF
   ? JSON.parse(readFileSync(canonicalManifestFile, "utf8"))
   : null;
 const fullSource = join(root, "data", "lake", "partitions", "ley-19862");
-if (!existsSync(fullSource) && !canonicalManifest && !allowSample) {
+const fullSourceAvailable = hasFullTransferSource(fullSource);
+if (!fullSourceAvailable && !canonicalManifest && !allowSample) {
   throw new Error("STATIC_DATA_FULL_TRANSFER_SOURCE_MISSING: hydrate the complete Ley 19.862 lake or the canonical paginated release before building Pages");
 }
 const fullRelease = canonicalManifest
   ? { manifest: canonicalManifest, summary: JSON.parse(readFileSync(join(transferDir, "summary.json"), "utf8")) }
-  : existsSync(fullSource)
+  : fullSourceAvailable
     ? await buildTransferenciasStatic({ source: fullSource, output: transferDir, registeredThrough })
     : null;
 if (!fullRelease && !allowSample) throw new Error("STATIC_DATA_FULL_TRANSFER_RELEASE_EMPTY");
