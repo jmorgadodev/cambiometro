@@ -1247,3 +1247,18 @@ La identificación ahora conserva el componente específico cuando el
 
 No se corrigieron conteos a mano ni se promovió ningún artefacto; primero debe
 reconstruirse o localizarse el release local verificable de cada componente.
+
+### Estado de implementación — 16-09-2026
+
+Cambios versionados en la rama de trabajo del proyecto:
+
+- `d7e764f`: auditoría de alcance de Remuneraciones de sólo lectura.
+- `ef07c25`: preservación de componentes separados de Cámara.
+- `c83b8ac`: bloqueo de crecimiento unificado al 95%.
+- `f5c98ec`: tipado y pruebas del auditor de Remuneraciones.
+
+Validación final local: `npm test` aprobó 198 archivos y 1.051 pruebas. La
+verificación productiva de Movimientos continúa aprobada con 46/46. Estos
+cambios todavía no se promueven a Pages ni modifican releases de datos, porque
+la auditoría debe explicar primero los artefactos locales faltantes y los
+desfases de Senado.
