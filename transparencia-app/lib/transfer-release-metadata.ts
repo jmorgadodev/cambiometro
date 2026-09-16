@@ -72,6 +72,7 @@ function fromCandidate(candidate: Record<string, unknown>): TransferReleaseMetad
  * when a checkout has not been hydrated yet.
  */
 export function getTransferReleaseMetadata(): TransferReleaseMetadata {
+  const candidates: TransferReleaseMetadata[] = [];
   for (const relativePath of [
     "data/generated/transferencias/summary.json",
     "public/data/transferencias/manifest.json",
@@ -79,7 +80,7 @@ export function getTransferReleaseMetadata(): TransferReleaseMetadata {
   ]) {
     const metadata = readJson(relativePath);
     const parsed = metadata ? fromCandidate(metadata) : null;
-    if (parsed) return parsed;
+    if (parsed) candidates.push(parsed);
   }
-  return FALLBACK;
+  return candidates.sort((left, right) => right.totalRows - left.totalRows)[0] ?? FALLBACK;
 }

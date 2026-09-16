@@ -1,7 +1,17 @@
 import { describe, expect, it } from "vitest";
-import { getLey19862Summary } from "./transferencias-data";
+import { getLey19862Summary, selectBestTransferSummary } from "./transferencias-data";
 
 describe("Módulo /transferencias — Validación y aserciones", () => {
+  it("prefiere el resumen completo sobre una muestra compacta", () => {
+    const compact = getLey19862Summary();
+    const selected = selectBestTransferSummary([
+      { ...compact, kpis: { ...compact.kpis, total_transfers: 1_000 }, top_receptores: [], top_emisores: [] },
+      { ...compact, kpis: { ...compact.kpis, total_transfers: 59_361 }, top_receptores: [{ name: "Receptor", count: 1, total_clp: 1, rut: "", class: null, top_emisores: [] }], top_emisores: [] },
+    ]);
+
+    expect(selected?.kpis.total_transfers).toBe(59_361);
+  });
+
   it("0. Carga autoritativa en build-time con datos no vacíos", () => {
     const summary = getLey19862Summary();
     expect(summary).toBeDefined();
