@@ -23,6 +23,8 @@
 - [x] Reconstruir las 7 particiones históricas faltantes de Cámara en R2; manifiestos y registros verificados por checksum, alias y fuente canónica completos en producción.
 - [x] Verificar las 2 particiones históricas de Senado en R2 (2025-08: 121; 2026-02: 7) contra sus manifiestos y registros publicados, sin reconstruir ni duplicar artefactos.
 - [x] Auditar la retención de R2 en modo lectura (2026-09-16): 0 snapshots expirados y 0 bytes candidatos; no se ejecutaron `PUT` ni `DELETE`.
+- [x] Auditar las proyecciones CPLT productivas sin descargar el universo: municipal 1.243.761 y central 2.110.434; búsqueda `scope=all` verificada con consultas nominales acotadas.
+- [x] Detectar la discrepancia entre la tarjeta estática CPLT (1.203.287) y el release productivo municipal; documentada sin modificar R2 ni D1.
 
 ## D1 después del reinicio — comprobado 2026-09-16
 
@@ -63,6 +65,15 @@
   escribir si el origen devuelve HTTP 403, vacío o un resultado inválido.
 - Interfaz: los detalles técnicos de infraestructura no se muestran en la
   experiencia pública; quedan sólo en pruebas, auditoría y configuración.
+
+### Pendientes actuales de datos
+
+1. Corregir la presentación del conteo CPLT para separar municipalidades y
+   organismos centrales; no usar el valor estático 1.203.287.
+2. Auditar la cobertura CPLT por período y organismo antes de incorporar pagos.
+3. Completar la matriz de calidad de nombres, montos, períodos y duplicados
+   desde manifiestos R2, sin cargar el universo en D1.
+4. Construir historiales, altas, bajas y cambios de monto por lotes pequeños.
 
 ## Fuera de alcance
 
