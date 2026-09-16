@@ -1543,3 +1543,10 @@ InfoLobby 2026-07 (10.649), Servel 2025-11 (23.894), SINIM 2025-12 (3.105),
 votaciones Senado 2026-08 (23) y las particiones base de Senado 2026-05 y
 2026-07. Es una vía de recuperación verificable, pero no se copiaron objetos:
 primero se debe liberar espacio y separar las categorías de Senado.
+
+La auditoría ampliada suma ambos buckets: `transparencia-public-data` ocupa
+11.078.005.075 bytes y `cambiometro-backups` ocupa 6.359.832.609 bytes. El
+total observado es 17.437.837.684 bytes, equivalente a 174,378% de 10 GB.
+El respaldo del 2026-09-13 representa 4,31 GB y el del 2026-08-20 otros 1,91
+GB. Antes de incorporar más datos, se debe conservar una sola política de
+rollback y trasladar o retirar snapshots redundantes con permisos de escritura.
