@@ -1430,3 +1430,23 @@ Movimientos. La búsqueda combinada de funcionarios respondió correctamente en
 las pruebas posteriores, pero conserva una alerta técnica separada por
 intermitencia 503/1102: no se declarará resuelta de forma permanente hasta
 reducir sus lecturas duplicadas y repetir el smoke bajo carga controlada.
+
+### Mitigación de lecturas duplicadas en búsqueda nacional — 16-09-2026
+
+La revisión del código confirmó que `scope=all` consultaba cada proyección
+R2 una primera vez para obtener el total y una segunda vez para volver a
+traer la primera página. Esto aumentaba innecesariamente descompresión,
+latencia y probabilidad de 1102, sin alterar el conteo. La mitigación reutiliza
+la primera respuesta cuando se solicita la página 1 y mantiene el mecanismo de
+encabezado para páginas posteriores.
+
+La corrección está en la PR #544, rama
+`codex/reduce-r2-all-search-20260916`, con prueba que verifica una lectura por
+manifiesto, índice, shard y página física. Validación local: 201 archivos y
+1.061 pruebas aprobadas; el despliegue queda pendiente de los checks remotos.
+
+La auditoría de fuentes repetida a las 11:49 UTC-3 conserva el diagnóstico:
+15 fuentes, 6 coincidencias, 1 diferencia de frescura, 8 diferencias de
+alcance y 0 diferencias sin explicación. El inventario R2 conserva
+9.179.838.007 bytes de 10.000.000.000 (91,798%); no se realizaron borrados ni
+se incorporaron releases.
