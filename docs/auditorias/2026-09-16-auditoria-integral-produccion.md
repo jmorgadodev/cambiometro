@@ -1248,6 +1248,35 @@ La identificación ahora conserva el componente específico cuando el
 No se corrigieron conteos a mano ni se promovió ningún artefacto; primero debe
 reconstruirse o localizarse el release local verificable de cada componente.
 
+### Inventario remoto R2 reproducible — 16-09-2026
+
+Se ejecutó la auditoría remota `npm run audit:r2:storage` contra el manifiesto
+`catalog/v1/storage.json`, sin descargar el universo de datos ni escribir en
+R2, D1 o Pages. El resultado exacto fue:
+
+| Métrica | Resultado |
+|---|---:|
+| Bytes usados | 9.179.838.007 |
+| Límite operativo auditado | 10.000.000.000 |
+| Uso | 91,798% |
+| Objetos | 10.300 |
+| Estado de política | `review` (90%–<95%) |
+| Grupos de checksum duplicado | 3 grupos pequeños |
+
+Los prefijos de mayor tamaño son `projections/funcionarios-central-v1`
+(4.459.740.764 bytes) y `projections/funcionarios-v1` (4.446.589.646 bytes).
+El segundo conserva dos versiones municipales para historial/rollback; la
+auditoría no encontró un duplicado grande cuya eliminación pudiera autorizarse
+sin comparar release, checksum y posibilidad de recuperación. Los duplicados
+detectados son índices pequeños y no explican por sí solos el consumo.
+
+Conclusión operativa: no se debe borrar ni cargar un universo nuevo todavía.
+Cada release posterior debe pasar por cálculo de crecimiento proyectado,
+compresión y verificación de rollback; al alcanzar 95% la publicación debe
+bloquearse automáticamente. La diferencia local/producción continúa siendo un
+hallazgo de artefactos y frescura, no una autorización para reemplazar el
+release productivo con snapshots locales.
+
 ### Estado de implementación — 16-09-2026
 
 Cambios versionados en la rama de trabajo del proyecto:
@@ -1256,6 +1285,7 @@ Cambios versionados en la rama de trabajo del proyecto:
 - `ef07c25`: preservación de componentes separados de Cámara.
 - `c83b8ac`: bloqueo de crecimiento unificado al 95%.
 - `f5c98ec`: tipado y pruebas del auditor de Remuneraciones.
+- auditor R2 remoto reproducible: inventario de uso, versiones y duplicados.
 
 Validación final local: `npm test` aprobó 198 archivos y 1.051 pruebas. La
 verificación productiva de Movimientos continúa aprobada con 46/46. Estos
