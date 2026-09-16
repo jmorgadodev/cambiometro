@@ -1278,6 +1278,7 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
     return failure("INVALID_QUERY", "El período debe tener formato AAAA o AAAA-MM.", 400);
   }
   let rawRows: unknown[] = [];
+  const usesAuthoritativeMovementRelease = requestedSource === "movimientos";
 
   // The static-site projection is intentionally compact and is not the full
   // source record set. When D1 is unavailable, use the versioned lake
@@ -1285,7 +1286,7 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
   // helper applies filters and pagination before returning the response, so
   // the dataset is never embedded in the Worker bundle or sent to the client
   // in one response.
-  if (env.PUBLIC_DATA) {
+  if (env.PUBLIC_DATA && !usesAuthoritativeMovementRelease) {
     try {
       const offset = offsetFrom(requestUrl);
       const limit = limitFrom(requestUrl);
