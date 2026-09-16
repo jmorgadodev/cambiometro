@@ -164,7 +164,12 @@ export function productionSourcesPayload(payload) {
     lastUpdated: source.lastUpdated ?? source.generatedAt ?? null,
     foundPeriods: Array.isArray(source.foundPeriods) ? source.foundPeriods : [],
     components: Array.isArray(source.components) ? source.components.map((component) => ({
-      id: canonicalId(component.sourceId ?? component.id),
+      id: canonicalId(
+        component.sourceId && canonicalId(component.sourceId) !== canonicalId(source.id)
+          ? component.sourceId
+          : component.id,
+      ),
+      sourceId: canonicalId(component.sourceId ?? component.id),
       label: component.label ?? null,
       recordCount: Number(component.recordCount ?? 0),
       includedInRecordCount: component.includedInRecordCount !== false,

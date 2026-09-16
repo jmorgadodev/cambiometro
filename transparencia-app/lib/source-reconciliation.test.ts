@@ -102,6 +102,29 @@ describe("auditoría de reconciliación producción/R2/local", () => {
     });
   });
 
+  it("no colapsa componentes de Cámara cuyo sourceId coincide con el padre", () => {
+    const production = productionSourcesPayload({
+      data: [{
+        id: "camara",
+        recordCount: 58_751,
+        components: [
+          { id: "asistencia", sourceId: "camara", recordCount: 54_538 },
+          { id: "votaciones", sourceId: "camara", recordCount: 4_058 },
+          { id: "autoridades", sourceId: "camara", recordCount: 155 },
+          { id: "gastos", sourceId: "gastos_camara", recordCount: 16_275, includedInRecordCount: false },
+        ],
+      }],
+    });
+
+    const components = production[0].components as Array<{ id: string }>;
+    expect(components.map((component) => component.id)).toEqual([
+      "asistencia",
+      "votaciones",
+      "autoridades",
+      "gastos_camara",
+    ]);
+  });
+
   it("separa categorías parlamentarias sin sumar categorías distintas", () => {
     expect(sourceCategories("gastos_senado")).toEqual(["gastos"]);
     expect(sourceCategories("votaciones_senado")).toEqual(["votaciones"]);
