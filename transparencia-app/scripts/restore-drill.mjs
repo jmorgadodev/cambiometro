@@ -1,6 +1,6 @@
 import { spawnSync } from "node:child_process";
 import { createGunzip } from "node:zlib";
-import { existsSync, rmSync, writeFileSync } from "node:fs";
+import { existsSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { DatabaseSync } from "node:sqlite";
@@ -51,6 +51,14 @@ const R2_API = hasCredentials
 
 function log(msg) { console.log(`[restore-drill] ${msg}`); }
 function err(msg) { console.error(`[restore-drill][ERROR] ${msg}`); }
+
+// Mantiene los errores de validación como fallos controlados. Sin un handler,
+// Node puede abortar el proceso mientras todavía cierra el stream de fetch en
+// Windows, ocultando el motivo real del fallo.
+process.on("uncaughtException", (error) => {
+  err(error instanceof Error ? error.stack ?? error.message : String(error));
+  process.exitCode = 1;
+});
 
 async function r2Get(bucket, key) {
   const url = `${R2_API}/${bucket}/objects/${encodeURIComponent(key)}`;
@@ -150,7 +158,16 @@ log(`Bucket: ${BACKUP_BUCKET} | Motor: node:sqlite (100% aislado, NUNCA D1 remot
 log(`Paso 1: Descargando ${INVENTORY_KEY}...`);
 const inventoryResponse = await r2Get(BACKUP_BUCKET, INVENTORY_KEY);
 const inventory = await inventoryResponse.json();
-const lakeObjects = getR2LakeObjects(inventory);
+let lakeObjects;
+try {
+  lakeObjects = getR2LakeObjects(inventory);
+} catch (error) {
+  // Cierra explícitamente el body de la respuesta antes de propagar el
+  // rechazo. En Windows, dejar el stream abierto durante el error produce
+  // un assertion del runtime aunque el guard haya funcionado correctamente.
+  try { await inventoryResponse.body?.cancel(); } catch { /* best effort */ }
+  throw error;
+}
 log(`Inventario: schemaVersion=${inventory.schemaVersion} generatedAt=${inventory.generatedAt} objects=${lakeObjects.length}`);
 
 // Paso 2: stamp
