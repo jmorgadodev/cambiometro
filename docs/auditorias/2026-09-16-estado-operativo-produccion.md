@@ -47,6 +47,33 @@ declara un universo mayor o un corte temporal, y que la consulta pública debe
 usar particiones verificadas. DIPRES permanece correctamente fuera del
 buscador individual.
 
+## Reconciliación vigente del manifiesto R2
+
+El manifiesto `catalog/v1/manifest.json` recuperado directamente desde R2 fue
+generado el 2026-09-16 a las 12:45:42 y contiene 147 particiones. El desglose
+que debe usarse para Cámara y Senado es el siguiente:
+
+| Componente | Particiones | Filas en R2 | Período publicado |
+| --- | ---: | ---: | --- |
+| Cámara · asistencia | 30 | 54.538 | 2024-01 a 2026-09 |
+| Cámara · votaciones | 30 | 4.058 | 2024-01 a 2026-09 |
+| Cámara · autoridades vigentes | 1 | 155 | 2026-09 |
+| Cámara · gastos | 5 | 16.275 | 2026-03 a 2026-07 |
+| Senado · registro base | 4 | 1.428 | 2025-08 a 2026-07 |
+| Senado · votaciones | 7 | 218 | 2026-03 a 2026-09 |
+| Senado · gastos | 5 | 6.520 | 2026-01 a 2026-05 |
+
+Las particiones de Cámara no existen para febrero de 2024, 2025 y 2026. Esto
+es una ausencia de publicación que debe comprobarse contra la fuente original;
+no se convierte automáticamente en cero ni en una eliminación. El estado
+`partial` del catálogo es un estado de publicación de la partición, no prueba
+por sí solo que sus filas sean incorrectas.
+
+Las consultas exploratorias masivas al endpoint público produjeron respuestas
+429 en algunos períodos. Esas respuestas no se consideran evidencia de datos
+faltantes y no se volverán a usar como método de auditoría. La fuente de
+verdad para esta reconciliación es el manifiesto R2 y sus checksums.
+
 ## Estado de D1 y R2
 
 - El health productivo declara `publicDataBackend=r2`, `publicD1Reads=false` y
@@ -64,9 +91,9 @@ buscador individual.
 1. Identificar el consumidor externo que explica la actividad histórica de
    `transparencia-db`; la sonda actual sólo permite atribuirla por base de
    datos, no por proyecto.
-2. Reconciliar por período los componentes de Cámara y Senado que siguen
-   marcados como parciales, sin interpretar un HTTP 429 o un timeout como
-   ausencia de datos.
+2. Comprobar con las fuentes originales si los tres febreros sin partición de
+   Cámara fueron meses sin publicación o releases faltantes, sin interpretar un
+   HTTP 429 o un timeout como ausencia de datos.
 3. Auditar la cobertura de remuneraciones CPLT por período y organismo antes
    de incorporar nuevos pagos.
 4. Completar la matriz de calidad de nombres, montos, períodos y duplicados
@@ -75,4 +102,3 @@ buscador individual.
 
 No se considera pendiente la corrección crítica de Movimientos ni la
 verificación del release actual: ambas quedaron comprobadas en producción.
-
