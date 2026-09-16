@@ -4,6 +4,7 @@ import { readFileSync, rmSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { parseR2ListPage } from "../lib/r2-list.mjs";
+import { getExpiredBackupObjects, projectedAccountBytes } from "../lib/backup-retention.mjs";
 
 // Backup semanal del sistema: copia el data lake R2 completo a
 // cambiometro-backups, con retención de 8 semanas. El dump D1 queda
@@ -18,6 +19,8 @@ const BACKUP_BUCKET = "cambiometro-backups";
 const RETENTION_WEEKS = 8;
 const SOURCE_DATABASE = "transparencia-db";
 const INVENTORY_KEY = "backup-inventory.json";
+const R2_LIMIT_BYTES = Number(process.env.R2_LIMIT_BYTES ?? 10_000_000_000);
+const R2_BLOCK_RATIO = 0.95;
 const BACKUP_D1 = process.env.BACKUP_D1 === "1"
   && process.env.D1_BACKUP_CONFIRM === "CAMBIOMETRO_D1_BACKUP";
 
@@ -90,15 +93,8 @@ async function d1Export(stamp) {
 
 const stamp = new Date().toISOString().slice(0, 10);
 const prefix = `backup/${stamp}/`;
-const cutoff = Date.now() - RETENTION_WEEKS * 7 * 24 * 60 * 60 * 1000;
 
 console.log(`stamp: ${stamp}`);
-
-if (BACKUP_D1) {
-  await d1Export(stamp);
-} else {
-  console.log("[OK] export D1 omitido: el backup semanal R2 no lee D1. Para habilitarlo manualmente se requieren BACKUP_D1=1 y D1_BACKUP_CONFIRM=CAMBIOMETRO_D1_BACKUP.");
-}
 
 let sourceObjects;
 if (usingRestApi) {
@@ -111,6 +107,28 @@ if (usingRestApi) {
 console.log(`[INFO] ${sourceObjects.length} objects listados del bucket fuente`);
 if (sourceObjects.length === 0) {
   throw new Error("R2_SOURCE_INVENTORY_EMPTY: se cancela el backup para no registrar una copia vacía");
+}
+
+const backupObjects = await listObjectsRest(BACKUP_BUCKET);
+const expiredBackupObjects = getExpiredBackupObjects(backupObjects, stamp, RETENTION_WEEKS);
+const projectedBytes = projectedAccountBytes({ sourceObjects, backupObjects, expiredBackupObjects });
+if (!Number.isSafeInteger(R2_LIMIT_BYTES) || R2_LIMIT_BYTES < 1) throw new Error("INVALID_R2_LIMIT_BYTES");
+if (projectedBytes >= R2_LIMIT_BYTES * R2_BLOCK_RATIO) {
+  throw new Error(`R2_BACKUP_BLOCKED_AT_95_PERCENT: projectedAccountBytes=${projectedBytes} limitBytes=${R2_LIMIT_BYTES}`);
+}
+console.log(`[INFO] preflight R2: ${backupObjects.length} objetos de backup, ${expiredBackupObjects.length} expirados, ${projectedBytes} bytes proyectados`);
+
+let deleted = 0;
+for (const object of expiredBackupObjects) {
+  await r2Request("DELETE", BACKUP_BUCKET, object.key);
+  deleted += 1;
+}
+if (deleted > 0) console.log(`[OK] ${deleted} objetos de snapshots antiguos eliminados antes de copiar`);
+
+if (BACKUP_D1) {
+  await d1Export(stamp);
+} else {
+  console.log("[OK] export D1 omitido: el backup semanal R2 no lee D1. Para habilitarlo manualmente se requieren BACKUP_D1=1 y D1_BACKUP_CONFIRM=CAMBIOMETRO_D1_BACKUP.");
 }
 
 let copied = 0;
@@ -127,17 +145,6 @@ for (const object of sourceObjects) {
   await r2Request("PUT", BACKUP_BUCKET, targetKey, Buffer.from(srcBuffer), object.contentType ?? "application/octet-stream");
   copied += 1;
   if (copied % 20 === 0) console.log(`[OK] ${copied}/${sourceObjects.length} copiados`);
-}
-
-let deleted = 0;
-for (const object of sourceObjects) {
-  const match = object.key.match(/^backup\/(\d{4}-\d{2}-\d{2})\//);
-  if (!match) continue;
-  const stampMs = Date.parse(`${match[1]}T00:00:00Z`);
-  if (!Number.isNaN(stampMs) && stampMs < cutoff) {
-    await r2Request("DELETE", BACKUP_BUCKET, object.key);
-    deleted += 1;
-  }
 }
 
 const inventory = {
