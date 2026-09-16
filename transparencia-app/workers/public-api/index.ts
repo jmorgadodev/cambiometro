@@ -1356,6 +1356,7 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
     return failure("INVALID_QUERY", "El período debe tener formato AAAA o AAAA-MM.", 400);
   }
   let rawRows: unknown[] = [];
+  let completeStaticRelease = false;
   const usesAuthoritativeMovementRelease = requestedSource === "movimientos";
 
   // The static-site projection is intentionally compact and is not the full
@@ -1424,6 +1425,13 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
     const candidateRows = staticRecordRows(payload);
     if (candidateRows.length > 0) {
       rawRows = candidateRows;
+      if (source === "movimientos" && payload) {
+        const declaredRows = Number((payload.stats as JsonRecord | undefined)?.total_movimientos);
+        completeStaticRelease = typeof payload.release_id === "string"
+          && typeof payload.checksum_sha256 === "string"
+          && Number.isInteger(declaredRows)
+          && declaredRows === candidateRows.length;
+      }
       break;
     }
   }
@@ -1458,7 +1466,7 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
     page: Math.floor(offset / limit) + 1,
     totalPages: Math.max(1, Math.ceil(total / limit)),
     sourceBackend: "r2",
-    sourceStatus: source === "infoprobidad" ? "complete" : "partial",
+    sourceStatus: completeStaticRelease || source === "infoprobidad" ? "complete" : "partial",
     publishedRows: rawRows.length,
   }, pageLinks(requestUrl, offset, limit, total));
 }

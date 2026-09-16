@@ -266,6 +266,37 @@ describe("API canónica v1", () => {
     expect(payload.meta).toMatchObject({ total: 1, limit: 1 });
   });
 
+  it("marca como completo el release reconciliado de movimientos cuando su conteo declarado coincide", async () => {
+    const movimientos = Array.from({ length: 46 }, (_, index) => ({
+      id: `mov-${String(index + 1).padStart(3, "0")}`,
+      tipo: "renuncia",
+      fecha: "2026-09-14",
+      cargo: "Seremi",
+      saliente: `Autoridad ${index + 1}`,
+      fuentes: [{ nivel: "prensa", url: "https://example.test/evidencia" }],
+    }));
+    const files: Record<string, unknown> = {
+      "projections/static-site-v1/manifest.json": {
+        files: [{ path: "data/movimientos.json", key: "releases/movimientos.json" }],
+      },
+      "releases/movimientos.json": {
+        release_id: "kast-2026-succession-reconciled-2026-09-14",
+        checksum_sha256: "movement-release-checksum",
+        stats: { total_movimientos: 46 },
+        movimientos,
+      },
+    };
+    const response = await api.fetch(
+      new Request("https://example.test/api/v1/records?source=movimientos&limit=100"),
+      { PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } } } as never,
+    );
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta).toMatchObject({ sourceBackend: "r2", sourceStatus: "complete", publishedRows: 46, total: 46 });
+    expect(payload.data).toHaveLength(46);
+  });
+
   it("mantiene la búsqueda del home disponible desde el catálogo R2", async () => {
     const env = {
       DB: { prepare: () => { throw new Error("D1 no debe consultarse para la búsqueda del catálogo"); } },
