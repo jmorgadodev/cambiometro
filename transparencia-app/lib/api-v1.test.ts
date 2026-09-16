@@ -453,12 +453,14 @@ describe("API canónica v1", () => {
         totalRows: 2,
         pageSize: 10,
         pages: [{ page: 1, key: "projections/funcionarios-v1/versions/municipal-test/search_index/p-0001.json", count: 2 }],
+        quality: { recordsWithIssues: 2, byIssue: { remuneracion_liquida_no_informada: 2 } },
       },
       "projections/funcionarios-central-v1/versions/central-test/search_index.json": {
         schemaVersion: 1,
         totalRows: 1,
         pageSize: 10,
         pages: [{ page: 1, key: "projections/funcionarios-central-v1/versions/central-test/search_index/p-0001.json", count: 1 }],
+        quality: { recordsWithIssues: 3, byIssue: { remuneracion_liquida_no_informada: 2, nombre_incompleto: 1 } },
       },
       "projections/funcionarios-v1/versions/municipal-test/search_index/p-0001.json": [
         { id: "municipal-1", n: "Persona Municipal 1", c: "Profesional", o: "Municipalidad A", t: "Planta", e: "Profesional", b: 1000000 },
@@ -478,6 +480,12 @@ describe("API canónica v1", () => {
 
     expect(response.status).toBe(200);
     expect(payload.meta).toMatchObject({ total: 3, sourceStatus: "r2-search-combined", sources: ["municipal", "central"] });
+    expect(payload.meta.calidadDatos).toMatchObject({
+      alcance: "universo_publicado",
+      registrosConIncidencias: 5,
+      porIncidencia: { remuneracion_liquida_no_informada: 4, nombre_incompleto: 1 },
+    });
+    expect(payload.meta.stats).toMatchObject({ totalMuni: 3, totalValidos: 3, promedioSueldo: 1266667 });
     expect(payload.data.map((item: { id: string }) => item.id).sort()).toEqual(["central-1", "municipal-1", "municipal-2"]);
   });
 

@@ -1022,11 +1022,45 @@ async function listAllFuncionariosFromR2(requestUrl: URL, env: Env) {
     const id = String(row.id ?? "");
     if (id && !unique.has(id)) unique.set(id, row);
   }
+  const combinedRows = [...unique.values()];
+  const combinedQuality = payloads.reduce<JsonRecord>((quality, payload) => {
+    const sourceQuality = (payload.meta as JsonRecord | undefined)?.calidadDatos as JsonRecord | undefined;
+    if (!sourceQuality) return quality;
+    const sourceIssues = sourceQuality.porIncidencia as Record<string, unknown> | undefined;
+    const byIssue = (quality.porIncidencia as Record<string, number> | undefined) ?? {};
+    for (const [issue, value] of Object.entries(sourceIssues ?? {})) {
+      const count = Number(value);
+      if (Number.isFinite(count)) byIssue[issue] = (byIssue[issue] ?? 0) + count;
+    }
+    quality.porIncidencia = byIssue;
+    const recordsWithIssues = Number(sourceQuality.registrosConIncidencias ?? 0);
+    if (Number.isFinite(recordsWithIssues)) {
+      quality.registrosConIncidencias = Number(quality.registrosConIncidencias ?? 0) + recordsWithIssues;
+    }
+    if (!quality.metodologia && typeof sourceQuality.metodologia === "string") quality.metodologia = sourceQuality.metodologia;
+    return quality;
+  }, { porIncidencia: {} });
+  combinedQuality.alcance = usable.length === sourceResponses.length ? "universo_publicado" : "universo_publicado_parcial";
+  const withoutPayment = combinedRows.filter((row) => officialSalary(row) <= 0);
+  const microAmount = combinedRows.filter((row) => officialSalary(row) > 0 && officialSalary(row) < 50_000);
+  const completeSalary = combinedRows.filter((row) => officialSalary(row) >= 50_000);
+  const validSalary = completeSalary.reduce((sum, row) => sum + officialSalary(row), 0);
+  const combinedStats = {
+    totalMuni: combinedRows.length,
+    totalValidos: completeSalary.length,
+    promedioSueldo: completeSalary.length ? Math.round(validSalary / completeSalary.length) : 0,
+    conHorasExtras: completeSalary.filter((row) => Number(row.horas_extras_mes_anterior ?? 0) > 0).length,
+    observadosCount: withoutPayment.length + microAmount.length,
+    sinPagoCount: withoutPayment.length,
+    microMontoCount: microAmount.length,
+  };
   const firstMeta = (payloads[0].meta as JsonRecord | undefined) ?? {};
   return json({
-    data: [...unique.values()],
+    data: combinedRows,
     meta: {
       ...firstMeta,
+      calidadDatos: combinedQuality,
+      stats: combinedStats,
       total,
       totalHeadcount: total,
       page,
