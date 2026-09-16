@@ -74,6 +74,23 @@ Las consultas exploratorias masivas al endpoint público produjeron respuestas
 faltantes y no se volverán a usar como método de auditoría. La fuente de
 verdad para esta reconciliación es el manifiesto R2 y sus checksums.
 
+### Comprobación de febrero en la fuente original
+
+Se consultó de forma directa y acotada el servicio oficial WSSala de la
+Cámara, sin publicar ni modificar datos. La respuesta fue `200` para los tres
+años y no incluyó sesiones en febrero:
+
+| Año | Sesiones oficiales devueltas | Meses con sesiones |
+| --- | ---: | --- |
+| 2024 | 142 | enero, marzo a diciembre |
+| 2025 | 124 | enero, marzo a diciembre |
+| 2026 | 91 | enero, marzo a septiembre |
+
+Esto confirma que la ausencia de febrero en las particiones de **asistencia**
+corresponde al calendario publicado por la fuente original. Las votaciones
+usan un conector distinto y permanecen como control separado; no se infiere su
+ausencia sólo a partir del calendario de sesiones.
+
 ## Estado de D1 y R2
 
 - El health productivo declara `publicDataBackend=r2`, `publicD1Reads=false` y
