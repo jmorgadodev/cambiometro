@@ -967,13 +967,14 @@ async function listAllFuncionariosFromR2(requestUrl: URL, env: Env) {
   const headUrl = new URL(requestUrl);
   headUrl.searchParams.set("page", "1");
   headUrl.searchParams.set("limit", "1");
+  const initialUrl = requestedPage === 1 ? requestUrl : headUrl;
   // Las dos nóminas tienen índices grandes. Consultarlas secuencialmente
   // evita duplicar la descompresión y las lecturas R2 dentro del Worker. El
   // encabezado de cada fuente permite paginar el universo combinado sin
   // devolver varias veces el límite solicitado ni perder filas entre páginas.
   const sourceResponses = [
-    { name: "municipal", root: "funcionarios-v1", response: await listFuncionariosFromR2(headUrl, env, "funcionarios-v1") },
-    { name: "central", root: "funcionarios-central-v1", response: await listFuncionariosFromR2(headUrl, env, "funcionarios-central-v1") },
+    { name: "municipal", root: "funcionarios-v1", response: await listFuncionariosFromR2(initialUrl, env, "funcionarios-v1") },
+    { name: "central", root: "funcionarios-central-v1", response: await listFuncionariosFromR2(initialUrl, env, "funcionarios-central-v1") },
   ];
   const usable = sourceResponses.filter(({ response }) => response.status < 500);
   if (usable.length === 0) return sourceResponses[0].response;
@@ -1008,15 +1009,32 @@ async function listAllFuncionariosFromR2(requestUrl: URL, env: Env) {
   const municipalTotal = sourceTotals.get("municipal") ?? 0;
   const municipalSource = usable.find((source) => source.name === "municipal");
   const centralSource = usable.find((source) => source.name === "central");
-  if (municipalSource) {
-    const municipalStart = Math.min(start, municipalTotal);
-    const municipalEnd = Math.min(end, municipalTotal);
-    await appendSourceSegment(municipalSource, municipalStart, municipalEnd);
-  }
-  if (centralSource) {
-    const centralStart = Math.max(0, start - municipalTotal);
-    const centralEnd = Math.max(0, end - municipalTotal);
-    await appendSourceSegment(centralSource, centralStart, centralEnd);
+  if (requestedPage === 1) {
+    // La primera consulta ya trae la página solicitada de cada proyección.
+    // Reutilizarla evita repetir manifiesto, índice, shard y página física,
+    // que era la principal fuente de latencia/CPU en `scope=all`.
+    const appendInitialRows = (sourceName: string, payload: JsonRecord, count: number) => {
+      if (count <= 0) return;
+      const sourceRows = Array.isArray(payload.data) ? payload.data as JsonRecord[] : [];
+      rows.push(...sourceRows.slice(0, count).map((row) => ({ ...row, sourceScope: sourceName })));
+    };
+    const municipalPayload = usable.find(({ name }) => name === "municipal");
+    const centralPayload = usable.find(({ name }) => name === "central");
+    const municipalData = municipalPayload ? payloads[usable.indexOf(municipalPayload)] : null;
+    const centralData = centralPayload ? payloads[usable.indexOf(centralPayload)] : null;
+    appendInitialRows("municipal", municipalData ?? {}, Math.min(limit, municipalTotal));
+    appendInitialRows("central", centralData ?? {}, Math.max(0, limit - rows.length));
+  } else {
+    if (municipalSource) {
+      const municipalStart = Math.min(start, municipalTotal);
+      const municipalEnd = Math.min(end, municipalTotal);
+      await appendSourceSegment(municipalSource, municipalStart, municipalEnd);
+    }
+    if (centralSource) {
+      const centralStart = Math.max(0, start - municipalTotal);
+      const centralEnd = Math.max(0, end - municipalTotal);
+      await appendSourceSegment(centralSource, centralStart, centralEnd);
+    }
   }
 
   const unique = new Map<string, JsonRecord>();

@@ -178,6 +178,62 @@ describe("registros públicos R2", () => {
     expect(bucket.requested.some((key) => key.includes("/de-"))).toBe(false);
   });
 
+  it("no vuelve a leer la misma página R2 al combinar la primera página nacional", async () => {
+    const municipalVersion = "municipal-first-page";
+    const centralVersion = "central-first-page";
+    const municipalManifest = {
+      version: municipalVersion,
+      generatedAt: "2026-09-15T00:00:00Z",
+      assets: [],
+      searchIndex: { key: `projections/funcionarios-v1/versions/${municipalVersion}/search_index.json` },
+    };
+    const centralManifest = {
+      version: centralVersion,
+      generatedAt: "2026-09-15T00:00:00Z",
+      assets: [],
+      searchIndex: { key: `projections/funcionarios-central-v1/versions/${centralVersion}/search_index.json` },
+    };
+    const makeIndex = (root: string, version: string, rowKey: string) => ({
+      totalRows: 1,
+      pageSize: 10,
+      pages: [{ page: 1, key: `${root}/versions/${version}/search_index/p-0001.json`, count: 1 }],
+      shards: { lu: `${root}/versions/${version}/search_index/lu-001.json` },
+      filters: {},
+      rowKey,
+    });
+    const municipalIndex = makeIndex("projections/funcionarios-v1", municipalVersion, "municipal-row");
+    const centralIndex = makeIndex("projections/funcionarios-central-v1", centralVersion, "central-row");
+    const bucket = fakeBucket({
+      "projections/funcionarios-v1/manifest.json": municipalManifest,
+      "projections/funcionarios-central-v1/manifest.json": centralManifest,
+      [municipalManifest.searchIndex.key]: municipalIndex,
+      [centralManifest.searchIndex.key]: centralIndex,
+      "projections/funcionarios-v1/versions/municipal-first-page/search_index/lu-001.json": [["lucy", [0]]],
+      "projections/funcionarios-central-v1/versions/central-first-page/search_index/lu-001.json": [["lucy", [0]]],
+      "projections/funcionarios-v1/versions/municipal-first-page/search_index/p-0001.json": [{ id: "municipal-row", n: "Lucy Depablos Chacon", c: "Asesora", o: "Municipalidad" }],
+      "projections/funcionarios-central-v1/versions/central-first-page/search_index/p-0001.json": [{ id: "central-row", n: "Lucy Depablos Chacon", c: "Asesora", o: "Servicio público" }],
+    });
+
+    const response = await worker.fetch(
+      new Request("https://example.test/api/funcionarios?scope=all&query=Lucy&include_zero=true&limit=20&page=1"),
+      { PUBLIC_DATA: bucket as never } as never,
+    );
+
+    expect(response.status).toBe(200);
+    const counts = new Map<string, number>();
+    for (const key of bucket.requested) counts.set(key, (counts.get(key) ?? 0) + 1);
+    for (const key of [
+      "projections/funcionarios-v1/manifest.json",
+      municipalManifest.searchIndex.key,
+      "projections/funcionarios-v1/versions/municipal-first-page/search_index/lu-001.json",
+      "projections/funcionarios-v1/versions/municipal-first-page/search_index/p-0001.json",
+      "projections/funcionarios-central-v1/manifest.json",
+      centralManifest.searchIndex.key,
+      "projections/funcionarios-central-v1/versions/central-first-page/search_index/lu-001.json",
+      "projections/funcionarios-central-v1/versions/central-first-page/search_index/p-0001.json",
+    ]) expect(counts.get(key)).toBe(1);
+  });
+
   it("conserva la nómina municipal si la nómina central falla en una búsqueda combinada", async () => {
     const version = "municipal-only";
     const manifest = {
