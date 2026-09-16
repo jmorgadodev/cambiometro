@@ -7,11 +7,15 @@
  * sources from silently accepting an incorrectly shaped artifact.
  */
 export function staticRecordCandidatePaths(source: string) {
+  // Movimientos has a dedicated reconciled release. Never let a stale lake
+  // projection win before data/movimientos.json, otherwise the public API can
+  // expose the retired 83-row universe while /movimientos renders 46 rows.
+  if (source === "movimientos") return ["data/movimientos.json"];
+
   const paths = [
     `data/lake/projections/v1/${source}.json`,
     `data/lake-subsets/${source}.subset.json`,
   ];
-  if (source === "movimientos") paths.push("data/movimientos.json");
   return paths;
 }
 
