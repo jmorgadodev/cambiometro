@@ -1501,3 +1501,37 @@ La verificación integral `verify-prod-full` completó dos pasadas verdes, con
 fichas políticas, Cámara, Senado, votaciones, gastos, cruces, transferencias,
 Movimientos y las rutas públicas principales. La versión de producción
 observada fue `v1.0-a3bfcc66`.
+
+### Auditoría física R2 y referencias del catálogo — 16-09-2026 10:23 UTC-3
+
+Se repitió la revisión directamente contra el listado físico del bucket
+`transparencia-public-data`, sin descargar los objetos. R2 contiene 23.152
+objetos y 11.078.005.075 bytes: 110,780% del umbral operativo de 10 GB. El
+inventario `catalog/v1/storage.json` estaba incompleto: declaraba 10.309
+objetos y omitía 12.843 objetos físicos. Por ello, los porcentajes anteriores
+basados sólo en ese inventario no eran una medición completa.
+
+El catálogo vigente declara 147 particiones. Sólo 65 tienen su manifiesto
+físico presente y 82 referencias están huérfanas, con 471.536 filas declaradas
+sin manifiesto disponible. La distribución no implica que todas esas filas
+sean datos perdidos: parte corresponde a históricos archivados, pero sí
+significa que no deben presentarse como consultables hasta restaurar o
+reclasificar cada partición. Los grupos afectados son Cámara, ChileCompra,
+Contraloría, DIPRES, gastos de Cámara, InfoLobby, InfoProbidad, Ley 19.862,
+Senado, Servel y SINIM. Gastos de Senado y votaciones de Senado sí tienen sus
+manifiestos físicos.
+
+Senado queda confirmado como caso de integridad pendiente: sus cuatro
+particiones base declaradas (2025-08, 2026-02, 2026-05 y 2026-07; 1.428 filas)
+no existen en R2. La API oficial sí responde y el conector validó 50 dietas de
+2026-07, pero el histórico anterior mezcla categorías distintas bajo el mismo
+`sourceId` (`tickets`, `misiones`, `gastos` y `dietas`). No se publica una
+reparación parcial que pueda volver a confundir remuneraciones con gastos.
+
+Se agregó la auditoría `npm run audit:r2:catalog`, que compara catálogo y
+objetos físicos, y el publisher ahora valida que el catálogo no active
+particiones sin manifiesto. También se cambió la auditoría de almacenamiento
+para usar el listado físico de R2; no se realizaron borrados ni publicaciones
+de datos en esta revisión. La publicación queda bloqueada hasta liberar
+espacio con una credencial de escritura y definir qué histórico se conserva,
+porque el token local vigente sólo tiene permisos de lectura.
