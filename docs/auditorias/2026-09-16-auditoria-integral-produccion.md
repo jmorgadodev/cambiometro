@@ -1287,8 +1287,15 @@ Cambios versionados en la rama de trabajo del proyecto:
 - `f5c98ec`: tipado y pruebas del auditor de Remuneraciones.
 - auditor R2 remoto reproducible: inventario de uso, versiones y duplicados.
 
-Validación final local: `npm test` aprobó 198 archivos y 1.051 pruebas. La
+Validación final local: `npm test` aprobó 199 archivos y 1.053 pruebas. La
 verificación productiva de Movimientos continúa aprobada con 46/46. Estos
 cambios todavía no se promueven a Pages ni modifican releases de datos, porque
 la auditoría debe explicar primero los artefactos locales faltantes y los
 desfases de Senado.
+
+La comprobación posterior también pasó `check:etl-calendar` (19 workflows,
+zona `America/Santiago`), `check:etl-freshness` (Transferencias por R2, 62.172
+filas y 0 filas materializadas en D1), `check:data-quality-summary` y
+`check:production-gates`. La verificación productiva de Remuneraciones pasó
+con 33.776 filas estáticas, 169 páginas y las búsquedas críticas de Lucy
+Depablos, Sofía Pumpin, María Victoria Raimann Pumpin e Independencia.
