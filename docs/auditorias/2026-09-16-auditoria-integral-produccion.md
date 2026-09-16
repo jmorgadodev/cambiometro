@@ -1864,3 +1864,21 @@ El PR #555 fue integrado en `main` con el commit
 requiere una confirmación manual explícita; sin ella no calcula ni ejecuta
 `DELETE`. Los checks de seguridad, calidad, tipos, build estático, APIs,
 responsive y temas terminaron correctamente antes de la integración.
+
+### Congelamiento del Worker ETL legado — 16-09-2026
+
+La revisión del repositorio encontró que `transparencia-app/workers/etl/cron.ts`
+conservaba un pipeline histórico con sincronizaciones directas de autoridades,
+movimientos y relaciones en D1. Aunque no aparece en los workflows actuales,
+su configuración todavía declaraba un cron diario y bindings D1/R2.
+
+La PR #557 (`cc00a9dff90aa2d257ec761c12f2167dfd45c04c`) lo dejó congelado:
+el entrypoint es un no-op sin red ni persistencia, se retiraron los bindings y
+el trigger, y se agregó una prueba de regresión. El post-merge completó build,
+E2E, seguridad, lint, tipos y validación responsive; los jobs ETL y de
+publicación de datos quedaron omitidos.
+
+La presencia histórica del Worker en la cuenta Cloudflare aún no puede
+confirmarse desde este entorno porque la credencial disponible no tiene
+`Workers Scripts → Read`. Por tanto, el cierre de runtime requiere una
+verificación independiente en el panel o con una credencial de sólo lectura.
