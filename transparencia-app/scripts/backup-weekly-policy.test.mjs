@@ -16,6 +16,8 @@ describe("política de backup sin consumo accidental de D1", () => {
     expect(backup).toContain('process.env.BACKUP_D1 === "1"');
     expect(backup).toContain('process.env.D1_BACKUP_CONFIRM === "CAMBIOMETRO_D1_BACKUP"');
     expect(backup).toContain("export D1 omitido");
+    expect(backup).toContain("CAMBIOMETRO_R2_RETENTION_DELETE");
+    expect(backup).toContain("limpieza por retención omitida");
   });
 
   it("permite validar el respaldo R2 sin descargar ni restaurar un dump D1", () => {

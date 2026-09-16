@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { getExpiredBackupObjects, projectedAccountBytes } from "./backup-retention.mjs";
+import { getExpiredBackupObjects, projectedAccountBytes, retentionDeletionAuthorized } from "./backup-retention.mjs";
 
 describe("backup retention", () => {
   it("detecta sólo snapshots backup antiguos y no confunde objetos D1", () => {
@@ -22,5 +22,11 @@ describe("backup retention", () => {
       backupObjects: [{ key: "backup/2026-01-01/a", size: 500 }, { key: "backup/2026-09-13/a", size: 200 }],
       expiredBackupObjects: [{ key: "backup/2026-01-01/a", size: 500 }],
     })).toBe(1_100);
+  });
+
+  it("exige confirmación explícita para borrar snapshots vencidos", () => {
+    expect(retentionDeletionAuthorized({})).toBe(false);
+    expect(retentionDeletionAuthorized({ BACKUP_RETENTION_CONFIRM: "incorrecto" })).toBe(false);
+    expect(retentionDeletionAuthorized({ BACKUP_RETENTION_CONFIRM: "CAMBIOMETRO_R2_RETENTION_DELETE" })).toBe(true);
   });
 });

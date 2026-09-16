@@ -34,3 +34,8 @@ export function projectedAccountBytes({ sourceObjects, backupObjects, expiredBac
   );
   return sourceBytes + backupBytes;
 }
+
+/** @param {{ BACKUP_RETENTION_CONFIRM?: string }} environment */
+export function retentionDeletionAuthorized(environment = process.env) {
+  return environment.BACKUP_RETENTION_CONFIRM === "CAMBIOMETRO_R2_RETENTION_DELETE";
+}
