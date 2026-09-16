@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import TransparencyActivaSummary from "./TransparencyActivaSummary";
+import { searchTransparencyActiva } from "@/lib/remuneraciones-remote-search";
 
 type SourceStatus = "complete" | "partial" | "aggregate_only" | "unavailable";
 
@@ -51,6 +52,7 @@ interface SearchResult {
   rows: UnifiedRow[];
   remoteRows: UnifiedRow[];
   totalRemote: number | null;
+  remotePartial: boolean;
 }
 
 const number = new Intl.NumberFormat("es-CL");
@@ -218,21 +220,16 @@ export default function RemuneracionesUnifiedExplorer() {
 
       let remoteRows: UnifiedRow[] = [];
       let totalRemote: number | null = null;
+      let remotePartial = false;
       const isLocalStaticPreview = typeof window !== "undefined"
         && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
       if (!isLocalStaticPreview && (source === "all" || source === "transparencia-activa")) {
-        try {
-          const response = await fetch(`/api/funcionarios?scope=all&query=${encodeURIComponent(cleanQuery)}&include_zero=true&limit=20&sortBy=nombre_asc`, { cache: "no-store" });
-          if (response.ok) {
-            const payload = await response.json() as { data?: Record<string, unknown>[]; total?: number };
-            remoteRows = (payload.data ?? []).map((row) => RemoteOfficialRow(row, cleanQuery)).filter((row): row is UnifiedRow => Boolean(row));
-            totalRemote = Number.isFinite(payload.total) ? Number(payload.total) : remoteRows.length;
-          }
-        } catch {
-          // El release estático sigue disponible; la fuente CPLT se marca como no consultada si el Worker no responde.
-        }
+        const remote = await searchTransparencyActiva({ query: cleanQuery, organism, role });
+        remoteRows = remote.rows.map((row) => RemoteOfficialRow(row, cleanQuery)).filter((row): row is UnifiedRow => Boolean(row));
+        totalRemote = remote.total;
+        remotePartial = remote.partial;
       }
-      setResults({ rows: staticRows, remoteRows, totalRemote });
+      setResults({ rows: staticRows, remoteRows, totalRemote, remotePartial });
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "No se pudo completar la búsqueda.");
       setResults(null);
@@ -282,6 +279,7 @@ export default function RemuneracionesUnifiedExplorer() {
           {results && <section id="resultados-remuneraciones" className="remuneration-module remuneration-module--results" aria-labelledby="resultados-remuneraciones-title" aria-live="polite">
             <div className="remuneration-results__heading"><div><span className="eyebrow">RESULTADOS</span><h3 id="resultados-remuneraciones-title">Coincidencias para “{query.trim()}”</h3></div><span>{number.format(groups.length)} personas · {number.format(results.rows.length + results.remoteRows.length)} registros</span></div>
             {results.remoteRows.length === 0 && (source === "all" || source === "transparencia-activa") && <p className="remuneration-results__note">La búsqueda muestra los pagos publicados en los archivos disponibles. La nómina de Transparencia Activa se consulta por separado cuando el servicio responde.</p>}
+            {results.remotePartial && <p className="remuneration-results__note">Algunos registros están temporalmente fuera de esta búsqueda. Intenta nuevamente para consultar todas las nóminas disponibles.</p>}
             {groups.length === 0 && <div className="stat-tile" role="status">No encontramos coincidencias. Prueba con el apellido, organismo o cargo sin tildes.</div>}
              <div className="remuneration-results__list">
                {visibleGroups.map((group) => {
