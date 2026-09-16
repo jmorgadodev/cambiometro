@@ -315,11 +315,27 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   const variants = params.variant === undefined
     ? null
     : Array.isArray(params.variant) ? params.variant : [params.variant];
-  const partitions = catalog.partitions.filter((partition) => sourceIds.includes(partition.sourceId)
-    && (!variants || variants.includes(partition.variant ?? partition.sourceId))
-    && (!params.period || partition.period === params.period)
-    && (!params.from || partition.period >= params.from.slice(0, 7))
-    && (!params.to || partition.period <= params.to.slice(0, 7)));
+  const partitions = catalog.partitions.filter((partition) => {
+    if (!sourceIds.includes(partition.sourceId)) return false;
+    if (!variants) {
+      return (!params.period || partition.period === params.period)
+        && (!params.from || partition.period >= params.from.slice(0, 7))
+        && (!params.to || partition.period <= params.to.slice(0, 7));
+    }
+    const declaredVariant = partition.variant ?? partition.sourceId;
+    // Releases anteriores al campo `variant` almacenaban votaciones y
+    // asistencia bajo `camara`. El alias público de votaciones puede leer
+    // esas particiones legadas sólo cuando el filtro de tipo ya restringe a
+    // `vote`; así se conserva compatibilidad sin mezclar asistencia.
+    const legacyCamaraVote = partition.variant == null
+      && partition.sourceId === "camara"
+      && params.kind === "vote"
+      && variants.includes("votaciones_camara");
+    return (variants.includes(declaredVariant) || legacyCamaraVote)
+      && (!params.period || partition.period === params.period)
+      && (!params.from || partition.period >= params.from.slice(0, 7))
+      && (!params.to || partition.period <= params.to.slice(0, 7));
+  });
   if (partitions.length === 0) return null;
   const orderedPartitions = [...partitions].sort((left, right) => right.period.localeCompare(left.period) || right.manifestKey.localeCompare(left.manifestKey));
   const expectedTotal = orderedPartitions.every((partition) => Number.isFinite(Number(partition.recordCount)))
