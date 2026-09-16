@@ -1128,3 +1128,26 @@ las búsquedas de Lucy Depablos (7 filas: 3 municipales y 4 centrales), Sofía
 Pumpin, María Victoria Raimann Pumpin e Independencia (9.493 filas). Esto
 confirma que la ruta pública consulta ambos alcances; no equivale a afirmar
 que los releases sean cobertura histórica total.
+
+### Reconciliación de componentes productivos — 16-09-2026
+
+Se corrigió el auditor de producción/local para conservar y comparar los
+componentes declarados por la API pública, no sólo el conteo del registro
+padre. Esto evita marcar como “coincidencia” fuentes cuyo número de filas
+coincide, pero cuyo alcance semántico es distinto.
+
+Resultado de la lectura acotada más reciente:
+
+- Resumen: 6 coincidencias semánticas, 1 diferencia de frescura, 8 diferencias
+  de alcance, 0 inexplicadas y 7 desajustes con `source-health`.
+- ChileCompra y DIPRES quedan como `scope` aunque el conteo numérico coincida:
+  el primero separa corte vigente de histórico y el segundo filas
+  presupuestarias de entidades/series resumidas.
+- Senado productivo declara 6.520 gastos y 218 votaciones; el catálogo local
+  conserva 6.517 y 194 respectivamente. Las diferencias quedan explícitas:
+  +3 gastos y +24 votaciones productivas. No se cambia ningún release ni se
+  publica una corrección automática.
+
+La prueba específica y `api-v1` pasaron 76/76; `typecheck` también pasó. Esta
+reconciliación es sólo de metadatos y no lee masivamente D1 ni descarga los
+universos de R2.
