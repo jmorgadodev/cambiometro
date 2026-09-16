@@ -2,11 +2,11 @@ import { createHash } from "node:crypto";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
-import { fetchSenateDomesticTickets, fetchSenateForeignMissions } from "./connectors/senado.mjs";
+import { fetchSenateDiet, fetchSenateDomesticTickets, fetchSenateForeignMissions } from "./connectors/senado.mjs";
 import { buildLakePlan } from "./lake.mjs";
 import { stableStringify } from "./core.mjs";
 
-export const REPAIR_DATASETS = new Set(["domestic_tickets", "foreign_missions"]);
+export const REPAIR_DATASETS = new Set(["diet", "domestic_tickets", "foreign_missions"]);
 
 function argument(name, fallback = undefined) {
   const index = process.argv.indexOf(name);
@@ -105,7 +105,9 @@ async function main() {
   const outputRoot = resolve(argument("--output", `data/repair-senado-${year}-${String(month).padStart(2, "0")}-${dataset}`));
   if (!existsSync(catalogPath)) throw new Error(`SENADO_REPAIR_CATALOG_MISSING: ${catalogPath}`);
   const existingCatalog = JSON.parse(readFileSync(catalogPath, "utf8"));
-  const fetcher = dataset === "domestic_tickets" ? fetchSenateDomesticTickets : fetchSenateForeignMissions;
+  const fetcher = dataset === "diet"
+    ? fetchSenateDiet
+    : dataset === "domestic_tickets" ? fetchSenateDomesticTickets : fetchSenateForeignMissions;
   const result = await fetcher({ year, month });
   const generatedAt = new Date().toISOString();
   const plan = buildRepairPlan({ result, existingCatalog, generatedAt });

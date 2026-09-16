@@ -20,6 +20,27 @@ function record(id, fecha) {
 }
 
 describe("repair-senate-partition", () => {
+  it("permite reparar una partición de dietas declarada pero ausente", () => {
+    const result = {
+      sourceId: "senado",
+      dataset: "diet",
+      year: 2026,
+      month: 7,
+      records: [record(1, "2026-07-01")],
+    };
+    const existingCatalog = {
+      generatedAt: "2026-09-16T00:00:00.000Z",
+      sources: [{ id: "senado", entityKey: "entities/v1/senado-existing.jsonl.gz", entityIndexKey: "indexes/v1/senado-existing.jsonl.gz", entityCount: 50 }],
+      partitions: [{ id: "senado/2026/07", sourceId: "senado", period: "2026-07", recordCount: 1, checksumSha256: "old" }],
+    };
+
+    const plan = buildRepairPlan({ result, existingCatalog, generatedAt: "2026-09-16T12:00:00.000Z" });
+
+    expect(plan.catalog.partitions.find((item) => item.id === "senado/2026/07").recordCount).toBe(1);
+    expect(plan.publishPlan.repair.dataset).toBe("diet");
+    expect(plan.assets.some((item) => item.key === "partitions/senado/2026/07/manifest.json")).toBe(true);
+  });
+
   it("reconstruye sólo la partición declarada con el mismo número de filas", () => {
     const result = {
       sourceId: "senado",
