@@ -11,6 +11,7 @@ import {
   sha256Buffer,
 } from "./static-site-inputs.mjs";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
+import { assertRemoteR2WriteBudget, configuredR2BudgetBuckets } from "./etl/r2-account-budget.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const bucket = argument("--bucket", "transparencia-public-data");
@@ -52,9 +53,13 @@ const releaseId = sha256Buffer(Buffer.from(files.map((file) => {
 }).join("\n"), "utf8"));
 const freshEntries = buildStaticInputEntries({ root, files, releaseId });
 let manifest = buildStaticInputManifest({ entries: freshEntries });
+let storageBudget = null;
 
 if (!localOnly) {
-  if (!allowLocalAuth) requireCloudflareDataCredentials();
+  const credentials = !allowLocalAuth ? requireCloudflareDataCredentials() : {
+    accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
+    token: process.env.CLOUDFLARE_API_TOKEN,
+  };
   mkdirSync(output, { recursive: true });
   const previous = readRemoteManifest();
   if (previous) assertStaticInputManifest(previous);
@@ -63,6 +68,16 @@ if (!localOnly) {
   manifest = buildStaticInputManifest({ entries: [...merged.values()] });
   const releaseDir = join(output, "releases", releaseId);
   mkdirSync(releaseDir, { recursive: true });
+  const manifestText = `${JSON.stringify(manifest, null, 2)}\n`;
+  storageBudget = await assertRemoteR2WriteBudget({
+    accountId: credentials.accountId,
+    token: credentials.token,
+    buckets: configuredR2BudgetBuckets(bucket),
+    puts: [
+      ...freshEntries.map((entry) => ({ bucket, key: entry.key, size: entry.size })),
+      { bucket, key: manifestKey, size: Buffer.byteLength(manifestText) },
+    ],
+  });
   for (const entry of freshEntries) {
     const source = resolveSafeStaticPath(root, entry.path);
     const content = readFileSync(source);
@@ -72,7 +87,7 @@ if (!localOnly) {
     runWrangler(["r2", "object", "put", `${bucket}/${entry.key}`, "--file", staged, "--content-type", "application/json"]);
   }
   const manifestPath = join(output, "manifest.json");
-  writeFileSync(manifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+  writeFileSync(manifestPath, manifestText, "utf8");
   runWrangler(["r2", "object", "put", `${bucket}/${manifestKey}`, "--file", manifestPath, "--content-type", "application/json"]);
 } else {
   mkdirSync(output, { recursive: true });
@@ -87,4 +102,9 @@ console.log(JSON.stringify({
   files: manifest.files.length,
   updatedFiles: freshEntries.length,
   checksumSha256: manifest.checksumSha256,
+  storageBudget: storageBudget ? {
+    currentBytes: storageBudget.currentBytes,
+    projectedBytes: storageBudget.projectedBytes,
+    peakBytes: storageBudget.peakBytes,
+  } : null,
 }, null, 2));

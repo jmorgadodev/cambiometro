@@ -69,6 +69,19 @@ describe("automatizacion CPLT nacional", () => {
     expect(publisher).toContain("for (const manifest of activationManifests)");
   });
 
+  it("aplica el presupuesto account-wide antes de cualquier publicación R2 directa", () => {
+    for (const file of [
+      "scripts/publish-data-lake.mjs",
+      "scripts/publish-static-site-inputs.mjs",
+      "scripts/publish-personal-apoyo.mjs",
+      "scripts/publish-transferencias-api-release.mjs",
+    ]) {
+      const publisher = readFileSync(resolve(process.cwd(), file), "utf8");
+      expect(publisher, file).toContain("assertRemoteR2WriteBudget");
+      expect(publisher, file).toContain("configuredR2BudgetBuckets");
+    }
+  });
+
   it("hidrata el respaldo estático CPLT desde el manifiesto R2 antes de Pages", () => {
     const pagesWorkflow = readFileSync(resolve(process.cwd(), "../.github/workflows/pages-static-refresh.yml"), "utf8");
     const packageJson = readFileSync(resolve(process.cwd(), "package.json"), "utf8");

@@ -1,9 +1,11 @@
-import { existsSync, mkdtempSync } from "node:fs";
+import { existsSync, mkdtempSync, statSync } from "node:fs";
 import { mkdir, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawn } from "node:child_process";
 import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
+import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
+import { assertRemoteR2WriteBudget, configuredR2BudgetBuckets } from "./etl/r2-account-budget.mjs";
 import { assertCanonicalTransferRelease } from "./etl/transfer-release-guard.mjs";
 
 const root = resolve(import.meta.dirname, "..");
@@ -92,10 +94,26 @@ try {
   const pointer = join(staging, "api-manifest.json");
   await mkdir(staging, { recursive: true });
   await writeFile(pointer, `${JSON.stringify(apiManifest, null, 2)}\n`, "utf8");
+  const credentials = requireCloudflareDataCredentials();
+  const plannedPuts = [
+    ...apiManifest.pages.map((page) => ({
+      bucket,
+      key: page.key,
+      size: statSync(join(staging, page.path.split("/").pop())).size,
+    })),
+    { bucket, key: apiManifest.searchIndex.key, size: statSync(join(staging, "search-index.json")).size },
+    { bucket, key: "projections/transferencias-v1/manifest.json", size: statSync(pointer).size },
+  ];
+  const storageBudget = await assertRemoteR2WriteBudget({
+    accountId: credentials.accountId,
+    token: credentials.token,
+    buckets: configuredR2BudgetBuckets(bucket),
+    puts: plannedPuts,
+  });
   await putInBatches(apiManifest.pages.map((page) => ({ key: page.key, file: join(staging, page.path.split("/").pop()) })));
   await put(apiManifest.searchIndex.key, join(staging, "search-index.json"));
   await put("projections/transferencias-v1/manifest.json", pointer);
-  console.log(JSON.stringify({ bucket, dataset: apiManifest.dataset, totalRows: apiManifest.totalRows, totalPages: apiManifest.totalPages, checksumSha256: apiManifest.checksumSha256, releasePrefix }, null, 2));
+  console.log(JSON.stringify({ bucket, dataset: apiManifest.dataset, totalRows: apiManifest.totalRows, totalPages: apiManifest.totalPages, checksumSha256: apiManifest.checksumSha256, releasePrefix, storageBudget: { currentBytes: storageBudget.currentBytes, projectedBytes: storageBudget.projectedBytes, peakBytes: storageBudget.peakBytes } }, null, 2));
 } finally {
   await rm(staging, { recursive: true, force: true });
 }
