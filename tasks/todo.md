@@ -72,8 +72,11 @@
    organismos centrales; no usar el valor estático 1.203.287.
 2. [x] Auditar los cortes CPLT productivos por período; evidencia en
    `docs/auditorias/2026-09-16-cplt-cortes-r2.md`.
-3. Completar la matriz de calidad de nombres, montos, períodos y duplicados
-   desde manifiestos R2, sin cargar el universo en D1.
+3. [ ] Completar la matriz de calidad de nombres, montos, períodos y duplicados
+   desde manifiestos R2, sin cargar el universo en D1. La auditoría de metadatos,
+   montos y períodos quedó documentada en
+   `docs/auditorias/2026-09-16-calidad-remuneraciones-r2.md`; falta el conteo
+   reproducible de duplicados exactos y la revisión por organismo.
 4. Construir historiales, altas, bajas y cambios de monto por lotes pequeños.
 
 ### Pendientes de normalización habilitados
@@ -84,7 +87,9 @@
 - [ ] Generar un índice R2 liviano por organismo y período para explicar la
   cobertura sin leer el universo ni usar D1.
 - [ ] Auditar el salto de julio y la caída de agosto/septiembre por categoría
-  y organismo antes de ampliar la interfaz o incorporar pagos.
+  y organismo antes de ampliar la interfaz o incorporar pagos. La señal quedó
+  confirmada en ambos releases productivos y documentada; falta el desglose
+  por organismo y archivo de origen.
 
 ## Fuera de alcance
 
