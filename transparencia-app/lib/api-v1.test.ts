@@ -1801,6 +1801,38 @@ describe("API canónica v1", () => {
     expect(payload.data[0].organo_nombre).toBe("Presidencia");
   });
 
+  it("respeta scope=municipal y no hace fallback a la proyección central", async () => {
+    const files: Record<string, unknown> = {
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-08-25T00:00:00.000Z",
+        version: "2026-08-25",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/2026-08-25/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/2026-08-25/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 0,
+        pageSize: 2,
+        pages: [],
+        shards: {},
+      },
+    };
+    let centralReads = 0;
+    const env = {
+      PUBLIC_DATA: { get: async (key: string) => {
+        if (key.includes("funcionarios-central-v1")) centralReads += 1;
+        return files[key] === undefined ? null : { json: async <T>() => files[key] as T };
+      } },
+    } as never;
+    const response = await api.fetch(new Request("https://example.test/api/funcionarios?scope=municipal&query=Latorre&limit=10"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.sourceStatus).toBe("r2-search");
+    expect(payload.meta.total).toBe(0);
+    expect(centralReads).toBe(0);
+  });
+
   it("combina las coincidencias municipales y centrales en una búsqueda nominal", async () => {
     const files: Record<string, unknown> = {
       "projections/funcionarios-v1/manifest.json": {

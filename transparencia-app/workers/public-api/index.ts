@@ -2336,7 +2336,7 @@ export default {
         // Mantiene la proyección municipal como contrato principal. Cuando
         // una búsqueda nominal no encuentra nada allí, consulta la proyección
         // central separada, sin mezclar ambos universos ni tocar D1.
-        if (datasetRoot === "funcionarios-v1" && !url.searchParams.get("muni") && !url.searchParams.get("organismo")
+        if (datasetRoot === "funcionarios-v1" && requestedScope === "" && !url.searchParams.get("muni") && !url.searchParams.get("organismo")
           && (url.searchParams.get("query") ?? url.searchParams.get("q"))?.trim()) {
           try {
             const payload = await r2.clone().json() as { meta?: { total?: number } };
