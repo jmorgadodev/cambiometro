@@ -1103,3 +1103,20 @@ El siguiente bloque de trabajo queda definido como auditoría por período y
 organismo de esas incidencias, empezando por una muestra reproducible y sin
 reescribir el release. Sólo después se evaluará si conviene una vista derivada
 de historial; el valor bruto y la URL de origen permanecerán intactos.
+
+### Procedencia municipal y central en la búsqueda unificada — 16-09-2026
+
+La búsqueda `scope=all` ahora conserva en cada fila el origen lógico de la
+nómina mediante `sourceScope`: `municipal` u `central`. La interfaz deja de
+presentar todas las filas remotas como si fueran únicamente municipalidades y
+etiqueta los resultados centrales como “Transparencia Activa · Organismos
+centrales”. El cambio quedó en `517f20a` y no fusiona personas por nombre ni
+modifica los valores originales.
+
+Validación: el candidato del Worker
+`ca06c7b8-8cd4-45fe-9df7-29923347ef0c` encontró a Río Sebastián Torrealba del
+como registro central de Presidencia y a Lucy Depablos en sus registros
+municipales y centrales. El Worker se promovió mediante el run `35072282152`.
+La publicación Pages UI pasó preview completo en el run `35072437560`; queda
+pendiente registrar el deployment productivo de ese mismo build cuando la
+tubería de Pages finalice la promoción.
