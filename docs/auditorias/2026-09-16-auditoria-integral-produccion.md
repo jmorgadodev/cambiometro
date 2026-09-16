@@ -1740,6 +1740,15 @@ del stream de red quedó en el PR #553; sus checks de seguridad y calidad están
 en ejecución. Hasta que el inventario se repare, el resultado correcto es
 `no restaurable` y no debe maquillarse como éxito.
 
+La revisión por prefijo de la proyección municipal aclara por qué no se debe
+eliminar aún la versión antigua del bucket público. El manifiesto vigente
+apunta a `2026-09-15T08-08-44-566Z` con 1.243.761 registros. La versión
+anterior pública `2026-09-02T03-28-30-598Z` conserva 1.514 objetos y
+2.134.868.312 bytes, pero el snapshot del 13-09 sólo contiene 587 de esos
+objetos; sus 1.514 objetos principales corresponden a otra versión del
+30-08. Por tanto, no existe hoy un rollback completo verificable para la
+versión del 02-09 y esa proyección queda protegida.
+
 ### Auditoría del respaldo R2 — 16-09-2026
 
 La revisión se hizo mediante el inventario de objetos del API de R2, sin
