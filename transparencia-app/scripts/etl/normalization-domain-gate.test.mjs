@@ -25,6 +25,14 @@ describe("compuerta de normalización por dominio", () => {
     expect(result).toMatchObject({ status: "blocked", failed: ["fallo"], publicD1Reads: 0, publicR2Writes: 0 });
   });
 
+  it("permite el checkout limpio cuando faltan artefactos generados y los deja visibles como omitidos", () => {
+    const result = summarizeDomainResults([
+      { id: "ok", script: "ok.mjs", status: "ok", exitCode: 0, report: {} },
+      { id: "faltante", script: "faltante.mjs", status: "skipped", exitCode: 1, report: {} },
+    ]);
+    expect(result).toMatchObject({ status: "partial", failed: [], skipped: ["faltante"] });
+  });
+
   it("ejecuta cada validador de manera secuencial y resume el resultado", () => {
     const called = [];
     const result = runNormalizationDomainChecks({
@@ -39,5 +47,16 @@ describe("compuerta de normalización por dominio", () => {
     });
     expect(called.map((value) => value.split(/[\\/]/).at(-1))).toEqual(["uno.mjs", "dos.mjs"]);
     expect(result).toMatchObject({ status: "ok", failed: [], publicD1Reads: 0, publicR2Writes: 0 });
+  });
+
+  it("clasifica un artefacto ausente como omitido sólo con la opción explícita", () => {
+    const result = runNormalizationDomainChecks({
+      checks: [{ id: "faltante", script: "faltante.mjs" }],
+      allowMissingArtifacts: true,
+      spawn() {
+        return { status: 1, stdout: "", stderr: "Error: ENOENT: no such file or directory" };
+      },
+    });
+    expect(result).toMatchObject({ status: "partial", failed: [], skipped: ["faltante"] });
   });
 });

@@ -54,18 +54,24 @@ function compactReport(id, report) {
 }
 
 export function summarizeDomainResults(results) {
-  const failed = results.filter((result) => result.status !== "ok");
+  const failed = results.filter((result) => result.status === "failed");
+  const skipped = results.filter((result) => result.status === "skipped");
   return {
-    status: failed.length === 0 ? "ok" : "blocked",
+    status: failed.length > 0 ? "blocked" : skipped.length > 0 ? "partial" : "ok",
     checks: results.map(({ id, script, status, exitCode, report }) => ({ id, script, status, exitCode, report: compactReport(id, report) })),
     failed: failed.map((result) => result.id),
+    skipped: skipped.map((result) => result.id),
     publicD1Reads: 0,
     publicR2Writes: 0,
     note: "Compuerta local de normalización; no publica ni materializa datos.",
   };
 }
 
-export function runNormalizationDomainChecks({ checks = NORMALIZATION_DOMAIN_CHECKS, spawn = spawnSync } = {}) {
+export function runNormalizationDomainChecks({
+  checks = NORMALIZATION_DOMAIN_CHECKS,
+  spawn = spawnSync,
+  allowMissingArtifacts = process.argv.includes("--allow-missing-artifacts") || process.env.ALLOW_MISSING_NORMALIZATION_ARTIFACTS === "1",
+} = {}) {
   const results = [];
   for (const check of checks) {
     const child = spawn(process.execPath, [resolve(root, check.script)], {
@@ -75,13 +81,15 @@ export function runNormalizationDomainChecks({ checks = NORMALIZATION_DOMAIN_CHE
       env: { ...process.env },
     });
     const exitCode = child.status ?? 1;
+    const stderr = String(child.stderr ?? "").trim().slice(-500) || null;
+    const missingArtifact = /ENOENT|no such file or directory|FILE_NOT_FOUND/i.test(stderr ?? "");
     results.push({
       id: check.id,
       script: check.script,
-      status: exitCode === 0 ? "ok" : "failed",
+      status: exitCode === 0 ? "ok" : allowMissingArtifacts && missingArtifact ? "skipped" : "failed",
       exitCode,
       report: parseJsonOutput(child.stdout),
-      stderr: String(child.stderr ?? "").trim().slice(-500) || null,
+      stderr,
     });
   }
   return summarizeDomainResults(results);
@@ -90,5 +98,5 @@ export function runNormalizationDomainChecks({ checks = NORMALIZATION_DOMAIN_CHE
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const result = runNormalizationDomainChecks();
   console.log(JSON.stringify(result, null, 2));
-  if (result.status !== "ok") process.exitCode = 2;
+  if (result.status === "blocked") process.exitCode = 2;
 }

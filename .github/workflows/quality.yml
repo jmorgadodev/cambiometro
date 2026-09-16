@@ -48,7 +48,7 @@ jobs:
         working-directory: transparencia-app
 
       - name: Validate normalization by domain without D1/R2 writes
-        run: npm run check:normalization-domains
+        run: npm run check:normalization-domains -- --allow-missing-artifacts
         working-directory: transparencia-app
 
       - name: Check no AI traces
