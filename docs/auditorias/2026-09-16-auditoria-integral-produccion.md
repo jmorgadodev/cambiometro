@@ -1550,3 +1550,22 @@ total observado es 17.437.837.684 bytes, equivalente a 174,378% de 10 GB.
 El respaldo del 2026-09-13 representa 4,31 GB y el del 2026-08-20 otros 1,91
 GB. Antes de incorporar más datos, se debe conservar una sola política de
 rollback y trasladar o retirar snapshots redundantes con permisos de escritura.
+### Seguimiento posterior al PR #548 — 16-09-2026 14:10 UTC-3
+
+El PR #548 quedó integrado en `main` mediante el merge `2dbc194`; sus checks
+remotos quedaron verdes. Separó las categorías del Senado y agregó auditorías
+de referencias y almacenamiento R2. No ejecutó ETL ni escribió datos.
+
+La comprobación productiva conserva Movimientos en 46 registros desde R2.
+Cámara responde con 2.117 filas para 2026-08. Senado `2026-07` todavía
+responde 0 filas porque su partición productiva sigue ausente; no se publicará
+una reparación parcial.
+
+La auditoría física actual confirma 11.078.005.075 bytes en el bucket público,
+6.359.832.609 bytes en backups y 17.437.837.684 bytes en la cuenta. El catálogo
+mantiene 82 particiones sin manifiesto físico. No se borró ni copió ningún
+objeto R2.
+
+En el equipo se eliminaron sólo los directorios regenerables `.next` y `out` del
+proyecto maestro. No se eliminaron repositorios, datos fuente, históricos ni
+`cambiometro-editorial`.
