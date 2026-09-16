@@ -1748,6 +1748,13 @@ El snapshot `backup/2026-08-20/` sigue siendo necesario por ahora: contiene
 particiones ausentes. No se puede eliminar sólo por ser más antiguo, porque
 el snapshot del 13-09 no reemplaza automáticamente todo su contenido.
 
+La comparación entre snapshots muestra que 166 objetos son idénticos
+(73.635.893 bytes), cinco manifiestos cambiaron y 442 objetos por
+1.804.413.096 bytes sólo existen en el snapshot del 20-08. Esos objetos son
+la versión anterior de `funcionarios-v1`; podrían ser redundantes únicamente
+después de comprobar que la versión del 13-09 es restaurable y que existe
+otro rollback íntegro para ese mismo release.
+
 Conclusión operativa: no se eliminó ningún respaldo y no se subió ningún
 dato. La prioridad es reparar el inventario, verificar una restauración
 aislada de ambos snapshots y escoger explícitamente un rollback por cada
