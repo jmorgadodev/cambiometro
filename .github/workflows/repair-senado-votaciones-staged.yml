@@ -1,0 +1,172 @@
+name: Reparación aislada - Votaciones Senado R2
+
+on:
+  workflow_dispatch:
+    inputs:
+      from:
+        description: Primer período a reemplazar (YYYY-MM-DD)
+        required: true
+        default: "2026-08-01"
+      to:
+        description: Último día a reemplazar (YYYY-MM-DD)
+        required: true
+        default: "2026-09-15"
+      confirm_repair:
+        description: Escribe CAMBIOMETRO_CONFIRM_SENADO_VOTACIONES_REPAIR para publicar
+        required: true
+        default: ""
+
+concurrency:
+  group: cambiometro-senado-votaciones-staged
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    name: Reemplazar sólo particiones Senado validadas
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Instalar dependencias
+        working-directory: transparencia-app
+        run: npm ci
+
+      - name: Validar confirmación y credenciales
+        env:
+          CONFIRMATION: ${{ inputs.confirm_repair }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test "$CONFIRMATION" = "CAMBIOMETRO_CONFIRM_SENADO_VOTACIONES_REPAIR"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_DATA_API_TOKEN"
+
+      - name: Recuperar catálogo y estado de almacenamiento vigentes
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p .repair-staging/catalog/v1
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json \
+            --file .repair-staging/catalog-before.json --remote
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/storage.json \
+            --file .repair-staging/storage-before.json --remote || true
+
+      - name: Construir release oficial aislado sin publicar
+        working-directory: transparencia-app
+        run: |
+          set -euo pipefail
+          node scripts/etl/prepare-senado-votaciones-release.mjs \
+            --from "${{ inputs.from }}" --to "${{ inputs.to }}" \
+            --output .repair-staging/release
+
+      - name: Fusionar catálogo y validar alcance
+        working-directory: transparencia-app
+        run: |
+          set -euo pipefail
+          node scripts/etl/merge-senado-votaciones-preflight.mjs \
+            --catalog .repair-staging/catalog-before.json \
+            --staged .repair-staging/release/release-summary.json \
+            --output .repair-staging/merge-preflight.json \
+            --catalog-output .repair-staging/merged-catalog.json
+          node --input-type=module - <<'NODE'
+          import { readFileSync } from "node:fs";
+          const preflight = JSON.parse(readFileSync(".repair-staging/merge-preflight.json", "utf8"));
+          const staged = JSON.parse(readFileSync(".repair-staging/release/release-summary.json", "utf8"));
+          const source = preflight.catalog.sources.find((entry) => entry.id === "votaciones_senado");
+          if (!source || source.recordCount <= preflight.oldSourceRecordCount) throw new Error("SENADO_REPAIR_NO_GROWTH");
+          if (staged.periods.length === 0 || staged.recordCount <= 0) throw new Error("SENADO_REPAIR_EMPTY");
+          if (new Set(staged.periods.flatMap((period) => period.ids)).size !== staged.recordCount) throw new Error("SENADO_REPAIR_DUPLICATE_IDS");
+          if (source.entityCount !== 51) throw new Error(`SENADO_REPAIR_ENTITY_SCOPE_CHANGED:${source.entityCount}`);
+          console.log(JSON.stringify({ old: preflight.oldSourceRecordCount, next: source.recordCount, periods: staged.periods }, null, 2));
+          NODE
+
+      - name: Preflight de tamaño R2
+        working-directory: transparencia-app
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import { readFileSync, statSync } from "node:fs";
+          const storagePath = ".repair-staging/storage-before.json";
+          const used = (() => { try { return Number(JSON.parse(readFileSync(storagePath, "utf8")).usedBytes ?? 0); } catch { return 0; } })();
+          const root = ".repair-staging/release";
+          const summary = JSON.parse(readFileSync(`${root}/release-summary.json`, "utf8"));
+          const bytes = summary.assets.filter((asset) => asset.key.startsWith("partitions/votaciones_senado/")).reduce((sum, asset) => sum + Number(asset.size ?? 0), 0);
+          const projected = used + bytes;
+          if (used > 0 && projected >= 9_500_000_000) throw new Error(`R2_REPAIR_BLOCKED_AT_95_PERCENT:${projected}`);
+          console.log(JSON.stringify({ usedBytes: used, addedBytes: bytes, projectedBytes: projected, thresholdBytes: 9_500_000_000 }, null, 2));
+          NODE
+
+      - name: Respaldar catálogo anterior
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler r2 object put "transparencia-public-data/catalog/v1/rollback/senado-votaciones-${GITHUB_RUN_ID}-before.json" \
+            --file .repair-staging/catalog-before.json --remote --content-type application/json
+
+      - name: Publicar sólo particiones Senado
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE' > .repair-staging/partition-assets.txt
+          import { readFileSync } from "node:fs";
+          const summary = JSON.parse(readFileSync(".repair-staging/release/release-summary.json", "utf8"));
+          for (const asset of summary.assets.filter((item) => item.key.startsWith("partitions/votaciones_senado/"))) console.log(asset.key);
+          NODE
+          while IFS= read -r key; do
+            [ -n "$key" ] || continue
+            content_type="application/octet-stream"
+            case "$key" in
+              *.json|*/sha256.txt) content_type="application/json" ;;
+            esac
+            npx wrangler r2 object put "transparencia-public-data/$key" \
+              --file ".repair-staging/release/$key" --remote --content-type "$content_type"
+          done < .repair-staging/partition-assets.txt
+
+      - name: Activar catálogo fusionado como último paso
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler r2 object put transparencia-public-data/catalog/v1/manifest.json \
+            --file .repair-staging/merged-catalog.json --remote --content-type application/json
+
+      - name: Verificar períodos y ausencia de D1
+        env:
+          API_URL: https://cambiometro.impulsacv.cl/api/v1/records
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          const base = process.env.API_URL;
+          for (const period of ["2026-08", "2026-09"]) {
+            const response = await fetch(`${base}?source=votaciones_senado&kind=vote&period=${period}&limit=1`);
+            if (!response.ok) throw new Error(`SENADO_REPAIR_HTTP:${period}:${response.status}`);
+            const payload = await response.json();
+            if (Number(payload.meta?.total ?? 0) <= 0) throw new Error(`SENADO_REPAIR_EMPTY_PRODUCTION:${period}`);
+            if (payload.meta?.sourceBackend !== "r2-lake") throw new Error(`SENADO_REPAIR_BACKEND:${period}`);
+          }
+          console.log("Senado votaciones reparado; consultas servidas desde R2.");
+          NODE

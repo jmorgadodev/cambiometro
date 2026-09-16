@@ -28,6 +28,7 @@ function readJson(path) {
 const catalogPath = required("--catalog");
 const stagedPath = required("--staged");
 const outputPath = required("--output");
+const catalogOutputPath = arg("--catalog-output", null);
 const sourceId = arg("--source", "votaciones_senado");
 
 const catalog = readJson(catalogPath);
@@ -108,6 +109,10 @@ const summary = {
 
 mkdirSync(dirname(outputPath), { recursive: true });
 writeFileSync(outputPath, `${JSON.stringify(summary, null, 2)}\n`, "utf8");
+if (catalogOutputPath) {
+  mkdirSync(dirname(resolve(catalogOutputPath)), { recursive: true });
+  writeFileSync(resolve(catalogOutputPath), `${JSON.stringify(mergedCatalog)}\n`, "utf8");
+}
 console.log(JSON.stringify({
   ok: true,
   status: summary.status,
@@ -117,4 +122,5 @@ console.log(JSON.stringify({
   newSourceRecordCount: summary.newSourceRecordCount,
   unchangedSourceCount: unchangedSourceIds.length,
   output: outputPath,
+  catalogOutput: catalogOutputPath ? resolve(catalogOutputPath) : null,
 }, null, 2));
