@@ -8,6 +8,17 @@ const manifest = JSON.parse(await readFile(join(repoRoot, ".github", "etl-calend
 const workflowDir = join(repoRoot, ".github", "workflows");
 
 const failures = [];
+
+const pagesRefresh = await readFile(join(workflowDir, "pages-static-refresh.yml"), "utf8").catch(() => "");
+const publicationGuard = await readFile(join(workflowDir, "etl-publication-guard.yml"), "utf8").catch(() => "");
+const workflowRunPushGuard = "github.event.workflow_run.event != 'push'";
+if (!pagesRefresh.includes(workflowRunPushGuard)) {
+  failures.push("pages-static-refresh.yml: el refresco por workflow_run debe ignorar push-noop");
+}
+if (!publicationGuard.includes(workflowRunPushGuard)) {
+  failures.push("etl-publication-guard.yml: la guardia debe ignorar push-noop");
+}
+
 for (const entry of manifest.entries) {
   const file = join(workflowDir, entry.workflow);
   let content = "";

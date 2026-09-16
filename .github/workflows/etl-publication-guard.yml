@@ -32,7 +32,7 @@ permissions:
 
 jobs:
   verify:
-    if: github.event_name == 'workflow_dispatch' || github.event.workflow_run.conclusion == 'success'
+    if: github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'push')
     runs-on: ubuntu-latest
     # Pages hidrata desde R2, construye y publica después del ETL. En los
     # releases grandes el despliegue puede superar los 10 minutos; la guardia
