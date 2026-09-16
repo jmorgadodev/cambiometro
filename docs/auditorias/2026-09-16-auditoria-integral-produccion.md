@@ -1395,3 +1395,38 @@ Remuneraciones ni D1. La intermitencia observada en la búsqueda combinada de
 funcionarios (503/1102 sólo para algunas consultas `scope=all`) queda como el
 primer pendiente técnico separado; no se mezclará con el cierre de
 Movimientos.
+
+### Auditoría integral posterior — 16-09-2026
+
+La revisión por manifiestos R2 y muestras productivas no encontró una
+diferencia inexplicada en las fuentes restantes. El resultado se clasifica
+como auditoría de alcance y frescura, no como aprobación semántica fila por
+fila de todo el universo:
+
+- Fuentes auditadas: 15; 6 coinciden con el manifiesto local, 1 presenta sólo
+  diferencia de frescura y 8 presentan diferencia de alcance documentada; 0
+  quedaron sin explicación.
+- Cámara: producción separa 54.538 asistencias, 4.058 votaciones, 155
+  autoridades y 16.275 gastos; el conteo padre de 58.751 no debe sumarse con
+  gastos ni interpretarse como remuneraciones.
+- Senado: producción publica 218 votaciones, 6.520 gastos y 1.428 en el
+  registro padre; las diferencias locales son 24 votaciones y 3 gastos, a
+  revisar por corte o alcance, no a corregir automáticamente.
+- Transparencia Activa: producción tiene 1.243.761 filas frente a 1.203.287
+  del subconjunto estático de Remuneraciones; la diferencia corresponde a
+  alcance/corte y no demuestra pérdida de datos.
+- ChileCompra y DIPRES mantienen separados corte vigente e histórico; DIPRES
+  continúa siendo agregado, no nómina individual.
+- R2 tiene 9.179.838.007 bytes de 10.000.000.000 (91,798%), en revisión y sin
+  eliminaciones automáticas. No apareció un grupo de duplicados grande que
+  pueda borrarse con seguridad.
+- D1 permanece con `publicD1Reads=false`; las consultas públicas probadas
+  respondieron desde R2. El `d1Consistent=false` del health público es
+  esperado mientras el chequeo físico D1 está desactivado y no equivale a una
+  falla de los datos públicos.
+
+La única incidencia reproducible cerrada como integridad de datos es
+Movimientos. La búsqueda combinada de funcionarios respondió correctamente en
+las pruebas posteriores, pero conserva una alerta técnica separada por
+intermitencia 503/1102: no se declarará resuelta de forma permanente hasta
+reducir sus lecturas duplicadas y repetir el smoke bajo carga controlada.
