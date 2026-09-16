@@ -43,4 +43,12 @@ describe("interfaz unificada de remuneraciones", () => {
     expect(explorer).toContain("void runSearch(undefined, initialQuery)");
     expect(explorer).not.toContain("requestSubmit()");
   });
+
+  it("mantiene el universo R2 también al probar Remuneraciones en local", () => {
+    const explorer = readFileSync(join(projectRoot, "components", "remuneraciones", "RemuneracionesUnifiedExplorer.tsx"), "utf8");
+
+    expect(explorer).toContain("NEXT_PUBLIC_PUBLIC_API_ORIGIN");
+    expect(explorer).toContain("searchTransparencyActiva({ query: cleanQuery, organism, role, apiOrigin: publicApiOrigin })");
+    expect(explorer).not.toContain("if (!isLocalStaticPreview && (source === \"all\" || transparencySourceSelected))");
+  });
 });

@@ -230,9 +230,15 @@ export default function RemuneracionesUnifiedExplorer() {
       let remotePartial = false;
       const isLocalStaticPreview = typeof window !== "undefined"
         && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+      // El preview local no tiene un Worker propio: consulta el endpoint
+      // público que lee los índices R2, para que las pruebas no se hagan sobre
+      // las 33 mil filas del snapshot estático ni diverjan de producción.
+      const publicApiOrigin = isLocalStaticPreview
+        ? (process.env.NEXT_PUBLIC_PUBLIC_API_ORIGIN?.trim() || "https://cambiometro.impulsacv.cl")
+        : undefined;
       const transparencySourceSelected = source === "transparencia-activa" || source === "transparencia-activa-central";
-      if (!isLocalStaticPreview && (source === "all" || transparencySourceSelected)) {
-        const remote = await searchTransparencyActiva({ query: cleanQuery, organism, role });
+      if (source === "all" || transparencySourceSelected) {
+        const remote = await searchTransparencyActiva({ query: cleanQuery, organism, role, apiOrigin: publicApiOrigin });
         remoteRows = remote.rows.map((row) => RemoteOfficialRow(row, cleanQuery))
           .filter((row): row is UnifiedRow => Boolean(row))
           .filter((row) => source === "all" || row.sourceId === source || (source === "transparencia-activa" && row.sourceId === "transparencia-activa-central"));
