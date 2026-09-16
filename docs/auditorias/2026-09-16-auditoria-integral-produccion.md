@@ -1586,3 +1586,8 @@ más, el proceso se detiene antes de cualquier borrado, exportación D1 o copia.
 La prueba de regresión confirma que los objetos `d1/` no se confunden con
 snapshots. La suite posterior terminó con 203 archivos y 1.068 tests aprobados.
 No se ejecutó el backup real ni se modificó R2.
+La doble verificación productiva posterior terminó con 134 controles aprobados
+y 0 fallas en cada una de las dos pasadas. La versión observada fue
+`v1.0-a3c08e35`; Movimientos permaneció en 46/46, el health respondió HTTP 200
+con `publicDataBackend=r2` y `publicD1Reads=false`, y las rutas principales
+continuaron disponibles.
