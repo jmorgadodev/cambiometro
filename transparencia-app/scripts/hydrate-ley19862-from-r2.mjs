@@ -12,9 +12,17 @@ const DOWNLOAD_MAX_ATTEMPTS = Number(process.env.LEY_19862_R2_DOWNLOAD_ATTEMPTS 
 const DOWNLOAD_RETRY_DELAY_MS = 2_000;
 
 function runWrangler(args, timeoutMs = DOWNLOAD_TIMEOUT_MS) {
-  const command = process.platform === "win32" ? "npx.cmd" : "npx";
+  // Invoke the checked-in Wrangler entrypoint directly. On Windows, spawning
+  // the `npx.cmd` shim (especially while hydrating several partitions) can
+  // fail with EINVAL and hides the actual R2 error.
+  const command = process.execPath;
+  const wranglerBin = resolve(root, "node_modules", "wrangler", "bin", "wrangler.js");
   return new Promise((resolvePromise, reject) => {
-    const child = spawn(command, ["wrangler", ...args], { cwd: root, stdio: "inherit", shell: false });
+    const child = spawn(command, [wranglerBin, ...args], {
+      cwd: root,
+      stdio: "inherit",
+      shell: false,
+    });
     const timer = setTimeout(() => {
       child.kill();
       reject(new Error(`LEY_19862_R2_COMMAND_TIMEOUT: ${args.join(" ")}`));
@@ -66,7 +74,10 @@ if (!partitions.length) throw new Error("LEY_19862_R2_PARTITIONS_MISSING");
 const sourceRoot = join(lakeRoot, "partitions", "ley-19862");
 rmSync(sourceRoot, { recursive: true, force: true });
 const queue = [...partitions];
-const workers = Array.from({ length: Math.min(4, queue.length) }, async () => {
+// Windows can reject concurrent `npx.cmd` children with EINVAL. Keep the
+// remote reads deterministic there; Unix runners may still use four workers.
+const workerCount = process.platform === "win32" ? 1 : Math.min(4, queue.length);
+const workers = Array.from({ length: workerCount }, async () => {
   while (queue.length) {
     const partition = queue.shift();
     if (!partition) return;
