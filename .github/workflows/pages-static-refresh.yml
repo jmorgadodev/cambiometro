@@ -84,7 +84,7 @@ jobs:
     timeout-minutes: 60
     steps:
       - name: Checkout del código de la rama del despliegue
-        uses: actions/checkout@v5
+        uses: actions/checkout@v7
         with:
           # workflow_run.head_sha apunta al commit del ETL que disparó el
           # refresco. Ese commit puede ser anterior a la lógica vigente de
@@ -459,7 +459,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v7
 
       - uses: actions/setup-node@v5
         with:
