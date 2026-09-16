@@ -1,0 +1,165 @@
+name: Reparación aislada - Asistencia Cámara R2
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm_repair:
+        description: Escribe CAMBIOMETRO_CONFIRM_CAMARA_ATTENDANCE_REPAIR para publicar
+        required: true
+        default: ""
+  workflow_call:
+    inputs:
+      confirm_repair:
+        required: true
+        type: string
+    secrets:
+      CLOUDFLARE_ACCOUNT_ID:
+        required: true
+      CLOUDFLARE_DATA_API_TOKEN:
+        required: true
+
+concurrency:
+  group: cambiometro-camara-attendance-staged
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  repair:
+    name: Reemplazar sólo asistencia Cámara 2026-09
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    environment: production
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+
+      - name: Instalar dependencias
+        working-directory: transparencia-app
+        run: npm ci
+
+      - name: Validar confirmación y credenciales
+        env:
+          CONFIRMATION: ${{ inputs.confirm_repair }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_DATA_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          test "$CONFIRMATION" = "CAMBIOMETRO_CONFIRM_CAMARA_ATTENDANCE_REPAIR"
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_DATA_API_TOKEN"
+
+      - name: Recuperar catálogo y almacenamiento vigentes
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          mkdir -p .repair-staging
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file .repair-staging/catalog-before.json --remote
+          npx wrangler r2 object get transparencia-public-data/catalog/v1/storage.json --file .repair-staging/storage-before.json --remote || true
+
+      - name: Construir staging oficial sin publicar
+        working-directory: transparencia-app
+        run: |
+          set -euo pipefail
+          node scripts/etl/prepare-camara-attendance-release.mjs \
+            --year 2026 --period 2026-09 --output .repair-staging/release
+
+      - name: Fusionar catálogo y validar alcance
+        working-directory: transparencia-app
+        run: |
+          set -euo pipefail
+          node scripts/etl/merge-camara-attendance-preflight.mjs \
+            --catalog .repair-staging/catalog-before.json \
+            --staged .repair-staging/release/release-summary.json \
+            --output .repair-staging/merged-catalog.json
+          node --input-type=module - <<'NODE'
+          import { readFileSync } from "node:fs";
+          const before = JSON.parse(readFileSync(".repair-staging/catalog-before.json", "utf8"));
+          const after = JSON.parse(readFileSync(".repair-staging/merged-catalog.json", "utf8"));
+          const staged = JSON.parse(readFileSync(".repair-staging/release/release-summary.json", "utf8"));
+          const source = after.sources.find((entry) => entry.id === "camara");
+          const old = before.sources.find((entry) => entry.id === "camara");
+          if (staged.recordCount !== 775) throw new Error(`CAMARA_ATTENDANCE_COUNT:${staged.recordCount}`);
+          if (source?.recordCount !== old?.recordCount) throw new Error(`CAMARA_SOURCE_SCOPE_CHANGED:${old?.recordCount}:${source?.recordCount}`);
+          if (new Set(staged.partitions.map((partition) => partition.id)).size !== 1) throw new Error("CAMARA_ATTENDANCE_PARTITION_SCOPE");
+          console.log(JSON.stringify({ oldPartitions: before.partitions.length, newPartitions: after.partitions.length, records: staged.recordCount, checksum: staged.partitions[0].checksumSha256 }, null, 2));
+          NODE
+
+      - name: Preflight de tamaño R2
+        working-directory: transparencia-app
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import { readFileSync } from "node:fs";
+          const storage = JSON.parse(readFileSync(".repair-staging/storage-before.json", "utf8"));
+          const summary = JSON.parse(readFileSync(".repair-staging/release/release-summary.json", "utf8"));
+          const added = summary.assets.reduce((total, asset) => total + Number(asset.size ?? 0), 0);
+          const projected = Number(storage.usedBytes ?? 0) + added;
+          if (projected >= 9_500_000_000) throw new Error(`R2_REPAIR_BLOCKED_AT_95_PERCENT:${projected}`);
+          console.log(JSON.stringify({ usedBytes: storage.usedBytes, addedBytes: added, projectedBytes: projected, thresholdBytes: 9500000000 }, null, 2));
+          NODE
+
+      - name: Respaldar catálogo anterior
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler r2 object put "transparencia-public-data/catalog/v1/rollback/camara-attendance-${GITHUB_RUN_ID}-before.json" \
+            --file .repair-staging/catalog-before.json --remote --content-type application/json
+
+      - name: Publicar sólo asistencia Cámara
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE' > .repair-staging/asset-keys.txt
+          import { readFileSync } from "node:fs";
+          const summary = JSON.parse(readFileSync(".repair-staging/release/release-summary.json", "utf8"));
+          for (const asset of summary.assets) console.log(asset.key);
+          NODE
+          while IFS= read -r key; do
+            [ -n "$key" ] || continue
+            content_type="application/octet-stream"
+            case "$key" in *.json|*/sha256.txt) content_type="application/json" ;; esac
+            npx wrangler r2 object put "transparencia-public-data/$key" \
+              --file ".repair-staging/release/$key" --remote --content-type "$content_type"
+          done < .repair-staging/asset-keys.txt
+
+      - name: Activar catálogo fusionado como último paso
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          set -euo pipefail
+          npx wrangler r2 object put transparencia-public-data/catalog/v1/manifest.json \
+            --file .repair-staging/merged-catalog.json --remote --content-type application/json
+
+      - name: Verificar asistencia productiva y ausencia de D1
+        env:
+          API_URL: https://cambiometro.impulsacv.cl/api/v1/records
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          const url = `${process.env.API_URL}?source=camara&kind=attendance&period=2026-09&limit=1&repair_probe=${process.env.GITHUB_RUN_ID}`;
+          const response = await fetch(url);
+          if (!response.ok) throw new Error(`CAMARA_ATTENDANCE_HTTP:${response.status}`);
+          const payload = await response.json();
+          if (Number(payload.meta?.total ?? 0) !== 775) throw new Error(`CAMARA_ATTENDANCE_TOTAL:${payload.meta?.total}`);
+          if (payload.meta?.sourceBackend !== "r2-lake") throw new Error(`CAMARA_ATTENDANCE_BACKEND:${payload.meta?.sourceBackend}`);
+          console.log(JSON.stringify({ total: payload.meta.total, backend: payload.meta.sourceBackend, status: payload.meta.sourceStatus }, null, 2));
+          NODE
