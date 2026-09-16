@@ -13,6 +13,8 @@ interface SearchOptions {
   query: string;
   organism?: string;
   role?: string;
+  /** Optional absolute public API origin used by local previews. */
+  apiOrigin?: string;
   fetchImpl?: typeof fetch;
 }
 
@@ -32,7 +34,8 @@ function requestUrl(scope: "all" | "municipal" | "central", options: SearchOptio
   });
   if (options.organism?.trim()) params.set("organismo", options.organism.trim());
   if (options.role?.trim()) params.set("cargo", options.role.trim());
-  return `/api/funcionarios?${params.toString()}`;
+  const path = `/api/funcionarios?${params.toString()}`;
+  return options.apiOrigin ? new URL(path, options.apiOrigin).toString() : path;
 }
 
 async function readResponse(response: Response): Promise<{ rows: RemoteOfficialRow[]; total: number | null } | null> {

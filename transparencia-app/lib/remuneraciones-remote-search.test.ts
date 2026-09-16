@@ -55,4 +55,18 @@ describe("búsqueda remota de Transparencia Activa", () => {
     expect(result.rows[0].id).toBe("muni-1");
     expect(result.rows[0].sourceScope).toBe("municipal");
   });
+
+  it("puede consultar el Worker público desde un preview local", async () => {
+    const calls: string[] = [];
+    await searchTransparencyActiva({
+      query: "Latorre",
+      apiOrigin: "https://cambiometro.impulsacv.cl",
+      fetchImpl: async (input) => {
+        calls.push(String(input));
+        return response({ data: [], meta: { total: 0 } });
+      },
+    });
+
+    expect(calls[0]).toMatch(/^https:\/\/cambiometro\.impulsacv\.cl\/api\/funcionarios\?/);
+  });
 });

@@ -83,10 +83,15 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
-      - name: Checkout del commit que produjo el release ETL
+      - name: Checkout del código de la rama del despliegue
         uses: actions/checkout@v5
         with:
-          ref: ${{ github.event.workflow_run.head_sha || github.sha }}
+          # workflow_run.head_sha apunta al commit del ETL que disparó el
+          # refresco. Ese commit puede ser anterior a la lógica vigente de
+          # validación (por ejemplo, exigir 79 movimientos en vez del release
+          # reconciliado de 46). Los datos se hidratan desde R2 más abajo; el
+          # código debe provenir de la rama que ejecuta este workflow.
+          ref: ${{ github.ref_name }}
 
       - name: Validar modo data-refresh
         env:
