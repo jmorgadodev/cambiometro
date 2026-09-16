@@ -3,6 +3,7 @@ import { copyFileSync, createReadStream, existsSync, mkdirSync, readFileSync, re
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { buildCpltTransparencySummary } from "./cplt-transparency-summary.mjs";
+import { getCpltSearchPageSize } from "./cplt-search-config.mjs";
 
 const centralScope = process.argv.includes("--central");
 const datasetRoot = centralScope ? "funcionarios-central-v1" : "funcionarios-v1";
@@ -131,7 +132,11 @@ compactRows.forEach((row, position) => {
     tokenMap.get(token).push(position);
   }
 });
-const searchPageSize = 10_000;
+// La nómina central supera los dos millones de filas. Sus páginas de 10.000
+// filas superan 6 MB y una búsqueda nominal puede descomprimir varias en el
+// mismo Worker. Se reduce sólo ese índice; las filas originales y la nómina
+// municipal conservan su particionado vigente.
+const searchPageSize = getCpltSearchPageSize({ central: centralScope });
 const searchAssets = [];
 const writeGeneratedAsset = async (filePath, key) => {
   const data = readFileSync(filePath);
