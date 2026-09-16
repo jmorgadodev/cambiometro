@@ -1792,3 +1792,18 @@ redundantes identificados por clave y checksum. Mientras tanto R2 permanece
 bloqueado por el umbral account-wide: el bucket público ocupa
 11.078.005.075 bytes, backups 6.359.832.609 bytes y el total combinado
 17.437.837.684 bytes frente al límite operativo de 10 GB.
+
+### Verificación integral de producción — 16-09-2026
+
+La primera pasada del verificador de producción (`verify-prod-double`) terminó
+con 134 verificaciones aprobadas y cero fallos. Se comprobaron las rutas y
+conteos de Home, fichas, remuneraciones, municipalidades, votaciones, gastos,
+transferencias, cruces, InfoLobby, movimientos, fuentes, calidad y donaciones.
+También se verificó que el backend público siga siendo R2 y que las lecturas
+masivas no dependan de D1.
+
+El build de Pages asociado al commit `8a4fc9956bb327a19e31ce9572d5fdbe0e15dfb6`
+terminó correctamente en modo `ui-only`. No ejecutó ETL, no escribió en R2 ni
+publicó a producción; los pasos de preview y despliegue quedaron omitidos por
+la política de confirmación. Por ello esta evidencia valida la integridad del
+build, pero no debe confundirse con un despliegue productivo nuevo.
