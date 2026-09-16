@@ -90,10 +90,11 @@ function dbUnavailable() {
   return failure("DATABASE_UNAVAILABLE", "D1 no esta disponible.", 503, undefined);
 }
 
-const sourceComponentDefinitions: Record<string, Record<string, { sourceId: string; label: string; includedInRecordCount: boolean }>> = {
+const sourceComponentDefinitions: Record<string, Record<string, { sourceId: string; label: string; includedInRecordCount: boolean; variant?: string }>> = {
   camara: {
-    asistencia: { sourceId: "camara", label: "Asistencia", includedInRecordCount: true },
-    votaciones: { sourceId: "camara", label: "Votaciones", includedInRecordCount: true },
+    asistencia: { sourceId: "camara", variant: "asistencia_camara", label: "Asistencia", includedInRecordCount: true },
+    votaciones: { sourceId: "camara", variant: "votaciones_camara", label: "Votaciones", includedInRecordCount: true },
+    autoridades: { sourceId: "camara", variant: "congreso_opendata", label: "Autoridades vigentes", includedInRecordCount: true },
     gastos: { sourceId: "gastos_camara", label: "Gastos operacionales", includedInRecordCount: false },
   },
   senado: {
@@ -102,13 +103,20 @@ const sourceComponentDefinitions: Record<string, Record<string, { sourceId: stri
   },
 };
 
-function publicSourceComponents(sourceId: string, state: JsonRecord) {
+function publicSourceComponents(sourceId: string, state: JsonRecord, lakePartitionsBySource: Map<string, JsonRecord[]>) {
   const definitions = sourceComponentDefinitions[sourceId];
   const rawComponents = state.components;
   if (!definitions || !rawComponents || typeof rawComponents !== "object" || Array.isArray(rawComponents)) return undefined;
   const components = rawComponents as JsonRecord;
   return Object.entries(definitions).map(([id, definition]) => {
-    const count = Number(components[id] ?? 0);
+    const publishedPartitions = lakePartitionsBySource.get(definition.sourceId) ?? [];
+    const matchingPartitions = definition.variant
+      ? publishedPartitions.filter((partition) => String(partition.variant ?? "") === definition.variant)
+      : publishedPartitions;
+    const publishedCount = matchingPartitions.length > 0
+      ? matchingPartitions.reduce((total, partition) => total + Number(partition.recordCount ?? 0), 0)
+      : null;
+    const count = publishedCount ?? Number(components[id] ?? 0);
     return {
       id,
       sourceId: definition.sourceId,
@@ -2011,7 +2019,7 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
     const stateStatus = hasPublishedLake
       ? String(lakeSource.status ?? "partial")
       : String(state.status ?? source.status ?? "unavailable");
-    const components = publicSourceComponents(id, state);
+    const components = publicSourceComponents(id, state, lakePartitionsBySource);
     return {
       ...source,
       id,

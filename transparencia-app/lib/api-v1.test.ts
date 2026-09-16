@@ -877,6 +877,7 @@ describe("API canónica v1", () => {
     expect(payload.data[0].components).toEqual([
       { id: "asistencia", sourceId: "camara", label: "Asistencia", recordCount: 120, includedInRecordCount: true },
       { id: "votaciones", sourceId: "camara", label: "Votaciones", recordCount: 30, includedInRecordCount: true },
+      { id: "autoridades", sourceId: "camara", label: "Autoridades vigentes", recordCount: 0, includedInRecordCount: true },
       { id: "gastos", sourceId: "gastos_camara", label: "Gastos operacionales", recordCount: 40, includedInRecordCount: false },
     ]);
   });
@@ -902,6 +903,44 @@ describe("API canónica v1", () => {
     expect(senado.components).toEqual([
       { id: "votaciones", sourceId: "votaciones_senado", label: "Votaciones", recordCount: 205, includedInRecordCount: false },
       { id: "gastos", sourceId: "gastos_senado", label: "Gastos operacionales", recordCount: 6517, includedInRecordCount: false },
+    ]);
+  });
+
+  it("deriva los componentes de Cámara desde las particiones R2 vigentes", async () => {
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/sources-v1/source-inventory.json") {
+          return { json: async <T>() => ({ sources: [{ id: "camara", label: "Cámara" }] }) as T };
+        }
+        if (key === "projections/sources-v1/source-health.json") {
+          return { json: async <T>() => ({ sources: { camara: { recordCount: 9, status: "partial", components: { asistencia: 99, votaciones: 88, gastos: 77 } } } }) as T };
+        }
+        if (key === "catalog/v1/manifest.json") {
+          return { json: async <T>() => ({
+            sources: [{ id: "camara", recordCount: 9, status: "partial" }],
+            partitions: [
+              { sourceId: "camara", variant: "asistencia_camara", recordCount: 2 },
+              { sourceId: "camara", variant: "votaciones_camara", recordCount: 3 },
+              { sourceId: "camara", variant: "congreso_opendata", recordCount: 4 },
+              { sourceId: "gastos_camara", recordCount: 5 },
+            ],
+          }) as T };
+        }
+        return null;
+      },
+    };
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/sources"), { PUBLIC_DATA } as never);
+    const payload = await response.json();
+    const camara = payload.data.find((source: { id: string }) => source.id === "camara");
+
+    expect(response.status).toBe(200);
+    expect(camara.recordCount).toBe(9);
+    expect(camara.components).toEqual([
+      { id: "asistencia", sourceId: "camara", label: "Asistencia", recordCount: 2, includedInRecordCount: true },
+      { id: "votaciones", sourceId: "camara", label: "Votaciones", recordCount: 3, includedInRecordCount: true },
+      { id: "autoridades", sourceId: "camara", label: "Autoridades vigentes", recordCount: 4, includedInRecordCount: true },
+      { id: "gastos", sourceId: "gastos_camara", label: "Gastos operacionales", recordCount: 5, includedInRecordCount: false },
     ]);
   });
 
