@@ -51,4 +51,12 @@ describe("interfaz unificada de remuneraciones", () => {
     expect(explorer).toContain("searchTransparencyActiva({ query: cleanQuery, organism, role, apiOrigin: publicApiOrigin })");
     expect(explorer).not.toContain("if (!isLocalStaticPreview && (source === \"all\" || transparencySourceSelected))");
   });
+
+  it("no muestra la evolución mensual ni una tabla de cortes que no tiene comparaciones completas", () => {
+    const explorer = readFileSync(join(projectRoot, "components", "remuneraciones", "RemuneracionesUnifiedExplorer.tsx"), "utf8");
+
+    expect(explorer).not.toContain("TransparencyActivaSummary");
+    expect(explorer).not.toContain('href="#historial-transparencia"');
+    expect(explorer).not.toContain("Historial mensual");
+  });
 });
