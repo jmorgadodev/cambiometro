@@ -22,6 +22,7 @@
 - [x] Reparar/publicar sólo la variante R2 `votaciones_camara`; PR #495 fusionado y Worker `d2f82268-b1af-4481-a67b-d1f8953f0fc6` promovido. Alias validado en producción desde R2, sin D1.
 - [x] Reconstruir las 7 particiones históricas faltantes de Cámara en R2; manifiestos y registros verificados por checksum, alias y fuente canónica completos en producción.
 - [x] Verificar las 2 particiones históricas de Senado en R2 (2025-08: 121; 2026-02: 7) contra sus manifiestos y registros publicados, sin reconstruir ni duplicar artefactos.
+- [x] Auditar la retención de R2 en modo lectura (2026-09-16): 0 snapshots expirados y 0 bytes candidatos; no se ejecutaron `PUT` ni `DELETE`.
 
 ## Cuando Analytics confirme el siguiente reset de D1
 
