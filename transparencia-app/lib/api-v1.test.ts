@@ -384,6 +384,56 @@ describe("API canónica v1", () => {
     });
   });
 
+  it("incluye en la búsqueda de la Home coincidencias centrales y municipales", async () => {
+    const files: Record<string, unknown> = {
+      "projections/entities-v1/entities-routes.json": [],
+      "projections/funcionarios-v1/manifest.json": {
+        generatedAt: "2026-09-15T00:00:00.000Z",
+        version: "municipal-test",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-v1/versions/municipal-test/search_index.json" },
+      },
+      "projections/funcionarios-central-v1/manifest.json": {
+        generatedAt: "2026-09-15T00:00:00.000Z",
+        version: "central-test",
+        assets: [],
+        searchIndex: { key: "projections/funcionarios-central-v1/versions/central-test/search_index.json" },
+      },
+      "projections/funcionarios-v1/versions/municipal-test/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1,
+        pageSize: 10,
+        pages: [{ page: 1, key: "projections/funcionarios-v1/versions/municipal-test/search_index/p-0001.json", count: 1 }],
+        shards: { to: "projections/funcionarios-v1/versions/municipal-test/search_index/to.json" },
+      },
+      "projections/funcionarios-central-v1/versions/central-test/search_index.json": {
+        schemaVersion: 1,
+        totalRows: 1,
+        pageSize: 10,
+        pages: [{ page: 1, key: "projections/funcionarios-central-v1/versions/central-test/search_index/p-0001.json", count: 1 }],
+        shards: { to: "projections/funcionarios-central-v1/versions/central-test/search_index/to.json" },
+      },
+      "projections/funcionarios-v1/versions/municipal-test/search_index/to.json": [["torrealba", [0]]],
+      "projections/funcionarios-central-v1/versions/central-test/search_index/to.json": [["torrealba", [0]]],
+      "projections/funcionarios-v1/versions/municipal-test/search_index/p-0001.json": [
+        { id: "municipal-torrealba", n: "Alejandro Ríos Torrealba", c: "Profesional", o: "Municipalidad de Talca", t: "Planta", e: "Profesional", b: 1000000 },
+      ],
+      "projections/funcionarios-central-v1/versions/central-test/search_index/p-0001.json": [
+        { id: "central-torrealba", n: "Río Sebastián Torrealba del Río", c: "Coordinador de Asesores", o: "Presidencia", t: "Planta", e: "Directivo", b: 9200000 },
+      ],
+    };
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse para la búsqueda nacional"); } },
+      PUBLIC_DATA: { get: async (key: string) => files[key] === undefined ? null : { json: async <T>() => files[key] as T } },
+    } as never;
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/search?q=Torrealba"), env);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data.funcionarios.map((item: { id: string }) => item.id).sort()).toEqual(["central-torrealba", "municipal-torrealba"]);
+  });
+
   it("conserva la búsqueda de funcionarios si el catálogo de entidades no está disponible", async () => {
     const files: Record<string, unknown> = {
       "projections/funcionarios-v1/manifest.json": {

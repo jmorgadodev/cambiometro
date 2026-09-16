@@ -1616,7 +1616,10 @@ async function searchFuncionariosFromR2(raw: string, env: Env) {
   requestUrl.searchParams.set("limit", "8");
   requestUrl.searchParams.set("include_zero", "true");
   try {
-    const response = await listFuncionariosFromR2(requestUrl, env);
+    // La búsqueda de la Home debe consultar las dos nóminas publicadas. El
+    // endpoint combinado ya pagina cada índice por separado y los une sin
+    // cargar el universo completo ni recurrir a D1.
+    const response = await listAllFuncionariosFromR2(requestUrl, env);
     if (!response || response.status >= 400) return [];
     const payload = await response.json() as JsonRecord;
     const rows = Array.isArray(payload.data) ? payload.data : [];
