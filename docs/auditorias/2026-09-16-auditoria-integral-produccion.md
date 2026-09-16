@@ -1807,3 +1807,17 @@ terminó correctamente en modo `ui-only`. No ejecutó ETL, no escribió en R2 ni
 publicó a producción; los pasos de preview y despliegue quedaron omitidos por
 la política de confirmación. Por ello esta evidencia valida la integridad del
 build, pero no debe confundirse con un despliegue productivo nuevo.
+
+### Auditoría de retención ejecutada — 16-09-2026
+
+La herramienta de retención se ejecutó contra `transparencia-public-data` y
+`cambiometro-backups` en modo estrictamente de lectura. Encontró 23.152 objetos
+y 11.078.005.075 bytes en el bucket público, y 3.206 objetos y 6.359.832.609
+bytes en respaldos. Con una retención de ocho semanas y fecha de corte
+16-09-2026 no hay snapshots expirados: cero objetos y cero bytes son candidatos
+para la limpieza automática. No se ejecutaron `PUT` ni `DELETE`.
+
+Esto confirma que la política vigente no libera espacio por sí sola. La
+optimización debe tratar por separado las copias redundantes y los releases
+incompletamente respaldados, con checksum y rollback verificable antes de
+autorizar cualquier eliminación.
