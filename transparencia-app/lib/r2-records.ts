@@ -115,6 +115,7 @@ function indexedRecordMatches(record: EvidenceRecord, params: {
   entityId?: string;
   recordIds?: string[];
   kind?: EvidenceRecord["kind"];
+  period?: string;
   from?: string;
   to?: string;
   query?: string;
@@ -123,6 +124,7 @@ function indexedRecordMatches(record: EvidenceRecord, params: {
   if (params.entityId && !record.subjectEntityIds.includes(params.entityId) && !record.objectEntityIds.includes(params.entityId)) return false;
   if (params.recordIds && !params.recordIds.includes(record.id)) return false;
   if (params.kind && record.kind !== params.kind) return false;
+  if (params.period && !date.startsWith(params.period)) return false;
   if (outsideDateRange(date, params.from, params.to)) return false;
   if (params.query) {
     const haystack = JSON.stringify({ id: record.id, title: record.title, description: record.description, data: record.data }).toLocaleLowerCase("es-CL");
@@ -152,7 +154,7 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
   const missingIndexedRows = Math.max(0, expectedTotal - manifest.totalRows);
   const offset = cursorOffset(params.cursor);
   const limit = Math.min(Math.max(params.limit, 1), 100);
-  const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || params.from || params.to);
+  const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || params.period || params.from || params.to);
   let candidatePages = manifest.pages.map((_, index) => index);
   const query = params.query?.trim();
   let indexedQueryTotal: number | null = null;
@@ -162,7 +164,7 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
     const index = await searchObject.json<Record<string, number[]>>();
     const terms = searchTerms(query);
     if (terms.length > 0) {
-      if (terms.length === 1 && manifest.searchCountIndexKey && !params.entityId && !params.recordIds && !params.kind && !params.from && !params.to) {
+      if (terms.length === 1 && manifest.searchCountIndexKey && !params.entityId && !params.recordIds && !params.kind && !params.period && !params.from && !params.to) {
         const countObject = await bucket.get(manifest.searchCountIndexKey);
         if (countObject) {
           const counts = await countObject.json<Record<string, number>>();
@@ -282,6 +284,7 @@ function matchesIndexedParams(record: EvidenceRecord, params: Parameters<typeof 
   if (params.entityId && !record.subjectEntityIds.includes(params.entityId) && !record.objectEntityIds.includes(params.entityId)) return false;
   if (params.recordIds && !params.recordIds.includes(record.id)) return false;
   if (params.kind && record.kind !== params.kind) return false;
+  if (params.period && !date.startsWith(params.period)) return false;
   if (outsideDateRange(date, params.from, params.to)) return false;
   if (params.query) {
     const haystack = JSON.stringify({ id: record.id, title: record.title, description: record.description, data: record.data }).toLocaleLowerCase("es-CL");
@@ -299,6 +302,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   kind?: EvidenceRecord["kind"];
   from?: string;
   to?: string;
+  period?: string;
   limit: number;
   cursor?: string;
 }) {
@@ -313,6 +317,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
     : Array.isArray(params.variant) ? params.variant : [params.variant];
   const partitions = catalog.partitions.filter((partition) => sourceIds.includes(partition.sourceId)
     && (!variants || variants.includes(partition.variant ?? partition.sourceId))
+    && (!params.period || partition.period === params.period)
     && (!params.from || partition.period >= params.from.slice(0, 7))
     && (!params.to || partition.period <= params.to.slice(0, 7)));
   if (partitions.length === 0) return null;
@@ -320,7 +325,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   const expectedTotal = orderedPartitions.every((partition) => Number.isFinite(Number(partition.recordCount)))
     ? orderedPartitions.reduce((total, partition) => total + Number(partition.recordCount), 0)
     : null;
-  const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || params.from || params.to);
+  const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || params.period || params.from || params.to);
   const limit = Math.min(Math.max(params.limit, 1), 100);
   const offset = cursorOffset(params.cursor);
 

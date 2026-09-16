@@ -1141,16 +1141,18 @@ async function listExpensesFromR2(requestUrl: URL, env: Env): Promise<Response |
   if (subsets.some((subset) => !subset || !Array.isArray(subset.records))) return null;
 
   const query = normalized(requestUrl.searchParams.get("q") ?? requestUrl.searchParams.get("query"));
+  const period = requestUrl.searchParams.get("period")?.trim() ?? requestUrl.searchParams.get("periodo")?.trim() ?? "";
   const from = requestUrl.searchParams.get("from")?.trim() ?? "";
   const to = requestUrl.searchParams.get("to")?.trim() ?? "";
   const entityId = normalized(requestUrl.searchParams.get("entity_id"));
-  if (query.length > 80 || from.length > 32 || to.length > 32 || entityId.length > 160) {
+  if ((period && !/^\d{4}(?:-\d{2})?$/.test(period)) || query.length > 80 || from.length > 32 || to.length > 32 || entityId.length > 160) {
     return failure("INVALID_QUERY", "Parámetros de consulta inválidos.", 400);
   }
   const normalize = (value: unknown) => normalized(value);
   const rows = subsets.flatMap((subset) => subset!.records.map((row) => ({ row, sourceId: subset!.sourceId })));
   const filtered = rows
     .filter(({ row }) => !query || normalize(`${row.id} ${row.nombre} ${row.item} ${row.fuente}`).includes(query))
+    .filter(({ row }) => !period || row.periodo === period)
     .filter(({ row }) => !from || row.fecha >= from)
     .filter(({ row }) => !to || row.fecha <= to)
     .filter(({ row }) => !entityId || normalize(`${row.diputado_id ?? ""} ${row.nombre ?? ""}`).includes(entityId))
@@ -1247,6 +1249,10 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
     return failure("INVALID_QUERY", "La fuente de votaciones de Cámara sólo admite registros de tipo vote.", 400);
   }
   const effectiveKind = requestedKind ?? (isCamaraVoteAlias ? "vote" : undefined);
+  const requestedPeriod = requestUrl.searchParams.get("period")?.trim() ?? requestUrl.searchParams.get("periodo")?.trim() ?? "";
+  if (requestedPeriod && !/^\d{4}(?:-\d{2})?$/.test(requestedPeriod)) {
+    return failure("INVALID_QUERY", "El período debe tener formato AAAA o AAAA-MM.", 400);
+  }
   let rawRows: unknown[] = [];
 
   // The static-site projection is intentionally compact and is not the full
@@ -1261,9 +1267,11 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
       const limit = limitFrom(requestUrl);
       const lake = await readR2EvidenceRecords(env.PUBLIC_DATA, {
         source,
+        variant: isCamaraVoteAlias ? "votaciones_camara" : undefined,
         query: requestUrl.searchParams.get("q")?.trim() ?? requestUrl.searchParams.get("query")?.trim() ?? undefined,
         entityId: requestUrl.searchParams.get("entity_id")?.trim() || undefined,
         kind: effectiveKind as never,
+        period: requestedPeriod || undefined,
         from: requestUrl.searchParams.get("from")?.trim() || undefined,
         to: requestUrl.searchParams.get("to")?.trim() || undefined,
         limit,
@@ -1333,6 +1341,7 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
   const filtered = rows
     .filter((row) => !kind || row.kind === kind)
     .filter((row) => !query || searchable(row).includes(query))
+    .filter((row) => !requestedPeriod || String(row.occurredAt ?? (row.data as JsonRecord)?.periodo ?? (row.data as JsonRecord)?.period ?? "").startsWith(requestedPeriod))
     .filter((row) => !from || String(row.occurredAt ?? "") >= from)
     .filter((row) => !to || String(row.occurredAt ?? "") <= to)
     .filter((row) => !entityId || normalized(JSON.stringify({ subjectEntityIds: row.subjectEntityIds, objectEntityIds: row.objectEntityIds, data: row.data })).includes(entityId))

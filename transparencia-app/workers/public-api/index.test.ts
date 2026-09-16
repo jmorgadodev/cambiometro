@@ -1,7 +1,15 @@
+import { createHash } from "node:crypto";
+import { gzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
-import { listRecordsFromR2 } from "./index";
+import worker, { listRecordsFromR2 } from "./index";
 
 function r2Object(value: unknown) {
+  if (value instanceof ArrayBuffer) {
+    return {
+      json: async <T>() => JSON.parse(new TextDecoder().decode(new Uint8Array(value))) as T,
+      arrayBuffer: async () => value,
+    };
+  }
   const encoded = new TextEncoder().encode(typeof value === "string" ? value : JSON.stringify(value));
   return {
     json: async <T>() => JSON.parse(new TextDecoder().decode(encoded)) as T,
@@ -18,6 +26,15 @@ function fakeBucket(objects: Record<string, unknown>) {
       return Object.prototype.hasOwnProperty.call(objects, key) ? r2Object(objects[key]) : null;
     },
   };
+}
+
+function gzipJsonl(records: unknown[]) {
+  const data = gzipSync(`${records.map((record) => JSON.stringify(record)).join("\n")}\n`);
+  return data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength);
+}
+
+function sha256(data: ArrayBuffer) {
+  return createHash("sha256").update(Buffer.from(data)).digest("hex");
 }
 
 describe("registros públicos R2", () => {
@@ -53,5 +70,63 @@ describe("registros públicos R2", () => {
     expect(payload.data).toHaveLength(1);
     expect(payload.meta.sourceBackend).toBe("r2-lake");
     expect(bucket.requested).not.toContain("projections/static-site-v1/manifest.json");
+  });
+
+  it("respeta period en una consulta pública de gastos de Senado", async () => {
+    const january = gzipJsonl([{ id: "senado-expense-jan", sourceId: "gastos_senado", kind: "expense", occurredAt: "2026-01-15", data: { title: "Enero" } }]);
+    const february = gzipJsonl([{ id: "senado-expense-feb", sourceId: "gastos_senado", kind: "expense", occurredAt: "2026-02-15", data: { title: "Febrero" } }]);
+    const januaryPartition = {
+      sourceId: "gastos_senado", period: "2026-01", recordCount: 1,
+      manifestKey: "partitions/gastos_senado/2026/01/manifest.json", checksumSha256: "jan", releaseTag: "test",
+      manifest: { projectionChecksumSha256: "projection", artifacts: [{ key: "partitions/gastos_senado/2026/01/records.jsonl.gz", checksumSha256: sha256(january), releaseAssetName: "jan" }] },
+    };
+    const februaryPartition = {
+      sourceId: "gastos_senado", period: "2026-02", recordCount: 1,
+      manifestKey: "partitions/gastos_senado/2026/02/manifest.json", checksumSha256: "feb", releaseTag: "test",
+      manifest: { projectionChecksumSha256: "projection", artifacts: [{ key: "partitions/gastos_senado/2026/02/records.jsonl.gz", checksumSha256: sha256(february), releaseAssetName: "feb" }] },
+    };
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": { generatedAt: "2026-09-12T00:00:00Z", partitions: [januaryPartition, februaryPartition] },
+      [januaryPartition.manifestKey]: januaryPartition.manifest,
+      [februaryPartition.manifestKey]: februaryPartition.manifest,
+      "partitions/gastos_senado/2026/01/records.jsonl.gz": january,
+      "partitions/gastos_senado/2026/02/records.jsonl.gz": february,
+    });
+
+    const response = await listRecordsFromR2(
+      new URL("https://example.test/api/v1/records?source=gastos_senado&kind=expense&period=2026-01&limit=10"),
+      { PUBLIC_DATA: bucket as never },
+    );
+    const payload = await response!.json() as { data: Array<{ id: string }>; meta: Record<string, unknown> };
+
+    expect(response!.status).toBe(200);
+    expect(payload.meta.total).toBe(1);
+    expect(payload.data.map((row) => row.id)).toEqual(["senado-expense-jan"]);
+  });
+
+  it("respeta period en la proyección compacta de gastos", async () => {
+    const bucket = fakeBucket({
+      "projections/static-site-v1/manifest.json": {
+        files: [{ path: "data/lake-subsets/gastos-senado.subset.json", key: "subsets/gastos-senado.json" }],
+      },
+      "subsets/gastos-senado.json": {
+        sourceId: "gastos_senado",
+        generatedAt: "2026-09-12T00:00:00Z",
+        records: [
+          { id: "expense-jan", fecha: "2026-01-15", periodo: "2026-01", nombre: "Senador Enero", item: "ITEM", monto_clp: 1, url: "https://example.test/jan", fuente: "Senado" },
+          { id: "expense-feb", fecha: "2026-02-15", periodo: "2026-02", nombre: "Senador Febrero", item: "ITEM", monto_clp: 2, url: "https://example.test/feb", fuente: "Senado" },
+        ],
+      },
+    });
+
+    const response = await worker.fetch(
+      new Request("https://example.test/api/v1/records?source=gastos_senado&kind=expense&period=2026-01&limit=10"),
+      { PUBLIC_DATA: bucket as never } as never,
+    );
+    const payload = await response.json() as { data: Array<{ id: string }>; meta: Record<string, unknown> };
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.total).toBe(1);
+    expect(payload.data.map((row) => row.id)).toEqual(["expense-jan"]);
   });
 });
