@@ -1450,3 +1450,20 @@ La auditoría de fuentes repetida a las 11:49 UTC-3 conserva el diagnóstico:
 alcance y 0 diferencias sin explicación. El inventario R2 conserva
 9.179.838.007 bytes de 10.000.000.000 (91,798%); no se realizaron borrados ni
 se incorporaron releases.
+
+La PR #544 fue integrada en `main` mediante el merge commit
+`a596d4764539ef9cf790fc9283339807ae2def31`. El candidato Worker
+`6dbfb869-37c4-4ea9-8d1f-1fe25fb09910` fue promovido al 100% después de pasar
+validación, typecheck, tamaño y health check productivo. El smoke posterior
+confirmó Movimientos 46/46, Lucy 7, Torrealba 1.547 e Independencia 8.161,
+con paginación y origen R2.
+
+La revisión local de espacio identificó seis carpetas `cambiometro*`. La
+estructura vigente queda en `cambiometro-cplt-central-scope` (maestro),
+`cambiometro-audit` y `cambiometro-editorial`. Las ramas auxiliares
+`cambiometro-remuneraciones-api-20260913` (3,51 GB) y
+`cambiometro-promote-ui` (0,91 GB) conservan código, pero sus artefactos
+regenerables (`.next`, `out`, `node_modules`) fueron identificados para una
+limpieza separada; `cambiometro-public` (2,17 GB) no se toca porque contiene
+datos/release que todavía requieren comparación. No se borraron repositorios
+ni datos fuente durante esta revisión.
