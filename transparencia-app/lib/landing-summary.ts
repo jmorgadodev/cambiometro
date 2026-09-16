@@ -45,6 +45,10 @@ type MovementsPayload = {
   last_event_date?: string | null;
 };
 
+export function isMovementsScopePublic(status: unknown): boolean {
+  return ["validated", "validated_reference", "validated_reconciled"].includes(String(status));
+}
+
 type GlobalKpis = {
   registros_canonicos?: number;
   entidades?: number;
