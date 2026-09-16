@@ -5,7 +5,7 @@ import { useEffect, useId, useRef, useState } from "react";
 import { resolveHomeSearchTarget, resolveSearchResultUrl } from "@/lib/home-search-routing";
 
 interface SearchResult {
-  type: "politico" | "persona" | "municipalidad" | "funcionario" | "entidad";
+  type: "politico" | "persona" | "municipalidad" | "funcionario" | "remuneracion" | "entidad";
   id: string;
   nombre: string;
   url: string;
@@ -21,6 +21,7 @@ interface SearchPayload {
     autoridades: SearchResult[];
     municipalidades: SearchResult[];
     funcionarios: SearchResult[];
+    remuneraciones?: SearchResult[];
     entidades: SearchResult[];
   };
 }
@@ -30,6 +31,7 @@ const TYPE_LABELS: Record<SearchResult["type"], string> = {
   persona: "Autoridad",
   municipalidad: "Municipalidad",
   funcionario: "Funcionario/a",
+  remuneracion: "Remuneración",
   entidad: "Entidad jurídica",
 };
 
@@ -60,9 +62,13 @@ export default function HeaderSearch() {
 
         const payload = (await response.json()) as SearchPayload;
         setResults([
+          // Los pagos publicados deben aparecer antes del resto de las
+          // coincidencias: si se omiten, una persona presente en 38 bis sólo
+          // parece inexistente o queda escondida entre funcionarios.
+          ...(payload.data.remuneraciones ?? []),
+          ...payload.data.funcionarios,
           ...payload.data.autoridades,
           ...payload.data.municipalidades,
-          ...payload.data.funcionarios,
           ...(payload.data.entidades ?? []),
         ].slice(0, 9));
       } catch (requestError) {
