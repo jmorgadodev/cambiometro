@@ -1335,9 +1335,10 @@ resuelve el incidente presentado en Movimientos; no se mezclará ese release
 con cambios de administraciones anteriores.
 
 Los refrescos automáticos de Pages posteriores al merge (`35080810187` y
-`35080810184`) siguen su ciclo de verificación. Su demora no invalida la
-versión ya publicada, pero se revisará su resultado antes de declarar cerrado
-el ciclo de despliegue completo.
+`35080810184`) terminaron con éxito en sus verificaciones. Sus pasos de
+publicación productiva quedaron omitidos por los guards de promoción, por lo
+que se conservó deliberadamente el deployment válido anterior; no hubo
+reemplazo ni regresión del release público.
 
 ### Ruta de auditoría posterior al incidente — 16-09-2026
 
