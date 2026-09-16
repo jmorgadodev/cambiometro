@@ -20,6 +20,29 @@ describe("parser de personal CPLT", () => {
     });
   });
 
+  it("descarta períodos posteriores al corte solicitado y años imposibles", () => {
+    const header = parseCpltHeader("organismo_nombre;anyo;Mes;Nombres;Paterno;Materno;Tipo cargo;remuneracionbruta_mensual");
+    const futureMonth = parseCpltRecord({
+      line: "Hospital;2026;Octubre;ANA;PEREZ;SOTO;PROFESIONAL;1000000",
+      header,
+      tipo: "Planta",
+      organismoId: "org-hospital",
+      sourceUrl: "https://oficial.test/planta",
+      maxPeriod: "2026-09",
+    });
+    const impossibleYear = parseCpltRecord({
+      line: "Hospital;2121;Enero;ANA;PEREZ;SOTO;PROFESIONAL;1000000",
+      header,
+      tipo: "Planta",
+      organismoId: "org-hospital",
+      sourceUrl: "https://oficial.test/planta",
+      maxPeriod: "2026-09",
+    });
+
+    expect(futureMonth).toBeNull();
+    expect(impossibleYear).toBeNull();
+  });
+
   it("interpreta el esquema reducido de Honorarios sin exigir 40 columnas", () => {
     const header = parseCpltHeader("organismo_nombre;anyo;Mes;Nombres;Paterno;Materno;descripcion_funcion;tipo_calificacionp;remuneracionbruta;remuliquida_mensual;fecha_ingreso;fecha_termino;observaciones;enlace");
     const record = parseCpltRecord({
