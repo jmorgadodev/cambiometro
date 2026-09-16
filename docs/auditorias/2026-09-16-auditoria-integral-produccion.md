@@ -1893,14 +1893,17 @@ coherente con que las búsquedas públicas usen R2 y con el healthcheck producti
 que declara `publicDataBackend: r2` y `publicD1Reads: false`.
 
 En el mismo período, `impulsacv-db` registra 98 consultas, aproximadamente
-6.000 filas leídas y 56 filas escritas. La actividad es acotada y no prueba por
-sí sola que exista una lectura masiva; debe atribuirse al servicio que todavía
-usa esa base antes de considerar cerrado el diagnóstico global de D1. A nivel
-de cuenta el panel informa 5,19k filas leídas, 57 escritas y $0,00 de uso
+6.000 filas leídas y 56 filas escritas. La vista de metadatos identifica
+consultas sobre `payment_events`, `users`, `api_usage`, `free_generations` y
+eventos de seguridad/suscripción. Por tanto, esa actividad corresponde a otro
+servicio de ImpulsaCV y no al Cambiómetro ni a sus datasets públicos; no debe
+desconectarse ni mezclarse con la auditoría de remuneraciones. A nivel de
+cuenta el panel informa 5,19k filas leídas, 57 escritas y $0,00 de uso
 facturable para el período actual.
 
 Esta verificación no ejecutó SQL, ETL, `PUT`, `DELETE` ni cambios de
 configuración. El resultado permite cerrar la hipótesis de que
-`transparencia-db` esté provocando el consumo actual, pero deja como pendiente
-la atribución de las 98 consultas de `impulsacv-db` y la medición histórica de
-la cuenta con el token de auditoría separado.
+`transparencia-db` esté provocando el consumo actual y también atribuye las
+consultas de `impulsacv-db` a la aplicación externa correspondiente. Sólo queda
+mantener la medición histórica de la cuenta con el token de auditoría separado;
+no existe evidencia para hacer cambios sobre esas bases desde este proyecto.
