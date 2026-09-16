@@ -1117,6 +1117,14 @@ Validación: el candidato del Worker
 `ca06c7b8-8cd4-45fe-9df7-29923347ef0c` encontró a Río Sebastián Torrealba del
 como registro central de Presidencia y a Lucy Depablos en sus registros
 municipales y centrales. El Worker se promovió mediante el run `35072282152`.
-La publicación Pages UI pasó preview completo en el run `35072437560`; queda
-pendiente registrar el deployment productivo de ese mismo build cuando la
-tubería de Pages finalice la promoción.
+La publicación Pages UI pasó preview completo en el run `35072437560` y se
+promovió ese mismo build en el run `35073669119`. Deployment productivo:
+`8c9cfa59-598e-4ac6-b36e-f1d1c00d7ad4`, con rollback
+`npm run pages:rollback -- 8c9cfa59-598e-4ac6-b36e-f1d1c00d7ad4`.
+
+La verificación posterior pasó `verify:prod:remuneraciones` y el verificador
+integral `134/134`, versión productiva `v1.0-a3be8d25`. Se comprobaron además
+las búsquedas de Lucy Depablos (7 filas: 3 municipales y 4 centrales), Sofía
+Pumpin, María Victoria Raimann Pumpin e Independencia (9.493 filas). Esto
+confirma que la ruta pública consulta ambos alcances; no equivale a afirmar
+que los releases sean cobertura histórica total.
