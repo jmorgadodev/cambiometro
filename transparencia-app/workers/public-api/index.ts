@@ -579,6 +579,17 @@ function canonicalOrgType(value: unknown) {
   return compactNormalized(value).replace("gobiernoregional", "gore");
 }
 
+function isPublicCpltPeriod(period: unknown, generatedAt: unknown) {
+  const value = String(period ?? "").trim();
+  if (!value || value === "Todos") return true;
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) return false;
+  const year = Number(value.slice(0, 4));
+  const releasePeriod = String(generatedAt ?? "").slice(0, 7);
+  return year >= 2024 && year <= 2100
+    && /^\d{4}-(0[1-9]|1[0-2])$/.test(releasePeriod)
+    && value <= releasePeriod;
+}
+
 function officialSalary(row: JsonRecord) {
   const value = Number(row.remuneracion_bruta_mensual ?? 0);
   return Number.isFinite(value) ? value : 0;
@@ -820,6 +831,17 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
   const projectionRoot = `projections/${datasetRoot}`;
   const manifest = await r2Json<CpltManifest>(env.PUBLIC_DATA, `${projectionRoot}/manifest.json`);
   if (!manifest?.version || !Array.isArray(manifest.assets)) return failure("DATASET_UNAVAILABLE", "La nómina oficial no está publicada.", 503);
+
+  const requestedPeriod = requestUrl.searchParams.get("periodo") ?? requestUrl.searchParams.get("fuente_periodo");
+  if (requestedPeriod && !isPublicCpltPeriod(requestedPeriod, manifest.generatedAt)) {
+    return officialsResponse(
+      [],
+      requestUrl,
+      manifest.generatedAt,
+      datasetRoot === "funcionarios-v1" ? "r2-search" : "r2-search-central",
+      organism,
+    );
+  }
 
   if (!organism || organism === "Todos") {
     const indexKey = manifest.searchIndex?.key ?? `${projectionRoot}/versions/${manifest.version}/search_index.json`;

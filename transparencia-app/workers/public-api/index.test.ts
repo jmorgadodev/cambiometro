@@ -265,4 +265,28 @@ describe("registros públicos R2", () => {
     expect(response.status).toBe(200);
     expect(payload.data.map((row) => row.id)).toEqual(["municipal-row"]);
   });
+
+  it("no expone períodos CPLT posteriores al corte del manifiesto", async () => {
+    const version = "central-period-guard";
+    const manifest = {
+      version,
+      generatedAt: "2026-09-14T03:51:42.634Z",
+      assets: [],
+      searchIndex: { key: `projections/funcionarios-central-v1/versions/${version}/search_index.json` },
+    };
+    const bucket = fakeBucket({
+      "projections/funcionarios-central-v1/manifest.json": manifest,
+    });
+
+    const response = await worker.fetch(
+      new Request("https://example.test/api/funcionarios?scope=central&periodo=2121-01&limit=20"),
+      { PUBLIC_DATA: bucket as never } as never,
+    );
+    const payload = await response.json() as { data: unknown[]; meta: Record<string, unknown> };
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toEqual([]);
+    expect(payload.meta.total).toBe(0);
+    expect(bucket.requested).toEqual(["projections/funcionarios-central-v1/manifest.json"]);
+  });
 });
