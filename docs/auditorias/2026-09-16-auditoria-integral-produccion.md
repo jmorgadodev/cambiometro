@@ -1317,3 +1317,55 @@ corren Build/E2E, Quality, Security y calendario. Esto corrige un desfase real:
 `main` todavía exigía 79 movimientos y por eso su refresco automático falló
 con el release reconciliado de 46. No se hizo merge ni promoción automática;
 la promoción queda condicionada a que todos los checks terminen verdes.
+
+### Cierre productivo de Movimientos — 16-09-2026
+
+La PR #539 quedó integrada en `main` mediante el merge commit
+`65ab477e5144cda5227af60ccfb60c9ea4c7fcde`. La validación directa contra
+producción confirmó que `/movimientos/` responde 200 y mantiene el release
+`kast-2026-succession-reconciled-2026-09-14`, con 46 salidas, corte público
+14-09-2026 y checksum
+`9a884d9bef8627718afed406d530591acec6a95c50dd27956c744b56766f1995`.
+
+También quedaron comprobadas las exclusiones de Carolina Arredondo, Eduardo
+Vergara, Ignacia Fernández, Daniela Dresdner, José Andrés Herrera y Patricio
+Kuhn, además del cargo correcto de Rafael Araos como subsecretario. Esto
+resuelve el incidente presentado en Movimientos; no se mezclará ese release
+con cambios de administraciones anteriores.
+
+Los refrescos automáticos de Pages posteriores al merge (`35080810187` y
+`35080810184`) siguen su ciclo de verificación. Su demora no invalida la
+versión ya publicada, pero se revisará su resultado antes de declarar cerrado
+el ciclo de despliegue completo.
+
+### Ruta de auditoría posterior al incidente — 16-09-2026
+
+El incidente se tratará como una señal para auditar por dominio, no como
+evidencia de que todos los datos estén incorrectos. El orden operativo queda:
+
+1. **Movimientos bloqueados:** conservar el release de 46, comparar cada fila
+   con su decreto o evidencia oficial y no permitir que un fallo externo lo
+   reemplace por cero filas.
+2. **Remuneraciones:** reconciliar por fuente, período y organismo; verificar
+   primero que el universo municipal y central no se reduzca al publicar un
+   snapshot. Separar filas publicadas, consultables, históricas, faltantes y
+   duplicadas aparentes.
+3. **Cámara y Senado:** auditar por componente —remuneraciones, apoyo,
+   asesorías, gastos y votaciones— y explicar las diferencias local/producción
+   por fecha o alcance antes de cambiar cualquier manifiesto.
+4. **Calidad y consistencia:** muestrear nombres, cargos, períodos, montos,
+   identificadores y procedencia; preservar siempre el valor original y marcar
+   la normalización como derivada.
+5. **Historiales desde R2:** probar una persona y un organismo, luego ampliar
+   por lotes sólo si conteo, checksum y alcance coinciden. D1 queda fuera de
+   búsquedas e historiales masivos.
+6. **R2 y espacio:** medir cada release antes de publicarlo, mantener rollback
+   y bloquear el crecimiento al 95%; no eliminar históricos sin identificar
+   exactamente el release y su recuperación.
+7. **Promoción:** cada bloque pasa por pruebas, preview, smoke móvil/escritorio,
+   verificación productiva y registro de rollback independiente.
+
+No se modifican rutas, menú, municipalidades ni el contenido editorial como
+parte de esta auditoría. El siguiente informe deberá indicar por dominio qué
+está confirmado, qué está pendiente y qué no está publicado; nunca presentar
+la aprobación de Movimientos como cobertura total del sitio.
