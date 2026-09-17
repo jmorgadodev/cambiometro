@@ -38,6 +38,21 @@ function sha256(data: ArrayBuffer) {
 }
 
 describe("registros públicos R2", () => {
+  it("consulta un organismo mediante posiciones paginadas, sin descargar su archivo completo", async () => {
+    const root="projections/funcionarios-central-v1";
+    const bucket=fakeBucket({
+      [`${root}/manifest.json`]:{version:"test",generatedAt:"2026-09-14T00:00:00Z",assets:[{key:`${root}/versions/test/org-ine.json`}],searchIndex:{key:`${root}/index.json`}},
+      [`${root}/index.json`]:{totalRows:4,pageSize:4,pages:[{page:1,key:`${root}/page.json`,count:4}],publicationExclusions:{key:`${root}/excluded.json`,count:1},filters:{"organismo:org-ine":{key:`${root}/organism.json`,count:3}}},
+      [`${root}/organism.json`]:[0,2,3], [`${root}/excluded.json`]:[2],
+      [`${root}/page.json`]:[{id:"ine-1",oid:"org-ine",n:"Persona A",p:"2026-07",b:100000},{id:"other",oid:"org-other",n:"Persona B",p:"2026-07",b:100000},{id:"future",oid:"org-ine",n:"Persona C",p:"2029-01",b:100000},{id:"ine-2",oid:"org-ine",n:"Persona D",p:"2026-07",b:100000}],
+    });
+    const response=await worker.fetch(new Request("https://example.test/api/funcionarios?scope=central&organismo=org-ine&include_zero=true&limit=1&page=2"),{PUBLIC_DATA:bucket as never} as never);
+    const payload=await response.json() as {data:Array<{id:string}>;meta:{total:number}};
+    expect(response.status).toBe(200);
+    expect(payload.meta.total).toBe(2);
+    expect(payload.data.map(row=>row.id)).toEqual(["ine-2"]);
+    expect(bucket.requested).not.toContain(`${root}/versions/test/org-ine.json`);
+  });
   it("consulta páginas de remuneraciones comprimidas sin cambiar registros ni paginación", async () => {
     const root = "projections/funcionarios-central-v1";
     const raw = [{id:"salary-original",n:"Sofía Pumpin",p:"2026-07",b:5674763}];

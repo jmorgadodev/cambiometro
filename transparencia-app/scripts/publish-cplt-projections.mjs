@@ -2,6 +2,8 @@ import { createHash } from "node:crypto";
 import { copyFileSync, existsSync, mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
+import { gzipSync } from "node:zlib";
+import { appendOrganismPositions } from "../lib/cplt-organism-index.mjs";
 import { buildCpltCoverageIndex } from "./cplt-coverage-index.mjs";
 import { buildCpltTransparencySummary } from "./cplt-transparency-summary.mjs";
 import { getCpltSearchPageSize } from "./cplt-search-config.mjs";
@@ -155,20 +157,24 @@ compactRows.forEach((row, position) => {
 // municipal conservan su particionado vigente.
 const searchPageSize = getCpltSearchPageSize({ central: centralScope });
 const searchAssets = [];
-const writeGeneratedAsset = async (filePath, key) => {
+const writeGeneratedAsset = async (filePath, key, properties = {}) => {
   const data = readFileSync(filePath);
   const checksumSha256 = createHash("sha256").update(data).digest("hex");
-  const metadata = { key, checksumSha256, size: data.byteLength, sourcePath: filePath };
+  const metadata = { key, checksumSha256, size: data.byteLength, sourcePath: filePath, ...properties };
   searchAssets.push(metadata);
   return metadata;
 };
 const pages = [];
+const organismPositions = new Map();
 for (let offset = 0; offset < compactRows.length; offset += searchPageSize) {
   const page = Math.floor(offset / searchPageSize) + 1;
-  const filePath = join(searchIndexRoot, `p-${String(page).padStart(4, "0")}.json`);
-  writeFileSync(filePath, `${JSON.stringify(compactRows.slice(offset, offset + searchPageSize))}\n`);
-  pages.push({ page, count: Math.min(searchPageSize, compactRows.length - offset), key: `projections/${datasetRoot}/versions/${version}/search_index/p-${String(page).padStart(4, "0")}.json` });
-  await writeGeneratedAsset(filePath, pages.at(-1).key);
+  const rows = compactRows.slice(offset, offset + searchPageSize);
+  const raw = Buffer.from(`${JSON.stringify(rows)}\n`);
+  const filePath = join(searchIndexRoot, `p-${String(page).padStart(4, "0")}.json.gz`);
+  writeFileSync(filePath, gzipSync(raw, { level: 9 }));
+  pages.push({ page, count: rows.length, key: `projections/${datasetRoot}/versions/${version}/search_index/p-${String(page).padStart(4, "0")}.json.gz` });
+  appendOrganismPositions(organismPositions, pages.at(-1), rows, searchPageSize);
+  await writeGeneratedAsset(filePath, pages.at(-1).key, { encoding: "gzip", originalChecksumSha256: createHash("sha256").update(raw).digest("hex"), originalSize: raw.length });
 }
 const shards = {};
 const searchShardReferenceLimit = 250_000;
@@ -260,6 +266,14 @@ for (const definition of filterDefinitions) {
   writeFileSync(filePath, `${JSON.stringify(positions)}\n`);
   await writeGeneratedAsset(filePath, key);
   filters[definition.key] = { key, count: positions.length };
+}
+for (const [id, positions] of organismPositions) {
+  const fileName = `organism-${id}.json.gz`;
+  const filePath = join(searchIndexRoot, fileName);
+  const key = `projections/${datasetRoot}/versions/${version}/search_index/${fileName}`;
+  writeFileSync(filePath, gzipSync(Buffer.from(`${JSON.stringify(positions)}\n`), { level: 9 }));
+  await writeGeneratedAsset(filePath, key, { encoding: "gzip" });
+  filters[`organismo:${id}`] = { key, count: positions.length };
 }
 const searchIndexPath = join(projectionRoot, "search_index.json");
 const searchIndex = {
