@@ -11,6 +11,7 @@ export interface RemoteSearchResult {
 
 interface SearchOptions {
   query: string;
+  scope?: "all" | "municipal" | "central";
   organism?: string;
   role?: string;
   page?: number;
@@ -58,6 +59,13 @@ async function readResponse(response: Response): Promise<{ rows: RemoteOfficialR
  */
 export async function searchTransparencyActiva(options: SearchOptions): Promise<RemoteSearchResult> {
   const fetcher = options.fetchImpl ?? fetch;
+  if (options.scope && options.scope !== "all") {
+    try {
+      const scoped = await readResponse(await fetcher(requestUrl(options.scope, options)));
+      if (scoped) return { ...scoped, rows: scoped.rows.map(row => ({ ...row, sourceScope: options.scope })), partial: false };
+    } catch { /* Preserve the selected source boundary on failure. */ }
+    return {rows:[],total:null,partial:true};
+  }
   try {
     const combined = await readResponse(await fetcher(requestUrl("all", options)));
     if (combined) return { ...combined, partial: false };

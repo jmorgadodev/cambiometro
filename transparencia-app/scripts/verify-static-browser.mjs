@@ -127,7 +127,7 @@ async function checkRoute(browser, baseUrl, route, markers) {
 
 async function main() {
   const movementPolicy = JSON.parse(await readFile(join(process.cwd(), "data", "movimientos-scope-policy.json"), "utf8"));
-  const movementMarkers = movementPolicy.status === "validated"
+  const movementMarkers = ["validated", "validated_reference", "validated_reconciled"].includes(movementPolicy.status)
     ? ["Movimientos y Relevos de Autoridades"]
     : ["Movimientos y Relevos de Autoridades", "Validación documental en curso"];
   let baseUrl = remoteBaseUrl;

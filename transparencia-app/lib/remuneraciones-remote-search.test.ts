@@ -6,6 +6,13 @@ function response(body: unknown, status = 200) {
 }
 
 describe("búsqueda remota de Transparencia Activa", () => {
+  it("consulta sólo organismos centrales cuando el filtro de fuente lo exige", async () => {
+    const calls:string[] = [];
+    const result = await searchTransparencyActiva({query:"asesor",scope:"central",fetchImpl:async input => {calls.push(String(input));return response({data:[{id:"central"}],meta:{total:1}});}});
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toContain("scope=central");
+    expect(result.rows[0].sourceScope).toBe("central");
+  });
   it("usa la ruta combinada cuando responde correctamente", async () => {
     const calls: string[] = [];
     const result = await searchTransparencyActiva({

@@ -48,7 +48,8 @@ describe("interfaz unificada de remuneraciones", () => {
     const explorer = readFileSync(join(projectRoot, "components", "remuneraciones", "RemuneracionesUnifiedExplorer.tsx"), "utf8");
 
     expect(explorer).toContain("NEXT_PUBLIC_PUBLIC_API_ORIGIN");
-    expect(explorer).toContain("searchTransparencyActiva({ query: cleanQuery, organism, role, apiOrigin: publicApiOrigin, page: 1, limit: RESULTS_PAGE_SIZE })");
+    expect(explorer).toContain('scope: source === "transparencia-activa-central" ? "central" : "all"');
+    expect(explorer).toContain("page: 1, limit: RESULTS_PAGE_SIZE");
     expect(explorer).not.toContain("if (!isLocalStaticPreview && (source === \"all\" || transparencySourceSelected))");
   });
 

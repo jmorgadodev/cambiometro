@@ -38,6 +38,39 @@ function sha256(data: ArrayBuffer) {
 }
 
 describe("registros públicos R2", () => {
+  it("no pierde registros centrales cuando una página combinada cruza una página de la fuente", async () => {
+    const objects:Record<string,unknown> = {};
+    for (const [name,total] of [["funcionarios-v1",2],["funcionarios-central-v1",4]] as const) {
+      const root = `projections/${name}`;
+      objects[`${root}/manifest.json`] = {version:"test",generatedAt:"2026-09-15T00:00:00Z",assets:[],searchIndex:{key:`${root}/index.json`}};
+      objects[`${root}/index.json`] = {totalRows:total,pageSize:10,pages:[{page:1,key:`${root}/page.json`,count:total}],filters:{}};
+      objects[`${root}/page.json`] = Array.from({length:total},(_,i)=>({id:`${name}-${i}`,n:`Nombre ${i}`,b:100000,p:"2026-07"}));
+    }
+    const bucket = fakeBucket(objects);
+    const response = await worker.fetch(new Request("https://example.test/api/funcionarios?scope=all&limit=3&page=2&include_zero=true&sortBy=nombre_asc"), { PUBLIC_DATA: bucket as never } as never);
+    const payload = await response.json() as {data:Array<{id:string}>;meta:{total:number}};
+    expect(payload.meta.total).toBe(6);
+    expect(payload.data.map(row=>row.id)).toEqual(["funcionarios-central-v1-1","funcionarios-central-v1-2","funcionarios-central-v1-3"]);
+  });
+  it("excluye municipales del alcance central leyendo el complemento pequeño verificado", async () => {
+    const root = "projections/funcionarios-central-v1/versions/test";
+    const bucket = fakeBucket({
+      "projections/funcionarios-central-v1/manifest.json": { version: "test", generatedAt: "2026-09-15T00:00:00Z", assets: [], searchIndex: { key: `${root}/search_index.json` } },
+      [`${root}/search_index.json`]: { totalRows: 3, pageSize: 3, pages: [{page:1,key:`${root}/page.json`,count:3}], filters: { "tipo:servicio": {key:`${root}/service.json`,count:2}, "tipo:municipalidad": {key:`${root}/municipal.json`,count:1} } },
+      [`${root}/municipal.json`]: [1],
+      [`${root}/page.json`]: [
+        {id:"central-1",n:"Persona Uno",c:"Asesor",ot:"servicio",p:"2026-07",b:100000},
+        {id:"municipal-1",n:"Persona Dos",c:"Asesor",ot:"municipalidad",p:"2026-07",b:100000},
+        {id:"central-2",n:"Persona Tres",c:"Asesor",ot:"servicio",p:"2026-07",b:100000},
+      ],
+    });
+    const response = await worker.fetch(new Request("https://example.test/api/funcionarios?scope=central&limit=2&include_zero=true"), { PUBLIC_DATA: bucket as never } as never);
+    const payload = await response.json() as {data:Array<{id:string}>;meta:{total:number}};
+    expect(response.status).toBe(200);
+    expect(payload.meta.total).toBe(2);
+    expect(payload.data.map(row => row.id).sort()).toEqual(["central-1", "central-2"]);
+    expect(bucket.requested).not.toContain(`${root}/service.json`);
+  });
   it("consulta primero el índice paginado y evita cargar la proyección estática completa", async () => {
     const line = JSON.stringify({
       id: "chilecompra-1",
