@@ -1,6 +1,7 @@
 import { writeFileSync, readFileSync, existsSync, mkdirSync } from "node:fs";
 import { resolve, join } from "node:path";
 import { POLITICOS_SEED } from "../lib/politicos-source.ts";
+import { attendedSession } from "./etl/connectors/senado-votaciones.mjs";
 
 const USER_AGENT = "Cambiometro-ETL/1.0 (+https://cambiometro.impulsacv.cl)";
 const REQUEST_TIMEOUT_MS = 30_000;
@@ -323,7 +324,7 @@ async function fetchSenadoVotaciones() {
         // Any attendee not in voted list is "No Vota"
         const votedPolIds = new Set(individualVotes.map((v) => v.polId));
         for (const att of attendance) {
-          if (att.ASISTENCIA !== "Inasiste") {
+          if (attendedSession(att)) {
             const pol = mapSenatorToPolitico(att);
             if (pol && !votedPolIds.has(pol.id)) {
               individualVotes.push({

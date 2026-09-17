@@ -41,6 +41,9 @@ describe("publicación incremental de Senado", () => {
     expect(await fetchVotacionesSenado({ desde: "2026-09-01", to: "2026-09-17" })).toEqual([]);
   });
   it("no asigna No Vota a senadores ausentes", async () => {
+    const staticBuilder = readFileSync("scripts/ingest-votaciones-full.mjs", "utf8");
+    expect(staticBuilder).not.toContain('ASISTENCIA !== "Inasiste"');
+    expect(staticBuilder).toContain("attendedSession(att)");
     vi.stubGlobal("fetch", vi.fn(async (url: string) => url.includes("sesiones.php")
       ? new Response("<sesiones><sesion><SESIID>10273</SESIID><FECHAINICIO>Miércoles 9 de Septiembre de 2026 16:18</FECHAINICIO></sesion></sesiones>")
       : url.includes("/api/votes") ? Response.json({ data: { data: [{ ID_VOTACION: 1, FECHA_VOTACION: "09-09-2026", VOTACIONES: {}, SI: 0, NO: 0 }] } })

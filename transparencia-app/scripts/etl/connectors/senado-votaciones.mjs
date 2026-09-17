@@ -103,7 +103,7 @@ function memberId(member) {
   return String(member.ID_PARLAMENTARIO ?? member.PARLID ?? member.UUID ?? "");
 }
 
-function attendedSession(member) {
+export function attendedSession(member) {
   return String(member.ASISTENCIA ?? "").trim().toLocaleLowerCase("es-CL") === "asiste";
 }
 
