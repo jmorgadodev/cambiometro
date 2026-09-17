@@ -11,6 +11,8 @@ import { AwsClient } from "aws4fetch";
 
 const mode = process.argv.find((arg) => arg.startsWith("--mode="))?.slice(7) ?? "plan";
 const directory = resolve(process.argv.find((arg) => arg.startsWith("--directory="))?.slice(12) ?? "../artifacts/r2-compaction-2026-09-17");
+const concurrencyLimit = Number(process.argv.find((arg) => arg.startsWith("--concurrency="))?.slice(14) ?? 8);
+if (!Number.isInteger(concurrencyLimit) || concurrencyLimit < 1 || concurrencyLimit > 16) throw new Error("COMPACTION_INVALID_CONCURRENCY");
 const accountId = process.env.CLOUDFLARE_ACCOUNT_ID?.trim();
 const token = process.env.CLOUDFLARE_API_TOKEN?.trim();
 if (!accountId || !token) throw new Error("COMPACTION_MISSING_CREDENTIALS");
@@ -77,7 +79,7 @@ async function verifyGzip(file, expectedSha, expectedSize) {
   }));
   if (hash.digest("hex") !== expectedSha || size !== expectedSize) throw new Error(`COMPACTION_RESTORE_MISMATCH: ${file}`);
 }
-async function limited(items, operation, concurrency = 5) {
+async function limited(items, operation, concurrency = concurrencyLimit) {
   let next = 0; let failed = null;
   await Promise.all(Array.from({ length: concurrency }, async () => {
     while (next < items.length && !failed) {
