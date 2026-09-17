@@ -3,6 +3,7 @@ import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { gunzipSync } from "node:zlib";
 import { buildLakePlan } from "./etl/lake.mjs";
+import { hydrateSourceHistory } from "./etl/hydrate-source-history.mjs";
 
 const appRoot = resolve(dirname(fileURLToPath(import.meta.url)), "..");
 const snapshotPath = resolve(appRoot, "data", "etl", "latest.json");
@@ -10,6 +11,8 @@ const inventoryPath = resolve(appRoot, "data", "etl", "source-inventory.json");
 const outputArgIndex = process.argv.indexOf("--output");
 const outputRoot = resolve(outputArgIndex >= 0 ? process.argv[outputArgIndex + 1] : join(appRoot, "data", "lake"));
 const dryRun = process.argv.includes("--dry-run");
+const sourceIndex = process.argv.indexOf("--source");
+const sourceKeys = new Set((sourceIndex >= 0 ? process.argv[sourceIndex + 1] : "").split(",").map(value => value.trim()).filter(Boolean));
 const excludeSourceIndex = process.argv.indexOf("--exclude-source");
 const excludedSources = new Set((excludeSourceIndex >= 0 ? process.argv[excludeSourceIndex + 1] : "")
   .split(",").map((value) => value.trim()).filter(Boolean));
@@ -21,6 +24,10 @@ if (!existsSync(snapshotPath)) throw new Error(`Snapshot inexistente: ${snapshot
 if (outputRoot === appRoot || dirname(outputRoot) === outputRoot) throw new Error("INVALID_OUTPUT_PATH");
 
 const snapshot = JSON.parse(readFileSync(snapshotPath, "utf8"));
+if (sourceKeys.size) {
+  for (const key of sourceKeys) if (!Array.isArray(snapshot.fuentes?.[key]) || !snapshot.fuentes[key].length) throw new Error(`SOURCE_PUBLICATION_EMPTY:${key}`);
+  snapshot.fuentes = Object.fromEntries(Object.entries(snapshot.fuentes ?? {}).filter(([key]) => sourceKeys.has(key)));
+}
 for (const source of excludedSources) delete snapshot.fuentes?.[source];
 const sourceInventory = existsSync(inventoryPath) ? JSON.parse(readFileSync(inventoryPath, "utf8")) : null;
 const existingCatalogPath = join(outputRoot, "catalog", "v1", "manifest.json");
@@ -41,13 +48,18 @@ function readExistingProjection(key) {
   return text ? text.split("\n").map((line) => JSON.parse(line)) : [];
 }
 
+let hydratedHistory = { existingPartitionRecords: {}, existingEntityBundles: {} };
+if (sourceKeys.size && process.argv.includes("--hydrate-history")) {
+  hydratedHistory = hydrateSourceHistory(snapshot, { appRoot, outputRoot, sourceInventory, existingCatalog, sourceKeys });
+}
+
 const existingEntityBundles = Object.fromEntries((existingCatalog?.sources ?? [])
   .filter((source) => source.entityKey || source.entityIndexKey)
   .map((source) => [source.id, {
     entities: readExistingProjection(source.entityKey),
     indexes: readExistingProjection(source.entityIndexKey),
   }]));
-const plan = buildLakePlan(snapshot, { sourceInventory, existingCatalog, existingEntityBundles, replaceSourceIds });
+const plan = buildLakePlan(snapshot, { sourceInventory, existingCatalog, existingEntityBundles: { ...existingEntityBundles, ...hydratedHistory.existingEntityBundles }, replaceSourceIds, sourceKeys, existingPartitionRecords: hydratedHistory.existingPartitionRecords });
 const publishPlan = {
   schemaVersion: "1.0.0",
   generatedAt: snapshot.actualizado_en ?? null,

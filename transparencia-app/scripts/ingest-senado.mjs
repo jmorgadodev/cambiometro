@@ -48,6 +48,7 @@ const sourceInventory = existsSync(inventoryPath) ? JSON.parse(readFileSync(inve
 const existingCatalogPath = join(outputRoot, "catalog", "v1", "manifest.json");
 const existingCatalog = existsSync(existingCatalogPath) ? JSON.parse(readFileSync(existingCatalogPath, "utf8")) : null;
 const plan = buildLakePlan(snapshot, {
+  sourceKeys: Object.keys(buildSenateSources(results)),
   sourceInventory,
   existingCatalog,
   originalAssets: results.map((result) => ({ sourceId: senateSourceId(result.dataset ?? "operational_expenses"), year: result.year, month: result.month, ...result.original })),

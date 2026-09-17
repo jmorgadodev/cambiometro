@@ -153,7 +153,6 @@ jobs:
             done
             npm run data:lake:projection:ley19862
             npm run data:build:subsets
-            npm run data:lake
             npm run data:publish
           else
             period=$(date -u -d '1 month ago' +%Y-%m)
@@ -162,7 +161,6 @@ jobs:
             npm run ingest:ley-19862 -- --year "$target_year" --month "$target_month"
             npm run data:lake:projection:ley19862
             npm run data:build:subsets
-            npm run data:lake
             npm run data:publish
           fi
 

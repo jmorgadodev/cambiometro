@@ -47,7 +47,12 @@ jobs:
         working-directory: transparencia-app
       - name: Construir período ETL genérico
         if: inputs.source != 'asistencia_camara' && inputs.source != 'infolobby' && inputs.source != 'infoprobidad'
-        run: npm run data:lake
+        env:
+          INPUT_SOURCE: ${{ inputs.source }}
+        run: |
+          source_key="$INPUT_SOURCE"
+          if [[ "$source_key" == "camara" ]]; then source_key=congreso_opendata; fi
+          npm run data:lake -- --source "$source_key"
         working-directory: transparencia-app
       - name: Ingerir período completo de InfoLobby
         if: inputs.source == 'infolobby'

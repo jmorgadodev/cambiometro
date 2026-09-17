@@ -295,6 +295,10 @@ export function buildLakePlan(snapshot, options = {}) {
   const existingCatalog = options.existingCatalog ?? null;
   const existingEntityBundles = options.existingEntityBundles ?? {};
   const replaceSourceIds = new Set(options.replaceSourceIds ?? []);
+  const sourceKeys = new Set(options.sourceKeys ?? []);
+  for (const key of sourceKeys) {
+    if (!Array.isArray(snapshot.fuentes?.[key]) || !snapshot.fuentes[key].length) throw new Error(`SOURCE_PUBLICATION_EMPTY:${key}`);
+  }
   const fallbackDate = new Date(snapshot.actualizado_en ?? "1970-01-01T00:00:00.000Z");
   if (Number.isNaN(fallbackDate.getTime())) throw new Error("INVALID_SNAPSHOT_DATE");
   const groups = new Map();
@@ -302,6 +306,7 @@ export function buildLakePlan(snapshot, options = {}) {
   const recordIds = new Set();
 
   for (const [sourceKey, rawRecords] of Object.entries(snapshot.fuentes ?? {})) {
+    if (sourceKeys.size && !sourceKeys.has(sourceKey)) continue;
     const sourceId = SOURCE_MAP[sourceKey] ?? sourceKey;
     const variant = partitionVariant(sourceKey, sourceId);
     for (const raw of rawRecords) {
@@ -357,6 +362,11 @@ export function buildLakePlan(snapshot, options = {}) {
   const assets = [];
   const partitions = [];
   for (const group of [...groups.values()].sort((a, b) => a.id.localeCompare(b.id))) {
+    const previousRows = options.existingPartitionRecords?.[group.id] ?? [];
+    if (previousRows.some(row => row.sourceId !== group.sourceId)) throw new Error(`PARTITION_SOURCE_MISMATCH:${group.id}`);
+    const merged = new Map(previousRows.map(row => [row.id, row]));
+    for (const row of group.records) merged.set(row.id, row);
+    group.records = [...merged.values()];
     const prefix = `partitions/${group.id}`;
     const assetPrefix = group.variant ? `${group.sourceId}-${group.variant}-` : `${group.sourceId}-`;
     const projection = buildDeterministicPartition(group.records);
@@ -516,6 +526,7 @@ export function buildLakePlan(snapshot, options = {}) {
     sources: sourceIds.map((sourceId) => {
       const inventory = inventoryById.get(sourceId);
       const previousSource = (existingCatalog?.sources ?? []).find((source) => source.id === sourceId);
+      if (updatedSourceIds.size && previousSource && !updatedSourceIds.has(sourceId)) return previousSource;
       const entity = entityMetadata.get(sourceId);
       const partitionPeriods = allPartitions.filter((partition) => partition.sourceId === sourceId).map((partition) => partition.period);
       return {
