@@ -8,6 +8,13 @@ const backup = readFileSync(resolve(appRoot, "scripts", "backup-weekly.mjs"), "u
 const drill = readFileSync(resolve(appRoot, "scripts", "restore-drill.mjs"), "utf8");
 
 describe("política de backup sin consumo accidental de D1", () => {
+  it("verifica el archivo compacto y exige una acción manual para duplicar el lake", () => {
+    expect(workflow).toContain("inputs.backup_lake == true");
+    expect(workflow).toContain("CAMBIOMETRO_FULL_LAKE_BACKUP");
+    expect(workflow).toContain("r2-compact-backups.mjs --mode=verify-remote");
+    expect(backup).toContain('process.env.BACKUP_LAKE_COPY === "1"');
+    expect(backup).toContain('process.env.BACKUP_LAKE_CONFIRM === "CAMBIOMETRO_FULL_LAKE_BACKUP"');
+  });
   it("mantiene el backup programado en R2 y exige confirmación manual para D1", () => {
     expect(workflow).toContain("Backup Semanal (R2; D1 manual)");
     expect(workflow).toContain("BACKUP_D1:");
@@ -28,7 +35,7 @@ describe("política de backup sin consumo accidental de D1", () => {
   });
 
   it("rechaza un inventario con cero objetos antes de considerar cualquier dump D1", () => {
-    expect(drill).toContain("const lakeObjects = getR2LakeObjects(inventory);");
+    expect(drill).toContain("lakeObjects = getR2LakeObjects(inventory);");
     expect(drill).toContain("R2_BACKUP_INVENTORY_EMPTY");
     expect(drill.indexOf("getR2LakeObjects(inventory)")).toBeLessThan(drill.indexOf("Paso 3: descargar dump"));
   });

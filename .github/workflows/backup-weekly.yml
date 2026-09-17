@@ -5,6 +5,16 @@ on:
     - cron: "0 5 * * 0" # 01:00 CLT, domingo
   workflow_dispatch:
     inputs:
+      backup_lake:
+        description: "Copiar excepcionalmente el lake completo (requiere margen R2)"
+        type: boolean
+        required: false
+        default: false
+      confirm_lake_backup:
+        description: "Escribe CAMBIOMETRO_FULL_LAKE_BACKUP para autorizar la copia completa"
+        type: string
+        required: false
+        default: ""
       backup_d1:
         description: "Exportar D1 excepcionalmente (consume rows_read; sólo si fue revisado)"
         type: boolean
@@ -46,6 +56,8 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
           BACKUP_D1: ${{ github.event_name == 'workflow_dispatch' && inputs.backup_d1 == true && inputs.confirm_d1_backup == 'CAMBIOMETRO_D1_BACKUP' && '1' || '0' }}
           D1_BACKUP_CONFIRM: ${{ github.event_name == 'workflow_dispatch' && inputs.confirm_d1_backup || '' }}
+          BACKUP_LAKE_COPY: ${{ github.event_name == 'workflow_dispatch' && inputs.backup_lake == true && inputs.confirm_lake_backup == 'CAMBIOMETRO_FULL_LAKE_BACKUP' && '1' || '0' }}
+          BACKUP_LAKE_CONFIRM: ${{ github.event_name == 'workflow_dispatch' && inputs.confirm_lake_backup || '' }}
         run: node scripts/backup-weekly.mjs
 
   drill-restore:
@@ -71,4 +83,9 @@ jobs:
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
-        run: node scripts/restore-drill.mjs
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ] && [ "${{ inputs.backup_lake }}" = "true" ] && [ "${{ inputs.confirm_lake_backup }}" = "CAMBIOMETRO_FULL_LAKE_BACKUP" ]; then
+            node scripts/restore-drill.mjs
+          else
+            node scripts/r2-compact-backups.mjs --mode=verify-remote
+          fi

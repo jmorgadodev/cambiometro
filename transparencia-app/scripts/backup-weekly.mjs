@@ -24,6 +24,15 @@ const R2_BLOCK_RATIO = 0.95;
 const BACKUP_D1 = process.env.BACKUP_D1 === "1"
   && process.env.D1_BACKUP_CONFIRM === "CAMBIOMETRO_D1_BACKUP";
 const BACKUP_RETENTION_DELETE = retentionDeletionAuthorized();
+const BACKUP_LAKE_COPY = process.env.BACKUP_LAKE_COPY === "1"
+  && process.env.BACKUP_LAKE_CONFIRM === "CAMBIOMETRO_FULL_LAKE_BACKUP";
+
+// Scheduled runs verify the compact archive instead of duplicating the lake.
+// A manual full copy still has to pass the account-wide peak-storage guard.
+if (!BACKUP_LAKE_COPY) {
+  console.log("[OK] copia completa del lake omitida: el respaldo compacto se verifica por separado.");
+  process.exit(0);
+}
 
 const accountId = process.env.CLOUDFLARE_ACCOUNT_ID?.trim();
 const token = process.env.CLOUDFLARE_API_TOKEN?.trim();
