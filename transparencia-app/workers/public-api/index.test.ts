@@ -330,6 +330,7 @@ describe("registros públicos R2", () => {
     expect(response.status).toBe(200);
     expect(payload.data.map((row) => row.id)).toEqual(["central-row"]);
     expect(payload.meta.total).toBe(1);
+    expect(payload.meta.totalHeadcount).toBe(1);
     expect(bucket.requested).toContain(`${root}/search_index/filter-service.json`);
     expect(bucket.requested).not.toContain(`${root}/search_index/filter-municipal.json`);
   });
