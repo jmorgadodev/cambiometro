@@ -6,7 +6,8 @@ describe("separación de workflows Pages", () => {
   it("separa el estado de Pages del Worker API para evitar bloqueos SQLite", () => {
     for (const file of ["pages-ui-refresh.yml", "build-e2e.yml"]) {
       const workflow = readFileSync(resolve(process.cwd(), "../.github/workflows", file), "utf8");
-      expect(workflow).toContain("wrangler pages dev out --persist-to .wrangler/pages-test-state");
+      const pagesCommand = workflow.split("\n").find(line => line.includes("wrangler pages dev out"));
+      expect(pagesCommand).toContain("--persist-to .wrangler/pages-test-state");
     }
   });
   it("envía cambios de código a UI y reserva el refresco estático push para datos", () => {
