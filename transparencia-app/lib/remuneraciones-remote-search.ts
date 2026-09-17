@@ -13,6 +13,8 @@ interface SearchOptions {
   query: string;
   organism?: string;
   role?: string;
+  page?: number;
+  limit?: number;
   /** Optional absolute public API origin used by local previews. */
   apiOrigin?: string;
   fetchImpl?: typeof fetch;
@@ -25,11 +27,14 @@ interface SearchPayload {
 }
 
 function requestUrl(scope: "all" | "municipal" | "central", options: SearchOptions) {
+  const page = Number.isInteger(options.page) ? Math.max(1, Number(options.page)) : 1;
+  const limit = Number.isInteger(options.limit) ? Math.max(1, Math.min(100, Number(options.limit))) : 20;
   const params = new URLSearchParams({
     scope,
     query: options.query,
     include_zero: "true",
-    limit: "20",
+    limit: String(limit),
+    page: String(page),
     sortBy: "nombre_asc",
   });
   if (options.organism?.trim()) params.set("organismo", options.organism.trim());
