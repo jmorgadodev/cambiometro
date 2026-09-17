@@ -79,12 +79,16 @@ async function fetchJson(url, intentos = 3) {
 
 async function fetchVotacionesDeSesion(sesionId) {
   const payload = await fetchJson(`${API_BASE}/api/votes?id_sesion=${encodeURIComponent(sesionId)}`);
-  return payload?.data?.data ?? [];
+  // Official special sessions without votes return an empty string and total 0.
+  if (payload?.status === "ok" && payload?.data?.total === 0 && payload.data.data === "") return [];
+  if (!Array.isArray(payload?.data?.data)) throw new Error("SENADO_VOTES_SCHEMA");
+  return payload.data.data;
 }
 
 async function fetchAsistenciaDeSesion(sesionId) {
   const payload = await fetchJson(`${API_BASE}/api/sessions/attendance?id_sesion=${encodeURIComponent(sesionId)}`);
-  return Array.isArray(payload?.data?.DATA) ? payload.data.DATA : [];
+  if (!Array.isArray(payload?.data?.DATA)) throw new Error("SENADO_ATTENDANCE_SCHEMA");
+  return payload.data.DATA;
 }
 
 function fullName(member) {
@@ -97,6 +101,10 @@ function fullName(member) {
 
 function memberId(member) {
   return String(member.ID_PARLAMENTARIO ?? member.PARLID ?? member.UUID ?? "");
+}
+
+export function attendedSession(member) {
+  return String(member.ASISTENCIA ?? "").trim().toLocaleLowerCase("es-CL") === "asiste";
 }
 
 function buildVoto(member, opcion) {
@@ -118,9 +126,12 @@ export async function fetchVotacionesSenado({ legislatura = 374, desde, to }) {
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
   if (!response.ok) throw new Error(`Sesiones del Senado HTTP ${response.status}`);
-  const sessions = parseSessionList(await response.text(), desde);
+  const xml = await response.text();
+  if (!/<sesiones\b[^>]*>[\s\S]*<\/sesiones>/.test(xml)) throw new Error("SENADO_SESSION_SCHEMA");
+  const sessions = parseSessionList(xml, desde);
   const seen = new Set();
   const votes = [];
+  const failures = [];
 
   for (const session of sessions) {
     if (session.fecha > (to ?? "9999-12-31")) continue;
@@ -130,7 +141,7 @@ export async function fetchVotacionesSenado({ legislatura = 374, desde, to }) {
         fetchAsistenciaDeSesion(session.id),
       ]);
       const asistentes = asistencia
-        .filter((member) => member.ASISTENCIA !== "Inasiste")
+        .filter(attendedSession)
         .map((member) => memberId(member));
       for (const votacion of votaciones) {
         const id = Number(votacion.ID_VOTACION);
@@ -149,7 +160,7 @@ export async function fetchVotacionesSenado({ legislatura = 374, desde, to }) {
         }
         const votantesIds = new Set(votos.map((voto) => voto.id));
         const asistenciaPorId = new Map(
-          asistencia.filter((member) => member.ASISTENCIA !== "Inasiste").map((member) => [memberId(member), member])
+          asistencia.filter(attendedSession).map((member) => [memberId(member), member])
         );
         for (const memberId of asistentes) {
           if (!votantesIds.has(memberId) && asistenciaPorId.has(memberId)) {
@@ -181,7 +192,9 @@ export async function fetchVotacionesSenado({ legislatura = 374, desde, to }) {
       }
     } catch (error) {
       console.warn(`[etl] senado_votaciones: sesión ${session.id} (${session.fecha}) omitida: ${String(error).slice(0, 100)}`);
+      failures.push(session.id);
     }
   }
+  if (failures.length) throw new Error(`SENADO_SESSION_INCOMPLETE:${failures.join(",")}`);
   return votes.sort((a, b) => a.fecha.localeCompare(b.fecha) || a.votacion_id.localeCompare(b.votacion_id));
 }
