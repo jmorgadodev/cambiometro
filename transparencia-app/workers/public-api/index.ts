@@ -863,6 +863,9 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
     const requestedLimit = Number(requestUrl.searchParams.get("limit") ?? 20);
     const limit = Number.isInteger(requestedLimit) ? Math.max(1, Math.min(requestedLimit, 100)) : 20;
     const filterKeys = officialFilterKeys(requestUrl, datasetRoot, index.filters);
+    const scopeHeadcount = datasetRoot === "funcionarios-central-v1"
+      ? Number(index.filters?.["tipo:servicio"]?.count ?? index.totalRows)
+      : index.totalRows;
     let resultTotal = index.totalRows;
     let totalPages = Math.max(1, Math.ceil(resultTotal / limit));
     let page = Number.isInteger(requestedPage) ? Math.max(1, Math.min(requestedPage, totalPages)) : 1;
@@ -949,7 +952,7 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
       const payload = await response.json() as JsonRecord;
       const meta = (payload.meta as JsonRecord) ?? {};
       meta.total = resultTotal;
-      meta.totalHeadcount = index.totalRows;
+      meta.totalHeadcount = scopeHeadcount;
       meta.page = page;
       meta.totalPages = totalPages;
       meta.limit = limit;
@@ -967,7 +970,7 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
     const payload = await response.json() as JsonRecord;
     const meta = (payload.meta as JsonRecord) ?? {};
     meta.total = resultTotal;
-    meta.totalHeadcount = index.totalRows;
+    meta.totalHeadcount = scopeHeadcount;
     meta.page = page;
     meta.totalPages = totalPages;
     meta.limit = limit;
