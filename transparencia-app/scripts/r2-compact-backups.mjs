@@ -203,7 +203,7 @@ if (mode === "verify-remote") {
   let deleted = 0;
   await limited(plan.candidates, async (object) => {
     if (!current.some((item) => identity(item) === identity(object))) return;
-    const response = await request(object.bucket, object.key, { method: "DELETE", headers: { "If-Match": String(object.etag ?? "") } });
+    const response = await request(object.bucket, object.key, { method: "DELETE", headers: { "If-Match": `"${String(object.etag ?? "").replaceAll('"', "")}"` } });
     if (!response.ok) throw new Error(`COMPACTION_DELETE_FAILED: ${identity(object)}`);
     deleted++;
     if (deleted % 500 === 0) console.log(`[delete] ${deleted}/${plan.candidates.length}`);
@@ -229,6 +229,8 @@ if (mode === "verify-remote") {
   const after = await inventory();
   const afterRoots = await manifests(after);
   if (plan.roots.some((root) => afterRoots.find((item) => item.key === root.key)?.sha256 !== root.sha256)) throw new Error("COMPACTION_ACTIVE_MANIFEST_CHANGED_AFTER_APPLY");
-  const report = { completedAt: new Date().toISOString(), beforeBytes: plan.beforeBytes, afterBytes: after.reduce((sum, object) => sum + object.size, 0), deleted, uploaded, activeManifestsUnchanged: true, localArchive: directory };
+  const bucketBytes = {};
+  for (const object of after) bucketBytes[object.bucket] = (bucketBytes[object.bucket] ?? 0) + object.size;
+  const report = { completedAt: new Date().toISOString(), beforeBytes: plan.beforeBytes, afterBytes: after.reduce((sum, object) => sum + object.size, 0), bucketBytes, deleted, uploaded, activeManifestsUnchanged: true, allLocalArchivesRestored: true, allUploadsChecksumVerified: true, localArchive: directory };
   await save("result.json", report); console.log(JSON.stringify(report, null, 2));
 } else throw new Error("COMPACTION_UNKNOWN_MODE");
