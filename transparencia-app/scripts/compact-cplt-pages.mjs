@@ -23,7 +23,9 @@ if (!verification.success || verification.result?.status!=="active") throw new E
 const client=new AwsClient({accessKeyId:verification.result.id,secretAccessKey:sha(Buffer.from(token)),service:"s3",region:"auto"});
 const bucket="transparencia-public-data";
 async function request(key,init={}) {
-  const response=await client.fetch(`https://${accountId}.r2.cloudflarestorage.com/${bucket}/${key.split("/").map(encodeURIComponent).join("/")}`,{...init,signal:AbortSignal.timeout(60000)});
+  // The gateway weakens ETags when applying HTTP compression. Use the object's
+  // identity representation so conditional PUT compares the actual R2 ETag.
+  const response=await client.fetch(`https://${accountId}.r2.cloudflarestorage.com/${bucket}/${key.split("/").map(encodeURIComponent).join("/")}`,{...init,headers:{"Accept-Encoding":"identity",...init.headers},signal:AbortSignal.timeout(60000)});
   if (!response.ok) throw new Error(`COMPACTION_HTTP_${response.status}:${key}`);
   return response;
 }

@@ -36,7 +36,11 @@ const catalogBytes = await remote(catalogKey);
 const catalog = JSON.parse(catalogBytes);
 const inventory = await listR2Objects({ accountId, token, bucket });
 const known = new Map(inventory.map(v => [v.key, v]));
-const missing = auditCatalogReferences(catalog, new Set(known.keys())).missing;
+const selectedIds = process.argv.find(value => value.startsWith("--partitions="))?.slice(13).split(",").filter(Boolean);
+if (selectedIds?.some(id => !catalog.partitions.some(partition => partition.id === id))) throw new Error("ARCHIVE_PARTITION_SELECTION_INVALID");
+const missing = selectedIds
+  ? catalog.partitions.filter(partition => selectedIds.includes(partition.id))
+  : auditCatalogReferences(catalog, new Set(known.keys())).missing;
 const report = { generatedAt: new Date().toISOString(), catalogSha256: sha(catalogBytes), missingPartitions: missing.length, restored: [], unavailable: [], puts: [] };
 await mkdir(root, { recursive: true });
 await writeFile(join(root, "catalog-before.json"), catalogBytes);
@@ -53,6 +57,7 @@ await Promise.all(Array.from({ length: 3 }, async () => {
       const bytes = Buffer.from(await response.arrayBuffer());
       const manifest = JSON.parse(bytes);
       if (manifest.id !== item.id || manifest.sourceId !== item.sourceId || manifest.recordCount !== item.recordCount) throw new Error("ARCHIVE_MANIFEST_IDENTITY_MISMATCH");
+      if (known.has(item.manifestKey) && sha(await remote(item.manifestKey)) !== sha(bytes)) throw new Error("ARCHIVE_EXISTING_MANIFEST_CONFLICT");
       const parts = manifest.artifacts.filter(v => /records.*\.jsonl\.gz(?:\.part-\d+)?$/.test(v.key)).sort((a,b) => a.key.localeCompare(b.key));
       if (!parts.length) throw new Error("ARCHIVE_NO_RECORDS");
       const chunks = [];
