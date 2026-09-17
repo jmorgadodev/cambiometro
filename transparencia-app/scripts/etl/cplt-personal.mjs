@@ -1,4 +1,5 @@
 import { createHash } from "node:crypto";
+import { acceptsCpltScope } from "./cplt-scope.mjs";
 
 const MONTHS = new Map([
   ["enero", 1], ["febrero", 2], ["marzo", 3], ["abril", 4], ["mayo", 5], ["junio", 6],
@@ -65,6 +66,10 @@ function monthNumber(value) {
 
 const CPLT_PERIOD_PATTERN = /^(\d{4})-(0[1-9]|1[0-2])$/;
 
+function isMunicipalScopeType(value) {
+  return normalized(value).includes("municip");
+}
+
 /** @param {string|null|undefined} period @param {string|null|undefined} maxPeriod */
 export function isPlausibleCpltPeriod(period, maxPeriod = null) {
   const value = String(period ?? "").trim();
@@ -81,6 +86,22 @@ export function isPlausibleCpltPeriod(period, maxPeriod = null) {
 export function filterCpltRowsForPublication(rows, maxPeriod) {
   if (!Array.isArray(rows)) return [];
   return rows.filter((row) => isPlausibleCpltPeriod(row?.fuente_periodo ?? row?.periodo, maxPeriod));
+}
+
+/**
+ * Applies the dataset boundary a second time at publication time. This is
+ * intentionally defensive: a stale or previously materialized projection can
+ * contain rows from the other CPLT scope even when the streaming ETL filtered
+ * them correctly.
+ */
+export function filterCpltRowsForScope(rows, scope) {
+  if (!Array.isArray(rows)) return [];
+  const central = normalized(scope) === "central";
+  return rows.filter((row) => {
+    const acceptedByName = acceptsCpltScope(row?.organo_nombre, central ? "central" : "municipal");
+    const municipalByType = isMunicipalScopeType(row?.organo_tipo);
+    return central ? acceptedByName && !municipalByType : acceptedByName || municipalByType;
+  });
 }
 
 export function parseCpltHeader(line) {
