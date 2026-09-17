@@ -80,7 +80,7 @@ jobs:
         run: |
           npx wrangler dev --local --var ALLOW_PUBLIC_D1_READS:1 --config workers/public-api/wrangler.jsonc --port 8788 --inspector-port 9230 --log-level warn > /tmp/cambiometro-api.log 2>&1 &
           api_pid=$!
-          npx wrangler pages dev out --port 3003 --proxy 8788 --inspector-port 9231 --compatibility-date=2026-08-08 --log-level warn > /tmp/cambiometro-pages.log 2>&1 &
+          npx wrangler pages dev out --persist-to .wrangler/pages-test-state --port 3003 --proxy 8788 --inspector-port 9231 --compatibility-date=2026-08-08 --log-level warn > /tmp/cambiometro-pages.log 2>&1 &
           pages_pid=$!
           trap 'kill "$api_pid" "$pages_pid" 2>/dev/null || true' EXIT
           ready=""
