@@ -229,6 +229,11 @@ export default function SiteHeader() {
         </div>
       </header>
 
+      <div className="maintenance-banner" role="status">
+        <span className="maintenance-banner__mark" aria-hidden="true" />
+        <span>El sitio se encuentra en mantención. Algunas secciones pueden presentar intermitencias.</span>
+      </div>
+
       {/* ─── DRAWER MÓVIL (<1024px, Slide-in <200ms) ───────────────────────── */}
       {drawerOpen && (
         <div

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { normalizeRemunerationText, personKeyForRemuneration, remunerationAmountState } from "./remuneraciones-unified-contract.mjs";
+import { readCpltPublishedCount } from "./remuneraciones-unified-metadata.mjs";
 
 const root = process.cwd();
 const outputDir = path.join(root, "public", "data", "remuneraciones-unified");
@@ -18,6 +19,7 @@ const source38 = JSON.parse(fs.readFileSync(source38Path, "utf8"));
 const source38History = JSON.parse(fs.readFileSync(source38HistoryPath, "utf8"));
 const support = JSON.parse(fs.readFileSync(supportPath, "utf8"));
 const qualitySources = JSON.parse(fs.readFileSync(qualitySourcesPath, "utf8"));
+const cpltPublishedCount = readCpltPublishedCount(root);
 fs.rmSync(outputDir, { recursive: true, force: true });
 fs.mkdirSync(outputDir, { recursive: true });
 
@@ -190,8 +192,8 @@ const releaseSources = [
     label: "Transparencia Activa CPLT",
     status: "partial",
     sourceType: "individual",
-    publishedCount: 1203287,
-    queryableCount: 1203287,
+    publishedCount: cpltPublishedCount,
+    queryableCount: cpltPublishedCount,
     note: "Se consulta mediante el índice R2 del directorio; el conteo debe reconciliarse con el release productivo antes de declarar cobertura total.",
     modulePath: "/funcionarios",
   }),
