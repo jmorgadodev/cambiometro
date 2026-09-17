@@ -720,7 +720,7 @@ function compactOfficialRows(value: unknown): JsonRecord[] {
   return value.map((row) => compactOfficialRow(row as CompactOfficialRow));
 }
 
-function officialFilterKeys(requestUrl: URL, datasetRoot = "funcionarios-v1") {
+function officialFilterKeys(requestUrl: URL, datasetRoot = "funcionarios-v1", availableFilters?: Record<string, unknown>) {
   const keys: string[] = [];
   const values = [
     ["contrato", requestUrl.searchParams.get("contrato") ?? "Todos"],
@@ -740,7 +740,9 @@ function officialFilterKeys(requestUrl: URL, datasetRoot = "funcionarios-v1") {
   // Defensa de lectura mientras exista un release central anterior que pudo
   // contener filas municipales. El publicador también aplica esta frontera,
   // pero el Worker debe respetarla aun antes de sustituir ese release.
-  if (datasetRoot === "funcionarios-central-v1" && !keys.includes("tipo:servicio")) {
+  if (datasetRoot === "funcionarios-central-v1"
+    && availableFilters?.["tipo:servicio"]
+    && !keys.includes("tipo:servicio")) {
     keys.push("tipo:servicio");
   }
   return keys;
@@ -860,7 +862,7 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
     const requestedPage = Number(requestUrl.searchParams.get("page") ?? 1);
     const requestedLimit = Number(requestUrl.searchParams.get("limit") ?? 20);
     const limit = Number.isInteger(requestedLimit) ? Math.max(1, Math.min(requestedLimit, 100)) : 20;
-    const filterKeys = officialFilterKeys(requestUrl, datasetRoot);
+    const filterKeys = officialFilterKeys(requestUrl, datasetRoot, index.filters);
     let resultTotal = index.totalRows;
     let totalPages = Math.max(1, Math.ceil(resultTotal / limit));
     let page = Number.isInteger(requestedPage) ? Math.max(1, Math.min(requestedPage, totalPages)) : 1;
