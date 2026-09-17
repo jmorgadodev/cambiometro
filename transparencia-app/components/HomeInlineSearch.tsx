@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useId, useRef, useState } from "react";
-import { resolveHomeSearchTarget, resolveSearchResultUrl } from "@/lib/home-search-routing";
+import { interleaveDistinctSearchResults, resolveHomeSearchTarget, resolveSearchResultUrl } from "@/lib/home-search-routing";
 import { publicApiUrl } from "@/lib/public-api-origin";
 
 type SearchResultType = "politico" | "persona" | "municipalidad" | "funcionario" | "entidad" | "proveedor" | "organismo" | "remuneracion";
@@ -148,13 +148,7 @@ export default function HomeInlineSearch() {
         // Reservar espacio para las fuentes que no devuelve el endpoint de
         // personas evita que un bloque de funcionarios o autoridades oculte
         // todas las remuneraciones coincidentes.
-        const mixedResults: SearchResult[] = [];
-        const slots = Math.max(workerResults.length, remunerationResults.length);
-        for (let index = 0; index < slots && mixedResults.length < 8; index += 1) {
-          if (workerResults[index]) mixedResults.push(workerResults[index]);
-          if (remunerationResults[index] && mixedResults.length < 8) mixedResults.push(remunerationResults[index]);
-        }
-        setResults(mixedResults);
+        setResults(interleaveDistinctSearchResults(workerResults, remunerationResults));
         if (workerResults.length === 0 && remunerationResults.length === 0 && !workerPayload) {
           setError("No fue posible consultar el índice público. Puedes abrir la búsqueda completa.");
         }
