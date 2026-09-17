@@ -5,7 +5,7 @@ import { spawnSync } from "node:child_process";
 import { buildCpltCoverageIndex } from "./cplt-coverage-index.mjs";
 import { buildCpltTransparencySummary } from "./cplt-transparency-summary.mjs";
 import { getCpltSearchPageSize } from "./cplt-search-config.mjs";
-import { filterCpltRowsForPublication } from "./etl/cplt-personal.mjs";
+import { filterCpltRowsForPublication, filterCpltRowsForScope } from "./etl/cplt-personal.mjs";
 
 const centralScope = process.argv.includes("--central");
 const datasetRoot = centralScope ? "funcionarios-central-v1" : "funcionarios-v1";
@@ -88,7 +88,7 @@ for (const fileName of files) {
   try { rows = JSON.parse(readFileSync(source, "utf8")); } catch { continue; }
   if (!Array.isArray(rows)) continue;
   const organismId = fileName.replace(/\.json$/, "");
-  const publicRows = filterCpltRowsForPublication(rows, month);
+  const publicRows = filterCpltRowsForScope(filterCpltRowsForPublication(rows, month), centralScope ? "central" : "municipal");
   publishedRowsByFile.set(fileName, publicRows);
   for (const row of rows) {
     const sourceKey = sourceKeyForContract(row?.tipo_contrato);

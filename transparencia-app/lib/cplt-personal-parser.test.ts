@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createCpltRecordId, filterCpltRowsForPublication, parseCpltHeader, parseCpltRecord } from "../scripts/etl/cplt-personal.mjs";
+import { createCpltRecordId, filterCpltRowsForPublication, filterCpltRowsForScope, parseCpltHeader, parseCpltRecord } from "../scripts/etl/cplt-personal.mjs";
 
 describe("parser de personal CPLT", () => {
   it("interpreta meses en texto y columnas de Planta", () => {
@@ -52,6 +52,16 @@ describe("parser de personal CPLT", () => {
 
     expect(filterCpltRowsForPublication(rows, "2026-09")).toEqual([rows[0]]);
     expect(rows).toHaveLength(3);
+  });
+
+  it("no permite que una proyección central publique filas municipales", () => {
+    const rows = [
+      { id: "municipal", organo_nombre: "I. Municipalidad de Penco", organo_tipo: "municipalidad" },
+      { id: "central", organo_nombre: "Ministerio de Educación", organo_tipo: "servicio_publico" },
+    ];
+
+    expect(filterCpltRowsForScope(rows, "central")).toEqual([rows[1]]);
+    expect(filterCpltRowsForScope(rows, "municipal")).toEqual([rows[0]]);
   });
 
   it("interpreta el esquema reducido de Honorarios sin exigir 40 columnas", () => {
