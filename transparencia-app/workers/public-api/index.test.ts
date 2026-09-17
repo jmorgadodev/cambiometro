@@ -38,6 +38,48 @@ function sha256(data: ArrayBuffer) {
 }
 
 describe("registros públicos R2", () => {
+  it("excluye períodos fuera del corte antes de contar y paginar sin modificar los originales", async () => {
+    const root = "projections/funcionarios-central-v1";
+    const bucket = fakeBucket({
+      [`${root}/manifest.json`]: {version:"test", generatedAt:"2026-09-14T00:00:00Z", assets:[], searchIndex:{key:`${root}/index.json`}},
+      [`${root}/index.json`]: {totalRows:4,pageSize:4,pages:[{page:1,key:`${root}/page.json`,count:4}],publicationExclusions:{key:`${root}/excluded.json`,count:1},filters:{"tipo:servicio":{key:`${root}/service.json`,count:3},"tipo:municipalidad":{key:`${root}/municipal.json`,count:1}}},
+      [`${root}/municipal.json`]: [1], [`${root}/excluded.json`]: [2],
+      [`${root}/page.json`]: [{id:"valid-1",n:"Persona A",b:100000,p:"2026-07"},{id:"municipal",n:"Persona B",b:100000,p:"2026-07"},{id:"future",n:"Persona C",b:100000,p:"2029-01"},{id:"valid-2",n:"Persona D",b:100000,p:"2026-07"}],
+    });
+    for (const [page,id] of [[1,"valid-1"],[2,"valid-2"]] as const) {
+      const response = await worker.fetch(new Request(`https://example.test/api/funcionarios?scope=central&include_zero=true&limit=1&page=${page}`),{PUBLIC_DATA:bucket as never} as never);
+      const payload = await response.json() as {data:Array<{id:string}>;meta:{total:number;totalHeadcount:number}};
+      expect(response.status).toBe(200);
+      expect(payload.meta.total).toBe(2);
+      expect(payload.meta.totalHeadcount).toBe(2);
+      expect(payload.data.map(row=>row.id)).toEqual([id]);
+    }
+    expect(bucket.requested).not.toContain(`${root}/service.json`);
+  });
+  it("aplica las exclusiones también a una búsqueda nominal", async () => {
+    const root = "projections/funcionarios-v1";
+    const bucket = fakeBucket({
+      [`${root}/manifest.json`]: {version:"test",generatedAt:"2026-09-14T00:00:00Z",assets:[],searchIndex:{key:`${root}/index.json`}},
+      [`${root}/index.json`]: {totalRows:2,pageSize:2,pages:[{page:1,key:`${root}/page.json`,count:2}],publicationExclusions:{key:`${root}/excluded.json`,count:1},shards:{pe:`${root}/tokens.json`}},
+      [`${root}/tokens.json`]: [["persona",[0,1]]], [`${root}/excluded.json`]: [1],
+      [`${root}/page.json`]: [{id:"valid",n:"Persona A",p:"2026-07",b:100000},{id:"future",n:"Persona B",p:"2029-01",b:100000}],
+    });
+    const response=await worker.fetch(new Request("https://example.test/api/funcionarios?q=persona&include_zero=true"),{PUBLIC_DATA:bucket as never} as never);
+    const payload=await response.json() as {data:Array<{id:string}>;meta:{total:number}};
+    expect(payload.meta.total).toBe(1);
+    expect(payload.data.map(row=>row.id)).toEqual(["valid"]);
+  });
+  it("un índice de exclusión inconsistente no publica una nómina parcialmente validada", async () => {
+    const root = "projections/funcionarios-v1";
+    const bucket = fakeBucket({
+      [`${root}/manifest.json`]: {version:"test",assets:[],searchIndex:{key:`${root}/index.json`}},
+      [`${root}/index.json`]: {totalRows:2,pageSize:2,pages:[{page:1,key:`${root}/page.json`,count:2}],publicationExclusions:{key:`${root}/excluded.json`,count:2}},
+      [`${root}/excluded.json`]: [1,1],
+    });
+    const response=await worker.fetch(new Request("https://example.test/api/funcionarios?scope=municipal"),{PUBLIC_DATA:bucket as never} as never);
+    expect(response.status).toBe(503);
+    expect(bucket.requested).not.toContain(`${root}/page.json`);
+  });
   it("no pierde registros centrales cuando una página combinada cruza una página de la fuente", async () => {
     const objects:Record<string,unknown> = {};
     for (const [name,total] of [["funcionarios-v1",2],["funcionarios-central-v1",4]] as const) {
