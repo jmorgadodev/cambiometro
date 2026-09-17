@@ -102,7 +102,7 @@ jobs:
 
       - name: Upload theme evidence
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: theme-screenshots-${{ github.sha }}
           path: transparencia-app/artifacts/themes
