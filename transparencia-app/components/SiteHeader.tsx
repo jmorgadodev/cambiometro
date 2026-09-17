@@ -5,7 +5,6 @@ import Image from "next/image";
 import { usePathname } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 import Icono from "@/components/ui/Icono";
-import { GLOBAL_KPIS } from "@/lib/global-kpis";
 import { THEME_ORDER, type ThemeName } from "@/lib/theme-tokens";
 
 /**
@@ -50,11 +49,7 @@ export const NAV_CLUSTERS = [
   },
 ];
 
-interface SiteHeaderProps {
-  totalRecords?: number;
-}
-
-export default function SiteHeader({ totalRecords }: SiteHeaderProps) {
+export default function SiteHeader() {
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [hydrated, setHydrated] = useState(false);
@@ -62,8 +57,7 @@ export default function SiteHeader({ totalRecords }: SiteHeaderProps) {
   const previousPathname = useRef(pathname);
   const pathnameEffectReady = useRef(false);
 
-  const displayTotal = totalRecords && totalRecords > 0 ? totalRecords : GLOBAL_KPIS.registros_canonicos;
-  const catalogStatusLabel = "En línea · actualización por fuente";
+  const catalogStatusLabel = "actualización por fuente · corte propio";
   const catalogStatusDescription = "Catálogo público disponible. Cada fuente conserva su propia fecha de actualización.";
 
   // Papel es el valor predeterminado; nunca se usa el tema del sistema.
@@ -158,12 +152,12 @@ export default function SiteHeader({ totalRecords }: SiteHeaderProps) {
               href="/fuentes"
               prefetch={false}
               className="snapshot-stamp"
-              aria-label={`${catalogStatusDescription} ${displayTotal.toLocaleString("es-CL")} registros.`}
+              aria-label={catalogStatusDescription}
               title={catalogStatusDescription}
             >
               <span className="snapshot-stamp__status" aria-hidden="true" />
               <span>
-                <strong>{displayTotal.toLocaleString("es-CL")} registros</strong>
+                <strong>Datos actualizados por fuente</strong>
                 <small>{catalogStatusLabel}</small>
               </span>
             </Link>
@@ -308,12 +302,12 @@ export default function SiteHeader({ totalRecords }: SiteHeaderProps) {
             prefetch={false}
             className="drawer-snapshot-stamp"
             onClick={() => setDrawerOpen(false)}
-            aria-label={`${catalogStatusDescription} ${displayTotal.toLocaleString("es-CL")} registros.`}
+            aria-label={catalogStatusDescription}
             title={catalogStatusDescription}
           >
             <span className="snapshot-stamp__status" aria-hidden="true" />
             <span>
-              <strong>{displayTotal.toLocaleString("es-CL")} registros</strong>
+              <strong>Datos actualizados por fuente</strong>
               <small>{catalogStatusLabel}</small>
             </span>
           </Link>

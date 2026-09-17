@@ -8,7 +8,6 @@ import RouteTransitionOrb from "@/components/RouteTransitionOrb";
 import NavigationProgressBar from "@/components/NavigationProgressBar";
 import CookieConsent, { CookiePreferencesButton } from "@/components/CookieConsent";
 import { SupportProjectLink } from "@/components/SupportProjectLink";
-import { getDataPlatformSummary } from "@/lib/data-platform-d1";
 import "./globals.css";
 
 const inter = Inter({
@@ -140,12 +139,7 @@ function FacebookIcon({ size = 14 }: { size?: number }) {
   );
 }
 
-import { GLOBAL_KPIS } from "@/lib/global-kpis";
-
-export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
-  const platform = await getDataPlatformSummary();
-  const totalRecords = Math.max(platform.totalRecords || 0, GLOBAL_KPIS.registros_canonicos);
-
+export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="es" data-theme="paper" className={`${inter.variable} ${ibmPlexMono.variable}`}>
       <body className="font-sans">
@@ -159,18 +153,18 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <a className="skip-link" href="#contenido-principal">Saltar al contenido</a>
         <RouteTransitionOrb />
         <NavigationProgressBar />
-        <SiteHeader totalRecords={totalRecords} />
+        <SiteHeader />
         <PageEntrance>
           <main id="contenido-principal">{children}</main>
         </PageEntrance>
-        <Footer totalRecords={totalRecords} />
+        <Footer />
         <CookieConsent />
       </body>
     </html>
   );
 }
 
-function Footer({ totalRecords }: { totalRecords: number }) {
+function Footer() {
   return (
     <footer className="site-footer">
       <div className="container-main site-footer__grid">
@@ -197,8 +191,8 @@ function Footer({ totalRecords }: { totalRecords: number }) {
               <span className="snapshot-stamp__status" aria-hidden="true" />
               <span>Estado del catálogo</span>
             </div>
-            <strong>Catálogo en línea</strong>
-            <small>{totalRecords.toLocaleString("es-CL")} registros compilados · actualización por fuente</small>
+            <strong>Catálogo actualizado por fuente</strong>
+            <small>Las fuentes se actualizan por separado y conservan su propio corte</small>
           </div>
           <aside className="site-footer__support">
             <h2>Sostenibilidad Ciudadana</h2>
