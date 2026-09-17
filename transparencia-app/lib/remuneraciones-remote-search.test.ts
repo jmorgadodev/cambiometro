@@ -76,6 +76,7 @@ describe("búsqueda remota de Transparencia Activa", () => {
       query: "asesor",
       page: 3,
       limit: 15,
+      apiOrigin: "https://cambiometro.impulsacv.cl",
       fetchImpl: async (input) => {
         calls.push(String(input));
         return response({ data: [], meta: { total: 45 } });
