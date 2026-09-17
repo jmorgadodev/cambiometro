@@ -29,13 +29,19 @@ describe("Footer compacto y pulido móvil", () => {
     expect(layoutContent).toContain("provenance-stamp");
     expect(layoutContent).toContain("Estado del catálogo");
     expect(layoutContent).toContain("Catálogo en línea");
-    expect(layoutContent).toContain("registros compilados · actualización por fuente");
+    expect(layoutContent).toContain("Las fuentes se actualizan por separado y conservan su propio corte");
 
     expect(cssContent).toContain(".site-footer__mission");
     expect(cssContent).toContain("font-size: 13.5px");
     expect(cssContent).toContain(".provenance-stamp");
     expect(cssContent).toContain("background: var(--surface-2)");
     expect(cssContent).toContain("border: 1px solid var(--border)");
+  });
+
+  it("el layout global no consulta D1 ni muestra un total consolidado desactualizable", () => {
+    expect(layoutContent).not.toContain("getDataPlatformSummary");
+    expect(layoutContent).toContain("Catálogo actualizado por fuente");
+    expect(layoutContent).not.toContain("totalRecords.toLocaleString");
   });
 
   it("móvil: links del footer accesibles", () => {
