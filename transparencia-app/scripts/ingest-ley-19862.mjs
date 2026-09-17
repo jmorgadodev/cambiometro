@@ -41,6 +41,7 @@ const existingEntityBundles = existingLeySource ? {
   },
 } : {};
 const plan = buildLakePlan(snapshot, {
+  sourceKeys: ["ley-19862"],
   sourceInventory,
   existingCatalog,
   existingEntityBundles,

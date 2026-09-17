@@ -24,6 +24,7 @@ const sourceInventory = existsSync(inventoryPath) ? JSON.parse(readFileSync(inve
 const existingCatalogPath = join(outputRoot, "catalog", "v1", "manifest.json");
 const existingCatalog = existsSync(existingCatalogPath) ? JSON.parse(readFileSync(existingCatalogPath, "utf8")) : null;
 const plan = buildLakePlan(snapshot, {
+  sourceKeys: ["sinim"],
   sourceInventory,
   existingCatalog,
   originalAssets: [{ sourceId: "sinim", year, month: 12, ...result.original }],

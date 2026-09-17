@@ -53,8 +53,14 @@ export function auditCatalogReferences(catalog = {}, objectKeys = []) {
   };
 }
 
-export function assertCatalogReferencesAvailable(catalog, availableKeys) {
-  const report = auditCatalogReferences(catalog, availableKeys);
+/** @param {{ partitions?: Array<Record<string, unknown>> } | null} previousCatalog */
+export function assertCatalogReferencesAvailable(catalog, availableKeys, previousCatalog = null) {
+  const previous = new Map((previousCatalog?.partitions ?? []).map(partition => [partition.id, partition]));
+  const relevant = previousCatalog ? { ...catalog, partitions: (catalog.partitions ?? []).filter(partition => {
+    const old = previous.get(partition.id);
+    return !old || Object.keys({ ...old, ...partition }).some(key => JSON.stringify(old[key]) !== JSON.stringify(partition[key]));
+  }) } : catalog;
+  const report = auditCatalogReferences(relevant, availableKeys);
   if (report.missingPartitions > 0) {
     const sample = report.missing.slice(0, 5).map((item) => item.manifestKey).join(", ");
     throw new Error(`R2_CATALOG_ORPHANED_PARTITIONS: ${report.missingPartitions} missing (${sample})`);

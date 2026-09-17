@@ -21,8 +21,8 @@ on:
         default: ""
 
 concurrency:
-  group: cambiometro-camara-reconciliation
-  cancel-in-progress: true
+  group: cambiometro-static-publication
+  cancel-in-progress: false
 
 permissions:
   contents: write
@@ -102,7 +102,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: |
-          npm run data:lake -- --replace-source camara
+          npm run data:lake -- --replace-source camara --source congreso_opendata,votaciones_camara
           npm run data:publish
 
       - name: Reconstruir asistencia oficial por año

@@ -221,7 +221,12 @@ if (publishR2) {
       checksumSha256: cachedByKey.get(object.key)?.size === object.size ? cachedByKey.get(object.key)?.checksumSha256 ?? null : null,
     })),
   };
-  const r2Plan = planR2Publication(assets, previous);
+  const previousCatalogPath = join(r2Staging, "catalog-before.json");
+  const catalogDownload = wrangler(["r2", "object", "get", `${bucket}/catalog/v1/manifest.json`, "--file", previousCatalogPath], true);
+  if (catalogDownload.status !== 0) throw new Error("PUBLICATION_BASELINE_CATALOG_UNAVAILABLE");
+  const previousCatalog = readJsonIfPresent(previousCatalogPath, null);
+  if (!Array.isArray(previousCatalog?.partitions)) throw new Error("PUBLICATION_BASELINE_CATALOG_INVALID");
+  const r2Plan = planR2Publication(assets, previous, undefined, previousCatalog);
   const activationManifests = r2Plan.puts.filter((asset) => asset.key.endsWith("/manifest.json"));
   const inventoryText = `${JSON.stringify(r2Plan.inventory, null, 2)}\n`;
   const storageBudget = await assertRemoteR2WriteBudget({

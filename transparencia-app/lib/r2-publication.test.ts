@@ -63,15 +63,15 @@ describe("publicación caliente en R2", () => {
     ]);
   });
 
-  it("elimina objetos fríos administrados y bloquea crecimiento desde 95 %", () => {
-    const plan = planR2Publication([asset("catalog/v1/manifest.json", 81)], {
+  it("conserva históricos al 80% y bloquea crecimiento desde 95 %", () => {
+    const plan = planR2Publication([asset("catalog/v1/manifest.json", 1)], {
       objects: [{ key: "partitions/old/2020/01/records.jsonl.gz", size: 80, checksumSha256: "old" }],
     }, 100);
-    expect(plan.action).toBe("archive_cold_partitions");
-    expect(plan.deletes).toEqual(["partitions/old/2020/01/records.jsonl.gz"]);
+    expect(plan.action).toBe("review_storage");
+    expect(plan.deletes).toEqual([]);
 
     expect(planR2Publication([asset("catalog/v1/manifest.json", 91)], { objects: [] }, 100).action)
-      .toBe("archive_cold_partitions");
+      .toBe("review_storage");
 
     expect(() => planR2Publication([asset("catalog/v1/manifest.json", 96)], { objects: [] }, 100))
       .toThrow("R2_GROWTH_BLOCKED_AT_95_PERCENT");

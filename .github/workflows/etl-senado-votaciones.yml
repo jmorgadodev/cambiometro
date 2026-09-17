@@ -103,7 +103,7 @@ jobs:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: |
-          npm run data:lake -- --exclude-source infolobby,infoprobidad
+          npm run data:lake -- --source votaciones_senado --hydrate-history
           npm run data:publish
 
       - name: Actualizar cache estático incremental del Senado

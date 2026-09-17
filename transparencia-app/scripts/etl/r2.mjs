@@ -29,17 +29,6 @@ function latestPrefixes(assets) {
   return new Set([...latest.values()].map((value) => value.prefix));
 }
 
-function catalogLatestPrefixes(assets) {
-  const catalogAsset = assets.find((asset) => asset.key === "catalog/v1/manifest.json");
-  if (!catalogAsset?.data) return latestPrefixes(assets);
-  try {
-    const catalog = JSON.parse(Buffer.from(catalogAsset.data).toString("utf8"));
-    return latestPrefixes((catalog.partitions ?? []).map((partition) => ({ key: `${partition.manifestKey ?? `partitions/${partition.sourceId}/${partition.period.replace("-", "/")}/manifest.json`}` })));
-  } catch {
-    return latestPrefixes(assets);
-  }
-}
-
 export function selectHotAssets(assets) {
   const prefixes = latestPrefixes(assets);
   return assets.filter((asset) => asset.key.startsWith("catalog/")
@@ -91,9 +80,11 @@ function pruneObsoleteProjectionVersions(desired, previous, assets) {
   }
 }
 
-export function planR2Publication(assets, previousInventory = { objects: [] }, limitBytes = DEFAULT_LIMIT_BYTES) {
+export function planR2Publication(assets, previousInventory = { objects: [] }, limitBytes = DEFAULT_LIMIT_BYTES, previousCatalog = null) {
   if (!Number.isSafeInteger(limitBytes) || limitBytes < 1) throw new Error("INVALID_R2_LIMIT");
-  const hot = selectHotAssets(assets);
+  // Every newly declared partition must be physically published. An ETL's
+  // source selection controls volume; dropping older assets leaves orphans.
+  const hot = assets;
   const previous = new Map((previousInventory.objects ?? []).map((object) => [object.key, object]));
   const desired = new Map(previous);
   for (const asset of hot) desired.set(asset.key, asset);
@@ -105,24 +96,15 @@ export function planR2Publication(assets, previousInventory = { objects: [] }, l
     } catch {
       throw new Error("R2_CATALOG_INVALID_JSON");
     }
-    assertCatalogReferencesAvailable(catalog, new Set([...desired.keys(), ...assets.map((asset) => asset.key)]));
+    assertCatalogReferencesAvailable(catalog, new Set(desired.keys()), previousCatalog);
   }
   // Cada proyección versionada conserva la candidata entrante y la versión
   // activa previa como rollback. Las copias más antiguas no son referenciadas
   // por ningún manifiesto y duplican gigabytes sin aportar disponibilidad.
   pruneObsoleteProjectionVersions(desired, previous, hot);
   const previousBytes = [...previous.values()].reduce((total, object) => total + object.size, 0);
-  let projectedBytes = [...desired.values()].reduce((total, object) => total + object.size, 0);
-  let ratio = projectedBytes / limitBytes;
-  if (ratio >= 0.8) {
-    const latest = catalogLatestPrefixes(assets);
-    for (const key of previous.keys()) {
-      const partition = key.match(/^(partitions\/[^/]+\/(?:[^/]+\/)?\d{4}\/\d{2}\/)/)?.[1];
-      if (partition && !latest.has(partition)) desired.delete(key);
-    }
-    projectedBytes = [...desired.values()].reduce((total, object) => total + object.size, 0);
-    ratio = projectedBytes / limitBytes;
-  }
+  const projectedBytes = [...desired.values()].reduce((total, object) => total + object.size, 0);
+  const ratio = projectedBytes / limitBytes;
   if (ratio >= GROWTH_BLOCK_RATIO && projectedBytes > previousBytes) throw new Error("R2_GROWTH_BLOCKED_AT_95_PERCENT");
 
   const puts = hot
@@ -134,7 +116,7 @@ export function planR2Publication(assets, previousInventory = { objects: [] }, l
     });
   const deletes = [...previous.keys()].filter((key) => !desired.has(key));
   return {
-    action: ratio >= 0.8 ? "archive_cold_partitions" : "publish",
+    action: ratio >= 0.8 ? "review_storage" : "publish",
     limitBytes,
     previousBytes,
     projectedBytes,

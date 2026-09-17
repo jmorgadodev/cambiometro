@@ -91,6 +91,7 @@ if (result.rejectedDocuments.length > 0) {
   });
 }
 const plan = buildLakePlan(snapshot, {
+  sourceKeys: ["chilecompra"],
   sourceInventory,
   existingCatalog,
   originalAssets,

@@ -3,6 +3,7 @@ import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { fetchInfoLobbyBundle } from "./etl/connectors/cplt.mjs";
 import { buildLakePlan } from "./etl/lake.mjs";
+import { hydrateSourceHistory } from "./etl/hydrate-source-history.mjs";
 
 function argument(name) {
   const index = process.argv.indexOf(name);
@@ -60,7 +61,10 @@ const originalAssets = result.originals.flatMap((quarter) => {
     redistributable: false,
   })));
 });
-const plan = buildLakePlan({ actualizado_en: generatedAt, fuentes: { infolobby: result.records } }, {
+const snapshot = { actualizado_en: generatedAt, fuentes: { infolobby: result.records } };
+const history = hydrateSourceHistory(snapshot, { appRoot: root, outputRoot, existingCatalog, sourceKeys: ["infolobby"] });
+const plan = buildLakePlan(snapshot, {
+  ...history,
   existingCatalog,
   originalAssets,
 });

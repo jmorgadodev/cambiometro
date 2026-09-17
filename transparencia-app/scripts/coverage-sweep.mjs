@@ -154,7 +154,7 @@ export async function runCoverageSweep({ silent = false, transferManifest = null
 
   rows.push({
     modulo: "Movimientos Autoridades (Diario Oficial / Ley Chile)",
-    indexado: `${totalMovimientos} decretos`,
+    indexado: `${totalMovimientos} movimientos documentados`,
     universo: `${benchmarkMovimientos} benchmark`,
     cobertura: `${cobMov.toFixed(1)}%`,
     umbral: "≥ 95.0%",

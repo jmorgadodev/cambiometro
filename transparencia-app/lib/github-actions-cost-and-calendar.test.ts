@@ -17,7 +17,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       "etl-chilecompra.yml", "etl-contraloria.yml", "etl-cplt.yml", "etl-daily.yml", "etl-camara-votaciones.yml", "etl-senado-votaciones.yml",
       "etl-dipres.yml", "etl-expenses.yml", "etl-infolobby-scheduled.yml", "etl-infoprobidad.yml",
       "etl-ley-19862.yml", "etl-movimientos.yml", "etl-personal-apoyo.yml", "etl-personal-apoyo-senado.yml", "etl-servel.yml",
-      "etl-sinim.yml",
+      "etl-sinim.yml", "etl-camara-reconciliation.yml",
     ]);
     const serializedMutations = new Set(["repair-transfer-d1.yml"]);
 
