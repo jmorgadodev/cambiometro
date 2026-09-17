@@ -25,6 +25,10 @@
 - [x] Auditar la retención de R2 en modo lectura (2026-09-16): 0 snapshots expirados y 0 bytes candidatos; no se ejecutaron `PUT` ni `DELETE`.
 - [x] Auditar las proyecciones CPLT productivas sin descargar el universo: municipal 1.243.761 y central 2.110.434; búsqueda `scope=all` verificada con consultas nominales acotadas.
 - [x] Detectar la discrepancia entre la tarjeta estática CPLT (1.203.287) y el release productivo municipal; documentada sin modificar R2 ni D1.
+- [x] Blindar el publicador para que el alcance central vuelva a excluir municipalidades; PR #579 fusionado el 2026-09-17.
+- [x] Confirmar mediante dry-run que la corrección central elimina 18.022 filas fuera de alcance y conserva 2.092.412 filas válidas.
+- [ ] Publicar la proyección central corregida después de resolver capacidad y rollback de R2; producción aún conserva el release contaminado anterior.
+- [ ] Auditar y depurar backups R2 con lista explícita de objetos, sin borrar ningún snapshot hasta verificar su restauración.
 
 ## D1 después del reinicio — comprobado 2026-09-16
 
@@ -80,6 +84,13 @@
    central local ya fue revisado: 2.110.434 filas, 0 duplicados exactos; falta
    repetirlo para municipal.
 4. Construir historiales, altas, bajas y cambios de monto por lotes pequeños.
+
+### Bloqueante operativo actual
+
+La cuenta R2 suma 17.437.837.684 bytes entre el bucket público y backups; el
+bucket público suma 11.078.005.075 bytes. La guardia de publicación al 95% se
+mantiene activa. La decisión de respaldo y la secuencia para liberar espacio
+están documentadas en `docs/auditorias/2026-09-17-decision-backup-r2.md`.
 
 ### Pendientes de normalización habilitados
 
