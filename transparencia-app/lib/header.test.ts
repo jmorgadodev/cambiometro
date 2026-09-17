@@ -90,6 +90,10 @@ describe("Header y navegación global", () => {
     expect(headerContent).not.toContain("Corte oficial: ${displayTotal.toLocaleString(\"es-CL\")} registros");
   });
 
+  it("no conserva un aviso permanente de mantención al restaurar la operación", () => {
+    expect(headerContent).not.toContain("El sitio se encuentra en mantención");
+  });
+
   it("reglas de CSS: touch targets ≥ 44px, sticky header, drawer transition < 200ms", () => {
     expect(cssContent).toContain("position: sticky");
     expect(cssContent).toContain("overflow-x: clip");
