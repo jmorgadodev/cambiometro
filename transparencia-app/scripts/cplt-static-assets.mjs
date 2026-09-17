@@ -1,4 +1,4 @@
-const cpltStaticAssetPattern = /^projections\/funcionarios-v1\/versions\/[A-Za-z0-9._-]+\/(?:[A-Za-z0-9._-]+\/)*[A-Za-z0-9._-]+\.json$/;
+const cpltStaticAssetPattern = /^projections\/funcionarios-v1\/versions\/[A-Za-z0-9._-]+\/(?:[A-Za-z0-9._-]+\/)*[A-Za-z0-9._-]+\.json(?:\.gz)?$/;
 
 export function cpltStaticAssetRelativePath(key, version) {
   const versionPrefix = `projections/funcionarios-v1/versions/${version}/`;

@@ -387,6 +387,11 @@ async function r2Json<T>(bucket: R2Bucket | undefined, key: string): Promise<T |
   }
   if (!object) return null;
   try {
+    if (key.endsWith(".json.gz")) {
+      const stream = new Blob([await object.arrayBuffer()]).stream()
+        .pipeThrough(new DecompressionStream("gzip"));
+      return await new Response(stream).json() as T;
+    }
     return await object.json<T>();
   } catch {
     return null;
@@ -955,6 +960,9 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
       const lastPhysicalPage = Math.floor(Math.max(start, end - 1) / index.pageSize) + 1;
       const physicalPages = index.pages.filter((item) => item.page >= firstPhysicalPage && item.page <= lastPhysicalPage);
       const physicalRows = await Promise.all(physicalPages.map((item) => r2Json<CompactOfficialRow[]>(env.PUBLIC_DATA, item.key)));
+      if (physicalRows.some((value) => !Array.isArray(value))) {
+        return failure("DATASET_UNAVAILABLE", "Una página del directorio no está disponible temporalmente.", 503);
+      }
       const baseOffset = (firstPhysicalPage - 1) * index.pageSize;
       rows = compactOfficialRows(physicalRows.flatMap((value) => value ?? [])).slice(start - baseOffset, end - baseOffset);
     }

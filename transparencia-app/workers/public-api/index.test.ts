@@ -38,6 +38,31 @@ function sha256(data: ArrayBuffer) {
 }
 
 describe("registros públicos R2", () => {
+  it("consulta páginas de remuneraciones comprimidas sin cambiar registros ni paginación", async () => {
+    const root = "projections/funcionarios-central-v1";
+    const raw = [{id:"salary-original",n:"Sofía Pumpin",p:"2026-07",b:5674763}];
+    const compressed = gzipSync(JSON.stringify(raw));
+    const bucket = fakeBucket({
+      [`${root}/manifest.json`]: {version:"test",generatedAt:"2026-09-14T00:00:00Z",assets:[],searchIndex:{key:`${root}/index.json`}},
+      [`${root}/index.json`]: {totalRows:1,pageSize:1,pages:[{page:1,key:`${root}/page.json.gz`,count:1}],filters:{}},
+      [`${root}/page.json.gz`]: compressed.buffer.slice(compressed.byteOffset,compressed.byteOffset+compressed.byteLength),
+    });
+    const response = await worker.fetch(new Request("https://example.test/api/funcionarios?scope=central&include_zero=true"),{PUBLIC_DATA:bucket as never} as never);
+    const payload = await response.json() as {data:Array<{id:string;nombre_completo:string;remuneracion_bruta_mensual:number}>;meta:{total:number}};
+    expect(response.status).toBe(200);
+    expect(payload.meta.total).toBe(1);
+    expect(payload.data[0]).toMatchObject({id:"salary-original",nombre_completo:"Sofía Pumpin",remuneracion_bruta_mensual:5674763});
+  });
+  it("no declara disponible una página comprimida corrupta", async () => {
+    const root="projections/funcionarios-v1";
+    const bucket=fakeBucket({
+      [`${root}/manifest.json`]:{version:"test",generatedAt:"2026-09-14T00:00:00Z",assets:[],searchIndex:{key:`${root}/index.json`}},
+      [`${root}/index.json`]:{totalRows:1,pageSize:1,pages:[{page:1,key:`${root}/page.json.gz`,count:1}],filters:{}},
+      [`${root}/page.json.gz`]:new Uint8Array([0,1,2]).buffer,
+    });
+    const response=await worker.fetch(new Request("https://example.test/api/funcionarios?scope=municipal"),{PUBLIC_DATA:bucket as never} as never);
+    expect(response.status).toBe(503);
+  });
   it("excluye períodos fuera del corte antes de contar y paginar sin modificar los originales", async () => {
     const root = "projections/funcionarios-central-v1";
     const bucket = fakeBucket({

@@ -11,6 +11,12 @@ describe("CPLT static asset keys", () => {
     )).toBe("search_index/p-0001.json");
   });
 
+  it("accepts compressed search pages but never hydrates them into Pages", () => {
+    const key = `projections/funcionarios-v1/versions/${version}/search_index/p-0001.json.gz`;
+    expect(cpltStaticAssetRelativePath(key, version)).toBe("search_index/p-0001.json.gz");
+    expect(cpltStaticAssetsForPages([{key}])).toEqual([]);
+  });
+
   it("accepts a direct versioned projection", () => {
     expect(cpltStaticAssetRelativePath(
       `projections/funcionarios-v1/versions/${version}/muni-maipu.json`,
