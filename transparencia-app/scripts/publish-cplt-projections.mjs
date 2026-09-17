@@ -327,7 +327,8 @@ const assets = [];
 const manifestAssets = [
   transparencySummaryMetadata,
   searchIndexMetadata,
-  ...searchAssets.filter((asset) => asset.key !== searchIndexKey && asset.key !== transparencySummaryKey),
+  coverageIndexMetadata,
+  ...searchAssets.filter((asset) => asset.key !== searchIndexKey && asset.key !== coverageIndexKey && asset.key !== transparencySummaryKey),
 ];
 for (const asset of manifestAssets) {
   const target = join(outputRoot, asset.key);
