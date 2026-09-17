@@ -111,6 +111,7 @@ describe("automatizacion CPLT nacional", () => {
     expect(publisher).toContain("buildCpltCoverageIndex");
     expect(publisher).toContain('"coverage-index.json"');
     expect(publisher).toContain("coverageIndex:");
+    expect(publisher).toMatch(/const manifestAssets = \[\s*transparencySummaryMetadata,\s*searchIndexMetadata,\s*coverageIndexMetadata,/);
     expect(indexer).toContain("organismId");
     expect(indexer).toContain("invalidPeriodRows");
     expect(indexer).not.toContain("nombre_completo");
