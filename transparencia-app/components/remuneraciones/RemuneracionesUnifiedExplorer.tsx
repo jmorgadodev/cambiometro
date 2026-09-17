@@ -204,13 +204,22 @@ export default function RemuneracionesUnifiedExplorer() {
   }, [results]);
 
   const paidSources = useMemo(() => manifest?.sources.filter((item) => PAID_SOURCE_IDS.includes(item.id)) ?? [], [manifest]);
-  const totalPages = Math.max(1, Math.ceil(groups.length / RESULTS_PAGE_SIZE));
+  const totalRemotePages = Math.max(1, Math.ceil((results?.totalRemote ?? 0) / RESULTS_PAGE_SIZE));
+  const totalPages = Math.max(1, Math.ceil(groups.length / RESULTS_PAGE_SIZE), totalRemotePages);
   const pageStart = groups.length === 0 ? 0 : (currentPage - 1) * RESULTS_PAGE_SIZE + 1;
   const pageEnd = Math.min(currentPage * RESULTS_PAGE_SIZE, groups.length);
   const visibleGroups = groups.slice((currentPage - 1) * RESULTS_PAGE_SIZE, currentPage * RESULTS_PAGE_SIZE);
 
   function goToResultsPage(nextPage: number) {
+    if (nextPage > currentPage && results && totalRemotePages > currentPage && results.remoteRows.length < (results.totalRemote ?? 0)) {
+      void loadRemoteResultsPage(nextPage);
+      return;
+    }
     setCurrentPage(nextPage);
+    scrollToResults();
+  }
+
+  function scrollToResults() {
     window.setTimeout(() => {
       const target = document.getElementById("resultados-remuneraciones");
       if (!target) return;
@@ -265,7 +274,7 @@ export default function RemuneracionesUnifiedExplorer() {
         : undefined;
       const transparencySourceSelected = source === "transparencia-activa" || source === "transparencia-activa-central";
       if (source === "all" || transparencySourceSelected) {
-        const remote = await searchTransparencyActiva({ query: cleanQuery, organism, role, apiOrigin: publicApiOrigin });
+        const remote = await searchTransparencyActiva({ query: cleanQuery, organism, role, apiOrigin: publicApiOrigin, page: 1, limit: RESULTS_PAGE_SIZE });
         remoteRows = remote.rows.map((row) => RemoteOfficialRow(row, cleanQuery))
           .filter((row): row is UnifiedRow => Boolean(row))
           .filter((row) => source === "all" || row.sourceId === source || (source === "transparencia-activa" && row.sourceId === "transparencia-activa-central"));
@@ -276,6 +285,42 @@ export default function RemuneracionesUnifiedExplorer() {
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "No se pudo completar la búsqueda.");
       setResults(null);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function loadRemoteResultsPage(page: number) {
+    if (!manifest || !results || loading) return;
+    const isLocalStaticPreview = typeof window !== "undefined"
+      && (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1");
+    const publicApiOrigin = isLocalStaticPreview
+      ? (process.env.NEXT_PUBLIC_PUBLIC_API_ORIGIN?.trim() || "https://cambiometro.impulsacv.cl")
+      : undefined;
+    setLoading(true);
+    setError(null);
+    try {
+      const remote = await searchTransparencyActiva({
+        query: query.trim(),
+        organism,
+        role,
+        apiOrigin: publicApiOrigin,
+        page,
+        limit: RESULTS_PAGE_SIZE,
+      });
+      const newRows = remote.rows.map((row) => RemoteOfficialRow(row, query.trim()))
+        .filter((row): row is UnifiedRow => Boolean(row))
+        .filter((row) => source === "all" || row.sourceId === source || (source === "transparencia-activa" && row.sourceId === "transparencia-activa-central"));
+      setResults((previous) => previous ? {
+        ...previous,
+        remoteRows: [...previous.remoteRows, ...newRows.filter((row) => !previous.remoteRows.some((existing) => existing.recordId === row.recordId))],
+        totalRemote: remote.total,
+        remotePartial: remote.partial,
+      } : previous);
+      setCurrentPage(page);
+      scrollToResults();
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : "No se pudo cargar la siguiente página.");
     } finally {
       setLoading(false);
     }
@@ -352,10 +397,10 @@ export default function RemuneracionesUnifiedExplorer() {
                  </details>;
                })}
             </div>
-            {groups.length > RESULTS_PAGE_SIZE && <nav className="remuneration-results__pagination" aria-label="Paginación de resultados">
-              <button type="button" onClick={() => goToResultsPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1}>← Anterior</button>
-              <span>Mostrando {number.format(pageStart)}–{number.format(pageEnd)} de {number.format(groups.length)} personas</span>
-              <button type="button" onClick={() => goToResultsPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages}>Siguiente →</button>
+            {totalPages > 1 && <nav className="remuneration-results__pagination" aria-label="Paginación de resultados">
+              <button type="button" onClick={() => goToResultsPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1 || loading}>← Anterior</button>
+              <span>Mostrando {number.format(pageStart)}–{number.format(pageEnd)} de {number.format(Math.max(groups.length, results.totalRemote ?? 0))} resultados</span>
+              <button type="button" onClick={() => goToResultsPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages || loading}>Siguiente →</button>
             </nav>}
           </section>}
 

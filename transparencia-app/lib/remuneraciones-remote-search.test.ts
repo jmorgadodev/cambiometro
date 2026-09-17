@@ -69,4 +69,22 @@ describe("búsqueda remota de Transparencia Activa", () => {
 
     expect(calls[0]).toMatch(/^https:\/\/cambiometro\.impulsacv\.cl\/api\/funcionarios\?/);
   });
+
+  it("envía la página y el tamaño solicitados para no limitarse al primer bloque", async () => {
+    const calls: string[] = [];
+    await searchTransparencyActiva({
+      query: "asesor",
+      page: 3,
+      limit: 15,
+      apiOrigin: "https://cambiometro.impulsacv.cl",
+      fetchImpl: async (input) => {
+        calls.push(String(input));
+        return response({ data: [], meta: { total: 45 } });
+      },
+    });
+
+    const url = new URL(calls[0]);
+    expect(url.searchParams.get("page")).toBe("3");
+    expect(url.searchParams.get("limit")).toBe("15");
+  });
 });
