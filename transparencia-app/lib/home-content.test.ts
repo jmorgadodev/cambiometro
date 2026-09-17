@@ -43,6 +43,7 @@ describe("promesas editoriales del inicio", () => {
     expect(search).toContain("event.preventDefault();");
     expect(search).toContain("resolveHomeSearchTarget");
     expect(search).toContain("resolveSearchResultUrl");
+    expect(search).toContain("const key = resolveSearchResultUrl(result);");
     expect(search).toContain("fullSearchTarget.href");
     expect(search).not.toContain("hasRemunerationResults");
   });

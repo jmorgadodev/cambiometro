@@ -109,7 +109,7 @@ function flattenResults(payload: SearchPayload) {
   ];
   const unique = new Map<string, SearchResult>();
   for (const result of groups.flat()) {
-    const key = result.url || `${result.type}-${result.id}`;
+    const key = resolveSearchResultUrl(result);
     if (!unique.has(key)) unique.set(key, result);
   }
   return [...unique.values()].slice(0, 8);
