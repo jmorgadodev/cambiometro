@@ -12,7 +12,6 @@ import {
   MOVIMIENTOS_PUBLICATION_BLOCKED,
   MOTIVOS_CATEGORIAS,
   isMovimientoDocumentoPendienteMayor30,
-  summarizeMovementFreshness,
   esMovimientoRespaldado,
   type MovimientoTipo,
   type MovimientoMotivoCategoria,
@@ -228,10 +227,6 @@ function MovimientosContent() {
 
   const [nowMs] = useState<number>(() => Date.now());
   const [shareFeedback, setShareFeedback] = useState(false);
-  const frescura = useMemo(
-    () => summarizeMovementFreshness(MOVIMIENTOS_PIPELINE_METADATA, nowMs),
-    [nowMs],
-  );
 
   // KPIs 100% DINÁMICOS DESDE EL DATASET (RECONCILIACIÓN EXTERNA + TRANSPARENCIA)
   const {
@@ -247,9 +242,6 @@ function MovimientosContent() {
     ultimaEjecucionTexto,
     ultimaPublicacionTexto,
     senalesEnConfirmacion,
-    fuentesRevisadas,
-    fuentesSinRespuesta,
-    ultimaRevisionFuentesTexto,
   } = useMemo(() => {
     const enGobierno = MOVIMIENTOS.filter((m) => m.fecha >= "2026-03-11");
     const totalGob = enGobierno.length;
@@ -311,13 +303,6 @@ function MovimientosContent() {
     const ultimaPublicacionTexto = ultimaPublicacionDate && !Number.isNaN(ultimaPublicacionDate.getTime())
       ? ultimaPublicacionDate.toLocaleDateString("es-CL", { day: "numeric", month: "long", year: "numeric", timeZone: "America/Santiago" })
       : "sin registro";
-    const fuentes = MOVIMIENTOS_PIPELINE_METADATA.source_health;
-    const fuentesSinRespuesta = fuentes.filter((source) => source.ok === false);
-    const ultimaRevisionFuentes = fuentes
-      .map((source) => String(source.fetchedAt ?? ""))
-      .filter((value) => Number.isFinite(Date.parse(value)))
-      .sort()
-      .at(-1);
 
     return {
       totalCambiosGobierno: totalGob,
@@ -335,9 +320,6 @@ function MovimientosContent() {
       ),
       ultimaPublicacionTexto,
       senalesEnConfirmacion: Number(MOVIMIENTOS_PIPELINE_METADATA.stats.signals_en_confirmacion ?? 0),
-      fuentesRevisadas: fuentes,
-      fuentesSinRespuesta,
-      ultimaRevisionFuentesTexto: formatPipelineTimestamp(ultimaRevisionFuentes),
     };
   }, [nowMs]);
 
@@ -465,7 +447,7 @@ function MovimientosContent() {
               </div>
               <div className="stat-tile__label">Último Cambio Registrado</div>
               <div className="stat-tile__hint" style={{ color: "var(--ok)", fontWeight: 600 }}>
-                {haceTexto} · {totalVerificados} verificados con decreto
+                {haceTexto} · {totalVerificados} con respaldo documental
               </div>
             </div>
 
@@ -487,49 +469,6 @@ function MovimientosContent() {
         </div>
       </section>
 
-      <section className="container-main" aria-labelledby="sources-health-heading" style={{ paddingTop: "1.25rem" }}>
-        <div style={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 10, padding: "1rem 1.2rem" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", gap: "1rem", flexWrap: "wrap" }}>
-            <div>
-              <h2 id="sources-health-heading" style={{ fontSize: "0.95rem", margin: 0, color: "var(--text-1)" }}>
-                Estado de las fuentes
-              </h2>
-              <p style={{ margin: "0.3rem 0 0", color: "var(--text-2)", fontSize: "0.78rem", lineHeight: 1.45 }}>
-                La fecha del evento, la revisión de las fuentes y la publicación de la versión son hitos distintos.
-              </p>
-            </div>
-            <span style={{ color: "var(--text-muted)", fontSize: "0.72rem" }}>
-              Última revisión de fuentes: {ultimaRevisionFuentesTexto}
-            </span>
-          </div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "0.55rem", marginTop: "0.8rem" }}>
-            {fuentesRevisadas.map((source) => {
-              const label = String(source.label ?? source.id ?? "Fuente sin nombre");
-              const ok = source.ok === true;
-              const status = source.status ? `HTTP ${String(source.status)}` : "sin respuesta";
-              const error = source.error ? ` · ${String(source.error)}` : "";
-              return (
-                <div key={String(source.id ?? label)} style={{ border: "1px solid var(--border-subtle)", borderRadius: 8, padding: "0.65rem 0.75rem", background: "var(--surface)" }}>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: "0.5rem" }}>
-                    <strong style={{ fontSize: "0.75rem", color: "var(--text-1)" }}>{label}</strong>
-                    <span style={{ color: ok ? "var(--ok)" : "var(--warn)", fontSize: "0.68rem", fontWeight: 700 }}>
-                      {ok ? "Respondió" : "No respondió"}
-                    </span>
-                  </div>
-                  <span style={{ display: "block", marginTop: "0.2rem", color: "var(--text-muted)", fontSize: "0.68rem" }}>
-                    {status}{error}
-                  </span>
-                </div>
-              );
-            })}
-          </div>
-          {fuentesSinRespuesta.length > 0 && (
-            <p role="status" style={{ margin: "0.7rem 0 0", color: "var(--warn)", fontSize: "0.75rem", lineHeight: 1.45 }}>
-              {fuentesSinRespuesta.length} fuente{fuentesSinRespuesta.length === 1 ? "" : "s"} no respondió en la última revisión. La versión anterior se conserva y esas señales no se promueven automáticamente a movimiento oficial.
-            </p>
-          )}
-        </div>
-      </section>
 
       {señalesPendientes.length > 0 && (
         <section className="container-main" aria-labelledby="signals-heading" style={{ paddingTop: "1.25rem" }}>
@@ -554,70 +493,13 @@ function MovimientosContent() {
 
       <section className="container-main" aria-labelledby="freshness-heading" style={{ paddingTop: "1.25rem" }}>
         <div style={{ background: "var(--surface)", border: "1px solid var(--border)", borderRadius: 10, padding: "1rem 1.2rem" }}>
-          <div style={{ display: "flex", justifyContent: "space-between", gap: "1rem", alignItems: "flex-start", flexWrap: "wrap" }}>
-            <div>
-              <h2 id="freshness-heading" style={{ fontSize: "0.95rem", margin: "0 0 0.35rem", color: "var(--text-1)" }}>
-                Estado de actualización
-              </h2>
-              <p style={{ margin: 0, color: "var(--text-2)", fontSize: "0.82rem", lineHeight: 1.45 }}>
-                Las fechas se mantienen separadas: una fuente puede consultarse hoy aunque su último evento publicado sea anterior.
-              </p>
-            </div>
-            <span
-              style={{
-                display: "inline-flex",
-                alignItems: "center",
-                gap: "0.35rem",
-                padding: "0.3rem 0.65rem",
-                borderRadius: 999,
-                border: "1px solid var(--border)",
-                color: frescura.state === "operativo" ? "var(--ok)" : "var(--warn)",
-                fontSize: "0.72rem",
-                fontWeight: 800,
-                textTransform: "uppercase",
-              }}
-            >
-              <span className="live-dot" aria-hidden="true" />
-              {frescura.state === "operativo" ? "Fuentes operativas" : frescura.state === "advertencia" ? "Advertencia de fuente" : "Sin fuente oficial disponible"}
-            </span>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(190px, 1fr))", gap: "0.65rem", marginTop: "0.9rem" }}>
-            <div style={{ padding: "0.65rem 0.75rem", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--border)" }}>
-              <div style={{ color: "var(--text-muted)", fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Última ejecución exitosa</div>
-              <strong style={{ display: "block", marginTop: "0.2rem", fontSize: "0.82rem" }}>{formatPipelineTimestamp(frescura.lastSuccessAt ?? undefined)}</strong>
-            </div>
-            <div style={{ padding: "0.65rem 0.75rem", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--border)" }}>
-              <div style={{ color: "var(--text-muted)", fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Último evento efectivo</div>
-              <strong style={{ display: "block", marginTop: "0.2rem", fontSize: "0.82rem" }}>{frescura.lastEventDate ? formatFechaCorta(frescura.lastEventDate) : "sin registro"}</strong>
-              <span style={{ color: "var(--text-muted)", fontSize: "0.72rem" }}>{frescura.eventDaysAgo === null ? "sin fecha" : `${frescura.eventDaysAgo} días desde el evento`}</span>
-            </div>
-            <div style={{ padding: "0.65rem 0.75rem", borderRadius: 8, background: "var(--surface-2)", border: "1px solid var(--border)" }}>
-              <div style={{ color: "var(--text-muted)", fontSize: "0.7rem", textTransform: "uppercase", letterSpacing: "0.05em" }}>Fuentes oficiales</div>
-              <strong style={{ display: "block", marginTop: "0.2rem", fontSize: "0.82rem" }}>{frescura.connectors.filter((source) => source.tier === "official" && source.ok).length} disponibles</strong>
-              <span style={{ color: "var(--text-muted)", fontSize: "0.72rem" }}>{frescura.connectors.filter((source) => source.tier === "official").length} monitoreadas</span>
-            </div>
-          </div>
-
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: "0.45rem", marginTop: "0.9rem" }}>
-            {frescura.connectors.map((source) => (
-              <div key={source.id} style={{ display: "flex", justifyContent: "space-between", gap: "0.75rem", alignItems: "center", padding: "0.55rem 0.65rem", borderTop: "1px solid var(--border)" }}>
-                <div style={{ minWidth: 0 }}>
-                  <strong style={{ display: "block", fontSize: "0.76rem", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{source.label}</strong>
-                  <span style={{ color: "var(--text-muted)", fontSize: "0.7rem" }}>{source.checkedAt ? `Consultada ${formatPipelineTimestamp(source.checkedAt)}` : "Sin consulta registrada"}</span>
-                </div>
-                <span style={{ color: source.ok ? "var(--ok)" : "var(--warn)", fontSize: "0.7rem", fontWeight: 800, whiteSpace: "nowrap" }}>
-                  {source.ok ? "Disponible" : `No disponible${source.status ? ` · ${source.status}` : ""}`}
-                </span>
-              </div>
-            ))}
-          </div>
-
-          {frescura.unavailableOfficial.length > 0 && (
-            <p style={{ margin: "0.75rem 0 0", color: "var(--warn)", fontSize: "0.76rem", lineHeight: 1.45 }}>
-              Algunas fuentes oficiales no respondieron en la última ejecución ({frescura.unavailableOfficial.map((source) => source.label).join(", ")}). La versión anterior se conserva y no se borran movimientos por una falla temporal.
-            </p>
-          )}
+          <h2 id="freshness-heading" style={{ fontSize: "0.95rem", margin: "0 0 0.75rem" }}>Estado de actualización</h2>
+          <dl style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(160px, 1fr))", gap: "0.75rem", margin: 0 }}>
+            <div><dt>Última actualización pública</dt><dd style={{ margin: "0.25rem 0 0", fontWeight: 700 }}>{ultimaPublicacionTexto}</dd></div>
+            <div><dt>Último evento disponible</dt><dd style={{ margin: "0.25rem 0 0", fontWeight: 700 }}>{ultFechaFormateada}</dd></div>
+            <div><dt>Con respaldo documental</dt><dd style={{ margin: "0.25rem 0 0", fontWeight: 700 }}>{totalVerificados}</dd></div>
+            <div><dt>En confirmación</dt><dd style={{ margin: "0.25rem 0 0", fontWeight: 700 }}>{totalEnConfirmacion + senalesEnConfirmacion}</dd></div>
+          </dl>
         </div>
       </section>
 

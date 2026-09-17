@@ -5,6 +5,7 @@ import { readR2EvidenceRecords } from "../../lib/r2-records";
 import { readR2EntityIndex } from "../../lib/r2-entities";
 import { staticRecordCandidatePaths, staticRecordRows } from "../../lib/r2-public-record-paths";
 import { matchesFuncionarioQuality, normalizeFuncionarioRecord, type FuncionarioQualityFilter } from "../../lib/funcionarios-normalization";
+import { intersectSortedPositions, subtractSortedPositions, positionsWithoutExcluded } from "./search-postings";
 
 interface EmailSender {
   send(message: {
@@ -748,27 +749,6 @@ function officialFilterKeys(requestUrl: URL, datasetRoot = "funcionarios-v1", av
   return keys;
 }
 
-function intersectSortedPositions(lists: number[][]) {
-  if (lists.length === 0) return [];
-  return [...lists].sort((left, right) => left.length - right.length).reduce((left, right) => {
-    const intersection: number[] = [];
-    let leftIndex = 0;
-    let rightIndex = 0;
-    while (leftIndex < left.length && rightIndex < right.length) {
-      if (left[leftIndex] === right[rightIndex]) {
-        intersection.push(left[leftIndex]);
-        leftIndex += 1;
-        rightIndex += 1;
-      } else if (left[leftIndex] < right[rightIndex]) {
-        leftIndex += 1;
-      } else {
-        rightIndex += 1;
-      }
-    }
-    return intersection;
-  });
-}
-
 async function officialsAtPositions(index: OfficialsSearchIndex, positions: number[], env: Env) {
   if (positions.length === 0) return [];
   const physicalPages = [...new Set(positions.map((position) => Math.floor(position / index.pageSize) + 1))];
@@ -863,6 +843,24 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
     const requestedLimit = Number(requestUrl.searchParams.get("limit") ?? 20);
     const limit = Number.isInteger(requestedLimit) ? Math.max(1, Math.min(requestedLimit, 100)) : 20;
     const filterKeys = officialFilterKeys(requestUrl, datasetRoot, index.filters);
+    const centralService = index.filters?.["tipo:servicio"];
+    const centralMunicipal = index.filters?.["tipo:municipalidad"];
+    // The production legacy release contains only these two disjoint types.
+    // Use its verified small complement, not a 2-million-position filter.
+    const centralExclusion = datasetRoot === "funcionarios-central-v1"
+      && centralService && centralMunicipal
+      && centralService.count + centralMunicipal.count === index.totalRows
+      && centralMunicipal.count < centralService.count ? centralMunicipal : null;
+    let excludedPositions: number[] = [];
+    if (centralExclusion) {
+      const values = await r2Json<number[]>(env.PUBLIC_DATA, centralExclusion.key);
+      if (!Array.isArray(values) || values.length !== centralExclusion.count) {
+        return failure("DATASET_UNAVAILABLE", "El alcance de la nómina central no está disponible.", 503);
+      }
+      excludedPositions = values;
+      const serviceFilter = filterKeys.indexOf("tipo:servicio");
+      if (serviceFilter >= 0) filterKeys.splice(serviceFilter, 1);
+    }
     const scopeHeadcount = datasetRoot === "funcionarios-central-v1"
       ? Number(index.filters?.["tipo:servicio"]?.count ?? index.totalRows)
       : index.totalRows;
@@ -881,9 +879,11 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
         const shardKeys = Array.isArray(shardValue) ? shardValue : shardValue ? [shardValue] : [];
         const shardParts = await Promise.all(shardKeys.map((key) => r2Json<CompactOfficialTokenEntry[]>(env.PUBLIC_DATA, key)));
         if (shardParts.some((entries) => !Array.isArray(entries))) return null;
-        return [...new Set(shardParts
+        const matches = shardParts
           .flatMap((entries) => entries ?? [])
-          .filter((entry) => Array.isArray(entry) && typeof entry[0] === "string" && entry[0].startsWith(token) && Array.isArray(entry[1]))
+          .filter((entry) => Array.isArray(entry) && typeof entry[0] === "string" && entry[0].startsWith(token) && Array.isArray(entry[1]));
+        if (matches.length === 1) return matches[0][1];
+        return [...new Set(matches
           .flatMap((entry) => entry[1])
           .filter(Number.isInteger))].sort((left, right) => left - right);
       }));
@@ -891,6 +891,7 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
         return failure("DATASET_UNAVAILABLE", "Un índice nacional de búsqueda no está disponible.", 503);
       }
       let positions = intersectSortedPositions(tokenPositionLists as number[][]);
+      if (centralExclusion) positions = subtractSortedPositions(positions, excludedPositions);
       if (filterKeys.length > 0) {
         const filterDescriptors = filterKeys.map((key) => index.filters?.[key]);
         if (filterDescriptors.some((descriptor) => !descriptor)) {
@@ -917,13 +918,22 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
       if (positionLists.some((positions) => !Array.isArray(positions))) {
         return failure("DATASET_UNAVAILABLE", "Un índice nacional de filtros no está disponible.", 503, { filters: filterKeys });
       }
-      const positions = intersectSortedPositions(positionLists as number[][]);
+      let positions = intersectSortedPositions(positionLists as number[][]);
+      if (centralExclusion) positions = subtractSortedPositions(positions, excludedPositions);
       resultTotal = positions.length;
       totalPages = Math.max(1, Math.ceil(resultTotal / limit));
       page = Number.isInteger(requestedPage) ? Math.max(1, Math.min(requestedPage, totalPages)) : 1;
       const selected = positions.slice((page - 1) * limit, page * limit);
       const selectedRows = await officialsAtPositions(index, selected, env);
       if (selectedRows === null) return failure("DATASET_UNAVAILABLE", "Una página del directorio nacional no está disponible.", 503);
+      rows = selectedRows;
+    } else if (centralExclusion) {
+      resultTotal = scopeHeadcount;
+      totalPages = Math.max(1, Math.ceil(resultTotal / limit));
+      page = Number.isInteger(requestedPage) ? Math.max(1, Math.min(requestedPage, totalPages)) : 1;
+      const selected = positionsWithoutExcluded(index.totalRows, excludedPositions, (page - 1) * limit, limit);
+      const selectedRows = await officialsAtPositions(index, selected, env);
+      if (selectedRows === null) return failure("DATASET_UNAVAILABLE", "Una página de la nómina central no está disponible.", 503);
       rows = selectedRows;
     } else {
       // Las páginas físicas de R2 contienen hasta 10.000 filas, mientras que
@@ -1023,17 +1033,19 @@ async function listAllFuncionariosFromR2(requestUrl: URL, env: Env) {
 
   async function appendSourceSegment(source: { name: string; root: string }, sourceStart: number, sourceEnd: number) {
     if (sourceStart >= sourceEnd) return;
-    const sourceUrl = new URL(requestUrl);
-    sourceUrl.searchParams.set("page", String(Math.floor(sourceStart / limit) + 1));
-    sourceUrl.searchParams.set("limit", String(limit));
-    const response = await listFuncionariosFromR2(sourceUrl, env, source.root);
-    if (response.status >= 500) return;
-    const payload = await response.json() as JsonRecord;
-    const sourceRows = Array.isArray(payload.data) ? payload.data as JsonRecord[] : [];
-    const localOffset = sourceStart % limit;
-    rows.push(...sourceRows
-      .slice(localOffset, localOffset + (sourceEnd - sourceStart))
-      .map((row) => ({ ...row, sourceScope: source.name })));
+    for (let cursor = sourceStart; cursor < sourceEnd;) {
+      const sourceUrl = new URL(requestUrl);
+      sourceUrl.searchParams.set("page", String(Math.floor(cursor / limit) + 1));
+      sourceUrl.searchParams.set("limit", String(limit));
+      const response = await listFuncionariosFromR2(sourceUrl, env, source.root);
+      if (response.status >= 500) return;
+      const payload = await response.json() as JsonRecord;
+      const sourceRows = Array.isArray(payload.data) ? payload.data as JsonRecord[] : [];
+      const localOffset = cursor % limit;
+      const count = Math.min(sourceEnd - cursor, limit - localOffset);
+      rows.push(...sourceRows.slice(localOffset, localOffset + count).map((row) => ({ ...row, sourceScope: source.name })));
+      cursor += count;
+    }
   }
 
   // El contrato combinado es determinista: primero municipal y luego central.

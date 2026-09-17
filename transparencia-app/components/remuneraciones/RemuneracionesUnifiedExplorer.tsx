@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { searchTransparencyActiva } from "@/lib/remuneraciones-remote-search";
+import { remunerationResultWindow } from "@/lib/remuneraciones-pagination";
 
 type SourceStatus = "complete" | "partial" | "aggregate_only" | "unavailable";
 
@@ -53,6 +54,8 @@ interface SearchResult {
   remoteRows: UnifiedRow[];
   totalRemote: number | null;
   remotePartial: boolean;
+  remoteLoadedPage: number;
+  criteria: { query: string; organism: string; role: string; source: string };
 }
 
 interface LiveCpltCoverage {
@@ -204,14 +207,17 @@ export default function RemuneracionesUnifiedExplorer() {
   }, [results]);
 
   const paidSources = useMemo(() => manifest?.sources.filter((item) => PAID_SOURCE_IDS.includes(item.id)) ?? [], [manifest]);
-  const totalRemotePages = Math.max(1, Math.ceil((results?.totalRemote ?? 0) / RESULTS_PAGE_SIZE));
-  const totalPages = Math.max(1, Math.ceil(groups.length / RESULTS_PAGE_SIZE), totalRemotePages);
-  const pageStart = groups.length === 0 ? 0 : (currentPage - 1) * RESULTS_PAGE_SIZE + 1;
-  const pageEnd = Math.min(currentPage * RESULTS_PAGE_SIZE, groups.length);
-  const visibleGroups = groups.slice((currentPage - 1) * RESULTS_PAGE_SIZE, currentPage * RESULTS_PAGE_SIZE);
+  const resultWindow = remunerationResultWindow(results?.rows.length ?? 0, results?.totalRemote ?? results?.remoteRows.length ?? 0, currentPage, RESULTS_PAGE_SIZE);
+  const totalPages = resultWindow.totalPages;
+  const pageStart = resultWindow.totalRecords === 0 ? 0 : resultWindow.start + 1;
+  const pageEnd = resultWindow.end;
+  const pageNames = new Set([...(results?.rows ?? []), ...(results?.remoteRows ?? [])]
+    .slice(resultWindow.start, resultWindow.end).map(row => personIdentityKey(row.nombreOriginal) || row.personKey));
+  const visibleGroups = groups.filter(group => pageNames.has(personIdentityKey(group[0].nombreOriginal) || group[0].personKey));
 
   function goToResultsPage(nextPage: number) {
-    if (nextPage > currentPage && results && totalRemotePages > currentPage && results.remoteRows.length < (results.totalRemote ?? 0)) {
+    const nextWindow = remunerationResultWindow(results?.rows.length ?? 0, results?.totalRemote ?? results?.remoteRows.length ?? 0, nextPage, RESULTS_PAGE_SIZE);
+    if (results && nextWindow.remoteEnd > results.remoteRows.length) {
       void loadRemoteResultsPage(nextPage);
       return;
     }
@@ -274,14 +280,14 @@ export default function RemuneracionesUnifiedExplorer() {
         : undefined;
       const transparencySourceSelected = source === "transparencia-activa" || source === "transparencia-activa-central";
       if (source === "all" || transparencySourceSelected) {
-        const remote = await searchTransparencyActiva({ query: cleanQuery, organism, role, apiOrigin: publicApiOrigin, page: 1, limit: RESULTS_PAGE_SIZE });
+        const remote = await searchTransparencyActiva({ query: cleanQuery, organism, role, scope: source === "transparencia-activa-central" ? "central" : "all", apiOrigin: publicApiOrigin, page: 1, limit: RESULTS_PAGE_SIZE });
         remoteRows = remote.rows.map((row) => RemoteOfficialRow(row, cleanQuery))
           .filter((row): row is UnifiedRow => Boolean(row))
           .filter((row) => source === "all" || row.sourceId === source || (source === "transparencia-activa" && row.sourceId === "transparencia-activa-central"));
         totalRemote = remote.total;
         remotePartial = remote.partial;
       }
-      setResults({ rows: staticRows, remoteRows, totalRemote, remotePartial });
+      setResults({ rows: staticRows, remoteRows, totalRemote, remotePartial, remoteLoadedPage: 1, criteria: {query:cleanQuery, organism, role, source} });
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "No se pudo completar la búsqueda.");
       setResults(null);
@@ -300,23 +306,32 @@ export default function RemuneracionesUnifiedExplorer() {
     setLoading(true);
     setError(null);
     try {
-      const remote = await searchTransparencyActiva({
-        query: query.trim(),
-        organism,
-        role,
-        apiOrigin: publicApiOrigin,
-        page,
-        limit: RESULTS_PAGE_SIZE,
-      });
-      const newRows = remote.rows.map((row) => RemoteOfficialRow(row, query.trim()))
-        .filter((row): row is UnifiedRow => Boolean(row))
-        .filter((row) => source === "all" || row.sourceId === source || (source === "transparencia-activa" && row.sourceId === "transparencia-activa-central"));
-      setResults((previous) => previous ? {
-        ...previous,
-        remoteRows: [...previous.remoteRows, ...newRows.filter((row) => !previous.remoteRows.some((existing) => existing.recordId === row.recordId))],
-        totalRemote: remote.total,
-        remotePartial: remote.partial,
-      } : previous);
+      const required = remunerationResultWindow(results.rows.length, results.totalRemote ?? results.remoteRows.length, page, RESULTS_PAGE_SIZE).remoteEnd;
+      let loadedRows = [...results.remoteRows];
+      let loadedPage = results.remoteLoadedPage;
+      let totalRemote = results.totalRemote;
+      let partial = results.remotePartial;
+      while (loadedRows.length < required && loadedRows.length < (totalRemote ?? 0)) {
+        const remote = await searchTransparencyActiva({
+          query: results.criteria.query,
+          organism: results.criteria.organism,
+          role: results.criteria.role,
+          scope: results.criteria.source === "transparencia-activa-central" ? "central" : "all",
+          apiOrigin: publicApiOrigin,
+          page: loadedPage + 1,
+          limit: RESULTS_PAGE_SIZE,
+        });
+        const newRows = remote.rows.map((row) => RemoteOfficialRow(row, results.criteria.query))
+          .filter((row): row is UnifiedRow => Boolean(row))
+          .filter((row) => results.criteria.source === "all" || row.sourceId === results.criteria.source || (results.criteria.source === "transparencia-activa" && row.sourceId === "transparencia-activa-central"));
+        const additions = newRows.filter(row => !loadedRows.some(existing => existing.recordId === row.recordId));
+        if (!additions.length) throw new Error("No se pudo completar esta página. Intenta nuevamente.");
+        loadedRows = [...loadedRows, ...additions];
+        loadedPage++;
+        totalRemote = remote.total;
+        partial = remote.partial;
+      }
+      setResults(previous => previous ? {...previous,remoteRows:loadedRows,remoteLoadedPage:loadedPage,totalRemote,remotePartial:partial} : previous);
       setCurrentPage(page);
       scrollToResults();
     } catch (reason) {
@@ -364,10 +379,9 @@ export default function RemuneracionesUnifiedExplorer() {
           </section>
 
           {results && <section id="resultados-remuneraciones" className="remuneration-module remuneration-module--results" aria-labelledby="resultados-remuneraciones-title" aria-live="polite">
-            <div className="remuneration-results__heading"><div><span className="eyebrow">RESULTADOS</span><h3 id="resultados-remuneraciones-title">Coincidencias para “{query.trim()}”</h3></div><span>{number.format(groups.length)} personas · {number.format(results.rows.length + results.remoteRows.length)} registros</span></div>
-            {results.remoteRows.length === 0 && (source === "all" || source === "transparencia-activa" || source === "transparencia-activa-central") && <p className="remuneration-results__note">La búsqueda muestra los pagos publicados en los archivos disponibles. La nómina de Transparencia Activa se consulta por separado cuando el servicio responde.</p>}
+            <div className="remuneration-results__heading"><div><span className="eyebrow">RESULTADOS</span><h3 id="resultados-remuneraciones-title">Coincidencias para “{results.criteria.query}”</h3></div><span>{number.format(resultWindow.totalRecords)} registros disponibles</span></div>
             {results.remotePartial && <p className="remuneration-results__note">Algunos registros están temporalmente fuera de esta búsqueda. Intenta nuevamente para consultar todas las nóminas disponibles.</p>}
-            {groups.length === 0 && <div className="stat-tile" role="status">No encontramos coincidencias. Prueba con el apellido, organismo o cargo sin tildes.</div>}
+            {groups.length === 0 && <div className="stat-tile" role="status">No encontramos coincidencias. Prueba con otro apellido, organismo o cargo.</div>}
              <div className="remuneration-results__list">
                {visibleGroups.map((group) => {
                  const sourceIds = new Set(group.map((row) => row.sourceId));
@@ -389,7 +403,7 @@ export default function RemuneracionesUnifiedExplorer() {
                    </summary>
                    <div className="remuneration-person-result__body">
                      <p className="remuneration-person-result__note">
-                       {sourceIds.size > 1 ? "Hay registros con este mismo nombre en más de una fuente; revisa el organismo y el período antes de relacionarlos." : "Registro publicado por una fuente oficial."}
+                       {sourceIds.size > 1 || new Set(group.map(row => row.organismoOriginal)).size > 1 ? "Hay registros con este mismo nombre en distintos organismos o fuentes; revisa el cargo y el período antes de relacionarlos." : "Registro publicado por una fuente oficial."}
                        {publishedNames.length > 1 && <> La fuente publicó variantes del nombre: {publishedNames.join(" / ")}.</>}
                      </p>
                      <div className="remuneration-person-result__table"><table className="data-table"><thead><tr><th>Fuente</th><th>Organismo</th><th>Cargo</th><th>Mes</th><th>Monto</th></tr></thead><tbody>{group.map((row) => <tr key={row.recordId}><td><strong>{row.sourceLabel}</strong><small>{recordDescription(row)}</small></td><td>{row.organismoOriginal}</td><td>{row.cargoOriginal}</td><td>{row.periodo ?? "No informado"}</td><td>{displayAmount(row.montoBruto)}</td></tr>)}</tbody></table></div>
@@ -399,7 +413,7 @@ export default function RemuneracionesUnifiedExplorer() {
             </div>
             {totalPages > 1 && <nav className="remuneration-results__pagination" aria-label="Paginación de resultados">
               <button type="button" onClick={() => goToResultsPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1 || loading}>← Anterior</button>
-              <span>Mostrando {number.format(pageStart)}–{number.format(pageEnd)} de {number.format(Math.max(groups.length, results.totalRemote ?? 0))} resultados</span>
+              <span>Registros {number.format(pageStart)}–{number.format(pageEnd)} de {number.format(resultWindow.totalRecords)}</span>
               <button type="button" onClick={() => goToResultsPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages || loading}>Siguiente →</button>
             </nav>}
           </section>}

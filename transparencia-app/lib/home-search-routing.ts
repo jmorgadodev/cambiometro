@@ -57,3 +57,15 @@ export function resolveSearchResultUrl(result: HomeSearchRoutingResult) {
     ? `/municipalidades/?search=${encodeQuery(result.nombre ?? "")}`
     : `/personas/?search=${encodeQuery(result.nombre ?? "")}`);
 }
+
+export function interleaveDistinctSearchResults<T extends HomeSearchRoutingResult, U extends HomeSearchRoutingResult>(first: T[], second: U[], limit = 8): Array<T | U> {
+  const unique = new Map<string, T | U>();
+  for (let index = 0; index < Math.max(first.length, second.length) && unique.size < limit; index++) {
+    for (const result of [first[index], second[index]]) {
+      if (!result || unique.size >= limit) continue;
+      const key = resolveSearchResultUrl(result);
+      if (!unique.has(key)) unique.set(key, result);
+    }
+  }
+  return [...unique.values()];
+}
