@@ -79,6 +79,8 @@ async function fetchJson(url, intentos = 3) {
 
 async function fetchVotacionesDeSesion(sesionId) {
   const payload = await fetchJson(`${API_BASE}/api/votes?id_sesion=${encodeURIComponent(sesionId)}`);
+  // Official special sessions without votes return an empty string and total 0.
+  if (payload?.status === "ok" && payload?.data?.total === 0 && payload.data.data === "") return [];
   if (!Array.isArray(payload?.data?.data)) throw new Error("SENADO_VOTES_SCHEMA");
   return payload.data.data;
 }
@@ -99,6 +101,10 @@ function fullName(member) {
 
 function memberId(member) {
   return String(member.ID_PARLAMENTARIO ?? member.PARLID ?? member.UUID ?? "");
+}
+
+function attendedSession(member) {
+  return String(member.ASISTENCIA ?? "").trim().toLocaleLowerCase("es-CL") === "asiste";
 }
 
 function buildVoto(member, opcion) {
@@ -135,7 +141,7 @@ export async function fetchVotacionesSenado({ legislatura = 374, desde, to }) {
         fetchAsistenciaDeSesion(session.id),
       ]);
       const asistentes = asistencia
-        .filter((member) => member.ASISTENCIA !== "Inasiste")
+        .filter(attendedSession)
         .map((member) => memberId(member));
       for (const votacion of votaciones) {
         const id = Number(votacion.ID_VOTACION);
@@ -154,7 +160,7 @@ export async function fetchVotacionesSenado({ legislatura = 374, desde, to }) {
         }
         const votantesIds = new Set(votos.map((voto) => voto.id));
         const asistenciaPorId = new Map(
-          asistencia.filter((member) => member.ASISTENCIA !== "Inasiste").map((member) => [memberId(member), member])
+          asistencia.filter(attendedSession).map((member) => [memberId(member), member])
         );
         for (const memberId of asistentes) {
           if (!votantesIds.has(memberId) && asistenciaPorId.has(memberId)) {

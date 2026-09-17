@@ -33,4 +33,19 @@ describe("publicación incremental de Senado", () => {
       : Response.json({ data: {} })));
     await expect(fetchVotacionesSenado({ desde: "2026-09-01", to: "2026-09-17" })).rejects.toThrow("SENADO_SESSION_INCOMPLETE");
   });
+  it("acepta la respuesta oficial de una sesión sin votaciones", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => url.includes("sesiones.php")
+      ? new Response("<sesiones><sesion><SESIID>10260</SESIID><FECHAINICIO>Miércoles 9 de Septiembre de 2026 12:15</FECHAINICIO></sesion></sesiones>")
+      : url.includes("/api/votes") ? Response.json({ status: "ok", data: { total: 0, data: "" } })
+      : Response.json({ data: { DATA: [] } })));
+    expect(await fetchVotacionesSenado({ desde: "2026-09-01", to: "2026-09-17" })).toEqual([]);
+  });
+  it("no asigna No Vota a senadores ausentes", async () => {
+    vi.stubGlobal("fetch", vi.fn(async (url: string) => url.includes("sesiones.php")
+      ? new Response("<sesiones><sesion><SESIID>10273</SESIID><FECHAINICIO>Miércoles 9 de Septiembre de 2026 16:18</FECHAINICIO></sesion></sesiones>")
+      : url.includes("/api/votes") ? Response.json({ data: { data: [{ ID_VOTACION: 1, FECHA_VOTACION: "09-09-2026", VOTACIONES: {}, SI: 0, NO: 0 }] } })
+      : Response.json({ data: { DATA: [{ ID_PARLAMENTARIO: 1, NOMBRE: "Presente", ASISTENCIA: "Asiste" }, { ID_PARLAMENTARIO: 2, NOMBRE: "Ausente", ASISTENCIA: "Ausente" }, { ID_PARLAMENTARIO: 3, NOMBRE: "Desconocido", ASISTENCIA: "" }] } })));
+    const votes = await fetchVotacionesSenado({ desde: "2026-09-01", to: "2026-09-17" });
+    expect(votes[0].votos).toEqual([{ id: "1", nombre: "Presente", opcion_valor: "NP", opcion: "No Vota" }]);
+  });
 });
