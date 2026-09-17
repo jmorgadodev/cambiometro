@@ -28,9 +28,10 @@ actual.
 Sí, pero no todo el contenido actual tiene que conservarse indefinidamente.
 Debe existir al menos un rollback verificable por cada proyección activa antes
 de reemplazarla. El respaldo disponible no acredita hoy una copia completa y
-exacta de toda la proyección central activa: la auditoría previa encontró
-copias parciales o con diferencias de fecha y no autorizó tratarlas como
-rollback completo.
+exacta de toda la proyección central activa: el inventario remoto no contiene
+objetos bajo `funcionarios-central-v1` ni `central-v1`. Las copias observadas
+corresponden principalmente a snapshots municipales y artefactos generales,
+por lo que no se pueden tratar como rollback central completo.
 
 Por eso no se eliminan respaldos por nombre o por antigüedad sin una lista de
 objetos verificada. La decisión correcta es retención selectiva, no borrar el
@@ -68,4 +69,3 @@ mezcle archivos centrales y municipales o deje el sitio sin datos.
 - No usar D1 como alternativa de emergencia.
 - La próxima intervención debe ser una conciliación de retención con una lista
   exacta, reversible y con rollback verificable.
-
