@@ -289,4 +289,48 @@ describe("registros públicos R2", () => {
     expect(payload.meta.total).toBe(0);
     expect(bucket.requested).toEqual(["projections/funcionarios-central-v1/manifest.json"]);
   });
+
+  it("blinda el alcance central contra filas municipales del release anterior", async () => {
+    const version = "central-runtime-scope";
+    const root = `projections/funcionarios-central-v1/versions/${version}`;
+    const manifest = {
+      version,
+      generatedAt: "2026-09-14T03:51:42.634Z",
+      assets: [],
+      searchIndex: { key: `${root}/search_index.json` },
+    };
+    const index = {
+      totalRows: 2,
+      pageSize: 10,
+      pages: [{ page: 1, key: `${root}/search_index/p-0001.json`, count: 2 }],
+      shards: { lu: `${root}/search_index/lu-001.json` },
+      filters: {
+        "tipo:servicio": { key: `${root}/search_index/filter-service.json`, count: 1 },
+        "tipo:municipalidad": { key: `${root}/search_index/filter-municipal.json`, count: 1 },
+      },
+    };
+    const bucket = fakeBucket({
+      "projections/funcionarios-central-v1/manifest.json": manifest,
+      [manifest.searchIndex.key]: index,
+      [`${root}/search_index/lu-001.json`]: [["lucy", [0, 1]]],
+      [`${root}/search_index/filter-service.json`]: [0],
+      [`${root}/search_index/filter-municipal.json`]: [1],
+      [`${root}/search_index/p-0001.json`]: [
+        { id: "central-row", n: "Lucy Servicio", c: "Asesora", o: "Ministerio", ot: "servicio_publico", b: 1000000 },
+        { id: "municipal-row", n: "Lucy Municipalidad", c: "Asesora", o: "Municipalidad", ot: "municipalidad", b: 900000 },
+      ],
+    });
+
+    const response = await worker.fetch(
+      new Request("https://example.test/api/funcionarios?scope=central&query=Lucy&include_zero=true&limit=20"),
+      { PUBLIC_DATA: bucket as never } as never,
+    );
+    const payload = await response.json() as { data: Array<{ id: string }>; meta: Record<string, unknown> };
+
+    expect(response.status).toBe(200);
+    expect(payload.data.map((row) => row.id)).toEqual(["central-row"]);
+    expect(payload.meta.total).toBe(1);
+    expect(bucket.requested).toContain(`${root}/search_index/filter-service.json`);
+    expect(bucket.requested).not.toContain(`${root}/search_index/filter-municipal.json`);
+  });
 });
