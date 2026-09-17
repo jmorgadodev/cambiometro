@@ -1,7 +1,16 @@
 import { describe, expect, it } from "vitest";
-import { cpltStaticAssetsForPages, cpltStaticAssetRelativePath } from "./cplt-static-assets.mjs";
+import { cpltStaticAssetsForPages, cpltStaticAssetRelativePath, restoreCpltOriginalAsset } from "./cplt-static-assets.mjs";
+import { gzipSync } from "node:zlib";
+import { createHash } from "node:crypto";
 
 describe("CPLT static asset keys", () => {
+  it("restaura el original comprimido con su checksum y tamaño exactos", () => {
+    const raw=Buffer.from('[{"id":"original","formacion":"Sin pérdida"}]\n');
+    const metadata={encoding:"gzip",originalSize:raw.length,originalChecksumSha256:createHash("sha256").update(raw).digest("hex")};
+    expect(restoreCpltOriginalAsset(gzipSync(raw),metadata)).toEqual(raw);
+    expect(()=>restoreCpltOriginalAsset(gzipSync(raw),{...metadata,originalSize:2})).toThrow();
+    expect(()=>restoreCpltOriginalAsset(gzipSync(raw),{encoding:"gzip"})).toThrow();
+  });
   const version = "2026-09-02T03-28-30-598Z";
 
   it("accepts paginated search assets nested under search_index", () => {
