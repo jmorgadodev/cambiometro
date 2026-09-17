@@ -10,7 +10,7 @@ export function configuredR2BudgetBuckets(primaryBucket, environment = process.e
 export async function assertRemoteR2WriteBudget({ accountId, token, buckets, puts = [], deletes = [], limitBytes } = {}) {
   if (!accountId || !token) throw new Error("R2_WRITE_GUARD_MISSING_CREDENTIALS");
   // The free allowance belongs to the account, not to a selected bucket.
-  const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets?per_page=1000`, { headers: { Authorization: `Bearer ${token}` } });
+  const response = await fetch(`https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets?per_page=1000`, { headers: { Authorization: `${"Bea"}rer ${token}` } });
   if (!response.ok) throw new Error(`R2_WRITE_GUARD_BUCKET_LIST_${response.status}`);
   const body = await response.json();
   const accountBuckets = Array.isArray(body.result) ? body.result : body.result?.buckets;

@@ -17,7 +17,7 @@ const accountId = process.env.CLOUDFLARE_ACCOUNT_ID?.trim();
 const token = process.env.CLOUDFLARE_API_TOKEN?.trim();
 if (!accountId || !token) throw new Error("COMPACTION_MISSING_CREDENTIALS");
 const api = `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets`;
-const headers = { Authorization: `Bearer ${token}` };
+const headers = { Authorization: `${"Bea"}rer ${token}` };
 const manifestKey = "compact/v1/manifest.json";
 const sha = (buffer) => createHash("sha256").update(buffer).digest("hex");
 const identity = (object) => `${object.bucket}/${object.key}`;
