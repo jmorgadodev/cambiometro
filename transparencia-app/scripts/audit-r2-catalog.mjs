@@ -23,4 +23,31 @@ function wranglerGet(key) {
 
 const catalog = wranglerGet(catalogKey);
 const objectKeys = (await listR2Objects({ accountId, token, bucket })).map((item) => item.key);
-console.log(JSON.stringify({ source: "r2-live-list", bucket, catalogKey, objectCount: objectKeys.length, ...auditCatalogReferences(catalog, objectKeys) }, null, 2));
+const report = auditCatalogReferences(catalog, objectKeys);
+const alternateIndexes = [];
+for (const source of report.bySource.filter((item) => item.missing > 0)) {
+  const key = `indexes/v1/${source.sourceId}/manifest.json`;
+  try {
+    const manifest = wranglerGet(key);
+    if (manifest?.sourceId !== source.sourceId || !Number.isSafeInteger(Number(manifest.totalRows))) continue;
+    alternateIndexes.push({
+      sourceId: source.sourceId,
+      key,
+      totalRows: Number(manifest.totalRows),
+      pageCount: Array.isArray(manifest.pages) ? manifest.pages.length : null,
+      generatedAt: manifest.generatedAt ?? null,
+      status: "alternate_index_present",
+    });
+  } catch {
+    // A missing alternate index is part of the audit result, not a fatal
+    // condition. The strict publication guard still rejects orphaned entries.
+  }
+}
+console.log(JSON.stringify({
+  source: "r2-live-list",
+  bucket,
+  catalogKey,
+  objectCount: objectKeys.length,
+  ...report,
+  alternateIndexes,
+}, null, 2));
