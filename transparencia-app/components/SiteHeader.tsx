@@ -57,7 +57,7 @@ export default function SiteHeader() {
   const previousPathname = useRef(pathname);
   const pathnameEffectReady = useRef(false);
 
-  const catalogStatusLabel = "Cada fuente conserva su propio corte";
+  const catalogStatusLabel = "actualización por fuente · corte propio";
   const catalogStatusDescription = "Catálogo público disponible. Cada fuente conserva su propia fecha de actualización.";
 
   // Papel es el valor predeterminado; nunca se usa el tema del sistema.
