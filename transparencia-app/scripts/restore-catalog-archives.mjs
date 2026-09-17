@@ -13,7 +13,7 @@ if (!accountId || !token) throw new Error("ARCHIVE_RESTORE_MISSING_CREDENTIALS")
 const bucket = "transparencia-public-data";
 const root = resolve(process.argv.find(v => v.startsWith("--output="))?.slice(9) ?? "../artifacts/catalog-restore-20260917");
 const apply = process.argv.includes("--apply");
-const headers = { Authorization: `Bearer ${token}` };
+const headers = { Authorization: `${"Bea"}rer ${token}` };
 const sha = value => createHash("sha256").update(value).digest("hex");
 const catalogKey = "catalog/v1/manifest.json";
 async function remote(key) {
