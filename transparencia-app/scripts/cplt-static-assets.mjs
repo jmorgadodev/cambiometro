@@ -1,5 +1,16 @@
 const cpltStaticAssetPattern = /^projections\/funcionarios-v1\/versions\/[A-Za-z0-9._-]+\/(?:[A-Za-z0-9._-]+\/)*[A-Za-z0-9._-]+\.json(?:\.gz)?$/;
 
+import { createHash } from "node:crypto";
+import { gunzipSync } from "node:zlib";
+
+export function restoreCpltOriginalAsset(data,asset) {
+  if (asset.encoding!=="gzip") return data;
+  const raw=gunzipSync(data);
+  if (!Number.isSafeInteger(asset.originalSize) || raw.length!==asset.originalSize
+    || createHash("sha256").update(raw).digest("hex")!==asset.originalChecksumSha256) throw new Error("CPLT_ORIGINAL_RESTORE_CHECKSUM");
+  return raw;
+}
+
 export function cpltStaticAssetRelativePath(key, version) {
   const versionPrefix = `projections/funcionarios-v1/versions/${version}/`;
   const relativePath = typeof key === "string" && key.startsWith(versionPrefix)
