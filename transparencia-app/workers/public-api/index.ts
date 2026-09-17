@@ -837,9 +837,11 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
     );
   }
 
-  if (!organism || organism === "Todos") {
-    const indexKey = manifest.searchIndex?.key ?? `${projectionRoot}/versions/${manifest.version}/search_index.json`;
-    const index = await r2Json<OfficialsSearchIndex | CompactOfficialRow[]>(env.PUBLIC_DATA, indexKey);
+  const indexKey = manifest.searchIndex?.key ?? `${projectionRoot}/versions/${manifest.version}/search_index.json`;
+  const index = await r2Json<OfficialsSearchIndex | CompactOfficialRow[]>(env.PUBLIC_DATA, indexKey);
+  const organismFilter = `organismo:${normalized(organism)}`;
+  const indexedOrganism = organism && organism !== "Todos" && !Array.isArray(index) && index?.filters?.[organismFilter];
+  if (!organism || organism === "Todos" || indexedOrganism) {
     if (Array.isArray(index)) {
       return officialsResponse(compactOfficialRows(index), requestUrl, manifest.generatedAt, "r2-search-legacy", "Todos");
     }
@@ -849,6 +851,7 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
     const requestedLimit = Number(requestUrl.searchParams.get("limit") ?? 20);
     const limit = Number.isInteger(requestedLimit) ? Math.max(1, Math.min(requestedLimit, 100)) : 20;
     const filterKeys = officialFilterKeys(requestUrl, datasetRoot, index.filters);
+    if (indexedOrganism) filterKeys.push(organismFilter);
     const centralService = index.filters?.["tipo:servicio"];
     const centralMunicipal = index.filters?.["tipo:municipalidad"];
     // The production legacy release contains only these two disjoint types.
@@ -974,7 +977,7 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
     } else {
       responseUrl.searchParams.set("sortBy", "nombre_asc");
     }
-    const response = officialsResponse(rows, responseUrl, manifest.generatedAt, datasetRoot === "funcionarios-v1" ? "r2-search" : "r2-search-central", "Todos");
+    const response = officialsResponse(rows, responseUrl, manifest.generatedAt, datasetRoot === "funcionarios-v1" ? "r2-search" : "r2-search-central", indexedOrganism ? organism : "Todos");
     if (!query) {
       const payload = await response.json() as JsonRecord;
       const meta = (payload.meta as JsonRecord) ?? {};
