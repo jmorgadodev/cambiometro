@@ -4,7 +4,7 @@ function sha256(value) {
   return createHash("sha256").update(value).digest("hex");
 }
 
-export function reconcileReleaseCatalog(catalog, manifestsById) {
+export function reconcileReleaseCatalog(catalog, manifestsById, { preserveUnselected = false } = {}) {
   if (!Array.isArray(catalog?.partitions) || !Array.isArray(catalog?.sources)) {
     throw new Error("RECOVERY_INVALID_CATALOG");
   }
@@ -12,6 +12,7 @@ export function reconcileReleaseCatalog(catalog, manifestsById) {
   const changes = [];
   const partitions = catalog.partitions.map((partition) => {
     const manifest = manifestsById.get(partition.id);
+    if (!manifest && preserveUnselected) return partition;
     if (!manifest) throw new Error(`RECOVERY_MISSING_MANIFEST: ${partition.id}`);
     if (manifest.id !== partition.id || manifest.sourceId !== partition.sourceId) {
       throw new Error(`RECOVERY_MANIFEST_ID_MISMATCH: ${partition.id}`);
@@ -40,6 +41,7 @@ export function reconcileReleaseCatalog(catalog, manifestsById) {
   });
 
   const sources = catalog.sources.map((source) => {
+    if (preserveUnselected && ![...manifestsById.values()].some(manifest => manifest.sourceId === source.id)) return source;
     const sourcePartitions = partitions.filter((partition) => partition.sourceId === source.id);
     const recordCount = sourcePartitions.reduce((total, partition) => total + partition.recordCount, 0);
     const foundPeriods = [...new Set(sourcePartitions.map((partition) => partition.period))].sort();
@@ -58,8 +60,7 @@ export function reconcileReleaseCatalog(catalog, manifestsById) {
     };
   });
 
-  const generatedAt = [...manifestsById.values()]
-    .map((manifest) => manifest.generatedAt)
+  const generatedAt = [catalog.generatedAt, ...[...manifestsById.values()].map(manifest => manifest.generatedAt)]
     .filter(Boolean)
     .sort()
     .at(-1) ?? catalog.generatedAt;
