@@ -93,10 +93,14 @@ jobs:
         run: npm run data:hydrate:static -- --required --required-files data/politicos-votaciones.json --only-files data/politicos-votaciones.json --force
 
       - name: Ingerir sólo votaciones del Senado
+        id: ingest
         working-directory: transparencia-app
-        run: npm run etl -- --from "${{ steps.range.outputs.from }}" --to "${{ steps.range.outputs.to }}" --source votaciones_senado
+        run: |
+          npm run etl -- --from "${{ steps.range.outputs.from }}" --to "${{ steps.range.outputs.to }}" --source votaciones_senado
+          node --input-type=module -e "import {readFileSync,appendFileSync} from 'node:fs'; import {senateVotePublicationReady} from './scripts/etl/senate-vote-publication.mjs'; const ready=senateVotePublicationReady(JSON.parse(readFileSync('data/etl/status.json','utf8'))); appendFileSync(process.env.GITHUB_OUTPUT, 'publish='+ready+'\n'); console.log(ready?'Novedades verificadas para publicar':'Sin novedades: no se modifica el release vigente');"
 
       - name: Construir y publicar lake de Senado
+        if: steps.ingest.outputs.publish == 'true'
         working-directory: transparencia-app
         env:
           GH_TOKEN: ${{ github.token }}
@@ -107,6 +111,7 @@ jobs:
           npm run data:publish
 
       - name: Actualizar cache estático incremental del Senado
+        if: steps.ingest.outputs.publish == 'true'
         working-directory: transparencia-app
         env:
           FULL_VOTACIONES: ${{ inputs.full_votaciones }}
@@ -119,10 +124,12 @@ jobs:
           fi
 
       - name: Construir subsets estáticos
+        if: steps.ingest.outputs.publish == 'true'
         working-directory: transparencia-app
         run: npm run data:build:subsets
 
       - name: Publicar entradas estáticas de Parlamento
+        if: steps.ingest.outputs.publish == 'true'
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

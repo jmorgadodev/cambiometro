@@ -79,12 +79,14 @@ async function fetchJson(url, intentos = 3) {
 
 async function fetchVotacionesDeSesion(sesionId) {
   const payload = await fetchJson(`${API_BASE}/api/votes?id_sesion=${encodeURIComponent(sesionId)}`);
-  return payload?.data?.data ?? [];
+  if (!Array.isArray(payload?.data?.data)) throw new Error("SENADO_VOTES_SCHEMA");
+  return payload.data.data;
 }
 
 async function fetchAsistenciaDeSesion(sesionId) {
   const payload = await fetchJson(`${API_BASE}/api/sessions/attendance?id_sesion=${encodeURIComponent(sesionId)}`);
-  return Array.isArray(payload?.data?.DATA) ? payload.data.DATA : [];
+  if (!Array.isArray(payload?.data?.DATA)) throw new Error("SENADO_ATTENDANCE_SCHEMA");
+  return payload.data.DATA;
 }
 
 function fullName(member) {
@@ -118,9 +120,12 @@ export async function fetchVotacionesSenado({ legislatura = 374, desde, to }) {
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
   });
   if (!response.ok) throw new Error(`Sesiones del Senado HTTP ${response.status}`);
-  const sessions = parseSessionList(await response.text(), desde);
+  const xml = await response.text();
+  if (!/<sesiones\b[^>]*>[\s\S]*<\/sesiones>/.test(xml)) throw new Error("SENADO_SESSION_SCHEMA");
+  const sessions = parseSessionList(xml, desde);
   const seen = new Set();
   const votes = [];
+  const failures = [];
 
   for (const session of sessions) {
     if (session.fecha > (to ?? "9999-12-31")) continue;
@@ -181,7 +186,9 @@ export async function fetchVotacionesSenado({ legislatura = 374, desde, to }) {
       }
     } catch (error) {
       console.warn(`[etl] senado_votaciones: sesión ${session.id} (${session.fecha}) omitida: ${String(error).slice(0, 100)}`);
+      failures.push(session.id);
     }
   }
+  if (failures.length) throw new Error(`SENADO_SESSION_INCOMPLETE:${failures.join(",")}`);
   return votes.sort((a, b) => a.fecha.localeCompare(b.fecha) || a.votacion_id.localeCompare(b.votacion_id));
 }
