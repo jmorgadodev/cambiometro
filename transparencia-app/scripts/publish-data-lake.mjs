@@ -240,8 +240,8 @@ if (publishR2) {
     deletes: r2Plan.deletes.map((key) => ({ bucket, key, size: 0 })),
   });
 
-  // Sólo se eliminan particiones frías o versiones históricas no activas.
-  // Liberarlas antes de subir evita superar transitoriamente la cuota R2.
+  // Sólo se retiran versiones de proyecciones no activas ni protegidas para rollback.
+  // El histórico de particiones nunca se elimina para liberar cuota automáticamente.
   await runConcurrent(r2Plan.deletes, (key) => wranglerWithRetryAsync(["r2", "object", "delete", `${bucket}/${key}`]), r2PublishConcurrency);
   const dataPuts = r2Plan.puts.filter((item) => !activationManifests.includes(item));
   await runConcurrent(dataPuts, (asset) => wranglerWithRetryAsync(["r2", "object", "put", `${bucket}/${asset.key}`, "--file", join(outputRoot, asset.key)]), r2PublishConcurrency);

@@ -330,6 +330,7 @@ interface OfficialsSearchIndex {
   pages: Array<{ page: number; key: string; count: number }>;
   shards: Record<string, string | string[]>;
   filters?: Record<string, { key: string; count: number }>;
+  publicationExclusions?: { key: string; count: number };
   quality?: OfficialsQualitySummary;
 }
 
@@ -386,6 +387,11 @@ async function r2Json<T>(bucket: R2Bucket | undefined, key: string): Promise<T |
   }
   if (!object) return null;
   try {
+    if (key.endsWith(".json.gz")) {
+      const stream = new Blob([await object.arrayBuffer()]).stream()
+        .pipeThrough(new DecompressionStream("gzip"));
+      return await new Response(stream).json() as T;
+    }
     return await object.json<T>();
   } catch {
     return null;
@@ -861,7 +867,15 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
       const serviceFilter = filterKeys.indexOf("tipo:servicio");
       if (serviceFilter >= 0) filterKeys.splice(serviceFilter, 1);
     }
-    const scopeHeadcount = datasetRoot === "funcionarios-central-v1"
+    if (index.publicationExclusions) {
+      const values = await r2Json<number[]>(env.PUBLIC_DATA, index.publicationExclusions.key);
+      if (!Array.isArray(values) || values.length !== index.publicationExclusions.count
+        || values.some((value, offset) => !Number.isSafeInteger(value) || value < 0 || value >= index.totalRows || (offset > 0 && values[offset - 1] >= value))) {
+        return failure("DATASET_UNAVAILABLE", "La nómina consultable no está disponible temporalmente.", 503);
+      }
+      excludedPositions = [...new Set([...excludedPositions, ...values])].sort((left, right) => left - right);
+    }
+    const scopeHeadcount = excludedPositions.length ? index.totalRows - excludedPositions.length : datasetRoot === "funcionarios-central-v1"
       ? Number(index.filters?.["tipo:servicio"]?.count ?? index.totalRows)
       : index.totalRows;
     let resultTotal = index.totalRows;
@@ -891,7 +905,7 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
         return failure("DATASET_UNAVAILABLE", "Un índice nacional de búsqueda no está disponible.", 503);
       }
       let positions = intersectSortedPositions(tokenPositionLists as number[][]);
-      if (centralExclusion) positions = subtractSortedPositions(positions, excludedPositions);
+      if (excludedPositions.length) positions = subtractSortedPositions(positions, excludedPositions);
       if (filterKeys.length > 0) {
         const filterDescriptors = filterKeys.map((key) => index.filters?.[key]);
         if (filterDescriptors.some((descriptor) => !descriptor)) {
@@ -919,7 +933,7 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
         return failure("DATASET_UNAVAILABLE", "Un índice nacional de filtros no está disponible.", 503, { filters: filterKeys });
       }
       let positions = intersectSortedPositions(positionLists as number[][]);
-      if (centralExclusion) positions = subtractSortedPositions(positions, excludedPositions);
+      if (excludedPositions.length) positions = subtractSortedPositions(positions, excludedPositions);
       resultTotal = positions.length;
       totalPages = Math.max(1, Math.ceil(resultTotal / limit));
       page = Number.isInteger(requestedPage) ? Math.max(1, Math.min(requestedPage, totalPages)) : 1;
@@ -927,7 +941,7 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
       const selectedRows = await officialsAtPositions(index, selected, env);
       if (selectedRows === null) return failure("DATASET_UNAVAILABLE", "Una página del directorio nacional no está disponible.", 503);
       rows = selectedRows;
-    } else if (centralExclusion) {
+    } else if (excludedPositions.length) {
       resultTotal = scopeHeadcount;
       totalPages = Math.max(1, Math.ceil(resultTotal / limit));
       page = Number.isInteger(requestedPage) ? Math.max(1, Math.min(requestedPage, totalPages)) : 1;
@@ -946,6 +960,9 @@ async function listFuncionariosFromR2(requestUrl: URL, env: Env, datasetRoot = "
       const lastPhysicalPage = Math.floor(Math.max(start, end - 1) / index.pageSize) + 1;
       const physicalPages = index.pages.filter((item) => item.page >= firstPhysicalPage && item.page <= lastPhysicalPage);
       const physicalRows = await Promise.all(physicalPages.map((item) => r2Json<CompactOfficialRow[]>(env.PUBLIC_DATA, item.key)));
+      if (physicalRows.some((value) => !Array.isArray(value))) {
+        return failure("DATASET_UNAVAILABLE", "Una página del directorio no está disponible temporalmente.", 503);
+      }
       const baseOffset = (firstPhysicalPage - 1) * index.pageSize;
       rows = compactOfficialRows(physicalRows.flatMap((value) => value ?? [])).slice(start - baseOffset, end - baseOffset);
     }
