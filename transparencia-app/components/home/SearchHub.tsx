@@ -2,6 +2,7 @@ import Link from "next/link";
 import HomeInlineSearch from "@/components/HomeInlineSearch";
 
 const destinations = [
+  { label: "Explorar parlamentarios", href: "/politico" },
   { label: "Personas", href: "/personas" },
   { label: "Remuneraciones", href: "/remuneraciones-publicas" },
   { label: "Compras públicas", href: "/cruces" },

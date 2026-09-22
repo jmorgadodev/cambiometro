@@ -60,6 +60,11 @@ describe("promesas editoriales del inicio", () => {
     expect(search).not.toContain("hasRemunerationResults");
   });
 
+  it("ofrece acceso directo al registro parlamentario sin sustituir el buscador general", () => {
+    expect(home).toContain('{ label: "Explorar parlamentarios", href: "/politico" }');
+    expect(home).toContain('href="#buscador"');
+  });
+
   it("mantiene cinco preguntas de análisis y separa el seguimiento de movimientos", () => {
     expect(home).toContain("Directorio de personas");
     expect(home).toContain("¿Quiénes ocupan los cargos públicos?");
