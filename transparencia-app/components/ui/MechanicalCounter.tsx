@@ -81,6 +81,7 @@ export default function MechanicalCounter({
     <span
       ref={ref}
       className={`mechanical-counter ${className}`.trim()}
+      role="img"
       aria-label={`${finalFormatted}${suffix}`}
       style={{ minWidth: `${finalFormatted.length + suffix.length}ch` }}
     >

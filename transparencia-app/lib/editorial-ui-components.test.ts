@@ -11,6 +11,14 @@ describe("componentes editoriales compartidos", () => {
     expect(source).toContain("minimumIntegerDigits");
     expect(source).toContain("minWidth");
     expect(source).toContain("aria-label");
+    expect(source).toContain('role="img"');
+  });
+
+  it("los enlaces de la portada y la navegación de ficha mantienen contraste y distinción", () => {
+    const styles = readFileSync(resolve(root, "app/globals.css"), "utf8");
+    expect(styles).toMatch(/\.editorial-territory-copy > small a\s*\{[^}]*text-decoration:\s*underline/);
+    expect(styles).toMatch(/\.authority-section-nav__label\s*\{[^}]*color:\s*var\(--accent\)/);
+    expect(styles).toMatch(/\.authority-section-nav__links a span\s*\{[^}]*color:\s*var\(--accent\)/);
   });
 
   it("Reveal admite aparición sin desplazamiento y movimiento reducido", () => {

@@ -133,7 +133,7 @@
 .editorial-territory-facts strong { color: var(--editorial-paper); font-family: var(--font-editorial), Newsreader, Georgia, serif; font-size: clamp(1.15rem, 2vw, 1.8rem); }
 .editorial-territory-facts span { color: #a3c7bd; font-family: var(--font-ledger), monospace; font-size: .58rem; }
 .editorial-territory-copy > small { display: block; margin-top: 1rem; color: var(--text-2); font-size: .67rem; }
-.editorial-territory-copy > small a { color: var(--accent); }
+.editorial-territory-copy > small a { color: var(--accent); text-decoration: underline; text-underline-offset: .15em; }
 .editorial-territory-visual { position: relative; min-height: 25rem; overflow: hidden; border: 1px solid var(--border); border-radius: 1rem; background: linear-gradient(0deg, rgba(0,0,0,.7), transparent 65%), url('/assets/patagonia.jpg') center / cover; box-shadow: var(--shadow-md); }
 .editorial-territory-visual > div { position: absolute; right: 1rem; bottom: 1rem; left: 1rem; padding: 1rem; border: 1px solid #255446; border-radius: .6rem; background: rgba(19,55,46,.93); color: white; }
 .editorial-territory-visual span { color: var(--editorial-mint); font-family: var(--font-ledger), monospace; font-size: .58rem; letter-spacing: .1em; text-transform: uppercase; }
@@ -3354,7 +3354,7 @@ html.dark .page-masthead {
 
 .authority-section-nav__label {
   flex: 0 0 auto;
-  color: var(--editorial-forest);
+  color: var(--accent);
   font-family: var(--font-ledger), ui-monospace, monospace;
   font-size: .66rem;
   font-weight: 800;
@@ -3383,7 +3383,7 @@ html.dark .page-masthead {
 }
 
 .authority-section-nav__links a span {
-  color: var(--editorial-mint);
+  color: var(--accent);
   font-family: var(--font-ledger), ui-monospace, monospace;
   font-size: .6rem;
 }
