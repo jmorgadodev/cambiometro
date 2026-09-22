@@ -3014,6 +3014,19 @@ html.dark .page-masthead {
   transform: translateY(0);
 }
 
+.reveal--fade {
+  transform: none;
+}
+
+.mechanical-counter {
+  display: inline-block;
+  color: inherit;
+  font-family: var(--font-ledger), "JetBrains Mono", Consolas, monospace;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -.045em;
+  text-align: right;
+}
+
 /* ═══════════════════════════════════════════════════════════
    DASHBOARD COMPONENTS (OPENDESIGN)
    stat-grid · stat-tile · capsule · data-bar · hist-bar
