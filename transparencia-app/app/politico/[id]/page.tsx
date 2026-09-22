@@ -338,7 +338,7 @@ export default async function PoliticoPage({ params }: Props) {
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
       <PoliticoScoreHeader data={headerData} />
-      <AuthoritySectionNav />
+      <AuthoritySectionNav hasElectionData={Boolean(pol.votos_2025)} />
 
       <div className="container-main politico-editorial-profile__context" style={{ paddingTop: "1rem" }}>
         <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.82rem" }}>
