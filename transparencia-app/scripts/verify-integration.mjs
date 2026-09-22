@@ -236,9 +236,9 @@ try {
   assert((await page.locator('a[target="_blank"]').count()) > 0, "El registro completo debe conservar enlaces oficiales");
 
   await gotoWithNetworkRetry(baseUrl);
-  await page.getByRole("heading", { name: /La información pública no debería perderse|Transparencia, votaciones y gastos p.blicos|Sigue las decisiones p.blicas/ }).first().waitFor({ state: "visible", timeout: 15_000 });
+  await page.getByRole("heading", { name: "Un Chile más transparente es posible." }).waitFor({ state: "visible", timeout: 15_000 });
   await page.getByRole("link", { name: /Explorar parlamentarios/ }).first().waitFor({ state: "visible", timeout: 15_000 });
-  assert.equal(await page.getByRole("heading", { name: /La información pública no debería perderse|Transparencia, votaciones y gastos p.blicos|Sigue las decisiones p.blicas/ }).count(), 1);
+  assert.equal(await page.getByRole("heading", { name: "Un Chile más transparente es posible." }).count(), 1);
   assert.equal(await page.getByRole("link", { name: /Explorar parlamentarios/ }).count(), 1);
   const highlightedVotes = page.getByRole("region", { name: "Votaciones destacadas" });
   await highlightedVotes.getByRole("heading", { name: "Votaciones destacadas" }).waitFor({ state: "visible", timeout: 15_000 });
