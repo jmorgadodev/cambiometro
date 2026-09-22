@@ -5,7 +5,9 @@ import { describe, expect, it } from "vitest";
 const projectRoot = join(import.meta.dirname, "..");
 
 describe("Footer compacto y pulido móvil", () => {
-  const layoutContent = readFileSync(join(projectRoot, "app", "layout.tsx"), "utf8");
+  const rootLayoutContent = readFileSync(join(projectRoot, "app", "layout.tsx"), "utf8");
+  const footerContent = readFileSync(join(projectRoot, "components", "layout", "Footer.tsx"), "utf8");
+  const layoutContent = `${rootLayoutContent}\n${footerContent}`;
   const cssContent = readFileSync(join(projectRoot, "app", "globals.css"), "utf8");
 
   it("implementa la estructura de secciones con lista flex y gap compacto (fix raíz)", () => {

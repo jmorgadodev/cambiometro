@@ -32,8 +32,11 @@ describe("Tarea 15 - 5 Fixes Críticos Pre-Launch", () => {
   });
 
   it("Fix 2: Home y /datos muestran el catálogo de fuentes con coherencia numérica", () => {
-    const homeContent = readFileSync(join(projectRoot, "app", "page.tsx"), "utf8");
-    expect(homeContent).toContain("operationalSources.length");
+    const homeContent = [
+      readFileSync(join(projectRoot, "app", "page.tsx"), "utf8"),
+      readFileSync(join(projectRoot, "components", "home", "SourcesCatalog.tsx"), "utf8"),
+    ].join("\n");
+    expect(homeContent).toContain("sources.length");
     expect(homeContent).toContain("12 fuentes oficiales");
     expect(homeContent).toContain('href="/fuentes"');
 

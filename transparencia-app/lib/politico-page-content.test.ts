@@ -1,6 +1,9 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
+import AuthoritySectionNav from "../components/politico/AuthoritySectionNav";
 
 describe("contenido verificable de la ficha política", () => {
   const page = readFileSync(resolve("app/politico/[id]/page.tsx"), "utf8");
@@ -19,5 +22,27 @@ describe("contenido verificable de la ficha política", () => {
   it("apila la ficha en pantallas moviles sin mantener una columna fija", () => {
     expect(page).toContain('className="politico-layout"');
     expect(css).toMatch(/@media \(max-width: 850px\)[\s\S]*\.politico-layout \{ grid-template-columns: minmax\(0, 1fr\); \}/);
+  });
+
+  it("aplica el expediente editorial y mantiene accesos directos a sus secciones", () => {
+    const sectionNav = readFileSync(resolve("components/politico/AuthoritySectionNav.tsx"), "utf8");
+
+    expect(page).toContain("AuthoritySectionNav");
+    expect(page).toContain('className="politico-editorial-profile"');
+    expect(page).toContain('id="seccion-gastos"');
+    expect(page).toContain('id="seccion-asesores"');
+    expect(page).toContain('id="seccion-votaciones"');
+    expect(sectionNav).toContain("Gastos rendidos");
+    expect(sectionNav).toContain("Personal y asesores");
+    expect(css).toContain(".authority-section-nav");
+  });
+
+  it("no enlaza una sección electoral cuando la ficha no tiene votos publicados", () => {
+    const withoutElection = renderToStaticMarkup(createElement(AuthoritySectionNav, { hasElectionData: false }));
+    const withElection = renderToStaticMarkup(createElement(AuthoritySectionNav, { hasElectionData: true }));
+
+    expect(withoutElection).not.toContain('href="#seccion-electoral"');
+    expect(withElection).toContain('href="#seccion-electoral"');
+    expect(withoutElection).toContain('href="#seccion-gastos"');
   });
 });

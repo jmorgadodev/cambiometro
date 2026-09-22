@@ -5,7 +5,18 @@ import { canonicalSourceId } from "./data-platform-d1";
 import { ETL_SOURCES_DATA } from "./etl-sources-data";
 
 describe("promesas editoriales del inicio", () => {
-  const home = readFileSync(resolve(import.meta.dirname, "../app/page.tsx"), "utf8");
+  const homeEntry = readFileSync(resolve(import.meta.dirname, "../app/page.tsx"), "utf8");
+  const home = [
+    homeEntry,
+    "Hero.tsx",
+    "SearchHub.tsx",
+    "MetricsBar.tsx",
+    "MovementsTimeline.tsx",
+    "FeaturedVotes.tsx",
+    "TerritorialBlock.tsx",
+    "QuestionsGrid.tsx",
+    "SourcesCatalog.tsx",
+  ].map((file, index) => index === 0 ? file : readFileSync(resolve(import.meta.dirname, `../components/home/${file}`), "utf8")).join("\n");
 
   it("no promete una nomina nacional ni cifras decorativas sin respaldo", () => {
     expect(home).not.toContain("+400");
@@ -49,12 +60,17 @@ describe("promesas editoriales del inicio", () => {
     expect(search).not.toContain("hasRemunerationResults");
   });
 
+  it("ofrece acceso directo al registro parlamentario sin sustituir el buscador general", () => {
+    expect(home).toContain('{ label: "Explorar parlamentarios", href: "/politico" }');
+    expect(home).toContain('href="#buscador"');
+  });
+
   it("mantiene cinco preguntas de análisis y separa el seguimiento de movimientos", () => {
     expect(home).toContain("Directorio de personas");
     expect(home).toContain("¿Quiénes ocupan los cargos públicos?");
-    expect(home).toContain("home-movement-feature");
-    expect(home).toContain("home-movement-timeline");
-    expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.diasSinCambios");
+    expect(home).toContain("editorial-movements");
+    expect(home).toContain("editorial-timeline");
+    expect(home).toContain("summary.diasSinCambios");
     expect(home).toContain("Último cambio");
     expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.renuncias");
     expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.enConfirmacion");
@@ -71,7 +87,7 @@ describe("promesas editoriales del inicio", () => {
   it("usa una selección editorial estable y muestra el resumen factual de cada votación", () => {
     expect(home).toContain("HOME_FEATURED_VOTE_IDS");
     expect(home).toContain("impacto público, quórum relevante");
-    expect(home).toContain("{vote.resumen}");
+    expect(home).toContain("summary: vote.resumen");
     expect(home).toContain('"senado-vot-11264"');
     expect(home).toContain('"camara-vot-89844"');
   });

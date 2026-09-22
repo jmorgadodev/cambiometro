@@ -55,8 +55,9 @@ describe("Auditoría e Integración Global de Datos Conectados", () => {
 
 
   it("verifica que la portada enlace el explorador de transferencias", () => {
-    const homePage = readFileSync(resolve("app/page.tsx"), "utf8");
-    expect(homePage).toContain('href="/transferencias"');
+    const homePage = readFileSync(resolve("app/page.tsx"), "utf8") +
+      readFileSync(resolve("components/home/QuestionsGrid.tsx"), "utf8");
+    expect(homePage).toContain('href: "/transferencias"');
     expect(homePage).toContain("Transferencias Ley 19.862");
     expect(homePage).toContain("GLOBAL_KPIS.registros_canonicos");
   });
