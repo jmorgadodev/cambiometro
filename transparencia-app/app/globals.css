@@ -3175,6 +3175,228 @@ html.dark .page-masthead {
   transform: translateY(0);
 }
 
+/* ─────────── Expediente editorial de autoridad ─────────── */
+.politico-editorial-profile {
+  background: var(--editorial-paper);
+  color: var(--editorial-ink);
+}
+
+.politico-editorial-profile > section:first-of-type {
+  position: relative;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, color-mix(in srgb, var(--editorial-forest) 5%, transparent) 1px, transparent 1px),
+    linear-gradient(color-mix(in srgb, var(--editorial-forest) 5%, transparent) 1px, transparent 1px),
+    var(--editorial-paper) !important;
+  background-size: 32px 32px !important;
+  border-bottom-color: var(--editorial-line) !important;
+  padding: clamp(1.5rem, 3vw, 2.75rem) 0 !important;
+}
+
+.politico-editorial-profile .politico-header-title {
+  max-width: 18ch;
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: clamp(2.1rem, 4.5vw, 4.2rem);
+  font-weight: 600;
+  line-height: .94;
+  letter-spacing: -.045em;
+  color: var(--editorial-ink);
+}
+
+.politico-editorial-profile .politico-header-avatar-img,
+.politico-editorial-profile .politico-header-avatar-fallback {
+  width: 164px;
+  height: 196px;
+  border: 1px solid var(--editorial-line);
+  border-radius: 18px;
+  box-shadow: 0 16px 36px rgb(19 55 46 / .12);
+}
+
+.politico-editorial-profile .politico-header-avatar-img {
+  object-position: center top;
+}
+
+.politico-editorial-profile .politico-header-dip-col > div,
+.politico-editorial-profile .politico-header-bottom-full .stat-tile,
+.politico-editorial-profile .card-flat {
+  background: var(--editorial-raised) !important;
+  border-color: var(--editorial-line) !important;
+  box-shadow: 0 12px 28px rgb(19 55 46 / .055);
+}
+
+.politico-editorial-profile .politico-header-dip-col > div {
+  border-radius: 16px !important;
+  border-top: 3px solid var(--editorial-mint) !important;
+  padding: 1.1rem !important;
+}
+
+.politico-editorial-profile .politico-header-bottom-full {
+  border-top: 1px solid var(--editorial-line);
+  padding-top: 1.15rem;
+}
+
+.politico-editorial-profile .politico-header-bottom-full .stat-tile {
+  border-radius: 14px !important;
+  padding: 1rem !important;
+}
+
+.politico-editorial-profile__context {
+  display: flex;
+  align-items: center;
+  gap: .6rem;
+  min-height: 3.25rem;
+  border-bottom: 1px solid var(--editorial-line);
+  font-family: var(--font-ledger), ui-monospace, monospace;
+  text-transform: uppercase;
+  letter-spacing: .04em;
+}
+
+.politico-editorial-profile__body {
+  display: flex;
+  flex-direction: column;
+  gap: 1.75rem;
+}
+
+.politico-editorial-profile__body .section-title {
+  font-family: var(--font-editorial), Georgia, serif;
+  font-size: clamp(1.15rem, 2vw, 1.45rem) !important;
+  font-weight: 650;
+  letter-spacing: -.015em;
+  color: var(--editorial-ink);
+}
+
+.politico-editorial-profile__body .card-flat {
+  margin: 0;
+  border-radius: 16px;
+  padding: clamp(1rem, 2vw, 1.35rem);
+}
+
+.authority-section-nav {
+  position: sticky;
+  top: 108px;
+  z-index: 45;
+  background: color-mix(in srgb, var(--editorial-paper) 94%, transparent);
+  border-bottom: 1px solid var(--editorial-line);
+  backdrop-filter: blur(14px);
+}
+
+.authority-section-nav__inner {
+  display: flex;
+  align-items: center;
+  gap: .9rem;
+  min-height: 48px;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+
+.authority-section-nav__inner::-webkit-scrollbar { display: none; }
+
+.authority-section-nav__label {
+  flex: 0 0 auto;
+  color: var(--editorial-forest);
+  font-family: var(--font-ledger), ui-monospace, monospace;
+  font-size: .66rem;
+  font-weight: 800;
+  letter-spacing: .1em;
+  text-transform: uppercase;
+}
+
+.authority-section-nav__links {
+  display: flex;
+  align-items: center;
+  gap: .35rem;
+  min-width: max-content;
+}
+
+.authority-section-nav__links a {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  padding: .42rem .65rem;
+  color: var(--text-muted);
+  border: 1px solid transparent;
+  border-radius: 8px;
+  font-size: .72rem;
+  font-weight: 650;
+  text-decoration: none;
+}
+
+.authority-section-nav__links a span {
+  color: var(--editorial-mint);
+  font-family: var(--font-ledger), ui-monospace, monospace;
+  font-size: .6rem;
+}
+
+.authority-section-nav__links a:hover,
+.authority-section-nav__links a:focus-visible {
+  color: var(--editorial-forest);
+  background: var(--editorial-raised);
+  border-color: var(--editorial-line);
+}
+
+.politico-editorial-profile .politico-layout {
+  grid-template-columns: minmax(0, 1fr) minmax(320px, .72fr);
+  gap: 1.75rem;
+}
+
+.politico-editorial-profile .authority-staff-card,
+.politico-editorial-profile .authority-votes-card {
+  border-top: 3px solid var(--editorial-forest) !important;
+}
+
+.politico-editorial-profile .authority-expenses-card {
+  border-top: 3px solid var(--editorial-mint) !important;
+}
+
+.politico-editorial-profile .authority-remuneration-card strong,
+.politico-editorial-profile .authority-expenses-card strong {
+  font-family: var(--font-ledger), ui-monospace, monospace !important;
+}
+
+.politico-editorial-profile .politico-secondary-grid {
+  grid-template-columns: minmax(260px, .7fr) minmax(0, 1.3fr);
+  margin-top: 0;
+  gap: 1.75rem;
+}
+
+.politico-editorial-profile [id^="seccion-"] {
+  scroll-margin-top: 172px;
+}
+
+@media (max-width: 1023px) {
+  .authority-section-nav { top: 56px; }
+  .politico-editorial-profile .politico-header-avatar-img,
+  .politico-editorial-profile .politico-header-avatar-fallback {
+    width: 132px;
+    height: 158px;
+  }
+}
+
+@media (max-width: 850px) {
+  .politico-editorial-profile .politico-layout,
+  .politico-editorial-profile .politico-secondary-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
+
+@media (max-width: 479px) {
+  .politico-editorial-profile .politico-header-title {
+    font-size: clamp(2rem, 12vw, 3rem);
+  }
+  .politico-editorial-profile .politico-header-top {
+    align-items: flex-start;
+  }
+  .politico-editorial-profile .politico-header-avatar-img,
+  .politico-editorial-profile .politico-header-avatar-fallback {
+    width: 112px;
+    height: 136px;
+  }
+  .authority-section-nav__label { display: none; }
+  .authority-section-nav__inner { padding-inline: 1rem; }
+  .politico-editorial-profile__body { gap: 1.1rem; }
+  .politico-editorial-profile__body .card-flat { padding: .9rem; }
+}
+
 .reveal--fade {
   transform: none;
 }

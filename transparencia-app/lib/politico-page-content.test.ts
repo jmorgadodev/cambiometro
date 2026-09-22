@@ -20,4 +20,17 @@ describe("contenido verificable de la ficha política", () => {
     expect(page).toContain('className="politico-layout"');
     expect(css).toMatch(/@media \(max-width: 850px\)[\s\S]*\.politico-layout \{ grid-template-columns: minmax\(0, 1fr\); \}/);
   });
+
+  it("aplica el expediente editorial y mantiene accesos directos a sus secciones", () => {
+    const sectionNav = readFileSync(resolve("components/politico/AuthoritySectionNav.tsx"), "utf8");
+
+    expect(page).toContain("AuthoritySectionNav");
+    expect(page).toContain('className="politico-editorial-profile"');
+    expect(page).toContain('id="seccion-gastos"');
+    expect(page).toContain('id="seccion-asesores"');
+    expect(page).toContain('id="seccion-votaciones"');
+    expect(sectionNav).toContain("Gastos rendidos");
+    expect(sectionNav).toContain("Personal y asesores");
+    expect(css).toContain(".authority-section-nav");
+  });
 });

@@ -18,19 +18,11 @@ export async function generateStaticParams() {
 }
 import {
   getVotacionesParaPolitico,
-  getPrecomputedPoliticoProfile,
-  getPrecomputedPoliticoVotaciones,
   getTimelineParaPolitico,
   getEntidadesRelacionadas,
   getGastosParaPolitico,
   diputadoIdParaPolitico,
 } from "@/lib/data-source";
-import { getPoliticoDataCache } from "@/lib/db";
-import {
-  getCanonicalGastosParaPolitico,
-  getCanonicalLobbyParaPolitico,
-  getCanonicalVotacionesParaPolitico,
-} from "@/lib/politico-canonical";
 import { FUENTE_REMUNERACIONES, mesRemuneraciones, remuneracionParaPolitico } from "@/lib/remuneraciones";
 import { servelParaPolitico } from "@/lib/servel";
 import { infoprobidadParaPolitico } from "@/lib/infoprobidad";
@@ -49,6 +41,7 @@ import PersonalApoyoMensual from "@/components/PersonalApoyoMensual";
 import nextDynamic from "next/dynamic";
 import { cohesionForPolitico } from "@/lib/cohesion-bancadas";
 import { SupportProjectBanner } from "@/components/SupportProjectLink";
+import AuthoritySectionNav from "@/components/politico/AuthoritySectionNav";
 
 const VotacionesHistorial = nextDynamic(() => import("@/components/VotacionesHistorial"), {
   loading: () => <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-3)" }}>Cargando historial de votaciones...</div>,
@@ -339,20 +332,21 @@ export default async function PoliticoPage({ params }: Props) {
   };
 
   return (
-    <div style={{ minHeight: "100vh" }}>
+    <div className="politico-editorial-profile" style={{ minHeight: "100vh" }}>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd).replace(/</g, "\\u003c") }}
       />
       <PoliticoScoreHeader data={headerData} />
+      <AuthoritySectionNav />
 
-      <div className="container-main" style={{ paddingTop: "1rem" }}>
+      <div className="container-main politico-editorial-profile__context" style={{ paddingTop: "1rem" }}>
         <p style={{ margin: 0, color: "var(--text-muted)", fontSize: "0.82rem" }}>
           Su bancada vota unida {cohesion?.cohesion_pct != null ? `${cohesion.cohesion_pct}%` : "Sin muestra"} · {cohesion?.camara ?? pol.cargo}
         </p>
       </div>
 
-      <div className="container-main" style={{ paddingTop: "2rem", paddingBottom: "2rem" }}>
+      <div className="container-main politico-editorial-profile__body" style={{ paddingTop: "2rem", paddingBottom: "2rem" }}>
         
         {/* ── 1. GRILLA SUPERIOR (PERSONAL & GASTOS) ── */}
         <div className="politico-layout">
@@ -361,7 +355,7 @@ export default async function PoliticoPage({ params }: Props) {
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", minWidth: 0 }}>
             {/* Votación Electoral 2025 */}
             {pol.votos_2025 && (
-              <div className="card-flat">
+              <div className="card-flat authority-electoral-card" id="seccion-electoral">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.4rem" }}>
                   <div className="section-title" style={{ margin: 0 }}>
                     Votación Electoral 2025
@@ -388,7 +382,7 @@ export default async function PoliticoPage({ params }: Props) {
 
             {/* Sueldo oficial */}
             {remuneracion && (
-              <div className="card-flat">
+              <div className="card-flat authority-remuneration-card" id="costo-mensual">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.4rem" }}>
                   <div className="section-title" style={{ margin: 0 }}>
                     Remuneración bruta mensual
@@ -413,7 +407,7 @@ export default async function PoliticoPage({ params }: Props) {
             )}
 
             {/* Personal de Apoyo y Asesores */}
-            <div className="card-flat">
+            <div className="card-flat authority-staff-card" id="seccion-asesores">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.8rem" }}>
                 <div className="section-title" style={{ margin: 0 }}>
                   Personal de Apoyo y Asesores
@@ -443,7 +437,7 @@ export default async function PoliticoPage({ params }: Props) {
           {/* ── COLUMNA DERECHA ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
             {/* Gastos Operacionales */}
-            <div className="card-flat">
+            <div className="card-flat authority-expenses-card" id="seccion-gastos">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.4rem" }}>
                 <div className="section-title" style={{ margin: 0, fontSize: "0.9rem" }}>
                   Gastos Operacionales Rendidos
@@ -525,7 +519,7 @@ export default async function PoliticoPage({ params }: Props) {
             </div>
 
             {/* Lobby (InfoLobby) */}
-            <div className="card-flat">
+            <div className="card-flat authority-lobby-card" id="seccion-lobby">
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.4rem" }}>
                 <div className="section-title" style={{ margin: 0, fontSize: "0.9rem" }}>
                   Lobby Registrado (InfoLobby)
@@ -626,7 +620,7 @@ export default async function PoliticoPage({ params }: Props) {
 
             {/* Resultado elección 2025 (SERVEL) */}
             {candidatoServel && (
-              <div className="card-flat">
+              <div className="card-flat authority-servel-card">
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.4rem" }}>
                   <div className="section-title" style={{ margin: 0, fontSize: "0.9rem" }}>
                     Resultado elección 2025 · SERVEL
@@ -684,7 +678,7 @@ export default async function PoliticoPage({ params }: Props) {
         </div>
 
         {/* ── 2. FILA 1: MILITANCIAS (IZQ) Y DIP (DER) 50/50 ── */}
-        <div className="politico-secondary-grid">
+        <div className="politico-secondary-grid" id="seccion-trayectoria">
 
           {/* Militancias y Periodo */}
           <div className="card-flat" style={{ height: "100%", margin: 0, display: "flex", flexDirection: "column" }}>
@@ -788,7 +782,7 @@ export default async function PoliticoPage({ params }: Props) {
         </div>
 
         {/* ── 4. HISTORIAL DE VOTACIONES (ANCHO COMPLETO) ── */}
-        <div className="card-flat" id="historial-votaciones" style={{ marginTop: "1.5rem" }}>
+        <div className="card-flat authority-votes-card" id="seccion-votaciones" style={{ marginTop: "1.5rem" }}>
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "baseline", flexWrap: "wrap", gap: "0.5rem", marginBottom: "0.4rem" }}>
             <div className="section-title" style={{ margin: 0 }}>
               Historial de Votaciones
