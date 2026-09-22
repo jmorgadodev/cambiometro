@@ -9,6 +9,7 @@ describe("promesas editoriales del inicio", () => {
   const home = [
     homeEntry,
     "Hero.tsx",
+    "SearchHub.tsx",
     "MetricsBar.tsx",
     "MovementsTimeline.tsx",
     "FeaturedVotes.tsx",

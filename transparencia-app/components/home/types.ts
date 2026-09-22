@@ -24,6 +24,7 @@ export interface HomeVote {
   summary: string;
   chamber: string;
   result: string;
+  votes?: { favor: number; contra: number; abstencion: number };
 }
 
 export interface HomeSource {

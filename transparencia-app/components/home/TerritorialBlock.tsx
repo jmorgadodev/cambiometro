@@ -9,15 +9,23 @@ interface TerritorialBlockProps {
 
 export default function TerritorialBlock({ renuncias, verificados, enConfirmacion }: TerritorialBlockProps) {
   return (
-    <section className="container-main editorial-section" aria-labelledby="territory-title">
-      <header className="editorial-heading">
-        <div><p className="eyebrow">Territorio y actualidad</p><h2 id="territory-title">El Estado, visto desde el territorio</h2></div>
-        <Link prefetch={false} href="/datos">Ver el catálogo de datos →</Link>
-      </header>
-      <div className="editorial-territory">
-        <Link prefetch={false} href="/municipalidades"><Icono nombre="territorio" size={24} /><span>Municipios</span><strong>346 comunas con ficha territorial</strong><small>Demografía, alcaldías, finanzas y compras públicas.</small></Link>
-        <Link prefetch={false} href="/movimientos"><Icono nombre="etl" size={24} /><span>Actualidad</span><strong>{renuncias} renuncias registradas</strong><small>{verificados} verificadas y {enConfirmacion} en confirmación.</small></Link>
-        <Link prefetch={false} href="/municipalidades"><Icono nombre="datos" size={24} /><span>Datos censales</span><strong>INE Censo 2024 en el territorio</strong><small>Población, viviendas y hogares desde la fuente oficial.</small></Link>
+    <section className="editorial-territory-section editorial-section" aria-labelledby="territory-title">
+      <div className="container-main editorial-territory-layout">
+        <div className="editorial-territory-copy">
+          <p className="eyebrow"><Icono nombre="territorio" size={16} /> Territorio y cobertura nacional</p>
+          <h2 id="territory-title">Fiscalización desde Arica hasta Magallanes.</h2>
+          <p>Las fichas territoriales reúnen datos oficiales de las 346 comunas de Chile. Puedes revisar alcaldías, demografía, finanzas y compras con la fuente de cada registro.</p>
+          <div className="editorial-territory-facts">
+            <Link prefetch={false} href="/municipalidades"><strong>346</strong><span>comunas con ficha</span></Link>
+            <Link prefetch={false} href="/municipalidades"><strong>INE 2024</strong><span>datos censales</span></Link>
+            <Link prefetch={false} href="/movimientos"><strong>{renuncias}</strong><span>renuncias registradas</span></Link>
+          </div>
+          <Link prefetch={false} className="btn btn-primary" href="/municipalidades">Explorar comunas <span aria-hidden="true">→</span></Link>
+          <small>{verificados} movimientos verificados; {enConfirmacion} en confirmación. <Link prefetch={false} href="/movimientos">Ver movimientos</Link></small>
+        </div>
+        <div className="editorial-territory-visual" role="img" aria-label="Paisaje de la Patagonia chilena">
+          <div><span>Democracia territorial</span><p>La evidencia pública también debe poder leerse desde cada comuna.</p></div>
+        </div>
       </div>
     </section>
   );

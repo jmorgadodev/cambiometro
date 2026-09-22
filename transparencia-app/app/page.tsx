@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Reveal from "@/components/Reveal";
 import FeaturedVotes from "@/components/home/FeaturedVotes";
 import Hero from "@/components/home/Hero";
+import SearchHub from "@/components/home/SearchHub";
 import MetricsBar from "@/components/home/MetricsBar";
 import MovementsTimeline from "@/components/home/MovementsTimeline";
 import QuestionsGrid from "@/components/home/QuestionsGrid";
@@ -11,7 +12,7 @@ import type { HomeMetric, HomeSource, HomeVote } from "@/components/home/types";
 import { GLOBAL_KPIS, KPI_SCOPES } from "@/lib/global-kpis";
 import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
 import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
-import { getHomeFeaturedVotes, getVotingFreshness } from "@/lib/votaciones-destacadas";
+import { getHomeFeaturedVotes, getVotingFreshness, getVotacionesAnuales } from "@/lib/votaciones-destacadas";
 import { tituloVotacionLegible } from "@/lib/votaciones-format";
 import { MOVIMIENTOS_HOME_SUMMARY } from "@/lib/movimientos";
 import { formatFechaCorta } from "@/lib/format";
@@ -83,6 +84,7 @@ export default async function HomePage() {
     }));
   const entityCount = getStaticEntityCatalog().total;
   const metrics = HOME_KPIS.map((metric) => metric.key === "entidades" ? { ...metric, value: entityCount || metric.value } : metric);
+  const annualVotes = new Map(getVotacionesAnuales().map((vote) => [vote.votacion_id, vote]));
   const votes: HomeVote[] = getHomeFeaturedVotes(HOME_FEATURED_VOTE_IDS).map((vote) => ({
     id: vote.votacion_id,
     date: vote.fecha,
@@ -91,6 +93,7 @@ export default async function HomePage() {
     summary: vote.resumen,
     chamber: vote.camara,
     result: vote.resultado,
+    votes: annualVotes.get(vote.votacion_id)?.votos,
   }));
   const updatedAt = formatLandingDate(landingSummary.dataUpdatedAt);
 
@@ -103,7 +106,8 @@ export default async function HomePage() {
         url: "https://cambiometro.impulsacv.cl",
         publisher: { "@type": "Organization", name: "ImpulsaCV", url: "https://impulsacv.cl" },
       })}</script>
-      <Hero updatedAt={updatedAt} records={GLOBAL_KPIS.registros_canonicos} entities={entityCount} sourceCount={sources.length} />
+      <Hero />
+      <SearchHub />
       <MetricsBar metrics={metrics} />
       <Reveal><QuestionsGrid /></Reveal>
       <Reveal delay={50}>
