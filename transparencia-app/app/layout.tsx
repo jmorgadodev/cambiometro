@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import Image from "next/image";
-import { Inter, IBM_Plex_Mono } from "next/font/google";
+import { Inter, JetBrains_Mono, Newsreader } from "next/font/google";
 import SiteHeader from "@/components/SiteHeader";
 import PageEntrance from "@/components/PageEntrance";
 import RouteTransitionOrb from "@/components/RouteTransitionOrb";
@@ -11,16 +11,23 @@ import { SupportProjectLink } from "@/components/SupportProjectLink";
 import "./globals.css";
 
 const inter = Inter({
-  variable: "--font-sans",
+  variable: "--font-inter",
   subsets: ["latin"],
   display: "swap",
 });
 
-const ibmPlexMono = IBM_Plex_Mono({
+const jetBrainsMono = JetBrains_Mono({
   weight: ["400", "500", "600", "700"],
-  variable: "--font-mono",
+  variable: "--font-ledger",
   subsets: ["latin"],
   display: "swap",
+});
+
+const newsreader = Newsreader({
+  variable: "--font-editorial",
+  subsets: ["latin"],
+  display: "swap",
+  style: ["normal", "italic"],
 });
 
 export const metadata: Metadata = {
@@ -141,7 +148,11 @@ function FacebookIcon({ size = 14 }: { size?: number }) {
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="es" data-theme="paper" className={`${inter.variable} ${ibmPlexMono.variable}`}>
+    <html
+      lang="es"
+      data-theme="paper"
+      className={`${inter.variable} ${jetBrainsMono.variable} ${newsreader.variable}`}
+    >
       <body className="font-sans">
         <div id="initial-splash-orb" className="initial-splash-orb" role="status" aria-label="Cargando El Cambiómetro...">
           <div className="loading-orb" style={{ width: "56px", height: "56px" }}>

@@ -5,7 +5,8 @@
 
 @theme {
   --font-sans: var(--font-inter, "Inter", sans-serif);
-  --font-mono: var(--font-mono, "IBM Plex Mono", "JetBrains Mono", Consolas, monospace);
+  --font-serif: var(--font-editorial, "Newsreader", Georgia, serif);
+  --font-mono: var(--font-ledger, "JetBrains Mono", Consolas, monospace);
 }
 
 /* ═══════════════════════════════════════════════════════════
@@ -13,6 +14,13 @@
    Papel es el valor por defecto; la interfaz no sigue el tema del sistema.
 ═══════════════════════════════════════════════════════════ */
 :root, :root[data-theme="paper"] {
+  --editorial-forest: #13372E;
+  --editorial-paper: #F6F5F2;
+  --editorial-mint: #4CC38A;
+  --editorial-graphite: #2A2E33;
+  --editorial-card: #FBFAF8;
+  --editorial-surface: #FFFFFF;
+  --editorial-alert: #D92D20;
   --bg: #F6F5F2;
   --surface: #FFFFFF;
   --surface-2: #FBFAF8;
@@ -52,6 +60,13 @@
 }
 
 :root[data-theme="dark"], html.dark, body.dark, .dark {
+  --editorial-forest: #13372E;
+  --editorial-paper: #F6F5F2;
+  --editorial-mint: #4CC38A;
+  --editorial-graphite: #2A2E33;
+  --editorial-card: #181B1E;
+  --editorial-surface: #1D2023;
+  --editorial-alert: #F97066;
   --bg: #151719; --surface: #1D2023; --surface-2: #212428; --border: #2A2E33;
   --text-1: #E8E6E1; --text-2: #A3A8AD; --text-3: #A3A8AD; --accent: #34B39A; --on-accent: #0B2A22;
   --highlight: #E8A33D; --link: #3FBFA8; --ok: #4CC38A; --ok-bg: #10281F; --bad: #F97066; --bad-bg: #351A19;
@@ -65,6 +80,13 @@
 }
 
 :root[data-theme="night"] {
+  --editorial-forest: #13372E;
+  --editorial-paper: #F6F5F2;
+  --editorial-mint: #4CC38A;
+  --editorial-graphite: #2A2E33;
+  --editorial-card: #121313;
+  --editorial-surface: #161818;
+  --editorial-alert: #E0655C;
   --bg: #0A0B0B; --surface: #121313; --surface-2: #161818; --border: #1F2222;
   --text-1: #D6D3CC; --text-2: #8B8E89; --text-3: #8B8E89; --accent: #2FA08C; --on-accent: #06201B;
   --highlight: #C98A3D; --link: #3AA793; --ok: #3DA97C; --ok-bg: #10251E; --bad: #E0655C; --bad-bg: #2A1514;
@@ -81,7 +103,8 @@
   --color-background: var(--bg-primary);
   --color-foreground: var(--text-primary);
   --font-sans: var(--font-inter, Inter, Aptos, sans-serif);
-  --font-mono: var(--font-mono, "IBM Plex Mono", "JetBrains Mono", monospace);
+  --font-serif: var(--font-editorial, Newsreader, Georgia, serif);
+  --font-mono: var(--font-ledger, "JetBrains Mono", Consolas, monospace);
 
   --color-brand:   var(--brand);
   --color-accent:  var(--accent);
@@ -117,7 +140,7 @@ h1, h2, h3, h4, h5, h6, .section-title, [id] {
 body {
   background: var(--bg-primary);
   color: var(--text-primary);
-  font-family: Inter, Aptos, "Segoe UI", system-ui, sans-serif;
+  font-family: var(--font-inter), Inter, Aptos, "Segoe UI", system-ui, sans-serif;
   min-height: 100vh;
   line-height: 1.6;
   max-width: 100%;
