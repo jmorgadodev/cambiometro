@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 
 describe("redes sociales del footer", () => {
   it("publica los cuatro perfiles oficiales con etiquetas accesibles", () => {
-    const layout = readFileSync(resolve("app/layout.tsx"), "utf8");
+    const layout = readFileSync(resolve("components/layout/Footer.tsx"), "utf8");
     for (const url of [
       "https://www.tiktok.com/@cambiometro",
       "https://www.instagram.com/cambiometro/",
