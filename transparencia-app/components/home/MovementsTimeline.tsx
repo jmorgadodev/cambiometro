@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import MechanicalCounter from "./MechanicalCounter";
-import { daysSinceCalendarDate } from "@/lib/movement-age";
+import { daysSinceCalendarDate, latestEffectiveMovementDate } from "@/lib/movement-age";
 
 export interface MovementItem {
   id: string;
@@ -43,18 +43,58 @@ export function MovementsTimeline({
   movements,
 }: MovementsTimelineProps) {
   const [diasSinCambiosActualizados, setDiasSinCambiosActualizados] = useState(diasSinCambios);
+  const [fechaCambioEfectivoActualizada, setFechaCambioEfectivoActualizada] = useState(ultimoCambioEfectivo);
   const leadMovement = movements[0];
   const archiveMovements = movements.slice(1, 3);
 
   useEffect(() => {
     const actualizarDiasSinCambios = () => {
-      setDiasSinCambiosActualizados(daysSinceCalendarDate(ultimoCambioEfectivo));
+      setDiasSinCambiosActualizados(daysSinceCalendarDate(fechaCambioEfectivoActualizada));
     };
 
     actualizarDiasSinCambios();
     const timer = window.setInterval(actualizarDiasSinCambios, 60_000);
     return () => window.clearInterval(timer);
-  }, [ultimoCambioEfectivo]);
+  }, [fechaCambioEfectivoActualizada]);
+
+  useEffect(() => {
+    let active = true;
+    let lastCheckedAt = 0;
+
+    const revisarUltimoCambioPublicado = async (force = false) => {
+      if (document.visibilityState !== "visible") return;
+      if (!force && Date.now() - lastCheckedAt < 60_000) return;
+      lastCheckedAt = Date.now();
+
+      try {
+        const response = await fetch("/data/movimientos.json", { cache: "no-store" });
+        if (!response.ok) return;
+        const payload: unknown = await response.json();
+        const movimientos = payload && typeof payload === "object" && "movimientos" in payload
+          ? payload.movimientos
+          : null;
+        const latestDate = latestEffectiveMovementDate(movimientos);
+        if (!active || !latestDate) return;
+
+        setFechaCambioEfectivoActualizada((currentDate) => latestDate > currentDate ? latestDate : currentDate);
+      } catch {
+        // La Home conserva la fecha ya publicada si la comprobación no está disponible.
+      }
+    };
+
+    const checkWhenVisible = () => { void revisarUltimoCambioPublicado(true); };
+    const timer = window.setInterval(() => { void revisarUltimoCambioPublicado(); }, 10 * 60_000);
+    window.addEventListener("focus", checkWhenVisible);
+    document.addEventListener("visibilitychange", checkWhenVisible);
+    void revisarUltimoCambioPublicado();
+
+    return () => {
+      active = false;
+      window.clearInterval(timer);
+      window.removeEventListener("focus", checkWhenVisible);
+      document.removeEventListener("visibilitychange", checkWhenVisible);
+    };
+  }, []);
 
   const renderStatus = (status: MovementItem["status"]) => {
     if (status === "VERIFICADO OFICIAL") {
