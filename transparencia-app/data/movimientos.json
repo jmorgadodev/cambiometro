@@ -33,6 +33,20 @@
       "fase": "anunciado",
       "status": "en_confirmacion",
       "tipo": "renuncia"
+    },
+    {
+      "signal_id": "signal-fabian-paez-2026-09-17",
+      "source_id": "media-review",
+      "source_label": "Chilevisión (comunicado DPR citado)",
+      "source_tier": "provisional",
+      "title": "Fabián Páez dejó la Seremi de Energía de Coquimbo; asume una subrogancia",
+      "url": "https://www.chilevision.cl/noticias/nacional/seremi-de-energia-de-coquimbo-renuncia-tras-observaciones-de-contraloria-por-su-experiencia-profesional/",
+      "date": "2026-09-17",
+      "summary": "La nota cita un comunicado de la Delegación Presidencial Regional que confirma la renuncia y la subrogancia de Juan Carlos Salinas. La fecha del evento se reporta como la noche del 16; falta localizar el comunicado primario enlazable, por lo que queda en confirmación.",
+      "detected_at": "2026-09-23T13:24:23.238Z",
+      "fase": "anunciado",
+      "status": "en_confirmacion",
+      "tipo": "renuncia"
     }
   ],
   "stats": {
@@ -42,7 +56,7 @@
     "en_confirmacion": 0,
     "con_reemplazo": 26,
     "reemplazo_no_informado": 20,
-    "signals_en_confirmacion": 1,
+    "signals_en_confirmacion": 2,
     "target_categories": "{\"ministers\":3,\"subsecretaries\":6,\"seremis\":36,\"delegados\":1}"
   },
   "movimientos": [
@@ -2256,5 +2270,5 @@
       "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     }
   ],
-  "checksum_sha256": "3ce483e03ec8f3d51d321f6d57e40622240b8d0a37f767daaa8a11e8455265d6"
+  "checksum_sha256": "66cb8486aace545919e2bd4e779053862524bb554cc8986c4da1eaa812821ed2"
 }
