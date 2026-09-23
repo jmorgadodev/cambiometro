@@ -118,8 +118,26 @@ function loadDeputies() {
   return diputados;
 }
 
+export function pagesRefreshWorkflowDispatchArgs() {
+  return [
+    "workflow",
+    "run",
+    "Pages estático - refresco automático verificable",
+    "--ref",
+    "main",
+    "-f",
+    "deployment_mode=data-refresh",
+    "-f",
+    "confirm_data_refresh=CAMBIOMETRO_DATA_REFRESH",
+    "-f",
+    "publish_pages=true",
+    "-f",
+    "confirm_cutover=CAMBIOMETRO_CONFIRM_CUTOVER",
+  ];
+}
+
 function triggerPagesRefresh() {
-  run("gh", ["workflow", "run", "Pages estático - refresco automático verificable", "--ref", "main"], "PAGES_REFRESH");
+  run("gh", pagesRefreshWorkflowDispatchArgs(), "PAGES_REFRESH");
 }
 
 export async function main() {
