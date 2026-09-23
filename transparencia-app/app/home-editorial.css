@@ -1,0 +1,52 @@
+/* La maqueta vive aquí: sus variables no modifican fichas ni módulos existentes. */
+.home-desk {
+  font-family: var(--font-jakarta), var(--font-inter), sans-serif;
+  padding-bottom: 0;
+}
+
+.home-desk .bg-grid-documental {
+  background-image: linear-gradient(to right, color-mix(in srgb, var(--accent) 7%, transparent) 1px, transparent 1px), linear-gradient(to bottom, color-mix(in srgb, var(--accent) 7%, transparent) 1px, transparent 1px);
+  background-size: 28px 28px;
+}
+
+.home-desk .bg-grid-dark-documental {
+  background-image: linear-gradient(to right, var(--home-grid-dark-line) 1px, transparent 1px), linear-gradient(to bottom, var(--home-grid-dark-line) 1px, transparent 1px);
+  background-size: 32px 32px;
+}
+
+.home-desk .mask-radial-fade { mask-image: radial-gradient(ellipse at center, var(--home-mask-opaque) 35%, transparent 80%); }
+.home-desk .mask-linear-fade-y { mask-image: linear-gradient(to bottom, transparent, var(--home-mask-opaque) 15%, var(--home-mask-opaque) 85%, transparent); }
+.home-desk .clip-hero-editorial { clip-path: polygon(18% 0, 100% 0, 100% 100%, 0 100%); }
+.home-desk .clip-hero-backdrop { clip-path: polygon(21% 0, 100% 0, 100% 100%, 3% 100%); }
+
+@keyframes editorialHeadlineFade { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes editorialPhotoExpose { from { opacity: 0; filter: blur(6px) brightness(.85); } to { opacity: 1; filter: blur(0) brightness(.95); } }
+@keyframes editorialStampPop { from { opacity: .4; transform: scale(.88); } to { opacity: 1; transform: scale(1); } }
+
+.home-desk .animate-hero-kicker { animation: editorialHeadlineFade .6s ease-out .05s both; }
+.home-desk .animate-hero-title { animation: editorialHeadlineFade .75s ease-out .18s both; }
+.home-desk .animate-hero-desc { animation: editorialHeadlineFade .75s ease-out .32s both; }
+.home-desk .animate-hero-actions { animation: editorialHeadlineFade .75s ease-out .45s both; }
+.home-desk .animate-hero-checkpoints { animation: editorialHeadlineFade .75s ease-out .58s both; }
+.home-desk .animate-hero-photo-reveal { animation: editorialPhotoExpose 1.1s ease-out .25s both; }
+.home-desk .animate-stamp-pop { animation: editorialStampPop .45s ease-out both; }
+.home-desk .card-hover-editorial { transition: transform .22s ease, box-shadow .22s ease, border-color .22s ease; }
+.home-desk .card-hover-editorial:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
+
+/* El pie compartido adopta la maqueta sólo cuando se muestra la portada. */
+body:has(.home-desk) .site-footer {
+  margin-top: 0;
+}
+
+@media (max-width: 1024px) {
+  .home-desk .clip-hero-editorial, .home-desk .clip-hero-backdrop { clip-path: none; }
+}
+
+@media (max-width: 640px) {
+  /* La nota queda al pie de la fotografía; el buscador empieza debajo. */
+  .home-desk .editorial-search-hub { margin-top: 2rem; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .home-desk [class*="animate-hero-"] { animation: none; }
+}

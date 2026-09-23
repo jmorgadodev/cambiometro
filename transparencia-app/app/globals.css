@@ -1,4 +1,6 @@
 @import "tailwindcss";
+@source "../components";
+@source "../app";
 @source not "../data";
 @source not "../scratch";
 @source not "../fixtures";
@@ -321,7 +323,76 @@
   --shadow-sm: none; --shadow-md: 0 12px 32px rgba(0, 0, 0, .45); --shadow-lg: 0 18px 48px rgba(0, 0, 0, .58); --shadow-glow: none; --shadow-red: none; --overlay: rgba(0, 0, 0, .84);
 }
 
+/* Tokens de la portada: definidos aquí para la guardia de color y limitados a Home. */
+.home-desk {
+  --forest-bg: #13372e;
+  --forest-card: #194036;
+  --forest-border: #1f4f42;
+  --forest-border-subtle: #23584b;
+  --forest-text: #f6f5f2;
+  --forest-subtle: #a3c7bd;
+  --forest-accent: #34b39a;
+  --forest-accent-ok: #4cc38a;
+  --postit-bg: #faf8f5;
+  --postit-tape: rgba(254, 240, 138, .85);
+  --postit-tape-border: rgba(252, 211, 77, .6);
+  --home-grid-dark-line: rgba(255, 255, 255, .05);
+  --home-mask-opaque: #000;
+}
+:root[data-theme="dark"] .home-desk {
+  --forest-bg: #16221d;
+  --forest-card: #111a17;
+  --forest-border: #243b33;
+  --postit-bg: #1d2023;
+  --postit-tape: #2a2e33;
+  --postit-tape-border: rgba(255, 255, 255, .1);
+}
+:root[data-theme="night"] .home-desk {
+  --forest-bg: #0d1613;
+  --forest-card: #111c18;
+  --forest-border: #1a2e27;
+  --forest-text: #e8e6e1;
+  --forest-accent: #2fa08c;
+  --forest-accent-ok: #3da97c;
+  --postit-bg: #141718;
+  --postit-tape: #1f2222;
+  --postit-tape-border: rgba(255, 255, 255, .08);
+}
+body:has(.home-desk) .site-footer {
+  --surface: #1b2320;
+  --surface-2: #141b18;
+  --border: #34443c;
+  --text-1: #f6f5f2;
+  --text-2: #c2cbc5;
+  --text-3: #a7b6ac;
+  --accent: #4cc38a;
+}
+
 @theme inline {
+  /* La portada usa los mismos tokens semánticos que el resto del sitio. */
+  --color-bg: var(--bg);
+  --color-surface-2: var(--surface-2);
+  --color-text-1: var(--text-1);
+  --color-text-2: var(--text-2);
+  --color-text-3: var(--text-3);
+  --color-on-accent: var(--on-accent);
+  --color-ok-bg: var(--ok-bg);
+  --color-warn-bg: var(--warn-bg);
+  --color-bad-bg: var(--bad-bg);
+  --color-forest-bg: var(--forest-bg);
+  --color-forest-card: var(--forest-card);
+  --color-forest-border: var(--forest-border);
+  --color-forest-text: var(--forest-text);
+  --color-forest-border-subtle: var(--forest-border-subtle);
+  --color-forest-subtle: var(--forest-subtle);
+  --color-forest-accent: var(--forest-accent);
+  --color-forest-accent-ok: var(--forest-accent-ok);
+  --color-postit-bg: var(--postit-bg);
+  --color-postit-tape: var(--postit-tape);
+  --color-postit-tape-border: var(--postit-tape-border);
+  --shadow-postit: 0 12px 24px -6px rgba(0, 0, 0, .25), 0 4px 8px -2px rgba(0, 0, 0, .1);
+  --shadow-editorial: 0 12px 32px -8px rgba(0, 0, 0, .08), 0 2px 6px rgba(0, 0, 0, .03);
+  --font-hand: var(--font-caveat, cursive);
   --color-background: var(--bg-primary);
   --color-foreground: var(--text-primary);
   --font-sans: var(--font-inter, Inter, Aptos, sans-serif);
@@ -343,6 +414,13 @@
 ═══════════════════════════════════════════════════════════ */
 *, *::before, *::after {
   box-sizing: border-box;
+}
+
+/* Las vistas heredadas conservan su reset; la portada editorial usa el reset
+   por capas de Tailwind para que sus utilidades de espaciado sí funcionen. */
+*:not(.home-desk, .home-desk *),
+*:not(.home-desk, .home-desk *)::before,
+*:not(.home-desk, .home-desk *)::after {
   margin: 0;
   padding: 0;
 }

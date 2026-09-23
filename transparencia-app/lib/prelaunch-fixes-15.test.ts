@@ -36,9 +36,10 @@ describe("Tarea 15 - 5 Fixes Críticos Pre-Launch", () => {
       readFileSync(join(projectRoot, "app", "page.tsx"), "utf8"),
       readFileSync(join(projectRoot, "components", "home", "SourcesCatalog.tsx"), "utf8"),
     ].join("\n");
-    expect(homeContent).toContain("sources.length");
-    expect(homeContent).toContain("12 fuentes oficiales");
-    expect(homeContent).toContain('href="/fuentes"');
+    expect(homeContent).toContain("operationalSources.length");
+    expect(homeContent).toContain("buildEditorialChapters(operationalSources)");
+    expect(homeContent).not.toContain("12 fuentes oficiales");
+    expect(homeContent).toContain("source.link");
 
     const datosContent = readFileSync(join(projectRoot, "app", "datos", "page.tsx"), "utf8");
     expect(datosContent).toContain("fuentes oficiales +");

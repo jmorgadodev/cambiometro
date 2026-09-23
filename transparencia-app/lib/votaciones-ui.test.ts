@@ -26,7 +26,9 @@ describe("interfaz de votaciones destacadas", () => {
 
   it("permite abrir desde la home el análisis de cada votación destacada", () => {
     const page = readFileSync(resolve(import.meta.dirname, "../components/home/FeaturedVotes.tsx"), "utf8");
-    expect(page).toContain("?votacion=${vote.id}");
+    const adapter = readFileSync(resolve(import.meta.dirname, "./home-editorial-adapter.ts"), "utf8");
+    expect(page).toContain("href={vote.link}");
+    expect(adapter).toContain("?votacion=${encodeURIComponent(vote.votacion_id)}");
     expect(client).toContain("new URLSearchParams(window.location.search)");
   });
 
@@ -47,7 +49,7 @@ describe("interfaz de votaciones destacadas", () => {
   it("explica por separado la revisión del pipeline y la última votación", () => {
     const page = readFileSync(resolve(import.meta.dirname, "../components/home/FeaturedVotes.tsx"), "utf8");
     expect(page).toContain("Última revisión");
-    expect(page).toContain("Última votación nominal");
+    expect(page).toContain("Última votación de sala");
     expect(client).toContain("Última revisión automática");
     expect(client).toContain("Última votación nominal");
   });

@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Inter, JetBrains_Mono, Newsreader } from "next/font/google";
+import { Caveat, Inter, JetBrains_Mono, Newsreader, Plus_Jakarta_Sans } from "next/font/google";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import PageEntrance from "@/components/PageEntrance";
@@ -26,6 +26,19 @@ const newsreader = Newsreader({
   subsets: ["latin"],
   display: "swap",
   style: ["normal", "italic"],
+});
+
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-jakarta",
+  subsets: ["latin"],
+  display: "swap",
+});
+
+const caveat = Caveat({
+  variable: "--font-caveat",
+  subsets: ["latin"],
+  weight: ["600", "700"],
+  display: "swap",
 });
 
 export const metadata: Metadata = {
@@ -80,7 +93,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
     <html
       lang="es"
       data-theme="paper"
-      className={`${inter.variable} ${jetBrainsMono.variable} ${newsreader.variable}`}
+      className={`${inter.variable} ${jetBrainsMono.variable} ${newsreader.variable} ${plusJakartaSans.variable} ${caveat.variable}`}
     >
       <body className="font-sans">
         <div id="initial-splash-orb" className="initial-splash-orb" role="status" aria-label="Cargando El Cambiómetro...">

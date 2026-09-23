@@ -1,26 +1,34 @@
 import type { Metadata } from "next";
-import Reveal from "@/components/Reveal";
-import FeaturedVotes from "@/components/home/FeaturedVotes";
-import Hero from "@/components/home/Hero";
-import SearchHub from "@/components/home/SearchHub";
-import MetricsBar from "@/components/home/MetricsBar";
-import MovementsTimeline from "@/components/home/MovementsTimeline";
-import QuestionsGrid from "@/components/home/QuestionsGrid";
-import SourcesCatalog from "@/components/home/SourcesCatalog";
-import TerritorialBlock from "@/components/home/TerritorialBlock";
-import type { HomeMetric, HomeSource, HomeVote } from "@/components/home/types";
-import { GLOBAL_KPIS, KPI_SCOPES } from "@/lib/global-kpis";
-import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
+import "./home-editorial.css";
+import { GLOBAL_KPIS } from "@/lib/global-kpis";
+import { ETL_SOURCES_DATA } from "@/lib/etl-sources-data";
 import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
 import { getHomeFeaturedVotes, getVotingFreshness, getVotacionesAnuales } from "@/lib/votaciones-destacadas";
-import { tituloVotacionLegible } from "@/lib/votaciones-format";
-import { MOVIMIENTOS_HOME_SUMMARY } from "@/lib/movimientos";
+import { MOVIMIENTOS, MOVIMIENTOS_HOME_SUMMARY, MOVIMIENTOS_PIPELINE_METADATA } from "@/lib/movimientos";
 import { formatFechaCorta } from "@/lib/format";
-import { getLandingSummary } from "@/lib/landing-summary-runtime";
+import { getLandingSummary, sourceKeyForHomeSource } from "@/lib/landing-summary-runtime";
+import { buildEditorialChapters, buildEditorialMovements, buildEditorialVotes } from "@/lib/home-editorial-adapter";
+
+import { Hero } from "@/components/home/Hero";
+import { SearchBar } from "@/components/home/SearchBar";
+import { MetricsBar } from "@/components/home/MetricsBar";
+import { QuestionsGrid } from "@/components/home/QuestionsGrid";
+import { MovementsTimeline } from "@/components/home/MovementsTimeline";
+import { FeaturedVotes } from "@/components/home/FeaturedVotes";
+import { TerritorialBlock } from "@/components/home/TerritorialBlock";
+import { SourcesCatalog } from "@/components/home/SourcesCatalog";
+import { IndependenceCallout } from "@/components/home/IndependenceCallout";
 
 export const dynamic = "force-static";
 
 const VOTING_FRESHNESS = getVotingFreshness();
+const HOME_FEATURED_VOTE_IDS = [
+  "senado-vot-11264",
+  "camara-vot-89844",
+  "senado-vot-11274",
+  "camara-vot-89749",
+  "camara-vot-89750",
+] as const;
 
 function formatVotingDate(value: string | null) {
   if (!value) return "Sin fecha publicada";
@@ -29,18 +37,9 @@ function formatVotingDate(value: string | null) {
 }
 
 function formatLandingDate(value: string | null) {
-  if (!value) return "Sin fecha publicada";
+  if (!value) return null;
   return new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(value));
 }
-
-// Selección editorial estable: impacto público, quórum relevante y diversidad de materias.
-const HOME_FEATURED_VOTE_IDS = [
-  "senado-vot-11264",
-  "camara-vot-89844",
-  "senado-vot-11274",
-  "camara-vot-89749",
-  "camara-vot-89750",
-] as const;
 
 export const metadata: Metadata = {
   title: "El Cambiómetro — Plataforma de Datos Públicos y Transparencia",
@@ -59,63 +58,108 @@ export const metadata: Metadata = {
   },
 };
 
-const HOME_KPIS: HomeMetric[] = [
-  { key: "registros_canonicos", value: GLOBAL_KPIS.registros_canonicos, label: KPI_SCOPES.registros_canonicos.label, tooltip: KPI_SCOPES.registros_canonicos.tooltip, href: KPI_SCOPES.registros_canonicos.href },
-  { key: "entidades", value: GLOBAL_KPIS.entidades, label: KPI_SCOPES.entidades.label, tooltip: KPI_SCOPES.entidades.tooltip, href: KPI_SCOPES.entidades.href },
-  { key: "relaciones", value: GLOBAL_KPIS.relaciones, label: KPI_SCOPES.relaciones.label, tooltip: KPI_SCOPES.relaciones.tooltip, href: KPI_SCOPES.relaciones.href },
-  { key: "votaciones", value: GLOBAL_KPIS.votaciones, label: KPI_SCOPES.votaciones.label, tooltip: KPI_SCOPES.votaciones.tooltip, href: KPI_SCOPES.votaciones.href },
-  { key: "gastos", value: GLOBAL_KPIS.gastos, label: KPI_SCOPES.gastos.label, tooltip: KPI_SCOPES.gastos.tooltip, href: KPI_SCOPES.gastos.href },
-];
-
 export default async function HomePage() {
   const landingSummary = getLandingSummary();
-  const { sources: qualitySources } = await getDataQualityDashboardData();
-  const sources: HomeSource[] = qualitySources
-    .filter((source) => source.canonicalCount > 0)
-    .map((source) => ({
-      id: source.id,
-      name: source.name,
-      organization: source.organization,
-      recordCount: source.canonicalCount,
-      frequency: source.frequency,
-      status: source.status,
-      statusText: source.statusLabel,
-      viewLink: source.modulePath,
-    }));
-  const entityCount = getStaticEntityCatalog().total;
-  const metrics = HOME_KPIS.map((metric) => metric.key === "entidades" ? { ...metric, value: entityCount || metric.value } : metric);
-  const annualVotes = new Map(getVotacionesAnuales().map((vote) => [vote.votacion_id, vote]));
-  const votes: HomeVote[] = getHomeFeaturedVotes(HOME_FEATURED_VOTE_IDS).map((vote) => ({
-    id: vote.votacion_id,
-    date: vote.fecha,
-    bulletin: vote.boletin,
-    title: tituloVotacionLegible(vote),
-    summary: vote.resumen,
-    chamber: vote.camara,
-    result: vote.resultado,
-    votes: annualVotes.get(vote.votacion_id)?.votos,
-  }));
-  const updatedAt = formatLandingDate(landingSummary.dataUpdatedAt);
+  const sourceSnapshots = new Map(landingSummary.sources.map((source) => [source.id, source]));
+  const homeSources = ETL_SOURCES_DATA.map((source) => {
+    const sourceKey = sourceKeyForHomeSource(source.id);
+    const snapshot = sourceKey ? sourceSnapshots.get(sourceKey) : undefined;
+    if (!snapshot || snapshot.recordCount <= 0) return source;
+    return {
+      ...source,
+      recordCount: snapshot.recordCount,
+      lastUpdated: snapshot.generatedAt ?? source.lastUpdated,
+      lastUpdatedRelative: snapshot.generatedAt
+        ? `Corte ${new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(snapshot.generatedAt))}`
+        : source.lastUpdatedRelative,
+      status: snapshot.status === "complete" ? "operational" : source.status,
+      statusText: snapshot.status === "complete" ? "Cobertura completa" : source.statusText,
+    };
+  }).filter((source) => source.recordCount > 0);
+
+  const operationalSources = homeSources;
+  const entityCount = getStaticEntityCatalog().total || GLOBAL_KPIS.entidades;
+  const editorialVotes = buildEditorialVotes(getHomeFeaturedVotes(HOME_FEATURED_VOTE_IDS), getVotacionesAnuales());
+  const editorialMovements = buildEditorialMovements(MOVIMIENTOS);
+  const eventDates = [...new Set(MOVIMIENTOS.filter((movement) => movement.fecha >= MOVIMIENTOS_HOME_SUMMARY.desde).map((movement) => movement.fecha))].sort();
+  const daysBetweenChanges = eventDates.length > 1
+    ? Math.round((Date.parse(`${eventDates.at(-1)}T12:00:00Z`) - Date.parse(`${eventDates[0]}T12:00:00Z`)) / 86_400_000 / (eventDates.length - 1) * 10) / 10
+    : 0;
 
   return (
-    <div className="editorial-home">
-      <script type="application/ld+json">{JSON.stringify({
+    <div className="home-desk min-h-screen bg-background text-text-1 transition-colors duration-200">
+      <script
+        type="application/ld+json"
+      >{JSON.stringify({
         "@context": "https://schema.org",
         "@type": "WebSite",
         name: "El Cambiómetro",
         url: "https://cambiometro.impulsacv.cl",
-        publisher: { "@type": "Organization", name: "ImpulsaCV", url: "https://impulsacv.cl" },
+        publisher: {
+          "@type": "Organization",
+          name: "ImpulsaCV",
+          url: "https://impulsacv.cl",
+        },
       })}</script>
+
+      {/* 1. Hero Asimétrico con Slider Arquitectónico y Nota Editorial Adhesiva */}
       <Hero />
-      <SearchHub />
-      <MetricsBar metrics={metrics} />
-      <Reveal><QuestionsGrid /></Reveal>
-      <Reveal delay={50}>
-        <MovementsTimeline summary={MOVIMIENTOS_HOME_SUMMARY} startLabel={formatFechaCorta(MOVIMIENTOS_HOME_SUMMARY.desde)} lastEventLabel={formatFechaCorta(MOVIMIENTOS_HOME_SUMMARY.ultimoEvento)} />
-      </Reveal>
-      <Reveal delay={75}><TerritorialBlock renuncias={MOVIMIENTOS_HOME_SUMMARY.renuncias} verificados={MOVIMIENTOS_HOME_SUMMARY.verificados} enConfirmacion={MOVIMIENTOS_HOME_SUMMARY.enConfirmacion} /></Reveal>
-      <Reveal delay={100}><FeaturedVotes votes={votes} reviewedAt={formatVotingDate(VOTING_FRESHNESS.reviewedAt)} latestVoteDate={formatVotingDate(VOTING_FRESHNESS.latestVoteDate)} /></Reveal>
-      <Reveal delay={150}><SourcesCatalog sources={sources} updatedAt={updatedAt} /></Reveal>
+
+      {/* 2. Buscador Cívico Flotante con Autocompletado Inteligente */}
+      <SearchBar />
+
+      {/* 3. Barra de Métricas Globales con Odómetro / Contador Analógico */}
+      <MetricsBar
+        metrics={{
+          registros: GLOBAL_KPIS.registros_canonicos,
+          fuentes: operationalSources.length,
+          entidades: entityCount,
+          votaciones: GLOBAL_KPIS.votaciones,
+          relaciones: GLOBAL_KPIS.relaciones,
+        }}
+      />
+
+      {/* 4. Mesa de Análisis Cívico: Empieza por una Pregunta */}
+      <QuestionsGrid availableSourceCount={operationalSources.length} />
+
+      {/* 5. Lo Último que Cambió en el Estado: Monolito Cívico y Timeline */}
+      <MovementsTimeline
+        total={MOVIMIENTOS_HOME_SUMMARY.total}
+        renuncias={MOVIMIENTOS_HOME_SUMMARY.renuncias}
+        diasSinCambios={MOVIMIENTOS_HOME_SUMMARY.diasSinCambios}
+        diasEntreCambios={daysBetweenChanges}
+        desde={formatFechaCorta(MOVIMIENTOS_HOME_SUMMARY.desde)}
+        ultimoEvento={formatFechaCorta(MOVIMIENTOS_HOME_SUMMARY.ultimoEvento)}
+        ultimaRevision={formatFechaCorta(MOVIMIENTOS_PIPELINE_METADATA.last_success_at ?? MOVIMIENTOS_HOME_SUMMARY.ultimoCorte)}
+        movements={editorialMovements}
+      />
+
+      {/* 6. Votaciones Destacadas en el Congreso: Fichas de Hemiciclo y Spotlight */}
+      <FeaturedVotes
+        votes={editorialVotes}
+        reviewedAt={formatVotingDate(VOTING_FRESHNESS.reviewedAt)}
+        latestVoteDate={formatVotingDate(VOTING_FRESHNESS.latestVoteDate)}
+      />
+
+      {/* 7. Cobertura Territorial Nacional: 346 Municipios y GOREs */}
+      <TerritorialBlock
+        municipios={346}
+        gobReg={16}
+        renuncias={MOVIMIENTOS_HOME_SUMMARY.renuncias}
+        verificados={MOVIMIENTOS_HOME_SUMMARY.verificados}
+        enConfirmacion={MOVIMIENTOS_HOME_SUMMARY.enConfirmacion}
+      />
+
+      {/* 8. Gran Libro Mayor de Fuentes Oficiales (Ledger de Auditoría) */}
+      <SourcesCatalog
+        chapters={buildEditorialChapters(operationalSources)}
+        totalSources={operationalSources.length}
+        totalRecords={GLOBAL_KPIS.registros_canonicos}
+        dataUpdatedAt={formatLandingDate(landingSummary.dataUpdatedAt)}
+      />
+
+      {/* 9. Llamado de Independencia Técnica y Transparencia Ética */}
+      <IndependenceCallout />
     </div>
   );
 }

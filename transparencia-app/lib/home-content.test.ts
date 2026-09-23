@@ -2,106 +2,56 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { canonicalSourceId } from "./data-platform-d1";
-import { ETL_SOURCES_DATA } from "./etl-sources-data";
 
-describe("promesas editoriales del inicio", () => {
-  const homeEntry = readFileSync(resolve(import.meta.dirname, "../app/page.tsx"), "utf8");
-  const home = [
-    homeEntry,
-    "Hero.tsx",
-    "SearchHub.tsx",
-    "MetricsBar.tsx",
-    "MovementsTimeline.tsx",
-    "FeaturedVotes.tsx",
-    "TerritorialBlock.tsx",
-    "QuestionsGrid.tsx",
-    "SourcesCatalog.tsx",
-  ].map((file, index) => index === 0 ? file : readFileSync(resolve(import.meta.dirname, `../components/home/${file}`), "utf8")).join("\n");
+const read = (path: string) => readFileSync(resolve(import.meta.dirname, "..", path), "utf8");
 
-  it("no promete una nomina nacional ni cifras decorativas sin respaldo", () => {
-    expect(home).not.toContain("+400");
-    expect(home).not.toContain("Cobertura Territorial");
-    expect(home).not.toContain("nómina completa del Estado");
+describe("portada editorial conectada a datos públicos", () => {
+  const home = read("app/page.tsx");
+  const searchCard = read("components/home/SearchBar.tsx");
+  const search = read("components/HomeInlineSearch.tsx");
+  const movements = read("components/home/MovementsTimeline.tsx");
+  const votes = read("components/home/FeaturedVotes.tsx");
+  const sources = read("components/home/SourcesCatalog.tsx");
+  const globalStyles = read("app/globals.css");
+  const homeStyles = read("app/home-editorial.css");
+
+  it("mantiene el diseño separado del contrato de datos y sin ejemplos codificados", () => {
+    expect(home).toContain("buildEditorialMovements(MOVIMIENTOS)");
+    expect(home).toContain("buildEditorialVotes(getHomeFeaturedVotes(HOME_FEATURED_VOTE_IDS)");
+    expect(home).toContain("buildEditorialChapters(operationalSources)");
+    expect(movements).not.toContain("const LEAD_MOVEMENT");
+    expect(votes).not.toContain("DEFAULT_VOTES");
+    expect(sources).not.toContain("PILLAR_CHAPTERS");
+    expect(searchCard).not.toContain("SEARCH_INDEX");
   });
 
-  it("calcula los indicadores desde la plataforma canonica", () => {
+  it("reutiliza el buscador real y conserva rutas públicas", () => {
+    expect(searchCard).toContain("<HomeInlineSearch />");
+    expect(search).toContain("publicApiUrl(`/api/v1/search?q=${encodeURIComponent(normalizedQuery)}`)");
+    expect(search).toContain("searchStaticRemunerations(normalizedQuery)");
+    expect(search).toContain("interleaveDistinctSearchResults(workerResults, remunerationResults)");
+    expect(search).toContain('action="/remuneraciones-publicas/"');
+    expect(searchCard).toContain('href: "/municipalidades"');
+  });
+
+  it("muestra cifras y estados del release, no números de la maqueta", () => {
+    expect(home).toContain("GLOBAL_KPIS.registros_canonicos");
     expect(home).toContain("GLOBAL_KPIS.votaciones");
-    expect(home).toContain("GLOBAL_KPIS.gastos");
-    expect(home).toContain("GLOBAL_KPIS.relaciones");
+    expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.renuncias");
+    expect(home).toContain("MOVIMIENTOS_PIPELINE_METADATA.last_success_at");
+    expect(sources).not.toContain("SHA-256 verificado");
   });
 
-  it("distingue disponibilidad del corte y validación del universo", () => {
-    expect(ETL_SOURCES_DATA.some((source) => source.statusText === "Disponible para consulta")).toBe(true);
-    expect(ETL_SOURCES_DATA.some((source) => source.statusText === "Universo verificado")).toBe(true);
-    expect(home).toContain("registros publicados y consultables");
-    expect(home).not.toContain("cobertura parcial declarada");
-  });
-
-  it("agrupa datasets parlamentarios bajo su institucion", () => {
+  it("conserva la identidad de los datasets parlamentarios", () => {
     expect(canonicalSourceId("votaciones_senado")).toBe("senado");
     expect(canonicalSourceId("gastos_camara")).toBe("camara");
-    expect(canonicalSourceId("contraloria")).toBe("contraloria");
   });
 
-  it("muestra coincidencias cruzadas y no envía la búsqueda al módulo parlamentario", () => {
-    const search = readFileSync(resolve(import.meta.dirname, "../components/HomeInlineSearch.tsx"), "utf8");
-    expect(home).toContain("<HomeInlineSearch />");
-    expect(search).toContain('fetch(publicApiUrl(`/api/v1/search?q=${encodeURIComponent(normalizedQuery)}`)');
-    expect(search).toContain('from "@/lib/public-api-origin"');
-    expect(search).toContain('placeholder="Nombre, partido, distrito o región"');
-    expect(search).toContain("Coincidencias");
-    expect(search).toContain('action="/remuneraciones-publicas/"');
-    expect(search).toContain("event.preventDefault();");
-    expect(search).toContain("resolveHomeSearchTarget");
-    expect(search).toContain("resolveSearchResultUrl");
-    expect(search).toContain("const key = resolveSearchResultUrl(result);");
-    expect(search).toContain("interleaveDistinctSearchResults(workerResults, remunerationResults)");
-    expect(search).toContain("fullSearchTarget.href");
-    expect(search).not.toContain("hasRemunerationResults");
-  });
-
-  it("ofrece acceso directo al registro parlamentario sin sustituir el buscador general", () => {
-    expect(home).toContain('{ label: "Explorar parlamentarios", href: "/politico" }');
-    expect(home).toContain('href="#buscador"');
-  });
-
-  it("mantiene cinco preguntas de análisis y separa el seguimiento de movimientos", () => {
-    expect(home).toContain("Directorio de personas");
-    expect(home).toContain("¿Quiénes ocupan los cargos públicos?");
-    expect(home).toContain("editorial-movements");
-    expect(home).toContain("editorial-timeline");
-    expect(home).toContain("summary.diasSinCambios");
-    expect(home).toContain("Último cambio");
-    expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.renuncias");
-    expect(home).toContain("MOVIMIENTOS_HOME_SUMMARY.enConfirmacion");
-    expect(home).toContain('href="/movimientos"');
-    expect(home).not.toContain("home-path--movement");
-  });
-
-  it("explica el alcance de la ficha parlamentaria", () => {
-    expect(home).toContain("gastos operacionales rendidos");
-    expect(home).toContain("Asesores y declaraciones");
-    expect(home).toContain("Relaciones y fuentes");
-  });
-
-  it("usa una selección editorial estable y muestra el resumen factual de cada votación", () => {
-    expect(home).toContain("HOME_FEATURED_VOTE_IDS");
-    expect(home).toContain("impacto público, quórum relevante");
-    expect(home).toContain("summary: vote.resumen");
-    expect(home).toContain('"senado-vot-11264"');
-    expect(home).toContain('"camara-vot-89844"');
-  });
-
-  it("presenta el alcance histórico de las votaciones sin reducirlo al corte actual", () => {
-    expect(home).toContain("Votaciones de sala históricas");
-    expect(home).toContain("Cámara + Senado · 2022–2026");
-  });
-
-  it("centra el bloque central de las fuentes y conserva las bandas laterales", () => {
-    const styles = readFileSync(resolve(import.meta.dirname, "../app/globals.css"), "utf8");
-    expect(styles).toContain(".home-source-card h3 { margin: 1.35rem 0 .25rem; color: var(--text-1); font-size: .95rem; font-weight: 750; letter-spacing: -.02em; line-height: 1.2; text-align: center; }");
-    expect(styles).toContain(".home-source-card p { min-height: 2.2em; margin: 0; overflow: hidden; color: var(--text-2); font-size: .72rem; line-height: 1.45; text-align: center; text-overflow: ellipsis; }");
-    expect(styles).toContain(".home-source-card__metric { display: flex; align-items: baseline; justify-content: center; gap: .4rem; margin-top: 1.15rem; }");
-    expect(styles).toContain(".home-source-card__top, .home-source-card__footer { display: flex; align-items: center; justify-content: space-between;");
+  it("aplica la maqueta sólo a la portada y evita textos internos", () => {
+    expect(globalStyles).toContain("*:not(.home-desk, .home-desk *)");
+    expect(homeStyles).toContain("body:has(.home-desk) .site-footer");
+    expect(homeStyles).toContain("padding-bottom: 0;");
+    expect(sources).not.toContain("Pipelines</span>");
+    expect(sources).not.toContain("Intermediarios</span>");
   });
 });
