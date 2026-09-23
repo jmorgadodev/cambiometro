@@ -177,6 +177,10 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(senateWorkflow).toContain("name: ETL Diario - Votaciones Senado");
     expect(senateWorkflow).toContain("npm run etl -- --from");
     expect(senateWorkflow).toContain("--source votaciones_senado");
+    expect(senateWorkflow).toContain("node scripts/sync-senado-votes-static.mjs --from 2026-01");
+    expect(senateWorkflow.indexOf("Reconciliar proyección estática Senado 2026+ desde R2"))
+      .toBeLessThan(senateWorkflow.indexOf("name: Construir subsets estáticos"));
+    expect(senateWorkflow).not.toContain("data:materialize");
     const etlPipeline = fs.readFileSync(path.resolve(root, "scripts", "etl.mjs"), "utf8");
     expect(etlPipeline).toContain("fetchSenateVotesByDateRange({ from: options.from, to: options.to })");
     expect(senateWorkflow).toContain("npm run ingest:votaciones-full -- --source senado --full");
