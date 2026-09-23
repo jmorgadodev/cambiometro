@@ -69,6 +69,10 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
     ]));
   });
 
+  it("1f. toma como último cambio sólo el movimiento respaldado más reciente", () => {
+    expect(MOVIMIENTOS_HOME_SUMMARY.ultimoCambioEfectivo).toBe("2026-09-14");
+  });
+
   it("1e. la Home presenta señales en confirmación en la cronología, conservando su estado", () => {
     const items = buildEditorialMovements(MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA.signals);
 

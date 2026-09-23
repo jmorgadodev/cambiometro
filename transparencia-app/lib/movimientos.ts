@@ -290,9 +290,12 @@ const esVerificado = (movement: Movimiento) => ["verificado", "verificado_oficia
 const esRenuncia = (movement: Movimiento) => movement.tipo_evento === "renuncia" || movement.tipo === "renuncia";
 const fechaComoDiaUtc = (value: string) => Date.parse(`${value.slice(0, 10)}T00:00:00Z`);
 const ultimoEvento = movimientosGobierno.reduce((latest, movement) => movement.fecha > latest ? movement.fecha : latest, "");
+const ultimoCambioEfectivo = movimientosGobierno
+  .filter(esVerificado)
+  .reduce((latest, movement) => movement.fecha > latest ? movement.fecha : latest, "");
 const ultimoCorte = payload.last_run?.slice(0, 10) ?? ultimoEvento;
-const diasSinCambios = Number.isFinite(fechaComoDiaUtc(ultimoCorte)) && Number.isFinite(fechaComoDiaUtc(ultimoEvento))
-  ? Math.max(0, Math.round((fechaComoDiaUtc(ultimoCorte) - fechaComoDiaUtc(ultimoEvento)) / 86_400_000))
+const diasSinCambios = Number.isFinite(fechaComoDiaUtc(ultimoCorte)) && Number.isFinite(fechaComoDiaUtc(ultimoCambioEfectivo))
+  ? Math.max(0, Math.round((fechaComoDiaUtc(ultimoCorte) - fechaComoDiaUtc(ultimoCambioEfectivo)) / 86_400_000))
   : 0;
 
 export const MOVIMIENTOS_HOME_SUMMARY = {
@@ -302,6 +305,7 @@ export const MOVIMIENTOS_HOME_SUMMARY = {
   verificados: movimientosGobierno.filter(esVerificado).length,
   enConfirmacion: movimientosGobierno.filter((movement) => movement.estado === "en_confirmacion").length + (payload.signals ?? []).length,
   ultimoEvento,
+  ultimoCambioEfectivo,
   ultimoCorte,
   diasSinCambios,
 } as const;
