@@ -54,7 +54,27 @@ describe("pipeline automático de movimientos", () => {
       status: "en_confirmacion",
       tipo: "renuncia",
     });
-    expect(publishedMovements.stats.signals_en_confirmacion).toBe(1);
+    expect(publishedMovements.stats.signals_en_confirmacion).toBe(2);
+    expect(validateMovementPayload(publishedMovements)).toBe(publishedMovements);
+  });
+
+  it("registra la salida reportada de Fabián Páez como señal pendiente sin alterar las 46 salidas reconciliadas", () => {
+    const signal = publishedMovements.signals?.find((item) => /fabi[aá]n p[aá]ez/i.test(`${item.title} ${item.summary}`));
+
+    expect(publishedMovements.movimientos).toHaveLength(46);
+    expect(publishedMovements.movimientos.some((movement) => /fabi[aá]n p[aá]ez/i.test(`${movement.saliente ?? ""} ${movement.salio?.nombre ?? ""}`))).toBe(false);
+    expect(signal).toMatchObject({
+      source_id: "media-review",
+      source_label: "Chilevisión (comunicado DPR citado)",
+      source_tier: "provisional",
+      date: "2026-09-17",
+      fase: "anunciado",
+      status: "en_confirmacion",
+      tipo: "renuncia",
+      url: "https://www.chilevision.cl/noticias/nacional/seremi-de-energia-de-coquimbo-renuncia-tras-observaciones-de-contraloria-por-su-experiencia-profesional/",
+    });
+    expect(signal.summary).toContain("falta localizar el comunicado primario enlazable");
+    expect(publishedMovements.stats.signals_en_confirmacion).toBe(2);
     expect(validateMovementPayload(publishedMovements)).toBe(publishedMovements);
   });
 
