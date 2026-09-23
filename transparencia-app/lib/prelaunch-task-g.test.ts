@@ -32,11 +32,12 @@ describe("TAREA G: Cierre de Hallazgos Pre-Launch", () => {
     expect(calidadContent).toContain("12 oficiales + 1 derivada");
   });
 
-  it("H-11: Fecha de /movimientos derivada de MOVIMIENTOS y sin fecha literal '17 de agosto 2026'", () => {
+  it("H-11: Fecha de /movimientos derivada del corte y los datos, sin fecha literal obsoleta", () => {
     const movPageContent = readFileSync(join(projectRoot, "app", "movimientos", "page.tsx"), "utf8");
     expect(movPageContent).not.toContain("Actualizado 17 de agosto 2026");
     expect(movPageContent).not.toContain('"2026-08-10"');
-    expect(movPageContent).toContain("fechaActualizacionTexto");
+    expect(movPageContent).toContain("latestMovementPublicationDate");
+    expect(movPageContent).toContain("MOVIMIENTOS_PIPELINE_METADATA.last_event_date");
     expect(movPageContent).toContain("MOVIMIENTOS.reduce");
 
     // Validar que la última fecha del dataset es la que se deriva

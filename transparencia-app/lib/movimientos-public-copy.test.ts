@@ -15,4 +15,10 @@ describe('información pública de Movimientos',()=>{
     expect(page).not.toContain('verificados con decreto');
     expect(page).toContain('con respaldo documental');
   });
+  it('no expone nombres internos de pipeline ni repite la actualización pública',()=>{
+    expect(page).not.toContain('Pipeline diario');
+    expect(page).not.toContain('Última ejecución exitosa');
+    expect(page).not.toContain('Última publicación detectada');
+    expect(page).toContain('Estado de actualización');
+  });
 });

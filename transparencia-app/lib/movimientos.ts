@@ -91,6 +91,10 @@ export interface MovimientoSignal {
   fase: "anunciado";
   status: "en_confirmacion";
   tipo: MovimientoTipo;
+  person_name?: string;
+  role?: string;
+  ministry?: string;
+  region?: string;
 }
 
 export interface MovimientosPayload {
@@ -293,10 +297,10 @@ const diasSinCambios = Number.isFinite(fechaComoDiaUtc(ultimoCorte)) && Number.i
 
 export const MOVIMIENTOS_HOME_SUMMARY = {
   desde: MOVIMIENTOS_GOBIERNO_DESDE,
-  total: movimientosGobierno.length,
+  total: movimientosGobierno.length + (payload.signals ?? []).length,
   renuncias: movimientosGobierno.filter(esRenuncia).length,
   verificados: movimientosGobierno.filter(esVerificado).length,
-  enConfirmacion: movimientosGobierno.filter((movement) => movement.estado === "en_confirmacion").length,
+  enConfirmacion: movimientosGobierno.filter((movement) => movement.estado === "en_confirmacion").length + (payload.signals ?? []).length,
   ultimoEvento,
   ultimoCorte,
   diasSinCambios,

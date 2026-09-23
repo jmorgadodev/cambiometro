@@ -16,7 +16,7 @@ describe("portada editorial conectada a datos públicos", () => {
   const homeStyles = read("app/home-editorial.css");
 
   it("mantiene el diseño separado del contrato de datos y sin ejemplos codificados", () => {
-    expect(home).toContain("buildEditorialMovements(MOVIMIENTOS)");
+    expect(home).toContain("buildEditorialMovements(MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA.signals)");
     expect(home).toContain("buildEditorialVotes(getHomeFeaturedVotes(HOME_FEATURED_VOTE_IDS)");
     expect(home).toContain("buildEditorialChapters(operationalSources)");
     expect(movements).not.toContain("const LEAD_MOVEMENT");

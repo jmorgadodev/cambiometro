@@ -152,6 +152,16 @@ jobs:
           # or rebuild an ETL projection during a UI-only deployment: older raw
           # partitions are intentionally not retained in the public bucket.
 
+      - name: Conservar release reconciliado de Movimientos del commit
+        working-directory: transparencia-app
+        run: |
+          if node -e 'const fs=require("fs"); const p=JSON.parse(fs.readFileSync("data/movimientos.json")); const policy=JSON.parse(fs.readFileSync("data/movimientos-scope-policy.json")); process.exit(["validated_reference","validated_reconciled"].includes(policy.status) && /^kast-2026-(exits-46|succession-reconciled)-/.test(p.release_id || "") ? 0 : 1);'; then
+            git show "${GITHUB_SHA}:transparencia-app/data/movimientos.json" > data/movimientos.json
+            echo "Se conserva el release reconciliado de Movimientos versionado en el commit."
+          else
+            echo "Se conserva el snapshot estático de Movimientos hidratado desde R2."
+          fi
+
       - name: Verificar calidad semántica de entradas estáticas
         working-directory: transparencia-app
         run: npm run check:static-input-quality
