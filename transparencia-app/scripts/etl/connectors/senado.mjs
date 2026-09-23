@@ -5,6 +5,8 @@ const API_BASE = "https://web-back.senado.cl";
 const EXPENSE_PATH = "/api/transparency/expenses/senator-Operational-expenses";
 const PERIODS_PATH = "/api/transparency/available-periods";
 const PERIOD_ENDPOINT = "gastos-operacionales-senadores";
+const PERIODS_PAGE_SIZE = 500;
+const MAX_PERIODS_PAGES = 4;
 const DATASETS = {
   operational_expenses: { path: EXPENSE_PATH, periodEndpoint: PERIOD_ENDPOINT, pageSize: 500, pageUrl: "https://www.senado.cl/transparencia/gastos-operacionales-senadores" },
   diet: { path: "/api/transparency/diet", periodEndpoint: "dietas", pageSize: 300, pageUrl: "https://www.senado.cl/transparencia/dietas" },
@@ -157,16 +159,49 @@ export async function discoverLatestSenateExpensePeriod({ fetchImpl = fetch, tim
 }
 
 export async function discoverLatestSenatePeriod({ dataset, fetchImpl = fetch, timeoutMs = 60_000 }) {
+  const periods = await discoverSenatePublishedPeriods({ dataset, fetchImpl, timeoutMs });
+  return periods.at(-1);
+}
+
+export async function discoverSenatePublishedPeriods({ dataset = "operational_expenses", fetchImpl = fetch, timeoutMs = 60_000 } = {}) {
   const config = DATASETS[dataset];
   if (!config) throw new Error(`SENADO_UNKNOWN_DATASET: ${dataset}`);
-  const url = new URL(PERIODS_PATH, API_BASE);
-  url.searchParams.set("pagination[limit]", "500");
-  url.searchParams.set("filters[endpoint][$eq]", config.periodEndpoint);
-  const payload = await fetchJson(url, fetchImpl, timeoutMs);
-  const periods = (payload?.data?.data ?? []).map((item) => ({ year: item.attributes?.ano, month: item.attributes?.mes })).filter(({ year, month }) => Number.isInteger(year) && Number.isInteger(month));
-  periods.sort((a, b) => b.year - a.year || b.month - a.month);
+  const periods = [];
+  let page = 1;
+  let pageCount = 1;
+  do {
+    const url = new URL(PERIODS_PATH, API_BASE);
+    url.searchParams.set("pagination[pageSize]", String(PERIODS_PAGE_SIZE));
+    url.searchParams.set("pagination[page]", String(page));
+    url.searchParams.set("filters[endpoint][$eq]", config.periodEndpoint);
+    const payload = await fetchJson(url, fetchImpl, timeoutMs);
+    const items = payload?.data?.data;
+    const pagination = payload?.data?.meta?.pagination;
+    if (!Array.isArray(items) || items.length > PERIODS_PAGE_SIZE || !Number.isInteger(pagination?.pageCount) || pagination.pageCount < 1 || pagination.pageCount > MAX_PERIODS_PAGES) {
+      throw new Error("SENADO_INVALID_PUBLISHED_PERIODS_RESPONSE");
+    }
+    pageCount = pagination.pageCount;
+    for (const item of items) {
+      const { ano: year, mes: month, endpoint } = item?.attributes ?? {};
+      if (endpoint !== undefined && endpoint !== config.periodEndpoint) throw new Error("SENADO_UNEXPECTED_PUBLISHED_PERIOD_ENDPOINT");
+      try {
+        validPeriod(year, month);
+      } catch {
+        throw new Error("SENADO_INVALID_PUBLISHED_PERIOD");
+      }
+      periods.push({ year, month });
+    }
+    page += 1;
+  } while (page <= pageCount);
+
   if (!periods.length) throw new Error("SENADO_NO_PUBLISHED_PERIODS");
-  return periods[0];
+  const seen = new Set();
+  for (const period of periods) {
+    const key = `${period.year}-${String(period.month).padStart(2, "0")}`;
+    if (seen.has(key)) throw new Error("SENADO_DUPLICATE_PUBLISHED_PERIOD");
+    seen.add(key);
+  }
+  return periods.sort((a, b) => a.year - b.year || a.month - b.month);
 }
 
 async function fetchSenateDataset({ dataset, year, month, normalize, fetchImpl = fetch, timeoutMs = 60_000 }) {
