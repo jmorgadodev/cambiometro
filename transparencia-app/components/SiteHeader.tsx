@@ -147,21 +147,6 @@ export default function SiteHeader() {
           </Link>
 
           <div className="site-header__actions">
-            {/* Estado del catálogo (cada fuente conserva su propia fecha) */}
-            <Link
-              href="/fuentes"
-              prefetch={false}
-              className="snapshot-stamp"
-              aria-label={catalogStatusDescription}
-              title={catalogStatusDescription}
-            >
-              <span className="snapshot-stamp__status" aria-hidden="true" />
-              <span>
-                <strong>Datos actualizados por fuente</strong>
-                <small>{catalogStatusLabel}</small>
-              </span>
-            </Link>
-
             <a
               href="/donar"
               className="site-support-link"

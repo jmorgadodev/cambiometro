@@ -237,13 +237,16 @@ try {
 
   await gotoWithNetworkRetry(baseUrl);
   await page.getByRole("heading", { name: "Un Chile más transparente es posible." }).waitFor({ state: "visible", timeout: 15_000 });
-  await page.getByRole("link", { name: /Explorar parlamentarios/ }).first().waitFor({ state: "visible", timeout: 15_000 });
+  const exploreOfficialDataLink = page.getByRole("link", { name: /Explorar datos oficiales/ });
+  await exploreOfficialDataLink.waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await page.getByRole("heading", { name: "Un Chile más transparente es posible." }).count(), 1);
-  assert.equal(await page.getByRole("link", { name: /Explorar parlamentarios/ }).count(), 1);
-  const highlightedVotes = page.getByRole("region", { name: "Votaciones destacadas" });
-  await highlightedVotes.getByRole("heading", { name: "Votaciones destacadas" }).waitFor({ state: "visible", timeout: 15_000 });
-  await highlightedVotes.getByRole("link", { name: /Ver todas las votaciones/ }).waitFor({ state: "visible", timeout: 15_000 });
-  const analysisLink = highlightedVotes.getByRole("link", { name: /Abrir análisis/ }).first();
+  assert.equal(await exploreOfficialDataLink.count(), 1);
+  assert.equal(await exploreOfficialDataLink.getAttribute("href"), "/politico/");
+  const highlightedVotes = page.getByRole("region", { name: "Votaciones destacadas en el Congreso" });
+  await highlightedVotes.getByRole("heading", { name: "Votaciones destacadas en el Congreso", exact: true }).waitFor({ state: "visible", timeout: 15_000 });
+  await highlightedVotes.getByRole("link", { name: /Ver listado completo de votaciones/ }).waitFor({ state: "visible", timeout: 15_000 });
+  assert((await highlightedVotes.locator("article").count()) > 0, "La portada debe mostrar fichas editoriales de votaciones");
+  const analysisLink = highlightedVotes.getByRole("link", { name: /Ver cómo votó cada parlamentario/ }).first();
   await analysisLink.waitFor({ state: "visible", timeout: 15_000 });
   await analysisLink.click();
   await page.waitForURL(/\/votaciones-destacadas\/\?votacion=/, { timeout: 15_000 });

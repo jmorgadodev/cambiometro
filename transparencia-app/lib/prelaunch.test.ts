@@ -68,16 +68,16 @@ describe("Sanidad global pre-lanzamiento y rutas", () => {
     expect(headerContent).toContain("site-nav__separator");
   });
 
-  it("Sección 1. Home consume global-kpis y contiene tooltips de ámbito", () => {
+  it("Sección 1. Home consume global-kpis y comunica el ámbito de cada fuente", () => {
     const homeContent = [
       readFileSync(join(projectRoot, "app", "page.tsx"), "utf8"),
       readFileSync(join(projectRoot, "components", "home", "MetricsBar.tsx"), "utf8"),
       readFileSync(join(projectRoot, "components", "home", "SourcesCatalog.tsx"), "utf8"),
     ].join("\n");
     expect(homeContent).toContain("GLOBAL_KPIS");
-    expect(homeContent).toContain("KPI_SCOPES");
-    expect(homeContent).toContain("title={item.tooltip}");
-    expect(homeContent).toContain("getDataQualityDashboardData");
+    expect(homeContent).toContain("getLandingSummary");
+    expect(homeContent).toContain("Cada fuente tiene su propio corte");
+    expect(homeContent).toContain("Los conteos corresponden a cada fuente");
   });
 
   it("Sección 2. /datos muestra 11 / 11 fuentes y registros canónicos", () => {

@@ -71,6 +71,12 @@ describe("Header y navegación global", () => {
     expect(headerContent).toContain('title={item.label}');
   });
 
+  it("no muestra el distintivo de actualización en la esquina superior derecha", () => {
+    const desktopActions = headerContent.split('className="site-header__actions"')[1]?.split('className="site-header__nav-row"')[0] ?? "";
+    expect(desktopActions).not.toContain('className="snapshot-stamp"');
+    expect(desktopActions).toContain("Apoyar Proyecto");
+  });
+
   it("mobile (<1024px) contiene drawer con las 10 secciones, chip de corte, X y donación", () => {
     expect(headerContent).toContain("mobile-drawer");
     expect(headerContent).toContain("drawer-overlay");
