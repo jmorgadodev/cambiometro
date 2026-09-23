@@ -42,10 +42,13 @@ describe("portada editorial conectada a datos públicos", () => {
     expect(sources).not.toContain("SHA-256 verificado");
   });
 
-  it("actualiza diariamente los días desde el último movimiento respaldado", () => {
+  it("actualiza los días y detecta releases nuevos de movimientos efectivos", () => {
     expect(home).toContain("ultimoCambioEfectivo={MOVIMIENTOS_HOME_SUMMARY.ultimoCambioEfectivo}");
-    expect(movements).toContain("daysSinceCalendarDate(ultimoCambioEfectivo)");
+    expect(movements).toContain("daysSinceCalendarDate(fechaCambioEfectivoActualizada)");
     expect(movements).toContain("window.setInterval(actualizarDiasSinCambios, 60_000)");
+    expect(movements).toContain('fetch("/data/movimientos.json", { cache: "no-store" })');
+    expect(movements).toContain("latestEffectiveMovementDate(movimientos)");
+    expect(movements).toContain("window.setInterval(() => { void revisarUltimoCambioPublicado(); }, 10 * 60_000)");
   });
 
   it("conserva la identidad de los datasets parlamentarios", () => {
