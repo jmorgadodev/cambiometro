@@ -42,6 +42,12 @@ describe("portada editorial conectada a datos públicos", () => {
     expect(sources).not.toContain("SHA-256 verificado");
   });
 
+  it("actualiza diariamente los días desde el último movimiento respaldado", () => {
+    expect(home).toContain("ultimoCambioEfectivo={MOVIMIENTOS_HOME_SUMMARY.ultimoCambioEfectivo}");
+    expect(movements).toContain("daysSinceCalendarDate(ultimoCambioEfectivo)");
+    expect(movements).toContain("window.setInterval(actualizarDiasSinCambios, 60_000)");
+  });
+
   it("conserva la identidad de los datasets parlamentarios", () => {
     expect(canonicalSourceId("votaciones_senado")).toBe("senado");
     expect(canonicalSourceId("gastos_camara")).toBe("camara");

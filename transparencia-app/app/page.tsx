@@ -127,6 +127,7 @@ export default async function HomePage() {
         total={MOVIMIENTOS_HOME_SUMMARY.total}
         renuncias={MOVIMIENTOS_HOME_SUMMARY.renuncias}
         diasSinCambios={MOVIMIENTOS_HOME_SUMMARY.diasSinCambios}
+        ultimoCambioEfectivo={MOVIMIENTOS_HOME_SUMMARY.ultimoCambioEfectivo}
         diasEntreCambios={daysBetweenChanges}
         desde={formatFechaCorta(MOVIMIENTOS_HOME_SUMMARY.desde)}
         ultimoEvento={formatFechaCorta(MOVIMIENTOS_HOME_SUMMARY.ultimoEvento)}

@@ -1,7 +1,8 @@
 "use client";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import MechanicalCounter from "./MechanicalCounter";
+import { daysSinceCalendarDate } from "@/lib/movement-age";
 
 export interface MovementItem {
   id: string;
@@ -22,6 +23,7 @@ export interface MovementsTimelineProps {
   total: number;
   renuncias: number;
   diasSinCambios: number;
+  ultimoCambioEfectivo: string;
   diasEntreCambios: number;
   desde: string;
   ultimoEvento: string;
@@ -33,14 +35,27 @@ export function MovementsTimeline({
   total,
   renuncias,
   diasSinCambios,
+  ultimoCambioEfectivo,
   diasEntreCambios,
   desde,
   ultimoEvento,
   ultimaRevision,
   movements,
 }: MovementsTimelineProps) {
+  const [diasSinCambiosActualizados, setDiasSinCambiosActualizados] = useState(diasSinCambios);
   const leadMovement = movements[0];
   const archiveMovements = movements.slice(1, 3);
+
+  useEffect(() => {
+    const actualizarDiasSinCambios = () => {
+      setDiasSinCambiosActualizados(daysSinceCalendarDate(ultimoCambioEfectivo));
+    };
+
+    actualizarDiasSinCambios();
+    const timer = window.setInterval(actualizarDiasSinCambios, 60_000);
+    return () => window.clearInterval(timer);
+  }, [ultimoCambioEfectivo]);
+
   const renderStatus = (status: MovementItem["status"]) => {
     if (status === "VERIFICADO OFICIAL") {
       return (
@@ -158,7 +173,9 @@ export function MovementsTimeline({
                 {/* 3. Días Sin Cambios */}
                 <div>
                   <div className="font-serif text-4xl sm:text-5xl lg:text-6xl text-forest-accent-ok font-bold tracking-tight leading-none tabular-nums drop-shadow-xs">
-                    <MechanicalCounter target={diasSinCambios} padZero delay={360} className="text-forest-accent-ok" />
+                    <span aria-label={`${diasSinCambiosActualizados} días desde el último cambio`}>
+                      {String(diasSinCambiosActualizados).padStart(2, "0")}
+                    </span>
                   </div>
                   <div className="text-[10px] sm:text-[11px] font-mono tracking-widest text-forest-accent-ok font-semibold uppercase mt-2">
                     DÍAS SIN CAMBIOS

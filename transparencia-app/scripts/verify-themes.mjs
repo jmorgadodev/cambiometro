@@ -43,9 +43,9 @@ for (const [routeName, route] of routes) {
         await route.continue({ url: apiUrl.toString() });
       });
     }
-    await page.goto(`${baseUrl}${route}`, { waitUntil: "networkidle", timeout: 30_000 });
+    await page.goto(`${baseUrl}${route}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
     await page.evaluate((value) => { localStorage.setItem("cambiometro-theme", value); document.documentElement.setAttribute("data-theme", value); }, theme);
-    await page.reload({ waitUntil: "networkidle", timeout: 30_000 });
+    await page.reload({ waitUntil: "domcontentloaded", timeout: 30_000 });
     await page.mouse.move(1279, 719);
     await page.evaluate(async () => {
       await Promise.all(document.getAnimations().map((animation) => animation.finished.catch(() => undefined)));
