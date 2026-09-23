@@ -4,13 +4,13 @@ on:
   workflow_dispatch:
     inputs:
       from:
-        description: Primer período a reemplazar (YYYY-MM-DD)
-        required: true
-        default: "2026-08-01"
+        description: Primer día del primer mes a reemplazar (vacío usa el mes actual)
+        required: false
+        default: ""
       to:
-        description: Último día a reemplazar (YYYY-MM-DD)
-        required: true
-        default: "2026-09-15"
+        description: Último día inclusivo (vacío usa hoy; meses anteriores deben cerrarse completos)
+        required: false
+        default: ""
       confirm_repair:
         description: Escribe CAMBIOMETRO_CONFIRM_SENADO_VOTACIONES_REPAIR para publicar
         required: true
@@ -18,10 +18,10 @@ on:
   workflow_call:
     inputs:
       from:
-        required: true
+        required: false
         type: string
       to:
-        required: true
+        required: false
         type: string
       confirm_repair:
         required: true
@@ -69,6 +69,31 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_DATA_API_TOKEN"
 
+      - name: Resolver rango mensual completo
+        id: range
+        env:
+          INPUT_FROM: ${{ inputs.from }}
+          INPUT_TO: ${{ inputs.to }}
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import { appendFileSync } from "node:fs";
+          const today = new Date().toISOString().slice(0, 10);
+          const from = process.env.INPUT_FROM?.trim() || `${today.slice(0, 7)}-01`;
+          const to = process.env.INPUT_TO?.trim() || today;
+          const validDate = (value) => /^\d{4}-\d{2}-\d{2}$/.test(value)
+            && !Number.isNaN(Date.parse(`${value}T00:00:00Z`))
+            && new Date(`${value}T00:00:00Z`).toISOString().slice(0, 10) === value;
+          if (!validDate(from) || !validDate(to) || from > to) throw new Error("SENADO_REPAIR_INVALID_DATE_RANGE");
+          if (from < "2026-01-01" || !from.endsWith("-01")) throw new Error("SENADO_REPAIR_RANGE_START_MUST_BE_MONTH_START");
+          if (to > today) throw new Error("SENADO_REPAIR_RANGE_END_IN_FUTURE");
+          const [year, month] = to.slice(0, 7).split("-").map(Number);
+          const monthEnd = new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10);
+          if (to !== today && to !== monthEnd) throw new Error("SENADO_REPAIR_RANGE_END_MUST_BE_MONTH_END_OR_TODAY");
+          appendFileSync(process.env.GITHUB_OUTPUT, `from=${from}\nto=${to}\n`);
+          console.log(JSON.stringify({ from, to, today }));
+          NODE
+
       - name: Recuperar catálogo y estado de almacenamiento vigentes
         working-directory: transparencia-app
         env:
@@ -87,8 +112,46 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/etl/prepare-senado-votaciones-release.mjs \
-            --from "${{ inputs.from }}" --to "${{ inputs.to }}" \
+            --from "${{ steps.range.outputs.from }}" --to "${{ steps.range.outputs.to }}" \
             --output .repair-staging/release
+
+      - name: Confirmar que la relectura conserva los IDs publicados del mes
+        working-directory: transparencia-app
+        env:
+          API_URL: https://cambiometro.impulsacv.cl/api/v1/records
+        run: |
+          set -euo pipefail
+          node --input-type=module - <<'NODE'
+          import { readFileSync } from "node:fs";
+          const base = process.env.API_URL;
+          const summary = JSON.parse(readFileSync(".repair-staging/release/release-summary.json", "utf8"));
+          const stagedByPeriod = new Map(summary.periods.map((item) => [item.period, new Set(item.ids.map(String))]));
+          for (const period of summary.periods) {
+            const currentIds = new Set();
+            let page = 1;
+            let totalPages = 1;
+            do {
+              const url = `${base}?source=votaciones_senado&kind=vote&period=${period.period}&limit=100&page=${page}`;
+              const response = await fetch(url);
+              if (!response.ok) throw new Error(`SENADO_REPAIR_EXISTING_HTTP:${period.period}:${response.status}`);
+              const payload = await response.json();
+              if (payload.meta?.sourceBackend !== "r2-lake" || payload.meta?.sourceStatus !== "complete") {
+                throw new Error(`SENADO_REPAIR_EXISTING_NOT_COMPLETE:${period.period}`);
+              }
+              for (const row of payload.data ?? []) {
+                const id = String(row.data?.votacion_id ?? row.id).match(/(\d+)$/)?.[1];
+                if (!id) throw new Error(`SENADO_REPAIR_EXISTING_INVALID_ID:${period.period}`);
+                currentIds.add(id);
+              }
+              totalPages = Number(payload.meta?.totalPages ?? 1);
+              page += 1;
+            } while (page <= totalPages);
+            const stagedIds = stagedByPeriod.get(period.period);
+            const missing = [...currentIds].filter((id) => !stagedIds.has(id));
+            if (missing.length) throw new Error(`SENADO_REPAIR_EXISTING_VOTE_DROPPED:${period.period}:${missing.join(",")}`);
+            console.log(JSON.stringify({ period: period.period, existingRecords: currentIds.size, stagedRecords: stagedIds.size, preserved: true }));
+          }
+          NODE
 
       - name: Fusionar catálogo y validar alcance
         working-directory: transparencia-app
@@ -176,13 +239,16 @@ jobs:
         run: |
           set -euo pipefail
           node --input-type=module - <<'NODE'
+          import { readFileSync } from "node:fs";
           const base = process.env.API_URL;
-          for (const period of ["2026-08", "2026-09"]) {
+          const summary = JSON.parse(readFileSync("transparencia-app/.repair-staging/release/release-summary.json", "utf8"));
+          for (const { period, recordCount } of summary.periods) {
             const response = await fetch(`${base}?source=votaciones_senado&kind=vote&period=${period}&limit=1`);
             if (!response.ok) throw new Error(`SENADO_REPAIR_HTTP:${period}:${response.status}`);
             const payload = await response.json();
-            if (Number(payload.meta?.total ?? 0) <= 0) throw new Error(`SENADO_REPAIR_EMPTY_PRODUCTION:${period}`);
+            if (Number(payload.meta?.total ?? 0) !== recordCount) throw new Error(`SENADO_REPAIR_COUNT_MISMATCH:${period}:${payload.meta?.total ?? 0}:${recordCount}`);
             if (payload.meta?.sourceBackend !== "r2-lake") throw new Error(`SENADO_REPAIR_BACKEND:${period}`);
+            if (payload.meta?.sourceStatus !== "complete" || Number(payload.meta?.missingPartitions ?? 0) !== 0) throw new Error(`SENADO_REPAIR_INCOMPLETE:${period}`);
           }
           console.log("Senado votaciones reparado; consultas servidas desde R2.");
           NODE

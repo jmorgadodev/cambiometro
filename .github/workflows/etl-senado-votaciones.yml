@@ -140,7 +140,7 @@ jobs:
     if: github.event_name == 'workflow_dispatch' && inputs.repair_staged == true
     uses: ./.github/workflows/repair-senado-votaciones-staged.yml
     with:
-      from: ${{ inputs.from || '2026-08-01' }}
-      to: ${{ inputs.to || '2026-09-15' }}
+      from: ${{ inputs.from || '' }}
+      to: ${{ inputs.to || '' }}
       confirm_repair: ${{ inputs.confirm_repair }}
     secrets: inherit

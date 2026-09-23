@@ -247,6 +247,20 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(workflow).not.toContain('grep -F "La información pública"');
   });
 
+  it("11d. La reparación de votos valida sólo los períodos completos que staged reemplazará", () => {
+    const workflow = fs.readFileSync(path.join(workflowsDir, "repair-senado-votaciones-staged.yml"), "utf8");
+    const dispatcher = fs.readFileSync(path.join(workflowsDir, "etl-senado-votaciones.yml"), "utf8");
+    expect(dispatcher).toContain("from: ${{ inputs.from || '' }}");
+    expect(dispatcher).toContain("to: ${{ inputs.to || '' }}");
+    expect(workflow).toContain("SENADO_REPAIR_RANGE_START_MUST_BE_MONTH_START");
+    expect(workflow).toContain("SENADO_REPAIR_RANGE_END_MUST_BE_MONTH_END_OR_TODAY");
+    expect(workflow).toContain("SENADO_REPAIR_EXISTING_VOTE_DROPPED");
+    expect(workflow).toContain("for (const { period, recordCount } of summary.periods)");
+    expect(workflow).toContain("SENADO_REPAIR_COUNT_MISMATCH");
+    expect(workflow).toContain("for (const period of summary.periods)");
+    expect(workflow).not.toContain('["2026-08", "2026-09"]');
+  });
+
   it("12. Los ETL de personal separados publican R2 sin usar D1; CPLT conserva su fallback", () => {
     const personal = fs.readFileSync(path.join(workflowsDir, "etl-personal-apoyo.yml"), "utf8");
     const personalSenado = fs.readFileSync(path.join(workflowsDir, "etl-personal-apoyo-senado.yml"), "utf8");
