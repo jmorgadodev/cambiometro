@@ -202,7 +202,6 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       "etl-chilecompra.yml",
       "etl-contraloria.yml",
       "etl-dipres.yml",
-      "etl-expenses.yml",
       "etl-infolobby-scheduled.yml",
       "etl-infoprobidad.yml",
       "etl-ley-19862.yml",
@@ -224,6 +223,22 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     const infolobby = fs.readFileSync(path.join(workflowsDir, "etl-infolobby-scheduled.yml"), "utf8");
     expect(infolobby).toContain("data:materialize:optional");
     expect(infolobby).toContain("D1 pospuesto por asset no disponible");
+  });
+
+  it("11a. El histórico de gastos públicos se publica en R2/Pages sin materializar en D1", () => {
+    const expenses = fs.readFileSync(path.join(workflowsDir, "etl-expenses.yml"), "utf8");
+    expect(expenses).not.toMatch(/d1-preflight|data:materialize/);
+    expect(expenses).toContain("npm run data:publish");
+    expect(expenses).toContain("npm run data:publish:static -- --groups gastos");
+    expect(expenses).toContain("node scripts/verify-expense-release.mjs --required");
+  });
+
+  it("11b. El despliegue sólo de interfaz conserva el release validado de Movimientos del commit", () => {
+    const workflow = fs.readFileSync(path.join(workflowsDir, "pages-ui-refresh.yml"), "utf8");
+    expect(workflow).toContain("validated_reference");
+    expect(workflow).toContain("validated_reconciled");
+    expect(workflow).toContain('git show "${GITHUB_SHA}:transparencia-app/data/movimientos.json"');
+    expect(workflow).toContain("release reconciliado de Movimientos");
   });
 
   it("12. Los ETL de personal separados publican R2 sin usar D1; CPLT conserva su fallback", () => {

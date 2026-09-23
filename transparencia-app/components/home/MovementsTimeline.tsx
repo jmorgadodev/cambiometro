@@ -15,6 +15,7 @@ export interface MovementItem {
   source: string;
   status: "VERIFICADO OFICIAL" | "CORROBORADO" | "EN CONFIRMACIÓN";
   link: string;
+  dateQualifier?: string;
 }
 
 export interface MovementsTimelineProps {
@@ -201,7 +202,7 @@ export function MovementsTimeline({
                 <div className="flex items-center gap-2.5">
                   <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-ok-bg text-accent border border-accent/20 text-[10px] font-mono font-bold uppercase tracking-wider">
                     <span className="w-1.5 h-1.5 rounded-full bg-accent" />
-                    <span>ÚLTIMO MOVIMIENTO</span>
+                    <span>{leadMovement.status === "EN CONFIRMACIÓN" ? "ÚLTIMA SEÑAL PUBLICADA" : "ÚLTIMO MOVIMIENTO"}</span>
                   </span>
                   <span className="text-xs font-mono font-bold tracking-[0.2em] text-accent uppercase">
                     {leadMovement.category}
@@ -217,6 +218,7 @@ export function MovementsTimeline({
               <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 sm:gap-8 items-start">
                 {/* Fecha protagonista vertical centrada */}
                 <div className="sm:col-span-3 flex flex-col items-center justify-center text-center font-mono leading-none select-none py-2 sm:border-r border-border/80 sm:pr-6">
+                  {leadMovement.dateQualifier && <span className="text-[9px] font-bold tracking-wider text-warn mb-2">{leadMovement.dateQualifier}</span>}
                   <span className="font-serif text-5xl sm:text-6xl font-bold text-text-1 tracking-tight tabular-nums">
                     {leadMovement.day}
                   </span>
@@ -274,6 +276,7 @@ export function MovementsTimeline({
                     <div className="grid grid-cols-1 sm:grid-cols-12 gap-4 sm:gap-8 items-start">
                       {/* Fecha grande centrada */}
                       <div className="sm:col-span-2 flex flex-col items-center justify-center text-center font-mono leading-none select-none py-1 sm:border-r border-border/80 sm:pr-6">
+                        {mov.dateQualifier && <span className="text-[8px] font-bold tracking-wider text-warn mb-1.5">{mov.dateQualifier}</span>}
                         <span className="font-serif text-3xl sm:text-4xl font-bold text-text-1 tracking-tight tabular-nums">
                           {mov.day}
                         </span>

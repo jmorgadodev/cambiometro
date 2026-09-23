@@ -6,8 +6,10 @@ import {
   latestMovementPublicationDate,
   MOVIMIENTOS,
   MOVIMIENTOS_HOME_SUMMARY,
+  MOVIMIENTOS_PIPELINE_METADATA,
   summarizeMovementFreshness,
 } from "./movimientos";
+import { buildEditorialMovements } from "./home-editorial-adapter";
 
 describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV y Anatomía de Card", () => {
   const root = process.cwd();
@@ -47,10 +49,37 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
     expect(delGobierno.length).toBeGreaterThan(0);
     expect(MOVIMIENTOS_HOME_SUMMARY).toMatchObject({
       desde,
-      total: delGobierno.length,
+      total: delGobierno.length + (MOVIMIENTOS_PIPELINE_METADATA.signals ?? []).length,
       renuncias: renuncias.length,
       verificados: verificados.length,
-      enConfirmacion: enConfirmacion.length,
+      enConfirmacion: enConfirmacion.length + (MOVIMIENTOS_PIPELINE_METADATA.signals ?? []).length,
+    });
+  });
+
+  it("1d. incluye las dos señales recientes en el total sin mezclarlas con las 46 salidas", () => {
+    const signals = MOVIMIENTOS_PIPELINE_METADATA.signals ?? [];
+
+    expect(MOVIMIENTOS).toHaveLength(46);
+    expect(signals).toHaveLength(2);
+    expect(MOVIMIENTOS_HOME_SUMMARY.total).toBe(48);
+    expect(MOVIMIENTOS_HOME_SUMMARY.enConfirmacion).toBe(2);
+    expect(signals.map((signal) => signal.title)).toEqual(expect.arrayContaining([
+      expect.stringContaining("José Bravo"),
+      expect.stringContaining("Fabián Páez"),
+    ]));
+  });
+
+  it("1e. la Home presenta señales en confirmación en la cronología, conservando su estado", () => {
+    const items = buildEditorialMovements(MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA.signals);
+
+    expect(items[0]).toMatchObject({
+      title: expect.stringContaining("Fabián Páez"),
+      status: "EN CONFIRMACIÓN",
+      link: expect.stringContaining("/movimientos/"),
+    });
+    expect(items[1]).toMatchObject({
+      title: expect.stringContaining("José Bravo"),
+      status: "EN CONFIRMACIÓN",
     });
   });
 
@@ -101,8 +130,8 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
   it("4b. Explica la diferencia entre fecha efectiva y fecha de publicación de la fuente", () => {
     expect(movimientosPageSource).toContain("Fecha del evento");
     expect(movimientosPageSource).toContain("fecha de publicación");
-    expect(movimientosPageSource).toContain("Última publicación detectada");
-    expect(movimientosPageSource).toContain("Último evento efectivo");
+    expect(movimientosPageSource).toContain("Última actualización pública");
+    expect(movimientosPageSource).toContain("Última salida documentada");
   });
 
   it("4c. calcula la última publicación sin reemplazar la fecha efectiva", () => {

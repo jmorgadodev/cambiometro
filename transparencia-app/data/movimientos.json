@@ -32,7 +32,11 @@
       "detected_at": "2026-09-23T13:24:23.238Z",
       "fase": "anunciado",
       "status": "en_confirmacion",
-      "tipo": "renuncia"
+      "tipo": "renuncia",
+      "person_name": "José Bravo Burgos",
+      "role": "Seremi de Salud",
+      "ministry": "Ministerio de Salud",
+      "region": "La Araucanía"
     },
     {
       "signal_id": "signal-fabian-paez-2026-09-17",
@@ -46,7 +50,11 @@
       "detected_at": "2026-09-23T13:24:23.238Z",
       "fase": "anunciado",
       "status": "en_confirmacion",
-      "tipo": "renuncia"
+      "tipo": "renuncia",
+      "person_name": "Fabián Páez",
+      "role": "Seremi de Energía",
+      "ministry": "Ministerio de Energía",
+      "region": "Coquimbo"
     }
   ],
   "stats": {
@@ -2270,5 +2278,5 @@
       "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     }
   ],
-  "checksum_sha256": "66cb8486aace545919e2bd4e779053862524bb554cc8986c4da1eaa812821ed2"
+  "checksum_sha256": "d13f5601a427e26784dc923d23ebe27e9c691dfc41a216303e96e070eba5323b"
 }

@@ -80,7 +80,7 @@ export default async function HomePage() {
   const operationalSources = homeSources;
   const entityCount = getStaticEntityCatalog().total || GLOBAL_KPIS.entidades;
   const editorialVotes = buildEditorialVotes(getHomeFeaturedVotes(HOME_FEATURED_VOTE_IDS), getVotacionesAnuales());
-  const editorialMovements = buildEditorialMovements(MOVIMIENTOS);
+  const editorialMovements = buildEditorialMovements(MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA.signals);
   const eventDates = [...new Set(MOVIMIENTOS.filter((movement) => movement.fecha >= MOVIMIENTOS_HOME_SUMMARY.desde).map((movement) => movement.fecha))].sort();
   const daysBetweenChanges = eventDates.length > 1
     ? Math.round((Date.parse(`${eventDates.at(-1)}T12:00:00Z`) - Date.parse(`${eventDates[0]}T12:00:00Z`)) / 86_400_000 / (eventDates.length - 1) * 10) / 10

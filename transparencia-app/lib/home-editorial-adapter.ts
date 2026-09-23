@@ -1,4 +1,4 @@
-import type { Movimiento } from "./movimientos";
+import type { Movimiento, MovimientoSignal } from "./movimientos";
 import { MOVIMIENTOS_TIPO_LABEL } from "./movimientos";
 import type { MovementItem } from "@/components/home/MovementsTimeline";
 import type { FeaturedVoteItem } from "@/components/home/FeaturedVotes";
@@ -10,12 +10,10 @@ import type { PillarChapter } from "@/components/home/SourcesCatalog";
 const GOVERNMENT_START = "2026-03-11";
 const monthLabel = new Intl.DateTimeFormat("es-CL", { month: "short", timeZone: "UTC" });
 
-export function buildEditorialMovements(movements: Movimiento[]): MovementItem[] {
-  return movements
+export function buildEditorialMovements(movements: Movimiento[], signals: MovimientoSignal[] = []): MovementItem[] {
+  const publishedMovements = movements
     .filter((movement) => movement.fecha >= GOVERNMENT_START && movement.fechaExacta !== false)
-    .sort((a, b) => b.fecha.localeCompare(a.fecha) || a.id.localeCompare(b.id))
-    .slice(0, 3)
-    .map((movement) => {
+    .map((movement): { sortDate: string; item: MovementItem } => {
       const name = movement.salio?.nombre || movement.entro?.nombre || "";
       const kind = MOVIMIENTOS_TIPO_LABEL[movement.tipo_evento] || "Cambio de autoridad";
       const source = movement.fuentes?.find((item) => item.nivel === "oficial") ?? movement.fuentes?.[0];
@@ -23,7 +21,7 @@ export function buildEditorialMovements(movements: Movimiento[]): MovementItem[]
       const status = movement.estado === "verificado_oficial" || movement.estado === "verificado"
         ? "VERIFICADO OFICIAL"
         : movement.estado === "corroborado" ? "CORROBORADO" : "EN CONFIRMACIÓN";
-      return {
+      return { sortDate: movement.fecha, item: {
         id: movement.id,
         refCode: movement.decreto_numero || "",
         day: String(date.getUTCDate()).padStart(2, "0"),
@@ -35,8 +33,33 @@ export function buildEditorialMovements(movements: Movimiento[]): MovementItem[]
         source: source?.medio || "Fuente del registro",
         status,
         link: name ? `/movimientos/?q=${encodeURIComponent(name)}` : "/movimientos/",
-      };
+      } };
     });
+
+  const publishedSignals = signals
+    .filter((signal) => signal.date && signal.date >= GOVERNMENT_START && /^\d{4}-\d{2}-\d{2}$/u.test(signal.date))
+    .map((signal): { sortDate: string; item: MovementItem } => {
+      const date = new Date(`${signal.date}T12:00:00Z`);
+      return { sortDate: signal.date!, item: {
+        id: signal.signal_id,
+        refCode: "",
+        day: String(date.getUTCDate()).padStart(2, "0"),
+        month: monthLabel.format(date).replace(".", "").toUpperCase(),
+        year: String(date.getUTCFullYear()),
+        category: "RENUNCIA · EN CONFIRMACIÓN",
+        title: signal.title,
+        desc: [signal.role, signal.ministry, signal.region, signal.summary].filter(Boolean).join(" · "),
+        source: signal.source_label,
+        status: "EN CONFIRMACIÓN",
+        link: `/movimientos/?q=${encodeURIComponent(signal.person_name || signal.title)}&estado=en_confirmacion`,
+        dateQualifier: "FECHA DE PUBLICACIÓN",
+      } };
+    });
+
+  return [...publishedMovements, ...publishedSignals]
+    .sort((a, b) => b.sortDate.localeCompare(a.sortDate) || a.item.id.localeCompare(b.item.id))
+    .slice(0, 3)
+    .map(({ item }) => item);
 }
 
 export function buildEditorialVotes(selected: VotacionDestacada[], annual: VotacionAnual[]): FeaturedVoteItem[] {

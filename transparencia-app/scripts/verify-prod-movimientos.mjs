@@ -61,7 +61,10 @@ if (payload.release_id === "kast-2026-exits-46-cutoff-2026-09-14" || payload.rel
   const joseBravoSignal = payload.signals?.find((signal) => signal.source_id === "minsal" && /Jos[eé] Bravo/i.test(signal.title));
   assert(joseBravoSignal?.date === "2026-09-15" && joseBravoSignal.status === "en_confirmacion", "José Bravo aparece como señal oficial pendiente desde el 15-09-2026");
   assert(!payload.movimientos.some((movement) => /Jos[eé] Bravo/i.test(movement.saliente ?? "")), "José Bravo no se cuenta como salida efectiva sin fecha de salida");
-  assert(payload.stats?.signals_en_confirmacion === 1, "el resumen distingue una señal en confirmación del total de 46 salidas");
+  const fabianPaezSignal = payload.signals?.find((signal) => signal.signal_id === "signal-fabian-paez-2026-09-17");
+  assert(fabianPaezSignal?.date === "2026-09-17" && fabianPaezSignal.status === "en_confirmacion", "Fabián Páez aparece como señal pendiente desde el 17-09-2026");
+  assert(!payload.movimientos.some((movement) => /Fabián Páez/i.test(movement.saliente ?? "")), "Fabián Páez no se cuenta como salida efectiva sin respaldo primario publicado");
+  assert(payload.stats?.signals_en_confirmacion === 2, "el resumen distingue dos señales pendientes del total de 46 salidas");
   assert(payload.movimientos.every((movement) => movement.fuentes.every((source) => !/renunciaskast/i.test(`${source.url} ${source.medio}`))), "no se usa el agregador externo como fuente");
   assert(payload.movimientos.every((movement) => !movement.fecha || movement.fecha <= "2026-09-14"), "no se mezcla la salida posterior al corte");
   const araos = payload.movimientos.find((movement) => movement.saliente === "Rafael Araos");
