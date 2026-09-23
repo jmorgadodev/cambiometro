@@ -77,20 +77,20 @@ describe("Header y navegación global", () => {
     expect(desktopActions).toContain("Apoyar Proyecto");
   });
 
-  it("mobile (<1024px) contiene drawer con las 10 secciones, chip de corte, X y donación", () => {
+  it("mobile (<1024px) contiene drawer con las secciones, X y donación sin distintivo de corte", () => {
     expect(headerContent).toContain("mobile-drawer");
     expect(headerContent).toContain("drawer-overlay");
     expect(headerContent).toContain("mobile-drawer__cluster");
-    expect(headerContent).toContain("drawer-snapshot-stamp");
+    expect(headerContent).not.toContain("drawer-snapshot-stamp");
     expect(headerContent).toContain("https://x.com/cambiometro");
     expect(headerContent).toContain("Donar y apoyar");
     expect(headerContent).toContain('href="/donar"');
   });
 
   it("no presenta un corte global cuando cada fuente tiene su propia actualización", () => {
-    expect(headerContent).toContain("actualización por fuente");
-    expect(headerContent).toContain("Catálogo público disponible");
-    expect(headerContent).toContain("Datos actualizados por fuente");
+    expect(headerContent).not.toContain("actualización por fuente");
+    expect(headerContent).not.toContain("Catálogo público disponible");
+    expect(headerContent).not.toContain("Datos actualizados por fuente");
     expect(headerContent).not.toContain("displayTotal");
     expect(headerContent).not.toContain("Corte ${displayCorte}");
     expect(headerContent).not.toContain("Corte oficial: ${displayTotal.toLocaleString(\"es-CL\")} registros");

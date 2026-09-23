@@ -57,9 +57,6 @@ export default function SiteHeader() {
   const previousPathname = useRef(pathname);
   const pathnameEffectReady = useRef(false);
 
-  const catalogStatusLabel = "actualización por fuente · corte propio";
-  const catalogStatusDescription = "Catálogo público disponible. Cada fuente conserva su propia fecha de actualización.";
-
   // Papel es el valor predeterminado; nunca se usa el tema del sistema.
   useEffect(() => {
     const id = requestAnimationFrame(() => {
@@ -281,22 +278,6 @@ export default function SiteHeader() {
         </nav>
 
         <div className="mobile-drawer__footer">
-          {/* Estado del catálogo en el drawer */}
-          <Link
-            href="/fuentes"
-            prefetch={false}
-            className="drawer-snapshot-stamp"
-            onClick={() => setDrawerOpen(false)}
-            aria-label={catalogStatusDescription}
-            title={catalogStatusDescription}
-          >
-            <span className="snapshot-stamp__status" aria-hidden="true" />
-            <span>
-              <strong>Datos actualizados por fuente</strong>
-              <small>{catalogStatusLabel}</small>
-            </span>
-          </Link>
-
           {/* Enlaces de pie y Donación */}
           <div className="mobile-drawer__actions">
             <a
