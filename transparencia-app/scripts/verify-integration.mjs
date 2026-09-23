@@ -241,7 +241,7 @@ try {
   await exploreOfficialDataLink.waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await page.getByRole("heading", { name: "Un Chile más transparente es posible." }).count(), 1);
   assert.equal(await exploreOfficialDataLink.count(), 1);
-  assert.equal(await exploreOfficialDataLink.getAttribute("href"), "/politico");
+  assert.equal(await exploreOfficialDataLink.getAttribute("href"), "/politico/");
   const highlightedVotes = page.getByRole("region", { name: "Votaciones destacadas" });
   await highlightedVotes.getByRole("heading", { name: "Votaciones destacadas" }).waitFor({ state: "visible", timeout: 15_000 });
   await highlightedVotes.getByRole("link", { name: /Ver todas las votaciones/ }).waitFor({ state: "visible", timeout: 15_000 });
