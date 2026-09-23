@@ -8,6 +8,7 @@ function item(id: number, amount: number | null = 1_200_000) {
 describe("conector de gastos operacionales del Senado", () => {
   it("construye filtros y paginación oficiales", () => {
     const url = new URL(buildSenateExpenseUrl(2026, 5, 3));
+    expect(url.searchParams.get("sort")).toBe("id:asc");
     expect(url.searchParams.get("filters[ano][$eq]")).toBe("2026");
     expect(url.searchParams.get("filters[mes][$eq]")).toBe("5");
     expect(url.searchParams.get("pagination[page]")).toBe("3");

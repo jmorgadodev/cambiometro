@@ -23,7 +23,10 @@ export function buildSenateExpenseUrl(year, month, page = 1) {
   validPeriod(year, month);
   if (!Number.isInteger(page) || page < 1) throw new Error("SENADO_INVALID_PAGE");
   const url = new URL(EXPENSE_PATH, API_BASE);
-  url.searchParams.set("sort", "gastos_operacionales");
+  // Sorting by category is unstable when many rows share the same value;
+  // page boundaries then repeat rows and can omit other official IDs.
+  // The unique primary key gives the monthly pagination a deterministic order.
+  url.searchParams.set("sort", "id:asc");
   url.searchParams.set("filters[ano][$eq]", String(year));
   url.searchParams.set("filters[mes][$eq]", String(month));
   url.searchParams.set("pagination[pageSize]", "500");
