@@ -35,6 +35,12 @@ export const MOVIMIENTOS_SOURCES = Object.freeze([
     tier: "official",
     url: "https://www.mindep.cl/noticias",
   },
+  {
+    id: "minsal",
+    label: "Ministerio de Salud",
+    tier: "official",
+    url: "https://www.minsal.cl/category/noticias/",
+  },
 ]);
 
 // gob.cl sometimes applies its edge policy differently to the news path and
@@ -402,6 +408,28 @@ export async function collectMovementSources({ sources = MOVIMIENTOS_SOURCES, fe
   };
 }
 
+export function buildMovementReviewReport({ now = new Date().toISOString(), collected }) {
+  const sources = (collected?.results ?? []).map((source) => {
+    const summary = { ...source };
+    delete summary.signals;
+    return summary;
+  });
+  const signals = collected?.signals ?? [];
+  const hasOfficialSource = collected?.hasOfficialSource === true;
+  return {
+    pipeline: "etl_movimientos_autoridades",
+    attemptedAt: now,
+    status: hasOfficialSource ? "review_only" : "review_only_sources_unavailable",
+    reason: hasOfficialSource
+      ? "RELEASE_APPROVAL_REQUIRED_FOR_PUBLICATION"
+      : "NO_OFFICIAL_SOURCE_AVAILABLE",
+    published: false,
+    sources,
+    signal_count: signals.length,
+    signals,
+  };
+}
+
 export function calculateMovimientoEstado(movimiento) {
   if (["verificado", "verificado_oficial", "corroborado"].includes(movimiento.estado)) return movimiento.estado;
   // Una nota oficial o un comunicado confirma el anuncio, pero no reemplaza
@@ -435,6 +463,7 @@ function connectorKeyForSource(sourceId) {
   if (sourceId === "gob-cl") return "t1_gob_cl";
   if (sourceId === "prensa-presidencia") return "t1_prensa_presidencia";
   if (sourceId === "mindep") return "t1_mindep";
+  if (sourceId === "minsal") return "t1_minsal";
   return null;
 }
 

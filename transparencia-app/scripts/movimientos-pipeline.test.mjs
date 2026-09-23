@@ -1,5 +1,7 @@
+import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import {
+  buildMovementReviewReport,
   buildMovementPayload,
   calculateMovimientoEstado,
   collectMovementSources,
@@ -19,7 +21,85 @@ const baseline = {
   stats: {},
 };
 
+const publishedMovements = JSON.parse(readFileSync(new URL("../data/movimientos.json", import.meta.url), "utf8"));
+
 describe("pipeline automático de movimientos", () => {
+  it("mantiene 46 salidas y añade evidencia oficial a Jorge Olivares", () => {
+    const jorge = publishedMovements.movimientos.find((movement) => movement.id === "mov-kast-2026-2026-09-14-jorge-olivares");
+
+    expect(publishedMovements.movimientos).toHaveLength(46);
+    expect(jorge?.fuentes).toEqual(expect.arrayContaining([
+      expect.objectContaining({
+        nivel: "oficial",
+        medio: "Ministerio de Vivienda y Urbanismo",
+        url: "https://www.minvu.gob.cl/noticia/declaracion-publica-14-septiembre-2026/",
+        fecha: "2026-09-14",
+      }),
+    ]));
+    expect(jorge).toMatchObject({ estado: "corroborado", verificado: false, documento_pendiente: true });
+  });
+
+  it("mantiene a José Bravo como señal oficial pendiente, sin sumarlo a las salidas", () => {
+    const minsalUrl = "https://www.minsal.cl/el-ministerio-de-salud-informa-que-solicito-la-renuncia-del-secretario-regional-ministerial-de-salud-de-la-region-de-la-araucania/";
+    const joseRows = publishedMovements.movimientos.filter((movement) => /jos[eé] bravo/i.test(`${movement.saliente ?? ""} ${movement.salio?.nombre ?? ""}`));
+    const signal = publishedMovements.signals?.find((item) => item.url === minsalUrl);
+
+    expect(joseRows).toHaveLength(0);
+    expect(signal).toMatchObject({
+      source_id: "minsal",
+      source_label: "Ministerio de Salud de Chile",
+      source_tier: "official",
+      date: "2026-09-15",
+      fase: "anunciado",
+      status: "en_confirmacion",
+      tipo: "renuncia",
+    });
+    expect(publishedMovements.stats.signals_en_confirmacion).toBe(1);
+    expect(validateMovementPayload(publishedMovements)).toBe(publishedMovements);
+  });
+
+  it("deja el modo de revisión en verde y no publica señales como movimientos", () => {
+    const signal = {
+      signal_id: "signal-jose-bravo",
+      title: "Minsal solicita la renuncia del seremi José Bravo",
+      status: "en_confirmacion",
+    };
+    const report = buildMovementReviewReport({
+      now: "2026-09-23T13:00:00.000Z",
+      collected: {
+        hasOfficialSource: true,
+        results: [{ id: "minsal", tier: "official", ok: true, signals: [signal] }],
+        signals: [signal],
+      },
+    });
+
+    expect(report).toMatchObject({
+      status: "review_only",
+      published: false,
+      signal_count: 1,
+      signals: [signal],
+    });
+    expect(report).not.toHaveProperty("movimientos");
+    expect(report.sources[0]).not.toHaveProperty("signals");
+  });
+
+  it("registra indisponibilidad de fuentes sin fallar ni intentar publicación", () => {
+    const report = buildMovementReviewReport({
+      now: "2026-09-23T13:00:00.000Z",
+      collected: {
+        hasOfficialSource: false,
+        results: [{ id: "minsal", tier: "official", ok: false, status: 403, signals: [] }],
+        signals: [],
+      },
+    });
+
+    expect(report).toMatchObject({
+      status: "review_only_sources_unavailable",
+      published: false,
+      signal_count: 0,
+    });
+  });
+
   it("detecta señales de cambio sin convertirlas en hechos oficiales", () => {
     const signals = parseMovementSignals(
       '<html><a href="/a">Gobierno anuncia nombramiento de autoridad</a><a href="/a">Gobierno anuncia nombramiento de autoridad</a></html>',
