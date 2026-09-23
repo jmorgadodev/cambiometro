@@ -241,6 +241,12 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(workflow).toContain("release reconciliado de Movimientos");
   });
 
+  it("11c. La verificación post-promoción valida la marca estable de la Home", () => {
+    const workflow = fs.readFileSync(path.join(workflowsDir, "pages-promote-artifact.yml"), "utf8");
+    expect(workflow).toContain('grep -F "<title>El Cambiómetro');
+    expect(workflow).not.toContain('grep -F "La información pública"');
+  });
+
   it("12. Los ETL de personal separados publican R2 sin usar D1; CPLT conserva su fallback", () => {
     const personal = fs.readFileSync(path.join(workflowsDir, "etl-personal-apoyo.yml"), "utf8");
     const personalSenado = fs.readFileSync(path.join(workflowsDir, "etl-personal-apoyo-senado.yml"), "utf8");
