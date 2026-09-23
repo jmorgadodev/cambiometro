@@ -95,7 +95,7 @@ export function Hero() {
               <Link
                 href="/politico"
                 prefetch={false}
-                className="group inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-lg bg-accent hover:opacity-90 text-white font-semibold text-sm transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-0.5 text-center"
+                className="group inline-flex items-center justify-center gap-2.5 px-6 py-3.5 rounded-lg bg-accent hover:opacity-90 text-on-accent font-semibold text-sm transition-all duration-300 shadow-md hover:shadow-xl hover:-translate-y-0.5 text-center"
               >
                 <span>Explorar datos oficiales</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />

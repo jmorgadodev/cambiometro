@@ -28,7 +28,7 @@ const browser = await chromium.launch({ headless: true });
 const failures = [];
 for (const [routeName, route] of routes) {
   for (const theme of Object.keys(expected)) {
-    const context = await browser.newContext();
+    const context = await browser.newContext({ reducedMotion: "reduce" });
     const page = await context.newPage();
     const consoleErrors = [];
     const failedResponses = [];
@@ -46,6 +46,11 @@ for (const [routeName, route] of routes) {
     await page.goto(`${baseUrl}${route}`, { waitUntil: "networkidle", timeout: 30_000 });
     await page.evaluate((value) => { localStorage.setItem("cambiometro-theme", value); document.documentElement.setAttribute("data-theme", value); }, theme);
     await page.reload({ waitUntil: "networkidle", timeout: 30_000 });
+    await page.mouse.move(1279, 719);
+    await page.evaluate(async () => {
+      await Promise.all(document.getAnimations().map((animation) => animation.finished.catch(() => undefined)));
+    });
+    await page.waitForTimeout(250);
     const result = await page.evaluate(() => {
       const style = getComputedStyle(document.documentElement);
       return { theme: document.documentElement.getAttribute("data-theme"), tokens: Object.fromEntries(["--bg", "--surface", "--border", "--text", "--muted", "--accent", "--highlight", "--link", "--success", "--warning", "--danger", "--focus"].map((name) => [name, style.getPropertyValue(name).trim().toUpperCase()])), spinner: /Cargando contenido|Cargando municipalidades|Cargando transferencias|Cargando funcionarios/i.test(document.body.innerText) };

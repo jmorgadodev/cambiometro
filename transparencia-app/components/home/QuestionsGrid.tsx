@@ -215,7 +215,7 @@ export function QuestionsGrid({ availableSourceCount }: QuestionsGridProps) {
                 <p className="text-[12px] text-text-2 mt-1.5 leading-snug max-w-[240px]">
                   Transferencias Ley 19.862: emisor, fundación receptora y montos.
                 </p>
-                <div className="mt-3 inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-accent opacity-75 group-hover:opacity-100 group-hover:underline">
+                <div className="mt-3 inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-accent group-hover:underline">
                   <span>Explorar</span>
                   <ArrowUpRight className="w-3 h-3" />
                 </div>
@@ -244,7 +244,7 @@ export function QuestionsGrid({ availableSourceCount }: QuestionsGridProps) {
                 <p className="text-[12px] text-text-2 mt-1.5 leading-snug max-w-[240px]">
                   Censo 2024, finanzas locales, alcaldías y compras públicas.
                 </p>
-                <div className="mt-3 inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-accent opacity-75 group-hover:opacity-100 group-hover:underline">
+                <div className="mt-3 inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-accent group-hover:underline">
                   <span>Explorar</span>
                   <ArrowUpRight className="w-3 h-3" />
                 </div>
@@ -273,7 +273,7 @@ export function QuestionsGrid({ availableSourceCount }: QuestionsGridProps) {
                 <p className="text-[12px] text-text-2 mt-1.5 leading-snug max-w-[240px]">
                   Relaciones documentales, cruces de contratos y vínculos.
                 </p>
-                <div className="mt-3 inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-accent opacity-75 group-hover:opacity-100 group-hover:underline">
+                <div className="mt-3 inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-accent group-hover:underline">
                   <span>Explorar</span>
                   <ArrowUpRight className="w-3 h-3" />
                 </div>
@@ -302,7 +302,7 @@ export function QuestionsGrid({ availableSourceCount }: QuestionsGridProps) {
                 <p className="text-[12px] text-text-2 mt-1.5 leading-snug max-w-[240px]">
                   Autoridades, seremis, directores y nóminas oficiales.
                 </p>
-                <div className="mt-3 inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-accent opacity-75 group-hover:opacity-100 group-hover:underline">
+                <div className="mt-3 inline-flex items-center gap-1 text-[11px] font-mono font-semibold text-accent group-hover:underline">
                   <span>Explorar</span>
                   <ArrowUpRight className="w-3 h-3" />
                 </div>

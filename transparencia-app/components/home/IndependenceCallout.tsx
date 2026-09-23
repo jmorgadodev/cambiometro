@@ -30,9 +30,9 @@ export function IndependenceCallout() {
             <Link
               href="/donar"
               prefetch={false}
-              className="px-6 py-3 rounded-lg bg-forest-accent hover:opacity-90 text-background font-bold text-sm transition-all duration-200 shadow-md flex items-center gap-2 group cursor-pointer"
+              className="px-6 py-3 rounded-lg bg-forest-accent hover:opacity-90 text-forest-bg font-bold text-sm transition-all duration-200 shadow-md flex items-center gap-2 group cursor-pointer"
             >
-              <Heart className="w-4 h-4 text-background fill-current" />
+              <Heart className="w-4 h-4 text-forest-bg fill-current" />
               <span>Apóyanos</span>
               <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
             </Link>

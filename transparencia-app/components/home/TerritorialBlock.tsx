@@ -85,7 +85,7 @@ export function TerritorialBlock({
               <Link
                 href="/municipalidades"
                 prefetch={false}
-                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-accent hover:opacity-90 text-white font-semibold text-xs sm:text-sm transition-all shadow-sm hover:shadow-md group"
+                className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-accent hover:opacity-90 text-on-accent font-semibold text-xs sm:text-sm transition-all shadow-sm hover:shadow-md group"
               >
                 <span>Explorar comparador territorial de comunas</span>
                 <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
