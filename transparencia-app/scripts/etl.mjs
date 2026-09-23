@@ -16,7 +16,7 @@ import { fileURLToPath } from "node:url";
 import { fetchInfoLobby, fetchInfoProbidad } from "./etl/connectors/cplt.mjs";
 import { mergeLakeProjections } from "./etl/merge-lake-projections.mjs";
 import {
-  discoverLatestSenateExpensePeriod,
+  discoverSenatePublishedPeriods,
   fetchSenateOperationalExpenses,
 } from "./etl/connectors/senado.mjs";
 import { fetchVotacionesSenado } from "./etl/connectors/senado-votaciones.mjs";
@@ -24,7 +24,7 @@ import { assertSuccessfulRun } from "./etl/validation.mjs";
 import { readJsonIfPresent, writeFileAtomic } from "./etl/safe-file.mjs";
 import { mergeRecordsById } from "./etl/history.mjs";
 import { resolveCamaraVoteWindow, CAMARA_CURRENT_PERIOD_START } from "./etl/camara-history.mjs";
-import { expenseMonthWindow } from "./etl/expense-window.mjs";
+import { selectSenateExpensePeriods } from "./etl/expense-window.mjs";
 
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const dataDirectory = join(scriptDirectory, "..", "data", "etl");
@@ -220,14 +220,15 @@ async function fetchVotacionesCamara({ from, to, minimumFrom = PERIODO_ACTUAL_DE
  * monto (CLP) y el concepto rendido por el ejecutor.
  */
 async function fetchGastosSenado({ fullHistory = false } = {}) {
-  const latest = await discoverLatestSenateExpensePeriod();
+  const publishedPeriods = await discoverSenatePublishedPeriods({ dataset: "operational_expenses" });
+  const latest = publishedPeriods.at(-1);
   const months = [];
-  // El lake conserva particiones anteriores. El proceso mensual sólo necesita
-  // el release más reciente y un mes de solapamiento; --full-history queda
-  // reservado para backfills deliberados o un bootstrap sin lake publicado.
-  const { firstMonth, lastMonth } = expenseMonthWindow(latest.month, { fullHistory });
-  for (let month = firstMonth; month <= lastMonth; month += 1) {
-    months.push(await fetchSenateOperationalExpenses({ year: latest.year, month }));
+  // El ETL mensual consulta el mes más reciente y su solapamiento. El backfill
+  // histórico recorre todos los períodos enumerados oficialmente, no sólo el
+  // año calendario del último corte.
+  const periods = selectSenateExpensePeriods(publishedPeriods, { latest, fullHistory });
+  for (const { year, month } of periods) {
+    months.push(await fetchSenateOperationalExpenses({ year, month }));
   }
   const records = months.flatMap((result) => result.records);
   const ids = new Set(records.map((record) => record.id));

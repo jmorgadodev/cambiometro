@@ -28,7 +28,7 @@ describe("conector de gastos operacionales del Senado", () => {
   });
 
   it("descubre el último período y recorre todas las páginas sin límite artificial", async () => {
-    const period = await discoverLatestSenateExpensePeriod({ fetchImpl: async () => Response.json({ data: { data: [{ attributes: { ano: 2025, mes: 12 } }, { attributes: { ano: 2026, mes: 5 } }] } }) });
+    const period = await discoverLatestSenateExpensePeriod({ fetchImpl: async () => Response.json({ data: { data: [{ attributes: { ano: 2025, mes: 12 } }, { attributes: { ano: 2026, mes: 5 } }], meta: { pagination: { page: 1, pageSize: 500, pageCount: 1, total: 2 } } } }) });
     expect(period).toEqual({ year: 2026, month: 5 });
     const calls: string[] = [];
     const result = await fetchSenateOperationalExpenses({
