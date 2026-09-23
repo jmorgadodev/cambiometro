@@ -41,6 +41,7 @@ export function FeaturedVotes({
   return (
     <section
       className="relative overflow-hidden py-16 sm:py-20 bg-background text-text-1 border-b border-border transition-colors duration-200"
+      aria-labelledby="home-featured-votes-title"
     >
       <div className="absolute inset-0 bg-grid-documental mask-radial-fade pointer-events-none opacity-40" aria-hidden="true" />
 
@@ -52,7 +53,7 @@ export function FeaturedVotes({
           </div>
           <div className="flex flex-col lg:flex-row lg:items-end justify-between gap-4">
             <div>
-              <h2 className="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-text-1 tracking-tight leading-tight">
+              <h2 id="home-featured-votes-title" className="font-serif text-3xl sm:text-4xl lg:text-[42px] font-bold text-text-1 tracking-tight leading-tight">
                 Votaciones destacadas en el Congreso
               </h2>
               <p className="text-sm sm:text-[15px] text-text-2 max-w-2xl leading-relaxed mt-1">
