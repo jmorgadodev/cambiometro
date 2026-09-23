@@ -68,9 +68,16 @@ function wrangler(args, label = "WRANGLER") {
 }
 
 function npm(args, label) {
-  const npmCli = resolve(root, "node_modules", "npm", "bin", "npm-cli.js");
-  if (existsSync(npmCli)) return run(process.execPath, [npmCli, ...args], label);
-  return run(process.platform === "win32" ? "npm.cmd" : "npm", args, label);
+  const npmCli = resolveNpmCliPath({
+    localNpmCli: resolve(root, "node_modules", "npm", "bin", "npm-cli.js"),
+    npmExecPath: process.env.npm_execpath,
+  });
+  if (!npmCli) throw new Error("EXPENSE_LOCAL_NPM_CLI_NOT_FOUND: ejecuta el ETL mediante npm run");
+  return run(process.execPath, [npmCli, ...args], label);
+}
+
+export function resolveNpmCliPath({ localNpmCli, npmExecPath, isFile = existsSync } = {}) {
+  return [localNpmCli, npmExecPath].find((candidate) => candidate && isFile(candidate)) ?? null;
 }
 
 function readRemoteManifest(work) {
