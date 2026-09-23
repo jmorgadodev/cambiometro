@@ -75,12 +75,12 @@ jobs:
             cp data/movimientos.json data/movimientos.previous.json
           fi
 
-      - name: Ejecutar ETL independiente de Cámara
+      - name: Revisar fuentes de Movimientos sin publicar
         if: inputs.repair_reconciled != true
+        id: movimientos_etl
         working-directory: transparencia-app
         env:
-          # Queda congelado hasta promover el release reconciliado Kast 2026.
-          # No borrar esta bandera: evita que el baseline inflado vuelva a publicarse.
+          # El cron revisa fuentes y genera un artefacto; sólo publica con un release aprobado.
           MOVIMIENTOS_RELEASE_APPROVED: "0"
           MOVIMIENTOS_RUN_REPORT: data/generated/movimientos-run.json
           MOVIMIENTOS_INPUT: data/movimientos.previous.json
@@ -90,9 +90,13 @@ jobs:
           # TLS normal; nunca se usa NODE_TLS_REJECT_UNAUTHORIZED=0.
           NODE_OPTIONS: "--use-system-ca"
           NODE_EXTRA_CA_CERTS: ${{ github.workspace }}/transparencia-app/config/certs/sectigo-public-server-authentication-ca-ov-r36.pem
-        run: npm run etl:movimientos
+        run: |
+          npm run etl:movimientos
+          PUBLISH=$(node --input-type=module -e 'import { readFileSync } from "node:fs"; const report=JSON.parse(readFileSync("data/generated/movimientos-run.json","utf8")); process.stdout.write(report.published === true ? "true" : "false");')
+          echo "publish=$PUBLISH" >> "$GITHUB_OUTPUT"
 
       - name: Validar snapshot y publicar grupo estático
+        if: inputs.repair_reconciled == true || steps.movimientos_etl.outputs.publish == 'true'
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}

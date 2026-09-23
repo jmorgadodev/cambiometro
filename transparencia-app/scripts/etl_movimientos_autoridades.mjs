@@ -10,6 +10,7 @@ import { existsSync } from "node:fs";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
 import {
+  buildMovementReviewReport,
   buildMovementPayload,
   collectMovementSources,
   MOVIMIENTOS_SOURCES,
@@ -56,20 +57,24 @@ function writeReport(report) {
 }
 
 async function main() {
-  // Incidente de integridad: no permitimos que el proceso vuelva a conservar
-  // el baseline histórico ni a publicar señales hasta que exista un release
-  // explícitamente reconciliado y aprobado. El archivo de salida queda intacto.
+  // Sin aprobación, el cron sólo inspecciona las fuentes y deja evidencia
+  // interna. Nunca muta el snapshot público ni convierte una señal en salida.
   if (!releaseApproval) {
-    const report = {
-      pipeline: "etl_movimientos_autoridades",
-      attemptedAt: now,
-      published: false,
-      status: "frozen",
-      reason: "MOVIMIENTOS_INTEGRITY_RELEASE_PENDING",
-      message: "ETL congelado: falta un release Kast 2026 validado contra documentos oficiales.",
-    };
+    const collected = await collectMovementSources({
+      sources: configuredSources(),
+      retries: Number(process.env.MOVIMIENTOS_SOURCE_RETRIES ?? 2),
+    });
+    const report = buildMovementReviewReport({ now, collected });
     await writeReport(report);
-    throw new Error("MOVIMIENTOS_ETL_FROZEN_INTEGRITY_REVIEW");
+    console.log(JSON.stringify({
+      ok: true,
+      status: report.status,
+      published: report.published,
+      signals: report.signal_count,
+      availableOfficialSources: collected.results.filter((source) => source.tier === "official" && source.ok).length,
+      reportPath,
+    }, null, 2));
+    return;
   }
   if (!existsSync(inputPath)) throw new Error(`MOVIMIENTOS_INPUT_MISSING:${inputPath}`);
   const previous = JSON.parse(await readFile(inputPath, "utf8"));

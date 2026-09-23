@@ -19,7 +19,22 @@
       "ok": true
     }
   ],
-  "signals": [],
+  "signals": [
+    {
+      "signal_id": "signal-384524ac78c8c703cac0d21e",
+      "source_id": "minsal",
+      "source_label": "Ministerio de Salud de Chile",
+      "source_tier": "official",
+      "title": "Minsal solicita la renuncia del seremi de Salud de La Araucanía, José Bravo Burgos",
+      "url": "https://www.minsal.cl/el-ministerio-de-salud-informa-que-solicito-la-renuncia-del-secretario-regional-ministerial-de-salud-de-la-region-de-la-araucania/",
+      "date": "2026-09-15",
+      "summary": "El comunicado informa que el Ministerio solicitó su renuncia, pero no indica la fecha efectiva de salida. La designación de quien asumirá la Seremi será informada posteriormente.",
+      "detected_at": "2026-09-23T13:24:23.238Z",
+      "fase": "anunciado",
+      "status": "en_confirmacion",
+      "tipo": "renuncia"
+    }
+  ],
   "stats": {
     "total_movimientos": 46,
     "verificados": 11,
@@ -27,7 +42,7 @@
     "en_confirmacion": 0,
     "con_reemplazo": 26,
     "reemplazo_no_informado": 20,
-    "signals_en_confirmacion": 0,
+    "signals_en_confirmacion": 1,
     "target_categories": "{\"ministers\":3,\"subsecretaries\":6,\"seremis\":36,\"delegados\":1}"
   },
   "movimientos": [
@@ -598,6 +613,13 @@
       },
       "fuentes": [
         {
+          "nivel": "oficial",
+          "medio": "Ministerio de Vivienda y Urbanismo",
+          "url": "https://www.minvu.gob.cl/noticia/declaracion-publica-14-septiembre-2026/",
+          "fecha": "2026-09-14",
+          "titulo": "Declaración pública: Jorge Olivares presentó la renuncia voluntaria al cargo de Seremi de Antofagasta"
+        },
+        {
           "nivel": "prensa",
           "medio": "Timeline",
           "url": "https://www.timeline.cl/ministro-de-vivienda-pide-renuncia-a-seremi-de-antofagasta-tras-polemica-por-reduccion-de-mas-de-5-mil-viviendas/",
@@ -615,12 +637,12 @@
       "organo": "Secretaría Regional Ministerial de Vivienda",
       "saliente": "Jorge Olivares",
       "motivo": "Renuncia pedida por el ministro de Vivienda tras graves falencias en gestión de convenio regional",
-      "fuente": "Timeline (2026-09-14)",
+      "fuente": "Ministerio de Vivienda y Urbanismo (2026-09-14) · Timeline (2026-09-14)",
       "referencia_externa": {
         "releaseId": "kast-2026-succession-reconciled-2026-09-14",
         "categoria": "seremis",
-        "tipo_fuente": "prensa_publicada",
-        "documento_primario_verificado": false
+        "tipo_fuente": "registro_oficial_y_prensa",
+        "documento_primario_verificado": true
       },
       "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     },
@@ -2234,5 +2256,5 @@
       "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     }
   ],
-  "checksum_sha256": "9a884d9bef8627718afed406d530591acec6a95c50dd27956c744b56766f1995"
+  "checksum_sha256": "3ce483e03ec8f3d51d321f6d57e40622240b8d0a37f767daaa8a11e8455265d6"
 }
