@@ -105,7 +105,7 @@ jobs:
           npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json \
             --file .repair-staging/catalog-before.json --remote
           npx wrangler r2 object get transparencia-public-data/catalog/v1/storage.json \
-            --file .repair-staging/storage-before.json --remote || true
+            --file .repair-staging/storage-before.json --remote
 
       - name: Construir release oficial aislado sin publicar
         working-directory: transparencia-app
@@ -123,21 +123,21 @@ jobs:
           set -euo pipefail
           node --input-type=module - <<'NODE'
           import { readFileSync } from "node:fs";
+          import { assertSenateVotePeriodPreserved } from "./scripts/etl/senado-votaciones-release.mjs";
           const base = process.env.API_URL;
+          const catalog = JSON.parse(readFileSync(".repair-staging/catalog-before.json", "utf8"));
           const summary = JSON.parse(readFileSync(".repair-staging/release/release-summary.json", "utf8"));
-          const stagedByPeriod = new Map(summary.periods.map((item) => [item.period, new Set(item.ids.map(String))]));
           for (const period of summary.periods) {
             const currentIds = new Set();
             let page = 1;
             let totalPages = 1;
+            let firstMeta = null;
             do {
               const url = `${base}?source=votaciones_senado&kind=vote&period=${period.period}&limit=100&page=${page}`;
               const response = await fetch(url);
               if (!response.ok) throw new Error(`SENADO_REPAIR_EXISTING_HTTP:${period.period}:${response.status}`);
               const payload = await response.json();
-              if (payload.meta?.sourceBackend !== "r2-lake" || payload.meta?.sourceStatus !== "complete") {
-                throw new Error(`SENADO_REPAIR_EXISTING_NOT_COMPLETE:${period.period}`);
-              }
+              if (page === 1) firstMeta = payload.meta;
               for (const row of payload.data ?? []) {
                 const id = String(row.data?.votacion_id ?? row.id).match(/(\d+)$/)?.[1];
                 if (!id) throw new Error(`SENADO_REPAIR_EXISTING_INVALID_ID:${period.period}`);
@@ -146,10 +146,14 @@ jobs:
               totalPages = Number(payload.meta?.totalPages ?? 1);
               page += 1;
             } while (page <= totalPages);
-            const stagedIds = stagedByPeriod.get(period.period);
-            const missing = [...currentIds].filter((id) => !stagedIds.has(id));
-            if (missing.length) throw new Error(`SENADO_REPAIR_EXISTING_VOTE_DROPPED:${period.period}:${missing.join(",")}`);
-            console.log(JSON.stringify({ period: period.period, existingRecords: currentIds.size, stagedRecords: stagedIds.size, preserved: true }));
+            const result = assertSenateVotePeriodPreserved({
+              period: period.period,
+              catalog,
+              stagedIds: period.ids,
+              currentMeta: firstMeta,
+              currentIds: [...currentIds],
+            });
+            console.log(JSON.stringify(result));
           }
           NODE
 
@@ -181,12 +185,14 @@ jobs:
           node --input-type=module - <<'NODE'
           import { readFileSync, statSync } from "node:fs";
           const storagePath = ".repair-staging/storage-before.json";
-          const used = (() => { try { return Number(JSON.parse(readFileSync(storagePath, "utf8")).usedBytes ?? 0); } catch { return 0; } })();
+          const storage = JSON.parse(readFileSync(storagePath, "utf8"));
+          const used = Number(storage.usedBytes);
+          if (!Number.isSafeInteger(used) || used <= 0) throw new Error("R2_REPAIR_STORAGE_USAGE_UNVERIFIED");
           const root = ".repair-staging/release";
           const summary = JSON.parse(readFileSync(`${root}/release-summary.json`, "utf8"));
           const bytes = summary.assets.filter((asset) => asset.key.startsWith("partitions/votaciones_senado/")).reduce((sum, asset) => sum + Number(asset.size ?? 0), 0);
           const projected = used + bytes;
-          if (used > 0 && projected >= 9_500_000_000) throw new Error(`R2_REPAIR_BLOCKED_AT_95_PERCENT:${projected}`);
+          if (projected >= 9_500_000_000) throw new Error(`R2_REPAIR_BLOCKED_AT_95_PERCENT:${projected}`);
           console.log(JSON.stringify({ usedBytes: used, addedBytes: bytes, projectedBytes: projected, thresholdBytes: 9_500_000_000 }, null, 2));
           NODE
 

@@ -123,6 +123,11 @@ jobs:
             npm run ingest:votaciones-full -- --source senado
           fi
 
+      - name: Reconciliar proyección estática Senado 2026+ desde R2
+        if: steps.ingest.outputs.publish == 'true'
+        working-directory: transparencia-app
+        run: node scripts/sync-senado-votes-static.mjs --from 2026-01 --to "$(date -u +%Y-%m)"
+
       - name: Construir subsets estáticos
         if: steps.ingest.outputs.publish == 'true'
         working-directory: transparencia-app

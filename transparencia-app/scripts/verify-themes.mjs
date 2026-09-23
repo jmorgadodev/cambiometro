@@ -46,11 +46,16 @@ for (const [routeName, route] of routes) {
     await page.goto(`${baseUrl}${route}`, { waitUntil: "domcontentloaded", timeout: 30_000 });
     await page.evaluate((value) => { localStorage.setItem("cambiometro-theme", value); document.documentElement.setAttribute("data-theme", value); }, theme);
     await page.reload({ waitUntil: "domcontentloaded", timeout: 30_000 });
+    await page.waitForFunction((expectedTheme) => {
+      const header = document.querySelector(".site-header");
+      return header?.getAttribute("data-hydrated") === "true"
+        && document.documentElement.getAttribute("data-theme") === expectedTheme;
+    }, theme, { timeout: 10_000 });
     await page.mouse.move(1279, 719);
     await page.evaluate(async () => {
       await Promise.all(document.getAnimations().map((animation) => animation.finished.catch(() => undefined)));
+      await new Promise((resolve) => requestAnimationFrame(() => requestAnimationFrame(resolve)));
     });
-    await page.waitForTimeout(250);
     const result = await page.evaluate(() => {
       const style = getComputedStyle(document.documentElement);
       return { theme: document.documentElement.getAttribute("data-theme"), tokens: Object.fromEntries(["--bg", "--surface", "--border", "--text", "--muted", "--accent", "--highlight", "--link", "--success", "--warning", "--danger", "--focus"].map((name) => [name, style.getPropertyValue(name).trim().toUpperCase()])), spinner: /Cargando contenido|Cargando municipalidades|Cargando transferencias|Cargando funcionarios/i.test(document.body.innerText) };

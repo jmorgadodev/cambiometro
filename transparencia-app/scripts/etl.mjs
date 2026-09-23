@@ -19,7 +19,7 @@ import {
   discoverSenatePublishedPeriods,
   fetchSenateOperationalExpenses,
 } from "./etl/connectors/senado.mjs";
-import { fetchVotacionesSenado } from "./etl/connectors/senado-votaciones.mjs";
+import { fetchSenateVotesByDateRange } from "./etl/senado-votaciones-release.mjs";
 import { assertSuccessfulRun } from "./etl/validation.mjs";
 import { readJsonIfPresent, writeFileAtomic } from "./etl/safe-file.mjs";
 import { mergeRecordsById } from "./etl/history.mjs";
@@ -341,7 +341,7 @@ async function main() {
   await runSource({
     key: "votaciones_senado", label: "Votaciones Senado", selected: options.sources, previous, snapshot, summary,
     summaryKey: "votaciones_senado_ingresadas", minimum: 0, preserveHistory: true,
-    load: () => fetchVotacionesSenado({ legislatura: 374, desde: options.from, to: options.to }),
+    load: () => fetchSenateVotesByDateRange({ from: options.from, to: options.to }),
   });
   await runSource({
     key: "gastos_senado", label: "Gastos Operacionales Senado", selected: options.sources, previous, snapshot, summary,

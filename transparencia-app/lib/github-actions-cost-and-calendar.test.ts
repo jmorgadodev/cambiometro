@@ -177,8 +177,12 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(senateWorkflow).toContain("name: ETL Diario - Votaciones Senado");
     expect(senateWorkflow).toContain("npm run etl -- --from");
     expect(senateWorkflow).toContain("--source votaciones_senado");
+    expect(senateWorkflow).toContain("node scripts/sync-senado-votes-static.mjs --from 2026-01");
+    expect(senateWorkflow.indexOf("Reconciliar proyección estática Senado 2026+ desde R2"))
+      .toBeLessThan(senateWorkflow.indexOf("name: Construir subsets estáticos"));
+    expect(senateWorkflow).not.toContain("data:materialize");
     const etlPipeline = fs.readFileSync(path.resolve(root, "scripts", "etl.mjs"), "utf8");
-    expect(etlPipeline).toContain("fetchVotacionesSenado({ legislatura: 374, desde: options.from, to: options.to })");
+    expect(etlPipeline).toContain("fetchSenateVotesByDateRange({ from: options.from, to: options.to })");
     expect(senateWorkflow).toContain("npm run ingest:votaciones-full -- --source senado --full");
     expect(workflow).not.toContain("--source camara,votaciones_camara");
     expect(ingest).toContain("const REFRESH_FROM");
@@ -254,10 +258,12 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(dispatcher).toContain("to: ${{ inputs.to || '' }}");
     expect(workflow).toContain("SENADO_REPAIR_RANGE_START_MUST_BE_MONTH_START");
     expect(workflow).toContain("SENADO_REPAIR_RANGE_END_MUST_BE_MONTH_END_OR_TODAY");
-    expect(workflow).toContain("SENADO_REPAIR_EXISTING_VOTE_DROPPED");
+    expect(workflow).toContain("assertSenateVotePeriodPreserved");
     expect(workflow).toContain("for (const { period, recordCount } of summary.periods)");
     expect(workflow).toContain("SENADO_REPAIR_COUNT_MISMATCH");
     expect(workflow).toContain("for (const period of summary.periods)");
+    expect(workflow).toContain("R2_REPAIR_STORAGE_USAGE_UNVERIFIED");
+    expect(workflow).not.toContain("storage-before.json --remote || true");
     expect(workflow).not.toContain('["2026-08", "2026-09"]');
   });
 

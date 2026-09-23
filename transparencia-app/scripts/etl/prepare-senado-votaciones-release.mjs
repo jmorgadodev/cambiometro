@@ -13,7 +13,7 @@
 
 import { mkdirSync, writeFileSync } from "node:fs";
 import { dirname, resolve, sep } from "node:path";
-import { fetchVotacionesSenado } from "./connectors/senado-votaciones.mjs";
+import { fetchSenateVotesByDateRange, senateVoteRangesByLegislature } from "./senado-votaciones-release.mjs";
 import { buildLakePlan } from "./lake.mjs";
 
 function argument(name) {
@@ -64,7 +64,8 @@ const from = isoDate(argument("--from"), "--from");
 const to = isoDate(argument("--to"), "--to");
 if (from > to) throw new Error("--from no puede ser posterior a --to");
 
-const rows = await fetchVotacionesSenado({ legislatura: 374, desde: from, to });
+const ranges = senateVoteRangesByLegislature(from, to);
+const rows = await fetchSenateVotesByDateRange({ from, to });
 assertRows(rows, from, to);
 
 const sourceRows = rows.map((row) => ({ ...row, source_period: String(row.fecha).slice(0, 7) }));
@@ -85,7 +86,8 @@ const summary = {
   schemaVersion: "senado-votaciones-release-v1",
   generatedAt: snapshot.actualizado_en,
   sourceId: "votaciones_senado",
-  officialSource: "Senado de la República · web-back.senado.cl (API votaciones y asistencia, legislatura 374)",
+  officialSource: "Senado de la República · web-back.senado.cl (API votaciones y asistencia; legislaturas 373 y 374 según fecha)",
+  legislaturasConsultadas: ranges.map(({ legislatura, from: rangeFrom, to: rangeTo }) => ({ legislatura, from: rangeFrom, to: rangeTo })),
   requestedRange: { from, to },
   recordCount: sourceRows.length,
   periods,
