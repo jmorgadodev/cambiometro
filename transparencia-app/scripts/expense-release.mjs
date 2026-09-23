@@ -24,14 +24,13 @@ export function compactExpenseRecord(record, sourceId) {
   const periodo = periodFor(record);
   const item = String(record?.item ?? record?.categoria ?? record?.concepto ?? record?.title ?? "").trim();
   const rawAmount = record?.monto_clp;
-  const monto = rawAmount === null || rawAmount === undefined ? NaN : Number(rawAmount);
+  const monto = rawAmount === null || rawAmount === undefined ? null : Number(rawAmount);
   const url = String(record?.url ?? "").trim();
   const nombre = String(record?.nombre ?? record?.person?.name ?? "").replace(/\s+/g, " ").trim();
   const diputadoId = String(record?.diputado_id ?? "").trim();
 
-  if (!id || !periodo || !item || !Number.isSafeInteger(monto) || monto < 0 || !/^https:\/\//i.test(url)) return null;
+  if (!id || !periodo || !item || (monto !== null && (!Number.isSafeInteger(monto) || monto < 0)) || !/^https:\/\//i.test(url)) return null;
   if (sourceId === "gastos_camara" && !/^\d+$/.test(diputadoId)) return null;
-  if (sourceId === "gastos_senado" && !nombre) return null;
 
   return {
     id,
@@ -56,7 +55,9 @@ export function buildExpenseSubset({ sourceId, records, generatedAt = new Date()
   if (ids.size !== compact.length) throw new Error(`EXPENSE_DUPLICATE_ID: ${sourceId}`);
 
   const periods = [...new Set(compact.map((record) => record.periodo))].sort();
-  const politicians = new Set(compact.map((record) => sourceId === "gastos_camara" ? record.diputado_id : record.nombre));
+  const politicians = new Set(compact
+    .map((record) => sourceId === "gastos_camara" ? record.diputado_id : record.nombre)
+    .filter(Boolean));
   const subset = {
     schemaVersion: 1,
     sourceId,

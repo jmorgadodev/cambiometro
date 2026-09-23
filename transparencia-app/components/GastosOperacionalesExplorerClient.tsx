@@ -9,7 +9,7 @@ interface GastoRow {
   fecha: string;
   periodo: string;
   item: string;
-  monto_clp: number;
+  monto_clp: number | null;
   url: string;
   fuente?: string;
 }
@@ -21,7 +21,7 @@ interface SearchRow {
   y: string;
   d: string;
   t: string;
-  m: number;
+  m: number | null;
   s: string;
 }
 
@@ -31,13 +31,13 @@ interface ExpenseManifest {
   totalPages: number;
   pages: Array<{ page: number; path: string; count: number }>;
   searchIndex: { path: string };
-  expected: { totalMontoClp: number; bySource: Record<string, number> };
+  expected: { totalMontoClp: number; montoNoInformado?: number; bySource: Record<string, number> };
 }
 
 type LoadState = "loading" | "ready" | "error";
 
 const PAGE_SIZE = 20;
-const money = (value: number) => value.toLocaleString("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 });
+const money = (value: number | null) => value === null ? "Monto no informado" : value.toLocaleString("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 });
 const number = (value: number) => value.toLocaleString("es-CL");
 const date = (value: string) => value ? value.slice(0, 10).split("-").reverse().join("/") : "—";
 
@@ -160,7 +160,7 @@ export default function GastosOperacionalesExplorerClient() {
       {manifest && (
         <div className="stat-grid" style={{ marginTop: "1.5rem" }} aria-label="Resumen de gastos operacionales">
           <div className="stat-tile stat-tile--accent"><div className="stat-tile__value">{number(manifest.totalRows)}</div><div className="stat-tile__label">Rendiciones publicadas</div></div>
-          <div className="stat-tile"><div className="stat-tile__value">{money(manifest.expected.totalMontoClp)}</div><div className="stat-tile__label">Monto acumulado</div></div>
+          <div className="stat-tile"><div className="stat-tile__value">{money(manifest.expected.totalMontoClp)}</div><div className="stat-tile__label">Montos informados · {number(manifest.expected.montoNoInformado ?? 0)} sin informar</div></div>
           <div className="stat-tile"><div className="stat-tile__value">{number(manifest.expected.bySource.gastos_camara ?? 0)}</div><div className="stat-tile__label">Registros Cámara</div></div>
           <div className="stat-tile"><div className="stat-tile__value">{number(manifest.expected.bySource.gastos_senado ?? 0)}</div><div className="stat-tile__label">Registros Senado</div></div>
         </div>

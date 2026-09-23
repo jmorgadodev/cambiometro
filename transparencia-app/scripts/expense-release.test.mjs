@@ -31,4 +31,22 @@ describe("release estático de gastos operacionales", () => {
     expect(subset.records[0]).not.toHaveProperty("diputado_id");
     expect(subset.recordCount).toBe(1);
   });
+
+  it("conserva rendiciones oficiales aunque el monto no esté publicado", () => {
+    const record = compactExpenseRecord({ ...base, id: "sen-no-amount", monto_clp: null }, "gastos_senado");
+
+    expect(record).toMatchObject({ id: "sen-no-amount", monto_clp: null });
+  });
+
+  it("conserva filas sin nombre ni monto y no las cuenta como una persona identificada", () => {
+    const subset = buildExpenseSubset({
+      sourceId: "gastos_senado",
+      generatedAt: "2026-08-26T00:00:00.000Z",
+      records: [{ ...base, id: "sen-unreported", diputado_id: undefined, nombre: "", person: { name: "" }, monto_clp: null }],
+    });
+
+    expect(subset.recordCount).toBe(1);
+    expect(subset.politicianCount).toBe(0);
+    expect(subset.records[0]).toMatchObject({ id: "sen-unreported", monto_clp: null });
+  });
 });

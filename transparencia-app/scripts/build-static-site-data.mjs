@@ -146,7 +146,8 @@ const expenseManifest = {
   searchIndex: { path: "/data/gastos-operacionales/search-index.json", count: expenseSearchRows.length, sha256: crypto.createHash("sha256").update(expenseSearchContent).digest("hex") },
   checksumSha256: crypto.createHash("sha256").update(JSON.stringify(expenseRows)).digest("hex"),
   expected: {
-    totalMontoClp: expenseRows.reduce((sum, row) => sum + row.monto_clp, 0),
+    totalMontoClp: expenseRows.reduce((sum, row) => sum + (row.monto_clp ?? 0), 0),
+    montoNoInformado: expenseRows.filter((row) => row.monto_clp === null || row.monto_clp === undefined).length,
     bySource: Object.fromEntries(["gastos_camara", "gastos_senado"].map((sourceId) => [sourceId, expenseRows.filter((row) => row.sourceId === sourceId).length])),
   },
 };
