@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { chileExpenseSchedule, mergeExpenseRecords } from "./etl-expenses-local.mjs";
+import { chileExpenseSchedule, mergeExpenseRecords, pagesRefreshWorkflowDispatchArgs } from "./etl-expenses-local.mjs";
 
 describe("runner local de gastos operacionales", () => {
   it("ejecuta el día 2 usando la zona horaria de Chile", () => {
@@ -21,6 +21,24 @@ describe("runner local de gastos operacionales", () => {
       { id: "a", monto_clp: 100 },
       { id: "b", monto_clp: 250 },
       { id: "c", monto_clp: 300 },
+    ]);
+  });
+
+  it("solicita un data-refresh confirmado que también publique Pages", () => {
+    expect(pagesRefreshWorkflowDispatchArgs()).toEqual([
+      "workflow",
+      "run",
+      "Pages estático - refresco automático verificable",
+      "--ref",
+      "main",
+      "-f",
+      "deployment_mode=data-refresh",
+      "-f",
+      "confirm_data_refresh=CAMBIOMETRO_DATA_REFRESH",
+      "-f",
+      "publish_pages=true",
+      "-f",
+      "confirm_cutover=CAMBIOMETRO_CONFIRM_CUTOVER",
     ]);
   });
 });
