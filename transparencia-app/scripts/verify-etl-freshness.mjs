@@ -1,3 +1,5 @@
+import { hasOfficialMovementEvidence, validateMovementFreshness } from "./movement-release-freshness.mjs";
+
 const prodUrl = (process.env.PROD_URL || "https://cambiometro.impulsacv.cl").replace(/\/$/, "");
 const apiUrl = (process.env.API_URL || prodUrl).replace(/\/$/, "");
 const token = process.env.UPTIME_TOKEN?.trim() || "";
@@ -70,12 +72,8 @@ if (/movimientos/i.test(etlWorkflow)) {
     if (!Array.isArray(payload?.movimientos) || payload.movimientos.length !== 0) throw new Error("MOVIMIENTOS_BLOCKED_ASSET_NOT_EMPTY");
     movement = { total: 0, status: payload.release_status, lastSuccess: null, checksum: payload.checksum_sha256 };
   } else {
-    const lastSuccess = Date.parse(payload?.last_success_at || payload?.last_run || "");
-    if (!Number.isFinite(lastSuccess)) throw new Error("MOVIMIENTOS_LAST_SUCCESS_MISSING");
-    if (Number.isFinite(etlCompletedAt) && lastSuccess + 5 * 60_000 < etlCompletedAt) throw new Error("MOVIMIENTOS_RELEASE_NOT_REFRESHED_AFTER_ETL");
-    if (!Array.isArray(payload?.movimientos) || payload.movimientos.length < 79) throw new Error("MOVIMIENTOS_UNIVERSE_INCOMPLETE");
-    if (!payload.source_health?.some((source) => source.tier === "official" && source.ok === true)) throw new Error("MOVIMIENTOS_OFFICIAL_SOURCE_UNAVAILABLE");
-    movement = { total: payload.movimientos.length, lastSuccess: new Date(lastSuccess).toISOString(), checksum: payload.checksum_sha256 };
+    movement = validateMovementFreshness(payload, manifest.json, etlCompletedAt);
+    if (!hasOfficialMovementEvidence(payload)) throw new Error("MOVIMIENTOS_OFFICIAL_SOURCE_UNAVAILABLE");
   }
   if (!/^[a-f0-9]{64}$/i.test(payload?.checksum_sha256 || "")) throw new Error("MOVIMIENTOS_CHECKSUM_MISSING");
 }
