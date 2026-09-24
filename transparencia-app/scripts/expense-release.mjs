@@ -15,6 +15,11 @@ function periodFor(record) {
   return /^\d{4}-\d{2}$/.test(date) ? date : "";
 }
 
+export function isValidExpenseAmount(value, sourceId) {
+  if (value === null || value === undefined) return true;
+  return Number.isSafeInteger(value) && (sourceId === "gastos_senado" || value >= 0);
+}
+
 /**
  * Keep only the fields needed by the static profile and the public evidence
  * link. Raw ETL payloads never cross into the Pages build.
@@ -29,7 +34,8 @@ export function compactExpenseRecord(record, sourceId) {
   const nombre = String(record?.nombre ?? record?.person?.name ?? "").replace(/\s+/g, " ").trim();
   const diputadoId = String(record?.diputado_id ?? "").trim();
 
-  if (!id || !periodo || !item || (monto !== null && (!Number.isSafeInteger(monto) || monto < 0)) || !/^https:\/\//i.test(url)) return null;
+  const amountInvalid = !isValidExpenseAmount(monto, sourceId);
+  if (!id || !periodo || !item || amountInvalid || !/^https:\/\//i.test(url)) return null;
   if (sourceId === "gastos_camara" && !/^\d+$/.test(diputadoId)) return null;
 
   return {

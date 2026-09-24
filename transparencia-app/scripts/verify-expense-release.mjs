@@ -1,6 +1,6 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { buildExpenseSubset, EXPENSE_SOURCES, readExpenseSubset } from "./expense-release.mjs";
+import { buildExpenseSubset, EXPENSE_SOURCES, isValidExpenseAmount, readExpenseSubset } from "./expense-release.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const required = process.argv.includes("--required") || process.env.ALLOW_STATIC_SAMPLE !== "1";
@@ -26,7 +26,7 @@ const subsets = EXPENSE_SOURCES.map((sourceId) => {
     if (ids.has(record.id)) fail(`${sourceId} tiene id duplicado ${record.id}`);
     ids.add(record.id);
     if (!/^\d{4}-\d{2}$/.test(record.periodo)) fail(`${sourceId}/${record.id} período inválido`);
-    if (!Number.isSafeInteger(record.monto_clp) || record.monto_clp < 0) fail(`${sourceId}/${record.id} monto inválido`);
+    if (!isValidExpenseAmount(record.monto_clp, sourceId)) fail(`${sourceId}/${record.id} monto inválido`);
     if (!/^https:\/\//i.test(record.url ?? "")) fail(`${sourceId}/${record.id} no tiene fuente HTTPS`);
   }
   return subset;
