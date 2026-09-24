@@ -49,6 +49,21 @@ describe("rangos de legislatura para votaciones del Senado 2026+", () => {
     })).rejects.toThrow("SENADO_VOTES_DUPLICATE_ID:10900");
   });
 
+  it("propaga los IDs del release vigente a cada rango consultado", async () => {
+    const existingVoteIds = ["11341", "11342"];
+    const received: string[][] = [];
+    await fetchSenateVotesByDateRange({
+      from: "2026-03-01",
+      to: "2026-03-31",
+      existingVoteIds: existingVoteIds as never,
+      fetcher: async (input) => {
+        received.push(input.existingVoteIds ?? []);
+        return [];
+      },
+    });
+    expect(received).toEqual([existingVoteIds, existingVoteIds]);
+  });
+
   it("acepta una partición nueva sin fingir que ya existían filas", () => {
     expect(assertSenateVotePeriodPreserved({
       period: "2026-01",

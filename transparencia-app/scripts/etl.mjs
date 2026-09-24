@@ -19,7 +19,7 @@ import {
   discoverSenatePublishedPeriods,
   fetchSenateOperationalExpenses,
 } from "./etl/connectors/senado.mjs";
-import { fetchSenateVotesByDateRange } from "./etl/senado-votaciones-release.mjs";
+import { existingSenateVoteIdsFromProjection, fetchSenateVotesByDateRange } from "./etl/senado-votaciones-release.mjs";
 import { assertSuccessfulRun } from "./etl/validation.mjs";
 import { readJsonIfPresent, writeFileAtomic } from "./etl/safe-file.mjs";
 import { mergeRecordsById } from "./etl/history.mjs";
@@ -29,6 +29,7 @@ import { selectSenateExpensePeriods } from "./etl/expense-window.mjs";
 const scriptDirectory = dirname(fileURLToPath(import.meta.url));
 const dataDirectory = join(scriptDirectory, "..", "data", "etl");
 const latestPath = join(dataDirectory, "latest.json");
+const senateVotesProjectionPath = join(scriptDirectory, "..", "data", "politicos-votaciones.json");
 const statusPath = join(dataDirectory, "status.json");
 
 const USER_AGENT = "Cambiometro-ETL/1.0 (+https://cambiometro.impulsacv.cl)";
@@ -289,6 +290,10 @@ async function main() {
   const now = new Date();
   const options = parseOptions();
   const previous = readJsonIfPresent(latestPath, null);
+  const publishedSenateVoteIds = new Set([
+    ...(previous?.fuentes?.votaciones_senado ?? []).map((vote) => String(vote?.votacion_id ?? "")),
+    ...existingSenateVoteIdsFromProjection(readJsonIfPresent(senateVotesProjectionPath, null)),
+  ].filter(Boolean));
   const voteWindow = resolveCamaraVoteWindow({
     requestedFrom: options.from,
     fullHistory: FULL_HISTORY,
@@ -341,7 +346,11 @@ async function main() {
   await runSource({
     key: "votaciones_senado", label: "Votaciones Senado", selected: options.sources, previous, snapshot, summary,
     summaryKey: "votaciones_senado_ingresadas", minimum: 0, preserveHistory: true,
-    load: () => fetchSenateVotesByDateRange({ from: options.from, to: options.to }),
+    load: () => fetchSenateVotesByDateRange({
+      from: options.from,
+      to: options.to,
+      existingVoteIds: [...publishedSenateVoteIds],
+    }),
   });
   await runSource({
     key: "gastos_senado", label: "Gastos Operacionales Senado", selected: options.sources, previous, snapshot, summary,

@@ -22,10 +22,27 @@ export function senateVoteRangesByLegislature(from, to) {
   });
 }
 
-export async function fetchSenateVotesByDateRange({ from, to, fetcher = fetchVotacionesSenado }) {
+export function existingSenateVoteIdsFromProjection(projection) {
+  const votesByPerson = projection?.votes;
+  if (!votesByPerson || typeof votesByPerson !== "object" || Array.isArray(votesByPerson)) return [];
+
+  const ids = new Set();
+  for (const [personId, personVotes] of Object.entries(votesByPerson)) {
+    if (!String(personId).startsWith("sen-")) continue;
+    if (!Array.isArray(personVotes)) continue;
+    for (const entry of personVotes) {
+      const rawId = Array.isArray(entry) ? entry[0] : entry?.id;
+      const match = String(rawId ?? "").match(/^(?:senado-vot-)?(\d+)$/);
+      if (match) ids.add(match[1]);
+    }
+  }
+  return [...ids];
+}
+
+export async function fetchSenateVotesByDateRange({ from, to, existingVoteIds = [], fetcher = fetchVotacionesSenado }) {
   const ranges = senateVoteRangesByLegislature(from, to);
   const batches = await Promise.all(ranges.map(({ legislatura, from: desde, to: through }) =>
-    fetcher({ legislatura, desde, to: through }),
+    fetcher({ legislatura, desde, to: through, existingVoteIds }),
   ));
   const byId = new Map();
   for (const row of batches.flat()) {
