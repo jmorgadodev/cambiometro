@@ -23,6 +23,15 @@ describe("selectSenateExpensePeriods", () => {
     })).toEqual([period(2026, 6), period(2026, 7)]);
   });
 
+  it("keeps the previous December in the overlap when the latest published period is January", () => {
+    const publishedAcrossYears = [period(2026, 11), period(2026, 12), period(2027, 1)];
+
+    expect(selectSenateExpensePeriods(publishedAcrossYears, {
+      latest: period(2027, 1),
+      overlapMonths: 1,
+    })).toEqual([period(2026, 12), period(2027, 1)]);
+  });
+
   it("rejects duplicate source periods instead of silently double-loading them", () => {
     expect(() => selectSenateExpensePeriods([...published, period(2026, 7)], {
       latest: period(2026, 7),
