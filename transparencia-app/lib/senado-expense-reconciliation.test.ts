@@ -29,4 +29,10 @@ describe("reconciliación de gastos mensuales del Senado", () => {
       { id: "gasto-sin-periodo", monto_clp: 100 },
     ])).toThrow("SENADO_EXPENSE_PERIOD_REQUIRED");
   });
+
+  it("rechaza filas anteriores a 2026 aunque lleguen por una ruta inesperada", () => {
+    expect(() => reconcileSenateExpenseHistory([], [
+      { id: "gasto-2025", periodo: "2025-12", monto_clp: 100 },
+    ])).toThrow("SENADO_EXPENSE_PERIOD_BEFORE_2026");
+  });
 });

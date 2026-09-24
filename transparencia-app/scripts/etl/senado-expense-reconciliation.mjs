@@ -22,7 +22,10 @@ export function reconcileSenateExpenseHistory(previous = [], refreshed = []) {
   const refreshedPeriods = new Set();
   for (const record of refreshed) {
     const period = expensePeriod(record, { required: true });
-    if (period >= RECONCILIATION_START_PERIOD) refreshedPeriods.add(period);
+    if (period < RECONCILIATION_START_PERIOD) {
+      throw new Error("SENADO_EXPENSE_PERIOD_BEFORE_2026");
+    }
+    refreshedPeriods.add(period);
   }
 
   const retained = previous.filter((record) => {
