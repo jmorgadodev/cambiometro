@@ -182,7 +182,8 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       .toBeLessThan(senateWorkflow.indexOf("name: Construir subsets estáticos"));
     expect(senateWorkflow).not.toContain("data:materialize");
     const etlPipeline = fs.readFileSync(path.resolve(root, "scripts", "etl.mjs"), "utf8");
-    expect(etlPipeline).toContain("fetchSenateVotesByDateRange({ from: options.from, to: options.to })");
+    expect(etlPipeline).toContain("fetchSenateVotesByDateRange({");
+    expect(etlPipeline).toContain("existingVoteIds: [...publishedSenateVoteIds]");
     expect(senateWorkflow).toContain("npm run ingest:votaciones-full -- --source senado --full");
     expect(workflow).not.toContain("--source camara,votaciones_camara");
     expect(ingest).toContain("const REFRESH_FROM");

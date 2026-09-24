@@ -120,7 +120,7 @@ function buildVoto(member, opcion) {
  * Descarga todas las votaciones de la legislatura indicada desde `desde` (YYYY-MM-DD)
  * hasta `to` (YYYY-MM-DD, inclusive) con el padrón completo de la sesión.
  */
-export async function fetchVotacionesSenado({ legislatura = 374, desde, to }) {
+export async function fetchVotacionesSenado({ legislatura = 374, desde, to, existingVoteIds = [] }) {
   const response = await fetch(`${SESIONES_URL}?legislatura=${encodeURIComponent(legislatura)}`, {
     headers: { "User-Agent": USER_AGENT },
     signal: AbortSignal.timeout(REQUEST_TIMEOUT_MS),
@@ -130,16 +130,23 @@ export async function fetchVotacionesSenado({ legislatura = 374, desde, to }) {
   if (!/<sesiones\b[^>]*>[\s\S]*<\/sesiones>/.test(xml)) throw new Error("SENADO_SESSION_SCHEMA");
   const sessions = parseSessionList(xml, desde);
   const seen = new Set();
+  const existing = new Set(existingVoteIds.map((id) => String(id)));
   const votes = [];
   const failures = [];
 
   for (const session of sessions) {
     if (session.fecha > (to ?? "9999-12-31")) continue;
     try {
-      const [votaciones, asistencia] = await Promise.all([
-        fetchVotacionesDeSesion(session.id),
-        fetchAsistenciaDeSesion(session.id),
-      ]);
+      const votaciones = await fetchVotacionesDeSesion(session.id);
+      if (!votaciones.length) continue;
+
+      // The ETL runs with an overlap window. If every vote in a session already
+      // exists in the hydrated release, an attendance-only outage must not make
+      // that already-published session look incomplete or block newer sessions.
+      const sessionVoteIds = votaciones.map((vote) => String(vote?.ID_VOTACION ?? "")).filter(Boolean);
+      if (sessionVoteIds.length && sessionVoteIds.every((id) => existing.has(id))) continue;
+
+      const asistencia = await fetchAsistenciaDeSesion(session.id);
       const asistentes = asistencia
         .filter(attendedSession)
         .map((member) => memberId(member));

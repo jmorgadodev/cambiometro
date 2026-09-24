@@ -35,6 +35,12 @@ try {
   if ($LookbackDays -lt 1 -or $LookbackDays -gt 14) {
     throw "SENADO_LOCAL_INVALID_LOOKBACK_DAYS:$LookbackDays"
   }
+  $node = (Get-Command node.exe -ErrorAction Stop).Source
+  Invoke-Step "verificar datos locales sin cambios" $node @(
+    (Join-Path $repoRoot "scripts\etl\local-worktree-guard.mjs"),
+    "--root", $repoRoot
+  )
+
   $hasAccountId = -not [string]::IsNullOrWhiteSpace($env:CLOUDFLARE_ACCOUNT_ID)
   $hasApiToken = -not [string]::IsNullOrWhiteSpace($env:CLOUDFLARE_API_TOKEN)
   if (-not $hasAccountId -or -not $hasApiToken) {
@@ -59,8 +65,6 @@ try {
   $toText = $to.ToString("yyyy-MM-dd")
   $periodTo = $to.ToString("yyyy-MM")
   $npm = (Get-Command npm.cmd -ErrorAction Stop).Source
-  $node = (Get-Command node.exe -ErrorAction Stop).Source
-
   Push-Location $repoRoot
   try {
     Invoke-Step "preparar espacio local" $npm @("run", "etl:prepare")
@@ -111,6 +115,24 @@ try {
     if ($DryRun) {
       Write-Host "[senado-votaciones-local] DRY RUN: hay datos listos, pero no se publica"
       exit 0
+    }
+
+    # El publicador del lake usa GH_TOKEN. La tarea programada corre bajo la
+    # sesión interactiva del usuario, donde GitHub CLI ya está autenticado;
+    # reutilizar esa sesión evita que una novedad quede sin publicar por no
+    # tener GH_TOKEN definido como variable persistente del sistema.
+    if ([string]::IsNullOrWhiteSpace($env:GH_TOKEN)) {
+      $gh = Get-Command gh.exe -ErrorAction SilentlyContinue
+      if (-not $gh) { $gh = Get-Command gh -ErrorAction SilentlyContinue }
+      if ($gh) {
+        $tokenOutput = & $gh.Source auth token 2>$null
+        if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace(($tokenOutput | Select-Object -First 1))) {
+          $env:GH_TOKEN = [string]($tokenOutput | Select-Object -First 1).Trim()
+        }
+      }
+    }
+    if ([string]::IsNullOrWhiteSpace($env:GH_TOKEN)) {
+      throw "SENADO_LOCAL_MISSING_GH_TOKEN: autentica GitHub CLI con acceso al repositorio"
     }
 
     Invoke-Step "construir release R2 del Senado" $npm @(
