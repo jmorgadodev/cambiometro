@@ -52,14 +52,25 @@ function normalizeAmount(value) {
   return value;
 }
 
+function normalizeSignedAmount(value) {
+  if (value === null || value === undefined) return null;
+  if (!Number.isSafeInteger(value)) throw new Error(`SENADO_INVALID_AMOUNT: ${value}`);
+  return value;
+}
+
 export function normalizeSenateExpense(item, { sourceUrl }) {
   const attributes = item?.attributes;
-  if (!Number.isInteger(item?.id) || !attributes?.gastos_operacionales || !Number.isInteger(attributes.unidad_ejecutora)) throw new Error("SENADO_INVALID_SCHEMA");
+  if (!Number.isInteger(item?.id) || !attributes?.gastos_operacionales
+    || (attributes.unidad_ejecutora != null && !Number.isInteger(attributes.unidad_ejecutora))) {
+    throw new Error("SENADO_INVALID_SCHEMA");
+  }
   validPeriod(attributes.ano, attributes.mes);
-  const amount = normalizeAmount(attributes.monto);
+  const amount = normalizeSignedAmount(attributes.monto);
   const fullName = [attributes.nombre, attributes.appaterno, attributes.apmaterno].filter(Boolean).join(" ").replace(/\s+/g, " ").trim();
   if (!fullName) throw new Error("SENADO_INVALID_NAME");
-  const personEntityId = `senator-cl-ue-${attributes.unidad_ejecutora}`;
+  const personEntityId = Number.isInteger(attributes.unidad_ejecutora)
+    ? `senator-cl-ue-${attributes.unidad_ejecutora}`
+    : null;
   const period = `${attributes.ano}-${String(attributes.mes).padStart(2, "0")}`;
   return {
     id: `senado-operational-expense-${item.id}`,
@@ -71,11 +82,11 @@ export function normalizeSenateExpense(item, { sourceUrl }) {
     category: attributes.gastos_operacionales.trim(),
     person: {
       entity_id: personEntityId,
-      official_id: String(attributes.unidad_ejecutora),
+      official_id: Number.isInteger(attributes.unidad_ejecutora) ? String(attributes.unidad_ejecutora) : null,
       name: fullName,
       role: "Senador/a",
     },
-    subject_entity_ids: [personEntityId],
+    subject_entity_ids: personEntityId ? [personEntityId] : [],
     object_entity_ids: [],
     monto_clp: amount,
     monto_original: amount === null ? null : { amount: String(amount), currency: "CLP", unit: "pesos" },

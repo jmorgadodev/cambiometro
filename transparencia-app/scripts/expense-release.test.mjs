@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildExpenseSubset, compactExpenseRecord } from "./expense-release.mjs";
+import { buildExpenseSubset, compactExpenseRecord, isValidExpenseAmount } from "./expense-release.mjs";
 
 const base = {
   id: "cam-1",
@@ -36,6 +36,18 @@ describe("release estático de gastos operacionales", () => {
     const record = compactExpenseRecord({ ...base, id: "sen-no-amount", monto_clp: null }, "gastos_senado");
 
     expect(record).toMatchObject({ id: "sen-no-amount", monto_clp: null });
+  });
+
+  it("conserva montos negativos oficiales del Senado sin aceptarlos para Cámara", () => {
+    const senateRecord = compactExpenseRecord({ ...base, id: "sen-adjustment", monto_clp: -171017 }, "gastos_senado");
+    const chamberRecord = compactExpenseRecord({ ...base, id: "cam-adjustment", monto_clp: -171017 }, "gastos_camara");
+
+    expect(senateRecord).toMatchObject({ id: "sen-adjustment", monto_clp: -171017 });
+    expect(chamberRecord).toBeNull();
+    expect(isValidExpenseAmount(-171017, "gastos_senado")).toBe(true);
+    expect(isValidExpenseAmount(-171017, "gastos_camara")).toBe(false);
+    expect(isValidExpenseAmount(null, "gastos_senado")).toBe(true);
+    expect(isValidExpenseAmount(1.5, "gastos_senado")).toBe(false);
   });
 
   it("conserva filas sin nombre ni monto y no las cuenta como una persona identificada", () => {
