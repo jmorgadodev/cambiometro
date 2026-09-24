@@ -215,7 +215,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       expect(content, name).toContain("uses: ./.github/actions/d1-preflight");
       expect(content, name).toContain('threshold-percent: "60"');
       const materializationGuard = name === "etl-infolobby-scheduled.yml"
-        ? "github.event_name == 'workflow_dispatch' && inputs.skip_d1 != true && steps.d1-quota.outputs.proceed == 'true'"
+        ? "github.event_name == 'workflow_dispatch' && steps.infolobby-ingest.outputs.has_records == 'true' && inputs.skip_d1 != true && steps.d1-quota.outputs.proceed == 'true'"
         : "github.event_name == 'workflow_dispatch' && steps.d1-quota.outputs.proceed == 'true'";
       expect(content, name).toContain(materializationGuard);
       expect(content, name).toContain("steps.d1-quota.outputs.proceed == 'true'");
