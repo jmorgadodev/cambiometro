@@ -96,15 +96,16 @@ const movimientosRelease = {
   status: movimientosPublicationBlocked ? "blocked_pending_official_reconciliation" : "published",
 };
 
-// Publicar el universo completo de rendiciones operacionales en chunks. Las
-// fichas actuales consumen sus propios slices; este índice conserva además
-// las rendiciones históricas de autoridades que ya no pertenecen al
-// directorio vigente, sin inventar una atribución.
-const expenseRows = ["gastos_camara", "gastos_senado"].flatMap((sourceId) => {
+// El universo completo se consulta en R2 mediante la API paginada. Pages no
+// debe duplicar cada fila en miles de objetos estáticos ni enviar un índice
+// masivo al navegador; aquí sólo generamos el resumen que alimenta las cifras
+// de la página.
+const expenseSubsets = ["gastos_camara", "gastos_senado"].map((sourceId) => {
   const subset = readExpenseSubset(root, sourceId);
-  return (subset?.records ?? []).map((record) => ({ ...record, sourceId }));
-}).sort((left, right) => String(right.fecha ?? "").localeCompare(String(left.fecha ?? "")) || right.monto_clp - left.monto_clp || left.id.localeCompare(right.id));
-if (!expenseRows.length && !allowSample) {
+  return { sourceId, subset };
+});
+const expenseRecords = expenseSubsets.flatMap(({ sourceId, subset }) => (subset?.records ?? []).map((record) => ({ ...record, sourceId })));
+if (!expenseRecords.length && !allowSample) {
   throw new Error([
     "STATIC_EXPENSE_RELEASE_EMPTY: no hay un release de gastos operacionales en este checkout.",
     "Este dato no se versiona en Git; hidrátalo desde R2 antes de construir Pages:",
@@ -113,45 +114,15 @@ if (!expenseRows.length && !allowSample) {
   ].join("\n"));
 }
 await rm(expenseDir, { recursive: true, force: true });
-await mkdir(expenseDir, { recursive: true });
-const expensePageSize = 50;
-const expensePages = [];
-for (let offset = 0; offset < expenseRows.length; offset += expensePageSize) {
-  const page = Math.floor(offset / expensePageSize) + 1;
-  const filename = `p-${String(page).padStart(4, "0")}.json`;
-  const content = `${JSON.stringify(expenseRows.slice(offset, offset + expensePageSize))}\n`;
-  await writeFile(join(expenseDir, filename), content);
-  expensePages.push({ page, path: `/data/gastos-operacionales/${filename}`, count: Math.min(expensePageSize, expenseRows.length - offset), sha256: crypto.createHash("sha256").update(content).digest("hex") });
-}
-const expenseSearchRows = expenseRows.map((row, index) => ({
-  i: index,
-  p: Math.floor(index / expensePageSize) + 1,
-  n: row.nombre ?? null,
-  y: row.periodo,
-  d: row.fecha,
-  t: row.item,
-  m: row.monto_clp,
-  s: row.sourceId,
-}));
-const expenseSearchContent = `${JSON.stringify(expenseSearchRows)}\n`;
-await writeFile(join(expenseDir, "search-index.json"), expenseSearchContent);
-const expenseManifest = {
-  schemaVersion: 1,
-  dataset: "gastos-operacionales-rendidos",
+const expenseSummary = {
   generatedAt: new Date().toISOString(),
-  totalRows: expenseRows.length,
-  pageSize: expensePageSize,
-  totalPages: expensePages.length,
-  pages: expensePages,
-  searchIndex: { path: "/data/gastos-operacionales/search-index.json", count: expenseSearchRows.length, sha256: crypto.createHash("sha256").update(expenseSearchContent).digest("hex") },
-  checksumSha256: crypto.createHash("sha256").update(JSON.stringify(expenseRows)).digest("hex"),
-  expected: {
-    totalMontoClp: expenseRows.reduce((sum, row) => sum + (row.monto_clp ?? 0), 0),
-    montoNoInformado: expenseRows.filter((row) => row.monto_clp === null || row.monto_clp === undefined).length,
-    bySource: Object.fromEntries(["gastos_camara", "gastos_senado"].map((sourceId) => [sourceId, expenseRows.filter((row) => row.sourceId === sourceId).length])),
-  },
+  totalRows: expenseRecords.length,
+  totalMontoClp: expenseRecords.reduce((sum, row) => sum + (row.monto_clp ?? 0), 0),
+  montoNoInformado: expenseRecords.filter((row) => row.monto_clp === null || row.monto_clp === undefined).length,
+  bySource: Object.fromEntries(expenseSubsets.map(({ sourceId, subset }) => [sourceId, subset?.recordCount ?? 0])),
+  periodsBySource: Object.fromEntries(expenseSubsets.map(({ sourceId, subset }) => [sourceId, subset?.periods ?? []])),
 };
-await writeFile(join(expenseDir, "manifest.json"), `${JSON.stringify(expenseManifest, null, 2)}\n`);
+await writeFile(join(generatedDir, "gastos-operacionales-summary.json"), `${JSON.stringify(expenseSummary)}\n`);
 
 const pinnedSummary = await readJson("data/lake/projections/v1/ley19862-summary.json");
 const registeredThrough = process.env.TRANSFER_RELEASE_REGISTERED_THROUGH

@@ -1,4 +1,4 @@
-import { readdir, unlink } from "node:fs/promises";
+import { readFile, readdir, unlink } from "node:fs/promises";
 import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -23,3 +23,25 @@ async function walk(dir) {
 }
 await walk(out);
 console.log(`Removed ${removed} non-public Next static metadata files.`);
+
+// Historical copies of party logos were exposed at /partidos/<sigla>.svg,
+// but the interface has always used the canonical /logos/partidos paths.
+// Drop only byte-identical copies from the Pages export; keep their source
+// files untouched so existing local tools and rollback snapshots are safe.
+const duplicatePartyLogoDir = join(out, "partidos");
+const canonicalPartyLogoDir = join(out, "logos", "partidos");
+let duplicateLogosRemoved = 0;
+for (const entry of await readdir(duplicatePartyLogoDir, { withFileTypes: true }).catch(() => [])) {
+  if (!entry.isFile() || !entry.name.endsWith(".svg")) continue;
+  const duplicatePath = join(duplicatePartyLogoDir, entry.name);
+  const canonicalPath = join(canonicalPartyLogoDir, entry.name);
+  const [duplicate, canonical] = await Promise.all([
+    readFile(duplicatePath).catch(() => null),
+    readFile(canonicalPath).catch(() => null),
+  ]);
+  if (duplicate && canonical && duplicate.equals(canonical)) {
+    await unlink(duplicatePath);
+    duplicateLogosRemoved += 1;
+  }
+}
+console.log(`Removed ${duplicateLogosRemoved} duplicate party-logo assets from the Pages export.`);
