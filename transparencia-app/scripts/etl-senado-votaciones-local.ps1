@@ -35,6 +35,12 @@ try {
   if ($LookbackDays -lt 1 -or $LookbackDays -gt 14) {
     throw "SENADO_LOCAL_INVALID_LOOKBACK_DAYS:$LookbackDays"
   }
+  $node = (Get-Command node.exe -ErrorAction Stop).Source
+  Invoke-Step "verificar datos locales sin cambios" $node @(
+    (Join-Path $repoRoot "scripts\etl\local-worktree-guard.mjs"),
+    "--root", $repoRoot
+  )
+
   $hasAccountId = -not [string]::IsNullOrWhiteSpace($env:CLOUDFLARE_ACCOUNT_ID)
   $hasApiToken = -not [string]::IsNullOrWhiteSpace($env:CLOUDFLARE_API_TOKEN)
   if (-not $hasAccountId -or -not $hasApiToken) {
@@ -59,8 +65,6 @@ try {
   $toText = $to.ToString("yyyy-MM-dd")
   $periodTo = $to.ToString("yyyy-MM")
   $npm = (Get-Command npm.cmd -ErrorAction Stop).Source
-  $node = (Get-Command node.exe -ErrorAction Stop).Source
-
   Push-Location $repoRoot
   try {
     Invoke-Step "preparar espacio local" $npm @("run", "etl:prepare")
