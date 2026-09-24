@@ -251,23 +251,50 @@ export async function fetchSenateOperationalExpenses({ year, month, fetchImpl = 
   validPeriod(year, month);
   const pages = [];
   let page = 1;
-  let pageCount = 1;
+  let expectedPagination = null;
   do {
     const sourceUrl = buildSenateExpenseUrl(year, month, page);
     const payload = await fetchJson(sourceUrl, fetchImpl, timeoutMs);
     const pagination = payload?.data?.meta?.pagination;
     const items = payload?.data?.data;
-    if (!Array.isArray(items) || !Number.isInteger(pagination?.pageCount)) throw new Error("SENADO_INVALID_RESPONSE_SCHEMA");
+    if (!Array.isArray(items)
+      || !Number.isInteger(pagination?.page)
+      || !Number.isInteger(pagination?.pageSize)
+      || !Number.isInteger(pagination?.pageCount)
+      || !Number.isInteger(pagination?.total)
+      || pagination.page !== page
+      || pagination.pageSize < 1
+      || pagination.pageCount < 1
+      || pagination.total < 0
+      || items.length > pagination.pageSize) {
+      throw new Error("SENADO_INVALID_RESPONSE_SCHEMA");
+    }
+    const pageMetadata = {
+      pageSize: pagination.pageSize,
+      pageCount: pagination.pageCount,
+      total: pagination.total,
+    };
+    if (expectedPagination && Object.entries(pageMetadata).some(([key, value]) => expectedPagination[key] !== value)) {
+      throw new Error("SENADO_EXPENSE_PAGINATION_METADATA_CHANGED");
+    }
+    if (pagination.pageCount !== Math.max(1, Math.ceil(pagination.total / pagination.pageSize))) {
+      throw new Error("SENADO_EXPENSE_PAGINATION_COUNT_MISMATCH");
+    }
+    expectedPagination ??= pageMetadata;
     pages.push({ sourceUrl, payload });
-    pageCount = pagination.pageCount;
     page += 1;
-  } while (page <= pageCount);
+  } while (page <= expectedPagination.pageCount);
   const records = pages.flatMap(({ sourceUrl, payload }) => payload.data.data.map((item) => normalizeSenateExpense(item, { sourceUrl })));
   if (records.length === 0) throw new Error(`SENADO_PERIOD_NOT_PUBLISHED: ${year}-${String(month).padStart(2, "0")}`);
   const seen = new Set();
   const unique = records.filter((record) => (seen.has(record.id) ? false : (seen.add(record.id), true)));
-  if (unique.length !== records.length) {
-    console.warn(`[senado] ${year}-${String(month).padStart(2, "0")}: ${records.length - unique.length} registros duplicados entre páginas (sort inestable del API) descartados.`);
+  const expectedCount = expectedPagination?.total;
+  if (records.length !== expectedCount || unique.length !== expectedCount) {
+    throw new Error("SENADO_EXPENSE_PAGINATION_COUNT_MISMATCH");
+  }
+  const requestedPeriod = `${year}-${String(month).padStart(2, "0")}`;
+  if (unique.some((record) => record.period !== requestedPeriod)) {
+    throw new Error("SENADO_EXPENSE_PERIOD_MISMATCH");
   }
   const originalText = `${pages.map(({ payload }) => stableStringify(payload)).join("\n")}\n`;
   return {

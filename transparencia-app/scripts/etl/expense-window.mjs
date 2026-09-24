@@ -26,12 +26,14 @@ export function selectSenateExpensePeriods(publishedPeriods, { latest, fullHisto
 
   const latestKey = `${latest.year}-${String(latest.month).padStart(2, "0")}`;
   if (!seen.has(latestKey)) throw new Error("ETL_EXPENSE_LATEST_PERIOD_NOT_PUBLISHED");
-  if (fullHistory) return normalized;
+  const from2026 = normalized.filter(({ year }) => year >= 2026);
+  if (from2026.length === 0 || latest.year < 2026) throw new Error("ETL_EXPENSE_NO_PERIODS_FROM_2026");
+  if (fullHistory) return from2026;
 
   expenseMonthWindow(latest.month, { overlapMonths });
   const latestIndex = latest.year * 12 + latest.month - 1;
   const firstIndex = latestIndex - overlapMonths;
-  return normalized.filter(({ year, month }) => {
+  return from2026.filter(({ year, month }) => {
     const periodIndex = year * 12 + month - 1;
     return periodIndex >= firstIndex && periodIndex <= latestIndex;
   });
