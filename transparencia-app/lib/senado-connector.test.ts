@@ -60,7 +60,8 @@ describe("conector de gastos operacionales del Senado", () => {
   });
 
   it("rechaza montos inválidos y respuestas incompatibles", async () => {
-    expect(() => normalizeSenateExpense(item(1, -1), { sourceUrl: "x" })).toThrow("SENADO_INVALID_AMOUNT");
+    expect(normalizeSenateExpense(item(1, -1), { sourceUrl: "x" }).monto_clp).toBe(-1);
+    expect(() => normalizeSenateExpense(item(2, 1.5), { sourceUrl: "x" })).toThrow("SENADO_INVALID_AMOUNT");
     await expect(fetchSenateOperationalExpenses({ year: 2026, month: 5, fetchImpl: async () => Response.json({ data: {} }) })).rejects.toThrow("SENADO_INVALID_RESPONSE_SCHEMA");
   });
 
