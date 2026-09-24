@@ -1,9 +1,10 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve, sep } from "node:path";
 import { fileURLToPath } from "node:url";
 import { fetchInfoLobbyBundle } from "./etl/connectors/cplt.mjs";
 import { buildLakePlan } from "./etl/lake.mjs";
 import { hydrateSourceHistory } from "./etl/hydrate-source-history.mjs";
+import { infolobbyRunOutputs } from "./etl/infolobby-run-state.mjs";
 
 function argument(name) {
   const index = process.argv.indexOf(name);
@@ -31,7 +32,11 @@ const result = await fetchInfoLobbyBundle({
   to,
   onProgress(progress) { process.stderr.write(`${JSON.stringify(progress)}\n`); },
 });
-if (result.records.length === 0) {
+const runOutputs = infolobbyRunOutputs(result.records.length);
+if (process.env.GITHUB_OUTPUT) {
+  appendFileSync(process.env.GITHUB_OUTPUT, `has_records=${runOutputs.hasRecords}\nrecord_count=${runOutputs.recordCount}\n`);
+}
+if (!runOutputs.hasRecords) {
   console.warn(JSON.stringify({ warning: "INFOLOBBY_EMPTY_RANGE", from, to, message: "No records returned for the requested range — this is expected for already-processed or low-activity periods." }));
   process.exit(0);
 }

@@ -67,7 +67,8 @@ jobs:
         working-directory: transparencia-app
         run: npm run etl:prepare
 
-      - name: Ingerir y proyectar InfoLobby
+      - name: Ingerir InfoLobby
+        id: infolobby-ingest
         working-directory: transparencia-app
         env:
           INPUT_FROM: ${{ inputs.from }}
@@ -79,12 +80,25 @@ jobs:
           from_date="${INPUT_FROM:-$(date -u -d '8 days ago' +%F)}"
           to_date="${INPUT_TO:-$(date -u +%F)}"
           npm run ingest:infolobby -- --from "$from_date" --to "$to_date"
+
+      - name: Construir proyección y publicar InfoLobby en R2
+        if: steps.infolobby-ingest.outputs.has_records == 'true'
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
           npm run data:lake:projection:infolobby
-          npm run data:lake -- --source infolobby
           npm run data:build:subsets
           npm run data:publish
 
+      - name: Conservar el release vigente si el rango no trae registros
+        if: steps.infolobby-ingest.outputs.has_records != 'true'
+        run: echo "El rango no trajo registros; se conserva el release vigente y se omite la publicación."
+
       - name: Publicar entradas estáticas versionadas para Pages
+        if: steps.infolobby-ingest.outputs.has_records == 'true'
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -101,7 +115,7 @@ jobs:
 
       - name: Preflight de cuota D1 antes de materializar
         id: d1-quota
-        if: inputs.skip_d1 != true
+        if: steps.infolobby-ingest.outputs.has_records == 'true' && inputs.skip_d1 != true
         uses: ./.github/actions/d1-preflight
         with:
           threshold-percent: "60"
@@ -111,7 +125,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
 
       - name: Materializar D1 y registrar ejecución
-        if: github.event_name == 'workflow_dispatch' && inputs.skip_d1 != true && steps.d1-quota.outputs.proceed == 'true'
+        if: github.event_name == 'workflow_dispatch' && steps.infolobby-ingest.outputs.has_records == 'true' && inputs.skip_d1 != true && steps.d1-quota.outputs.proceed == 'true'
         working-directory: transparencia-app
         env:
           GH_TOKEN: ${{ github.token }}
@@ -121,10 +135,10 @@ jobs:
         run: npm run data:materialize:optional -- --database transparencia-db --remote --skip-unchanged --sources infolobby
 
       - name: Registrar D1 pospuesto por cuota
-        if: inputs.skip_d1 == true || steps.d1-quota.outputs.proceed != 'true'
+        if: steps.infolobby-ingest.outputs.has_records == 'true' && (inputs.skip_d1 == true || steps.d1-quota.outputs.proceed != 'true')
         run: echo "::warning::D1 de InfoLobby pospuesto por cuota alta o métrica ilegible; R2/Pages conserva el release canónico."
 
       - name: Registrar D1 pospuesto por asset no disponible
-        if: steps.d1-quota.outputs.proceed == 'true'
+        if: steps.infolobby-ingest.outputs.has_records == 'true' && steps.d1-quota.outputs.proceed == 'true'
         run: >-
           echo "InfoLobby usa materialización opcional: si falta un asset de D1, el release R2/Pages se conserva y el diagnóstico queda en el resumen."

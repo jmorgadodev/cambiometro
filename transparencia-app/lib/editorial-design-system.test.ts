@@ -8,9 +8,9 @@ const styles = readFileSync(resolve(projectRoot, "app/globals.css"), "utf8");
 
 describe("sistema editorial compartido", () => {
   it("carga las tres familias tipograficas definidas en el traspaso", () => {
-    expect(layout).toContain("Newsreader");
-    expect(layout).toContain("JetBrains_Mono");
-    expect(layout).toContain("Inter");
+    expect(layout).toContain("newsreader-latin-variable.woff2");
+    expect(layout).toContain("jetbrains-mono-latin-variable.woff2");
+    expect(layout).toContain("inter-latin-variable.woff2");
     expect(layout).toContain("--font-editorial");
     expect(layout).toContain("--font-ledger");
   });

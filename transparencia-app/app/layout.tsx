@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Caveat, Inter, JetBrains_Mono, Newsreader, Plus_Jakarta_Sans } from "next/font/google";
+import localFont from "next/font/local";
 import Header from "@/components/layout/Header";
 import Footer from "@/components/layout/Footer";
 import PageEntrance from "@/components/PageEntrance";
@@ -8,36 +8,40 @@ import NavigationProgressBar from "@/components/NavigationProgressBar";
 import CookieConsent from "@/components/CookieConsent";
 import "./globals.css";
 
-const inter = Inter({
+const inter = localFont({
+  src: "../public/fonts/inter-latin-variable.woff2",
+  weight: "100 900",
   variable: "--font-inter",
-  subsets: ["latin"],
   display: "swap",
 });
 
-const jetBrainsMono = JetBrains_Mono({
-  weight: ["400", "500", "600", "700"],
+const jetBrainsMono = localFont({
+  src: "../public/fonts/jetbrains-mono-latin-variable.woff2",
+  weight: "100 800",
   variable: "--font-ledger",
-  subsets: ["latin"],
   display: "swap",
 });
 
-const newsreader = Newsreader({
+const newsreader = localFont({
+  src: [
+    { path: "../public/fonts/newsreader-latin-variable.woff2", weight: "200 800", style: "normal" },
+    { path: "../public/fonts/newsreader-latin-italic-variable.woff2", weight: "200 800", style: "italic" },
+  ],
   variable: "--font-editorial",
-  subsets: ["latin"],
   display: "swap",
-  style: ["normal", "italic"],
 });
 
-const plusJakartaSans = Plus_Jakarta_Sans({
+const plusJakartaSans = localFont({
+  src: "../public/fonts/plus-jakarta-sans-latin-variable.woff2",
+  weight: "200 800",
   variable: "--font-jakarta",
-  subsets: ["latin"],
   display: "swap",
 });
 
-const caveat = Caveat({
+const caveat = localFont({
+  src: "../public/fonts/caveat-latin-variable.woff2",
+  weight: "400 700",
   variable: "--font-caveat",
-  subsets: ["latin"],
-  weight: ["600", "700"],
   display: "swap",
 });
 
