@@ -1,5 +1,8 @@
 import type { Metadata } from "next";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import GastosOperacionalesExplorerClient from "@/components/GastosOperacionalesExplorerClient";
+import type { ExpenseSummary } from "@/components/GastosOperacionalesExplorerClient";
 
 export const metadata: Metadata = {
   title: "Gastos Operacionales Rendidos — El Cambiómetro",
@@ -8,5 +11,6 @@ export const metadata: Metadata = {
 };
 
 export default function GastosOperacionalesPage() {
-  return <GastosOperacionalesExplorerClient />;
+  const summary = JSON.parse(readFileSync(join(process.cwd(), "data/generated/gastos-operacionales-summary.json"), "utf8")) as ExpenseSummary;
+  return <GastosOperacionalesExplorerClient summary={summary} />;
 }
