@@ -29,4 +29,14 @@ describe("contador de días desde el último movimiento", () => {
       { fecha: "2026-09-21", estado: "en_confirmacion" },
     ])).toBeNull();
   });
+
+  it("lee el registro efectivo más reciente desde la respuesta paginada de la API", () => {
+    expect(latestEffectiveMovementDate({
+      data: [
+        { data: { fecha: "2026-09-23", estado: "verificado_oficial" } },
+        { data: { fecha: "2026-09-22", estado: "corroborado" } },
+      ],
+      meta: { sourceBackend: "r2", sourceStatus: "complete" },
+    })).toBe("2026-09-23");
+  });
 });

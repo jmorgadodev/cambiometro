@@ -3,6 +3,7 @@ import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import MechanicalCounter from "./MechanicalCounter";
 import { daysSinceCalendarDate, latestEffectiveMovementDate } from "@/lib/movement-age";
+import { publicApiUrl } from "@/lib/public-api-origin";
 
 export interface MovementItem {
   id: string;
@@ -67,16 +68,17 @@ export function MovementsTimeline({
       lastCheckedAt = Date.now();
 
       try {
-        const response = await fetch("/data/movimientos.json", { cache: "no-store" });
+        const response = await fetch(publicApiUrl("/api/v1/records?source=movimientos&limit=1"), { cache: "no-store" });
         if (!response.ok) return;
-        const payload: unknown = await response.json();
-        const movimientos = payload && typeof payload === "object" && "movimientos" in payload
-          ? payload.movimientos
-          : null;
-        const latestDate = latestEffectiveMovementDate(movimientos);
+        const payload = await response.json() as {
+          data?: unknown;
+          meta?: { sourceBackend?: string; sourceStatus?: string };
+        };
+        if (payload.meta?.sourceBackend !== "r2" || payload.meta.sourceStatus !== "complete") return;
+        const latestDate = latestEffectiveMovementDate(payload.data);
         if (!active || !latestDate) return;
 
-        setFechaCambioEfectivoActualizada((currentDate) => latestDate > currentDate ? latestDate : currentDate);
+        setFechaCambioEfectivoActualizada(latestDate);
       } catch {
         // La Home conserva la fecha ya publicada si la comprobación no está disponible.
       }

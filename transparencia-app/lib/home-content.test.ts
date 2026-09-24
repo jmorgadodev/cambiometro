@@ -46,8 +46,9 @@ describe("portada editorial conectada a datos públicos", () => {
     expect(home).toContain("ultimoCambioEfectivo={MOVIMIENTOS_HOME_SUMMARY.ultimoCambioEfectivo}");
     expect(movements).toContain("daysSinceCalendarDate(fechaCambioEfectivoActualizada)");
     expect(movements).toContain("window.setInterval(actualizarDiasSinCambios, 60_000)");
-    expect(movements).toContain('fetch("/data/movimientos.json", { cache: "no-store" })');
-    expect(movements).toContain("latestEffectiveMovementDate(movimientos)");
+    expect(movements).toContain('fetch(publicApiUrl("/api/v1/records?source=movimientos&limit=1"), { cache: "no-store" })');
+    expect(movements).toContain('payload.meta?.sourceBackend !== "r2" || payload.meta.sourceStatus !== "complete"');
+    expect(movements).toContain("latestEffectiveMovementDate(payload.data)");
     expect(movements).toContain("window.setInterval(() => { void revisarUltimoCambioPublicado(); }, 10 * 60_000)");
   });
 
