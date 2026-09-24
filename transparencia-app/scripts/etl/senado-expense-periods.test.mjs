@@ -9,11 +9,18 @@ function period(year, month) {
 describe("selectSenateExpensePeriods", () => {
   const published = [period(2025, 12), ...Array.from({ length: 7 }, (_, index) => period(2026, index + 1))];
 
-  it("selects every published period for an explicit historical backfill across year boundaries", () => {
+  it("limits an explicit backfill to published periods from 2026 onward", () => {
     expect(selectSenateExpensePeriods(published, {
       latest: period(2026, 7),
       fullHistory: true,
-    })).toEqual(published);
+    })).toEqual(published.slice(1));
+  });
+
+  it("refuses to backfill if the official source has no published period from 2026 onward", () => {
+    expect(() => selectSenateExpensePeriods([period(2025, 12)], {
+      latest: period(2025, 12),
+      fullHistory: true,
+    })).toThrow("ETL_EXPENSE_NO_PERIODS_FROM_2026");
   });
 
   it("keeps the incremental refresh limited to the latest month and its overlap", () => {

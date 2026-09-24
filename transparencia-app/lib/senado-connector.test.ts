@@ -39,24 +39,28 @@ describe("conector de gastos operacionales del Senado", () => {
         const url = String(input);
         calls.push(url);
         const page = Number(new URL(url).searchParams.get("pagination[page]"));
-        return Response.json({ data: { data: [item(page)], meta: { pagination: { page, pageSize: 500, pageCount: 2, total: 2 } } } });
+        const items = page === 1
+          ? Array.from({ length: 500 }, (_, index) => item(index + 1))
+          : [item(501)];
+        return Response.json({ data: { data: items, meta: { pagination: { page, pageSize: 500, pageCount: 2, total: 501 } } } });
       },
     });
     expect(calls).toHaveLength(2);
-    expect(result.records).toHaveLength(2);
+    expect(result.records).toHaveLength(501);
   });
 
-  it("descarta filas repetidas cuando la paginacion inestable repite un ID oficial", async () => {
-    const result = await fetchSenateOperationalExpenses({
+  it("rechaza un mes incompleto si las páginas repiten IDs y el total único no coincide", async () => {
+    await expect(fetchSenateOperationalExpenses({
       year: 2026,
       month: 5,
       fetchImpl: async (input) => {
         const page = Number(new URL(String(input)).searchParams.get("pagination[page]"));
-        return Response.json({ data: { data: [item(77)], meta: { pagination: { page, pageSize: 500, pageCount: 2, total: 2 } } } });
+        const items = page === 1
+          ? Array.from({ length: 500 }, (_, index) => item(index + 1))
+          : [item(500)];
+        return Response.json({ data: { data: items, meta: { pagination: { page, pageSize: 500, pageCount: 2, total: 501 } } } });
       },
-    });
-    expect(result.records).toHaveLength(1);
-    expect(result.records[0].id).toBe("senado-operational-expense-77");
+    })).rejects.toThrow("SENADO_EXPENSE_PAGINATION_COUNT_MISMATCH");
   });
 
   it("rechaza montos inválidos y respuestas incompatibles", async () => {

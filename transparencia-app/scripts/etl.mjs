@@ -23,6 +23,7 @@ import { existingSenateVoteIdsFromProjection, fetchSenateVotesByDateRange } from
 import { assertSuccessfulRun } from "./etl/validation.mjs";
 import { readJsonIfPresent, writeFileAtomic } from "./etl/safe-file.mjs";
 import { mergeRecordsById } from "./etl/history.mjs";
+import { reconcileSenateExpenseHistory } from "./etl/senado-expense-reconciliation.mjs";
 import { resolveCamaraVoteWindow, CAMARA_CURRENT_PERIOD_START } from "./etl/camara-history.mjs";
 import { selectSenateExpensePeriods } from "./etl/expense-window.mjs";
 
@@ -269,15 +270,18 @@ function validateRecords(name, records, minimumExpected = 1) {
   return traced;
 }
 
-async function runSource({ key, label, selected, previous, snapshot, summary, summaryKey, load, minimum = 1, preserveHistory = false }) {
+async function runSource({ key, label, selected, previous, snapshot, summary, summaryKey, load, minimum = 1, preserveHistory = false, reconcileHistory }) {
   if (!selected.has(key)) return;
   try {
     const records = validateRecords(label, await load(), minimum);
     summary[summaryKey] = records.length;
     const snapshotKey = key === "camara" ? "congreso_opendata" : key;
-    snapshot.fuentes[snapshotKey] = preserveHistory
-      ? mergeRecordsById(previous?.fuentes?.[snapshotKey] ?? [], records)
-      : records;
+    const previousRecords = previous?.fuentes?.[snapshotKey] ?? [];
+    snapshot.fuentes[snapshotKey] = reconcileHistory
+      ? reconcileHistory(previousRecords, records)
+      : preserveHistory
+        ? mergeRecordsById(previousRecords, records)
+        : records;
   } catch (error) {
     summary.errores.push(`${label}: ${String(error)}`);
     const snapshotKey = key === "camara" ? "congreso_opendata" : key;
@@ -354,7 +358,7 @@ async function main() {
   });
   await runSource({
     key: "gastos_senado", label: "Gastos Operacionales Senado", selected: options.sources, previous, snapshot, summary,
-    summaryKey: "gastos_senado_ingresados", minimum: 0, preserveHistory: true,
+    summaryKey: "gastos_senado_ingresados", minimum: 0, reconcileHistory: reconcileSenateExpenseHistory,
     load: () => fetchGastosSenado({ fullHistory: FULL_HISTORY }),
   });
   await runSource({
