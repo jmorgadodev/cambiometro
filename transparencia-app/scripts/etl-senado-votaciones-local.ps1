@@ -1,12 +1,25 @@
 param(
   [switch]$DryRun,
-  [int]$LookbackDays = 3
+  [int]$LookbackDays = 3,
+  [string]$RepoRoot,
+  [switch]$IsolatedRuntime
 )
 
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
 
-$repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+$repoRoot = if ([string]::IsNullOrWhiteSpace($RepoRoot)) {
+  (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
+} else {
+  (Resolve-Path $RepoRoot).Path
+}
+
+if ($IsolatedRuntime) {
+  $expectedRuntime = (Join-Path $env:LOCALAPPDATA "Temp\cambiometro-senado-etl-runtime\transparencia-app").TrimEnd("\")
+  if (-not [string]::Equals($repoRoot.TrimEnd("\"), $expectedRuntime, [StringComparison]::OrdinalIgnoreCase)) {
+    throw "SENADO_LOCAL_UNEXPECTED_ISOLATED_RUNTIME:$repoRoot"
+  }
+}
 $logRoot = Join-Path $env:ProgramData "Cambiometro\votaciones-senado\logs"
 New-Item -ItemType Directory -Force -Path $logRoot | Out-Null
 $logPath = Join-Path $logRoot ("run-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".log")
@@ -162,6 +175,20 @@ try {
   Write-Error "[senado-votaciones-local] error fatal: $_"
   exit 1
 } finally {
+  if ($IsolatedRuntime) {
+    # This worktree is dedicated to the scheduled ETL. Revert only generated
+    # data artifacts there so the next run starts clean; the user's checkout
+    # is never targeted by this cleanup.
+    & git -C $repoRoot restore --worktree --source=HEAD -- data
+    if ($LASTEXITCODE -ne 0) {
+      Write-Error "[senado-votaciones-local] no se pudieron restaurar los artefactos locales del runtime aislado"
+    } else {
+      & git -C $repoRoot clean -fd -- data public/data
+      if ($LASTEXITCODE -ne 0) {
+        Write-Error "[senado-votaciones-local] no se pudieron limpiar los artefactos locales no versionados del runtime aislado"
+      }
+    }
+  }
   if ($lock) { $lock.Dispose() }
   if ($transcriptStarted) { Stop-Transcript | Out-Null }
 }
