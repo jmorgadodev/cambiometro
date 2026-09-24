@@ -113,6 +113,24 @@ try {
       exit 0
     }
 
+    # El publicador del lake usa GH_TOKEN. La tarea programada corre bajo la
+    # sesión interactiva del usuario, donde GitHub CLI ya está autenticado;
+    # reutilizar esa sesión evita que una novedad quede sin publicar por no
+    # tener GH_TOKEN definido como variable persistente del sistema.
+    if ([string]::IsNullOrWhiteSpace($env:GH_TOKEN)) {
+      $gh = Get-Command gh.exe -ErrorAction SilentlyContinue
+      if (-not $gh) { $gh = Get-Command gh -ErrorAction SilentlyContinue }
+      if ($gh) {
+        $tokenOutput = & $gh.Source auth token 2>$null
+        if ($LASTEXITCODE -eq 0 -and -not [string]::IsNullOrWhiteSpace(($tokenOutput | Select-Object -First 1))) {
+          $env:GH_TOKEN = [string]($tokenOutput | Select-Object -First 1).Trim()
+        }
+      }
+    }
+    if ([string]::IsNullOrWhiteSpace($env:GH_TOKEN)) {
+      throw "SENADO_LOCAL_MISSING_GH_TOKEN: autentica GitHub CLI con acceso al repositorio"
+    }
+
     Invoke-Step "construir release R2 del Senado" $npm @(
       "run", "data:lake", "--",
       "--source", "votaciones_senado",
