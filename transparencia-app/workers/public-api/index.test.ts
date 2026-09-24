@@ -187,6 +187,47 @@ describe("registros públicos R2", () => {
     expect(bucket.requested).not.toContain("projections/static-site-v1/manifest.json");
   });
 
+  it("informa como completo un mes oficial sin sesiones y conserva evidencia de cobertura", async () => {
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": {
+        generatedAt: "2026-09-24T00:00:00Z",
+        sources: [{
+          id: "votaciones_senado",
+          coverage: {
+            confirmedEmptyPeriods: [{
+              period: "2026-02",
+              kind: "vote",
+              reason: "Las legislaturas 373 y 374 no registran sesiones en febrero de 2026.",
+              verifiedAt: "2026-09-24",
+              evidenceUrls: [
+                "https://tramitacion.senado.cl/wspublico/sesiones.php?legislatura=373",
+                "https://tramitacion.senado.cl/wspublico/sesiones.php?legislatura=374",
+              ],
+            }],
+          },
+        }],
+        partitions: [],
+      },
+    });
+
+    const response = await listRecordsFromR2(
+      new URL("https://example.test/api/v1/records?source=votaciones_senado&kind=vote&period=2026-02&limit=10"),
+      { PUBLIC_DATA: bucket as never },
+    );
+    const payload = await response!.json() as { data: unknown[]; meta: Record<string, unknown> };
+
+    expect(response!.status).toBe(200);
+    expect(payload.data).toEqual([]);
+    expect(payload.meta).toMatchObject({
+      total: 0,
+      sourceBackend: "r2-lake",
+      sourceStatus: "complete",
+      expectedRows: 0,
+      missingPartitions: 0,
+      periodCoverage: "confirmed-empty",
+    });
+  });
+
   it("respeta period en una consulta pública de gastos de Senado", async () => {
     const january = gzipJsonl([{ id: "senado-expense-jan", sourceId: "gastos_senado", kind: "expense", occurredAt: "2026-01-15", data: { title: "Enero" } }]);
     const february = gzipJsonl([{ id: "senado-expense-feb", sourceId: "gastos_senado", kind: "expense", occurredAt: "2026-02-15", data: { title: "Febrero" } }]);

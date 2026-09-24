@@ -30,6 +30,9 @@ if (sourceKeys.size) {
 }
 for (const source of excludedSources) delete snapshot.fuentes?.[source];
 const sourceInventory = existsSync(inventoryPath) ? JSON.parse(readFileSync(inventoryPath, "utf8")) : null;
+const sourceCoveragePath = resolve(appRoot, "config", "r2-source-coverage.json");
+const configuredCoverage = existsSync(sourceCoveragePath) ? JSON.parse(readFileSync(sourceCoveragePath, "utf8")) : {};
+const sourceMetadata = Object.fromEntries(Object.entries(configuredCoverage).map(([sourceId, coverage]) => [sourceId, { coverage }]));
 const existingCatalogPath = join(outputRoot, "catalog", "v1", "manifest.json");
 let existingCatalog = null;
 if (existsSync(existingCatalogPath)) {
@@ -59,7 +62,7 @@ const existingEntityBundles = Object.fromEntries((existingCatalog?.sources ?? []
     entities: readExistingProjection(source.entityKey),
     indexes: readExistingProjection(source.entityIndexKey),
   }]));
-const plan = buildLakePlan(snapshot, { sourceInventory, existingCatalog, existingEntityBundles: { ...existingEntityBundles, ...hydratedHistory.existingEntityBundles }, replaceSourceIds, sourceKeys, existingPartitionRecords: hydratedHistory.existingPartitionRecords });
+const plan = buildLakePlan(snapshot, { sourceInventory, existingCatalog, sourceMetadata, existingEntityBundles: { ...existingEntityBundles, ...hydratedHistory.existingEntityBundles }, replaceSourceIds, sourceKeys, existingPartitionRecords: hydratedHistory.existingPartitionRecords });
 const publishPlan = {
   schemaVersion: "1.0.0",
   generatedAt: snapshot.actualizado_en ?? null,

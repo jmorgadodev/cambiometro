@@ -52,6 +52,114 @@ function partition(sourceId: string, period: string, key: string, data: ArrayBuf
 }
 
 describe("registros calientes de R2", () => {
+  it("declara completo el mes sin sesiones sólo cuando R2 conserva evidencia explícita", async () => {
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": {
+        generatedAt: "2026-09-24T00:00:00Z",
+        sources: [{
+          id: "votaciones_senado",
+          coverage: {
+            confirmedEmptyPeriods: [{
+              period: "2026-02",
+              kind: "vote",
+              reason: "Las legislaturas 373 y 374 no registran sesiones durante febrero de 2026.",
+              verifiedAt: "2026-09-24",
+              evidenceUrls: [
+                "https://tramitacion.senado.cl/wspublico/sesiones.php?legislatura=373",
+                "https://tramitacion.senado.cl/wspublico/sesiones.php?legislatura=374",
+              ],
+            }],
+          },
+        }],
+        partitions: [],
+      },
+    });
+
+    const result = await readR2EvidenceRecords(bucket, {
+      source: "votaciones_senado",
+      kind: "vote",
+      period: "2026-02",
+      limit: 10,
+    });
+
+    expect(result).toMatchObject({
+      data: [],
+      total: 0,
+      expectedTotal: 0,
+      complete: true,
+      missingPartitions: 0,
+      missingArtifacts: 0,
+      periodCoverage: "confirmed-empty",
+    });
+  });
+
+  it("no infiere meses vacíos para períodos sin confirmación oficial", async () => {
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": {
+        generatedAt: "2026-09-24T00:00:00Z",
+        sources: [{
+          id: "votaciones_senado",
+          coverage: {
+            confirmedEmptyPeriods: [{
+              period: "2026-02",
+              kind: "vote",
+              reason: "Sin sesiones.",
+              verifiedAt: "2026-09-24",
+              evidenceUrls: ["https://tramitacion.senado.cl/wspublico/sesiones.php?legislatura=373"],
+            }],
+          },
+        }],
+        partitions: [],
+      },
+    });
+
+    const result = await readR2EvidenceRecords(bucket, {
+      source: "votaciones_senado",
+      kind: "vote",
+      period: "2026-03",
+      limit: 10,
+    });
+
+    expect(result).toBeNull();
+  });
+
+  it("no aplica una cobertura mensual vacía a búsquedas amplias ni a otras categorías", async () => {
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": {
+        sources: [{
+          id: "votaciones_senado",
+          coverage: {
+            confirmedEmptyPeriods: [{
+              period: "2026-02",
+              kind: "vote",
+              reason: "Sin sesiones.",
+              verifiedAt: "2026-09-24",
+              evidenceUrls: ["https://tramitacion.senado.cl/wspublico/sesiones.php?legislatura=373"],
+            }],
+          },
+        }],
+        partitions: [],
+      },
+    });
+
+    const rangeResult = await readR2EvidenceRecords(bucket, {
+      source: "votaciones_senado",
+      kind: "vote",
+      from: "2026-01-01",
+      to: "2026-03-31",
+      limit: 10,
+    });
+    const categoryResult = await readR2EvidenceRecords(bucket, {
+      source: "votaciones_senado",
+      kind: "attendance",
+      period: "2026-02",
+      limit: 10,
+    });
+
+    expect(rangeResult).toBeNull();
+    expect(categoryResult).toBeNull();
+  });
+
   it("proyecta ejecución DIPRES con monto CLP, origen y checksum", () => {
     const record = projectLakeEvidence({ id: "dipres-1", sourceId: "dipres", kind: "budget_execution", occurredAt: "2026-06-01", evidence: { sourceUrl: "https://dipres.gob.cl/real.csv" }, data: { period: "2026-06", denominacion: "APORTE FISCAL", ejecucion_acumulada_clp: 12_809_860_000, monto_original: { ejecutado: "12.809.860", unidad: "miles de pesos" } } }, "abc", "2026-08-08T00:00:00Z");
     expect(record).toMatchObject({ kind: "budget_execution", title: "APORTE FISCAL", amount: { amountClp: 12_809_860_000, currency: "CLP", originalAmount: "12.809.860", originalUnit: "miles de pesos" }, evidence: { checksumSha256: "abc" } });

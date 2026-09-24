@@ -340,7 +340,42 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
       && (!params.from || partition.period >= params.from.slice(0, 7))
       && (!params.to || partition.period <= params.to.slice(0, 7));
   });
-  if (partitions.length === 0) return null;
+  if (partitions.length === 0) {
+    const sourceCoverage = sourceIds.length === 1
+      ? catalog.sources?.find((source) => source.id === sourceIds[0])?.coverage?.confirmedEmptyPeriods
+      : undefined;
+    const hasExactEmptyCoverage = !variants
+      && sourceIds.length === 1
+      && /^\d{4}-\d{2}$/.test(params.period ?? "")
+      && !params.query?.trim()
+      && !params.entityId
+      && !params.recordIds
+      && !params.from
+      && !params.to
+      && !params.cursor
+      && sourceCoverage?.some((coverage) => coverage.period === params.period
+        && coverage.kind === params.kind
+        && typeof coverage.reason === "string"
+        && coverage.reason.trim().length > 0
+        && /^\d{4}-\d{2}-\d{2}$/.test(coverage.verifiedAt)
+        && Array.isArray(coverage.evidenceUrls)
+        && coverage.evidenceUrls.length > 0
+        && coverage.evidenceUrls.every((url) => typeof url === "string" && url.startsWith("https://")));
+    if (!hasExactEmptyCoverage) return null;
+    return {
+      data: [] as EvidenceRecord[],
+      total: 0,
+      limit: Math.min(Math.max(params.limit, 1), 100),
+      nextCursor: null,
+      expectedTotal: 0,
+      loadedRows: 0,
+      complete: true,
+      missingPartitions: 0,
+      missingArtifacts: 0,
+      scanLimited: false,
+      periodCoverage: "confirmed-empty" as const,
+    };
+  }
   const orderedPartitions = [...partitions].sort((left, right) => right.period.localeCompare(left.period) || right.manifestKey.localeCompare(left.manifestKey));
   let expectedTotal = legacyCamaraVotePartitionIds.size > 0 ? null : orderedPartitions.every((partition) => Number.isFinite(Number(partition.recordCount)))
     ? orderedPartitions.reduce((total, partition) => total + Number(partition.recordCount), 0)
