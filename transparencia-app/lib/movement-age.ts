@@ -20,11 +20,19 @@ export function daysSinceCalendarDate(eventDate: string, todayDate = getChileDat
 }
 
 export function latestEffectiveMovementDate(movements: unknown): string | null {
-  if (!Array.isArray(movements)) return null;
+  const rows = Array.isArray(movements)
+    ? movements
+    : movements && typeof movements === "object" && "data" in movements && Array.isArray(movements.data)
+      ? movements.data
+      : null;
+  if (!rows) return null;
 
-  const dates = movements.flatMap((movement) => {
+  const dates = rows.flatMap((movement) => {
     if (!movement || typeof movement !== "object") return [];
-    const record = movement as { fecha?: unknown; estado?: unknown };
+    const item = movement as { data?: unknown; fecha?: unknown; estado?: unknown };
+    const record = item.data && typeof item.data === "object"
+      ? item.data as { fecha?: unknown; estado?: unknown }
+      : item;
     if (typeof record.fecha !== "string" || typeof record.estado !== "string") return [];
     const date = record.fecha.slice(0, 10);
     if (!EFFECTIVE_MOVEMENT_STATES.has(record.estado) || !/^\d{4}-\d{2}-\d{2}$/.test(date)) return [];
