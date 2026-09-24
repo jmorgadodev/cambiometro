@@ -3,7 +3,21 @@ import type { SourceManifest } from "./data-contracts";
 export interface R2PublicCatalog {
   schemaVersion: string;
   generatedAt: string | null;
-  sources: Array<{ id: string; status: SourceManifest["status"]; foundPeriods: string[]; recordCount: number }>;
+  sources: Array<{
+    id: string;
+    status: SourceManifest["status"];
+    foundPeriods: string[];
+    recordCount: number;
+    coverage?: {
+      confirmedEmptyPeriods?: Array<{
+        period: string;
+        kind: string;
+        reason: string;
+        verifiedAt: string;
+        evidenceUrls: string[];
+      }>;
+    } | null;
+  }>;
   partitions: Array<{ id: string; sourceId: string; variant?: string | null; period: string; manifestKey: string; manifestAssetName?: string; checksumSha256: string; releaseTag?: string; status: SourceManifest["status"]; recordCount?: number }>;
 }
 

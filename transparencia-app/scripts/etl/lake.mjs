@@ -513,7 +513,7 @@ export function buildLakePlan(snapshot, options = {}) {
       error: source.error ?? null,
       generatedAt: snapshot.actualizado_en ?? null,
       inventoryGeneratedAt: sourceInventory.generatedAt ?? null,
-      coverage: metadata.coverage ?? null,
+      coverage: metadata.coverage ?? previousSource?.coverage ?? null,
       license: metadata.license ?? null,
       notes: metadata.notes ?? null,
     };
@@ -526,9 +526,11 @@ export function buildLakePlan(snapshot, options = {}) {
     sources: sourceIds.map((sourceId) => {
       const inventory = inventoryById.get(sourceId);
       const previousSource = (existingCatalog?.sources ?? []).find((source) => source.id === sourceId);
+      const metadata = sourceMetadata[sourceId] ?? {};
       if (updatedSourceIds.size && previousSource && !updatedSourceIds.has(sourceId)) return previousSource;
       const entity = entityMetadata.get(sourceId);
       const partitionPeriods = allPartitions.filter((partition) => partition.sourceId === sourceId).map((partition) => partition.period);
+      const coverage = metadata.coverage ?? previousSource?.coverage;
       return {
         id: sourceId,
         status: partitionPeriods.length > 0 ? "partial" : (inventory?.status ?? previousSource?.status ?? "unavailable"),
@@ -540,6 +542,7 @@ export function buildLakePlan(snapshot, options = {}) {
         entityKey: entity?.entityKey ?? previousSource?.entityKey ?? null,
         entityIndexKey: entity?.entityIndexKey ?? previousSource?.entityIndexKey ?? null,
         entityCount: entity?.entityCount ?? previousSource?.entityCount ?? 0,
+        ...(coverage ? { coverage } : {}),
       };
     }),
     partitions: allPartitions,

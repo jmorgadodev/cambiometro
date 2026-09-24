@@ -1,0 +1,16 @@
+{
+  "votaciones_senado": {
+    "confirmedEmptyPeriods": [
+      {
+        "period": "2026-02",
+        "kind": "vote",
+        "reason": "Las listas oficiales de sesiones de las legislaturas 373 y 374 no registran sesiones en febrero de 2026.",
+        "verifiedAt": "2026-09-24",
+        "evidenceUrls": [
+          "https://tramitacion.senado.cl/wspublico/sesiones.php?legislatura=373",
+          "https://tramitacion.senado.cl/wspublico/sesiones.php?legislatura=374"
+        ]
+      }
+    ]
+  }
+}

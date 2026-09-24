@@ -1485,6 +1485,7 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
           expectedRows: lake.expectedTotal,
           missingPartitions: lake.missingPartitions,
           missingArtifacts: lake.missingArtifacts,
+          periodCoverage: "periodCoverage" in lake ? lake.periodCoverage : undefined,
           nextCursor: lake.nextCursor,
         }, pageLinks(requestUrl, offset, limit, lake.total));
       }

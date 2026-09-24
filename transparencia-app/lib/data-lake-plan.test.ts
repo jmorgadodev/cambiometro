@@ -7,6 +7,24 @@ const entityAsset = (plan: ReturnType<typeof buildLakePlan>, sourceId: string) =
 const entityIndexAsset = (plan: ReturnType<typeof buildLakePlan>, sourceId: string) => plan.assets.find((asset) => asset.key.startsWith(`indexes/v1/${sourceId}/entities-`) && asset.key.endsWith(".jsonl.gz"));
 
 describe("plan de publicación del lago estático", () => {
+  it("incluye en el catálogo R2 la cobertura vacía certificada por período y fuente", () => {
+    const coverage = {
+      confirmedEmptyPeriods: [{
+        period: "2026-02",
+        kind: "vote",
+        reason: "Sin sesiones oficiales.",
+        verifiedAt: "2026-09-24",
+        evidenceUrls: ["https://tramitacion.senado.cl/wspublico/sesiones.php?legislatura=373"],
+      }],
+    };
+    const plan = buildLakePlan({ actualizado_en: "2026-09-24T00:00:00Z", fuentes: {
+      votaciones_senado: [{ id: "sen-vote-mar", fecha: "2026-03-12", url: "https://senado.cl/vote/mar" }],
+    } }, { sourceMetadata: { votaciones_senado: { coverage } } });
+
+    expect(plan.catalog.sources.find((source: { id: string }) => source.id === "votaciones_senado"))
+      .toMatchObject({ coverage });
+  });
+
   it("rechaza IDs duplicados antes de construir manifiestos o relaciones", () => {
     expect(() => buildLakePlan({ actualizado_en: "2026-08-08T00:00:00Z", fuentes: {
       chilecompra: [
