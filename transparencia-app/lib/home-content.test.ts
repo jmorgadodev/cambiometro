@@ -11,13 +11,15 @@ describe("portada editorial conectada a datos públicos", () => {
   const search = read("components/HomeInlineSearch.tsx");
   const movements = read("components/home/MovementsTimeline.tsx");
   const votes = read("components/home/FeaturedVotes.tsx");
+  const hero = read("components/home/Hero.tsx");
+  const homeVotes = read("components/home/HomeFeaturedVotes.tsx");
   const sources = read("components/home/SourcesCatalog.tsx");
   const globalStyles = read("app/globals.css");
   const homeStyles = read("app/home-editorial.css");
 
   it("mantiene el diseño separado del contrato de datos y sin ejemplos codificados", () => {
     expect(home).toContain("buildEditorialMovements(MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA.signals)");
-    expect(home).toContain("buildEditorialVotes(getHomeFeaturedVotes(HOME_FEATURED_VOTE_IDS)");
+    expect(home).toContain("buildEditorialVotes(getHomeFeaturedVotes([HOME_IMPORTANT_VOTE_ID])");
     expect(home).toContain("buildEditorialChapters(operationalSources)");
     expect(movements).not.toContain("const LEAD_MOVEMENT");
     expect(votes).not.toContain("DEFAULT_VOTES");
@@ -50,6 +52,22 @@ describe("portada editorial conectada a datos públicos", () => {
     expect(movements).toContain('payload.meta?.sourceBackend !== "r2" || payload.meta.sourceStatus !== "complete"');
     expect(movements).toContain("latestEffectiveMovementDate(payload.data)");
     expect(movements).toContain("window.setInterval(() => { void revisarUltimoCambioPublicado(); }, 10 * 60_000)");
+  });
+
+  it("muestra fechas legibles y alimenta las fichas recientes desde el release R2", () => {
+    expect(movements).toContain("Último cambio efectivo");
+    expect(movements).toContain("Última revisión");
+    expect(movements).toContain("dateTime=");
+    expect(movements).toContain("fechaCambioEfectivoActualizada");
+    expect(homeVotes).toContain("source=votaciones_senado&kind=vote&limit=50");
+    expect(homeVotes).toContain('sourceBackend !== "r2-lake"');
+    expect(home).toContain("<HomeFeaturedVotes");
+  });
+
+  it("rota las fotografías del hero automáticamente y respeta movimiento reducido", () => {
+    expect(hero).toContain("setInterval");
+    expect(hero).toContain("prefers-reduced-motion: reduce");
+    expect(hero).toContain("clearInterval");
   });
 
   it("conserva la identidad de los datasets parlamentarios", () => {

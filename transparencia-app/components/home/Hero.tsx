@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { ArrowRight, FileText } from "./Icons";
 
@@ -64,6 +64,16 @@ const slides: SlideData[] = [
 
 export function Hero() {
   const [currentSlide, setCurrentSlide] = useState(0);
+
+  useEffect(() => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+
+    const timer = window.setInterval(() => {
+      setCurrentSlide((current) => (current + 1) % slides.length);
+    }, 6_000);
+
+    return () => window.clearInterval(timer);
+  }, []);
 
   return (
     <section className="relative pt-6 pb-24 sm:pt-8 sm:pb-28 lg:pt-12 lg:pb-32 border-b border-border">
@@ -173,13 +183,14 @@ export function Hero() {
               {slides.map((slide, idx) => (
                 <div
                   key={slide.id}
+                  aria-hidden={idx !== currentSlide}
                   className={`absolute inset-0 transition-opacity duration-1000 ease-in-out ${
                     idx === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
                   }`}
                 >
                   <img
                     src={slide.image}
-                    alt={slide.alt}
+                    alt={idx === currentSlide ? slide.alt : ""}
                     className="w-full h-full object-cover object-center filter brightness-95 contrast-105 transition-transform duration-7000 ease-out transform scale-100 hover:scale-105"
                   />
                   {/* Subtle atmospheric gradients */}
@@ -201,6 +212,7 @@ export function Hero() {
                     }`}
                     title={`Cambiar a vista: ${s.label}`}
                     aria-label={`Ver ${s.label}`}
+                    aria-pressed={idx === currentSlide}
                   />
                 ))}
               </div>

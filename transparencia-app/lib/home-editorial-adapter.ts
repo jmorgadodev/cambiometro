@@ -95,6 +95,132 @@ export function buildEditorialVotes(selected: VotacionDestacada[], annual: Votac
     });
 }
 
+interface VoteRecordLike {
+  kind?: unknown;
+  sourceId?: unknown;
+  camara?: unknown;
+  id?: unknown;
+  occurredAt?: unknown;
+  evidence?: { sourceUrl?: unknown };
+  data?: Record<string, unknown>;
+  votacion_id?: unknown;
+  fecha?: unknown;
+  fecha_original?: unknown;
+  titulo?: unknown;
+  descripcion?: unknown;
+  resultado?: unknown;
+  boletin?: unknown;
+  tipo?: unknown;
+  quorum?: unknown;
+  fuente_url?: unknown;
+  url?: unknown;
+  votos?: { favor?: unknown; contra?: unknown; abstencion?: unknown };
+  total_si?: unknown;
+  total_no?: unknown;
+  total_abstencion?: unknown;
+}
+
+function voteTimestamp(value: unknown, fallback: unknown): number {
+  const text = String(value ?? "");
+  const spanishDate = text.match(/^(\d{2})-(\d{2})-(\d{4})(?:\s+(\d{2}):(\d{2}):(\d{2}))?/u);
+  if (spanishDate) {
+    const [, day, month, year, hour = "12", minute = "0", second = "0"] = spanishDate;
+    return Date.UTC(Number(year), Number(month) - 1, Number(day), Number(hour), Number(minute), Number(second));
+  }
+  const isoDate = String(fallback ?? text).slice(0, 10);
+  return /^\d{4}-\d{2}-\d{2}$/u.test(isoDate) ? Date.parse(`${isoDate}T12:00:00Z`) : Number.NaN;
+}
+
+function numericVoteId(value: unknown): number {
+  const match = String(value ?? "").match(/(\d+)$/u);
+  return match ? Number(match[1]) : 0;
+}
+
+/** Adapts one bounded R2 page of official Senate votes for the home cards. */
+export function buildLatestSenateVotes(
+  records: readonly VoteRecordLike[],
+  limit = 2,
+  excludedIds: readonly string[] = [],
+): FeaturedVoteItem[] {
+  const excluded = new Set(excludedIds);
+  return records
+    .map((record) => {
+      const data = record.data ?? record;
+      const sourceId = String(record.sourceId ?? (record.camara === "Senado" ? "votaciones_senado" : ""));
+      const kind = String(record.kind ?? "vote");
+      const id = String(data.id ?? data.votacion_id ?? record.votacion_id ?? record.id ?? "");
+      const occurredAt = String(record.occurredAt ?? data.fecha ?? record.fecha ?? "").slice(0, 10);
+      const result = String(data.resultado ?? record.resultado ?? "");
+      const isValid = sourceId === "votaciones_senado"
+        && kind === "vote"
+        && Boolean(id)
+        && /^\d{4}-\d{2}-\d{2}$/u.test(occurredAt)
+        && (result === "Aprobado" || result === "Rechazado")
+        && !excluded.has(id);
+      if (!isValid) return null;
+
+      const favor = Number(data.total_si ?? record.votos?.favor) || 0;
+      const contra = Number(data.total_no ?? record.votos?.contra) || 0;
+      const abstencion = Number(data.total_abstencion ?? record.votos?.abstencion) || 0;
+      const total = favor + contra + abstencion;
+      const percentage = (value: number) => total > 0 ? Math.round(value / total * 100) : 0;
+      const sourceUrl = String(record.evidence?.sourceUrl ?? data.url ?? record.fuente_url ?? "https://www.senado.cl/");
+      const bulletin = String(data.boletin ?? record.boletin ?? "").trim();
+      const title = String(data.descripcion ?? record.titulo ?? record.descripcion ?? "Votación de sala del Senado")
+        .replace(/\s+/gu, " ")
+        .trim();
+      const verdictType: FeaturedVoteItem["veredictoTipo"] = result === "Aprobado" ? "aprobado" : "rechazado";
+      const date = new Intl.DateTimeFormat("es-CL", {
+        day: "2-digit", month: "short", year: "numeric", timeZone: "UTC",
+      }).format(new Date(`${occurredAt}T12:00:00Z`)).toUpperCase();
+
+      return {
+        id,
+        camara: "Senado",
+        fecha: date,
+        boletin: bulletin ? `BOLETÍN ${bulletin}` : "VOTACIÓN DE SALA",
+        etapa: String(data.tipo ?? record.tipo ?? "Votación de sala"),
+        dilemaCivico: "ÚLTIMA DEL SENADO",
+        titulo: title,
+        impactoCiudadano: title.length > 220 ? `${title.slice(0, 217).trimEnd()}…` : title,
+        veredicto: result,
+        veredictoTipo: verdictType,
+        quorumExplicado: String(data.quorum ?? record.quorum ?? ""),
+        votosFavor: percentage(favor),
+        votosContra: percentage(contra),
+        votosAbstencion: percentage(abstencion),
+        hasNominalVotes: total > 0,
+        link: sourceUrl,
+        linkLabel: "Abrir registro oficial del Senado",
+        externalLink: true,
+        sortAt: voteTimestamp(data.fecha_original ?? record.fecha_original, occurredAt),
+        sortId: numericVoteId(data.votacion_id ?? id),
+      };
+    })
+    .filter((vote): vote is NonNullable<typeof vote> => vote !== null)
+    .sort((left, right) => right.sortAt - left.sortAt || right.sortId - left.sortId)
+    .slice(0, Math.max(0, limit))
+    .map((entry) => {
+      const { sortAt, sortId, ...vote } = entry;
+      void sortAt;
+      void sortId;
+      return vote;
+    });
+}
+
+/** Keeps the curated important vote centered between the two newest Senate votes. */
+export function composeHomeFeaturedVotes(
+  importantVotes: readonly FeaturedVoteItem[],
+  latestSenateVotes: readonly FeaturedVoteItem[],
+): FeaturedVoteItem[] {
+  const important = importantVotes[0];
+  const sideVotes = latestSenateVotes.filter((vote) => vote.id !== important?.id).slice(0, 2);
+  if (!important) return sideVotes;
+  return sideVotes.length >= 2
+    ? [sideVotes[0], important, sideVotes[1]]
+    : [important, ...sideVotes];
+}
+
 const CHAPTERS = [
   { id: "dinero", romanNumeral: "I", title: "Dinero Público & Contrataciones", shortLabel: "Dinero & Contratos", question: "¿A dónde van los recursos del Estado y cómo se compran bienes y servicios?", categories: ["finanzas", "compras"] },
   { id: "poder", romanNumeral: "II", title: "Poder, Vínculos & Gestión de Intereses", shortLabel: "Poder & Lobby", question: "¿Qué relaciones y declaraciones se han publicado?", categories: ["probidad"] },

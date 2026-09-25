@@ -20,6 +20,8 @@ export interface FeaturedVoteItem {
   alineacionPolitica?: string;
   hasNominalVotes: boolean;
   link: string;
+  linkLabel?: string;
+  externalLink?: boolean;
 }
 
 export interface FeaturedVotesProps {
@@ -325,16 +327,30 @@ export function FeaturedVotes({
                       isLead ? "border-forest-border" : "border-border/70"
                     }`}
                   >
-                    <Link
-                      href={vote.link}
-                      prefetch={false}
-                      className={`inline-flex items-center justify-between w-full text-xs font-mono font-bold hover:underline group/cta ${
-                        isLead ? "text-forest-accent-ok hover:opacity-90" : "text-accent"
-                      }`}
-                    >
-                      <span>Ver cómo votó cada parlamentario</span>
-                      <span className="transition-transform group-hover/cta:translate-x-1">→</span>
-                    </Link>
+                    {vote.externalLink ? (
+                      <a
+                        href={vote.link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={`inline-flex items-center justify-between w-full text-xs font-mono font-bold hover:underline group/cta ${
+                          isLead ? "text-forest-accent-ok hover:opacity-90" : "text-accent"
+                        }`}
+                      >
+                        <span>{vote.linkLabel ?? "Abrir fuente oficial"}</span>
+                        <span className="transition-transform group-hover/cta:translate-x-1" aria-hidden="true">↗</span>
+                      </a>
+                    ) : (
+                      <Link
+                        href={vote.link}
+                        prefetch={false}
+                        className={`inline-flex items-center justify-between w-full text-xs font-mono font-bold hover:underline group/cta ${
+                          isLead ? "text-forest-accent-ok hover:opacity-90" : "text-accent"
+                        }`}
+                      >
+                        <span>{vote.linkLabel ?? "Ver cómo votó cada parlamentario"}</span>
+                        <span className="transition-transform group-hover/cta:translate-x-1" aria-hidden="true">→</span>
+                      </Link>
+                    )}
                   </div>
                 </div>
               </article>
