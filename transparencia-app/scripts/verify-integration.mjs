@@ -245,30 +245,16 @@ try {
   const highlightedVotes = page.getByRole("region", { name: "Votaciones destacadas en el Congreso" });
   await highlightedVotes.getByRole("heading", { name: "Votaciones destacadas en el Congreso", exact: true }).waitFor({ state: "visible", timeout: 15_000 });
   await highlightedVotes.getByRole("link", { name: /Ver listado completo de votaciones/ }).waitFor({ state: "visible", timeout: 15_000 });
-  assert((await highlightedVotes.locator("article").count()) > 0, "La portada debe mostrar fichas editoriales de votaciones");
-  const analysisLink = highlightedVotes.getByRole("link", { name: /Ver cómo votó cada parlamentario/ }).first();
-  await analysisLink.waitFor({ state: "visible", timeout: 15_000 });
-  await analysisLink.click();
-  await page.waitForURL(/\/votaciones-destacadas\/\?votacion=/, { timeout: 15_000 });
-  const featuredDialog = page.locator(".featured-vote-dialog:visible");
-  await featuredDialog.waitFor({ state: "visible", timeout: 5_000 });
-  assert.equal(await featuredDialog.locator("[role=tab]").count(), 3, "Detalle destacado debe ofrecer tres capas");
-  assert.equal(await featuredDialog.getByText("Mapa de decisión", { exact: true }).count(), 1, "Detalle destacado debe mostrar el mapa de decisión");
-  assert.equal(await featuredDialog.getByText(/Bancada más cohesionada/i, { exact: true }).count(), 1, "Detalle destacado debe mostrar lecturas de bancada");
-
-  await featuredDialog.getByRole("tab", { name: "Bancadas" }).click();
-  assert((await featuredDialog.locator(".featured-vote__party-row").count()) >= 2, "Detalle destacado debe mostrar bancadas comparables");
-  const comparisonInputs = featuredDialog.locator("input[type=checkbox]");
-  assert((await comparisonInputs.count()) >= 3, "Detalle destacado debe permitir seleccionar bancadas");
-  for (let index = 0; index < 3; index += 1) await comparisonInputs.nth(index).check();
-  assert.equal(await featuredDialog.locator(".featured-vote__comparison-card").count(), 3, "Detalle destacado debe comparar hasta tres bancadas");
-
-  await featuredDialog.getByRole("tab", { name: "Padrón nominal" }).click();
-  const nominalSearch = featuredDialog.locator('input[placeholder="Nombre o bancada"]');
-  await nominalSearch.fill("Pedro Araya");
-  assert.equal(await featuredDialog.getByText("Pedro Araya Guerrero", { exact: true }).count(), 1, "El padrón nominal debe encontrar a Pedro Araya Guerrero");
-  await featuredDialog.getByRole("button", { name: "Cerrar análisis" }).click();
-  await page.waitForTimeout(500);
+  const voteCards = highlightedVotes.locator("article");
+  assert.equal(await voteCards.count(), 3, "La portada debe mostrar las tres votaciones más recientes del Senado");
+  await voteCards.nth(1).getByText("MÁS RECIENTE", { exact: true }).waitFor({ state: "visible", timeout: 15_000 });
+  const officialVoteLinks = highlightedVotes.locator('a[target="_blank"]');
+  assert.equal(await officialVoteLinks.count(), 3, "Cada ficha debe enlazar el registro oficial de su votación");
+  for (let index = 0; index < 3; index += 1) {
+    const link = officialVoteLinks.nth(index);
+    assert.match(await link.getAttribute("href"), /^https:\/\//, "El enlace de votación debe ser oficial y HTTPS");
+    assert.match(await link.getAttribute("rel"), /noopener noreferrer/, "El enlace externo debe ser seguro");
+  }
   await page.screenshot({ path: join(tmpdir(), "transparencia-home-desktop.png"), fullPage: true });
 
   await gotoWithNetworkRetry(`${baseUrl}/cruces`);

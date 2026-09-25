@@ -132,7 +132,7 @@ export function FeaturedVotes({
                         {isLead && (
                           <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full bg-forest-card border border-forest-border-subtle text-[9px] font-mono font-bold text-forest-accent-ok uppercase tracking-wider">
                             <span className="w-1.5 h-1.5 rounded-full bg-forest-accent-ok animate-pulse" />
-                            <span>PROYECTO CLAVE</span>
+                            <span>MÁS RECIENTE</span>
                           </span>
                         )}
                         <span
