@@ -28,6 +28,7 @@ export interface MovementsTimelineProps {
   diasEntreCambios: number;
   desde: string;
   ultimaRevision: string;
+  ultimaSenal: string | null;
   movements: MovementItem[];
 }
 
@@ -54,6 +55,7 @@ export function MovementsTimeline({
   diasEntreCambios,
   desde,
   ultimaRevision,
+  ultimaSenal,
   movements,
 }: MovementsTimelineProps) {
   const [diasSinCambiosActualizados, setDiasSinCambiosActualizados] = useState(diasSinCambios);
@@ -154,23 +156,31 @@ export function MovementsTimeline({
           </div>
         </div>
 
-        {/* ── FECHAS DE CAMBIO Y REVISIÓN ── */}
+        {/* ── FECHAS DE SEÑAL, CAMBIO EFECTIVO Y REVISIÓN ── */}
         <div className="mb-12 pb-6 border-b border-border/70">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div className="rounded-lg border border-border bg-surface-2 px-4 py-3">
-              <span className="block text-[10px] font-mono font-bold text-text-3 uppercase tracking-widest">Último cambio efectivo</span>
-              <time dateTime={dateKey(fechaCambioEfectivoActualizada) || undefined} className="mt-1 block text-lg sm:text-xl font-mono font-bold text-text-1 tracking-wide">
-                {displayDate(fechaCambioEfectivoActualizada)}
-              </time>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 font-mono text-xs">
+            <div className="flex items-center gap-2 text-text-2">
+              <span className="text-text-1 font-semibold tracking-wider">{desde}</span>
+              <span className="text-[10px] text-text-3 uppercase tracking-widest">— Inicio</span>
             </div>
-            <div className="rounded-lg border border-border bg-surface-2 px-4 py-3">
-              <span className="block text-[10px] font-mono font-bold text-text-3 uppercase tracking-widest">Última revisión</span>
-              <time dateTime={dateKey(ultimaRevision) || undefined} className="mt-1 block text-lg sm:text-xl font-mono font-bold text-text-1 tracking-wide">
-                {displayDate(ultimaRevision)}
-              </time>
+            <div className="flex-1 flex items-center px-2 sm:px-6">
+              <div className="min-h-px w-full bg-border relative flex items-center justify-center animate-line-draw">
+                <div className="bg-background px-3.5 py-1.5 border border-accent/40 rounded-full flex flex-col sm:flex-row items-center justify-center gap-x-3 gap-y-1 shadow-xs animate-stamp-pop text-center">
+                  {ultimaSenal && <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-accent uppercase tracking-wider">
+                    <span className="w-2 h-2 rounded-full bg-accent" aria-hidden="true" />
+                    <span>ÚLTIMA SEÑAL PUBLICADA: <time dateTime={dateKey(ultimaSenal) || undefined}>{displayDate(ultimaSenal)}</time></span>
+                  </span>}
+                  <span className="text-[10px] font-bold text-text-2 uppercase tracking-wider">
+                    CAMBIO EFECTIVO: <time dateTime={dateKey(fechaCambioEfectivoActualizada) || undefined}>{displayDate(fechaCambioEfectivoActualizada)}</time>
+                  </span>
+                </div>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 md:justify-end text-text-2">
+              <span className="text-[10px] text-text-3 uppercase tracking-widest">Última revisión —</span>
+              <time dateTime={dateKey(ultimaRevision) || undefined} className="text-text-1 font-semibold tracking-wider">{displayDate(ultimaRevision)}</time>
             </div>
           </div>
-          <p className="mt-2 text-[10px] font-mono text-text-3">Seguimiento desde {desde}</p>
         </div>
 
         {/* ── ESTRUCTURA ASIMÉTRICA PRINCIPAL ── */}

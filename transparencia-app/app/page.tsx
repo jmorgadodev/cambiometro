@@ -9,6 +9,7 @@ import { formatFechaCorta } from "@/lib/format";
 import { getLandingSummary, sourceKeyForHomeSource } from "@/lib/landing-summary-runtime";
 import { buildEditorialChapters, buildEditorialMovements, buildEditorialVotes, buildLatestSenateVotes, composeHomeFeaturedVotes } from "@/lib/home-editorial-adapter";
 import { HOME_STRUCTURED_DATA } from "@/lib/home-structured-data";
+import { latestMovementReviewDate, latestMovementSignalDate } from "@/lib/movement-age";
 
 import { Hero } from "@/components/home/Hero";
 import { SearchBar } from "@/components/home/SearchBar";
@@ -118,7 +119,8 @@ export default async function HomePage() {
         ultimoCambioEfectivo={MOVIMIENTOS_HOME_SUMMARY.ultimoCambioEfectivo}
         diasEntreCambios={daysBetweenChanges}
         desde={formatFechaCorta(MOVIMIENTOS_HOME_SUMMARY.desde)}
-        ultimaRevision={MOVIMIENTOS_PIPELINE_METADATA.last_success_at ?? MOVIMIENTOS_HOME_SUMMARY.ultimoCorte}
+        ultimaRevision={latestMovementReviewDate(MOVIMIENTOS_PIPELINE_METADATA.last_success_at, MOVIMIENTOS_PIPELINE_METADATA.signals) ?? MOVIMIENTOS_HOME_SUMMARY.ultimoCorte}
+        ultimaSenal={latestMovementSignalDate(MOVIMIENTOS_PIPELINE_METADATA.signals)}
         movements={editorialMovements}
       />
 
