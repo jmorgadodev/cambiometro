@@ -75,12 +75,20 @@ try {
   const searchResponse = await page.request.get(`${apiBaseUrl}/api/v1/search`, {
     params: { q: xssPayload },
   });
-  assert.equal(searchResponse.status(), 200, "búsqueda con payload XSS debe responder 200");
+  assert(
+    [200, 503].includes(searchResponse.status()),
+    `búsqueda con payload XSS debe responder 200 o indisponibilidad R2 explícita; recibió ${searchResponse.status()}`,
+  );
   const contentType = searchResponse.headers()["content-type"] ?? "";
   assert(contentType.includes("application/json"), "búsqueda debe responder JSON, no HTML");
   const searchBody = await searchResponse.text();
   const searchJson = JSON.parse(searchBody);
-  assert.equal(searchJson.meta?.query, xssPayload, "la búsqueda debe conservar el payload sólo como dato JSON");
+  if (searchResponse.status() === 200) {
+    assert.equal(searchJson.meta?.query, xssPayload, "la búsqueda debe conservar el payload sólo como dato JSON");
+  } else {
+    assert.equal(searchJson.error?.code, "DATABASE_UNAVAILABLE", "503 debe representar sólo el índice R2 ausente");
+    assert(!searchBody.includes(xssPayload), "la respuesta de indisponibilidad no debe reflejar el payload");
+  }
 
   await gotoWithRetry(`${baseUrl}/`);
   await page.evaluate(() => {
