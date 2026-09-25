@@ -315,6 +315,57 @@ describe("API canónica v1", () => {
     expect(payload.meta.sourceStatus).toBe("r2-catalog");
   });
 
+  it("encuentra entidades por RUT oficial tanto con puntos como sin formato", async () => {
+    const buyer = {
+      id: "public-body-chilecompra-rut-690713004",
+      kind: "public_body",
+      name: "Comprador de prueba",
+      attributes: {},
+      identifiers: [{ scheme: "CHILECOMPRA-RUT", value: "69.071.300-4", isPublic: true, sourceUrl: "https://example.test/source" }],
+      sourceIds: ["chilecompra"],
+    };
+    const supplier = {
+      id: "provider-chilecompra-legal-cl-966893109",
+      kind: "supplier",
+      name: "Proveedor de prueba",
+      attributes: {},
+      identifiers: [{ scheme: "CL-MP", value: "legal-cl-966893109", isPublic: true, sourceUrl: "https://example.test/source" }],
+      sourceIds: ["chilecompra"],
+    };
+    const privatePerson = {
+      id: "person-private-run",
+      kind: "person",
+      name: "Persona no identificada en resultados por RUT",
+      attributes: {},
+      identifiers: [{ scheme: "CL-RUN", value: "92.011.000-2", isPublic: false, sourceUrl: "https://example.test/private" }],
+      sourceIds: ["source-private"],
+    };
+    const numericNameOnly = {
+      id: "legal-entity-name-only",
+      kind: "legal_entity",
+      name: "Sociedad 96.689.310-9 histórica",
+      attributes: {},
+      identifiers: [],
+      sourceIds: ["unverified"],
+    };
+    const env = {
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse para buscar por RUT"); } },
+      PUBLIC_DATA: {
+        get: async (key: string) => key === "projections/entities-v1/entities-routes.json"
+          ? { json: async <T>() => [buyer, supplier, privatePerson, numericNameOnly] as T }
+          : null,
+      },
+    } as never;
+
+    for (const rut of ["966893109", "96.689.310-9", "690713004", "69.071.300-4"]) {
+      const response = await api.fetch(new Request(`https://example.test/api/v1/search?q=${encodeURIComponent(rut)}`), env);
+      const payload = await response.json();
+      expect(response.status).toBe(200);
+      const expected = rut.includes("966") || rut.startsWith("96.") ? supplier : buyer;
+      expect(payload.data.entidades).toEqual([expect.objectContaining({ nombre: expected.name, id: expected.id })]);
+    }
+  });
+
   it("incluye pagos 38 bis en la búsqueda general sin consultar D1", async () => {
     const env = {
       DB: { prepare: () => { throw new Error("D1 no debe consultarse para remuneraciones del home"); } },
