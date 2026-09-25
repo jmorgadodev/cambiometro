@@ -11,7 +11,9 @@ marcan como tales, no se presumen completos.
 |---|---|---:|---|
 | P0 | Quitar del footer el estado del catálogo y la tarjeta de donación | 100% | PR #627 integrado; build, E2E, seguridad y prueba de regresión pasaron. Promoción `36094441207`, deployment `bfff1571-61e6-446a-9723-cfb20f6c04c8`. HTML y navegador productivo confirman que los bloques desaparecieron, la misión permanece y “Donar y apoyar” sigue enlazado a `/donar`. |
 | P1 | SEO de la Home | 100% | Título, descripción y H1 verificados directamente en producción el 25-09-2026; HTTP 200. PR #625 y guardia de promoción #626 integrados. |
-| P1 | SEO técnico y oportunidades de Search Console | 45% | En producción, `/municipalidades/niquen/` tiene título y descripción propios; la canónica coincide con la URL con barra final. PR #628 corrige el título genérico y la descripción duplicada de fichas parlamentarias; la publicación/verificación productiva de ese commit sigue pendiente. También falta obtener las URLs concretas de 404, redirecciones y canónicas del informe para resolverlas sin crear redirecciones a ciegas. El CTR sólo se considerará validado después de medir Search Console. |
+| P1 | Metadatos SEO municipales | 100% | Producción verificada en `/municipalidades/niquen/`: título y descripción describen la ficha y canonical coincide con la URL con barra final. |
+| P1 | Metadatos SEO de fichas parlamentarias | 100% | PR #628 desplegado; Javiera Morales devuelve título neutral y descripción propia sobre registros, períodos y fuentes. HTTP 200 y canonical autorreferencial con barra final, comprobados en producción. |
+| P1 | Resolver los hallazgos técnicos/CTR de Search Console | 25% | Home y muestras de Niquén/Javiera verificadas. Aún faltan las URLs concretas de 404/redirecciones/canónicas para actuar sin redirigir a ciegas, revisar los casos de RUT y enlaces internos, y medir impresiones/CTR después de la indexación. No afirmar que Search Console está completamente saneado. |
 | P1 | Movimientos publicados | 90% | A 25-09: 46 filas oficiales en R2 y Páez/Bravo presentados aparte en confirmación. Falta evidencia primaria para reclasificarlos y seguir incorporando sólo cambios posteriores verificados. |
 | P1 | Gastos operacionales del Senado | 85% | La reconciliación registrada encuentra 174 manifiestos/artefactos locales con checksum válido y 154.132 filas esperadas; se probaron consultas productivas paginadas y meses de muestra. Falta completar un recorrido de interfaz/API de todos los períodos y confirmar que el release servido coincide íntegramente. No se debe reconstruir ni subir el universo sin preflight. |
 | P1 | R2: tamaño, respaldo y restauración | 45% | Existe inventario y guard account-wide de publicación; la última evidencia histórica disponible suma 17,44 GB entre el bucket público y backup, por encima del margen gratuito conocido. El tamaño actual no está medido. El inventario de backup no permite aún certificar restauración; no borrar snapshots hasta completar un drill aislado y comparar checksum/rollback. |
@@ -27,18 +29,18 @@ marcan como tales, no se presumen completos.
   El Cambiómetro`; H1 correspondiente; descripción orientada a datos oficiales.
 - Municipalidad de Ñiquén: HTTP 200; título descriptivo con atributos de la
   ficha y descripción específica.
-- Javiera Morales antes del despliegue de PR #628: HTTP 200, título con cargo
-  masculino genérico y meta descripción duplicada. La plantilla ya quedó
-  corregida y probada para usar una ficha pública neutral, registros realmente
-  presentados y fuentes; comprobar el HTML productivo luego de la promoción.
+- Javiera Morales después del despliegue de PR #628: HTTP 200; título
+  `Javiera Morales Alvarado: ficha pública | El Cambiómetro`, descripción propia
+  sobre asistencia, votaciones, rendiciones, períodos y fuentes, y canonical
+  autorreferencial con barra final.
 - Los conteos de Search Console (404, redirecciones, canónicas, impresiones y
   CTR) requieren consultar sus URLs/filas exactas; los totales del informe no
   bastan para crear redirecciones ni para declarar resuelta la indexación.
 
 ## Secuencia de trabajo
 
-1. Promover y verificar en producción los metadatos dinámicos de fichas
-   parlamentarias; luego resolver Search Console por URLs concretas.
+1. Resolver Search Console cuando se cuente con sus URLs exactas, empezando por
+   404, redirecciones y canónicas; después comprobar CTR por un período medible.
 2. Revalidar la compactación de R2 sin escribir ni borrar; resolver primero la
    restaurabilidad del backup.
 3. Auditar ChileCompra de forma acotada y después recorrer Gastos Senado por

@@ -63,6 +63,14 @@ El cierre productivo se confirmó el 25-09-2026: PR #627, commit de producción
 productiva devolvió HTTP 200; el HTML y la revisión en navegador confirmaron
 ausentes ambos bloques, presente la misión y conservado el enlace a `/donar`.
 
+El 25-09-2026 se promovieron además los metadatos SEO de fichas parlamentarias
+del PR #628 usando el artefacto del run `36094686045`. Deployment
+`cdf08329-34eb-4283-bccb-3a6495b492f8`; se verificó en producción el título,
+la descripción y la canonical de Javiera Morales, sin el cargo masculino
+genérico ni la descripción duplicada. Los pendientes de Search Console
+(URLs 404, canónicas y medición de CTR) continúan abiertos; no se infieren
+redirecciones a partir de conteos agregados.
+
 ## Producción vigente
 
 - Sitio: `https://cambiometro.impulsacv.cl`
