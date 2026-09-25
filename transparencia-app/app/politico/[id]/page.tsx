@@ -10,6 +10,7 @@ import {
   getPoliticoByIdOrSlug,
   getPoliticoSlug,
 } from "@/lib/politico-slugs";
+import { createPoliticoSeoMetadata } from "@/lib/politico-seo-metadata";
 
 export async function generateStaticParams() {
   return POLITICOS_SEED.map((pol) => ({
@@ -56,33 +57,14 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const pol = getPoliticoByIdOrSlug(id);
   if (!pol) return { title: "Político no encontrado" };
 
-  const partido = PARTIDOS_SEED.find((p) => p.id === pol.partido_id);
-  const partidoLabel = partido?.sigla ?? pol.partido_id ?? "IND";
   const canonicalSlug = getPoliticoSlug(pol);
   const ogImage = `https://cambiometro.impulsacv.cl/api/og/${pol.id}`;
 
-  const metaTitle = `${pol.nombre_completo} (${partidoLabel}) — ${pol.cargo}, asistencia, votaciones y rendiciones`;
-  const metaDesc = `${pol.nombre_completo} (${partidoLabel}) — ${pol.cargo}, asistencia, votaciones y rendiciones | El Cambiómetro`;
-
-  return {
-    title: metaTitle,
-    description: metaDesc,
-    alternates: {
-      canonical: `https://cambiometro.impulsacv.cl/politico/${canonicalSlug}`,
-    },
-    openGraph: {
-      title: metaTitle,
-      description: metaDesc,
-      url: `https://cambiometro.impulsacv.cl/politico/${canonicalSlug}`,
-      images: [ogImage],
-    },
-    twitter: {
-      card: "summary_large_image",
-      title: metaTitle,
-      description: metaDesc,
-      images: [ogImage],
-    },
-  };
+  return createPoliticoSeoMetadata({
+    name: pol.nombre_completo,
+    canonicalSlug,
+    ogImage,
+  });
 }
 
 /* ─── PÁGINA DE PERFIL ─────────────────────────────────────────────────── */
