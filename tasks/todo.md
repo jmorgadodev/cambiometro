@@ -12,16 +12,16 @@ cierre verificados; no representan cobertura de datos ni una métrica automátic
   smoke productivo HTTP 200; workflow `36078815272` exitoso.
 - [x] Movimientos separa las 46 salidas reconciliadas del Ejecutivo de las dos
   señales en confirmación. Reemplazos parlamentarios quedan fuera de ese conteo.
-- [x] ETL remoto diario de votaciones Senado deshabilitado en GitHub; la tarea
-  local de Windows está registrada y `Ready`. El workflow de ingestión se
-  retiró también del calendario/versionado; la reparación manual aislada queda.
+- [x] ETL remoto diario de votaciones Senado retirado de workflow y calendario
+  versionados; PR #621 integrado con checks verdes. La tarea local de Windows
+  permanece registrada y `Ready`; la reparación manual aislada queda.
 
 ### Pendiente priorizado
 
 | Bloque | Avance estimado | Próximo criterio para cerrar |
 | --- | ---: | --- |
 | Historial de mandatos parlamentarios — **nuevo** | 10% | Capturar cortes oficiales por ID y asiento; comparar altas/bajas; confirmar fechas con evidencia; conservar períodos cerrados sin sumarlos a Movimientos del Ejecutivo. El análisis encontró que la tabla D1 actual no basta como historial público y su materialización remota está deshabilitada por defecto. |
-| Gastos Senado | 75% | Reconciliar en producción las 25 filas de diferencia API/R2 vs. estático y confirmar el recorrido histórico. El build local valida 174 períodos, pero eso no cierra por sí solo la discrepancia productiva observada el 23-09. |
+| Gastos Senado | 75% | Reconciliar en producción las 25 filas de diferencia API/R2 vs. estático y confirmar el recorrido histórico. Se validaron por API 2012-01 (307), 2026-06 (1.248) y 2026-07 (1.250); faltan 171 cortes para probar 174 meses y el delta estático sigue abierto. |
 | Votaciones Senado | 60% | Validar el lote local de 6 IDs (11341–11346) contra el origen y publicarlo sólo con conteos completos y rollback. |
 | ChileCompra | 60% | Resolver el 403 del archivo mensual o mantener el corte válido; publicar sólo un período verificable, nunca el resultado vacío. |
 | Remuneraciones y calidad CPLT | 55% | Terminar duplicados/calidad municipales, revisar el corte central contaminado y reconciliar el salto de julio con la parcialidad de agosto-septiembre; luego construir historiales por lotes. |
@@ -30,7 +30,8 @@ cierre verificados; no representan cobertura de datos ni una métrica automátic
 | Auditoría integral ETL → R2 → API → páginas | 60% | Cerrar deltas conocidos por fuente, corte y checksum; repetir smoke productivo y registrar fallos externos que siguen conservando el último release válido. |
 
 **Avance global estimado: 65%.** Es una estimación ponderada de los bloques
-anteriores. El último corte de auditoría de fuentes disponible es 23-09-2026;
+anteriores. La última auditoría de fuentes amplia es 23-09-2026; se añadió una
+verificación puntual de Gastos Senado el 24-09, sin cerrar su cobertura histórica.
 el despliegue UI-only del 25-09 no refrescó ETL ni modificó R2/D1, así que no
 debe interpretarse como una actualización de los datos.
 

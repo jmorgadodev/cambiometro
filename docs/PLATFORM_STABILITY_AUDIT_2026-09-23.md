@@ -57,3 +57,28 @@ Los conteos de padres, componentes y fuentes agregadas tienen alcances distintos
 ## Siguiente paso seguro
 
 Restaurar permisos de lectura de métricas R2/D1; reconciliar los 25 registros y las diferencias de conteo antes de una publicación de datos; ejecutar un preview Pages con hidratación controlada y repetir el build/font check. Mantener el backup intacto hasta probar una restauración y no volver a materializar gastos en D1.
+
+## Verificación incremental adicional — 24-09-2026
+
+Se consultó la API pública con `source=gastos_senado`, `limit=1` y filtros de
+período, sin leer D1 ni descargar el conjunto completo. El resumen sin filtro
+declara 154.132 filas esperadas y usa `r2-lake`; la primera página reporta
+`partial` porque la paginación no escanea todas las particiones en una sola
+petición. Esto no equivale a que falten datos ni demuestra cobertura completa.
+
+| Período muestreado | Filas del período | Filas devueltas | Estado | Particiones/artefactos ausentes |
+| --- | ---: | ---: | --- | --- |
+| 2012-01 | 307 | 1 | complete | 0 / 0 |
+| 2026-06 | 1.248 | 1 | complete | 0 / 0 |
+| 2026-07 | 1.250 | 1 | complete | 0 / 0 |
+
+La consulta de cada corte queda acotada al período; no se recorrieron los 174
+meses ni se verificó el artefacto estático contra todas las filas de R2. Por
+tanto, la discrepancia de 25 filas del corte estático y la cobertura histórica
+siguen abiertas. Los tres resultados sólo confirman que esos períodos concretos
+se pueden consultar desde R2 con su manifiesto completo.
+
+También se integró el PR #621: el ETL remoto programado de votaciones Senado
+se retiró del workflow y del calendario versionado; se conserva la ejecución
+local ya registrada y la reparación manual aislada. La integración no desplegó
+la web ni escribió en R2/D1.
