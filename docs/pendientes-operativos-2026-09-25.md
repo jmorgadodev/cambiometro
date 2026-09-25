@@ -9,9 +9,9 @@ marcan como tales, no se presumen completos.
 
 | Prioridad | Alcance | Avance | Evidencia y trabajo restante |
 |---|---|---:|---|
-| P0 | Quitar del footer el estado del catálogo y la tarjeta de donación | 75% | La prueba falló primero reproduciendo ambos bloques; el código y la prueba ya están corregidos localmente. Falta PR, CI, promoción y comprobar el footer servido por producción. “Donar y apoyar” permanece enlazado a `/donar`. |
+| P0 | Quitar del footer el estado del catálogo y la tarjeta de donación | 100% | PR #627 integrado; build, E2E, seguridad y prueba de regresión pasaron. Promoción `36094441207`, deployment `bfff1571-61e6-446a-9723-cfb20f6c04c8`. HTML y navegador productivo confirman que los bloques desaparecieron, la misión permanece y “Donar y apoyar” sigue enlazado a `/donar`. |
 | P1 | SEO de la Home | 100% | Título, descripción y H1 verificados directamente en producción el 25-09-2026; HTTP 200. PR #625 y guardia de promoción #626 integrados. |
-| P1 | SEO técnico y oportunidades de Search Console | 35% | En producción, `/municipalidades/niquen/` ya tiene título descriptivo con comuna, alcalde, sueldos, censo y presupuesto, y una descripción propia. La ficha de Javiera Morales aún entrega “Diputado” en el título y una descripción duplicada del título. Pendiente: corregir y probar metadatos de fichas; revisar canonical/trailing slash; obtener y resolver las listas concretas de 404, redirecciones y canónicas que Google reporta. No prometer mejora de CTR sin medirla. |
+| P1 | SEO técnico y oportunidades de Search Console | 45% | En producción, `/municipalidades/niquen/` tiene título y descripción propios; la canónica coincide con la URL con barra final. PR #628 corrige el título genérico y la descripción duplicada de fichas parlamentarias; la publicación/verificación productiva de ese commit sigue pendiente. También falta obtener las URLs concretas de 404, redirecciones y canónicas del informe para resolverlas sin crear redirecciones a ciegas. El CTR sólo se considerará validado después de medir Search Console. |
 | P1 | Movimientos publicados | 90% | A 25-09: 46 filas oficiales en R2 y Páez/Bravo presentados aparte en confirmación. Falta evidencia primaria para reclasificarlos y seguir incorporando sólo cambios posteriores verificados. |
 | P1 | Gastos operacionales del Senado | 85% | La reconciliación registrada encuentra 174 manifiestos/artefactos locales con checksum válido y 154.132 filas esperadas; se probaron consultas productivas paginadas y meses de muestra. Falta completar un recorrido de interfaz/API de todos los períodos y confirmar que el release servido coincide íntegramente. No se debe reconstruir ni subir el universo sin preflight. |
 | P1 | R2: tamaño, respaldo y restauración | 45% | Existe inventario y guard account-wide de publicación; la última evidencia histórica disponible suma 17,44 GB entre el bucket público y backup, por encima del margen gratuito conocido. El tamaño actual no está medido. El inventario de backup no permite aún certificar restauración; no borrar snapshots hasta completar un drill aislado y comparar checksum/rollback. |
@@ -27,23 +27,23 @@ marcan como tales, no se presumen completos.
   El Cambiómetro`; H1 correspondiente; descripción orientada a datos oficiales.
 - Municipalidad de Ñiquén: HTTP 200; título descriptivo con atributos de la
   ficha y descripción específica.
-- Javiera Morales: HTTP 200, pero el título observado dice “Diputado” y la
-  meta descripción repite el título. Corregir la plantilla con atributos que
-  existan en la ficha, sin inventar categorías.
+- Javiera Morales antes del despliegue de PR #628: HTTP 200, título con cargo
+  masculino genérico y meta descripción duplicada. La plantilla ya quedó
+  corregida y probada para usar una ficha pública neutral, registros realmente
+  presentados y fuentes; comprobar el HTML productivo luego de la promoción.
 - Los conteos de Search Console (404, redirecciones, canónicas, impresiones y
   CTR) requieren consultar sus URLs/filas exactas; los totales del informe no
   bastan para crear redirecciones ni para declarar resuelta la indexación.
 
 ## Secuencia de trabajo
 
-1. Cerrar footer con prueba negativa, CI y verificación de producción.
-2. Corregir y probar los metadatos dinámicos de figuras públicas y luego
-   revisar Search Console por URLs concretas.
-3. Revalidar la compactación de R2 sin escribir ni borrar; resolver primero la
+1. Promover y verificar en producción los metadatos dinámicos de fichas
+   parlamentarias; luego resolver Search Console por URLs concretas.
+2. Revalidar la compactación de R2 sin escribir ni borrar; resolver primero la
    restaurabilidad del backup.
-4. Auditar ChileCompra de forma acotada y después recorrer Gastos Senado por
+3. Auditar ChileCompra de forma acotada y después recorrer Gastos Senado por
    períodos en interfaz/API.
-5. Continuar la reconciliación por fuente y registrar cada corte comprobado.
+4. Continuar la reconciliación por fuente y registrar cada corte comprobado.
 
 Ningún pendiente de datos autoriza por sí solo una publicación masiva en R2 ni
 una consulta masiva en D1. Un ETL verde no equivale a datos publicados; un
