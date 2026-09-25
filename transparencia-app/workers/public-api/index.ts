@@ -5,6 +5,7 @@ import { readR2EvidenceRecords } from "../../lib/r2-records";
 import { readR2EntityIndex } from "../../lib/r2-entities";
 import { staticRecordCandidatePaths, staticRecordRows } from "../../lib/r2-public-record-paths";
 import { matchesFuncionarioQuality, normalizeFuncionarioRecord, type FuncionarioQualityFilter } from "../../lib/funcionarios-normalization";
+import { publicLegalRutValue } from "../../lib/public-legal-rut";
 import { intersectSortedPositions, subtractSortedPositions, positionsWithoutExcluded } from "./search-postings";
 
 interface EmailSender {
@@ -1861,6 +1862,15 @@ async function searchFromR2(requestUrl: URL, env: Env) {
   if (raw.length < 2 || raw.length > 80) return failure("INVALID_QUERY", "La búsqueda debe tener entre 2 y 80 caracteres.", 400);
   const normalize = (value: unknown) => String(value ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL");
   const needle = normalize(raw);
+  const compactRutQuery = raw.replace(/[^0-9k]/gi, "").toUpperCase();
+  const isRutQuery = /^[0-9.kK-]+$/.test(raw) && compactRutQuery.length >= 8 && compactRutQuery.length <= 10;
+  const matchesPublicRut = (row: JsonRecord) => isRutQuery && Array.isArray(row.identifiers) && row.identifiers.some((identifier) => {
+    if (!identifier || typeof identifier !== "object") return false;
+    const candidate = identifier as JsonRecord;
+    if (typeof candidate.scheme !== "string" || typeof candidate.value !== "string") return false;
+    const legalRut = publicLegalRutValue({ scheme: candidate.scheme, value: candidate.value, isPublic: candidate.isPublic === true });
+    return legalRut === compactRutQuery;
+  });
   // Parlamentarios no viven en la tabla nacional de funcionarios CPLT. Se
   // mantienen en el catálogo pequeño y versionado del Worker, por lo que la
   // búsqueda del home sigue encontrando diputados y senadores aunque D1 esté
@@ -1883,7 +1893,7 @@ async function searchFromR2(requestUrl: URL, env: Env) {
     searchRemuneraciones38BisFromR2(raw, env),
   ]);
   const entities = (rows ?? [])
-    .filter((row) => normalize(row.name).includes(needle))
+    .filter((row) => isRutQuery ? matchesPublicRut(row) : normalize(row.name).includes(needle))
     .slice(0, 75)
     .map((row) => {
       const item = entity(row);

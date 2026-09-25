@@ -12,6 +12,7 @@ import EntityEvidenceAccordionExplorer from "@/components/records/EntityEvidence
 import { traducirPredicado, traducirTipoEntidad, formatNombreInstitucional } from "@/lib/diccionario-cruces";
 import { evaluateBudgetSourceAnomaly } from "@/lib/budget-integrity";
 import type { Metadata } from "next";
+import { createEntitySeoMetadata, getPublicLegalRut } from "@/lib/entity-seo-metadata";
 
 export function generateStaticParams() {
   try {
@@ -27,11 +28,8 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: { params: Promise<{ id: string }> }): Promise<Metadata> {
   const { id } = await params;
-  return {
-    alternates: {
-      canonical: `/entidades/${id}`,
-    },
-  };
+  const payload = readEntityPayload(id);
+  return payload?.entity ? createEntitySeoMetadata(payload.entity) : { title: "Ficha de entidad | El Cambiómetro" };
 }
 
 const TABS: Array<{ id: string; label: string; kinds?: EvidenceKind[] }> = [
@@ -69,6 +67,7 @@ export default async function EntityPage({ params }: { params: Promise<{ id: str
   const payload = readEntityPayload(id);
   const entity = payload?.entity;
   if (!entity || !payload) notFound();
+  const publicRut = getPublicLegalRut(entity);
 
   const supportRecords: EvidenceRecord[] = [];
   const allRecords = payload.records;
@@ -188,6 +187,7 @@ export default async function EntityPage({ params }: { params: Promise<{ id: str
           <div>
             <p className="eyebrow">Entidad canónica · {traducirTipoEntidad(entity.kind)}</p>
             <h1>{formatNombreInstitucional(entity.name).display}</h1>
+            {publicRut && <p style={{ marginTop: "0.35rem", color: "var(--text-muted)" }}>RUT <code>{publicRut}</code></p>}
             {entity.attributes?.parentName && (
               <div style={{ marginTop: "0.35rem", fontSize: "0.82rem", color: "var(--text-muted)" }}>
                 Institución matriz:{" "}
