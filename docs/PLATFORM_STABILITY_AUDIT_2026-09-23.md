@@ -117,3 +117,43 @@ declara 41 filas, `complete`, cero particiones ausentes y cero artefactos
 ausentes. El lote ya está en R2; no se hizo una publicación adicional. Esto
 cierra la comprobación de esos días, no una auditoría de todo el histórico ni
 la validación de cada pantalla de detalle parlamentaria.
+
+## Verificación de continuidad — 25-09-2026
+
+### Movimientos
+
+- `GET /api/v1/records?source=movimientos&limit=5&offset=0` respondió HTTP 200
+  desde R2 y declaró `meta.total=46`, `sourceStatus=complete` y
+  `publishedRows=46`. El evento más reciente del conjunto oficial es del
+  2026-09-14 (Jorge Olivares).
+- La Home productiva incluye las fichas de Fabián Páez y José Bravo separadas
+  como **en confirmación**. No forman parte de las 46 filas oficiales de la API.
+- El Ministerio de Salud publicó que solicitó la renuncia de José Bravo Burgos,
+  pero el comunicado no fija fecha efectiva ni identifica a quien asumió. Se
+  mantiene la señal pendiente hasta encontrar evidencia primaria de eficacia.
+  [Comunicado del Minsal](https://www.minsal.cl/el-ministerio-de-salud-informa-que-solicito-la-renuncia-del-secretario-regional-ministerial-de-salud-de-la-region-de-la-araucania/)
+- Para Fabián Páez, las notas de Emol y BioBioChile informan que la salida se
+  materializó el 17-09, pero no se localizó en esta revisión un decreto o
+  comunicado primario. Se conserva en confirmación y fuera del total oficial.
+  [Emol](https://www.emol.com/noticias/Nacional/2026/09/17/1211717/renuncia-38-seremi-energia-coquimbo.html),
+  [BioBioChile](https://www.biobiochile.cl/noticias/nacional/region-de-coquimbo/2026/09/17/baja-48-del-gobierno-renuncia-seremi-de-energia-coquimbo-por-no-acreditar-requisitos-academicos.shtml)
+- Resultado: ambas señales están visibles en Home y no faltan en el tratamiento
+  público; el flujo oficial no las incorpora al conteo hasta completar la
+  comprobación primaria. Sin cambios en R2/D1 ni promoción.
+
+### ChileCompra
+
+- El workflow `35615467921` (21-09-2026) terminó en fallo durante “Ingerir y
+  proyectar ChileCompra OCDS”. El respaldo masivo devolvió
+  `CHILECOMPRA_BULK_HTTP_403` para septiembre de 2026.
+- La guardia `assertChileCompraReleaseUsable` rechazó el lote con
+  `CHILECOMPRA_RELEASE_EMPTY_OR_UNAVAILABLE` y resumen
+  `listings=0, documents=0, records=0, projectedRecords=0`.
+- Por `set -e`, los pasos de proyección/publicación se omitieron; también se
+  omitieron todos los pasos de materialización D1. El release anterior se
+  conservó. Es un bloqueo de disponibilidad del origen, no un fallo de R2
+  demostrado.
+- Decisión segura: no repetir el ETL completo ni publicar un mes vacío. El
+  siguiente intento debe usar el origen alternativo oficial con alcance y
+  paginación acotados, preflight de conteos y estimación de bytes antes de
+  cualquier publicación. No hubo escritura remota en esta verificación.
