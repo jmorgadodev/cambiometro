@@ -26,23 +26,22 @@ describe("Footer compacto y pulido móvil", () => {
     expect(cssContent).toContain("gap: 10px");
   });
 
-  it("móvil: marca con misión y corte como caja compacta --surface-2 no inline", () => {
+  it("mantiene la misión y evita repetir el estado del catálogo o la donación en el footer", () => {
     expect(layoutContent).toContain("site-footer__mission");
-    expect(layoutContent).toContain("provenance-stamp");
-    expect(layoutContent).toContain("Estado del catálogo");
-    expect(layoutContent).toContain("Catálogo actualizado por fuente");
-    expect(layoutContent).toContain("Las fuentes se actualizan por separado y conservan su propio corte");
+    expect(layoutContent).not.toContain("provenance-stamp");
+    expect(layoutContent).not.toContain("Estado del catálogo");
+    expect(layoutContent).not.toContain("Catálogo actualizado por fuente");
+    expect(layoutContent).not.toContain("Sostenibilidad Ciudadana");
+    expect(layoutContent).not.toContain("Realizar un aporte en Mercado Pago");
+    expect(layoutContent).toContain('["Donar y apoyar", "/donar"]');
 
     expect(cssContent).toContain(".site-footer__mission");
     expect(cssContent).toContain("font-size: 13.5px");
-    expect(cssContent).toContain(".provenance-stamp");
-    expect(cssContent).toContain("background: var(--surface-2)");
-    expect(cssContent).toContain("border: 1px solid var(--border)");
   });
 
-  it("el layout global no consulta D1 ni muestra un total consolidado desactualizable", () => {
+  it("el layout global no consulta D1 ni muestra estado del catálogo", () => {
     expect(layoutContent).not.toContain("getDataPlatformSummary");
-    expect(layoutContent).toContain("Catálogo actualizado por fuente");
+    expect(layoutContent).not.toContain("Catálogo actualizado por fuente");
     expect(layoutContent).not.toContain("totalRecords.toLocaleString");
   });
 

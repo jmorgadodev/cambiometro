@@ -1,7 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
 import { CookiePreferencesButton } from "@/components/CookieConsent";
-import { SupportProjectLink } from "@/components/SupportProjectLink";
 
 const FOOTER_GROUPS = [
   {
@@ -87,23 +86,6 @@ export default function Footer() {
           <p className="site-footer__mission">
             Plataforma ciudadana independiente que compila, consolida y visualiza información de fuentes públicas oficiales del Estado de Chile para facilitar la fiscalización y transparencia.
           </p>
-          <div className="provenance-stamp">
-            <div className="provenance-stamp__header">
-              <span className="snapshot-stamp__status" aria-hidden="true" />
-              <span>Estado del catálogo</span>
-            </div>
-            <strong>Catálogo actualizado por fuente</strong>
-            <small>Las fuentes se actualizan por separado y conservan su propio corte</small>
-          </div>
-          <aside className="site-footer__support">
-            <h2>Sostenibilidad Ciudadana</h2>
-            <p>
-              El Cambiómetro es una plataforma ciudadana 100% independiente que procesa y audita más de 1,7 millones de registros públicos de Chile sin financiamiento de partidos ni de empresas. Ayúdanos a costear los servidores y la infraestructura de datos con un aporte voluntario desde cualquier monto.
-            </p>
-            <SupportProjectLink className="btn btn-primary site-footer__support-link">
-              Realizar un aporte en Mercado Pago ↗
-            </SupportProjectLink>
-          </aside>
         </div>
 
         {FOOTER_GROUPS.map((group) => (
