@@ -17,6 +17,11 @@ export interface FeaturedVoteItem {
   votosFavor: number;
   votosContra: number;
   votosAbstencion: number;
+  conteoVotosFavor?: number;
+  conteoVotosContra?: number;
+  conteoVotosAbstencion?: number;
+  totalVotosEmitidos?: number;
+  sourceUrl?: string;
   alineacionPolitica?: string;
   hasNominalVotes: boolean;
   link: string;
@@ -63,7 +68,7 @@ export function FeaturedVotes({
               </p>
             </div>
             <Link
-              href="/votaciones-destacadas"
+              href="/votaciones-destacadas/#ultimas-senado"
               prefetch={false}
               className="text-xs sm:text-sm font-mono font-bold text-accent hover:underline flex items-center gap-1.5 group shrink-0"
             >
@@ -236,6 +241,7 @@ export function FeaturedVotes({
                       >
                         {vote.hasNominalVotes ? `${vote.votosFavor}%` : "—"}
                       </div>
+                      {vote.conteoVotosFavor != null && <div className={`text-[9px] mt-0.5 ${isLead ? "text-forest-subtle" : "text-text-3"}`}>{vote.conteoVotosFavor} votos</div>}
                     </div>
                     <div
                       className={`px-1 border-x ${
@@ -256,6 +262,7 @@ export function FeaturedVotes({
                       <div className="font-serif text-lg sm:text-xl font-bold text-danger tabular-nums mt-0.5">
                         {vote.hasNominalVotes ? `${vote.votosContra}%` : "—"}
                       </div>
+                      {vote.conteoVotosContra != null && <div className="text-[9px] text-text-3 mt-0.5">{vote.conteoVotosContra} votos</div>}
                     </div>
                     <div className="px-1">
                       <div
@@ -272,6 +279,7 @@ export function FeaturedVotes({
                       >
                         {vote.hasNominalVotes ? `${vote.votosAbstencion}%` : "—"}
                       </div>
+                      {vote.conteoVotosAbstencion != null && <div className={`text-[9px] mt-0.5 ${isLead ? "text-forest-subtle" : "text-text-3"}`}>{vote.conteoVotosAbstencion} votos</div>}
                     </div>
                   </div>
 
@@ -319,6 +327,12 @@ export function FeaturedVotes({
                       Fuerzas:{" "}
                     </span>}
                     {vote.alineacionPolitica}
+                    {vote.totalVotosEmitidos != null && (
+                      <span>
+                        {vote.alineacionPolitica ? " · " : ""}
+                        Porcentaje de {vote.totalVotosEmitidos} votos contabilizados
+                      </span>
+                    )}
                   </p>
 
                   {/* 5. Llamado a la acción cívico */}

@@ -3,6 +3,9 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import VotacionesAnualesExplorer from "@/components/VotacionesAnualesExplorer";
+import { buildLatestSenateVotes } from "@/lib/home-editorial-adapter";
+import type { FeaturedVoteItem } from "@/components/home/FeaturedVotes";
+import { publicApiUrl } from "@/lib/public-api-origin";
 import type {
   OpcionVotacion,
   VotingFreshness,
@@ -26,6 +29,11 @@ const OPTION_LABELS: Array<{ key: OpcionVotacion; label: string; color: string }
   { key: "Abstención", label: "Abstención", color: "var(--warning)" },
   { key: "No Vota", label: "No vota / sin emisión", color: "var(--text-3)" },
 ];
+
+interface SenateVotesResponse {
+  data?: unknown[];
+  meta?: { sourceBackend?: string };
+}
 
 function formatNumber(value: number) { return value.toLocaleString("es-CL"); }
 
@@ -229,7 +237,26 @@ function VoteDetailDialog({ detail, onClose }: { detail: VotacionDestacadaDetall
 
 export default function VotacionesDestacadasClient({ entries, annualEntries, details, freshness }: { entries: VotacionDestacada[]; annualEntries: VotacionAnual[]; details: Record<string, VotacionDestacadaDetalle>; freshness: VotingFreshness }) {
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [latestSenateVotes, setLatestSenateVotes] = useState<FeaturedVoteItem[]>([]);
   const selected = selectedId ? details[selectedId] : undefined;
+
+  useEffect(() => {
+    let active = true;
+    const loadLatestSenateVotes = async () => {
+      try {
+        const response = await fetch(publicApiUrl("/api/v1/records?source=votaciones_senado&kind=vote&limit=50"), { cache: "no-store" });
+        if (!response.ok) return;
+        const payload = await response.json() as SenateVotesResponse;
+        if (payload.meta?.sourceBackend !== "r2-lake" || !Array.isArray(payload.data)) return;
+        const latest = buildLatestSenateVotes(payload.data as Parameters<typeof buildLatestSenateVotes>[0], 3);
+        if (active) setLatestSenateVotes(latest);
+      } catch {
+        // El catálogo anual sigue disponible aunque no se pueda cargar el corte reciente.
+      }
+    };
+    void loadLatestSenateVotes();
+    return () => { active = false; };
+  }, []);
 
   useEffect(() => {
     const id = new URLSearchParams(window.location.search).get("votacion");
@@ -250,7 +277,26 @@ export default function VotacionesDestacadasClient({ entries, annualEntries, det
 
   return <div className="page-shell featured-votes-page" style={{ minHeight: "100vh" }}>
     <header className="page-masthead"><div className="container-main"><span className="eyebrow">Congreso Nacional · registro nominal</span><h1>Votaciones parlamentarias</h1><p>Consulta el registro completo de votaciones publicadas por la Cámara y el Senado. Cada fila conserva su fecha, resultado, votación nominal y enlace a la fuente oficial.</p></div></header>
-    <main className="container-main featured-votes-page__main"><div className="featured-votes-page__intro"><div><span className="eyebrow">Registro público</span><h2>Todas las votaciones</h2></div><p>{formatNumber(annualEntries.length)} votaciones en el período</p></div><div className="voting-freshness" role="status" aria-label="Frescura de las votaciones parlamentarias"><span><strong>Última revisión automática</strong>{freshness.reviewedAt ? formatDate(freshness.reviewedAt.slice(0, 10)) : "Sin fecha publicada"}</span><span><strong>Última votación nominal</strong>{freshness.latestVoteDate ? formatDate(freshness.latestVoteDate) : "Sin fecha publicada"}</span><small>{formatNumber(freshness.totalSessions)} votaciones verificadas. {entries.length} fichas cuentan además con análisis editorial.</small></div><VotacionesAnualesExplorer entries={annualEntries} onOpenDetail={openDetail} /></main>
+    <main className="container-main featured-votes-page__main"><div className="featured-votes-page__intro"><div><span className="eyebrow">Registro público</span><h2>Todas las votaciones</h2></div><p>{formatNumber(annualEntries.length)} votaciones en el período</p></div><div className="voting-freshness" role="status" aria-label="Frescura de las votaciones parlamentarias"><span><strong>Última revisión automática</strong>{freshness.reviewedAt ? formatDate(freshness.reviewedAt.slice(0, 10)) : "Sin fecha publicada"}</span><span><strong>Última votación nominal</strong>{freshness.latestVoteDate ? formatDate(freshness.latestVoteDate) : "Sin fecha publicada"}</span><small>{formatNumber(freshness.totalSessions)} votaciones verificadas. {entries.length} fichas cuentan además con análisis editorial.</small></div>
+      <section id="ultimas-senado" className="my-8 scroll-mt-24" aria-labelledby="latest-senate-votes-title">
+        <div className="featured-votes-page__intro"><div><span className="eyebrow">Actividad reciente</span><h2 id="latest-senate-votes-title">Últimas votaciones del Senado</h2></div></div>
+        <p className="annual-votes__intro">Los porcentajes se calculan sobre los votos contabilizados por la fuente oficial.</p>
+        <div className="annual-votes__list">
+          {latestSenateVotes.map((vote) => (
+            <article className="annual-vote-row" key={vote.id}>
+              <div className="annual-vote-row__date"><span>{vote.fecha}</span><span>Senado</span></div>
+              <div className="annual-vote-row__body">
+                <div className="annual-vote-row__heading"><h3>{vote.titulo}</h3><span className="featured-vote__result" data-result={vote.veredicto}>{vote.veredicto}</span></div>
+                <p>{vote.boletin}</p>
+                <div className="annual-vote-row__meta"><span>{vote.conteoVotosFavor ?? 0} a favor</span><span>{vote.conteoVotosContra ?? 0} en contra</span><span>{vote.conteoVotosAbstencion ?? 0} abstenciones</span></div>
+                <div className="annual-vote-row__actions"><a className="btn btn-secondary" href={vote.sourceUrl ?? "https://www.senado.cl/"} target="_blank" rel="noopener noreferrer">Ver registro oficial ↗</a></div>
+              </div>
+            </article>
+          ))}
+          {latestSenateVotes.length === 0 && <p className="featured-vote__empty" role="status">No hay votaciones recientes disponibles.</p>}
+        </div>
+      </section>
+      <VotacionesAnualesExplorer entries={annualEntries} onOpenDetail={openDetail} /></main>
     {selected && <VoteDetailDialog detail={selected} onClose={closeDetail} />}
   </div>;
 }

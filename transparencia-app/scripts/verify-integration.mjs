@@ -248,13 +248,26 @@ try {
   const voteCards = highlightedVotes.locator("article");
   assert.equal(await voteCards.count(), 3, "La portada debe mostrar las tres votaciones más recientes del Senado");
   await voteCards.nth(1).getByText("MÁS RECIENTE", { exact: true }).waitFor({ state: "visible", timeout: 15_000 });
-  const officialVoteLinks = highlightedVotes.locator('a[target="_blank"]');
-  assert.equal(await officialVoteLinks.count(), 3, "Cada ficha debe enlazar el registro oficial de su votación");
+  const voteSectionLinks = highlightedVotes.getByRole("link", { name: "Ver en votaciones", exact: true });
+  assert.equal(await voteSectionLinks.count(), 3, "Cada ficha debe llevar primero al registro interno de votaciones");
   for (let index = 0; index < 3; index += 1) {
-    const link = officialVoteLinks.nth(index);
-    assert.match(await link.getAttribute("href"), /^https:\/\//, "El enlace de votación debe ser oficial y HTTPS");
+    assert.equal(await voteSectionLinks.nth(index).getAttribute("href"), "/votaciones-destacadas/#ultimas-senado");
+  }
+  await voteSectionLinks.nth(1).click();
+  await page.waitForURL("**/votaciones-destacadas/#ultimas-senado");
+  await page.getByRole("heading", { name: "Últimas votaciones del Senado", exact: true }).waitFor({ state: "visible", timeout: 15_000 });
+  const latestSenateRows = page.locator("#ultimas-senado .annual-vote-row");
+  await latestSenateRows.nth(2).waitFor({ state: "visible", timeout: 15_000 });
+  assert.equal(await latestSenateRows.count(), 3, "La sección interna debe mostrar los tres registros recientes del Senado");
+  const latestOfficialLinks = page.locator("#ultimas-senado a[target=\"_blank\"]");
+  assert.equal(await latestOfficialLinks.count(), 3, "La sección de votaciones debe conservar el enlace oficial por registro");
+  for (let index = 0; index < 3; index += 1) {
+    const link = latestOfficialLinks.nth(index);
+    assert.match(await link.getAttribute("href"), /^https:\/\//, "El enlace oficial debe usar HTTPS");
     assert.match(await link.getAttribute("rel"), /noopener noreferrer/, "El enlace externo debe ser seguro");
   }
+  await page.goto(baseUrl);
+  await page.getByRole("heading", { name: "Datos públicos de Chile para fiscalizar." }).waitFor({ state: "visible", timeout: 15_000 });
   await page.screenshot({ path: join(tmpdir(), "transparencia-home-desktop.png"), fullPage: true });
 
   await gotoWithNetworkRetry(`${baseUrl}/cruces`);
