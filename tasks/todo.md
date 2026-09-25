@@ -12,6 +12,12 @@ cierre verificados; no representan cobertura de datos ni una métrica automátic
   smoke productivo HTTP 200; workflow `36078815272` exitoso.
 - [x] Movimientos separa las 46 salidas reconciliadas del Ejecutivo de las dos
   señales en confirmación. Reemplazos parlamentarios quedan fuera de ese conteo.
+- [x] Verificación productiva adicional (25-09): la Home presenta a Fabián
+  Páez y José Bravo en confirmación; la API de movimientos mantiene 46 filas
+  reconciliadas y su fecha máxima en 2026-09-14. No promover por notas de
+  prensa ni inferir fecha efectiva: Bravo tiene comunicado oficial que solicita
+  la renuncia, sin fecha efectiva ni reemplazo; para Páez falta decreto o
+  comunicado primario localizado. Evidencia en la auditoría de estabilidad.
 - [x] ETL remoto diario de votaciones Senado retirado de workflow y calendario
   versionados; PR #621 integrado con checks verdes. La tarea local de Windows
   permanece registrada y `Ready`; la reparación manual aislada queda.
@@ -26,7 +32,7 @@ cierre verificados; no representan cobertura de datos ni una métrica automátic
 | --- | ---: | --- |
 | Historial de mandatos parlamentarios — **nuevo** | 10% | Capturar cortes oficiales por ID y asiento; comparar altas/bajas; confirmar fechas con evidencia; conservar períodos cerrados sin sumarlos a Movimientos del Ejecutivo. El análisis encontró que la tabla D1 actual no basta como historial público y su materialización remota está deshabilitada por defecto. |
 | Votaciones Senado | 85% | El preflight local y la API R2 coinciden para 12 votos del 20–24-09; septiembre publica 41 filas completas. Falta smoke de navegación/fichas y seguir revisando cortes futuros mediante la tarea local (cron remoto retirado). |
-| ChileCompra | 60% | Resolver el 403 del archivo mensual o mantener el corte válido; publicar sólo un período verificable, nunca el resultado vacío. |
+| ChileCompra | 60% | Resolver el 403 del archivo mensual o mantener el corte válido; publicar sólo un período verificable, nunca el resultado vacío. La corrida del 21-09 recibió `CHILECOMPRA_BULK_HTTP_403` y fue bloqueada por `CHILECOMPRA_RELEASE_EMPTY_OR_UNAVAILABLE` (0 listings/documentos/registros); no continuó hacia publicación ni materialización D1. |
 | Remuneraciones y calidad CPLT | 55% | Terminar duplicados/calidad municipales, revisar el corte central contaminado y reconciliar el salto de julio con la parcialidad de agosto-septiembre; luego construir historiales por lotes. |
 | Backups y capacidad R2 | 30% | Obtener medición vigente, inventario/checksums y restauración probada; sólo entonces decidir retención selectiva. No borrar backups ni publicar una proyección grande antes de asegurar margen y rollback. |
 | Aislamiento y consumo D1 | 85% | La materialización remota no corre por defecto. Falta recuperar una lectura vigente de consumo/cuotas para certificarlo; no ejecutar escaneos ni cargas masivas. |
@@ -34,8 +40,9 @@ cierre verificados; no representan cobertura de datos ni una métrica automátic
 
 **Avance global estimado: 66%.** Es una estimación ponderada de los bloques
 anteriores. La última auditoría de fuentes amplia es 23-09-2026; se añadió una
-reconciliación completa del corte de marzo de Gastos Senado el 24-09 y una
-comparación acotada de votaciones. El cierre de Gastos aplica al release vigente;
+reconciliación completa del corte de marzo de Gastos Senado el 24-09, una
+comparación acotada de votaciones y un smoke productivo de Movimientos el
+25-09. El cierre de Gastos aplica al release vigente;
 no implica que toda la plataforma tenga cobertura histórica completa.
 el despliegue UI-only del 25-09 no refrescó ETL ni modificó R2/D1, así que no
 debe interpretarse como una actualización de los datos.
