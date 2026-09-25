@@ -78,6 +78,16 @@ tanto, la discrepancia de 25 filas del corte estático y la cobertura histórica
 siguen abiertas. Los tres resultados sólo confirman que esos períodos concretos
 se pueden consultar desde R2 con su manifiesto completo.
 
+Como verificación complementaria de bajo costo, se contrastó el inventario local
+de manifests/archivos sin imprimir ni exportar las filas: hay 174 manifests y
+174 artefactos, los 174 SHA-256 coinciden y la suma de conteos da 154.132. El
+resumen que alimenta la página productiva y el total esperado del API también
+declaran 154.132. En el calendario entre enero de 2012 y julio de 2026 no está
+el período `2020-12`; por eso existen 174 períodos publicados y no 175 meses
+continuos. Esto refuerza la cobertura declarada, pero no demuestra que cada
+objeto local sea byte a byte el mismo objeto productivo ni sustituye la
+reconciliación del artefacto estático de marzo.
+
 También se integró el PR #621: el ETL remoto programado de votaciones Senado
 se retiró del workflow y del calendario versionado; se conserva la ejecución
 local ya registrada y la reparación manual aislada. La integración no desplegó
