@@ -42,18 +42,18 @@ function formatLandingDate(value: string | null) {
 }
 
 export const metadata: Metadata = {
-  title: "El Cambiómetro — Plataforma de Datos Públicos y Transparencia",
-  description: "Consulta y fiscaliza votaciones parlamentarias, gastos operacionales, personal de apoyo y autoridades con datos oficiales consolidados.",
+  title: "Datos públicos de Chile para fiscalizar | El Cambiómetro",
+  description: "Explora datos oficiales de autoridades, remuneraciones, municipios, votaciones y gasto público en Chile. Consulta cada registro y verifica su fuente.",
   alternates: { canonical: "/" },
   openGraph: {
-    title: "El Cambiómetro — Plataforma de Datos Públicos",
-    description: "Votaciones de sala, asistencia, gastos operacionales y personal de apoyo del Congreso Nacional de Chile.",
+    title: "Datos públicos de Chile para fiscalizar | El Cambiómetro",
+    description: "Datos oficiales de autoridades, remuneraciones, municipios, votaciones y gasto público de Chile, con fuentes que puedes consultar y verificar.",
     images: ["https://cambiometro.impulsacv.cl/api/og/site"],
   },
   twitter: {
     card: "summary_large_image",
-    title: "El Cambiómetro — Plataforma de Datos Públicos",
-    description: "Votaciones de sala, asistencia, gastos operacionales y personal de apoyo del Congreso Nacional de Chile.",
+    title: "Datos públicos de Chile para fiscalizar | El Cambiómetro",
+    description: "Datos oficiales de autoridades, remuneraciones, municipios, votaciones y gasto público de Chile, con fuentes que puedes consultar y verificar.",
     images: ["https://cambiometro.impulsacv.cl/api/og/site"],
   },
 };
