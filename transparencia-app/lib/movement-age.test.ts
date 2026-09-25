@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { daysSinceCalendarDate, getChileDateKey, latestEffectiveMovementDate } from "./movement-age";
+import { daysSinceCalendarDate, getChileDateKey, latestEffectiveMovementDate, latestMovementReviewDate, latestMovementSignalDate } from "./movement-age";
 
 describe("contador de días desde el último movimiento", () => {
   it("cuenta días calendario desde el cambio efectivo, no desde la última revisión", () => {
@@ -38,5 +38,25 @@ describe("contador de días desde el último movimiento", () => {
       ],
       meta: { sourceBackend: "r2", sourceStatus: "complete" },
     })).toBe("2026-09-23");
+  });
+
+  it("usa la detección más reciente como fecha de revisión, sin confundirla con la fecha del evento", () => {
+    expect(latestMovementReviewDate("2026-09-15T00:00:00.000Z", [
+      { date: "2026-09-17", detected_at: "2026-09-23T13:24:23.238Z" },
+      { date: "2026-09-15", detected_at: "2026-09-23T13:24:23.238Z" },
+    ])).toBe("2026-09-23");
+  });
+
+  it("ignora marcas de detección inválidas y conserva el último corte revisado válido", () => {
+    expect(latestMovementReviewDate("2026-09-15T00:00:00.000Z", [
+      { date: "2026-09-17", detected_at: "no-es-fecha" },
+    ])).toBe("2026-09-15");
+  });
+
+  it("obtiene la señal publicada más reciente sin convertirla en un cambio efectivo", () => {
+    expect(latestMovementSignalDate([
+      { date: "2026-09-15", status: "en_confirmacion" },
+      { date: "2026-09-17", status: "en_confirmacion" },
+    ])).toBe("2026-09-17");
   });
 });

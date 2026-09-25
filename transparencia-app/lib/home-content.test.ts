@@ -55,8 +55,12 @@ describe("portada editorial conectada a datos públicos", () => {
   });
 
   it("muestra fechas legibles y alimenta las fichas recientes desde el release R2", () => {
-    expect(movements).toContain("Último cambio efectivo");
+    expect(movements).toContain("ÚLTIMA SEÑAL PUBLICADA");
+    expect(movements).toContain("CAMBIO EFECTIVO");
     expect(movements).toContain("Última revisión");
+    expect(movements).toContain("animate-line-draw");
+    expect(movements).not.toContain("grid grid-cols-1 sm:grid-cols-2 gap-3");
+    expect(home).toContain("ultimaSenal={latestMovementSignalDate(MOVIMIENTOS_PIPELINE_METADATA.signals)}");
     expect(movements).toContain("dateTime=");
     expect(movements).toContain("fechaCambioEfectivoActualizada");
     expect(homeVotes).toContain("source=votaciones_senado&kind=vote&limit=50");

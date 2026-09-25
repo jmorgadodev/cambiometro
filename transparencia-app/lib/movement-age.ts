@@ -43,3 +43,34 @@ export function latestEffectiveMovementDate(movements: unknown): string | null {
 
   return dates.sort().at(-1) ?? null;
 }
+
+function validDatePrefix(value: unknown): string | null {
+  if (typeof value !== "string") return null;
+  const date = value.slice(0, 10);
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(date)) return null;
+  const parsed = Date.parse(`${date}T00:00:00Z`);
+  return Number.isFinite(parsed) && new Date(parsed).toISOString().slice(0, 10) === date ? date : null;
+}
+
+export function latestMovementSignalDate(signals: unknown): string | null {
+  if (!Array.isArray(signals)) return null;
+  const dates = signals.flatMap((signal) => {
+    if (!signal || typeof signal !== "object") return [];
+    const date = validDatePrefix((signal as { date?: unknown }).date);
+    return date ? [date] : [];
+  });
+  return dates.sort().at(-1) ?? null;
+}
+
+export function latestMovementReviewDate(lastSuccessAt: string | null | undefined, signals: unknown): string | null {
+  const dates = [validDatePrefix(lastSuccessAt)];
+  if (Array.isArray(signals)) {
+    dates.push(...signals.flatMap((signal) => {
+      if (!signal || typeof signal !== "object") return [];
+      const detectedAt = (signal as { detected_at?: unknown }).detected_at;
+      const date = validDatePrefix(detectedAt);
+      return date ? [date] : [];
+    }));
+  }
+  return dates.filter((date): date is string => Boolean(date)).sort().at(-1) ?? null;
+}
