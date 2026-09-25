@@ -15,13 +15,16 @@ cierre verificados; no representan cobertura de datos ni una métrica automátic
 - [x] ETL remoto diario de votaciones Senado retirado de workflow y calendario
   versionados; PR #621 integrado con checks verdes. La tarea local de Windows
   permanece registrada y `Ready`; la reparación manual aislada queda.
+- [x] Gastos Senado: 174 manifests/artefactos con SHA-256 válido, 154.132 filas
+  (igual al total productivo); los 1.655 IDs de marzo coinciden en producción,
+  proyección estática y partición local, sin duplicados ni diferencias. La API
+  oficial confirma que 2020-12 no publicó filas; no es un hueco ETL.
 
 ### Pendiente priorizado
 
 | Bloque | Avance estimado | Próximo criterio para cerrar |
 | --- | ---: | --- |
 | Historial de mandatos parlamentarios — **nuevo** | 10% | Capturar cortes oficiales por ID y asiento; comparar altas/bajas; confirmar fechas con evidencia; conservar períodos cerrados sin sumarlos a Movimientos del Ejecutivo. El análisis encontró que la tabla D1 actual no basta como historial público y su materialización remota está deshabilitada por defecto. |
-| Gastos Senado | 85% | 174 manifests y archivos locales con SHA-256 válido, 154.132 filas (coincide con resumen/API); API productiva confirmó 2012-01, 2026-03, 2026-06 y 2026-07 completos. Falta demostrar igualdad de los objetos locales con R2 y cerrar la diferencia histórica del artefacto estático de marzo; 2020-12 no tiene corte publicado. |
 | Votaciones Senado | 85% | El preflight local y la API R2 coinciden para 12 votos del 20–24-09; septiembre publica 41 filas completas. Falta smoke de navegación/fichas y seguir revisando cortes futuros mediante la tarea local (cron remoto retirado). |
 | ChileCompra | 60% | Resolver el 403 del archivo mensual o mantener el corte válido; publicar sólo un período verificable, nunca el resultado vacío. |
 | Remuneraciones y calidad CPLT | 55% | Terminar duplicados/calidad municipales, revisar el corte central contaminado y reconciliar el salto de julio con la parcialidad de agosto-septiembre; luego construir historiales por lotes. |
@@ -29,10 +32,11 @@ cierre verificados; no representan cobertura de datos ni una métrica automátic
 | Aislamiento y consumo D1 | 85% | La materialización remota no corre por defecto. Falta recuperar una lectura vigente de consumo/cuotas para certificarlo; no ejecutar escaneos ni cargas masivas. |
 | Auditoría integral ETL → R2 → API → páginas | 60% | Cerrar deltas conocidos por fuente, corte y checksum; repetir smoke productivo y registrar fallos externos que siguen conservando el último release válido. |
 
-**Avance global estimado: 65%.** Es una estimación ponderada de los bloques
+**Avance global estimado: 66%.** Es una estimación ponderada de los bloques
 anteriores. La última auditoría de fuentes amplia es 23-09-2026; se añadió una
-verificación puntual de Gastos Senado y votaciones Senado el 24-09; ninguna
-muestra cierra por sí sola el universo histórico.
+reconciliación completa del corte de marzo de Gastos Senado el 24-09 y una
+comparación acotada de votaciones. El cierre de Gastos aplica al release vigente;
+no implica que toda la plataforma tenga cobertura histórica completa.
 el despliegue UI-only del 25-09 no refrescó ETL ni modificó R2/D1, así que no
 debe interpretarse como una actualización de los datos.
 
