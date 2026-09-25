@@ -72,7 +72,6 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     const cronMap: Record<string, string | null> = {
       "etl-daily.yml": "0 7 * * *",
       "etl-camara-votaciones.yml": "15 7 * * *",
-      "etl-senado-votaciones.yml": "30 7 * * *",
       "etl-personal-apoyo.yml": "0 7 * * 1",
       "etl-personal-apoyo-senado.yml": "30 7 * * 1",
       "etl-chilecompra.yml": "0 8 * * 1",
@@ -162,7 +161,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(content).toContain("transfer-d1-materialization-${{ github.run_id }}");
   });
 
-  it("9. Las votaciones usan incremental diario y reservan el full para backfill", () => {
+  it("9. Senado se ejecuta sólo desde la tarea local y conserva la reparación manual aislada", () => {
     const workflow = fs.readFileSync(path.join(workflowsDir, "etl-daily.yml"), "utf8");
     const ingest = fs.readFileSync(path.resolve(root, "scripts", "ingest-votaciones-full.mjs"), "utf8");
 
@@ -173,18 +172,18 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(camaraVotesWorkflow).toContain("name: ETL Diario - Votaciones Cámara");
     expect(camaraVotesWorkflow).toContain("--source votaciones_camara");
     expect(camaraVotesWorkflow).toContain("npm run ingest:votaciones-full -- --source camara --full");
-    const senateWorkflow = fs.readFileSync(path.join(workflowsDir, "etl-senado-votaciones.yml"), "utf8");
-    expect(senateWorkflow).toContain("name: ETL Diario - Votaciones Senado");
-    expect(senateWorkflow).toContain("npm run etl -- --from");
-    expect(senateWorkflow).toContain("--source votaciones_senado");
-    expect(senateWorkflow).toContain("node scripts/sync-senado-votes-static.mjs --from 2026-01");
-    expect(senateWorkflow.indexOf("Reconciliar proyección estática Senado 2026+ desde R2"))
-      .toBeLessThan(senateWorkflow.indexOf("name: Construir subsets estáticos"));
-    expect(senateWorkflow).not.toContain("data:materialize");
+    const senateRemoteWorkflow = path.join(workflowsDir, "etl-senado-votaciones.yml");
+    const senateLocalTask = path.resolve(root, "scripts", "etl-senado-votaciones-local.ps1");
+    const senateRepairWorkflow = path.join(workflowsDir, "repair-senado-votaciones-staged.yml");
+    expect(fs.existsSync(senateRemoteWorkflow), "No debe quedar ETL remoto programado para Senado").toBe(false);
+    expect(fs.existsSync(senateLocalTask), "Debe conservarse la tarea local de Senado").toBe(true);
+    expect(fs.existsSync(senateRepairWorkflow), "La reparación manual aislada sigue disponible").toBe(true);
+    const localTask = fs.readFileSync(senateLocalTask, "utf8");
+    expect(localTask).toContain("data:lake");
+    expect(localTask).toContain("data:publish");
     const etlPipeline = fs.readFileSync(path.resolve(root, "scripts", "etl.mjs"), "utf8");
     expect(etlPipeline).toContain("fetchSenateVotesByDateRange({");
     expect(etlPipeline).toContain("existingVoteIds: [...publishedSenateVoteIds]");
-    expect(senateWorkflow).toContain("npm run ingest:votaciones-full -- --source senado --full");
     expect(workflow).not.toContain("--source camara,votaciones_camara");
     expect(ingest).toContain("const REFRESH_FROM");
     expect(ingest).toContain("function cachedSession");
@@ -254,9 +253,9 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
 
   it("11d. La reparación de votos valida sólo los períodos completos que staged reemplazará", () => {
     const workflow = fs.readFileSync(path.join(workflowsDir, "repair-senado-votaciones-staged.yml"), "utf8");
-    const dispatcher = fs.readFileSync(path.join(workflowsDir, "etl-senado-votaciones.yml"), "utf8");
-    expect(dispatcher).toContain("from: ${{ inputs.from || '' }}");
-    expect(dispatcher).toContain("to: ${{ inputs.to || '' }}");
+    expect(workflow).toContain("workflow_dispatch:");
+    expect(workflow).toContain("from:");
+    expect(workflow).toContain("to:");
     expect(workflow).toContain("SENADO_REPAIR_RANGE_START_MUST_BE_MONTH_START");
     expect(workflow).toContain("SENADO_REPAIR_RANGE_END_MUST_BE_MONTH_END_OR_TODAY");
     expect(workflow).toContain("assertSenateVotePeriodPreserved");

@@ -14,12 +14,15 @@ describe("publicación incremental de Senado", () => {
     } })).toEqual(["11341", "11342"]);
     expect(existingSenateVoteIdsFromProjection(null)).toEqual([]);
   });
-  it("omite todas las escrituras y reconstrucciones cuando no existen novedades", () => {
-    const workflow = readFileSync("../.github/workflows/etl-senado-votaciones.yml", "utf8");
-    expect(workflow).toContain("senateVotePublicationReady");
-    for (const name of ["Construir y publicar lake de Senado", "Actualizar cache estático incremental del Senado", "Construir subsets estáticos", "Publicar entradas estáticas de Parlamento"]) {
-      const step = workflow.split(`- name: ${name}`)[1]?.split("- name:")[0];
-      expect(step).toContain("if: steps.ingest.outputs.publish == 'true'");
+  it("omite escrituras y reconstrucciones locales cuando no existen novedades", () => {
+    const localTask = readFileSync("scripts/etl-senado-votaciones-local.ps1", "utf8");
+    const noNewsGuard = localTask.indexOf("if (-not $publish)");
+    expect(noNewsGuard).toBeGreaterThanOrEqual(0);
+    expect(localTask).toContain("sin novedades verificadas; R2 queda intacto");
+
+    for (const command of ["data:lake", "data:publish", "data:build:subsets", "data:publish:static"]) {
+      const writeIndex = localTask.indexOf(`"${command}"`);
+      expect(writeIndex, `${command} debe estar protegido por el guard de novedades`).toBeGreaterThan(noNewsGuard);
     }
   });
   it("no publica una consulta válida sin novedades", () => {
