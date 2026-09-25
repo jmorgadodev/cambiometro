@@ -39,6 +39,16 @@ interface SlideData {
   image: string;
   alt: string;
   label: string;
+  width: number;
+  height: number;
+  responsiveWidths: number[];
+}
+
+const HERO_IMAGE_SIZES = "(max-width: 1023px) calc(100vw - 2rem), (max-width: 1312px) 50vw, 640px";
+
+function responsiveImageSet(image: string, widths: number[], format: "avif" | "webp") {
+  const basePath = image.replace(/\.jpe?g$/iu, "");
+  return widths.map((width) => `${basePath}-${width}.${format} ${width}w`).join(", ");
 }
 
 const slides: SlideData[] = [
@@ -47,18 +57,27 @@ const slides: SlideData[] = [
     image: "/assets/congreso.jpg",
     alt: "Congreso Nacional de Chile en Valparaíso",
     label: "Poder Legislativo",
+    width: 1376,
+    height: 768,
+    responsiveWidths: [480, 960, 1376],
   },
   {
     id: "moneda",
     image: "/assets/lamoneda.jpg",
     alt: "Palacio de La Moneda y bandera de Chile",
     label: "Poder Ejecutivo",
+    width: 512,
+    height: 382,
+    responsiveWidths: [384, 512],
   },
   {
     id: "cordillera",
     image: "/assets/cordillera.jpg",
     alt: "Cordillera de Los Andes y territorio chileno",
     label: "Territorio Nacional",
+    width: 1376,
+    height: 768,
+    responsiveWidths: [480, 960, 1376],
   },
 ];
 
@@ -188,11 +207,28 @@ export function Hero() {
                     idx === currentSlide ? "opacity-100 z-10" : "opacity-0 z-0 pointer-events-none"
                   }`}
                 >
-                  <img
-                    src={slide.image}
-                    alt={idx === currentSlide ? slide.alt : ""}
-                    className="w-full h-full object-cover object-center filter brightness-95 contrast-105 transition-transform duration-7000 ease-out transform scale-100 hover:scale-105"
-                  />
+                  <picture>
+                    <source
+                      type="image/avif"
+                      srcSet={responsiveImageSet(slide.image, slide.responsiveWidths, "avif")}
+                      sizes={HERO_IMAGE_SIZES}
+                    />
+                    <source
+                      type="image/webp"
+                      srcSet={responsiveImageSet(slide.image, slide.responsiveWidths, "webp")}
+                      sizes={HERO_IMAGE_SIZES}
+                    />
+                    <img
+                      src={slide.image}
+                      width={slide.width}
+                      height={slide.height}
+                      alt={idx === currentSlide ? slide.alt : ""}
+                      loading={idx === currentSlide ? "eager" : "lazy"}
+                      fetchPriority={idx === currentSlide ? "high" : "low"}
+                      decoding="async"
+                      className="w-full h-full object-cover object-center filter brightness-95 contrast-105 transition-transform duration-7000 ease-out transform scale-100 hover:scale-105"
+                    />
+                  </picture>
                   {/* Subtle atmospheric gradients */}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-black/10 pointer-events-none" />
                   <div className="absolute inset-0 bg-gradient-to-r from-black/40 via-transparent to-transparent pointer-events-none" />

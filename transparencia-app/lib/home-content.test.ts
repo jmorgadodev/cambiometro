@@ -1,9 +1,10 @@
-import { readFileSync } from "node:fs";
+import { existsSync, readFileSync, statSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import { canonicalSourceId } from "./data-platform-d1";
 
 const read = (path: string) => readFileSync(resolve(import.meta.dirname, "..", path), "utf8");
+const fileExists = (path: string) => existsSync(resolve(import.meta.dirname, "..", path));
 
 describe("portada editorial conectada a datos públicos", () => {
   const home = read("app/page.tsx");
@@ -72,6 +73,29 @@ describe("portada editorial conectada a datos públicos", () => {
     expect(hero).toContain("setInterval");
     expect(hero).toContain("prefers-reduced-motion: reduce");
     expect(hero).toContain("clearInterval");
+  });
+
+  it("sirve imágenes responsive AVIF/WebP y prioriza sólo la foto visible del hero", () => {
+    expect(hero).toContain("<picture>");
+    expect(hero).toContain('type="image/avif"');
+    expect(hero).toContain('type="image/webp"');
+    expect(hero).toContain("srcSet");
+    expect(hero).toContain('const HERO_IMAGE_SIZES = "(max-width: 1023px) calc(100vw - 2rem), (max-width: 1312px) 50vw, 640px"');
+    expect(hero).toContain("sizes={HERO_IMAGE_SIZES}");
+    expect(hero).toContain('loading={idx === currentSlide ? "eager" : "lazy"}');
+    expect(hero).toContain('fetchPriority={idx === currentSlide ? "high" : "low"}');
+    expect(hero).toContain('decoding="async"');
+
+    const responsiveAssets = [
+      "congreso-480.avif", "congreso-960.avif", "congreso-1376.avif",
+      "congreso-480.webp", "congreso-960.webp", "congreso-1376.webp",
+      "lamoneda-384.avif", "lamoneda-512.avif", "lamoneda-384.webp", "lamoneda-512.webp",
+      "cordillera-480.avif", "cordillera-960.avif", "cordillera-1376.avif",
+      "cordillera-480.webp", "cordillera-960.webp", "cordillera-1376.webp",
+    ].map((name) => `public/assets/${name}`);
+
+    expect(responsiveAssets.every(fileExists)).toBe(true);
+    expect(statSync(resolve(import.meta.dirname, "..", "public/assets/congreso-480.avif")).size).toBeLessThan(50_000);
   });
 
   it("conserva la identidad de los datasets parlamentarios", () => {
