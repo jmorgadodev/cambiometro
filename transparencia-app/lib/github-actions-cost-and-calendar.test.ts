@@ -247,7 +247,8 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
 
   it("11c. La verificación post-promoción valida la marca estable de la Home", () => {
     const workflow = fs.readFileSync(path.join(workflowsDir, "pages-promote-artifact.yml"), "utf8");
-    expect(workflow).toContain('grep -F "<title>El Cambiómetro');
+    expect(workflow).toContain("grep -F '<title>Datos públicos de Chile para fiscalizar | El Cambiómetro</title>'");
+    expect(workflow).toContain("grep -F 'Datos públicos de Chile'");
     expect(workflow).not.toContain('grep -F "La información pública"');
   });
 
