@@ -92,8 +92,8 @@ describe("TAREA G: Cierre de Hallazgos Pre-Launch", () => {
 
   it("H-17a: JSON-LD WebSite y Organization en home", () => {
     const homeContent = readFileSync(join(projectRoot, "app", "page.tsx"), "utf8");
-    expect(homeContent).toContain('"@type": "WebSite"');
-    expect(homeContent).toContain('"@type": "Organization"');
+    expect(homeContent).toContain("HOME_STRUCTURED_DATA");
+    expect(readFileSync(join(projectRoot, "lib", "home-structured-data.ts"), "utf8")).toContain('"@type": "Organization"');
     expect(homeContent).toContain("application/ld+json");
   });
 

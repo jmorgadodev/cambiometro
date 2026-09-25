@@ -8,6 +8,7 @@ import { MOVIMIENTOS, MOVIMIENTOS_HOME_SUMMARY, MOVIMIENTOS_PIPELINE_METADATA } 
 import { formatFechaCorta } from "@/lib/format";
 import { getLandingSummary, sourceKeyForHomeSource } from "@/lib/landing-summary-runtime";
 import { buildEditorialChapters, buildEditorialMovements, buildEditorialVotes } from "@/lib/home-editorial-adapter";
+import { HOME_STRUCTURED_DATA } from "@/lib/home-structured-data";
 
 import { Hero } from "@/components/home/Hero";
 import { SearchBar } from "@/components/home/SearchBar";
@@ -90,17 +91,7 @@ export default async function HomePage() {
     <div className="home-desk min-h-screen bg-background text-text-1 transition-colors duration-200">
       <script
         type="application/ld+json"
-      >{JSON.stringify({
-        "@context": "https://schema.org",
-        "@type": "WebSite",
-        name: "El Cambiómetro",
-        url: "https://cambiometro.impulsacv.cl",
-        publisher: {
-          "@type": "Organization",
-          name: "ImpulsaCV",
-          url: "https://impulsacv.cl",
-        },
-      })}</script>
+      >{JSON.stringify(HOME_STRUCTURED_DATA)}</script>
 
       {/* 1. Hero Asimétrico con Slider Arquitectónico y Nota Editorial Adhesiva */}
       <Hero />
