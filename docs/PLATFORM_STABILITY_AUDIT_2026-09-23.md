@@ -73,10 +73,8 @@ petición. Esto no equivale a que falten datos ni demuestra cobertura completa.
 | 2026-07 | 1.250 | 1 | complete | 0 / 0 |
 
 La consulta de cada corte queda acotada al período; no se recorrieron los 174
-meses ni se verificó el artefacto estático contra todas las filas de R2. Por
-tanto, la discrepancia de 25 filas del corte estático y la cobertura histórica
-siguen abiertas. Los tres resultados sólo confirman que esos períodos concretos
-se pueden consultar desde R2 con su manifiesto completo.
+meses en producción. Los resultados iniciales sólo confirmaban los períodos
+muestreados; la reconciliación completa del corte marzo se documenta más abajo.
 
 Como verificación complementaria de bajo costo, se contrastó el inventario local
 de manifests/archivos sin imprimir ni exportar las filas: hay 174 manifests y
@@ -85,8 +83,26 @@ resumen que alimenta la página productiva y el total esperado del API también
 declaran 154.132. En el calendario entre enero de 2012 y julio de 2026 no está
 el período `2020-12`; por eso existen 174 períodos publicados y no 175 meses
 continuos. Esto refuerza la cobertura declarada, pero no demuestra que cada
-objeto local sea byte a byte el mismo objeto productivo ni sustituye la
-reconciliación del artefacto estático de marzo.
+objeto local sea byte a byte el mismo objeto productivo.
+
+La discrepancia de marzo quedó reconciliada con la versión actual: se recorrieron
+las 17 páginas del API productivo de `2026-03` (límite 100), se compararon sus
+1.655 IDs con el artefacto estático local y la partición R2 local, y los tres
+conjuntos coincidieron exactamente: 1.655 únicos, cero ausentes, cero extras y
+cero duplicados. El API marcó el período `complete`, sin particiones ni
+artefactos faltantes. Por tanto, el delta de 25 filas registrado en la captura
+del 23-09 corresponde a una versión anterior y no está presente en el release
+actual.
+
+También se consultó directamente el endpoint oficial del Senado para
+`2020-12`: HTTP 200, estado `ok`, `meta.pagination.total=0`. Ese período se
+clasifica como **sin registros publicados por la fuente**, no como un mes
+perdido por el ETL. La página productiva y el resumen del release actual declaran
+154.132 registros; el API permite paginar las filas por fuente y período.
+Resultado de cierre del alcance solicitado: los 174 períodos con registros están
+incluidos; no hay carga adicional que hacer para cubrir `2020-12`.
+
+No se escribió en R2 ni D1, no se promovió otro release ni se desplegó la web.
 
 También se integró el PR #621: el ETL remoto programado de votaciones Senado
 se retiró del workflow y del calendario versionado; se conserva la ejecución
