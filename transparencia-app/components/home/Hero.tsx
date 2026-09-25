@@ -79,15 +79,15 @@ export function Hero() {
 
             {/* Main Headline */}
             <h1 className="animate-hero-title font-serif text-3xl sm:text-5xl lg:text-[62px] leading-[1.1] sm:leading-[1.08] text-text-1 font-bold tracking-tight">
-              Un Chile más transparente{" "}
+              Datos públicos de Chile{" "}
               <span className="italic font-normal text-accent underline decoration-accent/30 underline-offset-8 block sm:inline">
-                es posible.
+                para fiscalizar.
               </span>
             </h1>
 
             {/* Subtitle */}
             <p className="animate-hero-desc text-sm sm:text-base lg:text-lg text-text-2 max-w-xl font-normal leading-relaxed">
-              Exploramos, visualizamos y conectamos información pública oficial para que cualquier persona pueda entender, comparar y auditar las decisiones, gastos y votaciones en el Estado de Chile.
+              Explora datos oficiales de autoridades, remuneraciones, municipios, votaciones y gasto público en Chile. Cada registro conserva su fuente para que puedas comprobarlo.
             </p>
 
             {/* CTAs */}
