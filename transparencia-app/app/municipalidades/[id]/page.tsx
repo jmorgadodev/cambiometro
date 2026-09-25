@@ -14,6 +14,7 @@ import {
   isMuniLegacyId,
   getAllMuniSlugs,
 } from "@/lib/slug-utils";
+import { getMunicipalidadSeoCopy } from "@/lib/municipalidad-seo";
 
 export function generateStaticParams() {
   return getAllMuniSlugs().map(({ slug }) => ({ id: slug }));
@@ -28,25 +29,24 @@ export async function generateMetadata({
   const muni = getMuniBySlugOrId(id);
   if (!muni) return { title: "Municipalidad No Encontrada — El Cambiómetro" };
   const canonicalSlug = getMuniCanonicalSlug(id) ?? muni.id;
-  const muniData = getMunicipalidadData(muni.id);
-  const alcalde = muniData?.alcalde?.nombre ?? muni.alcalde_actual ?? "Alcaldía";
+  const { title, description } = getMunicipalidadSeoCopy(muni.nombre_comuna);
   const ogImage = `https://cambiometro.impulsacv.cl/api/og/site`;
 
   return {
-    title: `Municipalidad de ${muni.nombre_comuna} — Alcalde ${alcalde}, Sueldos, Censo & Presupuesto | El Cambiómetro`,
-    description: `Ficha municipal oficial de ${muni.nombre_comuna}: población Censo 2024, presupuesto per cápita, dependencia FCM, nóminas CPLT, concejo municipal SERVEL 2024 y compras públicas ChileCompra OCDS.`,
+    title,
+    description,
     alternates: {
       canonical: `/municipalidades/${canonicalSlug}`,
     },
     openGraph: {
-      title: `Municipalidad de ${muni.nombre_comuna} — El Cambiómetro`,
-      description: `Sueldos, demografía Censo 2024, presupuesto SINIM y dotación municipal de ${muni.nombre_comuna}.`,
+      title,
+      description,
       images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
-      title: `Municipalidad de ${muni.nombre_comuna} — El Cambiómetro`,
-      description: `Sueldos, demografía Censo 2024, presupuesto SINIM y dotación municipal de ${muni.nombre_comuna}.`,
+      title,
+      description,
       images: [ogImage],
     },
   };

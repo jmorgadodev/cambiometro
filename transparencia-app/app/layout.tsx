@@ -53,16 +53,6 @@ export const metadata: Metadata = {
   },
   description:
     "Explora autoridades, instituciones y nóminas públicas de Chile con fecha de corte, procedencia y enlaces a sus fuentes.",
-  keywords: [
-    "transparencia",
-    "Chile",
-    "datos públicos",
-    "autoridades",
-    "diputados",
-    "senadores",
-    "municipalidades",
-    "funcionarios públicos",
-  ],
   authors: [{ name: "ImpulsaCV", url: "https://impulsacv.cl" }],
   creator: "ImpulsaCV",
   publisher: "ImpulsaCV",
