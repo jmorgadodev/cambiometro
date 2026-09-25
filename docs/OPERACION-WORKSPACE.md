@@ -57,6 +57,12 @@ conservando la misión y el enlace “Donar y apoyar” hacia `/donar`. La prueb
 debe exigir que los dos bloques estén ausentes. No copiar el footer ni el
 proyecto desde `cambiometro-audit` al repositorio maestro.
 
+El cierre productivo se confirmó el 25-09-2026: PR #627, commit de producción
+`ada43535ed46c4513ca019bb6d3e992dd0c3f875`, artefacto verificado del run
+`36093610766` y deployment `bfff1571-61e6-446a-9723-cfb20f6c04c8`. La página
+productiva devolvió HTTP 200; el HTML y la revisión en navegador confirmaron
+ausentes ambos bloques, presente la misión y conservado el enlace a `/donar`.
+
 ## Producción vigente
 
 - Sitio: `https://cambiometro.impulsacv.cl`
