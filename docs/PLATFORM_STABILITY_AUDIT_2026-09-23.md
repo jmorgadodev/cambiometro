@@ -57,3 +57,47 @@ Los conteos de padres, componentes y fuentes agregadas tienen alcances distintos
 ## Siguiente paso seguro
 
 Restaurar permisos de lectura de métricas R2/D1; reconciliar los 25 registros y las diferencias de conteo antes de una publicación de datos; ejecutar un preview Pages con hidratación controlada y repetir el build/font check. Mantener el backup intacto hasta probar una restauración y no volver a materializar gastos en D1.
+
+## Verificación incremental adicional — 24-09-2026
+
+Se consultó la API pública con `source=gastos_senado`, `limit=1` y filtros de
+período, sin leer D1 ni descargar el conjunto completo. El resumen sin filtro
+declara 154.132 filas esperadas y usa `r2-lake`; la primera página reporta
+`partial` porque la paginación no escanea todas las particiones en una sola
+petición. Esto no equivale a que falten datos ni demuestra cobertura completa.
+
+| Período muestreado | Filas del período | Filas devueltas | Estado | Particiones/artefactos ausentes |
+| --- | ---: | ---: | --- | --- |
+| 2012-01 | 307 | 1 | complete | 0 / 0 |
+| 2026-06 | 1.248 | 1 | complete | 0 / 0 |
+| 2026-07 | 1.250 | 1 | complete | 0 / 0 |
+
+La consulta de cada corte queda acotada al período; no se recorrieron los 174
+meses ni se verificó el artefacto estático contra todas las filas de R2. Por
+tanto, la discrepancia de 25 filas del corte estático y la cobertura histórica
+siguen abiertas. Los tres resultados sólo confirman que esos períodos concretos
+se pueden consultar desde R2 con su manifiesto completo.
+
+Como verificación complementaria de bajo costo, se contrastó el inventario local
+de manifests/archivos sin imprimir ni exportar las filas: hay 174 manifests y
+174 artefactos, los 174 SHA-256 coinciden y la suma de conteos da 154.132. El
+resumen que alimenta la página productiva y el total esperado del API también
+declaran 154.132. En el calendario entre enero de 2012 y julio de 2026 no está
+el período `2020-12`; por eso existen 174 períodos publicados y no 175 meses
+continuos. Esto refuerza la cobertura declarada, pero no demuestra que cada
+objeto local sea byte a byte el mismo objeto productivo ni sustituye la
+reconciliación del artefacto estático de marzo.
+
+También se integró el PR #621: el ETL remoto programado de votaciones Senado
+se retiró del workflow y del calendario versionado; se conserva la ejecución
+local ya registrada y la reparación manual aislada. La integración no desplegó
+la web ni escribió en R2/D1.
+
+La API oficial del Senado se consultó localmente para `2026-09-20` a
+`2026-09-24`. Devolvió 12 votaciones con IDs `11341–11349`, `11352–11354`
+(sin asumir continuidad de IDs). Una consulta productiva acotada al mismo rango
+devolvió exactamente esos 12 IDs y fechas; la partición pública de septiembre
+declara 41 filas, `complete`, cero particiones ausentes y cero artefactos
+ausentes. El lote ya está en R2; no se hizo una publicación adicional. Esto
+cierra la comprobación de esos días, no una auditoría de todo el histórico ni
+la validación de cada pantalla de detalle parlamentaria.
