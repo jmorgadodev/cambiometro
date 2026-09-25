@@ -110,9 +110,11 @@ jobs:
           UPTIME_TOKEN: ${{ secrets.CAMBIOMETRO_UPTIME_TOKEN }}
         run: |
           test -n "$UPTIME_TOKEN"
-          curl --fail --silent --show-error --location --retry 5 --retry-delay 2 \
+          html="$(curl --fail --silent --show-error --location --retry 5 --retry-delay 2 \
             --header "X-Cambiometro-Uptime-Token: $UPTIME_TOKEN" \
-            "$PROD_URL/" | grep -F "<title>El Cambiómetro"
+            "$PROD_URL/")"
+          printf '%s' "$html" | grep -F '<title>Datos públicos de Chile para fiscalizar | El Cambiómetro</title>'
+          printf '%s' "$html" | grep -F 'Datos públicos de Chile'
 
       - uses: actions/upload-artifact@v4
         with:
