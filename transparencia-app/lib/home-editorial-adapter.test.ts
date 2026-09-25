@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildEditorialChapters, buildEditorialMovements, buildEditorialVotes } from "./home-editorial-adapter";
+import { buildEditorialChapters, buildEditorialMovements, buildEditorialVotes, buildLatestSenateVotes, composeHomeFeaturedVotes } from "./home-editorial-adapter";
 import type { Movimiento } from "./movimientos";
 import type { EtlSourceInfo } from "./etl-sources-data";
 import type { VotacionAnual, VotacionDestacada } from "./votaciones-destacadas";
@@ -26,6 +26,23 @@ describe("portada editorial conectada al release", () => {
     expect(cards).toHaveLength(1);
     expect(cards[0]).toMatchObject({ titulo: "Proyecto público", impactoCiudadano: "Resumen oficial publicado", votosFavor: 100, hasNominalVotes: true, veredicto: "Aprobado" });
     expect(cards[0].alineacionPolitica).toBeUndefined();
+  });
+
+  it("combina una votación importante con las dos votaciones más recientes del Senado desde R2", () => {
+    const latestSenateVotes = buildLatestSenateVotes([
+      { id: "r2-11352", kind: "vote", sourceId: "votaciones_senado", occurredAt: "2026-09-23", evidence: { sourceUrl: "https://senado.cl/11352" }, data: { id: "sen-vot-11352", fecha_original: "23-09-2026 19:30:00", descripcion: "Votación del Senado 11352", resultado: "Aprobado", boletin: "12345-67", total_si: "18", total_no: "2", total_abstencion: "1", quorum: "Mayoría simple", url: "https://senado.cl/11352" } },
+      { id: "r2-11354", kind: "vote", sourceId: "votaciones_senado", occurredAt: "2026-09-23", evidence: { sourceUrl: "https://senado.cl/11354" }, data: { id: "sen-vot-11354", fecha_original: "23-09-2026 19:50:00", descripcion: "Votación del Senado 11354", resultado: "Aprobado", boletin: "12345-69", total_si: "20", total_no: "1", total_abstencion: "0", quorum: "Mayoría simple", url: "https://senado.cl/11354" } },
+      { id: "r2-11353", kind: "vote", sourceId: "votaciones_senado", occurredAt: "2026-09-23", evidence: { sourceUrl: "https://senado.cl/11353" }, data: { id: "sen-vot-11353", fecha_original: "23-09-2026 19:45:00", descripcion: "Votación del Senado 11353", resultado: "Rechazado", boletin: "12345-68", total_si: "7", total_no: "12", total_abstencion: "1", quorum: "Mayoría simple", url: "https://senado.cl/11353" } },
+      { id: "r2-camara", kind: "vote", sourceId: "votaciones_camara", occurredAt: "2026-09-24", data: { id: "camara-vot-90000", fecha: "2026-09-24", descripcion: "No es una votación del Senado", resultado: "Aprobado" } },
+    ]);
+    const important = [{ id: "votacion-importante", camara: "Senado", fecha: "19 AGO 2026", boletin: "BOLETÍN 18302-11", etapa: "Votación de sala", dilemaCivico: "SALUD", titulo: "Acceso a alimentos libres de gluten", impactoCiudadano: "Proyecto importante", veredicto: "Aprobado", veredictoTipo: "aprobado", quorumExplicado: "Mayoría simple", votosFavor: 100, votosContra: 0, votosAbstencion: 0, hasNominalVotes: true, link: "/votaciones-destacadas/?votacion=senado-vot-11264" }] as const;
+
+    const homepageVotes = composeHomeFeaturedVotes(important, latestSenateVotes);
+
+    expect(latestSenateVotes.map((vote) => vote.id)).toEqual(["sen-vot-11354", "sen-vot-11353"]);
+    expect(homepageVotes.map((vote) => vote.id)).toEqual(["sen-vot-11354", "votacion-importante", "sen-vot-11353"]);
+    expect(homepageVotes[0]).toMatchObject({ camara: "Senado", titulo: "Votación del Senado 11354", link: "https://senado.cl/11354" });
+    expect(homepageVotes[2]).toMatchObject({ veredicto: "Rechazado", votosFavor: 35, votosContra: 60, votosAbstencion: 5 });
   });
 
   it("construye el catálogo sólo con fuentes presentes en el release", () => {
