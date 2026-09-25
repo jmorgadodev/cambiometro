@@ -4,6 +4,7 @@ import { POLITICOS_SEED } from "@/lib/seed-politicos";
 import { MUNICIPALIDADES_SEED } from "@/lib/municipalidades";
 import { SERVICIOS_PUBLICOS_SEED } from "@/lib/servicios-publicos";
 import { getAllOrganismos } from "@/lib/organismos";
+import { getMuniCanonicalSlug, getServicioCanonicalSlug } from "@/lib/slug-utils";
 import PersonasUniversalClient, {
   type ParlamentarioItem,
   type AlcaldeItem,
@@ -81,6 +82,7 @@ export default function PersonasPage() {
     if (!nombreAlcalde) return [];
     return [{
       muni_id: muni.id,
+      href: `/municipalidades/${getMuniCanonicalSlug(muni.id) ?? muni.id}`,
       cut: muni.cut,
       nombre_comuna: muni.nombre_comuna,
       region: muni.region,
@@ -103,6 +105,7 @@ export default function PersonasPage() {
     const org = organismosMap.get(serv.id);
     return {
       id: serv.id,
+      href: `/servicios-publicos/${getServicioCanonicalSlug(serv.id) ?? serv.id}`,
       nombre_canonico: serv.nombre,
       sigla: serv.sigla,
       tipo: serv.tipo_organo,

@@ -16,16 +16,16 @@ describe("rutas del buscador global de la home", () => {
     expect(workers).toHaveLength(8);
     expect(staticResults).toHaveLength(2);
   });
-  it("lleva funcionarios al explorador de remuneraciones y no al tab de parlamentarios", () => {
+  it("lleva todas las categorías a una búsqueda global", () => {
     expect(resolveHomeSearchTarget([{ type: "funcionario" }], "Rosa Bustamante")).toEqual({
-      href: "/remuneraciones-publicas/?q=Rosa%20Bustamante",
-      label: "Ver todas las remuneraciones →",
+      href: "/buscar?q=Rosa%20Bustamante",
+      label: "Ver todos los resultados →",
     });
   });
 
-  it("prioriza remuneraciones cuando una búsqueda mezcla autoridades y pagos", () => {
+  it("mantiene juntas las categorías cuando una búsqueda mezcla autoridades y pagos", () => {
     expect(resolveHomeSearchTarget([{ type: "politico" }, { type: "funcionario" }], "Torrealba").href)
-      .toBe("/remuneraciones-publicas/?q=Torrealba");
+      .toBe("/buscar?q=Torrealba");
   });
 
   it("corrige también el enlace individual de un funcionario", () => {
@@ -33,8 +33,10 @@ describe("rutas del buscador global de la home", () => {
       .toBe("/remuneraciones-publicas/?q=Rosa%20Bustamante");
   });
 
-  it("no envía una búsqueda sin resultados al listado parlamentario", () => {
-    expect(resolveHomeSearchTarget([], "Sofía Pumpin").href)
-      .toBe("/remuneraciones-publicas/?q=Sof%C3%ADa%20Pumpin");
+  it("envía también una búsqueda vacía a la experiencia global", () => {
+    expect(resolveHomeSearchTarget([], "Sofía Pumpin")).toEqual({
+      href: "/buscar?q=Sof%C3%ADa%20Pumpin",
+      label: "Ver todos los resultados →",
+    });
   });
 });

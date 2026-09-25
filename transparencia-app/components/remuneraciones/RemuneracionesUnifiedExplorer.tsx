@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { searchTransparencyActiva } from "@/lib/remuneraciones-remote-search";
-import { remunerationResultWindow } from "@/lib/remuneraciones-pagination";
+import { remunerationPersonKey, remunerationPersonWindow, remunerationResultWindow } from "@/lib/remuneraciones-pagination";
 
 type SourceStatus = "complete" | "partial" | "aggregate_only" | "unavailable";
 
@@ -139,6 +139,17 @@ function RemoteOfficialRow(row: Record<string, unknown>, query: string): Unified
   };
 }
 
+function groupRows(rows: UnifiedRow[]) {
+  const grouped = new Map<string, UnifiedRow[]>();
+  for (const row of rows) {
+    const key = remunerationPersonKey(row);
+    const list = grouped.get(key) ?? [];
+    list.push(row);
+    grouped.set(key, list);
+  }
+  return [...grouped.values()].sort((left, right) => left[0].nombreOriginal.localeCompare(right[0].nombreOriginal, "es-CL"));
+}
+
 export default function RemuneracionesUnifiedExplorer() {
   const [manifest, setManifest] = useState<UnifiedManifest | null>(null);
   const [liveCpltCoverage, setLiveCpltCoverage] = useState<LiveCpltCoverage | null>(null);
@@ -193,31 +204,21 @@ export default function RemuneracionesUnifiedExplorer() {
 
   const groups = useMemo(() => {
     const allRows = [...(results?.rows ?? []), ...(results?.remoteRows ?? [])];
-    const grouped = new Map<string, UnifiedRow[]>();
-    for (const row of allRows) {
-      // Algunas nóminas intercambian el orden de los apellidos entre meses.
-      // Agrupamos por el conjunto normalizado de palabras, pero conservamos
-      // debajo cada nombre y fila tal como fueron publicados.
-      const groupKey = personIdentityKey(row.nombreOriginal) || row.personKey;
-      const list = grouped.get(groupKey) ?? [];
-      list.push(row);
-      grouped.set(groupKey, list);
-    }
-    return [...grouped.values()].sort((left, right) => left[0].nombreOriginal.localeCompare(right[0].nombreOriginal, "es-CL"));
+    return groupRows(allRows);
   }, [results]);
 
   const paidSources = useMemo(() => manifest?.sources.filter((item) => PAID_SOURCE_IDS.includes(item.id)) ?? [], [manifest]);
-  const resultWindow = remunerationResultWindow(results?.rows.length ?? 0, results?.totalRemote ?? results?.remoteRows.length ?? 0, currentPage, RESULTS_PAGE_SIZE);
-  const totalPages = resultWindow.totalPages;
-  const pageStart = resultWindow.totalRecords === 0 ? 0 : resultWindow.start + 1;
-  const pageEnd = resultWindow.end;
-  const pageNames = new Set([...(results?.rows ?? []), ...(results?.remoteRows ?? [])]
-    .slice(resultWindow.start, resultWindow.end).map(row => personIdentityKey(row.nombreOriginal) || row.personKey));
-  const visibleGroups = groups.filter(group => pageNames.has(personIdentityKey(group[0].nombreOriginal) || group[0].personKey));
+  const recordWindow = remunerationResultWindow(results?.rows.length ?? 0, results?.totalRemote ?? results?.remoteRows.length ?? 0, currentPage, RESULTS_PAGE_SIZE);
+  const profileWindow = remunerationPersonWindow(groups, currentPage, RESULTS_PAGE_SIZE);
+  const totalPages = profileWindow.totalPages;
+  const pageStart = profileWindow.totalProfiles === 0 ? 0 : profileWindow.start + 1;
+  const pageEnd = profileWindow.end;
+  const visibleGroups = profileWindow.items;
+  const hasMoreRemoteRows = Boolean(results && results.totalRemote !== null && results.remoteRows.length < results.totalRemote);
 
   function goToResultsPage(nextPage: number) {
-    const nextWindow = remunerationResultWindow(results?.rows.length ?? 0, results?.totalRemote ?? results?.remoteRows.length ?? 0, nextPage, RESULTS_PAGE_SIZE);
-    if (results && nextWindow.remoteEnd > results.remoteRows.length) {
+    const nextWindow = remunerationPersonWindow(groups, nextPage, RESULTS_PAGE_SIZE);
+    if (results && nextWindow.start >= groups.length && hasMoreRemoteRows) {
       void loadRemoteResultsPage(nextPage);
       return;
     }
@@ -306,12 +307,16 @@ export default function RemuneracionesUnifiedExplorer() {
     setLoading(true);
     setError(null);
     try {
-      const required = remunerationResultWindow(results.rows.length, results.totalRemote ?? results.remoteRows.length, page, RESULTS_PAGE_SIZE).remoteEnd;
       let loadedRows = [...results.remoteRows];
       let loadedPage = results.remoteLoadedPage;
       let totalRemote = results.totalRemote;
       let partial = results.remotePartial;
-      while (loadedRows.length < required && loadedRows.length < (totalRemote ?? 0)) {
+      const maxRequestsPerAction = 10;
+      let requests = 0;
+      const targetProfiles = page * RESULTS_PAGE_SIZE;
+      while (loadedRows.length < (totalRemote ?? 0)
+        && groupRows([...results.rows, ...loadedRows]).length < targetProfiles
+        && requests < maxRequestsPerAction) {
         const remote = await searchTransparencyActiva({
           query: results.criteria.query,
           organism: results.criteria.organism,
@@ -328,11 +333,13 @@ export default function RemuneracionesUnifiedExplorer() {
         if (!additions.length) throw new Error("No se pudo completar esta página. Intenta nuevamente.");
         loadedRows = [...loadedRows, ...additions];
         loadedPage++;
+        requests++;
         totalRemote = remote.total;
         partial = remote.partial;
       }
       setResults(previous => previous ? {...previous,remoteRows:loadedRows,remoteLoadedPage:loadedPage,totalRemote,remotePartial:partial} : previous);
-      setCurrentPage(page);
+      const availableProfiles = groupRows([...results.rows, ...loadedRows]).length;
+      setCurrentPage(Math.min(page, Math.max(1, Math.ceil(availableProfiles / RESULTS_PAGE_SIZE))));
       scrollToResults();
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : "No se pudo cargar la siguiente página.");
@@ -379,7 +386,7 @@ export default function RemuneracionesUnifiedExplorer() {
           </section>
 
           {results && <section id="resultados-remuneraciones" className="remuneration-module remuneration-module--results" aria-labelledby="resultados-remuneraciones-title" aria-live="polite">
-            <div className="remuneration-results__heading"><div><span className="eyebrow">RESULTADOS</span><h3 id="resultados-remuneraciones-title">Coincidencias para “{results.criteria.query}”</h3></div><span>{number.format(resultWindow.totalRecords)} registros disponibles</span></div>
+            <div className="remuneration-results__heading"><div><span className="eyebrow">RESULTADOS</span><h3 id="resultados-remuneraciones-title">Coincidencias para “{results.criteria.query}”</h3></div><span>{number.format(profileWindow.totalProfiles)} fichas · {number.format(recordWindow.totalRecords)} registros disponibles</span></div>
             {results.remotePartial && <p className="remuneration-results__note">Algunos registros están temporalmente fuera de esta búsqueda. Intenta nuevamente para consultar todas las nóminas disponibles.</p>}
             {groups.length === 0 && <div className="stat-tile" role="status">No encontramos coincidencias. Prueba con otro apellido, organismo o cargo.</div>}
              <div className="remuneration-results__list">
@@ -411,10 +418,10 @@ export default function RemuneracionesUnifiedExplorer() {
                  </details>;
                })}
             </div>
-            {totalPages > 1 && <nav className="remuneration-results__pagination" aria-label="Paginación de resultados">
+            {(totalPages > 1 || hasMoreRemoteRows) && <nav className="remuneration-results__pagination" aria-label="Paginación de resultados">
               <button type="button" onClick={() => goToResultsPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1 || loading}>← Anterior</button>
-              <span>Registros {number.format(pageStart)}–{number.format(pageEnd)} de {number.format(resultWindow.totalRecords)}</span>
-              <button type="button" onClick={() => goToResultsPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages || loading}>Siguiente →</button>
+              <span>Fichas {number.format(pageStart)}–{number.format(pageEnd)} de {number.format(profileWindow.totalProfiles)}</span>
+              <button type="button" onClick={() => goToResultsPage(currentPage + 1)} disabled={(currentPage >= totalPages && !hasMoreRemoteRows) || loading}>Siguiente →</button>
             </nav>}
           </section>}
 

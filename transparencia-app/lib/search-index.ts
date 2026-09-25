@@ -3,6 +3,7 @@ import { POLITICOS_SEED, PARTIDOS_SEED } from "@/lib/seed-politicos";
 import { getPoliticoSlug } from "@/lib/politico-slugs";
 import { getAllServiciosPublicos } from "@/lib/servicios-publicos";
 import { MUNICIPALIDADES_SEED } from "@/lib/municipalidades";
+import { getMuniSlug, getServicioCanonicalSlug } from "@/lib/slug-utils";
 
 export interface SearchDoc {
   id: string;
@@ -60,7 +61,7 @@ export function getSearchDocs(): SearchDoc[] {
       subtitle: `${serv.tipo_organo} · ${serv.ministerio_dependiente || "Gobierno de Chile"}`,
       category: "Servicio Público",
       categoryCode: "servicio",
-      url: `/servicios-publicos/${serv.id}`,
+      url: `/servicios-publicos/${getServicioCanonicalSlug(serv.id) ?? serv.id}`,
       keywords: `${serv.nombre} ${serv.sigla || ""} ${serv.tipo_organo} ${serv.ministerio_dependiente || ""} ${serv.director_jefe_actual || ""}`,
     });
   }
@@ -73,7 +74,7 @@ export function getSearchDocs(): SearchDoc[] {
       subtitle: `Municipalidad · ${mun.region}`,
       category: "Municipalidad",
       categoryCode: "muni",
-      url: `/municipalidades/${mun.id}`,
+      url: `/municipalidades/${getMuniSlug(mun)}`,
       keywords: `${mun.nombre_comuna} ${mun.region} ${mun.cut} ${mun.alcalde_actual || ""}`,
     });
   }

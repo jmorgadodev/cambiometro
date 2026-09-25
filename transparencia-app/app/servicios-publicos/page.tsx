@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { getAllServiciosPublicosEnriquecidos } from "@/lib/servicios-publicos-data";
+import { getServicioCanonicalSlug } from "@/lib/slug-utils";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
 import { getPresupuestoNacionalTotales, leerPresupuestoV1 } from "@/lib/presupuesto";
 import { coverageMetric, readGeneratedDataQualitySummary } from "@/lib/data-quality-summary";
@@ -38,6 +39,7 @@ export default function ServiciosPublicosPage() {
 
     return {
       ...serv,
+      canonicalSlug: getServicioCanonicalSlug(serv.id) ?? serv.id,
       politico_id: politicoMatch?.id ?? null,
     };
   });

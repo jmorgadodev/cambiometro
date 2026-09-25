@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { SERVICIOS_PUBLICOS_SEED } from "@/lib/servicios-publicos";
 import { getServicioPublicoEnriquecido } from "@/lib/servicios-publicos-data";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
 import ShareButton from "@/components/ShareButton";
@@ -10,7 +9,6 @@ import ServicioPublicoDashboardClient from "@/components/servicios/ServicioPubli
 import {
   getServicioBySlugOrId,
   getServicioCanonicalSlug,
-  isServicioLegacyId,
   getAllServicioSlugs,
 } from "@/lib/slug-utils";
 
@@ -58,9 +56,6 @@ export default async function ServicioPublicoDetailPage({
   const { id } = await params;
   const servicio = getServicioBySlugOrId(id);
   if (!servicio) notFound();
-
-  const canonicalSlug = getServicioCanonicalSlug(id) ?? id;
-  void isServicioLegacyId;
 
   const enriquecido = getServicioPublicoEnriquecido(servicio.id);
   if (!enriquecido) notFound();

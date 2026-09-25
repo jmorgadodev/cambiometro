@@ -11,6 +11,7 @@ import type { CoverageMetric, DataQualityStatus } from "@/lib/data-quality-summa
 import OverviewSignalPanel from "@/components/dashboard/OverviewSignalPanel";
 
 type ServicioConPolitico = ServicioPublicoEnriquecido & {
+  canonicalSlug?: string;
   politico_id?: string | null;
 };
 
@@ -686,7 +687,7 @@ export default function ServiciosPublicosClient({
 
                     <div style={{ marginTop: "0.85rem", display: "flex", gap: "0.5rem" }}>
                       <Link prefetch={false}
-                        href={`/servicios-publicos/${serv.id}`}
+                        href={`/servicios-publicos/${serv.canonicalSlug ?? serv.id}`}
                         className="btn btn-secondary"
                         style={{ fontSize: "0.8rem", padding: "0.4rem 0.75rem", flex: 1, textAlign: "center", justifyContent: "center" }}
                       >
@@ -743,7 +744,7 @@ export default function ServiciosPublicosClient({
                         }}
                       >
                         <td style={{ padding: "0.85rem 1rem", fontWeight: 700 }}>
-                          <Link prefetch={false} href={`/servicios-publicos/${serv.id}`} style={{ color: "var(--text-primary)", textDecoration: "none" }}>
+                          <Link prefetch={false} href={`/servicios-publicos/${serv.canonicalSlug ?? serv.id}`} style={{ color: "var(--text-primary)", textDecoration: "none" }}>
                             {serv.nombre}
                           </Link>
                           {serv.sigla && (
@@ -768,7 +769,7 @@ export default function ServiciosPublicosClient({
                           {compras?.monto_total_clp !== null && compras?.monto_total_clp !== undefined ? formatCLP(compras.monto_total_clp) : "—"}
                         </td>
                         <td style={{ padding: "0.85rem 1rem", textAlign: "center" }}>
-                          <Link prefetch={false} href={`/servicios-publicos/${serv.id}`} className="btn btn-ghost" style={{ fontSize: "0.75rem", padding: "0.25rem 0.5rem" }}>
+                          <Link prefetch={false} href={`/servicios-publicos/${serv.canonicalSlug ?? serv.id}`} className="btn btn-ghost" style={{ fontSize: "0.75rem", padding: "0.25rem 0.5rem" }}>
                             Ver Ficha →
                           </Link>
                         </td>

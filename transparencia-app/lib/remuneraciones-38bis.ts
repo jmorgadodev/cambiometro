@@ -44,7 +44,7 @@ export function getRemuneraciones38BisRows(release: Remuneracion38BisRelease): R
 }
 
 export function remuneracion38BisKey(record: Remuneracion38BisRecord): string {
-  return [record.nombre, record.organismo, record.cargo]
+  return [record.partida, record.organismo, record.cargo, record.nombre]
     .map((value) => normalizeSearchText(value ?? ""))
     .join("|");
 }

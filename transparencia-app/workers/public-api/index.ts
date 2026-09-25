@@ -132,6 +132,13 @@ function publicD1ReadsEnabled(env: Env) {
   return env.ALLOW_PUBLIC_D1_READS === "1";
 }
 
+export function normalizedSearchMatches(query: string, text: string) {
+  const normalize = (value: string) => value.normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL");
+  const queryTokens = normalize(query).split(/[^a-z0-9]+/).filter((token) => token.length >= 2);
+  const normalizedText = normalize(text);
+  return queryTokens.length > 0 && queryTokens.every((token) => normalizedText.includes(token));
+}
+
 /**
  * The municipal catalogue uses entity ids for reconciliation, while the
  * public municipal module uses semantic commune slugs. Keep search results
@@ -159,6 +166,7 @@ function publicEntityPath(item: { id: unknown; kind: unknown; name: unknown }) {
     const slug = municipalitySlug(name);
     if (slug) return `/municipalidades/${slug}`;
   }
+  if (kind === "person") return `/personas/${encodeURIComponent(id)}`;
   return `/entidades/${id}`;
 }
 
@@ -1860,13 +1868,12 @@ async function searchFromR2(requestUrl: URL, env: Env) {
   const raw = requestUrl.searchParams.get("q")?.trim() ?? "";
   if (raw.length < 2 || raw.length > 80) return failure("INVALID_QUERY", "La búsqueda debe tener entre 2 y 80 caracteres.", 400);
   const normalize = (value: unknown) => String(value ?? "").normalize("NFD").replace(/\p{Diacritic}/gu, "").toLocaleLowerCase("es-CL");
-  const needle = normalize(raw);
   // Parlamentarios no viven en la tabla nacional de funcionarios CPLT. Se
   // mantienen en el catálogo pequeño y versionado del Worker, por lo que la
   // búsqueda del home sigue encontrando diputados y senadores aunque D1 esté
   // temporalmente sin cuota de lectura.
   const politicians = POLITICOS_SEED
-    .filter((politico) => normalize(`${politico.nombre_completo} ${politico.cargo} ${politico.partido_electoral ?? ""} ${politico.distrito_region ?? ""}`).includes(needle))
+    .filter((politico) => normalizedSearchMatches(raw, `${politico.nombre_completo} ${politico.cargo} ${politico.partido_electoral ?? ""} ${politico.distrito_region ?? ""}`))
     .slice(0, 75)
     .map((politico) => ({
       id: politico.id,
@@ -1883,7 +1890,7 @@ async function searchFromR2(requestUrl: URL, env: Env) {
     searchRemuneraciones38BisFromR2(raw, env),
   ]);
   const entities = (rows ?? [])
-    .filter((row) => normalize(row.name).includes(needle))
+    .filter((row) => normalizedSearchMatches(raw, String(row.name ?? "")))
     .slice(0, 75)
     .map((row) => {
       const item = entity(row);
@@ -1898,7 +1905,7 @@ async function searchFromR2(requestUrl: URL, env: Env) {
   for (const item of politicians) {
     const key = normalize(item.nombre);
     const current = merged.get(key);
-    if (!current || current.url.startsWith("/entidades/")) merged.set(key, item);
+    if (!current || current.url.startsWith("/entidades/") || current.url.startsWith("/personas/")) merged.set(key, item);
   }
   const data = [...merged.values()].slice(0, 75);
   if (data.length === 0 && funcionarios.length === 0 && remuneraciones.length === 0 && !rows) return dbUnavailable();
@@ -2311,8 +2318,10 @@ export default {
     if (path === "/api/v1/search") {
       const limited = await rateLimit(request, env, "search");
       return limited ?? cachedPublicGet(request, async () => {
-        const r2 = await searchFromR2(url, env);
-        return r2.status < 500 ? r2 : databaseSafe(search(url, env));
+        // Las búsquedas públicas permanecen en los catálogos e índices R2.
+        // Un problema de R2 se muestra como indisponibilidad; no se dispara
+        // una búsqueda amplia de respaldo en D1.
+        return searchFromR2(url, env);
       });
     }
     if (path === "/api/v1/transferencias") {

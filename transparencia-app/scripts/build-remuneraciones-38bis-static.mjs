@@ -55,7 +55,7 @@ function stableHash(value) {
 }
 
 function rowKey(row) {
-  return [row.nombre, row.organismo, row.cargo].map(normalize).join("|");
+  return [row.partida, row.organismo, row.cargo, row.nombre].map(normalize).join("|");
 }
 
 function nameSortKey(value) {

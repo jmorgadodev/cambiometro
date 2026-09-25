@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { MUNICIPALIDADES_SEED } from "@/lib/seed-politicos";
 import { getMunicipalidadData } from "@/lib/municipalidades-data";
+import { buildMunicipalitySeoMetadata } from "@/lib/municipality-seo-metadata";
 import { getVerifiedMuniRRSS } from "@/lib/municipalidades-rrss";
 import { getPartidoConfig } from "@/lib/partidos.config";
 import ShareButton from "@/components/ShareButton";
@@ -29,24 +29,36 @@ export async function generateMetadata({
   if (!muni) return { title: "Municipalidad No Encontrada — El Cambiómetro" };
   const canonicalSlug = getMuniCanonicalSlug(id) ?? muni.id;
   const muniData = getMunicipalidadData(muni.id);
-  const alcalde = muniData?.alcalde?.nombre ?? muni.alcalde_actual ?? "Alcaldía";
+  const hasPublishedBudget = [
+    muniData?.presupuesto?.inicial_clp,
+    muniData?.presupuesto?.vigente_clp,
+    muniData?.presupuesto?.gasto_personal_clp,
+    muniData?.presupuesto?.ingresos_propios_clp,
+  ].some((amount) => typeof amount === "number" && amount > 0);
+  const seo = buildMunicipalitySeoMetadata(muni.nombre_comuna, {
+    periodCount: muniData?.periodos_disponibles?.length ?? 0,
+    budgetYear: hasPublishedBudget ? muniData?.presupuesto?.ano ?? null : null,
+    populationCensusYear:
+      typeof muniData?.poblacion_censo_2024 === "number" && muniData.poblacion_censo_2024 > 0 ? 2024 : null,
+    hasVerifiedPurchases: muniData?.compras_publicas?.metodo_enlace === "RUT_EXACTO",
+  });
   const ogImage = `https://cambiometro.impulsacv.cl/api/og/site`;
 
   return {
-    title: `Municipalidad de ${muni.nombre_comuna} — Alcalde ${alcalde}, Sueldos, Censo & Presupuesto | El Cambiómetro`,
-    description: `Ficha municipal oficial de ${muni.nombre_comuna}: población Censo 2024, presupuesto per cápita, dependencia FCM, nóminas CPLT, concejo municipal SERVEL 2024 y compras públicas ChileCompra OCDS.`,
+    title: seo.title,
+    description: seo.description,
     alternates: {
       canonical: `/municipalidades/${canonicalSlug}`,
     },
     openGraph: {
-      title: `Municipalidad de ${muni.nombre_comuna} — El Cambiómetro`,
-      description: `Sueldos, demografía Censo 2024, presupuesto SINIM y dotación municipal de ${muni.nombre_comuna}.`,
+      title: seo.title,
+      description: seo.description,
       images: [ogImage],
     },
     twitter: {
       card: "summary_large_image",
-      title: `Municipalidad de ${muni.nombre_comuna} — El Cambiómetro`,
-      description: `Sueldos, demografía Censo 2024, presupuesto SINIM y dotación municipal de ${muni.nombre_comuna}.`,
+      title: seo.title,
+      description: seo.description,
       images: [ogImage],
     },
   };
@@ -88,7 +100,7 @@ export default async function MunicipalidadDetailPage({
     "@context": "https://schema.org",
     "@type": "GovernmentOrganization",
     name: `Municipalidad de ${muni.nombre_comuna}`,
-    url: `https://cambiometro.impulsacv.cl/municipalidades/${id}`,
+    url: `https://cambiometro.impulsacv.cl/municipalidades/${canonicalSlug}`,
     address: {
       "@type": "PostalAddress",
       addressRegion: muni.region,

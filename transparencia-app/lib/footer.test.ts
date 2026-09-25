@@ -19,30 +19,25 @@ describe("Footer compacto y pulido móvil", () => {
     expect(layoutContent).not.toContain('aria-label="Explorar"');
     expect(layoutContent).not.toContain('title: "Explorar"');
 
-    // CSS debe incluir list-style: none, flex-direction: column, gap: 10px
+    // CSS mantiene una separación compacta y uniforme entre enlaces.
     expect(cssContent).toContain(".site-footer__list");
     expect(cssContent).toContain("list-style: none");
     expect(cssContent).toContain("flex-direction: column");
-    expect(cssContent).toContain("gap: 10px");
+    expect(cssContent).toContain("gap: 0.5rem");
   });
 
-  it("móvil: marca con misión y corte como caja compacta --surface-2 no inline", () => {
-    expect(layoutContent).toContain("site-footer__mission");
-    expect(layoutContent).toContain("provenance-stamp");
-    expect(layoutContent).toContain("Estado del catálogo");
-    expect(layoutContent).toContain("Catálogo actualizado por fuente");
-    expect(layoutContent).toContain("Las fuentes se actualizan por separado y conservan su propio corte");
-
-    expect(cssContent).toContain(".site-footer__mission");
-    expect(cssContent).toContain("font-size: 13.5px");
-    expect(cssContent).toContain(".provenance-stamp");
-    expect(cssContent).toContain("background: var(--surface-2)");
-    expect(cssContent).toContain("border: 1px solid var(--border)");
+  it("retira el bloque marcado y conserva Donar y apoyar en navegación", () => {
+    expect(layoutContent).not.toContain("site-footer__about");
+    expect(layoutContent).not.toContain("site-footer__mission");
+    expect(layoutContent).not.toContain("site-footer__support");
+    expect(layoutContent).not.toContain("provenance-stamp");
+    expect(layoutContent).not.toContain("Sostenibilidad Ciudadana");
+    expect(layoutContent).not.toContain("SupportProjectLink");
+    expect(layoutContent).toContain("Donar y apoyar");
   });
 
   it("el layout global no consulta D1 ni muestra un total consolidado desactualizable", () => {
     expect(layoutContent).not.toContain("getDataPlatformSummary");
-    expect(layoutContent).toContain("Catálogo actualizado por fuente");
     expect(layoutContent).not.toContain("totalRecords.toLocaleString");
   });
 
@@ -68,9 +63,9 @@ describe("Footer compacto y pulido móvil", () => {
     expect(layoutContent).toContain("https://www.tiktok.com/@cambiometro");
   });
 
-  it("desktop (>=1024px) cuenta con grid compacto de 3 columnas (brand + 2 nav)", () => {
+  it("desktop (>=1024px) distribuye las dos secciones en columnas equilibradas", () => {
     expect(cssContent).toContain("@media (min-width: 1024px)");
-    expect(cssContent).toContain("grid-template-columns: minmax(18rem, 2fr) repeat(2, minmax(10rem, 1fr))");
+    expect(cssContent).toContain("grid-template-columns: repeat(2, minmax(0, 1fr))");
   });
 
   it("pulido home móvil: banda KPI en 2 columnas con último ítem a ancho completo", () => {

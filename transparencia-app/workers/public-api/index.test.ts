@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { gzipSync } from "node:zlib";
 import { describe, expect, it } from "vitest";
-import worker, { listRecordsFromR2 } from "./index";
+import worker, { listRecordsFromR2, normalizedSearchMatches } from "./index";
 
 function r2Object(value: unknown) {
   if (value instanceof ArrayBuffer) {
@@ -38,6 +38,24 @@ function sha256(data: ArrayBuffer) {
 }
 
 describe("registros públicos R2", () => {
+  it("busca sin distinguir tildes, mayúsculas ni el orden de nombres y apellidos", () => {
+    expect(normalizedSearchMatches("KAISER VANESSA", "Vanessa Kaiser Barents-Von Hohenhagen")).toBe(true);
+    expect(normalizedSearchMatches("Torrealba Río Sebastián", "RÍO SEBASTIÁN TORREALBA DEL")).toBe(true);
+    expect(normalizedSearchMatches("Torrealba inexistente", "RÍO SEBASTIÁN TORREALBA DEL")).toBe(false);
+  });
+
+  it("no usa D1 como fallback de búsquedas públicas y conserva autoridades del catálogo local", async () => {
+    let d1Calls = 0;
+    const response = await worker.fetch(
+      new Request("https://example.test/api/v1/search?q=Kaiser"),
+      { PUBLIC_DATA: fakeBucket({}) as never, DB: { prepare: () => { d1Calls++; throw new Error("D1 debe permanecer fuera de la búsqueda"); } } as never } as never,
+    );
+    expect(response.status).toBe(200);
+    const payload = await response.json() as { data: { autoridades: Array<{ nombre: string }> } };
+    expect(payload.data.autoridades.some((item) => item.nombre.toLocaleLowerCase("es-CL").includes("kaiser"))).toBe(true);
+    expect(d1Calls).toBe(0);
+  });
+
   it("consulta un organismo mediante posiciones paginadas, sin descargar su archivo completo", async () => {
     const root="projections/funcionarios-central-v1";
     const bucket=fakeBucket({

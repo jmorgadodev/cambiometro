@@ -191,7 +191,7 @@ export default function HomeInlineSearch() {
 
   return (
     <div ref={wrapperRef} className="home-query-wrap">
-      <form className="home-query" action="/remuneraciones-publicas/" method="get" role="search" onSubmit={handleSubmit}>
+      <form className="home-query" action="/buscar" method="get" role="search" onSubmit={handleSubmit}>
         <label htmlFor="home-search">Buscar en los registros</label>
         <div className="home-query__control">
           <input

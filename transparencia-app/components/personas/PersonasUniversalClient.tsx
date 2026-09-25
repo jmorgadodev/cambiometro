@@ -31,6 +31,7 @@ export interface ParlamentarioItem {
 
 export interface AlcaldeItem {
   muni_id: string;
+  href?: string;
   cut: string;
   nombre_comuna: string;
   region: string;
@@ -46,6 +47,7 @@ export interface AlcaldeItem {
 
 export interface AutoridadItem {
   id: string;
+  href?: string;
   nombre_canonico: string;
   sigla?: string;
   tipo: string;
@@ -1159,7 +1161,7 @@ export default function PersonasUniversalClient({
                 {paginatedAlcaldes.map((a) => (
                   <Link prefetch={false}
                     key={a.muni_id}
-                    href={`/municipalidades/${a.muni_id}`}
+                    href={a.href ?? `/municipalidades/${a.muni_id}`}
                     style={{
                       display: "flex",
                       flexDirection: "column",
@@ -1260,7 +1262,7 @@ export default function PersonasUniversalClient({
                         </td>
                         <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
                           <Link prefetch={false}
-                            href={`/municipalidades/${a.muni_id}`}
+                            href={a.href ?? `/municipalidades/${a.muni_id}`}
                             style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textDecoration: "none" }}
                           >
                             Ver Comuna →
@@ -1331,7 +1333,7 @@ export default function PersonasUniversalClient({
 
                     <div style={{ marginTop: "0.75rem", paddingTop: "0.65rem", borderTop: "1px solid var(--border)" }}>
                       <Link prefetch={false}
-                        href={`/servicios-publicos/${aut.id}`}
+                        href={aut.href ?? `/servicios-publicos/${aut.id}`}
                         style={{
                           display: "block",
                           width: "100%",
@@ -1381,7 +1383,7 @@ export default function PersonasUniversalClient({
                         </td>
                         <td style={{ padding: "0.75rem 1rem", textAlign: "right" }}>
                           <Link prefetch={false}
-                            href={`/servicios-publicos/${aut.id}`}
+                            href={aut.href ?? `/servicios-publicos/${aut.id}`}
                             style={{ fontSize: "0.75rem", color: "var(--accent)", fontWeight: 700, textDecoration: "none" }}
                           >
                             Ver Organismo →

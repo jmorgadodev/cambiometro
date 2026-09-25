@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { remunerationResultWindow } from "./remuneraciones-pagination";
+import { remunerationPersonKey, remunerationPersonWindow, remunerationResultWindow } from "./remuneraciones-pagination";
 
 describe("paginación de registros sin perder fichas agrupadas", () => {
   it("no confunde tres nombres repetidos con quince registros de una página", () => {
@@ -11,5 +11,19 @@ describe("paginación de registros sin perder fichas agrupadas", () => {
   });
   it("mantiene el último segmento sin inflar su rango", () => {
     expect(remunerationResultWindow(24, 30, 4, 15)).toMatchObject({start:45,end:54,remoteEnd:30});
+  });
+
+  it("pagina perfiles agrupados después de consolidar sus meses", () => {
+    const profiles = Array.from({ length: 16 }, (_, id) => ({ id }));
+    expect(remunerationPersonWindow(profiles, 1, 15)).toMatchObject({ start: 0, end: 15, totalProfiles: 16, totalPages: 2 });
+    expect(remunerationPersonWindow(profiles, 2, 15).items).toEqual([{ id: 15 }]);
+  });
+
+  it("no fusiona homónimos nominales de distinta fuente, organismo o cargo", () => {
+    const row = { nombreOriginal: "RÍO Sebastián Torrealba Del", sourceId: "cplt-municipal", organismoOriginal: "Municipalidad A", cargoOriginal: "Asesor" };
+    expect(remunerationPersonKey(row)).toBe(remunerationPersonKey({ ...row, nombreOriginal: "Sebastián Torrealba del Río" }));
+    expect(remunerationPersonKey(row)).not.toBe(remunerationPersonKey({ ...row, sourceId: "cplt-central" }));
+    expect(remunerationPersonKey(row)).not.toBe(remunerationPersonKey({ ...row, organismoOriginal: "Municipalidad B" }));
+    expect(remunerationPersonKey(row)).toBe(remunerationPersonKey({ ...row, cargoOriginal: "Director" }));
   });
 });

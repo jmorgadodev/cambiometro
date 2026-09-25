@@ -42,6 +42,20 @@ describe("remuneraciones 38 bis", () => {
     expect(result.cambios[0]).toMatchObject({ brutoAnterior: 1000000, brutoActual: 1300000 });
   });
 
+  it("trata una partida distinta como una nueva fila y conserva la salida anterior", () => {
+    const previous = release("2026-06", [
+      { partida: "Ministerio A", organismo: "ORGANISMO", cargo: "ASESOR", nombre: "Ana Pérez", bruto_mensual: 1000000 },
+    ]);
+    const current = release("2026-07", [
+      { partida: "Ministerio B", organismo: "ORGANISMO", cargo: "ASESOR", nombre: "ANA PEREZ", bruto_mensual: 1000000 },
+    ]);
+
+    const result = compareRemuneraciones38Bis(previous, current);
+    expect(result.entradas).toHaveLength(1);
+    expect(result.salidasObservadas).toHaveLength(1);
+    expect(result.cambios).toHaveLength(0);
+  });
+
   it("no inventa entradas ni salidas en la primera publicación", () => {
     const result = compareRemuneraciones38Bis(null, release("2026-06", []));
     expect(result.estado).toBe("linea_base");
