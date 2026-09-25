@@ -82,3 +82,12 @@ También se integró el PR #621: el ETL remoto programado de votaciones Senado
 se retiró del workflow y del calendario versionado; se conserva la ejecución
 local ya registrada y la reparación manual aislada. La integración no desplegó
 la web ni escribió en R2/D1.
+
+La API oficial del Senado se consultó localmente para `2026-09-20` a
+`2026-09-24`. Devolvió 12 votaciones con IDs `11341–11349`, `11352–11354`
+(sin asumir continuidad de IDs). Una consulta productiva acotada al mismo rango
+devolvió exactamente esos 12 IDs y fechas; la partición pública de septiembre
+declara 41 filas, `complete`, cero particiones ausentes y cero artefactos
+ausentes. El lote ya está en R2; no se hizo una publicación adicional. Esto
+cierra la comprobación de esos días, no una auditoría de todo el histórico ni
+la validación de cada pantalla de detalle parlamentaria.
