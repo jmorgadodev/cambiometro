@@ -267,6 +267,9 @@ for (const definition of filterDefinitions) {
   await writeGeneratedAsset(filePath, key);
   filters[definition.key] = { key, count: positions.length };
 }
+for (const fileName of files) {
+  if (publishedRowsByFile.has(fileName) && !organismPositions.has(fileName.slice(0,-5))) organismPositions.set(fileName.slice(0,-5),[]);
+}
 for (const [id, positions] of organismPositions) {
   const fileName = `organism-${id}.json.gz`;
   const filePath = join(searchIndexRoot, fileName);
@@ -358,18 +361,20 @@ for (const asset of manifestAssets) {
   delete asset.sourcePath;
 }
 for (const fileName of files) {
+  if (!publishedRowsByFile.has(fileName)) throw new Error(`CPLT_NON_RECORD_PROJECTION:${fileName}`);
   const publishedRows = publishedRowsByFile.get(fileName) ?? [];
-  const data = Buffer.from(`${JSON.stringify(publishedRows)}\n`);
+  const original = Buffer.from(`${JSON.stringify(publishedRows)}\n`);
+  const data = gzipSync(original, { level: 9 });
   const size = data.byteLength;
   if (size < 2) throw new Error(`CPLT_EMPTY_PROJECTION: ${fileName}`);
   const checksumSha256 = createHash("sha256").update(data).digest("hex");
-  const key = `projections/${datasetRoot}/versions/${version}/${fileName}`;
+  const key = `projections/${datasetRoot}/versions/${version}/${fileName}.gz`;
   const target = join(outputRoot, key);
   mkdirSync(dirname(target), { recursive: true });
   writeFileSync(target, data);
-  const releaseAssetName = `cplt-${version}-${fileName}`;
+  const releaseAssetName = `cplt-${version}-${fileName}.gz`;
   assets.push({ key, checksumSha256, size, releaseTag, releaseAssetName });
-  manifestAssets.push({ key, checksumSha256, size });
+  manifestAssets.push({ key, checksumSha256, size, encoding: "gzip", originalChecksumSha256: createHash("sha256").update(original).digest("hex"), originalSize: original.length });
 }
 
 const manifest = {

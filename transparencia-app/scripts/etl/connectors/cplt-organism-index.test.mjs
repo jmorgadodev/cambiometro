@@ -44,5 +44,8 @@ describe("índices de organismos sin copiar registros", () => {
     const positions=JSON.parse(gunzipSync(readFileSync(join(output,index.filters["organismo:org-test"].key))));
     expect(positions).toEqual([0,1,2,3]);
     expect(manifest.assets.find(x=>x.key===index.pages[0].key).originalSize).toBeGreaterThan(0);
+    const originalAsset=manifest.assets.find(x=>x.key.endsWith("/org-test.json.gz"));
+    expect(originalAsset.originalSize).toBeGreaterThan(0);
+    expect(JSON.parse(gunzipSync(readFileSync(join(output,originalAsset.key))))).toEqual(rows);
   });
 });
