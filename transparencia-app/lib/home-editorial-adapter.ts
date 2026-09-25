@@ -208,17 +208,11 @@ export function buildLatestSenateVotes(
     });
 }
 
-/** Keeps the curated important vote centered between the two newest Senate votes. */
-export function composeHomeFeaturedVotes(
-  importantVotes: readonly FeaturedVoteItem[],
-  latestSenateVotes: readonly FeaturedVoteItem[],
-): FeaturedVoteItem[] {
-  const important = importantVotes[0];
-  const sideVotes = latestSenateVotes.filter((vote) => vote.id !== important?.id).slice(0, 2);
-  if (!important) return sideVotes;
-  return sideVotes.length >= 2
-    ? [sideVotes[0], important, sideVotes[1]]
-    : [important, ...sideVotes];
+/** Places the newest Senate vote in the center, flanked by the next two newest. */
+export function composeHomeLatestSenateVotes(latestSenateVotes: readonly FeaturedVoteItem[]): FeaturedVoteItem[] {
+  const [newest, secondNewest, thirdNewest] = latestSenateVotes.slice(0, 3);
+  if (!newest) return [];
+  return [secondNewest, newest, thirdNewest].filter((vote): vote is FeaturedVoteItem => Boolean(vote));
 }
 
 const CHAPTERS = [

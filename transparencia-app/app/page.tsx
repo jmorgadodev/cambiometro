@@ -3,11 +3,11 @@ import "./home-editorial.css";
 import { GLOBAL_KPIS } from "@/lib/global-kpis";
 import { ETL_SOURCES_DATA } from "@/lib/etl-sources-data";
 import { getStaticEntityCatalog } from "@/lib/static-entity-catalog";
-import { getHomeFeaturedVotes, getVotingFreshness, getVotacionesAnuales } from "@/lib/votaciones-destacadas";
+import { getVotingFreshness, getVotacionesAnuales } from "@/lib/votaciones-destacadas";
 import { MOVIMIENTOS, MOVIMIENTOS_HOME_SUMMARY, MOVIMIENTOS_PIPELINE_METADATA } from "@/lib/movimientos";
 import { formatFechaCorta } from "@/lib/format";
 import { getLandingSummary, sourceKeyForHomeSource } from "@/lib/landing-summary-runtime";
-import { buildEditorialChapters, buildEditorialMovements, buildEditorialVotes, buildLatestSenateVotes, composeHomeFeaturedVotes } from "@/lib/home-editorial-adapter";
+import { buildEditorialChapters, buildEditorialMovements, buildLatestSenateVotes } from "@/lib/home-editorial-adapter";
 import { HOME_STRUCTURED_DATA } from "@/lib/home-structured-data";
 import { latestMovementReviewDate, latestMovementSignalDate } from "@/lib/movement-age";
 
@@ -24,7 +24,6 @@ import { IndependenceCallout } from "@/components/home/IndependenceCallout";
 export const dynamic = "force-static";
 
 const VOTING_FRESHNESS = getVotingFreshness();
-const HOME_IMPORTANT_VOTE_ID = "senado-vot-11264";
 
 function formatVotingDate(value: string | null) {
   if (!value) return "Sin fecha publicada";
@@ -76,9 +75,7 @@ export default async function HomePage() {
   const operationalSources = homeSources;
   const entityCount = getStaticEntityCatalog().total || GLOBAL_KPIS.entidades;
   const annualVotes = getVotacionesAnuales();
-  const importantVote = buildEditorialVotes(getHomeFeaturedVotes([HOME_IMPORTANT_VOTE_ID]), annualVotes);
-  const localLatestSenateVotes = buildLatestSenateVotes(annualVotes, 2, [HOME_IMPORTANT_VOTE_ID]);
-  const editorialVotes = composeHomeFeaturedVotes(importantVote, localLatestSenateVotes);
+  const latestSenateVotes = buildLatestSenateVotes(annualVotes, 3);
   const editorialMovements = buildEditorialMovements(MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA.signals);
   const eventDates = [...new Set(MOVIMIENTOS.filter((movement) => movement.fecha >= MOVIMIENTOS_HOME_SUMMARY.desde).map((movement) => movement.fecha))].sort();
   const daysBetweenChanges = eventDates.length > 1
@@ -126,8 +123,7 @@ export default async function HomePage() {
 
       {/* 6. Votaciones Destacadas en el Congreso: Fichas de Hemiciclo y Spotlight */}
       <HomeFeaturedVotes
-        votes={editorialVotes}
-        importantVoteId={HOME_IMPORTANT_VOTE_ID}
+        votes={latestSenateVotes}
         reviewedAt={formatVotingDate(VOTING_FRESHNESS.reviewedAt)}
         latestVoteDate={formatVotingDate(VOTING_FRESHNESS.latestVoteDate)}
       />

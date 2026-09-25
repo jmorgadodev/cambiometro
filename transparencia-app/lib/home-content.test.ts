@@ -20,7 +20,7 @@ describe("portada editorial conectada a datos públicos", () => {
 
   it("mantiene el diseño separado del contrato de datos y sin ejemplos codificados", () => {
     expect(home).toContain("buildEditorialMovements(MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA.signals)");
-    expect(home).toContain("buildEditorialVotes(getHomeFeaturedVotes([HOME_IMPORTANT_VOTE_ID])");
+    expect(home).toContain("buildLatestSenateVotes(annualVotes, 3)");
     expect(home).toContain("buildEditorialChapters(operationalSources)");
     expect(movements).not.toContain("const LEAD_MOVEMENT");
     expect(votes).not.toContain("DEFAULT_VOTES");
@@ -65,6 +65,8 @@ describe("portada editorial conectada a datos públicos", () => {
     expect(movements).toContain("dateTime=");
     expect(movements).toContain("fechaCambioEfectivoActualizada");
     expect(homeVotes).toContain("source=votaciones_senado&kind=vote&limit=50");
+    expect(homeVotes).toContain("buildLatestSenateVotes(payload.data as Parameters<typeof buildLatestSenateVotes>[0], 3)");
+    expect(homeVotes).toContain("composeHomeLatestSenateVotes(latestSenateVotes)");
     expect(homeVotes).toContain('sourceBackend !== "r2-lake"');
     expect(home).toContain("<HomeFeaturedVotes");
   });
