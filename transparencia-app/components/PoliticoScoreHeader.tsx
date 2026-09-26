@@ -38,6 +38,7 @@ export interface PoliticoHeaderData {
   fecha_nacimiento?: string;
   lugar_nacimiento?: string;
   edad?: number | null;
+  currentPeriod?: string | null;
   dipInfo?: PoliticoDipInfo;
   // Metricas reales
   pctAsistencia: number | null;
@@ -208,7 +209,7 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
                   {data.lugar_nacimiento ? ` · ${data.lugar_nacimiento}` : ""}
                 </span>
               )}
-              <span>Período 2026–2030</span>
+              {data.currentPeriod && <span>Período {data.currentPeriod}</span>}
               <a
                 href="https://www.bcn.cl/historiapolitica/resenas_parlamentarias/"
                 target="_blank"
