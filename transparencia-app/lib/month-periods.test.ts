@@ -46,4 +46,28 @@ describe("monthly published-period selectors", () => {
     expect(html).toContain("Julio 2026");
     expect(html).not.toContain("Diciembre 2025");
   });
+
+  it("keeps a 2012–2026 history compact instead of rendering one control per month", () => {
+    const periods: string[] = [];
+    for (let year = 2012; year <= 2026; year += 1) {
+      const finalMonth = year === 2026 ? 7 : 12;
+      for (let month = 1; month <= finalMonth; month += 1) {
+        periods.push(`${year}-${String(month).padStart(2, "0")}`);
+      }
+    }
+
+    const html = renderToStaticMarkup(createElement(PeriodYearMonthFilter, {
+      periods,
+      selectedPeriod: latestPublishedPeriod(periods),
+      onChange: () => undefined,
+      label: "Filtrar costo mensual publicado",
+    }));
+
+    expect(periods).toHaveLength(175);
+    expect(html.match(/<select/g)).toHaveLength(2);
+    expect(html.match(/<option/g)).toHaveLength(22); // 15 años + 7 meses de 2026
+    expect(html).not.toContain("<button");
+    expect(html).toContain('<option value="2026" selected="">2026</option>');
+    expect(html).toContain('<option value="2026-07" selected="">Julio 2026</option>');
+  });
 });
