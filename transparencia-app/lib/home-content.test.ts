@@ -31,9 +31,12 @@ describe("portada editorial conectada a datos públicos", () => {
   it("reutiliza el buscador real y conserva rutas públicas", () => {
     expect(searchCard).toContain("<HomeInlineSearch />");
     expect(search).toContain("publicApiUrl(`/api/v1/search?q=${encodeURIComponent(normalizedQuery)}`)");
-    expect(search).toContain("searchStaticRemunerations(normalizedQuery)");
+    expect(search).toContain("searchStaticRemunerations(normalizedQuery, controller.signal)");
+    expect(search).toContain("Promise.allSettled([workerRequest, remunerationRequest])");
+    expect(search).toContain("isLoading && results.length === 0");
     expect(search).toContain("interleaveDistinctSearchResults(workerResults, remunerationResults)");
-    expect(search).toContain('action="/remuneraciones-publicas/"');
+    expect(search).toContain('action="/buscar"');
+    expect(search).toContain("router.push(fullSearchTarget.href)");
     expect(searchCard).toContain('href: "/municipalidades"');
   });
 

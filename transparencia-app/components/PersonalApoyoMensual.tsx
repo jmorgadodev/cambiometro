@@ -3,6 +3,8 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { formatCLP } from "@/lib/format";
+import { latestPublishedPeriod, parseSpanishMonthPeriod } from "@/lib/month-periods";
+import PeriodYearMonthFilter from "@/components/PeriodYearMonthFilter";
 import AccessibleTooltip from "@/components/ui/AccessibleTooltip";
 import type { AsignacionSenado } from "@/lib/personal-apoyo";
 import type { SenateSupportEvaluation } from "@/scripts/etl/senado-assignment.mjs";
@@ -43,28 +45,8 @@ export interface PersonalApoyoProps {
   fuenteUrl?: string;
 }
 
-const MONTH_MAP: Record<string, string> = {
-  enero: "2026-01",
-  febrero: "2026-02",
-  marzo: "2026-03",
-  abril: "2026-04",
-  mayo: "2026-05",
-  junio: "2026-06",
-  julio: "2026-07",
-  agosto: "2026-08",
-  septiembre: "2026-09",
-  octubre: "2026-10",
-  noviembre: "2026-11",
-  diciembre: "2026-12",
-};
-
 function normalizeCamaraMonth(mesPersonal?: string | null): string {
-  if (!mesPersonal) return "";
-  const parts = mesPersonal.toLowerCase().trim().split(/\s+/);
-  if (parts.length >= 2 && MONTH_MAP[parts[0]]) {
-    return MONTH_MAP[parts[0]];
-  }
-  return mesPersonal;
+  return parseSpanishMonthPeriod(mesPersonal);
 }
 
 export default function PersonalApoyoMensual({
@@ -75,18 +57,23 @@ export default function PersonalApoyoMensual({
   senadorPersonal,
   fuenteUrl,
 }: PersonalApoyoProps) {
-  const [periodoSeleccionado, setPeriodoSeleccionado] = useState(
-    ultimoPeriodo || mesesDisponibles[mesesDisponibles.length - 1]?.periodo || ""
-  );
+  const ultimoPublicado = latestPublishedPeriod(mesesDisponibles.map((month) => month.periodo));
+  const periodoInicial = ultimoPeriodo && mesesDisponibles.some((month) => month.periodo === ultimoPeriodo)
+    ? ultimoPeriodo
+    : ultimoPublicado;
+  const [periodoSeleccionado, setPeriodoSeleccionado] = useState(periodoInicial);
 
   const esSenador = cargo === "Senador";
   const mesDiputadoOficial = normalizeCamaraMonth(diputadoPersonal?.mes_personal);
 
   // Datos filtrados para el mes seleccionado
-  const { filas, totalMensual, totalAcumulado2026, personasContratadas } = useMemo(() => {
+  const { filas, totalMensual, totalAcumuladoAnual, personasContratadas } = useMemo(() => {
     if (esSenador) {
       const all = senadorPersonal?.registros ?? [];
-      const acumulado = all.reduce((sum, r) => sum + (r.monto ?? 0), 0);
+      const selectedYear = periodoSeleccionado.slice(0, 4);
+      const acumulado = all
+        .filter((record) => record.periodo.startsWith(`${selectedYear}-`))
+        .reduce((sum, record) => sum + (record.monto ?? 0), 0);
       const enMes = all.filter((r) => r.periodo === periodoSeleccionado);
       const totalMes = enMes.reduce((sum, r) => sum + (r.monto ?? 0), 0);
       return {
@@ -101,16 +88,13 @@ export default function PersonalApoyoMensual({
           }))
           .sort((a, b) => a.nombre.localeCompare(b.nombre, "es-CL", { sensitivity: "base" })),
         totalMensual: totalMes,
-        totalAcumulado2026: acumulado,
+        totalAcumuladoAnual: acumulado,
         personasContratadas: enMes.length,
       };
     } else {
       const allDip = diputadoPersonal?.personal_apoyo ?? [];
       const totalMes = allDip.reduce((sum, f) => sum + (f.sueldo ?? 0), 0);
-      const coincideMes =
-        periodoSeleccionado === mesDiputadoOficial ||
-        periodoSeleccionado === "2026-06" ||
-        (mesesDisponibles.length > 0 && periodoSeleccionado === mesesDisponibles[mesesDisponibles.length - 1]?.periodo);
+      const coincideMes = periodoSeleccionado === mesDiputadoOficial;
 
       if (coincideMes && allDip.length > 0) {
         return {
@@ -125,7 +109,7 @@ export default function PersonalApoyoMensual({
             }))
             .sort((a, b) => a.nombre.localeCompare(b.nombre, "es-CL", { sensitivity: "base" })),
           totalMensual: totalMes,
-          totalAcumulado2026: totalMes,
+          totalAcumuladoAnual: totalMes,
           personasContratadas: allDip.length,
         };
       }
@@ -134,11 +118,11 @@ export default function PersonalApoyoMensual({
       return {
         filas: [],
         totalMensual: 0,
-        totalAcumulado2026: totalMes,
+        totalAcumuladoAnual: totalMes,
         personasContratadas: 0,
       };
     }
-  }, [esSenador, senadorPersonal, diputadoPersonal, periodoSeleccionado, mesDiputadoOficial, mesesDisponibles]);
+  }, [esSenador, senadorPersonal, diputadoPersonal, periodoSeleccionado, mesDiputadoOficial]);
 
   const mesActivoEtiqueta =
     mesesDisponibles.find((m) => m.periodo === periodoSeleccionado)?.etiqueta ?? periodoSeleccionado;
@@ -146,36 +130,12 @@ export default function PersonalApoyoMensual({
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.2rem" }}>
-      {/* Selector de Meses */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
-        {mesesDisponibles.map((m) => {
-          const activo = m.periodo === periodoSeleccionado;
-          return (
-            <button
-              key={m.periodo}
-              type="button"
-              onClick={() => setPeriodoSeleccionado(m.periodo)}
-              aria-pressed={activo}
-              className="capsule"
-              style={{
-                cursor: "pointer",
-                fontFamily: "var(--font-mono)",
-                fontSize: "0.72rem",
-                padding: "0.35rem 0.75rem",
-                borderRadius: 99,
-                transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
-                border: activo ? "1px solid var(--accent)" : "1px solid var(--border)",
-                background: activo ? "var(--accent)" : "var(--surface)",
-                color: activo ? "var(--bg)" : "var(--text-1)",
-                fontWeight: activo ? 800 : 500,
-                boxShadow: activo ? "0 0 12px var(--accent-glow)" : "none",
-              }}
-            >
-              {m.etiqueta}
-            </button>
-          );
-        })}
-      </div>
+      <PeriodYearMonthFilter
+        periods={mesesDisponibles.map((month) => month.periodo)}
+        selectedPeriod={periodoSeleccionado}
+        onChange={setPeriodoSeleccionado}
+        label="Filtrar personal de apoyo y asesores"
+      />
 
       {/* Tarjetas Resumen del Mes Seleccionado */}
       <div className="stat-grid" style={{ marginTop: "0.25rem" }}>
@@ -221,10 +181,10 @@ export default function PersonalApoyoMensual({
               fontSize: "clamp(14px, 4.5vw, 1.25rem)",
             }}
           >
-            {formatCLP(totalAcumulado2026)}
+            {formatCLP(totalAcumuladoAnual)}
           </div>
           <div className="stat-tile__label">
-            Acumulado 2026
+            {esSenador ? `Acumulado ${periodoSeleccionado.slice(0, 4)}` : "Total del corte publicado"}
           </div>
         </div>
       </div>

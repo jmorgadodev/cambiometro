@@ -2,6 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { formatCLP } from "@/lib/format";
+import { latestPublishedPeriod } from "@/lib/month-periods";
+import PeriodYearMonthFilter from "@/components/PeriodYearMonthFilter";
 
 export interface MesCostoData {
   periodo: string; // e.g. "2026-05"
@@ -30,7 +32,7 @@ export default function PoliticoCostoMensual({
     if (ultimoPeriodoConDatos && meses.some((m) => m.periodo === ultimoPeriodoConDatos)) {
       return ultimoPeriodoConDatos;
     }
-    return meses[meses.length - 1]?.periodo || "";
+    return latestPublishedPeriod(meses.map((m) => m.periodo));
   }, [meses, ultimoPeriodoConDatos]);
 
   const [periodoSeleccionado, setPeriodoSeleccionado] = useState<string>(defaultPeriodo);
@@ -102,40 +104,12 @@ export default function PoliticoCostoMensual({
           </span>
         </div>
 
-        {/* Selector de meses interactivo */}
-        <div
-          role="group"
-          aria-label="Seleccionar mes de costo"
-          style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}
-        >
-          {meses.map((m) => {
-            const isSelected = m.periodo === mesActivo.periodo;
-            return (
-              <button
-                key={m.periodo}
-                type="button"
-                onClick={() => setPeriodoSeleccionado(m.periodo)}
-                aria-pressed={isSelected}
-                className="capsule"
-                style={{
-                  cursor: "pointer",
-                  fontFamily: "var(--font-mono)",
-                  fontSize: "0.72rem",
-                  padding: "0.3rem 0.65rem",
-                  borderRadius: "99px",
-                  transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
-                  border: isSelected ? "1px solid var(--accent)" : "1px solid var(--border)",
-                  background: isSelected ? "var(--accent)" : "var(--surface)",
-                  color: isSelected ? "var(--bg)" : "var(--text-1)",
-                  fontWeight: isSelected ? 800 : 500,
-                  boxShadow: isSelected ? "0 0 12px var(--accent-glow)" : "none",
-                }}
-              >
-                {m.etiqueta}
-              </button>
-            );
-          })}
-        </div>
+        <PeriodYearMonthFilter
+          periods={meses.map((month) => month.periodo)}
+          selectedPeriod={mesActivo.periodo}
+          onChange={setPeriodoSeleccionado}
+          label="Filtrar costo mensual publicado"
+        />
       </div>
 
       {/* Grid de 4 Tiles */}
