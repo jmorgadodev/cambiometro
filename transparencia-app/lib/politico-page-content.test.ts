@@ -20,8 +20,18 @@ describe("contenido verificable de la ficha política", () => {
 
 
   it("apila la ficha en pantallas moviles sin mantener una columna fija", () => {
-    expect(page).toContain('className="politico-layout"');
+    expect(page).toContain('className={`politico-layout ${');
     expect(css).toMatch(/@media \(max-width: 850px\)[\s\S]*\.politico-layout \{ grid-template-columns: minmax\(0, 1fr\); \}/);
+  });
+
+  it("expande y redistribuye los gastos cuando la ficha no tiene resultado electoral 2025", () => {
+    const expenses = readFileSync(resolve("app/politico/[id]/gastos-mensuales.tsx"), "utf8");
+
+    expect(page).toContain('politico-layout--without-2025-result');
+    expect(expenses).toContain('className="authority-expenses-period"');
+    expect(expenses).toContain('className="authority-expenses-items"');
+    expect(css).toMatch(/\.politico-layout--without-2025-result \.authority-expenses-card\s*\{[^}]*grid-column:\s*1 \/ -1/);
+    expect(css).toMatch(/\.politico-layout--without-2025-result \.authority-expenses-items\s*\{[^}]*grid-template-columns:\s*repeat\(2, minmax\(0, 1fr\)\)/);
   });
 
   it("aplica el expediente editorial y mantiene accesos directos a sus secciones", () => {

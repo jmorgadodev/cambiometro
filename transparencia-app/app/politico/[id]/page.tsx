@@ -290,7 +290,11 @@ export default async function PoliticoPage({ params }: Props) {
       <div className="container-main politico-editorial-profile__body" style={{ paddingTop: "2rem", paddingBottom: "2rem" }}>
         
         {/* ── 1. GRILLA SUPERIOR (PERSONAL & GASTOS) ── */}
-        <div className="politico-layout">
+        <div
+          className={`politico-layout ${
+            pol.votos_2025 ? "politico-layout--with-2025-result" : "politico-layout--without-2025-result"
+          }`}
+        >
 
           {/* ── COLUMNA IZQUIERDA ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", minWidth: 0 }}>

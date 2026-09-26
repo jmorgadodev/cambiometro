@@ -66,48 +66,51 @@ export default function GastosMensuales({ meses, ultimo }: { meses: MesGastos[];
   const maxMonto = itemsConGasto.length > 0 ? itemsConGasto[0].monto : 1;
 
   return (
-    <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      <PeriodYearMonthFilter
-        periods={meses.map((mes) => mes.periodo)}
-        selectedPeriod={activo.periodo}
-        onChange={setSeleccionado}
-        label="Filtrar gastos operacionales rendidos"
-      />
+    <div className="authority-expenses-detail">
+      <div className="authority-expenses-period">
+        <PeriodYearMonthFilter
+          periods={meses.map((mes) => mes.periodo)}
+          selectedPeriod={activo.periodo}
+          onChange={setSeleccionado}
+          label="Filtrar gastos operacionales rendidos"
+        />
 
-      {/* Resumen del Mes Activo */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          padding: "0.75rem 1rem",
-          background: "var(--surface-2)",
-          borderRadius: 8,
-          border: "1px solid var(--border)",
-          flexWrap: "wrap",
-          gap: "0.5rem",
-        }}
-      >
-        <div>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span style={{ fontSize: "0.7rem", color: "var(--text-3)", textTransform: "uppercase", fontWeight: 700 }}>
-              Mes publicado: {activo.etiqueta}
-            </span>
+        {/* Resumen del Mes Activo */}
+        <div
+          className="authority-expenses-period__summary"
+          style={{
+            display: "flex",
+            justifyContent: "space-between",
+            alignItems: "center",
+            padding: "0.75rem 1rem",
+            background: "var(--surface-2)",
+            borderRadius: 8,
+            border: "1px solid var(--border)",
+            flexWrap: "wrap",
+            gap: "0.5rem",
+          }}
+        >
+          <div>
+            <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+              <span style={{ fontSize: "0.7rem", color: "var(--text-3)", textTransform: "uppercase", fontWeight: 700 }}>
+                Mes publicado: {activo.etiqueta}
+              </span>
+            </div>
+            {activo.variacion !== null && (
+              <div style={{ fontSize: "0.68rem", color: activo.variacion > 0 ? "var(--bad)" : "var(--ok)", fontWeight: 700, marginTop: "0.1rem" }}>
+                {activo.variacion > 0 ? "▲ +" : "▼ "}{activo.variacion.toLocaleString("es-CL", { maximumFractionDigits: 1 })}% vs mes anterior
+              </div>
+            )}
+            {sinMontosPositivos && (
+              <div style={{ fontSize: "0.68rem", color: "var(--text-3)", marginTop: "0.2rem" }}>
+                El corte publicado no registra un monto positivo.
+              </div>
+            )}
           </div>
-          {activo.variacion !== null && (
-            <div style={{ fontSize: "0.68rem", color: activo.variacion > 0 ? "var(--bad)" : "var(--ok)", fontWeight: 700, marginTop: "0.1rem" }}>
-              {activo.variacion > 0 ? "▲ +" : "▼ "}{activo.variacion.toLocaleString("es-CL", { maximumFractionDigits: 1 })}% vs mes anterior
-            </div>
-          )}
-          {sinMontosPositivos && (
-            <div style={{ fontSize: "0.68rem", color: "var(--text-3)", marginTop: "0.2rem" }}>
-              El corte publicado no registra un monto positivo.
-            </div>
-          )}
+          <strong style={{ fontFamily: "monospace", fontSize: "1.1rem", color: "var(--text-1)" }}>
+            {formatCLP(activo.total)}
+          </strong>
         </div>
-        <strong style={{ fontFamily: "monospace", fontSize: "1.1rem", color: "var(--text-1)" }}>
-          {formatCLP(activo.total)}
-        </strong>
       </div>
 
       {/* Badge de Discrepancia Explicada (si la fuente publicó un total distinto a la suma de ítems) */}
@@ -148,7 +151,7 @@ export default function GastosMensuales({ meses, ultimo }: { meses: MesGastos[];
           </span>
         </div>
       ) : (
-        <div style={{ display: "flex", flexDirection: "column", gap: "0.6rem" }}>
+        <div className="authority-expenses-items">
           {itemsConGasto.map(({ item, monto }) => {
             const pct = Math.round((monto / totalMes) * 100);
             const barPct = Math.round((monto / maxMonto) * 100);
@@ -208,7 +211,7 @@ export default function GastosMensuales({ meses, ultimo }: { meses: MesGastos[];
 
           {/* Acordeón para ítems sin gasto ($0) */}
           {itemsSinGasto.length > 0 && (
-            <div style={{ marginTop: "0.4rem" }}>
+            <div style={{ marginTop: "0.4rem", gridColumn: "1 / -1" }}>
               <button
                 type="button"
                 onClick={() => setMostrarSinGasto(!mostrarSinGasto)}
@@ -257,7 +260,7 @@ export default function GastosMensuales({ meses, ultimo }: { meses: MesGastos[];
           )}
 
           {activo.items.length === 0 && (
-            <p style={{ fontSize: "0.8rem", color: "var(--text-2)", margin: 0 }}>Sin ítems desglosados en este mes.</p>
+            <p style={{ fontSize: "0.8rem", color: "var(--text-2)", margin: 0, gridColumn: "1 / -1" }}>Sin ítems desglosados en este mes.</p>
           )}
         </div>
       )}

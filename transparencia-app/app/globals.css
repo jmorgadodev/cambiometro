@@ -3423,6 +3423,9 @@ html.dark .page-masthead {
 .politico-editorial-profile .authority-electoral-card .stat-tile { min-height: 6rem; }
 .politico-editorial-profile .authority-electoral-card .stat-tile__value { max-width: 100%; font-size: clamp(.88rem, 1.5vw, 1.15rem); overflow-wrap: anywhere; white-space: normal; }
 .politico-editorial-profile .authority-expenses-card { order: 2; }
+.politico-editorial-profile .politico-layout--without-2025-result .authority-expenses-card {
+  grid-column: 1 / -1;
+}
 .politico-editorial-profile .authority-remuneration-card { order: 3; grid-column: 1 / -1; }
 .politico-editorial-profile .authority-staff-card { order: 4; grid-column: 1 / -1; }
 .politico-editorial-profile .authority-lobby-card { order: 5; }
@@ -3440,6 +3443,31 @@ html.dark .page-masthead {
 .politico-editorial-profile .authority-remuneration-card strong,
 .politico-editorial-profile .authority-expenses-card strong {
   font-family: var(--font-ledger), ui-monospace, monospace !important;
+}
+
+.authority-expenses-detail,
+.authority-expenses-period {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.authority-expenses-items {
+  display: flex;
+  flex-direction: column;
+  gap: .6rem;
+}
+
+.politico-editorial-profile .politico-layout--without-2025-result .authority-expenses-period {
+  display: grid;
+  grid-template-columns: minmax(17rem, .75fr) minmax(0, 1.25fr);
+  align-items: end;
+}
+
+.politico-editorial-profile .politico-layout--without-2025-result .authority-expenses-items {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: .65rem;
 }
 
 .politico-editorial-profile .politico-secondary-grid {
@@ -3468,6 +3496,10 @@ html.dark .page-masthead {
   }
   .politico-editorial-profile .politico-layout > .card-flat,
   .politico-editorial-profile .politico-layout .card-flat { grid-column: 1 / -1; }
+  .politico-editorial-profile .politico-layout--without-2025-result .authority-expenses-period,
+  .politico-editorial-profile .politico-layout--without-2025-result .authority-expenses-items {
+    grid-template-columns: minmax(0, 1fr);
+  }
 }
 
 @media (max-width: 479px) {
