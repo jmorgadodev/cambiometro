@@ -25,6 +25,8 @@ import {
   diputadoIdParaPolitico,
 } from "@/lib/data-source";
 import { FUENTE_REMUNERACIONES, mesRemuneraciones, remuneracionParaPolitico } from "@/lib/remuneraciones";
+import { buildParliamentCostPeriods } from "@/lib/parliamentary-cost-periods";
+import { formatPublishedMonth, latestPublishedPeriod, parseSpanishMonthPeriod } from "@/lib/month-periods";
 import { servelParaPolitico } from "@/lib/servel";
 import { infoprobidadParaPolitico } from "@/lib/infoprobidad";
 import { getDipParaPolitico } from "@/lib/politico-dip";
@@ -93,7 +95,10 @@ export default async function PoliticoPage({ params }: Props) {
 
   const timeline = getTimelineParaPolitico(pol);
   const entidades = getEntidadesRelacionadas(pol);
-  const remuneracion = await remuneracionParaPolitico(pol.nombre_completo);
+  const [remuneracion, periodoRemuneracion] = await Promise.all([
+    remuneracionParaPolitico(pol.nombre_completo),
+    mesRemuneraciones(),
+  ]);
   const probidad = infoprobidadParaPolitico(pol.nombre_completo);
   const apoyoDiputado = pol.cargo === "Diputado" ? await personalApoyoParaDiputado(diputadoIdParaPolitico(pol)) : null;
   const apoyoSenador = pol.cargo === "Senador" ? await personalApoyoParaSenador(pol.nombre_completo) : null;
@@ -205,81 +210,35 @@ export default async function PoliticoPage({ params }: Props) {
   const pctAsistencia = totalSesiones > 0 ? Math.min(100, Math.round((presentes / totalSesiones) * 100)) : null;
   const pctEmitioVoto = presentes > 0 ? Math.min(100, Math.round((votosEmitidos / presentes) * 100)) : null;
 
-  const camaraMonthMap: Record<string, string> = {
-    enero: "2026-01", febrero: "2026-02", marzo: "2026-03", abril: "2026-04",
-    mayo: "2026-05", junio: "2026-06", julio: "2026-07", agosto: "2026-08",
-  };
   const rawCamaraMonth = apoyoDiputado?.diputado?.mes_personal?.trim() ?? "";
-  const camaraMonth = /^2026-\d{2}$/.test(rawCamaraMonth)
-    ? rawCamaraMonth
-    : camaraMonthMap[rawCamaraMonth.toLocaleLowerCase("es-CL").split(/\s+/)[0]] ?? "";
+  const camaraMonth = parseSpanishMonthPeriod(rawCamaraMonth);
   const periodosPersonal = pol.cargo === "Senador"
     ? [...new Set(apoyoSenador?.registros.map((record) => record.periodo).filter(Boolean) ?? [])].sort()
     : camaraMonth ? [camaraMonth] : [];
-  const mesesDisponiblesPersonal = periodosPersonal.map((periodo) => ({ periodo, etiqueta: periodo }));
-  const ultimoPeriodoPersonal = pol.cargo === "Senador" ? (apoyoSenador?.ultimo_mes ?? "") : camaraMonth;
+  const mesesDisponiblesPersonal = periodosPersonal.map((periodo) => ({ periodo, etiqueta: formatPublishedMonth(periodo) }));
+  const ultimoPeriodoPersonal = latestPublishedPeriod(periodosPersonal);
 
   // ── Consolidar datos para el Panel Costo Mensual ──
-  const monthLabels: Record<string, string> = {
-    "01": "Enero", "02": "Febrero", "03": "Marzo", "04": "Abril",
-    "05": "Mayo", "06": "Junio", "07": "Julio", "08": "Agosto",
-    "09": "Septiembre", "10": "Octubre", "11": "Noviembre", "12": "Diciembre",
-  };
-
-  const periodosSet = new Set<string>();
-  for (const m of mesesGastos) {
-    if (m.periodo) periodosSet.add(m.periodo);
-  }
-  for (const p of periodosPersonal) {
-    if (p) periodosSet.add(p);
-  }
-
-  const periodosOrdenados = [...periodosSet].sort();
-  const periodosFinales = periodosOrdenados.length > 0
-    ? periodosOrdenados
-    : ["2026-03", "2026-04", "2026-05"];
-
-  const mesesCosto = periodosFinales.map((periodo) => {
-    const parts = periodo.split("-");
-    const labelMes = parts.length === 2 && monthLabels[parts[1]] ? `${monthLabels[parts[1]]} ${parts[0]}` : periodo;
-
-    const sueldo = remuneracion?.bruto_mensual ?? null;
-    const mesGasto = mesesGastos.find((m) => m.periodo === periodo);
-    const gastosVal = mesGasto && mesGasto.total > 0 ? mesGasto.total : null;
-
-    let personalVal: number | null = null;
-    if (pol.cargo === "Senador") {
-      const recordsMes = apoyoSenador?.registros.filter((r) => r.periodo === periodo) ?? [];
-      if (recordsMes.length > 0) {
-        const sumPersonal = recordsMes.reduce((s: number, r) => s + (r.monto ?? 0), 0);
-        personalVal = sumPersonal > 0 ? sumPersonal : null;
-      }
-    } else if (pol.cargo === "Diputado") {
-      if (periodo === camaraMonth && (apoyoDiputado?.total_mensual ?? 0) > 0) {
-        personalVal = apoyoDiputado!.total_mensual;
-      }
+  const staffAmountsByPeriod = new Map<string, number>();
+  if (pol.cargo === "Senador") {
+    for (const registro of apoyoSenador?.registros ?? []) {
+      if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(registro.periodo)) continue;
+      staffAmountsByPeriod.set(
+        registro.periodo,
+        (staffAmountsByPeriod.get(registro.periodo) ?? 0) + (registro.monto ?? 0),
+      );
     }
-
-    return {
-      periodo,
-      etiqueta: labelMes,
-      sueldo,
-      gastos: gastosVal,
-      personal: personalVal,
-    };
-  });
-
-  let ultimoPeriodoConDatos = "";
-  for (let i = mesesCosto.length - 1; i >= 0; i--) {
-    const mc = mesesCosto[i];
-    if (mc.gastos !== null || mc.personal !== null || mc.sueldo !== null) {
-      ultimoPeriodoConDatos = mc.periodo;
-      break;
-    }
+  } else if (pol.cargo === "Diputado" && camaraMonth && (apoyoDiputado?.n_personas ?? 0) > 0) {
+    staffAmountsByPeriod.set(camaraMonth, apoyoDiputado?.total_mensual ?? 0);
   }
-  if (!ultimoPeriodoConDatos && mesesCosto.length > 0) {
-    ultimoPeriodoConDatos = mesesCosto[mesesCosto.length - 1].periodo;
-  }
+
+  const mesesCosto = buildParliamentCostPeriods({
+    expenseMonths: mesesGastos,
+    staffAmountsByPeriod,
+    salaryPeriod: periodoRemuneracion,
+    salaryAmount: remuneracion?.bruto_mensual ?? null,
+  }).map((month) => ({ ...month, etiqueta: formatPublishedMonth(month.periodo) }));
+  const ultimoPeriodoConDatos = latestPublishedPeriod(mesesCosto.map((month) => month.periodo));
 
   const headerData: PoliticoHeaderData = {
     id: pol.id,
@@ -378,7 +337,7 @@ export default async function PoliticoPage({ params }: Props) {
                     {remuneracion.bruto_mensual.toLocaleString("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 })}
                   </strong>
                   <span style={{ fontSize: "0.75rem", color: "var(--text-subtle)" }}>
-                    dieta parlamentaria bruta · {mesRemuneraciones() ?? "mayo 2026"}
+                    dieta parlamentaria bruta · {periodoRemuneracion ? formatPublishedMonth(periodoRemuneracion) : "período no informado"}
                   </span>
                 </div>
                 <p style={{ fontSize: "0.72rem", color: "var(--text-muted)", marginTop: "0.5rem" }}>

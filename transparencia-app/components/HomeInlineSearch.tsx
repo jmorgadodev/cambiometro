@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { FormEvent, useEffect, useId, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import { interleaveDistinctSearchResults, resolveHomeSearchTarget, resolveSearchResultUrl } from "@/lib/home-search-routing";
 import { publicApiUrl } from "@/lib/public-api-origin";
 
@@ -53,14 +54,41 @@ function remunerationIdentityKey(value: string) {
   return searchTokens(value).sort().join(" ");
 }
 
-async function searchStaticRemunerations(query: string): Promise<SearchResult[]> {
+type UnifiedManifest = { searchIndexKey: string; pages: Array<{ page: number; key: string }> };
+
+let unifiedManifestPromise: Promise<UnifiedManifest> | null = null;
+let unifiedIndexPromise: Promise<Record<string, number[]>> | null = null;
+
+async function loadUnifiedManifest() {
+  unifiedManifestPromise ??= fetch("/data/remuneraciones-unified/manifest.json", { cache: "force-cache" })
+    .then((response) => {
+      if (!response.ok) throw new Error("REMUNERATION_MANIFEST_UNAVAILABLE");
+      return response.json() as Promise<UnifiedManifest>;
+    })
+    .catch((error) => {
+      unifiedManifestPromise = null;
+      throw error;
+    });
+  return unifiedManifestPromise;
+}
+
+async function loadUnifiedIndex(manifest: UnifiedManifest) {
+  unifiedIndexPromise ??= fetch(`/data/remuneraciones-unified/${manifest.searchIndexKey}`, { cache: "force-cache" })
+    .then((response) => {
+      if (!response.ok) throw new Error("REMUNERATION_INDEX_UNAVAILABLE");
+      return response.json() as Promise<Record<string, number[]>>;
+    })
+    .catch((error) => {
+      unifiedIndexPromise = null;
+      throw error;
+    });
+  return unifiedIndexPromise;
+}
+
+async function searchStaticRemunerations(query: string, signal: AbortSignal): Promise<SearchResult[]> {
   try {
-    const manifestResponse = await fetch("/data/remuneraciones-unified/manifest.json", { cache: "force-cache" });
-    if (!manifestResponse.ok) return [];
-    const manifest = await manifestResponse.json() as { searchIndexKey: string; pages: Array<{ page: number; key: string }> };
-    const indexResponse = await fetch(`/data/remuneraciones-unified/${manifest.searchIndexKey}`, { cache: "force-cache" });
-    if (!indexResponse.ok) return [];
-    const index = await indexResponse.json() as Record<string, number[]>;
+    const manifest = await loadUnifiedManifest();
+    const index = await loadUnifiedIndex(manifest);
     const requestedTokens = searchTokens(query);
     const candidatePages = requestedTokens.reduce<number[] | null>((current, token) => {
       const pages = index[token] ?? [];
@@ -69,7 +97,7 @@ async function searchStaticRemunerations(query: string): Promise<SearchResult[]>
     const rows = (await Promise.all(candidatePages.slice(0, 24).map(async (page) => {
       const entry = manifest.pages.find((item) => item.page === page);
       if (!entry) return [];
-      const response = await fetch(`/data/remuneraciones-unified/${entry.key}`, { cache: "force-cache" });
+      const response = await fetch(`/data/remuneraciones-unified/${entry.key}`, { cache: "force-cache", signal });
       return response.ok ? await response.json() as Array<Record<string, unknown>> : [];
     }))).flat().filter((row) => {
       const sourceId = String(row.sourceId ?? "");
@@ -94,7 +122,8 @@ async function searchStaticRemunerations(query: string): Promise<SearchResult[]>
       organo: String(row.organismoOriginal ?? ""),
       periodo: row.periodo ? String(row.periodo) : null,
     })).filter((row) => row.id && row.nombre);
-  } catch {
+  } catch (error) {
+    if ((error as Error).name === "AbortError") throw error;
     return [];
   }
 }
@@ -116,6 +145,7 @@ function flattenResults(payload: SearchPayload) {
 }
 
 export default function HomeInlineSearch() {
+  const router = useRouter();
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [isOpen, setIsOpen] = useState(false);
@@ -134,22 +164,30 @@ export default function HomeInlineSearch() {
     const timer = window.setTimeout(async () => {
       setIsLoading(true);
       setError(null);
+      setResults([]);
+      let workerResults: SearchResult[] = [];
+      let remunerationResults: SearchResult[] = [];
+      let successfulSources = 0;
+      const publish = () => {
+        if (!controller.signal.aborted) setResults(interleaveDistinctSearchResults(workerResults, remunerationResults));
+      };
       try {
-        const [workerPayload, remunerationResults] = await Promise.all([
+        const workerRequest =
           fetch(publicApiUrl(`/api/v1/search?q=${encodeURIComponent(normalizedQuery)}`), { signal: controller.signal })
-            .then(async (response) => response.ok ? await response.json() as SearchPayload : null)
-            .catch((requestError) => {
-              if ((requestError as Error).name === "AbortError") throw requestError;
-              return null;
-            }),
-          searchStaticRemunerations(normalizedQuery),
-        ]);
-        const workerResults = workerPayload ? flattenResults(workerPayload) : [];
-        // Reservar espacio para las fuentes que no devuelve el endpoint de
-        // personas evita que un bloque de funcionarios o autoridades oculte
-        // todas las remuneraciones coincidentes.
-        setResults(interleaveDistinctSearchResults(workerResults, remunerationResults));
-        if (workerResults.length === 0 && remunerationResults.length === 0 && !workerPayload) {
+            .then(async (response) => {
+              if (!response.ok) throw new Error(`SEARCH_HTTP_${response.status}`);
+              const payload = await response.json() as SearchPayload;
+              workerResults = flattenResults(payload);
+              successfulSources += 1;
+              publish();
+            });
+        const remunerationRequest = searchStaticRemunerations(normalizedQuery, controller.signal).then((rows) => {
+          remunerationResults = rows;
+          successfulSources += 1;
+          publish();
+        });
+        await Promise.allSettled([workerRequest, remunerationRequest]);
+        if (!controller.signal.aborted && successfulSources === 0) {
           setError("No fue posible consultar el índice público. Puedes abrir la búsqueda completa.");
         }
       } catch (requestError) {
@@ -181,17 +219,13 @@ export default function HomeInlineSearch() {
   const fullSearchTarget = resolveHomeSearchTarget(results, normalizedQuery);
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
-    // The home search is an inline index, so pressing Enter must not silently
-    // route every query to the parliamentarian section. Keep a useful static
-    // fallback for users without JavaScript below, but never replace visible
-    // cross-source results when the client is hydrated.
     event.preventDefault();
-    setIsOpen(true);
+    if (normalizedQuery.length >= 2) router.push(fullSearchTarget.href);
   };
 
   return (
     <div ref={wrapperRef} className="home-query-wrap">
-      <form className="home-query" action="/remuneraciones-publicas/" method="get" role="search" onSubmit={handleSubmit}>
+      <form className="home-query" action="/buscar" method="get" role="search" onSubmit={handleSubmit}>
         <label htmlFor="home-search">Buscar en los registros</label>
         <div className="home-query__control">
           <input
@@ -227,7 +261,7 @@ export default function HomeInlineSearch() {
 
       {showResults && (
         <div id={listboxId} className="home-query__results" role="listbox" aria-label="Resultados de búsqueda">
-          {isLoading ? (
+          {isLoading && results.length === 0 ? (
             <p className="home-query__message" role="status">Consultando registros publicados…</p>
           ) : error ? (
             <div className="home-query__message" role="alert">

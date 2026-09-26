@@ -1783,8 +1783,10 @@ async function searchFuncionariosFromR2(raw: string, env: Env) {
     // que una nómina municipal extensa no oculte una coincidencia central en
     // la vista previa, se intercalan resultados de ambos índices y sólo se
     // leen las primeras filas coincidentes de cada uno.
-    const municipal = await listFuncionariosFromR2(requestUrl, env, "funcionarios-v1");
-    const central = await listFuncionariosFromR2(requestUrl, env, "funcionarios-central-v1");
+    const [municipal, central] = await Promise.all([
+      listFuncionariosFromR2(requestUrl, env, "funcionarios-v1"),
+      listFuncionariosFromR2(requestUrl, env, "funcionarios-central-v1"),
+    ]);
     const payloads = [municipal, central]
       .filter((response) => response.status < 400)
       .map(async (response) => await response.json() as JsonRecord);

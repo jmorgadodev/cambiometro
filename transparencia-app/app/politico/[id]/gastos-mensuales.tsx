@@ -2,6 +2,8 @@
 
 import { useState, useMemo } from "react";
 import { formatCLP } from "@/lib/format";
+import { latestPublishedPeriod } from "@/lib/month-periods";
+import PeriodYearMonthFilter from "@/components/PeriodYearMonthFilter";
 
 export interface MesGastos {
   periodo: string;
@@ -37,7 +39,9 @@ function getCategoryColor(item: string): { bg: string; text: string } {
 }
 
 export default function GastosMensuales({ meses, ultimo }: { meses: MesGastos[]; ultimo: string }) {
-  const [seleccionado, setSeleccionado] = useState(ultimo);
+  const ultimoPublicado = latestPublishedPeriod(meses.map((mes) => mes.periodo));
+  const periodoInicial = ultimo && meses.some((mes) => mes.periodo === ultimo) ? ultimo : ultimoPublicado;
+  const [seleccionado, setSeleccionado] = useState(periodoInicial);
   const [mostrarSinGasto, setMostrarSinGasto] = useState(false);
 
   const activo = useMemo(
@@ -57,51 +61,18 @@ export default function GastosMensuales({ meses, ultimo }: { meses: MesGastos[];
 
   if (!activo) return null;
 
-  const esPendiente = activo.total === 0;
+  const sinMontosPositivos = activo.total === 0 && itemsConGasto.length === 0;
   const totalMes = activo.total > 0 ? activo.total : 1;
   const maxMonto = itemsConGasto.length > 0 ? itemsConGasto[0].monto : 1;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-      {/* Selector de Meses */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "0.4rem" }}>
-        {meses.map((mes) => {
-          const activoMes = mes.periodo === activo.periodo;
-          const esCero = mes.total === 0;
-          return (
-            <button
-              key={mes.periodo}
-              type="button"
-              onClick={() => setSeleccionado(mes.periodo)}
-              aria-pressed={activoMes}
-              className="capsule"
-              style={{
-                cursor: "pointer",
-                fontFamily: "var(--font-mono)",
-                fontSize: "0.72rem",
-                padding: "0.35rem 0.75rem",
-                borderRadius: 99,
-                transition: "all 0.2s cubic-bezier(0.16, 1, 0.3, 1)",
-                border: activoMes ? "1px solid var(--accent)" : "1px solid var(--border)",
-                background: activoMes ? "var(--accent)" : esCero ? "var(--surface-2)" : "var(--surface)",
-                color: activoMes ? "var(--bg)" : esCero ? "var(--text-3)" : "var(--text-1)",
-                fontWeight: activoMes ? 800 : 500,
-                boxShadow: activoMes ? "0 0 12px var(--accent-glow)" : "none",
-                opacity: esCero && !activoMes ? 0.75 : 1,
-              }}
-              title={
-                esCero
-                  ? "Mes aún no publicado por la fuente oficial ($0)"
-                  : mes.variacion !== null
-                    ? `Variación vs. mes anterior: ${mes.variacion > 0 ? "+" : ""}${mes.variacion.toLocaleString("es-CL", { maximumFractionDigits: 1 })}%`
-                    : "Primer mes registrado"
-              }
-            >
-              {mes.etiqueta} {esCero ? "· Pendiente" : ""}
-            </button>
-          );
-        })}
-      </div>
+      <PeriodYearMonthFilter
+        periods={meses.map((mes) => mes.periodo)}
+        selectedPeriod={activo.periodo}
+        onChange={setSeleccionado}
+        label="Filtrar gastos operacionales rendidos"
+      />
 
       {/* Resumen del Mes Activo */}
       <div
@@ -112,34 +83,29 @@ export default function GastosMensuales({ meses, ultimo }: { meses: MesGastos[];
           padding: "0.75rem 1rem",
           background: "var(--surface-2)",
           borderRadius: 8,
-          border: esPendiente ? "1px dashed var(--border)" : "1px solid var(--border)",
+          border: "1px solid var(--border)",
           flexWrap: "wrap",
           gap: "0.5rem",
         }}
       >
         <div>
           <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-            <span style={{ fontSize: "0.7rem", color: esPendiente ? "var(--warn)" : "var(--text-3)", textTransform: "uppercase", fontWeight: 700 }}>
-              Mes Rendido: {activo.etiqueta} {esPendiente ? "· Pendiente" : ""}
+            <span style={{ fontSize: "0.7rem", color: "var(--text-3)", textTransform: "uppercase", fontWeight: 700 }}>
+              Mes publicado: {activo.etiqueta}
             </span>
-            {esPendiente && (
-              <span className="badge badge-warn" style={{ fontSize: "0.65rem", padding: "0.1rem 0.4rem" }}>
-                Pendiente de publicación
-              </span>
-            )}
           </div>
-          {!esPendiente && activo.variacion !== null && (
+          {activo.variacion !== null && (
             <div style={{ fontSize: "0.68rem", color: activo.variacion > 0 ? "var(--bad)" : "var(--ok)", fontWeight: 700, marginTop: "0.1rem" }}>
               {activo.variacion > 0 ? "▲ +" : "▼ "}{activo.variacion.toLocaleString("es-CL", { maximumFractionDigits: 1 })}% vs mes anterior
             </div>
           )}
-          {esPendiente && (
+          {sinMontosPositivos && (
             <div style={{ fontSize: "0.68rem", color: "var(--text-3)", marginTop: "0.2rem" }}>
-              La Cámara/Senado publica con ~1-2 meses de desfase normativo a mes vencido.
+              El corte publicado no registra un monto positivo.
             </div>
           )}
         </div>
-        <strong style={{ fontFamily: "monospace", fontSize: "1.1rem", color: esPendiente ? "var(--warn)" : "var(--text-1)" }}>
+        <strong style={{ fontFamily: "monospace", fontSize: "1.1rem", color: "var(--text-1)" }}>
           {formatCLP(activo.total)}
         </strong>
       </div>
@@ -172,13 +138,13 @@ export default function GastosMensuales({ meses, ultimo }: { meses: MesGastos[];
       )}
 
       {/* Lista de Ítems Rendidos (Todos los ítems > $0 ordenados desc con barras) */}
-      {esPendiente ? (
+      {sinMontosPositivos ? (
         <div style={{ padding: "1rem", background: "var(--surface-2)", borderRadius: 8, border: "1px dashed var(--border)", textAlign: "center" }}>
           <p style={{ fontSize: "0.82rem", color: "var(--text-1)", margin: "0 0 0.3rem 0", fontWeight: 600 }}>
-            ⏳ Sin rendiciones publicadas para {activo.etiqueta} en la fuente oficial.
+            El total publicado para {activo.etiqueta} es $0.
           </p>
           <span style={{ fontSize: "0.72rem", color: "var(--text-3)" }}>
-            Los datos se actualizarán automáticamente cuando la Cámara o el Senado publiquen el corte oficial.
+            Este período aparece porque la fuente entregó un registro para ese corte.
           </span>
         </div>
       ) : (

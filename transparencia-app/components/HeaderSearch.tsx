@@ -154,7 +154,7 @@ export default function HeaderSearch() {
             <div role="status" className="header-search__message">
               <p>Sin coincidencias verificadas con ese texto.</p>
               <Link prefetch={false} href={resolveHomeSearchTarget([], query.trim()).href} onClick={() => setIsOpen(false)}>
-                Buscar “{query.trim()}” en remuneraciones →
+                Ver todos los resultados para “{query.trim()}” →
               </Link>
             </div>
           ) : (

@@ -34,6 +34,36 @@ confirmar que no duplican el proyecto maestro.
   para el elemento solicitado. Un despliegue de otra tarea (por ejemplo SEO)
   no acredita que un cambio de footer, menú o diseño haya sido incluido.
 
+### Ruta única para cambios de frontend y diseño
+
+- Todo cambio visual, de navegación o de componentes se realiza en
+  `C:\Users\jorge\Proyectos\cambiometro-public\transparencia-app`.
+- `cambiometro-design-sandbox` fue una referencia de maqueta; no es una fuente
+  de producción ni un lugar desde el cual desplegar.
+- `cambiometro-audit` documenta verificaciones, pero su código no reemplaza el
+  frontend maestro.
+- Si el checkout maestro contiene cambios locales o está atrasado, se crea o
+  reutiliza **un único worktree temporal fuera de `Proyectos`**, basado en el
+  `origin/main` recién obtenido. La rama debe usar el prefijo `codex/` y debe
+  retirarse después de integrar el cambio. Nunca se copia un proyecto entero
+  entre carpetas.
+- Antes de modificar la interfaz se deben registrar cuatro referencias:
+  repositorio canónico, ruta `transparencia-app`, commit de `origin/main` y
+  rama aislada. Antes de desplegar, se comprueba que el commit a publicar es
+  descendiente de ese `origin/main` y que contiene exactamente el diff
+  aprobado.
+
+### Incidente de buscador global — 26-09-2026
+
+El commit `c2b4b8b8` contenía `/buscar` y agrupación de resultados por persona,
+pero quedó únicamente en `codex/home-movement-counter` y nunca entró en
+`origin/main`. Por eso producción mantuvo el destino parcial hacia
+Remuneraciones aunque el trabajo ya se había desarrollado. La recuperación no
+debe incorporar ese commit completo: también contiene snapshots y cambios
+antiguos incompatibles. Se rescatan sólo los archivos de presentación y las
+pruebas necesarias sobre una rama nueva basada en el `origin/main` vigente,
+conservando las protecciones actuales de SEO, RUT, datos y diseño.
+
 ### Incidente de footer — 25-09-2026
 
 En esta revisión, el checkout de `cambiometro-public` en `Proyectos` estaba en
