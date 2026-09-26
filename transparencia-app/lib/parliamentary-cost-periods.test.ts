@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildParliamentCostPeriods } from "./parliamentary-cost-periods";
+import {
+  buildParliamentCostPeriods,
+  selectDefaultParliamentCostPeriod,
+} from "./parliamentary-cost-periods";
 
 describe("parliamentary monthly cost periods", () => {
   it("uses only source-published periods and keeps every component in its own cut", () => {
@@ -27,5 +30,33 @@ describe("parliamentary monthly cost periods", () => {
       salaryPeriod: null,
       salaryAmount: null,
     })).toEqual([]);
+  });
+
+  it("opens the consolidated panel in the latest period with an official salary", () => {
+    const months = buildParliamentCostPeriods({
+      expenseMonths: [
+        { periodo: "2026-06", total: 100 },
+        { periodo: "2026-07", total: 120 },
+      ],
+      staffAmountsByPeriod: new Map([
+        ["2026-06", 200],
+        ["2026-07", 220],
+      ]),
+      salaryPeriod: "2026-06",
+      salaryAmount: 8_239_091,
+    });
+
+    expect(selectDefaultParliamentCostPeriod(months, "2026-06")).toBe("2026-06");
+  });
+
+  it("falls back to the latest published component period when salary is unavailable", () => {
+    const months = buildParliamentCostPeriods({
+      expenseMonths: [{ periodo: "2026-07", total: 120 }],
+      staffAmountsByPeriod: new Map(),
+      salaryPeriod: null,
+      salaryAmount: null,
+    });
+
+    expect(selectDefaultParliamentCostPeriod(months, null)).toBe("2026-07");
   });
 });

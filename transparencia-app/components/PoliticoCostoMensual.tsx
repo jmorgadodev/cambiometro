@@ -16,7 +16,7 @@ export interface MesCostoData {
 export interface PoliticoCostoMensualProps {
   cargo: "Diputado" | "Senador";
   meses: MesCostoData[];
-  ultimoPeriodoConDatos: string;
+  periodoInicial: string;
   fuenteSueldoUrl?: string;
   fuenteGastosUrl?: string;
   fuentePersonalUrl?: string;
@@ -25,21 +25,28 @@ export interface PoliticoCostoMensualProps {
 export default function PoliticoCostoMensual({
   cargo,
   meses,
-  ultimoPeriodoConDatos,
+  periodoInicial,
   fuenteSueldoUrl = "https://comision38bis.gob.cl/registro-publico",
 }: PoliticoCostoMensualProps) {
   const defaultPeriodo = useMemo(() => {
-    if (ultimoPeriodoConDatos && meses.some((m) => m.periodo === ultimoPeriodoConDatos)) {
-      return ultimoPeriodoConDatos;
+    if (periodoInicial && meses.some((m) => m.periodo === periodoInicial)) {
+      return periodoInicial;
     }
     return latestPublishedPeriod(meses.map((m) => m.periodo));
-  }, [meses, ultimoPeriodoConDatos]);
+  }, [meses, periodoInicial]);
 
   const [periodoSeleccionado, setPeriodoSeleccionado] = useState<string>(defaultPeriodo);
 
   const mesActivo = useMemo(() => {
     return meses.find((m) => m.periodo === periodoSeleccionado) || meses[meses.length - 1] || null;
   }, [meses, periodoSeleccionado]);
+
+  const ultimoSueldoOficial = useMemo(() => {
+    const periodo = latestPublishedPeriod(
+      meses.filter((month) => typeof month.sueldo === "number").map((month) => month.periodo),
+    );
+    return meses.find((month) => month.periodo === periodo) ?? null;
+  }, [meses]);
 
   if (!mesActivo || meses.length === 0) {
     return null;
@@ -151,9 +158,16 @@ export default function PoliticoCostoMensual({
               {typeof sueldo === "number" ? formatCLP(sueldo) : "—"}
             </div>
             {typeof sueldo !== "number" && (
-              <span style={{ fontSize: "0.68rem", color: "var(--text-3)", display: "block", marginTop: "0.2rem" }}>
-                No publicado por la fuente
-              </span>
+              <>
+                <span style={{ fontSize: "0.68rem", color: "var(--text-3)", display: "block", marginTop: "0.2rem" }}>
+                  No publicado para {mesActivo.etiqueta}
+                </span>
+                {ultimoSueldoOficial && typeof ultimoSueldoOficial.sueldo === "number" && (
+                  <span style={{ fontSize: "0.68rem", color: "var(--text-2)", display: "block", marginTop: "0.35rem", lineHeight: 1.45 }}>
+                    Último sueldo oficial publicado: {formatCLP(ultimoSueldoOficial.sueldo)} · {ultimoSueldoOficial.etiqueta}; no se suma al total de {mesActivo.etiqueta}.
+                  </span>
+                )}
+              </>
             )}
           </div>
           <div style={{ marginTop: "0.5rem", borderTop: "1px dashed var(--border)", paddingTop: "0.35rem" }}>

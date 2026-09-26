@@ -25,7 +25,10 @@ import {
   diputadoIdParaPolitico,
 } from "@/lib/data-source";
 import { FUENTE_REMUNERACIONES, mesRemuneraciones, remuneracionParaPolitico } from "@/lib/remuneraciones";
-import { buildParliamentCostPeriods } from "@/lib/parliamentary-cost-periods";
+import {
+  buildParliamentCostPeriods,
+  selectDefaultParliamentCostPeriod,
+} from "@/lib/parliamentary-cost-periods";
 import { formatPublishedMonth, latestPublishedPeriod, parseSpanishMonthPeriod } from "@/lib/month-periods";
 import { servelParaPolitico } from "@/lib/servel";
 import { infoprobidadParaPolitico } from "@/lib/infoprobidad";
@@ -45,6 +48,7 @@ import nextDynamic from "next/dynamic";
 import { cohesionForPolitico } from "@/lib/cohesion-bancadas";
 import { SupportProjectBanner } from "@/components/SupportProjectLink";
 import AuthoritySectionNav from "@/components/politico/AuthoritySectionNav";
+import { currentParliamentaryPeriod } from "@/lib/politico-current-period";
 
 const VotacionesHistorial = nextDynamic(() => import("@/components/VotacionesHistorial"), {
   loading: () => <div style={{ padding: "2rem", textAlign: "center", color: "var(--text-3)" }}>Cargando historial de votaciones...</div>,
@@ -100,6 +104,7 @@ export default async function PoliticoPage({ params }: Props) {
     mesRemuneraciones(),
   ]);
   const probidad = infoprobidadParaPolitico(pol.nombre_completo);
+  const currentPeriod = currentParliamentaryPeriod(pol.militancias);
   const apoyoDiputado = pol.cargo === "Diputado" ? await personalApoyoParaDiputado(diputadoIdParaPolitico(pol)) : null;
   const apoyoSenador = pol.cargo === "Senador" ? await personalApoyoParaSenador(pol.nombre_completo) : null;
   const companerosPartido = POLITICOS_SEED.filter((p) => p.partido_id === pol.partido_id && p.id !== pol.id);
@@ -238,7 +243,7 @@ export default async function PoliticoPage({ params }: Props) {
     salaryPeriod: periodoRemuneracion,
     salaryAmount: remuneracion?.bruto_mensual ?? null,
   }).map((month) => ({ ...month, etiqueta: formatPublishedMonth(month.periodo) }));
-  const ultimoPeriodoConDatos = latestPublishedPeriod(mesesCosto.map((month) => month.periodo));
+  const periodoCostoInicial = selectDefaultParliamentCostPeriod(mesesCosto, periodoRemuneracion);
 
   const headerData: PoliticoHeaderData = {
     id: pol.id,
@@ -259,6 +264,7 @@ export default async function PoliticoPage({ params }: Props) {
     fecha_nacimiento: pol.fecha_nacimiento,
     lugar_nacimiento: pol.lugar_nacimiento,
     edad: pol.fecha_nacimiento ? edadEnAnos(pol.fecha_nacimiento) : null,
+    currentPeriod,
     dipInfo: getDipParaPolitico(pol.id, pol.nombre_completo),
     pctAsistencia,
     pctEmitioVoto,
@@ -267,7 +273,7 @@ export default async function PoliticoPage({ params }: Props) {
     totalSesiones,
     costoData: {
       meses: mesesCosto,
-      ultimoPeriodoConDatos,
+      periodoInicial: periodoCostoInicial,
       fuenteSueldoUrl: FUENTE_REMUNERACIONES.url,
     },
   };
@@ -290,7 +296,11 @@ export default async function PoliticoPage({ params }: Props) {
       <div className="container-main politico-editorial-profile__body" style={{ paddingTop: "2rem", paddingBottom: "2rem" }}>
         
         {/* ── 1. GRILLA SUPERIOR (PERSONAL & GASTOS) ── */}
-        <div className="politico-layout">
+        <div
+          className={`politico-layout ${
+            pol.votos_2025 ? "politico-layout--with-2025-result" : "politico-layout--without-2025-result"
+          }`}
+        >
 
           {/* ── COLUMNA IZQUIERDA ── */}
           <div style={{ display: "flex", flexDirection: "column", gap: "1.5rem", minWidth: 0 }}>
@@ -628,7 +638,7 @@ export default async function PoliticoPage({ params }: Props) {
                 Militancias y Períodos
               </div>
               <span style={{ fontSize: "0.72rem", color: "var(--text-subtle)" }}>
-                Fuente: nómina oficial 2026-2030 ↗
+                Fuente: nómina parlamentaria oficial
               </span>
             </div>
             {pol.militancias && pol.militancias.length > 0 ? (
@@ -646,7 +656,8 @@ export default async function PoliticoPage({ params }: Props) {
               </ul>
             ) : (
               <p style={{ fontSize: "0.85rem", color: "var(--text-primary)", lineHeight: 1.5, margin: 0 }}>
-                {partido?.nombre ?? pol.partido_id} · Período constitucional 2026–2030
+                {partido?.nombre ?? pol.partido_id}
+                {currentPeriod ? ` · Período constitucional ${currentPeriod}` : ""}
               </p>
             )}
           </div>

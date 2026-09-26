@@ -1,4 +1,4 @@
-import { isPublishedMonthPeriod } from "@/lib/month-periods";
+import { isPublishedMonthPeriod, latestPublishedPeriod } from "@/lib/month-periods";
 
 export interface ExpenseMonthAmount {
   periodo: string;
@@ -39,4 +39,18 @@ export function buildParliamentCostPeriods(input: {
       personal: hasStaff ? input.staffAmountsByPeriod.get(periodo)! : null,
     };
   });
+}
+
+export function selectDefaultParliamentCostPeriod(
+  months: readonly ParliamentaryCostPeriod[],
+  salaryPeriod: string | null,
+): string {
+  if (
+    salaryPeriod &&
+    months.some((month) => month.periodo === salaryPeriod && typeof month.sueldo === "number")
+  ) {
+    return salaryPeriod;
+  }
+
+  return latestPublishedPeriod(months.map((month) => month.periodo));
 }
