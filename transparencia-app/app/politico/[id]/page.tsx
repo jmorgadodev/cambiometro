@@ -25,7 +25,10 @@ import {
   diputadoIdParaPolitico,
 } from "@/lib/data-source";
 import { FUENTE_REMUNERACIONES, mesRemuneraciones, remuneracionParaPolitico } from "@/lib/remuneraciones";
-import { buildParliamentCostPeriods } from "@/lib/parliamentary-cost-periods";
+import {
+  buildParliamentCostPeriods,
+  selectDefaultParliamentCostPeriod,
+} from "@/lib/parliamentary-cost-periods";
 import { formatPublishedMonth, latestPublishedPeriod, parseSpanishMonthPeriod } from "@/lib/month-periods";
 import { servelParaPolitico } from "@/lib/servel";
 import { infoprobidadParaPolitico } from "@/lib/infoprobidad";
@@ -240,7 +243,7 @@ export default async function PoliticoPage({ params }: Props) {
     salaryPeriod: periodoRemuneracion,
     salaryAmount: remuneracion?.bruto_mensual ?? null,
   }).map((month) => ({ ...month, etiqueta: formatPublishedMonth(month.periodo) }));
-  const ultimoPeriodoConDatos = latestPublishedPeriod(mesesCosto.map((month) => month.periodo));
+  const periodoCostoInicial = selectDefaultParliamentCostPeriod(mesesCosto, periodoRemuneracion);
 
   const headerData: PoliticoHeaderData = {
     id: pol.id,
@@ -270,7 +273,7 @@ export default async function PoliticoPage({ params }: Props) {
     totalSesiones,
     costoData: {
       meses: mesesCosto,
-      ultimoPeriodoConDatos,
+      periodoInicial: periodoCostoInicial,
       fuenteSueldoUrl: FUENTE_REMUNERACIONES.url,
     },
   };

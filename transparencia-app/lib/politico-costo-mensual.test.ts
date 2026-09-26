@@ -1,4 +1,7 @@
 import { describe, it, expect } from "vitest";
+import { createElement } from "react";
+import { renderToStaticMarkup } from "react-dom/server";
+import PoliticoCostoMensual from "@/components/PoliticoCostoMensual";
 import { SLUG_TO_POLITICO } from "@/lib/politico-slugs";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
 import { personalApoyoParaSenador } from "@/lib/personal-apoyo";
@@ -97,5 +100,20 @@ describe("Tarea 14 / Fix #14: Costo Mensual del Parlamentario y Dieta Oficial", 
   it("caso sin fuente o nombre inexistente: devuelve null", async () => {
     const inexistente = await remuneracionParaPolitico("Persona Totalmente Falsa Inexistente");
     expect(inexistente).toBeNull();
+  });
+
+  it("explica el último sueldo oficial cuando el mes elegido aún no lo publica", () => {
+    const html = renderToStaticMarkup(createElement(PoliticoCostoMensual, {
+      cargo: "Senador",
+      meses: [
+        { periodo: "2026-06", etiqueta: "Junio 2026", sueldo: 8_239_091, gastos: 100, personal: 200 },
+        { periodo: "2026-07", etiqueta: "Julio 2026", sueldo: null, gastos: 120, personal: 220 },
+      ],
+      periodoInicial: "2026-07",
+    }));
+
+    expect(html).toContain("Último sueldo oficial publicado");
+    expect(html).toContain("Junio 2026");
+    expect(html).toContain("no se suma al total de Julio 2026");
   });
 });

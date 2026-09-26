@@ -49,7 +49,7 @@ export interface PoliticoHeaderData {
   // Costo mensual
   costoData?: {
     meses: MesCostoData[];
-    ultimoPeriodoConDatos: string;
+    periodoInicial: string;
     fuenteSueldoUrl?: string;
   };
 }
@@ -409,7 +409,7 @@ export default function PoliticoScoreHeader({ data }: { data: PoliticoHeaderData
               <PoliticoCostoMensual
                 cargo={data.cargo}
                 meses={data.costoData.meses}
-                ultimoPeriodoConDatos={data.costoData.ultimoPeriodoConDatos}
+                periodoInicial={data.costoData.periodoInicial}
                 fuenteSueldoUrl={data.costoData.fuenteSueldoUrl}
               />
             )}
