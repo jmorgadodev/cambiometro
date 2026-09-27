@@ -102,8 +102,18 @@ checksum productivo no se ha cotejado directamente. La API productiva responde
 74.142 registros; una consulta de muestra devolvió un registro de junio de
 2026. La consulta de API filtrada por período produjo error 1102, por lo que
 esta auditoría no confirma el corte mensual más reciente ni conteos por mes.
-No hay prueba de pérdida de la partición ChileCompra, pero tampoco se declara
-íntegro el catálogo hasta cotejar su manifiesto y checksums.
+La lectura puntual de R2 el 27-09 muestra que el catálogo lista los períodos
+2026-06 y 2026-07, declara 74.142 filas, pero contiene sólo una partición:
+2026-06 con esas 74.142 filas. El objeto exacto de manifiesto que esa partición
+referencia (`partitions/chilecompra/2026/06/manifest.json`) no existe en R2.
+El índice independiente `indexes/v1/chilecompra/manifest.json` sí existe y
+declara 74.142 filas en 1.483 páginas; por eso la búsqueda pública todavía
+responde, aunque no prueba la disponibilidad de la partición ni resuelve el
+corte de julio. El índice no declara `generatedAt`. No se pudo cotejar el
+checksum del release de partición. Este hallazgo confirma una referencia rota
+en el catálogo, pero no permite atribuir cuándo o qué ejecución la causó. No
+hay prueba de pérdida del índice consultable; sí queda pendiente reconciliar o
+reparar la referencia con un backup íntegro y una estimación segura de tamaño.
 
 Los runs 14 y 21-09 se detuvieron en el guard de corte vacío antes de
 `data:publish`. Se añadió al workflow una validación de todos los artefactos
@@ -122,9 +132,10 @@ conserva su checksum. La última ejecución diaria listada del ETL fue exitosa e
 
 ## Pendientes ordenados por riesgo y posibilidad de resolver
 
-1. **ChileCompra:** confirmar si existe un endpoint/descarga oficial vigente
-   para agosto-septiembre. Mantener el corte previo hasta validar conteos,
-   checksum y tamaño proyectado; no promover un “cero” como actualización.
+1. **ChileCompra:** conciliar la referencia de partición R2 rota con el backup,
+   recuperar checksum/tamaño y medir el espacio de cualquier reparación antes
+   de escribir; confirmar si existe endpoint/descarga oficial vigente para
+   julio-septiembre. No promover un “cero” como actualización.
 2. **Personal de apoyo Cámara:** conseguir o identificar un mecanismo oficial
    accesible que sustituya la página bloqueada. No sortear el 403 ni usar datos
    de terceros como reemplazo; conservar agosto de 2026 hasta obtener evidencia.
