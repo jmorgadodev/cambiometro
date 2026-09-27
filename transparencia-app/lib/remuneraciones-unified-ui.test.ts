@@ -16,7 +16,7 @@ describe("interfaz unificada de remuneraciones", () => {
   it("presenta cada coincidencia como una ficha expandible, sin abrir todas las filas de golpe", () => {
     const explorer = readFileSync(join(projectRoot, "components", "remuneraciones", "RemuneracionesUnifiedExplorer.tsx"), "utf8");
 
-    expect(explorer).toContain("<details key={group[0].personKey}");
+    expect(explorer).toContain("<details key={remunerationGroupKey(");
     expect(explorer).toContain("Ver ficha y registros");
     expect(explorer).toContain("<summary className=\"remuneration-person-result__summary\">");
     expect(explorer).toContain("La fuente publicó variantes del nombre");
@@ -49,7 +49,9 @@ describe("interfaz unificada de remuneraciones", () => {
 
     expect(explorer).toContain("NEXT_PUBLIC_PUBLIC_API_ORIGIN");
     expect(explorer).toContain('scope: source === "transparencia-activa-central" ? "central" : "all"');
-    expect(explorer).toContain("page: 1, limit: RESULTS_PAGE_SIZE");
+    expect(explorer).toContain("page: 1, limit: 100");
+    expect(explorer).toContain("distinctResultWindow(groups, currentPage");
+    expect(explorer).toContain("remunerationGroupKey({ name: row.nombreOriginal, source: row.sourceId");
     expect(explorer).not.toContain("if (!isLocalStaticPreview && (source === \"all\" || transparencySourceSelected))");
   });
 
