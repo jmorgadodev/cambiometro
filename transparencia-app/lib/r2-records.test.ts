@@ -233,6 +233,27 @@ describe("registros calientes de R2", () => {
     expect(result?.data.map((record) => record.id)).toEqual(["senado-expense-jan"]);
   });
 
+  it("excluye cortes retirados antes de contar y paginar gastos", async () => {
+    const june = gzipText([{ id: "cam-june", sourceId: "gastos_camara", kind: "expense", occurredAt: "2026-06-01", data: { title: "Junio" } }]);
+    const july = gzipText([{ id: "cam-july", sourceId: "gastos_camara", kind: "expense", occurredAt: "2026-07-01", data: { title: "Julio" } }]);
+    const junePartition = partition("gastos_camara", "2026-06", "partitions/gastos_camara/2026/06/records.jsonl.gz", june, 1);
+    const julyPartition = partition("gastos_camara", "2026-07", "partitions/gastos_camara/2026/07/records.jsonl.gz", july, 1);
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": { generatedAt: "2026-09-27T00:00:00Z", partitions: [junePartition, julyPartition] },
+      [junePartition.manifestKey]: junePartition.manifest,
+      [julyPartition.manifestKey]: julyPartition.manifest,
+      [junePartition.key]: june,
+      [julyPartition.key]: july,
+    });
+
+    const result = await readR2EvidenceRecords(bucket, {
+      source: "gastos_camara", kind: "expense", excludePeriods: ["2026-07"], limit: 10,
+    } as never);
+
+    expect(result).toMatchObject({ total: 1, expectedTotal: 1, loadedRows: 1, complete: true });
+    expect(result?.data.map((record) => record.id)).toEqual(["cam-june"]);
+  });
+
   it("rechaza filtros amplios sin índice antes de iniciar un scan que pueda producir 1102", async () => {
     const partitions = Array.from({ length: 13 }, (_, index) => {
       const period = `202${Math.floor(index / 12) + 4}-${String((index % 12) + 1).padStart(2, "0")}`;

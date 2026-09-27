@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { advanceExpenseOffsets, mapExpenseApiRecord, mergeExpenseSourcePages, type ExpenseOffsets, type ExpenseSourceId, type PublicExpenseRow } from "@/lib/gastos-public-api";
+import { advanceExpenseOffsets, getPublishedPeriodDateRange, isPublishedPeriod, mapExpenseApiRecord, mergeExpenseSourcePages, type ExpenseOffsets, type ExpenseSourceId, type PublicExpenseRow } from "@/lib/gastos-public-api";
 import { publicApiUrl } from "@/lib/public-api-origin";
 
 export interface ExpenseSummary {
@@ -9,6 +9,7 @@ export interface ExpenseSummary {
   totalMontoClp: number;
   montoNoInformado: number;
   bySource: Record<ExpenseSourceId, number>;
+  periodsBySource: Record<ExpenseSourceId, string[]>;
 }
 
 interface ExpenseApiResponse {
@@ -24,15 +25,22 @@ const money = (value: number | null) => value === null ? "Monto no informado" : 
 const number = (value: number) => value.toLocaleString("es-CL");
 const date = (value: string) => value ? value.slice(0, 10).split("-").reverse().join("/") : "—";
 
-function expenseApiUrl(source: ExpenseSourceId, offset: number, query: string, period: string) {
+function expenseApiUrl(source: ExpenseSourceId, offset: number, query: string, period: string, range?: { from: string; to: string }) {
   const params = new URLSearchParams({ source, kind: "expense", limit: String(PAGE_SIZE), offset: String(offset) });
   if (query.trim()) params.set("q", query.trim());
   if (period) params.set("period", period);
+  else if (range) {
+    params.set("from", range.from);
+    params.set("to", range.to);
+  }
   return publicApiUrl(`/api/v1/records?${params}`, window.location.hostname);
 }
 
-async function fetchSourcePage(source: ExpenseSourceId, offset: number, query: string, period: string, signal: AbortSignal) {
-  const response = await fetch(expenseApiUrl(source, offset, query, period), { signal, cache: "no-store" });
+async function fetchSourcePage(source: ExpenseSourceId, offset: number, query: string, period: string, publishedPeriods: string[], signal: AbortSignal) {
+  if (period && !isPublishedPeriod(publishedPeriods, period)) return { rows: [], total: 0 };
+  const range = source === "gastos_camara" && !period ? getPublishedPeriodDateRange(publishedPeriods) ?? undefined : undefined;
+  if (source === "gastos_camara" && !period && !range) throw new Error("El corte de Cámara requiere revisión antes de mostrarse.");
+  const response = await fetch(expenseApiUrl(source, offset, query, period, range), { signal, cache: "no-store" });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const payload = await response.json() as ExpenseApiResponse;
   if (!Array.isArray(payload.data) || !Number.isFinite(payload.meta?.total)) throw new Error("Respuesta incompleta");
@@ -70,6 +78,7 @@ export default function GastosOperacionalesExplorerClient({ summary }: { summary
       source === "Todos" ? startOffsets[sourceId] : (page - 1) * PAGE_SIZE,
       query,
       period,
+      summary.periodsBySource[sourceId] ?? [],
       controller.signal,
     ).then((result) => [sourceId, result] as const)))
       .then((results) => {
