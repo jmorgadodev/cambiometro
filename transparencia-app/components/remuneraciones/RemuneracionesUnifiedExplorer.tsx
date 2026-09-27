@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { searchTransparencyActiva } from "@/lib/remuneraciones-remote-search";
-import { remunerationResultWindow } from "@/lib/remuneraciones-pagination";
+import { distinctResultWindow, remunerationGroupKey } from "@/lib/remuneraciones-pagination";
 
 type SourceStatus = "complete" | "partial" | "aggregate_only" | "unavailable";
 
@@ -198,7 +198,7 @@ export default function RemuneracionesUnifiedExplorer() {
       // Algunas nóminas intercambian el orden de los apellidos entre meses.
       // Agrupamos por el conjunto normalizado de palabras, pero conservamos
       // debajo cada nombre y fila tal como fueron publicados.
-      const groupKey = personIdentityKey(row.nombreOriginal) || row.personKey;
+      const groupKey = remunerationGroupKey({ name: row.nombreOriginal, source: row.sourceId, organization: row.organismoOriginal, fallbackId: row.personKey });
       const list = grouped.get(groupKey) ?? [];
       list.push(row);
       grouped.set(groupKey, list);
@@ -207,20 +207,18 @@ export default function RemuneracionesUnifiedExplorer() {
   }, [results]);
 
   const paidSources = useMemo(() => manifest?.sources.filter((item) => PAID_SOURCE_IDS.includes(item.id)) ?? [], [manifest]);
-  const resultWindow = remunerationResultWindow(results?.rows.length ?? 0, results?.totalRemote ?? results?.remoteRows.length ?? 0, currentPage, RESULTS_PAGE_SIZE);
-  const totalPages = resultWindow.totalPages;
-  const pageStart = resultWindow.totalRecords === 0 ? 0 : resultWindow.start + 1;
-  const pageEnd = resultWindow.end;
-  const pageNames = new Set([...(results?.rows ?? []), ...(results?.remoteRows ?? [])]
-    .slice(resultWindow.start, resultWindow.end).map(row => personIdentityKey(row.nombreOriginal) || row.personKey));
-  const visibleGroups = groups.filter(group => pageNames.has(personIdentityKey(group[0].nombreOriginal) || group[0].personKey));
+  const groupedWindow = distinctResultWindow(groups, currentPage, RESULTS_PAGE_SIZE, (group) => remunerationGroupKey({ name: group[0].nombreOriginal, source: group[0].sourceId, organization: group[0].organismoOriginal, fallbackId: group[0].personKey }));
+  const visibleGroups = groupedWindow.items;
+  const totalRecords = (results?.rows.length ?? 0) + (results?.totalRemote ?? results?.remoteRows.length ?? 0);
+  const hasMoreRemote = Boolean(results && results.totalRemote !== null && results.remoteRows.length < results.totalRemote);
+  const hasNextPage = groupedWindow.end < groups.length || hasMoreRemote;
 
   function goToResultsPage(nextPage: number) {
-    const nextWindow = remunerationResultWindow(results?.rows.length ?? 0, results?.totalRemote ?? results?.remoteRows.length ?? 0, nextPage, RESULTS_PAGE_SIZE);
-    if (results && nextWindow.remoteEnd > results.remoteRows.length) {
+    if (results && nextPage * RESULTS_PAGE_SIZE > groups.length && hasMoreRemote) {
       void loadRemoteResultsPage(nextPage);
       return;
     }
+    if ((nextPage - 1) * RESULTS_PAGE_SIZE >= groups.length) return;
     setCurrentPage(nextPage);
     scrollToResults();
   }
@@ -280,7 +278,7 @@ export default function RemuneracionesUnifiedExplorer() {
         : undefined;
       const transparencySourceSelected = source === "transparencia-activa" || source === "transparencia-activa-central";
       if (source === "all" || transparencySourceSelected) {
-        const remote = await searchTransparencyActiva({ query: cleanQuery, organism, role, scope: source === "transparencia-activa-central" ? "central" : "all", apiOrigin: publicApiOrigin, page: 1, limit: RESULTS_PAGE_SIZE });
+        const remote = await searchTransparencyActiva({ query: cleanQuery, organism, role, scope: source === "transparencia-activa-central" ? "central" : "all", apiOrigin: publicApiOrigin, page: 1, limit: 100 });
         remoteRows = remote.rows.map((row) => RemoteOfficialRow(row, cleanQuery))
           .filter((row): row is UnifiedRow => Boolean(row))
           .filter((row) => source === "all" || row.sourceId === source || (source === "transparencia-activa" && row.sourceId === "transparencia-activa-central"));
@@ -306,12 +304,13 @@ export default function RemuneracionesUnifiedExplorer() {
     setLoading(true);
     setError(null);
     try {
-      const required = remunerationResultWindow(results.rows.length, results.totalRemote ?? results.remoteRows.length, page, RESULTS_PAGE_SIZE).remoteEnd;
+      const requiredGroups = page * RESULTS_PAGE_SIZE;
       let loadedRows = [...results.remoteRows];
       let loadedPage = results.remoteLoadedPage;
       let totalRemote = results.totalRemote;
       let partial = results.remotePartial;
-      while (loadedRows.length < required && loadedRows.length < (totalRemote ?? 0)) {
+      const countGroups = () => new Set([...results.rows, ...loadedRows].map((row) => remunerationGroupKey({ name: row.nombreOriginal, source: row.sourceId, organization: row.organismoOriginal, fallbackId: row.personKey }))).size;
+      while (countGroups() < requiredGroups && loadedRows.length < (totalRemote ?? loadedRows.length)) {
         const remote = await searchTransparencyActiva({
           query: results.criteria.query,
           organism: results.criteria.organism,
@@ -319,7 +318,7 @@ export default function RemuneracionesUnifiedExplorer() {
           scope: results.criteria.source === "transparencia-activa-central" ? "central" : "all",
           apiOrigin: publicApiOrigin,
           page: loadedPage + 1,
-          limit: RESULTS_PAGE_SIZE,
+          limit: 100,
         });
         const newRows = remote.rows.map((row) => RemoteOfficialRow(row, results.criteria.query))
           .filter((row): row is UnifiedRow => Boolean(row))
@@ -332,6 +331,7 @@ export default function RemuneracionesUnifiedExplorer() {
         partial = remote.partial;
       }
       setResults(previous => previous ? {...previous,remoteRows:loadedRows,remoteLoadedPage:loadedPage,totalRemote,remotePartial:partial} : previous);
+      if (countGroups() <= (page - 1) * RESULTS_PAGE_SIZE) throw new Error("No hay más fichas para mostrar en esta búsqueda.");
       setCurrentPage(page);
       scrollToResults();
     } catch (reason) {
@@ -379,7 +379,7 @@ export default function RemuneracionesUnifiedExplorer() {
           </section>
 
           {results && <section id="resultados-remuneraciones" className="remuneration-module remuneration-module--results" aria-labelledby="resultados-remuneraciones-title" aria-live="polite">
-            <div className="remuneration-results__heading"><div><span className="eyebrow">RESULTADOS</span><h3 id="resultados-remuneraciones-title">Coincidencias para “{results.criteria.query}”</h3></div><span>{number.format(resultWindow.totalRecords)} registros disponibles</span></div>
+            <div className="remuneration-results__heading"><div><span className="eyebrow">RESULTADOS</span><h3 id="resultados-remuneraciones-title">Coincidencias para “{results.criteria.query}”</h3></div><span>{number.format(totalRecords)} registros disponibles</span></div>
             {results.remotePartial && <p className="remuneration-results__note">Algunos registros están temporalmente fuera de esta búsqueda. Intenta nuevamente para consultar todas las nóminas disponibles.</p>}
             {groups.length === 0 && <div className="stat-tile" role="status">No encontramos coincidencias. Prueba con otro apellido, organismo o cargo.</div>}
              <div className="remuneration-results__list">
@@ -387,7 +387,7 @@ export default function RemuneracionesUnifiedExplorer() {
                  const sourceIds = new Set(group.map((row) => row.sourceId));
                  const primaryRow = group[0];
                  const publishedNames = [...new Set(group.map((row) => row.nombreOriginal).filter(Boolean))];
-                 return <details key={group[0].personKey} className="remuneration-person-result">
+                 return <details key={remunerationGroupKey({ name: group[0].nombreOriginal, source: group[0].sourceId, organization: group[0].organismoOriginal, fallbackId: group[0].personKey })} className="remuneration-person-result">
                    <summary className="remuneration-person-result__summary">
                      <span className="remuneration-person-result__identity">
                        <span className="remuneration-person-result__marker" aria-hidden="true">{primaryRow.nombreOriginal.slice(0, 1).toUpperCase()}</span>
@@ -411,10 +411,10 @@ export default function RemuneracionesUnifiedExplorer() {
                  </details>;
                })}
             </div>
-            {totalPages > 1 && <nav className="remuneration-results__pagination" aria-label="Paginación de resultados">
+            {(currentPage > 1 || hasNextPage) && <nav className="remuneration-results__pagination" aria-label="Paginación de fichas">
               <button type="button" onClick={() => goToResultsPage(Math.max(1, currentPage - 1))} disabled={currentPage === 1 || loading}>← Anterior</button>
-              <span>Registros {number.format(pageStart)}–{number.format(pageEnd)} de {number.format(resultWindow.totalRecords)}</span>
-              <button type="button" onClick={() => goToResultsPage(Math.min(totalPages, currentPage + 1))} disabled={currentPage === totalPages || loading}>Siguiente →</button>
+              <span>Fichas {number.format(groupedWindow.start + 1)}–{number.format(groupedWindow.end)} · {number.format(totalRecords)} registros disponibles</span>
+              <button type="button" onClick={() => goToResultsPage(currentPage + 1)} disabled={!hasNextPage || loading}>Siguiente →</button>
             </nav>}
           </section>}
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { advanceExpenseOffsets, getPublishedPeriodDateRange, isPublishedPeriod, mapExpenseApiRecord, mergeExpenseSourcePages, type ExpenseOffsets, type ExpenseSourceId, type PublicExpenseRow } from "@/lib/gastos-public-api";
+import { advanceExpenseOffsets, getLatestPublishedPeriod, getPublishedPeriodDateRange, isPublishedPeriod, mapExpenseApiRecord, mergeExpenseSourcePages, type ExpenseOffsets, type ExpenseSourceId, type PublicExpenseRow } from "@/lib/gastos-public-api";
 import { publicApiUrl } from "@/lib/public-api-origin";
 
 export interface ExpenseSummary {
@@ -37,10 +37,13 @@ function expenseApiUrl(source: ExpenseSourceId, offset: number, query: string, p
 }
 
 async function fetchSourcePage(source: ExpenseSourceId, offset: number, query: string, period: string, publishedPeriods: string[], signal: AbortSignal) {
-  if (period && !isPublishedPeriod(publishedPeriods, period)) return { rows: [], total: 0 };
-  const range = source === "gastos_camara" && !period ? getPublishedPeriodDateRange(publishedPeriods) ?? undefined : undefined;
-  if (source === "gastos_camara" && !period && !range) throw new Error("El corte de Cámara requiere revisión antes de mostrarse.");
-  const response = await fetch(expenseApiUrl(source, offset, query, period, range), { signal, cache: "no-store" });
+  const latestPeriod = period === "latest" ? getLatestPublishedPeriod(publishedPeriods) : null;
+  if (period === "latest" && !latestPeriod) return { rows: [], total: 0 };
+  const effectivePeriod = period === "latest" ? latestPeriod! : period;
+  if (effectivePeriod && !isPublishedPeriod(publishedPeriods, effectivePeriod)) return { rows: [], total: 0 };
+  const range = source === "gastos_camara" && !effectivePeriod ? getPublishedPeriodDateRange(publishedPeriods) ?? undefined : undefined;
+  if (source === "gastos_camara" && !effectivePeriod && !range) throw new Error("El corte de Cámara requiere revisión antes de mostrarse.");
+  const response = await fetch(expenseApiUrl(source, offset, query, effectivePeriod, range), { signal, cache: "no-store" });
   if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const payload = await response.json() as ExpenseApiResponse;
   if (!Array.isArray(payload.data) || !Number.isFinite(payload.meta?.total)) throw new Error("Respuesta incompleta");
@@ -55,7 +58,7 @@ export default function GastosOperacionalesExplorerClient({ summary }: { summary
   const [rows, setRows] = useState<PublicExpenseRow[]>([]);
   const [query, setQuery] = useState("");
   const [source, setSource] = useState<"Todos" | ExpenseSourceId>("Todos");
-  const [period, setPeriod] = useState("");
+  const [period, setPeriod] = useState("latest");
   const [page, setPage] = useState(1);
   const offsetsByPage = useRef<ExpenseOffsets[]>([EMPTY_OFFSETS]);
   const [total, setTotal] = useState(0);
@@ -111,7 +114,7 @@ export default function GastosOperacionalesExplorerClient({ summary }: { summary
       window.clearTimeout(start);
       window.clearTimeout(timeout);
     };
-  }, [page, period, query, retry, source]);
+  }, [page, period, query, retry, source, summary.periodsBySource]);
 
   const totalPages = Math.max(1, Math.ceil(total / PAGE_SIZE));
   const updateFilter = <T extends string>(setter: (value: T) => void, value: T) => {
@@ -145,9 +148,14 @@ export default function GastosOperacionalesExplorerClient({ summary }: { summary
           </select>
           <label style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
             <span>Período</span>
-            <input type="month" value={period} onChange={(event) => updateFilter(setPeriod, event.target.value)} aria-label="Filtrar por período" />
+            <select value={period} onChange={(event) => updateFilter(setPeriod, event.target.value)} aria-label="Filtrar por período">
+              <option value="latest">Último mes publicado por fuente</option>
+              <option value="">Todos los períodos</option>
+              {[...new Set(SOURCES.flatMap((sourceId) => summary.periodsBySource[sourceId] ?? []))].sort().reverse().map((value) => <option key={value} value={value}>{value}</option>)}
+            </select>
           </label>
         </div>
+        {period === "latest" && <p role="status" style={{ color: "var(--text-muted)", fontSize: "0.85rem" }}>Se muestra el mes más reciente disponible en cada fuente; los cortes pueden corresponder a meses distintos.</p>}
 
         {state === "loading" && <p role="status">Cargando rendiciones…</p>}
         {state === "error" && <div role="alert"><p>{error}</p><button type="button" className="btn btn-secondary" onClick={() => setRetry((value) => value + 1)}>Reintentar</button></div>}

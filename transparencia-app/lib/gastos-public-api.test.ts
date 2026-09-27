@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { advanceExpenseOffsets, getPublishedPeriodDateRange, getPublishedPeriodRange, isPublishedPeriod, mapExpenseApiRecord, mergeExpenseSourcePages } from "./gastos-public-api";
+import { advanceExpenseOffsets, getLatestPublishedPeriod, getPublishedPeriodDateRange, getPublishedPeriodRange, isPublishedPeriod, mapExpenseApiRecord, mergeExpenseSourcePages } from "./gastos-public-api";
 
 const row = (id: string, sourceId: "gastos_camara" | "gastos_senado", date: string) => ({
   id,
@@ -23,6 +23,12 @@ describe("paginación pública de gastos", () => {
     expect(getPublishedPeriodDateRange(["2024-02"])).toEqual({ from: "2024-02-01", to: "2024-02-29" });
     expect(isPublishedPeriod(["2026-06"], "2026-06")).toBe(true);
     expect(isPublishedPeriod(["2026-06"], "2026-07")).toBe(false);
+  });
+
+  it("elige el corte publicado más reciente por fuente sin asumir meses ausentes", () => {
+    expect(getLatestPublishedPeriod(["2026-05", "2026-07", "2026-06", "2026-07"])).toBe("2026-07");
+    expect(getLatestPublishedPeriod(["2026-04", "dato-inválido"])).toBe("2026-04");
+    expect(getLatestPublishedPeriod([])).toBeNull();
   });
 
   it("normaliza la respuesta de records API a una fila mostrable", () => {

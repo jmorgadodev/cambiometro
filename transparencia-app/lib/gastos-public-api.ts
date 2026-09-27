@@ -40,6 +40,10 @@ function periodOrdinal(period: string) {
   return year * 12 + month - 1;
 }
 
+export function getLatestPublishedPeriod(periods: readonly string[]) {
+  return [...new Set(periods)].filter((period) => periodOrdinal(period) !== null).sort().at(-1) ?? null;
+}
+
 export function getPublishedPeriodRange(periods: readonly string[]) {
   const ordered = [...new Set(periods)].sort();
   if (!ordered.length) return null;
