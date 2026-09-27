@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { advanceExpenseOffsets, mapExpenseApiRecord, mergeExpenseSourcePages } from "./gastos-public-api";
+import { advanceExpenseOffsets, getPublishedPeriodDateRange, getPublishedPeriodRange, isPublishedPeriod, mapExpenseApiRecord, mergeExpenseSourcePages } from "./gastos-public-api";
 
 const row = (id: string, sourceId: "gastos_camara" | "gastos_senado", date: string) => ({
   id,
@@ -14,6 +14,17 @@ const row = (id: string, sourceId: "gastos_camara" | "gastos_senado", date: stri
 });
 
 describe("paginación pública de gastos", () => {
+  it("genera límites inclusivos sólo para meses publicados consecutivos", () => {
+    expect(getPublishedPeriodRange(["2026-04", "2026-06", "2026-05", "2026-04"]))
+      .toEqual({ from: "2026-04", to: "2026-06" });
+    expect(getPublishedPeriodRange(["2026-04", "2026-06"])).toBeNull();
+    expect(getPublishedPeriodDateRange(["2026-03", "2026-04", "2026-05", "2026-06"]))
+      .toEqual({ from: "2026-03-01", to: "2026-06-30" });
+    expect(getPublishedPeriodDateRange(["2024-02"])).toEqual({ from: "2024-02-01", to: "2024-02-29" });
+    expect(isPublishedPeriod(["2026-06"], "2026-06")).toBe(true);
+    expect(isPublishedPeriod(["2026-06"], "2026-07")).toBe(false);
+  });
+
   it("normaliza la respuesta de records API a una fila mostrable", () => {
     expect(mapExpenseApiRecord(row("sen-1", "gastos_senado", "2026-07-01"))).toMatchObject({
       id: "sen-1",

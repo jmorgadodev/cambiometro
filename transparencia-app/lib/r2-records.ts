@@ -283,6 +283,8 @@ async function readPartitionRecords(
 
 function matchesIndexedParams(record: EvidenceRecord, params: Parameters<typeof readR2EvidenceRecords>[1]) {
   const date = record.occurredAt?.slice(0, 10) ?? "";
+  const period = date.slice(0, 7);
+  if (params.excludePeriods?.includes(period)) return false;
   if (params.entityId && !record.subjectEntityIds.includes(params.entityId) && !record.objectEntityIds.includes(params.entityId)) return false;
   if (params.recordIds && !params.recordIds.includes(record.id)) return false;
   if (params.kind && record.kind !== params.kind) return false;
@@ -305,6 +307,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   from?: string;
   to?: string;
   period?: string;
+  excludePeriods?: readonly string[];
   limit: number;
   cursor?: string;
 }) {
@@ -320,6 +323,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   const legacyCamaraVotePartitionIds = new Set<string>();
   const partitions = catalog.partitions.filter((partition) => {
     if (!sourceIds.includes(partition.sourceId)) return false;
+    if (params.excludePeriods?.includes(partition.period)) return false;
     if (!variants) {
       return (!params.period || partition.period === params.period)
         && (!params.from || partition.period >= params.from.slice(0, 7))

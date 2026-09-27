@@ -7,6 +7,14 @@ export function expenseMonthWindow(latestMonth, { fullHistory = false, overlapMo
   };
 }
 
+export function latestEligibleCamaraPeriod(generatedAt) {
+  const timestamp = Date.parse(String(generatedAt ?? ""));
+  if (!Number.isFinite(timestamp)) throw new Error("ETL_EXPENSE_INVALID_CAMARA_CUTOFF");
+  const date = new Date(timestamp);
+  const cutoff = new Date(Date.UTC(date.getUTCFullYear(), date.getUTCMonth() - 2, 1));
+  return `${cutoff.getUTCFullYear()}-${String(cutoff.getUTCMonth() + 1).padStart(2, "0")}`;
+}
+
 export function selectSenateExpensePeriods(publishedPeriods, { latest, fullHistory = false, overlapMonths = 1 } = {}) {
   if (!Array.isArray(publishedPeriods) || publishedPeriods.length === 0) throw new Error("ETL_EXPENSE_NO_PUBLISHED_PERIODS");
   if (!latest || !Number.isSafeInteger(latest.year) || latest.year < 1990 || latest.year > 2100 || !Number.isSafeInteger(latest.month) || latest.month < 1 || latest.month > 12) {

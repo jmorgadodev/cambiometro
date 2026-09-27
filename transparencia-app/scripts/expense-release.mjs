@@ -1,8 +1,12 @@
 import { createHash } from "node:crypto";
 import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
+import { latestEligibleCamaraPeriod } from "./etl/expense-window.mjs";
 
 const EXPENSE_SOURCES = ["gastos_camara", "gastos_senado"];
+const ALL_ZERO_MATRIX_MIN_ROWS = 100;
+const ALL_ZERO_MATRIX_MIN_POLITICIANS = 20;
+const ALL_ZERO_MATRIX_MIN_ITEMS = 10;
 
 function sha256Json(value) {
   return createHash("sha256").update(JSON.stringify(value), "utf8").digest("hex");
@@ -82,6 +86,79 @@ export function readExpenseSubset(root, sourceId) {
   const subset = JSON.parse(readFileSync(path, "utf8"));
   if (subset?.sourceId !== sourceId || !Array.isArray(subset.records)) throw new Error(`EXPENSE_SUBSET_INVALID: ${sourceId}`);
   return subset;
+}
+
+function broadAllZeroPeriods(sourceId, records) {
+  if (sourceId !== "gastos_camara") return new Set();
+  const periods = new Map();
+  for (const record of records) {
+    const rows = periods.get(record.periodo) ?? [];
+    rows.push(record);
+    periods.set(record.periodo, rows);
+  }
+  return new Set([...periods].filter(([, rows]) =>
+    rows.length >= ALL_ZERO_MATRIX_MIN_ROWS
+      && new Set(rows.map((row) => row.diputado_id)).size >= ALL_ZERO_MATRIX_MIN_POLITICIANS
+      && new Set(rows.map((row) => row.item)).size >= ALL_ZERO_MATRIX_MIN_ITEMS
+      && rows.every((row) => row.monto_clp === 0),
+  ).map(([period]) => period));
+}
+
+export function sanitizeExpenseSubsetForPublication(subset) {
+  const sourceId = subset?.sourceId;
+  if (!EXPENSE_SOURCES.includes(sourceId) || !Array.isArray(subset?.records)) {
+    throw new Error("EXPENSE_SUBSET_INVALID_FOR_PUBLICATION");
+  }
+  if (!Number.isSafeInteger(subset.recordCount) || subset.recordCount !== subset.records.length) {
+    throw new Error(`EXPENSE_SUBSET_COUNT_MISMATCH:${sourceId}`);
+  }
+  const { checksumSha256, ...rawPayload } = subset;
+  if (!/^[a-f0-9]{64}$/i.test(String(checksumSha256 ?? "")) || sha256Json(rawPayload) !== checksumSha256) {
+    throw new Error(`EXPENSE_SUBSET_CHECKSUM_MISMATCH:${sourceId}`);
+  }
+
+  const records = subset.records.map((record) => compactExpenseRecord(record, sourceId));
+  if (records.some((record) => !record)) throw new Error(`EXPENSE_SUBSET_ROW_INVALID:${sourceId}`);
+  const validRecords = records;
+  const ids = new Set(validRecords.map((record) => record.id));
+  if (ids.size !== validRecords.length) throw new Error(`EXPENSE_DUPLICATE_ID:${sourceId}`);
+
+  const rowsByPeriod = new Map();
+  for (const record of validRecords) rowsByPeriod.set(record.periodo, (rowsByPeriod.get(record.periodo) ?? 0) + 1);
+  const excludedPeriods = [];
+  let latestEligible = null;
+  const zeroPeriods = broadAllZeroPeriods(sourceId, validRecords);
+  if (sourceId === "gastos_camara") {
+    try {
+      latestEligible = latestEligibleCamaraPeriod(subset.generatedAt);
+    } catch {
+      throw new Error("EXPENSE_RELEASE_TIMESTAMP_INVALID:gastos_camara");
+    }
+    for (const [period, rows] of [...rowsByPeriod].sort(([left], [right]) => left.localeCompare(right))) {
+      if (period > latestEligible) excludedPeriods.push({ period, reason: "not-yet-published", rows });
+      else if (zeroPeriods.has(period)) excludedPeriods.push({ period, reason: "broad-all-zero-matrix", rows });
+    }
+  }
+
+  const excluded = new Set(excludedPeriods.map((item) => item.period));
+  const publishedRecords = validRecords.filter((record) => !excluded.has(record.periodo));
+  const periods = [...new Set(publishedRecords.map((record) => record.periodo))].sort();
+  const politicians = new Set(publishedRecords
+    .map((record) => sourceId === "gastos_camara" ? record.diputado_id : record.nombre)
+    .filter(Boolean));
+  const payload = {
+    ...rawPayload,
+    recordCount: publishedRecords.length,
+    politicianCount: politicians.size,
+    periods,
+    records: publishedRecords,
+  };
+  return { subset: { ...payload, checksumSha256: sha256Json(payload) }, excludedPeriods };
+}
+
+export function readExpenseSubsetForPublication(root, sourceId) {
+  const subset = readExpenseSubset(root, sourceId);
+  return subset ? sanitizeExpenseSubsetForPublication(subset) : null;
 }
 
 export function readExpenseSnapshot(root) {

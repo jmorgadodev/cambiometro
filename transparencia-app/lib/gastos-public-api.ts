@@ -34,6 +34,35 @@ export interface PublicExpenseRow {
 
 export type ExpenseOffsets = Record<ExpenseSourceId, number>;
 
+function periodOrdinal(period: string) {
+  if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(period)) return null;
+  const [year, month] = period.split("-").map(Number);
+  return year * 12 + month - 1;
+}
+
+export function getPublishedPeriodRange(periods: readonly string[]) {
+  const ordered = [...new Set(periods)].sort();
+  if (!ordered.length) return null;
+  const ordinals = ordered.map(periodOrdinal);
+  if (ordinals.some((ordinal) => ordinal === null)) return null;
+  for (let index = 1; index < ordinals.length; index += 1) {
+    if (ordinals[index] !== ordinals[index - 1]! + 1) return null;
+  }
+  return { from: ordered[0], to: ordered.at(-1)! };
+}
+
+export function getPublishedPeriodDateRange(periods: readonly string[]) {
+  const range = getPublishedPeriodRange(periods);
+  if (!range) return null;
+  const [year, month] = range.to.split("-").map(Number);
+  const lastDay = new Date(Date.UTC(year, month, 0)).toISOString().slice(0, 10);
+  return { from: `${range.from}-01`, to: lastDay };
+}
+
+export function isPublishedPeriod(periods: readonly string[], period: string) {
+  return periods.includes(period);
+}
+
 export function mapExpenseApiRecord(record: ExpenseApiRecord): PublicExpenseRow {
   const fecha = record.data?.fecha ?? record.occurredAt ?? "";
   return {

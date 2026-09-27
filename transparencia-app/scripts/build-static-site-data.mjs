@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { writeChunkedJson } from "./static-site-data.mjs";
 import { buildTransferenciasStatic, hasFullTransferSource } from "./build-transferencias-static.mjs";
 import { chunkJsonRows, listUnavailableMunicipalities } from "./static-payroll.mjs";
-import { readExpenseSubset } from "./expense-release.mjs";
+import { readExpenseSubsetForPublication } from "./expense-release.mjs";
 import { normalizeMovementPayload, sha256, validateMovementPayload } from "./movimientos-pipeline.mjs";
 import { buildCpltAggregateSummary, isPlausiblePeriod } from "./cplt-transparency-summary.mjs";
 
@@ -101,8 +101,8 @@ const movimientosRelease = {
 // masivo al navegador; aquí sólo generamos el resumen que alimenta las cifras
 // de la página.
 const expenseSubsets = ["gastos_camara", "gastos_senado"].map((sourceId) => {
-  const subset = readExpenseSubset(root, sourceId);
-  return { sourceId, subset };
+  const result = readExpenseSubsetForPublication(root, sourceId);
+  return { sourceId, subset: result?.subset ?? null, excludedPeriods: result?.excludedPeriods ?? [] };
 });
 const expenseRecords = expenseSubsets.flatMap(({ sourceId, subset }) => (subset?.records ?? []).map((record) => ({ ...record, sourceId })));
 if (!expenseRecords.length && !allowSample) {
@@ -122,6 +122,9 @@ const expenseSummary = {
   bySource: Object.fromEntries(expenseSubsets.map(({ sourceId, subset }) => [sourceId, subset?.recordCount ?? 0])),
   periodsBySource: Object.fromEntries(expenseSubsets.map(({ sourceId, subset }) => [sourceId, subset?.periods ?? []])),
 };
+for (const { sourceId, excludedPeriods } of expenseSubsets) {
+  if (excludedPeriods.length) console.log(`[build-static-site-data] Cortes de gastos no publicados (${sourceId}): ${JSON.stringify(excludedPeriods)}`);
+}
 await writeFile(join(generatedDir, "gastos-operacionales-summary.json"), `${JSON.stringify(expenseSummary)}\n`);
 
 const pinnedSummary = await readJson("data/lake/projections/v1/ley19862-summary.json");

@@ -260,6 +260,36 @@ describe("registros públicos R2", () => {
     expect(payload.data.map((row) => row.id)).toEqual(["senado-expense-jan"]);
   });
 
+  it("excluye el corte retirado de Cámara desde el lake R2 antes de contar", async () => {
+    const june = gzipJsonl([{ id: "cam-june", sourceId: "gastos_camara", kind: "expense", occurredAt: "2026-06-15", data: { title: "Junio" } }]);
+    const july = gzipJsonl([{ id: "cam-july", sourceId: "gastos_camara", kind: "expense", occurredAt: "2026-07-15", data: { title: "Julio" } }]);
+    const makePartition = (period: string, data: ArrayBuffer) => ({
+      sourceId: "gastos_camara", period, recordCount: 1,
+      manifestKey: `partitions/gastos_camara/${period}/manifest.json`,
+      checksumSha256: period,
+      manifest: { projectionChecksumSha256: "projection", artifacts: [{ key: `partitions/gastos_camara/${period}/records.jsonl.gz`, checksumSha256: sha256(data), releaseAssetName: period }] },
+    });
+    const junePartition = makePartition("2026-06", june);
+    const julyPartition = makePartition("2026-07", july);
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": { generatedAt: "2026-09-27T00:00:00Z", partitions: [junePartition, julyPartition] },
+      [junePartition.manifestKey]: junePartition.manifest,
+      [julyPartition.manifestKey]: julyPartition.manifest,
+      "partitions/gastos_camara/2026-06/records.jsonl.gz": june,
+      "partitions/gastos_camara/2026-07/records.jsonl.gz": july,
+    });
+
+    const response = await listRecordsFromR2(
+      new URL("https://example.test/api/v1/records?source=gastos_camara&kind=expense&limit=10"),
+      { PUBLIC_DATA: bucket as never },
+    );
+    const payload = await response!.json() as { data: Array<{ id: string }>; meta: Record<string, unknown> };
+
+    expect(response!.status).toBe(200);
+    expect(payload.meta.total).toBe(1);
+    expect(payload.data.map((row) => row.id)).toEqual(["cam-june"]);
+  });
+
   it("respeta period en la proyección compacta de gastos", async () => {
     const bucket = fakeBucket({
       "projections/static-site-v1/manifest.json": {
@@ -284,6 +314,33 @@ describe("registros públicos R2", () => {
     expect(response.status).toBe(200);
     expect(payload.meta.total).toBe(1);
     expect(payload.data.map((row) => row.id)).toEqual(["expense-jan"]);
+  });
+
+  it("retira los períodos observados no válidos de gastos de Cámara antes del total", async () => {
+    const bucket = fakeBucket({
+      "projections/static-site-v1/manifest.json": {
+        files: [{ path: "data/lake-subsets/gastos-camara.subset.json", key: "subsets/gastos-camara.json" }],
+      },
+      "subsets/gastos-camara.json": {
+        sourceId: "gastos_camara",
+        generatedAt: "2026-09-27T00:00:00Z",
+        records: [
+          { id: "expense-june", fecha: "2026-06-15", periodo: "2026-06", nombre: "Diputado Junio", item: "ITEM", monto_clp: 1, url: "https://example.test/june", fuente: "Cámara" },
+          { id: "expense-july", fecha: "2026-07-15", periodo: "2026-07", nombre: "Diputado Julio", item: "ITEM", monto_clp: 0, url: "https://example.test/july", fuente: "Cámara" },
+          { id: "expense-august", fecha: "2026-08-15", periodo: "2026-08", nombre: "Diputado Agosto", item: "ITEM", monto_clp: 0, url: "https://example.test/august", fuente: "Cámara" },
+        ],
+      },
+    });
+
+    const response = await worker.fetch(
+      new Request("https://example.test/api/v1/records?source=gastos_camara&kind=expense&limit=10"),
+      { PUBLIC_DATA: bucket as never } as never,
+    );
+    const payload = await response.json() as { data: Array<{ id: string }>; meta: Record<string, unknown> };
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.total).toBe(1);
+    expect(payload.data.map((row) => row.id)).toEqual(["expense-june"]);
   });
 
   it("omite palabras vacías nacionales y consulta ambas nóminas sin cargar su shard gigante", async () => {

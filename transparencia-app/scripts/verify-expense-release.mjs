@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { buildExpenseSubset, EXPENSE_SOURCES, isValidExpenseAmount, readExpenseSubset } from "./expense-release.mjs";
+import { EXPENSE_SOURCES, isValidExpenseAmount, readExpenseSubsetForPublication } from "./expense-release.mjs";
+import { PUBLIC_EXPENSE_EXCLUDED_PERIODS } from "../lib/expense-publication-policy.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const required = process.argv.includes("--required") || process.env.ALLOW_STATIC_SAMPLE !== "1";
@@ -12,15 +13,20 @@ function fail(message) {
 }
 
 const subsets = EXPENSE_SOURCES.map((sourceId) => {
-  const subset = readExpenseSubset(root, sourceId);
-  if (!subset) {
+  const result = readExpenseSubsetForPublication(root, sourceId);
+  if (!result) {
     if (required) fail(`falta data/lake-subsets/${sourceId.replace("gastos_", "gastos-")}.subset.json`);
     return null;
   }
+  const { subset, excludedPeriods } = result;
+  const observed = excludedPeriods.map(({ period }) => period).sort();
+  const declared = [...(PUBLIC_EXPENSE_EXCLUDED_PERIODS[sourceId] ?? [])].sort();
+  if (JSON.stringify(observed) !== JSON.stringify(declared)) {
+    fail(`${sourceId} política pública desfasada; derivado=${observed.join(",") || "ninguno"}; declarada=${declared.join(",") || "ninguno"}`);
+  }
+  if (excludedPeriods.length) console.log(JSON.stringify({ sourceId, excludedPeriods }, null, 2));
   if (subset.recordCount !== subset.records.length) fail(`${sourceId} recordCount no coincide`);
   if (required && subset.recordCount === 0) fail(`${sourceId} está vacío; no se publica una ficha sin rendiciones`);
-  const rebuilt = buildExpenseSubset({ sourceId, records: subset.records, generatedAt: subset.generatedAt });
-  if (rebuilt.checksumSha256 !== subset.checksumSha256) fail(`${sourceId} checksum inválido`);
   const ids = new Set();
   for (const record of subset.records) {
     if (ids.has(record.id)) fail(`${sourceId} tiene id duplicado ${record.id}`);

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildExpenseSubset, compactExpenseRecord, isValidExpenseAmount } from "./expense-release.mjs";
+import { buildExpenseSubset, compactExpenseRecord, isValidExpenseAmount, sanitizeExpenseSubsetForPublication } from "./expense-release.mjs";
 
 const base = {
   id: "cam-1",
@@ -14,6 +14,33 @@ const base = {
 };
 
 describe("release estático de gastos operacionales", () => {
+  it("retira matrices amplias de ceros y períodos prematuros sólo de la vista publicada", () => {
+    const records = [
+      { ...base, id: "cam-june", periodo: "2026-06", fecha: "2026-06-01", monto_clp: 1000 },
+      ...Array.from({ length: 200 }, (_, index) => ({
+        ...base,
+        id: `cam-july-${index}`,
+        diputado_id: String(2000 + Math.floor(index / 10)),
+        periodo: "2026-07",
+        fecha: "2026-07-01",
+        item: `Ítem ${index % 10}`,
+        monto_clp: 0,
+      })),
+      { ...base, id: "cam-august", periodo: "2026-08", fecha: "2026-08-01", monto_clp: 1000 },
+    ];
+    const rawSubset = buildExpenseSubset({ sourceId: "gastos_camara", records, generatedAt: "2026-09-27T00:00:00.000Z" });
+
+    const result = sanitizeExpenseSubsetForPublication(rawSubset);
+
+    expect(result.subset.periods).toEqual(["2026-06"]);
+    expect(result.subset.records.map((record) => record.id)).toEqual(["cam-june"]);
+    expect(result.excludedPeriods).toEqual([
+      { period: "2026-07", reason: "broad-all-zero-matrix", rows: 200 },
+      { period: "2026-08", reason: "not-yet-published", rows: 1 },
+    ]);
+    expect(rawSubset.records).toHaveLength(202);
+  });
+
   it("compacta sólo una fila trazable y conserva monto cero", () => {
     expect(compactExpenseRecord({ ...base, monto_clp: 0 }, "gastos_camara")).toMatchObject({ id: "cam-1", monto_clp: 0 });
     expect(compactExpenseRecord({ ...base, url: "http://no-oficial.example" }, "gastos_camara")).toBeNull();

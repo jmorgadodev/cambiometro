@@ -2,6 +2,7 @@ import type { D1Database, R2Bucket } from "@cloudflare/workers-types";
 
 import { POLITICOS_SEED } from "../../lib/politicos-source";
 import { readR2EvidenceRecords } from "../../lib/r2-records";
+import { isPublicExpensePeriod, PUBLIC_EXPENSE_EXCLUDED_PERIODS } from "../../lib/expense-publication-policy.mjs";
 import { readR2EntityIndex } from "../../lib/r2-entities";
 import { staticRecordCandidatePaths, staticRecordRows } from "../../lib/r2-public-record-paths";
 import { matchesFuncionarioQuality, normalizeFuncionarioRecord, type FuncionarioQualityFilter } from "../../lib/funcionarios-normalization";
@@ -1321,6 +1322,7 @@ async function listExpensesFromR2(requestUrl: URL, env: Env): Promise<Response |
   const normalize = (value: unknown) => normalized(value);
   const rows = subsets.flatMap((subset) => subset!.records.map((row) => ({ row, sourceId: subset!.sourceId })));
   const filtered = rows
+    .filter(({ sourceId, row }) => isPublicExpensePeriod(sourceId, row.periodo))
     .filter(({ row }) => !query || normalize(`${row.id} ${row.nombre} ${row.item} ${row.fuente}`).includes(query))
     .filter(({ row }) => !period || row.periodo === period)
     .filter(({ row }) => !from || row.fecha >= from)
@@ -1462,6 +1464,7 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
         period: requestedPeriod || undefined,
         from: requestUrl.searchParams.get("from")?.trim() || undefined,
         to: requestUrl.searchParams.get("to")?.trim() || undefined,
+        excludePeriods: requestedSource === "gastos_camara" ? PUBLIC_EXPENSE_EXCLUDED_PERIODS.gastos_camara : undefined,
         limit,
         cursor: offset > 0 ? `v1_${offset.toString(36)}` : undefined,
       });
@@ -1536,6 +1539,8 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
   const searchable = (row: JsonRecord) => normalized(JSON.stringify({ id: row.id, title: row.title, description: row.description, data: row.data }));
   const filtered = rows
     .filter((row) => !kind || row.kind === kind)
+    .filter((row) => row.kind !== "expense"
+      || isPublicExpensePeriod(row.sourceId as "gastos_camara" | "gastos_senado", String(row.occurredAt ?? (row.data as JsonRecord)?.periodo ?? "").slice(0, 7)))
     .filter((row) => !query || searchable(row).includes(query))
     .filter((row) => !requestedPeriod || String(row.occurredAt ?? (row.data as JsonRecord)?.periodo ?? (row.data as JsonRecord)?.period ?? "").startsWith(requestedPeriod))
     .filter((row) => !from || String(row.occurredAt ?? "") >= from)
