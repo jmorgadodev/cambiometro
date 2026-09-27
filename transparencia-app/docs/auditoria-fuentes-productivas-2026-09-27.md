@@ -113,7 +113,11 @@ corte de julio. El índice no declara `generatedAt`. No se pudo cotejar el
 checksum del release de partición. Este hallazgo confirma una referencia rota
 en el catálogo, pero no permite atribuir cuándo o qué ejecución la causó. No
 hay prueba de pérdida del índice consultable; sí queda pendiente reconciliar o
-reparar la referencia con un backup íntegro y una estimación segura de tamaño.
+reparar la referencia con una estimación segura de tamaño. La ruta equivalente
+del manifiesto en los snapshots documentados de 2026-09-13 y 2026-08-20 en
+`cambiometro-backups` devolvió 404; el release GitHub asociado a la partición
+tampoco existe. No se ha demostrado una copia de restauración en esos dos
+respaldos, sin que esto descarte otras copias ni recuperar desde el origen.
 
 Los runs 14 y 21-09 se detuvieron en el guard de corte vacío antes de
 `data:publish`. Se añadió al workflow una validación de todos los artefactos
@@ -132,10 +136,10 @@ conserva su checksum. La última ejecución diaria listada del ETL fue exitosa e
 
 ## Pendientes ordenados por riesgo y posibilidad de resolver
 
-1. **ChileCompra:** conciliar la referencia de partición R2 rota con el backup,
-   recuperar checksum/tamaño y medir el espacio de cualquier reparación antes
-   de escribir; confirmar si existe endpoint/descarga oficial vigente para
-   julio-septiembre. No promover un “cero” como actualización.
+1. **ChileCompra:** localizar otra copia íntegra o recuperar del origen oficial
+   la partición y comprobar su checksum/tamaño; medir el espacio de cualquier
+   reparación antes de escribir. Confirmar si existe endpoint/descarga vigente
+   para julio-septiembre. No promover un “cero” como actualización.
 2. **Personal de apoyo Cámara:** conseguir o identificar un mecanismo oficial
    accesible que sustituya la página bloqueada. No sortear el 403 ni usar datos
    de terceros como reemplazo; conservar agosto de 2026 hasta obtener evidencia.
