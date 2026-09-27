@@ -83,6 +83,44 @@ completa por inferencia.
 | Contraloría | 02-09 | Falló el paso de materialización D1. La API sigue exponiendo 310 registros; ese fallo por sí solo no demuestra que R2/Pages haya perdido el release |
 | InfoProbidad / Ley 19.862 / SINIM / DIPRES / CPLT | 10-09 / 08-09 / 01-09 / 25-08 / 15-09 | Últimas ejecuciones listadas exitosas, de acuerdo con sus frecuencias mensual, semestral, trimestral o mensual |
 
+### Gastos operacionales: consultas mensuales y límite de CPU
+
+Las consultas mensuales productivas de Senado respondieron 200 en las muestras
+revisadas. En Cámara, consultas frías equivalentes devolvieron ocasionalmente
+HTTP 503 / error 1102, aunque otras fechas respondieron 200; no es un fallo de
+cobertura uniforme. Cámara publica abril-junio de 2026 en el release consultable;
+julio se mantiene retirado por la regla de matriz amplia de ceros y agosto aún
+no es un corte publicado. No se debe interpretar esos dos meses como pérdida de
+historial.
+
+El fallback anterior podía abrir un subconjunto histórico de hasta 7,7 MB para
+resolver una petición mensual. La corrección local agrega artefactos R2 por
+mes, metadatos de conteo, lectura paginada por período y límite explícito para
+búsquedas filtradas que abarcarían más de 12 meses. La interfaz acepta ahora
+`r2-months` y explica cuándo acotar la búsqueda. La generación de fragmentos es
+compartida entre el build de Pages y el publicador del ETL, para que una corrida
+automática no dependa de un build previo. Los fragmentos no incluyen la fecha de
+la corrida, así un mes sin cambios conserva su clave R2 por contenido.
+
+La validación local generó 178 fragmentos mensuales (167.152 filas) y dos
+subconjuntos completos para un total de 181 entradas candidatas y 153.547.684
+bytes. Como el manifiesto productivo ya conserva esos dos subconjuntos, el
+publicador los reutiliza sin volver a subirlos: la proyección real es 179 PUT,
+75.596.382 bytes nuevos y el manifiesto. El preflight de sólo lectura midió
+8.105.276.881 bytes en toda la cuenta (81,053% de 10 GB) y proyectó
+8.180.864.919 bytes (81,809%), incluido el bucket de respaldos; no se ha
+realizado ninguna escritura. Antes de promover se debe repetir el preflight
+inmediatamente antes del publicador, desplegar primero el Worker compatible y
+verificar las consultas de ambos organismos. El build completo local pasó al
+hidratar, por checksum, el release canónico de Transferencias Ley 19.862 desde
+R2 (62.172 filas, 1.244 páginas); no se alteraron datos remotos.
+
+La verificación de navegador local pasó 101 comprobaciones de ruta y móvil.
+Separadamente, el smoke contra la API productiva observó Cámara junio 2026 en
+HTTP 200 y Senado julio 2026 en HTTP 503 en dos intentos consecutivos. Esto
+confirma que el fallo sigue visible en producción; el cambio local aún debe
+pasar por el preview antes de desplegar el Worker y los nuevos assets.
+
 ### ChileCompra: comprobación de sólo lectura
 
 La página oficial vigente documenta las consultas OCDS por año, mes y rango de

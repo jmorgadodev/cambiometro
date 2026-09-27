@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import { buildExpenseSubset, compactExpenseRecord, isValidExpenseAmount, sanitizeExpenseSubsetForPublication } from "./expense-release.mjs";
+import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
+import { buildExpensePeriodShards, buildExpenseSubset, compactExpenseRecord, isValidExpenseAmount, sanitizeExpenseSubsetForPublication, writeExpensePeriodArtifacts } from "./expense-release.mjs";
 
 const base = {
   id: "cam-1",
@@ -51,6 +54,64 @@ describe("release estático de gastos operacionales", () => {
     const second = buildExpenseSubset({ sourceId: "gastos_camara", records: [base], generatedAt: "2026-08-26T00:00:00.000Z" });
     expect(first.checksumSha256).toBe(second.checksumSha256);
     expect(first.recordCount).toBe(1);
+  });
+
+  it("genera fragmentos mensuales ordenados y trazables desde el release validado", () => {
+    const subset = buildExpenseSubset({
+      sourceId: "gastos_camara",
+      generatedAt: "2026-09-27T00:00:00.000Z",
+      records: [
+        { ...base, id: "may-2", periodo: "2026-05", fecha: "2026-05-20" },
+        { ...base, id: "apr-1", periodo: "2026-04", fecha: "2026-04-10" },
+        { ...base, id: "may-1", periodo: "2026-05", fecha: "2026-05-05" },
+      ],
+    });
+
+    expect(buildExpensePeriodShards(subset)).toEqual([
+      {
+        period: "2026-04",
+        payload: { sourceId: "gastos_camara", period: "2026-04", recordCount: 1, records: [subset.records.find((record) => record.id === "apr-1")] },
+      },
+      {
+        period: "2026-05",
+        payload: { sourceId: "gastos_camara", period: "2026-05", recordCount: 2, records: [subset.records.find((record) => record.id === "may-2"), subset.records.find((record) => record.id === "may-1")] },
+      },
+    ]);
+  });
+
+  it("mantiene inmutable el checksum de un mes cuyo contenido no cambió", () => {
+    const first = buildExpenseSubset({ sourceId: "gastos_camara", generatedAt: "2026-09-26T00:00:00.000Z", records: [base] });
+    const nextRun = buildExpenseSubset({ sourceId: "gastos_camara", generatedAt: "2026-09-27T00:00:00.000Z", records: [base] });
+
+    expect(buildExpensePeriodShards(first)[0].payload).toEqual(buildExpensePeriodShards(nextRun)[0].payload);
+  });
+
+  it("rechaza fragmentos mensuales con fuente o período inválidos", () => {
+    expect(() => buildExpensePeriodShards({ sourceId: "gastos_unknown", records: [{ ...base }] }))
+      .toThrow("EXPENSE_PERIOD_SHARD_SOURCE_MISMATCH");
+    expect(() => buildExpensePeriodShards({ sourceId: "gastos_camara", records: [{ ...base, periodo: "2026-13" }] }))
+      .toThrow("EXPENSE_PERIOD_SHARD_PERIOD_INVALID");
+  });
+
+  it("prepara índice y fragmentos al publicar, incluyendo fuentes sin meses", () => {
+    const root = mkdtempSync(join(tmpdir(), "expense-period-artifacts-"));
+    try {
+      const sourceDirectory = join(root, "data", "lake-subsets");
+      mkdirSync(sourceDirectory, { recursive: true });
+      const subset = buildExpenseSubset({ sourceId: "gastos_camara", generatedAt: "2026-09-27T00:00:00.000Z", records: [base] });
+      writeFileSync(join(sourceDirectory, "gastos-camara.subset.json"), JSON.stringify(subset));
+
+      const result = writeExpensePeriodArtifacts(root, "2026-09-27T00:00:00.000Z");
+      const shardPath = join(root, "data", "lake-subsets", "expense-periods", "gastos_camara", "2026-07.json");
+
+      expect(result.index.sources).toEqual([
+        { sourceId: "gastos_camara", periods: [{ period: "2026-07", path: "data/lake-subsets/expense-periods/gastos_camara/2026-07.json", recordCount: 1 }] },
+        { sourceId: "gastos_senado", periods: [] },
+      ]);
+      expect(JSON.parse(readFileSync(shardPath, "utf8"))).toMatchObject({ sourceId: "gastos_camara", period: "2026-07", recordCount: 1 });
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 
   it("acepta el esquema oficial del Senado por nombre", () => {

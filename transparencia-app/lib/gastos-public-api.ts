@@ -1,5 +1,9 @@
 export type ExpenseSourceId = "gastos_camara" | "gastos_senado";
 
+export function isExpenseSourceBackendSupported(sourceBackend: unknown): sourceBackend is "r2" | "r2-lake" | "r2-months" {
+  return sourceBackend === "r2" || sourceBackend === "r2-lake" || sourceBackend === "r2-months";
+}
+
 export interface ExpenseApiRecord {
   id: string;
   sourceId: ExpenseSourceId;

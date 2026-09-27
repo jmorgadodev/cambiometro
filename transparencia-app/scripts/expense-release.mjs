@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { existsSync, readFileSync } from "node:fs";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import { latestEligibleCamaraPeriod } from "./etl/expense-window.mjs";
 
@@ -78,6 +78,32 @@ export function buildExpenseSubset({ sourceId, records, generatedAt = new Date()
     records: compact,
   };
   return { ...subset, checksumSha256: sha256Json(subset) };
+}
+
+export function buildExpensePeriodShards(subset) {
+  if (!EXPENSE_SOURCES.includes(subset?.sourceId) || !Array.isArray(subset?.records)) {
+    throw new Error("EXPENSE_PERIOD_SHARD_SOURCE_MISMATCH");
+  }
+  const byPeriod = new Map();
+  for (const record of subset.records) {
+    if (record?.sourceId && record.sourceId !== subset.sourceId) throw new Error("EXPENSE_PERIOD_SHARD_SOURCE_MISMATCH");
+    const period = String(record?.periodo ?? "");
+    if (!/^\d{4}-(?:0[1-9]|1[0-2])$/.test(period)) throw new Error("EXPENSE_PERIOD_SHARD_PERIOD_INVALID");
+    const rows = byPeriod.get(period) ?? [];
+    rows.push(record);
+    byPeriod.set(period, rows);
+  }
+  return [...byPeriod.entries()]
+    .sort(([left], [right]) => left.localeCompare(right))
+    .map(([period, records]) => ({
+      period,
+      payload: {
+        sourceId: subset.sourceId,
+        period,
+        recordCount: records.length,
+        records: records.sort((left, right) => String(right.fecha ?? "").localeCompare(String(left.fecha ?? "")) || String(right.id).localeCompare(String(left.id))),
+      },
+    }));
 }
 
 export function readExpenseSubset(root, sourceId) {
@@ -159,6 +185,37 @@ export function sanitizeExpenseSubsetForPublication(subset) {
 export function readExpenseSubsetForPublication(root, sourceId) {
   const subset = readExpenseSubset(root, sourceId);
   return subset ? sanitizeExpenseSubsetForPublication(subset) : null;
+}
+
+export function writeExpensePeriodArtifacts(root, generatedAt = new Date().toISOString()) {
+  const expensePeriodRoot = join(root, "data", "lake-subsets", "expense-periods");
+  const index = {
+    schemaVersion: 1,
+    dataset: "gastos-operacionales-por-periodo",
+    generatedAt,
+    sources: [],
+  };
+  const published = [];
+
+  for (const sourceId of EXPENSE_SOURCES) {
+    const result = readExpenseSubsetForPublication(root, sourceId);
+    const source = { sourceId, subset: result?.subset ?? null, excludedPeriods: result?.excludedPeriods ?? [], periods: [] };
+    if (source.subset) {
+      for (const shard of buildExpensePeriodShards(source.subset)) {
+        const path = `data/lake-subsets/expense-periods/${sourceId}/${shard.period}.json`;
+        const outputPath = join(root, path);
+        mkdirSync(join(expensePeriodRoot, sourceId), { recursive: true });
+        writeFileSync(outputPath, `${JSON.stringify(shard.payload)}\n`);
+        source.periods.push({ period: shard.period, path, recordCount: shard.payload.recordCount });
+      }
+    }
+    index.sources.push({ sourceId, periods: source.periods });
+    published.push(source);
+  }
+
+  mkdirSync(expensePeriodRoot, { recursive: true });
+  writeFileSync(join(expensePeriodRoot, "manifest.json"), `${JSON.stringify(index)}\n`);
+  return { index, sources: published };
 }
 
 export function readExpenseSnapshot(root) {

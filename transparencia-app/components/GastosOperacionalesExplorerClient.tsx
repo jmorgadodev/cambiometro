@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
-import { advanceExpenseOffsets, getLatestPublishedPeriod, getPublishedPeriodDateRange, isPublishedPeriod, mapExpenseApiRecord, mergeExpenseSourcePages, type ExpenseOffsets, type ExpenseSourceId, type PublicExpenseRow } from "@/lib/gastos-public-api";
+import { advanceExpenseOffsets, getLatestPublishedPeriod, getPublishedPeriodDateRange, isExpenseSourceBackendSupported, isPublishedPeriod, mapExpenseApiRecord, mergeExpenseSourcePages, type ExpenseOffsets, type ExpenseSourceId, type PublicExpenseRow } from "@/lib/gastos-public-api";
 import { publicApiUrl } from "@/lib/public-api-origin";
 
 export interface ExpenseSummary {
@@ -15,10 +15,12 @@ export interface ExpenseSummary {
 interface ExpenseApiResponse {
   data?: Parameters<typeof mapExpenseApiRecord>[0][];
   meta?: { total?: number; sourceBackend?: string };
+  error?: { code?: string };
 }
 
 type LoadState = "loading" | "ready" | "error";
 const PAGE_SIZE = 20;
+const QUERY_SCOPE_REQUIRED_MESSAGE = "Para buscar en períodos extensos, selecciona un año o un mes.";
 const SOURCES: ExpenseSourceId[] = ["gastos_camara", "gastos_senado"];
 const EMPTY_OFFSETS: ExpenseOffsets = { gastos_camara: 0, gastos_senado: 0 };
 const money = (value: number | null) => value === null ? "Monto no informado" : value.toLocaleString("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 });
@@ -44,10 +46,13 @@ async function fetchSourcePage(source: ExpenseSourceId, offset: number, query: s
   const range = source === "gastos_camara" && !effectivePeriod ? getPublishedPeriodDateRange(publishedPeriods) ?? undefined : undefined;
   if (source === "gastos_camara" && !effectivePeriod && !range) throw new Error("El corte de Cámara requiere revisión antes de mostrarse.");
   const response = await fetch(expenseApiUrl(source, offset, query, effectivePeriod, range), { signal, cache: "no-store" });
-  if (!response.ok) throw new Error(`HTTP ${response.status}`);
   const payload = await response.json() as ExpenseApiResponse;
+  if (!response.ok) {
+    if (response.status === 422 && payload.error?.code === "QUERY_SCOPE_REQUIRED") throw new Error(QUERY_SCOPE_REQUIRED_MESSAGE);
+    throw new Error(`HTTP ${response.status}`);
+  }
   if (!Array.isArray(payload.data) || !Number.isFinite(payload.meta?.total)) throw new Error("Respuesta incompleta");
-  if (payload.meta?.sourceBackend !== "r2" && payload.meta?.sourceBackend !== "r2-lake") throw new Error("Fuente de datos no disponible");
+  if (!isExpenseSourceBackendSupported(payload.meta?.sourceBackend)) throw new Error("Fuente de datos no disponible");
   return {
     rows: payload.data.map(mapExpenseApiRecord),
     total: payload.meta.total!,
@@ -101,8 +106,9 @@ export default function GastosOperacionalesExplorerClient({ summary }: { summary
         }
         setState("ready");
       })
-      .catch(() => {
+      .catch((reason: unknown) => {
         if (controller.signal.aborted) setError("No se pudo cargar la página. Revisa tu conexión e inténtalo nuevamente.");
+        else if (reason instanceof Error && reason.message === QUERY_SCOPE_REQUIRED_MESSAGE) setError(QUERY_SCOPE_REQUIRED_MESSAGE);
         else setError("No se pudieron cargar las rendiciones. Inténtalo nuevamente.");
         setRows([]);
         setState("error");
