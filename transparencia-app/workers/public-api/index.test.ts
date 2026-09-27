@@ -363,6 +363,76 @@ describe("registros públicos R2", () => {
     expect(bucket.requested).not.toContain(fullSubsetKey);
   });
 
+  it("prioriza fragmentos mensuales sobre el lake en las consultas públicas de gastos", async () => {
+    const monthPath = "data/lake-subsets/expense-periods/gastos_camara/2026-06.json";
+    const monthKey = "subsets/expense-periods/gastos_camara/2026-06.json";
+    const lakeKey = "partitions/gastos_camara/2026/06/records.jsonl.gz";
+    const monthlyRow = {
+      id: "camera-june-monthly",
+      fecha: "2026-06-15",
+      periodo: "2026-06",
+      nombre: "Diputada Junio",
+      item: "Traslado",
+      monto_clp: 1000,
+      url: "https://example.test/camera-june",
+      fuente: "Cámara",
+    };
+    const lake = gzipJsonl([{
+      id: monthlyRow.id,
+      sourceId: "gastos_camara",
+      kind: "expense",
+      occurredAt: monthlyRow.fecha,
+      data: { title: monthlyRow.item },
+    }]);
+    const partitionManifestKey = "partitions/gastos_camara/2026/06/manifest.json";
+    const partition = {
+      sourceId: "gastos_camara",
+      period: "2026-06",
+      recordCount: 1,
+      manifestKey: partitionManifestKey,
+      checksumSha256: "june",
+      releaseTag: "test",
+      manifest: {
+        projectionChecksumSha256: "projection",
+        artifacts: [{ key: lakeKey, checksumSha256: sha256(lake), releaseAssetName: "june" }],
+      },
+    };
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": { generatedAt: "2026-09-27T00:00:00Z", partitions: [partition] },
+      [partitionManifestKey]: partition.manifest,
+      [lakeKey]: lake,
+      "projections/static-site-v1/manifest.json": {
+        files: [
+          { path: "data/lake-subsets/expense-periods/manifest.json", key: "subsets/expense-periods/manifest.json" },
+          { path: monthPath, key: monthKey, sourceId: "gastos_camara", period: "2026-06", recordCount: 1 },
+        ],
+      },
+      "subsets/expense-periods/manifest.json": {
+        schemaVersion: 1,
+        dataset: "gastos-operacionales-por-periodo",
+        generatedAt: "2026-09-27T00:00:00Z",
+        sources: [{ sourceId: "gastos_camara", periods: [{ period: "2026-06", path: monthPath, recordCount: 1 }] }],
+      },
+      [monthKey]: {
+        sourceId: "gastos_camara",
+        period: "2026-06",
+        recordCount: 1,
+        records: [monthlyRow],
+      },
+    });
+
+    const response = await worker.fetch(
+      new Request("https://example.test/api/v1/records?source=gastos_camara&kind=expense&period=2026-06&limit=10"),
+      { PUBLIC_DATA: bucket as never } as never,
+    );
+    const payload = await response.json() as { data: Array<{ id: string }>; meta: Record<string, unknown> };
+
+    expect(response.status).toBe(200);
+    expect(payload.meta).toMatchObject({ total: 1, sourceBackend: "r2-months" });
+    expect(payload.data.map((row) => row.id)).toEqual([monthlyRow.id]);
+    expect(bucket.requested).not.toContain(lakeKey);
+  });
+
   it("pagina el histórico por mes y no descarga meses anteriores al completar la página", async () => {
     const julyPath = "data/lake-subsets/expense-periods/gastos_senado/2026-07.json";
     const junePath = "data/lake-subsets/expense-periods/gastos_senado/2026-06.json";

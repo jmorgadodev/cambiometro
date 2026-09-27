@@ -2484,6 +2484,13 @@ export default {
         const expenseSource = url.searchParams.get("source")?.startsWith("gastos_");
         const expenseKind = url.searchParams.get("kind") === "expense";
         if (expenseSource || expenseKind) {
+          // Prefer bounded month shards whenever their index is published.
+          // The canonical lake path can otherwise turn one monthly request
+          // into a wide historical scan and hit the Worker CPU limit.
+          const r2 = await listExpensesFromR2(url, env);
+          const r2Payload = r2 ? await r2.clone().json().catch(() => null) as { meta?: JsonRecord } | null : null;
+          if (r2 && r2Payload?.meta?.sourceBackend === "r2-months") return r2;
+
           // El lake es la proyección canónica y puede contener más histórico
           // que el subconjunto estático usado como respaldo de compatibilidad.
           // Sólo usamos el subconjunto si el lake no tiene filas publicadas;
@@ -2494,7 +2501,6 @@ export default {
             const lakePayload = lake ? await lake.clone().json().catch(() => null) as { meta?: JsonRecord } | null : null;
             if (lake && lakePayload?.meta?.sourceBackend === "r2-lake" && Number(lakePayload.meta.publishedRows ?? 0) > 0) return lake;
           }
-          const r2 = await listExpensesFromR2(url, env);
           if (r2) return r2;
         }
         // Any source with a published R2 snapshot must be served from that
