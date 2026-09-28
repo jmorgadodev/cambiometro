@@ -661,3 +661,44 @@ identificar cómo el ETL define períodos e IDs, cotejar estos candidatos con
 manifiestos/filas originales disponibles y localizar una fuente oficial
 verificable para el resto de agosto. No se ejecutó el ETL, no se descargaron
 informes/documentos y no se escribieron objetos R2 o filas D1.
+
+### Recuperación automática del último corte disponible de ChileCompra — 28-09-2026
+
+La automatización semanal usaba el mes calendario actual como período de
+ingesta. El 21-09 la fuente respondió 403/vacío y la guardia evitó publicar un
+release vacío, pero el workflow no retrocedió al último mes con datos. Una
+verificación acotada de la API oficial confirmó listados de julio de 2026
+(8.004 licitaciones, 9.361 tratos directos y 17.364 convenios), mientras que
+el catálogo R2 consultado aún sólo tenía una partición publicada de junio.
+Agosto y septiembre respondían “No se encontraron resultados”. Se repitió
+esta consulta el 28-09-2026 desde el selector implementado: eligió julio con
+los mismos tres totales; una lectura de sólo el manifiesto R2 confirmó que la
+partición publicada sigue siendo únicamente junio (74.142 registros y el
+checksum declarado). No se leyeron filas R2 ni se cargó el período julio.
+
+En la rama `codex/r2-catalog-reference-audit-20260928` se preparó un selector
+que prueba los tres listados mensuales oficiales y elige el período más
+reciente con datos que no figure como partición publicada. Si el origen no
+tiene registros nuevos, el workflow omite íntegramente ingesta y publicación
+y conserva el release vigente. Una respuesta HTTP no exitosa o un JSON de
+esquema inválido causa error; no se interpreta como cero. Si se especifica un
+mes manualmente, se respeta esa selección. Se mantiene el preflight D1 y la
+materialización continúa limitada a `workflow_dispatch`.
+
+El selector incluye cinco pruebas: retroceso hasta julio disponible,
+preferencia por el mes actual con datos, no reingesta de períodos anteriores
+ya publicados, fallo ante respuesta inválida y rechazo de una respuesta que
+declara resultados pero devuelve la primera página vacía. La suite completa
+pasó con 245 archivos y 1.314 pruebas; el YAML del workflow parsea y
+`git diff --check` está limpio. El ETL no se ha ejecutado y no hubo escrituras
+R2/D1. Este cambio no está aún integrado ni desplegado; debe validarse en
+Actions y comprobar el corte resultante antes de considerar resuelta la
+actualización automática.
+
+El build completo local continúa bloqueado antes del preview por
+`STATIC_DATA_FULL_TRANSFER_SOURCE_MISSING`: este checkout carece del release
+canónico paginado completo de Ley 19.862. No se descargó ese universo para
+desbloquear el build y no se escribió en R2. Las correcciones DIPRES y
+ChileCompra no deben promoverse como una release completa de Pages mientras
+no se resuelva ese prerrequisito o se valide un build en un entorno que ya
+contenga el release íntegro.

@@ -53,18 +53,29 @@ jobs:
         working-directory: transparencia-app
         run: npm run etl:prepare
 
+      - name: Seleccionar último período con datos oficiales no publicado
+        id: source-period
+        working-directory: transparencia-app
+        env:
+          INPUT_YEAR: ${{ inputs.year }}
+          INPUT_MONTH: ${{ inputs.month }}
+        run: node scripts/select-chilecompra-period.mjs
+
+      - name: Omitir publicación si el origen no tiene un nuevo corte
+        if: steps.source-period.outputs.has_records != 'true'
+        run: echo "::notice::ChileCompra no publica todavía un mes nuevo con registros; se conserva íntegro el último release válido."
+
       - name: Ingerir y proyectar ChileCompra OCDS
+        if: steps.source-period.outputs.has_records == 'true'
         working-directory: transparencia-app
         env:
           GH_TOKEN: ${{ github.token }}
-          INPUT_YEAR: ${{ inputs.year }}
-          INPUT_MONTH: ${{ inputs.month }}
+          INPUT_YEAR: ${{ steps.source-period.outputs.year }}
+          INPUT_MONTH: ${{ steps.source-period.outputs.month }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: |
-          target_year="${INPUT_YEAR:-$(date -u +%Y)}"
-          target_month="${INPUT_MONTH:-$((10#$(date -u +%m)))}"
-          npm run ingest:chilecompra -- --year "$target_year" --month "$target_month" --concurrency 24 --rate 5
+          npm run ingest:chilecompra -- --year "$INPUT_YEAR" --month "$INPUT_MONTH" --concurrency 24 --rate 5
           npm run data:lake:projection:chilecompra
           npm run data:build:subsets
           # Validate all ChileCompra static artifacts before any lake/catalog write to R2.
@@ -72,6 +83,7 @@ jobs:
           npm run data:publish
 
       - name: Publicar entradas estáticas versionadas para Pages
+        if: steps.source-period.outputs.has_records == 'true'
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -79,6 +91,7 @@ jobs:
         run: npm run data:publish:static -- --groups chilecompra
 
       - name: Refrescar catálogo maestro antes de materializar
+        if: steps.source-period.outputs.has_records == 'true'
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -87,6 +100,7 @@ jobs:
           npx wrangler r2 object get transparencia-public-data/catalog/v1/manifest.json --file data/lake/catalog/v1/manifest.json --remote
 
       - name: Preflight de cuota D1 antes de materializar
+        if: steps.source-period.outputs.has_records == 'true'
         id: d1-quota
         uses: ./.github/actions/d1-preflight
         with:
@@ -97,7 +111,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
 
       - name: Materializar D1 y registrar ejecución
-        if: github.event_name == 'workflow_dispatch' && steps.d1-quota.outputs.proceed == 'true'
+        if: github.event_name == 'workflow_dispatch' && steps.d1-quota.outputs.proceed == 'true' && steps.source-period.outputs.has_records == 'true'
         working-directory: transparencia-app
         env:
           GH_TOKEN: ${{ github.token }}
@@ -107,7 +121,7 @@ jobs:
         run: npm run data:materialize:optional -- --database transparencia-db --remote --skip-unchanged --sources chilecompra
 
       - name: Registrar D1 pospuesto por cuota
-        if: steps.d1-quota.outputs.proceed != 'true'
+        if: steps.source-period.outputs.has_records == 'true' && steps.d1-quota.outputs.proceed != 'true'
         run: echo "::warning::D1 de ChileCompra pospuesto por cuota alta o métrica ilegible; R2/Pages conserva el release canónico."
 
       - name: Conservar diagnóstico de preflight D1
