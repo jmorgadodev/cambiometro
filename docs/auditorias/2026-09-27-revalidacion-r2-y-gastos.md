@@ -485,7 +485,11 @@ válidos. El preview nuevo informa el total esperado de 310 pero mantiene el
 estado parcial; el endpoint sin filtro reserva las 35 posiciones ausentes, por
 lo que las primeras páginas quedan vacías y la primera página legible comienza
 en offset 35. Se endureció el smoke para validar explícitamente el total
-esperado y la paginación de julio con IDs reales; falta repetirlo tras publicar
-esa prueba corregida. No se escribieron objetos R2 ni filas D1, ni se promovió
-producción. La restauración del release de agosto sólo debe intentarse después
-de comprobar una copia exacta y el margen de almacenamiento de R2.
+esperado y la paginación de julio con IDs reales. La segunda ejecución
+(`36382131945`) pasó: total esperado 310 estable, 62 filas publicadas en julio,
+estado parcial y cuatro IDs distintos entre dos páginas reales; preview versión
+`7427aa94-2c02-4fe8-baa2-bed8a8a8ff9b`. No se escribieron objetos R2 ni filas
+D1, ni se promovió producción. La restauración del release de agosto sólo debe
+intentarse después de comprobar una copia exacta y el margen de almacenamiento
+de R2; la página pública debe seguir indicando que los registros consultables
+son parciales hasta resolverlo.
