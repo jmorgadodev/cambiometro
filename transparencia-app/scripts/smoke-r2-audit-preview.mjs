@@ -18,7 +18,30 @@ async function page(offset, period) {
   return response.json();
 }
 
-const first = await page(0);
+async function waitForPublishedAvailablePage(timeoutMs = 45_000) {
+  const deadline = Date.now() + timeoutMs;
+  let lastMeta = null;
+  while (Date.now() < deadline) {
+    const response = await page(0);
+    lastMeta = response.meta ?? {};
+    if (
+      lastMeta.sourceBackend === "r2-lake" &&
+      lastMeta.totalScope === "published-available" &&
+      (response.data ?? []).length > 0
+    ) {
+      return response;
+    }
+    // A newly deployed workers.dev version can briefly serve the previous
+    // edge version. Poll the actual API contract instead of sleeping a fixed
+    // amount, and keep a firm bound so a bad deployment still fails quickly.
+    await new Promise((resolve) => setTimeout(resolve, 3_000));
+  }
+  throw new Error(
+    `El preview no alcanzó published-available en ${timeoutMs}ms; último meta: ${JSON.stringify(lastMeta)}.`,
+  );
+}
+
+const first = await waitForPublishedAvailablePage();
 const second = await page(2);
 const julyFirst = await page(0, "2026-07");
 const julySecond = await page(2, "2026-07");
