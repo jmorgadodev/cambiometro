@@ -252,6 +252,7 @@ const originalAssets = [{
 const plan = buildLakePlan(snapshot, {
   sourceInventory,
   existingCatalog,
+  preserveExistingPartitionCountsFor: ["contraloria"],
   originalAssets,
   sourceMetadata: {
     contraloria: {
