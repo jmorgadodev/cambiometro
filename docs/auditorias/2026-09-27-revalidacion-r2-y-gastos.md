@@ -613,13 +613,21 @@ subset, no evidencia de que falten 156 filas en la proyección completa.
 
 La página y el workflow prefieren/hidratan la proyección completa, por lo que
 el número 320 no se considera el conteo productivo activo de la vista normal.
-Sin embargo, el subset de fallback no respeta el contrato de `count` y su
-total declarado es incorrecto. Se cambió localmente el generador para
-establecer `count` como las 60 filas incluidas y `totalPrograms` como el
-conteo completo verificado; se añadieron tres pruebas para cero, derivación y
-discrepancia. Las pruebas pasan, pero no se re-generó ni publicó el artefacto
-estático existente. El release de proyección DIPRES fue generado el
-21-08-2026; su frescura y últimos períodos requieren auditoría aparte.
+sin embargo, el subset remoto de fallback no respeta el contrato de `count` y
+su total declarado es incorrecto. Se descargó por una lectura R2 el único
+artefacto completo y acotado de DIPRES (987.514 bytes): sus 476 programas tienen
+476 IDs distintos. Los 60 registros del fallback local tienen IDs y campos
+compactados que coinciden exactamente con esos programas. Se regeneraron sólo
+los metadatos del fallback local (`count=60`, `totalPrograms=476`), sin cambiar
+sus filas, y una prueba de regresión exige que el conteo del subset coincida
+con las filas disponibles y no supere el universo. Las cuatro pruebas de
+`presupuesto-subset.test.mjs` y `typecheck` pasan. El objeto en R2 sigue intacto
+y aún no se promovió una nueva versión. El release completo DIPRES es del
+21-08-2026, así que su frescura y últimos períodos siguen pendientes. El build
+Pages local se detuvo en `STATIC_DATA_FULL_TRANSFER_SOURCE_MISSING`: este
+worktree no incluye el release canónico completo de Ley 19.862. No se hidrató
+ese universo para evitar una descarga no acotada; por eso el cambio aún
+requiere un preview con sus datos completos antes de publicar.
 
 ### API oficial del Geoportal municipal, validación acotada — 28-09-2026
 

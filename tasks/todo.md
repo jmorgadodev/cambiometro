@@ -42,15 +42,18 @@
   cotejar IDs/documentos y localizar evidencia oficial para las otras filas;
   no sumar automáticamente estos 3 registros ni declarar recuperado el corte.
 
-- [ ] **DIPRES — 75% técnico (3/4 controles):** el manifest estático R2
+- [ ] **DIPRES — 80% técnico:** el manifest estático R2
   productivo referencia la proyección completa correcta (476 filas, 476 IDs
   distintos, checksum válido), pero el subset de 60 filas publica
-  `totalPrograms: 320` y omite `count`. La aplicación y el workflow usan la
-  proyección completa; el total 320 es un defecto del fallback, no el conteo
-  de la vista normal. El generador ya fue corregido localmente para `count=60`
-  disponible y `totalPrograms=476`, con 3 pruebas verdes. Pendiente integrar,
-  regenerar el artefacto y probar preview; además revisar frescura/períodos
-  porque la proyección fue generada el 21-08-2026. No se escribió R2.
+  `totalPrograms: 320` y omite `count`. La aplicación usa la proyección
+  completa cuando está disponible; el total 320 es un defecto del fallback,
+  no la cobertura de la vista normal. Se confirmó que los 60 registros del
+  fallback local coinciden exactamente con 60 programas de la proyección R2
+  completa (476 IDs únicos); el artefacto local ahora declara `count=60` y
+  `totalPrograms=476`, con prueba de regresión (4 pruebas verdes) y `typecheck`.
+  Pendiente probarlo en preview y revisar frescura/períodos: la proyección es
+  del 21-08-2026. El build local se detuvo porque falta hidratar el release
+  canónico completo de Ley 19.862; no se descargó ni escribió R2.
 
 ## Estado de cierre actualizado — 25-09-2026
 
