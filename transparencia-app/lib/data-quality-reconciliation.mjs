@@ -10,6 +10,7 @@ export function reconcileSourceCounts({ source, healthEntry, catalogEntry, trans
   const configuredCanonicalCount = safeCount(source.canonicalCount);
   const configuredHistoricalCount = safeCount(source.historicalCount);
   const observedCount = safeCount(healthEntry?.recordCount);
+  const catalogCount = safeCount(catalogEntry?.recordCount);
   const publishedTransferRows = safeCount(transferRows);
   const isTransferRelease = source.id === "ley-19862" && publishedTransferRows !== null;
   const canonicalCount = isTransferRelease
@@ -19,9 +20,10 @@ export function reconcileSourceCounts({ source, healthEntry, catalogEntry, trans
     ? publishedTransferRows
     : configuredHistoricalCount ?? canonicalCount;
   const scopeMismatch = !isTransferRelease
-    && observedCount !== null
-    && configuredCanonicalCount !== null
-    && observedCount !== configuredCanonicalCount;
+    && ((observedCount !== null
+      && configuredCanonicalCount !== null
+      && observedCount !== configuredCanonicalCount)
+      || (catalogCount !== null && configuredCanonicalCount !== null && catalogCount !== configuredCanonicalCount));
   const comparisonEligible = isTransferRelease || (observedCount !== null && !scopeMismatch);
   const state = isTransferRelease
     ? "release_override"
@@ -41,7 +43,7 @@ export function reconcileSourceCounts({ source, healthEntry, catalogEntry, trans
     : [];
   const components = rawComponents.length > 0 ? Object.fromEntries(rawComponents) : null;
   const note = state === "scope_mismatch"
-    ? `El release observado informa ${observedCount.toLocaleString("es-CL")} registros; la referencia histórica declarada es ${configuredCanonicalCount.toLocaleString("es-CL")}. No se calcula cobertura hasta reconciliar el alcance.`
+    ? `Los conteos no coinciden: observado ${observedCount?.toLocaleString("es-CL") ?? "sin dato"}, catálogo ${catalogCount?.toLocaleString("es-CL") ?? "sin dato"} y referencia ${configuredCanonicalCount?.toLocaleString("es-CL") ?? "sin dato"}. No se calcula cobertura hasta reconciliar el alcance.`
     : state === "configured_only"
       ? "No hay un snapshot de salud asociado a este build; se conserva la referencia configurada y no se infiere cobertura vigente."
       : state === "release_override"
@@ -58,7 +60,7 @@ export function reconcileSourceCounts({ source, healthEntry, catalogEntry, trans
       configuredCanonicalCount,
       configuredHistoricalCount,
       observedCount,
-      catalogCount: safeCount(catalogEntry?.recordCount),
+      catalogCount,
       components,
       note,
     },

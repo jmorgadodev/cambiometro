@@ -16,7 +16,7 @@ export interface DataQualitySourceRow {
   canonicalCount: number;
   historicalCount: number;
   catalogDeclaredCount: number | null;
-  publicHistoricalCount: number;
+  publicHistoricalCount: number | null;
   periodoReciente: string;
   desfase: string;
   coberturaDetalle: string;
@@ -41,8 +41,8 @@ export interface DataQualitySummary {
   coberturaMunicipalAlDia: number;
   coberturaMunicipalTotal: number;
   guardsCriticos: number;
-  totalRegistrosCanonicos: number;
-  totalRegistrosHistoricos: number;
+  totalRegistrosCanonicos: number | null;
+  totalRegistrosHistoricos: number | null;
   releaseVersion: string;
   releaseChecksum: string;
   ultimaValidacionIso: string;

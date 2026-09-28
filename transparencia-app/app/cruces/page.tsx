@@ -42,7 +42,6 @@ export default async function CrossesPage() {
   const infolobby = leerInfoLobbyV1();
   const ley19862 = getLey19862Summary();
   const { sources: qualitySources } = await getDataQualityDashboardData();
-  const cgrCanonicalCount = SOURCE_CANONICAL_COUNTS.contraloria;
   const chilecompraCanonicalCount = SOURCE_CANONICAL_COUNTS.chilecompra;
   const chilecompraSummary = getChileCompraResumen(5);
   const chilecompraQuality = qualitySources.find((source) => source.id === "chilecompra");
@@ -69,6 +68,7 @@ export default async function CrossesPage() {
       : null;
 
   const cgrIndexedCount = contraloria?.records.length ?? 0;
+  const cgrAvailableCount = cgrIndexedCount;
   const infolobbyIndexedCount = infolobby?.count ?? 0;
   const cgrReference = CRUCES_CGR_MUESTRA[0];
   const infolobbyReference = CRUCES_INFOLOBBY_MUESTRA[0];
@@ -122,9 +122,9 @@ export default async function CrossesPage() {
 
             {/* KPI 2 */}
             <div className="stat-tile stat-tile--ok">
-              <div className="stat-tile__value">{cgrCanonicalCount.toLocaleString("es-CL")}</div>
+              <div className="stat-tile__value">{cgrAvailableCount.toLocaleString("es-CL")}</div>
               <div className="stat-tile__label">Auditorías CGR</div>
-              <div className="stat-tile__hint">Universo canónico · {cgrIndexedCount.toLocaleString("es-CL")} informes indexados en esta vista</div>
+              <div className="stat-tile__hint">Informes incluidos en esta vista; el total disponible se muestra en el explorador de registros</div>
             </div>
 
             {/* KPI 3: el conteo canónico es estable; el monto sólo se muestra si
@@ -155,7 +155,7 @@ export default async function CrossesPage() {
           records={<CrucesSourceRecords counts={{
             chilecompra: chilecompraCanonicalCount,
             infolobby: infolobbyCanonicalCount,
-            contraloria: cgrCanonicalCount,
+            contraloria: cgrAvailableCount,
             infoprobidad: SOURCE_CANONICAL_COUNTS.infoprobidad,
           }} />}
         />
@@ -244,7 +244,7 @@ export default async function CrossesPage() {
             <div className="card" style={{ padding: "1.25rem", background: "var(--surface)", borderColor: "var(--border)" }}>
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem" }}>
                 <span style={{ fontSize: "1.3rem" }}>⚖️</span>
-                 <span className="badge badge-ok">{cgrCanonicalCount.toLocaleString("es-CL")} informes</span>
+                 <span className="badge badge-ok">{cgrAvailableCount.toLocaleString("es-CL")} informes en esta vista</span>
               </div>
               <strong style={{ fontSize: "0.95rem", color: "var(--text-primary)", display: "block" }}>
                 Contraloría General (CGR)

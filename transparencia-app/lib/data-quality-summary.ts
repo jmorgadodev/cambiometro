@@ -59,7 +59,7 @@ export interface DataQualitySourceSummary {
   /** Rows declared by the latest public catalog before index reconciliation, when available. */
   catalogDeclaredCount?: number;
   /** Rows present in the published R2 catalog across its available partitions. */
-  publicHistoricalCount: number;
+  publicHistoricalCount: number | null;
   lastSuccessAt: string | null;
   checksumSha256: string | null;
   status: DataQualityStatus;
@@ -83,8 +83,8 @@ export interface DataQualitySummary {
   schemaVersion: 1;
   generatedAt: string;
   sourceCount: number;
-  totalCanonicalRecords: number;
-  totalHistoricalRecords: number;
+  totalCanonicalRecords: number | null;
+  totalHistoricalRecords: number | null;
   totalRelatedRecords: number | null;
   globalKpiRecords?: number | null;
   manifestChecksumSha256?: string;
@@ -152,14 +152,16 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
     const catalogEntry = catalogSources.find((entry) => entry && typeof entry === "object" && (entry as JsonObject).id === source.id);
     const catalogRecord = catalogEntry && typeof catalogEntry === "object" ? catalogEntry as JsonObject : {};
     const observedCount = safeCount(healthRecord.recordCount);
+    const catalogCount = safeCount(catalogRecord.recordCount);
     const configuredCanonicalCount = safeCount(source.canonicalCount);
     const isTransferRelease = source.id === "ley-19862";
     const canonicalCount = isTransferRelease ? transfer.totalRows : source.canonicalCount;
     const historicalCount = isTransferRelease ? transfer.totalRows : source.historicalCount;
     const scopeMismatch = !isTransferRelease
-      && observedCount !== null
-      && configuredCanonicalCount !== null
-      && observedCount !== configuredCanonicalCount;
+      && ((observedCount !== null
+        && configuredCanonicalCount !== null
+        && observedCount !== configuredCanonicalCount)
+        || (catalogCount !== null && configuredCanonicalCount !== null && catalogCount !== configuredCanonicalCount));
     const reconciliationState: SourceReconciliationState = isTransferRelease
       ? "release_override"
       : observedCount === null
@@ -175,8 +177,9 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
       }
     }
     const components = componentEntries.length > 0 ? Object.fromEntries(componentEntries) : null;
+    const catalogMatchesConfigured = catalogCount !== null && catalogCount === configuredCanonicalCount;
     const reconciliationNote = reconciliationState === "scope_mismatch"
-      ? `El snapshot observado informa ${observedCount!.toLocaleString("es-CL")} registros; la referencia configurada es ${configuredCanonicalCount!.toLocaleString("es-CL")}. No se calcula cobertura hasta reconciliar el alcance.`
+      ? `Los conteos no coinciden: observado ${observedCount?.toLocaleString("es-CL") ?? "sin dato"}, catálogo ${catalogCount?.toLocaleString("es-CL") ?? "sin dato"} y referencia ${configuredCanonicalCount?.toLocaleString("es-CL") ?? "sin dato"}. No se calcula cobertura hasta reconciliar el alcance.`
       : reconciliationState === "release_override"
         ? "El conteo proviene del release vigente validado para esta fuente."
         : reconciliationState === "configured_only"
@@ -197,7 +200,8 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
     canonicalCount,
     historicalCount,
     catalogDeclaredCount: source.catalogDeclaredCount,
-    publicHistoricalCount: source.publicHistoricalCount ?? canonicalCount,
+    publicHistoricalCount: source.publicHistoricalCount
+      ?? (catalogMatchesConfigured ? configuredCanonicalCount : scopeMismatch ? null : canonicalCount),
     lastSuccessAt: null,
     checksumSha256: null,
     status: source.canonicalCount > 0 ? "parcial" : "no_disponible" as DataQualityStatus,
@@ -206,7 +210,7 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
     derived: source.derived,
     metrics: {
       published: coverageMetric(null, null),
-      queryable: coverageMetric(source.id === "ley-19862" ? transfer.totalRows : source.queryableCount, canonicalCount),
+      queryable: coverageMetric(scopeMismatch ? null : source.id === "ley-19862" ? transfer.totalRows : source.queryableCount, scopeMismatch ? null : canonicalCount),
       related: coverageMetric(source.relatedCount, canonicalCount),
     },
     quality: source.qualityObservations,
@@ -216,24 +220,29 @@ export function buildFallbackDataQualitySummary(): DataQualitySummary {
       configuredCanonicalCount,
       configuredHistoricalCount: source.historicalCount,
       observedCount,
-      catalogCount: safeCount(catalogRecord.recordCount),
+      catalogCount,
       components,
       note: reconciliationNote,
     },
     qualityAudit: source.qualityAudit as QualityAuditSnapshot | undefined,
     });
   });
-  const totalCanonicalRecords = sources.reduce((sum, source) => sum + source.canonicalCount, 0);
-  const totalHistoricalRecords = sources.reduce((sum, source) => sum + source.historicalCount, 0);
+  const allSourceCountsReconciled = sources.every((source) => source.reconciliation.comparisonEligible);
+  const totalCanonicalRecords = allSourceCountsReconciled
+    ? sources.reduce((sum, source) => sum + source.canonicalCount, 0)
+    : null;
+  const totalHistoricalRecords = allSourceCountsReconciled
+    ? sources.reduce((sum, source) => sum + source.historicalCount, 0)
+    : null;
   const relatedSources = sources.filter((source) => source.metrics.related.count !== null);
   const totalRelatedRecords = relatedSources.length
     ? relatedSources.reduce((sum, source) => sum + (source.metrics.related.count ?? 0), 0)
     : null;
   const queryableSources = sources.filter((source) => source.metrics.queryable.count !== null);
-  const queryableCount = queryableSources.length
+  const queryableCount = allSourceCountsReconciled && queryableSources.length
     ? queryableSources.reduce((sum, source) => sum + (source.metrics.queryable.count ?? 0), 0)
     : null;
-  const queryableDenominator = queryableSources.length
+  const queryableDenominator = allSourceCountsReconciled && queryableSources.length
     ? queryableSources.reduce((sum, source) => sum + source.canonicalCount, 0)
     : null;
   return {

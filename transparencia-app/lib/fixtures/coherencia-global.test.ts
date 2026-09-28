@@ -24,10 +24,10 @@ describe("Blindaje Anti-Regresión — Coherencia Global del Sitio", () => {
       expect(sources.length).toBe(13);
     });
 
-    it("La suma de conteos canónicos por fuente coincide exactamente con el resumen del dashboard de calidad", async () => {
+    it("No agrega conteos de fuentes cuando existe una diferencia de alcance sin resolver", async () => {
       const { summary, sources } = await getDataQualityDashboardData();
-      const canonicalSum = sources.reduce((sum, source) => sum + source.canonicalCount, 0);
-      expect(summary.totalRegistrosCanonicos).toBe(canonicalSum);
+      expect(summary.totalRegistrosCanonicos).toBeNull();
+      expect(summary.totalRegistrosHistoricos).toBeNull();
       expect(summary.metrics.published.label).toBe("No calculable");
       expect(sources.some((source) => source.reconciliation.state === "scope_mismatch")).toBe(true);
       expect(GLOBAL_KPIS.registros_canonicos).toBe(1753013);

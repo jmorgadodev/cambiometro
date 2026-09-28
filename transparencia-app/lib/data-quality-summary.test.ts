@@ -6,7 +6,8 @@ describe("manifiesto unificado de calidad de datos", () => {
     const summary = buildFallbackDataQualitySummary();
     expect(getDataQualityConfig()).toHaveLength(13);
     expect(summary.sourceCount).toBe(13);
-    expect(summary.totalCanonicalRecords).toBeGreaterThan(1_400_000);
+    expect(summary.totalCanonicalRecords).toBeNull();
+    expect(summary.totalHistoricalRecords).toBeNull();
     expect(summary.globalKpiRecords ?? null).toBeNull();
     expect(summary.metrics.published.label).toBe("No calculable");
   });
@@ -54,5 +55,19 @@ describe("manifiesto unificado de calidad de datos", () => {
     expect(source?.publicHistoricalCount).toBe(15_689);
     expect(source?.publicHistoricalCount).toBeLessThan(source?.catalogDeclaredCount ?? 0);
     expect((source?.catalogDeclaredCount ?? 0) - (source?.publicHistoricalCount ?? 0)).toBe(231_598);
+  });
+
+  it("no anuncia conteos ni cobertura de Contraloría cuando el catálogo discrepa del snapshot", () => {
+    const source = buildFallbackDataQualitySummary().sources.find((item) => item.id === "contraloria");
+
+    expect(source?.reconciliation).toMatchObject({
+      state: "scope_mismatch",
+      comparisonEligible: false,
+      observedCount: 291,
+      catalogCount: 310,
+    });
+    expect(source?.publicHistoricalCount).toBeNull();
+    expect(source?.metrics.published.label).toBe("No calculable");
+    expect(source?.metrics.queryable.label).toBe("No calculable");
   });
 });

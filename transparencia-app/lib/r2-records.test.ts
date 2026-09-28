@@ -195,7 +195,7 @@ describe("registros calientes de R2", () => {
     expect(result?.data[0]?.id).toBe("camara-1");
   });
 
-  it("mantiene estable el total esperado al paginar una fuente con particiones faltantes", async () => {
+  it("pagina primero los registros disponibles cuando falta una partición reciente", async () => {
     const records = gzipText([
       { id: "contraloria-1", sourceId: "contraloria", kind: "audit", occurredAt: "2026-09-03", data: {} },
       { id: "contraloria-2", sourceId: "contraloria", kind: "audit", occurredAt: "2026-09-02", data: {} },
@@ -222,16 +222,14 @@ describe("registros calientes de R2", () => {
 
     const firstPage = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 1 });
     const secondPage = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 1, cursor: "v1_1" });
-    const gapPage = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 1, cursor: "v1_2" });
-    const afterGapPage = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 1, cursor: "v1_3" });
-    const olderPage = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 1, cursor: "v1_5" });
+    const thirdPage = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 1, cursor: "v1_2" });
+    const fourthPage = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 1, cursor: "v1_3" });
 
-    expect(firstPage).toMatchObject({ total: 7, totalScope: "catalog-expected", expectedTotal: 7, complete: false, missingPartitions: 1 });
-    expect(secondPage).toMatchObject({ total: 7, totalScope: "catalog-expected", expectedTotal: 7, complete: false, missingPartitions: 1 });
-    expect(gapPage).toMatchObject({ total: 7, nextCursor: "v1_3", missingPartitions: 1 });
-    expect(gapPage?.data).toEqual([]);
-    expect(afterGapPage?.data).toEqual([]);
-    expect(olderPage?.data.map((record) => record.id)).toEqual(["contraloria-older-1"]);
+    expect(firstPage).toMatchObject({ total: 4, totalScope: "published-available", expectedTotal: 7, complete: false, missingPartitions: 1 });
+    expect(secondPage).toMatchObject({ total: 4, totalScope: "published-available", expectedTotal: 7, complete: false, missingPartitions: 1 });
+    expect(thirdPage?.data.map((record) => record.id)).toEqual(["contraloria-older-1"]);
+    expect(fourthPage?.data.map((record) => record.id)).toEqual(["contraloria-older-2"]);
+    expect(fourthPage?.nextCursor).toBeNull();
     expect(firstPage?.data.map((record) => record.id)).toEqual(["contraloria-1"]);
     expect(secondPage?.data.map((record) => record.id)).toEqual(["contraloria-2"]);
   });

@@ -32,15 +32,17 @@ const ids = [...(julyFirst.data ?? []), ...(julySecond.data ?? [])].map(
 
 if (a.sourceBackend !== "r2-lake" || b.sourceBackend !== "r2-lake")
   throw new Error("La consulta no se atendió desde el lago R2.");
-if (a.totalScope !== "catalog-expected" || b.totalScope !== "catalog-expected")
-  throw new Error("El total no declara el alcance esperado del catálogo.");
+if (a.totalScope !== "published-available" || b.totalScope !== "published-available")
+  throw new Error("El total no declara el alcance de registros disponibles.");
 if (
   a.total !== b.total ||
-  a.total !== a.expectedRows ||
-  b.total !== b.expectedRows
+  a.total > a.expectedRows ||
+  b.total > b.expectedRows ||
+  !(first.data ?? []).length ||
+  !(second.data ?? []).length
 )
   throw new Error(
-    "El total/expectedRows cambia entre páginas o no coincide con el catálogo.",
+    "El total disponible cambia/supera el esperado o la primera página está vacía pese a existir particiones disponibles.",
   );
 if (a.nextCursor !== "v1_2" || b.nextCursor !== "v1_4")
   throw new Error("Los cursores no avanzan de forma estable.");
@@ -70,6 +72,7 @@ console.log(
       sourceBackend: a.sourceBackend,
       total: a.total,
       expectedRows: a.expectedRows,
+      totalScope: a.totalScope,
       publishedRows: julyA.publishedRows,
       sourceStatus: a.sourceStatus,
       missingPartitions: a.missingPartitions,

@@ -1570,11 +1570,11 @@ describe("API canónica v1", () => {
       sourceStatus: "partial",
       publishedRows: 1,
       expectedRows: 2,
-      // Pagination uses the stable expected positions in the catalog. The
-      // partial status and publishedRows keep missing evidence explicit.
-      total: 2,
-      totalScope: "catalog-expected",
-      totalPages: 2,
+      // Missing release partitions do not create empty page slots; expectedRows
+      // remains the independent catalog denominator.
+      total: 1,
+      totalScope: "published-available",
+      totalPages: 1,
     });
     expect(payload.data[0].id).toBe("camara-lake-available");
   });

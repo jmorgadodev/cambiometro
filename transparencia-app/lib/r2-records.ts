@@ -411,6 +411,11 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
     .filter((partition) => !partition.manifestKey || partition.checksumSha256 === "missing")
     .map((partition) => partition.id));
   let missingPartitions = knownMissingPartitionIds.size;
+  let unavailableRows = orderedPartitions.reduce((total, partition) => {
+    if (!knownMissingPartitionIds.has(partition.id)) return total;
+    const count = Number(partition.recordCount);
+    return total + (Number.isSafeInteger(count) && count >= 0 ? count : 0);
+  }, 0);
   let missingArtifacts = 0;
   let scannedAll = true;
   for (const partition of orderedPartitions) {
@@ -422,7 +427,6 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
       ? Number(partition.recordCount)
       : null;
     if (knownMissingPartitionIds.has(partition.id)) {
-      if (!hasFilters && partitionExpectedRows !== null) matched += partitionExpectedRows;
       continue;
     }
     const result = await readPartitionRecords(
@@ -433,14 +437,14 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
     );
     if (!result) {
       missingPartitions += 1;
-      if (!hasFilters && partitionExpectedRows !== null) matched += partitionExpectedRows;
+      if (partitionExpectedRows !== null) unavailableRows += partitionExpectedRows;
       continue;
     }
     loadedRows += result.loadedRows;
     missingArtifacts += result.missingArtifacts;
     if (result.incomplete) {
       missingPartitions += 1;
-      if (!hasFilters && partitionExpectedRows !== null) matched += partitionExpectedRows;
+      if (partitionExpectedRows !== null) unavailableRows += partitionExpectedRows;
       continue;
     }
     for (const record of result.records) {
@@ -448,28 +452,23 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
       if (matched >= offset && matched < offset + limit && data.length < limit) data.push(record);
       matched += 1;
     }
-    // Unfiltered offsets are positions in the catalog's expected release, not
-    // just in the subset of readable objects. Reserve missing rows in their
-    // chronological slot so later cursors neither repeat nor skip records.
+    // Unfiltered offsets are positions in the readable result set. Missing
+    // partitions are excluded from the cursor sequence so users never have to
+    // page through empty slots before reaching the next available month.
     if (!hasFilters && partitionExpectedRows !== null && result.records.length < partitionExpectedRows) {
       missingPartitions += 1;
-      matched += partitionExpectedRows - result.records.length;
+      unavailableRows += partitionExpectedRows - result.records.length;
     }
   }
   if (expectedTotal === null) expectedTotal = loadedRows;
   const partial = missingPartitions > 0 || missingArtifacts > 0;
-  // Keep the unfiltered pagination contract stable even when the catalog says
-  // the release is partial. `matched` is intentionally bounded to the current
-  // page for unfiltered requests, so using it as `total` made totals grow on
-  // every cursor. The catalog's per-partition record counts remain the
-  // expected universe; `complete` and missing-partition metadata disclose that
-  // some of those rows are not currently readable.
-  const total = hasFilters ? matched : expectedTotal ?? matched;
-  const complete = !partial && (hasFilters ? scannedAll : scannedAll && (expectedTotal === null || matched === expectedTotal));
+  const availableTotal = expectedTotal === null ? null : Math.max(0, expectedTotal - unavailableRows);
+  const total = hasFilters ? matched : availableTotal ?? matched;
+  const complete = !partial && (hasFilters ? scannedAll : scannedAll && (availableTotal === null || matched === availableTotal));
   return {
     data,
     total,
-    totalScope: hasFilters ? "matched-available" as const : expectedTotal !== null ? "catalog-expected" as const : "scanned-so-far" as const,
+    totalScope: hasFilters ? "matched-available" as const : expectedTotal !== null ? "published-available" as const : "scanned-so-far" as const,
     limit,
     nextCursor: offset + limit < total ? `v1_${(offset + limit).toString(36)}` : null,
     expectedTotal,

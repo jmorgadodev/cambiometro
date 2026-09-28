@@ -52,7 +52,7 @@ export default async function DataQualityPage() {
           <dl className="page-fact-sheet" aria-label="Resumen de calidad de datos">
             <div>
               <dt>Registros Canónicos</dt>
-              <dd>{summary.totalRegistrosCanonicos.toLocaleString("es-CL")}</dd>
+              <dd>{summary.totalRegistrosCanonicos?.toLocaleString("es-CL") ?? "No calculable"}</dd>
             </div>
             <div>
               <dt>Fuentes Operativas</dt>
@@ -101,7 +101,7 @@ export default async function DataQualityPage() {
             </div>
 
             <div className="stat-tile stat-tile--info">
-              <div className="stat-tile__value">{summary.totalRegistrosHistoricos.toLocaleString("es-CL")}</div>
+              <div className="stat-tile__value">{summary.totalRegistrosHistoricos?.toLocaleString("es-CL") ?? "No calculable"}</div>
               <div className="stat-tile__label">Registros Históricos</div>
               <div className="stat-tile__hint">Consolidación de datos públicos</div>
             </div>
@@ -201,7 +201,7 @@ export default async function DataQualityPage() {
                       </span>
                     </td>
                     <td style={{ padding: "0.9rem 1rem", textAlign: "right", fontWeight: 600, color: "var(--text-primary)", fontFamily: "var(--font-mono, monospace)" }}>
-                      {source.canonicalCount.toLocaleString("es-CL")}
+                      {source.reconciliation.comparisonEligible ? source.canonicalCount.toLocaleString("es-CL") : "No conciliado"}
                     </td>
                     <td style={{ padding: "0.9rem 1rem", textAlign: "right", color: "var(--text-muted)", fontFamily: "var(--font-mono, monospace)" }}>
                       {source.historicalCount.toLocaleString("es-CL")}
