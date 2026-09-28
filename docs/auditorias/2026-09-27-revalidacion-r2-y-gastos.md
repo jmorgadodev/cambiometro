@@ -542,3 +542,12 @@ remoto volvió a confirmar `expectedRows=310`, `publishedRows=62`, estado
 distintos. Esa prueba mantiene visible el hueco real; no pudo activar el
 fallback porque R2 estaba disponible. No se desplegó a producción ni se
 escribió en R2/D1.
+
+También se eliminó del generador local de subsets de Contraloría el uso de
+`|| 275/261/248`: los conteos se derivan de los arrays reales si faltan y se
+rechaza un metadato declarado que no coincida con sus filas. La proyección
+local actual tiene 275 registros, 210 entidades y 248 relaciones, y esos
+valores sí coinciden con sus arrays; por tanto, esta protección no altera el
+artefacto actual. Tres pruebas cubren cero real, conteo derivado y discrepancia.
+El generador no se ejecutó contra los demás subsets ni se publicó; la
+protección requiere integrarse antes de una próxima generación ETL.

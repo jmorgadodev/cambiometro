@@ -6,9 +6,11 @@
   (310), el manifiesto ETL (284) y los registros por partición (275 legibles +
   35 esperados de agosto, cuyo manifiesto falta); también se validó el backup y
   se corrigió en código el `expectedTotal` literal que exponía 291 durante una
-  caída. Pasan los 24 tests del Worker, `api:typecheck`, `api:size` y el smoke
-  del preview aislado R2-only (`36383543138`); la paginación sigue marcando la
-  partición ausente. Falta reconciliar la versión por período y
+  caída. El generador local ya deriva sus conteos desde las filas y falla ante
+  discrepancias; la proyección existente coincide (275/210/248). Pasan los 24
+  tests del Worker, 3 pruebas del generador, `api:typecheck`, `api:size` y el
+  smoke del preview aislado R2-only (`36383543138`); la paginación sigue
+  marcando la partición ausente. Falta reconciliar la versión por período y
   recuperar/regenerar agosto con fuente oficial y preflight de tamaño; luego
   validar datos y búsquedas en producción. Sin restaurar el backup de 3 filas,
   escribir R2, materializar D1 ni promover producción mientras los conteos
