@@ -120,15 +120,50 @@ describe("pipeline automático de movimientos", () => {
     });
   });
 
-  it("detecta señales de cambio sin convertirlas en hechos oficiales", () => {
+  it("acepta sólo señales fechadas desde el inicio del gobierno vigente", () => {
     const signals = parseMovementSignals(
-      '<html><a href="/a">Gobierno anuncia nombramiento de autoridad</a><a href="/a">Gobierno anuncia nombramiento de autoridad</a></html>',
-      { url: "https://fuente.test/noticias", contentType: "text/html" },
+      JSON.stringify([
+        { title: "Presidente Boric nombra al director del IND", url: "https://fuente.test/boric", date: "2023-07-15" },
+        { title: "Nombran autoridad regional", url: "https://fuente.test/sin-fecha", date: null },
+        { title: "Gobierno anuncia nuevo nombramiento", url: "https://fuente.test/vigente", date: "2026-03-11T10:30:00-03:00" },
+      ]),
+      { url: "https://fuente.test/noticias", contentType: "application/json" },
     );
     expect(signals).toHaveLength(1);
-    expect(signals[0].title).toContain("nombramiento");
-    expect(signals[0].fase).toBe("anunciado");
-    expect(signals[0].status).toBe("en_confirmacion");
+    expect(signals[0]).toMatchObject({
+      title: "Gobierno anuncia nuevo nombramiento",
+      date: "2026-03-11",
+      fase: "anunciado",
+      status: "en_confirmacion",
+    });
+  });
+
+  it("conserva el día publicado de fechas ISO con zona horaria", () => {
+    const signals = parseMovementSignals(
+      JSON.stringify([{
+        title: "Gobierno anuncia nuevo nombramiento",
+        url: "https://fuente.test/vigente",
+        date: "2026-03-11T00:30:00+03:00",
+      }]),
+      { url: "https://fuente.test/noticias", contentType: "application/json" },
+    );
+    expect(signals[0]?.date).toBe("2026-03-11");
+  });
+
+  it("conserva el día publicado de fechas RSS RFC 2822", () => {
+    const signals = parseMovementSignals(
+      '<rss><channel><item><title>Gobierno anuncia nuevo nombramiento</title><link>https://fuente.test/vigente</link><pubDate>Wed, 11 Mar 2026 00:30:00 +0300</pubDate></item></channel></rss>',
+      { url: "https://fuente.test/feed.xml", contentType: "application/rss+xml" },
+    );
+    expect(signals[0]?.date).toBe("2026-03-11");
+  });
+
+  it("no convierte titulares HTML sin fecha verificable en señales nuevas", () => {
+    const signals = parseMovementSignals(
+      '<html><a href="/boric">Presidente Boric nombra a través de Alta Dirección Pública al director del IND</a></html>',
+      { url: "https://fuente.test/noticias", contentType: "text/html" },
+    );
+    expect(signals).toEqual([]);
   });
 
   it("lee titulares, fecha y resumen de una página de noticia", () => {
@@ -286,7 +321,7 @@ describe("pipeline automático de movimientos", () => {
     expect(result.hasOfficialSource).toBe(true);
     expect(result.results[0]).toMatchObject({ ok: true, status: 200, resolved_url: "https://www.gob.cl/" });
     expect(requested).toEqual([canonicalUrl, "https://www.gob.cl/"]);
-    expect(result.signals).toHaveLength(1);
+    expect(result.signals).toHaveLength(0);
   });
 
   it("actualiza metadata, preserva el baseline y genera checksum", () => {
