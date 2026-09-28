@@ -195,6 +195,47 @@ describe("registros calientes de R2", () => {
     expect(result?.data[0]?.id).toBe("camara-1");
   });
 
+  it("mantiene estable el total esperado al paginar una fuente con particiones faltantes", async () => {
+    const records = gzipText([
+      { id: "contraloria-1", sourceId: "contraloria", kind: "audit", occurredAt: "2026-09-03", data: {} },
+      { id: "contraloria-2", sourceId: "contraloria", kind: "audit", occurredAt: "2026-09-02", data: {} },
+    ]);
+    const available = { ...partition("contraloria", "2026-09", "partitions/contraloria/2026/09/records.jsonl.gz", records, 2), id: "contraloria-2026-09" };
+    const olderRecords = gzipText([
+      { id: "contraloria-older-1", sourceId: "contraloria", kind: "audit", occurredAt: "2026-07-02", data: {} },
+      { id: "contraloria-older-2", sourceId: "contraloria", kind: "audit", occurredAt: "2026-07-01", data: {} },
+    ]);
+    const older = { ...partition("contraloria", "2026-07", "partitions/contraloria/2026/07/records.jsonl.gz", olderRecords, 2), id: "contraloria-2026-07" };
+    const missing = {
+      ...partition("contraloria", "2026-08", "partitions/contraloria/2026/08/records.jsonl.gz", records, 3),
+      id: "contraloria-2026-08",
+      manifestKey: "partitions/contraloria/2026/08/missing-manifest.json",
+      checksumSha256: "missing",
+    };
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": { generatedAt: "2026-09-28T00:00:00Z", partitions: [available, missing, older] },
+      [available.manifestKey]: available.manifest,
+      [available.key]: records,
+      [older.manifestKey]: older.manifest,
+      [older.key]: olderRecords,
+    });
+
+    const firstPage = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 1 });
+    const secondPage = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 1, cursor: "v1_1" });
+    const gapPage = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 1, cursor: "v1_2" });
+    const afterGapPage = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 1, cursor: "v1_3" });
+    const olderPage = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 1, cursor: "v1_5" });
+
+    expect(firstPage).toMatchObject({ total: 7, totalScope: "catalog-expected", expectedTotal: 7, complete: false, missingPartitions: 1 });
+    expect(secondPage).toMatchObject({ total: 7, totalScope: "catalog-expected", expectedTotal: 7, complete: false, missingPartitions: 1 });
+    expect(gapPage).toMatchObject({ total: 7, nextCursor: "v1_3", missingPartitions: 1 });
+    expect(gapPage?.data).toEqual([]);
+    expect(afterGapPage?.data).toEqual([]);
+    expect(olderPage?.data.map((record) => record.id)).toEqual(["contraloria-older-1"]);
+    expect(firstPage?.data.map((record) => record.id)).toEqual(["contraloria-1"]);
+    expect(secondPage?.data.map((record) => record.id)).toEqual(["contraloria-2"]);
+  });
+
   it("sirve una variante de Cámara sin mezclar asistencia ni consultar D1", async () => {
     const vote = gzipText([{ id: "camara-vote-1", sourceId: "camara", kind: "vote", occurredAt: "2026-09-02", data: { title: "Votación" } }]);
     const attendance = gzipText([{ id: "camara-attendance-1", sourceId: "camara", kind: "attendance", occurredAt: "2026-09-02", data: { title: "Asistencia" } }]);

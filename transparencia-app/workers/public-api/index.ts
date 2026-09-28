@@ -264,6 +264,10 @@ interface TransferApiManifest {
   dataset: string;
   generatedAt: string;
   totalRows: number;
+  sourceRows?: number | null;
+  duplicateExactRows?: number | null;
+  duplicateConflictingRows?: number | null;
+  excludedAfterCutoff?: number | null;
   pageSize: number;
   totalPages: number;
   pages: TransferApiPage[];
@@ -1614,6 +1618,7 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
         }
         return success(lake.data, {
           total: lake.total,
+          totalScope: lake.totalScope,
           limit,
           page: Math.floor(offset / limit) + 1,
           totalPages: Math.max(1, Math.ceil(lake.total / limit)),

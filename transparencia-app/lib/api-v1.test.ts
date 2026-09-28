@@ -1570,11 +1570,11 @@ describe("API canónica v1", () => {
       sourceStatus: "partial",
       publishedRows: 1,
       expectedRows: 2,
-      // `total` is the number of rows actually consultable in the published
-      // lake, not the catalog expectation. The latter is exposed separately
-      // so a partial release cannot look complete to pagination or coverage.
-      total: 1,
-      totalPages: 1,
+      // Pagination uses the stable expected positions in the catalog. The
+      // partial status and publishedRows keep missing evidence explicit.
+      total: 2,
+      totalScope: "catalog-expected",
+      totalPages: 2,
     });
     expect(payload.data[0].id).toBe("camara-lake-available");
   });

@@ -98,7 +98,7 @@ describe("archivo histórico en R2", () => {
 
     const result = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 10 });
 
-    expect(result).toMatchObject({ data: [], total: 0, loadedRows: 0, expectedTotal: 1, complete: false, missingPartitions: 1, missingArtifacts: 0 });
+    expect(result).toMatchObject({ data: [], total: 1, loadedRows: 0, expectedTotal: 1, complete: false, missingPartitions: 1, missingArtifacts: 0 });
     expect(fetchSpy).not.toHaveBeenCalled();
   });
 
@@ -177,7 +177,7 @@ describe("archivo histórico en R2", () => {
 
     const result = await readR2EvidenceRecords(bucket, { source: "camara", limit: 10 });
 
-    expect(result).toMatchObject({ data: [], total: 0, loadedRows: 0, expectedTotal: 2, complete: false, missingPartitions: 1, missingArtifacts: 1 });
+    expect(result).toMatchObject({ data: [], total: 2, loadedRows: 0, expectedTotal: 2, complete: false, missingPartitions: 1, missingArtifacts: 1 });
   });
 
   it("combina evidencia de varias fuentes para una entidad canónica", async () => {
