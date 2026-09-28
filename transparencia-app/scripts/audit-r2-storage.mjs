@@ -1,4 +1,4 @@
-import { summarizeR2Inventory } from "../lib/r2-inventory-audit.mjs";
+import { reconcileR2Inventory, summarizeR2Inventory } from "../lib/r2-inventory-audit.mjs";
 import { listR2Objects } from "../lib/r2-live-list.mjs";
 
 const bucket = process.env.R2_BUCKET || "transparencia-public-data";
@@ -33,8 +33,7 @@ try {
   }
   const cached = await loadRemoteInventory({ accountId, token });
   const publicObjects = allObjects.filter((object) => object.bucket === bucket);
-  const cachedKeys = new Set((cached.objects ?? []).map((object) => object.key));
-  const liveKeys = new Set(publicObjects.map((object) => object.key));
+  const reconciliation = reconcileR2Inventory({ cachedObjects: cached.objects ?? [], liveObjects: publicObjects });
   const accountObjects = allObjects.map((object) => Object.fromEntries(
     Object.entries(object).filter(([key]) => key !== "bucket"),
   ));
@@ -43,9 +42,14 @@ try {
     source: "r2-live-list-account",
     buckets: reports,
     inventoryKey,
-    cachedObjectCount: cachedKeys.size,
-    liveOnlyObjects: publicObjects.filter((object) => !cachedKeys.has(object.key)).length,
-    cachedOnlyObjects: [...cachedKeys].filter((key) => !liveKeys.has(key)).length,
+    cachedInventory: {
+      generatedAt: cached.generatedAt ?? null,
+      declaredUsedBytes: Number(cached.usedBytes) || null,
+      ...reconciliation,
+    },
+    cachedObjectCount: reconciliation.cachedObjectCount,
+    liveOnlyObjects: reconciliation.liveOnly.count,
+    cachedOnlyObjects: reconciliation.cachedOnly.count,
     account: {
       usedBytes: account.usedBytes,
       limitBytes: account.limitBytes,

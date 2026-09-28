@@ -7,13 +7,20 @@ const sourceBucket = process.env.R2_SOURCE_BUCKET || "transparencia-public-data"
 const backupBucket = process.env.R2_BACKUP_BUCKET || "cambiometro-backups";
 const retentionWeeks = Number(process.env.R2_RETENTION_WEEKS ?? 8);
 const asOf = process.env.R2_RETENTION_AS_OF || new Date().toISOString().slice(0, 10);
+const compactManifestKey = "compact/v1/manifest.json";
 
 if (!accountId || !token) throw new Error("R2_RETENTION_AUDIT_MISSING_CLOUDFLARE_CREDENTIALS");
 if (!Number.isInteger(retentionWeeks) || retentionWeeks < 0) throw new Error("R2_RETENTION_AUDIT_INVALID_RETENTION_WEEKS");
 
 const sourceObjects = await listR2Objects({ accountId, token, bucket: sourceBucket });
 const backupObjects = await listR2Objects({ accountId, token, bucket: backupBucket });
-const report = buildR2RetentionReport({ sourceObjects, backupObjects, asOf, retentionWeeks });
+const manifestUrl = `https://api.cloudflare.com/client/v4/accounts/${accountId}/r2/buckets/${encodeURIComponent(backupBucket)}/objects/${encodeURIComponent(compactManifestKey)}`;
+const manifestResponse = await fetch(manifestUrl, { headers: { Authorization: `Bearer ${token}` } });
+if (!manifestResponse.ok && manifestResponse.status !== 404) {
+  throw new Error(`R2_RETENTION_COMPACT_MANIFEST_HTTP_${manifestResponse.status}`);
+}
+const compactManifest = manifestResponse.ok ? await manifestResponse.json() : null;
+const report = buildR2RetentionReport({ sourceObjects, backupObjects, compactManifest, asOf, retentionWeeks });
 console.log(JSON.stringify({
   ...report,
   buckets: { source: sourceBucket, backups: backupBucket },
