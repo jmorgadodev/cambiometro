@@ -454,3 +454,27 @@ en lugar de limitarse a las pocas coincidencias del índice estático. El alias
 de preview continúa con `X-Robots-Tag: noindex`. Esto valida el buscador en
 preview, pero no prueba que la misma corrección esté en producción: no se ha
 promovido ningún cambio productivo.
+
+## Revalidación de Contraloría y preview aislado (28-09-2026)
+
+Dos lecturas pequeñas a la API productiva, con `limit=2` y offsets 0 y 2,
+confirmaron que Contraloría responde desde `r2-lake` y que el cursor avanza sin
+repetir los cuatro IDs. Sin embargo, el Worker productivo entrega `total=62`,
+`publishedRows=62`, `expectedRows=310`, `sourceStatus=partial` y una partición
+faltante; por eso informa 31 páginas aunque el catálogo espera 155 páginas de
+dos filas. El cambio local de paginación declara `totalScope=catalog-expected`
+y conserva los huecos esperados; esa versión aún requiere prueba remota.
+
+La configuración estándar `env.preview` no es adecuada para esta prueba: enlaza
+D1 productiva y el job de staging ejecuta `ensure-transfer-d1.mjs --create`.
+Se añadió `wrangler.audit-preview.jsonc`, un validador que prohíbe bindings de
+D1, rutas de dominio y correo, y un smoke que compara dos páginas, total,
+expectedRows y cursores. `wrangler deploy --dry-run` confirmó que sólo enlaza
+`PUBLIC_DATA` (R2) y las tres guardas de lectura. El despliegue local fue
+rechazado antes de publicar por permisos del token de Cloudflare en el endpoint
+de secrets (`No access to the specified resource`). Para no recurrir al job
+existente, que crea/binda D1, se agregó una opción manual y separada de GitHub
+Actions (`deploy_r2_audit_preview`) que despliega ese Worker aislado y ejecuta
+el smoke; todavía debe ejecutarse y pasar antes de considerar corregida la
+paginación en entorno remoto. No se escribieron objetos R2 ni filas D1, ni se
+promovió producción.

@@ -32,6 +32,11 @@ on:
         type: boolean
         required: false
         default: false
+      deploy_r2_audit_preview:
+        description: "Desplegar Worker aislado para validar lecturas R2; sin D1, rutas ni escrituras de datos"
+        type: boolean
+        required: false
+        default: false
       confirmation:
         description: "Escribir CAMBIOMETRO_CONFIRM_CUTOVER sólo para promover producción"
         type: string
@@ -253,3 +258,38 @@ jobs:
             --config "$TRANSFER_CONFIG" \
             --env preview \
             --message "API preview ${GITHUB_SHA}"
+
+  r2_audit_preview:
+    name: Preview API aislado R2-only (sin D1)
+    needs: validate
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy_r2_audit_preview == true
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-node@v5
+        with:
+          node-version: "22"
+          cache: npm
+          cache-dependency-path: transparencia-app/package-lock.json
+      - name: Instalar dependencias
+        working-directory: transparencia-app
+        run: npm ci
+      - name: Validar aislamiento del preview
+        working-directory: transparencia-app
+        run: node scripts/check-r2-audit-preview.mjs
+      - name: Desplegar Worker aislado sin rutas productivas
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.WRANGLER_TOKEN }}
+        run: |
+          test -n "$CLOUDFLARE_ACCOUNT_ID"
+          test -n "$CLOUDFLARE_API_TOKEN"
+          output="$(npx wrangler deploy \
+            --config workers/public-api/wrangler.audit-preview.jsonc \
+            --message "R2-only audit preview ${GITHUB_SHA}" 2>&1)"
+          printf '%s\n' "$output"
+          worker_url="$(printf '%s\n' "$output" | grep -Eo 'https://[A-Za-z0-9.-]+\.workers\.dev' | head -n 1)"
+          test -n "$worker_url"
+          node scripts/smoke-r2-audit-preview.mjs "$worker_url"
