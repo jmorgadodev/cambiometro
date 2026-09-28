@@ -43,14 +43,6 @@ export function buildParliamentCostPeriods(input: {
 
 export function selectDefaultParliamentCostPeriod(
   months: readonly ParliamentaryCostPeriod[],
-  salaryPeriod: string | null,
 ): string {
-  if (
-    salaryPeriod &&
-    months.some((month) => month.periodo === salaryPeriod && typeof month.sueldo === "number")
-  ) {
-    return salaryPeriod;
-  }
-
   return latestPublishedPeriod(months.map((month) => month.periodo));
 }
