@@ -1,8 +1,12 @@
 import { createHash } from "node:crypto";
+import { readFileSync } from "node:fs";
 import { execFile } from "node:child_process";
 import { promisify } from "node:util";
 
 const execFileAsync = promisify(execFile);
+const MOVEMENT_SCOPE_START_DATE = JSON.parse(
+  readFileSync(new URL("../data/movimientos-scope-policy.json", import.meta.url), "utf8"),
+).scopeStartDate;
 
 export const MOVIMIENTOS_SOURCES = Object.freeze([
   {
@@ -178,8 +182,30 @@ function readHtmlArticleDate(body) {
     || readHtmlMeta(body, "itemprop", "datePublished")
     || body.match(/<time\b[^>]*datetime=["']([^"']+)["']/i)?.[1]
     || "";
-  const match = String(raw).match(/\d{4}-\d{2}-\d{2}/);
-  return match?.[0] ?? null;
+  return normalizePublishedDate(raw);
+}
+
+function normalizePublishedDate(value) {
+  const raw = String(value ?? "").trim();
+  if (!raw) return null;
+  const isoDate = raw.match(/^(\d{4}-\d{2}-\d{2})(?:$|[T\s])/i)?.[1];
+  const rfcDate = raw.match(/(?:^|,\s*)(\d{1,2})\s+([A-Za-z]{3})\s+(\d{4})(?=\s|$)/);
+  const rfcMonthTimestamp = rfcDate
+    ? Date.parse(`${rfcDate[2]} 1, ${rfcDate[3]} 00:00:00 UTC`)
+    : NaN;
+  const expectedRfcDate = Number.isFinite(rfcMonthTimestamp)
+    ? `${rfcDate[3]}-${String(new Date(rfcMonthTimestamp).getUTCMonth() + 1).padStart(2, "0")}-${rfcDate[1].padStart(2, "0")}`
+    : null;
+  const timestamp = isoDate
+    ? Date.parse(`${isoDate}T00:00:00.000Z`)
+    : rfcDate
+      ? Date.parse(`${rfcDate[2]} ${rfcDate[1]}, ${rfcDate[3]} 00:00:00 UTC`)
+      : Date.parse(raw);
+  if (!Number.isFinite(timestamp)) return null;
+  const normalized = new Date(timestamp).toISOString().slice(0, 10);
+  if (isoDate) return normalized === isoDate ? normalized : null;
+  if (rfcDate) return normalized === expectedRfcDate ? normalized : null;
+  return normalized;
 }
 
 function sourceUrls(source) {
@@ -217,7 +243,7 @@ export function parseMovementSignals(body, source) {
         const title = decodeHtml(row.title ?? row.name ?? row.headline);
         if (!title || !MOVEMENT_KEYWORDS.test(title)) continue;
         const url = normalizeUrl(row.link ?? row.url ?? source.url, source.url);
-        const date = String(row.date ?? row.pubDate ?? row.published ?? "").slice(0, 10) || null;
+        const date = normalizePublishedDate(row.date ?? row.pubDate ?? row.published);
         items.push({ title, url, date, summary: decodeHtml(row.description ?? row.summary ?? "") });
       }
     }
@@ -230,7 +256,7 @@ export function parseMovementSignals(body, source) {
         items.push({
           title,
           url: normalizeUrl(readTag("link") || source.url, source.url),
-          date: (readTag("pubDate") || readTag("date") || "").slice(0, 10) || null,
+          date: normalizePublishedDate(readTag("pubDate") || readTag("date")),
           summary: readTag("description"),
         });
       }
@@ -261,7 +287,7 @@ export function parseMovementSignals(body, source) {
   }
 
   const seen = new Set();
-  return items.filter((item) => {
+  return items.filter((item) => item.date && item.date >= MOVEMENT_SCOPE_START_DATE).filter((item) => {
     const key = `${item.url ?? source.url}|${item.title.toLowerCase()}`;
     if (seen.has(key)) return false;
     seen.add(key);
