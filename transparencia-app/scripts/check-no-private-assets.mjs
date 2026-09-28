@@ -30,6 +30,7 @@ const PATTERNS = [
 const ALLOWLIST = {
   ".github/workflows/usage-watch.yml": ["bearer"], // Authorization: Bearer $GH_TOKEN
   "scripts/backup-weekly.mjs": ["bearer"], // Authorization: Bearer $CLOUDFLARE_API_TOKEN (R2 API)
+  "scripts/audit-r2-retention.mjs": ["bearer"], // Authorization: Bearer $CLOUDFLARE_API_TOKEN (read-only R2 audit)
   "scripts/restore-drill.mjs": ["bearer"], // Authorization: Bearer $CLOUDFLARE_API_TOKEN (R2 API)
   "scripts/verify-lake-manifests.mjs": ["bearer"], // allow if uses Bearer for R2
   "scripts/pages-rollback.mjs": ["bearer"], // Authorization: Bearer $CLOUDFLARE_API_TOKEN (Pages API)
