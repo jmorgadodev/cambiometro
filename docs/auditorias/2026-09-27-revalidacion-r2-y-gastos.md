@@ -620,3 +620,36 @@ conteo completo verificado; se añadieron tres pruebas para cero, derivación y
 discrepancia. Las pruebas pasan, pero no se re-generó ni publicó el artefacto
 estático existente. El release de proyección DIPRES fue generado el
 21-08-2026; su frescura y últimos períodos requieren auditoría aparte.
+
+### API oficial del Geoportal municipal, validación acotada — 28-09-2026
+
+Se inspeccionó la aplicación oficial del [Geoportal de Auditorías de la
+Contraloría](https://www.contraloria.cl/opencgrapp/geoportal/auditoria) y se
+identificaron sus endpoints JSON same-origin. En lectura acotada, el resumen
+global de 2026 declara 22 informes. Los resúmenes por comuna de las nueve
+regiones con actividad 2026 también suman 22, distribuidos en 20 comunas; al
+consultar sólo esas 20 listas comunales, sus filas `ANOINFORME=2026` sumaron
+igualmente 22. La distribución por `FECHAINFORME` fue abril 6, mayo 1, junio
+2, julio 3, agosto 3 y septiembre 7. La igualdad entre agregados y detalle
+verifica este alcance municipal del Geoportal; no mide toda la base de
+Contraloría ni sus informes centrales.
+
+Entre los tres informes de agosto aparecen los registros oficiales
+`IDACTIVIDAD` 117834 (Concepción, 03-08-2026), 115060 (Navidad, 11-08-2026) y
+119648 (Putre, 31-08-2026), cada uno con enlace de detalle SICA devuelto por
+el Geoportal. Son candidatos para cotejo por identificador y documento, no
+filas que se puedan sumar automáticamente al ETL: el catálogo R2 espera 35
+filas en la partición de agosto y su payload/manifiesto canónico no está
+disponible. Una consulta productiva acotada a `source=contraloria`,
+`period=2026-08` devolvió HTTP 200 con `publishedRows=0`, `expectedRows=35`,
+`missingPartitions=1` y estado `partial`. Por tanto, todavía no se ha probado
+si alguno de esos informes forma parte de las 35 filas esperadas del release.
+
+Esta interfaz resuelve una limitación de los listados HTML para el
+subconjunto municipal: permite verificar fechas, IDs y enlaces oficiales sin
+descargar el universo. No reconstruye por sí sola las 35 filas esperadas ni
+el universo central/regional del ETL. Antes de incorporar registros hay que
+identificar cómo el ETL define períodos e IDs, cotejar estos candidatos con
+manifiestos/filas originales disponibles y localizar una fuente oficial
+verificable para el resto de agosto. No se ejecutó el ETL, no se descargaron
+informes/documentos y no se escribieron objetos R2 o filas D1.

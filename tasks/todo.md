@@ -31,6 +31,17 @@
   (municipal hasta 2024); no sirven para reconstruir agosto 2026. Sólo se
   consultaron sus tamaños HTTP, no se descargaron ni integraron.
 
+  **Endpoint oficial nuevo (28-09):** el Geoportal publica resúmenes por
+  comuna y un listado de informes por código comunal. Sus agregados 2026
+  coinciden: 22 en el resumen global, 22 en los resúmenes por región y 22 filas
+  detalladas en 20 comunas. El subconjunto municipal incluye tres informes de
+  agosto (Concepción, Navidad y Putre), potenciales para cotejo, pero no
+  reconcilia las 35 filas del lago Contraloría, que incluye un alcance distinto.
+  La API productiva de Cambiómetro confirma que agosto sigue sin estar
+  consultable (`publishedRows=0`, `expectedRows=35`, partición faltante). Falta
+  cotejar IDs/documentos y localizar evidencia oficial para las otras filas;
+  no sumar automáticamente estos 3 registros ni declarar recuperado el corte.
+
 - [ ] **DIPRES — 75% técnico (3/4 controles):** el manifest estático R2
   productivo referencia la proyección completa correcta (476 filas, 476 IDs
   distintos, checksum válido), pero el subset de 60 filas publica
