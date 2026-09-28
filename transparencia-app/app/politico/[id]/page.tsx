@@ -243,7 +243,7 @@ export default async function PoliticoPage({ params }: Props) {
     salaryPeriod: periodoRemuneracion,
     salaryAmount: remuneracion?.bruto_mensual ?? null,
   }).map((month) => ({ ...month, etiqueta: formatPublishedMonth(month.periodo) }));
-  const periodoCostoInicial = selectDefaultParliamentCostPeriod(mesesCosto, periodoRemuneracion);
+  const periodoCostoInicial = selectDefaultParliamentCostPeriod(mesesCosto);
 
   const headerData: PoliticoHeaderData = {
     id: pol.id,
