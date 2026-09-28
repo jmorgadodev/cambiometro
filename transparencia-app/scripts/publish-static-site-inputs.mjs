@@ -6,12 +6,14 @@ import {
   assertStaticInputContentQuality,
   buildStaticInputEntries,
   buildStaticInputManifest,
+  omitRetainedExpenseSubsets,
   parseRequestedStaticFiles,
   resolveSafeStaticPath,
   sha256Buffer,
 } from "./static-site-inputs.mjs";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
 import { assertRemoteR2WriteBudget, configuredR2BudgetBuckets } from "./etl/r2-account-budget.mjs";
+import { writeExpensePeriodArtifacts } from "./expense-release.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const bucket = argument("--bucket", "transparencia-public-data");
@@ -45,14 +47,16 @@ function readRemoteManifest() {
   return JSON.parse(readFileSync(target, "utf8"));
 }
 
-const files = parseRequestedStaticFiles({ files: requestedFiles, groups: requestedGroups });
+if (requestedGroups.includes("gastos")) writeExpensePeriodArtifacts(root);
+const files = parseRequestedStaticFiles({ files: requestedFiles, groups: requestedGroups, root });
 const releaseId = sha256Buffer(Buffer.from(files.map((file) => {
   const path = resolveSafeStaticPath(root, file);
   if (!existsSync(path)) throw new Error(`STATIC_INPUT_MISSING: ${file}`);
   return `${file}:${sha256Buffer(readFileSync(path))}`;
 }).join("\n"), "utf8"));
-const freshEntries = buildStaticInputEntries({ root, files, releaseId });
-let manifest = buildStaticInputManifest({ entries: freshEntries });
+const generatedEntries = buildStaticInputEntries({ root, files, releaseId });
+let freshEntries = generatedEntries;
+let manifest = buildStaticInputManifest({ entries: generatedEntries });
 let storageBudget = null;
 
 if (!localOnly) {
@@ -63,6 +67,7 @@ if (!localOnly) {
   mkdirSync(output, { recursive: true });
   const previous = readRemoteManifest();
   if (previous) assertStaticInputManifest(previous);
+  freshEntries = omitRetainedExpenseSubsets(generatedEntries, previous);
   const merged = new Map((previous?.files ?? []).map((file) => [file.path, file]));
   for (const file of freshEntries) merged.set(file.path, file);
   manifest = buildStaticInputManifest({ entries: [...merged.values()] });

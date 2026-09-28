@@ -316,6 +316,169 @@ describe("registros públicos R2", () => {
     expect(payload.data.map((row) => row.id)).toEqual(["expense-jan"]);
   });
 
+  it("consulta el fragmento mensual de gastos sin descargar el histórico completo", async () => {
+    const monthPath = "data/lake-subsets/expense-periods/gastos_camara/2026-04.json";
+    const monthKey = "subsets/expense-periods/gastos_camara/2026-04.json";
+    const fullSubsetKey = "subsets/gastos-camara.json";
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": { generatedAt: "2026-09-27T00:00:00Z", sources: [], partitions: [] },
+      "projections/static-site-v1/manifest.json": {
+        files: [
+          { path: "data/lake-subsets/expense-periods/manifest.json", key: "subsets/expense-periods/manifest.json" },
+          { path: monthPath, key: monthKey, sourceId: "gastos_camara", period: "2026-04", recordCount: 1 },
+          { path: "data/lake-subsets/gastos-camara.subset.json", key: fullSubsetKey },
+        ],
+      },
+      "subsets/expense-periods/manifest.json": {
+        schemaVersion: 1,
+        dataset: "gastos-operacionales-por-periodo",
+        generatedAt: "2026-09-27T00:00:00Z",
+        sources: [{
+          sourceId: "gastos_camara",
+          periods: [{ period: "2026-04", path: monthPath, recordCount: 1 }],
+        }],
+      },
+      [monthKey]: {
+        sourceId: "gastos_camara",
+        period: "2026-04",
+        generatedAt: "2026-09-27T00:00:00Z",
+        recordCount: 1,
+        records: [
+          { id: "expense-april", fecha: "2026-04-10", periodo: "2026-04", nombre: "Diputada Abril", item: "Traslado", monto_clp: 1000, url: "https://example.test/april", fuente: "Cámara" },
+        ],
+      },
+      [fullSubsetKey]: { sourceId: "gastos_camara", records: Array.from({ length: 1000 }, () => ({ id: "historical" })) },
+    });
+
+    const response = await worker.fetch(
+      new Request("https://example.test/api/v1/records?source=gastos_camara&kind=expense&period=2026-04&limit=10"),
+      { PUBLIC_DATA: bucket as never } as never,
+    );
+    const payload = await response.json() as { data: Array<{ id: string; period: { periodo: string } }>; meta: Record<string, unknown> };
+
+    expect(response.status).toBe(200);
+    expect(payload.meta).toMatchObject({ total: 1, sourceBackend: "r2-months" });
+    expect(payload.data.map((row) => [row.id, row.period.periodo])).toEqual([["expense-april", "2026-04"]]);
+    expect(bucket.requested).toContain(monthKey);
+    expect(bucket.requested).not.toContain(fullSubsetKey);
+  });
+
+  it("prioriza fragmentos mensuales sobre el lake en las consultas públicas de gastos", async () => {
+    const monthPath = "data/lake-subsets/expense-periods/gastos_camara/2026-06.json";
+    const monthKey = "subsets/expense-periods/gastos_camara/2026-06.json";
+    const lakeKey = "partitions/gastos_camara/2026/06/records.jsonl.gz";
+    const monthlyRow = {
+      id: "camera-june-monthly",
+      fecha: "2026-06-15",
+      periodo: "2026-06",
+      nombre: "Diputada Junio",
+      item: "Traslado",
+      monto_clp: 1000,
+      url: "https://example.test/camera-june",
+      fuente: "Cámara",
+    };
+    const lake = gzipJsonl([{
+      id: monthlyRow.id,
+      sourceId: "gastos_camara",
+      kind: "expense",
+      occurredAt: monthlyRow.fecha,
+      data: { title: monthlyRow.item },
+    }]);
+    const partitionManifestKey = "partitions/gastos_camara/2026/06/manifest.json";
+    const partition = {
+      sourceId: "gastos_camara",
+      period: "2026-06",
+      recordCount: 1,
+      manifestKey: partitionManifestKey,
+      checksumSha256: "june",
+      releaseTag: "test",
+      manifest: {
+        projectionChecksumSha256: "projection",
+        artifacts: [{ key: lakeKey, checksumSha256: sha256(lake), releaseAssetName: "june" }],
+      },
+    };
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": { generatedAt: "2026-09-27T00:00:00Z", partitions: [partition] },
+      [partitionManifestKey]: partition.manifest,
+      [lakeKey]: lake,
+      "projections/static-site-v1/manifest.json": {
+        files: [
+          { path: "data/lake-subsets/expense-periods/manifest.json", key: "subsets/expense-periods/manifest.json" },
+          { path: monthPath, key: monthKey, sourceId: "gastos_camara", period: "2026-06", recordCount: 1 },
+        ],
+      },
+      "subsets/expense-periods/manifest.json": {
+        schemaVersion: 1,
+        dataset: "gastos-operacionales-por-periodo",
+        generatedAt: "2026-09-27T00:00:00Z",
+        sources: [{ sourceId: "gastos_camara", periods: [{ period: "2026-06", path: monthPath, recordCount: 1 }] }],
+      },
+      [monthKey]: {
+        sourceId: "gastos_camara",
+        period: "2026-06",
+        recordCount: 1,
+        records: [monthlyRow],
+      },
+    });
+
+    const response = await worker.fetch(
+      new Request("https://example.test/api/v1/records?source=gastos_camara&kind=expense&period=2026-06&limit=10"),
+      { PUBLIC_DATA: bucket as never } as never,
+    );
+    const payload = await response.json() as { data: Array<{ id: string }>; meta: Record<string, unknown> };
+
+    expect(response.status).toBe(200);
+    expect(payload.meta).toMatchObject({ total: 1, sourceBackend: "r2-months" });
+    expect(payload.data.map((row) => row.id)).toEqual([monthlyRow.id]);
+    expect(bucket.requested).not.toContain(lakeKey);
+  });
+
+  it("pagina el histórico por mes y no descarga meses anteriores al completar la página", async () => {
+    const julyPath = "data/lake-subsets/expense-periods/gastos_senado/2026-07.json";
+    const junePath = "data/lake-subsets/expense-periods/gastos_senado/2026-06.json";
+    const julyKey = "subsets/expense-periods/senado-2026-07.json";
+    const juneKey = "subsets/expense-periods/senado-2026-06.json";
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": { generatedAt: "2026-09-27T00:00:00Z", sources: [], partitions: [] },
+      "projections/static-site-v1/manifest.json": {
+        files: [
+          { path: "data/lake-subsets/expense-periods/manifest.json", key: "subsets/expense-periods/manifest.json" },
+          { path: julyPath, key: julyKey, sourceId: "gastos_senado", period: "2026-07", recordCount: 2 },
+          { path: junePath, key: juneKey, sourceId: "gastos_senado", period: "2026-06", recordCount: 2 },
+        ],
+      },
+      "subsets/expense-periods/manifest.json": {
+        schemaVersion: 1,
+        dataset: "gastos-operacionales-por-periodo",
+        generatedAt: "2026-09-27T00:00:00Z",
+        sources: [{ sourceId: "gastos_senado", periods: [
+          { period: "2026-07", path: julyPath, recordCount: 2 },
+          { period: "2026-06", path: junePath, recordCount: 2 },
+        ] }],
+      },
+      [julyKey]: { sourceId: "gastos_senado", period: "2026-07", recordCount: 2, records: [
+        { id: "july-2", fecha: "2026-07-15", periodo: "2026-07", nombre: "Senador", item: "Viaje", monto_clp: 200, url: "https://example.test/july-2", fuente: "Senado" },
+        { id: "july-1", fecha: "2026-07-10", periodo: "2026-07", nombre: "Senador", item: "Viaje", monto_clp: 100, url: "https://example.test/july-1", fuente: "Senado" },
+      ] },
+      [juneKey]: { sourceId: "gastos_senado", period: "2026-06", recordCount: 2, records: [
+        { id: "june-2", fecha: "2026-06-15", periodo: "2026-06", nombre: "Senador", item: "Viaje", monto_clp: 20, url: "https://example.test/june-2", fuente: "Senado" },
+        { id: "june-1", fecha: "2026-06-10", periodo: "2026-06", nombre: "Senador", item: "Viaje", monto_clp: 10, url: "https://example.test/june-1", fuente: "Senado" },
+      ] },
+    });
+
+    const response = await worker.fetch(
+      new Request("https://example.test/api/v1/records?source=gastos_senado&kind=expense&limit=1"),
+      { PUBLIC_DATA: bucket as never } as never,
+    );
+    const payload = await response.json() as { data: Array<{ id: string }>; meta: Record<string, unknown> };
+
+    expect(response.status).toBe(200);
+    expect(payload.meta).toMatchObject({ total: 4, sourceBackend: "r2-months" });
+    expect(payload.data.map((row) => row.id)).toEqual(["july-2"]);
+    expect(bucket.requested).toContain(julyKey);
+    expect(bucket.requested).not.toContain(juneKey);
+  });
+
   it("retira los períodos observados no válidos de gastos de Cámara antes del total", async () => {
     const bucket = fakeBucket({
       "projections/static-site-v1/manifest.json": {
@@ -341,6 +504,35 @@ describe("registros públicos R2", () => {
     expect(response.status).toBe(200);
     expect(payload.meta.total).toBe(1);
     expect(payload.data.map((row) => row.id)).toEqual(["expense-june"]);
+  });
+
+  it("usa la respuesta R2 ya filtrada sin volver a descargar el subconjunto de gastos", async () => {
+    const subsetKey = "subsets/gastos-camara.json";
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": { generatedAt: "2026-09-27T00:00:00Z", sources: [], partitions: [] },
+      "projections/static-site-v1/manifest.json": {
+        files: [{ path: "data/lake-subsets/gastos-camara.subset.json", key: subsetKey }],
+      },
+      [subsetKey]: {
+        sourceId: "gastos_camara",
+        generatedAt: "2026-09-27T00:00:00Z",
+        records: [
+          { id: "expense-april", fecha: "2026-04-10", periodo: "2026-04", nombre: "Diputada Abril", item: "Traslado", monto_clp: 1000, url: "https://example.test/april", fuente: "Cámara" },
+          { id: "expense-may", fecha: "2026-05-10", periodo: "2026-05", nombre: "Diputada Mayo", item: "Traslado", monto_clp: 2000, url: "https://example.test/may", fuente: "Cámara" },
+        ],
+      },
+    });
+
+    const response = await worker.fetch(
+      new Request("https://example.test/api/v1/records?source=gastos_camara&kind=expense&period=2026-04&limit=10"),
+      { PUBLIC_DATA: bucket as never } as never,
+    );
+    const payload = await response.json() as { data: Array<{ id: string; period: { periodo: string } }>; meta: Record<string, unknown> };
+
+    expect(response.status).toBe(200);
+    expect(payload.meta).toMatchObject({ total: 1, sourceBackend: "r2" });
+    expect(payload.data.map((row) => [row.id, row.period.periodo])).toEqual([["expense-april", "2026-04"]]);
+    expect(bucket.requested.filter((key) => key === subsetKey)).toHaveLength(1);
   });
 
   it("omite palabras vacías nacionales y consulta ambas nóminas sin cargar su shard gigante", async () => {

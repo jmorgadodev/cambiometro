@@ -6,7 +6,7 @@ import { fileURLToPath } from "node:url";
 import { writeChunkedJson } from "./static-site-data.mjs";
 import { buildTransferenciasStatic, hasFullTransferSource } from "./build-transferencias-static.mjs";
 import { chunkJsonRows, listUnavailableMunicipalities } from "./static-payroll.mjs";
-import { readExpenseSubsetForPublication } from "./expense-release.mjs";
+import { writeExpensePeriodArtifacts } from "./expense-release.mjs";
 import { normalizeMovementPayload, sha256, validateMovementPayload } from "./movimientos-pipeline.mjs";
 import { buildCpltAggregateSummary, isPlausiblePeriod } from "./cplt-transparency-summary.mjs";
 
@@ -100,10 +100,8 @@ const movimientosRelease = {
 // debe duplicar cada fila en miles de objetos estáticos ni enviar un índice
 // masivo al navegador; aquí sólo generamos el resumen que alimenta las cifras
 // de la página.
-const expenseSubsets = ["gastos_camara", "gastos_senado"].map((sourceId) => {
-  const result = readExpenseSubsetForPublication(root, sourceId);
-  return { sourceId, subset: result?.subset ?? null, excludedPeriods: result?.excludedPeriods ?? [] };
-});
+const expenseArtifacts = writeExpensePeriodArtifacts(root);
+const expenseSubsets = expenseArtifacts.sources;
 const expenseRecords = expenseSubsets.flatMap(({ sourceId, subset }) => (subset?.records ?? []).map((record) => ({ ...record, sourceId })));
 if (!expenseRecords.length && !allowSample) {
   throw new Error([

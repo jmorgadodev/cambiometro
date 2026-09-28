@@ -3,6 +3,15 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 
 describe("separación de workflows Pages", () => {
+  it("valida la proyección y los subsets de ChileCompra antes de escribir el release R2", () => {
+    const workflow = readFileSync(resolve(process.cwd(), "../.github/workflows/etl-chilecompra.yml"), "utf8");
+    const qualityGate = workflow.indexOf("npm run check:static-input-quality");
+    const lakePublish = workflow.indexOf("npm run data:publish");
+
+    expect(qualityGate).toBeGreaterThanOrEqual(0);
+    expect(lakePublish).toBeGreaterThan(qualityGate);
+  });
+
   it("separa el estado de Pages del Worker API para evitar bloqueos SQLite", () => {
     for (const file of ["pages-ui-refresh.yml", "build-e2e.yml"]) {
       const workflow = readFileSync(resolve(process.cwd(), "../.github/workflows", file), "utf8");

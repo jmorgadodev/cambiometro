@@ -222,13 +222,13 @@ async function main() {
     }
   });
   await navigationPage.goto(`${baseUrl}/`, { waitUntil: "domcontentloaded", timeout: 30_000 });
-  await navigationPage.getByRole("link", { name: "Explorar parlamentarios" }).click();
+  await navigationPage.getByRole("link", { name: "Explorar datos oficiales" }).click();
   await navigationPage.waitForTimeout(waitMs);
   const politicianNavigation = {
     path: new URL(navigationPage.url()).pathname,
     ok: (await navigationPage.locator("body").innerText()).includes("Diputados y Senadores"),
   };
-  await navigationPage.getByRole("link", { name: "Municipalidades", exact: true }).first().click();
+  await navigationPage.locator('a[href="/municipalidades/"]').first().click();
   await navigationPage.waitForTimeout(waitMs);
   const municipalityNavigation = {
     path: new URL(navigationPage.url()).pathname,

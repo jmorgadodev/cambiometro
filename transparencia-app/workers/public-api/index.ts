@@ -303,12 +303,23 @@ interface CpltManifest {
 }
 
 interface StaticSiteManifest {
-  files: Array<{ path: string; key: string }>;
+  files: Array<{ path: string; key: string; sourceId?: string; period?: string; recordCount?: number }>;
+}
+
+interface ExpensePeriodIndex {
+  schemaVersion: 1;
+  dataset: "gastos-operacionales-por-periodo";
+  generatedAt?: string;
+  sources: Array<{
+    sourceId: "gastos_camara" | "gastos_senado";
+    periods: Array<{ period: string; path: string; recordCount: number }>;
+  }>;
 }
 
 interface ExpenseSubset {
   schemaVersion: number;
   sourceId: "gastos_camara" | "gastos_senado";
+  period?: string;
   generatedAt?: string;
   recordCount: number;
   checksumSha256?: string;
@@ -1293,6 +1304,97 @@ function expenseRecord(row: ExpenseSubset["records"][number], sourceId: ExpenseS
   };
 }
 
+async function listExpenseMonthlyShardsFromR2(
+  requestUrl: URL,
+  env: Env,
+  manifest: StaticSiteManifest,
+  sourceIds: ExpenseSubset["sourceId"][],
+  query: string,
+  period: string,
+  from: string,
+  to: string,
+  entityId: string,
+): Promise<Response | null> {
+  const indexEntry = manifest.files.find((file) => file.path === "data/lake-subsets/expense-periods/manifest.json");
+  if (!indexEntry) return null;
+  const index = await r2Json<ExpensePeriodIndex>(env.PUBLIC_DATA, indexEntry.key);
+  if (!index || index.schemaVersion !== 1 || index.dataset !== "gastos-operacionales-por-periodo" || !Array.isArray(index.sources)) {
+    return failure("EXPENSE_PERIOD_INDEX_INVALID", "Los cortes mensuales de gastos no están disponibles temporalmente.", 503);
+  }
+
+  const allPeriods = new Map<string, Array<{ sourceId: ExpenseSubset["sourceId"]; key: string; recordCount: number }>>();
+  const indexedSources = new Set(index.sources.map((source) => source.sourceId));
+  for (const sourceId of sourceIds) {
+    if (!indexedSources.has(sourceId)) return failure("EXPENSE_PERIOD_INDEX_SOURCE_MISSING", "Falta un índice de gastos para una fuente publicada.", 503, { source: sourceId });
+  }
+  for (const source of index.sources) {
+    if (!sourceIds.includes(source.sourceId) || !Array.isArray(source.periods)) continue;
+    for (const item of source.periods) {
+      const expectedPath = `data/lake-subsets/expense-periods/${source.sourceId}/${item.period}.json`;
+      const validPeriod = /^\d{4}-(?:0[1-9]|1[0-2])$/.test(item.period);
+      const asset = manifest.files.find((file) => file.path === item.path);
+      if (!validPeriod || item.path !== expectedPath || !Number.isSafeInteger(item.recordCount) || item.recordCount < 1
+        || !asset || asset.sourceId !== source.sourceId || asset.period !== item.period || asset.recordCount !== item.recordCount) {
+        return failure("EXPENSE_PERIOD_INDEX_ENTRY_INVALID", "Un corte mensual de gastos necesita revisión.", 503, { source: source.sourceId, period: item.period });
+      }
+      const rows = allPeriods.get(item.period) ?? [];
+      rows.push({ sourceId: source.sourceId, key: asset.key, recordCount: item.recordCount });
+      allPeriods.set(item.period, rows);
+    }
+  }
+
+  const selectedPeriods = [...allPeriods.keys()]
+    .filter((value) => (!period || value.startsWith(period))
+      && (!from || value >= from.slice(0, 7))
+      && (!to || value <= to.slice(0, 7)))
+    .sort((left, right) => right.localeCompare(left));
+  const needsFullCount = Boolean(query || entityId || from || to);
+  if (needsFullCount && selectedPeriods.length > 12) {
+    return failure("QUERY_SCOPE_REQUIRED", "Para revisar gastos en un rango amplio, selecciona un año o un período mensual.", 422, {
+      source: sourceIds.length === 1 ? sourceIds[0] : "gastos_operacionales",
+      availablePeriods: selectedPeriods.length,
+      maximumSearchPeriods: 12,
+    });
+  }
+  const limit = limitFrom(requestUrl);
+  const offset = offsetFrom(requestUrl);
+  const rows: Array<{ row: ExpenseSubset["records"][number]; sourceId: ExpenseSubset["sourceId"] }> = [];
+  let matched = 0;
+  const totalFromIndex = selectedPeriods.reduce((total, current) => total + (allPeriods.get(current) ?? []).reduce((sum, asset) => sum + asset.recordCount, 0), 0);
+  for (const current of selectedPeriods) {
+    const assets = allPeriods.get(current) ?? [];
+    const loaded = await Promise.all(assets.map(async (asset) => ({ asset, subset: await r2Json<ExpenseSubset>(env.PUBLIC_DATA, asset.key) })));
+    for (const { asset, subset } of loaded) {
+      if (!subset || subset.sourceId !== asset.sourceId || subset.period !== current || subset.recordCount !== asset.recordCount
+        || !Array.isArray(subset.records) || subset.records.length !== asset.recordCount
+        || subset.records.some((row) => row.periodo !== current)) {
+        return failure("EXPENSE_MONTH_SHARD_INVALID", "El corte mensual de gastos no pasó la verificación.", 503, { source: asset.sourceId, period: current });
+      }
+      const filtered = subset.records
+        .filter((row) => isPublicExpensePeriod(asset.sourceId, row.periodo))
+        .filter((row) => !query || normalized(`${row.id} ${row.nombre} ${row.item} ${row.fuente}`).includes(query))
+        .filter((row) => !from || row.fecha >= from)
+        .filter((row) => !to || row.fecha <= to)
+        .filter((row) => !entityId || normalized(`${row.diputado_id ?? ""} ${row.nombre ?? ""}`).includes(entityId));
+      matched += filtered.length;
+      rows.push(...filtered.map((row) => ({ row, sourceId: asset.sourceId })));
+    }
+    if (!needsFullCount && rows.length >= offset + limit) break;
+  }
+  rows.sort((left, right) => right.row.fecha.localeCompare(left.row.fecha) || right.row.id.localeCompare(left.row.id));
+  const total = needsFullCount ? matched : totalFromIndex;
+  const data = rows.slice(offset, offset + limit).map(({ row, sourceId }) => expenseRecord(row, sourceId));
+  return success(data, {
+    total,
+    limit,
+    page: Math.floor(offset / limit) + 1,
+    totalPages: Math.max(1, Math.ceil(total / limit)),
+    source: sourceIds.length === 1 ? sourceIds[0] : "gastos_operacionales",
+    updatedAt: index.generatedAt ?? null,
+    sourceBackend: "r2-months",
+  }, pageLinks(requestUrl, offset, limit, total));
+}
+
 async function listExpensesFromR2(requestUrl: URL, env: Env): Promise<Response | null> {
   const requestedSource = requestUrl.searchParams.get("source")?.trim();
   const requestedKind = requestUrl.searchParams.get("kind")?.trim();
@@ -1302,15 +1404,6 @@ async function listExpensesFromR2(requestUrl: URL, env: Env): Promise<Response |
 
   const manifest = await r2Json<StaticSiteManifest>(env.PUBLIC_DATA, "projections/static-site-v1/manifest.json");
   if (!manifest?.files?.length) return null;
-  const sourceIds = requestedSource ? [requestedSource as ExpenseSubset["sourceId"]] : expenseSources;
-  const subsets = await Promise.all(sourceIds.map(async (sourceId) => {
-    const path = `data/lake-subsets/${sourceId.replace("gastos_", "gastos-")}.subset.json`;
-    const entry = manifest.files.find((file) => file.path === path);
-    if (!entry) return null;
-    return await r2Json<ExpenseSubset>(env.PUBLIC_DATA, entry.key);
-  }));
-  if (subsets.some((subset) => !subset || !Array.isArray(subset.records))) return null;
-
   const query = normalized(requestUrl.searchParams.get("q") ?? requestUrl.searchParams.get("query"));
   const period = requestUrl.searchParams.get("period")?.trim() ?? requestUrl.searchParams.get("periodo")?.trim() ?? "";
   const from = requestUrl.searchParams.get("from")?.trim() ?? "";
@@ -1319,8 +1412,50 @@ async function listExpensesFromR2(requestUrl: URL, env: Env): Promise<Response |
   if ((period && !/^\d{4}(?:-\d{2})?$/.test(period)) || query.length > 80 || from.length > 32 || to.length > 32 || entityId.length > 160) {
     return failure("INVALID_QUERY", "Parámetros de consulta inválidos.", 400);
   }
+  const sourceIds = requestedSource ? [requestedSource as ExpenseSubset["sourceId"]] : expenseSources;
+  const monthlyResponse = await listExpenseMonthlyShardsFromR2(requestUrl, env, manifest, sourceIds, query, period, from, to, entityId);
+  if (monthlyResponse) return monthlyResponse;
+  const subsets = await Promise.all(sourceIds.map(async (sourceId) => {
+    const monthlyRoot = `data/lake-subsets/expense-periods/${sourceId}/`;
+    const monthlyAssetsExist = manifest.files.some((file) => file.path.startsWith(monthlyRoot));
+    const selectedPeriods = period.length === 4
+      ? manifest.files.map((file) => file.path.slice(monthlyRoot.length, -5)).filter((value) => /^\d{4}-\d{2}$/.test(value) && value.startsWith(period))
+      : period.length === 7
+        ? [period]
+        : [];
+    const exactDateRange = !period && (from || to);
+    const rangedPeriods = exactDateRange
+      ? manifest.files.map((file) => file.path.slice(monthlyRoot.length, -5)).filter((value) => /^\d{4}-\d{2}$/.test(value)
+        && (!from || value >= from.slice(0, 7)) && (!to || value <= to.slice(0, 7)))
+      : [];
+    const periodsToLoad = selectedPeriods.length > 0 ? selectedPeriods : rangedPeriods;
+    const canUseMonthlyArtifacts = monthlyAssetsExist && (period.length === 4 || period.length === 7 || exactDateRange);
+    if (canUseMonthlyArtifacts) {
+      const monthFiles = periodsToLoad.map((value) => manifest.files.find((file) => file.path === `${monthlyRoot}${value}.json`)).filter((file): file is StaticSiteManifest["files"][number] => Boolean(file));
+      if (selectedPeriods.length === 1 && monthFiles.length === 0) return { schemaVersion: 1, sourceId, generatedAt: undefined, recordCount: 0, records: [] };
+      const monthly = await Promise.all(monthFiles.map((file) => r2Json<ExpenseSubset>(env.PUBLIC_DATA, file.key)));
+      if (monthly.some((subset) => !subset || subset.sourceId !== sourceId || !Array.isArray(subset.records)
+        || subset.recordCount !== subset.records.length
+        || subset.records.some((row) => row.periodo !== subset.period))) {
+        return null;
+      }
+      return {
+        sourceId,
+        generatedAt: monthly.map((subset) => subset!.generatedAt ?? "").sort().at(-1),
+        records: monthly.flatMap((subset) => subset!.records),
+      } as ExpenseSubset;
+    }
+    const path = `data/lake-subsets/${sourceId.replace("gastos_", "gastos-")}.subset.json`;
+    const entry = manifest.files.find((file) => file.path === path);
+    if (!entry) return null;
+    return await r2Json<ExpenseSubset>(env.PUBLIC_DATA, entry.key);
+  }));
+  const validSubsets = subsets.filter((subset): subset is ExpenseSubset => Boolean(subset)
+    && Array.isArray((subset as ExpenseSubset).records));
+  if (validSubsets.length !== subsets.length) return null;
+
   const normalize = (value: unknown) => normalized(value);
-  const rows = subsets.flatMap((subset) => subset!.records.map((row) => ({ row, sourceId: subset!.sourceId })));
+  const rows = validSubsets.flatMap((subset) => subset.records.map((row) => ({ row, sourceId: subset.sourceId })));
   const filtered = rows
     .filter(({ sourceId, row }) => isPublicExpensePeriod(sourceId, row.periodo))
     .filter(({ row }) => !query || normalize(`${row.id} ${row.nombre} ${row.item} ${row.fuente}`).includes(query))
@@ -1340,7 +1475,7 @@ async function listExpensesFromR2(requestUrl: URL, env: Env): Promise<Response |
     page: Math.floor(offset / limit) + 1,
     totalPages: Math.max(1, Math.ceil(total / limit)),
     source: requestedSource ?? "gastos_operacionales",
-    updatedAt: subsets.reduce((latest, subset) => String(subset!.generatedAt ?? "") > latest ? String(subset!.generatedAt ?? "") : latest, ""),
+    updatedAt: validSubsets.reduce((latest, subset) => String(subset.generatedAt ?? "") > latest ? String(subset.generatedAt ?? "") : latest, ""),
     sourceBackend: "r2",
   }, pageLinks(requestUrl, offset, limit, total));
 }
@@ -2349,6 +2484,13 @@ export default {
         const expenseSource = url.searchParams.get("source")?.startsWith("gastos_");
         const expenseKind = url.searchParams.get("kind") === "expense";
         if (expenseSource || expenseKind) {
+          // Prefer bounded month shards whenever their index is published.
+          // The canonical lake path can otherwise turn one monthly request
+          // into a wide historical scan and hit the Worker CPU limit.
+          const r2 = await listExpensesFromR2(url, env);
+          const r2Payload = r2 ? await r2.clone().json().catch(() => null) as { meta?: JsonRecord } | null : null;
+          if (r2 && r2Payload?.meta?.sourceBackend === "r2-months") return r2;
+
           // El lake es la proyección canónica y puede contener más histórico
           // que el subconjunto estático usado como respaldo de compatibilidad.
           // Sólo usamos el subconjunto si el lake no tiene filas publicadas;
@@ -2359,7 +2501,6 @@ export default {
             const lakePayload = lake ? await lake.clone().json().catch(() => null) as { meta?: JsonRecord } | null : null;
             if (lake && lakePayload?.meta?.sourceBackend === "r2-lake" && Number(lakePayload.meta.publishedRows ?? 0) > 0) return lake;
           }
-          const r2 = await listExpensesFromR2(url, env);
           if (r2) return r2;
         }
         // Any source with a published R2 snapshot must be served from that

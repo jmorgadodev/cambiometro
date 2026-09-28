@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { advanceExpenseOffsets, getLatestPublishedPeriod, getPublishedPeriodDateRange, getPublishedPeriodRange, isPublishedPeriod, mapExpenseApiRecord, mergeExpenseSourcePages } from "./gastos-public-api";
+import { advanceExpenseOffsets, getLatestPublishedPeriod, getPublishedPeriodDateRange, getPublishedPeriodRange, isExpenseSourceBackendSupported, isPublishedPeriod, mapExpenseApiRecord, mergeExpenseSourcePages } from "./gastos-public-api";
 
 const row = (id: string, sourceId: "gastos_camara" | "gastos_senado", date: string) => ({
   id,
@@ -14,6 +14,12 @@ const row = (id: string, sourceId: "gastos_camara" | "gastos_senado", date: stri
 });
 
 describe("paginación pública de gastos", () => {
+  it("acepta respuestas servidas desde fragmentos mensuales de R2", () => {
+    expect(isExpenseSourceBackendSupported("r2-months")).toBe(true);
+    expect(isExpenseSourceBackendSupported("r2")).toBe(true);
+    expect(isExpenseSourceBackendSupported("d1")).toBe(false);
+  });
+
   it("genera límites inclusivos sólo para meses publicados consecutivos", () => {
     expect(getPublishedPeriodRange(["2026-04", "2026-06", "2026-05", "2026-04"]))
       .toEqual({ from: "2026-04", to: "2026-06" });
