@@ -402,12 +402,14 @@ Páez (17-09) y José Bravo (15-09) permanecen como las dos señales en
 confirmación, separadas de las salidas verificadas; las exclusiones históricas
 y el cargo de Rafael Araos también pasaron sus aserciones.
 
-No se pudo listar el proyecto Pages con el token Cloudflare disponible: el API
+No se pudo listar el proyecto Pages con el token Cloudflare local: el API
 respondió error de autenticación/permisos `10000` en la lectura de
-`pages/projects`. Por tanto no se ha subido preview ni producción y no se ha
-alterado R2/D1. Hace falta un token con permiso de lectura del proyecto Pages y
-capacidad de despliegue para continuar la validación remota; el arreglo de
-paginación de Contraloría sigue siendo sólo local.
+`pages/projects`. La publicación de preview se completó de forma alternativa
+mediante GitHub Actions, run `36378158323`, URL
+`https://3f407566.cambiometro.pages.dev` (alias de rama
+`https://codex-r2-catalog-reference-a.cambiometro.pages.dev`). Fue sólo un
+deployment de preview; no se promovió producción ni se hicieron escrituras en
+R2/D1. Las ocho rutas respondieron HTTP 200 y el preview incluyó `noindex`.
 
 Durante la revisión previa a promoción se encontró y corrigió otra falla local
 en `publish-transferencias-api-release.mjs`: tras extraer el manifiesto a un
@@ -418,12 +420,27 @@ manifiesto construido y una prueba reproduce su contenido. Los valores usados
 por esa prueba son un fixture pequeño sintético; no afirman que las 271 filas
 pendientes de reconciliación sean duplicadas.
 
-La suite completa vuelve a pasar con 1.298 pruebas; typechecks, arquitectura,
+La suite completa de ese estado pasó con 1.298 pruebas; typechecks, arquitectura,
 tokens, enlaces y scanner de HTML también pasaron. `eslint` de los archivos
 tocados terminó con cero errores y cuatro advertencias. El workflow
 `pages-ui-refresh` ofrece una entrada manual `preview_branch`: su paso de
 preview despliega a Pages sólo esa rama y los pasos de producción requieren
 `publish_pages=true` junto a `confirm_cutover=CAMBIOMETRO_CONFIRM_CUTOVER`.
-Publicar el preview mediante GitHub Actions es viable, pero requiere guardar
-estos cambios en la rama y despachar explícitamente ese workflow; no se ha
-despachado todavía.
+La prueba interactiva posterior detectó que las tres llamadas del buscador
+global (`/api/v1/search`, `/api/v1/funcionarios` y `/api/v1/entities`)
+respondían HTTP 404 desde el host `pages.dev`; sólo cargaban las coincidencias
+del índice estático de remuneraciones. Por eso el smoke de rutas anterior no
+demostraba que el buscador funcionara. Se añadió una prueba de regresión y se
+ajustó `publicApiUrl` para usar la API pública en localhost y `*.pages.dev`,
+manteniendo rutas relativas en producción y permitiendo un origen explícito de
+preview. La nueva prueba falló antes del cambio y pasa después. `npm test`
+terminó con 1.299 pruebas aprobadas tras la corrección.
+
+El build completo de Pages no se pudo validar localmente: faltan el lago
+completo de Ley 19.862 y el release paginado canónico, por lo que
+`build-static-site-data.mjs` detuvo correctamente el proceso antes de exportar.
+El siguiente paso seguro es volver a ejecutar `pages-ui-refresh` en modo
+`ui-only` y con `preview_branch` solamente; no habilitar `publish_pages`.
+Después hay que comprobar que las tres llamadas API dejan de responder 404 y
+que búsquedas de Kaiser/Torrealba muestran todas las categorías publicadas.
+Producción sigue sin promoverse.
