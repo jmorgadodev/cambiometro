@@ -551,3 +551,24 @@ valores sí coinciden con sus arrays; por tanto, esta protección no altera el
 artefacto actual. Tres pruebas cubren cero real, conteo derivado y discrepancia.
 El generador no se ejecutó contra los demás subsets ni se publicó; la
 protección requiere integrarse antes de una próxima generación ETL.
+
+### Contraste DIPRES en el release estático productivo
+
+El manifiesto `projections/static-site-v1/manifest.json` vigente al
+27-09-2026 contiene tanto la proyección completa como el subset. Se leyeron
+ambos artefactos pequeños desde R2 y se verificaron sus SHA-256 contra el
+manifiesto. La proyección completa declara 476 filas, contiene 476 IDs de
+programa distintos y coincide con su checksum. El subset contiene 60 filas,
+declara `totalPrograms: 320` y no incluye `count`; el proyecto de origen
+confirma que ese `count` correcto es 476. Es, por tanto, metadato errado del
+subset, no evidencia de que falten 156 filas en la proyección completa.
+
+La página y el workflow prefieren/hidratan la proyección completa, por lo que
+el número 320 no se considera el conteo productivo activo de la vista normal.
+Sin embargo, el subset de fallback no respeta el contrato de `count` y su
+total declarado es incorrecto. Se cambió localmente el generador para
+establecer `count` como las 60 filas incluidas y `totalPrograms` como el
+conteo completo verificado; se añadieron tres pruebas para cero, derivación y
+discrepancia. Las pruebas pasan, pero no se re-generó ni publicó el artefacto
+estático existente. El release de proyección DIPRES fue generado el
+21-08-2026; su frescura y últimos períodos requieren auditoría aparte.

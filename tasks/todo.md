@@ -16,6 +16,16 @@
   escribir R2, materializar D1 ni promover producción mientras los conteos
   discrepen.
 
+- [ ] **DIPRES — 75% técnico (3/4 controles):** el manifest estático R2
+  productivo referencia la proyección completa correcta (476 filas, 476 IDs
+  distintos, checksum válido), pero el subset de 60 filas publica
+  `totalPrograms: 320` y omite `count`. La aplicación y el workflow usan la
+  proyección completa; el total 320 es un defecto del fallback, no el conteo
+  de la vista normal. El generador ya fue corregido localmente para `count=60`
+  disponible y `totalPrograms=476`, con 3 pruebas verdes. Pendiente integrar,
+  regenerar el artefacto y probar preview; además revisar frescura/períodos
+  porque la proyección fue generada el 21-08-2026. No se escribió R2.
+
 ## Estado de cierre actualizado — 25-09-2026
 
 Este resumen prevalece sobre los estados históricos fechados más abajo cuando
