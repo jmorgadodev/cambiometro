@@ -64,7 +64,7 @@ function loadCheckpoints(checkpointDir, diputados) {
     try {
       const records = JSON.parse(raw);
       if (Array.isArray(records)) recordsById.set(String(diputado.id), records);
-    } catch (error) {
+    } catch {
       console.warn(`[camara-gastos] checkpoint inválido para ${diputado.id}; se volverá a consultar`);
     }
   }
@@ -107,18 +107,6 @@ function limpiarCelda(texto) {
     .trim();
 }
 
-/** Extrae el HTML del UpdatePanel del delta de ScriptManager (length-prefixed). */
-function parseUpdatePanel(delta) {
-  const marker = `updatePanel|${PANEL_ID}|`;
-  const start = delta.indexOf(marker);
-  if (start < 0) throw new Error("respuesta sin updatePanel");
-  const inicioContenido = start + marker.length;
-  const finRe = /\|\d+\|updatePanelIDs\|/;
-  const finMatch = finRe.exec(delta.slice(inicioContenido));
-  if (!finMatch) throw new Error("respuesta sin fin de updatePanel");
-  return delta.slice(inicioContenido, inicioContenido + finMatch.index);
-}
-
 /** Convierte las filas <tr><td>item</td><td>monto</td></tr> en registros. */
 function parseRows(html) {
   const rows = [];
@@ -135,6 +123,13 @@ function parseRows(html) {
   return rows;
 }
 
+export function parseCamaraExpensePanel({ html = "", text = "" } = {}) {
+  if (/no han sido publicados/i.test(text)) return { nodata: true };
+  const filas = parseRows(html);
+  if (filas.length === 0) throw new Error("CAMARA_GASTOS_EMPTY_PANEL");
+  return { filas };
+}
+
 function obtenerMesesDisponibles(page) {
   return page.evaluate(() => {
     const sel = document.querySelector('select[name$="ddlMes"]');
@@ -142,54 +137,34 @@ function obtenerMesesDisponibles(page) {
   });
 }
 
-/**
- * Postback asíncrono del ddlMes. Devuelve { filas } o { nodata: true }; lanza
- * ErrorRateLimit si Cloudflare responde 429 o desafío (para retry con espera).
- */
+/** Cambia el selector con el postback nativo de WebForms y lee el panel ya actualizado. */
 async function postbackMes(page, { mes, anno, diputadoId }) {
-  const respuesta = await page.evaluate(async ({ mes, anno, diputadoId }) => {
-    const form = document.querySelector("#Form1") ?? document.forms[document.forms.length - 1];
-    if (!form) return { status: 0, text: "" };
-    const selMes = document.querySelector('select[name$="ddlMes"]');
-    const selAno = document.querySelector('select[name$="ddlAno"]');
-    const selDip = document.querySelector('select[name$="ddlDiputados"]');
-    const data = new FormData(form);
-    for (const [clave] of [...data.entries()]) {
-      if (!clave.includes("ddl") && !clave.includes("ScriptManager") && !clave.startsWith("__")) data.delete(clave);
-    }
-    if (selMes) {
-      data.set(selMes.name, String(mes));
-      data.set("__EVENTTARGET", selMes.name);
-    }
-    if (selAno && [...selAno.options].some((o) => o.value === String(anno))) data.set(selAno.name, String(anno));
-    if (selDip && [...selDip.options].some((o) => o.value === String(diputadoId))) data.set(selDip.name, String(diputadoId));
-    data.set("__EVENTARGUMENT", "");
-    data.set("__ASYNCPOST", "true");
-    const resp = await fetch(form.getAttribute("action") || location.href, {
-      method: "POST",
-      body: data,
-      credentials: "include",
-      headers: { "X-Requested-With": "XMLHttpRequest", "X-MicrosoftAjax": "Delta=true" },
+  const selector = 'select[name$="ddlMes"]';
+  const monthValue = String(mes);
+  const currentValue = await page.$eval(selector, (element) => element.value);
+  if (currentValue !== monthValue) {
+    const listenerReady = await page.evaluate(() => {
+      const manager = window.Sys?.WebForms?.PageRequestManager?.getInstance();
+      if (!manager) return false;
+      window.__camaraGastosPostback = { done: false, error: null };
+      const handler = (_sender, args) => {
+        const error = args.get_error();
+        window.__camaraGastosPostback = { done: true, error: error?.message ?? null };
+        manager.remove_endRequest(handler);
+      };
+      manager.add_endRequest(handler);
+      return true;
     });
-    return { status: resp.status, text: await resp.text() };
-  }, { mes, anno, diputadoId });
+    if (!listenerReady) throw new Error("CAMARA_GASTOS_WEBFORMS_MANAGER_MISSING");
+    const selected = await page.select(selector, monthValue);
+    if (!selected.includes(monthValue)) throw new Error(`CAMARA_GASTOS_MONTH_NOT_AVAILABLE:${anno}-${monthValue}:${diputadoId}`);
+    await page.waitForFunction(() => window.__camaraGastosPostback?.done === true, { timeout: 60000 });
+    const requestError = await page.evaluate(() => window.__camaraGastosPostback?.error ?? null);
+    if (requestError) throw new Error(`CAMARA_GASTOS_POSTBACK_FAILED:${anno}-${monthValue}:${requestError}`);
+  }
 
-  if (respuesta.status === 429 || /cf-wrapper|Just a moment|Attention Required/i.test(respuesta.text)) {
-    throw Object.assign(new Error(`Cloudflare rate-limit en mes ${mes} (status ${respuesta.status})`), { rate: true });
-  }
-  if (respuesta.status !== 200 || !respuesta.text) {
-    throw new Error(`postback mes ${mes}: status ${respuesta.status}`);
-  }
-  if (/no han sido publicados/.test(respuesta.text)) return { nodata: true };
-  try {
-    return { filas: parseRows(parseUpdatePanel(respuesta.text)) };
-  } catch (error) {
-    if (process.env.CAMARA_GASTOS_DUMP) {
-      writeFileSync(join(PROGRESO_DIR, `dbg-postback-${diputadoId}-${mes}.html`), respuesta.text);
-      console.warn(`[camara-gastos] dump guardado para ${diputadoId} mes ${mes} (${respuesta.text.length} chars)`);
-    }
-    throw error;
-  }
+  const panel = await page.$eval(`#${PANEL_ID}`, (element) => ({ html: element.innerHTML, text: element.innerText }));
+  return parseCamaraExpensePanel(panel);
 }
 
 async function abrirDiputado(page, diputadoId, reintentos = MAX_REINTENTOS) {
