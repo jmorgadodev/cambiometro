@@ -534,5 +534,11 @@ valores no se podían respaldar con un catálogo accesible. Se eliminó esa
 afirmación del código de trabajo: el fallback ahora devuelve `expectedTotal:
 null` si no hay manifiesto disponible. La prueba de regresión falló primero al
 recibir 291 y pasó después del cambio; los 24 tests de `index.test.ts` y
-`api:typecheck` pasan. Esto está validado sólo en la rama local; todavía no se
-ha desplegado ni en el preview aislado ni en producción.
+`api:typecheck` pasan. La versión se desplegó sólo al Worker aislado
+`cambiometro-public-api-r2-audit-preview` (versión
+`20446794-73d6-4ebb-95df-2cbeaa64fe45`, workflow `36383543138`). Su smoke
+remoto volvió a confirmar `expectedRows=310`, `publishedRows=62`, estado
+`partial`, una partición faltante y paginación de julio con cuatro IDs
+distintos. Esa prueba mantiene visible el hueco real; no pudo activar el
+fallback porque R2 estaba disponible. No se desplegó a producción ni se
+escribió en R2/D1.

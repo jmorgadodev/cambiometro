@@ -2,15 +2,17 @@
 
 ## Actualización crítica — Contraloría (28-09-2026)
 
-- [ ] **Contraloría — 40% (2/5 controles):** ya se compararon el catálogo R2
+- [ ] **Contraloría — 60% técnico (3/5 etapas; los datos siguen sin reconciliar):** ya se compararon el catálogo R2
   (310), el manifiesto ETL (284) y los registros por partición (275 legibles +
   35 esperados de agosto, cuyo manifiesto falta); también se validó el backup y
   se corrigió en código el `expectedTotal` literal que exponía 291 durante una
-  caída. Pasan los 24 tests del Worker y `api:typecheck`. Falta reconciliar la
-  versión por período y recuperar/regenerar agosto con fuente oficial y
-  preflight de tamaño; luego probar el endpoint sin huecos en preview y
-  producción. Sin restaurar el backup de 3 filas, escribir R2, materializar
-  D1 ni promover producción mientras los conteos discrepen.
+  caída. Pasan los 24 tests del Worker, `api:typecheck`, `api:size` y el smoke
+  del preview aislado R2-only (`36383543138`); la paginación sigue marcando la
+  partición ausente. Falta reconciliar la versión por período y
+  recuperar/regenerar agosto con fuente oficial y preflight de tamaño; luego
+  validar datos y búsquedas en producción. Sin restaurar el backup de 3 filas,
+  escribir R2, materializar D1 ni promover producción mientras los conteos
+  discrepen.
 
 ## Estado de cierre actualizado — 25-09-2026
 
