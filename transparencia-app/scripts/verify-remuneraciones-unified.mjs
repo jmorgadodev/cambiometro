@@ -1,11 +1,13 @@
 import fs from "node:fs";
 import path from "node:path";
+import { validateUnifiedStaticManifest } from "./remuneraciones-unified-metadata.mjs";
 
 const root = process.cwd();
 const outputDir = path.join(root, "public", "data", "remuneraciones-unified");
 const source38 = JSON.parse(fs.readFileSync(path.join(root, "data", "remuneraciones-38bis-publico.json"), "utf8"));
 const source38History = JSON.parse(fs.readFileSync(path.join(root, "data", "remuneraciones-38bis-publico-historico.json"), "utf8"));
 const manifest = JSON.parse(fs.readFileSync(path.join(outputDir, "manifest.json"), "utf8"));
+validateUnifiedStaticManifest(manifest);
 
 const rows = [];
 for (const page of manifest.pages) {

@@ -226,6 +226,7 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
   return {
     data: selected,
     total: resultTotal,
+    totalScope: "published-index" as const,
     limit,
     nextCursor: offset + selected.length < resultTotal
       ? `v1_${(offset + selected.length).toString(36)}`
@@ -369,6 +370,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
     return {
       data: [] as EvidenceRecord[],
       total: 0,
+      totalScope: "confirmed-empty" as const,
       limit: Math.min(Math.max(params.limit, 1), 100),
       nextCursor: null,
       expectedTotal: 0,
@@ -393,7 +395,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
   // 1102; callers can narrow the period or use a published search index.
   if (hasFilters && orderedPartitions.length > MAX_UNINDEXED_FILTER_PARTITIONS && !params.from && !params.to) {
     return {
-      data: [] as EvidenceRecord[], total: 0, limit, nextCursor: null,
+      data: [] as EvidenceRecord[], total: 0, totalScope: "unknown" as const, limit, nextCursor: null,
       expectedTotal, loadedRows: 0, complete: false, missingPartitions: 0, missingArtifacts: 0,
       scanLimited: true,
     };
@@ -409,13 +411,23 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
     .filter((partition) => !partition.manifestKey || partition.checksumSha256 === "missing")
     .map((partition) => partition.id));
   let missingPartitions = knownMissingPartitionIds.size;
+  let unavailableRows = orderedPartitions.reduce((total, partition) => {
+    if (!knownMissingPartitionIds.has(partition.id)) return total;
+    const count = Number(partition.recordCount);
+    return total + (Number.isSafeInteger(count) && count >= 0 ? count : 0);
+  }, 0);
   let missingArtifacts = 0;
   let scannedAll = true;
   for (const partition of orderedPartitions) {
-    if (knownMissingPartitionIds.has(partition.id)) continue;
     if (!hasFilters && matched >= offset + limit) {
       scannedAll = false;
       break;
+    }
+    const partitionExpectedRows = Number.isSafeInteger(Number(partition.recordCount)) && Number(partition.recordCount) >= 0
+      ? Number(partition.recordCount)
+      : null;
+    if (knownMissingPartitionIds.has(partition.id)) {
+      continue;
     }
     const result = await readPartitionRecords(
       bucket,
@@ -425,29 +437,40 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
     );
     if (!result) {
       missingPartitions += 1;
+      if (partitionExpectedRows !== null) unavailableRows += partitionExpectedRows;
       continue;
     }
     loadedRows += result.loadedRows;
     missingArtifacts += result.missingArtifacts;
     if (result.incomplete) {
       missingPartitions += 1;
+      if (partitionExpectedRows !== null) unavailableRows += partitionExpectedRows;
       continue;
     }
     for (const record of result.records) {
       if (!matchesIndexedParams(record, params)) continue;
-      if (matched >= offset && data.length < limit) data.push(record);
+      if (matched >= offset && matched < offset + limit && data.length < limit) data.push(record);
       matched += 1;
+    }
+    // Unfiltered offsets are positions in the readable result set. Missing
+    // partitions are excluded from the cursor sequence so users never have to
+    // page through empty slots before reaching the next available month.
+    if (!hasFilters && partitionExpectedRows !== null && result.records.length < partitionExpectedRows) {
+      missingPartitions += 1;
+      unavailableRows += partitionExpectedRows - result.records.length;
     }
   }
   if (expectedTotal === null) expectedTotal = loadedRows;
   const partial = missingPartitions > 0 || missingArtifacts > 0;
-  const total = hasFilters || partial ? matched : expectedTotal ?? matched;
-  const complete = !partial && (hasFilters ? scannedAll : scannedAll && (expectedTotal === null || matched === expectedTotal));
+  const availableTotal = expectedTotal === null ? null : Math.max(0, expectedTotal - unavailableRows);
+  const total = hasFilters ? matched : availableTotal ?? matched;
+  const complete = !partial && (hasFilters ? scannedAll : scannedAll && (availableTotal === null || matched === availableTotal));
   return {
     data,
     total,
+    totalScope: hasFilters ? "matched-available" as const : expectedTotal !== null ? "published-available" as const : "scanned-so-far" as const,
     limit,
-    nextCursor: offset + data.length < total ? `v1_${(offset + data.length).toString(36)}` : null,
+    nextCursor: offset + limit < total ? `v1_${(offset + limit).toString(36)}` : null,
     expectedTotal,
     loadedRows,
     complete,

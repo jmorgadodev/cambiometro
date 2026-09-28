@@ -295,6 +295,7 @@ export function buildLakePlan(snapshot, options = {}) {
   const existingCatalog = options.existingCatalog ?? null;
   const existingEntityBundles = options.existingEntityBundles ?? {};
   const replaceSourceIds = new Set(options.replaceSourceIds ?? []);
+  const preserveExistingPartitionCountsFor = new Set(options.preserveExistingPartitionCountsFor ?? []);
   const sourceKeys = new Set(options.sourceKeys ?? []);
   for (const key of sourceKeys) {
     if (!Array.isArray(snapshot.fuentes?.[key]) || !snapshot.fuentes[key].length) throw new Error(`SOURCE_PUBLICATION_EMPTY:${key}`);
@@ -367,6 +368,12 @@ export function buildLakePlan(snapshot, options = {}) {
     const merged = new Map(previousRows.map(row => [row.id, row]));
     for (const row of group.records) merged.set(row.id, row);
     group.records = [...merged.values()];
+    if (preserveExistingPartitionCountsFor.has(group.sourceId)) {
+      const previousCount = existingCatalog?.partitions?.find((partition) => partition.id === group.id)?.recordCount;
+      if (Number.isSafeInteger(previousCount) && group.records.length < previousCount) {
+        throw new Error(`PARTITION_RECORD_COUNT_REGRESSION:${group.id}:${group.records.length}<${previousCount}`);
+      }
+    }
     const prefix = `partitions/${group.id}`;
     const assetPrefix = group.variant ? `${group.sourceId}-${group.variant}-` : `${group.sourceId}-`;
     const projection = buildDeterministicPartition(group.records);

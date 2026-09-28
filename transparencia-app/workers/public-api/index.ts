@@ -264,6 +264,10 @@ interface TransferApiManifest {
   dataset: string;
   generatedAt: string;
   totalRows: number;
+  sourceRows?: number | null;
+  duplicateExactRows?: number | null;
+  duplicateConflictingRows?: number | null;
+  excludedAfterCutoff?: number | null;
   pageSize: number;
   totalPages: number;
   pages: TransferApiPage[];
@@ -751,7 +755,7 @@ function officialFilterKeys(requestUrl: URL, datasetRoot = "funcionarios-v1", av
     ["calidad", requestUrl.searchParams.get("calidad") ?? "Todos"],
   ];
   for (const [name, value] of values) {
-    const normalizedValue = normalized(value);
+    const normalizedValue = name === "contrato" ? canonicalContract(value) : normalized(value);
     if (normalizedValue && normalizedValue !== "todos") keys.push(`${name}:${normalizedValue}`);
   }
   if (requestUrl.searchParams.get("horas_extras") === "true" || requestUrl.searchParams.get("soloHorasExtras") === "true") {
@@ -1193,7 +1197,7 @@ function pageLinks(url: URL, offset: number, limit: number, total: number) {
   const links: JsonRecord = { self: url.toString() };
   if (offset + limit < total) {
     const next = new URL(url);
-    next.searchParams.set("cursor", `v1_${offset + limit}`);
+    next.searchParams.set("cursor", `v1_${(offset + limit).toString(36)}`);
     links.next = next.toString();
   }
   return links;
@@ -1614,6 +1618,7 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
         }
         return success(lake.data, {
           total: lake.total,
+          totalScope: lake.totalScope,
           limit,
           page: Math.floor(offset / limit) + 1,
           totalPages: Math.max(1, Math.ceil(lake.total / limit)),
@@ -1700,7 +1705,6 @@ function recordsUnavailable(requestUrl: URL, reason: string) {
   const limit = limitFrom(requestUrl);
   const offset = offsetFrom(requestUrl);
   const source = requestUrl.searchParams.get("source")?.trim() ?? null;
-  const expectedTotals: Record<string, number> = { chilecompra: 74142, infolobby: 71467, contraloria: 291, infoprobidad: 15331 };
   return success([], {
     total: 0,
     limit,
@@ -1710,7 +1714,9 @@ function recordsUnavailable(requestUrl: URL, reason: string) {
     sourceStatus: "temporarily-unavailable",
     availability: "summary-only-or-d1-quota",
     requestedSource: source,
-    expectedTotal: source ? expectedTotals[source] ?? null : null,
+    // Do not surface cached literals as if they were the current source
+    // universe. If R2 is unavailable, there is no authoritative count here.
+    expectedTotal: null,
     reason,
   }, pageLinks(requestUrl, offset, limit, 0));
 }
@@ -2388,7 +2394,7 @@ function validateOfficials(url: URL) {
   const sortBy = url.searchParams.get("sortBy") ?? "sueldo_desc";
   if (query.length > 80 || (query.length > 0 && query.length < 2)) return "La busqueda debe tener entre 2 y 80 caracteres.";
   if (!/^(?:Todos|[a-z0-9][a-z0-9_-]{0,159})$/.test(url.searchParams.get("muni") ?? url.searchParams.get("organismo") ?? "Todos")) return "Organismo invalido.";
-  if (!["Todos", "Planta", "Contrata", "Honorarios", "CodigoTrabajo", "Codigo del Trabajo"].includes(contrato)) return "Tipo de contrato invalido.";
+  if (!["Todos", "Planta", "Contrata", "Honorarios", "CodigoTrabajo", "Codigo del Trabajo", "Código del Trabajo"].includes(contrato)) return "Tipo de contrato invalido.";
   if (!["sueldo_desc", "sueldo_asc", "horas_extras_desc", "nombre_asc", "nombre_desc"].includes(sortBy)) return "Orden invalido.";
   return null;
 }

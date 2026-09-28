@@ -69,11 +69,17 @@ const sources = config.map((source) => {
   const configuredPublicHistoricalCount = Number.isSafeInteger(source.publicHistoricalCount)
     ? source.publicHistoricalCount
     : null;
+  const catalogMatchesConfigured = Number.isSafeInteger(catalogEntry?.recordCount)
+    && catalogEntry.recordCount === source.canonicalCount;
   const publicHistoricalCount = configuredPublicHistoricalCount !== null
     ? configuredPublicHistoricalCount
-    : Number.isSafeInteger(partitionCount) && partitionCount > 0
-      ? Math.max(canonicalCount, partitionCount)
-      : canonicalCount;
+    : catalogMatchesConfigured
+      ? source.canonicalCount
+      : reconciliation.comparisonEligible && Number.isSafeInteger(partitionCount) && partitionCount > 0
+        ? Math.max(canonicalCount, partitionCount)
+        : reconciliation.comparisonEligible
+          ? canonicalCount
+          : null;
   const lastSuccessAt = healthEntry?.generatedAt ?? catalogEntry?.generatedAt ?? null;
   const sourceStatus = healthEntry?.status ?? catalogEntry?.status ?? null;
   const status = canonicalCount <= 0
@@ -106,7 +112,7 @@ const sources = config.map((source) => {
           : "Release disponible; la completitud se mantiene separada de la disponibilidad.",
     metrics: {
       published: metric(canonicalCount, historicalCount),
-      queryable: metric(queryableCount, canonicalCount),
+      queryable: reconciliation.comparisonEligible ? metric(queryableCount, canonicalCount) : metric(null, null),
       related: metric(source.relatedCount, canonicalCount),
     },
     quality: source.qualityObservations,
@@ -117,15 +123,25 @@ const sources = config.map((source) => {
 for (const source of sources) {
   if (!source.reconciliation.comparisonEligible) {
     source.metrics.published = metric(null, null);
+    source.metrics.queryable = metric(null, null);
     source.statusDetail = source.reconciliation.note;
   }
 }
 
-const totalCanonicalRecords = sources.reduce((sum, source) => sum + source.canonicalCount, 0);
-const totalHistoricalRecords = sources.reduce((sum, source) => sum + source.historicalCount, 0);
+const allSourceCountsReconciled = sources.every((source) => source.reconciliation.comparisonEligible);
+const totalCanonicalRecords = allSourceCountsReconciled
+  ? sources.reduce((sum, source) => sum + source.canonicalCount, 0)
+  : null;
+const totalHistoricalRecords = allSourceCountsReconciled
+  ? sources.reduce((sum, source) => sum + source.historicalCount, 0)
+  : null;
 const queryableSources = sources.filter((source) => source.reconciliation.comparisonEligible && source.metrics.queryable.count !== null);
-const queryableCount = queryableSources.length ? queryableSources.reduce((sum, source) => sum + source.metrics.queryable.count, 0) : null;
-const queryableDenominator = queryableSources.length ? queryableSources.reduce((sum, source) => sum + source.canonicalCount, 0) : null;
+const queryableCount = allSourceCountsReconciled && queryableSources.length
+  ? queryableSources.reduce((sum, source) => sum + source.metrics.queryable.count, 0)
+  : null;
+const queryableDenominator = allSourceCountsReconciled && queryableSources.length
+  ? queryableSources.reduce((sum, source) => sum + source.canonicalCount, 0)
+  : null;
 const totalRelatedRecords = Number.isSafeInteger(globalKpis.relaciones) ? globalKpis.relaciones : null;
 const generatedAt = health.generatedAt ?? catalog.generatedAt ?? globalKpis.generatedAt ?? new Date().toISOString();
 const payload = {

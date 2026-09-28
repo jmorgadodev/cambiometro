@@ -1,5 +1,78 @@
 # Lista de trabajo inmediata
 
+## Actualización crítica — Contraloría (28-09-2026)
+
+- [ ] **R2 — 81,8% de almacenamiento de cuenta (lectura 28-09):** 8.180.607.166
+  de 10.000.000.000 bytes sumando el bucket público (7.131.123.983) y backups
+  (1.049.483.183). Está sobre la advertencia del 80%, bajo la revisión del 90%
+  y el bloqueo al 95%; quedan 1.319.392.834 bytes hasta el bloqueo. El inventario
+  publicado del bucket principal está atrasado: omite 183 objetos/89.689.856
+  bytes y tiene una diferencia de tamaño de 84.078 bytes. El guard de publicación
+  consulta el inventario vivo, pero debe conservarse esta discrepancia para
+  corregir/reconciliar el índice, sin borrar objetos. No publicar un release
+  nuevo sin tamaño proyectado y preflight de cuenta completo.
+
+- [ ] **Contraloría — 60% técnico (3/5 etapas; los datos siguen sin reconciliar):** ya se compararon el catálogo R2
+  (310), el manifiesto ETL (284) y los registros por partición (275 legibles +
+  35 esperados de agosto, cuyo manifiesto falta); también se validó el backup y
+  se corrigió en código el `expectedTotal` literal que exponía 291 durante una
+  caída. El generador local ya deriva sus conteos desde las filas y falla ante
+  discrepancias; la proyección existente coincide (275/210/248). Pasan los 24
+  tests del Worker, 3 pruebas del generador, `api:typecheck`, `api:size` y el
+  smoke del preview aislado R2-only (`36383543138`); la paginación sigue
+  marcando la partición ausente. Falta reconciliar la versión por período y
+  recuperar/regenerar agosto con fuente oficial y preflight de tamaño; luego
+  validar datos y búsquedas en producción. Sin restaurar el backup de 3 filas,
+  escribir R2, materializar D1 ni promover producción mientras los conteos
+  discrepen.
+
+  **Nuevo hallazgo de cobertura (28-09):** se relevaron los 43 listados
+  oficiales (27 centrales y 16 regionales); quedaron visibles 33 filas de
+  agosto, que son sólo un mínimo observado. Varias vistas muestran hasta 10
+  filas recientes sin paginación aparente, y el ETL lee únicamente las filas
+  cargadas. El 35 de catálogo aún no se pudo reconciliar y el ETL no debe
+  presentarse como universo completo. Falta ubicar filtros/endpoints oficiales
+  de alcance completo y cotejar IDs antes de regenerar o publicar.
+  También se verificó que la clave canónica del payload de agosto no existe
+  en R2. Se añadió localmente una barrera para que el ETL no reemplace una
+  partición de Contraloría con un conteo menor al publicado; 2 regresiones
+  prueban 33<35 bloqueado y 35=35 permitido. No recupera el payload ni está
+  desplegada. La sección oficial Datos Abiertos ofrece además bases hasta 2025
+  (municipal hasta 2024); no sirven para reconstruir agosto 2026. Sólo se
+  consultaron sus tamaños HTTP, no se descargaron ni integraron.
+
+  **Endpoint oficial nuevo (28-09):** el Geoportal publica resúmenes por
+  comuna y un listado de informes por código comunal. Sus agregados 2026
+  coinciden: 22 en el resumen global, 22 en los resúmenes por región y 22 filas
+  detalladas en 20 comunas. El subconjunto municipal incluye tres informes de
+  agosto (Concepción, Navidad y Putre), potenciales para cotejo, pero no
+  reconcilia las 35 filas del lago Contraloría, que incluye un alcance distinto.
+  La API productiva de Cambiómetro confirma que agosto sigue sin estar
+  consultable (`publishedRows=0`, `expectedRows=35`, partición faltante). Falta
+  cotejar IDs/documentos y localizar evidencia oficial para las otras filas;
+  no sumar automáticamente estos 3 registros ni declarar recuperado el corte.
+
+- [ ] **DIPRES — 80% técnico:** el manifest estático R2
+  productivo referencia la proyección completa correcta (476 filas, 476 IDs
+  distintos, checksum válido), pero el subset de 60 filas publica
+  `totalPrograms: 320` y omite `count`. La aplicación usa la proyección
+  completa cuando está disponible; el total 320 es un defecto del fallback,
+  no la cobertura de la vista normal. Se confirmó que los 60 registros del
+  fallback local coinciden exactamente con 60 programas de la proyección R2
+  completa (476 IDs únicos); el artefacto local ahora declara `count=60` y
+  `totalPrograms=476`, con prueba de regresión (4 pruebas verdes) y `typecheck`.
+  El 28-09-2026 el build completo de Pages sí se validó localmente usando el
+  release canónico paginado de Ley 19.862, que es el que hidratan los workflows
+  oficiales: 62.172 filas, 1.244 páginas y checksum
+  `9615b9e0453a3dcbb849114295d3803a3aaeec84c336669efb0e2afe6f800825`; coincide
+  con el manifiesto R2. `npm run build` terminó en 0 y generó 4.675 rutas; el
+  smoke Playwright local pasó 101 comprobaciones. Esto corrige la conclusión
+  anterior: la ausencia de las ocho claves de manifiesto del lago histórico
+  (enero–agosto 2026) no bloquea Pages, pues el release API canónico existe y
+  está verificado. Siguen pendientes preview/publicación, revisión de frescura
+  DIPRES (release 21-08-2026) y reconciliación de las claves históricas
+  ausentes; no se escribió R2/D1 ni se desplegó.
+
 ## Estado de cierre actualizado — 25-09-2026
 
 Este resumen prevalece sobre los estados históricos fechados más abajo cuando
@@ -32,7 +105,7 @@ cierre verificados; no representan cobertura de datos ni una métrica automátic
 | --- | ---: | --- |
 | Historial de mandatos parlamentarios — **nuevo** | 10% | Capturar cortes oficiales por ID y asiento; comparar altas/bajas; confirmar fechas con evidencia; conservar períodos cerrados sin sumarlos a Movimientos del Ejecutivo. El análisis encontró que la tabla D1 actual no basta como historial público y su materialización remota está deshabilitada por defecto. |
 | Votaciones Senado | 85% | El preflight local y la API R2 coinciden para 12 votos del 20–24-09; septiembre publica 41 filas completas. Falta smoke de navegación/fichas y seguir revisando cortes futuros mediante la tarea local (cron remoto retirado). |
-| ChileCompra | 60% | Resolver el 403 del archivo mensual o mantener el corte válido; publicar sólo un período verificable, nunca el resultado vacío. La corrida del 21-09 recibió `CHILECOMPRA_BULK_HTTP_403` y fue bloqueada por `CHILECOMPRA_RELEASE_EMPTY_OR_UNAVAILABLE` (0 listings/documentos/registros); no continuó hacia publicación ni materialización D1. |
+| ChileCompra | 70% técnico; ejecución completa pendiente | El selector automático y sus 5 pruebas están en `c736f59`, rama `codex/r2-catalog-reference-audit-20260928`, con checks de CI verdes. El sondeo oficial eligió julio 2026 (8.004 licitaciones, 9.361 tratos directos y 17.364 convenios); R2 aún declara junio (74.142 registros). El preflight encontró 38.625 URLs de detalle únicas; a 5 req/s el piso es 2 h 8 min. Amplié en esta rama el timeout del workflow de 60 a 240 minutos, manteniendo la tasa y el guard R2 al 95%. Falta que CI valide el workflow y que una ejecución completa confirme estabilidad, conteos y bytes. La prueba local parcial se interrumpió tras 500 respuestas; no se completó ETL ni se escribió R2/D1. Antes de promover julio: verificar artefactos y presupuesto total de cuenta; no ejecutar si el preflight supera el margen/coste acordado. |
 | Remuneraciones y calidad CPLT | 55% | Terminar duplicados/calidad municipales, revisar el corte central contaminado y reconciliar el salto de julio con la parcialidad de agosto-septiembre; luego construir historiales por lotes. |
 | Backups y capacidad R2 | 30% | Obtener medición vigente, inventario/checksums y restauración probada; sólo entonces decidir retención selectiva. No borrar backups ni publicar una proyección grande antes de asegurar margen y rollback. |
 | Aislamiento y consumo D1 | 85% | La materialización remota no corre por defecto. Falta recuperar una lectura vigente de consumo/cuotas para certificarlo; no ejecutar escaneos ni cargas masivas. |

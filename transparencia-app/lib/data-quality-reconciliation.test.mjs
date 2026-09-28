@@ -37,6 +37,23 @@ describe("reconciliación de conteos de fuentes", () => {
     expect(result.reconciliation.components).toMatchObject({ asistencia: 54_538, votaciones: 4_058 });
   });
 
+  it("marca como no reconciliado el catálogo cuando declara más filas que el corte observado", () => {
+    const result = reconcileSourceCounts({
+      source: source({ id: "contraloria", canonicalCount: 291, historicalCount: 291, queryableCount: 291 }),
+      healthEntry: { recordCount: 291 },
+      catalogEntry: { recordCount: 310 },
+    });
+
+    expect(result.reconciliation).toMatchObject({
+      state: "scope_mismatch",
+      comparisonEligible: false,
+      observedCount: 291,
+      catalogCount: 310,
+    });
+    expect(result.reconciliation.note).toContain("310");
+    expect(result.reconciliation.note).toContain("291");
+  });
+
   it("acepta el release explícito de transferencias como denominador vigente", () => {
     const result = reconcileSourceCounts({
       source: source({ id: "ley-19862", canonicalCount: 59_361, historicalCount: 59_361 }),

@@ -195,6 +195,91 @@ describe("registros calientes de R2", () => {
     expect(result?.data[0]?.id).toBe("camara-1");
   });
 
+  it("pagina primero los registros disponibles cuando falta una partición reciente", async () => {
+    const records = gzipText([
+      { id: "contraloria-1", sourceId: "contraloria", kind: "audit", occurredAt: "2026-09-03", data: {} },
+      { id: "contraloria-2", sourceId: "contraloria", kind: "audit", occurredAt: "2026-09-02", data: {} },
+    ]);
+    const available = { ...partition("contraloria", "2026-09", "partitions/contraloria/2026/09/records.jsonl.gz", records, 2), id: "contraloria-2026-09" };
+    const olderRecords = gzipText([
+      { id: "contraloria-older-1", sourceId: "contraloria", kind: "audit", occurredAt: "2026-07-02", data: {} },
+      { id: "contraloria-older-2", sourceId: "contraloria", kind: "audit", occurredAt: "2026-07-01", data: {} },
+    ]);
+    const older = { ...partition("contraloria", "2026-07", "partitions/contraloria/2026/07/records.jsonl.gz", olderRecords, 2), id: "contraloria-2026-07" };
+    const missing = {
+      ...partition("contraloria", "2026-08", "partitions/contraloria/2026/08/records.jsonl.gz", records, 3),
+      id: "contraloria-2026-08",
+      manifestKey: "partitions/contraloria/2026/08/missing-manifest.json",
+      checksumSha256: "missing",
+    };
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": { generatedAt: "2026-09-28T00:00:00Z", partitions: [available, missing, older] },
+      [available.manifestKey]: available.manifest,
+      [available.key]: records,
+      [older.manifestKey]: older.manifest,
+      [older.key]: olderRecords,
+    });
+
+    const firstPage = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 1 });
+    const secondPage = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 1, cursor: "v1_1" });
+    const thirdPage = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 1, cursor: "v1_2" });
+    const fourthPage = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 1, cursor: "v1_3" });
+
+    expect(firstPage).toMatchObject({ total: 4, totalScope: "published-available", expectedTotal: 7, complete: false, missingPartitions: 1 });
+    expect(secondPage).toMatchObject({ total: 4, totalScope: "published-available", expectedTotal: 7, complete: false, missingPartitions: 1 });
+    expect(thirdPage?.data.map((record) => record.id)).toEqual(["contraloria-older-1"]);
+    expect(fourthPage?.data.map((record) => record.id)).toEqual(["contraloria-older-2"]);
+    expect(fourthPage?.nextCursor).toBeNull();
+    expect(firstPage?.data.map((record) => record.id)).toEqual(["contraloria-1"]);
+    expect(secondPage?.data.map((record) => record.id)).toEqual(["contraloria-2"]);
+  });
+
+  it("no repite filas al paginar cuando falta una partición anterior mayor que una página", async () => {
+    const julyRows = Array.from({ length: 62 }, (_, index) => ({
+      id: `contraloria-july-${String(index).padStart(2, "0")}`,
+      sourceId: "contraloria",
+      kind: "audit",
+      occurredAt: `2026-07-${String(31 - Math.floor(index / 2)).padStart(2, "0")}`,
+      data: {},
+    }));
+    const juneRows = Array.from({ length: 65 }, (_, index) => ({
+      id: `contraloria-june-${String(index).padStart(2, "0")}`,
+      sourceId: "contraloria",
+      kind: "audit",
+      occurredAt: `2026-06-${String(30 - Math.floor(index / 3)).padStart(2, "0")}`,
+      data: {},
+    }));
+    const julyBytes = gzipText(julyRows);
+    const juneBytes = gzipText(juneRows);
+    const july = partition("contraloria", "2026-07", "partitions/contraloria/2026/07/records.jsonl.gz", julyBytes, julyRows.length);
+    const missingAugust = {
+      ...partition("contraloria", "2026-08", "partitions/contraloria/2026/08/records.jsonl.gz", julyBytes, 35),
+      id: "contraloria-2026-08",
+      manifestKey: "partitions/contraloria/2026/08/missing-manifest.json",
+      checksumSha256: "missing",
+    };
+    const june = partition("contraloria", "2026-06", "partitions/contraloria/2026/06/records.jsonl.gz", juneBytes, juneRows.length);
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": { generatedAt: "2026-09-28T00:00:00Z", partitions: [july, missingAugust, june] },
+      [july.manifestKey]: july.manifest,
+      [july.key]: julyBytes,
+      [june.manifestKey]: june.manifest,
+      [june.key]: juneBytes,
+    });
+
+    const pages = [];
+    let cursor: string | undefined;
+    do {
+      const page = await readR2EvidenceRecords(bucket, { source: "contraloria", limit: 50, cursor });
+      expect(page).not.toBeNull();
+      pages.push(...page!.data.map((record) => record.id));
+      cursor = page!.nextCursor ?? undefined;
+    } while (cursor);
+
+    expect(pages).toHaveLength(julyRows.length + juneRows.length);
+    expect(new Set(pages).size).toBe(pages.length);
+  });
+
   it("sirve una variante de Cámara sin mezclar asistencia ni consultar D1", async () => {
     const vote = gzipText([{ id: "camara-vote-1", sourceId: "camara", kind: "vote", occurredAt: "2026-09-02", data: { title: "Votación" } }]);
     const attendance = gzipText([{ id: "camara-attendance-1", sourceId: "camara", kind: "attendance", occurredAt: "2026-09-02", data: { title: "Asistencia" } }]);

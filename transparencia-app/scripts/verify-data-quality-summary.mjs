@@ -14,6 +14,10 @@ if (summary.schemaVersion !== 1 || summary.sourceCount !== config.length || summ
 if (JSON.stringify(summary) !== JSON.stringify(publicSummary)) fail("la copia pública no coincide con el artefacto de build");
 if (!Number.isSafeInteger(summary.globalKpiRecords) || summary.globalKpiRecords < 1) fail("falta la referencia al KPI global canónico");
 const ids = new Set();
+const allSourceCountsReconciled = summary.sources.every((source) => source.reconciliation?.comparisonEligible === true);
+if (!allSourceCountsReconciled && (summary.totalCanonicalRecords !== null || summary.totalHistoricalRecords !== null)) {
+  fail("se publicaron totales agregados aunque hay fuentes sin reconciliar");
+}
 for (const source of summary.sources) {
   if (ids.has(source.id)) fail(`fuente duplicada: ${source.id}`);
   ids.add(source.id);
@@ -21,6 +25,7 @@ for (const source of summary.sources) {
   if (!Number.isSafeInteger(source.historicalCount) || source.historicalCount < 0) fail(`${source.id}: historicalCount inválido`);
   if (!source.reconciliation || typeof source.reconciliation.note !== "string") fail(`${source.id}: falta reconciliación de conteos`);
   if (!source.reconciliation.comparisonEligible && source.metrics.published.count !== null) fail(`${source.id}: publicó cobertura sin denominadores reconciliados`);
+  if (!source.reconciliation.comparisonEligible && source.metrics.queryable.count !== null) fail(`${source.id}: publicó disponibilidad porcentual sin conteos reconciliados`);
   const healthEntry = health.sources?.[healthAliases[source.id] ?? source.id];
   if (Number.isSafeInteger(healthEntry?.recordCount) && source.id !== "ley-19862" && source.canonicalCount !== healthEntry.recordCount) {
     fail(`${source.id}: canonicalCount no coincide con source-health (${source.canonicalCount} != ${healthEntry.recordCount})`);

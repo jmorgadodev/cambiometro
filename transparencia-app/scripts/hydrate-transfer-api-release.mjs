@@ -119,8 +119,10 @@ function buildSummary(manifest, rows) {
   return {
     generatedAt: manifest.generatedAt,
     registeredThrough: manifest.registeredThrough ?? null,
-    sourceRows: manifest.sourceRows ?? null,
-    excludedAfterCutoff: manifest.excludedAfterCutoff ?? 0,
+    sourceRows: Number.isSafeInteger(manifest.sourceRows) ? manifest.sourceRows : null,
+    duplicateExactRows: Number.isSafeInteger(manifest.duplicateExactRows) ? manifest.duplicateExactRows : null,
+    duplicateConflictingRows: Number.isSafeInteger(manifest.duplicateConflictingRows) ? manifest.duplicateConflictingRows : null,
+    excludedAfterCutoff: Number.isSafeInteger(manifest.excludedAfterCutoff) ? manifest.excludedAfterCutoff : null,
     kpis: {
       total_monto_clp: manifest.expected.totalMontoClp,
       total_transfers: manifest.totalRows,

@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { assertCamaraExpenseComplete, resumableCamaraIds } from "./camara-gastos.mjs";
+import {
+  assertCamaraExpenseComplete,
+  parseCamaraExpensePanel,
+  resumableCamaraIds,
+} from "./camara-gastos.mjs";
 
 describe("conector de gastos operacionales de Cámara", () => {
   it("acepta sólo una nómina completamente procesada", () => {
@@ -18,5 +22,21 @@ describe("conector de gastos operacionales de Cámara", () => {
     const progressIds = new Set(["1", "2"]);
     const checkpointIds = new Map([["2", []]]).keys();
     expect(resumableCamaraIds(progressIds, checkpointIds)).toEqual(new Set(["2"]));
+  });
+});
+
+describe("panel mensual de gastos de Cámara", () => {
+  it("no convierte el estado explícito de mes no publicado en gastos con monto cero", () => {
+    expect(parseCamaraExpensePanel({
+      html: "<table><tr><td>Telefonía</td><td>0</td></tr></table>",
+      text: "Los datos de transparencia para el mes seleccionado no han sido publicados",
+    })).toEqual({ nodata: true });
+  });
+
+  it("conserva montos cero cuando el panel sí corresponde a un mes publicado", () => {
+    expect(parseCamaraExpensePanel({
+      html: "<table><tr><td>Telefonía</td><td>0</td></tr></table>",
+      text: "Gastos Operacionales Telefonía 0",
+    })).toEqual({ filas: [{ item: "Telefonía", monto_clp: 0 }] });
   });
 });

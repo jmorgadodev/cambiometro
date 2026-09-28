@@ -26,7 +26,15 @@ try {
 
   const remote = JSON.parse(readFileSync(remoteManifestPath, "utf8"));
   const local = JSON.parse(readFileSync(localManifestPath, "utf8"));
-  const fields = ["totalRows", "totalPages", "checksumSha256"];
+  const fields = [
+    "totalRows",
+    "totalPages",
+    "checksumSha256",
+    "sourceRows",
+    "duplicateExactRows",
+    "duplicateConflictingRows",
+    "excludedAfterCutoff",
+  ];
   for (const field of fields) {
     if (remote[field] !== local[field]) {
       throw new Error(`TRANSFER_STATIC_API_MISMATCH:${field}:${local[field]}:${remote[field]}`);

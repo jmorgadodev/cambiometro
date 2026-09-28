@@ -352,6 +352,11 @@ export default function RemuneracionesUnifiedExplorer() {
         {manifest && <div className="remuneration-hero__summary"><strong>{paidSources.length}</strong><span>fuentes con pagos publicados</span></div>}
       </header>
 
+      <p className="remuneration-reading-note">
+        <strong>Alcance de Transparencia Activa:</strong> el directorio consultable conserva el registro más reciente por organismo, modalidad, nombre y cargo; no es un historial completo de pagos mensuales.{" "}
+        <a href="/como-funciona#fuentes">Revisa el alcance de las fuentes</a>.
+      </p>
+
       {!manifest && !error && <div className="stat-tile" role="status" aria-busy="true">Cargando fuentes públicas…</div>}
       {error && <div className="badge badge-danger" role="alert" style={{ textTransform: "none", letterSpacing: 0 }}>{error}</div>}
 

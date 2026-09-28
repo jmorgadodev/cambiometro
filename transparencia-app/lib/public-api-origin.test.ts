@@ -12,6 +12,11 @@ describe("origen del API público en previews", () => {
       .toBe("/api/v1/search?q=Latorre");
   });
 
+  it("usa la API pública desde un deployment preview de Cloudflare Pages", () => {
+    expect(publicApiUrl("/api/v1/search?q=Kaiser", "3f407566.cambiometro.pages.dev"))
+      .toBe("https://cambiometro.impulsacv.cl/api/v1/search?q=Kaiser");
+  });
+
   it("permite usar un Worker de preview explícito", () => {
     expect(publicApiUrl("/api/v1/search?q=Latorre", "127.0.0.1", "https://preview.example.workers.dev"))
       .toBe("https://preview.example.workers.dev/api/v1/search?q=Latorre");

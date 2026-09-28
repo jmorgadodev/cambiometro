@@ -2,11 +2,23 @@ import { describe, expect, it } from "vitest";
 import { buildFallbackDataQualitySummary, coverageMetric, getDataQualityConfig } from "@/lib/data-quality-summary";
 
 describe("manifiesto unificado de calidad de datos", () => {
+  const reconciliationArtifacts = {
+    health: { sources: {
+      chilecompra: { recordCount: 888_693 },
+      contraloria: { recordCount: 291 },
+    } },
+    catalog: { sources: [
+      { id: "chilecompra", recordCount: 74_142 },
+      { id: "contraloria", recordCount: 310 },
+    ] },
+  };
+
   it("mantiene las 13 fuentes y separa el KPI global de la suma por fuente", () => {
     const summary = buildFallbackDataQualitySummary();
     expect(getDataQualityConfig()).toHaveLength(13);
     expect(summary.sourceCount).toBe(13);
-    expect(summary.totalCanonicalRecords).toBeGreaterThan(1_400_000);
+    expect(summary.totalCanonicalRecords).toBeNull();
+    expect(summary.totalHistoricalRecords).toBeNull();
     expect(summary.globalKpiRecords ?? null).toBeNull();
     expect(summary.metrics.published.label).toBe("No calculable");
   });
@@ -34,7 +46,7 @@ describe("manifiesto unificado de calidad de datos", () => {
   });
 
   it("separa el histórico declarado del histórico realmente publicado", () => {
-    const source = buildFallbackDataQualitySummary().sources.find((item) => item.id === "chilecompra");
+    const source = buildFallbackDataQualitySummary(reconciliationArtifacts).sources.find((item) => item.id === "chilecompra");
     expect(source?.historicalCount).toBe(888_693);
     expect(source?.publicHistoricalCount).toBe(74_142);
     expect(source?.publicHistoricalCount).toBeLessThan(source?.historicalCount ?? 0);
@@ -54,5 +66,19 @@ describe("manifiesto unificado de calidad de datos", () => {
     expect(source?.publicHistoricalCount).toBe(15_689);
     expect(source?.publicHistoricalCount).toBeLessThan(source?.catalogDeclaredCount ?? 0);
     expect((source?.catalogDeclaredCount ?? 0) - (source?.publicHistoricalCount ?? 0)).toBe(231_598);
+  });
+
+  it("no anuncia conteos ni cobertura de Contraloría cuando el catálogo discrepa del snapshot", () => {
+    const source = buildFallbackDataQualitySummary(reconciliationArtifacts).sources.find((item) => item.id === "contraloria");
+
+    expect(source?.reconciliation).toMatchObject({
+      state: "scope_mismatch",
+      comparisonEligible: false,
+      observedCount: 291,
+      catalogCount: 310,
+    });
+    expect(source?.publicHistoricalCount).toBeNull();
+    expect(source?.metrics.published.label).toBe("No calculable");
+    expect(source?.metrics.queryable.label).toBe("No calculable");
   });
 });
