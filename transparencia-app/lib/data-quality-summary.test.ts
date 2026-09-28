@@ -2,6 +2,17 @@ import { describe, expect, it } from "vitest";
 import { buildFallbackDataQualitySummary, coverageMetric, getDataQualityConfig } from "@/lib/data-quality-summary";
 
 describe("manifiesto unificado de calidad de datos", () => {
+  const reconciliationArtifacts = {
+    health: { sources: {
+      chilecompra: { recordCount: 888_693 },
+      contraloria: { recordCount: 291 },
+    } },
+    catalog: { sources: [
+      { id: "chilecompra", recordCount: 74_142 },
+      { id: "contraloria", recordCount: 310 },
+    ] },
+  };
+
   it("mantiene las 13 fuentes y separa el KPI global de la suma por fuente", () => {
     const summary = buildFallbackDataQualitySummary();
     expect(getDataQualityConfig()).toHaveLength(13);
@@ -35,7 +46,7 @@ describe("manifiesto unificado de calidad de datos", () => {
   });
 
   it("separa el histórico declarado del histórico realmente publicado", () => {
-    const source = buildFallbackDataQualitySummary().sources.find((item) => item.id === "chilecompra");
+    const source = buildFallbackDataQualitySummary(reconciliationArtifacts).sources.find((item) => item.id === "chilecompra");
     expect(source?.historicalCount).toBe(888_693);
     expect(source?.publicHistoricalCount).toBe(74_142);
     expect(source?.publicHistoricalCount).toBeLessThan(source?.historicalCount ?? 0);
@@ -58,7 +69,7 @@ describe("manifiesto unificado de calidad de datos", () => {
   });
 
   it("no anuncia conteos ni cobertura de Contraloría cuando el catálogo discrepa del snapshot", () => {
-    const source = buildFallbackDataQualitySummary().sources.find((item) => item.id === "contraloria");
+    const source = buildFallbackDataQualitySummary(reconciliationArtifacts).sources.find((item) => item.id === "contraloria");
 
     expect(source?.reconciliation).toMatchObject({
       state: "scope_mismatch",

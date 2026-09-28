@@ -140,12 +140,14 @@ export function getDataQualityConfig(): SourceConfig[] {
   return sourceConfig as SourceConfig[];
 }
 
-export function buildFallbackDataQualitySummary(): DataQualitySummary {
+export function buildFallbackDataQualitySummary(artifacts: { health?: JsonObject; catalog?: JsonObject } = {}): DataQualitySummary {
   const transfer = getTransferReleaseMetadata();
-  const healthSources = localHealth.sources && typeof localHealth.sources === "object"
-    ? localHealth.sources as JsonObject
+  const health = artifacts.health ?? localHealth;
+  const catalog = artifacts.catalog ?? localCatalog;
+  const healthSources = health.sources && typeof health.sources === "object"
+    ? health.sources as JsonObject
     : {};
-  const catalogSources = Array.isArray(localCatalog.sources) ? localCatalog.sources : [];
+  const catalogSources = Array.isArray(catalog.sources) ? catalog.sources : [];
   const sources = getDataQualityConfig().map((source) => {
     const healthEntry = healthSources[LOCAL_HEALTH_ALIASES[source.id] ?? source.id];
     const healthRecord = healthEntry && typeof healthEntry === "object" ? healthEntry as JsonObject : {};
