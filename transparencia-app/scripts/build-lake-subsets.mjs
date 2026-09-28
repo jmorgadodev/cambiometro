@@ -1,5 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
+import { contraloriaSubsetCounts } from "./etl/contraloria-subset.mjs";
 import { fileURLToPath } from "node:url";
 import { buildExpenseSubset, EXPENSE_SOURCES, readExpenseSnapshot } from "./expense-release.mjs";
 
@@ -205,6 +206,7 @@ if (fs.existsSync(contraloriaPath)) {
   const allRecords = Array.isArray(contraloriaRaw.records) ? contraloriaRaw.records : [];
   const allRelations = Array.isArray(contraloriaRaw.relations) ? contraloriaRaw.relations : [];
   const allEntities = Array.isArray(contraloriaRaw.entities) ? contraloriaRaw.entities : [];
+  const counts = contraloriaSubsetCounts({ ...contraloriaRaw, records: allRecords, relations: allRelations, entities: allEntities });
 
   const sampleReports = ["704/2024", "249/2025", "540/2025", "654/2025", "564/2024"];
 
@@ -231,9 +233,7 @@ if (fs.existsSync(contraloriaPath)) {
   const contraloriaSubset = {
     generatedAt: contraloriaRaw.generatedAt || new Date().toISOString(),
     sourceId: "contraloria",
-    entityCount: contraloriaRaw.entityCount || 261,
-    recordCount: contraloriaRaw.recordCount || 275,
-    relationCount: contraloriaRaw.relationCount || 248,
+    ...counts,
     entities: subsetEntities,
     records: subsetRecords,
     relations: subsetRelations,
