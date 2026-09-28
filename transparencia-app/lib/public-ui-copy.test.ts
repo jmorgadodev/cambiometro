@@ -21,6 +21,21 @@ function collectSourceFiles(directory: string): string[] {
 }
 
 describe("texto público", () => {
+  it("explica el alcance actual de remuneraciones y conserva enlace a la guía oficial", () => {
+    const publicMethodology = readFileSync(resolve(projectRoot, "app/como-funciona/page.tsx"), "utf8");
+    const remunerationSearch = readFileSync(resolve(projectRoot, "components/remuneraciones/RemuneracionesUnifiedExplorer.tsx"), "utf8");
+
+    expect(publicMethodology).toContain("no es un historial mensual completo");
+    expect(publicMethodology).toContain("desde 2024");
+    expect(publicMethodology).toContain("nombre y cargo");
+    expect(publicMethodology).toContain("no afirmamos identidades únicas sólo por coincidencia de nombre");
+    expect(publicMethodology).toContain("portal-de-transparencia/guia-pte-publicacion-remuneraciones");
+    expect(publicMethodology).toContain('target="_blank"');
+    expect(publicMethodology).toContain('rel="noopener noreferrer"');
+    expect(remunerationSearch).toContain("el registro más reciente por organismo, modalidad, nombre y cargo");
+    expect(remunerationSearch).toContain("/como-funciona#fuentes");
+  });
+
   it("no expone detalles técnicos internos en las tarjetas de fuentes", () => {
     const releaseMetaCard = readFileSync(resolve(projectRoot, "components/data/ReleaseMetaCard.tsx"), "utf8");
     const remuneracionesPage = readFileSync(resolve(projectRoot, "components/remuneraciones/Remuneraciones38BisClient.tsx"), "utf8");

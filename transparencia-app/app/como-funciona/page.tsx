@@ -114,7 +114,7 @@ export default async function HowItWorksPage() {
         </section>
 
         {/* Fuentes integradas */}
-        <section className="card" style={{ padding: "1.75rem" }}>
+        <section id="fuentes" className="card" style={{ padding: "1.75rem" }}>
           <div style={{ marginBottom: "1.25rem" }}>
             <span className="eyebrow">Orígenes de la Información</span>
             <h2 style={{ fontSize: "1.25rem", margin: "0.2rem 0 0.4rem 0" }}>
@@ -180,6 +180,24 @@ export default async function HowItWorksPage() {
           <p style={{ margin: "1rem 0 0", color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: 1.5 }}>
             La plataforma tiene {summary.totalFuentes} fuentes en el catálogo. “No calculable” significa que el corte actual no publica evidencia suficiente para afirmar una cobertura, no que la fuente esté vacía.
           </p>
+
+          <div style={{ marginTop: "1.5rem", paddingTop: "1.25rem", borderTop: "1px solid var(--border-subtle)" }}>
+            <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem", color: "var(--text-primary)" }}>
+              Alcance de remuneraciones del CPLT
+            </h3>
+            <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.6, margin: 0 }}>
+              La fuente publica remuneraciones mes a mes. En nuestra búsqueda consultable conservamos, desde 2024, el registro más reciente para cada combinación de organismo, tipo de contrato, nombre y cargo. Por eso, no es un historial mensual completo de pagos. Los archivos no incluyen un identificador personal único que permita confirmar que cada combinación corresponde a una sola persona; no afirmamos identidades únicas sólo por coincidencia de nombre.
+            </p>
+            <p style={{ fontSize: "0.78rem", color: "var(--text-muted)", lineHeight: 1.5, margin: "0.75rem 0 0" }}>
+              Puedes revisar la publicación y sus criterios en la{" "}
+              <a href="https://www.consejotransparencia.cl/portal-de-transparencia/guia-pte-publicacion-remuneraciones/" target="_blank" rel="noopener noreferrer" className="data-link">
+                guía oficial del CPLT
+              </a>{" "}y en sus{" "}
+              <a href="https://www.consejotransparencia.cl/datosabiertos/" target="_blank" rel="noopener noreferrer" className="data-link">
+                datos abiertos
+              </a>.
+            </p>
+          </div>
         </section>
 
         {/* CTA de exploración */}
