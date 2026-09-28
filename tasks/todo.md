@@ -27,7 +27,9 @@
   en R2. Se añadió localmente una barrera para que el ETL no reemplace una
   partición de Contraloría con un conteo menor al publicado; 2 regresiones
   prueban 33<35 bloqueado y 35=35 permitido. No recupera el payload ni está
-  desplegada.
+  desplegada. La sección oficial Datos Abiertos ofrece además bases hasta 2025
+  (municipal hasta 2024); no sirven para reconstruir agosto 2026. Sólo se
+  consultaron sus tamaños HTTP, no se descargaron ni integraron.
 
 - [ ] **DIPRES — 75% técnico (3/4 controles):** el manifest estático R2
   productivo referencia la proyección completa correcta (476 filas, 476 IDs

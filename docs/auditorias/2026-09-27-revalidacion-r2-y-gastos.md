@@ -556,6 +556,14 @@ Hasta entonces, los conteos deben describirse como subconjunto disponible; no
 como cobertura anual completa. No se debe volver a ejecutar y promover el ETL
 actual como si cubriera el universo completo.
 
+También se revisó el catálogo de [Datos Abiertos CGR](https://www.contraloria.cl/multisite/datos-abiertos/auditorias-y-fiscalizaciones.html).
+Sus archivos abiertos aportan una ruta oficial para histórico, pero la página
+declara alcances anteriores al año requerido: la base no municipal cubre
+2020–2025 y la municipal 2020–2024; la base general termina en 2025. Sólo se
+consultaron los encabezados HTTP, no se descargaron los ZIP (aprox. 4,86 MB,
+4,02 MB y 9,03 MB respectivamente). Por eso esas bases no prueban ni reparan
+el corte de agosto de 2026 y no se han incorporado al sitio.
+
 Como protección local, `buildLakePlan` ahora permite exigir que una fuente no
 reemplace una partición existente con un conteo menor. `ingest-contraloria`
 activa esta regla para sus períodos: si el siguiente intento vuelve a producir
