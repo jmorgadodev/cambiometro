@@ -436,11 +436,21 @@ manteniendo rutas relativas en producción y permitiendo un origen explícito de
 preview. La nueva prueba falló antes del cambio y pasa después. `npm test`
 terminó con 1.299 pruebas aprobadas tras la corrección.
 
-El build completo de Pages no se pudo validar localmente: faltan el lago
-completo de Ley 19.862 y el release paginado canónico, por lo que
-`build-static-site-data.mjs` detuvo correctamente el proceso antes de exportar.
-El siguiente paso seguro es volver a ejecutar `pages-ui-refresh` en modo
-`ui-only` y con `preview_branch` solamente; no habilitar `publish_pages`.
-Después hay que comprobar que las tres llamadas API dejan de responder 404 y
-que búsquedas de Kaiser/Torrealba muestran todas las categorías publicadas.
-Producción sigue sin promoverse.
+El build completo local no se pudo validar: faltan el lago completo de Ley
+19.862 y el release paginado canónico, por lo que `build-static-site-data.mjs`
+detuvo el proceso antes de exportar. El workflow `pages-ui-refresh` sí pudo
+recuperar el snapshot validado por checksum y completar el build y verificadores.
+El run `36379778139` terminó exitosamente; publicó sólo el preview
+`https://1a54a9d3.cambiometro.pages.dev` y el alias
+`https://codex-r2-catalog-reference-a.cambiometro.pages.dev`. La opción de
+publicación productiva estaba desactivada y sus pasos quedaron omitidos.
+
+La verificación interactiva posterior confirmó que las tres llamadas del
+buscador reciben HTTP 200 desde la API pública: `/api/v1/search`,
+`/api/v1/funcionarios` y `/api/v1/entities`. Para Kaiser, la interfaz presenta
+30 fichas agrupadas en páginas de 15; Johannes aparece en la primera página y
+Vanessa en la segunda. Torrealba también devuelve fichas agrupadas y paginadas,
+en lugar de limitarse a las pocas coincidencias del índice estático. El alias
+de preview continúa con `X-Robots-Tag: noindex`. Esto valida el buscador en
+preview, pero no prueba que la misma corrección esté en producción: no se ha
+promovido ningún cambio productivo.
