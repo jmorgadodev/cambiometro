@@ -1,7 +1,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { normalizeRemunerationText, personKeyForRemuneration, remunerationAmountState } from "./remuneraciones-unified-contract.mjs";
-import { readCpltPublishedCount } from "./remuneraciones-unified-metadata.mjs";
+import {
+  countScopeForRemunerationSource,
+  readCpltPublishedCount,
+  validateUnifiedStaticManifest,
+} from "./remuneraciones-unified-metadata.mjs";
 
 const root = process.cwd();
 const outputDir = path.join(root, "public", "data", "remuneraciones-unified");
@@ -38,6 +42,7 @@ function sourceMeta(id, overrides = {}) {
   const source = qualitySources.find((item) => item.id === id) ?? {};
   return {
     id,
+    countScope: countScopeForRemunerationSource(id),
     label: source.label ?? id,
     organization: source.organization ?? null,
     officialUrl: source.officialUrl ?? null,
@@ -263,6 +268,7 @@ const manifest = {
   generatedAt: new Date().toISOString(),
   pageSize,
   totalRows: rows.length,
+  staticRows: rows.length,
   pageCount: pages.length,
   pages,
   searchIndexKey: "search-index.json",
@@ -270,6 +276,8 @@ const manifest = {
   sources: releaseSources,
   quality,
 };
+
+validateUnifiedStaticManifest(manifest);
 
 fs.writeFileSync(path.join(outputDir, "manifest.json"), `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
 fs.writeFileSync(path.join(outputDir, "search-index.json"), `${JSON.stringify(Object.fromEntries([...tokenPages.entries()].map((entry) => [entry[0], [...entry[1]].sort((a, b) => a - b)])))}\n`, "utf8");

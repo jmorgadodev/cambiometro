@@ -48,6 +48,18 @@ async function main() {
   const manifest = manifestResult.value;
   assert(manifest?.schemaVersion === 1, "manifiesto unificado con schemaVersion 1");
   assert(Number.isInteger(manifest?.totalRows) && manifest.totalRows > 0, "manifiesto declara registros consultables", `total: ${manifest?.totalRows ?? "n/a"}`);
+  assert(manifest?.staticRows === manifest.totalRows, "manifiesto distingue y valida las filas estáticas", `staticRows: ${manifest?.staticRows ?? "ausente"}`);
+  const expectedScopes = {
+    "transparencia-activa": "external-index",
+    "remuneraciones-38bis": "static-pages",
+    camara: "static-pages",
+    senado: "static-pages",
+    dipres: "aggregate",
+  };
+  for (const [sourceId, expectedScope] of Object.entries(expectedScopes)) {
+    const source = manifest?.sources?.find((item) => item.id === sourceId);
+    assert(source?.countScope === expectedScope, `manifiesto declara el alcance correcto para ${sourceId}`, `esperado: ${expectedScope}; recibido: ${source?.countScope ?? "ausente"}`);
+  }
   assert(Number.isInteger(manifest?.pageCount) && manifest.pageCount > 0, "manifiesto declara paginación");
   assert(Array.isArray(manifest?.sources) && manifest.sources.some((source) => source.id === "transparencia-activa"), "manifiesto conserva Transparencia Activa");
   assert(Array.isArray(manifest?.sources) && manifest.sources.some((source) => source.id === "remuneraciones-38bis"), "manifiesto conserva Registro 38 bis");
