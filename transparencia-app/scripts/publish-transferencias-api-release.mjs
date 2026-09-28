@@ -4,6 +4,7 @@ import { tmpdir } from "node:os";
 import { join, resolve } from "node:path";
 import { spawn } from "node:child_process";
 import { buildTransferenciasStatic } from "./build-transferencias-static.mjs";
+import { buildTransferApiManifest, buildTransferApiPublishSummary } from "./transfer-api-manifest.mjs";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
 import { assertRemoteR2WriteBudget, configuredR2BudgetBuckets } from "./etl/r2-account-budget.mjs";
 import { assertCanonicalTransferRelease } from "./etl/transfer-release-guard.mjs";
@@ -76,21 +77,7 @@ try {
   if (!release) throw new Error("TRANSFER_API_RELEASE_EMPTY");
   const { manifest } = release;
   assertCanonicalTransferRelease({ totalRows: manifest.totalRows, totalMontoClp: manifest.expected.totalMontoClp });
-  const releasePrefix = `projections/transferencias-v1/releases/${manifest.checksumSha256}`;
-  const apiManifest = {
-    schemaVersion: 1,
-    dataset: manifest.dataset,
-    generatedAt: manifest.generatedAt,
-    registeredThrough: manifest.registeredThrough,
-    totalRows: manifest.totalRows,
-    pageSize: manifest.pageSize,
-    totalPages: manifest.totalPages,
-    checksumSha256: manifest.checksumSha256,
-    expected: manifest.expected,
-    releasePrefix,
-    pages: manifest.pages.map((page) => ({ ...page, key: `${releasePrefix}/${page.path.split("/").pop()}` })),
-    searchIndex: { ...manifest.searchIndex, key: `${releasePrefix}/search-index.json` },
-  };
+  const apiManifest = buildTransferApiManifest(manifest);
   const pointer = join(staging, "api-manifest.json");
   await mkdir(staging, { recursive: true });
   await writeFile(pointer, `${JSON.stringify(apiManifest, null, 2)}\n`, "utf8");
@@ -113,7 +100,7 @@ try {
   await putInBatches(apiManifest.pages.map((page) => ({ key: page.key, file: join(staging, page.path.split("/").pop()) })));
   await put(apiManifest.searchIndex.key, join(staging, "search-index.json"));
   await put("projections/transferencias-v1/manifest.json", pointer);
-  console.log(JSON.stringify({ bucket, dataset: apiManifest.dataset, totalRows: apiManifest.totalRows, totalPages: apiManifest.totalPages, checksumSha256: apiManifest.checksumSha256, releasePrefix, storageBudget: { currentBytes: storageBudget.currentBytes, projectedBytes: storageBudget.projectedBytes, peakBytes: storageBudget.peakBytes } }, null, 2));
+  console.log(JSON.stringify(buildTransferApiPublishSummary({ bucket, apiManifest, storageBudget }), null, 2));
 } finally {
   await rm(staging, { recursive: true, force: true });
 }
