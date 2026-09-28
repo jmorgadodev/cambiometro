@@ -65,6 +65,42 @@ describe("registros públicos R2", () => {
     expect(payload.data.map(row=>row.id)).toEqual(["ine-2"]);
     expect(bucket.requested).not.toContain(`${root}/versions/test/org-ine.json`);
   });
+  it("filtra Código del Trabajo con sus variantes públicas usando el índice R2 canónico", async () => {
+    const root = "projections/funcionarios-v1";
+    const bucket = fakeBucket({
+      [`${root}/manifest.json`]: { version: "test", generatedAt: "2026-09-15T00:00:00Z", assets: [], searchIndex: { key: `${root}/index.json` } },
+      [`${root}/index.json`]: {
+        totalRows: 2,
+        pageSize: 2,
+        pages: [{ page: 1, key: `${root}/page.json`, count: 2 }],
+        filters: {
+          "organismo:muni-talca": { key: `${root}/organism.json`, count: 1 },
+          "contrato:codigotrabajo": { key: `${root}/contract.json`, count: 1 },
+          "periodo:2026-07": { key: `${root}/period.json`, count: 1 },
+        },
+      },
+      [`${root}/organism.json`]: [1],
+      [`${root}/contract.json`]: [1],
+      [`${root}/period.json`]: [1],
+      [`${root}/page.json`]: [
+        { id: "other-row", oid: "muni-talca", n: "Persona Honorarios", t: "Honorarios", p: "2026-07", b: 100000 },
+        { id: "codigo-trabajo-row", oid: "muni-talca", n: "Persona Código Trabajo", t: "CodigoTrabajo", p: "2026-07", b: 200000 },
+      ],
+    });
+
+    for (const contract of ["Código del Trabajo", "Codigo del Trabajo", "CodigoTrabajo"]) {
+      const query = new URLSearchParams({ scope: "municipal", organismo: "muni-talca", contrato: contract, periodo: "2026-07", include_zero: "true", limit: "10" });
+      const response = await worker.fetch(
+        new Request(`https://example.test/api/v1/funcionarios?${query}`),
+        { PUBLIC_DATA: bucket as never } as never,
+      );
+      const payload = await response.json() as { data: Array<{ id: string }>; meta: { total: number } };
+
+      expect(response.status).toBe(200);
+      expect(payload.meta.total).toBe(1);
+      expect(payload.data.map((row) => row.id)).toEqual(["codigo-trabajo-row"]);
+    }
+  });
   it("consulta páginas de remuneraciones comprimidas sin cambiar registros ni paginación", async () => {
     const root = "projections/funcionarios-central-v1";
     const raw = [{id:"salary-original",n:"Sofía Pumpin",p:"2026-07",b:5674763}];

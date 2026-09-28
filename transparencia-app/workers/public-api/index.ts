@@ -755,7 +755,7 @@ function officialFilterKeys(requestUrl: URL, datasetRoot = "funcionarios-v1", av
     ["calidad", requestUrl.searchParams.get("calidad") ?? "Todos"],
   ];
   for (const [name, value] of values) {
-    const normalizedValue = normalized(value);
+    const normalizedValue = name === "contrato" ? canonicalContract(value) : normalized(value);
     if (normalizedValue && normalizedValue !== "todos") keys.push(`${name}:${normalizedValue}`);
   }
   if (requestUrl.searchParams.get("horas_extras") === "true" || requestUrl.searchParams.get("soloHorasExtras") === "true") {
@@ -2394,7 +2394,7 @@ function validateOfficials(url: URL) {
   const sortBy = url.searchParams.get("sortBy") ?? "sueldo_desc";
   if (query.length > 80 || (query.length > 0 && query.length < 2)) return "La busqueda debe tener entre 2 y 80 caracteres.";
   if (!/^(?:Todos|[a-z0-9][a-z0-9_-]{0,159})$/.test(url.searchParams.get("muni") ?? url.searchParams.get("organismo") ?? "Todos")) return "Organismo invalido.";
-  if (!["Todos", "Planta", "Contrata", "Honorarios", "CodigoTrabajo", "Codigo del Trabajo"].includes(contrato)) return "Tipo de contrato invalido.";
+  if (!["Todos", "Planta", "Contrata", "Honorarios", "CodigoTrabajo", "Codigo del Trabajo", "Código del Trabajo"].includes(contrato)) return "Tipo de contrato invalido.";
   if (!["sueldo_desc", "sueldo_asc", "horas_extras_desc", "nombre_asc", "nombre_desc"].includes(sortBy)) return "Orden invalido.";
   return null;
 }

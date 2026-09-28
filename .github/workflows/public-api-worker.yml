@@ -99,7 +99,7 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_DATA_API_TOKEN"
           config="$GITHUB_WORKSPACE/transparencia-app/workers/public-api/.ci-transfer-d1-worker.jsonc"
-          node scripts/ensure-transfer-d1.mjs --worker-config --create --output "$config"
+          node scripts/ensure-transfer-d1.mjs --worker-config --output "$config"
           echo "config=$config" >> "$GITHUB_OUTPUT"
       - name: Subir versión Worker y conservar evidencia
         working-directory: transparencia-app
@@ -165,7 +165,7 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_DATA_API_TOKEN"
           config="$GITHUB_WORKSPACE/transparencia-app/workers/public-api/.ci-transfer-d1-worker.jsonc"
-          node scripts/ensure-transfer-d1.mjs --worker-config --create --output "$config"
+          node scripts/ensure-transfer-d1.mjs --worker-config --output "$config"
           echo "config=$config" >> "$GITHUB_OUTPUT"
       - name: Validar version ID explícito
         env:
@@ -243,7 +243,7 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_DATA_API_TOKEN"
           config="$GITHUB_WORKSPACE/transparencia-app/workers/public-api/.ci-transfer-d1-worker.jsonc"
-          node scripts/ensure-transfer-d1.mjs --worker-config --create --output "$config"
+          node scripts/ensure-transfer-d1.mjs --worker-config --output "$config"
           echo "config=$config" >> "$GITHUB_OUTPUT"
       - name: Desplegar preview sin ruta productiva
         working-directory: transparencia-app
