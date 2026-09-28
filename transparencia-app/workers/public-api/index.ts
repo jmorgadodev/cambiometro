@@ -1705,7 +1705,6 @@ function recordsUnavailable(requestUrl: URL, reason: string) {
   const limit = limitFrom(requestUrl);
   const offset = offsetFrom(requestUrl);
   const source = requestUrl.searchParams.get("source")?.trim() ?? null;
-  const expectedTotals: Record<string, number> = { chilecompra: 74142, infolobby: 71467, contraloria: 291, infoprobidad: 15331 };
   return success([], {
     total: 0,
     limit,
@@ -1715,7 +1714,9 @@ function recordsUnavailable(requestUrl: URL, reason: string) {
     sourceStatus: "temporarily-unavailable",
     availability: "summary-only-or-d1-quota",
     requestedSource: source,
-    expectedTotal: source ? expectedTotals[source] ?? null : null,
+    // Do not surface cached literals as if they were the current source
+    // universe. If R2 is unavailable, there is no authoritative count here.
+    expectedTotal: null,
     reason,
   }, pageLinks(requestUrl, offset, limit, 0));
 }

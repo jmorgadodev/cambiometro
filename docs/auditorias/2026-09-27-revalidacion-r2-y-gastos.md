@@ -493,3 +493,46 @@ D1, ni se promovió producción. La restauración del release de agosto sólo de
 intentarse después de comprobar una copia exacta y el margen de almacenamiento
 de R2; la página pública debe seguir indicando que los registros consultables
 son parciales hasta resolverlo.
+
+### Diferencia de universo del release
+
+La revisión del respaldo no encontró la versión productiva de agosto: los
+snapshots `backup/2026-08-20` y `backup/2026-09-13` contienen el mismo manifiesto
+antiguo, SHA-256
+`8c683a7bb06ac30f5d3415000a066378eaa323528d9cf6732ad09e7cd596d722`, cuyo
+`recordCount` es 3. Su objeto JSONL comprimido también se validó contra el hash
+archivado. No sirve para restaurar la partición que el catálogo actual declara
+con 35 filas y checksum `83ffe5a6…`.
+
+El run ETL de Contraloría `33633187407` (02-09) sí publicó el lago R2 antes de
+fallar después en la materialización D1. Su manifiesto de fuente está en el
+release `data-contraloria-2026-manifest-c3b10aa8e943de2b` y declara 284 filas.
+El catálogo productivo del 27-09 declara 310; la distribución mensual también
+difiere en enero–julio de 2026 (la cifra de agosto coincide en 35). La suma
+consultable por período del catálogo es 275 filas en períodos con artefactos
+legibles y 35 esperadas en agosto sin su manifiesto. Las diferencias de
+checksum entre los manifiestos de fuente y catálogo no se interpretan por sí
+solas como corrupción porque sus alcances podrían ser distintos; los conteos
+sí requieren reconciliación antes de afirmar completitud.
+
+El release de GitHub contiene sólo el manifiesto JSON de 6,6 KB, no las filas
+ni el artefacto recuperable; el checkout local tampoco conserva la partición.
+Por tanto, no se puede reconstruir la versión de 35 filas desde el backup
+verificado. Queda pendiente determinar qué versión es la autoridad para cada
+período y, si el origen oficial aún la ofrece, regenerar únicamente los
+artefactos faltantes con preflight de tamaño/checksum. Hasta entonces
+Contraloría sigue parcial, la promoción productiva no está autorizada y la
+paginación sin filtro puede empezar con páginas vacías al reservar el hueco de
+agosto.
+
+### Respuesta degradada de la API
+
+El fallback `recordsUnavailable` del Worker mantenía totales literales por
+fuente; Contraloría reportaba 291 aunque el catálogo R2 vigente declara 310 y
+el manifiesto ETL revisado declara 284. Al ocurrir una indisponibilidad, esos
+valores no se podían respaldar con un catálogo accesible. Se eliminó esa
+afirmación del código de trabajo: el fallback ahora devuelve `expectedTotal:
+null` si no hay manifiesto disponible. La prueba de regresión falló primero al
+recibir 291 y pasó después del cambio; los 24 tests de `index.test.ts` y
+`api:typecheck` pasan. Esto está validado sólo en la rama local; todavía no se
+ha desplegado ni en el preview aislado ni en producción.

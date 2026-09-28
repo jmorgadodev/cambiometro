@@ -38,6 +38,18 @@ function sha256(data: ArrayBuffer) {
 }
 
 describe("registros públicos R2", () => {
+  it("no presenta como vigente un conteo fijo cuando Contraloría no está disponible", async () => {
+    const response = await worker.fetch(
+      new Request("https://example.test/api/v1/records?source=contraloria&limit=1"),
+      { PUBLIC_DATA: fakeBucket({}) as never } as never,
+    );
+    const payload = await response.json() as { meta: Record<string, unknown> };
+
+    expect(response.status).toBe(200);
+    expect(payload.meta.sourceStatus).toBe("temporarily-unavailable");
+    expect(payload.meta.expectedTotal).toBeNull();
+  });
+
   it("consulta un organismo mediante posiciones paginadas, sin descargar su archivo completo", async () => {
     const root="projections/funcionarios-central-v1";
     const bucket=fakeBucket({
