@@ -8,6 +8,13 @@ import {
   CGR_CENTRAL_AREAS, CGR_CONSOLIDATED_API_URL, CGR_INDEX_URL, CGR_REGIONS,
   normalizeCgrConsolidatedProducts, normalizeCgrReports,
 } from "./etl/connectors/contraloria.mjs";
+import { buildCgrDetailUrl } from "./etl/connectors/contraloria-search-audit.mjs";
+import {
+  buildCgrReportFromSearchDetail,
+  collectCgrSearchMonth,
+  mergeCgrReportsByDocumentId,
+  waitForCgrDocumentReady,
+} from "./etl/connectors/contraloria-search-ingest.mjs";
 import { stableStringify } from "./etl/core.mjs";
 import { buildLakePlan } from "./etl/lake.mjs";
 
@@ -30,6 +37,17 @@ if (outputRoot === root || dirname(outputRoot) === outputRoot) throw new Error("
 const workRoot = join(outputRoot, ".work", `contraloria-${year}`);
 const reuseDetails = process.argv.includes("--reuse-details");
 const reportCachePath = join(workRoot, "report-input.json");
+const requestedSearchMonths = argument("--search-months");
+const searchMonthCount = year === new Date().getUTCFullYear() ? new Date().getUTCMonth() + 1 : 12;
+const searchMonths = requestedSearchMonths
+  ? requestedSearchMonths.split(",").map((month) => month.trim()).filter(Boolean)
+  : Array.from({ length: searchMonthCount }, (_, index) => `${year}-${String(index + 1).padStart(2, "0")}`);
+if (!searchMonths.length || new Set(searchMonths).size !== searchMonths.length
+  || searchMonths.some((month) => !new RegExp(`^${year}-(0[1-9]|1[0-2])$`).test(month))) {
+  throw new Error("INVALID_CGR_SEARCH_MONTHS");
+}
+const maxSearchBytes = Number(argument("--max-search-mb") ?? 300) * 1024 * 1024;
+if (!Number.isSafeInteger(maxSearchBytes) || maxSearchBytes < 1_048_576) throw new Error("INVALID_CGR_SEARCH_BUDGET");
 mkdirSync(workRoot, { recursive: true });
 
 function clean(value) {
@@ -87,7 +105,7 @@ async function downloadConsolidatedDocuments(products) {
 }
 
 async function detailFields(page) {
-  const labels = new Set(["Número", "Fecha", "Tipo de Informe", "Unidad CGR", "Servicio", "Nivel", "Área", "Nombre de Informe", "Destinatarios", "Objetivos", "Universo", "Muestra", "Conclusiones o Dictamen"]);
+const labels = new Set(["Número", "Fecha", "Tipo de Informe", "Unidad CGR", "Servicio", "Nivel", "Región", "Sector", "Área", "Nombre de Informe", "Destinatarios", "Objetivos", "Universo", "Muestra", "Conclusiones o Dictamen"]);
   const rows = await page.locator("tr").evaluateAll((elements) => elements.map((row) => [...row.querySelectorAll(":scope > td")].map((cell) => cell.innerText.trim())));
   const fields = {};
   for (const cells of rows) for (let index = 0; index < cells.length - 1; index += 1) {
@@ -110,6 +128,7 @@ async function collectListing(page, context) {
     const detail = await popupPromise;
     try {
       await detail.waitForLoadState("domcontentloaded");
+      await waitForCgrDocumentReady(detail);
       const fields = await detailFields(detail);
       const detailUrl = new URL(detail.url());
       const documentId = detailUrl.searchParams.get("docIdcm");
@@ -143,6 +162,68 @@ async function collectListing(page, context) {
       await detail.close();
     }
   }
+}
+
+async function collectSearchIndexedReports() {
+  const usedIds = new Set(rawReports.map((report) => String(report.documentId ?? "").trim()).filter(Boolean));
+  const recovered = [];
+  let responseBytes = 0;
+  let officialCandidates = 0;
+  for (const month of searchMonths) {
+    const remainingBytes = maxSearchBytes - responseBytes;
+    if (remainingBytes < 1_048_576) throw new Error("CGR_SEARCH_YEAR_BUDGET_EXHAUSTED");
+    const result = await collectCgrSearchMonth(month, {
+      maxTotalBytes: remainingBytes,
+      maxResponseBytes: Math.min(30 * 1024 * 1024, remainingBytes),
+    });
+    if (!result.matchesGlobalDeclaredTotal || result.candidates.some((candidate) => candidate.publishedAt.slice(0, 7) !== month)) {
+      throw new Error(`CGR_SEARCH_MONTH_RECONCILIATION_FAILED:${month}`);
+    }
+    responseBytes += result.responseBytes;
+    officialCandidates += result.candidates.length;
+    for (const candidate of result.candidates) if (!usedIds.has(candidate.documentId)) {
+      recovered.push({ month, candidate });
+      usedIds.add(candidate.documentId);
+    }
+    process.stderr.write(`${JSON.stringify({ phase: "official_search_month", month, candidates: result.candidates.length, missingFromListings: recovered.filter((item) => item.month === month).length, activeUnits: result.activeUnits, overlaps: result.overlapIds, responseBytes: result.responseBytes })}\n`);
+  }
+
+  if (recovered.length) {
+    const browser = await chromium.launch({ headless: true });
+    try {
+      const page = await browser.newPage({ locale: "es-CL" });
+      for (const [index, { candidate }] of recovered.entries()) {
+        const detailUrl = buildCgrDetailUrl(candidate.documentId);
+        const response = await page.goto(detailUrl, { waitUntil: "domcontentloaded", timeout: 90_000 });
+        if (!response?.ok()) throw new Error(`CGR_SICA_DETAIL_HTTP:${candidate.documentId}:${response?.status() ?? "NO_RESPONSE"}`);
+        await page.waitForFunction(() => document.body.innerText.includes("Nombre de Informe"), null, { timeout: 45_000 });
+        await waitForCgrDocumentReady(page);
+        const fields = await detailFields(page);
+        const report = buildCgrReportFromSearchDetail(candidate, fields);
+        try {
+          const downloadPromise = page.waitForEvent("download", { timeout: 30_000 });
+          await page.locator("#cil1").click();
+          const download = await downloadPromise;
+          const pdfPath = join(workRoot, `${report.documentId}.pdf`);
+          await download.saveAs(pdfPath);
+          const bytes = readFileSync(pdfPath);
+          if (bytes.subarray(0, 5).toString("ascii") !== "%PDF-") throw new Error("INVALID_PDF");
+          report.pdfPath = pdfPath;
+          report.documentChecksumSha256 = createHash("sha256").update(bytes).digest("hex");
+          report.documentSize = bytes.byteLength;
+        } catch (error) {
+          process.stderr.write(`${JSON.stringify({ phase: "supplemental_pdf_error", report: report.reportNumber, error: error instanceof Error ? error.message : String(error) })}\n`);
+          report.documentError = "CGR_PDF_DOWNLOAD_FAILED";
+        }
+        recovered[index] = report;
+        process.stderr.write(`${JSON.stringify({ phase: "supplemental_sica_detail", completed: index + 1, total: recovered.length })}\n`);
+      }
+    } finally {
+      await browser.close();
+    }
+  }
+  rawReports = mergeCgrReportsByDocumentId(rawReports, recovered);
+  return { months: searchMonths.length, officialCandidates, supplementalReports: recovered.length, responseBytes };
 }
 
 if (reuseDetails) {
@@ -183,6 +264,9 @@ if (reuseDetails) {
   }
   writeFileSync(reportCachePath, JSON.stringify({ schemaVersion: "1.0.0", year, areas: areaLimit, regions: regionLimit, reports: rawReports }), "utf8");
 }
+
+const searchRecovery = await collectSearchIndexedReports();
+writeFileSync(reportCachePath, JSON.stringify({ schemaVersion: "1.0.0", year, areas: areaLimit, regions: regionLimit, reports: rawReports }), "utf8");
 
 const consolidatedProducts = await fetchConsolidatedProducts();
 await downloadConsolidatedDocuments(consolidatedProducts);
@@ -287,4 +371,4 @@ const publishPlan = {
   assets: plan.assets.map((item) => ({ key: item.key, checksumSha256: item.checksumSha256, size: item.size, releaseTag: item.releaseTag, releaseAssetName: item.releaseAssetName })),
 };
 writeFileSync(join(outputRoot, "publish-plan.json"), `${JSON.stringify(publishPlan, null, 2)}\n`, "utf8");
-console.log(JSON.stringify({ source: "contraloria", year, areas: areaLimit, regions: regionLimit, records: records.length, auditReports: auditRecords.length, consolidatedProducts: consolidatedRecords.length, cic: consolidatedRecords.filter((record) => record.cgr_product_type === "cic").length, cra: consolidatedRecords.filter((record) => record.cgr_product_type === "cra").length, radar: consolidatedRecords.filter((record) => record.cgr_product_type === "radar").length, pdfs: pdfEntries.length, findingsWithPage: records.reduce((total, record) => total + record.findings.length, 0), pdfErrors: records.filter((record) => record.document_error).length, originalChecksumSha256, assets: plan.assets.length, output: outputRoot }, null, 2));
+console.log(JSON.stringify({ source: "contraloria", year, areas: areaLimit, regions: regionLimit, searchRecovery, records: records.length, auditReports: auditRecords.length, consolidatedProducts: consolidatedRecords.length, cic: consolidatedRecords.filter((record) => record.cgr_product_type === "cic").length, cra: consolidatedRecords.filter((record) => record.cgr_product_type === "cra").length, radar: consolidatedRecords.filter((record) => record.cgr_product_type === "radar").length, pdfs: pdfEntries.length, findingsWithPage: records.reduce((total, record) => total + record.findings.length, 0), pdfErrors: records.filter((record) => record.document_error).length, originalChecksumSha256, assets: plan.assets.length, output: outputRoot }, null, 2));
