@@ -4,11 +4,12 @@ if (!base || !/^https:\/\/[a-z0-9.-]+\.workers\.dev$/i.test(base)) {
   throw new Error("Se requiere la URL workers.dev del preview aislado.");
 }
 
-async function page(offset) {
+async function page(offset, period) {
   const url = new URL("/api/v1/records", base);
   url.searchParams.set("source", "contraloria");
   url.searchParams.set("limit", "2");
   url.searchParams.set("offset", String(offset));
+  if (period) url.searchParams.set("period", period);
   const response = await fetch(url);
   if (!response.ok)
     throw new Error(
@@ -19,9 +20,13 @@ async function page(offset) {
 
 const first = await page(0);
 const second = await page(2);
+const julyFirst = await page(0, "2026-07");
+const julySecond = await page(2, "2026-07");
 const a = first.meta ?? {};
 const b = second.meta ?? {};
-const ids = [...(first.data ?? []), ...(second.data ?? [])].map(
+const julyA = julyFirst.meta ?? {};
+const julyB = julySecond.meta ?? {};
+const ids = [...(julyFirst.data ?? []), ...(julySecond.data ?? [])].map(
   (record) => record.id,
 );
 
@@ -39,8 +44,24 @@ if (
   );
 if (a.nextCursor !== "v1_2" || b.nextCursor !== "v1_4")
   throw new Error("Los cursores no avanzan de forma estable.");
+if (a.sourceStatus !== "partial" || a.missingPartitions < 1)
+  throw new Error("El endpoint no informa la partición faltante del catálogo.");
+if (
+  julyA.sourceStatus !== "complete" ||
+  julyA.total !== julyB.total ||
+  julyA.total !== julyA.expectedRows ||
+  julyA.nextCursor !== "v1_2" ||
+  julyB.nextCursor !== "v1_4"
+)
+  throw new Error(
+    "La partición consultable de julio no pagina con conteos y cursores estables.",
+  );
+if ((julyFirst.data ?? []).length !== 2 || (julySecond.data ?? []).length !== 2)
+  throw new Error(
+    "La paginación de julio no entregó dos filas en cada página.",
+  );
 if (new Set(ids).size !== ids.length)
-  throw new Error("La paginación repitió IDs entre las dos páginas.");
+  throw new Error("La paginación de julio repitió IDs entre las dos páginas.");
 
 console.log(
   JSON.stringify(
@@ -49,11 +70,14 @@ console.log(
       sourceBackend: a.sourceBackend,
       total: a.total,
       expectedRows: a.expectedRows,
-      publishedRows: a.publishedRows,
+      publishedRows: julyA.publishedRows,
       sourceStatus: a.sourceStatus,
       missingPartitions: a.missingPartitions,
-      page1Cursor: a.nextCursor,
-      page2Cursor: b.nextCursor,
+      unfilteredPage1Cursor: a.nextCursor,
+      unfilteredPage2Cursor: b.nextCursor,
+      julyTotal: julyA.total,
+      julyPage1Cursor: julyA.nextCursor,
+      julyPage2Cursor: julyB.nextCursor,
       distinctIds: ids.length,
     },
     null,

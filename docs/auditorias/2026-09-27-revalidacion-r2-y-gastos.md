@@ -474,7 +474,18 @@ expectedRows y cursores. `wrangler deploy --dry-run` confirmó que sólo enlaza
 rechazado antes de publicar por permisos del token de Cloudflare en el endpoint
 de secrets (`No access to the specified resource`). Para no recurrir al job
 existente, que crea/binda D1, se agregó una opción manual y separada de GitHub
-Actions (`deploy_r2_audit_preview`) que despliega ese Worker aislado y ejecuta
-el smoke; todavía debe ejecutarse y pasar antes de considerar corregida la
-paginación en entorno remoto. No se escribieron objetos R2 ni filas D1, ni se
-promovió producción.
+Actions (`deploy_r2_audit_preview`), que desplegó el Worker
+`https://cambiometro-public-api-r2-audit-preview.koooke.workers.dev` (versión
+`a7d87df1-d574-46d6-83a6-8c23652b9870`, run `36381743537`). El primer smoke fue
+demasiado permisivo y aceptó páginas vacías, así que no se toma como validación.
+Una lectura R2 directa y acotada confirmó que falta
+`partitions/contraloria/2026/08/manifest.json`; el catálogo aún espera 35 filas
+para agosto. Julio sí está disponible: 62 filas, paginables y con checksums
+válidos. El preview nuevo informa el total esperado de 310 pero mantiene el
+estado parcial; el endpoint sin filtro reserva las 35 posiciones ausentes, por
+lo que las primeras páginas quedan vacías y la primera página legible comienza
+en offset 35. Se endureció el smoke para validar explícitamente el total
+esperado y la paginación de julio con IDs reales; falta repetirlo tras publicar
+esa prueba corregida. No se escribieron objetos R2 ni filas D1, ni se promovió
+producción. La restauración del release de agosto sólo debe intentarse después
+de comprobar una copia exacta y el margen de almacenamiento de R2.
