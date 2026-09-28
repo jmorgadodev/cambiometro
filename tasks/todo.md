@@ -16,6 +16,19 @@
   escribir R2, materializar D1 ni promover producción mientras los conteos
   discrepen.
 
+  **Nuevo hallazgo de cobertura (28-09):** se relevaron los 43 listados
+  oficiales (27 centrales y 16 regionales); quedaron visibles 33 filas de
+  agosto, que son sólo un mínimo observado. Varias vistas muestran hasta 10
+  filas recientes sin paginación aparente, y el ETL lee únicamente las filas
+  cargadas. El 35 de catálogo aún no se pudo reconciliar y el ETL no debe
+  presentarse como universo completo. Falta ubicar filtros/endpoints oficiales
+  de alcance completo y cotejar IDs antes de regenerar o publicar.
+  También se verificó que la clave canónica del payload de agosto no existe
+  en R2. Se añadió localmente una barrera para que el ETL no reemplace una
+  partición de Contraloría con un conteo menor al publicado; 2 regresiones
+  prueban 33<35 bloqueado y 35=35 permitido. No recupera el payload ni está
+  desplegada.
+
 - [ ] **DIPRES — 75% técnico (3/4 controles):** el manifest estático R2
   productivo referencia la proyección completa correcta (476 filas, 476 IDs
   distintos, checksum válido), pero el subset de 60 filas publica

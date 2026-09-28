@@ -525,6 +525,46 @@ Contraloría sigue parcial, la promoción productiva no está autorizada y la
 paginación sin filtro puede empezar con páginas vacías al reservar el hueco de
 agosto.
 
+### Reconsulta del origen oficial y límite de cobertura observado — 28-09-2026
+
+Se consultó en modo lectura la aplicación oficial de Contraloría, recorriendo
+las 27 áreas centrales y las 16 regiones (43 listados). La vista actual muestra
+informes de agosto de 2026; 33 filas de agosto quedaron visibles en los listados
+consultados. Ese 33 es un **mínimo observado**, no el universo mensual: varias
+vistas entregan como máximo diez filas, ordenadas desde las más recientes, y
+no se encontró paginación en el listado. Una inspección de Bio-Bío mostró seis
+filas de septiembre seguidas por cuatro de agosto, para diez en total.
+
+El scraper vigente (`scripts/ingest-contraloria.mjs`) lee sólo las filas que
+están cargadas en cada listado mediante `tr:has(td)` y no navega páginas
+adicionales. Por tanto, no puede asumirse que su conteo represente todos los
+informes del área/año. El dato del catálogo de 35 para agosto coincide con un
+conteo declarado en un manifiesto anterior, pero no se pudo comprobar aún
+contra los 43 listados actuales ni recuperar las 35 filas exactas. Esta
+reconsulta acredita que el origen todavía ofrece registros de agosto, pero no
+que permita reconstruir íntegramente el corte faltante desde la interfaz
+actual. No se descargaron PDFs, no se ejecutó el ETL y no se escribió en R2 o
+D1. Además, se consultó una sola vez la clave canónica
+`partitions/contraloria/2026/08/records.jsonl.gz`; Wrangler confirmó que el
+objeto tampoco existe en R2 (404), por lo que no queda un payload huérfano en
+esa ruta.
+
+Antes de regenerar o publicar, queda pendiente identificar una interfaz oficial
+que permita recorrer el listado completo (paginación, filtros por período o
+endpoint con alcance verificable) y reconciliar sus IDs con catálogo/manifiesto.
+Hasta entonces, los conteos deben describirse como subconjunto disponible; no
+como cobertura anual completa. No se debe volver a ejecutar y promover el ETL
+actual como si cubriera el universo completo.
+
+Como protección local, `buildLakePlan` ahora permite exigir que una fuente no
+reemplace una partición existente con un conteo menor. `ingest-contraloria`
+activa esta regla para sus períodos: si el siguiente intento vuelve a producir
+33 ante 35 filas catalogadas en agosto, fallará antes de emitir un plan de
+publicación. Las pruebas reproducen 33<35 y verifican que 35=35 sigue pasando.
+El guard sólo compara conteos —no prueba igualdad de IDs ni repara agosto— y
+quedó guardado en el commit `cf7716b` de la rama de trabajo; no se ejecutó el
+ETL ni se desplegó.
+
 ### Respuesta degradada de la API
 
 El fallback `recordsUnavailable` del Worker mantenía totales literales por
