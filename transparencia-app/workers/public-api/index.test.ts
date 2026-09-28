@@ -50,6 +50,37 @@ describe("registros públicos R2", () => {
     expect(payload.meta.expectedTotal).toBeNull();
   });
 
+  it("genera enlaces de paginación con el mismo cursor que acepta el lector", async () => {
+    const key = "partitions/contraloria/2026/07/records.jsonl.gz";
+    const manifestKey = "partitions/contraloria/2026/07/manifest.json";
+    const records = gzipJsonl(Array.from({ length: 51 }, (_, index) => ({
+      id: `cgr-${index}`,
+      sourceId: "contraloria",
+      kind: "audit",
+      occurredAt: `2026-07-${String(31 - Math.floor(index / 2)).padStart(2, "0")}`,
+      data: {},
+    })));
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": {
+        generatedAt: "2026-09-28T00:00:00Z",
+        partitions: [{ sourceId: "contraloria", period: "2026-07", recordCount: 51, manifestKey }],
+      },
+      [manifestKey]: { projectionChecksumSha256: "projection", artifacts: [{ key, checksumSha256: sha256(records), releaseAssetName: "cgr-july" }] },
+      [key]: records,
+    });
+
+    const response = await worker.fetch(
+      new Request("https://example.test/api/v1/records?source=contraloria&limit=50"),
+      { PUBLIC_DATA: bucket as never } as never,
+    );
+    const payload = await response.json() as { links: { next: string }; meta: { nextCursor: string } };
+    const nextLink = new URL(payload.links.next);
+
+    expect(response.status).toBe(200);
+    expect(nextLink.searchParams.get("cursor")).toBe(payload.meta.nextCursor);
+    expect(payload.meta.nextCursor).toBe("v1_1e");
+  });
+
   it("consulta un organismo mediante posiciones paginadas, sin descargar su archivo completo", async () => {
     const root="projections/funcionarios-central-v1";
     const bucket=fakeBucket({

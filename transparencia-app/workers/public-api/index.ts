@@ -1197,7 +1197,7 @@ function pageLinks(url: URL, offset: number, limit: number, total: number) {
   const links: JsonRecord = { self: url.toString() };
   if (offset + limit < total) {
     const next = new URL(url);
-    next.searchParams.set("cursor", `v1_${offset + limit}`);
+    next.searchParams.set("cursor", `v1_${(offset + limit).toString(36)}`);
     links.next = next.toString();
   }
   return links;

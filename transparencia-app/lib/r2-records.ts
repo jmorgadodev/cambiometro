@@ -445,7 +445,7 @@ export async function readR2EvidenceRecords(bucket: R2BucketLike, params: {
     }
     for (const record of result.records) {
       if (!matchesIndexedParams(record, params)) continue;
-      if (matched >= offset && data.length < limit) data.push(record);
+      if (matched >= offset && matched < offset + limit && data.length < limit) data.push(record);
       matched += 1;
     }
     // Unfiltered offsets are positions in the catalog's expected release, not
