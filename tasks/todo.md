@@ -2,6 +2,16 @@
 
 ## Actualización crítica — Contraloría (28-09-2026)
 
+- [ ] **R2 — 81,8% de almacenamiento de cuenta (lectura 28-09):** 8.180.607.166
+  de 10.000.000.000 bytes sumando el bucket público (7.131.123.983) y backups
+  (1.049.483.183). Está sobre la advertencia del 80%, bajo la revisión del 90%
+  y el bloqueo al 95%; quedan 1.319.392.834 bytes hasta el bloqueo. El inventario
+  publicado del bucket principal está atrasado: omite 183 objetos/89.689.856
+  bytes y tiene una diferencia de tamaño de 84.078 bytes. El guard de publicación
+  consulta el inventario vivo, pero debe conservarse esta discrepancia para
+  corregir/reconciliar el índice, sin borrar objetos. No publicar un release
+  nuevo sin tamaño proyectado y preflight de cuenta completo.
+
 - [ ] **Contraloría — 60% técnico (3/5 etapas; los datos siguen sin reconciliar):** ya se compararon el catálogo R2
   (310), el manifiesto ETL (284) y los registros por partición (275 legibles +
   35 esperados de agosto, cuyo manifiesto falta); también se validó el backup y
@@ -51,9 +61,17 @@
   fallback local coinciden exactamente con 60 programas de la proyección R2
   completa (476 IDs únicos); el artefacto local ahora declara `count=60` y
   `totalPrograms=476`, con prueba de regresión (4 pruebas verdes) y `typecheck`.
-  Pendiente probarlo en preview y revisar frescura/períodos: la proyección es
-  del 21-08-2026. El build local se detuvo porque falta hidratar el release
-  canónico completo de Ley 19.862; no se descargó ni escribió R2.
+  El 28-09-2026 el build completo de Pages sí se validó localmente usando el
+  release canónico paginado de Ley 19.862, que es el que hidratan los workflows
+  oficiales: 62.172 filas, 1.244 páginas y checksum
+  `9615b9e0453a3dcbb849114295d3803a3aaeec84c336669efb0e2afe6f800825`; coincide
+  con el manifiesto R2. `npm run build` terminó en 0 y generó 4.675 rutas; el
+  smoke Playwright local pasó 101 comprobaciones. Esto corrige la conclusión
+  anterior: la ausencia de las ocho claves de manifiesto del lago histórico
+  (enero–agosto 2026) no bloquea Pages, pues el release API canónico existe y
+  está verificado. Siguen pendientes preview/publicación, revisión de frescura
+  DIPRES (release 21-08-2026) y reconciliación de las claves históricas
+  ausentes; no se escribió R2/D1 ni se desplegó.
 
 ## Estado de cierre actualizado — 25-09-2026
 
@@ -87,7 +105,7 @@ cierre verificados; no representan cobertura de datos ni una métrica automátic
 | --- | ---: | --- |
 | Historial de mandatos parlamentarios — **nuevo** | 10% | Capturar cortes oficiales por ID y asiento; comparar altas/bajas; confirmar fechas con evidencia; conservar períodos cerrados sin sumarlos a Movimientos del Ejecutivo. El análisis encontró que la tabla D1 actual no basta como historial público y su materialización remota está deshabilitada por defecto. |
 | Votaciones Senado | 85% | El preflight local y la API R2 coinciden para 12 votos del 20–24-09; septiembre publica 41 filas completas. Falta smoke de navegación/fichas y seguir revisando cortes futuros mediante la tarea local (cron remoto retirado). |
-| ChileCompra | 70% técnico; pendiente integración | Resolver el 403 del archivo mensual o mantener el corte válido; seleccionar automáticamente el período más reciente con registros oficiales todavía no publicado. La corrida del 21-09 recibió `CHILECOMPRA_BULK_HTTP_403` y fue bloqueada por `CHILECOMPRA_RELEASE_EMPTY_OR_UNAVAILABLE` (0 listings/documentos/registros); no continuó hacia publicación ni materialización D1. El 28-09 el selector volvió a consultar la API oficial: eligió julio 2026 (8.004 licitaciones, 9.361 tratos directos, 17.364 convenios); la lectura del manifiesto R2 confirmó que sólo junio está publicado (74.142 registros). Se añadieron localmente el selector y 5 pruebas; la suite completa pasó con 1.314 tests. No se ejecutó ETL ni hubo escritura R2/D1. Falta integrar y ejecutar el workflow, validar la publicación mensual real, y confirmar paginación, checksums y tamaño antes de promover. |
+| ChileCompra | 70% técnico; ejecución completa pendiente | El selector automático y sus 5 pruebas están en `c736f59`, rama `codex/r2-catalog-reference-audit-20260928`, con checks de CI verdes. El sondeo oficial eligió julio 2026 (8.004 licitaciones, 9.361 tratos directos y 17.364 convenios); R2 aún declara junio (74.142 registros). El preflight encontró 38.625 URLs de detalle únicas; a 5 req/s el piso es 2 h 8 min. Amplié en esta rama el timeout del workflow de 60 a 240 minutos, manteniendo la tasa y el guard R2 al 95%. Falta que CI valide el workflow y que una ejecución completa confirme estabilidad, conteos y bytes. La prueba local parcial se interrumpió tras 500 respuestas; no se completó ETL ni se escribió R2/D1. Antes de promover julio: verificar artefactos y presupuesto total de cuenta; no ejecutar si el preflight supera el margen/coste acordado. |
 | Remuneraciones y calidad CPLT | 55% | Terminar duplicados/calidad municipales, revisar el corte central contaminado y reconciliar el salto de julio con la parcialidad de agosto-septiembre; luego construir historiales por lotes. |
 | Backups y capacidad R2 | 30% | Obtener medición vigente, inventario/checksums y restauración probada; sólo entonces decidir retención selectiva. No borrar backups ni publicar una proyección grande antes de asegurar margen y rollback. |
 | Aislamiento y consumo D1 | 85% | La materialización remota no corre por defecto. Falta recuperar una lectura vigente de consumo/cuotas para certificarlo; no ejecutar escaneos ni cargas masivas. |

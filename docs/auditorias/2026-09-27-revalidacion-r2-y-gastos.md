@@ -695,10 +695,110 @@ R2/D1. Este cambio no está aún integrado ni desplegado; debe validarse en
 Actions y comprobar el corte resultante antes de considerar resuelta la
 actualización automática.
 
-El build completo local continúa bloqueado antes del preview por
-`STATIC_DATA_FULL_TRANSFER_SOURCE_MISSING`: este checkout carece del release
-canónico paginado completo de Ley 19.862. No se descargó ese universo para
-desbloquear el build y no se escribió en R2. Las correcciones DIPRES y
-ChileCompra no deben promoverse como una release completa de Pages mientras
-no se resuelva ese prerrequisito o se valide un build en un entorno que ya
-contenga el release íntegro.
+La conclusión de bloqueo de build quedó superada por la validación del
+28-09-2026 documentada a continuación. La ausencia del lago histórico de Ley
+19.862 se conserva como hallazgo independiente y no se debe confundir con la
+disponibilidad del release paginado que consume Pages.
+
+### Validación del build de Pages y estado del release canónico — 28-09-2026
+
+Se revisaron los workflows `.github/workflows/pages-ui-refresh.yml` y
+`pages-static-refresh.yml`. Ambos descargan el manifiesto
+`projections/transferencias-v1/manifest.json` y sus páginas al artefacto
+estático; no requieren hidratar las particiones del lago histórico de Ley
+19.862 cuando ese release canónico está disponible.
+
+El release local se contrastó con el manifiesto R2: **62.172 filas, 1.244
+páginas y SHA-256
+`9615b9e0453a3dcbb849114295d3803a3aaeec84c336669efb0e2afe6f800825`**. El
+manifiesto remoto declara los mismos valores. El verificador local de
+consistencia con R2 pasó, con SHA-256 del manifiesto
+`a2455fc26713fb9e075f3e16f2058cd6b95a6cab55d8bcdf4722c518fea15ed7`.
+
+Se ejecutó `npm run build` con
+`TRANSFER_STATIC_CANONICAL_MANIFEST_FILE` apuntando al manifiesto canónico, tal
+como hacen los workflows de Pages. Terminó con código 0: se generaron 4.675
+rutas estáticas; los verificadores de SEO, transferencias y gastos pasaron.
+`npm run verify:static:browser` pasó 101 comprobaciones de rutas, renderizado,
+consola/red y navegación móvil/escritorio. La salida es local: **no es un
+preview remoto ni un despliegue productivo**.
+
+En una comprobación distinta se probaron sólo las ocho claves de manifiesto
+que el catálogo del lago histórico declara para enero–agosto de 2026
+(`partitions/ley-19862/2026/01/manifest.json` a `/08/manifest.json`); R2
+respondió clave inexistente en las ocho. No se descargaron filas ni se
+escribieron objetos. Esto significa que el catálogo histórico apunta a
+artefactos ausentes; no invalida el release paginado verificado, pero requiere
+reconciliar o corregir esas referencias antes de afirmar que el lago está
+completo.
+
+### Estado operativo después de la validación
+
+- **ChileCompra:** `c736f59` incorpora selección del último período oficial no
+  publicado y tiene checks de GitHub verdes. La prueba oficial acotada eligió
+  julio de 2026 (8.004 licitaciones, 9.361 tratos directos y 17.364 convenios);
+  el catálogo consultado todavía publica junio (74.142 registros). No se ejecutó
+  la ingestión. Antes de publicar julio hay que obtener el tamaño real de los
+  artefactos proyectados y comprobar el presupuesto de toda la cuenta R2,
+  incluyendo `cambiometro-backups`; la escritura debe detenerse si rebasa el
+  umbral/coste acordado. Después validar conteos, checksums, API y pantalla.
+- **DIPRES:** el arreglo de metadatos del fallback está validado localmente;
+  el release completo vigente (476 programas) tiene corte del 21-08-2026. Falta
+  verificar frescura y un preview/publicación del cambio. No se escribió R2.
+- **Contraloría:** agosto sigue sin payload/manifiesto recuperable y con
+  `publishedRows=0`, `expectedRows=35`; no se deben promocionar esos registros
+  hasta reconciliar IDs y evidencia primaria.
+- **Despliegue general:** no se desplegó Pages ni se ejecutaron ETL en esta
+  validación; tampoco se escribieron objetos R2 o filas D1. La validación de
+  navegación fue local, no productiva.
+
+Por tanto, el build ya no es un bloqueante. La prioridad es completar el
+preflight de tamaño y capacidad de ChileCompra, luego comprobar DIPRES y
+Contraloría, revisar el preview con artefactos vigentes y finalmente promover
+los cambios aceptados con smoke productivo. No se declara el proyecto cerrado.
+
+### Preflight cuantitativo R2 y ChileCompra — 28-09-2026
+
+Se ejecutó `node scripts/audit-r2-storage.mjs` en sólo lectura. La cuenta
+presenta **8.180.607.166 / 10.000.000.000 bytes (81,806%)** en 27.499 objetos:
+
+| Bucket | Bytes | Objetos |
+|---|---:|---:|
+| `transparencia-public-data` | 7.131.123.983 | 23.391 |
+| `cambiometro-backups` | 1.049.483.183 | 4.108 |
+| **Cuenta** | **8.180.607.166** | **27.499** |
+
+La cuenta está sobre el aviso configurado de 80%, aún bajo revisión 90% y
+bloqueo 95%. Quedan 1.319.392.834 bytes hasta el umbral de bloqueo (y
+1.819.392.834 bytes hasta 10 GB). La reconciliación del inventario interno del
+bucket público halló 183 objetos/89.689.856 bytes vivos no inventariados y un
+objeto con delta de 84.078 bytes; no hay objetos cacheados que hayan
+desaparecido. El publicador calcula el preflight con el listado vivo de todos
+los buckets de la cuenta, no sólo con ese inventario cacheado. No se borró ni
+escribió ningún objeto.
+
+Para estimar la viabilidad de ChileCompra sin subir datos, se leyó sólo el
+manifiesto de catálogo R2 al checkout ignorado por Git y se repitió el selector
+oficial: julio de 2026 es el siguiente período disponible; la partición
+consultable vigente sigue siendo junio con 74.142 filas. Un `HEAD` acotado al
+archivo oficial `2026/202607.7z` respondió 200 y `Content-Length: 168032`.
+La prueba local inició la extracción y paginó los tres índices completos:
+8.004 licitaciones, 9.361 tratos directos y 17.364 convenios. El archivo masivo
+contenía 76 documentos; al construir el conjunto de detalles a consultar, el
+conector contó 38.625 URLs únicas. Se canceló antes de continuar más allá de
+500 documentos de detalle para evitar mantener una corrida de decenas de miles
+de llamadas externas sin un plan reanudable. La corrida no llegó a generar
+releases y no escribió R2 ni D1.
+
+El ETL semanal tenía `timeout-minutes: 60` y ejecuta a 5 solicitudes/segundo.
+Sólo el límite inferior aritmético para 38.625 URLs es 7.725 segundos (2 h 8
+min 45 s), sin contar reintentos, parsing ni publicación; por lo tanto, el
+workflow no daba tiempo suficiente al mes de julio con su límite anterior. En
+esta rama se amplió el timeout a 240 minutos sin elevar la tasa. El máximo
+permitido por GitHub Actions es 360 minutos, según la
+[documentación oficial de sintaxis de workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax#jobsjob_idtimeout-minutes).
+El cambio aún requiere CI y una corrida completa controlada; no se ha probado
+que el origen mantenga estabilidad durante toda esa ventana. No se iniciará
+ninguna carga a R2 hasta que la generación local termine, mida todos los
+artefactos y el guard de cuenta confirme el margen bajo 95%. No aumentar la
+tasa sin respaldo oficial y ensayo.
