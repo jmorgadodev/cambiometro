@@ -3,6 +3,7 @@ export interface LandingSourceSnapshot {
   recordCount: number;
   status: string;
   generatedAt: string | null;
+  generatedAtKind: "source-success" | "release" | "unknown";
 }
 
 export interface LandingSummary {
@@ -32,6 +33,9 @@ type SourceHealth = {
     recordCount?: number;
     status?: string;
     generatedAt?: string | null;
+    updatedAtKind?: string;
+    lastSuccessAt?: string | null;
+    last_success_at?: string | null;
   }>;
 };
 
@@ -94,17 +98,23 @@ export function buildLandingSummary({
         : Number.isSafeInteger(source.recordCount) && (source.recordCount ?? 0) >= 0
         ? source.recordCount ?? 0
         : 0;
+      const lastSuccessAt = validDate(source.lastSuccessAt ?? source.last_success_at);
+      const releaseGeneratedAt = isTransferRelease
+        ? validDate(effectiveTransferRelease.generatedAt)
+        : source.updatedAtKind === "release" ? validDate(source.generatedAt) : null;
+      const generatedAt = lastSuccessAt ?? releaseGeneratedAt;
       return {
         id: canonicalSourceId(id),
         recordCount,
         status: source.status ?? "unknown",
-        generatedAt: isTransferRelease ? effectiveTransferRelease.generatedAt : validDate(source.generatedAt),
+        generatedAt,
+        generatedAtKind: lastSuccessAt ? "source-success" as const : releaseGeneratedAt ? "release" as const : "unknown" as const,
       };
     })
     .sort((left, right) => left.id.localeCompare(right.id));
   const lastSuccessAt = validDate(movements.last_success_at);
   const lastEventDate = validDate(movements.last_event_date);
-  const generatedAt = latestDate([sourceHealth.generatedAt, ...sources.map((source) => source.generatedAt)]);
+  const generatedAt = latestDate(sources.map((source) => source.generatedAt));
 
   return {
     schemaVersion: 1,

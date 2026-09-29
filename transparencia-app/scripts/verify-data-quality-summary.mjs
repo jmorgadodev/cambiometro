@@ -1,5 +1,6 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { cpltR2ReleaseCount } from "../lib/data-quality-reconciliation.mjs";
 
 const root = process.cwd();
 const read = (relative) => JSON.parse(readFileSync(join(root, relative), "utf8"));
@@ -7,6 +8,12 @@ const summary = read("data/generated/data-quality-summary.json");
 const publicSummary = read("public/data/data-quality-summary.json");
 const config = read("data/data-quality-sources.json");
 const health = read("data/etl/source-health.json");
+const cpltManifest = (() => {
+  try { return read(".ci-data-version/funcionarios-manifest.json"); } catch {
+    try { return read(".ci-data-version/cplt-current-r2-manifest.json"); } catch { return null; }
+  }
+})();
+const cpltReleaseCount = cpltR2ReleaseCount(cpltManifest);
 const fail = (message) => { throw new Error(`DATA_QUALITY_SUMMARY_INVALID: ${message}`); };
 const healthAliases = { "transparencia-activa": "cplt", "ley-19862": "ley19862", "ine-censo-2024": "ine" };
 
@@ -27,8 +34,14 @@ for (const source of summary.sources) {
   if (!source.reconciliation.comparisonEligible && source.metrics.published.count !== null) fail(`${source.id}: publicó cobertura sin denominadores reconciliados`);
   if (!source.reconciliation.comparisonEligible && source.metrics.queryable.count !== null) fail(`${source.id}: publicó disponibilidad porcentual sin conteos reconciliados`);
   const healthEntry = health.sources?.[healthAliases[source.id] ?? source.id];
-  if (Number.isSafeInteger(healthEntry?.recordCount) && source.id !== "ley-19862" && source.canonicalCount !== healthEntry.recordCount) {
-    fail(`${source.id}: canonicalCount no coincide con source-health (${source.canonicalCount} != ${healthEntry.recordCount})`);
+  const expectedCount = source.id === "transparencia-activa" && source.reconciliation.state === "release_override"
+    ? cpltReleaseCount
+    : healthEntry?.recordCount;
+  if (source.id === "transparencia-activa" && source.reconciliation.state === "release_override" && !Number.isSafeInteger(expectedCount)) {
+    fail("transparencia-activa: release R2 no está presente o no valida contra el índice y sus partes");
+  }
+  if (Number.isSafeInteger(expectedCount) && source.id !== "ley-19862" && source.canonicalCount !== expectedCount) {
+    fail(`${source.id}: canonicalCount no coincide con la referencia vigente (${source.canonicalCount} != ${expectedCount})`);
   }
   for (const [name, metric] of Object.entries(source.metrics)) {
     if (metric.count === null) {

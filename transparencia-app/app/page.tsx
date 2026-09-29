@@ -63,12 +63,12 @@ export default async function HomePage() {
     return {
       ...source,
       recordCount: snapshot.recordCount,
-      lastUpdated: snapshot.generatedAt ?? source.lastUpdated,
+      lastUpdated: snapshot.generatedAt,
       lastUpdatedRelative: snapshot.generatedAt
-        ? `Corte ${new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(snapshot.generatedAt))}`
-        : source.lastUpdatedRelative,
+        ? `${snapshot.generatedAtKind === "source-success" ? "Actualización comprobada" : "Versión publicada"} ${new Intl.DateTimeFormat("es-CL", { dateStyle: "medium", timeZone: "America/Santiago" }).format(new Date(snapshot.generatedAt))}`
+        : "Fecha de actualización no informada",
       status: snapshot.status === "complete" ? "operational" : source.status,
-      statusText: snapshot.status === "complete" ? "Cobertura completa" : source.statusText,
+      statusText: snapshot.status === "complete" ? "Release disponible" : source.statusText,
     };
   }).filter((source) => source.recordCount > 0);
 
