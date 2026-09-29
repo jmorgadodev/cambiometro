@@ -2,7 +2,7 @@
 
 import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 import { searchTransparencyActiva } from "@/lib/remuneraciones-remote-search";
-import { distinctResultWindow, remunerationGroupKey } from "@/lib/remuneraciones-pagination";
+import { distinctResultWindow, isPlaceholderRemunerationName, remunerationGroupKey } from "@/lib/remuneraciones-pagination";
 
 type SourceStatus = "complete" | "partial" | "aggregate_only" | "unavailable";
 
@@ -30,7 +30,7 @@ interface UnifiedManifest {
   pages: Array<{ page: number; key: string; count: number }>;
   searchIndexKey: string;
   sources: SourceInfo[];
-  quality: { rows: { total: number; withAmount: number; withoutAmount: number }; relationGroups: number; notes: string[] };
+  quality: { rows: { total: number; withAmount: number; withoutAmount: number; zeroAmount?: number; unidentifiableName?: number }; bySource?: Record<string, { total: number; withAmount: number; withoutAmount: number; zeroAmount: number; unidentifiableName: number; periods: string[] }>; relationGroups: number; notes: string[] };
 }
 
 interface UnifiedRow {
@@ -391,13 +391,15 @@ export default function RemuneracionesUnifiedExplorer() {
                {visibleGroups.map((group) => {
                  const sourceIds = new Set(group.map((row) => row.sourceId));
                  const primaryRow = group[0];
-                 const publishedNames = [...new Set(group.map((row) => row.nombreOriginal).filter(Boolean))];
+                 const identityUnavailable = isPlaceholderRemunerationName(primaryRow.nombreOriginal);
+                 const displayName = identityUnavailable ? "Identidad no informada" : primaryRow.nombreOriginal;
+                 const publishedNames = [...new Set(group.map((row) => row.nombreOriginal).filter((name) => Boolean(name) && !isPlaceholderRemunerationName(name)))];
                  return <details key={remunerationGroupKey({ name: group[0].nombreOriginal, source: group[0].sourceId, organization: group[0].organismoOriginal, fallbackId: group[0].personKey })} className="remuneration-person-result">
                    <summary className="remuneration-person-result__summary">
                      <span className="remuneration-person-result__identity">
-                       <span className="remuneration-person-result__marker" aria-hidden="true">{primaryRow.nombreOriginal.slice(0, 1).toUpperCase()}</span>
+                       <span className="remuneration-person-result__marker" aria-hidden="true">{identityUnavailable ? "?" : displayName.slice(0, 1).toUpperCase()}</span>
                        <span className="remuneration-person-result__copy">
-                         <strong>{primaryRow.nombreOriginal}</strong>
+                         <strong>{displayName}</strong>
                          <small>{primaryRow.organismoOriginal} · {primaryRow.cargoOriginal}</small>
                        </span>
                      </span>
@@ -408,7 +410,7 @@ export default function RemuneracionesUnifiedExplorer() {
                    </summary>
                    <div className="remuneration-person-result__body">
                      <p className="remuneration-person-result__note">
-                       {sourceIds.size > 1 || new Set(group.map(row => row.organismoOriginal)).size > 1 ? "Hay registros con este mismo nombre en distintos organismos o fuentes; revisa el cargo y el período antes de relacionarlos." : "Registro publicado por una fuente oficial."}
+                       {identityUnavailable ? "La fuente no publica un nombre identificable para este registro; se conserva sin vincularlo a una persona." : sourceIds.size > 1 || new Set(group.map(row => row.organismoOriginal)).size > 1 ? "Hay registros con este mismo nombre en distintos organismos o fuentes; revisa el cargo y el período antes de relacionarlos." : "Registro publicado por una fuente oficial."}
                        {publishedNames.length > 1 && <> La fuente publicó variantes del nombre: {publishedNames.join(" / ")}.</>}
                      </p>
                      <div className="remuneration-person-result__table"><table className="data-table"><thead><tr><th>Fuente</th><th>Organismo</th><th>Cargo</th><th>Mes</th><th>Monto</th></tr></thead><tbody>{group.map((row) => <tr key={row.recordId}><td><strong>{row.sourceLabel}</strong><small>{recordDescription(row)}</small></td><td>{row.organismoOriginal}</td><td>{row.cargoOriginal}</td><td>{row.periodo ?? "No informado"}</td><td>{displayAmount(row.montoBruto)}</td></tr>)}</tbody></table></div>
