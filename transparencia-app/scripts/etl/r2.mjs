@@ -44,7 +44,8 @@ export function selectHotAssets(assets) {
 }
 
 function publicationRank(key) {
-  if (key === "catalog/v1/manifest.json" || /^projections\/[^/]+\/manifest\.json$/.test(key)) return 2;
+  if (key === "catalog/v1/manifest.json") return 3;
+  if (key === "indexes/v1/chilecompra/manifest.json" || /^projections\/[^/]+\/manifest\.json$/.test(key)) return 2;
   if (key.endsWith("/manifest.json")) return 1;
   return 0;
 }
@@ -80,6 +81,59 @@ function pruneObsoleteProjectionVersions(desired, previous, assets) {
   }
 }
 
+function pruneObsoleteChileCompraRecordIndexVersions(desired, previous, assets) {
+  const prefix = "indexes/v1/chilecompra/";
+  const hash = "[a-f0-9]{64}";
+  const isRecordIndexArtifact = (key) => new RegExp(
+    `^${prefix}(?:manifest(?:-${hash})?\\.json|records(?:-${hash})?\\.jsonl|records-by-date-${hash}\\.jsonl|periods-${hash}\\.json|search(?:-${hash})?\\.json|search-counts(?:-${hash})?\\.json)$`,
+  ).test(key);
+  const activeAsset = assets.find((asset) => asset.key === `${prefix}manifest.json`);
+  if (!activeAsset) return;
+  let activeManifest;
+  try {
+    activeManifest = JSON.parse(Buffer.from(activeAsset.data ?? "").toString("utf8"));
+  } catch {
+    throw new Error("CHILECOMPRA_INDEX_MANIFEST_INVALID");
+  }
+  const rollbackKey = activeManifest.rollbackManifestKey;
+  if (typeof rollbackKey !== "string" || !isRecordIndexArtifact(rollbackKey) || !rollbackKey.startsWith(`${prefix}manifest-`)) {
+    throw new Error("CHILECOMPRA_INDEX_ROLLBACK_MANIFEST_MISSING");
+  }
+  const rollbackAsset = assets.find((asset) => asset.key === rollbackKey);
+  if (!rollbackAsset) throw new Error("CHILECOMPRA_INDEX_ROLLBACK_MANIFEST_MISSING");
+  let rollbackManifest;
+  try {
+    rollbackManifest = JSON.parse(Buffer.from(rollbackAsset.data ?? "").toString("utf8"));
+  } catch {
+    throw new Error("CHILECOMPRA_INDEX_ROLLBACK_MANIFEST_INVALID");
+  }
+
+  const referencedKeys = (manifest) => [
+    manifest.recordArchiveKey,
+    manifest.dateArchiveKey,
+    manifest.periodIndexKey,
+    manifest.searchIndexKey,
+    manifest.searchCountIndexKey,
+  ].filter((key) => key != null);
+  const activeReferences = referencedKeys(activeManifest);
+  const rollbackReferences = referencedKeys(rollbackManifest);
+  if ([...activeReferences, ...rollbackReferences].some((key) => typeof key !== "string" || !isRecordIndexArtifact(key))) {
+    throw new Error("CHILECOMPRA_INDEX_REFERENCED_ASSET_INVALID");
+  }
+  const retained = new Set([
+    `${prefix}manifest.json`,
+    rollbackKey,
+    ...activeReferences,
+    ...rollbackReferences,
+  ]);
+  for (const key of retained) {
+    if (!key.startsWith(prefix) || !desired.has(key)) throw new Error(`CHILECOMPRA_INDEX_REFERENCED_ASSET_MISSING:${key}`);
+  }
+  for (const key of previous.keys()) {
+    if (isRecordIndexArtifact(key) && !retained.has(key)) desired.delete(key);
+  }
+}
+
 export function planR2Publication(assets, previousInventory = { objects: [] }, limitBytes = DEFAULT_LIMIT_BYTES, previousCatalog = null) {
   if (!Number.isSafeInteger(limitBytes) || limitBytes < 1) throw new Error("INVALID_R2_LIMIT");
   // Every newly declared partition must be physically published. An ETL's
@@ -98,6 +152,7 @@ export function planR2Publication(assets, previousInventory = { objects: [] }, l
     }
     assertCatalogReferencesAvailable(catalog, new Set(desired.keys()), previousCatalog);
   }
+  pruneObsoleteChileCompraRecordIndexVersions(desired, previous, hot);
   // Cada proyección versionada conserva la candidata entrante y la versión
   // activa previa como rollback. Las copias más antiguas no son referenciadas
   // por ningún manifiesto y duplican gigabytes sin aportar disponibilidad.

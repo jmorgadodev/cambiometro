@@ -113,7 +113,8 @@ if (publishReleases) {
   if (!process.env.GH_TOKEN?.trim()) throw new Error("PUBLICATION_MISSING_SECRET: GH_TOKEN");
   const releaseStaging = mkdtempSync(join(tmpdir(), "cambiometro-releases-"));
   const releaseVerifyRoot = mkdtempSync(join(tmpdir(), "cambiometro-release-verify-"));
-  const releaseCatalog = releaseManifestsOnly ? assets.filter((asset) => asset.key.endsWith("/manifest.json")) : assets;
+  const releaseAssets = assets.filter((asset) => asset.r2Only !== true);
+  const releaseCatalog = releaseManifestsOnly ? releaseAssets.filter((asset) => asset.key.endsWith("/manifest.json")) : releaseAssets;
   if (releaseCatalog.length === 0) throw new Error("PUBLICATION_RELEASE_MANIFEST_MISSING");
   const grouped = Map.groupBy(releaseCatalog, (asset) => asset.releaseTag);
   for (const [tag, releaseAssets] of grouped) {

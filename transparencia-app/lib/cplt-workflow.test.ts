@@ -27,7 +27,9 @@ describe("automatizacion CPLT nacional", () => {
     expect(packageJson).toContain('"data:finalize:cplt": "npm run data:finalize:cplt:r2 && npm run data:record:cplt-state -- --remote"');
     expect(packageJson).toContain('"data:finalize:cplt:r2": "node scripts/merge-cplt-category-artifacts.mjs && node scripts/publish-cplt-projections.mjs --r2"');
     expect(packageJson).toContain('"data:archive:cplt": "node scripts/publish-data-lake.mjs --output data/lake-cplt --releases --release-manifests-only"');
-    expect(readFileSync(resolve(process.cwd(), "scripts/publish-data-lake.mjs"), "utf8")).toContain("releaseManifestsOnly ? assets.filter");
+    const publisher = readFileSync(resolve(process.cwd(), "scripts/publish-data-lake.mjs"), "utf8");
+    expect(publisher).toContain("const releaseAssets = assets.filter((asset) => asset.r2Only !== true)");
+    expect(publisher).toContain("releaseManifestsOnly ? releaseAssets.filter");
     expect(workflow).toContain("npm run data:archive:cplt");
     expect(workflow).toContain("continue-on-error: true");
     expect(workflow).toContain("Archivo GitHub Releases no crítico");

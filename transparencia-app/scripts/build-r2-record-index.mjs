@@ -49,7 +49,6 @@ if (inputDir) {
 
 const outDir = resolve(output);
 mkdirSync(outDir, { recursive: true });
-const archivePath = resolve(outDir, "records.jsonl");
 let archive = "";
 const pages = [];
 const search = new Map();
@@ -127,12 +126,19 @@ for (let index = 0; index < dateRecords.length; index += 1) {
 
 dateArchiveStream.end();
 await finished(dateArchiveStream);
-writeFileSync(archivePath, archive, "utf8");
 const searchObject = Object.fromEntries([...search.entries()].sort(([left], [right]) => left.localeCompare(right)));
-const searchPath = resolve(outDir, "search.json");
-writeFileSync(searchPath, JSON.stringify(searchObject), "utf8");
-const searchCountsPath = resolve(outDir, "search-counts.json");
-writeFileSync(searchCountsPath, JSON.stringify(Object.fromEntries([...searchCounts.entries()].sort(([left], [right]) => left.localeCompare(right)))), "utf8");
+const archiveChecksumSha256 = createHash("sha256").update(archive).digest("hex");
+const archiveKey = `indexes/v1/${source}/records-${archiveChecksumSha256}.jsonl`;
+const archivePath = resolve(outDir, archiveKey.split("/").at(-1));
+writeFileSync(archivePath, archive, "utf8");
+const searchText = JSON.stringify(searchObject);
+const searchChecksumSha256 = createHash("sha256").update(searchText).digest("hex");
+const searchKey = `indexes/v1/${source}/search-${searchChecksumSha256}.json`;
+writeFileSync(resolve(outDir, searchKey.split("/").at(-1)), searchText, "utf8");
+const searchCountsText = JSON.stringify(Object.fromEntries([...searchCounts.entries()].sort(([left], [right]) => left.localeCompare(right))));
+const searchCountsChecksumSha256 = createHash("sha256").update(searchCountsText).digest("hex");
+const searchCountsKey = `indexes/v1/${source}/search-counts-${searchCountsChecksumSha256}.json`;
+writeFileSync(resolve(outDir, searchCountsKey.split("/").at(-1)), searchCountsText, "utf8");
 const dateArchiveChecksumSha256 = dateArchiveHash.digest("hex");
 const dateArchiveKey = `indexes/v1/${source}/records-by-date-${dateArchiveChecksumSha256}.jsonl`;
 renameSync(temporaryDateArchivePath, resolve(outDir, `records-by-date-${dateArchiveChecksumSha256}.jsonl`));
@@ -155,13 +161,16 @@ const manifest = {
   sourceId: source,
   totalRows: lines.length,
   pageSize,
-  recordArchiveKey: `indexes/v1/${source}/records.jsonl`,
+  recordArchiveKey: archiveKey,
+  recordArchiveChecksumSha256: archiveChecksumSha256,
   dateArchiveKey,
   dateArchiveChecksumSha256,
   periodIndexKey: `indexes/v1/${source}/periods-${periodIndexChecksumSha256}.json`,
   periodIndexChecksumSha256,
-  searchIndexKey: `indexes/v1/${source}/search.json`,
-  searchCountIndexKey: `indexes/v1/${source}/search-counts.json`,
+  searchIndexKey: searchKey,
+  searchIndexChecksumSha256: searchChecksumSha256,
+  searchCountIndexKey: searchCountsKey,
+  searchCountIndexChecksumSha256: searchCountsChecksumSha256,
   pages,
 };
 writeFileSync(resolve(outDir, "manifest.json"), JSON.stringify(manifest, null, 2), "utf8");

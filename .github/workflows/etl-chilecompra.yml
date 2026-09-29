@@ -82,7 +82,35 @@ jobs:
           npm run data:build:subsets
           # Validate all ChileCompra static artifacts before any lake/catalog write to R2.
           npm run check:static-input-quality
-          npm run data:publish
+
+      - name: Reconstruir índice completo ChileCompra desde el release vigente
+        if: steps.source-period.outputs.has_records == 'true'
+        working-directory: transparencia-app
+        env:
+          INPUT_YEAR: ${{ steps.source-period.outputs.year }}
+          INPUT_MONTH: ${{ steps.source-period.outputs.month }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        shell: bash
+        run: |
+          index_work="data/lake/.work/chilecompra-r2-index"
+          mkdir -p "$index_work"
+          base_manifest="$index_work/base-manifest.json"
+          base_archive="$index_work/base-records.jsonl"
+          npx wrangler r2 object get transparencia-public-data/indexes/v1/chilecompra/manifest.json --file "$base_manifest" --remote
+          archive_key="$(node --input-type=module -e 'import fs from "node:fs"; const manifest = JSON.parse(fs.readFileSync(process.argv[1], "utf8")); if (manifest.sourceId !== "chilecompra" || typeof manifest.recordArchiveKey !== "string" || !manifest.recordArchiveKey.startsWith("indexes/v1/chilecompra/")) process.exit(2); process.stdout.write(manifest.recordArchiveKey);' "$base_manifest")"
+          test -n "$archive_key"
+          npx wrangler r2 object get "transparencia-public-data/$archive_key" --file "$base_archive" --remote
+          node scripts/refresh-chilecompra-r2-index.mjs --period "${INPUT_YEAR}-${INPUT_MONTH}" --base-manifest "$base_manifest" --base-archive "$base_archive" --lake-root data/lake
+
+      - name: Publicar release de datos e índices validados en R2
+        if: steps.source-period.outputs.has_records == 'true'
+        working-directory: transparencia-app
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:publish
 
       - name: Publicar entradas estáticas versionadas para Pages
         if: steps.source-period.outputs.has_records == 'true'
