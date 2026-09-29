@@ -1589,6 +1589,17 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
       },
     );
   }
+  // Ley 19.862 se publica como release paginado propio. Sus manifiestos
+  // históricos del catálogo no están disponibles y consultar la ruta genérica
+  // devolvería cero filas, aunque el release vigente sí es consultable.
+  if (source === "ley-19862") {
+    return failure(
+      "SOURCE_HAS_DEDICATED_ROUTE",
+      "Las transferencias publicadas se consultan en la ruta especializada.",
+      422,
+      { source, queryRoute: "/api/v1/transferencias" },
+    );
+  }
   const requestedKind = requestUrl.searchParams.get("kind")?.trim();
   const isCamaraVoteAlias = requestedSource === "votaciones_camara";
   if (isCamaraVoteAlias && requestedKind && requestedKind !== "vote") {

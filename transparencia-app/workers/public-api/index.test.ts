@@ -38,6 +38,17 @@ function sha256(data: ArrayBuffer) {
 }
 
 describe("registros públicos R2", () => {
+  it("no presenta Ley 19.862 como vacía cuando se consulta por la ruta genérica", async () => {
+    const response = await worker.fetch(
+      new Request("https://example.test/api/v1/records?source=ley-19862&limit=1"),
+      { PUBLIC_DATA: fakeBucket({}) as never } as never,
+    );
+    expect(response.status).toBe(422);
+    expect(await response.json()).toMatchObject({
+      error: { code: "SOURCE_HAS_DEDICATED_ROUTE", details: { queryRoute: "/api/v1/transferencias" } },
+    });
+  });
+
   it("usa el release dedicado completo para el estado público de Ley 19.862", async () => {
     const bucket = fakeBucket({
       "projections/sources-v1/source-inventory.json": {
