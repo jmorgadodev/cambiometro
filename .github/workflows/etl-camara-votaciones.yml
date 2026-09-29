@@ -148,7 +148,7 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: |
           npm run data:build:subsets
-          npm run data:publish:static -- --groups parlamento
+          npm run data:publish:static -- --files data/politicos-votaciones.json,data/lake-subsets/politicos-votaciones.subset.json
 
   repair-attendance:
     name: Reparación aislada de asistencia Cámara

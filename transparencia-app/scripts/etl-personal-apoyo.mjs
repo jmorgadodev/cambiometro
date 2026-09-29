@@ -4,6 +4,7 @@ import fs from "node:fs";
 import { externalText } from "./etl/safe-text.mjs";
 import { assertUsableOfficialHtml, mergePersonalApoyoDeputies } from "./etl/personal-apoyo-publication.mjs";
 import { parseSenadoAssignmentPolicy } from "./etl/senado-assignment.mjs";
+import { assertSenadoSupportCollection, fetchSenadoSupportPage } from "./etl/senado-support.mjs";
 
 const UA =
   "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36";
@@ -266,12 +267,27 @@ async function main() {
   if (INCLUDE_SENADO) {
     let page = 1;
     const pageSize = 500;
+    let expectedTotal = null;
+    let expectedPageCount = null;
+    const senadoRows = [];
     while (true) {
       const u = `https://web-back.senado.cl/api/transparency/senator-assignments/support-staff?filters%5Bano%5D%5B%24eq%5D=2026&pagination%5BpageSize%5D=${pageSize}&pagination%5Bpage%5D=${page}`;
-      const r = await fetch(u, { headers: { "user-agent": "cambiometro ETL" } });
-      const j = await r.json();
-      const meta = j.data.meta.pagination;
-      for (const f of j.data.data) {
+      const { rows, pagination } = await fetchSenadoSupportPage(u);
+      if (pagination.page !== page) throw new Error(`SENADO_SUPPORT_PAGE_MISMATCH: requested=${page} received=${pagination.page}`);
+      if (expectedTotal === null) {
+        expectedTotal = pagination.total;
+        expectedPageCount = pagination.pageCount;
+      } else if (pagination.total !== expectedTotal || pagination.pageCount !== expectedPageCount) {
+        throw new Error(`SENADO_SUPPORT_PAGINATION_DRIFT: page=${page}`);
+      }
+      senadoRows.push(...rows);
+      console.log(`senado página ${page}/${pagination.pageCount} (${pagination.total})`);
+      if (page >= pagination.pageCount) break;
+      page++;
+      await pausa(250);
+    }
+    assertSenadoSupportCollection(senadoRows, expectedTotal);
+    for (const f of senadoRows) {
         const a = f.attributes;
         const sen = (a.unidad_laboral ?? "").trim();
         if (!senadores[sen]) senadores[sen] = [];
@@ -285,11 +301,6 @@ async function main() {
           monto: a.monto,
           calidad_juridica: a.calidad_juridica,
         });
-      }
-      console.log(`senado página ${page}/${meta.pageCount} (${meta.total})`);
-      if (page >= meta.pageCount) break;
-      page++;
-      await pausa(250);
     }
     for (const rows of Object.values(senadores)) for (const r of rows) mesesSenado.add(`${r.ano}-${String(r.mes).padStart(2, "0")}`);
     for (const rows of Object.values(senadores)) for (const r of rows) r.periodo = `${r.ano}-${String(r.mes).padStart(2, "0")}`;
