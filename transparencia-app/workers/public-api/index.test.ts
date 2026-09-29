@@ -38,6 +38,53 @@ function sha256(data: ArrayBuffer) {
 }
 
 describe("registros públicos R2", () => {
+  it("usa el release dedicado completo para el estado público de Ley 19.862", async () => {
+    const bucket = fakeBucket({
+      "projections/sources-v1/source-inventory.json": {
+        sources: [{ id: "ley-19862", label: "Registro Ley 19.862", status: "partial", recordCount: 1 }],
+      },
+      "projections/sources-v1/source-health.json": {
+        sources: { "ley-19862": { status: "partial", recordCount: 1, generatedAt: "2026-08-01T00:00:00Z" } },
+      },
+      "catalog/v1/manifest.json": {
+        sources: [{ id: "ley-19862", status: "partial" }],
+        partitions: [{ sourceId: "ley-19862", period: "2026-07", recordCount: 1 }],
+      },
+      "projections/transferencias-v1/manifest.json": {
+        schemaVersion: 1,
+        dataset: "transferencias-ley-19862",
+        generatedAt: "2026-09-28T12:00:00Z",
+        totalRows: 1,
+        pageSize: 1,
+        totalPages: 1,
+        pages: [{ page: 1, key: "projections/transferencias-v1/pages/0001.json", count: 1 }],
+        searchIndex: { key: "projections/transferencias-v1/search-index.json", count: 1 },
+        checksumSha256: "release-checksum",
+      },
+    });
+
+    const response = await worker.fetch(
+      new Request("https://example.test/api/v1/sources"),
+      { PUBLIC_DATA: bucket as never } as never,
+    );
+    const payload = await response.json() as { data: Array<Record<string, unknown>> };
+    const source = payload.data.find((item) => item.id === "ley-19862");
+
+    expect(response.status).toBe(200);
+    expect(source).toMatchObject({
+      status: "partial",
+      recordCount: 1,
+      queryable: true,
+      queryableCount: 1,
+      checksumSha256: "release-checksum",
+      lastUpdated: "2026-09-28T12:00:00Z",
+      lastUpdatedKind: "release",
+      queryRoute: "/api/v1/transferencias",
+    });
+    expect(source?.statusDetail).toContain("El explorador de Transferencias consulta el release publicado de 1 registros");
+    expect(source?.statusDetail).toContain("cobertura frente al catálogo general aún no está conciliada");
+  });
+
   it("ignora respuestas Cache API de versiones anteriores del contrato", async () => {
     const url = "https://example.test/api/v1/records?source=contraloria&limit=1";
     const entries = new Map<string, Response>([[url, new Response(JSON.stringify({ meta: { publishedRows: 62 } }))]]);
