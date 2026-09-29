@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { formatInfoLobbyEventKind } from "@/lib/infolobby-public-label";
 
 type SourceId = "chilecompra" | "infolobby" | "contraloria" | "infoprobidad" | "gastos_camara" | "gastos_senado";
 
@@ -24,7 +25,7 @@ interface SourceResponseMeta {
 
 const SOURCES: Array<{ id: SourceId; label: string; description: string }> = [
   { id: "chilecompra", label: "ChileCompra", description: "Compras, contratos y proveedores publicados." },
-  { id: "infolobby", label: "InfoLobby", description: "Audiencias, sujetos pasivos y organismos." },
+  { id: "infolobby", label: "InfoLobby", description: "Audiencias, viajes y donativos publicados por la fuente." },
   { id: "contraloria", label: "Contraloría", description: "Informes y documentos de fiscalización." },
   { id: "infoprobidad", label: "InfoProbidad", description: "Declaraciones y registros de probidad." },
   { id: "gastos_camara", label: "Gastos Cámara", description: "Rendiciones operacionales completas de diputadas y diputados." },
@@ -51,7 +52,7 @@ function recordFacts(record: SourceRecord, source: SourceId) {
     );
   } else if (source === "infolobby") {
     facts.push(
-      { label: "Tipo de registro", value: text(data.lobby_event_kind) },
+      { label: "Tipo de registro", value: formatInfoLobbyEventKind(data.lobby_event_kind) },
       { label: "Sujeto pasivo", value: text(data.sujeto_pasivo) },
       { label: "Cargo", value: text(data.cargo) },
       { label: "Organismo", value: text(data.organismo) },
@@ -211,7 +212,7 @@ export default function CrucesSourceRecords({ counts }: { counts?: Partial<Recor
         <input type="search" value={entityId} onChange={(event) => { setEntityId(event.target.value); setPage(1); }} placeholder="ID de entidad" className="input" aria-label="Filtrar por ID de entidad" />
         <select value={kind} onChange={(event) => { setKind(event.target.value); setPage(1); }} className="input" aria-label="Filtrar por tipo">
           <option value="">Todos los tipos</option>
-          <option value="purchase">Compras</option><option value="contract">Contratos</option><option value="lobby">Audiencias</option><option value="audit">Auditorías</option><option value="declaration">Declaraciones</option>
+          <option value="purchase">Compras</option><option value="contract">Contratos</option><option value="lobby">InfoLobby (todos los tipos)</option><option value="audit">Auditorías</option><option value="declaration">Declaraciones</option>
         </select>
         <input type="date" value={from} onChange={(event) => { setFrom(event.target.value); setPage(1); }} className="input" aria-label="Desde" />
         <input type="date" value={to} onChange={(event) => { setTo(event.target.value); setPage(1); }} className="input" aria-label="Hasta" />
@@ -236,7 +237,7 @@ export default function CrucesSourceRecords({ counts }: { counts?: Partial<Recor
               {rows.map((row) => (
                 <tr key={row.id}>
                   <td style={{ whiteSpace: "nowrap", color: "var(--text-muted)", fontSize: "0.78rem" }}>{row.occurredAt || "—"}</td>
-                  <td style={{ minWidth: 220, fontWeight: 700, color: "var(--text-primary)" }}>{row.title || row.id}</td>
+                  <td style={{ minWidth: 220, fontWeight: 700, color: "var(--text-primary)" }}>{source === "infolobby" ? `${formatInfoLobbyEventKind(row.data?.lobby_event_kind)} · ${row.id}` : row.title || row.id}</td>
                   <td style={{ minWidth: 280, color: "var(--text-muted)", fontSize: "0.8rem" }}>{row.description || "Registro oficial publicado por la fuente."}</td>
                   <td style={{ minWidth: 220 }}>
                     <details>

@@ -175,7 +175,7 @@ export async function runCoverageSweep({ silent = false, transferManifest = null
   const universos = [
     transferCoverage,
     { modulo: "ChileCompra (auditoría profunda pendiente)", indexado: "No evaluado en esta fase", universo: "No medido", cobertura: "No medida", umbral: "Pendiente última fase", estado: "NO MEDIDA", nota: "Volumen alto; sin conteos ni porcentaje de cobertura inferidos", pass: true, measured: false },
-    { modulo: "InfoLobby Audiencias", indexado: normalizedInfoLobbyCount ? `${formattedInfoLobbyCount} audiencias` : "Conteo no disponible", universo: "No medido frente al origen", cobertura: "No medida", umbral: "N/A", estado: "NO MEDIDA", nota: "Conteo de release productivo; sin denominador oficial independiente", pass: true, measured: false },
+    { modulo: "InfoLobby (audiencias, viajes y donativos)", indexado: normalizedInfoLobbyCount ? `${formattedInfoLobbyCount} registros` : "Conteo no disponible", universo: "No medido frente al origen", cobertura: "No medida", umbral: "N/A", estado: "NO MEDIDA", nota: "Conteo conjunto del release productivo; sin desglose auditado ni denominador oficial independiente", pass: true, measured: false },
     { modulo: "Contraloría General (CGR) Auditorías", indexado: normalizedContraloriaCount ? `${normalizedContraloriaCount.toLocaleString("es-CL")} informes publicados` : "Conteo no disponible", universo: "No medido frente al origen", cobertura: "No medida", umbral: "N/A", estado: "NO MEDIDA", nota: "El conteo publicado no establece por sí solo la cobertura del portal CGR", pass: true, measured: false },
   ];
 
