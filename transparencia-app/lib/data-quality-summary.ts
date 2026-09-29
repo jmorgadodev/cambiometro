@@ -2,6 +2,7 @@ import { existsSync, readFileSync } from "node:fs";
 import { join } from "node:path";
 import sourceConfig from "@/data/data-quality-sources.json";
 import { getTransferReleaseMetadata } from "@/lib/transfer-release-metadata";
+import { cpltR2ReleaseCount } from "@/lib/data-quality-reconciliation.mjs";
 
 export type DataQualityStatus = "completo" | "parcial" | "desfasado" | "no_disponible";
 export type ConfidenceLevel = "official" | "semi-official" | "provisional" | "derived";
@@ -61,6 +62,8 @@ export interface DataQualitySourceSummary {
   /** Rows present in the published R2 catalog across its available partitions. */
   publicHistoricalCount: number | null;
   lastSuccessAt: string | null;
+  lastUpdatedAt: string | null;
+  lastUpdatedKind: "source-success" | "release" | "unknown";
   checksumSha256: string | null;
   status: DataQualityStatus;
   statusDetail: string;
@@ -120,6 +123,8 @@ const LOCAL_HEALTH_ALIASES: Record<string, string> = {
 
 const localHealth = readOptionalJson("data/etl/source-health.json");
 const localCatalog = readOptionalJson("data/lake/catalog/v1/manifest.json");
+const localCpltR2Manifest = readOptionalJson(".ci-data-version/funcionarios-manifest.json")
+  ?? readOptionalJson(".ci-data-version/cplt-current-r2-manifest.json");
 
 const percent = (count: number | null, denominator: number | null): number | null => {
   if (count === null || denominator === null || denominator <= 0) return null;
@@ -140,10 +145,12 @@ export function getDataQualityConfig(): SourceConfig[] {
   return sourceConfig as SourceConfig[];
 }
 
-export function buildFallbackDataQualitySummary(artifacts: { health?: JsonObject; catalog?: JsonObject } = {}): DataQualitySummary {
+export function buildFallbackDataQualitySummary(artifacts: { health?: JsonObject; catalog?: JsonObject; cpltManifest?: JsonObject } = {}): DataQualitySummary {
   const transfer = getTransferReleaseMetadata();
   const health = artifacts.health ?? localHealth;
   const catalog = artifacts.catalog ?? localCatalog;
+  const cpltManifest = artifacts.cpltManifest ?? localCpltR2Manifest;
+  const cpltReleaseCount = cpltR2ReleaseCount(cpltManifest);
   const healthSources = health.sources && typeof health.sources === "object"
     ? health.sources as JsonObject
     : {};
@@ -157,14 +164,31 @@ export function buildFallbackDataQualitySummary(artifacts: { health?: JsonObject
     const catalogCount = safeCount(catalogRecord.recordCount);
     const configuredCanonicalCount = safeCount(source.canonicalCount);
     const isTransferRelease = source.id === "ley-19862";
-    const canonicalCount = isTransferRelease ? transfer.totalRows : source.canonicalCount;
+    const isCpltRelease = source.id === "transparencia-activa" && cpltReleaseCount !== null;
+    const canonicalCount = isTransferRelease ? transfer.totalRows : isCpltRelease ? cpltReleaseCount : source.canonicalCount;
     const historicalCount = isTransferRelease ? transfer.totalRows : source.historicalCount;
-    const scopeMismatch = !isTransferRelease
+    const lastSuccessAt = typeof healthRecord.lastSuccessAt === "string"
+      ? healthRecord.lastSuccessAt
+      : typeof healthRecord.last_success_at === "string"
+        ? healthRecord.last_success_at
+        : null;
+    const releaseUpdatedAt = isCpltRelease && typeof cpltManifest.generatedAt === "string"
+      ? cpltManifest.generatedAt
+      : healthRecord.updatedAtKind === "release" && typeof healthRecord.generatedAt === "string"
+      ? healthRecord.generatedAt
+      : null;
+    const lastUpdatedAt = isTransferRelease ? transfer.generatedAt : isCpltRelease ? releaseUpdatedAt : lastSuccessAt ?? releaseUpdatedAt;
+    const lastUpdatedKind: DataQualitySourceSummary["lastUpdatedKind"] = isTransferRelease || isCpltRelease || (!lastSuccessAt && releaseUpdatedAt)
+      ? "release"
+      : lastSuccessAt
+        ? "source-success"
+        : "unknown";
+    const scopeMismatch = !isTransferRelease && !isCpltRelease
       && ((observedCount !== null
         && configuredCanonicalCount !== null
         && observedCount !== configuredCanonicalCount)
         || (catalogCount !== null && configuredCanonicalCount !== null && catalogCount !== configuredCanonicalCount));
-    const reconciliationState: SourceReconciliationState = isTransferRelease
+    const reconciliationState: SourceReconciliationState = isTransferRelease || isCpltRelease
       ? "release_override"
       : observedCount === null
         ? "configured_only"
@@ -180,7 +204,9 @@ export function buildFallbackDataQualitySummary(artifacts: { health?: JsonObject
     }
     const components = componentEntries.length > 0 ? Object.fromEntries(componentEntries) : null;
     const catalogMatchesConfigured = catalogCount !== null && catalogCount === configuredCanonicalCount;
-    const reconciliationNote = reconciliationState === "scope_mismatch"
+    const reconciliationNote = isCpltRelease
+      ? `El sitio permite consultar ${cpltReleaseCount.toLocaleString("es-CL")} registros publicados. La cobertura total de la fuente no está medida.`
+      : reconciliationState === "scope_mismatch"
       ? `Los conteos no coinciden: observado ${observedCount?.toLocaleString("es-CL") ?? "sin dato"}, catálogo ${catalogCount?.toLocaleString("es-CL") ?? "sin dato"} y referencia ${configuredCanonicalCount?.toLocaleString("es-CL") ?? "sin dato"}. No se calcula cobertura hasta reconciliar el alcance.`
       : reconciliationState === "release_override"
         ? "El conteo proviene del release vigente validado para esta fuente."
@@ -195,7 +221,7 @@ export function buildFallbackDataQualitySummary(artifacts: { health?: JsonObject
     scope: source.scope,
     confidenceLevel: source.confidenceLevel as ConfidenceLevel,
     frequency: source.frequency,
-    period: source.period,
+    period: isCpltRelease ? "Período por confirmar" : source.period,
     lag: source.lag,
     coverageDetail: source.coverageDetail,
     coverageNote: source.coverageNote,
@@ -203,8 +229,10 @@ export function buildFallbackDataQualitySummary(artifacts: { health?: JsonObject
     historicalCount,
     catalogDeclaredCount: source.catalogDeclaredCount,
     publicHistoricalCount: source.publicHistoricalCount
-      ?? (catalogMatchesConfigured ? configuredCanonicalCount : scopeMismatch ? null : canonicalCount),
-    lastSuccessAt: null,
+      ?? (isCpltRelease ? canonicalCount : catalogMatchesConfigured ? configuredCanonicalCount : scopeMismatch ? null : canonicalCount),
+    lastSuccessAt,
+    lastUpdatedAt,
+    lastUpdatedKind,
     checksumSha256: null,
     status: source.canonicalCount > 0 ? "parcial" : "no_disponible" as DataQualityStatus,
     statusDetail: source.canonicalCount > 0 ? "Release disponible; la completitud se mantiene separada de la disponibilidad." : "No hay release publicado.",
@@ -212,13 +240,13 @@ export function buildFallbackDataQualitySummary(artifacts: { health?: JsonObject
     derived: source.derived,
     metrics: {
       published: coverageMetric(null, null),
-      queryable: coverageMetric(scopeMismatch ? null : source.id === "ley-19862" ? transfer.totalRows : source.queryableCount, scopeMismatch ? null : canonicalCount),
+      queryable: coverageMetric(scopeMismatch || isCpltRelease ? null : source.id === "ley-19862" ? transfer.totalRows : source.queryableCount, scopeMismatch || isCpltRelease ? null : canonicalCount),
       related: coverageMetric(source.relatedCount, canonicalCount),
     },
     quality: source.qualityObservations,
     reconciliation: {
       state: reconciliationState,
-      comparisonEligible: isTransferRelease || (observedCount !== null && !scopeMismatch),
+      comparisonEligible: isTransferRelease || (!isCpltRelease && observedCount !== null && !scopeMismatch),
       configuredCanonicalCount,
       configuredHistoricalCount: source.historicalCount,
       observedCount,

@@ -8,7 +8,7 @@ describe("landing summary", () => {
       sourceHealth: {
         generatedAt: "2026-09-04T10:00:00Z",
         sources: {
-          chilecompra: { recordCount: 74142, status: "partial", generatedAt: "2026-09-04T09:00:00Z" },
+          chilecompra: { recordCount: 74142, status: "partial", updatedAtKind: "release", generatedAt: "2026-09-04T09:00:00Z" },
           movimientos: { recordCount: 79, status: "complete", generatedAt: "2026-09-04T10:00:00Z" },
         },
       },
@@ -23,7 +23,9 @@ describe("landing summary", () => {
     expect(summary.sourceCount).toBe(2);
     expect(summary.totalSourceRecords).toBe(74221);
     expect(summary.movements.total).toBe(79);
-    expect(summary.dataUpdatedAt).toBe("2026-09-04T10:00:00Z");
+    expect(summary.sources.find((source) => source.id === "chilecompra")).toMatchObject({ generatedAtKind: "release", generatedAt: "2026-09-04T09:00:00Z" });
+    expect(summary.sources.find((source) => source.id === "movimientos")).toMatchObject({ generatedAtKind: "unknown", generatedAt: null });
+    expect(summary.dataUpdatedAt).toBe("2026-09-04T09:00:00Z");
     expect(summary.canonical.records).toBe(1753013);
   });
 
@@ -37,6 +39,20 @@ describe("landing summary", () => {
     expect(summary.sources[0]).toMatchObject({ id: "broken", recordCount: 0, generatedAt: null });
     expect(summary.dataUpdatedAt).toBeNull();
     expect(summary.canonical).toMatchObject({ records: 0, cutoff: "Sin corte publicado" });
+  });
+
+  it("no toma la fecha global de generación como actualización de ninguna fuente", () => {
+    const summary = buildLandingSummary({
+      sourceHealth: { generatedAt: "2026-09-29T05:00:00Z", sources: {
+        camara: { recordCount: 19_025, status: "partial", generatedAt: "2026-09-29T05:00:00Z" },
+      } },
+      movements: { movimientos: [] },
+      globalKpis: {},
+    });
+
+    expect(summary.sources[0]).toMatchObject({ generatedAt: null, generatedAtKind: "unknown" });
+    expect(summary.generatedAt).toBeNull();
+    expect(summary.dataUpdatedAt).toBeNull();
   });
 
   it("mantiene el vínculo explícito entre las tarjetas y el snapshot de salud", () => {

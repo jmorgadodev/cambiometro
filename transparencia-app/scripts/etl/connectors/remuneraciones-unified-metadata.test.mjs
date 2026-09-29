@@ -22,6 +22,20 @@ describe("readCpltPublishedCount", () => {
     fs.rmSync(root, { recursive: true, force: true });
   });
 
+  it("usa el manifiesto R2 canónico de sólo metadatos si el lake no está hidratado", () => {
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), "cambiometro-cplt-count-"));
+    const metadataDir = path.join(root, ".ci-data-version");
+    fs.mkdirSync(metadataDir, { recursive: true });
+    fs.writeFileSync(path.join(metadataDir, "cplt-current-r2-manifest.json"), JSON.stringify({
+      sourceId: "transparencia-activa",
+      version: "2026-09-15T08-08-44-566Z",
+      coverage: [{ recordCount: 1 }, { recordCount: 2 }],
+    }));
+
+    expect(readCpltPublishedCount(root)).toBe(3);
+    fs.rmSync(root, { recursive: true, force: true });
+  });
+
   it("conserva el respaldo cuando no hay manifiesto válido", () => {
     const root = fs.mkdtempSync(path.join(os.tmpdir(), "cambiometro-r2-count-"));
     expect(readCpltPublishedCount(root, 123)).toBe(123);

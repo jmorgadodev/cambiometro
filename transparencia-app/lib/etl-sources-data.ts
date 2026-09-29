@@ -6,7 +6,7 @@ export interface EtlSourceInfo {
   organization: string;
   category: "personal" | "finanzas" | "compras" | "probidad" | "parlamento" | "municipios";
   frequency: string;
-  lastUpdated: string;
+  lastUpdated: string | null;
   lastUpdatedRelative: string;
   recordCount: number;
   canonicalCount: number;
@@ -81,7 +81,9 @@ export const ETL_SOURCES_DATA: EtlSourceInfo[] = descriptors.map(({ health, ...d
   const state = health === "personal_apoyo" ? null : healthRaw.sources[health as keyof typeof healthRaw.sources];
   const canonicalCount = CANONICAL_COUNTS[health] ?? state?.recordCount ?? 0;
   const historicalCount = HISTORICAL_COUNTS[health] ?? state?.recordCount ?? canonicalCount;
-  const generatedAt = state?.generatedAt ?? "2026-08-21T10:02:59.458Z";
+  const generatedAt = state && "updatedAtKind" in state && state.updatedAtKind === "release" && typeof state.generatedAt === "string"
+    ? state.generatedAt
+    : null;
   const financialAmountClp = state && "financialAmountClp" in state && typeof state.financialAmountClp === "number"
     ? state.financialAmountClp
     : undefined;
@@ -95,9 +97,9 @@ export const ETL_SOURCES_DATA: EtlSourceInfo[] = descriptors.map(({ health, ...d
     ...(CATALOG_DECLARED_COUNTS[health] !== undefined ? { catalogDeclaredCount: CATALOG_DECLARED_COUNTS[health] } : {}),
     ...(financialAmountClp !== undefined ? { financialAmountClp } : {}),
     lastUpdated: generatedAt,
-    lastUpdatedRelative: dateLabel(generatedAt),
+    lastUpdatedRelative: generatedAt ? dateLabel(generatedAt) : "Fecha no informada en el release",
     status: state?.status === "complete" ? "operational" : "official_lag",
-    statusText: state?.status === "complete" ? "Universo verificado" : "Disponible para consulta",
+    statusText: state?.status === "complete" ? "Release disponible" : "Disponible para consulta",
   };
 });
 

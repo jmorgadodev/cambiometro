@@ -28,6 +28,18 @@ describe("manifiesto unificado de calidad de datos", () => {
     expect(coverageMetric(10, 0).label).toBe("No calculable");
   });
 
+  it("no confunde la generación global del catálogo con la actualización de una fuente", () => {
+    const summary = buildFallbackDataQualitySummary({
+      health: { generatedAt: "2026-09-29T05:00:00.000Z", sources: {
+        camara: { recordCount: 19_025, status: "partial", generatedAt: "2026-09-29T05:00:00.000Z" },
+      } },
+      catalog: { generatedAt: "2026-09-29T05:00:00.000Z", sources: [{ id: "camara", generatedAt: "2026-09-29T05:00:00.000Z" }] },
+    });
+    const camara = summary.sources.find((source) => source.id === "camara");
+
+    expect(camara).toMatchObject({ lastSuccessAt: null, lastUpdatedAt: null, lastUpdatedKind: "unknown" });
+  });
+
   it("mantiene métricas dentro de rango para cada fuente", () => {
     const summary = buildFallbackDataQualitySummary();
     for (const source of summary.sources) {
@@ -80,5 +92,31 @@ describe("manifiesto unificado de calidad de datos", () => {
     expect(source?.publicHistoricalCount).toBeNull();
     expect(source?.metrics.published.label).toBe("No calculable");
     expect(source?.metrics.queryable.label).toBe("No calculable");
+  });
+
+  it("usa el release CPLT verificado en R2 y no inventa cobertura total en el fallback", () => {
+    const summary = buildFallbackDataQualitySummary({
+      health: { sources: { cplt: { recordCount: 1_218_136 } } },
+      catalog: { sources: [{ id: "transparencia-activa", recordCount: 0 }] },
+      cpltManifest: {
+        sourceId: "transparencia-activa",
+        generatedAt: "2026-09-15T08:08:44.566Z",
+        recordCount: 3,
+        searchIndex: { totalRows: 3 },
+        sources: [{ sourceId: "planta", recordCount: 3, checksumSha256: "a".repeat(64) }],
+      },
+    });
+    const source = summary.sources.find((item) => item.id === "transparencia-activa");
+
+    expect(source).toMatchObject({
+      canonicalCount: 3,
+      publicHistoricalCount: 3,
+      period: "Período por confirmar",
+      lastUpdatedAt: "2026-09-15T08:08:44.566Z",
+      lastUpdatedKind: "release",
+      reconciliation: { state: "release_override", comparisonEligible: false },
+      metrics: { published: { label: "No calculable" }, queryable: { label: "No calculable" } },
+    });
+    expect(source?.reconciliation.note).toContain("cobertura total de la fuente no está medida");
   });
 });

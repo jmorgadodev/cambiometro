@@ -31,4 +31,11 @@ describe("paginación de fichas distintas", () => {
     expect(remunerationGroupKey({ name: "María Paz Rojas", source: "cplt", organization: "Municipalidad B", fallbackId: "3" })).not.toBe(sameMunicipality);
     expect(remunerationGroupKey({ name: "María Paz Rojas", source: "senado", organization: "Senado", fallbackId: "4" })).not.toBe(sameMunicipality);
   });
+
+  it("mantiene separados los registros cuyo nombre publicado es el placeholder 0 0", () => {
+    const may = remunerationGroupKey({ name: "0 0", source: "remuneraciones-38bis", organization: "DIPRES", fallbackId: "row-may" });
+    const june = remunerationGroupKey({ name: "0 0", source: "remuneraciones-38bis", organization: "DIPRES", fallbackId: "row-june" });
+
+    expect(may).not.toBe(june);
+  });
 });

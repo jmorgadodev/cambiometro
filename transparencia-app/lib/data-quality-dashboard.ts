@@ -20,8 +20,9 @@ export interface DataQualitySourceRow {
   periodoReciente: string;
   desfase: string;
   coberturaDetalle: string;
-  lastSync: string;
+  lastSync: string | null;
   lastSyncFormatted: string;
+  lastSyncKind: "source-success" | "release" | "unknown";
   coverageNote: string;
   isDerived: boolean;
   modulePath: string;
@@ -106,8 +107,9 @@ export async function getDataQualityDashboardData(): Promise<{ sources: DataQual
       periodoReciente: source.period,
       desfase: source.lag,
       coberturaDetalle: source.coverageDetail,
-      lastSync: source.lastSuccessAt ?? ultimaValidacionIso,
-      lastSyncFormatted: formatDate(source.lastSuccessAt, ultimaValidacionIso),
+      lastSync: source.lastUpdatedAt,
+      lastSyncFormatted: source.lastUpdatedAt ? formatDate(source.lastUpdatedAt, source.lastUpdatedAt) : "No informada en el release",
+      lastSyncKind: source.lastUpdatedKind,
       coverageNote: source.coverageNote,
       isDerived: source.derived,
       modulePath: source.modulePath,

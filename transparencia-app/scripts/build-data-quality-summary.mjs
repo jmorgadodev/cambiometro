@@ -2,7 +2,7 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { mkdir, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { reconcileSourceCounts } from "../lib/data-quality-reconciliation.mjs";
+import { cpltR2ReleaseCount, reconcileSourceCounts } from "../lib/data-quality-reconciliation.mjs";
 
 const root = process.cwd();
 const readJson = (relative, fallback) => {
@@ -22,6 +22,9 @@ const health = readJson("data/etl/source-health.json", { generatedAt: null, sour
 const catalog = readJson("data/lake/catalog/v1/manifest.json", { generatedAt: null, sources: [] });
 const globalKpis = readJson("lib/global-kpis.json", { registros_canonicos: null, relaciones: null });
 const transferRelease = readJson("data/generated/transferencias/summary.json", null);
+const cpltR2Manifest = readJson(".ci-data-version/funcionarios-manifest.json",
+  readJson(".ci-data-version/cplt-current-r2-manifest.json", null));
+const cpltReleaseCount = cpltR2ReleaseCount(cpltR2Manifest);
 const transferRows = Number.isSafeInteger(transferRelease?.totalRows)
   ? transferRelease.totalRows
   : Number.isSafeInteger(transferRelease?.sourceRows)
@@ -64,7 +67,13 @@ const sources = config.map((source) => {
   const catalogEntry = catalogById.get(source.id) ?? null;
   const catalogSourceId = catalogSourceAliases[source.id] ?? source.id;
   const partitionCount = publishedPartitionCounts.get(catalogSourceId);
-  const resolvedCounts = reconcileSourceCounts({ source, healthEntry, catalogEntry, transferRows });
+  const resolvedCounts = reconcileSourceCounts({
+    source,
+    healthEntry,
+    catalogEntry,
+    transferRows,
+    r2ReleaseCount: source.id === "transparencia-activa" ? cpltReleaseCount : null,
+  });
   const { canonicalCount, historicalCount, queryableCount, reconciliation } = resolvedCounts;
   const configuredPublicHistoricalCount = Number.isSafeInteger(source.publicHistoricalCount)
     ? source.publicHistoricalCount
@@ -73,6 +82,8 @@ const sources = config.map((source) => {
     && catalogEntry.recordCount === source.canonicalCount;
   const publicHistoricalCount = configuredPublicHistoricalCount !== null
     ? configuredPublicHistoricalCount
+    : reconciliation.state === "release_override" && source.id === "transparencia-activa"
+      ? canonicalCount
     : catalogMatchesConfigured
       ? source.canonicalCount
       : reconciliation.comparisonEligible && Number.isSafeInteger(partitionCount) && partitionCount > 0
@@ -80,7 +91,22 @@ const sources = config.map((source) => {
         : reconciliation.comparisonEligible
           ? canonicalCount
           : null;
-  const lastSuccessAt = healthEntry?.generatedAt ?? catalogEntry?.generatedAt ?? null;
+  const lastSuccessAt = healthEntry?.lastSuccessAt ?? healthEntry?.last_success_at ?? catalogEntry?.lastSuccessAt ?? null;
+  const releaseGeneratedAt = source.id === "transparencia-activa" && cpltReleaseCount !== null
+    ? cpltR2Manifest.generatedAt ?? null
+    : healthEntry?.updatedAtKind === "release"
+    ? healthEntry.generatedAt ?? null
+    : catalogEntry?.updatedAtKind === "release"
+      ? catalogEntry.generatedAt ?? null
+      : source.id === "ley-19862"
+        ? transferRelease?.generatedAt ?? null
+        : null;
+  const lastUpdatedAt = reconciliation.state === "release_override" && source.id === "transparencia-activa"
+    ? releaseGeneratedAt
+    : lastSuccessAt ?? releaseGeneratedAt;
+  const lastUpdatedKind = reconciliation.state === "release_override" && source.id === "transparencia-activa"
+    ? "release"
+    : lastSuccessAt ? "source-success" : releaseGeneratedAt ? "release" : "unknown";
   const sourceStatus = healthEntry?.status ?? catalogEntry?.status ?? null;
   const status = canonicalCount <= 0
     ? "no_disponible"
@@ -89,7 +115,9 @@ const sources = config.map((source) => {
       : sourceStatus === "connected" || sourceStatus === "complete"
         ? "completo"
         : "parcial";
-  const period = Array.isArray(catalogEntry?.foundPeriods) && catalogEntry.foundPeriods.length
+  const period = source.id === "transparencia-activa" && reconciliation.state === "release_override"
+    ? "Período por confirmar"
+    : Array.isArray(catalogEntry?.foundPeriods) && catalogEntry.foundPeriods.length
     ? catalogEntry.foundPeriods[catalogEntry.foundPeriods.length - 1]
     : source.period;
   const checksumSha256 = catalogEntry?.indexChecksumSha256 ?? null;
@@ -101,6 +129,8 @@ const sources = config.map((source) => {
     publicHistoricalCount,
     period,
     lastSuccessAt,
+    lastUpdatedAt,
+    lastUpdatedKind,
     checksumSha256,
     status,
     statusDetail: status === "completo"

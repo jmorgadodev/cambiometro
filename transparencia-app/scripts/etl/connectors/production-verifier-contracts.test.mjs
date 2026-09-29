@@ -36,4 +36,10 @@ describe("production verifier contracts", () => {
     expect(hasPublishedParliamentaryDiet(html, "2026-06")).toBe(true);
     expect(hasPublishedParliamentaryDiet(html, "2026-05")).toBe(false);
   });
+
+  it("matches a published diet period rendered as a localized month", () => {
+    const html = '<div>$8.239.091</div><span>dieta parlamentaria bruta · Junio 2026</span>';
+    expect(hasPublishedParliamentaryDiet(html, "2026-06")).toBe(true);
+    expect(hasPublishedParliamentaryDiet(html, "2026-05")).toBe(false);
+  });
 });

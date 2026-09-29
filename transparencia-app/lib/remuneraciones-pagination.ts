@@ -20,7 +20,13 @@ export function distinctResultWindow<T>(items: readonly T[], page: number, size:
   return { items: groups.slice(start, end), start, end, totalGroups: groups.length };
 }
 
+export function isPlaceholderRemunerationName(value: string) {
+  const normalized = value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es-CL").replace(/[^a-z0-9]+/g, " ").trim();
+  return /^0(?: 0)+$/.test(normalized);
+}
+
 export function remunerationGroupKey(row: { name: string; source: string; organization: string; fallbackId: string }) {
   const normalizeTokens = (value: string) => value.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase("es-CL").split(/[^a-z0-9]+/).filter(Boolean).sort().join(" ");
-  return [row.source.trim().toLocaleLowerCase("es-CL"), normalizeTokens(row.organization), normalizeTokens(row.name) || row.fallbackId].join("::");
+  const normalizedName = isPlaceholderRemunerationName(row.name) ? "" : normalizeTokens(row.name);
+  return [row.source.trim().toLocaleLowerCase("es-CL"), normalizeTokens(row.organization), normalizedName || row.fallbackId].join("::");
 }

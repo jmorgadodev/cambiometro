@@ -1,6 +1,6 @@
 import fs from "node:fs";
 import path from "node:path";
-import { normalizeRemunerationText, personKeyForRemuneration, remunerationAmountState } from "./remuneraciones-unified-contract.mjs";
+import { isPlaceholderRemunerationName, normalizeRemunerationText, personKeyForRemuneration, remunerationAmountState, remunerationPeriodRange } from "./remuneraciones-unified-contract.mjs";
 import {
   countScopeForRemunerationSource,
   readCpltPublishedCount,
@@ -28,6 +28,9 @@ fs.rmSync(outputDir, { recursive: true, force: true });
 fs.mkdirSync(outputDir, { recursive: true });
 
 const normalize = normalizeRemunerationText;
+const sourcePeriodRange = (sourceId) => remunerationPeriodRange(rows
+  .filter((row) => row.sourceId === sourceId)
+  .map((row) => row.periodo));
 
 function hash(value) {
   let result = 2166136261;
@@ -61,6 +64,7 @@ function sourceMeta(id, overrides = {}) {
 
 function makeRow({ sourceId, sourceLabel, sourceType, recordId, name, organism, role, period, amount, contract }) {
   const normalizedName = normalize(name);
+  const placeholderName = isPlaceholderRemunerationName(name);
   return {
     sourceId,
     sourceLabel,
@@ -77,7 +81,7 @@ function makeRow({ sourceId, sourceLabel, sourceType, recordId, name, organism, 
     montoBruto: Number.isFinite(amount) ? amount : null,
     tipoContrato: contract ?? null,
     estadoRegistro: remunerationAmountState(amount),
-    qualityObservations: [],
+    qualityObservations: placeholderName ? ["identity_not_identifiable"] : [],
   };
 }
 
@@ -184,9 +188,13 @@ const relations = Object.fromEntries([...entitySources.entries()]
 
 const bySource = new Map();
 for (const row of rows) {
-  const current = bySource.get(row.sourceId) ?? { count: 0, withAmount: 0, periods: new Set(), related: new Set() };
+  const current = bySource.get(row.sourceId) ?? { count: 0, withAmount: 0, withoutAmount: 0, zeroAmount: 0, unidentifiableName: 0, periods: new Set(), related: new Set() };
   current.count += 1;
-  if (row.montoBruto !== null) current.withAmount += 1;
+  if (row.montoBruto !== null) {
+    current.withAmount += 1;
+    if (row.montoBruto === 0) current.zeroAmount += 1;
+  } else current.withoutAmount += 1;
+  if (row.qualityObservations.includes("identity_not_identifiable")) current.unidentifiableName += 1;
   if (row.periodo) current.periods.add(row.periodo);
   if (relations[row.personKey]) current.related.add(row.personKey);
   bySource.set(row.sourceId, current);
@@ -222,7 +230,7 @@ const releaseSources = [
     publishedCount: bySource.get("camara")?.count ?? 0,
     queryableCount: bySource.get("camara")?.count ?? 0,
     relatedCount: bySource.get("camara")?.related.size ?? 0,
-    period: support.generado_en?.slice(0, 7) ?? null,
+    period: sourcePeriodRange("camara"),
     checksum: support.fuentes?.camara?.checksum_sha256 ?? null,
     note: "Consolidado derivado de personal de apoyo; no representa la nómina completa de la Cámara.",
     modulePath: "/remuneraciones-publicas",
@@ -234,7 +242,7 @@ const releaseSources = [
     publishedCount: bySource.get("senado")?.count ?? 0,
     queryableCount: bySource.get("senado")?.count ?? 0,
     relatedCount: bySource.get("senado")?.related.size ?? 0,
-    period: support.generado_en?.slice(0, 7) ?? null,
+    period: sourcePeriodRange("senado"),
     checksum: support.asignacion_senado_2026?.checksum_sha256 ?? null,
     note: "Consolidado derivado de personal de apoyo del Senado.",
     modulePath: "/remuneraciones-publicas",
@@ -254,12 +262,23 @@ const quality = {
     total: rows.length,
     withAmount: rows.filter((row) => row.montoBruto !== null).length,
     withoutAmount: rows.filter((row) => row.montoBruto === null).length,
+    zeroAmount: rows.filter((row) => row.montoBruto === 0).length,
     blankName: rows.filter((row) => !row.nombreNormalizado).length,
+    unidentifiableName: rows.filter((row) => row.qualityObservations.includes("identity_not_identifiable")).length,
   },
+  bySource: Object.fromEntries([...bySource].map(([sourceId, current]) => [sourceId, {
+    total: current.count,
+    withAmount: current.withAmount,
+    withoutAmount: current.withoutAmount,
+    zeroAmount: current.zeroAmount,
+    unidentifiableName: current.unidentifiableName,
+    periods: [...current.periods].sort(),
+  }])),
   relationGroups: Object.keys(relations).length,
   notes: [
     "Las relaciones entre fuentes se presentan como coincidencias nominales hasta contar con identificadores o contexto suficiente.",
     "Los valores originales de nombre, organismo, cargo y monto se conservan por registro y no se mezclan entre fuentes.",
+    "Los nombres placeholder publicados por la fuente se conservan como dato original, pero no se usan para identificar ni agrupar personas.",
   ],
 };
 

@@ -109,9 +109,11 @@ export default async function FuentesPage() {
                     <div>
                       <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Registros: </dt>
                       <dd style={{ display: "inline", color: "var(--text-muted)" }}>
-                        {source.reconciliation.comparisonEligible
-                          ? `Canónicos: ${source.canonicalCount.toLocaleString("es-CL")}`
-                          : "Conteo: No conciliado"} · Consultables en el sitio: {source.publicHistoricalCount?.toLocaleString("es-CL") ?? "No conciliable"}
+                        {source.reconciliation.state === "release_override"
+                          ? `${(source.publicHistoricalCount ?? source.canonicalCount).toLocaleString("es-CL")} registros publicados y consultables`
+                          : source.reconciliation.comparisonEligible
+                            ? `${source.canonicalCount.toLocaleString("es-CL")} registros en este alcance · Consultables: ${source.publicHistoricalCount?.toLocaleString("es-CL") ?? "No conciliable"}`
+                            : "Conteo pendiente de revisión"}
                         {source.catalogDeclaredCount && source.publicHistoricalCount !== null && source.catalogDeclaredCount !== source.publicHistoricalCount
                           ? ` · Catálogo declarado: ${source.catalogDeclaredCount.toLocaleString("es-CL")}`
                           : ""}
@@ -120,6 +122,8 @@ export default async function FuentesPage() {
               <div style={{ fontSize: "0.7rem", color: source.publicHistoricalCount === null || source.publicHistoricalCount < source.historicalCount ? "var(--warn)" : "var(--text-subtle)", marginTop: "-0.15rem" }}>
                       {source.publicHistoricalCount === null
                         ? source.reconciliation.note
+                        : source.reconciliation.state === "release_override"
+                        ? "La cobertura total de la fuente no está medida."
                         : source.publicHistoricalCount < source.historicalCount
                         ? `Histórico: declarado ${source.historicalCount.toLocaleString("es-CL")}; aún no está todo disponible para consulta. Diferencia por deduplicación y cobertura declarada.`
                         : "Histórico: el valor declarado coincide con el catálogo publicado. Diferencia por deduplicación y cobertura declarada."}
@@ -137,7 +141,9 @@ export default async function FuentesPage() {
                       <dd style={{ display: "inline", color: "var(--text-muted)" }}>{source.coberturaDetalle}</dd>
                     </div>
                     <div>
-                      <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>Última validación ETL: </dt>
+                      <dt style={{ fontWeight: 700, display: "inline", color: "var(--text-primary)" }}>
+                        {source.lastSyncKind === "source-success" ? "Última actualización comprobada: " : source.lastSyncKind === "release" ? "Fecha del release: " : "Fecha de actualización: "}
+                      </dt>
                       <dd style={{ display: "inline", color: "var(--text-muted)" }}>{source.lastSyncFormatted}</dd>
                     </div>
                     <div style={{ paddingTop: "0.35rem", borderTop: "1px solid var(--border-subtle)" }}>
@@ -154,7 +160,11 @@ export default async function FuentesPage() {
                   )}
                   <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: "0.75rem", marginTop: "auto", paddingTop: "0.5rem" }}>
                     <span style={{ fontSize: "0.68rem", color: "var(--text-subtle)" }}>
-                      {source.reconciliation.comparisonEligible ? "Conteos comparados" : "Conteos pendientes de revisión"}
+                      {source.reconciliation.comparisonEligible
+                        ? "Conteos comparados"
+                        : source.reconciliation.state === "release_override"
+                          ? "Cobertura total sin medir"
+                          : "Conteos pendientes de revisión"}
                     </span>
                     <Link prefetch={false} href={source.modulePath} className="data-link" style={{ fontSize: "0.75rem", fontWeight: 700 }}>
                       Explorar registros →

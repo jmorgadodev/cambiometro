@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { reconcileSourceCounts } from "./data-quality-reconciliation.mjs";
+import { cpltR2ReleaseCount, reconcileSourceCounts } from "./data-quality-reconciliation.mjs";
 
 const source = (overrides = {}) => ({
   id: "camara",
@@ -10,6 +10,21 @@ const source = (overrides = {}) => ({
 });
 
 describe("reconciliación de conteos de fuentes", () => {
+  it("acepta el conteo CPLT sólo si el manifest, índice y partes son consistentes", () => {
+    const manifest = {
+      sourceId: "transparencia-activa",
+      recordCount: 3,
+      searchIndex: { totalRows: 3 },
+      sources: [
+        { sourceId: "planta", recordCount: 1, checksumSha256: "a".repeat(64) },
+        { sourceId: "honorarios", recordCount: 2, checksumSha256: "b".repeat(64) },
+      ],
+    };
+    expect(cpltR2ReleaseCount(manifest)).toBe(3);
+    expect(cpltR2ReleaseCount({ ...manifest, searchIndex: { totalRows: 4 } })).toBeNull();
+    expect(cpltR2ReleaseCount({ ...manifest, sources: [{ ...manifest.sources[0], checksumSha256: "invalid" }] })).toBeNull();
+  });
+
   it("usa el snapshot observado cuando coincide con la referencia", () => {
     const result = reconcileSourceCounts({
       source: source(),
@@ -68,6 +83,34 @@ describe("reconciliación de conteos de fuentes", () => {
       queryableCount: 62_172,
       reconciliation: { state: "release_override", comparisonEligible: true },
     });
+  });
+
+  it("prefiere el índice R2 validado de CPLT sin afirmar cobertura total", () => {
+    const result = reconcileSourceCounts({
+      source: source({
+        id: "transparencia-activa",
+        canonicalCount: 1_203_287,
+        historicalCount: 1_218_136,
+        queryableCount: 1_203_287,
+      }),
+      healthEntry: { recordCount: 1_218_136 },
+      catalogEntry: { recordCount: 0 },
+      r2ReleaseCount: 1_243_761,
+    });
+
+    expect(result).toMatchObject({
+      canonicalCount: 1_243_761,
+      queryableCount: 1_243_761,
+      reconciliation: {
+        state: "release_override",
+        comparisonEligible: false,
+        configuredCanonicalCount: 1_203_287,
+        observedCount: 1_218_136,
+        catalogCount: 0,
+      },
+    });
+    expect(result.reconciliation.note).toContain("1.243.761 registros publicados");
+    expect(result.reconciliation.note).toContain("cobertura total de la fuente no está medida");
   });
 
   it("no infiere cobertura cuando sólo existe la configuración", () => {

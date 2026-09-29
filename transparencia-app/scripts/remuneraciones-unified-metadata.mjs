@@ -42,6 +42,8 @@ export function validateUnifiedStaticManifest(manifest) {
 
 export function readCpltPublishedCount(root, fallback = 1203287) {
   const candidates = [
+    path.join(root, ".ci-data-version", "funcionarios-manifest.json"),
+    path.join(root, ".ci-data-version", "cplt-current-r2-manifest.json"),
     path.join(root, "data", "lake-cplt", "projections", "funcionarios-v1", "manifest.json"),
     path.join(root, "data", "lake", "projections", "funcionarios-v1", "manifest.json"),
   ];
@@ -52,6 +54,12 @@ export function readCpltPublishedCount(root, fallback = 1203287) {
       if (manifest?.sourceId !== "transparencia-activa") continue;
       if (Number.isSafeInteger(manifest.recordCount) && manifest.recordCount > 0) {
         return manifest.recordCount;
+      }
+      if (Array.isArray(manifest.coverage)
+        && manifest.coverage.length > 0
+        && manifest.coverage.every((commune) => Number.isSafeInteger(commune?.recordCount) && commune.recordCount >= 0)) {
+        const coverageCount = manifest.coverage.reduce((sum, commune) => sum + commune.recordCount, 0);
+        if (Number.isSafeInteger(coverageCount) && coverageCount > 0) return coverageCount;
       }
     } catch {
       // El build local puede no tener el snapshot R2 hidratado todavía.

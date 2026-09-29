@@ -188,6 +188,10 @@ async function verifyProdFull() {
   const homeRes = await fetch(`${PROD_URL}/`, { headers });
   assertCheck("HOME", "HTTP Status 200", homeRes.status === 200);
   const homeHtml = (await homeRes.text()).replace(/<!--.*?-->/g, "");
+  const sourcesApiRes = await fetch(`${API_URL}/api/v1/sources`, { headers });
+  const sourcesApi = sourcesApiRes.ok ? await sourcesApiRes.json().catch(() => null) : null;
+  const sourceRows = Array.isArray(sourcesApi?.data) ? sourcesApi.data : [];
+  const sourceById = new Map(sourceRows.map((source) => [source.id, source]));
   await verifyThemePersistence(PROD_URL, headers);
   try {
     await verifyAnalyticsConsent(PROD_URL, headers);
@@ -209,12 +213,10 @@ async function verifyProdFull() {
   assertCheck("HOME", `Total entidades identificadas (${formatInteger(canonicalCount)})`, canonicalCount > 0 && homeHtml.includes(formatInteger(canonicalCount)));
   assertCheck("HOME", "Total relaciones y cruces (1.897)", homeHtml.includes("1.897"));
   assertCheck("HOME", "Total votaciones de sala (12.111)", homeHtml.includes("12.111"));
-  assertCheck("HOME", "Total gastos parlamentarios (690)", homeHtml.includes("690"));
+  assertCheck("HOME", "Home mantiene acceso a gastos operacionales", homeHtml.includes("/gastos-operacionales"));
   assertCheck("HOME", "Hero KPIs sin signo negativo '-' en SSR", !homeHtml.includes("home-stat\"><strong>-") && !homeHtml.includes("home-stat\">-"));
-  // Home muestra sólo las fuentes oficiales con registros disponibles (12).
-  // /fuentes también incluye una fuente derivada y por eso se valida como 13
-  // en el módulo correspondiente; no mezclar ambos universos.
-  assertCheck("HOME", "Total 12 fuentes oficiales con registros", homeHtml.includes("12 fuentes oficiales"));
+  const displayedHomeSourceCount = Number(homeHtml.match(/(\d+)\s+FUENTES OFICIALES/i)?.[1] ?? 0);
+  assertCheck("HOME", "Fuentes oficiales de Home coinciden con el catálogo API", displayedHomeSourceCount > 0 && displayedHomeSourceCount === sourceRows.length, `home: ${displayedHomeSourceCount}, api: ${sourceRows.length}`);
   assertCheck("HOME", "Footer contiene 'Creado por Jorge Morgado'", homeHtml.includes("Creado por") && homeHtml.includes("Jorge Morgado"));
   assertCheck("HOME", "Footer contiene enlace a LinkedIn de Jorge Morgado", homeHtml.includes("https://www.linkedin.com/in/jorge-morgado/"));
   assertCheck("HOME", "Footer NO contiene columna 'Explorar' (duplicada)", !homeHtml.includes('aria-label="Explorar"') && !homeHtml.includes('>Explorar</h2>'));
@@ -222,7 +224,7 @@ async function verifyProdFull() {
   assertCheck("HOME", "Footer contiene icono SVG de Instagram", homeHtml.includes("<svg") && homeHtml.includes("Instagram"));
   assertCheck("HOME", "Footer contiene icono SVG de X", homeHtml.includes("<svg") && (homeHtml.includes("𝕏") || homeHtml.includes("Twitter")));
   assertCheck("HOME", "Footer contiene enlace de TikTok @cambiometro", homeHtml.includes("https://www.tiktok.com/@cambiometro") && homeHtml.includes("TikTok"));
-  assertCheck("HOME", "Footer contiene 'Última consolidación'", homeHtml.includes("Última consolidación") || homeHtml.includes("Corte"));
+  assertCheck("HOME", "Footer no expone mensajes internos de consolidación", !/Última consolidación|Estado del catálogo|Catálogo actualizado por fuente/i.test(homeHtml));
 
   // ─── MÓDULO 2: FICHAS E INVARIANTES ────────────────────────────────────────
   console.log("\n2. MÓDULO FICHAS E INVARIANTES");
@@ -298,7 +300,8 @@ async function verifyProdFull() {
   assertCheck("CRUCES", "HTTP Status 200", crucesRes.status === 200);
   const crucesHtml = (await crucesRes.text()).replace(/<!--.*?-->/g, "");
 
-  assertCheck("CRUCES", "Tile CGR '291'", crucesHtml.includes("291"));
+  const cgrPublishedCount = Number(sourceById.get("contraloria")?.recordCount ?? 0);
+  assertCheck("CRUCES", "Tile CGR coincide con el conteo publicado por la API", cgrPublishedCount > 0 && crucesHtml.includes(formatInteger(cgrPublishedCount)), `API: ${formatInteger(cgrPublishedCount)}`);
   assertCheck("CRUCES", "Tile ChileCompra '74.142'", crucesHtml.includes("74.142"));
   const infoLobbyCount = extractInfoLobbyCount(crucesHtml);
   assertCheck("CRUCES", "Tile InfoLobby muestra el conteo publicado", Number.isInteger(infoLobbyCount) && infoLobbyCount > 0, `count: ${infoLobbyCount ?? "n/a"}`);
@@ -434,9 +437,6 @@ async function verifyProdFull() {
 
   // ─── MÓDULO 5: /FUENTES Y /DATOS/CALIDAD ───────────────────────────────────
   console.log("\n5. MÓDULO FUENTES Y CALIDAD DE DATOS (/fuentes, /datos/calidad)");
-  const sourcesApiRes = await fetch(`${API_URL}/api/v1/sources`, { headers });
-  const sourcesApi = sourcesApiRes.ok ? await sourcesApiRes.json().catch(() => null) : null;
-  const sourceRows = Array.isArray(sourcesApi?.data) ? sourcesApi.data : [];
   const expectedSourceIds = ["camara", "chilecompra", "contraloria", "cplt", "dipres", "ine", "infolobby", "infoprobidad", "ley-19862", "senado", "servel", "sinim"];
   assertCheck("FUENTES", "API de fuentes responde con el universo canónico", sourcesApiRes.status === 200 && sourceRows.length === expectedSourceIds.length && expectedSourceIds.every((id) => sourceRows.some((source) => source?.id === id)), `actual: ${sourceRows.length}/${expectedSourceIds.length}`);
   // `partial` describes coverage or freshness, not a broken connection.  The
@@ -517,12 +517,17 @@ async function verifyProdFull() {
   assertCheck("LAYOUT", "/cruces con container-main", crucesHtml.includes("container-main"));
   assertCheck("LAYOUT", "/transferencias con container-main", transfHtml.includes("container-main"));
   assertCheck("LAYOUT", "Home con main.home-desk y container-main", homeHtml.includes("home-desk") && homeHtml.includes("container-main"));
-  assertCheck("LAYOUT", "Home ledger y rutas layout", homeHtml.includes("home-ledger__grid") && homeHtml.includes("home-paths"));
+  assertCheck("LAYOUT", "Home presenta la búsqueda editorial y sus rutas principales", homeHtml.includes("Encuentra la evidencia pública") && homeHtml.includes("/gastos-operacionales") && homeHtml.includes("/movimientos"));
 
   // ─── MÓDULO 9: BARRIDO DE COBERTURA Y CONCORDANCIA OFICIAL ────────────────
   console.log("\n9. MÓDULO BARRIDO DE COBERTURA Y CONCORDANCIA OFICIAL");
   const { runCoverageSweep } = await import("./coverage-sweep.mjs");
-  const coverageResult = await runCoverageSweep({ silent: false, transferManifest, infolobbyCount: infoLobbyCount });
+  const coverageResult = await runCoverageSweep({
+    silent: false,
+    transferManifest,
+    infolobbyCount: infoLobbyCount,
+    contraloriaCount: sourceById.get("contraloria")?.recordCount ?? null,
+  });
   assertCheck("COBERTURA", "Barrido de cobertura integral (Votaciones, Muestra 5 Fichas, Personal Apoyo, Movimientos, Manifest)", coverageResult.passed);
 
   // ─── MÓDULO 10: FICHAS /politico/* ESTÁTICAS Y RENDIMIENTO (10 URLs × 2 requests) ──

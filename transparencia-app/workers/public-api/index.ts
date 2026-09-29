@@ -433,27 +433,39 @@ async function health(env: Env) {
   const transferD1 = Boolean(transferDb);
   const r2 = Boolean(manifest);
   const checkD1 = env.HEALTH_CHECK_D1 === "1";
-  let d1TransferRows = 0;
+  let d1CheckStatus: "not-requested" | "consistent" | "inconsistent" | "unavailable" = "not-requested";
+  let d1TransferRows: number | null = null;
   let d1ReleaseChecksum: string | null = null;
-  if (transferD1 && checkD1) {
-    try {
-      // Never count the transfer table from a health probe. COUNT(*) scans the
-      // full D1 projection and can consume the free rows_read quota every time
-      // uptime smoke calls this endpoint. The release pointer is the cheap,
-      // canonical consistency check; a physical-table audit is a separate
-      // operator action, not a public health request.
-      const release = await transferDb?.prepare("SELECT checksum_sha256,total_rows FROM transferencias_19862_release WHERE singleton = 1").first<{ checksum_sha256: string; total_rows: number }>();
-      d1TransferRows = Number(release?.total_rows ?? 0);
-      d1ReleaseChecksum = release?.checksum_sha256 ?? null;
-    } catch {
-      d1TransferRows = 0;
-      d1ReleaseChecksum = null;
+  if (checkD1) {
+    if (!transferD1 || !manifest) {
+      d1CheckStatus = "unavailable";
+    } else {
+      try {
+        // Never count the transfer table from a health probe. COUNT(*) scans the
+        // full D1 projection and can consume the free rows_read quota every time
+        // uptime smoke calls this endpoint. The release pointer is the cheap,
+        // canonical consistency check; a physical-table audit is a separate
+        // operator action, not a public health request.
+        const release = await transferDb?.prepare("SELECT checksum_sha256,total_rows FROM transferencias_19862_release WHERE singleton = 1").first<{ checksum_sha256: string; total_rows: number }>();
+        if (!release) {
+          d1CheckStatus = "unavailable";
+        } else {
+          d1TransferRows = Number(release.total_rows);
+          d1ReleaseChecksum = release.checksum_sha256;
+          d1CheckStatus = d1TransferRows === manifest.totalRows && d1ReleaseChecksum === manifest.checksumSha256
+            ? "consistent"
+            : "inconsistent";
+        }
+      } catch {
+        d1CheckStatus = "unavailable";
+      }
     }
   }
   // The dedicated transfer projection is preferred when available. R2 remains
   // the canonical fallback so a partial refresh never takes the public API
-  // offline.
-  const d1Consistent = Boolean(checkD1 && transferD1 && manifest && d1TransferRows === manifest.totalRows && d1ReleaseChecksum === manifest.checksumSha256);
+  // offline. A disabled or unavailable optional check is unknown, not a proven
+  // mismatch; callers can use d1CheckStatus to distinguish both cases.
+  const d1Consistent = d1CheckStatus === "consistent" ? true : d1CheckStatus === "inconsistent" ? false : null;
   const ok = Boolean(r2);
   return json({
     data: {
@@ -461,6 +473,7 @@ async function health(env: Env) {
     service: "cambiometro-public-api",
     d1,
     r2,
+    d1CheckStatus,
     d1TransferRows,
     d1Consistent,
     transferD1,
@@ -1576,6 +1589,17 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
       },
     );
   }
+  // Ley 19.862 se publica como release paginado propio. Sus manifiestos
+  // históricos del catálogo no están disponibles y consultar la ruta genérica
+  // devolvería cero filas, aunque el release vigente sí es consultable.
+  if (source === "ley-19862") {
+    return failure(
+      "SOURCE_HAS_DEDICATED_ROUTE",
+      "Las transferencias publicadas se consultan en la ruta especializada.",
+      422,
+      { source, queryRoute: "/api/v1/transferencias" },
+    );
+  }
   const requestedKind = requestUrl.searchParams.get("kind")?.trim();
   const isCamaraVoteAlias = requestedSource === "votaciones_camara";
   if (isCamaraVoteAlias && requestedKind && requestedKind !== "vote") {
@@ -2276,6 +2300,7 @@ async function listSources(requestUrl: URL, env: Env) {
         status,
         checksumSha256: row.state_checksum_sha256 ?? null,
         lastUpdated: row.state_last_success_at ?? row.state_generated_at ?? null,
+        lastUpdatedKind: row.state_last_success_at ? "source-success" : row.state_generated_at ? "release" : "unknown",
         publishedVersion: row.state_published_version ?? null,
         statusDetail: archiveOnly
           ? "Histórico íntegro en R2; se consulta bajo demanda para preservar capacidad en D1."
@@ -2366,6 +2391,18 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
       ? String(lakeSource.status ?? "partial")
       : String(state.status ?? source.status ?? "unavailable");
     const components = publicSourceComponents(id, state, lakePartitionsBySource);
+    const lastSuccessAt = state.lastSuccessAt ?? state.last_success_at ?? null;
+    const releaseGeneratedAt = state.updatedAtKind === "release" ? state.generatedAt ?? null : null;
+    const lastUpdated = isTransferSource && currentTransferRelease
+      ? currentTransferRelease.generatedAt
+      : lastSuccessAt ?? releaseGeneratedAt;
+    const lastUpdatedKind = isTransferSource && currentTransferRelease
+      ? "release"
+      : lastSuccessAt
+        ? "source-success"
+        : releaseGeneratedAt
+          ? "release"
+          : "unknown";
     return {
       ...source,
       id,
@@ -2375,14 +2412,16 @@ async function listSourcesFromR2(requestUrl: URL, env: Env) {
       checksumSha256: isTransferSource && currentTransferRelease
         ? currentTransferRelease.checksumSha256
         : state.checksumSha256 ?? source.indexChecksumSha256 ?? null,
-      lastUpdated: isTransferSource && currentTransferRelease
-        ? currentTransferRelease.generatedAt
-        : state.lastSuccessAt ?? state.last_success_at ?? state.generatedAt ?? source.generatedAt ?? null,
+      lastUpdated,
+      lastUpdatedKind,
       dataScope: aggregateOnly ? "aggregate" : "individual-or-event",
       queryable: !aggregateOnly,
       queryableCount: aggregateOnly ? 0 : recordCount,
+      ...(isTransferSource ? { queryRoute: "/api/v1/transferencias" } : {}),
       statusDetail: aggregateOnly
         ? "Datos agregados de presupuesto y ejecución; no corresponde a un buscador de personas."
+        : isTransferSource && currentTransferRelease
+          ? `El explorador de Transferencias consulta el release publicado de ${recordCount.toLocaleString("es-CL")} registros; la cobertura frente al catálogo general aún no está conciliada.`
         : stateStatus === "archive_only"
         ? "Histórico íntegro en R2; se consulta bajo demanda."
         : hasPublishedLake && stateStatus === "partial"

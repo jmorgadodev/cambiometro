@@ -21,7 +21,7 @@ describe("Tarea 15 - 5 Fixes Críticos Pre-Launch", () => {
 
     // Verificar que los componentes contienen el desglose dual
     const fuentesContent = readFileSync(join(projectRoot, "app", "fuentes", "page.tsx"), "utf8");
-    expect(fuentesContent).toContain("Canónicos:");
+    expect(fuentesContent).toContain("Registros:");
     expect(fuentesContent).toContain("Histórico:");
     expect(fuentesContent).toContain("Diferencia por deduplicación y cobertura declarada");
 

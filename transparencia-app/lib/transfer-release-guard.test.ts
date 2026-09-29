@@ -43,7 +43,9 @@ describe("guardia del release de transferencias", () => {
 
   it("mide el release actual contra el baseline sin rechazar filas nuevas oficiales", () => {
     expect(buildTransferCoverageRow({ totalRows: 59_544, totalMontoClp: 5_013_581_357_467 })).toMatchObject({
-      estado: "PASS",
+      estado: "CHECKED",
+      cobertura: "No medida",
+      universo: "Release publicado; universo oficial no medido",
       pass: true,
     });
     expect(buildTransferCoverageRow({ totalRows: 6_652, totalMontoClp: 1 })).toMatchObject({

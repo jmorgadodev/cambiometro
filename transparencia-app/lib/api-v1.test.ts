@@ -938,7 +938,7 @@ describe("API canónica v1", () => {
 
     expect(response.status).toBe(200);
     expect(response.headers.get("Cache-Control")).toBe("no-store");
-    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, publicDataBackend: "r2", publicD1Reads: true, d1TransferRows: 59361, transferRows: 59361, d1ReleaseChecksum: "release-checksum", transferSource: "d1" });
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, publicDataBackend: "r2", publicD1Reads: true, d1CheckStatus: "consistent", d1Consistent: true, d1TransferRows: 59361, transferRows: 59361, d1ReleaseChecksum: "release-checksum", transferSource: "d1" });
   });
 
   it("mantiene health operativo y marca D1 inconsistente cuando el puntero R2 difiere", async () => {
@@ -947,7 +947,7 @@ describe("API canónica v1", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, publicDataBackend: "r2", publicD1Reads: true, d1TransferRows: 59360, transferRows: 59361, d1Consistent: false, transferSource: "r2" });
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, publicDataBackend: "r2", publicD1Reads: true, d1CheckStatus: "inconsistent", d1TransferRows: 59360, transferRows: 59361, d1Consistent: false, transferSource: "r2" });
   });
 
   it("usa sólo el puntero de release en health y nunca cuenta la tabla D1", async () => {
@@ -963,7 +963,7 @@ describe("API canónica v1", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.data).toMatchObject({ d1TransferRows: 59361, d1Consistent: true, transferSource: "r2" });
+    expect(payload.data).toMatchObject({ d1CheckStatus: "consistent", d1TransferRows: 59361, d1Consistent: true, transferSource: "r2" });
     expect(prepare).toHaveBeenCalledTimes(1);
   });
 
@@ -978,8 +978,45 @@ describe("API canónica v1", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, publicDataBackend: "r2", publicD1Reads: false, d1TransferRows: 0, d1Consistent: false, transferSource: "r2" });
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, publicDataBackend: "r2", publicD1Reads: false, d1CheckStatus: "not-requested", d1TransferRows: null, d1Consistent: null, transferSource: "r2" });
     expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it("marca como no verificada la consistencia D1 cuando el chequeo está desactivado", async () => {
+    const response = await api.fetch(new Request("https://example.test/api/v1/health"), {
+      ...(transferR2Env() as object),
+      DB: { prepare: () => { throw new Error("D1 no debe consultarse sin activar la auditoría"); } },
+    } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toMatchObject({
+      ok: true,
+      publicDataBackend: "r2",
+      publicD1Reads: false,
+      d1CheckStatus: "not-requested",
+      d1TransferRows: null,
+      d1Consistent: null,
+      transferSource: "r2",
+    });
+  });
+
+  it("distingue una auditoría D1 que no pudo ejecutarse de una diferencia confirmada", async () => {
+    const response = await api.fetch(new Request("https://example.test/api/v1/health"), {
+      ...(transferR2Env() as object),
+      DB: { prepare: () => { throw new Error("D1 temporalmente inaccesible"); } },
+      HEALTH_CHECK_D1: "1",
+    } as never);
+    const payload = await response.json();
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toMatchObject({
+      ok: true,
+      d1CheckStatus: "unavailable",
+      d1TransferRows: null,
+      d1Consistent: null,
+      transferSource: "r2",
+    });
   });
 
   it("mantiene health operativo cuando la proyección D1 opcional aún no existe", async () => {
@@ -996,7 +1033,7 @@ describe("API canónica v1", () => {
     const payload = await response.json();
 
     expect(response.status).toBe(200);
-    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1TransferRows: 0, d1Consistent: false, transferSource: "r2", transferRows: 59361 });
+    expect(payload.data).toMatchObject({ ok: true, d1: true, r2: true, d1CheckStatus: "not-requested", d1TransferRows: null, d1Consistent: null, transferSource: "r2", transferRows: 59361 });
   });
 
   it("devuelve 503 estructurado cuando el manifest R2 está corrupto", async () => {
@@ -1087,6 +1124,44 @@ describe("API canónica v1", () => {
     expect(response.status).toBe(200);
     expect(payload.data[0]).toMatchObject({ id: "chilecompra", recordCount: 74142, status: "connected" });
     expect(prepare).not.toHaveBeenCalled();
+  });
+
+  it("no presenta la generación del catálogo como actualización de la fuente", async () => {
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/sources-v1/source-inventory.json") {
+          return { json: async <T>() => ({ sources: [{ id: "camara", label: "Cámara", generatedAt: "2026-09-29T05:00:00.000Z" }] }) as T };
+        }
+        if (key === "projections/sources-v1/source-health.json") {
+          return { json: async <T>() => ({ sources: { camara: { recordCount: 12, status: "partial", generatedAt: "2026-09-29T05:00:00.000Z" } } }) as T };
+        }
+        return null;
+      },
+    };
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/sources"), { PUBLIC_DATA } as never);
+    const payload = await response.json();
+
+    expect(payload.data[0]).toMatchObject({ lastUpdated: null, lastUpdatedKind: "unknown" });
+  });
+
+  it("conserva una fecha cuando el manifiesto declara explícitamente el último éxito de la fuente", async () => {
+    const PUBLIC_DATA = {
+      get: async (key: string) => {
+        if (key === "projections/sources-v1/source-inventory.json") {
+          return { json: async <T>() => ({ sources: [{ id: "camara", label: "Cámara", generatedAt: "2026-09-29T05:00:00.000Z" }] }) as T };
+        }
+        if (key === "projections/sources-v1/source-health.json") {
+          return { json: async <T>() => ({ sources: { camara: { recordCount: 12, status: "partial", lastSuccessAt: "2026-09-28T14:46:13.000Z", generatedAt: "2026-09-29T05:00:00.000Z" } } }) as T };
+        }
+        return null;
+      },
+    };
+
+    const response = await api.fetch(new Request("https://example.test/api/v1/sources"), { PUBLIC_DATA } as never);
+    const payload = await response.json();
+
+    expect(payload.data[0]).toMatchObject({ lastUpdated: "2026-09-28T14:46:13.000Z", lastUpdatedKind: "source-success" });
   });
 
   it("sirve el catálogo de fuentes desde R2 si D1 agotó su cuota", async () => {

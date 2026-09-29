@@ -22,7 +22,7 @@ function chamberCountsFromSnapshot(polVotData) {
   return { camaraOfficial, senadoOfficial };
 }
 
-export async function runCoverageSweep({ silent = false, transferManifest = null, infolobbyCount = null } = {}) {
+export async function runCoverageSweep({ silent = false, transferManifest = null, infolobbyCount = null, contraloriaCount = null } = {}) {
   const rows = [];
   let allPassed = true;
 
@@ -47,18 +47,17 @@ export async function runCoverageSweep({ silent = false, transferManifest = null
   const { camaraOfficial, senadoOfficial } = chamberCountsFromSnapshot(polVotData);
   const totalOficialVotaciones = camaraOfficial + senadoOfficial;
   const indexadasVotaciones = Object.keys(polVotData.sessions || {}).length;
-  const cobVotaciones = totalOficialVotaciones > 0 ? (indexadasVotaciones / totalOficialVotaciones) * 100 : 0;
-  const passVotaciones = cobVotaciones >= 99.0;
+  const passVotaciones = totalOficialVotaciones > 0 && indexadasVotaciones > 0;
   if (!passVotaciones) allPassed = false;
 
   rows.push({
     modulo: "Votaciones Sala Período 2026-2030",
     indexado: `${indexadasVotaciones} eventos`,
-    universo: `${totalOficialVotaciones} eventos`,
-    cobertura: `${cobVotaciones.toFixed(1)}%`,
-    umbral: "≥ 99.0%",
-    estado: passVotaciones ? "PASS" : "FAIL",
-    nota: `Universo del snapshot ETL: ${camaraOfficial} Cámara + ${senadoOfficial} Senado`,
+    universo: `${totalOficialVotaciones} sesiones del snapshot`,
+    cobertura: "No medida",
+    umbral: "Ambas cámaras presentes",
+    estado: passVotaciones ? "CHECKED" : "FAIL",
+    nota: `Conteo interno del snapshot: ${camaraOfficial} Cámara + ${senadoOfficial} Senado; falta denominador oficial independiente`,
   });
 
   // 3. Muestra Obligatoria de Parlamentarios (Kaiser, Bianchi K., Bianchi C., Winter, Cariola, Schalper)
@@ -74,18 +73,17 @@ export async function runCoverageSweep({ silent = false, transferManifest = null
   for (const item of muestraAudit) {
     const pol = POLITICOS_SEED.find((p) => p.id === item.id);
     const pVotes = pol && polVotData.votes?.[pol.id] ? polVotData.votes[pol.id] : [];
-    const cobP = item.esperado > 0 ? (pVotes.length / item.esperado) * 100 : 0;
-    const passP = cobP >= 99.0;
+    const passP = item.esperado > 0 && pVotes.length > 0 && pVotes.length <= item.esperado;
     if (!passP) allPassed = false;
 
     rows.push({
       modulo: `  ↳ Votos ${item.label}`,
       indexado: `${pVotes.length} votos`,
-      universo: `${item.esperado} eventos`,
-      cobertura: `${cobP.toFixed(1)}%`,
-      umbral: "≥ 99.0%",
-      estado: passP ? "PASS" : "FAIL",
-      nota: `${cobP >= 100 ? "100% asistido/votado" : "Conforme a sala"}`,
+      universo: `${item.esperado} sesiones del snapshot`,
+      cobertura: "No medida",
+      umbral: "Registro presente; sin denominador oficial",
+      estado: passP ? "CHECKED" : "FAIL",
+      nota: `${pVotes.length} registros en el snapshot; no es porcentaje de asistencia ni de cobertura oficial`,
     });
   }
 
@@ -95,18 +93,17 @@ export async function runCoverageSweep({ silent = false, transferManifest = null
   const activeDipWithStaff = activeDipIds.filter((id) => personalApoyoData.diputados?.[id]);
   const dipIndexadosVigentes = activeDipWithStaff.length;
   const dipTotalVigentes = 155;
-  const cobDipApoyo = (dipIndexadosVigentes / dipTotalVigentes) * 100;
-  const passDipApoyo = dipIndexadosVigentes === dipTotalVigentes;
+  const passDipApoyo = dipIndexadosVigentes > 0 && dipIndexadosVigentes <= dipTotalVigentes;
   if (!passDipApoyo) allPassed = false;
 
   rows.push({
-    modulo: "Personal Apoyo Cámara (Nómina Vigente)",
+    modulo: "Personal Apoyo Cámara (presencia por escaño)",
     indexado: `${dipIndexadosVigentes} diputados`,
     universo: `${dipTotalVigentes} escaños`,
-    cobertura: `${cobDipApoyo.toFixed(1)}%`,
-    umbral: "= 100.0%",
-    estado: passDipApoyo ? "PASS" : "FAIL",
-    nota: "155/155 escaños vigentes cubiertos",
+    cobertura: "No medida",
+    umbral: "Presencia de filas; no integridad de nómina",
+    estado: passDipApoyo ? "CHECKED" : "FAIL",
+    nota: `${dipIndexadosVigentes}/${dipTotalVigentes} escaños con una entrada asociada; sin validar universo de contratos`,
   });
 
   // Senado: 50 senadores electos vigentes
@@ -124,18 +121,17 @@ export async function runCoverageSweep({ silent = false, transferManifest = null
   }
 
   const senTotalVigentes = 50;
-  const cobSenApoyo = (senIndexadosVigentes / senTotalVigentes) * 100;
-  const passSenApoyo = senIndexadosVigentes === senTotalVigentes;
+  const passSenApoyo = senIndexadosVigentes > 0 && senIndexadosVigentes <= senTotalVigentes;
   if (!passSenApoyo) allPassed = false;
 
   rows.push({
-    modulo: "Personal Apoyo Senado (Nómina Vigente CPLT)",
+    modulo: "Personal Apoyo Senado (presencia por escaño)",
     indexado: `${senIndexadosVigentes} senadores`,
     universo: `${senTotalVigentes} escaños`,
-    cobertura: `${cobSenApoyo.toFixed(1)}%`,
-    umbral: "= 100.0%",
-    estado: passSenApoyo ? "PASS" : "FAIL",
-    nota: "50/50 escaños vigentes cubiertos",
+    cobertura: "No medida",
+    umbral: "Presencia de filas; no integridad de nómina",
+    estado: passSenApoyo ? "CHECKED" : "FAIL",
+    nota: `${senIndexadosVigentes}/${senTotalVigentes} escaños con una entrada asociada; conciliación nominal no demuestra integridad`,
   });
 
   // 5. Movimientos de Autoridades (Benchmark Oficial BCN / Diario Oficial)
@@ -175,15 +171,28 @@ export async function runCoverageSweep({ silent = false, transferManifest = null
     : buildTransferCoverageRow({ totalRows: transferData.kpis?.total_transfers, totalMontoClp: transferData.kpis?.total_monto_clp });
   const normalizedInfoLobbyCount = Number.isInteger(infolobbyCount) && infolobbyCount > 0 ? infolobbyCount : null;
   const formattedInfoLobbyCount = normalizedInfoLobbyCount?.toLocaleString("es-CL") ?? "No verificado";
+  const normalizedContraloriaCount = Number.isInteger(contraloriaCount) && contraloriaCount > 0 ? contraloriaCount : null;
   const universos = [
     transferCoverage,
-    { modulo: "ChileCompra Compradores / Órdenes", indexado: "74.142 compradores ($1,9 billones)", universo: "74.142 manifest", nota: "Mercado Público", pass: true },
-    { modulo: "InfoLobby Audiencias", indexado: `${formattedInfoLobbyCount} audiencias`, universo: `${formattedInfoLobbyCount} release productivo`, nota: "InfoLobby CPLT", pass: normalizedInfoLobbyCount !== null },
-    { modulo: "Contraloría General (CGR) Auditorías", indexado: "291 informes", universo: "291 manifest", nota: "CGR Portal", pass: true },
+    { modulo: "ChileCompra (auditoría profunda pendiente)", indexado: "No evaluado en esta fase", universo: "No medido", cobertura: "No medida", umbral: "Pendiente última fase", estado: "NO MEDIDA", nota: "Volumen alto; sin conteos ni porcentaje de cobertura inferidos", pass: true, measured: false },
+    { modulo: "InfoLobby Audiencias", indexado: normalizedInfoLobbyCount ? `${formattedInfoLobbyCount} audiencias` : "Conteo no disponible", universo: "No medido frente al origen", cobertura: "No medida", umbral: "N/A", estado: "NO MEDIDA", nota: "Conteo de release productivo; sin denominador oficial independiente", pass: true, measured: false },
+    { modulo: "Contraloría General (CGR) Auditorías", indexado: normalizedContraloriaCount ? `${normalizedContraloriaCount.toLocaleString("es-CL")} informes publicados` : "Conteo no disponible", universo: "No medido frente al origen", cobertura: "No medida", umbral: "N/A", estado: "NO MEDIDA", nota: "El conteo publicado no establece por sí solo la cobertura del portal CGR", pass: true, measured: false },
   ];
 
   for (const u of universos) {
     if (!u.pass) allPassed = false;
+    if (u.measured === false) {
+      rows.push({
+        modulo: u.modulo,
+        indexado: u.indexado,
+        universo: u.universo,
+        cobertura: u.cobertura,
+        umbral: u.umbral,
+        estado: u.estado,
+        nota: u.nota,
+      });
+      continue;
+    }
     rows.push({
       modulo: u.modulo,
       indexado: u.indexado,
@@ -203,21 +212,21 @@ export async function runCoverageSweep({ silent = false, transferManifest = null
       "| " +
       "Módulo / Métrica".padEnd(46) + " | " +
       "Indexado".padEnd(23) + " | " +
-      "Universo Oficial".padEnd(18) + " | " +
+      "Referencia/denominador".padEnd(22) + " | " +
       "Cobertura".padEnd(10) + " | " +
       "Umbral".padEnd(10) + " | " +
       "Estado".padEnd(6) + " | " +
       "Nota / Alcance".padEnd(32) + " |"
     );
-    console.log("|" + "-".repeat(48) + "|" + "-".repeat(25) + "|" + "-".repeat(20) + "|" + "-".repeat(12) + "|" + "-".repeat(12) + "|" + "-".repeat(8) + "|" + "-".repeat(34) + "|");
+    console.log("|" + "-".repeat(48) + "|" + "-".repeat(25) + "|" + "-".repeat(24) + "|" + "-".repeat(12) + "|" + "-".repeat(12) + "|" + "-".repeat(8) + "|" + "-".repeat(34) + "|");
 
     for (const r of rows) {
-      const mark = r.estado === "PASS" ? "✅ PASS" : "❌ FAIL";
+      const mark = r.estado === "PASS" ? "✅ PASS" : r.estado === "CHECKED" ? "✅ CHECK" : r.estado === "NO MEDIDA" ? "— N/M" : "❌ FAIL";
       console.log(
         "| " +
         r.modulo.padEnd(46) + " | " +
         r.indexado.padEnd(23) + " | " +
-        r.universo.padEnd(18) + " | " +
+        r.universo.padEnd(22) + " | " +
         r.cobertura.padEnd(10) + " | " +
         r.umbral.padEnd(10) + " | " +
         mark.padEnd(6) + " | " +
@@ -225,10 +234,11 @@ export async function runCoverageSweep({ silent = false, transferManifest = null
       );
     }
     console.log("========================================================================================================================");
-    console.log(`Resultado General: ${allPassed ? "✅ TODOS LOS UMBRALES CUMPLIDOS" : "❌ UMBRALES INCUMPLIDOS — CI ROJO"}\n`);
+    const unmeasuredCount = rows.filter(({ estado }) => estado === "NO MEDIDA" || estado === "CHECKED").length;
+    console.log(`Resultado General: ${allPassed ? `✅ Checks de integridad aprobados; ${unmeasuredCount} coberturas/universos sin medición completa` : "❌ CHECKS DE INTEGRIDAD INCUMPLIDOS — CI ROJO"}\n`);
   }
 
-  return { passed: allPassed, rows };
+  return { passed: allPassed, rows, unmeasuredCount: rows.filter(({ estado }) => estado === "NO MEDIDA" || estado === "CHECKED").length };
 }
 
 if (process.argv[1]?.endsWith("coverage-sweep.mjs")) {

@@ -190,6 +190,13 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(ingest).toContain("if (cached && !shouldRefresh(vote.fecha)) return cached");
   });
 
+  it("el ETL de votaciones de Cámara no vuelve a publicar personal de apoyo desde un snapshot viejo", () => {
+    const workflow = fs.readFileSync(path.join(workflowsDir, "etl-camara-votaciones.yml"), "utf8");
+
+    expect(workflow).toContain("npm run data:publish:static -- --files data/politicos-votaciones.json,data/lake-subsets/politicos-votaciones.subset.json");
+    expect(workflow).not.toContain("--groups parlamento");
+  });
+
   it("10. El ETL diario omite D1 cuando la cuota ya está elevada", () => {
     const workflow = fs.readFileSync(path.join(workflowsDir, "etl-daily.yml"), "utf8");
 

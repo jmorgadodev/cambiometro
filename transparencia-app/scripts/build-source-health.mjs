@@ -15,26 +15,28 @@ const source = new Map(catalog.sources.map((item) => [item.id, item]));
 const count = (...ids) => ids.reduce((sum, id) => sum + (source.get(id)?.recordCount ?? 0), 0);
 const parliament = buildParliamentSourceHealth(catalog);
 const generatedAt = new Date(Math.max(...[catalog.generatedAt, cplt.generatedAt, presupuesto.generatedAt, ley19862.generatedAt, chilecompra.generatedAt].map((value) => new Date(value).getTime()).filter(Number.isFinite))).toISOString();
-const latestExpense = presupuesto.programs.filter((program) => program.budgetSide === "expense").map((program) => program.meses?.at(-1)?.vigente).filter((value) => Number.isSafeInteger(value));
+// La proyección DIPRES contiene programas de distintos lados presupuestarios
+// y no acredita un universo completo de gasto. No sumar el subconjunto
+// "expenditure" como si representara el total nacional.
 
 const health = {
   generatedAt,
   sources: {
-    cplt: { recordCount: cplt.recordCount, status: "partial", generatedAt: cplt.generatedAt },
-    dipres: { recordCount: presupuesto.count, financialAmountClp: latestExpense.length ? latestExpense.reduce((sum, value) => sum + value, 0) : null, status: source.get("dipres")?.status ?? "partial", generatedAt: presupuesto.generatedAt },
-    ley19862: { recordCount: ley19862.kpis.total_transfers, financialAmountClp: ley19862.kpis.total_monto_clp, status: source.get("ley-19862")?.status ?? "partial", generatedAt: ley19862.generatedAt },
-    chilecompra: { recordCount: chilecompra.buyers.reduce((sum, buyer) => sum + (buyer.procesos ?? 0), 0), financialAmountClp: chilecompra.total_adjudicado_clp ?? null, status: source.get("chilecompra")?.status ?? "partial", generatedAt: chilecompra.generatedAt },
-    infolobby: { recordCount: count("infolobby"), status: source.get("infolobby")?.status ?? "partial", generatedAt: catalog.generatedAt },
-    infoprobidad: { recordCount: count("infoprobidad"), status: source.get("infoprobidad")?.status ?? "partial", generatedAt: catalog.generatedAt },
-    sinim: { recordCount: count("sinim"), coverageCount: sinim.total, coverageUniverse: municipalities.length, status: source.get("sinim")?.status ?? "partial", generatedAt: sinim.generatedAt },
+    cplt: { recordCount: cplt.recordCount, status: "partial", updatedAtKind: "release", generatedAt: cplt.generatedAt },
+    dipres: { recordCount: presupuesto.count, financialAmountClp: null, status: source.get("dipres")?.status ?? "partial", updatedAtKind: "release", generatedAt: presupuesto.generatedAt },
+    ley19862: { recordCount: ley19862.kpis.total_transfers, financialAmountClp: ley19862.kpis.total_monto_clp, status: source.get("ley-19862")?.status ?? "partial", updatedAtKind: "release", generatedAt: ley19862.generatedAt },
+    chilecompra: { recordCount: chilecompra.buyers.reduce((sum, buyer) => sum + (buyer.procesos ?? 0), 0), financialAmountClp: chilecompra.total_adjudicado_clp ?? null, status: source.get("chilecompra")?.status ?? "partial", updatedAtKind: "release", generatedAt: chilecompra.generatedAt },
+    infolobby: { recordCount: count("infolobby"), status: source.get("infolobby")?.status ?? "partial", updatedAtKind: "catalog", generatedAt: catalog.generatedAt },
+    infoprobidad: { recordCount: count("infoprobidad"), status: source.get("infoprobidad")?.status ?? "partial", updatedAtKind: "catalog", generatedAt: catalog.generatedAt },
+    sinim: { recordCount: count("sinim"), coverageCount: sinim.total, coverageUniverse: municipalities.length, status: source.get("sinim")?.status ?? "partial", updatedAtKind: "release", generatedAt: sinim.generatedAt },
     // El Censo 2024 se materializa en las fichas comunales, no como una
     // partición del lago. Debe seguir figurando en el catálogo operativo para
     // que la API, la landing y el dashboard de calidad compartan el universo.
-    ine: { recordCount: municipalities.length, coverageCount: municipalities.length, coverageUniverse: municipalities.length, status: "complete", generatedAt: catalog.generatedAt },
-    contraloria: { recordCount: count("contraloria"), status: source.get("contraloria")?.status ?? "partial", generatedAt: catalog.generatedAt },
-    camara: { recordCount: parliament.camara.recordCount, components: parliament.camara.components, status: "partial", generatedAt: catalog.generatedAt },
-    senado: { recordCount: parliament.senado.recordCount, components: parliament.senado.components, status: "partial", generatedAt: catalog.generatedAt },
-    servel: { recordCount: count("servel"), status: source.get("servel")?.status ?? "partial", generatedAt: catalog.generatedAt },
+    ine: { recordCount: municipalities.length, coverageCount: municipalities.length, coverageUniverse: municipalities.length, status: "complete", updatedAtKind: "catalog", generatedAt: catalog.generatedAt },
+    contraloria: { recordCount: count("contraloria"), status: source.get("contraloria")?.status ?? "partial", updatedAtKind: "catalog", generatedAt: catalog.generatedAt },
+    camara: { recordCount: parliament.camara.recordCount, components: parliament.camara.components, status: "partial", updatedAtKind: "catalog", generatedAt: catalog.generatedAt },
+    senado: { recordCount: parliament.senado.recordCount, components: parliament.senado.components, status: "partial", updatedAtKind: "catalog", generatedAt: catalog.generatedAt },
+    servel: { recordCount: count("servel"), status: source.get("servel")?.status ?? "partial", updatedAtKind: "catalog", generatedAt: catalog.generatedAt },
   },
 };
 
