@@ -1,6 +1,6 @@
 import { createHash } from "node:crypto";
 import { gzipSync } from "node:zlib";
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import worker, { listRecordsFromR2 } from "./index";
 
 function r2Object(value: unknown) {
@@ -38,6 +38,30 @@ function sha256(data: ArrayBuffer) {
 }
 
 describe("registros públicos R2", () => {
+  it("ignora respuestas Cache API de versiones anteriores del contrato", async () => {
+    const url = "https://example.test/api/v1/records?source=contraloria&limit=1";
+    const entries = new Map<string, Response>([[url, new Response(JSON.stringify({ meta: { publishedRows: 62 } }))]]);
+    const cache = {
+      match: async (request: Request) => entries.get(request.url)?.clone(),
+      put: async (request: Request, response: Response) => { entries.set(request.url, response.clone()); },
+    };
+    vi.stubGlobal("caches", { default: cache });
+
+    try {
+      const response = await worker.fetch(
+        new Request(url),
+        { PUBLIC_DATA: fakeBucket({}) as never } as never,
+      );
+      const payload = await response.json() as { meta: Record<string, unknown> };
+
+      expect(payload.meta.sourceStatus).toBe("temporarily-unavailable");
+      expect(payload.meta.publishedRows).not.toBe(62);
+      expect([...entries.keys()].some((key) => key !== url)).toBe(true);
+    } finally {
+      vi.unstubAllGlobals();
+    }
+  });
+
   it("no presenta como vigente un conteo fijo cuando Contraloría no está disponible", async () => {
     const response = await worker.fetch(
       new Request("https://example.test/api/v1/records?source=contraloria&limit=1"),
