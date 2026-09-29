@@ -69,8 +69,9 @@ if (
   );
 if (a.nextCursor !== "v1_2" || b.nextCursor !== "v1_4")
   throw new Error("Los cursores no avanzan de forma estable.");
-if (a.sourceStatus !== "partial" || a.missingPartitions < 1)
-  throw new Error("El endpoint no informa la partición faltante del catálogo.");
+if (a.sourceStatus !== "partial" || !Number.isSafeInteger(a.missingPartitions) || a.missingPartitions < 0
+  || a.publishedRows !== a.total || a.expectedRows < a.publishedRows)
+  throw new Error("El estado parcial o los conteos publicados de Contraloría no son coherentes.");
 if (
   julyA.sourceStatus !== "complete" ||
   julyA.total !== julyB.total ||
