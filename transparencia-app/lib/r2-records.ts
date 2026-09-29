@@ -158,7 +158,10 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
     // when the public catalog proves that every indexed row belongs to the
     // requested period range. Otherwise let the partition reader answer (or
     // return unavailable) instead of scanning the full archive in a Worker.
-    const onlyDateFilters = !params.query?.trim() && !params.entityId && !params.recordIds && !params.kind;
+    const monthPrecisionRange = (!params.from || /^\d{4}-\d{2}$/.test(params.from))
+      && (!params.to || /^\d{4}-\d{2}$/.test(params.to));
+    const onlyDateFilters = monthPrecisionRange
+      && !params.query?.trim() && !params.entityId && !params.recordIds && !params.kind;
     if (!onlyDateFilters || !catalogManifest || catalogExpectedTotal === null) return null;
     const matchingPartitions = catalogManifest.partitions.filter((partition) => {
       if (partition.sourceId !== sourceId || !/^\d{4}-\d{2}$/.test(partition.period)) return false;

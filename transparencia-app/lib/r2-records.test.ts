@@ -457,4 +457,26 @@ describe("registros calientes de R2", () => {
     expect(result).toBeNull();
     expect(requestedKeys).not.toContain("indexes/v1/chilecompra/records.jsonl");
   });
+
+  it("no amplía un rango de fechas diarias al mes completo", async () => {
+    const requestedKeys: string[] = [];
+    const record = { id: "june-20", sourceId: "chilecompra", kind: "contract", occurredAt: "2026-06-20", data: {} };
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": {
+        generatedAt: "2026-09-28T00:00:00Z",
+        sources: [{ id: "chilecompra", recordCount: 1 }],
+        partitions: [{ id: "chilecompra-2026-06", sourceId: "chilecompra", period: "2026-06", recordCount: 1, manifestKey: "missing/partition-manifest.json", checksumSha256: "catalog-checksum", status: "published" }],
+      },
+      "indexes/v1/chilecompra/manifest.json": {
+        schemaVersion: 1, sourceId: "chilecompra", totalRows: 1, pageSize: 1,
+        recordArchiveKey: "indexes/v1/chilecompra/records.jsonl", pages: [{ offset: 0, length: Buffer.byteLength(`${JSON.stringify(record)}\n`) }],
+      },
+      "indexes/v1/chilecompra/records.jsonl": `${JSON.stringify(record)}\n`,
+    }, requestedKeys);
+
+    const result = await readR2EvidenceRecords(bucket, { source: "chilecompra", from: "2026-06-15", limit: 10 });
+
+    expect(result).toMatchObject({ total: 0, expectedTotal: 1, complete: false, missingPartitions: 1 });
+    expect(requestedKeys).not.toContain("indexes/v1/chilecompra/records.jsonl");
+  });
 });
