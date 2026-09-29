@@ -81,6 +81,57 @@ describe("registros públicos R2", () => {
     expect(payload.meta.nextCursor).toBe("v1_1e");
   });
 
+  it("distingue las filas disponibles de las leídas para servir la primera página", async () => {
+    const julyKey = "partitions/contraloria/2026/07/records.jsonl.gz";
+    const julyManifestKey = "partitions/contraloria/2026/07/manifest.json";
+    const juneKey = "partitions/contraloria/2026/06/records.jsonl.gz";
+    const juneManifestKey = "partitions/contraloria/2026/06/manifest.json";
+    const julyRecords = gzipJsonl(Array.from({ length: 62 }, (_, index) => ({
+      id: `cgr-july-${index}`,
+      sourceId: "contraloria",
+      kind: "audit",
+      occurredAt: "2026-07-01",
+      data: {},
+    })));
+    const juneRecords = gzipJsonl(Array.from({ length: 213 }, (_, index) => ({
+      id: `cgr-june-${index}`,
+      sourceId: "contraloria",
+      kind: "audit",
+      occurredAt: "2026-06-01",
+      data: {},
+    })));
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": {
+        generatedAt: "2026-09-28T00:00:00Z",
+        partitions: [
+          { id: "july", sourceId: "contraloria", period: "2026-07", recordCount: 62, manifestKey: julyManifestKey, checksumSha256: "available" },
+          { id: "august", sourceId: "contraloria", period: "2026-08", recordCount: 35, manifestKey: "partitions/contraloria/2026/08/missing.json", checksumSha256: "missing" },
+          { id: "june", sourceId: "contraloria", period: "2026-06", recordCount: 213, manifestKey: juneManifestKey, checksumSha256: "available" },
+        ],
+      },
+      [julyManifestKey]: { projectionChecksumSha256: "projection", artifacts: [{ key: julyKey, checksumSha256: sha256(julyRecords), releaseAssetName: "cgr-july" }] },
+      [julyKey]: julyRecords,
+      [juneManifestKey]: { projectionChecksumSha256: "projection", artifacts: [{ key: juneKey, checksumSha256: sha256(juneRecords), releaseAssetName: "cgr-june" }] },
+      [juneKey]: juneRecords,
+    });
+
+    const response = await worker.fetch(
+      new Request("https://example.test/api/v1/records?source=contraloria&limit=1"),
+      { PUBLIC_DATA: bucket as never } as never,
+    );
+    const payload = await response.json() as { data: unknown[]; meta: Record<string, unknown> };
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toHaveLength(1);
+    expect(payload.meta).toMatchObject({
+      total: 275,
+      publishedRows: 275,
+      rowsRead: 62,
+      expectedRows: 310,
+      missingPartitions: 1,
+    });
+  });
+
   it("consulta un organismo mediante posiciones paginadas, sin descargar su archivo completo", async () => {
     const root="projections/funcionarios-central-v1";
     const bucket=fakeBucket({

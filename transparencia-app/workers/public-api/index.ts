@@ -1625,7 +1625,13 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
           sourceBackend: "r2-lake",
           requestedSource,
           sourceStatus: lake.complete ? "complete" : "partial",
-          publishedRows: lake.loadedRows,
+          // `total` is the number of rows available in this query scope;
+          // `loadedRows` is only the number decompressed while serving a
+          // partition-backed page and must not be presented as dataset size.
+          publishedRows: lake.total,
+          rowsRead: lake.totalScope === "published-available" || lake.totalScope === "matched-available"
+            ? lake.loadedRows
+            : undefined,
           expectedRows: lake.expectedTotal,
           missingPartitions: lake.missingPartitions,
           missingArtifacts: lake.missingArtifacts,
