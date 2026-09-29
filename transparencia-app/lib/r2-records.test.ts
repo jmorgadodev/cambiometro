@@ -41,6 +41,10 @@ function sha256(data: ArrayBuffer) {
   return createHash("sha256").update(Buffer.from(data)).digest("hex");
 }
 
+function sha256Text(data: string) {
+  return createHash("sha256").update(data).digest("hex");
+}
+
 function partition(sourceId: string, period: string, key: string, data: ArrayBuffer, recordCount: number) {
   return {
     sourceId,
@@ -387,7 +391,7 @@ describe("registros calientes de R2", () => {
     expect(result?.data[0]?.sourceId).toBe("infoprobidad");
   });
 
-  it("usa páginas acotadas del índice cuando catálogo e índice prueban que todo el corte pertenece al mes", async () => {
+  it("filtra por fecha efectiva aunque el corte publicado mezcle eventos de meses distintos", async () => {
     const juneRecord = {
       id: "chilecompra-june",
       sourceId: "chilecompra",
@@ -395,14 +399,33 @@ describe("registros calientes de R2", () => {
       occurredAt: "2026-06-12",
       data: { buyer: "Municipalidad de Prueba" },
     };
-    const secondJuneRecord = {
-      id: "chilecompra-june-2",
+    const julyEventInJuneRelease = {
+      id: "chilecompra-july-event",
       sourceId: "chilecompra",
       kind: "contract",
-      occurredAt: "2026-06-20",
-      data: { buyer: "Municipalidad de Prueba 2" },
+      occurredAt: "2026-07-22",
+      data: { buyer: "Municipalidad de Prueba", source_period: "2026-06" },
     };
-    const indexedArchive = `${JSON.stringify(juneRecord)}\n${JSON.stringify(secondJuneRecord)}\n`;
+    const indexedArchive = `${JSON.stringify(juneRecord)}\n${JSON.stringify(julyEventInJuneRelease)}\n`;
+    const dateArchive = `${JSON.stringify(julyEventInJuneRelease)}\n${JSON.stringify(juneRecord)}\n`;
+    const julyLine = `${JSON.stringify(julyEventInJuneRelease)}\n`;
+    const juneLine = `${JSON.stringify(juneRecord)}\n`;
+    const dateArchiveKey = "indexes/v1/chilecompra/records-by-date.jsonl";
+    const periodIndexText = JSON.stringify({
+      schemaVersion: 1,
+      sourceId: "chilecompra",
+      totalRows: 2,
+      undatedRows: 0,
+      pageSize: 1,
+      archiveKey: dateArchiveKey,
+      archiveChecksumSha256: sha256Text(dateArchive),
+      pages: [
+        { offset: 0, length: Buffer.byteLength(julyLine) },
+        { offset: Buffer.byteLength(julyLine), length: Buffer.byteLength(juneLine) },
+      ],
+      months: { "2026-06": { recordCount: 1, pages: [1] }, "2026-07": { recordCount: 1, pages: [0] } },
+      days: { "2026-06-12": { recordCount: 1, pages: [1] }, "2026-07-22": { recordCount: 1, pages: [0] } },
+    });
     const requestedKeys: string[] = [];
     const requestedRanges: Array<{ key: string; offset: number; length: number }> = [];
     const bucket = fakeBucket({
@@ -417,12 +440,18 @@ describe("registros calientes de R2", () => {
         totalRows: 2,
         pageSize: 1,
         recordArchiveKey: "indexes/v1/chilecompra/records.jsonl",
+        dateArchiveKey,
+        dateArchiveChecksumSha256: sha256Text(dateArchive),
+        periodIndexKey: "indexes/v1/chilecompra/periods.json",
+        periodIndexChecksumSha256: sha256Text(periodIndexText),
         pages: [
           { offset: 0, length: Buffer.byteLength(`${JSON.stringify(juneRecord)}\n`) },
-          { offset: Buffer.byteLength(`${JSON.stringify(juneRecord)}\n`), length: Buffer.byteLength(`${JSON.stringify(secondJuneRecord)}\n`) },
+          { offset: Buffer.byteLength(`${JSON.stringify(juneRecord)}\n`), length: Buffer.byteLength(`${JSON.stringify(julyEventInJuneRelease)}\n`) },
         ],
       },
+      "indexes/v1/chilecompra/periods.json": periodIndexText,
       "indexes/v1/chilecompra/records.jsonl": indexedArchive,
+      [dateArchiveKey]: dateArchive,
     }, requestedKeys, requestedRanges);
 
     const result = await readR2EvidenceRecords(bucket, {
@@ -431,10 +460,53 @@ describe("registros calientes de R2", () => {
       limit: 1,
     });
 
-    expect(result).toMatchObject({ total: 2, expectedTotal: 2, complete: true, missingPartitions: 0 });
+    expect(result).toMatchObject({ total: 1, expectedTotal: 2, complete: true, missingPartitions: 0 });
     expect(result?.data.map((record) => record.id)).toEqual(["chilecompra-june"]);
-    expect(requestedRanges).toEqual([{ key: "indexes/v1/chilecompra/records.jsonl", offset: 0, length: Buffer.byteLength(`${JSON.stringify(juneRecord)}\n`) }]);
+    expect(requestedRanges).toEqual([{ key: dateArchiveKey, offset: Buffer.byteLength(julyLine), length: Buffer.byteLength(juneLine) }]);
     expect(requestedKeys).not.toContain("missing/partition-manifest.json");
+  });
+
+  it("acota rangos diarios a las páginas de sus meses y aplica ambos límites exactos", async () => {
+    const before = { id: "before", sourceId: "chilecompra", kind: "contract", occurredAt: "2026-06-14", data: {} };
+    const inside = { id: "inside", sourceId: "chilecompra", kind: "contract", occurredAt: "2026-06-20", data: {} };
+    const after = { id: "after", sourceId: "chilecompra", kind: "contract", occurredAt: "2026-07-01", data: {} };
+    const lines = [before, inside, after].map((row) => `${JSON.stringify(row)}\n`);
+    const archive = lines.join("");
+    const offsets = [0, Buffer.byteLength(lines[0]), Buffer.byteLength(lines[0] + lines[1])];
+    const dateRecords = [after, inside, before];
+    const dateLines = dateRecords.map((row) => `${JSON.stringify(row)}\n`);
+    const dateArchive = dateLines.join("");
+    const dateOffsets = [0, Buffer.byteLength(dateLines[0]), Buffer.byteLength(dateLines[0] + dateLines[1])];
+    const dateArchiveKey = "indexes/v1/chilecompra/records-by-date.jsonl";
+    const periodIndexText = JSON.stringify({
+      schemaVersion: 1, sourceId: "chilecompra", totalRows: 3, undatedRows: 0, pageSize: 1, archiveKey: dateArchiveKey,
+      archiveChecksumSha256: sha256Text(dateArchive),
+      pages: dateLines.map((line, index) => ({ offset: dateOffsets[index], length: Buffer.byteLength(line) })),
+      months: { "2026-06": { recordCount: 2, pages: [1, 2] }, "2026-07": { recordCount: 1, pages: [0] } },
+      days: {
+        "2026-06-14": { recordCount: 1, pages: [2] },
+        "2026-06-20": { recordCount: 1, pages: [1] },
+        "2026-07-01": { recordCount: 1, pages: [0] },
+      },
+    });
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": { sources: [{ id: "chilecompra", recordCount: 3 }], partitions: [] },
+      "indexes/v1/chilecompra/manifest.json": {
+        schemaVersion: 1, sourceId: "chilecompra", totalRows: 3, pageSize: 1,
+        recordArchiveKey: "indexes/v1/chilecompra/records.jsonl", periodIndexKey: "indexes/v1/chilecompra/periods.json",
+        dateArchiveKey, dateArchiveChecksumSha256: sha256Text(dateArchive),
+        periodIndexChecksumSha256: sha256Text(periodIndexText),
+        pages: lines.map((line, index) => ({ offset: offsets[index], length: Buffer.byteLength(line) })),
+      },
+      "indexes/v1/chilecompra/periods.json": periodIndexText,
+      "indexes/v1/chilecompra/records.jsonl": archive,
+      [dateArchiveKey]: dateArchive,
+    });
+
+    const result = await readR2EvidenceRecords(bucket, { source: "chilecompra", from: "2026-06-15", to: "2026-06-30", limit: 10 });
+
+    expect(result?.data.map((record) => record.id)).toEqual(["inside"]);
+    expect(result).toMatchObject({ total: 1, complete: true });
   });
 
   it("no escanea el índice cuando el período pedido no tiene corte publicado", async () => {

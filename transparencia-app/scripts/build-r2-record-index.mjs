@@ -13,9 +13,12 @@
  *     --output .tmp-r2-chilecompra-index
  */
 
-import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
+import { createWriteStream, mkdirSync, readFileSync, readdirSync, renameSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { gunzipSync } from "node:zlib";
+import { createHash } from "node:crypto";
+import { once } from "node:events";
+import { finished } from "node:stream/promises";
 
 const args = new Map();
 for (let index = 2; index < process.argv.length; index += 1) {
@@ -51,6 +54,15 @@ let archive = "";
 const pages = [];
 const search = new Map();
 const searchCounts = new Map();
+const dateRecords = [...records].sort((left, right) => String(right.occurredAt ?? "").localeCompare(String(left.occurredAt ?? "")) || String(left.id).localeCompare(String(right.id)));
+const dateArchivePages = [];
+const temporaryDateArchivePath = resolve(outDir, "records-by-date.jsonl.tmp");
+const dateArchiveStream = createWriteStream(temporaryDateArchivePath);
+const dateArchiveHash = createHash("sha256");
+let dateArchiveBytes = 0;
+const monthPages = new Map();
+const dayPages = new Map();
+let undatedRows = 0;
 const searchableText = (record) => {
   const values = [record.id, record.kind, record.occurredAt];
   const collect = (value, depth = 0) => {
@@ -85,21 +97,72 @@ for (let index = 0; index < records.length; index += 1) {
   }
 }
 
+const addDatePage = (map, key, pageIndex) => {
+  const entry = map.get(key) ?? { recordCount: 0, pages: [] };
+  entry.recordCount += 1;
+  if (entry.pages.at(-1) !== pageIndex) entry.pages.push(pageIndex);
+  map.set(key, entry);
+};
+for (let index = 0; index < dateRecords.length; index += 1) {
+  const record = dateRecords[index];
+  if (index % pageSize === 0) dateArchivePages.push({ offset: dateArchiveBytes, length: 0 });
+  const pageIndex = Math.floor(index / pageSize);
+  const line = `${JSON.stringify(record)}\n`;
+  const lineBytes = Buffer.byteLength(line, "utf8");
+  dateArchiveHash.update(line);
+  dateArchiveBytes += lineBytes;
+  dateArchivePages[pageIndex].length += lineBytes;
+  if (!dateArchiveStream.write(line)) await once(dateArchiveStream, "drain");
+  const occurredAt = typeof record.occurredAt === "string" ? record.occurredAt : "";
+  const match = /^(\d{4})-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])(?:T|$)/.exec(occurredAt);
+  const day = match?.[0].slice(0, 10);
+  const parsedDate = day ? new Date(`${day}T00:00:00Z`) : null;
+  if (day && parsedDate && Number.isFinite(parsedDate.getTime()) && parsedDate.toISOString().slice(0, 10) === day) {
+    addDatePage(monthPages, day.slice(0, 7), pageIndex);
+    addDatePage(dayPages, day, pageIndex);
+  } else {
+    undatedRows += 1;
+  }
+}
+
+dateArchiveStream.end();
+await finished(dateArchiveStream);
 writeFileSync(archivePath, archive, "utf8");
 const searchObject = Object.fromEntries([...search.entries()].sort(([left], [right]) => left.localeCompare(right)));
 const searchPath = resolve(outDir, "search.json");
 writeFileSync(searchPath, JSON.stringify(searchObject), "utf8");
 const searchCountsPath = resolve(outDir, "search-counts.json");
 writeFileSync(searchCountsPath, JSON.stringify(Object.fromEntries([...searchCounts.entries()].sort(([left], [right]) => left.localeCompare(right)))), "utf8");
+const dateArchiveChecksumSha256 = dateArchiveHash.digest("hex");
+const dateArchiveKey = `indexes/v1/${source}/records-by-date-${dateArchiveChecksumSha256}.jsonl`;
+renameSync(temporaryDateArchivePath, resolve(outDir, `records-by-date-${dateArchiveChecksumSha256}.jsonl`));
+const periodIndexText = JSON.stringify({
+  schemaVersion: 1,
+  sourceId: source,
+  totalRows: records.length,
+  undatedRows,
+  pageSize,
+  archiveKey: dateArchiveKey,
+  archiveChecksumSha256: dateArchiveChecksumSha256,
+  pages: dateArchivePages,
+  months: Object.fromEntries([...monthPages.entries()].sort(([left], [right]) => left.localeCompare(right))),
+  days: Object.fromEntries([...dayPages.entries()].sort(([left], [right]) => left.localeCompare(right))),
+});
+const periodIndexChecksumSha256 = createHash("sha256").update(periodIndexText).digest("hex");
+writeFileSync(resolve(outDir, `periods-${periodIndexChecksumSha256}.json`), periodIndexText, "utf8");
 const manifest = {
   schemaVersion: 1,
   sourceId: source,
   totalRows: lines.length,
   pageSize,
   recordArchiveKey: `indexes/v1/${source}/records.jsonl`,
+  dateArchiveKey,
+  dateArchiveChecksumSha256,
+  periodIndexKey: `indexes/v1/${source}/periods-${periodIndexChecksumSha256}.json`,
+  periodIndexChecksumSha256,
   searchIndexKey: `indexes/v1/${source}/search.json`,
   searchCountIndexKey: `indexes/v1/${source}/search-counts.json`,
   pages,
 };
 writeFileSync(resolve(outDir, "manifest.json"), JSON.stringify(manifest, null, 2), "utf8");
-console.log(JSON.stringify({ source, totalRows: lines.length, totalPages: pages.length, archiveBytes: Buffer.byteLength(archive), searchTerms: search.size, output: outDir }, null, 2));
+console.log(JSON.stringify({ source, totalRows: lines.length, totalPages: pages.length, archiveBytes: Buffer.byteLength(archive), dateArchiveBytes, datePages: dateArchivePages.length, periods: monthPages.size, searchTerms: search.size, output: outDir }, null, 2));
