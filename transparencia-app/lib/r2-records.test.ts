@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { projectLakeEvidence, readR2EvidenceRecords } from "@/lib/r2-records";
 
-function fakeBucket(recordsByKey: Record<string, unknown>, requestedKeys?: string[]) {
+function fakeBucket(recordsByKey: Record<string, unknown>, requestedKeys?: string[], requestedRanges?: Array<{ key: string; offset: number; length: number }>) {
   const encoded = new Map<string, ArrayBuffer>();
   for (const [key, value] of Object.entries(recordsByKey)) {
     if (value instanceof ArrayBuffer) {
@@ -15,13 +15,18 @@ function fakeBucket(recordsByKey: Record<string, unknown>, requestedKeys?: strin
     encoded.set(key, data.buffer.slice(data.byteOffset, data.byteOffset + data.byteLength));
   }
   return {
-    async get(key: string) {
+    async get(key: string, options?: { range?: { offset: number; length: number } }) {
       requestedKeys?.push(key);
       const data = encoded.get(key);
       if (!data) return null;
+      const range = options?.range;
+      if (range) requestedRanges?.push({ key, ...range });
+      const body = range
+        ? data.slice(range.offset, range.offset + range.length)
+        : data;
       return {
-        async json<T>() { return JSON.parse(new TextDecoder().decode(data)) as T; },
-        async arrayBuffer() { return data; },
+        async json<T>() { return JSON.parse(new TextDecoder().decode(body)) as T; },
+        async arrayBuffer() { return body; },
       };
     },
   };
@@ -382,7 +387,7 @@ describe("registros calientes de R2", () => {
     expect(result?.data[0]?.sourceId).toBe("infoprobidad");
   });
 
-  it("resuelve filtros mensuales de ChileCompra desde la partición del período, sin escanear el índice anual", async () => {
+  it("usa páginas acotadas del índice cuando catálogo e índice prueban que todo el corte pertenece al mes", async () => {
     const juneRecord = {
       id: "chilecompra-june",
       sourceId: "chilecompra",
@@ -390,22 +395,21 @@ describe("registros calientes de R2", () => {
       occurredAt: "2026-06-12",
       data: { buyer: "Municipalidad de Prueba" },
     };
-    const oldRecord = {
-      id: "chilecompra-old",
+    const secondJuneRecord = {
+      id: "chilecompra-june-2",
       sourceId: "chilecompra",
       kind: "contract",
-      occurredAt: "2025-12-12",
-      data: { buyer: "Municipalidad Histórica" },
+      occurredAt: "2026-06-20",
+      data: { buyer: "Municipalidad de Prueba 2" },
     };
-    const juneBytes = gzipText([juneRecord]);
-    const junePartition = partition("chilecompra", "2026-06", "partitions/chilecompra/2026/06/records.jsonl.gz", juneBytes, 1);
-    const indexedArchive = `${JSON.stringify(juneRecord)}\n${JSON.stringify(oldRecord)}\n`;
+    const indexedArchive = `${JSON.stringify(juneRecord)}\n${JSON.stringify(secondJuneRecord)}\n`;
     const requestedKeys: string[] = [];
+    const requestedRanges: Array<{ key: string; offset: number; length: number }> = [];
     const bucket = fakeBucket({
       "catalog/v1/manifest.json": {
         generatedAt: "2026-09-28T00:00:00Z",
-        sources: [{ id: "chilecompra", recordCount: 1 }],
-        partitions: [junePartition],
+        sources: [{ id: "chilecompra", recordCount: 2 }],
+        partitions: [{ id: "chilecompra-2026-06", sourceId: "chilecompra", period: "2026-06", recordCount: 2, manifestKey: "missing/partition-manifest.json", checksumSha256: "catalog-checksum", status: "published" }],
       },
       "indexes/v1/chilecompra/manifest.json": {
         schemaVersion: 1,
@@ -415,23 +419,42 @@ describe("registros calientes de R2", () => {
         recordArchiveKey: "indexes/v1/chilecompra/records.jsonl",
         pages: [
           { offset: 0, length: Buffer.byteLength(`${JSON.stringify(juneRecord)}\n`) },
-          { offset: Buffer.byteLength(`${JSON.stringify(juneRecord)}\n`), length: Buffer.byteLength(`${JSON.stringify(oldRecord)}\n`) },
+          { offset: Buffer.byteLength(`${JSON.stringify(juneRecord)}\n`), length: Buffer.byteLength(`${JSON.stringify(secondJuneRecord)}\n`) },
         ],
       },
       "indexes/v1/chilecompra/records.jsonl": indexedArchive,
-      [junePartition.manifestKey]: junePartition.manifest,
-      [junePartition.key]: juneBytes,
-    }, requestedKeys);
+    }, requestedKeys, requestedRanges);
 
     const result = await readR2EvidenceRecords(bucket, {
       source: "chilecompra",
       period: "2026-06",
-      limit: 25,
+      limit: 1,
     });
 
-    expect(result).toMatchObject({ total: 1, expectedTotal: 1, complete: true, missingPartitions: 0 });
+    expect(result).toMatchObject({ total: 2, expectedTotal: 2, complete: true, missingPartitions: 0 });
     expect(result?.data.map((record) => record.id)).toEqual(["chilecompra-june"]);
+    expect(requestedRanges).toEqual([{ key: "indexes/v1/chilecompra/records.jsonl", offset: 0, length: Buffer.byteLength(`${JSON.stringify(juneRecord)}\n`) }]);
+    expect(requestedKeys).not.toContain("missing/partition-manifest.json");
+  });
+
+  it("no escanea el índice cuando el período pedido no tiene corte publicado", async () => {
+    const requestedKeys: string[] = [];
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": {
+        generatedAt: "2026-09-28T00:00:00Z",
+        sources: [{ id: "chilecompra", recordCount: 1 }],
+        partitions: [{ id: "chilecompra-2026-06", sourceId: "chilecompra", period: "2026-06", recordCount: 1, manifestKey: "missing/partition-manifest.json", checksumSha256: "catalog-checksum", status: "published" }],
+      },
+      "indexes/v1/chilecompra/manifest.json": {
+        schemaVersion: 1, sourceId: "chilecompra", totalRows: 1, pageSize: 1,
+        recordArchiveKey: "indexes/v1/chilecompra/records.jsonl", pages: [{ offset: 0, length: 20 }],
+      },
+      "indexes/v1/chilecompra/records.jsonl": `${JSON.stringify({ id: "row", sourceId: "chilecompra", kind: "contract", occurredAt: "2026-06-12", data: {} })}\n`,
+    }, requestedKeys);
+
+    const result = await readR2EvidenceRecords(bucket, { source: "chilecompra", period: "2026-07", limit: 10 });
+
+    expect(result).toBeNull();
     expect(requestedKeys).not.toContain("indexes/v1/chilecompra/records.jsonl");
-    expect(requestedKeys).toContain(junePartition.manifestKey);
   });
 });

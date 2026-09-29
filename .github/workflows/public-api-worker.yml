@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "transparencia-app/workers/public-api/**"
+      - "transparencia-app/lib/r2-records.ts"
       - "transparencia-app/scripts/ensure-transfer-d1.mjs"
       - "transparencia-app/migrations-transferencias/**"
       - "transparencia-app/package.json"
