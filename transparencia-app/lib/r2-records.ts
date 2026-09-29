@@ -136,6 +136,12 @@ function indexedRecordMatches(record: EvidenceRecord, params: {
 async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeof readR2EvidenceRecords>[1]) {
   const sourceIds = Array.isArray(params.source) ? params.source : [params.source];
   if (sourceIds.length !== 1 || !["chilecompra", "infolobby", "infoprobidad"].includes(sourceIds[0])) return null;
+  // This index has search-term -> page mappings, but no period -> page mapping.
+  // A month-only request would otherwise scan and parse the entire archive in
+  // one Worker invocation. Let the lake reader select only matching period
+  // partitions; if that cut is not published, the caller can report it as
+  // unavailable instead of exhausting the Worker CPU budget.
+  if (params.period || params.from || params.to) return null;
   const sourceId = sourceIds[0];
   const manifestObject = await bucket.get(`indexes/v1/${sourceId}/manifest.json`);
   if (!manifestObject) return null;

@@ -3,7 +3,7 @@ import { createHash } from "node:crypto";
 import { describe, expect, it } from "vitest";
 import { projectLakeEvidence, readR2EvidenceRecords } from "@/lib/r2-records";
 
-function fakeBucket(recordsByKey: Record<string, unknown>) {
+function fakeBucket(recordsByKey: Record<string, unknown>, requestedKeys?: string[]) {
   const encoded = new Map<string, ArrayBuffer>();
   for (const [key, value] of Object.entries(recordsByKey)) {
     if (value instanceof ArrayBuffer) {
@@ -16,6 +16,7 @@ function fakeBucket(recordsByKey: Record<string, unknown>) {
   }
   return {
     async get(key: string) {
+      requestedKeys?.push(key);
       const data = encoded.get(key);
       if (!data) return null;
       return {
@@ -379,5 +380,58 @@ describe("registros calientes de R2", () => {
     expect(result).toMatchObject({ total: 2, expectedTotal: 2, complete: true, missingPartitions: 0 });
     expect(result?.data).toHaveLength(1);
     expect(result?.data[0]?.sourceId).toBe("infoprobidad");
+  });
+
+  it("resuelve filtros mensuales de ChileCompra desde la partición del período, sin escanear el índice anual", async () => {
+    const juneRecord = {
+      id: "chilecompra-june",
+      sourceId: "chilecompra",
+      kind: "contract",
+      occurredAt: "2026-06-12",
+      data: { buyer: "Municipalidad de Prueba" },
+    };
+    const oldRecord = {
+      id: "chilecompra-old",
+      sourceId: "chilecompra",
+      kind: "contract",
+      occurredAt: "2025-12-12",
+      data: { buyer: "Municipalidad Histórica" },
+    };
+    const juneBytes = gzipText([juneRecord]);
+    const junePartition = partition("chilecompra", "2026-06", "partitions/chilecompra/2026/06/records.jsonl.gz", juneBytes, 1);
+    const indexedArchive = `${JSON.stringify(juneRecord)}\n${JSON.stringify(oldRecord)}\n`;
+    const requestedKeys: string[] = [];
+    const bucket = fakeBucket({
+      "catalog/v1/manifest.json": {
+        generatedAt: "2026-09-28T00:00:00Z",
+        sources: [{ id: "chilecompra", recordCount: 1 }],
+        partitions: [junePartition],
+      },
+      "indexes/v1/chilecompra/manifest.json": {
+        schemaVersion: 1,
+        sourceId: "chilecompra",
+        totalRows: 2,
+        pageSize: 1,
+        recordArchiveKey: "indexes/v1/chilecompra/records.jsonl",
+        pages: [
+          { offset: 0, length: Buffer.byteLength(`${JSON.stringify(juneRecord)}\n`) },
+          { offset: Buffer.byteLength(`${JSON.stringify(juneRecord)}\n`), length: Buffer.byteLength(`${JSON.stringify(oldRecord)}\n`) },
+        ],
+      },
+      "indexes/v1/chilecompra/records.jsonl": indexedArchive,
+      [junePartition.manifestKey]: junePartition.manifest,
+      [junePartition.key]: juneBytes,
+    }, requestedKeys);
+
+    const result = await readR2EvidenceRecords(bucket, {
+      source: "chilecompra",
+      period: "2026-06",
+      limit: 25,
+    });
+
+    expect(result).toMatchObject({ total: 1, expectedTotal: 1, complete: true, missingPartitions: 0 });
+    expect(result?.data.map((record) => record.id)).toEqual(["chilecompra-june"]);
+    expect(requestedKeys).not.toContain("indexes/v1/chilecompra/records.jsonl");
+    expect(requestedKeys).toContain(junePartition.manifestKey);
   });
 });
