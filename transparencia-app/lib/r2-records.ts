@@ -96,15 +96,39 @@ function outsideDateRange(date: string, from?: string, to?: string) {
   return false;
 }
 
+function inclusiveDateBound(value: string | undefined, end: boolean) {
+  if (!value) return undefined;
+  if (/^\d{4}$/.test(value)) return `${value}-${end ? "12-31" : "01-01"}`;
+  if (/^\d{4}-\d{2}$/.test(value)) return `${value}-${end ? "31" : "01"}`;
+  return value.slice(0, 10);
+}
+
 interface IndexedRecordsManifest {
   schemaVersion: number;
   sourceId: string;
   totalRows: number;
   pageSize: number;
   recordArchiveKey: string;
+  dateArchiveKey?: string;
+  dateArchiveChecksumSha256?: string;
+  periodIndexKey?: string;
+  periodIndexChecksumSha256?: string;
   pages: Array<{ offset: number; length: number }>;
   searchIndexKey?: string;
   searchCountIndexKey?: string;
+}
+
+interface PeriodPageIndex {
+  schemaVersion: number;
+  sourceId: string;
+  totalRows: number;
+  undatedRows: number;
+  pageSize: number;
+  pages: Array<{ offset: number; length: number }>;
+  archiveKey: string;
+  archiveChecksumSha256: string;
+  months: Record<string, { recordCount: number; pages: number[] }>;
+  days: Record<string, { recordCount: number; pages: number[] }>;
 }
 
 function searchTerms(query: string) {
@@ -152,39 +176,78 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
     }
   }
   const hasDateFilter = Boolean(params.period || params.from || params.to);
-  let dateScopeProvenByCatalog = false;
+  let datePageCandidates: number[] | null = null;
+  let dateArchiveKey: string | null = null;
+  let dateArchivePages: Array<{ offset: number; length: number }> | null = null;
+  let dateResultTotal: number | null = null;
   if (hasDateFilter) {
-    // The index has no period -> page map. Use it for a date-only query only
-    // when the public catalog proves that every indexed row belongs to the
-    // requested period range. Otherwise let the partition reader answer (or
-    // return unavailable) instead of scanning the full archive in a Worker.
-    const monthPrecisionRange = (!params.from || /^\d{4}-\d{2}$/.test(params.from))
-      && (!params.to || /^\d{4}-\d{2}$/.test(params.to));
-    const onlyDateFilters = monthPrecisionRange
-      && !params.query?.trim() && !params.entityId && !params.recordIds && !params.kind;
-    if (!onlyDateFilters || !catalogManifest || catalogExpectedTotal === null) return null;
-    const matchingPartitions = catalogManifest.partitions.filter((partition) => {
-      if (partition.sourceId !== sourceId || !/^\d{4}-\d{2}$/.test(partition.period)) return false;
-      if (params.period && partition.period !== params.period) return false;
-      if (params.from && partition.period < params.from.slice(0, 7)) return false;
-      if (params.to && partition.period > params.to.slice(0, 7)) return false;
-      return true;
+    // Catalog partitions describe publication batches, not each row's
+    // effective date. Use the separate date-sorted archive and its verified
+    // day/page index so month filters neither widen nor scan unrelated pages.
+    if (params.query?.trim() || params.entityId || params.recordIds || params.kind
+      || !manifest.dateArchiveKey || !manifest.periodIndexKey
+      || !/^[a-f0-9]{64}$/.test(manifest.periodIndexChecksumSha256 ?? "")) return null;
+    const periodObject = await bucket.get(manifest.periodIndexKey);
+    if (!periodObject) return null;
+    const periodBytes = await periodObject.arrayBuffer();
+    if (await checksumSha256(periodBytes) !== manifest.periodIndexChecksumSha256) return null;
+    const periodIndex = JSON.parse(new TextDecoder().decode(periodBytes)) as PeriodPageIndex;
+    const monthEntries = Object.entries(periodIndex.months ?? {});
+    const dayEntries = Object.entries(periodIndex.days ?? {});
+    const validPageEntries = (entries: Array<[string, { recordCount: number; pages: number[] }]>, pattern: RegExp) => entries.every(([period, entry]) =>
+      pattern.test(period)
+      && Number.isSafeInteger(entry.recordCount) && entry.recordCount >= 0
+      && Array.isArray(entry.pages)
+      && entry.pages.every((page) => Number.isSafeInteger(page) && page >= 0 && page < periodIndex.pages.length));
+    const validDayDates = dayEntries.every(([day]) => {
+      const date = new Date(`${day}T00:00:00Z`);
+      return Number.isFinite(date.getTime()) && date.toISOString().slice(0, 10) === day;
     });
-    const matchingRows = matchingPartitions.reduce((sum, partition) => {
-      const count = Number(partition.recordCount);
-      return Number.isSafeInteger(count) && count >= 0 ? sum + count : Number.NaN;
-    }, 0);
-    dateScopeProvenByCatalog = Number.isSafeInteger(matchingRows)
-      && matchingRows === manifest.totalRows
-      && catalogExpectedTotal === manifest.totalRows;
-    if (!dateScopeProvenByCatalog) return null;
+    const indexedMonthRows = monthEntries.reduce((sum, [, entry]) => sum + Number(entry.recordCount), 0);
+    const indexedDayRows = dayEntries.reduce((sum, [, entry]) => sum + Number(entry.recordCount), 0);
+    const daysMatchMonths = monthEntries.every(([month, entry]) =>
+      dayEntries.filter(([day]) => day.startsWith(month)).reduce((sum, [, dayEntry]) => sum + Number(dayEntry.recordCount), 0) === entry.recordCount);
+    if (periodIndex.schemaVersion !== 1
+      || periodIndex.sourceId !== sourceId
+      || periodIndex.totalRows !== manifest.totalRows
+      || !Number.isSafeInteger(periodIndex.pageSize) || periodIndex.pageSize < 1
+      || !Array.isArray(periodIndex.pages) || periodIndex.pages.length !== Math.ceil(periodIndex.totalRows / periodIndex.pageSize)
+      || periodIndex.archiveKey !== manifest.dateArchiveKey
+      || periodIndex.archiveChecksumSha256 !== manifest.dateArchiveChecksumSha256
+      || !/^[a-f0-9]{64}$/.test(periodIndex.archiveChecksumSha256)
+      || !validPageEntries(monthEntries, /^\d{4}-(0[1-9]|1[0-2])$/)
+      || !validPageEntries(dayEntries, /^\d{4}-(0[1-9]|1[0-2])-\d{2}$/)
+      || !validDayDates
+      || !Number.isSafeInteger(periodIndex.undatedRows) || periodIndex.undatedRows < 0
+      || indexedMonthRows + periodIndex.undatedRows !== manifest.totalRows
+      || indexedDayRows + periodIndex.undatedRows !== manifest.totalRows
+      || !daysMatchMonths) return null;
+
+    const fromDay = inclusiveDateBound(params.from, false);
+    const toDay = inclusiveDateBound(params.to, true);
+    const selectedDays = dayEntries.filter(([day]) => (!params.period || day.startsWith(params.period!))
+      && (!fromDay || day >= fromDay)
+      && (!toDay || day <= toDay));
+    dateResultTotal = selectedDays.reduce((sum, [, entry]) => sum + entry.recordCount, 0);
+    datePageCandidates = [...new Set(selectedDays.flatMap(([, entry]) => entry.pages))].sort((left, right) => left - right);
+    dateArchiveKey = periodIndex.archiveKey;
+    dateArchivePages = periodIndex.pages;
   }
   const expectedTotal = catalogExpectedTotal ?? manifest.totalRows;
   const missingIndexedRows = Math.max(0, expectedTotal - manifest.totalRows);
   const offset = cursorOffset(params.cursor);
   const limit = Math.min(Math.max(params.limit, 1), 100);
-  const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || (hasDateFilter && !dateScopeProvenByCatalog));
-  let candidatePages = manifest.pages.map((_, index) => index);
+  const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || hasDateFilter);
+  let candidatePages = datePageCandidates ?? manifest.pages.map((_, index) => index);
+  const activePages = dateArchivePages ?? manifest.pages;
+  const activeArchiveKey = dateArchiveKey ?? manifest.recordArchiveKey;
+  if (dateResultTotal === 0) {
+    return {
+      data: [], total: 0, totalScope: "published-index" as const, limit,
+      nextCursor: null, expectedTotal, loadedRows: 0, complete: missingIndexedRows === 0,
+      missingPartitions: missingIndexedRows > 0 ? 1 : 0, missingArtifacts: 0,
+    };
+  }
   const query = params.query?.trim();
   let indexedQueryTotal: number | null = null;
   if (query && manifest.searchIndexKey) {
@@ -208,7 +271,7 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
   if (!hasFilters) {
     const firstPageIndex = Math.floor(offset / manifest.pageSize);
     const lastPageIndex = Math.floor(Math.max(offset, offset + limit - 1) / manifest.pageSize);
-    candidatePages = manifest.pages
+    candidatePages = activePages
       .map((_, index) => index)
       .filter((index) => index >= firstPageIndex && index <= lastPageIndex);
   }
@@ -226,13 +289,13 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
     let lastPageIndex = firstPageIndex;
     while (index + 1 < candidatePages.length
       && candidatePages[index + 1] === lastPageIndex + 1
-      && manifest.pages[candidatePages[index + 1]].offset + manifest.pages[candidatePages[index + 1]].length - manifest.pages[firstPageIndex].offset <= 1_000_000) {
+      && activePages[candidatePages[index + 1]].offset + activePages[candidatePages[index + 1]].length - activePages[firstPageIndex].offset <= 1_000_000) {
       index += 1;
       lastPageIndex = candidatePages[index];
     }
-    const firstPage = manifest.pages[firstPageIndex];
-    const lastPage = manifest.pages[lastPageIndex];
-    const object = await bucket.get(manifest.recordArchiveKey, {
+    const firstPage = activePages[firstPageIndex];
+    const lastPage = activePages[lastPageIndex];
+    const object = await bucket.get(activeArchiveKey, {
       range: { offset: firstPage.offset, length: lastPage.offset + lastPage.length - firstPage.offset },
     });
     if (!object) return null;
@@ -241,19 +304,18 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
       if (!line) continue;
       const lakeRecord = JSON.parse(line) as LakeRecord;
       const record = projectLakeEvidence(lakeRecord, null, null);
-      if (!indexedRecordMatches(record, dateScopeProvenByCatalog
-        ? { ...params, period: undefined, from: undefined, to: undefined }
-        : params)) continue;
+      if (!indexedRecordMatches(record, params)) continue;
       if (total >= selectionOffset && selected.length < limit) selected.push(record);
       total += 1;
-      if (indexedQueryTotal !== null && selected.length >= limit && total >= selectionOffset + limit) {
+      if ((indexedQueryTotal !== null && selected.length >= limit && total >= selectionOffset + limit)
+        || (dateResultTotal !== null && selected.length >= limit)) {
         exhausted = true;
         break;
       }
     }
     index += 1;
   }
-  const resultTotal = indexedQueryTotal ?? (hasFilters ? total : manifest.totalRows);
+  const resultTotal = dateResultTotal ?? indexedQueryTotal ?? (hasFilters ? total : manifest.totalRows);
   return {
     data: selected,
     total: resultTotal,
@@ -263,7 +325,7 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
       ? `v1_${(offset + selected.length).toString(36)}`
       : null,
     expectedTotal,
-    loadedRows: manifest.totalRows,
+    loadedRows: dateResultTotal ?? manifest.totalRows,
     complete: missingIndexedRows === 0,
     missingPartitions: missingIndexedRows > 0 ? 1 : 0,
     missingArtifacts: 0,
