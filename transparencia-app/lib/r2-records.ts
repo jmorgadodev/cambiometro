@@ -136,31 +136,51 @@ function indexedRecordMatches(record: EvidenceRecord, params: {
 async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeof readR2EvidenceRecords>[1]) {
   const sourceIds = Array.isArray(params.source) ? params.source : [params.source];
   if (sourceIds.length !== 1 || !["chilecompra", "infolobby", "infoprobidad"].includes(sourceIds[0])) return null;
-  // This index has search-term -> page mappings, but no period -> page mapping.
-  // A month-only request would otherwise scan and parse the entire archive in
-  // one Worker invocation. Let the lake reader select only matching period
-  // partitions; if that cut is not published, the caller can report it as
-  // unavailable instead of exhausting the Worker CPU budget.
-  if (params.period || params.from || params.to) return null;
   const sourceId = sourceIds[0];
   const manifestObject = await bucket.get(`indexes/v1/${sourceId}/manifest.json`);
   if (!manifestObject) return null;
   const manifest = await manifestObject.json<IndexedRecordsManifest>();
   if (manifest.schemaVersion !== 1 || manifest.sourceId !== sourceId || !Array.isArray(manifest.pages)) return null;
   let catalogExpectedTotal: number | null = null;
+  let catalogManifest: R2PublicCatalog | null = null;
   const catalogObject = await bucket.get("catalog/v1/manifest.json");
   if (catalogObject) {
-    const catalog = await catalogObject.json<R2PublicCatalog>();
-    const catalogSource = catalog.sources?.find((source) => source.id === sourceId);
+    catalogManifest = await catalogObject.json<R2PublicCatalog>();
+    const catalogSource = catalogManifest.sources?.find((source) => source.id === sourceId);
     if (catalogSource && Number.isFinite(Number(catalogSource.recordCount))) {
       catalogExpectedTotal = Number(catalogSource.recordCount);
     }
+  }
+  const hasDateFilter = Boolean(params.period || params.from || params.to);
+  let dateScopeProvenByCatalog = false;
+  if (hasDateFilter) {
+    // The index has no period -> page map. Use it for a date-only query only
+    // when the public catalog proves that every indexed row belongs to the
+    // requested period range. Otherwise let the partition reader answer (or
+    // return unavailable) instead of scanning the full archive in a Worker.
+    const onlyDateFilters = !params.query?.trim() && !params.entityId && !params.recordIds && !params.kind;
+    if (!onlyDateFilters || !catalogManifest || catalogExpectedTotal === null) return null;
+    const matchingPartitions = catalogManifest.partitions.filter((partition) => {
+      if (partition.sourceId !== sourceId || !/^\d{4}-\d{2}$/.test(partition.period)) return false;
+      if (params.period && partition.period !== params.period) return false;
+      if (params.from && partition.period < params.from.slice(0, 7)) return false;
+      if (params.to && partition.period > params.to.slice(0, 7)) return false;
+      return true;
+    });
+    const matchingRows = matchingPartitions.reduce((sum, partition) => {
+      const count = Number(partition.recordCount);
+      return Number.isSafeInteger(count) && count >= 0 ? sum + count : Number.NaN;
+    }, 0);
+    dateScopeProvenByCatalog = Number.isSafeInteger(matchingRows)
+      && matchingRows === manifest.totalRows
+      && catalogExpectedTotal === manifest.totalRows;
+    if (!dateScopeProvenByCatalog) return null;
   }
   const expectedTotal = catalogExpectedTotal ?? manifest.totalRows;
   const missingIndexedRows = Math.max(0, expectedTotal - manifest.totalRows);
   const offset = cursorOffset(params.cursor);
   const limit = Math.min(Math.max(params.limit, 1), 100);
-  const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || params.period || params.from || params.to);
+  const hasFilters = Boolean(params.query?.trim() || params.entityId || params.recordIds || params.kind || (hasDateFilter && !dateScopeProvenByCatalog));
   let candidatePages = manifest.pages.map((_, index) => index);
   const query = params.query?.trim();
   let indexedQueryTotal: number | null = null;
@@ -218,7 +238,9 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
       if (!line) continue;
       const lakeRecord = JSON.parse(line) as LakeRecord;
       const record = projectLakeEvidence(lakeRecord, null, null);
-      if (!indexedRecordMatches(record, params)) continue;
+      if (!indexedRecordMatches(record, dateScopeProvenByCatalog
+        ? { ...params, period: undefined, from: undefined, to: undefined }
+        : params)) continue;
       if (total >= selectionOffset && selected.length < limit) selected.push(record);
       total += 1;
       if (indexedQueryTotal !== null && selected.length >= limit && total >= selectionOffset + limit) {
