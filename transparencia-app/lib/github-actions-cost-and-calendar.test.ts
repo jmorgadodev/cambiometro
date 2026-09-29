@@ -204,7 +204,6 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
   it("11. Todo ETL que materializa D1 tiene el preflight fail-safe de cuota", () => {
     const workflows = [
       "etl-chilecompra.yml",
-      "etl-contraloria.yml",
       "etl-dipres.yml",
       "etl-infolobby-scheduled.yml",
       "etl-infoprobidad.yml",
@@ -229,7 +228,15 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(infolobby).toContain("D1 pospuesto por asset no disponible");
   });
 
-  it("11a. El histórico de gastos públicos se publica en R2/Pages sin materializar en D1", () => {
+  it("11a. Contraloría publica en R2/Pages sin depender de D1", () => {
+    const contraloria = fs.readFileSync(path.join(workflowsDir, "etl-contraloria.yml"), "utf8");
+    expect(contraloria).not.toMatch(/d1-preflight|data:materialize:optional|wrangler d1/i);
+    expect(contraloria).toContain("npm run data:publish");
+    expect(contraloria).toContain("npm run data:publish:static -- --groups contraloria");
+    expect(contraloria).toContain("D1 no participa en este ETL");
+  });
+
+  it("11b. El histórico de gastos públicos se publica en R2/Pages sin materializar en D1", () => {
     const expenses = fs.readFileSync(path.join(workflowsDir, "etl-expenses.yml"), "utf8");
     expect(expenses).not.toMatch(/d1-preflight|data:materialize/);
     expect(expenses).toContain("npm run data:publish");
