@@ -4,6 +4,7 @@ import {
   extractConsolidatedCount,
   extractInfoLobbyCount,
   hasPublishedParliamentaryDiet,
+  hasConsistentPublishedStaffExcess,
   isRetryableHttpStatus,
   parseDisplayedInteger,
 } from "../production-verifier-contracts.mjs";
@@ -41,5 +42,23 @@ describe("production verifier contracts", () => {
     const html = '<div>$8.239.091</div><span>dieta parlamentaria bruta · Junio 2026</span>';
     expect(hasPublishedParliamentaryDiet(html, "2026-06")).toBe(true);
     expect(hasPublishedParliamentaryDiet(html, "2026-05")).toBe(false);
+  });
+
+  it("checks the current staff excess against the displayed official base and total", () => {
+    const panel = (percentage, total) => `<section>Personal de Apoyo y Asesores<!-- -->
+      <span>Exceso de ${percentage} sobre la base mensual oficial</span>
+      <p>Base mensual oficial: $11.406.149. Total publicado: ${total}; traspaso individual acreditado: $0.</p>
+    </section>`;
+    expect(hasConsistentPublishedStaffExcess(panel("+39,7%", "$15.930.000"))).toBe(true);
+    expect(hasConsistentPublishedStaffExcess(panel("+33,7%", "$15.930.000"))).toBe(false);
+    expect(hasConsistentPublishedStaffExcess(panel("+33,7%", "$15.250.000"))).toBe(true);
+  });
+
+  it("does not require an excess alert when the published staff amount is within the base", () => {
+    const panel = `<section>Personal de Apoyo y Asesores
+      <p>Base mensual oficial: $11.406.149. Total publicado: $10.000.000.</p>
+    </section>`;
+    expect(hasConsistentPublishedStaffExcess(panel)).toBe(true);
+    expect(hasConsistentPublishedStaffExcess("<section>Other content</section>")).toBe(false);
   });
 });

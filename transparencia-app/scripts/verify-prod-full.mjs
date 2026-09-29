@@ -5,6 +5,7 @@ import {
   extractCanonicalCount,
   extractConsolidatedCount,
   extractInfoLobbyCount,
+  hasConsistentPublishedStaffExcess,
   hasPublishedParliamentaryDiet,
   isRetryableHttpStatus,
 } from "./etl/production-verifier-contracts.mjs";
@@ -232,7 +233,7 @@ async function verifyProdFull() {
   assertCheck("INVARIANTES", "Ficha Vanessa Kaiser HTTP 200", kaiserRes.status === 200);
   const kaiserHtml = (await kaiserRes.text()).replace(/<!--.*?-->/g, "");
   assertCheck("INVARIANTES", "Dieta Kaiser publicada con período y monto", hasPublishedParliamentaryDiet(kaiserHtml, "2026-06"));
-  assertCheck("INVARIANTES", "Asignación Kaiser: +33,7%", kaiserHtml.includes("+33,7%") || kaiserHtml.includes("33,7%"));
+  assertCheck("INVARIANTES", "Asignación Kaiser: porcentaje coherente con el mes publicado", hasConsistentPublishedStaffExcess(kaiserHtml));
   assertCheck("GASTOS", "Kaiser tiene rendiciones operacionales publicadas", kaiserHtml.includes("Gastos Operacionales Rendidos") && !/Sin registros de gastos operacionales rendidos/i.test(kaiserHtml));
 
   const bianchiRes = await fetch(`${PROD_URL}/politico/carlos-bianchi-chelech`, { headers });
