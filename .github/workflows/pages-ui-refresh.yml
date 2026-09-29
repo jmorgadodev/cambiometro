@@ -199,6 +199,24 @@ jobs:
             transparencia-app/data/municipalidades-list.json
             transparencia-app/public/data/transferencias
 
+      - name: Conciliar personal de apoyo con el release canónico R2
+        # El snapshot estático/caché puede conservar menos meses que la
+        # proyección propia de personal de apoyo. No usarlo para Pages sin
+        # cotejar el checksum y los conteos del manifiesto vigente.
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          mkdir -p .ci-data-version
+          npx wrangler r2 object get transparencia-public-data/projections/personal-apoyo-v1/manifest.json --file .ci-data-version/personal-apoyo-manifest.json --remote
+          npx wrangler r2 object get transparencia-public-data/projections/personal-apoyo-v1/personal-apoyo.json --file .ci-data-version/personal-apoyo.json --remote
+          node scripts/verify-personal-apoyo-release.mjs \
+            --manifest .ci-data-version/personal-apoyo-manifest.json \
+            --input .ci-data-version/personal-apoyo.json \
+            --output data/personal-apoyo.json \
+            --subset data/lake-subsets/personal-apoyo.subset.json
+
       - name: Regenerar salud de fuentes desde el snapshot publicado
         working-directory: transparencia-app
         run: npm run data:health
