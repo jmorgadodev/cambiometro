@@ -511,6 +511,21 @@ describe("registros calientes de R2", () => {
 
   it("no escanea el índice cuando el período pedido no tiene corte publicado", async () => {
     const requestedKeys: string[] = [];
+    const record = { id: "june", sourceId: "chilecompra", kind: "contract", occurredAt: "2026-06-12", data: {} };
+    const line = `${JSON.stringify(record)}\n`;
+    const dateArchiveKey = "indexes/v1/chilecompra/records-by-date.jsonl";
+    const periodIndexText = JSON.stringify({
+      schemaVersion: 1,
+      sourceId: "chilecompra",
+      totalRows: 1,
+      undatedRows: 0,
+      pageSize: 1,
+      archiveKey: dateArchiveKey,
+      archiveChecksumSha256: sha256Text(line),
+      pages: [{ offset: 0, length: Buffer.byteLength(line) }],
+      months: { "2026-06": { recordCount: 1, pages: [0] } },
+      days: { "2026-06-12": { recordCount: 1, pages: [0] } },
+    });
     const bucket = fakeBucket({
       "catalog/v1/manifest.json": {
         generatedAt: "2026-09-28T00:00:00Z",
@@ -519,14 +534,22 @@ describe("registros calientes de R2", () => {
       },
       "indexes/v1/chilecompra/manifest.json": {
         schemaVersion: 1, sourceId: "chilecompra", totalRows: 1, pageSize: 1,
-        recordArchiveKey: "indexes/v1/chilecompra/records.jsonl", pages: [{ offset: 0, length: 20 }],
+        recordArchiveKey: "indexes/v1/chilecompra/records.jsonl",
+        dateArchiveKey,
+        dateArchiveChecksumSha256: sha256Text(line),
+        periodIndexKey: "indexes/v1/chilecompra/periods.json",
+        periodIndexChecksumSha256: sha256Text(periodIndexText),
+        pages: [{ offset: 0, length: Buffer.byteLength(line) }],
       },
-      "indexes/v1/chilecompra/records.jsonl": `${JSON.stringify({ id: "row", sourceId: "chilecompra", kind: "contract", occurredAt: "2026-06-12", data: {} })}\n`,
+      "indexes/v1/chilecompra/periods.json": periodIndexText,
+      [dateArchiveKey]: line,
     }, requestedKeys);
 
     const result = await readR2EvidenceRecords(bucket, { source: "chilecompra", period: "2026-07", limit: 10 });
 
     expect(result).toBeNull();
+    expect(requestedKeys).toContain("indexes/v1/chilecompra/periods.json");
+    expect(requestedKeys).not.toContain(dateArchiveKey);
     expect(requestedKeys).not.toContain("indexes/v1/chilecompra/records.jsonl");
   });
 
