@@ -241,13 +241,9 @@ async function readIndexedRecords(bucket: R2BucketLike, params: Parameters<typeo
   let candidatePages = datePageCandidates ?? manifest.pages.map((_, index) => index);
   const activePages = dateArchivePages ?? manifest.pages;
   const activeArchiveKey = dateArchiveKey ?? manifest.recordArchiveKey;
-  if (dateResultTotal === 0) {
-    return {
-      data: [], total: 0, totalScope: "published-index" as const, limit,
-      nextCursor: null, expectedTotal, loadedRows: 0, complete: missingIndexedRows === 0,
-      missingPartitions: missingIndexedRows > 0 ? 1 : 0, missingArtifacts: 0,
-    };
-  }
+  // No row in a date-index is not proof that the source reported an empty
+  // period. Require explicit catalog coverage before answering a zero result.
+  if (dateResultTotal === 0) return null;
   const query = params.query?.trim();
   let indexedQueryTotal: number | null = null;
   if (query && manifest.searchIndexKey) {
