@@ -48,6 +48,23 @@ export function hasPublishedParliamentaryDiet(html, period = null) {
   return hasLabel && hasAmount && hasPeriod;
 }
 
+export function hasConsistentPublishedStaffExcess(html) {
+  const text = String(html)
+    .replace(/<!--.*?-->/gs, " ")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/\s+/g, " ");
+  if (!text.includes("Personal de Apoyo y Asesores")) return false;
+
+  const base = parseDisplayedInteger(text.match(/Base mensual oficial:\s*(\$[\d.]+)/i)?.[1]);
+  const total = parseDisplayedInteger(text.match(/Total publicado:\s*(\$[\d.]+)/i)?.[1]);
+  if (base === null || total === null || base <= 0) return false;
+
+  const reported = text.match(/Exceso de\s*([+-]?\d+(?:,\d)?)%\s*sobre la base mensual oficial/i);
+  if (!reported) return total <= base;
+  const expected = Number((((total - base) / base) * 100).toFixed(1));
+  return total > base && Number(reported[1].replace(",", ".")) === expected;
+}
+
 export function isRetryableHttpStatus(status) {
   return status === 429 || (status >= 500 && status <= 599);
 }
