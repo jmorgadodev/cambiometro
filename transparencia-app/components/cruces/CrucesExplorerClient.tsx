@@ -85,7 +85,7 @@ const PRESET_CRUCES = [
 export const CHIPS_CONFIG = [
   { id: "todos", label: "Todos los tipos", icon: "🌐" },
   { id: "Compras", label: "Compras Públicas", icon: "🛒" },
-  { id: "Lobby", label: "Audiencias InfoLobby", icon: "🤝" },
+  { id: "Lobby", label: "Registros InfoLobby", icon: "🤝" },
   { id: "Transferencias", label: "Transferencias Ley 19.862", icon: "📑" },
   { id: "Auditorías", label: "Auditorías CGR", icon: "⚖️" },
   { id: "Declaraciones", label: "Declaraciones InfoProbidad", icon: "📋" },
@@ -117,7 +117,7 @@ export function getTipoCruceBadge(row: CrossEdge): {
     return { tipo: "Compras Públicas", badgeClass: "badge-ok" };
   }
   if (sourcesJoined.includes("infolobby") || pred.includes("lobby")) {
-    return { tipo: "Audiencias InfoLobby", badgeClass: "badge-accent" };
+    return { tipo: "Registros InfoLobby", badgeClass: "badge-accent" };
   }
   if (
     sourcesJoined.includes("ley-19862") ||

@@ -86,7 +86,7 @@ async function verifyProdCruces() {
   // 3. Chips de Tipo
   console.log("\n--- Verificación de Chips de Tipo ---");
   assertCheck("Chip 'Compras Públicas' contiene número > 0", /Compras Públicas\s*\(\s*[1-9]\d*\s*\)/.test(html) || html.includes("Compras Públicas"));
-  assertCheck("Chip 'Audiencias InfoLobby' contiene número > 0", /Audiencias InfoLobby\s*\(\s*[1-9]\d*\s*\)/.test(html) || html.includes("Audiencias InfoLobby"));
+  assertCheck("Chip 'Registros InfoLobby' contiene número > 0", /Registros InfoLobby\s*\(\s*[1-9]\d*\s*\)/.test(html) || html.includes("Registros InfoLobby"));
   assertCheck("Chip 'Transferencias Ley 19.862' contiene número > 0", /Transferencias Ley 19\.862\s*\(\s*[1-9]\d*\s*\)/.test(html) || html.includes("Transferencias Ley 19.862"));
   assertCheck("Chip 'Auditorías CGR' contiene número > 0", /Auditorías CGR\s*\(\s*[1-9]\d*\s*\)/.test(html) || html.includes("Auditorías CGR"));
 

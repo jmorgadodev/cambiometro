@@ -14,11 +14,12 @@ describe("coverage sweep labels for unmeasured universes", () => {
     expect(transfer.cobertura).toBe("No medida");
     expect(transfer.estado).toBe("CHECKED");
 
-    for (const name of ["InfoLobby Audiencias", "ChileCompra", "Contraloría General (CGR)"]) {
+    for (const name of ["InfoLobby (audiencias, viajes y donativos)", "ChileCompra", "Contraloría General (CGR)"]) {
       const row = rows.find(({ modulo }) => modulo.includes(name));
       expect(row, `row for ${name}`).toBeDefined();
       expect(row.cobertura, name).toBe("No medida");
       expect(row.estado, name).toBe("NO MEDIDA");
+      if (name.startsWith("InfoLobby")) expect(row.indexado).toBe("71.467 registros");
     }
   });
 
