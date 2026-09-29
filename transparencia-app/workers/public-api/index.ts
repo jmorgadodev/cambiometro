@@ -1703,7 +1703,7 @@ export async function listRecordsFromR2(requestUrl: URL, env: Env): Promise<Resp
     totalPages: Math.max(1, Math.ceil(total / limit)),
     sourceBackend: "r2",
     sourceStatus: completeStaticRelease || source === "infoprobidad" ? "complete" : "partial",
-    publishedRows: rawRows.length,
+    publishedRows: total,
   }, pageLinks(requestUrl, offset, limit, total));
 }
 

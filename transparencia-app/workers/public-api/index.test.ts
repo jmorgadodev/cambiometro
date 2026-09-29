@@ -132,6 +132,28 @@ describe("registros públicos R2", () => {
     });
   });
 
+  it("reporta publishedRows dentro del filtro aplicado en la proyección estática", async () => {
+    const bucket = fakeBucket({
+      "projections/static-site-v1/manifest.json": {
+        files: [{ path: "data/lake-subsets/contraloria.subset.json", key: "subsets/contraloria.json" }],
+      },
+      "subsets/contraloria.json": {
+        sourceId: "contraloria",
+        records: [{ id: "cgr-july", fecha: "2026-07-01", periodo: "2026-07", titulo: "Auditoría", fuente: "CGR" }],
+      },
+    });
+
+    const response = await worker.fetch(
+      new Request("https://example.test/api/v1/records?source=contraloria&period=2026-09&limit=1"),
+      { PUBLIC_DATA: bucket as never } as never,
+    );
+    const payload = await response.json() as { data: unknown[]; meta: Record<string, unknown> };
+
+    expect(response.status).toBe(200);
+    expect(payload.data).toEqual([]);
+    expect(payload.meta).toMatchObject({ total: 0, publishedRows: 0, sourceBackend: "r2" });
+  });
+
   it("consulta un organismo mediante posiciones paginadas, sin descargar su archivo completo", async () => {
     const root="projections/funcionarios-central-v1";
     const bucket=fakeBucket({
