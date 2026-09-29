@@ -3,7 +3,7 @@ import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync
 import { dirname, join, resolve } from "node:path";
 import { tmpdir } from "node:os";
 import { spawn } from "node:child_process";
-import { cpltStaticAssetRelativePath, cpltStaticAssetsForPages } from "./cplt-static-assets.mjs";
+import { cpltStaticAssetRelativePath, cpltStaticAssetsForPages, restoreCpltOriginalAsset } from "./cplt-static-assets.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const bucket = argument("--bucket", "transparencia-public-data");
@@ -120,16 +120,20 @@ try {
   const assetsToHydrate = pagesOnly ? cpltStaticAssetsForPages(manifest.assets) : manifest.assets;
   for (const asset of assetsToHydrate) {
     const relativePath = cpltStaticAssetRelativePath(asset.key, manifest.version);
-    const target = join(versionRoot, relativePath);
+    const compressedOriginal = asset.encoding === "gzip" && !relativePath.includes("/") && relativePath.endsWith(".json.gz");
+    const target = join(versionRoot, compressedOriginal ? relativePath.slice(0,-3) : relativePath);
+    const localSize = compressedOriginal ? asset.originalSize : asset.size;
+    const localChecksum = compressedOriginal ? asset.originalChecksumSha256 : asset.checksumSha256;
     mkdirSync(dirname(target), { recursive: true });
     const existing = existingAssets.get(asset.key);
     if (existing?.size === asset.size && existing.checksumSha256 === asset.checksumSha256 && existsSync(target)) {
       const current = readFileSync(target);
-      if (current.byteLength === asset.size && sha256(current) === asset.checksumSha256) continue;
+      if (current.byteLength === localSize && sha256(current) === localChecksum) continue;
     }
     const downloaded = `${target}.download`;
     await downloadObject(asset.key, downloaded, asset.size, asset.checksumSha256);
-    writeFileSync(target, readFileSync(downloaded));
+    const data = readFileSync(downloaded);
+    writeFileSync(target, compressedOriginal ? restoreCpltOriginalAsset(data,asset) : data);
     rmSync(downloaded, { force: true });
   }
 
