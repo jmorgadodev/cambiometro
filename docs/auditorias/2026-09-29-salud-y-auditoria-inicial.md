@@ -1,7 +1,7 @@
 # Salud y auditoría inicial de datos en producción
 
-Fecha de observación: 2026-09-29  
-Referencia de código: `codex/r2-canonical-health-status`, basado en `5cdc3fe`  
+Fecha de observación: 2026-09-29
+Referencia de código: `codex/r2-canonical-health-status`, basado en `5cdc3fe`
 Alcance: consultas públicas de solo lectura. No se consultó D1 directamente ni se escribieron o borraron objetos R2. Para validar el build se leyeron dos subconjuntos publicados (78.043.725 bytes combinados) y el release canónico paginado de transferencias Ley 19.862 (62.172 filas, 1.244 páginas, 32,44 MiB en páginas), con verificación SHA-256. ChileCompra queda expresamente para la última fase.
 
 ## Estado operativo
