@@ -18,6 +18,77 @@ const asset = (key: string, size = 10, checksumSha256 = key) => {
   });
 
 describe("publicación caliente en R2", () => {
+  it("conserva el índice ChileCompra activo y un rollback, y poda generaciones derivadas antiguas", () => {
+    const prefix = "indexes/v1/chilecompra";
+    const backupKey = `${prefix}/manifest-${"e".repeat(64)}.json`;
+    const backupManifest = {
+      sourceId: "chilecompra",
+      recordArchiveKey: `${prefix}/records.jsonl`,
+      dateArchiveKey: `${prefix}/records-by-date-${"a".repeat(64)}.jsonl`,
+      periodIndexKey: `${prefix}/periods-${"b".repeat(64)}.json`,
+      searchIndexKey: `${prefix}/search.json`,
+      searchCountIndexKey: `${prefix}/search-counts.json`,
+    };
+    const nextManifest = {
+      sourceId: "chilecompra",
+      recordArchiveKey: `${prefix}/records-${"1".repeat(64)}.jsonl`,
+      dateArchiveKey: `${prefix}/records-by-date-${"2".repeat(64)}.jsonl`,
+      periodIndexKey: `${prefix}/periods-${"3".repeat(64)}.json`,
+      searchIndexKey: `${prefix}/search-${"4".repeat(64)}.json`,
+      searchCountIndexKey: `${prefix}/search-counts-${"5".repeat(64)}.json`,
+      rollbackManifestKey: backupKey,
+    };
+    const indexAsset = (key: string, content: Buffer) => ({
+      key,
+      size: content.length,
+      checksumSha256: "new",
+      data: content,
+      releaseTag: "test",
+      releaseAssetName: key.split("/").at(-1)!,
+      r2Only: true,
+    });
+    const assets = [
+      indexAsset(`${prefix}/manifest.json`, Buffer.from(JSON.stringify(nextManifest))),
+      indexAsset(backupKey, Buffer.from(JSON.stringify(backupManifest))),
+      ...[
+        nextManifest.recordArchiveKey,
+        nextManifest.dateArchiveKey,
+        nextManifest.periodIndexKey,
+        nextManifest.searchIndexKey,
+        nextManifest.searchCountIndexKey,
+      ].map((key) => indexAsset(key, Buffer.from("next"))),
+    ];
+    const previousKeys = [
+      ...Object.values(backupManifest),
+      `${prefix}/records-by-date-${"c".repeat(64)}.jsonl`,
+      `${prefix}/manifest-${"d".repeat(64)}.json`,
+      `${prefix}/entities-${"f".repeat(64)}.jsonl.gz`,
+    ];
+    const plan = planR2Publication(assets, {
+      objects: [...new Set(previousKeys)].map((key) => ({ key, size: 4, checksumSha256: "old" })),
+    }, 10_000);
+
+    expect(plan.deletes).toEqual([`${prefix}/records-by-date-${"c".repeat(64)}.jsonl`, `${prefix}/manifest-${"d".repeat(64)}.json`]);
+    expect(plan.inventory.objects.map((item: { key: string }) => item.key)).toContain(backupManifest.recordArchiveKey);
+    expect(plan.inventory.objects.map((item: { key: string }) => item.key)).toContain(nextManifest.recordArchiveKey);
+    expect(plan.inventory.objects.map((item: { key: string }) => item.key)).toContain(`${prefix}/entities-${"f".repeat(64)}.jsonl.gz`);
+  });
+
+  it("falla cerrado si el manifiesto del índice no incluye los assets de rollback", () => {
+    const prefix = "indexes/v1/chilecompra";
+    const manifest = { sourceId: "chilecompra", recordArchiveKey: `${prefix}/records-new.jsonl`, rollbackManifestKey: `${prefix}/missing.json` };
+    const active = {
+      key: `${prefix}/manifest.json`,
+      size: 1,
+      checksumSha256: "active",
+      data: Buffer.from(JSON.stringify(manifest)),
+      releaseTag: "test",
+      releaseAssetName: "manifest.json",
+      r2Only: true,
+    };
+    expect(() => planR2Publication([active])).toThrow("CHILECOMPRA_INDEX_ROLLBACK_MANIFEST_MISSING");
+  });
+
   it("conserva catálogo y sólo la partición más reciente de cada fuente", () => {
     const hot = selectHotAssets([
       asset("catalog/v1/manifest.json"),
