@@ -18,18 +18,29 @@ se promueven automáticamente a verificados.
 
 El workflow .github/workflows/etl-movimientos.yml se ejecuta diariamente a las
 07:00 UTC (03:00 en Chile durante el horario de invierno) y también admite
-workflow_dispatch. Este flujo:
+workflow_dispatch. La ejecución programada es de revisión: consulta, registra
+señales y deja un artefacto; no publica por sí sola. La incorporación pública
+de nuevas señales requiere revisión y el flujo de publicación protegido. Este
+flujo:
 
 1. Recupera el último snapshot válido desde R2.
-2. Consulta en paralelo Ley Chile, Diario Oficial, Gob.cl, Prensa Presidencia
-   y Ministerio del Deporte.
-3. Detecta señales, las deduplica y materializa sólo las señales con identidad
-   estable conocida.
-4. Conserva el snapshot anterior si todas las fuentes oficiales están
+2. Consulta en paralelo fuentes primarias (Ley Chile, Diario Oficial,
+   Presidencia y ministerios) y feeds de medios con fecha y enlace, incluidos
+   Radio Universidad de Chile y Cooperativa. La prensa descubre anuncios, pero
+   no acredita por sí sola un cese legal.
+3. Registra titulares fechados como señales pendientes, conservando las que
+   aún no han sido resueltas y deduplicando por identificador estable.
+4. En revisiones posteriores conserva los pendientes y busca menciones
+   exactas del nombre en las páginas normativas consultadas. Una coincidencia
+   aparece como posible respaldo para revisión humana; no acredita por sí sola
+   que el documento sea el acto correcto ni cambia el estado automáticamente.
+   La confirmación requiere comprobar manualmente el decreto o resolución y
+   su fecha efectiva.
+5. Conserva el snapshot anterior si todas las fuentes oficiales están
    bloqueadas; el workflow falla visiblemente y deja un artefacto de diagnóstico.
-5. Valida identificadores, fuentes, estados, conteos y checksum.
-6. Publica el grupo estático movimientos para que Pages lo consuma en el
-   siguiente refresco.
+6. Valida identificadores, fuentes, estados, conteos y checksum.
+7. Publica el grupo estático movimientos para que Pages lo consuma sólo cuando
+   la ejecución tenga autorización de publicación.
 
 El flujo de Movimientos es independiente del ETL de Cámara. Un bloqueo de
 Cámara no debe impedir esta actualización.
@@ -70,3 +81,15 @@ Una fuente bloqueada no elimina el snapshot anterior. El proceso conserva los
 movimientos con identificadores estables y reconcilia señales nuevas con filas
 provisionales existentes en cada ejecución; una señal no se convierte en
 movimiento verificado sin decreto o resolución oficial.
+
+## Revisión del 30 de septiembre de 2026
+
+Se añadieron tres novedades como señales separadas del corte histórico de 46
+salidas: Sebastián Norambuena (efectiva el 30-09 según comunicado del Minvu),
+Kattia Durán (efectiva el 01-10 según información de Radio Universidad de
+Chile que cita al ministerio) y Juan Carlos Meléndez (efecto inmediato según
+comunicado del Ministerio de Economía, también reportado por El Rancagüino).
+Las tres quedan `en_confirmacion` hasta localizar y comprobar el acto
+administrativo de cese. No se suman al total histórico de 46. Ante diferencias
+entre versiones de prensa y el comunicado institucional, se conserva la
+formulación de la fuente primaria y se omiten motivos no confirmados.

@@ -40,11 +40,12 @@ parte de la otra cámara desde el snapshot válido anterior; no publica un
 archivo incompleto como si fuera una actualización total. La fecha de la
 última ejecución y la fecha del último movimiento son metadatos distintos.
 
-Las fuentes provisionales RSS autorizadas se configuran en la variable de
-entorno `MOVIMIENTOS_PROVISIONAL_SOURCES` como una lista separada por comas.
-No se guardan credenciales ni se agregan URLs de medios directamente al código:
-si una fuente no está configurada, el pipeline la reporta como ausente y no
-convierte titulares en hechos estructurados.
+Los feeds editoriales estables del pipeline se declaran junto al conector de
+Movimientos; fuentes de prensa adicionales pueden configurarse mediante
+`MOVIMIENTOS_PROVISIONAL_SOURCES` como una lista separada por comas. El parser
+requiere titulares, fecha y URL del artículo para aceptar una señal. No
+convierte titulares en salidas oficiales ni los usa para acreditar por sí solos
+un cese.
 
 La configuración operativa actual incorpora fuentes oficiales y páginas de
 prensa para detectar anuncios recientes que todavía no tienen decreto publicado:

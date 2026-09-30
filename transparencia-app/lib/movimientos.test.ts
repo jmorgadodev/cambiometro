@@ -56,16 +56,19 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
     });
   });
 
-  it("1d. incluye las dos señales recientes en el total sin mezclarlas con las 46 salidas", () => {
+  it("1d. incluye cinco señales pendientes en el total sin mezclarlas con las 46 salidas", () => {
     const signals = MOVIMIENTOS_PIPELINE_METADATA.signals ?? [];
 
     expect(MOVIMIENTOS).toHaveLength(46);
-    expect(signals).toHaveLength(2);
-    expect(MOVIMIENTOS_HOME_SUMMARY.total).toBe(48);
-    expect(MOVIMIENTOS_HOME_SUMMARY.enConfirmacion).toBe(2);
+    expect(signals).toHaveLength(5);
+    expect(MOVIMIENTOS_HOME_SUMMARY.total).toBe(51);
+    expect(MOVIMIENTOS_HOME_SUMMARY.enConfirmacion).toBe(5);
     expect(signals.map((signal) => signal.title)).toEqual(expect.arrayContaining([
       expect.stringContaining("José Bravo"),
       expect.stringContaining("Fabián Páez"),
+      expect.stringContaining("Sebastián Norambuena"),
+      expect.stringContaining("Kattia Durán"),
+      expect.stringContaining("Juan Carlos Meléndez"),
     ]));
   });
 
@@ -76,15 +79,14 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
   it("1e. la Home presenta señales en confirmación en la cronología, conservando su estado", () => {
     const items = buildEditorialMovements(MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA.signals);
 
-    expect(items[0]).toMatchObject({
-      title: expect.stringContaining("Fabián Páez"),
-      status: "EN CONFIRMACIÓN",
-      link: expect.stringContaining("/movimientos/"),
-    });
-    expect(items[1]).toMatchObject({
-      title: expect.stringContaining("José Bravo"),
-      status: "EN CONFIRMACIÓN",
-    });
+    expect(items).toHaveLength(3);
+    expect(items.map((item) => item.title)).toEqual(expect.arrayContaining([
+      expect.stringContaining("Sebastián Norambuena"),
+      expect.stringContaining("Kattia Durán"),
+      expect.stringContaining("Juan Carlos Meléndez"),
+    ]));
+    expect(items.every((item) => item.status === "EN CONFIRMACIÓN")).toBe(true);
+    expect(items[0].link).toContain("/movimientos/");
   });
 
   it("2. Eventos obligatorios del 14-08-2026 presentes (Duco/Deporte y Urrejola/Atacama) con fuentes de prensa", () => {

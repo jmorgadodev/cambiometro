@@ -64,7 +64,13 @@ if (payload.release_id === "kast-2026-exits-46-cutoff-2026-09-14" || payload.rel
   const fabianPaezSignal = payload.signals?.find((signal) => signal.signal_id === "signal-fabian-paez-2026-09-17");
   assert(fabianPaezSignal?.date === "2026-09-17" && fabianPaezSignal.status === "en_confirmacion", "Fabián Páez aparece como señal pendiente desde el 17-09-2026");
   assert(!payload.movimientos.some((movement) => /Fabián Páez/i.test(movement.saliente ?? "")), "Fabián Páez no se cuenta como salida efectiva sin respaldo primario publicado");
-  assert(payload.stats?.signals_en_confirmacion === 2, "el resumen distingue dos señales pendientes del total de 46 salidas");
+  for (const person of ["Sebastián Norambuena", "Kattia Durán", "Juan Carlos Meléndez"]) {
+    const signal = payload.signals?.find((item) => item.person_name?.includes(person));
+    assert(signal?.date === "2026-09-30" && signal.status === "en_confirmacion", `${person} queda como señal pendiente del 30-09-2026`);
+    assert(!payload.movimientos.some((movement) => String(movement.saliente ?? "").includes(person)), `${person} no se suma al corte reconciliado de 46`);
+  }
+  assert(payload.signals?.find((signal) => signal.person_name === "Kattia Durán")?.effective_date === "2026-10-01", "Kattia Durán conserva el 01-10 como fecha efectiva reportada");
+  assert(payload.stats?.signals_en_confirmacion === 5, "el resumen separa cinco señales pendientes de las 46 salidas reconciliadas");
   assert(payload.movimientos.every((movement) => movement.fuentes.every((source) => !/renunciaskast/i.test(`${source.url} ${source.medio}`))), "no se usa el agregador externo como fuente");
   assert(payload.movimientos.every((movement) => !movement.fecha || movement.fecha <= "2026-09-14"), "no se mezcla la salida posterior al corte");
   const araos = payload.movimientos.find((movement) => movement.saliente === "Rafael Araos");

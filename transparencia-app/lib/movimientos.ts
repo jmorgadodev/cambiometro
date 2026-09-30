@@ -82,10 +82,11 @@ export interface MovimientoSignal {
   signal_id: string;
   source_id: string;
   source_label: string;
-  source_tier: "official" | "provisional";
+  source_tier: "official" | "press" | "provisional";
   title: string;
   url: string | null;
   date: string | null;
+  effective_date?: string | null;
   summary: string;
   detected_at: string;
   fase: "anunciado";
@@ -95,6 +96,16 @@ export interface MovimientoSignal {
   role?: string;
   ministry?: string;
   region?: string;
+  related_sources?: Array<{
+    source_id?: string;
+    source_label?: string;
+    source_tier?: string;
+    label?: string;
+    title?: string;
+    url: string;
+    date?: string | null;
+  }>;
+  last_seen_at?: string;
 }
 
 export interface MovimientosPayload {
