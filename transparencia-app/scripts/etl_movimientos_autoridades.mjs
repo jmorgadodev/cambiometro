@@ -64,7 +64,8 @@ async function main() {
       sources: configuredSources(),
       retries: Number(process.env.MOVIMIENTOS_SOURCE_RETRIES ?? 2),
     });
-    const report = buildMovementReviewReport({ now, collected });
+    const previous = existsSync(inputPath) ? JSON.parse(await readFile(inputPath, "utf8")) : null;
+    const report = buildMovementReviewReport({ now, collected, pendingSignals: previous?.signals ?? [] });
     await writeReport(report);
     console.log(JSON.stringify({
       ok: true,

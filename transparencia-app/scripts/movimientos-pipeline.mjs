@@ -45,6 +45,30 @@ export const MOVIMIENTOS_SOURCES = Object.freeze([
     tier: "official",
     url: "https://www.minsal.cl/category/noticias/",
   },
+  {
+    id: "economia-registros",
+    label: "Ministerio de Economía, Fomento y Turismo",
+    tier: "official",
+    url: "https://www.economia.gob.cl/category/noticias-ministerio/feed/",
+  },
+  {
+    id: "midesof-registros",
+    label: "Ministerio de Desarrollo Social y Familia",
+    tier: "official",
+    url: "https://www.midesof.gob.cl/feed/",
+  },
+  {
+    id: "radio-uchile",
+    label: "Radio Universidad de Chile",
+    tier: "press",
+    url: "https://radio.uchile.cl/feed/",
+  },
+  {
+    id: "cooperativa",
+    label: "Cooperativa",
+    tier: "press",
+    url: "https://www.cooperativa.cl/noticias/site/tax/port/all/rss____1.xml",
+  },
 ]);
 
 // gob.cl sometimes applies its edge policy differently to the news path and
@@ -60,11 +84,99 @@ const GOB_CL_URL_VARIANTS = Object.freeze([
 ]);
 
 const MOVEMENT_KEYWORDS = /\b(renuncia|renunció|renuncio|nombramiento|nombra|designa|designación|asume|asumió|remueve|remoción|decreto|subrogante|cambio de gabinete|salida de)\b/i;
+const AUTHORITY_KEYWORDS = /\b(seremi|subsecretar(?:io|ia)|ministro|ministra|delegad[oa]|autoridad(?:es)?|gabinete|gobierno|secretar[ií]a regional ministerial|presidente de la rep[uú]blica)\b/i;
 
 const normalizeSignalText = (value) => String(value ?? "")
   .normalize("NFD")
   .replace(/[\u0300-\u036f]/g, "")
   .toLowerCase();
+
+function sameSignalSubject(knownSignal, evidenceSignal) {
+  const person = normalizeSignalText(knownSignal.person_name ?? "");
+  const evidenceText = normalizeSignalText(`${evidenceSignal.title ?? ""} ${evidenceSignal.summary ?? ""}`);
+  if (person.length < 8 || !evidenceText.includes(person)) return false;
+  const context = normalizeSignalText(`${knownSignal.role ?? ""} ${knownSignal.ministry ?? ""} ${knownSignal.region ?? ""}`)
+    .split(/[^a-z0-9]+/)
+    .filter((word) => word.length >= 5 && !["ministerio", "secretaria", "regional"].includes(word));
+  return context.length > 0 && context.some((word) => evidenceText.includes(word));
+}
+
+function findLegalConfirmation(left, right) {
+  const legalSourceIds = new Set(["ley-chile", "diario-oficial"]);
+  const candidates = [left, right];
+  for (const evidence of candidates) {
+    if (evidence.source_tier !== "official" || !legalSourceIds.has(evidence.source_id)) continue;
+    const pending = evidence === left ? right : left;
+    if (pending.status !== "en_confirmacion" || !pending.person_name || !sameSignalSubject(pending, evidence)) continue;
+
+    const documentText = normalizeSignalText(`${evidence.title ?? ""} ${evidence.summary ?? ""}`);
+    const person = normalizeSignalText(pending.person_name);
+    const locationOrAgencyTerms = [pending.region, pending.ministry]
+      .flatMap((value) => normalizeSignalText(value ?? "").split(/[^a-z0-9]+/))
+      .filter((word) => word.length >= 5 && !["ministerio", "secretaria", "regional"].includes(word));
+    const confirmsCessation = /\b(?:aceptase|acepta|acepto|aceptada|aceptado)\b.{0,80}\brenuncia\b|\brenuncia\b.{0,80}\b(?:aceptada|aceptase|acepto)\b|\b(?:cesa|cese|cesese|remueve|remocion)\b.{0,80}\b(?:cargo|funciones)\b/u.test(documentText);
+    if (!documentText.includes(person) || !locationOrAgencyTerms.some((word) => documentText.includes(word)) || !confirmsCessation) continue;
+
+    return {
+      source_id: evidence.source_id,
+      source_label: evidence.source_label,
+      url: evidence.url,
+      date: evidence.date,
+      title: evidence.title,
+    };
+  }
+  return null;
+}
+
+function mergeSignalCollections(...collections) {
+  const merged = [];
+  for (const signal of collections.flatMap((items) => Array.isArray(items) ? items : [])) {
+    const id = signal.signal_id ?? `signal-${sha256(`${signal.source_id ?? "source"}|${signal.url ?? ""}|${signal.title ?? ""}|${signal.date ?? ""}`).slice(0, 24)}`;
+    const index = merged.findIndex((candidate) => (
+      candidate.signal_id === id
+      || sameSignalSubject(candidate, signal)
+      || sameSignalSubject(signal, candidate)
+    ));
+    if (index === -1) {
+      merged.push({ ...signal, signal_id: id });
+      continue;
+    }
+    const prior = merged[index];
+    const evidence = [
+      ...(prior.related_sources ?? []),
+      ...(signal.related_sources ?? []),
+      ...[prior, signal].filter((item) => item.url).map((item) => ({
+        source_id: item.source_id,
+        source_label: item.source_label,
+        source_tier: item.source_tier,
+        title: item.title,
+        url: item.url,
+        date: item.date,
+      })),
+    ];
+    const seen = new Set();
+    const related_sources = evidence.filter((item) => {
+      if (!item.url || seen.has(item.url)) return false;
+      seen.add(item.url);
+      return true;
+    });
+    const verification = findLegalConfirmation(prior, signal)
+      ?? prior.verification
+      ?? signal.verification;
+    merged[index] = {
+      ...prior,
+      ...(prior.signal_id === id ? signal : {}),
+      signal_id: prior.signal_id ?? id,
+      person_name: prior.person_name ?? signal.person_name,
+      detected_at: prior.detected_at ?? signal.detected_at,
+      last_seen_at: signal.detected_at ?? prior.last_seen_at,
+      status: verification ? "verificado_oficial" : prior.status ?? signal.status,
+      ...(verification ? { verification } : {}),
+      related_sources,
+    };
+  }
+  return merged;
+}
 
 const MARIA_PAZ_RIOS_SOURCES = Object.freeze([
   {
@@ -158,6 +270,7 @@ export function classifySignalType(title) {
 
 function decodeHtml(value) {
   return String(value ?? "")
+    .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, "$1")
     .replace(/<[^>]*>/g, " ")
     .replace(/&amp;/g, "&")
     .replace(/&quot;/g, '"')
@@ -223,6 +336,11 @@ function normalizeUrl(href, baseUrl) {
   }
 }
 
+function isAuthorityMovementSignal(title, summary) {
+  const text = `${title ?? ""} ${String(summary ?? "").slice(0, 1600)}`;
+  return MOVEMENT_KEYWORDS.test(text) && AUTHORITY_KEYWORDS.test(text);
+}
+
 export function parseMovementSignals(body, source) {
   const text = String(body ?? "");
   const contentType = /json|rss|xml/i.test(source.contentType ?? "") || /^\s*[\[{]/.test(text)
@@ -241,10 +359,11 @@ export function parseMovementSignals(body, source) {
     if (Array.isArray(rows)) {
       for (const row of rows) {
         const title = decodeHtml(row.title ?? row.name ?? row.headline);
-        if (!title || !MOVEMENT_KEYWORDS.test(title)) continue;
+        const summary = decodeHtml(row.description ?? row.summary ?? "");
+        if (!title || !isAuthorityMovementSignal(title, summary)) continue;
         const url = normalizeUrl(row.link ?? row.url ?? source.url, source.url);
         const date = normalizePublishedDate(row.date ?? row.pubDate ?? row.published);
-        items.push({ title, url, date, summary: decodeHtml(row.description ?? row.summary ?? "") });
+        items.push({ title, url, date, summary });
       }
     }
     if (!parsed && /xml|rss/i.test(source.contentType ?? "")) {
@@ -252,12 +371,13 @@ export function parseMovementSignals(body, source) {
         const block = item[1];
         const readTag = (tag) => decodeHtml(block.match(new RegExp(`<${tag}[^>]*>([\\s\\S]*?)<\\/${tag}>`, "i"))?.[1] ?? "");
         const title = readTag("title");
-        if (!title || !MOVEMENT_KEYWORDS.test(title)) continue;
+        const summary = readTag("description");
+        if (!title || !isAuthorityMovementSignal(title, summary)) continue;
         items.push({
           title,
           url: normalizeUrl(readTag("link") || source.url, source.url),
           date: normalizePublishedDate(readTag("pubDate") || readTag("date")),
-          summary: readTag("description"),
+          summary,
         });
       }
     }
@@ -265,7 +385,7 @@ export function parseMovementSignals(body, source) {
     const anchorPattern = /<a\b[^>]*href=["']([^"']+)["'][^>]*>([\s\S]*?)<\/a>/gi;
     for (const match of text.matchAll(anchorPattern)) {
       const title = decodeHtml(match[2]);
-      if (!title || !MOVEMENT_KEYWORDS.test(title)) continue;
+      if (!title || !isAuthorityMovementSignal(title, "")) continue;
       items.push({ title, url: normalizeUrl(match[1], source.url), date: null, summary: "" });
     }
 
@@ -276,7 +396,7 @@ export function parseMovementSignals(body, source) {
       || readHtmlMeta(text, "name", "twitter:title")
       || decodeHtml(text.match(/<title\b[^>]*>([\s\S]*?)<\/title>/i)?.[1] ?? "");
     const metaSummary = readHtmlMeta(text, "name", "description") || readHtmlMeta(text, "property", "og:description");
-    if (metaTitle && MOVEMENT_KEYWORDS.test(`${metaTitle} ${metaSummary}`)) {
+    if (metaTitle && isAuthorityMovementSignal(metaTitle, metaSummary)) {
       items.push({
         title: metaTitle,
         url: source.url,
@@ -434,13 +554,35 @@ export async function collectMovementSources({ sources = MOVIMIENTOS_SOURCES, fe
   };
 }
 
-export function buildMovementReviewReport({ now = new Date().toISOString(), collected }) {
+export function buildMovementReviewReport({ now = new Date().toISOString(), collected, pendingSignals = [] }) {
   const sources = (collected?.results ?? []).map((source) => {
     const summary = { ...source };
     delete summary.signals;
     return summary;
   });
   const signals = collected?.signals ?? [];
+  const openSignals = mergeSignalCollections(pendingSignals, signals)
+    .filter((signal) => signal.status === "en_confirmacion")
+    .slice(-250);
+  const legalSourceIds = new Set(["ley-chile", "diario-oficial"]);
+  const legalEvidence = signals.filter((signal) => legalSourceIds.has(signal.source_id));
+  const legalFollowups = openSignals.flatMap((signal) => {
+    const person = normalizeSignalText(signal.person_name ?? "");
+    if (person.length < 8) return [];
+    return legalEvidence
+      .filter((evidence) => sameSignalSubject(signal, evidence))
+      .map((evidence) => ({
+        signal_id: signal.signal_id,
+        person_name: signal.person_name,
+        source_id: evidence.source_id,
+        source_label: evidence.source_label,
+        title: evidence.title,
+        url: evidence.url,
+        date: evidence.date,
+        requires_manual_review: true,
+        status: "posible_respaldo_normativo",
+      }));
+  });
   const hasOfficialSource = collected?.hasOfficialSource === true;
   return {
     pipeline: "etl_movimientos_autoridades",
@@ -453,6 +595,8 @@ export function buildMovementReviewReport({ now = new Date().toISOString(), coll
     sources,
     signal_count: signals.length,
     signals,
+    pending_signals: openSignals,
+    legal_followups: legalFollowups,
   };
 }
 
@@ -778,6 +922,12 @@ export function buildMovementPayload(previous, { now = new Date().toISOString(),
     return { ...enriched, id };
   });
   const movimientos = materializeKnownSignals(movimientosBase, signals, now);
+  const retainedSignals = mergeSignalCollections(previous.signals, signals)
+    .filter((signal) => ["en_confirmacion", "verificado_oficial"].includes(signal.status))
+    .slice(-250);
+  const pendingSignalCount = retainedSignals.filter((signal) => signal.status === "en_confirmacion").length;
+  const verifiedSignalCount = retainedSignals.filter((signal) => signal.status === "verificado_oficial").length;
+  const backedMovementCount = movimientos.filter((movement) => ["verificado", "verificado_oficial", "corroborado"].includes(movement.estado)).length;
   const lastEventDate = movimientos.map((movement) => movement.fecha).filter(Boolean).sort().at(-1) ?? null;
   const sourceHealth = sourceResults.map((source) => Object.fromEntries(
     Object.entries(source).filter(([key]) => key !== "signals"),
@@ -795,18 +945,21 @@ export function buildMovementPayload(previous, { now = new Date().toISOString(),
     frecuencia_utc: "07:00 UTC",
     conectores: buildConnectorMetadata(previous.conectores, sourceResults, now),
     source_health: sourceHealth,
-    signals: signals.slice(0, 250),
+    signals: retainedSignals,
     stats: {
       ...(previous.stats ?? {}),
       total_movimientos: movimientos.length,
-    verificados: movimientos.filter((movement) => ["verificado", "verificado_oficial"].includes(movement.estado)).length,
+      total_eventos_publicados: movimientos.length + retainedSignals.length,
+      eventos_con_respaldo: backedMovementCount + verifiedSignalCount,
+      verificados: movimientos.filter((movement) => ["verificado", "verificado_oficial"].includes(movement.estado)).length,
       corroborados: movimientos.filter((movement) => movement.estado === "corroborado").length,
-      en_confirmacion: movimientos.filter((movement) => movement.estado === "en_confirmacion").length,
+      en_confirmacion: movimientos.filter((movement) => movement.estado === "en_confirmacion").length + pendingSignalCount,
       ultimos_7_dias: movimientos.filter((movement) => {
         const eventMs = Date.parse(`${movement.fecha}T12:00:00Z`);
         return Number.isFinite(eventMs) && eventMs <= nowMs && nowMs - eventMs <= 7 * 86_400_000;
       }).length,
-      signals_en_confirmacion: signals.length,
+      signals_en_confirmacion: pendingSignalCount,
+      signals_verificadas_oficialmente: verifiedSignalCount,
     },
     movimientos,
   };

@@ -21,6 +21,8 @@ requireText(pagesRefresh, "github.event_name == 'workflow_run' && github.event.w
 requireText(freshness, "STATIC_RELEASE_WAIT_MS", "ETL freshness wait configuration");
 requireText(movementsWorkflow, "NODE_OPTIONS: \"--use-system-ca\"", "Movimientos TLS system CA configuration");
 requireText(movementsWorkflow, "NODE_EXTRA_CA_CERTS: ${{ github.workspace }}/transparencia-app/config/certs/sectigo-public-server-authentication-ca-ov-r36.pem", "Movimientos Sectigo intermediate certificate");
+requireText(movementsWorkflow, 'MOVIMIENTOS_RELEASE_APPROVED: "1"', "Movimientos scheduled publication after ETL validation");
+requireText(movementsWorkflow, "steps.movimientos_etl.outputs.publish == 'true'", "Movimientos publication requires a successful validated ETL report");
 requireText(worker, "CAMBIOMETRO_CONFIRM_CUTOVER: ${{ inputs.confirmation }}", "Worker promotion confirmation input");
 requireText(worker, 'test "$CAMBIOMETRO_CONFIRM_CUTOVER" = "CAMBIOMETRO_CONFIRM_CUTOVER"', "Worker promotion confirmation check");
 requireText(domain, 'test -n "$UPTIME_TOKEN"', "DNS cutover uptime token check");

@@ -82,19 +82,37 @@ export interface MovimientoSignal {
   signal_id: string;
   source_id: string;
   source_label: string;
-  source_tier: "official" | "provisional";
+  source_tier: "official" | "press" | "provisional";
   title: string;
   url: string | null;
   date: string | null;
+  effective_date?: string | null;
   summary: string;
   detected_at: string;
   fase: "anunciado";
-  status: "en_confirmacion";
+  status: "en_confirmacion" | "verificado_oficial";
   tipo: MovimientoTipo;
   person_name?: string;
   role?: string;
   ministry?: string;
   region?: string;
+  related_sources?: Array<{
+    source_id?: string;
+    source_label?: string;
+    source_tier?: string;
+    label?: string;
+    title?: string;
+    url: string;
+    date?: string | null;
+  }>;
+  verification?: {
+    source_id: "ley-chile" | "diario-oficial";
+    source_label?: string;
+    url: string | null;
+    date: string | null;
+    title: string;
+  };
+  last_seen_at?: string;
 }
 
 export interface MovimientosPayload {
@@ -289,21 +307,24 @@ const movimientosGobierno = MOVIMIENTOS.filter((movement) => movement.fecha >= M
 const esVerificado = (movement: Movimiento) => ["verificado", "verificado_oficial", "corroborado"].includes(movement.estado);
 const esRenuncia = (movement: Movimiento) => movement.tipo_evento === "renuncia" || movement.tipo === "renuncia";
 const fechaComoDiaUtc = (value: string) => Date.parse(`${value.slice(0, 10)}T00:00:00Z`);
-const ultimoEvento = movimientosGobierno.reduce((latest, movement) => movement.fecha > latest ? movement.fecha : latest, "");
+const ultimoEvento = [
+  ...movimientosGobierno.map((movement) => movement.fecha),
+  ...(payload.signals ?? []).map((signal) => signal.effective_date ?? signal.date ?? ""),
+].filter(Boolean).reduce((latest, date) => date > latest ? date : latest, "");
 const ultimoCambioEfectivo = movimientosGobierno
   .filter(esVerificado)
   .reduce((latest, movement) => movement.fecha > latest ? movement.fecha : latest, "");
 const ultimoCorte = payload.last_run?.slice(0, 10) ?? ultimoEvento;
-const diasSinCambios = Number.isFinite(fechaComoDiaUtc(ultimoCorte)) && Number.isFinite(fechaComoDiaUtc(ultimoCambioEfectivo))
-  ? Math.max(0, Math.round((fechaComoDiaUtc(ultimoCorte) - fechaComoDiaUtc(ultimoCambioEfectivo)) / 86_400_000))
+const diasSinCambios = Number.isFinite(fechaComoDiaUtc(ultimoCorte)) && Number.isFinite(fechaComoDiaUtc(ultimoEvento))
+  ? Math.max(0, Math.round((fechaComoDiaUtc(ultimoCorte) - fechaComoDiaUtc(ultimoEvento)) / 86_400_000))
   : 0;
 
 export const MOVIMIENTOS_HOME_SUMMARY = {
   desde: MOVIMIENTOS_GOBIERNO_DESDE,
   total: movimientosGobierno.length + (payload.signals ?? []).length,
-  renuncias: movimientosGobierno.filter(esRenuncia).length,
-  verificados: movimientosGobierno.filter(esVerificado).length,
-  enConfirmacion: movimientosGobierno.filter((movement) => movement.estado === "en_confirmacion").length + (payload.signals ?? []).length,
+  renuncias: movimientosGobierno.filter(esRenuncia).length + (payload.signals ?? []).filter((signal) => signal.tipo === "renuncia").length,
+  verificados: movimientosGobierno.filter(esVerificado).length + (payload.signals ?? []).filter((signal) => signal.status === "verificado_oficial").length,
+  enConfirmacion: movimientosGobierno.filter((movement) => movement.estado === "en_confirmacion").length + (payload.signals ?? []).filter((signal) => signal.status === "en_confirmacion").length,
   ultimoEvento,
   ultimoCambioEfectivo,
   ultimoCorte,

@@ -55,16 +55,90 @@
       "role": "Seremi de Energía",
       "ministry": "Ministerio de Energía",
       "region": "Coquimbo"
+    },
+    {
+      "signal_id": "signal-sebastian-norambuena-2026-09-30",
+      "source_id": "minvu-comunicado",
+      "source_label": "Ministerio de Vivienda y Urbanismo",
+      "source_tier": "official",
+      "title": "Minvu informa la renuncia de Sebastián Norambuena, efectiva el 30 de septiembre",
+      "url": "https://www.minvu.gob.cl/noticia/declaracion-publica-30-de-septiembre-2026/",
+      "date": "2026-09-30",
+      "effective_date": "2026-09-30",
+      "summary": "El Minvu informó que presentó su renuncia voluntaria, efectiva desde el 30 de septiembre, y que Mauricio Bottner ejercerá la subrogancia. El acto administrativo de cese aún debe localizarse. La explicación atribuida por prensa al ministro no se incorpora como motivo oficial porque el comunicado no la establece.",
+      "related_sources": [
+        {
+          "label": "T13",
+          "url": "https://www.t13.cl/noticia/politica/los-motivos-tras-las-salidas-seremis-vivienda-desarrollo-social-30-9-2026",
+          "date": "2026-09-30"
+        }
+      ],
+      "detected_at": "2026-09-30T22:07:04.000Z",
+      "fase": "anunciado",
+      "status": "en_confirmacion",
+      "tipo": "renuncia",
+      "person_name": "Sebastián Norambuena",
+      "role": "Seremi de Vivienda y Urbanismo",
+      "ministry": "Ministerio de Vivienda y Urbanismo",
+      "region": "Metropolitana"
+    },
+    {
+      "signal_id": "signal-kattia-duran-2026-09-30",
+      "source_id": "radio-uchile",
+      "source_label": "Radio Universidad de Chile",
+      "source_tier": "press",
+      "title": "Kattia Durán renuncia a la Seremi de Desarrollo Social de la Región Metropolitana",
+      "url": "https://radio.uchile.cl/2026/09/30/por-razones-familiares-renuncia-seremi-de-desarrollo-social-de-la-rm-kattia-duran/",
+      "date": "2026-09-30",
+      "effective_date": "2026-10-01",
+      "summary": "Radio Universidad de Chile informa, citando un comunicado del Ministerio de Desarrollo Social y Familia, que la renuncia responde a motivos familiares y será efectiva el 1 de octubre. La resolución o acto administrativo de cese queda pendiente de verificación.",
+      "detected_at": "2026-09-30T22:07:04.000Z",
+      "fase": "anunciado",
+      "status": "en_confirmacion",
+      "tipo": "renuncia",
+      "person_name": "Kattia Durán",
+      "role": "Seremi de Desarrollo Social y Familia",
+      "ministry": "Ministerio de Desarrollo Social y Familia",
+      "region": "Metropolitana"
+    },
+    {
+      "signal_id": "signal-juan-carlos-melendez-2026-09-30",
+      "source_id": "economia-registros",
+      "source_label": "Ministerio de Economía, Fomento y Turismo",
+      "source_tier": "official",
+      "title": "Juan Carlos Meléndez presenta su renuncia como Seremi de Economía de O’Higgins",
+      "url": "https://www.economia.gob.cl/2026/09/30/comunicado-de-prensa-2.htm",
+      "date": "2026-09-30",
+      "effective_date": "2026-09-30",
+      "summary": "El Ministerio de Economía comunicó que presentó la renuncia con efecto inmediato y que Sebastián Vargas asumirá el 1 de octubre. Se registra como señal pendiente hasta localizar y verificar el acto administrativo de cese.",
+      "related_sources": [
+        {
+          "label": "El Rancagüino",
+          "url": "https://www.elrancaguino.cl/2026/09/30/seremi-de-economia-en-ohiggins-renuncia-al-cargo/",
+          "date": "2026-09-30"
+        }
+      ],
+      "detected_at": "2026-09-30T22:07:04.000Z",
+      "fase": "anunciado",
+      "status": "en_confirmacion",
+      "tipo": "renuncia",
+      "person_name": "Juan Carlos Meléndez Santelices",
+      "role": "Seremi de Economía",
+      "ministry": "Ministerio de Economía, Fomento y Turismo",
+      "region": "O’Higgins"
     }
   ],
   "stats": {
     "total_movimientos": 46,
+    "total_eventos_publicados": 51,
+    "eventos_con_respaldo": 46,
     "verificados": 11,
     "corroborados": 35,
-    "en_confirmacion": 0,
+    "en_confirmacion": 5,
     "con_reemplazo": 26,
     "reemplazo_no_informado": 20,
-    "signals_en_confirmacion": 2,
+    "signals_en_confirmacion": 5,
+    "signals_verificadas_oficialmente": 0,
     "target_categories": "{\"ministers\":3,\"subsecretaries\":6,\"seremis\":36,\"delegados\":1}"
   },
   "movimientos": [
@@ -2278,5 +2352,5 @@
       "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     }
   ],
-  "checksum_sha256": "d13f5601a427e26784dc923d23ebe27e9c691dfc41a216303e96e070eba5323b"
+  "checksum_sha256": "d181b141bd2d461530617451952846335a0829db6110e0897c2d4fb302f82a14"
 }

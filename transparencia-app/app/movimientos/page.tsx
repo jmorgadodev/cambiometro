@@ -94,6 +94,8 @@ function MovimientosContent() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const señalesPendientes = MOVIMIENTOS_PIPELINE_METADATA.signals;
+  const señalesEnConfirmacion = señalesPendientes.filter((signal) => signal.status === "en_confirmacion");
+  const señalesVerificadas = señalesPendientes.filter((signal) => signal.status === "verificado_oficial");
 
   // Estados de filtrado sincronizados con URL
   const [filtroTipo, setFiltroTipo] = useState<MovimientoTipo | "todos">(() => {
@@ -219,7 +221,8 @@ function MovimientosContent() {
 
   const señalesFiltradas = useMemo(() => señalesPendientes.filter((signal) => {
     if (filtroTipo !== "todos" && signal.tipo !== filtroTipo) return false;
-    if (filtroEstado === "verificado") return false;
+    if (filtroEstado === "verificado" && signal.status !== "verificado_oficial") return false;
+    if (filtroEstado === "en_confirmacion" && signal.status !== "en_confirmacion") return false;
     if (filtroMinisterio !== "todos" && signal.ministry !== filtroMinisterio) return false;
     if (filtroRegion !== "todos" && signal.region !== filtroRegion) return false;
     if (filtroMotivo !== "todos" && filtroMotivo !== "Renuncia pedida por el Gobierno") return false;
@@ -272,7 +275,6 @@ function MovimientosContent() {
     totalVerificados,
     totalEnConfirmacion,
     ultimaPublicacionTexto,
-    senalesEnConfirmacion,
   } = useMemo(() => {
     const enGobierno = MOVIMIENTOS.filter((m) => m.fecha >= "2026-03-11");
     const totalGob = enGobierno.length;
@@ -319,7 +321,7 @@ function MovimientosContent() {
       promedioRotacion = (diasTranscurridos / totalGob).toFixed(1).replace(".", ",");
     }
 
-    const verificados = MOVIMIENTOS.filter(esMovimientoRespaldado).length;
+    const verificados = MOVIMIENTOS.filter(esMovimientoRespaldado).length + señalesVerificadas.length;
     const enConfirmacion = MOVIMIENTOS.filter((m) => m.estado === "en_confirmacion").length;
     const ultimaPublicacion = latestMovementPublicationDate(MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA.signals);
     const ultimaPublicacionDate = ultimaPublicacion ? new Date(`${ultimaPublicacion}T12:00:00Z`) : null;
@@ -329,18 +331,17 @@ function MovimientosContent() {
 
     return {
       totalCambiosGobierno: totalGob + señalesPendientes.length,
-      totalSalidas: salidas,
-      desgloseGobierno: `${totalGob} salidas revisadas · ${señalesPendientes.length} en confirmación`,
+      totalSalidas: salidas + señalesPendientes.filter((signal) => signal.tipo === "renuncia").length,
+      desgloseGobierno: `${verificados} respaldados · ${señalesEnConfirmacion.length} en confirmación`,
       ultFecha: maxFecha,
       ultFechaFormateada: fechaTxt,
       haceTexto: haceTxt,
       diasEntreCambios: promedioRotacion,
       totalVerificados: verificados,
-      totalEnConfirmacion: enConfirmacion,
+      totalEnConfirmacion: enConfirmacion + señalesEnConfirmacion.length,
       ultimaPublicacionTexto,
-      senalesEnConfirmacion: señalesPendientes.length,
     };
-  }, [nowMs, señalesPendientes.length]);
+  }, [nowMs, señalesPendientes, señalesEnConfirmacion.length, señalesVerificadas.length]);
 
   // Botón Compartir reactivo para Hero y Toolbar (URL con filtros activos + share nativo)
   const handleShare = useCallback(() => {
@@ -485,7 +486,7 @@ function MovimientosContent() {
             <div><dt>Última actualización pública</dt><dd style={{ margin: "0.25rem 0 0", fontWeight: 700 }}>{ultimaPublicacionTexto}</dd></div>
             <div><dt>Última salida documentada</dt><dd style={{ margin: "0.25rem 0 0", fontWeight: 700 }}>{ultFechaFormateada}</dd></div>
             <div><dt>Con respaldo documental</dt><dd style={{ margin: "0.25rem 0 0", fontWeight: 700 }}>{totalVerificados}</dd></div>
-            <div><dt>En confirmación</dt><dd style={{ margin: "0.25rem 0 0", fontWeight: 700 }}>{totalEnConfirmacion + senalesEnConfirmacion}</dd></div>
+            <div><dt>En confirmación</dt><dd style={{ margin: "0.25rem 0 0", fontWeight: 700 }}>{totalEnConfirmacion}</dd></div>
           </dl>
         </div>
       </section>
@@ -558,7 +559,7 @@ function MovimientosContent() {
             >
               <option value="todos">Estado: Todos ({MOVIMIENTOS.length + señalesPendientes.length})</option>
               <option value="verificado">Respaldado públicamente ({totalVerificados})</option>
-              <option value="en_confirmacion">En confirmación ({totalEnConfirmacion + senalesEnConfirmacion})</option>
+              <option value="en_confirmacion">En confirmación ({totalEnConfirmacion})</option>
             </select>
 
             {/* Filtro Ministerio */}
@@ -896,7 +897,7 @@ function MovimientosContent() {
                         return (
                           <article
                             key={entry.id}
-                            style={{ position: "relative", background: "var(--surface-2)", border: "1px solid var(--warn)", borderRadius: 10, padding: "1.25rem 1.4rem", boxShadow: "var(--card-shadow)", display: "flex", flexDirection: "column", gap: "0.6rem" }}
+                            style={{ position: "relative", background: "var(--surface-2)", border: `1px solid ${signal.status === "verificado_oficial" ? "var(--ok)" : "var(--warn)"}`, borderRadius: 10, padding: "1.25rem 1.4rem", boxShadow: "var(--card-shadow)", display: "flex", flexDirection: "column", gap: "0.6rem" }}
                           >
                             <div aria-hidden="true" style={{ position: "absolute", left: "-2.25rem", top: "1.2rem", width: 24, height: 24, borderRadius: "50%", background: "var(--surface)", border: `3px solid ${typeColor}`, display: "flex", alignItems: "center", justifyContent: "center", fontSize: "0.65rem", zIndex: 2, boxShadow: "0 0 0 3px var(--bg)" }}>⚠</div>
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5rem" }}>
@@ -904,7 +905,11 @@ function MovimientosContent() {
                                 <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--text-muted)" }}>{signal.date ? formatFechaCorta(signal.date) : "Fecha no informada"}</span>
                                 <span style={{ fontSize: "0.72rem", fontWeight: 700, padding: "0.15rem 0.5rem", borderRadius: 4, background: "var(--surface)", color: typeColor, border: `1px solid ${typeColor}` }}>Fecha de publicación</span>
                               </div>
+                            {signal.status === "verificado_oficial" ? (
+                              <span className="badge badge-ok" style={{ fontSize: "0.72rem" }}>✓ Verificado con acto oficial</span>
+                            ) : (
                               <span className="badge badge-warn" style={{ fontSize: "0.72rem" }}>En confirmación</span>
+                            )}
                             </div>
                             <div>
                               <h3 style={{ fontSize: "1.08rem", fontWeight: 800, margin: "0 0 0.15rem", color: "var(--text-1)" }}>{signal.person_name ?? signal.title}</h3>
@@ -914,8 +919,13 @@ function MovimientosContent() {
                             </div>
                             <p style={{ fontSize: "0.88rem", color: "var(--text-2)", lineHeight: 1.5, margin: 0 }}>{signal.summary}</p>
                             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5rem", borderTop: "1px solid var(--border)", paddingTop: "0.6rem" }}>
-                              <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>{signal.source_label} · La fecha efectiva de salida está pendiente de confirmación.</span>
+                              <span style={{ fontSize: "0.75rem", color: "var(--text-muted)" }}>
+                                {signal.status === "verificado_oficial"
+                                  ? `${signal.verification?.source_label ?? "Acto oficial"} · Confirmado${signal.verification?.date ? ` el ${formatFechaCorta(signal.verification.date)}` : ""}.`
+                                  : `${signal.source_label} · La fecha efectiva de salida está pendiente de confirmación.`}
+                              </span>
                               {signal.url && <a href={signal.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", fontSize: "0.78rem", fontWeight: 700 }}>Ver fuente ↗</a>}
+                              {signal.verification?.url && <a href={signal.verification.url} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", fontSize: "0.78rem", fontWeight: 700 }}>Ver acto oficial ↗</a>}
                             </div>
                           </article>
                         );

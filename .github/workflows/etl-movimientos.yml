@@ -75,13 +75,14 @@ jobs:
             cp data/movimientos.json data/movimientos.previous.json
           fi
 
-      - name: Revisar fuentes de Movimientos sin publicar
+      - name: Revisar y validar novedades de Movimientos
         if: inputs.repair_reconciled != true
         id: movimientos_etl
         working-directory: transparencia-app
         env:
-          # El cron revisa fuentes y genera un artefacto; sólo publica con un release aprobado.
-          MOVIMIENTOS_RELEASE_APPROVED: "0"
+          # Las señales se publican sólo en estado en_confirmacion; nunca se
+          # convierten automáticamente en salidas oficiales sin acto legal.
+          MOVIMIENTOS_RELEASE_APPROVED: "1"
           MOVIMIENTOS_RUN_REPORT: data/generated/movimientos-run.json
           MOVIMIENTOS_INPUT: data/movimientos.previous.json
           MOVIMIENTOS_PROVISIONAL_SOURCES: ${{ vars.MOVIMIENTOS_PROVISIONAL_SOURCES }}

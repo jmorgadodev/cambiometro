@@ -50,22 +50,26 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
     expect(MOVIMIENTOS_HOME_SUMMARY).toMatchObject({
       desde,
       total: delGobierno.length + (MOVIMIENTOS_PIPELINE_METADATA.signals ?? []).length,
-      renuncias: renuncias.length,
+      renuncias: renuncias.length + (MOVIMIENTOS_PIPELINE_METADATA.signals ?? []).filter((signal) => signal.tipo === "renuncia").length,
       verificados: verificados.length,
-      enConfirmacion: enConfirmacion.length + (MOVIMIENTOS_PIPELINE_METADATA.signals ?? []).length,
+      enConfirmacion: enConfirmacion.length + (MOVIMIENTOS_PIPELINE_METADATA.signals ?? []).filter((signal) => signal.status === "en_confirmacion").length,
     });
   });
 
-  it("1d. incluye las dos señales recientes en el total sin mezclarlas con las 46 salidas", () => {
+  it("1d. cuenta los cinco anuncios como eventos en confirmación, separados de las 46 salidas respaldadas", () => {
     const signals = MOVIMIENTOS_PIPELINE_METADATA.signals ?? [];
 
     expect(MOVIMIENTOS).toHaveLength(46);
-    expect(signals).toHaveLength(2);
-    expect(MOVIMIENTOS_HOME_SUMMARY.total).toBe(48);
-    expect(MOVIMIENTOS_HOME_SUMMARY.enConfirmacion).toBe(2);
+    expect(signals).toHaveLength(5);
+    expect(MOVIMIENTOS_HOME_SUMMARY.total).toBe(51);
+    expect(MOVIMIENTOS_HOME_SUMMARY.enConfirmacion).toBe(5);
+    expect(MOVIMIENTOS_HOME_SUMMARY.renuncias).toBeGreaterThan(5);
     expect(signals.map((signal) => signal.title)).toEqual(expect.arrayContaining([
       expect.stringContaining("José Bravo"),
       expect.stringContaining("Fabián Páez"),
+      expect.stringContaining("Sebastián Norambuena"),
+      expect.stringContaining("Kattia Durán"),
+      expect.stringContaining("Juan Carlos Meléndez"),
     ]));
   });
 
@@ -73,18 +77,50 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
     expect(MOVIMIENTOS_HOME_SUMMARY.ultimoCambioEfectivo).toBe("2026-09-14");
   });
 
+  it("reinicia los días sin novedades al registrar un anuncio reciente en confirmación", () => {
+    expect(MOVIMIENTOS_HOME_SUMMARY.ultimoEvento).toBe("2026-10-01");
+    expect(MOVIMIENTOS_HOME_SUMMARY.diasSinCambios).toBe(0);
+  });
+
   it("1e. la Home presenta señales en confirmación en la cronología, conservando su estado", () => {
     const items = buildEditorialMovements(MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA.signals);
 
-    expect(items[0]).toMatchObject({
-      title: expect.stringContaining("Fabián Páez"),
-      status: "EN CONFIRMACIÓN",
-      link: expect.stringContaining("/movimientos/"),
-    });
-    expect(items[1]).toMatchObject({
-      title: expect.stringContaining("José Bravo"),
-      status: "EN CONFIRMACIÓN",
-    });
+    expect(items).toHaveLength(3);
+    expect(items.map((item) => item.title)).toEqual(expect.arrayContaining([
+      expect.stringContaining("Sebastián Norambuena"),
+      expect.stringContaining("Kattia Durán"),
+      expect.stringContaining("Juan Carlos Meléndez"),
+    ]));
+    expect(items.every((item) => item.status === "EN CONFIRMACIÓN")).toBe(true);
+    expect(items[0].link).toContain("/movimientos/");
+  });
+
+  it("1g. cuando aparece el acto legal, el mismo evento pasa a verificado oficial", () => {
+    const [item] = buildEditorialMovements([], [{
+      signal_id: "signal-kattia-duran-2026-09-30",
+      source_id: "radio-uchile",
+      source_label: "Radio Universidad de Chile",
+      source_tier: "press",
+      title: "Kattia Durán deja la Seremi",
+      url: "https://radio.uchile.cl/noticia-kattia",
+      date: "2026-09-30",
+      summary: "Renuncia informada por la prensa.",
+      detected_at: "2026-09-30T07:00:00.000Z",
+      fase: "anunciado",
+      status: "verificado_oficial",
+      tipo: "renuncia",
+      person_name: "Kattia Durán",
+      verification: {
+        source_id: "diario-oficial",
+        source_label: "Diario Oficial",
+        url: "https://www.diariooficial.interior.gob.cl/publicaciones/2026/10/01/",
+        date: "2026-10-01",
+        title: "Decreto que acepta renuncia",
+      },
+    }]);
+
+    expect(item).toMatchObject({ title: "Renuncia de Kattia Durán", status: "VERIFICADO OFICIAL" });
+    expect(item.link).toContain("estado=verificado");
   });
 
   it("2. Eventos obligatorios del 14-08-2026 presentes (Duco/Deporte y Urrejola/Atacama) con fuentes de prensa", () => {

@@ -6,6 +6,7 @@ import {
   calculateMovimientoEstado,
   collectMovementSources,
   materializeKnownSignals,
+  MOVIMIENTOS_SOURCES,
   normalizeMovementPayload,
   parseMovementSignals,
   sha256,
@@ -54,7 +55,10 @@ describe("pipeline automático de movimientos", () => {
       status: "en_confirmacion",
       tipo: "renuncia",
     });
-    expect(publishedMovements.stats.signals_en_confirmacion).toBe(2);
+    expect(publishedMovements.stats.total_eventos_publicados).toBe(51);
+    expect(publishedMovements.stats.eventos_con_respaldo).toBe(46);
+    expect(publishedMovements.stats.en_confirmacion).toBe(5);
+    expect(publishedMovements.stats.signals_en_confirmacion).toBe(5);
     expect(validateMovementPayload(publishedMovements)).toBe(publishedMovements);
   });
 
@@ -74,8 +78,208 @@ describe("pipeline automático de movimientos", () => {
       url: "https://www.chilevision.cl/noticias/nacional/seremi-de-energia-de-coquimbo-renuncia-tras-observaciones-de-contraloria-por-su-experiencia-profesional/",
     });
     expect(signal.summary).toContain("falta localizar el comunicado primario enlazable");
-    expect(publishedMovements.stats.signals_en_confirmacion).toBe(2);
+    expect(publishedMovements.stats.signals_en_confirmacion).toBe(5);
     expect(validateMovementPayload(publishedMovements)).toBe(publishedMovements);
+  });
+
+  it("registra las tres novedades del 30-09 como señales pendientes, separadas del corte oficial", () => {
+    const novedades = [
+      { name: "Sebastián Norambuena", source: "Ministerio de Vivienda y Urbanismo", effectiveDate: "2026-09-30" },
+      { name: "Kattia Durán", source: "Radio Universidad de Chile", effectiveDate: "2026-10-01" },
+      { name: "Juan Carlos Meléndez Santelices", source: "Ministerio de Economía, Fomento y Turismo", effectiveDate: "2026-09-30" },
+    ];
+
+    expect(publishedMovements.movimientos).toHaveLength(46);
+    for (const item of novedades) {
+      const signal = publishedMovements.signals?.find((entry) => entry.person_name === item.name);
+      expect(signal).toMatchObject({
+        date: "2026-09-30",
+        effective_date: item.effectiveDate,
+        fase: "anunciado",
+        status: "en_confirmacion",
+        tipo: "renuncia",
+        source_label: item.source,
+      });
+      expect(signal.url).toMatch(/^https:\/\//);
+    }
+    expect(publishedMovements.stats.signals_en_confirmacion).toBe(5);
+    expect(validateMovementPayload(publishedMovements)).toBe(publishedMovements);
+  });
+
+  it("monitorea prensa confiable y páginas institucionales para captar señales y su respaldo", () => {
+    expect(MOVIMIENTOS_SOURCES).toEqual(expect.arrayContaining([
+      expect.objectContaining({ id: "radio-uchile", tier: "press", url: "https://radio.uchile.cl/feed/" }),
+      expect.objectContaining({ id: "cooperativa", tier: "press", url: "https://www.cooperativa.cl/noticias/site/tax/port/all/rss____1.xml" }),
+      expect.objectContaining({ id: "midesof-registros", tier: "official", url: "https://www.midesof.gob.cl/feed/" }),
+      expect.objectContaining({ id: "economia-registros", tier: "official", url: "https://www.economia.gob.cl/category/noticias-ministerio/feed/" }),
+    ]));
+  });
+
+  it("lee titulares fechados de RSS y mantiene las señales en confirmación", () => {
+    const signals = parseMovementSignals(`<?xml version="1.0"?><rss><channel><item><title><![CDATA[Comunicado de prensa]]></title><link>https://radio.uchile.cl/noticia-kattia</link><pubDate>Wed, 30 Sep 2026 15:44:00 +0000</pubDate><description><![CDATA[El Ministerio informa que la Seremi Kattia Durán presenta su renuncia efectiva el 1 de octubre.]]></description></item><item><title><![CDATA[Trump califica una retirada como el fin de una incursión]]></title><link>https://radio.uchile.cl/noticia-ruido</link><pubDate>Wed, 30 Sep 2026 15:44:00 +0000</pubDate><description><![CDATA[La nota menciona la renuncia de un funcionario extranjero.]]></description></item></channel></rss>`, {
+      id: "radio-uchile",
+      url: "https://radio.uchile.cl/feed/",
+      contentType: "application/rss+xml",
+    });
+    expect(signals).toEqual([expect.objectContaining({
+      title: "Comunicado de prensa",
+      url: "https://radio.uchile.cl/noticia-kattia",
+      date: "2026-09-30",
+      status: "en_confirmacion",
+      fase: "anunciado",
+      summary: "El Ministerio informa que la Seremi Kattia Durán presenta su renuncia efectiva el 1 de octubre.",
+    })]);
+  });
+
+  it("conserva pendientes entre revisiones y sólo propone coincidencias normativas exactas para revisión", () => {
+    const pending = {
+      signal_id: "signal-person",
+      person_name: "Kattia Durán",
+      role: "Seremi de Desarrollo Social y Familia",
+      status: "en_confirmacion",
+      title: "Kattia Durán presenta su renuncia",
+    };
+    const legalEvidence = {
+      signal_id: "signal-legal",
+      source_id: "diario-oficial",
+      source_label: "Diario Oficial",
+      title: "Decreto de cese de Kattia Durán Álvarez",
+      summary: "Se acepta la renuncia de la Seremi de Desarrollo Social Kattia Durán Álvarez.",
+      url: "https://diariooficial.interior.gob.cl/ejemplo",
+      date: "2026-10-01",
+      status: "en_confirmacion",
+    };
+    const report = buildMovementReviewReport({
+      collected: { hasOfficialSource: true, results: [], signals: [legalEvidence] },
+      pendingSignals: [pending],
+    });
+    expect(report.pending_signals).toEqual([expect.objectContaining({
+      signal_id: "signal-person",
+      related_sources: expect.arrayContaining([expect.objectContaining({ url: legalEvidence.url })]),
+    })]);
+    expect(report.legal_followups).toEqual([expect.objectContaining({
+      signal_id: "signal-person",
+      source_id: "diario-oficial",
+      requires_manual_review: true,
+      status: "posible_respaldo_normativo",
+    })]);
+    expect(report.published).toBe(false);
+  });
+
+  it("agrega una nueva fuente al pendiente existente de la misma persona sin duplicar el evento", () => {
+    const existing = {
+      signal_id: "signal-kattia-curated",
+      person_name: "Kattia Durán",
+      role: "Seremi de Desarrollo Social y Familia",
+      title: "Kattia Durán renuncia a la Seremi",
+      url: "https://ministerio.example/comunicado",
+      source_label: "Ministerio",
+      status: "en_confirmacion",
+    };
+    const payload = buildMovementPayload({ ...baseline, signals: [existing] }, {
+      now: "2026-10-01T07:00:00.000Z",
+      signals: [{
+        signal_id: "signal-kattia-rss",
+        title: "Kattia Durán deja su cargo de Seremi de Desarrollo Social",
+        url: "https://radio.example/noticia-kattia",
+        source_label: "Radio Universidad de Chile",
+        detected_at: "2026-10-01T07:00:00.000Z",
+        status: "en_confirmacion",
+      }],
+    });
+    expect(payload.signals).toHaveLength(1);
+    expect(payload.signals[0]).toMatchObject({ signal_id: "signal-kattia-curated", person_name: "Kattia Durán", status: "en_confirmacion" });
+    expect(payload.signals[0].related_sources).toEqual(expect.arrayContaining([
+      expect.objectContaining({ url: existing.url }),
+      expect.objectContaining({ url: "https://radio.example/noticia-kattia" }),
+    ]));
+  });
+
+  it("confirma el mismo evento cuando un acto legal oficial coincide con persona, cargo y causal", () => {
+    const pending = {
+      signal_id: "signal-kattia-duran-2026-09-30",
+      person_name: "Kattia Durán",
+      role: "Seremi de Desarrollo Social y Familia",
+      ministry: "Ministerio de Desarrollo Social y Familia",
+      region: "Metropolitana",
+      title: "Kattia Durán renuncia a la Seremi de Desarrollo Social de la Región Metropolitana",
+      url: "https://radio.uchile.cl/2026/09/30/por-razones-familiares-renuncia-seremi-de-desarrollo-social-de-la-rm-kattia-duran/",
+      date: "2026-09-30",
+      status: "en_confirmacion",
+      source_id: "radio-uchile",
+      source_tier: "press",
+      source_label: "Radio Universidad de Chile",
+      detected_at: "2026-09-30T07:00:00.000Z",
+    };
+    const legalDocument = {
+      signal_id: "legal-kattia-duran",
+      title: "Decreto acepta renuncia de Kattia Durán a la Seremi de Desarrollo Social de la Región Metropolitana",
+      summary: "Acéptase, a contar del 30 de septiembre, la renuncia presentada por Kattia Durán al cargo de Seremi de Desarrollo Social de la Región Metropolitana.",
+      url: "https://www.diariooficial.interior.gob.cl/publicaciones/2026/10/01/",
+      date: "2026-10-01",
+      status: "en_confirmacion",
+      source_id: "diario-oficial",
+      source_tier: "official",
+      source_label: "Diario Oficial",
+      detected_at: "2026-10-01T07:00:00.000Z",
+    };
+
+    const payload = buildMovementPayload({ ...baseline, signals: [pending] }, {
+      now: "2026-10-01T07:00:00.000Z",
+      sourceResults: [{ id: "diario-oficial", tier: "official", ok: true, signals: [legalDocument] }],
+      signals: [legalDocument],
+    });
+
+    expect(payload.signals).toHaveLength(1);
+    expect(payload.signals[0]).toMatchObject({
+      signal_id: pending.signal_id,
+      status: "verificado_oficial",
+      verification: {
+        source_id: "diario-oficial",
+        url: legalDocument.url,
+        date: legalDocument.date,
+      },
+    });
+    expect(payload.stats.signals_en_confirmacion).toBe(0);
+    expect(payload.stats.signals_verificadas_oficialmente).toBe(1);
+    expect(payload.stats.total_eventos_publicados).toBe(3);
+    expect(payload.stats.eventos_con_respaldo).toBe(2);
+    expect(payload.movimientos.filter((movement) => /Kattia Durán/i.test(movement.saliente ?? ""))).toHaveLength(0);
+  });
+
+  it("no confirma un anuncio sólo por encontrar el nombre en un documento legal sin acto de cese", () => {
+    const pending = {
+      signal_id: "signal-person",
+      person_name: "Kattia Durán",
+      role: "Seremi de Desarrollo Social y Familia",
+      region: "Metropolitana",
+      title: "Kattia Durán deja la Seremi de Desarrollo Social",
+      status: "en_confirmacion",
+      source_id: "radio-uchile",
+      source_tier: "press",
+    };
+    const unrelatedLegalMention = {
+      signal_id: "legal-mention",
+      person_name: "Kattia Durán",
+      role: "Seremi de Desarrollo Social y Familia",
+      region: "Metropolitana",
+      title: "Kattia Durán participa en una reunión de coordinación regional",
+      summary: "La autoridad participó en una actividad del ministerio.",
+      url: "https://www.diariooficial.interior.gob.cl/publicaciones/2026/10/01/",
+      date: "2026-10-01",
+      status: "en_confirmacion",
+      source_id: "diario-oficial",
+      source_tier: "official",
+    };
+
+    const payload = buildMovementPayload({ ...baseline, signals: [pending] }, {
+      now: "2026-10-01T07:00:00.000Z",
+      signals: [unrelatedLegalMention],
+    });
+
+    expect(payload.signals).toHaveLength(1);
+    expect(payload.signals[0].status).toBe("en_confirmacion");
+    expect(payload.signals[0]).not.toHaveProperty("verification");
   });
 
   it("deja el modo de revisión en verde y no publica señales como movimientos", () => {
@@ -325,14 +529,16 @@ describe("pipeline automático de movimientos", () => {
   });
 
   it("actualiza metadata, preserva el baseline y genera checksum", () => {
-    const payload = buildMovementPayload(baseline, {
+    const existingPending = { signal_id: "signal-older", title: "Renuncia de autoridad", status: "en_confirmacion" };
+    const payload = buildMovementPayload({ ...baseline, signals: [existingPending] }, {
       now: "2026-08-28T07:00:00.000Z",
       sourceResults: [{ id: "ley-chile", tier: "official", ok: true, signals: [] }],
       signals: [{ signal_id: "signal-1", status: "en_confirmacion" }],
     });
     expect(payload.movimientos).toHaveLength(2);
     expect(payload.last_success_at).toBe("2026-08-28T07:00:00.000Z");
-    expect(payload.stats.signals_en_confirmacion).toBe(1);
+    expect(payload.stats.signals_en_confirmacion).toBe(2);
+    expect(payload.signals.map((signal) => signal.signal_id)).toEqual(["signal-older", "signal-1"]);
     expect(payload.conectores.t1_ley_chile.estado).toBe("Disponible");
     expect(payload.conectores.t1_ley_chile.http_status).toBeNull();
     expect(payload.checksum_sha256).toBe(sha256({ ...payload, checksum_sha256: undefined }));
