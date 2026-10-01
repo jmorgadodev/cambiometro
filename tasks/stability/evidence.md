@@ -243,3 +243,22 @@ Riesgo o siguiente puerta:
   El generador se ejecutó contra ambos manifiestos productivos y produjo 19
   entradas. El 100 % del registro es efectivo tras CI verde y fusión de este
   cambio, no acredita estabilidad global ni salud de todos los conectores.
+
+### O04 — contadores públicos por release · 2026-10-01 · 75 %
+
+- Rama `codex/source-counters-20261001`, worktree canónico, base main 84d5d216.
+- `/fuentes` deja de importar GLOBAL_KPIS: total sólo si conciliado por el
+  resumen publicado, fuentes desde ese resumen, versión desde su checksum y
+  cortes separados por fuente. Sin versión válida no expone cifras/períodos
+  configurados como vigentes. Los nulos no se sustituyen por cero.
+- Se conserva el estado parcial del resumen en su presentación; no se anuncia
+  operativa una cobertura parcial. Se retira la explicación no demostrada de
+  diferencias «por deduplicación». Sin cambios de diseño, menú, rutas o ETL.
+- Cuatro pruebas de render reprodujeron el problema antes de corregirlo;
+  19 pruebas dirigidas, tipos, lint, enlaces y arquitectura estática aprobados.
+- Verificación acotada reproducible: `node scripts/verify-prod-fuentes.mjs`,
+  con VERIFY_BASE_URL para preview. Compara `/fuentes` con su resumen JSON
+  público, conteos, períodos, checksum, estados y móvil/escritorio.
+- La cuarta puerta sigue abierta hasta preview, promoción ui-only y smoke
+  productivo. No se escribe ni borra R2, no se ejecutan ETL ni D1 remoto;
+  costes #671 permanecen apartados. Rollback: deployment anterior de Pages.
