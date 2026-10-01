@@ -13,6 +13,7 @@ import {
   MOTIVOS_CATEGORIAS,
   isMovimientoDocumentoPendienteMayor30,
   esMovimientoRespaldado,
+  summarizeMovementPublicationCounts,
   type MovimientoTipo,
   type MovimientoMotivoCategoria,
   type Movimiento,
@@ -94,8 +95,6 @@ function MovimientosContent() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const señalesPendientes = MOVIMIENTOS_PIPELINE_METADATA.signals;
-  const señalesEnConfirmacion = señalesPendientes.filter((signal) => signal.status === "en_confirmacion");
-  const señalesVerificadas = señalesPendientes.filter((signal) => signal.status === "verificado_oficial");
 
   // Estados de filtrado sincronizados con URL
   const [filtroTipo, setFiltroTipo] = useState<MovimientoTipo | "todos">(() => {
@@ -321,8 +320,10 @@ function MovimientosContent() {
       promedioRotacion = (diasTranscurridos / totalGob).toFixed(1).replace(".", ",");
     }
 
-    const verificados = MOVIMIENTOS.filter(esMovimientoRespaldado).length + señalesVerificadas.length;
-    const enConfirmacion = MOVIMIENTOS.filter((m) => m.estado === "en_confirmacion").length;
+    const { backed: verificados, pending: totalEnConfirmacion } = summarizeMovementPublicationCounts(
+      MOVIMIENTOS,
+      señalesPendientes,
+    );
     const ultimaPublicacion = latestMovementPublicationDate(MOVIMIENTOS, MOVIMIENTOS_PIPELINE_METADATA.signals);
     const ultimaPublicacionDate = ultimaPublicacion ? new Date(`${ultimaPublicacion}T12:00:00Z`) : null;
     const ultimaPublicacionTexto = ultimaPublicacionDate && !Number.isNaN(ultimaPublicacionDate.getTime())
@@ -332,16 +333,16 @@ function MovimientosContent() {
     return {
       totalCambiosGobierno: totalGob + señalesPendientes.length,
       totalSalidas: salidas + señalesPendientes.filter((signal) => signal.tipo === "renuncia").length,
-      desgloseGobierno: `${verificados} respaldados · ${señalesEnConfirmacion.length} en confirmación`,
+      desgloseGobierno: `${verificados} respaldados · ${totalEnConfirmacion} en confirmación`,
       ultFecha: maxFecha,
       ultFechaFormateada: fechaTxt,
       haceTexto: haceTxt,
       diasEntreCambios: promedioRotacion,
       totalVerificados: verificados,
-      totalEnConfirmacion: enConfirmacion + señalesEnConfirmacion.length,
+      totalEnConfirmacion,
       ultimaPublicacionTexto,
     };
-  }, [nowMs, señalesPendientes, señalesEnConfirmacion.length, señalesVerificadas.length]);
+  }, [nowMs, señalesPendientes]);
 
   // Botón Compartir reactivo para Hero y Toolbar (URL con filtros activos + share nativo)
   const handleShare = useCallback(() => {
@@ -1216,7 +1217,7 @@ function MovimientosContent() {
             * <strong>Cómo leer el catálogo:</strong> Cada fila conserva sus fuentes públicas. “Verificado oficial” requiere un documento oficial; “Corroborado públicamente” indica que la salida está respaldada por una fuente periodística identificable. Si no existe respaldo suficiente, la fila queda “En confirmación”.
           </p>
           <p style={{ margin: "0 0 0.5rem 0" }}>
-            * <strong>Corte público:</strong> Este listado contiene 46 salidas documentadas hasta el 14 de septiembre de 2026, distribuidas en 3 ministras, 6 subsecretarías, 36 seremis y 1 delegado provincial. Cada fila indica si existe reemplazo informado y qué tipo de respaldo tiene.
+            * <strong>Corte del registro:</strong> La base contiene 46 movimientos hasta el 14 de septiembre: 45 con respaldo público y 1 en confirmación. Además, se muestran 5 anuncios publicados hasta el 30 de septiembre, también en confirmación. Si se localiza el acto administrativo, se actualizará el mismo movimiento sin contarlo dos veces.
           </p>
         </footer>
       </div>

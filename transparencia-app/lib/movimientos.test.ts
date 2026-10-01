@@ -8,6 +8,7 @@ import {
   MOVIMIENTOS_HOME_SUMMARY,
   MOVIMIENTOS_PIPELINE_METADATA,
   summarizeMovementFreshness,
+  summarizeMovementPublicationCounts,
 } from "./movimientos";
 import { buildEditorialMovements } from "./home-editorial-adapter";
 
@@ -71,6 +72,13 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
       expect.stringContaining("Kattia Durán"),
       expect.stringContaining("Juan Carlos Meléndez"),
     ]));
+  });
+
+  it("resume juntos los movimientos pendientes y los anuncios sin ocultar ninguno", () => {
+    expect(summarizeMovementPublicationCounts(
+      [{ estado: "corroborado" }, { estado: "en_confirmacion" }],
+      [{ status: "en_confirmacion" }, { status: "verificado_oficial" }],
+    )).toEqual({ backed: 2, pending: 2 });
   });
 
   it("1f. toma como último cambio sólo el movimiento respaldado más reciente", () => {
