@@ -1,12 +1,29 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { getDataQualityDashboardData } from "@/lib/data-quality-dashboard";
 import { getMuniCanonicalSlug, isMuniLegacyId, getAllMuniSlugs } from "@/lib/slug-utils";
 import { evaluateSenateSupport } from "@/scripts/etl/senado-assignment.mjs";
+import * as qualitySummary from "@/lib/data-quality-summary";
 
 describe("Tarea D: Dashboard Público de Calidad de Datos (/datos/calidad)", () => {
   const projectRoot = join(process.cwd());
+
+  it("conserva cobertura parcial como parcial, sin anunciarla operativa", async () => {
+    const fallback = qualitySummary.buildFallbackDataQualitySummary();
+    const read = vi.spyOn(qualitySummary, "readGeneratedDataQualitySummary").mockReturnValue(fallback);
+    try {
+      const { sources, summary } = await getDataQualityDashboardData();
+      const partialIds = fallback.sources.filter((source) => source.status === "parcial" && !source.derived).map((source) => source.id);
+      expect(partialIds.length).toBeGreaterThan(0);
+      for (const id of partialIds) {
+        expect(sources.find((source) => source.id === id)).toMatchObject({ status: "parcial", statusLabel: "Cobertura parcial", statusBadgeClass: "badge badge-warn" });
+      }
+      expect(summary.fuentesParciales).toBe(partialIds.length);
+    } finally {
+      read.mockRestore();
+    }
+  });
 
   it("Retorna las 13 fuentes (12 oficiales + 1 derivada) con metadata completa y sin números inventados", async () => {
     const { sources, summary } = await getDataQualityDashboardData();

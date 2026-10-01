@@ -55,7 +55,7 @@ actualiza ni se usa para desplegar. `cambiometro-audit` sólo guarda evidencia.
 | O02 | Despliegue UI y ETL de Movimientos no retroceden a Git | S | — | 100 % |
 | O05 | Confirmar ausencia de copias nuevas y presupuesto R2 de toda la cuenta | S | O01 | 50 % |
 | O03 | Registro ETL con procedencia configurada, calendario y manifiestos | S | O01 | 100 % |
-| O04 | Suprimir contadores fijos antiguos de Fuentes; derivar por release y alcance | S | O03 | 0 % |
+| O04 | Suprimir contadores fijos antiguos de Fuentes; derivar por release y alcance | S | O03 | 75 % |
 | O06 | Candidato/no-op de Movimientos: anuncio, confirmación en el mismo ID y cero inesperado | M | O02, O05 | 100 % |
 | O07 | Guardia ETL común: esquema, checksum, períodos, duplicados, descenso y fallo externo | M | O06 | 0 % |
 | O08 | `ReleaseSet` R2 con IDs/checksums por dominio y lectura fijada por Pages | M | O03, O07 | 0 % |

@@ -22,8 +22,9 @@ describe("Tarea 15 - 5 Fixes Críticos Pre-Launch", () => {
     // Verificar que los componentes contienen el desglose dual
     const fuentesContent = readFileSync(join(projectRoot, "app", "fuentes", "page.tsx"), "utf8");
     expect(fuentesContent).toContain("Registros:");
-    expect(fuentesContent).toContain("Histórico:");
-    expect(fuentesContent).toContain("Diferencia por deduplicación y cobertura declarada");
+    expect(fuentesContent).toContain("Histórico declarado:");
+    expect(fuentesContent).toContain("Conteo no medido para este corte");
+    expect(fuentesContent).not.toContain("Diferencia por deduplicación y cobertura declarada");
 
     const datosContent = readFileSync(join(projectRoot, "components", "datos", "EtlHealthDashboardClient.tsx"), "utf8");
     expect(datosContent).toContain("Canónicos:");

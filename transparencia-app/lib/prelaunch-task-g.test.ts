@@ -25,7 +25,8 @@ describe("TAREA G: Cierre de Hallazgos Pre-Launch", () => {
     expect(datosContent).toContain("GLOBAL_KPIS.fuentes_derivadas");
 
     const fuentesContent = readFileSync(join(projectRoot, "app", "fuentes", "page.tsx"), "utf8");
-    expect(fuentesContent).toContain("GLOBAL_KPIS.total_fuentes");
+    expect(fuentesContent).toContain("summary.totalFuentes");
+    expect(fuentesContent).not.toContain("GLOBAL_KPIS");
 
     const calidadContent = readFileSync(join(projectRoot, "app", "datos", "calidad", "page.tsx"), "utf8");
     expect(calidadContent).toContain("13 fuentes");

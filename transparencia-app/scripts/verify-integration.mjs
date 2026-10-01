@@ -493,7 +493,9 @@ try {
   await gotoWithNetworkRetry(`${baseUrl}/fuentes`);
   await page.getByRole("heading", { name: "Fuentes y versiones" }).waitFor({ state: "visible", timeout: 15_000 });
   assert.equal(await page.getByRole("heading", { name: "Fuentes y versiones" }).count(), 1);
-  assert((await page.getByText(/Versión (?:[0-9]+ de )?[a-z]+(?: de)? [0-9]{4}/i, { exact: false }).count()) >= 1, "/fuentes debe mostrar su fecha de versión");
+  const sourceFacts = page.locator(".page-fact-sheet");
+  assert((await sourceFacts.getByText("Versión del catálogo", { exact: true }).count()) === 1, "/fuentes debe identificar su versión de catálogo");
+  assert.match(await sourceFacts.locator("dd").last().innerText(), /^(?:[a-f0-9]{16}|Versión no informada)$/, "/fuentes debe mostrar el checksum del release o indicar su ausencia");
 
   // M2: sin GA4_ID el HTML servido no debe contener ningún script de gtag
   const servedHtml = await (await page.request.get(baseUrl)).text();

@@ -31,11 +31,11 @@ Registro en [source-registry.md](source-registry.md). Cierre efectivo al fusiona
 este cambio con CI verde. Registra configuración y metadatos, no declara sanos
 los ETL ni completa las puertas operativas O11–O13.
 
-## O04 · Contadores públicos por release · S · 0 %
+## O04 · Contadores públicos por release · S · 75 %
 
-- [ ] Identificar todos los literales de conteo/frescura en Fuentes y su unidad.
-- [ ] Sustituirlos por metadatos verificados, con estados «parcial»/«no medido».
-- [ ] Probar discrepancias de corte, nulos y ausencia de manifiesto.
+- [x] Identificar los literales de conteo/frescura en Fuentes y su unidad.
+- [x] Sustituirlos por metadatos verificados, con estados «parcial»/«no medido».
+- [x] Probar discrepancias de corte, nulos y ausencia de manifiesto.
 - [ ] Preview, promoción y comparación con API/manifiesto productivo.
 
 ## O05 · Costo cero y respaldo existente · S · 50 %
