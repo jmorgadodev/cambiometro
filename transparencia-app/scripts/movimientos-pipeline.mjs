@@ -923,12 +923,13 @@ export function materializeKnownSignals(movimientos, signals, now) {
         ...existing,
         fuentes: mergedSources,
         fuente: sourceLabelsForMovement(mergedSources),
-        fecha_deteccion: now,
+        fecha_deteccion: existing.fecha_deteccion ?? rebuilt.fecha_deteccion ?? now,
       };
     } else {
       result[existingIndex] = {
         ...existing,
         ...rebuilt,
+        fecha_deteccion: existing.fecha_deteccion ?? rebuilt.fecha_deteccion ?? now,
         fuentes: mergedSources,
         fuente: sourceLabelsForMovement(mergedSources),
       };

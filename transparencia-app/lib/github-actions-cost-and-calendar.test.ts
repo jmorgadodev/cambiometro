@@ -30,6 +30,9 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       } else if (serializedMutations.has(file)) {
         expect(content, `El workflow ${file} debe usar una cola propia`).toMatch(/group:\s*cambiometro-transfer-d1-repair/);
         expect(content, `El workflow ${file} no debe cancelar una reparación D1 activa`).toMatch(/cancel-in-progress:\s*false/);
+      } else if (file === "pages-static-refresh.yml") {
+        expect(content, "Un no-op no debe cancelar una promoción activa").toMatch(/cancel-in-progress:\s*false/);
+        expect(content).toContain("needs: refresh-decision");
       } else {
         expect(content, `El workflow ${file} debe conservar cancel-in-progress: true`).toMatch(/cancel-in-progress:\s*true/);
       }

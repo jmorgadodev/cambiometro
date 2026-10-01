@@ -25,6 +25,13 @@ const baseline = {
 const publishedMovements = JSON.parse(readFileSync(new URL("../data/movimientos.json", import.meta.url), "utf8"));
 
 describe("pipeline automático de movimientos", () => {
+  it("conserva la primera fecha de detección al releer una señal conocida", () => {
+    const movement = publishedMovements.movimientos.find((row) => row.id === "mov-kast-2026-2026-09-01-patricio-lohr");
+    const signals = [{ title: "Patricio Löhr renuncia como seremi de Transportes de Arica", date: "2026-09-01", url: "https://source.test/noticia", source_label: "Prensa", source_tier: "press" }];
+    const first = materializeKnownSignals([movement], signals, "2026-10-01T10:00:00Z");
+    const second = materializeKnownSignals(first, signals, "2026-10-02T10:00:00Z");
+    expect(second[0].fecha_deteccion).toBe(first[0].fecha_deteccion);
+  });
   it("no presenta todos los eventos del corte como confirmados", () => {
     const payload = buildMovementPayload(publishedMovements);
     const backed = payload.movimientos.filter((row) => ["verificado", "verificado_oficial", "corroborado"].includes(row.estado)).length
