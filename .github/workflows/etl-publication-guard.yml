@@ -24,7 +24,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: etl-publication-guard
+  group: etl-publication-guard-${{ github.event_name == 'workflow_dispatch' && github.ref || 'production' }}
   cancel-in-progress: true
 
 permissions:

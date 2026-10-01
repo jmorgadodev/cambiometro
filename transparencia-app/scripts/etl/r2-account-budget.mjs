@@ -20,9 +20,13 @@ async function accountOperations(accountId, token) {
   });
   if (!response.ok) throw new Error(`R2_OPERATIONS_TELEMETRY_${response.status}`);
   const body = await response.json();
+  if (body.errors?.length) {
+    const reason = String(body.errors[0]?.message ?? "unknown").replaceAll(token, "[redacted]").replaceAll(accountId, "[account]").slice(0, 300);
+    throw new Error(`R2_OPERATIONS_TELEMETRY_INVALID: ${reason}`);
+  }
   const accounts = body.data?.viewer?.accounts;
   const groups = accounts?.[0]?.r2OperationsAdaptiveGroups;
-  if (body.errors?.length || !Array.isArray(accounts) || accounts.length !== 1 || !Array.isArray(groups) || groups.length >= 1000) throw new Error("R2_OPERATIONS_TELEMETRY_INVALID");
+  if (!Array.isArray(accounts) || accounts.length !== 1 || !Array.isArray(groups) || groups.length >= 1000) throw new Error("R2_OPERATIONS_TELEMETRY_INVALID");
   let classA = 0;
   let classB = 0;
   for (const group of groups) {
