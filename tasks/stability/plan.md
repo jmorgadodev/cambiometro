@@ -46,9 +46,9 @@ actualiza ni se usa para desplegar. `cambiometro-audit` sólo guarda evidencia.
 | --- | --- | --- | --- | ---: |
 | O01 | Tablero único y ruta canónica documentados | XS | — | 75 % |
 | O02 | Despliegue UI y ETL de Movimientos no retroceden a Git | S | — | 100 % |
+| O05 | Medir presupuesto R2 de cuenta y catalogar respaldo, sin eliminarlo | S | O01 | 0 % |
 | O03 | Registro operativo de fuentes desde calendario y manifiestos; estados sin cifras inventadas | S | O01 | 0 % |
 | O04 | Suprimir contadores fijos antiguos de Fuentes; derivar por release y alcance | S | O03 | 0 % |
-| O05 | Medir presupuesto R2 de cuenta y catalogar respaldo, sin eliminarlo | S | O01 | 0 % |
 | O06 | Candidato/no-op de Movimientos: anuncio, confirmación en el mismo ID y cero inesperado | M | O02, O05 | 0 % |
 | O07 | Guardia ETL común: esquema, checksum, períodos, duplicados, descenso y fallo externo | M | O06 | 0 % |
 | O08 | `ReleaseSet` R2 con IDs/checksums por dominio y lectura fijada por Pages | M | O03, O07 | 0 % |
@@ -61,8 +61,11 @@ actualiza ni se usa para desplegar. `cambiometro-audit` sólo guarda evidencia.
 | O15 | Siete días continuos de concordancia R2 → API → Pages y alertas útiles | S operativo, 7 días calendario | O09–O14 | 0 % |
 | O16 | ChileCompra: último, con preflight de alcance/coste y recuperación 403 | M por período | O05, O07, O15 | 0 % |
 
-O11 y O13 se dividen en una tarea verificable por fuente/componente antes de
-editar código. Una falla externa queda como `degraded_external` y no bloquea
+Los IDs permanecen estables para que la evidencia no se renumere. Entre las
+tareas abiertas, **O05 es la siguiente**: medir el margen R2 antes de cualquier
+publicación nueva; después O03 y O04. O11 y O13 se dividen en una tarea
+verificable por fuente/componente antes de editar código. Una falla externa
+queda como `degraded_external` y no bloquea
 las otras fuentes; no se transforma una extracción vacía en release nuevo.
 
 ## Checkpoints
