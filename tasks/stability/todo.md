@@ -41,12 +41,15 @@ documental; no marcarla por una prueba local. Orden y dependencias en
 - [ ] Probar sin escrituras un preflight que bloquee si falta telemetría o hay riesgo de superar cualquier margen gratuito.
 - [ ] Publicar informe fechado de costo cero verificable, protección existente y presupuesto por publicación.
 
-## O06 · Piloto ETL Movimientos · M · 0 %
+## O06 · Piloto ETL Movimientos · M · 75 %
 
-- [ ] Preparar candidato aislado desde release R2; distinguir sin cambios y fallo externo.
-- [ ] Probar cero inesperado, descenso, anuncio contabilizado y confirmación sobre el mismo ID.
-- [ ] Ensayar replay acotado; ningún no-op dispara publicación Pages.
+- [x] Preparar candidato aislado desde release R2; distinguir sin cambios y fallo externo.
+- [x] Probar cero inesperado, descenso, anuncio contabilizado y confirmación sobre el mismo ID.
+- [x] Ensayar replay acotado; ningún no-op dispara publicación Pages.
 - [ ] Promover sólo con pruebas verdes y verificar cronología/rollback.
+
+El replay es local, sin consultar fuentes ni escribir en R2/D1; no acredita
+todavía la próxima ejecución programada. Costes (#671) siguen apartados.
 
 ## O07 · Contrato ETL reutilizable · M · 0 %
 

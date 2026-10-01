@@ -137,3 +137,28 @@ Riesgo o siguiente puerta:
   operación con guardas. La publicación actual usa PUT directos; antes de
   cerrar se debe conectar al preflight común de cuenta y comprobar no-op.
 - R2 PUT/DELETE y D1 remoto en esta auditoría: ninguno.
+
+## O06 — puertas 1–3 · 2026-10-01 · implementación independiente
+
+- Rama `codex/movimientos-noop-20261001` desde `origin/main`, mismo worktree
+  aislado de estabilización. #671 y su bloqueo Analytics se conservan aparte;
+  sus cambios no se incluyen en esta rama.
+- El ETL continúa recuperando y validando el snapshot R2 y escribiendo el
+  candidato mediante archivo temporal y rename. Ahora compara únicamente
+  movimientos/señales y su evidencia; una hora de revisión, salud técnica o
+  `last_seen_at` no genera un release nuevo.
+- Sin novedades: reporte `published=false`, motivo `NO_PUBLIC_CHANGES`,
+  checksum anterior; no se sustituye el snapshot ni se ejecuta el publicador.
+  Una señal periodística nueva, confirmación sobre el mismo ID o cambio de
+  evidencia sí requieren publicación. Fallo externo conserva la guarda previa.
+- Pages y el verificador posterior consultan el resultado del paso de
+  publicación del ETL en GitHub Actions: success permite continuar, skipped
+  evita build y comprobaciones de frescura falsas; resultado ausente/ambiguo
+  bloquea. Otros ETL y despachos manuales conservan su comportamiento.
+- Replay de dos cortes del fixture existente, sin red ni R2/D1: no hay cambio
+  público en el segundo; cero y descenso de filas se rechazan antes de activar.
+  41 pruebas dirigidas aprobadas, TypeScript y lint de archivos cambiados
+  aprobados; YAML de ambos workflows parseado correctamente.
+- O06 = 75 %; falta fusión con controles verdes y ejecución productiva que
+  demuestre el camino completo. No se declara estabilidad de siete días ni
+  cierre de otras fuentes. Sin modificación visual ni backup nuevo.

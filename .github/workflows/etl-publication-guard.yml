@@ -29,6 +29,7 @@ concurrency:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   verify:
@@ -43,7 +44,17 @@ jobs:
       - uses: actions/setup-node@v5
         with:
           node-version: "22"
+      - name: Comprobar si Movimientos publicó cambios
+        id: decision
+        uses: actions/github-script@v7
+        with:
+          script: |
+            if (context.eventName !== 'workflow_run' || context.payload.workflow_run.name !== 'ETL Diario - Movimientos de Autoridades') return true;
+            const { shouldRefreshMovements } = await import(`${process.env.GITHUB_WORKSPACE}/transparencia-app/scripts/movimientos-publication.mjs`);
+            const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, { ...context.repo, run_id: context.payload.workflow_run.id });
+            return shouldRefreshMovements(jobs);
       - name: Verificar publicación R2/D1 y manifest Pages
+        if: steps.decision.outputs.result == 'true'
         working-directory: transparencia-app
         env:
           PROD_URL: ${{ vars.PROD_URL || 'https://cambiometro.impulsacv.cl' }}
