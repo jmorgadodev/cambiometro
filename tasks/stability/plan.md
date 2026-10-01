@@ -44,7 +44,7 @@ actualiza ni se usa para desplegar. `cambiometro-audit` sólo guarda evidencia.
 
 | ID | Tarea / criterio de salida | Complejidad | Depende de | Avance |
 | --- | --- | --- | --- | ---: |
-| O01 | Tablero único y ruta canónica documentados | XS | — | 75 % |
+| O01 | Tablero único y ruta canónica documentados | XS | — | 100 % |
 | O02 | Despliegue UI y ETL de Movimientos no retroceden a Git | S | — | 100 % |
 | O05 | Medir presupuesto R2 de cuenta y catalogar respaldo, sin eliminarlo | S | O01 | 0 % |
 | O03 | Registro operativo de fuentes desde calendario y manifiestos; estados sin cifras inventadas | S | O01 | 0 % |

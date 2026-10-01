@@ -6,12 +6,12 @@ Para cada tarea, la cuarta puerta es la verificación externa o la fusión
 documental; no marcarla por una prueba local. Orden y dependencias en
 [plan.md](plan.md).
 
-## O01 · Tablero y ruta canónica · XS · 75 %
+## O01 · Tablero y ruta canónica · XS · 100 %
 
 - [x] Revisar `origin/main`, checkout divergente y documentos existentes.
 - [x] Crear plan ordenado, tablero y registro de evidencia sin borrar historia.
 - [x] Definir fórmula de porcentaje y protocolo de cierre/reapertura.
-- [ ] Fusionar la documentación en `main` y comprobar sus enlaces/rutas.
+- [x] Fusionar la documentación en `main` y comprobar sus enlaces/rutas.
 
 ## O02 · Evitar retroceso de Movimientos · S · 100 %
 
