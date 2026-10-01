@@ -212,3 +212,34 @@ Riesgo o siguiente puerta:
   No se realizaron operaciones D1 ni borrado de históricos.
 - Este cierre acredita O06, no siete días de estabilidad ni el cierre global.
   #671 y las demás puertas permanecen con sus estados anteriores.
+
+### O03 — registro reproducible de fuentes · 2026-10-01
+
+- Rama `codex/source-registry-20261001`, mismo worktree canónico bajo
+  `.codex/worktrees/codex-stabilizacion-20261001`; base `origin/main` 773dec2a.
+  Checkout divergente y rama de costes #671 intactos.
+- Se reutilizó `.github/etl-calendar.json`: 18 workflows contrastados con
+  cron/dispatch reales y conectores existentes; Senado votaciones local-only
+  se registra aparte, sin inventar workflow remoto. Calendario histórico
+  marcado como contexto, no como autorización D1 ni prueba de salud.
+- Sólo dos lecturas R2: `catalog/v1/manifest.json` y
+  `projections/static-site-v1/manifest.json`. Catálogo de
+  `2026-09-30T13:39:09.758Z`; manifiesto estático de
+  `2026-10-01T02:00:29.670Z`, checksum
+  `7c29abdf2542cb6a0d1f1b4fb5209f9c036caa16e7563602aa0a1212274f9c6d`.
+  Sin consultas D1, extracción de universos, escritura R2 ni despliegue UI.
+- Generador local `scripts/build-source-registry.mjs`: categorías separadas,
+  origen configurado, ventana documentada por workflow, conteos y períodos
+  de catálogo, checksum de índice, artefacto versionado y checksum estático.
+  No suma catálogos compartidos. Ausencias y límites de frescura son no medidos.
+  Conserva entradas de catálogo sin workflow asociado (Senado) sin inventarlo.
+- Matriz en `source-registry.md`; JSON e inputs locales en
+  `C:\Users\jorge\Proyectos\cambiometro-audit\evidence\source-registry-20261001.json`.
+  Metadatos de índices específicos CPLT/38 bis/apoyo permanecen explícitamente
+  no medidos; esto no declara cerradas sus puertas de operación.
+- Siete pruebas dirigidas aprobadas: conteos y unidades, ausencias sin cero,
+  duplicados, cron divergente, checksum inválido, manual/local-only y catálogo
+  sin workflow. TypeScript, lint dirigido y calendario (18 workflows) aprobados.
+  El generador se ejecutó contra ambos manifiestos productivos y produjo 19
+  entradas. El 100 % del registro es efectivo tras CI verde y fusión de este
+  cambio, no acredita estabilidad global ni salud de todos los conectores.

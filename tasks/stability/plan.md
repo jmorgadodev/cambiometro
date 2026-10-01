@@ -54,9 +54,9 @@ actualiza ni se usa para desplegar. `cambiometro-audit` sólo guarda evidencia.
 | O01 | Tablero único y ruta canónica documentados | XS | — | 100 % |
 | O02 | Despliegue UI y ETL de Movimientos no retroceden a Git | S | — | 100 % |
 | O05 | Confirmar ausencia de copias nuevas y presupuesto R2 de toda la cuenta | S | O01 | 50 % |
-| O03 | Registro ETL con procedencia efectiva, calendario y manifiestos | S | O01 | 0 % |
+| O03 | Registro ETL con procedencia configurada, calendario y manifiestos | S | O01 | 100 % |
 | O04 | Suprimir contadores fijos antiguos de Fuentes; derivar por release y alcance | S | O03 | 0 % |
-| O06 | Candidato/no-op de Movimientos: anuncio, confirmación en el mismo ID y cero inesperado | M | O02, O05 | 0 % |
+| O06 | Candidato/no-op de Movimientos: anuncio, confirmación en el mismo ID y cero inesperado | M | O02, O05 | 100 % |
 | O07 | Guardia ETL común: esquema, checksum, períodos, duplicados, descenso y fallo externo | M | O06 | 0 % |
 | O08 | `ReleaseSet` R2 con IDs/checksums por dominio y lectura fijada por Pages | M | O03, O07 | 0 % |
 | O09 | Promoción Pages de artefacto coherente y bloqueo global de publicación | M | O08 | 0 % |
@@ -70,7 +70,8 @@ actualiza ni se usa para desplegar. `cambiometro-audit` sólo guarda evidencia.
 
 Los IDs permanecen estables para que la evidencia no se renumere. Entre las
 tareas abiertas, **O05 es la siguiente**: medir el margen R2 antes de cualquier
-publicación nueva; después O03 y O04. O11 y O13 se dividen en una tarea
+publicación nueva. O05/#671 está apartado por indicación del usuario; O03 está
+cerrado y la siguiente tarea sin cargas es O04. O11 y O13 se dividen en una tarea
 verificable por fuente/componente antes de editar código. Una falla externa
 queda como `degraded_external` y no bloquea
 las otras fuentes; no se transforma una extracción vacía en release nuevo.
