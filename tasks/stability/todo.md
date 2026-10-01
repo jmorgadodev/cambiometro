@@ -89,7 +89,11 @@ productiva y rollback comprobados; evidencia abajo. Costes (#671) siguen apartad
 - [ ] Artefacto incluye evidencia de releases y smoke de rutas, búsqueda y conteos.
 - [ ] Promover y registrar deployment, rollback y verificación productiva.
 
-## O10 · Monitor diario · M · 0 %
+## O10 · Monitor diario · M · 25 %
+
+- [x] Agrupación de incidentes del smoke existente, recordatorio semanal y
+  recuperación sólo tras controles correctos; 11 pruebas, tipos y lint locales.
+  CI/integración remota pendiente. Runbook en `docs/operations/uptime-incidents-20261001.md`.
 
 - [ ] Leer calendario, estado de candidato/release, R2/API/Pages y presupuesto sin extraer universos.
 - [ ] Clasificar `healthy`, `degraded_external`, `stale`, `failed_internal`, `paused_local_only`.
