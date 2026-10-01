@@ -55,6 +55,9 @@ describe("pipeline automático de movimientos", () => {
       status: "en_confirmacion",
       tipo: "renuncia",
     });
+    expect(publishedMovements.stats.total_eventos_publicados).toBe(51);
+    expect(publishedMovements.stats.eventos_con_respaldo).toBe(46);
+    expect(publishedMovements.stats.en_confirmacion).toBe(5);
     expect(publishedMovements.stats.signals_en_confirmacion).toBe(5);
     expect(validateMovementPayload(publishedMovements)).toBe(publishedMovements);
   });
@@ -190,6 +193,93 @@ describe("pipeline automático de movimientos", () => {
       expect.objectContaining({ url: existing.url }),
       expect.objectContaining({ url: "https://radio.example/noticia-kattia" }),
     ]));
+  });
+
+  it("confirma el mismo evento cuando un acto legal oficial coincide con persona, cargo y causal", () => {
+    const pending = {
+      signal_id: "signal-kattia-duran-2026-09-30",
+      person_name: "Kattia Durán",
+      role: "Seremi de Desarrollo Social y Familia",
+      ministry: "Ministerio de Desarrollo Social y Familia",
+      region: "Metropolitana",
+      title: "Kattia Durán renuncia a la Seremi de Desarrollo Social de la Región Metropolitana",
+      url: "https://radio.uchile.cl/2026/09/30/por-razones-familiares-renuncia-seremi-de-desarrollo-social-de-la-rm-kattia-duran/",
+      date: "2026-09-30",
+      status: "en_confirmacion",
+      source_id: "radio-uchile",
+      source_tier: "press",
+      source_label: "Radio Universidad de Chile",
+      detected_at: "2026-09-30T07:00:00.000Z",
+    };
+    const legalDocument = {
+      signal_id: "legal-kattia-duran",
+      title: "Decreto acepta renuncia de Kattia Durán a la Seremi de Desarrollo Social de la Región Metropolitana",
+      summary: "Acéptase, a contar del 30 de septiembre, la renuncia presentada por Kattia Durán al cargo de Seremi de Desarrollo Social de la Región Metropolitana.",
+      url: "https://www.diariooficial.interior.gob.cl/publicaciones/2026/10/01/",
+      date: "2026-10-01",
+      status: "en_confirmacion",
+      source_id: "diario-oficial",
+      source_tier: "official",
+      source_label: "Diario Oficial",
+      detected_at: "2026-10-01T07:00:00.000Z",
+    };
+
+    const payload = buildMovementPayload({ ...baseline, signals: [pending] }, {
+      now: "2026-10-01T07:00:00.000Z",
+      sourceResults: [{ id: "diario-oficial", tier: "official", ok: true, signals: [legalDocument] }],
+      signals: [legalDocument],
+    });
+
+    expect(payload.signals).toHaveLength(1);
+    expect(payload.signals[0]).toMatchObject({
+      signal_id: pending.signal_id,
+      status: "verificado_oficial",
+      verification: {
+        source_id: "diario-oficial",
+        url: legalDocument.url,
+        date: legalDocument.date,
+      },
+    });
+    expect(payload.stats.signals_en_confirmacion).toBe(0);
+    expect(payload.stats.signals_verificadas_oficialmente).toBe(1);
+    expect(payload.stats.total_eventos_publicados).toBe(3);
+    expect(payload.stats.eventos_con_respaldo).toBe(2);
+    expect(payload.movimientos.filter((movement) => /Kattia Durán/i.test(movement.saliente ?? ""))).toHaveLength(0);
+  });
+
+  it("no confirma un anuncio sólo por encontrar el nombre en un documento legal sin acto de cese", () => {
+    const pending = {
+      signal_id: "signal-person",
+      person_name: "Kattia Durán",
+      role: "Seremi de Desarrollo Social y Familia",
+      region: "Metropolitana",
+      title: "Kattia Durán deja la Seremi de Desarrollo Social",
+      status: "en_confirmacion",
+      source_id: "radio-uchile",
+      source_tier: "press",
+    };
+    const unrelatedLegalMention = {
+      signal_id: "legal-mention",
+      person_name: "Kattia Durán",
+      role: "Seremi de Desarrollo Social y Familia",
+      region: "Metropolitana",
+      title: "Kattia Durán participa en una reunión de coordinación regional",
+      summary: "La autoridad participó en una actividad del ministerio.",
+      url: "https://www.diariooficial.interior.gob.cl/publicaciones/2026/10/01/",
+      date: "2026-10-01",
+      status: "en_confirmacion",
+      source_id: "diario-oficial",
+      source_tier: "official",
+    };
+
+    const payload = buildMovementPayload({ ...baseline, signals: [pending] }, {
+      now: "2026-10-01T07:00:00.000Z",
+      signals: [unrelatedLegalMention],
+    });
+
+    expect(payload.signals).toHaveLength(1);
+    expect(payload.signals[0].status).toBe("en_confirmacion");
+    expect(payload.signals[0]).not.toHaveProperty("verification");
   });
 
   it("deja el modo de revisión en verde y no publica señales como movimientos", () => {

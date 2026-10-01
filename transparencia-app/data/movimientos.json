@@ -130,12 +130,15 @@
   ],
   "stats": {
     "total_movimientos": 46,
+    "total_eventos_publicados": 51,
+    "eventos_con_respaldo": 46,
     "verificados": 11,
     "corroborados": 35,
-    "en_confirmacion": 0,
+    "en_confirmacion": 5,
     "con_reemplazo": 26,
     "reemplazo_no_informado": 20,
     "signals_en_confirmacion": 5,
+    "signals_verificadas_oficialmente": 0,
     "target_categories": "{\"ministers\":3,\"subsecretaries\":6,\"seremis\":36,\"delegados\":1}"
   },
   "movimientos": [
@@ -2349,5 +2352,5 @@
       "reemplazo_estado": "no_informado_en_fuentes_consultadas"
     }
   ],
-  "checksum_sha256": "53341a1d67bbf2792ad8013530729ee53a7b8121e7eef948cc76c0af6a24ad58"
+  "checksum_sha256": "d181b141bd2d461530617451952846335a0829db6110e0897c2d4fb302f82a14"
 }

@@ -17,11 +17,11 @@ se promueven automáticamente a verificados.
 ## Ejecución automática
 
 El workflow .github/workflows/etl-movimientos.yml se ejecuta diariamente a las
-07:00 UTC (03:00 en Chile durante el horario de invierno) y también admite
-workflow_dispatch. La ejecución programada es de revisión: consulta, registra
-señales y deja un artefacto; no publica por sí sola. La incorporación pública
-de nuevas señales requiere revisión y el flujo de publicación protegido. Este
-flujo:
+07:00 UTC y también admite workflow_dispatch. La ejecución programada consulta
+fuentes oficiales y medios confiables, y puede publicar señales nuevas en
+estado `en_confirmacion`, separadas del catálogo de salidas verificadas. No
+promueve automáticamente ninguna señal a movimiento oficial. El artefacto de
+ejecución conserva el detalle para auditoría. Este flujo:
 
 1. Recupera el último snapshot válido desde R2.
 2. Consulta en paralelo fuentes primarias (Ley Chile, Diario Oficial,
@@ -39,8 +39,10 @@ flujo:
 5. Conserva el snapshot anterior si todas las fuentes oficiales están
    bloqueadas; el workflow falla visiblemente y deja un artefacto de diagnóstico.
 6. Valida identificadores, fuentes, estados, conteos y checksum.
-7. Publica el grupo estático movimientos para que Pages lo consuma sólo cuando
-   la ejecución tenga autorización de publicación.
+7. Publica el grupo estático movimientos para que Pages lo consuma sólo si
+   hubo fuentes oficiales utilizables y pasó la validación del snapshot. Si
+   las fuentes oficiales no permiten verificar la ejecución, conserva el
+   release público anterior.
 
 El flujo de Movimientos es independiente del ETL de Cámara. Un bloqueo de
 Cámara no debe impedir esta actualización.
@@ -93,3 +95,8 @@ Las tres quedan `en_confirmacion` hasta localizar y comprobar el acto
 administrativo de cese. No se suman al total histórico de 46. Ante diferencias
 entre versiones de prensa y el comunicado institucional, se conserva la
 formulación de la fuente primaria y se omiten motivos no confirmados.
+
+Una ejecución diaria puede hacer visibles estas señales pendientes después de
+superar la validación automática. La fecha del cron no sustituye la publicación:
+el workflow debe terminar correctamente y el endpoint público debe verificarse
+antes de confirmar que el cambio llegó al sitio.

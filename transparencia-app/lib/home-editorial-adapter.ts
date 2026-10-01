@@ -46,12 +46,12 @@ export function buildEditorialMovements(movements: Movimiento[], signals: Movimi
         day: String(date.getUTCDate()).padStart(2, "0"),
         month: monthLabel.format(date).replace(".", "").toUpperCase(),
         year: String(date.getUTCFullYear()),
-        category: "RENUNCIA · EN CONFIRMACIÓN",
-        title: signal.title,
+        category: signal.status === "verificado_oficial" ? "RENUNCIA · VERIFICADA" : "RENUNCIA · EN CONFIRMACIÓN",
+        title: signal.person_name ? `${MOVIMIENTOS_TIPO_LABEL[signal.tipo] || "Cambio de autoridad"} de ${signal.person_name}` : signal.title,
         desc: [signal.role, signal.ministry, signal.region, signal.summary].filter(Boolean).join(" · "),
         source: signal.source_label,
-        status: "EN CONFIRMACIÓN",
-        link: `/movimientos/?q=${encodeURIComponent(signal.person_name || signal.title)}&estado=en_confirmacion`,
+        status: signal.status === "verificado_oficial" ? "VERIFICADO OFICIAL" : "EN CONFIRMACIÓN",
+        link: `/movimientos/?q=${encodeURIComponent(signal.person_name || signal.title)}&estado=${signal.status === "verificado_oficial" ? "verificado" : "en_confirmacion"}`,
         dateQualifier: "FECHA DE PUBLICACIÓN",
       } };
     });
