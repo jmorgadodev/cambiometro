@@ -52,6 +52,11 @@ function validDatePrefix(value: unknown): string | null {
   return Number.isFinite(parsed) && new Date(parsed).toISOString().slice(0, 10) === date ? date : null;
 }
 
+export function latestPublishedMovementDate(effectiveDate: string | null, signalDate: string | null): string | null {
+  return [validDatePrefix(effectiveDate), validDatePrefix(signalDate)]
+    .filter((date): date is string => date !== null).sort().at(-1) ?? null;
+}
+
 export function latestMovementSignalDate(signals: unknown): string | null {
   if (!Array.isArray(signals)) return null;
   const dates = signals.flatMap((signal) => {

@@ -53,3 +53,34 @@ Riesgo o siguiente puerta:
   quedó registrado. No se modificó R2/D1 en esta promoción.
 - Límite: esto evita el retroceso conocido; no acredita aún un `ReleaseSet`
   completo ni siete días de estabilidad.
+
+## O05 — puerta 1 · 2026-10-01 · comprobada
+
+- `.github/workflows/backup-weekly.yml` programa la verificación semanal,
+  pero asigna `BACKUP_LAKE_COPY=0` y `BACKUP_D1=0` en ejecución programada.
+  La copia completa exige despacho manual con confirmación explícita.
+- `transparencia-app/scripts/backup-weekly.mjs` sale sin copia cuando
+  `BACKUP_LAKE_COPY` no es `1`; luego el workflow ejecuta
+  `r2-compact-backups.mjs --mode=verify-remote`, una verificación del respaldo
+  existente, no la creación de otro backup.
+- Ejecución GitHub `36312112058` (2026-09-27): registró copia completa
+  omitida y verificación remota `status=OK` de 4.940 objetos, 4.107 blobs y
+  seis muestras restauradas. Esta evidencia **no** confirma coste mensual $0:
+  las lecturas de verificación también cuentan como operaciones R2.
+- Rama `codex/etl-cierre-costo-cero-20261001`, basada en `origin/main`
+  `5041518d`; documentación pendiente de PR/CI. R2 PUT/DELETE y D1 remoto
+  ejecutados en esta revisión: ninguno. Próxima puerta: medir uso de toda la
+  cuenta, operaciones y facturación del ciclo actual.
+
+## Incidente Home — contador de días · 2026-10-01
+
+- Causa: el efecto del navegador recalculaba los días exclusivamente desde
+  `ultimoCambioEfectivo` (14-09), ignorando señales publicadas el 30-09.
+- Corrección: calcular desde la fecha más reciente entre cambio efectivo y
+  señal publicada. Mantener el cálculo diario en zona America/Santiago y
+  conservar ambas fechas y sus estados en la interfaz.
+- Pruebas: 24 pruebas puntuales aprobadas (edad de movimientos, Home y
+  política de backup); TypeScript sin errores. Casos: anuncio del 30-09 da
+  cero ese día y un día el 01-10; una respuesta efectiva anterior no lo borra.
+- Promoción productiva y smoke: pendientes. Esta corrección no cierra O06.
+- R2 PUT/DELETE y D1 remoto: ninguno.

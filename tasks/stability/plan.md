@@ -13,6 +13,13 @@ No usar D1 para búsquedas, barridos o materialización masiva. No borrar datos
 ni backups para ganar espacio. ChileCompra se aborda al final y mientras tanto
 conserva su release válido. No cambiar diseño, menú ni rutas.
 
+**Costo facturable objetivo: $0.** El backup completo no se genera por
+calendario: se conserva y verifica el respaldo existente, sin crear copias
+nuevas ni reducirlo automáticamente. Antes de publicar, comprobar el uso y la
+proyección de almacenamiento **y operaciones Clase A/B de toda la cuenta R2**.
+El umbral de 95 % de almacenamiento no demuestra por sí solo costo cero. Si
+faltan métricas de facturación o margen verificable, no promover la carga.
+
 La ruta de código es el repositorio `C:\Users\jorge\Proyectos\cambiometro-public`
 en una rama `codex/` creada desde `origin/main` y montada bajo
 `C:\Users\jorge\.codex\worktrees`. El checkout principal divergente no se
@@ -46,8 +53,8 @@ actualiza ni se usa para desplegar. `cambiometro-audit` sólo guarda evidencia.
 | --- | --- | --- | --- | ---: |
 | O01 | Tablero único y ruta canónica documentados | XS | — | 100 % |
 | O02 | Despliegue UI y ETL de Movimientos no retroceden a Git | S | — | 100 % |
-| O05 | Medir presupuesto R2 de cuenta y catalogar respaldo, sin eliminarlo | S | O01 | 0 % |
-| O03 | Registro operativo de fuentes desde calendario y manifiestos; estados sin cifras inventadas | S | O01 | 0 % |
+| O05 | Confirmar ausencia de copias nuevas y presupuesto R2 de toda la cuenta | S | O01 | 25 % |
+| O03 | Registro ETL con procedencia efectiva, calendario y manifiestos | S | O01 | 0 % |
 | O04 | Suprimir contadores fijos antiguos de Fuentes; derivar por release y alcance | S | O03 | 0 % |
 | O06 | Candidato/no-op de Movimientos: anuncio, confirmación en el mismo ID y cero inesperado | M | O02, O05 | 0 % |
 | O07 | Guardia ETL común: esquema, checksum, períodos, duplicados, descenso y fallo externo | M | O06 | 0 % |
@@ -57,7 +64,7 @@ actualiza ni se usa para desplegar. `cambiometro-audit` sólo guarda evidencia.
 | O11 | Migrar fuentes pequeñas; Senado votaciones local-only; fallos externos aislados | M por fuente | O07 | 0 % |
 | O12 | Gastos parlamentarios: guardas y períodos publicados, nulo distinto de cero | M | O07, O08 | 0 % |
 | O13 | Remuneraciones municipal/central/38 bis: guardas, cortes e índices sin D1 masiva | M por componente | O07, O08 | 0 % |
-| O14 | Simulacro de restauración desde backup y rollback por release | M | O05, O08 | 0 % |
+| O14 | Simulacro de rollback por release y verificación del respaldo existente, sin copia nueva | M | O05, O08 | 0 % |
 | O15 | Siete días continuos de concordancia R2 → API → Pages y alertas útiles | S operativo, 7 días calendario | O09–O14 | 0 % |
 | O16 | ChileCompra: último, con preflight de alcance/coste y recuperación 403 | M por período | O05, O07, O15 | 0 % |
 
@@ -67,6 +74,12 @@ publicación nueva; después O03 y O04. O11 y O13 se dividen en una tarea
 verificable por fuente/componente antes de editar código. Una falla externa
 queda como `degraded_external` y no bloquea
 las otras fuentes; no se transforma una extracción vacía en release nuevo.
+
+El [inventario de cierre ETL](etl-closure.md) es la lista de trabajo por
+conector. Ningún ETL se declara operativo por tener workflow verde: requiere
+procedencia efectiva, replay acotado, coherencia R2/API/página y una ejecución
+en su modalidad real con guardas de costo. Los ETL manuales y local-only no se
+presentan como actualizaciones automáticas.
 
 ## Checkpoints
 
@@ -87,8 +100,9 @@ las otras fuentes; no se transforma una extracción vacía en release nuevo.
 
 - El nuevo release reduce filas fuera del umbral, cambia período/identidad de
   fuente o no supera checksum y conteos.
-- La suma de almacenamiento de la cuenta R2, incluido el backup, alcanza la
-  revisión obligatoria del 90 % sin decisión registrada o el bloqueo del 95 %.
+- La proyección de almacenamiento de toda la cuenta R2, incluido el backup,
+  llega al 90 % sin revisión o al 95 %; o las operaciones Clase A/B podrían
+  superar el tramo gratuito. Sin telemetría de facturación, detener publicación.
 - Pages no puede demostrar qué release de cada dominio compiló, o su API y
   página muestran otro corte.
 - Una fuente externa devuelve 403/timeout o cero sin certificación explícita.

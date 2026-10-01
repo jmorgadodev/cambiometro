@@ -22,8 +22,8 @@ documental; no marcarla por una prueba local. Orden y dependencias en
 
 ## O03 · Registro de fuentes · S · 0 %
 
-- [ ] Reconciliar `.github/etl-calendar.json` con workflows, modo y frecuencia; incluir Senado local-only.
-- [ ] Asociar por fuente el manifiesto R2, release, checksum, períodos y alcance o marcar «no medido».
+- [ ] Reconciliar calendario con workflows, modo, frecuencia y fuente efectiva (URL/API/documento); incluir Senado local-only.
+- [ ] Asociar por fuente ventana extraída, manifiesto R2, release, checksum, períodos y alcance o marcar «no medido».
 - [ ] Generar matriz reproducible y probar faltantes/duplicados sin descargar universos.
 - [ ] Validar contra manifiestos productivos y fusionar sin alterar datos públicos.
 
@@ -34,12 +34,12 @@ documental; no marcarla por una prueba local. Orden y dependencias en
 - [ ] Probar discrepancias de corte, nulos y ausencia de manifiesto.
 - [ ] Preview, promoción y comparación con API/manifiesto productivo.
 
-## O05 · Presupuesto R2 y respaldo · S · 0 %
+## O05 · Costo cero y respaldo existente · S · 25 %
 
-- [ ] Medir bytes/objetos/operaciones de **toda la cuenta**, incluidos buckets de backup.
-- [ ] Inventariar protección, IDs y checksums del respaldo; no borrar objetos.
-- [ ] Verificar preflight 80/90/95 % con tamaño proyectado y prueba sin escritura.
-- [ ] Publicar informe fechado con margen seguro y decisión de retención pendiente.
+- [x] Confirmar que el calendario no genera nueva copia completa ni backup D1; verificar sólo el respaldo existente.
+- [ ] Medir bytes, objetos, operaciones Clase A/B y uso facturable de **toda la cuenta**, incluidos backups, en el ciclo actual.
+- [ ] Probar sin escrituras un preflight que bloquee si falta telemetría o hay riesgo de superar cualquier margen gratuito.
+- [ ] Publicar informe fechado de costo cero verificable, protección existente y presupuesto por publicación.
 
 ## O06 · Piloto ETL Movimientos · M · 0 %
 
@@ -78,7 +78,7 @@ documental; no marcarla por una prueba local. Orden y dependencias en
 
 ## O11 · Fuentes pequeñas y bloqueadas · M por fuente · 0 %
 
-- [ ] Dividir por fuente y registrar modo/frescura; Senado votaciones es local-only.
+- [ ] Dividir por fuente y registrar procedencia efectiva, ventana, modo/frescura; Senado votaciones es local-only.
 - [ ] Migrar fuentes pequeñas con prueba de fallo externo y último release preservado.
 - [ ] Tratar Cámara personal de apoyo y Senado sin convertir 403 en cero.
 - [ ] Verificar API, página y rollbacks individuales antes de cerrar cada fuente.
@@ -97,12 +97,12 @@ documental; no marcarla por una prueba local. Orden y dependencias en
 - [ ] Comparar conteos, checksum e índices por organismo/período en preview.
 - [ ] Promover cada componente por separado y verificar fichas y búsqueda.
 
-## O14 · Restauración · M · 0 %
+## O14 · Rollback sin nueva copia · M · 0 %
 
-- [ ] Seleccionar release/backups verificables y documentar alcance sin borrar nada.
-- [ ] Restaurar muestra representativa en entorno aislado y comprobar checksum.
-- [ ] Medir duración, bytes, coste y procedimiento de rollback reproducible.
-- [ ] Revisar resultado; cualquier cambio de retención requerirá decisión aparte.
+- [ ] Identificar release vigente y anterior con checksum; inventariar respaldo ya existente sin borrar ni copiar.
+- [ ] Ensayar rollback del puntero de release en entorno aislado, sin escritura R2 productiva.
+- [ ] Verificar muestra del respaldo existente de forma acotada y medir lecturas/coste proyectado.
+- [ ] Documentar recuperación reproducible; nueva copia o cambio de retención requiere decisión aparte.
 
 ## O15 · Observación · S operativo / 7 días · 0 %
 

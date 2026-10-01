@@ -1,7 +1,20 @@
 import { describe, expect, it } from "vitest";
-import { daysSinceCalendarDate, getChileDateKey, latestEffectiveMovementDate, latestMovementReviewDate, latestMovementSignalDate } from "./movement-age";
+import { daysSinceCalendarDate, getChileDateKey, latestEffectiveMovementDate, latestMovementReviewDate, latestMovementSignalDate, latestPublishedMovementDate } from "./movement-age";
 
 describe("contador de días desde el último movimiento", () => {
+  it("reinicia el contador con un anuncio publicado aunque siga en confirmación", () => {
+    const latest = latestPublishedMovementDate("2026-09-14", "2026-09-30");
+    expect(latest).toBe("2026-09-30");
+    expect(daysSinceCalendarDate(latest!, "2026-10-01")).toBe(1);
+    expect(daysSinceCalendarDate(latest!, "2026-09-30")).toBe(0);
+  });
+
+  it("conserva la fecha publicada reciente frente a una consulta efectiva anterior", () => {
+    expect(latestPublishedMovementDate("2026-09-14", "2026-09-30")).toBe("2026-09-30");
+    expect(latestPublishedMovementDate("2026-10-01", "2026-09-30")).toBe("2026-10-01");
+    expect(latestPublishedMovementDate("2026-09-14", null)).toBe("2026-09-14");
+    expect(latestPublishedMovementDate("invalid", "2026-99-42")).toBeNull();
+  });
   it("cuenta días calendario desde el cambio efectivo, no desde la última revisión", () => {
     expect(daysSinceCalendarDate("2026-09-14", "2026-09-23")).toBe(9);
   });
