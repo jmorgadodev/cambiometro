@@ -81,6 +81,15 @@ describe("Módulo /movimientos — Rediseño de Jerarquía, Eliminación de CSV 
     )).toEqual({ backed: 2, pending: 2 });
   });
 
+  it("mantiene coherente el total pendiente entre movimientos y anuncios publicados", () => {
+    const productionLikeMovements = [
+      ...Array.from({ length: 45 }, () => ({ estado: "corroborado" as const })),
+      { estado: "en_confirmacion" as const },
+    ];
+    expect(summarizeMovementPublicationCounts(productionLikeMovements, MOVIMIENTOS_PIPELINE_METADATA.signals ?? []))
+      .toEqual({ backed: 45, pending: 6 });
+  });
+
   it("1f. toma como último cambio sólo el movimiento respaldado más reciente", () => {
     expect(MOVIMIENTOS_HOME_SUMMARY.ultimoCambioEfectivo).toBe("2026-09-14");
   });
