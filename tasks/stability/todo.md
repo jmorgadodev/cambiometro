@@ -56,11 +56,11 @@ Además del replay local, la ejecución real desde `main` 36854416777 y sus
 controles posteriores pasaron: no-op sin subida R2 ni build Pages. Cronología
 productiva y rollback comprobados; evidencia abajo. Costes (#671) siguen apartados.
 
-## O07 · Contrato ETL reutilizable · M · 0 %
+## O07 · Contrato ETL reutilizable · M · 75 %
 
-- [ ] Extraer guardas comunes sin duplicar la lógica existente de cada fuente.
-- [ ] Cubrir checksum, períodos, identidad, duplicados, descenso y presupuesto.
-- [ ] Pruebas contractuales: caída externa, cero, candidato parcial y rollback.
+- [x] Extraer guardas comunes sin duplicar la lógica existente de cada fuente.
+- [x] Cubrir checksum, períodos, identidad, duplicados, descenso y presupuesto.
+- [x] Pruebas contractuales: caída externa, cero, candidato parcial y rollback.
 - [ ] Migrar una segunda fuente pequeña y verificar promoción aislada.
 
 ## O08 · `ReleaseSet` R2 · M · 0 %

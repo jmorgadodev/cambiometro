@@ -9,13 +9,12 @@
 import { existsSync } from "node:fs";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { hasMovementPublicChanges } from "./movimientos-publication.mjs";
+import { assertMovementCandidate, hasMovementPublicChanges } from "./movimientos-publication.mjs";
 import {
   buildMovementReviewReport,
   buildMovementPayload,
   collectMovementSources,
   MOVIMIENTOS_SOURCES,
-  validateMovementPayload,
 } from "./movimientos-pipeline.mjs";
 
 const root = resolve(import.meta.dirname, "..");
@@ -101,7 +100,7 @@ async function main() {
     throw new Error("MOVIMIENTOS_ALL_OFFICIAL_SOURCES_BLOCKED");
   }
 
-  const payload = validateMovementPayload(buildMovementPayload(previous, {
+  const payload = assertMovementCandidate(previous, buildMovementPayload(previous, {
     now,
     sourceResults: collected.results,
     signals: collected.signals,
