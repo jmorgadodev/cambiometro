@@ -34,12 +34,17 @@ documental; no marcarla por una prueba local. Orden y dependencias en
 - [ ] Probar discrepancias de corte, nulos y ausencia de manifiesto.
 - [ ] Preview, promoción y comparación con API/manifiesto productivo.
 
-## O05 · Costo cero y respaldo existente · S · 50 %
+## O05 · Costo cero y respaldo existente · S · 75 %
 
 - [x] Confirmar que el calendario no genera nueva copia completa ni backup D1; verificar sólo el respaldo existente.
 - [x] Medir bytes, objetos, operaciones Clase A/B y uso facturable de **toda la cuenta**, incluidos backups, en el ciclo actual.
-- [ ] Probar sin escrituras un preflight que bloquee si falta telemetría o hay riesgo de superar cualquier margen gratuito.
+- [x] Probar sin escrituras un preflight que bloquee si falta telemetría o hay riesgo de superar cualquier margen gratuito (PR #671; ejecución 36849101906 bloqueada por permiso Analytics ausente).
 - [ ] Publicar informe fechado de costo cero verificable, protección existente y presupuesto por publicación.
+
+Bloqueo de cierre: habilitar lectura Analytics de cuenta al token
+`CLOUDFLARE_DATA_API_TOKEN`, repetir el preflight y fusionar #671 sólo con
+telemetría válida y controles verdes. No activar guardas que bloqueen todos
+los ETL por credenciales incompletas. No hay nuevas copias ni cargas R2.
 
 ## O06 · Piloto ETL Movimientos · M · 0 %
 

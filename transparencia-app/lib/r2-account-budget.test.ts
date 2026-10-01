@@ -23,6 +23,10 @@ describe("account-wide public R2 write budget", () => {
       ? new Response(JSON.stringify(telemetry())) : new Response("denied", { status: 403 })));
     await expect(assertRemoteR2WriteBudget({ accountId: "account", token: "test", buckets: ["primary"] })).rejects.toThrow("R2_WRITE_GUARD_BUCKET_LIST_403");
   });
+  it("cannot raise the free storage allowance through configuration", async () => {
+    stubBudgetFetch(telemetry(), [{ name: "other-project" }]);
+    await expect(assertRemoteR2WriteBudget({ accountId: "account", token: "test", limitBytes: 20_000_000_000 })).rejects.toThrow("R2_WRITE_BLOCKED");
+  });
   it.each([[950_000, "PutObject"], [9_500_000, "GetObject"]])("blocks at 95 percent of operation allowance (%i %s)", async (requests, action) => {
     stubBudgetFetch(telemetry(requests, action));
     await expect(assertRemoteR2WriteBudget({ accountId: "account", token: "test" })).rejects.toThrow("R2_OPERATIONS_BLOCKED_AT_95_PERCENT");

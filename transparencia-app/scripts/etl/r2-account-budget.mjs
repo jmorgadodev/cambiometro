@@ -78,7 +78,7 @@ export async function assertRemoteR2WriteBudget({ accountId, token, buckets, put
     currentObjects,
     puts,
     deletes,
-    limitBytes: limitBytes ?? Number(process.env.R2_LIMIT_BYTES ?? 10_000_000_000),
+    limitBytes: Math.min(10_000_000_000, limitBytes ?? Number(process.env.R2_LIMIT_BYTES ?? 10_000_000_000)),
   });
   return { ...storageBudget, operationsBudget: operationProjection(operations, puts, inventoryRequests) };
 }

@@ -167,3 +167,26 @@ Riesgo o siguiente puerta:
   no es un límite de facturación de Cloudflare ni puede limitar tráfico público
   concurrente. La API de métricas puede tener retraso y datos muestreados.
   No acredita cobertura integral ni siete días de operación autónoma.
+
+### Resultado remoto y siguiente paso único
+
+- PR de implementación: #671. Ejecución manual **36849101906**, commit
+  `079bc2ea`: preflight detenido con `not authorized for that account`.
+  La cuenta sí recibió credenciales; el permiso Analytics está ausente.
+  La verificación de publicación posterior quedó omitida; no se extrajeron
+  fuentes ni se ejecutaron PUT/DELETE R2 o consultas D1.
+- O05 puerta 3 cerrada: se probó realmente el bloqueo por telemetría ausente.
+  O05 = 75 %. La puerta 4 permanece abierta: no existe todavía un presupuesto
+  de operaciones autorizado que permita promover estas guardas.
+- #671 permanece **sin fusionar** para no detener los publicadores vigentes.
+  Acción requerida: en el token que alimenta `CLOUDFLARE_DATA_API_TOKEN`,
+  habilitar **Account / Account Analytics / Read** para esta cuenta (o
+  sustituir ese secreto por un token equivalente con lectura Analytics).
+  No ampliar permisos de escritura ni compartir el valor del token en el chat.
+- Después: despachar `etl-publication-guard.yml` en
+  `codex/etl-cost-publication-20261001`, confirmar presupuesto y controles
+  del PR verdes, fusionar y registrar el informe. No iniciar otra auditoría
+  ni relanzar cargas históricas. El límite gratuito de almacenamiento no se
+  puede ampliar mediante `R2_LIMIT_BYTES` ni el argumento `limitBytes`.
+- Publicación de cada ETL: conexión al preflight cubierta por pruebas; no
+  se declara cierre operativo de cada fuente sin su publicación verificada.
