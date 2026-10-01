@@ -137,3 +137,56 @@ Riesgo o siguiente puerta:
   operación con guardas. La publicación actual usa PUT directos; antes de
   cerrar se debe conectar al preflight común de cuenta y comprobar no-op.
 - R2 PUT/DELETE y D1 remoto en esta auditoría: ninguno.
+
+## Guardas de costes y publicación — 2026-10-01
+
+- PR #670 fusionado en `2fa03dd379dc75bf762f75886403925bfaa10ec5`;
+  sus controles quedaron verdes. Trabajo posterior aislado en
+  `codex/etl-cost-publication-20261001`, worktree
+  `C:\Users\jorge\.codex\worktrees\codex-stabilizacion-20261001`.
+- Se reutiliza `scripts/etl/r2-account-budget.mjs`: inventario de todos los
+  buckets, pico de almacenamiento y ahora operaciones A/B de toda la cuenta.
+  Consulta GraphQL de los últimos 31 días (ventana conservadora que contiene
+  el ciclo mensual), reserva de cargas/multipart/reintentos y 1.000 operaciones
+  de margen. Bloqueo al 95 % de 10 GB, 1 millón A o 10 millones B.
+- Telemetría ausente, denegada, truncada, acciones desconocidas o cantidades
+  inválidas bloquean la publicación. El token de datos necesita lectura de
+  Analytics de la cuenta además de los permisos R2 existentes; no se añaden
+  permisos automáticamente ni se permite sustituir métricas por cifras manuales.
+- Los publicadores de lake, entradas estáticas, personal de apoyo y
+  transferencias ya usan ese preflight. CPLT delega en el publicador del lake.
+  Los ocho PUT directos de 38 bis ahora pasan el mismo presupuesto antes del
+  primero; el manifiesto corriente sigue publicándose al final.
+- El despacho manual de `etl-publication-guard.yml` comprueba ese presupuesto
+  con el token de GitHub, sin extraer ni escribir datos. La validación remota
+  y su resultado deben registrarse antes de cerrar O05.
+- Pruebas negativas nuevas fallaron antes de implementar las guardas;
+  pruebas de operaciones/almacenamiento y contrato de publicadores pasan.
+  TypeScript pasa. No se reejecutan ETL masivos ni se generan backups.
+- Alcance del control: evita publicaciones que excedan el presupuesto medido;
+  no es un límite de facturación de Cloudflare ni puede limitar tráfico público
+  concurrente. La API de métricas puede tener retraso y datos muestreados.
+  No acredita cobertura integral ni siete días de operación autónoma.
+
+### Resultado remoto y siguiente paso único
+
+- PR de implementación: #671. Ejecución manual **36849101906**, commit
+  `079bc2ea`: preflight detenido con `not authorized for that account`.
+  La cuenta sí recibió credenciales; el permiso Analytics está ausente.
+  La verificación de publicación posterior quedó omitida; no se extrajeron
+  fuentes ni se ejecutaron PUT/DELETE R2 o consultas D1.
+- O05 puerta 3 cerrada: se probó realmente el bloqueo por telemetría ausente.
+  O05 = 75 %. La puerta 4 permanece abierta: no existe todavía un presupuesto
+  de operaciones autorizado que permita promover estas guardas.
+- #671 permanece **sin fusionar** para no detener los publicadores vigentes.
+  Acción requerida: en el token que alimenta `CLOUDFLARE_DATA_API_TOKEN`,
+  habilitar **Account / Account Analytics / Read** para esta cuenta (o
+  sustituir ese secreto por un token equivalente con lectura Analytics).
+  No ampliar permisos de escritura ni compartir el valor del token en el chat.
+- Después: despachar `etl-publication-guard.yml` en
+  `codex/etl-cost-publication-20261001`, confirmar presupuesto y controles
+  del PR verdes, fusionar y registrar el informe. No iniciar otra auditoría
+  ni relanzar cargas históricas. El límite gratuito de almacenamiento no se
+  puede ampliar mediante `R2_LIMIT_BYTES` ni el argumento `limitBytes`.
+- Publicación de cada ETL: conexión al preflight cubierta por pruebas; no
+  se declara cierre operativo de cada fuente sin su publicación verificada.

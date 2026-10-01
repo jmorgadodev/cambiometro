@@ -87,10 +87,34 @@ jobs:
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+          RELEASE_CHECKSUM: ${{ steps.release.outputs.checksum }}
         shell: bash
         run: |
           base="transparencia-public-data/projections/remuneraciones-38bis-v1"
           release="${base}/releases/${{ steps.release.outputs.checksum }}"
+          node --input-type=module <<'NODE'
+          import { statSync } from 'node:fs';
+          import { assertRemoteR2WriteBudget } from './scripts/etl/r2-account-budget.mjs';
+          const bucket = 'transparencia-public-data';
+          const base = 'projections/remuneraciones-38bis-v1';
+          const release = `${base}/releases/${process.env.RELEASE_CHECKSUM}`;
+          const files = [
+            ['data.json', 'current.json', 'data/remuneraciones-38bis-publico.json'],
+            ['history.json', 'current-history.json', 'data/remuneraciones-38bis-publico-historico.json'],
+            ['audit.json', 'current-audit.json', 'data/remuneraciones-38bis-publico-audit.json'],
+            ['manifest.json', 'manifest.json', 'data/remuneraciones-38bis-release/manifest.json'],
+          ];
+          const puts = files.flatMap(([versioned, current, file]) => [
+            { bucket, key: `${release}/${versioned}`, size: statSync(file).size },
+            { bucket, key: `${base}/${current}`, size: statSync(file).size },
+          ]);
+          const budget = await assertRemoteR2WriteBudget({
+            accountId: process.env.CLOUDFLARE_ACCOUNT_ID,
+            token: process.env.CLOUDFLARE_API_TOKEN,
+            buckets: [bucket], puts,
+          });
+          console.log(JSON.stringify(budget));
+          NODE
           npx wrangler r2 object put "$release/data.json" --file data/remuneraciones-38bis-publico.json --content-type application/json --remote
           npx wrangler r2 object put "$release/history.json" --file data/remuneraciones-38bis-publico-historico.json --content-type application/json --remote
           npx wrangler r2 object put "$release/audit.json" --file data/remuneraciones-38bis-publico-audit.json --content-type application/json --remote
