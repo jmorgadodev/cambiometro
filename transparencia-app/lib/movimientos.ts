@@ -115,6 +115,18 @@ export interface MovimientoSignal {
   last_seen_at?: string;
 }
 
+export function summarizeMovementPublicationCounts(
+  movements: readonly Pick<Movimiento, "estado">[],
+  signals: readonly Pick<MovimientoSignal, "status">[],
+) {
+  return {
+    backed: movements.filter(esMovimientoRespaldado).length
+      + signals.filter((signal) => signal.status === "verificado_oficial").length,
+    pending: movements.filter((movement) => movement.estado === "en_confirmacion").length
+      + signals.filter((signal) => signal.status === "en_confirmacion").length,
+  };
+}
+
 export interface MovimientosPayload {
   version: string;
   pipeline: "etl_movimientos_autoridades";
