@@ -25,6 +25,15 @@ const baseline = {
 const publishedMovements = JSON.parse(readFileSync(new URL("../data/movimientos.json", import.meta.url), "utf8"));
 
 describe("pipeline automático de movimientos", () => {
+  it("no cuenta noticias internacionales ni críticas sin anuncio de salida", () => {
+    const signals = parseMovementSignals(JSON.stringify([
+      { title: 'Irán: salida de EE.UU. de Irak', description: 'El Gobierno de Bagdad celebra la salida de tropas.', url: 'https://www.cooperativa.cl/noticias/mundo/iran/salida.html', date: '2026-10-01' },
+      { title: 'Heraldo Muñoz acusó doble estándar del Gobierno por mantener a Zaliasnik', description: 'Se menciona la renuncia de una embajadora y un nombramiento anterior de autoridades.', url: 'https://www.cooperativa.cl/noticias/pais/critica.html', date: '2026-10-01' },
+      { title: 'Ministro renuncia en Irak', description: 'El Gobierno informa su salida.', url: 'https://www.cooperativa.cl/noticias/mundo/irak/ministro.html', date: '2026-10-01' },
+      { title: 'Seremi descarta renuncia', url: 'https://www.cooperativa.cl/noticias/pais/desmentido.html', date: '2026-10-01' },
+    ]), { id: 'cooperativa', tier: 'press', url: 'https://www.cooperativa.cl/noticias/site/tax/port/all/rss__1.xml', contentType: 'application/json' });
+    expect(signals).toEqual([]);
+  });
   it("mantiene 46 salidas y añade evidencia oficial a Jorge Olivares", () => {
     const jorge = publishedMovements.movimientos.find((movement) => movement.id === "mov-kast-2026-2026-09-14-jorge-olivares");
 
