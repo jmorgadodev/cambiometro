@@ -321,3 +321,17 @@ Riesgo o siguiente puerta:
   no se ejecutó workflow de reparación ni se promovieron objetos R2/D1.
   La adopción común se cierra sólo tras CI verde y fusión; el cierre operativo
   individual de conectores/publicaciones remotas pertenece a O11–O13/O05.
+
+### O07 — cierre del contrato común · 2026-10-01 · 100 %
+
+- PR #679 integrado en main: `d2824d02ba0004a70be8ff522155e256f005361d`.
+  Lint, tipos, unitarias, arquitectura, tokens, enlaces, seguridad, build y
+  verificación de rutas/API/UI aprobados. Build/E2E: run 36924265689, success.
+- Segunda adopción comprobada con replay local Cámara, sin publicar: bytes
+  alterados bloquean la salida; candidato válido genera catálogo aislado;
+  el catálogo previo y la fuente ajena permanecen intactos. Movimientos usa
+  el contrato en el ETL existente antes de reemplazar su snapshot local.
+- El 100 % corresponde a la librería común y ambas adopciones verificadas,
+  no a la operación remota de todas las fuentes. No se disparó extracción ni
+  reparación remota, no hubo D1 remoto, objetos nuevos R2 ni respaldos nuevos.
+  O05/#671 sigue apartado; O11–O13 mantienen sus puertas operativas propias.

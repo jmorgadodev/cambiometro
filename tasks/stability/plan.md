@@ -57,7 +57,7 @@ actualiza ni se usa para desplegar. `cambiometro-audit` sólo guarda evidencia.
 | O03 | Registro ETL con procedencia configurada, calendario y manifiestos | S | O01 | 100 % |
 | O04 | Suprimir contadores fijos antiguos de Fuentes; derivar por release y alcance | S | O03 | 100 % |
 | O06 | Candidato/no-op de Movimientos: anuncio, confirmación en el mismo ID y cero inesperado | M | O02, O05 | 100 % |
-| O07 | Guardia ETL común: esquema, checksum, períodos, duplicados, descenso y fallo externo | M | O06 | 75 % |
+| O07 | Guardia ETL común: esquema, checksum, períodos, duplicados, descenso y fallo externo | M | O06 | 100 % |
 | O08 | `ReleaseSet` R2 con IDs/checksums por dominio y lectura fijada por Pages | M | O03, O07 | 0 % |
 | O09 | Promoción Pages de artefacto coherente y bloqueo global de publicación | M | O08 | 0 % |
 | O10 | Control diario sin extracción ni alertas repetidas por una misma causa | M | O03, O08 | 0 % |
@@ -71,7 +71,7 @@ actualiza ni se usa para desplegar. `cambiometro-audit` sólo guarda evidencia.
 Los IDs permanecen estables para que la evidencia no se renumere. Entre las
 tareas abiertas, **O05 es la siguiente**: medir el margen R2 antes de cualquier
 publicación nueva. O05/#671 está apartado por indicación del usuario; O03 y O04
-están cerrados y la siguiente tarea es O07. O11 y O13 se dividen en una tarea
+están cerrados; O07 también está cerrado y la siguiente tarea es O08. O11 y O13 se dividen en una tarea
 verificable por fuente/componente antes de editar código. Una falla externa
 queda como `degraded_external` y no bloquea
 las otras fuentes; no se transforma una extracción vacía en release nuevo.
