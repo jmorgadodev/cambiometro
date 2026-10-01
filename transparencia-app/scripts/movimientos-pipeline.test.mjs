@@ -25,6 +25,15 @@ const baseline = {
 const publishedMovements = JSON.parse(readFileSync(new URL("../data/movimientos.json", import.meta.url), "utf8"));
 
 describe("pipeline automático de movimientos", () => {
+  it("no presenta todos los eventos del corte como confirmados", () => {
+    const payload = buildMovementPayload(publishedMovements);
+    const backed = payload.movimientos.filter((row) => ["verificado", "verificado_oficial", "corroborado"].includes(row.estado)).length
+      + payload.signals.filter((row) => row.status === "verificado_oficial").length;
+    const pending = payload.movimientos.filter((row) => row.estado === "en_confirmacion").length
+      + payload.signals.filter((row) => row.status === "en_confirmacion").length;
+    expect(payload.stats.eventos_con_respaldo).toBe(backed);
+    expect(payload.stats.en_confirmacion).toBe(pending);
+  });
   it("no cuenta noticias internacionales ni críticas sin anuncio de salida", () => {
     const signals = parseMovementSignals(JSON.stringify([
       { title: 'Irán: salida de EE.UU. de Irak', description: 'El Gobierno de Bagdad celebra la salida de tropas.', url: 'https://www.cooperativa.cl/noticias/mundo/iran/salida.html', date: '2026-10-01' },
