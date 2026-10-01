@@ -69,10 +69,11 @@ on:
         default: false
 
 concurrency:
-  # Cada ETL tiene su propia cola. Un no-op posterior no debe cancelar
-  # la promoción válida en curso antes de evaluar refresh-decision.
-  group: pages-static-refresh-${{ github.event_name == 'workflow_run' && github.event.workflow_run.name || github.event_name }}
+  # Una cola compartida evita despliegues y publicaciones solapados.
+  # queue: max conserva pendientes; cancel-in-progress protege el activo.
+  group: cambiometro-static-publication
   cancel-in-progress: false
+  queue: max
 
 permissions:
   contents: read
@@ -272,6 +273,14 @@ jobs:
             --file data/remuneraciones-38bis-publico-audit.json --remote
           node -e 'const fs=require("fs"); const r=JSON.parse(fs.readFileSync("data/remuneraciones-38bis-publico.json")); const a=JSON.parse(fs.readFileSync("data/remuneraciones-38bis-publico-audit.json")); if(!Array.isArray(r.registros)||r.registros.length!==r.filas) throw new Error("38BIS_RELEASE_INVALID"); if(a.d1_rows_read!==0||a.d1_rows_written!==0) throw new Error("38BIS_D1_NOT_ZERO"); console.log(JSON.stringify({rows:r.filas,mes:r.mes,checksum:r.checksum_sha256,d1:[a.d1_rows_read,a.d1_rows_written]}));'
 
+      - name: Fijar ReleaseSet de entradas estáticas y validar bytes locales
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: npm run data:hydrate:static -- --required --required-all --manifest-file .ci-data-version/static-site-manifest.json --release-set-file .ci-data-version/release-set.json
+
+
       - name: Verificar calidad semántica de entradas estáticas
         working-directory: transparencia-app
         run: npm run check:static-input-quality
@@ -399,6 +408,14 @@ jobs:
         working-directory: transparencia-app
         run: npm run api:size
 
+      - name: Adjuntar ReleaseSet verificado al artefacto
+        working-directory: transparencia-app
+        run: |
+          node scripts/verify-release-set.mjs --pin .ci-data-version/release-set.json --manifest .ci-data-version/static-site-manifest.json
+          mkdir -p out/data
+          cp .ci-data-version/release-set.json out/data/release-set.json
+
+
       - name: Guardar artefacto Pages
         uses: actions/upload-artifact@v4
         with:
@@ -406,6 +423,17 @@ jobs:
           path: transparencia-app/out
           if-no-files-found: error
           retention-days: 7
+
+      - name: Rechazar promoción con ReleaseSet estático desfasado
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          mkdir -p .ci-data-version
+          npx wrangler r2 object get transparencia-public-data/projections/static-site-v1/manifest.json --file .ci-data-version/promotion-static-manifest.json --remote
+          node scripts/verify-release-set.mjs --pin out/data/release-set.json --manifest .ci-data-version/promotion-static-manifest.json
+
 
       - name: Publicar preview Pages aislado
         if: inputs.preview_branch != ''

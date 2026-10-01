@@ -1,4 +1,4 @@
-import { assertStaticInputManifest, STATIC_SITE_FILE_GROUPS, sha256Json } from "./static-site-inputs.mjs";
+import { assertStaticInputManifest, STATIC_SITE_FILE_GROUPS, sha256Buffer, sha256Json } from "./static-site-inputs.mjs";
 
 // Pure local contract. Remote compare-and-swap and Pages integration are
 // deliberately not enabled by importing this module.
@@ -38,6 +38,17 @@ function assertReleaseSet(set) {
 export function assertPinnedReleaseSet(set, manifest) {
   assertReleaseSet(set);
   if (buildReleaseSet(manifest).releaseSetId !== set.releaseSetId) throw new Error("RELEASE_SET_PIN_MISMATCH");
+  return set;
+}
+
+export function assertReleaseSetArtifacts(set, manifest, readArtifact) {
+  assertPinnedReleaseSet(set, manifest);
+  for (const file of manifest.files) {
+    const bytes = readArtifact(file.path);
+    if (bytes.byteLength !== file.size || sha256Buffer(bytes) !== file.checksumSha256) {
+      throw new Error(`RELEASE_SET_ARTIFACT_MISMATCH:${file.path}`);
+    }
+  }
   return set;
 }
 

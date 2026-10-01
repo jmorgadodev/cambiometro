@@ -2,6 +2,7 @@ import { existsSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node
 import { dirname, resolve } from "node:path";
 import { spawnSync } from "node:child_process";
 import { assertStaticInputContentQuality, assertStaticInputManifest, assertStaticInputManifestComplete, resolveSafeStaticPath, sha256Buffer } from "./static-site-inputs.mjs";
+import { buildReleaseSet, assertReleaseSetArtifacts } from "./release-set.mjs";
 
 const root = resolve(import.meta.dirname, "..");
 const bucket = argument("--bucket", "transparencia-public-data");
@@ -11,6 +12,8 @@ const force = process.argv.includes("--force");
 const requiredFiles = argument("--required-files", "").split(",").map((value) => value.trim()).filter(Boolean);
 const onlyFiles = argument("--only-files", "").split(",").map((value) => value.trim()).filter(Boolean);
 const manifestFile = argument("--manifest-file", "");
+const releaseSetFile = argument("--release-set-file", "");
+if (releaseSetFile && onlyFiles.length > 0) throw new Error("RELEASE_SET_PARTIAL_HYDRATION_NOT_ALLOWED");
 const localManifestPath = manifestFile ? resolve(root, manifestFile) : resolve(root, ".static-site-release-manifest.json");
 const remoteKey = "projections/static-site-v1/manifest.json";
 
@@ -57,6 +60,7 @@ if (manifestFile) {
 }
 
 assertStaticInputManifest(manifest);
+const releaseSet = releaseSetFile ? buildReleaseSet(manifest) : null;
 if (requiredAll) assertStaticInputManifestComplete(manifest);
 const availableFiles = new Set(manifest.files.map((entry) => entry.path));
 const existingManifest = readExistingManifest();
@@ -85,4 +89,10 @@ for (const entry of manifest.files) {
   rmSync(temporary, { force: true });
 }
 writeFileSync(localManifestPath, `${JSON.stringify(manifest, null, 2)}\n`, "utf8");
+if (releaseSet) {
+  assertReleaseSetArtifacts(releaseSet, manifest, (path) => readFileSync(resolveSafeStaticPath(root, path)));
+  const pinPath = resolve(root, releaseSetFile);
+  mkdirSync(dirname(pinPath), { recursive: true });
+  writeFileSync(pinPath, `${JSON.stringify(releaseSet, null, 2)}\n`, "utf8");
+}
 console.log(JSON.stringify({ action: "hydrated", files: manifest.files.length, checksumSha256: manifest.checksumSha256 }, null, 2));

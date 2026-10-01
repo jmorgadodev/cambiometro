@@ -13,8 +13,9 @@ on:
         type: string
 
 concurrency:
-  group: pages-production-promotion
-  cancel-in-progress: true
+  group: cambiometro-static-publication
+  cancel-in-progress: false
+  queue: max
 
 permissions:
   actions: read
@@ -73,6 +74,17 @@ jobs:
           test -s out/sitemap.xml
           test -s out/robots.txt
           test -s out/404.html
+
+      - name: Rechazar promoción con ReleaseSet estático desfasado
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          mkdir -p .ci-data-version
+          npx wrangler r2 object get transparencia-public-data/projections/static-site-v1/manifest.json --file .ci-data-version/promotion-static-manifest.json --remote
+          node scripts/verify-release-set.mjs --pin out/data/release-set.json --manifest .ci-data-version/promotion-static-manifest.json
+
 
       - name: Publicar artefacto verificado en Pages producción
         working-directory: transparencia-app
