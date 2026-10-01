@@ -9,6 +9,7 @@
 import { existsSync } from "node:fs";
 import { mkdir, readFile, rename, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
+import { hasMovementPublicChanges } from "./movimientos-publication.mjs";
 import {
   buildMovementReviewReport,
   buildMovementPayload,
@@ -106,6 +107,13 @@ async function main() {
     signals: collected.signals,
     signalSeeds,
   }));
+  if (!hasMovementPublicChanges(previous, payload)) {
+    report.reason = "NO_PUBLIC_CHANGES";
+    report.checksum_sha256 = previous.checksum_sha256;
+    await writeReport(report);
+    console.log(JSON.stringify({ ok: true, published: false, reason: report.reason }));
+    return;
+  }
   const temporaryPath = `${outputPath}.tmp`;
   await writeFile(temporaryPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
   await rename(temporaryPath, outputPath);

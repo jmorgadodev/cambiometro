@@ -76,10 +76,30 @@ concurrency:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
-  build-verify-publish:
+  refresh-decision:
     if: (github.event_name == 'workflow_dispatch' && inputs.record_pages_deployment != true) || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event != 'push') || (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    outputs:
+      refresh: ${{ steps.decision.outputs.result }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          ref: ${{ github.ref_name }}
+      - uses: actions/github-script@v7
+        id: decision
+        with:
+          script: |
+            if (context.eventName !== 'workflow_run' || context.payload.workflow_run.name !== 'ETL Diario - Movimientos de Autoridades') return true;
+            const { shouldRefreshMovements } = await import(`${process.env.GITHUB_WORKSPACE}/transparencia-app/scripts/movimientos-publication.mjs`);
+            const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, { ...context.repo, run_id: context.payload.workflow_run.id });
+            return shouldRefreshMovements(jobs);
+
+  build-verify-publish:
+    needs: refresh-decision
+    if: needs.refresh-decision.outputs.refresh == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 60
     steps:
