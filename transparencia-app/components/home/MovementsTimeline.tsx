@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import MechanicalCounter from "./MechanicalCounter";
-import { daysSinceCalendarDate, latestEffectiveMovementDate } from "@/lib/movement-age";
+import { daysSinceCalendarDate, latestEffectiveMovementDate, latestPublishedMovementDate } from "@/lib/movement-age";
 import { publicApiUrl } from "@/lib/public-api-origin";
 
 export interface MovementItem {
@@ -65,13 +65,14 @@ export function MovementsTimeline({
 
   useEffect(() => {
     const actualizarDiasSinCambios = () => {
-      setDiasSinCambiosActualizados(daysSinceCalendarDate(fechaCambioEfectivoActualizada));
+      const latestPublishedDate = latestPublishedMovementDate(fechaCambioEfectivoActualizada, ultimaSenal);
+      if (latestPublishedDate) setDiasSinCambiosActualizados(daysSinceCalendarDate(latestPublishedDate));
     };
 
     actualizarDiasSinCambios();
     const timer = window.setInterval(actualizarDiasSinCambios, 60_000);
     return () => window.clearInterval(timer);
-  }, [fechaCambioEfectivoActualizada]);
+  }, [fechaCambioEfectivoActualizada, ultimaSenal]);
 
   useEffect(() => {
     let active = true;

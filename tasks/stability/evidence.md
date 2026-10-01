@@ -71,3 +71,16 @@ Riesgo o siguiente puerta:
   `5041518d`; documentación pendiente de PR/CI. R2 PUT/DELETE y D1 remoto
   ejecutados en esta revisión: ninguno. Próxima puerta: medir uso de toda la
   cuenta, operaciones y facturación del ciclo actual.
+
+## Incidente Home — contador de días · 2026-10-01
+
+- Causa: el efecto del navegador recalculaba los días exclusivamente desde
+  `ultimoCambioEfectivo` (14-09), ignorando señales publicadas el 30-09.
+- Corrección: calcular desde la fecha más reciente entre cambio efectivo y
+  señal publicada. Mantener el cálculo diario en zona America/Santiago y
+  conservar ambas fechas y sus estados en la interfaz.
+- Pruebas: 24 pruebas puntuales aprobadas (edad de movimientos, Home y
+  política de backup); TypeScript sin errores. Casos: anuncio del 30-09 da
+  cero ese día y un día el 01-10; una respuesta efectiva anterior no lo borra.
+- Promoción productiva y smoke: pendientes. Esta corrección no cierra O06.
+- R2 PUT/DELETE y D1 remoto: ninguno.
