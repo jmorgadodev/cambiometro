@@ -187,3 +187,28 @@ Riesgo o siguiente puerta:
   antes de la corrección; 43 pruebas dirigidas, tipos y lint pasan después.
 - La cola Pages no cancela una promoción válida cuando llega un no-op nuevo.
   O06 sigue en 75 % hasta repetir y comprobar la ejecución corregida.
+
+### O06 — cierre verificado · 2026-10-01 · 100 %
+
+- #673 fusionado en `b2a28d34` después de todos los controles verdes, incluidos
+  build y navegación responsive. 59 pruebas dirigidas, tipos y lint aprobados.
+- Se preserva la primera fecha de detección al releer una señal conocida;
+  una revisión sin novedades no altera datos ni genera publicaciones.
+- Ejecución real desde `main`: `36854416777`, exitosa;
+  `published=false`, `reason=NO_PUBLIC_CHANGES`. Paso de subida omitido.
+- Pages `36854519350`: decisión exitosa y `build-verify-publish` omitido.
+  Guardia `36854519373`: exitosa y comprobación de publicación omitida, sin
+  falsas alertas de frescura por un no-op.
+- Smoke productivo posterior aprobado: HTTP 200, hidratación sin errores,
+  cinco señales pendientes presentes y exautoridades excluidas. Checksum
+  público conservado:
+  `fa9aae700ec9fab351e40f1f90d9601c1bb79f79fdafa218e456cc2dd35d52cc`.
+- Hay 51 eventos: 10 verificados, 35 corroborados y 6 pendientes; no se
+  presenta el catálogo de 46 como 46 confirmaciones legales. Home comprobada
+  con 51 eventos y 01 días sin cambios el 1 de octubre.
+- Rollback existente validado por checksum y contenido (108.691 bytes), sin
+  nueva copia de respaldo. Restauración acotada bajo guarda de almacenamiento:
+  8.391.577.561 bytes, pico 8.391.669.984, inferior al umbral 9.500.000.000.
+  No se realizaron operaciones D1 ni borrado de históricos.
+- Este cierre acredita O06, no siete días de estabilidad ni el cierre global.
+  #671 y las demás puertas permanecen con sus estados anteriores.
