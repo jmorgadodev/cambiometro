@@ -283,3 +283,13 @@ Riesgo o siguiente puerta:
   no se creó respaldo R2, no se escribieron/borraron datos R2, no se ejecutó ETL
   ni D1 remoto. #671 continúa apartado. Este cierre sólo acredita O04, no la
   estabilidad global de todos los ETL ni los siete días de observación.
+
+### Ajuste solicitado — favicon del logo · 2026-10-01
+
+- Rama `codex/site-favicon-20261001`, base main d52060f4, mismo worktree canónico.
+- `app/favicon.ico` convertido desde `public/brand/el-cambiometro-mark.svg`,
+  el mismo símbolo utilizado por SiteHeader, con imágenes de 16/32/48/64 px.
+- Verificación binaria: cada imagen del ICO coincide exactamente con la
+  conversión PNG del logo en su tamaño. Sin rediseño, dependencias nuevas,
+  cambios de datos, ETL, D1 o R2. La validación y promoción siguen pendientes
+  hasta que los controles del PR y el deployment ui-only terminen.
