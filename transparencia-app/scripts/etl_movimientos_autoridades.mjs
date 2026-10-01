@@ -19,6 +19,9 @@ import {
 
 const root = resolve(import.meta.dirname, "..");
 const inputPath = resolve(root, process.env.MOVIMIENTOS_INPUT ?? "data/movimientos.json");
+const signalSeedPath = process.env.MOVIMIENTOS_SIGNAL_SEED
+  ? resolve(root, process.env.MOVIMIENTOS_SIGNAL_SEED)
+  : null;
 const outputPath = resolve(root, process.env.MOVIMIENTOS_OUTPUT ?? "data/movimientos.json");
 const reportPath = resolve(root, process.env.MOVIMIENTOS_RUN_REPORT ?? "data/generated/movimientos-run.json");
 const now = new Date().toISOString();
@@ -79,6 +82,9 @@ async function main() {
   }
   if (!existsSync(inputPath)) throw new Error(`MOVIMIENTOS_INPUT_MISSING:${inputPath}`);
   const previous = JSON.parse(await readFile(inputPath, "utf8"));
+  const signalSeeds = signalSeedPath && existsSync(signalSeedPath)
+    ? JSON.parse(await readFile(signalSeedPath, "utf8")).signals ?? []
+    : [];
   const collected = await collectMovementSources({ sources: configuredSources(), retries: Number(process.env.MOVIMIENTOS_SOURCE_RETRIES ?? 2) });
   const report = {
     pipeline: "etl_movimientos_autoridades",
@@ -98,12 +104,16 @@ async function main() {
     now,
     sourceResults: collected.results,
     signals: collected.signals,
+    signalSeeds,
   }));
   const temporaryPath = `${outputPath}.tmp`;
   await writeFile(temporaryPath, `${JSON.stringify(payload, null, 2)}\n`, "utf8");
   await rename(temporaryPath, outputPath);
   report.published = true;
   report.total = payload.movimientos.length;
+  report.totalEvents = payload.stats.total_eventos_publicados;
+  report.pendingSignals = payload.stats.signals_en_confirmacion;
+  report.lastEventDate = payload.last_event_date;
   report.checksum_sha256 = payload.checksum_sha256;
   await writeReport(report);
   console.log(JSON.stringify({
