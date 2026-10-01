@@ -9,6 +9,10 @@ lecturas o escrituras innecesarias.
 Usar `.github/workflows/pages-ui-refresh.yml`.
 
 - Recupera el último release validado desde R2.
+- Movimientos se rehidrata siempre desde la entrada `data/movimientos.json`
+  del manifiesto R2 fijado al comenzar el build, incluso si se restauró una
+  caché. La descarga exige checksum y falla si falta el objeto; el JSON del
+  commit nunca sustituye un release productivo.
 - Construye Pages con ese snapshot, sin ejecutar ningún `etl:*`.
 - Usa D1 sólo localmente durante las pruebas de integración.
 - No escribe en D1 productiva ni modifica snapshots o checksums.
@@ -28,6 +32,12 @@ Usar `.github/workflows/pages-static-refresh.yml` después de un ETL exitoso.
 - Recupera y valida el release nuevo, recalcula sus artefactos necesarios y
   publica sólo después de pasar sus guards.
 - El snapshot anterior se conserva si el refresh falla.
+
+Para Movimientos, el ETL exige el manifiesto R2 y verifica el objeto anterior
+antes de extraer. Si R2 no responde, el workflow falla sin publicar ni usar el
+snapshot de Git como respaldo. Una restauración debe elegir explícitamente un
+release anterior validado de R2; no existe un modo de reparación con la copia
+versionada de septiembre.
 
 La promoción a producción sigue requiriendo `CAMBIOMETRO_CONFIRM_CUTOVER`.
 Un cambio visual no necesita esperar ni volver a ejecutar el calendario ETL.
