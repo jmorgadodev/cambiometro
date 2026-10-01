@@ -82,5 +82,58 @@ Riesgo o siguiente puerta:
 - Pruebas: 24 pruebas puntuales aprobadas (edad de movimientos, Home y
   política de backup); TypeScript sin errores. Casos: anuncio del 30-09 da
   cero ese día y un día el 01-10; una respuesta efectiva anterior no lo borra.
-- Promoción productiva y smoke: pendientes. Esta corrección no cierra O06.
+- [PR #669](https://github.com/jmorgadodev/cambiometro/pull/669) fusionado:
+  `b0fd66269c0374a0619e7b1eaca6aa645bb2aaa2`. Calidad, seguridad, build y
+  E2E aprobados. Preview verificado `36845324112`:
+  `https://31bc05f2.cambiometro.pages.dev`, contador `01`.
+- Promoción productiva `36846753798` aprobada. Deployment
+  `fc0759f6-7642-4cdc-b6a4-e92c00cf98c8`. Navegador en
+  `https://cambiometro.impulsacv.cl/`: tras cargar, contador `01`, 51
+  movimientos, 35 renuncias, última señal 30-09 y revisión 01-10.
+- Rollback anterior comprobado en metadata Pages:
+  `0712bb24-539b-4237-bcd3-d19ca9053631` (commit `da4c5304`).
+  Esta corrección no cierra O06 ni acredita siete días de estabilidad.
 - R2 PUT/DELETE y D1 remoto: ninguno.
+
+## O05 — puerta 2 · 2026-10-01 · comprobada
+
+- Panel R2 de la cuenta Jorge, ciclo **26 septiembre–26 octubre**: 8,39 GB
+  totales, 2,78 mil operaciones Clase A, 29,93 mil Clase B, **$0,00 facturable**.
+  Son valores redondeados del panel; no equivalen a cifras exactas de objetos.
+- Buckets: `transparencia-public-data`, 7,34 GB / 23,46 mil objetos;
+  `cambiometro-backups`, 1,05 GB / 4,11 mil objetos;
+  `mascotas-impulsacv-cl`, 257,84 kB / 3 objetos;
+  `impulsacv-contexto-multas`, 0 B / 0 objetos.
+- Frente al límite operativo de 10 GB: aproximadamente 83,9 %; advertencia
+  del 80 % activa, aún bajo revisión al 90 % y bloqueo al 95 %. Margen hasta
+  el bloqueo: aproximadamente 1,11 GB antes de nuevas cargas y su pico.
+- Referencia vigente: https://developers.cloudflare.com/r2/pricing/ y
+  https://developers.cloudflare.com/r2/platform/metrics-analytics/.
+  Las operaciones gratuitas Standard son 1 millón A y 10 millones B por mes.
+- Consulta GraphQL con el token local: acceso a analytics denegado; el panel
+  autenticado permitió la lectura. No se cambiaron credenciales ni permisos.
+  Próxima puerta: probar e integrar guardas de operaciones con telemetría
+  autorizada; el control de almacenamiento existente no basta para esa puerta.
+- R2 PUT/DELETE y D1 remoto: ninguno; sin creación de backup nuevo.
+
+## ETL Remuneraciones 38 bis — puerta 1 · 2026-10-01
+
+- Fuente efectiva: `https://comision38bis.gob.cl/registro-publico?csv-todo`;
+  fallback HTML oficial en `https://comision38bis.gob.cl/registro-publico`.
+  Constantes en `scripts/etl/remuneraciones-38bis-parser.mjs`; el conector
+  `scripts/etl-remuneraciones-38bis.mjs` selecciona el último período presente
+  en CSV y exige al menos 500 registros. No fija 2026 por inferencia.
+- Consulta acotada HEAD al CSV: HTTP 200, `text/csv; charset=UTF-8`.
+  No se descargó el CSV ni se ejecutó una publicación.
+- Modalidad: cron `15 10 5 * *` y despacho manual. Destino:
+  `transparencia-public-data/projections/remuneraciones-38bis-v1/`, releases
+  identificados por checksum y punteros `current.json`, `current-history.json`
+  y `manifest.json`.
+- Ejecución previa verificada `36054022783` (24-09): 1.590 registros,
+  período `2026-07`, 18 períodos históricos,
+  checksum `c6fe851b6dc0b2de8ba0eb4d80fe699636165a7fe41b61f8b2411252d44101dc`.
+  Su éxito acredita esa ejecución manual, no todas las futuras ejecuciones.
+- Cierre: 1/4 = 25 %. Restan replay contractual, coherencia productiva y
+  operación con guardas. La publicación actual usa PUT directos; antes de
+  cerrar se debe conectar al preflight común de cuenta y comprobar no-op.
+- R2 PUT/DELETE y D1 remoto en esta auditoría: ninguno.
