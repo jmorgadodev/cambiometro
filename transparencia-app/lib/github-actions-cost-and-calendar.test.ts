@@ -251,12 +251,11 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(expenses).toContain("node scripts/verify-expense-release.mjs --required");
   });
 
-  it("11b. El despliegue sólo de interfaz conserva el release validado de Movimientos del commit", () => {
+  it("11b. El despliegue sólo de interfaz rehidrata Movimientos desde el manifiesto R2 fijado", () => {
     const workflow = fs.readFileSync(path.join(workflowsDir, "pages-ui-refresh.yml"), "utf8");
-    expect(workflow).toContain("validated_reference");
-    expect(workflow).toContain("validated_reconciled");
-    expect(workflow).toContain('git show "${GITHUB_SHA}:transparencia-app/data/movimientos.json"');
-    expect(workflow).toContain("release reconciliado de Movimientos");
+    expect(workflow).toContain("name: Rehidratar Movimientos desde el release vigente de R2");
+    expect(workflow).toContain("--manifest-file .ci-data-version/static-site-manifest.json --required-files data/movimientos.json --only-files data/movimientos.json --force");
+    expect(workflow).not.toContain('git show "${GITHUB_SHA}:transparencia-app/data/movimientos.json"');
   });
 
   it("11c. La verificación post-promoción valida la marca estable de la Home", () => {

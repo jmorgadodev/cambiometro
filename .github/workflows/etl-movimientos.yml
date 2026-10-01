@@ -4,17 +4,6 @@ on:
   schedule:
     - cron: "0 7 * * *" # 03:00 America/Santiago en horario de invierno
   workflow_dispatch:
-    inputs:
-      repair_reconciled:
-        description: "Publicar sólo el release reconciliado versionado, sin ejecutar el ETL"
-        type: boolean
-        required: false
-        default: false
-      confirm_repair:
-        description: "Confirmación exacta para publicar los 46 movimientos reconciliados"
-        type: string
-        required: false
-        default: ""
 
 concurrency:
   group: cambiometro-static-publication
@@ -51,13 +40,6 @@ jobs:
           test -n "$CLOUDFLARE_ACCOUNT_ID"
           test -n "$CLOUDFLARE_DATA_API_TOKEN"
 
-      - name: Confirmar publicación reconciliada aislada
-        if: inputs.repair_reconciled == true
-        env:
-          CONFIRM_REPAIR: ${{ inputs.confirm_repair }}
-        run: |
-          test "$CONFIRM_REPAIR" = "CAMBIOMETRO_CONFIRM_MOVIMIENTOS_REPAIR"
-
       - name: Recuperar último snapshot válido desde R2
         working-directory: transparencia-app
         env:
@@ -67,16 +49,11 @@ jobs:
         run: |
           set -euo pipefail
           mkdir -p .ci-movimientos
-          if npx wrangler r2 object get transparencia-public-data/projections/static-site-v1/manifest.json --file .ci-movimientos/static-site-manifest.json --remote; then
-            MOVIMIENTOS_KEY=$(node --input-type=module -e 'import { readFileSync } from "node:fs"; const m=JSON.parse(readFileSync(".ci-movimientos/static-site-manifest.json","utf8")); const e=m.files?.find((file)=>file.path==="data/movimientos.json"); if(!e?.key) process.exit(1); process.stdout.write(e.key);')
-            npx wrangler r2 object get "transparencia-public-data/$MOVIMIENTOS_KEY" --file data/movimientos.previous.json --remote
-          else
-            echo "::warning::No hay manifest estático en R2; se usa el baseline versionado como respaldo."
-            cp data/movimientos.json data/movimientos.previous.json
-          fi
+          npx wrangler r2 object get transparencia-public-data/projections/static-site-v1/manifest.json --file .ci-movimientos/static-site-manifest.json --remote
+          node scripts/hydrate-static-site-inputs.mjs --required --manifest-file .ci-movimientos/static-site-manifest.json --required-files data/movimientos.json --only-files data/movimientos.json --force
+          cp data/movimientos.json data/movimientos.previous.json
 
       - name: Revisar y validar novedades de Movimientos
-        if: inputs.repair_reconciled != true
         id: movimientos_etl
         working-directory: transparencia-app
         env:
@@ -100,17 +77,13 @@ jobs:
           echo "publish=$PUBLISH" >> "$GITHUB_OUTPUT"
 
       - name: Validar snapshot y publicar grupo estático
-        if: inputs.repair_reconciled == true || steps.movimientos_etl.outputs.publish == 'true'
+        if: steps.movimientos_etl.outputs.publish == 'true'
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: |
-          if [ "${{ inputs.repair_reconciled }}" = "true" ]; then
-            node --input-type=module -e 'import { readFileSync } from "node:fs"; import { validateMovementPayload } from "./scripts/movimientos-pipeline.mjs"; const payload=JSON.parse(readFileSync("data/movimientos.json","utf8")); if (payload.release_id !== "kast-2026-succession-reconciled-2026-09-14" || payload.movimientos?.length !== 46) throw new Error(`MOVIMIENTOS_REPAIR_RELEASE_INVALID:${payload.release_id}:${payload.movimientos?.length ?? 0}`); validateMovementPayload(payload);'
-          else
-            node --input-type=module -e 'import { readFileSync, writeFileSync } from "node:fs"; import { normalizeMovementPayload, validateMovementPayload } from "./scripts/movimientos-pipeline.mjs"; const file="data/movimientos.json"; const payload=normalizeMovementPayload(JSON.parse(readFileSync(file,"utf8"))); validateMovementPayload(payload); writeFileSync(file, `${JSON.stringify(payload,null,2)}\n`);'
-          fi
+          node --input-type=module -e 'import { readFileSync, writeFileSync } from "node:fs"; import { normalizeMovementPayload, validateMovementPayload } from "./scripts/movimientos-pipeline.mjs"; const file="data/movimientos.json"; const payload=normalizeMovementPayload(JSON.parse(readFileSync(file,"utf8"))); validateMovementPayload(payload); writeFileSync(file, `${JSON.stringify(payload,null,2)}\n`);'
           npm run data:publish:static -- --groups movimientos
 
       - name: Publicar resumen de ejecución

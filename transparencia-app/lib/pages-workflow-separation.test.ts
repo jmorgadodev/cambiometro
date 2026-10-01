@@ -57,4 +57,12 @@ describe("separación de workflows Pages", () => {
     expect(uiRefresh).toContain("name: Verificar coherencia con el release API de R2");
     expect(uiRefresh).toContain("scripts/verify-transfer-r2-consistency.mjs");
   });
+
+  it("Movimientos nunca vuelve al snapshot del commit si falla R2", () => {
+    const workflow = readFileSync(resolve(process.cwd(), "../.github/workflows/etl-movimientos.yml"), "utf8");
+    expect(workflow).toContain("--manifest-file .ci-movimientos/static-site-manifest.json");
+    expect(workflow).toContain("--required-files data/movimientos.json");
+    expect(workflow).not.toContain("No hay manifest estático en R2; se usa el baseline versionado");
+    expect(workflow).not.toContain("repair_reconciled");
+  });
 });
