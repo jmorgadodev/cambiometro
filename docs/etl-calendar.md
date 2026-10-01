@@ -1,5 +1,11 @@
 # Calendario operativo de ETL
 
+Referencia vigente: `.github/etl-calendar.json`, validada por
+`npm run check:etl-calendar`, y [registro generado](../tasks/stability/source-registry.md).
+La tabla y notas siguientes son contexto histórico; no acreditan estado operativo.
+Votaciones Senado es **local-only**, sin cron remoto. No usar las antiguas notas
+D1 como autorización: el cierre actual usa R2 y no materializa datos masivos D1.
+
 Los schedules de GitHub Actions se declaran en UTC. El portal opera con la
 zona horaria `America/Santiago`, que cambia entre horario de invierno y
 verano. Por eso el mismo cron `0 7 * * *` se muestra como 04:00 en invierno y

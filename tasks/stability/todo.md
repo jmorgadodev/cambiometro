@@ -20,12 +20,16 @@ documental; no marcarla por una prueba local. Orden y dependencias en
 - [x] Pasar pruebas, tipos, build y smoke de CI.
 - [x] Promover el artefacto y verificar release/eventos productivos.
 
-## O03 · Registro de fuentes · S · 0 %
+## O03 · Registro de fuentes · S · 100 %
 
-- [ ] Reconciliar calendario con workflows, modo, frecuencia y fuente efectiva (URL/API/documento); incluir Senado local-only.
-- [ ] Asociar por fuente ventana extraída, manifiesto R2, release, checksum, períodos y alcance o marcar «no medido».
-- [ ] Generar matriz reproducible y probar faltantes/duplicados sin descargar universos.
-- [ ] Validar contra manifiestos productivos y fusionar sin alterar datos públicos.
+- [x] Reconciliar calendario con workflows, modo, frecuencia y fuente configurada (URL/API/documento); incluir Senado local-only.
+- [x] Asociar por fuente ventana extraída, manifiesto R2, release, checksum, períodos y alcance o marcar «no medido».
+- [x] Generar matriz reproducible y probar faltantes/duplicados sin descargar universos.
+- [x] Validar contra manifiestos productivos y fusionar sin alterar datos públicos.
+
+Registro en [source-registry.md](source-registry.md). Cierre efectivo al fusionar
+este cambio con CI verde. Registra configuración y metadatos, no declara sanos
+los ETL ni completa las puertas operativas O11–O13.
 
 ## O04 · Contadores públicos por release · S · 0 %
 
