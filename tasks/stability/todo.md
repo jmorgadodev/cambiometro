@@ -63,18 +63,25 @@ productiva y rollback comprobados; evidencia abajo. Costes (#671) siguen apartad
 - [x] Pruebas contractuales: caída externa, cero, candidato parcial y rollback.
 - [x] Migrar preflight Cámara y verificar catálogo candidato aislado mediante replay local, sin publicación R2. PR #679 integrado con CI verde.
 
-## O08 · `ReleaseSet` R2 · M · 20 %
+## O08 · `ReleaseSet` R2 · M · 40 %
 
 - [x] Contrato local de inputs estáticos: huellas por dominio, checksum y pin de manifiesto;
   conteos ausentes quedan nulos. Prueba de base concurrente obsoleta y candidato combinado.
 - [ ] Implementar comparación y promoción atómica remota; el contrato local no la sustituye.
+- [x] Añadir pin de inputs estáticos, verificación de bytes y metadatos al artefacto Pages.
+- [ ] Validar integración en preview y abarcar manifiestos externos al conjunto estático.
 
 - [ ] Definir esquema versionado de IDs/checksums/conteos por dominio y puntero atómico.
 - [ ] Construirlo desde releases existentes, sin alterar historiales ni D1.
 - [ ] Probar dos ETL concurrentes, checksum incorrecto y `ui-only` sin retroceso.
 - [ ] Pages fija ese `ReleaseSet`; preview y producción concuerdan.
 
-## O09 · Promoción Pages coherente · M · 0 %
+## O09 · Promoción Pages coherente · M · 30 %
+
+- [x] Implementar bloqueo compartido para tres flujos Pages y publicadores estáticos,
+  sin cancelación del activo y con `queue: max`; 19 pruebas de configuración.
+- [x] Añadir rechazo de artefacto con pin estático distinto del manifiesto R2 actual.
+- [ ] Verificar estos cambios en CI/preview y producción; no equivalen a CAS remoto.
 
 - [ ] Separar y documentar disparos `ui-only`, `data-refresh` y promoción.
 - [ ] Un bloqueo global impide promociones solapadas; fallos/no-op no despliegan.

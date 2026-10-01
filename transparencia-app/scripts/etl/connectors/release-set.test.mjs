@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
-import { buildStaticInputManifest } from "../../static-site-inputs.mjs";
-import { buildReleaseSet, assertPinnedReleaseSet, assertReleaseSetPromotion } from "../../release-set.mjs";
+import { buildStaticInputManifest, sha256Buffer } from "../../static-site-inputs.mjs";
+import { buildReleaseSet, assertPinnedReleaseSet, assertReleaseSetPromotion, assertReleaseSetArtifacts } from "../../release-set.mjs";
 
 const entry = (path, digest = "a".repeat(64)) => ({
   path, key: `projections/static-site-v1/releases/${digest}/${path}`,
@@ -9,6 +9,15 @@ const entry = (path, digest = "a".repeat(64)) => ({
 const manifest = (files) => buildStaticInputManifest({ entries: files, generatedAt: "2026-10-01T00:00:00Z" });
 
 describe("ReleaseSet local contract", () => {
+  it("rejects stale Git or cached bytes even when their manifest metadata matches", () => {
+    const bytes = Buffer.from('{"movimientos":[]}');
+    const file = { ...entry("data/movimientos.json", sha256Buffer(bytes)), size: bytes.length };
+    const input = manifest([file]);
+    const set = buildReleaseSet(input);
+    expect(assertReleaseSetArtifacts(set, input, () => bytes)).toBe(set);
+    expect(() => assertReleaseSetArtifacts(set, input, () => Buffer.from("old Git snapshot"))).toThrow("RELEASE_SET_ARTIFACT_MISMATCH");
+    expect(() => assertReleaseSetArtifacts(set, input, () => { throw new Error("missing"); })).toThrow();
+  });
   it("pins each static domain without inventing record counts", () => {
     const input = manifest([entry("data/movimientos.json"), entry("data/municipalidades-list.json")]);
     const set = buildReleaseSet(input);
