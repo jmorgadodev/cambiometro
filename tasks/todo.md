@@ -1,3 +1,7 @@
+> Histórico (septiembre de 2026). El tablero operativo vigente es
+> [tasks/stability/todo.md](stability/todo.md). Sus porcentajes se calculan por
+> puertas verificadas, no por estimaciones históricas.
+
 # Lista de trabajo inmediata
 
 ## Actualización crítica — Contraloría (28-09-2026)

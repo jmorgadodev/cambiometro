@@ -1,5 +1,10 @@
 # Estabilización operativa — estado y ruta canónica
 
+Tablero vigente: [plan](../tasks/stability/plan.md),
+[puertas y porcentajes](../tasks/stability/todo.md) y
+[evidencia de cierre](../tasks/stability/evidence.md). La tabla resumida al
+final sólo indica bloques; el porcentaje verificable está en el tablero.
+
 ## Dónde trabajar
 
 El repositorio canónico es `C:\Users\jorge\Proyectos\cambiometro-public`.
@@ -38,7 +43,7 @@ ahora de una entrada R2 verificada por checksum.
 
 | Bloque | Estado | Criterio de cierre |
 | --- | --- | --- |
-| Impedir retroceso de Movimientos en `ui-only` y ETL | Implementado en rama; falta promoción y smoke | Test, preview y comprobación productiva |
+| Impedir retroceso de Movimientos en `ui-only` y ETL | Cerrado en producción (PR #666) | Despliegue y comprobación productiva registrados en el tablero |
 | Registro de fuentes y `ReleaseSet` R2 completo | Pendiente | IDs, checksum, conteos y períodos de cada dominio, con promoción atómica |
 | Guardia ETL compartida y migración por fuente | Pendiente | Cero inesperado, reducción, duplicados, sin cambios y fallo externo probados |
 | Monitoreo diario sin alertas repetidas | Pendiente | Estado por fuente y comparación R2/API/Pages sin extracción |

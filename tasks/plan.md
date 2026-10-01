@@ -1,3 +1,7 @@
+> Histórico (septiembre de 2026). El plan operativo vigente es
+> [tasks/stability/plan.md](stability/plan.md). No usar los estados de este
+> documento para calcular el avance actual.
+
 # Plan de trabajo inmediato sin D1
 
 ## Objetivo
