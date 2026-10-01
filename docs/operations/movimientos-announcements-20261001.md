@@ -29,4 +29,13 @@ Rama: `codex/movimientos-press-announcements-20261001`.
   sucesor; no una noticia independiente que afirme explícitamente la salida o
   el nombramiento fallido. No se añade una renuncia por inferencia.
 - No hubo escrituras R2, consultas D1 ni modificación del snapshot público.
-- La validación local no equivale a despliegue. Revisar CI antes de promover.
+- Producción: PR #681 integrado en `76f2d56c16016a47cfe1f125575f62a26506b34d`,
+  con tipos/lint/unitarias/seguridad y build/E2E aprobados.
+- Ejecución productiva `36930661823`: success, 2026-10-01T21:45:07Z;
+  seis enlaces pendientes revisados, cero diferidos, `NO_PUBLIC_CHANGES`.
+  No se publicó un objeto nuevo. Snapshot público: 51 eventos, última señal
+  2026-09-30. Home y Movimientos HTTP 200 después de la ejecución.
+- Evidencia del run descargada en
+  `C:\Users\jorge\Proyectos\cambiometro-audit\evidence\movimientos-36930661823`.
+- Rollback de código: revertir el merge de #681; el snapshot anterior no fue
+  reemplazado. No se declara que todos los sitios regionales estén conectados.

@@ -63,7 +63,11 @@ productiva y rollback comprobados; evidencia abajo. Costes (#671) siguen apartad
 - [x] Pruebas contractuales: caída externa, cero, candidato parcial y rollback.
 - [x] Migrar preflight Cámara y verificar catálogo candidato aislado mediante replay local, sin publicación R2. PR #679 integrado con CI verde.
 
-## O08 · `ReleaseSet` R2 · M · 0 %
+## O08 · `ReleaseSet` R2 · M · 20 %
+
+- [x] Contrato local de inputs estáticos: huellas por dominio, checksum y pin de manifiesto;
+  conteos ausentes quedan nulos. Prueba de base concurrente obsoleta y candidato combinado.
+- [ ] Implementar comparación y promoción atómica remota; el contrato local no la sustituye.
 
 - [ ] Definir esquema versionado de IDs/checksums/conteos por dominio y puntero atómico.
 - [ ] Construirlo desde releases existentes, sin alterar historiales ni D1.
