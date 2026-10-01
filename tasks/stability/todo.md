@@ -34,10 +34,10 @@ documental; no marcarla por una prueba local. Orden y dependencias en
 - [ ] Probar discrepancias de corte, nulos y ausencia de manifiesto.
 - [ ] Preview, promoción y comparación con API/manifiesto productivo.
 
-## O05 · Costo cero y respaldo existente · S · 25 %
+## O05 · Costo cero y respaldo existente · S · 50 %
 
 - [x] Confirmar que el calendario no genera nueva copia completa ni backup D1; verificar sólo el respaldo existente.
-- [ ] Medir bytes, objetos, operaciones Clase A/B y uso facturable de **toda la cuenta**, incluidos backups, en el ciclo actual.
+- [x] Medir bytes, objetos, operaciones Clase A/B y uso facturable de **toda la cuenta**, incluidos backups, en el ciclo actual.
 - [ ] Probar sin escrituras un preflight que bloquee si falta telemetría o hay riesgo de superar cualquier margen gratuito.
 - [ ] Publicar informe fechado de costo cero verificable, protección existente y presupuesto por publicación.
 

@@ -40,7 +40,7 @@ como automático.
 | DIPRES · `etl-dipres.yml` | Trimestral | Por verificar | 0/4 |
 | SINIM · `etl-sinim.yml` | Semestral | Por verificar | 0/4 |
 | Gastos Senado · `etl-expenses.yml` | Mensual | Por verificar | 0/4 |
-| Remuneraciones 38 bis · `etl-remuneraciones-38bis.yml` | Mensual | Por verificar | 0/4 |
+| Remuneraciones 38 bis · `etl-remuneraciones-38bis.yml` | Mensual, día 5 a las 10:15 UTC | `comision38bis.gob.cl/registro-publico?csv-todo`; R2 `projections/remuneraciones-38bis-v1/` | 1/4 (25 %) |
 | SERVEL · `etl-servel.yml` | Manual | Por verificar | 0/4 |
 | Cámara histórica · `etl-camara-reconciliation.yml` | Manual | Por verificar | 0/4 |
 | Nóminas centrales CPLT · `etl-cplt-central.yml` | Manual | Por verificar | 0/4 |
