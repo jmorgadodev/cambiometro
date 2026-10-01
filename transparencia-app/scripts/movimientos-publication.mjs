@@ -1,3 +1,19 @@
+import { assertReleaseCandidate } from "./etl/release-candidate.mjs";
+import { sha256, validateMovementPayload } from "./movimientos-pipeline.mjs";
+
+export function assertMovementCandidate(previous, candidate) {
+  validateMovementPayload(candidate);
+  assertReleaseCandidate({
+    sourceId: candidate.pipeline, expectedSourceId: "etl_movimientos_autoridades",
+    complete: true, records: candidate.movimientos, recordCount: candidate.movimientos.length,
+    periods: candidate.movimientos.map((row) => row.fecha),
+    checksumSha256: candidate.checksum_sha256,
+    actualChecksumSha256: sha256({ ...candidate, checksum_sha256: undefined }),
+    previous: { recordCount: previous.movimientos.length, checksumSha256: previous.checksum_sha256 },
+  });
+  return candidate;
+}
+
 function canonical(value) {
   if (Array.isArray(value)) return value.map(canonical);
   if (!value || typeof value !== "object") return value;

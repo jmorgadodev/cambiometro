@@ -291,5 +291,33 @@ Riesgo o siguiente puerta:
   el mismo símbolo utilizado por SiteHeader, con imágenes de 16/32/48/64 px.
 - Verificación binaria: cada imagen del ICO coincide exactamente con la
   conversión PNG del logo en su tamaño. Sin rediseño, dependencias nuevas,
-  cambios de datos, ETL, D1 o R2. La validación y promoción siguen pendientes
-  hasta que los controles del PR y el deployment ui-only terminen.
+  cambios de datos, ETL, D1 o R2.
+- PR #678 integrado con todos los controles verdes; producción ui-only
+  run 36921383037 terminó success. `/favicon.ico` devuelve 200 y 2.586 bytes,
+  idénticos al archivo local; la Home referencia ese icono. SHA-256:
+  `421bd981e5e7baf60f6c1c1902dc3d449242f8fbe05b8b4e95e13632ba2c2a14`.
+
+### O07 — contrato ETL reutilizable · 2026-10-01 · 75 %
+
+- Rama `codex/etl-contract-20261001`, mismo worktree canónico, base 2162d21c.
+- `scripts/etl/release-candidate.mjs` valida identidad, períodos reales,
+  checksum calculado, conteo, IDs únicos, completitud y reducción respecto al
+  release previo. Candidato vacío o fuente caída no autoriza reemplazo.
+- Una verificación de preparación no autoriza escribir: el modo publicación
+  exige presupuesto y reutiliza `assertR2WriteBudget`; no duplica su cálculo
+  ni modifica O05/#671, que continúa apartado. No sustituye la medición remota
+  de cuenta ni acredita guardas de operaciones facturables.
+- Movimientos conserva su validador de dominio y no-op; agrega comparación
+  con el último candidato antes de reemplazar el archivo local. Cámara usa
+  el mismo contrato en su preflight aislado: comprueba bytes y SHA de cada
+  artefacto, filas reales descomprimidas y alcance exacto del mes/categoría.
+- Tres pruebas fallaron antes de sus cambios: descenso de Movimientos, staging
+  Cámara corrupto que antes se aceptaba y presupuesto sin inventario confundido
+  con cuenta vacía. 55 pruebas dirigidas pasan, incluidas 19 contractuales.
+  Tipos y lint dirigido aprobados. Revisión acotada de corrección, límites de
+  rutas y conservación del rollback, sin dependencias ni cambios de workflows.
+- Replay Cámara exclusivamente local: catálogo anterior intacto ante fallo;
+  catálogo candidato conserva otra fuente byte a byte. No se extrajo la fuente,
+  no se ejecutó workflow de reparación ni se promovieron objetos R2/D1.
+  La adopción común se cierra sólo tras CI verde y fusión; el cierre operativo
+  individual de conectores/publicaciones remotas pertenece a O11–O13/O05.

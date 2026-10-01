@@ -57,7 +57,7 @@ actualiza ni se usa para desplegar. `cambiometro-audit` sólo guarda evidencia.
 | O03 | Registro ETL con procedencia configurada, calendario y manifiestos | S | O01 | 100 % |
 | O04 | Suprimir contadores fijos antiguos de Fuentes; derivar por release y alcance | S | O03 | 100 % |
 | O06 | Candidato/no-op de Movimientos: anuncio, confirmación en el mismo ID y cero inesperado | M | O02, O05 | 100 % |
-| O07 | Guardia ETL común: esquema, checksum, períodos, duplicados, descenso y fallo externo | M | O06 | 0 % |
+| O07 | Guardia ETL común: esquema, checksum, períodos, duplicados, descenso y fallo externo | M | O06 | 75 % |
 | O08 | `ReleaseSet` R2 con IDs/checksums por dominio y lectura fijada por Pages | M | O03, O07 | 0 % |
 | O09 | Promoción Pages de artefacto coherente y bloqueo global de publicación | M | O08 | 0 % |
 | O10 | Control diario sin extracción ni alertas repetidas por una misma causa | M | O03, O08 | 0 % |
