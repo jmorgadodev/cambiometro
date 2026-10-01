@@ -69,6 +69,12 @@ export const MOVIMIENTOS_SOURCES = Object.freeze([
     tier: "press",
     url: "https://www.cooperativa.cl/noticias/site/tax/port/all/rss____1.xml",
   },
+  {
+    id: "desierto-fm",
+    label: "Desierto FM",
+    tier: "press",
+    url: "https://www.desiertofm.cl/feed/",
+  },
 ]);
 
 // gob.cl sometimes applies its edge policy differently to the news path and
@@ -359,6 +365,7 @@ function normalizePublishedDate(value) {
 }
 
 function sourceUrls(source) {
+  if (source.pending_followup) return [source.url];
   if (source.id !== "gob-cl") return [source.url];
   return [...new Set([source.url, ...GOB_CL_URL_VARIANTS])];
 }
@@ -575,8 +582,28 @@ export async function fetchSource(source, { fetchImpl = fetch, retries = 2, time
   };
 }
 
-export async function collectMovementSources({ sources = MOVIMIENTOS_SOURCES, fetchImpl = fetch, retries = 2 } = {}) {
-  const results = await Promise.all(sources.map((source) => fetchSource(source, { fetchImpl, retries })));
+export async function collectMovementSources({ sources = MOVIMIENTOS_SOURCES, pendingSignals = [], fetchImpl = fetch, retries = 2 } = {}) {
+  const pendingSourceOrigins = [
+    { id: "minvu", label: "Ministerio de Vivienda y Urbanismo", tier: "official", url: "https://www.minvu.gob.cl/" },
+    { id: "chilevision", label: "Chilevisión", tier: "press", url: "https://www.chilevision.cl/" },
+  ];
+  const seen = new Set(sources.map((source) => source.url));
+  const followups = [];
+  for (const signal of pendingSignals.filter((item) => item.status === "en_confirmacion")) {
+    for (const evidence of [signal, ...(signal.related_sources ?? [])]) {
+      try {
+        const url = new URL(evidence.url);
+        const source = [...sources, ...pendingSourceOrigins].find((item) => new URL(item.url).origin === url.origin);
+        if (!source || url.protocol !== "https:" || url.username || url.password || seen.has(url.href)) continue;
+        seen.add(url.href);
+        followups.push({ ...source, url: url.href, pending_followup: true });
+      } catch { /* Missing or malformed evidence is never fetched. */ }
+    }
+  }
+  // Bound network work; rotate larger backlogs rather than starving old cases.
+  const offset = followups.length ? (Math.floor(Date.now() / 86_400_000) * 50) % followups.length : 0;
+  const selected = [...followups.slice(offset), ...followups.slice(0, offset)].slice(0, 50);
+  const results = await Promise.all([...sources, ...selected].map((source) => fetchSource(source, { fetchImpl, retries })));
   const official = results.filter((source) => source.tier === "official");
   const officialOk = official.filter((source) => source.ok);
   const signals = results.flatMap((source) => source.signals.map((signal) => ({
@@ -593,7 +620,12 @@ export async function collectMovementSources({ sources = MOVIMIENTOS_SOURCES, fe
   return {
     results,
     signals,
+    pendingEvidenceChecked: selected.length,
+    pendingEvidenceDeferred: Math.max(0, followups.length - selected.length),
     hasOfficialSource: officialOk.length > 0,
+    // Official downtime must not suppress dated announcements from the
+    // configured press sources. Their status remains pending legal evidence.
+    canPublishAnnouncements: signals.some((signal) => ["official", "press"].includes(signal.source_tier)),
     allOfficialBlocked: official.length > 0 && officialOk.length === 0,
   };
 }

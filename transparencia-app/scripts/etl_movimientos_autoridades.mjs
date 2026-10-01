@@ -63,11 +63,12 @@ async function main() {
   // Sin aprobación, el cron sólo inspecciona las fuentes y deja evidencia
   // interna. Nunca muta el snapshot público ni convierte una señal en salida.
   if (!releaseApproval) {
+    const previous = existsSync(inputPath) ? JSON.parse(await readFile(inputPath, "utf8")) : null;
     const collected = await collectMovementSources({
       sources: configuredSources(),
+      pendingSignals: previous?.signals ?? [],
       retries: Number(process.env.MOVIMIENTOS_SOURCE_RETRIES ?? 2),
     });
-    const previous = existsSync(inputPath) ? JSON.parse(await readFile(inputPath, "utf8")) : null;
     const report = buildMovementReviewReport({ now, collected, pendingSignals: previous?.signals ?? [] });
     await writeReport(report);
     console.log(JSON.stringify({
@@ -85,16 +86,18 @@ async function main() {
   const signalSeeds = signalSeedPath && existsSync(signalSeedPath)
     ? JSON.parse(await readFile(signalSeedPath, "utf8")).signals ?? []
     : [];
-  const collected = await collectMovementSources({ sources: configuredSources(), retries: Number(process.env.MOVIMIENTOS_SOURCE_RETRIES ?? 2) });
+  const collected = await collectMovementSources({ sources: configuredSources(), pendingSignals: previous.signals ?? [], retries: Number(process.env.MOVIMIENTOS_SOURCE_RETRIES ?? 2) });
   const report = {
     pipeline: "etl_movimientos_autoridades",
     attemptedAt: now,
     sources: collected.results,
     signals: collected.signals.length,
+    pendingEvidenceChecked: collected.pendingEvidenceChecked,
+    pendingEvidenceDeferred: collected.pendingEvidenceDeferred,
     published: false,
   };
 
-  if (collected.allOfficialBlocked || !collected.hasOfficialSource) {
+  if (!collected.hasOfficialSource && !collected.canPublishAnnouncements) {
     report.reason = "ALL_OFFICIAL_SOURCES_BLOCKED";
     await writeReport(report);
     throw new Error("MOVIMIENTOS_ALL_OFFICIAL_SOURCES_BLOCKED");
