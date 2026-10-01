@@ -19,7 +19,7 @@ R2 PUT/DELETE y D1 remoto ejecutados:
 Riesgo o siguiente puerta:
 ```
 
-## O01 — puertas 1–3 · 2026-10-01
+## O01 — puertas 1–4 · 2026-10-01 · cerrado
 
 - Base: repositorio `cambiometro-public`, `origin/main` en `da4c5304`;
   checkout principal divergente preservado. Rama documental
@@ -28,7 +28,11 @@ Riesgo o siguiente puerta:
 - Se revisaron `tasks/plan.md`, `tasks/todo.md`,
   `docs/ESTABILIZACION-OPERATIVA-2026-10-01.md` y el calendario de ETL.
   Los documentos antiguos no se borran; este directorio es el tablero nuevo.
-- Porcentaje: 3 de 4 puertas = 75 %. Falta fusionar y comprobar los enlaces.
+- Fusión: [PR #667](https://github.com/jmorgadodev/cambiometro/pull/667),
+  commit `35c2f3d6c430794b4a2fc936ce7c5351b49e60d9`. Lint, tipos,
+  pruebas, seguridad y build/smoke CI `36814344681` verdes. Los enlaces
+  relativos del tablero se comprobaron localmente tras la fusión.
+- Porcentaje: 4 de 4 puertas = 100 %. Próxima tarea abierta: O05.
 - Datos: ninguna escritura R2/D1; sin porcentajes de cobertura nuevos.
 
 ## O02 — puertas 1–4 · 2026-10-01 · cerrado
