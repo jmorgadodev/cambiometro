@@ -583,13 +583,17 @@ export async function fetchSource(source, { fetchImpl = fetch, retries = 2, time
 }
 
 export async function collectMovementSources({ sources = MOVIMIENTOS_SOURCES, pendingSignals = [], fetchImpl = fetch, retries = 2 } = {}) {
+  const pendingSourceOrigins = [
+    { id: "minvu", label: "Ministerio de Vivienda y Urbanismo", tier: "official", url: "https://www.minvu.gob.cl/" },
+    { id: "chilevision", label: "Chilevisión", tier: "press", url: "https://www.chilevision.cl/" },
+  ];
   const seen = new Set(sources.map((source) => source.url));
   const followups = [];
   for (const signal of pendingSignals.filter((item) => item.status === "en_confirmacion")) {
     for (const evidence of [signal, ...(signal.related_sources ?? [])]) {
       try {
         const url = new URL(evidence.url);
-        const source = sources.find((item) => new URL(item.url).origin === url.origin);
+        const source = [...sources, ...pendingSourceOrigins].find((item) => new URL(item.url).origin === url.origin);
         if (!source || url.protocol !== "https:" || url.username || url.password || seen.has(url.href)) continue;
         seen.add(url.href);
         followups.push({ ...source, url: url.href, pending_followup: true });

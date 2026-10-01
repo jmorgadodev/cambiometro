@@ -31,15 +31,16 @@ describe("pipeline automático de movimientos", () => {
       sources: [{ id: "official", tier: "official", url: "https://official.test/feed" }],
       pendingSignals: [{ status: "en_confirmacion", url: "https://official.test/old-case" },
         { status: "en_confirmacion", url: "https://untrusted.test/case" },
-        { status: "verificado_oficial", url: "https://official.test/closed-case" }],
+        { status: "verificado_oficial", url: "https://official.test/closed-case" },
+        { status: "en_confirmacion", url: "https://www.minvu.gob.cl/noticia/caso" }],
       retries: 0,
       fetchImpl: async (url) => {
         requested.push(url);
         return new Response(JSON.stringify([{ title: "Seremi anuncia su renuncia", date: "2026-09-01", url, description: "Anuncio de salida de la autoridad regional publicado por la fuente." }]), { headers: { "content-type": "application/json" } });
       },
     });
-    expect(requested).toEqual(["https://official.test/feed", "https://official.test/old-case"]);
-    expect(result.pendingEvidenceChecked).toBe(1);
+    expect(requested).toEqual(["https://official.test/feed", "https://official.test/old-case", "https://www.minvu.gob.cl/noticia/caso"]);
+    expect(result.pendingEvidenceChecked).toBe(2);
     expect(result.signals.some((signal) => signal.url.endsWith("old-case"))).toBe(true);
   });
   it("consulta prensa regional de Antofagasta sin usar el agregador como fuente", () => {
