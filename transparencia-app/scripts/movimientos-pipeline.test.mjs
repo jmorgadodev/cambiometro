@@ -62,6 +62,53 @@ describe("pipeline automático de movimientos", () => {
     expect(validateMovementPayload(publishedMovements)).toBe(publishedMovements);
   });
 
+  it("conserva como tres eventos pendientes los anuncios del 30 de septiembre aunque el ETL parta del release anterior", () => {
+    const seeds = publishedMovements.signals;
+    const previousCooperativaArticle = {
+      source_id: "cooperativa",
+      source_label: "Cooperativa",
+      source_tier: "press",
+      title: "El Gobierno perdió tres seremis en sólo un día",
+      url: "https://www.cooperativa.cl/noticias/seremis-30-septiembre/",
+      date: "2026-09-30",
+      summary: "Kattia Durán dejó Desarrollo Social; Sebastián Norambuena salió de Vivienda y Juan Carlos Meléndez dejó Economía en O'Higgins.",
+      status: "en_confirmacion",
+      fase: "anunciado",
+    };
+    const payload = buildMovementPayload({ ...publishedMovements, signals: [previousCooperativaArticle] }, {
+      now: "2026-10-01T03:00:00.000Z",
+      signalSeeds: seeds,
+      signals: [
+        {
+          source_id: "radio-uchile",
+          source_label: "Radio Universidad de Chile",
+          source_tier: "press",
+          title: "Por razones familiares: renuncia seremi de Desarrollo Social de la RM, Kattia Durán",
+          url: "https://radio.uchile.cl/2026/09/30/kattia-duran/",
+          date: "2026-09-30",
+          summary: "Kattia Durán deja la Seremi de Desarrollo Social.",
+          status: "en_confirmacion",
+          fase: "anunciado",
+        },
+      ],
+    });
+
+    const septemberSignals = payload.signals.filter((signal) => signal.date === "2026-09-30");
+    expect(septemberSignals).toHaveLength(3);
+    expect(septemberSignals.map((signal) => signal.person_name).sort()).toEqual([
+      "Juan Carlos Meléndez Santelices",
+      "Kattia Durán",
+      "Sebastián Norambuena",
+    ]);
+    expect(septemberSignals.every((signal) => signal.status === "en_confirmacion")).toBe(true);
+    expect(septemberSignals.every((signal) => signal.related_sources?.some((source) => source.source_id === "cooperativa"))).toBe(true);
+    expect(payload.signals.some((signal) => signal.title === "El Gobierno perdió tres seremis en sólo un día")).toBe(false);
+    expect(payload.stats.total_eventos_publicados).toBe(51);
+    expect(payload.stats.signals_en_confirmacion).toBe(5);
+    expect(payload.last_event_date).toBe("2026-09-30");
+    expect(payload.stats.ultimos_7_dias).toBe(3);
+  });
+
   it("registra la salida reportada de Fabián Páez como señal pendiente sin alterar las 46 salidas reconciliadas", () => {
     const signal = publishedMovements.signals?.find((item) => /fabi[aá]n p[aá]ez/i.test(`${item.title} ${item.summary}`));
 

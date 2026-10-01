@@ -94,11 +94,48 @@ const normalizeSignalText = (value) => String(value ?? "")
 function sameSignalSubject(knownSignal, evidenceSignal) {
   const person = normalizeSignalText(knownSignal.person_name ?? "");
   const evidenceText = normalizeSignalText(`${evidenceSignal.title ?? ""} ${evidenceSignal.summary ?? ""}`);
-  if (person.length < 8 || !evidenceText.includes(person)) return false;
+  const nameParts = person.split(/[^a-z0-9]+/).filter(Boolean);
+  const nameVariants = [person, nameParts.slice(0, 3).join(" ")]
+    .filter((variant) => variant.length >= 8);
+  if (!nameVariants.some((variant) => evidenceText.includes(variant))) return false;
   const context = normalizeSignalText(`${knownSignal.role ?? ""} ${knownSignal.ministry ?? ""} ${knownSignal.region ?? ""}`)
     .split(/[^a-z0-9]+/)
     .filter((word) => word.length >= 5 && !["ministerio", "secretaria", "regional"].includes(word));
   return context.length > 0 && context.some((word) => evidenceText.includes(word));
+}
+
+function expandNamedPressSignals(signals, seeds) {
+  return signals.flatMap((signal) => {
+    const matchedSeeds = seeds.filter((seed) => sameSignalSubject(seed, signal));
+    if (matchedSeeds.length === 0) return [signal];
+    return matchedSeeds.map((seed) => ({
+      ...seed,
+      last_seen_at: signal.detected_at ?? seed.last_seen_at,
+      related_sources: [
+        ...(seed.related_sources ?? []),
+        {
+          source_id: signal.source_id,
+          source_label: signal.source_label,
+          source_tier: signal.source_tier,
+          title: signal.title,
+          url: signal.url,
+          date: signal.date,
+        },
+      ],
+    }));
+  });
+}
+
+function isSignalAlreadyInMovement(signal, movements) {
+  if (signal.person_name) return false;
+  const text = normalizeSignalText(`${signal.title ?? ""} ${signal.summary ?? ""}`);
+  return KNOWN_ANNOUNCED_MOVEMENTS.some((definition) => (
+    definition.matches.test(text)
+    && movements.some((movement) => (
+      movement.id === definition.id
+      || definition.matches.test(normalizeSignalText(`${movement.saliente ?? movement.salio?.nombre ?? ""} ${movement.cargo ?? ""} ${movement.region ?? ""}`))
+    ))
+  ));
 }
 
 function findLegalConfirmation(left, right) {
@@ -909,7 +946,7 @@ function buildConnectorMetadata(previousConnectors, sourceResults, now) {
   return connectors;
 }
 
-export function buildMovementPayload(previous, { now = new Date().toISOString(), sourceResults = [], signals = [] } = {}) {
+export function buildMovementPayload(previous, { now = new Date().toISOString(), sourceResults = [], signals = [], signalSeeds = [] } = {}) {
   if (!previous || !Array.isArray(previous.movimientos) || previous.movimientos.length === 0) {
     throw new Error("MOVIMIENTOS_BASELINE_EMPTY");
   }
@@ -921,14 +958,25 @@ export function buildMovementPayload(previous, { now = new Date().toISOString(),
     usedIds.add(id);
     return { ...enriched, id };
   });
-  const movimientos = materializeKnownSignals(movimientosBase, signals, now);
-  const retainedSignals = mergeSignalCollections(previous.signals, signals)
+  const namedSignals = expandNamedPressSignals(signals, signalSeeds);
+  const namedPreviousSignals = expandNamedPressSignals(previous.signals ?? [], signalSeeds);
+  const movimientos = materializeKnownSignals(movimientosBase, namedSignals, now);
+  const retainedSignals = mergeSignalCollections(namedPreviousSignals, signalSeeds, namedSignals)
     .filter((signal) => ["en_confirmacion", "verificado_oficial"].includes(signal.status))
+    .filter((signal) => !isSignalAlreadyInMovement(signal, movimientos))
     .slice(-250);
   const pendingSignalCount = retainedSignals.filter((signal) => signal.status === "en_confirmacion").length;
   const verifiedSignalCount = retainedSignals.filter((signal) => signal.status === "verificado_oficial").length;
   const backedMovementCount = movimientos.filter((movement) => ["verificado", "verificado_oficial", "corroborado"].includes(movement.estado)).length;
-  const lastEventDate = movimientos.map((movement) => movement.fecha).filter(Boolean).sort().at(-1) ?? null;
+  const eventDates = [
+    ...movimientos.map((movement) => movement.fecha),
+    ...retainedSignals.map((signal) => signal.date ?? signal.effective_date),
+  ].filter(Boolean);
+  const lastEventDate = eventDates.sort().at(-1) ?? null;
+  const isWithinLastSevenDays = (date) => {
+    const eventMs = Date.parse(`${date}T12:00:00Z`);
+    return Number.isFinite(eventMs) && eventMs <= nowMs && nowMs - eventMs <= 7 * 86_400_000;
+  };
   const sourceHealth = sourceResults.map((source) => Object.fromEntries(
     Object.entries(source).filter(([key]) => key !== "signals"),
   ));
@@ -954,10 +1002,8 @@ export function buildMovementPayload(previous, { now = new Date().toISOString(),
       verificados: movimientos.filter((movement) => ["verificado", "verificado_oficial"].includes(movement.estado)).length,
       corroborados: movimientos.filter((movement) => movement.estado === "corroborado").length,
       en_confirmacion: movimientos.filter((movement) => movement.estado === "en_confirmacion").length + pendingSignalCount,
-      ultimos_7_dias: movimientos.filter((movement) => {
-        const eventMs = Date.parse(`${movement.fecha}T12:00:00Z`);
-        return Number.isFinite(eventMs) && eventMs <= nowMs && nowMs - eventMs <= 7 * 86_400_000;
-      }).length,
+      ultimos_7_dias: movimientos.filter((movement) => isWithinLastSevenDays(movement.fecha)).length
+        + retainedSignals.filter((signal) => isWithinLastSevenDays(signal.date ?? signal.effective_date)).length,
       signals_en_confirmacion: pendingSignalCount,
       signals_verificadas_oficialmente: verifiedSignalCount,
     },

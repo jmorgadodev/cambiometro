@@ -85,6 +85,9 @@ jobs:
           MOVIMIENTOS_RELEASE_APPROVED: "1"
           MOVIMIENTOS_RUN_REPORT: data/generated/movimientos-run.json
           MOVIMIENTOS_INPUT: data/movimientos.previous.json
+          # Reincorpora candidatos periodísticos revisados que aún no estén
+          # en el release R2 anterior; sólo se leen sus señales, nunca sus filas.
+          MOVIMIENTOS_SIGNAL_SEED: data/movimientos.json
           MOVIMIENTOS_PROVISIONAL_SOURCES: ${{ vars.MOVIMIENTOS_PROVISIONAL_SOURCES }}
           # El servidor de Prensa Presidencia omite su intermedio Sectigo.
           # Se agrega sólo ese intermedio público y se conserva la validación
