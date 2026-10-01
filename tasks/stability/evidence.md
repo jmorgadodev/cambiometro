@@ -262,3 +262,24 @@ Riesgo o siguiente puerta:
 - La cuarta puerta sigue abierta hasta preview, promoción ui-only y smoke
   productivo. No se escribe ni borra R2, no se ejecutan ETL ni D1 remoto;
   costes #671 permanecen apartados. Rollback: deployment anterior de Pages.
+
+### O04 — cierre productivo · 2026-10-01 · 100 %
+
+- PR #676 integrado en main: `76b8985e4d447f27170a0c663b3ccb9ea0ed28de`.
+  Se actualizaron únicamente las expectativas antiguas de los controles de
+  Fuentes: checksum del release en vez de fecha global y contadores conciliados
+  en vez de GLOBAL_KPIS. 34 pruebas dirigidas y todos los checks del PR verdes.
+- Preview: run 36910545533, `https://d7efd81b.cambiometro.pages.dev`.
+  Producción ui-only: run 36912818623, resultado success; deployment
+  `0154c7e6-d075-41f6-9097-362ce953b7d6`.
+- `node scripts/verify-prod-fuentes.mjs` aprobado en preview y producción:
+  13 fuentes, períodos y conteos por alcance, estados parciales, cero errores
+  de página y cero desbordamiento a 320/1440 px. La comprobación de la insignia
+  ignora mayúsculas porque el CSS transforma su presentación.
+- Checksum idéntico del resumen en ambos destinos:
+  `a316454f318bb2c3f11c170bbaa545e98cf5b8fab8003e0c2a77c5e2e17d6efc`.
+  Total público: «Conteo conjunto no calculable», sin inventar un total global.
+- Metadatos de deployment/rollback conservados en el artefacto del workflow;
+  no se creó respaldo R2, no se escribieron/borraron datos R2, no se ejecutó ETL
+  ni D1 remoto. #671 continúa apartado. Este cierre sólo acredita O04, no la
+  estabilidad global de todos los ETL ni los siete días de observación.

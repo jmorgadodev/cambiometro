@@ -33,7 +33,7 @@ try {
         const count = source.reconciliation.state === "release_override" ? source.publicHistoricalCount ?? source.canonicalCount : source.canonicalCount;
         assert.ok(text.includes(count.toLocaleString("es-CL")), `${source.id}: count mismatch`);
       }
-      if (source.status === "parcial" && !source.derived) assert.ok(text.includes("Cobertura parcial"), `${source.id}: partial status lost`);
+      if (source.status === "parcial" && !source.derived) assert.ok(/cobertura parcial/i.test(text), `${source.id}: partial status lost`);
     }
     assert.deepEqual(errors, []);
     assert.equal(await page.evaluate(() => document.documentElement.scrollWidth > innerWidth), false, `overflow at ${width}px`);
