@@ -25,6 +25,23 @@ const baseline = {
 const publishedMovements = JSON.parse(readFileSync(new URL("../data/movimientos.json", import.meta.url), "utf8"));
 
 describe("pipeline automático de movimientos", () => {
+  it("relee diariamente la evidencia pendiente fuera del feed reciente sin consultar hosts ajenos", async () => {
+    const requested = [];
+    const result = await collectMovementSources({
+      sources: [{ id: "official", tier: "official", url: "https://official.test/feed" }],
+      pendingSignals: [{ status: "en_confirmacion", url: "https://official.test/old-case" },
+        { status: "en_confirmacion", url: "https://untrusted.test/case" },
+        { status: "verificado_oficial", url: "https://official.test/closed-case" }],
+      retries: 0,
+      fetchImpl: async (url) => {
+        requested.push(url);
+        return new Response(JSON.stringify([{ title: "Seremi anuncia su renuncia", date: "2026-09-01", url, description: "Anuncio de salida de la autoridad regional publicado por la fuente." }]), { headers: { "content-type": "application/json" } });
+      },
+    });
+    expect(requested).toEqual(["https://official.test/feed", "https://official.test/old-case"]);
+    expect(result.pendingEvidenceChecked).toBe(1);
+    expect(result.signals.some((signal) => signal.url.endsWith("old-case"))).toBe(true);
+  });
   it("consulta prensa regional de Antofagasta sin usar el agregador como fuente", () => {
     expect(MOVIMIENTOS_SOURCES).toEqual(expect.arrayContaining([
       expect.objectContaining({ id: "desierto-fm", tier: "press", url: "https://www.desiertofm.cl/feed/" }),

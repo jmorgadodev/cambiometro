@@ -13,8 +13,12 @@ Rama: `codex/movimientos-press-announcements-20261001`.
 - Una página de prensa sin anuncios válidos no habilita esta excepción.
 - Se incorpora el RSS regional de Desierto FM, comprobado HTTP 200 y XML RSS.
 - La confirmación legal conserva el ID del anuncio y no incrementa el total.
+- Cada ejecución relee enlaces pendientes y sus evidencias relacionadas en
+  los orígenes HTTPS ya configurados; no sigue hosts desconocidos ni credenciales
+  en URLs. Hasta 50 enlaces extra por día; los excesos rotan y quedan registrados
+  como diferidos. Se mantienen consultas diarias a las fuentes legales existentes.
 - Pruebas: `npx vitest run scripts/movimientos-pipeline.test.mjs
-  scripts/etl/connectors/release-adapters.test.mjs`: 36 aprobadas.
+  scripts/etl/connectors/release-adapters.test.mjs`: 37 aprobadas.
 
 ## Límites y pendiente concreto
 
