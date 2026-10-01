@@ -13,8 +13,9 @@ on:
         type: string
 
 concurrency:
-  group: pages-production-promotion
-  cancel-in-progress: true
+  group: cambiometro-static-publication
+  cancel-in-progress: false
+  queue: max
 
 permissions:
   actions: read

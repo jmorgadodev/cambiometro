@@ -38,8 +38,9 @@ on:
         default: ""
 
 concurrency:
-  group: pages-ui-refresh
-  cancel-in-progress: true
+  group: cambiometro-static-publication
+  cancel-in-progress: false
+  queue: max
 
 permissions:
   contents: read

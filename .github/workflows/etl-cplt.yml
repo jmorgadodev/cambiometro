@@ -12,6 +12,7 @@ on:
 concurrency:
   group: cambiometro-static-publication
   cancel-in-progress: false
+  queue: max
 
 jobs:
   cplt-source-check:

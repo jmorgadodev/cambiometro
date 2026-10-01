@@ -20,6 +20,7 @@ on:
 concurrency:
   group: cambiometro-static-publication
   cancel-in-progress: false
+  queue: max
 
 jobs:
   ingest-publish-materialize:

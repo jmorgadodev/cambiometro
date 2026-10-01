@@ -69,10 +69,11 @@ on:
         default: false
 
 concurrency:
-  # Cada ETL tiene su propia cola. Un no-op posterior no debe cancelar
-  # la promoción válida en curso antes de evaluar refresh-decision.
-  group: pages-static-refresh-${{ github.event_name == 'workflow_run' && github.event.workflow_run.name || github.event_name }}
+  # Una cola compartida evita despliegues y publicaciones solapados.
+  # queue: max conserva pendientes; cancel-in-progress protege el activo.
+  group: cambiometro-static-publication
   cancel-in-progress: false
+  queue: max
 
 permissions:
   contents: read
