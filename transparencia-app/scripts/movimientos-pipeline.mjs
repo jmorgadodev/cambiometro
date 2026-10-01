@@ -69,6 +69,12 @@ export const MOVIMIENTOS_SOURCES = Object.freeze([
     tier: "press",
     url: "https://www.cooperativa.cl/noticias/site/tax/port/all/rss____1.xml",
   },
+  {
+    id: "desierto-fm",
+    label: "Desierto FM",
+    tier: "press",
+    url: "https://www.desiertofm.cl/feed/",
+  },
 ]);
 
 // gob.cl sometimes applies its edge policy differently to the news path and
@@ -594,6 +600,9 @@ export async function collectMovementSources({ sources = MOVIMIENTOS_SOURCES, fe
     results,
     signals,
     hasOfficialSource: officialOk.length > 0,
+    // Official downtime must not suppress dated announcements from the
+    // configured press sources. Their status remains pending legal evidence.
+    canPublishAnnouncements: signals.some((signal) => ["official", "press"].includes(signal.source_tier)),
     allOfficialBlocked: official.length > 0 && officialOk.length === 0,
   };
 }

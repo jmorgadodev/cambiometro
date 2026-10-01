@@ -94,7 +94,7 @@ async function main() {
     published: false,
   };
 
-  if (collected.allOfficialBlocked || !collected.hasOfficialSource) {
+  if (!collected.hasOfficialSource && !collected.canPublishAnnouncements) {
     report.reason = "ALL_OFFICIAL_SOURCES_BLOCKED";
     await writeReport(report);
     throw new Error("MOVIMIENTOS_ALL_OFFICIAL_SOURCES_BLOCKED");
