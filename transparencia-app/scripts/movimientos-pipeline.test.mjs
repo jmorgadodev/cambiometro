@@ -25,6 +25,31 @@ const baseline = {
 const publishedMovements = JSON.parse(readFileSync(new URL("../data/movimientos.json", import.meta.url), "utf8"));
 
 describe("pipeline automático de movimientos", () => {
+  it("conserva la primera fecha de detección al releer una señal conocida", () => {
+    const movement = publishedMovements.movimientos.find((row) => row.id === "mov-kast-2026-2026-09-01-patricio-lohr");
+    const signals = [{ title: "Patricio Löhr renuncia como seremi de Transportes de Arica", date: "2026-09-01", url: "https://source.test/noticia", source_label: "Prensa", source_tier: "press" }];
+    const first = materializeKnownSignals([movement], signals, "2026-10-01T10:00:00Z");
+    const second = materializeKnownSignals(first, signals, "2026-10-02T10:00:00Z");
+    expect(second[0].fecha_deteccion).toBe(first[0].fecha_deteccion);
+  });
+  it("no presenta todos los eventos del corte como confirmados", () => {
+    const payload = buildMovementPayload(publishedMovements);
+    const backed = payload.movimientos.filter((row) => ["verificado", "verificado_oficial", "corroborado"].includes(row.estado)).length
+      + payload.signals.filter((row) => row.status === "verificado_oficial").length;
+    const pending = payload.movimientos.filter((row) => row.estado === "en_confirmacion").length
+      + payload.signals.filter((row) => row.status === "en_confirmacion").length;
+    expect(payload.stats.eventos_con_respaldo).toBe(backed);
+    expect(payload.stats.en_confirmacion).toBe(pending);
+  });
+  it("no cuenta noticias internacionales ni críticas sin anuncio de salida", () => {
+    const signals = parseMovementSignals(JSON.stringify([
+      { title: 'Irán: salida de EE.UU. de Irak', description: 'El Gobierno de Bagdad celebra la salida de tropas.', url: 'https://www.cooperativa.cl/noticias/mundo/iran/salida.html', date: '2026-10-01' },
+      { title: 'Heraldo Muñoz acusó doble estándar del Gobierno por mantener a Zaliasnik', description: 'Se menciona la renuncia de una embajadora y un nombramiento anterior de autoridades.', url: 'https://www.cooperativa.cl/noticias/pais/critica.html', date: '2026-10-01' },
+      { title: 'Ministro renuncia en Irak', description: 'El Gobierno informa su salida.', url: 'https://www.cooperativa.cl/noticias/mundo/irak/ministro.html', date: '2026-10-01' },
+      { title: 'Seremi descarta renuncia', url: 'https://www.cooperativa.cl/noticias/pais/desmentido.html', date: '2026-10-01' },
+    ]), { id: 'cooperativa', tier: 'press', url: 'https://www.cooperativa.cl/noticias/site/tax/port/all/rss__1.xml', contentType: 'application/json' });
+    expect(signals).toEqual([]);
+  });
   it("mantiene 46 salidas y añade evidencia oficial a Jorge Olivares", () => {
     const jorge = publishedMovements.movimientos.find((movement) => movement.id === "mov-kast-2026-2026-09-14-jorge-olivares");
 

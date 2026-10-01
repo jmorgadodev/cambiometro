@@ -162,3 +162,28 @@ Riesgo o siguiente puerta:
 - O06 = 75 %; falta fusión con controles verdes y ejecución productiva que
   demuestre el camino completo. No se declara estabilidad de siete días ni
   cierre de otras fuentes. Sin modificación visual ni backup nuevo.
+
+### O06 — validación real y corrección acotada · 2026-10-01
+
+- #672 fusionado en `6a9d3648`, todos sus controles verdes. Ejecución real
+  `36851576565`: el extractor propuso dos señales ajenas a una salida actual
+  de autoridad chilena (noticia de Irán/Irak y crítica sobre continuidad de
+  Zaliasnik). No son movimientos válidos ni confirmaciones oficiales.
+- Se cancelaron el refresco Pages `36851751944` y el verificador
+  `36851751872`; se restauró el manifiesto canónico anterior desde la copia
+  local verificada. Antes de restaurar se comprobó que los demás archivos
+  del manifiesto no habían cambiado. No se modificaron otras fuentes.
+- Presupuesto de restauración: 8.391.468.869 bytes actuales, pico previsto
+  8.391.561.292 bytes, umbral 9.500.000.000. Sólo se reemplazó el manifiesto;
+  no se creó backup ni se eliminó histórico.
+- Rollback leído y validado: objeto de 108.691 bytes,
+  checksum `e3e6753b280f2535e080aa444c761ed5ea01b4103803284e6a0a55d8e3a372af`,
+  46 movimientos + 5 señales. Evidencia local conservada en
+  `C:\Users\jorge\Proyectos\cambiometro-audit\evidence\movimientos-closeout-20261001`.
+- Corrección limitada al filtro: no combinar un titular sin anuncio de salida
+  con referencias históricas en el cuerpo; excluir secciones internacionales
+  y desmentidos. Los comunicados oficiales con anuncio en el resumen y cargo
+  local siguen aceptándose. Prueba negativa reprodujo los falsos positivos
+  antes de la corrección; 43 pruebas dirigidas, tipos y lint pasan después.
+- La cola Pages no cancela una promoción válida cuando llega un no-op nuevo.
+  O06 sigue en 75 % hasta repetir y comprobar la ejecución corregida.

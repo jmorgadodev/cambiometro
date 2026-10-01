@@ -374,8 +374,13 @@ function normalizeUrl(href, baseUrl) {
 }
 
 function isAuthorityMovementSignal(title, summary) {
-  const text = `${title ?? ""} ${String(summary ?? "").slice(0, 1600)}`;
-  return MOVEMENT_KEYWORDS.test(text) && AUTHORITY_KEYWORDS.test(text);
+  const headline = String(title ?? "");
+  const detail = String(summary ?? "").slice(0, 1600);
+  if (/\b(?:descarta|desmiente|niega)\b.{0,100}\b(?:renuncia|salida)\b/i.test(headline)) return false;
+  const localOffice = /\b(?:seremi|subsecretar(?:io|ia)|delegad[oa] (?:presidencial|regional)|secretar[ií]a regional ministerial)\b/i.test(detail);
+  if (MOVEMENT_KEYWORDS.test(headline)) return AUTHORITY_KEYWORDS.test(headline) || localOffice;
+  return /^(?:comunicado(?: de prensa)?|declaraci[oó]n p[uú]blica)\b/i.test(headline)
+    && localOffice && MOVEMENT_KEYWORDS.test(detail);
 }
 
 export function parseMovementSignals(body, source) {
@@ -444,7 +449,9 @@ export function parseMovementSignals(body, source) {
   }
 
   const seen = new Set();
-  return items.filter((item) => item.date && item.date >= MOVEMENT_SCOPE_START_DATE).filter((item) => {
+  return items.filter((item) => item.date && item.date >= MOVEMENT_SCOPE_START_DATE)
+    .filter((item) => !/\/(?:mundo|internacional(?:es)?)\//i.test(item.url ?? ""))
+    .filter((item) => {
     const key = `${item.url ?? source.url}|${item.title.toLowerCase()}`;
     if (seen.has(key)) return false;
     seen.add(key);
@@ -916,12 +923,13 @@ export function materializeKnownSignals(movimientos, signals, now) {
         ...existing,
         fuentes: mergedSources,
         fuente: sourceLabelsForMovement(mergedSources),
-        fecha_deteccion: now,
+        fecha_deteccion: existing.fecha_deteccion ?? rebuilt.fecha_deteccion ?? now,
       };
     } else {
       result[existingIndex] = {
         ...existing,
         ...rebuilt,
+        fecha_deteccion: existing.fecha_deteccion ?? rebuilt.fecha_deteccion ?? now,
         fuentes: mergedSources,
         fuente: sourceLabelsForMovement(mergedSources),
       };

@@ -9,4 +9,9 @@ describe("workflow de refresco de Pages", () => {
     expect(workflow).toContain("ref: ${{ github.ref_name }}");
     expect(workflow).not.toContain("github.event.workflow_run.head_sha");
   });
+  it("no permite que un no-op posterior cancele una promoción activa", () => {
+    expect(workflow).toContain("cancel-in-progress: false");
+    expect(workflow).toContain("needs: refresh-decision");
+    expect(workflow).toContain("if: needs.refresh-decision.outputs.refresh == 'true'");
+  });
 });
