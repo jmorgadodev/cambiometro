@@ -240,6 +240,8 @@ function MovimientosContent() {
     return true;
   }), [señalesPendientes, filtroTipo, filtroEstado, filtroMinisterio, filtroRegion, filtroMotivo, busqueda]);
 
+  const pendientesFiltrados = summarizeMovementPublicationCounts(filtrados, señalesFiltradas).pending;
+
   const entradasFiltradas = useMemo<EntradaCronologica[]>(() => [
     ...filtrados.map((movement) => ({ kind: "movement" as const, id: movement.id, date: movement.fecha, movement })),
     ...señalesFiltradas.filter((signal): signal is MovimientoSignal & { date: string } => Boolean(signal.date)).map((signal) => ({
@@ -611,7 +613,7 @@ function MovimientosContent() {
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <span style={{ fontSize: "0.85rem", fontWeight: 700, color: "var(--text-1)" }}>
                 {entradasFiltradas.length} {entradasFiltradas.length === 1 ? "registro" : "registros"}
-                {señalesFiltradas.length > 0 && <span style={{ color: "var(--text-2)", fontWeight: 500 }}> · {señalesFiltradas.length} en confirmación</span>}
+                {pendientesFiltrados > 0 && <span style={{ color: "var(--text-2)", fontWeight: 500 }}> · {pendientesFiltrados} en confirmación</span>}
               </span>
               {busqueda && (
                 <button
