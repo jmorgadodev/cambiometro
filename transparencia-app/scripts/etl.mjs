@@ -24,6 +24,7 @@ import { assertSuccessfulRun } from "./etl/validation.mjs";
 import { readJsonIfPresent, writeFileAtomic } from "./etl/safe-file.mjs";
 import { mergeRecordsById } from "./etl/history.mjs";
 import { reconcileSenateExpenseHistory } from "./etl/senado-expense-reconciliation.mjs";
+import { readExpenseSubsetForPublication } from "./expense-release.mjs";
 import { resolveCamaraVoteWindow, CAMARA_CURRENT_PERIOD_START } from "./etl/camara-history.mjs";
 import { selectSenateExpensePeriods } from "./etl/expense-window.mjs";
 
@@ -358,7 +359,15 @@ async function main() {
   });
   await runSource({
     key: "gastos_senado", label: "Gastos Operacionales Senado", selected: options.sources, previous, snapshot, summary,
-    summaryKey: "gastos_senado_ingresados", minimum: 0, reconcileHistory: reconcileSenateExpenseHistory,
+    summaryKey: "gastos_senado_ingresados", minimum: 0,
+    reconcileHistory: (previousRecords, records) => {
+      if (!process.argv.includes("--require-published-expense-baseline")) {
+        return reconcileSenateExpenseHistory(previousRecords, records);
+      }
+      const published = readExpenseSubsetForPublication(join(scriptDirectory, ".."), "gastos_senado");
+      if (!published?.subset?.records?.length) throw new Error("SENADO_EXPENSE_PUBLISHED_BASELINE_REQUIRED");
+      return reconcileSenateExpenseHistory(previousRecords, records, { publishedRecords: published.subset.records });
+    },
     load: () => fetchGastosSenado({ fullHistory: FULL_HISTORY }),
   });
   await runSource({
