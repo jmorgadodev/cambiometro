@@ -33,13 +33,23 @@ Preguntas operativas: ¿qué ruta falló?, ¿es un incidente ya abierto?,
 
 ## Estado y límites
 
+PR #685 integrado en `main` (`97f49194c9b9cb3939b4bba0f10cf193a9264e40`),
+con CI y build/E2E verdes. Ejecución real `36939508453` completada correctamente:
+12 rutas pasaron, incluida validación de Movimientos; 42 incidencias antiguas
+cerradas después de comprobar recuperación. El inventario pasó de 88 a 46.
+Las restantes no se cierran sin probar sus rutas. No hubo escrituras R2 ni
+modificación de releases; una incidencia cerrada sigue siendo recuperable en GitHub.
+
 Pruebas locales cubren fallos repetidos, recordatorio semanal, recuperación,
 rutas no comprobadas e inventario GitHub fallido/incompleto. Las mutaciones de
 GitHub se ensayan con transporte simulado, sin abrir incidencias de prueba reales.
 
-O10 no queda completo: falta el control diario por calendario/frescura,
+O10 no queda completo: falta la frescura del release,
 coherencia entre manifiestos externos/API/Pages y presupuesto. Las guardas de
 costes permanecen apartadas y la escritura condicional R2 no se activa.
+
+El primer control de calendario por metadatos se documenta en
+`docs/operations/etl-calendar-monitor-20261001.md`; no acredita salud de datos.
 
 Ruta de trabajo: `C:\Users\jorge\.codex\worktrees\codex-stabilizacion-20261001`.
 Rama: `codex/uptime-incident-grouping-20261001`, basada en `origin/main` después
