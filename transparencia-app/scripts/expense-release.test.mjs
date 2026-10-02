@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { buildExpensePeriodShards, buildExpenseSubset, compactExpenseRecord, isValidExpenseAmount, sanitizeExpenseSubsetForPublication, writeExpensePeriodArtifacts } from "./expense-release.mjs";
+import { buildExpensePeriodShards, buildExpenseSubset, compactExpenseRecord, isValidExpenseAmount, sanitizeExpenseSubsetForPublication, writeExpensePeriodArtifacts, retainPublishedExpensePeriods } from "./expense-release.mjs";
 
 const base = {
   id: "cam-1",
@@ -17,6 +17,19 @@ const base = {
 };
 
 describe("release estático de gastos operacionales", () => {
+  it("conserva meses históricos del manifiesto R2 cuando el candidato sólo refresca un mes", () => {
+    const path = (period) => `data/lake-subsets/expense-periods/gastos_senado/${period}.json`;
+    const index = { sources: [{ sourceId: "gastos_senado", periods: [{ period: "2026-07", path: path("2026-07"), recordCount: 1251 }] }] };
+    const published = { files: [
+      { sourceId: "gastos_senado", period: "2012-01", path: path("2012-01"), recordCount: 307 },
+      { sourceId: "gastos_senado", period: "2026-07", path: path("2026-07"), recordCount: 1250 },
+      { sourceId: "gastos_camara", period: "2026-06", path: "data/lake-subsets/expense-periods/gastos_camara/2026-06.json", recordCount: 3255 },
+    ] };
+    expect(retainPublishedExpensePeriods(index, published).sources[0].periods).toEqual([
+      { period: "2012-01", path: path("2012-01"), recordCount: 307 }, index.sources[0].periods[0],
+    ]);
+    expect(index.sources[0].periods).toHaveLength(1);
+  });
   it("retira matrices amplias de ceros y períodos prematuros sólo de la vista publicada", () => {
     const records = [
       { ...base, id: "cam-june", periodo: "2026-06", fecha: "2026-06-01", monto_clp: 1000 },
