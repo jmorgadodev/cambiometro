@@ -91,12 +91,21 @@ jobs:
           ref: ${{ github.ref_name }}
       - uses: actions/github-script@v7
         id: decision
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         with:
           script: |
-            if (context.eventName !== 'workflow_run' || context.payload.workflow_run.name !== 'ETL Diario - Movimientos de Autoridades') return true;
-            const { shouldRefreshMovements } = await import(`${process.env.GITHUB_WORKSPACE}/transparencia-app/scripts/movimientos-publication.mjs`);
-            const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, { ...context.repo, run_id: context.payload.workflow_run.id });
-            return shouldRefreshMovements(jobs);
+            if (context.eventName !== 'workflow_run') return true;
+            if (context.payload.workflow_run.name === 'ETL Diario - Movimientos de Autoridades') {
+              const { shouldRefreshMovements } = await import(`${process.env.GITHUB_WORKSPACE}/transparencia-app/scripts/movimientos-publication.mjs`);
+              const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, { ...context.repo, run_id: context.payload.workflow_run.id });
+              if (!shouldRefreshMovements(jobs)) return false;
+            }
+            const { shouldRefreshStaticRelease } = await import(`${process.env.GITHUB_WORKSPACE}/transparencia-app/scripts/static-refresh-decision.mjs`);
+            const refresh = await shouldRefreshStaticRelease({ accountId: process.env.CLOUDFLARE_ACCOUNT_ID, token: process.env.CLOUDFLARE_API_TOKEN });
+            core.info(refresh ? 'Release R2 pendiente de publicar en Pages' : 'Pages ya contiene el release R2; sin compilación ni despliegue');
+            return refresh;
 
   build-verify-publish:
     needs: refresh-decision
