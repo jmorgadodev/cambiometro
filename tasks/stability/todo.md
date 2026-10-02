@@ -96,7 +96,7 @@ productiva y rollback comprobados; evidencia abajo. Costes (#671) siguen apartad
   PR #685 y ejecución real 36939508453 verdes: 12 rutas comprobadas, 42 alertas
   antiguas cerradas sólo tras recuperación. Runbook en `docs/operations/uptime-incidents-20261001.md`.
 - [x] Control acotado de calendario mediante metadatos GitHub (33 lecturas),
-  sin extracción ni datos R2/D1; 7 pruebas. CI y activación diaria pendientes.
+  sin extracción ni datos R2/D1; 7 pruebas. CI y ejecución real 36956479341 aprobadas; calendario diario activo.
   No equivale a frescura del release; evidencia en `docs/operations/etl-calendar-monitor-20261001.md`.
 
 - [ ] Leer calendario, estado de candidato/release, R2/API/Pages y presupuesto sin extraer universos.
@@ -113,11 +113,11 @@ Subtareas comprobadas al 2026-10-02: personal de apoyo Senado, ciclo 2026 cerrad
 - [ ] Tratar Cámara personal de apoyo y Senado sin convertir 403 en cero.
 - [ ] Verificar API, página y rollbacks individuales antes de cerrar cada fuente.
 
-## O12 · Gastos parlamentarios · M · 0 %
+## O12 · Gastos parlamentarios · M · 25 %
 
 - [ ] Cotejar meses y checksums declarados por Cámara/Senado con navegación.
 - [ ] Conservar nulo/no informado distinto de cero y seleccionar último corte.
-- [ ] Probar replay mensual y reducción inesperada sin D1 masiva.
+- [x] Probar replay mensual y reducción inesperada sin D1 masiva: PR #689 integrado, 43 pruebas; junio/julio Senado 1.248/1.250 filas. Workflow exige línea base R2 validada por checksum.
 - [ ] Promoción y smoke de fichas, API y manifiesto.
 
 ## O13 · Remuneraciones · M por componente · 0 %
@@ -127,12 +127,12 @@ Subtareas comprobadas al 2026-10-02: personal de apoyo Senado, ciclo 2026 cerrad
 - [ ] Comparar conteos, checksum e índices por organismo/período en preview.
 - [ ] Promover cada componente por separado y verificar fichas y búsqueda.
 
-## O14 · Rollback sin nueva copia · M · 0 %
+## O14 · Rollback sin nueva copia · M · 100 % tras fusión con CI verde
 
-- [ ] Identificar release vigente y anterior con checksum; inventariar respaldo ya existente sin borrar ni copiar.
-- [ ] Ensayar rollback del puntero de release en entorno aislado, sin escritura R2 productiva.
-- [ ] Verificar muestra del respaldo existente de forma acotada y medir lecturas/coste proyectado.
-- [ ] Documentar recuperación reproducible; nueva copia o cambio de retención requiere decisión aparte.
+- [x] Identificar release vigente y anterior con checksum; inventariar respaldo ya existente sin borrar ni copiar.
+- [x] Ensayar rollback del puntero de release en entorno aislado, sin escritura R2 productiva.
+- [x] Verificar muestra acotada: seis tamaños distribuidos, 22,3 MB restaurados, siete GET de datos, cero escrituras.
+- [x] Documentar recuperación en `docs/operations/rollback-existing-backup-20261002.md`; cierre efectivo tras CI verde y fusión. No acredita CAS remoto O08 ni restauración completa de todos los blobs.
 
 ## O15 · Observación · S operativo / 7 días · 0 %
 

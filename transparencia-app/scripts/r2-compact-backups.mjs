@@ -6,7 +6,7 @@ import { Readable, Transform, Writable } from "node:stream";
 import { pipeline } from "node:stream/promises";
 import { createGzip, createGunzip } from "node:zlib";
 import { listR2Objects } from "../lib/r2-live-list.mjs";
-import { compactionCandidates, requireVerifiedArchive, mergeCompactObjects } from "../lib/r2-compaction.mjs";
+import { compactionCandidates, requireVerifiedArchive, mergeCompactObjects, boundedRestoreSamples } from "../lib/r2-compaction.mjs";
 import { AwsClient } from "aws4fetch";
 
 const mode = process.argv.find((arg) => arg.startsWith("--mode="))?.slice(7) ?? "plan";
@@ -93,16 +93,22 @@ async function verifyRemote() {
   const manifest = await (await request("cambiometro-backups", manifestKey)).json();
   if (manifest.format !== "gzip-sha256-v1" || !manifest.objects?.length) throw new Error("COMPACTION_REMOTE_MANIFEST_INVALID");
   const unique = [...new Map(manifest.objects.map((object) => [object.blobKey, object])).values()];
-  const samples = unique.sort((a, b) => a.compressedSize - b.compressedSize).slice(0, 6);
+  const samples = boundedRestoreSamples(unique);
   for (const object of samples) {
     const response = await request("cambiometro-backups", object.blobKey);
     const hash = createHash("sha256"); let size = 0;
     await pipeline(Readable.fromWeb(response.body), createGunzip(), new Writable({
-      write(chunk, encoding, done) { hash.update(chunk); size += chunk.length; done(); },
+      write(chunk, encoding, done) {
+        size += chunk.length;
+        if (size > object.size) return done(new Error("COMPACTION_REMOTE_RESTORE_SIZE_EXCEEDED"));
+        hash.update(chunk); done();
+      },
     }));
     if (hash.digest("hex") !== object.sha256 || size !== object.size) throw new Error("COMPACTION_REMOTE_RESTORE_FAILED");
   }
-  console.log(JSON.stringify({ mode: "verify-remote", objects: manifest.objects.length, blobs: unique.length, restoredSamples: samples.length, status: "OK" }));
+  console.log(JSON.stringify({ mode: "verify-remote", objects: manifest.objects.length, blobs: unique.length, restoredSamples: samples.length,
+    sampleCompressedBytes: samples.reduce((sum, object) => sum + object.compressedSize, 0),
+    sampleRestoredBytes: samples.reduce((sum, object) => sum + object.size, 0), dataGetOperations: samples.length + 1, remoteWrites: 0, status: "OK" }));
 }
 
 if (mode === "verify-remote") {
