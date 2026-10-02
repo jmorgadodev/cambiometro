@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "30 7 * * 1" # lunes 03:30 America/Santiago en horario de verano
   workflow_dispatch:
+    inputs:
+      verify_release_only:
+        description: Validar el release vigente sin extraer ni publicar datos
+        type: boolean
+        default: false
 
 concurrency:
   group: cambiometro-static-publication
@@ -49,16 +54,17 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          if ! npx wrangler r2 object get transparencia-public-data/projections/personal-apoyo-v1/personal-apoyo.json --file /tmp/personal-apoyo-current.json --remote; then
-            echo "::warning::No hay snapshot remoto de personal de apoyo; se usa el baseline versionado."
-            cp data/personal-apoyo.json /tmp/personal-apoyo-current.json
-          fi
+          npx wrangler r2 object get transparencia-public-data/projections/personal-apoyo-v1/manifest.json --file /tmp/personal-apoyo-manifest.json --remote
+          npx wrangler r2 object get transparencia-public-data/projections/personal-apoyo-v1/personal-apoyo.json --file /tmp/personal-apoyo-downloaded.json --remote
+          node scripts/verify-personal-apoyo-release.mjs --manifest /tmp/personal-apoyo-manifest.json --input /tmp/personal-apoyo-downloaded.json --output /tmp/personal-apoyo-current.json --subset /tmp/personal-apoyo-verified-subset.json
 
       - name: Ejecutar ETL desde la última proyección válida
+        if: inputs.verify_release_only != true
         working-directory: transparencia-app
         run: npm run etl:personal-apoyo -- --source senado --input /tmp/personal-apoyo-current.json --output /tmp/personal-apoyo-next.json
 
       - name: Publicar personal de apoyo sólo en R2
+        if: inputs.verify_release_only != true
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -66,6 +72,7 @@ jobs:
         run: npm run data:publish:personal-apoyo -- --input /tmp/personal-apoyo-next.json --bucket transparencia-public-data --remote --skip-d1
 
       - name: Publicar entrada estática validada para Pages
+        if: inputs.verify_release_only != true
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -75,7 +82,7 @@ jobs:
           npm run data:publish:static -- --files data/personal-apoyo.json
 
       - name: Publicar resumen y diagnóstico
-        if: always()
+        if: always() && inputs.verify_release_only != true
         uses: actions/upload-artifact@v4
         with:
           name: personal-apoyo-senado-run-${{ github.run_id }}

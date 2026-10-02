@@ -9,6 +9,22 @@ import {
 } from "../scripts/etl/personal-apoyo-publication.mjs";
 
 describe("publicación del personal de apoyo", () => {
+  for (const workflowFile of ["etl-personal-apoyo.yml", "etl-personal-apoyo-senado.yml"]) {
+    it(`${workflowFile} exige checksum del release R2 y nunca restaura un baseline Git`, () => {
+      const workflow = readFileSync(resolve("..", ".github", "workflows", workflowFile), "utf8");
+      expect(workflow).toContain("projections/personal-apoyo-v1/manifest.json");
+      expect(workflow).toContain("node scripts/verify-personal-apoyo-release.mjs");
+      expect(workflow).not.toContain("cp data/personal-apoyo.json /tmp/personal-apoyo-current.json");
+      expect(workflow.indexOf("node scripts/verify-personal-apoyo-release.mjs"))
+        .toBeLessThan(workflow.indexOf("npm run etl:personal-apoyo"));
+    });
+    it(`${workflowFile} permite comprobar el baseline sin extraer ni publicar datos`, () => {
+      const workflow = readFileSync(resolve("..", ".github", "workflows", workflowFile), "utf8");
+      expect(workflow).toContain("verify_release_only:");
+      expect(workflow.match(/if: inputs\.verify_release_only != true/g)).toHaveLength(3);
+      expect(workflow).toContain("if: always() && inputs.verify_release_only != true");
+    });
+  }
   const valid = {
     generado_en: "2026-08-13T12:00:00.000Z",
     fuentes: { camara: { url: "https://www.camara.cl/oficial", nota: "Fuente oficial" } },
