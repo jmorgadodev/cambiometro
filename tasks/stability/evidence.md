@@ -364,3 +364,16 @@ Riesgo o siguiente puerta:
 - Inventario del respaldo: 4.108 objetos, 1.049.483.183 bytes; 4.107 blobs únicos. Seis muestras de distintos tamaños restauradas y verificadas por SHA-256: 22.345.237 bytes desde 1.645.633 bytes comprimidos; siete GET de datos, cero escrituras remotas.
 - Puntero en memoria `1c9dc4bec22b4a096a29a76452dc8f8ad4debee12b8b6a5b2a9ea288c11bb8cf` → `95785d19c8b77178004618d4027b4fd8f3343fa372ed3e2fc3fe644bd0c9fd5c` → vigente, con contratos y dos archivos reales verificados.
 - Once pruebas dirigidas aprobadas. Procedimiento: `docs/operations/rollback-existing-backup-20261002.md`. Cierre efectivo tras CI y fusión; el CAS remoto y los siete días siguen pendientes. No se restauró toda la copia ni se cambió producción.
+
+### O12 — cierre del alcance publicado · 2026-10-02 · 100 %
+
+- PR #693 integrado `6d7993578c321e19088dcac3c3543880dde40e78`, CI verde. Conservación histórica del índice y de filas del candidato R2: 32 pruebas; filtros/último corte/nulos: otras 27.
+- Índice reparado: Senado 174 períodos, Cámara cuatro; 19.660 bytes nuevos, cuenta proyectada 8.446.742.444 bytes. Manifiesto `55e5cd98b0270f398ecf59f344fe567c0692c9b38637413c0709b54b159a666a`; no backup ni D1 ni eliminación de histórico.
+- 178/178 períodos con HTTP 200, backend `r2-months` y conteo igual al manifiesto. Una fila por período, 2,5 segundos entre llamadas. Evidencia local `C:\Users\jorge\Proyectos\cambiometro-audit\evidence\expense-month-smoke-20261002-postfix.json`; se conserva el informe fallido anterior.
+- Run Pages 37050448199 success, deployment `https://a4a5369c.cambiometro.pages.dev`, ReleaseSet `92d5a447548effb98c334836c2392b419ff29961432ab7209d995b654090897e`. Pin productivo igual a R2; once páginas 200 y tres filtros anuales en fichas Pedro Araya/Vanessa Kaiser. No verifica cada fila histórica contra origen ni afirma cobertura total del Congreso.
+
+### O09 — cierre estático y no-op general · 2026-10-02 · 100 %
+
+- PR #692, ocho pruebas de decisión/contrato y CI verde. Run 37050531642: comparación R2/Pages sin cambios, build/publicación omitidos. Comprobación local posterior también devuelve `refresh=false`.
+- Run 37048540901 rechazó pin desfasado antes de publicar. La reconstrucción 37050448199 pasó tipos/build/E2E y todas las guardas; deployment y rollback registrados. Búsquedas Kaiser/Torrealba responden 200 con `r2-catalog`.
+- Modos, bloqueo compartido, promoción y límites documentados en `docs/operations/pages-coherent-promotion-20261002.md`. Manifiestos externos O08, monitor restante, remuneraciones, costes #671 y observación no se cierran por este hito.
