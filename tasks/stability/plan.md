@@ -62,9 +62,9 @@ actualiza ni se usa para desplegar. `cambiometro-audit` sólo guarda evidencia.
 | O09 | Promoción Pages de artefacto coherente y bloqueo global de publicación | M | O08 | 50 % |
 | O10 | Control diario sin extracción ni alertas repetidas por una misma causa | M | O03, O08 | 50 % |
 | O11 | Migrar fuentes pequeñas; Senado votaciones local-only; fallos externos aislados | M por fuente | O07 | 0 % |
-| O12 | Gastos parlamentarios: guardas y períodos publicados, nulo distinto de cero | M | O07, O08 | 0 % |
+| O12 | Gastos parlamentarios: guardas y períodos publicados, nulo distinto de cero | M | O07, O08 | 25 % |
 | O13 | Remuneraciones municipal/central/38 bis: guardas, cortes e índices sin D1 masiva | M por componente | O07, O08 | 0 % |
-| O14 | Simulacro de rollback por release y verificación del respaldo existente, sin copia nueva | M | O05, O08 | 0 % |
+| O14 | Simulacro local de rollback y muestra del respaldo existente, sin copia nueva; cierre tras CI y fusión | M | O05, O08 | 100 % tras fusión |
 | O15 | Siete días continuos de concordancia R2 → API → Pages y alertas útiles | S operativo, 7 días calendario | O09–O14 | 0 % |
 | O16 | ChileCompra: último, con preflight de alcance/coste y recuperación 403 | M por período | O05, O07, O15 | 0 % |
 

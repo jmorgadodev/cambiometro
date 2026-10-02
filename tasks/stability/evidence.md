@@ -345,3 +345,14 @@ Riesgo o siguiente puerta:
   no a la operación remota de todas las fuentes. No se disparó extracción ni
   reparación remota, no hubo D1 remoto, objetos nuevos R2 ni respaldos nuevos.
   O05/#671 sigue apartado; O11–O13 mantienen sus puertas operativas propias.
+
+### O12 — guarda mensual Senado · 2026-10-02 · 25 %
+
+- PR #689 integrado: `41e3655068768ad9e913f55e1e52f9d2ac6a2d77`, CI verde. 43 pruebas, replay junio/julio 1.248/1.250 filas, baseline publicado R2 obligatorio en workflow. Ejecución incremental 37044606324 pendiente de cola al registrar este hito.
+- Detalle: `docs/operations/expense-monthly-guard-20261002.md`. Los períodos oficiales coinciden (174), pero esto no acredita todas las filas históricas.
+
+### O14 — restauración acotada y simulacro · 2026-10-02
+
+- Inventario del respaldo: 4.108 objetos, 1.049.483.183 bytes; 4.107 blobs únicos. Seis muestras de distintos tamaños restauradas y verificadas por SHA-256: 22.345.237 bytes desde 1.645.633 bytes comprimidos; siete GET de datos, cero escrituras remotas.
+- Puntero en memoria `1c9dc4bec22b4a096a29a76452dc8f8ad4debee12b8b6a5b2a9ea288c11bb8cf` → `95785d19c8b77178004618d4027b4fd8f3343fa372ed3e2fc3fe644bd0c9fd5c` → vigente, con contratos y dos archivos reales verificados.
+- Once pruebas dirigidas aprobadas. Procedimiento: `docs/operations/rollback-existing-backup-20261002.md`. Cierre efectivo tras CI y fusión; el CAS remoto y los siete días siguen pendientes. No se restauró toda la copia ni se cambió producción.
