@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
-import { compareRows, extractPeriod, latestCsvPeriod, parseCsvRows, parseRows } from "../scripts/etl/remuneraciones-38bis-parser.mjs";
+import { readFileSync } from "node:fs";
+import { shouldVerify38BisPublication, validate38BisArtifacts } from "../scripts/etl/remuneraciones-38bis-publication.mjs";
+import { compareRows, extractPeriod, latestCsvPeriod, parseCsvRows, parseRows, checksumRows, validate38BisSnapshot, validate38BisHistory } from "../scripts/etl/remuneraciones-38bis-parser.mjs";
 
 describe("parser del registro público 38 bis", () => {
   it("conserva las filas sin nombre o monto reportado", () => {
@@ -33,5 +35,79 @@ describe("parser del registro público 38 bis", () => {
     const previous = [{ partida: "Ministerio", organismo: "MINISTERIO", cargo: "ASESOR", nombre: "No reportado", bruto_mensual: null }];
     const current = [{ partida: "Ministerio", organismo: "MINISTERIO", cargo: "ASESOR", nombre: "NO REPORTADO", bruto_mensual: null }];
     expect(compareRows(previous, current)).toMatchObject({ entradas: 0, salidasObservadas: 0, cambios: 0 });
+  });
+});
+
+describe("guardas del candidato 38 bis", () => {
+  it("no espera un despliegue inexistente tras no-op o verificación sin publicación", () => {
+    const job = (conclusion: string) => [{ steps: [{ name: "Publicar snapshot, manifest y auditoría en R2", conclusion }] }];
+    expect(shouldVerify38BisPublication(job("skipped"))).toBe(false);
+    expect(shouldVerify38BisPublication(job("success"))).toBe(true);
+    expect(() => shouldVerify38BisPublication([])).toThrow("MISSING");
+    expect(() => shouldVerify38BisPublication(job("failure"))).toThrow("INVALID");
+    const guard = readFileSync(new URL("../../.github/workflows/etl-publication-guard.yml", import.meta.url), "utf8");
+    expect(guard).toContain("shouldVerify38BisPublication");
+    const pages = readFileSync(new URL("../../.github/workflows/pages-static-refresh.yml", import.meta.url), "utf8");
+    const ui = readFileSync(new URL("../../.github/workflows/pages-ui-refresh.yml", import.meta.url), "utf8");
+    expect(pages).toContain("shouldVerify38BisPublication");
+    expect(pages).toContain("node scripts/hydrate-remuneraciones-38bis.mjs");
+    expect(ui).toContain("node scripts/hydrate-remuneraciones-38bis.mjs");
+  });
+  it("exige baseline R2, modo de verificación y preflight antes de escribir", () => {
+    const workflow = readFileSync(new URL("../../.github/workflows/etl-remuneraciones-38bis.yml", import.meta.url), "utf8");
+    expect(workflow).toContain("--require-published-baseline");
+    expect(workflow).toContain("verify_release_only:");
+    expect(workflow).toContain("assertRemoteR2WriteBudget");
+    expect(workflow).toContain("steps.extract.outputs.changed == 'true'");
+    expect(workflow).not.toContain("se usará el historial versionado");
+    expect(workflow).not.toContain("se creará una línea base");
+    expect(workflow).toContain("cancel-in-progress: false");
+    expect(workflow).toContain("releases/${r.mes}/${r.checksum_sha256}");
+  });
+  const rows = Array.from({ length: 600 }, (_, index) => ({ partida: "Congreso Nacional", organismo: "SENADO", cargo: "SENADOR", nombre: `PERSONA ${index}`, bruto_mensual: index === 0 ? null : index === 1 ? 0 : 100 }));
+  const release = (registros = rows, mes: string | null = "2026-07") => ({ schema_version: 2, url: "https://comision38bis.gob.cl/registro-publico", mes, registros, filas: registros.length, checksum_sha256: checksumRows(registros) });
+  it("hidrata sólo snapshot, histórico y auditoría concordantes, nunca el fixture Git", () => {
+    const current = release();
+    const history = { schema_version: 1, source_id: "remuneraciones-38bis", periodos: [] };
+    const audit = { source_id: "remuneraciones-38bis", mes: current.mes, filas: current.filas, checksum_sha256: current.checksum_sha256, d1_rows_read: 0, d1_rows_written: 0 };
+    expect(validate38BisArtifacts(current, history, audit).rows).toBe(600);
+    expect(() => validate38BisArtifacts(current, history, { ...audit, checksum_sha256: "0".repeat(64) })).toThrow("AUDIT");
+    expect(() => validate38BisArtifacts(current, history, { ...audit, mes: "2026-06" })).toThrow("AUDIT");
+  });
+  it("rechaza período ausente o inválido sin inventar el mes de ejecución", () => {
+    for (const month of [null, "2026-13"]) expect(() => validate38BisSnapshot(release(rows, month))).toThrow("PERIOD_INVALID");
+  });
+  it("rechaza una línea base corrupta antes de comparar", () => {
+    expect(() => validate38BisSnapshot(release(), { previous: { ...release(), checksum_sha256: "0".repeat(64) } })).toThrow("CHECKSUM");
+  });
+  it("rechaza un corte de otro origen aunque sus filas tengan checksum válido", () => {
+    expect(() => validate38BisSnapshot({ ...release(), url: "https://example.com" })).toThrow("SOURCE_INVALID");
+  });
+  it("bloquea cero, duplicados exactos y descenso del mismo período", () => {
+    expect(() => validate38BisSnapshot(release([]))).toThrow();
+    expect(() => validate38BisSnapshot(release([...rows, rows[0]]))).toThrow("DUPLICATE");
+    expect(() => validate38BisSnapshot(release(rows.slice(0, 599)), { previous: release() })).toThrow("REGRESSION");
+  });
+  it("permite diferencia mensual limitada pero bloquea retroceso y descenso anómalo", () => {
+    expect(validate38BisSnapshot(release(rows.slice(0, 580), "2026-08"), { previous: release() }).status).toBe("valid_candidate");
+    expect(() => validate38BisSnapshot(release(rows.slice(0, 530), "2026-08"), { previous: release() })).toThrow("REGRESSION");
+    expect(() => validate38BisSnapshot(release(rows, "2026-06"), { previous: release() })).toThrow("PERIOD_REGRESSION");
+  });
+  it("mantiene nulo y cero y reconoce el mismo corte como no-op", () => {
+    expect(validate38BisSnapshot(release(), { previous: release() }).status).toBe("unchanged");
+    expect(rows[0].bruto_mensual).toBeNull();
+    expect(rows[1].bruto_mensual).toBe(0);
+  });
+  it("un mes nuevo no es no-op aunque publique las mismas filas", () => {
+    expect(validate38BisSnapshot(release(rows, "2026-08"), { previous: release() }).status).toBe("valid_candidate");
+  });
+  it("valida cada período histórico y rechaza su sustitución por un fallback vacío", () => {
+    const history = { schema_version: 1, source_id: "remuneraciones-38bis", periodos: [release(rows, "2026-06")] };
+    expect(validate38BisHistory(history).periodos).toHaveLength(1);
+    expect(() => validate38BisHistory({ ...history, periodos: [{ ...release(), filas: 1 }] })).toThrow("COUNT");
+    expect(() => validate38BisHistory(null)).toThrow("HISTORY");
+    expect(() => validate38BisHistory({ ...history, periodos: [release(), release()] })).toThrow("HISTORY");
+    const repeated = release([...rows, rows[0]], "2026-06");
+    expect(validate38BisHistory({ ...history, periodos: [repeated] }).periodos[0].registros).toHaveLength(601);
   });
 });

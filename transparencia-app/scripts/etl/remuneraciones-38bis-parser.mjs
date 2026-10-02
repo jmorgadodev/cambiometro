@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
 import { externalText } from "./safe-text.mjs";
+import { assertReleaseCandidate } from "./release-candidate.mjs";
 
 export const SOURCE_URL = "https://comision38bis.gob.cl/registro-publico";
 export const SOURCE_CSV_URL = `${SOURCE_URL}?csv-todo`;
@@ -127,6 +128,37 @@ export function latestCsvPeriod(csvRows) {
 
 export function checksumRows(rows) {
   return crypto.createHash("sha256").update(JSON.stringify(rows)).digest("hex");
+}
+
+export function validate38BisSnapshot(current, { previous } = {}) {
+  if (previous) validate38BisSnapshot(previous);
+  if (current?.url !== SOURCE_URL) throw new Error("38BIS_SOURCE_INVALID");
+  if (!current || !/^\d{4}-(0[1-9]|1[0-2])$/.test(current.mes ?? "")) throw new Error("38BIS_PERIOD_INVALID");
+  if (previous && current.mes < previous.mes) throw new Error("38BIS_PERIOD_REGRESSION");
+  if (!Array.isArray(current.registros) || current.registros.length < 500) throw new Error("38BIS_COUNT_INCOMPLETE");
+  if (current.registros.some((row) => row.bruto_mensual !== null && (!Number.isSafeInteger(row.bruto_mensual) || row.bruto_mensual < 0))) throw new Error("38BIS_AMOUNT_INVALID");
+  const candidate = assertReleaseCandidate({ sourceId: "remuneraciones-38bis", expectedSourceId: "remuneraciones-38bis",
+    periods: [current.mes], records: current.registros.map((row) => ({ id: checksumRows([row]) })), recordCount: current.filas,
+    checksumSha256: current.checksum_sha256, actualChecksumSha256: checksumRows(current.registros), complete: true,
+    previous: previous ? { recordCount: previous.filas, checksumSha256: previous.checksum_sha256 } : undefined,
+    // Same-month corrections cannot silently lose rows. New months may vary by at most 10%.
+    maxDropRatio: previous?.mes === current.mes ? 0 : 0.1 });
+  return { ...candidate, status: previous?.mes !== current.mes ? "valid_candidate" : candidate.status };
+}
+
+export function validate38BisHistory(history) {
+  if (history?.schema_version !== 1 || history.source_id !== "remuneraciones-38bis" || !Array.isArray(history.periodos)) throw new Error("38BIS_HISTORY_INVALID");
+  const periods = new Set();
+  for (const period of history.periodos) {
+    if (periods.has(period.mes)) throw new Error("38BIS_HISTORY_DUPLICATE_PERIOD");
+    if (!/^\d{4}-(0[1-9]|1[0-2])$/.test(period.mes ?? "")) throw new Error("38BIS_HISTORY_PERIOD_INVALID");
+    if (!Array.isArray(period.registros) || period.filas !== period.registros.length || !period.filas) throw new Error("38BIS_HISTORY_COUNT_INVALID");
+    if (period.checksum_sha256 !== checksumRows(period.registros)) throw new Error("38BIS_HISTORY_CHECKSUM_INVALID");
+    // A published historical row has no official person ID. Keep repeated source rows
+    // byte-for-byte; an apparent duplicate is not authority to delete or merge it.
+    periods.add(period.mes);
+  }
+  return history;
 }
 
 function rowKey(row) {

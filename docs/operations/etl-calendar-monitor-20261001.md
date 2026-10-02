@@ -42,6 +42,8 @@ Pruebas: `scripts/etl/connectors/calendar-monitor.test.mjs`.
 
 Ampliación: `node scripts/etl/calendar-monitor.mjs --release-check --output <informe-local.json>`; Cloudflare account/token en entorno. Añadir `--sync-incidents` únicamente al ejecutar el control autorizado de incidencias. Son 33 consultas GitHub y dos de metadatos de releases, no barridos de objetos ni descarga de filas. El control real del 2 de octubre devolvió `healthy`, dos lecturas y HTTP 200. Cuatro pruebas nuevas fallaron antes de implementar el control; no se confunde un workflow exitoso con un release vigente.
 
+PR #695 integrado en `9f751b0a2a04dca645ece7f92135332d2fe3a517`, CI verde y ejecución 37054632539 aprobada. El control remoto registró 33 consultas GitHub y dos lecturas de pin, `healthy` para coherencia estática; 26 pruebas relacionadas, tipos y lint aprobados. Sigue programado a las 15:00 UTC. O10 llega a 75%, no a 100%: faltan frescura/estado por fuente, manifiestos externos y presupuesto.
+
 Ensayo local del 1 de octubre de 2026: 33 lecturas; 12 ejecuciones `on_schedule`,
 3 `failed` (personal de apoyo Cámara/Senado y ChileCompra), 3 `manual`,
 1 `paused_local_only`. Evidencia reproducible:
