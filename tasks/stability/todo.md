@@ -63,11 +63,11 @@ productiva y rollback comprobados; evidencia abajo. Costes (#671) siguen apartad
 - [x] Pruebas contractuales: caída externa, cero, candidato parcial y rollback.
 - [x] Migrar preflight Cámara y verificar catálogo candidato aislado mediante replay local, sin publicación R2. PR #679 integrado con CI verde.
 
-## O08 · `ReleaseSet` R2 · M · 50 %
+## O08 · `ReleaseSet` R2 · M · 75 % tras fusión de la guarda remota
 
 - [x] Contrato local de inputs estáticos: huellas por dominio, checksum y pin de manifiesto;
   conteos ausentes quedan nulos. Prueba de base concurrente obsoleta y candidato combinado.
-- [ ] Implementar comparación y promoción atómica remota; el contrato local no la sustituye.
+- [x] Implementar comparación/promoción condicional del puntero estático R2 con `If-Match`; rechazo 412 real y escritura idéntica válida comprobados. Cierre efectivo tras CI y fusión; detalle en `docs/operations/r2-static-conditional-promotion-20261002.md`.
 - [x] Añadir pin de inputs estáticos, verificación de bytes y metadatos al artefacto Pages.
 - [x] Integración estática validada en CI, preview y producción (PR #683, promoción 36934573710).
 - [ ] Validar integración en preview y abarcar manifiestos externos al conjunto estático.

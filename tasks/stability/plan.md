@@ -58,7 +58,7 @@ actualiza ni se usa para desplegar. `cambiometro-audit` sólo guarda evidencia.
 | O04 | Suprimir contadores fijos antiguos de Fuentes; derivar por release y alcance | S | O03 | 100 % |
 | O06 | Candidato/no-op de Movimientos: anuncio, confirmación en el mismo ID y cero inesperado | M | O02, O05 | 100 % |
 | O07 | Guardia ETL común: esquema, checksum, períodos, duplicados, descenso y fallo externo | M | O06 | 100 % |
-| O08 | `ReleaseSet` R2 con IDs/checksums por dominio y lectura fijada por Pages | M | O03, O07 | 50 % |
+| O08 | `ReleaseSet` R2 con IDs/checksums por dominio y lectura fijada por Pages; guarda remota tras CI y fusión | M | O03, O07 | 75 % tras fusión |
 | O09 | Promoción Pages de artefacto coherente y bloqueo global de publicación | M | O08 | 50 % |
 | O10 | Control diario sin extracción ni alertas repetidas por una misma causa | M | O03, O08 | 50 % |
 | O11 | Migrar fuentes pequeñas; Senado votaciones local-only; fallos externos aislados | M por fuente | O07 | 0 % |

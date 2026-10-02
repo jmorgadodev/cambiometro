@@ -351,6 +351,12 @@ Riesgo o siguiente puerta:
 - PR #689 integrado: `41e3655068768ad9e913f55e1e52f9d2ac6a2d77`, CI verde. 43 pruebas, replay junio/julio 1.248/1.250 filas, baseline publicado R2 obligatorio en workflow. Ejecución incremental 37044606324 pendiente de cola al registrar este hito.
 - Detalle: `docs/operations/expense-monthly-guard-20261002.md`. Los períodos oficiales coinciden (174), pero esto no acredita todas las filas históricas.
 
+### O08 — promoción condicional remota estática · 2026-10-02
+
+- Publicador exige manifiesto/checksum/ETag fuertes y `If-Match` al activar el puntero. Dos ETL concurrentes probados: segunda base rechazada y candidato combinado conserva ambos dominios.
+- Prueba real 412 bloqueó el ETag incorrecto sin alterar bytes. PUT idéntico con ETag válido aceptado; mismo checksum `db4998d03e583abb92b3b68d49f3e3495cf403235c5eed274887634284ef9dc5` y ETag tras lectura posterior. Preflight: 8.446.722.782 bytes, sin crecimiento ni objetos nuevos.
+- Quince pruebas dirigidas, tipos y lint aprobados. Cierre al fusionar con CI verde; O08 sigue pendiente de manifiestos externos y O09 de disparos/no-op generales. Procedimiento en `docs/operations/r2-static-conditional-promotion-20261002.md`.
+
 ### O14 — restauración acotada y simulacro · 2026-10-02
 
 - Inventario del respaldo: 4.108 objetos, 1.049.483.183 bytes; 4.107 blobs únicos. Seis muestras de distintos tamaños restauradas y verificadas por SHA-256: 22.345.237 bytes desde 1.645.633 bytes comprimidos; siete GET de datos, cero escrituras remotas.
