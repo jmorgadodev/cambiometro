@@ -1,6 +1,8 @@
 import { execFileSync } from "node:child_process";
 import { readFileSync, writeFileSync, appendFileSync } from "node:fs";
 import { pathToFileURL } from "node:url";
+import { shouldRefreshStaticRelease } from "../static-refresh-decision.mjs";
+import { syncUptimeIncidents } from "../uptime-smoke.mjs";
 
 export function latestCalendarSlot(cron, now = new Date(), graceMinutes = 180) {
   if (!Number.isFinite(now.getTime()) || !Number.isInteger(graceMinutes) || graceMinutes < 0 || graceMinutes > 1440) {
@@ -45,7 +47,22 @@ export function classifyCalendarExecution(entry, runs, now = new Date(), graceMi
     evidenceUrl: latest?.html_url ?? null, scope: "workflow-execution-only" };
 }
 
-function main() {
+export async function checkStaticReleaseConsistency({ accountId, token, productionUrl = "https://cambiometro.impulsacv.cl", fetchImpl = fetch } = {}) {
+  let metadataReads = 0;
+  const result = { scope: "static-release-consistency", path: "/data/release-set.json",
+    url: `${productionUrl}/data/release-set.json`, rayId: "not applicable" };
+  try {
+    const changed = await shouldRefreshStaticRelease({ accountId, token, productionUrl,
+      fetchImpl: (...args) => { metadataReads += 1; return fetchImpl(...args); } });
+    return { ...result, state: changed ? "stale" : "healthy", isOk: !changed,
+      status: 200, metadataReads, errorMsg: changed ? "STATIC_RELEASE_DIVERGENCE" : "" };
+  } catch (error) {
+    return { ...result, state: "failed_internal", isOk: false, status: 0,
+      metadataReads, errorMsg: error.message };
+  }
+}
+
+async function main() {
   const repository = process.env.GITHUB_REPOSITORY;
   if (!/^[\w.-]+\/[\w.-]+$/.test(repository ?? "")) throw new Error("GITHUB_REPOSITORY_REQUIRED");
   const calendar = JSON.parse(readFileSync(new URL("../../../.github/etl-calendar.json", import.meta.url), "utf8"));
@@ -69,6 +86,13 @@ function main() {
   sources.push({ workflow: null, name: "Votaciones Senado", executionState: "paused_local_only", scope: "workflow-execution-only" });
   const report = { schemaVersion: 1, generatedAt: now.toISOString(), scope: "workflow-execution-only",
     graceMinutes, requests, sources };
+  if (process.argv.includes("--release-check")) {
+    report.staticRelease = await checkStaticReleaseConsistency({
+      accountId: process.env.CLOUDFLARE_ACCOUNT_ID, token: process.env.CLOUDFLARE_API_TOKEN,
+      productionUrl: process.env.PROD_URL || "https://cambiometro.impulsacv.cl",
+    });
+    if (!report.staticRelease.isOk) process.exitCode = 1;
+  }
   const outputIndex = process.argv.indexOf("--output");
   if (outputIndex >= 0) {
     if (!process.argv[outputIndex + 1]) throw new Error("OUTPUT_REQUIRED");
@@ -78,9 +102,11 @@ function main() {
     `Consultas GitHub: ${requests}. Gracia del calendario UTC: ${graceMinutes} minutos.`, "",
     "| Fuente | Estado de ejecución | Última ejecución |", "| --- | --- | --- |",
     ...sources.map((source) => `| ${source.name} | ${source.executionState} | ${source.lastExecutionAt ?? "no medida"} |`),
-    "", "No verifica frescura del release, contenido del candidato, R2/API/Pages ni costes. No ejecuta ETL.", ""].join("\n");
+    "", ...(report.staticRelease ? [`Pin estático R2/Pages: ${report.staticRelease.state}; ${report.staticRelease.metadataReads} lecturas de metadatos.`] : []),
+    "No verifica cobertura, frescura del origen, contenido del candidato, manifiestos externos ni costes. No ejecuta ETL.", ""].join("\n");
   if (process.env.GITHUB_STEP_SUMMARY) appendFileSync(process.env.GITHUB_STEP_SUMMARY, summary);
   console.log(summary);
+  if (report.staticRelease && process.argv.includes("--sync-incidents")) syncUptimeIncidents([report.staticRelease]);
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) main();
+if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) await main();

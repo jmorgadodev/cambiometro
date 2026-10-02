@@ -25,20 +25,22 @@ release nuevo, frescura de datos, cobertura completa, checksum o coherencia API.
 Un fallo no se clasifica como interno/externo sin revisar su evidencia.
 Errores de lectura quedan `unknown`, nunca se convierten en `healthy`.
 
-No hay lectura de R2, D1, CSV, prensa ni fuentes originales. No escribe objetos,
-no despacha ETL, no despliega, no cambia punteros y no necesita secretos Cloudflare.
+Desde la ampliación del 2 de octubre, `--release-check` agrega una lectura del manifiesto R2 y otra del pin Pages. Reutiliza el verificador de promoción, valida checksums y compara IDs. `healthy` sólo significa coherencia del **conjunto estático**, no salud de cada fuente; diferencia de pin queda `stale`, lectura/checksum inválidos `failed_internal`.
+
+No lee D1, CSV, prensa ni fuentes originales. No escribe objetos,
+no despacha ETL, no despliega ni cambia punteros. El workflow utiliza el secreto de lectura de datos Cloudflare ya existente; faltante o denegado no se considera saludable.
 Sólo guarda un resumen pequeño de metadatos en Actions durante tres días;
 no es un respaldo de datos. Se mantienen apartadas las guardas de costes.
 
-El informe diario muestra estados en el resumen del job, sin abrir alertas
-repetitivas. Faltan integrar transiciones de estado por fuente, frescura de releases,
-manifiestos externos/API/Pages y presupuesto: O10 no está terminado.
+El informe diario muestra estados en el resumen del job. `--sync-incidents` reutiliza el plan de incidentes Uptime para `/data/release-set.json`: un incidente abierto por causa/ruta, recordatorio semanal y cierre sólo al recuperar coherencia comprobada. Se concede `issues: write`, nunca `contents: write`; se guarda el reporte incluso cuando falla el control. Faltan integrar estados/frescura por fuente, manifiestos externos/API y presupuesto: O10 no está terminado.
 
 ## Reproducción
 
 Desde `transparencia-app`, con GitHub CLI autenticado y `GITHUB_REPOSITORY`:
 `node scripts/etl/calendar-monitor.mjs --output <informe-local.json>`.
 Pruebas: `scripts/etl/connectors/calendar-monitor.test.mjs`.
+
+Ampliación: `node scripts/etl/calendar-monitor.mjs --release-check --output <informe-local.json>`; Cloudflare account/token en entorno. Añadir `--sync-incidents` únicamente al ejecutar el control autorizado de incidencias. Son 33 consultas GitHub y dos de metadatos de releases, no barridos de objetos ni descarga de filas. El control real del 2 de octubre devolvió `healthy`, dos lecturas y HTTP 200. Cuatro pruebas nuevas fallaron antes de implementar el control; no se confunde un workflow exitoso con un release vigente.
 
 Ensayo local del 1 de octubre de 2026: 33 lecturas; 12 ejecuciones `on_schedule`,
 3 `failed` (personal de apoyo Cámara/Senado y ChileCompra), 3 `manual`,

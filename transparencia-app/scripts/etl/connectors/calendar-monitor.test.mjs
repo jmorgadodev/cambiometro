@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { latestCalendarSlot, classifyCalendarExecution } from "../calendar-monitor.mjs";
+import { latestCalendarSlot, classifyCalendarExecution, checkStaticReleaseConsistency } from "../calendar-monitor.mjs";
+import { buildReleaseSet } from "../../release-set.mjs";
+import { buildStaticInputManifest } from "../../static-site-inputs.mjs";
 
 const now = new Date("2026-10-01T12:00:00Z");
 const scheduled = { workflow: "etl-daily.yml", cronUtc: "0 7 * * *" };
@@ -9,11 +11,13 @@ const run = (conclusion, status = "completed") => ({
 });
 
 describe("ETL calendar monitor (execution only)", () => {
-  it("keeps the daily workflow read-only, without ETL, deploy or Cloudflare credentials", () => {
+  it("keeps the daily workflow read-only for data, without ETL, deploy or D1", () => {
     const workflow = readFileSync(new URL("../../../../.github/workflows/source-calendar-monitor.yml", import.meta.url), "utf8");
     expect(workflow).toContain('cron: "0 15 * * *"');
     expect(workflow).toContain("actions: read");
-    expect(workflow).not.toMatch(/issues: write|contents: write|wrangler|CLOUDFLARE|data:publish|npm run etl/);
+    expect(workflow).not.toMatch(/contents: write|wrangler|data:publish|npm run etl|d1 execute/);
+    expect(workflow).toContain("--release-check");
+    expect(workflow).toContain("issues: write");
     expect(workflow).toContain("retention-days: 3");
   });
   it("uses the existing UTC calendar with a bounded scheduler grace", () => {
@@ -46,5 +50,31 @@ describe("ETL calendar monitor (execution only)", () => {
   it("rejects unsupported cron syntax and invalid grace instead of guessing", () => {
     expect(() => latestCalendarSlot("*/5 * * * *", now, 180)).toThrow("UNSUPPORTED_CALENDAR_CRON");
     expect(() => latestCalendarSlot("0 7 * * *", now, -1)).toThrow("INVALID_CALENDAR_CLOCK");
+  });
+});
+
+describe("daily static release consistency, not source coverage", () => {
+  const entry = { path: "data/movimientos.json", key: `projections/static-site-v1/releases/${"a".repeat(64)}/data/movimientos.json`, size: 10, checksumSha256: "a".repeat(64) };
+  const manifest = buildStaticInputManifest({ entries: [entry] });
+  const pinned = buildReleaseSet(manifest);
+  const fetchJson = (responses) => async () => Response.json(responses.shift());
+  it("marks matching validated pins healthy with two metadata reads only", async () => {
+    const result = await checkStaticReleaseConsistency({ accountId: "account", token: "token", fetchImpl: fetchJson([manifest, pinned]) });
+    expect(result).toMatchObject({ state: "healthy", isOk: true, scope: "static-release-consistency", metadataReads: 2 });
+  });
+  it("marks a valid older Pages pin stale instead of healthy", async () => {
+    const current = buildStaticInputManifest({ entries: [{ ...entry, checksumSha256: "b".repeat(64) }] });
+    const result = await checkStaticReleaseConsistency({ accountId: "account", token: "token", fetchImpl: fetchJson([current, pinned]) });
+    expect(result).toMatchObject({ state: "stale", isOk: false });
+  });
+  it("never declares an invalid checksum or unavailable metadata healthy", async () => {
+    for (const fetchImpl of [fetchJson([{ ...manifest, checksumSha256: "0".repeat(64) }]), async () => new Response("blocked", { status: 403 })]) {
+      const result = await checkStaticReleaseConsistency({ accountId: "account", token: "token", fetchImpl });
+      expect(result).toMatchObject({ state: "failed_internal", isOk: false });
+    }
+  });
+  it("keeps missing credentials fail-closed without network reads", async () => {
+    const result = await checkStaticReleaseConsistency({});
+    expect(result).toMatchObject({ state: "failed_internal", metadataReads: 0, isOk: false });
   });
 });
