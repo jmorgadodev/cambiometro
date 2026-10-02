@@ -47,6 +47,7 @@ describe("guardas del candidato 38 bis", () => {
     expect(workflow).not.toContain("se usará el historial versionado");
     expect(workflow).not.toContain("se creará una línea base");
     expect(workflow).toContain("cancel-in-progress: false");
+    expect(workflow).toContain("releases/${r.mes}/${r.checksum_sha256}");
   });
   const rows = Array.from({ length: 600 }, (_, index) => ({ partida: "Congreso Nacional", organismo: "SENADO", cargo: "SENADOR", nombre: `PERSONA ${index}`, bruto_mensual: index === 0 ? null : index === 1 ? 0 : 100 }));
   const release = (registros = rows, mes: string | null = "2026-07") => ({ schema_version: 2, url: "https://comision38bis.gob.cl/registro-publico", mes, registros, filas: registros.length, checksum_sha256: checksumRows(registros) });
@@ -73,6 +74,9 @@ describe("guardas del candidato 38 bis", () => {
     expect(validate38BisSnapshot(release(), { previous: release() }).status).toBe("unchanged");
     expect(rows[0].bruto_mensual).toBeNull();
     expect(rows[1].bruto_mensual).toBe(0);
+  });
+  it("un mes nuevo no es no-op aunque publique las mismas filas", () => {
+    expect(validate38BisSnapshot(release(rows, "2026-08"), { previous: release() }).status).toBe("valid_candidate");
   });
   it("valida cada período histórico y rechaza su sustitución por un fallback vacío", () => {
     const history = { schema_version: 1, source_id: "remuneraciones-38bis", periodos: [release(rows, "2026-06")] };
