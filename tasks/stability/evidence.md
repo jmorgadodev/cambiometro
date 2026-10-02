@@ -377,3 +377,9 @@ Riesgo o siguiente puerta:
 - PR #692, ocho pruebas de decisión/contrato y CI verde. Run 37050531642: comparación R2/Pages sin cambios, build/publicación omitidos. Comprobación local posterior también devuelve `refresh=false`.
 - Run 37048540901 rechazó pin desfasado antes de publicar. La reconstrucción 37050448199 pasó tipos/build/E2E y todas las guardas; deployment y rollback registrados. Búsquedas Kaiser/Torrealba responden 200 con `r2-catalog`.
 - Modos, bloqueo compartido, promoción y límites documentados en `docs/operations/pages-coherent-promotion-20261002.md`. Manifiestos externos O08, monitor restante, remuneraciones, costes #671 y observación no se cierran por este hito.
+
+### O13 — guardas de 38 bis, no promoción · 2026-10-02
+
+- Candidato reutiliza contrato común y baseline R2 obligatorio; no-op no escribe y período ausente no se inventa. Preflight de almacenamiento antes de los PUT existentes, sin respaldo nuevo ni D1. Trece pruebas dirigidas aprobadas; CI y verificación remota pendientes.
+- Release vigente: 1.590 filas, julio 2026, checksum `c6fe851b6dc0b2de8ba0eb4d80fe699636165a7fe41b61f8b2411252d44101dc`. Se verificaron 18 cortes históricos (29.703 filas) sin alterar sus ocho repeticiones aparentes. Replay contra sí mismo: unchanged.
+- CSV oficial acotado detenido a 10 MB; HTML oficial julio produce 1.595 filas, diferencia aún no conciliada con R2. No se promovió ni se completó una fecha por inferencia. Detalle y pendientes en `docs/operations/remuneraciones-38bis-candidate-guards-20261002.md`; O13 y pin externo O08 siguen abiertos.

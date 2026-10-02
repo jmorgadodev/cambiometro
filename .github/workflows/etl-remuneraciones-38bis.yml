@@ -4,10 +4,16 @@ on:
   schedule:
     - cron: "15 10 5 * *" # revisión mensual; el registro oficial se actualiza mensualmente
   workflow_dispatch:
+    inputs:
+      verify_release_only:
+        description: "Verificar el corte R2 sin extracción ni escrituras"
+        type: boolean
+        default: false
 
 concurrency:
-  group: remuneraciones-38bis-publication
-  cancel-in-progress: true
+  group: cambiometro-static-publication
+  cancel-in-progress: false
+  queue: max
 
 permissions:
   contents: read
@@ -47,30 +53,27 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         shell: bash
         run: |
-          if npx wrangler r2 object get transparencia-public-data/projections/remuneraciones-38bis-v1/current.json --file /tmp/remuneraciones-38bis-previous.json --remote; then
-            echo "previous_release=/tmp/remuneraciones-38bis-previous.json" >> "$GITHUB_ENV"
-          else
-            echo "No existe corte remoto anterior; se creará una línea base."
-            rm -f /tmp/remuneraciones-38bis-previous.json
-          fi
-          if npx wrangler r2 object get transparencia-public-data/projections/remuneraciones-38bis-v1/current-history.json --file /tmp/remuneraciones-38bis-previous-history.json --remote; then
-            echo "previous_history=/tmp/remuneraciones-38bis-previous-history.json" >> "$GITHUB_ENV"
-          else
-            echo "No existe historial remoto anterior; se usará el historial versionado como línea base."
-            rm -f /tmp/remuneraciones-38bis-previous-history.json
-          fi
+          npx wrangler r2 object get transparencia-public-data/projections/remuneraciones-38bis-v1/current.json --file /tmp/remuneraciones-38bis-previous.json --remote
+          npx wrangler r2 object get transparencia-public-data/projections/remuneraciones-38bis-v1/current-history.json --file /tmp/remuneraciones-38bis-previous-history.json --remote
+          echo "previous_release=/tmp/remuneraciones-38bis-previous.json" >> "$GITHUB_ENV"
+          echo "previous_history=/tmp/remuneraciones-38bis-previous-history.json" >> "$GITHUB_ENV"
+          node --input-type=module -e 'import fs from "node:fs"; import {validate38BisSnapshot,validate38BisHistory} from "./scripts/etl/remuneraciones-38bis-parser.mjs"; const r=JSON.parse(fs.readFileSync(process.env.previous_release||"/tmp/remuneraciones-38bis-previous.json")); const h=JSON.parse(fs.readFileSync(process.env.previous_history||"/tmp/remuneraciones-38bis-previous-history.json")); validate38BisSnapshot(r); validate38BisHistory(h); console.log(JSON.stringify({verified:true,mes:r.mes,rows:r.filas,checksum:r.checksum_sha256,historyPeriods:h.periodos.length,writes:0}));'
 
       - name: Ejecutar ETL y comparación mensual sin D1
+        id: extract
+        if: inputs.verify_release_only != true
         working-directory: transparencia-app
         shell: bash
         run: |
-          args=(--output data/remuneraciones-38bis-publico.json --audit-output data/remuneraciones-38bis-publico-audit.json --history-output data/remuneraciones-38bis-publico-historico.json)
+          args=(--require-published-baseline --output data/remuneraciones-38bis-publico.json --audit-output data/remuneraciones-38bis-publico-audit.json --history-output data/remuneraciones-38bis-publico-historico.json)
           if [ -n "${previous_release:-}" ]; then args+=(--previous "$previous_release"); fi
           if [ -n "${previous_history:-}" ]; then args+=(--previous-history "$previous_history"); fi
           node scripts/etl-remuneraciones-38bis.mjs "${args[@]}"
           node -e 'const r=require("./data/remuneraciones-38bis-publico.json"); const a=require("./data/remuneraciones-38bis-publico-audit.json"); const h=require("./data/remuneraciones-38bis-publico-historico.json"); if(r.filas<500||r.registros.length!==r.filas||!Array.isArray(h.periodos)||h.periodos.length<1) process.exit(1); if(a.d1_rows_read!==0||a.d1_rows_written!==0) process.exit(1); console.log(JSON.stringify({rows:r.filas, checksum:r.checksum_sha256, historicalPeriods:h.periodos.length, delta:a.delta, d1:a.d1_rows_read},null,2));'
+          echo "changed=$(node -p 'require("./data/remuneraciones-38bis-publico-audit.json").publication_status === "unchanged" ? "false" : "true"')" >> "$GITHUB_OUTPUT"
 
       - name: Preparar manifiesto inmutable del release
+        if: steps.extract.outputs.changed == 'true'
         id: release
         working-directory: transparencia-app
         shell: bash
@@ -82,7 +85,31 @@ jobs:
           echo "checksum=$checksum" >> "$GITHUB_OUTPUT"
           echo "mes=$mes" >> "$GITHUB_OUTPUT"
 
+      - name: Preflight de almacenamiento de toda la cuenta antes de escribir
+        if: steps.extract.outputs.changed == 'true'
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: |
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          import {assertRemoteR2WriteBudget} from "./scripts/etl/r2-account-budget.mjs";
+          const r=JSON.parse(fs.readFileSync("data/remuneraciones-38bis-publico.json"));
+          const bucket="transparencia-public-data", base="projections/remuneraciones-38bis-v1";
+          const files=[
+            ["data/remuneraciones-38bis-publico.json","data.json","current.json"],
+            ["data/remuneraciones-38bis-publico-historico.json","history.json","current-history.json"],
+            ["data/remuneraciones-38bis-publico-audit.json","audit.json","current-audit.json"],
+            ["data/remuneraciones-38bis-release/manifest.json","manifest.json","manifest.json"]
+          ];
+          const puts=files.flatMap(([file,name,alias])=>[`${base}/releases/${r.checksum_sha256}/${name}`,`${base}/${alias}`].map(key=>({bucket,key,size:fs.statSync(file).size})));
+          const budget=await assertRemoteR2WriteBudget({accountId:process.env.CLOUDFLARE_ACCOUNT_ID,token:process.env.CLOUDFLARE_API_TOKEN,puts});
+          console.log(JSON.stringify({currentBytes:budget.currentBytes,projectedBytes:budget.projectedBytes,peakBytes:budget.peakBytes,estimatedPuts:puts.length}));
+          NODE
+
       - name: Publicar snapshot, manifest y auditoría en R2
+        if: steps.extract.outputs.changed == 'true'
         working-directory: transparencia-app
         env:
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
@@ -101,7 +128,7 @@ jobs:
           npx wrangler r2 object put "$base/manifest.json" --file data/remuneraciones-38bis-release/manifest.json --content-type application/json --remote
 
       - name: Guardar evidencia del corte
-        if: always()
+        if: always() && inputs.verify_release_only != true
         uses: actions/upload-artifact@v4
         with:
           name: remuneraciones-38bis-${{ github.run_id }}
