@@ -390,3 +390,9 @@ Riesgo o siguiente puerta:
 - Los dos builds Pages rehidratan snapshot/histórico/auditoría R2 incluso con caché; validan concordancia completa antes de reemplazar inputs locales. Verificación real local: tres GET, 8.859.421 bytes, auditoría concordante, sin escrituras. Una publicación real 38 bis dispara Pages; un no-op lo omite. El pin externo canónico sigue en O08.
 - Release vigente: 1.590 filas, julio 2026, checksum `c6fe851b6dc0b2de8ba0eb4d80fe699636165a7fe41b61f8b2411252d44101dc`. Se verificaron 18 cortes históricos (29.703 filas) sin alterar sus ocho repeticiones aparentes. Replay contra sí mismo: unchanged.
 - CSV oficial acotado detenido a 10 MB; HTML oficial julio produce 1.595 filas, diferencia aún no conciliada con R2. No se promovió ni se completó una fecha por inferencia. Detalle y pendientes en `docs/operations/remuneraciones-38bis-candidate-guards-20261002.md`; O13 y pin externo O08 siguen abiertos.
+
+### O13 — 38 bis: conciliación y publicación guardada · 2026-10-02
+
+- PR #696 integrado (`aaa40b38aaded5a3e40e90f3bea6fafedbcedc0c`), CI verde. Replay CSV con tope 25 MB: 17.192.134 bytes, julio 1.595 filas y checksum `a63a155ee295ebabf52db7f5aff76d144e42533cbbde5e981eb3bde0b19de350`. Diferencia exacta: 13 filas nuevas/modificadas y ocho reemplazadas; no se infieren identidades ni salidas jurídicas. Los 18 históricos se conservan.
+- Verify-only 37057959135 y controles posteriores 37058216244/37058216228 success: no PUT, build Pages ni espera de frescura. Actualización real 37058336257 success; preflight cuenta 8.446.742.444 → 8.455.606.161 bytes, ocho PUT. Rollback previo: tres objetos HEAD 200. Sin backup nuevo ni datos D1.
+- Pages 37058503076 y guarda 37058502868 en curso. API: regresión reproducida de nulo convertido a cero, corregida en una línea con pruebas para monto informado/cero/nulo. 92 pruebas, tipos Worker y lint sin errores. Promoción y smoke pendientes; 38 bis 2/4, O13 completo sigue abierto.

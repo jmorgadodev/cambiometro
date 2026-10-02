@@ -2033,7 +2033,7 @@ async function searchRemuneraciones38BisFromR2(raw: string, env: Env) {
       cargo: cargo || undefined,
       organo: organismo || undefined,
       periodo: release.mes ?? null,
-      monto: Number.isFinite(Number(row.bruto_mensual)) ? Number(row.bruto_mensual) : null,
+      monto: row.bruto_mensual !== null && Number.isFinite(Number(row.bruto_mensual)) ? Number(row.bruto_mensual) : null,
       fuente: "Registro 38 bis",
     });
     if (matches.length >= 25) break;
