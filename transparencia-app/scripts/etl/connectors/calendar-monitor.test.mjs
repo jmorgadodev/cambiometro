@@ -10,7 +10,7 @@ const run = (conclusion, status = "completed") => ({
 
 describe("ETL calendar monitor (execution only)", () => {
   it("keeps the daily workflow read-only, without ETL, deploy or Cloudflare credentials", () => {
-    const workflow = readFileSync(new URL("../../../../.github/workflows/etl-calendar-monitor.yml", import.meta.url), "utf8");
+    const workflow = readFileSync(new URL("../../../../.github/workflows/source-calendar-monitor.yml", import.meta.url), "utf8");
     expect(workflow).toContain('cron: "0 15 * * *"');
     expect(workflow).toContain("actions: read");
     expect(workflow).not.toMatch(/issues: write|contents: write|wrangler|CLOUDFLARE|data:publish|npm run etl/);

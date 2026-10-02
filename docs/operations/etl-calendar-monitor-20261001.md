@@ -10,6 +10,8 @@ Senado votaciones sigue `paused_local_only`, sin ejecutar su conector remoto.
 El cron del monitor es `0 15 * * *` UTC. La hora local varía con el horario de
 America/Santiago. Se admite una gracia operativa explícita de 180 minutos para
 el arranque programado; no altera las frecuencias ni autoriza datos atrasados.
+Workflow `source-calendar-monitor.yml`: no usa el prefijo reservado `etl-`
+porque no es una extracción. Se mantiene intacta la guarda del calendario ETL.
 
 El parser acepta únicamente los formatos presentes en el calendario actual;
 una expresión no soportada no se interpreta por aproximación. Lee como máximo

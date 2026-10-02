@@ -1,4 +1,4 @@
-name: ETL calendar metadata monitor
+name: Source calendar metadata monitor
 
 on:
   schedule:
