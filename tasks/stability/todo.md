@@ -77,17 +77,17 @@ productiva y rollback comprobados; evidencia abajo. Costes (#671) siguen apartad
 - [ ] Probar dos ETL concurrentes, checksum incorrecto y `ui-only` sin retroceso.
 - [ ] Pages fija ese `ReleaseSet`; preview y producción concuerdan.
 
-## O09 · Promoción Pages coherente · M · 50 %
+## O09 · Promoción Pages coherente · M · 100 % del conjunto estático
 
 - [x] Implementar bloqueo compartido para tres flujos Pages y publicadores estáticos,
   sin cancelación del activo y con `queue: max`; 19 pruebas de configuración.
 - [x] Añadir rechazo de artefacto con pin estático distinto del manifiesto R2 actual.
 - [x] Verificar estos cambios en CI/preview y producción; no equivalen a CAS remoto.
 
-- [ ] Separar y documentar disparos `ui-only`, `data-refresh` y promoción.
-- [ ] Un bloqueo global impide promociones solapadas; fallos/no-op no despliegan.
-- [ ] Artefacto incluye evidencia de releases y smoke de rutas, búsqueda y conteos.
-- [ ] Promover y registrar deployment, rollback y verificación productiva.
+- [x] Separar y documentar disparos `ui-only`, `data-refresh` y promoción.
+- [x] Un bloqueo global impide promociones solapadas; fallos/no-op no despliegan (37050531642 omite build; 37048540901 bloquea pin desfasado).
+- [x] Artefacto incluye evidencia de releases y smoke de rutas, búsqueda y conteos.
+- [x] Promover y registrar deployment, rollback y verificación productiva (37050448199). Alcance y límites en `docs/operations/pages-coherent-promotion-20261002.md`; manifiestos externos siguen en O08.
 
 ## O10 · Monitor diario · M · 50 %
 
@@ -113,12 +113,12 @@ Subtareas comprobadas al 2026-10-02: personal de apoyo Senado, ciclo 2026 cerrad
 - [ ] Tratar Cámara personal de apoyo y Senado sin convertir 403 en cero.
 - [ ] Verificar API, página y rollbacks individuales antes de cerrar cada fuente.
 
-## O12 · Gastos parlamentarios · M · 25 %
+## O12 · Gastos parlamentarios · M · 100 % del alcance publicado
 
-- [ ] Cotejar meses y checksums declarados por Cámara/Senado con navegación.
-- [ ] Conservar nulo/no informado distinto de cero y seleccionar último corte.
+- [x] Cotejar meses y checksums declarados por Cámara/Senado con navegación: 178/178 períodos coinciden por conteo con API R2; tres archivos antiguos/recientes verificados por bytes y SHA.
+- [x] Conservar nulo/no informado distinto de cero y seleccionar último corte: 27 pruebas específicas y fichas productivas con los tres filtros.
 - [x] Probar replay mensual y reducción inesperada sin D1 masiva: PR #689 integrado, 43 pruebas; junio/julio Senado 1.248/1.250 filas. Workflow exige línea base R2 validada por checksum.
-- [ ] Promoción y smoke de fichas, API y manifiesto.
+- [x] Promoción y smoke de fichas, API y manifiesto: PR #693, índice histórico reparado, deployment 37050448199 y pin R2/Pages idénticos. No acredita cobertura total del Congreso ni cada fila histórica contra origen.
 
 ## O13 · Remuneraciones · M por componente · 0 %
 
