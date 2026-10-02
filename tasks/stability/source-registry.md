@@ -5,6 +5,8 @@ Checksum del manifiesto estático: `7c29abdf2542cb6a0d1f1b4fb5209f9c036caa16e756
 
 Generado desde calendario, conectores referenciados y dos manifiestos R2; no desde snapshots Git. No acredita salud operativa ni cobertura completa. No se suman catálogos compartidos. Sin denominador, cobertura no medida. Un campo ausente no equivale a cero.
 
+Actualización individual 2026-10-02: las dos filas de personal de apoyo de este catálogo histórico quedan superadas por el release `2026-10-02T04-08-54-151Z`, SHA `dc0e43f3218d38dded54229e614035574301156c43dd3150984c10b748edac5d`. Senado: 3.407 filas / 70 oficinas / enero–agosto 2026, extracción remota y publicación verificadas. Cámara: 1.084 filas / 160 diputados preservados, `degraded_external` (403), sin renovación de su corte. El timestamp compartido de publicación no significa actualización de Cámara. Véase [evidencia](../../docs/operations/personal-apoyo-source-guards-20261002.md).
+
 | Fuente / workflow | Modalidad / calendario UTC | Categorías | Conteo del catálogo (no de personas) / períodos | Artefacto / checksum |
 | --- | --- | --- | --- | --- |
 | Cámara / etl-daily.yml | scheduled / 0 7 * * * | nómina, gastos, asistencia | camara: 59726; 2024-01 a 2026-09 (30 cortes; no asegura continuidad); checksum índice 209ce6912849cfdc0699f916bba5f7d7cd462d0387de74d318503437b53ec3b5<br>gastos_camara: 16275; 2026-03 a 2026-07 (5 cortes; no asegura continuidad); checksum índice no medido | `data/politicos-votaciones.json` / checksum `94e45c033202db0eba852fa00107e191a59f34f61da2db992ee8557291c6e754` / release `e4944a87d66a657270d37f12787668d84e33cfd2d6e52245ecf3a5738c8b87bf` |

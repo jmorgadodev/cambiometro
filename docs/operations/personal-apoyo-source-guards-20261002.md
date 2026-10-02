@@ -3,7 +3,8 @@
 ## Referencia de trabajo
 
 Worktree: `C:\Users\jorge\.codex\worktrees\codex-stabilizacion-20261001`.
-Rama: `codex/support-source-response-20261001`, basada en main `419fc8b`.
+Implementación: `codex/support-source-response-20261001`, integrada en PR #687.
+Consolidación de evidencia: `codex/staff-closure-20261002`, basada en `origin/main` `9f7204ed` dentro del mismo worktree.
 
 ## Cambio realizado
 
@@ -29,13 +30,13 @@ Extracción, publicaciones y artefacto fueron omitidos explícitamente en modo d
 
 La causa corregida es el fallback a un snapshot Git antiguo ante errores R2. Ahora se detiene antes de extraer si no valida el release vigente.
 
-## Bloqueos operativos separados
+## Estado anterior a la reactivación (superado para Senado)
 
 - Cámara: fuente oficial responde 403; conservar el release vigente. Requiere una red permitida o alternativa oficial validada; no eludir WAF ni publicar vacío.
 - Senado: GitHub informa `disabled_manually` para el workflow de personal de apoyo. No se encontró motivo documentado en el registro operativo. El despacho de diagnóstico fue rechazado; no se reactivó. Esta desactivación es distinta de votaciones Senado local-only.
 - El mismo snapshot y verificador de ambos workflows se comprobó con el diagnóstico Cámara; esto no prueba extracción remota Senado.
 
-Pendiente: decidir la modalidad de Senado y comprobar la extracción completa de cada fuente cuando sea segura. O11 no está cerrado. No ejecutar publicaciones mientras O05 no acredite margen de costes.
+En ese momento quedaban pendientes la modalidad Senado y su extracción remota. Se resolvieron posteriormente con autorización expresa del usuario, según las secciones siguientes. O11 global no está cerrado.
 
 ## Senado: verificación adicional autorizada
 
@@ -55,3 +56,14 @@ Pages `36963350688`: success, despliegue productivo `b3dbf875.cambiometro.pages.
 Rollback: release anterior conservado, SHA `75d73d4ca0e30adb64b0a3d73e48281aba2363cab4ecbf8831ec6f9470638f59`; metadata de rollback registrada por Pages. No se borró histórico.
 
 El 100 % es sólo este ciclo operativo Senado 2026, no Cámara, cobertura de otros años, O11 completo ni siete días de estabilidad. Cámara sigue con bloqueo externo.
+
+## Cámara: diagnóstico y reanudación pendiente
+
+El 02-10-2026, `https://www.camara.cl/diputados/detalle/personaldepoyo.aspx?prmId=1009` sigue devolviendo HTTP 403 y la guarda identifica `PERSONAL_APOYO_SOURCE_BLOCKED`.
+La página oficial de transparencia enlaza además `https://www.camara.cl/transparencia/personalapoyogral.aspx`; esa nómina también devolvió 403. El catálogo `https://www.camara.cl/transparencia/datosAbiertos.aspx` consultado no ofrece un método de personal de apoyo. No se ha acreditado una alternativa automática equivalente.
+
+La solución al bloqueo requiere acceso permitido al origen o una descarga oficial equivalente con período e identidad verificables. No se cambió el conector por otra categoría de pagos ni se publicó un corte ficticio.
+
+Para reanudar, probar una sola ficha oficial. Cuando entregue selectores y filas válidos, recuperar el release R2 con el verificador de PR #687 y ejecutar el conector Cámara con `--input` canónico y `--output` temporal. Validar esquema, corte, conteos y conservación de Senado antes de publicar. En GitHub, `verify_release_only=true` comprueba sólo el release existente; nunca debe registrarse como prueba de acceso al origen.
+
+La ejecución semanal existente conserva la posibilidad de recuperación; un 403 inicial detiene el ETL antes de la publicación. Estado actual: `degraded_external`, 1/4 (25 %). La protección del release está comprobada; la extracción fresca sigue bloqueada y no se declara completa.

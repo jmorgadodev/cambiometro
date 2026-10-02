@@ -1,5 +1,15 @@
 # Evidencia de avance y cierre
 
+## O11 · Personal de apoyo · cierre individual 2026-10-02
+
+- Guardas: PR #687 / main `9f7204ed66c980ea03a5cd6a73181bbd5d5fd400`; 42 pruebas dirigidas, tipos, lint y CI aprobados. Se detiene la extracción si el release R2 no pasa checksum/conteos; no vuelve al snapshot Git.
+- Senado: run `36963215218` completó siete páginas, 3.407 filas, 70 oficinas y publicación con `--skip-d1`. Conservó 1.084 filas de Cámara; total compartido 4.491. Alcance del endpoint: enero–agosto 2026.
+- Release `2026-10-02T04-08-54-151Z`, checksum `dc0e43f3218d38dded54229e614035574301156c43dd3150984c10b748edac5d`. Rollback anterior conservado: SHA `75d73d4ca0e30adb64b0a3d73e48281aba2363cab4ecbf8831ec6f9470638f59`.
+- Pages run `36963350688`, producción `b3dbf875.cambiometro.pages.dev`: success. Pin público concuerda con el nuevo checksum. Home, búsqueda Kaiser y fichas Pedro Araya/Vanessa Kaiser respondieron 200; ambas fichas muestran agosto 2026.
+- R2: inventario de cuenta 8.425.652.239 bytes antes, proyección final 8.427.986.077; incremento 2.333.838 bytes. Cuota de operaciones confirmada expresamente por Jorge; consulta Analytics rechazada por permisos. Se registra esta autorización, no una medición de facturación inexistente. O05 automático sigue pendiente.
+- Cámara: la consulta local oficial `personaldepoyo.aspx?prmId=1009` devolvió 403 y `PERSONAL_APOYO_SOURCE_BLOCKED`; la nómina general enlazada oficialmente `https://www.camara.cl/transparencia/personalapoyogral.aspx` también devolvió 403. No se encontró un método de personal de apoyo en el catálogo oficial de datos abiertos consultado. Conserva release; puerta de procedencia identificada 1/4, extracción operativa pendiente.
+- Procedimiento de reanudación y límites: [registro detallado](../../docs/operations/personal-apoyo-source-guards-20261002.md). Senado 4/4 en su ciclo 2026; Cámara 1/4; O11 global y O15 no se declaran cerrados.
+
 Este registro es interno; no se copia a textos públicos. Una puerta se marca
 en `todo.md` sólo con una entrada aquí. Registrar `pendiente` cuando un campo
 no aplique; nunca inventar un checksum o un porcentaje de cobertura.
