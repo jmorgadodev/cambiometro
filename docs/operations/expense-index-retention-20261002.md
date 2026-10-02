@@ -6,7 +6,9 @@ Rama: `codex/expense-period-index-retention-20261002`; worktree canónico `C:\Us
 
 El replay incremental 37044606324 conservó los archivos históricos en el manifiesto estático, pero regeneró el índice mensual sólo desde el snapshot refrescado: cuatro meses Cámara y dos meses Senado. El manifiesto seguía referenciando 174 archivos mensuales Senado. La API sigue el índice y por ello meses históricos devolvían cero aunque sus archivos existieran. No se perdieron los objetos históricos.
 
-El publicador ahora combina los períodos del candidato con los archivos mensuales del manifiesto R2 validado. El candidato actualiza su mes; los meses fuera de la ventana mantienen sus referencias y conteos. Sólo se sube un índice completo nuevo, con clave derivada de su SHA-256, y se conserva el puntero mediante CAS. No se descarga el histórico ni se copian sus filas.
+El publicador ahora combina los períodos del candidato con los archivos mensuales del manifiesto R2 validado. El candidato actualiza su mes; los meses fuera de la ventana mantienen sus referencias y conteos. El ETL conserva también las filas históricas de la línea base R2 ya hidratada al reconciliar, para que el subset completo usado por las fichas incluya futuras revisiones y meses nuevos. No reconstruye ese histórico desde un snapshot Git parcial.
+
+La reparación inmediata sólo sube un índice completo nuevo, con clave derivada de su SHA-256, y conserva el puntero mediante CAS; no descarga ni copia las filas históricas. El ciclo mensual reutiliza el subset canónico que ya descargaba su workflow.
 
 ## Reparación acotada
 

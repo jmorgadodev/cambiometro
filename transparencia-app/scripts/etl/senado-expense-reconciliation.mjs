@@ -51,7 +51,7 @@ export function reconcileSenateExpenseHistory(previous = [], refreshed = [], { p
     });
   }
 
-  const retained = previous.filter((record) => {
+  const retained = publishedRecords.filter((record) => {
     const period = expensePeriod(record);
     return !period || period < RECONCILIATION_START_PERIOD || !refreshedByPeriod.has(period);
   });

@@ -2,6 +2,13 @@ import { describe, expect, it } from "vitest";
 import { reconcileSenateExpenseHistory } from "../scripts/etl/senado-expense-reconciliation.mjs";
 
 describe("reconciliación de gastos mensuales del Senado", () => {
+  it("preserva el histórico publicado en el candidato completo con snapshot local vacío", () => {
+    const historic = { id: "historic", periodo: "2012-01", monto_clp: null };
+    const publishedRecords = [historic, { id: "jul-1", periodo: "2026-07", monto_clp: 10 }];
+    const refreshed = [{ id: "jul-1", periodo: "2026-07", monto_clp: 20 }];
+    expect(reconcileSenateExpenseHistory([], refreshed, { publishedRecords })).toEqual([historic, ...refreshed]);
+    expect(publishedRecords[1].monto_clp).toBe(10);
+  });
   it("compara contra el release publicado aunque el snapshot local esté vacío", () => {
     const publishedRecords = [
       { id: "jul-1", periodo: "2026-07" },
