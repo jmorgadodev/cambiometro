@@ -44,3 +44,14 @@ El usuario autorizó reactivar personal de apoyo Senado. Workflow activo; diagn�
 Lectura local acotada del endpoint oficial 2026: siete páginas, 3.407 IDs únicos, 70 oficinas y períodos enero a agosto de 2026. Validación de esquema, páginas, total estable y duplicados aprobada; aproximadamente 2,11 MB de JSON de filas procesado en memoria. No se guardó un universo local ni se publicó.
 
 Esto acredita extracción local del conjunto 2026 reportado por ese endpoint, no otros años ni ejecución completa desde la red GitHub. Los conteos coinciden con el release vigente, pero igualdad de conteos no acredita igualdad de contenido. La promoción sigue condicionada a presupuesto y candidato validado.
+
+## Cierre operativo Senado 2026: 100 %
+
+Con cuota de operaciones confirmada expresamente por el usuario (Analytics rechazó el token), run `36963215218` completó extracción de siete páginas, validación y publicación R2 con `--skip-d1`. Se preservó Cámara: 1.084 filas; Senado: 3.407; total: 4.491.
+Release: `2026-10-02T04-08-54-151Z`; SHA: `dc0e43f3218d38dded54229e614035574301156c43dd3150984c10b748edac5d`.
+Inventario previo de toda la cuenta: 8.425.652.239 bytes; proyectado tras ambas publicaciones: 8.427.986.077 bytes. Aumento neto: 2.333.838 bytes; pico estimado: 8.428.078.501, por debajo de 9.500.000.000. No se afirma medición de facturación.
+
+Pages `36963350688`: success, despliegue productivo `b3dbf875.cambiometro.pages.dev`. Pin público contiene el SHA nuevo de personal de apoyo. Home, búsqueda Kaiser y fichas Pedro Araya/Vanessa Kaiser respondieron HTTP 200; ambas fichas muestran personal de apoyo y agosto de 2026.
+Rollback: release anterior conservado, SHA `75d73d4ca0e30adb64b0a3d73e48281aba2363cab4ecbf8831ec6f9470638f59`; metadata de rollback registrada por Pages. No se borró histórico.
+
+El 100 % es sólo este ciclo operativo Senado 2026, no Cámara, cobertura de otros años, O11 completo ni siete días de estabilidad. Cámara sigue con bloqueo externo.
