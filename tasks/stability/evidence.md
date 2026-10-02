@@ -348,6 +348,8 @@ Riesgo o siguiente puerta:
 
 ### O12 — guarda mensual Senado · 2026-10-02 · 25 %
 
+- Ejecución 37044606324 terminó correctamente, pero la comprobación de meses detectó un índice publicado parcial (Senado 2 períodos mientras el manifiesto conserva 174 archivos). O12 permanece abierto hasta corregir y repetir el smoke. Los objetos históricos no se perdieron. Reparación acotada en `docs/operations/expense-index-retention-20261002.md`; aumento proyectado de sólo 19.662 bytes.
+
 - PR #689 integrado: `41e3655068768ad9e913f55e1e52f9d2ac6a2d77`, CI verde. 43 pruebas, replay junio/julio 1.248/1.250 filas, baseline publicado R2 obligatorio en workflow. Ejecución incremental 37044606324 pendiente de cola al registrar este hito.
 - Detalle: `docs/operations/expense-monthly-guard-20261002.md`. Los períodos oficiales coinciden (174), pero esto no acredita todas las filas históricas.
 

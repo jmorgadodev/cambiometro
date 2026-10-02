@@ -13,7 +13,7 @@ import {
 } from "./static-site-inputs.mjs";
 import { requireCloudflareDataCredentials } from "./etl/ci-env.mjs";
 import { assertRemoteR2WriteBudget, configuredR2BudgetBuckets } from "./etl/r2-account-budget.mjs";
-import { writeExpensePeriodArtifacts } from "./expense-release.mjs";
+import { writeExpensePeriodArtifacts, retainPublishedExpensePeriods } from "./expense-release.mjs";
 import { buildReleaseSet } from "./release-set.mjs";
 import { createR2ManifestClient, readConditionalManifest, putConditionalManifest, changedManifestEntries } from "./etl/r2-conditional-manifest.mjs";
 
@@ -65,7 +65,17 @@ if (!localOnly) {
   const { manifest: previous, etag } = await readConditionalManifest({ url: manifestUrl, fetchImpl: client.fetch });
   assertStaticInputManifest(previous);
   buildReleaseSet(previous);
-  freshEntries = changedManifestEntries(omitRetainedExpenseSubsets(generatedEntries, previous), previous);
+  let candidateEntries = generatedEntries;
+  if (requestedGroups.includes("gastos")) {
+    const indexPath = "data/lake-subsets/expense-periods/manifest.json";
+    const fullPath = resolveSafeStaticPath(root, indexPath);
+    const index = retainPublishedExpensePeriods(JSON.parse(readFileSync(fullPath, "utf8")), previous);
+    const content = Buffer.from(`${JSON.stringify(index)}\n`);
+    writeFileSync(fullPath, content);
+    const retainedIndexEntries = buildStaticInputEntries({ root, files: [indexPath], releaseId: sha256Buffer(content) });
+    candidateEntries = [...generatedEntries.filter((entry) => entry.path !== indexPath), ...retainedIndexEntries];
+  }
+  freshEntries = changedManifestEntries(omitRetainedExpenseSubsets(candidateEntries, previous), previous);
   const merged = new Map((previous?.files ?? []).map((file) => [file.path, file]));
   for (const file of freshEntries) merged.set(file.path, file);
   manifest = freshEntries.length ? buildStaticInputManifest({ entries: [...merged.values()] }) : previous;
