@@ -132,6 +132,7 @@ export function checksumRows(rows) {
 
 export function validate38BisSnapshot(current, { previous } = {}) {
   if (previous) validate38BisSnapshot(previous);
+  if (current?.url !== SOURCE_URL) throw new Error("38BIS_SOURCE_INVALID");
   if (!current || !/^\d{4}-(0[1-9]|1[0-2])$/.test(current.mes ?? "")) throw new Error("38BIS_PERIOD_INVALID");
   if (previous && current.mes < previous.mes) throw new Error("38BIS_PERIOD_REGRESSION");
   if (!Array.isArray(current.registros) || current.registros.length < 500) throw new Error("38BIS_COUNT_INCOMPLETE");

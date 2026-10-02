@@ -56,6 +56,9 @@ describe("guardas del candidato 38 bis", () => {
   it("rechaza una línea base corrupta antes de comparar", () => {
     expect(() => validate38BisSnapshot(release(), { previous: { ...release(), checksum_sha256: "0".repeat(64) } })).toThrow("CHECKSUM");
   });
+  it("rechaza un corte de otro origen aunque sus filas tengan checksum válido", () => {
+    expect(() => validate38BisSnapshot({ ...release(), url: "https://example.com" })).toThrow("SOURCE_INVALID");
+  });
   it("bloquea cero, duplicados exactos y descenso del mismo período", () => {
     expect(() => validate38BisSnapshot(release([]))).toThrow();
     expect(() => validate38BisSnapshot(release([...rows, rows[0]]))).toThrow("DUPLICATE");

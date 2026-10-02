@@ -89,7 +89,7 @@ productiva y rollback comprobados; evidencia abajo. Costes (#671) siguen apartad
 - [x] Artefacto incluye evidencia de releases y smoke de rutas, búsqueda y conteos.
 - [x] Promover y registrar deployment, rollback y verificación productiva (37050448199). Alcance y límites en `docs/operations/pages-coherent-promotion-20261002.md`; manifiestos externos siguen en O08.
 
-## O10 · Monitor diario · M · 50 %
+## O10 · Monitor diario · M · 75 %
 
 - [x] Agrupación de incidentes del smoke existente, recordatorio semanal y
   recuperación sólo tras controles correctos; 11 pruebas, tipos y lint locales.
@@ -99,10 +99,8 @@ productiva y rollback comprobados; evidencia abajo. Costes (#671) siguen apartad
   sin extracción ni datos R2/D1; 7 pruebas. CI y ejecución real 36956479341 aprobadas; calendario diario activo.
   No equivale a frescura del release; evidencia en `docs/operations/etl-calendar-monitor-20261001.md`.
 
-- [ ] Leer calendario, estado de candidato/release, R2/API/Pages y presupuesto sin extraer universos.
-- [ ] Clasificar `healthy`, `degraded_external`, `stale`, `failed_internal`, `paused_local_only`.
-- [ ] Alertar por transición/umbral; agrupar fallos repetidos y recordar semanalmente.
-- [ ] Replay de estados, ejecución diaria verde y documentación de respuesta.
+- [x] Comparar pin estático R2/Pages por checksum y ID, sin filas; replay de errores y ejecución real 37054632539 verde. PR #695; 26 pruebas. Incidente por divergencia agrupado con recordatorio semanal y recuperación verificada.
+- [ ] Completar estado/frescura de cada candidato y release, manifiestos externos/API y presupuesto automático; distinguir degradación externa con evidencia, no por la conclusión de Actions. No se declara sana una fuente porque el pin estático coincida.
 
 ## O11 · Fuentes pequeñas y bloqueadas · M por fuente · 0 %
 

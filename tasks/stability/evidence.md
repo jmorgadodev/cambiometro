@@ -368,7 +368,7 @@ Riesgo o siguiente puerta:
 ### O10 — control diario de coherencia estática · 2026-10-02
 
 - El monitor existente agrega dos lecturas R2/Pages y reutiliza `shouldRefreshStaticRelease`, sin ETL, filas, D1, escrituras R2, cambios de puntero ni backup. Pin distinto no es healthy; checksum/credenciales inválidos fallan de forma cerrada.
-- Control real local: pin vigente R2/Pages concordante, estado `healthy` restringido a `static-release-consistency`, HTTP 200 y dos lecturas. Pruebas de calendario/decisión aprobadas; CI y ejecución diaria ampliada pendientes antes de cerrar esta puerta.
+- Control real local y remoto: pin vigente R2/Pages concordante, estado `healthy` restringido a `static-release-consistency`, HTTP 200 y dos lecturas. PR #695 integrado con CI verde (`9f751b0a2a04dca645ece7f92135332d2fe3a517`); ejecución 37054632539 success, 33 consultas GitHub + dos de pin, 26 pruebas relacionadas aprobadas. O10: 75%; quedan controles por fuente/externos/costes.
 - Incidentes reutilizan el agrupador Uptime: `/data/release-set.json`, recordatorio semanal y recuperación verificada. No se infiere estado externo/interno de un conector por un fallo de Actions; frescura por fuente, manifiestos externos y costes permanecen pendientes.
 
 ### O12 — cierre del alcance publicado · 2026-10-02 · 100 %
@@ -386,6 +386,6 @@ Riesgo o siguiente puerta:
 
 ### O13 — guardas de 38 bis, no promoción · 2026-10-02
 
-- Candidato reutiliza contrato común y baseline R2 obligatorio; no-op no escribe y período ausente no se inventa. Preflight de almacenamiento antes de los PUT existentes, sin respaldo nuevo ni D1. Trece pruebas dirigidas aprobadas; CI y verificación remota pendientes.
+- Candidato reutiliza contrato común y baseline R2 obligatorio; no-op no escribe y período ausente no se inventa. Preflight de almacenamiento antes de los PUT existentes, sin respaldo nuevo ni D1. Catorce pruebas dirigidas aprobadas; CI y verificación remota pendientes.
 - Release vigente: 1.590 filas, julio 2026, checksum `c6fe851b6dc0b2de8ba0eb4d80fe699636165a7fe41b61f8b2411252d44101dc`. Se verificaron 18 cortes históricos (29.703 filas) sin alterar sus ocho repeticiones aparentes. Replay contra sí mismo: unchanged.
 - CSV oficial acotado detenido a 10 MB; HTML oficial julio produce 1.595 filas, diferencia aún no conciliada con R2. No se promovió ni se completó una fecha por inferencia. Detalle y pendientes en `docs/operations/remuneraciones-38bis-candidate-guards-20261002.md`; O13 y pin externo O08 siguen abiertos.

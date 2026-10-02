@@ -60,7 +60,7 @@ actualiza ni se usa para desplegar. `cambiometro-audit` sólo guarda evidencia.
 | O07 | Guardia ETL común: esquema, checksum, períodos, duplicados, descenso y fallo externo | M | O06 | 100 % |
 | O08 | `ReleaseSet` R2 con IDs/checksums por dominio y lectura fijada por Pages; guarda remota tras CI y fusión | M | O03, O07 | 75 % tras fusión |
 | O09 | Promoción Pages coherente y bloqueo global; alcance estático verificado | M | O08 | 100 % estático |
-| O10 | Control diario sin extracción ni alertas repetidas por una misma causa | M | O03, O08 | 50 % |
+| O10 | Control diario sin extracción ni alertas repetidas; pin estático comprobado | M | O03, O08 | 75 % |
 | O11 | Migrar fuentes pequeñas; Senado votaciones local-only; fallos externos aislados | M por fuente | O07 | 0 % |
 | O12 | Gastos parlamentarios: guardas y períodos publicados, nulo distinto de cero | M | O07, O08 | 100 % del alcance publicado |
 | O13 | Remuneraciones municipal/central/38 bis: guardas, cortes e índices sin D1 masiva | M por componente | O07, O08 | 0 % |
