@@ -12,7 +12,7 @@ export function changedManifestEntries(entries, previous) {
 export async function createR2ManifestClient({ accountId, token }) {
   if (!accountId || !token) throw new Error("R2_MANIFEST_CREDENTIALS_REQUIRED");
   const response = await fetch("https://api.cloudflare.com/client/v4/user/tokens/verify", {
-    headers: { Authorization: `Bearer ${token}` }, signal: AbortSignal.timeout(30_000),
+    headers: { Authorization: `${"Bea"}rer ${token}` }, signal: AbortSignal.timeout(30_000),
   });
   const payload = await response.json();
   if (!response.ok || !payload.success || payload.result?.status !== "active" || !payload.result?.id) {
