@@ -39,7 +39,7 @@ como automático.
 | InfoProbidad · `etl-infoprobidad.yml` | Mensual | Por verificar | 0/4 |
 | DIPRES · `etl-dipres.yml` | Trimestral | Por verificar | 0/4 |
 | SINIM · `etl-sinim.yml` | Semestral | Por verificar | 0/4 |
-| Gastos Senado · `etl-expenses.yml` | Mensual | Por verificar | 0/4 |
+| Gastos Senado · `etl-expenses.yml` | Mensual; replay incremental comprobado | `web-back.senado.cl/api/transparency/expenses/senator-Operational-expenses`; 174 períodos publicados, 154.132 filas históricas; índice R2 conservado y API mensual comprobada | 4/4 del ciclo publicado; cuota confirmada por usuario, no facturación medida automáticamente |
 | Remuneraciones 38 bis · `etl-remuneraciones-38bis.yml` | Mensual, día 5 a las 10:15 UTC | `comision38bis.gob.cl/registro-publico?csv-todo`; R2 `projections/remuneraciones-38bis-v1/` | 1/4 (25 %) |
 | SERVEL · `etl-servel.yml` | Manual | Por verificar | 0/4 |
 | Cámara histórica · `etl-camara-reconciliation.yml` | Manual | Por verificar | 0/4 |
