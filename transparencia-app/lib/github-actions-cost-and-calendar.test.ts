@@ -221,7 +221,6 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       "etl-infoprobidad.yml",
       "etl-ley-19862.yml",
       "etl-servel.yml",
-      "etl-sinim.yml",
       "etl-cplt.yml",
     ];
 
@@ -246,6 +245,20 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(contraloria).toContain("npm run data:publish");
     expect(contraloria).toContain("npm run data:publish:static -- --groups contraloria");
     expect(contraloria).toContain("D1 no participa en este ETL");
+  });
+
+  it("11a. SINIM conserva publicación R2 y verificación sin extracción ni D1", () => {
+    const sinim = fs.readFileSync(path.join(workflowsDir, "etl-sinim.yml"), "utf8");
+    expect(sinim).not.toMatch(/d1-preflight|data:materialize|wrangler d1/i);
+    expect(sinim).toContain("verify_release_only:");
+    expect(sinim).toContain("if: inputs.verify_release_only != true");
+    expect(sinim).toContain("--required-files data/lake/projections/v1/sinim.json");
+    expect(sinim).toContain("--only-files data/lake/projections/v1/sinim.json --force");
+    expect(sinim).toContain("npm run data:publish:static -- --groups sinim");
+    expect(sinim).toContain("contents: read");
+    const guard = fs.readFileSync(path.join(workflowsDir, "etl-publication-guard.yml"), "utf8");
+    expect(guard).toContain("SINIM_PUBLICATION_RESULT_INVALID");
+    expect(guard).toContain("return steps[0].conclusion === 'success'");
   });
 
   it("11b. El histórico de gastos públicos se publica en R2/Pages sin materializar en D1", () => {
