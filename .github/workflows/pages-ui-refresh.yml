@@ -162,6 +162,14 @@ jobs:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
         run: npm run data:hydrate:static -- --required --manifest-file .ci-data-version/static-site-manifest.json --required-files data/movimientos.json --only-files data/movimientos.json --force
 
+      - name: Rehidratar remuneraciones 38 bis desde el release vigente de R2
+        # Se ejecuta también con cache-hit: los fixtures Git no son producción.
+        working-directory: transparencia-app
+        env:
+          CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_DATA_API_TOKEN }}
+        run: node scripts/hydrate-remuneraciones-38bis.mjs
+
       - name: Fijar ReleaseSet de entradas estáticas y validar bytes locales
         working-directory: transparencia-app
         env:

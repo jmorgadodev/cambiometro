@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
-import { shouldVerify38BisPublication } from "../scripts/etl/remuneraciones-38bis-publication.mjs";
+import { shouldVerify38BisPublication, validate38BisArtifacts } from "../scripts/etl/remuneraciones-38bis-publication.mjs";
 import { compareRows, extractPeriod, latestCsvPeriod, parseCsvRows, parseRows, checksumRows, validate38BisSnapshot, validate38BisHistory } from "../scripts/etl/remuneraciones-38bis-parser.mjs";
 
 describe("parser del registro público 38 bis", () => {
@@ -47,6 +47,11 @@ describe("guardas del candidato 38 bis", () => {
     expect(() => shouldVerify38BisPublication(job("failure"))).toThrow("INVALID");
     const guard = readFileSync(new URL("../../.github/workflows/etl-publication-guard.yml", import.meta.url), "utf8");
     expect(guard).toContain("shouldVerify38BisPublication");
+    const pages = readFileSync(new URL("../../.github/workflows/pages-static-refresh.yml", import.meta.url), "utf8");
+    const ui = readFileSync(new URL("../../.github/workflows/pages-ui-refresh.yml", import.meta.url), "utf8");
+    expect(pages).toContain("shouldVerify38BisPublication");
+    expect(pages).toContain("node scripts/hydrate-remuneraciones-38bis.mjs");
+    expect(ui).toContain("node scripts/hydrate-remuneraciones-38bis.mjs");
   });
   it("exige baseline R2, modo de verificación y preflight antes de escribir", () => {
     const workflow = readFileSync(new URL("../../.github/workflows/etl-remuneraciones-38bis.yml", import.meta.url), "utf8");
@@ -61,6 +66,14 @@ describe("guardas del candidato 38 bis", () => {
   });
   const rows = Array.from({ length: 600 }, (_, index) => ({ partida: "Congreso Nacional", organismo: "SENADO", cargo: "SENADOR", nombre: `PERSONA ${index}`, bruto_mensual: index === 0 ? null : index === 1 ? 0 : 100 }));
   const release = (registros = rows, mes: string | null = "2026-07") => ({ schema_version: 2, url: "https://comision38bis.gob.cl/registro-publico", mes, registros, filas: registros.length, checksum_sha256: checksumRows(registros) });
+  it("hidrata sólo snapshot, histórico y auditoría concordantes, nunca el fixture Git", () => {
+    const current = release();
+    const history = { schema_version: 1, source_id: "remuneraciones-38bis", periodos: [] };
+    const audit = { source_id: "remuneraciones-38bis", mes: current.mes, filas: current.filas, checksum_sha256: current.checksum_sha256, d1_rows_read: 0, d1_rows_written: 0 };
+    expect(validate38BisArtifacts(current, history, audit).rows).toBe(600);
+    expect(() => validate38BisArtifacts(current, history, { ...audit, checksum_sha256: "0".repeat(64) })).toThrow("AUDIT");
+    expect(() => validate38BisArtifacts(current, history, { ...audit, mes: "2026-06" })).toThrow("AUDIT");
+  });
   it("rechaza período ausente o inválido sin inventar el mes de ejecución", () => {
     for (const month of [null, "2026-13"]) expect(() => validate38BisSnapshot(release(rows, month))).toThrow("PERIOD_INVALID");
   });

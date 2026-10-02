@@ -386,6 +386,7 @@ Riesgo o siguiente puerta:
 
 ### O13 — guardas de 38 bis, no promoción · 2026-10-02
 
-- Candidato reutiliza contrato común y baseline R2 obligatorio; no-op no escribe ni espera despliegue y período ausente no se inventa. Clave con mes/checksum preserva meses distintos con filas idénticas. Preflight de almacenamiento antes de los PUT existentes, sin respaldo nuevo ni D1. Dieciséis pruebas dirigidas aprobadas; CI y verificación remota pendientes.
+- Candidato reutiliza contrato común y baseline R2 obligatorio; no-op no escribe ni espera despliegue y período ausente no se inventa. Clave con mes/checksum preserva meses distintos con filas idénticas. Preflight de almacenamiento antes de los PUT existentes, sin respaldo nuevo ni D1. Diecisiete pruebas del dominio más 27 relacionadas (44), tipos y lint aprobados; CI y verificación remota pendientes.
+- Los dos builds Pages rehidratan snapshot/histórico/auditoría R2 incluso con caché; validan concordancia completa antes de reemplazar inputs locales. Verificación real local: tres GET, 8.859.421 bytes, auditoría concordante, sin escrituras. Una publicación real 38 bis dispara Pages; un no-op lo omite. El pin externo canónico sigue en O08.
 - Release vigente: 1.590 filas, julio 2026, checksum `c6fe851b6dc0b2de8ba0eb4d80fe699636165a7fe41b61f8b2411252d44101dc`. Se verificaron 18 cortes históricos (29.703 filas) sin alterar sus ocho repeticiones aparentes. Replay contra sí mismo: unchanged.
 - CSV oficial acotado detenido a 10 MB; HTML oficial julio produce 1.595 filas, diferencia aún no conciliada con R2. No se promovió ni se completó una fecha por inferencia. Detalle y pendientes en `docs/operations/remuneraciones-38bis-candidate-guards-20261002.md`; O13 y pin externo O08 siguen abiertos.
