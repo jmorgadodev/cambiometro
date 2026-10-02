@@ -366,7 +366,7 @@ describe("API canónica v1", () => {
     }
   });
 
-  it("incluye pagos 38 bis en la búsqueda general sin consultar D1", async () => {
+  it.each([9200000, 0, null])("incluye pagos 38 bis sin D1 y conserva el monto %s", async (amount) => {
     const env = {
       DB: { prepare: () => { throw new Error("D1 no debe consultarse para remuneraciones del home"); } },
       PUBLIC_DATA: {
@@ -379,7 +379,7 @@ describe("API canónica v1", () => {
                 nombre: "RÍO SEBASTIÁN TORREALBA DEL",
                 organismo: "PRESIDENCIA",
                 cargo: "COORDINADOR DE ASESORES",
-                bruto_mensual: 9200000,
+                bruto_mensual: amount,
               }],
             }) as T,
           }
@@ -396,7 +396,7 @@ describe("API canónica v1", () => {
       nombre: "RÍO SEBASTIÁN TORREALBA DEL",
       type: "remuneracion",
       periodo: "2026-06",
-      monto: 9200000,
+      monto: amount,
     });
   });
 
