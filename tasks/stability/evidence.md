@@ -365,6 +365,12 @@ Riesgo o siguiente puerta:
 - Puntero en memoria `1c9dc4bec22b4a096a29a76452dc8f8ad4debee12b8b6a5b2a9ea288c11bb8cf` → `95785d19c8b77178004618d4027b4fd8f3343fa372ed3e2fc3fe644bd0c9fd5c` → vigente, con contratos y dos archivos reales verificados.
 - Once pruebas dirigidas aprobadas. Procedimiento: `docs/operations/rollback-existing-backup-20261002.md`. Cierre efectivo tras CI y fusión; el CAS remoto y los siete días siguen pendientes. No se restauró toda la copia ni se cambió producción.
 
+### O10 — control diario de coherencia estática · 2026-10-02
+
+- El monitor existente agrega dos lecturas R2/Pages y reutiliza `shouldRefreshStaticRelease`, sin ETL, filas, D1, escrituras R2, cambios de puntero ni backup. Pin distinto no es healthy; checksum/credenciales inválidos fallan de forma cerrada.
+- Control real local: pin vigente R2/Pages concordante, estado `healthy` restringido a `static-release-consistency`, HTTP 200 y dos lecturas. Pruebas de calendario/decisión aprobadas; CI y ejecución diaria ampliada pendientes antes de cerrar esta puerta.
+- Incidentes reutilizan el agrupador Uptime: `/data/release-set.json`, recordatorio semanal y recuperación verificada. No se infiere estado externo/interno de un conector por un fallo de Actions; frescura por fuente, manifiestos externos y costes permanecen pendientes.
+
 ### O12 — cierre del alcance publicado · 2026-10-02 · 100 %
 
 - PR #693 integrado `6d7993578c321e19088dcac3c3543880dde40e78`, CI verde. Conservación histórica del índice y de filas del candidato R2: 32 pruebas; filtros/último corte/nulos: otras 27.
