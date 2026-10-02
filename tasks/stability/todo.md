@@ -120,6 +120,8 @@ Subtareas comprobadas al 2026-10-02: personal de apoyo Senado, ciclo 2026 cerrad
 
 ## O13 · Remuneraciones · M por componente · 0 %
 
+Avance por componente: **38 bis 75% (3/4)**, fuente/replay/publicación comprobados; operación remota `degraded_external`. Corrección nulo/cero de búsqueda publicada y comprobada al 100%. Municipal y central pendientes, por lo que no se atribuye el porcentaje de 38 bis al conjunto. Evidencia y ruta de trabajo en `docs/operations/remuneraciones-38bis-candidate-guards-20261002.md`.
+
 - [ ] Dividir municipal, central, 38 bis y apoyo parlamentario; fijar cortes/unidades.
 - [ ] Probar guardas y búsquedas indexadas sin barridos D1 ni fusión nominal.
 - [ ] Comparar conteos, checksum e índices por organismo/período en preview.
