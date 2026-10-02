@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
+import { shouldVerify38BisPublication } from "../scripts/etl/remuneraciones-38bis-publication.mjs";
 import { compareRows, extractPeriod, latestCsvPeriod, parseCsvRows, parseRows, checksumRows, validate38BisSnapshot, validate38BisHistory } from "../scripts/etl/remuneraciones-38bis-parser.mjs";
 
 describe("parser del registro público 38 bis", () => {
@@ -38,6 +39,15 @@ describe("parser del registro público 38 bis", () => {
 });
 
 describe("guardas del candidato 38 bis", () => {
+  it("no espera un despliegue inexistente tras no-op o verificación sin publicación", () => {
+    const job = (conclusion: string) => [{ steps: [{ name: "Publicar snapshot, manifest y auditoría en R2", conclusion }] }];
+    expect(shouldVerify38BisPublication(job("skipped"))).toBe(false);
+    expect(shouldVerify38BisPublication(job("success"))).toBe(true);
+    expect(() => shouldVerify38BisPublication([])).toThrow("MISSING");
+    expect(() => shouldVerify38BisPublication(job("failure"))).toThrow("INVALID");
+    const guard = readFileSync(new URL("../../.github/workflows/etl-publication-guard.yml", import.meta.url), "utf8");
+    expect(guard).toContain("shouldVerify38BisPublication");
+  });
   it("exige baseline R2, modo de verificación y preflight antes de escribir", () => {
     const workflow = readFileSync(new URL("../../.github/workflows/etl-remuneraciones-38bis.yml", import.meta.url), "utf8");
     expect(workflow).toContain("--require-published-baseline");
