@@ -36,3 +36,11 @@ La causa corregida es el fallback a un snapshot Git antiguo ante errores R2. Aho
 - El mismo snapshot y verificador de ambos workflows se comprobó con el diagnóstico Cámara; esto no prueba extracción remota Senado.
 
 Pendiente: decidir la modalidad de Senado y comprobar la extracción completa de cada fuente cuando sea segura. O11 no está cerrado. No ejecutar publicaciones mientras O05 no acredite margen de costes.
+
+## Senado: verificación adicional autorizada
+
+El usuario autorizó reactivar personal de apoyo Senado. Workflow activo; diagnóstico remoto `36962215053` aprobado con extracción y publicaciones omitidas. No se modificó votaciones Senado.
+
+Lectura local acotada del endpoint oficial 2026: siete páginas, 3.407 IDs únicos, 70 oficinas y períodos enero a agosto de 2026. Validación de esquema, páginas, total estable y duplicados aprobada; aproximadamente 2,11 MB de JSON de filas procesado en memoria. No se guardó un universo local ni se publicó.
+
+Esto acredita extracción local del conjunto 2026 reportado por ese endpoint, no otros años ni ejecución completa desde la red GitHub. Los conteos coinciden con el release vigente, pero igualdad de conteos no acredita igualdad de contenido. La promoción sigue condicionada a presupuesto y candidato validado.
