@@ -1,6 +1,6 @@
 # Plan canónico de estabilización
 
-Actualizado: 2026-10-01. Este plan sustituye como tablero operativo a los
+Actualizado: 2026-10-02. Este plan sustituye como tablero operativo a los
 planes fechados en septiembre; aquellos permanecen como historial, no como
 instrucciones vigentes ni evidencia de cobertura actual.
 
@@ -67,6 +67,8 @@ actualiza ni se usa para desplegar. `cambiometro-audit` sólo guarda evidencia.
 | O14 | Simulacro de rollback por release y verificación del respaldo existente, sin copia nueva | M | O05, O08 | 0 % |
 | O15 | Siete días continuos de concordancia R2 → API → Pages y alertas útiles | S operativo, 7 días calendario | O09–O14 | 0 % |
 | O16 | ChileCompra: último, con preflight de alcance/coste y recuperación 403 | M por período | O05, O07, O15 | 0 % |
+
+Detalle O11: personal de apoyo Senado terminó su ciclo 2026, publicado y comprobado en producción (4/4). Personal de apoyo Cámara conserva el release y queda en 1/4 por bloqueo externo verificado. El cierre de Senado no equivale al cierre de todas las fuentes de O11. La cuota de operaciones fue confirmada expresamente por Jorge para esta publicación; no se registró una medición de Analytics que el token no permite leer.
 
 Los IDs permanecen estables para que la evidencia no se renumere. Entre las
 tareas abiertas, **O05 es la siguiente**: medir el margen R2 antes de cualquier

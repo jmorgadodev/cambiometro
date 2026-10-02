@@ -1,6 +1,6 @@
 # Cierre individual de ETL
 
-Actualizado: 2026-10-01. Inventario preliminar obtenido del
+Actualizado: 2026-10-02. Inventario preliminar obtenido del
 [`etl-calendar.json`](../../.github/etl-calendar.json). El calendario prueba
 intención de ejecución, **no** procedencia efectiva ni funcionamiento. Los
 endpoints, documentos y destinos R2 se registrarán desde cada conector y su
@@ -28,8 +28,8 @@ como automático.
 | --- | --- | --- | ---: |
 | Cámara · `etl-daily.yml` | Diario | Por verificar | 0/4 |
 | Votaciones Cámara · `etl-camara-votaciones.yml` | Diario | Por verificar | 0/4 |
-| Personal de apoyo Cámara · `etl-personal-apoyo.yml` | Semanal | Por verificar | 0/4 |
-| Personal de apoyo Senado · `etl-personal-apoyo-senado.yml` | Semanal | Por verificar | 0/4 |
+| Personal de apoyo Cámara · `etl-personal-apoyo.yml` | Semanal; origen bloqueado | `camara.cl/diputados/detalle/personaldepoyo.aspx`; `degraded_external`; R2 `projections/personal-apoyo-v1/`; conserva 1.084 filas | 1/4 (25 %); bloqueo externo |
+| Personal de apoyo Senado · `etl-personal-apoyo-senado.yml` | Semanal activo; ejecución manual completa verificada | `web-back.senado.cl/api/transparency/senator-assignments/support-staff`; 3.407 filas, enero–agosto 2026; R2 `projections/personal-apoyo-v1/` | 4/4 (100 % del ciclo 2026; cuota confirmada por usuario, ver evidencia) |
 | Movimientos · `etl-movimientos.yml` | Diario | Por verificar | 0/4 |
 | ChileCompra · `etl-chilecompra.yml` | Semanal; cierre al final | Por verificar | 0/4 |
 | InfoLobby · `etl-infolobby-scheduled.yml` | Semanal | Por verificar | 0/4 |
@@ -51,3 +51,6 @@ procedencia de los ETL pequeños y sanos, cerrar Movimientos como piloto,
 seguir gastos y remuneraciones por componente, y dejar ChileCompra al final.
 La corrección de retroceso de Movimientos (O02) no equivale a cerrar sus cuatro
 puertas operativas.
+
+Personal de apoyo: [cierre y bloqueos](../../docs/operations/personal-apoyo-source-guards-20261002.md).
+En Senado se aceptó la autorización expresa de Jorge y su confirmación de cuota disponible para la puerta de costes; el almacenamiento sí se midió sobre toda la cuenta. Analytics rechazó el token, por lo que no se presenta la facturación como medida automáticamente. La observación de siete días sigue perteneciendo a O15.
