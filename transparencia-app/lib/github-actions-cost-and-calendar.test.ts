@@ -217,7 +217,6 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     const workflows = [
       "etl-chilecompra.yml",
       "etl-infolobby-scheduled.yml",
-      "etl-infoprobidad.yml",
       "etl-ley-19862.yml",
       "etl-servel.yml",
       "etl-cplt.yml",
@@ -271,7 +270,22 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(dipres).toContain("npm run data:publish:static -- --groups dipres");
     expect(dipres).toContain("contents: read");
     const guard = fs.readFileSync(path.join(workflowsDir, "etl-publication-guard.yml"), "utf8");
-    expect(guard).toContain("['ETL Semestral - SINIM Finanzas Municipales', 'ETL Trimestral - DIPRES Presupuestos'].includes");
+    expect(guard).toContain("'ETL Trimestral - DIPRES Presupuestos', 'ETL Mensual - InfoProbidad DIP'].includes");
+    expect(guard).toContain("return steps[0].conclusion === 'success'");
+  });
+
+  it("11a. InfoProbidad verifica su release sin extracción, publicación ni D1", () => {
+    const workflow = fs.readFileSync(path.join(workflowsDir, "etl-infoprobidad.yml"), "utf8");
+    expect(workflow).not.toMatch(/d1-preflight|data:materialize|wrangler d1/i);
+    expect(workflow).toContain("verify_release_only:");
+    expect(workflow.match(/if: inputs.verify_release_only != true/g)).toHaveLength(3);
+    expect(workflow).toContain("if: inputs.verify_release_only == true");
+    expect(workflow).toContain("--required-files data/lake/projections/v1/infoprobidad.json,data/lake-subsets/infoprobidad.subset.json");
+    expect(workflow).toContain("--only-files data/lake/projections/v1/infoprobidad.json,data/lake-subsets/infoprobidad.subset.json --force");
+    expect(workflow).toContain("npm run data:publish:static -- --groups infoprobidad");
+    expect(workflow).toContain("contents: read");
+    const guard = fs.readFileSync(path.join(workflowsDir, "etl-publication-guard.yml"), "utf8");
+    expect(guard).toContain("'ETL Mensual - InfoProbidad DIP'].includes");
     expect(guard).toContain("return steps[0].conclusion === 'success'");
   });
 
