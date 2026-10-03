@@ -429,3 +429,10 @@ Riesgo o siguiente puerta:
 - Lectura acotada de manifiesto y dos objetos (736.930 bytes), con SHA/bytes concordantes. Verify-only 37106727934 success desde `main`: preparación, extracción y publicación omitidas; cero PUT, datos D1 o backup nuevo. El contador de 203 archivos es del manifiesto, no una descarga de 203 objetos.
 - Pages 37106819129 y guarda 37106819187 success: build/promoción/espera omitidos. Guarda R2-only cerrada al 100 %, no el ciclo mensual, cobertura completa ni O11 conjunto. No se afirma facturación medida automáticamente.
 - Cancelado sólo push `ui-only` redundante 37106727835 del mismo commit para liberar cola; CI obligatorio preservado. Procedimiento en `docs/operations/infoprobidad-r2-only-20261003.md`; rama documental `codex/infoprobidad-closure-20261003` en el worktree canónico.
+
+### O11 — Ley 19.862: cierre de guarda R2-only · 2026-10-03
+
+- PR #707 integrado en `d653c398c4fcedf45ee39a1b396fdab169e242d3` con CI completo verde. Dos regresiones rojas/verde; 30 pruebas dirigidas, tipos/lint y calendario aprobados. Se retiran creación/materialización D1 y su preflight/diagnóstico, sin borrar bases ni datos existentes.
+- Lectura acotada de manifiesto y dos objetos estáticos, 4.907.481 bytes, con bytes/SHA concordantes. Verify-only 37108164915 success desde `main`: bridge/secret, preparación, histórico, extracción y publicaciones omitidos; cero PUT, datos D1 o backups nuevos. El contador de 203 es del manifiesto, no de objetos descargados.
+- Pages 37108286931 y guarda 37108286936 success con build/promoción/espera omitidos; R2 no crece y el release no cambia. Guarda R2-only cerrada al 100 %, no ciclo mensual, cobertura, manifiesto API externo O08 ni O11 completo. No se afirma facturación medida automáticamente.
+- Cancelado únicamente push `ui-only` redundante 37108150249 del mismo commit para liberar cola. Registro reproducible en `docs/operations/ley19862-r2-only-20261003.md`, rama documental `codex/ley19862-closure-20261003` en el worktree canónico.

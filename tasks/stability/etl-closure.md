@@ -35,7 +35,7 @@ como automático.
 | InfoLobby · `etl-infolobby-scheduled.yml` | Semanal | Por verificar | 0/4 |
 | Contraloría · `etl-contraloria.yml` | Mensual | Por verificar | 0/4 |
 | CPLT · `etl-cplt.yml` | Mensual | Por verificar | 0/4 |
-| Ley 19.862 · `etl-ley-19862.yml` | Mensual | Por verificar | 0/4 |
+| Ley 19.862 · `etl-ley-19862.yml` | Mensual, R2-only | Resumen/subset R2 verificados por bytes/SHA (4.907.481 bytes); PR #707 y verify-only 37108164915 cierran creación/materialización D1, no replay mensual ni manifiesto API externo | 0/4 del ciclo completo; guarda R2-only 100 % |
 | InfoProbidad · `etl-infoprobidad.yml` | Mensual, R2-only | Proyección/subset R2 verificados por bytes/SHA (736.930 bytes); PR #705 y verify-only 37106727934 cierran dependencia D1, no replay mensual | 0/4 del ciclo completo; guarda R2-only 100 % |
 | DIPRES · `etl-dipres.yml` | Trimestral, R2-only | Proyección/subset R2 verificados por bytes/SHA (1.127.842 bytes); PR #701 y verify-only 37085144507 cierran dependencia D1, no replay presupuestario | 0/4 del ciclo completo; guarda R2-only 100 % |
 | SINIM · `etl-sinim.yml` | Semestral, R2-only | Nueve indicadores configurados, 345 municipios exigidos; release R2 verificado por bytes/SHA. PR #699 y verify-only 37062175649 cierran dependencia D1, no replay de origen | 0/4 del ciclo completo; guarda R2-only 100 % |
