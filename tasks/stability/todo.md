@@ -106,6 +106,8 @@ productiva y rollback comprobados; evidencia abajo. Costes (#671) siguen apartad
 
 Subtareas comprobadas al 2026-10-02: personal de apoyo Senado, ciclo 2026 cerrado (4/4, cuota confirmada por Jorge); Cámara 1/4, `degraded_external`. Guardas compartidas cerradas en PR #687. El porcentaje de O11 completo permanece pendiente de las otras fuentes. Evidencia en `docs/operations/personal-apoyo-source-guards-20261002.md`.
 
+SINIM: dependencia D1 eliminada y guarda R2-only cerrada al 100 % (PR #699, verify-only 37062175649 y controles posteriores sin despliegue). No cierra replay anual ni cobertura de origen: `docs/operations/sinim-r2-only-20261002.md`.
+
 - [ ] Dividir por fuente y registrar procedencia efectiva, ventana, modo/frescura; Senado votaciones es local-only.
 - [ ] Migrar fuentes pequeñas con prueba de fallo externo y último release preservado.
 - [ ] Tratar Cámara personal de apoyo y Senado sin convertir 403 en cero.

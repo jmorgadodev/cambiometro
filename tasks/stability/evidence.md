@@ -402,3 +402,10 @@ Riesgo o siguiente puerta:
 - Pages 37058503076 y guarda 37058502868 success; deployment `https://963686d7.cambiometro.pages.dev`. R2/Pages: mismo corte/fecha, 1.595 filas, 19 meses y 29.703 filas históricas. Dos filas corregidas coinciden con API; cuatro rutas públicas HTTP 200. Reporte de smoke en `cambiometro-audit/evidence/38bis-production-smoke-20261002.json`.
 - PR #697 integrado con CI verde, preserva monto nulo en búsqueda. Preview `cf009e78-dac8-4502-90ff-c139f6164ee1` verifica siete registros reales nulos, sin datos D1. Promoción 37060149866 success al 100% con health. Smoke final: siete nulos concordantes con R2, dos montos publicados correctos, once HTTP 200. Corrección nulo/cero cerrada al 100%; no equivale a cerrar conectividad de origen.
 - Run 37059321643 falla en conexión de origen en ambos intentos; cero PUT/Pages y release vigente intacto. Replay local oficial coincide con 1.595 filas/checksum R2 y devuelve `unchanged`, cero diferencias. Remoto `degraded_external`; no se afirma bloqueo IP ni se reintenta sin límite. Tres puertas cerradas; operación no se marca 100 %.
+
+### O11 — SINIM: cierre de guarda R2-only · 2026-10-02
+
+- PR #699 fusionado con CI verde en `b55855df64a6855d045836bef6a950cc8f02a7f9`; 28 pruebas dirigidas, tipos/lint y calendario (18 workflows) aprobados. Se eliminan preflight/materialización D1, sin tocar conector, datos ni calendario.
+- Verify-only 37062175649 success: recupera y valida proyección SINIM publicada (1.440.946 bytes, SHA `ff6c62d9211e8c12cec8422f125b421799fcaf896c41bc79dd4ed87d5691c620`). Extracción y publicaciones omitidas; cero PUT y cero datos D1.
+- Pages 37062412926 y guarda 37062412990 success: omiten build/promoción y espera de frescura. No cambian el release productivo. Guarda R2-only cerrada al 100 %, no el ciclo anual SINIM ni O11 completo.
+- Procedimiento y límites en `docs/operations/sinim-r2-only-20261002.md`; ruta canónica conservada, cierre documental en `codex/etl-closure-record-20261002`.
