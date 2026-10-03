@@ -409,3 +409,9 @@ Riesgo o siguiente puerta:
 - Verify-only 37062175649 success: recupera y valida proyección SINIM publicada (1.440.946 bytes, SHA `ff6c62d9211e8c12cec8422f125b421799fcaf896c41bc79dd4ed87d5691c620`). Extracción y publicaciones omitidas; cero PUT y cero datos D1.
 - Pages 37062412926 y guarda 37062412990 success: omiten build/promoción y espera de frescura. No cambian el release productivo. Guarda R2-only cerrada al 100 %, no el ciclo anual SINIM ni O11 completo.
 - Procedimiento y límites en `docs/operations/sinim-r2-only-20261002.md`; ruta canónica conservada, cierre documental en `codex/etl-closure-record-20261002`.
+
+### O11 — DIPRES: cierre de guarda R2-only · 2026-10-02
+
+- PR #701 integrado con CI verde en `6955a3da1ee3d286df2c37f896863bed29134383`; 35 pruebas dirigidas, tipos/lint y calendario aprobados. D1 preflight/materialización retirados; calendario/conector/datos intactos.
+- Dos objetos publicados cotejados por bytes/SHA: proyección 1.081.699 bytes, subset 46.143; total 1.127.842. Verify-only 37085144507 success desde `main`, sin extracción/PUT/datos D1. No hubo backup nuevo ni cambios de almacenamiento.
+- Pages 37085281760 y guarda 37085281856 success con build/promoción/espera omitidos. Cierre 100 % de la guarda, no del ciclo presupuestario, cobertura ni O11 completo. Detalle en `docs/operations/dipres-r2-only-20261002.md`.
