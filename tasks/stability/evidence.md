@@ -436,3 +436,10 @@ Riesgo o siguiente puerta:
 - Lectura acotada de manifiesto y dos objetos estáticos, 4.907.481 bytes, con bytes/SHA concordantes. Verify-only 37108164915 success desde `main`: bridge/secret, preparación, histórico, extracción y publicaciones omitidos; cero PUT, datos D1 o backups nuevos. El contador de 203 es del manifiesto, no de objetos descargados.
 - Pages 37108286931 y guarda 37108286936 success con build/promoción/espera omitidos; R2 no crece y el release no cambia. Guarda R2-only cerrada al 100 %, no ciclo mensual, cobertura, manifiesto API externo O08 ni O11 completo. No se afirma facturación medida automáticamente.
 - Cancelado únicamente push `ui-only` redundante 37108150249 del mismo commit para liberar cola. Registro reproducible en `docs/operations/ley19862-r2-only-20261003.md`, rama documental `codex/ley19862-closure-20261003` en el worktree canónico.
+
+### O11/O13 — CPLT: cierre de guarda R2-only · 2026-10-03
+
+- PR #709 integrado en `51e11941167e6e2294bc0376b6b7b1918d2cc255` con CI completo verde. Cinco regresiones rojas antes del ajuste; 44 pruebas dirigidas, tipos, lint y calendario aprobados. Se retira el registro D1 automático del workflow y alias de finalización, sin borrar bases ni datos.
+- Check-sources-only **37118857265 success** desde `main`: cuatro CSV oficiales responden; ingestas y consolidación/publicación omitidas. `changed=true` corresponde a validadores previos nulos, no a un nuevo corte demostrado. No se descargan cuerpos CSV, escriben objetos R2 ni generan backups.
+- Pages **37118947771 success**: build/promoción/registro omitidos. Guarda **37118947696 success**: espera/verificación de frescura omitida. Cierre 100 % de esta guarda, no del ciclo municipal/central, cobertura ni O11/O13 conjuntos; O05, O08 y O15 permanecen separados.
+- Cancelado sólo push `ui-only` redundante **37118830296** del mismo commit para liberar cola. Procedimiento en `docs/operations/cplt-r2-only-20261003.md`; rama documental `codex/cplt-closure-20261003`, worktree canónico. No se afirma facturación medida automáticamente.
