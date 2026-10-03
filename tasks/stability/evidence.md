@@ -415,3 +415,10 @@ Riesgo o siguiente puerta:
 - PR #701 integrado con CI verde en `6955a3da1ee3d286df2c37f896863bed29134383`; 35 pruebas dirigidas, tipos/lint y calendario aprobados. D1 preflight/materialización retirados; calendario/conector/datos intactos.
 - Dos objetos publicados cotejados por bytes/SHA: proyección 1.081.699 bytes, subset 46.143; total 1.127.842. Verify-only 37085144507 success desde `main`, sin extracción/PUT/datos D1. No hubo backup nuevo ni cambios de almacenamiento.
 - Pages 37085281760 y guarda 37085281856 success con build/promoción/espera omitidos. Cierre 100 % de la guarda, no del ciclo presupuestario, cobertura ni O11 completo. Detalle en `docs/operations/dipres-r2-only-20261002.md`.
+
+### O13 — 38 bis: recuperación remota comprobada · 2026-10-02 · 100 % del ciclo
+
+- PR #703 integrado con CI verde en `7dbe71c81e775b06a53f6f1dbbf01ad8fc2dee7b`. Una línea conserva causa anidada del error; prueba roja/verde, 40 pruebas dirigidas y tipos/lint aprobados. No cambia origen/red/TLS/parser ni datos.
+- Ejecución guardada única 37086353257 success: CSV oficial respondió sin fallback HTML; julio 2026, 1.595 filas, mismo SHA `a63a155ee295ebabf52db7f5aff76d144e42533cbbde5e981eb3bde0b19de350` que R2, 18 históricos conservados. `unchanged` omite PUT y no crece R2; cero datos D1/backup nuevo.
+- Pages 37086505613 y guarda 37086505590 success, build/promoción/espera omitidos. El fallo anterior no se reproduce y su causa de red permanece indeterminada; conservar `cause` no se presenta como arreglo de red. 38 bis 4/4 del ciclo comprobado, no disponibilidad continua ni cobertura total; cuota confirmada por Jorge, métricas de facturación O05 y observación O15 pendientes.
+- Registro en `docs/operations/remuneraciones-38bis-network-cause-20261002.md`, rama documental `codex/38bis-network-result-20261002` en la ruta canónica.
