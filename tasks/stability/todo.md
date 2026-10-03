@@ -114,6 +114,8 @@ InfoProbidad: guarda R2-only cerrada al 100 % (PR #705, verify-only 37106727934 
 
 Ley 19.862: guarda R2-only cerrada al 100 % (PR #707, verify-only 37108164915 y controles 37108286931/37108286936 sin despliegue). Creación/materialización D1 retiradas; bridge, extracción y publicaciones omitidos en verificación. Dos objetos estáticos verificados, 4.907.481 bytes; sin datos nuevos, crecimiento R2 ni cierre del replay mensual/manifiesto API externo: `docs/operations/ley19862-r2-only-20261003.md`.
 
+CPLT: guarda R2-only cerrada al 100 % (PR #709, check-sources-only 37118857265 y controles 37118947771/37118947696 sin despliegue). Registro automático D1 retirado, incluido alias de finalización; cuatro categorías oficiales responden. Validadores previos nulos: no acredita corte nuevo ni cobertura. Ingestas/consolidación omitidas, sin cuerpos CSV, escrituras R2 ni cierre del ciclo municipal/central: `docs/operations/cplt-r2-only-20261003.md`.
+
 - [ ] Dividir por fuente y registrar procedencia efectiva, ventana, modo/frescura; Senado votaciones es local-only.
 - [ ] Migrar fuentes pequeñas con prueba de fallo externo y último release preservado.
 - [ ] Tratar Cámara personal de apoyo y Senado sin convertir 403 en cero.
