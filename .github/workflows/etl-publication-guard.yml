@@ -60,6 +60,11 @@ jobs:
               const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, { ...context.repo, run_id: context.payload.workflow_run.id });
               return shouldVerify38BisPublication(jobs);
             }
+            if (context.eventName === 'workflow_run' && context.payload.workflow_run.name === 'ETL Mensual - CPLT Nóminas Transparencia Activa') {
+              const { shouldVerifyCpltPublication } = await import(`${process.env.GITHUB_WORKSPACE}/transparencia-app/scripts/etl/cplt-source-freshness.mjs`);
+              const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, { ...context.repo, run_id: context.payload.workflow_run.id });
+              return shouldVerifyCpltPublication(jobs);
+            }
             if (context.eventName !== 'workflow_run' || context.payload.workflow_run.name !== 'ETL Diario - Movimientos de Autoridades') return true;
             const { shouldRefreshMovements } = await import(`${process.env.GITHUB_WORKSPACE}/transparencia-app/scripts/movimientos-publication.mjs`);
             const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, { ...context.repo, run_id: context.payload.workflow_run.id });

@@ -30,3 +30,14 @@ export function compareCpltSourceValidators(previousSources, currentSources) {
     };
   });
 }
+
+export function shouldVerifyCpltPublication(jobs) {
+  const finalizers = jobs.filter((job) => job.name === "Consolidación y Publicación R2");
+  if (finalizers.length !== 1 || !["success", "skipped"].includes(finalizers[0].conclusion)) {
+    throw new Error("CPLT_PUBLICATION_RESULT_INVALID");
+  }
+  if (finalizers[0].conclusion === "skipped") return false;
+  const steps = (finalizers[0].steps ?? []).filter((step) => step.name === "Publicar agregados municipales para Pages");
+  if (steps.length !== 1 || steps[0].conclusion !== "success") throw new Error("CPLT_PUBLICATION_RESULT_INVALID");
+  return true;
+}

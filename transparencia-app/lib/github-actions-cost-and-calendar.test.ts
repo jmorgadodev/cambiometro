@@ -215,7 +215,6 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
       "etl-chilecompra.yml",
       "etl-infolobby-scheduled.yml",
       "etl-servel.yml",
-      "etl-cplt.yml",
     ];
 
     for (const name of workflows) {
@@ -323,7 +322,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(workflow).not.toContain('["2026-08", "2026-09"]');
   });
 
-  it("12. Los ETL de personal separados publican R2 sin usar D1; CPLT conserva su fallback", () => {
+  it("12. Los ETL de personal y CPLT publican R2 sin pasos D1 automáticos", () => {
     const personal = fs.readFileSync(path.join(workflowsDir, "etl-personal-apoyo.yml"), "utf8");
     const personalSenado = fs.readFileSync(path.join(workflowsDir, "etl-personal-apoyo-senado.yml"), "utf8");
     const cplt = fs.readFileSync(path.join(workflowsDir, "etl-cplt.yml"), "utf8");
@@ -335,7 +334,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(personalSenado).not.toMatch(/d1-preflight|data:materialize/);
     expect(personal).toContain("Publicar personal de apoyo sólo en R2");
     expect(cplt).toContain("data:finalize:cplt:r2");
-    expect(cplt).toContain("Registrar D1 CPLT pospuesto por cuota");
+    expect(cplt).not.toMatch(/d1-preflight|data:record:cplt-state/);
   });
 
   it("13. El preflight siempre deja un diagnóstico aunque Analytics D1 no responda", () => {
