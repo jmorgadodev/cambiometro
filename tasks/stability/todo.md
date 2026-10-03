@@ -56,6 +56,12 @@ Además del replay local, la ejecución real desde `main` 36854416777 y sus
 controles posteriores pasaron: no-op sin subida R2 ni build Pages. Cronología
 productiva y rollback comprobados; evidencia abajo. Costes (#671) siguen apartados.
 
+Conciliación documental 2026-10-03: O06 sigue al 100 % del piloto, mientras
+`etl-closure.md` reconoce 3/4 puertas operativas (75 %) respaldadas por las
+ejecuciones 36854416777 y 36930661823. Su cuarta puerta requiere acreditar
+operación y uso facturable; no se cierra O05 ni O15 ni se afirma cobertura
+completa. La fila antigua 0/4 no describía las evidencias existentes.
+
 ## O07 · Contrato ETL reutilizable · M · 100 %
 
 - [x] Extraer guardas comunes sin duplicar la lógica existente de cada fuente.

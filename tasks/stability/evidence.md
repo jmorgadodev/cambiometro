@@ -443,3 +443,10 @@ Riesgo o siguiente puerta:
 - Check-sources-only **37118857265 success** desde `main`: cuatro CSV oficiales responden; ingestas y consolidación/publicación omitidas. `changed=true` corresponde a validadores previos nulos, no a un nuevo corte demostrado. No se descargan cuerpos CSV, escriben objetos R2 ni generan backups.
 - Pages **37118947771 success**: build/promoción/registro omitidos. Guarda **37118947696 success**: espera/verificación de frescura omitida. Cierre 100 % de esta guarda, no del ciclo municipal/central, cobertura ni O11/O13 conjuntos; O05, O08 y O15 permanecen separados.
 - Cancelado sólo push `ui-only` redundante **37118830296** del mismo commit para liberar cola. Procedimiento en `docs/operations/cplt-r2-only-20261003.md`; rama documental `codex/cplt-closure-20261003`, worktree canónico. No se afirma facturación medida automáticamente.
+
+### O06 — conciliación documental de matriz ETL · 2026-10-03
+
+- Rama `codex/movimientos-matrix-20261003`, worktree canónico, desde `origin/main` (`815e60e10dd9b383108ed1f4ee4b97e44446aa67`). Se reemplaza la fila obsoleta `Por verificar / 0/4` por 3/4 (75 % operativo documentado), sin cambiar el cierre 100 % del piloto O06.
+- Respaldo existente: cierre O06 del 2026-10-01, replay y 59 pruebas dirigidas, ejecución 36854416777 y controles no-op; smoke productivo y rollback por checksum. PR #681 y ejecución 36930661823 documentan anuncios contabilizados, revisión de seis enlaces pendientes, no-op y HTTP 200 de Home/Movimientos.
+- No son nuevas verificaciones de producción ni garantizan cobertura retrospectiva o descubrimiento de todas las noticias. La cuarta puerta de esta matriz permanece abierta por operación/costes; O05 y O15 conservan sus pendientes. No se modifican sus porcentajes ni el avance global por esta corrección documental.
+- Sólo se editan matriz, tablero y evidencia. No se despachan ETL ni cargas/auditorías R2/D1; no se cambian código, datos o diseño. La historia original se conserva.
