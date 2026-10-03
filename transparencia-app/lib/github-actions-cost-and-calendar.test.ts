@@ -216,7 +216,6 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
   it("11. Todo ETL que materializa D1 tiene el preflight fail-safe de cuota", () => {
     const workflows = [
       "etl-chilecompra.yml",
-      "etl-dipres.yml",
       "etl-infolobby-scheduled.yml",
       "etl-infoprobidad.yml",
       "etl-ley-19862.yml",
@@ -257,7 +256,22 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(sinim).toContain("npm run data:publish:static -- --groups sinim");
     expect(sinim).toContain("contents: read");
     const guard = fs.readFileSync(path.join(workflowsDir, "etl-publication-guard.yml"), "utf8");
-    expect(guard).toContain("SINIM_PUBLICATION_RESULT_INVALID");
+    expect(guard).toContain("STATIC_PUBLICATION_RESULT_INVALID");
+    expect(guard).toContain("return steps[0].conclusion === 'success'");
+  });
+
+  it("11a. DIPRES verifica proyección y subset sin extracción, publicación ni D1", () => {
+    const dipres = fs.readFileSync(path.join(workflowsDir, "etl-dipres.yml"), "utf8");
+    expect(dipres).not.toMatch(/d1-preflight|data:materialize|wrangler d1/i);
+    expect(dipres).toContain("verify_release_only:");
+    expect(dipres.match(/if: inputs.verify_release_only != true/g)).toHaveLength(3);
+    expect(dipres).toContain("if: inputs.verify_release_only == true");
+    expect(dipres).toContain("--required-files data/lake/projections/v1/presupuesto.json,data/lake-subsets/presupuesto.subset.json");
+    expect(dipres).toContain("--only-files data/lake/projections/v1/presupuesto.json,data/lake-subsets/presupuesto.subset.json --force");
+    expect(dipres).toContain("npm run data:publish:static -- --groups dipres");
+    expect(dipres).toContain("contents: read");
+    const guard = fs.readFileSync(path.join(workflowsDir, "etl-publication-guard.yml"), "utf8");
+    expect(guard).toContain("['ETL Semestral - SINIM Finanzas Municipales', 'ETL Trimestral - DIPRES Presupuestos'].includes");
     expect(guard).toContain("return steps[0].conclusion === 'success'");
   });
 
