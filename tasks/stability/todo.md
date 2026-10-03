@@ -124,7 +124,7 @@ DIPRES: guarda R2-only cerrada al 100 % (PR #701, verify-only 37085144507 y cont
 
 ## O13 · Remuneraciones · M por componente · 0 %
 
-Avance por componente: **38 bis 75% (3/4)**, fuente/replay/publicación comprobados; operación remota `degraded_external`. Corrección nulo/cero de búsqueda publicada y comprobada al 100%. Municipal y central pendientes, por lo que no se atribuye el porcentaje de 38 bis al conjunto. Evidencia y ruta de trabajo en `docs/operations/remuneraciones-38bis-candidate-guards-20261002.md`.
+Avance por componente: **38 bis 100 % del ciclo probado (4/4)**; ejecución remota 37086353257 recuperada, CSV/R2 concordantes y no-op sin PUT/Pages. No demuestra disponibilidad continua; O15 pendiente. Corrección nulo/cero de búsqueda publicada y comprobada al 100%. Municipal y central pendientes, por lo que no se atribuye el porcentaje de 38 bis al conjunto. Evidencia y ruta de trabajo en `docs/operations/remuneraciones-38bis-candidate-guards-20261002.md`.
 
 - [ ] Dividir municipal, central, 38 bis y apoyo parlamentario; fijar cortes/unidades.
 - [ ] Probar guardas y búsquedas indexadas sin barridos D1 ni fusión nominal.
