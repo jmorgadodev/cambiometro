@@ -49,7 +49,7 @@ jobs:
         uses: actions/github-script@v7
         with:
           script: |
-            if (context.eventName === 'workflow_run' && ['ETL Semestral - SINIM Finanzas Municipales', 'ETL Trimestral - DIPRES Presupuestos', 'ETL Mensual - InfoProbidad DIP'].includes(context.payload.workflow_run.name)) {
+            if (context.eventName === 'workflow_run' && ['ETL Semestral - SINIM Finanzas Municipales', 'ETL Trimestral - DIPRES Presupuestos', 'ETL Mensual - InfoProbidad DIP', 'ETL Mensual - Ley 19.862 Transferencias del Estado'].includes(context.payload.workflow_run.name)) {
               const jobs = await github.paginate(github.rest.actions.listJobsForWorkflowRun, { ...context.repo, run_id: context.payload.workflow_run.id });
               const steps = jobs.flatMap(job => job.steps ?? []).filter(step => step.name === 'Publicar entradas estáticas versionadas para Pages');
               if (steps.length !== 1 || !['success', 'skipped'].includes(steps[0].conclusion)) throw new Error('STATIC_PUBLICATION_RESULT_INVALID');
