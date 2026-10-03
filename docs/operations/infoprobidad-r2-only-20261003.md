@@ -22,7 +22,8 @@ real conserva la verificación habitual. Permiso GitHub reducido a lectura.
 - Prueba de regresión roja ante la dependencia D1 original; después 26 pruebas
   dirigidas aprobadas (calendario/costes y decisión de actualización estática).
 - TypeScript, lint sin errores y calendario de 18 workflows aprobados;
-  CI pendiente antes de fusionar. Sin cambios frontend ni Worker.
+  CI completo aprobado en PR #705, incluido build Pages/Worker, seguridad,
+  CodeQL y navegación adaptable. Sin cambios frontend ni Worker.
 - Preflight: un manifiesto y dos objetos, 736.930 bytes en total, por debajo
   del límite de lectura de 12 MB. Lectura en memoria, sin escrituras R2/D1.
 - Proyección `data/lake/projections/v1/infoprobidad.json`: 675.448 bytes,
@@ -32,12 +33,24 @@ real conserva la verificación habitual. Permiso GitHub reducido a lectura.
 - Ambos coinciden con el manifiesto estático, claves de release
   `f9778924cc57918ce3c5e061f9d6ac91f6bf916e0e002c9c9bafcd85125d4501`.
 
-## Cierre pendiente de ejecución
+## Cierre comprobado · guarda R2-only 100 %
 
-Antes de declarar la guarda cerrada: CI verde, fusión, ejecución manual desde
-`main` con `verify_release_only=true` y controles posteriores que omitan
-build/promoción/espera de frescura. Registrar PR y ejecuciones aquí y en
-`tasks/stability/evidence.md`.
+- PR #705 fusionado en `33bfacb0a17a53104217367fcf7440121f2aa334`, con todos
+  los checks verdes. Rama documental: `codex/infoprobidad-closure-20261003`,
+  basada nuevamente en `origin/main` dentro del mismo worktree.
+- Ejecución `37106727934` desde `main`, `verify_release_only=true`: success;
+  extracción, preparación y publicación estática omitidas. Sólo GET del
+  catálogo, manifiesto y los dos objetos requeridos. Cero PUT y cero datos D1.
+- Checksum del manifiesto estático validado por el hidratador:
+  `55e5cd98b0270f398ecf59f344fe567c0692c9b38637413c0709b54b159a666a`.
+  Su contador de 203 archivos corresponde a metadatos del manifiesto, no a
+  203 descargas: `--only-files` limita la lectura a los dos archivos indicados.
+- Pages `37106819129`: success en decisión, build/promoción y registro de
+  deployment omitidos. Guarda `37106819187`: success, espera de frescura
+  omitida. Release productivo intacto y almacenamiento sin crecimiento.
+- Se canceló únicamente el build `ui-only` de push `37106727835` del mismo
+  commit, redundante para este cambio de workflow. No se canceló ningún ETL
+  ni publicación de datos; no se omitió CI del PR.
 
 Esto no prueba extracción mensual, cobertura completa de declaraciones,
 frescura del origen ni las cuatro puertas del ETL. No se generan nuevos

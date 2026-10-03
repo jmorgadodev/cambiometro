@@ -422,3 +422,10 @@ Riesgo o siguiente puerta:
 - Ejecución guardada única 37086353257 success: CSV oficial respondió sin fallback HTML; julio 2026, 1.595 filas, mismo SHA `a63a155ee295ebabf52db7f5aff76d144e42533cbbde5e981eb3bde0b19de350` que R2, 18 históricos conservados. `unchanged` omite PUT y no crece R2; cero datos D1/backup nuevo.
 - Pages 37086505613 y guarda 37086505590 success, build/promoción/espera omitidos. El fallo anterior no se reproduce y su causa de red permanece indeterminada; conservar `cause` no se presenta como arreglo de red. 38 bis 4/4 del ciclo comprobado, no disponibilidad continua ni cobertura total; cuota confirmada por Jorge, métricas de facturación O05 y observación O15 pendientes.
 - Registro en `docs/operations/remuneraciones-38bis-network-cause-20261002.md`, rama documental `codex/38bis-network-result-20261002` en la ruta canónica.
+
+### O11 — InfoProbidad: cierre de guarda R2-only · 2026-10-03
+
+- PR #705 integrado en `33bfacb0a17a53104217367fcf7440121f2aa334` con CI completo verde. Prueba roja/verde y 26 pruebas dirigidas; tipos, lint y calendario aprobados. Retirados preflight/materialización D1; calendario mensual, conector y datos intactos.
+- Lectura acotada de manifiesto y dos objetos (736.930 bytes), con SHA/bytes concordantes. Verify-only 37106727934 success desde `main`: preparación, extracción y publicación omitidas; cero PUT, datos D1 o backup nuevo. El contador de 203 archivos es del manifiesto, no una descarga de 203 objetos.
+- Pages 37106819129 y guarda 37106819187 success: build/promoción/espera omitidos. Guarda R2-only cerrada al 100 %, no el ciclo mensual, cobertura completa ni O11 conjunto. No se afirma facturación medida automáticamente.
+- Cancelado sólo push `ui-only` redundante 37106727835 del mismo commit para liberar cola; CI obligatorio preservado. Procedimiento en `docs/operations/infoprobidad-r2-only-20261003.md`; rama documental `codex/infoprobidad-closure-20261003` en el worktree canónico.
