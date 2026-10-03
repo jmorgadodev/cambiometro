@@ -1,9 +1,24 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
+import { runInNewContext } from "node:vm";
 import { shouldVerify38BisPublication, validate38BisArtifacts } from "../scripts/etl/remuneraciones-38bis-publication.mjs";
 import { compareRows, extractPeriod, latestCsvPeriod, parseCsvRows, parseRows, checksumRows, validate38BisSnapshot, validate38BisHistory } from "../scripts/etl/remuneraciones-38bis-parser.mjs";
 
 describe("parser del registro público 38 bis", () => {
+  it("conserva la causa de conexión al agotar reintentos sin ejecutar el ETL", async () => {
+    const script = readFileSync(new URL("../scripts/etl-remuneraciones-38bis.mjs", import.meta.url), "utf8");
+    const functionSource = script.slice(script.indexOf("async function fetchWithRetry("), script.indexOf("\nfunction readJson("));
+    const networkError = new TypeError("fetch failed", { cause: new Error("connect timeout") });
+    const fetchWithRetry = runInNewContext(`${functionSource}\nfetchWithRetry`, {
+      AbortController, setTimeout, clearTimeout,
+      fetch: async () => { throw networkError; },
+    }) as (url: string, attempts: number) => Promise<Response>;
+    await expect(fetchWithRetry("https://comision38bis.gob.cl/registro-publico", 1)).rejects.toMatchObject({
+      message: expect.stringContaining("tras 1 intentos: fetch failed"),
+      cause: networkError,
+    });
+  });
+
   it("conserva las filas sin nombre o monto reportado", () => {
     const html = `
       <title>Registro de remuneraciones 2026-06</title>
