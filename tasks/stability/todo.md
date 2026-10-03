@@ -110,6 +110,8 @@ SINIM: dependencia D1 eliminada y guarda R2-only cerrada al 100 % (PR #699, veri
 
 DIPRES: guarda R2-only cerrada al 100 % (PR #701, verify-only 37085144507 y controles posteriores sin despliegue). Proyección/subset verificados, sin actualización presupuestaria ni cierre de cobertura: `docs/operations/dipres-r2-only-20261002.md`.
 
+InfoProbidad: guarda R2-only cerrada al 100 % (PR #705, verify-only 37106727934 y controles 37106819129/37106819187 sin despliegue). Dos objetos verificados, 736.930 bytes; sin extracción mensual, datos nuevos ni D1. No cierra las cuatro puertas ni cobertura de origen: `docs/operations/infoprobidad-r2-only-20261003.md`.
+
 - [ ] Dividir por fuente y registrar procedencia efectiva, ventana, modo/frescura; Senado votaciones es local-only.
 - [ ] Migrar fuentes pequeñas con prueba de fallo externo y último release preservado.
 - [ ] Tratar Cámara personal de apoyo y Senado sin convertir 403 en cero.

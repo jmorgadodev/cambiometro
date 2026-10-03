@@ -1,6 +1,6 @@
 # Cierre individual de ETL
 
-Actualizado: 2026-10-02. Inventario preliminar obtenido del
+Actualizado: 2026-10-03. Inventario preliminar obtenido del
 [`etl-calendar.json`](../../.github/etl-calendar.json). El calendario prueba
 intención de ejecución, **no** procedencia efectiva ni funcionamiento. Los
 endpoints, documentos y destinos R2 se registrarán desde cada conector y su
@@ -36,7 +36,7 @@ como automático.
 | Contraloría · `etl-contraloria.yml` | Mensual | Por verificar | 0/4 |
 | CPLT · `etl-cplt.yml` | Mensual | Por verificar | 0/4 |
 | Ley 19.862 · `etl-ley-19862.yml` | Mensual | Por verificar | 0/4 |
-| InfoProbidad · `etl-infoprobidad.yml` | Mensual | Por verificar | 0/4 |
+| InfoProbidad · `etl-infoprobidad.yml` | Mensual, R2-only | Proyección/subset R2 verificados por bytes/SHA (736.930 bytes); PR #705 y verify-only 37106727934 cierran dependencia D1, no replay mensual | 0/4 del ciclo completo; guarda R2-only 100 % |
 | DIPRES · `etl-dipres.yml` | Trimestral, R2-only | Proyección/subset R2 verificados por bytes/SHA (1.127.842 bytes); PR #701 y verify-only 37085144507 cierran dependencia D1, no replay presupuestario | 0/4 del ciclo completo; guarda R2-only 100 % |
 | SINIM · `etl-sinim.yml` | Semestral, R2-only | Nueve indicadores configurados, 345 municipios exigidos; release R2 verificado por bytes/SHA. PR #699 y verify-only 37062175649 cierran dependencia D1, no replay de origen | 0/4 del ciclo completo; guarda R2-only 100 % |
 | Gastos Senado · `etl-expenses.yml` | Mensual; replay incremental comprobado | `web-back.senado.cl/api/transparency/expenses/senator-Operational-expenses`; 174 períodos publicados, 154.132 filas históricas; índice R2 conservado y API mensual comprobada | 4/4 del ciclo publicado; cuota confirmada por usuario, no facturación medida automáticamente |
