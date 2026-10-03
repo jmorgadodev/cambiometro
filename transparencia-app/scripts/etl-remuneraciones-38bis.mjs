@@ -35,7 +35,7 @@ async function fetchWithRetry(url, attempts = 4) {
       clearTimeout(timeout);
     }
   }
-  throw new Error(`No fue posible consultar ${url} tras ${attempts} intentos: ${lastError?.message ?? lastError}`);
+  throw new Error(`No fue posible consultar ${url} tras ${attempts} intentos: ${lastError?.message ?? lastError}`, { cause: lastError });
 }
 
 function readJson(filePath, fallback = null) {
