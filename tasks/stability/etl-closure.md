@@ -30,7 +30,7 @@ como automático.
 | Votaciones Cámara · `etl-camara-votaciones.yml` | Diario | Por verificar | 0/4 |
 | Personal de apoyo Cámara · `etl-personal-apoyo.yml` | Semanal; origen bloqueado | `camara.cl/diputados/detalle/personaldepoyo.aspx`; `degraded_external`; R2 `projections/personal-apoyo-v1/`; conserva 1.084 filas | 1/4 (25 %); bloqueo externo |
 | Personal de apoyo Senado · `etl-personal-apoyo-senado.yml` | Semanal activo; ejecución manual completa verificada | `web-back.senado.cl/api/transparency/senator-assignments/support-staff`; 3.407 filas, enero–agosto 2026; R2 `projections/personal-apoyo-v1/` | 4/4 (100 % del ciclo 2026; cuota confirmada por usuario, ver evidencia) |
-| Movimientos · `etl-movimientos.yml` | Diario | Por verificar | 0/4 |
+| Movimientos · `etl-movimientos.yml` | Diario; ejecución remota comprobada | Prensa/RSS y fuentes oficiales configuradas en `scripts/movimientos-pipeline.mjs`; anuncios cuentan y confirmación conserva ID. R2 `data/movimientos.json`; replay, rollback, smoke y no-op 36854416777/36930661823 documentados | 3/4 (75 % operativo documentado); piloto O06 100 %; puerta de costes pendiente |
 | ChileCompra · `etl-chilecompra.yml` | Semanal; cierre al final | Por verificar | 0/4 |
 | InfoLobby · `etl-infolobby-scheduled.yml` | Semanal | Por verificar | 0/4 |
 | Contraloría · `etl-contraloria.yml` | Mensual | Por verificar | 0/4 |
@@ -50,7 +50,13 @@ Orden inicial: terminar O05 antes de cualquier carga; luego documentar
 procedencia de los ETL pequeños y sanos, cerrar Movimientos como piloto,
 seguir gastos y remuneraciones por componente, y dejar ChileCompra al final.
 La corrección de retroceso de Movimientos (O02) no equivale a cerrar sus cuatro
-puertas operativas.
+puertas operativas. Conciliación de su fila al 2026-10-03: las puertas 1–3
+se respaldan en el [cierre O06](evidence.md)
+y en [anuncios y revisión de pendientes](../../docs/operations/movimientos-announcements-20261001.md).
+El piloto O06 está cerrado, pero esta matriz mantiene la cuarta puerta abierta
+hasta acreditar operación y uso facturable según su definición. O05 no está
+cerrado; el no-op evita escrituras, pero no demuestra por sí solo facturación
+de toda la cuenta. O15 conserva la observación de siete días pendiente.
 
 Personal de apoyo: [cierre y bloqueos](../../docs/operations/personal-apoyo-source-guards-20261002.md).
 En Senado se aceptó la autorización expresa de Jorge y su confirmación de cuota disponible para la puerta de costes; el almacenamiento sí se midió sobre toda la cuenta. Analytics rechazó el token, por lo que no se presenta la facturación como medida automáticamente. La observación de siete días sigue perteneciendo a O15.
