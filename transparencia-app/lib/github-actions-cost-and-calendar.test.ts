@@ -154,16 +154,13 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(content).toContain("api.github.com/users/$OWNER/settings/billing/actions");
   });
 
-  it("8. Ley 19.862 mantiene R2 canónico cuando D1 alcanza su límite", () => {
+  it("8. Ley 19.862 publica en R2 sin crear ni materializar D1", () => {
     const content = fs.readFileSync(path.join(workflowsDir, "etl-ley-19862.yml"), "utf8");
 
-    expect(content).toContain("D1 opcional");
-    expect(content).toContain("Exceeded maximum DB size");
-    expect(content).toContain("code: 7500");
-    expect(content).toContain("R2 permanece como fuente canónica");
-    expect(content).toContain("se aborta el ETL");
-    expect(content).toContain("status=skipped_r2_canonical");
-    expect(content).toContain("transfer-d1-materialization-${{ github.run_id }}");
+    expect(content).not.toMatch(/d1-preflight|ensure-transfer-d1|data:materialize|transfer-d1-materialization|wrangler d1/i);
+    expect(content).toContain("npm run data:publish:static -- --groups ley19862");
+    expect(content).toContain("npm run data:publish:transfer-api");
+    expect(content).toContain("contents: read");
   });
 
   it("9. Senado se ejecuta sólo desde la tarea local y conserva la reparación manual aislada", () => {
@@ -217,7 +214,6 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     const workflows = [
       "etl-chilecompra.yml",
       "etl-infolobby-scheduled.yml",
-      "etl-ley-19862.yml",
       "etl-servel.yml",
       "etl-cplt.yml",
     ];
@@ -270,7 +266,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(dipres).toContain("npm run data:publish:static -- --groups dipres");
     expect(dipres).toContain("contents: read");
     const guard = fs.readFileSync(path.join(workflowsDir, "etl-publication-guard.yml"), "utf8");
-    expect(guard).toContain("'ETL Trimestral - DIPRES Presupuestos', 'ETL Mensual - InfoProbidad DIP'].includes");
+    expect(guard).toMatch(/\[[^\]]*'ETL Trimestral - DIPRES Presupuestos'[^\]]*\]\.includes/);
     expect(guard).toContain("return steps[0].conclusion === 'success'");
   });
 
@@ -285,7 +281,7 @@ describe("Protección de Costo GitHub Actions + Calendario ETL Oficial", () => {
     expect(workflow).toContain("npm run data:publish:static -- --groups infoprobidad");
     expect(workflow).toContain("contents: read");
     const guard = fs.readFileSync(path.join(workflowsDir, "etl-publication-guard.yml"), "utf8");
-    expect(guard).toContain("'ETL Mensual - InfoProbidad DIP'].includes");
+    expect(guard).toMatch(/\[[^\]]*'ETL Mensual - InfoProbidad DIP'[^\]]*\]\.includes/);
     expect(guard).toContain("return steps[0].conclusion === 'success'");
   });
 
