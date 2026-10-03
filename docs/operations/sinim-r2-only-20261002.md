@@ -14,6 +14,10 @@ El conector configura nueve indicadores y exige 345 municipios para la extracci�
 
 - Prueba roja antes del cambio; 28 pruebas dirigidas aprobadas (workflow, conector SINIM, decisión Pages). Calendario: 18 workflows. Tipos/lint dirigidos sin errores.
 - Lectura real acotada del manifiesto y su proyección: 1.440.946 bytes, SHA-256 `ff6c62d9211e8c12cec8422f125b421799fcaf896c41bc79dd4ed87d5691c620`, checksum/bytes/calidad concordantes. Dos lecturas, cero escrituras R2 y cero datos D1. Se verifica el release publicado, no la frescura del origen.
-- CI, fusión y ejecución remota verify-only pendientes al crear el cambio. No ejecutar el ETL completo para comprobar esta guarda; verificar primero sin publicar.
+- PR #699 fusionado con toda la CI verde en `b55855df64a6855d045836bef6a950cc8f02a7f9`.
+- Ejecución remota `verify_release_only=true` 37062175649: success; hidratación y validación del objeto versionado publicadas, preparación/extracción/publicación omitidas. No hay pasos D1 ni PUT R2.
+- Controles posteriores 37062412926 (Pages) y 37062412990 (guarda) success: build/promoción y espera de frescura omitidos correctamente. No hubo despliegue ni cambio de release.
 
-SINIM completo sigue abierto en O11: falta replay de origen y conciliación por año antes de cualquier promoción de datos. La eliminación de dependencia D1 se cierra separadamente tras CI y control remoto. No modifica respaldo, retención ni facturación; O05 sigue apartado.
+La eliminación de dependencia D1 y su comprobación remota quedan cerradas al **100 % de esta guarda**. SINIM completo sigue abierto en O11: falta replay de origen y conciliación por año antes de cualquier promoción de datos. No modifica respaldo, retención ni facturación; O05 sigue apartado.
+
+Registro de cierre en la misma ruta canónica, rama documental `codex/etl-closure-record-20261002`. No trabajar ni desplegar desde el checkout divergente en `Proyectos`.

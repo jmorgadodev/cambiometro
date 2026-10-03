@@ -38,7 +38,7 @@ como automático.
 | Ley 19.862 · `etl-ley-19862.yml` | Mensual | Por verificar | 0/4 |
 | InfoProbidad · `etl-infoprobidad.yml` | Mensual | Por verificar | 0/4 |
 | DIPRES · `etl-dipres.yml` | Trimestral | Por verificar | 0/4 |
-| SINIM · `etl-sinim.yml` | Semestral | Por verificar | 0/4 |
+| SINIM · `etl-sinim.yml` | Semestral, R2-only | Nueve indicadores configurados, 345 municipios exigidos; release R2 verificado por bytes/SHA. PR #699 y verify-only 37062175649 cierran dependencia D1, no replay de origen | 0/4 del ciclo completo; guarda R2-only 100 % |
 | Gastos Senado · `etl-expenses.yml` | Mensual; replay incremental comprobado | `web-back.senado.cl/api/transparency/expenses/senator-Operational-expenses`; 174 períodos publicados, 154.132 filas históricas; índice R2 conservado y API mensual comprobada | 4/4 del ciclo publicado; cuota confirmada por usuario, no facturación medida automáticamente |
 | Remuneraciones 38 bis · `etl-remuneraciones-38bis.yml` | Mensual, día 5 a las 10:15 UTC; última repetición con conexión externa fallida | CSV oficial completo comprobado; julio 2026 corregido a 1.595 filas, 18 históricos preservados; R2/API/Pages concordantes; `degraded_external` remoto | 3/4 (75 %); guardas/publicación verificadas, operación remota pendiente |
 | SERVEL · `etl-servel.yml` | Manual | Por verificar | 0/4 |
