@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
+import { shouldVerifyCpltPublication } from "../scripts/etl/cplt-source-freshness.mjs";
 
 describe("automatizacion CPLT nacional", () => {
   const workflow = readFileSync(resolve(process.cwd(), "../.github/workflows/etl-cplt.yml"), "utf8");
@@ -24,7 +25,7 @@ describe("automatizacion CPLT nacional", () => {
 
   it("no bloquea R2 ni Pages cuando falla el archivo secundario de GitHub Releases", () => {
     const packageJson = readFileSync(resolve(process.cwd(), "package.json"), "utf8");
-    expect(packageJson).toContain('"data:finalize:cplt": "npm run data:finalize:cplt:r2 && npm run data:record:cplt-state -- --remote"');
+    expect(packageJson).toContain('"data:finalize:cplt": "npm run data:finalize:cplt:r2"');
     expect(packageJson).toContain('"data:finalize:cplt:r2": "node scripts/merge-cplt-category-artifacts.mjs && node scripts/publish-cplt-projections.mjs --r2"');
     expect(packageJson).toContain('"data:archive:cplt": "node scripts/publish-data-lake.mjs --output data/lake-cplt --releases --release-manifests-only"');
     const publisher = readFileSync(resolve(process.cwd(), "scripts/publish-data-lake.mjs"), "utf8");
@@ -134,5 +135,33 @@ describe("automatizacion CPLT nacional", () => {
     const recorder = readFileSync(resolve(process.cwd(), "scripts/record-cplt-source-state.mjs"), "utf8");
     expect(recorder).toContain('database !== "transparencia-db"');
     expect(recorder).toContain('source_id,etl_run_id,status');
+  });
+
+  it("comprueba fuentes sin activar ingesta ni publicación, y retira D1 automático", () => {
+    expect(workflow).toContain("check_sources_only:");
+    expect(workflow).toContain("timeout-minutes: 5");
+    expect(workflow).toContain("if: inputs.check_sources_only != true && needs.cplt-source-check.outputs.changed == 'true'");
+    expect(workflow).not.toMatch(/d1-preflight|data:record:cplt-state|d1-preflight-cplt/i);
+    const guard = readFileSync(resolve(process.cwd(), "../.github/workflows/etl-publication-guard.yml"), "utf8");
+    expect(guard).toContain("return shouldVerifyCpltPublication(jobs)");
+  });
+
+  it("no espera Pages cuando la consolidación CPLT fue omitida", () => {
+    expect(shouldVerifyCpltPublication([{ name: "Consolidación y Publicación R2", conclusion: "skipped", steps: [] }])).toBe(false);
+  });
+
+  it("verifica Pages sólo tras publicación CPLT completada", () => {
+    expect(shouldVerifyCpltPublication([{ name: "Consolidación y Publicación R2", conclusion: "success", steps: [{ name: "Publicar agregados municipales para Pages", conclusion: "success" }] }])).toBe(true);
+  });
+
+  it("rechaza metadatos ausentes, fallidos o publicación CPLT incompleta", () => {
+    for (const jobs of [
+      [],
+      [{ name: "Consolidación y Publicación R2", conclusion: "failure", steps: [] }],
+      [{ name: "Consolidación y Publicación R2", conclusion: "success", steps: [] }],
+      [{ name: "Consolidación y Publicación R2", conclusion: "success", steps: [{ name: "Publicar agregados municipales para Pages", conclusion: "skipped" }] }],
+    ]) {
+      expect(() => shouldVerifyCpltPublication(jobs)).toThrow("CPLT_PUBLICATION_RESULT_INVALID");
+    }
   });
 });
