@@ -112,6 +112,8 @@ DIPRES: guarda R2-only cerrada al 100 % (PR #701, verify-only 37085144507 y cont
 
 InfoProbidad: guarda R2-only cerrada al 100 % (PR #705, verify-only 37106727934 y controles 37106819129/37106819187 sin despliegue). Dos objetos verificados, 736.930 bytes; sin extracción mensual, datos nuevos ni D1. No cierra las cuatro puertas ni cobertura de origen: `docs/operations/infoprobidad-r2-only-20261003.md`.
 
+Ley 19.862: guarda R2-only cerrada al 100 % (PR #707, verify-only 37108164915 y controles 37108286931/37108286936 sin despliegue). Creación/materialización D1 retiradas; bridge, extracción y publicaciones omitidos en verificación. Dos objetos estáticos verificados, 4.907.481 bytes; sin datos nuevos, crecimiento R2 ni cierre del replay mensual/manifiesto API externo: `docs/operations/ley19862-r2-only-20261003.md`.
+
 - [ ] Dividir por fuente y registrar procedencia efectiva, ventana, modo/frescura; Senado votaciones es local-only.
 - [ ] Migrar fuentes pequeñas con prueba de fallo externo y último release preservado.
 - [ ] Tratar Cámara personal de apoyo y Senado sin convertir 403 en cero.
