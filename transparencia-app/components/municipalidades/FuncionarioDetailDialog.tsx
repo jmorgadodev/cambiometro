@@ -270,6 +270,11 @@ export default function FuncionarioDetailDialog({ record, nombreOrganismo, onClo
             )}
           </div>
 
+          <p className="municipal-staff-dialog-note" role="note">
+            Los importes corresponden al período informado por la fuente. Un registro histórico puede corresponder a una exautoridad:
+            no acredita que siga en el cargo. El motivo del pago sólo puede confirmarse en las observaciones o en documentación del organismo.
+          </p>
+
           {hasOvertime && breakdown.length > 0 && (
             <div className="municipal-staff-dialog-callout">
               <strong>Detalle de horas extra disponible</strong>
@@ -310,7 +315,9 @@ export default function FuncionarioDetailDialog({ record, nombreOrganismo, onClo
           <footer className="municipal-staff-dialog-footer">
             <span>Fuente: {valueOrFallback(record.fuente)}{record.calidad ? ` · ${record.calidad}` : ""}</span>
             {record.sourceUrl ? (
-              <a href={record.sourceUrl} target="_blank" rel="noopener noreferrer">Ver registro original ↗</a>
+              <a href={record.sourceUrl} target="_blank" rel="noopener noreferrer">
+                {/\.csv(?:[?#]|$)/i.test(record.sourceUrl) ? "Consultar datos de origen (CSV completo) ↗" : "Ver registro original ↗"}
+              </a>
             ) : (
               <span>El registro se conserva según el corte publicado.</span>
             )}
