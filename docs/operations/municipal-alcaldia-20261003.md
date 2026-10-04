@@ -92,7 +92,15 @@ de julio para renderizado, no para sustituir el corte productivo de agosto.
 La URL legacy `muni-tortel` necesita la redirección del export y no funciona
 directamente en `next dev`; la ruta canónica sí. No se cambiaron rutas.
 
-Pendiente de registrar: CI/build completo, merge/despliegue y smoke productivo.
+Corrección del selector cerrada en PR #712 y main `865d83f1`.
+CI/build/E2E aprobados. Preview R2: ejecución `37171185046`.
+Promoción verificada: ejecución `37171936357`, deployment
+`69b17e86-1002-41db-8a2f-4a0bf9b07622`. Smoke productivo 3 oct 2026,
+23:45 America/Santiago: Tortel agosto 2026, Marisela Jimenez Cruces,
+bruto $8.120.877/líquido $6.715.597; escritorio/móvil sin errores JS ni
+desborde y directorio coincidente. Release municipal conservado sin escrituras R2.
+Estado final y metadata también registrados en el PR y en
+`C:\Users\jorge\Proyectos\cambiometro-audit\municipal-alcaldia-cierre-20261003.md`.
 El primer E2E detectó una expectativa con el rótulo antiguo de remuneración;
 se actualizó al nuevo rótulo de alcance, sin omitir la comprobación de la tarjeta.
 No declarar publicado por pasar pruebas locales.
@@ -100,3 +108,17 @@ La causa económica del importe de Abel sigue **no explicada por la fuente**;
 requiere aclaración/documento de Municipalidad de Tortel, no una corrección inventada.
 Rollback: revertir el commit de esta corrección y desplegar con el mismo
 ReleaseSet. Nunca revertir releases de datos ni borrar históricos por este cambio.
+
+## Procedencia junto a remuneraciones
+
+Seguimiento en `codex/municipal-payroll-provenance-20261003`, mismo worktree,
+basado en main `865d83f1` (no continuar desde la rama anterior cerrada).
+La tarjeta identifica nómina municipal de Transparencia Activa, recopilación
+CPLT y período informado. El expediente de nómina explica que un corte histórico
+puede incluir exautoridades y no acredita cargo actual. No se atribuye motivo
+al pago sin observaciones/documentación de origen. Los enlaces a CSV se rotulan
+como **CSV completo**, no como si fueran un expediente individual.
+Sin cambios de montos, ETL, APIs, releases R2 ni rutas.
+Tres pruebas de procedencia reproducen la ausencia inicial de esa explicación;
+validación focalizada y tipos/enlaces aprobados. Publicación de esta nota sujeta
+al ciclo CI → preview con release productivo → promoción → smoke.

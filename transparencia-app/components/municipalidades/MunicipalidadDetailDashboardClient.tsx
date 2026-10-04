@@ -166,6 +166,9 @@ export default function MunicipalidadDetailDashboardClient({
     periodo: null,
     partido_alcalde: verifiedAlcalde.partido,
   } : null);
+  const alcaldiaSourceUrl = /^https?:\/\//i.test(muniData.alcalde?.fuente ?? "")
+    ? muniData.alcalde?.fuente
+    : muniData.sitio_transparencia_activa;
   const pres = muniData.presupuesto;
   const personal = muniData.resumen_personal;
   const compras = muniData.compras_publicas;
@@ -1306,9 +1309,22 @@ export default function MunicipalidadDetailDashboardClient({
                   gap: "0.25rem",
                 }}
               >
+                {muniData.alcalde ? (
+                  <p role="note">
+                    <strong>Origen del dato:</strong> nómina publicada por la Municipalidad de {nombreComuna} en Transparencia Activa,
+                    recopilada por el Consejo para la Transparencia (CPLT).{" "}
+                    <strong>Período informado:</strong> {muniData.alcalde.periodo || "No informado"}.{" "}
+                    {alcaldiaSourceUrl ? (
+                      <a href={alcaldiaSourceUrl} target="_blank" rel="noopener noreferrer">
+                        {/\.csv(?:[?#]|$)/i.test(alcaldiaSourceUrl) ? "Consultar datos de origen (CSV completo) ↗" : "Consultar fuente oficial ↗"}
+                      </a>
+                    ) : null}
+                  </p>
+                ) : null}
                 <p role="note">
                   Registro del corte publicado; no acredita por sí solo la vigencia legal del cargo.
                   Las remuneraciones de cortes anteriores se conservan en la nómina histórica.
+                  Esa nómina puede incluir exautoridades; el motivo de un pago sólo puede aclararse con documentación del organismo.
                 </p>
                 <div>
                   <strong>Grado EUS:</strong> {alcalde?.grado_eus ? `Grado ${alcalde.grado_eus}` : "No publicado"}
