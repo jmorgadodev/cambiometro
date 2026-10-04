@@ -50,7 +50,12 @@ describe("Fixture Externo Congelado: Referencia Oficial de Municipalidades (Rond
       expect(perCapitaCalc).toBe(564738);
       expect(muni?.presupuesto_per_capita_clp).toBe(564738);
 
-      expect(muni?.alcalde?.nombre).toContain("Desbordes");
+      // La autoridad acreditada y el sueldo observado son evidencias separadas.
+      expect(getVerifiedMuniRRSS("muni-santiago")?.alcalde_oficial?.nombre).toContain("Desbordes");
+      if (muni?.alcalde) {
+        expect(muni.alcalde.nombre).toContain("Desbordes");
+        expect(muni.periodos_disponibles?.some(cut => cut.periodo > (muni.alcalde?.periodo ?? ""))).toBe(false);
+      }
       expect(muni?.sitio_web_oficial).toBe("https://www.munistgo.cl");
       expect(muni?.redes_sociales?.twitter).toBe("https://x.com/Muni_Stgo");
       expect(muni?.redes_sociales?.instagram).toBe("https://www.instagram.com/munistgo");

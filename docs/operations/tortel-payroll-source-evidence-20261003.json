@@ -1,0 +1,77 @@
+{
+  "source": "https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/TA_PersonalPlanta.csv",
+  "etag": "\"2072b609f-65c7477322280\"",
+  "requests": 23,
+  "bytes": 1180224,
+  "matchingRows": 45,
+  "rows": [
+    {
+      "raw": {
+        "period": "2026 Agosto",
+        "name": "Marisela Jimenez Cruces",
+        "cargo": "ALCALDESA",
+        "gross": "8120877,0",
+        "net": "6715597,0",
+        "observations": "Sin observaciones",
+        "publicationDate": "2026/09/07",
+        "pageId": "62599220",
+        "startDate": "2015/10/01",
+        "endDate": "Indefinido"
+      },
+      "parsedGross": 8120877,
+      "parsedNet": 6715597,
+      "recordId": "func-muni-tortel-planta-62c31e1e9f158224"
+    },
+    {
+      "raw": {
+        "period": "2025 Enero",
+        "name": "Abel Becerra Vidal",
+        "cargo": "ALCALDE",
+        "gross": "468212,0",
+        "net": "410021,0",
+        "observations": "Sin observaciones",
+        "publicationDate": "2026/09/07",
+        "pageId": "61143682",
+        "startDate": "2021/06/28",
+        "endDate": "Indefinido"
+      },
+      "parsedGross": 468212,
+      "parsedNet": 410021,
+      "recordId": "func-muni-tortel-planta-1c42f3a12d9a31b0"
+    },
+    {
+      "raw": {
+        "period": "2024 Diciembre",
+        "name": "Abel Becerra Vidal",
+        "cargo": "ALCALDE",
+        "gross": "3464016,0",
+        "net": "2624304,0",
+        "observations": "Sin observaciones",
+        "publicationDate": "2026/09/07",
+        "pageId": "61100298",
+        "startDate": "2021/06/28",
+        "endDate": "Indefinido"
+      },
+      "parsedGross": 3464016,
+      "parsedNet": 2624304,
+      "recordId": "func-muni-tortel-planta-1c42f3a12d9a31b0"
+    },
+    {
+      "raw": {
+        "period": "2024 Noviembre",
+        "name": "Abel Becerra Vidal",
+        "cargo": "ALCALDE",
+        "gross": "7426023,0",
+        "net": "6080879,0",
+        "observations": "Sin observaciones",
+        "publicationDate": "2026/09/07",
+        "pageId": "61041847",
+        "startDate": "2021/06/28",
+        "endDate": "Indefinido"
+      },
+      "parsedGross": 7426023,
+      "parsedNet": 6080879,
+      "recordId": "func-muni-tortel-planta-1c42f3a12d9a31b0"
+    }
+  ]
+}

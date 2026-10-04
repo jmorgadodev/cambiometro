@@ -306,9 +306,7 @@ export default function MunicipalidadDetailDashboardClient({
   const esDesfasado = desfaseMeses !== null && desfaseMeses > 3;
 
   const partidoAlcalde =
-    alcalde?.partido_alcalde ||
-    muniData.partido_alcalde ||
-    "Independiente";
+    alcalde?.partido_alcalde || "";
   const brandingAlcalde = getPartidoConfig(partidoAlcalde);
 
   const presVigente = pres?.vigente_clp ?? pres?.inicial_clp ?? 0;
@@ -504,7 +502,7 @@ export default function MunicipalidadDetailDashboardClient({
                 marginBottom: "0.3rem",
               }}
             >
-              💼 Remuneración Oficial de la Alcaldía
+              💼 Remuneración publicada de la Alcaldía
             </div>
             <div
               style={{
@@ -514,7 +512,7 @@ export default function MunicipalidadDetailDashboardClient({
                 color: alcalde?.remuneracion_bruta ? "var(--ok)" : "var(--text-muted)",
               }}
             >
-              {alcalde?.remuneracion_bruta ? formatCLP(alcalde.remuneracion_bruta) : "No publicado"}
+              {typeof alcalde?.remuneracion_bruta === "number" ? formatCLP(alcalde.remuneracion_bruta) : "No publicado"}
             </div>
             <div
               style={{
@@ -1201,7 +1199,7 @@ export default function MunicipalidadDetailDashboardClient({
               >
                 <div>
                   <span className="badge badge-info" style={{ fontSize: "0.68rem" }}>
-                    Máxima Autoridad Comunal
+                    {alcalde?.periodo ? `Alcaldía en nómina · ${alcalde.periodo}` : "Alcaldía"}
                   </span>
                   <h3
                     style={{
@@ -1228,7 +1226,7 @@ export default function MunicipalidadDetailDashboardClient({
                       backgroundColor: brandingAlcalde.color_oficial,
                     }}
                   >
-                    {brandingAlcalde.logo_url && (
+                    {partidoAlcalde && brandingAlcalde.logo_url && (
                       /* eslint-disable-next-line @next/next/no-img-element */
                       <img
                         src={brandingAlcalde.logo_url}
@@ -1236,7 +1234,7 @@ export default function MunicipalidadDetailDashboardClient({
                         style={{ width: 14, height: 14, borderRadius: 2, objectFit: "contain" }}
                       />
                     )}
-                    {brandingAlcalde.sigla || brandingAlcalde.nombre}
+                    {partidoAlcalde ? brandingAlcalde.sigla || brandingAlcalde.nombre : "Partido no informado"}
                   </span>
                 ) : (
                   <span className="badge">Sin registro</span>
@@ -1270,7 +1268,7 @@ export default function MunicipalidadDetailDashboardClient({
                       marginTop: "0.15rem",
                     }}
                   >
-                    {alcalde?.remuneracion_bruta ? formatCLP(alcalde.remuneracion_bruta) : "No publicado"}
+                    {typeof alcalde?.remuneracion_bruta === "number" ? formatCLP(alcalde.remuneracion_bruta) : "No publicado"}
                   </div>
                 </div>
 
@@ -1293,7 +1291,7 @@ export default function MunicipalidadDetailDashboardClient({
                       marginTop: "0.15rem",
                     }}
                   >
-                    {alcalde?.remuneracion_liquida ? formatCLP(alcalde.remuneracion_liquida) : "No publicado"}
+                    {typeof alcalde?.remuneracion_liquida === "number" ? formatCLP(alcalde.remuneracion_liquida) : "No publicado"}
                   </div>
                 </div>
               </div>
@@ -1308,6 +1306,10 @@ export default function MunicipalidadDetailDashboardClient({
                   gap: "0.25rem",
                 }}
               >
+                <p role="note">
+                  Registro del corte publicado; no acredita por sí solo la vigencia legal del cargo.
+                  Las remuneraciones de cortes anteriores se conservan en la nómina histórica.
+                </p>
                 <div>
                   <strong>Grado EUS:</strong> {alcalde?.grado_eus ? `Grado ${alcalde.grado_eus}` : "No publicado"}
                 </div>
@@ -1322,11 +1324,11 @@ export default function MunicipalidadDetailDashboardClient({
                 </div>
               </div>
 
-              {!alcalde?.remuneracion_bruta && (
+              {typeof alcalde?.remuneracion_bruta !== "number" && (
                 <div className="municipal-missing-data-callout" role="note">
-                  <strong>El sueldo no está publicado en este corte</strong>
+                  <strong>Remuneración no identificada en este corte</strong>
                   <span>
-                    La ficha sí puede identificar a la autoridad, pero el corte CPLT disponible no contiene una remuneración positiva asociada a un registro de alcaldía. No mostramos $0 ni estimamos el monto.
+                    Los registros disponibles no permiten atribuir un monto de forma inequívoca a la alcaldía en este período. Puedes revisar la nómina y los cortes históricos; no estimamos el sueldo ni sustituimos un dato ausente por $0.
                   </span>
                   <div>
                     <button type="button" className="btn btn-secondary" onClick={() => setActiveTab("personal")}>
