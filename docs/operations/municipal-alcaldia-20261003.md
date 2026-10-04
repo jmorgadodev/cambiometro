@@ -55,6 +55,9 @@ bruto $8.120.877 y líquido $6.715.597. La evidencia del CSV original queda en
   máxima autoridad vigente. Sin evidencia reciente suficiente, no se arrastra
   el sueldo antiguo.
 - No asignar por defecto partido Independiente ni grado 1 cuando no están informados.
+- El directorio y sus búsquedas usan la misma alcaldía del corte que la ficha;
+  no reutilizan el nombre antiguo del índice resumido. El estamento original
+  (por ejemplo, Directivo) se conserva sin sustituirlo por una categoría inventada.
 
 ## Reproducción y límites
 
@@ -74,7 +77,7 @@ usa rangos acotados y corta antes de 6 MB/40 solicitudes; no ingiere el CSV de
 ## Validación y estado
 
 Reproducción antes del arreglo: 7 pruebas fallaban por selección histórica,
-ambigüedad y períodos inválidos. Tras corregir: 38 pruebas focalizadas y
+ambigüedad y períodos inválidos. Tras corregir: 48 pruebas focalizadas y
 1.549 pruebas totales aprobadas; tipos de interfaz/Worker, arquitectura, tokens,
 enlaces e innerHTML aprobados. Lint focalizado: cero errores, 13 advertencias
 preexistentes; no se tocaron asuntos ajenos. La comparación distingue último
@@ -90,6 +93,8 @@ La URL legacy `muni-tortel` necesita la redirección del export y no funciona
 directamente en `next dev`; la ruta canónica sí. No se cambiaron rutas.
 
 Pendiente de registrar: CI/build completo, merge/despliegue y smoke productivo.
+El primer E2E detectó una expectativa con el rótulo antiguo de remuneración;
+se actualizó al nuevo rótulo de alcance, sin omitir la comprobación de la tarjeta.
 No declarar publicado por pasar pruebas locales.
 La causa económica del importe de Abel sigue **no explicada por la fuente**;
 requiere aclaración/documento de Municipalidad de Tortel, no una corrección inventada.

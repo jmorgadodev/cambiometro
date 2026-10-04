@@ -295,7 +295,7 @@ try {
   assert.equal(await page.getByText("Población Censo INE", { exact: false }).count() > 0, true, "Debe mostrar KPI Censo");
   assert.equal(await page.getByText("Presupuesto Per Cápita", { exact: false }).count() > 0, true, "Debe mostrar Presupuesto Per Cápita");
   assert.equal(await page.getByText("Dependencia del FCM", { exact: false }).count() > 0, true, "Debe mostrar Dependencia FCM");
-  assert.equal(await page.getByText("Remuneración Oficial de la Alcaldía", { exact: false }).count() > 0, true, "Debe mostrar Remuneración Alcaldía");
+  assert.equal(await page.getByText("Remuneración publicada de la Alcaldía", { exact: false }).count() > 0, true, "Debe mostrar Remuneración Alcaldía con alcance del corte");
   assert.equal(await page.getByText("Concejo Municipal", { exact: false }).count() > 0, true, "Debe mostrar Concejo Municipal");
   assert.equal(await page.getByText("Alertas y Auditorías Contraloría (CGR)", { exact: false }).count() > 0, true, "Debe mostrar Auditorías CGR");
   assert.equal(await page.getByText("Nómina Detallada de Funcionarios", { exact: false }).count() > 0, true, "Debe mostrar Nómina Detallada");

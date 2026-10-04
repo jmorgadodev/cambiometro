@@ -1,10 +1,17 @@
 import { describe, expect, it } from "vitest";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { selectPublishedAlcaldia, resolvePublishedAlcaldia } from "./municipal-alcaldia";
 
 const old = { nombre: "Abel Becerra Vidal", cargo: "Alcalde", periodo: "2025-01", remuneracion_bruta: 468212 };
 const recent = { nombre: "Marisela Jimenez Cruces", cargo: "Alcaldesa", periodo: "2026-08", remuneracion_bruta: 8120877 };
 
 describe("alcaldía y remuneración del corte publicado", () => {
+  it("el directorio usa la misma alcaldía resuelta que la ficha, no el nombre histórico del índice", () => {
+    const page = readFileSync(join(process.cwd(), "app/municipalidades/page.tsx"), "utf8");
+    expect(page).toContain("getMunicipalidadData(item.id)?.alcalde ?? null");
+    expect(page).toContain("conAlcaldeCount: allData.filter((item) => item.alcalde !== null).length");
+  });
   it("selecciona el corte reciente sin depender del orden ni modificar montos históricos", () => {
     for (const rows of [[old, recent], [recent, old]]) {
       expect(selectPublishedAlcaldia(rows, "2026-08")).toEqual(recent);
@@ -41,5 +48,8 @@ describe("alcaldía y remuneración del corte publicado", () => {
   });
   it("no confunde el corte representativo de dotación con el último período publicado", () => {
     expect(resolvePublishedAlcaldia({ alcalde: old, periodo_cplt_reciente: "2025-01", periodos_disponibles: [{ periodo: "2026-08" }], top_remuneraciones_por_periodo: { "2026-08": [recent] } })).toEqual(recent);
+  });
+  it("conserva el estamento original aunque la alcaldesa figure como Directivo", () => {
+    expect(selectPublishedAlcaldia([{ ...recent, estamento: "Directivo" }], "2026-08")?.estamento).toBe("Directivo");
   });
 });

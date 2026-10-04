@@ -141,7 +141,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
         id: alcaldeRecord.id,
         nombre: alcaldeRecord.nombre_completo,
         cargo: alcaldeRecord.cargo ?? null,
-        estamento: "Alcalde",
+        estamento: alcaldeRecord.estamento ?? null,
         remuneracion_bruta: alcaldeRecord.remuneracion_bruta_mensual ?? null,
         remuneracion_liquida: alcaldeRecord.remuneracion_liquida_mensual ?? null,
         grado_eus: alcaldeRecord.grado_eus ? String(alcaldeRecord.grado_eus) : null,

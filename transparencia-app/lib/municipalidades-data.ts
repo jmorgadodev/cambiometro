@@ -14,7 +14,7 @@ export interface AlcaldeData {
   id?: string;
   nombre: string;
   cargo: string | null;
-  estamento: string;
+  estamento: string | null;
   remuneracion_bruta: number | null;
   remuneracion_liquida: number | null;
   grado_eus: string | null;
@@ -81,6 +81,7 @@ export interface TopFuncionarioRemuneracion {
   id: string;
   nombre: string;
   cargo: string | null;
+  estamento?: string | null;
   sueldo_base?: number;
   horas_extras_monto?: number;
   horas_extras_hrs?: number;
@@ -262,7 +263,7 @@ const MUNICIPALIDADES_DICT = Object.fromEntries(
           id: row.id,
           nombre: row.nombre,
           cargo: row.cargo ?? null,
-          estamento: "Alcalde",
+          estamento: row.estamento ?? null,
           remuneracion_bruta: row.remuneracion_bruta,
           remuneracion_liquida: row.remuneracion_liquida,
           grado_eus: row.grado_eus ?? null,

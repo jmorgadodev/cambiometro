@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import type { Metadata } from "next";
 import { getMunicipalidadesList, getMunicipalidadesStats } from "@/lib/municipalidades-list";
+import { getMunicipalidadData } from "@/lib/municipalidades-data";
 import { coverageMetric, readGeneratedDataQualitySummary } from "@/lib/data-quality-summary";
 import MunicipalidadesExplorerClient from "@/components/municipalidades/MunicipalidadesExplorerClient";
 
@@ -22,8 +23,12 @@ export const metadata: Metadata = {
 };
 
 export default function MunicipalidadesPage() {
-  const allData = getMunicipalidadesList();
-  const stats = getMunicipalidadesStats();
+  const allData = getMunicipalidadesList().map((item) => {
+    const alcalde = getMunicipalidadData(item.id)?.alcalde ?? null;
+    return { ...item, alcalde: alcalde ? { nombre: alcalde.nombre, partido_alcalde: alcalde.partido_alcalde } : null,
+      partido_alcalde: alcalde?.partido_alcalde ?? null };
+  });
+  const stats = { ...getMunicipalidadesStats(), conAlcaldeCount: allData.filter((item) => item.alcalde !== null).length };
   const dataSummary = readGeneratedDataQualitySummary();
   const municipalSources = dataSummary.sources.filter((source) => ["sinim", "ine-censo-2024", "transparencia-activa", "chilecompra"].includes(source.id));
   const municipalRelease = {
