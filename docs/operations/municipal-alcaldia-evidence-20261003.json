@@ -1,0 +1,2124 @@
+{
+  "checkedAt": "2026-10-04T02:07:33.638Z",
+  "releaseId": "59c3019908af8ffc31f84ec5ba09fe4df320669e45fff7fd2d25f173866e9021",
+  "artifactChecksumSha256": "e32d47583976b250335907452ee77b7547474a97f1ae421687e2f32d190ebfd5",
+  "readBytes": 61788251,
+  "scope": "346 municipal aggregates; latest top-five payroll evidence is partial, not a census of current legal incumbents or validation of all salaries",
+  "summary": {
+    "total": 346,
+    "withPreviousMayor": 318,
+    "olderThanPublishedCut": 156,
+    "newerMayorObserved": 68,
+    "differentNameObserved": 60,
+    "lowGross": 17,
+    "lowGrossAllHistorical": true,
+    "observedLatestAmbiguous": 0,
+    "resolvedObservedMayor": 210
+  },
+  "cases": [
+    {
+      "id": "muni-iquique",
+      "previousName": "Mauricio Alejandro Soria Macciavello",
+      "previousPeriod": "2025-05",
+      "previousGross": 12477311,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-iquique-planta-f43d6bae08269c6c",
+          "name": "Mauricio Alejandro Soria Macchiavello",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 9255757
+        }
+      ],
+      "selectedName": "Mauricio Alejandro Soria Macchiavello",
+      "lowGross": false
+    },
+    {
+      "id": "muni-colchane",
+      "previousName": "Javier Ignacio Garcia Choque",
+      "previousPeriod": "2024-11",
+      "previousGross": 2702627,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-colchane-planta-65df00aebbc2bc76",
+          "name": "Teofilo Pedro Mamani Garcia",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 6736865
+        }
+      ],
+      "selectedName": "Teofilo Pedro Mamani Garcia",
+      "lowGross": false
+    },
+    {
+      "id": "muni-mejillones",
+      "previousName": "Marcelino Carvajal Ferreira",
+      "previousPeriod": "2026-07",
+      "previousGross": 7831229,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-sierragorda",
+      "previousName": "Adriana Nataly Rivera Vega",
+      "previousPeriod": "2026-01",
+      "previousGross": 7669601,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-ollague",
+      "previousName": "Humberto Flores Gonzalez",
+      "previousPeriod": "2024-12",
+      "previousGross": 1712800,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-ollague-planta-f9f7c60863ba4f93",
+          "name": "Jhean Ramirez Dominguez",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 8405184
+        }
+      ],
+      "selectedName": "Jhean Ramirez Dominguez",
+      "lowGross": false
+    },
+    {
+      "id": "muni-chanaral",
+      "previousName": "Alex Ahumada Monroy",
+      "previousPeriod": "2025-02",
+      "previousGross": 6654273,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-diegodealmagro",
+      "previousName": "Mario Edwar Araya Rojas",
+      "previousPeriod": "2026-07",
+      "previousGross": 7069763,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-laserena",
+      "previousName": "Daniela Norambuena Borgheresi",
+      "previousPeriod": "2025-09",
+      "previousGross": 8555741,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-laserena-planta-74a6cb61eb0ed31c",
+          "name": "Daniela Norambuena Borgheresi",
+          "cargo": "Alcaldesa",
+          "period": "2026-07",
+          "gross": 12546542
+        }
+      ],
+      "selectedName": "Daniela Norambuena Borgheresi",
+      "lowGross": false
+    },
+    {
+      "id": "muni-coquimbo",
+      "previousName": "Ali Manuel Manouchehri Moghadam Lobos",
+      "previousPeriod": "2025-08",
+      "previousGross": 8588510,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-andacollo",
+      "previousName": "Gerald Albert Cerda Pizarro",
+      "previousPeriod": "2024-11",
+      "previousGross": 2914057,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-andacollo-planta-7e99f3d3a0b940e4",
+          "name": "Juan Carlos Alfaro Aravena",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7659204
+        }
+      ],
+      "selectedName": "Juan Carlos Alfaro Aravena",
+      "lowGross": false
+    },
+    {
+      "id": "muni-lahiguera",
+      "previousName": "Yerko Hernaldo Galleguillos Ossandon",
+      "previousPeriod": "2024-12",
+      "previousGross": 3306729,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-lahiguera-planta-8e4a9cfa4875728d",
+          "name": "Uberlinda Ester Aquea Barraza",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 5964775
+        }
+      ],
+      "selectedName": "Uberlinda Ester Aquea Barraza",
+      "lowGross": false
+    },
+    {
+      "id": "muni-paihuano",
+      "previousName": "Hernan Andres Ahumada Ahumada",
+      "previousPeriod": "2026-07",
+      "previousGross": 7419179,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-canela",
+      "previousName": "Juan Bernardo Leyton Lemus",
+      "previousPeriod": "2024-11",
+      "previousGross": 5648416,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-salamanca",
+      "previousName": "Gerardo Andres Rojas Escudero",
+      "previousPeriod": "2024-11",
+      "previousGross": 3147892,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-salamanca-planta-cc82de3a129613b6",
+          "name": "Carlos Andres Lillo Alamos",
+          "cargo": "Alcalde",
+          "period": "2026-07",
+          "gross": 6814945
+        }
+      ],
+      "selectedName": "Carlos Andres Lillo Alamos",
+      "lowGross": false
+    },
+    {
+      "id": "muni-ovalle",
+      "previousName": "Jonathan Paul Acuña Rojas",
+      "previousPeriod": "2024-12",
+      "previousGross": 3746416,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-combarbala",
+      "previousName": "Roberto Enrique Rojas Rojas",
+      "previousPeriod": "2024-12",
+      "previousGross": 557915,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": true
+    },
+    {
+      "id": "muni-valparaiso",
+      "previousName": "Celia Alicia Zuñiga Valencia",
+      "previousPeriod": "2025-01",
+      "previousGross": 40174,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": true
+    },
+    {
+      "id": "muni-quintero",
+      "previousName": "Isaac Mauricio Carrasco Pardo",
+      "previousPeriod": "2025-01",
+      "previousGross": 34689,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-quintero-planta-3ea8444664f7f5c0",
+          "name": "Rolando Hernan Silva Fuentes",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7459849
+        }
+      ],
+      "selectedName": "Rolando Hernan Silva Fuentes",
+      "lowGross": true
+    },
+    {
+      "id": "muni-isladepascua",
+      "previousName": "Elizabeth Joana Arevalo Pakarati",
+      "previousPeriod": "2026-02",
+      "previousGross": 9364922,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-losandes",
+      "previousName": "Manuel Eduardo Rivera Martinez",
+      "previousPeriod": "2026-08",
+      "previousGross": 7860948,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-laligua",
+      "previousName": "Patricio Daniel Pallares Valenzuela",
+      "previousPeriod": "2025-08",
+      "previousGross": 6742433,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-cabildo",
+      "previousName": "Victor Manuel Donoso Oyanedel",
+      "previousPeriod": "2024-12",
+      "previousGross": 3293839,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-cabildo-planta-79ae0775ebe1f434",
+          "name": "Alberto Patricio Aliaga Diaz",
+          "cargo": "Alcalde",
+          "period": "2026-07",
+          "gross": 10259620
+        }
+      ],
+      "selectedName": "Alberto Patricio Aliaga Diaz",
+      "lowGross": false
+    },
+    {
+      "id": "muni-petorca",
+      "previousName": "Ignacio Gamalier Villalobos Henríquez",
+      "previousPeriod": "2024-06",
+      "previousGross": 5447738,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-hijuelas",
+      "previousName": "Jose Rafael Saavedra Ibacache",
+      "previousPeriod": "2024-11",
+      "previousGross": 6891046,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-hijuelas-planta-5cbe6f694fed174d",
+          "name": "Veronica Paz Maria Rossat Arriagada",
+          "cargo": "Alcaldesa",
+          "period": "2026-07",
+          "gross": 10574170
+        }
+      ],
+      "selectedName": "Veronica Paz Maria Rossat Arriagada",
+      "lowGross": false
+    },
+    {
+      "id": "muni-lacruz",
+      "previousName": "Filomena Aida Navia Hevia",
+      "previousPeriod": "2026-08",
+      "previousGross": 7526718,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-sanantonio",
+      "previousName": "Luis Omar Vera Castro",
+      "previousPeriod": "2026-01",
+      "previousGross": 7212599,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-algarrobo",
+      "previousName": "Marco Antonio Gonzalez Candia",
+      "previousPeriod": "2026-08",
+      "previousGross": 5910601,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-cartagena",
+      "previousName": "Luis Rodrigo Garcia Tapia",
+      "previousPeriod": "2025-01",
+      "previousGross": 34766,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-cartagena-planta-98205695d3c2e821",
+          "name": "Lily Lidia Isabel Silva Garcia",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7459849
+        }
+      ],
+      "selectedName": "Lily Lidia Isabel Silva Garcia",
+      "lowGross": true
+    },
+    {
+      "id": "muni-eltabo",
+      "previousName": "Alfonso Muñoz Aravena",
+      "previousPeriod": "2026-07",
+      "previousGross": 7459849,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-santodomingo",
+      "previousName": "Dino Paolo Lotito Flores",
+      "previousPeriod": "2024-12",
+      "previousGross": 3270208,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-santodomingo-planta-8318ee1f7bc4162b",
+          "name": "Fernando Jose Rodriguez Larrain",
+          "cargo": "Alcalde",
+          "period": "2026-07",
+          "gross": 10574170
+        }
+      ],
+      "selectedName": "Fernando Jose Rodriguez Larrain",
+      "lowGross": false
+    },
+    {
+      "id": "muni-panquehue",
+      "previousName": "Gonzalo Enrique Vergara Lizana",
+      "previousPeriod": "2026-03",
+      "previousGross": 6587457,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-putaendo",
+      "previousName": "Mauricio Quiroz Chamorro",
+      "previousPeriod": "2026-03",
+      "previousGross": 7390147,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-quilpue",
+      "previousName": "Valeria Andrea Melipillan Figueroa",
+      "previousPeriod": "2025-01",
+      "previousGross": 66207,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-quilpue-planta-9416b2f96886bfaa",
+          "name": "Maria Corti Badia",
+          "cargo": "Alcaldesa",
+          "period": "2026-08",
+          "gross": 7755873
+        }
+      ],
+      "selectedName": "Maria Corti Badia",
+      "lowGross": true
+    },
+    {
+      "id": "muni-limache",
+      "previousName": "Daniel Rodrigo Morales Espindola",
+      "previousPeriod": "2024-11",
+      "previousGross": 3161437,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-limache-planta-eaa93f5f1b257c49",
+          "name": "Fernando Luciano Valenzuela Romero",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 6279124
+        }
+      ],
+      "selectedName": "Fernando Luciano Valenzuela Romero",
+      "lowGross": false
+    },
+    {
+      "id": "muni-villaalemana",
+      "previousName": "Nelson Fernando Estay Molina",
+      "previousPeriod": "2026-04",
+      "previousGross": 7308089,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-rancagua",
+      "previousName": "Emerson Adrian Avendaño Llanca",
+      "previousPeriod": "2024-09",
+      "previousGross": 8046514,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-rancagua-planta-b4c2a0cdebba1e11",
+          "name": "Raimundo Agliati Marchant",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 8730398
+        }
+      ],
+      "selectedName": "Raimundo Agliati Marchant",
+      "lowGross": false
+    },
+    {
+      "id": "muni-codegua",
+      "previousName": "Jose Alexander Flores Osorio",
+      "previousPeriod": "2025-12",
+      "previousGross": 5729226,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-codegua-planta-9e41744d73eb2e21",
+          "name": "Jose Alexander Flores Osorio",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 5925624
+        }
+      ],
+      "selectedName": "Jose Alexander Flores Osorio",
+      "lowGross": false
+    },
+    {
+      "id": "muni-donihue",
+      "previousName": "Pabla Alejandra Ponce Valle",
+      "previousPeriod": "2024-04",
+      "previousGross": 6856762,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-donihue-planta-c69ead31d2218d17",
+          "name": "Ricardo Boris Acuña Gonzalez",
+          "cargo": "Alcalde",
+          "period": "2026-07",
+          "gross": 9732485
+        }
+      ],
+      "selectedName": "Ricardo Boris Acuña Gonzalez",
+      "lowGross": false
+    },
+    {
+      "id": "muni-graneros",
+      "previousName": "Claudio Rafael Segovia Cofre",
+      "previousPeriod": "2024-11",
+      "previousGross": 3951892,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-graneros-planta-81abf3b999e87d90",
+          "name": "Juan Marcelo Minanir Matus",
+          "cargo": "Alcalde",
+          "period": "2026-07",
+          "gross": 8290055
+        }
+      ],
+      "selectedName": "Juan Marcelo Minanir Matus",
+      "lowGross": false
+    },
+    {
+      "id": "muni-malloa",
+      "previousName": "Luis Manuel Barra Villanueva",
+      "previousPeriod": "2026-07",
+      "previousGross": 9424254,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-olivar",
+      "previousName": "María Estrella Montero Carrasco",
+      "previousPeriod": "2026-08",
+      "previousGross": 6679576,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-pichidegua",
+      "previousName": "Ruben Adolfo Ceron Gonzalez",
+      "previousPeriod": "2025-06",
+      "previousGross": 6488761,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-rengo",
+      "previousName": "Carlos Soto Gonzalez",
+      "previousPeriod": "2024-12",
+      "previousGross": 3203376,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-rengo-planta-574f60ee2f909709",
+          "name": "Enrique Alfonso Del Barrio Hernandez",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7717803
+        }
+      ],
+      "selectedName": "Enrique Alfonso Del Barrio Hernandez",
+      "lowGross": false
+    },
+    {
+      "id": "muni-pichilemu",
+      "previousName": "Cristian Andres Pozo Parraguez",
+      "previousPeriod": "2024-12",
+      "previousGross": 3037555,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-pichilemu-planta-b46bc54069079bbe",
+          "name": "Roberto Cordova Carreno",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 6647723
+        }
+      ],
+      "selectedName": "Roberto Cordova Carreno",
+      "lowGross": false
+    },
+    {
+      "id": "muni-laestrella",
+      "previousName": "Maria Angelica Silva Arrue",
+      "previousPeriod": "2024-11",
+      "previousGross": 5435656,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-laestrella-planta-b37ccea138305cdc",
+          "name": "Valentin Geronimo Vidal Rubio",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 5895578
+        }
+      ],
+      "selectedName": "Valentin Geronimo Vidal Rubio",
+      "lowGross": false
+    },
+    {
+      "id": "muni-litueche",
+      "previousName": "Rene Santiago Acuña Echeverria",
+      "previousPeriod": "2024-12",
+      "previousGross": 2762215,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-sanfernando",
+      "previousName": "Pablo Francisco Silva Perez",
+      "previousPeriod": "2026-07",
+      "previousGross": 10607932,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-chimbarongo",
+      "previousName": "Alejandro Hernan Arenas Arenas",
+      "previousPeriod": "2026-05",
+      "previousGross": 4152096,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-chimbarongo-planta-725a4a0ad3cbb938",
+          "name": "Marco Antonio Contreras Jorquera",
+          "cargo": "Alcalde",
+          "period": "2026-07",
+          "gross": 6711426
+        }
+      ],
+      "selectedName": "Marco Antonio Contreras Jorquera",
+      "lowGross": false
+    },
+    {
+      "id": "muni-nancagua",
+      "previousName": "Gabriel Antonio Ahumada Diaz",
+      "previousPeriod": "2026-07",
+      "previousGross": 9710470,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-palmilla",
+      "previousName": "Gloria Paredes Valdés",
+      "previousPeriod": "2024-11",
+      "previousGross": 2384628,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-peralillo",
+      "previousName": "Claudio Abraham Cumsille Chomali",
+      "previousPeriod": "2026-07",
+      "previousGross": 9424254,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-talca",
+      "previousName": "Juan Carlos Diaz Avendano",
+      "previousPeriod": "2026-07",
+      "previousGross": 12150847,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-constitucion",
+      "previousName": "Fabian Manuel Perez Herrera",
+      "previousPeriod": "2025-01",
+      "previousGross": 35389,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-constitucion-planta-8d27f1127e8c0b11",
+          "name": "Carlos Moises Valenzuela Gajardo",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7753570
+        }
+      ],
+      "selectedName": "Carlos Moises Valenzuela Gajardo",
+      "lowGross": true
+    },
+    {
+      "id": "muni-empedrado",
+      "previousName": "Gonzalo Antonio Tejos Perez",
+      "previousPeriod": "2024-12",
+      "previousGross": 2404882,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-pelarco",
+      "previousName": "Luis Bernardo Vásquez Bobadilla",
+      "previousPeriod": "2024-11",
+      "previousGross": 9509626,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-rioclaro",
+      "previousName": "Americo Gustavo Guajardo Oyarce",
+      "previousPeriod": "2026-08",
+      "previousGross": 6724175,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-sanclemente",
+      "previousName": "Maria Ines Sepulveda Fuentes",
+      "previousPeriod": "2024-12",
+      "previousGross": 3008116,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-sanclemente-planta-cddda484b7f09070",
+          "name": "Juan Raul Rojas Vergara",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7459849
+        }
+      ],
+      "selectedName": "Juan Raul Rojas Vergara",
+      "lowGross": false
+    },
+    {
+      "id": "muni-cauquenes",
+      "previousName": "Nery Cristina Rodriguez Dominguez",
+      "previousPeriod": "2024-12",
+      "previousGross": 2640220,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-cauquenes-planta-e4388e9aa5dc5294",
+          "name": "Jorge Eduardo Muñoz Saavedra",
+          "cargo": "Alcalde",
+          "period": "2026-07",
+          "gross": 7578016
+        }
+      ],
+      "selectedName": "Jorge Eduardo Muñoz Saavedra",
+      "lowGross": false
+    },
+    {
+      "id": "muni-chanco",
+      "previousName": "Marcelo Osvaldo Waddington Guajardo",
+      "previousPeriod": "2026-07",
+      "previousGross": 7611778,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-pelluhue",
+      "previousName": "Maria Luz Reyes Orellana",
+      "previousPeriod": "2026-08",
+      "previousGross": 7330992,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-curico",
+      "previousName": "Leoncio Saavedra Concha",
+      "previousPeriod": "2025-01",
+      "previousGross": 1640786,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-molina",
+      "previousName": "Priscilla Elena Castillo Gerli",
+      "previousPeriod": "2024-12",
+      "previousGross": 921258,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-molina-planta-72d1f4506a2884a1",
+          "name": "Felipe Eduardo Mendez Guzman",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7459849
+        }
+      ],
+      "selectedName": "Felipe Eduardo Mendez Guzman",
+      "lowGross": true
+    },
+    {
+      "id": "muni-romeral",
+      "previousName": "Carlos Alberto Vergara Zerega",
+      "previousPeriod": "2025-01",
+      "previousGross": 34766,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-romeral-planta-c50d10d485bbc02d",
+          "name": "Jose Antonio Arellano Lynch",
+          "cargo": "Alcalde",
+          "period": "2026-07",
+          "gross": 7459849
+        }
+      ],
+      "selectedName": "Jose Antonio Arellano Lynch",
+      "lowGross": true
+    },
+    {
+      "id": "muni-sagradafamilia",
+      "previousName": "Francisco Javier Melendez Rojas",
+      "previousPeriod": "2024-01",
+      "previousGross": 975097,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-sagradafamilia-planta-d8d5762e7a7fa911",
+          "name": "Osvaldo Del Transito Jorquera Padilla",
+          "cargo": "Alcalde",
+          "period": "2026-07",
+          "gross": 7476730
+        }
+      ],
+      "selectedName": "Osvaldo Del Transito Jorquera Padilla",
+      "lowGross": true
+    },
+    {
+      "id": "muni-colbun",
+      "previousName": "Pedro Pablo Muñoz Oses",
+      "previousPeriod": "2026-07",
+      "previousGross": 8320099,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-longavi",
+      "previousName": "Jaime Antonio Briones Jorquera",
+      "previousPeriod": "2026-06",
+      "previousGross": 6647722,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-parral",
+      "previousName": "Paula Retamal Urrutia",
+      "previousPeriod": "2025-01",
+      "previousGross": 28607,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": true
+    },
+    {
+      "id": "muni-retiro",
+      "previousName": "Angela Vanessa Cerda Zapata",
+      "previousPeriod": "2024-11",
+      "previousGross": 1664714,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-retiro-planta-1f2f9f0412f2995f",
+          "name": "Rafael Antonio Ramirez Parra",
+          "cargo": "Alcalde",
+          "period": "2026-07",
+          "gross": 6406868
+        }
+      ],
+      "selectedName": "Rafael Antonio Ramirez Parra",
+      "lowGross": false
+    },
+    {
+      "id": "muni-villaalegre",
+      "previousName": "Pablo Benito Fuentes Vallejos",
+      "previousPeriod": "2024-12",
+      "previousGross": 1783996,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-concepcion",
+      "previousName": "Boris Christopher Negrete Canales",
+      "previousPeriod": "2024-11",
+      "previousGross": 1578331,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-chiguayante",
+      "previousName": "Jorge Carlos Lozano Zapata",
+      "previousPeriod": "2026-02",
+      "previousGross": 8182681,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-sanpedrodelapaz",
+      "previousName": "Javier Enrique Guiñez Castro",
+      "previousPeriod": "2024-10",
+      "previousGross": 8362656,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-sanpedrodelapaz-planta-aec64f6a6ab25c2b",
+          "name": "Juan Pablo Spoerer Brito",
+          "cargo": "Alcalde",
+          "period": "2026-07",
+          "gross": 11199921
+        }
+      ],
+      "selectedName": "Juan Pablo Spoerer Brito",
+      "lowGross": false
+    },
+    {
+      "id": "muni-santajuana",
+      "previousName": "Fabián Omar Riquelme Jara",
+      "previousPeriod": "2024-12",
+      "previousGross": 1345476,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-talcahuano",
+      "previousName": "Eduardo Antonio Saavedra Bustos",
+      "previousPeriod": "2026-07",
+      "previousGross": 12701929,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-canete",
+      "previousName": "Jorge James Radonich Barra",
+      "previousPeriod": "2025-11",
+      "previousGross": 7607916,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-curanilahue",
+      "previousName": "Alex Calzadilla Velasquez",
+      "previousPeriod": "2024-12",
+      "previousGross": 2270159,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-curanilahue-planta-fccb1eb01f4fb53b",
+          "name": "Luis Gengnagel Gutiererz",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 6604699
+        }
+      ],
+      "selectedName": "Luis Gengnagel Gutiererz",
+      "lowGross": false
+    },
+    {
+      "id": "muni-losalamos",
+      "previousName": "Pablo Cesar Vegas Verdugo",
+      "previousPeriod": "2024-07",
+      "previousGross": 8957920,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-laja",
+      "previousName": "Roberto Elias Quintana Inostroza",
+      "previousPeriod": "2024-10",
+      "previousGross": 9951437,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-nacimiento",
+      "previousName": "Carlos Alberto Toloza Soto",
+      "previousPeriod": "2025-05",
+      "previousGross": 10372981,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-nacimiento-planta-c19c2bc2b3d19608",
+          "name": "Carlos Roberto Toloza Soto",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7703969
+        }
+      ],
+      "selectedName": "Carlos Roberto Toloza Soto",
+      "lowGross": false
+    },
+    {
+      "id": "muni-tucapel",
+      "previousName": "Jaime Sergio Veloso Jara",
+      "previousPeriod": "2026-07",
+      "previousGross": 10937111,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-altobiobio",
+      "previousName": "Nivaldo Eusebio Pinaleo Llaulen",
+      "previousPeriod": "2024-12",
+      "previousGross": 973705,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": true
+    },
+    {
+      "id": "muni-cunco",
+      "previousName": "Antonio Alfonso Coke Candia",
+      "previousPeriod": "2024-07",
+      "previousGross": 512465,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": true
+    },
+    {
+      "id": "muni-curarrehue",
+      "previousName": "Daniel Antonio Parra Calabrano",
+      "previousPeriod": "2026-03",
+      "previousGross": 6021598,
+      "latestPeriod": "2026-05",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-freire",
+      "previousName": "Jose Antonio Colihuil Binimelis",
+      "previousPeriod": "2026-07",
+      "previousGross": 10751419,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-galvarino",
+      "previousName": "Hans Osvaldo González Espinoza",
+      "previousPeriod": "2025-06",
+      "previousGross": 7383975,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-pucon",
+      "previousName": "Carlos Reinaldo Barra Matamala",
+      "previousPeriod": "2024-12",
+      "previousGross": 3425599,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-pucon-planta-dfe837e15158bc9f",
+          "name": "Sebastian Diego Alvarez Ramirez",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7731950
+        }
+      ],
+      "selectedName": "Sebastian Diego Alvarez Ramirez",
+      "lowGross": false
+    },
+    {
+      "id": "muni-teodoroschmidt",
+      "previousName": "Baldomero Abel Santos Vidal",
+      "previousPeriod": "2026-02",
+      "previousGross": 7127815,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-villarrica",
+      "previousName": "Katalina Veronica Gudenschwager Basso",
+      "previousPeriod": "2024-12",
+      "previousGross": 252148,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-villarrica-planta-3e76dddd260dd1f8",
+          "name": "Pablo Santiago Astete Mermoud",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7660909
+        }
+      ],
+      "selectedName": "Pablo Santiago Astete Mermoud",
+      "lowGross": true
+    },
+    {
+      "id": "muni-cholchol",
+      "previousName": "Luis Huirilef Barra",
+      "previousPeriod": "2024-12",
+      "previousGross": 3280998,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-cholchol-planta-023f0d8d0771fc23",
+          "name": "Alvaro Josue Labraña Opazo",
+          "cargo": "Alcalde",
+          "period": "2026-07",
+          "gross": 7637100
+        }
+      ],
+      "selectedName": "Alvaro Josue Labraña Opazo",
+      "lowGross": false
+    },
+    {
+      "id": "muni-curacautin",
+      "previousName": "Victor Barrera Barrera",
+      "previousPeriod": "2024-12",
+      "previousGross": 1057188,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-ercilla",
+      "previousName": "Valentin Enrique Vidal Hernandez",
+      "previousPeriod": "2024-12",
+      "previousGross": 1049298,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-ercilla-planta-8908c5ad2ca1fa9b",
+          "name": "Luis Alberto Orellana Rocha",
+          "cargo": "Alcalde",
+          "period": "2026-07",
+          "gross": 9559624
+        }
+      ],
+      "selectedName": "Luis Alberto Orellana Rocha",
+      "lowGross": false
+    },
+    {
+      "id": "muni-lossauces",
+      "previousName": "Victor Hugo Gonzalez Rodriguez",
+      "previousPeriod": "2025-02",
+      "previousGross": 6547172,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-lossauces-planta-bc94fbd1b607aa88",
+          "name": "Victor Hugo Gonzalez Rodriguez",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 6814945
+        }
+      ],
+      "selectedName": "Victor Hugo Gonzalez Rodriguez",
+      "lowGross": false
+    },
+    {
+      "id": "muni-lumaco",
+      "previousName": "Richard Alexi Leonelli Contreras",
+      "previousPeriod": "2026-08",
+      "previousGross": 6083365,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-renaico",
+      "previousName": "Claudio Musre Contreras",
+      "previousPeriod": "2024-01",
+      "previousGross": 5612894,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-renaico-planta-abf47370c6e530c0",
+          "name": "Claudio Musre Contreras",
+          "cargo": "Alcalde",
+          "period": "2026-07",
+          "gross": 9631160
+        }
+      ],
+      "selectedName": "Claudio Musre Contreras",
+      "lowGross": false
+    },
+    {
+      "id": "muni-traiguen",
+      "previousName": "Ricardo Javier Sanhueza Pirce",
+      "previousPeriod": "2024-12",
+      "previousGross": 2833391,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-traiguen-planta-d4eb6693d6da651f",
+          "name": "Luis Armando Alvarez Valenzuela",
+          "cargo": "Alcalde",
+          "period": "2026-07",
+          "gross": 9559625
+        }
+      ],
+      "selectedName": "Luis Armando Alvarez Valenzuela",
+      "lowGross": false
+    },
+    {
+      "id": "muni-victoria",
+      "previousName": "Javier Jaramillo Soto",
+      "previousPeriod": "2024-11",
+      "previousGross": 7120617,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-victoria-planta-dffc6095dd4bae49",
+          "name": "Javier Alejandro Jaramillo Soto",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7609246
+        }
+      ],
+      "selectedName": "Javier Alejandro Jaramillo Soto",
+      "lowGross": false
+    },
+    {
+      "id": "muni-puertomontt",
+      "previousName": "Rodrigo Javi Wainraihgt Galilea",
+      "previousPeriod": "2025-09",
+      "previousGross": 8613087,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-puertomontt-planta-9752830ba2d7a0f3",
+          "name": "Rodrigo Javier Wainraihgt Galilea",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 8908342
+        }
+      ],
+      "selectedName": "Rodrigo Javier Wainraihgt Galilea",
+      "lowGross": false
+    },
+    {
+      "id": "muni-cochamo",
+      "previousName": "Jesus Silverio Morales Rosales",
+      "previousPeriod": "2024-12",
+      "previousGross": 964474,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-cochamo-planta-e75a9faec2044599",
+          "name": "Francisco Javier Donoso Oyarzun",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 6278664
+        }
+      ],
+      "selectedName": "Francisco Javier Donoso Oyarzun",
+      "lowGross": true
+    },
+    {
+      "id": "muni-frutillar",
+      "previousName": "Cesar Huenuqueo Maldonado",
+      "previousPeriod": "2024-12",
+      "previousGross": 3338720,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-frutillar-planta-38759803397e25cf",
+          "name": "Javier Ignacio Arismendi Valenzuela",
+          "cargo": "Alcalde",
+          "period": "2026-07",
+          "gross": 10751420
+        }
+      ],
+      "selectedName": "Javier Ignacio Arismendi Valenzuela",
+      "lowGross": false
+    },
+    {
+      "id": "muni-puertovaras",
+      "previousName": "Tomas Andres Garate Silva",
+      "previousPeriod": "2026-07",
+      "previousGross": 10030064,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-dalcahue",
+      "previousName": "Alex Waldemar Gomez Aguilar",
+      "previousPeriod": "2024-12",
+      "previousGross": 2533037,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-dalcahue-planta-f75119ed171b5e6e",
+          "name": "Maria Alejandra Villegas Huichaman",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7126758
+        }
+      ],
+      "selectedName": "Maria Alejandra Villegas Huichaman",
+      "lowGross": false
+    },
+    {
+      "id": "muni-puqueldon",
+      "previousName": "Jose Rodrigo Ojeda Cardenas",
+      "previousPeriod": "2024-12",
+      "previousGross": 2695113,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-quellon",
+      "previousName": "Pedro Andrés Barría Oyarzo",
+      "previousPeriod": "2024-12",
+      "previousGross": 1726016,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-quemchi",
+      "previousName": "Luis Heriberto Macias Demarchi",
+      "previousPeriod": "2024-12",
+      "previousGross": 2779854,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-quemchi-planta-bf54591a2b99b0bd",
+          "name": "Javier Hernan Ugarte Mansilla",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7126758
+        }
+      ],
+      "selectedName": "Javier Hernan Ugarte Mansilla",
+      "lowGross": false
+    },
+    {
+      "id": "muni-osorno",
+      "previousName": "Emeterio Carrillo Torres",
+      "previousPeriod": "2024-11",
+      "previousGross": 5092812,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-osorno-planta-62d5c9b151544fc5",
+          "name": "Jaime Alberto Bertin Valenzuela",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 8335349
+        }
+      ],
+      "selectedName": "Jaime Alberto Bertin Valenzuela",
+      "lowGross": false
+    },
+    {
+      "id": "muni-purranque",
+      "previousName": "Cesar Ivan Crot Vargas",
+      "previousPeriod": "2024-12",
+      "previousGross": 2224958,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-purranque-planta-fc08d61cd1e2a62c",
+          "name": "Alicia Villar Vargas",
+          "cargo": "Alcaldesa",
+          "period": "2026-08",
+          "gross": 5693710
+        }
+      ],
+      "selectedName": "Alicia Villar Vargas",
+      "lowGross": false
+    },
+    {
+      "id": "muni-puyehue",
+      "previousName": "Maria Jimena Nuñez Morales",
+      "previousPeriod": "2025-04",
+      "previousGross": 5873203,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-puyehue-planta-3de4d0a3120a529f",
+          "name": "Maria Jimena Nuñez Morales",
+          "cargo": "Alcaldesa",
+          "period": "2026-07",
+          "gross": 8507888
+        }
+      ],
+      "selectedName": "Maria Jimena Nuñez Morales",
+      "lowGross": false
+    },
+    {
+      "id": "muni-sanjuandelacosta",
+      "previousName": "Eduardo Sebastian Ortega Piniao",
+      "previousPeriod": "2024-12",
+      "previousGross": 1740932,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-sanjuandelacosta-planta-7d9a4770bbd01d71",
+          "name": "José Luis Muñoz Uribe",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7755266
+        }
+      ],
+      "selectedName": "José Luis Muñoz Uribe",
+      "lowGross": false
+    },
+    {
+      "id": "muni-sanpablo",
+      "previousName": "Marco Antonio Carrillo Bravo",
+      "previousPeriod": "2026-07",
+      "previousGross": 7063052,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-lagoverde",
+      "previousName": "Nelson Fredy Opazo Lopez",
+      "previousPeriod": "2024-11",
+      "previousGross": 7513159,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-lagoverde-planta-9ee4bf3449d56614",
+          "name": "Claudia Andrea Valdés Vasquéz",
+          "cargo": "Alcaldesa",
+          "period": "2026-07",
+          "gross": 10205479
+        }
+      ],
+      "selectedName": "Claudia Andrea Valdés Vasquéz",
+      "lowGross": false
+    },
+    {
+      "id": "muni-aysen",
+      "previousName": "Julio Esteban Confucio Uribe Alvarado",
+      "previousPeriod": "2024-12",
+      "previousGross": 3524758,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-aysen-planta-6ef0e5031f79427c",
+          "name": "Luis Alberto Martinez Gallardo",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7818283
+        }
+      ],
+      "selectedName": "Luis Alberto Martinez Gallardo",
+      "lowGross": false
+    },
+    {
+      "id": "muni-guaitecas",
+      "previousName": "Marcos Rafael Silva Miranda",
+      "previousPeriod": "2024-12",
+      "previousGross": 2125797,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-guaitecas-planta-97bc39959dd49776",
+          "name": "Bans Ramiro Puinao Carimoney",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 8074355
+        }
+      ],
+      "selectedName": "Bans Ramiro Puinao Carimoney",
+      "lowGross": false
+    },
+    {
+      "id": "muni-cochrane",
+      "previousName": "Jorge Calderon Nuñez",
+      "previousPeriod": "2024-11",
+      "previousGross": 3092437,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-tortel",
+      "previousName": "Abel Becerra Vidal",
+      "previousPeriod": "2025-01",
+      "previousGross": 468212,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-tortel-planta-62c31e1e9f158224",
+          "name": "Marisela Jimenez Cruces",
+          "cargo": "Alcaldesa",
+          "period": "2026-08",
+          "gross": 8120877
+        }
+      ],
+      "selectedName": "Marisela Jimenez Cruces",
+      "lowGross": true
+    },
+    {
+      "id": "muni-chilechico",
+      "previousName": "Ariel Keim Orellana",
+      "previousPeriod": "2024-12",
+      "previousGross": 5472163,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-chilechico-planta-41473ef284a47e20",
+          "name": "Ariel Keim Hermosilla",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 9569016
+        }
+      ],
+      "selectedName": "Ariel Keim Hermosilla",
+      "lowGross": false
+    },
+    {
+      "id": "muni-rioibanez",
+      "previousName": "Juan Hernan Saldivia Cea",
+      "previousPeriod": "2024-12",
+      "previousGross": 1140775,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-rioibanez-planta-b46f2aaa500a309c",
+          "name": "Marcelo Daniel Jelvez Cardenas",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7210088
+        }
+      ],
+      "selectedName": "Marcelo Daniel Jelvez Cardenas",
+      "lowGross": false
+    },
+    {
+      "id": "muni-santiago",
+      "previousName": "Iraci Luiza Hassler Jacob",
+      "previousPeriod": "2024-11",
+      "previousGross": 5405516,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-cerrillos",
+      "previousName": "Lorena Leonor Facuse Rojas",
+      "previousPeriod": "2024-11",
+      "previousGross": 3517877,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-cerronavia",
+      "previousName": "Mauro Elias Tamayo Rozas",
+      "previousPeriod": "2025-10",
+      "previousGross": 8490197,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-cerronavia-planta-71c964c288f67b65",
+          "name": "Mauro Elias Tamayo Rozas",
+          "cargo": "Alcalde",
+          "period": "2026-07",
+          "gross": 8781239
+        }
+      ],
+      "selectedName": "Mauro Elias Tamayo Rozas",
+      "lowGross": false
+    },
+    {
+      "id": "muni-elbosque",
+      "previousName": "Manuel Francisco Zuñiga Aguilar",
+      "previousPeriod": "2026-03",
+      "previousGross": 8643286,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-elbosque-planta-ade4a68f96b02e3d",
+          "name": "Manuel Francisco Zuñiga Aguilar",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 8764292
+        }
+      ],
+      "selectedName": "Manuel Francisco Zuñiga Aguilar",
+      "lowGross": false
+    },
+    {
+      "id": "muni-independencia",
+      "previousName": "Agustin Iglesias Muñoz",
+      "previousPeriod": "2025-10",
+      "previousGross": 8135678,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-lacisterna",
+      "previousName": "Joel Andrés Olmos Espinoza",
+      "previousPeriod": "2026-07",
+      "previousGross": 11980205,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-laflorida",
+      "previousName": "Rodolfo Rafael Carter Fernandez",
+      "previousPeriod": "2024-11",
+      "previousGross": 3968206,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-laflorida-planta-d426bb17c44e53a3",
+          "name": "Daniel Adolfo Reyes Morales",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 9118278
+        }
+      ],
+      "selectedName": "Daniel Adolfo Reyes Morales",
+      "lowGross": false
+    },
+    {
+      "id": "muni-lareina",
+      "previousName": "Jose Manuel Palacios Parra",
+      "previousPeriod": "2025-12",
+      "previousGross": 10684742,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-macul",
+      "previousName": "Gonzalo Eugenio Montoya Riquelme",
+      "previousPeriod": "2024-12",
+      "previousGross": 3901061,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-macul-planta-8bd2e9203abdaf19",
+          "name": "Eduardo Rene Espinoza Gaete",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 8730398
+        }
+      ],
+      "selectedName": "Eduardo Rene Espinoza Gaete",
+      "lowGross": false
+    },
+    {
+      "id": "muni-maipu",
+      "previousName": "Tomas Vodanovic Escudero",
+      "previousPeriod": "2026-07",
+      "previousGross": 12510959,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-penalolen",
+      "previousName": "Carolina Leitao Alvarezsalamanca",
+      "previousPeriod": "2024-11",
+      "previousGross": 1414457,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-penalolen-planta-dee6126f56e0897a",
+          "name": "Miguel Andres Concha Manso",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 9118277
+        }
+      ],
+      "selectedName": "Miguel Andres Concha Manso",
+      "lowGross": false
+    },
+    {
+      "id": "muni-puentealto",
+      "previousName": "German Codina Powers",
+      "previousPeriod": "2024-11",
+      "previousGross": 3587277,
+      "latestPeriod": "2025-04",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-lampa",
+      "previousName": "Jonathan Enrique Opazo Carrasco",
+      "previousPeriod": "2025-12",
+      "previousGross": 7496607,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-tiltil",
+      "previousName": "Luis Andrés Valenzuela Cruzat",
+      "previousPeriod": "2024-12",
+      "previousGross": 1182964,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-tiltil-planta-deff6594ecd4d7be",
+          "name": "Cesar Mena Retamal",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7459849
+        }
+      ],
+      "selectedName": "Cesar Mena Retamal",
+      "lowGross": false
+    },
+    {
+      "id": "muni-caleradetango",
+      "previousName": "Hortensia Marisel Mora Catalan",
+      "previousPeriod": "2025-05",
+      "previousGross": 10202695,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-caleradetango-planta-d1f12ab303faf717",
+          "name": "Hortensia Maricel Mora Catalan",
+          "cargo": "Alcaldesa",
+          "period": "2026-08",
+          "gross": 7493611
+        }
+      ],
+      "selectedName": "Hortensia Maricel Mora Catalan",
+      "lowGross": false
+    },
+    {
+      "id": "muni-alhue",
+      "previousName": "Roberto Eduardo Torres Huerta",
+      "previousPeriod": "2024-05",
+      "previousGross": 7691937,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-sanpedro",
+      "previousName": "Manuel Jesús Devia Vilches",
+      "previousPeriod": "2026-08",
+      "previousGross": 5895578,
+      "latestPeriod": "2026-09",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-talagante",
+      "previousName": "Carlos Daniel Álvarez Esteban",
+      "previousPeriod": "2024-12",
+      "previousGross": 3074669,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-talagante-planta-df57152e6cfcd9a7",
+          "name": "Sebastian Enrique Rosas Guerrero",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7492957
+        }
+      ],
+      "selectedName": "Sebastian Enrique Rosas Guerrero",
+      "lowGross": false
+    },
+    {
+      "id": "muni-elmonte",
+      "previousName": "Zandra Sofia Maulen Jofre",
+      "previousPeriod": "2026-07",
+      "previousGross": 6663648,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-loslagos",
+      "previousName": "Victor David Fritz Aguayo",
+      "previousPeriod": "2026-07",
+      "previousGross": 9529897,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-mariquina",
+      "previousName": "Guillermo Rolando Mitre Gatica",
+      "previousPeriod": "2026-07",
+      "previousGross": 7795167,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-paillaco",
+      "previousName": "Miguel Angel Carrasco García",
+      "previousPeriod": "2024-12",
+      "previousGross": 2955935,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-panguipulli",
+      "previousName": "Pedro Javier Burgos Vasquez",
+      "previousPeriod": "2024-12",
+      "previousGross": 1128737,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-panguipulli-planta-ec5771f4fb4962f8",
+          "name": "Rodrigo Valdivia Orias",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 7937111
+        }
+      ],
+      "selectedName": "Rodrigo Valdivia Orias",
+      "lowGross": false
+    },
+    {
+      "id": "muni-launion",
+      "previousName": "Saturnino Casimiro Quezada Solís",
+      "previousPeriod": "2026-07",
+      "previousGross": 10751420,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-futrono",
+      "previousName": "Claudio Rosamel Lavado Castro",
+      "previousPeriod": "2024-12",
+      "previousGross": 2600483,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-futrono-planta-bd6359ce021b63c5",
+          "name": "Fernando Javier Flández Montecinos",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 6053321
+        }
+      ],
+      "selectedName": "Fernando Javier Flández Montecinos",
+      "lowGross": false
+    },
+    {
+      "id": "muni-lagoranco",
+      "previousName": "Miguel Angel Meza Schwenke",
+      "previousPeriod": "2026-05",
+      "previousGross": 6707479,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-lagoranco-planta-a24fd02775e6f7c8",
+          "name": "Miguel Angel Meza Shwenke",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 6761171
+        }
+      ],
+      "selectedName": "Miguel Angel Meza Shwenke",
+      "lowGross": false
+    },
+    {
+      "id": "muni-riobueno",
+      "previousName": "Carolina Andrea Silva Pérez",
+      "previousPeriod": "2024-12",
+      "previousGross": 5446642,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-bulnes",
+      "previousName": "Gonzalo Andres Bustamante Troncoso",
+      "previousPeriod": "2025-06",
+      "previousGross": 6589073,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-bulnes-planta-7a56557a8ee20ed0",
+          "name": "Gonzalo Andres Bustamante Troncoso",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 6830871
+        }
+      ],
+      "selectedName": "Gonzalo Andres Bustamante Troncoso",
+      "lowGross": false
+    },
+    {
+      "id": "muni-elcarmen",
+      "previousName": "José Hernando San Martín Rubilar",
+      "previousPeriod": "2025-01",
+      "previousGross": 30650,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [
+        {
+          "id": "func-muni-elcarmen-planta-977cfc679bb8ce9c",
+          "name": "Renan Eduardo Cabezas Arroyo",
+          "cargo": "Alcalde",
+          "period": "2026-08",
+          "gross": 6926427
+        }
+      ],
+      "selectedName": "Renan Eduardo Cabezas Arroyo",
+      "lowGross": true
+    },
+    {
+      "id": "muni-pinto",
+      "previousName": "Marcelo Alexis Ojeda Cárcamo",
+      "previousPeriod": "2024-12",
+      "previousGross": 2538542,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-quillon",
+      "previousName": "Felipe Ignacio Catalan Venegas",
+      "previousPeriod": "2026-07",
+      "previousGross": 8878821,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-sanignacio",
+      "previousName": "Patricio Eduardo Suazo Romero",
+      "previousPeriod": "2026-07",
+      "previousGross": 6240794,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-quirihue",
+      "previousName": "Eduardo Enrique Redlich Mardones",
+      "previousPeriod": "2026-05",
+      "previousGross": 6830797,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-cobquecura",
+      "previousName": "Julio Manuel Fuentes Alarcon",
+      "previousPeriod": "2024-12",
+      "previousGross": 934985,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": true
+    },
+    {
+      "id": "muni-coelemu",
+      "previousName": "Alejandro Rodrigo Pedreros Urrutia",
+      "previousPeriod": "2026-07",
+      "previousGross": 8899875,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-ranquil",
+      "previousName": "Nicolas Alfonso Torres Ovalle",
+      "previousPeriod": "2026-06",
+      "previousGross": 6868201,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-treguaco",
+      "previousName": "Raul Jaime Espejo Escobar",
+      "previousPeriod": "2024-12",
+      "previousGross": 3301183,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-sancarlos",
+      "previousName": "Williams Gaston Suazo Soto",
+      "previousPeriod": "2024-11",
+      "previousGross": 7163324,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-coihueco",
+      "previousName": "Wilson Enrique Palma Jelves",
+      "previousPeriod": "2026-07",
+      "previousGross": 8535170,
+      "latestPeriod": "2026-08",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    },
+    {
+      "id": "muni-sanfabian",
+      "previousName": "Cristofer Antonio Valdes Gonzalez",
+      "previousPeriod": "2026-06",
+      "previousGross": 6158480,
+      "latestPeriod": "2026-07",
+      "observedLatestMayors": [],
+      "selectedName": null,
+      "lowGross": false
+    }
+  ]
+}

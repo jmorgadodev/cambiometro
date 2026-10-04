@@ -12,6 +12,7 @@ import { CENSO_2024_OFICIAL } from './census-data.mjs';
 import { findBuyerByVerifiedRut, projectOfficialBuyer } from './etl/r10-chilecompra.mjs';
 import { partitionV7Records } from './etl/v7-quarantine.mjs';
 import { selectBestCpltDirectory } from './etl/municipal-cplt-source.mjs';
+import { isAlcaldiaRole, selectPublishedAlcaldia } from '../lib/municipal-alcaldia.ts';
 
 const root = process.cwd();
 
@@ -136,27 +137,8 @@ for (const muni of MUNICIPALIDADES_SEED) {
 
   // --- A. ALCALDE ---
   let alcalde = null;
-
-  if (!alcalde && rawStaff.length > 0) {
-    const alcaldeRecord = rawStaff.find(f => {
-      const cargo = String(f.cargo ?? "").toLowerCase().trim();
-      const est = String(f.estamento ?? "").toLowerCase().trim();
-      const bruto = Number(f.remuneracion_bruta_mensual ?? 0);
-      const isForbidden = cargo.includes("secretari") || cargo.includes("auxiliar") || cargo.includes("chofer") || cargo.includes("escuela") || cargo.includes("docente");
-      if (isForbidden) return false;
-      const isAlcaldeRole = est === "alcalde" ||
-        /^(?:alcaldia|alcaldía)\s+alcalde(?:sa)?$/.test(cargo) ||
-        /^(?:alcalde|alcaldesa)$/.test(cargo) ||
-        /^(?:alcalde|alcaldesa)\s+/.test(cargo);
-      // El sueldo de una alcaldía no tiene un umbral nacional único. Un corte
-      // oficial puede informar menos de $4 millones según comuna, jornada,
-      // descuentos o la forma en que la municipalidad publica la nómina.
-      // Filtrar por monto hacía desaparecer alcaldes válidos del release.
-      return isAlcaldeRole && bruto > 0;
-    });
-
-    if (alcaldeRecord) {
-      alcalde = {
+  const alcaldia_registros = rawStaff.filter(isAlcaldiaRole).map(alcaldeRecord => ({
+        id: alcaldeRecord.id,
         nombre: alcaldeRecord.nombre_completo,
         cargo: alcaldeRecord.cargo ?? null,
         estamento: "Alcalde",
@@ -165,12 +147,12 @@ for (const muni of MUNICIPALIDADES_SEED) {
         grado_eus: alcaldeRecord.grado_eus ? String(alcaldeRecord.grado_eus) : null,
         formacion: alcaldeRecord.formacion ?? null,
         fecha_ingreso: alcaldeRecord.fecha_ingreso ?? null,
+        fecha_termino: alcaldeRecord.fecha_termino ?? null,
+        observaciones: alcaldeRecord.observaciones ?? null,
         fuente: alcaldeRecord.url ?? alcaldeRecord.fuente ?? null,
         periodo: alcaldeRecord.periodo ?? alcaldeRecord.fuente_periodo ?? null,
         partido_alcalde: muni.partido_alcalde ?? null,
-      };
-    }
-  }
+  }));
 
   // --- B. PRESUPUESTO SINIM ---
   let presupuesto = null;
@@ -234,6 +216,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
     const validPeriods = Array.from(periodGroups.keys())
       .filter((p) => /^202[4-6]-(?:0[1-9]|1[0-2])$/.test(p))
       .sort((a, b) => b.localeCompare(a));
+    alcalde = selectPublishedAlcaldia(alcaldia_registros, validPeriods[0]);
 
     const benchmarkCount = validPeriods.length > 0
       ? Math.max(...validPeriods.map((p) => periodGroups.get(p).length), 1)
@@ -505,6 +488,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
     densidad_hab_km2,
     presupuesto_per_capita_clp,
     alcalde,
+    alcaldia_registros,
     partido_alcalde: alcalde?.partido_alcalde ?? null,
     presupuesto,
     resumen_personal,
