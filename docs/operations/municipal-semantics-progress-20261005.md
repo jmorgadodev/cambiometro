@@ -41,4 +41,28 @@ No desplegar desde el checkout divergente de Proyectos.
 - Reejecución posterior: `npm run test` terminó con código 0, 268 archivos y 1.569 pruebas aprobadas.
 - Producción permanece sin cambios hasta completar preview y promoción verificadas.
 
+## Verificación remota de la API candidata
+
+- PR: https://github.com/jmorgadodev/cambiometro/pull/714, candidato `cd26c28a94ed2713fe00d911448433a7d94792af`.
+- Pages preview: ejecución `37265967562`; en curso durante esta comprobación, regenerando agregados desde CPLT. No se reinició.
+- API: ejecución `37266160465`; validación y preview R2-only aprobados. Worker aislado: `https://cambiometro-public-api-r2-audit-preview.koooke.workers.dev`, versión `aab2e065-8c4c-4d24-be95-8e2a56aaf479`.
+- Consulta acotada de Abel: una fila, bruto 468212, líquido 410021, período 2025-01, URL oficial CPLT. `sueldoCompletoCount: null`, `completeMonthlyPayroll: false`, `stats.scope: page`, `stats.rows: 1`.
+- `totalHeadcount` conserva el universo de la fuente por compatibilidad; el total de la búsqueda es `meta.total: 1`. No interpretar el primero como personas únicas o coincidencias municipales.
+- Sigue pendiente render de Pages, promoción del candidato y verificación productiva. El preview no sustituye esa verificación.
+
+## Candidato y comprobaciones adicionales
+
+- Todos los checks del PR #714 terminaron aprobados, incluido build estático, APIs y verificación responsive (7m20s).
+- Versión candidata de la API productiva, aún sin tráfico: `8d2015f7-c10f-4d12-a5f9-2e0c771c8b24`, artefacto `worker-version-cd26c28a94ed2713fe00d911448433a7d94792af` de la ejecución `37266160465`.
+- Preview R2-only, agosto 2026: Tortel devuelve una fila de Marisela (8120877 bruto); O’Higgins devuelve Fica (7210087) y Torres (1824508), sin fusionarlas; Cobquecura devuelve cero coincidencias de alcaldía para ese período. Cero coincidencias del subconjunto no acredita ausencia de publicación oficial.
+- El build Pages específico que regenera los agregados (`37265967562`) continúa vivo; no se sustituyó por otro build ni se promovió su artefacto antes de terminar.
+- El token local no permite listar deployments del Worker (`No access to the specified resource`). Usar el workflow existente con sus permisos de CI para promover/verificar, no cambiar permisos locales ni inferir el deployment activo del listado de versiones.
+
+## Corrección acotada de reconstrucción
+
+- El helper de historial exigía coincidencia nominal incluso con ID explícito. Una prueba con un mismo ID y nombres presentados de manera distinta reprodujo la pérdida de un período; luego pasó al seleccionar primero por ID.
+- Sin ID se conserva la regla de no unir nombres con múltiples claves. No se crean identidades ni se modifican montos.
+- Medición sintética local, 20.000 filas y 20 llamadas: 301 ms antes, 12 ms después. No es una medición del build completo ni de producción.
+- Se mantiene viva la ejecución inicial; el nuevo código requiere su propio artefacto verificado, no se promoverá el anterior como si incluyera este cambio.
+
 No se subieron ni borraron objetos R2 ni se consultó D1 en este bloque. Los importes originales se mantienen. No se certifica cobertura mensual completa ni la causa económica del importe de Abel.

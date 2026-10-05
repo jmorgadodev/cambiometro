@@ -21,6 +21,14 @@ function row(overrides: Partial<FuncionarioPublico>): FuncionarioPublico {
 }
 
 describe("buildFuncionarioSalaryHistory", () => {
+  it("usa el ID explícito sin depender del formato del nombre", () => {
+    const history = buildFuncionarioSalaryHistory([
+      row({ id: "registro", nombre_completo: "Ana M. Pérez Soto", fuente_periodo: "2026-07" }),
+      row({ id: "registro", fuente_periodo: "2026-08" }),
+      row({ id: "otro", fuente_periodo: "2026-08" }),
+    ], "Ana Pérez Soto", "registro");
+    expect(history.map(point => point.periodo)).toEqual(["2026-07", "2026-08"]);
+  });
   it("ordena por período y separa registros con distintos identificadores", () => {
     const history = buildFuncionarioSalaryHistory([
       row({ id: "contract-a", fuente_periodo: "2026-03", remuneracion_bruta_mensual: 900_000, remuneracion_liquida_mensual: 700_000 }),

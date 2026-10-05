@@ -32,7 +32,10 @@ function periodLabel(periodo: string) {
 export function buildFuncionarioSalaryHistory(
   records: FuncionarioPublico[], targetName: string, targetId?: string,
 ): FuncionarioSalaryHistoryPoint[] {
-  const named = records.filter(row => normalizeName(row.nombre_completo) === normalizeName(targetName));
+  const target = targetId ? "" : normalizeName(targetName);
+  const named = targetId
+    ? records.filter(row => row.id === targetId)
+    : records.filter(row => normalizeName(row.nombre_completo) === target);
   const ids = new Set(named.map(row => row.id).filter(Boolean));
   const id = targetId ?? (ids.size === 1 ? [...ids][0] : undefined);
   if (!id) return [];
