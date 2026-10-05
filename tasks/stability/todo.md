@@ -1,5 +1,23 @@
 # Tablero de puertas verificables
 
+## Cierre solicitado — baja y media complejidad, 2026-10-05
+
+Este es el listado activo LM01–LM09. Los bloques O01–O16 de abajo conservan su propio alcance y evidencia; no se vuelven a ejecutar ni se suman para fabricar un porcentaje global. Cada LM usa las cuatro puertas definidas en `plan.md`; una ejecución omitida o una muestra no certifica una fuente completa.
+
+| ID | Tarea | Complejidad | Puertas comprobadas | Avance |
+| --- | --- | --- | --- | ---: |
+| LM01 | Tablero/documentación únicos y ruta vigente | Baja | Referencia, actualización y enlaces/diff validados; fusión pendiente | 75 % |
+| LM02 | Alcance, fuente y corte en cifras municipales | Baja | Pendiente revisar sólo etiquetas restantes | 0 % |
+| LM03 | Titular documentado separado del pago histórico en dos comunas | Baja–media | Pendiente | 0 % |
+| LM04 | Metodología: alcance efectivo por fuente | Baja–media | Pendiente | 0 % |
+| LM05 | Fechas/contadores coherentes Home–API–release | Media | Pendiente | 0 % |
+| LM06 | Procedencia, frecuencia, ejecución y fallos por ETL | Media | Pendiente; reutilizar `etl-closure.md` y registro | 0 % |
+| LM07 | Ciclo automático de anuncio y confirmación de Movimientos | Media | Pendiente; reutilizar pruebas/piloto cerrado | 0 % |
+| LM08 | Muestra de montos bajos, cero y faltantes contra origen | Media | Pendiente; alcance de muestra explícito | 0 % |
+| LM09 | Preflight de históricos y margen de cuenta sin cargar datos | Media | Pendiente; telemetría necesaria antes de publicar | 0 % |
+
+Fuera de este encargo: recuperar/ampliar históricos masivos, nuevos análisis dependientes de ellos y ChileCompra. No se modifican `cambiometro-editorial`, menú ni rutas.
+
 Actualizar este archivo y `evidence.md` en el mismo PR que completa una
 puerta. `0/4 = 0 %`, `1/4 = 25 %`, `2/4 = 50 %`, `3/4 = 75 %`, `4/4 = 100 %`.
 Para cada tarea, la cuarta puerta es la verificación externa o la fusión
