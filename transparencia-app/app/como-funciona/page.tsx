@@ -215,7 +215,7 @@ export default async function HowItWorksPage() {
         <section className="card" style={{ padding: "1.5rem" }} aria-labelledby="cohesion-method-title">
           <span className="eyebrow">Metodología reproducible</span>
           <h2 id="cohesion-method-title" style={{ fontSize: "1.25rem", margin: "0.25rem 0 0.5rem" }}>Cohesión de bancadas y votaciones destacadas</h2>
-          <p style={{ color: "var(--text-muted)", margin: 0 }}>La cohesión es el promedio, por bancada y cámara, de la cuota de la opción mayoritaria sobre votos efectivos (Afirmativo, En Contra y Abstención). Se excluyen ausencias, “No Vota”, dispensados y pareos; una bancada unitaria queda como “Sin muestra”. La selección destacada prioriza impacto institucional, quórum calificado, iniciativas presidenciales de alto perfil y seguimiento público; excluye votaciones procedimentales o sin quórum.</p>
+          <p style={{ color: "var(--text-muted)", margin: 0 }}>La cohesión es el promedio, por bancada y cámara, de la cuota de la opción mayoritaria sobre votos efectivos (Afirmativo, En Contra y Abstención). Se excluyen ausencias, “No Vota”, dispensados y pareos; una bancada unitaria queda como “Sin muestra”. La portada muestra las tres votaciones más recientes del Senado disponibles en el corte publicado; la tarjeta central tiene énfasis visual, no una clasificación de importancia. Los porcentajes representan los votos informados para cada registro y no se ajustan para aparentar diversidad.</p>
         </section>
 
         <section

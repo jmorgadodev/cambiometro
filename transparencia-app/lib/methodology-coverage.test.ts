@@ -8,4 +8,9 @@ describe("política pública de cobertura", () => {
       expect(page.includes(text), text).toBe(true);
     }
   });
+  it("describe la selección cronológica real de la portada", () => {
+    const page = readFileSync("app/como-funciona/page.tsx", "utf8");
+    expect(page.includes("las tres votaciones más recientes del Senado disponibles en el corte publicado")).toBe(true);
+    expect(page.includes("La selección destacada prioriza impacto institucional")).toBe(false);
+  });
 });
