@@ -1486,10 +1486,10 @@ export default function PersonasUniversalClient({
 
                         <div style={{ marginTop: "0.75rem", paddingTop: "0.65rem", borderTop: "1px solid var(--border)", display: "flex", flexDirection: "column", gap: "0.3rem", fontSize: "0.72rem" }}>
                           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                            <span style={{ color: "var(--text-3)" }}>{qualityInfo.isSinPago ? "Estado:" : "Sueldo Bruto:"}</span>
+                            <span style={{ color: "var(--text-3)" }}>{qualityInfo.isSinPago ? "Monto:" : "Remuneración bruta:"}</span>
                             {qualityInfo.isSinPago ? (
                               <span className="badge badge-subtle" style={{ fontSize: "0.68rem", fontWeight: 700 }}>
-                                Sin pago registrado
+                                No informado por la fuente
                               </span>
                             ) : (
                               <div style={{ display: "flex", alignItems: "center", gap: "0.35rem" }}>
@@ -1584,7 +1584,7 @@ export default function PersonasUniversalClient({
                           <td style={{ padding: "0.75rem 1rem", fontSize: "0.75rem", fontFamily: "monospace" }}>{formatEstamentoCorto(f.estamento).label}</td>
                           <td style={{ padding: "0.75rem 1rem", textAlign: "right", fontFamily: "monospace", fontWeight: 700, color: "var(--text-1)" }}>
                             {qualityInfo.isSinPago ? (
-                              <span className="badge badge-subtle" style={{ fontSize: "0.7rem" }}>Sin pago</span>
+                              <span className="badge badge-subtle" style={{ fontSize: "0.7rem" }}>Monto no informado</span>
                             ) : (
                               <div style={{ display: "inline-flex", alignItems: "center", gap: "0.3rem" }}>
                                 <span style={{ color: qualityInfo.isMicroMonto ? "var(--warn)" : "inherit" }}>{formatCLP(bruto)}</span>

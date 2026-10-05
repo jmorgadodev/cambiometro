@@ -23,6 +23,7 @@ import FuncionarioDetailDialog, { type FuncionarioDetailRecord } from "@/compone
 import { getVerifiedMuniRRSS } from "@/lib/municipalidades-rrss";
 import { buildFuncionarioSalaryHistory } from "@/lib/funcionarios-history";
 import type { FuncionarioPublico } from "@/lib/funcionarios";
+import { getAlcaldiaPayrollStatus, resolvePublishedAlcaldia, latestPublishedPayrollPeriod, payrollMonthsBehind } from "@/lib/municipal-alcaldia";
 
 interface Props {
   muniData: MunicipalidadEnriquecida;
@@ -32,7 +33,7 @@ interface Props {
 }
 
 function formatCLP(n?: number | null) {
-  if (n === null || n === undefined || isNaN(n) || n <= 0) return "—";
+  if (n === null || n === undefined || !Number.isFinite(n)) return "No informado";
   return new Intl.NumberFormat("es-CL", {
     style: "currency",
     currency: "CLP",
@@ -68,10 +69,7 @@ function getTopOvertimeAmount(record: TopFuncionarioRemuneracion) {
   if (record.horas_extras_monto !== undefined && record.horas_extras_monto !== null) {
     return record.horas_extras_monto;
   }
-  if (record.sueldo_base !== undefined && record.sueldo_base !== null) {
-    return Math.max(0, record.remuneracion_bruta - record.sueldo_base);
-  }
-  return 0;
+  return null;
 }
 
 function formatServiceYears(fechaIngreso?: string | null, periodo?: string | null) {
@@ -153,7 +151,28 @@ export default function MunicipalidadDetailDashboardClient({
   };
 
   const verifiedAlcalde = getVerifiedMuniRRSS(muniData.id)?.alcalde_oficial ?? null;
-  const alcalde: AlcaldeData | null = muniData.alcalde ?? (verifiedAlcalde ? {
+  const periodosDisponibles = useMemo(() => muniData.periodos_disponibles || [], [muniData]);
+  const defaultPeriod = latestPublishedPayrollPeriod(muniData) || "";
+  const [selectedPeriod, setSelectedPeriod] = useState<string>(defaultPeriod);
+  const payrollCandidate = resolvePublishedAlcaldia(muniData, selectedPeriod);
+  const payrollStatus = getAlcaldiaPayrollStatus(muniData, selectedPeriod);
+  const payrollAlcalde: AlcaldeData | null = payrollCandidate ? {
+    id: payrollCandidate.id,
+    nombre: String(("nombre_completo" in payrollCandidate
+      ? payrollCandidate.nombre_completo ?? payrollCandidate.nombre
+      : payrollCandidate.nombre) ?? ""),
+    cargo: payrollCandidate.cargo ?? null,
+    estamento: payrollCandidate.estamento ?? null,
+    remuneracion_bruta: payrollCandidate.remuneracion_bruta ?? null,
+    remuneracion_liquida: payrollCandidate.remuneracion_liquida ?? null,
+    grado_eus: payrollCandidate.grado_eus ?? null,
+    formacion: payrollCandidate.formacion ?? null,
+    fecha_ingreso: payrollCandidate.fecha_ingreso ?? null,
+    fecha_termino: payrollCandidate.fecha_termino ?? null,
+    fuente: payrollCandidate.fuente ?? null,
+    periodo: payrollCandidate.periodo ?? ("fuente_periodo" in payrollCandidate ? payrollCandidate.fuente_periodo ?? null : null),
+  } : null;
+  const alcalde: AlcaldeData | null = payrollAlcalde ?? (verifiedAlcalde ? {
     nombre: verifiedAlcalde.nombre,
     cargo: "Alcalde",
     estamento: "Alcalde",
@@ -166,8 +185,8 @@ export default function MunicipalidadDetailDashboardClient({
     periodo: null,
     partido_alcalde: verifiedAlcalde.partido,
   } : null);
-  const alcaldiaSourceUrl = /^https?:\/\//i.test(muniData.alcalde?.fuente ?? "")
-    ? muniData.alcalde?.fuente
+  const alcaldiaSourceUrl = /^https?:\/\//i.test(payrollAlcalde?.fuente ?? "")
+    ? payrollAlcalde?.fuente
     : muniData.sitio_transparencia_activa;
   const pres = muniData.presupuesto;
   const personal = muniData.resumen_personal;
@@ -179,9 +198,6 @@ export default function MunicipalidadDetailDashboardClient({
   const topHorasExtras = muniData.top_horas_extras ?? [];
   const integrityAnomalies = muniData.anomalias_integridad ?? [];
 
-  const periodosDisponibles = useMemo(() => muniData.periodos_disponibles || [], [muniData]);
-  const defaultPeriod = muniData.periodo_cplt_reciente || periodosDisponibles.find((p) => !p.es_parcial)?.periodo || periodosDisponibles[0]?.periodo || "2026-06";
-  const [selectedPeriod, setSelectedPeriod] = useState<string>(defaultPeriod);
 
   const availableYears = useMemo(() => {
     const yearsSet = new Set<number>();
@@ -216,7 +232,7 @@ export default function MunicipalidadDetailDashboardClient({
     if (monthsForYear.length > 0) {
       const isCurrentInYear = monthsForYear.some((p) => p.periodo === selectedPeriod);
       if (!isCurrentInYear) {
-        const bestMonth = monthsForYear.find((p) => !p.es_parcial) || monthsForYear[0];
+        const bestMonth = monthsForYear[0];
         setSelectedPeriod(bestMonth.periodo);
       }
     }
@@ -261,7 +277,7 @@ export default function MunicipalidadDetailDashboardClient({
         if (!responses.every((response) => response.ok)) return;
         const payloads = await Promise.all(responses.map((response) => response.json()));
         const rows = payloads.flat().filter((row): row is FuncionarioPublico => Boolean(row && typeof row === "object"));
-        const history = buildFuncionarioSalaryHistory(rows, selectedPerson.nombre);
+        const history = buildFuncionarioSalaryHistory(rows, selectedPerson.nombre, selectedPerson.id);
         if (active && history.length > 0) setTopHistory({ id: selectedPerson.id, history });
       } catch {
         // El expediente conserva el historial embebido en el release si la carga bajo demanda falla.
@@ -273,11 +289,8 @@ export default function MunicipalidadDetailDashboardClient({
 
   const selectedTopFuncionarioDetail: FuncionarioDetailRecord | null = selectedTopFuncionario
     ? (() => {
-        const base = selectedTopFuncionario.sueldo_base ?? null;
+        const base = null; // Legacy aggregates derived a base; it is not an official base salary.
         const amountProvided = selectedTopFuncionario.horas_extras_monto !== undefined && selectedTopFuncionario.horas_extras_monto !== null;
-        const calculatedOvertime = !amountProvided && base !== null
-          ? Math.max(0, selectedTopFuncionario.remuneracion_bruta - base)
-          : null;
         return {
           id: selectedTopFuncionario.id,
           nombre: selectedTopFuncionario.nombre,
@@ -288,8 +301,8 @@ export default function MunicipalidadDetailDashboardClient({
           remuneracionBruta: selectedTopFuncionario.remuneracion_bruta,
           remuneracionLiquida: selectedTopFuncionario.remuneracion_liquida,
           horasExtras: selectedTopFuncionario.horas_extras_hrs,
-          montoHorasExtras: amountProvided ? selectedTopFuncionario.horas_extras_monto : calculatedOvertime,
-          montoHorasExtrasCalculado: !amountProvided && calculatedOvertime !== null,
+          montoHorasExtras: amountProvided ? selectedTopFuncionario.horas_extras_monto : null,
+          montoHorasExtrasCalculado: false,
           grado: selectedTopFuncionario.grado_eus,
           formacion: selectedTopFuncionario.formacion,
           fechaIngreso: selectedTopFuncionario.fecha_ingreso,
@@ -300,12 +313,12 @@ export default function MunicipalidadDetailDashboardClient({
           cargosConsolidados: selectedTopFuncionario.cargos_consolidados,
           historial: topHistory?.id === selectedTopFuncionario.id
             ? topHistory.history
-            : selectedTopFuncionario.historial_salarial,
+            : selectedTopFuncionario.historial_salarial?.filter(point => point.registros === 1),
         };
       })()
     : null;
 
-  const desfaseMeses = muniData.desfase_meses ?? null;
+  const desfaseMeses = payrollMonthsBehind(defaultPeriod);
   const esDesfasado = desfaseMeses !== null && desfaseMeses > 3;
 
   const partidoAlcalde =
@@ -319,10 +332,8 @@ export default function MunicipalidadDetailDashboardClient({
       ? Math.round(presVigente / muniData.poblacion_censo_2024)
       : 0);
   const fcmPct = muniData.fcm_dependencia_pct ?? 0;
+  const fcmKnown = typeof muniData.fcm_dependencia_pct === "number" && Number.isFinite(muniData.fcm_dependencia_pct);
   const comprasMuni = muniData.compras_publicas;
-  const escenarioAnualPersonal = currentResumenPersonal?.masa_mensual_clp
-    ? currentResumenPersonal.masa_mensual_clp * 12
-    : null;
 
   return (
     <div style={{ display: "flex", flexDirection: "column", gap: "1.75rem" }}>
@@ -362,7 +373,7 @@ export default function MunicipalidadDetailDashboardClient({
                 marginBottom: "0.3rem",
               }}
             >
-              📊 Presupuesto SINIM 2025
+              📊 Presupuesto SINIM {pres?.ano ?? "sin período informado"}
             </div>
             <div
               style={{
@@ -515,7 +526,7 @@ export default function MunicipalidadDetailDashboardClient({
                 color: alcalde?.remuneracion_bruta ? "var(--ok)" : "var(--text-muted)",
               }}
             >
-              {typeof alcalde?.remuneracion_bruta === "number" ? formatCLP(alcalde.remuneracion_bruta) : "No publicado"}
+              {typeof alcalde?.remuneracion_bruta === "number" ? formatCLP(alcalde.remuneracion_bruta) : payrollStatus === "multiple" ? "Varios registros" : "Sin monto identificado"}
             </div>
             <div
               style={{
@@ -524,7 +535,9 @@ export default function MunicipalidadDetailDashboardClient({
                 marginTop: "0.25rem",
               }}
             >
-              {alcalde?.periodo ? `Corte CPLT ${alcalde.periodo}` : "No hay registro de remuneración en el corte CPLT"}
+              {alcalde?.periodo ? `Corte CPLT ${alcalde.periodo}` : payrollStatus === "multiple"
+                ? `Varios registros de alcaldía · ${selectedPeriod || "corte no informado"}`
+                : `Sin registro de remuneración de alcaldía en el corte · ${selectedPeriod || "corte no informado"}`}
             </div>
           </div>
 
@@ -562,7 +575,7 @@ export default function MunicipalidadDetailDashboardClient({
                 color: fcmPct > 60 ? "var(--warn)" : "var(--info)",
               }}
             >
-              {fcmPct.toFixed(1)}% FCM
+              {fcmKnown ? `${fcmPct.toFixed(1)}% FCM` : "FCM no informado"}
             </div>
             <div
               style={{
@@ -587,18 +600,16 @@ export default function MunicipalidadDetailDashboardClient({
           { label: "Compras y control", value: comprasMuni ? formatNum(comprasMuni.procesos_count ?? 0) : "No publicado", detail: `${auditorias.length} auditorías CGR`, tone: "warn" },
         ]}
         bars={[
-          { label: "Dependencia del Fondo Común Municipal", value: fcmPct > 0 ? fcmPct : null, displayValue: fcmPct > 0 ? `${fcmPct.toLocaleString("es-CL")} %` : "No publicado", detail: "Indicador SINIM", tone: fcmPct > 60 ? "warn" : "info" },
+          { label: "Dependencia del Fondo Común Municipal", value: fcmKnown ? fcmPct : null, displayValue: fcmKnown ? `${fcmPct.toLocaleString("es-CL")} %` : "No informado", detail: `SINIM ${muniData.fcm_periodo ?? "sin período informado"}`, tone: fcmPct > 60 ? "warn" : "info" },
           ...(currentResumenPersonal && currentResumenPersonal.total_funcionarios > 0
             ? [
-                { label: "Planta", value: (currentResumenPersonal.planta / currentResumenPersonal.total_funcionarios) * 100, displayValue: `${((currentResumenPersonal.planta / currentResumenPersonal.total_funcionarios) * 100).toFixed(1)} %`, detail: `${formatNum(currentResumenPersonal.planta)} funcionarios`, tone: "ok" as const },
-                { label: "Contrata", value: (currentResumenPersonal.contrata / currentResumenPersonal.total_funcionarios) * 100, displayValue: `${((currentResumenPersonal.contrata / currentResumenPersonal.total_funcionarios) * 100).toFixed(1)} %`, detail: `${formatNum(currentResumenPersonal.contrata)} funcionarios`, tone: "accent" as const },
+                { label: "Planta", value: (currentResumenPersonal.planta / currentResumenPersonal.total_funcionarios) * 100, displayValue: `${((currentResumenPersonal.planta / currentResumenPersonal.total_funcionarios) * 100).toFixed(1)} %`, detail: `${formatNum(currentResumenPersonal.planta)} registros`, tone: "ok" as const },
+                { label: "Contrata", value: (currentResumenPersonal.contrata / currentResumenPersonal.total_funcionarios) * 100, displayValue: `${((currentResumenPersonal.contrata / currentResumenPersonal.total_funcionarios) * 100).toFixed(1)} %`, detail: `${formatNum(currentResumenPersonal.contrata)} registros`, tone: "accent" as const },
               ]
             : []),
         ]}
         insight={
-          escenarioAnualPersonal
-            ? <>Escenario orientativo: la masa mensual del período equivaldría a <strong style={{ color: "var(--ok)" }}>{formatCompactCLP(escenarioAnualPersonal)}</strong> en 12 meses si se mantuviera constante. No reemplaza una ejecución anual oficial.</>
-            : <>La ficha no tiene una masa salarial mensual publicada para construir una extrapolación responsable.</>
+          <>Los importes corresponden a los registros disponibles del período. No acreditan una nómina mensual completa ni permiten extrapolar el gasto anual municipal.</>
         }
       />
 
@@ -852,7 +863,7 @@ export default function MunicipalidadDetailDashboardClient({
                       fontSize: "0.95rem",
                     }}
                   >
-                    {muniData.ingresos_totales_clp
+                    {typeof muniData.ingresos_totales_clp === "number"
                       ? formatCLP(muniData.ingresos_totales_clp)
                       : "—"}
                   </strong>
@@ -877,7 +888,7 @@ export default function MunicipalidadDetailDashboardClient({
                       fontSize: "0.95rem",
                     }}
                   >
-                    {muniData.fcm_ingresos_clp
+                    {typeof muniData.fcm_ingresos_clp === "number"
                       ? formatCLP(muniData.fcm_ingresos_clp)
                       : "—"}
                   </strong>
@@ -901,7 +912,7 @@ export default function MunicipalidadDetailDashboardClient({
                     margin: "0 0 1rem",
                   }}
                 >
-                  Proporción de ingresos generados localmente vs transferencias redistributivas
+                  Proporción del FCM sobre los ingresos totales informados
                 </p>
 
                 {/* Progress bar */}
@@ -923,7 +934,7 @@ export default function MunicipalidadDetailDashboardClient({
                         color: fcmPct > 60 ? "var(--warn)" : "var(--ok)",
                       }}
                     >
-                      {fcmPct.toFixed(1)}%
+                      {fcmKnown ? `${fcmPct.toFixed(1)}%` : "No informado"}
                     </strong>
                   </div>
                   <div
@@ -946,7 +957,7 @@ export default function MunicipalidadDetailDashboardClient({
                     />
                     <div
                       style={{
-                        width: `${Math.max(0, 100 - fcmPct)}%`,
+                        width: `${fcmKnown ? Math.max(0, 100 - fcmPct) : 0}%`,
                         background: "var(--info-bg)",
                       }}
                     />
@@ -960,8 +971,8 @@ export default function MunicipalidadDetailDashboardClient({
                       marginTop: "0.3rem",
                     }}
                   >
-                    <span>FCM ({fcmPct.toFixed(1)}%)</span>
-                    <span>Ingresos Propios ({(100 - fcmPct).toFixed(1)}%)</span>
+                    <span>{fcmKnown ? `FCM (${fcmPct.toFixed(1)}%)` : "FCM no informado"}</span>
+                    <span>{fcmKnown ? `Otros ingresos, distintos del FCM (${(100 - fcmPct).toFixed(1)}%)` : "Distribución no disponible"}</span>
                   </div>
                 </div>
 
@@ -975,12 +986,9 @@ export default function MunicipalidadDetailDashboardClient({
                     lineHeight: 1.5,
                   }}
                 >
-                  {fcmPct < 30 ? (
+                  {!fcmKnown ? <span>No hay importes comparables del mismo período para calcular la proporción de FCM.</span> : fcmPct < 30 ? (
                     <span>
-                      🟢 <strong>Alta Autonomía Financiera:</strong> La
-                      Municipalidad de {nombreComuna} financia la mayor parte de
-                      sus operaciones mediante ingresos propios (patentes, permisos
-                      y derechos municipales) y transfiere recursos al FCM.
+                      <strong>Menor proporción de FCM:</strong> El indicador informado es inferior al 30%. Los ingresos restantes no se clasifican como propios sin un desglose oficial.
                     </span>
                   ) : fcmPct > 60 ? (
                     <span>
@@ -991,9 +999,7 @@ export default function MunicipalidadDetailDashboardClient({
                     </span>
                   ) : (
                     <span>
-                      🔵 <strong>Autonomía Media:</strong> La comuna mantiene un
-                      balance mixto entre ingresos locales propios y aportes
-                      redistributivos del Fondo Común Municipal.
+                      <strong>Proporción intermedia de FCM:</strong> El indicador informado está entre el 30% y el 60%. No permite identificar por sí solo el origen de los ingresos restantes.
                     </span>
                   )}
                 </div>
@@ -1012,7 +1018,7 @@ export default function MunicipalidadDetailDashboardClient({
                   gap: "0.5rem",
                 }}
               >
-                <span>Fuente: Sistema Nacional de Información Municipal (SINIM / SUBDERE) · Partidas Variables M1 (Inicial), M2 (Vigente), M3 (Ingresos Propios), M4 (Gasto Personal) · Período 2025</span>
+                <span>Fuente: Sistema Nacional de Información Municipal (SINIM / SUBDERE) · Período {pres?.ano ?? "no informado"}. Los ingresos distintos del FCM no equivalen necesariamente a ingresos propios.</span>
                 <a
                   href="https://datos.sinim.gov.cl/datos_municipales.php"
                   target="_blank"
@@ -1065,13 +1071,13 @@ export default function MunicipalidadDetailDashboardClient({
                     📅 Declaraciones de Nómina CPLT
                   </span>
                   <span className="badge" style={{ fontSize: "0.68rem", background: "var(--bg-surface-2)", border: "1px solid var(--border-subtle)" }}>
-                    {periodosDisponibles.length} meses históricos
+                    {periodosDisponibles.length} períodos con registros
                   </span>
                 </div>
                 <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                   {selectedPeriodInfo?.es_parcial && (
                     <span className="badge badge-warn" style={{ fontSize: "0.68rem" }}>
-                      ⚠️ Declaración parcial ({selectedPeriodInfo.count.toLocaleString("es-CL")} reg.)
+                      Menor volumen de registros ({selectedPeriodInfo.count.toLocaleString("es-CL")} reg.)
                     </span>
                   )}
                   <span className="badge badge-info" style={{ fontSize: "0.72rem", fontFamily: "monospace" }}>
@@ -1202,7 +1208,7 @@ export default function MunicipalidadDetailDashboardClient({
               >
                 <div>
                   <span className="badge badge-info" style={{ fontSize: "0.68rem" }}>
-                    {alcalde?.periodo ? `Alcaldía en nómina · ${alcalde.periodo}` : "Alcaldía"}
+                    {payrollAlcalde?.periodo ? `Alcaldía en nómina · ${payrollAlcalde.periodo}` : verifiedAlcalde ? "Autoridad según fuente municipal" : "Alcaldía"}
                   </span>
                   <h3
                     style={{
@@ -1212,7 +1218,7 @@ export default function MunicipalidadDetailDashboardClient({
                       margin: "0.35rem 0 0",
                     }}
                   >
-                    {alcalde?.nombre || "Dato de alcaldía no publicado"}
+                    {alcalde?.nombre || (payrollStatus === "multiple" ? "Varios registros de alcaldía en este corte" : "No se identificó registro de alcaldía en este corte")}
                   </h3>
                 </div>
                 {alcalde ? (
@@ -1240,7 +1246,7 @@ export default function MunicipalidadDetailDashboardClient({
                     {partidoAlcalde ? brandingAlcalde.sigla || brandingAlcalde.nombre : "Partido no informado"}
                   </span>
                 ) : (
-                  <span className="badge">Sin registro</span>
+                  <span className="badge">Revisar nómina</span>
                 )}
               </div>
 
@@ -1271,7 +1277,7 @@ export default function MunicipalidadDetailDashboardClient({
                       marginTop: "0.15rem",
                     }}
                   >
-                    {typeof alcalde?.remuneracion_bruta === "number" ? formatCLP(alcalde.remuneracion_bruta) : "No publicado"}
+                    {typeof alcalde?.remuneracion_bruta === "number" ? formatCLP(alcalde.remuneracion_bruta) : payrollStatus === "multiple" ? "Varios registros; sin monto único" : "No informado en este registro"}
                   </div>
                 </div>
 
@@ -1294,7 +1300,7 @@ export default function MunicipalidadDetailDashboardClient({
                       marginTop: "0.15rem",
                     }}
                   >
-                    {typeof alcalde?.remuneracion_liquida === "number" ? formatCLP(alcalde.remuneracion_liquida) : "No publicado"}
+                    {typeof alcalde?.remuneracion_liquida === "number" ? formatCLP(alcalde.remuneracion_liquida) : payrollStatus === "multiple" ? "Varios registros; sin monto único" : "No informado en este registro"}
                   </div>
                 </div>
               </div>
@@ -1309,11 +1315,11 @@ export default function MunicipalidadDetailDashboardClient({
                   gap: "0.25rem",
                 }}
               >
-                {muniData.alcalde ? (
+                {payrollAlcalde ? (
                   <p role="note">
                     <strong>Origen del dato:</strong> nómina publicada por la Municipalidad de {nombreComuna} en Transparencia Activa,
                     recopilada por el Consejo para la Transparencia (CPLT).{" "}
-                    <strong>Período informado:</strong> {muniData.alcalde.periodo || "No informado"}.{" "}
+                    <strong>Período informado:</strong> {payrollAlcalde.periodo || "No informado"}.{" "}
                     {alcaldiaSourceUrl ? (
                       <a href={alcaldiaSourceUrl} target="_blank" rel="noopener noreferrer">
                         {/\.csv(?:[?#]|$)/i.test(alcaldiaSourceUrl) ? "Consultar datos de origen (CSV completo) ↗" : "Consultar fuente oficial ↗"}
@@ -1323,7 +1329,7 @@ export default function MunicipalidadDetailDashboardClient({
                 ) : null}
                 <p role="note">
                   Registro del corte publicado; no acredita por sí solo la vigencia legal del cargo.
-                  Las remuneraciones de cortes anteriores se conservan en la nómina histórica.
+                  Los registros anteriores disponibles se conservan como evidencia; no se garantiza una nómina completa de cada mes.
                   Esa nómina puede incluir exautoridades; el motivo de un pago sólo puede aclararse con documentación del organismo.
                 </p>
                 <div>
@@ -1348,7 +1354,7 @@ export default function MunicipalidadDetailDashboardClient({
                   </span>
                   <div>
                     <button type="button" className="btn btn-secondary" onClick={() => setActiveTab("personal")}>
-                      Revisar nómina completa
+                      Revisar registros disponibles
                     </button>{" "}
                     {muniData.sitio_transparencia_activa && (
                       <a href={muniData.sitio_transparencia_activa} target="_blank" rel="noopener noreferrer">
@@ -1368,10 +1374,10 @@ export default function MunicipalidadDetailDashboardClient({
                     className="section-title"
                     style={{ marginBottom: "0.2rem" }}
                   >
-                    👥 Composición de la Dotación Comunal
+                    👥 Composición de registros de personal
                   </div>
                   <span
-                    title="Ámbito de dotación: Corresponde a la dotación comunal completa registrada en Transparencia Activa CPLT, consolidando la administración central municipal (Planta, Contrata y Honorarios) junto al personal sectorial de salud (Ley 19.378) y educación (DAEM / Código del Trabajo)."
+                    title="Ámbito del conjunto: registros municipales integrados desde Transparencia Activa CPLT, incluidos los sectores de salud y educación cuando están disponibles. No acredita una dotación única ni una nómina mensual completa."
                     style={{
                       color: "var(--accent)",
                       cursor: "help",
@@ -1390,7 +1396,7 @@ export default function MunicipalidadDetailDashboardClient({
                       margin: 0,
                     }}
                   >
-                    Dotación de <strong>{formatNum(currentResumenPersonal.total_funcionarios)}</strong> funcionarios en <strong>{selectedPeriodInfo?.etiqueta || selectedPeriod}</strong>
+                    <strong>{formatNum(currentResumenPersonal.total_funcionarios)}</strong> registros de personal en <strong>{selectedPeriodInfo?.etiqueta || selectedPeriod}</strong>
                   </p>
                   <span className="badge badge-info" style={{ fontSize: "0.68rem", fontFamily: "monospace" }}>
                     Período: {selectedPeriodInfo?.etiqueta || selectedPeriod}
@@ -1465,7 +1471,7 @@ export default function MunicipalidadDetailDashboardClient({
 
                 {currentResumenPersonal.masa_mensual_clp ? (
                   <div style={{ marginTop: "0.75rem", fontSize: "0.73rem", color: "var(--text-muted)" }}>
-                    Masa salarial mensual del período: <strong style={{ color: "var(--ok)", fontFamily: "monospace" }}>{formatCLP(currentResumenPersonal.masa_mensual_clp)}</strong>
+                    Suma de importes brutos observados en el período: <strong style={{ color: "var(--ok)", fontFamily: "monospace" }}>{formatCLP(currentResumenPersonal.masa_mensual_clp)}</strong>
                   </div>
                 ) : null}
 
@@ -1480,7 +1486,7 @@ export default function MunicipalidadDetailDashboardClient({
                     lineHeight: 1.35,
                   }}
                 >
-                  * Total histórico consolidado en el sistema: <strong>{formatNum(muniData.resumen_personal?.total_funcionarios || 0)}</strong> personas físicas registradas a lo largo de {periodosDisponibles.length} declaraciones mensuales CPLT.
+                  * <strong>{formatNum(muniData.resumen_personal?.total_funcionarios || 0)}</strong> registros de cargos o contratos disponibles, distribuidos entre {periodosDisponibles.length} períodos. No equivalen a personas únicas ni acreditan nóminas completas de cada mes.
                 </div>
 
                 {currentResumenPersonal.es_parcial && (
@@ -1500,7 +1506,7 @@ export default function MunicipalidadDetailDashboardClient({
                   >
                     <span>⚠️</span>
                     <span>
-                      <strong>Declaración parcial:</strong> Este período registra {formatNum(currentResumenPersonal.total_funcionarios)} funcionarios (publicación preliminar o segmentada en la fuente CPLT).
+                      <strong>Menor volumen observado:</strong> Este período contiene {formatNum(currentResumenPersonal.total_funcionarios)} registros. La diferencia no acredita cambios de dotación ni una publicación preliminar de la fuente.
                     </span>
                   </div>
                 )}
@@ -1567,7 +1573,7 @@ export default function MunicipalidadDetailDashboardClient({
                     margin: 0,
                   }}
                 >
-                  Ordenado por sueldo bruto total (base + horas extras), con idéntico criterio que el buscador de funcionarios.
+                  Registros ordenados por remuneración bruta informada. No se infiere el sueldo base ni la identidad entre contratos.
                 </p>
               </div>
               <span className="badge badge-info" style={{ fontSize: "0.7rem", fontFamily: "monospace" }}>
@@ -1621,7 +1627,7 @@ export default function MunicipalidadDetailDashboardClient({
                         )}
                       </div>
                       <div style={{ fontSize: "0.73rem", color: "var(--text-subtle)", fontFamily: "monospace", marginTop: "0.25rem" }}>
-                        Base {formatCLP(r.sueldo_base ?? r.remuneracion_bruta)} · HH.EE. {formatCLP(getTopOvertimeAmount(r))} ({r.horas_extras_hrs ?? 0} hrs) · Total {formatCLP(r.remuneracion_bruta)}
+                        Bruto {formatCLP(r.remuneracion_bruta)} · Monto HH.EE. informado {formatCLP(getTopOvertimeAmount(r))} ({r.horas_extras_hrs ?? 0} hrs)
                       </div>
                     </div>
                     <div style={{ textAlign: "right" }}>
@@ -1660,7 +1666,7 @@ export default function MunicipalidadDetailDashboardClient({
                   color: "var(--text-primary)",
                 }}
               >
-                📋 Buscador y Nómina Completa de Funcionarios
+                📋 Buscador de registros municipales
               </h2>
               <p
                 style={{
@@ -1669,7 +1675,7 @@ export default function MunicipalidadDetailDashboardClient({
                   margin: 0,
                 }}
               >
-                Consulta directa de la dotación de la Municipalidad de {nombreComuna} en el período {selectedPeriodInfo?.etiqueta || selectedPeriod} con sueldos brutos, líquidos, estamentos y asignaciones.
+                Consulta los registros disponibles de la Municipalidad de {nombreComuna} para {selectedPeriodInfo?.etiqueta || selectedPeriod}, con importes brutos, líquidos, estamentos y asignaciones informados. No acredita una nómina mensual completa.
               </p>
             </div>
 

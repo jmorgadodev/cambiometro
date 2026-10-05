@@ -1,12 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
-import { selectPublishedAlcaldia, resolvePublishedAlcaldia } from "./municipal-alcaldia";
+import { getAlcaldiaPayrollStatus, selectPublishedAlcaldia, resolvePublishedAlcaldia, latestPublishedPayrollPeriod, payrollMonthsBehind } from "./municipal-alcaldia";
 
 const old = { nombre: "Abel Becerra Vidal", cargo: "Alcalde", periodo: "2025-01", remuneracion_bruta: 468212 };
 const recent = { nombre: "Marisela Jimenez Cruces", cargo: "Alcaldesa", periodo: "2026-08", remuneracion_bruta: 8120877 };
 
 describe("alcaldía y remuneración del corte publicado", () => {
+  it("selecciona el último corte disponible y calcula desfase con la fecha de consulta", () => {
+    expect(latestPublishedPayrollPeriod({ periodo_cplt_reciente: "2026-07", periodos_disponibles: [{ periodo: "2026-08" }, { periodo: "2026-99" }] })).toBe("2026-08");
+    expect(payrollMonthsBehind("2026-08", new Date("2026-10-05T12:00:00Z"))).toBe(2);
+    expect(payrollMonthsBehind("2026-08", new Date("2027-01-05T12:00:00Z"))).toBe(5);
+    expect(payrollMonthsBehind(null, new Date("2026-10-05T12:00:00Z"))).toBeNull();
+  });
   it("el directorio usa la misma alcaldía resuelta que la ficha, no el nombre histórico del índice", () => {
     const page = readFileSync(join(process.cwd(), "app/municipalidades/page.tsx"), "utf8");
     expect(page).toContain("getMunicipalidadData(item.id)?.alcalde ?? null");
@@ -51,5 +57,13 @@ describe("alcaldía y remuneración del corte publicado", () => {
   });
   it("conserva el estamento original aunque la alcaldesa figure como Directivo", () => {
     expect(selectPublishedAlcaldia([{ ...recent, estamento: "Directivo" }], "2026-08")?.estamento).toBe("Directivo");
+  });
+  it("consulta la alcaldía del mes seleccionado aunque exista un corte posterior parcial", () => {
+    const july = { ...recent, periodo: "2026-07" };
+    expect(resolvePublishedAlcaldia({ periodo_cplt_reciente: "2026-07", periodos_disponibles: [{ periodo: "2026-08" }], top_remuneraciones_por_periodo: { "2026-07": [july] } }, "2026-07")).toEqual(july);
+  });
+  it("distingue un corte sin registro de uno con varias alcaldías", () => {
+    expect(getAlcaldiaPayrollStatus({ alcaldia_registros: [], periodos_disponibles: [{ periodo: "2026-08" }] }, "2026-08")).toBe("sin_registro");
+    expect(getAlcaldiaPayrollStatus({ alcaldia_registros: [recent, { ...recent, nombre: "Otra persona" }] }, "2026-08")).toBe("multiple");
   });
 });

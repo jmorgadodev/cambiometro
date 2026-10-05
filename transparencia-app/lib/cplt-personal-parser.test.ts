@@ -2,6 +2,20 @@ import { describe, expect, it } from "vitest";
 import { createCpltRecordId, filterCpltRowsForPublication, filterCpltRowsForScope, parseCpltHeader, parseCpltRecord } from "../scripts/etl/cplt-personal.mjs";
 
 describe("parser de personal CPLT", () => {
+  it("distingue bruto vacío, inválido y cero explícito conservando el original", () => {
+    const header = parseCpltHeader("organismo_nombre;anyo;Mes;Nombres;Paterno;Materno;Tipo cargo;remuneracionbruta_mensual;remuliquida_mensual");
+    for (const raw of ["", "Sin información", "abc123"]) {
+      const record = parseCpltRecord({ line: `Municipalidad;2026;Agosto;ANA;PEREZ;SOTO;PROFESIONAL;${raw};`, header, tipo: "Planta", organismoId: "muni-prueba", sourceUrl: "https://oficial.test/planta" });
+      expect(record?.remuneracion_bruta_mensual).toBeNull();
+      expect(record?.remuneracion_liquida_mensual).toBeNull();
+      expect(record?.remuneracion_bruta_mensual_original).toBe(raw);
+    }
+    const zero = parseCpltRecord({ line: "Municipalidad;2026;Agosto;ANA;PEREZ;SOTO;PROFESIONAL;0;0", header, tipo: "Planta", organismoId: "muni-prueba", sourceUrl: "https://oficial.test/planta" });
+    expect(zero?.remuneracion_bruta_mensual).toBe(0);
+    expect(zero?.remuneracion_liquida_mensual).toBe(0);
+    const zeroLiquid = parseCpltRecord({ line: "Municipalidad;2026;Agosto;ANA;PEREZ;SOTO;PROFESIONAL;100000;0", header, tipo: "Planta", organismoId: "muni-prueba", sourceUrl: "https://oficial.test/planta" });
+    expect(zeroLiquid?.remuneracion_liquida_mensual).toBe(0);
+  });
   it("interpreta meses en texto y columnas de Planta", () => {
     const header = parseCpltHeader("organismo_nombre;anyo;Mes;Tipo Estamento;Nombres;Paterno;Materno;Tipo cargo;remuneracionbruta_mensual;remuliquida_mensual;observaciones;enlace");
     const record = parseCpltRecord({
@@ -83,7 +97,7 @@ describe("parser de personal CPLT", () => {
     expect(record?.id).toMatch(/^func-org-presidencia-honorarios-[a-f0-9]{16}$/);
   });
 
-  it("marca errores de formato de la fuente sin inventar nombre ni sueldo líquido", () => {
+  it("marca errores de formato y conserva cero explícito informado por la fuente", () => {
     const header = parseCpltHeader("organismo_nombre;anyo;Mes;Nombres;Paterno;Materno;descripcion_funcion;remuneracionbruta;remuliquida_mensual;enlace");
     const record = parseCpltRecord({
       line: "Municipalidad;2026;Junio;. EZZIO;BRAZZODURO;;SERVICIO;1000000;0;https://oficial.test/nomina",
@@ -96,12 +110,10 @@ describe("parser de personal CPLT", () => {
     expect(record).toMatchObject({
       nombre_completo: "Ezzio Brazzoduro",
       nombre_completo_original: ". Ezzio Brazzoduro",
-      remuneracion_liquida_mensual: null,
-      remuneracion_liquida_mensual_original: 0,
+      remuneracion_liquida_mensual: 0,
     });
     expect(record?.calidad_datos?.incidencias).toEqual([
       "nombre_prefijo_invalido",
-      "remuneracion_liquida_no_informada",
     ]);
   });
 

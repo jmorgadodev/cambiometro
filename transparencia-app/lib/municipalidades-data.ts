@@ -82,7 +82,7 @@ export interface TopFuncionarioRemuneracion {
   nombre: string;
   cargo: string | null;
   estamento?: string | null;
-  sueldo_base?: number;
+  sueldo_base?: number | null;
   horas_extras_monto?: number;
   horas_extras_hrs?: number;
   remuneracion_bruta: number;
@@ -100,9 +100,9 @@ export interface TopFuncionarioRemuneracion {
   historial_salarial?: Array<{
     periodo: string;
     etiqueta: string;
-    bruto: number;
+    bruto: number | null;
     liquido: number | null;
-    horasExtras: number;
+    horasExtras: number | null;
     montoHorasExtras: number | null;
     registros: number;
   }>;
@@ -228,6 +228,7 @@ export interface MunicipalidadEnriquecida {
   densidad_hab_km2?: number | null;
   presupuesto_per_capita_clp?: number | null;
   fcm_dependencia_pct?: number | null;
+  fcm_periodo?: string | null;
   fcm_ingresos_clp?: number | null;
   ingresos_totales_clp?: number | null;
   alcalde: AlcaldeData | null;

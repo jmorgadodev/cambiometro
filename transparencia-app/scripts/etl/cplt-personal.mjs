@@ -58,6 +58,11 @@ function dateCl(value) {
   return match ? `${match[3]}-${match[2]}-${match[1]}` : null;
 }
 
+function moneyCl(value) {
+  const text = String(value ?? "").trim();
+  return /^-?\d+(?:[.,]\d+)*$/.test(text) ? numberCl(text) : null;
+}
+
 function monthNumber(value) {
   const parsed = Number(value);
   if (Number.isInteger(parsed) && parsed >= 1 && parsed <= 12) return parsed;
@@ -199,9 +204,12 @@ export function parseCpltRecord({ line, columns: inputColumns = null, header, ti
   const extraDay = numberCl(readCell("horas extra diurnas"));
   const extraNight = numberCl(readCell("horas extra nocturnas"));
   const extraHoliday = numberCl(readCell("horas extra festivas"));
-  const remuneracionBruta = numberCl(readCell("remuneracionbruta_mensual", "remuneracionbruta"));
-  const remuneracionLiquidaOriginal = numberCl(readCell("remuliquida_mensual"));
-  const liquidNoInformada = remuneracionBruta > 0 && remuneracionLiquidaOriginal <= 0;
+  const brutoOriginal = readCell("remuneracionbruta_mensual", "remuneracionbruta");
+  const remuneracionBruta = moneyCl(brutoOriginal);
+  const liquidoOriginal = readCell("remuliquida_mensual");
+  const remuneracionLiquidaOriginal = moneyCl(liquidoOriginal);
+  const liquidNoInformada = (remuneracionBruta ?? 0) > 0 && remuneracionLiquidaOriginal === null;
+  if (remuneracionBruta === null) nombreNormalizado.incidencias.push("remuneracion_bruta_no_informada");
   if (liquidNoInformada) nombreNormalizado.incidencias.push("remuneracion_liquida_no_informada");
 
   return {
@@ -213,7 +221,7 @@ export function parseCpltRecord({ line, columns: inputColumns = null, header, ti
       calidad_datos: {
         estado: "normalizado",
         incidencias: nombreNormalizado.incidencias,
-        detalle: "Se corrigió sólo formato inequívoco de la fuente; el valor líquido cero se conserva como original y se muestra como no informado.",
+        detalle: "Se corrigió sólo formato inequívoco; cero explícito, valor no informado y valor inválido se mantienen diferenciados.",
       },
     } : { calidad_datos: { estado: "original", incidencias: [], detalle: "" } }),
     organo_nombre: readCell("organismo_nombre", "organismo nombre"),
@@ -222,8 +230,9 @@ export function parseCpltRecord({ line, columns: inputColumns = null, header, ti
     estamento: titleCase(readCell("tipo estamento")) || tipo,
     tipo_contrato: tipo,
     remuneracion_bruta_mensual: remuneracionBruta,
+    ...(remuneracionBruta === null ? { remuneracion_bruta_mensual_original: brutoOriginal } : {}),
     remuneracion_liquida_mensual: liquidNoInformada ? null : remuneracionLiquidaOriginal,
-    ...(liquidNoInformada ? { remuneracion_liquida_mensual_original: remuneracionLiquidaOriginal } : {}),
+    ...(liquidNoInformada ? { remuneracion_liquida_mensual_original: liquidoOriginal } : {}),
     fecha_ingreso: dateCl(readCell("fecha_ingreso")),
     fecha_termino: dateCl(readCell("fecha_termino")),
     horas_extras_diurnas_hrs: extraDay,

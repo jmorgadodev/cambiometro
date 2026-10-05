@@ -1,5 +1,5 @@
 import type { FuncionarioPublico } from "./funcionarios";
-import { classifyFuncionarioRecord } from "./funcionarios-quality";
+import { classifyFuncionarioRecord, summarizePayrollAmounts } from "./funcionarios-quality";
 import { matchesFuncionarioQuality, normalizeFuncionarioRecord, type FuncionarioQualityFilter } from "./funcionarios-normalization";
 
 export interface StaticFuncionariosQuery {
@@ -39,20 +39,21 @@ export function queryStaticFuncionarios(rows: FuncionarioPublico[], query: Stati
   const allRecords = period === "Todos"
     ? normalizedRows
     : normalizedRows.filter((row) => String(row.fuente_periodo ?? row.periodo ?? "") === period);
-  const sinPago = allRecords.filter((row) => salary(row) <= 0);
-  const microMonto = allRecords.filter((row) => salary(row) > 0 && salary(row) < 50_000);
-  const sueldoCompleto = allRecords.filter((row) => salary(row) >= 50_000);
   const needle = normalized(query.query);
   const contract = normalized(query.contrato ?? "Todos");
   const estamento = normalized(query.estamento ?? "Todos");
 
-  let filtered = allRecords.filter((row) => salary(row) > 0);
+  let filtered = [...allRecords];
   const quality = query.calidad ?? "Todos";
   if (quality !== "Todos") filtered = filtered.filter((row) => matchesFuncionarioQuality(row, quality));
   if (needle) filtered = filtered.filter((row) => normalized(`${row.nombre_completo} ${row.cargo} ${row.formacion ?? ""}`).includes(needle));
   if (contract && contract !== "todos") filtered = filtered.filter((row) => normalized(row.tipo_contrato).includes(contract));
   if (estamento && estamento !== "todos") filtered = filtered.filter((row) => normalized(row.estamento).includes(estamento));
+  if (query.sortBy === "sueldo_asc") filtered = filtered.filter(row => salary(row) > 0);
   sortRows(filtered, query.sortBy ?? "sueldo_desc");
+  const amounts = summarizePayrollAmounts(filtered);
+  const sinPago = filtered.filter(row => row.remuneracion_bruta_mensual == null || row.remuneracion_bruta_mensual === 0);
+  const microMonto = filtered.filter(row => salary(row) > 0 && salary(row) < 50_000);
 
   const page = Math.max(1, Math.trunc(query.page ?? 1));
   const limit = Math.min(100, Math.max(1, Math.trunc(query.limit ?? 24)));
@@ -81,8 +82,7 @@ export function queryStaticFuncionarios(rows: FuncionarioPublico[], query: Stati
     const cause = classifyFuncionarioRecord(row).causaId;
     if (cause && cause in causes) causes[cause as keyof typeof causes] += 1;
   }
-  const validSalaryTotal = sueldoCompleto.reduce((sum, row) => sum + salary(row), 0);
-  const qualityCounts = allRecords.reduce<Record<string, number>>((counts, row) => {
+  const qualityCounts = filtered.reduce<Record<string, number>>((counts, row) => {
     for (const issue of row.calidad_datos.incidencias) counts[issue] = (counts[issue] ?? 0) + 1;
     return counts;
   }, {});
@@ -94,17 +94,21 @@ export function queryStaticFuncionarios(rows: FuncionarioPublico[], query: Stati
     estamento: row.estamento,
     fuente_periodo: row.fuente_periodo ?? row.periodo ?? "",
     observaciones: row.observaciones ?? "",
+      remuneracion_bruta_mensual: row.remuneracion_bruta_mensual,
   }));
 
   return {
     data: filtered.slice((page - 1) * limit, page * limit),
     meta: {
       total,
-      totalHeadcount: allRecords.length,
+      totalHeadcount: filtered.length,
+      countUnit: "records",
+      completeMonthlyPayroll: false,
+      amountCounts: amounts.amountCounts,
       sinPagoCount: sinPago.length,
       microMontoCount: microMonto.length,
-      sueldoCompletoCount: sueldoCompleto.length,
-      observadosCount: sinPago.length + microMonto.length,
+      sueldoCompletoCount: null,
+      observadosCount: filtered.filter(row => row.calidad_datos.incidencias.length > 0).length,
       page,
       totalPages: Math.max(1, Math.ceil(total / limit)),
       limit,
@@ -112,19 +116,21 @@ export function queryStaticFuncionarios(rows: FuncionarioPublico[], query: Stati
       sourceStatus: "static-fallback",
       calidadDatos: {
         alcance: "nomina_consultada",
-        registrosConIncidencias: allRecords.filter((row) => row.calidad_datos.incidencias.length > 0).length,
+        registrosConIncidencias: filtered.filter((row) => row.calidad_datos.incidencias.length > 0).length,
         porIncidencia: qualityCounts,
         metodologia: "Se corrigen sólo espacios y prefijos aislados inequívocos para lectura. Se conserva el valor original y no se infieren nombres ni remuneraciones.",
       },
-      causasBreakdown: { ...causes, nominal_sin_pago: sinPago.length },
+      causasBreakdown: causes,
       anomaliasSample,
       sinPagoSample,
       stats: {
-        totalMuni: allRecords.length,
-        totalValidos: sueldoCompleto.length,
-        promedioSueldo: sueldoCompleto.length ? Math.round(validSalaryTotal / sueldoCompleto.length) : 0,
-        conHorasExtras: sueldoCompleto.filter((row) => Number(row.horas_extras_mes_anterior ?? 0) > 0).length,
-        observadosCount: sinPago.length + microMonto.length,
+        scope: "filtered_records",
+        rows: filtered.length,
+        totalMuni: filtered.length,
+        totalValidos: amounts.informedCount,
+        promedioSueldo: amounts.meanAmount,
+        conHorasExtras: filtered.filter((row) => Number(row.horas_extras_mes_anterior ?? 0) > 0).length,
+        observadosCount: filtered.filter(row => row.calidad_datos.incidencias.length > 0).length,
         sinPagoCount: sinPago.length,
         microMontoCount: microMonto.length,
       },
