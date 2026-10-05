@@ -1,12 +1,27 @@
 import { describe, expect, it } from "vitest";
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
+import { getVerifiedMuniRRSS } from "./municipalidades-rrss";
 import { getAlcaldiaPayrollStatus, selectPublishedAlcaldia, resolvePublishedAlcaldia, latestPublishedPayrollPeriod, payrollMonthsBehind } from "./municipal-alcaldia";
 
 const old = { nombre: "Abel Becerra Vidal", cargo: "Alcalde", periodo: "2025-01", remuneracion_bruta: 468212 };
 const recent = { nombre: "Marisela Jimenez Cruces", cargo: "Alcaldesa", periodo: "2026-08", remuneracion_bruta: 8120877 };
 
 describe("alcaldía y remuneración del corte publicado", () => {
+  it("conserva autoridades documentadas separadas de los registros de pago", () => {
+    for (const [id, nombre, host] of [
+      ["muni-tortel", "Marisela Jiménez Cruces", "www.tortel.cl"],
+      ["muni-ohiggins", "Raquel Torres Cuevas", "www.municipalidadohiggins.cl"],
+    ]) {
+      const authority = getVerifiedMuniRRSS(id)?.autoridad_documentada;
+      expect(authority?.nombre).toBe(nombre);
+      expect(new URL(authority!.url).hostname).toBe(host);
+      expect(authority?.fecha_revision).toBe("2026-10-05");
+      expect(authority).not.toHaveProperty("remuneracion_bruta");
+      expect(authority).not.toHaveProperty("partido");
+    }
+    expect(old.remuneracion_bruta).toBe(468212);
+  });
   it("selecciona el último corte disponible y calcula desfase con la fecha de consulta", () => {
     expect(latestPublishedPayrollPeriod({ periodo_cplt_reciente: "2026-07", periodos_disponibles: [{ periodo: "2026-08" }, { periodo: "2026-99" }] })).toBe("2026-08");
     expect(payrollMonthsBehind("2026-08", new Date("2026-10-05T12:00:00Z"))).toBe(2);
