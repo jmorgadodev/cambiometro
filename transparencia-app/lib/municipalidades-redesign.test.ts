@@ -173,13 +173,15 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
       expect(listPageSource).toContain("⚖️ CGR:");
     });
 
-    it("M4. Composición de dotación de Santiago cuadra con la nómina CPLT actual", () => {
+    it("M4. Las categorías suman los registros de Santiago sin afirmar una nómina completa", () => {
       const santiago = getMunicipalidadData("muni-santiago");
       expect(santiago?.resumen_personal).toBeDefined();
       const { planta, contrata, honorarios, codigo_trabajo_salud_educacion, total_funcionarios } = santiago!.resumen_personal!;
       expect(total_funcionarios).toBeGreaterThan(0);
       expect(planta + contrata + honorarios + codigo_trabajo_salud_educacion).toBe(total_funcionarios);
-      expect(detailPageSource).toContain("Ámbito de dotación");
+      expect(detailPageSource).toContain("Ámbito del conjunto");
+      expect(detailPageSource).toContain("No acredita una dotación única ni una nómina mensual completa.");
+      expect(detailPageSource).not.toContain("dotación comunal completa registrada");
     });
   });
 
