@@ -13,7 +13,7 @@ Este es el listado activo LM01–LM09. Los bloques O01–O16 de abajo conservan 
 | LM05 | Fechas/contadores coherentes Home–API–release | Media | Pendiente | 0 % |
 | LM06 | Procedencia, frecuencia, ejecución y fallos por ETL | Media | Pendiente; reutilizar `etl-closure.md` y registro | 0 % |
 | LM07 | Ciclo automático de anuncio y confirmación de Movimientos | Media | Piloto/pruebas reutilizados y 71 pruebas actuales aprobadas; falta cotejo productivo y cierre documental | 50 % |
-| LM08 | Muestra de montos bajos, cero y faltantes contra origen | Media | Pendiente; alcance de muestra explícito | 0 % |
+| LM08 | Muestra de montos bajos, cero y faltantes contra origen | Media | Cuatro casos positivos cotejados previamente; Abel reconfirmado y 16 pruebas semánticas aprobadas; falta evidencia original de cero/faltante | 50 % |
 | LM09 | Preflight de históricos y margen de cuenta sin cargar datos | Media | Pendiente; telemetría necesaria antes de publicar | 0 % |
 
 Fuera de este encargo: recuperar/ampliar históricos masivos, nuevos análisis dependientes de ellos y ChileCompra. No se modifican `cambiometro-editorial`, menú ni rutas.
