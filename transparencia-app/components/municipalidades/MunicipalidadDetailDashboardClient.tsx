@@ -603,8 +603,8 @@ export default function MunicipalidadDetailDashboardClient({
           { label: "Dependencia del Fondo Común Municipal", value: fcmKnown ? fcmPct : null, displayValue: fcmKnown ? `${fcmPct.toLocaleString("es-CL")} %` : "No informado", detail: `SINIM ${muniData.fcm_periodo ?? "sin período informado"}`, tone: fcmPct > 60 ? "warn" : "info" },
           ...(currentResumenPersonal && currentResumenPersonal.total_funcionarios > 0
             ? [
-                { label: "Planta", value: (currentResumenPersonal.planta / currentResumenPersonal.total_funcionarios) * 100, displayValue: `${((currentResumenPersonal.planta / currentResumenPersonal.total_funcionarios) * 100).toFixed(1)} %`, detail: `${formatNum(currentResumenPersonal.planta)} funcionarios`, tone: "ok" as const },
-                { label: "Contrata", value: (currentResumenPersonal.contrata / currentResumenPersonal.total_funcionarios) * 100, displayValue: `${((currentResumenPersonal.contrata / currentResumenPersonal.total_funcionarios) * 100).toFixed(1)} %`, detail: `${formatNum(currentResumenPersonal.contrata)} funcionarios`, tone: "accent" as const },
+                { label: "Planta", value: (currentResumenPersonal.planta / currentResumenPersonal.total_funcionarios) * 100, displayValue: `${((currentResumenPersonal.planta / currentResumenPersonal.total_funcionarios) * 100).toFixed(1)} %`, detail: `${formatNum(currentResumenPersonal.planta)} registros`, tone: "ok" as const },
+                { label: "Contrata", value: (currentResumenPersonal.contrata / currentResumenPersonal.total_funcionarios) * 100, displayValue: `${((currentResumenPersonal.contrata / currentResumenPersonal.total_funcionarios) * 100).toFixed(1)} %`, detail: `${formatNum(currentResumenPersonal.contrata)} registros`, tone: "accent" as const },
               ]
             : []),
         ]}
@@ -912,7 +912,7 @@ export default function MunicipalidadDetailDashboardClient({
                     margin: "0 0 1rem",
                   }}
                 >
-                  Proporción de ingresos generados localmente vs transferencias redistributivas
+                  Proporción del FCM sobre los ingresos totales informados
                 </p>
 
                 {/* Progress bar */}
@@ -1277,7 +1277,7 @@ export default function MunicipalidadDetailDashboardClient({
                       marginTop: "0.15rem",
                     }}
                   >
-                    {typeof alcalde?.remuneracion_bruta === "number" ? formatCLP(alcalde.remuneracion_bruta) : "No publicado"}
+                    {typeof alcalde?.remuneracion_bruta === "number" ? formatCLP(alcalde.remuneracion_bruta) : payrollStatus === "multiple" ? "Varios registros; sin monto único" : "No informado en este registro"}
                   </div>
                 </div>
 
@@ -1300,7 +1300,7 @@ export default function MunicipalidadDetailDashboardClient({
                       marginTop: "0.15rem",
                     }}
                   >
-                    {typeof alcalde?.remuneracion_liquida === "number" ? formatCLP(alcalde.remuneracion_liquida) : "No publicado"}
+                    {typeof alcalde?.remuneracion_liquida === "number" ? formatCLP(alcalde.remuneracion_liquida) : payrollStatus === "multiple" ? "Varios registros; sin monto único" : "No informado en este registro"}
                   </div>
                 </div>
               </div>
@@ -1354,7 +1354,7 @@ export default function MunicipalidadDetailDashboardClient({
                   </span>
                   <div>
                     <button type="button" className="btn btn-secondary" onClick={() => setActiveTab("personal")}>
-                      Revisar nómina completa
+                      Revisar registros disponibles
                     </button>{" "}
                     {muniData.sitio_transparencia_activa && (
                       <a href={muniData.sitio_transparencia_activa} target="_blank" rel="noopener noreferrer">
@@ -1374,10 +1374,10 @@ export default function MunicipalidadDetailDashboardClient({
                     className="section-title"
                     style={{ marginBottom: "0.2rem" }}
                   >
-                    👥 Composición de la Dotación Comunal
+                    👥 Composición de registros de personal
                   </div>
                   <span
-                    title="Ámbito de dotación: Corresponde a la dotación comunal completa registrada en Transparencia Activa CPLT, consolidando la administración central municipal (Planta, Contrata y Honorarios) junto al personal sectorial de salud (Ley 19.378) y educación (DAEM / Código del Trabajo)."
+                    title="Ámbito del conjunto: registros municipales integrados desde Transparencia Activa CPLT, incluidos los sectores de salud y educación cuando están disponibles. No acredita una dotación única ni una nómina mensual completa."
                     style={{
                       color: "var(--accent)",
                       cursor: "help",
@@ -1396,7 +1396,7 @@ export default function MunicipalidadDetailDashboardClient({
                       margin: 0,
                     }}
                   >
-                    Dotación de <strong>{formatNum(currentResumenPersonal.total_funcionarios)}</strong> funcionarios en <strong>{selectedPeriodInfo?.etiqueta || selectedPeriod}</strong>
+                    <strong>{formatNum(currentResumenPersonal.total_funcionarios)}</strong> registros de personal en <strong>{selectedPeriodInfo?.etiqueta || selectedPeriod}</strong>
                   </p>
                   <span className="badge badge-info" style={{ fontSize: "0.68rem", fontFamily: "monospace" }}>
                     Período: {selectedPeriodInfo?.etiqueta || selectedPeriod}
@@ -1471,7 +1471,7 @@ export default function MunicipalidadDetailDashboardClient({
 
                 {currentResumenPersonal.masa_mensual_clp ? (
                   <div style={{ marginTop: "0.75rem", fontSize: "0.73rem", color: "var(--text-muted)" }}>
-                    Masa salarial mensual del período: <strong style={{ color: "var(--ok)", fontFamily: "monospace" }}>{formatCLP(currentResumenPersonal.masa_mensual_clp)}</strong>
+                    Suma de importes brutos observados en el período: <strong style={{ color: "var(--ok)", fontFamily: "monospace" }}>{formatCLP(currentResumenPersonal.masa_mensual_clp)}</strong>
                   </div>
                 ) : null}
 
@@ -1666,7 +1666,7 @@ export default function MunicipalidadDetailDashboardClient({
                   color: "var(--text-primary)",
                 }}
               >
-                📋 Buscador y Nómina Completa de Funcionarios
+                📋 Buscador de registros municipales
               </h2>
               <p
                 style={{
@@ -1675,7 +1675,7 @@ export default function MunicipalidadDetailDashboardClient({
                   margin: 0,
                 }}
               >
-                Consulta directa de la dotación de la Municipalidad de {nombreComuna} en el período {selectedPeriodInfo?.etiqueta || selectedPeriod} con sueldos brutos, líquidos, estamentos y asignaciones.
+                Consulta los registros disponibles de la Municipalidad de {nombreComuna} para {selectedPeriodInfo?.etiqueta || selectedPeriod}, con importes brutos, líquidos, estamentos y asignaciones informados. No acredita una nómina mensual completa.
               </p>
             </div>
 

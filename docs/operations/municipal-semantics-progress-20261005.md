@@ -73,3 +73,9 @@ No desplegar desde el checkout divergente de Proyectos.
 - El build inicial llegó a verificación de navegador/temas/CSP. El build intermedio `37266955702`, aún pendiente sin ejecutar, se retirará porque falta el ajuste FCM; no se cancela por un timeout ni se reinicia una ejecución activa.
 
 No se subieron ni borraron objetos R2 ni se consultó D1 en este bloque. Los importes originales se mantienen. No se certifica cobertura mensual completa ni la causa económica del importe de Abel.
+
+## Revisión visual del preview y cierre de etiquetas
+
+- Preview inicial `https://68e9ff63.cambiometro.pages.dev`: O’Higgins muestra varios registros de alcaldía, pero el detalle aún indicaba «No publicado». Se corrigió a «Varios registros; sin monto único».
+- Se retiraron las promesas de nómina/dotación completa, incluidos el tooltip y el buscador; los conteos describen registros, no personas únicas. La disponibilidad de archivos no acredita ausencia de publicación oficial en otras comunas.
+- Validación focalizada posterior: 47 pruebas aprobadas en cuatro archivos. La suite completa previa aprobó 1.571 pruebas. Producción sigue pendiente de promoción y comprobación del artefacto final.

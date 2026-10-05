@@ -524,7 +524,7 @@ export default function OrganismoFuncionariosList({
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.75rem", marginBottom: "1rem", fontSize: "0.82rem", color: "var(--text-muted)" }}>
         <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", flexWrap: "wrap" }}>
           <span>
-            Mostrando <strong>{total.toLocaleString("es-CL")}</strong> funcionarios navegables{" "}
+            Mostrando <strong>{total.toLocaleString("es-CL")}</strong> registros consultables{" "}
             {totalHeadcount > 0 ? (
               <span style={{ color: "var(--text-subtle)" }}>
                 ({totalHeadcount.toLocaleString("es-CL")} registros en los filtros actuales; son filas de nómina, no personas únicas ni sueldos completos)
@@ -557,8 +557,8 @@ export default function OrganismoFuncionariosList({
       )}
       {payrollCoverage && payrollCoverage.available < payrollCoverage.expected && (
         <div className="card-flat" role="note" style={{ marginBottom: "1rem", padding: "0.8rem 1rem", fontSize: "0.78rem", lineHeight: 1.5, color: "var(--text-muted)" }}>
-          <strong style={{ color: "var(--text-primary)" }}>Cobertura real de nóminas:</strong>{" "}
-          el corte actual publica registros para {payrollCoverage.available.toLocaleString("es-CL")} de {payrollCoverage.expected.toLocaleString("es-CL")} comunas. Las comunas sin nómina publicada se mantienen como “sin datos publicados”; no se muestran como $0 ni se completan con estimaciones.
+          <strong style={{ color: "var(--text-primary)" }}>Alcance del conjunto disponible:</strong>{" "}
+          hay registros integrados para {payrollCoverage.available.toLocaleString("es-CL")} de {payrollCoverage.expected.toLocaleString("es-CL")} entradas comunales. Esto no acredita nóminas completas ni ausencia de publicación oficial en las demás comunas. Los faltantes no se reemplazan por $0 ni estimaciones.
         </div>
       )}
       {visibleQualityCount > 0 && (
