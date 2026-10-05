@@ -1,5 +1,31 @@
 # Cierre individual de ETL
 
+## Comprobación operativa del 5 de octubre de 2026
+
+Consulta de metadatos Actions, sin ejecutar ingestas ni consultar D1. La última ejecución no equivale al último corte publicado:
+
+| Flujo | Última ejecución observada | Resultado y alcance comprobado |
+| --- | --- | --- |
+| Cámara | 37203950593, 4 oct, schedule | success; publicación/conteos aún por cotejar |
+| Votaciones Cámara | 37204638954, 4 oct, schedule | success; publicación/conteos aún por cotejar |
+| Movimientos | 37203847565, 4 oct, schedule | Recupera release, revisa novedades y resume; publicación omitida (no se acredita un release nuevo) |
+| Apoyo Cámara | 36959078144, 2 oct, manual | success de workflow; no acredita recuperación del bloqueo externo |
+| Apoyo Senado | 37048541225, 2 oct, manual | success; cierre anterior conserva su alcance documentado |
+| InfoLobby | 37272047367, 5 oct, push | Sólo validación de workflow; ingesta omitida, no es actualización de datos |
+| Contraloría | 37025325935, 2 oct, schedule | failure: espera del navegador agotada tras 9/27 áreas centrales; candidato incompleto, no anunciar actualización |
+| CPLT | 37118857265, 3 oct, manual | check-sources-only; sin extracción |
+| Ley 19.862 | 37108164915, 3 oct, manual | verify-only; sin extracción |
+| InfoProbidad | 37106727934, 3 oct, manual | verify-only; sin extracción |
+| DIPRES | 37085144507, 3 oct, manual | verify-only; sin extracción |
+| SINIM | 37062175649, 2 oct, manual | verify-only; sin extracción |
+| Gastos Senado | 37044606324, 2 oct, manual | success; alcance del replay documentado abajo |
+| 38 bis | 37086353257, 3 oct, manual | no-op comprobado previamente; sin release nuevo |
+| SERVEL | 32853028527, 25 ago, manual | success; no actualización automática posterior acreditada |
+| Reconciliación Cámara | 34608470964, 11 sep, manual | success; no corte posterior acreditado |
+| CPLT central | 35056072805, 16 sep, manual | cancelled; no acredita publicación |
+
+ChileCompra excluido de este lote por prioridad explícita. Senado votaciones sigue local-only. Esta tabla es evidencia de operación observada, no certificación de datos, costes ni cobertura completa. Contraloría requiere comprobar preservación del release anterior antes de cerrar LM06; no se relanza el conector ni se amplía su recuperación en este lote.
+
 Actualizado: 2026-10-03. Inventario preliminar obtenido del
 [`etl-calendar.json`](../../.github/etl-calendar.json). El calendario prueba
 intención de ejecución, **no** procedencia efectiva ni funcionamiento. Los
