@@ -14,6 +14,12 @@ const render = (sourceUrl?: string) => renderToStaticMarkup(createElement(Funcio
 }));
 
 describe("procedencia y alcance de remuneraciones municipales", () => {
+  it("la lectura rápida conserva presupuesto cero y no afirma ausencia oficial", () => {
+    const source = readFileSync(resolve("components/municipalidades/MunicipalidadDetailDashboardClient.tsx"), "utf8");
+    expect(source.includes('const presupuestoPublicado = pres?.vigente_clp ?? pres?.inicial_clp ?? null')).toBe(true);
+    expect(source.includes('label: "Presupuesto vigente", value: presupuestoPublicado !== null')).toBe(true);
+    expect(source.includes('"No publicado por la fuente"')).toBe(false);
+  });
   it("no convierte ausencia en compras/control en ausencia de publicación oficial", () => {
     const source = readFileSync(resolve("components/municipalidades/MunicipalidadDetailDashboardClient.tsx"), "utf8");
     expect(source).toContain('"Sin registros integrados"');

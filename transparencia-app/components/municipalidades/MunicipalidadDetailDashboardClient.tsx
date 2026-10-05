@@ -325,7 +325,8 @@ export default function MunicipalidadDetailDashboardClient({
     alcalde?.partido_alcalde || "";
   const brandingAlcalde = getPartidoConfig(partidoAlcalde);
 
-  const presVigente = pres?.vigente_clp ?? pres?.inicial_clp ?? 0;
+  const presupuestoPublicado = pres?.vigente_clp ?? pres?.inicial_clp ?? null;
+  const presVigente = presupuestoPublicado ?? 0;
   const perCapita =
     muniData.presupuesto_per_capita_clp ??
     (muniData.poblacion_censo_2024 && presVigente > 0
@@ -490,7 +491,7 @@ export default function MunicipalidadDetailDashboardClient({
             >
               {muniData.poblacion_censo_2024
                 ? "Censo 2024 INE / SINIM"
-                : "No publicado por la fuente"}
+                : "Sin dato integrado"}
             </div>
           </div>
 
@@ -594,9 +595,9 @@ export default function MunicipalidadDetailDashboardClient({
         title={`Lectura rápida de ${nombreComuna}`}
         description="Una vista de contexto para entender la escala financiera, territorial y de control antes de entrar al detalle. Las cifras se calculan con el último corte municipal disponible y conservan sus períodos y ausencias."
         metrics={[
-          { label: "Población Censo 2024", value: muniData.poblacion_censo_2024 ? formatNum(muniData.poblacion_censo_2024) : "No publicado", detail: muniData.superficie_km2 ? `${muniData.superficie_km2.toLocaleString("es-CL")} km²` : "INE", tone: "accent" },
-          { label: "Presupuesto vigente", value: presVigente > 0 ? formatCompactCLP(presVigente) : "No publicado", detail: perCapita > 0 ? `${formatCLP(perCapita)} por habitante` : `SINIM ${pres?.ano ?? "s/f"}`, tone: "ok" },
-          { label: "Personal del período", value: currentResumenPersonal ? formatNum(currentResumenPersonal.total_funcionarios) : "No publicado", detail: selectedPeriodInfo?.etiqueta ?? "CPLT", tone: "info" },
+          { label: "Población Censo 2024", value: muniData.poblacion_censo_2024 != null ? formatNum(muniData.poblacion_censo_2024) : "Sin dato integrado", detail: muniData.superficie_km2 ? `${muniData.superficie_km2.toLocaleString("es-CL")} km²` : "INE", tone: "accent" },
+          { label: "Presupuesto vigente", value: presupuestoPublicado !== null ? formatCompactCLP(presupuestoPublicado) : "Sin dato integrado", detail: perCapita > 0 ? `${formatCLP(perCapita)} por habitante` : `SINIM ${pres?.ano ?? "s/f"}`, tone: "ok" },
+          { label: "Registros de personal del período", value: currentResumenPersonal ? formatNum(currentResumenPersonal.total_funcionarios) : "Sin registros integrados", detail: selectedPeriodInfo?.etiqueta ?? "CPLT", tone: "info" },
           { label: "Compras y control", value: comprasMuni?.procesos_count != null ? formatNum(comprasMuni.procesos_count) : "Sin registros integrados", detail: `${auditorias.length} informes CGR integrados; no representa el universo completo`, tone: "warn" },
         ]}
         bars={[
