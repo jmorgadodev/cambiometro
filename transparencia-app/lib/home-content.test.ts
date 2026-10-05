@@ -62,7 +62,7 @@ describe("portada editorial conectada a datos públicos", () => {
   it("muestra fechas legibles y alimenta las fichas recientes desde el release R2", () => {
     expect(movements).toContain("ÚLTIMA SEÑAL PUBLICADA");
     expect(movements).toContain("CAMBIO EFECTIVO");
-    expect(movements).toContain("Última revisión");
+    expect(movements).toContain("Última revisión publicada");
     expect(movements).toContain("animate-line-draw");
     expect(movements).not.toContain("grid grid-cols-1 sm:grid-cols-2 gap-3");
     expect(home).toContain("ultimaSenal={latestMovementSignalDate(MOVIMIENTOS_PIPELINE_METADATA.signals)}");

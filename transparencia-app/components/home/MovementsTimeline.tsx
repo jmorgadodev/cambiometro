@@ -178,7 +178,7 @@ export function MovementsTimeline({
               </div>
             </div>
             <div className="flex items-center gap-2 md:justify-end text-text-2">
-              <span className="text-[10px] text-text-3 uppercase tracking-widest">Última revisión —</span>
+              <span className="text-[10px] text-text-3 uppercase tracking-widest">Última revisión publicada —</span>
               <time dateTime={dateKey(ultimaRevision) || undefined} className="text-text-1 font-semibold tracking-wider">{displayDate(ultimaRevision)}</time>
             </div>
           </div>
