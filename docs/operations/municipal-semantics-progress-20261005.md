@@ -65,4 +65,11 @@ No desplegar desde el checkout divergente de Proyectos.
 - Medición sintética local, 20.000 filas y 20 llamadas: 301 ms antes, 12 ms después. No es una medición del build completo ni de producción.
 - Se mantiene viva la ejecución inicial; el nuevo código requiere su propio artefacto verificado, no se promoverá el anterior como si incluyera este cambio.
 
+## Cierre de interpretación FCM
+
+- Se conserva cero explícito frente a falta de indicador. La proporción sólo se calcula con ingresos totales y FCM del mismo año, denominador positivo e importes numéricos válidos.
+- La interfaz no transforma un indicador ausente en 0% ni en una conclusión de menor dependencia. Expone el año del indicador cuando está disponible.
+- `npm run test`: código 0; 268 archivos y 1.571 pruebas aprobadas.
+- El build inicial llegó a verificación de navegador/temas/CSP. El build intermedio `37266955702`, aún pendiente sin ejecutar, se retirará porque falta el ajuste FCM; no se cancela por un timeout ni se reinicia una ejecución activa.
+
 No se subieron ni borraron objetos R2 ni se consultó D1 en este bloque. Los importes originales se mantienen. No se certifica cobertura mensual completa ni la causa económica del importe de Abel.

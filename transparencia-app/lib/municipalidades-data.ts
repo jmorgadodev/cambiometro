@@ -228,6 +228,7 @@ export interface MunicipalidadEnriquecida {
   densidad_hab_km2?: number | null;
   presupuesto_per_capita_clp?: number | null;
   fcm_dependencia_pct?: number | null;
+  fcm_periodo?: string | null;
   fcm_ingresos_clp?: number | null;
   ingresos_totales_clp?: number | null;
   alcalde: AlcaldeData | null;

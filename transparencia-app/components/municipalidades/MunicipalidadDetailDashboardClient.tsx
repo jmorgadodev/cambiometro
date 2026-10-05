@@ -332,6 +332,7 @@ export default function MunicipalidadDetailDashboardClient({
       ? Math.round(presVigente / muniData.poblacion_censo_2024)
       : 0);
   const fcmPct = muniData.fcm_dependencia_pct ?? 0;
+  const fcmKnown = typeof muniData.fcm_dependencia_pct === "number" && Number.isFinite(muniData.fcm_dependencia_pct);
   const comprasMuni = muniData.compras_publicas;
 
   return (
@@ -574,7 +575,7 @@ export default function MunicipalidadDetailDashboardClient({
                 color: fcmPct > 60 ? "var(--warn)" : "var(--info)",
               }}
             >
-              {fcmPct.toFixed(1)}% FCM
+              {fcmKnown ? `${fcmPct.toFixed(1)}% FCM` : "FCM no informado"}
             </div>
             <div
               style={{
@@ -599,7 +600,7 @@ export default function MunicipalidadDetailDashboardClient({
           { label: "Compras y control", value: comprasMuni ? formatNum(comprasMuni.procesos_count ?? 0) : "No publicado", detail: `${auditorias.length} auditorías CGR`, tone: "warn" },
         ]}
         bars={[
-          { label: "Dependencia del Fondo Común Municipal", value: fcmPct > 0 ? fcmPct : null, displayValue: fcmPct > 0 ? `${fcmPct.toLocaleString("es-CL")} %` : "No publicado", detail: "Indicador SINIM", tone: fcmPct > 60 ? "warn" : "info" },
+          { label: "Dependencia del Fondo Común Municipal", value: fcmKnown ? fcmPct : null, displayValue: fcmKnown ? `${fcmPct.toLocaleString("es-CL")} %` : "No informado", detail: `SINIM ${muniData.fcm_periodo ?? "sin período informado"}`, tone: fcmPct > 60 ? "warn" : "info" },
           ...(currentResumenPersonal && currentResumenPersonal.total_funcionarios > 0
             ? [
                 { label: "Planta", value: (currentResumenPersonal.planta / currentResumenPersonal.total_funcionarios) * 100, displayValue: `${((currentResumenPersonal.planta / currentResumenPersonal.total_funcionarios) * 100).toFixed(1)} %`, detail: `${formatNum(currentResumenPersonal.planta)} funcionarios`, tone: "ok" as const },
@@ -862,7 +863,7 @@ export default function MunicipalidadDetailDashboardClient({
                       fontSize: "0.95rem",
                     }}
                   >
-                    {muniData.ingresos_totales_clp
+                    {typeof muniData.ingresos_totales_clp === "number"
                       ? formatCLP(muniData.ingresos_totales_clp)
                       : "—"}
                   </strong>
@@ -887,7 +888,7 @@ export default function MunicipalidadDetailDashboardClient({
                       fontSize: "0.95rem",
                     }}
                   >
-                    {muniData.fcm_ingresos_clp
+                    {typeof muniData.fcm_ingresos_clp === "number"
                       ? formatCLP(muniData.fcm_ingresos_clp)
                       : "—"}
                   </strong>
@@ -933,7 +934,7 @@ export default function MunicipalidadDetailDashboardClient({
                         color: fcmPct > 60 ? "var(--warn)" : "var(--ok)",
                       }}
                     >
-                      {fcmPct.toFixed(1)}%
+                      {fcmKnown ? `${fcmPct.toFixed(1)}%` : "No informado"}
                     </strong>
                   </div>
                   <div
@@ -956,7 +957,7 @@ export default function MunicipalidadDetailDashboardClient({
                     />
                     <div
                       style={{
-                        width: `${Math.max(0, 100 - fcmPct)}%`,
+                        width: `${fcmKnown ? Math.max(0, 100 - fcmPct) : 0}%`,
                         background: "var(--info-bg)",
                       }}
                     />
@@ -970,8 +971,8 @@ export default function MunicipalidadDetailDashboardClient({
                       marginTop: "0.3rem",
                     }}
                   >
-                    <span>FCM ({fcmPct.toFixed(1)}%)</span>
-                    <span>Otros ingresos, distintos del FCM ({(100 - fcmPct).toFixed(1)}%)</span>
+                    <span>{fcmKnown ? `FCM (${fcmPct.toFixed(1)}%)` : "FCM no informado"}</span>
+                    <span>{fcmKnown ? `Otros ingresos, distintos del FCM (${(100 - fcmPct).toFixed(1)}%)` : "Distribución no disponible"}</span>
                   </div>
                 </div>
 
@@ -985,7 +986,7 @@ export default function MunicipalidadDetailDashboardClient({
                     lineHeight: 1.5,
                   }}
                 >
-                  {fcmPct < 30 ? (
+                  {!fcmKnown ? <span>No hay importes comparables del mismo período para calcular la proporción de FCM.</span> : fcmPct < 30 ? (
                     <span>
                       <strong>Menor proporción de FCM:</strong> El indicador informado es inferior al 30%. Los ingresos restantes no se clasifican como propios sin un desglose oficial.
                     </span>

@@ -1,7 +1,14 @@
 import { describe, expect, it } from "vitest";
-import { municipalBudgetCut } from "./municipal-finance";
+import { municipalBudgetCut, municipalFcmCut } from "./municipal-finance";
 
 describe("presupuesto municipal por corte", () => {
+  it("distingue FCM cero de ausente y no divide importes de años diferentes", () => {
+    const total = { code: "IADM01", period: "2025", monto_clp: 100 };
+    expect(municipalFcmCut([total]).fcm_dependencia_pct).toBeNull();
+    expect(municipalFcmCut([total, { code: "IADM40", period: "2024", monto_clp: 25 }]).fcm_dependencia_pct).toBeNull();
+    expect(municipalFcmCut([total, { code: "IADM40", period: "2025", monto_clp: 0 }]).fcm_dependencia_pct).toBe(0);
+    expect(municipalFcmCut([total, { code: "IADM40", period: "2025", monto_clp: 25 }]).fcm_dependencia_pct).toBe(25);
+  });
   it("conserva cero, no mezcla años ni llama propios a ingresos totales", () => {
     expect(municipalBudgetCut([
       { code: "BPVIM", period: "2024", monto_clp: 900 },

@@ -14,7 +14,7 @@ import { partitionV7Records } from './etl/v7-quarantine.mjs';
 import { selectBestCpltDirectory } from './etl/municipal-cplt-source.mjs';
 import { isAlcaldiaRole, selectPublishedAlcaldia } from '../lib/municipal-alcaldia.ts';
 import { buildFuncionarioSalaryHistory } from '../lib/funcionarios-history.ts';
-import { municipalBudgetCut } from '../lib/municipal-finance.ts';
+import { municipalBudgetCut, municipalFcmCut } from '../lib/municipal-finance.ts';
 
 const root = process.cwd();
 
@@ -32,19 +32,17 @@ for (const m of sinimRaw.municipios || []) {
   }
   const vigente_clp = indMap['BPVIM']?.monto_clp || indMap['BPIIM']?.monto_clp || 0;
   const inicial_clp = indMap['BPIIM']?.monto_clp || vigente_clp;
-  const ingresos_totales_clp = indMap['IADM01']?.monto_clp || 0;
-  const fcm_ingresos_clp = indMap['IADM40']?.monto_clp || 0;
+  const fcm = municipalFcmCut(m.indicators || []);
+  const { ingresos_totales_clp, fcm_ingresos_clp, fcm_dependencia_pct } = fcm;
   const fcm_transferido_clp = indMap['IADM39']?.monto_clp || 0;
   const gasto_personal_clp = indMap['IADM61']?.monto_clp || 0;
   const total_funcionarios_sinim = indMap['IRH17']?.value || 0;
-  const fcm_dependencia_pct = ingresos_totales_clp > 0
-    ? Number(((fcm_ingresos_clp / ingresos_totales_clp) * 100).toFixed(1))
-    : 0;
 
   sinimByCut.set(cut, {
     cut,
     name: m.name,
     budget: municipalBudgetCut(m.indicators || []),
+    fcm_periodo: fcm.periodo,
     vigente_clp,
     inicial_clp,
     ingresos_totales_clp,
@@ -462,8 +460,9 @@ for (const muni of MUNICIPALIDADES_SEED) {
     sitio_transparencia_activa: `https://www.portaltransparencia.cl/PortalPdT/directorio-de-organismos-regulados/?org=${encodeURIComponent(muni.nombre_comuna)}`,
     redes_sociales: null,
     fcm_dependencia_pct: sinim?.fcm_dependencia_pct ?? null,
-    fcm_ingresos_clp: sinim?.fcm_ingresos_clp || null,
-    ingresos_totales_clp: sinim?.ingresos_totales_clp || null,
+    fcm_periodo: sinim?.fcm_periodo ?? null,
+    fcm_ingresos_clp: sinim?.fcm_ingresos_clp ?? null,
+    ingresos_totales_clp: sinim?.ingresos_totales_clp ?? null,
     auditorias_cgr: audits,
   };
 }
