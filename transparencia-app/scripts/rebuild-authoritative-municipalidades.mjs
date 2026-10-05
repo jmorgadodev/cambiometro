@@ -13,6 +13,8 @@ import { findBuyerByVerifiedRut, projectOfficialBuyer } from './etl/r10-chilecom
 import { partitionV7Records } from './etl/v7-quarantine.mjs';
 import { selectBestCpltDirectory } from './etl/municipal-cplt-source.mjs';
 import { isAlcaldiaRole, selectPublishedAlcaldia } from '../lib/municipal-alcaldia.ts';
+import { buildFuncionarioSalaryHistory } from '../lib/funcionarios-history.ts';
+import { municipalBudgetCut } from '../lib/municipal-finance.ts';
 
 const root = process.cwd();
 
@@ -42,6 +44,7 @@ for (const m of sinimRaw.municipios || []) {
   sinimByCut.set(cut, {
     cut,
     name: m.name,
+    budget: municipalBudgetCut(m.indicators || []),
     vigente_clp,
     inicial_clp,
     ingresos_totales_clp,
@@ -155,17 +158,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
   }));
 
   // --- B. PRESUPUESTO SINIM ---
-  let presupuesto = null;
-  if (sinim && (sinim.vigente_clp > 0 || sinim.inicial_clp > 0)) {
-    presupuesto = {
-      cut,
-      inicial_clp: sinim.inicial_clp || null,
-      vigente_clp: sinim.vigente_clp || null,
-      gasto_personal_clp: sinim.gasto_personal_clp || null,
-      ingresos_propios_clp: sinim.ingresos_totales_clp || null,
-      ano: 2025,
-    };
-  }
+  const presupuesto = sinim?.budget ? { cut, ...sinim.budget } : null;
 
   const presVigente = presupuesto?.vigente_clp ?? presupuesto?.inicial_clp ?? null;
   const presupuesto_per_capita_clp = presVigente !== null && poblacion_censo_2024
@@ -193,7 +186,10 @@ for (const muni of MUNICIPALIDADES_SEED) {
     return `${mesName} ${y}`;
   }
 
-  function calcularDesfaseMeses(periodoStr, refYear = 2026, refMonth = 8) {
+  function calcularDesfaseMeses(periodoStr) {
+    const parts = new Intl.DateTimeFormat("en-CA", { timeZone: "America/Santiago", year: "numeric", month: "2-digit" }).formatToParts(new Date());
+    const refYear = Number(parts.find(part => part.type === "year")?.value);
+    const refMonth = Number(parts.find(part => part.type === "month")?.value);
     if (!periodoStr || !/^\d{4}-\d{2}$/.test(periodoStr)) return null;
     const [y, m] = periodoStr.split("-").map(Number);
     const diff = (refYear - y) * 12 + (refMonth - m);
@@ -289,9 +285,8 @@ for (const muni of MUNICIPALIDADES_SEED) {
         };
       });
 
-      // Default: período más reciente representativo (es_parcial === false)
-      const firstRepresentative = periodos_disponibles.find((item) => !item.es_parcial);
-      periodo_cplt_reciente = firstRepresentative?.periodo || validPeriods[0];
+      // Row volume is not evidence of completeness; publish the latest observed cut.
+      periodo_cplt_reciente = validPeriods[0];
       desfase_meses = calcularDesfaseMeses(periodo_cplt_reciente);
       estado_frescura = desfase_meses !== null && desfase_meses <= 3 ? "al_dia" : "desfasado";
 
@@ -302,63 +297,23 @@ for (const muni of MUNICIPALIDADES_SEED) {
       estado_frescura = "sin_datos";
     }
 
-    function buildSalaryHistory(name, historySource) {
-      const target = normalizeStr(name);
-      const grouped = new Map();
-      for (const record of historySource) {
-        if (normalizeStr(record.nombre_completo) !== target) continue;
-        const periodo = String(record.fuente_periodo || record.periodo || "").trim();
-        if (!/^\d{4}-(?:0[1-9]|1[0-2])$/.test(periodo)) continue;
-        const current = grouped.get(periodo) || {
-          bruto: 0,
-          liquido: 0,
-          hasLiquido: false,
-          horasExtras: 0,
-          montoHorasExtras: 0,
-          hasMontoHorasExtras: false,
-          registros: 0,
-        };
-        current.bruto += Number(record.remuneracion_bruta_mensual || 0);
-        if (record.remuneracion_liquida_mensual !== null && record.remuneracion_liquida_mensual !== undefined) {
-          current.liquido += Number(record.remuneracion_liquida_mensual || 0);
-          current.hasLiquido = true;
-        }
-        current.horasExtras += Number(record.horas_extras_mes_anterior || 0);
-        if (record.monto_horas_extras_clp !== null && record.monto_horas_extras_clp !== undefined) {
-          current.montoHorasExtras += Number(record.monto_horas_extras_clp || 0);
-          current.hasMontoHorasExtras = true;
-        }
-        current.registros += 1;
-        grouped.set(periodo, current);
-      }
-      return [...grouped.entries()].sort(([left], [right]) => left.localeCompare(right)).map(([periodo, value]) => ({
-        periodo,
-        etiqueta: formatPeriodoEtiqueta(periodo),
-        bruto: Math.round(value.bruto),
-        liquido: value.hasLiquido ? Math.round(value.liquido) : null,
-        horasExtras: Number(value.horasExtras.toFixed(2)),
-        montoHorasExtras: value.hasMontoHorasExtras ? Math.round(value.montoHorasExtras) : null,
-        registros: value.registros,
-      }));
-    }
 
     function buildTopRemuneraciones(staffList, historySource = regularStaff) {
       const sortedByBruto = staffList
         .filter((f) => Number(f.remuneracion_bruta_mensual || 0) >= 50000)
         .sort((a, b) => Number(b.remuneracion_bruta_mensual || 0) - Number(a.remuneracion_bruta_mensual || 0));
 
-      const seenNames = new Set();
+      const seenIds = new Set();
       const topList = [];
       for (const f of sortedByBruto) {
         const name = f.nombre_completo.trim();
-        const normKey = name.toLowerCase();
-        if (seenNames.has(normKey)) continue;
-        seenNames.add(normKey);
+        if (seenIds.has(f.id)) continue;
+        seenIds.add(f.id);
 
         const bruto = Number(f.remuneracion_bruta_mensual || 0);
         const heMonto = Number(f.monto_horas_extras_clp || 0);
         const heHrs = Number(f.horas_extras_mes_anterior || 0);
-        const base = Math.max(0, bruto - heMonto);
+        const base = null; // Gross minus overtime is not an official base salary.
         const liquida = f.remuneracion_liquida_mensual === null || f.remuneracion_liquida_mensual === undefined
           ? null
           : Number(f.remuneracion_liquida_mensual);
@@ -381,7 +336,7 @@ for (const muni of MUNICIPALIDADES_SEED) {
           formacion: f.formacion || null,
           fuente: f.url || f.fuente || null,
           fuente_periodo: f.fuente_periodo || f.periodo || null,
-          historial_salarial: buildSalaryHistory(name, historySource),
+          historial_salarial: buildFuncionarioSalaryHistory(historySource, name, f.id),
         });
 
         if (topList.length >= 5) break;

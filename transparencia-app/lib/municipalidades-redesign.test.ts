@@ -184,14 +184,14 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
   });
 
   describe("MD UNIFICADO — Validación de Aserciones A1 a A9", () => {
-    it("A1. suma(anomalías) + suma(nómina regular) + suma(sin pago) === dotación total (cero registros perdidos)", () => {
+    it("A1. los importes informados, ceros y faltantes conservan todos los registros", () => {
       const stgoQuery = queryFallbackFuncionarios({ organismoId: "muni-santiago" });
-      const sumStgo = stgoQuery.microMontoCount + stgoQuery.sueldoCompletoCount + stgoQuery.sinPagoCount;
+      const sumStgo = Object.values(stgoQuery.amountCounts).reduce((sum, count) => sum + count, 0);
       expect(sumStgo).toBe(stgoQuery.totalHeadcount);
       expect(stgoQuery.totalHeadcount).toBe(20805);
 
       const maipuQuery = queryFallbackFuncionarios({ organismoId: "muni-maipu" });
-      const sumMaipu = maipuQuery.microMontoCount + maipuQuery.sueldoCompletoCount + maipuQuery.sinPagoCount;
+      const sumMaipu = Object.values(maipuQuery.amountCounts).reduce((sum, count) => sum + count, 0);
       expect(sumMaipu).toBe(maipuQuery.totalHeadcount);
       expect(maipuQuery.totalHeadcount).toBe(11483);
     });
@@ -206,7 +206,8 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
       const result = queryFallbackFuncionarios({ organismoId: "muni-santiago" });
       expect(result.anomaliasSample.length).toBeGreaterThan(0);
       for (const anom of result.anomaliasSample) {
-        expect(anom.causaId).not.toBeNull();
+        // A low amount is not evidence of its cause; unknown causes remain null.
+        expect(anom.causaId === null || typeof anom.causaId === "string").toBe(true);
         expect(anom.etiquetaCausa).not.toContain("boleta de honorarios de $50");
         expect(anom.explicacionCiudadana).toBeDefined();
         expect(anom.nivelConfianza).toBeDefined();
@@ -222,9 +223,10 @@ describe("Rediseño /municipalidades + Ficha Comunal — Validación de 14 Prior
     });
 
     it("A5. Caja ciudadana presente con conteos por causa del forense", () => {
-      expect(organismoListSource).toContain("¿Por qué hay montos de $52 a $80");
+      expect(organismoListSource).toContain("¿Qué significan estos importes?");
       expect(organismoListSource).toContain("Transparencia Activa");
-      expect(organismoListSource).toContain("anomalía de la fuente");
+      expect(organismoListSource).toContain("Su valor por sí solo no permite concluir");
+      expect(organismoListSource).not.toContain("no es un sueldo mensual ni una boleta válida");
     });
 
     it("A6. hrs(card) === hrs(top) en top remuneraciones de Santiago (histórico 2025-06)", () => {

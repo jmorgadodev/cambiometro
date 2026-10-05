@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { FuncionarioPublico } from "@/lib/funcionarios";
 import { FUNCIONARIOS_REALES_POR_MUNI } from "@/lib/funcionarios-source";
-import { classifyFuncionarioRecord } from "@/lib/funcionarios-quality";
+import { classifyFuncionarioRecord, summarizePayrollAmounts } from "@/lib/funcionarios-quality";
 
 // Fecha de corte del único respaldo embebido: nómina oficial CPLT de Maipú.
 export const FUNCIONARIOS_FALLBACK_UPDATED_AT = "2026-06-30T00:00:00.000Z";
@@ -91,7 +91,7 @@ export function queryFallbackFuncionarios({
   periodo = "Todos",
   sortBy = "sueldo_desc",
   soloHorasExtras = false,
-  includeZero = false,
+  includeZero = true,
   minSueldo,
   maxSueldo,
   page = 1,
@@ -120,7 +120,6 @@ export function queryFallbackFuncionarios({
   const amount = (record: FuncionarioPublico) => record.remuneracion_bruta_mensual ?? 0;
   const sinPagoRecords = allForOrg.filter((record) => amount(record) <= 0);
   const microMontoRecords = allForOrg.filter((record) => amount(record) > 0 && amount(record) < 50_000);
-  const sueldoCompletoRecords = allForOrg.filter((record) => amount(record) >= 50_000);
 
   const causasBreakdown = {
     ajuste_periodo_anterior: 0,
@@ -128,7 +127,7 @@ export function queryFallbackFuncionarios({
     asignacion_reembolso_menor: 0,
     error_unidad_fuente: 0,
     anomalia_fuente: 0,
-    nominal_sin_pago: sinPagoRecords.length,
+    nominal_sin_pago: 0,
   };
   const anomaliasSample = microMontoRecords.map((record) => {
     const info = classifyFuncionarioRecord(record);
@@ -177,6 +176,7 @@ export function queryFallbackFuncionarios({
   if (minSueldo && minSueldo > 0) filtered = filtered.filter((record) => amount(record) >= minSueldo);
   if (maxSueldo && maxSueldo > 0) filtered = filtered.filter((record) => amount(record) <= maxSueldo);
 
+  if (sortBy === "sueldo_asc") filtered = filtered.filter(record => amount(record) > 0);
   filtered.sort((left, right) => {
     if (sortBy === "nombre_asc") return left.nombre_completo.localeCompare(right.nombre_completo, "es-CL");
     if (sortBy === "nombre_desc") return right.nombre_completo.localeCompare(left.nombre_completo, "es-CL");
@@ -187,9 +187,9 @@ export function queryFallbackFuncionarios({
 
   const total = filtered.length;
   const start = (page - 1) * limit;
-  const totalSueldos = sueldoCompletoRecords.reduce((sum, record) => sum + amount(record), 0);
-  const promedioSueldo = sueldoCompletoRecords.length > 0 ? Math.round(totalSueldos / sueldoCompletoRecords.length) : 0;
-  const conHorasExtras = sueldoCompletoRecords.filter((record) => (record.horas_extras_mes_anterior ?? 0) > 0).length;
+  const amounts = summarizePayrollAmounts(filtered);
+  const promedioSueldo = amounts.meanAmount;
+  const conHorasExtras = filtered.filter((record) => (record.horas_extras_mes_anterior ?? 0) > 0).length;
   const sinPagoSample = sinPagoRecords.slice(0, 50).map((record) => ({
     id: record.id,
     nombre_completo: record.nombre_completo,
@@ -204,17 +204,22 @@ export function queryFallbackFuncionarios({
   return {
     data: filtered.slice(start, start + limit),
     total,
-    totalHeadcount: allForOrg.length,
+    totalHeadcount: filtered.length,
+    countUnit: "records",
+    completeMonthlyPayroll: false,
+    amountCounts: amounts.amountCounts,
     sinPagoCount: sinPagoRecords.length,
     microMontoCount: microMontoRecords.length,
-    sueldoCompletoCount: sueldoCompletoRecords.length,
+    sueldoCompletoCount: null,
     observadosCount,
     causasBreakdown,
     anomaliasSample: anomaliasSample.slice(0, 50),
     sinPagoSample,
     stats: {
-      totalMuni: allForOrg.length,
-      totalValidos: sueldoCompletoRecords.length,
+      scope: "filtered_records",
+      rows: filtered.length,
+      totalMuni: filtered.length,
+      totalValidos: amounts.informedCount,
       promedioSueldo,
       conHorasExtras,
       observadosCount,

@@ -206,7 +206,7 @@ export default function OrganismoFuncionariosList({
         if (!active) return;
         setData((result.data ?? []).map((item: FuncionarioPublico) => normalizeFuncionarioRecord(item)));
         setTotal(result.meta?.total ?? 0);
-        setTotalHeadcount(result.meta?.totalHeadcount || result.meta?.stats?.totalMuni || result.meta?.total || 0);
+        setTotalHeadcount(result.meta?.total ?? 0);
         setTotalPages(result.meta?.totalPages ?? 1);
         setObservadosCount(result.meta?.observadosCount || result.meta?.stats?.observadosCount || 0);
         setSinPagoCount(result.meta?.sinPagoCount || result.meta?.stats?.sinPagoCount || 0);
@@ -301,7 +301,7 @@ export default function OrganismoFuncionariosList({
           fuentePeriodo: selectedFuncionario.fuente_periodo,
           calidad: selectedFuncionario.calidad_datos?.estado,
           calidadDetalle: selectedFuncionario.calidad_datos?.detalle,
-          historial: buildFuncionarioSalaryHistory(staticRecords, selectedFuncionario.nombre_completo),
+          historial: buildFuncionarioSalaryHistory(staticRecords, selectedFuncionario.nombre_completo, selectedFuncionario.id),
         };
       })()
     : null;
@@ -323,7 +323,7 @@ export default function OrganismoFuncionariosList({
             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
               <span style={{ fontSize: "1.25rem" }}>⚠️</span>
               <h3 style={{ margin: 0, fontSize: "1.05rem", color: "var(--text-primary)", fontWeight: 800 }}>
-                Anomalías y pagos parciales ({microMontoCount.toLocaleString("es-CL")})
+                Importes publicados menores a $50.000 ({microMontoCount.toLocaleString("es-CL")})
               </h3>
             </div>
             <button
@@ -350,16 +350,16 @@ export default function OrganismoFuncionariosList({
             }}
           >
             <strong style={{ color: "var(--warn)", display: "block", marginBottom: "0.25rem" }}>
-              💡 ¿Por qué hay montos de $52 a $80 en la nómina oficial?
+              ¿Qué significan estos importes?
             </strong>
-            Estos montos vienen así desde Transparencia Activa. No los borramos ni corregimos: los mostramos tal cual y los separamos de los sueldos mensuales para no distorsionar totales. Un monto de $80 no es un sueldo mensual ni una boleta válida; tras revisar la fuente, las causas detectadas son: <strong>{causasTexto}</strong>. Los registros sin causa confirmada quedan como <em>&ldquo;anomalía de la fuente&rdquo;</em> y puedes verificarlos en el portal oficial.
+            Estos importes fueron publicados en Transparencia Activa. Se conservan sin modificar. Su valor por sí solo no permite concluir que correspondan a un mes completo, un pago parcial o un error. Revisa el período, las observaciones y el enlace de origen de cada registro.
           </div>
 
           {/* Cards de Anomalías §2.2 */}
           {showAnomaliasSection && anomaliasList.length > 0 && (
             <div style={{ marginTop: "1rem" }}>
               <div style={{ fontSize: "0.72rem", color: "var(--text-subtle)", fontWeight: 700, textTransform: "uppercase", marginBottom: "0.6rem" }}>
-                Muestra de registros anómalos clasificados con evidencia ({anomaliasList.length} de {microMontoCount})
+                Muestra de registros con importes menores a $50.000 ({anomaliasList.length} de {microMontoCount})
               </div>
               <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(290px, 1fr))", gap: "0.75rem" }}>
                 {anomaliasList.slice(0, 8).map((anom) => (
@@ -527,7 +527,7 @@ export default function OrganismoFuncionariosList({
             Mostrando <strong>{total.toLocaleString("es-CL")}</strong> funcionarios navegables{" "}
             {totalHeadcount > 0 ? (
               <span style={{ color: "var(--text-subtle)" }}>
-                (Dotación total: {totalHeadcount.toLocaleString("es-CL")} = {sueldoCompletoCount.toLocaleString("es-CL")} sueldos regulares + {microMontoCount.toLocaleString("es-CL")} anomalías + {sinPagoCount.toLocaleString("es-CL")} sin pago)
+                ({totalHeadcount.toLocaleString("es-CL")} registros en los filtros actuales; son filas de nómina, no personas únicas ni sueldos completos)
               </span>
             ) : ""}
           </span>
@@ -692,16 +692,6 @@ export default function OrganismoFuncionariosList({
                   </span>
 
                   {/* Badges de Calidad §2.4 */}
-                  {qualityInfo.isSueldoCompleto && (
-                    <span
-                      className="badge badge-ok"
-                      style={{ fontSize: "0.65rem", padding: "0.15rem 0.45rem" }}
-                      title="Remuneración mensual completa regular"
-                    >
-                      ✓ Sueldo mensual completo
-                    </span>
-                  )}
-
                   {qualityInfo.isMicroMonto && (
                     <span
                       className="badge badge-warn"
@@ -720,7 +710,7 @@ export default function OrganismoFuncionariosList({
                     </span>
                     {qualityInfo.isSinPago ? (
                       <span className="badge badge-subtle" style={{ fontSize: "0.75rem", fontWeight: 700 }}>
-                        Sin pago registrado
+                        Monto no informado
                       </span>
                     ) : (
                       <div style={{ display: "flex", alignItems: "baseline", gap: "0.35rem" }}>
@@ -815,7 +805,7 @@ export default function OrganismoFuncionariosList({
         >
           <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "0.5rem" }}>
             <div style={{ color: "var(--text-muted)" }}>
-              📌 <strong>{sinPagoCount.toLocaleString("es-CL")} registros sin pago en el período</strong> (ex funcionarios, licencias sin goce u observaciones de la fuente).
+              📌 <strong>{sinPagoCount.toLocaleString("es-CL")} registros con monto cero o no informado</strong>. No se presume ausencia de pago ni su motivo.
             </div>
             <button
               type="button"
@@ -830,7 +820,7 @@ export default function OrganismoFuncionariosList({
           {showSinPagoExpander && sinPagoList.length > 0 && (
             <div style={{ marginTop: "0.85rem", paddingTop: "0.75rem", borderTop: "1px dashed var(--border)" }}>
               <div style={{ fontSize: "0.72rem", color: "var(--text-subtle)", marginBottom: "0.5rem", fontWeight: 700, textTransform: "uppercase" }}>
-                Registros sin remuneración en la nómina oficial ({sinPagoList.length} de {sinPagoCount})
+                Registros con monto cero o no informado ({sinPagoList.length} de {sinPagoCount})
               </div>
               <div style={{ display: "flex", flexDirection: "column", gap: "0.35rem", maxHeight: "280px", overflowY: "auto" }}>
                 {sinPagoList.map((item, idx) => (
@@ -854,7 +844,7 @@ export default function OrganismoFuncionariosList({
                       <span style={{ color: "var(--text-subtle)", marginLeft: "0.4rem", fontFamily: "monospace" }}>({item.tipo_contrato})</span>
                     </div>
                     <span className="badge badge-subtle" style={{ fontSize: "0.65rem", whiteSpace: "nowrap" }}>
-                      {item.observaciones || "Sin pago registrado"}
+                      {item.observaciones || "La fuente no informa un monto."}
                     </span>
                   </div>
                 ))}
