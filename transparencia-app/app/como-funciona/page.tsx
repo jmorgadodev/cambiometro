@@ -183,6 +183,17 @@ export default async function HowItWorksPage() {
 
           <div style={{ marginTop: "1.5rem", paddingTop: "1.25rem", borderTop: "1px solid var(--border-subtle)" }}>
             <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem", color: "var(--text-primary)" }}>
+              Fuente oficial no significa conjunto completo
+            </h3>
+            <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.6 }}>
+              La procedencia identifica quién publicó el dato; la cobertura describe qué categorías, organismos y períodos están disponibles aquí. Sólo consideramos completo un conjunto cuando sus conteos y períodos se han contrastado con un universo de referencia del mismo alcance. Una cobertura parcial identifica un subconjunto conocido. «Cobertura no medida» indica que no existe un denominador verificable para calcular un porcentaje; no equivale a cero.
+            </p>
+            <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.6 }}>
+              Que un registro no aparezca en la plataforma no prueba que la fuente no lo haya publicado. Los períodos y cifras de la tabla se interpretan por fuente, no como un corte común de todo el Estado. Los montos no informados permanecen separados de cero. Las coincidencias de nombres o fechas no prueban causalidad ni irregularidad, ni acreditan por sí solas la identidad de una persona.
+            </p>
+          </div>
+          <div style={{ marginTop: "1.5rem", paddingTop: "1.25rem", borderTop: "1px solid var(--border-subtle)" }}>
+            <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem", color: "var(--text-primary)" }}>
               Alcance de remuneraciones del CPLT
             </h3>
             <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.6, margin: 0 }}>

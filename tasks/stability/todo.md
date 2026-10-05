@@ -9,7 +9,7 @@ Este es el listado activo LM01–LM09. Los bloques O01–O16 de abajo conservan 
 | LM01 | Tablero/documentación únicos y ruta vigente | Baja | Referencia, actualización y enlaces/diff validados; fusión pendiente | 75 % |
 | LM02 | Alcance, fuente y corte en cifras municipales | Baja | Pendiente revisar sólo etiquetas restantes | 0 % |
 | LM03 | Titular documentado separado del pago histórico en dos comunas | Baja–media | Fuentes municipales contrastadas, implementación y 15 pruebas/tipos/enlaces aprobados; preview/promoción pendientes | 75 % |
-| LM04 | Metodología: alcance efectivo por fuente | Baja–media | Pendiente | 0 % |
+| LM04 | Metodología: alcance efectivo por fuente | Baja–media | Política general implementada y probada; falta validar alcances particulares y preview | 50 % |
 | LM05 | Fechas/contadores coherentes Home–API–release | Media | Pendiente | 0 % |
 | LM06 | Procedencia, frecuencia, ejecución y fallos por ETL | Media | Pendiente; reutilizar `etl-closure.md` y registro | 0 % |
 | LM07 | Ciclo automático de anuncio y confirmación de Movimientos | Media | Pendiente; reutilizar pruebas/piloto cerrado | 0 % |
