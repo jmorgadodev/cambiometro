@@ -14,6 +14,12 @@ const render = (sourceUrl?: string) => renderToStaticMarkup(createElement(Funcio
 }));
 
 describe("procedencia y alcance de remuneraciones municipales", () => {
+  it("no convierte ausencia en compras/control en ausencia de publicación oficial", () => {
+    const source = readFileSync(resolve("components/municipalidades/MunicipalidadDetailDashboardClient.tsx"), "utf8");
+    expect(source).toContain('"Sin registros integrados"');
+    expect(source).toContain("informes CGR integrados");
+    expect(source).not.toContain('label: "Compras y control", value: comprasMuni ? formatNum(comprasMuni.procesos_count ?? 0) : "No publicado"');
+  });
   it("mantiene el monto y período históricos y explica que no acreditan cargo actual", () => {
     const html = render(source);
     expect(html).toContain("2025-01");
