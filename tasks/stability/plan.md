@@ -21,8 +21,9 @@ Orden: LM01, LM02–LM04, LM05–LM07, LM08–LM09. Cada bloque reutiliza las pr
 La cola concreta y sus dependencias están en [todo.md](todo.md). LM01–LM05,
 LM07 y LM09 quedaron integrados y comprobados en producción mediante #715;
 LM08 quedó integrado con CI verde mediante #716. No se repiten esos bloques
-ni sus previews. Sólo queda integrar y activar el arranque local aislado
-LM06; su preflight Windows y dry-run acotado ya están documentados.
+ni sus previews. LM06 quedó integrado mediante #717 con CI verde y acción
+diaria normal activada; preflight Windows y dry-run acotado documentados.
+LM01–LM09 completos en su alcance; no equivalen a cierre del plan O01–O16.
 Las sesiones incompletas detectadas son una dependencia operativa O11:
 no se fuerza su publicación para cerrar el registro de procedencia/fallos.
 Las tareas operativas O05,

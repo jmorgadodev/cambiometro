@@ -1,5 +1,31 @@
 # Evidencia de avance y cierre
 
+## Acta de cierre LM01–LM09 — 2026-10-07
+
+LM06 integrado mediante PR #717, merge
+`e7ab8730fb2de23c6c0fe4cc218e927c7b7a0c87`, 04:18:56 UTC. Build/E2E
+`37570303117` completo success; calidad `37570249223`/`37570303104`, CodeQL
+`37570249246`, seguridad `37570303179` y validación de workflow verdes.
+Después de fusionar se activó la acción Windows normal sin flags de prueba:
+script/directorio existentes, estado Ready, próximo 7 oct 09:30 CL,
+principal/triggers/settings idénticos a los anteriores. Último preflight
+01:07:42 CL resultado 0 no se presenta como extracción exitosa.
+
+El dry-run real y sus guardas ya están registrados abajo: sesiones de origen
+incompletas, publicación bloqueada, release conservado y candidato eliminado.
+LM06 cumple 4/4 de procedencia, calendario, fallos y arranque aislado; el
+problema de asistencia de sesiones 10292/10291 continúa explícito en O11.
+No se reintenta extracción ni se debilita el validador para cerrar este acta.
+
+Los nueve puntos LM tienen evidencia específica, no un porcentaje global
+de exactitud: LM01 ruta/tablero y #715; LM02–LM04 pruebas, preview final y
+render productivo #715; LM05/LM07 snapshot/API/cronología/ciclo probado;
+LM08 celdas originales e integración #716; LM09 preflight negativo fechado
+integrado #715; LM06 reparación/activación #717. Los detalles y límites
+permanecen en las actas anteriores. No quedan puertas de implementación LM
+abiertas; esta actualización registra su cierre, sin cambiar aplicación,
+datos públicos o cobertura. O05/O08/O10/O11/O13/O15/O16 siguen abiertos.
+
 ## Cierre LM08 y reparación LM06 — 2026-10-07
 
 PR #716 integrado en `f88356bb9356d436fc26f74325d96f53d8286a4e`, 04:05:18 UTC.

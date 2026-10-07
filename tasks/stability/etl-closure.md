@@ -27,7 +27,7 @@ Un resultado verde de Actions no demuestra actualización ni cobertura.
 | SERVEL | 32853028527, 25 ago, manual, success | Resultados configurados en conector; sin calendario remoto nuevo ni rango inferido |
 | Reconciliación Cámara | 34608470964, 11 sep, manual, success | Rango explícito validado, full-history manual; no relanzado |
 | CPLT central | 35056072805, 16 sep, manual, cancelled | Cuatro categorías; publish false por defecto, finalización exige éxito de todas; no se acredita publicación |
-| Votaciones Senado | Tarea local «Cambiómetro - ETL votaciones Senado» | Arranque reparado y preflight 7 oct 01:07:42 CL: resultado 0. Dry-run tres días alcanzó sesiones 10292/10291 del 6 oct; validación de asistencia falló y no publicó. Horario 09:30 CL conservado; activación normal pendiente de CI/fusión |
+| Votaciones Senado | Tarea local «Cambiómetro - ETL votaciones Senado» | PR #717 integrado; acción diaria normal activada y horario 09:30 CL conservado. Preflight 7 oct 01:07:42 CL: 0. Dry-run tres días rechazó sesiones 10292/10291 por asistencia incompleta; no publicó. Fallo del conector permanece en O11 |
 
 Procedencia efectiva: las URLs ya registradas siguen vinculadas a cada
 conector. Para Contraloría, el flujo vigente usa además
@@ -88,8 +88,9 @@ salida 0; candidato eliminado. Misma preparación desde el Programador de
 tareas: último intento **7 oct 01:07:42 CL, resultado 0, estado Ready**.
 Se preservaron por comparación principal, triggers y settings; próxima
 ejecución 09:30 CL. Cuenta/token persistentes del usuario presentes, sin
-imprimirlos. Acción de prueba usa `--prepare-only` hasta integrar código
-con CI verde; después se activa la acción normal sin ese flag.
+imprimirlos. Acción de prueba usó `--prepare-only`. Tras integrar #717 en
+`e7ab8730fb2de23c6c0fe4cc218e927c7b7a0c87` con CI verde, se activó la
+acción normal sin flags de prueba; estado Ready y ruta/cadencia comprobados.
 
 Dry-run real **2026-10-04..2026-10-07**: leyó catálogo y snapshot canónico,
 recuperó las sesiones **10292 y 10291, 6 oct**, y ambas fallaron con
@@ -105,8 +106,8 @@ manifiesto, pero `--only-files` seleccionó sólo la proyección de votaciones;
 no se descargó ese universo de 203 archivos. No hubo PUT/DELETE R2, D1 ni
 cambios en `data`/`public/data` del frontend; candidato y junction retirados.
 
-Esto cierra la prueba de arranque/preservación de LM06 una vez integrado y
-activado; **no cierra disponibilidad ni cobertura de votaciones Senado O11**.
+Esto cierra la prueba de arranque/preservación y documentación de LM06;
+**no cierra disponibilidad ni cobertura de votaciones Senado O11**.
 No se relanza otra extracción para obtener artificialmente un verde.
 
 ## Comprobación operativa del 5 de octubre de 2026
