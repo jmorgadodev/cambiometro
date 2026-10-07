@@ -68,6 +68,7 @@ export default async function MunicipalidadDetailPage({
   if (!muniData) notFound();
 
   const alcalde = muniData.alcalde;
+  const autoridadDocumentada = getVerifiedMuniRRSS(muni.id)?.autoridad_documentada;
   const partidoAlcalde =
     alcalde?.partido_alcalde || (!alcalde ? getVerifiedMuniRRSS(muni.id)?.alcalde_oficial?.partido : "") || "";
   const brandingAlcalde = getPartidoConfig(partidoAlcalde);
@@ -201,7 +202,18 @@ export default async function MunicipalidadDetailPage({
                   flexWrap: "wrap",
                 }}
               >
-                {alcalde ? (
+                {autoridadDocumentada ? (
+                  <>
+                    <span>Autoridad documentada:</span>
+                    <strong style={{ color: "var(--text-1)" }}>{autoridadDocumentada.nombre}</strong>
+                    <a href={autoridadDocumentada.url} target="_blank" rel="noopener noreferrer">
+                      Fuente municipal ↗
+                    </a>
+                    <span style={{ fontSize: "0.75rem", color: "var(--text-3)" }}>
+                      Revisada {autoridadDocumentada.fecha_revision}. Los pagos se muestran por su propio período.
+                    </span>
+                  </>
+                ) : alcalde ? (
                   <>
                     <span>Alcaldía en nómina ({alcalde.periodo}):</span>
                     <strong style={{ color: "var(--text-1)" }}>{alcalde.nombre}</strong>

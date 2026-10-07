@@ -161,12 +161,25 @@ export default async function HowItWorksPage() {
 
           <div style={{ overflowX: "auto", marginTop: "1.25rem" }}>
             <table className="data-table" style={{ width: "100%" }}>
-              <thead><tr><th>Fuente</th><th>Frecuencia / corte</th><th>Registros</th><th>Publicado</th><th>Consultable</th><th>Relacionado</th><th>Módulo</th></tr></thead>
+              <thead><tr><th>Fuente / alcance</th><th>Frecuencia / corte</th><th>Registros integrados</th><th>Publicado</th><th>Consultable</th><th>Relacionado</th><th>Módulo</th></tr></thead>
               <tbody>
                 {sources.map((source) => (
                   <tr key={source.id}>
-                    <td><strong>{source.name}</strong><br /><span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>{source.organization}</span></td>
-                    <td>{source.frequency}<br /><span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>{source.periodoReciente}</span></td>
+                    <td>
+                      <strong>{source.name}</strong><br />
+                      <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
+                        {source.organization}<br />
+                        Categorías de origen: {source.coberturaDetalle}. {source.coverageNote}<br />
+                        Estado del conjunto integrado: {source.statusLabel}.
+                      </span>
+                    </td>
+                    <td>
+                      {source.frequency}<br />
+                      <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
+                        {source.periodoReciente}<br />
+                        Actualización registrada: {source.lastSyncFormatted}
+                      </span>
+                    </td>
                     <td>{source.canonicalCount.toLocaleString("es-CL")}</td>
                     <td>{source.metrics.published.label}</td>
                     <td>{source.metrics.queryable.label}</td>
@@ -178,9 +191,20 @@ export default async function HowItWorksPage() {
             </table>
           </div>
           <p style={{ margin: "1rem 0 0", color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: 1.5 }}>
-            La plataforma tiene {summary.totalFuentes} fuentes en el catálogo. “No calculable” significa que el corte actual no publica evidencia suficiente para afirmar una cobertura, no que la fuente esté vacía.
+            La plataforma tiene {summary.totalFuentes} fuentes en el catálogo. Las categorías de origen describen lo que publica cada fuente, no certifican que integremos todos sus registros. Las cifras corresponden al conjunto disponible en el corte indicado; no representan personas únicas. “No calculable” significa que el corte actual no publica evidencia suficiente para afirmar una cobertura, no que la fuente esté vacía.
           </p>
 
+          <div style={{ marginTop: "1.5rem", paddingTop: "1.25rem", borderTop: "1px solid var(--border-subtle)" }}>
+            <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem", color: "var(--text-primary)" }}>
+              Fuente oficial no significa conjunto completo
+            </h3>
+            <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.6 }}>
+              La procedencia identifica quién publicó el dato; la cobertura describe qué categorías, organismos y períodos están disponibles aquí. Sólo consideramos completo un conjunto cuando sus conteos y períodos se han contrastado con un universo de referencia del mismo alcance. Una cobertura parcial identifica un subconjunto conocido. «Cobertura no medida» indica que no existe un denominador verificable para calcular un porcentaje; no equivale a cero.
+            </p>
+            <p style={{ fontSize: "0.82rem", color: "var(--text-muted)", lineHeight: 1.6 }}>
+              Que un registro no aparezca en la plataforma no prueba que la fuente no lo haya publicado. Los períodos y cifras de la tabla se interpretan por fuente, no como un corte común de todo el Estado. Los montos no informados permanecen separados de cero. Las coincidencias de nombres o fechas no prueban causalidad ni irregularidad, ni acreditan por sí solas la identidad de una persona.
+            </p>
+          </div>
           <div style={{ marginTop: "1.5rem", paddingTop: "1.25rem", borderTop: "1px solid var(--border-subtle)" }}>
             <h3 style={{ fontSize: "1rem", margin: "0 0 0.5rem", color: "var(--text-primary)" }}>
               Alcance de remuneraciones del CPLT
@@ -204,7 +228,7 @@ export default async function HowItWorksPage() {
         <section className="card" style={{ padding: "1.5rem" }} aria-labelledby="cohesion-method-title">
           <span className="eyebrow">Metodología reproducible</span>
           <h2 id="cohesion-method-title" style={{ fontSize: "1.25rem", margin: "0.25rem 0 0.5rem" }}>Cohesión de bancadas y votaciones destacadas</h2>
-          <p style={{ color: "var(--text-muted)", margin: 0 }}>La cohesión es el promedio, por bancada y cámara, de la cuota de la opción mayoritaria sobre votos efectivos (Afirmativo, En Contra y Abstención). Se excluyen ausencias, “No Vota”, dispensados y pareos; una bancada unitaria queda como “Sin muestra”. La selección destacada prioriza impacto institucional, quórum calificado, iniciativas presidenciales de alto perfil y seguimiento público; excluye votaciones procedimentales o sin quórum.</p>
+          <p style={{ color: "var(--text-muted)", margin: 0 }}>La cohesión es el promedio, por bancada y cámara, de la cuota de la opción mayoritaria sobre votos efectivos (Afirmativo, En Contra y Abstención). Se excluyen ausencias, “No Vota”, dispensados y pareos; una bancada unitaria queda como “Sin muestra”. La portada muestra las tres votaciones más recientes del Senado disponibles en el corte publicado; la tarjeta central tiene énfasis visual, no una clasificación de importancia. Los porcentajes representan los votos informados para cada registro y no se ajustan para aparentar diversidad.</p>
         </section>
 
         <section

@@ -1,6 +1,41 @@
 # Plan canónico de estabilización
 
-Actualizado: 2026-10-02. Este plan sustituye como tablero operativo a los
+## Encargo vigente: cierres de complejidad baja y media — 2026-10-05
+
+Ejecutar LM01–LM09 del [tablero único](todo.md), sin renumerar ni borrar O01–O16. La autorización cubre documentación, correcciones de interpretación, validación acotada y estimación; no implica cargas históricas nacionales, nuevas fuentes, borrados o ampliación ChileCompra.
+
+- **LM01:** consolidar pendientes, marcar documentos anteriores y fijar ruta/branch. Aceptación: referencias únicas, historial preservado y documentación fusionada.
+- **LM02:** aclarar alcance/período/fuente en las cifras municipales pendientes. Aceptación: no atribuir cobertura completa, personas únicas ni pagos ausentes a un subconjunto; pruebas y render productivo.
+- **LM03:** distinguir titular documentado de pagos históricos en Tortel/O’Higgins. Aceptación: evidencia oficial fechada, separación de representación y registros conservados; prueba y ficha productiva.
+- **LM04:** completar política y alcance por fuente en Metodología con los metadatos ya auditados. Aceptación: oficial no equivale a completo, limitaciones específicas y períodos; pruebas y render.
+- **LM05:** conciliar fechas/contadores Home–API–release. Aceptación: comparar unidades iguales, no fecha global inferida y no regresión del release; evidencia productiva.
+- **LM06:** cerrar procedencia, frecuencia, última ejecución y fallos por ETL existente. Aceptación: usar registro/calendario actual, verificar ejecuciones y pruebas de preservación; no considerar verde como extracción exitosa cuando se omitió. Los bloqueados permanecen explícitos, no se fuerzan cargas.
+- **LM07:** verificar anuncio contado y confirmación diaria de Movimientos. Aceptación: mismo ID, evidencia fiable, no-op/caída sin pérdida y ejecución/modalidad real cotejada.
+- **LM08:** cotejar muestra explícita de pagos bajos, cero y faltantes. Aceptación: fuente y celda original, discrepancias resueltas o causa desconocida documentada; no extrapolar a todo el universo.
+- **LM09:** medir viabilidad de históricos. Aceptación: bytes/objetos/operaciones estimados, inventario de cuenta fechado y límite gratuito; si falta telemetría no declarar coste cero ni publicar. No recuperar el universo durante la medición.
+
+Orden: LM01, LM02–LM04, LM05–LM07, LM08–LM09. Cada bloque reutiliza las pruebas/scripts existentes; no hay refactor general. Si una fuente no responde, cerrar la protección y registrar la dependencia, sin marcar completa su cobertura.
+
+### Secuencia de cierre restante — 2026-10-07
+
+La cola concreta y sus dependencias están en [todo.md](todo.md). Se agrupan
+los cierres sencillos LM01–LM04 y el diagnóstico ya validado LM09 en una
+entrega documental/de presentación: revisión puntual restante, commit final,
+un preview final y verificación pública tras promoción. No se espera a LM08
+ni a recuperar históricos para publicar correcciones ya comprobadas.
+
+Después se completan las comprobaciones acotadas LM05/LM07, la ficha por
+ETL LM06 y las celdas originales pendientes LM08. Las tareas operativas O05,
+O08, O10, O11, O13 y O15 siguen separadas con sus dependencias y evidencia;
+ChileCompra O16 permanece al final. No se añaden fuentes ni auditorías.
+
+En cada cierre actualizar `todo.md` y `evidence.md` con fecha, commit,
+pruebas y destino real (local, preview o producción). El avance no se aumenta
+por iniciar un comando ni por un workflow verde que omitió la extracción.
+
+Cuatro puertas por punto: referencia/evidencia, cambio o diagnóstico, validación reproducible, fusión y verificación pública cuando cambia presentación. Cada puerta vale 25%; esos porcentajes describen el trabajo, nunca exactitud o cobertura de datos. La última puerta documental exige fusión, no sólo archivo local.
+
+Cola vigente actualizada: 2026-10-07; base operativa: 2026-10-02. Este plan sustituye como tablero operativo a los
 planes fechados en septiembre; aquellos permanecen como historial, no como
 instrucciones vigentes ni evidencia de cobertura actual.
 

@@ -450,3 +450,144 @@ Riesgo o siguiente puerta:
 - Respaldo existente: cierre O06 del 2026-10-01, replay y 59 pruebas dirigidas, ejecución 36854416777 y controles no-op; smoke productivo y rollback por checksum. PR #681 y ejecución 36930661823 documentan anuncios contabilizados, revisión de seis enlaces pendientes, no-op y HTTP 200 de Home/Movimientos.
 - No son nuevas verificaciones de producción ni garantizan cobertura retrospectiva o descubrimiento de todas las noticias. La cuarta puerta de esta matriz permanece abierta por operación/costes; O05 y O15 conservan sus pendientes. No se modifican sus porcentajes ni el avance global por esta corrección documental.
 - Sólo se editan matriz, tablero y evidencia. No se despachan ETL ni cargas/auditorías R2/D1; no se cambian código, datos o diseño. La historia original se conserva.
+## Orden de cierre actualizado — 2026-10-07
+
+LM05/LM07, cotejo canónico acotado: pin público y archivo R2 exacto
+concordantes por SHA256 `e3e6753b280f2535e080aa444c761ed5ea01b4103803284e6a0a55d8e3a372af`
+y 108.691 bytes, dominio `2e3c65a371ffa818e5568f3dce92ef4b28e2f885aefa8b7b1e3e65a97d740965`.
+Contiene 46 filas principales (10 verificadas, 35 corroboradas, una en
+confirmación) y cinco señales adicionales en confirmación: 51 eventos, 45
+respaldados, seis pendientes. API paginada anuncia 46 filas principales,
+backend R2 completo; no dice 46 confirmaciones legales. No hay IDs duplicados
+en ambos conjuntos. Home toma total/renuncias y cronología del mismo payload.
+Fechas observadas en HTML: señal 30 sep, cambio efectivo 14 sep, revisión
+publicada 1 oct. Una fecha de señal no sustituye la fecha efectiva ni una
+ejecución no-op crea una revisión publicada nueva. El contador cliente usa
+calendario de Chile y la fecha publicada más reciente, con actualización
+automática; el cero inicial del HTML estático no acredita el contador tras
+hidratación. Comprobación de navegador final pendiente.
+
+LM07: ejecución programada `37473396433`, 6 oct 13:45 UTC, success; recuperó
+el release R2, revisó/validó novedades y generó resumen. Sin release nuevo
+acreditado; el pin observado permanece igual. Después de instalar el lock
+corregido pasaron 87 pruebas en siete archivos, incluidos 34 casos del
+pipeline, contadores/fechas, procedencia, finanzas y registro de fuentes.
+La confirmación exacta/mismo ID se prueba con casos controlados; no se inventa
+una confirmación legal real ni se garantiza descubrir toda noticia.
+
+Control de seguridad: run `37565511264` bloqueó el PR por dos avisos de
+producción. Corrección acotada del lockfile, dentro de rangos existentes:
+sharp 0.35.4 → 0.35.5 (binarios/libvips asociados) y source-map-js 1.2.1 →
+1.2.2. Sin `--force`, overrides ni cambios de Next/React/ETL. Avisos y notas
+primarios contrastados:
+https://github.com/advisories/GHSA-wq5f-xc86-pv6w y
+https://github.com/advisories/GHSA-68fv-2mgg-jv7q.
+Instalación congelada `npm ci --ignore-scripts`; prueba nativa WebP correcta.
+`npm audit --omit=dev --audit-level=high`: cero vulnerabilidades. La auditoría
+que incluye desarrollo aún informa dos moderadas y once altas; no se declara
+cero para toda la cadena ni se ocultan resultados. CI/preview del lock final
+pendientes antes de promover.
+
+LM02/LM04, incremento de presentación: se distingue presupuesto inicial de
+vigente y se conserva ausencia como null hasta el render; cero explícito y
+per cápita cero calculable se muestran como $0. La tabla de Metodología usa
+alcance, nota, estado y fecha del mismo resumen por fuente; explica que las
+categorías de origen no acreditan cobertura completa ni personas únicas.
+No se altera el resumen ni se agregan datos. Tres regresiones fallaron antes
+del cambio; 13 pruebas dirigidas aprobaron después. Tipos front/Worker,
+arquitectura estática, tokens, enlaces e innerHTML: código 0. Revisión puntual
+del diff: sin consultas nuevas, dependencias, datos inventados ni cambios de
+rutas/diseño. Preview del commit final pendiente; no se aumenta aún la puerta
+de validación pública ni se afirma publicación productiva.
+
+- Solicitud: añadir los pendientes del plan y cerrar primero los sencillos.
+  Se desglosó la cola existente en `todo.md`, sin crear tareas nuevas ni
+  reabrir los bloques cerrados. `plan.md` fija un solo preview final para el
+  bloque rápido de documentación/presentación.
+- Estado Git comprobado: rama `codex/low-medium-closeout-20261005`, worktree
+  `C:\Users\jorge\.codex\worktrees\codex-stabilizacion-20261001`, HEAD
+  `9469da5c`; cuatro commits locales por delante del remoto. Se preserva
+  `.ci-municipal-worker-candidate/`, sin seguimiento.
+- GitHub: PR #715 abierto, `MERGEABLE`, head remoto
+  `5d7e6833be8b08a7ad46621b9bab685808134746`. Preview 37272960580 completado
+  con `success` para ese commit; no incluye los cuatro posteriores. No se
+  certifica publicación productiva ni validación de esos cambios con este run.
+- Por evidencia existente, LM02 pasa a 50% (cambios/pruebas locales, preview
+  final pendiente), LM05 y LM06 a 25% (referencia documentada, conciliación
+  completa pendiente). LM03 conserva 75% y se explicita que la cabecera sí
+  fue revisada en preview escritorio/móvil. Las demás puertas no cambian.
+- Sólo documentación en este incremento: sin consultas D1, cargas/borrados
+  R2, despachos ETL, nuevos backups ni cambios de producción.
+- Validación del incremento: `git diff --check` y todos los enlaces Markdown
+  locales de los tres documentos aprobados; sólo esos tres archivos cambiados.
+
+## Actualización del tablero y dependencias — 2026-10-07
+
+La cola LM01–LM09 incorpora explícitamente los pendientes O05/O08/O10/O11/
+O13/O15/O16, sin duplicarlos ni volver a ejecutar bloques cerrados. Las
+puertas locales nuevas elevan LM02/LM04 a 75%; snapshot SHA y navegador
+productivo permiten LM05/LM07 a 75%. LM06 documental queda 50%: tabla
+actualizada de ventanas y ejecuciones, no cierre operativo de todos los ETL.
+LM08 permanece 50%, porque falta cotejo original de cero/faltante; no se
+oculta esta dependencia para declarar 100%.
+
+Actions consultados el 7 oct: Cámara 37473771087 y votos 37476518739
+success; apoyo Senado 37339561783 success. Apoyo Cámara 37333599905
+recuperó baseline validado de 4.491 filas y falló con
+PERSONAL_APOYO_SOURCE_BLOCKED; publicaciones R2/estática skipped. CPLT
+37351220112 canceló frescura y omitió ingestas/consolidación. 38 bis
+37362307722 tiene job cancelled, conclusión failure; los logs no están
+disponibles, por lo que no se atribuye causa ni publicación. InfoLobby
+37347406257 schedule terminó success, pero publicación estática skipped:
+no se acredita corte nuevo. Estos incidentes no invalidan una prueba
+anterior, pero impiden presentarla como disponibilidad continua actual.
+
+La guarda de seguridad del HEAD de aplicación ef580bbf pasó en CI
+37566117628. CodeQL y pruebas/tipos también verdes. Preview 37566114254
+en construcción; no se acredita promoción ni validación del artefacto final.
+Navegador productivo: contador «7 días desde el último cambio» muestra 07,
+con consola warn/error vacía. Sigue calculándose desde la última señal
+publicada, no sólo desde un cese legal anterior.
+
+Sin despachos ETL, nuevas copias, lecturas D1 ni escrituras/borrados R2.
+Se conservan el checkout principal divergente y el artefacto local sin
+seguimiento. Las fechas de inventario/facturación anteriores se mantienen:
+no se inventa una medición de coste de hoy.
+
+## Cierre baja/media — referencia 2026-10-05
+
+LM03 móvil: mismo preview O’Higgins revisado a 320×760. Tras rechazar cookies opcionales, cabecera, nombre, enlace oficial y advertencia de períodos se leen en flujo vertical; viewport320/document.scrollWidth312, sin desborde horizontal. Consola warn/error vacía. Se restauró viewport original al finalizar. Verifica la cabecera compartida con el código final, no las etiquetas añadidas después. Sigue pendiente promoción productiva.
+
+LM03 preview visual: navegador integrado abierto en `https://efc3560d.cambiometro.pages.dev/municipalidades/ohiggins/`. Cabecera muestra Raquel Torres Cuevas como autoridad documentada y enlace municipal; tarjeta salarial conserva «Varios registros» agosto 2026, sin unir remuneraciones. Screenshot de escritorio revisado y consola error/warn vacía. HTML Tortel y Metodología también HTTP200 con nombres/política esperados. Este artefacto no contiene las últimas etiquetas de lectura rápida ni selección cronológica documentada; no se utiliza para certificarlas. Verificación móvil y promoción aún pendientes.
+
+LM04, coherencia de selección: `app/page.tsx` usa `buildLatestSenateVotes(annualVotes, 3)`. Metodología conservaba una explicación antigua de prioridad editorial por impacto/quórum. Se reemplaza por últimas tres votaciones Senado del corte disponible, énfasis central sólo visual y porcentajes fieles al registro. Prueba nueva falló antes; 16 pruebas dirigidas Metodología/Home/procedencia y tipos aprobaron después. No se cambia el selector, la votación ni su diseño. Requiere incluir en preview final junto a las últimas etiquetas municipales.
+
+LM02, etiquetas rápidas restantes: población/presupuesto sin valor se describen «Sin dato integrado»; personal cuenta registros del período, no personas únicas. Presupuesto explícito cero se conserva en lectura rápida; ausencia permanece null antes de formatear. No se afirma que la fuente no publicó población. Prueba roja antes; ocho pruebas de procedencia/finanzas y tipos aprobaron después. Preview 37272050500 HTTP200 de Tortel/O’Higgins/Metodología contiene autoridades documentadas y política; ese artefacto no incluye esta modificación posterior, que necesitará validación final antes de promoción.
+
+LM09, preflight real 2026-10-05 06:31 UTC: se enumeraron los cuatro buckets de la cuenta y se ejecutó el inventario existente de sólo lectura. Principal 7.432.570.998 bytes/23.536 objetos; backup 1.049.483.183/4.108; mascotas 257.752/3; multas 0. Cuenta total 8.482.311.933 bytes/27.647 objetos, 84,82311933% del techo operativo decimal de 10GB. Margen hasta 95%: 1.017.688.067 bytes; hasta 90%: 517.688.067. No es facturación mensual medida (GB-mes/picos diarios/operaciones), ni prueba de $0. Inventario cacheado principal omitía un objeto de 8.656.177 bytes; se usa el listado vivo para la decisión.
+
+Histórico municipal sin comprimir no autorizado: sólo la proyección municipal de última fila ocupa 1.785.010.804 bytes, más que el margen a 95%; copiarla completa añadiría más que ese margen. El CSV Planta previamente medido de ~8,71GB tampoco cabe. Esto no estima el tamaño real de un histórico comprimido ni multiplica por meses una proyección de últimas filas. Una ampliación requerirá muestra de compresión/particiones, índices compactos y preflight de bytes/objetos/pico activo+rollback+staging, más cuota de operaciones/facturación del ciclo; no se ejecuta ahora. Preflight responde la viabilidad del almacenamiento bruto actual sin cargar datos ni borrar históricos. Tarifas oficiales consultadas: https://developers.cloudflare.com/r2/pricing/ (Standard: 10GB-mes, 1M Clase A y 10M Clase B gratuitos mensuales; no aplica a Infrequent Access). Listado paginado metadatos, sin cuerpos de registros, PUT, DELETE o D1. LM09 75%, pendiente fusión documental.
+
+LM08: se reutiliza la revisión primaria de cuatro casos del 4 oct, no un nuevo cotejo universal. Consulta productiva acotada reconfirma Abel: `func-muni-tortel-planta-1c42f3a12d9a31b0`, enero 2025, bruto 468212, líquido 410021, URL CSV CPLT Planta. `completeMonthlyPayroll:false`, `countUnit:records`, `sueldoCompletoCount:null`, stats de página. Proyección inicial con nombres de propiedades incorrectos devolvió null al seleccionar; al inspeccionar el contrato real los campos `_mensual` contienen los importes anteriores: no es ausencia de dato. 16 pruebas parser/semántica/finanzas aprobadas. Los seis brutos cero y 276 líquidos nulos observados en tres archivos previos no acreditan por sí solos celdas originales; falta cotejo de esa parte de la muestra. LM08 50%, sin causas inventadas.
+
+LM05: etiqueta Home ajustada a «Última revisión publicada», sin alterar el valor, diseño o lógica de días. La revisión publicada pertenece al release; una revisión diaria no-op posterior no se presenta como nueva publicación ni se inventa una fecha. Regresión Home roja antes del ajuste; 20 pruebas Home/movement-age aprobadas después. El preview 37272050500 ya terminó compilación y verifica navegador/temas/CSP, pero corresponde a 4f5240e4 y todavía no incluye este ajuste posterior. Se validará el commit final antes de promover.
+
+LM05, producción observada: `/api/v1/records?source=movimientos&limit=1` responde backend R2/status complete, total/publicadas 46, última fila corroborada Jorge Olivares 2026-09-14. No incluye automáticamente las señales pendientes; no comparar ese total con total de anuncios como si fueran la misma unidad. HTML Home publica fechas 2026-09-30 (señal), 2026-09-14 (efectivo), 2026-10-01 (revisión). ReleaseSet público: dominio movimientos `2e3c65a371ffa818e5568f3dce92ef4b28e2f885aefa8b7b1e3e65a97d740965`, archivo SHA256 `e3e6753b280f2535e080aa444c761ed5ea01b4103803284e6a0a55d8e3a372af`, 108691 bytes. Ejecución sin cambios del 4 oct no equivale a nuevo release: pendiente aclarar alcance de «Última revisión» y cotejar snapshot canónico. Consultas públicas pequeñas, sin D1 ni escritura R2. No se certifica coherencia completa todavía.
+
+LM06/CGR: inspeccionados workflow y pasos de 37025325935. El fallo ocurre en ingesta; publicación estática y confirmación quedan `skipped`. El script escribe su candidato en workspace local y prepara `publish-plan.json` sólo al final; la publicación R2 es un comando posterior al proceso que falló. Esta ejecución no alcanzó promoción. No se relanza ni modifica el conector bloqueado; cotejo productivo aún pendiente.
+
+LM07: 34 pruebas de `scripts/movimientos-pipeline.test.mjs` y 37 de las librerías Movimientos/publicación/task-h aprobadas con Vitest. Cubren relectura diaria de pendientes, anuncio con oficial bloqueada, conservar detección, misma identidad al añadir evidencia y acto legal exacto, no confirmar mero nombre y preservar baseline. Primer intento erróneo usando `node --test` sobre suite Vitest falló por runner; se corrigió la invocación, no el código ni se omitieron pruebas. Ejecución remota diaria 37203847565 comprobada; publicación omitida. No demuestra descubrir toda noticia ni un nuevo evento real confirmado; cotejo público pendiente. LM07 50%.
+
+LM06: consultada la última ejecución de cada flujo del calendario salvo ChileCompra; fecha/evento/resultado registrados en `etl-closure.md`. Se inspeccionaron pasos de Movimientos 37203847565 (schedule, publicación omitida) y fallo CGR 37025325935 (timeout 90 s, candidato incompleto). InfoLobby push 37272047367 sólo valida workflow: su ingesta está omitida. No se convierten estos éxitos en nuevos cortes. Pendientes: procedencia por conector, preservación ante fallo y cotejo de releases. Sin ingestas, D1 o escrituras R2.
+
+Preview UI iniciado con commit 4f5240e4: Actions 37272050500, PR #715. Hasta la comprobación intermedia, pin/checksum del ReleaseSet, calidad semántica, agregados municipales, personal de apoyo y salud de fuentes aprobados. Build/E2E/promoción pendientes. Intento de adjuntar PR al chat rechazado por límite de 100 adjuntos; el PR sigue accesible por URL y no se eliminan adjuntos ajenos.
+
+LM04: política pública añadida a Metodología junto a la tabla por fuente. Distingue procedencia/completitud, denominador verificable, cobertura parcial/no medida, ausencia en plataforma frente a ausencia en origen, cero/no informado y coincidencias sin identidad/causalidad/irregularidad inferidas. Regresión nueva roja antes del cambio; 20 pruebas dirigidas aprobadas después. Tipos front/Worker, enlaces, arquitectura estática, tokens e innerHTML aprobados. La política general no certifica coberturas particulares; falta revisar esos alcances y preview/promoción. LM04 50%. Compilación local iniciada, no se afirma exitosa hasta terminar.
+
+LM02, ajuste puntual: la tarjeta «Compras y control» ya no atribuye a la fuente una ausencia que sólo se observa en nuestro conjunto integrado. Se conserva cero explícito; un contador ausente no se rellena con cero. La cifra CGR se identifica como informes integrados y no como universo completo. Regresión inicialmente roja; después 19 pruebas combinadas de procedencia/alcaldía y TypeScript aprobaron. LM02 permanece abierto para las demás etiquetas y preview; no hubo cargas R2 ni D1.
+
+LM03: Tortel documenta a Marisela Jiménez Cruces en https://www.tortel.cl/alcaldesa/; O’Higgins documenta la elección de Raquel Torres Cuevas el 21 de agosto en https://www.municipalidadohiggins.cl/2026/08/21/concejo-municipal-de-ohiggins-elige-a-raquel-torres-cuevas-como-nueva-alcaldesa-para-completar-el-periodo-edilicio/. Consulta 2026-10-05. Se agrega autoridad documentada independiente de nómina, sin partido o remuneración inferidos. La cabecera prioriza esa evidencia y enlaza el documento; pagos históricos y selección mensual no cambian. Prueba nueva falló inicialmente; después 15/15 pruebas de `municipal-alcaldia.test.ts`, `npm run typecheck` y `npm run check:links` terminaron con código 0. Falta preview, revisión visual y promoción: 75%, no desplegado. Sin escrituras R2 ni consultas D1.
+
+LM01: se preservó el checkout divergente y el artefacto local sin seguimiento. Se reutiliza el worktree operativo, con rama `codex/low-medium-closeout-20261005` basada en `origin/main` `de9de3023df9039849ef6ba6e6d23c6b2a13464a`. El tablero `todo.md` registra los nueve puntos autorizados y el plan define evidencia por puerta. Se añadió referencia vigente en `docs/OPERACION-WORKSPACE.md`; los documentos históricos siguen preservados. Enlaces Markdown locales y `git diff --check` aprobados. Fusión pendiente: 3/4 puertas, 75%, no 100% documental.
+
+Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Worker `37269186871`, ambos exitosos. API municipal declara registros y alcance parcial, sin lecturas públicas D1. Se reutiliza como evidencia anterior, no como prueba de los nuevos puntos LM03–LM09. La ejecución CPLT `37118857265` fue `check-sources-only`: no acredita extracción/consolidación del 3 de octubre. No convertir esa ejecución verde en «nómina actualizada».

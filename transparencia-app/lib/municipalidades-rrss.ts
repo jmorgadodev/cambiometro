@@ -22,9 +22,35 @@ export interface MuniRRSSInfo {
     fuente: string;
   } | null;
   nota_territorial?: string | null;
+  autoridad_documentada?: {
+    nombre: string;
+    url: string;
+    fecha_documento: string | null;
+    fecha_revision: string;
+  };
 }
 
 export const VERIFIED_MUNICIPALIDADES_RRSS: Record<string, MuniRRSSInfo> = {
+  "muni-tortel": {
+    sitio_web_oficial: "https://www.tortel.cl",
+    redes_sociales: null,
+    autoridad_documentada: {
+      nombre: "Marisela Jiménez Cruces",
+      url: "https://www.tortel.cl/alcaldesa/",
+      fecha_documento: null,
+      fecha_revision: "2026-10-05",
+    },
+  },
+  "muni-ohiggins": {
+    sitio_web_oficial: "https://www.municipalidadohiggins.cl",
+    redes_sociales: null,
+    autoridad_documentada: {
+      nombre: "Raquel Torres Cuevas",
+      url: "https://www.municipalidadohiggins.cl/2026/08/21/concejo-municipal-de-ohiggins-elige-a-raquel-torres-cuevas-como-nueva-alcaldesa-para-completar-el-periodo-edilicio/",
+      fecha_documento: "2026-08-21",
+      fecha_revision: "2026-10-05",
+    },
+  },
   "muni-maipu": {
     sitio_web_oficial: "https://www.municipalidadmaipu.cl",
     redes_sociales: {

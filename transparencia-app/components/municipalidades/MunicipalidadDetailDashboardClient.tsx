@@ -42,7 +42,8 @@ function formatCLP(n?: number | null) {
 }
 
 function formatCompactCLP(n?: number | null) {
-  if (!n || n <= 0) return "—";
+  if (n === null || n === undefined || !Number.isFinite(n)) return "Sin dato integrado";
+  if (Math.abs(n) < 1_000_000) return formatCLP(n);
   if (n >= 1_000_000_000_000) {
     return `$${(n / 1_000_000_000_000).toLocaleString("es-CL", {
       minimumFractionDigits: 1,
@@ -325,12 +326,14 @@ export default function MunicipalidadDetailDashboardClient({
     alcalde?.partido_alcalde || "";
   const brandingAlcalde = getPartidoConfig(partidoAlcalde);
 
-  const presVigente = pres?.vigente_clp ?? pres?.inicial_clp ?? 0;
+  const presupuestoPublicado = pres?.vigente_clp ?? pres?.inicial_clp ?? null;
+  const presupuestoLabel = pres?.vigente_clp != null ? "Presupuesto vigente"
+    : pres?.inicial_clp != null ? "Presupuesto inicial informado" : "Presupuesto SINIM";
   const perCapita =
     muniData.presupuesto_per_capita_clp ??
-    (muniData.poblacion_censo_2024 && presVigente > 0
-      ? Math.round(presVigente / muniData.poblacion_censo_2024)
-      : 0);
+    (muniData.poblacion_censo_2024 != null && muniData.poblacion_censo_2024 > 0 && presupuestoPublicado !== null
+      ? Math.round(presupuestoPublicado / muniData.poblacion_censo_2024)
+      : null);
   const fcmPct = muniData.fcm_dependencia_pct ?? 0;
   const fcmKnown = typeof muniData.fcm_dependencia_pct === "number" && Number.isFinite(muniData.fcm_dependencia_pct);
   const comprasMuni = muniData.compras_publicas;
@@ -383,7 +386,7 @@ export default function MunicipalidadDetailDashboardClient({
                 color: "var(--ok)",
               }}
             >
-              {presVigente > 0 ? formatCompactCLP(presVigente) : "—"}
+              {formatCompactCLP(presupuestoPublicado)}
             </div>
             <div
               style={{
@@ -392,7 +395,7 @@ export default function MunicipalidadDetailDashboardClient({
                 marginTop: "0.25rem",
               }}
             >
-              Presupuesto Per Cápita: {perCapita > 0 ? `${formatCLP(perCapita)} / hab` : "—"}
+              Presupuesto Per Cápita: {perCapita !== null ? `${formatCLP(perCapita)} / hab` : "Sin dato integrado"}
             </div>
             <div
               style={{
@@ -490,7 +493,7 @@ export default function MunicipalidadDetailDashboardClient({
             >
               {muniData.poblacion_censo_2024
                 ? "Censo 2024 INE / SINIM"
-                : "No publicado por la fuente"}
+                : "Sin dato integrado"}
             </div>
           </div>
 
@@ -594,10 +597,10 @@ export default function MunicipalidadDetailDashboardClient({
         title={`Lectura rápida de ${nombreComuna}`}
         description="Una vista de contexto para entender la escala financiera, territorial y de control antes de entrar al detalle. Las cifras se calculan con el último corte municipal disponible y conservan sus períodos y ausencias."
         metrics={[
-          { label: "Población Censo 2024", value: muniData.poblacion_censo_2024 ? formatNum(muniData.poblacion_censo_2024) : "No publicado", detail: muniData.superficie_km2 ? `${muniData.superficie_km2.toLocaleString("es-CL")} km²` : "INE", tone: "accent" },
-          { label: "Presupuesto vigente", value: presVigente > 0 ? formatCompactCLP(presVigente) : "No publicado", detail: perCapita > 0 ? `${formatCLP(perCapita)} por habitante` : `SINIM ${pres?.ano ?? "s/f"}`, tone: "ok" },
-          { label: "Personal del período", value: currentResumenPersonal ? formatNum(currentResumenPersonal.total_funcionarios) : "No publicado", detail: selectedPeriodInfo?.etiqueta ?? "CPLT", tone: "info" },
-          { label: "Compras y control", value: comprasMuni ? formatNum(comprasMuni.procesos_count ?? 0) : "No publicado", detail: `${auditorias.length} auditorías CGR`, tone: "warn" },
+          { label: "Población Censo 2024", value: muniData.poblacion_censo_2024 != null ? formatNum(muniData.poblacion_censo_2024) : "Sin dato integrado", detail: muniData.superficie_km2 ? `${muniData.superficie_km2.toLocaleString("es-CL")} km²` : "INE", tone: "accent" },
+          { label: presupuestoLabel, value: presupuestoPublicado !== null ? formatCompactCLP(presupuestoPublicado) : "Sin dato integrado", detail: `SINIM ${pres?.ano ?? "sin período informado"}${perCapita !== null ? ` · ${formatCLP(perCapita)} por habitante` : ""}`, tone: "ok" },
+          { label: "Registros de personal del período", value: currentResumenPersonal ? formatNum(currentResumenPersonal.total_funcionarios) : "Sin registros integrados", detail: selectedPeriodInfo?.etiqueta ?? "CPLT", tone: "info" },
+          { label: "Compras y control", value: comprasMuni?.procesos_count != null ? formatNum(comprasMuni.procesos_count) : "Sin registros integrados", detail: `${auditorias.length} informes CGR integrados; no representa el universo completo`, tone: "warn" },
         ]}
         bars={[
           { label: "Dependencia del Fondo Común Municipal", value: fcmKnown ? fcmPct : null, displayValue: fcmKnown ? `${fcmPct.toLocaleString("es-CL")} %` : "No informado", detail: `SINIM ${muniData.fcm_periodo ?? "sin período informado"}`, tone: fcmPct > 60 ? "warn" : "info" },
@@ -808,7 +811,7 @@ export default function MunicipalidadDetailDashboardClient({
                   }}
                 >
                   <span style={{ fontSize: "0.82rem", color: "var(--text-muted)" }}>
-                    Presupuesto Vigente Total
+                    {presupuestoLabel}
                   </span>
                   <strong
                     style={{
@@ -817,7 +820,7 @@ export default function MunicipalidadDetailDashboardClient({
                       fontSize: "0.95rem",
                     }}
                   >
-                    {formatCLP(presVigente)}
+                    {presupuestoPublicado !== null ? formatCLP(presupuestoPublicado) : "Sin dato integrado"}
                   </strong>
                 </div>
 
@@ -840,7 +843,7 @@ export default function MunicipalidadDetailDashboardClient({
                       fontSize: "0.95rem",
                     }}
                   >
-                    {formatCLP(perCapita)} / habitante
+                    {perCapita !== null ? `${formatCLP(perCapita)} / habitante` : "Sin dato integrado"}
                   </strong>
                 </div>
 

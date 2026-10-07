@@ -1,5 +1,11 @@
 # Espacio operativo único de El Cambiómetro
 
+## Referencia vigente — 5 de octubre de 2026
+
+Para este cierre se reutiliza `C:\Users\jorge\.codex\worktrees\codex-stabilizacion-20261001`, aplicación `transparencia-app`, rama `codex/low-medium-closeout-20261005`, basada en `origin/main` `de9de3023df9039849ef6ba6e6d23c6b2a13464a`. El checkout de `Proyectos\cambiometro-public` sigue preservado y no es un origen de despliegue por el mero nombre `main`.
+
+El único tablero vigente es [tasks/stability/todo.md](../tasks/stability/todo.md), con criterios en [plan.md](../tasks/stability/plan.md) y cierres en [evidence.md](../tasks/stability/evidence.md). Los informes fechados describen su observación original; no sumar sus porcentajes ni usar sus pendientes como estado actual. La tabla de carpetas de abajo identifica responsabilidades, no autoriza desplegar un checkout divergente.
+
 Desde el 12 de septiembre de 2026, las únicas carpetas de trabajo activas son:
 
 | Carpeta | Responsabilidad |
