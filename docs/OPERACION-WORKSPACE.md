@@ -2,6 +2,13 @@
 
 ## Referencia vigente — 5 de octubre de 2026
 
+Actualización de cierre, 7 de octubre: el mismo worktree y rama permanecen
+vigentes. PR #715 integrado mediante `a2b70c2e`; aplicación `ef580bbf`
+promovida con artefacto validado, ejecución `37567311188`. Antes de seguir,
+obtener `origin/main` y comparar hashes; los SHA de la referencia inicial
+de abajo son históricos, no un punto al cual retroceder. Los cierres y
+pendientes reales se registran exclusivamente en el tablero enlazado.
+
 Para este cierre se reutiliza `C:\Users\jorge\.codex\worktrees\codex-stabilizacion-20261001`, aplicación `transparencia-app`, rama `codex/low-medium-closeout-20261005`, basada en `origin/main` `de9de3023df9039849ef6ba6e6d23c6b2a13464a`. El checkout de `Proyectos\cambiometro-public` sigue preservado y no es un origen de despliegue por el mero nombre `main`.
 
 El único tablero vigente es [tasks/stability/todo.md](../tasks/stability/todo.md), con criterios en [plan.md](../tasks/stability/plan.md) y cierres en [evidence.md](../tasks/stability/evidence.md). Los informes fechados describen su observación original; no sumar sus porcentajes ni usar sus pendientes como estado actual. La tabla de carpetas de abajo identifica responsabilidades, no autoriza desplegar un checkout divergente.

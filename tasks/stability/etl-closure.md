@@ -27,7 +27,7 @@ Un resultado verde de Actions no demuestra actualización ni cobertura.
 | SERVEL | 32853028527, 25 ago, manual, success | Resultados configurados en conector; sin calendario remoto nuevo ni rango inferido |
 | Reconciliación Cámara | 34608470964, 11 sep, manual, success | Rango explícito validado, full-history manual; no relanzado |
 | CPLT central | 35056072805, 16 sep, manual, cancelled | Cuatro categorías; publish false por defecto, finalización exige éxito de todas; no se acredita publicación |
-| Votaciones Senado | Local-only | Sin workflow remoto; ventana y ejecución se registran con la tarea local, no como cron sano |
+| Votaciones Senado | Tarea local «Cambiómetro - ETL votaciones Senado» | Ready; último intento 6 oct 13:27:46 CL, resultado 2147942667 (0x8007010B, directorio no válido). Script y working directory configurados no existen. Próximo intento 7 oct 09:30 CL; no se presenta como ejecución sana |
 
 Procedencia efectiva: las URLs ya registradas siguen vinculadas a cada
 conector. Para Contraloría, el flujo vigente usa además
@@ -44,6 +44,22 @@ cancelaciones CPLT/38 bis y validar sus siguientes candidatos con las guardas
 existentes. No se cambian conectores ni cron, ni se desactivan guardas ni se
 despachan cargas para cerrar esta actualización documental. ChileCompra
 continúa al final. LM06 documental no equivale al cierre operativo de cada ETL.
+
+Comprobación local con `Get-ScheduledTask -ErrorAction Stop`: la tarea de
+votaciones Senado está registrada y habilitada, pero su acción apunta a
+`C:\Users\jorge\Proyectos\cambiometro-public\transparencia-app\scripts\etl-senado-votaciones-local.ps1`
+(archivo ausente) y al working directory
+`C:\Users\jorge\AppData\Local\Temp\cambiometro-senado-etl-runtime\transparencia-app`
+(directorio ausente). La consulta inicial no la encontró porque el nombre
+contiene «Cambiómetro» con tilde; se repitió con ese nombre real, sin ocultar
+errores. Win32Exception 267 confirma «El nombre del directorio no es válido».
+Es un fallo de arranque interno, no evidencia de un 403 del Senado.
+Falta restaurar un ejecutor local aislado desde `origin/main` y corregir la
+acción sin usar el checkout divergente ni ejecutar una publicación para
+probar el arranque. No se cambió la tarea ni se lanzó una extracción en este
+lote. Este defecto mantiene abierto LM06; el último release válido sigue
+activo. No se exige esperar al cron: la reparación debe probarse en modo
+sin publicación antes de cerrar.
 
 ## Comprobación operativa del 5 de octubre de 2026
 

@@ -521,6 +521,98 @@ de validación pública ni se afirma publicación productiva.
 - Validación del incremento: `git diff --check` y todos los enlaces Markdown
   locales de los tres documentos aprobados; sólo esos tres archivos cambiados.
 
+## Promoción y muestra original completadas — 2026-10-07
+
+PR #715 integrado a las 03:33 UTC mediante
+`a2b70c2e3d2f293f226e9d23f522ff2ff58a84bc`, con todas sus comprobaciones
+verdes. Aplicación de `ef580bbf9832e7ea59a63229c8cbbd5b0057c111` idéntica
+al merge; los últimos cambios sólo documentan estado/evidencia. Preview
+`37566114254` success, URL inmutable `https://66f3421b.cambiometro.pages.dev`.
+Build, navegador/temas/CSP y validación del export terminaron correctamente.
+
+Promoción del mismo artefacto: `37567311188`, success; deployment
+`d81c86ed-d45b-48e5-9c37-e3372d399e53`, creado 03:43:51 UTC. El inventario
+del artefacto de promoción identifica el anterior productivo
+`314114bc-5d69-4a91-bafc-8b871eb0d713` (6 oct, commit `de9de302`). Éste es
+el rollback, no el ID nuevo que imprime la frase genérica del workflow.
+La API Worker no se desplegó en este lote.
+
+ReleaseSet público completo de preview y producción: SHA256
+`619765926f22de4569ec94fba5481bb1245e9b1a07ebcf5bdd2e06d2e46c54c6` en
+ambos. No se cambió un release de datos para publicar la presentación.
+No hubo ingestas, nuevas copias, PUT/DELETE R2 ni consultas D1 productivas.
+
+Render final: Tortel muestra Marisela Jiménez Cruces; O’Higgins muestra
+Raquel Torres Cuevas y «Varios registros» de alcaldía agosto 2026. Cabeceras
+independientes del pago, enlaces municipales y revisión documental 5 oct.
+En preview a 320 px: ancho de documento 312 px, sin desborde; screenshot
+de O’Higgins y escritorio Tortel revisados. Consolas warn/error vacías.
+En producción se comprobaron ambos nombres, las etiquetas de alcance y
+registros por período. Metodología tiene 13 filas con alcance/estado/corte y
+la política de cobertura, así como selección real de últimas tres votaciones.
+Home productiva muestra «Última revisión publicada» y 07 días desde la
+señal del 30 sep; no se confunde con el cambio efectivo del 14 sep.
+
+LM08: se completó el cotejo original que faltaba, sin corregir registros:
+
+| Caso publicado | Período | Celda bruta original | Celda líquida original | Resultado del parser existente / producción |
+| --- | --- | --- | --- | --- |
+| Tortel, Pedro Molina Lineros, Código del Trabajo, idPagina 60749221 | 2024-06 | `0,0` | `0,0` | 0 / 0; ID `func-muni-tortel-codigotrabajo-e53749629e5a6a5f` coincide |
+| Tortel, Constanza Gomez Jaramillo, Honorarios, idPagina 62406389 | 2026-05 | `781011,0` | Vacía | 781011 / null; ID `func-muni-tortel-honorarios-35747480aeefb549` coincide; incidencia `remuneracion_liquida_no_informada` |
+
+Fuentes oficiales:
+`https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/TA_PersonalCodigotrabajo.csv`
+y `https://consejotransparencia.cl/transparencia_activa/datoabierto/archivos/TA_PersonalContratohonorarios.csv`.
+Código oficial encontrado en las filas: MU326, Municipalidad de Tortel.
+Se comprobó HTTP206 y ETag estable antes de leer cuerpos. Se rechazaron
+respuestas 200 para evitar descargar el universo. Búsqueda inicial acotada
+por orden de organismo, luego límites del grupo y preflight antes de leerlo.
+
+Código Trabajo: ETag `"176d35f6c-65cecdd69ce40"`, bytes
+6123282209–6124768496; 1.486.288 bytes, 4.138 filas del grupo. Honorarios:
+ETag `"1f58822b1-65d008326b880"`, bytes 8006529503–8009868032;
+3.338.530 bytes, 8.549 filas. Ambos segmentos incluyen límites MU325/MU327;
+se filtró exclusivamente MU326 y el período/persona del caso. No se sumaron
+filas ni se modificó la proyección. Incluyendo localización y una búsqueda
+sin coincidencia, 100 peticiones Range / 6.445.026 bytes del origen; no son
+operaciones R2 ni un barrido de los CSV de 6,29/8,41 GB. Lecturas de cabecera
+incluidas. Límites por grupo: 2 MB Código Trabajo y 4 MB Honorarios.
+
+Reproducción: solicitar cabecera 0–4095 y los dos rangos anteriores con
+`Range` e `If-Range` del ETag correspondiente. **Cancelar el cuerpo antes
+de leerlo si no es 206 o cambió el ETag**; no usar una descarga CSV completa.
+Decodificar Windows-1252; usar `parseCpltHeader`, `getCpltCell` y
+`parseCpltRecord` de `scripts/etl/cplt-personal.mjs`, filtrando MU326,
+idPagina/período. Comparar los IDs y campos `remuneracion_*_mensual` del
+archivo público `data/funcionarios/muni-tortel.json`. Los cuatro casos
+positivos del 4 oct mantienen su fecha de comprobación histórica; esta
+muestra nueva no certifica todos los pagos ni explica por qué se informó 0.
+El líquido vacío no demuestra falta de pago ni permite calcular descuentos.
+
+LM06: snapshot CGR de ReleaseSet conserva la clave/release `a8946f86...`
+y SHA de proyección `eb655e75...` registrados en la matriz anterior al
+fallo. API productiva confirma 528 registros disponibles, backend r2-lake,
+estado parcial y cero artefactos/particiones faltantes. El candidato de
+41 informes visto antes del timeout no se publicó como sustituto. CPLT
+omitió ingestas/consolidación y Cámara omitió ambas publicaciones, según
+pasos Actions. El job 38 bis cancelado tiene steps vacíos: no hay extracción
+acreditada ni causa determinada. La consulta local inicial no encontró la
+tarea por la tilde del nombre; comprobación corregida con ErrorAction Stop:
+«Cambiómetro - ETL votaciones Senado», Ready, último intento 6 oct
+13:27:46 CL, LastTaskResult 2147942667 (0x8007010B). Win32Exception 267:
+directorio no válido. Script y working directory configurados no existen;
+causa de arranque acreditada, no un rechazo externo del Senado. El script
+canónico existe en el worktree vigente; no se ejecutó ni se copió al checkout
+divergente. Reparación aislada/prueba sin publicación pendientes en LM06.
+La tarea local de gastos Cámara tiene resultado 0 del 6 oct 06:30 CL; esto
+no certifica datos nuevos. LM06 no cierra O11/O13. Diecinueve pruebas de
+parser/finanzas/registro de fuentes aprobaron tras el cotejo original.
+
+LM01–LM05, LM07 y LM09 cumplen sus cuatro puertas dentro de su alcance;
+LM08 queda 75% hasta integrar esta evidencia. LM06 continúa con su
+dependencia local y fusión documental. El cierre no certifica coste actual
+$0, funcionamiento de todos los conectores ni cobertura universal.
+
 ## Actualización del tablero y dependencias — 2026-10-07
 
 La cola LM01–LM09 incorpora explícitamente los pendientes O05/O08/O10/O11/
