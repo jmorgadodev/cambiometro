@@ -54,7 +54,7 @@ protocolos propuestos, consulta preparada y cierre con decisiones humanas/RIEA.
 
 ## Validación local, antes del preview
 
-- 276 archivos, **1.603 pruebas aprobadas** antes de la corrección de Datos; tipos frontend/Worker y guardas
+- 276 archivos, **1.604 pruebas aprobadas** después de la corrección de Datos; tipos frontend/Worker y guardas
   arquitectura, tokens, enlaces e innerHTML con salida 0.
 - ESLint del conjunto: salida 0, 139 advertencias; no se afirma cero advertencias.
   ESLint de los últimos archivos modificados: salida 0.
@@ -137,6 +137,8 @@ documentos nominales/actas y la afiliación temporal. Avance ponderado: **77%**
 ## Referencias
 
 - [Matriz por indicador](matriz.md).
+- [Decisión por las 31 rutas existentes](estado-por-ruta.md).
+- [Entrega y bloqueo de publicación](entrega-20261007.md).
 - [Consulta de elegibilidad no enviada](consulta-riea.md).
 - [Tablero operativo](../stability/todo.md).
 - Bases: `C:\Users\jorge\Downloads\Bases_ConfianzaChile_2026.pdf`;
