@@ -521,6 +521,39 @@ de validación pública ni se afirma publicación productiva.
 - Validación del incremento: `git diff --check` y todos los enlaces Markdown
   locales de los tres documentos aprobados; sólo esos tres archivos cambiados.
 
+## Actualización del tablero y dependencias — 2026-10-07
+
+La cola LM01–LM09 incorpora explícitamente los pendientes O05/O08/O10/O11/
+O13/O15/O16, sin duplicarlos ni volver a ejecutar bloques cerrados. Las
+puertas locales nuevas elevan LM02/LM04 a 75%; snapshot SHA y navegador
+productivo permiten LM05/LM07 a 75%. LM06 documental queda 50%: tabla
+actualizada de ventanas y ejecuciones, no cierre operativo de todos los ETL.
+LM08 permanece 50%, porque falta cotejo original de cero/faltante; no se
+oculta esta dependencia para declarar 100%.
+
+Actions consultados el 7 oct: Cámara 37473771087 y votos 37476518739
+success; apoyo Senado 37339561783 success. Apoyo Cámara 37333599905
+recuperó baseline validado de 4.491 filas y falló con
+PERSONAL_APOYO_SOURCE_BLOCKED; publicaciones R2/estática skipped. CPLT
+37351220112 canceló frescura y omitió ingestas/consolidación. 38 bis
+37362307722 tiene job cancelled, conclusión failure; los logs no están
+disponibles, por lo que no se atribuye causa ni publicación. InfoLobby
+37347406257 schedule terminó success, pero publicación estática skipped:
+no se acredita corte nuevo. Estos incidentes no invalidan una prueba
+anterior, pero impiden presentarla como disponibilidad continua actual.
+
+La guarda de seguridad del HEAD de aplicación ef580bbf pasó en CI
+37566117628. CodeQL y pruebas/tipos también verdes. Preview 37566114254
+en construcción; no se acredita promoción ni validación del artefacto final.
+Navegador productivo: contador «7 días desde el último cambio» muestra 07,
+con consola warn/error vacía. Sigue calculándose desde la última señal
+publicada, no sólo desde un cese legal anterior.
+
+Sin despachos ETL, nuevas copias, lecturas D1 ni escrituras/borrados R2.
+Se conservan el checkout principal divergente y el artefacto local sin
+seguimiento. Las fechas de inventario/facturación anteriores se mantienen:
+no se inventa una medición de coste de hoy.
+
 ## Cierre baja/media — referencia 2026-10-05
 
 LM03 móvil: mismo preview O’Higgins revisado a 320×760. Tras rechazar cookies opcionales, cabecera, nombre, enlace oficial y advertencia de períodos se leen en flujo vertical; viewport320/document.scrollWidth312, sin desborde horizontal. Consola warn/error vacía. Se restauró viewport original al finalizar. Verifica la cabecera compartida con el código final, no las etiquetas añadidas después. Sigue pendiente promoción productiva.

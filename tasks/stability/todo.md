@@ -7,12 +7,12 @@ Este es el listado activo LM01–LM09. Los bloques O01–O16 de abajo conservan 
 | ID | Tarea | Complejidad | Puertas comprobadas | Avance |
 | --- | --- | --- | --- | ---: |
 | LM01 | Tablero/documentación únicos y ruta vigente | Baja | Referencia, actualización y enlaces/diff validados; fusión pendiente | 75 % |
-| LM02 | Alcance, fuente y corte en cifras municipales | Baja | Etiquetas de compras, población, presupuesto y personal corregidas con pruebas; faltan comprobación final de etiquetas restantes y preview del commit final | 50 % |
+| LM02 | Alcance, fuente y corte en cifras municipales | Baja | Etiquetas corregidas; pruebas de presupuesto inicial/vigente, cero y faltante aprobadas; preview final y promoción pendientes | 75 % |
 | LM03 | Titular documentado separado del pago histórico en dos comunas | Baja–media | Fuentes municipales, implementación, pruebas y cabecera en preview escritorio/móvil comprobadas; promoción productiva pendiente | 75 % |
-| LM04 | Metodología: alcance efectivo por fuente | Baja–media | Política general implementada y probada; falta validar alcances particulares y preview | 50 % |
-| LM05 | Fechas/contadores coherentes Home–API–release | Media | Unidades y fechas productivas identificadas; etiqueta de revisión publicada probada, pero falta conciliación completa con snapshot canónico | 25 % |
-| LM06 | Procedencia, frecuencia, ejecución y fallos por ETL | Media | Ejecuciones y pasos relevantes documentados; falta completar procedencia efectiva y preservación por conector en el registro existente | 25 % |
-| LM07 | Ciclo automático de anuncio y confirmación de Movimientos | Media | Piloto/pruebas reutilizados y 71 pruebas actuales aprobadas; falta cotejo productivo y cierre documental | 50 % |
+| LM04 | Metodología: alcance efectivo por fuente | Baja–media | Política y tabla conectadas al alcance/corte del resumen del release; pruebas aprobadas; preview final y promoción pendientes | 75 % |
+| LM05 | Fechas/contadores coherentes Home–API–release | Media | Snapshot canónico verificado por SHA/tamaño, API y Home conciliados por unidad; contador cliente 07 comprobado; etiqueta final pendiente de promoción | 75 % |
+| LM06 | Procedencia, frecuencia, ejecución y fallos por ETL | Media | Ventanas y ejecuciones actualizadas en el registro existente; publicación omitida en fallos comprobados; faltan evidencia productiva por conector y cierres operativos | 50 % |
+| LM07 | Ciclo automático de anuncio y confirmación de Movimientos | Media | Pruebas de anuncio/mismo ID, ejecución diaria del 6 oct y conteo productivo conciliados; falta integrar cierre documental | 75 % |
 | LM08 | Muestra de montos bajos, cero y faltantes contra origen | Media | Cuatro casos positivos cotejados previamente; Abel reconfirmado y 16 pruebas semánticas aprobadas; falta evidencia original de cero/faltante | 50 % |
 | LM09 | Preflight de históricos y margen de cuenta sin cargar datos | Media | Inventario de cuatro buckets medido; histórico sin comprimir no cabe bajo 95%; diagnóstico validado, fusión pendiente | 75 % |
 
@@ -40,12 +40,12 @@ carga histórica ni mezclarlo con ChileCompra. Antes de promover se ejecutan
 las validaciones del commit exacto; no se usa un preview anterior como prueba
 de cambios posteriores.
 
-Estado comprobado el 7 de octubre: PR #715 abierto y fusionable; preview
-`37272960580` exitoso para `5d7e6833`. El checkout contiene cuatro commits
-posteriores (`a14cc769`, `e4de1624`, `45241b7c`, `9469da5c`) aún no enviados
-al remoto. Por tanto, las últimas etiquetas y explicación de votaciones
-**no están acreditadas en ese preview ni en producción**. Esta anotación es
-un punto de control fechado, no una instrucción para volver a ramas antiguas.
+Estado actualizado el 7 de octubre: todos los cambios enviados a la rama
+`codex/low-medium-closeout-20261005`, HEAD de aplicación `ef580bbf`, PR #715.
+El preview final `37566114254` está en construcción. Tipos, pruebas, CodeQL
+y seguridad de producción aprobados; no se omite la guarda de seguridad.
+Los previews anteriores son evidencia histórica, no validación del commit
+final. Las nuevas etiquetas **todavía no se acreditan en producción**.
 
 ### Otros pendientes del plan operativo — conservar, no duplicar
 
@@ -58,6 +58,14 @@ un punto de control fechado, no una instrucción para volver a ramas antiguas.
 | O08: ReleaseSet externo | 75 % del alcance registrado | Manifiestos externos al conjunto estático y prueba de coherencia completa | Alta; no reabrir lo estático ya validado |
 | O15: observación | 0 % | Siete días reales tras cumplir sus condiciones de inicio | Depende de operación; no puede acelerarse con pruebas locales |
 | O16: ChileCompra | 0 % | Conciliación por período y recuperación del origen con preflight | Último, expresamente diferido |
+
+Dependencias observadas el 7 de octubre, sin crear una nueva auditoría:
+personal de apoyo Cámara `37333599905` bloqueado por el origen; CPLT
+`37351220112` y 38 bis `37362307722` cancelados/fallidos, sin ejecución
+de publicación acreditada. Sus cierres anteriores describen ciclos probados,
+no garantizan disponibilidad continua. Registrar y resolver estas ejecuciones
+en O11/O13 después del bloque rápido; no repetir ingestas masivas para
+comprobarlas. Detalle y límites en `etl-closure.md`.
 
 O05, la publicación operativa de cada ETL y sus controles no se consideran
 terminados por fusionar documentación o desplegar cambios visuales. No se
