@@ -30,14 +30,24 @@ primero esa junction y elimina sólo su candidato, incluso ante fallo. Los
 logs existentes quedan en `%ProgramData%\Cambiometro\votaciones-senado\logs`.
 No crea un backup ni escribe en R2 durante estas comprobaciones.
 
-Desde `transparencia-app`, `node scripts/etl-senado-votaciones-runtime.mjs
---prepare-only` prueba código/directorio/dependencias sin extraer; `--dry-run`
-consulta la ventana de tres días con el runner existente y termina antes
-de publicar. La acción diaria normal no lleva esos flags. Preservar horario,
+Desde `transparencia-app`, estas comprobaciones no publican:
+
+```powershell
+node scripts/etl-senado-votaciones-runtime.mjs --prepare-only
+node scripts/etl-senado-votaciones-runtime.mjs --dry-run
+```
+
+La primera prueba código/directorio/dependencias sin extraer; la segunda
+consulta la ventana de tres días y termina antes de publicar. La acción
+diaria normal no lleva esos flags. Preservar horario,
 principal y ajustes de la tarea existente; no instalar otra ni tocar la de
 gastos Cámara. Fallos del origen o sesiones incompletas mantienen el release
 anterior. La reparación de arranque no certifica disponibilidad continua:
 estado y evidencia en [etl-closure.md](../tasks/stability/etl-closure.md).
+Activación comprobada tras PR #717 (`e7ab8730`): acción normal sin flags de
+prueba, horario diario 09:30 y permisos originales conservados. No archivar
+este worktree mientras la tarea apunte a su ejecutor; cualquier cambio de
+ruta requiere reconfigurar y comprobar primero la tarea.
 
 Desde el 12 de septiembre de 2026, las únicas carpetas de trabajo activas son:
 

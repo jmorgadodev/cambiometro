@@ -11,7 +11,7 @@ Este es el listado activo LM01–LM09. Los bloques O01–O16 de abajo conservan 
 | LM03 | Titular documentado separado del pago histórico en dos comunas | Baja–media | Tortel/O’Higgins comprobados en preview 320 px/escritorio y producción; pagos conservan sus períodos | 100 % |
 | LM04 | Metodología: alcance efectivo por fuente | Baja–media | Tabla de 13 fuentes y política comprobadas en preview/producción; no certifica cobertura universal | 100 % |
 | LM05 | Fechas/contadores coherentes Home–API–release | Media | Snapshot, API y Home conciliados por unidad; etiqueta publicada y contador 07 comprobados; ReleaseSet preview/producción idéntico | 100 % |
-| LM06 | Procedencia, frecuencia, ejecución y fallos por ETL | Media | Arranque aislado y preflight Windows comprobados; dry-run llegó al Senado y bloqueó dos sesiones incompletas sin publicar. Falta integrar reparación y activar acción normal | 75 % |
+| LM06 | Procedencia, frecuencia, ejecución y fallos por ETL | Media | PR #717 integrado con CI verde; acción diaria normal activada, horario/principal preservados. Preflight 0 y dry-run con rechazo de sesiones incompletas documentados; no certifica disponibilidad de O11 | 100 % |
 | LM07 | Ciclo automático de anuncio y confirmación de Movimientos | Media | Pruebas de mismo ID, anuncio contado, ejecución diaria real y cronología productiva comprobadas; no garantiza detectar toda noticia | 100 % |
 | LM08 | Muestra de montos bajos, cero y faltantes contra origen | Media | Cuatro casos positivos históricos y dos celdas originales de cero/faltante cotejados; acta integrada en PR #716, CI completo verde | 100 % |
 | LM09 | Preflight de históricos y margen de cuenta sin cargar datos | Media | Diagnóstico fechado integrado en #715: bruto no cabe bajo 95%; no se cargó ni se certificó facturación actual | 100 % |
@@ -26,17 +26,16 @@ trabajo, **no porcentaje de datos correctos ni cobertura de una fuente**.
 
 | Orden | Pendiente concreto | Avance actual | Esfuerzo restante | Criterio de cierre / dependencia |
 | --- | --- | ---: | --- | --- |
-| 1 | LM06: integrar reparación y activar acción local normal | 75 % | XS–S, integración | CI verde, fusión y acción sin `--prepare-only`; arranque/prueba acotada ya comprobados. No repetir extracción para cerrar documentación |
-| 3 | O05: completar guardas automáticas de costes | 50 % | S, con telemetría disponible | Preflight de sólo lectura bloquea ante telemetría ausente o margen inseguro; informe fechado del ciclo, sin nueva copia |
-| 4 | O10: completar monitor de frescura y estado | 75 % | M | Usar registro existente y metadatos de candidatos/releases; cubrir presupuesto y manifiestos externos según O05/O08 |
-| 5 | O11: cerrar ciclos por ETL, uno a uno | 0 % del conjunto | M por fuente | Empezar por fuentes pequeñas sin bloqueo; completar las cuatro puertas propias, conservando releases ante fallo externo |
-| 6 | O13/O08: remuneraciones y manifiestos externos | 0 % / 75 % | M–alta | Municipal/central por separado, conteos/índices y coherencia externa; preflight antes de cualquier recorrido o publicación |
-| 7 | O15: observación real de estabilidad | 0 % | S operativo, siete días | Iniciar sólo al cumplir O09–O14; registrar días reales, sin sustituirlos por replay |
-| 8 | O16: ChileCompra | 0 % | Alta por volumen/origen | Último y diferido; mantener release válido, sin cargas ni rankings nuevos hasta conciliar cortes y margen |
+| 1 | O05: completar guardas automáticas de costes | 50 % | S, con telemetría disponible | Preflight de sólo lectura bloquea ante telemetría ausente o margen inseguro; informe fechado del ciclo, sin nueva copia |
+| 2 | O10: completar monitor de frescura y estado | 75 % | M | Usar registro existente y metadatos de candidatos/releases; cubrir presupuesto y manifiestos externos según O05/O08 |
+| 3 | O11: cerrar ciclos por ETL, uno a uno | 0 % del conjunto | M por fuente | Empezar por fuentes pequeñas sin bloqueo; completar las cuatro puertas propias, conservando releases ante fallo externo |
+| 4 | O13/O08: remuneraciones y manifiestos externos | 0 % / 75 % | M–alta | Municipal/central por separado, conteos/índices y coherencia externa; preflight antes de cualquier recorrido o publicación |
+| 5 | O15: observación real de estabilidad | 0 % | S operativo, siete días | Iniciar sólo al cumplir O09–O14; registrar días reales, sin sustituirlos por replay |
+| 6 | O16: ChileCompra | 0 % | Alta por volumen/origen | Último y diferido; mantener release válido, sin cargas ni rankings nuevos hasta conciliar cortes y margen |
 
-**Siguiente cierre más rápido:** integrar y activar la reparación LM06.
-LM01–LM05, LM07–LM09 ya están cerrados en
-su alcance; no vuelven a la cola ni requieren otro preview. Las referencias
+**Bloque baja/media LM01–LM09 cerrado:** sus cuatro puertas están acreditadas
+en el alcance del plan. No vuelven a la cola ni requieren otro preview.
+Las referencias
 O conservan sus criterios y porcentajes propios; las guardas automáticas y
 la publicación de cada ETL siguen separadas del bloque rápido, como se pidió.
 El orden expresa prioridad, no autoriza cargas ni elimina dependencias.
@@ -51,10 +50,12 @@ productiva. El ReleaseSet coincide por SHA entre preview y producción.
 LM08 integrado mediante PR #716, merge `f88356bb`, tras build/E2E, calidad,
 CodeQL y seguridad verdes. No requiere otro despliegue visual.
 LM06: el error anterior 0x8007010B quedó reproducido y se reparó el arranque
-en un candidato aislado. Preflight del Programador de tareas del 7 oct
-01:07:42 CL terminó 0; dry-run de tres días detectó sesiones incompletas y
-no publicó. La acción normal se activa después de integrar el ejecutor con
-CI verde. Validación de asistencia de sesiones 10292/10291 pendiente en
+en un candidato aislado. PR #717, merge `e7ab8730`, integrado con build/E2E
+`37570303117`, calidad, CodeQL y seguridad verdes. Preflight Windows del
+7 oct 01:07:42 CL terminó 0; acción normal activada después de la fusión,
+estado Ready, próxima ejecución 09:30 CL, horario/principal/settings intactos.
+Dry-run de tres días detectó sesiones incompletas y no publicó.
+Validación de asistencia de sesiones 10292/10291 pendiente en
 O11, no convertida en cero ni en fallo HTTP; ver `etl-closure.md`.
 
 ### Otros pendientes del plan operativo — conservar, no duplicar
