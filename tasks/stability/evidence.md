@@ -452,6 +452,42 @@ Riesgo o siguiente puerta:
 - Sólo se editan matriz, tablero y evidencia. No se despachan ETL ni cargas/auditorías R2/D1; no se cambian código, datos o diseño. La historia original se conserva.
 ## Orden de cierre actualizado — 2026-10-07
 
+LM05/LM07, cotejo canónico acotado: pin público y archivo R2 exacto
+concordantes por SHA256 `e3e6753b280f2535e080aa444c761ed5ea01b4103803284e6a0a55d8e3a372af`
+y 108.691 bytes, dominio `2e3c65a371ffa818e5568f3dce92ef4b28e2f885aefa8b7b1e3e65a97d740965`.
+Contiene 46 filas principales (10 verificadas, 35 corroboradas, una en
+confirmación) y cinco señales adicionales en confirmación: 51 eventos, 45
+respaldados, seis pendientes. API paginada anuncia 46 filas principales,
+backend R2 completo; no dice 46 confirmaciones legales. No hay IDs duplicados
+en ambos conjuntos. Home toma total/renuncias y cronología del mismo payload.
+Fechas observadas en HTML: señal 30 sep, cambio efectivo 14 sep, revisión
+publicada 1 oct. Una fecha de señal no sustituye la fecha efectiva ni una
+ejecución no-op crea una revisión publicada nueva. El contador cliente usa
+calendario de Chile y la fecha publicada más reciente, con actualización
+automática; el cero inicial del HTML estático no acredita el contador tras
+hidratación. Comprobación de navegador final pendiente.
+
+LM07: ejecución programada `37473396433`, 6 oct 13:45 UTC, success; recuperó
+el release R2, revisó/validó novedades y generó resumen. Sin release nuevo
+acreditado; el pin observado permanece igual. Después de instalar el lock
+corregido pasaron 87 pruebas en siete archivos, incluidos 34 casos del
+pipeline, contadores/fechas, procedencia, finanzas y registro de fuentes.
+La confirmación exacta/mismo ID se prueba con casos controlados; no se inventa
+una confirmación legal real ni se garantiza descubrir toda noticia.
+
+Control de seguridad: run `37565511264` bloqueó el PR por dos avisos de
+producción. Corrección acotada del lockfile, dentro de rangos existentes:
+sharp 0.35.4 → 0.35.5 (binarios/libvips asociados) y source-map-js 1.2.1 →
+1.2.2. Sin `--force`, overrides ni cambios de Next/React/ETL. Avisos y notas
+primarios contrastados:
+https://github.com/advisories/GHSA-wq5f-xc86-pv6w y
+https://github.com/advisories/GHSA-68fv-2mgg-jv7q.
+Instalación congelada `npm ci --ignore-scripts`; prueba nativa WebP correcta.
+`npm audit --omit=dev --audit-level=high`: cero vulnerabilidades. La auditoría
+que incluye desarrollo aún informa dos moderadas y once altas; no se declara
+cero para toda la cadena ni se ocultan resultados. CI/preview del lock final
+pendientes antes de promover.
+
 LM02/LM04, incremento de presentación: se distingue presupuesto inicial de
 vigente y se conserva ausencia como null hasta el render; cero explícito y
 per cápita cero calculable se muestran como $0. La tabla de Metodología usa
