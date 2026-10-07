@@ -4,6 +4,14 @@ import {describe,it,expect} from 'vitest';
 
 describe('información pública de Movimientos',()=>{
   const page=readFileSync(resolve(process.cwd(),'app/movimientos/page.tsx'),'utf8');
+  it('todos los filtros se pueden contraer sin desbordar el ancho móvil',()=>{
+    const selects=page.match(/<select\b[\s\S]*?\}\}/g) ?? [];
+    expect(selects).toHaveLength(4);
+    for (const select of selects) {
+      expect(select.includes('maxWidth: "100%"')).toBe(true);
+      expect(select.includes('minWidth: 0')).toBe(true);
+    }
+  });
   it('mantiene una única sección de actualización sin errores de conectores',()=>{
     expect(page).not.toContain('sources-health-heading');
     expect(page).toContain('freshness-heading');

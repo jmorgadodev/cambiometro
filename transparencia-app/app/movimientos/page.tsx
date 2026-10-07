@@ -533,6 +533,8 @@ function MovimientosContent() {
               value={filtroTipo}
               onChange={(e) => setFiltroTipo(e.target.value as MovimientoTipo | "todos")}
               style={{
+                maxWidth: "100%",
+                minWidth: 0,
                 padding: "0.48rem 0.65rem",
                 borderRadius: 6,
                 border: "1px solid var(--border)",
@@ -555,6 +557,8 @@ function MovimientosContent() {
               value={filtroEstado}
               onChange={(e) => setFiltroEstado(e.target.value as "todos" | "verificado" | "en_confirmacion")}
               style={{
+                maxWidth: "100%",
+                minWidth: 0,
                 padding: "0.48rem 0.65rem",
                 borderRadius: 6,
                 border: "1px solid var(--border)",
@@ -574,6 +578,8 @@ function MovimientosContent() {
               value={filtroMinisterio}
               onChange={(e) => setFiltroMinisterio(e.target.value)}
               style={{
+                maxWidth: "100%",
+                minWidth: 0,
                 padding: "0.48rem 0.65rem",
                 borderRadius: 6,
                 border: "1px solid var(--border)",
@@ -596,6 +602,8 @@ function MovimientosContent() {
               value={filtroRegion}
               onChange={(e) => setFiltroRegion(e.target.value)}
               style={{
+                maxWidth: "100%",
+                minWidth: 0,
                 padding: "0.48rem 0.65rem",
                 borderRadius: 6,
                 border: "1px solid var(--border)",
