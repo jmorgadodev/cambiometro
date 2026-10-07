@@ -161,12 +161,25 @@ export default async function HowItWorksPage() {
 
           <div style={{ overflowX: "auto", marginTop: "1.25rem" }}>
             <table className="data-table" style={{ width: "100%" }}>
-              <thead><tr><th>Fuente</th><th>Frecuencia / corte</th><th>Registros</th><th>Publicado</th><th>Consultable</th><th>Relacionado</th><th>Módulo</th></tr></thead>
+              <thead><tr><th>Fuente / alcance</th><th>Frecuencia / corte</th><th>Registros integrados</th><th>Publicado</th><th>Consultable</th><th>Relacionado</th><th>Módulo</th></tr></thead>
               <tbody>
                 {sources.map((source) => (
                   <tr key={source.id}>
-                    <td><strong>{source.name}</strong><br /><span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>{source.organization}</span></td>
-                    <td>{source.frequency}<br /><span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>{source.periodoReciente}</span></td>
+                    <td>
+                      <strong>{source.name}</strong><br />
+                      <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
+                        {source.organization}<br />
+                        Categorías de origen: {source.coberturaDetalle}. {source.coverageNote}<br />
+                        Estado del conjunto integrado: {source.statusLabel}.
+                      </span>
+                    </td>
+                    <td>
+                      {source.frequency}<br />
+                      <span style={{ color: "var(--text-muted)", fontSize: "0.75rem" }}>
+                        {source.periodoReciente}<br />
+                        Actualización registrada: {source.lastSyncFormatted}
+                      </span>
+                    </td>
                     <td>{source.canonicalCount.toLocaleString("es-CL")}</td>
                     <td>{source.metrics.published.label}</td>
                     <td>{source.metrics.queryable.label}</td>
@@ -178,7 +191,7 @@ export default async function HowItWorksPage() {
             </table>
           </div>
           <p style={{ margin: "1rem 0 0", color: "var(--text-muted)", fontSize: "0.75rem", lineHeight: 1.5 }}>
-            La plataforma tiene {summary.totalFuentes} fuentes en el catálogo. “No calculable” significa que el corte actual no publica evidencia suficiente para afirmar una cobertura, no que la fuente esté vacía.
+            La plataforma tiene {summary.totalFuentes} fuentes en el catálogo. Las categorías de origen describen lo que publica cada fuente, no certifican que integremos todos sus registros. Las cifras corresponden al conjunto disponible en el corte indicado; no representan personas únicas. “No calculable” significa que el corte actual no publica evidencia suficiente para afirmar una cobertura, no que la fuente esté vacía.
           </p>
 
           <div style={{ marginTop: "1.5rem", paddingTop: "1.25rem", borderTop: "1px solid var(--border-subtle)" }}>

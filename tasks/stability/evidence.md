@@ -452,6 +452,18 @@ Riesgo o siguiente puerta:
 - Sólo se editan matriz, tablero y evidencia. No se despachan ETL ni cargas/auditorías R2/D1; no se cambian código, datos o diseño. La historia original se conserva.
 ## Orden de cierre actualizado — 2026-10-07
 
+LM02/LM04, incremento de presentación: se distingue presupuesto inicial de
+vigente y se conserva ausencia como null hasta el render; cero explícito y
+per cápita cero calculable se muestran como $0. La tabla de Metodología usa
+alcance, nota, estado y fecha del mismo resumen por fuente; explica que las
+categorías de origen no acreditan cobertura completa ni personas únicas.
+No se altera el resumen ni se agregan datos. Tres regresiones fallaron antes
+del cambio; 13 pruebas dirigidas aprobaron después. Tipos front/Worker,
+arquitectura estática, tokens, enlaces e innerHTML: código 0. Revisión puntual
+del diff: sin consultas nuevas, dependencias, datos inventados ni cambios de
+rutas/diseño. Preview del commit final pendiente; no se aumenta aún la puerta
+de validación pública ni se afirma publicación productiva.
+
 - Solicitud: añadir los pendientes del plan y cerrar primero los sencillos.
   Se desglosó la cola existente en `todo.md`, sin crear tareas nuevas ni
   reabrir los bloques cerrados. `plan.md` fija un solo preview final para el
