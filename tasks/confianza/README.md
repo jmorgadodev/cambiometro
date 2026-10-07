@@ -82,6 +82,18 @@ sin publicación. [Hallazgo nominal](hallazgo-votos.md): 152 sesiones con
 discordancia entre nominales y totales, retiradas en presentación sin inventar
 su opción. La muestra Cámara reproduce la contradicción en el XML original.
 Las correcciones siguientes requieren un nuevo preview; producción no cambió.
+El run `37639712187` compiló el pin, pero el navegador rechazó enlaces de
+votaciones sin `noopener`; corregidos con regresión específica. No se relajó
+la puerta del preview ni se publicó el artefacto fallido. La guarda estática
+exige ahora ambos atributos, igual que el navegador; se completaron únicamente
+esos atributos en los enlaces existentes que no cumplían la regla.
+
+Desviación documentada: el CI automático de PR `37639724535` terminó antes
+de poder cancelarlo y preparó una **D1 local efímera de pruebas**. No consultó
+ni modificó D1 productiva; aun así incumple el límite de no materialización
+de esta revisión. Sus resultados no cuentan como evidencia «sin D1».
+La validación canónica de este encargo usa `audit_without_d1=true`; los CI
+automáticos siguientes se cancelarán antes de preparar fixtures D1.
 La aritmética productiva de C02 ya se comprobó (3/4 puertas, 75%); faltan los
 documentos nominales/actas y la afiliación temporal. Avance ponderado: **77%**
 (77,5% sin redondear; conservador). No mide porcentaje de datos correctos.

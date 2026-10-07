@@ -216,7 +216,7 @@ function VoteDetailDialog({ detail, onClose }: { detail: VotacionDestacadaDetall
               <p>El padrón produce un resultado <strong>{detail.resultadoRecalculado.toLowerCase()}</strong>: la opción mayoritaria fue <strong>{optionLabel(detail.analisis.opcionMayoritaria)}</strong>, con un margen de {formatNumber(detail.totales.margenMayoria)} voto{detail.totales.margenMayoria === 1 ? "" : "s"} sobre la siguiente alternativa.</p>
               {mostDividedParty && <p className="featured-vote__callout"><strong>Lectura de bancada:</strong> {mostDividedParty.sigla} fue la más dividida: {mostDividedParty.disenso} de sus {mostDividedParty.efectivos} votos efectivos no siguieron su opción mayoritaria.</p>}
               {detail.tramite && <p><strong>Etapa registrada:</strong> {detail.tramite}</p>}
-              {detail.tramiteUrl && <p><a href={detail.tramiteUrl} target="_blank" rel="noreferrer"><strong>Ver tramitación oficial del proyecto ↗</strong></a></p>}
+              {detail.tramiteUrl && <p><a href={detail.tramiteUrl} target="_blank" rel="noopener noreferrer"><strong>Ver tramitación oficial del proyecto ↗</strong></a></p>}
               {detail.descripcionOficial && <details><summary>Descripción oficial completa</summary><p>{detail.descripcionOficial}</p></details>}
             </div>
             <div className="featured-vote__bars"><h3>Votos efectivos</h3><VoteBar label="A favor" value={detail.totales.afirmativo} total={totalEffective} color="var(--success)" /><VoteBar label="En contra" value={detail.totales.enContra} total={totalEffective} color="var(--danger)" /><VoteBar label="Abstención" value={detail.totales.abstencion} total={totalEffective} color="var(--warning)" /><VoteBar label="No vota / sin emisión" value={detail.totales.noVota} total={detail.totales.padron} color="var(--text-3)" /></div>
@@ -230,7 +230,7 @@ function VoteDetailDialog({ detail, onClose }: { detail: VotacionDestacadaDetall
         </div>}
         {tab === "nominal" && <div><div className="featured-vote-dialog__section-heading"><div><h3>Padrón nominal</h3><p>Busca una persona, filtra por bancada u opción y abre su ficha.</p></div><span>{formatNumber(filteredNominal.length)} resultados</span></div><div className="featured-vote__filters"><label>Buscar<input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Nombre o bancada" /></label><label>Opción<select value={option} onChange={(event) => setOption(event.target.value as "Todas" | OpcionVotacion)}><option>Todas</option>{OPTION_LABELS.map((entry) => <option key={entry.key}>{entry.key}</option>)}</select></label><label>Bancada<select value={party} onChange={(event) => setParty(event.target.value)}>{parties.map((value) => <option key={value}>{value}</option>)}</select></label></div><ul className="featured-vote__nominal-list">{filteredNominal.map((vote) => <NominalRow key={vote.politico_id} vote={vote} />)}</ul>{filteredNominal.length === 0 && <p className="featured-vote__empty" role="status">No hay integrantes que coincidan con estos filtros.</p>}</div>}
       </div>
-      <footer className="featured-vote-dialog__footer"><span>Fuente: padrón nominal consolidado por El Cambiómetro.</span><a href={detail.fuente_url} target="_blank" rel="noreferrer">Abrir registro oficial ↗</a></footer>
+      <footer className="featured-vote-dialog__footer"><span>Fuente: padrón nominal consolidado por El Cambiómetro.</span><a href={detail.fuente_url} target="_blank" rel="noopener noreferrer">Abrir registro oficial ↗</a></footer>
     </section>
   </div>;
 }

@@ -251,7 +251,7 @@ export default function CrucesSourceRecords({ counts }: { counts?: Partial<Recor
                         ))}
                       </dl>
                       {sourceUrl(row) && (
-                        <a href={sourceUrl(row) ?? undefined} target="_blank" rel="noreferrer" style={{ color: "var(--accent)", fontSize: "0.72rem", fontWeight: 700 }}>
+                        <a href={sourceUrl(row) ?? undefined} target="_blank" rel="noopener noreferrer" style={{ color: "var(--accent)", fontSize: "0.72rem", fontWeight: 700 }}>
                           Fuente oficial ↗
                         </a>
                       )}

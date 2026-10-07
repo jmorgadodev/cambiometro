@@ -96,7 +96,7 @@ export default function ReleaseMetaCard({
       {note ? <p className="release-meta-note" style={{ margin: "0.7rem 0 0", color: "var(--text-muted)", fontSize: "0.76rem", lineHeight: 1.5 }}>{note}</p> : null}
       <div className="release-meta-actions" style={{ display: "flex", flexWrap: "wrap", gap: "0.7rem", marginTop: "0.85rem" }}>
         <Link prefetch={false} href={href} className="btn btn-secondary" style={{ fontSize: "0.76rem" }}>Explorar registros</Link>
-        {officialUrl ? <a href={officialUrl} target="_blank" rel="noreferrer" className="btn btn-ghost" style={{ fontSize: "0.76rem" }}>Fuente oficial ↗</a> : null}
+        {officialUrl ? <a href={officialUrl} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ fontSize: "0.76rem" }}>Fuente oficial ↗</a> : null}
       </div>
     </section>
   );

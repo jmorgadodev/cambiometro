@@ -149,7 +149,7 @@ export default function VotacionesAnualesExplorer({
                     Abrir análisis
                   </button>
                 ) : null}
-                <a className="btn btn-secondary" href={entry.tramite_url ?? entry.fuente_url} target="_blank" rel="noreferrer">
+                <a className="btn btn-secondary" href={entry.tramite_url ?? entry.fuente_url} target="_blank" rel="noopener noreferrer">
                   Ver registro oficial ↗
                 </a>
               </div>

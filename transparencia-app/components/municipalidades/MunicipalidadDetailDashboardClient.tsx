@@ -1529,7 +1529,7 @@ export default function MunicipalidadDetailDashboardClient({
                   Estado del corte: <strong>{muniData.estado_frescura === "sin_datos" ? "sin nómina consultable" : "sin período informado"}</strong>.
                 </p>
                 {muniData.sitio_transparencia_activa && (
-                  <a href={muniData.sitio_transparencia_activa} target="_blank" rel="noreferrer" className="btn btn-ghost" style={{ alignSelf: "flex-start", marginTop: "0.85rem", fontSize: "0.75rem" }}>
+                  <a href={muniData.sitio_transparencia_activa} target="_blank" rel="noopener noreferrer" className="btn btn-ghost" style={{ alignSelf: "flex-start", marginTop: "0.85rem", fontSize: "0.75rem" }}>
                     Revisar Transparencia Activa ↗
                   </a>
                 )}

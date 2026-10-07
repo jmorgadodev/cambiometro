@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 // CI gate S4: todo enlace con target="_blank" debe declarar rel con
-// noopener o noreferrer (evita tabnabbing en enlaces externos).
+// noopener y noreferrer, igual que la puerta de navegador.
 import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join } from "node:path";
 
@@ -41,7 +41,8 @@ for (const file of files) {
       continue;
     }
     const relMatch = /\brel=["'][^"']*["']/.exec(tag);
-    if (!relMatch || !/noopener|noreferrer/i.test(relMatch[0])) {
+    const relTokens = relMatch?.[0].split(/[\s="']+/) ?? [];
+    if (!relTokens.includes("noopener") || !relTokens.includes("noreferrer")) {
       const line = content.slice(0, match.index).split("\n").length;
       failures.push(`${file}:${line} <a target="_blank"> sin rel="noopener noreferrer"`);
     }
@@ -52,4 +53,4 @@ if (failures.length > 0) {
   console.error(`[FAIL] ${failures.length} enlace(s) target="_blank" sin protección rel:\n${failures.join("\n")}`);
   process.exit(1);
 }
-console.log("[OK] Todos los target=\"_blank\" tienen rel noopener/noreferrer.");
+console.log("[OK] Todos los target=\"_blank\" tienen rel noopener y noreferrer.");
