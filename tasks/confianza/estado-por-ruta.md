@@ -8,7 +8,7 @@ todos sus indicadores; ninguna ruta obtiene certificación universal.
 | Ruta | Decisión aplicada o propuesta | Comprobación que falta |
 | --- | --- | --- |
 | `/` | Conservar diseño y catálogo; aviso de alcance | Conciliación de todos los contadores y smoke completo |
-| `/movimientos` | Contar 51 anuncios/eventos; separar confirmación documental | Leer documentos individualizados y resolver fechas cuestionadas |
+| `/movimientos` | Contar 51 anuncios/eventos; separar confirmación documental; seis fechas cuestionadas En revisión ([acta](movimientos-documentos-20261007.md)) | Validar render/preview nuevo; obtener actos faltantes y conciliar metadatos sin alterar originales |
 | `/cambios` | Mantener con alcance de Movimientos | Mismo control documental; no sumar casos dos veces |
 | `/votaciones-destacadas` | Mantener totales de sesión declarados; retirar nominales discordantes | Padrón/actas originales, particularmente Senado |
 | `/politico` | Mantener directorio y períodos; sin dieta constante ficticia | Identidad, vigencia y conciliación de costos por mes |

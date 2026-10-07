@@ -11,6 +11,9 @@ Las tareas nuevas miden entregables, no porcentaje de datos correctos.
 - C02: dietas sin registro, suma histórica mensual y agregados de bancada
   retirados localmente; aritmética del pin R2 comprobada. 152 sesiones nominales
   discordantes quedan en revisión. Faltan documentos/actas y afiliación temporal.
+  Seis fechas de Movimientos contrastadas y retiradas en presentación
+  ([acta](../confianza/movimientos-documentos-20261007.md)); 47 pruebas dirigidas
+  y 24 render locales aprobados. Build/CI nuevo pendiente; no seis ceses certificados.
 - C03: avisos SSR por dominio, política de tres estados y metadatos de
   Movimientos corregidos; preview `41b39145` validado (96/96), 75% de puertas.
   Integración del PR reejecutada con D1 local autorizada: todos los pasos de

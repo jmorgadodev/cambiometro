@@ -7,7 +7,7 @@ fórmula/código, pruebas y destino para cerrarse. Mantener no significa cobertu
 | --- | --- | --- | --- |
 | Home | Catálogo; filas, no personas | Sumas compatibles sin doble conteo; sin promesas nacionales | Sólo contadores reconciliados |
 | Movimientos | Eventos + señales; release `2e3c65a3…` | 46+5=51; seis pendientes, no 46 decretos | Mantener total y niveles separados |
-| Movimientos: fechas | Fuentes identificadas por caso | Seis verificaciones anteriores a una fuente citada | Fecha/reemplazo no probado en revisión |
+| Movimientos: fechas | [Seis documentos contrastados](movimientos-documentos-20261007.md) | Fechas de cese, asunción y publicación no equivalentes; 6/6 casos clasificados, no seis ceses certificados | Fecha/reemplazo no probado retirado en tabla y cronología; actos/metadatos pendientes |
 | Votaciones | Nominales por cámara; parlamento `5c4a4477…` | Denominadores por opción; Senado reciente incompleto | Mantener corte sin prometer últimas sesiones completas |
 | Análisis: asistencia | Actas de sesiones | Presencia formal no equivale a voto emitido | Etiqueta/fórmula propia para cada componente |
 | Partidos: cohesión | Votos + pertenencia temporal | Partido actual no acredita afiliación histórica | Limitar período o retirar agregado sin respaldo |

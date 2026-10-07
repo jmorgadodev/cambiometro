@@ -141,7 +141,10 @@ era 77% (77,5% sin redondear), superado por el estado vigente de arriba.
   + 5 señales = 51 eventos, 6 pendientes. Estado almacenado no acredita un decreto.
 - Seis verificaciones preceden una fuente citada: Evelyn Bintrup, Jorge Heiden,
   Camila Alonso, Patricia Dinamarca, Jorge Salazar y Alexander Nanjarí.
-  Revisar esas fechas sin eliminar anuncios ni alterar el release.
+  [Revisión documental 6/6](movimientos-documentos-20261007.md): fechas
+  cuestionadas retiradas en presentación; no equivale a seis ceses legalmente
+  confirmados. Anuncios y release original conservados. Render local 24/24;
+  preview del cambio nuevo pendiente; avance global sin cambio (83%).
 - Senado local: arranque reparado; sesiones 10292/10291 rechazadas por asistencia
   incompleta. Último release preservado, no cobertura actual completa.
 - INV-001: BCN `idNorma=30230` es Ley 18.854, no 18.883 (consulta 2026-10-07).

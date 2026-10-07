@@ -21,6 +21,7 @@ import {
   type MovimientoSignal,
 } from "@/lib/movimientos";
 import Link from "next/link";
+import { movementDocumentaryReview } from "@/lib/movimientos-documentary-review";
 import { POLITICOS_SEED } from "@/lib/seed-politicos";
 
 const MESES = [
@@ -767,10 +768,11 @@ function MovimientosContent() {
                     );
                   }
                   const mov = entry.movement;
+                  const documentaryReview = movementDocumentaryReview(mov);
                   return (
                   <tr key={mov.id} style={{ borderBottom: "1px solid var(--border)", verticalAlign: "middle" }}>
                     <td style={{ padding: "0.65rem 0.85rem", whiteSpace: "nowrap", fontWeight: 600, fontSize: "0.78rem" }}>
-                      {formatFechaCorta(mov.fecha)}
+                      {documentaryReview?.dateInReview ? "Fecha en revisión" : formatFechaCorta(mov.fecha)}
                     </td>
                     <td style={{ padding: "0.65rem 0.85rem", whiteSpace: "nowrap" }}>
                       <span
@@ -807,6 +809,7 @@ function MovimientosContent() {
                     </td>
                     <td style={{ padding: "0.65rem 0.85rem" }}>
                       <span style={{ color: "var(--text-2)" }}>{mov.salio?.motivo_categoria || mov.motivo}</span>
+                      {documentaryReview && <p><strong>En revisión:</strong> {documentaryReview.note} <a href={documentaryReview.sourceUrl} target="_blank" rel="noopener noreferrer">Ver documento consultado ↗</a></p>}
                     </td>
                     <td style={{ padding: "0.65rem 0.85rem", whiteSpace: "nowrap" }}>
                       {mov.estado === "verificado" ? (
@@ -947,6 +950,7 @@ function MovimientosContent() {
                         );
                       }
                       const mov = entry.movement;
+                      const documentaryReview = movementDocumentaryReview(mov);
                       const isExpanded = expandedIds.has(mov.id);
                       const tipoColor = MOVIMIENTOS_TIPO_COLOR[mov.tipo] || "var(--text-1)";
                       const tipoLabel = MOVIMIENTOS_TIPO_LABEL[mov.tipo] || mov.tipo;
@@ -995,7 +999,7 @@ function MovimientosContent() {
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.5rem" }}>
                             <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                               <span style={{ fontSize: "0.82rem", fontWeight: 700, color: "var(--text-muted)" }}>
-                                {formatFechaCorta(mov.fecha)}
+                                {documentaryReview?.dateInReview ? "Fecha en revisión" : formatFechaCorta(mov.fecha)}
                               </span>
                               <span
                                 style={{
@@ -1079,7 +1083,7 @@ function MovimientosContent() {
 
                             {mov.entrante ? (
                               <span>
-                                Asume:{" "}
+                                Autoridad posterior informada:{" "}
                                 <strong style={{ color: "var(--ok)" }}>
                                   {(() => {
                                     const p = POLITICOS_SEED.find((x) => x.nombre_completo.toLowerCase() === mov.entrante!.toLowerCase());
@@ -1092,6 +1096,8 @@ function MovimientosContent() {
                               <span style={{ color: "var(--text-muted)" }}>Reemplazo: no informado en las fuentes consultadas</span>
                             )}
                           </div>
+
+                          {documentaryReview && <p><strong>En revisión:</strong> {documentaryReview.note} <a href={documentaryReview.sourceUrl} target="_blank" rel="noopener noreferrer">Ver documento consultado ↗</a></p>}
 
                           {/* Motivo y Acciones de Trazabilidad */}
                           <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.6rem", marginTop: "0.2rem" }}>
@@ -1188,7 +1194,7 @@ function MovimientosContent() {
                               <div>
                                 <strong style={{ fontSize: "0.78rem", color: "var(--text-muted)" }}>Fuentes y Evidencias Trazables:</strong>
                                 <p style={{ margin: "0.25rem 0 0", fontSize: "0.74rem", color: "var(--text-muted)", lineHeight: 1.45 }}>
-                                  <strong>Fecha del evento:</strong> {formatFechaCorta(mov.fecha)}. La fecha entre paréntesis en cada fuente corresponde a su <strong>fecha de publicación</strong>; puede ser posterior al cambio efectivo.
+                                  <strong>Fecha del evento registrada:</strong> {documentaryReview?.dateInReview ? "Fecha en revisión" : formatFechaCorta(mov.fecha)}. La fecha registrada, la fecha de publicación y la asunción de una autoridad posterior no son necesariamente iguales.
                                 </p>
                                 <ul style={{ margin: "0.3rem 0 0 0", paddingLeft: "1.2rem", fontSize: "0.78rem", color: "var(--text-2)" }}>
                                   {mov.fuentes.map((f, fIdx) => (
@@ -1199,7 +1205,7 @@ function MovimientosContent() {
                                         rel="noopener noreferrer"
                                         style={{ color: "var(--accent)", textDecoration: "underline" }}
                                       >
-                                        [{f.nivel.toUpperCase()}] {f.medio}: {f.titulo} ({f.fecha}) ↗
+                                        [{f.nivel.toUpperCase()}] {f.medio}: {f.titulo} ({documentaryReview ? "Fecha de referencia en revisión" : f.fecha}) ↗
                                       </a>
                                     </li>
                                   ))}
