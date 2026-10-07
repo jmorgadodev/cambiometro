@@ -157,6 +157,9 @@ era 77% (77,5% sin redondear), superado por el estado vigente de arriba.
 
 ## Referencias
 
+- [Gastos: períodos e indicador retirado](gastos-presentacion-20261007.md):
+  regresiones y render local comprobados; preview y originales pendientes.
+
 - [Matriz por indicador](matriz.md).
 - [Decisión por las 31 rutas existentes](estado-por-ruta.md).
 - [Entrega y bloqueo de publicación](entrega-20261007.md).

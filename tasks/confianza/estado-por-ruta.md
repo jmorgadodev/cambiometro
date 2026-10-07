@@ -15,7 +15,7 @@ todos sus indicadores; ninguna ruta obtiene certificación universal.
 | `/politico/[id]` | Mantener evidencia individual; asistencia/cohesión y nominales cuestionados En revisión | Actas, afiliación temporal y documentos nominales |
 | `/partidos` | Mantener catálogo; retirar comparaciones agregadas | Receta reproducible y pertenencia temporal |
 | `/partidos/[sigla]` | Enlaces individuales; indicadores agregados En revisión | Igual que catálogo; no usar partido actual para votos históricos |
-| `/gastos-operacionales` | Mantener rendiciones por cámara y período, cobertura limitada | Conciliar ítems/montos y meses declarados consultables |
+| `/gastos-operacionales` | Mantener registros; retirar agregado no conciliado y promesa de universo completo ([acta](gastos-presentacion-20261007.md)) | Validar preview nuevo; conciliar ítems/montos y meses declarados consultables |
 | `/remuneraciones-publicas` | Mantener registros por fuente/organismo/período | Muestreo y conciliación de cortes; no suponer mensualidad completa |
 | `/funcionarios` | Mantener nóminas con alcance y originales | Identidades y unidades; filas no son personas únicas |
 | `/personas` | Mantener evidencia por fuente sin fusionar homónimos | Identificadores suficientes para cada vínculo |

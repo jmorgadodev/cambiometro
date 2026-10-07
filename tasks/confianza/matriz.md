@@ -40,6 +40,7 @@ Una referencia genérica al portal no acredita cifra, causa ni conclusión norma
 | Avisos por ruta | 21 layouts SSR y Home, estado/corte con significado específico | Pruebas unitarias y render real: 24 rutas, 96/96 controles en preview `41b39145` | Comprobación de indicadores restantes; el render no certifica cada cifra |
 | Nominales discordantes | Guarda por sesión, incluidas slices; En revisión, sin inventar opciones | 152 sesiones identificadas en objetos R2, 1.601 pruebas; `hallazgo-votos.md` | Documentos y origen Senado; Cámara también presenta contradicción en XML oficial |
 | Asistencia/cohesión en ficha | Porcentajes inferidos y cohesión retirados; compartir sin cifra no acreditada | Guarda, prop nula y mensajes; no confundir voto con acta o afiliación histórica | Actas y pertenencia temporal verificables |
+| Gastos: agregado global y períodos | Agregado sin conciliar En revisión y fuera de props; sólo meses calculables, variación entre consecutivos, ausencia no es cero | [Acta](gastos-presentacion-20261007.md), 30 pruebas dirigidas y 8 controles de render local | Preview nuevo; conciliación por autoridad/período y comprobantes originales |
 
 Las filas restantes mantienen decisión de cobertura limitada, **sin cierre de
 comprobación completa**. El reporte CI de aritmética de votaciones no demuestra

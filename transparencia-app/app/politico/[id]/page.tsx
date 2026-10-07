@@ -414,10 +414,10 @@ export default async function PoliticoPage({ params }: Props) {
                     }}
                   >
                     <div style={{ fontFamily: "monospace", fontSize: "clamp(14px, 4.5vw, 1.25rem)", fontWeight: 800, color: "var(--text-primary)", wordBreak: "normal", overflowWrap: "normal", whiteSpace: "nowrap" }}>
-                      {formatCLP(gastosTotales)}
+                      {mesesGastos.length > 0 ? formatCLP(gastosTotales) : "Monto no informado"}
                     </div>
                     <div style={{ fontSize: "0.65rem", color: "var(--text-subtle)", marginTop: "0.2rem" }}>
-                      Total acumulado {periodosGastos.length} {periodosGastos.length === 1 ? "mes" : "meses"} publicados
+                      Suma de montos informados · {periodosGastos.length} {periodosGastos.length === 1 ? "mes" : "meses"} con montos calculables
                     </div>
                   </div>
 
