@@ -56,6 +56,20 @@ protocolos propuestos, consulta preparada y cierre con decisiones humanas/RIEA.
 
 ## Validación local, antes del preview
 
+### Referencia más reciente de código
+
+Corrección de gastos: `87acf41826207dbffac6e01e4c26e94318abfcae`.
+Suite local: **278 archivos / 1.620 pruebas**, salida 0. Preview canónico
+`37668737784`, success: https://5df196d2.cambiometro.pages.dev. Pasaron
+96 controles del candidato y ocho adicionales de gastos/ficha publicados;
+ReleaseSet igual al pin. Quality/integración aprobados. No es una promoción productiva. El acta
+[gastos-presentacion-20261007.md](gastos-presentacion-20261007.md) separa
+las correcciones probadas de la conciliación documental todavía pendiente.
+Los resultados anteriores que siguen se conservan como historial, no como
+referencia del código más reciente.
+
+### Validaciones anteriores
+
 - 276 archivos, **1.605 pruebas aprobadas** después de las correcciones de Datos y filtros móviles; tipos frontend/Worker y guardas
   arquitectura, tokens, enlaces e innerHTML con salida 0.
 - ESLint del conjunto: salida 0, 139 advertencias; no se afirma cero advertencias.
@@ -158,7 +172,7 @@ era 77% (77,5% sin redondear), superado por el estado vigente de arriba.
 ## Referencias
 
 - [Gastos: períodos e indicador retirado](gastos-presentacion-20261007.md):
-  regresiones y render local comprobados; preview y originales pendientes.
+  regresiones y preview comprobados; conciliación de originales pendiente.
 
 - [Matriz por indicador](matriz.md).
 - [Decisión por las 31 rutas existentes](estado-por-ruta.md).

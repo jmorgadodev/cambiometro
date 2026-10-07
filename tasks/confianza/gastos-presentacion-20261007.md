@@ -41,7 +41,32 @@ serializa a la página. Los contratos existentes conservan su campo opcional.
 - Evidencia local: `.ci-confianza-audit/gastos-local/` y `gastos-browser.mjs`.
 - Suite global local: 278 archivos y 1.620 pruebas aprobadas (código 0),
   incluyendo tipos de frontend/Worker, arquitectura, tokens, enlaces e innerHTML.
-  Preview del código nuevo: pendiente. D1 remoto y publicaciones de datos no ejecutados.
+  D1 remoto y publicaciones de datos no ejecutados.
+
+## Cierre técnico del bloque
+
+- Código publicado en la rama: `87acf41826207dbffac6e01e4c26e94318abfcae`.
+- Preview inmutable: https://5df196d2.cambiometro.pages.dev.
+- Build canónico y publicación de preview: run `37668737784`, success.
+- Quality `37668712136` e integración `37668712191`: success sobre el mismo
+  SHA. Integración usa únicamente la fixture D1 local autorizada.
+- Candidato: 96/96 controles de presentación, cero fallos, 41 solicitudes API
+  interceptadas. No acredita conectividad ni búsquedas productivas.
+- Preview publicado: 8/8 controles de gastos/ficha a 320/768/1024/1440 px,
+  ocho solicitudes API interceptadas, cero consultas D1 remotas/escrituras.
+  Captura de 320 px inspeccionada; sin desborde. Histórico y último corte inicial
+  conservados. El estado de error API de las capturas es intencional.
+- GET público del ReleaseSet: HTTP 200, 95.598 bytes, SHA-256
+  `4a683ecb2d24a9777acc0707c014b3d8c6dc8aa12e351df942f13c2ec716c0c7`,
+  igual al pin del build y al preview anterior: sin retroceso ni sustitución.
+- Evidencia: `.ci-confianza-audit/preview-87acf418/` y
+  `.ci-confianza-audit/gastos-live-87acf418/`.
+- **100% del bloque de corrección y validación técnica**, no de la conciliación
+  de fuentes. PR #719 sigue borrador; producción no modificada.
+
+Esta acta de cierre se registra localmente después del código probado;
+se incorporará al siguiente push. No atribuir al SHA probado cambios posteriores
+de documentación ni anunciar promoción productiva.
 
 ## Qué no se certifica y próximo cierre
 
