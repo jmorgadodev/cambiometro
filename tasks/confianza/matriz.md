@@ -32,12 +32,12 @@ Una referencia genérica al portal no acredita cifra, causa ni conclusión norma
 
 | Indicador | Cambio local | Evidencia de cierre local | Pendiente |
 | --- | --- | --- | --- |
-| Dieta sin registro en catálogo parlamentario | Retirada constante; En revisión | `lib/defensible-indicators.test.ts`, SSR | Preview y conciliación completa por período |
+| Dieta sin registro en catálogo parlamentario | Retirada constante; En revisión | `lib/defensible-indicators.test.ts`, SSR y preview 96/96 | Conciliación completa por período; preview no certifica pagos originales |
 | Apoyo mensual por bancada | Retirado sumatorio histórico y enlace por nombre parcial | Mismo test; datos individuales originales conservados | Reconstruir sólo tras identidad y meses comparables acreditados |
 | Votos/gastos agregados de bancada | En revisión, sin serializar dashboards/rankings cuestionados | `lib/defensible-pages.test.ts`; receta de agregado no individualizada en pin | Acreditar entradas y pertenencia temporal; no reactivar por aviso |
 | Confirmación legal de movimiento | Referencia exacta y fecha coherente o confirmación documental en revisión | Test de enlace genérico y documento individualizado | Leer cada documento; enlace válido no certifica contenido |
 | Ranking electoral vacío | En revisión, sin cifra ni sincronización ficticias | `lib/prelaunch-fixes-15.test.ts` | Conjunto respaldado de esa elección |
-| Avisos por ruta | 21 layouts SSR y Home, estado/corte con significado específico | `lib/publication-scope.test.ts`, `lib/defensible-pages.test.ts` | Render real; no significa que todos los indicadores pasaron |
+| Avisos por ruta | 21 layouts SSR y Home, estado/corte con significado específico | Pruebas unitarias y render real: 24 rutas, 96/96 controles en preview `41b39145` | Comprobación de indicadores restantes; el render no certifica cada cifra |
 | Nominales discordantes | Guarda por sesión, incluidas slices; En revisión, sin inventar opciones | 152 sesiones identificadas en objetos R2, 1.601 pruebas; `hallazgo-votos.md` | Documentos y origen Senado; Cámara también presenta contradicción en XML oficial |
 | Asistencia/cohesión en ficha | Porcentajes inferidos y cohesión retirados; compartir sin cifra no acreditada | Guarda, prop nula y mensajes; no confundir voto con acta o afiliación histórica | Actas y pertenencia temporal verificables |
 

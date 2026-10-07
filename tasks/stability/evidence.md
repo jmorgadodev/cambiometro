@@ -786,3 +786,22 @@ Línea base de corrección municipal: PR #714 fusionado; Pages `37269183824`, Wo
   API interceptada. No permite afirmar que las búsquedas productivas fueron probadas.
 - Sin commit promocionado, publicación editorial, consulta enviada ni R2 PUT/DELETE.
   Tablero específico: `tasks/confianza/README.md`, 71% provisional por puertas.
+
+## 2026-10-07 — preview defendible cerrado, producción pendiente
+
+- Worktree canónico y rama `codex/confianza-evidencia-20261007`; código probado
+  `41b391458b7cd734689c65193c37fa5ad4b1b399`, PR #719 borrador.
+- Actions https://github.com/jmorgadodev/cambiometro/actions/runs/37652611168:
+  success; https://61e4f67e.cambiometro.pages.dev, 96/96 controles de presentación
+  (24 rutas, 390/1440 px, claro/oscuro), cero fallos. Filtros móviles contenidos.
+- Suite local: 276 archivos / 1.605 pruebas y guardas técnicas, salida 0.
+- Home y Movimientos publicados comprobados a 390/1440 px; ReleaseSet y SHA
+  coinciden con el build. Pin y rutas de informes en `../confianza/entrega-20261007.md`.
+- Todas las solicitudes API se abortan en estas comprobaciones: no prueba
+  integración API, búsquedas ni exactitud universal de documentos originales.
+- CI automático `37652617675` cancelado antes de fixture D1. El control requerido
+  de integración no está aprobado: necesita resolver la autorización de D1 local
+  efímera o una alternativa equivalente. No se omite ni se promueve con fallo.
+- Sin ETL, D1 en esta validación, PUT/DELETE R2, publicación editorial ni envío
+  institucional. Se conserva la desviación histórica D1 local del run anterior.
+- Avance actual C01–C05: 83% (83,75% ponderado), entregables, no exactitud.

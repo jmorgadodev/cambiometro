@@ -12,7 +12,9 @@ Las tareas nuevas miden entregables, no porcentaje de datos correctos.
   retirados localmente; aritmética del pin R2 comprobada. 152 sesiones nominales
   discordantes quedan en revisión. Faltan documentos/actas y afiliación temporal.
 - C03: avisos SSR por dominio, política de tres estados y metadatos de
-  Movimientos corregidos localmente; pendiente preview y comprobación de todos los indicadores.
+  Movimientos corregidos; preview `41b39145` validado (96/96), 75% de puertas.
+  Pendientes: indicadores restantes e integración API del PR; no se probó API
+  en el smoke con solicitudes interceptadas. Avance ponderado C01–C05: 83%.
 - C04: cuatro borradores clasificados NO PUBLICABLES y versiones neutrales
   preparadas en editorial, con originales intactos.
 - C05: expediente preparado; elegibilidad, adopción, evidencia de prácticas,

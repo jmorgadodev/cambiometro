@@ -36,16 +36,16 @@ El artefacto no reemplaza un smoke vigente del dominio personalizado.
 
 | ID | Peso | Complejidad | Estado |
 | --- | ---: | --- | --- |
-| C01 Referencia, matriz y consulta | 20 | Baja | 4/4 puertas documentales: 100%; publicación del registro pendiente |
+| C01 Referencia, matriz y consulta | 20 | Baja | 4/4 puertas documentales: 100%; registro en PR borrador, no adoptado institucionalmente |
 | C02 Parlamento y Movimientos | 25 | Media | 3/4: 75%; hallazgos, retirada y aritmética productiva; documentos/actas y afiliación temporal pendientes |
-| C03 Otras páginas y avisos | 25 | Media-alta | 2/4: 50%; inventario/avisos y correcciones locales; preview y resto de indicadores pendientes |
+| C03 Otras páginas y avisos | 25 | Media-alta | 3/4: 75%; inventario/avisos, correcciones y preview 96/96; comprobación de indicadores restantes pendiente |
 | C04 Cuatro investigaciones preparadas | 15 | Alta | 4/4 casos clasificados: 100% de preparación, ninguno publicable |
 | C05 Expediente institucional | 15 | Media | 3/4: 75%; documentos preparados; elegibilidad/adopción/evidencia/firma pendientes |
 
 Registrar evidencia, cambio, pruebas y destino real. Los pesos miden entregables,
 no confianza/cobertura ni tiempo. No declarar 100% con publicación o elegibilidad pendientes.
 
-Avance ponderado vigente: **77% de entregables** (77,5% sin redondear; conservador).
+Avance ponderado vigente: **83% de entregables** (83,75% sin redondear; conservador).
 Las puertas C01 son referencia, reglas, matriz y consulta; C02 son hallazgos,
 correcciones con regresión, aritmética del pin y documentos originales; C03 son
 inventario/avisos, correcciones, preview y cierre de componentes restantes.
@@ -54,7 +54,7 @@ protocolos propuestos, consulta preparada y cierre con decisiones humanas/RIEA.
 
 ## Validación local, antes del preview
 
-- 276 archivos, **1.604 pruebas aprobadas** después de la corrección de Datos; tipos frontend/Worker y guardas
+- 276 archivos, **1.605 pruebas aprobadas** después de las correcciones de Datos y filtros móviles; tipos frontend/Worker y guardas
   arquitectura, tokens, enlaces e innerHTML con salida 0.
 - ESLint del conjunto: salida 0, 139 advertencias; no se afirma cero advertencias.
   ESLint de los últimos archivos modificados: salida 0.
@@ -71,9 +71,18 @@ protocolos propuestos, consulta preparada y cierre con decisiones humanas/RIEA.
 - Este modo reutiliza la hidratación canónica existente de Pages. No ejecuta
   ETL, no altera releases ni hace PUT/DELETE R2. Un fallo bloquea promoción.
 
-Estado actual: código y documentos locales; aún sin preview ni promoción de
-este encargo. No confundir los avisos incorporados con una auditoría concluida
-de todos los registros ni con una candidatura aprobada.
+Estado actual: rama publicada y preview validado, sin promoción productiva de
+este encargo. Commit probado: `41b391458b7cd734689c65193c37fa5ad4b1b399`.
+Preview: https://61e4f67e.cambiometro.pages.dev.
+Actions: https://github.com/jmorgadodev/cambiometro/actions/runs/37652611168.
+Pasaron 96/96 controles (24 rutas, dos tamaños y dos temas), sin llamadas API.
+Cuatro comprobaciones adicionales del preview publicado verificaron Home y
+Movimientos en móvil/escritorio y coincidencia del ReleaseSet con el artefacto.
+No confundir esos resultados con certificación de búsquedas, documentos originales
+o candidatura. El control requerido de integración del PR sigue cancelado para
+evitar su fixture D1; no es un control aprobado y no se omite para promover.
+
+## Historial de intentos anteriores — superado por el preview citado
 
 Actualización de evidencia: rama publicada, commit inicial `531836b8`,
 PR https://github.com/jmorgadodev/cambiometro/pull/719 (borrador).
@@ -106,8 +115,8 @@ Su pin cambió por actualizaciones ajenas a este encargo: ReleaseSet
 1.024 sesiones (711 Cámara / 313 Senado); no sustituye la evidencia del pin
 inicial de 1.009 sesiones ni implica que hayamos cargado datos.
 La aritmética productiva de C02 ya se comprobó (3/4 puertas, 75%); faltan los
-documentos nominales/actas y la afiliación temporal. Avance ponderado: **77%**
-(77,5% sin redondear; conservador). No mide porcentaje de datos correctos.
+documentos nominales/actas y la afiliación temporal. El avance de este intento
+era 77% (77,5% sin redondear), superado por el estado vigente de arriba.
 
 ## Entregables editoriales e institucionales
 
